@@ -1,0 +1,356 @@
+{
+  "course_id": "COURSE-G-GIT",
+  "criteria": [
+    {
+      "criterion_id": "C-GIT-STAGE-COMMIT",
+      "outcome": "Inspect, stage, and commit a working-tree change using the Git index correctly.",
+      "skill_id": "S-GIT-STAGE-COMMIT"
+    },
+    {
+      "criterion_id": "C-GIT-BRANCH-MERGE",
+      "outcome": "Create a feature branch, commit there, merge into main, and verify the resulting history.",
+      "skill_id": "S-GIT-BRANCH-MERGE"
+    }
+  ],
+  "desired_outcome": "Create a Git feature branch, make and commit a change, merge it into main, and verify the result independently.",
+  "generation_adapter": "MODEL-STUB-GROUNDED-V1",
+  "goal_id": "G-GIT",
+  "items": [
+    {
+      "answer": "git add notes.txt",
+      "claim_refs": [
+        "CL-GIT-002"
+      ],
+      "criterion_id": "C-GIT-STAGE-COMMIT",
+      "family_id": "F-GIT-STAGE-P1",
+      "grounding_spans": [
+        {
+          "claim_refs": [
+            "CL-GIT-002"
+          ],
+          "role": "RATIONALE",
+          "text": "git add copies the selected file content into the index."
+        }
+      ],
+      "item_id": "P-GIT-STAGE-1",
+      "mode": "PRACTICE",
+      "prompt": "Which command stages the current content of notes.txt for the next commit?",
+      "rationale": "git add copies the selected file content into the index.",
+      "scoring_type": "EXACT"
+    },
+    {
+      "answer": "git status",
+      "claim_refs": [
+        "CL-GIT-001"
+      ],
+      "criterion_id": "C-GIT-STAGE-COMMIT",
+      "family_id": "F-GIT-STAGE-P2",
+      "grounding_spans": [
+        {
+          "claim_refs": [
+            "CL-GIT-001"
+          ],
+          "role": "RATIONALE",
+          "text": "git status summarizes differences among working tree, index, and HEAD."
+        }
+      ],
+      "item_id": "P-GIT-STAGE-2",
+      "mode": "PRACTICE",
+      "prompt": "Which command shows working-tree and staging status?",
+      "rationale": "git status summarizes differences among working tree, index, and HEAD.",
+      "scoring_type": "EXACT"
+    },
+    {
+      "answer": "git add app.txt; git commit -m \"Feature work\"",
+      "claim_refs": [
+        "CL-GIT-002",
+        "CL-GIT-003"
+      ],
+      "criterion_id": "C-GIT-STAGE-COMMIT",
+      "family_id": "F-GIT-STAGE-M1",
+      "grounding_spans": [
+        {
+          "claim_refs": [
+            "CL-GIT-002",
+            "CL-GIT-003"
+          ],
+          "role": "RATIONALE",
+          "text": "Stage first, then commit the index."
+        }
+      ],
+      "item_id": "M-GIT-STAGE-1",
+      "mode": "MASTERY_CHECK",
+      "prompt": "After editing app.txt, give the two Git commands that stage app.txt and record it as a commit with message Feature work. Separate commands with ;",
+      "rationale": "Stage first, then commit the index.",
+      "scoring_type": "GIT_SEQUENCE"
+    },
+    {
+      "answer": "git add later.txt; git commit -m \"Later work\"",
+      "claim_refs": [
+        "CL-GIT-002",
+        "CL-GIT-003"
+      ],
+      "criterion_id": "C-GIT-STAGE-COMMIT",
+      "family_id": "F-GIT-STAGE-R1",
+      "grounding_spans": [
+        {
+          "claim_refs": [
+            "CL-GIT-002",
+            "CL-GIT-003"
+          ],
+          "role": "RATIONALE",
+          "text": "A delayed parallel task uses the same staging/commit distinction."
+        }
+      ],
+      "item_id": "R-GIT-STAGE-1",
+      "mode": "RETENTION_CHECK",
+      "prompt": "After editing later.txt, give the two commands that stage it and commit it with message Later work. Separate commands with ;",
+      "rationale": "A delayed parallel task uses the same staging/commit distinction.",
+      "scoring_type": "GIT_SEQUENCE"
+    },
+    {
+      "answer": "git switch -c feature",
+      "claim_refs": [
+        "CL-GIT-004"
+      ],
+      "criterion_id": "C-GIT-BRANCH-MERGE",
+      "family_id": "F-GIT-BRANCH-P1",
+      "grounding_spans": [
+        {
+          "claim_refs": [
+            "CL-GIT-004"
+          ],
+          "role": "RATIONALE",
+          "text": "The -c form creates the branch and switches to it."
+        }
+      ],
+      "item_id": "P-GIT-BRANCH-1",
+      "mode": "PRACTICE",
+      "prompt": "Which command creates and switches to a branch named feature?",
+      "rationale": "The -c form creates the branch and switches to it.",
+      "scoring_type": "EXACT"
+    },
+    {
+      "answer": "git merge feature",
+      "claim_refs": [
+        "CL-GIT-006"
+      ],
+      "criterion_id": "C-GIT-BRANCH-MERGE",
+      "family_id": "F-GIT-BRANCH-P2",
+      "grounding_spans": [
+        {
+          "claim_refs": [
+            "CL-GIT-006"
+          ],
+          "role": "RATIONALE",
+          "text": "git merge integrates the named history into the current branch."
+        }
+      ],
+      "item_id": "P-GIT-BRANCH-2",
+      "mode": "PRACTICE",
+      "prompt": "If you are on main, which command integrates branch feature into main?",
+      "rationale": "git merge integrates the named history into the current branch.",
+      "scoring_type": "EXACT"
+    },
+    {
+      "answer": "git switch -c topic; git add change.txt; git commit -m \"Add change\"; git switch main; git merge topic",
+      "claim_refs": [
+        "CL-GIT-002",
+        "CL-GIT-003",
+        "CL-GIT-004",
+        "CL-GIT-005",
+        "CL-GIT-006"
+      ],
+      "criterion_id": "C-GIT-BRANCH-MERGE",
+      "family_id": "F-GIT-BRANCH-M1",
+      "grounding_spans": [
+        {
+          "claim_refs": [
+            "CL-GIT-002",
+            "CL-GIT-003",
+            "CL-GIT-004",
+            "CL-GIT-005",
+            "CL-GIT-006"
+          ],
+          "role": "RATIONALE",
+          "text": "Create/switch, stage, commit on feature, return to main, then merge."
+        }
+      ],
+      "item_id": "M-GIT-BRANCH-1",
+      "mode": "MASTERY_CHECK",
+      "prompt": "From main, give the branch/commit/merge command sequence using branch topic and file change.txt. Use message Add change and separate commands with ;",
+      "rationale": "Create/switch, stage, commit on feature, return to main, then merge.",
+      "scoring_type": "GIT_FEATURE_WORKFLOW"
+    },
+    {
+      "answer": "git switch -c fix; git add fix.txt; git commit -m \"Fix issue\"; git switch main; git merge fix",
+      "claim_refs": [
+        "CL-GIT-002",
+        "CL-GIT-003",
+        "CL-GIT-004",
+        "CL-GIT-005",
+        "CL-GIT-006"
+      ],
+      "criterion_id": "C-GIT-BRANCH-MERGE",
+      "family_id": "F-GIT-BRANCH-R1",
+      "grounding_spans": [
+        {
+          "claim_refs": [
+            "CL-GIT-002",
+            "CL-GIT-003",
+            "CL-GIT-004",
+            "CL-GIT-005",
+            "CL-GIT-006"
+          ],
+          "role": "RATIONALE",
+          "text": "Delayed parallel workflow verifies retention without reusing the exact feature family."
+        }
+      ],
+      "item_id": "R-GIT-BRANCH-1",
+      "mode": "RETENTION_CHECK",
+      "prompt": "From main, give the same workflow using branch fix and file fix.txt with message Fix issue. Separate commands with ;",
+      "rationale": "Delayed parallel workflow verifies retention without reusing the exact feature family.",
+      "scoring_type": "GIT_FEATURE_WORKFLOW"
+    }
+  ],
+  "lessons": [
+    {
+      "claim_refs": [
+        "CL-GIT-001",
+        "CL-GIT-002",
+        "CL-GIT-003"
+      ],
+      "criterion_ids": [
+        "C-GIT-STAGE-COMMIT"
+      ],
+      "explanation": "Use `git status` to inspect what differs. `git add <file>` stages the selected file content in Git's index. `git commit -m <message>` then records the staged index as a new commit. Editing a file after staging it does not automatically update the staged copy; stage again if the later edit belongs in the same commit.",
+      "grounding_spans": [
+        {
+          "claim_refs": [
+            "CL-GIT-001",
+            "CL-GIT-002",
+            "CL-GIT-003"
+          ],
+          "role": "EXPLANATION",
+          "text": "Use `git status` to inspect what differs. `git add <file>` stages the selected file content in Git's index. `git commit -m <message>` then records the staged index as a new commit. Editing a file after staging it does not automatically update the staged copy; stage again if the later edit belongs in the same commit."
+        },
+        {
+          "claim_refs": [
+            "CL-GIT-001",
+            "CL-GIT-002",
+            "CL-GIT-003"
+          ],
+          "role": "WORKED_EXAMPLE",
+          "text": "After editing notes.txt, run `git status`, then `git add notes.txt`, then `git commit -m \"Update notes\"`."
+        },
+        {
+          "claim_refs": [
+            "CL-GIT-002",
+            "CL-GIT-003"
+          ],
+          "role": "WORKED_EXAMPLE",
+          "text": "If notes.txt is edited again after `git add notes.txt`, run `git add notes.txt` again before committing if you want the later edit included."
+        }
+      ],
+      "lesson_id": "L-GIT-STAGE-COMMIT",
+      "objective": "Use status, staging, and commit as distinct steps and explain what each step changes.",
+      "practice_item_ids": [
+        "P-GIT-STAGE-1",
+        "P-GIT-STAGE-2"
+      ],
+      "skill_id": "S-GIT-STAGE-COMMIT",
+      "title": "From working tree to commit",
+      "worked_examples": [
+        "After editing notes.txt, run `git status`, then `git add notes.txt`, then `git commit -m \"Update notes\"`.",
+        "If notes.txt is edited again after `git add notes.txt`, run `git add notes.txt` again before committing if you want the later edit included."
+      ]
+    },
+    {
+      "claim_refs": [
+        "CL-GIT-004",
+        "CL-GIT-005",
+        "CL-GIT-006",
+        "CL-GIT-007"
+      ],
+      "criterion_ids": [
+        "C-GIT-BRANCH-MERGE"
+      ],
+      "explanation": "From a clean main branch, `git switch -c feature` creates and switches to a new branch. Commits made there advance the feature branch. After the feature commit, switch back with `git switch main`, merge with `git merge feature`, then inspect `git status` and `git log --oneline --graph --all` to verify the repository is clean and the feature commit is reachable from main.",
+      "grounding_spans": [
+        {
+          "claim_refs": [
+            "CL-GIT-001",
+            "CL-GIT-004",
+            "CL-GIT-005",
+            "CL-GIT-006",
+            "CL-GIT-007"
+          ],
+          "role": "EXPLANATION",
+          "text": "From a clean main branch, `git switch -c feature` creates and switches to a new branch. Commits made there advance the feature branch. After the feature commit, switch back with `git switch main`, merge with `git merge feature`, then inspect `git status` and `git log --oneline --graph --all` to verify the repository is clean and the feature commit is reachable from main."
+        },
+        {
+          "claim_refs": [
+            "CL-GIT-002",
+            "CL-GIT-003",
+            "CL-GIT-004",
+            "CL-GIT-005",
+            "CL-GIT-006"
+          ],
+          "role": "WORKED_EXAMPLE",
+          "text": "A minimal workflow is: `git switch -c feature`; edit; `git add <file>`; `git commit -m \"Feature\"`; `git switch main`; `git merge feature`."
+        },
+        {
+          "claim_refs": [
+            "CL-GIT-006"
+          ],
+          "role": "WORKED_EXAMPLE",
+          "text": "When main has not diverged from the feature's starting point, the merge can be a fast-forward: main advances to the feature commit rather than requiring a separate merge commit."
+        }
+      ],
+      "lesson_id": "L-GIT-BRANCH-MERGE",
+      "objective": "Create a feature branch, make its commit, return to main, merge the feature, and verify the result.",
+      "practice_item_ids": [
+        "P-GIT-BRANCH-1",
+        "P-GIT-BRANCH-2"
+      ],
+      "skill_id": "S-GIT-BRANCH-MERGE",
+      "title": "Create and merge a feature branch",
+      "worked_examples": [
+        "A minimal workflow is: `git switch -c feature`; edit; `git add <file>`; `git commit -m \"Feature\"`; `git switch main`; `git merge feature`.",
+        "When main has not diverged from the feature's starting point, the merge can be a fast-forward: main advances to the feature commit rather than requiring a separate merge commit."
+      ]
+    }
+  ],
+  "research_dossier_id": "RSCH-GIT-FEATURE-WORKFLOW-001",
+  "skills": [
+    {
+      "criterion_ids": [
+        "C-GIT-STAGE-COMMIT"
+      ],
+      "hard_prerequisite_skill_ids": [],
+      "skill_id": "S-GIT-STAGE-COMMIT",
+      "title": "Stage and commit a change"
+    },
+    {
+      "criterion_ids": [
+        "C-GIT-BRANCH-MERGE"
+      ],
+      "hard_prerequisite_skill_ids": [
+        "S-GIT-STAGE-COMMIT"
+      ],
+      "skill_id": "S-GIT-BRANCH-MERGE",
+      "title": "Create, work on, and merge a feature branch"
+    }
+  ],
+  "source_ids": [
+    "SRC-GIT-STATUS",
+    "SRC-GIT-ADD",
+    "SRC-GIT-COMMIT",
+    "SRC-GIT-SWITCH",
+    "SRC-GIT-MERGE",
+    "SRC-GIT-LOG"
+  ],
+  "state": "READY_FOR_REVIEW",
+  "title": "Git feature branch workflow",
+  "version": 1
+}

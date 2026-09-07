@@ -1,0 +1,302 @@
+{
+  "activation_stress": {
+    "pass": true,
+    "passes": 100,
+    "runs": 100,
+    "unique_activation_results": 1
+  },
+  "adversarial_campaign": {
+    "cases": [
+      "test_quality_regression_blocks_factually_refreshed_successor",
+      "test_professional_quality_gate_does_not_claim_college_credit_or_accreditation",
+      "test_historical_course_bytes_remain_immutable_after_refresh",
+      "test_historical_attempts_are_not_copied_or_rewritten_by_refresh",
+      "test_material_assessment_change_requires_revalidation_only_for_affected_skill",
+      "test_material_change_records_exact_assessment_and_source_basis_reasons",
+      "test_successor_is_not_activated_automatically",
+      "test_activation_requires_explicit_human_review_gate",
+      "test_activation_stale_base_is_blocked",
+      "test_activation_same_operation_changed_payload_conflicts",
+      "test_refresh_same_operation_changed_payload_conflicts",
+      "test_refresh_capture_drift_after_trigger_fails_closed",
+      "test_refresh_model_drift_after_pin_fails_closed",
+      "test_recovery_after_candidate_generation_needs_no_research_or_model_provider",
+      "test_all_refresh_crash_boundaries_recover_without_duplicate_successors",
+      "test_unknown_learner_does_not_receive_invented_mastery",
+      "test_refresh_diff_preserves_historical_interpretability"
+    ],
+    "pass": true,
+    "passed": 17,
+    "total": 17
+  },
+  "material_change_demo": {
+    "affected_skill_ids": [
+      "S-PY-LISTCOMP"
+    ],
+    "fixture_truth_boundary": "SYNTHETIC_MATERIAL_CHANGE_FIXTURE_NOT_REAL_PYTHON_SEMANTICS_CHANGE",
+    "historical_attempts_mutated": false,
+    "historical_projections_mutated": false,
+    "learner_skill_decisions": {
+      "S-PY-DICTCOMP": {
+        "decision": "PRESERVE_BY_SEMANTIC_EQUIVALENCE",
+        "reason_codes": [
+          "SEMANTIC_EQUIVALENCE_PRESERVED"
+        ],
+        "skill_id": "S-PY-DICTCOMP",
+        "source_counted_attempt_ids": [
+          "A-DC-M",
+          "A-DC-R",
+          "A-DC-T"
+        ],
+        "source_projection_digest": "628d0429e6dd9b6a7b87ad7c73ab1ac9526c71ba4067a6b8f9c7024d4f1722c4",
+        "successor_stage": "MASTERED"
+      },
+      "S-PY-LISTCOMP": {
+        "decision": "REVALIDATION_REQUIRED",
+        "reason_codes": [
+          "ASSESSMENT_MEANING_CHANGED:M-PY-LC-1",
+          "ASSESSMENT_SOURCE_BASIS_CHANGED:M-PY-LC-1",
+          "ASSESSMENT_SOURCE_BASIS_CHANGED:R-PY-LC-1"
+        ],
+        "skill_id": "S-PY-LISTCOMP",
+        "source_counted_attempt_ids": [
+          "A-LC-M",
+          "A-LC-R"
+        ],
+        "source_projection_digest": "b14b2bee4adf851e9a2ff6d2bf58ec01d16f44bcb6d2342fc916b6ff9c8f24db",
+        "successor_stage": "REVALIDATION_DUE"
+      }
+    },
+    "pass": true,
+    "reason_codes": {
+      "S-PY-LISTCOMP": [
+        "ASSESSMENT_MEANING_CHANGED:M-PY-LC-1",
+        "ASSESSMENT_SOURCE_BASIS_CHANGED:M-PY-LC-1",
+        "ASSESSMENT_SOURCE_BASIS_CHANGED:R-PY-LC-1"
+      ]
+    },
+    "semantic_class": "MATERIAL_LEARNING_MEANING_CHANGE"
+  },
+  "objective": "LEARNING-LAB-IMPL-009",
+  "predecessor_impl008_regression": {
+    "expected": 220,
+    "pass": true,
+    "passed": 220,
+    "returncode": 0
+  },
+  "professional_quality": {
+    "external_recognition": "NOT_CLAIMED",
+    "generation_may_vary_qualification_standard_may_not": true,
+    "profile_id": "PROFESSIONAL-COURSE-QUALITY-V1",
+    "purpose": "INTERNAL_PROFESSIONAL_RIGOR_GATE_NOT_ACCREDITATION_OR_COLLEGE_CREDIT",
+    "quality_regression_blocks_refresh": true,
+    "real_human_review": "NOT_PERFORMED_SYNTHETIC_FIXTURE_ONLY",
+    "same_profile_required_for_successor": true
+  },
+  "python_compile": {
+    "errors": [],
+    "files": 43,
+    "pass": true
+  },
+  "refresh_demo": {
+    "affected_skill_ids": [],
+    "base_course_digest": "4806f7c350a5c5dfd66cd6359cb3fc0b6bb9656876f2214cb7cb6d398d56717c",
+    "base_course_id": "COURSE-G-PY-REFRESH",
+    "explicit_activation_revision": 2,
+    "external_recognition": "NOT_CLAIMED",
+    "freshness_before": {
+      "age_seconds": 4500,
+      "as_of": "2026-09-07T07:12:00-04:00",
+      "captured_at": "2026-09-07T05:57:00-04:00",
+      "course_id": "COURSE-G-PY-REFRESH",
+      "max_age_seconds": 3600,
+      "reason_codes": [
+        "SOURCE_AGE_EXCEEDED_POLICY"
+      ],
+      "series_id": "SERIES-PY-COMP",
+      "source_capture_id": "LIVE-RSCH-PY-COMP-20260907-001",
+      "status": "STALE",
+      "trigger_required": true
+    },
+    "historical_attempts_unchanged": true,
+    "historical_course_immutable": true,
+    "mastery_revalidation_required": false,
+    "migration": {
+      "historical_attempts_mutated": false,
+      "historical_projections_mutated": false,
+      "learners": [
+        {
+          "learner_id": "L",
+          "skill_decisions": [
+            {
+              "decision": "PRESERVE_BY_SEMANTIC_EQUIVALENCE",
+              "reason_codes": [
+                "SEMANTIC_EQUIVALENCE_PRESERVED"
+              ],
+              "skill_id": "S-PY-LISTCOMP",
+              "source_counted_attempt_ids": [
+                "A-LC-M",
+                "A-LC-R"
+              ],
+              "source_projection_digest": "b14b2bee4adf851e9a2ff6d2bf58ec01d16f44bcb6d2342fc916b6ff9c8f24db",
+              "successor_stage": "MASTERED"
+            },
+            {
+              "decision": "PRESERVE_BY_SEMANTIC_EQUIVALENCE",
+              "reason_codes": [
+                "SEMANTIC_EQUIVALENCE_PRESERVED"
+              ],
+              "skill_id": "S-PY-DICTCOMP",
+              "source_counted_attempt_ids": [
+                "A-DC-M",
+                "A-DC-R",
+                "A-DC-T"
+              ],
+              "source_projection_digest": "628d0429e6dd9b6a7b87ad7c73ab1ac9526c71ba4067a6b8f9c7024d4f1722c4",
+              "successor_stage": "MASTERED"
+            }
+          ]
+        }
+      ],
+      "new_course_id": "COURSE-G-PY-REFRESH-REFRESH-V2",
+      "old_course_id": "COURSE-G-PY-REFRESH",
+      "policy_version": "MASTERY-REVALIDATION-ON-MEANING-CHANGE-V1",
+      "series_id": "SERIES-PY-COMP"
+    },
+    "pass": true,
+    "professional_quality": {
+      "evidence": {
+        "admitted_source_count": 2,
+        "assessment_family_independence": {
+          "C-PY-DICTCOMP": {
+            "MASTERY_CHECK": [
+              "F-PY-DC-M1"
+            ],
+            "PRACTICE": [
+              "F-PY-DC-P1",
+              "F-PY-DC-P2"
+            ],
+            "RETENTION_CHECK": [
+              "F-PY-DC-R1"
+            ]
+          },
+          "C-PY-LISTCOMP": {
+            "MASTERY_CHECK": [
+              "F-PY-LC-M1"
+            ],
+            "PRACTICE": [
+              "F-PY-LC-P1",
+              "F-PY-LC-P2"
+            ],
+            "RETENTION_CHECK": [
+              "F-PY-LC-R1"
+            ]
+          }
+        },
+        "criterion_alignment": {
+          "C-PY-DICTCOMP": {
+            "lesson_exists": true,
+            "mastery": true,
+            "practice": true,
+            "retention": true,
+            "skill_exists": true
+          },
+          "C-PY-LISTCOMP": {
+            "lesson_exists": true,
+            "mastery": true,
+            "practice": true,
+            "retention": true,
+            "skill_exists": true
+          }
+        },
+        "grounding": {
+          "material_refs": 64,
+          "unknown_claim_refs": []
+        },
+        "human_review_boundary": true,
+        "lesson_depth": {
+          "L-PY-DICTCOMP": {
+            "practice_items": 2,
+            "worked_examples": 2
+          },
+          "L-PY-LISTCOMP": {
+            "practice_items": 2,
+            "worked_examples": 2
+          }
+        },
+        "transfer_task_diversity": {
+          "S-PY-DICTCOMP": 2
+        }
+      },
+      "external_recognition": "NOT_CLAIMED",
+      "failures": [],
+      "profile_digest": "6a5e13959a58a83466398bd0fe515932f7181f0e74085d16d8db6e23a468da26",
+      "profile_id": "PROFESSIONAL-COURSE-QUALITY-V1",
+      "standing": "PROFESSIONAL_COURSE_QUALITY_STRUCTURE_GATE_PASS_EXTERNAL_REVIEW_REQUIRED",
+      "status": "PASS"
+    },
+    "review_fixture_truth_boundary": "SYNTHETIC_TEST_FIXTURE_NOT_INDEPENDENT_HUMAN_REVIEW",
+    "semantic_class": "NON_MATERIAL_SOURCE_REFRESH",
+    "successor_course_digest": "d06d1518e45487775a2e22d85570ff2f94f4a27865a5379c4be8c1609473aea0",
+    "successor_course_id": "COURSE-G-PY-REFRESH-REFRESH-V2"
+  },
+  "refresh_recovery_stress": {
+    "crash_injection_seeds": {
+      "REFRESH_CANDIDATE_GENERATED": true,
+      "REFRESH_MODEL_PINNED": true,
+      "REFRESH_SOURCES_ACQUIRED": true,
+      "REFRESH_TRIGGERED": true,
+      "SEMANTIC_DIFF_COMPUTED": true,
+      "SUCCESSOR_GENERATED_VALIDATED": true
+    },
+    "pass": true,
+    "passes": 100,
+    "phase_passes": {
+      "REFRESH_CANDIDATE_GENERATED": 17,
+      "REFRESH_MODEL_PINNED": 17,
+      "REFRESH_SOURCES_ACQUIRED": 17,
+      "REFRESH_TRIGGERED": 17,
+      "SEMANTIC_DIFF_COMPUTED": 16,
+      "SUCCESSOR_GENERATED_VALIDATED": 16
+    },
+    "runs": 100,
+    "unique_readiness_digests": 1,
+    "unique_semantic_diff_digests": 1,
+    "unique_successor_course_digests": 1
+  },
+  "refresh_semantics": {
+    "active_course_immutable": true,
+    "bounded_revalidation": true,
+    "explicit_activation_required": true,
+    "freshness_only_preserves_mastery": true,
+    "meaning_change_requires_affected_skill_revalidation": true,
+    "refresh_creates_successor": true,
+    "semantic_diff_required": true,
+    "successor_auto_activation": false,
+    "unaffected_skill_evidence_preserved_by_explicit_lineage": true
+  },
+  "semantic_diff_determinism": {
+    "pass": true,
+    "runs": 100,
+    "unique_semantic_diff_digests": 1
+  },
+  "status": "PASS_PORTABLE_IMPLEMENTATION",
+  "tests": {
+    "expected": 247,
+    "new_impl009": 27,
+    "pass": true,
+    "passed": 247,
+    "prior_regressions": 220,
+    "returncode": 0
+  },
+  "truth_boundary": {
+    "college_credit_or_accreditation": "NOT_CLAIMED",
+    "human_review_receipt": "SYNTHETIC_TEST_FIXTURE_NOT_INDEPENDENT_HUMAN_REVIEW",
+    "material_change_demo": "SYNTHETIC_FIXTURE_NOT_REAL_PYTHON_SEMANTICS_CHANGE",
+    "native_iphone": "NOT_RUN",
+    "production_system_master_integration": "NOT_RUN",
+    "professional_course_gate": "MECHANICAL_INTERNAL_GATE_ONLY",
+    "real_learner_effectiveness": "NOT_PROVEN",
+    "source_freshness_window": "ONE_HOUR_LAB_FIXTURE_NOT_UNIVERSAL_POLICY"
+  }
+}

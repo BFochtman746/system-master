@@ -1,0 +1,352 @@
+{
+  "course_id": "COURSE-G-ASQ-014",
+  "criteria": [
+    {
+      "criterion_id": "C-ASQ-SIPOC",
+      "outcome": "Analyze a bounded process using suppliers, inputs, process, outputs, customers, and explicit boundaries.",
+      "skill_id": "S-ASQ-SIPOC"
+    },
+    {
+      "criterion_id": "C-ASQ-CHARTER",
+      "outcome": "Apply project-charter elements to define a measurable improvement problem and goal with bounded scope.",
+      "skill_id": "S-ASQ-CHARTER"
+    }
+  ],
+  "desired_outcome": "Analyze a process with SIPOC and frame an improvement project with a project charter aligned to selected ASQ CSSGB requirements.",
+  "domain_key": "asq-cssgb-define-sipoc-charter",
+  "generation_adapter": "ASQ-STANDARD-ALIGNED-COMPILER-V1",
+  "goal_id": "G-ASQ-014",
+  "items": [
+    {
+      "answer": "{\"customers\":[\"customer\"],\"end\":\"shipment confirmation sent\",\"inputs\":[\"customer order\",\"inventory status\"],\"outputs\":[\"shipped order\",\"shipment confirmation\"],\"process_steps\":[\"receive order\",\"pick items\",\"pack order\",\"ship order\"],\"start\":\"order received\",\"suppliers\":[\"customer\",\"inventory system\"]}",
+      "claim_refs": [
+        "CL-ASQ-BOK-SIPOC",
+        "CL-ASQ-SIPOC-ELEMENTS",
+        "CL-ASQ-SIPOC-BOUNDARY"
+      ],
+      "criterion_id": "C-ASQ-SIPOC",
+      "family_id": "F-ASQ-SIPOC-P1",
+      "grounding_spans": [
+        {
+          "claim_refs": [
+            "CL-ASQ-BOK-SIPOC",
+            "CL-ASQ-SIPOC-ELEMENTS",
+            "CL-ASQ-SIPOC-BOUNDARY"
+          ],
+          "role": "RATIONALE",
+          "text": "Practice uses a bounded known scenario."
+        }
+      ],
+      "item_id": "P-ASQ-SIPOC-1",
+      "mode": "PRACTICE",
+      "prompt": "Build the fulfillment SIPOC as JSON.",
+      "rationale": "Practice uses a bounded known scenario.",
+      "scoring_type": "ASQ_SIPOC_JSON"
+    },
+    {
+      "answer": "{\"customers\":[\"customer\"],\"end\":\"closure notice sent\",\"inputs\":[\"support request\",\"account data\"],\"outputs\":[\"resolved ticket\",\"closure notice\"],\"process_steps\":[\"receive ticket\",\"triage ticket\",\"resolve issue\",\"close ticket\"],\"start\":\"ticket received\",\"suppliers\":[\"customer\",\"support portal\"]}",
+      "claim_refs": [
+        "CL-ASQ-BOK-SIPOC",
+        "CL-ASQ-SIPOC-ELEMENTS",
+        "CL-ASQ-SIPOC-BOUNDARY"
+      ],
+      "criterion_id": "C-ASQ-SIPOC",
+      "family_id": "F-ASQ-SIPOC-P2",
+      "grounding_spans": [
+        {
+          "claim_refs": [
+            "CL-ASQ-BOK-SIPOC",
+            "CL-ASQ-SIPOC-ELEMENTS",
+            "CL-ASQ-SIPOC-BOUNDARY"
+          ],
+          "role": "RATIONALE",
+          "text": "Second practice varies the process context."
+        }
+      ],
+      "item_id": "P-ASQ-SIPOC-2",
+      "mode": "PRACTICE",
+      "prompt": "Build the service SIPOC as JSON.",
+      "rationale": "Second practice varies the process context.",
+      "scoring_type": "ASQ_SIPOC_JSON"
+    },
+    {
+      "answer": "{\"customers\":[\"customer\"],\"end\":\"shipment confirmation sent\",\"inputs\":[\"customer order\",\"inventory status\"],\"outputs\":[\"shipped order\",\"shipment confirmation\"],\"process_steps\":[\"receive order\",\"pick items\",\"pack order\",\"ship order\"],\"start\":\"order received\",\"suppliers\":[\"customer\",\"inventory system\"]}",
+      "claim_refs": [
+        "CL-ASQ-BOK-SIPOC",
+        "CL-ASQ-SIPOC-ELEMENTS",
+        "CL-ASQ-SIPOC-BOUNDARY"
+      ],
+      "criterion_id": "C-ASQ-SIPOC",
+      "family_id": "F-ASQ-SIPOC-M1",
+      "grounding_spans": [
+        {
+          "claim_refs": [
+            "CL-ASQ-BOK-SIPOC",
+            "CL-ASQ-SIPOC-ELEMENTS",
+            "CL-ASQ-SIPOC-BOUNDARY"
+          ],
+          "role": "RATIONALE",
+          "text": "Independent scenario analysis matches the ASQ Analyze-level target."
+        }
+      ],
+      "item_id": "M-ASQ-SIPOC-1",
+      "mode": "MASTERY_CHECK",
+      "prompt": "Independently analyze the fulfillment process as SIPOC JSON.",
+      "rationale": "Independent scenario analysis matches the ASQ Analyze-level target.",
+      "scoring_type": "ASQ_SIPOC_JSON"
+    },
+    {
+      "answer": "{\"customers\":[\"customer\"],\"end\":\"closure notice sent\",\"inputs\":[\"support request\",\"account data\"],\"outputs\":[\"resolved ticket\",\"closure notice\"],\"process_steps\":[\"receive ticket\",\"triage ticket\",\"resolve issue\",\"close ticket\"],\"start\":\"ticket received\",\"suppliers\":[\"customer\",\"support portal\"]}",
+      "claim_refs": [
+        "CL-ASQ-BOK-SIPOC",
+        "CL-ASQ-SIPOC-ELEMENTS",
+        "CL-ASQ-SIPOC-BOUNDARY"
+      ],
+      "criterion_id": "C-ASQ-SIPOC",
+      "family_id": "F-ASQ-SIPOC-R1",
+      "grounding_spans": [
+        {
+          "claim_refs": [
+            "CL-ASQ-BOK-SIPOC",
+            "CL-ASQ-SIPOC-ELEMENTS",
+            "CL-ASQ-SIPOC-BOUNDARY"
+          ],
+          "role": "RATIONALE",
+          "text": "Delayed distinct-family evidence checks retention."
+        }
+      ],
+      "item_id": "R-ASQ-SIPOC-1",
+      "mode": "RETENTION_CHECK",
+      "prompt": "Later, independently analyze the service process as SIPOC JSON.",
+      "rationale": "Delayed distinct-family evidence checks retention.",
+      "scoring_type": "ASQ_SIPOC_JSON"
+    },
+    {
+      "answer": "{\"baseline\":\"18%\",\"goal\":\"8%\",\"primary_metric\":\"late-order rate\",\"problem_statement\":\"Current performance includes 18% late orders\",\"scope_in\":\"order receipt to shipment\",\"scope_out\":\"supplier manufacturing\"}",
+      "claim_refs": [
+        "CL-ASQ-BOK-CHARTER",
+        "CL-ASQ-CHARTER-ELEMENTS"
+      ],
+      "criterion_id": "C-ASQ-CHARTER",
+      "family_id": "F-ASQ-CHARTER-P1",
+      "grounding_spans": [
+        {
+          "claim_refs": [
+            "CL-ASQ-BOK-CHARTER",
+            "CL-ASQ-CHARTER-ELEMENTS"
+          ],
+          "role": "RATIONALE",
+          "text": "Practice applies the charter elements to a bounded improvement case."
+        }
+      ],
+      "item_id": "P-ASQ-CHARTER-1",
+      "mode": "PRACTICE",
+      "prompt": "Build the fulfillment project charter as JSON.",
+      "rationale": "Practice applies the charter elements to a bounded improvement case.",
+      "scoring_type": "ASQ_CHARTER_JSON"
+    },
+    {
+      "answer": "{\"baseline\":\"12%\",\"goal\":\"5%\",\"primary_metric\":\"reopen rate\",\"problem_statement\":\"Current performance includes 12% reopened tickets\",\"scope_in\":\"ticket receipt to closure\",\"scope_out\":\"product redesign\"}",
+      "claim_refs": [
+        "CL-ASQ-BOK-CHARTER",
+        "CL-ASQ-CHARTER-ELEMENTS"
+      ],
+      "criterion_id": "C-ASQ-CHARTER",
+      "family_id": "F-ASQ-CHARTER-P2",
+      "grounding_spans": [
+        {
+          "claim_refs": [
+            "CL-ASQ-BOK-CHARTER",
+            "CL-ASQ-CHARTER-ELEMENTS"
+          ],
+          "role": "RATIONALE",
+          "text": "Second practice varies the business problem."
+        }
+      ],
+      "item_id": "P-ASQ-CHARTER-2",
+      "mode": "PRACTICE",
+      "prompt": "Build the service project charter as JSON.",
+      "rationale": "Second practice varies the business problem.",
+      "scoring_type": "ASQ_CHARTER_JSON"
+    },
+    {
+      "answer": "{\"baseline\":\"18%\",\"goal\":\"8%\",\"primary_metric\":\"late-order rate\",\"problem_statement\":\"Current performance includes 18% late orders\",\"scope_in\":\"order receipt to shipment\",\"scope_out\":\"supplier manufacturing\"}",
+      "claim_refs": [
+        "CL-ASQ-BOK-CHARTER",
+        "CL-ASQ-CHARTER-ELEMENTS"
+      ],
+      "criterion_id": "C-ASQ-CHARTER",
+      "family_id": "F-ASQ-CHARTER-M1",
+      "grounding_spans": [
+        {
+          "claim_refs": [
+            "CL-ASQ-BOK-CHARTER",
+            "CL-ASQ-CHARTER-ELEMENTS"
+          ],
+          "role": "RATIONALE",
+          "text": "Independent charter construction matches the ASQ Apply-level target."
+        }
+      ],
+      "item_id": "M-ASQ-CHARTER-1",
+      "mode": "MASTERY_CHECK",
+      "prompt": "Independently build the fulfillment charter as JSON.",
+      "rationale": "Independent charter construction matches the ASQ Apply-level target.",
+      "scoring_type": "ASQ_CHARTER_JSON"
+    },
+    {
+      "answer": "{\"baseline\":\"12%\",\"goal\":\"5%\",\"primary_metric\":\"reopen rate\",\"problem_statement\":\"Current performance includes 12% reopened tickets\",\"scope_in\":\"ticket receipt to closure\",\"scope_out\":\"product redesign\"}",
+      "claim_refs": [
+        "CL-ASQ-BOK-CHARTER",
+        "CL-ASQ-CHARTER-ELEMENTS"
+      ],
+      "criterion_id": "C-ASQ-CHARTER",
+      "family_id": "F-ASQ-CHARTER-R1",
+      "grounding_spans": [
+        {
+          "claim_refs": [
+            "CL-ASQ-BOK-CHARTER",
+            "CL-ASQ-CHARTER-ELEMENTS"
+          ],
+          "role": "RATIONALE",
+          "text": "Delayed distinct-family application checks retention."
+        }
+      ],
+      "item_id": "R-ASQ-CHARTER-1",
+      "mode": "RETENTION_CHECK",
+      "prompt": "Later, independently build the service charter as JSON.",
+      "rationale": "Delayed distinct-family application checks retention.",
+      "scoring_type": "ASQ_CHARTER_JSON"
+    }
+  ],
+  "lessons": [
+    {
+      "claim_refs": [
+        "CL-ASQ-BOK-SIPOC",
+        "CL-ASQ-SIPOC-ELEMENTS",
+        "CL-ASQ-SIPOC-BOUNDARY"
+      ],
+      "criterion_ids": [
+        "C-ASQ-SIPOC"
+      ],
+      "explanation": "A SIPOC is a high-level process boundary and relationship model: identify suppliers and inputs, the core process steps, outputs and customers, then make the process start/end explicit.",
+      "grounding_spans": [
+        {
+          "claim_refs": [
+            "CL-ASQ-BOK-SIPOC",
+            "CL-ASQ-SIPOC-ELEMENTS",
+            "CL-ASQ-SIPOC-BOUNDARY"
+          ],
+          "role": "EXPLANATION",
+          "text": "A SIPOC is a high-level process boundary and relationship model: identify suppliers and inputs, the core process steps, outputs and customers, then make the process start/end explicit."
+        },
+        {
+          "claim_refs": [
+            "CL-ASQ-BOK-SIPOC",
+            "CL-ASQ-SIPOC-ELEMENTS",
+            "CL-ASQ-SIPOC-BOUNDARY"
+          ],
+          "role": "WORKED_EXAMPLE",
+          "text": "Example Scenario: order fulfillment maps order/customer/system inputs through picking and shipping to shipment outputs."
+        },
+        {
+          "claim_refs": [
+            "CL-ASQ-BOK-SIPOC",
+            "CL-ASQ-SIPOC-ELEMENTS",
+            "CL-ASQ-SIPOC-BOUNDARY"
+          ],
+          "role": "WORKED_EXAMPLE",
+          "text": "Example Scenario: service support maps requests/account data through triage and resolution to closure outputs."
+        }
+      ],
+      "lesson_id": "L-ASQ-SIPOC",
+      "objective": "Analyze a process boundary and its supplier-input-process-output-customer relationships.",
+      "practice_item_ids": [
+        "P-ASQ-SIPOC-1",
+        "P-ASQ-SIPOC-2"
+      ],
+      "skill_id": "S-ASQ-SIPOC",
+      "title": "SIPOC process analysis",
+      "worked_examples": [
+        "Example Scenario: order fulfillment maps order/customer/system inputs through picking and shipping to shipment outputs.",
+        "Example Scenario: service support maps requests/account data through triage and resolution to closure outputs."
+      ]
+    },
+    {
+      "claim_refs": [
+        "CL-ASQ-BOK-CHARTER",
+        "CL-ASQ-CHARTER-ELEMENTS"
+      ],
+      "criterion_ids": [
+        "C-ASQ-CHARTER"
+      ],
+      "explanation": "A project charter turns a selected improvement problem into a bounded project by stating the current problem/baseline, a measurable goal, the primary metric, and what is in and out of scope.",
+      "grounding_spans": [
+        {
+          "claim_refs": [
+            "CL-ASQ-BOK-CHARTER",
+            "CL-ASQ-CHARTER-ELEMENTS"
+          ],
+          "role": "EXPLANATION",
+          "text": "A project charter turns a selected improvement problem into a bounded project by stating the current problem/baseline, a measurable goal, the primary metric, and what is in and out of scope."
+        },
+        {
+          "claim_refs": [
+            "CL-ASQ-BOK-CHARTER",
+            "CL-ASQ-CHARTER-ELEMENTS"
+          ],
+          "role": "WORKED_EXAMPLE",
+          "text": "Example Scenario: an 18% late-order baseline is framed against an 8% goal with a late-order metric and bounded fulfillment scope."
+        },
+        {
+          "claim_refs": [
+            "CL-ASQ-BOK-CHARTER",
+            "CL-ASQ-CHARTER-ELEMENTS"
+          ],
+          "role": "WORKED_EXAMPLE",
+          "text": "Example Scenario: a 12% ticket-reopen baseline is framed against a 5% goal with a reopen-rate metric and bounded support scope."
+        }
+      ],
+      "lesson_id": "L-ASQ-CHARTER",
+      "objective": "Apply charter elements to a measurable process-improvement problem.",
+      "practice_item_ids": [
+        "P-ASQ-CHARTER-1",
+        "P-ASQ-CHARTER-2"
+      ],
+      "skill_id": "S-ASQ-CHARTER",
+      "title": "Project charter application",
+      "worked_examples": [
+        "Example Scenario: an 18% late-order baseline is framed against an 8% goal with a late-order metric and bounded fulfillment scope.",
+        "Example Scenario: a 12% ticket-reopen baseline is framed against a 5% goal with a reopen-rate metric and bounded support scope."
+      ]
+    }
+  ],
+  "research_dossier_id": "RSCH-ASQ-CSSGB-DEFINE-BOUND-001",
+  "skills": [
+    {
+      "criterion_ids": [
+        "C-ASQ-SIPOC"
+      ],
+      "hard_prerequisite_skill_ids": [],
+      "skill_id": "S-ASQ-SIPOC",
+      "title": "Analyze process inputs/outputs with SIPOC"
+    },
+    {
+      "criterion_ids": [
+        "C-ASQ-CHARTER"
+      ],
+      "hard_prerequisite_skill_ids": [
+        "S-ASQ-SIPOC"
+      ],
+      "skill_id": "S-ASQ-CHARTER",
+      "title": "Frame an improvement project with a charter"
+    }
+  ],
+  "source_ids": [
+    "SRC-ASQ-BOK",
+    "SRC-ASQ-SIPOC",
+    "SRC-ASQ-DMAIC"
+  ],
+  "state": "READY_FOR_REVIEW",
+  "title": "ASQ CSSGB Define: SIPOC + Project Charter",
+  "version": 1
+}

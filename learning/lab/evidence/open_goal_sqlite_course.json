@@ -1,0 +1,372 @@
+{
+  "course_id": "COURSE-G-SQL-DEMO",
+  "criteria": [
+    {
+      "criterion_id": "C-SQL-SELECT-WHERE",
+      "outcome": "Write a SQLite SELECT that returns specified columns and filters rows with a WHERE condition.",
+      "skill_id": "S-SQL-SELECT-WHERE"
+    },
+    {
+      "criterion_id": "C-SQL-ORDER",
+      "outcome": "Add an ORDER BY clause that produces the requested deterministic row order, including tie-breaking when needed.",
+      "skill_id": "S-SQL-ORDER"
+    }
+  ],
+  "desired_outcome": "Query a SQLite tasks table with SELECT, filter rows with WHERE, and sort results with ORDER BY.",
+  "domain_key": "sqlite-query-fundamentals",
+  "generation_adapter": "OPEN-GOAL-COMPILER-V1",
+  "goal_id": "G-SQL-DEMO",
+  "items": [
+    {
+      "answer": "SELECT title FROM tasks WHERE done = 0",
+      "claim_refs": [
+        "CL-SQL-001",
+        "CL-SQL-002"
+      ],
+      "criterion_id": "C-SQL-SELECT-WHERE",
+      "family_id": "F-SQL-WHERE-P1",
+      "grounding_spans": [
+        {
+          "claim_refs": [
+            "CL-SQL-001",
+            "CL-SQL-002"
+          ],
+          "role": "RATIONALE",
+          "text": "In a simple SQLite SELECT, the result expression list determines which result columns are produced from the input rows. When a WHERE clause is present, SQLite evaluates its expression for each input row and filters the input before result rows are produced."
+        }
+      ],
+      "item_id": "P-SQL-WHERE-1",
+      "mode": "PRACTICE",
+      "prompt": "Write a SQLite query returning only title for tasks with done = 0.",
+      "rationale": "In a simple SQLite SELECT, the result expression list determines which result columns are produced from the input rows. When a WHERE clause is present, SQLite evaluates its expression for each input row and filters the input before result rows are produced.",
+      "scoring_type": "SQLITE_QUERY"
+    },
+    {
+      "answer": "SELECT title, owner FROM tasks WHERE priority >= 2",
+      "claim_refs": [
+        "CL-SQL-001",
+        "CL-SQL-002",
+        "CL-SQL-003"
+      ],
+      "criterion_id": "C-SQL-SELECT-WHERE",
+      "family_id": "F-SQL-WHERE-P2",
+      "grounding_spans": [
+        {
+          "claim_refs": [
+            "CL-SQL-001",
+            "CL-SQL-002",
+            "CL-SQL-003"
+          ],
+          "role": "RATIONALE",
+          "text": "In a simple SQLite SELECT, the result expression list determines which result columns are produced from the input rows. When a WHERE clause is present, SQLite evaluates its expression for each input row and filters the input before result rows are produced. SQLite comparison expressions can be used inside WHERE conditions to test row values, including equality and ordered comparisons."
+        }
+      ],
+      "item_id": "P-SQL-WHERE-2",
+      "mode": "PRACTICE",
+      "prompt": "Write a SQLite query returning title and owner for tasks where priority >= 2.",
+      "rationale": "In a simple SQLite SELECT, the result expression list determines which result columns are produced from the input rows. When a WHERE clause is present, SQLite evaluates its expression for each input row and filters the input before result rows are produced. SQLite comparison expressions can be used inside WHERE conditions to test row values, including equality and ordered comparisons.",
+      "scoring_type": "SQLITE_QUERY"
+    },
+    {
+      "answer": "SELECT title, priority FROM tasks WHERE owner = 'Ava'",
+      "claim_refs": [
+        "CL-SQL-001",
+        "CL-SQL-002",
+        "CL-SQL-003"
+      ],
+      "criterion_id": "C-SQL-SELECT-WHERE",
+      "family_id": "F-SQL-WHERE-M1",
+      "grounding_spans": [
+        {
+          "claim_refs": [
+            "CL-SQL-001",
+            "CL-SQL-002",
+            "CL-SQL-003"
+          ],
+          "role": "RATIONALE",
+          "text": "In a simple SQLite SELECT, the result expression list determines which result columns are produced from the input rows. When a WHERE clause is present, SQLite evaluates its expression for each input row and filters the input before result rows are produced. SQLite comparison expressions can be used inside WHERE conditions to test row values, including equality and ordered comparisons."
+        }
+      ],
+      "item_id": "M-SQL-WHERE-1",
+      "mode": "MASTERY_CHECK",
+      "prompt": "Write a query returning title and priority for tasks owned by Ava.",
+      "rationale": "In a simple SQLite SELECT, the result expression list determines which result columns are produced from the input rows. When a WHERE clause is present, SQLite evaluates its expression for each input row and filters the input before result rows are produced. SQLite comparison expressions can be used inside WHERE conditions to test row values, including equality and ordered comparisons.",
+      "scoring_type": "SQLITE_QUERY"
+    },
+    {
+      "answer": "SELECT title, owner FROM tasks WHERE priority <= 1",
+      "claim_refs": [
+        "CL-SQL-001",
+        "CL-SQL-002",
+        "CL-SQL-003"
+      ],
+      "criterion_id": "C-SQL-SELECT-WHERE",
+      "family_id": "F-SQL-WHERE-R1",
+      "grounding_spans": [
+        {
+          "claim_refs": [
+            "CL-SQL-001",
+            "CL-SQL-002",
+            "CL-SQL-003"
+          ],
+          "role": "RATIONALE",
+          "text": "In a simple SQLite SELECT, the result expression list determines which result columns are produced from the input rows. When a WHERE clause is present, SQLite evaluates its expression for each input row and filters the input before result rows are produced. SQLite comparison expressions can be used inside WHERE conditions to test row values, including equality and ordered comparisons."
+        }
+      ],
+      "item_id": "R-SQL-WHERE-1",
+      "mode": "RETENTION_CHECK",
+      "prompt": "Write a query returning title and owner for tasks where priority <= 1.",
+      "rationale": "In a simple SQLite SELECT, the result expression list determines which result columns are produced from the input rows. When a WHERE clause is present, SQLite evaluates its expression for each input row and filters the input before result rows are produced. SQLite comparison expressions can be used inside WHERE conditions to test row values, including equality and ordered comparisons.",
+      "scoring_type": "SQLITE_QUERY"
+    },
+    {
+      "answer": "SELECT title, priority FROM tasks WHERE done = 0 ORDER BY priority DESC, title ASC",
+      "claim_refs": [
+        "CL-SQL-002",
+        "CL-SQL-004",
+        "CL-SQL-005",
+        "CL-SQL-006"
+      ],
+      "criterion_id": "C-SQL-ORDER",
+      "family_id": "F-SQL-ORDER-P1",
+      "grounding_spans": [
+        {
+          "claim_refs": [
+            "CL-SQL-002",
+            "CL-SQL-004",
+            "CL-SQL-005",
+            "CL-SQL-006"
+          ],
+          "role": "RATIONALE",
+          "text": "When a WHERE clause is present, SQLite evaluates its expression for each input row and filters the input before result rows are produced. If a SELECT returns multiple rows without ORDER BY, SQLite does not define the order in which those rows are returned. An ORDER BY clause determines result-row ordering from its expressions; ASC orders smaller values first and DESC orders larger values first. When multiple ORDER BY expressions are present, SQLite sorts by the left-most expression first and uses later expressions to break ties."
+        }
+      ],
+      "item_id": "P-SQL-ORDER-1",
+      "mode": "PRACTICE",
+      "prompt": "Return title and priority for incomplete tasks, highest priority first and title ascending for ties.",
+      "rationale": "When a WHERE clause is present, SQLite evaluates its expression for each input row and filters the input before result rows are produced. If a SELECT returns multiple rows without ORDER BY, SQLite does not define the order in which those rows are returned. An ORDER BY clause determines result-row ordering from its expressions; ASC orders smaller values first and DESC orders larger values first. When multiple ORDER BY expressions are present, SQLite sorts by the left-most expression first and uses later expressions to break ties.",
+      "scoring_type": "SQLITE_QUERY"
+    },
+    {
+      "answer": "SELECT owner, title FROM tasks WHERE priority >= 2 ORDER BY owner ASC, title ASC",
+      "claim_refs": [
+        "CL-SQL-002",
+        "CL-SQL-003",
+        "CL-SQL-005",
+        "CL-SQL-006"
+      ],
+      "criterion_id": "C-SQL-ORDER",
+      "family_id": "F-SQL-ORDER-P2",
+      "grounding_spans": [
+        {
+          "claim_refs": [
+            "CL-SQL-002",
+            "CL-SQL-003",
+            "CL-SQL-005",
+            "CL-SQL-006"
+          ],
+          "role": "RATIONALE",
+          "text": "When a WHERE clause is present, SQLite evaluates its expression for each input row and filters the input before result rows are produced. SQLite comparison expressions can be used inside WHERE conditions to test row values, including equality and ordered comparisons. An ORDER BY clause determines result-row ordering from its expressions; ASC orders smaller values first and DESC orders larger values first. When multiple ORDER BY expressions are present, SQLite sorts by the left-most expression first and uses later expressions to break ties."
+        }
+      ],
+      "item_id": "P-SQL-ORDER-2",
+      "mode": "PRACTICE",
+      "prompt": "Return owner and title for priority >= 2, ordered by owner then title ascending.",
+      "rationale": "When a WHERE clause is present, SQLite evaluates its expression for each input row and filters the input before result rows are produced. SQLite comparison expressions can be used inside WHERE conditions to test row values, including equality and ordered comparisons. An ORDER BY clause determines result-row ordering from its expressions; ASC orders smaller values first and DESC orders larger values first. When multiple ORDER BY expressions are present, SQLite sorts by the left-most expression first and uses later expressions to break ties.",
+      "scoring_type": "SQLITE_QUERY"
+    },
+    {
+      "answer": "SELECT title, owner, priority FROM tasks WHERE done = 0 ORDER BY priority ASC, owner ASC, title ASC",
+      "claim_refs": [
+        "CL-SQL-001",
+        "CL-SQL-002",
+        "CL-SQL-005",
+        "CL-SQL-006"
+      ],
+      "criterion_id": "C-SQL-ORDER",
+      "family_id": "F-SQL-ORDER-M1",
+      "grounding_spans": [
+        {
+          "claim_refs": [
+            "CL-SQL-001",
+            "CL-SQL-002",
+            "CL-SQL-005",
+            "CL-SQL-006"
+          ],
+          "role": "RATIONALE",
+          "text": "In a simple SQLite SELECT, the result expression list determines which result columns are produced from the input rows. When a WHERE clause is present, SQLite evaluates its expression for each input row and filters the input before result rows are produced. An ORDER BY clause determines result-row ordering from its expressions; ASC orders smaller values first and DESC orders larger values first. When multiple ORDER BY expressions are present, SQLite sorts by the left-most expression first and uses later expressions to break ties."
+        }
+      ],
+      "item_id": "M-SQL-ORDER-1",
+      "mode": "MASTERY_CHECK",
+      "prompt": "Return title, owner, and priority for incomplete tasks, ordered priority ascending, then owner ascending, then title ascending.",
+      "rationale": "In a simple SQLite SELECT, the result expression list determines which result columns are produced from the input rows. When a WHERE clause is present, SQLite evaluates its expression for each input row and filters the input before result rows are produced. An ORDER BY clause determines result-row ordering from its expressions; ASC orders smaller values first and DESC orders larger values first. When multiple ORDER BY expressions are present, SQLite sorts by the left-most expression first and uses later expressions to break ties.",
+      "scoring_type": "SQLITE_QUERY"
+    },
+    {
+      "answer": "SELECT title, priority FROM tasks WHERE priority >= 2 ORDER BY priority DESC, title DESC",
+      "claim_refs": [
+        "CL-SQL-002",
+        "CL-SQL-003",
+        "CL-SQL-005",
+        "CL-SQL-006"
+      ],
+      "criterion_id": "C-SQL-ORDER",
+      "family_id": "F-SQL-ORDER-R1",
+      "grounding_spans": [
+        {
+          "claim_refs": [
+            "CL-SQL-002",
+            "CL-SQL-003",
+            "CL-SQL-005",
+            "CL-SQL-006"
+          ],
+          "role": "RATIONALE",
+          "text": "When a WHERE clause is present, SQLite evaluates its expression for each input row and filters the input before result rows are produced. SQLite comparison expressions can be used inside WHERE conditions to test row values, including equality and ordered comparisons. An ORDER BY clause determines result-row ordering from its expressions; ASC orders smaller values first and DESC orders larger values first. When multiple ORDER BY expressions are present, SQLite sorts by the left-most expression first and uses later expressions to break ties."
+        }
+      ],
+      "item_id": "R-SQL-ORDER-1",
+      "mode": "RETENTION_CHECK",
+      "prompt": "Return title and priority for tasks with priority >= 2, ordered priority descending then title descending.",
+      "rationale": "When a WHERE clause is present, SQLite evaluates its expression for each input row and filters the input before result rows are produced. SQLite comparison expressions can be used inside WHERE conditions to test row values, including equality and ordered comparisons. An ORDER BY clause determines result-row ordering from its expressions; ASC orders smaller values first and DESC orders larger values first. When multiple ORDER BY expressions are present, SQLite sorts by the left-most expression first and uses later expressions to break ties.",
+      "scoring_type": "SQLITE_QUERY"
+    }
+  ],
+  "lessons": [
+    {
+      "claim_refs": [
+        "CL-SQL-001",
+        "CL-SQL-002",
+        "CL-SQL-003"
+      ],
+      "criterion_ids": [
+        "C-SQL-SELECT-WHERE"
+      ],
+      "explanation": "In a simple SQLite SELECT, the result expression list determines which result columns are produced from the input rows. When a WHERE clause is present, SQLite evaluates its expression for each input row and filters the input before result rows are produced. SQLite comparison expressions can be used inside WHERE conditions to test row values, including equality and ordered comparisons.",
+      "grounding_spans": [
+        {
+          "claim_refs": [
+            "CL-SQL-001",
+            "CL-SQL-002",
+            "CL-SQL-003"
+          ],
+          "role": "EXPLANATION",
+          "text": "In a simple SQLite SELECT, the result expression list determines which result columns are produced from the input rows. When a WHERE clause is present, SQLite evaluates its expression for each input row and filters the input before result rows are produced. SQLite comparison expressions can be used inside WHERE conditions to test row values, including equality and ordered comparisons."
+        },
+        {
+          "claim_refs": [
+            "CL-SQL-001",
+            "CL-SQL-002",
+            "CL-SQL-003"
+          ],
+          "role": "WORKED_EXAMPLE",
+          "text": "`SELECT title FROM tasks WHERE done = 0` returns the titles of incomplete tasks."
+        },
+        {
+          "claim_refs": [
+            "CL-SQL-001",
+            "CL-SQL-002",
+            "CL-SQL-003"
+          ],
+          "role": "WORKED_EXAMPLE",
+          "text": "`SELECT title, priority FROM tasks WHERE priority >= 2` returns those two columns only for tasks whose priority is at least 2."
+        }
+      ],
+      "lesson_id": "L-SQL-SELECT-WHERE",
+      "objective": "Use SELECT for the requested columns and WHERE for row-level conditions.",
+      "practice_item_ids": [
+        "P-SQL-WHERE-1",
+        "P-SQL-WHERE-2"
+      ],
+      "skill_id": "S-SQL-SELECT-WHERE",
+      "title": "Choose columns, then filter rows",
+      "worked_examples": [
+        "`SELECT title FROM tasks WHERE done = 0` returns the titles of incomplete tasks.",
+        "`SELECT title, priority FROM tasks WHERE priority >= 2` returns those two columns only for tasks whose priority is at least 2."
+      ]
+    },
+    {
+      "claim_refs": [
+        "CL-SQL-002",
+        "CL-SQL-003",
+        "CL-SQL-004",
+        "CL-SQL-005",
+        "CL-SQL-006"
+      ],
+      "criterion_ids": [
+        "C-SQL-ORDER"
+      ],
+      "explanation": "If a SELECT returns multiple rows without ORDER BY, SQLite does not define the order in which those rows are returned. An ORDER BY clause determines result-row ordering from its expressions; ASC orders smaller values first and DESC orders larger values first. When multiple ORDER BY expressions are present, SQLite sorts by the left-most expression first and uses later expressions to break ties.",
+      "grounding_spans": [
+        {
+          "claim_refs": [
+            "CL-SQL-004",
+            "CL-SQL-005",
+            "CL-SQL-006"
+          ],
+          "role": "EXPLANATION",
+          "text": "If a SELECT returns multiple rows without ORDER BY, SQLite does not define the order in which those rows are returned. An ORDER BY clause determines result-row ordering from its expressions; ASC orders smaller values first and DESC orders larger values first. When multiple ORDER BY expressions are present, SQLite sorts by the left-most expression first and uses later expressions to break ties."
+        },
+        {
+          "claim_refs": [
+            "CL-SQL-002",
+            "CL-SQL-005",
+            "CL-SQL-006"
+          ],
+          "role": "WORKED_EXAMPLE",
+          "text": "`SELECT title, priority FROM tasks WHERE done = 0 ORDER BY priority DESC, title ASC` sorts incomplete tasks by highest priority first and alphabetically within a priority tie."
+        },
+        {
+          "claim_refs": [
+            "CL-SQL-002",
+            "CL-SQL-003",
+            "CL-SQL-005",
+            "CL-SQL-006"
+          ],
+          "role": "WORKED_EXAMPLE",
+          "text": "`SELECT owner, title FROM tasks WHERE priority >= 2 ORDER BY owner ASC, title ASC` sorts qualifying tasks by owner and then title."
+        }
+      ],
+      "lesson_id": "L-SQL-ORDER",
+      "objective": "Use ORDER BY with explicit direction and a tie-breaker when the requested output requires deterministic ordering.",
+      "practice_item_ids": [
+        "P-SQL-ORDER-1",
+        "P-SQL-ORDER-2"
+      ],
+      "skill_id": "S-SQL-ORDER",
+      "title": "Make result order explicit",
+      "worked_examples": [
+        "`SELECT title, priority FROM tasks WHERE done = 0 ORDER BY priority DESC, title ASC` sorts incomplete tasks by highest priority first and alphabetically within a priority tie.",
+        "`SELECT owner, title FROM tasks WHERE priority >= 2 ORDER BY owner ASC, title ASC` sorts qualifying tasks by owner and then title."
+      ]
+    }
+  ],
+  "research_dossier_id": "RSCH-OPEN-AE3C672345F8",
+  "skills": [
+    {
+      "criterion_ids": [
+        "C-SQL-SELECT-WHERE"
+      ],
+      "hard_prerequisite_skill_ids": [],
+      "skill_id": "S-SQL-SELECT-WHERE",
+      "title": "Select columns and filter rows"
+    },
+    {
+      "criterion_ids": [
+        "C-SQL-ORDER"
+      ],
+      "hard_prerequisite_skill_ids": [
+        "S-SQL-SELECT-WHERE"
+      ],
+      "skill_id": "S-SQL-ORDER",
+      "title": "Order filtered query results"
+    }
+  ],
+  "source_ids": [
+    "SRC-SQLITE-SELECT",
+    "SRC-SQLITE-EXPR"
+  ],
+  "state": "READY_FOR_REVIEW",
+  "title": "SQLite query fundamentals",
+  "version": 1
+}

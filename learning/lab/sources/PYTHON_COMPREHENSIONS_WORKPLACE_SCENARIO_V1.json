@@ -1,0 +1,116 @@
+{
+  "claim_boundary": "BOUNDED_AUTHENTIC_SCENARIO_NOT_JOB_QUALIFICATION",
+  "course_criterion_refs": [
+    "C-PY-LISTCOMP",
+    "C-PY-DICTCOMP"
+  ],
+  "course_skill_refs": [
+    "S-PY-LISTCOMP",
+    "S-PY-DICTCOMP"
+  ],
+  "defense_prompts": [
+    {
+      "prompt": "Explain why the list result is appropriate for the supervisor's priority worklist.",
+      "prompt_id": "D1"
+    },
+    {
+      "prompt": "Explain why order_id is the dictionary key and identify one duplicate-key or data-quality risk you would check before using this pattern on production data.",
+      "prompt_id": "D2"
+    }
+  ],
+  "external_authority_claims": "NOT_CLAIMED",
+  "independence_group": "OPS_STRUCTURED_RECORD_FILTER_MAP_A",
+  "novelty_tags": [
+    "FULFILLMENT",
+    "ORDER_TRIAGE",
+    "THRESHOLD_FILTER",
+    "ID_VALUE_MAPPING"
+  ],
+  "purpose": "Use bounded Python comprehension skills to turn a small raw order dataset into a priority worklist and a late-order amount mapping for a supervisor review.",
+  "records": [
+    {
+      "amount": 1200,
+      "order_id": "A100",
+      "owner": "amy",
+      "status": "late"
+    },
+    {
+      "amount": 450,
+      "order_id": "A101",
+      "owner": "ben",
+      "status": "open"
+    },
+    {
+      "amount": 900,
+      "order_id": "A102",
+      "owner": "cara",
+      "status": "late"
+    },
+    {
+      "amount": 1500,
+      "order_id": "A103",
+      "owner": "drew",
+      "status": "open"
+    },
+    {
+      "amount": 700,
+      "order_id": "A104",
+      "owner": "erin",
+      "status": "late"
+    }
+  ],
+  "requirement_bindings": [
+    {
+      "requirement_id": "REQ-PY-OPS-01",
+      "standing": "EXACT_SHARED_REF"
+    },
+    {
+      "requirement_id": "REQ-PY-OPS-02",
+      "standing": "EXACT_SHARED_REF"
+    },
+    {
+      "requirement_id": "REQ-PY-OPS-03",
+      "standing": "OWNER_APPROVED_MAPPING_REF"
+    },
+    {
+      "requirement_id": "REQ-PY-OPS-04",
+      "standing": "EXACT_SHARED_REF"
+    }
+  ],
+  "requirements": {
+    "late_amount_rule": "Return a dictionary mapping every late order ID to its amount.",
+    "priority_rule": "Return order IDs whose status is late and amount is at least the threshold, preserving source order.",
+    "priority_threshold": 800,
+    "required_implementation_forms": {
+      "late_amount_by_id": "DICT_COMPREHENSION",
+      "priority_order_ids": "LIST_COMPREHENSION"
+    }
+  },
+  "role_context": "Junior operations analyst supporting a fulfillment team",
+  "rubric": [
+    {
+      "criterion_id": "WP-PY-01",
+      "description": "Construct the required priority worklist with a list comprehension.",
+      "verification": "INDEPENDENT_MECHANICAL"
+    },
+    {
+      "criterion_id": "WP-PY-02",
+      "description": "Construct the required late-order amount mapping with a dictionary comprehension.",
+      "verification": "INDEPENDENT_MECHANICAL"
+    },
+    {
+      "criterion_id": "WP-PY-03",
+      "description": "Produce outputs that match the independently derived business rules.",
+      "verification": "INDEPENDENT_MECHANICAL"
+    },
+    {
+      "criterion_id": "WP-PY-04",
+      "description": "Explain the implementation choice and identify a realistic data-quality risk.",
+      "verification": "HUMAN_SEMANTIC_REVIEW_REQUIRED"
+    }
+  ],
+  "scenario_family": "FULFILLMENT_ORDER_TRIAGE",
+  "scenario_id": "WP-PY-OPS-TRIAGE-V1",
+  "title": "Operations order-triage analysis",
+  "version": 1
+}

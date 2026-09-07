@@ -1,0 +1,3368 @@
+{
+  "adversarial": {
+    "cases": [
+      "test_standard_digest_tampering_fails",
+      "test_bad_exam_weights_fail",
+      "test_duplicate_requirement_id_fails",
+      "test_invalid_cognitive_level_fails",
+      "test_requirement_mapping_starts_unmapped",
+      "test_requirement_set_makes_no_certification_claim",
+      "test_blueprint_does_not_invent_learner_evidence",
+      "test_blueprint_does_not_mint_certification",
+      "test_internal_evidence_augmentation_not_asq_claim",
+      "test_same_version_content_drift_is_conflict",
+      "test_update_delta_never_defaults_to_full_course_retake",
+      "test_service_same_operation_changed_standard_conflicts",
+      "test_same_standard_identity_with_different_bytes_fails_closed",
+      "test_structured_extract_truth_boundary_is_explicit",
+      "test_mapping_plan_does_not_claim_existing_competency_equivalence",
+      "test_deeper_skill_decomposition_is_explicitly_deferred",
+      "test_ai_inferred_mapping_remains_planning_only",
+      "test_unknown_mapping_requirement_fails_closed",
+      "test_duplicate_mapping_update_fails_closed",
+      "test_service_recovers_from_every_checkpoint",
+      "test_external_experience_context_preserved",
+      "test_freshness_scheduler_is_deferred_not_reimplemented",
+      "test_new_authoritative_version_is_update_available",
+      "test_unchanged_standard_needs_no_update_training"
+    ],
+    "pass": true,
+    "passed": 24,
+    "total": 24
+  },
+  "compile": {
+    "errors": [],
+    "files": 59,
+    "pass": true
+  },
+  "current_source": {
+    "authority": "American Society for Quality (ASQ)",
+    "bok_pdf": "https://www.asq.org/cert/resource/pdf/certification/cssgb-cert-insert.pdf",
+    "capture_class": "AUTHORITATIVE_STRUCTURED_EXTRACT_FROM_LIVE_SOURCE",
+    "certification_page": "https://www.asq.org/cert/six-sigma-green-belt",
+    "note": "Currentness was checked against live ASQ web/PDF in the build session; portable packet freezes a structured extract and freshness contract, not a downloaded ASQ PDF.",
+    "observed_date": "2026-09-07",
+    "pass": true,
+    "published_version_label": "2022 CSSGB BoK",
+    "requirement_count": 66,
+    "section_weights": [
+      11,
+      20,
+      20,
+      18,
+      16,
+      15
+    ],
+    "source_bytes_archived": false
+  },
+  "demo": {
+    "freshness_contract": {
+      "authority_ref": "https://www.asq.org/cert/six-sigma-green-belt",
+      "bound_standard_digest": "475eeb34e54f09315120ea51829acf4e1a9a3c1637a8cfe72f56eb065c2afce2",
+      "freshness_contract_digest": "7c87ced5e03d5017c2c67892a05e6505046b9c7d6945c98d4e9cf15856f083ba",
+      "lab_policy_note": "30_DAY_RECHECK_IS_A_BOUNDED_LAB_POLICY_NOT_A_UNIVERSAL_STANDARD",
+      "observed_current_at": 1788784860,
+      "on_new_version": "BUILD_IMMUTABLE_SUCCESSOR_AND_UPDATE_TRAINING_DELTA",
+      "on_same_version_content_drift": "CONFLICT_REVIEW_REQUIRED",
+      "published_version_label": "2022 CSSGB BoK",
+      "recheck_interval_seconds": 2592000,
+      "scheduler_execution": "DEFERRED_TO_SHARED_SCHEDULER_INTEGRATION",
+      "source_ref": "https://www.asq.org/cert/resource/pdf/certification/cssgb-cert-insert.pdf",
+      "standard_id": "ASQ-CSSGB-BOK-2022",
+      "trigger_classes": [
+        "SCHEDULED_RECHECK",
+        "AUTHORITY_VERSION_CHANGE",
+        "SOURCE_DIGEST_CHANGE",
+        "MANUAL_REFRESH_REQUEST"
+      ],
+      "version": "EXTERNAL-STANDARD-FRESHNESS-V1"
+    },
+    "mapping_plan": {
+      "external_standard_digest": "475eeb34e54f09315120ea51829acf4e1a9a3c1637a8cfe72f56eb065c2afce2",
+      "external_standard_id": "ASQ-CSSGB-BOK-2022",
+      "mapping_plan_digest": "46ecd5974ca1de3b4ac9460f5e58cd2653564ae947bde8cff45fb30733acd67a",
+      "mapping_policy": [
+        "EXACT_DERIVATION_DOES_NOT_PROVE_EQUIVALENCE_TO_AN_EXISTING_LOCAL_COMPETENCY",
+        "AI_SIMILARITY_IS_PLANNING_ONLY",
+        "CONSEQUENTIAL_EQUIVALENCE_REQUIRES_EXACT_OR_OWNER_APPROVED_MAPPING"
+      ],
+      "mappings": [
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-I.A.1",
+          "external_requirement_id": "ASQ-CSSGB-2022-I.A.1",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "UNDERSTAND",
+          "title": "Value of Six Sigma"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-I.A.2",
+          "external_requirement_id": "ASQ-CSSGB-2022-I.A.2",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "UNDERSTAND",
+          "title": "Organizational goals and Six Sigma projects"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-I.A.3",
+          "external_requirement_id": "ASQ-CSSGB-2022-I.A.3",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "UNDERSTAND",
+          "title": "Organizational drivers and metrics"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-I.B.1",
+          "external_requirement_id": "ASQ-CSSGB-2022-I.B.1",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "APPLY",
+          "title": "Lean concepts"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-I.B.2",
+          "external_requirement_id": "ASQ-CSSGB-2022-I.B.2",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "UNDERSTAND",
+          "title": "Value stream mapping"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-I.C.1",
+          "external_requirement_id": "ASQ-CSSGB-2022-I.C.1",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "UNDERSTAND",
+          "title": "Road maps for DfSS"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-I.C.2",
+          "external_requirement_id": "ASQ-CSSGB-2022-I.C.2",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "ANALYZE",
+          "title": "Basic failure mode and effects analysis (FMEA)"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-I.C.3",
+          "external_requirement_id": "ASQ-CSSGB-2022-I.C.3",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "APPLY",
+          "title": "Design FMEA and process FMEA"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-II.A.1",
+          "external_requirement_id": "ASQ-CSSGB-2022-II.A.1",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "UNDERSTAND",
+          "title": "Project selection"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-II.A.2",
+          "external_requirement_id": "ASQ-CSSGB-2022-II.A.2",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "ANALYZE",
+          "title": "Process elements"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-II.A.3",
+          "external_requirement_id": "ASQ-CSSGB-2022-II.A.3",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "UNDERSTAND",
+          "title": "Benchmarking"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-II.A.4",
+          "external_requirement_id": "ASQ-CSSGB-2022-II.A.4",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "ANALYZE",
+          "title": "Process inputs and outputs (SIPOC)"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-II.A.5",
+          "external_requirement_id": "ASQ-CSSGB-2022-II.A.5",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "APPLY",
+          "title": "Owners and stakeholders"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-II.B.1",
+          "external_requirement_id": "ASQ-CSSGB-2022-II.B.1",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "APPLY",
+          "title": "Customer identification"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-II.B.2",
+          "external_requirement_id": "ASQ-CSSGB-2022-II.B.2",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "APPLY",
+          "title": "Customer data"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-II.B.3",
+          "external_requirement_id": "ASQ-CSSGB-2022-II.B.3",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "APPLY",
+          "title": "Customer requirements"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-II.C.1",
+          "external_requirement_id": "ASQ-CSSGB-2022-II.C.1",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "APPLY",
+          "title": "Project methodology"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-II.C.2",
+          "external_requirement_id": "ASQ-CSSGB-2022-II.C.2",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "APPLY",
+          "title": "Project charter"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-II.C.3",
+          "external_requirement_id": "ASQ-CSSGB-2022-II.C.3",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "APPLY",
+          "title": "Project scope"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-II.C.4",
+          "external_requirement_id": "ASQ-CSSGB-2022-II.C.4",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "APPLY",
+          "title": "Project metrics"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-II.C.5",
+          "external_requirement_id": "ASQ-CSSGB-2022-II.C.5",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "APPLY",
+          "title": "Project planning tools"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-II.C.6",
+          "external_requirement_id": "ASQ-CSSGB-2022-II.C.6",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "APPLY",
+          "title": "Project documentation"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-II.C.7",
+          "external_requirement_id": "ASQ-CSSGB-2022-II.C.7",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "UNDERSTAND",
+          "title": "Project risk analysis and management"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-II.C.8",
+          "external_requirement_id": "ASQ-CSSGB-2022-II.C.8",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "APPLY",
+          "title": "Project closure"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-II.D.1",
+          "external_requirement_id": "ASQ-CSSGB-2022-II.D.1",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "APPLY",
+          "title": "Management and planning tools"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-II.E.1",
+          "external_requirement_id": "ASQ-CSSGB-2022-II.E.1",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "ANALYZE",
+          "title": "Process performance metrics"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-II.E.2",
+          "external_requirement_id": "ASQ-CSSGB-2022-II.E.2",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "APPLY",
+          "title": "Organizational communication"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-II.F.1",
+          "external_requirement_id": "ASQ-CSSGB-2022-II.F.1",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "UNDERSTAND",
+          "title": "Team stages and dynamics"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-II.F.2",
+          "external_requirement_id": "ASQ-CSSGB-2022-II.F.2",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "APPLY",
+          "title": "Team roles and responsibilities"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-II.F.3",
+          "external_requirement_id": "ASQ-CSSGB-2022-II.F.3",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "APPLY",
+          "title": "Team tools and decision-making concepts"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-II.F.4",
+          "external_requirement_id": "ASQ-CSSGB-2022-II.F.4",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "APPLY",
+          "title": "Team communication"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-III.A.1",
+          "external_requirement_id": "ASQ-CSSGB-2022-III.A.1",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "CREATE",
+          "title": "Process analysis and documentation"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-III.B.1",
+          "external_requirement_id": "ASQ-CSSGB-2022-III.B.1",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "UNDERSTAND",
+          "title": "Basic probability concepts"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-III.B.2",
+          "external_requirement_id": "ASQ-CSSGB-2022-III.B.2",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "UNDERSTAND",
+          "title": "Central limit theorem"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-III.C.1",
+          "external_requirement_id": "ASQ-CSSGB-2022-III.C.1",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "UNDERSTAND",
+          "title": "Statistical distributions"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-III.D.1",
+          "external_requirement_id": "ASQ-CSSGB-2022-III.D.1",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "ANALYZE",
+          "title": "Types of data and measurement scales"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-III.D.2",
+          "external_requirement_id": "ASQ-CSSGB-2022-III.D.2",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "APPLY",
+          "title": "Sampling and data collection plans and methods"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-III.D.3",
+          "external_requirement_id": "ASQ-CSSGB-2022-III.D.3",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "EVALUATE",
+          "title": "Descriptive statistics"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-III.D.4",
+          "external_requirement_id": "ASQ-CSSGB-2022-III.D.4",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "CREATE",
+          "title": "Graphical methods"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-III.E.1",
+          "external_requirement_id": "ASQ-CSSGB-2022-III.E.1",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "EVALUATE",
+          "title": "Measurement system analysis (MSA)"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-III.F.1",
+          "external_requirement_id": "ASQ-CSSGB-2022-III.F.1",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "EVALUATE",
+          "title": "Process performance vs. process specifications"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-III.F.2",
+          "external_requirement_id": "ASQ-CSSGB-2022-III.F.2",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "EVALUATE",
+          "title": "Process capability studies"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-III.F.3",
+          "external_requirement_id": "ASQ-CSSGB-2022-III.F.3",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "EVALUATE",
+          "title": "Process capability and performance indices"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-III.F.4",
+          "external_requirement_id": "ASQ-CSSGB-2022-III.F.4",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "EVALUATE",
+          "title": "Short-term vs. long-term capability and sigma shift"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-IV.A.1",
+          "external_requirement_id": "ASQ-CSSGB-2022-IV.A.1",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "CREATE",
+          "title": "Multi-vari studies"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-IV.A.2",
+          "external_requirement_id": "ASQ-CSSGB-2022-IV.A.2",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "EVALUATE",
+          "title": "Correlation and linear regression"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-IV.B.1",
+          "external_requirement_id": "ASQ-CSSGB-2022-IV.B.1",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "APPLY",
+          "title": "Hypothesis testing basics"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-IV.B.2",
+          "external_requirement_id": "ASQ-CSSGB-2022-IV.B.2",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "ANALYZE",
+          "title": "Tests for means, variances, and proportions"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-IV.C.1",
+          "external_requirement_id": "ASQ-CSSGB-2022-IV.C.1",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "ANALYZE",
+          "title": "Gap analysis"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-IV.C.2",
+          "external_requirement_id": "ASQ-CSSGB-2022-IV.C.2",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "ANALYZE",
+          "title": "Root cause analysis"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-V.A.1",
+          "external_requirement_id": "ASQ-CSSGB-2022-V.A.1",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "UNDERSTAND",
+          "title": "Design of experiments basic terms"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-V.A.2",
+          "external_requirement_id": "ASQ-CSSGB-2022-V.A.2",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "APPLY",
+          "title": "DoE graphs and plots"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-V.B.1",
+          "external_requirement_id": "ASQ-CSSGB-2022-V.B.1",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "APPLY",
+          "title": "Implementation planning"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-V.C.1",
+          "external_requirement_id": "ASQ-CSSGB-2022-V.C.1",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "APPLY",
+          "title": "Waste elimination"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-V.C.2",
+          "external_requirement_id": "ASQ-CSSGB-2022-V.C.2",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "ANALYZE",
+          "title": "Cycle-time reduction"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-V.C.3",
+          "external_requirement_id": "ASQ-CSSGB-2022-V.C.3",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "APPLY",
+          "title": "Kaizen and kaizen blitz"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-VI.A.1",
+          "external_requirement_id": "ASQ-CSSGB-2022-VI.A.1",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "ANALYZE",
+          "title": "Statistical process control basics"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-VI.A.2",
+          "external_requirement_id": "ASQ-CSSGB-2022-VI.A.2",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "UNDERSTAND",
+          "title": "Rational subgrouping"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-VI.A.3",
+          "external_requirement_id": "ASQ-CSSGB-2022-VI.A.3",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "APPLY",
+          "title": "Control charts"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-VI.B.1",
+          "external_requirement_id": "ASQ-CSSGB-2022-VI.B.1",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "APPLY",
+          "title": "Control plan"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-VI.B.2",
+          "external_requirement_id": "ASQ-CSSGB-2022-VI.B.2",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "UNDERSTAND",
+          "title": "Document control"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-VI.B.3",
+          "external_requirement_id": "ASQ-CSSGB-2022-VI.B.3",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "APPLY",
+          "title": "Training plans"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-VI.B.4",
+          "external_requirement_id": "ASQ-CSSGB-2022-VI.B.4",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "REMEMBER",
+          "title": "Audits"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-VI.B.5",
+          "external_requirement_id": "ASQ-CSSGB-2022-VI.B.5",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "APPLY",
+          "title": "Plan-do-check-act (PDCA)"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-VI.C.1",
+          "external_requirement_id": "ASQ-CSSGB-2022-VI.C.1",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "UNDERSTAND",
+          "title": "Total productive maintenance (TPM)"
+        },
+        {
+          "consequential_equivalence_established": false,
+          "deeper_skill_decomposition_standing": "DEFERRED_TO_COURSE_COMPILER_AND_REVIEW",
+          "derivation_standing": "EXACT_DERIVATION_FROM_EXTERNAL_REQUIREMENT",
+          "derived_learning_target_id": "LT-ASQ-CSSGB-2022-VI.C.2",
+          "external_requirement_id": "ASQ-CSSGB-2022-VI.C.2",
+          "local_competency_mapping_standing": "UNMAPPED",
+          "local_competency_ref": null,
+          "target_cognitive_level": "UNDERSTAND",
+          "title": "Visual factory"
+        }
+      ],
+      "requirement_set_digest": "86a1baba495d2637ef4d889948befd2c87a9b87a377f04b892b06c5ec980a298",
+      "version": "EXTERNAL-REQUIREMENT-MAPPING-PLAN-V1"
+    },
+    "pass": true,
+    "readiness_blueprint": {
+      "blueprint_digest": "38c5f99307e15070051381e14c4948867dae02b031574464e7c406cbb572fc69",
+      "blueprint_id": "CERT-BP-ASQ-CSSGB-BOK-2022",
+      "content_coverage_standing": "GAPS_REMAIN",
+      "exam_section_weights": {
+        "I": 11,
+        "II": 20,
+        "III": 20,
+        "IV": 18,
+        "V": 16,
+        "VI": 15
+      },
+      "external_certification_status": "NOT_MADE",
+      "external_eligibility_requirements": {
+        "education_waiver": false,
+        "experience_years": 3,
+        "external_authority_controls_eligibility": true
+      },
+      "external_standard_digest": "475eeb34e54f09315120ea51829acf4e1a9a3c1637a8cfe72f56eb065c2afce2",
+      "external_standard_id": "ASQ-CSSGB-BOK-2022",
+      "learner_evidence_standing": "NOT_EVALUATED",
+      "limitations": [
+        "BLUEPRINT_IS_NOT_ASQ_CERTIFICATION",
+        "INTERNAL_EVIDENCE_PROFILE_MAY_EXCEED_EXAM_REQUIREMENTS",
+        "EXAM_READINESS_REQUIRES FUTURE ASSESSMENT BLUEPRINT AND LEARNER EVIDENCE"
+      ],
+      "requirement_set_digest": "86a1baba495d2637ef4d889948befd2c87a9b87a377f04b892b06c5ec980a298",
+      "requirements": [
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "UNDERSTAND",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_KNOWLEDGE_ASSESSMENT",
+            "DELAYED_RETENTION"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-I.A.1",
+          "title": "Value of Six Sigma"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "UNDERSTAND",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_KNOWLEDGE_ASSESSMENT",
+            "DELAYED_RETENTION"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-I.A.2",
+          "title": "Organizational goals and Six Sigma projects"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "UNDERSTAND",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_KNOWLEDGE_ASSESSMENT",
+            "DELAYED_RETENTION"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-I.A.3",
+          "title": "Organizational drivers and metrics"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "APPLY",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_APPLICATION_TASK",
+            "DELAYED_RETENTION",
+            "NOVEL_TRANSFER"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-I.B.1",
+          "title": "Lean concepts"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "UNDERSTAND",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_KNOWLEDGE_ASSESSMENT",
+            "DELAYED_RETENTION"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-I.B.2",
+          "title": "Value stream mapping"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "UNDERSTAND",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_KNOWLEDGE_ASSESSMENT",
+            "DELAYED_RETENTION"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-I.C.1",
+          "title": "Road maps for DfSS"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "ANALYZE",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_SCENARIO_ANALYSIS",
+            "DELAYED_RETENTION",
+            "NOVEL_TRANSFER"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-I.C.2",
+          "title": "Basic failure mode and effects analysis (FMEA)"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "APPLY",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_APPLICATION_TASK",
+            "DELAYED_RETENTION",
+            "NOVEL_TRANSFER"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-I.C.3",
+          "title": "Design FMEA and process FMEA"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "UNDERSTAND",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_KNOWLEDGE_ASSESSMENT",
+            "DELAYED_RETENTION"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-II.A.1",
+          "title": "Project selection"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "ANALYZE",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_SCENARIO_ANALYSIS",
+            "DELAYED_RETENTION",
+            "NOVEL_TRANSFER"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-II.A.2",
+          "title": "Process elements"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "UNDERSTAND",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_KNOWLEDGE_ASSESSMENT",
+            "DELAYED_RETENTION"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-II.A.3",
+          "title": "Benchmarking"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "ANALYZE",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_SCENARIO_ANALYSIS",
+            "DELAYED_RETENTION",
+            "NOVEL_TRANSFER"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-II.A.4",
+          "title": "Process inputs and outputs (SIPOC)"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "APPLY",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_APPLICATION_TASK",
+            "DELAYED_RETENTION",
+            "NOVEL_TRANSFER"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-II.A.5",
+          "title": "Owners and stakeholders"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "APPLY",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_APPLICATION_TASK",
+            "DELAYED_RETENTION",
+            "NOVEL_TRANSFER"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-II.B.1",
+          "title": "Customer identification"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "APPLY",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_APPLICATION_TASK",
+            "DELAYED_RETENTION",
+            "NOVEL_TRANSFER"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-II.B.2",
+          "title": "Customer data"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "APPLY",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_APPLICATION_TASK",
+            "DELAYED_RETENTION",
+            "NOVEL_TRANSFER"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-II.B.3",
+          "title": "Customer requirements"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "APPLY",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_APPLICATION_TASK",
+            "DELAYED_RETENTION",
+            "NOVEL_TRANSFER"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-II.C.1",
+          "title": "Project methodology"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "APPLY",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_APPLICATION_TASK",
+            "DELAYED_RETENTION",
+            "NOVEL_TRANSFER"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-II.C.2",
+          "title": "Project charter"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "APPLY",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_APPLICATION_TASK",
+            "DELAYED_RETENTION",
+            "NOVEL_TRANSFER"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-II.C.3",
+          "title": "Project scope"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "APPLY",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_APPLICATION_TASK",
+            "DELAYED_RETENTION",
+            "NOVEL_TRANSFER"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-II.C.4",
+          "title": "Project metrics"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "APPLY",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_APPLICATION_TASK",
+            "DELAYED_RETENTION",
+            "NOVEL_TRANSFER"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-II.C.5",
+          "title": "Project planning tools"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "APPLY",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_APPLICATION_TASK",
+            "DELAYED_RETENTION",
+            "NOVEL_TRANSFER"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-II.C.6",
+          "title": "Project documentation"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "UNDERSTAND",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_KNOWLEDGE_ASSESSMENT",
+            "DELAYED_RETENTION"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-II.C.7",
+          "title": "Project risk analysis and management"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "APPLY",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_APPLICATION_TASK",
+            "DELAYED_RETENTION",
+            "NOVEL_TRANSFER"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-II.C.8",
+          "title": "Project closure"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "APPLY",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_APPLICATION_TASK",
+            "DELAYED_RETENTION",
+            "NOVEL_TRANSFER"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-II.D.1",
+          "title": "Management and planning tools"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "ANALYZE",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_SCENARIO_ANALYSIS",
+            "DELAYED_RETENTION",
+            "NOVEL_TRANSFER"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-II.E.1",
+          "title": "Process performance metrics"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "APPLY",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_APPLICATION_TASK",
+            "DELAYED_RETENTION",
+            "NOVEL_TRANSFER"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-II.E.2",
+          "title": "Organizational communication"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "UNDERSTAND",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_KNOWLEDGE_ASSESSMENT",
+            "DELAYED_RETENTION"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-II.F.1",
+          "title": "Team stages and dynamics"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "APPLY",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_APPLICATION_TASK",
+            "DELAYED_RETENTION",
+            "NOVEL_TRANSFER"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-II.F.2",
+          "title": "Team roles and responsibilities"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "APPLY",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_APPLICATION_TASK",
+            "DELAYED_RETENTION",
+            "NOVEL_TRANSFER"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-II.F.3",
+          "title": "Team tools and decision-making concepts"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "APPLY",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_APPLICATION_TASK",
+            "DELAYED_RETENTION",
+            "NOVEL_TRANSFER"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-II.F.4",
+          "title": "Team communication"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "CREATE",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "AUTHENTIC_CONSTRUCTED_ARTIFACT",
+            "INDEPENDENT_DEFENSE",
+            "DELAYED_RETENTION",
+            "NOVEL_TRANSFER"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-III.A.1",
+          "title": "Process analysis and documentation"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "UNDERSTAND",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_KNOWLEDGE_ASSESSMENT",
+            "DELAYED_RETENTION"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-III.B.1",
+          "title": "Basic probability concepts"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "UNDERSTAND",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_KNOWLEDGE_ASSESSMENT",
+            "DELAYED_RETENTION"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-III.B.2",
+          "title": "Central limit theorem"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "UNDERSTAND",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_KNOWLEDGE_ASSESSMENT",
+            "DELAYED_RETENTION"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-III.C.1",
+          "title": "Statistical distributions"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "ANALYZE",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_SCENARIO_ANALYSIS",
+            "DELAYED_RETENTION",
+            "NOVEL_TRANSFER"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-III.D.1",
+          "title": "Types of data and measurement scales"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "APPLY",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_APPLICATION_TASK",
+            "DELAYED_RETENTION",
+            "NOVEL_TRANSFER"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-III.D.2",
+          "title": "Sampling and data collection plans and methods"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "EVALUATE",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_JUDGMENT_TASK",
+            "RATIONALE_OR_DEFENSE",
+            "DELAYED_RETENTION",
+            "NOVEL_TRANSFER"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-III.D.3",
+          "title": "Descriptive statistics"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "CREATE",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "AUTHENTIC_CONSTRUCTED_ARTIFACT",
+            "INDEPENDENT_DEFENSE",
+            "DELAYED_RETENTION",
+            "NOVEL_TRANSFER"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-III.D.4",
+          "title": "Graphical methods"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "EVALUATE",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_JUDGMENT_TASK",
+            "RATIONALE_OR_DEFENSE",
+            "DELAYED_RETENTION",
+            "NOVEL_TRANSFER"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-III.E.1",
+          "title": "Measurement system analysis (MSA)"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "EVALUATE",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_JUDGMENT_TASK",
+            "RATIONALE_OR_DEFENSE",
+            "DELAYED_RETENTION",
+            "NOVEL_TRANSFER"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-III.F.1",
+          "title": "Process performance vs. process specifications"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "EVALUATE",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_JUDGMENT_TASK",
+            "RATIONALE_OR_DEFENSE",
+            "DELAYED_RETENTION",
+            "NOVEL_TRANSFER"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-III.F.2",
+          "title": "Process capability studies"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "EVALUATE",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_JUDGMENT_TASK",
+            "RATIONALE_OR_DEFENSE",
+            "DELAYED_RETENTION",
+            "NOVEL_TRANSFER"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-III.F.3",
+          "title": "Process capability and performance indices"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "EVALUATE",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_JUDGMENT_TASK",
+            "RATIONALE_OR_DEFENSE",
+            "DELAYED_RETENTION",
+            "NOVEL_TRANSFER"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-III.F.4",
+          "title": "Short-term vs. long-term capability and sigma shift"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "CREATE",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "AUTHENTIC_CONSTRUCTED_ARTIFACT",
+            "INDEPENDENT_DEFENSE",
+            "DELAYED_RETENTION",
+            "NOVEL_TRANSFER"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-IV.A.1",
+          "title": "Multi-vari studies"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "EVALUATE",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_JUDGMENT_TASK",
+            "RATIONALE_OR_DEFENSE",
+            "DELAYED_RETENTION",
+            "NOVEL_TRANSFER"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-IV.A.2",
+          "title": "Correlation and linear regression"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "APPLY",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_APPLICATION_TASK",
+            "DELAYED_RETENTION",
+            "NOVEL_TRANSFER"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-IV.B.1",
+          "title": "Hypothesis testing basics"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "ANALYZE",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_SCENARIO_ANALYSIS",
+            "DELAYED_RETENTION",
+            "NOVEL_TRANSFER"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-IV.B.2",
+          "title": "Tests for means, variances, and proportions"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "ANALYZE",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_SCENARIO_ANALYSIS",
+            "DELAYED_RETENTION",
+            "NOVEL_TRANSFER"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-IV.C.1",
+          "title": "Gap analysis"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "ANALYZE",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_SCENARIO_ANALYSIS",
+            "DELAYED_RETENTION",
+            "NOVEL_TRANSFER"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-IV.C.2",
+          "title": "Root cause analysis"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "UNDERSTAND",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_KNOWLEDGE_ASSESSMENT",
+            "DELAYED_RETENTION"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-V.A.1",
+          "title": "Design of experiments basic terms"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "APPLY",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_APPLICATION_TASK",
+            "DELAYED_RETENTION",
+            "NOVEL_TRANSFER"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-V.A.2",
+          "title": "DoE graphs and plots"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "APPLY",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_APPLICATION_TASK",
+            "DELAYED_RETENTION",
+            "NOVEL_TRANSFER"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-V.B.1",
+          "title": "Implementation planning"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "APPLY",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_APPLICATION_TASK",
+            "DELAYED_RETENTION",
+            "NOVEL_TRANSFER"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-V.C.1",
+          "title": "Waste elimination"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "ANALYZE",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_SCENARIO_ANALYSIS",
+            "DELAYED_RETENTION",
+            "NOVEL_TRANSFER"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-V.C.2",
+          "title": "Cycle-time reduction"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "APPLY",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_APPLICATION_TASK",
+            "DELAYED_RETENTION",
+            "NOVEL_TRANSFER"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-V.C.3",
+          "title": "Kaizen and kaizen blitz"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "ANALYZE",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_SCENARIO_ANALYSIS",
+            "DELAYED_RETENTION",
+            "NOVEL_TRANSFER"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-VI.A.1",
+          "title": "Statistical process control basics"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "UNDERSTAND",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_KNOWLEDGE_ASSESSMENT",
+            "DELAYED_RETENTION"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-VI.A.2",
+          "title": "Rational subgrouping"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "APPLY",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_APPLICATION_TASK",
+            "DELAYED_RETENTION",
+            "NOVEL_TRANSFER"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-VI.A.3",
+          "title": "Control charts"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "APPLY",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_APPLICATION_TASK",
+            "DELAYED_RETENTION",
+            "NOVEL_TRANSFER"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-VI.B.1",
+          "title": "Control plan"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "UNDERSTAND",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_KNOWLEDGE_ASSESSMENT",
+            "DELAYED_RETENTION"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-VI.B.2",
+          "title": "Document control"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "APPLY",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_APPLICATION_TASK",
+            "DELAYED_RETENTION",
+            "NOVEL_TRANSFER"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-VI.B.3",
+          "title": "Training plans"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "REMEMBER",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_KNOWLEDGE_ASSESSMENT",
+            "DELAYED_RETENTION"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-VI.B.4",
+          "title": "Audits"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "APPLY",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_APPLICATION_TASK",
+            "DELAYED_RETENTION",
+            "NOVEL_TRANSFER"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-VI.B.5",
+          "title": "Plan-do-check-act (PDCA)"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "UNDERSTAND",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_KNOWLEDGE_ASSESSMENT",
+            "DELAYED_RETENTION"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-VI.C.1",
+          "title": "Total productive maintenance (TPM)"
+        },
+        {
+          "content_mapping_standing": "UNMAPPED",
+          "external_cognitive_level": "UNDERSTAND",
+          "profile_authority": "SYSTEM_MASTER_INTERNAL_EVIDENCE_AUGMENTATION_NOT_ASQ_REQUIREMENT",
+          "required_learning_evidence_profile": [
+            "INDEPENDENT_KNOWLEDGE_ASSESSMENT",
+            "DELAYED_RETENTION"
+          ],
+          "requirement_id": "ASQ-CSSGB-2022-VI.C.2",
+          "title": "Visual factory"
+        }
+      ],
+      "version": "CERTIFICATION-READINESS-BLUEPRINT-V1"
+    },
+    "requirement_set": {
+      "external_certification_status": "NOT_MADE",
+      "external_standard_digest": "475eeb34e54f09315120ea51829acf4e1a9a3c1637a8cfe72f56eb065c2afce2",
+      "external_standard_id": "ASQ-CSSGB-BOK-2022",
+      "owner_ref": "American Society for Quality (ASQ)",
+      "owner_version": "2022 CSSGB BoK",
+      "requirement_set_digest": "86a1baba495d2637ef4d889948befd2c87a9b87a377f04b892b06c5ec980a298",
+      "requirement_set_id": "REQSET-ASQ-CSSGB-BOK-2022",
+      "requirements": [
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "I.A.1",
+          "highest_cognitive_level": "UNDERSTAND",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-I.A.1",
+          "source_locator": "ASQ CSSGB BoK 2022 p.3 / I.A.1",
+          "title": "Value of Six Sigma"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "I.A.2",
+          "highest_cognitive_level": "UNDERSTAND",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-I.A.2",
+          "source_locator": "ASQ CSSGB BoK 2022 p.3 / I.A.2",
+          "title": "Organizational goals and Six Sigma projects"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "I.A.3",
+          "highest_cognitive_level": "UNDERSTAND",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-I.A.3",
+          "source_locator": "ASQ CSSGB BoK 2022 p.3 / I.A.3",
+          "title": "Organizational drivers and metrics"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "I.B.1",
+          "highest_cognitive_level": "APPLY",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-I.B.1",
+          "source_locator": "ASQ CSSGB BoK 2022 p.3 / I.B.1",
+          "title": "Lean concepts"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "I.B.2",
+          "highest_cognitive_level": "UNDERSTAND",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-I.B.2",
+          "source_locator": "ASQ CSSGB BoK 2022 p.3 / I.B.2",
+          "title": "Value stream mapping"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "I.C.1",
+          "highest_cognitive_level": "UNDERSTAND",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-I.C.1",
+          "source_locator": "ASQ CSSGB BoK 2022 p.4 / I.C.1",
+          "title": "Road maps for DfSS"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "I.C.2",
+          "highest_cognitive_level": "ANALYZE",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-I.C.2",
+          "source_locator": "ASQ CSSGB BoK 2022 p.4 / I.C.2",
+          "title": "Basic failure mode and effects analysis (FMEA)"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "I.C.3",
+          "highest_cognitive_level": "APPLY",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-I.C.3",
+          "source_locator": "ASQ CSSGB BoK 2022 p.4 / I.C.3",
+          "title": "Design FMEA and process FMEA"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "II.A.1",
+          "highest_cognitive_level": "UNDERSTAND",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-II.A.1",
+          "source_locator": "ASQ CSSGB BoK 2022 p.4 / II.A.1",
+          "title": "Project selection"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "II.A.2",
+          "highest_cognitive_level": "ANALYZE",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-II.A.2",
+          "source_locator": "ASQ CSSGB BoK 2022 p.4 / II.A.2",
+          "title": "Process elements"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "II.A.3",
+          "highest_cognitive_level": "UNDERSTAND",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-II.A.3",
+          "source_locator": "ASQ CSSGB BoK 2022 p.4 / II.A.3",
+          "title": "Benchmarking"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "II.A.4",
+          "highest_cognitive_level": "ANALYZE",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-II.A.4",
+          "source_locator": "ASQ CSSGB BoK 2022 p.4 / II.A.4",
+          "title": "Process inputs and outputs (SIPOC)"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "II.A.5",
+          "highest_cognitive_level": "APPLY",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-II.A.5",
+          "source_locator": "ASQ CSSGB BoK 2022 p.4 / II.A.5",
+          "title": "Owners and stakeholders"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "II.B.1",
+          "highest_cognitive_level": "APPLY",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-II.B.1",
+          "source_locator": "ASQ CSSGB BoK 2022 p.4 / II.B.1",
+          "title": "Customer identification"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "II.B.2",
+          "highest_cognitive_level": "APPLY",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-II.B.2",
+          "source_locator": "ASQ CSSGB BoK 2022 p.4 / II.B.2",
+          "title": "Customer data"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "II.B.3",
+          "highest_cognitive_level": "APPLY",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-II.B.3",
+          "source_locator": "ASQ CSSGB BoK 2022 p.4 / II.B.3",
+          "title": "Customer requirements"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "II.C.1",
+          "highest_cognitive_level": "APPLY",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-II.C.1",
+          "source_locator": "ASQ CSSGB BoK 2022 p.5 / II.C.1",
+          "title": "Project methodology"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "II.C.2",
+          "highest_cognitive_level": "APPLY",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-II.C.2",
+          "source_locator": "ASQ CSSGB BoK 2022 p.5 / II.C.2",
+          "title": "Project charter"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "II.C.3",
+          "highest_cognitive_level": "APPLY",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-II.C.3",
+          "source_locator": "ASQ CSSGB BoK 2022 p.5 / II.C.3",
+          "title": "Project scope"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "II.C.4",
+          "highest_cognitive_level": "APPLY",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-II.C.4",
+          "source_locator": "ASQ CSSGB BoK 2022 p.5 / II.C.4",
+          "title": "Project metrics"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "II.C.5",
+          "highest_cognitive_level": "APPLY",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-II.C.5",
+          "source_locator": "ASQ CSSGB BoK 2022 p.5 / II.C.5",
+          "title": "Project planning tools"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "II.C.6",
+          "highest_cognitive_level": "APPLY",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-II.C.6",
+          "source_locator": "ASQ CSSGB BoK 2022 p.5 / II.C.6",
+          "title": "Project documentation"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "II.C.7",
+          "highest_cognitive_level": "UNDERSTAND",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-II.C.7",
+          "source_locator": "ASQ CSSGB BoK 2022 p.5 / II.C.7",
+          "title": "Project risk analysis and management"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "II.C.8",
+          "highest_cognitive_level": "APPLY",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-II.C.8",
+          "source_locator": "ASQ CSSGB BoK 2022 p.5 / II.C.8",
+          "title": "Project closure"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "II.D.1",
+          "highest_cognitive_level": "APPLY",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-II.D.1",
+          "source_locator": "ASQ CSSGB BoK 2022 p.5 / II.D.1",
+          "title": "Management and planning tools"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "II.E.1",
+          "highest_cognitive_level": "ANALYZE",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-II.E.1",
+          "source_locator": "ASQ CSSGB BoK 2022 p.5 / II.E.1",
+          "title": "Process performance metrics"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "II.E.2",
+          "highest_cognitive_level": "APPLY",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-II.E.2",
+          "source_locator": "ASQ CSSGB BoK 2022 p.5 / II.E.2",
+          "title": "Organizational communication"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "II.F.1",
+          "highest_cognitive_level": "UNDERSTAND",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-II.F.1",
+          "source_locator": "ASQ CSSGB BoK 2022 p.5 / II.F.1",
+          "title": "Team stages and dynamics"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "II.F.2",
+          "highest_cognitive_level": "APPLY",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-II.F.2",
+          "source_locator": "ASQ CSSGB BoK 2022 p.6 / II.F.2",
+          "title": "Team roles and responsibilities"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "II.F.3",
+          "highest_cognitive_level": "APPLY",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-II.F.3",
+          "source_locator": "ASQ CSSGB BoK 2022 p.6 / II.F.3",
+          "title": "Team tools and decision-making concepts"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "II.F.4",
+          "highest_cognitive_level": "APPLY",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-II.F.4",
+          "source_locator": "ASQ CSSGB BoK 2022 p.6 / II.F.4",
+          "title": "Team communication"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "III.A.1",
+          "highest_cognitive_level": "CREATE",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-III.A.1",
+          "source_locator": "ASQ CSSGB BoK 2022 p.6 / III.A.1",
+          "title": "Process analysis and documentation"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "III.B.1",
+          "highest_cognitive_level": "UNDERSTAND",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-III.B.1",
+          "source_locator": "ASQ CSSGB BoK 2022 p.6 / III.B.1",
+          "title": "Basic probability concepts"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "III.B.2",
+          "highest_cognitive_level": "UNDERSTAND",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-III.B.2",
+          "source_locator": "ASQ CSSGB BoK 2022 p.6 / III.B.2",
+          "title": "Central limit theorem"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "III.C.1",
+          "highest_cognitive_level": "UNDERSTAND",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-III.C.1",
+          "source_locator": "ASQ CSSGB BoK 2022 p.6 / III.C.1",
+          "title": "Statistical distributions"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "III.D.1",
+          "highest_cognitive_level": "ANALYZE",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-III.D.1",
+          "source_locator": "ASQ CSSGB BoK 2022 p.6 / III.D.1",
+          "title": "Types of data and measurement scales"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "III.D.2",
+          "highest_cognitive_level": "APPLY",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-III.D.2",
+          "source_locator": "ASQ CSSGB BoK 2022 p.6 / III.D.2",
+          "title": "Sampling and data collection plans and methods"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "III.D.3",
+          "highest_cognitive_level": "EVALUATE",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-III.D.3",
+          "source_locator": "ASQ CSSGB BoK 2022 p.6 / III.D.3",
+          "title": "Descriptive statistics"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "III.D.4",
+          "highest_cognitive_level": "CREATE",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-III.D.4",
+          "source_locator": "ASQ CSSGB BoK 2022 p.6 / III.D.4",
+          "title": "Graphical methods"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "III.E.1",
+          "highest_cognitive_level": "EVALUATE",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-III.E.1",
+          "source_locator": "ASQ CSSGB BoK 2022 p.6 / III.E.1",
+          "title": "Measurement system analysis (MSA)"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "III.F.1",
+          "highest_cognitive_level": "EVALUATE",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-III.F.1",
+          "source_locator": "ASQ CSSGB BoK 2022 p.7 / III.F.1",
+          "title": "Process performance vs. process specifications"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "III.F.2",
+          "highest_cognitive_level": "EVALUATE",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-III.F.2",
+          "source_locator": "ASQ CSSGB BoK 2022 p.7 / III.F.2",
+          "title": "Process capability studies"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "III.F.3",
+          "highest_cognitive_level": "EVALUATE",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-III.F.3",
+          "source_locator": "ASQ CSSGB BoK 2022 p.7 / III.F.3",
+          "title": "Process capability and performance indices"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "III.F.4",
+          "highest_cognitive_level": "EVALUATE",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-III.F.4",
+          "source_locator": "ASQ CSSGB BoK 2022 p.7 / III.F.4",
+          "title": "Short-term vs. long-term capability and sigma shift"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "IV.A.1",
+          "highest_cognitive_level": "CREATE",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-IV.A.1",
+          "source_locator": "ASQ CSSGB BoK 2022 p.7 / IV.A.1",
+          "title": "Multi-vari studies"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "IV.A.2",
+          "highest_cognitive_level": "EVALUATE",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-IV.A.2",
+          "source_locator": "ASQ CSSGB BoK 2022 p.7 / IV.A.2",
+          "title": "Correlation and linear regression"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "IV.B.1",
+          "highest_cognitive_level": "APPLY",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-IV.B.1",
+          "source_locator": "ASQ CSSGB BoK 2022 p.7 / IV.B.1",
+          "title": "Hypothesis testing basics"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "IV.B.2",
+          "highest_cognitive_level": "ANALYZE",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-IV.B.2",
+          "source_locator": "ASQ CSSGB BoK 2022 p.7 / IV.B.2",
+          "title": "Tests for means, variances, and proportions"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "IV.C.1",
+          "highest_cognitive_level": "ANALYZE",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-IV.C.1",
+          "source_locator": "ASQ CSSGB BoK 2022 p.7 / IV.C.1",
+          "title": "Gap analysis"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "IV.C.2",
+          "highest_cognitive_level": "ANALYZE",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-IV.C.2",
+          "source_locator": "ASQ CSSGB BoK 2022 p.7 / IV.C.2",
+          "title": "Root cause analysis"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "V.A.1",
+          "highest_cognitive_level": "UNDERSTAND",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-V.A.1",
+          "source_locator": "ASQ CSSGB BoK 2022 p.8 / V.A.1",
+          "title": "Design of experiments basic terms"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "V.A.2",
+          "highest_cognitive_level": "APPLY",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-V.A.2",
+          "source_locator": "ASQ CSSGB BoK 2022 p.8 / V.A.2",
+          "title": "DoE graphs and plots"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "V.B.1",
+          "highest_cognitive_level": "APPLY",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-V.B.1",
+          "source_locator": "ASQ CSSGB BoK 2022 p.8 / V.B.1",
+          "title": "Implementation planning"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "V.C.1",
+          "highest_cognitive_level": "APPLY",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-V.C.1",
+          "source_locator": "ASQ CSSGB BoK 2022 p.8 / V.C.1",
+          "title": "Waste elimination"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "V.C.2",
+          "highest_cognitive_level": "ANALYZE",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-V.C.2",
+          "source_locator": "ASQ CSSGB BoK 2022 p.8 / V.C.2",
+          "title": "Cycle-time reduction"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "V.C.3",
+          "highest_cognitive_level": "APPLY",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-V.C.3",
+          "source_locator": "ASQ CSSGB BoK 2022 p.8 / V.C.3",
+          "title": "Kaizen and kaizen blitz"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "VI.A.1",
+          "highest_cognitive_level": "ANALYZE",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-VI.A.1",
+          "source_locator": "ASQ CSSGB BoK 2022 p.8 / VI.A.1",
+          "title": "Statistical process control basics"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "VI.A.2",
+          "highest_cognitive_level": "UNDERSTAND",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-VI.A.2",
+          "source_locator": "ASQ CSSGB BoK 2022 p.8 / VI.A.2",
+          "title": "Rational subgrouping"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "VI.A.3",
+          "highest_cognitive_level": "APPLY",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-VI.A.3",
+          "source_locator": "ASQ CSSGB BoK 2022 p.8 / VI.A.3",
+          "title": "Control charts"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "VI.B.1",
+          "highest_cognitive_level": "APPLY",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-VI.B.1",
+          "source_locator": "ASQ CSSGB BoK 2022 p.8 / VI.B.1",
+          "title": "Control plan"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "VI.B.2",
+          "highest_cognitive_level": "UNDERSTAND",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-VI.B.2",
+          "source_locator": "ASQ CSSGB BoK 2022 p.8 / VI.B.2",
+          "title": "Document control"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "VI.B.3",
+          "highest_cognitive_level": "APPLY",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-VI.B.3",
+          "source_locator": "ASQ CSSGB BoK 2022 p.8 / VI.B.3",
+          "title": "Training plans"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "VI.B.4",
+          "highest_cognitive_level": "REMEMBER",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-VI.B.4",
+          "source_locator": "ASQ CSSGB BoK 2022 p.8 / VI.B.4",
+          "title": "Audits"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "VI.B.5",
+          "highest_cognitive_level": "APPLY",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-VI.B.5",
+          "source_locator": "ASQ CSSGB BoK 2022 p.8 / VI.B.5",
+          "title": "Plan-do-check-act (PDCA)"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "VI.C.1",
+          "highest_cognitive_level": "UNDERSTAND",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-VI.C.1",
+          "source_locator": "ASQ CSSGB BoK 2022 p.8 / VI.C.1",
+          "title": "Total productive maintenance (TPM)"
+        },
+        {
+          "content_coverage": "NOT_MAPPED",
+          "external_source_code": "VI.C.2",
+          "highest_cognitive_level": "UNDERSTAND",
+          "learner_evidence_coverage": "NOT_EVALUATED",
+          "mapping": {
+            "local_competency_ref": null,
+            "standing": "UNMAPPED"
+          },
+          "requirement_id": "ASQ-CSSGB-2022-VI.C.2",
+          "source_locator": "ASQ CSSGB BoK 2022 p.8 / VI.C.2",
+          "title": "Visual factory"
+        }
+      ],
+      "sections": [
+        {
+          "exam_question_weight": 11,
+          "section_id": "I",
+          "title": "Overview: Six Sigma and the Organization"
+        },
+        {
+          "exam_question_weight": 20,
+          "section_id": "II",
+          "title": "Define Phase"
+        },
+        {
+          "exam_question_weight": 20,
+          "section_id": "III",
+          "title": "Measure Phase"
+        },
+        {
+          "exam_question_weight": 18,
+          "section_id": "IV",
+          "title": "Analyze Phase"
+        },
+        {
+          "exam_question_weight": 16,
+          "section_id": "V",
+          "title": "Improve Phase"
+        },
+        {
+          "exam_question_weight": 15,
+          "section_id": "VI",
+          "title": "Control Phase"
+        }
+      ],
+      "version": "EXTERNAL-REQUIREMENT-SET-V1"
+    },
+    "service_result": {
+      "blueprint_digest": "38c5f99307e15070051381e14c4948867dae02b031574464e7c406cbb572fc69",
+      "blueprint_id": "CERT-BP-ASQ-CSSGB-BOK-2022",
+      "external_certification_status": "NOT_MADE",
+      "freshness_contract_digest": "7c87ced5e03d5017c2c67892a05e6505046b9c7d6945c98d4e9cf15856f083ba",
+      "mapping_plan_digest": "46ecd5974ca1de3b4ac9460f5e58cd2653564ae947bde8cff45fb30733acd67a",
+      "requirement_count": 66,
+      "requirement_set_digest": "86a1baba495d2637ef4d889948befd2c87a9b87a377f04b892b06c5ec980a298",
+      "requirement_set_id": "REQSET-ASQ-CSSGB-BOK-2022",
+      "standard_digest": "475eeb34e54f09315120ea51829acf4e1a9a3c1637a8cfe72f56eb065c2afce2",
+      "standard_id": "ASQ-CSSGB-BOK-2022",
+      "status": "COMPLETE"
+    },
+    "standard": {
+      "authority": "American Society for Quality (ASQ)",
+      "authority_ref": "https://www.asq.org/cert/six-sigma-green-belt",
+      "capture_class": "AUTHORITATIVE_STRUCTURED_EXTRACT_FROM_LIVE_SOURCE",
+      "cognitive_levels": [
+        "REMEMBER",
+        "UNDERSTAND",
+        "APPLY",
+        "ANALYZE",
+        "EVALUATE",
+        "CREATE"
+      ],
+      "eligibility_context": {
+        "education_waiver": false,
+        "experience_years": 3,
+        "external_authority_controls_eligibility": true
+      },
+      "exam": {
+        "computer_delivered_scored_questions": 100,
+        "computer_delivered_total_questions": 110,
+        "computer_delivered_unscored_questions": 10,
+        "exam_minutes": 258,
+        "open_book": true
+      },
+      "ingest_version": "EXTERNAL-STANDARD-INGEST-V1",
+      "limitations": [
+        "STRUCTURED_EXTRACT_DOES_NOT_REPLACE_OFFICIAL_ASQ_SOURCE",
+        "SYSTEM_MASTER_DOES_NOT_ISSUE_ASQ_CERTIFICATION",
+        "BOK_SUBTEXT_IS_NOT_DECLARED_ALL_INCLUSIVE_BY_ASQ"
+      ],
+      "observed_current_at": 1788784860,
+      "published_version_label": "2022 CSSGB BoK",
+      "requirements": [
+        {
+          "highest_cognitive_level": "UNDERSTAND",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-I.A.1",
+          "section_id": "I",
+          "source_code": "I.A.1",
+          "source_locator": "ASQ CSSGB BoK 2022 p.3 / I.A.1",
+          "source_page": 3,
+          "title": "Value of Six Sigma"
+        },
+        {
+          "highest_cognitive_level": "UNDERSTAND",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-I.A.2",
+          "section_id": "I",
+          "source_code": "I.A.2",
+          "source_locator": "ASQ CSSGB BoK 2022 p.3 / I.A.2",
+          "source_page": 3,
+          "title": "Organizational goals and Six Sigma projects"
+        },
+        {
+          "highest_cognitive_level": "UNDERSTAND",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-I.A.3",
+          "section_id": "I",
+          "source_code": "I.A.3",
+          "source_locator": "ASQ CSSGB BoK 2022 p.3 / I.A.3",
+          "source_page": 3,
+          "title": "Organizational drivers and metrics"
+        },
+        {
+          "highest_cognitive_level": "APPLY",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-I.B.1",
+          "section_id": "I",
+          "source_code": "I.B.1",
+          "source_locator": "ASQ CSSGB BoK 2022 p.3 / I.B.1",
+          "source_page": 3,
+          "title": "Lean concepts"
+        },
+        {
+          "highest_cognitive_level": "UNDERSTAND",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-I.B.2",
+          "section_id": "I",
+          "source_code": "I.B.2",
+          "source_locator": "ASQ CSSGB BoK 2022 p.3 / I.B.2",
+          "source_page": 3,
+          "title": "Value stream mapping"
+        },
+        {
+          "highest_cognitive_level": "UNDERSTAND",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-I.C.1",
+          "section_id": "I",
+          "source_code": "I.C.1",
+          "source_locator": "ASQ CSSGB BoK 2022 p.4 / I.C.1",
+          "source_page": 4,
+          "title": "Road maps for DfSS"
+        },
+        {
+          "highest_cognitive_level": "ANALYZE",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-I.C.2",
+          "section_id": "I",
+          "source_code": "I.C.2",
+          "source_locator": "ASQ CSSGB BoK 2022 p.4 / I.C.2",
+          "source_page": 4,
+          "title": "Basic failure mode and effects analysis (FMEA)"
+        },
+        {
+          "highest_cognitive_level": "APPLY",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-I.C.3",
+          "section_id": "I",
+          "source_code": "I.C.3",
+          "source_locator": "ASQ CSSGB BoK 2022 p.4 / I.C.3",
+          "source_page": 4,
+          "title": "Design FMEA and process FMEA"
+        },
+        {
+          "highest_cognitive_level": "UNDERSTAND",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-II.A.1",
+          "section_id": "II",
+          "source_code": "II.A.1",
+          "source_locator": "ASQ CSSGB BoK 2022 p.4 / II.A.1",
+          "source_page": 4,
+          "title": "Project selection"
+        },
+        {
+          "highest_cognitive_level": "ANALYZE",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-II.A.2",
+          "section_id": "II",
+          "source_code": "II.A.2",
+          "source_locator": "ASQ CSSGB BoK 2022 p.4 / II.A.2",
+          "source_page": 4,
+          "title": "Process elements"
+        },
+        {
+          "highest_cognitive_level": "UNDERSTAND",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-II.A.3",
+          "section_id": "II",
+          "source_code": "II.A.3",
+          "source_locator": "ASQ CSSGB BoK 2022 p.4 / II.A.3",
+          "source_page": 4,
+          "title": "Benchmarking"
+        },
+        {
+          "highest_cognitive_level": "ANALYZE",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-II.A.4",
+          "section_id": "II",
+          "source_code": "II.A.4",
+          "source_locator": "ASQ CSSGB BoK 2022 p.4 / II.A.4",
+          "source_page": 4,
+          "title": "Process inputs and outputs (SIPOC)"
+        },
+        {
+          "highest_cognitive_level": "APPLY",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-II.A.5",
+          "section_id": "II",
+          "source_code": "II.A.5",
+          "source_locator": "ASQ CSSGB BoK 2022 p.4 / II.A.5",
+          "source_page": 4,
+          "title": "Owners and stakeholders"
+        },
+        {
+          "highest_cognitive_level": "APPLY",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-II.B.1",
+          "section_id": "II",
+          "source_code": "II.B.1",
+          "source_locator": "ASQ CSSGB BoK 2022 p.4 / II.B.1",
+          "source_page": 4,
+          "title": "Customer identification"
+        },
+        {
+          "highest_cognitive_level": "APPLY",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-II.B.2",
+          "section_id": "II",
+          "source_code": "II.B.2",
+          "source_locator": "ASQ CSSGB BoK 2022 p.4 / II.B.2",
+          "source_page": 4,
+          "title": "Customer data"
+        },
+        {
+          "highest_cognitive_level": "APPLY",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-II.B.3",
+          "section_id": "II",
+          "source_code": "II.B.3",
+          "source_locator": "ASQ CSSGB BoK 2022 p.4 / II.B.3",
+          "source_page": 4,
+          "title": "Customer requirements"
+        },
+        {
+          "highest_cognitive_level": "APPLY",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-II.C.1",
+          "section_id": "II",
+          "source_code": "II.C.1",
+          "source_locator": "ASQ CSSGB BoK 2022 p.5 / II.C.1",
+          "source_page": 5,
+          "title": "Project methodology"
+        },
+        {
+          "highest_cognitive_level": "APPLY",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-II.C.2",
+          "section_id": "II",
+          "source_code": "II.C.2",
+          "source_locator": "ASQ CSSGB BoK 2022 p.5 / II.C.2",
+          "source_page": 5,
+          "title": "Project charter"
+        },
+        {
+          "highest_cognitive_level": "APPLY",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-II.C.3",
+          "section_id": "II",
+          "source_code": "II.C.3",
+          "source_locator": "ASQ CSSGB BoK 2022 p.5 / II.C.3",
+          "source_page": 5,
+          "title": "Project scope"
+        },
+        {
+          "highest_cognitive_level": "APPLY",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-II.C.4",
+          "section_id": "II",
+          "source_code": "II.C.4",
+          "source_locator": "ASQ CSSGB BoK 2022 p.5 / II.C.4",
+          "source_page": 5,
+          "title": "Project metrics"
+        },
+        {
+          "highest_cognitive_level": "APPLY",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-II.C.5",
+          "section_id": "II",
+          "source_code": "II.C.5",
+          "source_locator": "ASQ CSSGB BoK 2022 p.5 / II.C.5",
+          "source_page": 5,
+          "title": "Project planning tools"
+        },
+        {
+          "highest_cognitive_level": "APPLY",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-II.C.6",
+          "section_id": "II",
+          "source_code": "II.C.6",
+          "source_locator": "ASQ CSSGB BoK 2022 p.5 / II.C.6",
+          "source_page": 5,
+          "title": "Project documentation"
+        },
+        {
+          "highest_cognitive_level": "UNDERSTAND",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-II.C.7",
+          "section_id": "II",
+          "source_code": "II.C.7",
+          "source_locator": "ASQ CSSGB BoK 2022 p.5 / II.C.7",
+          "source_page": 5,
+          "title": "Project risk analysis and management"
+        },
+        {
+          "highest_cognitive_level": "APPLY",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-II.C.8",
+          "section_id": "II",
+          "source_code": "II.C.8",
+          "source_locator": "ASQ CSSGB BoK 2022 p.5 / II.C.8",
+          "source_page": 5,
+          "title": "Project closure"
+        },
+        {
+          "highest_cognitive_level": "APPLY",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-II.D.1",
+          "section_id": "II",
+          "source_code": "II.D.1",
+          "source_locator": "ASQ CSSGB BoK 2022 p.5 / II.D.1",
+          "source_page": 5,
+          "title": "Management and planning tools"
+        },
+        {
+          "highest_cognitive_level": "ANALYZE",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-II.E.1",
+          "section_id": "II",
+          "source_code": "II.E.1",
+          "source_locator": "ASQ CSSGB BoK 2022 p.5 / II.E.1",
+          "source_page": 5,
+          "title": "Process performance metrics"
+        },
+        {
+          "highest_cognitive_level": "APPLY",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-II.E.2",
+          "section_id": "II",
+          "source_code": "II.E.2",
+          "source_locator": "ASQ CSSGB BoK 2022 p.5 / II.E.2",
+          "source_page": 5,
+          "title": "Organizational communication"
+        },
+        {
+          "highest_cognitive_level": "UNDERSTAND",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-II.F.1",
+          "section_id": "II",
+          "source_code": "II.F.1",
+          "source_locator": "ASQ CSSGB BoK 2022 p.5 / II.F.1",
+          "source_page": 5,
+          "title": "Team stages and dynamics"
+        },
+        {
+          "highest_cognitive_level": "APPLY",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-II.F.2",
+          "section_id": "II",
+          "source_code": "II.F.2",
+          "source_locator": "ASQ CSSGB BoK 2022 p.6 / II.F.2",
+          "source_page": 6,
+          "title": "Team roles and responsibilities"
+        },
+        {
+          "highest_cognitive_level": "APPLY",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-II.F.3",
+          "section_id": "II",
+          "source_code": "II.F.3",
+          "source_locator": "ASQ CSSGB BoK 2022 p.6 / II.F.3",
+          "source_page": 6,
+          "title": "Team tools and decision-making concepts"
+        },
+        {
+          "highest_cognitive_level": "APPLY",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-II.F.4",
+          "section_id": "II",
+          "source_code": "II.F.4",
+          "source_locator": "ASQ CSSGB BoK 2022 p.6 / II.F.4",
+          "source_page": 6,
+          "title": "Team communication"
+        },
+        {
+          "highest_cognitive_level": "CREATE",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-III.A.1",
+          "section_id": "III",
+          "source_code": "III.A.1",
+          "source_locator": "ASQ CSSGB BoK 2022 p.6 / III.A.1",
+          "source_page": 6,
+          "title": "Process analysis and documentation"
+        },
+        {
+          "highest_cognitive_level": "UNDERSTAND",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-III.B.1",
+          "section_id": "III",
+          "source_code": "III.B.1",
+          "source_locator": "ASQ CSSGB BoK 2022 p.6 / III.B.1",
+          "source_page": 6,
+          "title": "Basic probability concepts"
+        },
+        {
+          "highest_cognitive_level": "UNDERSTAND",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-III.B.2",
+          "section_id": "III",
+          "source_code": "III.B.2",
+          "source_locator": "ASQ CSSGB BoK 2022 p.6 / III.B.2",
+          "source_page": 6,
+          "title": "Central limit theorem"
+        },
+        {
+          "highest_cognitive_level": "UNDERSTAND",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-III.C.1",
+          "section_id": "III",
+          "source_code": "III.C.1",
+          "source_locator": "ASQ CSSGB BoK 2022 p.6 / III.C.1",
+          "source_page": 6,
+          "title": "Statistical distributions"
+        },
+        {
+          "highest_cognitive_level": "ANALYZE",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-III.D.1",
+          "section_id": "III",
+          "source_code": "III.D.1",
+          "source_locator": "ASQ CSSGB BoK 2022 p.6 / III.D.1",
+          "source_page": 6,
+          "title": "Types of data and measurement scales"
+        },
+        {
+          "highest_cognitive_level": "APPLY",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-III.D.2",
+          "section_id": "III",
+          "source_code": "III.D.2",
+          "source_locator": "ASQ CSSGB BoK 2022 p.6 / III.D.2",
+          "source_page": 6,
+          "title": "Sampling and data collection plans and methods"
+        },
+        {
+          "highest_cognitive_level": "EVALUATE",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-III.D.3",
+          "section_id": "III",
+          "source_code": "III.D.3",
+          "source_locator": "ASQ CSSGB BoK 2022 p.6 / III.D.3",
+          "source_page": 6,
+          "title": "Descriptive statistics"
+        },
+        {
+          "highest_cognitive_level": "CREATE",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-III.D.4",
+          "section_id": "III",
+          "source_code": "III.D.4",
+          "source_locator": "ASQ CSSGB BoK 2022 p.6 / III.D.4",
+          "source_page": 6,
+          "title": "Graphical methods"
+        },
+        {
+          "highest_cognitive_level": "EVALUATE",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-III.E.1",
+          "section_id": "III",
+          "source_code": "III.E.1",
+          "source_locator": "ASQ CSSGB BoK 2022 p.6 / III.E.1",
+          "source_page": 6,
+          "title": "Measurement system analysis (MSA)"
+        },
+        {
+          "highest_cognitive_level": "EVALUATE",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-III.F.1",
+          "section_id": "III",
+          "source_code": "III.F.1",
+          "source_locator": "ASQ CSSGB BoK 2022 p.7 / III.F.1",
+          "source_page": 7,
+          "title": "Process performance vs. process specifications"
+        },
+        {
+          "highest_cognitive_level": "EVALUATE",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-III.F.2",
+          "section_id": "III",
+          "source_code": "III.F.2",
+          "source_locator": "ASQ CSSGB BoK 2022 p.7 / III.F.2",
+          "source_page": 7,
+          "title": "Process capability studies"
+        },
+        {
+          "highest_cognitive_level": "EVALUATE",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-III.F.3",
+          "section_id": "III",
+          "source_code": "III.F.3",
+          "source_locator": "ASQ CSSGB BoK 2022 p.7 / III.F.3",
+          "source_page": 7,
+          "title": "Process capability and performance indices"
+        },
+        {
+          "highest_cognitive_level": "EVALUATE",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-III.F.4",
+          "section_id": "III",
+          "source_code": "III.F.4",
+          "source_locator": "ASQ CSSGB BoK 2022 p.7 / III.F.4",
+          "source_page": 7,
+          "title": "Short-term vs. long-term capability and sigma shift"
+        },
+        {
+          "highest_cognitive_level": "CREATE",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-IV.A.1",
+          "section_id": "IV",
+          "source_code": "IV.A.1",
+          "source_locator": "ASQ CSSGB BoK 2022 p.7 / IV.A.1",
+          "source_page": 7,
+          "title": "Multi-vari studies"
+        },
+        {
+          "highest_cognitive_level": "EVALUATE",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-IV.A.2",
+          "section_id": "IV",
+          "source_code": "IV.A.2",
+          "source_locator": "ASQ CSSGB BoK 2022 p.7 / IV.A.2",
+          "source_page": 7,
+          "title": "Correlation and linear regression"
+        },
+        {
+          "highest_cognitive_level": "APPLY",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-IV.B.1",
+          "section_id": "IV",
+          "source_code": "IV.B.1",
+          "source_locator": "ASQ CSSGB BoK 2022 p.7 / IV.B.1",
+          "source_page": 7,
+          "title": "Hypothesis testing basics"
+        },
+        {
+          "highest_cognitive_level": "ANALYZE",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-IV.B.2",
+          "section_id": "IV",
+          "source_code": "IV.B.2",
+          "source_locator": "ASQ CSSGB BoK 2022 p.7 / IV.B.2",
+          "source_page": 7,
+          "title": "Tests for means, variances, and proportions"
+        },
+        {
+          "highest_cognitive_level": "ANALYZE",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-IV.C.1",
+          "section_id": "IV",
+          "source_code": "IV.C.1",
+          "source_locator": "ASQ CSSGB BoK 2022 p.7 / IV.C.1",
+          "source_page": 7,
+          "title": "Gap analysis"
+        },
+        {
+          "highest_cognitive_level": "ANALYZE",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-IV.C.2",
+          "section_id": "IV",
+          "source_code": "IV.C.2",
+          "source_locator": "ASQ CSSGB BoK 2022 p.7 / IV.C.2",
+          "source_page": 7,
+          "title": "Root cause analysis"
+        },
+        {
+          "highest_cognitive_level": "UNDERSTAND",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-V.A.1",
+          "section_id": "V",
+          "source_code": "V.A.1",
+          "source_locator": "ASQ CSSGB BoK 2022 p.8 / V.A.1",
+          "source_page": 8,
+          "title": "Design of experiments basic terms"
+        },
+        {
+          "highest_cognitive_level": "APPLY",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-V.A.2",
+          "section_id": "V",
+          "source_code": "V.A.2",
+          "source_locator": "ASQ CSSGB BoK 2022 p.8 / V.A.2",
+          "source_page": 8,
+          "title": "DoE graphs and plots"
+        },
+        {
+          "highest_cognitive_level": "APPLY",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-V.B.1",
+          "section_id": "V",
+          "source_code": "V.B.1",
+          "source_locator": "ASQ CSSGB BoK 2022 p.8 / V.B.1",
+          "source_page": 8,
+          "title": "Implementation planning"
+        },
+        {
+          "highest_cognitive_level": "APPLY",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-V.C.1",
+          "section_id": "V",
+          "source_code": "V.C.1",
+          "source_locator": "ASQ CSSGB BoK 2022 p.8 / V.C.1",
+          "source_page": 8,
+          "title": "Waste elimination"
+        },
+        {
+          "highest_cognitive_level": "ANALYZE",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-V.C.2",
+          "section_id": "V",
+          "source_code": "V.C.2",
+          "source_locator": "ASQ CSSGB BoK 2022 p.8 / V.C.2",
+          "source_page": 8,
+          "title": "Cycle-time reduction"
+        },
+        {
+          "highest_cognitive_level": "APPLY",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-V.C.3",
+          "section_id": "V",
+          "source_code": "V.C.3",
+          "source_locator": "ASQ CSSGB BoK 2022 p.8 / V.C.3",
+          "source_page": 8,
+          "title": "Kaizen and kaizen blitz"
+        },
+        {
+          "highest_cognitive_level": "ANALYZE",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-VI.A.1",
+          "section_id": "VI",
+          "source_code": "VI.A.1",
+          "source_locator": "ASQ CSSGB BoK 2022 p.8 / VI.A.1",
+          "source_page": 8,
+          "title": "Statistical process control basics"
+        },
+        {
+          "highest_cognitive_level": "UNDERSTAND",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-VI.A.2",
+          "section_id": "VI",
+          "source_code": "VI.A.2",
+          "source_locator": "ASQ CSSGB BoK 2022 p.8 / VI.A.2",
+          "source_page": 8,
+          "title": "Rational subgrouping"
+        },
+        {
+          "highest_cognitive_level": "APPLY",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-VI.A.3",
+          "section_id": "VI",
+          "source_code": "VI.A.3",
+          "source_locator": "ASQ CSSGB BoK 2022 p.8 / VI.A.3",
+          "source_page": 8,
+          "title": "Control charts"
+        },
+        {
+          "highest_cognitive_level": "APPLY",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-VI.B.1",
+          "section_id": "VI",
+          "source_code": "VI.B.1",
+          "source_locator": "ASQ CSSGB BoK 2022 p.8 / VI.B.1",
+          "source_page": 8,
+          "title": "Control plan"
+        },
+        {
+          "highest_cognitive_level": "UNDERSTAND",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-VI.B.2",
+          "section_id": "VI",
+          "source_code": "VI.B.2",
+          "source_locator": "ASQ CSSGB BoK 2022 p.8 / VI.B.2",
+          "source_page": 8,
+          "title": "Document control"
+        },
+        {
+          "highest_cognitive_level": "APPLY",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-VI.B.3",
+          "section_id": "VI",
+          "source_code": "VI.B.3",
+          "source_locator": "ASQ CSSGB BoK 2022 p.8 / VI.B.3",
+          "source_page": 8,
+          "title": "Training plans"
+        },
+        {
+          "highest_cognitive_level": "REMEMBER",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-VI.B.4",
+          "section_id": "VI",
+          "source_code": "VI.B.4",
+          "source_locator": "ASQ CSSGB BoK 2022 p.8 / VI.B.4",
+          "source_page": 8,
+          "title": "Audits"
+        },
+        {
+          "highest_cognitive_level": "APPLY",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-VI.B.5",
+          "section_id": "VI",
+          "source_code": "VI.B.5",
+          "source_locator": "ASQ CSSGB BoK 2022 p.8 / VI.B.5",
+          "source_page": 8,
+          "title": "Plan-do-check-act (PDCA)"
+        },
+        {
+          "highest_cognitive_level": "UNDERSTAND",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-VI.C.1",
+          "section_id": "VI",
+          "source_code": "VI.C.1",
+          "source_locator": "ASQ CSSGB BoK 2022 p.8 / VI.C.1",
+          "source_page": 8,
+          "title": "Total productive maintenance (TPM)"
+        },
+        {
+          "highest_cognitive_level": "UNDERSTAND",
+          "mapping_standing": "UNMAPPED",
+          "requirement_id": "ASQ-CSSGB-2022-VI.C.2",
+          "section_id": "VI",
+          "source_code": "VI.C.2",
+          "source_locator": "ASQ CSSGB BoK 2022 p.8 / VI.C.2",
+          "source_page": 8,
+          "title": "Visual factory"
+        }
+      ],
+      "sections": [
+        {
+          "exam_question_weight": 11,
+          "section_id": "I",
+          "title": "Overview: Six Sigma and the Organization"
+        },
+        {
+          "exam_question_weight": 20,
+          "section_id": "II",
+          "title": "Define Phase"
+        },
+        {
+          "exam_question_weight": 20,
+          "section_id": "III",
+          "title": "Measure Phase"
+        },
+        {
+          "exam_question_weight": 18,
+          "section_id": "IV",
+          "title": "Analyze Phase"
+        },
+        {
+          "exam_question_weight": 16,
+          "section_id": "V",
+          "title": "Improve Phase"
+        },
+        {
+          "exam_question_weight": 15,
+          "section_id": "VI",
+          "title": "Control Phase"
+        }
+      ],
+      "source_bytes_archived": false,
+      "source_ref": "https://www.asq.org/cert/resource/pdf/certification/cssgb-cert-insert.pdf",
+      "source_structure_verified": true,
+      "standard_digest": "475eeb34e54f09315120ea51829acf4e1a9a3c1637a8cfe72f56eb065c2afce2",
+      "standard_id": "ASQ-CSSGB-BOK-2022",
+      "title": "ASQ Certified Six Sigma Green Belt (CSSGB) Body of Knowledge"
+    },
+    "truth_boundary": "REAL CURRENT ASQ CSSGB 2022 BOK STRUCTURED EXTRACT; NOT ASQ CERTIFICATION; DEEP COURSE/SKILL DECOMPOSITION NOT YET BUILT"
+  },
+  "determinism": {
+    "pass": true,
+    "runs": 100,
+    "unique_blueprint_digests": 1,
+    "unique_freshness_contract_digests": 1,
+    "unique_mapping_plan_digests": 1,
+    "unique_requirement_set_digests": 1,
+    "unique_standard_digests": 1
+  },
+  "full": {
+    "expected": 411,
+    "pass": true,
+    "passed": 411,
+    "returncode": 0
+  },
+  "new_slice": {
+    "derivation": "PARSED_FROM_FULL_SUITE",
+    "expected": 48,
+    "pass": true,
+    "passed": 48
+  },
+  "predecessor": {
+    "derivation": "FULL_SUITE_MINUS_IMPL013_SLICE",
+    "expected": 363,
+    "pass": true,
+    "passed": 363
+  },
+  "recovery": {
+    "crash_seeds": {
+      "BLUEPRINT_BUILT": true,
+      "COMPLETE_BEFORE_RETURN": true,
+      "FRESHNESS_BOUND": true,
+      "REQUIREMENTS_DECOMPOSED": true,
+      "STANDARD_BOUND": true
+    },
+    "pass": true,
+    "passes": 100,
+    "phase_passes": {
+      "BLUEPRINT_BUILT": 20,
+      "COMPLETE_BEFORE_RETURN": 20,
+      "FRESHNESS_BOUND": 20,
+      "REQUIREMENTS_DECOMPOSED": 20,
+      "STANDARD_BOUND": 20
+    },
+    "runs": 100,
+    "unique_blueprint_digests": 1,
+    "unique_freshness_contract_digests": 1,
+    "unique_requirement_set_digests": 1,
+    "unique_standard_digests": 1
+  },
+  "status": "PASS_PORTABLE_IMPLEMENTATION",
+  "update_training": {
+    "freshness_decision": {
+      "new_digest": "90dbaae7a71a56f08e014de8ffafc22c24355a1020d75131e65bd220b054d371",
+      "new_version": "FUTURE CSSGB BoK TEST FIXTURE",
+      "old_digest": "475eeb34e54f09315120ea51829acf4e1a9a3c1637a8cfe72f56eb065c2afce2",
+      "old_version": "2022 CSSGB BoK",
+      "status": "NEW_VERSION_UPDATE_AVAILABLE"
+    },
+    "pass": true,
+    "truth_boundary": "SYNTHETIC FUTURE ASQ VERSION USED ONLY TO PROVE UPDATE-DETECTION/DELTA LOGIC",
+    "update_training_delta": {
+      "added_requirement_ids": [
+        "ASQ-CSSGB-FUTURE-VII.A.1"
+      ],
+      "affected_training_requirement_ids": [
+        "ASQ-CSSGB-2022-I.A.1",
+        "ASQ-CSSGB-FUTURE-VII.A.1"
+      ],
+      "changed_requirement_ids": [
+        "ASQ-CSSGB-2022-I.A.1"
+      ],
+      "new_requirement_set_digest": "b0e6e8d30e692ac7db2b22f988b98fbb4865ce9b0720637580295b60e3822e21",
+      "old_requirement_set_digest": "86a1baba495d2637ef4d889948befd2c87a9b87a377f04b892b06c5ec980a298",
+      "removed_requirement_ids": [],
+      "retake_entire_course_required": false,
+      "revalidation_policy": "ONLY_AFFECTED_MEANING_OR_EVIDENCE_DEPENDENCIES_REVALIDATE",
+      "update_training_delta_digest": "55cd0284c141d4aa765d1b4b8ff64105d0a916c7b8d23c548e96166d269a533a",
+      "update_training_required": true,
+      "version": "UPDATE-TRAINING-DELTA-V1"
+    }
+  }
+}

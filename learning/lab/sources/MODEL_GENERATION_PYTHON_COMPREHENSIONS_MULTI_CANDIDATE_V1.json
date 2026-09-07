@@ -1,0 +1,2492 @@
+{
+  "fixture_version": "STOCHASTIC-CANDIDATE-SET-V1",
+  "goal": "Use Python list and dictionary comprehensions to transform and filter data.",
+  "model_id": "GPT-5.6 Sol",
+  "shared_prompt_digest": "90cbfd5e88469edeb9dd077abd9697f3718094087ff4eb326ef380fc9abb8073",
+  "shared_research_evidence_digest": "785d9f533c50611173993e150c9c7920bf0d2303c10b8a9a70b0d4e12b9c0407",
+  "traces": [
+    {
+      "candidate_note": "full mechanical qualification coverage",
+      "capture_mode": "CHAT_SESSION_SAME_PROMPT_MULTI_CANDIDATE",
+      "captured_at": "2026-09-07T06:20:00-04:00",
+      "generation_trace_id": "MODEL-GEN-PY-COMP-MC-A-20260907",
+      "model_id": "GPT-5.6 Sol",
+      "model_role": "CANDIDATE_GENERATOR_ONLY",
+      "output": {
+        "course_blueprint": {
+          "criteria": [
+            {
+              "criterion_id": "C-PY-LISTCOMP",
+              "outcome": "Construct and explain list comprehensions that transform and filter an iterable.",
+              "skill_id": "S-PY-LISTCOMP"
+            },
+            {
+              "criterion_id": "C-PY-DICTCOMP",
+              "outcome": "Construct and explain dictionary comprehensions that derive key-value pairs from an iterable.",
+              "skill_id": "S-PY-DICTCOMP"
+            }
+          ],
+          "items": [
+            {
+              "answer": "[x * 2 for x in [2, 5, 8]]",
+              "claim_refs": [
+                "CL-PY-COMP-001",
+                "CL-PY-COMP-002"
+              ],
+              "criterion_id": "C-PY-LISTCOMP",
+              "family_id": "F-PY-LC-P1",
+              "item_id": "P-PY-LC-1",
+              "mode": "PRACTICE",
+              "oracle_spec": {
+                "expected": [
+                  4,
+                  10,
+                  16
+                ],
+                "kind": "PYTHON_EXPRESSION"
+              },
+              "prompt": "Write one Python list-comprehension expression that doubles each value in [2, 5, 8].",
+              "rationale": "A list comprehension applies the expression before the for clause to each selected input value.",
+              "scoring_type": "PYTHON_COMPREHENSION"
+            },
+            {
+              "answer": "[x for x in [-3, 0, 2, 5] if x > 0]",
+              "claim_refs": [
+                "CL-PY-COMP-001",
+                "CL-PY-COMP-002"
+              ],
+              "criterion_id": "C-PY-LISTCOMP",
+              "family_id": "F-PY-LC-P2",
+              "item_id": "P-PY-LC-2",
+              "mode": "PRACTICE",
+              "oracle_spec": {
+                "expected": [
+                  2,
+                  5
+                ],
+                "kind": "PYTHON_EXPRESSION"
+              },
+              "prompt": "Write one list comprehension that keeps only positive values from [-3, 0, 2, 5].",
+              "rationale": "An if clause can filter which iterable elements contribute results.",
+              "scoring_type": "PYTHON_COMPREHENSION"
+            },
+            {
+              "answer": "[x**2 for x in range(7) if x % 2 == 0]",
+              "claim_refs": [
+                "CL-PY-COMP-001",
+                "CL-PY-COMP-002",
+                "CL-PY-COMP-003"
+              ],
+              "criterion_id": "C-PY-LISTCOMP",
+              "family_id": "F-PY-LC-M1",
+              "item_id": "M-PY-LC-1",
+              "mode": "MASTERY_CHECK",
+              "oracle_spec": {
+                "expected": [
+                  0,
+                  4,
+                  16,
+                  36
+                ],
+                "kind": "PYTHON_EXPRESSION"
+              },
+              "prompt": "Write one list comprehension that returns the squares of the even numbers produced by range(7).",
+              "rationale": "The comprehension combines a transformation with a filtering condition.",
+              "scoring_type": "PYTHON_COMPREHENSION"
+            },
+            {
+              "answer": "[len(w) for w in [\"cat\", \"tiger\", \"ox\", \"horse\"] if len(w) > 3]",
+              "claim_refs": [
+                "CL-PY-COMP-001",
+                "CL-PY-COMP-002"
+              ],
+              "criterion_id": "C-PY-LISTCOMP",
+              "family_id": "F-PY-LC-R1",
+              "item_id": "R-PY-LC-1",
+              "mode": "RETENTION_CHECK",
+              "oracle_spec": {
+                "expected": [
+                  5,
+                  5
+                ],
+                "kind": "PYTHON_EXPRESSION"
+              },
+              "prompt": "Write one list comprehension that returns lengths of words longer than three characters from [\"cat\", \"tiger\", \"ox\", \"horse\"].",
+              "rationale": "This delayed item requires both filtering and transformation in a new item family.",
+              "scoring_type": "PYTHON_COMPREHENSION"
+            },
+            {
+              "answer": "{x: x**2 for x in (2, 3, 4)}",
+              "claim_refs": [
+                "CL-PY-DICT-001",
+                "CL-PY-DICT-002"
+              ],
+              "criterion_id": "C-PY-DICTCOMP",
+              "family_id": "F-PY-DC-P1",
+              "item_id": "P-PY-DC-1",
+              "mode": "PRACTICE",
+              "oracle_spec": {
+                "expected": {
+                  "2": 4,
+                  "3": 9,
+                  "4": 16
+                },
+                "kind": "PYTHON_EXPRESSION",
+                "normalize_dict_keys": "string"
+              },
+              "prompt": "Write one dictionary comprehension mapping each number in (2, 3, 4) to its square.",
+              "rationale": "A dictionary comprehension supplies both key and value expressions before the for clause.",
+              "scoring_type": "PYTHON_COMPREHENSION"
+            },
+            {
+              "answer": "{w: len(w) for w in [\"ant\", \"bear\"]}",
+              "claim_refs": [
+                "CL-PY-DICT-001",
+                "CL-PY-DICT-002"
+              ],
+              "criterion_id": "C-PY-DICTCOMP",
+              "family_id": "F-PY-DC-P2",
+              "item_id": "P-PY-DC-2",
+              "mode": "PRACTICE",
+              "oracle_spec": {
+                "expected": {
+                  "ant": 3,
+                  "bear": 4
+                },
+                "kind": "PYTHON_EXPRESSION"
+              },
+              "prompt": "Write one dictionary comprehension mapping each word in [\"ant\", \"bear\"] to its length.",
+              "rationale": "The key and value expressions may be derived independently from each selected element.",
+              "scoring_type": "PYTHON_COMPREHENSION"
+            },
+            {
+              "answer": "{name: len(name) for name in [\"Ada\", \"Linus\", \"Guido\"]}",
+              "claim_refs": [
+                "CL-PY-DICT-001",
+                "CL-PY-DICT-002"
+              ],
+              "criterion_id": "C-PY-DICTCOMP",
+              "family_id": "F-PY-DC-M1",
+              "item_id": "M-PY-DC-1",
+              "mode": "MASTERY_CHECK",
+              "oracle_spec": {
+                "expected": {
+                  "Ada": 3,
+                  "Guido": 5,
+                  "Linus": 5
+                },
+                "kind": "PYTHON_EXPRESSION"
+              },
+              "prompt": "Write one dictionary comprehension mapping each name in [\"Ada\", \"Linus\", \"Guido\"] to the length of that name.",
+              "rationale": "The task independently checks construction of key-value results from each iterable element.",
+              "scoring_type": "PYTHON_COMPREHENSION"
+            },
+            {
+              "answer": "{n: n**3 for n in range(1, 5)}",
+              "claim_refs": [
+                "CL-PY-DICT-001",
+                "CL-PY-DICT-002"
+              ],
+              "criterion_id": "C-PY-DICTCOMP",
+              "family_id": "F-PY-DC-R1",
+              "item_id": "R-PY-DC-1",
+              "mode": "RETENTION_CHECK",
+              "oracle_spec": {
+                "expected": {
+                  "1": 1,
+                  "2": 8,
+                  "3": 27,
+                  "4": 64
+                },
+                "kind": "PYTHON_EXPRESSION",
+                "normalize_dict_keys": "string"
+              },
+              "prompt": "Write one dictionary comprehension mapping each number in range(1, 5) to its cube.",
+              "rationale": "This delayed parallel family checks retained dictionary-comprehension construction.",
+              "scoring_type": "PYTHON_COMPREHENSION"
+            }
+          ],
+          "lessons": [
+            {
+              "criterion_ids": [
+                "C-PY-LISTCOMP"
+              ],
+              "explanation_claim_refs": [
+                "CL-PY-COMP-001",
+                "CL-PY-COMP-002",
+                "CL-PY-COMP-003"
+              ],
+              "lesson_id": "L-PY-LISTCOMP",
+              "objective": "Create a list comprehension from an iterable, transformation expression, and optional filter.",
+              "practice_item_ids": [
+                "P-PY-LC-1",
+                "P-PY-LC-2"
+              ],
+              "skill_id": "S-PY-LISTCOMP",
+              "title": "Transform and filter with list comprehensions",
+              "worked_examples": [
+                {
+                  "claim_refs": [
+                    "CL-PY-COMP-001",
+                    "CL-PY-COMP-002"
+                  ],
+                  "oracle_spec": {
+                    "expected": [
+                      2,
+                      4,
+                      6
+                    ],
+                    "kind": "PYTHON_EXPRESSION"
+                  },
+                  "text": "`[x * 2 for x in [1, 2, 3]]` creates `[2, 4, 6]` by transforming each input value."
+                },
+                {
+                  "claim_refs": [
+                    "CL-PY-COMP-001",
+                    "CL-PY-COMP-002"
+                  ],
+                  "oracle_spec": {
+                    "expected": [
+                      0,
+                      1,
+                      2
+                    ],
+                    "kind": "PYTHON_EXPRESSION"
+                  },
+                  "text": "`[x for x in [-2, -1, 0, 1, 2] if x >= 0]` creates `[0, 1, 2]` by filtering the iterable."
+                }
+              ]
+            },
+            {
+              "criterion_ids": [
+                "C-PY-DICTCOMP"
+              ],
+              "explanation_claim_refs": [
+                "CL-PY-DICT-001",
+                "CL-PY-DICT-002",
+                "CL-PY-COMP-003"
+              ],
+              "lesson_id": "L-PY-DICTCOMP",
+              "objective": "Create a dictionary comprehension that derives a key and value for each selected input item.",
+              "practice_item_ids": [
+                "P-PY-DC-1",
+                "P-PY-DC-2"
+              ],
+              "skill_id": "S-PY-DICTCOMP",
+              "title": "Create mappings with dictionary comprehensions",
+              "worked_examples": [
+                {
+                  "claim_refs": [
+                    "CL-PY-DICT-001",
+                    "CL-PY-DICT-002"
+                  ],
+                  "oracle_spec": {
+                    "expected": {
+                      "2": 4,
+                      "4": 16,
+                      "6": 36
+                    },
+                    "kind": "PYTHON_EXPRESSION",
+                    "normalize_dict_keys": "string"
+                  },
+                  "text": "`{x: x**2 for x in (2, 4, 6)}` creates `{2: 4, 4: 16, 6: 36}`."
+                },
+                {
+                  "claim_refs": [
+                    "CL-PY-DICT-001",
+                    "CL-PY-DICT-002"
+                  ],
+                  "oracle_spec": {
+                    "expected": {
+                      "ant": 3,
+                      "bear": 4
+                    },
+                    "kind": "PYTHON_EXPRESSION"
+                  },
+                  "text": "`{w: len(w) for w in [\"ant\", \"bear\"]}` creates `{\"ant\": 3, \"bear\": 4}`."
+                }
+              ]
+            }
+          ],
+          "skills": [
+            {
+              "criterion_ids": [
+                "C-PY-LISTCOMP"
+              ],
+              "hard_prerequisite_skill_ids": [],
+              "skill_id": "S-PY-LISTCOMP",
+              "title": "Build list comprehensions"
+            },
+            {
+              "criterion_ids": [
+                "C-PY-DICTCOMP"
+              ],
+              "hard_prerequisite_skill_ids": [],
+              "skill_id": "S-PY-DICTCOMP",
+              "title": "Build dictionary comprehensions"
+            }
+          ]
+        },
+        "domain_key": "python-comprehensions",
+        "maintenance_tasks": [
+          {
+            "answer": "[w.upper() for w in [\"a\", \"bee\", \"code\"] if len(w) > 2]",
+            "claim_refs": [
+              "CL-PY-COMP-001",
+              "CL-PY-COMP-002"
+            ],
+            "criterion_id": "C-PY-LISTCOMP",
+            "family_id": "F-PY-LC-MN2",
+            "fresh_family": true,
+            "item_id": "MN-PY-LC-2",
+            "mode": "RETENTION_CHECK",
+            "oracle_spec": {
+              "allow_methods": [
+                "upper"
+              ],
+              "expected": [
+                "BEE",
+                "CODE"
+              ],
+              "kind": "PYTHON_EXPRESSION"
+            },
+            "prompt": "Write one list comprehension that returns uppercase versions of words longer than two characters from [\"a\", \"bee\", \"code\"].",
+            "rationale": "A fresh maintenance family combines filtering and transformation.",
+            "scoring_type": "PYTHON_COMPREHENSION",
+            "skill_id": "S-PY-LISTCOMP"
+          },
+          {
+            "answer": "{w: w.upper() for w in [\"red\", \"blue\"]}",
+            "claim_refs": [
+              "CL-PY-DICT-001",
+              "CL-PY-DICT-002"
+            ],
+            "criterion_id": "C-PY-DICTCOMP",
+            "family_id": "F-PY-DC-MN2",
+            "fresh_family": true,
+            "item_id": "MN-PY-DC-2",
+            "mode": "RETENTION_CHECK",
+            "oracle_spec": {
+              "allow_methods": [
+                "upper"
+              ],
+              "expected": {
+                "blue": "BLUE",
+                "red": "RED"
+              },
+              "kind": "PYTHON_EXPRESSION"
+            },
+            "prompt": "Write one dictionary comprehension mapping each word in [\"red\", \"blue\"] to its uppercase form.",
+            "rationale": "A fresh maintenance family checks retained key-value construction.",
+            "scoring_type": "PYTHON_COMPREHENSION",
+            "skill_id": "S-PY-DICTCOMP"
+          }
+        ],
+        "oracle_descriptor": {
+          "additional_task_oracles": [
+            {
+              "item_id": "TP-PY-LC-1",
+              "oracle_spec": {
+                "expected": [
+                  0,
+                  2,
+                  4
+                ],
+                "kind": "PYTHON_EXPRESSION"
+              }
+            },
+            {
+              "item_id": "TP-PY-LC-2",
+              "oracle_spec": {
+                "expected": [
+                  3,
+                  4
+                ],
+                "kind": "PYTHON_EXPRESSION"
+              }
+            },
+            {
+              "item_id": "MN-PY-LC-2",
+              "oracle_spec": {
+                "allow_methods": [
+                  "upper"
+                ],
+                "expected": [
+                  "BEE",
+                  "CODE"
+                ],
+                "kind": "PYTHON_EXPRESSION"
+              }
+            },
+            {
+              "item_id": "MN-PY-DC-2",
+              "oracle_spec": {
+                "allow_methods": [
+                  "upper"
+                ],
+                "expected": {
+                  "blue": "BLUE",
+                  "red": "RED"
+                },
+                "kind": "PYTHON_EXPRESSION"
+              }
+            },
+            {
+              "item_id": "T-PY-COMP-ODD-SQUARES",
+              "oracle_spec": {
+                "expected": {
+                  "1": 1,
+                  "3": 9,
+                  "5": 25,
+                  "7": 49
+                },
+                "kind": "PYTHON_EXPRESSION",
+                "normalize_dict_keys": "string"
+              }
+            },
+            {
+              "item_id": "T-PY-COMP-WORD-LENGTHS",
+              "oracle_spec": {
+                "expected": {
+                  "galaxy": 6,
+                  "planet": 6,
+                  "star": 4
+                },
+                "kind": "PYTHON_EXPRESSION"
+              }
+            }
+          ],
+          "allowed_builtins": [
+            "range",
+            "len"
+          ],
+          "max_ast_nodes": 120,
+          "type": "PYTHON_COMPREHENSION_EXPRESSION"
+        },
+        "pedagogy_review": [
+          {
+            "dimension": "skill_decomposition",
+            "standing": "MODEL_PROPOSAL_HUMAN_REVIEW_REQUIRED"
+          },
+          {
+            "dimension": "lesson_sequence",
+            "standing": "MODEL_PROPOSAL_HUMAN_REVIEW_REQUIRED"
+          },
+          {
+            "dimension": "transfer_novelty_strength",
+            "standing": "MODEL_PROPOSAL_HUMAN_REVIEW_REQUIRED"
+          }
+        ],
+        "transfer_required_skills": [
+          "S-PY-DICTCOMP"
+        ],
+        "transfer_tasks": [
+          {
+            "answer": "{n: n**2 for n in range(8) if n % 2 == 1}",
+            "claim_refs": [
+              "CL-PY-COMP-003",
+              "CL-PY-DICT-001",
+              "CL-PY-DICT-002"
+            ],
+            "criterion_id": "C-PY-DICTCOMP",
+            "family_id": "F-PY-TR-ODD",
+            "item_id": "T-PY-COMP-ODD-SQUARES",
+            "mode": "TRANSFER_CHECK",
+            "novelty": {
+              "context_shift": "dictionary plus filtering",
+              "item_family": "unseen"
+            },
+            "oracle_spec": {
+              "expected": {
+                "1": 1,
+                "3": 9,
+                "5": 25,
+                "7": 49
+              },
+              "kind": "PYTHON_EXPRESSION",
+              "normalize_dict_keys": "string"
+            },
+            "prompt": "In one dictionary comprehension, map each odd number produced by range(8) to its square.",
+            "rationale": "This combines dictionary construction with a filter in a context not used in instruction.",
+            "scoring_type": "PYTHON_COMPREHENSION",
+            "skill_id": "S-PY-DICTCOMP"
+          },
+          {
+            "answer": "{w: len(w) for w in [\"sun\", \"planet\", \"star\", \"galaxy\"] if len(w) > 3}",
+            "claim_refs": [
+              "CL-PY-COMP-003",
+              "CL-PY-DICT-001",
+              "CL-PY-DICT-002"
+            ],
+            "criterion_id": "C-PY-DICTCOMP",
+            "family_id": "F-PY-TR-WORD",
+            "item_id": "T-PY-COMP-WORD-LENGTHS",
+            "mode": "TRANSFER_CHECK",
+            "novelty": {
+              "context_shift": "string filter plus mapping",
+              "item_family": "unseen"
+            },
+            "oracle_spec": {
+              "expected": {
+                "galaxy": 6,
+                "planet": 6,
+                "star": 4
+              },
+              "kind": "PYTHON_EXPRESSION"
+            },
+            "prompt": "In one dictionary comprehension, map each word longer than three characters in [\"sun\", \"planet\", \"star\", \"galaxy\"] to its length.",
+            "rationale": "This combines filtering with derived dictionary values on strings.",
+            "scoring_type": "PYTHON_COMPREHENSION",
+            "skill_id": "S-PY-DICTCOMP"
+          }
+        ],
+        "tutor_probes": [
+          {
+            "claim_refs": [
+              "CL-PY-COMP-001",
+              "CL-PY-COMP-002"
+            ],
+            "error_rules": [
+              {
+                "must_contain": [
+                  "for"
+                ],
+                "must_not_contain": [
+                  "if"
+                ],
+                "signature": "FILTER_OMITTED"
+              }
+            ],
+            "family_id": "TF-PY-LC-A",
+            "oracle_item_id": "TP-PY-LC-1",
+            "oracle_spec": {
+              "expected": [
+                0,
+                2,
+                4
+              ],
+              "kind": "PYTHON_EXPRESSION"
+            },
+            "probe_id": "TP-PY-LC-1",
+            "prompt": "Write a list comprehension that keeps even numbers from range(6).",
+            "skill_id": "S-PY-LISTCOMP"
+          },
+          {
+            "claim_refs": [
+              "CL-PY-COMP-001",
+              "CL-PY-COMP-002"
+            ],
+            "error_rules": [
+              {
+                "must_contain": [
+                  "for"
+                ],
+                "must_not_contain": [
+                  "if"
+                ],
+                "signature": "FILTER_OMITTED"
+              }
+            ],
+            "family_id": "TF-PY-LC-B",
+            "oracle_item_id": "TP-PY-LC-2",
+            "oracle_spec": {
+              "expected": [
+                3,
+                4
+              ],
+              "kind": "PYTHON_EXPRESSION"
+            },
+            "probe_id": "TP-PY-LC-2",
+            "prompt": "Write a list comprehension that keeps numbers greater than 2 from [1,2,3,4].",
+            "skill_id": "S-PY-LISTCOMP"
+          }
+        ],
+        "tutor_remediation": {
+          "ABSTAINED": {
+            "claim_refs": [
+              "CL-PY-COMP-002"
+            ],
+            "content": "The response is not correct, but the cause is not established. Reconstruct the comprehension as output expression, `for` clause, then any filter condition.",
+            "move": "DIAGNOSTIC_PROBE"
+          },
+          "DEFAULT": {
+            "claim_refs": [
+              "CL-PY-COMP-002"
+            ],
+            "content": "Identify the output expression first, then the iterable in the `for` clause, then decide whether a filtering `if` clause is required.",
+            "move": "GUIDED_RECONSTRUCTION"
+          },
+          "FILTER_OMITTED": {
+            "claim_refs": [
+              "CL-PY-COMP-001",
+              "CL-PY-COMP-002"
+            ],
+            "content": "A filtering comprehension needs an `if` clause after the `for` clause to decide which input elements contribute results.",
+            "hypothesis_content": "Your answer may be missing the filtering part. Check whether an `if` clause is needed after the `for` clause.",
+            "move": "TARGETED_REMEDIATION"
+          }
+        }
+      },
+      "output_digest": "f3f3865cf50f8d09cfb1b67507a9132b578f6e5e2707155b5ed912d76559d71a",
+      "prompt": {
+        "goal": "Use Python list and dictionary comprehensions to transform and filter data.",
+        "instruction": "Using only admitted research claims, generate a bounded course candidate with skills, lessons, practice, independent mastery, delayed retention, transfer, tutor probes, and an oracle descriptor. Do not mark the course verified; flag pedagogical judgments for review.",
+        "required_claim_ids": [
+          "CL-PY-COMP-001",
+          "CL-PY-COMP-002",
+          "CL-PY-COMP-003",
+          "CL-PY-DICT-001",
+          "CL-PY-DICT-002"
+        ],
+        "research_dossier_digest": "785d9f533c50611173993e150c9c7920bf0d2303c10b8a9a70b0d4e12b9c0407"
+      },
+      "prompt_digest": "90cbfd5e88469edeb9dd077abd9697f3718094087ff4eb326ef380fc9abb8073",
+      "research_capture_id": "LIVE-RSCH-PY-COMP-20260907-001",
+      "research_evidence_digest": "785d9f533c50611173993e150c9c7920bf0d2303c10b8a9a70b0d4e12b9c0407",
+      "trace_digest": "3403efc959f10e4008141a3e35d6dce0c248836e52280e90391e7fbfa010ba8b"
+    },
+    {
+      "candidate_note": "valid but bounded transfer/diagnostic coverage below declared target",
+      "capture_mode": "CHAT_SESSION_SAME_PROMPT_MULTI_CANDIDATE",
+      "captured_at": "2026-09-07T06:20:00-04:00",
+      "generation_trace_id": "MODEL-GEN-PY-COMP-MC-B-20260907",
+      "model_id": "GPT-5.6 Sol",
+      "model_role": "CANDIDATE_GENERATOR_ONLY",
+      "output": {
+        "course_blueprint": {
+          "criteria": [
+            {
+              "criterion_id": "C-PY-LISTCOMP",
+              "outcome": "Construct and explain list comprehensions that transform and filter an iterable.",
+              "skill_id": "S-PY-LISTCOMP"
+            },
+            {
+              "criterion_id": "C-PY-DICTCOMP",
+              "outcome": "Construct and explain dictionary comprehensions that derive key-value pairs from an iterable.",
+              "skill_id": "S-PY-DICTCOMP"
+            }
+          ],
+          "items": [
+            {
+              "answer": "[x * 2 for x in [2, 5, 8]]",
+              "claim_refs": [
+                "CL-PY-COMP-001",
+                "CL-PY-COMP-002"
+              ],
+              "criterion_id": "C-PY-LISTCOMP",
+              "family_id": "F-PY-LC-P1",
+              "item_id": "P-PY-LC-1",
+              "mode": "PRACTICE",
+              "oracle_spec": {
+                "expected": [
+                  4,
+                  10,
+                  16
+                ],
+                "kind": "PYTHON_EXPRESSION"
+              },
+              "prompt": "Write one Python list-comprehension expression that doubles each value in [2, 5, 8].",
+              "rationale": "A list comprehension applies the expression before the for clause to each selected input value.",
+              "scoring_type": "PYTHON_COMPREHENSION"
+            },
+            {
+              "answer": "[x for x in [-3, 0, 2, 5] if x > 0]",
+              "claim_refs": [
+                "CL-PY-COMP-001",
+                "CL-PY-COMP-002"
+              ],
+              "criterion_id": "C-PY-LISTCOMP",
+              "family_id": "F-PY-LC-P2",
+              "item_id": "P-PY-LC-2",
+              "mode": "PRACTICE",
+              "oracle_spec": {
+                "expected": [
+                  2,
+                  5
+                ],
+                "kind": "PYTHON_EXPRESSION"
+              },
+              "prompt": "Write one list comprehension that keeps only positive values from [-3, 0, 2, 5].",
+              "rationale": "An if clause can filter which iterable elements contribute results.",
+              "scoring_type": "PYTHON_COMPREHENSION"
+            },
+            {
+              "answer": "[x**2 for x in range(7) if x % 2 == 0]",
+              "claim_refs": [
+                "CL-PY-COMP-001",
+                "CL-PY-COMP-002",
+                "CL-PY-COMP-003"
+              ],
+              "criterion_id": "C-PY-LISTCOMP",
+              "family_id": "F-PY-LC-M1",
+              "item_id": "M-PY-LC-1",
+              "mode": "MASTERY_CHECK",
+              "oracle_spec": {
+                "expected": [
+                  0,
+                  4,
+                  16,
+                  36
+                ],
+                "kind": "PYTHON_EXPRESSION"
+              },
+              "prompt": "Write one list comprehension that returns the squares of the even numbers produced by range(7).",
+              "rationale": "The comprehension combines a transformation with a filtering condition.",
+              "scoring_type": "PYTHON_COMPREHENSION"
+            },
+            {
+              "answer": "[len(w) for w in [\"cat\", \"tiger\", \"ox\", \"horse\"] if len(w) > 3]",
+              "claim_refs": [
+                "CL-PY-COMP-001",
+                "CL-PY-COMP-002"
+              ],
+              "criterion_id": "C-PY-LISTCOMP",
+              "family_id": "F-PY-LC-R1",
+              "item_id": "R-PY-LC-1",
+              "mode": "RETENTION_CHECK",
+              "oracle_spec": {
+                "expected": [
+                  5,
+                  5
+                ],
+                "kind": "PYTHON_EXPRESSION"
+              },
+              "prompt": "Write one list comprehension that returns lengths of words longer than three characters from [\"cat\", \"tiger\", \"ox\", \"horse\"].",
+              "rationale": "This delayed item requires both filtering and transformation in a new item family.",
+              "scoring_type": "PYTHON_COMPREHENSION"
+            },
+            {
+              "answer": "{x: x**2 for x in (2, 3, 4)}",
+              "claim_refs": [
+                "CL-PY-DICT-001",
+                "CL-PY-DICT-002"
+              ],
+              "criterion_id": "C-PY-DICTCOMP",
+              "family_id": "F-PY-DC-P1",
+              "item_id": "P-PY-DC-1",
+              "mode": "PRACTICE",
+              "oracle_spec": {
+                "expected": {
+                  "2": 4,
+                  "3": 9,
+                  "4": 16
+                },
+                "kind": "PYTHON_EXPRESSION",
+                "normalize_dict_keys": "string"
+              },
+              "prompt": "Write one dictionary comprehension mapping each number in (2, 3, 4) to its square.",
+              "rationale": "A dictionary comprehension supplies both key and value expressions before the for clause.",
+              "scoring_type": "PYTHON_COMPREHENSION"
+            },
+            {
+              "answer": "{w: len(w) for w in [\"ant\", \"bear\"]}",
+              "claim_refs": [
+                "CL-PY-DICT-001",
+                "CL-PY-DICT-002"
+              ],
+              "criterion_id": "C-PY-DICTCOMP",
+              "family_id": "F-PY-DC-P2",
+              "item_id": "P-PY-DC-2",
+              "mode": "PRACTICE",
+              "oracle_spec": {
+                "expected": {
+                  "ant": 3,
+                  "bear": 4
+                },
+                "kind": "PYTHON_EXPRESSION"
+              },
+              "prompt": "Write one dictionary comprehension mapping each word in [\"ant\", \"bear\"] to its length.",
+              "rationale": "The key and value expressions may be derived independently from each selected element.",
+              "scoring_type": "PYTHON_COMPREHENSION"
+            },
+            {
+              "answer": "{name: len(name) for name in [\"Ada\", \"Linus\", \"Guido\"]}",
+              "claim_refs": [
+                "CL-PY-DICT-001",
+                "CL-PY-DICT-002"
+              ],
+              "criterion_id": "C-PY-DICTCOMP",
+              "family_id": "F-PY-DC-M1",
+              "item_id": "M-PY-DC-1",
+              "mode": "MASTERY_CHECK",
+              "oracle_spec": {
+                "expected": {
+                  "Ada": 3,
+                  "Guido": 5,
+                  "Linus": 5
+                },
+                "kind": "PYTHON_EXPRESSION"
+              },
+              "prompt": "Write one dictionary comprehension mapping each name in [\"Ada\", \"Linus\", \"Guido\"] to the length of that name.",
+              "rationale": "The task independently checks construction of key-value results from each iterable element.",
+              "scoring_type": "PYTHON_COMPREHENSION"
+            },
+            {
+              "answer": "{n: n**3 for n in range(1, 5)}",
+              "claim_refs": [
+                "CL-PY-DICT-001",
+                "CL-PY-DICT-002"
+              ],
+              "criterion_id": "C-PY-DICTCOMP",
+              "family_id": "F-PY-DC-R1",
+              "item_id": "R-PY-DC-1",
+              "mode": "RETENTION_CHECK",
+              "oracle_spec": {
+                "expected": {
+                  "1": 1,
+                  "2": 8,
+                  "3": 27,
+                  "4": 64
+                },
+                "kind": "PYTHON_EXPRESSION",
+                "normalize_dict_keys": "string"
+              },
+              "prompt": "Write one dictionary comprehension mapping each number in range(1, 5) to its cube.",
+              "rationale": "This delayed parallel family checks retained dictionary-comprehension construction.",
+              "scoring_type": "PYTHON_COMPREHENSION"
+            }
+          ],
+          "lessons": [
+            {
+              "criterion_ids": [
+                "C-PY-LISTCOMP"
+              ],
+              "explanation_claim_refs": [
+                "CL-PY-COMP-001",
+                "CL-PY-COMP-002",
+                "CL-PY-COMP-003"
+              ],
+              "lesson_id": "L-PY-LISTCOMP",
+              "objective": "Create a list comprehension from an iterable, transformation expression, and optional filter.",
+              "practice_item_ids": [
+                "P-PY-LC-1",
+                "P-PY-LC-2"
+              ],
+              "skill_id": "S-PY-LISTCOMP",
+              "title": "Transform and filter with list comprehensions",
+              "worked_examples": [
+                {
+                  "claim_refs": [
+                    "CL-PY-COMP-001",
+                    "CL-PY-COMP-002"
+                  ],
+                  "oracle_spec": {
+                    "expected": [
+                      2,
+                      4,
+                      6
+                    ],
+                    "kind": "PYTHON_EXPRESSION"
+                  },
+                  "text": "`[x * 2 for x in [1, 2, 3]]` creates `[2, 4, 6]` by transforming each input value."
+                },
+                {
+                  "claim_refs": [
+                    "CL-PY-COMP-001",
+                    "CL-PY-COMP-002"
+                  ],
+                  "oracle_spec": {
+                    "expected": [
+                      0,
+                      1,
+                      2
+                    ],
+                    "kind": "PYTHON_EXPRESSION"
+                  },
+                  "text": "`[x for x in [-2, -1, 0, 1, 2] if x >= 0]` creates `[0, 1, 2]` by filtering the iterable."
+                }
+              ]
+            },
+            {
+              "criterion_ids": [
+                "C-PY-DICTCOMP"
+              ],
+              "explanation_claim_refs": [
+                "CL-PY-DICT-001",
+                "CL-PY-DICT-002",
+                "CL-PY-COMP-003"
+              ],
+              "lesson_id": "L-PY-DICTCOMP",
+              "objective": "Create a dictionary comprehension that derives a key and value for each selected input item.",
+              "practice_item_ids": [
+                "P-PY-DC-1",
+                "P-PY-DC-2"
+              ],
+              "skill_id": "S-PY-DICTCOMP",
+              "title": "Create mappings with dictionary comprehensions",
+              "worked_examples": [
+                {
+                  "claim_refs": [
+                    "CL-PY-DICT-001",
+                    "CL-PY-DICT-002"
+                  ],
+                  "oracle_spec": {
+                    "expected": {
+                      "2": 4,
+                      "4": 16,
+                      "6": 36
+                    },
+                    "kind": "PYTHON_EXPRESSION",
+                    "normalize_dict_keys": "string"
+                  },
+                  "text": "`{x: x**2 for x in (2, 4, 6)}` creates `{2: 4, 4: 16, 6: 36}`."
+                },
+                {
+                  "claim_refs": [
+                    "CL-PY-DICT-001",
+                    "CL-PY-DICT-002"
+                  ],
+                  "oracle_spec": {
+                    "expected": {
+                      "ant": 3,
+                      "bear": 4
+                    },
+                    "kind": "PYTHON_EXPRESSION"
+                  },
+                  "text": "`{w: len(w) for w in [\"ant\", \"bear\"]}` creates `{\"ant\": 3, \"bear\": 4}`."
+                }
+              ]
+            }
+          ],
+          "skills": [
+            {
+              "criterion_ids": [
+                "C-PY-LISTCOMP"
+              ],
+              "hard_prerequisite_skill_ids": [],
+              "skill_id": "S-PY-LISTCOMP",
+              "title": "Build list comprehensions"
+            },
+            {
+              "criterion_ids": [
+                "C-PY-DICTCOMP"
+              ],
+              "hard_prerequisite_skill_ids": [],
+              "skill_id": "S-PY-DICTCOMP",
+              "title": "Build dictionary comprehensions"
+            }
+          ]
+        },
+        "domain_key": "python-comprehensions",
+        "maintenance_tasks": [
+          {
+            "answer": "[w.upper() for w in [\"a\", \"bee\", \"code\"] if len(w) > 2]",
+            "claim_refs": [
+              "CL-PY-COMP-001",
+              "CL-PY-COMP-002"
+            ],
+            "criterion_id": "C-PY-LISTCOMP",
+            "family_id": "F-PY-LC-MN2",
+            "fresh_family": true,
+            "item_id": "MN-PY-LC-2",
+            "mode": "RETENTION_CHECK",
+            "oracle_spec": {
+              "allow_methods": [
+                "upper"
+              ],
+              "expected": [
+                "BEE",
+                "CODE"
+              ],
+              "kind": "PYTHON_EXPRESSION"
+            },
+            "prompt": "Write one list comprehension that returns uppercase versions of words longer than two characters from [\"a\", \"bee\", \"code\"].",
+            "rationale": "A fresh maintenance family combines filtering and transformation.",
+            "scoring_type": "PYTHON_COMPREHENSION",
+            "skill_id": "S-PY-LISTCOMP"
+          },
+          {
+            "answer": "{w: w.upper() for w in [\"red\", \"blue\"]}",
+            "claim_refs": [
+              "CL-PY-DICT-001",
+              "CL-PY-DICT-002"
+            ],
+            "criterion_id": "C-PY-DICTCOMP",
+            "family_id": "F-PY-DC-MN2",
+            "fresh_family": true,
+            "item_id": "MN-PY-DC-2",
+            "mode": "RETENTION_CHECK",
+            "oracle_spec": {
+              "allow_methods": [
+                "upper"
+              ],
+              "expected": {
+                "blue": "BLUE",
+                "red": "RED"
+              },
+              "kind": "PYTHON_EXPRESSION"
+            },
+            "prompt": "Write one dictionary comprehension mapping each word in [\"red\", \"blue\"] to its uppercase form.",
+            "rationale": "A fresh maintenance family checks retained key-value construction.",
+            "scoring_type": "PYTHON_COMPREHENSION",
+            "skill_id": "S-PY-DICTCOMP"
+          }
+        ],
+        "oracle_descriptor": {
+          "additional_task_oracles": [
+            {
+              "item_id": "TP-PY-LC-1",
+              "oracle_spec": {
+                "expected": [
+                  0,
+                  2,
+                  4
+                ],
+                "kind": "PYTHON_EXPRESSION"
+              }
+            },
+            {
+              "item_id": "MN-PY-LC-2",
+              "oracle_spec": {
+                "allow_methods": [
+                  "upper"
+                ],
+                "expected": [
+                  "BEE",
+                  "CODE"
+                ],
+                "kind": "PYTHON_EXPRESSION"
+              }
+            },
+            {
+              "item_id": "MN-PY-DC-2",
+              "oracle_spec": {
+                "allow_methods": [
+                  "upper"
+                ],
+                "expected": {
+                  "blue": "BLUE",
+                  "red": "RED"
+                },
+                "kind": "PYTHON_EXPRESSION"
+              }
+            },
+            {
+              "item_id": "T-PY-COMP-ODD-SQUARES",
+              "oracle_spec": {
+                "expected": {
+                  "1": 1,
+                  "3": 9,
+                  "5": 25,
+                  "7": 49
+                },
+                "kind": "PYTHON_EXPRESSION",
+                "normalize_dict_keys": "string"
+              }
+            }
+          ],
+          "allowed_builtins": [
+            "range",
+            "len"
+          ],
+          "max_ast_nodes": 120,
+          "type": "PYTHON_COMPREHENSION_EXPRESSION"
+        },
+        "pedagogy_review": [
+          {
+            "dimension": "skill_decomposition",
+            "standing": "MODEL_PROPOSAL_HUMAN_REVIEW_REQUIRED"
+          },
+          {
+            "dimension": "lesson_sequence",
+            "standing": "MODEL_PROPOSAL_HUMAN_REVIEW_REQUIRED"
+          },
+          {
+            "dimension": "transfer_novelty_strength",
+            "standing": "MODEL_PROPOSAL_HUMAN_REVIEW_REQUIRED"
+          }
+        ],
+        "transfer_required_skills": [
+          "S-PY-DICTCOMP"
+        ],
+        "transfer_tasks": [
+          {
+            "answer": "{n: n**2 for n in range(8) if n % 2 == 1}",
+            "claim_refs": [
+              "CL-PY-COMP-003",
+              "CL-PY-DICT-001",
+              "CL-PY-DICT-002"
+            ],
+            "criterion_id": "C-PY-DICTCOMP",
+            "family_id": "F-PY-TR-ODD",
+            "item_id": "T-PY-COMP-ODD-SQUARES",
+            "mode": "TRANSFER_CHECK",
+            "novelty": {
+              "context_shift": "dictionary plus filtering",
+              "item_family": "unseen"
+            },
+            "oracle_spec": {
+              "expected": {
+                "1": 1,
+                "3": 9,
+                "5": 25,
+                "7": 49
+              },
+              "kind": "PYTHON_EXPRESSION",
+              "normalize_dict_keys": "string"
+            },
+            "prompt": "In one dictionary comprehension, map each odd number produced by range(8) to its square.",
+            "rationale": "This combines dictionary construction with a filter in a context not used in instruction.",
+            "scoring_type": "PYTHON_COMPREHENSION",
+            "skill_id": "S-PY-DICTCOMP"
+          }
+        ],
+        "tutor_probes": [
+          {
+            "claim_refs": [
+              "CL-PY-COMP-001",
+              "CL-PY-COMP-002"
+            ],
+            "error_rules": [
+              {
+                "must_contain": [
+                  "for"
+                ],
+                "must_not_contain": [
+                  "if"
+                ],
+                "signature": "FILTER_OMITTED"
+              }
+            ],
+            "family_id": "TF-PY-LC-A",
+            "oracle_item_id": "TP-PY-LC-1",
+            "oracle_spec": {
+              "expected": [
+                0,
+                2,
+                4
+              ],
+              "kind": "PYTHON_EXPRESSION"
+            },
+            "probe_id": "TP-PY-LC-1",
+            "prompt": "Write a list comprehension that keeps even numbers from range(6).",
+            "skill_id": "S-PY-LISTCOMP"
+          }
+        ],
+        "tutor_remediation": {
+          "ABSTAINED": {
+            "claim_refs": [
+              "CL-PY-COMP-002"
+            ],
+            "content": "The response is not correct, but the cause is not established. Reconstruct the comprehension as output expression, `for` clause, then any filter condition.",
+            "move": "DIAGNOSTIC_PROBE"
+          },
+          "DEFAULT": {
+            "claim_refs": [
+              "CL-PY-COMP-002"
+            ],
+            "content": "Identify the output expression first, then the iterable in the `for` clause, then decide whether a filtering `if` clause is required.",
+            "move": "GUIDED_RECONSTRUCTION"
+          },
+          "FILTER_OMITTED": {
+            "claim_refs": [
+              "CL-PY-COMP-001",
+              "CL-PY-COMP-002"
+            ],
+            "content": "A filtering comprehension needs an `if` clause after the `for` clause to decide which input elements contribute results.",
+            "hypothesis_content": "Your answer may be missing the filtering part. Check whether an `if` clause is needed after the `for` clause.",
+            "move": "TARGETED_REMEDIATION"
+          }
+        }
+      },
+      "output_digest": "5a9ffc54c392dd9d0f708b0833ecba12a9c2ad2ac0e702164ed8123a40c77e6e",
+      "prompt": {
+        "goal": "Use Python list and dictionary comprehensions to transform and filter data.",
+        "instruction": "Using only admitted research claims, generate a bounded course candidate with skills, lessons, practice, independent mastery, delayed retention, transfer, tutor probes, and an oracle descriptor. Do not mark the course verified; flag pedagogical judgments for review.",
+        "required_claim_ids": [
+          "CL-PY-COMP-001",
+          "CL-PY-COMP-002",
+          "CL-PY-COMP-003",
+          "CL-PY-DICT-001",
+          "CL-PY-DICT-002"
+        ],
+        "research_dossier_digest": "785d9f533c50611173993e150c9c7920bf0d2303c10b8a9a70b0d4e12b9c0407"
+      },
+      "prompt_digest": "90cbfd5e88469edeb9dd077abd9697f3718094087ff4eb326ef380fc9abb8073",
+      "research_capture_id": "LIVE-RSCH-PY-COMP-20260907-001",
+      "research_evidence_digest": "785d9f533c50611173993e150c9c7920bf0d2303c10b8a9a70b0d4e12b9c0407",
+      "trace_digest": "89e75bdc001fe95e952feb96c56bed86383684c3a65076d2794633b292567842"
+    },
+    {
+      "candidate_note": "deliberately defective mastery answer for hard-gate rejection",
+      "capture_mode": "CHAT_SESSION_SAME_PROMPT_MULTI_CANDIDATE",
+      "captured_at": "2026-09-07T06:20:00-04:00",
+      "generation_trace_id": "MODEL-GEN-PY-COMP-MC-C-20260907",
+      "model_id": "GPT-5.6 Sol",
+      "model_role": "CANDIDATE_GENERATOR_ONLY",
+      "output": {
+        "course_blueprint": {
+          "criteria": [
+            {
+              "criterion_id": "C-PY-LISTCOMP",
+              "outcome": "Construct and explain list comprehensions that transform and filter an iterable.",
+              "skill_id": "S-PY-LISTCOMP"
+            },
+            {
+              "criterion_id": "C-PY-DICTCOMP",
+              "outcome": "Construct and explain dictionary comprehensions that derive key-value pairs from an iterable.",
+              "skill_id": "S-PY-DICTCOMP"
+            }
+          ],
+          "items": [
+            {
+              "answer": "[x * 2 for x in [2, 5, 8]]",
+              "claim_refs": [
+                "CL-PY-COMP-001",
+                "CL-PY-COMP-002"
+              ],
+              "criterion_id": "C-PY-LISTCOMP",
+              "family_id": "F-PY-LC-P1",
+              "item_id": "P-PY-LC-1",
+              "mode": "PRACTICE",
+              "oracle_spec": {
+                "expected": [
+                  4,
+                  10,
+                  16
+                ],
+                "kind": "PYTHON_EXPRESSION"
+              },
+              "prompt": "Write one Python list-comprehension expression that doubles each value in [2, 5, 8].",
+              "rationale": "A list comprehension applies the expression before the for clause to each selected input value.",
+              "scoring_type": "PYTHON_COMPREHENSION"
+            },
+            {
+              "answer": "[x for x in [-3, 0, 2, 5] if x > 0]",
+              "claim_refs": [
+                "CL-PY-COMP-001",
+                "CL-PY-COMP-002"
+              ],
+              "criterion_id": "C-PY-LISTCOMP",
+              "family_id": "F-PY-LC-P2",
+              "item_id": "P-PY-LC-2",
+              "mode": "PRACTICE",
+              "oracle_spec": {
+                "expected": [
+                  2,
+                  5
+                ],
+                "kind": "PYTHON_EXPRESSION"
+              },
+              "prompt": "Write one list comprehension that keeps only positive values from [-3, 0, 2, 5].",
+              "rationale": "An if clause can filter which iterable elements contribute results.",
+              "scoring_type": "PYTHON_COMPREHENSION"
+            },
+            {
+              "answer": "[999]",
+              "claim_refs": [
+                "CL-PY-COMP-001",
+                "CL-PY-COMP-002",
+                "CL-PY-COMP-003"
+              ],
+              "criterion_id": "C-PY-LISTCOMP",
+              "family_id": "F-PY-LC-M1",
+              "item_id": "M-PY-LC-1",
+              "mode": "MASTERY_CHECK",
+              "oracle_spec": {
+                "expected": [
+                  0,
+                  4,
+                  16,
+                  36
+                ],
+                "kind": "PYTHON_EXPRESSION"
+              },
+              "prompt": "Write one list comprehension that returns the squares of the even numbers produced by range(7).",
+              "rationale": "The comprehension combines a transformation with a filtering condition.",
+              "scoring_type": "PYTHON_COMPREHENSION"
+            },
+            {
+              "answer": "[len(w) for w in [\"cat\", \"tiger\", \"ox\", \"horse\"] if len(w) > 3]",
+              "claim_refs": [
+                "CL-PY-COMP-001",
+                "CL-PY-COMP-002"
+              ],
+              "criterion_id": "C-PY-LISTCOMP",
+              "family_id": "F-PY-LC-R1",
+              "item_id": "R-PY-LC-1",
+              "mode": "RETENTION_CHECK",
+              "oracle_spec": {
+                "expected": [
+                  5,
+                  5
+                ],
+                "kind": "PYTHON_EXPRESSION"
+              },
+              "prompt": "Write one list comprehension that returns lengths of words longer than three characters from [\"cat\", \"tiger\", \"ox\", \"horse\"].",
+              "rationale": "This delayed item requires both filtering and transformation in a new item family.",
+              "scoring_type": "PYTHON_COMPREHENSION"
+            },
+            {
+              "answer": "{x: x**2 for x in (2, 3, 4)}",
+              "claim_refs": [
+                "CL-PY-DICT-001",
+                "CL-PY-DICT-002"
+              ],
+              "criterion_id": "C-PY-DICTCOMP",
+              "family_id": "F-PY-DC-P1",
+              "item_id": "P-PY-DC-1",
+              "mode": "PRACTICE",
+              "oracle_spec": {
+                "expected": {
+                  "2": 4,
+                  "3": 9,
+                  "4": 16
+                },
+                "kind": "PYTHON_EXPRESSION",
+                "normalize_dict_keys": "string"
+              },
+              "prompt": "Write one dictionary comprehension mapping each number in (2, 3, 4) to its square.",
+              "rationale": "A dictionary comprehension supplies both key and value expressions before the for clause.",
+              "scoring_type": "PYTHON_COMPREHENSION"
+            },
+            {
+              "answer": "{w: len(w) for w in [\"ant\", \"bear\"]}",
+              "claim_refs": [
+                "CL-PY-DICT-001",
+                "CL-PY-DICT-002"
+              ],
+              "criterion_id": "C-PY-DICTCOMP",
+              "family_id": "F-PY-DC-P2",
+              "item_id": "P-PY-DC-2",
+              "mode": "PRACTICE",
+              "oracle_spec": {
+                "expected": {
+                  "ant": 3,
+                  "bear": 4
+                },
+                "kind": "PYTHON_EXPRESSION"
+              },
+              "prompt": "Write one dictionary comprehension mapping each word in [\"ant\", \"bear\"] to its length.",
+              "rationale": "The key and value expressions may be derived independently from each selected element.",
+              "scoring_type": "PYTHON_COMPREHENSION"
+            },
+            {
+              "answer": "{name: len(name) for name in [\"Ada\", \"Linus\", \"Guido\"]}",
+              "claim_refs": [
+                "CL-PY-DICT-001",
+                "CL-PY-DICT-002"
+              ],
+              "criterion_id": "C-PY-DICTCOMP",
+              "family_id": "F-PY-DC-M1",
+              "item_id": "M-PY-DC-1",
+              "mode": "MASTERY_CHECK",
+              "oracle_spec": {
+                "expected": {
+                  "Ada": 3,
+                  "Guido": 5,
+                  "Linus": 5
+                },
+                "kind": "PYTHON_EXPRESSION"
+              },
+              "prompt": "Write one dictionary comprehension mapping each name in [\"Ada\", \"Linus\", \"Guido\"] to the length of that name.",
+              "rationale": "The task independently checks construction of key-value results from each iterable element.",
+              "scoring_type": "PYTHON_COMPREHENSION"
+            },
+            {
+              "answer": "{n: n**3 for n in range(1, 5)}",
+              "claim_refs": [
+                "CL-PY-DICT-001",
+                "CL-PY-DICT-002"
+              ],
+              "criterion_id": "C-PY-DICTCOMP",
+              "family_id": "F-PY-DC-R1",
+              "item_id": "R-PY-DC-1",
+              "mode": "RETENTION_CHECK",
+              "oracle_spec": {
+                "expected": {
+                  "1": 1,
+                  "2": 8,
+                  "3": 27,
+                  "4": 64
+                },
+                "kind": "PYTHON_EXPRESSION",
+                "normalize_dict_keys": "string"
+              },
+              "prompt": "Write one dictionary comprehension mapping each number in range(1, 5) to its cube.",
+              "rationale": "This delayed parallel family checks retained dictionary-comprehension construction.",
+              "scoring_type": "PYTHON_COMPREHENSION"
+            }
+          ],
+          "lessons": [
+            {
+              "criterion_ids": [
+                "C-PY-LISTCOMP"
+              ],
+              "explanation_claim_refs": [
+                "CL-PY-COMP-001",
+                "CL-PY-COMP-002",
+                "CL-PY-COMP-003"
+              ],
+              "lesson_id": "L-PY-LISTCOMP",
+              "objective": "Create a list comprehension from an iterable, transformation expression, and optional filter.",
+              "practice_item_ids": [
+                "P-PY-LC-1",
+                "P-PY-LC-2"
+              ],
+              "skill_id": "S-PY-LISTCOMP",
+              "title": "Transform and filter with list comprehensions",
+              "worked_examples": [
+                {
+                  "claim_refs": [
+                    "CL-PY-COMP-001",
+                    "CL-PY-COMP-002"
+                  ],
+                  "oracle_spec": {
+                    "expected": [
+                      2,
+                      4,
+                      6
+                    ],
+                    "kind": "PYTHON_EXPRESSION"
+                  },
+                  "text": "`[x * 2 for x in [1, 2, 3]]` creates `[2, 4, 6]` by transforming each input value."
+                },
+                {
+                  "claim_refs": [
+                    "CL-PY-COMP-001",
+                    "CL-PY-COMP-002"
+                  ],
+                  "oracle_spec": {
+                    "expected": [
+                      0,
+                      1,
+                      2
+                    ],
+                    "kind": "PYTHON_EXPRESSION"
+                  },
+                  "text": "`[x for x in [-2, -1, 0, 1, 2] if x >= 0]` creates `[0, 1, 2]` by filtering the iterable."
+                }
+              ]
+            },
+            {
+              "criterion_ids": [
+                "C-PY-DICTCOMP"
+              ],
+              "explanation_claim_refs": [
+                "CL-PY-DICT-001",
+                "CL-PY-DICT-002",
+                "CL-PY-COMP-003"
+              ],
+              "lesson_id": "L-PY-DICTCOMP",
+              "objective": "Create a dictionary comprehension that derives a key and value for each selected input item.",
+              "practice_item_ids": [
+                "P-PY-DC-1",
+                "P-PY-DC-2"
+              ],
+              "skill_id": "S-PY-DICTCOMP",
+              "title": "Create mappings with dictionary comprehensions",
+              "worked_examples": [
+                {
+                  "claim_refs": [
+                    "CL-PY-DICT-001",
+                    "CL-PY-DICT-002"
+                  ],
+                  "oracle_spec": {
+                    "expected": {
+                      "2": 4,
+                      "4": 16,
+                      "6": 36
+                    },
+                    "kind": "PYTHON_EXPRESSION",
+                    "normalize_dict_keys": "string"
+                  },
+                  "text": "`{x: x**2 for x in (2, 4, 6)}` creates `{2: 4, 4: 16, 6: 36}`."
+                },
+                {
+                  "claim_refs": [
+                    "CL-PY-DICT-001",
+                    "CL-PY-DICT-002"
+                  ],
+                  "oracle_spec": {
+                    "expected": {
+                      "ant": 3,
+                      "bear": 4
+                    },
+                    "kind": "PYTHON_EXPRESSION"
+                  },
+                  "text": "`{w: len(w) for w in [\"ant\", \"bear\"]}` creates `{\"ant\": 3, \"bear\": 4}`."
+                }
+              ]
+            }
+          ],
+          "skills": [
+            {
+              "criterion_ids": [
+                "C-PY-LISTCOMP"
+              ],
+              "hard_prerequisite_skill_ids": [],
+              "skill_id": "S-PY-LISTCOMP",
+              "title": "Build list comprehensions"
+            },
+            {
+              "criterion_ids": [
+                "C-PY-DICTCOMP"
+              ],
+              "hard_prerequisite_skill_ids": [],
+              "skill_id": "S-PY-DICTCOMP",
+              "title": "Build dictionary comprehensions"
+            }
+          ]
+        },
+        "domain_key": "python-comprehensions",
+        "maintenance_tasks": [
+          {
+            "answer": "[w.upper() for w in [\"a\", \"bee\", \"code\"] if len(w) > 2]",
+            "claim_refs": [
+              "CL-PY-COMP-001",
+              "CL-PY-COMP-002"
+            ],
+            "criterion_id": "C-PY-LISTCOMP",
+            "family_id": "F-PY-LC-MN2",
+            "fresh_family": true,
+            "item_id": "MN-PY-LC-2",
+            "mode": "RETENTION_CHECK",
+            "oracle_spec": {
+              "allow_methods": [
+                "upper"
+              ],
+              "expected": [
+                "BEE",
+                "CODE"
+              ],
+              "kind": "PYTHON_EXPRESSION"
+            },
+            "prompt": "Write one list comprehension that returns uppercase versions of words longer than two characters from [\"a\", \"bee\", \"code\"].",
+            "rationale": "A fresh maintenance family combines filtering and transformation.",
+            "scoring_type": "PYTHON_COMPREHENSION",
+            "skill_id": "S-PY-LISTCOMP"
+          },
+          {
+            "answer": "{w: w.upper() for w in [\"red\", \"blue\"]}",
+            "claim_refs": [
+              "CL-PY-DICT-001",
+              "CL-PY-DICT-002"
+            ],
+            "criterion_id": "C-PY-DICTCOMP",
+            "family_id": "F-PY-DC-MN2",
+            "fresh_family": true,
+            "item_id": "MN-PY-DC-2",
+            "mode": "RETENTION_CHECK",
+            "oracle_spec": {
+              "allow_methods": [
+                "upper"
+              ],
+              "expected": {
+                "blue": "BLUE",
+                "red": "RED"
+              },
+              "kind": "PYTHON_EXPRESSION"
+            },
+            "prompt": "Write one dictionary comprehension mapping each word in [\"red\", \"blue\"] to its uppercase form.",
+            "rationale": "A fresh maintenance family checks retained key-value construction.",
+            "scoring_type": "PYTHON_COMPREHENSION",
+            "skill_id": "S-PY-DICTCOMP"
+          }
+        ],
+        "oracle_descriptor": {
+          "additional_task_oracles": [
+            {
+              "item_id": "TP-PY-LC-1",
+              "oracle_spec": {
+                "expected": [
+                  0,
+                  2,
+                  4
+                ],
+                "kind": "PYTHON_EXPRESSION"
+              }
+            },
+            {
+              "item_id": "TP-PY-LC-2",
+              "oracle_spec": {
+                "expected": [
+                  3,
+                  4
+                ],
+                "kind": "PYTHON_EXPRESSION"
+              }
+            },
+            {
+              "item_id": "MN-PY-LC-2",
+              "oracle_spec": {
+                "allow_methods": [
+                  "upper"
+                ],
+                "expected": [
+                  "BEE",
+                  "CODE"
+                ],
+                "kind": "PYTHON_EXPRESSION"
+              }
+            },
+            {
+              "item_id": "MN-PY-DC-2",
+              "oracle_spec": {
+                "allow_methods": [
+                  "upper"
+                ],
+                "expected": {
+                  "blue": "BLUE",
+                  "red": "RED"
+                },
+                "kind": "PYTHON_EXPRESSION"
+              }
+            },
+            {
+              "item_id": "T-PY-COMP-ODD-SQUARES",
+              "oracle_spec": {
+                "expected": {
+                  "1": 1,
+                  "3": 9,
+                  "5": 25,
+                  "7": 49
+                },
+                "kind": "PYTHON_EXPRESSION",
+                "normalize_dict_keys": "string"
+              }
+            },
+            {
+              "item_id": "T-PY-COMP-WORD-LENGTHS",
+              "oracle_spec": {
+                "expected": {
+                  "galaxy": 6,
+                  "planet": 6,
+                  "star": 4
+                },
+                "kind": "PYTHON_EXPRESSION"
+              }
+            }
+          ],
+          "allowed_builtins": [
+            "range",
+            "len"
+          ],
+          "max_ast_nodes": 120,
+          "type": "PYTHON_COMPREHENSION_EXPRESSION"
+        },
+        "pedagogy_review": [
+          {
+            "dimension": "skill_decomposition",
+            "standing": "MODEL_PROPOSAL_HUMAN_REVIEW_REQUIRED"
+          },
+          {
+            "dimension": "lesson_sequence",
+            "standing": "MODEL_PROPOSAL_HUMAN_REVIEW_REQUIRED"
+          },
+          {
+            "dimension": "transfer_novelty_strength",
+            "standing": "MODEL_PROPOSAL_HUMAN_REVIEW_REQUIRED"
+          }
+        ],
+        "transfer_required_skills": [
+          "S-PY-DICTCOMP"
+        ],
+        "transfer_tasks": [
+          {
+            "answer": "{n: n**2 for n in range(8) if n % 2 == 1}",
+            "claim_refs": [
+              "CL-PY-COMP-003",
+              "CL-PY-DICT-001",
+              "CL-PY-DICT-002"
+            ],
+            "criterion_id": "C-PY-DICTCOMP",
+            "family_id": "F-PY-TR-ODD",
+            "item_id": "T-PY-COMP-ODD-SQUARES",
+            "mode": "TRANSFER_CHECK",
+            "novelty": {
+              "context_shift": "dictionary plus filtering",
+              "item_family": "unseen"
+            },
+            "oracle_spec": {
+              "expected": {
+                "1": 1,
+                "3": 9,
+                "5": 25,
+                "7": 49
+              },
+              "kind": "PYTHON_EXPRESSION",
+              "normalize_dict_keys": "string"
+            },
+            "prompt": "In one dictionary comprehension, map each odd number produced by range(8) to its square.",
+            "rationale": "This combines dictionary construction with a filter in a context not used in instruction.",
+            "scoring_type": "PYTHON_COMPREHENSION",
+            "skill_id": "S-PY-DICTCOMP"
+          },
+          {
+            "answer": "{w: len(w) for w in [\"sun\", \"planet\", \"star\", \"galaxy\"] if len(w) > 3}",
+            "claim_refs": [
+              "CL-PY-COMP-003",
+              "CL-PY-DICT-001",
+              "CL-PY-DICT-002"
+            ],
+            "criterion_id": "C-PY-DICTCOMP",
+            "family_id": "F-PY-TR-WORD",
+            "item_id": "T-PY-COMP-WORD-LENGTHS",
+            "mode": "TRANSFER_CHECK",
+            "novelty": {
+              "context_shift": "string filter plus mapping",
+              "item_family": "unseen"
+            },
+            "oracle_spec": {
+              "expected": {
+                "galaxy": 6,
+                "planet": 6,
+                "star": 4
+              },
+              "kind": "PYTHON_EXPRESSION"
+            },
+            "prompt": "In one dictionary comprehension, map each word longer than three characters in [\"sun\", \"planet\", \"star\", \"galaxy\"] to its length.",
+            "rationale": "This combines filtering with derived dictionary values on strings.",
+            "scoring_type": "PYTHON_COMPREHENSION",
+            "skill_id": "S-PY-DICTCOMP"
+          }
+        ],
+        "tutor_probes": [
+          {
+            "claim_refs": [
+              "CL-PY-COMP-001",
+              "CL-PY-COMP-002"
+            ],
+            "error_rules": [
+              {
+                "must_contain": [
+                  "for"
+                ],
+                "must_not_contain": [
+                  "if"
+                ],
+                "signature": "FILTER_OMITTED"
+              }
+            ],
+            "family_id": "TF-PY-LC-A",
+            "oracle_item_id": "TP-PY-LC-1",
+            "oracle_spec": {
+              "expected": [
+                0,
+                2,
+                4
+              ],
+              "kind": "PYTHON_EXPRESSION"
+            },
+            "probe_id": "TP-PY-LC-1",
+            "prompt": "Write a list comprehension that keeps even numbers from range(6).",
+            "skill_id": "S-PY-LISTCOMP"
+          },
+          {
+            "claim_refs": [
+              "CL-PY-COMP-001",
+              "CL-PY-COMP-002"
+            ],
+            "error_rules": [
+              {
+                "must_contain": [
+                  "for"
+                ],
+                "must_not_contain": [
+                  "if"
+                ],
+                "signature": "FILTER_OMITTED"
+              }
+            ],
+            "family_id": "TF-PY-LC-B",
+            "oracle_item_id": "TP-PY-LC-2",
+            "oracle_spec": {
+              "expected": [
+                3,
+                4
+              ],
+              "kind": "PYTHON_EXPRESSION"
+            },
+            "probe_id": "TP-PY-LC-2",
+            "prompt": "Write a list comprehension that keeps numbers greater than 2 from [1,2,3,4].",
+            "skill_id": "S-PY-LISTCOMP"
+          }
+        ],
+        "tutor_remediation": {
+          "ABSTAINED": {
+            "claim_refs": [
+              "CL-PY-COMP-002"
+            ],
+            "content": "The response is not correct, but the cause is not established. Reconstruct the comprehension as output expression, `for` clause, then any filter condition.",
+            "move": "DIAGNOSTIC_PROBE"
+          },
+          "DEFAULT": {
+            "claim_refs": [
+              "CL-PY-COMP-002"
+            ],
+            "content": "Identify the output expression first, then the iterable in the `for` clause, then decide whether a filtering `if` clause is required.",
+            "move": "GUIDED_RECONSTRUCTION"
+          },
+          "FILTER_OMITTED": {
+            "claim_refs": [
+              "CL-PY-COMP-001",
+              "CL-PY-COMP-002"
+            ],
+            "content": "A filtering comprehension needs an `if` clause after the `for` clause to decide which input elements contribute results.",
+            "hypothesis_content": "Your answer may be missing the filtering part. Check whether an `if` clause is needed after the `for` clause.",
+            "move": "TARGETED_REMEDIATION"
+          }
+        }
+      },
+      "output_digest": "1cb030289ae320ef117e7741655acf48d98e4559563bed930773dd31a8088851",
+      "prompt": {
+        "goal": "Use Python list and dictionary comprehensions to transform and filter data.",
+        "instruction": "Using only admitted research claims, generate a bounded course candidate with skills, lessons, practice, independent mastery, delayed retention, transfer, tutor probes, and an oracle descriptor. Do not mark the course verified; flag pedagogical judgments for review.",
+        "required_claim_ids": [
+          "CL-PY-COMP-001",
+          "CL-PY-COMP-002",
+          "CL-PY-COMP-003",
+          "CL-PY-DICT-001",
+          "CL-PY-DICT-002"
+        ],
+        "research_dossier_digest": "785d9f533c50611173993e150c9c7920bf0d2303c10b8a9a70b0d4e12b9c0407"
+      },
+      "prompt_digest": "90cbfd5e88469edeb9dd077abd9697f3718094087ff4eb326ef380fc9abb8073",
+      "research_capture_id": "LIVE-RSCH-PY-COMP-20260907-001",
+      "research_evidence_digest": "785d9f533c50611173993e150c9c7920bf0d2303c10b8a9a70b0d4e12b9c0407",
+      "trace_digest": "3cb0c0c135792ec3e9d4978de63f134c438fa3a90119bf7fa2372e81191eb282"
+    },
+    {
+      "candidate_note": "mechanically tied alternate wording for abstention test",
+      "capture_mode": "CHAT_SESSION_SAME_PROMPT_MULTI_CANDIDATE",
+      "captured_at": "2026-09-07T06:20:00-04:00",
+      "generation_trace_id": "MODEL-GEN-PY-COMP-MC-D-20260907",
+      "model_id": "GPT-5.6 Sol",
+      "model_role": "CANDIDATE_GENERATOR_ONLY",
+      "output": {
+        "course_blueprint": {
+          "criteria": [
+            {
+              "criterion_id": "C-PY-LISTCOMP",
+              "outcome": "Construct and explain list comprehensions that transform and filter an iterable.",
+              "skill_id": "S-PY-LISTCOMP"
+            },
+            {
+              "criterion_id": "C-PY-DICTCOMP",
+              "outcome": "Construct and explain dictionary comprehensions that derive key-value pairs from an iterable.",
+              "skill_id": "S-PY-DICTCOMP"
+            }
+          ],
+          "items": [
+            {
+              "answer": "[x * 2 for x in [2, 5, 8]]",
+              "claim_refs": [
+                "CL-PY-COMP-001",
+                "CL-PY-COMP-002"
+              ],
+              "criterion_id": "C-PY-LISTCOMP",
+              "family_id": "F-PY-LC-P1",
+              "item_id": "P-PY-LC-1",
+              "mode": "PRACTICE",
+              "oracle_spec": {
+                "expected": [
+                  4,
+                  10,
+                  16
+                ],
+                "kind": "PYTHON_EXPRESSION"
+              },
+              "prompt": "Write one Python list-comprehension expression that doubles each value in [2, 5, 8].",
+              "rationale": "A list comprehension applies the expression before the for clause to each selected input value.",
+              "scoring_type": "PYTHON_COMPREHENSION"
+            },
+            {
+              "answer": "[x for x in [-3, 0, 2, 5] if x > 0]",
+              "claim_refs": [
+                "CL-PY-COMP-001",
+                "CL-PY-COMP-002"
+              ],
+              "criterion_id": "C-PY-LISTCOMP",
+              "family_id": "F-PY-LC-P2",
+              "item_id": "P-PY-LC-2",
+              "mode": "PRACTICE",
+              "oracle_spec": {
+                "expected": [
+                  2,
+                  5
+                ],
+                "kind": "PYTHON_EXPRESSION"
+              },
+              "prompt": "Write one list comprehension that keeps only positive values from [-3, 0, 2, 5].",
+              "rationale": "An if clause can filter which iterable elements contribute results.",
+              "scoring_type": "PYTHON_COMPREHENSION"
+            },
+            {
+              "answer": "[x**2 for x in range(7) if x % 2 == 0]",
+              "claim_refs": [
+                "CL-PY-COMP-001",
+                "CL-PY-COMP-002",
+                "CL-PY-COMP-003"
+              ],
+              "criterion_id": "C-PY-LISTCOMP",
+              "family_id": "F-PY-LC-M1",
+              "item_id": "M-PY-LC-1",
+              "mode": "MASTERY_CHECK",
+              "oracle_spec": {
+                "expected": [
+                  0,
+                  4,
+                  16,
+                  36
+                ],
+                "kind": "PYTHON_EXPRESSION"
+              },
+              "prompt": "Write one list comprehension that returns the squares of the even numbers produced by range(7).",
+              "rationale": "The comprehension combines a transformation with a filtering condition.",
+              "scoring_type": "PYTHON_COMPREHENSION"
+            },
+            {
+              "answer": "[len(w) for w in [\"cat\", \"tiger\", \"ox\", \"horse\"] if len(w) > 3]",
+              "claim_refs": [
+                "CL-PY-COMP-001",
+                "CL-PY-COMP-002"
+              ],
+              "criterion_id": "C-PY-LISTCOMP",
+              "family_id": "F-PY-LC-R1",
+              "item_id": "R-PY-LC-1",
+              "mode": "RETENTION_CHECK",
+              "oracle_spec": {
+                "expected": [
+                  5,
+                  5
+                ],
+                "kind": "PYTHON_EXPRESSION"
+              },
+              "prompt": "Write one list comprehension that returns lengths of words longer than three characters from [\"cat\", \"tiger\", \"ox\", \"horse\"].",
+              "rationale": "This delayed item requires both filtering and transformation in a new item family.",
+              "scoring_type": "PYTHON_COMPREHENSION"
+            },
+            {
+              "answer": "{x: x**2 for x in (2, 3, 4)}",
+              "claim_refs": [
+                "CL-PY-DICT-001",
+                "CL-PY-DICT-002"
+              ],
+              "criterion_id": "C-PY-DICTCOMP",
+              "family_id": "F-PY-DC-P1",
+              "item_id": "P-PY-DC-1",
+              "mode": "PRACTICE",
+              "oracle_spec": {
+                "expected": {
+                  "2": 4,
+                  "3": 9,
+                  "4": 16
+                },
+                "kind": "PYTHON_EXPRESSION",
+                "normalize_dict_keys": "string"
+              },
+              "prompt": "Write one dictionary comprehension mapping each number in (2, 3, 4) to its square.",
+              "rationale": "A dictionary comprehension supplies both key and value expressions before the for clause.",
+              "scoring_type": "PYTHON_COMPREHENSION"
+            },
+            {
+              "answer": "{w: len(w) for w in [\"ant\", \"bear\"]}",
+              "claim_refs": [
+                "CL-PY-DICT-001",
+                "CL-PY-DICT-002"
+              ],
+              "criterion_id": "C-PY-DICTCOMP",
+              "family_id": "F-PY-DC-P2",
+              "item_id": "P-PY-DC-2",
+              "mode": "PRACTICE",
+              "oracle_spec": {
+                "expected": {
+                  "ant": 3,
+                  "bear": 4
+                },
+                "kind": "PYTHON_EXPRESSION"
+              },
+              "prompt": "Write one dictionary comprehension mapping each word in [\"ant\", \"bear\"] to its length.",
+              "rationale": "The key and value expressions may be derived independently from each selected element.",
+              "scoring_type": "PYTHON_COMPREHENSION"
+            },
+            {
+              "answer": "{name: len(name) for name in [\"Ada\", \"Linus\", \"Guido\"]}",
+              "claim_refs": [
+                "CL-PY-DICT-001",
+                "CL-PY-DICT-002"
+              ],
+              "criterion_id": "C-PY-DICTCOMP",
+              "family_id": "F-PY-DC-M1",
+              "item_id": "M-PY-DC-1",
+              "mode": "MASTERY_CHECK",
+              "oracle_spec": {
+                "expected": {
+                  "Ada": 3,
+                  "Guido": 5,
+                  "Linus": 5
+                },
+                "kind": "PYTHON_EXPRESSION"
+              },
+              "prompt": "Write one dictionary comprehension mapping each name in [\"Ada\", \"Linus\", \"Guido\"] to the length of that name.",
+              "rationale": "The task independently checks construction of key-value results from each iterable element.",
+              "scoring_type": "PYTHON_COMPREHENSION"
+            },
+            {
+              "answer": "{n: n**3 for n in range(1, 5)}",
+              "claim_refs": [
+                "CL-PY-DICT-001",
+                "CL-PY-DICT-002"
+              ],
+              "criterion_id": "C-PY-DICTCOMP",
+              "family_id": "F-PY-DC-R1",
+              "item_id": "R-PY-DC-1",
+              "mode": "RETENTION_CHECK",
+              "oracle_spec": {
+                "expected": {
+                  "1": 1,
+                  "2": 8,
+                  "3": 27,
+                  "4": 64
+                },
+                "kind": "PYTHON_EXPRESSION",
+                "normalize_dict_keys": "string"
+              },
+              "prompt": "Write one dictionary comprehension mapping each number in range(1, 5) to its cube.",
+              "rationale": "This delayed parallel family checks retained dictionary-comprehension construction.",
+              "scoring_type": "PYTHON_COMPREHENSION"
+            }
+          ],
+          "lessons": [
+            {
+              "criterion_ids": [
+                "C-PY-LISTCOMP"
+              ],
+              "explanation_claim_refs": [
+                "CL-PY-COMP-001",
+                "CL-PY-COMP-002",
+                "CL-PY-COMP-003"
+              ],
+              "lesson_id": "L-PY-LISTCOMP",
+              "objective": "Construct list comprehensions that transform inputs and optionally filter them.",
+              "practice_item_ids": [
+                "P-PY-LC-1",
+                "P-PY-LC-2"
+              ],
+              "skill_id": "S-PY-LISTCOMP",
+              "title": "List comprehensions for mapping and filtering",
+              "worked_examples": [
+                {
+                  "claim_refs": [
+                    "CL-PY-COMP-001",
+                    "CL-PY-COMP-002"
+                  ],
+                  "oracle_spec": {
+                    "expected": [
+                      2,
+                      4,
+                      6
+                    ],
+                    "kind": "PYTHON_EXPRESSION"
+                  },
+                  "text": "`[x * 2 for x in [1, 2, 3]]` creates `[2, 4, 6]` by transforming each input value."
+                },
+                {
+                  "claim_refs": [
+                    "CL-PY-COMP-001",
+                    "CL-PY-COMP-002"
+                  ],
+                  "oracle_spec": {
+                    "expected": [
+                      0,
+                      1,
+                      2
+                    ],
+                    "kind": "PYTHON_EXPRESSION"
+                  },
+                  "text": "`[x for x in [-2, -1, 0, 1, 2] if x >= 0]` creates `[0, 1, 2]` by filtering the iterable."
+                }
+              ]
+            },
+            {
+              "criterion_ids": [
+                "C-PY-DICTCOMP"
+              ],
+              "explanation_claim_refs": [
+                "CL-PY-DICT-001",
+                "CL-PY-DICT-002",
+                "CL-PY-COMP-003"
+              ],
+              "lesson_id": "L-PY-DICTCOMP",
+              "objective": "Construct dictionary comprehensions that derive keys and values from iterable inputs.",
+              "practice_item_ids": [
+                "P-PY-DC-1",
+                "P-PY-DC-2"
+              ],
+              "skill_id": "S-PY-DICTCOMP",
+              "title": "Dictionary comprehensions for derived mappings",
+              "worked_examples": [
+                {
+                  "claim_refs": [
+                    "CL-PY-DICT-001",
+                    "CL-PY-DICT-002"
+                  ],
+                  "oracle_spec": {
+                    "expected": {
+                      "2": 4,
+                      "4": 16,
+                      "6": 36
+                    },
+                    "kind": "PYTHON_EXPRESSION",
+                    "normalize_dict_keys": "string"
+                  },
+                  "text": "`{x: x**2 for x in (2, 4, 6)}` creates `{2: 4, 4: 16, 6: 36}`."
+                },
+                {
+                  "claim_refs": [
+                    "CL-PY-DICT-001",
+                    "CL-PY-DICT-002"
+                  ],
+                  "oracle_spec": {
+                    "expected": {
+                      "ant": 3,
+                      "bear": 4
+                    },
+                    "kind": "PYTHON_EXPRESSION"
+                  },
+                  "text": "`{w: len(w) for w in [\"ant\", \"bear\"]}` creates `{\"ant\": 3, \"bear\": 4}`."
+                }
+              ]
+            }
+          ],
+          "skills": [
+            {
+              "criterion_ids": [
+                "C-PY-LISTCOMP"
+              ],
+              "hard_prerequisite_skill_ids": [],
+              "skill_id": "S-PY-LISTCOMP",
+              "title": "Build list comprehensions"
+            },
+            {
+              "criterion_ids": [
+                "C-PY-DICTCOMP"
+              ],
+              "hard_prerequisite_skill_ids": [],
+              "skill_id": "S-PY-DICTCOMP",
+              "title": "Build dictionary comprehensions"
+            }
+          ]
+        },
+        "domain_key": "python-comprehensions",
+        "maintenance_tasks": [
+          {
+            "answer": "[w.upper() for w in [\"a\", \"bee\", \"code\"] if len(w) > 2]",
+            "claim_refs": [
+              "CL-PY-COMP-001",
+              "CL-PY-COMP-002"
+            ],
+            "criterion_id": "C-PY-LISTCOMP",
+            "family_id": "F-PY-LC-MN2",
+            "fresh_family": true,
+            "item_id": "MN-PY-LC-2",
+            "mode": "RETENTION_CHECK",
+            "oracle_spec": {
+              "allow_methods": [
+                "upper"
+              ],
+              "expected": [
+                "BEE",
+                "CODE"
+              ],
+              "kind": "PYTHON_EXPRESSION"
+            },
+            "prompt": "Write one list comprehension that returns uppercase versions of words longer than two characters from [\"a\", \"bee\", \"code\"].",
+            "rationale": "A fresh maintenance family combines filtering and transformation.",
+            "scoring_type": "PYTHON_COMPREHENSION",
+            "skill_id": "S-PY-LISTCOMP"
+          },
+          {
+            "answer": "{w: w.upper() for w in [\"red\", \"blue\"]}",
+            "claim_refs": [
+              "CL-PY-DICT-001",
+              "CL-PY-DICT-002"
+            ],
+            "criterion_id": "C-PY-DICTCOMP",
+            "family_id": "F-PY-DC-MN2",
+            "fresh_family": true,
+            "item_id": "MN-PY-DC-2",
+            "mode": "RETENTION_CHECK",
+            "oracle_spec": {
+              "allow_methods": [
+                "upper"
+              ],
+              "expected": {
+                "blue": "BLUE",
+                "red": "RED"
+              },
+              "kind": "PYTHON_EXPRESSION"
+            },
+            "prompt": "Write one dictionary comprehension mapping each word in [\"red\", \"blue\"] to its uppercase form.",
+            "rationale": "A fresh maintenance family checks retained key-value construction.",
+            "scoring_type": "PYTHON_COMPREHENSION",
+            "skill_id": "S-PY-DICTCOMP"
+          }
+        ],
+        "oracle_descriptor": {
+          "additional_task_oracles": [
+            {
+              "item_id": "TP-PY-LC-1",
+              "oracle_spec": {
+                "expected": [
+                  0,
+                  2,
+                  4
+                ],
+                "kind": "PYTHON_EXPRESSION"
+              }
+            },
+            {
+              "item_id": "TP-PY-LC-2",
+              "oracle_spec": {
+                "expected": [
+                  3,
+                  4
+                ],
+                "kind": "PYTHON_EXPRESSION"
+              }
+            },
+            {
+              "item_id": "MN-PY-LC-2",
+              "oracle_spec": {
+                "allow_methods": [
+                  "upper"
+                ],
+                "expected": [
+                  "BEE",
+                  "CODE"
+                ],
+                "kind": "PYTHON_EXPRESSION"
+              }
+            },
+            {
+              "item_id": "MN-PY-DC-2",
+              "oracle_spec": {
+                "allow_methods": [
+                  "upper"
+                ],
+                "expected": {
+                  "blue": "BLUE",
+                  "red": "RED"
+                },
+                "kind": "PYTHON_EXPRESSION"
+              }
+            },
+            {
+              "item_id": "T-PY-COMP-ODD-SQUARES",
+              "oracle_spec": {
+                "expected": {
+                  "1": 1,
+                  "3": 9,
+                  "5": 25,
+                  "7": 49
+                },
+                "kind": "PYTHON_EXPRESSION",
+                "normalize_dict_keys": "string"
+              }
+            },
+            {
+              "item_id": "T-PY-COMP-WORD-LENGTHS",
+              "oracle_spec": {
+                "expected": {
+                  "galaxy": 6,
+                  "planet": 6,
+                  "star": 4
+                },
+                "kind": "PYTHON_EXPRESSION"
+              }
+            }
+          ],
+          "allowed_builtins": [
+            "range",
+            "len"
+          ],
+          "max_ast_nodes": 120,
+          "type": "PYTHON_COMPREHENSION_EXPRESSION"
+        },
+        "pedagogy_review": [
+          {
+            "dimension": "skill_decomposition",
+            "standing": "MODEL_PROPOSAL_HUMAN_REVIEW_REQUIRED"
+          },
+          {
+            "dimension": "lesson_sequence",
+            "standing": "MODEL_PROPOSAL_HUMAN_REVIEW_REQUIRED"
+          },
+          {
+            "dimension": "transfer_novelty_strength",
+            "standing": "MODEL_PROPOSAL_HUMAN_REVIEW_REQUIRED"
+          }
+        ],
+        "transfer_required_skills": [
+          "S-PY-DICTCOMP"
+        ],
+        "transfer_tasks": [
+          {
+            "answer": "{n: n**2 for n in range(8) if n % 2 == 1}",
+            "claim_refs": [
+              "CL-PY-COMP-003",
+              "CL-PY-DICT-001",
+              "CL-PY-DICT-002"
+            ],
+            "criterion_id": "C-PY-DICTCOMP",
+            "family_id": "F-PY-TR-ODD",
+            "item_id": "T-PY-COMP-ODD-SQUARES",
+            "mode": "TRANSFER_CHECK",
+            "novelty": {
+              "context_shift": "dictionary plus filtering",
+              "item_family": "unseen"
+            },
+            "oracle_spec": {
+              "expected": {
+                "1": 1,
+                "3": 9,
+                "5": 25,
+                "7": 49
+              },
+              "kind": "PYTHON_EXPRESSION",
+              "normalize_dict_keys": "string"
+            },
+            "prompt": "In one dictionary comprehension, map each odd number produced by range(8) to its square.",
+            "rationale": "This combines dictionary construction with a filter in a context not used in instruction.",
+            "scoring_type": "PYTHON_COMPREHENSION",
+            "skill_id": "S-PY-DICTCOMP"
+          },
+          {
+            "answer": "{w: len(w) for w in [\"sun\", \"planet\", \"star\", \"galaxy\"] if len(w) > 3}",
+            "claim_refs": [
+              "CL-PY-COMP-003",
+              "CL-PY-DICT-001",
+              "CL-PY-DICT-002"
+            ],
+            "criterion_id": "C-PY-DICTCOMP",
+            "family_id": "F-PY-TR-WORD",
+            "item_id": "T-PY-COMP-WORD-LENGTHS",
+            "mode": "TRANSFER_CHECK",
+            "novelty": {
+              "context_shift": "string filter plus mapping",
+              "item_family": "unseen"
+            },
+            "oracle_spec": {
+              "expected": {
+                "galaxy": 6,
+                "planet": 6,
+                "star": 4
+              },
+              "kind": "PYTHON_EXPRESSION"
+            },
+            "prompt": "In one dictionary comprehension, map each word longer than three characters in [\"sun\", \"planet\", \"star\", \"galaxy\"] to its length.",
+            "rationale": "This combines filtering with derived dictionary values on strings.",
+            "scoring_type": "PYTHON_COMPREHENSION",
+            "skill_id": "S-PY-DICTCOMP"
+          }
+        ],
+        "tutor_probes": [
+          {
+            "claim_refs": [
+              "CL-PY-COMP-001",
+              "CL-PY-COMP-002"
+            ],
+            "error_rules": [
+              {
+                "must_contain": [
+                  "for"
+                ],
+                "must_not_contain": [
+                  "if"
+                ],
+                "signature": "FILTER_OMITTED"
+              }
+            ],
+            "family_id": "TF-PY-LC-A",
+            "oracle_item_id": "TP-PY-LC-1",
+            "oracle_spec": {
+              "expected": [
+                0,
+                2,
+                4
+              ],
+              "kind": "PYTHON_EXPRESSION"
+            },
+            "probe_id": "TP-PY-LC-1",
+            "prompt": "Write a list comprehension that keeps even numbers from range(6).",
+            "skill_id": "S-PY-LISTCOMP"
+          },
+          {
+            "claim_refs": [
+              "CL-PY-COMP-001",
+              "CL-PY-COMP-002"
+            ],
+            "error_rules": [
+              {
+                "must_contain": [
+                  "for"
+                ],
+                "must_not_contain": [
+                  "if"
+                ],
+                "signature": "FILTER_OMITTED"
+              }
+            ],
+            "family_id": "TF-PY-LC-B",
+            "oracle_item_id": "TP-PY-LC-2",
+            "oracle_spec": {
+              "expected": [
+                3,
+                4
+              ],
+              "kind": "PYTHON_EXPRESSION"
+            },
+            "probe_id": "TP-PY-LC-2",
+            "prompt": "Write a list comprehension that keeps numbers greater than 2 from [1,2,3,4].",
+            "skill_id": "S-PY-LISTCOMP"
+          }
+        ],
+        "tutor_remediation": {
+          "ABSTAINED": {
+            "claim_refs": [
+              "CL-PY-COMP-002"
+            ],
+            "content": "The response is not correct, but the cause is not established. Reconstruct the comprehension as output expression, `for` clause, then any filter condition.",
+            "move": "DIAGNOSTIC_PROBE"
+          },
+          "DEFAULT": {
+            "claim_refs": [
+              "CL-PY-COMP-002"
+            ],
+            "content": "Identify the output expression first, then the iterable in the `for` clause, then decide whether a filtering `if` clause is required.",
+            "move": "GUIDED_RECONSTRUCTION"
+          },
+          "FILTER_OMITTED": {
+            "claim_refs": [
+              "CL-PY-COMP-001",
+              "CL-PY-COMP-002"
+            ],
+            "content": "A filtering comprehension needs an `if` clause after the `for` clause to decide which input elements contribute results.",
+            "hypothesis_content": "Your answer may be missing the filtering part. Check whether an `if` clause is needed after the `for` clause.",
+            "move": "TARGETED_REMEDIATION"
+          }
+        }
+      },
+      "output_digest": "afcc858269447b8a92feea82841f06efd52a807cd8e0fe0fad5e975f92a3d67f",
+      "prompt": {
+        "goal": "Use Python list and dictionary comprehensions to transform and filter data.",
+        "instruction": "Using only admitted research claims, generate a bounded course candidate with skills, lessons, practice, independent mastery, delayed retention, transfer, tutor probes, and an oracle descriptor. Do not mark the course verified; flag pedagogical judgments for review.",
+        "required_claim_ids": [
+          "CL-PY-COMP-001",
+          "CL-PY-COMP-002",
+          "CL-PY-COMP-003",
+          "CL-PY-DICT-001",
+          "CL-PY-DICT-002"
+        ],
+        "research_dossier_digest": "785d9f533c50611173993e150c9c7920bf0d2303c10b8a9a70b0d4e12b9c0407"
+      },
+      "prompt_digest": "90cbfd5e88469edeb9dd077abd9697f3718094087ff4eb326ef380fc9abb8073",
+      "research_capture_id": "LIVE-RSCH-PY-COMP-20260907-001",
+      "research_evidence_digest": "785d9f533c50611173993e150c9c7920bf0d2303c10b8a9a70b0d4e12b9c0407",
+      "trace_digest": "32bf80a7e4c6e59835cf1e5b88d24c1139cb15c398e3a060e1964fd146423de1"
+    }
+  ],
+  "truth_boundary": "Multiple same-prompt recorded candidate outputs are used to exercise stochastic-selection semantics. This does not claim a live provider was sampled four independent times."
+}
