@@ -1,0 +1,51 @@
+name: BOOK-EVAL-LEMONADE-001 Blind Resume State Probe
+
+on:
+  push:
+    branches:
+      - book-eval-lemonade-001-blind-resume-001
+    paths:
+      - "qualification/book-eval-lemonade-001/RUN-BLIND-STATE-PROBE"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: book-eval-lemonade-001-blind-state-probe-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    name: Probe persisted blind campaign state on A-01
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout exact probe commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+          clean: true
+
+      - name: Run read-only blind state probe
+        shell: cmd
+        run: call qualification\book-eval-lemonade-001\a01-blind-state-probe.cmd
+
+      - name: Publish state probe summary
+        if: always()
+        shell: cmd
+        run: |
+          set "EVIDENCE=%RUNNER_TEMP%\book-eval-blind-state-probe-%GITHUB_RUN_ID%"
+          echo ## BOOK-EVAL-LEMONADE-001 BLIND RESUME STATE PROBE>>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE%\state-probe-summary.txt" type "%EVIDENCE%\state-probe-summary.txt">>"%GITHUB_STEP_SUMMARY%"
+
+      - name: Upload state probe evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: book-eval-lemonade-001-blind-state-probe-evidence
+          path: ${{ runner.temp }}\book-eval-blind-state-probe-${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 30
