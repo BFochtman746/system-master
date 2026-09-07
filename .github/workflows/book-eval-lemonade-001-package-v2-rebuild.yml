@@ -36,7 +36,7 @@ jobs:
       - name: Verify no concurrent branch advance before rebuild
         shell: cmd
         run: |
-          git fetch origin refs/heads/book-eval-lemonade-001-repo-bind-001:refs/remotes/origin/book-eval-lemonade-001-repo-bind-001
+          git fetch origin +refs/heads/book-eval-lemonade-001-repo-bind-001:refs/remotes/origin/book-eval-lemonade-001-repo-bind-001
           for /f %%S in ('git rev-parse refs/remotes/origin/book-eval-lemonade-001-repo-bind-001') do set "REMOTE_SHA=%%S"
           if /I not "%REMOTE_SHA%"=="%GITHUB_SHA%" exit /b 91
 
@@ -78,7 +78,7 @@ jobs:
           git add -- qualification/book-eval-lemonade-001/jar-base64-v2 qualification/book-eval-lemonade-001/provider-visible-corpus-base64-v2 qualification/book-eval-lemonade-001/provider-ontology-base64-v2 qualification/book-eval-lemonade-001/runner-private-base64-v2 qualification/book-eval-lemonade-001/PACKAGE-V2-REBUILD-MANIFEST.json
           git diff --cached --quiet && exit /b 92
           git commit -m "book-eval: rebuild complete repository-authoritative package v2"
-          git fetch origin refs/heads/book-eval-lemonade-001-repo-bind-001:refs/remotes/origin/book-eval-lemonade-001-repo-bind-001
+          git fetch origin +refs/heads/book-eval-lemonade-001-repo-bind-001:refs/remotes/origin/book-eval-lemonade-001-repo-bind-001
           for /f %%S in ('git rev-parse refs/remotes/origin/book-eval-lemonade-001-repo-bind-001') do set "REMOTE_SHA=%%S"
           if /I not "%REMOTE_SHA%"=="%GITHUB_SHA%" exit /b 93
           git push origin HEAD:refs/heads/book-eval-lemonade-001-repo-bind-001
