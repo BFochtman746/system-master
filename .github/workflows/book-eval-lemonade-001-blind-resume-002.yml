@@ -1,0 +1,51 @@
+name: BOOK-EVAL-LEMONADE-001 Blind E5 Resume 002
+
+on:
+  push:
+    branches:
+      - book-eval-lemonade-001-blind-resume-002
+    paths:
+      - "qualification/book-eval-lemonade-001/RUN-BLIND-RESUME-002"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: book-eval-lemonade-001-blind-resume-002-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  resume:
+    name: Resume remaining E5 blind outputs from proven 117 state on A-01
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 180
+
+    steps:
+      - name: Checkout exact resume 002 commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+          clean: true
+
+      - name: Resume only missing E5 outputs from 117 state
+        shell: cmd
+        run: call qualification\book-eval-lemonade-001\a01-blind-resume-002.cmd
+
+      - name: Publish blind resume 002 summary
+        if: always()
+        shell: cmd
+        run: |
+          set "EVIDENCE=%RUNNER_TEMP%\book-eval-blind-resume-002-%GITHUB_RUN_ID%"
+          echo ## BOOK-EVAL-LEMONADE-001 BLIND E5 RESUME 002>>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE%\blind-resume-002-summary.txt" type "%EVIDENCE%\blind-resume-002-summary.txt">>"%GITHUB_STEP_SUMMARY%"
+
+      - name: Upload blind resume 002 evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: book-eval-lemonade-001-blind-resume-002-evidence
+          path: ${{ runner.temp }}\book-eval-blind-resume-002-${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 30
