@@ -1,0 +1,103 @@
+name: Safe Runner Bootstrap Qualification
+
+on:
+  push:
+    paths:
+      - ".github/workflows/safe-runner-bootstrap.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: safe-runner-bootstrap
+  cancel-in-progress: false
+
+jobs:
+  qualify:
+    name: Qualify Windows self-hosted runner
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 10
+
+    steps:
+      - name: Create bounded evidence directory
+        shell: powershell
+        run: |
+          $ErrorActionPreference = "Stop"
+          Set-StrictMode -Version Latest
+          $evidenceDir = Join-Path $env:RUNNER_TEMP "system-master-runner-bootstrap"
+          if (Test-Path -LiteralPath $evidenceDir) {
+            Remove-Item -LiteralPath $evidenceDir -Recurse -Force
+          }
+          New-Item -ItemType Directory -Path $evidenceDir | Out-Null
+          "EVIDENCE_DIR=$evidenceDir" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Inventory runner without enumerating secrets
+        shell: powershell
+        run: |
+          $ErrorActionPreference = "Stop"
+          Set-StrictMode -Version Latest
+
+          $reportPath = Join-Path $env:EVIDENCE_DIR "runner-bootstrap.txt"
+          $lines = [System.Collections.Generic.List[string]]::new()
+          $lines.Add("qualification=SAFE-RUNNER-BOOTSTRAP-001")
+          $lines.Add("timestamp_utc=$([DateTime]::UtcNow.ToString('o'))")
+          $lines.Add("repository=$env:GITHUB_REPOSITORY")
+          $lines.Add("commit=$env:GITHUB_SHA")
+          $lines.Add("runner_os=$env:RUNNER_OS")
+          $lines.Add("runner_arch=$env:RUNNER_ARCH")
+          $lines.Add("powershell=$($PSVersionTable.PSVersion)")
+          $lines.Add("git=$(git --version 2>&1)")
+
+          foreach ($tool in @("node", "npm", "python", "py", "dotnet")) {
+            $command = Get-Command $tool -ErrorAction SilentlyContinue
+            if ($null -eq $command) {
+              $lines.Add("$tool=not-found")
+              continue
+            }
+            $version = & $tool --version 2>&1
+            $lines.Add("$tool=$($version -join ' ')")
+          }
+
+          $tcp = Test-NetConnection -ComputerName "github.com" -Port 443 -InformationLevel Quiet
+          $lines.Add("github_https_reachable=$tcp")
+          $lines.Add("workspace_write_scope=runner_temp_only")
+          $lines.Add("secrets_enumerated=false")
+          $lines | Set-Content -LiteralPath $reportPath -Encoding utf8
+
+          $hash = (Get-FileHash -LiteralPath $reportPath -Algorithm SHA256).Hash.ToLowerInvariant()
+          "sha256=$hash" | Add-Content -LiteralPath $reportPath -Encoding utf8
+          Get-Content -LiteralPath $reportPath
+
+          if (-not $tcp) {
+            throw "GitHub HTTPS connectivity check failed."
+          }
+          if ($env:RUNNER_OS -ne "Windows") {
+            throw "Expected a Windows runner."
+          }
+          if ($env:RUNNER_ARCH -ne "X64") {
+            throw "Expected an X64 runner."
+          }
+
+      - name: Publish job summary
+        if: always()
+        shell: powershell
+        run: |
+          $reportPath = Join-Path $env:EVIDENCE_DIR "runner-bootstrap.txt"
+          "## SAFE-RUNNER-BOOTSTRAP-001" | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY
+          if (Test-Path -LiteralPath $reportPath) {
+            "~~~text" | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY
+            Get-Content -LiteralPath $reportPath | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY
+            "~~~" | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY
+          } else {
+            "Evidence report was not created." | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY
+          }
+
+      - name: Upload qualification evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: safe-runner-bootstrap-evidence
+          path: ${{ env.EVIDENCE_DIR }}/runner-bootstrap.txt
+          if-no-files-found: error
+          retention-days: 30
