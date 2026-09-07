@@ -21,83 +21,64 @@ jobs:
 
     steps:
       - name: Create bounded evidence directory
-        shell: powershell
+        shell: cmd
         run: |
-          $ErrorActionPreference = "Stop"
-          Set-StrictMode -Version Latest
-          $evidenceDir = Join-Path $env:RUNNER_TEMP "system-master-runner-bootstrap"
-          if (Test-Path -LiteralPath $evidenceDir) {
-            Remove-Item -LiteralPath $evidenceDir -Recurse -Force
-          }
-          New-Item -ItemType Directory -Path $evidenceDir | Out-Null
-          "EVIDENCE_DIR=$evidenceDir" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          set "EVIDENCE_DIR=%RUNNER_TEMP%\system-master-bootstrap-%GITHUB_RUN_ID%"
+          if not exist "%EVIDENCE_DIR%" mkdir "%EVIDENCE_DIR%"
+          echo EVIDENCE_DIR=%EVIDENCE_DIR%>>"%GITHUB_ENV%"
 
       - name: Inventory runner without enumerating secrets
-        shell: powershell
+        shell: cmd
         run: |
-          $ErrorActionPreference = "Stop"
-          Set-StrictMode -Version Latest
-
-          $reportPath = Join-Path $env:EVIDENCE_DIR "runner-bootstrap.txt"
-          $lines = [System.Collections.Generic.List[string]]::new()
-          $lines.Add("qualification=SAFE-RUNNER-BOOTSTRAP-001")
-          $lines.Add("timestamp_utc=$([DateTime]::UtcNow.ToString('o'))")
-          $lines.Add("repository=$env:GITHUB_REPOSITORY")
-          $lines.Add("commit=$env:GITHUB_SHA")
-          $lines.Add("runner_os=$env:RUNNER_OS")
-          $lines.Add("runner_arch=$env:RUNNER_ARCH")
-          $lines.Add("powershell=$($PSVersionTable.PSVersion)")
-          $lines.Add("git=$(git --version 2>&1)")
-
-          foreach ($tool in @("node", "npm", "python", "py", "dotnet")) {
-            $command = Get-Command $tool -ErrorAction SilentlyContinue
-            if ($null -eq $command) {
-              $lines.Add("$tool=not-found")
-              continue
-            }
-            $version = & $tool --version 2>&1
-            $lines.Add("$tool=$($version -join ' ')")
-          }
-
-          $tcp = Test-NetConnection -ComputerName "github.com" -Port 443 -InformationLevel Quiet
-          $lines.Add("github_https_reachable=$tcp")
-          $lines.Add("workspace_write_scope=runner_temp_only")
-          $lines.Add("secrets_enumerated=false")
-          $lines | Set-Content -LiteralPath $reportPath -Encoding utf8
-
-          $hash = (Get-FileHash -LiteralPath $reportPath -Algorithm SHA256).Hash.ToLowerInvariant()
-          "sha256=$hash" | Add-Content -LiteralPath $reportPath -Encoding utf8
-          Get-Content -LiteralPath $reportPath
-
-          if (-not $tcp) {
-            throw "GitHub HTTPS connectivity check failed."
-          }
-          if ($env:RUNNER_OS -ne "Windows") {
-            throw "Expected a Windows runner."
-          }
-          if ($env:RUNNER_ARCH -ne "X64") {
-            throw "Expected an X64 runner."
-          }
+          if /I not "%RUNNER_OS%"=="Windows" exit /b 1
+          if /I not "%RUNNER_ARCH%"=="X64" exit /b 1
+          (
+            echo qualification=SAFE-RUNNER-BOOTSTRAP-001
+            echo repository=%GITHUB_REPOSITORY%
+            echo commit=%GITHUB_SHA%
+            echo runner_os=%RUNNER_OS%
+            echo runner_arch=%RUNNER_ARCH%
+            echo workspace_write_scope=runner_temp_only
+            echo secrets_enumerated=false
+            echo git:
+            git --version
+            echo node:
+            where node >nul 2>nul && node --version || echo not-found
+            echo npm:
+            where npm >nul 2>nul && npm --version || echo not-found
+            echo python:
+            where python >nul 2>nul && python --version || echo not-found
+            echo py:
+            where py >nul 2>nul && py --version || echo not-found
+            echo dotnet:
+            where dotnet >nul 2>nul && dotnet --version || echo not-found
+          ) > "%EVIDENCE_DIR%\runner-bootstrap.txt"
+          curl.exe --fail --silent --show-error --output NUL https://github.com/
+          if errorlevel 1 exit /b 1
+          echo github_https_reachable=true>>"%EVIDENCE_DIR%\runner-bootstrap.txt"
+          certutil -hashfile "%EVIDENCE_DIR%\runner-bootstrap.txt" SHA256 > "%EVIDENCE_DIR%\runner-bootstrap.sha256.txt"
+          type "%EVIDENCE_DIR%\runner-bootstrap.txt"
+          type "%EVIDENCE_DIR%\runner-bootstrap.sha256.txt"
 
       - name: Publish job summary
         if: always()
-        shell: powershell
+        shell: cmd
         run: |
-          $reportPath = Join-Path $env:EVIDENCE_DIR "runner-bootstrap.txt"
-          "## SAFE-RUNNER-BOOTSTRAP-001" | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY
-          if (Test-Path -LiteralPath $reportPath) {
-            "~~~text" | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY
-            Get-Content -LiteralPath $reportPath | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY
-            "~~~" | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY
-          } else {
-            "Evidence report was not created." | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY
-          }
+          echo ## SAFE-RUNNER-BOOTSTRAP-001>>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\runner-bootstrap.txt" (
+            echo ~~~text>>"%GITHUB_STEP_SUMMARY%"
+            type "%EVIDENCE_DIR%\runner-bootstrap.txt">>"%GITHUB_STEP_SUMMARY%"
+            type "%EVIDENCE_DIR%\runner-bootstrap.sha256.txt">>"%GITHUB_STEP_SUMMARY%"
+            echo ~~~>>"%GITHUB_STEP_SUMMARY%"
+          ) else (
+            echo Evidence report was not created.>>"%GITHUB_STEP_SUMMARY%"
+          )
 
       - name: Upload qualification evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: safe-runner-bootstrap-evidence
-          path: ${{ env.EVIDENCE_DIR }}/runner-bootstrap.txt
+          path: ${{ env.EVIDENCE_DIR }}
           if-no-files-found: error
           retention-days: 30
