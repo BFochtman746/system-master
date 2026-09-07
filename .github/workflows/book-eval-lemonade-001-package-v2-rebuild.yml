@@ -20,6 +20,7 @@ jobs:
     runs-on: [self-hosted, Windows, X64]
     timeout-minutes: 20
     permissions:
+      actions: read
       contents: write
     outputs:
       new_sha: ${{ steps.commit.outputs.new_sha }}
@@ -38,6 +39,25 @@ jobs:
           git fetch origin refs/heads/book-eval-lemonade-001-repo-bind-001:refs/remotes/origin/book-eval-lemonade-001-repo-bind-001
           for /f %%S in ('git rev-parse refs/remotes/origin/book-eval-lemonade-001-repo-bind-001') do set "REMOTE_SHA=%%S"
           if /I not "%REMOTE_SHA%"=="%GITHUB_SHA%" exit /b 91
+
+      - name: Recover retained A-01 canonical package
+        shell: cmd
+        env:
+          GH_ACTIONS_TOKEN: ${{ github.token }}
+        run: |
+          set "RECOVERY_ROOT=%RUNNER_TEMP%\book-eval-canonical-recovery-%GITHUB_RUN_ID%"
+          if exist "%RECOVERY_ROOT%" rmdir /s /q "%RECOVERY_ROOT%"
+          mkdir "%RECOVERY_ROOT%"
+          if errorlevel 1 exit /b 80
+          curl.exe --fail --silent --show-error --location -H "Authorization: Bearer %GH_ACTIONS_TOKEN%" -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "https://api.github.com/repos/%GITHUB_REPOSITORY%/actions/artifacts/10031477242/zip" -o "%RECOVERY_ROOT%\canonical.zip"
+          if errorlevel 1 exit /b 81
+          tar.exe -xf "%RECOVERY_ROOT%\canonical.zip" -C "%RECOVERY_ROOT%"
+          if errorlevel 1 exit /b 82
+          if not exist "%RECOVERY_ROOT%\extract\delivery\book-eval-lemonade.jar" exit /b 83
+          if not exist "%RECOVERY_ROOT%\extract\delivery\provider-visible\BOOK-EVAL-CORPUS-INPUT-v2.jsonl" exit /b 84
+          if not exist "%RECOVERY_ROOT%\extract\delivery\provider-visible\BOOK-EVAL-PROVIDER-ONTOLOGY-v2.json" exit /b 85
+          if not exist "%RECOVERY_ROOT%\extract\delivery\runner-private\RUNNER-PRIVATE-EXECUTION-MANIFEST-v2.json" exit /b 86
+          echo BOOK_EVAL_CANONICAL_DELIVERY=%RECOVERY_ROOT%\extract\delivery>>"%GITHUB_ENV%"
 
       - name: Generate and independently reconstruct all four V2 payloads
         shell: cmd
