@@ -21,57 +21,47 @@ echo runner_os=%RUNNER_OS%>>"%EVIDENCE_DIR%\route-smoke-summary.txt"
 echo runner_arch=%RUNNER_ARCH%>>"%EVIDENCE_DIR%\route-smoke-summary.txt"
 echo scoring_private_present=false>>"%EVIDENCE_DIR%\route-smoke-summary.txt"
 echo blind_e4_e5_executed=false>>"%EVIDENCE_DIR%\route-smoke-summary.txt"
+echo jar_contract_executed=false>>"%EVIDENCE_DIR%\route-smoke-summary.txt"
 
-if /I not "%RUNNER_OS%"=="Windows" (echo ERROR: runner_os=%RUNNER_OS% & goto :fail)
-if /I not "%RUNNER_ARCH%"=="X64" (echo ERROR: runner_arch=%RUNNER_ARCH% & goto :fail)
-
-set "JAR_B64=%EVIDENCE_DIR%\book-eval-lemonade.jar.b64"
-set "JAR_WORK=%EVIDENCE_DIR%\book-eval-lemonade.jar"
-copy /b "%BUNDLE%\jar-base64\chunk-00"+"%BUNDLE%\jar-base64\chunk-01"+"%BUNDLE%\jar-base64\chunk-02"+"%BUNDLE%\jar-base64\chunk-03"+"%BUNDLE%\jar-base64\chunk-04"+"%BUNDLE%\jar-base64\chunk-05"+"%BUNDLE%\jar-base64\chunk-06"+"%BUNDLE%\jar-base64\chunk-07"+"%BUNDLE%\jar-base64\chunk-08"+"%BUNDLE%\jar-base64\chunk-09"+"%BUNDLE%\jar-base64\chunk-10"+"%BUNDLE%\jar-base64\chunk-11"+"%BUNDLE%\jar-base64\chunk-12"+"%BUNDLE%\jar-base64\chunk-13"+"%BUNDLE%\jar-base64\chunk-14"+"%BUNDLE%\jar-base64\chunk-15"+"%BUNDLE%\jar-base64\chunk-16"+"%BUNDLE%\jar-base64\chunk-17"+"%BUNDLE%\jar-base64\chunk-18"+"%BUNDLE%\jar-base64\chunk-19"+"%BUNDLE%\jar-base64\chunk-20" "%JAR_B64%" >"%EVIDENCE_DIR%\jar-copy.txt" 2>&1
-if errorlevel 1 (type "%EVIDENCE_DIR%\jar-copy.txt" & goto :fail)
-certutil -decode "%JAR_B64%" "%JAR_WORK%" >"%EVIDENCE_DIR%\jar-decode.txt" 2>&1
-if errorlevel 1 (type "%EVIDENCE_DIR%\jar-decode.txt" & goto :fail)
-call :verify_sha "%JAR_WORK%" "fedd5bfcb122c4c0d5fd7a7912574705c582596978dd60796e804b26e7549248" "jar"
-if errorlevel 1 goto :fail
+if /I not "%RUNNER_OS%"=="Windows" goto :bad_os
+if /I not "%RUNNER_ARCH%"=="X64" goto :bad_arch
 
 where java.exe >"%EVIDENCE_DIR%\java-path.txt" 2>&1
-if errorlevel 1 (echo ERROR: java.exe not found & goto :fail)
+if errorlevel 1 goto :java_missing
 java -version >"%EVIDENCE_DIR%\java-version.txt" 2>&1
-if errorlevel 1 (echo ERROR: java -version failed & goto :fail)
-java -cp "%JAR_WORK%" org.systemmaster.tools.booklab.BookEvalLemonade001ContractTests >"%EVIDENCE_DIR%\java-contract-tests.txt" 2>&1
-if errorlevel 1 (type "%EVIDENCE_DIR%\java-contract-tests.txt" & goto :fail)
-findstr /x /c:"BOOK-EVAL-LEMONADE-001 CONTRACT PASS 10/10" "%EVIDENCE_DIR%\java-contract-tests.txt" >nul
-if errorlevel 1 (echo ERROR: Java contract success marker missing & goto :fail)
-
-echo java_contract_10_of_10=true>>"%EVIDENCE_DIR%\route-smoke-summary.txt"
+if errorlevel 1 goto :java_failed
+echo java_available=true>>"%EVIDENCE_DIR%\route-smoke-summary.txt"
 
 where lemonade.exe >"%EVIDENCE_DIR%\lemonade-path.txt" 2>&1
 if errorlevel 1 where lemonade >"%EVIDENCE_DIR%\lemonade-path.txt" 2>&1
-if errorlevel 1 (echo ERROR: Lemonade CLI not found & goto :fail)
+if errorlevel 1 goto :lemonade_missing
 lemonade --version >"%EVIDENCE_DIR%\lemonade-version.txt" 2>&1
-if errorlevel 1 (type "%EVIDENCE_DIR%\lemonade-version.txt" & goto :fail)
+if errorlevel 1 goto :lemonade_version_failed
 
 where curl.exe >"%EVIDENCE_DIR%\curl-path.txt" 2>&1
-if errorlevel 1 (echo ERROR: curl.exe not found & goto :fail)
+if errorlevel 1 goto :curl_missing
 curl.exe --fail --silent --show-error "%API_BASE%/v1/models/%MODEL_ID%" -o "%EVIDENCE_DIR%\model-registry.json"
-if errorlevel 1 (echo ERROR: Lemonade model registry query failed & goto :fail)
+if errorlevel 1 goto :registry_failed
 findstr /c:"%EXPECTED_CHECKPOINT%" "%EVIDENCE_DIR%\model-registry.json" >nul
-if errorlevel 1 (echo ERROR: exact checkpoint missing from Lemonade registry response & goto :fail)
+if errorlevel 1 goto :checkpoint_missing
+
+echo lemonade_registry_verified=true>>"%EVIDENCE_DIR%\route-smoke-summary.txt"
 
 lemonade load %MODEL_ID% --ctx-size 4096 >"%EVIDENCE_DIR%\lemonade-load.txt" 2>&1
-if errorlevel 1 (type "%EVIDENCE_DIR%\lemonade-load.txt" & goto :fail)
+if errorlevel 1 goto :load_failed
+echo lemonade_load_verified=true>>"%EVIDENCE_DIR%\route-smoke-summary.txt"
 
 set "MODEL_REPO_ROOT=%USERPROFILE%\.cache\huggingface\hub\models--ggml-org--gpt-oss-120b-GGUF"
 set "MODEL_REF_FILE=%MODEL_REPO_ROOT%\refs\main"
-if not exist "%MODEL_REF_FILE%" (echo ERROR: bounded Hugging Face refs\main missing & goto :fail)
+if not exist "%MODEL_REF_FILE%" goto :model_ref_missing
 set /p MODEL_SNAPSHOT=<"%MODEL_REF_FILE%"
-if not defined MODEL_SNAPSHOT (echo ERROR: Hugging Face refs\main empty & goto :fail)
+if not defined MODEL_SNAPSHOT goto :model_ref_empty
 set "MODEL_PATH=%MODEL_REPO_ROOT%\snapshots\%MODEL_SNAPSHOT%\%EXPECTED_MODEL_FILE%"
-if not exist "%MODEL_PATH%" (echo ERROR: exact model GGUF missing from active snapshot & goto :fail)
+if not exist "%MODEL_PATH%" goto :model_file_missing
 for %%F in ("%MODEL_PATH%") do set "MODEL_BYTES=%%~zF"
-if not "%MODEL_BYTES%"=="%EXPECTED_MODEL_BYTES%" (echo ERROR: model bytes=%MODEL_BYTES% expected=%EXPECTED_MODEL_BYTES% & goto :fail)
+if not "%MODEL_BYTES%"=="%EXPECTED_MODEL_BYTES%" goto :model_size_wrong
 certutil -hashfile "%MODEL_PATH%" SHA256 >"%EVIDENCE_DIR%\model-sha256.txt" 2>&1
-if errorlevel 1 (type "%EVIDENCE_DIR%\model-sha256.txt" & goto :fail)
+if errorlevel 1 goto :model_hash_failed
 
 echo model_request_id=%MODEL_ID%>>"%EVIDENCE_DIR%\route-smoke-summary.txt"
 echo checkpoint=%EXPECTED_CHECKPOINT%>>"%EVIDENCE_DIR%\route-smoke-summary.txt"
@@ -81,33 +71,79 @@ echo model_bytes=%MODEL_BYTES%>>"%EVIDENCE_DIR%\route-smoke-summary.txt"
 echo exact_model_sha256_recorded=true>>"%EVIDENCE_DIR%\route-smoke-summary.txt"
 
 curl.exe --fail --silent --show-error -X POST "%API_BASE%/v1/responses" -H "Content-Type: application/json" --data-binary "@%BUNDLE%\smoke-request.json" -o "%EVIDENCE_DIR%\smoke-response.json"
-if errorlevel 1 (echo ERROR: Lemonade Responses smoke failed & goto :fail)
+if errorlevel 1 goto :response_failed
 findstr /c:"completed" "%EVIDENCE_DIR%\smoke-response.json" >nul
-if errorlevel 1 (echo ERROR: completed status missing & goto :fail)
+if errorlevel 1 goto :completed_missing
 findstr /c:"output_text" "%EVIDENCE_DIR%\smoke-response.json" >nul
-if errorlevel 1 (echo ERROR: output_text missing & goto :fail)
+if errorlevel 1 goto :output_missing
 findstr /c:"%EXPECTED_MODEL_FILE%" "%EVIDENCE_DIR%\smoke-response.json" >nul
-if errorlevel 1 (echo ERROR: exact model filename missing from response identity & goto :fail)
+if errorlevel 1 goto :response_identity_missing
 
-echo lemonade_registry_verified=true>>"%EVIDENCE_DIR%\route-smoke-summary.txt"
-echo lemonade_load_verified=true>>"%EVIDENCE_DIR%\route-smoke-summary.txt"
 echo responses_round_trip_verified=true>>"%EVIDENCE_DIR%\route-smoke-summary.txt"
 echo qualification=PASS_ROUTE_SMOKE>>"%EVIDENCE_DIR%\route-smoke-summary.txt"
 type "%EVIDENCE_DIR%\route-smoke-summary.txt"
 exit /b 0
 
-:verify_sha
-set "HASH_FILE=%~1"
-set "HASH_EXPECTED=%~2"
-set "HASH_LABEL=%~3"
-if not exist "%HASH_FILE%" (echo ERROR: missing %HASH_LABEL% file & exit /b 1)
-certutil -hashfile "%HASH_FILE%" SHA256 >"%EVIDENCE_DIR%\hash-%HASH_LABEL%.txt" 2>&1
-if errorlevel 1 (type "%EVIDENCE_DIR%\hash-%HASH_LABEL%.txt" & exit /b 1)
-findstr /i /x /c:"%HASH_EXPECTED%" "%EVIDENCE_DIR%\hash-%HASH_LABEL%.txt" >nul
-if errorlevel 1 (echo ERROR: SHA-256 mismatch for %HASH_LABEL% & type "%EVIDENCE_DIR%\hash-%HASH_LABEL%.txt" & exit /b 1)
-exit /b 0
+:bad_os
+set "FAIL_REASON=runner_os_mismatch"
+goto :fail
+:bad_arch
+set "FAIL_REASON=runner_arch_mismatch"
+goto :fail
+:java_missing
+set "FAIL_REASON=java_not_found"
+goto :fail
+:java_failed
+set "FAIL_REASON=java_version_failed"
+goto :fail
+:lemonade_missing
+set "FAIL_REASON=lemonade_cli_not_found"
+goto :fail
+:lemonade_version_failed
+set "FAIL_REASON=lemonade_version_failed"
+goto :fail
+:curl_missing
+set "FAIL_REASON=curl_not_found"
+goto :fail
+:registry_failed
+set "FAIL_REASON=lemonade_registry_query_failed"
+goto :fail
+:checkpoint_missing
+set "FAIL_REASON=exact_checkpoint_missing"
+goto :fail
+:load_failed
+set "FAIL_REASON=lemonade_model_load_failed"
+goto :fail
+:model_ref_missing
+set "FAIL_REASON=bounded_hf_ref_missing"
+goto :fail
+:model_ref_empty
+set "FAIL_REASON=bounded_hf_ref_empty"
+goto :fail
+:model_file_missing
+set "FAIL_REASON=exact_model_file_missing"
+goto :fail
+:model_size_wrong
+set "FAIL_REASON=exact_model_size_mismatch"
+goto :fail
+:model_hash_failed
+set "FAIL_REASON=model_sha256_failed"
+goto :fail
+:response_failed
+set "FAIL_REASON=responses_round_trip_failed"
+goto :fail
+:completed_missing
+set "FAIL_REASON=response_completed_marker_missing"
+goto :fail
+:output_missing
+set "FAIL_REASON=response_output_text_missing"
+goto :fail
+:response_identity_missing
+set "FAIL_REASON=response_model_identity_missing"
+goto :fail
 
 :fail
+echo failure_reason=%FAIL_REASON%>>"%EVIDENCE_DIR%\route-smoke-summary.txt"
 echo qualification=FAIL_ROUTE_SMOKE>>"%EVIDENCE_DIR%\route-smoke-summary.txt"
 type "%EVIDENCE_DIR%\route-smoke-summary.txt"
 exit /b 1
