@@ -1,0 +1,58 @@
+name: BOOK-EVAL-LEMONADE-001 Full Blind Execution
+
+on:
+  push:
+    branches:
+      - book-eval-lemonade-001-repo-bind-001
+    paths:
+      - ".github/workflows/book-eval-lemonade-001-full-blind.yml"
+      - "qualification/book-eval-lemonade-001/a01-full-blind-run.cmd"
+      - "qualification/book-eval-lemonade-001/MODEL-ARTIFACT-REFERENCE.json"
+      - "qualification/book-eval-lemonade-001/lemonade-load-request.json"
+      - "qualification/book-eval-lemonade-001/smoke-request.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: book-eval-lemonade-001-full-blind-a01
+  cancel-in-progress: false
+
+jobs:
+  blind-execution:
+    name: Execute resumable E4 E5 blind campaign on A-01
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 355
+    steps:
+      - name: Checkout exact objective commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+          clean: true
+
+      - name: Execute HTTP-only blind campaign
+        shell: cmd
+        run: call qualification\book-eval-lemonade-001\a01-full-blind-run.cmd
+
+      - name: Publish campaign summary
+        if: always()
+        shell: cmd
+        run: |
+          echo ## BOOK-EVAL-LEMONADE-001 Full Blind Execution>>"%GITHUB_STEP_SUMMARY%"
+          if exist "C:\AI Test Kit\Books Testing\BOOK_EVAL_LEMONADE_001_A01_BLIND_RUN_GPT_OSS_120B\A01-EXECUTION-SUMMARY.txt" (
+            type "C:\AI Test Kit\Books Testing\BOOK_EVAL_LEMONADE_001_A01_BLIND_RUN_GPT_OSS_120B\A01-EXECUTION-SUMMARY.txt">>"%GITHUB_STEP_SUMMARY%"
+          ) else (
+            echo Campaign summary was not created.>>"%GITHUB_STEP_SUMMARY%"
+          )
+
+      - name: Upload blind execution evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: book-eval-lemonade-001-blind-execution-evidence
+          path: C:\AI Test Kit\Books Testing\BOOK_EVAL_LEMONADE_001_A01_BLIND_RUN_GPT_OSS_120B
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 6
