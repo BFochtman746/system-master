@@ -1,0 +1,1 @@
+GitHub connector transfer is qualified only by reconstructing the exact frozen bytes and verifying canonical SHA-256 on A-01. File-count or successful checkout alone is insufficient.
