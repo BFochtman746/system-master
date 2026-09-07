@@ -12,7 +12,10 @@ set "EXPECTED_ONTOLOGY_SHA=3daf139be2c35eb706ad0d0a1b6275a72c1ff18c21bf09d97eb26
 set "EXPECTED_EXEC_SHA=7d9348ecdad344d8aa73dc0fe984aef85559084610504f50f8d35ef6a001fb06"
 set "API_BASE=http://127.0.0.1:13305"
 set "RESPONSES_ENDPOINT=%API_BASE%/v1/responses"
-set "SOURCE_DIR=C:\AI Test Kit\Books Testing\BOOK_EVAL_LEMONADE_001_RUNNER_JAVA25_HOTFIX\delivery"
+set "SOURCE_DIR="
+set "SOURCE_CANDIDATE_1=C:\AI Test Kit\Books Testing\BOOK_EVAL_LEMONADE_001_RUNNER_POWERSHELL_AUDITED\delivery"
+set "SOURCE_CANDIDATE_2=C:\AI Test Kit\Books Testing\BOOK_EVAL_LEMONADE_001_RUNNER_JAVA25_HOTFIX\delivery"
+set "SOURCE_CANDIDATE_3=C:\AI Test Kit\Books Testing\BOOK_EVAL_LEMONADE_001_RUNNER\delivery"
 set "BUNDLE=%GITHUB_WORKSPACE%\qualification\book-eval-lemonade-001"
 set "EVIDENCE_DIR=%RUNNER_TEMP%\book-eval-lemonade-001-preflight-%GITHUB_RUN_ID%"
 set "STAGE=%EVIDENCE_DIR%\frozen-inputs"
@@ -28,7 +31,7 @@ echo commit=%GITHUB_SHA%>>"%EVIDENCE_DIR%\preflight-summary.txt"
 echo runner_name=%RUNNER_NAME%>>"%EVIDENCE_DIR%\preflight-summary.txt"
 echo runner_os=%RUNNER_OS%>>"%EVIDENCE_DIR%\preflight-summary.txt"
 echo runner_arch=%RUNNER_ARCH%>>"%EVIDENCE_DIR%\preflight-summary.txt"
-echo source_dir=%SOURCE_DIR%>>"%EVIDENCE_DIR%\preflight-summary.txt"
+echo source_candidates_checked=3>>"%EVIDENCE_DIR%\preflight-summary.txt"
 echo blind_e4_e5_executed=false>>"%EVIDENCE_DIR%\preflight-summary.txt"
 echo scoring_private_accessed=false>>"%EVIDENCE_DIR%\preflight-summary.txt"
 
@@ -41,8 +44,16 @@ if /I not "%RUNNER_ARCH%"=="X64" (
   goto :fail
 )
 
-rem The exact source path is user-approved Book-evaluator material previously executed in this chat.
-rem Do not enumerate parent directories. Copy only the four frozen inputs named below.
+rem These exact source paths are user-approved Book-evaluator material previously used in this chat.
+rem Do not enumerate parent directories. Select only a known delivery path containing all four frozen inputs.
+call :select_source "%SOURCE_CANDIDATE_1%"
+if not defined SOURCE_DIR call :select_source "%SOURCE_CANDIDATE_2%"
+if not defined SOURCE_DIR call :select_source "%SOURCE_CANDIDATE_3%"
+if not defined SOURCE_DIR (
+  echo failure=no_known_book_evaluator_source>>"%EVIDENCE_DIR%\preflight-summary.txt"
+  goto :fail
+)
+echo source_dir=%SOURCE_DIR%>>"%EVIDENCE_DIR%\preflight-summary.txt"
 if not exist "%SOURCE_DIR%\book-eval-lemonade.jar" (
   echo failure=source_jar_missing>>"%EVIDENCE_DIR%\preflight-summary.txt"
   goto :fail
@@ -225,6 +236,15 @@ echo qualification_context_size=4096>>"%EVIDENCE_DIR%\preflight-summary.txt"
 echo smoke_response_completed=true>>"%EVIDENCE_DIR%\preflight-summary.txt"
 echo qualification=PASS_A01_PREFLIGHT>>"%EVIDENCE_DIR%\preflight-summary.txt"
 type "%EVIDENCE_DIR%\preflight-summary.txt"
+exit /b 0
+
+:select_source
+set "SOURCE_TEST=%~1"
+if not exist "%SOURCE_TEST%\book-eval-lemonade.jar" exit /b 0
+if not exist "%SOURCE_TEST%\provider-visible\BOOK-EVAL-CORPUS-INPUT-v2.jsonl" exit /b 0
+if not exist "%SOURCE_TEST%\provider-visible\BOOK-EVAL-PROVIDER-ONTOLOGY-v2.json" exit /b 0
+if not exist "%SOURCE_TEST%\runner-private\RUNNER-PRIVATE-EXECUTION-MANIFEST-v2.json" exit /b 0
+set "SOURCE_DIR=%SOURCE_TEST%"
 exit /b 0
 
 :verify_sha
