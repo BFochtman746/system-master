@@ -20,9 +20,16 @@ if errorlevel 1 exit /b 1
 if not exist "%STAGE%" mkdir "%STAGE%"
 if errorlevel 1 exit /b 1
 
+for /f %%S in ('git rev-parse HEAD') do set "ACTUAL_COMMIT=%%S"
+if not defined ACTUAL_COMMIT (
+  set "FAIL_REASON=git_head_unavailable"
+  goto :fail
+)
+
 echo objective=%OBJECTIVE%>"%EVIDENCE_DIR%\preflight-summary.txt"
 echo repository=%GITHUB_REPOSITORY%>>"%EVIDENCE_DIR%\preflight-summary.txt"
-echo commit=%GITHUB_SHA%>>"%EVIDENCE_DIR%\preflight-summary.txt"
+echo commit=%ACTUAL_COMMIT%>>"%EVIDENCE_DIR%\preflight-summary.txt"
+echo trigger_commit=%GITHUB_SHA%>>"%EVIDENCE_DIR%\preflight-summary.txt"
 echo runner_name=%RUNNER_NAME%>>"%EVIDENCE_DIR%\preflight-summary.txt"
 echo runner_os=%RUNNER_OS%>>"%EVIDENCE_DIR%\preflight-summary.txt"
 echo runner_arch=%RUNNER_ARCH%>>"%EVIDENCE_DIR%\preflight-summary.txt"
@@ -204,7 +211,7 @@ if errorlevel 1 (
 for /f %%C in ('find /c /v "" ^< "%LIST_FILE%"') do set "ACTUAL_COUNT=%%C"
 if not "%ACTUAL_COUNT%"=="%EXPECTED_COUNT%" (
   set "FAIL_REASON=%LABEL%_part_count"
-  echo %LABEL%_part_count=%ACTUAL_COUNT%>>"%EVIDENCE_DIR%\preflight-summary.txt"
+  >>"%EVIDENCE_DIR%\preflight-summary.txt" echo %LABEL%_part_count=%ACTUAL_COUNT%
   exit /b 1
 )
 set "B64_FILE=%EVIDENCE_DIR%\%LABEL%.b64"
@@ -225,7 +232,7 @@ if errorlevel 1 (
   set "FAIL_REASON=%LABEL%_hash_mismatch"
   exit /b 1
 )
-echo %LABEL%_part_count=%ACTUAL_COUNT%>>"%EVIDENCE_DIR%\preflight-summary.txt"
+>>"%EVIDENCE_DIR%\preflight-summary.txt" echo %LABEL%_part_count=%ACTUAL_COUNT%
 echo %LABEL%_sha256=%EXPECTED_SHA%>>"%EVIDENCE_DIR%\preflight-summary.txt"
 exit /b 0
 
