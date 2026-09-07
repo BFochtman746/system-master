@@ -5,7 +5,7 @@ on:
     branches:
       - learning/repo-baseline-import-014
     paths:
-      - "learning/import/impl014/chunks/part-013.b64"
+      - "learning/import/impl014-br/READY"
 
 permissions:
   contents: write
@@ -42,16 +42,16 @@ jobs:
           echo runner_os=%RUNNER_OS%>>"%EVIDENCE_DIR%\run-context.txt"
           echo runner_arch=%RUNNER_ARCH%>>"%EVIDENCE_DIR%\run-context.txt"
 
-      - name: Reconstruct verified transport package
+      - name: Reconstruct verified Brotli transport package
         shell: cmd
         run: |
-          node learning\import\impl014\reconstruct_transport.js learning\import\impl014\chunks "%STAGE_DIR%\impl014-governed.tar.gz" 8ea5137d1eec3b03ce23d30a0088e09f22c3b8d6bcc26a50e72c3b9ad5eb357e 13 >"%EVIDENCE_DIR%\transport-reconstruct.json"
+          node learning\import\impl014\reconstruct_transport.js learning\import\impl014-br\chunks "%STAGE_DIR%\impl014-governed.tar.br" 704a60f78935270d3d9a79dda97136d308e9fb4584af5521398778176da75387 15 >"%EVIDENCE_DIR%\transport-reconstruct.json"
           type "%EVIDENCE_DIR%\transport-reconstruct.json"
 
       - name: Extract bounded governed transport
         shell: cmd
         run: |
-          node learning\import\impl014\extract_targz.js "%STAGE_DIR%\impl014-governed.tar.gz" "%STAGE_DIR%\extract" 249 >"%EVIDENCE_DIR%\transport-extract.json"
+          node learning\import\impl014-br\extract_tarbr.js "%STAGE_DIR%\impl014-governed.tar.br" "%STAGE_DIR%\extract" 249 >"%EVIDENCE_DIR%\transport-extract.json"
           type "%EVIDENCE_DIR%\transport-extract.json"
 
       - name: Verify original governed hashes and copy baseline
