@@ -1,0 +1,362 @@
+{
+  "bundle_id": "OPEN-BUNDLE-SQLITE-QUERY-001",
+  "version": "1.0.0",
+  "domain_key": "sqlite-query-fundamentals",
+  "retrieved_date": "2026-09-07",
+  "goal_terms": ["sqlite", "sql", "select", "where", "filter", "order", "sort", "query", "table", "rows"],
+  "required_authority_classes": ["OFFICIAL_SQLITE_DOCUMENTATION"],
+  "concepts": [
+    {"concept_id": "SQL-C-SELECT", "name": "SELECT result columns", "terms": ["select", "query", "columns"], "required": true},
+    {"concept_id": "SQL-C-WHERE", "name": "WHERE row filtering", "terms": ["where", "filter", "rows"], "required": true},
+    {"concept_id": "SQL-C-ORDER", "name": "ORDER BY result ordering", "terms": ["order", "sort", "rows"], "required": true}
+  ],
+  "sources": [
+    {
+      "source_id": "SRC-SQLITE-SELECT",
+      "title": "SQLite SELECT Documentation",
+      "url": "https://www.sqlite.org/lang_select.html",
+      "authority": "OFFICIAL_SQLITE_DOCUMENTATION",
+      "standing": "ADMITTED",
+      "topics": ["sqlite", "select", "where", "filter", "order", "sort", "query", "rows", "columns"]
+    },
+    {
+      "source_id": "SRC-SQLITE-EXPR",
+      "title": "SQLite SQL Language Expressions",
+      "url": "https://www.sqlite.org/lang_expr.html",
+      "authority": "OFFICIAL_SQLITE_DOCUMENTATION",
+      "standing": "ADMITTED",
+      "topics": ["sqlite", "where", "expression", "comparison", "filter", "query"]
+    }
+  ],
+  "claims": [
+    {
+      "claim_id": "CL-SQL-001",
+      "source_id": "SRC-SQLITE-SELECT",
+      "text": "In a simple SQLite SELECT, the result expression list determines which result columns are produced from the input rows.",
+      "kind": "FACT"
+    },
+    {
+      "claim_id": "CL-SQL-002",
+      "source_id": "SRC-SQLITE-SELECT",
+      "text": "When a WHERE clause is present, SQLite evaluates its expression for each input row and filters the input before result rows are produced.",
+      "kind": "FACT"
+    },
+    {
+      "claim_id": "CL-SQL-003",
+      "source_id": "SRC-SQLITE-EXPR",
+      "text": "SQLite comparison expressions can be used inside WHERE conditions to test row values, including equality and ordered comparisons.",
+      "kind": "FACT"
+    },
+    {
+      "claim_id": "CL-SQL-004",
+      "source_id": "SRC-SQLITE-SELECT",
+      "text": "If a SELECT returns multiple rows without ORDER BY, SQLite does not define the order in which those rows are returned.",
+      "kind": "FACT"
+    },
+    {
+      "claim_id": "CL-SQL-005",
+      "source_id": "SRC-SQLITE-SELECT",
+      "text": "An ORDER BY clause determines result-row ordering from its expressions; ASC orders smaller values first and DESC orders larger values first.",
+      "kind": "FACT"
+    },
+    {
+      "claim_id": "CL-SQL-006",
+      "source_id": "SRC-SQLITE-SELECT",
+      "text": "When multiple ORDER BY expressions are present, SQLite sorts by the left-most expression first and uses later expressions to break ties.",
+      "kind": "FACT"
+    }
+  ],
+  "course_blueprint": {
+    "criteria": [
+      {
+        "criterion_id": "C-SQL-SELECT-WHERE",
+        "skill_id": "S-SQL-SELECT-WHERE",
+        "outcome": "Write a SQLite SELECT that returns specified columns and filters rows with a WHERE condition."
+      },
+      {
+        "criterion_id": "C-SQL-ORDER",
+        "skill_id": "S-SQL-ORDER",
+        "outcome": "Add an ORDER BY clause that produces the requested deterministic row order, including tie-breaking when needed."
+      }
+    ],
+    "skills": [
+      {
+        "skill_id": "S-SQL-SELECT-WHERE",
+        "title": "Select columns and filter rows",
+        "criterion_ids": ["C-SQL-SELECT-WHERE"],
+        "hard_prerequisite_skill_ids": []
+      },
+      {
+        "skill_id": "S-SQL-ORDER",
+        "title": "Order filtered query results",
+        "criterion_ids": ["C-SQL-ORDER"],
+        "hard_prerequisite_skill_ids": ["S-SQL-SELECT-WHERE"]
+      }
+    ],
+    "lessons": [
+      {
+        "lesson_id": "L-SQL-SELECT-WHERE",
+        "title": "Choose columns, then filter rows",
+        "skill_id": "S-SQL-SELECT-WHERE",
+        "criterion_ids": ["C-SQL-SELECT-WHERE"],
+        "objective": "Use SELECT for the requested columns and WHERE for row-level conditions.",
+        "explanation_claim_refs": ["CL-SQL-001", "CL-SQL-002", "CL-SQL-003"],
+        "worked_examples": [
+          {
+            "text": "`SELECT title FROM tasks WHERE done = 0` returns the titles of incomplete tasks.",
+            "claim_refs": ["CL-SQL-001", "CL-SQL-002", "CL-SQL-003"],
+            "oracle_spec": {"columns": ["title"], "filter": {"column": "done", "op": "=", "value": 0}}
+          },
+          {
+            "text": "`SELECT title, priority FROM tasks WHERE priority >= 2` returns those two columns only for tasks whose priority is at least 2.",
+            "claim_refs": ["CL-SQL-001", "CL-SQL-002", "CL-SQL-003"],
+            "oracle_spec": {"columns": ["title", "priority"], "filter": {"column": "priority", "op": ">=", "value": 2}}
+          }
+        ],
+        "practice_item_ids": ["P-SQL-WHERE-1", "P-SQL-WHERE-2"]
+      },
+      {
+        "lesson_id": "L-SQL-ORDER",
+        "title": "Make result order explicit",
+        "skill_id": "S-SQL-ORDER",
+        "criterion_ids": ["C-SQL-ORDER"],
+        "objective": "Use ORDER BY with explicit direction and a tie-breaker when the requested output requires deterministic ordering.",
+        "explanation_claim_refs": ["CL-SQL-004", "CL-SQL-005", "CL-SQL-006"],
+        "worked_examples": [
+          {
+            "text": "`SELECT title, priority FROM tasks WHERE done = 0 ORDER BY priority DESC, title ASC` sorts incomplete tasks by highest priority first and alphabetically within a priority tie.",
+            "claim_refs": ["CL-SQL-002", "CL-SQL-005", "CL-SQL-006"],
+            "oracle_spec": {"columns": ["title", "priority"], "filter": {"column": "done", "op": "=", "value": 0}, "order_by": [{"column": "priority", "direction": "DESC"}, {"column": "title", "direction": "ASC"}]}
+          },
+          {
+            "text": "`SELECT owner, title FROM tasks WHERE priority >= 2 ORDER BY owner ASC, title ASC` sorts qualifying tasks by owner and then title.",
+            "claim_refs": ["CL-SQL-002", "CL-SQL-003", "CL-SQL-005", "CL-SQL-006"],
+            "oracle_spec": {"columns": ["owner", "title"], "filter": {"column": "priority", "op": ">=", "value": 2}, "order_by": [{"column": "owner", "direction": "ASC"}, {"column": "title", "direction": "ASC"}]}
+          }
+        ],
+        "practice_item_ids": ["P-SQL-ORDER-1", "P-SQL-ORDER-2"]
+      }
+    ],
+    "items": [
+      {
+        "item_id": "P-SQL-WHERE-1",
+        "family_id": "F-SQL-WHERE-P1",
+        "criterion_id": "C-SQL-SELECT-WHERE",
+        "mode": "PRACTICE",
+        "prompt": "Write a SQLite query returning only title for tasks with done = 0.",
+        "answer": "SELECT title FROM tasks WHERE done = 0",
+        "scoring_type": "SQLITE_QUERY",
+        "claim_refs": ["CL-SQL-001", "CL-SQL-002"],
+        "oracle_spec": {"columns": ["title"], "filter": {"column": "done", "op": "=", "value": 0}}
+      },
+      {
+        "item_id": "P-SQL-WHERE-2",
+        "family_id": "F-SQL-WHERE-P2",
+        "criterion_id": "C-SQL-SELECT-WHERE",
+        "mode": "PRACTICE",
+        "prompt": "Write a SQLite query returning title and owner for tasks where priority >= 2.",
+        "answer": "SELECT title, owner FROM tasks WHERE priority >= 2",
+        "scoring_type": "SQLITE_QUERY",
+        "claim_refs": ["CL-SQL-001", "CL-SQL-002", "CL-SQL-003"],
+        "oracle_spec": {"columns": ["title", "owner"], "filter": {"column": "priority", "op": ">=", "value": 2}}
+      },
+      {
+        "item_id": "M-SQL-WHERE-1",
+        "family_id": "F-SQL-WHERE-M1",
+        "criterion_id": "C-SQL-SELECT-WHERE",
+        "mode": "MASTERY_CHECK",
+        "prompt": "Write a query returning title and priority for tasks owned by Ava.",
+        "answer": "SELECT title, priority FROM tasks WHERE owner = 'Ava'",
+        "scoring_type": "SQLITE_QUERY",
+        "claim_refs": ["CL-SQL-001", "CL-SQL-002", "CL-SQL-003"],
+        "oracle_spec": {"columns": ["title", "priority"], "filter": {"column": "owner", "op": "=", "value": "Ava"}}
+      },
+      {
+        "item_id": "R-SQL-WHERE-1",
+        "family_id": "F-SQL-WHERE-R1",
+        "criterion_id": "C-SQL-SELECT-WHERE",
+        "mode": "RETENTION_CHECK",
+        "prompt": "Write a query returning title and owner for tasks where priority <= 1.",
+        "answer": "SELECT title, owner FROM tasks WHERE priority <= 1",
+        "scoring_type": "SQLITE_QUERY",
+        "claim_refs": ["CL-SQL-001", "CL-SQL-002", "CL-SQL-003"],
+        "oracle_spec": {"columns": ["title", "owner"], "filter": {"column": "priority", "op": "<=", "value": 1}}
+      },
+      {
+        "item_id": "P-SQL-ORDER-1",
+        "family_id": "F-SQL-ORDER-P1",
+        "criterion_id": "C-SQL-ORDER",
+        "mode": "PRACTICE",
+        "prompt": "Return title and priority for incomplete tasks, highest priority first and title ascending for ties.",
+        "answer": "SELECT title, priority FROM tasks WHERE done = 0 ORDER BY priority DESC, title ASC",
+        "scoring_type": "SQLITE_QUERY",
+        "claim_refs": ["CL-SQL-002", "CL-SQL-004", "CL-SQL-005", "CL-SQL-006"],
+        "oracle_spec": {"columns": ["title", "priority"], "filter": {"column": "done", "op": "=", "value": 0}, "order_by": [{"column": "priority", "direction": "DESC"}, {"column": "title", "direction": "ASC"}]}
+      },
+      {
+        "item_id": "P-SQL-ORDER-2",
+        "family_id": "F-SQL-ORDER-P2",
+        "criterion_id": "C-SQL-ORDER",
+        "mode": "PRACTICE",
+        "prompt": "Return owner and title for priority >= 2, ordered by owner then title ascending.",
+        "answer": "SELECT owner, title FROM tasks WHERE priority >= 2 ORDER BY owner ASC, title ASC",
+        "scoring_type": "SQLITE_QUERY",
+        "claim_refs": ["CL-SQL-002", "CL-SQL-003", "CL-SQL-005", "CL-SQL-006"],
+        "oracle_spec": {"columns": ["owner", "title"], "filter": {"column": "priority", "op": ">=", "value": 2}, "order_by": [{"column": "owner", "direction": "ASC"}, {"column": "title", "direction": "ASC"}]}
+      },
+      {
+        "item_id": "M-SQL-ORDER-1",
+        "family_id": "F-SQL-ORDER-M1",
+        "criterion_id": "C-SQL-ORDER",
+        "mode": "MASTERY_CHECK",
+        "prompt": "Return title, owner, and priority for incomplete tasks, ordered priority ascending, then owner ascending, then title ascending.",
+        "answer": "SELECT title, owner, priority FROM tasks WHERE done = 0 ORDER BY priority ASC, owner ASC, title ASC",
+        "scoring_type": "SQLITE_QUERY",
+        "claim_refs": ["CL-SQL-001", "CL-SQL-002", "CL-SQL-005", "CL-SQL-006"],
+        "oracle_spec": {"columns": ["title", "owner", "priority"], "filter": {"column": "done", "op": "=", "value": 0}, "order_by": [{"column": "priority", "direction": "ASC"}, {"column": "owner", "direction": "ASC"}, {"column": "title", "direction": "ASC"}]}
+      },
+      {
+        "item_id": "R-SQL-ORDER-1",
+        "family_id": "F-SQL-ORDER-R1",
+        "criterion_id": "C-SQL-ORDER",
+        "mode": "RETENTION_CHECK",
+        "prompt": "Return title and priority for tasks with priority >= 2, ordered priority descending then title descending.",
+        "answer": "SELECT title, priority FROM tasks WHERE priority >= 2 ORDER BY priority DESC, title DESC",
+        "scoring_type": "SQLITE_QUERY",
+        "claim_refs": ["CL-SQL-002", "CL-SQL-003", "CL-SQL-005", "CL-SQL-006"],
+        "oracle_spec": {"columns": ["title", "priority"], "filter": {"column": "priority", "op": ">=", "value": 2}, "order_by": [{"column": "priority", "direction": "DESC"}, {"column": "title", "direction": "DESC"}]}
+      }
+    ]
+  },
+  "oracle_descriptor": {
+    "type": "SQLITE_SELECT_QUERY",
+    "fixture": {
+      "table": "tasks",
+      "columns": [
+        {"name": "id", "type": "INTEGER"},
+        {"name": "title", "type": "TEXT"},
+        {"name": "owner", "type": "TEXT"},
+        {"name": "priority", "type": "INTEGER"},
+        {"name": "done", "type": "INTEGER"}
+      ],
+      "rows": [
+        {"id": 1, "title": "Plan release", "owner": "Ava", "priority": 3, "done": 0},
+        {"id": 2, "title": "Fix typo", "owner": "Ben", "priority": 1, "done": 1},
+        {"id": 3, "title": "Write tests", "owner": "Ava", "priority": 2, "done": 0},
+        {"id": 4, "title": "Update docs", "owner": "Cara", "priority": 2, "done": 0},
+        {"id": 5, "title": "Archive notes", "owner": "Ben", "priority": 1, "done": 0}
+      ]
+    },
+    "additional_task_oracles": [
+      {"item_id": "MN-SQL-WHERE-2", "oracle_spec": {"columns": ["title", "owner"], "filter": {"column": "owner", "op": "=", "value": "Ben"}}},
+      {"item_id": "MN-SQL-ORDER-2", "oracle_spec": {"columns": ["owner", "title"], "filter": {"column": "done", "op": "=", "value": 0}, "order_by": [{"column": "owner", "direction": "DESC"}, {"column": "title", "direction": "ASC"}]}},
+      {"item_id": "T-SQL-TRANSFER-BACKLOG", "oracle_spec": {"columns": ["owner", "title", "priority"], "filter": {"column": "done", "op": "=", "value": 0}, "order_by": [{"column": "owner", "direction": "ASC"}, {"column": "priority", "direction": "DESC"}, {"column": "title", "direction": "ASC"}]}},
+      {"item_id": "T-SQL-TRANSFER-TRIAGE", "oracle_spec": {"columns": ["title", "owner"], "filter": {"column": "priority", "op": ">=", "value": 2}, "order_by": [{"column": "owner", "direction": "DESC"}, {"column": "title", "direction": "DESC"}]}},
+      {"item_id": "TP-SQL-WHERE-1", "oracle_spec": {"columns": ["title"], "filter": {"column": "done", "op": "=", "value": 0}}},
+      {"item_id": "TP-SQL-WHERE-2", "oracle_spec": {"columns": ["owner"], "filter": {"column": "priority", "op": ">=", "value": 2}}},
+      {"item_id": "TP-SQL-ORDER-1", "oracle_spec": {"columns": ["title", "priority"], "filter": {"column": "done", "op": "=", "value": 0}, "order_by": [{"column": "priority", "direction": "DESC"}, {"column": "title", "direction": "ASC"}]}},
+      {"item_id": "TP-SQL-ORDER-2", "oracle_spec": {"columns": ["owner", "title"], "filter": {"column": "priority", "op": ">=", "value": 2}, "order_by": [{"column": "owner", "direction": "ASC"}, {"column": "title", "direction": "ASC"}]}}
+    ]
+  },
+  "maintenance_tasks": [
+    {
+      "item_id": "MN-SQL-WHERE-2",
+      "family_id": "F-SQL-WHERE-R2",
+      "criterion_id": "C-SQL-SELECT-WHERE",
+      "skill_id": "S-SQL-SELECT-WHERE",
+      "mode": "RETENTION_CHECK",
+      "prompt": "Return title and owner for tasks owned by Ben.",
+      "answer": "SELECT title, owner FROM tasks WHERE owner = 'Ben'",
+      "scoring_type": "SQLITE_QUERY",
+      "claim_refs": ["CL-SQL-001", "CL-SQL-002", "CL-SQL-003"],
+      "fresh_family": true
+    },
+    {
+      "item_id": "MN-SQL-ORDER-2",
+      "family_id": "F-SQL-ORDER-R2",
+      "criterion_id": "C-SQL-ORDER",
+      "skill_id": "S-SQL-ORDER",
+      "mode": "RETENTION_CHECK",
+      "prompt": "Return owner and title for incomplete tasks, ordered owner descending then title ascending.",
+      "answer": "SELECT owner, title FROM tasks WHERE done = 0 ORDER BY owner DESC, title ASC",
+      "scoring_type": "SQLITE_QUERY",
+      "claim_refs": ["CL-SQL-002", "CL-SQL-005", "CL-SQL-006"],
+      "fresh_family": true
+    }
+  ],
+  "transfer_tasks": [
+    {
+      "item_id": "T-SQL-TRANSFER-BACKLOG",
+      "family_id": "F-SQL-TRANSFER-A",
+      "criterion_id": "C-SQL-ORDER",
+      "skill_id": "S-SQL-ORDER",
+      "mode": "TRANSFER_CHECK",
+      "prompt": "For a backlog report, return owner, title, and priority for incomplete tasks, grouped visually by owner via owner ascending, then highest priority first, then title ascending.",
+      "answer": "SELECT owner, title, priority FROM tasks WHERE done = 0 ORDER BY owner ASC, priority DESC, title ASC",
+      "scoring_type": "SQLITE_QUERY",
+      "claim_refs": ["CL-SQL-001", "CL-SQL-002", "CL-SQL-005", "CL-SQL-006"],
+      "novelty": {"surface_context_changed": true, "multi_key_sort": true, "column_order_changed": true, "preserved_construct": "select, filter, and deterministically order rows"}
+    },
+    {
+      "item_id": "T-SQL-TRANSFER-TRIAGE",
+      "family_id": "F-SQL-TRANSFER-B",
+      "criterion_id": "C-SQL-ORDER",
+      "skill_id": "S-SQL-ORDER",
+      "mode": "TRANSFER_CHECK",
+      "prompt": "For a triage view, return title and owner for priority >= 2, ordered owner descending then title descending.",
+      "answer": "SELECT title, owner FROM tasks WHERE priority >= 2 ORDER BY owner DESC, title DESC",
+      "scoring_type": "SQLITE_QUERY",
+      "claim_refs": ["CL-SQL-001", "CL-SQL-002", "CL-SQL-003", "CL-SQL-005", "CL-SQL-006"],
+      "novelty": {"surface_context_changed": true, "direction_changed": true, "numbers_reused_as_data_not_prompt_template": true, "preserved_construct": "select, filter, and deterministically order rows"}
+    }
+  ],
+  "transfer_required_skills": ["S-SQL-ORDER"],
+  "tutor_probes": [
+    {
+      "probe_id": "TP-SQL-WHERE-1",
+      "oracle_item_id": "TP-SQL-WHERE-1",
+      "skill_id": "S-SQL-SELECT-WHERE",
+      "family_id": "TF-SQL-WHERE-A",
+      "prompt": "Write a query returning title for incomplete tasks.",
+      "claim_refs": ["CL-SQL-001", "CL-SQL-002"],
+      "next_probe_id": "TP-SQL-WHERE-2",
+      "error_rules": [{"signature": "WHERE_OMITTED", "must_contain": ["select", "from", "tasks"], "must_not_contain": ["where"]}]
+    },
+    {
+      "probe_id": "TP-SQL-WHERE-2",
+      "oracle_item_id": "TP-SQL-WHERE-2",
+      "skill_id": "S-SQL-SELECT-WHERE",
+      "family_id": "TF-SQL-WHERE-B",
+      "prompt": "Write a query returning owner for tasks with priority >= 2.",
+      "claim_refs": ["CL-SQL-001", "CL-SQL-002", "CL-SQL-003"],
+      "next_probe_id": null,
+      "error_rules": [{"signature": "WHERE_OMITTED", "must_contain": ["select", "from", "tasks"], "must_not_contain": ["where"]}]
+    },
+    {
+      "probe_id": "TP-SQL-ORDER-1",
+      "oracle_item_id": "TP-SQL-ORDER-1",
+      "skill_id": "S-SQL-ORDER",
+      "family_id": "TF-SQL-ORDER-A",
+      "prompt": "Return title and priority for incomplete tasks, highest priority first and title ascending for ties.",
+      "claim_refs": ["CL-SQL-002", "CL-SQL-005", "CL-SQL-006"],
+      "next_probe_id": "TP-SQL-ORDER-2",
+      "error_rules": [{"signature": "ORDER_BY_OMITTED", "must_contain": ["select", "where"], "must_not_contain": ["order by"]}]
+    },
+    {
+      "probe_id": "TP-SQL-ORDER-2",
+      "oracle_item_id": "TP-SQL-ORDER-2",
+      "skill_id": "S-SQL-ORDER",
+      "family_id": "TF-SQL-ORDER-B",
+      "prompt": "Return owner and title for priority >= 2, ordered by owner then title ascending.",
+      "claim_refs": ["CL-SQL-002", "CL-SQL-003", "CL-SQL-005", "CL-SQL-006"],
+      "next_probe_id": null,
+      "error_rules": [{"signature": "ORDER_BY_OMITTED", "must_contain": ["select", "where"], "must_not_contain": ["order by"]}]
+    }
+  ],
+  "tutor_remediation": {
+    "ABSTAINED": {"content": "The query is not producing the requested result, but the cause is not established. Compare the requested columns, row condition, and ordering separately.", "claim_refs": []},
+    "WHERE_OMITTED": {"content": "The result columns and row filter are separate responsibilities: keep SELECT for output columns and add a WHERE condition for which input rows qualify.", "hypothesis_content": "Check whether the query has a WHERE condition that restricts which input rows qualify.", "claim_refs": ["CL-SQL-001", "CL-SQL-002", "CL-SQL-003"]},
+    "ORDER_BY_OMITTED": {"content": "Filtering decides which rows qualify; ORDER BY decides the output order. Add the requested ORDER BY expressions and directions after the filter.", "hypothesis_content": "Check whether the query explicitly states the requested result order with ORDER BY.", "claim_refs": ["CL-SQL-004", "CL-SQL-005", "CL-SQL-006"]},
+    "DEFAULT": {"content": "Separate the task into requested result columns, row eligibility, and result ordering, then inspect the clause responsible for each part.", "claim_refs": ["CL-SQL-001", "CL-SQL-002", "CL-SQL-005"]}
+  }
+}

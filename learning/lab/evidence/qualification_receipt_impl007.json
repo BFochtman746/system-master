@@ -1,0 +1,169 @@
+{
+  "adversarial_campaign": {
+    "cases": [
+      "test_research_port_abstains_on_unsupported_goal",
+      "test_research_capture_digest_tamper_is_rejected",
+      "test_model_prompt_tamper_rejected",
+      "test_model_output_tamper_rejected",
+      "test_generator_self_verification_field_is_rejected",
+      "test_model_wrong_answer_key_is_caught_by_independent_python_oracle",
+      "test_model_wrong_worked_example_is_caught",
+      "test_model_unknown_claim_reference_is_blocked_before_course",
+      "test_model_cannot_self_approve_pedagogical_judgment",
+      "test_python_oracle_rejects_code_execution_escape",
+      "test_python_oracle_rejects_unapproved_attribute_access",
+      "test_assisted_transfer_does_not_become_mastery",
+      "test_tutor_context_does_not_contain_answer_or_oracle_gold",
+      "test_tutor_cannot_help_during_mastery",
+      "test_changed_payload_same_operation_conflicts",
+      "test_research_capture_drift_before_acquisition_fails_closed",
+      "test_model_trace_drift_after_pin_fails_closed",
+      "test_http_replay_detects_changed_bytes",
+      "test_recovery_after_model_generation_needs_no_live_research_or_model_trace",
+      "test_restart_rehydrates_dynamic_domain_from_persisted_generated_dossier",
+      "test_behaviorally_equivalent_mastery_answer_is_accepted"
+    ],
+    "pass": true,
+    "passed": 21,
+    "total": 21
+  },
+  "demo": {
+    "corroborated": "EVIDENCE_SUPPORTED",
+    "course_digest": "c12ad75ca9ba69263528c8bb68a54e78269a4cb7e6f35c44401ae96dae5f7411",
+    "course_id": "COURSE-G-PY",
+    "dict_stage": "RETAINED",
+    "domains_after": [
+      "fractions-unlike-denominators",
+      "git-feature-branch-workflow",
+      "python-comprehensions"
+    ],
+    "domains_before": [
+      "fractions-unlike-denominators",
+      "git-feature-branch-workflow"
+    ],
+    "final_action": "COURSE_COMPLETE",
+    "human_review_dimensions": [
+      "skill_decomposition",
+      "lesson_sequence",
+      "transfer_novelty_strength"
+    ],
+    "hypothesis": "TEACHING_HYPOTHESIS",
+    "list_stage": "MASTERED",
+    "model_id": "GPT-5.6 Sol",
+    "model_output_digest": "f3f3865cf50f8d09cfb1b67507a9132b578f6e5e2707155b5ed912d76559d71a",
+    "model_trace_id": "MODEL-GEN-PY-COMP-20260907-001",
+    "oracle_type": "PYTHON_COMPREHENSION_EXPRESSION",
+    "pass": true,
+    "research_capture_id": "LIVE-RSCH-PY-COMP-20260907-001",
+    "research_evidence_digest": "785d9f533c50611173993e150c9c7920bf0d2303c10b8a9a70b0d4e12b9c0407",
+    "transfer_stage": "MASTERED",
+    "verification_standing": "MECHANICALLY_VERIFIED_HUMAN_REVIEW_REQUIRED"
+  },
+  "deterministic_replay": {
+    "outputs": [
+      {
+        "course_digest": "8346e8dd8fae416f156ab61be38eb6cfcc108617ad304708157d3d9a286a7858",
+        "model_output_digest": "f3f3865cf50f8d09cfb1b67507a9132b578f6e5e2707155b5ed912d76559d71a",
+        "oracle_type": "PYTHON_COMPREHENSION_EXPRESSION",
+        "research_evidence_digest": "785d9f533c50611173993e150c9c7920bf0d2303c10b8a9a70b0d4e12b9c0407"
+      },
+      {
+        "course_digest": "8346e8dd8fae416f156ab61be38eb6cfcc108617ad304708157d3d9a286a7858",
+        "model_output_digest": "f3f3865cf50f8d09cfb1b67507a9132b578f6e5e2707155b5ed912d76559d71a",
+        "oracle_type": "PYTHON_COMPREHENSION_EXPRESSION",
+        "research_evidence_digest": "785d9f533c50611173993e150c9c7920bf0d2303c10b8a9a70b0d4e12b9c0407"
+      },
+      {
+        "course_digest": "8346e8dd8fae416f156ab61be38eb6cfcc108617ad304708157d3d9a286a7858",
+        "model_output_digest": "f3f3865cf50f8d09cfb1b67507a9132b578f6e5e2707155b5ed912d76559d71a",
+        "oracle_type": "PYTHON_COMPREHENSION_EXPRESSION",
+        "research_evidence_digest": "785d9f533c50611173993e150c9c7920bf0d2303c10b8a9a70b0d4e12b9c0407"
+      }
+    ],
+    "pass": true,
+    "runs": 3
+  },
+  "model_generation": {
+    "capture_mode": "CHAT_SESSION_MODEL_GENERATION",
+    "model_id": "GPT-5.6 Sol",
+    "model_role": "CANDIDATE_GENERATOR_ONLY",
+    "output_digest": "f3f3865cf50f8d09cfb1b67507a9132b578f6e5e2707155b5ed912d76559d71a",
+    "prompt_digest": "90cbfd5e88469edeb9dd077abd9697f3718094087ff4eb326ef380fc9abb8073",
+    "trace_digest": "bfd6610c41746864cc380176f85186e84614646792ea3fe5a0916dce486a4010",
+    "trace_id": "MODEL-GEN-PY-COMP-20260907-001"
+  },
+  "objective": "LEARNING-LAB-IMPL-007",
+  "open_goal_recovery_stress": {
+    "pass": true,
+    "passes": 100,
+    "phase_passes": {
+      "GOAL_INTERPRETED": 15,
+      "LIVE_OPEN_GOAL_COURSE_GENERATED": 14,
+      "MODEL_GENERATED": 14,
+      "MODEL_PINNED": 14,
+      "ORACLE_BOUND": 14,
+      "RESEARCH_PLANNED": 15,
+      "SOURCES_ACQUIRED": 14
+    },
+    "runs": 100,
+    "unique_course_digests": 1,
+    "unique_model_output_digests": 1,
+    "unique_research_digests": 1
+  },
+  "predecessor_impl006_regression": {
+    "current_full_suite_contains_prior_regressions": true,
+    "pass": true,
+    "prior_sealed_receipt_status": "PASS_PORTABLE_IMPLEMENTATION",
+    "prior_sealed_tests": 143
+  },
+  "python_compile": {
+    "errors": [],
+    "files": 33
+  },
+  "research_capture": {
+    "capture_id": "LIVE-RSCH-PY-COMP-20260907-001",
+    "capture_mode": "CHATGPT_WEB_LIVE_NORMALIZED",
+    "claim_count": 5,
+    "normalized_evidence_digest": "785d9f533c50611173993e150c9c7920bf0d2303c10b8a9a70b0d4e12b9c0407",
+    "source_count": 2
+  },
+  "status": "PASS_PORTABLE_IMPLEMENTATION",
+  "tests": {
+    "expected": 178,
+    "new_impl007": 35,
+    "passed": 178,
+    "prior_regressions": 143,
+    "returncode": 0
+  },
+  "transport_model_replay": {
+    "model_provider_shape": "CALLABLE_CAPTURE_REPLAY_VERIFIED",
+    "pass": true,
+    "passed": 3,
+    "portable_transport": "LOCAL_HTTP_CAPTURE_REPLAY_VERIFIED",
+    "public_network_inside_container": "UNAVAILABLE_NOT_CLAIMED",
+    "total": 3
+  },
+  "truth_boundary": {
+    "current_external_research": "CHATGPT_WEB_LIVE_CAPTURE_NORMALIZED_AND_PINNED",
+    "generator_self_approval": "PROHIBITED",
+    "http_capture_replay_mechanism": "PORTABLY_VERIFIED_AGAINST_LOCAL_HTTP_SERVER",
+    "model_backed_generation": "CURRENT_CHAT_MODEL_OUTPUT_CAPTURED_AND_REPLAYABLE",
+    "native_iphone": "NOT_RUN",
+    "pedagogical_human_review": "REQUIRED",
+    "production_live_model_provider_gateway": "NOT_YET_QUALIFIED",
+    "production_system_master_integration": "NOT_RUN",
+    "public_http_from_portable_container": "NOT_AVAILABLE_IN_THIS_ENVIRONMENT",
+    "real_learner_effectiveness": "NOT_PROVEN"
+  },
+  "tutor_recovery_stress": {
+    "pass": true,
+    "passes": 100,
+    "phase_passes": {
+      "DIAGNOSED": 33,
+      "MOVE_SELECTED": 33,
+      "OBSERVED": 34
+    },
+    "runs": 100,
+    "unique_result_digests": 1
+  }
+}

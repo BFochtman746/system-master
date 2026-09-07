@@ -1,0 +1,199 @@
+{
+  "after_compile_domain_keys": [
+    "fractions-unlike-denominators",
+    "git-feature-branch-workflow",
+    "sqlite-query-fundamentals"
+  ],
+  "after_runtime_bundle_domain_keys": [
+    "fractions-unlike-denominators",
+    "git-feature-branch-workflow"
+  ],
+  "corroborated_turn": {
+    "context_digest": "e714d6ba7b6bac46a9fd6afec39ec15e1732a2fc40932e27af446157cd24bd97",
+    "diagnosis": {
+      "evidence_refs": [
+        "TF-SQL-WHERE-A",
+        "TF-SQL-WHERE-B"
+      ],
+      "primary_cause": "WHERE_OMITTED",
+      "reason_codes": [
+        "REPEATED_DISTINCT_FAMILY_PATTERN",
+        "CAUSE_EVIDENCE_SUPPORTED"
+      ],
+      "standing": "EVIDENCE_SUPPORTED",
+      "status": "DIAGNOSED"
+    },
+    "domain_key": "sqlite-query-fundamentals",
+    "next_action": {
+      "action_type": "LESSON",
+      "reason_codes": [
+        "CURRICULUM_NEXT"
+      ],
+      "skill_id": "S-SQL-SELECT-WHERE",
+      "target_id": "L-SQL-SELECT-WHERE"
+    },
+    "observation": {
+      "correct": false,
+      "epistemic_standing": "DIRECT_OBSERVATION",
+      "error_signature_observed": "WHERE_OMITTED",
+      "requested_help_level": 3,
+      "response_digest": "87e781a2fd8ed8a2580799b613a3fa2c59b73bdcbe898cc22e743ac41db69300"
+    },
+    "policy_version": "OPEN-GOAL-TUTOR-DIRECTOR-V1",
+    "probe_family_id": "TF-SQL-WHERE-B",
+    "probe_id": "TP-SQL-WHERE-2",
+    "session_id": "DS",
+    "teaching_move": {
+      "claim_refs": [
+        "CL-SQL-001",
+        "CL-SQL-002",
+        "CL-SQL-003"
+      ],
+      "content": "The result columns and row filter are separate responsibilities: keep SELECT for output columns and add a WHERE condition for which input rows qualify.",
+      "move": "TARGETED_REMEDIATION",
+      "next_probe_id": null,
+      "overhelping_prevented": true,
+      "reason_codes": [
+        "EVIDENCE_SUPPORTED_CAUSE",
+        "FRESH_RECHECK_AFTER_SUPPORT"
+      ],
+      "support_level_after": 2,
+      "support_level_before": 1
+    },
+    "turn_id": "DT2"
+  },
+  "course_digest": "2ffce129300ab9727695c2e81dfdc8f41e1aa856909bf2b34309e5536bb3ea60",
+  "created": {
+    "course_build_job_id": "JOB-DEMO-CREATE:COURSE",
+    "course_digest": "2ffce129300ab9727695c2e81dfdc8f41e1aa856909bf2b34309e5536bb3ea60",
+    "course_id": "COURSE-G-SQL-DEMO",
+    "domain_key": "sqlite-query-fundamentals",
+    "generation_adapter": "OPEN-GOAL-COMPILER-V1",
+    "interpreter_version": "OPEN-GOAL-RESEARCH-V1",
+    "job_id": "JOB-DEMO-CREATE",
+    "open_goal": true,
+    "open_goal_compiler_version": "OPEN-GOAL-COMPILER-V1",
+    "research_dossier_digest": "1bd841a709b90b284591326e5e2b288c7efb076a993a51d7a2caa19d2fda7758",
+    "research_dossier_id": "RSCH-OPEN-AE3C672345F8",
+    "research_plan_id": "RPLAN-BDD3965C2E55",
+    "runtime_bundle_id": "OPEN-BUNDLE-SQLITE-QUERY-001",
+    "runtime_bundle_version": "1.0.0",
+    "state": "READY_FOR_REVIEW",
+    "validation_id": "VAL-COURSE-G-SQL-DEMO-V1",
+    "validation_status": "MECHANICALLY_VERIFIED_HUMAN_REVIEW_REQUIRED",
+    "version": 1
+  },
+  "dossier_digest": "1bd841a709b90b284591326e5e2b288c7efb076a993a51d7a2caa19d2fda7758",
+  "final_action": {
+    "action_type": "COURSE_COMPLETE",
+    "reason_codes": [
+      "ALL_SKILLS_MASTERED_CURRENT"
+    ],
+    "skill_id": null,
+    "target_id": null
+  },
+  "hypothesis_turn": {
+    "context_digest": "9c5ed77cb997a01ec2b83bb6df9206b248e4208ba9525a72f50a675a35b1abd2",
+    "diagnosis": {
+      "evidence_refs": [
+        "TF-SQL-WHERE-A"
+      ],
+      "primary_cause": "WHERE_OMITTED",
+      "reason_codes": [
+        "SINGLE_PATTERN",
+        "HYPOTHESIS_NOT_CONFIRMED"
+      ],
+      "standing": "TEACHING_HYPOTHESIS",
+      "status": "DIAGNOSED"
+    },
+    "domain_key": "sqlite-query-fundamentals",
+    "next_action": {
+      "action_type": "LESSON",
+      "reason_codes": [
+        "CURRICULUM_NEXT"
+      ],
+      "skill_id": "S-SQL-SELECT-WHERE",
+      "target_id": "L-SQL-SELECT-WHERE"
+    },
+    "observation": {
+      "correct": false,
+      "epistemic_standing": "DIRECT_OBSERVATION",
+      "error_signature_observed": "WHERE_OMITTED",
+      "requested_help_level": 3,
+      "response_digest": "9d11ffecd50be57d34c0e806fffc0553c8370da596e05d39bf598b22415a56bd"
+    },
+    "policy_version": "OPEN-GOAL-TUTOR-DIRECTOR-V1",
+    "probe_family_id": "TF-SQL-WHERE-A",
+    "probe_id": "TP-SQL-WHERE-1",
+    "session_id": "DS",
+    "teaching_move": {
+      "claim_refs": [
+        "CL-SQL-001",
+        "CL-SQL-002",
+        "CL-SQL-003"
+      ],
+      "content": "Check whether the query has a WHERE condition that restricts which input rows qualify.",
+      "move": "TARGETED_HINT",
+      "next_probe_id": "TP-SQL-WHERE-2",
+      "overhelping_prevented": true,
+      "reason_codes": [
+        "TEACHING_HYPOTHESIS_ONLY"
+      ],
+      "support_level_after": 1,
+      "support_level_before": 0
+    },
+    "turn_id": "DT1"
+  },
+  "initial_domain_keys": [
+    "fractions-unlike-denominators",
+    "git-feature-branch-workflow"
+  ],
+  "objective": "LEARNING-LAB-IMPL-006",
+  "plan_digest": "63911611d19a14d8b5bfab6e16497455d90acd12103a322b61d985be35766fd1",
+  "retained_projection": {
+    "counted_attempt_ids": [
+      "A-DOM",
+      "A-DOR"
+    ],
+    "course_id": "COURSE-G-SQL-DEMO",
+    "evidence_coverage_percent": 67,
+    "excluded_attempts": {},
+    "gate_states": {
+      "CRITERION_PERFORMANCE": "SATISFIED",
+      "INDEPENDENCE": "SATISFIED",
+      "RETENTION": "SATISFIED",
+      "TRANSFER": "IN_PROGRESS"
+    },
+    "learner_id": "L",
+    "mastery_progress_percent": 75,
+    "reason_codes": [
+      "TRANSFER_EVIDENCE_REQUIRED"
+    ],
+    "skill_id": "S-SQL-ORDER",
+    "stage": "RETAINED"
+  },
+  "transfer_projection": {
+    "counted_attempt_ids": [
+      "A-DOM",
+      "A-DOR",
+      "A-DTR"
+    ],
+    "course_id": "COURSE-G-SQL-DEMO",
+    "evidence_coverage_percent": 100,
+    "excluded_attempts": {},
+    "gate_states": {
+      "CRITERION_PERFORMANCE": "SATISFIED",
+      "INDEPENDENCE": "SATISFIED",
+      "RETENTION": "SATISFIED",
+      "TRANSFER": "SATISFIED"
+    },
+    "learner_id": "L",
+    "mastery_progress_percent": 100,
+    "reason_codes": [
+      "ALL_REQUIRED_GATES_SATISFIED",
+      "TRANSFER_DEMONSTRATED"
+    ],
+    "skill_id": "S-SQL-ORDER",
+    "stage": "MASTERED"
+  }
+}

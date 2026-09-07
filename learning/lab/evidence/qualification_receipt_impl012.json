@@ -1,0 +1,367 @@
+{
+  "adversarial": {
+    "cases": [
+      "test_one_scenario_is_not_enough_for_diversity",
+      "test_duplicate_same_family_does_not_create_diversity",
+      "test_distinct_family_but_same_independence_group_does_not_count_as_independent",
+      "test_stale_evidence_is_not_current_support",
+      "test_wrong_learner_has_no_support",
+      "test_unverified_mapping_cannot_be_used_consequentially",
+      "test_corrupt_dossier_is_inadmissible_if_only_evidence",
+      "test_failed_workplace_dossier_does_not_support_requirement",
+      "test_assisted_workplace_dossier_does_not_support_requirement",
+      "test_human_judgment_requirement_remains_partial_with_synthetic_reviews",
+      "test_portfolio_cannot_change_coverage_standing",
+      "test_portfolio_cannot_make_external_eligibility_decision",
+      "test_coverage_tampering_is_detected",
+      "test_gap_plan_tampering_is_detected",
+      "test_same_operation_changed_evidence_conflicts",
+      "test_requirement_set_identity_collision_fails_closed",
+      "test_scenario_catalog_drift_after_crash_fails_closed",
+      "test_evidence_set_drift_after_crash_fails_closed",
+      "test_as_of_drift_after_crash_fails_closed",
+      "test_coverage_does_not_mutate_learning_attempts_or_projections",
+      "test_scenario_digest_mismatch_makes_evidence_inadmissible",
+      "test_unbound_scenario_cannot_count_for_requirement",
+      "test_requirement_set_duplicate_ids_fail_closed",
+      "test_requirement_set_owner_and_version_are_required",
+      "test_requirement_set_does_not_contain_learner_identity",
+      "test_dossier_order_is_semantically_canonicalized_across_recovery"
+    ],
+    "pass": true,
+    "passed": 26,
+    "total": 26
+  },
+  "compile": {
+    "errors": [],
+    "files": 55,
+    "pass": true
+  },
+  "demo": {
+    "coverage": {
+      "as_of": 1200,
+      "coverage_counts": {
+        "AUTHORIZATION_BLOCKED": 0,
+        "INADMISSIBLE_FOR_USE": 0,
+        "MAPPING_UNVERIFIED": 0,
+        "NOT_SUPPORTED": 0,
+        "PARTIALLY_SUPPORTED": 1,
+        "STALE": 0,
+        "SUPPORTED": 3,
+        "UNKNOWN": 0
+      },
+      "coverage_digest": "00e773652b17654e9ac9f0f4a6c3679c91c1f9a161005b81adddec79f745ce80",
+      "coverage_standing": "DECLARED_REQUIREMENT_SET_PARTIALLY_SUPPORTED",
+      "external_eligibility_decision": "NOT_MADE",
+      "forbidden_claims_without_external_authority": [
+        "ACCREDITED",
+        "CERTIFIED",
+        "COLLEGE_CREDIT_AWARDED",
+        "HIRED",
+        "JOB_READY",
+        "LICENSED",
+        "QUALIFIED_FOR_ROLE",
+        "SUBJECT_MATTER_EXPERT"
+      ],
+      "gaps": [
+        {
+          "gap_code": "HUMAN_DEFENSE_REVIEW_REQUIRED",
+          "recommended_action": "OBTAIN_INDEPENDENT_HUMAN_DEFENSE_REVIEW",
+          "requirement_id": "REQ-PY-OPS-04"
+        }
+      ],
+      "intended_use": "EMPLOYER_CAPABILITY_PRESENTATION",
+      "learner_id": "L",
+      "limitations": [
+        "REQUIREMENT_COVERAGE_IS_NOT_JOB_QUALIFICATION",
+        "EMPLOYER_OR_EXTERNAL_OWNER_DECIDES_ROLE_RELEVANCE_AND_THRESHOLD",
+        "AI_INFERRED_MAPPING_NOT_ADMISSIBLE_FOR_CONSEQUENTIAL_COVERAGE"
+      ],
+      "policy_version": "ROLE-REQUIREMENT-EVIDENCE-POLICY-V1",
+      "requirement_coverage": [
+        {
+          "distinct_independence_groups": [
+            "OPS_STRUCTURED_RECORD_FILTER_MAP_A",
+            "OPS_STRUCTURED_RECORD_FILTER_MAP_B"
+          ],
+          "distinct_scenario_families": [
+            "FULFILLMENT_ORDER_TRIAGE",
+            "SERVICE_TICKET_ESCALATION"
+          ],
+          "evidence_profile": {
+            "max_evidence_age_seconds": 86400,
+            "min_distinct_independence_groups": 2,
+            "min_distinct_scenario_families": 2,
+            "require_independent_human_defense": false,
+            "required_skill_refs": [
+              "S-PY-LISTCOMP"
+            ],
+            "required_workplace_criterion_refs": [
+              "WP-PY-01",
+              "WP-PY-03"
+            ]
+          },
+          "inadmissible_evidence_refs": [],
+          "mapping_standing": "EXACT_SHARED_REF",
+          "qualifying_evidence_refs": [
+            "capability_dossier:a3b31864695bc0759ea27b6f4cebf851bbf4a1cbdbea9ff0b915d99119959da3",
+            "capability_dossier:c8bc7beb39a68e4b551bf4daf9d71dcc8b0077157bf29258112e597acce9c8b2"
+          ],
+          "reason_codes": [
+            "DECLARED_EVIDENCE_PROFILE_SATISFIED"
+          ],
+          "requirement_id": "REQ-PY-OPS-01",
+          "stale_evidence_refs": [],
+          "status": "SUPPORTED",
+          "title": "Filter and transform structured operational records with list comprehensions"
+        },
+        {
+          "distinct_independence_groups": [
+            "OPS_STRUCTURED_RECORD_FILTER_MAP_A",
+            "OPS_STRUCTURED_RECORD_FILTER_MAP_B"
+          ],
+          "distinct_scenario_families": [
+            "FULFILLMENT_ORDER_TRIAGE",
+            "SERVICE_TICKET_ESCALATION"
+          ],
+          "evidence_profile": {
+            "max_evidence_age_seconds": 86400,
+            "min_distinct_independence_groups": 2,
+            "min_distinct_scenario_families": 2,
+            "require_independent_human_defense": false,
+            "required_skill_refs": [
+              "S-PY-DICTCOMP"
+            ],
+            "required_workplace_criterion_refs": [
+              "WP-PY-02",
+              "WP-PY-03"
+            ]
+          },
+          "inadmissible_evidence_refs": [],
+          "mapping_standing": "EXACT_SHARED_REF",
+          "qualifying_evidence_refs": [
+            "capability_dossier:a3b31864695bc0759ea27b6f4cebf851bbf4a1cbdbea9ff0b915d99119959da3",
+            "capability_dossier:c8bc7beb39a68e4b551bf4daf9d71dcc8b0077157bf29258112e597acce9c8b2"
+          ],
+          "reason_codes": [
+            "DECLARED_EVIDENCE_PROFILE_SATISFIED"
+          ],
+          "requirement_id": "REQ-PY-OPS-02",
+          "stale_evidence_refs": [],
+          "status": "SUPPORTED",
+          "title": "Build keyed operational mappings with dictionary comprehensions"
+        },
+        {
+          "distinct_independence_groups": [
+            "OPS_STRUCTURED_RECORD_FILTER_MAP_A",
+            "OPS_STRUCTURED_RECORD_FILTER_MAP_B"
+          ],
+          "distinct_scenario_families": [
+            "FULFILLMENT_ORDER_TRIAGE",
+            "SERVICE_TICKET_ESCALATION"
+          ],
+          "evidence_profile": {
+            "max_evidence_age_seconds": 86400,
+            "min_distinct_independence_groups": 2,
+            "min_distinct_scenario_families": 2,
+            "require_independent_human_defense": false,
+            "required_skill_refs": [
+              "S-PY-LISTCOMP",
+              "S-PY-DICTCOMP"
+            ],
+            "required_workplace_criterion_refs": [
+              "WP-PY-01",
+              "WP-PY-02",
+              "WP-PY-03"
+            ]
+          },
+          "inadmissible_evidence_refs": [],
+          "mapping_standing": "OWNER_APPROVED_MAPPING_REF",
+          "qualifying_evidence_refs": [
+            "capability_dossier:a3b31864695bc0759ea27b6f4cebf851bbf4a1cbdbea9ff0b915d99119959da3",
+            "capability_dossier:c8bc7beb39a68e4b551bf4daf9d71dcc8b0077157bf29258112e597acce9c8b2"
+          ],
+          "reason_codes": [
+            "DECLARED_EVIDENCE_PROFILE_SATISFIED"
+          ],
+          "requirement_id": "REQ-PY-OPS-03",
+          "stale_evidence_refs": [],
+          "status": "SUPPORTED",
+          "title": "Apply both comprehension forms across distinct operational contexts"
+        },
+        {
+          "distinct_independence_groups": [],
+          "distinct_scenario_families": [],
+          "evidence_profile": {
+            "max_evidence_age_seconds": 86400,
+            "min_distinct_independence_groups": 2,
+            "min_distinct_scenario_families": 2,
+            "require_independent_human_defense": true,
+            "required_skill_refs": [
+              "S-PY-LISTCOMP",
+              "S-PY-DICTCOMP"
+            ],
+            "required_workplace_criterion_refs": []
+          },
+          "inadmissible_evidence_refs": [],
+          "mapping_standing": "EXACT_SHARED_REF",
+          "qualifying_evidence_refs": [],
+          "reason_codes": [
+            "HUMAN_DEFENSE_REVIEW_REQUIRED"
+          ],
+          "requirement_id": "REQ-PY-OPS-04",
+          "stale_evidence_refs": [],
+          "status": "PARTIALLY_SUPPORTED",
+          "title": "Explain implementation choices and operational data-quality risks"
+        }
+      ],
+      "requirement_set_digest": "c9072b80aa813474a172ee7c89caf499b4428bdd7b2cf37e9787852237e8abff",
+      "requirement_set_id": "ROLE-PY-OPS-CAPABILITY-V1",
+      "requirement_set_version": 1,
+      "version": "ROLE-COMPETENCY-COVERAGE-V1"
+    },
+    "gap_plan": {
+      "actions": [
+        {
+          "gap_code": "HUMAN_DEFENSE_REVIEW_REQUIRED",
+          "recommended_action": "OBTAIN_INDEPENDENT_HUMAN_DEFENSE_REVIEW",
+          "requirement_id": "REQ-PY-OPS-04"
+        }
+      ],
+      "complete": false,
+      "coverage_digest": "00e773652b17654e9ac9f0f4a6c3679c91c1f9a161005b81adddec79f745ce80",
+      "does_not_create_competence": true,
+      "gap_plan_digest": "7f4fc126bf66b9ec1fc3d146a0516cb8c6ff867f3f70539170ca1050817f067e",
+      "learner_id": "L",
+      "planning_only": true,
+      "requirement_set_id": "ROLE-PY-OPS-CAPABILITY-V1",
+      "version": "ROLE-COMPETENCY-GAP-PLAN-V1"
+    },
+    "handoff_verification": {
+      "failures": [],
+      "status": "PASS"
+    },
+    "pass": true,
+    "portfolio_handoff": {
+      "allowed_presentation": [
+        "DISPLAY_REQUIREMENT_COVERAGE_WITH_EXACT_STATUS",
+        "DISPLAY_GAPS_AND_LIMITATIONS",
+        "LINK_TO_LEARNING_OWNED_CAPABILITY_EVIDENCE"
+      ],
+      "canonical_capability_evidence_refs": [
+        "capability_dossier:a3b31864695bc0759ea27b6f4cebf851bbf4a1cbdbea9ff0b915d99119959da3",
+        "capability_dossier:c8bc7beb39a68e4b551bf4daf9d71dcc8b0077157bf29258112e597acce9c8b2"
+      ],
+      "coverage_digest": "00e773652b17654e9ac9f0f4a6c3679c91c1f9a161005b81adddec79f745ce80",
+      "coverage_standing": "DECLARED_REQUIREMENT_SET_PARTIALLY_SUPPORTED",
+      "external_eligibility_decision": "NOT_MADE",
+      "forbidden_without_external_authority": [
+        "ACCREDITED",
+        "CERTIFIED",
+        "COLLEGE_CREDIT_AWARDED",
+        "HIRED",
+        "JOB_READY",
+        "LICENSED",
+        "QUALIFIED_FOR_ROLE",
+        "SUBJECT_MATTER_EXPERT"
+      ],
+      "gap_plan_digest": "7f4fc126bf66b9ec1fc3d146a0516cb8c6ff867f3f70539170ca1050817f067e",
+      "handoff_digest": "1a95ad787dee0d0318b97ea333ebf7205ef647703eb2c2cba9872e72985436d3",
+      "learner_id": "L",
+      "portfolio_may_rewrite_competence_truth": false,
+      "portfolio_owner": "MOD-PORTFOLIO-001",
+      "read_only": true,
+      "requirement_coverage": [
+        {
+          "qualifying_evidence_refs": [
+            "capability_dossier:a3b31864695bc0759ea27b6f4cebf851bbf4a1cbdbea9ff0b915d99119959da3",
+            "capability_dossier:c8bc7beb39a68e4b551bf4daf9d71dcc8b0077157bf29258112e597acce9c8b2"
+          ],
+          "requirement_id": "REQ-PY-OPS-01",
+          "status": "SUPPORTED"
+        },
+        {
+          "qualifying_evidence_refs": [
+            "capability_dossier:a3b31864695bc0759ea27b6f4cebf851bbf4a1cbdbea9ff0b915d99119959da3",
+            "capability_dossier:c8bc7beb39a68e4b551bf4daf9d71dcc8b0077157bf29258112e597acce9c8b2"
+          ],
+          "requirement_id": "REQ-PY-OPS-02",
+          "status": "SUPPORTED"
+        },
+        {
+          "qualifying_evidence_refs": [
+            "capability_dossier:a3b31864695bc0759ea27b6f4cebf851bbf4a1cbdbea9ff0b915d99119959da3",
+            "capability_dossier:c8bc7beb39a68e4b551bf4daf9d71dcc8b0077157bf29258112e597acce9c8b2"
+          ],
+          "requirement_id": "REQ-PY-OPS-03",
+          "status": "SUPPORTED"
+        },
+        {
+          "qualifying_evidence_refs": [],
+          "requirement_id": "REQ-PY-OPS-04",
+          "status": "PARTIALLY_SUPPORTED"
+        }
+      ],
+      "requirement_set_id": "ROLE-PY-OPS-CAPABILITY-V1",
+      "requirement_set_version": 1,
+      "source_owner": "LEARNING_COMPETENCE_EVIDENCE_SEMANTICS",
+      "version": "LEARNING-TO-PORTFOLIO-ROLE-EVIDENCE-HANDOFF-V1"
+    },
+    "requirement_states": {
+      "REQ-PY-OPS-01": "SUPPORTED",
+      "REQ-PY-OPS-02": "SUPPORTED",
+      "REQ-PY-OPS-03": "SUPPORTED",
+      "REQ-PY-OPS-04": "PARTIALLY_SUPPORTED"
+    },
+    "truth_boundary": "SYNTHETIC LEARNER/REVIEW FIXTURE; BOUNDED SUPPLIED REQUIREMENT SET; REQUIREMENT COVERAGE IS NOT JOB READY OR ROLE QUALIFICATION"
+  },
+  "determinism": {
+    "pass": true,
+    "runs": 100,
+    "unique_coverage_digests": 1,
+    "unique_gap_plan_digests": 1,
+    "unique_handoff_digests": 1
+  },
+  "full": {
+    "expected": 363,
+    "pass": true,
+    "passed": 363,
+    "returncode": 0
+  },
+  "new_slice": {
+    "derivation": "PARSED_FROM_FULL_SUITE",
+    "expected": 40,
+    "pass": true,
+    "passed": 40
+  },
+  "predecessor": {
+    "derivation": "FULL_SUITE_MINUS_IMPL012_SLICE",
+    "expected": 323,
+    "pass": true,
+    "passed": 323
+  },
+  "recovery": {
+    "crash_seeds": {
+      "COVERAGE_COMPUTED": true,
+      "EVIDENCE_BOUND": true,
+      "GAP_PLAN_BUILT": true,
+      "HANDOFF_BUILT": true,
+      "REQUIREMENT_SET_BOUND": true
+    },
+    "pass": true,
+    "passes": 100,
+    "phase_passes": {
+      "COVERAGE_COMPUTED": 20,
+      "EVIDENCE_BOUND": 20,
+      "GAP_PLAN_BUILT": 20,
+      "HANDOFF_BUILT": 20,
+      "REQUIREMENT_SET_BOUND": 20
+    },
+    "runs": 100,
+    "unique_coverage_digests": 1,
+    "unique_coverage_standings": 1,
+    "unique_gap_plan_digests": 1,
+    "unique_handoff_digests": 1
+  },
+  "status": "PASS_PORTABLE_IMPLEMENTATION"
+}

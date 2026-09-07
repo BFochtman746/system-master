@@ -1,0 +1,347 @@
+{
+  "course_id": "COURSE-G-FRACTION-EVID",
+  "criteria": [
+    {
+      "criterion_id": "C-FRAC-EQUIV-LCD",
+      "outcome": "Find a least common denominator and rewrite unlike-denominator fractions as equivalent fractions using it.",
+      "skill_id": "S-FRAC-EQUIV-LCD"
+    },
+    {
+      "criterion_id": "C-FRAC-ADD-SUB",
+      "outcome": "Add or subtract fractions with unlike denominators and simplify the result.",
+      "skill_id": "S-FRAC-ADD-SUB"
+    }
+  ],
+  "desired_outcome": "Add and subtract fractions with unlike denominators, simplify results, and solve a simple quantity-change word problem.",
+  "domain_key": "fractions-unlike-denominators",
+  "generation_adapter": "MODEL-STUB-FRACTIONS-V1",
+  "goal_id": "G-FRACTION-EVID",
+  "items": [
+    {
+      "answer": "12",
+      "claim_refs": [
+        "CL-FRAC-001"
+      ],
+      "criterion_id": "C-FRAC-EQUIV-LCD",
+      "family_id": "F-FRAC-LCD-P1",
+      "grounding_spans": [
+        {
+          "claim_refs": [
+            "CL-FRAC-001"
+          ],
+          "role": "RATIONALE",
+          "text": "The LCD is the least common multiple of the denominators."
+        }
+      ],
+      "item_id": "P-FRAC-LCD-1",
+      "mode": "PRACTICE",
+      "prompt": "What is the LCD of 4 and 6?",
+      "rationale": "The LCD is the least common multiple of the denominators.",
+      "scoring_type": "INTEGER"
+    },
+    {
+      "answer": "8/12",
+      "claim_refs": [
+        "CL-FRAC-002"
+      ],
+      "criterion_id": "C-FRAC-EQUIV-LCD",
+      "family_id": "F-FRAC-LCD-P2",
+      "grounding_spans": [
+        {
+          "claim_refs": [
+            "CL-FRAC-002"
+          ],
+          "role": "RATIONALE",
+          "text": "Multiplying numerator and denominator by four preserves the fraction's value."
+        }
+      ],
+      "item_id": "P-FRAC-LCD-2",
+      "mode": "PRACTICE",
+      "prompt": "Rewrite 2/3 with denominator 12.",
+      "rationale": "Multiplying numerator and denominator by four preserves the fraction's value.",
+      "scoring_type": "EQUIVALENT_WITH_DENOMINATOR"
+    },
+    {
+      "answer": "LCD=24; 5/8=15/24; 7/12=14/24",
+      "claim_refs": [
+        "CL-FRAC-001",
+        "CL-FRAC-002"
+      ],
+      "criterion_id": "C-FRAC-EQUIV-LCD",
+      "family_id": "F-FRAC-LCD-M1",
+      "grounding_spans": [
+        {
+          "claim_refs": [
+            "CL-FRAC-001",
+            "CL-FRAC-002"
+          ],
+          "role": "RATIONALE",
+          "text": "Use the least common multiple 24 and equivalent-fraction multipliers three and two."
+        }
+      ],
+      "item_id": "M-FRAC-LCD-1",
+      "mode": "MASTERY_CHECK",
+      "prompt": "For 5/8 and 7/12, give the LCD and rewrite both fractions using it. Format: LCD=...; 5/8=...; 7/12=...",
+      "rationale": "Use the least common multiple 24 and equivalent-fraction multipliers three and two.",
+      "scoring_type": "LCD_EQUIV"
+    },
+    {
+      "answer": "LCD=60; 3/10=18/60; 5/12=25/60",
+      "claim_refs": [
+        "CL-FRAC-001",
+        "CL-FRAC-002"
+      ],
+      "criterion_id": "C-FRAC-EQUIV-LCD",
+      "family_id": "F-FRAC-LCD-R1",
+      "grounding_spans": [
+        {
+          "claim_refs": [
+            "CL-FRAC-001",
+            "CL-FRAC-002"
+          ],
+          "role": "RATIONALE",
+          "text": "A delayed parallel problem checks the same LCD/equivalence skill with new denominators."
+        }
+      ],
+      "item_id": "R-FRAC-LCD-1",
+      "mode": "RETENTION_CHECK",
+      "prompt": "For 3/10 and 5/12, give the LCD and rewrite both fractions using it. Format: LCD=...; 3/10=...; 5/12=...",
+      "rationale": "A delayed parallel problem checks the same LCD/equivalence skill with new denominators.",
+      "scoring_type": "LCD_EQUIV"
+    },
+    {
+      "answer": "5/6",
+      "claim_refs": [
+        "CL-FRAC-003",
+        "CL-FRAC-004",
+        "CL-FRAC-005"
+      ],
+      "criterion_id": "C-FRAC-ADD-SUB",
+      "family_id": "F-FRAC-ADD-P1",
+      "grounding_spans": [
+        {
+          "claim_refs": [
+            "CL-FRAC-003",
+            "CL-FRAC-004",
+            "CL-FRAC-005"
+          ],
+          "role": "RATIONALE",
+          "text": "Convert to sixths, add numerators, and simplify if needed."
+        }
+      ],
+      "item_id": "P-FRAC-ADD-1",
+      "mode": "PRACTICE",
+      "prompt": "Compute 1/2 + 1/3 and simplify.",
+      "rationale": "Convert to sixths, add numerators, and simplify if needed.",
+      "scoring_type": "FRACTION"
+    },
+    {
+      "answer": "7/12",
+      "claim_refs": [
+        "CL-FRAC-003",
+        "CL-FRAC-004",
+        "CL-FRAC-005"
+      ],
+      "criterion_id": "C-FRAC-ADD-SUB",
+      "family_id": "F-FRAC-SUB-P1",
+      "grounding_spans": [
+        {
+          "claim_refs": [
+            "CL-FRAC-003",
+            "CL-FRAC-004",
+            "CL-FRAC-005"
+          ],
+          "role": "RATIONALE",
+          "text": "Convert to twelfths before subtracting numerators."
+        }
+      ],
+      "item_id": "P-FRAC-SUB-1",
+      "mode": "PRACTICE",
+      "prompt": "Compute 3/4 - 1/6 and simplify.",
+      "rationale": "Convert to twelfths before subtracting numerators.",
+      "scoring_type": "FRACTION"
+    },
+    {
+      "answer": "19/12",
+      "claim_refs": [
+        "CL-FRAC-003",
+        "CL-FRAC-004",
+        "CL-FRAC-005"
+      ],
+      "criterion_id": "C-FRAC-ADD-SUB",
+      "family_id": "F-FRAC-ADD-M1",
+      "grounding_spans": [
+        {
+          "claim_refs": [
+            "CL-FRAC-003",
+            "CL-FRAC-004",
+            "CL-FRAC-005"
+          ],
+          "role": "RATIONALE",
+          "text": "Use a common denominator of 12, combine numerators, then simplify."
+        }
+      ],
+      "item_id": "M-FRAC-ADD-1",
+      "mode": "MASTERY_CHECK",
+      "prompt": "Compute 3/4 + 5/6 and give the simplified result.",
+      "rationale": "Use a common denominator of 12, combine numerators, then simplify.",
+      "scoring_type": "FRACTION"
+    },
+    {
+      "answer": "9/20",
+      "claim_refs": [
+        "CL-FRAC-003",
+        "CL-FRAC-004",
+        "CL-FRAC-005"
+      ],
+      "criterion_id": "C-FRAC-ADD-SUB",
+      "family_id": "F-FRAC-SUB-R1",
+      "grounding_spans": [
+        {
+          "claim_refs": [
+            "CL-FRAC-003",
+            "CL-FRAC-004",
+            "CL-FRAC-005"
+          ],
+          "role": "RATIONALE",
+          "text": "A delayed parallel subtraction problem requires a fresh common denominator and simplification."
+        }
+      ],
+      "item_id": "R-FRAC-SUB-1",
+      "mode": "RETENTION_CHECK",
+      "prompt": "Compute 7/10 - 1/4 and give the simplified result.",
+      "rationale": "A delayed parallel subtraction problem requires a fresh common denominator and simplification.",
+      "scoring_type": "FRACTION"
+    }
+  ],
+  "lessons": [
+    {
+      "claim_refs": [
+        "CL-FRAC-001",
+        "CL-FRAC-002"
+      ],
+      "criterion_ids": [
+        "C-FRAC-EQUIV-LCD"
+      ],
+      "explanation": "For unlike denominators, first find the least common multiple of the denominators; that value is the LCD. Then multiply each numerator and denominator by the same factor needed to reach the LCD. This changes the form of each fraction, not its value.",
+      "grounding_spans": [
+        {
+          "claim_refs": [
+            "CL-FRAC-001",
+            "CL-FRAC-002"
+          ],
+          "role": "EXPLANATION",
+          "text": "For unlike denominators, first find the least common multiple of the denominators; that value is the LCD. Then multiply each numerator and denominator by the same factor needed to reach the LCD. This changes the form of each fraction, not its value."
+        },
+        {
+          "claim_refs": [
+            "CL-FRAC-001",
+            "CL-FRAC-002"
+          ],
+          "role": "WORKED_EXAMPLE",
+          "text": "For 1/2 and 1/3, LCD = 6, so `1/2 = 3/6` and `1/3 = 2/6`."
+        },
+        {
+          "claim_refs": [
+            "CL-FRAC-001",
+            "CL-FRAC-002"
+          ],
+          "role": "WORKED_EXAMPLE",
+          "text": "For 3/4 and 1/6, LCD = 12, so `3/4 = 9/12` and `1/6 = 2/12`."
+        }
+      ],
+      "lesson_id": "L-FRAC-EQUIV-LCD",
+      "objective": "Find the LCD and rewrite each fraction without changing its value.",
+      "practice_item_ids": [
+        "P-FRAC-LCD-1",
+        "P-FRAC-LCD-2"
+      ],
+      "skill_id": "S-FRAC-EQUIV-LCD",
+      "title": "Make the pieces comparable",
+      "worked_examples": [
+        "For 1/2 and 1/3, LCD = 6, so `1/2 = 3/6` and `1/3 = 2/6`.",
+        "For 3/4 and 1/6, LCD = 12, so `3/4 = 9/12` and `1/6 = 2/12`."
+      ]
+    },
+    {
+      "claim_refs": [
+        "CL-FRAC-003",
+        "CL-FRAC-004",
+        "CL-FRAC-005"
+      ],
+      "criterion_ids": [
+        "C-FRAC-ADD-SUB"
+      ],
+      "explanation": "After equivalent fractions have a common denominator, add or subtract their numerators while keeping that denominator. Then simplify the resulting fraction by removing common factors from numerator and denominator when possible.",
+      "grounding_spans": [
+        {
+          "claim_refs": [
+            "CL-FRAC-003",
+            "CL-FRAC-004",
+            "CL-FRAC-005"
+          ],
+          "role": "EXPLANATION",
+          "text": "After equivalent fractions have a common denominator, add or subtract their numerators while keeping that denominator. Then simplify the resulting fraction by removing common factors from numerator and denominator when possible."
+        },
+        {
+          "claim_refs": [
+            "CL-FRAC-003",
+            "CL-FRAC-004"
+          ],
+          "role": "WORKED_EXAMPLE",
+          "text": "`1/2 + 1/3 = 3/6 + 2/6 = 5/6`."
+        },
+        {
+          "claim_refs": [
+            "CL-FRAC-003",
+            "CL-FRAC-004",
+            "CL-FRAC-005"
+          ],
+          "role": "WORKED_EXAMPLE",
+          "text": "`3/4 - 1/6 = 9/12 - 2/12 = 7/12`."
+        }
+      ],
+      "lesson_id": "L-FRAC-ADD-SUB",
+      "objective": "Convert to a common denominator, combine numerators, and simplify the result.",
+      "practice_item_ids": [
+        "P-FRAC-ADD-1",
+        "P-FRAC-SUB-1"
+      ],
+      "skill_id": "S-FRAC-ADD-SUB",
+      "title": "Add and subtract after conversion",
+      "worked_examples": [
+        "`1/2 + 1/3 = 3/6 + 2/6 = 5/6`.",
+        "`3/4 - 1/6 = 9/12 - 2/12 = 7/12`."
+      ]
+    }
+  ],
+  "research_dossier_id": "RSCH-FRACTIONS-UNLIKE-DENOMINATORS-001",
+  "skills": [
+    {
+      "criterion_ids": [
+        "C-FRAC-EQUIV-LCD"
+      ],
+      "hard_prerequisite_skill_ids": [],
+      "skill_id": "S-FRAC-EQUIV-LCD",
+      "title": "Find an LCD and build equivalent fractions"
+    },
+    {
+      "criterion_ids": [
+        "C-FRAC-ADD-SUB"
+      ],
+      "hard_prerequisite_skill_ids": [
+        "S-FRAC-EQUIV-LCD"
+      ],
+      "skill_id": "S-FRAC-ADD-SUB",
+      "title": "Add and subtract unlike-denominator fractions"
+    }
+  ],
+  "source_ids": [
+    "SRC-OPENSTAX-FRAC-DIFF",
+    "SRC-OPENSTAX-FRAC-SIMPLIFY",
+    "SRC-OPENSTAX-FRAC-KEY"
+  ],
+  "state": "READY_FOR_REVIEW",
+  "title": "Unlike-denominator fractions",
+  "version": 1
+}

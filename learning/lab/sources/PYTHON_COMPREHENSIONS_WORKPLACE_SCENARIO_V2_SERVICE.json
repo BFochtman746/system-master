@@ -1,0 +1,122 @@
+{
+  "claim_boundary": "BOUNDED_AUTHENTIC_SCENARIO_NOT_JOB_QUALIFICATION",
+  "course_criterion_refs": [
+    "C-PY-LISTCOMP",
+    "C-PY-DICTCOMP"
+  ],
+  "course_skill_refs": [
+    "S-PY-LISTCOMP",
+    "S-PY-DICTCOMP"
+  ],
+  "defense_prompts": [
+    {
+      "prompt": "Explain why the ordered list is useful for the supervisor escalation worklist.",
+      "prompt_id": "D1"
+    },
+    {
+      "prompt": "Explain why case_id is the mapping key and identify a duplicate-key or severity-data risk to check.",
+      "prompt_id": "D2"
+    }
+  ],
+  "external_authority_claims": "NOT_CLAIMED",
+  "independence_group": "OPS_STRUCTURED_RECORD_FILTER_MAP_B",
+  "novelty_tags": [
+    "SERVICE_OPERATIONS",
+    "CASE_ESCALATION",
+    "SEVERITY_THRESHOLD",
+    "CASE_VALUE_MAPPING"
+  ],
+  "purpose": "Use bounded Python comprehension skills to turn a service-ticket dataset into an escalation worklist and severity lookup for a supervisor.",
+  "records": [
+    {
+      "case_id": "T201",
+      "owner": "ava",
+      "severity_score": 9,
+      "state": "escalated"
+    },
+    {
+      "case_id": "T202",
+      "owner": "bo",
+      "severity_score": 5,
+      "state": "open"
+    },
+    {
+      "case_id": "T203",
+      "owner": "cy",
+      "severity_score": 7,
+      "state": "escalated"
+    },
+    {
+      "case_id": "T204",
+      "owner": "dee",
+      "severity_score": 10,
+      "state": "open"
+    },
+    {
+      "case_id": "T205",
+      "owner": "eli",
+      "severity_score": 6,
+      "state": "escalated"
+    }
+  ],
+  "requirement_bindings": [
+    {
+      "requirement_id": "REQ-PY-OPS-01",
+      "standing": "EXACT_SHARED_REF"
+    },
+    {
+      "requirement_id": "REQ-PY-OPS-02",
+      "standing": "EXACT_SHARED_REF"
+    },
+    {
+      "requirement_id": "REQ-PY-OPS-03",
+      "standing": "OWNER_APPROVED_MAPPING_REF"
+    },
+    {
+      "requirement_id": "REQ-PY-OPS-04",
+      "standing": "EXACT_SHARED_REF"
+    }
+  ],
+  "requirements": {
+    "id_field": "case_id",
+    "late_amount_rule": "Return a dictionary mapping every escalated case ID to its severity score.",
+    "mapping_output_key": "escalated_severity_by_id",
+    "priority_output_key": "priority_case_ids",
+    "priority_rule": "Return case IDs whose state is escalated and severity score is at least the threshold, preserving source order.",
+    "priority_threshold": 7,
+    "required_implementation_forms": {
+      "escalated_severity_by_id": "DICT_COMPREHENSION",
+      "priority_case_ids": "LIST_COMPREHENSION"
+    },
+    "status_field": "state",
+    "status_match": "escalated",
+    "value_field": "severity_score"
+  },
+  "role_context": "Junior operations analyst supporting a service operations team",
+  "rubric": [
+    {
+      "criterion_id": "WP-PY-01",
+      "description": "Construct the required escalation worklist with a list comprehension.",
+      "verification": "INDEPENDENT_MECHANICAL"
+    },
+    {
+      "criterion_id": "WP-PY-02",
+      "description": "Construct the required escalation severity mapping with a dictionary comprehension.",
+      "verification": "INDEPENDENT_MECHANICAL"
+    },
+    {
+      "criterion_id": "WP-PY-03",
+      "description": "Produce outputs matching the independently derived service rules.",
+      "verification": "INDEPENDENT_MECHANICAL"
+    },
+    {
+      "criterion_id": "WP-PY-04",
+      "description": "Explain implementation choice and identify a realistic service-data risk.",
+      "verification": "HUMAN_SEMANTIC_REVIEW_REQUIRED"
+    }
+  ],
+  "scenario_family": "SERVICE_TICKET_ESCALATION",
+  "scenario_id": "WP-PY-SERVICE-ESCALATION-V1",
+  "title": "Service-ticket escalation analysis",
+  "version": 1
+}
