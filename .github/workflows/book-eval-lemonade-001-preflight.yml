@@ -5,9 +5,7 @@ on:
     branches:
       - book-eval-lemonade-001-repo-bind-001
     paths:
-      - ".github/workflows/book-eval-lemonade-001-preflight.yml"
-      - "qualification/book-eval-lemonade-001/**"
-  workflow_dispatch:
+      - "qualification/book-eval-lemonade-001/RUN-A01-PREFLIGHT"
 
 permissions:
   contents: read
@@ -18,14 +16,15 @@ concurrency:
 
 jobs:
   preflight:
-    name: Verify frozen Book evaluator and Lemonade model on A-01
+    name: Verify repository-frozen Book evaluator and Lemonade model on A-01
     runs-on: [self-hosted, Windows, X64]
     timeout-minutes: 30
 
     steps:
       - name: Checkout exact objective commit
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
+          ref: ${{ github.sha }}
           fetch-depth: 1
           persist-credentials: false
           clean: true
@@ -50,7 +49,7 @@ jobs:
 
       - name: Upload A-01 preflight evidence
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: book-eval-lemonade-001-preflight-evidence
           path: ${{ runner.temp }}\book-eval-lemonade-001-preflight-${{ github.run_id }}
