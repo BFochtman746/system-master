@@ -1,0 +1,113 @@
+name: BOOK-EVAL-LEMONADE-001 Package V2 Rebuild
+
+on:
+  push:
+    branches:
+      - book-eval-lemonade-001-repo-bind-001
+    paths:
+      - "qualification/book-eval-lemonade-001/RUN-PACKAGE-V2-REBUILD"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: book-eval-lemonade-001-package-v2-rebuild
+  cancel-in-progress: false
+
+jobs:
+  rebuild:
+    name: Rebuild repository-authoritative frozen package on A-01
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    outputs:
+      new_sha: ${{ steps.commit.outputs.new_sha }}
+    steps:
+      - name: Checkout exact trigger commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          persist-credentials: true
+          clean: true
+
+      - name: Verify no concurrent branch advance before rebuild
+        shell: cmd
+        run: |
+          git fetch origin refs/heads/book-eval-lemonade-001-repo-bind-001:refs/remotes/origin/book-eval-lemonade-001-repo-bind-001
+          for /f %%S in ('git rev-parse refs/remotes/origin/book-eval-lemonade-001-repo-bind-001') do set "REMOTE_SHA=%%S"
+          if /I not "%REMOTE_SHA%"=="%GITHUB_SHA%" exit /b 91
+
+      - name: Generate and independently reconstruct all four V2 payloads
+        shell: cmd
+        run: node qualification\book-eval-lemonade-001\rebuild-package-v2.js
+
+      - name: Validate bounded repository changes
+        shell: cmd
+        run: |
+          git diff --check
+          git status --short
+
+      - name: Commit and push exact V2 repository payload
+        id: commit
+        shell: cmd
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- qualification/book-eval-lemonade-001/jar-base64-v2 qualification/book-eval-lemonade-001/provider-visible-corpus-base64-v2 qualification/book-eval-lemonade-001/provider-ontology-base64-v2 qualification/book-eval-lemonade-001/runner-private-base64-v2 qualification/book-eval-lemonade-001/PACKAGE-V2-REBUILD-MANIFEST.json
+          git diff --cached --quiet && exit /b 92
+          git commit -m "book-eval: rebuild complete repository-authoritative package v2"
+          git fetch origin refs/heads/book-eval-lemonade-001-repo-bind-001:refs/remotes/origin/book-eval-lemonade-001-repo-bind-001
+          for /f %%S in ('git rev-parse refs/remotes/origin/book-eval-lemonade-001-repo-bind-001') do set "REMOTE_SHA=%%S"
+          if /I not "%REMOTE_SHA%"=="%GITHUB_SHA%" exit /b 93
+          git push origin HEAD:refs/heads/book-eval-lemonade-001-repo-bind-001
+          for /f %%S in ('git rev-parse HEAD') do set "NEW_SHA=%%S"
+          echo new_sha=%NEW_SHA%>>"%GITHUB_OUTPUT%"
+          echo package_v2_commit=%NEW_SHA%>>"%RUNNER_TEMP%\book-eval-package-v2-rebuild-%GITHUB_RUN_ID%\package-v2-rebuild-summary.txt"
+
+      - name: Upload package rebuild evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: book-eval-lemonade-001-package-v2-rebuild-evidence
+          path: ${{ runner.temp }}\book-eval-package-v2-rebuild-${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 30
+
+  preflight:
+    name: Run exactly one repository-authoritative HTTP/cmd preflight on A-01
+    needs: rebuild
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout exact rebuilt package commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ needs.rebuild.outputs.new_sha }}
+          fetch-depth: 1
+          persist-credentials: false
+          clean: true
+
+      - name: Run repository-only HTTP/cmd A-01 preflight
+        shell: cmd
+        run: call qualification\book-eval-lemonade-001\a01-preflight.cmd
+
+      - name: Publish preflight summary
+        if: always()
+        shell: cmd
+        run: |
+          set "EVIDENCE_DIR=%RUNNER_TEMP%\book-eval-lemonade-001-preflight-%GITHUB_RUN_ID%"
+          echo ## BOOK-EVAL-LEMONADE-001 PACKAGE-V2-REBUILD PREFLIGHT>>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\preflight-summary.txt" type "%EVIDENCE_DIR%\preflight-summary.txt">>"%GITHUB_STEP_SUMMARY%"
+
+      - name: Upload A-01 preflight evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: book-eval-lemonade-001-package-v2-preflight-evidence
+          path: ${{ runner.temp }}\book-eval-lemonade-001-preflight-${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 30
