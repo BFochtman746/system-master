@@ -6,6 +6,7 @@ on:
       - system-master/f-wp-001-a01
     paths:
       - "system-master/f-wp-001/**"
+      - ".github/scripts/fwp001-qualify.js"
       - ".github/workflows/system-master-f-wp-001-a01.yml"
   workflow_dispatch:
 
@@ -26,118 +27,27 @@ jobs:
       - name: Checkout exact repository subject
         uses: actions/checkout@v4
 
-      - name: Create bounded evidence directory
-        shell: powershell
-        run: |
-          $evidence = Join-Path $env:RUNNER_TEMP "system-master-fwp001-$env:GITHUB_RUN_ID"
-          New-Item -ItemType Directory -Force -Path $evidence | Out-Null
-          "EVIDENCE_DIR=$evidence" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-
-      - name: Record exact subject and runner identity
-        shell: powershell
-        run: |
-          $head = (git rev-parse HEAD).Trim()
-          @(
-            "objective=SYSTEM-MASTER-F-WP-001-A01-REPO-BIND-IMPLEMENT-QUALIFY-001"
-            "repository=$env:GITHUB_REPOSITORY"
-            "commit=$head"
-            "runner_name=$env:RUNNER_NAME"
-            "runner_os=$env:RUNNER_OS"
-            "runner_arch=$env:RUNNER_ARCH"
-            "source_standing=BOUNDED_RECOVERY_REBASE_ENGINEERING_BASELINE__NOT_LATEST_ORIGINAL_SOURCE"
-          ) | Set-Content -Path (Join-Path $env:EVIDENCE_DIR "subject.txt") -Encoding utf8
-          java -version 2>&1 | Out-File (Join-Path $env:EVIDENCE_DIR "java-version.txt") -Encoding utf8
-          javac -version 2>&1 | Out-File (Join-Path $env:EVIDENCE_DIR "javac-version.txt") -Encoding utf8
-          if ($LASTEXITCODE -ne 0) { throw "JAVAC_NOT_AVAILABLE" }
-
-      - name: Verify sealed repository source slice
-        shell: powershell
-        run: |
-          $root = Join-Path $env:GITHUB_WORKSPACE "system-master\f-wp-001"
-          $manifestPath = Join-Path $root "control\SOURCE-SLICE-MANIFEST.json"
-          $manifest = Get-Content -Raw $manifestPath | ConvertFrom-Json
-          $report = Join-Path $env:EVIDENCE_DIR "source-slice-verification.txt"
-          "manifest_sha256=$((Get-FileHash -Algorithm SHA256 $manifestPath).Hash.ToLower())" | Set-Content $report
-          foreach ($entry in $manifest.files) {
-            $path = Join-Path $root ($entry.path -replace '/', '\')
-            if (-not (Test-Path $path -PathType Leaf)) { throw "MISSING_SLICE_FILE:$($entry.path)" }
-            $actual = (Get-FileHash -Algorithm SHA256 $path).Hash.ToLower()
-            $size = (Get-Item $path).Length
-            "path=$($entry.path) sha256=$actual size=$size" | Add-Content $report
-            if ($actual -ne $entry.sha256.ToLower()) { throw "SLICE_HASH_MISMATCH:$($entry.path)" }
-            if ($size -ne [int64]$entry.size) { throw "SLICE_SIZE_MISMATCH:$($entry.path)" }
-          }
-          "slice_verification=PASS" | Add-Content $report
-
-      - name: Reconstruct authoritative 021F traceability fixture
-        shell: powershell
-        run: |
-          $root = Join-Path $env:GITHUB_WORKSPACE "system-master\f-wp-001"
-          $parts = Get-ChildItem (Join-Path $root "transport\traceability\part-*.b64") | Sort-Object Name
-          if ($parts.Count -ne 5) { throw "TRACE_FIXTURE_PART_COUNT_MISMATCH" }
-          $b64 = ($parts | ForEach-Object { Get-Content -Raw $_.FullName }) -join ''
-          try { $bytes = [Convert]::FromBase64String($b64) } catch { throw "TRACE_FIXTURE_BASE64_INVALID" }
-          $fixture = Join-Path $env:RUNNER_TEMP "021F-R1-ATOMIC-REQUIREMENTS-TRACEABILITY-$env:GITHUB_RUN_ID.csv"
-          [IO.File]::WriteAllBytes($fixture, $bytes)
-          $actual = (Get-FileHash -Algorithm SHA256 $fixture).Hash.ToLower()
-          $expected = "cd801231c3ac21880424b264b6853183b396aef60de313d61e1dfa795d767c9d"
-          @(
-            "parts=$($parts.Count)"
-            "fixture_sha256=$actual"
-            "expected_sha256=$expected"
-          ) | Set-Content (Join-Path $env:EVIDENCE_DIR "fixture-reconstruction.txt")
-          if ($actual -ne $expected) { throw "TRACE_FIXTURE_HASH_MISMATCH" }
-          "TRACE_FIXTURE=$fixture" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-
-      - name: Compile exact F-WP-001 source and qualification harness
-        shell: powershell
-        run: |
-          $root = Join-Path $env:GITHUB_WORKSPACE "system-master\f-wp-001"
-          $classes = Join-Path $env:RUNNER_TEMP "fwp001-classes-$env:GITHUB_RUN_ID"
-          New-Item -ItemType Directory -Force -Path $classes | Out-Null
-          $sources = @(
-            (Join-Path $root "src\main\java\org\systemmaster\core\TraceLink.java"),
-            (Join-Path $root "src\main\java\org\systemmaster\core\TraceabilityRegistry.java"),
-            (Join-Path $root "src\main\java\org\systemmaster\core\RebuildGovernance.java"),
-            (Join-Path $root "src\test\java\org\systemmaster\core\Fwp001QualificationTest.java")
-          )
-          & javac --release 21 -d $classes @sources 2>&1 | Tee-Object -FilePath (Join-Path $env:EVIDENCE_DIR "compile.txt")
-          if ($LASTEXITCODE -ne 0) { throw "F_WP_001_COMPILE_FAILED" }
-          "CLASSES_DIR=$classes" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-
-      - name: Execute F-WP-001 qualification
-        shell: powershell
-        run: |
-          $root = Join-Path $env:GITHUB_WORKSPACE "system-master\f-wp-001"
-          $binding = Join-Path $root "control\BASELINE-BINDING.json"
-          $transcript = Join-Path $env:EVIDENCE_DIR "qualification.txt"
-          $output = & java -cp $env:CLASSES_DIR org.systemmaster.core.Fwp001QualificationTest $env:TRACE_FIXTURE $binding 2>&1
-          $exit = $LASTEXITCODE
-          $output | Tee-Object -FilePath $transcript
-          if ($exit -ne 0) { throw "F_WP_001_QUALIFICATION_FAILED" }
-          $text = $output -join "`n"
-          if ($text -notmatch [regex]::Escape("PASS F-WP-001 tests=12 requirements=60")) {
-            throw "F_WP_001_COMPLETION_PREDICATE_MISSING"
-          }
-          "result=PASS" | Set-Content (Join-Path $env:EVIDENCE_DIR "result.txt")
+      - name: Execute repository-owned F-WP-001 qualifier
+        shell: cmd
+        run: node .github\scripts\fwp001-qualify.js
 
       - name: Publish qualification summary
         if: always()
-        shell: powershell
+        shell: cmd
         run: |
-          "## SYSTEM-MASTER F-WP-001 A-01" | Out-File $env:GITHUB_STEP_SUMMARY -Append
-          $subject = Join-Path $env:EVIDENCE_DIR "subject.txt"
-          $result = Join-Path $env:EVIDENCE_DIR "result.txt"
-          $qualification = Join-Path $env:EVIDENCE_DIR "qualification.txt"
-          if (Test-Path $subject) { "~~~text" | Out-File $env:GITHUB_STEP_SUMMARY -Append; Get-Content $subject | Out-File $env:GITHUB_STEP_SUMMARY -Append; "~~~" | Out-File $env:GITHUB_STEP_SUMMARY -Append }
-          if (Test-Path $result) { Get-Content $result | Out-File $env:GITHUB_STEP_SUMMARY -Append } else { "result=FAIL_OR_INCOMPLETE" | Out-File $env:GITHUB_STEP_SUMMARY -Append }
-          if (Test-Path $qualification) { "~~~text" | Out-File $env:GITHUB_STEP_SUMMARY -Append; Get-Content $qualification | Out-File $env:GITHUB_STEP_SUMMARY -Append; "~~~" | Out-File $env:GITHUB_STEP_SUMMARY -Append }
+          set "EVIDENCE_DIR=%RUNNER_TEMP%\system-master-fwp001-%GITHUB_RUN_ID%"
+          echo ## SYSTEM-MASTER F-WP-001 A-01>>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\subject.txt" type "%EVIDENCE_DIR%\subject.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\result.txt" type "%EVIDENCE_DIR%\result.txt">>"%GITHUB_STEP_SUMMARY%"
+          if not exist "%EVIDENCE_DIR%\result.txt" echo result=FAIL_OR_INCOMPLETE>>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\qualification.txt" type "%EVIDENCE_DIR%\qualification.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\failure.txt" type "%EVIDENCE_DIR%\failure.txt">>"%GITHUB_STEP_SUMMARY%"
 
       - name: Upload F-WP-001 qualification evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: system-master-f-wp-001-a01-evidence
-          path: ${{ env.EVIDENCE_DIR }}
+          path: ${{ runner.temp }}/system-master-fwp001-${{ github.run_id }}
           if-no-files-found: error
           retention-days: 30
