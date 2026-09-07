@@ -38,6 +38,7 @@ jobs:
           echo USERPROFILE=%USERPROFILE%
           where py 2>nul || echo py launcher not currently on PATH
           where python 2>nul || echo python not currently on PATH
+          exit /b 0
 
       - name: Download and verify official Python installer
         shell: cmd
