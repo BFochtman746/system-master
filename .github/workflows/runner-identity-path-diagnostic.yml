@@ -1,0 +1,75 @@
+name: Runner Identity and Python Path Diagnostic
+
+on:
+  push:
+    paths:
+      - ".github/workflows/runner-identity-path-diagnostic.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    name: Inspect runner identity and Python path
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 10
+
+    steps:
+      - name: Collect read-only diagnostic
+        shell: cmd
+        run: |
+          set "EVIDENCE_DIR=%RUNNER_TEMP%\runner-identity-path-%GITHUB_RUN_ID%"
+          if not exist "%EVIDENCE_DIR%" mkdir "%EVIDENCE_DIR%"
+          set "REPORT=%EVIDENCE_DIR%\runner-identity-path.txt"
+
+          echo diagnostic=RUNNER-IDENTITY-PATH-001>"%REPORT%"
+          echo repository=%GITHUB_REPOSITORY%>>"%REPORT%"
+          echo commit=%GITHUB_SHA%>>"%REPORT%"
+          echo runner_name=%RUNNER_NAME%>>"%REPORT%"
+          echo runner_os=%RUNNER_OS%>>"%REPORT%"
+          echo runner_arch=%RUNNER_ARCH%>>"%REPORT%"
+          echo computername=%COMPUTERNAME%>>"%REPORT%"
+          echo process_identity:>>"%REPORT%"
+          whoami>>"%REPORT%" 2>&1
+          echo username=%USERNAME%>>"%REPORT%"
+          echo userdomain=%USERDOMAIN%>>"%REPORT%"
+          echo userprofile=%USERPROFILE%>>"%REPORT%"
+          echo localappdata=%LOCALAPPDATA%>>"%REPORT%"
+          echo process_path_begin>>"%REPORT%"
+          echo %PATH%>>"%REPORT%"
+          echo process_path_end>>"%REPORT%"
+
+          echo where_python:>>"%REPORT%"
+          where python>>"%REPORT%" 2>&1 || echo not-found>>"%REPORT%"
+          echo where_py:>>"%REPORT%"
+          where py>>"%REPORT%" 2>&1 || echo not-found>>"%REPORT%"
+
+          echo standard_user_installations:>>"%REPORT%"
+          if exist "%LOCALAPPDATA%\Programs\Python" dir /s /b "%LOCALAPPDATA%\Programs\Python\python.exe" "%LOCALAPPDATA%\Programs\Python\Python*\python.exe">>"%REPORT%" 2>&1
+          echo standard_machine_installations:>>"%REPORT%"
+          if exist "%ProgramFiles%\Python*" dir /s /b "%ProgramFiles%\Python*\python.exe">>"%REPORT%" 2>&1
+          if defined ProgramFiles(x86) if exist "%ProgramFiles(x86)%\Python*" dir /s /b "%ProgramFiles(x86)%\Python*\python.exe">>"%REPORT%" 2>&1
+
+          echo registry_current_user:>>"%REPORT%"
+          reg query "HKCU\Software\Python\PythonCore" /s>>"%REPORT%" 2>&1 || echo not-found>>"%REPORT%"
+          echo registry_local_machine:>>"%REPORT%"
+          reg query "HKLM\Software\Python\PythonCore" /s>>"%REPORT%" 2>&1 || echo not-found>>"%REPORT%"
+          echo registry_local_machine_wow6432:>>"%REPORT%"
+          reg query "HKLM\Software\WOW6432Node\Python\PythonCore" /s>>"%REPORT%" 2>&1 || echo not-found>>"%REPORT%"
+
+          echo runner_service_candidates:>>"%REPORT%"
+          sc query type= service state= all | findstr /I "actions.runner">>"%REPORT%" 2>&1 || echo none-found-or-foreground-runner>>"%REPORT%"
+          echo diagnostic_complete=true>>"%REPORT%"
+          type "%REPORT%"
+          echo EVIDENCE_DIR=%EVIDENCE_DIR%>>"%GITHUB_ENV%"
+          findstr /x /c:"diagnostic_complete=true" "%REPORT%">nul
+
+      - name: Upload diagnostic evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: runner-identity-path-evidence
+          path: ${{ env.EVIDENCE_DIR }}
+          if-no-files-found: error
+          retention-days: 30
