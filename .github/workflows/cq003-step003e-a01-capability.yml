@@ -1,0 +1,69 @@
+name: CQ-003 Step-003E A-01 Capability
+
+on:
+  push:
+    branches:
+      - cq003-step003e-recovery
+    paths:
+      - ".github/workflows/cq003-step003e-a01-capability.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cq003-step003e-a01-capability
+  cancel-in-progress: false
+
+jobs:
+  capability:
+    name: Check Java capability on A-01
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 5
+
+    steps:
+      - name: Create bounded evidence directory
+        shell: cmd
+        run: |
+          set "EVIDENCE_DIR=%RUNNER_TEMP%\cq003-step003e-capability-%GITHUB_RUN_ID%"
+          if not exist "%EVIDENCE_DIR%" mkdir "%EVIDENCE_DIR%"
+          echo EVIDENCE_DIR=%EVIDENCE_DIR%>>"%GITHUB_ENV%"
+
+      - name: Inspect required Java capability
+        shell: cmd
+        run: |
+          echo objective=CQ-003-STEP-003E>"%EVIDENCE_DIR%\capability.txt"
+          echo repository=%GITHUB_REPOSITORY%>>"%EVIDENCE_DIR%\capability.txt"
+          echo commit=%GITHUB_SHA%>>"%EVIDENCE_DIR%\capability.txt"
+          echo runner_name=%RUNNER_NAME%>>"%EVIDENCE_DIR%\capability.txt"
+          echo runner_os=%RUNNER_OS%>>"%EVIDENCE_DIR%\capability.txt"
+          echo runner_arch=%RUNNER_ARCH%>>"%EVIDENCE_DIR%\capability.txt"
+          echo machine=%COMPUTERNAME%>>"%EVIDENCE_DIR%\capability.txt"
+          git --version>>"%EVIDENCE_DIR%\capability.txt" 2>&1
+          where java>>"%EVIDENCE_DIR%\capability.txt" 2>nul || echo java=not-found>>"%EVIDENCE_DIR%\capability.txt"
+          where javac>>"%EVIDENCE_DIR%\capability.txt" 2>nul || echo javac=not-found>>"%EVIDENCE_DIR%\capability.txt"
+          java -version>>"%EVIDENCE_DIR%\capability.txt" 2>&1 || echo java_version=unavailable>>"%EVIDENCE_DIR%\capability.txt"
+          javac -version>>"%EVIDENCE_DIR%\capability.txt" 2>&1 || echo javac_version=unavailable>>"%EVIDENCE_DIR%\capability.txt"
+          where java>nul 2>nul && where javac>nul 2>nul && (echo java_ready=true>>"%EVIDENCE_DIR%\capability.txt") || (echo java_ready=false>>"%EVIDENCE_DIR%\capability.txt")
+          type "%EVIDENCE_DIR%\capability.txt"
+
+      - name: Publish job summary
+        if: always()
+        shell: cmd
+        run: |
+          echo ## CQ-003-STEP-003E A-01 capability>>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\capability.txt" type "%EVIDENCE_DIR%\capability.txt">>"%GITHUB_STEP_SUMMARY%"
+
+      - name: Upload capability evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: cq003-step003e-a01-capability
+          path: ${{ env.EVIDENCE_DIR }}
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Gate required Java capability
+        shell: cmd
+        run: |
+          findstr /x /c:"java_ready=true" "%EVIDENCE_DIR%\capability.txt">nul || exit /b 2
