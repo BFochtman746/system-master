@@ -38,8 +38,6 @@ jobs:
           echo USERPROFILE=%USERPROFILE%
           where py 2>nul || echo py launcher not currently on PATH
           where python 2>nul || echo python not currently on PATH
-          py -0p 2>nul || ver >nul
-          python --version 2>nul || ver >nul
 
       - name: Download and verify official Python installer
         shell: cmd
@@ -56,54 +54,45 @@ jobs:
           )
           echo Verified official Python 3.13.15 installer SHA-256.
 
-      - name: Install Python persistently
+      - name: Install Python persistently for A-01 runner
         shell: cmd
         run: |
           set "INSTALLER=%RUNNER_TEMP%\python-3.13.15-amd64.exe"
-          net session >nul 2>&1
-          if not errorlevel 1 (
-            echo Runner has elevation. Installing for all users.
-            "%INSTALLER%" /quiet InstallAllUsers=1 PrependPath=1 Include_launcher=1 InstallLauncherAllUsers=1 Include_test=0
-            set "RC=%ERRORLEVEL%"
-          ) else (
-            echo Runner is not elevated. Installing persistently for runner account %USERNAME%.
-            "%INSTALLER%" /quiet InstallAllUsers=0 PrependPath=1 Include_launcher=1 InstallLauncherAllUsers=0 Include_test=0
-            set "RC=%ERRORLEVEL%"
+          set "TARGET=C:\actions-runner\Python313"
+          set "LOG=%RUNNER_TEMP%\python-install.log"
+          if exist "%TARGET%\python.exe" (
+            echo Existing runner-local Python found.
+            "%TARGET%\python.exe" --version
+            exit /b 0
           )
+          echo Installing full Python runtime to %TARGET% for runner account %USERNAME%.
+          "%INSTALLER%" /quiet InstallAllUsers=0 TargetDir="%TARGET%" PrependPath=0 Include_launcher=0 Include_test=0 Include_pip=1 Include_doc=0 Include_tcltk=0 /log "%LOG%"
+          set "RC=%ERRORLEVEL%"
           echo Installer exit code: %RC%
+          if exist "%LOG%" type "%LOG%"
           if "%RC%"=="0" exit /b 0
           if "%RC%"=="3010" exit /b 0
           exit /b %RC%
 
-      - name: Verify persistent interpreter from installed locations
+      - name: Verify persistent runner-local interpreter
         shell: cmd
         run: |
-          set "FOUND="
-          if exist "%LocalAppData%\Programs\Python\Python313\python.exe" (
-            "%LocalAppData%\Programs\Python\Python313\python.exe" --version
-            "%LocalAppData%\Programs\Python\Python313\python.exe" -c "import sys,sqlite3,unittest; print(sys.executable); print(sys.version); print('stdlib-ok')"
-            set "FOUND=1"
-          )
-          if exist "C:\Program Files\Python313\python.exe" (
-            "C:\Program Files\Python313\python.exe" --version
-            "C:\Program Files\Python313\python.exe" -c "import sys,sqlite3,unittest; print(sys.executable); print(sys.version); print('stdlib-ok')"
-            set "FOUND=1"
-          )
-          if not defined FOUND (
-            echo ERROR: Python 3.13 installation path not found.
+          set "PYTHON_EXE=C:\actions-runner\Python313\python.exe"
+          if not exist "%PYTHON_EXE%" (
+            echo ERROR: Persistent Python executable not found at %PYTHON_EXE%.
             exit /b 1
           )
+          "%PYTHON_EXE%" --version
+          "%PYTHON_EXE%" -c "import sys,sqlite3,unittest; print(sys.executable); print(sys.version); print('stdlib-ok')"
+          "%PYTHON_EXE%" -m pip --version
 
-      - name: Verify launcher and persisted PATH registration
+      - name: Publish stable runner Python pointer
         shell: cmd
         run: |
-          echo Current-process PATH lookup after install:
-          where py 2>nul || echo py launcher requires a fresh process/session to appear on PATH
-          where python 2>nul || echo python requires a fresh process/session to appear on PATH
-          echo User PATH registry value:
-          reg query HKCU\Environment /v Path 2>nul || ver >nul
-          echo Machine PATH registry value:
-          reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v Path 2>nul || ver >nul
+          >"C:\actions-runner\python.cmd" echo @echo off
+          >>"C:\actions-runner\python.cmd" echo "C:\actions-runner\Python313\python.exe" %%*
+          call C:\actions-runner\python.cmd --version
+          echo Stable runner command: C:\actions-runner\python.cmd
 
       - name: Remove installer
         if: always()
