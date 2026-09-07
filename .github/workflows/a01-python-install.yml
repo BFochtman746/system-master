@@ -1,0 +1,112 @@
+name: A-01 Persistent Python Install
+
+on:
+  push:
+    branches:
+      - runner/python-install-001
+    paths:
+      - ".github/workflows/a01-python-install.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: a01-python-install
+  cancel-in-progress: false
+
+jobs:
+  install:
+    name: Install and verify Python 3.13.15 on A-01
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout exact installer contract
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+          clean: true
+
+      - name: Inspect current Python state
+        shell: cmd
+        run: |
+          echo COMPUTERNAME=%COMPUTERNAME%
+          echo USERNAME=%USERNAME%
+          echo USERPROFILE=%USERPROFILE%
+          where py 2>nul || echo py launcher not currently on PATH
+          where python 2>nul || echo python not currently on PATH
+          py -0p 2>nul || ver >nul
+          python --version 2>nul || ver >nul
+
+      - name: Download and verify official Python installer
+        shell: cmd
+        run: |
+          set "INSTALLER=%RUNNER_TEMP%\python-3.13.15-amd64.exe"
+          if exist "%INSTALLER%" del /q "%INSTALLER%"
+          curl.exe -L --fail --silent --show-error "https://www.python.org/ftp/python/3.13.15/python-3.13.15-amd64.exe" -o "%INSTALLER%"
+          if errorlevel 1 exit /b 1
+          certutil -hashfile "%INSTALLER%" SHA256
+          certutil -hashfile "%INSTALLER%" SHA256 | find /I "edec09c4853aeae9ac36efb8c9f95b6b8e2fee65eee56d9767a8b7c69c574403" >nul
+          if errorlevel 1 (
+            echo ERROR: Python installer SHA-256 mismatch.
+            exit /b 1
+          )
+          echo Verified official Python 3.13.15 installer SHA-256.
+
+      - name: Install Python persistently
+        shell: cmd
+        run: |
+          set "INSTALLER=%RUNNER_TEMP%\python-3.13.15-amd64.exe"
+          net session >nul 2>&1
+          if not errorlevel 1 (
+            echo Runner has elevation. Installing for all users.
+            "%INSTALLER%" /quiet InstallAllUsers=1 PrependPath=1 Include_launcher=1 InstallLauncherAllUsers=1 Include_test=0
+            set "RC=%ERRORLEVEL%"
+          ) else (
+            echo Runner is not elevated. Installing persistently for runner account %USERNAME%.
+            "%INSTALLER%" /quiet InstallAllUsers=0 PrependPath=1 Include_launcher=1 InstallLauncherAllUsers=0 Include_test=0
+            set "RC=%ERRORLEVEL%"
+          )
+          echo Installer exit code: %RC%
+          if "%RC%"=="0" exit /b 0
+          if "%RC%"=="3010" exit /b 0
+          exit /b %RC%
+
+      - name: Verify persistent interpreter from installed locations
+        shell: cmd
+        run: |
+          set "FOUND="
+          if exist "%LocalAppData%\Programs\Python\Python313\python.exe" (
+            "%LocalAppData%\Programs\Python\Python313\python.exe" --version
+            "%LocalAppData%\Programs\Python\Python313\python.exe" -c "import sys,sqlite3,unittest; print(sys.executable); print(sys.version); print('stdlib-ok')"
+            set "FOUND=1"
+          )
+          if exist "C:\Program Files\Python313\python.exe" (
+            "C:\Program Files\Python313\python.exe" --version
+            "C:\Program Files\Python313\python.exe" -c "import sys,sqlite3,unittest; print(sys.executable); print(sys.version); print('stdlib-ok')"
+            set "FOUND=1"
+          )
+          if not defined FOUND (
+            echo ERROR: Python 3.13 installation path not found.
+            exit /b 1
+          )
+
+      - name: Verify launcher and persisted PATH registration
+        shell: cmd
+        run: |
+          echo Current-process PATH lookup after install:
+          where py 2>nul || echo py launcher requires a fresh process/session to appear on PATH
+          where python 2>nul || echo python requires a fresh process/session to appear on PATH
+          echo User PATH registry value:
+          reg query HKCU\Environment /v Path 2>nul || ver >nul
+          echo Machine PATH registry value:
+          reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v Path 2>nul || ver >nul
+
+      - name: Remove installer
+        if: always()
+        shell: cmd
+        run: |
+          if exist "%RUNNER_TEMP%\python-3.13.15-amd64.exe" del /q "%RUNNER_TEMP%\python-3.13.15-amd64.exe"
