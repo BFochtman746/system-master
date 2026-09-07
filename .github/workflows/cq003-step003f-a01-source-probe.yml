@@ -1,0 +1,66 @@
+name: CQ-003 Step-003F A-01 Source Probe
+
+on:
+  push:
+    branches:
+      - cq003-step003f-a01-probe
+    paths:
+      - ".github/workflows/cq003-step003f-a01-source-probe.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cq003-step003f-a01-source-probe
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    name: Probe bounded Step-003E custody paths
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 5
+
+    steps:
+      - name: Probe exact Step-003E bundle filename
+        shell: cmd
+        run: |
+          set "EVIDENCE_DIR=%RUNNER_TEMP%\cq003-step003f-probe-%GITHUB_RUN_ID%"
+          if not exist "%EVIDENCE_DIR%" mkdir "%EVIDENCE_DIR%"
+          echo EVIDENCE_DIR=%EVIDENCE_DIR%>>"%GITHUB_ENV%"
+          set "OUT=%EVIDENCE_DIR%\source-probe.txt"
+          echo objective=CQ-003-STEP-003F-QUAL-002>"%OUT%"
+          echo repository=%GITHUB_REPOSITORY%>>"%OUT%"
+          echo workflow_commit=%GITHUB_SHA%>>"%OUT%"
+          echo runner_name=%RUNNER_NAME%>>"%OUT%"
+          echo runner_os=%RUNNER_OS%>>"%OUT%"
+          echo runner_arch=%RUNNER_ARCH%>>"%OUT%"
+          echo machine=%COMPUTERNAME%>>"%OUT%"
+          setlocal EnableDelayedExpansion
+          set "FOUND=false"
+          for %%R in ("C:\SystemMaster" "%USERPROFILE%\Downloads" "%USERPROFILE%\Documents" "C:\actions-runner\_work") do (
+            if exist "%%~R" (
+              for /f "delims=" %%F in ('dir /s /b "%%~R\CQ_003_STEP_003E.gitbundle" 2^>nul') do (
+                echo step003e_bundle=%%F>>"%OUT%"
+                set "FOUND=true"
+              )
+            )
+          )
+          echo found_step003e=!FOUND!>>"%OUT%"
+          endlocal
+          type "%OUT%"
+
+      - name: Publish probe summary
+        if: always()
+        shell: cmd
+        run: |
+          echo ## CQ-003-STEP-003F A-01 bounded source probe>>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\source-probe.txt" type "%EVIDENCE_DIR%\source-probe.txt">>"%GITHUB_STEP_SUMMARY%"
+
+      - name: Upload probe evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: cq003-step003f-a01-source-probe
+          path: ${{ env.EVIDENCE_DIR }}
+          if-no-files-found: error
+          retention-days: 30
