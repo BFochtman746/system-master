@@ -1,0 +1,60 @@
+name: BOOK-EVAL-LEMONADE-001 A-01 Route Smoke
+
+on:
+  push:
+    branches:
+      - book-eval-lemonade-001-repo-bind-001
+    paths:
+      - ".github/workflows/book-eval-lemonade-001-route-smoke.yml"
+      - "qualification/book-eval-lemonade-001/a01-route-smoke.cmd"
+      - "qualification/book-eval-lemonade-001/jar-base64/**"
+      - "qualification/book-eval-lemonade-001/smoke-request.json"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: book-eval-lemonade-001-route-smoke-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  route-smoke:
+    name: Verify Java Lemonade GPT-OSS route on A-01
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout exact objective commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+          clean: true
+
+      - name: Run bounded cmd route smoke
+        shell: cmd
+        run: call qualification\book-eval-lemonade-001\a01-route-smoke.cmd
+
+      - name: Publish route-smoke summary
+        if: always()
+        shell: cmd
+        run: |
+          echo ## BOOK-EVAL-LEMONADE-001-ROUTE-SMOKE>>"%GITHUB_STEP_SUMMARY%"
+          set "EVIDENCE_DIR=%RUNNER_TEMP%\book-eval-lemonade-001-route-smoke-%GITHUB_RUN_ID%"
+          if exist "%EVIDENCE_DIR%\route-smoke-summary.txt" (
+            echo ~~~text>>"%GITHUB_STEP_SUMMARY%"
+            type "%EVIDENCE_DIR%\route-smoke-summary.txt">>"%GITHUB_STEP_SUMMARY%"
+            echo ~~~>>"%GITHUB_STEP_SUMMARY%"
+          ) else (
+            echo Route-smoke summary was not created.>>"%GITHUB_STEP_SUMMARY%"
+          )
+
+      - name: Upload route-smoke evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: book-eval-lemonade-001-route-smoke-evidence
+          path: ${{ runner.temp }}\book-eval-lemonade-001-route-smoke-${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 30
