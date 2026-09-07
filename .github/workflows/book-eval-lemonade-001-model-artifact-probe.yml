@@ -1,0 +1,44 @@
+name: BOOK-EVAL-LEMONADE-001 Model Artifact Probe
+
+on:
+  push:
+    branches:
+      - book-eval-lemonade-001-repo-bind-001
+    paths:
+      - ".github/workflows/book-eval-lemonade-001-model-artifact-probe.yml"
+      - "qualification/book-eval-lemonade-001/a01-model-artifact-probe.cmd"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  bind-model-artifact:
+    name: Bind exact GPT-OSS 120B artifact on A-01
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 60
+    steps:
+      - name: Checkout exact commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+          clean: true
+      - name: Locate and hash exact model artifact
+        shell: cmd
+        run: call qualification\book-eval-lemonade-001\a01-model-artifact-probe.cmd
+      - name: Publish summary
+        if: always()
+        shell: cmd
+        run: |
+          set "EVIDENCE=%RUNNER_TEMP%\book-eval-model-artifact-%GITHUB_RUN_ID%"
+          echo ## BOOK-EVAL-LEMONADE-001 Model Artifact Probe>>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE%\summary.txt" type "%EVIDENCE%\summary.txt">>"%GITHUB_STEP_SUMMARY%"
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: book-eval-model-artifact-evidence
+          path: ${{ runner.temp }}\book-eval-model-artifact-${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 30
