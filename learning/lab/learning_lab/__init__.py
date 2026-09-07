@@ -143,3 +143,15 @@ from .external_standard import (
     build_standard_freshness_contract, assess_standard_update, build_update_training_delta,
 )
 from .external_standard import build_requirement_mapping_plan, apply_competency_mapping_snapshot
+
+from .baseline_diagnostic import (
+    BASELINE_DIAGNOSTIC_VERSION,
+    ADAPTIVE_ENTRY_POLICY_VERSION,
+    DiagnosticPolicyError,
+    BaselineDiagnosticDirector,
+)
+
+__all__ += [
+    "BASELINE_DIAGNOSTIC_VERSION", "ADAPTIVE_ENTRY_POLICY_VERSION",
+    "DiagnosticPolicyError", "BaselineDiagnosticDirector",
+]

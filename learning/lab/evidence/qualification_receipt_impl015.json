@@ -1,0 +1,115 @@
+{
+  "adversarial": {
+    "cases": {
+      "advanced_claim_checks_prerequisite_first": true,
+      "answer_reveal_cannot_bypass": true,
+      "answer_reveal_contaminates_diagnostic": true,
+      "assisted_probe_cannot_bypass_instructional_gate": true,
+      "assisted_probe_not_counted_as_correct": true,
+      "assisted_probe_not_mastery": true,
+      "blank_response_abstains": true,
+      "blank_response_requires_fresh_family": true,
+      "changed_replay_payload_blocked": true,
+      "correct_probe_leaves_mastery_attempts_zero": true,
+      "correct_probe_leaves_mastery_projection_absent": true,
+      "correct_probe_routes_to_verification_not_mastery": true,
+      "direct_mastery_item_as_diagnostic_blocked": true,
+      "fresh_probe_can_route_to_verification": true,
+      "learner_declaration_does_not_write_attempt": true,
+      "learner_declaration_does_not_write_projection": true,
+      "probe_id_reuse_across_operation_blocked": true,
+      "retention_due_not_bypassed_by_advanced_claim": true,
+      "second_probe_index_is_append_only": true,
+      "unknown_claim_fails_closed": true,
+      "unsupported_scorer_fails_closed": true,
+      "wrong_prerequisite_routes_targeted_remediation": true
+    },
+    "passed": 22,
+    "status": "PASS",
+    "total": 22
+  },
+  "authority_boundary": {
+    "diagnostic_can_write_mastery_attempts": false,
+    "diagnostic_can_write_mastery_projections": false,
+    "diagnostic_observation_is_mastery": false,
+    "independent_verification_remains_existing_learning_authority": true,
+    "learner_declaration_is_mastery": false
+  },
+  "combined_tests": 481,
+  "demo": {
+    "advanced_claim": "S-ROUTE",
+    "after_probe_action": {
+      "action_type": "INDEPENDENT_VERIFICATION",
+      "authority": "LEARNING_RUNTIME",
+      "reason_codes": [
+        "DIAGNOSTIC_SUPPORTS_BYPASS_OF_INSTRUCTION",
+        "DIAGNOSTIC_IS_NOT_MASTERY"
+      ],
+      "skill_id": "S-STABILITY",
+      "target_id": "M-STAB-1"
+    },
+    "diagnostic_digest": "1b0667034473469729321c1e74e6b0c434fb66eb61f1eff43919080738bd873c",
+    "first_action": {
+      "action_type": "DIAGNOSTIC_PROBE",
+      "authority": "ROUTING_ONLY",
+      "reason_codes": [
+        "ADVANCED_CLAIM_REQUIRES_PREREQUISITE_CHECK"
+      ],
+      "skill_id": "S-STABILITY",
+      "target_id": "P-STAB-1"
+    },
+    "mastery_attempt_count": 0,
+    "mastery_projection_count": 0,
+    "probe_digest": "74218545f81c16b4fffd7ddf624ea8d84b74ee69a92b5ba512507198d83e7ba0",
+    "probe_standing": "OBSERVED_CORRECT_INDEPENDENT"
+  },
+  "determinism_smoke": {
+    "runs": 20,
+    "status": "PASS",
+    "unique_result_tuples": 1
+  },
+  "extended_determinism": {
+    "runs": 100,
+    "status": "PASS",
+    "unique_result_tuples": 1
+  },
+  "extended_recovery": {
+    "all_mastery_attempt_counts_zero": true,
+    "all_mastery_projection_counts_zero": true,
+    "all_single_index_entries": true,
+    "phase_counts": {
+      "DIAGNOSTIC_PINNED": 34,
+      "PROBE_INDEXED": 33,
+      "PROBE_STORED": 33
+    },
+    "runs": 100,
+    "status": "PASS",
+    "unique_result_tuples": 1
+  },
+  "impl015_tests": 26,
+  "objective": "LEARNING-LAB-IMPL-015 \u2014 LEARNER BASELINE DIAGNOSTIC + ADAPTIVE ENTRY / PREREQUISITE-GAP ROUTING SLICE",
+  "predecessor_tests_preserved": 455,
+  "python_files_compiled": 67,
+  "recovery_smoke": {
+    "all_mastery_attempt_counts_zero": true,
+    "all_mastery_projection_counts_zero": true,
+    "all_single_index_entries": true,
+    "phase_counts": {
+      "DIAGNOSTIC_PINNED": 7,
+      "PROBE_INDEXED": 6,
+      "PROBE_STORED": 7
+    },
+    "runs": 20,
+    "status": "PASS",
+    "unique_result_tuples": 1
+  },
+  "status": "PASS_PORTABLE_IMPLEMENTATION",
+  "truth_boundary": {
+    "native_iphone_behavior": "NOT_PROVEN",
+    "portable_deterministic_behavior": "PROVEN_FOR_BOUNDED_SLICE",
+    "production_system_master_integration": "NOT_PROVEN",
+    "psychometric_validity": "NOT_PROVEN",
+    "real_learner_effectiveness": "NOT_PROVEN",
+    "windows_specific_behavior": "NOT_REQUIRED_FOR_THIS_SLICE"
+  }
+}
