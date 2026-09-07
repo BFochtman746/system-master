@@ -16,8 +16,12 @@ const packageRoot = path.join(workspace, 'system-master', 'f-wp-001');
 const evidenceDir = path.join(runnerTemp, `system-master-fwp001-${runId}`);
 fs.mkdirSync(evidenceDir, { recursive: true });
 
+function sha256Bytes(bytes) {
+  return crypto.createHash('sha256').update(bytes).digest('hex');
+}
+
 function sha256File(file) {
-  return crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
+  return sha256Bytes(fs.readFileSync(file));
 }
 
 function writeEvidence(name, content) {
@@ -42,13 +46,37 @@ function run(command, args, cwd = workspace) {
   };
 }
 
+function runBuffer(command, args, cwd = workspace) {
+  const result = spawnSync(command, args, {
+    cwd,
+    encoding: null,
+    windowsHide: true,
+    shell: false,
+  });
+  return {
+    status: result.status,
+    error: result.error,
+    stdout: result.stdout || Buffer.alloc(0),
+    stderr: result.stderr || Buffer.alloc(0),
+  };
+}
+
 function requireSuccess(label, result) {
   if (result.error) {
     throw new Error(`${label}:${result.error.message}`);
   }
   if (result.status !== 0) {
-    throw new Error(`${label}:exit=${result.status}\n${result.combined}`);
+    const detail = result.combined !== undefined
+      ? result.combined
+      : `${result.stdout.toString('utf8')}${result.stderr.toString('utf8')}`;
+    throw new Error(`${label}:exit=${result.status}\n${detail}`);
   }
+}
+
+function readGitBlob(repoPath) {
+  const result = runBuffer('git', ['show', `HEAD:${repoPath}`]);
+  requireSuccess(`GIT_BLOB_READ_FAILED:${repoPath}`, result);
+  return result.stdout;
 }
 
 try {
@@ -77,15 +105,22 @@ try {
 
   const manifestPath = path.join(packageRoot, 'control', 'SOURCE-SLICE-MANIFEST.json');
   const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
-  const sliceReport = [`manifest_sha256=${sha256File(manifestPath)}`];
+  const manifestBlob = readGitBlob('system-master/f-wp-001/control/SOURCE-SLICE-MANIFEST.json');
+  const sliceReport = [
+    `manifest_git_blob_sha256=${sha256Bytes(manifestBlob)}`,
+    `manifest_worktree_sha256=${sha256File(manifestPath)}`,
+    'verification_byte_source=git_blob_at_exact_HEAD',
+  ];
 
   for (const entry of manifest.files) {
     const target = path.join(packageRoot, ...entry.path.split('/'));
     if (!fs.existsSync(target) || !fs.statSync(target).isFile()) {
-      throw new Error(`MISSING_SLICE_FILE:${entry.path}`);
+      throw new Error(`MISSING_WORKTREE_FILE:${entry.path}`);
     }
-    const actualHash = sha256File(target);
-    const actualSize = fs.statSync(target).size;
+    const repoPath = `system-master/f-wp-001/${entry.path}`;
+    const blob = readGitBlob(repoPath);
+    const actualHash = sha256Bytes(blob);
+    const actualSize = blob.length;
     sliceReport.push(`path=${entry.path} sha256=${actualHash} size=${actualSize}`);
     if (actualHash !== String(entry.sha256).toLowerCase()) {
       throw new Error(`SLICE_HASH_MISMATCH:${entry.path}`);
@@ -97,16 +132,15 @@ try {
   sliceReport.push('slice_verification=PASS');
   writeEvidence('source-slice-verification.txt', `${sliceReport.join('\n')}\n`);
 
-  const transportDir = path.join(packageRoot, 'transport', 'traceability');
-  const parts = fs.readdirSync(transportDir)
-    .filter((name) => /^part-\d+\.b64$/.test(name))
-    .sort();
-  if (parts.length !== 5) {
-    throw new Error(`TRACE_FIXTURE_PART_COUNT_MISMATCH:${parts.length}`);
+  const transportEntries = manifest.files
+    .filter((entry) => entry.kind === 'FIXTURE_TRANSPORT')
+    .sort((a, b) => a.path.localeCompare(b.path));
+  if (transportEntries.length !== 5) {
+    throw new Error(`TRACE_FIXTURE_PART_COUNT_MISMATCH:${transportEntries.length}`);
   }
 
-  const b64 = parts
-    .map((name) => fs.readFileSync(path.join(transportDir, name), 'utf8').replace(/\s+/g, ''))
+  const b64 = transportEntries
+    .map((entry) => readGitBlob(`system-master/f-wp-001/${entry.path}`).toString('utf8').replace(/\s+/g, ''))
     .join('');
   if (b64.length % 4 !== 0 || !/^[A-Za-z0-9+/]*={0,2}$/.test(b64)) {
     throw new Error('TRACE_FIXTURE_BASE64_INVALID');
@@ -122,7 +156,7 @@ try {
   const fixtureHash = sha256File(fixture);
   const expectedFixtureHash = String(manifest.reconstructed_traceability_fixture_sha256).toLowerCase();
   writeEvidence('fixture-reconstruction.txt', [
-    `parts=${parts.length}`,
+    `parts=${transportEntries.length}`,
     `fixture_sha256=${fixtureHash}`,
     `expected_sha256=${expectedFixtureHash}`,
     '',
