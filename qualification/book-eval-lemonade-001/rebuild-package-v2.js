@@ -40,11 +40,13 @@ const expected = {
   }
 };
 
+const recoverySource = process.env.BOOK_EVAL_CANONICAL_DELIVERY;
 const candidates = [
+  recoverySource,
   "C:\\AI Test Kit\\Books Testing\\BOOK_EVAL_LEMONADE_001_RUNNER_POWERSHELL_AUDITED\\delivery",
   "C:\\AI Test Kit\\Books Testing\\BOOK_EVAL_LEMONADE_001_RUNNER_JAVA25_HOTFIX\\delivery",
   "C:\\AI Test Kit\\Books Testing\\BOOK_EVAL_LEMONADE_001_RUNNER\\delivery"
-];
+].filter(Boolean);
 
 function sha256(buf) {
   return crypto.createHash("sha256").update(buf).digest("hex");
@@ -57,6 +59,9 @@ function candidateComplete(dir) {
 const sourceIndex = candidates.findIndex(candidateComplete);
 if (sourceIndex < 0) throw new Error("No approved canonical Book evaluator delivery directory contains all four frozen inputs");
 const source = candidates[sourceIndex];
+const sourceKind = recoverySource && path.resolve(source).toLowerCase() === path.resolve(recoverySource).toLowerCase()
+  ? "retained_a01_artifact_recovery"
+  : "approved_local_delivery";
 
 if (fs.existsSync(path.join(source, "scoring-private")) || fs.existsSync(path.join(source, "BOOK_EVAL_SCORING_PRIVATE_v2.zip"))) {
   throw new Error("Scoring-private material is present in the selected source; refusing blind package rebuild");
@@ -68,8 +73,13 @@ if (fs.existsSync(path.join(root, "scoring-private")) || fs.existsSync(path.join
 const manifest = {
   schema: "BOOK-EVAL-LEMONADE-001-PACKAGE-V2-REBUILD/v1",
   part_size_chars: 6000,
-  source_authority: "A-01-proven canonical package; selected only from approved bounded delivery paths",
+  source_authority: sourceKind === "retained_a01_artifact_recovery"
+    ? "retained A-01 PASS_EXISTING_PACKAGE_PROBE artifact; canonical inputs independently hash-verified before repository rebuild"
+    : "A-01-proven canonical package; selected only from approved bounded delivery paths",
+  source_kind: sourceKind,
   source_candidate_id: sourceIndex + 1,
+  recovery_workflow_run_id: sourceKind === "retained_a01_artifact_recovery" ? 34157551269 : null,
+  recovery_artifact_id: sourceKind === "retained_a01_artifact_recovery" ? 10031477242 : null,
   scoring_private_included: false,
   objects: {}
 };
@@ -123,7 +133,10 @@ const summary = [
   `repository=${process.env.GITHUB_REPOSITORY || "unknown"}`,
   `commit_before=${process.env.GITHUB_SHA || "unknown"}`,
   `runner=${process.env.RUNNER_NAME || "unknown"}`,
+  `source_kind=${sourceKind}`,
   `source_candidate_id=${sourceIndex + 1}`,
+  sourceKind === "retained_a01_artifact_recovery" ? "recovery_workflow_run_id=34157551269" : "recovery_workflow_run_id=none",
+  sourceKind === "retained_a01_artifact_recovery" ? "recovery_artifact_id=10031477242" : "recovery_artifact_id=none",
   "source_paths_enumerated=false",
   "scoring_private_included=false",
   "part_size_chars=6000",
