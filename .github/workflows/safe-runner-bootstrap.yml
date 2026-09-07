@@ -39,6 +39,7 @@ jobs:
             echo runner_os=%RUNNER_OS%
             echo runner_arch=%RUNNER_ARCH%
             echo actions_transport=proven-by-dispatch-and-artifact-upload
+            echo evidence_integrity=github-artifact-sha256
             echo workspace_write_scope=runner_temp_only
             echo secrets_enumerated=false
             echo git:
@@ -54,10 +55,7 @@ jobs:
             echo dotnet:
             where dotnet >nul 2>nul && dotnet --version || echo not-found
           ) > "%EVIDENCE_DIR%\runner-bootstrap.txt"
-          certutil -hashfile "%EVIDENCE_DIR%\runner-bootstrap.txt" SHA256 > "%EVIDENCE_DIR%\runner-bootstrap.sha256.txt"
-          if errorlevel 1 exit /b 1
           type "%EVIDENCE_DIR%\runner-bootstrap.txt"
-          type "%EVIDENCE_DIR%\runner-bootstrap.sha256.txt"
 
       - name: Publish job summary
         if: always()
@@ -67,7 +65,6 @@ jobs:
           if exist "%EVIDENCE_DIR%\runner-bootstrap.txt" (
             echo ~~~text>>"%GITHUB_STEP_SUMMARY%"
             type "%EVIDENCE_DIR%\runner-bootstrap.txt">>"%GITHUB_STEP_SUMMARY%"
-            if exist "%EVIDENCE_DIR%\runner-bootstrap.sha256.txt" type "%EVIDENCE_DIR%\runner-bootstrap.sha256.txt">>"%GITHUB_STEP_SUMMARY%"
             echo ~~~>>"%GITHUB_STEP_SUMMARY%"
           ) else (
             echo Evidence report was not created.>>"%GITHUB_STEP_SUMMARY%"
