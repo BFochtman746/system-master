@@ -1,0 +1,1 @@
+This directory is reserved for repository-authoritative frozen Book evaluator transport inputs. All executable inputs must reconstruct to the canonical hashes recorded by BOOK-EVAL-LEMONADE-001 before A-01 execution.
