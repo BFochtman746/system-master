@@ -32,31 +32,26 @@ jobs:
         run: |
           if /I not "%RUNNER_OS%"=="Windows" exit /b 1
           if /I not "%RUNNER_ARCH%"=="X64" exit /b 1
-          (
-            echo qualification=SAFE-RUNNER-BOOTSTRAP-001
-            echo repository=%GITHUB_REPOSITORY%
-            echo commit=%GITHUB_SHA%
-            echo runner_os=%RUNNER_OS%
-            echo runner_arch=%RUNNER_ARCH%
-            echo actions_transport=proven-by-dispatch-and-artifact-upload
-            echo evidence_integrity=github-artifact-sha256
-            echo workspace_write_scope=runner_temp_only
-            echo secrets_enumerated=false
-            echo git:
-            git --version
-            echo node:
-            where node >nul 2>nul && node --version || echo not-found
-            echo npm:
-            where npm >nul 2>nul && npm --version || echo not-found
-            echo python:
-            where python >nul 2>nul && python --version || echo not-found
-            echo py:
-            where py >nul 2>nul && py --version || echo not-found
-            echo dotnet:
-            where dotnet >nul 2>nul && dotnet --version || echo not-found
-          ) > "%EVIDENCE_DIR%\runner-bootstrap.txt"
+          echo qualification=SAFE-RUNNER-BOOTSTRAP-001>"%EVIDENCE_DIR%\runner-bootstrap.txt"
+          echo repository=%GITHUB_REPOSITORY%>>"%EVIDENCE_DIR%\runner-bootstrap.txt"
+          echo commit=%GITHUB_SHA%>>"%EVIDENCE_DIR%\runner-bootstrap.txt"
+          echo runner_os=%RUNNER_OS%>>"%EVIDENCE_DIR%\runner-bootstrap.txt"
+          echo runner_arch=%RUNNER_ARCH%>>"%EVIDENCE_DIR%\runner-bootstrap.txt"
+          echo actions_transport=proven-by-dispatch-and-artifact-upload>>"%EVIDENCE_DIR%\runner-bootstrap.txt"
+          echo evidence_integrity=github-artifact-sha256>>"%EVIDENCE_DIR%\runner-bootstrap.txt"
+          echo workspace_write_scope=runner_temp_only>>"%EVIDENCE_DIR%\runner-bootstrap.txt"
+          echo secrets_enumerated=false>>"%EVIDENCE_DIR%\runner-bootstrap.txt"
+          git --version>>"%EVIDENCE_DIR%\runner-bootstrap.txt" 2>&1
+          echo optional_tool_paths:>>"%EVIDENCE_DIR%\runner-bootstrap.txt"
+          where node>>"%EVIDENCE_DIR%\runner-bootstrap.txt" 2>nul || echo node=not-found>>"%EVIDENCE_DIR%\runner-bootstrap.txt"
+          where npm>>"%EVIDENCE_DIR%\runner-bootstrap.txt" 2>nul || echo npm=not-found>>"%EVIDENCE_DIR%\runner-bootstrap.txt"
+          where python>>"%EVIDENCE_DIR%\runner-bootstrap.txt" 2>nul || echo python=not-found>>"%EVIDENCE_DIR%\runner-bootstrap.txt"
+          where py>>"%EVIDENCE_DIR%\runner-bootstrap.txt" 2>nul || echo py=not-found>>"%EVIDENCE_DIR%\runner-bootstrap.txt"
+          where dotnet>>"%EVIDENCE_DIR%\runner-bootstrap.txt" 2>nul || echo dotnet=not-found>>"%EVIDENCE_DIR%\runner-bootstrap.txt"
           type "%EVIDENCE_DIR%\runner-bootstrap.txt"
-          exit /b 0
+          findstr /x /c:"qualification=SAFE-RUNNER-BOOTSTRAP-001" "%EVIDENCE_DIR%\runner-bootstrap.txt">nul
+          findstr /x /c:"runner_os=Windows" "%EVIDENCE_DIR%\runner-bootstrap.txt">nul
+          findstr /x /c:"runner_arch=X64" "%EVIDENCE_DIR%\runner-bootstrap.txt">nul
 
       - name: Publish job summary
         if: always()
