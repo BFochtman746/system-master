@@ -15,6 +15,8 @@ from .repository import Repository, canonical_json, digest
 OPEN_GOAL_INPUT_PACKET_VERSION = "OPEN-GOAL-INPUT-PACKET-V1"
 OPEN_GOAL_PROVIDER_PROMPT_VERSION = "OPEN-GOAL-PROVIDER-PROMPT-V1"
 PACKET_STANDING = "SEALED_PROVIDER_INPUT_PACKET_NOT_COURSE_VERIFIED"
+RESEARCH_CHECKPOINT_KIND = "open_goal_provider_research_capture"
+MODEL_CHECKPOINT_KIND = "open_goal_provider_model_trace"
 
 _MODEL_INSTRUCTION = (
     "Using only admitted research claims, generate a bounded course candidate with skills, lessons, "
@@ -32,11 +34,18 @@ def _packet_digest(packet: Dict[str, Any]) -> str:
     return digest(unsigned)
 
 
+def _injected(stage: Optional[str], expected: str) -> None:
+    if stage == expected:
+        raise RuntimeError("INJECTED_CRASH:" + expected)
+
+
 class OpenGoalInputPacketService:
     """Seals provider research/model outputs before the open-goal runtime can consume them.
 
     Providers are acquisition transports only. This service does not approve a course,
     select mastery evidence, or allow a model-generated candidate to self-verify.
+    Accepted provider outputs are checkpointed before later stages so recovery never
+    silently resamples a stochastic provider after a durable capture exists.
     """
 
     def __init__(self, repo: Repository):
@@ -51,6 +60,7 @@ class OpenGoalInputPacketService:
         research_capture_provider: Callable[[str], Dict[str, Any]],
         model_id: str,
         model_candidate_provider: Callable[[Dict[str, Any]], Dict[str, Any]],
+        inject_crash_after: Optional[str] = None,
     ) -> Dict[str, Any]:
         if not operation_id:
             raise ValueError("OPERATION_ID_REQUIRED")
@@ -74,7 +84,23 @@ class OpenGoalInputPacketService:
         if prior:
             return prior
 
-        capture = copy.deepcopy(research_capture_provider(desired_outcome))
+        research_checkpoint = self.repo.get_object(RESEARCH_CHECKPOINT_KIND, packet_id, 1)
+        if research_checkpoint is not None:
+            if research_checkpoint.get("desired_outcome") != desired_outcome:
+                raise ValueError("PROVIDER_PACKET_RESEARCH_GOAL_MISMATCH")
+            capture = copy.deepcopy(research_checkpoint["capture"])
+        else:
+            capture = copy.deepcopy(research_capture_provider(desired_outcome))
+            # Validate support and normalized evidence before making the capture durable.
+            initial_research_port = NormalizedLiveResearchPort([capture])
+            initial_research_port.interpret(desired_outcome)
+            self.repo.put_object(RESEARCH_CHECKPOINT_KIND, packet_id, 1, {
+                "desired_outcome": desired_outcome,
+                "capture": capture,
+                "capture_digest": digest(capture),
+            })
+            _injected(inject_crash_after, "RESEARCH_CAPTURE_STORED")
+
         research_port = NormalizedLiveResearchPort([capture])
         interpretation = research_port.interpret(desired_outcome)
         plan = research_port.plan(interpretation)
@@ -88,9 +114,31 @@ class OpenGoalInputPacketService:
             "research_dossier_digest": evidence_digest,
             "required_claim_ids": sorted(c["claim_id"] for c in dossier["claims"]),
         }
-        trace = CallableModelCapturePort(model_id, model_candidate_provider).capture(prompt, evidence_digest)
-        model_port = RecordedModelGenerationPort([trace])
-        model_pin = model_port.pin(desired_outcome=desired_outcome, dossier=dossier)
+
+        model_checkpoint = self.repo.get_object(MODEL_CHECKPOINT_KIND, packet_id, 1)
+        if model_checkpoint is not None:
+            if model_checkpoint.get("desired_outcome") != desired_outcome:
+                raise ValueError("PROVIDER_PACKET_MODEL_GOAL_MISMATCH")
+            if model_checkpoint.get("model_id") != model_id:
+                raise ValueError("PROVIDER_PACKET_MODEL_ID_MISMATCH")
+            if model_checkpoint.get("research_evidence_digest") != evidence_digest:
+                raise ValueError("PROVIDER_PACKET_MODEL_RESEARCH_DRIFT")
+            trace = copy.deepcopy(model_checkpoint["trace"])
+            model_port = RecordedModelGenerationPort([trace])
+            model_pin = model_port.pin(desired_outcome=desired_outcome, dossier=dossier)
+        else:
+            trace = CallableModelCapturePort(model_id, model_candidate_provider).capture(prompt, evidence_digest)
+            # Reject self-verification and provenance drift before checkpointing provider output.
+            model_port = RecordedModelGenerationPort([trace])
+            model_pin = model_port.pin(desired_outcome=desired_outcome, dossier=dossier)
+            self.repo.put_object(MODEL_CHECKPOINT_KIND, packet_id, 1, {
+                "desired_outcome": desired_outcome,
+                "model_id": model_id,
+                "research_evidence_digest": evidence_digest,
+                "trace": trace,
+                "trace_digest": trace["trace_digest"],
+            })
+            _injected(inject_crash_after, "MODEL_TRACE_STORED")
 
         packet = {
             "packet_id": packet_id,
@@ -120,6 +168,7 @@ class OpenGoalInputPacketService:
         packet["packet_digest"] = _packet_digest(packet)
         self.validate_packet(packet)
         self.repo.put_object("open_goal_input_packet", packet_id, 1, packet)
+        _injected(inject_crash_after, "PACKET_STORED")
 
         result = {
             "packet_id": packet_id,
