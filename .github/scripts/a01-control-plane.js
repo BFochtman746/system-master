@@ -4,16 +4,21 @@ const fs = require('fs');
 const path = require('path');
 const cp = require('child_process');
 
-const ROOT = path.resolve(__dirname, '..', '..');
-const POLICY_PATH = path.join(ROOT, 'qualification', 'a01', 'a01-policy.json');
-const REGISTRY_PATH = path.join(ROOT, 'qualification', 'a01', 'registry.json');
-const RECEIPT_SCHEMA = path.join(ROOT, 'qualification', 'a01', 'schema', 'qualification-receipt.schema.json');
-const RETURN_SCHEMA = path.join(ROOT, 'qualification', 'a01', 'schema', 'return-ticket.schema.json');
+const SCRIPT_ROOT = path.resolve(__dirname, '..', '..');
+const CONTROL_ROOT = path.resolve(process.env.A01_CONTROL_ROOT || SCRIPT_ROOT);
+const SUBJECT_ROOT = path.resolve(process.env.A01_SUBJECT_ROOT || CONTROL_ROOT);
+const POLICY_PATH = path.join(CONTROL_ROOT, 'qualification', 'a01', 'a01-policy.json');
+const REGISTRY_PATH = path.join(CONTROL_ROOT, 'qualification', 'a01', 'registry.json');
+const RECEIPT_SCHEMA = path.join(CONTROL_ROOT, 'qualification', 'a01', 'schema', 'qualification-receipt.schema.json');
+const RETURN_SCHEMA = path.join(CONTROL_ROOT, 'qualification', 'a01', 'schema', 'return-ticket.schema.json');
 
 function readJson(p) { return JSON.parse(fs.readFileSync(p, 'utf8')); }
 function assert(condition, message) { if (!condition) throw new Error(message); }
 function mkdir(p) { fs.mkdirSync(p, { recursive: true }); }
 function writeJson(p, value) { fs.writeFileSync(p, JSON.stringify(value, null, 2) + '\n'); }
+function safeWrapper(rel) {
+  return typeof rel === 'string' && rel.startsWith('.github/scripts/') && !rel.includes('..') && !path.isAbsolute(rel);
+}
 
 function validate() {
   const policy = readJson(POLICY_PATH);
@@ -21,26 +26,35 @@ function validate() {
   readJson(RECEIPT_SCHEMA);
   readJson(RETURN_SCHEMA);
   assert(policy.control_plane_id === 'A01-CONTROL-PLANE-001', 'unexpected control_plane_id');
+  assert(policy.canonical_ref === 'main', 'canonical_ref must be main');
   assert(policy.runner.global_concurrency_group === 'a01-global', 'global concurrency must be a01-global');
   assert(policy.admission.allow_arbitrary_command_input === false, 'arbitrary commands must remain disabled');
   assert(policy.admission.require_registered_qualification === true, 'registered qualification must be required');
-  assert(registry.registry_version >= 1, 'registry_version missing');
+  assert(registry.registry_version >= 2, 'registry_version must be >= 2');
   assert(registry.qualifications && typeof registry.qualifications === 'object', 'qualifications missing');
+  const allowedActions = new Set((policy.post_actions && policy.post_actions.allowed) || []);
   for (const [id, q] of Object.entries(registry.qualifications)) {
     assert(q.executable === 'node', `${id}: only registered Node wrappers are allowed`);
     assert(Array.isArray(q.args) && q.args.length === 1, `${id}: expected one wrapper path`);
-    assert(q.args[0].startsWith('.github/scripts/') && !q.args[0].includes('..'), `${id}: unsafe wrapper path`);
+    assert(safeWrapper(q.args[0]), `${id}: unsafe wrapper path`);
+    assert(['control_plane', 'subject'].includes(q.source), `${id}: invalid qualifier source`);
     assert(['focused', 'consolidated', 'promotion'].includes(q.gate_class), `${id}: invalid gate class`);
     assert(typeof q.workstream_id === 'string' && q.workstream_id.length > 0, `${id}: workstream missing`);
-    assert(typeof q.evidence_artifact === 'string' && q.evidence_artifact.length > 0, `${id}: artifact missing`);
-    assert(fs.existsSync(path.join(ROOT, q.args[0])), `${id}: wrapper does not exist`);
+    assert(typeof q.evidence_artifact === 'string' && q.evidence_artifact.length > 0, `${id}: artifact prefix missing`);
+    if (q.source === 'control_plane') {
+      assert(fs.existsSync(path.join(CONTROL_ROOT, q.args[0])), `${id}: control-plane wrapper does not exist`);
+    }
+    if (q.allowed_post_actions !== undefined) {
+      assert(Array.isArray(q.allowed_post_actions), `${id}: allowed_post_actions must be an array`);
+      for (const action of q.allowed_post_actions) assert(allowedActions.has(action), `${id}: unapproved post action ${action}`);
+    }
   }
   return { policy, registry };
 }
 
-function gitHead() {
-  const safeRoot = ROOT.replace(/\\/g, '/');
-  const r = cp.spawnSync('git', ['-c', `safe.directory=${safeRoot}`, 'rev-parse', 'HEAD'], { cwd: ROOT, encoding: 'utf8', shell: false });
+function gitHead(root) {
+  const safeRoot = root.replace(/\\/g, '/');
+  const r = cp.spawnSync('git', ['-c', `safe.directory=${safeRoot}`, 'rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8', shell: false });
   if (r.status !== 0) throw new Error(`git rev-parse failed: ${r.stderr || r.stdout}`);
   return r.stdout.trim();
 }
@@ -71,6 +85,23 @@ function returnTicket(id, workstream, subject) {
   };
 }
 
+function readPostAction(evidenceDir, entry, policy) {
+  const marker = path.join(evidenceDir, 'post-action.txt');
+  if (!fs.existsSync(marker)) return '';
+  const action = fs.readFileSync(marker, 'utf8').trim();
+  if (!action) return '';
+  const allowedByPolicy = new Set((policy.post_actions && policy.post_actions.allowed) || []);
+  const allowedByEntry = new Set(entry.allowed_post_actions || []);
+  assert(allowedByPolicy.has(action), `POST_ACTION_NOT_ALLOWED_BY_POLICY:${action}`);
+  assert(allowedByEntry.has(action), `POST_ACTION_NOT_ALLOWED_BY_REGISTRY:${action}`);
+  return action;
+}
+
+function emitOutput(name, value) {
+  if (!process.env.GITHUB_OUTPUT) return;
+  fs.appendFileSync(process.env.GITHUB_OUTPUT, `${name}=${value}\n`);
+}
+
 async function execute() {
   const { policy, registry } = validate();
   const id = process.env.A01_QUALIFICATION_ID || 'A01-CONTROL-PLANE-SELFTEST';
@@ -80,16 +111,20 @@ async function execute() {
   assert(workstream === entry.workstream_id, `WORKSTREAM_MISMATCH:${workstream}:${entry.workstream_id}`);
   const subject = (process.env.A01_SUBJECT_SHA || process.env.GITHUB_SHA || '').trim();
   assert(/^[0-9a-fA-F]{40}$/.test(subject), `INVALID_SUBJECT_SHA:${subject}`);
-  const evidenceDir = process.env.A01_EVIDENCE_DIR || path.join(process.env.RUNNER_TEMP || ROOT, `a01-${process.env.GITHUB_RUN_ID || Date.now()}`);
+  const evidenceDir = process.env.A01_EVIDENCE_DIR || path.join(process.env.RUNNER_TEMP || SUBJECT_ROOT, `a01-${process.env.GITHUB_RUN_ID || Date.now()}`);
   mkdir(evidenceDir);
-  const checkout = gitHead();
+  const checkout = gitHead(SUBJECT_ROOT);
+  const wrapperRoot = entry.source === 'subject' ? SUBJECT_ROOT : CONTROL_ROOT;
+  const wrapperPath = path.join(wrapperRoot, entry.args[0]);
+  assert(fs.existsSync(wrapperPath), `REGISTERED_WRAPPER_MISSING:${entry.source}:${entry.args[0]}`);
   const meta = await runMetadata();
   const requestedAt = meta && meta.created_at ? meta.created_at : null;
   const workflowStartedAt = meta && meta.run_started_at ? meta.run_started_at : null;
   const queueMs = requestedAt && workflowStartedAt ? Math.max(0, Date.parse(workflowStartedAt) - Date.parse(requestedAt)) : null;
   const ticket = returnTicket(id, workstream, subject);
+  const artifactName = process.env.A01_ARTIFACT_NAME || `${entry.evidence_artifact}-${process.env.GITHUB_RUN_ID || 'local'}-evidence`;
   const request = {
-    request_version: 1,
+    request_version: 2,
     policy_version: policy.policy_version,
     registry_version: registry.registry_version,
     qualification_id: id,
@@ -107,21 +142,30 @@ async function execute() {
   let childExitCode = null;
   let stdout = '';
   let stderr = '';
+  let postAction = '';
 
   if (checkout.toLowerCase() !== subject.toLowerCase()) {
     stderr = `SUBJECT_CHECKOUT_MISMATCH expected=${subject} actual=${checkout}`;
   } else {
-    const child = cp.spawnSync(entry.executable, entry.args, {
-      cwd: ROOT,
+    const child = cp.spawnSync(entry.executable, [wrapperPath], {
+      cwd: SUBJECT_ROOT,
       encoding: 'utf8',
       shell: false,
-      env: { ...process.env, A01_EVIDENCE_DIR: evidenceDir }
+      env: {
+        ...process.env,
+        GITHUB_WORKSPACE: SUBJECT_ROOT,
+        GITHUB_SHA: subject,
+        A01_CONTROL_ROOT: CONTROL_ROOT,
+        A01_SUBJECT_ROOT: SUBJECT_ROOT,
+        A01_EVIDENCE_DIR: evidenceDir
+      }
     });
     childExitCode = typeof child.status === 'number' ? child.status : 1;
     stdout = child.stdout || '';
     stderr = child.stderr || '';
     resultClass = child.error ? 'INFRA_FAILURE' : childExitCode === 0 ? 'PASS' : 'SUBJECT_FAILURE';
     if (child.error) stderr += `\n${child.error.stack || child.error.message}`;
+    if (resultClass === 'PASS') postAction = readPostAction(evidenceDir, entry, policy);
   }
 
   fs.writeFileSync(path.join(evidenceDir, 'qualifier-stdout.txt'), stdout);
@@ -154,14 +198,17 @@ async function execute() {
       version: process.env.RUNNER_VERSION || null,
       required_labels: policy.runner.required_labels
     },
-    evidence_artifact: entry.evidence_artifact,
+    evidence_artifact: artifactName,
     return_ticket: ticket,
     promotion_authorized: promotionAuthorized
   };
   writeJson(path.join(evidenceDir, 'receipt.json'), receipt);
   fs.writeFileSync(path.join(evidenceDir, 'result.txt'), `${resultClass}\n`);
   writeJson(path.join(evidenceDir, 'timing.json'), { queue_ms: queueMs, execution_ms: receipt.execution_ms });
+  if (postAction) fs.writeFileSync(path.join(evidenceDir, 'registered-post-action.txt'), `${postAction}\n`);
+  emitOutput('post_action', postAction);
   console.log(`A01_RECEIPT=${JSON.stringify(receipt)}`);
+  if (postAction) console.log(`A01_POST_ACTION=${postAction}`);
   if (resultClass !== 'PASS') process.exit(childExitCode || 1);
 }
 

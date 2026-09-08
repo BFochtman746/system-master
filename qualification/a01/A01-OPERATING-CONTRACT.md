@@ -1,6 +1,6 @@
 # A-01 Operating Contract
 
-Status: CANONICAL CANDIDATE — A01-CONTROL-PLANE-001
+Status: CANONICAL — A01-CONTROL-PLANE-001
 
 ## Purpose
 
@@ -56,6 +56,18 @@ A valid receipt MUST bind all of the following:
 - promotion authorization decision
 
 `promotion_authorized=true` is allowed only when the qualification result is `PASS`, the checkout SHA equals the subject SHA, and all required evidence was produced.
+
+## Canonical control-plane / subject separation
+
+The reusable gateway MUST execute policy, registry, and control-plane code from the exact commit that defines the called reusable workflow, while the qualification subject is checked out separately at the exact requested `subject_sha`. A feature branch is therefore not required to merge unrelated canonical `main` history merely to consume A-01. Subject-owned qualifier wrappers execute from the exact subject checkout; control-plane-owned wrappers execute from the canonical control-plane checkout.
+
+A registry entry MUST declare its qualifier `source` as either `control_plane` or `subject`. The gateway verifies the subject checkout SHA independently before any registered qualifier can produce authoritative PASS evidence.
+
+## Registered disruptive handoff
+
+A qualification that must intentionally disrupt A-01, such as a genuine Windows reboot, MAY request only a policy- and registry-approved post action. The qualifier MUST first finish its non-disruptive preparation and produce a PASS receipt. The gateway MUST upload that receipt and evidence before applying the disruptive action. A later verification phase MUST prove that the disruptive action actually occurred; the pre-action receipt alone does not prove the reboot or authorize production.
+
+No workstream may inject an arbitrary post-action command. The only permitted actions are those explicitly allowed by the active policy and by that qualification's registry entry.
 
 ## Cross-chat rule
 

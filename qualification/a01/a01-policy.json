@@ -1,6 +1,7 @@
 {
-  "policy_version": 1,
+  "policy_version": 2,
   "control_plane_id": "A01-CONTROL-PLANE-001",
+  "canonical_ref": "main",
   "runner": {
     "name": "A-01",
     "required_labels": ["self-hosted", "Windows", "X64"],
@@ -27,6 +28,12 @@
       "purpose": "Exact promotion subject and required regressions",
       "promotion_authority": true
     }
+  },
+  "post_actions": {
+    "allowed": ["windows_reboot"],
+    "receipt_before_action": true,
+    "evidence_upload_before_action": true,
+    "verification_required_after_disruptive_action": true
   },
   "states": [
     "BUILDING",

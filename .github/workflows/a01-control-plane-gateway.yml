@@ -3,7 +3,7 @@ name: A-01 Control Plane Gateway
 on:
   push:
     branches:
-      - system-master/a01-control-plane-001
+      - 'system-master/a01-control-plane-*'
     paths:
       - 'SYSTEM-MASTER-WORKSTREAM-BOOTSTRAP.md'
       - 'qualification/a01/**'
@@ -82,30 +82,48 @@ jobs:
       A01_RESUME_ON_FAILURE: ${{ inputs.resume_on_failure || 'Adjudicate evidence, repair the failing boundary, and rerun the minimum sufficient gate.' }}
       A01_NOTIFICATION_TARGET: ${{ inputs.notification_target || 'originating-workstream' }}
     steps:
-      - name: Checkout exact qualification subject
+      - name: Checkout canonical control plane
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
-          ref: ${{ inputs.subject_sha || github.sha }}
+          repository: ${{ job.workflow_repository }}
+          ref: ${{ job.workflow_sha }}
+          path: control-plane
           fetch-depth: 1
           clean: true
           persist-credentials: false
 
-      - name: Prepare evidence directory
+      - name: Checkout exact qualification subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ inputs.subject_sha || github.sha }}
+          path: subject
+          fetch-depth: 0
+          clean: true
+          persist-credentials: false
+
+      - name: Prepare control-plane roots and evidence
         shell: cmd
         run: |
+          set "A01_CONTROL_ROOT=%GITHUB_WORKSPACE%\control-plane"
+          set "A01_SUBJECT_ROOT=%GITHUB_WORKSPACE%\subject"
           set "A01_EVIDENCE_DIR=%RUNNER_TEMP%\a01-control-plane-%GITHUB_RUN_ID%"
+          set "A01_ARTIFACT_NAME=%A01_QUALIFICATION_ID%-%GITHUB_RUN_ID%-evidence"
           if not exist "%A01_EVIDENCE_DIR%" mkdir "%A01_EVIDENCE_DIR%"
+          echo A01_CONTROL_ROOT=%A01_CONTROL_ROOT%>>"%GITHUB_ENV%"
+          echo A01_SUBJECT_ROOT=%A01_SUBJECT_ROOT%>>"%GITHUB_ENV%"
           echo A01_EVIDENCE_DIR=%A01_EVIDENCE_DIR%>>"%GITHUB_ENV%"
+          echo A01_ARTIFACT_NAME=%A01_ARTIFACT_NAME%>>"%GITHUB_ENV%"
 
-      - name: Validate control-plane policy and registry
+      - name: Validate canonical control-plane policy and registry
         shell: cmd
-        run: node .github\scripts\a01-control-plane.js validate
+        run: node "%A01_CONTROL_ROOT%\.github\scripts\a01-control-plane.js" validate
 
       - name: Execute registered qualification and emit receipt
+        id: control
         shell: cmd
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: node .github\scripts\a01-control-plane.js execute
+        run: node "%A01_CONTROL_ROOT%\.github\scripts\a01-control-plane.js" execute
 
       - name: Publish control-plane receipt summary
         if: always()
@@ -114,6 +132,7 @@ jobs:
           echo ## A-01 CONTROL PLANE>>"%GITHUB_STEP_SUMMARY%"
           echo Qualification: %A01_QUALIFICATION_ID%>>"%GITHUB_STEP_SUMMARY%"
           echo Subject: %A01_SUBJECT_SHA%>>"%GITHUB_STEP_SUMMARY%"
+          echo Artifact: %A01_ARTIFACT_NAME%>>"%GITHUB_STEP_SUMMARY%"
           if exist "%A01_EVIDENCE_DIR%\result.txt" type "%A01_EVIDENCE_DIR%\result.txt">>"%GITHUB_STEP_SUMMARY%"
           if exist "%A01_EVIDENCE_DIR%\receipt.json" type "%A01_EVIDENCE_DIR%\receipt.json">>"%GITHUB_STEP_SUMMARY%"
 
@@ -121,7 +140,16 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: a01-control-plane-${{ github.run_id }}-evidence
-          path: ${{ runner.temp }}\a01-control-plane-${{ github.run_id }}
+          name: ${{ env.A01_ARTIFACT_NAME }}
+          path: ${{ env.A01_EVIDENCE_DIR }}
           if-no-files-found: error
           retention-days: 30
+
+      - name: Apply registered Windows reboot handoff
+        if: steps.control.outcome == 'success' && steps.control.outputs.post_action == 'windows_reboot'
+        shell: powershell
+        run: |
+          & shutdown.exe /r /t 0 /d p:4:1 /c 'System Master registered A-01 qualification reboot handoff'
+          if ($LASTEXITCODE -ne 0) { throw "WINDOWS_REBOOT_COMMAND_FAILED:$LASTEXITCODE" }
+          Start-Sleep -Seconds 120
+          throw 'WINDOWS_REBOOT_NOT_OBSERVED_FROM_CONTROL_PLANE'

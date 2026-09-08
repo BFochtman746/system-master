@@ -1,13 +1,24 @@
 {
-  "registry_version": 1,
+  "registry_version": 2,
   "qualifications": {
     "A01-CONTROL-PLANE-SELFTEST": {
       "workstream_id": "SYSTEM-MASTER",
       "gate_class": "promotion",
+      "source": "control_plane",
       "executable": "node",
       "args": [".github/scripts/a01-control-plane-selftest.js"],
-      "evidence_artifact": "a01-control-plane-selftest-evidence",
-      "description": "Qualify policy, registry, schemas, bootstrap, gateway safety, receipt production, and exact-SHA binding for A01-CONTROL-PLANE-001."
+      "evidence_artifact": "a01-control-plane-selftest",
+      "description": "Qualify policy, registry, schemas, bootstrap, gateway safety, cross-ref subject execution, receipt production, exact-SHA binding, and shared queue behavior for A01-CONTROL-PLANE-001."
+    },
+    "CONTINUITY-TARGET-WINDOWS-REBOOT": {
+      "workstream_id": "SYSTEM-MASTER-CONTINUITY",
+      "gate_class": "focused",
+      "source": "subject",
+      "executable": "node",
+      "args": [".github/scripts/a01-continuity-target-windows-reboot.js"],
+      "evidence_artifact": "system-master-continuity-target-windows-reboot",
+      "allowed_post_actions": ["windows_reboot"],
+      "description": "Run the repository-owned TARGET_WINDOWS_REBOOT ARM or VERIFY phase while preserving durable reboot handoff evidence. ARM may request the registered windows_reboot post-action only after its receipt and evidence are produced."
     }
   }
 }
