@@ -1,0 +1,14 @@
+{
+  "authority": "021G",
+  "work_package": "G-WP-013",
+  "count": 7,
+  "requirements": [
+    {"id":"G-RQ-016","implementing_components":"ContinuityPolicyRegistry","invariant_validator":"No universal checkpoint interval","failure_recovery_rule":"Policy absent -> conservative class default/blocked","future_test_family":"PERFORMANCE+POLICY"},
+    {"id":"G-RQ-041","implementing_components":"RecoveryPlanner via policy retry budget","invariant_validator":"Retry budget explicit","failure_recovery_rule":"Budget exhausted -> WAIT/BLOCK/TERMINAL per policy","future_test_family":"RETRY+LOAD"},
+    {"id":"G-RQ-042","implementing_components":"RecoveryResourceAdapter","invariant_validator":"Paced admission/backoff","failure_recovery_rule":"Backlog remains queued with age visible","future_test_family":"LOAD+CHAOS"},
+    {"id":"G-RQ-065","implementing_components":"RecoveryResourceAdapter","invariant_validator":"021H owns resource allocation","failure_recovery_rule":"No admission -> queued/waiting","future_test_family":"BOUNDARY+LOAD"},
+    {"id":"G-RQ-066","implementing_components":"RecoveryResourceAdapter+ContinuityEvidencePublisher","invariant_validator":"Metric definitions versioned","failure_recovery_rule":"Missing metrics -> observability gap","future_test_family":"OBSERVABILITY+PERFORMANCE"},
+    {"id":"G-RQ-067","implementing_components":"ContinuityPolicyRegistry+RecoveryResourceAdapter","invariant_validator":"Resource bounds declared","failure_recovery_rule":"Limit reached -> throttle/rollover/wait","future_test_family":"LOAD+SOAK"},
+    {"id":"G-RQ-068","implementing_components":"RecoveryResourceAdapter","invariant_validator":"Recovery cannot stampede dependencies","failure_recovery_rule":"Backlog queued with priority/age","future_test_family":"CHAOS+LOAD"}
+  ]
+}

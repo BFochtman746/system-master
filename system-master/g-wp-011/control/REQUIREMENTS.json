@@ -1,0 +1,15 @@
+{
+  "authority": "021G",
+  "work_package": "G-WP-011",
+  "count": 8,
+  "requirements": [
+    {"id":"G-RQ-023","implementing_components":"RecoveryAuthorizationGate+CheckpointCoordinator","invariant_validator":"Secret references only; classification required","failure_recovery_rule":"Sensitive violation -> reject/quarantine","future_test_family":"SECURITY+PRIVACY+FUZZ"},
+    {"id":"G-RQ-024","implementing_components":"RecoveryIntegrityValidator","invariant_validator":"Integrity state must be VALID","failure_recovery_rule":"Quarantine; evaluate prior safe checkpoint/manual","future_test_family":"CORRUPTION+NEGATIVE"},
+    {"id":"G-RQ-044","implementing_components":"RecoveryAuthorizationGate+DurableSignalRecoveryAdapter","invariant_validator":"Current cancel/revoke outranks old plan","failure_recovery_rule":"Block/cancel before effect","future_test_family":"CANCEL_RACE+AUTHZ_CHANGE"},
+    {"id":"G-RQ-057","implementing_components":"RecoveryAuthorizationGate","invariant_validator":"Old attempt authority not sufficient","failure_recovery_rule":"DENY/UNKNOWN -> block","future_test_family":"AUTHZ_CHANGE+SECURITY"},
+    {"id":"G-RQ-058","implementing_components":"RecoveryAuthorizationGate","invariant_validator":"Current eligibility required","failure_recovery_rule":"Restriction -> alternate/manual/deny","future_test_family":"PRIVACY+PROVIDER+AUTHZ"},
+    {"id":"G-RQ-059","implementing_components":"RecoveryAuthorizationGate","invariant_validator":"Secret references only","failure_recovery_rule":"Missing/revoked secret -> WAIT/BLOCK","future_test_family":"SECURITY+FUZZ"},
+    {"id":"G-RQ-060","implementing_components":"RecoveryIntegrityValidator","invariant_validator":"All critical integrity checks pass","failure_recovery_rule":"Failure -> quarantine","future_test_family":"CORRUPTION+PROPERTY"},
+    {"id":"G-RQ-061","implementing_components":"RecoveryIntegrityValidator","invariant_validator":"Corrupt authority cannot execute","failure_recovery_rule":"QUARANTINED with evidence","future_test_family":"CORRUPTION+ADVERSARIAL"}
+  ]
+}

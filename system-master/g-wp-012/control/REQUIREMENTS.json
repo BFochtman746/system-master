@@ -1,0 +1,14 @@
+{
+  "authority": "021G",
+  "work_package": "G-WP-012",
+  "count": 7,
+  "requirements": [
+    {"id":"G-RQ-014","implementing_components":"RecoveryRegistry via RecoveryClosureCoordinator","invariant_validator":"Verification evidence required","failure_recovery_rule":"Insufficient -> VERIFYING/BLOCKED","future_test_family":"NEGATIVE+EVIDENCE"},
+    {"id":"G-RQ-015","implementing_components":"RecoveryRegistry via RecoveryClosureCoordinator","invariant_validator":"Terminal record retains residual refs","failure_recovery_rule":"Evidence unavailable -> terminal closure blocked","future_test_family":"EVIDENCE+STATE_MACHINE"},
+    {"id":"G-RQ-049","implementing_components":"RecoveryQueryService","invariant_validator":"Client is presentation/control attachment only","failure_recovery_rule":"Client reconnects by work identity","future_test_family":"IOS_CLIENT_SUSPEND_RESUME+E2E"},
+    {"id":"G-RQ-050","implementing_components":"RecoveryQueryService","invariant_validator":"Query/reconcile before re-command","failure_recovery_rule":"Unknown command outcome -> dedupe/reconcile","future_test_family":"IOS_CLIENT_SUSPEND_RESUME+IDEMPOTENCY"},
+    {"id":"G-RQ-062","implementing_components":"ContinuityEvidencePublisher","invariant_validator":"Evidence source/time/subject digest","failure_recovery_rule":"Publisher outage -> durable outbox/backfill","future_test_family":"EVIDENCE+PROCESS_KILL"},
+    {"id":"G-RQ-063","implementing_components":"RecoveryQueryService","invariant_validator":"Projection derives from registry/domain state","failure_recovery_rule":"Telemetry gap displayed explicitly","future_test_family":"OBSERVABILITY+NEGATIVE"},
+    {"id":"G-RQ-064","implementing_components":"RecoveryQueryService","invariant_validator":"Progress basis explicit","failure_recovery_rule":"Unknown -> state label, not invented percent","future_test_family":"QUERY+UX_CONTRACT"}
+  ]
+}
