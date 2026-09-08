@@ -1,0 +1,93 @@
+name: BOOK-EVAL-LEMONADE-001 Frozen Scoring Input Export
+
+on:
+  push:
+    branches:
+      - book-eval-lemonade-001-blind-resume-003-adapter-repair
+    paths:
+      - ".github/workflows/book-eval-scoring-input-export.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    name: Verify and export frozen E4/E5 scoring inputs
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout exact branch
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 1
+
+      - name: Export exact frozen inputs
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $Root = 'C:\AI Test Kit\Books Testing\BOOK_EVAL_LEMONADE_001_A01_BLIND_RUN_GPT_OSS_120B_E5_REPAIR_V1'
+          $OldRoot = 'C:\AI Test Kit\Books Testing\BOOK_EVAL_LEMONADE_001_A01_BLIND_RUN_GPT_OSS_120B'
+          $E4 = Join-Path $Root 'E4-SPECIALIST-v2-FROZEN.jsonl'
+          $E5 = Join-Path $Root 'E5-PANEL-v2-FROZEN.jsonl'
+          $Status = Join-Path $Root 'BLIND-RUN-STATUS.json'
+          $Manifest = Join-Path $Root 'BLIND-OUTPUT-MANIFEST.json'
+          $Freeze = Join-Path $Root 'CANDIDATE-FREEZE-v2.json'
+          $Identity = Join-Path $Root 'LEMONADE-RUNTIME-IDENTITY.json'
+          $OldE4 = Join-Path $OldRoot 'E4-SPECIALIST-v2-FROZEN.jsonl'
+          $OldE5 = Join-Path $OldRoot 'E5-PANEL-v2-FROZEN.jsonl'
+          $ExpectedE4Sha = 'a5a5a3d25b36f50b8e667e22137fefea88a1b12e0d1c1812d6cc1cdd782e8b9c'
+          $ExpectedOldE5Sha = '693b218ba475f51a48eabb759694934b1275873d140da4bf68454fe5987925b3'
+          $ExpectedE5Fingerprint = '3d275e96b5b231fdc2ab08eac70486cb7d4f858e25143fd404a5e039c431f598'
+          $Out = Join-Path $env:RUNNER_TEMP ('book-eval-scoring-inputs-' + $env:GITHUB_RUN_ID)
+          New-Item -ItemType Directory -Force -Path $Out | Out-Null
+          "EVIDENCE_DIR=$Out" | Out-File -FilePath $env:GITHUB_ENV -Encoding ascii -Append
+
+          function Sha([string]$Path) { (Get-FileHash -Algorithm SHA256 -LiteralPath $Path).Hash.ToLowerInvariant() }
+          function CountLines([string]$Path) { @(Get-Content -LiteralPath $Path | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }).Count }
+
+          foreach ($p in @($E4,$E5,$Status,$Manifest,$Identity,$OldE4,$OldE5)) {
+            if (-not (Test-Path -LiteralPath $p -PathType Leaf)) { throw "missing required scoring input: $p" }
+          }
+          if ((CountLines $E4) -ne 160) { throw 'E4 count is not 160' }
+          if ((CountLines $E5) -ne 160) { throw 'E5 count is not 160' }
+          if ((Sha $E4) -ne $ExpectedE4Sha) { throw 'E4 frozen hash mismatch' }
+          if ((Sha $OldE4) -ne $ExpectedE4Sha) { throw 'historical E4 authority mismatch' }
+          if ((Sha $OldE5) -ne $ExpectedOldE5Sha) { throw 'historical pre-repair E5 authority mismatch' }
+          $firstE5 = Get-Content -LiteralPath $E5 -TotalCount 1 | ConvertFrom-Json
+          if ([string]$firstE5.candidate_fingerprint -ne $ExpectedE5Fingerprint) { throw 'repaired E5 fingerprint mismatch' }
+          $s = Get-Content -LiteralPath $Status -Raw | ConvertFrom-Json
+          if ([string]$s.state -ne 'BLIND_OUTPUTS_FROZEN') { throw "blind status not frozen: $($s.state)" }
+          $m = Get-Content -LiteralPath $Manifest -Raw | ConvertFrom-Json
+          if ([string]$m.state -ne 'FROZEN_BLIND_OUTPUTS') { throw "blind manifest not frozen: $($m.state)" }
+          if (Test-Path (Join-Path $Root 'scoring-private')) { throw 'scoring-private material present in blind root' }
+
+          Copy-Item -LiteralPath $E4 -Destination (Join-Path $Out 'E4-SPECIALIST-v2-FROZEN.jsonl')
+          Copy-Item -LiteralPath $E5 -Destination (Join-Path $Out 'E5-PANEL-v2-FROZEN.jsonl')
+          Copy-Item -LiteralPath $Status -Destination (Join-Path $Out 'BLIND-RUN-STATUS.json')
+          Copy-Item -LiteralPath $Manifest -Destination (Join-Path $Out 'BLIND-OUTPUT-MANIFEST.json')
+          Copy-Item -LiteralPath $Identity -Destination (Join-Path $Out 'LEMONADE-RUNTIME-IDENTITY.json')
+          if (Test-Path -LiteralPath $Freeze) { Copy-Item -LiteralPath $Freeze -Destination (Join-Path $Out 'CANDIDATE-FREEZE-v2.json') }
+
+          @(
+            'objective=BOOK-EVAL-LEMONADE-001-BLIND-SCORING-INPUT-EXPORT',
+            'blind_outputs_frozen=true',
+            'e4_cases=160',
+            'e5_cases=160',
+            "e4_sha256=$(Sha $E4)",
+            "e5_sha256=$(Sha $E5)",
+            'e5_candidate_fingerprint=3d275e96b5b231fdc2ab08eac70486cb7d4f858e25143fd404a5e039c431f598',
+            'pre_repair_e5_117_preserved=true',
+            'scoring_private_accessed=false',
+            'standing=PASS_FROZEN_SCORING_INPUTS_EXPORTED'
+          ) | Set-Content -Encoding UTF8 (Join-Path $Out 'export-summary.txt')
+          Get-Content (Join-Path $Out 'export-summary.txt')
+
+      - name: Upload frozen scoring inputs
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: book-eval-frozen-scoring-inputs
+          path: ${{ env.EVIDENCE_DIR }}
+          if-no-files-found: error
+          retention-days: 30
