@@ -1,0 +1,121 @@
+{
+  "contract_id": "LITERARY-REFERENCE-CORPUS-CONTRACT-v1",
+  "purpose": [
+    "train and calibrate literary evaluators",
+    "retrieve craft principles during prose drafting and revision",
+    "generate contrastive examples and hard negatives",
+    "optimize prose while preserving project-specific voice, canon, intent and protected language"
+  ],
+  "prohibited_goal": "Do not optimize toward copying a named author or memorizing copyrighted prose. Learn transferable craft decisions, abstract patterns, contrasts, and measurable effects.",
+  "source_rights_classes": {
+    "PUBLIC_DOMAIN_FULL_TEXT": "Full text may be stored and transformed when public-domain status is verified for the relevant jurisdiction/use.",
+    "LICENSED_FULL_TEXT": "Full text may be stored only within documented license scope.",
+    "USER_OWNED_OR_AUTHORIZED": "Full text may be stored when the user owns or has authorized use.",
+    "ANALYSIS_ONLY_NO_FULL_TEXT": "Store bibliographic metadata, human-authored craft analysis, abstract technique descriptors and other permitted material; do not persist unauthorized full-text corpus content."
+  },
+  "required_record_fields": [
+    "reference_id",
+    "rights_class",
+    "source_identity",
+    "genre",
+    "form",
+    "audience",
+    "passage_function",
+    "technique_annotations",
+    "craft_principles",
+    "observable_effects",
+    "anti_patterns",
+    "voice_independent_features",
+    "provenance",
+    "content_digest"
+  ],
+  "technique_dimensions": [
+    "sentence_rhythm",
+    "sentence_length_variation",
+    "syntactic_complexity",
+    "paragraph_movement",
+    "narrative_distance",
+    "pov_fidelity",
+    "interiority_density",
+    "sensory_specificity",
+    "concrete_detail_density",
+    "image_coherence",
+    "metaphor_density",
+    "dialogue_subtext",
+    "dialogue_distinctiveness",
+    "exposition_density",
+    "information_release",
+    "scene_tension",
+    "conflict_progression",
+    "setup_payoff",
+    "transition_quality",
+    "pacing",
+    "compression",
+    "clarity",
+    "ambiguity_control",
+    "emotional_progression",
+    "character_goal_pressure",
+    "motif_recurrence",
+    "opening_strength",
+    "ending_turn",
+    "repetition_control",
+    "voice_consistency",
+    "register",
+    "rhetorical_structure"
+  ],
+  "derived_artifact_types": {
+    "CRAFT_PRINCIPLE": "Abstract rule with preconditions, desired effect, counterexamples, and failure modes.",
+    "CONTRASTIVE_PAIR": "Two non-gold training examples differing at one important decision boundary, with preferred result and explanation.",
+    "TECHNIQUE_PROFILE": "Vector/profile of prose characteristics independent of author identity.",
+    "REVISION_TRANSFORM": "Before/after transformation annotated by intended improvement and protected invariants.",
+    "HARD_NEGATIVE": "Plausible but inferior or misclassified example designed to separate near-neighbor concepts.",
+    "REFERENCE_STATE": "Canonical facts, timeline, character state, source support, protected language, and governing brief extracted separately from judgment."
+  },
+  "prose_optimizer_contract": {
+    "inputs": [
+      "draft",
+      "project_voice_profile",
+      "canon_state",
+      "scene_or_chapter_goal",
+      "protected_language",
+      "target_genre_form_audience"
+    ],
+    "pipeline": [
+      "analyze_current_prose",
+      "retrieve_relevant_craft_principles_and_abstract_exemplars",
+      "identify_specific_improvement_opportunities",
+      "generate_revision_candidates",
+      "verify_voice_canon_intent_and_protected_language",
+      "independently_compare_original_vs_revision",
+      "accept_only_measurable_improvement_or_return_original"
+    ],
+    "guardrails": [
+      "Never use one universal prose ideal.",
+      "Optimize relative to the project's declared genre, audience, voice and scene purpose.",
+      "Never replace authorial voice merely because a reference corpus has a different style.",
+      "Writer and evaluator roles must be logically separated.",
+      "Retain the original when the proposed revision does not clear the improvement threshold."
+    ]
+  },
+  "evaluator_training_contract": {
+    "development_only_for_adaptive_tuning": true,
+    "hidden_holdout_gold_allowed_during_training": false,
+    "contrastive_focus": [
+      "tradeoff_vs_preference",
+      "preference_vs_objective_superiority",
+      "knowledge_state_vs_pov_leak",
+      "timeline_vs_timeline_continuity",
+      "object_state_vs_location_continuity",
+      "fact_contradiction_vs_factual_claim_error_vs_source_support_conflict",
+      "causal_motivation_vs_argument_mechanism_vs_goal_conflict_vs_missing_payoff",
+      "meaning_damage_vs_intent_damage_vs_safe_edit"
+    ],
+    "required_negative_controls": [
+      "clean_authorized_style",
+      "decoy_evidence",
+      "evaluator_manipulation",
+      "position_swapped_pairwise",
+      "near_neighbor_wrong_label"
+    ]
+  }
+}
