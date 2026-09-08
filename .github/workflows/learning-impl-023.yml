@@ -1,0 +1,111 @@
+name: LEARNING-LAB-IMPL-023 HTTP Model Provider Adapter
+
+on:
+  push:
+    branches:
+      - learning/impl-023-http-model-provider-adapter
+    paths:
+      - ".github/workflows/learning-impl-023.yml"
+      - "learning/lab/learning_lab/http_model_provider.py"
+      - "learning/lab/tests/test_http_model_provider.py"
+      - "learning/lab/learning_lab/provider_multi_sample_acquisition.py"
+      - "learning/lab/learning_lab/provider_multi_candidate_runtime.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: learning-impl-023-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qualify:
+    name: Qualify durable HTTP model transport on A-01
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout exact IMPL-023 commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+          clean: true
+
+      - name: Provision pinned Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: '3.13.15'
+          architecture: x64
+          check-latest: false
+
+      - name: Prepare evidence
+        shell: cmd
+        run: |
+          set "EVIDENCE_DIR=%RUNNER_TEMP%\learning-impl-023-%GITHUB_RUN_ID%"
+          if not exist "%EVIDENCE_DIR%" mkdir "%EVIDENCE_DIR%"
+          echo EVIDENCE_DIR=%EVIDENCE_DIR%>>"%GITHUB_ENV%"
+          echo %GITHUB_SHA%>"%EVIDENCE_DIR%\source-commit.txt"
+          echo %RUNNER_NAME%>"%EVIDENCE_DIR%\runner.txt"
+          python --version >"%EVIDENCE_DIR%\python-version.txt" 2>&1
+          type "%EVIDENCE_DIR%\python-version.txt"
+
+      - name: Compile HTTP provider adapter
+        shell: cmd
+        run: |
+          python -m py_compile ^
+            learning\lab\learning_lab\http_model_provider.py ^
+            learning\lab\tests\test_http_model_provider.py ^
+            >"%EVIDENCE_DIR%\python-compile.txt" 2>&1
+          set "RC=%ERRORLEVEL%"
+          type "%EVIDENCE_DIR%\python-compile.txt"
+          exit /b %RC%
+
+      - name: Run focused real HTTP provider tests
+        shell: cmd
+        run: |
+          cd /d "%GITHUB_WORKSPACE%\learning\lab"
+          python -m unittest -v tests.test_http_model_provider >"%EVIDENCE_DIR%\python-http-provider.txt" 2>&1
+          set "RC=%ERRORLEVEL%"
+          type "%EVIDENCE_DIR%\python-http-provider.txt"
+          exit /b %RC%
+
+      - name: Regress IMPL-022 acquisition boundary
+        shell: cmd
+        run: |
+          cd /d "%GITHUB_WORKSPACE%\learning\lab"
+          python -m unittest -v tests.test_provider_multi_sample_acquisition >"%EVIDENCE_DIR%\python-impl022-regression.txt" 2>&1
+          set "RC=%ERRORLEVEL%"
+          type "%EVIDENCE_DIR%\python-impl022-regression.txt"
+          exit /b %RC%
+
+      - name: Regress IMPL-021 selection boundary
+        shell: cmd
+        run: |
+          cd /d "%GITHUB_WORKSPACE%\learning\lab"
+          python -m unittest -v tests.test_provider_multi_candidate_runtime >"%EVIDENCE_DIR%\python-impl021-regression.txt" 2>&1
+          set "RC=%ERRORLEVEL%"
+          type "%EVIDENCE_DIR%\python-impl021-regression.txt"
+          exit /b %RC%
+
+      - name: Publish IMPL-023 summary
+        if: always()
+        shell: cmd
+        run: |
+          echo ## LEARNING-LAB-IMPL-023>>"%GITHUB_STEP_SUMMARY%"
+          echo Commit: %GITHUB_SHA%>>"%GITHUB_STEP_SUMMARY%"
+          echo Truth boundary: real local HTTP transport; not external production-provider qualification.>>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\python-http-provider.txt" type "%EVIDENCE_DIR%\python-http-provider.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\python-impl022-regression.txt" type "%EVIDENCE_DIR%\python-impl022-regression.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\python-impl021-regression.txt" type "%EVIDENCE_DIR%\python-impl021-regression.txt">>"%GITHUB_STEP_SUMMARY%"
+
+      - name: Upload IMPL-023 evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: learning-impl-023-evidence
+          path: ${{ runner.temp }}\learning-impl-023-${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 30
