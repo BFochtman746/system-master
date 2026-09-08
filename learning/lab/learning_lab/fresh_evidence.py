@@ -61,12 +61,13 @@ def _resolve_default_spec(course: Dict[str, Any]):
 
 
 def _known_families(repo: Repository, course: Dict[str, Any], skill_id: str) -> set[str]:
+    criterion_ids = {
+        c["criterion_id"] for c in course.get("criteria", []) if c.get("skill_id") == skill_id
+    }
     families = {
         str(item["family_id"])
         for item in course.get("items", [])
-        if item.get("family_id") and item.get("criterion_id") in {
-            c["criterion_id"] for c in course.get("criteria", []) if c.get("skill_id") == skill_id
-        }
+        if item.get("family_id") and item.get("criterion_id") in criterion_ids
     }
     spec = _resolve_default_spec(course)
     if spec is not None:
@@ -233,7 +234,22 @@ class FreshEvidenceTaskAdmissionService:
         if not refs or not refs.issubset(admitted_claims):
             raise FreshEvidenceAdmissionError("FRESH_EVIDENCE_GROUNDING_NOT_ADMITTED")
 
-        if task["family_id"] in _known_families(self.repo, course, task["skill_id"]):
+        index_id = _index_id(course_id, kind, task["skill_id"])
+        latest_for_kind = self.repo.get_latest_object(FRESH_EVIDENCE_INDEX_KIND, index_id)
+        indexed_entry = None
+        if latest_for_kind:
+            indexed_entry = next(
+                (entry for entry in latest_for_kind.get("entries", []) if entry.get("task_id") == task["item_id"]),
+                None,
+            )
+        task_digest = digest(task)
+        exact_index_replay = bool(
+            indexed_entry
+            and indexed_entry.get("task_digest") == task_digest
+            and indexed_entry.get("family_id") == task["family_id"]
+            and indexed_entry.get("admission_id") == admission_id
+        )
+        if task["family_id"] in _known_families(self.repo, course, task["skill_id"]) and not exact_index_replay:
             raise FreshEvidenceAdmissionError("FRESH_EVIDENCE_FAMILY_NOT_FRESH")
         if kind == "maintenance" and task.get("fresh_family") is not True:
             raise FreshEvidenceAdmissionError("FRESH_EVIDENCE_MAINTENANCE_FRESH_FLAG_REQUIRED")
@@ -248,7 +264,7 @@ class FreshEvidenceTaskAdmissionService:
             raise FreshEvidenceAdmissionError("FRESH_EVIDENCE_TASK_ID_NOT_FRESH")
         for object_kind in ("maintenance_task", "transfer_task"):
             existing_task = self.repo.get_object(object_kind, task["item_id"], 1)
-            if existing_task is not None and digest(existing_task) != digest(task):
+            if existing_task is not None and digest(existing_task) != task_digest:
                 raise FreshEvidenceAdmissionError("FRESH_EVIDENCE_TASK_ID_COLLISION")
             if existing_task is not None and object_kind != task_object_kind:
                 raise FreshEvidenceAdmissionError("FRESH_EVIDENCE_TASK_KIND_COLLISION")
@@ -268,13 +284,15 @@ class FreshEvidenceTaskAdmissionService:
         if crash_after_phase == "TASK_STORED":
             raise RuntimeError("INJECTED_CRASH_AFTER_FRESH_TASK_STORED")
 
-        index_id = _index_id(course_id, kind, task["skill_id"])
         latest = self.repo.get_latest_object(FRESH_EVIDENCE_INDEX_KIND, index_id)
         entries = [] if latest is None else copy.deepcopy(latest.get("entries", []))
         existing_entry = next((entry for entry in entries if entry.get("task_id") == task["item_id"]), None)
-        task_digest = digest(task)
         if existing_entry is not None:
-            if existing_entry.get("task_digest") != task_digest or existing_entry.get("family_id") != task["family_id"]:
+            if (
+                existing_entry.get("task_digest") != task_digest
+                or existing_entry.get("family_id") != task["family_id"]
+                or existing_entry.get("admission_id") != admission_id
+            ):
                 raise FreshEvidenceAdmissionError("FRESH_EVIDENCE_INDEX_ENTRY_COLLISION")
             index_version = int(latest["_object_version"])
         else:
