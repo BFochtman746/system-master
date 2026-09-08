@@ -1,0 +1,97 @@
+{
+  "qualification_id": "LITERARY-PROSE-ENGINE-001-STEP-A-QUALIFICATION-v1",
+  "objective": "Qualify source taxonomy, rights/provenance, identity, ontology, derived artifacts, voice representation, conditioning, preservation and evaluator bridge before corpus acquisition.",
+  "source_authority": [
+    "qualification/book-eval-lemonade-001/repair005/LITERARY-PROSE-SYSTEM-CHAT-BOOTSTRAP.md",
+    "qualification/book-eval-lemonade-001/repair005/LITERARY-REFERENCE-CORPUS-CONTRACT-v1.json",
+    "qualification/book-eval-lemonade-001/repair005/CONTRASTIVE-JUDGE-TRAINING-RECORD-SCHEMA-v1.json",
+    "qualification/book-eval-lemonade-001/repair005/CONTRASTIVE-CURRICULUM-v1.json",
+    "qualification/book-eval-lemonade-001/repair005/BOOK-EVAL-HIERARCHICAL-SPECIALIST-TAXONOMY-v1.json",
+    "qualification/book-eval-lemonade-001/repair005/REPAIR-005-GATE-C-CLOSURE.md"
+  ],
+  "gates": [
+    {
+      "gate_id": "A-RIGHTS-001",
+      "must": "Every admitted source has one rights class and required evidence scoped to jurisdiction/use.",
+      "failure": "BLOCK_INGESTION"
+    },
+    {
+      "gate_id": "A-RIGHTS-002",
+      "must": "ANALYSIS_ONLY_NO_FULL_TEXT records prohibit persisted full text/passages and permit only nonreconstructive derived representations.",
+      "failure": "BLOCK_INGESTION_AND_DELETE_UNAUTHORIZED_PERSISTENCE"
+    },
+    {
+      "gate_id": "A-RIGHTS-003",
+      "must": "Unknown/ambiguous rights never default to public-domain/licensed admission.",
+      "failure": "BLOCK_INGESTION"
+    },
+    {
+      "gate_id": "A-ID-001",
+      "must": "Work, edition, source and passage identities are separate and digest-bound; exact/near duplicates cannot inflate corpus weight.",
+      "failure": "BLOCK_CORPUS_PROMOTION"
+    },
+    {
+      "gate_id": "A-SPLIT-001",
+      "must": "Work/edition/overlap groups cannot cross training-vs-evaluation boundaries in generalization claims.",
+      "failure": "INVALIDATE_QUALIFICATION_CLAIM"
+    },
+    {
+      "gate_id": "A-ONTOLOGY-001",
+      "must": "Annotations describe transferable craft decisions/effects with conditioning; no named-author technique target exists.",
+      "failure": "BLOCK_ARTIFACT_PROMOTION"
+    },
+    {
+      "gate_id": "A-DERIVED-001",
+      "must": "All six required artifact families carry rights/provenance linkage, derivation and digest.",
+      "failure": "BLOCK_ARTIFACT_PROMOTION"
+    },
+    {
+      "gate_id": "A-VOICE-001",
+      "must": "Voice profile is project-specific and based only on user brief/authorized project evidence/user approvals.",
+      "failure": "BLOCK_REVISION_AUTOMATION"
+    },
+    {
+      "gate_id": "A-IMITATION-001",
+      "must": "Named-author imitation, nearest-author targeting and author-identity optimization are prohibited objectives.",
+      "failure": "HARD_FAIL"
+    },
+    {
+      "gate_id": "A-QUALITY-001",
+      "must": "No universal great-prose scalar controls acceptance; decisions are conditioned multi-objective comparisons with preservation hard gates.",
+      "failure": "HARD_FAIL"
+    },
+    {
+      "gate_id": "A-SEPARATION-001",
+      "must": "Writer and evaluator roles are logically separated; evaluator does not receive scoring-private hidden gold or writer self-justification as authority.",
+      "failure": "HARD_FAIL"
+    },
+    {
+      "gate_id": "A-EVAL-BRIDGE-001",
+      "must": "Literary intelligence may supply authorized craft/reference artifacts to the Book evaluator but may not consume hidden-holdout gold or overwrite evaluator evidence/history.",
+      "failure": "HARD_FAIL"
+    },
+    {
+      "gate_id": "A-BULK-001",
+      "must": "No bulk book acquisition begins before STEP-A passes and a later ingestion objective declares source-by-source admission controls.",
+      "failure": "BLOCK_ACQUISITION"
+    }
+  ],
+  "writer_evaluator_separation": true,
+  "evaluator_hidden_holdout_gold_access": false,
+  "author_imitation_objective_allowed": false,
+  "unauthorized_full_text_persistence_allowed": false,
+  "bulk_download_allowed_in_step_a": false,
+  "required_artifacts": [
+    "LITERARY-SOURCE-RIGHTS-PROVENANCE-SCHEMA-v1.json",
+    "WORK-EDITION-SOURCE-PASSAGE-IDENTITY-CONTRACT-v1.json",
+    "CRAFT-ANNOTATION-ONTOLOGY-v1.json",
+    "DERIVED-LITERARY-INTELLIGENCE-SCHEMA-v1.json",
+    "PROJECT-VOICE-PROFILE-SCHEMA-v1.json",
+    "PROSE-QUALITY-CONDITIONING-AND-PRESERVATION-CONTRACT-v1.json",
+    "STEP-A-QUALIFICATION-CONTRACT-v1.json",
+    "RESEARCH-BASIS.md",
+    "validate_step_a.py",
+    "STEP-A-CLOSURE.md"
+  ],
+  "next_objective_after_pass": "LITERARY-PROSE-ENGINE-001-STEP-B — ADMISSION CONTROLLER + REFERENCE INGESTION / DERIVATION PIPELINE QUALIFICATION"
+}
