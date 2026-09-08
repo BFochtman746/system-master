@@ -1,0 +1,24 @@
+name: LEARNING PILOT-001 RUN-001 Execution Prep A-01 Qualification
+
+on:
+  workflow_dispatch:
+    inputs:
+      subject_sha:
+        description: Exact prequalified 40-character Learning subject SHA
+        required: true
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  qualify:
+    uses: BFochtman746/system-master/.github/workflows/a01-control-plane-gateway.yml@main
+    with:
+      qualification_id: LEARNING-PILOT-001-RUN-001-EXECUTION-PREP
+      workstream_id: LEARNING
+      subject_sha: ${{ inputs.subject_sha }}
+      origin_ref: refs/heads/learning/pilot-001-run-001-execution-prep
+      resume_on_pass: Adjudicate the canonical control-plane receipt; if promotion_authorized=true, promote the exact tested execution-prep SHA unchanged and permit only explicit-consent real-participant execution.
+      resume_on_failure: Classify SUBJECT_FAILURE versus INFRA_FAILURE or CONTROL_PLANE_FAILURE; repair only the failing execution-prep or infrastructure boundary when sufficient and rerun the minimum required gate.
+      notification_target: learning-pilot-001-run-001-execution
