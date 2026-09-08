@@ -68,6 +68,7 @@ def _packet_set(
     ]
     packet_set = {
         "packet_set_version": PROVIDER_PACKET_SET_VERSION,
+        "standing": "SEALED_PROVIDER_CANDIDATE_SET_PENDING_INDEPENDENT_SELECTION",
         "desired_outcome": next(iter(goals)),
         "domain_key": next(iter(domain_keys)),
         "research_evidence_digest": next(iter(research_evidence)),
@@ -87,7 +88,6 @@ def _packet_set(
     packet_set["packet_set_digest"] = digest(packet_set)
     set_id = f"PROVIDER-MC-SET-{packet_set['packet_set_digest'][:20].upper()}"
     packet_set["packet_set_id"] = set_id
-    # Recompute after binding the stable object identity into the sealed set.
     unsigned = {k: v for k, v in packet_set.items() if k != "packet_set_digest"}
     packet_set["packet_set_digest"] = digest(unsigned)
     repo.put_object("provider_multi_candidate_packet_set", set_id, 1, packet_set)
@@ -147,10 +147,16 @@ def start_provider_multi_candidate_adaptive_entry(
         "packet_set_id": packet_set["packet_set_id"],
         "packet_set_digest": packet_set["packet_set_digest"],
         "packet_ids": sorted(packet_ids),
+        "candidate_count": selection_result["candidate_count"],
         "candidate_set_digest": selection_decision["candidate_set_digest"],
         "selection_policy_version": selection_decision["policy_version"],
         "selection_decision_id": selection_result["selection_decision_id"],
         "selection_decision": selection_result["selection_decision"],
+        "selected_candidate_id": selection_result.get("selected_candidate_id"),
+        "selected_model_trace_id": selection_result.get("selected_model_trace_id"),
+        "course_id": selection_result.get("course_id"),
+        "desired_outcome": desired_outcome,
+        "research_evidence_digest": packet_set["research_evidence_digest"],
         "model_ranking_used": selection_decision["model_ranking_used"],
         "scalar_ranking_used": selection_decision["scalar_ranking_used"],
     }
@@ -184,7 +190,6 @@ def start_provider_multi_candidate_adaptive_entry(
     course = engine.course(course_id)
     domain_key = course["domain_key"]
     if not engine.registry.has_key(domain_key):
-        # Rehydrate the persisted selected dynamic domain on exact replay/process restart.
         engine.next_action(learner_id, course_id, now=now)
     spec = engine.registry.by_key(domain_key)
     allowed_skill_ids = _validate_claims(course, claimed_skill_ids)
