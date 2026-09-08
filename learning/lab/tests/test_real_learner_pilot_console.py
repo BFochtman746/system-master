@@ -38,8 +38,10 @@ class RealLearnerPilotConsoleTests(unittest.TestCase):
         self.assertEqual(manifest["baseline_skill_id"], course["skills"][0]["skill_id"])
         self.assertTrue(manifest["consent_recorded"])
         self.assertFalse(manifest["raw_response_persisted_by_console"])
+        self.assertNotIn("response", manifest)
+        self.assertNotIn("raw_response", manifest)
         rendered = json.dumps(manifest, sort_keys=True).lower()
-        for forbidden in ("name", "email", "phone", "address", "raw_response", console.CONSENT_TOKEN.lower()):
+        for forbidden in ("name", "email", "phone", "address", console.CONSENT_TOKEN.lower()):
             self.assertNotIn(forbidden, rendered)
         self.assertTrue(console.manifest_path(self.root, manifest["pilot_id"]).is_file())
         self.assertTrue((self.root / f"{manifest['state_key']}.sqlite3").is_file())
