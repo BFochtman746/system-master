@@ -107,7 +107,7 @@ jobs:
           echo Commit: %GITHUB_SHA%>>"%GITHUB_STEP_SUMMARY%"
           if exist "%EVIDENCE_DIR%\python-provider-multi-candidate.txt" type "%EVIDENCE_DIR%\python-provider-multi-candidate.txt">>"%GITHUB_STEP_SUMMARY%"
           if exist "%EVIDENCE_DIR%\java-isolation.txt" type "%EVIDENCE_DIR%\java-isolation.txt">>"%GITHUB_STEP_SUMMARY%"
-          if exist "%EVIDENCE_DIR%\impl021-integration.txt" type "%GITHUB_STEP_SUMMARY%" >nul & type "%EVIDENCE_DIR%\impl021-integration.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\impl021-integration.txt" type "%EVIDENCE_DIR%\impl021-integration.txt">>"%GITHUB_STEP_SUMMARY%"
 
       - name: Upload IMPL-021 evidence
         if: always()
