@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
 public final class LearningTurnControllerAdapter {
     public static final String ADAPTER_VERSION = "SYSTEM-MASTER-LEARNING-TURN-ADAPTER-V1";
     public static final String BRIDGE_VERSION = "SYSTEM-MASTER-LEARNING-TURN-BRIDGE-V1";
-    public static final String CONTROLLER_VERSION = "SYSTEM-MASTER-UNIFIED-LEARNING-TURN-V1";
+    public static final String CONTROLLER_VERSION = "SYSTEM-MASTER-UNIFIED-LEARNING-TURN-V2";
 
     private static final Pattern SAFE_ID = Pattern.compile("^[A-Za-z0-9][A-Za-z0-9_.:-]{0,95}$");
     private static final Pattern SAFE_STATE = Pattern.compile("^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$");
