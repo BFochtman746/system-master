@@ -39,7 +39,8 @@ function validate() {
 }
 
 function gitHead() {
-  const r = cp.spawnSync('git', ['rev-parse', 'HEAD'], { cwd: ROOT, encoding: 'utf8', shell: false });
+  const safeRoot = ROOT.replace(/\\/g, '/');
+  const r = cp.spawnSync('git', ['-c', `safe.directory=${safeRoot}`, 'rev-parse', 'HEAD'], { cwd: ROOT, encoding: 'utf8', shell: false });
   if (r.status !== 0) throw new Error(`git rev-parse failed: ${r.stderr || r.stdout}`);
   return r.stdout.trim();
 }
@@ -79,9 +80,9 @@ async function execute() {
   assert(workstream === entry.workstream_id, `WORKSTREAM_MISMATCH:${workstream}:${entry.workstream_id}`);
   const subject = (process.env.A01_SUBJECT_SHA || process.env.GITHUB_SHA || '').trim();
   assert(/^[0-9a-fA-F]{40}$/.test(subject), `INVALID_SUBJECT_SHA:${subject}`);
-  const checkout = gitHead();
   const evidenceDir = process.env.A01_EVIDENCE_DIR || path.join(process.env.RUNNER_TEMP || ROOT, `a01-${process.env.GITHUB_RUN_ID || Date.now()}`);
   mkdir(evidenceDir);
+  const checkout = gitHead();
   const meta = await runMetadata();
   const requestedAt = meta && meta.created_at ? meta.created_at : null;
   const workflowStartedAt = meta && meta.run_started_at ? meta.run_started_at : null;
@@ -178,6 +179,13 @@ async function execute() {
     }
     throw new Error(`UNKNOWN_COMMAND:${command}`);
   } catch (error) {
+    const evidenceDir = process.env.A01_EVIDENCE_DIR;
+    if (evidenceDir) {
+      try {
+        mkdir(evidenceDir);
+        fs.writeFileSync(path.join(evidenceDir, 'control-plane-failure.txt'), `${error.stack || error.message}\n`);
+      } catch (_) {}
+    }
     console.error(error.stack || error.message);
     process.exit(2);
   }
