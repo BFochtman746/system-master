@@ -1,0 +1,110 @@
+{
+  "contract_id": "PROSE-QUALITY-CONDITIONING-AND-PRESERVATION-CONTRACT-v1",
+  "version": 1,
+  "universal_great_prose_score": false,
+  "decision_model": "multi-objective, conditioned, thresholded, preservation-constrained pairwise comparison",
+  "quality_dimensions": {
+    "meaning_and_clarity": [
+      "semantic_precision",
+      "local_clarity",
+      "controlled_ambiguity",
+      "referent_clarity"
+    ],
+    "movement_and_reading": [
+      "sentence_rhythm_fit",
+      "paragraph_movement",
+      "transition_function",
+      "pacing_fit",
+      "compression_fit"
+    ],
+    "narrative": [
+      "pov_fidelity",
+      "distance_fit",
+      "interiority_effectiveness",
+      "information_release",
+      "tension_progression",
+      "setup_payoff",
+      "scene_function_fulfillment"
+    ],
+    "character_and_dialogue": [
+      "character_goal_pressure",
+      "dialogue_subtext",
+      "speaker_distinctiveness",
+      "relationship_dynamics"
+    ],
+    "imagery_and_detail": [
+      "concrete_detail_function",
+      "sensory_specificity_fit",
+      "image_coherence",
+      "metaphor_function",
+      "motif_control"
+    ],
+    "nonfiction": [
+      "argument_structure",
+      "claim_support",
+      "mechanism_explanation",
+      "example_fit",
+      "rhetorical_fairness"
+    ],
+    "preservation": [
+      "voice_fidelity",
+      "canon_fidelity",
+      "intent_fidelity",
+      "protected_language_fidelity",
+      "genre_fidelity",
+      "audience_fit"
+    ]
+  },
+  "conditioning_required": [
+    "genre",
+    "form",
+    "audience",
+    "project_voice_profile",
+    "pov",
+    "narrative_distance",
+    "scene_or_chapter_function",
+    "pacing_target",
+    "canon_state",
+    "authorial_intent",
+    "protected_language"
+  ],
+  "revision_acceptance": {
+    "writer_role": "generates targeted candidates after analysis/retrieval",
+    "evaluator_role": "receives original and candidate without writer rationale that could bias judgment; compares against the governing brief and invariants",
+    "required_checks": [
+      "no_preservation_hard_gate_failure",
+      "target_dimension_improves_or_tradeoff_is_explicit",
+      "no material regression on non-target critical dimensions",
+      "position-swapped comparison is consistent",
+      "confidence clears threshold or routes to REVIEW_REQUIRED"
+    ],
+    "default_on_uncertainty": "RETAIN_ORIGINAL",
+    "no_change_is_valid": true
+  },
+  "anti_overoptimization": [
+    "Do not optimize a scalar aggregate repeatedly until prose converges on the evaluator proxy.",
+    "Limit each revision pass to declared opportunities and a bounded edit budget unless the user asks for structural rewriting.",
+    "Track dimension deltas and preservation deltas, not only wins.",
+    "Use holdout project passages and user-approved samples to detect voice drift.",
+    "Inject clean controls where no revision should be preferred.",
+    "Use hard negatives for superficially polished but intent/voice/canon-damaging edits.",
+    "Require position-swapped pairwise consistency and abstention on unstable judgments.",
+    "Periodically compare accepted revisions to the pre-optimization project baseline for homogenization/drift."
+  ],
+  "voice_drift_indicators": [
+    "lexical_entropy_collapse",
+    "sentence_length_distribution_collapse",
+    "register_shift",
+    "dialogue_convergence_across_characters",
+    "loss_of_intentional_fragments_or_dialect",
+    "excessive_metaphor_normalization",
+    "systematic_tendency_toward_reference-corpus centroid"
+  ],
+  "prohibited_objectives": [
+    "maximize similarity to a named author",
+    "maximize prestige/canonical similarity",
+    "maximize a single prose score",
+    "remove all irregularity",
+    "prefer longer/more ornate/more concise prose irrespective of brief"
+  ]
+}
