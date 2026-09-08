@@ -23,8 +23,14 @@ try{
  const req=JSON.parse(fs.readFileSync(path.join(ws,root,'control','REQUIREMENTS.json'),'utf8'));if(req.requirements.length!==2)throw new Error('REQUIREMENTS_COUNT');
  const mf=JSON.parse(fs.readFileSync(path.join(ws,root,'control','SOURCE-SLICE-MANIFEST.json'),'utf8'));if(mf.expected_test_count!==35||mf.trace_requirement_count!==76||mf.contract_version!=='021G-continuity-policy/v1')throw new Error('MANIFEST_METADATA');
  for(const e of mf.files){const bytes=git(['show',`HEAD:${root}/${e.path}`],null);if(bytes.length!==e.size)throw new Error(`SEALED_SIZE_MISMATCH:${e.path}`);if(hash(bytes)!==e.sha256)throw new Error(`SEALED_HASH_MISMATCH:${e.path}`);}
- // Re-prove canonical 021F integration before consuming it.
- const prior=run('node',['.github/scripts/021f-integration-qualify.js']);if(!prior.includes('PASS 021F-INTEGRATION packages=12 java_files=51 requirements=60'))throw new Error(`021F_REGRESSION_NOT_PROVEN:${prior}`);write('dependency-021f.txt',prior);
+ // Re-prove canonical 021F integration on its exact qualified merge subject, not this descendant G commit.
+ const depWorktree=path.join(process.env.RUNNER_TEMP||path.join(ws,'.tmp'),`system-master-021f-dependency-${runId}`);
+ try{
+  if(fs.existsSync(depWorktree))git(['worktree','remove','--force',depWorktree]);
+  git(['worktree','add','--detach',depWorktree,pred]);
+  const r=spawnSync('node',['.github/scripts/021f-integration-qualify.js'],{cwd:depWorktree,encoding:'utf8',shell:false,windowsHide:true,env:{...process.env,GITHUB_WORKSPACE:depWorktree,GITHUB_REF_NAME:'dependency-021f'}});
+  const prior=`${r.stdout||''}${r.stderr||''}`;if(r.error||r.status!==0||!prior.includes('PASS 021F-INTEGRATION packages=12 java_files=51 requirements=60'))throw new Error(`021F_REGRESSION_NOT_PROVEN:${r.error?r.error.message:prior}`);write('dependency-021f.txt',prior);
+ } finally { try{git(['worktree','remove','--force',depWorktree]);}catch(_){} }
  const classes=path.join(evidenceDir,'classes');fs.mkdirSync(classes,{recursive:true});const src=path.join(ws,root,'src','main','java','org','systemmaster','continuity'),test=path.join(ws,root,'src','test','java','org','systemmaster','continuity','Gwp001QualificationTest.java');
  write('compile.txt',run('javac',['-encoding','UTF-8','-d',classes,path.join(src,'ContinuityPolicyRegistry.java'),path.join(src,'ContinuityGovernanceValidator.java'),test])||'javac=PASS');
  const out=run('java',['-cp',classes,'org.systemmaster.continuity.Gwp001QualificationTest']);write('qualification.txt',out);if(!out.includes('PASS G-WP-001 tests=35 requirements=2 trace_requirements=76'))throw new Error(`QUALIFICATION_SENTINEL_MISSING:${out}`);
