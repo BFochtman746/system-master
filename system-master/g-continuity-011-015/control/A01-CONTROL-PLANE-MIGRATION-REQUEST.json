@@ -1,11 +1,15 @@
 {
   "request":"A01-CONTROL-PLANE-MIGRATION-EQUIVALENCE",
-  "attempt":2,
+  "attempt":3,
   "control_plane":"A01-CONTROL-PLANE-001",
   "canonical_control_plane_baseline":"c51046152eaf749d672ce923ea983e1c7893d3f2",
   "migration_commit":"2b5f0c04c41e431db861d564b6315ba5dd867cdd",
-  "repair_commit":"0ab535cab824a8807c547cefab79c308b35add23",
-  "previous_attempt":{"run_id":34290471349,"subject_sha":"1c8e7a2e4c284a6c36bd72fd4e2940262ec01bbe","result_class":"SUBJECT_FAILURE","boundary":"MIGRATION_WRAPPER_ANCESTRY_ACQUISITION"},
+  "ancestry_repair_commit":"0ab535cab824a8807c547cefab79c308b35add23",
+  "safe_directory_repair_commit":"6fb7dd6bae0d318227c63a682b78f9e138847926",
+  "previous_attempts":[
+    {"run_id":34290471349,"subject_sha":"1c8e7a2e4c284a6c36bd72fd4e2940262ec01bbe","result_class":"SUBJECT_FAILURE","boundary":"MIGRATION_WRAPPER_ANCESTRY_ACQUISITION"},
+    {"run_id":34290951086,"subject_sha":"c4d1cb0f2dde5189d29e30cb26c2306ee164e938","result_class":"SUBJECT_FAILURE","boundary":"MIGRATION_WRAPPER_WINDOWS_GIT_SAFE_DIRECTORY"}
+  ],
   "workstream_id":"SYSTEM-MASTER-CONTINUITY",
   "qualification_id":"SYSTEM-MASTER-CONTINUITY-G-WP-011-015-CONSOLIDATED",
   "gate_class":"consolidated",
