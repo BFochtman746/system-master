@@ -1,0 +1,282 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "LITERARY-SOURCE-RIGHTS-PROVENANCE-SCHEMA-v1",
+  "title": "Literary source rights and provenance ledger record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "ledger_id",
+    "work_id",
+    "edition_id",
+    "source_id",
+    "rights_class",
+    "rights_evidence",
+    "permitted_uses",
+    "persistence_policy",
+    "provenance",
+    "content_digest",
+    "admission_decision"
+  ],
+  "properties": {
+    "ledger_id": {
+      "type": "string",
+      "pattern": "^LRL-[A-Z0-9][A-Z0-9._-]{7,}$"
+    },
+    "work_id": {
+      "type": "string",
+      "pattern": "^WORK-[a-f0-9]{16,64}$"
+    },
+    "edition_id": {
+      "type": "string",
+      "pattern": "^EDITION-[a-f0-9]{16,64}$"
+    },
+    "source_id": {
+      "type": "string",
+      "pattern": "^SOURCE-[a-f0-9]{16,64}$"
+    },
+    "rights_class": {
+      "enum": [
+        "PUBLIC_DOMAIN_FULL_TEXT",
+        "LICENSED_FULL_TEXT",
+        "USER_OWNED_OR_AUTHORIZED",
+        "ANALYSIS_ONLY_NO_FULL_TEXT"
+      ]
+    },
+    "rights_evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evidence_type",
+        "jurisdiction",
+        "evidence_locator",
+        "verified_at",
+        "verified_by",
+        "scope_note"
+      ],
+      "properties": {
+        "evidence_type": {
+          "enum": [
+            "PUBLIC_DOMAIN_DETERMINATION",
+            "LICENSE_GRANT",
+            "OWNERSHIP_ATTESTATION",
+            "EXPLICIT_AUTHORIZATION",
+            "ANALYSIS_ONLY_RESTRICTION"
+          ]
+        },
+        "jurisdiction": {
+          "type": "string",
+          "minLength": 2
+        },
+        "evidence_locator": {
+          "type": "string",
+          "minLength": 3
+        },
+        "license_identifier": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "license_terms_digest": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "verified_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "verified_by": {
+          "type": "string",
+          "minLength": 2
+        },
+        "scope_note": {
+          "type": "string",
+          "minLength": 10
+        },
+        "expires_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        }
+      }
+    },
+    "permitted_uses": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "PERSIST_FULL_TEXT",
+          "PERSIST_PASSAGES",
+          "COMPUTE_FEATURES",
+          "CREATE_DERIVED_ANALYSIS",
+          "RETRIEVE_PASSAGES_FOR_INTERNAL_USE",
+          "TRAIN_OR_TUNE",
+          "EVALUATE",
+          "DISPLAY_TO_AUTHORIZED_USER",
+          "PERSIST_METADATA_ONLY",
+          "PERSIST_ABSTRACT_ANALYSIS_ONLY"
+        ]
+      }
+    },
+    "persistence_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "full_text_allowed",
+        "passage_text_allowed",
+        "derived_analysis_allowed",
+        "raw_text_retention"
+      ],
+      "properties": {
+        "full_text_allowed": {
+          "type": "boolean"
+        },
+        "passage_text_allowed": {
+          "type": "boolean"
+        },
+        "derived_analysis_allowed": {
+          "const": true
+        },
+        "raw_text_retention": {
+          "enum": [
+            "PERSIST",
+            "SESSION_ONLY",
+            "TRANSIENT_PROCESSING_ONLY",
+            "NONE"
+          ]
+        },
+        "max_passage_chars": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "storage_location_class": {
+          "enum": [
+            "AUTHORIZED_CORPUS",
+            "RESTRICTED_PROJECT_VAULT",
+            "DERIVED_ONLY_STORE",
+            "NO_RAW_TEXT_STORE"
+          ]
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_locator",
+        "source_provider",
+        "acquired_at",
+        "acquisition_method",
+        "chain_of_custody"
+      ],
+      "properties": {
+        "source_locator": {
+          "type": "string",
+          "minLength": 3
+        },
+        "source_provider": {
+          "type": "string",
+          "minLength": 2
+        },
+        "acquired_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "acquisition_method": {
+          "type": "string",
+          "minLength": 2
+        },
+        "chain_of_custody": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 3
+          }
+        }
+      }
+    },
+    "content_digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "admission_decision": {
+      "enum": [
+        "ADMIT_FULL_TEXT",
+        "ADMIT_RESTRICTED",
+        "ADMIT_DERIVED_ONLY",
+        "REJECT"
+      ]
+    },
+    "decision_reason": {
+      "type": "string"
+    },
+    "review_required": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "rights_class": {
+            "const": "ANALYSIS_ONLY_NO_FULL_TEXT"
+          }
+        },
+        "required": [
+          "rights_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "persistence_policy": {
+            "properties": {
+              "full_text_allowed": {
+                "const": false
+              },
+              "passage_text_allowed": {
+                "const": false
+              },
+              "raw_text_retention": {
+                "enum": [
+                  "TRANSIENT_PROCESSING_ONLY",
+                  "NONE"
+                ]
+              },
+              "storage_location_class": {
+                "enum": [
+                  "DERIVED_ONLY_STORE",
+                  "NO_RAW_TEXT_STORE"
+                ]
+              }
+            }
+          },
+          "admission_decision": {
+            "enum": [
+              "ADMIT_DERIVED_ONLY",
+              "REJECT"
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "policy_invariants": {
+    "unknown_or_ambiguous_rights": "REJECT_OR_REVIEW; never default to full-text admission",
+    "public_domain": "must be verified for the applicable jurisdiction and edition/source; age alone is insufficient",
+    "licensed": "permitted uses and retention must be no broader than the documented license",
+    "user_authorized": "authorization scope must identify the work/material and allowed System Master uses",
+    "analysis_only": "raw full text and passage text must not be persisted in corpus, cache, logs, embeddings payloads, prompts-as-artifacts, or training datasets",
+    "derived_artifacts": "must retain source ledger linkage, derivation description, and digests without reconstructable unauthorized source text"
+  }
+}
