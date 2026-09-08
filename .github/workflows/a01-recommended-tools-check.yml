@@ -1,0 +1,63 @@
+name: A-01 Recommended Tools Check
+
+on:
+  push:
+    branches:
+      - runner/capability-audit-001
+    paths:
+      - ".github/workflows/a01-recommended-tools-check.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Check PowerShell7 GitHubCLI jq CMake Ninja dotnet
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 10
+    steps:
+      - name: Focused tool check
+        shell: cmd
+        run: |
+          echo === IDENTITY ===
+          whoami
+          echo.
+          echo === PATH LOOKUP ===
+          where pwsh 2>nul || echo pwsh=not-on-path
+          where gh 2>nul || echo gh=not-on-path
+          where jq 2>nul || echo jq=not-on-path
+          where cmake 2>nul || echo cmake=not-on-path
+          where ninja 2>nul || echo ninja=not-on-path
+          where dotnet 2>nul || echo dotnet=not-on-path
+          where msbuild 2>nul || echo msbuild=not-on-path
+          echo.
+          echo === VERSION EXECUTION ===
+          pwsh -NoLogo -NoProfile -Command "$PSVersionTable.PSVersion.ToString()" 2>nul || echo pwsh-version=unavailable
+          gh --version 2>nul || echo gh-version=unavailable
+          jq --version 2>nul || echo jq-version=unavailable
+          cmake --version 2>nul || echo cmake-version=unavailable
+          ninja --version 2>nul || echo ninja-version=unavailable
+          dotnet --info 2>nul || echo dotnet-info=unavailable
+          msbuild -version 2>nul || echo msbuild-version=unavailable
+          echo.
+          echo === COMMON INSTALL LOCATIONS ===
+          if exist "C:\Program Files\PowerShell\7\pwsh.exe" (echo powershell7-common-path=found & "C:\Program Files\PowerShell\7\pwsh.exe" -NoLogo -NoProfile -Command "$PSVersionTable.PSVersion.ToString()") else echo powershell7-common-path=not-found
+          if exist "C:\Program Files\GitHub CLI\gh.exe" (echo githubcli-common-path=found & "C:\Program Files\GitHub CLI\gh.exe" --version) else echo githubcli-common-path=not-found
+          if exist "C:\Program Files\CMake\bin\cmake.exe" (echo cmake-common-path=found & "C:\Program Files\CMake\bin\cmake.exe" --version) else echo cmake-common-path=not-found
+          if exist "C:\Program Files\CMake\bin\ninja.exe" (echo ninja-cmake-path=found & "C:\Program Files\CMake\bin\ninja.exe" --version) else echo ninja-cmake-path=not-found
+          if exist "C:\Program Files\dotnet\dotnet.exe" (echo dotnet-common-path=found & "C:\Program Files\dotnet\dotnet.exe" --info) else echo dotnet-common-path=not-found
+          if exist "%USERPROFILE%\scoop\shims\jq.exe" (echo jq-scoop-shim=found & "%USERPROFILE%\scoop\shims\jq.exe" --version) else echo jq-scoop-shim=not-found
+          if exist "%USERPROFILE%\scoop\shims\cmake.exe" (echo cmake-scoop-shim=found & "%USERPROFILE%\scoop\shims\cmake.exe" --version) else echo cmake-scoop-shim=not-found
+          if exist "%USERPROFILE%\scoop\shims\ninja.exe" (echo ninja-scoop-shim=found & "%USERPROFILE%\scoop\shims\ninja.exe" --version) else echo ninja-scoop-shim=not-found
+          echo.
+          echo === WINGET INSTALLED MATCHES ===
+          winget list --id Microsoft.PowerShell --exact --accept-source-agreements 2>nul || echo winget-powershell7=no-match
+          winget list --id GitHub.cli --exact --accept-source-agreements 2>nul || echo winget-githubcli=no-match
+          winget list --id jqlang.jq --exact --accept-source-agreements 2>nul || echo winget-jq=no-match
+          winget list --id Kitware.CMake --exact --accept-source-agreements 2>nul || echo winget-cmake=no-match
+          winget list --id Ninja-build.Ninja --exact --accept-source-agreements 2>nul || echo winget-ninja=no-match
+          winget list --id Microsoft.DotNet.SDK.8 --exact --accept-source-agreements 2>nul || echo winget-dotnet8=no-match
+          winget list --id Microsoft.DotNet.SDK.9 --exact --accept-source-agreements 2>nul || echo winget-dotnet9=no-match
+          winget list --id Microsoft.DotNet.SDK.10 --exact --accept-source-agreements 2>nul || echo winget-dotnet10=no-match
+          exit /b 0
