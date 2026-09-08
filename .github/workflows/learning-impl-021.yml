@@ -1,0 +1,119 @@
+name: LEARNING-LAB-IMPL-021 Provider Multi-Candidate Selection
+
+on:
+  push:
+    branches:
+      - learning/impl-021-provider-multicandidate-selection
+    paths:
+      - ".github/workflows/learning-impl-021.yml"
+      - "learning/lab/system_master_bridge.py"
+      - "learning/lab/learning_lab/provider_acquisition.py"
+      - "learning/lab/learning_lab/provider_multi_candidate_runtime.py"
+      - "learning/lab/learning_lab/multi_candidate.py"
+      - "learning/lab/qualification_impl021_prepare_packets.py"
+      - "learning/lab/tests/test_provider_multi_candidate_runtime.py"
+      - "system-master/learning-integration/impl-017/src/main/java/org/systemmaster/learning/LearningExecutionPort.java"
+      - "system-master/learning-integration/impl-021/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: learning-impl-021-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qualify:
+    name: Qualify admitted packet selection and abstention on A-01
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout exact IMPL-021 commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+          clean: true
+
+      - name: Provision pinned Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: '3.13.15'
+          architecture: x64
+          check-latest: false
+
+      - name: Prepare evidence
+        shell: cmd
+        run: |
+          set "EVIDENCE_DIR=%RUNNER_TEMP%\learning-impl-021-%GITHUB_RUN_ID%"
+          set "CLASS_DIR=%RUNNER_TEMP%\learning-impl-021-classes-%GITHUB_RUN_ID%"
+          if not exist "%EVIDENCE_DIR%" mkdir "%EVIDENCE_DIR%"
+          if not exist "%CLASS_DIR%" mkdir "%CLASS_DIR%"
+          echo EVIDENCE_DIR=%EVIDENCE_DIR%>>"%GITHUB_ENV%"
+          echo CLASS_DIR=%CLASS_DIR%>>"%GITHUB_ENV%"
+          echo %GITHUB_SHA%>"%EVIDENCE_DIR%\source-commit.txt"
+          echo %RUNNER_NAME%>"%EVIDENCE_DIR%\runner.txt"
+          python --version
+          java -version
+          javac -version
+
+      - name: Compile provider multi-candidate runtime
+        shell: cmd
+        run: |
+          python -m py_compile ^
+            learning\lab\system_master_bridge.py ^
+            learning\lab\learning_lab\provider_multi_candidate_runtime.py ^
+            learning\lab\qualification_impl021_prepare_packets.py ^
+            >"%EVIDENCE_DIR%\python-compile.txt" 2>&1
+          if errorlevel 1 (type "%EVIDENCE_DIR%\python-compile.txt" & exit /b 1)
+
+      - name: Run focused provider multi-candidate runtime tests
+        shell: cmd
+        run: |
+          cd /d "%GITHUB_WORKSPACE%\learning\lab"
+          python -m unittest -v tests.test_provider_multi_candidate_runtime >"%EVIDENCE_DIR%\python-provider-multi-candidate.txt" 2>&1
+          set "RC=%ERRORLEVEL%"
+          type "%EVIDENCE_DIR%\python-provider-multi-candidate.txt"
+          exit /b %RC%
+
+      - name: Prove System Master V6 adapter compiles without foundation packages
+        shell: cmd
+        run: |
+          javac -d "%CLASS_DIR%" ^
+            system-master\learning-integration\impl-017\src\main\java\org\systemmaster\learning\LearningExecutionPort.java ^
+            system-master\learning-integration\impl-021\src\main\java\org\systemmaster\learning\LearningCapabilityAdapter.java ^
+            system-master\learning-integration\impl-021\src\test\java\org\systemmaster\learning\Impl021ProviderMultiCandidateQualification.java ^
+            >"%EVIDENCE_DIR%\java-port-compile.txt" 2>&1
+          if errorlevel 1 (type "%EVIDENCE_DIR%\java-port-compile.txt" & exit /b 1)
+          echo IMPL021_JAVA_FOUNDATION_DEPENDENCY=NONE>"%EVIDENCE_DIR%\java-isolation.txt"
+          type "%EVIDENCE_DIR%\java-isolation.txt"
+
+      - name: Run real Java to Python select and abstain qualification
+        shell: cmd
+        run: |
+          java -cp "%CLASS_DIR%" org.systemmaster.learning.Impl021ProviderMultiCandidateQualification >"%EVIDENCE_DIR%\impl021-integration.txt" 2>&1
+          set "RC=%ERRORLEVEL%"
+          type "%EVIDENCE_DIR%\impl021-integration.txt"
+          exit /b %RC%
+
+      - name: Publish IMPL-021 summary
+        if: always()
+        shell: cmd
+        run: |
+          echo ## LEARNING-LAB-IMPL-021>>"%GITHUB_STEP_SUMMARY%"
+          echo Commit: %GITHUB_SHA%>>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\python-provider-multi-candidate.txt" type "%EVIDENCE_DIR%\python-provider-multi-candidate.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\java-isolation.txt" type "%EVIDENCE_DIR%\java-isolation.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\impl021-integration.txt" type "%GITHUB_STEP_SUMMARY%" >nul & type "%EVIDENCE_DIR%\impl021-integration.txt">>"%GITHUB_STEP_SUMMARY%"
+
+      - name: Upload IMPL-021 evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: learning-impl-021-evidence
+          path: ${{ runner.temp }}\learning-impl-021-${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 30
