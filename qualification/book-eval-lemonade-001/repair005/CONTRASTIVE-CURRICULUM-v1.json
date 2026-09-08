@@ -1,0 +1,88 @@
+{
+  "curriculum_id": "BOOK-EVAL-REPAIR-005-CONTRASTIVE-CURRICULUM-v1",
+  "source_policy": "DEVELOPMENT_AND_SYNTHETIC_ONLY",
+  "hidden_holdout_gold_used": false,
+  "goal": "Teach exact near-neighbor decision boundaries before specialist DEVELOPMENT qualification.",
+  "boundary_sets": [
+    {
+      "id": "PAIR-TRADEOFF-PREFERENCE",
+      "specialist": "PAIRWISE_COMPARISON/EQUIVALENCE_OR_TRADEOFF+PREFERENCE_ADVANTAGE",
+      "tokens": ["LEGITIMATE_TRADEOFF", "CANDIDATE_A_BETTER", "CANDIDATE_B_BETTER"],
+      "minimum_records": 36,
+      "requirements": ["balanced candidate positions", "position-swapped twins", "both-satisfy-brief tradeoffs", "one-sided brief advantages"]
+    },
+    {
+      "id": "PAIR-PREFERENCE-OBJECTIVE",
+      "specialist": "PAIRWISE_COMPARISON/PREFERENCE_ADVANTAGE+MANDATORY_OBJECTIVE_VIOLATION",
+      "tokens": ["CANDIDATE_A_BETTER", "CANDIDATE_B_BETTER", "OBJECTIVELY_SUPERIOR_A", "OBJECTIVELY_SUPERIOR_B"],
+      "minimum_records": 32,
+      "requirements": ["ordinary correctness flaw is not automatically objective-superiority", "mandatory binary criterion examples", "position-swapped twins"]
+    },
+    {
+      "id": "EPISTEMIC-KNOWLEDGE-POV",
+      "specialist": "MANUSCRIPT_DIAGNOSIS/CONTINUITY_STATE",
+      "tokens": ["KNOWLEDGE_STATE_CONTRADICTION", "POV_KNOWLEDGE_LEAK"],
+      "minimum_records": 24,
+      "requirements": ["character-state contradiction", "narrator viewpoint access violation", "near-identical counterfactual pairs"]
+    },
+    {
+      "id": "TIME-CONTINUITY",
+      "specialist": "MANUSCRIPT_DIAGNOSIS/CONTINUITY_STATE",
+      "tokens": ["TIMELINE_CONTRADICTION", "TIMELINE_CONTINUITY_CONTRADICTION", "TRAVEL_TIME_CONTRADICTION"],
+      "minimum_records": 30,
+      "requirements": ["explicit timestamp conflict", "chronological state conflict", "travel-duration impossibility"]
+    },
+    {
+      "id": "OBJECT-LOCATION-STATE",
+      "specialist": "MANUSCRIPT_DIAGNOSIS/CONTINUITY_STATE",
+      "tokens": ["OBJECT_STATE_CONTRADICTION", "LOCATION_CONTINUITY_CONTRADICTION", "IDENTITY_ATTRIBUTE_CONTRADICTION"],
+      "minimum_records": 30,
+      "requirements": ["physical object state", "entity location continuity", "stable identity attribute"]
+    },
+    {
+      "id": "FACT-SOURCE-SUPPORT",
+      "specialist": "MANUSCRIPT_DIAGNOSIS/FACT_SOURCE_EVIDENCE",
+      "tokens": ["FACT_CONTRADICTION", "FACTUAL_CLAIM_ERROR", "SOURCE_SUPPORT_CONFLICT", "UNSUPPORTED_ASSERTION", "QUOTE_ATTRIBUTION_CONFLICT"],
+      "minimum_records": 50,
+      "requirements": ["internal conflict", "external authoritative correction", "source misrepresentation", "missing support", "attribution conflict"]
+    },
+    {
+      "id": "STRUCTURAL-CAUSE-GOAL-PAYOFF",
+      "specialist": "MANUSCRIPT_DIAGNOSIS/STRUCTURE_CAUSAL",
+      "tokens": ["MISSING_CAUSAL_MOTIVATION_BRIDGE", "MISSING_ARGUMENT_MECHANISM", "UNRESOLVED_GOAL_CONFLICT", "MISSING_SETUP_FOR_PAYOFF", "MISSING_PAYOFF", "MISSING_RELATIONSHIP_REPAIR"],
+      "minimum_records": 60,
+      "requirements": ["fiction motivation", "nonfiction mechanism", "goal abandonment", "setup without payoff", "payoff without setup", "relationship repair bridge"]
+    },
+    {
+      "id": "REVISION-MEANING-INTENT-SAFE",
+      "specialist": "REVISION_ASSESSMENT/SAFE_OR_NO_MATERIAL_CHANGE+SEMANTIC_OR_INTENT_DAMAGE",
+      "tokens": ["SAFE_EDIT", "MEANING_PRESERVATION_DAMAGE", "INTENT_PRESERVATION_DAMAGE"],
+      "minimum_records": 36,
+      "requirements": ["faithful paraphrase", "proposition/scope change", "same proposition but altered force/purpose/emotional objective"]
+    }
+  ],
+  "minimum_total_records": 298,
+  "record_quality_gates": {
+    "schema_valid": "100%",
+    "hard_negative_present": "100%",
+    "counterfactual_present": "100%",
+    "rights_and_provenance_present": "100%",
+    "hidden_holdout_gold_used": false,
+    "pairwise_position_swap_coverage": ">=95% for pairwise records"
+  },
+  "training_sequence": [
+    "router specialist selection",
+    "within-specialist leaf classification",
+    "contrastive rationale/boundary discrimination",
+    "confidence calibration and REVIEW_REQUIRED abstention",
+    "independent severity/evidence/preservation graders",
+    "selective escalation policy"
+  ],
+  "advance_when": {
+    "router_accuracy_development": ">=0.95",
+    "leaf_accuracy_development": ">=0.85",
+    "clean_control": ">=0.95",
+    "prohibited_hard_gate_violations": 0,
+    "evidence_precision": ">=0.95"
+  }
+}
