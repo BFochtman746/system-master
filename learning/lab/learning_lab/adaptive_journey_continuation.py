@@ -62,8 +62,6 @@ def _provider_runtime_components(
     if not domain_key:
         raise AdaptiveJourneyContinuationError("COURSE_DOMAIN_KEY_MISSING")
     if not engine.registry.has_key(domain_key):
-        # Existing engine behavior rehydrates the sealed dynamic domain from persisted
-        # course/verification state. No provider call is made here.
         engine.next_action(learner_id, course["course_id"], now=now)
     spec = engine.registry.by_key(domain_key)
     return engine, spec.behavior_oracle.score, LiveReplayOpenGoalTutorDirector(repo, engine)
@@ -146,7 +144,11 @@ def submit_current_evidence_and_continue(
     )
     diagnostic = BaselineDiagnosticDirector(repo, scorer=scorer)
     sessions = MultiSessionDirector(repo, engine)
-    journey = AdaptiveEntryJourneyDirector(repo, engine, diagnostic, tutor, sessions)
+    # Local import avoids a module cycle: adaptive_tutor_continuation reuses the
+    # runtime-component resolver above. At runtime the continuation module is fully
+    # initialized, so the additive tutor-aware director can safely own routing here.
+    from .adaptive_tutor_continuation import AdaptiveTutorJourneyDirector
+    journey = AdaptiveTutorJourneyDirector(repo, engine, diagnostic, tutor, sessions)
 
     before = journey.plan_next(
         operation_id=f"{operation_id}:before",
@@ -165,11 +167,6 @@ def submit_current_evidence_and_continue(
         raise AdaptiveJourneyContinuationError("CURRENT_ACTION_DOES_NOT_ACCEPT_EVIDENCE:" + action_type)
 
     if action_type == "DIAGNOSTIC_PROBE":
-        # `before` is the durable authorization that this probe/target was current for
-        # this exact interaction. Call the diagnostic director directly so its own
-        # operation-idempotency can return an already-recorded probe on exact replay.
-        # Re-entering journey.record_diagnostic_probe() would re-evaluate the *new*
-        # current action after the first probe and incorrectly reject the replay.
         evidence = diagnostic.record_probe(
             operation_id=f"{operation_id}:evidence",
             probe_id=f"PROBE-{interaction_id}",
