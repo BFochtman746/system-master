@@ -1,0 +1,20 @@
+{
+  "package": "F-WP-006",
+  "requirements": [
+    {
+      "id": "F-RQ-013",
+      "requirement": "A change shall not become executable until all mandatory approvals, prerequisites, windows and policy obligations are satisfied.",
+      "invariant": "Grant only from exact qualified snapshot; any unknown prerequisite fails closed."
+    },
+    {
+      "id": "F-RQ-014",
+      "requirement": "Execution grants shall be scoped, expiring, non-transferable authority artifacts and shall not outlive revocation of required authorization.",
+      "invariant": "Current principal/auth policy is checked at start and consequential boundaries."
+    },
+    {
+      "id": "F-RQ-050",
+      "requirement": "Unknown authorization, unknown change revision, unknown target identity or unknown critical recovery eligibility shall fail closed for new consequential effects.",
+      "invariant": "Critical unknown is never treated as allow."
+    }
+  ]
+}
