@@ -1,0 +1,65 @@
+{
+  "objective": "CONTINUITY-TARGET-WINDOWS-REBOOT-QUALIFICATION",
+  "control_plane": {
+    "id": "A01-CONTROL-PLANE-001",
+    "workflow_commit": "8a5e5c6cf0273da8c2f8ddad1a9ec38dd7494c74",
+    "policy_version": 2,
+    "registry_version": 2,
+    "registered_qualification_id": "CONTINUITY-TARGET-WINDOWS-REBOOT"
+  },
+  "qualification": {
+    "qualification_id": "CONTINUITY-WINREBOOT-20260908-003",
+    "standing": "PASS",
+    "evidence_class": "TARGET_WINDOWS_REBOOT",
+    "arm": {
+      "subject_sha": "e0b00c69c7fd5954e04a8736b225eeaa6c1ef95f",
+      "run_id": 34291041277,
+      "receipt_result": "PASS",
+      "artifact_id": 10081345817,
+      "artifact_sha256": "3a7d7f29166c01434387a81922f9a67dc61bddd26878230d85efba0722ab2fb8",
+      "workflow_terminal_state": "cancelled_after_registered_reboot_handoff",
+      "post_action": "windows_reboot"
+    },
+    "verify": {
+      "subject_sha": "f57fe85a653c0700f3005f02f3a67c948a945c69",
+      "run_id": 34291128646,
+      "job_id": 102277689501,
+      "receipt_result": "PASS",
+      "checkout_sha": "f57fe85a653c0700f3005f02f3a67c948a945c69",
+      "artifact_id": 10081553101,
+      "artifact_sha256": "a96c3de23fadad00dba145fcb99f5d639b38ccb9cf333a7a0d74982ae1b60933"
+    }
+  },
+  "reboot_proof": {
+    "boot_time_before_utc": "2026-09-08T23:19:24.5000000Z",
+    "boot_time_after_utc": "2026-09-08T23:32:30.5000000Z",
+    "boot_time_changed": true,
+    "runner_name": "A-01",
+    "machine_name": "A-01",
+    "runner_service_start_mode": "Auto",
+    "reboot_command": "shutdown.exe /r /t 0 (non-forced)"
+  },
+  "durability_proof": {
+    "journal_sha256_before_reboot": "4b5096112de13a2ee2277bc14d4aa135410c83b1586c214b8c2c9c0488b70f74",
+    "journal_sha256_after_reboot_before_verify": "4b5096112de13a2ee2277bc14d4aa135410c83b1586c214b8c2c9c0488b70f74",
+    "identical_across_reboot_before_verify": true,
+    "pre_verify_state": "WAITING_DEPENDENCY",
+    "pre_verify_version": 2,
+    "post_verify_state": "CLASSIFYING",
+    "post_verify_version": 3
+  },
+  "requirements": {
+    "G-RQ-004": {
+      "TARGET_WINDOWS_REBOOT": "PASS",
+      "implementation_satisfied": true
+    },
+    "G-RQ-072": {
+      "TARGET_WINDOWS_REBOOT": "PASS",
+      "TARGET_IOS_CLIENT_SUSPEND_RESUME": "NOT_STARTED",
+      "implementation_satisfied": false
+    }
+  },
+  "EMPIRICAL_HUMAN_EVIDENCE": "NOT_STARTED",
+  "production_authorized": false,
+  "automatic_push_gate": "DISABLED_AFTER_CLOSURE"
+}
