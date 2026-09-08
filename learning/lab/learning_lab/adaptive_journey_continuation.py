@@ -7,10 +7,14 @@ from typing import Any, Dict, Sequence, Tuple
 from .adaptive import MultiSessionDirector
 from .adaptive_entry import AdaptiveEntryJourneyDirector
 from .baseline_diagnostic import BaselineDiagnosticDirector
-from .domain_general import DomainGeneralLearningEngine, default_domain_registry
+from .domain_general import default_domain_registry
 from .domain_tutor_compat import LegacyCompatibleDomainGeneralTutorDirector
+from .fresh_evidence import (
+    FreshEvidenceDomainGeneralLearningEngine,
+    FreshEvidenceStochasticMultiCandidateLearningEngine,
+)
 from .live_open_goal import LiveReplayOpenGoalTutorDirector, NormalizedLiveResearchPort
-from .multi_candidate import StochasticMultiCandidateLearningEngine, StochasticRecordedModelPort
+from .multi_candidate import StochasticRecordedModelPort
 from .provider_acquisition import OpenGoalInputPacketService
 from .repository import Repository
 
@@ -54,7 +58,7 @@ def _provider_runtime_components(
     candidate_port = StochasticRecordedModelPort(
         [copy.deepcopy(packet["model_trace"]) for packet in packets]
     )
-    engine = StochasticMultiCandidateLearningEngine(
+    engine = FreshEvidenceStochasticMultiCandidateLearningEngine(
         repo,
         research_port=research_port,
         candidate_model_port=candidate_port,
@@ -81,7 +85,7 @@ def _runtime_components(
     registry = default_domain_registry()
     domain_key = course.get("domain_key")
     if isinstance(domain_key, str) and registry.has_key(domain_key):
-        engine = DomainGeneralLearningEngine(repo, registry=registry)
+        engine = FreshEvidenceDomainGeneralLearningEngine(repo, registry=registry)
         spec = registry.by_key(domain_key)
         return engine, spec.behavior_oracle.score, LegacyCompatibleDomainGeneralTutorDirector(repo, engine)
 
@@ -96,7 +100,7 @@ def _runtime_components(
         except ValueError:
             spec = None
         if spec is not None:
-            engine = DomainGeneralLearningEngine(repo, registry=registry)
+            engine = FreshEvidenceDomainGeneralLearningEngine(repo, registry=registry)
             return engine, spec.behavior_oracle.score, LegacyCompatibleDomainGeneralTutorDirector(repo, engine)
 
     return _provider_runtime_components(repo, course=course, learner_id=learner_id, now=now)
