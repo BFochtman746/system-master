@@ -1,0 +1,176 @@
+name: PROPOSED LEARNING-LAB-IMPL-031 Post-Entry Tutor Route Unification
+
+on:
+  push:
+    branches:
+      - learning/proposed-impl-031-post-entry-tutor-route-unification
+    paths:
+      - ".github/workflows/learning-proposed-impl-031.yml"
+      - "learning/lab/learning_lab/adaptive_tutor_continuation.py"
+      - "learning/lab/learning_lab/action_presentation.py"
+      - "learning/lab/learning_lab/unified_turn_controller.py"
+      - "learning/lab/tests/test_post_entry_tutor_route_unification.py"
+      - "system-master/learning-integration/impl-030/src/main/java/org/systemmaster/learning/LearningTurnControllerAdapter.java"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: learning-proposed-impl-031-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qualify:
+    name: Qualify post-entry tutor route unification on A-01
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout exact proposed IMPL-031 commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+          clean: true
+
+      - name: Provision pinned Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: '3.13.15'
+          architecture: x64
+          check-latest: false
+
+      - name: Prepare evidence
+        shell: cmd
+        run: |
+          set "EVIDENCE_DIR=%RUNNER_TEMP%\learning-proposed-impl-031-%GITHUB_RUN_ID%"
+          set "CLASS_DIR=%RUNNER_TEMP%\learning-proposed-impl-031-classes-%GITHUB_RUN_ID%"
+          if not exist "%EVIDENCE_DIR%" mkdir "%EVIDENCE_DIR%"
+          if not exist "%CLASS_DIR%" mkdir "%CLASS_DIR%"
+          echo EVIDENCE_DIR=%EVIDENCE_DIR%>>"%GITHUB_ENV%"
+          echo CLASS_DIR=%CLASS_DIR%>>"%GITHUB_ENV%"
+          echo %GITHUB_SHA%>"%EVIDENCE_DIR%\source-commit.txt"
+          echo %RUNNER_NAME%>"%EVIDENCE_DIR%\runner.txt"
+          python --version >"%EVIDENCE_DIR%\python-version.txt" 2>&1
+          java -version >"%EVIDENCE_DIR%\java-version.txt" 2>&1
+          javac -version >"%EVIDENCE_DIR%\javac-version.txt" 2>&1
+          type "%EVIDENCE_DIR%\python-version.txt"
+          type "%EVIDENCE_DIR%\java-version.txt"
+          type "%EVIDENCE_DIR%\javac-version.txt"
+
+      - name: Compile post-entry tutor route boundary
+        shell: cmd
+        run: |
+          python -m py_compile ^
+            learning\lab\learning_lab\adaptive_tutor_continuation.py ^
+            learning\lab\learning_lab\action_presentation.py ^
+            learning\lab\learning_lab\unified_turn_controller.py ^
+            learning\lab\tests\test_post_entry_tutor_route_unification.py ^
+            >"%EVIDENCE_DIR%\python-compile.txt" 2>&1
+          set "RC=%ERRORLEVEL%"
+          type "%EVIDENCE_DIR%\python-compile.txt"
+          exit /b %RC%
+
+      - name: Run focused IMPL-031 route-unification tests
+        shell: cmd
+        run: |
+          cd /d "%GITHUB_WORKSPACE%\learning\lab"
+          python -m unittest -v tests.test_post_entry_tutor_route_unification >"%EVIDENCE_DIR%\python-impl031.txt" 2>&1
+          set "RC=%ERRORLEVEL%"
+          type "%EVIDENCE_DIR%\python-impl031.txt"
+          exit /b %RC%
+
+      - name: Compile System Master unified-turn adapter without foundation packages
+        shell: cmd
+        run: |
+          javac -d "%CLASS_DIR%" ^
+            system-master\learning-integration\impl-017\src\main\java\org\systemmaster\learning\LearningExecutionPort.java ^
+            system-master\learning-integration\impl-025\src\main\java\org\systemmaster\learning\LearningCapabilityAdapter.java ^
+            system-master\learning-integration\impl-030\src\main\java\org\systemmaster\learning\LearningTurnControllerAdapter.java ^
+            system-master\learning-integration\impl-030\src\test\java\org\systemmaster\learning\Impl030UnifiedLearningTurnQualification.java ^
+            >"%EVIDENCE_DIR%\java-port-compile.txt" 2>&1
+          set "RC=%ERRORLEVEL%"
+          type "%EVIDENCE_DIR%\java-port-compile.txt"
+          if not "%RC%"=="0" exit /b %RC%
+          echo IMPL031_JAVA_FOUNDATION_DEPENDENCY=NONE>"%EVIDENCE_DIR%\java-isolation.txt"
+          type "%EVIDENCE_DIR%\java-isolation.txt"
+
+      - name: Run real Java to Python unified-turn regression on controller V2
+        shell: cmd
+        run: |
+          java -cp "%CLASS_DIR%" org.systemmaster.learning.Impl030UnifiedLearningTurnQualification >"%EVIDENCE_DIR%\impl030-java-v2-regression.txt" 2>&1
+          set "RC=%ERRORLEVEL%"
+          type "%EVIDENCE_DIR%\impl030-java-v2-regression.txt"
+          exit /b %RC%
+
+      - name: Regress IMPL-030 unified turn controller
+        shell: cmd
+        run: |
+          cd /d "%GITHUB_WORKSPACE%\learning\lab"
+          python -m unittest -v tests.test_unified_turn_controller >"%EVIDENCE_DIR%\python-impl030-regression.txt" 2>&1
+          set "RC=%ERRORLEVEL%"
+          type "%EVIDENCE_DIR%\python-impl030-regression.txt"
+          exit /b %RC%
+
+      - name: Regress IMPL-029 learner action presentation
+        shell: cmd
+        run: |
+          cd /d "%GITHUB_WORKSPACE%\learning\lab"
+          python -m unittest -v tests.test_action_presentation >"%EVIDENCE_DIR%\python-impl029-regression.txt" 2>&1
+          set "RC=%ERRORLEVEL%"
+          type "%EVIDENCE_DIR%\python-impl029-regression.txt"
+          exit /b %RC%
+
+      - name: Regress IMPL-028 tutor continuation
+        shell: cmd
+        run: |
+          cd /d "%GITHUB_WORKSPACE%\learning\lab"
+          python -m unittest -v tests.test_adaptive_tutor_continuation >"%EVIDENCE_DIR%\python-impl028-regression.txt" 2>&1
+          set "RC=%ERRORLEVEL%"
+          type "%EVIDENCE_DIR%\python-impl028-regression.txt"
+          exit /b %RC%
+
+      - name: Regress IMPL-027 evidence continuation
+        shell: cmd
+        run: |
+          cd /d "%GITHUB_WORKSPACE%\learning\lab"
+          python -m unittest -v tests.test_adaptive_journey_continuation >"%EVIDENCE_DIR%\python-impl027-regression.txt" 2>&1
+          set "RC=%ERRORLEVEL%"
+          type "%EVIDENCE_DIR%\python-impl027-regression.txt"
+          exit /b %RC%
+
+      - name: Regress provider multi-candidate runtime
+        shell: cmd
+        run: |
+          cd /d "%GITHUB_WORKSPACE%\learning\lab"
+          python -m unittest -v tests.test_provider_multi_candidate_runtime >"%EVIDENCE_DIR%\python-provider-regression.txt" 2>&1
+          set "RC=%ERRORLEVEL%"
+          type "%EVIDENCE_DIR%\python-provider-regression.txt"
+          exit /b %RC%
+
+      - name: Publish proposed IMPL-031 summary
+        if: always()
+        shell: cmd
+        run: |
+          echo ## PROPOSED LEARNING-LAB-IMPL-031>>"%GITHUB_STEP_SUMMARY%"
+          echo Commit: %GITHUB_SHA%>>"%GITHUB_STEP_SUMMARY%"
+          echo Truth boundary: post-entry engine LESSON and REMEDIATION are normalized through the existing formative tutor authority and legacy tutor surfaces fail closed. Fresh maintenance/transfer task generation, native iPhone deployment, and real learner effectiveness remain unproven.>>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\python-impl031.txt" type "%EVIDENCE_DIR%\python-impl031.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\java-isolation.txt" type "%EVIDENCE_DIR%\java-isolation.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\impl030-java-v2-regression.txt" type "%EVIDENCE_DIR%\impl030-java-v2-regression.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\python-impl030-regression.txt" type "%EVIDENCE_DIR%\python-impl030-regression.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\python-impl029-regression.txt" type "%EVIDENCE_DIR%\python-impl029-regression.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\python-impl028-regression.txt" type "%EVIDENCE_DIR%\python-impl028-regression.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\python-impl027-regression.txt" type "%EVIDENCE_DIR%\python-impl027-regression.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\python-provider-regression.txt" type "%GITHUB_STEP_SUMMARY%" >nul
+
+      - name: Upload proposed IMPL-031 evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: learning-proposed-impl-031-evidence
+          path: ${{ runner.temp }}\learning-proposed-impl-031-${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 30
