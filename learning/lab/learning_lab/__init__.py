@@ -117,7 +117,7 @@ from .workplace_performance import (
 )
 
 __all__ += [
-    "WORKPLACE_PERFORMANCE_VERSION", "WORKPLACE_RUBRIC_VERSION", "CAPABILITY_DOSSIER_VERSION",
+    "WORKPLACE_PERFORMANCE_VERSION", "WORKPLACE_RUBRIC_VERSION", "CAPABILITY_DOSSIER_VERSION,
     "PORTFOLIO_HANDOFF_VERSION", "DEFENSE_REVIEW_POLICY_VERSION",
     "evaluate_workplace_submission", "adjudicate_workplace_defense_reviews",
     "build_capability_evidence_dossier", "build_portfolio_handoff", "verify_portfolio_handoff",
@@ -154,4 +154,15 @@ from .baseline_diagnostic import (
 __all__ += [
     "BASELINE_DIAGNOSTIC_VERSION", "ADAPTIVE_ENTRY_POLICY_VERSION",
     "DiagnosticPolicyError", "BaselineDiagnosticDirector",
+]
+
+from .adaptive_entry import (
+    ADAPTIVE_ENTRY_JOURNEY_VERSION,
+    RUNTIME_EVIDENCE_PRECEDENCE,
+    AdaptiveEntryJourneyDirector,
+)
+
+__all__ += [
+    "ADAPTIVE_ENTRY_JOURNEY_VERSION", "RUNTIME_EVIDENCE_PRECEDENCE",
+    "AdaptiveEntryJourneyDirector",
 ]
