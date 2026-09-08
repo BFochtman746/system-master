@@ -1,0 +1,1 @@
+This staging branch is superseded. Do not merge or qualify it. The canonical repository bind is performed on a clean branch using binary Git blobs with hash verification.
