@@ -5,108 +5,22 @@ on:
     branches:
       - book-eval-lemonade-001-blind-resume-003-adapter-repair
     paths:
-      - ".github/workflows/book-eval-repair-005-gate-d-private-gold-recovery.yml"
+      - "qualification/book-eval-lemonade-001/repair005/RUN-GATE-D-PRIVATE-GOLD-RECOVERY-CONTROL-PLANE"
   workflow_dispatch:
 
 permissions:
   contents: read
-
-concurrency:
-  group: book-eval-repair005-gate-d-private-gold-recovery
-  cancel-in-progress: false
+  actions: read
 
 jobs:
-  recover-private-authority:
-    name: Recover exact Gate B or scoring-private authority without qualification rerun
-    runs-on: [self-hosted, Windows, X64]
-    timeout-minutes: 45
-
-    steps:
-      - name: Checkout exact recovery commit
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-        with:
-          fetch-depth: 1
-          persist-credentials: false
-          clean: true
-
-      - name: Search expanded bounded historical roots by frozen SHA only
-        shell: powershell
-        run: |
-          $ErrorActionPreference = 'Stop'
-          $Bundle = Join-Path $env:GITHUB_WORKSPACE 'qualification\book-eval-lemonade-001'
-          if (Test-Path (Join-Path $Bundle 'scoring-private')) { throw 'scoring-private material present in repository bundle' }
-
-          $Python = (Get-Command python.exe -ErrorAction Stop).Source
-          $Evidence = Join-Path $env:RUNNER_TEMP ('book-eval-private-gold-recovery-' + $env:GITHUB_RUN_ID)
-          $Persistent = 'C:\AI Test Kit\Books Testing\BOOK_EVAL_LEMONADE_001_REPAIR005_PRIVATE_RECOVERY'
-          $Manifest = Join-Path $Evidence 'PRIVATE-GOLD-RECOVERY-MANIFEST.json'
-          $EnvOut = Join-Path $env:RUNNER_TEMP ('book-eval-private-gold-recovery-' + $env:GITHUB_RUN_ID + '.env')
-          New-Item -ItemType Directory -Force -Path $Evidence,$Persistent | Out-Null
-
-          $roots = New-Object System.Collections.Generic.List[string]
-          function Add-Root([string]$p) {
-            if ([string]::IsNullOrWhiteSpace($p)) { return }
-            if (-not (Test-Path -LiteralPath $p)) { return }
-            if (-not $roots.Contains($p)) { $roots.Add($p) }
-          }
-
-          Add-Root 'C:\AI Test Kit'
-          Add-Root 'C:\Users'
-          Add-Root 'C:\actions-runner'
-
-          if ($env:GITHUB_WORKSPACE) {
-            $p = [System.IO.DirectoryInfo]$env:GITHUB_WORKSPACE
-            for ($i = 0; $i -lt 4 -and $null -ne $p; $i++) {
-              Add-Root $p.FullName
-              $p = $p.Parent
-            }
-          }
-          if ($env:RUNNER_TEMP) {
-            $p = [System.IO.DirectoryInfo]$env:RUNNER_TEMP
-            for ($i = 0; $i -lt 3 -and $null -ne $p; $i++) {
-              Add-Root $p.FullName
-              $p = $p.Parent
-            }
-          }
-
-          $args = @(
-            (Join-Path $Bundle 'scripts\recover-repair005-gate-d-inputs.py'),
-            '--bundle', $Bundle,
-            '--out-dir', $Persistent,
-            '--manifest', $Manifest,
-            '--env-out', $EnvOut
-          )
-          foreach ($r in $roots) { $args += @('--root', $r) }
-
-          & $Python @args
-          $rc = $LASTEXITCODE
-
-          if (Test-Path -LiteralPath $Manifest) {
-            $m = Get-Content -LiteralPath $Manifest -Raw | ConvertFrom-Json
-            @(
-              'objective=BOOK-EVAL-LEMONADE-001-REPAIR-005-GATE-D-PRIVATE-GOLD-RECOVERY',
-              ('state=' + [string]$m.state),
-              ('exact_hash_binding=' + [string][bool]$m.exact_hash_binding),
-              ('recovered_roles=' + (@($m.recovered_roles) -join ',')),
-              ('missing_required_roles=' + (@($m.missing_required_roles) -join ',')),
-              ('sealed_archive_match_count=' + @($m.sealed_archive_matches).Count),
-              ('deterministic_rebuild_attempted=' + [string]([bool]($null -ne $m.deterministic_rebuild -and $m.deterministic_rebuild.attempted))),
-              'private_paths_persisted_to_evidence=false',
-              'raw_private_content_persisted_to_evidence=false',
-              'qualification_rerun=false',
-              'teacher_verification_run=false',
-              'student_training_run=false',
-              'selective_120b_run=false'
-            ) | Set-Content -Encoding UTF8 (Join-Path $Evidence 'PRIVATE-GOLD-RECOVERY-SUMMARY.txt')
-          }
-
-          if ($rc -ne 0) { throw 'expanded private-authority recovery did not establish exact frozen binding' }
-
-      - name: Upload non-sensitive recovery proof only
-        if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: book-eval-repair005-gate-d-private-gold-recovery-evidence
-          path: ${{ runner.temp }}\book-eval-private-gold-recovery-${{ github.run_id }}
-          if-no-files-found: error
-          retention-days: 30
+  qualify:
+    name: Recover exact Gate B or scoring-private authority through A-01 control plane
+    uses: BFochtman746/system-master/.github/workflows/a01-control-plane-gateway.yml@c51046152eaf749d672ce923ea983e1c7893d3f2
+    with:
+      qualification_id: BOOK-EVAL-REPAIR-005-GATE-D-PRIVATE-GOLD-RECOVERY
+      workstream_id: BOOK-EVAL-LEMONADE-001
+      subject_sha: ${{ github.sha }}
+      origin_ref: ${{ github.ref }}
+      resume_on_pass: "Adjudicate exact-hash private authority recovery; if exact binding is proven, resume Gate D at Teacher v3 freeze verification without touching visible-regression or hidden-holdout."
+      resume_on_failure: "Adjudicate receipt and qualifier evidence; repair only PRIVATE-GOLD-RECOVERY for subject failure, or the A-01/control-plane boundary for infrastructure/control-plane failure; do not run Teacher, student, or 120B."
+      notification_target: book-system-chat
