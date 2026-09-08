@@ -83,6 +83,21 @@ def _runtime_components(
         engine = DomainGeneralLearningEngine(repo, registry=registry)
         spec = registry.by_key(domain_key)
         return engine, spec.behavior_oracle.score, DomainGeneralTutorDirector(repo, engine)
+
+    # Qualified legacy courses predate persisted domain_key. Recover only when the
+    # exact desired outcome is already owned by the sealed default domain registry.
+    # Provider-generated/open courses are not silently reclassified here; they fall
+    # through to the provider binding path below.
+    desired_outcome = course.get("desired_outcome")
+    if isinstance(desired_outcome, str) and desired_outcome.strip():
+        try:
+            spec = registry.by_outcome(desired_outcome)
+        except ValueError:
+            spec = None
+        if spec is not None:
+            engine = DomainGeneralLearningEngine(repo, registry=registry)
+            return engine, spec.behavior_oracle.score, DomainGeneralTutorDirector(repo, engine)
+
     return _provider_runtime_components(repo, course=course, learner_id=learner_id, now=now)
 
 
@@ -144,9 +159,6 @@ def submit_current_evidence_and_continue(
     )
     diagnostic = BaselineDiagnosticDirector(repo, scorer=scorer)
     sessions = MultiSessionDirector(repo, engine)
-    # Local import avoids a module cycle: adaptive_tutor_continuation reuses the
-    # runtime-component resolver above. At runtime the continuation module is fully
-    # initialized, so the additive tutor-aware director can safely own routing here.
     from .adaptive_tutor_continuation import AdaptiveTutorJourneyDirector
     journey = AdaptiveTutorJourneyDirector(repo, engine, diagnostic, tutor, sessions)
 
