@@ -137,7 +137,7 @@ class UnifiedFreshEvidenceRecoveryTests(unittest.TestCase):
             diagnostic_id=f"D-{suffix}",
             learner_id=learner_id,
             course_id=self.course_id,
-            claimed_skill_ids=[],
+            claimed_skill_ids=["S-FRAC-EQUIV-LCD"],
             started_at=now,
         )
         sessions.start_session(
