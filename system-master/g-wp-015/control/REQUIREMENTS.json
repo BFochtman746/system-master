@@ -1,0 +1,12 @@
+{
+  "authority":"021G",
+  "work_package":"G-WP-015",
+  "name":"Qualification Closure + Evidence Classification",
+  "count":4,
+  "requirements":[
+    {"id":"G-RQ-071","canonical_owner":"021G","implementing_components":"RecoveryRegistry+CheckpointCoordinator+ResumeCoordinator","invariant_validator":"requirement-to-test mapping complete","failure_recovery_rule":"Any untested hard invariant blocks implementation qualification","future_test_family":"TRACEABILITY_META"},
+    {"id":"G-RQ-072","canonical_owner":"021G","implementing_components":"RecoveryQueryService+RecoveryClaimCoordinator+ResumeCoordinator","invariant_validator":"portable tests != target evidence","failure_recovery_rule":"Target evidence remains NOT_STARTED until run","future_test_family":"TARGET_WINDOWS_REBOOT+IOS_CLIENT_SUSPEND_RESUME"},
+    {"id":"G-RQ-073","canonical_owner":"021G","implementing_components":"HandoffCoordinator","invariant_validator":"human evidence separately labeled","failure_recovery_rule":"No human evidence -> EMPIRICAL_HUMAN_EVIDENCE NOT_STARTED","future_test_family":"HUMAN_HANDOFF"},
+    {"id":"G-RQ-074","canonical_owner":"System Master Rebuild Governance","implementing_components":"ContinuityEvidencePublisher","invariant_validator":"evidence class explicit","failure_recovery_rule":"Mislabel -> qualification invalid","future_test_family":"TRACEABILITY_META"}
+  ]
+}
