@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "VOICE-TRAIT-EVIDENCE-SCHEMA-v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "trait_id",
+    "level",
+    "disposition",
+    "confidence",
+    "effect_hypothesis",
+    "evidence_refs",
+    "failure_modes",
+    "status"
+  ],
+  "properties": {
+    "trait_id": {
+      "type": "string",
+      "minLength": 8
+    },
+    "level": {
+      "enum": [
+        "AUTHOR_FINGERPRINT",
+        "PROJECT_VOICE",
+        "BOOK_VOICE",
+        "POV_CHARACTER_VOICE",
+        "LOCAL_PASSAGE_STATE"
+      ]
+    },
+    "disposition": {
+      "enum": [
+        "PROTECT",
+        "RANGE",
+        "CHALLENGE",
+        "SUPPRESS"
+      ]
+    },
+    "confidence": {
+      "enum": [
+        "LOW",
+        "MEDIUM",
+        "HIGH"
+      ]
+    },
+    "effect_hypothesis": {
+      "type": "string",
+      "minLength": 20
+    },
+    "evidence_refs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    },
+    "failure_modes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "quantitative_signals": {
+      "type": "object"
+    },
+    "conditioning": {
+      "type": "object"
+    },
+    "local_overuse_trigger": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "status": {
+      "enum": [
+        "PROVISIONAL",
+        "QUALIFIED_BASELINE",
+        "REQUIRES_REVIEW"
+      ]
+    }
+  },
+  "policy_invariants": {
+    "frequency_not_quality": true,
+    "project_boundary_required": true,
+    "named_author_target": false
+  }
+}

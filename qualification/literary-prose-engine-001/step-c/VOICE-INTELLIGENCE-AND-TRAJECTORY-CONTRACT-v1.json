@@ -1,0 +1,62 @@
+{
+  "contract_id": "LITERARY-PROSE-ENGINE-001-STEP-C-VOICE-INTELLIGENCE-AND-TRAJECTORY-v1",
+  "status": "CANONICAL_STEP_C",
+  "depends_on": [
+    "MASTER-001",
+    "STEP-B"
+  ],
+  "voice_hierarchy": [
+    "AUTHOR_FINGERPRINT",
+    "PROJECT_VOICE",
+    "BOOK_VOICE",
+    "POV_CHARACTER_VOICE",
+    "LOCAL_PASSAGE_STATE"
+  ],
+  "trait_dispositions": [
+    "PROTECT",
+    "RANGE",
+    "CHALLENGE",
+    "SUPPRESS"
+  ],
+  "rules": {
+    "frequency_alone_can_protect": false,
+    "frequency_alone_can_suppress": false,
+    "later_version_is_automatically_better": false,
+    "maturity_label_is_quality_score": false,
+    "project_boundaries_must_be_preserved": true,
+    "raw_manuscript_text_required_in_repository": false,
+    "named_author_similarity_allowed": false,
+    "uncertain_trait_disposition": "RANGE_OR_CHALLENGE_PENDING_REVIEW",
+    "uncertain_voice_change": "VOICE_UNCERTAIN"
+  },
+  "protect_requires": [
+    "demonstrated contextual effect",
+    "cross-evidence support",
+    "preservation compatibility",
+    "confidence"
+  ],
+  "trajectory_requires": [
+    "ordered version/book metadata",
+    "feature deltas",
+    "project boundary",
+    "explicit non-causal warning"
+  ],
+  "voice_change_classes": [
+    "VOICE_DEGRADATION",
+    "VOICE_EVOLUTION",
+    "VOICE_NEUTRAL_CHANGE",
+    "VOICE_UNCERTAIN"
+  ],
+  "step_c_evolution_boundary": {
+    "final_voice_evolution_claim_available": false,
+    "reason": "STEP-I independent evaluator and user preference evidence are not yet available. STEP-C may emit EVOLUTION_CANDIDATE only."
+  },
+  "development_evidence_precedence": [
+    "explicit user decisions",
+    "same-book version evidence",
+    "same-project evidence",
+    "author-level cross-project evidence",
+    "external craft knowledge later in STEP-D"
+  ],
+  "no_blind_averaging": true
+}

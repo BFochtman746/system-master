@@ -1,0 +1,105 @@
+{
+  "cases": [
+    {
+      "id": "C-FIX-FREQUENT-NO-EFFECT",
+      "kind": "trait",
+      "input": {
+        "frequency": 0.95,
+        "effect_support": 0.2,
+        "project_count": 2
+      },
+      "expected": "CHALLENGE"
+    },
+    {
+      "id": "C-FIX-CROSS-PROJECT-STRENGTH",
+      "kind": "trait",
+      "input": {
+        "frequency": 0.7,
+        "effect_support": 0.9,
+        "project_count": 2
+      },
+      "expected": "PROTECT"
+    },
+    {
+      "id": "C-FIX-PROJECT-STRENGTH",
+      "kind": "trait",
+      "input": {
+        "frequency": 0.7,
+        "effect_support": 0.85,
+        "project_count": 1,
+        "project_specific": true
+      },
+      "expected": "PROTECT"
+    },
+    {
+      "id": "C-FIX-NEUTRAL-RANGE",
+      "kind": "trait",
+      "input": {
+        "frequency": 0.4,
+        "effect_support": 0.55,
+        "project_count": 1
+      },
+      "expected": "RANGE"
+    },
+    {
+      "id": "C-FIX-HARM-SUPPRESS",
+      "kind": "trait",
+      "input": {
+        "frequency": 0.8,
+        "effect_support": 0.1,
+        "harm_support": 0.9,
+        "project_count": 2
+      },
+      "expected": "SUPPRESS"
+    },
+    {
+      "id": "C-FIX-AUTHOR-IMITATION",
+      "kind": "trait",
+      "input": {
+        "named_author_target": true,
+        "frequency": 1,
+        "effect_support": 1,
+        "project_count": 2
+      },
+      "expected": "REJECT"
+    },
+    {
+      "id": "C-FIX-LATER-NOT-AUTO-EVOLUTION",
+      "kind": "change",
+      "input": {
+        "target_improvement_supported": true,
+        "independent_evaluation_available": false,
+        "explicit_user_approval": false
+      },
+      "expected": "EVOLUTION_CANDIDATE"
+    },
+    {
+      "id": "C-FIX-PRESERVATION-FAILURE",
+      "kind": "change",
+      "input": {
+        "target_improvement_supported": true,
+        "critical_preservation_failure": true,
+        "independent_evaluation_available": true
+      },
+      "expected": "VOICE_DEGRADATION"
+    },
+    {
+      "id": "C-FIX-UNCERTAIN-CHANGE",
+      "kind": "change",
+      "input": {
+        "target_improvement_supported": false,
+        "independent_evaluation_available": true
+      },
+      "expected": "VOICE_UNCERTAIN"
+    },
+    {
+      "id": "C-FIX-USER-APPROVED-EVOLUTION",
+      "kind": "change",
+      "input": {
+        "target_improvement_supported": true,
+        "explicit_user_approval": true
+      },
+      "expected": "VOICE_EVOLUTION"
+    }
+  ]
+}
