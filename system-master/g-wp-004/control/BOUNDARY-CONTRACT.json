@@ -1,0 +1,13 @@
+{
+  "package": "G-WP-004",
+  "021M_retention_boundary": {
+    "mode": "read-only disposition adapter",
+    "accepted_standings": ["DELETE_ELIGIBLE", "HOLD", "UNKNOWN"],
+    "rule": "Only DELETE_ELIGIBLE may authorize orphan payload deletion after reference scan and safety window; HOLD or UNKNOWN preserves bytes.",
+    "implementation_claim": "No claim that 021M runtime implementation is provided by G-WP-004."
+  },
+  "execution_fence_boundary": {
+    "mode": "current-fence query adapter",
+    "rule": "CheckpointCoordinator consumes current execution fence standing and never owns the fence authority."
+  }
+}
