@@ -1,10 +1,12 @@
 # A-01 Operating Contract
 
-Status: CANONICAL — A01-CONTROL-PLANE-001
+Status: CANONICAL — A01-CONTROL-PLANE-001 / NORMAL OPERATING MODE
 
 ## Purpose
 
 A-01 is the shared authoritative Windows/X64 machine-qualification resource for BFochtman746/system-master. This contract governs every workstream that requests, consumes, interprets, or promotes evidence produced by A-01.
+
+A01-MIGRATION-001 is closed. The proven control-plane execution baseline is now normal operating infrastructure and MUST NOT be modified as part of ordinary product repair merely because a workstream subject fails, waits, or requires different product-level qualification content.
 
 ## Non-negotiable rules
 
@@ -20,6 +22,8 @@ A-01 is the shared authoritative Windows/X64 machine-qualification resource for 
 10. Failures MUST be classified as `SUBJECT_FAILURE`, `INFRA_FAILURE`, or `CONTROL_PLANE_FAILURE`. Repair scope SHOULD be limited to the failing boundary unless evidence proves broader repair is required.
 11. Every run MUST preserve a request record, an immutable result receipt, timing telemetry, the exact subject SHA, runner identity, and evidence location.
 12. The authoritative state machine is repository-owned. Conversation memory, prose claims, screenshots, or local reasoning are not substitutes for a receipt.
+13. A `SUBJECT_FAILURE` MUST return to the owning workstream and MUST NOT by itself reopen A-01 control-plane engineering.
+14. A new A-01 infrastructure objective requires evidence meeting the change-control rule in `qualification/a01/A01-OPERATING-MODE-001.md`.
 
 ## Standing states
 
@@ -77,6 +81,8 @@ No workstream may inject an arbitrary post-action command. The only permitted ac
 
 All System Master workstreams use this repository contract as shared authority. A chat starting or resuming work MUST read `SYSTEM-MASTER-WORKSTREAM-BOOTSTRAP.md` and this contract before scheduling A-01 work. The repository, not any single conversation, is the communication bus between workstreams.
 
-## Migration rule
+## Normal operating mode and change control
 
-Legacy A-01 workflows may remain temporarily while being migrated, but they MUST NOT be treated as control-plane-authoritative unless they emit a receipt conforming to the active receipt schema and are registered by `qualification/a01/registry.json`.
+The active normal-mode baseline, workstream handoffs, and conditions that may legitimately reopen A-01 infrastructure work are defined in `qualification/a01/A01-OPERATING-MODE-001.md`.
+
+Historical migration evidence is preserved in `qualification/a01/A01-MIGRATION-001-CLOSURE.md`. Legacy migration is not an active objective. New direct self-hosted qualification paths are prohibited unless explicitly incorporated into the canonical control plane and enforcement policy.
