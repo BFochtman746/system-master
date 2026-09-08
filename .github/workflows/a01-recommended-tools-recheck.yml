@@ -1,0 +1,54 @@
+name: A-01 Recommended Tools Recheck
+
+on:
+  push:
+    branches:
+      - runner/capability-audit-001
+    paths:
+      - ".github/workflows/a01-recommended-tools-recheck.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  recheck:
+    name: Recheck PowerShell7 GitHubCLI jq CMake Ninja dotnet
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 10
+    steps:
+      - name: Recheck installed tools
+        shell: cmd
+        run: |
+          echo === IDENTITY ===
+          whoami
+          echo.
+          echo === POWERSHELL 7 ===
+          where pwsh 2>nul || echo pwsh=not-on-path
+          pwsh -NoLogo -NoProfile -Command "$PSVersionTable.PSVersion.ToString()" 2>nul || echo pwsh-version=unavailable
+          if exist "C:\Program Files\PowerShell\7\pwsh.exe" "C:\Program Files\PowerShell\7\pwsh.exe" -NoLogo -NoProfile -Command "$PSVersionTable.PSVersion.ToString()"
+          echo.
+          echo === GITHUB CLI ===
+          where gh 2>nul || echo gh=not-on-path
+          gh --version 2>nul || if exist "C:\Program Files\GitHub CLI\gh.exe" "C:\Program Files\GitHub CLI\gh.exe" --version
+          echo.
+          echo === JQ ===
+          where jq 2>nul || echo jq=not-on-path
+          jq --version 2>nul || echo jq-version=unavailable
+          echo.
+          echo === CMAKE ===
+          where cmake 2>nul || echo cmake=not-on-path
+          cmake --version 2>nul || if exist "C:\Program Files\CMake\bin\cmake.exe" "C:\Program Files\CMake\bin\cmake.exe" --version
+          echo.
+          echo === NINJA ===
+          where ninja 2>nul || echo ninja=not-on-path
+          ninja --version 2>nul || echo ninja-version=unavailable
+          if exist "%USERPROFILE%\scoop\shims\ninja.exe" "%USERPROFILE%\scoop\shims\ninja.exe" --version
+          echo.
+          echo === DOTNET ===
+          where dotnet 2>nul || echo dotnet=not-on-path
+          dotnet --info 2>nul || if exist "C:\Program Files\dotnet\dotnet.exe" "C:\Program Files\dotnet\dotnet.exe" --info
+          echo.
+          echo === MSBUILD THROUGH DOTNET ===
+          dotnet msbuild -version 2>nul || if exist "C:\Program Files\dotnet\dotnet.exe" "C:\Program Files\dotnet\dotnet.exe" msbuild -version
+          exit /b 0
