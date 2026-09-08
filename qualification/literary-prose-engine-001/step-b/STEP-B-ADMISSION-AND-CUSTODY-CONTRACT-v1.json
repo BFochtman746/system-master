@@ -1,0 +1,85 @@
+{
+  "contract_id": "LITERARY-PROSE-ENGINE-001-STEP-B-ADMISSION-AND-CUSTODY-v1",
+  "status": "CANONICAL",
+  "inherits": [
+    "LITERARY-SOURCE-RIGHTS-PROVENANCE-SCHEMA-v1",
+    "WORK-EDITION-SOURCE-PASSAGE-IDENTITY-CONTRACT-v1",
+    "DERIVED-LITERARY-INTELLIGENCE-SCHEMA-v1",
+    "LITERARY-PROSE-ENGINE-001-MASTER-001"
+  ],
+  "source_classes": [
+    "REFERENCE",
+    "USER_MANUSCRIPT"
+  ],
+  "rights_classes": [
+    "PUBLIC_DOMAIN_FULL_TEXT",
+    "LICENSED_FULL_TEXT",
+    "USER_OWNED_OR_AUTHORIZED",
+    "ANALYSIS_ONLY_NO_FULL_TEXT"
+  ],
+  "admission_states": [
+    "ADMIT_FULL_TEXT",
+    "ADMIT_RESTRICTED",
+    "ADMIT_DERIVED_ONLY",
+    "REJECT"
+  ],
+  "custody_states": {
+    "PERSISTENT_RAW": ["AUTHORIZED_CORPUS", "RESTRICTED_PROJECT_VAULT"],
+    "TRANSIENT_RAW": ["SESSION_ONLY", "TRANSIENT_PROCESSING_ONLY"],
+    "NO_RAW": ["NONE"]
+  },
+  "evidence_binding": {
+    "PUBLIC_DOMAIN_FULL_TEXT": ["PUBLIC_DOMAIN_DETERMINATION"],
+    "LICENSED_FULL_TEXT": ["LICENSE_GRANT"],
+    "USER_OWNED_OR_AUTHORIZED": ["OWNERSHIP_ATTESTATION", "EXPLICIT_AUTHORIZATION"],
+    "ANALYSIS_ONLY_NO_FULL_TEXT": ["ANALYSIS_ONLY_RESTRICTION"]
+  },
+  "full_text_admission_requirements": {
+    "rights_class_must_allow": true,
+    "full_text_allowed": true,
+    "raw_text_retention": "PERSIST",
+    "permitted_use": "PERSIST_FULL_TEXT",
+    "storage_location_class": ["AUTHORIZED_CORPUS", "RESTRICTED_PROJECT_VAULT"]
+  },
+  "analysis_only_requirements": {
+    "full_text_allowed": false,
+    "passage_text_allowed": false,
+    "raw_text_retention": ["TRANSIENT_PROCESSING_ONLY", "NONE"],
+    "storage_location_class": ["DERIVED_ONLY_STORE", "NO_RAW_TEXT_STORE"],
+    "allowed_admission_states": ["ADMIT_DERIVED_ONLY", "REJECT"],
+    "persistent_raw_fields_prohibited": [
+      "raw_text",
+      "full_text",
+      "passage_text",
+      "source_excerpt",
+      "quote",
+      "prompt_payload",
+      "embedding_payload"
+    ],
+    "derived_output_must_be_nonreconstructive": true
+  },
+  "unknown_rights_policy": "REJECT",
+  "deduplication": {
+    "exact_byte_digest": "ONE_PAYLOAD_MULTIPLE_PROVENANCE_EDGES",
+    "normalized_text_digest": "NO_WEIGHT_MULTIPLICATION",
+    "near_duplicate": "NOMINATE_ONLY_DETERMINISTIC_CONFIRMATION_REQUIRED",
+    "translation": "DISTINCT_EDITION",
+    "revision": "DISTINCT_VERSION_WHEN_WORDING_DIFFERS",
+    "overlap_group": "KEEP_TOGETHER_ACROSS_TRAIN_EVAL_SPLITS"
+  },
+  "manuscript_rules": {
+    "rights_class": "USER_OWNED_OR_AUTHORIZED",
+    "required_version_metadata": true,
+    "blind_average_across_projects_or_versions": false,
+    "development_trajectory_preserves_chronology": true,
+    "maturity_or_authority_must_not_be_inferred_from_filename_when_unknown": true
+  },
+  "derivation_rules": {
+    "rights_projection_for_analysis_only": "DERIVED_ONLY_NONRECONSTRUCTIVE",
+    "named_author_target": false,
+    "author_identity_feature_allowed": false,
+    "source_ledger_linkage_required": true,
+    "content_digest_required": true
+  },
+  "bulk_acquisition_allowed": false
+}
