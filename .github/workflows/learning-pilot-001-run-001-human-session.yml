@@ -12,12 +12,12 @@ permissions:
 
 jobs:
   qualify:
-    uses: ./.github/workflows/a01-control-plane-gateway.yml
+    uses: BFochtman746/system-master/.github/workflows/a01-control-plane-gateway.yml@main
     with:
       qualification_id: LEARNING-PILOT-001-RUN-001-HUMAN-SESSION
       workstream_id: LEARNING
       subject_sha: 84a4d72dccd05230e6fc85b3d0ff0a1fa4ec2535
       origin_ref: refs/heads/learning/pilot-001-run-001-real-participant-stage-1
-      resume_on_pass: Adjudicate the control-plane receipt; if promotion_authorized=true, promote exact tested SHA 84a4d72dccd05230e6fc85b3d0ff0a1fa4ec2535 unchanged and permit explicit-consent real-participant execution.
+      resume_on_pass: Adjudicate the control-plane receipt; if promotion_authorized=true, preserve exact tested SHA 84a4d72dccd05230e6fc85b3d0ff0a1fa4ec2535 as qualified and permit only explicit-consent real-participant execution.
       resume_on_failure: Classify SUBJECT_FAILURE versus INFRA_FAILURE or CONTROL_PLANE_FAILURE; repair only the failing boundary when sufficient and rerun the minimum required gate.
       notification_target: learning-pilot-001-run-001
