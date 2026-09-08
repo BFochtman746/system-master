@@ -1,0 +1,13 @@
+{
+  "id": "G-WP-002",
+  "objective": "Implement stable durable work identity and recovery registry persistence.",
+  "prerequisites": ["G-WP-001"],
+  "components": ["DurableWorkIdentityRegistry", "RecoveryRegistry"],
+  "data": ["DurableWorkIdentity", "RecoveryRecord", "RecoveryEvent"],
+  "contracts": ["RegisterDurableWorkIdentity", "OpenRecovery", "TransitionRecovery", "GetRecoveryStatus"],
+  "migration": "Crosswalk existing task/workflow/work-unit identifiers without changing historical IDs.",
+  "tests": ["UNIT", "CONTRACT", "PROPERTY", "CONCURRENCY"],
+  "evidence": "Schema/constraint/property test receipts.",
+  "rollback": "Additive schema rollback only before new records depend on fields.",
+  "completion": "Stable identity and versioned recovery lifecycle are durably enforceable."
+}
