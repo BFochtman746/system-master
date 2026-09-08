@@ -67,7 +67,7 @@ public final class Fwp009QualificationTest {
         expectThrows(() -> c.evaluateRollbackOrRestore(RecoveryKind.ROLL_FORWARD, target, ok), "roll forward cannot use rollback path");
 
         RecoveryTarget historicalRevoked = new RecoveryTarget("CHG-1", 1, D1, D2, D3, D4, D5);
-        CurrentEligibilitySnapshot currentReleaseRevoked = eligibility(Standing.ELIGIBLE,Standing.ELIGIBLE,Standing.ELIGIBLE,Standing.ELIGIBLE,Standing.ELIGIBLE,Standing.PROHIBITED,Compatibility.COMPATIBLE, Compatibility.COMPATIBLE,20);
+        CurrentEligibilitySnapshot currentReleaseRevoked = eligibility(Standing.ELIGIBLE,Standing.ELIGIBLE,Standing.ELIGIBLE,Standing.ELIGIBLE,Standing.ELIGIBLE,Standing.PROHIBITED,Compatibility.COMPATIBLE,Compatibility.COMPATIBLE,20);
         eq(Disposition.REQUIRE_ROLL_FORWARD, c.evaluateRollbackOrRestore(RecoveryKind.ROLLBACK, historicalRevoked, currentReleaseRevoked).disposition(), "historical eligible release cannot resurrect revoked current release");
 
         CurrentEligibilitySnapshot currentKeyRevoked = eligibility(Standing.ELIGIBLE,Standing.PROHIBITED,Standing.ELIGIBLE,Standing.ELIGIBLE,Standing.ELIGIBLE,Standing.ELIGIBLE,Compatibility.COMPATIBLE,Compatibility.COMPATIBLE,21);
