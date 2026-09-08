@@ -1,0 +1,46 @@
+{
+  "gate_id": "F-WP-005-021O-P-CONTRACT-GATE",
+  "status": "SATISFIED_FOR_BOUNDED_F_WP_005_SCOPE",
+  "021O": {
+    "architecture_build_spec_status": "CLOSED_REQUALIFIED_DEPENDENCY_VALID",
+    "material_architecture_residual_count": 0,
+    "computer_implementation_status": "NOT_STARTED",
+    "consumed_contracts": [
+      "principal identity reference",
+      "action/resource scoped authorization evidence",
+      "role/attribute policy inputs",
+      "principal lineage for separation of duties",
+      "revocation epoch/current standing",
+      "bounded emergency authorization"
+    ],
+    "prohibited_claims": [
+      "authentication implies authorization",
+      "role implies ambient privilege",
+      "identity implies semantic authority",
+      "021O stores raw reusable secrets/private keys/certificates"
+    ]
+  },
+  "021P": {
+    "architecture_build_spec_status": "CLOSED_REQUALIFIED_DEPENDENCY_VALID",
+    "material_architecture_residual_count": 0,
+    "computer_implementation_status": "NOT_STARTED",
+    "consumed_contracts": [
+      "opaque secret reference",
+      "secret version reference",
+      "current/revoked/unknown standing"
+    ],
+    "prohibited_claims": [
+      "cryptographic validity grants change authorization",
+      "raw reusable secret/private-key material may enter ordinary change records",
+      "portable tests prove production cryptographic security"
+    ]
+  },
+  "boundary_laws": [
+    "021O authorization and 021P cryptographic/secret standing are independent inputs.",
+    "F-WP-005 stores authorization evidence references and opaque secret references, never raw secret material.",
+    "Unknown/revoked/stale required authorization fails closed.",
+    "Revoked/unknown required secret-reference standing fails closed.",
+    "Emergency authority is bounded and attributable, never an unrestricted bypass.",
+    "F-WP-005 does not implement or claim implementation of 021O or 021P."
+  ]
+}

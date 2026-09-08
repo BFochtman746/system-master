@@ -1,0 +1,11 @@
+{
+  "package_id": "F-WP-003",
+  "requirements": [
+    {"id":"F-RQ-002","invariant":"Every material change identifies exactly one ChangeType and one RiskClass before execution eligibility.","failure":"Unknown classification -> ASSESSMENT_REQUIRED"},
+    {"id":"F-RQ-005","invariant":"Each change names the semantic authority owning the state or behavior being changed.","failure":"Unresolvable authority -> FAIL_CLOSED"},
+    {"id":"F-RQ-006","invariant":"Material changes carry complete user/system, dependency, security/privacy, data/state compatibility and recovery impact assessment.","failure":"Missing evidence -> ASSESSMENT_REQUIRED"},
+    {"id":"F-RQ-007","invariant":"Applicable security/privacy impact cannot remain UNKNOWN before consequential eligibility.","failure":"Unknown material impact -> deny/fail closed downstream"},
+    {"id":"F-RQ-008","invariant":"Approval policy is risk-tiered and bound to the exact current risk/context policy snapshot.","failure":"Policy unavailable -> no classified high-risk progression"}
+  ],
+  "acceptance": "all five requirements must have executable passing evidence"
+}

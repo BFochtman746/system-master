@@ -1,0 +1,27 @@
+{
+  "objective": "SYSTEM-MASTER-F-WP-002-A01-IMPLEMENT-QUALIFY-001",
+  "package_id": "F-WP-002",
+  "package_name": "ChangeRegistry + authoritative data/event store",
+  "authority": "021F",
+  "frozen_build_baseline": "BUILD-FREEZE-BASELINE-000",
+  "hard_predecessor": {
+    "package_id": "F-WP-001",
+    "qualified_commit": "2fa0748ca431152a248a0f2f6ca0835fda22e083",
+    "workflow_run_id": 34174577135,
+    "evidence_artifact_id": 10036919170,
+    "evidence_artifact_sha256": "c6f9d8264acc3feec14dc663f0ccbcace5c68eb460b1538ee830a6aaeee8fe01",
+    "qualification_result": "PASS F-WP-001 tests=12 requirements=60"
+  },
+  "implementation_scope": [
+    "ChangeRecord",
+    "ChangeRevision",
+    "ChangeTargetSnapshot semantics",
+    "ChangeEvent",
+    "optimistic concurrency control",
+    "content and target digests",
+    "rebuildable indexes",
+    "single local atomic transaction boundary"
+  ],
+  "qualification_families": ["unit", "property", "concurrency", "corruption", "transaction-fault"],
+  "production_authorized": false
+}

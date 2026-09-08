@@ -1,0 +1,79 @@
+name: System Master F-WP-002 A-01 Qualification
+
+on:
+  push:
+    branches:
+      - system-master/f-wp-002-a01
+    paths:
+      - 'system-master/f-wp-002/control/**'
+      - 'system-master/f-wp-002/transport/**'
+      - '.github/scripts/fwp002-rebuild.js'
+      - '.github/scripts/fwp002-qualify.js'
+      - '.github/workflows/system-master-f-wp-002-a01.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: system-master-f-wp-002-a01
+  cancel-in-progress: false
+
+jobs:
+  rebuild:
+    name: Reconstruct sealed F-WP-002 source on A-01
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    outputs:
+      rebuilt_commit: ${{ steps.rebuild.outputs.rebuilt_commit }}
+    steps:
+      - name: Checkout exact transport subject
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          clean: true
+          persist-credentials: true
+
+      - name: Reconstruct and commit sealed source slice
+        id: rebuild
+        shell: cmd
+        run: node .github\scripts\fwp002-rebuild.js
+
+  qualify:
+    name: Qualify F-WP-002 authoritative store on A-01
+    needs: rebuild
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout rebuilt repository subject
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.rebuild.outputs.rebuilt_commit }}
+          fetch-depth: 0
+          clean: true
+
+      - name: Execute repository-owned F-WP-002 qualifier
+        shell: cmd
+        run: node .github\scripts\fwp002-qualify.js
+
+      - name: Publish qualification summary
+        if: always()
+        shell: cmd
+        run: |
+          set "EVIDENCE_DIR=%RUNNER_TEMP%\system-master-fwp002-%GITHUB_RUN_ID%"
+          echo ## SYSTEM-MASTER F-WP-002 A-01>>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\subject.txt" type "%EVIDENCE_DIR%\subject.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\result.txt" type "%EVIDENCE_DIR%\result.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\qualification.txt" type "%EVIDENCE_DIR%\qualification.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\failure.txt" type "%EVIDENCE_DIR%\failure.txt">>"%GITHUB_STEP_SUMMARY%"
+
+      - name: Upload F-WP-002 qualification evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: system-master-f-wp-002-a01-evidence
+          path: ${{ runner.temp }}\system-master-fwp002-${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 30

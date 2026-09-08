@@ -1,0 +1,9 @@
+{
+  "package": "F-WP-012",
+  "requirements": [
+    {"id":"F-RQ-054","component":"ContractRegistry","invariant":"All logical command/query contracts are explicitly versioned; breaking major versions require an explicit migration and unsupported versions return explicit incompatibility."},
+    {"id":"F-RQ-055","component":"LegacyCrosswalkService","invariant":"Legacy reuse requires an explicit crosswalk, semantic ownership remains 021F, and ambiguous mappings are quarantined for adjudication."},
+    {"id":"F-RQ-056","component":"MigrationService","invariant":"Legacy migration is idempotent, resumable, content-digest verified, and produces a reconciliation report; identity/digest conflicts halt."},
+    {"id":"F-RQ-057","component":"PortabilityService","invariant":"Export preserves change identity, version, evidence references, and event order while rejecting secret material and invalid ordering."}
+  ]
+}

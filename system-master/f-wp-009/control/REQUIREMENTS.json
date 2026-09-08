@@ -1,0 +1,9 @@
+{
+  "package": "F-WP-009",
+  "requirements": [
+    {"id":"F-RQ-031","component":"RecoveryCoordinator","invariant":"Rollback/restore initiation always reevaluates current security, data/schema compatibility, provider and release eligibility; historical eligibility never authorizes current recovery."},
+    {"id":"F-RQ-032","component":"RecoveryCoordinator","invariant":"Roll-forward is a first-class content-bound recovery plan with exact scope, authority, evidence, target and migration identity; undocumented hotfix recovery is not representable."},
+    {"id":"F-RQ-042","component":"RecoveryEligibilityContracts","invariant":"Schema/state-contract recovery is allowed only with explicit current backward/forward compatibility and migration obligations; UNKNOWN or INCOMPATIBLE blocks consequential recovery."},
+    {"id":"F-RQ-048","component":"RecoveryCoordinator","invariant":"Current prohibited/revoked security, key, credential, policy, provider or release standing dominates historical state; recovery can never resurrect a currently prohibited subject."}
+  ]
+}

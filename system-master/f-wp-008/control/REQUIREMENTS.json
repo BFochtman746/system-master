@@ -1,0 +1,10 @@
+{
+  "package": "F-WP-008",
+  "requirements": [
+    {"id":"F-RQ-024","component":"ChangeVerifier","invariant":"Executor exit status alone can never establish change success; current authoritative changed-domain and required 021T observation evidence must satisfy the frozen verification criteria."},
+    {"id":"F-RQ-025","component":"ChangeVerifier","invariant":"SUCCEEDED is permitted only when all required criteria pass; unresolved criteria require VERIFYING/FAILED or an exact approved residual EXCEPTION."},
+    {"id":"F-RQ-027","component":"EvidencePublisher","invariant":"Every consequential step has an append-only content-bound receipt carrying exact change/revision/epoch/step/target/outcome/evidence identities."},
+    {"id":"F-RQ-040","component":"EvidencePublisher","invariant":"Sensitive evidence is classified and referenced; raw payload/user-content/secret dumping into change evidence is prohibited."},
+    {"id":"F-RQ-058","component":"IntegrityQuarantineService","invariant":"Authoritative integrity corruption quarantines the affected change from further execution/verification until explicit evidence-backed reconciliation."}
+  ]
+}
