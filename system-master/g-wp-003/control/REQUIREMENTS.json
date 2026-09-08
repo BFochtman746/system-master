@@ -1,0 +1,11 @@
+{
+  "package": "G-WP-003",
+  "requirements": [
+    {"id":"G-RQ-005","owner":"InterruptionDetector","invariant":"A crash/interruption never directly converts work to terminal failed or completed."},
+    {"id":"G-RQ-007","owner":"InterruptionDetector","invariant":"Every interruption creates or deduplicates one durable InterruptionObservation with source evidence."},
+    {"id":"G-RQ-008","owner":"InterruptionDetector","invariant":"Heartbeat/lease loss is interruption evidence only, never proof of domain failure."},
+    {"id":"G-RQ-009","owner":"RecoveryClassifier","invariant":"Interrupted work is classified before resumption unless a preauthorized deterministic class applies; critical evidence gaps block or require manual decision."},
+    {"id":"G-RQ-010","owner":"RecoveryClassifier","invariant":"Classification covers resume, reconcile-then-resume, restart-safe-boundary, restart-beginning, wait-dependency, migrate, old-runtime, manual, quarantine and terminal outcomes."},
+    {"id":"G-RQ-011","owner":"RecoveryPlanner","invariant":"RecoveryPlan binds the exact classification, checkpoint/effect evidence, compatibility, authority and verification criteria used to authorize resume; changed inputs require replan."}
+  ]
+}
