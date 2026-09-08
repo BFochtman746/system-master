@@ -1,0 +1,114 @@
+name: LEARNING-LAB-PILOT-001 Refresh Current Runtime Binding
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [learning/pilot-001-refresh-current-runtime-binding]
+    paths:
+      - "learning/lab/PILOT_001_REFRESH_GATE_TRIGGER.txt"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: learning-pilot-001-refresh-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qualify:
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+          clean: true
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: '3.13.15'
+          architecture: x64
+          check-latest: false
+      - name: Prepare evidence
+        shell: cmd
+        run: |
+          set "EVIDENCE_DIR=%RUNNER_TEMP%\learning-pilot-001-refresh-%GITHUB_RUN_ID%"
+          set "CLASS_DIR=%RUNNER_TEMP%\learning-pilot-001-refresh-classes-%GITHUB_RUN_ID%"
+          mkdir "%EVIDENCE_DIR%" 2>nul
+          mkdir "%CLASS_DIR%" 2>nul
+          echo EVIDENCE_DIR=%EVIDENCE_DIR%>>"%GITHUB_ENV%"
+          echo CLASS_DIR=%CLASS_DIR%>>"%GITHUB_ENV%"
+          echo %GITHUB_SHA%>"%EVIDENCE_DIR%\source-commit.txt"
+          python --version>"%EVIDENCE_DIR%\python-version.txt" 2>&1
+          javac -version>"%EVIDENCE_DIR%\javac-version.txt" 2>&1
+      - name: Verify frozen PILOT-001 blobs
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $expected = @{
+            'learning/lab/LEARNING_LAB_PILOT_001_PROTOCOL.md' = '0db3de824060f4eb7ce3c2c7ffa0ed4b57ba9d35'
+            'learning/lab/learning_lab/real_learner_pilot.py' = '0c9f7a8b7850cef15643e3c11899585d2c25a08d'
+            'learning/lab/tests/test_real_learner_pilot.py' = 'e77d423078af4662f2c72b0cc1f8501e20d29851'
+            'learning/lab/qualification_pilot001.py' = '44aa0124f194f074a421f0a87a0695d96d7bae11'
+          }
+          foreach ($path in $expected.Keys) {
+            $actual = (git hash-object -- $path).Trim()
+            if ($actual -ne $expected[$path]) { throw "frozen blob drift: $path expected=$($expected[$path]) actual=$actual" }
+            "$path=$actual" | Add-Content -Encoding ascii "$env:EVIDENCE_DIR\frozen-blobs.txt"
+          }
+      - name: Compile current-runtime pilot boundary
+        shell: cmd
+        run: |
+          python -m py_compile learning\lab\learning_lab\real_learner_pilot.py learning\lab\learning_lab\real_learner_pilot_runtime_binding.py learning\lab\system_master_pilot_runtime_bridge.py learning\lab\qualification_pilot001_refresh_current_runtime.py learning\lab\qualification_pilot001_refresh_system_master_runtime.py
+      - name: Run frozen plus current-runtime pilot qualification
+        shell: cmd
+        run: |
+          cd /d "%GITHUB_WORKSPACE%\learning\lab"
+          python qualification_pilot001_refresh_current_runtime.py --output "%EVIDENCE_DIR%\pilot-refresh-portable.json" >"%EVIDENCE_DIR%\pilot-refresh-portable.txt" 2>&1
+          set RC=%ERRORLEVEL%
+          type "%EVIDENCE_DIR%\pilot-refresh-portable.txt"
+          exit /b %RC%
+      - name: Compile foundation-free System Master pilot adapter
+        shell: cmd
+        run: |
+          javac -d "%CLASS_DIR%" system-master\learning-integration\impl-017\src\main\java\org\systemmaster\learning\LearningExecutionPort.java system-master\learning-integration\pilot-001-refresh\src\main\java\org\systemmaster\learning\RealLearnerPilotRuntimeAdapter.java system-master\learning-integration\pilot-001-refresh\src\test\java\org\systemmaster\learning\Pilot001RefreshRuntimeBindingQualification.java >"%EVIDENCE_DIR%\java-compile.txt" 2>&1
+          set RC=%ERRORLEVEL%
+          type "%EVIDENCE_DIR%\java-compile.txt"
+          if not "%RC%"=="0" exit /b %RC%
+          echo PILOT_REFRESH_JAVA_FOUNDATION_DEPENDENCY=NONE>"%EVIDENCE_DIR%\java-isolation.txt"
+      - name: Run Java to Python current-runtime pilot binding qualification
+        shell: cmd
+        run: |
+          python learning\lab\qualification_pilot001_refresh_system_master_runtime.py --class-dir "%CLASS_DIR%" >"%EVIDENCE_DIR%\pilot-refresh-integration.txt" 2>&1
+          set RC=%ERRORLEVEL%
+          type "%EVIDENCE_DIR%\pilot-refresh-integration.txt"
+          exit /b %RC%
+      - name: Run current Learning predecessor regressions
+        shell: cmd
+        run: |
+          cd /d "%GITHUB_WORKSPACE%\learning\lab"
+          python -m unittest -v tests.test_unified_fresh_evidence_recovery tests.test_fresh_evidence_provider_acquisition tests.test_fresh_evidence_configured_http tests.test_fresh_evidence_admission tests.test_unified_turn_controller tests.test_adaptive_journey_continuation tests.test_provider_multi_candidate_runtime >"%EVIDENCE_DIR%\regressions.txt" 2>&1
+          set RC=%ERRORLEVEL%
+          type "%EVIDENCE_DIR%\regressions.txt"
+          exit /b %RC%
+      - name: Publish summary
+        if: always()
+        shell: cmd
+        run: |
+          echo ## LEARNING-LAB-PILOT-001-REFRESH-001>>"%GITHUB_STEP_SUMMARY%"
+          echo Commit: %GITHUB_SHA%>>"%GITHUB_STEP_SUMMARY%"
+          echo Human boundary: A-01 qualifies software/runtime binding only; no deterministic or model-generated interaction is real-participant evidence.>>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\frozen-blobs.txt" type "%EVIDENCE_DIR%\frozen-blobs.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\pilot-refresh-portable.txt" type "%EVIDENCE_DIR%\pilot-refresh-portable.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\java-isolation.txt" type "%EVIDENCE_DIR%\java-isolation.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\pilot-refresh-integration.txt" type "%EVIDENCE_DIR%\pilot-refresh-integration.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\regressions.txt" type "%EVIDENCE_DIR%\regressions.txt">>"%GITHUB_STEP_SUMMARY%"
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: learning-pilot-001-refresh-current-runtime-evidence
+          path: ${{ runner.temp }}\learning-pilot-001-refresh-${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 30
