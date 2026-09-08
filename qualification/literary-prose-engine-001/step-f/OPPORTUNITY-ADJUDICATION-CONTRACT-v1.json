@@ -1,0 +1,33 @@
+{
+  "contract_id": "LITERARY-PROSE-ENGINE-001-STEP-F-OPPORTUNITY-ADJUDICATION-v1",
+  "input": "PASSAGE_STATE + DIAGNOSTIC_EVIDENCE[]",
+  "output": "ADJUDICATED_OPPORTUNITY[] or NO_ACTION",
+  "default_max_opportunities": 3,
+  "hard_rejects": [
+    "canon_conflict",
+    "protected_language_conflict",
+    "authorial_intent_conflict",
+    "pov_knowledge_violation",
+    "explicit_user_constraint_conflict",
+    "named_author_target",
+    "rewrite_payload_from_specialist"
+  ],
+  "aggregation_rules": [
+    "deduplicate multiple specialist findings that point to the same underlying opportunity",
+    "do not multiply confidence merely because correlated specialists repeat the same signal",
+    "preserve explicit specialist disagreement",
+    "voice/preservation evidence can veto an unsafe opportunity but cannot invent a better rewrite",
+    "purpose relevance and expected impact matter more than stylistic attractiveness",
+    "low-confidence evidence may support review but not outrank high-confidence purpose-critical evidence",
+    "NO_ACTION is valid",
+    "maximum three opportunities by default",
+    "ranking score is internal triage, never prose quality"
+  ],
+  "statuses": [
+    "ADMIT",
+    "REJECT_PRESERVATION_RISK",
+    "REJECT_SCOPE",
+    "REVIEW_CONFLICT",
+    "NO_ACTION"
+  ]
+}
