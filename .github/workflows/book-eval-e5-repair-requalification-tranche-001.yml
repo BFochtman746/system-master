@@ -1,0 +1,151 @@
+name: BOOK-EVAL-LEMONADE-001 Repaired E5 Requalification Tranche 001
+
+on:
+  push:
+    branches:
+      - book-eval-lemonade-001-blind-resume-003-adapter-repair
+    paths:
+      - ".github/workflows/book-eval-e5-repair-requalification-tranche-001.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: book-eval-repaired-e5-campaign
+  cancel-in-progress: false
+
+jobs:
+  requalify:
+    name: Preserve E4 and begin fresh repaired E5 campaign
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout exact repair branch
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 1
+
+      - name: Execute repaired E5 tranche
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $ExpectedJar = 'fedd5bfcb122c4c0d5fd7a7912574705c582596978dd60796e804b26e7549248'
+          $ExpectedCorpus = '30bd9d0b2c348b33e6b17a81d639e64c7e7e8eef63d7d6c0bfc3175e94fe2b53'
+          $ExpectedOntology = '3daf139be2c35eb706ad0d0a1b6275a72c1ff18c21bf09d97eb26c3eadd7b5d6'
+          $ExpectedExecution = '7d9348ecdad344d8aa73dc0fe984aef85559084610504f50f8d35ef6a001fb06'
+          $ExpectedE4Sha = 'a5a5a3d25b36f50b8e667e22137fefea88a1b12e0d1c1812d6cc1cdd782e8b9c'
+          $ExpectedOldE5Sha = '693b218ba475f51a48eabb759694934b1275873d140da4bf68454fe5987925b3'
+          $ExpectedE5Fingerprint = '3d275e96b5b231fdc2ab08eac70486cb7d4f858e25143fd404a5e039c431f598'
+          $Bundle = Join-Path $env:GITHUB_WORKSPACE 'qualification\book-eval-lemonade-001'
+          $OldRoot = 'C:\AI Test Kit\Books Testing\BOOK_EVAL_LEMONADE_001_A01_BLIND_RUN_GPT_OSS_120B'
+          $NewRoot = 'C:\AI Test Kit\Books Testing\BOOK_EVAL_LEMONADE_001_A01_BLIND_RUN_GPT_OSS_120B_E5_REPAIR_V1'
+          $OldE4 = Join-Path $OldRoot 'E4-SPECIALIST-v2-FROZEN.jsonl'
+          $OldE5 = Join-Path $OldRoot 'E5-PANEL-v2-FROZEN.jsonl'
+          $OldIdentity = Join-Path $OldRoot 'LEMONADE-RUNTIME-IDENTITY.json'
+          $NewE4 = Join-Path $NewRoot 'E4-SPECIALIST-v2-FROZEN.jsonl'
+          $NewE5 = Join-Path $NewRoot 'E5-PANEL-v2-FROZEN.jsonl'
+          $NewIdentity = Join-Path $NewRoot 'LEMONADE-RUNTIME-IDENTITY.json'
+          $Evidence = Join-Path $env:RUNNER_TEMP ("book-eval-e5-repair-tranche-001-" + $env:GITHUB_RUN_ID)
+          $Stage = Join-Path $Evidence 'frozen-inputs'
+          $Classes = Join-Path $Evidence 'repair-classes'
+          New-Item -ItemType Directory -Force -Path $Evidence,$Stage,$Classes | Out-Null
+          "EVIDENCE_DIR=$Evidence" | Out-File -FilePath $env:GITHUB_ENV -Encoding ascii -Append
+          $Summary = Join-Path $Evidence 'tranche-001-summary.txt'
+
+          function Sha([string]$Path) { return (Get-FileHash -Algorithm SHA256 -LiteralPath $Path).Hash.ToLowerInvariant() }
+          function CountLines([string]$Path) { if (-not (Test-Path $Path)) { return 0 }; return @(Get-Content -LiteralPath $Path).Count }
+          function Reconstruct([string]$Dir,[string]$Out,[string]$Expected) {
+            $parts = @(Get-ChildItem -LiteralPath $Dir -File -Filter 'part-*' | Sort-Object Name)
+            if ($parts.Count -eq 0) { throw "no transport parts in $Dir" }
+            $b64 = [string]::Concat(@($parts | ForEach-Object { [IO.File]::ReadAllText($_.FullName,[Text.Encoding]::ASCII) }))
+            [IO.File]::WriteAllBytes($Out,[Convert]::FromBase64String($b64))
+            if ((Sha $Out) -ne $Expected) { throw "reconstructed hash mismatch for $Out" }
+          }
+
+          if (-not (Test-Path $OldE4) -or -not (Test-Path $OldE5) -or -not (Test-Path $OldIdentity)) { throw 'pre-repair evidence missing' }
+          if ((CountLines $OldE4) -ne 160 -or (Sha $OldE4) -ne $ExpectedE4Sha) { throw 'pre-repair E4 authority mismatch' }
+          if ((CountLines $OldE5) -ne 117 -or (Sha $OldE5) -ne $ExpectedOldE5Sha) { throw 'pre-repair E5 historical evidence mismatch' }
+          $oldE4Before = Sha $OldE4
+          $oldE5Before = Sha $OldE5
+
+          Reconstruct (Join-Path $Bundle 'jar-base64-v2') (Join-Path $Stage 'book-eval-lemonade.jar') $ExpectedJar
+          Reconstruct (Join-Path $Bundle 'provider-visible-corpus-base64-v2') (Join-Path $Stage 'BOOK-EVAL-CORPUS-INPUT-v2.jsonl') $ExpectedCorpus
+          Reconstruct (Join-Path $Bundle 'provider-ontology-base64-v2') (Join-Path $Stage 'BOOK-EVAL-PROVIDER-ONTOLOGY-v2.json') $ExpectedOntology
+          Reconstruct (Join-Path $Bundle 'runner-private-base64-v2') (Join-Path $Stage 'RUNNER-PRIVATE-EXECUTION-MANIFEST-v2.json') $ExpectedExecution
+          $Jar = Join-Path $Stage 'book-eval-lemonade.jar'
+
+          $RepairSource = Join-Path $Bundle 'repair-src\org\systemmaster\tools\booklab\LemonadeResponsesBookEvaluatorV2.java'
+          & javac -cp $Jar -d $Classes $RepairSource
+          if ($LASTEXITCODE -ne 0) { throw 'repair adapter compilation failed' }
+          $cp = $Classes + ';' + $Jar
+
+          if (-not (Test-Path $NewRoot)) {
+            New-Item -ItemType Directory -Force -Path $NewRoot | Out-Null
+            Copy-Item -LiteralPath $OldE4 -Destination $NewE4
+            Copy-Item -LiteralPath $OldIdentity -Destination $NewIdentity
+          }
+          if ((CountLines $NewE4) -ne 160 -or (Sha $NewE4) -ne $ExpectedE4Sha) { throw 'new-run E4 seed mismatch' }
+          if ((Sha $NewIdentity) -ne (Sha $OldIdentity)) { throw 'runtime identity copy mismatch' }
+          $e5Before = CountLines $NewE5
+          if ($e5Before -lt 0 -or $e5Before -gt 160) { throw 'invalid repaired E5 starting count' }
+          if ($e5Before -gt 0) {
+            $first = Get-Content -LiteralPath $NewE5 -TotalCount 1 | ConvertFrom-Json
+            if ([string]$first.candidate_fingerprint -ne $ExpectedE5Fingerprint) { throw 'repaired E5 fingerprint mismatch before tranche' }
+          }
+
+          if (Test-Path (Join-Path $NewRoot 'scoring-private')) { throw 'scoring-private material present in repaired run root' }
+          if (Test-Path (Join-Path $Bundle 'scoring-private')) { throw 'scoring-private material present in repository bundle' }
+          curl.exe --fail --silent --show-error -X POST 'http://127.0.0.1:13305/v1/load' -H 'Content-Type: application/json' --data-binary ("@" + (Join-Path $Bundle 'lemonade-load-request.json')) -o (Join-Path $Evidence 'model-load.json')
+          if ($LASTEXITCODE -ne 0) { throw 'model load failed' }
+
+          $env:BOOK_EVAL_PROVIDER_KIND = 'LEMONADE'
+          $env:BOOK_EVAL_MODEL = 'user.gpt-oss-120b-MXFP4'
+          $env:BOOK_EVAL_ENDPOINT = 'http://127.0.0.1:13305/v1/responses'
+          $env:BOOK_EVAL_RUNTIME_IDENTITY_FILE = $NewIdentity
+          $env:BOOK_EVAL_MAX_OUTPUT_TOKENS = '1200'
+          $env:BOOK_EVAL_TEMPERATURE = '0'
+          $env:BOOK_EVAL_MAX_ATTEMPTS = '3'
+          $env:BOOK_EVAL_MAX_PROVIDER_CALLS = '36'
+
+          $RunLog = Join-Path $Evidence 'repaired-e5-tranche-001.log'
+          & java -cp $cp org.systemmaster.tools.booklab.BookEvalProvider001AV2BlindRun `
+            (Join-Path $Stage 'BOOK-EVAL-CORPUS-INPUT-v2.jsonl') `
+            (Join-Path $Stage 'BOOK-EVAL-PROVIDER-ONTOLOGY-v2.json') `
+            (Join-Path $Stage 'RUNNER-PRIVATE-EXECUTION-MANIFEST-v2.json') `
+            $NewRoot *> $RunLog
+          $javaExit = $LASTEXITCODE
+          $e5After = CountLines $NewE5
+
+          if ((CountLines $NewE4) -ne 160 -or (Sha $NewE4) -ne $ExpectedE4Sha) { throw 'E4 changed during repaired E5 tranche' }
+          if ((Sha $OldE4) -ne $oldE4Before -or (Sha $OldE5) -ne $oldE5Before) { throw 'pre-repair historical evidence mutated' }
+          if ($e5After -le $e5Before) { Get-Content $RunLog; throw "repaired E5 made no progress; java exit=$javaExit" }
+          $first = Get-Content -LiteralPath $NewE5 -TotalCount 1 | ConvertFrom-Json
+          if ([string]$first.candidate_fingerprint -ne $ExpectedE5Fingerprint) { throw 'repaired E5 fingerprint mismatch after tranche' }
+          if ($e5After -gt 160) { throw 'repaired E5 count exceeded 160' }
+
+          if (Test-Path (Join-Path $NewRoot 'BLIND-RUN-STATUS.json')) { Copy-Item -LiteralPath (Join-Path $NewRoot 'BLIND-RUN-STATUS.json') -Destination (Join-Path $Evidence 'BLIND-RUN-STATUS.json') -Force }
+          @(
+            'objective=BOOK-EVAL-LEMONADE-001-E5-REPAIR-REQUALIFICATION-TRANCHE-001',
+            'repair_validation_run=34186308224',
+            'e4_reused_cases=160',
+            "e5_before_cases=$e5Before",
+            "e5_after_cases=$e5After",
+            "e5_added_cases=$($e5After-$e5Before)",
+            "java_exit=$javaExit",
+            'e4_candidate_fingerprint=7e7e7588138081f9ac3eaca75229934c137307927ac5ea0529ea800d601e03fc',
+            'e5_candidate_fingerprint=3d275e96b5b231fdc2ab08eac70486cb7d4f858e25143fd404a5e039c431f598',
+            'pre_repair_e5_117_preserved=true',
+            'scoring_private_accessed=false',
+            $(if ($e5After -eq 160) { 'standing=PASS_REPAIRED_E5_COMPLETE' } else { 'standing=PASS_REPAIRED_E5_PROGRESS' })
+          ) | Set-Content -Encoding UTF8 $Summary
+          Get-Content $Summary
+
+      - name: Upload tranche evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: book-eval-repaired-e5-tranche-001-evidence
+          path: ${{ env.EVIDENCE_DIR }}
+          if-no-files-found: warn
+          retention-days: 30
