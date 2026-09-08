@@ -1,0 +1,29 @@
+{
+  "objective":"A01-CONTROL-PLANE-001-CONTINUITY-MIGRATION",
+  "attempt":1,
+  "subject_sha":"1c8e7a2e4c284a6c36bd72fd4e2940262ec01bbe",
+  "run_id":34290471349,
+  "receipt":{
+    "qualification_id":"SYSTEM-MASTER-CONTINUITY-G-WP-011-015-CONSOLIDATED",
+    "workstream_id":"SYSTEM-MASTER-CONTINUITY",
+    "gate_class":"consolidated",
+    "checkout_sha":"1c8e7a2e4c284a6c36bd72fd4e2940262ec01bbe",
+    "result_class":"SUBJECT_FAILURE",
+    "child_exit_code":1,
+    "promotion_authorized":false
+  },
+  "artifact":{
+    "id":10081271691,
+    "sha256":"c33640d5dd6f7014697437fc3d60d5201d56d0772e0b302c5d98a3789734e60d",
+    "size_bytes":3622
+  },
+  "failure_boundary":"MIGRATION_WRAPPER_ANCESTRY_ACQUISITION",
+  "failure":"Legacy qualifier could not prove ba5713958cd2930c7c54e3d5fdadc41dd7a7a9ca as an ancestor because the gateway exact-SHA checkout did not contain the required historical objects.",
+  "classification":"SUBJECT_FAILURE",
+  "repair":"Explicitly fetch the registered Continuity branch ancestry with authenticated Git transport whenever the required predecessor ancestry is not already locally provable, then re-check the predecessor before invoking the frozen legacy qualifier.",
+  "legacy_qualification_truth_changed":false,
+  "target_windows_reboot_changed":false,
+  "target_ios_suspend_resume_changed":false,
+  "empirical_human_evidence_changed":false,
+  "production_authorized":false
+}

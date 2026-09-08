@@ -8,6 +8,8 @@ const runId = process.env.GITHUB_RUN_ID || 'local';
 const runnerTemp = process.env.RUNNER_TEMP || path.join(root, '.tmp');
 const legacyEvidenceDir = path.join(runnerTemp, `system-master-continuity-011-015-${runId}`);
 const evidenceDir = process.env.A01_EVIDENCE_DIR || legacyEvidenceDir;
+const predecessor = 'ba5713958cd2930c7c54e3d5fdadc41dd7a7a9ca';
+const continuityBranch = 'system-master/g-wp-011-015-continuity-slice';
 
 function run(command, args, options = {}) {
   return cp.spawnSync(command, args, {
@@ -19,20 +21,46 @@ function run(command, args, options = {}) {
   });
 }
 
-function ensureFullHistory() {
-  const shallow = run('git', ['rev-parse', '--is-shallow-repository']);
-  if (shallow.status !== 0 || String(shallow.stdout || '').trim() !== 'true') return;
+function gitAuthEnv() {
   const token = process.env.GITHUB_TOKEN;
-  if (!token) throw new Error('SHALLOW_CHECKOUT_REQUIRES_GITHUB_TOKEN');
+  if (!token) throw new Error('CONTINUITY_ANCESTRY_FETCH_REQUIRES_GITHUB_TOKEN');
   const auth = Buffer.from(`x-access-token:${token}`, 'utf8').toString('base64');
-  const env = {
+  return {
     ...process.env,
     GIT_CONFIG_COUNT: '1',
     GIT_CONFIG_KEY_0: 'http.https://github.com/.extraheader',
     GIT_CONFIG_VALUE_0: `AUTHORIZATION: basic ${auth}`
   };
-  const fetched = run('git', ['fetch', '--no-tags', '--prune', '--unshallow', 'origin', '+refs/heads/*:refs/remotes/origin/*'], { env });
-  if (fetched.status !== 0) throw new Error(`UNSHALLOW_FAILED:${fetched.stderr || fetched.stdout}`);
+}
+
+function ancestorAvailable() {
+  const have = run('git', ['cat-file', '-e', `${predecessor}^{commit}`]);
+  if (have.status !== 0) return false;
+  const ancestry = run('git', ['merge-base', '--is-ancestor', predecessor, 'HEAD']);
+  return ancestry.status === 0;
+}
+
+function ensureContinuityAncestry() {
+  if (ancestorAvailable()) return;
+  const env = gitAuthEnv();
+  const shallow = run('git', ['rev-parse', '--is-shallow-repository']);
+  if (shallow.status !== 0) throw new Error(`SHALLOW_STATE_UNAVAILABLE:${shallow.stderr || shallow.stdout}`);
+  const isShallow = String(shallow.stdout || '').trim() === 'true';
+  const refspec = `+refs/heads/${continuityBranch}:refs/remotes/origin/${continuityBranch}`;
+  const args = ['fetch', '--no-tags', '--prune'];
+  if (isShallow) args.push('--unshallow');
+  args.push('origin', refspec);
+  const fetched = run('git', args, { env });
+  if (fetched.status !== 0) throw new Error(`CONTINUITY_ANCESTRY_FETCH_FAILED:${fetched.stderr || fetched.stdout}`);
+  if (!ancestorAvailable()) throw new Error(`CONTINUITY_PREDECESSOR_ANCESTRY_NOT_PROVEN:${predecessor}`);
+  fs.mkdirSync(evidenceDir, { recursive: true });
+  fs.writeFileSync(path.join(evidenceDir, 'ancestry-fetch.txt'), [
+    `branch=${continuityBranch}`,
+    `predecessor=${predecessor}`,
+    `checkout=${run('git', ['rev-parse', 'HEAD']).stdout.trim()}`,
+    `repository_was_shallow=${isShallow}`,
+    'ancestor_proven=true'
+  ].join('\n') + '\n');
 }
 
 function copyLegacyEvidence() {
@@ -44,7 +72,7 @@ function copyLegacyEvidence() {
 }
 
 try {
-  ensureFullHistory();
+  ensureContinuityAncestry();
   const child = run('node', ['.github/scripts/g-continuity-011-015-consolidated-qualify.js']);
   copyLegacyEvidence();
   fs.mkdirSync(evidenceDir, { recursive: true });
