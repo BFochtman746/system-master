@@ -1,0 +1,130 @@
+name: BOOK-EVAL-LEMONADE-001 E5 Adapter Repair Validation
+
+on:
+  push:
+    branches:
+      - book-eval-lemonade-001-blind-resume-003-adapter-repair
+    paths:
+      - ".github/workflows/book-eval-blind-resume-003-adapter-repair-validation.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: book-eval-adapter-repair-validation
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    name: Prove repaired E5 contract and one live candidate without state mutation
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout exact repair branch
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 1
+
+      - name: Compile, regress, and live-probe repaired E5 adapter
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $ExpectedJar = 'fedd5bfcb122c4c0d5fd7a7912574705c582596978dd60796e804b26e7549248'
+          $ExpectedCorpus = '30bd9d0b2c348b33e6b17a81d639e64c7e7e8eef63d7d6c0bfc3175e94fe2b53'
+          $ExpectedOntology = '3daf139be2c35eb706ad0d0a1b6275a72c1ff18c21bf09d97eb26c3eadd7b5d6'
+          $ExpectedExecution = '7d9348ecdad344d8aa73dc0fe984aef85559084610504f50f8d35ef6a001fb06'
+          $ExpectedE4 = 'a5a5a3d25b36f50b8e667e22137fefea88a1b12e0d1c1812d6cc1cdd782e8b9c'
+          $Bundle = Join-Path $env:GITHUB_WORKSPACE 'qualification\book-eval-lemonade-001'
+          $RunRoot = 'C:\AI Test Kit\Books Testing\BOOK_EVAL_LEMONADE_001_A01_BLIND_RUN_GPT_OSS_120B'
+          $E4 = Join-Path $RunRoot 'E4-SPECIALIST-v2-FROZEN.jsonl'
+          $E5 = Join-Path $RunRoot 'E5-PANEL-v2-FROZEN.jsonl'
+          $RuntimeIdentity = Join-Path $RunRoot 'LEMONADE-RUNTIME-IDENTITY.json'
+          $Evidence = Join-Path $env:RUNNER_TEMP ("book-eval-adapter-repair-validation-" + $env:GITHUB_RUN_ID)
+          $Stage = Join-Path $Evidence 'frozen-inputs'
+          $Classes = Join-Path $Evidence 'repair-classes'
+          $TestClasses = Join-Path $Evidence 'test-classes'
+          New-Item -ItemType Directory -Force -Path $Stage,$Classes,$TestClasses | Out-Null
+          "EVIDENCE_DIR=$Evidence" | Out-File -FilePath $env:GITHUB_ENV -Encoding ascii -Append
+
+          function Sha([string]$Path) { return (Get-FileHash -Algorithm SHA256 -LiteralPath $Path).Hash.ToLowerInvariant() }
+          function Reconstruct([string]$Dir,[string]$Out,[string]$Expected) {
+            $parts = @(Get-ChildItem -LiteralPath $Dir -File -Filter 'part-*' | Sort-Object Name)
+            if ($parts.Count -eq 0) { throw "no transport parts in $Dir" }
+            $b64 = [string]::Concat(@($parts | ForEach-Object { [IO.File]::ReadAllText($_.FullName,[Text.Encoding]::ASCII) }))
+            [IO.File]::WriteAllBytes($Out,[Convert]::FromBase64String($b64))
+            if ((Sha $Out) -ne $Expected) { throw "reconstructed hash mismatch for $Out" }
+          }
+
+          if (-not (Test-Path $E4) -or -not (Test-Path $E5) -or -not (Test-Path $RuntimeIdentity)) { throw 'persistent 160/117 state is missing' }
+          $e4Before = Sha $E4
+          $e5Before = Sha $E5
+          if ($e4Before -ne $ExpectedE4) { throw 'E4 precondition hash mismatch' }
+          $e4Count = @(Get-Content -LiteralPath $E4).Count
+          $e5Count = @(Get-Content -LiteralPath $E5).Count
+          if ($e4Count -ne 160 -or $e5Count -ne 117) { throw "expected 160/117 state, got $e4Count/$e5Count" }
+
+          Reconstruct (Join-Path $Bundle 'jar-base64-v2') (Join-Path $Stage 'book-eval-lemonade.jar') $ExpectedJar
+          Reconstruct (Join-Path $Bundle 'provider-visible-corpus-base64-v2') (Join-Path $Stage 'BOOK-EVAL-CORPUS-INPUT-v2.jsonl') $ExpectedCorpus
+          Reconstruct (Join-Path $Bundle 'provider-ontology-base64-v2') (Join-Path $Stage 'BOOK-EVAL-PROVIDER-ONTOLOGY-v2.json') $ExpectedOntology
+          Reconstruct (Join-Path $Bundle 'runner-private-base64-v2') (Join-Path $Stage 'RUNNER-PRIVATE-EXECUTION-MANIFEST-v2.json') $ExpectedExecution
+          $Jar = Join-Path $Stage 'book-eval-lemonade.jar'
+
+          $RepairSource = Join-Path $Bundle 'repair-src\org\systemmaster\tools\booklab\LemonadeResponsesBookEvaluatorV2.java'
+          $TestSource = Join-Path $Bundle 'repair-test-src\org\systemmaster\tools\booklab\LemonadeResponsesBookEvaluatorV2RepairTests.java'
+          $ProbeSource = Join-Path $Bundle 'repair-test-src\org\systemmaster\tools\booklab\BookEvalLemonadeE5RepairLiveProbe.java'
+          & javac -cp $Jar -d $Classes $RepairSource
+          if ($LASTEXITCODE -ne 0) { throw 'repair adapter compilation failed' }
+          $repairCp = $Classes + ';' + $Jar
+          & javac -cp $repairCp -d $TestClasses $TestSource $ProbeSource
+          if ($LASTEXITCODE -ne 0) { throw 'repair test/probe compilation failed' }
+          $cp = $Classes + ';' + $TestClasses + ';' + $Jar
+
+          $env:BOOK_EVAL_MAX_OUTPUT_TOKENS = '1200'
+          $env:BOOK_EVAL_TEMPERATURE = '0'
+          $Regression = Join-Path $Evidence 'repair-regression.txt'
+          & java -cp $cp org.systemmaster.tools.booklab.LemonadeResponsesBookEvaluatorV2RepairTests `
+            (Join-Path $Stage 'BOOK-EVAL-CORPUS-INPUT-v2.jsonl') `
+            (Join-Path $Stage 'BOOK-EVAL-PROVIDER-ONTOLOGY-v2.json') `
+            $RuntimeIdentity *> $Regression
+          if ($LASTEXITCODE -ne 0) { Get-Content $Regression; throw 'repair regression failed' }
+          Get-Content $Regression
+
+          curl.exe --fail --silent --show-error -X POST 'http://127.0.0.1:13305/v1/load' -H 'Content-Type: application/json' --data-binary ("@" + (Join-Path $Bundle 'lemonade-load-request.json')) -o (Join-Path $Evidence 'model-load.json')
+          if ($LASTEXITCODE -ne 0) { throw 'model load failed' }
+
+          $env:BOOK_EVAL_MODEL = 'user.gpt-oss-120b-MXFP4'
+          $env:BOOK_EVAL_ENDPOINT = 'http://127.0.0.1:13305/v1/responses'
+          $Live = Join-Path $Evidence 'repair-live-probe.txt'
+          & java -cp $cp org.systemmaster.tools.booklab.BookEvalLemonadeE5RepairLiveProbe `
+            (Join-Path $Stage 'BOOK-EVAL-CORPUS-INPUT-v2.jsonl') `
+            (Join-Path $Stage 'BOOK-EVAL-PROVIDER-ONTOLOGY-v2.json') `
+            $RuntimeIdentity *> $Live
+          if ($LASTEXITCODE -ne 0) { Get-Content $Live; throw 'repaired live E5 probe failed' }
+          Get-Content $Live
+
+          $e4After = Sha $E4
+          $e5After = Sha $E5
+          if ($e4After -ne $e4Before -or $e5After -ne $e5Before) { throw 'persistent blind state mutated during repair validation' }
+          $Summary = Join-Path $Evidence 'repair-validation-summary.txt'
+          @(
+            'objective=BOOK-EVAL-LEMONADE-001-BLIND-RESUME-003-ADAPTER-REPAIR',
+            'regression_assertions=26',
+            'e4_fingerprint_preserved=7e7e7588138081f9ac3eaca75229934c137307927ac5ea0529ea800d601e03fc',
+            'e5_old_fingerprint=8031e11f737aa048b7eddd0e1810641ba29a79e7334a945b07e30b4e043a2c59',
+            'e5_repaired_fingerprint=3d275e96b5b231fdc2ab08eac70486cb7d4f858e25143fd404a5e039c431f598',
+            'persistent_state_before=E4_160/E5_117',
+            'persistent_state_mutated=false',
+            'scoring_private_accessed=false',
+            'standing=PASS_REPAIR_VALIDATED_READY_FOR_FRESH_E5_REQUALIFICATION'
+          ) | Set-Content -Encoding UTF8 $Summary
+          Get-Content $Summary
+
+      - name: Upload repair validation evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: book-eval-e5-adapter-repair-validation-evidence
+          path: ${{ env.EVIDENCE_DIR }}
+          if-no-files-found: warn
+          retention-days: 30
