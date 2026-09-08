@@ -1,0 +1,8 @@
+{
+  "package": "F-WP-011",
+  "requirements": [
+    {"id":"F-RQ-037","component":"ChangeQueryService","invariant":"Current change state is a projection from authoritative durable state/event records; projection/UI surfaces cannot mutate or own authority."},
+    {"id":"F-RQ-038","component":"ChangeQueryService","invariant":"Queries expose current revision, risk, approvals, execution state, recovery eligibility, linked incidents, and evidence freshness from authoritative inputs; partial/stale/unknown standing remains explicit."},
+    {"id":"F-RQ-045","component":"ChangeQueryService","invariant":"Progress derives only from durable milestones and never fabricates a percentage when unknown or claims authoritative completion before verification."}
+  ]
+}
