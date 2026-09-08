@@ -1,0 +1,31 @@
+{
+  "contract_id": "LITERARY-PROSE-ENGINE-001-STEP-H-CONTROLLED-REVISION-ENGINE-v1",
+  "depends_on": ["STEP-E", "STEP-F", "STEP-G"],
+  "input": "PASSAGE_STATE + ADJUDICATED_OPPORTUNITY[] + REVISION_TRANSFORM[]",
+  "output": "REVISION_CANDIDATE_SET",
+  "ambition_levels": [
+    "LEVEL_0_NO_CHANGE",
+    "LEVEL_1_SURGICAL",
+    "LEVEL_2_LOCAL_RESTRUCTURE",
+    "LEVEL_3_SUBSTANTIAL_REWORK",
+    "LEVEL_4_APPROACH_CHALLENGE"
+  ],
+  "rules": [
+    "LEVEL_0_NO_CHANGE is mandatory in every candidate set.",
+    "Candidate ambition may not exceed PASSAGE_STATE.maximum_edit_scope.",
+    "Only ADMIT opportunities may drive candidate generation; REVIEW_CONFLICT requires resolution first.",
+    "Every nonzero candidate must cite at least one admitted opportunity and one qualified revision transform.",
+    "A transform may not be applied outside its scope_limit or against a countercondition.",
+    "Protected language, canon, authorial intent, POV/knowledge boundaries, explicit user constraints, required ambiguity, and semantic core are hard preservation boundaries.",
+    "LEVEL_4_APPROACH_CHALLENGE requires explicit development-frontier or user authorization.",
+    "Candidate generation must be bounded; default maximum is three nonzero candidates plus LEVEL_0_NO_CHANGE.",
+    "The writer/generator may declare targets and expected effects but may not declare a candidate superior to the original or to another candidate.",
+    "Every generated nonzero candidate remains UNEVALUATED_PENDING_STEP_I until independent evaluation.",
+    "Uncertainty or unresolved critical preservation state yields no nonzero candidate.",
+    "Named-author imitation targets are prohibited."
+  ],
+  "default_max_nonzero_candidates": 3,
+  "retain_original_default": true,
+  "writer_self_adjudication_allowed": false,
+  "named_author_target_allowed": false
+}
