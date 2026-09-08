@@ -1,0 +1,113 @@
+name: LEARNING-LAB-IMPL-019 Open-Goal Runtime Binding
+
+on:
+  push:
+    branches:
+      - learning/impl-019-open-goal-runtime-binding
+    paths:
+      - ".github/workflows/learning-impl-019.yml"
+      - "learning/lab/system_master_bridge.py"
+      - "learning/lab/tests/test_system_master_open_goal_runtime.py"
+      - "learning/lab/sources/LIVE_RESEARCH_PYTHON_COMPREHENSIONS_V1.json"
+      - "learning/lab/sources/MODEL_GENERATION_PYTHON_COMPREHENSIONS_V1.json"
+      - "system-master/learning-integration/impl-017/src/main/java/org/systemmaster/learning/LearningExecutionPort.java"
+      - "system-master/learning-integration/impl-019/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: learning-impl-019-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qualify:
+    name: Qualify open-goal Learning runtime through stable port on A-01
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout exact IMPL-019 commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+          clean: true
+
+      - name: Provision pinned Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: '3.13.15'
+          architecture: x64
+          check-latest: false
+
+      - name: Prepare evidence
+        shell: cmd
+        run: |
+          set "EVIDENCE_DIR=%RUNNER_TEMP%\learning-impl-019-%GITHUB_RUN_ID%"
+          set "CLASS_DIR=%RUNNER_TEMP%\learning-impl-019-classes-%GITHUB_RUN_ID%"
+          if not exist "%EVIDENCE_DIR%" mkdir "%EVIDENCE_DIR%"
+          if not exist "%CLASS_DIR%" mkdir "%CLASS_DIR%"
+          echo EVIDENCE_DIR=%EVIDENCE_DIR%>>"%GITHUB_ENV%"
+          echo CLASS_DIR=%CLASS_DIR%>>"%GITHUB_ENV%"
+          echo %GITHUB_SHA%>"%EVIDENCE_DIR%\source-commit.txt"
+          echo %RUNNER_NAME%>"%EVIDENCE_DIR%\runner.txt"
+          python --version
+          java -version
+          javac -version
+
+      - name: Compile open-goal bridge
+        shell: cmd
+        run: |
+          python -m py_compile learning\lab\system_master_bridge.py >"%EVIDENCE_DIR%\python-compile.txt" 2>&1
+          if errorlevel 1 (type "%EVIDENCE_DIR%\python-compile.txt" & exit /b 1)
+
+      - name: Run focused Python open-goal runtime tests
+        shell: cmd
+        run: |
+          cd /d "%GITHUB_WORKSPACE%\learning\lab"
+          python -m unittest -v tests.test_system_master_open_goal_runtime >"%EVIDENCE_DIR%\python-open-goal-runtime.txt" 2>&1
+          set "RC=%ERRORLEVEL%"
+          type "%EVIDENCE_DIR%\python-open-goal-runtime.txt"
+          exit /b %RC%
+
+      - name: Prove Java open-goal adapter compiles without foundation packages
+        shell: cmd
+        run: |
+          javac -d "%CLASS_DIR%" ^
+            system-master\learning-integration\impl-017\src\main\java\org\systemmaster\learning\LearningExecutionPort.java ^
+            system-master\learning-integration\impl-019\src\main\java\org\systemmaster\learning\LearningCapabilityAdapter.java ^
+            system-master\learning-integration\impl-019\src\test\java\org\systemmaster\learning\Impl019OpenGoalRuntimeQualification.java ^
+            >"%EVIDENCE_DIR%\java-port-compile.txt" 2>&1
+          if errorlevel 1 (type "%EVIDENCE_DIR%\java-port-compile.txt" & exit /b 1)
+          echo IMPL019_JAVA_FOUNDATION_DEPENDENCY=NONE>"%EVIDENCE_DIR%\java-isolation.txt"
+          type "%EVIDENCE_DIR%\java-isolation.txt"
+
+      - name: Run real Java to Python open-goal qualification
+        shell: cmd
+        run: |
+          java -cp "%CLASS_DIR%" org.systemmaster.learning.Impl019OpenGoalRuntimeQualification >"%EVIDENCE_DIR%\impl019-integration.txt" 2>&1
+          set "RC=%ERRORLEVEL%"
+          type "%EVIDENCE_DIR%\impl019-integration.txt"
+          exit /b %RC%
+
+      - name: Publish IMPL-019 summary
+        if: always()
+        shell: cmd
+        run: |
+          echo ## LEARNING-LAB-IMPL-019>>"%GITHUB_STEP_SUMMARY%"
+          echo Commit: %GITHUB_SHA%>>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\python-open-goal-runtime.txt" type "%EVIDENCE_DIR%\python-open-goal-runtime.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\java-isolation.txt" type "%EVIDENCE_DIR%\java-isolation.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\impl019-integration.txt" type "%EVIDENCE_DIR%\impl019-integration.txt">>"%GITHUB_STEP_SUMMARY%"
+
+      - name: Upload IMPL-019 evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: learning-impl-019-evidence
+          path: ${{ runner.temp }}\learning-impl-019-${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 30
