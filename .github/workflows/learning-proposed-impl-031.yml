@@ -1,0 +1,151 @@
+name: PROPOSED LEARNING-LAB-IMPL-031 Fresh Evidence Task Admission
+
+on:
+  push:
+    branches:
+      - learning/proposed-impl-031-fresh-evidence-task-admission
+    paths:
+      - ".github/workflows/learning-proposed-impl-031.yml"
+      - "learning/lab/learning_lab/fresh_evidence.py"
+      - "learning/lab/learning_lab/adaptive_journey_continuation.py"
+      - "learning/lab/tests/test_fresh_evidence_admission.py"
+      - "learning/lab/tests/test_fresh_evidence_turn_integration.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: learning-proposed-impl-031-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qualify:
+    name: Qualify fresh evidence recovery milestone on A-01
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout exact proposed IMPL-031 commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+          clean: true
+
+      - name: Provision pinned Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: '3.13.15'
+          architecture: x64
+          check-latest: false
+
+      - name: Prepare evidence
+        shell: cmd
+        run: |
+          set "EVIDENCE_DIR=%RUNNER_TEMP%\learning-proposed-impl-031-%GITHUB_RUN_ID%"
+          set "CLASS_DIR=%RUNNER_TEMP%\learning-proposed-impl-031-classes-%GITHUB_RUN_ID%"
+          if not exist "%EVIDENCE_DIR%" mkdir "%EVIDENCE_DIR%"
+          if not exist "%CLASS_DIR%" mkdir "%CLASS_DIR%"
+          echo EVIDENCE_DIR=%EVIDENCE_DIR%>>"%GITHUB_ENV%"
+          echo CLASS_DIR=%CLASS_DIR%>>"%GITHUB_ENV%"
+          echo %GITHUB_SHA%>"%EVIDENCE_DIR%\source-commit.txt"
+          echo %RUNNER_NAME%>"%EVIDENCE_DIR%\runner.txt"
+          python --version >"%EVIDENCE_DIR%\python-version.txt" 2>&1
+          type "%EVIDENCE_DIR%\python-version.txt"
+
+      - name: Compile fresh evidence recovery boundary
+        shell: cmd
+        run: |
+          python -m py_compile ^
+            learning\lab\learning_lab\fresh_evidence.py ^
+            learning\lab\learning_lab\adaptive_journey_continuation.py ^
+            learning\lab\tests\test_fresh_evidence_admission.py ^
+            learning\lab\tests\test_fresh_evidence_turn_integration.py ^
+            >"%EVIDENCE_DIR%\python-compile.txt" 2>&1
+          set "RC=%ERRORLEVEL%"
+          type "%EVIDENCE_DIR%\python-compile.txt"
+          exit /b %RC%
+
+      - name: Run focused fresh evidence admission and blocker recovery tests
+        shell: cmd
+        run: |
+          cd /d "%GITHUB_WORKSPACE%\learning\lab"
+          python -m unittest -v tests.test_fresh_evidence_admission tests.test_fresh_evidence_turn_integration >"%EVIDENCE_DIR%\python-impl031.txt" 2>&1
+          set "RC=%ERRORLEVEL%"
+          type "%EVIDENCE_DIR%\python-impl031.txt"
+          exit /b %RC%
+
+      - name: Compile System Master unified turn adapter without foundation packages
+        shell: cmd
+        run: |
+          javac -d "%CLASS_DIR%" ^
+            system-master\learning-integration\impl-017\src\main\java\org\systemmaster\learning\LearningExecutionPort.java ^
+            system-master\learning-integration\impl-025\src\main\java\org\systemmaster\learning\LearningCapabilityAdapter.java ^
+            system-master\learning-integration\impl-030\src\main\java\org\systemmaster\learning\LearningTurnControllerAdapter.java ^
+            system-master\learning-integration\impl-030\src\test\java\org\systemmaster\learning\Impl030UnifiedLearningTurnQualification.java ^
+            >"%EVIDENCE_DIR%\java-port-compile.txt" 2>&1
+          set "RC=%ERRORLEVEL%"
+          type "%EVIDENCE_DIR%\java-port-compile.txt"
+          if not "%RC%"=="0" exit /b %RC%
+          echo IMPL031_JAVA_FOUNDATION_DEPENDENCY=NONE>"%EVIDENCE_DIR%\java-isolation.txt"
+          type "%EVIDENCE_DIR%\java-isolation.txt"
+
+      - name: Run System Master unified turn regression
+        shell: cmd
+        run: |
+          java -cp "%CLASS_DIR%" org.systemmaster.learning.Impl030UnifiedLearningTurnQualification >"%EVIDENCE_DIR%\impl030-java-regression.txt" 2>&1
+          set "RC=%ERRORLEVEL%"
+          type "%EVIDENCE_DIR%\impl030-java-regression.txt"
+          exit /b %RC%
+
+      - name: Regress IMPL-030 unified turn controller
+        shell: cmd
+        run: |
+          cd /d "%GITHUB_WORKSPACE%\learning\lab"
+          python -m unittest -v tests.test_unified_turn_controller >"%EVIDENCE_DIR%\python-impl030-regression.txt" 2>&1
+          set "RC=%ERRORLEVEL%"
+          type "%EVIDENCE_DIR%\python-impl030-regression.txt"
+          exit /b %RC%
+
+      - name: Regress IMPL-027 evidence continuation
+        shell: cmd
+        run: |
+          cd /d "%GITHUB_WORKSPACE%\learning\lab"
+          python -m unittest -v tests.test_adaptive_journey_continuation >"%EVIDENCE_DIR%\python-impl027-regression.txt" 2>&1
+          set "RC=%ERRORLEVEL%"
+          type "%EVIDENCE_DIR%\python-impl027-regression.txt"
+          exit /b %RC%
+
+      - name: Regress provider multi-candidate runtime
+        shell: cmd
+        run: |
+          cd /d "%GITHUB_WORKSPACE%\learning\lab"
+          python -m unittest -v tests.test_provider_multi_candidate_runtime >"%EVIDENCE_DIR%\python-provider-regression.txt" 2>&1
+          set "RC=%ERRORLEVEL%"
+          type "%EVIDENCE_DIR%\python-provider-regression.txt"
+          exit /b %RC%
+
+      - name: Publish proposed IMPL-031 summary
+        if: always()
+        shell: cmd
+        run: |
+          echo ## PROPOSED LEARNING-LAB-IMPL-031>>"%GITHUB_STEP_SUMMARY%"
+          echo Commit: %GITHUB_SHA%>>"%GITHUB_STEP_SUMMARY%"
+          echo Truth boundary: independently oracle-validated fresh maintenance and transfer tasks can be admitted without mutating frozen course/dossier state, recover exhausted-family blockers, and surface through the existing unified turn path. External generation/acquisition of fresh task candidates, native iPhone deployment, and real learner effectiveness remain unproven.>>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\python-impl031.txt" type "%EVIDENCE_DIR%\python-impl031.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\java-isolation.txt" type "%EVIDENCE_DIR%\java-isolation.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\impl030-java-regression.txt" type "%EVIDENCE_DIR%\impl030-java-regression.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\python-impl030-regression.txt" type "%EVIDENCE_DIR%\python-impl030-regression.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\python-impl027-regression.txt" type "%EVIDENCE_DIR%\python-impl027-regression.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\python-provider-regression.txt" type "%EVIDENCE_DIR%\python-provider-regression.txt">>"%GITHUB_STEP_SUMMARY%"
+
+      - name: Upload proposed IMPL-031 evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: learning-proposed-impl-031-evidence
+          path: ${{ runner.temp }}\learning-proposed-impl-031-${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 30
