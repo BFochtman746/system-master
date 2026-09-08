@@ -27,11 +27,15 @@ from learning_lab.real_learner_pilot_human_session import (
     stage_one_status,
     submit_human_pilot_turn,
 )
-from learning_lab.real_learner_pilot_runtime_binding import start_runtime_bound_pilot
+from learning_lab.real_learner_pilot_runtime_binding import (
+    mark_runtime_bound_pilot_withdrawn,
+    start_runtime_bound_pilot,
+)
 
 
 CONSOLE_VERSION = "PILOT-001-REAL-PARTICIPANT-CONSOLE-V1"
 CONSENT_TOKEN = "I CONSENT TO PILOT-001-RUN-001"
+WITHDRAW_TOKEN = "WITHDRAW FROM PILOT-001-RUN-001"
 PROTOCOL_VERSION = "PILOT-001-v1"
 DEFAULT_ROOT = Path.home() / ".system-master" / "learning-pilot-001"
 
@@ -123,28 +127,20 @@ def choose_domain(registry, requested: str | None) -> str:
         spec = registry.by_key(key)
         print(f"  {index}. {key} — {spec.desired_outcome}")
     while True:
-        raw = input("Operator: choose domain number: ").strip()
+        raw = input("Operator: choose domain number before consent: ").strip()
         if raw.isdigit() and 1 <= int(raw) <= len(keys):
             return keys[int(raw) - 1]
         print("Choose one listed number.")
 
 
-def choose_baseline_skill(course: Dict[str, Any]) -> str:
+def deterministic_baseline_skill(course: Dict[str, Any]) -> str:
     skills = list(course.get("skills", []))
     if not skills:
         fail("PILOT_COURSE_HAS_NO_SKILLS")
-    print("\nBaseline will probe one declared skill before any instruction.")
-    for index, skill in enumerate(skills, start=1):
-        label = skill.get("title") or skill.get("name") or skill.get("skill_id")
-        print(f"  {index}. {skill.get('skill_id')} — {label}")
-    print("Choose a skill the participant is willing to be assessed on before instruction.")
-    while True:
-        raw = input("Operator: choose baseline skill number: ").strip()
-        if raw.isdigit() and 1 <= int(raw) <= len(skills):
-            skill_id = skills[int(raw) - 1].get("skill_id")
-            if isinstance(skill_id, str) and skill_id:
-                return skill_id
-        print("Choose one listed number.")
+    skill_id = skills[0].get("skill_id")
+    if not isinstance(skill_id, str) or not skill_id:
+        fail("PILOT_FIRST_SKILL_ID_INVALID")
+    return skill_id
 
 
 def initialize(root: Path, domain_key: str | None) -> Dict[str, Any]:
@@ -152,7 +148,9 @@ def initialize(root: Path, domain_key: str | None) -> Dict[str, Any]:
     selected_domain = choose_domain(registry, domain_key)
     spec = registry.by_key(selected_domain)
 
-    print("\nOperator: verify that the participant is present. Do not type consent for them.")
+    print(f"\nSelected domain (frozen before consent): {selected_domain}")
+    print(f"Desired outcome: {spec.desired_outcome}")
+    print("Operator: verify that the participant is present. Do not type consent for them.")
     if input("Operator: type PARTICIPANT PRESENT to continue: ").strip() != "PARTICIPANT PRESENT":
         fail("PARTICIPANT_PRESENCE_NOT_CONFIRMED")
 
@@ -186,7 +184,7 @@ def initialize(root: Path, domain_key: str | None) -> Dict[str, Any]:
     course = repo.get_object("course", course_id, 1)
     if course is None:
         fail("PILOT_COURSE_NOT_CREATED")
-    baseline_skill_id = choose_baseline_skill(course)
+    baseline_skill_id = deterministic_baseline_skill(course)
 
     scorer = engine._spec_for_course(course_id).behavior_oracle.score
     diagnostic = BaselineDiagnosticDirector(repo, scorer=scorer)
@@ -230,6 +228,7 @@ def initialize(root: Path, domain_key: str | None) -> Dict[str, Any]:
         "participant_key": participant_key,
         "state_key": state_key,
         "domain_key": selected_domain,
+        "baseline_selection_policy": "FIRST_FROZEN_COURSE_SKILL",
         "baseline_skill_id": baseline_skill_id,
         "learner_id": learner_id,
         "goal_id": goal_id,
@@ -242,11 +241,14 @@ def initialize(root: Path, domain_key: str | None) -> Dict[str, Any]:
         "consent_recorded": True,
         "next_turn_number": 1,
         "raw_response_persisted_by_console": False,
+        "halted_reason": None,
+        "withdrawn": False,
     }
     save_manifest(root, manifest)
     print("\nConsent recorded. A pseudonymous pilot record now exists.")
     print(f"Pilot ID: {pilot_id}")
     print(f"Participant key: {participant_key}")
+    print(f"Baseline skill selected deterministically: {baseline_skill_id}")
     print(f"Local state directory: {root}")
     print("No raw learner response has been collected yet.\n")
     return manifest
@@ -315,18 +317,24 @@ def collect_and_submit(repo: Repository, manifest: Dict[str, Any], turn: Dict[st
 
 
 def run_stage_one(root: Path, manifest: Dict[str, Any]) -> None:
+    if manifest.get("withdrawn") is True:
+        fail("PILOT_ALREADY_WITHDRAWN")
+    if manifest.get("halted_reason"):
+        fail("PILOT_REQUIRES_INVESTIGATOR_ADJUDICATION:" + str(manifest["halted_reason"]))
+
     repo = repository(root, manifest["state_key"])
     while True:
-        status = stage_one_status(repo=repo, pilot_id=manifest["pilot_id"])
-        if status["standing"] == "STAGE_1_COMPLETE_RETENTION_PENDING":
-            due = int(status["retention_not_before"])
-            print("\n=== STAGE ONE COMPLETE ===")
-            print("Standing: STAGE_1_COMPLETE_RETENTION_PENDING")
-            print(f"Retention must not be attempted before epoch {due} ({utc_text(due)}).")
-            print("The participant record remains INCOMPLETE until delayed retention and novel transfer are completed.")
-            return
-
         turn_number = int(manifest["next_turn_number"])
+        if turn_number > 1:
+            status = stage_one_status(repo=repo, pilot_id=manifest["pilot_id"])
+            if status["standing"] == "STAGE_1_COMPLETE_RETENTION_PENDING":
+                due = int(status["retention_not_before"])
+                print("\n=== STAGE ONE COMPLETE ===")
+                print("Standing: STAGE_1_COMPLETE_RETENTION_PENDING")
+                print(f"Retention must not be attempted before epoch {due} ({utc_text(due)}).")
+                print("The participant record remains INCOMPLETE until delayed retention and novel transfer are completed.")
+                return
+
         turn_id = f"{manifest['pilot_id']}-TURN-{turn_number:04d}"
         turn = prepare_human_pilot_turn(
             repo=repo,
@@ -336,26 +344,66 @@ def run_stage_one(root: Path, manifest: Dict[str, Any]) -> None:
             now=now_seconds(),
         )
         present_turn(turn)
-        collect_and_submit(repo, manifest, turn)
+        try:
+            collect_and_submit(repo, manifest, turn)
+        except ConsoleError as exc:
+            if str(exc) in {"INDEPENDENT_ITEM_CONTAMINATED", "ACTUAL_PARTICIPANT_RESPONSE_NOT_ATTESTED"}:
+                manifest["halted_reason"] = str(exc)
+                save_manifest(root, manifest)
+            raise
         manifest["next_turn_number"] = turn_number + 1
         save_manifest(root, manifest)
+
+
+def withdraw(root: Path, pilot_id: str) -> None:
+    manifest = load_manifest(root, pilot_id)
+    if manifest.get("withdrawn") is True:
+        print("Pilot is already withdrawn.")
+        return
+    print("\nWithdrawal is voluntary and terminal for this pilot record.")
+    token = input(f"Participant: type exactly '{WITHDRAW_TOKEN}' to withdraw: ").strip()
+    if token != WITHDRAW_TOKEN:
+        fail("EXPLICIT_PARTICIPANT_WITHDRAWAL_NOT_PROVIDED")
+    repo = repository(root, manifest["state_key"])
+    result = mark_runtime_bound_pilot_withdrawn(
+        repo=repo,
+        operation_id=safe_token("OP-PILOT-WITHDRAW"),
+        pilot_id=pilot_id,
+        withdrawn_at=now_seconds(),
+    )
+    manifest["withdrawn"] = True
+    manifest["withdrawn_at"] = now_seconds()
+    save_manifest(root, manifest)
+    print(f"Pilot {pilot_id} withdrawn. Participant outcome: {result['adjudication']['participant_outcome']}")
+    print("This record is excluded from effectiveness review.")
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Local interactive console for PILOT-001-RUN-001 real participant stage one.")
     parser.add_argument("--state-root", help="Local directory for pseudonymous pilot state. Defaults outside the repository in the user's home directory.")
-    parser.add_argument("--domain-key", help="Registered Learning domain key for a new pilot.")
+    parser.add_argument("--domain-key", help="Registered Learning domain key for a new pilot. Domain is frozen before consent.")
     parser.add_argument("--resume-pilot-id", help="Resume an already initialized local pilot by pseudonymous pilot ID.")
+    parser.add_argument("--withdraw-pilot-id", help="Withdraw an existing pilot after an explicit participant withdrawal statement.")
     args = parser.parse_args()
+
+    if args.resume_pilot_id and args.withdraw_pilot_id:
+        print("Choose either --resume-pilot-id or --withdraw-pilot-id, not both.", file=sys.stderr)
+        return 2
 
     root = state_root(args.state_root or os.environ.get("SYSTEM_MASTER_LEARNING_PILOT_STATE_ROOT"))
     try:
+        if args.withdraw_pilot_id:
+            withdraw(root, args.withdraw_pilot_id)
+            return 0
         if args.resume_pilot_id:
             manifest = load_manifest(root, args.resume_pilot_id)
         else:
             manifest = initialize(root, args.domain_key)
         run_stage_one(root, manifest)
         return 0
+    except KeyboardInterrupt:
+        print("\nSESSION INTERRUPTED. No consent or response should be inferred from interruption. Use --resume-pilot-id to continue an intact record or --withdraw-pilot-id if the participant chooses to withdraw.", file=sys.stderr)
+        return 130
     except (ConsoleError, RealLearnerPilotHumanSessionError, ValueError) as exc:
         print(f"\nSESSION STOPPED: {exc}", file=sys.stderr)
         return 2
