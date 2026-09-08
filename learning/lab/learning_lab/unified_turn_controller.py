@@ -13,7 +13,7 @@ from .adaptive_tutor_continuation import (
 from .repository import Repository, digest
 
 
-UNIFIED_TURN_CONTROLLER_VERSION = "SYSTEM-MASTER-UNIFIED-LEARNING-TURN-V1"
+UNIFIED_TURN_CONTROLLER_VERSION = "SYSTEM-MASTER-UNIFIED-LEARNING-TURN-V2"
 TURN_KIND = "system_master_learning_turn"
 TURN_SUBMISSION_KIND = "system_master_learning_turn_submission"
 _RESPONSE_MODES = {"EVIDENCE", "TUTOR"}
@@ -35,7 +35,6 @@ def _turn_mode(surface_kind: str) -> str:
         "COURSE_COMPLETE": "COMPLETE",
         "TRANSFER_REMEDIATION_REQUIRED": "TRANSFER_REMEDIATION_REQUIRED",
         "FRESH_EVIDENCE_RESEARCH_REQUIRED": "FRESH_EVIDENCE_RESEARCH_REQUIRED",
-        "LEGACY_TUTOR_CONTINUATION_REQUIRED": "LEGACY_TUTOR_CONTINUATION_REQUIRED",
     }
     if surface_kind not in mapping:
         raise UnifiedTurnControllerError("UNSUPPORTED_PRESENTATION_SURFACE:" + surface_kind)
