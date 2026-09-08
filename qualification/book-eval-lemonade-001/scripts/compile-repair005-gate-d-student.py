@@ -3,7 +3,7 @@ import argparse, hashlib, json
 from collections import Counter
 from pathlib import Path
 
-VERSION='BOOK-EVAL-REPAIR-005-GATE-D-STUDENT-COMPILER-v1'
+VERSION='BOOK-EVAL-REPAIR-005-GATE-D-STUDENT-COMPILER-v2'
 
 def read_jsonl(p):
     return [json.loads(x) for x in Path(p).read_text(encoding='utf-8').splitlines() if x.strip()]
@@ -42,21 +42,33 @@ def main():
     token_to_sp={}
     task_tokens={}
     specialist_tokens={}
+    specialist_task={}
     for task,tobj in tax['task_modes'].items():
         task_tokens[task]=[]
         for sp,leaves in tobj['specialists'].items():
-            sid=f'{task}/{sp}'
-            specialist_tokens[sid]=list(leaves)
+            if sp in specialist_tokens:
+                raise SystemExit('specialist ID collision across task modes: '+sp)
+            specialist_tokens[sp]=list(leaves)
+            specialist_task[sp]=task
             for tok in leaves:
                 if tok in token_to_sp:
                     raise SystemExit('duplicate taxonomy token '+tok)
-                token_to_sp[tok]=(task,sid)
+                token_to_sp[tok]=(task,sp)
                 task_tokens[task].append(tok)
     all_tokens=set(token_to_sp)
 
     base=read_jsonl(args.base_training)
     if any(r.get('hidden_holdout_gold_used') is not False for r in base):
         raise SystemExit('base corpus hidden-holdout flag violation')
+    for r in base:
+        sp=r['specialist_id']
+        if sp not in specialist_tokens:
+            raise SystemExit('base corpus unknown specialist '+sp)
+        if r['task_mode']!=specialist_task[sp]:
+            raise SystemExit('base corpus specialist/task mismatch '+r['record_id'])
+        if r['correct_token'] not in specialist_tokens[sp]:
+            raise SystemExit('base corpus token/specialist mismatch '+r['record_id'])
+
     teacher=read_jsonl(args.teacher)
     out=list(base)
     ids={r['record_id'] for r in base}
@@ -74,8 +86,8 @@ def main():
         token=t['target_token']
         if token not in token_to_sp:
             raise SystemExit('unknown teacher target '+token)
-        task,sid=token_to_sp[token]
-        if t.get('task_mode')!=task or t.get('specialist_id')!=sid:
+        task,sp=token_to_sp[token]
+        if t.get('task_mode')!=task or t.get('specialist_id')!=sp:
             raise SystemExit('teacher taxonomy binding mismatch '+rid)
         text=t['input_text']
         leaked=[tok for tok in all_tokens if tok in text]
@@ -83,7 +95,7 @@ def main():
             raise SystemExit(f'ontology token leak in {rid}: {sorted(leaked)}')
         if 'REFERENCE_LABELS:' not in text:
             raise SystemExit('teacher record missing REFERENCE_LABELS '+rid)
-        siblings=[x for x in specialist_tokens[sid] if x!=token]
+        siblings=[x for x in specialist_tokens[sp] if x!=token]
         if not siblings:
             siblings=[x for x in task_tokens[task] if x!=token][:1]
         if not siblings:
@@ -95,7 +107,7 @@ def main():
         row={
             'record_id':rid,
             'task_mode':task,
-            'specialist_id':sid,
+            'specialist_id':sp,
             'source_lane':'SYNTHETIC',
             'input_text':text,
             'correct_token':token,
@@ -115,7 +127,7 @@ def main():
             'notes':'Gate D offline semantic distillation teacher record.'
         }
         out.append(row)
-        teacher_counts[sid]+=1
+        teacher_counts[sp]+=1
 
     sp_counts=Counter(r['specialist_id'] for r in out)
     missing=sorted(set(specialist_tokens)-set(sp_counts))
