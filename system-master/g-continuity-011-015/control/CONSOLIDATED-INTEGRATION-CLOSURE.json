@@ -1,0 +1,38 @@
+{
+  "objective":"CONTINUITY-G-WP-011-015-CONSOLIDATED-INTEGRATION-QUALIFICATION",
+  "status":"CLOSED_A01_ORDINARY_INTEGRATION_PASS",
+  "qualified_commit":"19f68693ef3753596892d86a1bd5bf53343f0d1c",
+  "workflow":{
+    "name":"System Master Continuity G-WP-011-015 Consolidated A-01",
+    "successful_run_id":34287037899,
+    "conclusion":"success",
+    "artifact_id":10079863939,
+    "artifact_sha256":"23b0981715e2e5bc47a1d102f70e6b8809c9424e061df20a4ff48e5564454a9b",
+    "artifact_size_bytes":360984
+  },
+  "qualification":{
+    "assertions":143,
+    "predecessor_regression_assertions":96,
+    "new_scope_assertions":47,
+    "new_scope_requirements":29,
+    "work_packages":["G-WP-011","G-WP-012","G-WP-013","G-WP-014","G-WP-015"],
+    "traceability_mapping":"76/76"
+  },
+  "repair_history":[{
+    "run_id":34286970747,
+    "commit":"38150aef3ecd7fa1bbb304524cf43b5a37e83891",
+    "result":"FAIL",
+    "defect_class":"QUALIFICATION_FIXTURE",
+    "failure":"RecoveryRegistry correctly rejected unknown work_unit_id w-vis",
+    "repair":"register w-vis through DurableWorkIdentityRegistry before opening recovery"
+  }],
+  "evidence_classification":{
+    "A01_ORDINARY_INTEGRATION":"PASS",
+    "TARGET_WINDOWS_REBOOT":"NOT_STARTED",
+    "TARGET_IOS_CLIENT_SUSPEND_RESUME":"NOT_STARTED",
+    "EMPIRICAL_HUMAN_EVIDENCE":"NOT_STARTED"
+  },
+  "classification_rule":"A successful ordinary A-01 execution on Windows is not Windows-reboot evidence because the workflow performs no reboot; it also cannot satisfy iOS suspend/resume or empirical human handoff evidence.",
+  "workflow_push_trigger":"DISABLED_AFTER_CLOSURE",
+  "production_authorized":false
+}
