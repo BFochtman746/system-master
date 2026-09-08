@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "PROJECT-VOICE-PROFILE-SCHEMA-v1",
+  "title": "Project-specific voice profile",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "voice_profile_id",
+    "project_id",
+    "basis",
+    "dimensions",
+    "protected_invariants",
+    "allowed_variation",
+    "anti_imitation"
+  ],
+  "properties": {
+    "voice_profile_id": {
+      "type": "string",
+      "minLength": 8
+    },
+    "project_id": {
+      "type": "string",
+      "minLength": 3
+    },
+    "basis": {
+      "type": "object",
+      "required": [
+        "user_brief",
+        "authorized_project_samples",
+        "user_approved_revisions"
+      ],
+      "properties": {
+        "user_brief": {
+          "type": "string"
+        },
+        "authorized_project_samples": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "user_approved_revisions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "external_author_names_used_as_target": {
+          "const": false
+        }
+      }
+    },
+    "dimensions": {
+      "type": "object",
+      "required": [
+        "lexical_register",
+        "sentence_rhythm",
+        "syntax_profile",
+        "paragraph_movement",
+        "narrative_distance",
+        "interiority",
+        "dialogue_profile",
+        "description_profile",
+        "figurative_language",
+        "humor_or_irony",
+        "exposition_profile",
+        "pacing_profile",
+        "emotional_directness",
+        "ambiguity_tolerance"
+      ],
+      "additionalProperties": {
+        "type": [
+          "object",
+          "array",
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
+      }
+    },
+    "protected_invariants": {
+      "type": "object",
+      "required": [
+        "canon",
+        "authorial_intent",
+        "protected_language",
+        "pov",
+        "tense",
+        "character_voice_constraints"
+      ],
+      "additionalProperties": true
+    },
+    "allowed_variation": {
+      "type": "object",
+      "required": [
+        "by_scene_function",
+        "by_pacing_target",
+        "by_character_or_speaker",
+        "by_chapter_role"
+      ],
+      "additionalProperties": true
+    },
+    "anti_imitation": {
+      "type": "object",
+      "required": [
+        "named_author_objective_allowed",
+        "nearest_author_targeting_allowed",
+        "reference_retrieval_policy"
+      ],
+      "properties": {
+        "named_author_objective_allowed": {
+          "const": false
+        },
+        "nearest_author_targeting_allowed": {
+          "const": false
+        },
+        "reference_retrieval_policy": {
+          "const": "CRAFT_PRINCIPLES_AND_ABSTRACT_TECHNIQUE_PROFILES_ONLY_UNLESS_SOURCE_TEXT_IS_AUTHORIZED"
+        }
+      }
+    }
+  },
+  "comparison_rule": "Voice preservation is measured against the project's own declared/authorized baseline and user approvals, never proximity to a named external author."
+}
