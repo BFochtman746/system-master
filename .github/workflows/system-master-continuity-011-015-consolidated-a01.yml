@@ -1,0 +1,47 @@
+name: System Master Continuity G-WP-011-015 Consolidated A-01
+
+on:
+  push:
+    branches:
+      - system-master/g-wp-011-015-continuity-slice
+
+permissions:
+  contents: read
+
+jobs:
+  qualify-continuity-011-015:
+    name: Qualify consolidated G-WP-011-015 integration on A-01
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 45
+    steps:
+      - name: Checkout exact consolidated Continuity subject
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          clean: true
+      - name: Execute repository-owned consolidated Continuity qualifier
+        shell: cmd
+        run: node .github\scripts\g-continuity-011-015-consolidated-qualify.js
+      - name: Publish consolidated Continuity summary
+        if: always()
+        shell: cmd
+        run: |
+          set "EVIDENCE_DIR=%RUNNER_TEMP%\system-master-continuity-011-015-%GITHUB_RUN_ID%"
+          echo ## SYSTEM MASTER — CONTINUITY ^& RECOVERY — G-WP-011–015 CONSOLIDATED INTEGRATION>>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\subject.txt" type "%EVIDENCE_DIR%\subject.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\result.txt" type "%EVIDENCE_DIR%\result.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\evidence-classification.txt" type "%EVIDENCE_DIR%\evidence-classification.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\qualification-008-010.txt" type "%EVIDENCE_DIR%\qualification-008-010.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\qualification-011-013.txt" type "%EVIDENCE_DIR%\qualification-011-013.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\qualification-014.txt" type "%EVIDENCE_DIR%\qualification-014.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\qualification-015.txt" type "%EVIDENCE_DIR%\qualification-015.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\failure.txt" type "%EVIDENCE_DIR%\failure.txt">>"%GITHUB_STEP_SUMMARY%"
+      - name: Upload consolidated Continuity evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: system-master-continuity-011-015-consolidated-a01-evidence
+          path: ${{ runner.temp }}\system-master-continuity-011-015-${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 30
