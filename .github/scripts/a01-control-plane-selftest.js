@@ -20,6 +20,7 @@ const enforcementWorkflow = fs.readFileSync(path.join(root, '.github/workflows/a
 
 assert(policy.runner.name === 'A-01', 'runner name');
 assert(policy.runner.global_concurrency_group === 'a01-global', 'global concurrency');
+assert(policy.runner.queue_mode === 'max' && policy.runner.queue_capacity === 100, 'global queue policy');
 assert(policy.admission.max_outstanding_per_workstream === 1, 'outstanding limit');
 assert(policy.admission.allow_arbitrary_command_input === false, 'arbitrary commands disabled');
 assert(policy.states.includes('A01_PASSED') && policy.states.includes('SUPERSEDED'), 'standing states');
@@ -29,6 +30,7 @@ assert(ticketSchema.required.includes('resume_on_pass') && ticketSchema.required
 assert(bootstrap.includes('A01-OPERATING-CONTRACT.md'), 'bootstrap authority link');
 assert(contract.includes('No valid receipt') || contract.includes('without a valid control-plane receipt'), 'receipt gate contract');
 assert(workflow.includes('group: a01-global'), 'shared concurrency in gateway');
+assert(workflow.includes('queue: max'), 'global pending queue must preserve multiple workstreams');
 assert(workflow.includes('runs-on: [self-hosted, Windows, X64]'), 'A-01 runner labels');
 assert(!workflow.includes('qualifier_command'), 'gateway must not accept arbitrary qualifier command');
 assert(legacy.version === 1 && Object.keys(legacy.workflows).length > 0, 'legacy direct-workflow freeze missing');
@@ -45,6 +47,6 @@ assert(enforcementScan.status === 0, `enforcement scan failed: ${enforcementScan
 const evidenceDir = process.env.A01_EVIDENCE_DIR;
 if (evidenceDir) {
   fs.mkdirSync(evidenceDir, { recursive: true });
-  fs.writeFileSync(path.join(evidenceDir, 'selftest.txt'), 'A01_CONTROL_PLANE_SELFTEST=PASS\nA01_ENFORCEMENT=PASS\n');
+  fs.writeFileSync(path.join(evidenceDir, 'selftest.txt'), 'A01_CONTROL_PLANE_SELFTEST=PASS\nA01_ENFORCEMENT=PASS\nA01_GLOBAL_QUEUE=MAX\n');
 }
 console.log('A01_CONTROL_PLANE_SELFTEST=PASS');
