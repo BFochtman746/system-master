@@ -1,0 +1,45 @@
+{
+  "schema_id": "LITERARY-PROSE-ENGINE-001-DIAGNOSTIC-EVIDENCE-v1",
+  "required_fields": [
+    "evidence_id",
+    "specialist_id",
+    "finding_type",
+    "dimension",
+    "claim",
+    "signals",
+    "purpose_relevance",
+    "confidence",
+    "severity",
+    "preservation_risk",
+    "voice_risk",
+    "collateral_regression_risk",
+    "scope_limit",
+    "evidence_dependencies",
+    "contradictions",
+    "opportunity_candidate",
+    "rewrite_text_present",
+    "named_author_target"
+  ],
+  "finding_types": [
+    "STRENGTH",
+    "LIMITATION",
+    "RISK",
+    "OPPORTUNITY_SUPPORT",
+    "NO_FINDING",
+    "BLOCKED"
+  ],
+  "confidence": [
+    "HIGH",
+    "MEDIUM",
+    "LOW",
+    "UNRESOLVED"
+  ],
+  "rules": [
+    "claim must be diagnostic and non-prescriptive prose, not replacement text",
+    "signals must identify evidence features or state relations",
+    "rewrite_text_present must be false",
+    "named_author_target must be false",
+    "UNRESOLVED findings cannot independently justify revision",
+    "BLOCKED is required when a finding depends on missing critical passage state"
+  ]
+}
