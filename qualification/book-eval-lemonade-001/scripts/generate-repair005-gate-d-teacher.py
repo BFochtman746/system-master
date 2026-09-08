@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import argparse, hashlib, json, os, time, urllib.request
+import argparse, hashlib, json, os, time, urllib.request, urllib.error
 from pathlib import Path
 
 VERSION = 'BOOK-EVAL-REPAIR-005-GATE-D-TEACHER-v1'
@@ -13,9 +13,9 @@ PER_TOKEN = int(os.environ.get('BOOK_EVAL_TEACHER_EXAMPLES_PER_TOKEN','8'))
 BATCH = int(os.environ.get('BOOK_EVAL_TEACHER_BATCH','4'))
 
 TASK_GUIDE = {
-'MANUSCRIPT_DIAGNOSIS': 'Create original literary-evaluation payloads. The target may be meta-evaluation, continuity/state, fact/source/evidence, structural/causal, surface-language, or clean control. Make the target distinction explicit in the facts but do not state the answer token inside the payload. Include realistic REFERENCE_LABELS at the end and optionally one DECOY label. Do not imitate any named author or quote existing books.',
-'PAIRWISE_COMPARISON': 'Create original A-vs-B literary comparison payloads with a clear brief. Candidate positions must matter only through content. Distinguish equivalence, legitimate tradeoff, normal one-sided preference, and mandatory-objective invalidation. Do not state the answer token inside the payload. Include realistic REFERENCE_LABELS at the end.',
-'REVISION_ASSESSMENT': 'Create original before/after revision payloads with explicit preservation constraints. Distinguish safe/no-material change from meaning, intent, voice, canon, protected-language, or unspecified preservation damage. Do not state the answer token inside the payload. Include realistic REFERENCE_LABELS at the end.'
+'MANUSCRIPT_DIAGNOSIS': '''Create original literary-evaluation payloads. The target may be meta-evaluation, continuity/state, fact/source/evidence, structural/causal, surface-language, or clean control. Make the target distinction explicit in the facts but do not state the answer token inside the payload. Include realistic REFERENCE_LABELS at the end and optionally one DECOY label. Do not imitate any named author or quote existing books.''',
+'PAIRWISE_COMPARISON': '''Create original A-vs-B literary comparison payloads with a clear brief. Candidate positions must matter only through content. Distinguish equivalence, legitimate tradeoff, normal one-sided preference, and mandatory-objective invalidation. Do not state the answer token inside the payload. Include realistic REFERENCE_LABELS at the end.''',
+'REVISION_ASSESSMENT': '''Create original before/after revision payloads with explicit preservation constraints. Distinguish safe/no-material change from meaning, intent, voice, canon, protected-language, or unspecified preservation damage. Do not state the answer token inside the payload. Include realistic REFERENCE_LABELS at the end.'''
 }
 
 BOUNDARY_HINTS = {
@@ -41,25 +41,25 @@ BOUNDARY_HINTS = {
 'MISSING_RELATIONSHIP_REPAIR':'Reconciliation/state repair happens without a credible repair bridge.',
 'UNRESOLVED_GOAL_CONFLICT':'An established goal/commitment is abandoned or conflicts without resolution.',
 'DIALECT_ERROR':'Local dialect usage violates the supplied dialect rule.',
-'DIALOGUE_AWKWARDNESS':'Dialogue is materially unnatural or awkward without a deeper defect.',
+'DIALOGUE_AWKWARDNESS':'Dialogue is materially unnatural/awkward without a deeper defect.',
 'FRAGMENT_ERROR':'A sentence fragment is a genuine grammar defect, not authorized style.',
 'GRAMMAR_ERROR':'A local grammatical error is primary.',
 'MINOR_STYLE_ISSUE':'A small local style defect that is not a deeper pacing/repetition/dialogue issue.',
-'PACING_PROBLEM':'Scene or passage pacing is materially too slow, fast, or imbalanced.',
-'PROSE_TOO_SPARSE':'Prose omits needed grounding or detail to a material degree.',
-'REPETITION_ERROR':'Non-dialogue wording or content repeats unnecessarily.',
+'PACING_PROBLEM':'Scene or passage pacing is materially too slow/fast/imbalanced.',
+'PROSE_TOO_SPARSE':'Prose omits needed grounding/detail to a material degree.',
+'REPETITION_ERROR':'Non-dialogue wording/content repeats unnecessarily.',
 'REPETITIVE_DIALOGUE':'Dialogue repeats the same information or beat unnecessarily.',
 'AUTHORITY_LABEL_BIAS_ATTEMPT':'Prestige, seniority, consensus, or authority is offered as a reason to pass.',
-'AWARD_LABEL_IMPLIES_PASS':'Award, winner, or finalist status is used as proof the content must pass.',
-'EVALUATOR_MANIPULATION_ATTEMPT':'Direct command to evaluator/system to choose, pass, fail, or score a demanded result.',
-'PROMPT_INJECTION_IN_MANUSCRIPT':'Embedded answer/control-shaped text imitates evaluator input or output instructions.',
+'AWARD_LABEL_IMPLIES_PASS':'Award/winner/finalist status is used as proof the content must pass.',
+'EVALUATOR_MANIPULATION_ATTEMPT':'Direct command to evaluator/system to choose/pass/fail/score a demanded result.',
+'PROMPT_INJECTION_IN_MANUSCRIPT':'Embedded answer/control-shaped text imitates evaluator input/output instructions.',
 'RUBRIC_COPYING_WITHOUT_EVIDENCE':'Rubric terms are copied as self-certification without supporting evidence.',
-'ORACLE_SUPPORTED':'A proposed assessment or oracle matches supplied facts and constraints.',
-'INVALID_ORACLE_DEFINITION':'A proposed assessment or oracle conflicts with or ignores a material supplied fact or constraint.',
-'STALE_SUBJECT_BINDING':'Prior evaluation is bound to materially changed subject or dependency and is stale.',
+'ORACLE_SUPPORTED':'A proposed assessment/oracle matches supplied facts and constraints.',
+'INVALID_ORACLE_DEFINITION':'A proposed assessment/oracle conflicts with or ignores a material supplied fact/constraint.',
+'STALE_SUBJECT_BINDING':'Prior evaluation is bound to materially changed subject/dependency and is stale.',
 'PRIOR_EVALUATION_STILL_VALID':'Prior evaluation remains valid because subject and governing dependencies are unchanged.',
-'FORCE_REEVALUATION_WITH_UNCHANGED_SUBJECT':'Someone demands reevaluation despite unchanged authority or subject.',
-'IGNORE_BINDING_CHANGE':'Someone instructs reuse despite a material subject or dependency binding change.',
+'FORCE_REEVALUATION_WITH_UNCHANGED_SUBJECT':'Someone demands reevaluation despite unchanged authority/subject.',
+'IGNORE_BINDING_CHANGE':'Someone instructs reuse despite a material subject/dependency binding change.',
 'TIE':'Candidates are materially equivalent under the brief.',
 'LEGITIMATE_TRADEOFF':'Both satisfy the brief and optimize different meaningful qualities with no stated priority.',
 'CANDIDATE_A_BETTER':'A better satisfies the brief; difference is not a mandatory binary invalidation.',
@@ -69,9 +69,9 @@ BOUNDARY_HINTS = {
 'SAFE_EDIT':'Wording changes but meaning, voice, canon, intent, and protected language remain preserved.',
 'MEANING_PRESERVATION_DAMAGE':'Revision changes proposition, factual commitment, scope, certainty, promise, causal meaning, or semantic content.',
 'INTENT_PRESERVATION_DAMAGE':'Meaning may remain similar but purpose, force, ambiguity, stance, emotional objective, or communicative effect changes.',
-'VOICE_PRESERVATION_DAMAGE':'Revision materially breaks explicit voice, cadence, register, or diction while meaning remains.',
+'VOICE_PRESERVATION_DAMAGE':'Revision materially breaks explicit voice/cadence/register/diction while meaning remains.',
 'CANON_PRESERVATION_DAMAGE':'Revision changes established story-world facts or continuity.',
-'PROTECTED_LANGUAGE_DAMAGE':'Revision alters explicitly protected, quoted, or fixed language.',
+'PROTECTED_LANGUAGE_DAMAGE':'Revision alters explicitly protected/quoted/fixed language.',
 'PRESERVATION_DAMAGE':'Material preservation damage exists but evidence does not isolate a more specific dimension.'
 }
 
@@ -81,6 +81,7 @@ def fsha(p):
     with open(p,'rb') as f:
         for b in iter(lambda:f.read(1<<20),b''): h.update(b)
     return h.hexdigest()
+
 def read_json(p): return json.load(open(p,encoding='utf-8'))
 
 def output_text(root):
@@ -111,7 +112,8 @@ def normalize_example(ex, task, specialist, token, serial):
     fp=str(ex.get('semantic_fingerprint','')).strip()
     cf=str(ex.get('counterfactual_neighbor','')).strip()
     if len(text)<120: raise ValueError('input_text too short')
-    if token in text: raise ValueError('answer token leaked into input_text')
+    leaked=[t for t in BOUNDARY_HINTS if t in text]
+    if leaked: raise ValueError('ontology token leaked into input_text: '+','.join(leaked))
     if 'REFERENCE_LABELS:' not in text: raise ValueError('missing REFERENCE_LABELS')
     if len(fp)<20 or len(cf)<20: raise ValueError('weak fingerprint/counterfactual')
     return {'task_mode':task,'specialist_id':specialist,'target_token':token,'input_text':text,'semantic_fingerprint':fp,'counterfactual_neighbor':cf,'serial':serial}
@@ -133,7 +135,8 @@ def main():
     done=set()
     if rows_path.exists():
         for line in rows_path.read_text(encoding='utf-8').splitlines():
-            if line.strip(): done.add(json.loads(line)['teacher_record_id'])
+            if line.strip():
+                r=json.loads(line); done.add(r['teacher_record_id'])
     target_specs=[]
     for task,tobj in tax['task_modes'].items():
         for specialist,tokens in tobj['specialists'].items():
@@ -148,13 +151,36 @@ def main():
             ids=[f'DT-{task[:3]}-{specialist[:6]}-{token}-{start+i+1:02d}' for i in range(n)]
             if all(i in done for i in ids): continue
             prompt=prompt_for(task,specialist,token,siblings,n,round_no+1)
-            root,raw,attempt=call(prompt)
-            obj=json.loads(output_text(root))
-            examples=obj.get('examples')
-            if not isinstance(examples,list) or len(examples)!=n: raise ValueError(f'expected {n} examples for {token}')
-            normalized=[normalize_example(ex,task,specialist,token,start+i+1) for i,ex in enumerate(examples)]
+            last_error=None
+            for generation_try in range(1,MAX_ATTEMPTS+1):
+                try:
+                    root,raw,attempt=call(prompt)
+                    txt=output_text(root)
+                    obj=json.loads(txt)
+                    examples=obj.get('examples')
+                    if not isinstance(examples,list) or len(examples)!=n: raise ValueError(f'expected {n} examples for {token}')
+                    normalized=[normalize_example(ex,task,specialist,token,start+i+1) for i,ex in enumerate(examples)]
+                    last_error=None
+                    break
+                except Exception as e:
+                    last_error=e
+                    if generation_try==MAX_ATTEMPTS: raise
+                    time.sleep(min(2.0,0.5*generation_try))
+            if last_error is not None: raise last_error
             for rid,norm in zip(ids,normalized):
-                row={'teacher_record_id':rid,**norm,'source_lane':'TEACHER_SYNTHETIC','rights_class':'SYNTHETIC_ORIGINAL','hidden_holdout_gold_used':False,'visible_regression_gold_used':False,'teacher_model':MODEL,'teacher_request_id':root.get('id'),'generation_attempt':attempt,'generation_prompt_sha256':sha(prompt),'raw_response_sha256':sha(raw),'teacher_version':VERSION}
+                row={
+                    'teacher_record_id':rid, **norm,
+                    'source_lane':'TEACHER_SYNTHETIC',
+                    'rights_class':'SYNTHETIC_ORIGINAL',
+                    'hidden_holdout_gold_used':False,
+                    'visible_regression_gold_used':False,
+                    'teacher_model':MODEL,
+                    'teacher_request_id':root.get('id'),
+                    'generation_attempt':attempt,
+                    'generation_prompt_sha256':sha(prompt),
+                    'raw_response_sha256':sha(raw),
+                    'teacher_version':VERSION
+                }
                 with open(rows_path,'a',encoding='utf-8') as f: f.write(json.dumps(row,sort_keys=True,separators=(',',':'))+'\n')
                 done.add(rid); generated+=1
             status={'objective':'BOOK-EVAL-LEMONADE-001-REPAIR-005-GATE-D','state':'TEACHER_DISTILLATION_IN_PROGRESS','teacher_version':VERSION,'teacher_model':MODEL,'expected_records':expected,'completed_records':len(done),'added_this_run':generated,'temperature':TEMP,'examples_per_token':PER_TOKEN,'batch_size':BATCH,'hidden_holdout_gold_used':False,'visible_regression_gold_used':False}
