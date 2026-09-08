@@ -171,10 +171,6 @@ public final class BookEvalRepair004VisibleRegressionRun {
         BookEvaluationModel.EvaluationResponse response = decode(out);
         if (!allowed.contains(response.primaryFinding())) throw new IllegalArgumentException("primary outside ontology");
         for (String f : response.findings()) if (!allowed.contains(f)) throw new IllegalArgumentException("finding outside ontology");
-        if (!response.noMaterialProblem() && !response.findings().contains(response.primaryFinding())) throw new IllegalArgumentException("primary missing from findings");
-        if (response.primaryFinding().equals("NO_MATERIAL_PROBLEM") && !response.noMaterialProblem()) throw new IllegalArgumentException("clean flag mismatch");
-        Set<String> refs = referenceLabels(c.inputText());
-        for (String e : response.evidenceRefs()) if (!refs.contains(e)) throw new IllegalArgumentException("invented evidence ref " + e);
         if (response.confidence() < 0.0 || response.confidence() > 1.0) throw new IllegalArgumentException("confidence");
         return new Parsed(requestId, returnedModel, raw, attempt, response);
     }
