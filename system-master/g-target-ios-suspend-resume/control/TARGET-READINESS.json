@@ -1,0 +1,33 @@
+{
+  "objective":"CONTINUITY-TARGET-IOS-CLIENT-SUSPEND-RESUME-QUALIFICATION",
+  "qualification_id":"CONTINUITY-IOS-SUSPEND-RESUME-001",
+  "status":"BLOCKED_TARGET_SURFACE_NOT_PRESENT",
+  "repository_observation":{
+    "swift_source_detected":false,
+    "xcode_project_or_workspace_detected":false,
+    "ios_ui_test_target_detected":false,
+    "repository_owned_ios_lifecycle_executor_detected":false
+  },
+  "required_before_target_run":[
+    "real System Master iOS client executable target",
+    "client continuity adapter that reconnects by durable work_unit_id",
+    "GetRecoveryStatus/query path callable after client reactivation",
+    "unknown-command-outcome reconcile path observable before any re-command",
+    "XCUITest or equivalent real iOS lifecycle control capable of backgrounding and reactivating the client",
+    "evidence exporter conforming to TARGET-IOS-EVIDENCE.schema.json"
+  ],
+  "non_solutions":[
+    "running the JVM continuity test on A-01",
+    "mocking UIApplication or scene lifecycle callbacks",
+    "creating a dummy iOS app that is not the System Master client",
+    "relabeling portable evidence as target iOS evidence"
+  ],
+  "G-RQ-049":"NOT_STARTED_TARGET_IOS",
+  "G-RQ-050":"NOT_STARTED_TARGET_IOS",
+  "G-RQ-072":{
+    "TARGET_WINDOWS_REBOOT":"PASS",
+    "TARGET_IOS_CLIENT_SUSPEND_RESUME":"NOT_STARTED",
+    "implementation_satisfied":false
+  },
+  "production_authorized":false
+}
