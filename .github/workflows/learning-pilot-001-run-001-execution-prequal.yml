@@ -1,0 +1,122 @@
+name: LEARNING PILOT-001 RUN-001 Execution Prequalification
+
+on:
+  push:
+    branches: [learning/pilot-001-run-001-execution-prep]
+    paths:
+      - ".github/workflows/learning-pilot-001-run-001-execution-prequal.yml"
+      - "learning/lab/PILOT_001_RUN_001_PARTICIPANT_CONSENT.md"
+      - "learning/lab/run_pilot001.py"
+      - "learning/lab/run_pilot001_real_participant.py"
+      - "learning/lab/learning_lab/real_learner_pilot_withdrawal.py"
+      - "learning/lab/tests/test_real_learner_pilot_withdrawal.py"
+      - "learning/lab/tests/test_real_learner_pilot_console.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  prequalify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          clean: true
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: '3.13.15'
+          architecture: x64
+          check-latest: false
+      - name: Prepare evidence
+        shell: bash
+        run: |
+          EVIDENCE_DIR="$RUNNER_TEMP/pilot001-run001-execution-prequal-$GITHUB_RUN_ID"
+          mkdir -p "$EVIDENCE_DIR"
+          echo "EVIDENCE_DIR=$EVIDENCE_DIR" >> "$GITHUB_ENV"
+          printf '%s\n' "$GITHUB_SHA" > "$EVIDENCE_DIR/source-sha.txt"
+          python --version > "$EVIDENCE_DIR/python-version.txt" 2>&1
+      - name: Verify frozen PILOT-001 authority unchanged
+        shell: bash
+        run: |
+          set -euo pipefail
+          declare -A expected
+          expected[learning/lab/LEARNING_LAB_PILOT_001_PROTOCOL.md]=0db3de824060f4eb7ce3c2c7ffa0ed4b57ba9d35
+          expected[learning/lab/learning_lab/real_learner_pilot.py]=0c9f7a8b7850cef15643e3c11899585d2c25a08d
+          expected[learning/lab/tests/test_real_learner_pilot.py]=e77d423078af4662f2c72b0cc1f8501e20d29851
+          expected[learning/lab/qualification_pilot001.py]=44aa0124f194f074a421f0a87a0695d96d7bae11
+          : > "$EVIDENCE_DIR/frozen-blobs.txt"
+          for path in "${!expected[@]}"; do
+            actual="$(git hash-object -- "$path")"
+            test "$actual" = "${expected[$path]}"
+            printf '%s=%s\n' "$path" "$actual" >> "$EVIDENCE_DIR/frozen-blobs.txt"
+          done
+      - name: Compile participant execution boundary
+        shell: bash
+        run: |
+          python -m py_compile \
+            learning/lab/run_pilot001.py \
+            learning/lab/run_pilot001_real_participant.py \
+            learning/lab/learning_lab/real_learner_pilot_withdrawal.py
+      - name: Run participant and frozen-pilot qualification
+        shell: bash
+        working-directory: learning/lab
+        run: |
+          set -o pipefail
+          python -m unittest -v \
+            tests.test_real_learner_pilot_console \
+            tests.test_real_learner_pilot_withdrawal \
+            tests.test_real_learner_pilot_human_session \
+            tests.test_real_learner_pilot_runtime_binding \
+            tests.test_real_learner_pilot \
+            2>&1 | tee "$EVIDENCE_DIR/execution-focused.txt"
+          grep -q "Ran 37 tests" "$EVIDENCE_DIR/execution-focused.txt"
+          grep -q "^OK$" "$EVIDENCE_DIR/execution-focused.txt"
+      - name: Run Learning predecessor regressions
+        shell: bash
+        working-directory: learning/lab
+        run: |
+          set -o pipefail
+          python -m unittest -v \
+            tests.test_unified_fresh_evidence_recovery \
+            tests.test_fresh_evidence_provider_acquisition \
+            tests.test_fresh_evidence_configured_http \
+            tests.test_fresh_evidence_admission \
+            tests.test_unified_turn_controller \
+            tests.test_adaptive_journey_continuation \
+            tests.test_provider_multi_candidate_runtime \
+            2>&1 | tee "$EVIDENCE_DIR/regressions.txt"
+          grep -q "Ran 57 tests" "$EVIDENCE_DIR/regressions.txt"
+          grep -q "^OK$" "$EVIDENCE_DIR/regressions.txt"
+      - name: Verify shared control-plane enforcement
+        shell: bash
+        run: |
+          node .github/scripts/a01-control-plane-enforce.js selftest | tee "$EVIDENCE_DIR/control-plane-selftest.txt"
+          node .github/scripts/a01-control-plane-enforce.js scan | tee "$EVIDENCE_DIR/control-plane-scan.txt"
+      - name: Record truth boundary
+        shell: bash
+        run: |
+          cat > "$EVIDENCE_DIR/truth-boundary.txt" <<'EOF'
+          PILOT_RUN001_EXECUTION_PREQUAL=PASS
+          PILOT_RUN001_FOCUSED_TESTS=37
+          PILOT_RUN001_PREDECESSOR_REGRESSIONS=57
+          PILOT_RUN001_TOTAL_TESTS=94
+          PILOT_RUN001_FROZEN_V1_CHANGED=FALSE
+          PILOT_RUN001_REAL_PARTICIPANT_EVIDENCE=NOT_CREATED
+          PILOT_RUN001_CONSENT_INFERRED=FALSE
+          PILOT_RUN001_PREBASELINE_WITHDRAWAL_RECORD_MATERIALIZED=FALSE
+          EOF
+      - name: Upload prequalification evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: learning-pilot-001-run-001-execution-prequal-${{ github.run_id }}
+          path: ${{ runner.temp }}/pilot001-run001-execution-prequal-${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 14
