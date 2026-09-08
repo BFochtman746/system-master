@@ -1,0 +1,11 @@
+{
+  "authority":"021G",
+  "work_package":"G-WP-014",
+  "name":"Legacy Recovery Migration + Export",
+  "count":3,
+  "requirements":[
+    {"id":"G-RQ-006","implementing_components":"LegacyRecoveryMigrationService.ImportLegacyRecoveryState","invariant_validator":"Crosswalk only; no duplicate truth store","failure_recovery_rule":"Ambiguous mapping -> quarantine/manual binding","future_test_family":"BOUNDARY+MIGRATION"},
+    {"id":"G-RQ-069","implementing_components":"LegacyRecoveryMigrationService","invariant_validator":"Legacy history remains immutable and digest-bound","failure_recovery_rule":"Ambiguous mapping -> quarantine/manual binding","future_test_family":"MIGRATION+IDEMPOTENCY"},
+    {"id":"G-RQ-070","implementing_components":"LegacyRecoveryMigrationService.ExportRecoveryHistory","invariant_validator":"Provenance complete and minimization explicit","failure_recovery_rule":"Integrity/sensitive-material violation -> invalid export","future_test_family":"EXPORT+SECURITY"}
+  ]
+}
