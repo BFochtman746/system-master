@@ -1,0 +1,192 @@
+name: Books Canonical V2 Repo Bind A-01
+
+on:
+  push:
+    branches:
+      - book-eval-lemonade-001-repo-bind-v2-final
+    paths:
+      - ".github/workflows/book-eval-repo-bind-a01.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: book-eval-repo-bind-a01
+  cancel-in-progress: false
+
+jobs:
+  bind-and-qualify:
+    name: Bind canonical Books V2 package and qualify
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout exact branch
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+
+      - name: Locate, verify, import, and qualify canonical Books package
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $ExpectedJar = 'fedd5bfcb122c4c0d5fd7a7912574705c582596978dd60796e804b26e7549248'
+          $ExpectedCorpus = '30bd9d0b2c348b33e6b17a81d639e64c7e7e8eef63d7d6c0bfc3175e94fe2b53'
+          $ExpectedOntology = '3daf139be2c35eb706ad0d0a1b6275a72c1ff18c21bf09d97eb26c3eadd7b5d6'
+          $ExpectedExecution = '7d9348ecdad344d8aa73dc0fe984aef85559084610504f50f8d35ef6a001fb06'
+          $Evidence = Join-Path $env:RUNNER_TEMP ("book-eval-repo-bind-" + $env:GITHUB_RUN_ID)
+          New-Item -ItemType Directory -Force -Path $Evidence | Out-Null
+          $Log = Join-Path $Evidence 'BOOK-EVAL-REPO-BIND-A01.txt'
+
+          function Write-Log([string]$Text) {
+            $Text | Tee-Object -FilePath $Log -Append | Write-Host
+          }
+          function Sha256([string]$Path) {
+            return (Get-FileHash -Algorithm SHA256 -Path $Path).Hash.ToLowerInvariant()
+          }
+          function Test-PilotDir([string]$Dir) {
+            $jar = Join-Path $Dir 'book-eval-lemonade.jar'
+            $corpus = Join-Path $Dir 'provider-visible\BOOK-EVAL-CORPUS-INPUT-v2.jsonl'
+            $ontology = Join-Path $Dir 'provider-visible\BOOK-EVAL-PROVIDER-ONTOLOGY-v2.json'
+            $execution = Join-Path $Dir 'runner-private\RUNNER-PRIVATE-EXECUTION-MANIFEST-v2.json'
+            if (-not ((Test-Path $jar) -and (Test-Path $corpus) -and (Test-Path $ontology) -and (Test-Path $execution))) { return $false }
+            if ((Sha256 $jar) -ne $ExpectedJar) { return $false }
+            if ((Sha256 $corpus) -ne $ExpectedCorpus) { return $false }
+            if ((Sha256 $ontology) -ne $ExpectedOntology) { return $false }
+            if ((Sha256 $execution) -ne $ExpectedExecution) { return $false }
+            return $true
+          }
+
+          Write-Log 'qualification=BOOK-EVAL-LEMONADE-001-REPO-BIND-A01'
+          Write-Log ("repository=" + $env:GITHUB_REPOSITORY)
+          Write-Log ("trigger_commit=" + $env:GITHUB_SHA)
+          Write-Log ("runner=" + $env:RUNNER_NAME)
+          Write-Log ("identity=" + [System.Security.Principal.WindowsIdentity]::GetCurrent().Name)
+
+          $roots = @(
+            'C:\Users\BFoch\Downloads',
+            'C:\Users\BFoch\Desktop',
+            'C:\Users\BFoch\Documents',
+            'C:\Users\BFoch\OneDrive',
+            'C:\SystemMaster'
+          )
+          $source = $null
+
+          foreach ($root in $roots) {
+            if ($source) { break }
+            if (-not (Test-Path $root)) { continue }
+            Write-Log ("search_root=" + $root)
+            $jars = @(Get-ChildItem -Path $root -Recurse -File -Filter 'book-eval-lemonade.jar' -ErrorAction SilentlyContinue)
+            foreach ($jar in $jars) {
+              if (Test-PilotDir $jar.DirectoryName) { $source = $jar.DirectoryName; break }
+            }
+          }
+
+          if (-not $source) {
+            foreach ($root in $roots) {
+              if ($source) { break }
+              if (-not (Test-Path $root)) { continue }
+              $zips = @(Get-ChildItem -Path $root -Recurse -File -Filter '*.zip' -ErrorAction SilentlyContinue | Where-Object {
+                $_.Name -like '*BOOK*EVAL*LEMONADE*.zip' -or $_.Name -like 'REMOTE_QUALIFICATION_ENV_001*.zip'
+              })
+              foreach ($zip in $zips) {
+                $extract = Join-Path $Evidence ("extract-" + [Guid]::NewGuid().ToString('N'))
+                New-Item -ItemType Directory -Force -Path $extract | Out-Null
+                try {
+                  Expand-Archive -LiteralPath $zip.FullName -DestinationPath $extract -Force
+                  $jars = @(Get-ChildItem -Path $extract -Recurse -File -Filter 'book-eval-lemonade.jar' -ErrorAction SilentlyContinue)
+                  foreach ($jar in $jars) {
+                    if (Test-PilotDir $jar.DirectoryName) { $source = $jar.DirectoryName; break }
+                  }
+                } catch {
+                  Write-Log ("zip_skip=" + $zip.Name)
+                }
+                if ($source) { Write-Log ("source_archive=" + $zip.Name); break }
+              }
+            }
+          }
+
+          if (-not $source) { throw 'Canonical Books package not found in bounded local search roots.' }
+          Write-Log 'canonical_source_found=true'
+
+          $Target = Join-Path $env:GITHUB_WORKSPACE 'books\qualification\book-eval-lemonade-001'
+          New-Item -ItemType Directory -Force -Path (Join-Path $Target 'provider-visible') | Out-Null
+          New-Item -ItemType Directory -Force -Path (Join-Path $Target 'runner-private') | Out-Null
+
+          Copy-Item (Join-Path $source 'book-eval-lemonade.jar') (Join-Path $Target 'book-eval-lemonade.jar') -Force
+          Copy-Item (Join-Path $source 'provider-visible\BOOK-EVAL-CORPUS-INPUT-v2.jsonl') (Join-Path $Target 'provider-visible\BOOK-EVAL-CORPUS-INPUT-v2.jsonl') -Force
+          Copy-Item (Join-Path $source 'provider-visible\BOOK-EVAL-PROVIDER-ONTOLOGY-v2.json') (Join-Path $Target 'provider-visible\BOOK-EVAL-PROVIDER-ONTOLOGY-v2.json') -Force
+          Copy-Item (Join-Path $source 'runner-private\RUNNER-PRIVATE-EXECUTION-MANIFEST-v2.json') (Join-Path $Target 'runner-private\RUNNER-PRIVATE-EXECUTION-MANIFEST-v2.json') -Force
+
+          $optional = @(
+            'BOOK-EVAL-LEMONADE-001-MANIFEST.sha256',
+            'README-BOOK-EVAL-LEMONADE-001.txt',
+            'BOOK-EVAL-LEMONADE-001-REPORT.md',
+            'POWERSHELL-AUDIT-RESULTS.md',
+            'run-book-eval-lemonade.ps1'
+          )
+          foreach ($name in $optional) {
+            $p = Join-Path $source $name
+            if (Test-Path $p) { Copy-Item $p (Join-Path $Target $name) -Force }
+          }
+
+          $actualJar = Sha256 (Join-Path $Target 'book-eval-lemonade.jar')
+          $actualCorpus = Sha256 (Join-Path $Target 'provider-visible\BOOK-EVAL-CORPUS-INPUT-v2.jsonl')
+          $actualOntology = Sha256 (Join-Path $Target 'provider-visible\BOOK-EVAL-PROVIDER-ONTOLOGY-v2.json')
+          $actualExecution = Sha256 (Join-Path $Target 'runner-private\RUNNER-PRIVATE-EXECUTION-MANIFEST-v2.json')
+          if ($actualJar -ne $ExpectedJar) { throw 'JAR hash mismatch after import.' }
+          if ($actualCorpus -ne $ExpectedCorpus) { throw 'Corpus hash mismatch after import.' }
+          if ($actualOntology -ne $ExpectedOntology) { throw 'Ontology hash mismatch after import.' }
+          if ($actualExecution -ne $ExpectedExecution) { throw 'Execution manifest hash mismatch after import.' }
+          Write-Log 'frozen_hashes=PASS'
+
+          $forbidden = @(Get-ChildItem -Path $Target -Recurse -File | Where-Object {
+            $_.Name -match 'GOLD-CORPUS|HIDDEN-SPLIT|ORACLE-REGISTRY|SCORING-PRIVATE'
+          })
+          if ($forbidden.Count -ne 0) { throw 'Forbidden scoring-private/gold artifact detected in provider package.' }
+          Write-Log 'blind_gold_boundary=PASS'
+
+          $javaText = (& java -version 2>&1 | Out-String).Trim()
+          Write-Log ("java=" + ($javaText -replace "`r?`n", ' | '))
+          $contractOut = Join-Path $Evidence 'contract-tests.txt'
+          & java -cp (Join-Path $Target 'book-eval-lemonade.jar') org.systemmaster.tools.booklab.BookEvalLemonade001ContractTests *> $contractOut
+          if ($LASTEXITCODE -ne 0) { Get-Content $contractOut | ForEach-Object { Write-Log $_ }; throw "Book evaluator contract tests failed with exit code $LASTEXITCODE" }
+          Get-Content $contractOut | ForEach-Object { Write-Log $_ }
+          Write-Log 'contract_tests=PASS'
+
+          $receipt = [ordered]@{
+            packet_id = 'BOOK-EVAL-LEMONADE-001-REPO-BIND-001-PACKAGE-V2-REBUILD'
+            standing = 'PASS_REPOSITORY_BOUND_A01_PREFLIGHT'
+            trigger_commit = $env:GITHUB_SHA
+            runner = $env:RUNNER_NAME
+            jar_sha256 = $actualJar
+            corpus_sha256 = $actualCorpus
+            ontology_sha256 = $actualOntology
+            execution_manifest_sha256 = $actualExecution
+            blind_gold_boundary = 'PASS'
+            contract_tests = 'PASS'
+          }
+          $receiptPath = Join-Path $Target 'BOOK-EVAL-REPO-BIND-A01-RECEIPT.json'
+          $receipt | ConvertTo-Json -Depth 8 | Set-Content -Encoding UTF8 $receiptPath
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- 'books/qualification/book-eval-lemonade-001'
+          git diff --cached --quiet
+          if ($LASTEXITCODE -eq 0) { throw 'No Books package changes were staged.' }
+          git commit -m 'books: bind canonical v2 package via A-01'
+          if ($LASTEXITCODE -ne 0) { throw 'Failed to commit canonical Books package.' }
+          git push origin ("HEAD:" + $env:GITHUB_REF_NAME)
+          if ($LASTEXITCODE -ne 0) { throw 'Failed to push canonical Books package.' }
+          Write-Log 'repository_bind_commit=PASS'
+          Write-Log 'standing=PASS_REPOSITORY_BOUND_A01_PREFLIGHT'
+          "EVIDENCE_DIR=$Evidence" | Out-File -FilePath $env:GITHUB_ENV -Encoding ascii -Append
+
+      - name: Upload A-01 evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: book-eval-repo-bind-a01-evidence
+          path: ${{ env.EVIDENCE_DIR }}
+          if-no-files-found: warn
+          retention-days: 30
