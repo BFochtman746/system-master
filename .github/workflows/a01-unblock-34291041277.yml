@@ -13,11 +13,23 @@ jobs:
   cancel-exact-arm:
     runs-on: ubuntu-latest
     steps:
-      - name: Force-cancel exact receipt-preserved stale ARM run
+      - name: Force-cancel exact receipt-preserved stale ARM run until terminal
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
-          gh api --method POST "repos/${REPO}/actions/runs/34291041277/force-cancel"
-          echo "Force-cancelled stale A-01 ARM run 34291041277 after receipt/evidence preservation."
+          for attempt in $(seq 1 12); do
+            status=$(gh api "repos/${REPO}/actions/runs/34291041277" --jq .status)
+            if [ "$status" = "completed" ]; then
+              conclusion=$(gh api "repos/${REPO}/actions/runs/34291041277" --jq .conclusion)
+              echo "ARM run is terminal: ${conclusion}"
+              exit 0
+            fi
+            gh api --method POST "repos/${REPO}/actions/runs/34291041277/force-cancel" >/dev/null || true
+            echo "force-cancel attempt ${attempt}; current status=${status}"
+            sleep 5
+          done
+          status=$(gh api "repos/${REPO}/actions/runs/34291041277" --jq .status)
+          echo "ARM run did not become terminal; final status=${status}" >&2
+          exit 1
