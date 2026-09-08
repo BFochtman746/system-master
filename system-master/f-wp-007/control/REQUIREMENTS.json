@@ -1,0 +1,14 @@
+{
+  "package": "F-WP-007",
+  "requirements": [
+    {"id":"F-RQ-015","component":"ChangeCoordinator","invariant":"Every execution command requires an idempotency key; same key plus same payload returns the same logical result; conflicting reuse is rejected."},
+    {"id":"F-RQ-016","component":"ExecutionLeaseManager","invariant":"Only the highest current execution epoch and matching fence token may mutate a ChangeId."},
+    {"id":"F-RQ-017","component":"ConflictDetector","invariant":"Overlapping active targets require explicit compatibility disposition before concurrent execution."},
+    {"id":"F-RQ-022","component":"TimePolicyAdapter","invariant":"Lease/time decisions require trusted time evidence within bounded skew."},
+    {"id":"F-RQ-026","component":"ChangeCoordinator","invariant":"Execution progress is append-durable and reconstructable after controller crash/restart."},
+    {"id":"F-RQ-028","component":"ChangeCoordinator","invariant":"UNKNOWN external effect is not NOT_APPLIED and blocks retry until reconciliation proves a safe disposition."},
+    {"id":"F-RQ-029","component":"ChangeCoordinator","invariant":"PAUSE/HALT prevents new consequential boundaries while preserving durable history."},
+    {"id":"F-RQ-030","component":"ChangeCoordinator","invariant":"Cancellation stops future work and never implies reversal of already committed effects."},
+    {"id":"F-RQ-053","component":"ChangeCoordinator","invariant":"Cross-system actions use durable intent/observation/reconciliation and never claim distributed ACID."}
+  ]
+}
