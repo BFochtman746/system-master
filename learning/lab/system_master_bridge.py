@@ -22,8 +22,9 @@ from learning_lab import (
     Repository,
     default_domain_registry,
 )
+from learning_lab.provider_packet_runtime import start_provider_packet_adaptive_entry
 
-BRIDGE_VERSION = "SYSTEM-MASTER-LEARNING-BRIDGE-V3"
+BRIDGE_VERSION = "SYSTEM-MASTER-LEARNING-BRIDGE-V4"
 QUALIFIED_LEARNING_BOUNDARY = "LEARNING-LAB-QUAL-001"
 RUNTIME_BINDING_VERSION = "LEARNING-DOMAIN-RUNTIME-BINDING-V1"
 OPEN_GOAL_RUNTIME_BINDING_VERSION = "LEARNING-OPEN-GOAL-RUNTIME-BINDING-V1"
@@ -247,8 +248,6 @@ def _start_open_goal_adaptive_entry(request: Mapping[str, Any]) -> dict[str, Any
     course = engine.course(course_id)
     domain_key = course["domain_key"]
     if not engine.registry.has_key(domain_key):
-        # Public course-resolution path rehydrates a persisted dynamic domain after
-        # process restart/replay without rebuilding or mutating the sealed course.
         engine.next_action(learner_id, course_id, now=now)
     spec = engine.registry.by_key(domain_key)
     runtime, allowed_skill_ids = _journey_result(
@@ -286,6 +285,33 @@ def _start_open_goal_adaptive_entry(request: Mapping[str, Any]) -> dict[str, Any
     }
 
 
+def _start_provider_packet_entry(request: Mapping[str, Any]) -> dict[str, Any]:
+    state_key = _required_text(request.get("state_key"), "state_key", _ALLOWED_STATE_KEY)
+    request_id = _required_text(request.get("request_id"), "request_id", _ALLOWED_REQUEST_ID)
+    learner_id = _required_text(request.get("learner_id"), "learner_id", _ALLOWED_REQUEST_ID)
+    packet_id = _required_text(request.get("input_packet_id"), "input_packet_id", _ALLOWED_REQUEST_ID)
+    claimed = _claimed_skills(request)
+    now = request.get("now")
+    if not isinstance(now, int) or now < 0:
+        _fail("INVALID:now")
+    repo = Repository(str(_state_path(state_key)))
+    result = start_provider_packet_adaptive_entry(
+        repo=repo,
+        request_id=request_id,
+        learner_id=learner_id,
+        packet_id=packet_id,
+        claimed_skill_ids=claimed,
+        now=now,
+    )
+    return {
+        "bridge_version": BRIDGE_VERSION,
+        "qualified_learning_boundary": QUALIFIED_LEARNING_BOUNDARY,
+        "request_digest": _request_digest(request),
+        "state_key": state_key,
+        **result,
+    }
+
+
 def dispatch(request: Mapping[str, Any]) -> dict[str, Any]:
     if not isinstance(request, Mapping):
         _fail("REQUEST_MUST_BE_OBJECT")
@@ -294,6 +320,8 @@ def dispatch(request: Mapping[str, Any]) -> dict[str, Any]:
         return _start_adaptive_entry(request)
     if operation == "START_OPEN_GOAL_ADAPTIVE_ENTRY":
         return _start_open_goal_adaptive_entry(request)
+    if operation == "START_OPEN_GOAL_PACKET_ADAPTIVE_ENTRY":
+        return _start_provider_packet_entry(request)
     if operation == "START_GIT_ADAPTIVE_ENTRY":
         legacy = dict(request)
         legacy["operation"] = "START_ADAPTIVE_ENTRY"
