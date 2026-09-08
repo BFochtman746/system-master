@@ -1,0 +1,11 @@
+{
+  "id": "G-WP-003",
+  "objective": "Implement interruption observation, deduplication, classification and recovery-plan creation.",
+  "prerequisites": ["G-WP-002"],
+  "components": ["InterruptionDetector", "RecoveryClassifier", "RecoveryPlanner"],
+  "data": ["InterruptionObservation", "RecoveryClassification", "RecoveryPlan"],
+  "contracts": ["ReportInterruption", "ClassifyRecovery", "PlanRecovery", "GetRecoveryPlan"],
+  "tests": ["STATE_MACHINE", "PROPERTY", "FAULT_INJECTION"],
+  "completion": "Every interruption class resolves deterministically to an explicit plan or blocker.",
+  "production_authorized": false
+}
