@@ -1,0 +1,24 @@
+name: LEARNING PILOT-001 RUN-001 Human Session Qualification
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [learning/pilot-001-run-001-real-participant-stage-1]
+    paths:
+      - "learning/lab/PILOT_001_RUN_001_GATE_TRIGGER.txt"
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  qualify:
+    uses: ./.github/workflows/a01-control-plane-gateway.yml
+    with:
+      qualification_id: LEARNING-PILOT-001-RUN-001-HUMAN-SESSION
+      workstream_id: LEARNING
+      subject_sha: ${{ github.sha }}
+      origin_ref: ${{ github.ref }}
+      resume_on_pass: Adjudicate the control-plane receipt; if promotion_authorized=true, promote the exact tested SHA unchanged and permit explicit-consent real-participant execution.
+      resume_on_failure: Classify SUBJECT_FAILURE versus INFRA_FAILURE or CONTROL_PLANE_FAILURE; repair only the failing boundary when sufficient and rerun the minimum required gate.
+      notification_target: learning-pilot-001-run-001
