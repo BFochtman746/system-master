@@ -208,21 +208,30 @@ def submit_learning_turn(
     if mode not in _RESPONSE_MODES:
         raise UnifiedTurnControllerError("TURN_DOES_NOT_ACCEPT_RESPONSE:" + mode)
 
-    input_digest = digest({
+    response_digest = _response_digest(response)
+    audit_payload = {
         "turn_id": turn_id,
         "turn_binding_digest": turn_binding_digest,
-        "response_digest": _response_digest(response),
+        "response_digest": response_digest,
         "submitted_at": submitted_at,
         "assisted": assisted,
         "answer_revealed_before_commit": answer_revealed_before_commit,
         "requested_help_level": requested_help_level,
         "mode": mode,
-    })
+        "controller_version": UNIFIED_TURN_CONTROLLER_VERSION,
+    }
+    prior_operation = repo.operation_result(operation_id, audit_payload)
+    if prior_operation is not None:
+        return prior_operation
+
+    input_digest = digest(audit_payload)
     existing = repo.get_object(TURN_SUBMISSION_KIND, turn_id, 1)
     if existing is not None:
         if existing.get("input_digest") != input_digest:
             raise UnifiedTurnControllerError("TURN_ALREADY_SUBMITTED_WITH_DIFFERENT_INPUT")
-        return copy.deepcopy(existing["result"])
+        result = copy.deepcopy(existing["result"])
+        repo.record_operation(operation_id, audit_payload, result)
+        return result
 
     if mode == "EVIDENCE":
         underlying = submit_current_evidence_and_continue(
@@ -270,7 +279,7 @@ def submit_learning_turn(
         "turn_binding_digest": turn_binding_digest,
         "mode": mode,
         "submitted_at": submitted_at,
-        "response_digest": _response_digest(response),
+        "response_digest": response_digest,
         "response_echoed": False,
         "submission_authority": authority,
         "evidence": evidence,
@@ -283,6 +292,7 @@ def submit_learning_turn(
         "input_digest": input_digest,
         "result": result,
     })
+    repo.record_operation(operation_id, audit_payload, result)
     repo.emit("SystemMasterLearningTurnSubmitted", turn_id, {
         "mode": mode,
         "next_action_type": next_action["action_type"],
