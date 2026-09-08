@@ -10,7 +10,7 @@ from .baseline_diagnostic import BaselineDiagnosticDirector
 from .repository import Repository, digest
 
 
-ADAPTIVE_TUTOR_CONTINUATION_VERSION = "ADAPTIVE-TUTOR-CONTINUATION-V1"
+ADAPTIVE_TUTOR_CONTINUATION_VERSION = "ADAPTIVE-TUTOR-CONTINUATION-V2"
 TUTOR_INTERACTION_KIND = "adaptive_tutor_interaction"
 TUTOR_HANDOFF_KIND = "adaptive_tutor_formative_handoff"
 TUTOR_HANDOFF_STANDING = "FORMATIVE_RECHECK_PASSED_REQUIRES_INDEPENDENT_VERIFICATION"
@@ -27,6 +27,10 @@ class AdaptiveTutorJourneyDirector(AdaptiveEntryJourneyDirector):
     create a routing handoff to an existing independent mastery item, but never an
     attempt or mastery projection. Once that independent item is attempted, the
     handoff is consumed and the Learning engine again determines the route.
+
+    Runtime LESSON/REMEDIATION actions are also normalized through the tutor after
+    diagnostic entry is complete. This removes a legacy caller-side special case
+    without moving mastery authority out of the Learning engine.
     """
 
     def _mastery_target(self, course_id: str, skill_id: str) -> str:
@@ -64,10 +68,26 @@ class AdaptiveTutorJourneyDirector(AdaptiveEntryJourneyDirector):
 
     def _compose_action(self, *, journey: Dict[str, Any], now: int) -> Dict[str, Any]:
         composed = super()._compose_action(journey=journey, now=now)
-        diagnostic_action = composed["diagnostic_action"]
-        if diagnostic_action["action_type"] not in {"TARGETED_REMEDIATION", "LESSON"}:
+        selected = dict(composed["selected"])
+
+        # Diagnostic LESSON/TARGETED_REMEDIATION is already normalized by the base
+        # journey. Post-entry/revalidation runtime LESSON/REMEDIATION was the last
+        # legacy escape hatch, so normalize it through the same formative tutor.
+        if selected["action_type"] in {"LESSON", "REMEDIATION"}:
+            selected = self._map_diagnostic_action(selected)
+            selected["reason_codes"] = list(selected.get("reason_codes", [])) + [
+                "POST_ENTRY_TUTOR_ROUTE_UNIFIED"
+            ]
+            composed = {
+                **composed,
+                "selected": selected,
+                "authority": f"{composed['authority']}_TUTOR_ROUTE",
+            }
+
+        selected = composed["selected"]
+        if selected["action_type"] not in {"TUTOR_INSTRUCTION", "TUTOR_REMEDIATION"}:
             return composed
-        skill_id = diagnostic_action.get("skill_id")
+        skill_id = selected.get("skill_id")
         if not skill_id:
             return composed
         handoff = self._latest_handoff(journey["journey_id"], skill_id)
