@@ -1,0 +1,265 @@
+{
+  "cases": [
+    {
+      "case_id": "B-FIX-USER-001",
+      "expect": "ADMIT_FULL_TEXT",
+      "content": "The lantern clicked once in the empty room. Mara left it unlit because darkness was the only witness she trusted.",
+      "request": {
+        "ledger_id": "LRL-USERFIXTURE-001",
+        "source_class": "USER_MANUSCRIPT",
+        "rights_class": "USER_OWNED_OR_AUTHORIZED",
+        "rights_evidence": {
+          "evidence_type": "EXPLICIT_AUTHORIZATION",
+          "jurisdiction": "QUALIFICATION-FIXTURE",
+          "evidence_locator": "fixture://rights/b-fix-user-001",
+          "verified_at": "2026-09-08T00:00:00Z",
+          "verified_by": "step-b-fixture",
+          "scope_note": "Qualification fixture evidence only; no external rights claim is made."
+        },
+        "permitted_uses": ["PERSIST_FULL_TEXT", "COMPUTE_FEATURES", "CREATE_DERIVED_ANALYSIS", "EVALUATE"],
+        "persistence_policy": {
+          "full_text_allowed": true,
+          "passage_text_allowed": true,
+          "derived_analysis_allowed": true,
+          "raw_text_retention": "PERSIST",
+          "storage_location_class": "RESTRICTED_PROJECT_VAULT"
+        },
+        "identity_metadata": {
+          "canonical_title": "Synthetic User Manuscript Fixture",
+          "creator_stable_id": "fixture-user",
+          "original_publication_year": "unpublished",
+          "publisher": "unpublished",
+          "publication_date": "2026-09-08",
+          "edition_statement": "review copy",
+          "contributors": "none",
+          "standard_identifier": "none",
+          "provider": "qualification-fixture",
+          "locator": "fixture://user/001"
+        },
+        "manuscript_version": {
+          "project_id": "PROJECT-FIXTURE",
+          "book_id": "BOOK-FIXTURE",
+          "version_id": "VERSION-REVIEW-001",
+          "maturity_state": "REVIEW_COPY",
+          "authority_state": "NON_AUTHORITATIVE",
+          "canon_state": "PROVISIONAL_CANON",
+          "provenance": {"source_locator": "fixture://user/001", "observed_at": "2026-09-08T00:00:00Z", "asserted_by": "qualification-fixture"},
+          "relation_to_other_versions": [],
+          "protected_language_state": [],
+          "user_approval_state": "UNREVIEWED"
+        }
+      }
+    },
+    {
+      "case_id": "B-FIX-ANALYSIS-001",
+      "expect": "ADMIT_DERIVED_ONLY",
+      "content": "A proprietary reference passage exists only inside this qualification fixture. Its exact language must not survive derivation into persistent storage.",
+      "request": {
+        "ledger_id": "LRL-ANALYSIS-001",
+        "source_class": "REFERENCE",
+        "rights_class": "ANALYSIS_ONLY_NO_FULL_TEXT",
+        "rights_evidence": {
+          "evidence_type": "ANALYSIS_ONLY_RESTRICTION",
+          "jurisdiction": "QUALIFICATION-FIXTURE",
+          "evidence_locator": "fixture://rights/b-fix-analysis-001",
+          "verified_at": "2026-09-08T00:00:00Z",
+          "verified_by": "step-b-fixture",
+          "scope_note": "Qualification fixture evidence only; no external rights claim is made."
+        },
+        "permitted_uses": ["COMPUTE_FEATURES", "CREATE_DERIVED_ANALYSIS", "PERSIST_ABSTRACT_ANALYSIS_ONLY"],
+        "persistence_policy": {
+          "full_text_allowed": false,
+          "passage_text_allowed": false,
+          "derived_analysis_allowed": true,
+          "raw_text_retention": "TRANSIENT_PROCESSING_ONLY",
+          "storage_location_class": "DERIVED_ONLY_STORE"
+        },
+        "identity_metadata": {
+          "canonical_title": "Analysis Only Fixture",
+          "creator_stable_id": "fixture-reference",
+          "original_publication_year": "unknown",
+          "publisher": "unknown",
+          "publication_date": "unknown",
+          "edition_statement": "fixture",
+          "contributors": "none",
+          "standard_identifier": "none",
+          "provider": "qualification-fixture",
+          "locator": "fixture://analysis/001"
+        }
+      }
+    },
+    {
+      "case_id": "B-FIX-UNKNOWN-001",
+      "expect": "REJECT",
+      "content": "Unknown-rights material must never be admitted by optimistic default.",
+      "request": {
+        "ledger_id": "LRL-UNKNOWN-001",
+        "source_class": "REFERENCE",
+        "rights_class": "UNKNOWN",
+        "rights_evidence": {
+          "evidence_type": "UNKNOWN",
+          "jurisdiction": "QUALIFICATION-FIXTURE",
+          "evidence_locator": "fixture://rights/b-fix-unknown-001",
+          "verified_at": "2026-09-08T00:00:00Z",
+          "verified_by": "step-b-fixture",
+          "scope_note": "Qualification fixture evidence only; no external rights claim is made."
+        },
+        "permitted_uses": ["CREATE_DERIVED_ANALYSIS"],
+        "persistence_policy": {
+          "full_text_allowed": false,
+          "passage_text_allowed": false,
+          "derived_analysis_allowed": true,
+          "raw_text_retention": "NONE",
+          "storage_location_class": "NO_RAW_TEXT_STORE"
+        },
+        "identity_metadata": {
+          "canonical_title": "Unknown Rights Fixture",
+          "creator_stable_id": "unknown",
+          "original_publication_year": "unknown",
+          "publisher": "unknown",
+          "publication_date": "unknown",
+          "edition_statement": "unknown",
+          "contributors": "unknown",
+          "standard_identifier": "none",
+          "provider": "qualification-fixture",
+          "locator": "fixture://unknown/001"
+        }
+      }
+    },
+    {
+      "case_id": "B-FIX-BAD-EVIDENCE-001",
+      "expect": "REJECT",
+      "content": "A license claim cannot satisfy a public-domain evidence requirement.",
+      "request": {
+        "ledger_id": "LRL-BADEVIDENCE-001",
+        "source_class": "REFERENCE",
+        "rights_class": "PUBLIC_DOMAIN_FULL_TEXT",
+        "rights_evidence": {
+          "evidence_type": "LICENSE_GRANT",
+          "jurisdiction": "QUALIFICATION-FIXTURE",
+          "evidence_locator": "fixture://rights/b-fix-bad-evidence-001",
+          "verified_at": "2026-09-08T00:00:00Z",
+          "verified_by": "step-b-fixture",
+          "scope_note": "Qualification fixture evidence only; no external rights claim is made."
+        },
+        "permitted_uses": ["PERSIST_FULL_TEXT", "CREATE_DERIVED_ANALYSIS"],
+        "persistence_policy": {
+          "full_text_allowed": true,
+          "passage_text_allowed": true,
+          "derived_analysis_allowed": true,
+          "raw_text_retention": "PERSIST",
+          "storage_location_class": "AUTHORIZED_CORPUS"
+        },
+        "identity_metadata": {
+          "canonical_title": "Bad Evidence Fixture",
+          "creator_stable_id": "fixture",
+          "original_publication_year": "1900",
+          "publisher": "fixture",
+          "publication_date": "1900-01-01",
+          "edition_statement": "fixture",
+          "contributors": "none",
+          "standard_identifier": "none",
+          "provider": "qualification-fixture",
+          "locator": "fixture://bad-evidence/001"
+        }
+      }
+    },
+    {
+      "case_id": "B-FIX-ANALYSIS-RAW-001",
+      "expect": "REJECT",
+      "content": "This analysis-only source must be rejected because its stated persistence policy illegally allows full text storage.",
+      "request": {
+        "ledger_id": "LRL-ANALYSISRAW-001",
+        "source_class": "REFERENCE",
+        "rights_class": "ANALYSIS_ONLY_NO_FULL_TEXT",
+        "rights_evidence": {
+          "evidence_type": "ANALYSIS_ONLY_RESTRICTION",
+          "jurisdiction": "QUALIFICATION-FIXTURE",
+          "evidence_locator": "fixture://rights/b-fix-analysis-raw-001",
+          "verified_at": "2026-09-08T00:00:00Z",
+          "verified_by": "step-b-fixture",
+          "scope_note": "Qualification fixture evidence only; no external rights claim is made."
+        },
+        "permitted_uses": ["PERSIST_FULL_TEXT", "CREATE_DERIVED_ANALYSIS"],
+        "persistence_policy": {
+          "full_text_allowed": true,
+          "passage_text_allowed": false,
+          "derived_analysis_allowed": true,
+          "raw_text_retention": "PERSIST",
+          "storage_location_class": "AUTHORIZED_CORPUS"
+        },
+        "identity_metadata": {
+          "canonical_title": "Analysis Raw Violation Fixture",
+          "creator_stable_id": "fixture",
+          "original_publication_year": "unknown",
+          "publisher": "unknown",
+          "publication_date": "unknown",
+          "edition_statement": "fixture",
+          "contributors": "none",
+          "standard_identifier": "none",
+          "provider": "qualification-fixture",
+          "locator": "fixture://analysis-raw/001"
+        }
+      }
+    },
+    {
+      "case_id": "B-FIX-MANUSCRIPT-META-001",
+      "expect": "REJECT",
+      "content": "A user manuscript with missing maturity metadata is not admitted until its version state is explicit.",
+      "request": {
+        "ledger_id": "LRL-MANUSCRIPTMETA-001",
+        "source_class": "USER_MANUSCRIPT",
+        "rights_class": "USER_OWNED_OR_AUTHORIZED",
+        "rights_evidence": {
+          "evidence_type": "OWNERSHIP_ATTESTATION",
+          "jurisdiction": "QUALIFICATION-FIXTURE",
+          "evidence_locator": "fixture://rights/b-fix-manuscript-meta-001",
+          "verified_at": "2026-09-08T00:00:00Z",
+          "verified_by": "step-b-fixture",
+          "scope_note": "Qualification fixture evidence only; no external rights claim is made."
+        },
+        "permitted_uses": ["PERSIST_FULL_TEXT", "CREATE_DERIVED_ANALYSIS"],
+        "persistence_policy": {
+          "full_text_allowed": true,
+          "passage_text_allowed": true,
+          "derived_analysis_allowed": true,
+          "raw_text_retention": "PERSIST",
+          "storage_location_class": "RESTRICTED_PROJECT_VAULT"
+        },
+        "identity_metadata": {
+          "canonical_title": "Missing Metadata Fixture",
+          "creator_stable_id": "fixture-user",
+          "original_publication_year": "unpublished",
+          "publisher": "unpublished",
+          "publication_date": "2026-09-08",
+          "edition_statement": "draft",
+          "contributors": "none",
+          "standard_identifier": "none",
+          "provider": "qualification-fixture",
+          "locator": "fixture://user/missing-meta"
+        },
+        "manuscript_version": {
+          "project_id": "PROJECT-FIXTURE",
+          "book_id": "BOOK-FIXTURE",
+          "version_id": "VERSION-UNKNOWN-001"
+        }
+      }
+    }
+  ],
+  "duplicate_case": {
+    "base_case_id": "B-FIX-USER-001",
+    "second_locator": "fixture://user/001-copy",
+    "expect_same_payload": true,
+    "expect_no_weight_multiplication": true
+  },
+  "overlap_case": {
+    "source_id_seed": "SOURCE-overlap-fixture",
+    "passages": [
+      {"passage_id": "P1", "start": 0, "end": 100},
+      {"passage_id": "P2", "start": 80, "end": 160},
+      {"passage_id": "P3", "start": 200, "end": 240}
+    ],
+    "expect_same_group": [["P1", "P2"]],
+    "expect_different_group": [["P1", "P3"]]
+  }
+}
