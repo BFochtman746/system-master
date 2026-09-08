@@ -1,0 +1,11 @@
+{
+  "id": "G-WP-006",
+  "objective": "Implement deterministic restore/resume with new execution-attempt identity and post-resume verification.",
+  "prerequisites": ["G-WP-003", "G-WP-004", "G-WP-005"],
+  "components": ["ResumeCoordinator", "RecoveryPlanner"],
+  "data": ["RecoveryPlan", "ExecutionAttemptRef", "RecordedDecision"],
+  "contracts": ["StartResume", "RecordResumeOutcome", "MarkRecovered"],
+  "tests": ["REPLAY", "STATE_MACHINE", "PROCESS_KILL", "SOAK"],
+  "completion": "Representative interrupted workflows resume without duplicate semantic effects.",
+  "production_authorized": false
+}

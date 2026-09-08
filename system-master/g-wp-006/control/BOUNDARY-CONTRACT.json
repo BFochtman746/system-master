@@ -1,0 +1,11 @@
+{
+  "package": "G-WP-006",
+  "boundaries": [
+    "RecoveryRegistry remains authoritative for recovery lifecycle state and RECOVERED standing.",
+    "G-WP-005 remains authoritative for current claim/fence validity; G-WP-006 consumes it through a narrow FenceAuthority.",
+    "G-WP-003 remains authoritative for RecoveryPlan; G-WP-006 consumes only the current ready plan.",
+    "Replay consumes durable RecordedDecision results and does not query current clock/runtime/environment for past values.",
+    "Unknown or denied compatibility, reconciliation, or resource admission blocks creation of a new effectful attempt."
+  ],
+  "production_authorized": false
+}
