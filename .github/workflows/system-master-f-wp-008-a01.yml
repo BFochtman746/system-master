@@ -1,0 +1,44 @@
+name: System Master F-WP-008 A-01 Qualification
+
+on:
+  push:
+    branches:
+      - system-master/f-wp-008-a01
+
+permissions:
+  contents: read
+
+jobs:
+  qualify-f-wp-008:
+    name: Qualify F-WP-008 verification evidence integrity quarantine on A-01
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 25
+    steps:
+      - name: Checkout exact F-WP-008 subject
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          clean: true
+      - name: Execute repository-owned F-WP-008 qualifier
+        shell: cmd
+        run: node .github\scripts\fwp008-qualify.js
+      - name: Publish qualification summary
+        if: always()
+        shell: cmd
+        run: |
+          set "EVIDENCE_DIR=%RUNNER_TEMP%\system-master-fwp008-%GITHUB_RUN_ID%"
+          echo ## SYSTEM-MASTER F-WP-008 A-01>>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\subject.txt" type "%EVIDENCE_DIR%\subject.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\contract-gate.txt" type "%EVIDENCE_DIR%\contract-gate.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\result.txt" type "%EVIDENCE_DIR%\result.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\qualification.txt" type "%EVIDENCE_DIR%\qualification.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\failure.txt" type "%EVIDENCE_DIR%\failure.txt">>"%GITHUB_STEP_SUMMARY%"
+      - name: Upload F-WP-008 qualification evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: system-master-f-wp-008-a01-evidence
+          path: ${{ runner.temp }}\system-master-fwp008-${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 30
