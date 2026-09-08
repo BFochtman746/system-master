@@ -1,8 +1,6 @@
 package org.systemmaster.learning;
 
-import org.systemmaster.core.ExecutionGrantContracts.EligibilitySnapshot;
-import org.systemmaster.core.ExecutionGrantContracts.ExecutionGrant;
-import org.systemmaster.core.ExecutionGrantIssuer;
+import org.systemmaster.learning.LearningExecutionPort.AuthorizedExecution;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -17,9 +15,7 @@ import java.util.TreeSet;
 import java.util.regex.Pattern;
 
 public final class LearningCapabilityAdapter {
-    public static final String ACTION = "LEARNING_EXECUTE";
-    public static final Set<String> TARGETS = Set.of("learning:adaptive-entry");
-    public static final String ADAPTER_VERSION = "SYSTEM-MASTER-LEARNING-ADAPTER-V1";
+    public static final String ADAPTER_VERSION = "SYSTEM-MASTER-LEARNING-ADAPTER-V2";
 
     private static final Pattern SAFE_ID = Pattern.compile("^[A-Za-z0-9][A-Za-z0-9_.:-]{0,95}$");
     private static final Pattern SAFE_STATE = Pattern.compile("^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$");
@@ -62,11 +58,18 @@ public final class LearningCapabilityAdapter {
         }
     }
 
-    public record LearningResult(String responseJson, String responseDigest, String adapterVersion) {
+    public record LearningResult(
+            String responseJson,
+            String responseDigest,
+            String adapterVersion,
+            String executionPortVersion,
+            String authorizationRef) {
         public LearningResult {
             if (responseJson == null || responseJson.isBlank()) throw new IllegalArgumentException("EMPTY_LEARNING_RESPONSE");
             if (responseDigest == null || responseDigest.isBlank()) throw new IllegalArgumentException("EMPTY_RESPONSE_DIGEST");
             if (!ADAPTER_VERSION.equals(adapterVersion)) throw new IllegalArgumentException("ADAPTER_VERSION_MISMATCH");
+            if (!LearningExecutionPort.PORT_VERSION.equals(executionPortVersion)) throw new IllegalArgumentException("PORT_VERSION_MISMATCH");
+            if (authorizationRef == null || authorizationRef.isBlank()) throw new IllegalArgumentException("AUTHORIZATION_REF_REQUIRED");
         }
     }
 
@@ -105,40 +108,31 @@ public final class LearningCapabilityAdapter {
         }
     }
 
-    private final ExecutionGrantIssuer grantIssuer;
     private final BridgeInvoker bridgeInvoker;
 
-    public LearningCapabilityAdapter(ExecutionGrantIssuer grantIssuer, BridgeInvoker bridgeInvoker) {
-        this.grantIssuer = Objects.requireNonNull(grantIssuer, "grantIssuer");
+    public LearningCapabilityAdapter(BridgeInvoker bridgeInvoker) {
         this.bridgeInvoker = Objects.requireNonNull(bridgeInvoker, "bridgeInvoker");
     }
 
     public LearningResult execute(
-            ExecutionGrant grant,
-            EligibilitySnapshot currentSnapshot,
+            AuthorizedExecution authorization,
             String presentedPrincipalRef,
-            long currentAuthorizationRevocationEpoch,
             Instant now,
             LearningCommand command) throws Exception {
         Objects.requireNonNull(now, "now");
         Objects.requireNonNull(command, "command");
-        var validation = grantIssuer.validateForUse(
-                grant,
-                currentSnapshot,
-                presentedPrincipalRef,
-                ACTION,
-                TARGETS,
-                currentAuthorizationRevocationEpoch,
-                now);
-        if (!validation.valid()) {
-            throw new SecurityException("LEARNING_EXECUTION_DENIED:"+String.join(",", validation.reasons()));
-        }
+        LearningExecutionPort.requireUsable(authorization, presentedPrincipalRef, now);
 
         String response = bridgeInvoker.invoke(command.toJson());
         if (!response.contains("\"status\":\"PASS\"")) {
             throw new IllegalStateException("LEARNING_BRIDGE_NONPASS:"+bounded(response));
         }
-        return new LearningResult(response, sha256(response), ADAPTER_VERSION);
+        return new LearningResult(
+                response,
+                sha256(response),
+                ADAPTER_VERSION,
+                LearningExecutionPort.PORT_VERSION,
+                authorization.authorizationRef());
     }
 
     private static void require(String value, String name, Pattern pattern) {
