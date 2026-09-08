@@ -13,7 +13,11 @@ $runnerWork = Split-Path $env:RUNNER_TEMP -Parent
 $runnerRoot = Split-Path $runnerWork -Parent
 $persistentRoot = Join-Path $runnerRoot '_qualification\continuity-target-windows-reboot'
 $persistentDir = Join-Path $persistentRoot $qualificationId
-$evidenceDir = Join-Path $env:RUNNER_TEMP ("system-master-continuity-target-windows-reboot-" + $env:GITHUB_RUN_ID)
+if ($env:A01_EVIDENCE_DIR) {
+    $evidenceDir = $env:A01_EVIDENCE_DIR
+} else {
+    $evidenceDir = Join-Path $env:RUNNER_TEMP ("system-master-continuity-target-windows-reboot-" + $env:GITHUB_RUN_ID)
+}
 New-Item -ItemType Directory -Force -Path $persistentDir | Out-Null
 New-Item -ItemType Directory -Force -Path $evidenceDir | Out-Null
 
@@ -103,6 +107,13 @@ try {
         Copy-Item (Join-Path $evidenceDir 'java-arm.txt') (Join-Path $persistentDir 'arm-java.txt') -Force
         Write-Evidence 'arm-result.txt' ("result=ARMED_FOR_REAL_WINDOWS_REBOOT`njava=$armOut`nrunner_auto_start=PROVEN`npreexisting_reboot_pending=false`njournal_sha256=$journalHash`nreboot_force=false")
         Write-Host "ARMED TARGET_WINDOWS_REBOOT qualification_id=$qualificationId runner_service=$($service.Name) journal_sha256=$journalHash"
+
+        if ($env:A01_PREPARE_ONLY -eq '1') {
+            Write-Evidence 'post-action.txt' 'windows_reboot'
+            Write-Host 'A01_PREPARE_ONLY=1; returning control so the gateway can write/upload the receipt before the registered reboot handoff.'
+            exit 0
+        }
+
         Write-Host 'Initiating non-forced Windows reboot now. This job is expected to disconnect.'
         & shutdown.exe /r /t 0 /d p:4:1 /c 'System Master TARGET_WINDOWS_REBOOT qualification'
         if ($LASTEXITCODE -ne 0) { throw "WINDOWS_REBOOT_COMMAND_FAILED:$LASTEXITCODE" }

@@ -7,38 +7,17 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   qualify-target-windows-reboot:
-    name: Qualify genuine TARGET_WINDOWS_REBOOT on A-01
-    runs-on: [self-hosted, Windows, X64]
-    timeout-minutes: 20
-    steps:
-      - name: Checkout exact target Windows reboot subject
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.sha }}
-          fetch-depth: 0
-          clean: true
-      - name: Execute repository-owned target Windows reboot protocol
-        shell: powershell
-        run: .github\scripts\g-continuity-target-windows-reboot.ps1
-      - name: Publish target Windows reboot summary
-        if: always()
-        shell: cmd
-        run: |
-          set "EVIDENCE_DIR=%RUNNER_TEMP%\system-master-continuity-target-windows-reboot-%GITHUB_RUN_ID%"
-          echo ## SYSTEM MASTER - CONTINUITY TARGET WINDOWS REBOOT QUALIFICATION>>"%GITHUB_STEP_SUMMARY%"
-          if exist "%EVIDENCE_DIR%\subject.txt" type "%EVIDENCE_DIR%\subject.txt">>"%GITHUB_STEP_SUMMARY%"
-          if exist "%EVIDENCE_DIR%\arm-result.txt" type "%EVIDENCE_DIR%\arm-result.txt">>"%GITHUB_STEP_SUMMARY%"
-          if exist "%EVIDENCE_DIR%\result.txt" type "%EVIDENCE_DIR%\result.txt">>"%GITHUB_STEP_SUMMARY%"
-          if exist "%EVIDENCE_DIR%\post-reboot-result.json" type "%EVIDENCE_DIR%\post-reboot-result.json">>"%GITHUB_STEP_SUMMARY%"
-          if exist "%EVIDENCE_DIR%\failure.txt" type "%EVIDENCE_DIR%\failure.txt">>"%GITHUB_STEP_SUMMARY%"
-      - name: Upload target Windows reboot evidence
-        if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: system-master-continuity-target-windows-reboot-evidence
-          path: ${{ runner.temp }}\system-master-continuity-target-windows-reboot-${{ github.run_id }}
-          if-no-files-found: warn
-          retention-days: 30
+    name: Qualify TARGET_WINDOWS_REBOOT through A-01 control plane
+    uses: BFochtman746/system-master/.github/workflows/a01-control-plane-gateway.yml@main
+    with:
+      qualification_id: CONTINUITY-TARGET-WINDOWS-REBOOT
+      workstream_id: SYSTEM-MASTER-CONTINUITY
+      subject_sha: ${{ github.sha }}
+      origin_ref: ${{ github.ref }}
+      resume_on_pass: Adjudicate the receipt. If the subject phase is ARM, allow the registered reboot handoff and then advance only QUALIFICATION-SUBJECT.json to VERIFY. If the subject phase is VERIFY, record TARGET_WINDOWS_REBOOT PASS for G-RQ-004 and the Windows arm of G-RQ-072 while leaving iOS and production authorization incomplete.
+      resume_on_failure: Classify the receipt failure, repair only the failing Continuity reboot boundary, and rerun the minimum sufficient phase without rewriting prior reboot evidence.
+      notification_target: originating-workstream
