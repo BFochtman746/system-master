@@ -1,0 +1,80 @@
+name: BOOK-EVAL-LEMONADE-001 REPAIR-005 Hierarchy Gate A
+
+on:
+  push:
+    branches:
+      - book-eval-lemonade-001-blind-resume-003-adapter-repair
+    paths:
+      - ".github/workflows/book-eval-repair-005-hierarchy-gate-a.yml"
+      - "qualification/book-eval-lemonade-001/repair005/BOOK-EVAL-HIERARCHICAL-SPECIALIST-TAXONOMY-v1.json"
+      - "qualification/book-eval-lemonade-001/repair005-src/org/systemmaster/tools/booklab/BookEvalRepair005HierarchyValidator.java"
+
+permissions:
+  contents: read
+
+jobs:
+  gate-a:
+    name: Validate hierarchical specialist taxonomy
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact repair branch
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 1
+
+      - name: Reconstruct authority and validate hierarchy
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $ExpectedJar = 'fedd5bfcb122c4c0d5fd7a7912574705c582596978dd60796e804b26e7549248'
+          $ExpectedOntology = '3daf139be2c35eb706ad0d0a1b6275a72c1ff18c21bf09d97eb26c3eadd7b5d6'
+          $Bundle = Join-Path $env:GITHUB_WORKSPACE 'qualification\book-eval-lemonade-001'
+          $Evidence = Join-Path $env:RUNNER_TEMP ('book-eval-repair005-gate-a-' + $env:GITHUB_RUN_ID)
+          $Stage = Join-Path $Evidence 'frozen-inputs'
+          $Classes = Join-Path $Evidence 'classes'
+          New-Item -ItemType Directory -Force -Path $Evidence,$Stage,$Classes | Out-Null
+          "EVIDENCE_DIR=$Evidence" | Out-File -FilePath $env:GITHUB_ENV -Encoding ascii -Append
+
+          function Sha([string]$Path) { (Get-FileHash -Algorithm SHA256 -LiteralPath $Path).Hash.ToLowerInvariant() }
+          function Reconstruct([string]$Dir,[string]$Out,[string]$Expected) {
+            $parts = @(Get-ChildItem -LiteralPath $Dir -File -Filter 'part-*' | Sort-Object Name)
+            if ($parts.Count -eq 0) { throw "no transport parts in $Dir" }
+            $b64 = [string]::Concat(@($parts | ForEach-Object { [IO.File]::ReadAllText($_.FullName,[Text.Encoding]::ASCII) }))
+            [IO.File]::WriteAllBytes($Out,[Convert]::FromBase64String($b64))
+            if ((Sha $Out) -ne $Expected) { throw "reconstructed hash mismatch for $Out" }
+          }
+
+          Reconstruct (Join-Path $Bundle 'jar-base64-v2') (Join-Path $Stage 'book-eval-lemonade.jar') $ExpectedJar
+          Reconstruct (Join-Path $Bundle 'provider-ontology-base64-v2') (Join-Path $Stage 'BOOK-EVAL-PROVIDER-ONTOLOGY-v2.json') $ExpectedOntology
+
+          $Jar = Join-Path $Stage 'book-eval-lemonade.jar'
+          $Ontology = Join-Path $Stage 'BOOK-EVAL-PROVIDER-ONTOLOGY-v2.json'
+          $Taxonomy = Join-Path $Bundle 'repair005\BOOK-EVAL-HIERARCHICAL-SPECIALIST-TAXONOMY-v1.json'
+          $Validator = Join-Path $Bundle 'repair005-src\org\systemmaster\tools\booklab\BookEvalRepair005HierarchyValidator.java'
+
+          & javac -Xlint:all -Werror -cp $Jar -d $Classes $Validator
+          if ($LASTEXITCODE -ne 0) { throw 'REPAIR-005 hierarchy validator compilation failed' }
+          $Classpath = $Classes + ';' + $Jar
+          & java -cp $Classpath org.systemmaster.tools.booklab.BookEvalRepair005HierarchyValidator $Ontology $Taxonomy 2>&1 | Tee-Object -FilePath (Join-Path $Evidence 'gate-a.log')
+          if ($LASTEXITCODE -ne 0) { throw 'REPAIR-005 hierarchy Gate A failed' }
+
+          @(
+            'objective=BOOK-EVAL-LEMONADE-001-REPAIR-005',
+            'gate=A_TAXONOMY_INTEGRITY',
+            'canonical_ontology_sha256=' + $ExpectedOntology,
+            'canonical_jar_sha256=' + $ExpectedJar,
+            'model_calls=0',
+            'scoring_private_accessed=false',
+            'standing=PASS_GATE_A_HIERARCHY_INTEGRITY'
+          ) | Set-Content -Encoding UTF8 (Join-Path $Evidence 'qualification-summary.txt')
+          Get-Content (Join-Path $Evidence 'qualification-summary.txt')
+
+      - name: Upload Gate A evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: book-eval-repair005-hierarchy-gate-a-evidence
+          path: ${{ env.EVIDENCE_DIR }}
+          if-no-files-found: warn
+          retention-days: 30
