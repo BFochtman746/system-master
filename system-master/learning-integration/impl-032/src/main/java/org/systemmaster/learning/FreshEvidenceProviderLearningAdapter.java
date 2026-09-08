@@ -2,7 +2,9 @@ package org.systemmaster.learning;
 
 import org.systemmaster.learning.LearningExecutionPort.AuthorizedExecution;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
@@ -72,6 +74,37 @@ public final class FreshEvidenceProviderLearningAdapter {
             if (!ADAPTER_VERSION.equals(adapterVersion)) throw new IllegalArgumentException("ADAPTER_VERSION_MISMATCH");
             if (!LearningExecutionPort.PORT_VERSION.equals(executionPortVersion)) throw new IllegalArgumentException("PORT_VERSION_MISMATCH");
             if (authorizationRef == null || authorizationRef.isBlank()) throw new IllegalArgumentException("AUTHORIZATION_REF_REQUIRED");
+        }
+    }
+
+    /** Dedicated invoker so IMPL-032 cannot be accidentally routed into the start bridge. */
+    public static final class PythonFreshEvidenceBridgeInvoker implements LearningCapabilityAdapter.BridgeInvoker {
+        private final Path repositoryRoot;
+        private final Path stateRoot;
+
+        public PythonFreshEvidenceBridgeInvoker(Path repositoryRoot, Path stateRoot) {
+            this.repositoryRoot = Objects.requireNonNull(repositoryRoot, "repositoryRoot").toAbsolutePath().normalize();
+            this.stateRoot = Objects.requireNonNull(stateRoot, "stateRoot").toAbsolutePath().normalize();
+        }
+
+        @Override
+        public String invoke(String requestJson) throws IOException, InterruptedException {
+            ProcessBuilder builder = new ProcessBuilder("python", "learning/lab/fresh_evidence_system_master_bridge.py");
+            builder.directory(repositoryRoot.toFile());
+            builder.environment().put("SYSTEM_MASTER_LEARNING_STATE_ROOT", stateRoot.toString());
+            Process process = builder.start();
+            try (var stdin = process.getOutputStream()) {
+                stdin.write(requestJson.getBytes(StandardCharsets.UTF_8));
+            }
+            byte[] stdout = process.getInputStream().readAllBytes();
+            byte[] stderr = process.getErrorStream().readAllBytes();
+            int rc = process.waitFor();
+            String out = new String(stdout, StandardCharsets.UTF_8).trim();
+            String err = new String(stderr, StandardCharsets.UTF_8).trim();
+            if (rc != 0) {
+                throw new IllegalStateException("FRESH_EVIDENCE_BRIDGE_EXIT_" + rc + ":" + bounded(out + " " + err));
+            }
+            return out;
         }
     }
 
