@@ -1,0 +1,17 @@
+{
+  "schema_id": "LPE-REVISION-CANDIDATE-v1",
+  "required_fields": [
+    "candidate_id", "passage_state_id", "ambition_level", "candidate_text",
+    "opportunity_ids", "transform_ids", "target_dimensions", "expected_effects",
+    "preservation_obligations", "change_footprint", "pre_evaluation_preservation",
+    "evaluation_status", "writer_quality_claim", "named_author_target"
+  ],
+  "evaluation_statuses": ["CONTROL_ONLY", "UNEVALUATED_PENDING_STEP_I", "REJECTED_BEFORE_EVALUATION"],
+  "rules": [
+    "LEVEL_0_NO_CHANGE candidate_text must equal original text exactly.",
+    "Nonzero candidates must be immutable alternatives; generation never overwrites the original.",
+    "writer_quality_claim must be null for every candidate.",
+    "named_author_target must be null.",
+    "Pre-evaluation preservation can reject obvious violations but cannot certify literary superiority."
+  ]
+}
