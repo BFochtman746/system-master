@@ -1,0 +1,111 @@
+{
+  "taxonomy_id": "BOOK-EVAL-HIERARCHICAL-SPECIALIST-TAXONOMY-v1",
+  "source_ontology": "BOOK-EVAL-PROVIDER-ONTOLOGY-v2",
+  "purpose": "Route each broad task mode to a small specialist label set before exact leaf classification.",
+  "rules": {
+    "leaf_assignment": "EXACTLY_ONCE",
+    "router_output": "SPECIALIST_ID_ONLY",
+    "leaf_classifier_output": "ONE_ALLOWED_TOKEN_OR_ABSTAIN",
+    "abstention_token": "REVIEW_REQUIRED",
+    "gold_visibility": "FORBIDDEN_DURING_PROVIDER_EXECUTION"
+  },
+  "task_modes": {
+    "MANUSCRIPT_DIAGNOSIS": {
+      "specialists": {
+        "META_EVALUATION": [
+          "AUTHORITY_LABEL_BIAS_ATTEMPT",
+          "AWARD_LABEL_IMPLIES_PASS",
+          "EVALUATOR_MANIPULATION_ATTEMPT",
+          "FORCE_REEVALUATION_WITH_UNCHANGED_SUBJECT",
+          "IGNORE_BINDING_CHANGE",
+          "INVALID_ORACLE_DEFINITION",
+          "ORACLE_SUPPORTED",
+          "PRIOR_EVALUATION_STILL_VALID",
+          "PROMPT_INJECTION_IN_MANUSCRIPT",
+          "RUBRIC_COPYING_WITHOUT_EVIDENCE",
+          "STALE_SUBJECT_BINDING"
+        ],
+        "CONTINUITY_STATE": [
+          "IDENTITY_ATTRIBUTE_CONTRADICTION",
+          "KNOWLEDGE_STATE_CONTRADICTION",
+          "LOCATION_CONTINUITY_CONTRADICTION",
+          "NUMERIC_INCONSISTENCY",
+          "OBJECT_STATE_CONTRADICTION",
+          "POV_KNOWLEDGE_LEAK",
+          "TIMELINE_CONTINUITY_CONTRADICTION",
+          "TIMELINE_CONTRADICTION",
+          "TRAVEL_TIME_CONTRADICTION"
+        ],
+        "FACT_SOURCE_EVIDENCE": [
+          "FACTUAL_CLAIM_ERROR",
+          "FACT_CONTRADICTION",
+          "QUOTE_ATTRIBUTION_CONFLICT",
+          "SOURCE_SUPPORT_CONFLICT",
+          "UNSUPPORTED_ASSERTION"
+        ],
+        "STRUCTURE_CAUSAL": [
+          "MISSING_ARGUMENT_MECHANISM",
+          "MISSING_CAUSAL_MOTIVATION_BRIDGE",
+          "MISSING_PAYOFF",
+          "MISSING_RELATIONSHIP_REPAIR",
+          "MISSING_SETUP_FOR_PAYOFF",
+          "UNRESOLVED_GOAL_CONFLICT"
+        ],
+        "SURFACE_LANGUAGE": [
+          "DIALECT_ERROR",
+          "DIALOGUE_AWKWARDNESS",
+          "FRAGMENT_ERROR",
+          "GRAMMAR_ERROR",
+          "MINOR_STYLE_ISSUE",
+          "PACING_PROBLEM",
+          "PROSE_TOO_SPARSE",
+          "REPETITION_ERROR",
+          "REPETITIVE_DIALOGUE"
+        ],
+        "CLEAN_CONTROL": [
+          "NO_MATERIAL_PROBLEM"
+        ]
+      }
+    },
+    "PAIRWISE_COMPARISON": {
+      "specialists": {
+        "EQUIVALENCE_OR_TRADEOFF": [
+          "TIE",
+          "LEGITIMATE_TRADEOFF"
+        ],
+        "PREFERENCE_ADVANTAGE": [
+          "CANDIDATE_A_BETTER",
+          "CANDIDATE_B_BETTER"
+        ],
+        "MANDATORY_OBJECTIVE_VIOLATION": [
+          "OBJECTIVELY_SUPERIOR_A",
+          "OBJECTIVELY_SUPERIOR_B"
+        ]
+      }
+    },
+    "REVISION_ASSESSMENT": {
+      "specialists": {
+        "SAFE_OR_NO_MATERIAL_CHANGE": [
+          "SAFE_EDIT",
+          "NO_MATERIAL_PROBLEM"
+        ],
+        "SEMANTIC_OR_INTENT_DAMAGE": [
+          "MEANING_PRESERVATION_DAMAGE",
+          "INTENT_PRESERVATION_DAMAGE"
+        ],
+        "VOICE_DAMAGE": [
+          "VOICE_PRESERVATION_DAMAGE"
+        ],
+        "CANON_DAMAGE": [
+          "CANON_PRESERVATION_DAMAGE"
+        ],
+        "PROTECTED_LANGUAGE_DAMAGE": [
+          "PROTECTED_LANGUAGE_DAMAGE"
+        ],
+        "UNSPECIFIED_PRESERVATION_DAMAGE": [
+          "PRESERVATION_DAMAGE"
+        ]
+      }
+    }
+  }
+}
