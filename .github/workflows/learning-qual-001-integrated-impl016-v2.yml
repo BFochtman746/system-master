@@ -18,7 +18,7 @@ jobs:
   qualify:
     name: Qualify repaired IMPL-016 closed loop on A-01
     runs-on: [self-hosted, Windows, X64]
-    timeout-minutes: 30
+    timeout-minutes: 35
 
     steps:
       - name: Checkout exact integrated qualification commit
@@ -43,20 +43,23 @@ jobs:
           if not exist "%EVIDENCE_DIR%" mkdir "%EVIDENCE_DIR%"
           echo EVIDENCE_DIR=%EVIDENCE_DIR%>>"%GITHUB_ENV%"
           echo source_commit=%GITHUB_SHA%>"%EVIDENCE_DIR%\provenance.txt"
-          echo repaired_impl016_head=9e1fa5f3c087b2691b28b445f0be4eb60d1cd2aa>>"%EVIDENCE_DIR%\provenance.txt"
+          echo learning_source_snapshot=23d22d2c98d483d1be7c9b1bff202c270db2d72e>>"%EVIDENCE_DIR%\provenance.txt"
           echo export_repair_commit=9fba64a120ccb8c59b9b5f9b8cbf998f47228d12>>"%EVIDENCE_DIR%\provenance.txt"
           echo qual001_harness_blob=241afa9d12f38ade4f16f5aa5755db7ab919804b>>"%EVIDENCE_DIR%\provenance.txt"
+          echo impl016_durability_blob=4aa544eac292a6b429b6263fc1cd44aadc09f304>>"%EVIDENCE_DIR%\provenance.txt"
           echo runner=%RUNNER_NAME%>>"%EVIDENCE_DIR%\provenance.txt"
           echo machine=%COMPUTERNAME%>>"%EVIDENCE_DIR%\provenance.txt"
           python --version>>"%EVIDENCE_DIR%\provenance.txt" 2>&1
           type "%EVIDENCE_DIR%\provenance.txt"
 
-      - name: Compile Learning package
+      - name: Compile Learning package and qualification campaigns
         shell: cmd
         run: |
           cd /d "%GITHUB_WORKSPACE%\learning\lab"
-          python -m compileall -q learning_lab >"%EVIDENCE_DIR%\compile.txt" 2>&1
-          if errorlevel 1 (type "%EVIDENCE_DIR%\compile.txt" & exit /b 1)
+          python -m compileall -q learning_lab qualification_qual001.py qualification_impl016.py >"%EVIDENCE_DIR%\compile.txt" 2>&1
+          set "RC=%ERRORLEVEL%"
+          if not "%RC%"=="0" type "%EVIDENCE_DIR%\compile.txt"
+          exit /b %RC%
 
       - name: Run baseline diagnostic regression focus
         shell: cmd
@@ -85,6 +88,16 @@ jobs:
           type "%EVIDENCE_DIR%\adaptive-entry-impl016-tests.txt"
           exit /b %RC%
 
+      - name: Run IMPL-016 100-run durability campaign
+        shell: cmd
+        run: |
+          cd /d "%GITHUB_WORKSPACE%\learning\lab"
+          python qualification_impl016.py --iterations 100 --output "%EVIDENCE_DIR%\qualification_receipt_impl016.json" >"%EVIDENCE_DIR%\impl016-durability-stdout.txt" 2>&1
+          set "RC=%ERRORLEVEL%"
+          type "%EVIDENCE_DIR%\impl016-durability-stdout.txt"
+          if exist "%EVIDENCE_DIR%\qualification_receipt_impl016.json" type "%EVIDENCE_DIR%\qualification_receipt_impl016.json"
+          exit /b %RC%
+
       - name: Run full Learning regression suite
         shell: cmd
         run: |
@@ -109,13 +122,15 @@ jobs:
         run: |
           echo objective=LEARNING-LAB-QUAL-001-INTEGRATED-IMPL016-V2>"%EVIDENCE_DIR%\integrated-summary.txt"
           echo source_commit=%GITHUB_SHA%>>"%EVIDENCE_DIR%\integrated-summary.txt"
-          echo repaired_impl016_head=9e1fa5f3c087b2691b28b445f0be4eb60d1cd2aa>>"%EVIDENCE_DIR%\integrated-summary.txt"
+          echo learning_source_snapshot=23d22d2c98d483d1be7c9b1bff202c270db2d72e>>"%EVIDENCE_DIR%\integrated-summary.txt"
           echo baseline_focus=PASS>>"%EVIDENCE_DIR%\integrated-summary.txt"
           echo adaptive_multisession_focus=PASS>>"%EVIDENCE_DIR%\integrated-summary.txt"
           echo adaptive_entry_impl016_focus=PASS>>"%EVIDENCE_DIR%\integrated-summary.txt"
+          echo impl016_durability_100_run=PASS>>"%EVIDENCE_DIR%\integrated-summary.txt"
           echo full_learning_suite=PASS>>"%EVIDENCE_DIR%\integrated-summary.txt"
           echo qual001_campaign=PASS>>"%EVIDENCE_DIR%\integrated-summary.txt"
           echo portable_closed_loop_behavior=PROVEN>>"%EVIDENCE_DIR%\integrated-summary.txt"
+          echo portable_adaptive_entry_continuity=PROVEN>>"%EVIDENCE_DIR%\integrated-summary.txt"
           echo production_system_master_integration=NOT_PROVEN>>"%EVIDENCE_DIR%\integrated-summary.txt"
           echo psychometric_validity=NOT_PROVEN>>"%EVIDENCE_DIR%\integrated-summary.txt"
           echo real_learner_effectiveness=NOT_PROVEN>>"%EVIDENCE_DIR%\integrated-summary.txt"
@@ -130,6 +145,7 @@ jobs:
           echo ## LEARNING-LAB-QUAL-001 INTEGRATED IMPL-016 V2>>"%GITHUB_STEP_SUMMARY%"
           echo Commit: %GITHUB_SHA%>>"%GITHUB_STEP_SUMMARY%"
           if defined EVIDENCE_DIR if exist "%EVIDENCE_DIR%\integrated-summary.txt" type "%EVIDENCE_DIR%\integrated-summary.txt">>"%GITHUB_STEP_SUMMARY%"
+          if defined EVIDENCE_DIR if exist "%EVIDENCE_DIR%\qualification_receipt_impl016.json" type "%EVIDENCE_DIR%\qualification_receipt_impl016.json">>"%GITHUB_STEP_SUMMARY%"
           if defined EVIDENCE_DIR if exist "%EVIDENCE_DIR%\qualification_receipt_qual001.json" type "%EVIDENCE_DIR%\qualification_receipt_qual001.json">>"%GITHUB_STEP_SUMMARY%"
 
       - name: Upload integrated qualification evidence
