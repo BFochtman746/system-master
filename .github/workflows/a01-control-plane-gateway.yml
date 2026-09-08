@@ -37,13 +37,27 @@ on:
         default: originating-workstream
   workflow_call:
     inputs:
-      qualification_id: { type: string, required: true }
-      workstream_id: { type: string, required: true }
-      subject_sha: { type: string, required: true }
-      origin_ref: { type: string, required: true }
-      resume_on_pass: { type: string, required: true }
-      resume_on_failure: { type: string, required: true }
-      notification_target: { type: string, required: true }
+      qualification_id:
+        type: string
+        required: true
+      workstream_id:
+        type: string
+        required: true
+      subject_sha:
+        type: string
+        required: true
+      origin_ref:
+        type: string
+        required: true
+      resume_on_pass:
+        type: string
+        required: true
+      resume_on_failure:
+        type: string
+        required: true
+      notification_target:
+        type: string
+        required: true
 
 permissions:
   contents: read
@@ -66,7 +80,6 @@ jobs:
       A01_RESUME_ON_PASS: ${{ inputs.resume_on_pass || 'Adjudicate PASS and continue the next dependency-valid objective.' }}
       A01_RESUME_ON_FAILURE: ${{ inputs.resume_on_failure || 'Adjudicate evidence, repair the failing boundary, and rerun the minimum sufficient gate.' }}
       A01_NOTIFICATION_TARGET: ${{ inputs.notification_target || 'originating-workstream' }}
-      A01_EVIDENCE_DIR: ${{ runner.temp }}\a01-control-plane-${{ github.run_id }}
     steps:
       - name: Checkout exact qualification subject
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
@@ -75,6 +88,13 @@ jobs:
           fetch-depth: 1
           clean: true
           persist-credentials: false
+
+      - name: Prepare evidence directory
+        shell: cmd
+        run: |
+          set "A01_EVIDENCE_DIR=%RUNNER_TEMP%\a01-control-plane-%GITHUB_RUN_ID%"
+          if not exist "%A01_EVIDENCE_DIR%" mkdir "%A01_EVIDENCE_DIR%"
+          echo A01_EVIDENCE_DIR=%A01_EVIDENCE_DIR%>>"%GITHUB_ENV%"
 
       - name: Validate control-plane policy and registry
         shell: cmd
@@ -101,6 +121,6 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: a01-control-plane-${{ github.run_id }}-evidence
-          path: ${{ env.A01_EVIDENCE_DIR }}
+          path: ${{ runner.temp }}\a01-control-plane-${{ github.run_id }}
           if-no-files-found: error
           retention-days: 30
