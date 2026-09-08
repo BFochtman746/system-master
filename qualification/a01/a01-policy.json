@@ -1,0 +1,59 @@
+{
+  "policy_version": 1,
+  "control_plane_id": "A01-CONTROL-PLANE-001",
+  "runner": {
+    "name": "A-01",
+    "required_labels": ["self-hosted", "Windows", "X64"],
+    "global_concurrency_group": "a01-global",
+    "queue_mode": "max",
+    "queue_capacity": 100
+  },
+  "admission": {
+    "max_outstanding_per_workstream": 1,
+    "require_registered_qualification": true,
+    "allow_arbitrary_command_input": false,
+    "continue_dependency_valid_work_while_waiting": true
+  },
+  "gate_classes": {
+    "focused": {
+      "purpose": "Changed capability plus immediate integration dependencies",
+      "promotion_authority": false
+    },
+    "consolidated": {
+      "purpose": "Accumulated slice plus broader regressions",
+      "promotion_authority": false
+    },
+    "promotion": {
+      "purpose": "Exact promotion subject and required regressions",
+      "promotion_authority": true
+    }
+  },
+  "states": [
+    "BUILDING",
+    "PREQUALIFIED",
+    "A01_ELIGIBLE",
+    "A01_QUEUED",
+    "A01_RUNNING",
+    "A01_FAILED",
+    "A01_PASSED",
+    "REPAIR_REQUIRED",
+    "SUPERSEDED",
+    "PROMOTION_ELIGIBLE",
+    "CANONICAL"
+  ],
+  "result_classes": ["PASS", "SUBJECT_FAILURE", "INFRA_FAILURE", "CONTROL_PLANE_FAILURE"],
+  "stale_request_policy": {
+    "queued_superseded_subject": "SUPERSEDE",
+    "running_superseded_subject": "FINISH_IF_EVIDENCE_USEFUL"
+  },
+  "receipt": {
+    "schema": "qualification/a01/schema/qualification-receipt.schema.json",
+    "require_subject_checkout_match": true,
+    "require_evidence": true,
+    "promotion_requires_pass": true
+  },
+  "return_ticket": {
+    "schema": "qualification/a01/schema/return-ticket.schema.json",
+    "required": true
+  }
+}
