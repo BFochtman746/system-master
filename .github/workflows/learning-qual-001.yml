@@ -1,0 +1,124 @@
+name: LEARNING-LAB-QUAL-001 Closed-Loop Qualification
+
+on:
+  push:
+    branches:
+      - learning/qual-001-closed-loop
+    paths:
+      - ".github/workflows/learning-qual-001.yml"
+      - "learning/lab/qualification_qual001.py"
+      - "learning/lab/qualification_qual001_impl016.py"
+      - "learning/lab/learning_lab/**"
+      - "learning/lab/tests/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: learning-qual-001-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qualify:
+    name: Qualify baseline to adaptive routing closed loop on A-01
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout exact qualification commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+          clean: true
+
+      - name: Provision pinned Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: "3.13.15"
+          architecture: "x64"
+          check-latest: false
+
+      - name: Prepare bounded evidence directory
+        shell: cmd
+        run: |
+          set "EVIDENCE_DIR=%RUNNER_TEMP%\learning-qual-001-%GITHUB_RUN_ID%"
+          if not exist "%EVIDENCE_DIR%" mkdir "%EVIDENCE_DIR%"
+          echo EVIDENCE_DIR=%EVIDENCE_DIR%>>"%GITHUB_ENV%"
+          where python
+          python --version
+          echo %GITHUB_SHA%>"%EVIDENCE_DIR%\source-commit.txt"
+          echo %RUNNER_NAME%>"%EVIDENCE_DIR%\runner.txt"
+
+      - name: Compile Learning package and qualification harnesses
+        shell: cmd
+        run: |
+          cd /d "%GITHUB_WORKSPACE%\learning\lab"
+          python -m compileall -q learning_lab qualification_qual001.py qualification_qual001_impl016.py >"%EVIDENCE_DIR%\compile.txt" 2>&1
+          if errorlevel 1 (type "%EVIDENCE_DIR%\compile.txt" & exit /b 1)
+          type "%EVIDENCE_DIR%\compile.txt"
+
+      - name: Run IMPL-015 baseline regression focus
+        shell: cmd
+        run: |
+          cd /d "%GITHUB_WORKSPACE%\learning\lab"
+          python -m unittest discover -s tests -p "test_baseline_diagnostic.py" -v >"%EVIDENCE_DIR%\baseline-tests.txt" 2>&1
+          if errorlevel 1 (type "%EVIDENCE_DIR%\baseline-tests.txt" & exit /b 1)
+          type "%EVIDENCE_DIR%\baseline-tests.txt"
+
+      - name: Run adaptive multi-session regression focus
+        shell: cmd
+        run: |
+          cd /d "%GITHUB_WORKSPACE%\learning\lab"
+          python -m unittest discover -s tests -p "test_adaptive_multisession.py" -v >"%EVIDENCE_DIR%\adaptive-tests.txt" 2>&1
+          if errorlevel 1 (type "%EVIDENCE_DIR%\adaptive-tests.txt" & exit /b 1)
+          type "%EVIDENCE_DIR%\adaptive-tests.txt"
+
+      - name: Run IMPL-016 orchestration binding campaign
+        shell: cmd
+        run: |
+          cd /d "%GITHUB_WORKSPACE%\learning\lab"
+          python qualification_qual001_impl016.py --output "%EVIDENCE_DIR%\qualification_receipt_qual001_impl016.json"
+          set "IMPL016_RC=%ERRORLEVEL%"
+          if exist "%EVIDENCE_DIR%\qualification_receipt_qual001_impl016.json" type "%EVIDENCE_DIR%\qualification_receipt_qual001_impl016.json"
+          exit /b %IMPL016_RC%
+
+      - name: Run QUAL-001 legacy closed-loop campaign
+        shell: cmd
+        run: |
+          cd /d "%GITHUB_WORKSPACE%\learning\lab"
+          python qualification_qual001.py --output "%EVIDENCE_DIR%\qualification_receipt_qual001.json" >"%EVIDENCE_DIR%\qual001-stdout.txt" 2>&1
+          set "QUAL_RC=%ERRORLEVEL%"
+          type "%EVIDENCE_DIR%\qual001-stdout.txt"
+          if exist "%EVIDENCE_DIR%\qualification_receipt_qual001.json" type "%EVIDENCE_DIR%\qualification_receipt_qual001.json"
+          exit /b %QUAL_RC%
+
+      - name: Publish qualification summary
+        if: always()
+        shell: cmd
+        run: |
+          echo ## LEARNING-LAB-QUAL-001>>"%GITHUB_STEP_SUMMARY%"
+          echo Commit: %GITHUB_SHA%>>"%GITHUB_STEP_SUMMARY%"
+          if defined EVIDENCE_DIR if exist "%EVIDENCE_DIR%\qualification_receipt_qual001_impl016.json" (
+            echo ### IMPL-016 orchestration binding>>"%GITHUB_STEP_SUMMARY%"
+            echo ~~~json>>"%GITHUB_STEP_SUMMARY%"
+            type "%EVIDENCE_DIR%\qualification_receipt_qual001_impl016.json">>"%GITHUB_STEP_SUMMARY%"
+            echo ~~~>>"%GITHUB_STEP_SUMMARY%"
+          )
+          if defined EVIDENCE_DIR if exist "%EVIDENCE_DIR%\qualification_receipt_qual001.json" (
+            echo ### Legacy closed-loop campaign>>"%GITHUB_STEP_SUMMARY%"
+            echo ~~~json>>"%GITHUB_STEP_SUMMARY%"
+            type "%EVIDENCE_DIR%\qualification_receipt_qual001.json">>"%GITHUB_STEP_SUMMARY%"
+            echo ~~~>>"%GITHUB_STEP_SUMMARY%"
+          )
+
+      - name: Upload qualification evidence
+        if: always() && env.EVIDENCE_DIR != ''
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: learning-qual-001-evidence
+          path: ${{ env.EVIDENCE_DIR }}
+          if-no-files-found: error
+          retention-days: 30

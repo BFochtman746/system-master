@@ -1,0 +1,70 @@
+name: LEARNING-LAB-IMPL-016 Full Regression
+
+on:
+  push:
+    branches:
+      - learning/impl-016-adaptive-entry-continuity
+    paths:
+      - ".github/workflows/learning-impl-016-full-regression.yml"
+      - "learning/lab/tests/test_course_refresh.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  full-regression:
+    name: Run full Learning regression for IMPL-016 on A-01
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 35
+    steps:
+      - name: Checkout exact implementation commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+          clean: true
+
+      - name: Provision pinned Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: "3.13.15"
+          architecture: "x64"
+          check-latest: false
+
+      - name: Prepare evidence directory
+        shell: cmd
+        run: |
+          set "EVIDENCE_DIR=%RUNNER_TEMP%\learning-impl-016-full-%GITHUB_RUN_ID%"
+          if not exist "%EVIDENCE_DIR%" mkdir "%EVIDENCE_DIR%"
+          echo EVIDENCE_DIR=%EVIDENCE_DIR%>>"%GITHUB_ENV%"
+          python --version >"%EVIDENCE_DIR%\python-version.txt" 2>&1
+          echo %GITHUB_SHA%>"%EVIDENCE_DIR%\source-commit.txt"
+
+      - name: Compile all Learning Python
+        shell: cmd
+        run: |
+          cd /d "%GITHUB_WORKSPACE%\learning\lab"
+          python -m compileall -q learning_lab tests >"%EVIDENCE_DIR%\compile-all.txt" 2>&1
+          set "RC=%ERRORLEVEL%"
+          if not "%RC%"=="0" type "%EVIDENCE_DIR%\compile-all.txt"
+          exit /b %RC%
+
+      - name: Run complete Learning test suite
+        shell: cmd
+        run: |
+          cd /d "%GITHUB_WORKSPACE%\learning\lab"
+          python -m unittest discover -s tests -v >"%EVIDENCE_DIR%\full-tests.txt" 2>&1
+          set "RC=%ERRORLEVEL%"
+          type "%EVIDENCE_DIR%\full-tests.txt"
+          exit /b %RC%
+
+      - name: Upload full-regression evidence
+        if: always() && env.EVIDENCE_DIR != ''
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: learning-impl-016-full-regression-evidence
+          path: ${{ env.EVIDENCE_DIR }}
+          if-no-files-found: error
+          retention-days: 30

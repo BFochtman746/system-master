@@ -1,0 +1,168 @@
+{
+  "abstention_determinism": {
+    "pass": true,
+    "reason_codes": [
+      "NO_UNIQUE_EVIDENCE_DOMINANT_CANDIDATE"
+    ],
+    "runs": 100,
+    "unique_results": 1
+  },
+  "adversarial_campaign": {
+    "cases": [
+      "test_candidate_set_requires_at_least_two_candidates",
+      "test_candidate_set_rejects_duplicate_trace_ids",
+      "test_candidate_set_rejects_prompt_mismatch",
+      "test_candidate_set_rejects_mixed_model_ids_for_stochastic_same_model_slice",
+      "test_candidate_trace_output_tamper_is_rejected",
+      "test_model_candidate_self_ranking_field_is_forbidden",
+      "test_duplicate_stochastic_outputs_do_not_count_as_two_candidates",
+      "test_candidate_set_drift_after_pin_fails_closed",
+      "test_invalid_candidate_is_rejected_without_poisoning_valid_set",
+      "test_renamed_duplicate_tasks_do_not_inflate_diversity",
+      "test_mechanically_tied_candidates_abstain_instead_of_digest_tiebreak",
+      "test_all_invalid_candidates_abstain",
+      "test_valid_but_below_target_candidate_cannot_win_by_default",
+      "test_selection_decision_contains_no_scalar_score",
+      "test_selected_candidate_is_never_hard_gate_rejected",
+      "test_same_operation_changed_candidate_set_conflicts",
+      "test_same_goal_new_job_with_different_candidate_set_fails_identity_collision",
+      "test_persisted_candidate_evaluation_body_tamper_is_detected",
+      "test_defective_candidate_can_have_high_coverage_but_still_cannot_win",
+      "test_restart_rehydrates_selected_domain_from_persisted_selected_dossier",
+      "test_crash_after_selected_course_build_does_not_duplicate_course",
+      "test_candidate_order_does_not_change_selection",
+      "test_tie_abstention_is_order_invariant"
+    ],
+    "pass": true,
+    "passed": 23,
+    "total": 23
+  },
+  "candidate_fixture": {
+    "candidate_count": 4,
+    "fixture_version": "STOCHASTIC-CANDIDATE-SET-V1",
+    "model_id": "GPT-5.6 Sol",
+    "shared_prompt_digest": "90cbfd5e88469edeb9dd077abd9697f3718094087ff4eb326ef380fc9abb8073",
+    "shared_research_evidence_digest": "785d9f533c50611173993e150c9c7920bf0d2303c10b8a9a70b0d4e12b9c0407",
+    "truth_boundary": "Multiple same-prompt recorded candidate outputs are used to exercise stochastic-selection semantics. This does not claim a live provider was sampled four independent times."
+  },
+  "candidate_order_determinism": {
+    "pass": true,
+    "runs": 100,
+    "selected_candidate_id": "MC-CANDIDATE-15E43DAC49A7",
+    "unique_results": 1
+  },
+  "multi_candidate_recovery_stress": {
+    "crash_injection_seeds": {
+      "CANDIDATES_EVALUATED": true,
+      "CANDIDATES_GENERATED": true,
+      "CANDIDATE_SET_PINNED": true,
+      "GOAL_INTERPRETED": true,
+      "RESEARCH_PLANNED": true,
+      "SELECTED_COURSE_BUILT": true,
+      "SELECTION_DECIDED": true,
+      "SOURCES_ACQUIRED": true
+    },
+    "pass": true,
+    "passes": 100,
+    "phase_passes": {
+      "CANDIDATES_EVALUATED": 12,
+      "CANDIDATES_GENERATED": 12,
+      "CANDIDATE_SET_PINNED": 13,
+      "GOAL_INTERPRETED": 13,
+      "RESEARCH_PLANNED": 13,
+      "SELECTED_COURSE_BUILT": 12,
+      "SELECTION_DECIDED": 12,
+      "SOURCES_ACQUIRED": 13
+    },
+    "runs": 100,
+    "unique_candidate_set_digests": 1,
+    "unique_course_digests": 1,
+    "unique_selection_decision_digests": 1
+  },
+  "objective": "LEARNING-LAB-IMPL-008",
+  "predecessor_impl007_regression": {
+    "expected": 178,
+    "pass": true,
+    "passed": 178,
+    "returncode": 0
+  },
+  "python_compile": {
+    "errors": [],
+    "files": 37,
+    "pass": true
+  },
+  "qualification_execution": "SPLIT_RECEIPTS_AGGREGATED_TO_AVOID_SINGLE_PROCESS_EXECUTION_CEILING",
+  "selection_demo": {
+    "candidate_a": {
+      "hard_gate": "PASS",
+      "metrics": {
+        "validated_transfer_task_diversity": 2
+      }
+    },
+    "candidate_b": {
+      "hard_gate": "PASS",
+      "metrics": {
+        "validated_transfer_task_diversity": 1
+      },
+      "target_attainment": {
+        "validated_transfer_task_diversity": false
+      }
+    },
+    "candidate_c": {
+      "failures": [
+        "REFERENCE_ORACLE_GATE"
+      ],
+      "hard_gate": "REJECTED"
+    },
+    "candidate_set_digest": "d89720e2d71a9f60d036800b9b697377514c9b03af5c1c0e03d0e57ef0de5b19",
+    "course_digest": "5091630e57351226a8e37456e2d87f668534841473129123e0189e3507c6cbe3",
+    "pass": true,
+    "selected_trace_id": "MODEL-GEN-PY-COMP-MC-A-20260907",
+    "selection_reason_codes": [
+      "ONLY_CANDIDATE_CLEARING_PREDECLARED_SELECTION_EVIDENCE_TARGETS"
+    ],
+    "tie_case": {
+      "decision": "ABSTAIN",
+      "reason_codes": [
+        "NO_UNIQUE_EVIDENCE_DOMINANT_CANDIDATE"
+      ]
+    },
+    "validation_status": "MECHANICALLY_VERIFIED_HUMAN_REVIEW_REQUIRED",
+    "weak_survivor_case": {
+      "decision": "ABSTAIN",
+      "reason_codes": [
+        "NO_SELECTION_ELIGIBLE_CANDIDATES"
+      ]
+    }
+  },
+  "selection_semantics": {
+    "below_target_survivor": "ABSTAIN",
+    "current_metric_target": 2,
+    "current_ranking_metric": "validated_transfer_task_diversity",
+    "hard_gates_before_selection": true,
+    "id_only_duplicate_inflation_blocked": true,
+    "model_self_ranking_allowed": false,
+    "pedagogical_superiority_claim": "NOT_AUTHORIZED",
+    "scalar_quality_score_used": false,
+    "selection_rule": "HARD_GATES_THEN_SELECTION_TARGET_ELIGIBILITY_THEN_PARETO_OR_ABSTAIN",
+    "selection_target_attainment_required": true,
+    "tie_or_incomparability": "ABSTAIN"
+  },
+  "status": "PASS_PORTABLE_IMPLEMENTATION",
+  "tests": {
+    "expected": 220,
+    "new_impl008": 42,
+    "pass": true,
+    "passed": 220,
+    "prior_regressions": 178,
+    "returncode": 0
+  },
+  "truth_boundary": {
+    "candidate_selection": "MECHANICAL_SELECTION_WITH_EXPLICIT_ABSTENTION_ONLY",
+    "native_iphone": "NOT_RUN",
+    "pedagogical_human_review": "REQUIRED",
+    "production_system_master_integration": "NOT_RUN",
+    "real_learner_effectiveness": "NOT_PROVEN",
+    "stochastic_provider_sampling": "MULTIPLE_SAME_PROMPT_RECORDED_CANDIDATE_OUTPUTS_PLUS_CALLABLE_MULTI_SAMPLE_PORT; LIVE_PROVIDER_MULTI_SAMPLE_NOT_CLAIMED"
+  }
+}

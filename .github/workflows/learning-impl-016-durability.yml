@@ -1,0 +1,72 @@
+name: LEARNING-LAB-IMPL-016 Durability Qualification
+
+on:
+  push:
+    branches:
+      - learning/impl-016-adaptive-entry-continuity
+    paths:
+      - ".github/workflows/learning-impl-016-durability.yml"
+      - "learning/lab/qualification_impl016.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  durability:
+    name: Qualify IMPL-016 replay determinism and stale override on A-01
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 25
+    steps:
+      - name: Checkout exact qualification commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+          clean: true
+
+      - name: Provision pinned Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: "3.13.15"
+          architecture: "x64"
+          check-latest: false
+
+      - name: Prepare evidence directory
+        shell: cmd
+        run: |
+          set "EVIDENCE_DIR=%RUNNER_TEMP%\learning-impl-016-durability-%GITHUB_RUN_ID%"
+          if not exist "%EVIDENCE_DIR%" mkdir "%EVIDENCE_DIR%"
+          echo EVIDENCE_DIR=%EVIDENCE_DIR%>>"%GITHUB_ENV%"
+          python --version >"%EVIDENCE_DIR%\python-version.txt" 2>&1
+          echo %GITHUB_SHA%>"%EVIDENCE_DIR%\source-commit.txt"
+          echo %GITHUB_REPOSITORY%>"%EVIDENCE_DIR%\repository.txt"
+          echo %RUNNER_NAME%>"%EVIDENCE_DIR%\runner.txt"
+
+      - name: Compile qualification and package
+        shell: cmd
+        run: |
+          cd /d "%GITHUB_WORKSPACE%\learning\lab"
+          python -m compileall -q learning_lab qualification_impl016.py >"%EVIDENCE_DIR%\compile.txt" 2>&1
+          set "RC=%ERRORLEVEL%"
+          if not "%RC%"=="0" type "%EVIDENCE_DIR%\compile.txt"
+          exit /b %RC%
+
+      - name: Run 100-run crash replay and determinism campaigns
+        shell: cmd
+        run: |
+          cd /d "%GITHUB_WORKSPACE%\learning\lab"
+          python qualification_impl016.py --iterations 100 --output "%EVIDENCE_DIR%\qualification_receipt_impl016.json" >"%EVIDENCE_DIR%\qualification-stdout.txt" 2>&1
+          set "RC=%ERRORLEVEL%"
+          type "%EVIDENCE_DIR%\qualification-stdout.txt"
+          exit /b %RC%
+
+      - name: Upload durability evidence
+        if: always() && env.EVIDENCE_DIR != ''
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: learning-impl-016-durability-evidence
+          path: ${{ env.EVIDENCE_DIR }}
+          if-no-files-found: error
+          retention-days: 30

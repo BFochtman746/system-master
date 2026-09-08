@@ -1,0 +1,105 @@
+name: Learning Baseline Import 014
+
+on:
+  push:
+    branches:
+      - learning/repo-baseline-import-014
+    paths:
+      - "learning/import/impl014-br/READY"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: learning-repo-baseline-import-014
+  cancel-in-progress: false
+
+jobs:
+  import-baseline:
+    name: Verify and preserve cumulative IMPL-014 baseline
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out exact branch head
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+
+      - name: Create bounded import workspace
+        shell: cmd
+        run: |
+          set "EVIDENCE_DIR=%RUNNER_TEMP%\learning-baseline-import-%GITHUB_RUN_ID%"
+          set "STAGE_DIR=%RUNNER_TEMP%\learning-baseline-stage-%GITHUB_RUN_ID%"
+          if not exist "%EVIDENCE_DIR%" mkdir "%EVIDENCE_DIR%"
+          if not exist "%STAGE_DIR%" mkdir "%STAGE_DIR%"
+          echo EVIDENCE_DIR=%EVIDENCE_DIR%>>"%GITHUB_ENV%"
+          echo STAGE_DIR=%STAGE_DIR%>>"%GITHUB_ENV%"
+          echo objective=LEARNING-REPO-BASELINE-IMPORT-014>"%EVIDENCE_DIR%\run-context.txt"
+          echo trigger_commit=%GITHUB_SHA%>>"%EVIDENCE_DIR%\run-context.txt"
+          echo branch=%GITHUB_REF_NAME%>>"%EVIDENCE_DIR%\run-context.txt"
+          echo runner=%RUNNER_NAME%>>"%EVIDENCE_DIR%\run-context.txt"
+          echo runner_os=%RUNNER_OS%>>"%EVIDENCE_DIR%\run-context.txt"
+          echo runner_arch=%RUNNER_ARCH%>>"%EVIDENCE_DIR%\run-context.txt"
+
+      - name: Reconstruct verified Brotli transport package
+        shell: cmd
+        run: |
+          node learning\import\impl014\reconstruct_transport.js learning\import\impl014-br\chunks "%STAGE_DIR%\impl014-governed.tar.br" 704a60f78935270d3d9a79dda97136d308e9fb4584af5521398778176da75387 15 >"%EVIDENCE_DIR%\transport-reconstruct.json"
+          type "%EVIDENCE_DIR%\transport-reconstruct.json"
+
+      - name: Extract bounded governed transport
+        shell: cmd
+        run: |
+          node learning\import\impl014-br\extract_tarbr.js "%STAGE_DIR%\impl014-governed.tar.br" "%STAGE_DIR%\extract" 249 >"%EVIDENCE_DIR%\transport-extract.json"
+          type "%EVIDENCE_DIR%\transport-extract.json"
+
+      - name: Verify original governed hashes and copy baseline
+        shell: cmd
+        run: |
+          node learning\import\impl014\verify_and_copy.js "%STAGE_DIR%\extract" learning\lab "%EVIDENCE_DIR%\import-receipt.json" 8e2e84f093d05c12d1f705f774d4c3964bb76ae395ce5d279d00e8eeb6caa710 >"%EVIDENCE_DIR%\verify-copy-stdout.json"
+          type "%EVIDENCE_DIR%\import-receipt.json"
+
+      - name: Prove repository mutation is bounded to Learning baseline
+        shell: cmd
+        run: |
+          node learning\import\impl014\guard_git_scope.js "%EVIDENCE_DIR%\git-scope.json"
+          git status --porcelain=v1 --untracked-files=all >"%EVIDENCE_DIR%\precommit-status.txt"
+          type "%EVIDENCE_DIR%\git-scope.json"
+
+      - name: Commit and push exact baseline bytes
+        shell: cmd
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- learning/lab
+          git diff --cached --quiet && exit /b 1
+          git commit -m "learning: import cumulative qualified IMPL-014 baseline"
+          for /f %%S in ('git rev-parse HEAD') do set "BASELINE_SHA=%%S"
+          echo %BASELINE_SHA%>"%EVIDENCE_DIR%\baseline-commit.txt"
+          git status --porcelain >"%EVIDENCE_DIR%\post-commit-status.txt"
+          for %%A in ("%EVIDENCE_DIR%\post-commit-status.txt") do if not %%~zA==0 exit /b 1
+          git push origin HEAD:refs/heads/learning/repo-baseline-import-014
+          git ls-remote origin refs/heads/learning/repo-baseline-import-014 >"%EVIDENCE_DIR%\remote-head.txt"
+          findstr /b /c:"%BASELINE_SHA%" "%EVIDENCE_DIR%\remote-head.txt">nul
+
+      - name: Publish job summary
+        if: always()
+        shell: cmd
+        run: |
+          echo ## LEARNING-REPO-BASELINE-IMPORT-014>>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\run-context.txt" type "%EVIDENCE_DIR%\run-context.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\import-receipt.json" type "%EVIDENCE_DIR%\import-receipt.json">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\baseline-commit.txt" (
+            echo baseline_commit:>>"%GITHUB_STEP_SUMMARY%"
+            type "%EVIDENCE_DIR%\baseline-commit.txt">>"%GITHUB_STEP_SUMMARY%"
+          )
+
+      - name: Upload baseline import evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: learning-repo-baseline-import-014-evidence
+          path: ${{ env.EVIDENCE_DIR }}
+          if-no-files-found: error
+          retention-days: 30
