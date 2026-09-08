@@ -1,0 +1,12 @@
+{
+  "package_id": "F-WP-004",
+  "requirements": [
+    {"id":"F-RQ-009","invariant":"StandardChange models are versioned, bounded, low-risk and exact-constraint matched.","failure":"Constraint mismatch -> normal assessment path"},
+    {"id":"F-RQ-018","invariant":"Every change declares an explicit recovery strategy with rationale where required.","failure":"Missing/invalid plan -> not execution eligible downstream"},
+    {"id":"F-RQ-019","invariant":"Rollback targets use exact immutable and compatibility identities.","failure":"Unknown/ineligible target -> rollback blocked"},
+    {"id":"F-RQ-020","invariant":"Irreversible steps and point-of-no-return are explicit before execution.","failure":"Crossed point -> automatic rollback prohibited"},
+    {"id":"F-RQ-021","invariant":"Maintenance windows carry timezone, start/end, action/target scope and explicit override authority.","failure":"Outside window -> wait or valid explicit override"},
+    {"id":"F-RQ-023","invariant":"Verification success criteria are predeclared, versioned and bound to the exact change revision.","failure":"Missing criteria -> no material execution grant downstream"}
+  ],
+  "acceptance": "all six requirements must have executable passing evidence"
+}
