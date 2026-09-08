@@ -1,0 +1,12 @@
+{
+  "package_id": "F-WP-002",
+  "requirements": [
+    {"id":"F-RQ-001","invariant":"ChangeId immutable and globally unique within authority","test_family":"UNIT+PROPERTY"},
+    {"id":"F-RQ-003","invariant":"resolved target snapshot and target digest bind scope exactly","test_family":"PROPERTY+INTEGRATION"},
+    {"id":"F-RQ-004","invariant":"revision monotonic and content digest bound","test_family":"CONCURRENCY+PROPERTY"},
+    {"id":"F-RQ-036","invariant":"material event timeline append-only","test_family":"PROPERTY+CORRUPTION"},
+    {"id":"F-RQ-051","invariant":"all state mutation uses expected revision OCC; lost update rejected","test_family":"CONCURRENCY+PROPERTY"},
+    {"id":"F-RQ-052","invariant":"ChangeRecord and ChangeEvent commit atomically in one local transaction","test_family":"TRANSACTION+FAULT"}
+  ],
+  "acceptance": "all six requirements must have executable passing evidence; no partial percentage authorizes closure"
+}
