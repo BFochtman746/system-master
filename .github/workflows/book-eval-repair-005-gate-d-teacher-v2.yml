@@ -1,0 +1,135 @@
+name: BOOK-EVAL-LEMONADE-001 REPAIR-005 Gate D Teacher v2
+
+on:
+  push:
+    branches:
+      - book-eval-lemonade-001-blind-resume-003-adapter-repair
+    paths:
+      - ".github/workflows/book-eval-repair-005-gate-d-teacher-v2.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: book-eval-repair005-gate-d-teacher
+  cancel-in-progress: false
+
+jobs:
+  distill:
+    name: Complete 120B semantic teacher corpus with compact protocol
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 240
+
+    steps:
+      - name: Checkout exact repair branch
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 1
+
+      - name: Locate Python and verify blind boundary
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $Bundle = Join-Path $env:GITHUB_WORKSPACE 'qualification\book-eval-lemonade-001'
+          $Persistent = 'C:\AI Test Kit\Books Testing\BOOK_EVAL_LEMONADE_001_REPAIR005_GATE_D_TEACHER_V1'
+          New-Item -ItemType Directory -Force -Path $Persistent | Out-Null
+          "GATE_D_PERSISTENT=$Persistent" | Out-File -FilePath $env:GITHUB_ENV -Encoding ascii -Append
+          if (Test-Path (Join-Path $Bundle 'scoring-private')) { throw 'scoring-private material present in repository bundle' }
+          if (Test-Path (Join-Path $Persistent 'scoring-private')) { throw 'scoring-private material present in Gate D teacher root' }
+
+          $candidates = @()
+          $cmd = Get-Command python.exe -ErrorAction SilentlyContinue
+          if ($cmd) { $candidates += $cmd.Source }
+          $patterns = @(
+            (Join-Path $env:LOCALAPPDATA 'Programs\Python\Python*\python.exe'),
+            'C:\Python*\python.exe',
+            'C:\Program Files\Python*\python.exe',
+            'C:\Program Files (x86)\Python*\python.exe'
+          )
+          foreach ($pattern in $patterns) {
+            $candidates += @(Get-ChildItem -Path $pattern -File -ErrorAction SilentlyContinue | ForEach-Object { $_.FullName })
+          }
+          $Python = $null
+          foreach ($candidate in @($candidates | Select-Object -Unique)) {
+            try {
+              & $candidate --version | Out-Host
+              if ($LASTEXITCODE -eq 0) { $Python = $candidate; break }
+            } catch { }
+          }
+          if (-not $Python) { throw 'usable python.exe not found for runner identity' }
+          "PYTHON_EXE=$Python" | Out-File -FilePath $env:GITHUB_ENV -Encoding ascii -Append
+          $Script = Join-Path $Bundle 'scripts\generate-repair005-gate-d-teacher-v2.py'
+          & $Python -m py_compile $Script
+          if ($LASTEXITCODE -ne 0) { throw 'Gate D teacher v2 syntax check failed' }
+
+      - name: Load qualified Lemonade model
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $Bundle = Join-Path $env:GITHUB_WORKSPACE 'qualification\book-eval-lemonade-001'
+          $Evidence = Join-Path $env:RUNNER_TEMP ('book-eval-repair005-gate-d-teacher-v2-' + $env:GITHUB_RUN_ID)
+          New-Item -ItemType Directory -Force -Path $Evidence | Out-Null
+          "EVIDENCE_DIR=$Evidence" | Out-File -FilePath $env:GITHUB_ENV -Encoding ascii -Append
+          curl.exe --fail --silent --show-error -X POST 'http://127.0.0.1:13305/v1/load' -H 'Content-Type: application/json' --data-binary ('@' + (Join-Path $Bundle 'lemonade-load-request.json')) -o (Join-Path $Evidence 'model-load.json')
+          if ($LASTEXITCODE -ne 0) { throw 'model load failed' }
+
+      - name: Complete teacher corpus from durable progress
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $Bundle = Join-Path $env:GITHUB_WORKSPACE 'qualification\book-eval-lemonade-001'
+          $Script = Join-Path $Bundle 'scripts\generate-repair005-gate-d-teacher-v2.py'
+          $Taxonomy = Join-Path $Bundle 'repair005\BOOK-EVAL-HIERARCHICAL-SPECIALIST-TAXONOMY-v1.json'
+          $env:BOOK_EVAL_MODEL = 'user.gpt-oss-120b-MXFP4'
+          $env:BOOK_EVAL_ENDPOINT = 'http://127.0.0.1:13305/v1/responses'
+          $env:BOOK_EVAL_MAX_OUTPUT_TOKENS = '1500'
+          $env:BOOK_EVAL_TEMPERATURE = '0.4'
+          $env:BOOK_EVAL_MAX_ATTEMPTS = '3'
+          $env:BOOK_EVAL_GENERATION_ATTEMPTS = '6'
+          $env:BOOK_EVAL_TIMEOUT_SECONDS = '240'
+          $env:BOOK_EVAL_TEACHER_EXAMPLES_PER_TOKEN = '8'
+          $env:BOOK_EVAL_TEACHER_BATCH = '2'
+
+          $old = $ErrorActionPreference
+          try {
+            $ErrorActionPreference = 'Continue'
+            & $env:PYTHON_EXE $Script --taxonomy $Taxonomy --out-dir $env:GATE_D_PERSISTENT 2>&1 | Tee-Object -FilePath (Join-Path $env:EVIDENCE_DIR 'teacher-v2.log')
+            $exit = $LASTEXITCODE
+          } finally {
+            $ErrorActionPreference = $old
+          }
+          if ($exit -ne 0) { throw "Gate D teacher v2 failed with exit $exit" }
+
+          $Rows = Join-Path $env:GATE_D_PERSISTENT 'GATE-D-TEACHER-SYNTHETIC.jsonl'
+          $Status = Join-Path $env:GATE_D_PERSISTENT 'GATE-D-TEACHER-STATUS.json'
+          if (-not (Test-Path $Rows) -or -not (Test-Path $Status)) { throw 'teacher outputs missing' }
+          $s = Get-Content -LiteralPath $Status -Raw | ConvertFrom-Json
+          if ([string]$s.state -ne 'TEACHER_SYNTHETIC_FROZEN') { throw "unexpected state $($s.state)" }
+          if ([int]$s.completed_records -ne 440) { throw "expected 440 records got $($s.completed_records)" }
+          if ([bool]$s.hidden_holdout_gold_used -or [bool]$s.visible_regression_gold_used) { throw 'teacher status claims forbidden gold access' }
+          if (@(Get-Content -LiteralPath $Rows | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }).Count -ne 440) { throw 'teacher JSONL is not 440 records' }
+          Copy-Item -LiteralPath $Rows -Destination (Join-Path $env:EVIDENCE_DIR 'GATE-D-TEACHER-SYNTHETIC.jsonl') -Force
+          Copy-Item -LiteralPath $Status -Destination (Join-Path $env:EVIDENCE_DIR 'GATE-D-TEACHER-STATUS.json') -Force
+          @(
+            'objective=BOOK-EVAL-LEMONADE-001-REPAIR-005-GATE-D',
+            'phase=OFFLINE_120B_TEACHER_DISTILLATION_V2',
+            'teacher_records=440',
+            'canonical_leaves=55',
+            'examples_per_leaf=8',
+            'development_gold_accessed=false',
+            'visible_regression_gold_accessed=false',
+            'hidden_holdout_gold_accessed=false',
+            'scoring_private_accessed=false',
+            "output_sha256=$($s.output_sha256)",
+            'standing=TEACHER_SYNTHETIC_FROZEN_READY_FOR_PRIVATE_STUDENT_RETRAINING'
+          ) | Set-Content -Encoding UTF8 (Join-Path $env:EVIDENCE_DIR 'qualification-summary.txt')
+          Get-Content (Join-Path $env:EVIDENCE_DIR 'qualification-summary.txt')
+
+      - name: Upload Gate D teacher v2 evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: book-eval-repair005-gate-d-teacher-v2-evidence
+          path: ${{ env.EVIDENCE_DIR }}
+          if-no-files-found: warn
+          retention-days: 30
