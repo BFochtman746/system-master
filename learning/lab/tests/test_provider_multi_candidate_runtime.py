@@ -12,7 +12,7 @@ from learning_lab.provider_multi_candidate_runtime import (
     PROVIDER_MULTI_CANDIDATE_RUNTIME_VERSION,
     start_provider_multi_candidate_adaptive_entry,
 )
-from learning_lab.repository import Repository
+from learning_lab.repository import Repository, digest
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -140,7 +140,10 @@ class ProviderMultiCandidateRuntimeTests(unittest.TestCase):
         self.admit("PACKET-A", A)
         changed = copy.deepcopy(self.capture)
         changed["claims"][0]["text"] += " Updated provider wording."
-        changed.pop("normalized_evidence_digest", None)
+        changed["normalized_evidence_digest"] = digest({
+            "sources": changed["sources"],
+            "claims": changed["claims"],
+        })
         self.admit("PACKET-B", B, capture=changed)
         with self.assertRaisesRegex(ValueError, "PROVIDER_MULTI_CANDIDATE_RESEARCH_EVIDENCE_MISMATCH"):
             self.run_runtime(["PACKET-A", "PACKET-B"])
