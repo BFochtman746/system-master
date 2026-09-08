@@ -1,0 +1,36 @@
+name: A-01 Control Plane Enforcement
+
+on:
+  push:
+    paths:
+      - '.github/workflows/**'
+      - '.github/scripts/a01-control-plane-enforce.js'
+      - 'qualification/a01/**'
+      - 'SYSTEM-MASTER-WORKSTREAM-BOOTSTRAP.md'
+  pull_request:
+    paths:
+      - '.github/workflows/**'
+      - '.github/scripts/a01-control-plane-enforce.js'
+      - 'qualification/a01/**'
+      - 'SYSTEM-MASTER-WORKSTREAM-BOOTSTRAP.md'
+
+permissions:
+  contents: read
+
+jobs:
+  enforce:
+    name: Reject ungoverned direct self-hosted workflows
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout policy subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Self-test enforcement logic
+        run: node .github/scripts/a01-control-plane-enforce.js selftest
+
+      - name: Enforce shared A-01 gateway
+        run: node .github/scripts/a01-control-plane-enforce.js scan
