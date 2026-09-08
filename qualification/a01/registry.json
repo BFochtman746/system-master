@@ -1,5 +1,5 @@
 {
-  "registry_version": 1,
+  "registry_version": 2,
   "qualifications": {
     "A01-CONTROL-PLANE-SELFTEST": {
       "workstream_id": "SYSTEM-MASTER",
@@ -8,6 +8,14 @@
       "args": [".github/scripts/a01-control-plane-selftest.js"],
       "evidence_artifact": "a01-control-plane-selftest-evidence",
       "description": "Qualify policy, registry, schemas, bootstrap, gateway safety, receipt production, and exact-SHA binding for A01-CONTROL-PLANE-001."
+    },
+    "LEARNING-PILOT-001-RUN-001-HUMAN-SESSION": {
+      "workstream_id": "LEARNING",
+      "gate_class": "promotion",
+      "executable": "node",
+      "args": [".github/scripts/learning-pilot-001-run-001-human-session-qualify.js"],
+      "evidence_artifact": "learning-pilot-001-run-001-human-session-evidence",
+      "description": "Qualify the first real-participant stage human-source attestation, contamination rejection, raw-response exclusion, 3600-second retention boundary, current pilot binding, and Learning predecessor regressions. Qualification interactions are software fixtures and are not real-participant evidence."
     }
   }
 }
