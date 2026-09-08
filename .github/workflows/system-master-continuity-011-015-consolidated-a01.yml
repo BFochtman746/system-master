@@ -1,11 +1,6 @@
 name: System Master Continuity G-WP-011-015 Consolidated A-01
 
 on:
-  push:
-    branches:
-      - system-master/g-wp-011-015-continuity-slice
-    paths:
-      - 'system-master/g-continuity-011-015/control/A01-CONTROL-PLANE-MIGRATION-REQUEST.json'
   workflow_dispatch:
 
 permissions:
@@ -43,6 +38,6 @@ jobs:
       workstream_id: SYSTEM-MASTER-CONTINUITY
       subject_sha: ${{ github.sha }}
       origin_ref: ${{ github.ref }}
-      resume_on_pass: Adjudicate the control-plane receipt, preserve the exact tested SHA and legacy 143-assertion qualification truth, then continue the TARGET_WINDOWS_REBOOT objective without treating ordinary integration as reboot evidence.
-      resume_on_failure: Classify SUBJECT_FAILURE versus INFRA_FAILURE or CONTROL_PLANE_FAILURE, repair only the failing migration boundary when sufficient, and rerun the minimum gate.
+      resume_on_pass: Adjudicate the control-plane receipt and preserve the exact tested SHA and legacy 143-assertion qualification truth. Do not conflate ordinary integration with target lifecycle or human evidence.
+      resume_on_failure: Classify SUBJECT_FAILURE versus INFRA_FAILURE or CONTROL_PLANE_FAILURE, repair only the failing boundary when sufficient, and rerun the minimum gate.
       notification_target: system-master-continuity-workstream

@@ -1,10 +1,46 @@
 {
   "scope":"G-WP-011..G-WP-015",
   "new_requirements_since_last_a01":29,
-  "portable_evidence":{"G-WP-011..013":{"assertions":30,"requirements":22,"result":"PASS"},"G-WP-014":{"assertions":7,"requirements":3,"result":"PASS"},"G-WP-015":{"assertions":10,"portable_meta_pass":["G-RQ-071","G-RQ-074"],"target_pending":["G-RQ-072"],"human_pending":["G-RQ-073"]}},
-  "qualified_a01_ancestor":{"commit":"ba5713958cd2930c7c54e3d5fdadc41dd7a7a9ca","run_id":34281081879,"result":"PASS","assertions":96,"requirements":13,"capabilities":3},
+  "portable_evidence":{
+    "G-WP-011..013":{"assertions":30,"requirements":22,"result":"PASS"},
+    "G-WP-014":{"assertions":7,"requirements":3,"result":"PASS"},
+    "G-WP-015":{"assertions":10,"portable_meta_pass":["G-RQ-071","G-RQ-074"]}
+  },
+  "ordinary_integration":{
+    "standing":"PASS",
+    "legacy_subject_sha":"19f68693ef3753596892d86a1bd5bf53343f0d1c",
+    "legacy_run_id":34287037899,
+    "assertions":143,
+    "new_scope_requirements":29,
+    "control_plane_migration_subject_sha":"777836653aa967f4559e25a3cee26c9fb160398e",
+    "control_plane_migration_run_id":34291119893,
+    "migration_equivalence":"PASS"
+  },
+  "target_evidence":{
+    "TARGET_WINDOWS_REBOOT":{
+      "standing":"PASS",
+      "registered_qualification_id":"CONTINUITY-TARGET-WINDOWS-REBOOT",
+      "qualification_id":"CONTINUITY-WINREBOOT-20260908-003",
+      "arm_subject_sha":"e0b00c69c7fd5954e04a8736b225eeaa6c1ef95f",
+      "arm_run_id":34291041277,
+      "verify_subject_sha":"f57fe85a653c0700f3005f02f3a67c948a945c69",
+      "verify_run_id":34291128646,
+      "verify_artifact_id":10081553101,
+      "verify_artifact_sha256":"a96c3de23fadad00dba145fcb99f5d639b38ccb9cf333a7a0d74982ae1b60933",
+      "requirements":{"G-RQ-004":"PASS","G-RQ-072_WINDOWS":"PASS"}
+    },
+    "TARGET_IOS_CLIENT_SUSPEND_RESUME":{
+      "standing":"NOT_STARTED",
+      "requirements":["G-RQ-049","G-RQ-050","G-RQ-072_IOS"]
+    },
+    "EMPIRICAL_HUMAN_EVIDENCE":{
+      "standing":"NOT_STARTED",
+      "requirements":["G-RQ-073"]
+    }
+  },
   "qualification_matrix":{"mapped":76,"total":76,"mapping_complete":true},
-  "next_a01_gate":"NOT_SCHEDULED",
-  "reason":"Build/traceability scope accumulated first; target and human evidence remain explicitly separate and pending.",
+  "G-RQ-072":{"TARGET_WINDOWS_REBOOT":"PASS","TARGET_IOS_CLIENT_SUSPEND_RESUME":"NOT_STARTED","implementation_satisfied":false},
+  "next_objective":"CONTINUITY-TARGET-IOS-CLIENT-SUSPEND-RESUME-QUALIFICATION",
+  "next_a01_gate":"NOT_SCHEDULED_BY_THIS_CLOSURE",
   "production_authorized":false
 }
