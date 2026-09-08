@@ -1,0 +1,23 @@
+{
+  "contract_id": "LITERARY-PROSE-ENGINE-001-STEP-I-INDEPENDENT-LITERARY-EVALUATOR-v1",
+  "depends_on": ["STEP-E", "STEP-F", "STEP-G", "STEP-H"],
+  "input": "PASSAGE_STATE + immutable original + STEP-H candidate(s) + blinded comparative observations",
+  "output": "INDEPENDENT_EVALUATION_RECORD + candidate disposition",
+  "rules": [
+    "The evaluator may not consume writer rationale, writer quality claims, or generation-side declarations of superiority as authority.",
+    "Original and candidate identities are blinded during comparative judgment where practical.",
+    "Pairwise comparison is repeated with presentation order swapped where practical.",
+    "A position-dependent preference is bias evidence and cannot authorize candidate acceptance.",
+    "Hard preservation regressions veto literary preference.",
+    "Relevant dimensions are conditioned by passage purpose and adjudicated opportunity; no universal prose-quality scalar is permitted.",
+    "A candidate must demonstrate target improvement without unresolved critical non-target regression to displace the original.",
+    "Tied, contradictory, low-confidence, or materially incomplete evidence yields RETAIN_ORIGINAL or ABSTAIN_HUMAN_REVIEW.",
+    "The evaluator records tradeoffs rather than hiding them in one aggregate score.",
+    "Named-author similarity is not an evaluation target or quality proxy."
+  ],
+  "dispositions": ["ACCEPT_CANDIDATE", "RETAIN_ORIGINAL", "ABSTAIN_HUMAN_REVIEW", "REJECT_PRESERVATION_REGRESSION"],
+  "universal_prose_score": false,
+  "retain_original_default": true,
+  "writer_rationale_authority": false,
+  "named_author_target_allowed": false
+}
