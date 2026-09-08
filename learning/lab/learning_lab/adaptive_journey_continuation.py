@@ -165,9 +165,12 @@ def submit_current_evidence_and_continue(
         raise AdaptiveJourneyContinuationError("CURRENT_ACTION_DOES_NOT_ACCEPT_EVIDENCE:" + action_type)
 
     if action_type == "DIAGNOSTIC_PROBE":
-        evidence = journey.record_diagnostic_probe(
-            journey_id=journey_id,
-            now=submitted_at,
+        # `before` is the durable authorization that this probe/target was current for
+        # this exact interaction. Call the diagnostic director directly so its own
+        # operation-idempotency can return an already-recorded probe on exact replay.
+        # Re-entering journey.record_diagnostic_probe() would re-evaluate the *new*
+        # current action after the first probe and incorrectly reject the replay.
+        evidence = diagnostic.record_probe(
             operation_id=f"{operation_id}:evidence",
             probe_id=f"PROBE-{interaction_id}",
             diagnostic_id=before["diagnostic_id"],
