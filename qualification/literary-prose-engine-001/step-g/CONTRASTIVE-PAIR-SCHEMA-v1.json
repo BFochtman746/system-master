@@ -1,0 +1,12 @@
+{
+  "schema_id": "LPE-CONTRASTIVE-PAIR-v1",
+  "required_fields": ["pair_id", "reference_state_id", "source_class", "base_id", "variant_id", "primary_technique", "changed_dimensions", "held_constant_dimensions", "intended_effect", "observed_tradeoffs", "preservation_checks", "effect_state", "confidence", "provenance"],
+  "source_classes": ["SYNTHETIC", "USER_AUTHORIZED", "RIGHTS_ADMITTED_REFERENCE"],
+  "required_held_constant": ["semantic_core", "canon", "pov", "character_knowledge", "scene_function", "project_voice_constraints"],
+  "rules": {
+    "named_author_target": false,
+    "raw_external_analysis_only_text_persistence": false,
+    "pair_must_share_reference_state": true,
+    "qualified_pair_max_unjustified_dimensions": 2
+  }
+}
