@@ -114,7 +114,6 @@ def _validate_candidate_against_intent(
         _fail("FRESH_PROVIDER_CANDIDATE_OBJECT_REQUIRED")
     if _contains_forbidden_authority_assertion(candidate):
         _fail("FRESH_PROVIDER_SELF_APPROVAL_FORBIDDEN")
-
     missing = sorted(_REQUIRED_CANDIDATE_KEYS - set(candidate))
     if missing:
         _fail("FRESH_PROVIDER_CANDIDATE_INCOMPLETE:" + ",".join(missing))
@@ -186,14 +185,35 @@ def _validate_capture(capture: Dict[str, Any], intent: Dict[str, Any]) -> Dict[s
     return copy.deepcopy(capture)
 
 
-class FreshEvidenceProviderAcquisitionService:
-    """Acquire one fresh evidence candidate without giving the provider admission authority.
+def _intent_core(
+    *,
+    request_id: str,
+    course_id: str,
+    kind: str,
+    skill_id: str,
+    criterion_id: str,
+    provider_id: str,
+    model_id: str,
+    requested_at: int,
+    admitted_at: int,
+    oracle_spec: Optional[Dict[str, Any]],
+) -> Dict[str, Any]:
+    return {
+        "request_id": request_id,
+        "course_id": course_id,
+        "kind": kind,
+        "skill_id": skill_id,
+        "criterion_id": criterion_id,
+        "provider_id": provider_id,
+        "model_id": model_id,
+        "requested_at": requested_at,
+        "admitted_at": admitted_at,
+        "oracle_spec_digest": None if oracle_spec is None else digest(oracle_spec),
+    }
 
-    Request intent is frozen before the first stochastic provider call. The first
-    structurally acceptable provider result is durably sealed as an *unverified*
-    candidate before IMPL-031 is invoked. Exact replay therefore reuses the durable
-    capture rather than silently resampling the provider.
-    """
+
+class FreshEvidenceProviderAcquisitionService:
+    """Acquire and seal a provider candidate, then delegate admission to IMPL-031."""
 
     def __init__(self, repo: Repository):
         self.repo = repo
@@ -243,43 +263,54 @@ class FreshEvidenceProviderAcquisitionService:
         if not claims:
             _fail("FRESH_PROVIDER_ADMITTED_RESEARCH_REQUIRED")
 
+        core = _intent_core(
+            request_id=request_id,
+            course_id=course_id,
+            kind=kind,
+            skill_id=skill_id,
+            criterion_id=criterion_id,
+            provider_id=provider_id,
+            model_id=model_id,
+            requested_at=requested_at,
+            admitted_at=admitted_at,
+            oracle_spec=oracle_spec,
+        )
         course_digest = digest(course)
         dossier_digest = digest(dossier)
-        known_family_ids = sorted(_known_families(self.repo, course, skill_id))
-        intent = {
-            "acquisition_version": FRESH_EVIDENCE_PROVIDER_ACQUISITION_VERSION,
-            "request_version": FRESH_EVIDENCE_PROVIDER_REQUEST_VERSION,
-            "prompt_version": FRESH_EVIDENCE_PROVIDER_PROMPT_VERSION,
-            "request_id": request_id,
-            "course_id": course_id,
-            "kind": kind,
-            "skill_id": skill_id,
-            "criterion_id": criterion_id,
-            "provider_id": provider_id,
-            "model_id": model_id,
-            "requested_at": requested_at,
-            "admitted_at": admitted_at,
-            "course_digest": course_digest,
-            "research_dossier_id": dossier_id,
-            "research_dossier_digest": dossier_digest,
-            "admitted_claim_ids": sorted(claim["claim_id"] for claim in claims),
-            "known_family_ids": known_family_ids,
-            "oracle_spec_digest": None if oracle_spec is None else digest(oracle_spec),
-        }
-        operation_payload = {
-            "request_id": request_id,
-            "intent_digest": digest(intent),
-            "version": FRESH_EVIDENCE_PROVIDER_ACQUISITION_VERSION,
-        }
-        prior = self.repo.operation_result(operation_id, operation_payload)
-        if prior is not None:
-            return prior
-
         existing_intent = self.repo.get_object(FRESH_EVIDENCE_PROVIDER_INTENT_KIND, request_id, 1)
         if existing_intent is not None:
-            if digest(existing_intent) != digest(intent):
-                _fail("FRESH_PROVIDER_REQUEST_ID_REUSE_WITH_DIFFERENT_INTENT")
+            for key, value in core.items():
+                if existing_intent.get(key) != value:
+                    _fail("FRESH_PROVIDER_REQUEST_ID_REUSE_WITH_DIFFERENT_INTENT")
+            if existing_intent.get("acquisition_version") != FRESH_EVIDENCE_PROVIDER_ACQUISITION_VERSION:
+                _fail("FRESH_PROVIDER_ACQUISITION_VERSION_DRIFT")
+            if existing_intent.get("request_version") != FRESH_EVIDENCE_PROVIDER_REQUEST_VERSION:
+                _fail("FRESH_PROVIDER_REQUEST_VERSION_DRIFT")
+            if existing_intent.get("prompt_version") != FRESH_EVIDENCE_PROVIDER_PROMPT_VERSION:
+                _fail("FRESH_PROVIDER_PROMPT_VERSION_DRIFT")
+            if existing_intent.get("course_digest") != course_digest:
+                _fail("FRESH_PROVIDER_FROZEN_COURSE_DRIFT")
+            if existing_intent.get("research_dossier_id") != dossier_id:
+                _fail("FRESH_PROVIDER_RESEARCH_DOSSIER_ID_DRIFT")
+            if existing_intent.get("research_dossier_digest") != dossier_digest:
+                _fail("FRESH_PROVIDER_FROZEN_DOSSIER_DRIFT")
+            if sorted(existing_intent.get("admitted_claim_ids", [])) != sorted(
+                claim["claim_id"] for claim in claims
+            ):
+                _fail("FRESH_PROVIDER_ADMITTED_CLAIM_SCOPE_DRIFT")
+            intent = copy.deepcopy(existing_intent)
         else:
+            intent = {
+                "acquisition_version": FRESH_EVIDENCE_PROVIDER_ACQUISITION_VERSION,
+                "request_version": FRESH_EVIDENCE_PROVIDER_REQUEST_VERSION,
+                "prompt_version": FRESH_EVIDENCE_PROVIDER_PROMPT_VERSION,
+                **core,
+                "course_digest": course_digest,
+                "research_dossier_id": dossier_id,
+                "research_dossier_digest": dossier_digest,
+                "admitted_claim_ids": sorted(claim["claim_id"] for claim in claims),
+                "known_family_ids": sorted(_known_families(self.repo, course, skill_id)),
+            }
             self.repo.put_object(FRESH_EVIDENCE_PROVIDER_INTENT_KIND, request_id, 1, intent)
             self.repo.emit("FreshEvidenceProviderRequestFrozen", request_id, {
                 "course_id": course_id,
@@ -290,15 +321,22 @@ class FreshEvidenceProviderAcquisitionService:
                 "model_id": model_id,
                 "intent_digest": digest(intent),
             })
+
+        operation_payload = {
+            "request_id": request_id,
+            "intent_digest": digest(intent),
+            "version": FRESH_EVIDENCE_PROVIDER_ACQUISITION_VERSION,
+        }
+        prior = self.repo.operation_result(operation_id, operation_payload)
+        if prior is not None:
+            return prior
         _inject(crash_after_phase, "REQUEST_FROZEN")
 
-        # Re-read immutable authorities after intent freeze. A course/dossier mutation
-        # cannot silently alter the request that the provider or admission sees.
         current_course = self.repo.get_object("course", course_id, 1)
         current_dossier = self.repo.get_object("research_dossier", dossier_id, 1)
-        if current_course is None or digest(current_course) != course_digest:
+        if current_course is None or digest(current_course) != intent["course_digest"]:
             _fail("FRESH_PROVIDER_FROZEN_COURSE_DRIFT")
-        if current_dossier is None or digest(current_dossier) != dossier_digest:
+        if current_dossier is None or digest(current_dossier) != intent["research_dossier_digest"]:
             _fail("FRESH_PROVIDER_FROZEN_DOSSIER_DRIFT")
 
         capture = self.repo.get_object(FRESH_EVIDENCE_PROVIDER_CAPTURE_KIND, request_id, 1)
@@ -314,7 +352,7 @@ class FreshEvidenceProviderAcquisitionService:
                 "skill": skill,
                 "criterion": criterion,
                 "admitted_claims": copy.deepcopy(claims),
-                "banned_family_ids": list(known_family_ids),
+                "banned_family_ids": list(intent["known_family_ids"]),
                 "constraints": {
                     "provider_must_not_assert_admission_or_mastery": True,
                     "reference_answer_will_be_checked_by_independent_domain_oracle": True,
@@ -381,12 +419,11 @@ class FreshEvidenceProviderAcquisitionService:
             raise
         _inject(crash_after_phase, "ADMISSION_COMPLETED")
 
-        # Admission must not mutate the frozen source authorities.
         final_course = self.repo.get_object("course", course_id, 1)
         final_dossier = self.repo.get_object("research_dossier", dossier_id, 1)
-        if final_course is None or digest(final_course) != course_digest:
+        if final_course is None or digest(final_course) != intent["course_digest"]:
             _fail("FRESH_PROVIDER_COURSE_MUTATED_DURING_ADMISSION")
-        if final_dossier is None or digest(final_dossier) != dossier_digest:
+        if final_dossier is None or digest(final_dossier) != intent["research_dossier_digest"]:
             _fail("FRESH_PROVIDER_DOSSIER_MUTATED_DURING_ADMISSION")
 
         result = {
@@ -400,7 +437,6 @@ class FreshEvidenceProviderAcquisitionService:
             "raw_output_digest": capture["raw_output_digest"],
             "candidate_digest": capture["candidate_digest"],
             "admission": copy.deepcopy(admission),
-            "provider_called_on_replay": False,
             "frozen_course_mutated": False,
             "frozen_dossier_mutated": False,
             "authority_boundary": {
