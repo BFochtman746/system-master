@@ -7,6 +7,7 @@ on:
     paths:
       - ".github/workflows/learning-qual-001.yml"
       - "learning/lab/qualification_qual001.py"
+      - "learning/lab/qualification_qual001_impl016.py"
       - "learning/lab/learning_lab/**"
       - "learning/lab/tests/**"
   workflow_dispatch:
@@ -48,12 +49,14 @@ jobs:
           echo EVIDENCE_DIR=%EVIDENCE_DIR%>>"%GITHUB_ENV%"
           where python
           python --version
+          echo %GITHUB_SHA%>"%EVIDENCE_DIR%\source-commit.txt"
+          echo %RUNNER_NAME%>"%EVIDENCE_DIR%\runner.txt"
 
-      - name: Compile Learning package
+      - name: Compile Learning package and qualification harnesses
         shell: cmd
         run: |
           cd /d "%GITHUB_WORKSPACE%\learning\lab"
-          python -m compileall -q learning_lab >"%EVIDENCE_DIR%\compile.txt" 2>&1
+          python -m compileall -q learning_lab qualification_qual001.py qualification_qual001_impl016.py >"%EVIDENCE_DIR%\compile.txt" 2>&1
           if errorlevel 1 (type "%EVIDENCE_DIR%\compile.txt" & exit /b 1)
           type "%EVIDENCE_DIR%\compile.txt"
 
@@ -73,15 +76,17 @@ jobs:
           if errorlevel 1 (type "%EVIDENCE_DIR%\adaptive-tests.txt" & exit /b 1)
           type "%EVIDENCE_DIR%\adaptive-tests.txt"
 
-      - name: Run IMPL-016 adaptive-entry integration focus
+      - name: Run IMPL-016 orchestration binding campaign
         shell: cmd
         run: |
           cd /d "%GITHUB_WORKSPACE%\learning\lab"
-          python -m unittest tests.test_adaptive_entry_journey -v >"%EVIDENCE_DIR%\adaptive-entry-tests.txt" 2>&1
-          if errorlevel 1 (type "%EVIDENCE_DIR%\adaptive-entry-tests.txt" & exit /b 1)
-          type "%EVIDENCE_DIR%\adaptive-entry-tests.txt"
+          python qualification_qual001_impl016.py --output "%EVIDENCE_DIR%\qualification_receipt_qual001_impl016.json" >"%EVIDENCE_DIR%\qual001-impl016-stdout.txt" 2>&1
+          set "IMPL016_RC=%ERRORLEVEL%"
+          type "%EVIDENCE_DIR%\qual001-impl016-stdout.txt"
+          if exist "%EVIDENCE_DIR%\qualification_receipt_qual001_impl016.json" type "%EVIDENCE_DIR%\qualification_receipt_qual001_impl016.json"
+          exit /b %IMPL016_RC%
 
-      - name: Run QUAL-001 fail-first closed-loop campaign
+      - name: Run QUAL-001 legacy closed-loop campaign
         shell: cmd
         run: |
           cd /d "%GITHUB_WORKSPACE%\learning\lab"
@@ -97,12 +102,17 @@ jobs:
         run: |
           echo ## LEARNING-LAB-QUAL-001>>"%GITHUB_STEP_SUMMARY%"
           echo Commit: %GITHUB_SHA%>>"%GITHUB_STEP_SUMMARY%"
+          if defined EVIDENCE_DIR if exist "%EVIDENCE_DIR%\qualification_receipt_qual001_impl016.json" (
+            echo ### IMPL-016 orchestration binding>>"%GITHUB_STEP_SUMMARY%"
+            echo ~~~json>>"%GITHUB_STEP_SUMMARY%"
+            type "%EVIDENCE_DIR%\qualification_receipt_qual001_impl016.json">>"%GITHUB_STEP_SUMMARY%"
+            echo ~~~>>"%GITHUB_STEP_SUMMARY%"
+          )
           if defined EVIDENCE_DIR if exist "%EVIDENCE_DIR%\qualification_receipt_qual001.json" (
+            echo ### Legacy closed-loop campaign>>"%GITHUB_STEP_SUMMARY%"
             echo ~~~json>>"%GITHUB_STEP_SUMMARY%"
             type "%EVIDENCE_DIR%\qualification_receipt_qual001.json">>"%GITHUB_STEP_SUMMARY%"
             echo ~~~>>"%GITHUB_STEP_SUMMARY%"
-          ) else (
-            echo Qualification receipt was not created.>>"%GITHUB_STEP_SUMMARY%"
           )
 
       - name: Upload qualification evidence
@@ -111,7 +121,5 @@ jobs:
         with:
           name: learning-qual-001-evidence
           path: ${{ env.EVIDENCE_DIR }}
-          if-no-files-found: warn
+          if-no-files-found: error
           retention-days: 30
-
-# rerun-marker: A01-qualified-toolchain-2026-09-07
