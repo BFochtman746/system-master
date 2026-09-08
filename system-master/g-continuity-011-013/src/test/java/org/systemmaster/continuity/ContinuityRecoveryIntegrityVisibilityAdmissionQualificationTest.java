@@ -40,7 +40,10 @@ public final class ContinuityRecoveryIntegrityVisibilityAdmissionQualificationTe
         var corrupt=v.validateRecoveryIntegrity("r2","abc","xyz",List.of(),List.of("ev:2"));eq(IntegrityFinding.FindingType.CORRUPT,corrupt.findingType(),"digest mismatch corrupt");ok(v.recoveryQuarantined("r2"),"corrupt recovery quarantined");
     }
     private static void visibility(Path root) throws Exception {
-        RecoveryRegistry registry=new RecoveryRegistry(root.resolve("registry")); var opened=registry.openRecovery("w-vis",1,"interrupt-1");
+        Path registryRoot=root.resolve("registry");
+        DurableWorkIdentityRegistry identities=new DurableWorkIdentityRegistry(registryRoot);
+        identities.registerDurableWorkIdentity("task-vis","workflow-vis","stage-vis","w-vis","intent-vis","owner-vis");
+        RecoveryRegistry registry=new RecoveryRegistry(registryRoot); var opened=registry.openRecovery("w-vis",1,"interrupt-1");
         RecoveryQueryService svc=new RecoveryQueryService(registry,(w,c)->RecoveryQueryService.CommandStanding.UNKNOWN,new RecoveryQueryService.TelemetryAuthority(){public boolean fresh(String w){return false;}public String detail(String w){return "unused";}});
         var p=svc.getRecoveryStatus("w-vis");eq("w-vis",p.workUnitId(),"reconnect by work identity");ok(!p.telemetryFresh(),"telemetry gap explicit");eq("OBSERVABILITY_GAP",p.telemetryDetail(),"gap label explicit");ok(p.progressBasis()!=null&&!p.progressBasis().isBlank(),"progress basis explicit");
         var rd=svc.reconnect("w-vis","cmd-unknown");ok(!rd.mayRecommand(),"unknown command not recommanded");eq("RECONCILE_BEFORE_RECOMMAND",rd.nextAction(),"reconcile first");
