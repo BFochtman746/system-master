@@ -1,0 +1,34 @@
+{
+  "registry_id": "LITERARY-PROSE-ENGINE-001-STEP-F-SPECIALIST-REGISTRY-v1",
+  "specialists": [
+    {"specialist_id":"SENTENCE_RHYTHM_SYNTAX","scope":"sentence rhythm, syntax, cadence, fragmentation, and sentence-shape variation","may_rewrite":false,"must_consume_passage_state":true,"emits":"DIAGNOSTIC_EVIDENCE"},
+    {"specialist_id":"PARAGRAPH_MOVEMENT","scope":"paragraph propulsion, turns, emphasis, handoff, and local flow","may_rewrite":false,"must_consume_passage_state":true,"emits":"DIAGNOSTIC_EVIDENCE"},
+    {"specialist_id":"DICTION_REGISTER","scope":"diction, register, lexical fit, and tonal consistency","may_rewrite":false,"must_consume_passage_state":true,"emits":"DIAGNOSTIC_EVIDENCE"},
+    {"specialist_id":"POV_FOCALIZATION_DISTANCE","scope":"POV, focalization, knowledge boundaries, and narrative distance","may_rewrite":false,"must_consume_passage_state":true,"emits":"DIAGNOSTIC_EVIDENCE"},
+    {"specialist_id":"CHARACTER_GOAL_AGENCY_CONTINUITY","scope":"character goals, agency, continuity, and relationship pressure","may_rewrite":false,"must_consume_passage_state":true,"emits":"DIAGNOSTIC_EVIDENCE"},
+    {"specialist_id":"DIALOGUE_SUBTEXT_DISTINCTIVENESS","scope":"dialogue function, subtext, character distinctiveness, and thesis-delivery risk","may_rewrite":false,"must_consume_passage_state":true,"emits":"DIAGNOSTIC_EVIDENCE"},
+    {"specialist_id":"SCENE_TENSION_CAUSALITY","scope":"scene tension, causality, reversals, and consequence","may_rewrite":false,"must_consume_passage_state":true,"emits":"DIAGNOSTIC_EVIDENCE"},
+    {"specialist_id":"PACING_COMPRESSION_EXPANSION","scope":"pacing, compression, expansion, dwell time, and edit-budget fit","may_rewrite":false,"must_consume_passage_state":true,"emits":"DIAGNOSTIC_EVIDENCE"},
+    {"specialist_id":"INFORMATION_RELEASE_ORIENTATION","scope":"information release, reader questions, withholding, and orientation burden","may_rewrite":false,"must_consume_passage_state":true,"emits":"DIAGNOSTIC_EVIDENCE"},
+    {"specialist_id":"DESCRIPTION_SENSORY_IMAGERY_METAPHOR_MOTIF","scope":"description, sensory selection, imagery, metaphor, and motif dosage","may_rewrite":false,"must_consume_passage_state":true,"emits":"DIAGNOSTIC_EVIDENCE"},
+    {"specialist_id":"EMOTIONAL_PROGRESSION","scope":"emotional progression, implication, escalation, and explicitness","may_rewrite":false,"must_consume_passage_state":true,"emits":"DIAGNOSTIC_EVIDENCE"},
+    {"specialist_id":"EXPOSITION_ARGUMENT","scope":"exposition, argument, explanation, and reasoning load","may_rewrite":false,"must_consume_passage_state":true,"emits":"DIAGNOSTIC_EVIDENCE"},
+    {"specialist_id":"THEOLOGICAL_PHILOSOPHICAL_REASONING","scope":"theological/philosophical reasoning when passage state marks it relevant","may_rewrite":false,"must_consume_passage_state":true,"emits":"DIAGNOSTIC_EVIDENCE"},
+    {"specialist_id":"HISTORICAL_REGISTER","scope":"historical register and anachronism risk when relevant","may_rewrite":false,"must_consume_passage_state":true,"emits":"DIAGNOSTIC_EVIDENCE"},
+    {"specialist_id":"OPENING_ENDING_TURNS","scope":"opening/ending turns, entry pressure, exit resonance, and transition function","may_rewrite":false,"must_consume_passage_state":true,"emits":"DIAGNOSTIC_EVIDENCE"},
+    {"specialist_id":"CANON_PROTECTED_LANGUAGE","scope":"canon, protected language, factual constraints, and required ambiguity","may_rewrite":false,"must_consume_passage_state":true,"emits":"DIAGNOSTIC_EVIDENCE"},
+    {"specialist_id":"VOICE_PRESERVATION_EVOLUTION","scope":"author/project/book/character/local voice constraints and evolution risk","may_rewrite":false,"must_consume_passage_state":true,"emits":"DIAGNOSTIC_EVIDENCE"},
+    {"specialist_id":"HOMOGENIZATION_OVEROPTIMIZATION_RISK","scope":"generic drift, cadence convergence, character-voice convergence, and overoptimization","may_rewrite":false,"must_consume_passage_state":true,"emits":"DIAGNOSTIC_EVIDENCE"}
+  ],
+  "activation_rules": {
+    "THEOLOGICAL_PHILOSOPHICAL_REASONING": "activate only when theological/philosophical constraints or passage purpose make it relevant",
+    "HISTORICAL_REGISTER": "activate only when historical constraints or period-register claims are relevant",
+    "OPENING_ENDING_TURNS": "activate only at passage/scene/chapter boundary when turn function is relevant"
+  },
+  "global_rules": [
+    "Specialists diagnose and produce evidence; they do not rewrite.",
+    "A specialist cannot override canon, protected language, authorial intent, POV knowledge boundaries, or explicit user constraints.",
+    "Specialist agreement is evidence, not truth; correlated findings must not be counted as independent votes.",
+    "Named-author similarity is never a specialist target."
+  ]
+}
