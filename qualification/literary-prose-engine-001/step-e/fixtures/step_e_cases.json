@@ -1,0 +1,16 @@
+{
+  "cases": [
+    {"case_id":"E-FIX-SURGICAL-READY","requested_scope":"SURGICAL","mutations":{},"expected_status":"REVISION_STATE_READY"},
+    {"case_id":"E-FIX-MISSING-POV","requested_scope":"SURGICAL","mutations":{"narrative_state.pov":"UNKNOWN"},"expected_status":"BLOCKED_NEEDS_CONTEXT"},
+    {"case_id":"E-FIX-MISSING-PROTECTED-LANGUAGE","requested_scope":"SURGICAL","mutations":{"preservation_state.protected_language":[]},"expected_status":"BLOCKED_NEEDS_CONTEXT"},
+    {"case_id":"E-FIX-LOCAL-MISSING-READER","requested_scope":"LOCAL_RESTRUCTURE","mutations":{"reader_state":{}},"expected_status":"DIAGNOSIS_ONLY"},
+    {"case_id":"E-FIX-SUBSTANTIAL-MISSING-INTENT","requested_scope":"SUBSTANTIAL_REWORK","mutations":{"preservation_state.authorial_intent":"UNRESOLVED"},"expected_status":"BLOCKED_NEEDS_CONTEXT"},
+    {"case_id":"E-FIX-CHALLENGE-NO-AUTH","requested_scope":"APPROACH_CHALLENGE","mutations":{"voice_state.development_frontier_authorized":false},"expected_status":"DIAGNOSIS_ONLY"},
+    {"case_id":"E-FIX-NO-ACTION","requested_scope":"NONE","mutations":{},"expected_status":"NO_ACTION"},
+    {"case_id":"E-FIX-HARD-CANON-RISK","requested_scope":"SURGICAL","opportunity_mode":"hard_canon","expected_selected":0,"expected_reject":"REJECT_PRESERVATION_RISK"},
+    {"case_id":"E-FIX-HIGH-VALUE-WINS","requested_scope":"SURGICAL","opportunity_mode":"rank","expected_top":"OP-HIGH-PURPOSE"},
+    {"case_id":"E-FIX-LOW-VALUE-NO-ACTION","requested_scope":"SURGICAL","opportunity_mode":"low","expected_status":"NO_ACTION"},
+    {"case_id":"E-FIX-STRENGTH-FIRST","requested_scope":"SURGICAL","mutations":{"craft_state.current_strengths":[]},"expected_warning":"STRENGTHS_NOT_ESTABLISHED"},
+    {"case_id":"E-FIX-MAX-SCOPE-CAPPED","requested_scope":"SURGICAL","mutations":{"reader_state":{}},"expected_max_scope":"SURGICAL"}
+  ]
+}
