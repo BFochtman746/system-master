@@ -10,7 +10,7 @@ from .baseline_diagnostic import BaselineDiagnosticDirector
 from .repository import Repository, digest
 
 
-ACTION_PRESENTATION_VERSION = "LEARNING-ACTION-PRESENTATION-V1"
+ACTION_PRESENTATION_VERSION = "LEARNING-ACTION-PRESENTATION-V2"
 PRESENTATION_KIND = "learning_action_presentation"
 _FORBIDDEN_PRESENTATION_KEYS = {"answer", "rationale", "learner_response", "response"}
 _ASSESSMENT_ACTIONS = {
@@ -148,14 +148,7 @@ def _surface_for_action(
             "evidence_role": "COMPLETE",
         }
     if action_type in {"LESSON", "REMEDIATION"}:
-        return {
-            "surface_kind": "LEGACY_TUTOR_CONTINUATION_REQUIRED",
-            "response_required": False,
-            "prompt": None,
-            "answer_withheld": True,
-            "assessment_integrity_active": False,
-            "evidence_role": "FORMATIVE_ONLY",
-        }
+        raise ActionPresentationError("RAW_TUTOR_ROUTE_ESCAPED:" + action_type)
     raise ActionPresentationError("UNSUPPORTED_ACTION_PRESENTATION:" + action_type)
 
 
