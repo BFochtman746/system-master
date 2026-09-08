@@ -1,0 +1,44 @@
+name: System Master Continuity Target Windows Reboot Qualification
+
+on:
+  push:
+    branches:
+      - system-master/continuity-target-windows-reboot-qualification
+
+permissions:
+  contents: read
+
+jobs:
+  qualify-target-windows-reboot:
+    name: Qualify genuine TARGET_WINDOWS_REBOOT on A-01
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact target Windows reboot subject
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          clean: true
+      - name: Execute repository-owned target Windows reboot protocol
+        shell: powershell
+        run: .github\scripts\g-continuity-target-windows-reboot.ps1
+      - name: Publish target Windows reboot summary
+        if: always()
+        shell: cmd
+        run: |
+          set "EVIDENCE_DIR=%RUNNER_TEMP%\system-master-continuity-target-windows-reboot-%GITHUB_RUN_ID%"
+          echo ## SYSTEM MASTER - CONTINUITY TARGET WINDOWS REBOOT QUALIFICATION>>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\subject.txt" type "%EVIDENCE_DIR%\subject.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\arm-result.txt" type "%EVIDENCE_DIR%\arm-result.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\result.txt" type "%EVIDENCE_DIR%\result.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\post-reboot-result.json" type "%EVIDENCE_DIR%\post-reboot-result.json">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\failure.txt" type "%EVIDENCE_DIR%\failure.txt">>"%GITHUB_STEP_SUMMARY%"
+      - name: Upload target Windows reboot evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: system-master-continuity-target-windows-reboot-evidence
+          path: ${{ runner.temp }}\system-master-continuity-target-windows-reboot-${{ github.run_id }}
+          if-no-files-found: warn
+          retention-days: 30
