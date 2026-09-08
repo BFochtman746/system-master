@@ -1,0 +1,270 @@
+name: BOOK-EVAL-LEMONADE-001 REPAIR-005 Gate D Freeze + Student
+
+on:
+  push:
+    branches:
+      - book-eval-lemonade-001-blind-resume-003-adapter-repair
+    paths:
+      - ".github/workflows/book-eval-repair-005-gate-d-freeze-student.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: book-eval-repair005-gate-d-student
+  cancel-in-progress: false
+
+jobs:
+  gate-d:
+    name: Freeze teacher, retrain 1052-record student, adjudicate selective 120B
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 240
+
+    steps:
+      - name: Checkout exact repair branch
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 1
+
+      - name: Establish isolated Gate D workspace
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $Bundle = Join-Path $env:GITHUB_WORKSPACE 'qualification\book-eval-lemonade-001'
+          if (Test-Path (Join-Path $Bundle 'scoring-private')) { throw 'scoring-private material present in repository bundle' }
+          $cmd = Get-Command python.exe -ErrorAction SilentlyContinue
+          if (-not $cmd) { throw 'usable python.exe not found for runner identity' }
+          $Python = $cmd.Source
+          $Evidence = Join-Path $env:RUNNER_TEMP ('book-eval-repair005-gate-d-' + $env:GITHUB_RUN_ID)
+          $Work = Join-Path $env:RUNNER_TEMP ('book-eval-repair005-gate-d-work-' + $env:GITHUB_RUN_ID)
+          $Student = 'C:\AI Test Kit\Books Testing\BOOK_EVAL_LEMONADE_001_REPAIR005_GATE_D_STUDENT_V1'
+          New-Item -ItemType Directory -Force -Path $Evidence | Out-Null
+          New-Item -ItemType Directory -Force -Path $Work | Out-Null
+          New-Item -ItemType Directory -Force -Path $Student | Out-Null
+          "PYTHON_EXE=$Python" | Out-File -FilePath $env:GITHUB_ENV -Encoding ascii -Append
+          "BUNDLE=$Bundle" | Out-File -FilePath $env:GITHUB_ENV -Encoding ascii -Append
+          "EVIDENCE_DIR=$Evidence" | Out-File -FilePath $env:GITHUB_ENV -Encoding ascii -Append
+          "WORK_DIR=$Work" | Out-File -FilePath $env:GITHUB_ENV -Encoding ascii -Append
+          "STUDENT_DIR=$Student" | Out-File -FilePath $env:GITHUB_ENV -Encoding ascii -Append
+          & $Python -m py_compile `
+            (Join-Path $Bundle 'scripts\freeze-repair005-gate-d-teacher.py') `
+            (Join-Path $Bundle 'scripts\validate-repair005-gate-d-teacher.py') `
+            (Join-Path $Bundle 'scripts\compile-repair005-gate-d-student.py') `
+            (Join-Path $Bundle 'scripts\train-repair005-gate-d.py') `
+            (Join-Path $Bundle 'scripts\adjudicate-repair005-gate-d-selective-120b.py') `
+            (Join-Path $Bundle 'scripts\audit-repair005-gate-d-selective.py')
+          if ($LASTEXITCODE -ne 0) { throw 'Gate D Python syntax check failed' }
+
+      - name: Bind exact frozen Gate C private inputs by SHA-256
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $Root = 'C:\AI Test Kit\Books Testing'
+          $Wanted = @{
+            '0e3d237405340ae1abf0706c88c39275360c8c9380388b4f53d73275f4f38473' = 'BASE_TRAINING'
+            '30bd9d0b2c348b33e6b17a81d639e64c7e7e8eef63d7d6c0bfc3175e94fe2b53' = 'PROVIDER'
+            '51cd4790ddd89d067a6e85ee6c6f3092ec3a6fba94faac8e77e31041277da91a' = 'DEVELOPMENT_GOLD'
+          }
+          $Found = @{}
+          Get-ChildItem -LiteralPath $Root -Recurse -File -ErrorAction SilentlyContinue |
+            Where-Object { $_.Length -lt 52428800 } |
+            Sort-Object FullName |
+            ForEach-Object {
+              try {
+                $h = (Get-FileHash -Algorithm SHA256 -LiteralPath $_.FullName).Hash.ToLowerInvariant()
+                if ($Wanted.ContainsKey($h) -and -not $Found.ContainsKey($Wanted[$h])) {
+                  $Found[$Wanted[$h]] = $_.FullName
+                }
+              } catch { }
+            }
+          foreach ($role in @('BASE_TRAINING','PROVIDER','DEVELOPMENT_GOLD')) {
+            if (-not $Found.ContainsKey($role)) { throw "exact frozen Gate C input not found: $role" }
+            "$($role)_PATH=$($Found[$role])" | Out-File -FilePath $env:GITHUB_ENV -Encoding ascii -Append
+          }
+          @{
+            base_training_sha256 = '0e3d237405340ae1abf0706c88c39275360c8c9380388b4f53d73275f4f38473'
+            provider_sha256 = '30bd9d0b2c348b33e6b17a81d639e64c7e7e8eef63d7d6c0bfc3175e94fe2b53'
+            development_gold_sha256 = '51cd4790ddd89d067a6e85ee6c6f3092ec3a6fba94faac8e77e31041277da91a'
+            exact_hash_binding = $true
+            visible_regression_used = $false
+            hidden_holdout_used = $false
+          } | ConvertTo-Json | Set-Content -Encoding UTF8 (Join-Path $env:EVIDENCE_DIR 'GATE-D-INPUT-BINDING.json')
+
+      - name: Verify 440-of-440 teacher freeze and canonicalize exact duplicate rows only
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $TeacherRoot = 'C:\AI Test Kit\Books Testing\BOOK_EVAL_LEMONADE_001_REPAIR005_GATE_D_TEACHER_V1'
+          $Raw = Join-Path $TeacherRoot 'GATE-D-TEACHER-SYNTHETIC.jsonl'
+          $Status = Join-Path $TeacherRoot 'GATE-D-TEACHER-STATUS.json'
+          $Taxonomy = Join-Path $env:BUNDLE 'repair005\BOOK-EVAL-HIERARCHICAL-SPECIALIST-TAXONOMY-v1.json'
+          if (-not (Test-Path -LiteralPath $Raw)) { throw 'frozen teacher JSONL missing' }
+          if (-not (Test-Path -LiteralPath $Status)) { throw 'frozen teacher status missing' }
+          $s = Get-Content -LiteralPath $Status -Raw | ConvertFrom-Json
+          $taxHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $Taxonomy).Hash.ToLowerInvariant()
+          if ([string]$s.taxonomy_sha256 -ne $taxHash) { throw 'frozen teacher taxonomy hash does not match current frozen taxonomy' }
+          $Canonical = Join-Path $env:WORK_DIR 'GATE-D-TEACHER-CANONICAL-440.jsonl'
+          $Manifest = Join-Path $env:EVIDENCE_DIR 'GATE-D-TEACHER-FREEZE-MANIFEST.json'
+          & $env:PYTHON_EXE (Join-Path $env:BUNDLE 'scripts\freeze-repair005-gate-d-teacher.py') `
+            --raw $Raw --status $Status --taxonomy $Taxonomy `
+            --output $Canonical --manifest $Manifest `
+            --expected-raw-sha 'bb7d3b2c7e455dce271e8098fbbfd19325607b34d4c4aab10f5e5d894a0209be'
+          if ($LASTEXITCODE -ne 0) { throw 'teacher freeze integrity repair failed' }
+          & $env:PYTHON_EXE (Join-Path $env:BUNDLE 'scripts\validate-repair005-gate-d-teacher.py') `
+            --rows $Canonical --taxonomy $Taxonomy --examples-per-token 8 |
+            Tee-Object -FilePath (Join-Path $env:EVIDENCE_DIR 'GATE-D-TEACHER-VALIDATION.txt')
+          if ($LASTEXITCODE -ne 0) { throw 'canonical 440-row teacher validator failed' }
+          "CANONICAL_TEACHER=$Canonical" | Out-File -FilePath $env:GITHUB_ENV -Encoding ascii -Append
+
+      - name: Ingest frozen teacher into exact 1052-record private student corpus
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $Combined = Join-Path $env:WORK_DIR 'GATE-D-STUDENT-TRAINING-1052.jsonl'
+          $Manifest = Join-Path $env:EVIDENCE_DIR 'GATE-D-STUDENT-INGEST-MANIFEST.json'
+          & $env:PYTHON_EXE (Join-Path $env:BUNDLE 'scripts\compile-repair005-gate-d-student.py') `
+            --base-training $env:BASE_TRAINING_PATH `
+            --teacher $env:CANONICAL_TEACHER `
+            --taxonomy (Join-Path $env:BUNDLE 'repair005\BOOK-EVAL-HIERARCHICAL-SPECIALIST-TAXONOMY-v1.json') `
+            --output $Combined --manifest $Manifest
+          if ($LASTEXITCODE -ne 0) { throw 'Gate D student corpus compile failed' }
+          $m = Get-Content -LiteralPath $Manifest -Raw | ConvertFrom-Json
+          if ([int]$m.base_records -ne 612 -or [int]$m.teacher_records -ne 440 -or [int]$m.combined_records -ne 1052) {
+            throw 'compiled Gate D student corpus cardinality drift'
+          }
+          if (@($m.missing_specialists).Count -ne 0) { throw 'compiled Gate D corpus has missing specialists' }
+          "COMBINED_TRAINING=$Combined" | Out-File -FilePath $env:GITHUB_ENV -Encoding ascii -Append
+
+      - name: Retrain task-qualified hierarchical student and run source-held-out qualification
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          & $env:PYTHON_EXE (Join-Path $env:BUNDLE 'scripts\train-repair005-gate-d.py') `
+            --training $env:BASE_TRAINING_PATH `
+            --teacher $env:CANONICAL_TEACHER `
+            --provider $env:PROVIDER_PATH `
+            --gold $env:DEVELOPMENT_GOLD_PATH `
+            --taxonomy (Join-Path $env:BUNDLE 'repair005\BOOK-EVAL-HIERARCHICAL-SPECIALIST-TAXONOMY-v1.json') `
+            --output-dir $env:STUDENT_DIR
+          if ($LASTEXITCODE -ne 0) { throw 'Gate D source-held-out student trainer failed' }
+          Copy-Item -LiteralPath (Join-Path $env:STUDENT_DIR 'GATE-D-METRICS.json') -Destination (Join-Path $env:EVIDENCE_DIR 'GATE-D-STUDENT-PHASE1-METRICS.json') -Force
+          Copy-Item -LiteralPath (Join-Path $env:STUDENT_DIR 'MODEL-MANIFEST.json') -Destination (Join-Path $env:EVIDENCE_DIR 'GATE-D-STUDENT-MODEL-MANIFEST.json') -Force
+          $m = Get-Content -LiteralPath (Join-Path $env:STUDENT_DIR 'GATE-D-METRICS.json') -Raw | ConvertFrom-Json
+          if ([bool]$m.gate_d_student_advancement_pass) {
+            'STUDENT_PASS=true' | Out-File -FilePath $env:GITHUB_ENV -Encoding ascii -Append
+          } else {
+            'STUDENT_PASS=false' | Out-File -FilePath $env:GITHUB_ENV -Encoding ascii -Append
+          }
+          $Zip = Join-Path $env:EVIDENCE_DIR 'GATE-D-STUDENT-PRIVATE.zip'
+          if (Test-Path -LiteralPath $Zip) { Remove-Item -LiteralPath $Zip -Force }
+          Compress-Archive -CompressionLevel Optimal -Path `
+            (Join-Path $env:STUDENT_DIR 'vectorizer.joblib'), `
+            (Join-Path $env:STUDENT_DIR 'routers.joblib'), `
+            (Join-Path $env:STUDENT_DIR 'leaf-models.joblib'), `
+            (Join-Path $env:STUDENT_DIR 'MODEL-MANIFEST.json') `
+            -DestinationPath $Zip
+          $zipHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $Zip).Hash.ToLowerInvariant()
+          @{
+            model_zip_sha256 = $zipHash
+            raw_training_packaged = $false
+            raw_gold_packaged = $false
+            raw_provider_packaged = $false
+            teacher_synthetic_packaged = $false
+          } | ConvertTo-Json | Set-Content -Encoding UTF8 (Join-Path $env:EVIDENCE_DIR 'GATE-D-MODEL-RECEIPT.json')
+
+      - name: Load qualified 120B model for selective fallback only
+        if: env.STUDENT_PASS == 'true'
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          curl.exe --fail --silent --show-error -X POST 'http://127.0.0.1:13305/v1/load' `
+            -H 'Content-Type: application/json' `
+            --data-binary ('@' + (Join-Path $env:BUNDLE 'lemonade-load-request.json')) `
+            -o (Join-Path $env:EVIDENCE_DIR 'GATE-D-SELECTIVE-MODEL-LOAD.json')
+          if ($LASTEXITCODE -ne 0) { throw 'selective 120B model load failed' }
+
+      - name: Judge only the bottom 35 percent source-held-out cases with 120B
+        if: env.STUDENT_PASS == 'true'
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $env:BOOK_EVAL_MODEL = 'user.gpt-oss-120b-MXFP4'
+          $env:BOOK_EVAL_ENDPOINT = 'http://127.0.0.1:13305/v1/responses'
+          $env:BOOK_EVAL_MAX_OUTPUT_TOKENS = '300'
+          $env:BOOK_EVAL_TEMPERATURE = '0.0'
+          $env:BOOK_EVAL_MAX_ATTEMPTS = '3'
+          $env:BOOK_EVAL_SELECTIVE_ATTEMPTS = '4'
+          $env:BOOK_EVAL_TIMEOUT_SECONDS = '240'
+          $Fallback = Join-Path $env:WORK_DIR 'GATE-D-SELECTIVE-120B.jsonl'
+          $Manifest = Join-Path $env:EVIDENCE_DIR 'GATE-D-SELECTIVE-120B-MANIFEST.json'
+          & $env:PYTHON_EXE (Join-Path $env:BUNDLE 'scripts\adjudicate-repair005-gate-d-selective-120b.py') `
+            --predictions (Join-Path $env:STUDENT_DIR 'GATE-D-SOURCE-HELDOUT-PREDICTIONS.jsonl') `
+            --provider $env:PROVIDER_PATH `
+            --taxonomy (Join-Path $env:BUNDLE 'repair005\BOOK-EVAL-HIERARCHICAL-SPECIALIST-TAXONOMY-v1.json') `
+            --output $Fallback --manifest $Manifest
+          if ($LASTEXITCODE -ne 0) { throw 'selective 120B adjudication failed' }
+          "SELECTIVE_FALLBACK=$Fallback" | Out-File -FilePath $env:GITHUB_ENV -Encoding ascii -Append
+
+      - name: Adjudicate selective policy plus source-held-out pairwise swap symmetry
+        if: env.STUDENT_PASS == 'true'
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $Final = Join-Path $env:EVIDENCE_DIR 'GATE-D-FINAL-METRICS.json'
+          & $env:PYTHON_EXE (Join-Path $env:BUNDLE 'scripts\audit-repair005-gate-d-selective.py') `
+            --training $env:BASE_TRAINING_PATH `
+            --teacher $env:CANONICAL_TEACHER `
+            --provider $env:PROVIDER_PATH `
+            --gold $env:DEVELOPMENT_GOLD_PATH `
+            --taxonomy (Join-Path $env:BUNDLE 'repair005\BOOK-EVAL-HIERARCHICAL-SPECIALIST-TAXONOMY-v1.json') `
+            --phase1-metrics (Join-Path $env:STUDENT_DIR 'GATE-D-METRICS.json') `
+            --phase1-predictions (Join-Path $env:STUDENT_DIR 'GATE-D-SOURCE-HELDOUT-PREDICTIONS.jsonl') `
+            --fallback120b $env:SELECTIVE_FALLBACK `
+            --output $Final
+          if ($LASTEXITCODE -ne 0) { throw 'Gate D selective/symmetry audit failed' }
+          $m = Get-Content -LiteralPath $Final -Raw | ConvertFrom-Json
+          if ([bool]$m.gate_d_pass) {
+            'GATE_D_PASS=true' | Out-File -FilePath $env:GITHUB_ENV -Encoding ascii -Append
+          } else {
+            'GATE_D_PASS=false' | Out-File -FilePath $env:GITHUB_ENV -Encoding ascii -Append
+          }
+
+      - name: Write Gate D standing
+        if: always()
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Continue'
+          $Standing = if ($env:GATE_D_PASS -eq 'true') { 'PASS_GATE_D__VISIBLE_REGRESSION_REVALIDATION_ALLOWED' } elseif ($env:STUDENT_PASS -eq 'false') { 'GATE_D_OPEN__STUDENT_GENERALIZATION_GATE_FAILED' } else { 'GATE_D_OPEN__SELECTIVE_ESCALATION_OR_INTEGRITY_GATE_FAILED' }
+          $lines = @(
+            'objective=BOOK-EVAL-LEMONADE-001-REPAIR-005-GATE-D',
+            "standing=$Standing",
+            'teacher_raw_sha256=bb7d3b2c7e455dce271e8098fbbfd19325607b34d4c4aab10f5e5d894a0209be',
+            'teacher_logical_records=440',
+            'base_training_records=612',
+            'combined_training_records=1052',
+            "student_advancement_pass=$($env:STUDENT_PASS)",
+            "gate_d_pass=$($env:GATE_D_PASS)",
+            'visible_regression_used=false',
+            'hidden_holdout_used=false',
+            'promotion_claim=development_gate_only'
+          )
+          $lines | Set-Content -Encoding UTF8 (Join-Path $env:EVIDENCE_DIR 'qualification-summary.txt')
+          Get-Content (Join-Path $env:EVIDENCE_DIR 'qualification-summary.txt')
+
+      - name: Upload Gate D evidence and private student model
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: book-eval-repair005-gate-d-freeze-student-evidence
+          path: ${{ env.EVIDENCE_DIR }}
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Enforce Gate D standing
+        if: always()
+        shell: powershell
+        run: |
+          if ($env:GATE_D_PASS -ne 'true') {
+            throw 'Gate D remains open. Do not run VISIBLE_REGRESSION or fresh holdout from this result.'
+          }
+          Write-Host 'GATE_D_PASS: one explicit VISIBLE_REGRESSION revalidation is now permitted by the frozen contract.'
