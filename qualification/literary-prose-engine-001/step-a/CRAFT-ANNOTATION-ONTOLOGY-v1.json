@@ -1,0 +1,212 @@
+{
+  "ontology_id": "CRAFT-ANNOTATION-ONTOLOGY-v1",
+  "version": 1,
+  "annotation_principle": "Annotate decisions, mechanisms, context, evidence and observable effects; never use named-author identity as a target style label.",
+  "layers": {
+    "MICRO_LANGUAGE": [
+      "sentence_rhythm",
+      "sentence_length_variation",
+      "syntactic_complexity",
+      "syntax_patterning",
+      "diction_specificity",
+      "register",
+      "sound_patterning",
+      "repetition_control",
+      "clarity",
+      "ambiguity_control"
+    ],
+    "PARAGRAPH_AND_FLOW": [
+      "paragraph_movement",
+      "information_release",
+      "transition_quality",
+      "compression",
+      "expansion",
+      "emphasis_pattern"
+    ],
+    "POV_AND_DISTANCE": [
+      "pov_fidelity",
+      "narrative_distance",
+      "focalization",
+      "interiority_density",
+      "knowledge_boundary",
+      "free_indirectness_or_equivalent"
+    ],
+    "DESCRIPTION_AND_IMAGE": [
+      "sensory_specificity",
+      "concrete_detail_density",
+      "image_coherence",
+      "metaphor_density",
+      "motif_recurrence",
+      "setting_function"
+    ],
+    "DIALOGUE_AND_CHARACTER": [
+      "dialogue_subtext",
+      "dialogue_distinctiveness",
+      "turn_dynamics",
+      "character_goal_pressure",
+      "relationship_pressure",
+      "speaker_attribution_clarity"
+    ],
+    "SCENE_AND_NARRATIVE": [
+      "scene_tension",
+      "conflict_progression",
+      "event_density",
+      "causal_motivation",
+      "setup_payoff",
+      "emotional_progression",
+      "pacing",
+      "temporal_control",
+      "opening_strength",
+      "ending_turn"
+    ],
+    "EXPOSITION_AND_ARGUMENT": [
+      "exposition_density",
+      "exposition_integration",
+      "rhetorical_structure",
+      "claim_evidence_link",
+      "argument_mechanism",
+      "counterargument_handling",
+      "example_function"
+    ],
+    "PRESERVATION": [
+      "voice_consistency",
+      "canon_fidelity",
+      "intent_fidelity",
+      "protected_language_fidelity",
+      "genre_fidelity",
+      "audience_fit",
+      "pov_fidelity",
+      "scene_function_fidelity"
+    ]
+  },
+  "annotation_record": {
+    "required": [
+      "annotation_id",
+      "reference_id",
+      "technique_id",
+      "scope",
+      "polarity",
+      "strength",
+      "evidence_locator",
+      "mechanism",
+      "intended_or_observed_effect",
+      "conditioning",
+      "confidence",
+      "annotator_provenance"
+    ],
+    "scope_enum": [
+      "PHRASE",
+      "SENTENCE",
+      "PARAGRAPH",
+      "PASSAGE",
+      "SCENE",
+      "CHAPTER",
+      "WORK"
+    ],
+    "polarity_enum": [
+      "PRESENT_EFFECTIVE",
+      "PRESENT_CONTEXT_DEPENDENT",
+      "ABSENT_OPPORTUNITY",
+      "OVERUSED",
+      "MISAPPLIED",
+      "NOT_APPLICABLE"
+    ],
+    "strength_scale": "0.0 to 1.0; descriptive, not quality score",
+    "confidence_scale": "0.0 to 1.0",
+    "mechanism_rule": "Describe what textual decision creates the effect without copying protected source language.",
+    "effect_rule": "Effects are hypotheses/evidence-backed observations such as tension, clarity, intimacy, speed, emphasis, surprise, trust, or ambiguity; they are conditioned, not universally good."
+  },
+  "conditioning_dimensions": {
+    "genre": [
+      "literary_fiction",
+      "thriller",
+      "mystery",
+      "romance",
+      "fantasy",
+      "science_fiction",
+      "historical_fiction",
+      "horror",
+      "adventure",
+      "memoir",
+      "biography",
+      "narrative_nonfiction",
+      "argumentative_nonfiction",
+      "instructional_nonfiction",
+      "childrens",
+      "young_adult",
+      "other"
+    ],
+    "form": [
+      "novel",
+      "novella",
+      "short_story",
+      "memoir",
+      "essay",
+      "chapter",
+      "scene",
+      "prologue",
+      "epilogue",
+      "article",
+      "other"
+    ],
+    "audience": [
+      "adult_general",
+      "adult_specialist",
+      "young_adult",
+      "middle_grade",
+      "early_reader",
+      "academic",
+      "professional",
+      "other"
+    ],
+    "scene_function": [
+      "orientation",
+      "inciting_disruption",
+      "goal_commitment",
+      "escalation",
+      "reversal",
+      "revelation",
+      "confrontation",
+      "aftermath",
+      "reflection",
+      "transition",
+      "setup",
+      "payoff",
+      "relationship_development",
+      "argument_development",
+      "exposition_delivery",
+      "closure",
+      "other"
+    ],
+    "pacing_target": [
+      "compressed",
+      "fast",
+      "moderate",
+      "lingering",
+      "suspended",
+      "variable"
+    ],
+    "narrative_distance": [
+      "very_close",
+      "close",
+      "mid",
+      "distant",
+      "variable"
+    ],
+    "pov": [
+      "first_person",
+      "second_person",
+      "third_limited",
+      "third_omniscient",
+      "third_objective",
+      "multiple",
+      "other"
+    ]
+  },
+  "anti_label_rules": [
+    "No technique label may be a named author.",
+    "No quality annotation may encode prestige, awards, sales, or canonical status as proof of local craft superiority.",
+    "No passage is globally positive or negative outside its declared function and conditioning context.",
+    "Technique absence is not an error unless the governing brief or intended effect makes it relevant."
+  ]
+}
