@@ -17,7 +17,7 @@ permissions:
 
 concurrency:
   group: learning-qual-001-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   qualify:
@@ -80,9 +80,8 @@ jobs:
         shell: cmd
         run: |
           cd /d "%GITHUB_WORKSPACE%\learning\lab"
-          python qualification_qual001_impl016.py --output "%EVIDENCE_DIR%\qualification_receipt_qual001_impl016.json" >"%EVIDENCE_DIR%\qual001-impl016-stdout.txt" 2>&1
+          python qualification_qual001_impl016.py --output "%EVIDENCE_DIR%\qualification_receipt_qual001_impl016.json"
           set "IMPL016_RC=%ERRORLEVEL%"
-          type "%EVIDENCE_DIR%\qual001-impl016-stdout.txt"
           if exist "%EVIDENCE_DIR%\qualification_receipt_qual001_impl016.json" type "%EVIDENCE_DIR%\qualification_receipt_qual001_impl016.json"
           exit /b %IMPL016_RC%
 
