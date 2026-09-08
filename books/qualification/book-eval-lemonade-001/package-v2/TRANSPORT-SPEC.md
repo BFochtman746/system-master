@@ -1,0 +1,1 @@
+Transport inputs are split only to accommodate repository connector transfer. The split representation is never executed directly. A-01 reconstructs into RUNNER_TEMP, validates canonical SHA-256, then executes the reconstructed artifact. Any mismatch fails closed before model qualification.
