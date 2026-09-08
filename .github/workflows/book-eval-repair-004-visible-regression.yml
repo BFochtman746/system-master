@@ -1,0 +1,139 @@
+name: BOOK-EVAL-LEMONADE-001 REPAIR-004 Visible Regression
+
+on:
+  push:
+    branches:
+      - book-eval-lemonade-001-blind-resume-003-adapter-repair
+    paths:
+      - ".github/workflows/book-eval-repair-004-visible-regression.yml"
+      - "qualification/book-eval-lemonade-001/repair004-src/**"
+      - "qualification/book-eval-lemonade-001/repair004-test-src/**"
+      - "qualification/book-eval-lemonade-001/repair004/visible-regression-case-ids.txt"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: book-eval-repair004-visible-regression
+  cancel-in-progress: false
+
+jobs:
+  qualify:
+    name: Run repaired E4 on 48-case visible regression
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 90
+
+    steps:
+      - name: Checkout exact repair branch
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 1
+
+      - name: Verify, compile, and run REPAIR-004
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $ExpectedJar = 'fedd5bfcb122c4c0d5fd7a7912574705c582596978dd60796e804b26e7549248'
+          $ExpectedCorpus = '30bd9d0b2c348b33e6b17a81d639e64c7e7e8eef63d7d6c0bfc3175e94fe2b53'
+          $ExpectedOntology = '3daf139be2c35eb706ad0d0a1b6275a72c1ff18c21bf09d97eb26c3eadd7b5d6'
+          $ExpectedExecution = '7d9348ecdad344d8aa73dc0fe984aef85559084610504f50f8d35ef6a001fb06'
+
+          $Bundle = Join-Path $env:GITHUB_WORKSPACE 'qualification\book-eval-lemonade-001'
+          $Evidence = Join-Path $env:RUNNER_TEMP ('book-eval-repair004-visible-' + $env:GITHUB_RUN_ID)
+          $Stage = Join-Path $Evidence 'frozen-inputs'
+          $Classes = Join-Path $Evidence 'classes'
+          $Persistent = 'C:\AI Test Kit\Books Testing\BOOK_EVAL_LEMONADE_001_REPAIR004_VISIBLE_V1'
+          $Identity = 'C:\AI Test Kit\Books Testing\BOOK_EVAL_LEMONADE_001_A01_BLIND_RUN_GPT_OSS_120B_E5_REPAIR_V1\LEMONADE-RUNTIME-IDENTITY.json'
+          $Ids = Join-Path $Bundle 'repair004\visible-regression-case-ids.txt'
+          New-Item -ItemType Directory -Force -Path $Evidence,$Stage,$Classes,$Persistent | Out-Null
+          "EVIDENCE_DIR=$Evidence" | Out-File -FilePath $env:GITHUB_ENV -Encoding ascii -Append
+
+          function Sha([string]$Path) { (Get-FileHash -Algorithm SHA256 -LiteralPath $Path).Hash.ToLowerInvariant() }
+          function Reconstruct([string]$Dir,[string]$Out,[string]$Expected) {
+            $parts = @(Get-ChildItem -LiteralPath $Dir -File -Filter 'part-*' | Sort-Object Name)
+            if ($parts.Count -eq 0) { throw "no transport parts in $Dir" }
+            $b64 = [string]::Concat(@($parts | ForEach-Object { [IO.File]::ReadAllText($_.FullName,[Text.Encoding]::ASCII) }))
+            [IO.File]::WriteAllBytes($Out,[Convert]::FromBase64String($b64))
+            if ((Sha $Out) -ne $Expected) { throw "reconstructed hash mismatch for $Out" }
+          }
+
+          if (-not (Test-Path -LiteralPath $Identity -PathType Leaf)) { throw 'runtime identity missing' }
+          if (Test-Path (Join-Path $Bundle 'scoring-private')) { throw 'scoring-private material present in repository bundle' }
+          if (Test-Path (Join-Path $Persistent 'scoring-private')) { throw 'scoring-private material present in targeted run root' }
+
+          Reconstruct (Join-Path $Bundle 'jar-base64-v2') (Join-Path $Stage 'book-eval-lemonade.jar') $ExpectedJar
+          Reconstruct (Join-Path $Bundle 'provider-visible-corpus-base64-v2') (Join-Path $Stage 'BOOK-EVAL-CORPUS-INPUT-v2.jsonl') $ExpectedCorpus
+          Reconstruct (Join-Path $Bundle 'provider-ontology-base64-v2') (Join-Path $Stage 'BOOK-EVAL-PROVIDER-ONTOLOGY-v2.json') $ExpectedOntology
+          Reconstruct (Join-Path $Bundle 'runner-private-base64-v2') (Join-Path $Stage 'RUNNER-PRIVATE-EXECUTION-MANIFEST-v2.json') $ExpectedExecution
+          $Jar = Join-Path $Stage 'book-eval-lemonade.jar'
+          $Input = Join-Path $Stage 'BOOK-EVAL-CORPUS-INPUT-v2.jsonl'
+          $Ontology = Join-Path $Stage 'BOOK-EVAL-PROVIDER-ONTOLOGY-v2.json'
+          $Execution = Join-Path $Stage 'RUNNER-PRIVATE-EXECUTION-MANIFEST-v2.json'
+
+          $selectedIds = @(Get-Content -LiteralPath $Ids | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+          if ($selectedIds.Count -ne 48 -or @($selectedIds | Select-Object -Unique).Count -ne 48) { throw 'visible selection must contain 48 unique IDs' }
+          $exec = Get-Content -LiteralPath $Execution -Raw | ConvertFrom-Json
+          $selectedCases = @($exec.cases | Where-Object { $selectedIds -contains [string]$_.case_id })
+          if ($selectedCases.Count -ne 48) { throw 'selection IDs do not bind to 48 execution-manifest cases' }
+          $wrongSplit = @($selectedCases | Where-Object { [string]$_.split -ne 'VISIBLE_REGRESSION' })
+          if ($wrongSplit.Count -ne 0) { throw 'selection contains non-visible-regression cases' }
+
+          $Policy = Join-Path $Bundle 'repair004-src\org\systemmaster\tools\booklab\BookEvalRepair004PromptPolicy.java'
+          $Runner = Join-Path $Bundle 'repair004-src\org\systemmaster\tools\booklab\BookEvalRepair004VisibleRegressionRun.java'
+          $Tests = Join-Path $Bundle 'repair004-test-src\org\systemmaster\tools\booklab\BookEvalRepair004PromptPolicyTests.java'
+          & javac -Xlint:all -Werror -cp $Jar -d $Classes $Policy $Runner $Tests
+          if ($LASTEXITCODE -ne 0) { throw 'REPAIR-004 compilation failed' }
+          $Classpath = $Classes + ';' + $Jar
+          & java -cp $Classpath org.systemmaster.tools.booklab.BookEvalRepair004PromptPolicyTests $Ontology
+          if ($LASTEXITCODE -ne 0) { throw 'REPAIR-004 prompt policy tests failed' }
+
+          curl.exe --fail --silent --show-error -X POST 'http://127.0.0.1:13305/v1/load' -H 'Content-Type: application/json' --data-binary ('@' + (Join-Path $Bundle 'lemonade-load-request.json')) -o (Join-Path $Evidence 'model-load.json')
+          if ($LASTEXITCODE -ne 0) { throw 'model load failed' }
+
+          $env:BOOK_EVAL_MODEL = 'user.gpt-oss-120b-MXFP4'
+          $env:BOOK_EVAL_ENDPOINT = 'http://127.0.0.1:13305/v1/responses'
+          $env:BOOK_EVAL_MAX_OUTPUT_TOKENS = '1200'
+          $env:BOOK_EVAL_TEMPERATURE = '0'
+          $env:BOOK_EVAL_MAX_ATTEMPTS = '3'
+          $env:BOOK_EVAL_TIMEOUT_SECONDS = '180'
+
+          $oldPreference = $ErrorActionPreference
+          try {
+            $ErrorActionPreference = 'Continue'
+            & java -cp $Classpath org.systemmaster.tools.booklab.BookEvalRepair004VisibleRegressionRun $Input $Ontology $Ids $Identity $Persistent 2>&1 | Tee-Object -FilePath (Join-Path $Evidence 'targeted-run.log')
+            $javaExit = $LASTEXITCODE
+          } finally {
+            $ErrorActionPreference = $oldPreference
+          }
+          if ($javaExit -ne 0) { throw "REPAIR-004 targeted runner failed with exit $javaExit" }
+
+          $Output = Join-Path $Persistent 'E4-REPAIR-004-VISIBLE-REGRESSION.jsonl'
+          $Status = Join-Path $Persistent 'REPAIR-004-VISIBLE-STATUS.json'
+          if (-not (Test-Path $Output) -or -not (Test-Path $Status)) { throw 'targeted output/status missing' }
+          if (@(Get-Content -LiteralPath $Output | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }).Count -ne 48) { throw 'targeted output is not 48 cases' }
+          $s = Get-Content -LiteralPath $Status -Raw | ConvertFrom-Json
+          if ([string]$s.state -ne 'VISIBLE_REGRESSION_OUTPUTS_FROZEN') { throw "unexpected targeted state $($s.state)" }
+          if ([bool]$s.scoring_private_accessed) { throw 'targeted run claims scoring-private access' }
+          Copy-Item -LiteralPath $Output -Destination (Join-Path $Evidence 'E4-REPAIR-004-VISIBLE-REGRESSION.jsonl') -Force
+          Copy-Item -LiteralPath $Status -Destination (Join-Path $Evidence 'REPAIR-004-VISIBLE-STATUS.json') -Force
+          @(
+            'objective=BOOK-EVAL-LEMONADE-001-REPAIR-004',
+            'selection=VISIBLE_REGRESSION_ONLY',
+            'selected_cases=48',
+            'frozen_inputs_hash_verified=4/4',
+            'prompt_policy_tests=PASS',
+            'scoring_private_accessed=false',
+            "candidate_fingerprint=$($s.candidate_fingerprint)",
+            "output_sha256=$($s.output_sha256)",
+            'standing=VISIBLE_REGRESSION_OUTPUTS_FROZEN_READY_FOR_POST_FREEZE_SCORING'
+          ) | Set-Content -Encoding UTF8 (Join-Path $Evidence 'qualification-summary.txt')
+          Get-Content (Join-Path $Evidence 'qualification-summary.txt')
+
+      - name: Upload REPAIR-004 visible evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: book-eval-repair004-visible-regression-evidence
+          path: ${{ env.EVIDENCE_DIR }}
+          if-no-files-found: warn
+          retention-days: 30
