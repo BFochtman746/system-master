@@ -1,0 +1,22 @@
+{
+  "contract_id": "LITERARY-PROSE-ENGINE-001-STEP-G-CONTRASTIVE-CRAFT-FOUNDRY-v1",
+  "depends_on": ["STEP-D", "STEP-E", "STEP-F"],
+  "purpose": "Generate controlled synthetic or authorized contrasts that vary one or a small number of craft decisions while holding passage state constant, and record technique/effect evidence without named-author imitation.",
+  "artifact_families": ["CONTRASTIVE_PAIR", "HARD_NEGATIVE", "REVISION_TRANSFORM", "TECHNIQUE_PROFILE", "REFERENCE_STATE"],
+  "core_rules": [
+    "Every contrast binds one immutable reference passage-state id.",
+    "A qualified pair changes one primary craft variable or an explicitly bounded interacting set.",
+    "Uncontrolled semantic, canon, POV, character-knowledge, protected-language, or voice changes invalidate the pair as positive evidence.",
+    "Hard negatives preserve failure evidence and must not be silently discarded.",
+    "Technique effects are conditioned hypotheses, not universal quality claims.",
+    "Synthetic contrasts may use invented text only; user manuscript text is not required for STEP-G qualification.",
+    "Named-author targeting, nearest-author objectives, and prestige imitation are prohibited.",
+    "A transform specifies an operation and preservation obligations; it is not authority to apply that operation to a manuscript.",
+    "Ambiguous or multi-variable contrasts remain diagnostic-only unless separately decomposed.",
+    "Pair identity and provenance are deterministic."
+  ],
+  "change_cardinality": {"preferred": 1, "maximum_without_interaction_justification": 2},
+  "pair_outcomes": ["QUALIFIED_CONTRAST", "HARD_NEGATIVE", "DIAGNOSTIC_ONLY", "REJECT"],
+  "effect_states": ["SUPPORTED", "MIXED", "NOT_SUPPORTED", "UNRESOLVED"],
+  "named_author_imitation_allowed": false
+}
