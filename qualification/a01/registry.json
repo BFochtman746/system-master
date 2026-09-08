@@ -1,5 +1,5 @@
 {
-  "registry_version": 2,
+  "registry_version": 3,
   "qualifications": {
     "A01-CONTROL-PLANE-SELFTEST": {
       "workstream_id": "SYSTEM-MASTER",
@@ -19,6 +19,15 @@
       "evidence_artifact": "system-master-continuity-target-windows-reboot",
       "allowed_post_actions": ["windows_reboot"],
       "description": "Run the repository-owned TARGET_WINDOWS_REBOOT ARM or VERIFY phase while preserving durable reboot handoff evidence. ARM may request the registered windows_reboot post-action only after its receipt and evidence are produced."
+    },
+    "LITERARY-RESEARCH-OVERNIGHT-DEEP-HARVEST": {
+      "workstream_id": "LITERARY-PROSE",
+      "gate_class": "focused",
+      "source": "subject",
+      "executable": "node",
+      "args": [".github/scripts/a01-literary-research-deep-harvest.js"],
+      "evidence_artifact": "literary-research-overnight-deep",
+      "description": "Run the rights-aware, time-budgeted Literary Craft Academy research harvest from an exact Literary Prose subject SHA. Collect bibliographic metadata, OA/license signals, query provenance, public-domain candidate metadata, and curated rights-policy evidence without bulk article/book body acquisition or named-author imitation targets."
     }
   }
 }
