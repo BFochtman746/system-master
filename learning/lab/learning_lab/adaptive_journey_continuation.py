@@ -7,7 +7,8 @@ from typing import Any, Dict, Sequence, Tuple
 from .adaptive import MultiSessionDirector
 from .adaptive_entry import AdaptiveEntryJourneyDirector
 from .baseline_diagnostic import BaselineDiagnosticDirector
-from .domain_general import DomainGeneralLearningEngine, DomainGeneralTutorDirector, default_domain_registry
+from .domain_general import DomainGeneralLearningEngine, default_domain_registry
+from .domain_tutor_compat import LegacyCompatibleDomainGeneralTutorDirector
 from .live_open_goal import LiveReplayOpenGoalTutorDirector, NormalizedLiveResearchPort
 from .multi_candidate import StochasticMultiCandidateLearningEngine, StochasticRecordedModelPort
 from .provider_acquisition import OpenGoalInputPacketService
@@ -82,12 +83,12 @@ def _runtime_components(
     if isinstance(domain_key, str) and registry.has_key(domain_key):
         engine = DomainGeneralLearningEngine(repo, registry=registry)
         spec = registry.by_key(domain_key)
-        return engine, spec.behavior_oracle.score, DomainGeneralTutorDirector(repo, engine)
+        return engine, spec.behavior_oracle.score, LegacyCompatibleDomainGeneralTutorDirector(repo, engine)
 
     # Qualified legacy courses predate persisted domain_key. Recover only when the
     # exact desired outcome is already owned by the sealed default domain registry.
-    # Provider-generated/open courses are not silently reclassified here; they fall
-    # through to the provider binding path below.
+    # The tutor receives a runtime-only course view containing the engine-resolved
+    # domain key; the persisted course body and its pinned digest remain untouched.
     desired_outcome = course.get("desired_outcome")
     if isinstance(desired_outcome, str) and desired_outcome.strip():
         try:
@@ -96,7 +97,7 @@ def _runtime_components(
             spec = None
         if spec is not None:
             engine = DomainGeneralLearningEngine(repo, registry=registry)
-            return engine, spec.behavior_oracle.score, DomainGeneralTutorDirector(repo, engine)
+            return engine, spec.behavior_oracle.score, LegacyCompatibleDomainGeneralTutorDirector(repo, engine)
 
     return _provider_runtime_components(repo, course=course, learner_id=learner_id, now=now)
 
