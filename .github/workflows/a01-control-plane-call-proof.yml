@@ -1,0 +1,24 @@
+name: A-01 Control Plane Reusable Call Proof
+
+on:
+  push:
+    branches:
+      - system-master/a01-control-plane-call-proof
+    paths:
+      - '.github/workflows/a01-control-plane-call-proof.yml'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  prove-reusable-gateway:
+    uses: ./.github/workflows/a01-control-plane-gateway.yml
+    with:
+      qualification_id: A01-CONTROL-PLANE-SELFTEST
+      workstream_id: SYSTEM-MASTER
+      subject_sha: ${{ github.sha }}
+      origin_ref: ${{ github.ref }}
+      resume_on_pass: Reusable gateway invocation proven; migrate the next active A-01 workstream.
+      resume_on_failure: Diagnose the reusable-call boundary only and rerun the proof.
+      notification_target: originating-workstream
