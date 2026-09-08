@@ -21,10 +21,10 @@ from learning_lab.engine import InjectedCrash
 from learning_lab.repository import digest
 
 ROOT = Path(__file__).resolve().parents[1]
-BASE_CAPTURE = json.loads((ROOT / "sources" / "LIVE_RESEARCH_PYTHON_COMPREHENSIONS_V1.json").read_text())
-BASE_MULTI = json.loads((ROOT / "sources" / "MODEL_GENERATION_PYTHON_COMPREHENSIONS_MULTI_CANDIDATE_V1.json").read_text())
-REFRESH_CAPTURE = json.loads((ROOT / "sources" / "LIVE_RESEARCH_PYTHON_COMPREHENSIONS_V2_REFRESH.json").read_text())
-REFRESH_TRACE = json.loads((ROOT / "sources" / "MODEL_GENERATION_PYTHON_COMPREHENSIONS_REFRESH_V2.json").read_text())
+BASE_CAPTURE = json.loads((ROOT / "sources" / "LIVE_RESEARCH_PYTHON_COMPREHENSIONS_V1.json").read_text(encoding="utf-8"))
+BASE_MULTI = json.loads((ROOT / "sources" / "MODEL_GENERATION_PYTHON_COMPREHENSIONS_MULTI_CANDIDATE_V1.json").read_text(encoding="utf-8"))
+REFRESH_CAPTURE = json.loads((ROOT / "sources" / "LIVE_RESEARCH_PYTHON_COMPREHENSIONS_V2_REFRESH.json").read_text(encoding="utf-8"))
+REFRESH_TRACE = json.loads((ROOT / "sources" / "MODEL_GENERATION_PYTHON_COMPREHENSIONS_REFRESH_V2.json").read_text(encoding="utf-8"))
 GOAL = BASE_MULTI["goal"]
 A = "MODEL-GEN-PY-COMP-MC-A-20260907"
 B = "MODEL-GEN-PY-COMP-MC-B-20260907"

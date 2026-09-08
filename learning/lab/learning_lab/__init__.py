@@ -155,3 +155,14 @@ __all__ += [
     "BASELINE_DIAGNOSTIC_VERSION", "ADAPTIVE_ENTRY_POLICY_VERSION",
     "DiagnosticPolicyError", "BaselineDiagnosticDirector",
 ]
+
+from .adaptive_entry import (
+    ADAPTIVE_ENTRY_JOURNEY_VERSION,
+    RUNTIME_EVIDENCE_PRECEDENCE,
+    AdaptiveEntryJourneyDirector,
+)
+
+__all__ += [
+    "ADAPTIVE_ENTRY_JOURNEY_VERSION", "RUNTIME_EVIDENCE_PRECEDENCE",
+    "AdaptiveEntryJourneyDirector",
+]
