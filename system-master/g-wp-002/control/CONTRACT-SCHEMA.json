@@ -1,0 +1,29 @@
+{
+  "DurableWorkIdentity": {
+    "key": "work_unit_id",
+    "fields": ["task_id","workflow_id","stage_id","work_unit_id","parent_work_unit_id","intent_digest","semantic_owner_ref","created_at","classification"],
+    "invariant": "Identity is immutable; attempt/process/client identifiers are never substituted for work_unit_id."
+  },
+  "RecoveryRecord": {
+    "key": "recovery_id",
+    "unique": ["work_unit_id + active_recovery_epoch"],
+    "fields": ["work_unit_id","expected_work_version","recovery_epoch","state","interruption_ref","classification_ref","recovery_plan_ref","current_claim_ref","checkpoint_ref","external_effect_uncertainty","blocked_reason","created_at","updated_at","version"]
+  },
+  "RecoveryEvent": {
+    "key": "recovery_id + event_seq",
+    "fields": ["event_type","event_time","recorded_at","actor_ref","causation_ref","correlation_ref","payload_digest","evidence_refs"],
+    "invariant": "Append-only; corrections append new events."
+  },
+  "states": ["DETECTED","CLASSIFYING","PLAN_READY","CLAIMED","RECONCILING","RESTORING","RESUMING","VERIFYING","RECOVERED","WAITING_DEPENDENCY","BLOCKED","MANUAL_DECISION","QUARANTINED","TERMINAL_FAILED","CANCELLED_RECONCILED"],
+  "contracts": {
+    "RegisterDurableWorkIdentity": {"inputs":["task_id","workflow_id","stage_id","work_unit_id","intent_digest","semantic_owner_ref"],"idempotency":"work_unit_id + intent_digest","failure":"Same identity/different intent -> reject and alert."},
+    "OpenRecovery": {"inputs":["work_unit_id","expected_work_version","interruption_ref"],"idempotency":"work_unit_id + interruption_dedupe_key","failure":"Concurrent open -> one epoch wins; loser reloads."},
+    "TransitionRecovery": {"inputs":["recovery_id","expected_version","from_state","to_state","reason","evidence_refs"],"idempotency":"command_id","failure":"Stale/illegal transition -> reject without side effect."},
+    "GetRecoveryStatus": {"inputs":["work_unit_id"],"outputs":["recovery_state","user_visible_state","recoverability","progress_basis","checkpoint_age","blockers","evidence_freshness"],"consistency":"Projection with version/freshness; authority remains RecoveryRegistry/domain state.","failure":"Return explicit unavailable/stale/partial metadata; never fabricate authoritative state."}
+  },
+  "transaction_rules": [
+    "RecoveryRecord mutations use expected-version CAS/optimistic concurrency.",
+    "Local RecoveryRecord/RecoveryEvent updates commit in one durable journal frame.",
+    "Serialization/deadlock retries repeat only the safe local transaction and never an external effect."
+  ]
+}
