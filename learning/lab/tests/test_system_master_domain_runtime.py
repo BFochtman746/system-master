@@ -109,7 +109,7 @@ class SystemMasterDomainRuntimeTests(unittest.TestCase):
             domain_key=GIT_DOMAIN_KEY,
             claimed=[],
         ))
-        with self.assertRaisesRegex(ValueError, "ADAPTIVE_ENTRY_JOURNEY_ID_REUSE"):
+        with self.assertRaisesRegex(ValueError, "IDEMPOTENCY_DIGEST_MISMATCH"):
             bridge.dispatch(self.request(
                 request_id="REQ-SCOPE",
                 domain_key=FRACTION_DOMAIN_KEY,
