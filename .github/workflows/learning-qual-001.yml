@@ -73,6 +73,14 @@ jobs:
           if errorlevel 1 (type "%EVIDENCE_DIR%\adaptive-tests.txt" & exit /b 1)
           type "%EVIDENCE_DIR%\adaptive-tests.txt"
 
+      - name: Run IMPL-016 adaptive-entry integration focus
+        shell: cmd
+        run: |
+          cd /d "%GITHUB_WORKSPACE%\learning\lab"
+          python -m unittest tests.test_adaptive_entry_journey -v >"%EVIDENCE_DIR%\adaptive-entry-tests.txt" 2>&1
+          if errorlevel 1 (type "%EVIDENCE_DIR%\adaptive-entry-tests.txt" & exit /b 1)
+          type "%EVIDENCE_DIR%\adaptive-entry-tests.txt"
+
       - name: Run QUAL-001 fail-first closed-loop campaign
         shell: cmd
         run: |
