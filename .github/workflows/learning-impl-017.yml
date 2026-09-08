@@ -1,0 +1,114 @@
+name: LEARNING-LAB-IMPL-017 System Master Runtime Integration
+
+on:
+  push:
+    branches:
+      - learning/impl-017-system-master-runtime-integration
+    paths:
+      - ".github/workflows/learning-impl-017.yml"
+      - "learning/lab/system_master_bridge.py"
+      - "learning/lab/learning_lab/**"
+      - "learning/lab/qualification_qual001_impl016.py"
+      - "learning/lab/tests/test_adaptive_entry_journey.py"
+      - "system-master/f-wp-006/**"
+      - "system-master/learning-integration/impl-017/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: learning-impl-017-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qualify:
+    name: Qualify Learning runtime binding through System Master ExecutionGrant on A-01
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout exact IMPL-017 commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+          clean: true
+
+      - name: Provision pinned Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: '3.13.15'
+          architecture: x64
+          check-latest: false
+
+      - name: Prepare bounded evidence directories
+        shell: cmd
+        run: |
+          set "EVIDENCE_DIR=%RUNNER_TEMP%\learning-impl-017-%GITHUB_RUN_ID%"
+          set "CLASS_DIR=%RUNNER_TEMP%\learning-impl-017-classes-%GITHUB_RUN_ID%"
+          if not exist "%EVIDENCE_DIR%" mkdir "%EVIDENCE_DIR%"
+          if not exist "%CLASS_DIR%" mkdir "%CLASS_DIR%"
+          echo EVIDENCE_DIR=%EVIDENCE_DIR%>>"%GITHUB_ENV%"
+          echo CLASS_DIR=%CLASS_DIR%>>"%GITHUB_ENV%"
+          echo %GITHUB_SHA%>"%EVIDENCE_DIR%\source-commit.txt"
+          echo %RUNNER_NAME%>"%EVIDENCE_DIR%\runner.txt"
+          python --version
+          java -version
+          javac -version
+
+      - name: Compile Learning bridge and package
+        shell: cmd
+        run: |
+          python -m compileall -q learning\lab\learning_lab learning\lab\system_master_bridge.py >"%EVIDENCE_DIR%\python-compile.txt" 2>&1
+          if errorlevel 1 (type "%EVIDENCE_DIR%\python-compile.txt" & exit /b 1)
+          type "%EVIDENCE_DIR%\python-compile.txt"
+
+      - name: Compile System Master grant boundary and Learning adapter
+        shell: cmd
+        run: |
+          javac -d "%CLASS_DIR%" ^
+            system-master\f-wp-006\src\main\java\org\systemmaster\core\ExecutionGrantContracts.java ^
+            system-master\f-wp-006\src\main\java\org\systemmaster\core\ExecutionGrantIssuer.java ^
+            system-master\learning-integration\impl-017\src\main\java\org\systemmaster\learning\LearningCapabilityAdapter.java ^
+            system-master\learning-integration\impl-017\src\test\java\org\systemmaster\learning\Impl017IntegrationQualification.java ^
+            >"%EVIDENCE_DIR%\java-compile.txt" 2>&1
+          if errorlevel 1 (type "%EVIDENCE_DIR%\java-compile.txt" & exit /b 1)
+          type "%EVIDENCE_DIR%\java-compile.txt"
+
+      - name: Run grant-bound Java to Python Learning integration qualification
+        shell: cmd
+        run: |
+          java -cp "%CLASS_DIR%" org.systemmaster.learning.Impl017IntegrationQualification >"%EVIDENCE_DIR%\impl017-integration.txt" 2>&1
+          set "RC=%ERRORLEVEL%"
+          type "%EVIDENCE_DIR%\impl017-integration.txt"
+          exit /b %RC%
+
+      - name: Requalify IMPL-016 orchestration boundary
+        shell: cmd
+        run: |
+          cd /d "%GITHUB_WORKSPACE%\learning\lab"
+          python qualification_qual001_impl016.py --output "%EVIDENCE_DIR%\qualification_receipt_qual001_impl016.json" >"%EVIDENCE_DIR%\impl016-regression.txt" 2>&1
+          set "RC=%ERRORLEVEL%"
+          type "%EVIDENCE_DIR%\impl016-regression.txt"
+          if exist "%EVIDENCE_DIR%\qualification_receipt_qual001_impl016.json" type "%EVIDENCE_DIR%\qualification_receipt_qual001_impl016.json"
+          exit /b %RC%
+
+      - name: Publish IMPL-017 summary
+        if: always()
+        shell: cmd
+        run: |
+          echo ## LEARNING-LAB-IMPL-017>>"%GITHUB_STEP_SUMMARY%"
+          echo Commit: %GITHUB_SHA%>>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\impl017-integration.txt" type "%EVIDENCE_DIR%\impl017-integration.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\qualification_receipt_qual001_impl016.json" type "%EVIDENCE_DIR%\qualification_receipt_qual001_impl016.json">>"%GITHUB_STEP_SUMMARY%"
+
+      - name: Upload IMPL-017 evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: learning-impl-017-evidence
+          path: ${{ runner.temp }}\learning-impl-017-${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 30
