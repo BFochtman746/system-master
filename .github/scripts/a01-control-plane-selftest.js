@@ -18,15 +18,18 @@ const contract = fs.readFileSync(path.join(root, 'qualification/a01/A01-OPERATIN
 const workflow = fs.readFileSync(path.join(root, '.github/workflows/a01-control-plane-gateway.yml'), 'utf8');
 const enforcementWorkflow = fs.readFileSync(path.join(root, '.github/workflows/a01-control-plane-enforcement.yml'), 'utf8');
 
-assert(policy.policy_version >= 2, 'policy v2 required');
+assert(policy.policy_version >= 3, 'policy v3 required');
 assert(policy.canonical_ref === 'main', 'canonical main authority');
 assert(policy.runner.name === 'A-01', 'runner name');
-assert(policy.runner.global_concurrency_group === 'a01-global', 'global concurrency');
+assert(policy.runner.global_concurrency_group === 'a01-global-r2', 'current global concurrency generation');
+assert(policy.runner.concurrency_generation === 2, 'concurrency generation');
 assert(policy.runner.queue_mode === 'max' && policy.runner.queue_capacity === 100, 'global queue policy');
 assert(policy.admission.max_outstanding_per_workstream === 1, 'outstanding limit');
 assert(policy.admission.allow_arbitrary_command_input === false, 'arbitrary commands disabled');
 assert(policy.post_actions.allowed.includes('windows_reboot'), 'registered reboot action');
 assert(policy.post_actions.receipt_before_action === true && policy.post_actions.evidence_upload_before_action === true, 'disruptive action ordering');
+assert(policy.post_actions.windows_reboot_delay_seconds === 30, 'reboot delay');
+assert(policy.post_actions.disruption_settle_seconds === 90, 'hosted settle duration');
 assert(policy.states.includes('A01_PASSED') && policy.states.includes('SUPERSEDED'), 'standing states');
 assert(registry.registry_version >= 2, 'registry v2 required');
 assert(registry.qualifications['A01-CONTROL-PLANE-SELFTEST'].source === 'control_plane', 'selftest source');
@@ -36,15 +39,21 @@ assert(receiptSchema.required.includes('subject_sha') && receiptSchema.required.
 assert(ticketSchema.required.includes('resume_on_pass') && ticketSchema.required.includes('notification_target'), 'return routing fields');
 assert(bootstrap.includes('A01-OPERATING-CONTRACT.md'), 'bootstrap authority link');
 assert(contract.includes('No valid receipt') || contract.includes('without a valid control-plane receipt'), 'receipt gate contract');
-assert(workflow.includes('group: a01-global'), 'shared concurrency in gateway');
+assert(contract.includes('hosted settle'), 'hosted disruption settle contract');
+assert(workflow.includes('group: a01-global-r2'), 'shared concurrency generation in gateway');
 assert(workflow.includes('queue: max'), 'global pending queue');
 assert(workflow.includes('repository: ${{ job.workflow_repository }}'), 'called workflow must checkout its own authority source');
 assert(workflow.includes('ref: ${{ job.workflow_sha }}'), 'called workflow must pin its own authority SHA');
 assert(workflow.includes('path: control-plane') && workflow.includes('path: subject'), 'control/subject checkout split');
 assert(workflow.includes("steps.control.outputs.post_action == 'windows_reboot'"), 'registered disruptive handoff');
-assert(workflow.indexOf('Upload authoritative A-01 evidence') < workflow.indexOf('Apply registered Windows reboot handoff'), 'evidence must upload before reboot');
+assert(workflow.indexOf('Upload authoritative A-01 evidence') < workflow.indexOf('Schedule registered Windows reboot handoff'), 'evidence must upload before reboot scheduling');
+assert(workflow.includes('shutdown.exe /r /t 30'), 'reboot must be delayed so A-01 job can finish');
+assert(workflow.includes('Hold A-01 admission through registered reboot window'), 'hosted settle job missing');
+assert(workflow.includes("runs-on: ubuntu-latest"), 'hosted settle runner missing');
+assert(workflow.includes('sleep 90'), 'hosted settle interval missing');
 assert(workflow.includes('runs-on: [self-hosted, Windows, X64]'), 'A-01 runner labels');
 assert(!workflow.includes('qualifier_command'), 'gateway must not accept arbitrary qualifier command');
+assert(!workflow.includes("shutdown.exe /r /t 0"), 'immediate reboot would recreate stale runner bookkeeping');
 assert(legacy.version === 1 && Object.keys(legacy.workflows).length > 0, 'legacy direct-workflow freeze missing');
 assert(enforcementWorkflow.includes('runs-on: ubuntu-latest'), 'enforcement must not consume A-01');
 assert(enforcementWorkflow.includes('a01-control-plane-enforce.js scan'), 'enforcement scan missing');
@@ -59,6 +68,6 @@ assert(enforcementScan.status === 0, `enforcement scan failed: ${enforcementScan
 const evidenceDir = process.env.A01_EVIDENCE_DIR;
 if (evidenceDir) {
   fs.mkdirSync(evidenceDir, { recursive: true });
-  fs.writeFileSync(path.join(evidenceDir, 'selftest.txt'), 'A01_CONTROL_PLANE_SELFTEST=PASS\nA01_ENFORCEMENT=PASS\nA01_GLOBAL_QUEUE=MAX\nA01_CROSS_REF_AUTHORITY=PASS\nA01_DISRUPTIVE_HANDOFF_POLICY=PASS\n');
+  fs.writeFileSync(path.join(evidenceDir, 'selftest.txt'), 'A01_CONTROL_PLANE_SELFTEST=PASS\nA01_ENFORCEMENT=PASS\nA01_GLOBAL_QUEUE=MAX\nA01_CONCURRENCY_GENERATION=2\nA01_CROSS_REF_AUTHORITY=PASS\nA01_DISRUPTIVE_SETTLE=PASS\n');
 }
 console.log('A01_CONTROL_PLANE_SELFTEST=PASS');

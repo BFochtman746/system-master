@@ -1,11 +1,12 @@
 {
-  "policy_version": 2,
+  "policy_version": 3,
   "control_plane_id": "A01-CONTROL-PLANE-001",
   "canonical_ref": "main",
   "runner": {
     "name": "A-01",
     "required_labels": ["self-hosted", "Windows", "X64"],
-    "global_concurrency_group": "a01-global",
+    "global_concurrency_group": "a01-global-r2",
+    "concurrency_generation": 2,
     "queue_mode": "max",
     "queue_capacity": 100
   },
@@ -33,7 +34,10 @@
     "allowed": ["windows_reboot"],
     "receipt_before_action": true,
     "evidence_upload_before_action": true,
-    "verification_required_after_disruptive_action": true
+    "verification_required_after_disruptive_action": true,
+    "windows_reboot_delay_seconds": 30,
+    "disruption_settle_seconds": 90,
+    "strategy": "schedule_reboot_then_finish_a01_job_while_hosted_settle_job_preserves_global_admission_lock"
   },
   "states": [
     "BUILDING",
@@ -51,7 +55,8 @@
   "result_classes": ["PASS", "SUBJECT_FAILURE", "INFRA_FAILURE", "CONTROL_PLANE_FAILURE"],
   "stale_request_policy": {
     "queued_superseded_subject": "SUPERSEDE",
-    "running_superseded_subject": "FINISH_IF_EVIDENCE_USEFUL"
+    "running_superseded_subject": "FINISH_IF_EVIDENCE_USEFUL",
+    "disconnected_disruptive_run": "ROTATE_CONCURRENCY_GENERATION_ONLY_AFTER_EVIDENCE_PRESERVED_AND_REPAIR_PROVEN"
   },
   "receipt": {
     "schema": "qualification/a01/schema/qualification-receipt.schema.json",

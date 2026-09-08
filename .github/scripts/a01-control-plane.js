@@ -27,7 +27,7 @@ function validate() {
   readJson(RETURN_SCHEMA);
   assert(policy.control_plane_id === 'A01-CONTROL-PLANE-001', 'unexpected control_plane_id');
   assert(policy.canonical_ref === 'main', 'canonical_ref must be main');
-  assert(policy.runner.global_concurrency_group === 'a01-global', 'global concurrency must be a01-global');
+  assert(typeof policy.runner.global_concurrency_group === 'string' && policy.runner.global_concurrency_group.startsWith('a01-global'), 'global concurrency group must remain in the a01-global namespace');
   assert(policy.admission.allow_arbitrary_command_input === false, 'arbitrary commands must remain disabled');
   assert(policy.admission.require_registered_qualification === true, 'registered qualification must be required');
   assert(registry.registry_version >= 2, 'registry_version must be >= 2');

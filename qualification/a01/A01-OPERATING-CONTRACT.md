@@ -65,7 +65,11 @@ A registry entry MUST declare its qualifier `source` as either `control_plane` o
 
 ## Registered disruptive handoff
 
-A qualification that must intentionally disrupt A-01, such as a genuine Windows reboot, MAY request only a policy- and registry-approved post action. The qualifier MUST first finish its non-disruptive preparation and produce a PASS receipt. The gateway MUST upload that receipt and evidence before applying the disruptive action. A later verification phase MUST prove that the disruptive action actually occurred; the pre-action receipt alone does not prove the reboot or authorize production.
+A qualification that must intentionally disrupt A-01, such as a genuine Windows reboot, MAY request only a policy- and registry-approved post action. The qualifier MUST first finish its non-disruptive preparation and produce a PASS receipt. The gateway MUST upload that receipt and evidence before scheduling the disruptive action. A later verification phase MUST prove that the disruptive action actually occurred; the pre-action receipt alone does not prove the reboot or authorize production.
+
+For `windows_reboot`, the gateway MUST NOT reboot immediately while the A-01 worker is still the only process capable of reporting job completion. It MUST schedule the reboot with the policy-defined delay, allow the A-01 qualification job to finish cleanly, and keep the workflow-level global admission lock alive in a GitHub-hosted settle job for the policy-defined reboot window. Only after that hosted settle window completes may another qualification acquire the current A-01 global concurrency generation. This prevents a deliberate reboot from leaving a stale self-hosted job holding the shared queue.
+
+A concurrency generation may be rotated only to recover from a proven stale historical lock after the affected qualification's receipt and evidence are safely preserved and the replacement behavior has been qualified. A generation rotation is an infrastructure recovery action, not a shortcut around a genuinely running A-01 job.
 
 No workstream may inject an arbitrary post-action command. The only permitted actions are those explicitly allowed by the active policy and by that qualification's registry entry.
 

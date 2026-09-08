@@ -64,7 +64,7 @@ permissions:
   actions: read
 
 concurrency:
-  group: a01-global
+  group: a01-global-r2
   queue: max
   cancel-in-progress: false
 
@@ -73,6 +73,8 @@ jobs:
     name: A-01 registered qualification
     runs-on: [self-hosted, Windows, X64]
     timeout-minutes: 30
+    outputs:
+      post_action: ${{ steps.control.outputs.post_action }}
     env:
       A01_QUALIFICATION_ID: ${{ inputs.qualification_id || 'A01-CONTROL-PLANE-SELFTEST' }}
       A01_WORKSTREAM_ID: ${{ inputs.workstream_id || 'SYSTEM-MASTER' }}
@@ -145,11 +147,24 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
-      - name: Apply registered Windows reboot handoff
+      - name: Schedule registered Windows reboot handoff
         if: steps.control.outcome == 'success' && steps.control.outputs.post_action == 'windows_reboot'
         shell: powershell
         run: |
-          & shutdown.exe /r /t 0 /d p:4:1 /c 'System Master registered A-01 qualification reboot handoff'
-          if ($LASTEXITCODE -ne 0) { throw "WINDOWS_REBOOT_COMMAND_FAILED:$LASTEXITCODE" }
-          Start-Sleep -Seconds 120
-          throw 'WINDOWS_REBOOT_NOT_OBSERVED_FROM_CONTROL_PLANE'
+          & shutdown.exe /r /t 30 /d p:4:1 /c 'System Master registered A-01 qualification reboot handoff'
+          if ($LASTEXITCODE -ne 0) { throw "WINDOWS_REBOOT_SCHEDULE_FAILED:$LASTEXITCODE" }
+          Write-Host 'WINDOWS_REBOOT_SCHEDULED delay_seconds=30; A-01 job will finish cleanly before reboot.'
+
+  disruptive-settle:
+    name: Hold A-01 admission through registered reboot window
+    needs: qualify
+    if: needs.qualify.outputs.post_action == 'windows_reboot'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Preserve global admission lock while A-01 reboots
+        shell: bash
+        run: |
+          echo 'Registered Windows reboot scheduled; preserving a01-global-r2 admission lock for 90 seconds.'
+          sleep 90
+          echo 'Registered reboot settle window complete; verification may now acquire A-01.'
