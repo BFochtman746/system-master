@@ -246,6 +246,10 @@ def _start_open_goal_adaptive_entry(request: Mapping[str, Any]) -> dict[str, Any
     course_id = course_result["course_id"]
     course = engine.course(course_id)
     domain_key = course["domain_key"]
+    if not engine.registry.has_key(domain_key):
+        # Public course-resolution path rehydrates a persisted dynamic domain after
+        # process restart/replay without rebuilding or mutating the sealed course.
+        engine.next_action(learner_id, course_id, now=now)
     spec = engine.registry.by_key(domain_key)
     runtime, allowed_skill_ids = _journey_result(
         request=request,
