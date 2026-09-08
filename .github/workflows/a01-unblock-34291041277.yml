@@ -1,0 +1,23 @@
+name: A-01 Unblock Exact ARM Run 34291041277
+
+on:
+  push:
+    branches:
+      - system-master/a01-unblock-34291041277
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  cancel-exact-arm:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cancel exact receipt-preserved ARM run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          gh api --method POST "repos/${REPO}/actions/runs/34291041277/cancel"
+          echo "Cancelled exact A-01 ARM run 34291041277 after receipt/evidence preservation."
