@@ -1,0 +1,109 @@
+name: LEARNING-LAB-PILOT-001 Evidence Readiness
+
+on:
+  push:
+    branches:
+      - learning/pilot-001-real-learner-closed-loop
+    paths:
+      - ".github/workflows/learning-pilot-001.yml"
+      - "learning/lab/learning_lab/real_learner_pilot.py"
+      - "learning/lab/tests/test_real_learner_pilot.py"
+      - "learning/lab/qualification_pilot001.py"
+      - "learning/lab/qualification_qual001.py"
+      - "learning/lab/qualification_qual001_impl016.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: learning-pilot-001-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qualify:
+    name: Qualify real-learner evidence readiness on A-01
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout exact pilot commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+          clean: true
+
+      - name: Provision pinned Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: "3.13.15"
+          architecture: "x64"
+          check-latest: false
+
+      - name: Prepare evidence directory
+        shell: cmd
+        run: |
+          set "EVIDENCE_DIR=%RUNNER_TEMP%\learning-pilot-001-%GITHUB_RUN_ID%"
+          if not exist "%EVIDENCE_DIR%" mkdir "%EVIDENCE_DIR%"
+          echo EVIDENCE_DIR=%EVIDENCE_DIR%>>"%GITHUB_ENV%"
+          where python
+          python --version
+          echo %GITHUB_SHA%>"%EVIDENCE_DIR%\source-commit.txt"
+          echo %RUNNER_NAME%>"%EVIDENCE_DIR%\runner.txt"
+
+      - name: Compile pilot and inherited qualification harnesses
+        shell: cmd
+        run: |
+          cd /d "%GITHUB_WORKSPACE%\learning\lab"
+          python -m compileall -q learning_lab qualification_pilot001.py qualification_qual001.py qualification_qual001_impl016.py >"%EVIDENCE_DIR%\compile.txt" 2>&1
+          if errorlevel 1 (type "%EVIDENCE_DIR%\compile.txt" & exit /b 1)
+          type "%EVIDENCE_DIR%\compile.txt"
+
+      - name: Run PILOT-001 instrumentation qualification
+        shell: cmd
+        run: |
+          cd /d "%GITHUB_WORKSPACE%\learning\lab"
+          python qualification_pilot001.py --output "%EVIDENCE_DIR%\qualification_receipt_pilot001.json" >"%EVIDENCE_DIR%\pilot001-stdout.txt" 2>&1
+          set "PILOT_RC=%ERRORLEVEL%"
+          type "%EVIDENCE_DIR%\pilot001-stdout.txt"
+          if exist "%EVIDENCE_DIR%\qualification_receipt_pilot001.json" type "%EVIDENCE_DIR%\qualification_receipt_pilot001.json"
+          exit /b %PILOT_RC%
+
+      - name: Requalify IMPL-016 orchestration boundary
+        shell: cmd
+        run: |
+          cd /d "%GITHUB_WORKSPACE%\learning\lab"
+          python qualification_qual001_impl016.py --output "%EVIDENCE_DIR%\qualification_receipt_qual001_impl016.json"
+
+      - name: Requalify QUAL-001 closed-loop boundary
+        shell: cmd
+        run: |
+          cd /d "%GITHUB_WORKSPACE%\learning\lab"
+          python qualification_qual001.py --output "%EVIDENCE_DIR%\qualification_receipt_qual001.json" >"%EVIDENCE_DIR%\qual001-stdout.txt" 2>&1
+          set "QUAL_RC=%ERRORLEVEL%"
+          type "%EVIDENCE_DIR%\qual001-stdout.txt"
+          if exist "%EVIDENCE_DIR%\qualification_receipt_qual001.json" type "%EVIDENCE_DIR%\qualification_receipt_qual001.json"
+          exit /b %QUAL_RC%
+
+      - name: Publish pilot summary
+        if: always()
+        shell: cmd
+        run: |
+          echo ## LEARNING-LAB-PILOT-001>>"%GITHUB_STEP_SUMMARY%"
+          echo Commit: %GITHUB_SHA%>>"%GITHUB_STEP_SUMMARY%"
+          if defined EVIDENCE_DIR if exist "%EVIDENCE_DIR%\qualification_receipt_pilot001.json" (
+            echo ~~~json>>"%GITHUB_STEP_SUMMARY%"
+            type "%EVIDENCE_DIR%\qualification_receipt_pilot001.json">>"%GITHUB_STEP_SUMMARY%"
+            echo ~~~>>"%GITHUB_STEP_SUMMARY%"
+          )
+
+      - name: Upload pilot evidence
+        if: always() && env.EVIDENCE_DIR != ''
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: learning-pilot-001-evidence
+          path: ${{ env.EVIDENCE_DIR }}
+          if-no-files-found: error
+          retention-days: 30
