@@ -1,0 +1,108 @@
+name: BOOK-EVAL-LEMONADE-001 E5 Adapter Diagnostic 003
+
+on:
+  push:
+    branches:
+      - book-eval-lemonade-001-blind-resume-003-adapter-diagnostic
+    paths:
+      - ".github/workflows/book-eval-blind-resume-003-adapter-diagnostic.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: book-eval-adapter-diagnostic-003
+  cancel-in-progress: false
+
+jobs:
+  diagnose:
+    name: Capture first missing E5 raw response without mutating state
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout exact diagnostic branch
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 1
+
+      - name: Run one-shot read-only adapter diagnostic
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $ExpectedJar = 'fedd5bfcb122c4c0d5fd7a7912574705c582596978dd60796e804b26e7549248'
+          $ExpectedCorpus = '30bd9d0b2c348b33e6b17a81d639e64c7e7e8eef63d7d6c0bfc3175e94fe2b53'
+          $ExpectedOntology = '3daf139be2c35eb706ad0d0a1b6275a72c1ff18c21bf09d97eb26c3eadd7b5d6'
+          $ExpectedExecution = '7d9348ecdad344d8aa73dc0fe984aef85559084610504f50f8d35ef6a001fb06'
+          $ExpectedE4 = 'a5a5a3d25b36f50b8e667e22137fefea88a1b12e0d1c1812d6cc1cdd782e8b9c'
+          $Bundle = Join-Path $env:GITHUB_WORKSPACE 'qualification\book-eval-lemonade-001'
+          $RunRoot = 'C:\AI Test Kit\Books Testing\BOOK_EVAL_LEMONADE_001_A01_BLIND_RUN_GPT_OSS_120B'
+          $E4 = Join-Path $RunRoot 'E4-SPECIALIST-v2-FROZEN.jsonl'
+          $E5 = Join-Path $RunRoot 'E5-PANEL-v2-FROZEN.jsonl'
+          $RuntimeIdentity = Join-Path $RunRoot 'LEMONADE-RUNTIME-IDENTITY.json'
+          $Evidence = Join-Path $env:RUNNER_TEMP ("book-eval-adapter-diagnostic-003-" + $env:GITHUB_RUN_ID)
+          $Stage = Join-Path $Evidence 'frozen-inputs'
+          $Classes = Join-Path $Evidence 'classes'
+          New-Item -ItemType Directory -Force -Path $Stage,$Classes | Out-Null
+          "EVIDENCE_DIR=$Evidence" | Out-File -FilePath $env:GITHUB_ENV -Encoding ascii -Append
+
+          function Sha([string]$Path) { return (Get-FileHash -Algorithm SHA256 -LiteralPath $Path).Hash.ToLowerInvariant() }
+          function Reconstruct([string]$Dir,[string]$Out,[string]$Expected) {
+            $parts = @(Get-ChildItem -LiteralPath $Dir -File -Filter 'part-*' | Sort-Object Name)
+            if ($parts.Count -eq 0) { throw "no transport parts in $Dir" }
+            $b64 = [string]::Concat(@($parts | ForEach-Object { [IO.File]::ReadAllText($_.FullName,[Text.Encoding]::ASCII) }))
+            [IO.File]::WriteAllBytes($Out,[Convert]::FromBase64String($b64))
+            $actual = Sha $Out
+            if ($actual -ne $Expected) { throw "reconstructed hash mismatch for $Out" }
+          }
+
+          if (-not (Test-Path $E4) -or -not (Test-Path $E5) -or -not (Test-Path $RuntimeIdentity)) { throw 'persistent 160/117 state is missing' }
+          $e4Before = Sha $E4
+          $e5Before = Sha $E5
+          if ($e4Before -ne $ExpectedE4) { throw 'E4 precondition hash mismatch' }
+          $e4Count = @(Get-Content -LiteralPath $E4).Count
+          $e5Count = @(Get-Content -LiteralPath $E5).Count
+          if ($e4Count -ne 160 -or $e5Count -ne 117) { throw "expected 160/117 state, got $e4Count/$e5Count" }
+
+          Reconstruct (Join-Path $Bundle 'jar-base64-v2') (Join-Path $Stage 'book-eval-lemonade.jar') $ExpectedJar
+          Reconstruct (Join-Path $Bundle 'provider-visible-corpus-base64-v2') (Join-Path $Stage 'BOOK-EVAL-CORPUS-INPUT-v2.jsonl') $ExpectedCorpus
+          Reconstruct (Join-Path $Bundle 'provider-ontology-base64-v2') (Join-Path $Stage 'BOOK-EVAL-PROVIDER-ONTOLOGY-v2.json') $ExpectedOntology
+          Reconstruct (Join-Path $Bundle 'runner-private-base64-v2') (Join-Path $Stage 'RUNNER-PRIVATE-EXECUTION-MANIFEST-v2.json') $ExpectedExecution
+
+          $Jar = Join-Path $Stage 'book-eval-lemonade.jar'
+          $Source = Join-Path $Bundle 'diagnostic-src\org\systemmaster\tools\booklab\BookEvalLemonadeAdapterDiagnostic003.java'
+          & javac -cp $Jar -d $Classes $Source
+          if ($LASTEXITCODE -ne 0) { throw 'diagnostic helper compilation failed' }
+
+          curl.exe --fail --silent --show-error -X POST 'http://127.0.0.1:13305/v1/load' -H 'Content-Type: application/json' --data-binary ("@" + (Join-Path $Bundle 'lemonade-load-request.json')) -o (Join-Path $Evidence 'model-load.json')
+          if ($LASTEXITCODE -ne 0) { throw 'model load failed' }
+
+          $env:BOOK_EVAL_MODEL = 'user.gpt-oss-120b-MXFP4'
+          $env:BOOK_EVAL_ENDPOINT = 'http://127.0.0.1:13305/v1/responses'
+          $Raw = Join-Path $Evidence 'RAW-FIRST-MISSING-E5-RESPONSE.json'
+          $DiagLog = Join-Path $Evidence 'adapter-diagnostic-003.txt'
+          $cp = $Classes + ';' + $Jar
+          & java -cp $cp org.systemmaster.tools.booklab.BookEvalLemonadeAdapterDiagnostic003 `
+            (Join-Path $Stage 'BOOK-EVAL-CORPUS-INPUT-v2.jsonl') `
+            (Join-Path $Stage 'BOOK-EVAL-PROVIDER-ONTOLOGY-v2.json') `
+            (Join-Path $Stage 'RUNNER-PRIVATE-EXECUTION-MANIFEST-v2.json') `
+            $E5 $RuntimeIdentity $Raw *> $DiagLog
+          if ($LASTEXITCODE -ne 0) { Get-Content $DiagLog; throw 'one-shot adapter diagnostic failed' }
+
+          $e4After = Sha $E4
+          $e5After = Sha $E5
+          if ($e4After -ne $e4Before -or $e5After -ne $e5Before) { throw 'persistent blind state mutated during diagnostic' }
+          Add-Content -LiteralPath $DiagLog -Value 'persistent_state_mutated=false'
+          Add-Content -LiteralPath $DiagLog -Value 'provider_calls_executed=1'
+          Add-Content -LiteralPath $DiagLog -Value 'scoring_private_accessed=false'
+          Add-Content -LiteralPath $DiagLog -Value 'qualification=PASS_NON_MUTATING_RAW_RESPONSE_CAPTURE'
+          Get-Content $DiagLog
+
+      - name: Upload diagnostic evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: book-eval-adapter-diagnostic-003-evidence
+          path: ${{ env.EVIDENCE_DIR }}
+          if-no-files-found: warn
+          retention-days: 30
