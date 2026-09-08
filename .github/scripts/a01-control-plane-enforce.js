@@ -9,9 +9,14 @@ const WORKFLOWS = path.join(ROOT, '.github', 'workflows');
 const GATEWAY = '.github/workflows/a01-control-plane-gateway.yml';
 const ALLOWLIST = path.join(ROOT, 'qualification', 'a01', 'legacy-direct-workflows.json');
 
+function canonicalWorkflowBytes(buffer) {
+  return Buffer.from(buffer.toString('utf8').replace(/\r\n?/g, '\n'), 'utf8');
+}
+
 function gitBlobSha(buffer) {
-  const header = Buffer.from(`blob ${buffer.length}\0`, 'utf8');
-  return crypto.createHash('sha1').update(Buffer.concat([header, buffer])).digest('hex');
+  const canonical = canonicalWorkflowBytes(buffer);
+  const header = Buffer.from(`blob ${canonical.length}\0`, 'utf8');
+  return crypto.createHash('sha1').update(Buffer.concat([header, canonical])).digest('hex');
 }
 
 function isDirectSelfHosted(content) {
@@ -62,8 +67,11 @@ function selftest() {
   if (!isDirectSelfHosted(Buffer.from('jobs:\n  test:\n    runs-on: [self-hosted, Windows, X64]\n'))) throw new Error('inline self-hosted detection failed');
   if (!isDirectSelfHosted(Buffer.from('jobs:\n  test:\n    runs-on:\n      - self-hosted\n      - Windows\n      - X64\n'))) throw new Error('multiline self-hosted detection failed');
   if (isDirectSelfHosted(Buffer.from('jobs:\n  test:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: ./.github/workflows/a01-control-plane-gateway.yml\n'))) throw new Error('false positive for gateway caller');
-  const sample = Buffer.from('hello\n');
-  if (gitBlobSha(sample) !== 'ce013625030ba8dba906f756967f9e9ca394464a') throw new Error('git blob SHA implementation failed');
+  const lf = Buffer.from('hello\n');
+  const crlf = Buffer.from('hello\r\n');
+  const expected = 'ce013625030ba8dba906f756967f9e9ca394464a';
+  if (gitBlobSha(lf) !== expected) throw new Error('git blob SHA implementation failed');
+  if (gitBlobSha(crlf) !== expected) throw new Error('CRLF canonicalization failed');
   console.log('A01_ENFORCEMENT_SELFTEST=PASS');
 }
 
