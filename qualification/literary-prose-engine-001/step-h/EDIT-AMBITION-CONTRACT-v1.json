@@ -1,0 +1,22 @@
+{
+  "contract_id": "LPE-EDIT-AMBITION-v1",
+  "mapping": {
+    "LEVEL_0_NO_CHANGE": "NONE",
+    "LEVEL_1_SURGICAL": "SURGICAL",
+    "LEVEL_2_LOCAL_RESTRUCTURE": "LOCAL_RESTRUCTURE",
+    "LEVEL_3_SUBSTANTIAL_REWORK": "SUBSTANTIAL_REWORK",
+    "LEVEL_4_APPROACH_CHALLENGE": "APPROACH_CHALLENGE"
+  },
+  "requirements": {
+    "LEVEL_0_NO_CHANGE": ["original_text"],
+    "LEVEL_1_SURGICAL": ["REVISION_STATE_READY", "admitted_opportunity", "qualified_transform"],
+    "LEVEL_2_LOCAL_RESTRUCTURE": ["REVISION_STATE_READY", "reader_state", "pacing", "information_release", "character_pressure"],
+    "LEVEL_3_SUBSTANTIAL_REWORK": ["REVISION_STATE_READY", "project_voice", "book_voice", "broader_continuity", "authorial_intent"],
+    "LEVEL_4_APPROACH_CHALLENGE": ["REVISION_STATE_READY", "all_preservation_authorities", "explicit_challenge_authorization"]
+  },
+  "rules": [
+    "Higher ambition never inherits permission merely because a lower level is authorized.",
+    "Requested ambition above maximum_edit_scope is blocked rather than silently downgraded.",
+    "The engine may generate fewer candidates than requested when evidence does not justify them."
+  ]
+}
