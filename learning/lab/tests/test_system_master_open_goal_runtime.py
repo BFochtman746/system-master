@@ -44,7 +44,7 @@ class SystemMasterOpenGoalRuntimeTests(unittest.TestCase):
         self.assertEqual(out["domain_key"], "python-comprehensions")
         self.assertIn("S-PY-LISTCOMP", out["course_skill_ids"])
         self.assertIn("S-PY-DICTCOMP", out["course_skill_ids"])
-        self.assertEqual(out["next_action"]["action_type"], "DIAGNOSTIC_PROBE")
+        self.assertEqual(out["next_action"]["action_type"], "TUTOR_INSTRUCTION")
         self.assertEqual(out["next_action"]["skill_id"], "S-PY-LISTCOMP")
         self.assertEqual(out["selected_authority"], "BASELINE_DIAGNOSTIC_ROUTING")
 
