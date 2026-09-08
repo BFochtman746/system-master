@@ -1,0 +1,1 @@
+Superseded experimental transport branch. The authoritative Books V2 repository bind is rebuilt from main on a separate clean branch.
