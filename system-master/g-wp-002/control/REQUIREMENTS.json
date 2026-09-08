@@ -1,0 +1,10 @@
+{
+  "requirements": [
+    {"id":"G-RQ-001","component":"DurableWorkIdentityRegistry","api":"RegisterDurableWorkIdentity","invariant":"work_unit_id immutable","test":"PROPERTY+CONTRACT"},
+    {"id":"G-RQ-002","component":"DurableWorkIdentityRegistry","api":"RegisterDurableWorkIdentity","invariant":"parent lineage valid/acyclic","test":"PROPERTY+MIGRATION"},
+    {"id":"G-RQ-004","component":"RecoveryRegistry","api":"GetRecoveryStatus","invariant":"process loss cannot erase durable truth","test":"PROCESS_KILL+TARGET_WINDOWS_REBOOT"},
+    {"id":"G-RQ-012","component":"RecoveryRegistry","api":"TransitionRecovery","invariant":"expected_version == current","test":"CONCURRENCY+PROPERTY"},
+    {"id":"G-RQ-013","component":"RecoveryRegistry","api":"GetRecoveryStatus","invariant":"state semantics versioned","test":"STATE_MACHINE+QUERY"},
+    {"id":"G-RQ-032","component":"RecoveryRegistry","api":"TransitionRecovery","invariant":"transaction retry boundary excludes external call","test":"DATABASE_CONTENTION+UNKNOWN_COMMIT"}
+  ]
+}
