@@ -102,6 +102,24 @@ def withdraw_runtime_bound_pilot(
     updated["revision"] = int(updated["revision"]) + 1
     repo.put_object(PILOT_RUNTIME_BINDING_KIND, pilot_id, int(updated["revision"]), updated)
 
+    truth_boundary = {
+        "consent_binding_existed": True,
+        "baseline_evidence_existed": False,
+        "pilot001_v1_evidence_record_materialized": False,
+        "withdrawal_terminal_state_recorded": True,
+        "effectiveness_evidence_created": False,
+    }
+    operational_adjudication = {
+        "status": "VALID_WITHDRAWN_PRE_BASELINE",
+        "pilot_id": pilot_id,
+        "participant_key": binding["participant_key"],
+        "course_id": binding["course_id"],
+        "participant_outcome": "WITHDRAWN",
+        "eligible_for_effectiveness_review": False,
+        "withdrawn": True,
+        "record_materialized": False,
+        "truth_boundary": copy.deepcopy(truth_boundary),
+    }
     result = {
         "status": "PASS",
         "pilot_id": pilot_id,
@@ -115,15 +133,10 @@ def withdraw_runtime_bound_pilot(
         "eligible_for_effectiveness_review": False,
         "record_materialized": False,
         "frozen_v1_validator_used": False,
+        "adjudication": operational_adjudication,
         "revision": updated["revision"],
         "binding_digest": digest(updated),
-        "truth_boundary": {
-            "consent_binding_existed": True,
-            "baseline_evidence_existed": False,
-            "pilot001_v1_evidence_record_materialized": False,
-            "withdrawal_terminal_state_recorded": True,
-            "effectiveness_evidence_created": False,
-        },
+        "truth_boundary": truth_boundary,
     }
     repo.record_operation(operation_id, payload, result)
     repo.emit("RealLearnerPilotPreBaselineWithdrawn", pilot_id, {
