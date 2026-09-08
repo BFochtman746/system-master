@@ -1,0 +1,91 @@
+{
+  "contract_id": "LITERARY-PROSE-ENGINE-001-VOICE-EVOLUTION-AND-DEVELOPMENT-v1",
+  "status": "CANONICAL",
+  "voice_hierarchy": [
+    "AUTHOR_FINGERPRINT",
+    "PROJECT_VOICE",
+    "BOOK_VOICE",
+    "POV_CHARACTER_VOICE",
+    "LOCAL_PASSAGE_STATE"
+  ],
+  "trait_dispositions": {
+    "PROTECT": "Distinctive and demonstrably effective; disturbance requires strong contrary evidence.",
+    "RANGE": "Valid trait whose frequency or intensity must vary by context.",
+    "CHALLENGE": "Recurring habit that must be questioned rather than automatically preserved.",
+    "SUPPRESS": "Reliably detrimental tendency not protected by recurrence alone."
+  },
+  "trait_protection_rules": {
+    "frequency_alone_can_protect": false,
+    "named_author_similarity_can_protect": false,
+    "prestige_similarity_can_protect": false,
+    "required_evidence": [
+      "contextual_effect",
+      "project_or_book_fit",
+      "preservation_impact",
+      "confidence"
+    ]
+  },
+  "voice_change_classes": [
+    "VOICE_DEGRADATION",
+    "VOICE_EVOLUTION",
+    "VOICE_NEUTRAL_CHANGE",
+    "VOICE_UNCERTAIN"
+  ],
+  "voice_evolution_rule": {
+    "statistical_distance_from_old_baseline_is_automatic_failure": false,
+    "allowed_when": [
+      "target_improvement_supported",
+      "deeper_project_identity_preserved",
+      "critical_preservation_constraints_pass",
+      "non_target_regressions_acceptable"
+    ]
+  },
+  "manuscript_development_state": {
+    "required_fields_when_known": [
+      "project_id",
+      "book_id",
+      "version_id",
+      "maturity_state",
+      "authority_state",
+      "canon_state",
+      "provenance",
+      "relation_to_other_versions"
+    ],
+    "allowed_maturity_examples": [
+      "DRAFT",
+      "REVIEW_COPY",
+      "EDITOR_READY",
+      "MASTERED",
+      "CANONICAL"
+    ],
+    "blind_average_across_projects_or_versions": false
+  },
+  "development_trajectory_dimensions": [
+    "stable_author_fingerprint",
+    "project_specific_voice",
+    "book_specific_constraints",
+    "local_passage_requirements",
+    "maturity_linked_changes",
+    "repeated_habits",
+    "explicit_user_preference_changes"
+  ],
+  "learning_stores": {
+    "STABLE_IDENTITY": "Traits with strong evidence worth preserving.",
+    "CURRENT_PREFERENCE": "Current project/book preference state.",
+    "DEVELOPMENT_FRONTIER": "Traits/capabilities intentionally being pushed.",
+    "REJECTED_DIRECTION": "Polished or plausible directions rejected for harm or preference conflict."
+  },
+  "learning_rules": {
+    "accepted_revisions_are_evidence": true,
+    "rejected_revisions_are_evidence": true,
+    "chronology_preserved": true,
+    "user_decision_is_highest_project_preference_authority": true,
+    "external_author_proximity_is_preference_target": false
+  },
+  "uncertainty_policy": "RETAIN_ORIGINAL",
+  "author_imitation": {
+    "named_author_target": false,
+    "nearest_author_target": false,
+    "external_author_similarity_objective": false
+  }
+}

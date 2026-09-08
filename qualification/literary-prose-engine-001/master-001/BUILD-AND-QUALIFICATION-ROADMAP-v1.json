@@ -1,0 +1,83 @@
+{
+  "roadmap_id": "LITERARY-PROSE-ENGINE-001-BUILD-AND-QUALIFICATION-ROADMAP-v1",
+  "master_objective": "LITERARY-PROSE-ENGINE-001-MASTER-001",
+  "dependency_rule": "Later steps implement this master plan and may not silently redefine earlier invariants.",
+  "steps": [
+    {
+      "id": "MASTER-001",
+      "name": "Canonical Literary Intelligence Master Plan + Build/Qualification Roadmap Binding",
+      "depends_on": ["STEP-A"],
+      "closure": "STATIC_CONTRACT_QUALIFICATION"
+    },
+    {
+      "id": "STEP-B",
+      "name": "Admission Controller + Reference/Manuscript Ingestion / Derivation Pipeline Qualification",
+      "depends_on": ["MASTER-001"],
+      "bulk_acquisition_allowed": false
+    },
+    {
+      "id": "STEP-C",
+      "name": "Voice Intelligence + Development Trajectory",
+      "depends_on": ["STEP-B"]
+    },
+    {
+      "id": "STEP-D",
+      "name": "Literary Craft Academy + Source Registry",
+      "depends_on": ["STEP-B", "STEP-C"]
+    },
+    {
+      "id": "STEP-E",
+      "name": "Passage Intelligence Engine",
+      "depends_on": ["STEP-C", "STEP-D"]
+    },
+    {
+      "id": "STEP-F",
+      "name": "Specialist Diagnostic System",
+      "depends_on": ["STEP-E"]
+    },
+    {
+      "id": "STEP-G",
+      "name": "Contrastive Craft Foundry",
+      "depends_on": ["STEP-D", "STEP-E", "STEP-F"]
+    },
+    {
+      "id": "STEP-H",
+      "name": "Controlled Revision Engine",
+      "depends_on": ["STEP-E", "STEP-F", "STEP-G"]
+    },
+    {
+      "id": "STEP-I",
+      "name": "Independent Literary Evaluator",
+      "depends_on": ["STEP-H"]
+    },
+    {
+      "id": "STEP-J",
+      "name": "Voice Evolution + Preference Learning",
+      "depends_on": ["STEP-C", "STEP-I"]
+    },
+    {
+      "id": "STEP-K",
+      "name": "Homogenization / Overoptimization Defense",
+      "depends_on": ["STEP-C", "STEP-I", "STEP-J"]
+    },
+    {
+      "id": "STEP-L",
+      "name": "Closed-loop Qualification",
+      "depends_on": ["STEP-B", "STEP-C", "STEP-D", "STEP-E", "STEP-F", "STEP-G", "STEP-H", "STEP-I", "STEP-J", "STEP-K"]
+    },
+    {
+      "id": "REAL-BOOK-QUALIFICATION",
+      "name": "Representative User-Owned Book Closed-Loop Qualification",
+      "depends_on": ["STEP-L"],
+      "requires_explicit_admission_state": true
+    }
+  ],
+  "global_invariants": {
+    "universal_great_prose_score": false,
+    "retain_original_on_uncertainty": true,
+    "writer_evaluator_separation": true,
+    "named_author_imitation_allowed": false,
+    "unauthorized_full_text_persistence_allowed": false,
+    "bulk_book_acquisition_before_authorized_step": false
+  }
+}
