@@ -1,0 +1,27 @@
+{
+  "contract_id": "LITERARY-PROSE-ENGINE-001-STEP-E-PASSAGE-INTELLIGENCE-v1",
+  "depends_on": ["MASTER-001","STEP-C","STEP-D"],
+  "purpose": "Construct an explicit conditioned PASSAGE_STATE before specialist diagnosis or revision.",
+  "state_sections": ["purpose_state","reader_state","character_state","narrative_state","voice_state","preservation_state","craft_state"],
+  "authority_precedence": ["protected_canon_and_intent","protected_language","project_and_book_voice","pov_character_voice","scene_or_chapter_function","reader_and_narrative_state","transferable_craft_knowledge","external_reference_examples"],
+  "rules": {
+    "revision_without_passage_state": false,
+    "revision_with_unresolved_critical_authority": false,
+    "diagnosis_may_proceed_with_partial_context": true,
+    "external_craft_can_override_project_authority": false,
+    "named_author_target_allowed": false,
+    "universal_prose_score_allowed": false,
+    "no_action_is_valid": true,
+    "strengths_must_be_recorded_before_weakness_prioritization": true,
+    "reader_state_must_distinguish_unknown_from_intentionally_withheld": true,
+    "character_knowledge_must_not_exceed_established_boundaries": true
+  },
+  "critical_authorities": ["scene_or_chapter_function","pov","focalization","authorial_intent","protected_language","canon_facts"],
+  "scope_rules": {
+    "SURGICAL": "May proceed when local purpose, POV, protected language, and relevant canon are known.",
+    "LOCAL_RESTRUCTURE": "Also requires reader-state, pacing, information-release, and character-pressure confidence.",
+    "SUBSTANTIAL_REWORK": "Also requires book/project voice, broader continuity, authorial intent, and scene/chapter role confidence.",
+    "APPROACH_CHALLENGE": "Requires explicit development-frontier intent or user authorization plus all preservation authorities."
+  },
+  "output": "PASSAGE_STATE"
+}
