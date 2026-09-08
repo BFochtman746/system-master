@@ -15,6 +15,7 @@ if (!runnerTemp) {
 const packageRoot = path.join(workspace, 'system-master', 'f-wp-001');
 const evidenceDir = path.join(runnerTemp, `system-master-fwp001-${runId}`);
 fs.mkdirSync(evidenceDir, { recursive: true });
+const gitTrust = ['-c', `safe.directory=${workspace}`];
 
 function sha256Bytes(bytes) {
   return crypto.createHash('sha256').update(bytes).digest('hex');
@@ -74,13 +75,13 @@ function requireSuccess(label, result) {
 }
 
 function readGitBlob(repoPath) {
-  const result = runBuffer('git', ['show', `HEAD:${repoPath}`]);
+  const result = runBuffer('git', [...gitTrust, 'show', `HEAD:${repoPath}`]);
   requireSuccess(`GIT_BLOB_READ_FAILED:${repoPath}`, result);
   return result.stdout;
 }
 
 try {
-  const head = run('git', ['rev-parse', 'HEAD']);
+  const head = run('git', [...gitTrust, 'rev-parse', 'HEAD']);
   requireSuccess('GIT_HEAD_FAILED', head);
   const commit = head.stdout.trim();
 
