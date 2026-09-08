@@ -40,7 +40,9 @@ jobs:
           if not exist "%EVIDENCE_DIR%" mkdir "%EVIDENCE_DIR%"
           echo EVIDENCE_DIR=%EVIDENCE_DIR%>>"%GITHUB_ENV%"
           python --version >"%EVIDENCE_DIR%\python-version.txt" 2>&1
-          git rev-parse HEAD >"%EVIDENCE_DIR%\source-commit.txt" 2>&1
+          echo %GITHUB_SHA%>"%EVIDENCE_DIR%\source-commit.txt"
+          echo %GITHUB_REPOSITORY%>"%EVIDENCE_DIR%\repository.txt"
+          echo %RUNNER_NAME%>"%EVIDENCE_DIR%\runner.txt"
 
       - name: Compile qualification and package
         shell: cmd
