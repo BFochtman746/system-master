@@ -71,13 +71,27 @@ class AdaptiveTutorJourneyDirector(AdaptiveEntryJourneyDirector):
         selected = dict(composed["selected"])
 
         # Diagnostic LESSON/TARGETED_REMEDIATION is already normalized by the base
-        # journey. Post-entry/revalidation runtime LESSON/REMEDIATION was the last
-        # legacy escape hatch, so normalize it through the same formative tutor.
-        if selected["action_type"] in {"LESSON", "REMEDIATION"}:
+        # journey. Post-entry runtime uses literal LESSON/REMEDIATION, so normalize
+        # both through the same formative tutor authority before presentation.
+        if selected["action_type"] == "LESSON":
             selected = self._map_diagnostic_action(selected)
             selected["reason_codes"] = list(selected.get("reason_codes", [])) + [
                 "POST_ENTRY_TUTOR_ROUTE_UNIFIED"
             ]
+            composed = {
+                **composed,
+                "selected": selected,
+                "authority": f"{composed['authority']}_TUTOR_ROUTE",
+            }
+        elif selected["action_type"] == "REMEDIATION":
+            selected = {
+                **selected,
+                "action_type": "TUTOR_REMEDIATION",
+                "reason_codes": list(selected.get("reason_codes", [])) + [
+                    "TUTOR_OWNS_FORMATIVE_REMEDIATION",
+                    "POST_ENTRY_TUTOR_ROUTE_UNIFIED",
+                ],
+            }
             composed = {
                 **composed,
                 "selected": selected,
@@ -123,8 +137,6 @@ class AdaptiveTutorJourneyDirector(AdaptiveEntryJourneyDirector):
         journey = self._journey(journey_id)
         skill_id = turn_result.get("next_action", {}).get("skill_id")
         if not skill_id:
-            # The tutor result's next action may not carry the skill in every domain;
-            # recover it from the completed turn identity instead.
             turn_id = turn_result["turn_id"]
             rows = self.repo.completed_tutor_turns(
                 turn_result["session_id"], journey["course_id"],
@@ -349,8 +361,6 @@ def submit_current_tutor_interaction(
     if prior_turn and prior_turn["state"] == "COMPLETE":
         tutor_result = prior_turn["body"]["result"]
     else:
-        # A new or crash-resumed tutor write still requires this bound interaction's
-        # skill to be the current tutor route. Exact completed replay is handled above.
         current = journey.plan_next(
             operation_id=f"{operation_id}:current",
             decision_id=f"DEC-TUTOR-SUBMIT-{turn_id}",
