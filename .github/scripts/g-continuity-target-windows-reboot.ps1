@@ -22,9 +22,9 @@ function Write-Evidence([string]$Name, [string]$Value) {
     Set-Content -Path $path -Value $Value -Encoding UTF8
 }
 
-function Invoke-Git([string[]]$Args) {
-    $out = & git -c ("safe.directory=" + $workspace) @Args 2>&1
-    if ($LASTEXITCODE -ne 0) { throw "GIT_FAILED:$($Args -join ' '):$out" }
+function Invoke-Git([string[]]$GitArgs) {
+    $out = & git -c ("safe.directory=" + $workspace) @GitArgs 2>&1
+    if ($LASTEXITCODE -ne 0) { throw "GIT_FAILED:$($GitArgs -join ' '):$out" }
     return ($out -join "`n")
 }
 
