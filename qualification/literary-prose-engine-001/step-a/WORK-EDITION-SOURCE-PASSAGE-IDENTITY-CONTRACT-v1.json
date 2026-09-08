@@ -1,0 +1,84 @@
+{
+  "contract_id": "WORK-EDITION-SOURCE-PASSAGE-IDENTITY-CONTRACT-v1",
+  "version": 1,
+  "identity_layers": {
+    "WORK": {
+      "meaning": "Abstract intellectual work independent of edition, file, scan, or provider.",
+      "id_rule": "WORK- + first 32 hex chars of SHA-256 over normalized title|primary creator stable id|original publication year when known; collisions require disambiguation rather than overwrite.",
+      "required_metadata": [
+        "canonical_title",
+        "creator_entities",
+        "original_language",
+        "work_type"
+      ]
+    },
+    "EDITION": {
+      "meaning": "A publication/translation/revision manifestation of a work.",
+      "id_rule": "EDITION- + first 32 hex chars of SHA-256 over work_id|publisher/imprint|publication date|edition statement|translator/editor ids|ISBN or equivalent when present.",
+      "required_metadata": [
+        "work_id",
+        "language",
+        "edition_statement",
+        "publication_date",
+        "publisher",
+        "contributors"
+      ]
+    },
+    "SOURCE": {
+      "meaning": "A specific acquired file, URL, API record, scan, user upload, or licensed delivery.",
+      "id_rule": "SOURCE- + first 32 hex chars of SHA-256 over edition_id|provider|stable locator|content_digest.",
+      "required_metadata": [
+        "edition_id",
+        "provider",
+        "locator",
+        "media_type",
+        "content_digest",
+        "rights_ledger_id"
+      ]
+    },
+    "PASSAGE": {
+      "meaning": "A bounded segment of an admitted source used only within its rights envelope.",
+      "id_rule": "PASSAGE- + first 32 hex chars of SHA-256 over source_id|canonical structural locator|normalized passage digest.",
+      "required_metadata": [
+        "source_id",
+        "structural_locator",
+        "passage_digest",
+        "token_or_char_span"
+      ]
+    }
+  },
+  "normalization": {
+    "bibliographic": [
+      "Unicode NFC",
+      "trim surrounding whitespace",
+      "collapse repeated internal whitespace",
+      "case-fold identifiers only when the identifier standard is case-insensitive"
+    ],
+    "text_digest": "SHA-256 of exact acquired bytes plus a separate SHA-256 of Unicode-NFC text when text decoding is valid",
+    "do_not_normalize_away": [
+      "punctuation",
+      "paragraph boundaries",
+      "quotation marks",
+      "orthographic variants",
+      "dialect",
+      "intentional capitalization"
+    ]
+  },
+  "deduplication": {
+    "exact_duplicate": "same exact-byte digest -> one binary payload, multiple provenance edges allowed",
+    "text_equivalent_duplicate": "same normalized-text digest -> retain distinct source/edition provenance but do not multiply training/retrieval weight",
+    "near_duplicate": "MinHash/embedding similarity may nominate candidates only; automatic collapse requires matching work/edition evidence plus deterministic text checks",
+    "excerpt_overlap": "overlapping passages share overlap-group id; evaluation/training splits must keep overlap groups together",
+    "translation": "never deduplicate translations into one text instance; they are edition-level siblings",
+    "revision": "never deduplicate author revisions/editions if wording differs; model them as related editions"
+  },
+  "split_integrity": {
+    "group_keys": [
+      "work_id",
+      "edition_family_id",
+      "overlap_group_id",
+      "user_project_id when project text is involved"
+    ],
+    "rule": "No evaluation claim may treat passages from the same work/edition/overlap group as unseen if related text appears in training or calibration."
+  }
+}
