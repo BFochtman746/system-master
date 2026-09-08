@@ -215,7 +215,7 @@ class ProductionProviderConfigTests(unittest.TestCase):
             self.acquire(drifted)
         after = sum(len(rows) for rows in self.server.requests.values())
         self.assertEqual(before, after)
-        self.assertEqual(self.server.requests["/model-drift"], [])
+        self.assertEqual(self.server.requests.get("/model-drift", []), [])
 
     def test_allowed_research_authority_is_enforced_before_model_calls(self):
         self.server.scripts["/research"] = [{
@@ -226,7 +226,7 @@ class ProductionProviderConfigTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "HTTP_RESEARCH_SOURCE_AUTHORITY_REJECTED"):
             self.acquire(env)
         self.assertEqual(len(self.server.requests["/research"]), 1)
-        self.assertEqual(self.server.requests["/model"], [])
+        self.assertEqual(self.server.requests.get("/model", []), [])
 
 
 if __name__ == "__main__":
