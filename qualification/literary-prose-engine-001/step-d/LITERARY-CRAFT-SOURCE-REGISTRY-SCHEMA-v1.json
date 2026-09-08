@@ -1,0 +1,26 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"LITERARY-CRAFT-SOURCE-REGISTRY-SCHEMA-v1",
+  "title":"Literary Craft Source Registry entry",
+  "type":"object",
+  "required":["source_id","title","source_class","authority_facets","rights","craft_domains","admission_state","allowed_derivations","provenance","named_author_target_allowed"],
+  "properties":{
+    "source_id":{"type":"string","minLength":8},
+    "title":{"type":"string","minLength":3},
+    "source_class":{"enum":["PROFESSIONAL_STANDARD","CRAFT_PEDAGOGY","OPEN_TEXTBOOK","PEER_REVIEWED_RESEARCH","ANNOTATED_DATASET","NLP_TOOLING","PUBLIC_DOMAIN_POLICY","PUBLIC_DOMAIN_CANDIDATE_CATALOG","HUMAN_AI_WRITING_DATASET","ARGUMENTATIVE_WRITING_DATASET"]},
+    "authority_facets":{"type":"object","required":["domain_fit","evidence_strength","transferability","rights_clarity","task_match"],"properties":{"domain_fit":{"enum":["HIGH","MEDIUM","LOW","UNKNOWN"]},"evidence_strength":{"enum":["HIGH","MEDIUM","LOW","UNKNOWN"]},"transferability":{"enum":["HIGH","MEDIUM","LOW","UNKNOWN"]},"rights_clarity":{"enum":["HIGH","MEDIUM","LOW","UNKNOWN"]},"task_match":{"enum":["HIGH","MEDIUM","LOW","UNKNOWN"]}}},
+    "rights":{"type":"object","required":["status","evidence_locator","component_level_review_required","raw_text_persistence"],"properties":{"status":{"enum":["PUBLIC_DOMAIN_US_CANDIDATE_REQUIRES_WORK_CHECK","CC_BY_4_0","CC_BY_NC","CC_BY_NC_SA","MIT_CODE_ONLY","COPYRIGHTED_DERIVED_ONLY","OPEN_ACCESS_LICENSE_REVIEW_REQUIRED","LICENSE_UNRESOLVED_QUARANTINE","MIXED_COMPONENT_RIGHTS"]},"evidence_locator":{"type":"string"},"component_level_review_required":{"type":"boolean"},"raw_text_persistence":{"enum":["ALLOWED_WITH_LICENSE_TERMS","DISALLOWED","WORK_LEVEL_CHECK_REQUIRED","QUARANTINED"]}}},
+    "craft_domains":{"type":"array","items":{"type":"string"},"minItems":1},
+    "admission_state":{"enum":["ADMIT_DERIVED_KNOWLEDGE","ADMIT_LICENSED_DATA","ADMIT_CODE_TOOLING","CANDIDATE_ONLY","QUARANTINE"]},
+    "allowed_derivations":{"type":"array","items":{"enum":["CRAFT_PRINCIPLE","TECHNIQUE_PROFILE","EVALUATION_RULE","REFERENCE_STATE","CURRICULUM_NODE","MEASUREMENT_METHOD","NONE"]}},
+    "provenance":{"type":"object","required":["url","checked_at","source_specific_notes"]},
+    "named_author_target_allowed":{"const":false}
+  },
+  "policy_invariants":{
+    "no_prestige_override":"Prestige, awards, popularity, canonical status, citation count, or author identity cannot override rights, task fit, project voice, or local passage function.",
+    "catalog_not_rights_proof":"Presence in a public-domain-oriented catalog is candidate evidence only; work/edition/jurisdiction/use rights must still be adjudicated.",
+    "open_access_not_ingestion_permission":"Readable/open-access pages are not automatically licensed for persistent full-text ingestion.",
+    "component_rights":"Mixed-rights courses require component-level provenance; third-party excerpts cannot inherit the host course license.",
+    "author_imitation":"Named-author targets are prohibited; author names may exist only as provenance/bibliographic metadata."
+  }
+}
