@@ -54,6 +54,7 @@ public final class WindowsRebootRecoveryQualification {
                 "workflow-continuity-recovery",
                 "stage-target-windows-reboot",
                 workUnitId,
+                null,
                 "intent:" + commit,
                 "021G",
                 "QUALIFICATION");
