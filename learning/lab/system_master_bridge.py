@@ -23,14 +23,16 @@ from learning_lab import (
     default_domain_registry,
 )
 from learning_lab.http_research_provider import acquire_bind_and_start_full_http_adaptive_entry
+from learning_lab.production_provider_config import acquire_configured_and_start_full_http_adaptive_entry
 from learning_lab.provider_multi_candidate_runtime import start_provider_multi_candidate_adaptive_entry
 from learning_lab.provider_packet_runtime import start_provider_packet_adaptive_entry
 
-BRIDGE_VERSION = "SYSTEM-MASTER-LEARNING-BRIDGE-V6"
+BRIDGE_VERSION = "SYSTEM-MASTER-LEARNING-BRIDGE-V7"
 QUALIFIED_LEARNING_BOUNDARY = "LEARNING-LAB-QUAL-001"
 RUNTIME_BINDING_VERSION = "LEARNING-DOMAIN-RUNTIME-BINDING-V1"
 OPEN_GOAL_RUNTIME_BINDING_VERSION = "LEARNING-OPEN-GOAL-RUNTIME-BINDING-V1"
 FULL_HTTP_RUNTIME_BINDING_VERSION = "SYSTEM-MASTER-FULL-HTTP-PROVIDER-BINDING-V1"
+CONFIGURED_HTTP_RUNTIME_BINDING_VERSION = "SYSTEM-MASTER-CONFIGURED-HTTP-PROVIDER-BINDING-V1"
 _RESEARCH_TOKEN_ENV = "SYSTEM_MASTER_LEARNING_RESEARCH_BEARER_TOKEN"
 _MODEL_TOKEN_ENV = "SYSTEM_MASTER_LEARNING_MODEL_BEARER_TOKEN"
 _ALLOWED_STATE_KEY = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$")
@@ -418,6 +420,47 @@ def _start_full_http_provider_entry(request: Mapping[str, Any]) -> dict[str, Any
     }
 
 
+def _start_configured_full_http_provider_entry(request: Mapping[str, Any]) -> dict[str, Any]:
+    state_key = _required_text(request.get("state_key"), "state_key", _ALLOWED_STATE_KEY)
+    operation_id = _required_text(request.get("operation_id"), "operation_id", _ALLOWED_REQUEST_ID)
+    batch_id = _required_text(request.get("batch_id"), "batch_id", _ALLOWED_REQUEST_ID)
+    request_id = _required_text(request.get("request_id"), "request_id", _ALLOWED_REQUEST_ID)
+    learner_id = _required_text(request.get("learner_id"), "learner_id", _ALLOWED_REQUEST_ID)
+    desired_outcome = _bounded_goal_text(request.get("desired_outcome"), "desired_outcome")
+    claimed = _claimed_skills(request)
+    now = request.get("now")
+    if not isinstance(now, int) or now < 0:
+        _fail("INVALID:now")
+
+    forbidden_runtime_fields = {
+        "research_endpoint", "model_endpoint", "research_provider_id", "model_provider_id",
+        "model_id", "sample_count", "research_token", "model_token", "credential", "api_key",
+    }
+    present = sorted(forbidden_runtime_fields.intersection(request.keys()))
+    if present:
+        _fail("CONFIGURED_PROVIDER_RUNTIME_OVERRIDE_FORBIDDEN:" + ",".join(present))
+
+    repo = Repository(str(_state_path(state_key)))
+    result = acquire_configured_and_start_full_http_adaptive_entry(
+        repo=repo,
+        operation_id=operation_id,
+        batch_id=batch_id,
+        request_id=request_id,
+        learner_id=learner_id,
+        desired_outcome=desired_outcome,
+        claimed_skill_ids=claimed,
+        now=now,
+    )
+    return {
+        "bridge_version": BRIDGE_VERSION,
+        "configured_http_runtime_binding_version": CONFIGURED_HTTP_RUNTIME_BINDING_VERSION,
+        "qualified_learning_boundary": QUALIFIED_LEARNING_BOUNDARY,
+        "request_digest": _request_digest(request),
+        "state_key": state_key,
+        **result,
+    }
+
+
 def dispatch(request: Mapping[str, Any]) -> dict[str, Any]:
     if not isinstance(request, Mapping):
         _fail("REQUEST_MUST_BE_OBJECT")
@@ -432,6 +475,8 @@ def dispatch(request: Mapping[str, Any]) -> dict[str, Any]:
         return _start_provider_multi_candidate_entry(request)
     if operation == "START_FULL_HTTP_PROVIDER_ADAPTIVE_ENTRY":
         return _start_full_http_provider_entry(request)
+    if operation == "START_CONFIGURED_FULL_HTTP_PROVIDER_ADAPTIVE_ENTRY":
+        return _start_configured_full_http_provider_entry(request)
     if operation == "START_GIT_ADAPTIVE_ENTRY":
         legacy = dict(request)
         legacy["operation"] = "START_ADAPTIVE_ENTRY"
