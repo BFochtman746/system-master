@@ -73,9 +73,9 @@ try {
         $armOut = Invoke-Java 'ARM' $classes
         $armPropsPath = Join-Path $persistentDir 'java-arm.properties'
         if (-not (Test-Path $armPropsPath)) { throw 'ARM_PROPERTIES_MISSING' }
-        $journalLine = Get-Content $armPropsPath | Where-Object { $_ -like 'journal_path=*' } | Select-Object -First 1
-        if (-not $journalLine) { throw 'JOURNAL_PATH_MISSING' }
-        $journalPath = $journalLine.Substring('journal_path='.Length)
+        $journalPathFile = Join-Path $persistentDir 'journal-path.txt'
+        if (-not (Test-Path $journalPathFile)) { throw 'JOURNAL_PATH_FILE_MISSING' }
+        $journalPath = (Get-Content -Raw -Path $journalPathFile).Trim()
         if (-not (Test-Path $journalPath)) { throw "JOURNAL_FILE_MISSING:$journalPath" }
         $journalHash = (Get-FileHash -Algorithm SHA256 -Path $journalPath).Hash.ToLowerInvariant()
         $boot = (Get-CimInstance Win32_OperatingSystem).LastBootUpTime.ToUniversalTime()

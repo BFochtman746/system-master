@@ -92,6 +92,7 @@ public final class WindowsRebootRecoveryQualification {
         try (OutputStream out = Files.newOutputStream(root.resolve("java-arm.properties"))) {
             p.store(out, "System Master target Windows reboot qualification arm state");
         }
+        Files.writeString(root.resolve("journal-path.txt"), registry.journalPath().toAbsolutePath().toString());
         System.out.println("PASS TARGET-WINDOWS-REBOOT-ARM assertions=" + assertions + " recovery=" + record.recoveryId());
     }
 
