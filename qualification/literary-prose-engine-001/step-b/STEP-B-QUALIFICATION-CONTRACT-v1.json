@@ -1,0 +1,49 @@
+{
+  "qualification_id": "LITERARY-PROSE-ENGINE-001-STEP-B-QUALIFICATION-v1",
+  "depends_on": [
+    "LITERARY-PROSE-ENGINE-001-MASTER-001",
+    "LITERARY-PROSE-ENGINE-001-STEP-A"
+  ],
+  "required_artifacts": [
+    "STEP-B-ADMISSION-AND-CUSTODY-CONTRACT-v1.json",
+    "MANUSCRIPT-VERSION-MATURITY-SCHEMA-v1.json",
+    "admission_controller.py",
+    "fixtures/step_b_cases.json",
+    "run_step_b_fixtures.py",
+    "STEP-B-QUALIFICATION-EVIDENCE.json",
+    "STEP-B-QUALIFICATION-CONTRACT-v1.json",
+    "validate_step_b.py",
+    "STEP-B-CLOSURE.md"
+  ],
+  "gates": [
+    {"gate_id": "B-RIGHTS-001", "requirement": "unknown or ambiguous rights reject rather than default-admit"},
+    {"gate_id": "B-RIGHTS-002", "requirement": "rights evidence type is bound to rights class"},
+    {"gate_id": "B-RIGHTS-003", "requirement": "rights evidence includes jurisdiction, locator, verification time/actor, and scope note"},
+    {"gate_id": "B-CUSTODY-001", "requirement": "full-text persistence requires explicit full-text authority, retention, use, and storage class"},
+    {"gate_id": "B-CUSTODY-002", "requirement": "analysis-only raw text never persists"},
+    {"gate_id": "B-DERIVED-001", "requirement": "analysis-only persistent output is derived-only and nonreconstructive"},
+    {"gate_id": "B-ID-001", "requirement": "work/edition/source identities are deterministic and digest-bound"},
+    {"gate_id": "B-DEDUP-001", "requirement": "exact/text-equivalent duplicates do not multiply payload or retrieval weight"},
+    {"gate_id": "B-OVERLAP-001", "requirement": "overlapping passages receive shared overlap groups for split integrity"},
+    {"gate_id": "B-MANUSCRIPT-001", "requirement": "user manuscripts require explicit version/maturity/authority/canon provenance metadata"},
+    {"gate_id": "B-VOICE-BRIDGE-001", "requirement": "manuscript chronology and project/version identity remain available to STEP-C"},
+    {"gate_id": "B-IMITATION-001", "requirement": "derived artifacts hard-disable named-author targets and author-identity features"},
+    {"gate_id": "B-BULK-001", "requirement": "no bulk book acquisition in STEP-B"}
+  ],
+  "required_fixture_outcomes": {
+    "admit_user_authorized_full_text": true,
+    "admit_analysis_only_derived_only": true,
+    "reject_unknown_rights": true,
+    "reject_mismatched_rights_evidence": true,
+    "reject_analysis_only_raw_persistence": true,
+    "reject_incomplete_manuscript_version_metadata": true,
+    "dedup_exact_bytes": true,
+    "preserve_distinct_source_provenance": true,
+    "prevent_duplicate_weight_multiplier": true,
+    "overlap_grouping": true,
+    "deterministic_passage_identity": true
+  },
+  "bulk_download_allowed_in_step_b": false,
+  "a01_required_for_step_b_static_fixture_qualification": false,
+  "closure_requires_fixture_pass": true
+}
