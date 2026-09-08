@@ -1,0 +1,40 @@
+name: BOOK-EVAL-LEMONADE-001 Repaired E5 Requalification Completion
+
+on:
+  push:
+    branches:
+      - book-eval-lemonade-001-blind-resume-003-adapter-repair
+    paths:
+      - ".github/workflows/book-eval-e5-repair-requalification-complete.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: book-eval-repaired-e5-campaign
+  cancel-in-progress: false
+
+jobs:
+  complete:
+    name: Resume repaired E5 from durable state and complete 160/160
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 240
+
+    steps:
+      - name: Checkout exact repair branch
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 1
+
+      - name: Complete repaired E5 qualification
+        shell: powershell
+        run: ./qualification/book-eval-lemonade-001/scripts/run-e5-repair-completion.ps1
+
+      - name: Upload completion evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: book-eval-repaired-e5-completion-evidence
+          path: ${{ env.EVIDENCE_DIR }}
+          if-no-files-found: warn
+          retention-days: 30
