@@ -1,0 +1,46 @@
+name: A-01 Post-Restart Tool Check
+
+on:
+  push:
+    branches:
+      - runner/capability-audit-001
+    paths:
+      - ".github/workflows/a01-post-restart-toolcheck.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify toolchain after restart
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 10
+    steps:
+      - name: Verify tools by name
+        shell: cmd
+        run: |
+          echo === IDENTITY ===
+          whoami
+          echo === PATH ===
+          echo %PATH%
+          echo === POWERSHELL7 ===
+          where pwsh
+          pwsh -NoLogo -NoProfile -Command "$PSVersionTable.PSVersion.ToString()"
+          echo === GITHUB CLI ===
+          where gh
+          gh --version
+          echo === JQ ===
+          where jq
+          jq --version
+          echo === CMAKE ===
+          where cmake
+          cmake --version
+          echo === NINJA ===
+          where ninja
+          ninja --version
+          echo === DOTNET ===
+          where dotnet
+          dotnet --version
+          echo === MSBUILD ===
+          dotnet msbuild -version
