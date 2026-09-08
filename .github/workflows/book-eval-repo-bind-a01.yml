@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   bind-and-qualify:
-    name: Bind canonical Books V2 package and qualify
+    name: Reconstruct, bind, and qualify canonical Books V2
     runs-on: [self-hosted, Windows, X64]
     timeout-minutes: 20
 
@@ -26,7 +26,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Locate, verify, import, and qualify canonical Books package
+      - name: Reconstruct repository-native canonical package and qualify
         shell: powershell
         run: |
           $ErrorActionPreference = 'Stop'
@@ -34,27 +34,53 @@ jobs:
           $ExpectedCorpus = '30bd9d0b2c348b33e6b17a81d639e64c7e7e8eef63d7d6c0bfc3175e94fe2b53'
           $ExpectedOntology = '3daf139be2c35eb706ad0d0a1b6275a72c1ff18c21bf09d97eb26c3eadd7b5d6'
           $ExpectedExecution = '7d9348ecdad344d8aa73dc0fe984aef85559084610504f50f8d35ef6a001fb06'
+
           $Evidence = Join-Path $env:RUNNER_TEMP ("book-eval-repo-bind-" + $env:GITHUB_RUN_ID)
           New-Item -ItemType Directory -Force -Path $Evidence | Out-Null
+          "EVIDENCE_DIR=$Evidence" | Out-File -FilePath $env:GITHUB_ENV -Encoding ascii -Append
           $Log = Join-Path $Evidence 'BOOK-EVAL-REPO-BIND-A01.txt'
+          $Root = Join-Path $env:GITHUB_WORKSPACE 'books\qualification\book-eval-lemonade-001'
+          $ManifestPath = Join-Path $Root 'PACKAGE-V2-REBUILD-MANIFEST.json'
 
           function Write-Log([string]$Text) {
             $Text | Tee-Object -FilePath $Log -Append | Write-Host
           }
-          function Sha256([string]$Path) {
-            return (Get-FileHash -Algorithm SHA256 -Path $Path).Hash.ToLowerInvariant()
+          function Hash-Bytes([byte[]]$Bytes) {
+            $sha = [System.Security.Cryptography.SHA256]::Create()
+            try {
+              return ([BitConverter]::ToString($sha.ComputeHash($Bytes))).Replace('-', '').ToLowerInvariant()
+            } finally {
+              $sha.Dispose()
+            }
           }
-          function Test-PilotDir([string]$Dir) {
-            $jar = Join-Path $Dir 'book-eval-lemonade.jar'
-            $corpus = Join-Path $Dir 'provider-visible\BOOK-EVAL-CORPUS-INPUT-v2.jsonl'
-            $ontology = Join-Path $Dir 'provider-visible\BOOK-EVAL-PROVIDER-ONTOLOGY-v2.json'
-            $execution = Join-Path $Dir 'runner-private\RUNNER-PRIVATE-EXECUTION-MANIFEST-v2.json'
-            if (-not ((Test-Path $jar) -and (Test-Path $corpus) -and (Test-Path $ontology) -and (Test-Path $execution))) { return $false }
-            if ((Sha256 $jar) -ne $ExpectedJar) { return $false }
-            if ((Sha256 $corpus) -ne $ExpectedCorpus) { return $false }
-            if ((Sha256 $ontology) -ne $ExpectedOntology) { return $false }
-            if ((Sha256 $execution) -ne $ExpectedExecution) { return $false }
-            return $true
+          function Hash-Ascii([string]$Text) {
+            return Hash-Bytes ([System.Text.Encoding]::ASCII.GetBytes($Text))
+          }
+          function Reconstruct-Object([string]$Key, [string]$OutputRelative, [string]$ExpectedHash) {
+            $spec = $Manifest.objects.PSObject.Properties[$Key].Value
+            if (-not $spec) { throw "Manifest object missing: $Key" }
+            if ($spec.sha256 -ne $ExpectedHash) { throw "Manifest frozen hash mismatch for $Key" }
+            $dir = Join-Path $Root $spec.directory
+            if (-not (Test-Path $dir)) { throw "Transport directory missing for $Key" }
+            $parts = @(Get-ChildItem -LiteralPath $dir -File -Filter 'part-*' | Sort-Object Name)
+            if ($parts.Count -ne [int]$spec.part_count) { throw "Part count mismatch for $Key: $($parts.Count)" }
+            $builder = New-Object System.Text.StringBuilder
+            for ($i = 0; $i -lt $parts.Count; $i++) {
+              $part = [System.IO.File]::ReadAllText($parts[$i].FullName, [System.Text.Encoding]::ASCII)
+              $partHash = Hash-Ascii $part
+              if ($partHash -ne [string]$spec.part_sha256[$i]) { throw "Part hash mismatch for $Key part $i" }
+              [void]$builder.Append($part)
+            }
+            $bytes = [Convert]::FromBase64String($builder.ToString())
+            if ($bytes.Length -ne [int]$spec.source_bytes) { throw "Byte count mismatch for $Key" }
+            $actualHash = Hash-Bytes $bytes
+            if ($actualHash -ne $ExpectedHash) { throw "Reconstructed hash mismatch for $Key: $actualHash" }
+            $outPath = Join-Path $Root $OutputRelative
+            $outDir = Split-Path -Parent $outPath
+            New-Item -ItemType Directory -Force -Path $outDir | Out-Null
+            [System.IO.File]::WriteAllBytes($outPath, $bytes)
+            Write-Log ("reconstructed_" + $Key + "_sha256=" + $actualHash)
+            return $actualHash
           }
 
           Write-Log 'qualification=BOOK-EVAL-LEMONADE-001-REPO-BIND-A01'
@@ -62,95 +88,35 @@ jobs:
           Write-Log ("trigger_commit=" + $env:GITHUB_SHA)
           Write-Log ("runner=" + $env:RUNNER_NAME)
           Write-Log ("identity=" + [System.Security.Principal.WindowsIdentity]::GetCurrent().Name)
+          Write-Log 'source=repository_native_v2_transport'
 
-          $roots = @(
-            'C:\Users\BFoch\Downloads',
-            'C:\Users\BFoch\Desktop',
-            'C:\Users\BFoch\Documents',
-            'C:\Users\BFoch\OneDrive',
-            'C:\SystemMaster'
-          )
-          $source = $null
+          if (-not (Test-Path $ManifestPath)) { throw 'PACKAGE-V2-REBUILD-MANIFEST.json is missing.' }
+          $Manifest = Get-Content -LiteralPath $ManifestPath -Raw | ConvertFrom-Json
+          if ($Manifest.scoring_private_included -ne $false) { throw 'Manifest does not preserve blind/gold boundary.' }
+          if ([string]$Manifest.source_kind -ne 'retained_a01_artifact_recovery') { throw 'Unexpected canonical source kind.' }
+          Write-Log 'manifest_authority=PASS'
 
-          foreach ($root in $roots) {
-            if ($source) { break }
-            if (-not (Test-Path $root)) { continue }
-            Write-Log ("search_root=" + $root)
-            $jars = @(Get-ChildItem -Path $root -Recurse -File -Filter 'book-eval-lemonade.jar' -ErrorAction SilentlyContinue)
-            foreach ($jar in $jars) {
-              if (Test-PilotDir $jar.DirectoryName) { $source = $jar.DirectoryName; break }
-            }
-          }
+          $actualJar = Reconstruct-Object 'jar' 'book-eval-lemonade.jar' $ExpectedJar
+          $actualCorpus = Reconstruct-Object 'corpus' 'provider-visible\BOOK-EVAL-CORPUS-INPUT-v2.jsonl' $ExpectedCorpus
+          $actualOntology = Reconstruct-Object 'ontology' 'provider-visible\BOOK-EVAL-PROVIDER-ONTOLOGY-v2.json' $ExpectedOntology
+          $actualExecution = Reconstruct-Object 'execution_manifest' 'runner-private\RUNNER-PRIVATE-EXECUTION-MANIFEST-v2.json' $ExpectedExecution
+          Write-Log 'frozen_hashes=PASS_4_OF_4'
 
-          if (-not $source) {
-            foreach ($root in $roots) {
-              if ($source) { break }
-              if (-not (Test-Path $root)) { continue }
-              $zips = @(Get-ChildItem -Path $root -Recurse -File -Filter '*.zip' -ErrorAction SilentlyContinue | Where-Object {
-                $_.Name -like '*BOOK*EVAL*LEMONADE*.zip' -or $_.Name -like 'REMOTE_QUALIFICATION_ENV_001*.zip'
-              })
-              foreach ($zip in $zips) {
-                $extract = Join-Path $Evidence ("extract-" + [Guid]::NewGuid().ToString('N'))
-                New-Item -ItemType Directory -Force -Path $extract | Out-Null
-                try {
-                  Expand-Archive -LiteralPath $zip.FullName -DestinationPath $extract -Force
-                  $jars = @(Get-ChildItem -Path $extract -Recurse -File -Filter 'book-eval-lemonade.jar' -ErrorAction SilentlyContinue)
-                  foreach ($jar in $jars) {
-                    if (Test-PilotDir $jar.DirectoryName) { $source = $jar.DirectoryName; break }
-                  }
-                } catch {
-                  Write-Log ("zip_skip=" + $zip.Name)
-                }
-                if ($source) { Write-Log ("source_archive=" + $zip.Name); break }
-              }
-            }
-          }
-
-          if (-not $source) { throw 'Canonical Books package not found in bounded local search roots.' }
-          Write-Log 'canonical_source_found=true'
-
-          $Target = Join-Path $env:GITHUB_WORKSPACE 'books\qualification\book-eval-lemonade-001'
-          New-Item -ItemType Directory -Force -Path (Join-Path $Target 'provider-visible') | Out-Null
-          New-Item -ItemType Directory -Force -Path (Join-Path $Target 'runner-private') | Out-Null
-
-          Copy-Item (Join-Path $source 'book-eval-lemonade.jar') (Join-Path $Target 'book-eval-lemonade.jar') -Force
-          Copy-Item (Join-Path $source 'provider-visible\BOOK-EVAL-CORPUS-INPUT-v2.jsonl') (Join-Path $Target 'provider-visible\BOOK-EVAL-CORPUS-INPUT-v2.jsonl') -Force
-          Copy-Item (Join-Path $source 'provider-visible\BOOK-EVAL-PROVIDER-ONTOLOGY-v2.json') (Join-Path $Target 'provider-visible\BOOK-EVAL-PROVIDER-ONTOLOGY-v2.json') -Force
-          Copy-Item (Join-Path $source 'runner-private\RUNNER-PRIVATE-EXECUTION-MANIFEST-v2.json') (Join-Path $Target 'runner-private\RUNNER-PRIVATE-EXECUTION-MANIFEST-v2.json') -Force
-
-          $optional = @(
-            'BOOK-EVAL-LEMONADE-001-MANIFEST.sha256',
-            'README-BOOK-EVAL-LEMONADE-001.txt',
-            'BOOK-EVAL-LEMONADE-001-REPORT.md',
-            'POWERSHELL-AUDIT-RESULTS.md',
-            'run-book-eval-lemonade.ps1'
-          )
-          foreach ($name in $optional) {
-            $p = Join-Path $source $name
-            if (Test-Path $p) { Copy-Item $p (Join-Path $Target $name) -Force }
-          }
-
-          $actualJar = Sha256 (Join-Path $Target 'book-eval-lemonade.jar')
-          $actualCorpus = Sha256 (Join-Path $Target 'provider-visible\BOOK-EVAL-CORPUS-INPUT-v2.jsonl')
-          $actualOntology = Sha256 (Join-Path $Target 'provider-visible\BOOK-EVAL-PROVIDER-ONTOLOGY-v2.json')
-          $actualExecution = Sha256 (Join-Path $Target 'runner-private\RUNNER-PRIVATE-EXECUTION-MANIFEST-v2.json')
-          if ($actualJar -ne $ExpectedJar) { throw 'JAR hash mismatch after import.' }
-          if ($actualCorpus -ne $ExpectedCorpus) { throw 'Corpus hash mismatch after import.' }
-          if ($actualOntology -ne $ExpectedOntology) { throw 'Ontology hash mismatch after import.' }
-          if ($actualExecution -ne $ExpectedExecution) { throw 'Execution manifest hash mismatch after import.' }
-          Write-Log 'frozen_hashes=PASS'
-
-          $forbidden = @(Get-ChildItem -Path $Target -Recurse -File | Where-Object {
-            $_.Name -match 'GOLD-CORPUS|HIDDEN-SPLIT|ORACLE-REGISTRY|SCORING-PRIVATE'
+          $forbiddenDirs = @(Get-ChildItem -LiteralPath $Root -Directory -Recurse | Where-Object { $_.Name -ieq 'scoring-private' })
+          $forbiddenFiles = @(Get-ChildItem -LiteralPath $Root -File -Recurse | Where-Object {
+            $_.Name -match '^(BOOK-EVAL-(GOLD-CORPUS|HIDDEN-SPLIT|ORACLE-REGISTRY)|BOOK_EVAL_SCORING_PRIVATE_v2\.zip)'
           })
-          if ($forbidden.Count -ne 0) { throw 'Forbidden scoring-private/gold artifact detected in provider package.' }
+          if (($forbiddenDirs.Count + $forbiddenFiles.Count) -ne 0) { throw 'Forbidden scoring-private/gold artifact detected.' }
           Write-Log 'blind_gold_boundary=PASS'
 
           $javaText = (& java -version 2>&1 | Out-String).Trim()
           Write-Log ("java=" + ($javaText -replace "`r?`n", ' | '))
           $contractOut = Join-Path $Evidence 'contract-tests.txt'
-          & java -cp (Join-Path $Target 'book-eval-lemonade.jar') org.systemmaster.tools.booklab.BookEvalLemonade001ContractTests *> $contractOut
-          if ($LASTEXITCODE -ne 0) { Get-Content $contractOut | ForEach-Object { Write-Log $_ }; throw "Book evaluator contract tests failed with exit code $LASTEXITCODE" }
+          & java -cp (Join-Path $Root 'book-eval-lemonade.jar') org.systemmaster.tools.booklab.BookEvalLemonade001ContractTests *> $contractOut
+          if ($LASTEXITCODE -ne 0) {
+            Get-Content $contractOut | ForEach-Object { Write-Log $_ }
+            throw "Book evaluator contract tests failed with exit code $LASTEXITCODE"
+          }
           Get-Content $contractOut | ForEach-Object { Write-Log $_ }
           Write-Log 'contract_tests=PASS'
 
@@ -159,28 +125,32 @@ jobs:
             standing = 'PASS_REPOSITORY_BOUND_A01_PREFLIGHT'
             trigger_commit = $env:GITHUB_SHA
             runner = $env:RUNNER_NAME
+            source = 'repository_native_v2_transport'
             jar_sha256 = $actualJar
             corpus_sha256 = $actualCorpus
             ontology_sha256 = $actualOntology
             execution_manifest_sha256 = $actualExecution
+            canonical_inputs_verified = '4/4'
             blind_gold_boundary = 'PASS'
             contract_tests = 'PASS'
           }
-          $receiptPath = Join-Path $Target 'BOOK-EVAL-REPO-BIND-A01-RECEIPT.json'
+          $receiptPath = Join-Path $Root 'BOOK-EVAL-REPO-BIND-A01-RECEIPT.json'
           $receipt | ConvertTo-Json -Depth 8 | Set-Content -Encoding UTF8 $receiptPath
 
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -- 'books/qualification/book-eval-lemonade-001'
+          git add -- 'books/qualification/book-eval-lemonade-001/book-eval-lemonade.jar' 'books/qualification/book-eval-lemonade-001/provider-visible/BOOK-EVAL-CORPUS-INPUT-v2.jsonl' 'books/qualification/book-eval-lemonade-001/provider-visible/BOOK-EVAL-PROVIDER-ONTOLOGY-v2.json' 'books/qualification/book-eval-lemonade-001/runner-private/RUNNER-PRIVATE-EXECUTION-MANIFEST-v2.json' 'books/qualification/book-eval-lemonade-001/BOOK-EVAL-REPO-BIND-A01-RECEIPT.json'
           git diff --cached --quiet
-          if ($LASTEXITCODE -eq 0) { throw 'No Books package changes were staged.' }
-          git commit -m 'books: bind canonical v2 package via A-01'
+          if ($LASTEXITCODE -eq 0) { throw 'No canonical package changes were staged.' }
+          git commit -m 'books: materialize canonical v2 package after A-01 qualification'
           if ($LASTEXITCODE -ne 0) { throw 'Failed to commit canonical Books package.' }
+          $bindCommit = (git rev-parse HEAD).Trim()
           git push origin ("HEAD:" + $env:GITHUB_REF_NAME)
           if ($LASTEXITCODE -ne 0) { throw 'Failed to push canonical Books package.' }
+          Write-Log ("repository_bind_commit=" + $bindCommit)
           Write-Log 'repository_bind_commit=PASS'
           Write-Log 'standing=PASS_REPOSITORY_BOUND_A01_PREFLIGHT'
-          "EVIDENCE_DIR=$Evidence" | Out-File -FilePath $env:GITHUB_ENV -Encoding ascii -Append
+          Copy-Item -LiteralPath $receiptPath -Destination (Join-Path $Evidence 'BOOK-EVAL-REPO-BIND-A01-RECEIPT.json') -Force
 
       - name: Upload A-01 evidence
         if: always()
