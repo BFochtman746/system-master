@@ -1,0 +1,55 @@
+{
+  "objective":"CONTINUITY-TARGET-WINDOWS-REBOOT-QUALIFICATION",
+  "qualification_id":"CONTINUITY-WINREBOOT-20260908-002",
+  "status":"CLOSED_TARGET_WINDOWS_REBOOT_PASS",
+  "evidence_class":"TARGET_WINDOWS_REBOOT",
+  "subject":{
+    "base_closure_commit":"eb9bd781a8116ed6f20ad8fb89003b3b10262a65",
+    "arm_commit":"bbb1957d1a3e6f3cfac49d50b16f3410dfa04d65",
+    "verification_commit":"7c30d501aacef9ec8558a50ad9a9bdc961c32296"
+  },
+  "runs":{
+    "arm":{"run_id":34289986492,"github_conclusion":"failure","adjudication":"EXPECTED_RUNNER_DISCONNECT_DURING_REAL_REBOOT","started_at_utc":"2026-09-08T23:17:50Z","released_at_utc":"2026-09-08T23:28:56Z"},
+    "verify":{"run_id":34290314506,"github_conclusion":"success","adjudication":"PASS"}
+  },
+  "reboot_proof":{
+    "runner":"A-01",
+    "runner_service":"actions.runner.BFochtman746-system-master.A-01",
+    "runner_service_start_mode":"Auto",
+    "reboot_command":"shutdown.exe /r /t 0 (non-forced)",
+    "boot_time_before_utc":"2026-09-08T00:35:33.6513140Z",
+    "armed_at_utc":"2026-09-08T23:19:03.5732771Z",
+    "boot_time_after_utc":"2026-09-08T23:19:24.5000000Z",
+    "boot_time_changed":true,
+    "journal_sha256_before_reboot":"78485a20dfe0b98d31682815d147c348f002bf896edd9ee9b4783827b6b5d825",
+    "journal_sha256_after_reboot_before_verify":"78485a20dfe0b98d31682815d147c348f002bf896edd9ee9b4783827b6b5d825",
+    "durable_journal_identical_across_reboot_before_verify":true,
+    "recovery_id":"recovery-7f4b0446f5e0de39cc045b44",
+    "pre_verify_state":"WAITING_DEPENDENCY",
+    "pre_verify_version":2,
+    "post_verify_state":"CLASSIFYING",
+    "post_verify_version":3
+  },
+  "verification":{
+    "java_assertions":12,
+    "G-RQ-004":{"TARGET_WINDOWS_REBOOT":"PASS","implementation_satisfied":true},
+    "G-RQ-072":{"TARGET_WINDOWS_REBOOT":"PASS","TARGET_IOS_CLIENT_SUSPEND_RESUME":"NOT_STARTED","implementation_satisfied":false},
+    "EMPIRICAL_HUMAN_EVIDENCE":"NOT_STARTED",
+    "production_authorized":false
+  },
+  "artifact":{
+    "artifact_id":10081266539,
+    "name":"system-master-continuity-target-windows-reboot-evidence",
+    "size_bytes":57169,
+    "sha256":"4d42b72c8754a09b923ac8f747ffcbf66204a3b2c3049dde1e38f6e1fed0f94f",
+    "retention_expires_at":"2026-10-08T23:29:05Z"
+  },
+  "non_evidence_setup_attempts":[
+    {"run_id":34289777315,"commit":"60879a3770dd293d76d43cd4b07fc334871306d3","result":"PRE_REBOOT_HARNESS_FAILURE","reason":"PowerShell git wrapper argument collision","reboot_occurred":false},
+    {"run_id":34289838995,"commit":"818eff89357f4e10dd47512f82e817edb31ad155","result":"PRE_REBOOT_HARNESS_FAILURE","reason":"DurableWorkIdentityRegistry overload mismatch","reboot_occurred":false},
+    {"run_id":34289886434,"commit":"38db3306255c44a3eaa2bd5a04f0c4ed2c7f22c4","result":"PRE_REBOOT_HARNESS_FAILURE","reason":"Java properties path escaping in PowerShell handoff","reboot_occurred":false}
+  ],
+  "classification_rule":"The interrupted ARM run is not itself a PASS. TARGET_WINDOWS_REBOOT is PASS only because the independent VERIFY run proved a changed Windows boot time, identical durable journal hash before post-reboot verification, surviving authoritative recovery state/history, and successful post-reboot state transition.",
+  "workflow_push_trigger":"DISABLED_AFTER_CLOSURE",
+  "production_authorized":false
+}
