@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "CONTRASTIVE-JUDGE-TRAINING-RECORD-SCHEMA-v1",
+  "title": "Book evaluator contrastive training record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "record_id",
+    "task_mode",
+    "specialist_id",
+    "source_lane",
+    "input_text",
+    "correct_token",
+    "hard_negative_tokens",
+    "decisive_reference_state",
+    "boundary_rule",
+    "counterfactual",
+    "rights_class",
+    "provenance",
+    "hidden_holdout_gold_used"
+  ],
+  "properties": {
+    "record_id": {"type": "string", "minLength": 8},
+    "task_mode": {"enum": ["MANUSCRIPT_DIAGNOSIS", "PAIRWISE_COMPARISON", "REVISION_ASSESSMENT"]},
+    "specialist_id": {"type": "string", "minLength": 3},
+    "source_lane": {"enum": ["DEVELOPMENT_ORIGINAL", "DEVELOPMENT_DERIVED", "SYNTHETIC", "AUTHORIZED_REFERENCE_DERIVED"]},
+    "input_text": {"type": "string", "minLength": 1},
+    "correct_token": {"type": "string", "pattern": "^[A-Z0-9_]+$"},
+    "hard_negative_tokens": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "pattern": "^[A-Z0-9_]+$"}
+    },
+    "decisive_reference_state": {
+      "type": "object",
+      "additionalProperties": {"type": ["string", "number", "boolean", "array", "object", "null"]}
+    },
+    "boundary_rule": {"type": "string", "minLength": 20},
+    "counterfactual": {"type": "string", "minLength": 20},
+    "evidence_labels": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "position_swap_group": {"type": ["string", "null"]},
+    "rights_class": {
+      "enum": [
+        "PUBLIC_DOMAIN_FULL_TEXT",
+        "LICENSED_FULL_TEXT",
+        "USER_OWNED_OR_AUTHORIZED",
+        "ANALYSIS_ONLY_NO_FULL_TEXT"
+      ]
+    },
+    "provenance": {
+      "type": "object",
+      "required": ["source_id", "derivation", "content_digest"],
+      "properties": {
+        "source_id": {"type": "string"},
+        "derivation": {"type": "string"},
+        "content_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+      }
+    },
+    "hidden_holdout_gold_used": {"const": false},
+    "notes": {"type": "string"}
+  }
+}
