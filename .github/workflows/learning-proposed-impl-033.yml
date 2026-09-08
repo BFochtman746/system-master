@@ -1,0 +1,104 @@
+name: LEARNING-LAB-IMPL-033 Unified Fresh Evidence Recovery
+
+on:
+  push:
+    branches: [learning/proposed-impl-033-unified-fresh-evidence-recovery]
+    paths:
+      - ".github/workflows/learning-proposed-impl-033.yml"
+      - "learning/lab/learning_lab/unified_fresh_evidence_recovery.py"
+      - "learning/lab/system_master_recovery_turn_bridge.py"
+      - "learning/lab/tests/test_unified_fresh_evidence_recovery.py"
+      - "learning/lab/qualification_impl033_system_master_unified_fresh_evidence_recovery.py"
+      - "learning/lab/LEARNING_LAB_IMPL_033_OBJECTIVE.md"
+      - "system-master/learning-integration/impl-033/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: learning-impl-033-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qualify:
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+          clean: true
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: '3.13.15'
+          architecture: x64
+          check-latest: false
+      - name: Prepare evidence
+        shell: cmd
+        run: |
+          set "EVIDENCE_DIR=%RUNNER_TEMP%\learning-impl-033-%GITHUB_RUN_ID%"
+          set "CLASS_DIR=%RUNNER_TEMP%\learning-impl-033-classes-%GITHUB_RUN_ID%"
+          mkdir "%EVIDENCE_DIR%" 2>nul
+          mkdir "%CLASS_DIR%" 2>nul
+          echo EVIDENCE_DIR=%EVIDENCE_DIR%>>"%GITHUB_ENV%"
+          echo CLASS_DIR=%CLASS_DIR%>>"%GITHUB_ENV%"
+          echo %GITHUB_SHA%>"%EVIDENCE_DIR%\source-commit.txt"
+          python --version>"%EVIDENCE_DIR%\python-version.txt" 2>&1
+          javac -version>"%EVIDENCE_DIR%\javac-version.txt" 2>&1
+      - name: Compile IMPL-033 Python boundary
+        shell: cmd
+        run: |
+          python -m py_compile learning\lab\learning_lab\unified_fresh_evidence_recovery.py learning\lab\system_master_recovery_turn_bridge.py learning\lab\qualification_impl033_system_master_unified_fresh_evidence_recovery.py
+      - name: Run focused IMPL-033 tests
+        shell: cmd
+        run: |
+          cd /d "%GITHUB_WORKSPACE%\learning\lab"
+          python -m unittest -v tests.test_unified_fresh_evidence_recovery >"%EVIDENCE_DIR%\impl033-focused.txt" 2>&1
+          set RC=%ERRORLEVEL%
+          type "%EVIDENCE_DIR%\impl033-focused.txt"
+          exit /b %RC%
+      - name: Compile foundation-free Java recovery adapter
+        shell: cmd
+        run: |
+          javac -d "%CLASS_DIR%" system-master\learning-integration\impl-017\src\main\java\org\systemmaster\learning\LearningExecutionPort.java system-master\learning-integration\impl-033\src\main\java\org\systemmaster\learning\UnifiedFreshEvidenceRecoveryLearningAdapter.java system-master\learning-integration\impl-033\src\test\java\org\systemmaster\learning\Impl033UnifiedFreshEvidenceRecoveryQualification.java >"%EVIDENCE_DIR%\java-compile.txt" 2>&1
+          set RC=%ERRORLEVEL%
+          type "%EVIDENCE_DIR%\java-compile.txt"
+          if not "%RC%"=="0" exit /b %RC%
+          echo IMPL033_JAVA_FOUNDATION_DEPENDENCY=NONE>"%EVIDENCE_DIR%\java-isolation.txt"
+      - name: Run Java to Python to HTTP auto-recovery qualification
+        shell: cmd
+        run: |
+          python learning\lab\qualification_impl033_system_master_unified_fresh_evidence_recovery.py --class-dir "%CLASS_DIR%" >"%EVIDENCE_DIR%\impl033-integration.txt" 2>&1
+          set RC=%ERRORLEVEL%
+          type "%EVIDENCE_DIR%\impl033-integration.txt"
+          exit /b %RC%
+      - name: Run predecessor regressions
+        shell: cmd
+        run: |
+          cd /d "%GITHUB_WORKSPACE%\learning\lab"
+          python -m unittest -v tests.test_fresh_evidence_provider_acquisition tests.test_fresh_evidence_configured_http tests.test_fresh_evidence_admission tests.test_unified_turn_controller tests.test_adaptive_journey_continuation tests.test_provider_multi_candidate_runtime >"%EVIDENCE_DIR%\regressions.txt" 2>&1
+          set RC=%ERRORLEVEL%
+          type "%EVIDENCE_DIR%\regressions.txt"
+          exit /b %RC%
+      - name: Publish summary
+        if: always()
+        shell: cmd
+        run: |
+          echo ## LEARNING-LAB-IMPL-033>>"%GITHUB_STEP_SUMMARY%"
+          echo Commit: %GITHUB_SHA%>>"%GITHUB_STEP_SUMMARY%"
+          echo Truth boundary: unified maintenance/transfer fresh-evidence blocker recovery proven against local HTTP; external production-provider reliability remains unproven.>>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\impl033-focused.txt" type "%EVIDENCE_DIR%\impl033-focused.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\java-isolation.txt" type "%EVIDENCE_DIR%\java-isolation.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\impl033-integration.txt" type "%EVIDENCE_DIR%\impl033-integration.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\regressions.txt" type "%EVIDENCE_DIR%\regressions.txt">>"%GITHUB_STEP_SUMMARY%"
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: learning-proposed-impl-033-evidence
+          path: ${{ runner.temp }}\learning-impl-033-${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 30
