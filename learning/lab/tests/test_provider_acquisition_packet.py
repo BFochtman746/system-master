@@ -46,7 +46,12 @@ class ProviderAcquisitionPacketTests(unittest.TestCase):
         self.model_calls += 1
         return copy.deepcopy(self.base_trace["output"])
 
-    def capture(self, operation_id="OP-IMPL020-001", packet_id="PACKET-IMPL020-001"):
+    def capture(
+        self,
+        operation_id="OP-IMPL020-001",
+        packet_id="PACKET-IMPL020-001",
+        inject_crash_after=None,
+    ):
         return OpenGoalInputPacketService(self.repo).capture_and_admit(
             operation_id=operation_id,
             packet_id=packet_id,
@@ -54,6 +59,7 @@ class ProviderAcquisitionPacketTests(unittest.TestCase):
             research_capture_provider=self.research_provider,
             model_id="PROVIDER-MODEL-IMPL020",
             model_candidate_provider=self.model_provider,
+            inject_crash_after=inject_crash_after,
         )
 
     def test_fresh_provider_outputs_are_sealed_as_nonverified_packet(self):
@@ -76,6 +82,78 @@ class ProviderAcquisitionPacketTests(unittest.TestCase):
         self.assertEqual(self.research_calls, 1)
         self.assertEqual(self.model_calls, 1)
 
+    def test_same_packet_identity_new_operation_reuses_pinned_provider_bytes(self):
+        first = self.capture(operation_id="OP-IMPL020-FIRST", packet_id="PACKET-IMPL020-PINNED")
+
+        def should_not_research(goal):
+            raise AssertionError("research provider must not be recalled")
+
+        def should_not_model(prompt):
+            raise AssertionError("model provider must not be recalled")
+
+        replay = OpenGoalInputPacketService(self.repo).capture_and_admit(
+            operation_id="OP-IMPL020-SECOND",
+            packet_id="PACKET-IMPL020-PINNED",
+            desired_outcome=GOAL,
+            research_capture_provider=should_not_research,
+            model_id="PROVIDER-MODEL-IMPL020",
+            model_candidate_provider=should_not_model,
+        )
+        self.assertEqual(first["packet_digest"], replay["packet_digest"])
+        self.assertEqual(self.research_calls, 1)
+        self.assertEqual(self.model_calls, 1)
+
+    def test_recovery_after_research_capture_checkpoint_does_not_resample_research(self):
+        with self.assertRaisesRegex(RuntimeError, "INJECTED_CRASH:RESEARCH_CAPTURE_STORED"):
+            self.capture(
+                operation_id="OP-IMPL020-CRASH-RESEARCH",
+                packet_id="PACKET-IMPL020-CRASH-RESEARCH",
+                inject_crash_after="RESEARCH_CAPTURE_STORED",
+            )
+        self.assertEqual(self.research_calls, 1)
+        self.assertEqual(self.model_calls, 0)
+        result = self.capture(
+            operation_id="OP-IMPL020-CRASH-RESEARCH",
+            packet_id="PACKET-IMPL020-CRASH-RESEARCH",
+        )
+        self.assertEqual(result["standing"], PACKET_STANDING)
+        self.assertEqual(self.research_calls, 1)
+        self.assertEqual(self.model_calls, 1)
+
+    def test_recovery_after_model_trace_checkpoint_resamples_neither_provider(self):
+        with self.assertRaisesRegex(RuntimeError, "INJECTED_CRASH:MODEL_TRACE_STORED"):
+            self.capture(
+                operation_id="OP-IMPL020-CRASH-MODEL",
+                packet_id="PACKET-IMPL020-CRASH-MODEL",
+                inject_crash_after="MODEL_TRACE_STORED",
+            )
+        self.assertEqual(self.research_calls, 1)
+        self.assertEqual(self.model_calls, 1)
+        result = self.capture(
+            operation_id="OP-IMPL020-CRASH-MODEL",
+            packet_id="PACKET-IMPL020-CRASH-MODEL",
+        )
+        self.assertEqual(result["standing"], PACKET_STANDING)
+        self.assertEqual(self.research_calls, 1)
+        self.assertEqual(self.model_calls, 1)
+
+    def test_recovery_after_packet_store_reconstructs_operation_without_provider_calls(self):
+        with self.assertRaisesRegex(RuntimeError, "INJECTED_CRASH:PACKET_STORED"):
+            self.capture(
+                operation_id="OP-IMPL020-CRASH-PACKET",
+                packet_id="PACKET-IMPL020-CRASH-PACKET",
+                inject_crash_after="PACKET_STORED",
+            )
+        self.assertEqual(self.research_calls, 1)
+        self.assertEqual(self.model_calls, 1)
+        result = self.capture(
+            operation_id="OP-IMPL020-CRASH-PACKET",
+            packet_id="PACKET-IMPL020-CRASH-PACKET",
+        )
+        self.assertEqual(result["standing"], PACKET_STANDING)
+        self.assertEqual(self.research_calls, 1)
+        self.assertEqual(self.model_calls, 1)
+
     def test_packet_digest_tamper_is_rejected(self):
         result = self.capture()
         packet = OpenGoalInputPacketService(self.repo).load(result["packet_id"])
@@ -83,14 +161,7 @@ class ProviderAcquisitionPacketTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "OPEN_GOAL_INPUT_PACKET_DIGEST_MISMATCH"):
             OpenGoalInputPacketService.validate_packet(packet)
 
-    def test_research_capture_drift_is_rejected_even_with_recomputed_packet_digest_unavailable(self):
-        result = self.capture()
-        packet = OpenGoalInputPacketService(self.repo).load(result["packet_id"])
-        packet["research_capture"]["claims"][0]["text"] += " tampered"
-        with self.assertRaisesRegex(ValueError, "OPEN_GOAL_INPUT_PACKET_DIGEST_MISMATCH"):
-            OpenGoalInputPacketService.validate_packet(packet)
-
-    def test_model_self_verification_is_forbidden_at_admission(self):
+    def test_model_self_verification_is_forbidden_before_model_checkpoint(self):
         def bad_model(prompt):
             output = copy.deepcopy(self.base_trace["output"])
             output["validation_status"] = "VERIFIED"
@@ -106,8 +177,9 @@ class ProviderAcquisitionPacketTests(unittest.TestCase):
                 model_id="BAD-SELF-VERIFYING-MODEL",
                 model_candidate_provider=bad_model,
             )
+        self.assertIsNone(self.repo.get_object("open_goal_provider_model_trace", "PACKET-IMPL020-BAD-MODEL", 1))
 
-    def test_unsupported_research_goal_abstains_before_model_call(self):
+    def test_unsupported_research_goal_abstains_before_model_call_or_research_checkpoint(self):
         service = OpenGoalInputPacketService(self.repo)
         with self.assertRaisesRegex(ValueError, "LIVE_OPEN_GOAL_UNSUPPORTED_OR_INSUFFICIENT_RESEARCH"):
             service.capture_and_admit(
@@ -120,24 +192,7 @@ class ProviderAcquisitionPacketTests(unittest.TestCase):
             )
         self.assertEqual(self.research_calls, 1)
         self.assertEqual(self.model_calls, 0)
-
-    def test_same_packet_identity_cannot_silently_rebind_changed_model_output(self):
-        self.capture(operation_id="OP-IMPL020-FIRST", packet_id="PACKET-IMPL020-COLLIDE")
-
-        def changed_model(prompt):
-            output = copy.deepcopy(self.base_trace["output"])
-            output["course_blueprint"]["lessons"][0]["title"] = "Changed provider candidate"
-            return output
-
-        with self.assertRaisesRegex(ValueError, "OBJECT_IDENTITY_COLLISION"):
-            OpenGoalInputPacketService(self.repo).capture_and_admit(
-                operation_id="OP-IMPL020-SECOND",
-                packet_id="PACKET-IMPL020-COLLIDE",
-                desired_outcome=GOAL,
-                research_capture_provider=self.research_provider,
-                model_id="PROVIDER-MODEL-IMPL020",
-                model_candidate_provider=changed_model,
-            )
+        self.assertIsNone(self.repo.get_object("open_goal_provider_research_capture", "PACKET-IMPL020-UNSUPPORTED", 1))
 
     def test_packet_reconstructs_replay_ports(self):
         result = self.capture()
