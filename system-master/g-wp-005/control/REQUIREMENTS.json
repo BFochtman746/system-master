@@ -1,0 +1,9 @@
+{
+  "package": "G-WP-005",
+  "requirements": [
+    {"id":"G-RQ-027","invariant":"Recovery ownership uses a monotonic epoch/fence; stale workers/controllers cannot mutate current recovery state."},
+    {"id":"G-RQ-028","invariant":"Recovery leases expire from authoritative time and become reclaimable without graceful worker shutdown."},
+    {"id":"G-RQ-029","invariant":"Concurrent recovery claimers yield at most one current mutating owner."},
+    {"id":"G-RQ-030","invariant":"Queue-style selection optimizations never define authoritative recovery consistency semantics."}
+  ]
+}

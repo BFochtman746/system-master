@@ -1,0 +1,43 @@
+name: System Master G-WP-005 A-01 Qualification
+
+on:
+  push:
+    branches:
+      - system-master/g-wp-005-a01
+
+permissions:
+  contents: read
+
+jobs:
+  qualify-g-wp-005:
+    name: Qualify G-WP-005 recovery claim milestone on A-01
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact G-WP-005 milestone subject
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          clean: true
+      - name: Execute repository-owned G-WP-005 milestone qualifier
+        shell: cmd
+        run: node .github\scripts\gwp005-qualify.js
+      - name: Publish G-WP-005 summary
+        if: always()
+        shell: cmd
+        run: |
+          set "EVIDENCE_DIR=%RUNNER_TEMP%\system-master-gwp005-%GITHUB_RUN_ID%"
+          echo ## SYSTEM-MASTER G-WP-005 A-01 MILESTONE>>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\subject.txt" type "%EVIDENCE_DIR%\subject.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\result.txt" type "%EVIDENCE_DIR%\result.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\qualification.txt" type "%EVIDENCE_DIR%\qualification.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\failure.txt" type "%EVIDENCE_DIR%\failure.txt">>"%GITHUB_STEP_SUMMARY%"
+      - name: Upload G-WP-005 milestone evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: system-master-g-wp-005-a01-evidence
+          path: ${{ runner.temp }}\system-master-gwp005-${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 30

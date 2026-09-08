@@ -1,0 +1,11 @@
+{
+  "id": "G-WP-005",
+  "objective": "Implement recovery claim/lease/fence integration and stale-owner rejection.",
+  "prerequisites": ["G-WP-002", "G-WP-003"],
+  "components": ["RecoveryClaimCoordinator"],
+  "data": ["RecoveryClaim", "ExecutionAttemptRef"],
+  "contracts": ["ClaimRecovery", "RenewRecoveryClaim", "ReleaseRecoveryClaim"],
+  "tests": ["CONCURRENCY", "PROPERTY", "PROCESS_KILL", "DATABASE_CONTENTION"],
+  "completion": "At most one current fenced recovery owner can mutate a work unit.",
+  "production_authorized": false
+}

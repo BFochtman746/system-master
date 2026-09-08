@@ -1,0 +1,11 @@
+{
+  "package": "G-WP-005",
+  "authority_boundaries": {
+    "021G": "Owns recovery claim identity, claim epoch, lease/fence use inside recovery, and stale-owner rejection.",
+    "021I": "Owns executor eligibility/execution-fence authority; G-WP-005 consumes current eligibility and does not replace 021I.",
+    "021H": "Owns resource admission; G-WP-005 consumes admission standing when required and does not own resource policy.",
+    "queue_selection": "Non-authoritative hint only. Every actual claim re-reads authoritative recovery/eligibility/admission state under the claim transaction."
+  },
+  "unknown_policy": "DENY/BLOCK consequential ownership when required specialist standing is DENY or UNKNOWN.",
+  "production_authorized": false
+}
