@@ -22,9 +22,10 @@ from learning_lab import (
     Repository,
     default_domain_registry,
 )
+from learning_lab.provider_multi_candidate_runtime import start_provider_multi_candidate_adaptive_entry
 from learning_lab.provider_packet_runtime import start_provider_packet_adaptive_entry
 
-BRIDGE_VERSION = "SYSTEM-MASTER-LEARNING-BRIDGE-V4"
+BRIDGE_VERSION = "SYSTEM-MASTER-LEARNING-BRIDGE-V5"
 QUALIFIED_LEARNING_BOUNDARY = "LEARNING-LAB-QUAL-001"
 RUNTIME_BINDING_VERSION = "LEARNING-DOMAIN-RUNTIME-BINDING-V1"
 OPEN_GOAL_RUNTIME_BINDING_VERSION = "LEARNING-OPEN-GOAL-RUNTIME-BINDING-V1"
@@ -88,6 +89,19 @@ def _claimed_skills(request: Mapping[str, Any]) -> list[str]:
     if len(set(claimed)) != len(claimed):
         _fail("DUPLICATE:claimed_skill_ids")
     return list(claimed)
+
+
+def _input_packet_ids(request: Mapping[str, Any]) -> list[str]:
+    values = request.get("input_packet_ids")
+    if not isinstance(values, list) or any(
+        not isinstance(v, str) or not _ALLOWED_REQUEST_ID.fullmatch(v) for v in values
+    ):
+        _fail("INVALID:input_packet_ids")
+    if len(values) < 2:
+        _fail("PROVIDER_MULTI_CANDIDATE_SET_TOO_SMALL")
+    if len(set(values)) != len(values):
+        _fail("PROVIDER_MULTI_CANDIDATE_PACKET_ID_DUPLICATE")
+    return list(values)
 
 
 def _validate_claims(claimed: list[str], course: Mapping[str, Any]) -> set[str]:
@@ -312,6 +326,33 @@ def _start_provider_packet_entry(request: Mapping[str, Any]) -> dict[str, Any]:
     }
 
 
+def _start_provider_multi_candidate_entry(request: Mapping[str, Any]) -> dict[str, Any]:
+    state_key = _required_text(request.get("state_key"), "state_key", _ALLOWED_STATE_KEY)
+    request_id = _required_text(request.get("request_id"), "request_id", _ALLOWED_REQUEST_ID)
+    learner_id = _required_text(request.get("learner_id"), "learner_id", _ALLOWED_REQUEST_ID)
+    packet_ids = _input_packet_ids(request)
+    claimed = _claimed_skills(request)
+    now = request.get("now")
+    if not isinstance(now, int) or now < 0:
+        _fail("INVALID:now")
+    repo = Repository(str(_state_path(state_key)))
+    result = start_provider_multi_candidate_adaptive_entry(
+        repo=repo,
+        request_id=request_id,
+        learner_id=learner_id,
+        packet_ids=packet_ids,
+        claimed_skill_ids=claimed,
+        now=now,
+    )
+    return {
+        "bridge_version": BRIDGE_VERSION,
+        "qualified_learning_boundary": QUALIFIED_LEARNING_BOUNDARY,
+        "request_digest": _request_digest(request),
+        "state_key": state_key,
+        **result,
+    }
+
+
 def dispatch(request: Mapping[str, Any]) -> dict[str, Any]:
     if not isinstance(request, Mapping):
         _fail("REQUEST_MUST_BE_OBJECT")
@@ -322,6 +363,8 @@ def dispatch(request: Mapping[str, Any]) -> dict[str, Any]:
         return _start_open_goal_adaptive_entry(request)
     if operation == "START_OPEN_GOAL_PACKET_ADAPTIVE_ENTRY":
         return _start_provider_packet_entry(request)
+    if operation == "START_OPEN_GOAL_MULTI_CANDIDATE_PACKET_ADAPTIVE_ENTRY":
+        return _start_provider_multi_candidate_entry(request)
     if operation == "START_GIT_ADAPTIVE_ENTRY":
         legacy = dict(request)
         legacy["operation"] = "START_ADAPTIVE_ENTRY"
