@@ -1,0 +1,74 @@
+name: Literary Research Overnight A-01
+
+on:
+  schedule:
+    - cron: '0 0 9 9 *'
+      timezone: 'America/New_York'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: literary-research-overnight-a01
+  cancel-in-progress: false
+
+jobs:
+  harvest:
+    name: Rights-aware literary research harvest
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 360
+    steps:
+      - name: Checkout literary research branch
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: literary-prose-engine-001
+          persist-credentials: false
+
+      - name: Create bounded evidence directory
+        shell: pwsh
+        run: |
+          $dir = Join-Path $env:RUNNER_TEMP "literary-research-$env:GITHUB_RUN_ID"
+          New-Item -ItemType Directory -Force -Path $dir | Out-Null
+          "EVIDENCE_DIR=$dir" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Locate Python
+        shell: pwsh
+        run: |
+          $python = (Get-Command python -ErrorAction SilentlyContinue).Source
+          if (-not $python) {
+            $py = Get-Command py -ErrorAction SilentlyContinue
+            if ($py) { $python = "py" }
+          }
+          if (-not $python) { throw "Python not found on A-01" }
+          "PYTHON_CMD=$python" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Harvest rights-aware literary research
+        shell: pwsh
+        run: |
+          & $env:PYTHON_CMD "qualification/literary-prose-engine-001/overnight-research/overnight_harvest.py" `
+            --seeds "qualification/literary-prose-engine-001/overnight-research/LITERARY-RESEARCH-SOURCE-SEEDS-v1.json" `
+            --output $env:EVIDENCE_DIR `
+            --active-date "2026-09-09" `
+            --stop-hour 7
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Summarize harvest
+        if: always()
+        shell: pwsh
+        run: |
+          "## Literary Research Overnight A-01" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
+          if (Test-Path (Join-Path $env:EVIDENCE_DIR "harvest_summary.json")) {
+            '```json' | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
+            Get-Content (Join-Path $env:EVIDENCE_DIR "harvest_summary.json") | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
+            '```' | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
+          }
+
+      - name: Upload harvest evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: literary-research-overnight-${{ github.run_id }}
+          path: ${{ env.EVIDENCE_DIR }}
+          if-no-files-found: error
+          retention-days: 14
