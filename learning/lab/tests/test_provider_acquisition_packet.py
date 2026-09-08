@@ -158,7 +158,7 @@ class ProviderAcquisitionPacketTests(unittest.TestCase):
         result = self.capture()
         packet = OpenGoalInputPacketService(self.repo).load(result["packet_id"])
         packet["standing"] = "COURSE_VERIFIED"
-        with self.assertRaisesRegex(ValueError, "OPEN_GOAL_INPUT_PACKET_DIGEST_MISMATCH"):
+        with self.assertRaisesRegex(ValueError, "OPEN_GOAL_INPUT_PACKET_STANDING_INVALID"):
             OpenGoalInputPacketService.validate_packet(packet)
 
     def test_model_self_verification_is_forbidden_before_model_checkpoint(self):
