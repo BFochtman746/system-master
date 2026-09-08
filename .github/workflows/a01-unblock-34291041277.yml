@@ -13,11 +13,11 @@ jobs:
   cancel-exact-arm:
     runs-on: ubuntu-latest
     steps:
-      - name: Cancel exact receipt-preserved ARM run
+      - name: Force-cancel exact receipt-preserved stale ARM run
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
-          gh api --method POST "repos/${REPO}/actions/runs/34291041277/cancel"
-          echo "Cancelled exact A-01 ARM run 34291041277 after receipt/evidence preservation."
+          gh api --method POST "repos/${REPO}/actions/runs/34291041277/force-cancel"
+          echo "Force-cancelled stale A-01 ARM run 34291041277 after receipt/evidence preservation."
