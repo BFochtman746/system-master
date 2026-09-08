@@ -48,29 +48,33 @@ def margin(model,q):
 
 def taxonomy_maps(tax):
     token_to_sp={}
-    token_to_task={}
     sp_to_tokens={}
+    all_tokens=set()
     for task,tobj in tax['task_modes'].items():
         for sp,tokens in tobj['specialists'].items():
-            if sp in sp_to_tokens: raise ValueError('duplicate specialist '+sp)
-            sp_to_tokens[sp]=list(tokens)
+            sp_key=(task,sp)
+            if sp_key in sp_to_tokens: raise ValueError('duplicate specialist '+task+'/'+sp)
+            sp_to_tokens[sp_key]=list(tokens)
             for token in tokens:
-                if token in token_to_sp: raise ValueError('duplicate token '+token)
-                token_to_sp[token]=sp; token_to_task[token]=task
-    return token_to_sp,token_to_task,sp_to_tokens
+                key=(task,token)
+                if key in token_to_sp: raise ValueError('duplicate token within task '+task+'/'+token)
+                token_to_sp[key]=sp
+                all_tokens.add(token)
+    return token_to_sp,sp_to_tokens,all_tokens
 
-def teacher_to_training(rows,token_to_sp,token_to_task):
+def teacher_to_training(rows,token_to_sp,all_tokens):
     out=[]; ids=set()
     for r in rows:
         rid=r['teacher_record_id']
         if rid in ids: raise ValueError('duplicate teacher record '+rid)
         ids.add(rid)
         token=r['target_token']; sp=r['specialist_id']; task=r['task_mode']
-        if token not in token_to_sp: raise ValueError('teacher token outside taxonomy '+token)
-        if token_to_sp[token]!=sp or token_to_task[token]!=task: raise ValueError('teacher taxonomy drift '+rid)
+        key=(task,token)
+        if key not in token_to_sp: raise ValueError('teacher token outside taxonomy '+task+'/'+token)
+        if token_to_sp[key]!=sp: raise ValueError('teacher taxonomy drift '+rid)
         if r.get('hidden_holdout_gold_used') or r.get('visible_regression_gold_used'): raise ValueError('teacher forbidden gold flag')
         if r.get('source_lane')!='TEACHER_SYNTHETIC' or r.get('rights_class')!='SYNTHETIC_ORIGINAL': raise ValueError('teacher source/rights drift')
-        if any(tok in r['input_text'] for tok in token_to_sp): raise ValueError('ontology token leak in teacher input '+rid)
+        if any(tok in r['input_text'] for tok in all_tokens): raise ValueError('ontology token leak in teacher input '+rid)
         out.append({
             'record_id':rid,
             'task_mode':task,
@@ -158,8 +162,8 @@ def main():
     base=read_jsonl(args.training); teacher_raw=read_jsonl(args.teacher)
     provider={r['case_id']:r for r in read_jsonl(args.provider)}
     gold=read_jsonl(args.gold); dev=sorted([g for g in gold if g['split']=='DEVELOPMENT'],key=lambda z:z['case_id'])
-    tax=json.load(open(args.taxonomy,encoding='utf-8')); token_to_sp,token_to_task,sp_to_tokens=taxonomy_maps(tax)
-    teacher=teacher_to_training(teacher_raw,token_to_sp,token_to_task)
+    tax=json.load(open(args.taxonomy,encoding='utf-8')); token_to_sp,sp_to_tokens,all_tokens=taxonomy_maps(tax)
+    teacher=teacher_to_training(teacher_raw,token_to_sp,all_tokens)
     if len(teacher)!=440: raise SystemExit('expected 440 teacher records')
     if len(dev)!=80: raise SystemExit('expected 80 DEVELOPMENT cases')
     if any(r.get('hidden_holdout_gold_used') for r in base): raise SystemExit('base corpus claims hidden holdout gold')
@@ -172,7 +176,7 @@ def main():
     full_router=full_leaf=0
     for g in dev:
         p=provider[g['case_id']]; sp,pred,_,_,_=predict(v,router,leaves,p)
-        full_router += sp==token_to_sp[g['primary_finding']]
+        full_router += sp==token_to_sp[(p['task_mode'],g['primary_finding'])]
         full_leaf += pred==g['primary_finding']
 
     ids=[g['case_id'] for g in dev]; byid={g['case_id']:g for g in dev}
@@ -184,7 +188,7 @@ def main():
         fold_records=fold_base+teacher
         fv,fr,fl=fit_models(fold_records)
         for cid in sorted(test):
-            g=byid[cid]; p=provider[cid]; true_leaf=g['primary_finding']; true_sp=token_to_sp[true_leaf]
+            g=byid[cid]; p=provider[cid]; true_leaf=g['primary_finding']; true_sp=token_to_sp[(p['task_mode'],true_leaf)]
             pred_sp,pred_leaf,rm,lm,conf=predict(fv,fr,fl,p)
             if true_sp not in fl: missing+=1
             _,oracle_leaf,_,olm,_=predict(fv,fr,fl,p,forced_sp=true_sp)
