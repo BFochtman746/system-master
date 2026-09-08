@@ -1,0 +1,127 @@
+name: A-01 Control Plane Gateway
+
+on:
+  push:
+    branches:
+      - system-master/a01-control-plane-001
+    paths:
+      - 'SYSTEM-MASTER-WORKSTREAM-BOOTSTRAP.md'
+      - 'qualification/a01/**'
+      - '.github/scripts/a01-control-plane*.js'
+      - '.github/workflows/a01-control-plane-gateway.yml'
+  workflow_dispatch:
+    inputs:
+      qualification_id:
+        description: Registered qualification ID
+        required: true
+        default: A01-CONTROL-PLANE-SELFTEST
+      workstream_id:
+        description: Owning workstream
+        required: true
+        default: SYSTEM-MASTER
+      subject_sha:
+        description: Exact 40-character commit SHA to qualify
+        required: true
+      origin_ref:
+        description: Workstream branch/ref that owns the return ticket
+        required: true
+      resume_on_pass:
+        description: Authorized continuation after PASS
+        required: true
+      resume_on_failure:
+        description: Authorized continuation after failure
+        required: true
+      notification_target:
+        description: Logical notification target
+        required: true
+        default: originating-workstream
+  workflow_call:
+    inputs:
+      qualification_id:
+        type: string
+        required: true
+      workstream_id:
+        type: string
+        required: true
+      subject_sha:
+        type: string
+        required: true
+      origin_ref:
+        type: string
+        required: true
+      resume_on_pass:
+        type: string
+        required: true
+      resume_on_failure:
+        type: string
+        required: true
+      notification_target:
+        type: string
+        required: true
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: a01-global
+  queue: max
+  cancel-in-progress: false
+
+jobs:
+  qualify:
+    name: A-01 registered qualification
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 30
+    env:
+      A01_QUALIFICATION_ID: ${{ inputs.qualification_id || 'A01-CONTROL-PLANE-SELFTEST' }}
+      A01_WORKSTREAM_ID: ${{ inputs.workstream_id || 'SYSTEM-MASTER' }}
+      A01_SUBJECT_SHA: ${{ inputs.subject_sha || github.sha }}
+      A01_ORIGIN_REF: ${{ inputs.origin_ref || github.ref }}
+      A01_RESUME_ON_PASS: ${{ inputs.resume_on_pass || 'Adjudicate PASS and continue the next dependency-valid objective.' }}
+      A01_RESUME_ON_FAILURE: ${{ inputs.resume_on_failure || 'Adjudicate evidence, repair the failing boundary, and rerun the minimum sufficient gate.' }}
+      A01_NOTIFICATION_TARGET: ${{ inputs.notification_target || 'originating-workstream' }}
+    steps:
+      - name: Checkout exact qualification subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ inputs.subject_sha || github.sha }}
+          fetch-depth: 1
+          clean: true
+          persist-credentials: false
+
+      - name: Prepare evidence directory
+        shell: cmd
+        run: |
+          set "A01_EVIDENCE_DIR=%RUNNER_TEMP%\a01-control-plane-%GITHUB_RUN_ID%"
+          if not exist "%A01_EVIDENCE_DIR%" mkdir "%A01_EVIDENCE_DIR%"
+          echo A01_EVIDENCE_DIR=%A01_EVIDENCE_DIR%>>"%GITHUB_ENV%"
+
+      - name: Validate control-plane policy and registry
+        shell: cmd
+        run: node .github\scripts\a01-control-plane.js validate
+
+      - name: Execute registered qualification and emit receipt
+        shell: cmd
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node .github\scripts\a01-control-plane.js execute
+
+      - name: Publish control-plane receipt summary
+        if: always()
+        shell: cmd
+        run: |
+          echo ## A-01 CONTROL PLANE>>"%GITHUB_STEP_SUMMARY%"
+          echo Qualification: %A01_QUALIFICATION_ID%>>"%GITHUB_STEP_SUMMARY%"
+          echo Subject: %A01_SUBJECT_SHA%>>"%GITHUB_STEP_SUMMARY%"
+          if exist "%A01_EVIDENCE_DIR%\result.txt" type "%A01_EVIDENCE_DIR%\result.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%A01_EVIDENCE_DIR%\receipt.json" type "%A01_EVIDENCE_DIR%\receipt.json">>"%GITHUB_STEP_SUMMARY%"
+
+      - name: Upload authoritative A-01 evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: a01-control-plane-${{ github.run_id }}-evidence
+          path: ${{ runner.temp }}\a01-control-plane-${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 30

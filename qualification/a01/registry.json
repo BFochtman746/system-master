@@ -1,0 +1,22 @@
+{
+  "registry_version": 2,
+  "canonical_baseline": "c51046152eaf749d672ce923ea983e1c7893d3f2",
+  "qualifications": {
+    "A01-CONTROL-PLANE-SELFTEST": {
+      "workstream_id": "SYSTEM-MASTER",
+      "gate_class": "promotion",
+      "executable": "node",
+      "args": [".github/scripts/a01-control-plane-selftest.js"],
+      "evidence_artifact": "a01-control-plane-selftest-evidence",
+      "description": "Qualify policy, registry, schemas, bootstrap, gateway safety, receipt production, and exact-SHA binding for A01-CONTROL-PLANE-001."
+    },
+    "SYSTEM-MASTER-CONTINUITY-G-WP-011-015-CONSOLIDATED": {
+      "workstream_id": "SYSTEM-MASTER-CONTINUITY",
+      "gate_class": "consolidated",
+      "executable": "node",
+      "args": [".github/scripts/g-continuity-011-015-control-plane-qualify.js"],
+      "evidence_artifact": "system-master-continuity-011-015-consolidated-a01-evidence",
+      "description": "Control-plane migration/equivalence qualification for the accumulated G-WP-011-015 Continuity slice. Preserves the legacy 143-assertion ordinary A-01 integration boundary and explicitly does not satisfy Windows-reboot, iOS suspend/resume, or empirical human evidence."
+    }
+  }
+}
