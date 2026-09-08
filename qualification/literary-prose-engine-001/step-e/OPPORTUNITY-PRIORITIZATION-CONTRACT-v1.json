@@ -1,0 +1,16 @@
+{
+  "contract_id": "LITERARY-PROSE-ENGINE-001-STEP-E-OPPORTUNITY-PRIORITIZATION-v1",
+  "purpose": "Rank a small number of potential craft interventions by expected literary benefit under preservation risk, without producing revision text.",
+  "priority_inputs": ["expected_impact","diagnostic_confidence","purpose_relevance","preservation_risk","voice_risk","collateral_regression_risk","edit_budget_fit"],
+  "rules": [
+    "High impact cannot override a critical preservation risk.",
+    "Low-confidence opportunities cannot outrank high-confidence purpose-critical opportunities solely because they are stylistically attractive.",
+    "Opportunity count should be bounded; the engine should prefer the highest-value limiting factor.",
+    "NO_ACTION is valid when expected value is insufficient or risks are unresolved.",
+    "Opportunity records diagnose targets; STEP-E does not rewrite passages."
+  ],
+  "default_max_opportunities": 3,
+  "hard_reject_conditions": ["protected_language_conflict","canon_conflict","authorial_intent_conflict","pov_knowledge_violation"],
+  "score_is_internal_priority_not_quality": true,
+  "universal_prose_score": false
+}
