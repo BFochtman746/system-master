@@ -1,0 +1,115 @@
+name: BOOK-EVAL-LEMONADE-001 REPAIR-005 Gate D Teacher Pilot
+
+on:
+  push:
+    branches:
+      - book-eval-lemonade-001-blind-resume-003-adapter-repair
+    paths:
+      - ".github/workflows/book-eval-repair-005-gate-d-teacher-pilot.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: book-eval-repair005-gate-d-teacher-pilot
+  cancel-in-progress: false
+
+jobs:
+  distill:
+    name: Generate blind semantic-distillation pilot
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 120
+    steps:
+      - name: Checkout exact repair branch
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 1
+
+      - name: Generate and qualify teacher synthetic corpus
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $Bundle = Join-Path $env:GITHUB_WORKSPACE 'qualification\book-eval-lemonade-001'
+          $Taxonomy = Join-Path $Bundle 'repair005\BOOK-EVAL-HIERARCHICAL-SPECIALIST-TAXONOMY-v1.json'
+          $Generator = Join-Path $Bundle 'scripts\generate-repair005-gate-d-teacher.py'
+          $Persistent = 'C:\AI Test Kit\Books Testing\BOOK_EVAL_LEMONADE_001_REPAIR005_GATE_D_TEACHER_V1'
+          $Evidence = Join-Path $env:RUNNER_TEMP ('book-eval-repair005-gate-d-teacher-' + $env:GITHUB_RUN_ID)
+          New-Item -ItemType Directory -Force -Path $Persistent,$Evidence | Out-Null
+          "EVIDENCE_DIR=$Evidence" | Out-File -FilePath $env:GITHUB_ENV -Encoding ascii -Append
+
+          if (Test-Path (Join-Path $Bundle 'scoring-private')) { throw 'scoring-private material present in repository bundle' }
+          if (-not (Test-Path -LiteralPath $Taxonomy -PathType Leaf)) { throw 'taxonomy missing' }
+          if (-not (Test-Path -LiteralPath $Generator -PathType Leaf)) { throw 'teacher generator missing' }
+
+          curl.exe --fail --silent --show-error -X POST 'http://127.0.0.1:13305/v1/load' -H 'Content-Type: application/json' --data-binary ('@' + (Join-Path $Bundle 'lemonade-load-request.json')) -o (Join-Path $Evidence 'model-load.json')
+          if ($LASTEXITCODE -ne 0) { throw 'model load failed' }
+
+          $env:BOOK_EVAL_MODEL = 'user.gpt-oss-120b-MXFP4'
+          $env:BOOK_EVAL_ENDPOINT = 'http://127.0.0.1:13305/v1/responses'
+          $env:BOOK_EVAL_TEMPERATURE = '0.7'
+          $env:BOOK_EVAL_MAX_OUTPUT_TOKENS = '1800'
+          $env:BOOK_EVAL_MAX_ATTEMPTS = '3'
+          $env:BOOK_EVAL_TIMEOUT_SECONDS = '240'
+          $env:BOOK_EVAL_TEACHER_EXAMPLES_PER_TOKEN = '2'
+          $env:BOOK_EVAL_TEACHER_BATCH = '2'
+
+          & python $Generator --taxonomy $Taxonomy --out-dir $Persistent 2>&1 | Tee-Object -FilePath (Join-Path $Evidence 'teacher-run.log')
+          if ($LASTEXITCODE -ne 0) { throw 'teacher generator failed' }
+
+          $Rows = Join-Path $Persistent 'GATE-D-TEACHER-SYNTHETIC.jsonl'
+          $Status = Join-Path $Persistent 'GATE-D-TEACHER-STATUS.json'
+          if (-not (Test-Path $Rows) -or -not (Test-Path $Status)) { throw 'teacher outputs missing' }
+
+          @'
+import json, os, sys
+from pathlib import Path
+rows=Path(os.environ['ROWS_PATH'])
+tax=Path(os.environ['TAXONOMY_PATH'])
+t=json.load(open(tax,encoding='utf-8'))
+tokens=[]
+for task in t['task_modes'].values():
+    for leaves in task['specialists'].values(): tokens.extend(leaves)
+items=[json.loads(x) for x in rows.read_text(encoding='utf-8').splitlines() if x.strip()]
+expected=len(tokens)*2
+if len(items)!=expected: raise SystemExit(f'expected {expected} records, got {len(items)}')
+ids=set()
+for r in items:
+    if r['teacher_record_id'] in ids: raise SystemExit('duplicate teacher_record_id')
+    ids.add(r['teacher_record_id'])
+    if r.get('hidden_holdout_gold_used') is not False or r.get('visible_regression_gold_used') is not False: raise SystemExit('gold-use flag violation')
+    text=r['input_text']
+    leaked=[tok for tok in tokens if tok in text]
+    if leaked: raise SystemExit(f'ontology token leaked into input_text {r["teacher_record_id"]}: {leaked}')
+    if 'REFERENCE_LABELS:' not in text: raise SystemExit('missing reference labels')
+print(f'GATE-D TEACHER PILOT PASS records={len(items)} canonical_tokens={len(tokens)} token_leaks=0 gold_used=false')
+'@ | Set-Content -Encoding UTF8 (Join-Path $Evidence 'validate_teacher.py')
+          $env:ROWS_PATH = $Rows
+          $env:TAXONOMY_PATH = $Taxonomy
+          & python (Join-Path $Evidence 'validate_teacher.py') 2>&1 | Tee-Object -FilePath (Join-Path $Evidence 'teacher-validation.log')
+          if ($LASTEXITCODE -ne 0) { throw 'teacher corpus validation failed' }
+
+          Copy-Item $Rows (Join-Path $Evidence 'GATE-D-TEACHER-SYNTHETIC.jsonl') -Force
+          Copy-Item $Status (Join-Path $Evidence 'GATE-D-TEACHER-STATUS.json') -Force
+          $sha=(Get-FileHash -Algorithm SHA256 -LiteralPath $Rows).Hash.ToLowerInvariant()
+          @(
+            'objective=BOOK-EVAL-LEMONADE-001-REPAIR-005-GATE-D',
+            'phase=TEACHER_SEMANTIC_DISTILLATION_PILOT',
+            'canonical_tokens=55',
+            'examples_per_token=2',
+            'teacher_records=110',
+            'ontology_token_leaks=0',
+            'hidden_holdout_gold_used=false',
+            'visible_regression_gold_used=false',
+            "teacher_output_sha256=$sha",
+            'standing=PASS_TEACHER_PILOT_READY_FOR_STUDENT_RETRAIN'
+          ) | Set-Content -Encoding UTF8 (Join-Path $Evidence 'qualification-summary.txt')
+          Get-Content (Join-Path $Evidence 'qualification-summary.txt')
+
+      - name: Upload Gate D teacher pilot evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: book-eval-repair005-gate-d-teacher-pilot-evidence
+          path: ${{ env.EVIDENCE_DIR }}
+          if-no-files-found: warn
+          retention-days: 30
