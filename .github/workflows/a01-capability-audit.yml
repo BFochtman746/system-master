@@ -1,0 +1,183 @@
+name: A-01 Capability Audit
+
+on:
+  push:
+    branches:
+      - runner/capability-audit-001
+    paths:
+      - ".github/workflows/a01-capability-audit.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    name: Audit A-01 executable and permission surface
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout exact audit commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+          clean: true
+
+      - name: Collect identity permission and executable audit
+        shell: cmd
+        run: |
+          set "EVIDENCE_DIR=%RUNNER_TEMP%\a01-capability-audit-%GITHUB_RUN_ID%"
+          if not exist "%EVIDENCE_DIR%" mkdir "%EVIDENCE_DIR%"
+          set "REPORT=%EVIDENCE_DIR%\capability-audit.txt"
+          set "WRITE_REPORT=%EVIDENCE_DIR%\write-boundaries.txt"
+          set "NETWORK_REPORT=%EVIDENCE_DIR%\network-reachability.txt"
+
+          echo audit=A01-CAPABILITY-AUDIT-001>"%REPORT%"
+          echo commit=%GITHUB_SHA%>>"%REPORT%"
+          echo runner_name=%RUNNER_NAME%>>"%REPORT%"
+          echo runner_os=%RUNNER_OS%>>"%REPORT%"
+          echo runner_arch=%RUNNER_ARCH%>>"%REPORT%"
+          echo computername=%COMPUTERNAME%>>"%REPORT%"
+          echo whoami:>>"%REPORT%"
+          whoami>>"%REPORT%" 2>&1
+          echo username=%USERNAME%>>"%REPORT%"
+          echo userprofile=%USERPROFILE%>>"%REPORT%"
+          echo localappdata=%LOCALAPPDATA%>>"%REPORT%"
+          echo temp=%TEMP%>>"%REPORT%"
+          echo runner_temp=%RUNNER_TEMP%>>"%REPORT%"
+          echo github_workspace=%GITHUB_WORKSPACE%>>"%REPORT%"
+          echo admin_probe:>>"%REPORT%"
+          net session >nul 2>&1 && echo elevated-admin=yes>>"%REPORT%" || echo elevated-admin=no>>"%REPORT%"
+          echo groups_and_privileges:>>"%REPORT%"
+          whoami /groups>>"%REPORT%" 2>&1
+          whoami /priv>>"%REPORT%" 2>&1
+          echo path_begin>>"%REPORT%"
+          echo %PATH%>>"%REPORT%"
+          echo path_end>>"%REPORT%"
+
+          call :tool git "git --version"
+          call :tool node "node --version"
+          call :tool npm "npm --version"
+          call :tool npx "npx --version"
+          call :tool java "java -version"
+          call :tool javac "javac -version"
+          call :tool dotnet "dotnet --info"
+          call :tool msbuild "msbuild -version"
+          call :tool powershell "powershell -NoLogo -NoProfile -Command "$PSVersionTable.PSVersion.ToString()""
+          call :tool pwsh "pwsh -NoLogo -NoProfile -Command "$PSVersionTable.PSVersion.ToString()""
+          call :tool python "python --version"
+          call :tool py "py --version"
+          call :tool pip "pip --version"
+          call :tool winget "winget --version"
+          call :tool choco "choco --version"
+          call :tool scoop "scoop --version"
+          call :tool curl "curl.exe --version"
+          call :tool tar "tar --version"
+          call :tool 7z "7z"
+          call :tool sqlite3 "sqlite3 --version"
+          call :tool psql "psql --version"
+          call :tool docker "docker --version"
+          call :tool podman "podman --version"
+          call :tool wsl "wsl --status"
+          call :tool ssh "ssh -V"
+          call :tool scp "scp -V"
+          call :tool gh "gh --version"
+          call :tool code "code --version"
+          call :tool cmake "cmake --version"
+          call :tool ninja "ninja --version"
+          call :tool make "make --version"
+          call :tool clang "clang --version"
+          call :tool gcc "gcc --version"
+          call :tool go "go version"
+          call :tool rustc "rustc --version"
+          call :tool cargo "cargo --version"
+          call :tool ruby "ruby --version"
+          call :tool perl "perl -v"
+          call :tool php "php --version"
+          call :tool ffmpeg "ffmpeg -version"
+          call :tool magick "magick -version"
+          call :tool soffice "soffice --version"
+          call :tool libreoffice "libreoffice --version"
+          call :tool pandoc "pandoc --version"
+          call :tool jq "jq --version"
+          call :tool openssl "openssl version"
+          call :tool adb "adb version"
+          call :tool gradle "gradle --version"
+          call :tool mvn "mvn --version"
+          call :tool swift "swift --version"
+
+          echo filesystem_write_boundary_audit>"%WRITE_REPORT%"
+          call :writeprobe "%RUNNER_TEMP%" RUNNER_TEMP
+          call :writeprobe "%GITHUB_WORKSPACE%" GITHUB_WORKSPACE
+          call :writeprobe "C:\actions-runner" ACTIONS_RUNNER_ROOT
+          call :writeprobe "%USERPROFILE%" USERPROFILE
+          call :writeprobe "%LOCALAPPDATA%" LOCALAPPDATA
+          call :writeprobe "C:\SystemMaster" SYSTEMMASTER_ROOT
+          call :writeprobe "%ProgramFiles%" PROGRAMFILES
+          call :writeprobe "%SystemRoot%" WINDOWS_ROOT
+
+          echo network_reachability_audit>"%NETWORK_REPORT%"
+          call :netprobe https://github.com GITHUB
+          call :netprobe https://api.github.com API_GITHUB
+          call :netprobe https://www.python.org PYTHON_ORG
+          call :netprobe https://pypi.org PYPI
+          call :netprobe https://registry.npmjs.org NPM_REGISTRY
+          call :netprobe https://aka.ms AKA_MS
+
+          echo audit_complete=true>>"%REPORT%"
+          type "%REPORT%"
+          type "%WRITE_REPORT%"
+          type "%NETWORK_REPORT%"
+          echo EVIDENCE_DIR=%EVIDENCE_DIR%>>"%GITHUB_ENV%"
+          exit /b 0
+
+          :tool
+          set "TOOL=%~1"
+          set "CMD=%~2"
+          echo.>>"%REPORT%"
+          echo [tool:%TOOL%]>>"%REPORT%"
+          where %TOOL%>>"%REPORT%" 2>&1
+          if errorlevel 1 (
+            echo status=not-on-path>>"%REPORT%"
+            exit /b 0
+          )
+          echo status=on-path>>"%REPORT%"
+          cmd /d /s /c "%CMD%">>"%REPORT%" 2>&1
+          echo command_exit=%ERRORLEVEL%>>"%REPORT%"
+          exit /b 0
+
+          :writeprobe
+          set "DIR=%~1"
+          set "LABEL=%~2"
+          if not exist "%DIR%" (
+            echo %LABEL%=directory-not-found>>"%WRITE_REPORT%"
+            exit /b 0
+          )
+          set "MARKER=%DIR%\.a01-capability-audit-%GITHUB_RUN_ID%.tmp"
+          >"%MARKER%" echo bounded-write-probe
+          if exist "%MARKER%" (
+            del /q "%MARKER%" >nul 2>&1
+            echo %LABEL%=write-delete-yes>>"%WRITE_REPORT%"
+          ) else (
+            echo %LABEL%=write-no>>"%WRITE_REPORT%"
+          )
+          exit /b 0
+
+          :netprobe
+          set "URL=%~1"
+          set "LABEL=%~2"
+          curl.exe -L -I --connect-timeout 5 --max-time 10 --silent --show-error "%URL%" >nul 2>&1
+          if errorlevel 1 (echo %LABEL%=no>>"%NETWORK_REPORT%") else (echo %LABEL%=yes>>"%NETWORK_REPORT%")
+          exit /b 0
+
+      - name: Upload capability audit evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: a01-capability-audit-evidence
+          path: ${{ env.EVIDENCE_DIR }}
+          if-no-files-found: error
+          retention-days: 30
