@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "MANUSCRIPT-VERSION-MATURITY-SCHEMA-v1",
+  "title": "User-owned manuscript version and maturity record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "project_id",
+    "book_id",
+    "version_id",
+    "maturity_state",
+    "authority_state",
+    "canon_state",
+    "provenance",
+    "relation_to_other_versions",
+    "user_approval_state"
+  ],
+  "properties": {
+    "project_id": {"type": "string", "minLength": 3},
+    "book_id": {"type": "string", "minLength": 3},
+    "version_id": {"type": "string", "minLength": 3},
+    "maturity_state": {
+      "enum": ["DRAFT", "REVIEW_COPY", "EDITOR_READY", "MASTERED", "CANONICAL", "UNKNOWN"]
+    },
+    "authority_state": {
+      "enum": ["NON_AUTHORITATIVE", "WORKING_AUTHORITY", "AUTHORITATIVE", "UNKNOWN"]
+    },
+    "canon_state": {
+      "enum": ["NON_CANONICAL", "PROVISIONAL_CANON", "CANONICAL", "UNKNOWN"]
+    },
+    "provenance": {
+      "type": "object",
+      "required": ["source_locator", "observed_at", "asserted_by"],
+      "properties": {
+        "source_locator": {"type": "string", "minLength": 3},
+        "observed_at": {"type": "string", "minLength": 10},
+        "asserted_by": {"type": "string", "minLength": 2},
+        "version_note": {"type": ["string", "null"]}
+      }
+    },
+    "relation_to_other_versions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["relation", "other_version_id"],
+        "properties": {
+          "relation": {"enum": ["PRECEDES", "SUCCEEDS", "SUPERSEDES", "DERIVED_FROM", "SIBLING", "UNKNOWN"]},
+          "other_version_id": {"type": "string", "minLength": 3}
+        }
+      }
+    },
+    "protected_language_state": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "user_approval_state": {
+      "enum": ["UNREVIEWED", "PARTIALLY_APPROVED", "APPROVED", "REJECTED", "UNKNOWN"]
+    }
+  },
+  "invariants": {
+    "maturity_is_not_quality_score": true,
+    "later_version_is_not_automatically_better": true,
+    "cross_project_averaging_without_project_conditioning": false,
+    "chronology_must_be_preserved": true
+  }
+}
