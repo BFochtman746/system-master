@@ -1,0 +1,25 @@
+name: Literary Prose A01 Migration Equivalence Probe
+
+on:
+  push:
+    branches:
+      - literary/a01-migration-001-equivalence-probe
+    paths:
+      - '.github/workflows/literary-a01-migration-001-equivalence-probe.yml'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  probe:
+    name: Prove Literary Prose canonical A-01 routing and fail-closed window boundary
+    uses: BFochtman746/system-master/.github/workflows/a01-control-plane-gateway.yml@main
+    with:
+      qualification_id: LITERARY-RESEARCH-OVERNIGHT-DEEP-HARVEST
+      workstream_id: LITERARY-PROSE
+      subject_sha: 55fa713be0e9b704399bd75920d0186b406f8117
+      origin_ref: refs/heads/literary-prose-engine-001
+      resume_on_pass: Adjudicate exact-SHA Literary execution. A PASS is only valid inside the authorized overnight research window.
+      resume_on_failure: Adjudicate the receipt. Outside the authorized 01:00-01:30 America/New_York window, A01_LITERARY_0100_0130_WINDOW_NOT_ACTIVE is the expected SUBJECT_FAILURE and proves the migrated boundary fails closed without research acquisition.
+      notification_target: literary-prose-engine-001
