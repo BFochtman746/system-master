@@ -1,0 +1,16 @@
+{
+  "cases":[
+    {"case_id":"D-FIX-COPYRIGHTED-HIGH-AUTHORITY","rights":"COPYRIGHTED_DERIVED_ONLY","task_match":"HIGH","expected":"ADMIT_DERIVED_KNOWLEDGE"},
+    {"case_id":"D-FIX-MIXED-CC-THIRD-PARTY","rights":"MIXED_COMPONENT_RIGHTS","component_review":true,"expected":"COMPONENT_REVIEW_REQUIRED"},
+    {"case_id":"D-FIX-CC-DATA-HIGH-MATCH","rights":"CC_BY_4_0","task_match":"HIGH","expected":"ADMIT_LICENSED_DATA"},
+    {"case_id":"D-FIX-UNKNOWN-LICENSE","rights":"LICENSE_UNRESOLVED_QUARANTINE","expected":"QUARANTINE"},
+    {"case_id":"D-FIX-PD-CATALOG","source_class":"PUBLIC_DOMAIN_CANDIDATE_CATALOG","rights":"PUBLIC_DOMAIN_US_CANDIDATE_REQUIRES_WORK_CHECK","expected":"CANDIDATE_ONLY"},
+    {"case_id":"D-FIX-PRESTIGE-NO-OVERRIDE","prestige":true,"rights":"LICENSE_UNRESOLVED_QUARANTINE","expected":"QUARANTINE"},
+    {"case_id":"D-FIX-AUTHOR-TARGET","named_author_target":true,"expected":"REJECT"},
+    {"case_id":"D-FIX-TASK-MISMATCH","rights":"CC_BY_4_0","task_match":"LOW","requested_role":"GENERAL_FICTION_QUALITY_AUTHORITY","expected":"REJECT_ROLE"},
+    {"case_id":"D-FIX-EXTERNAL-OVERRIDE","external_principle_conflicts_project_voice":true,"expected":"PROJECT_VOICE_WINS"},
+    {"case_id":"D-FIX-UNIVERSAL-SCORE","universal_great_prose_score":true,"expected":"REJECT"},
+    {"case_id":"D-FIX-EMPIRICAL-SCOPE","empirical_support":true,"scope_limit_present":true,"expected":"ADMIT_CONDITIONED_PRINCIPLE"},
+    {"case_id":"D-FIX-OVERNIGHT-BATCH","conforms_registry_schema":true,"redefines_contract":false,"expected":"ADMIT_AS_NEW_BATCH"}
+  ]
+}
