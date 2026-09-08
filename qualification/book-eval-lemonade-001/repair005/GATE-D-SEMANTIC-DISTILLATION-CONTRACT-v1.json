@@ -1,0 +1,57 @@
+{
+  "objective": "BOOK-EVAL-LEMONADE-001-REPAIR-005-GATE-D",
+  "title": "SEMANTIC DISTILLATION + SOURCE-HELD-OUT GENERALIZATION / SELECTIVE 120B ESCALATION QUALIFICATION",
+  "teacher_role": "OFFLINE_SYNTHETIC_DATA_GENERATOR_ONLY",
+  "teacher_model": "user.gpt-oss-120b-MXFP4",
+  "teacher_visibility": {
+    "provider_ontology_tokens": true,
+    "hierarchical_taxonomy": true,
+    "development_gold": false,
+    "visible_regression_gold": false,
+    "hidden_holdout_gold": false,
+    "scoring_private": false
+  },
+  "teacher_generation": {
+    "examples_per_canonical_leaf": 8,
+    "canonical_leaves": 55,
+    "expected_teacher_synthetic_records": 440,
+    "batch_size": 4,
+    "expected_provider_calls": 110,
+    "temperature": 0.6,
+    "requirements": [
+      "original synthetic content only",
+      "no named-author imitation",
+      "no copyrighted-book quotation or transformation",
+      "semantic diversity across genre, setting, names, syntax and vocabulary",
+      "target token must not appear inside generated provider-style input_text",
+      "each record must contain semantic_fingerprint and counterfactual_neighbor",
+      "each provider-style input must end with REFERENCE_LABELS"
+    ]
+  },
+  "student_architecture": {
+    "default": "small hierarchical router + specialist leaf classifiers",
+    "teacher_120b_default_runtime": false,
+    "low_confidence_action": "REVIEW_REQUIRED_OR_SELECTIVE_120B_ESCALATION",
+    "evidence_selection": "deterministic_from_reference_labels"
+  },
+  "qualification": {
+    "primary_test": "5-fold source-held-out DEVELOPMENT diagnostic; all source-derived variants remain grouped with their source case",
+    "visible_regression_allowed": false,
+    "fresh_holdout_allowed": false,
+    "advance_targets": {
+      "source_heldout_router_accuracy": ">=0.80",
+      "source_heldout_leaf_accuracy_with_oracle_specialist": ">=0.75",
+      "source_heldout_end_to_end_accuracy": ">=0.65",
+      "missing_specialist_cases": 0,
+      "selective_hybrid_accuracy": ">=0.85",
+      "selective_120b_escalation_rate": "<=0.40",
+      "prohibited_hard_gate_violations": 0
+    }
+  },
+  "boundary": {
+    "training_private_stays_out_of_github": true,
+    "teacher_synthetic_artifact_contains_no_gold": true,
+    "original_hidden_holdout_remains_retired": true,
+    "no_visible_regression_rerun_until_gate_d_generalization_targets_pass": true
+  }
+}
