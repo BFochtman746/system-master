@@ -1,0 +1,14 @@
+{
+  "schema_id": "LPE-PAIRWISE-EVALUATION-v1",
+  "required_fields": ["evaluation_id", "passage_state_id", "original_candidate_id", "challenger_candidate_id", "blind_labels", "orientation_one", "orientation_two", "position_consistency", "dimension_results", "preservation_gate", "confidence", "disposition", "rationale_codes"],
+  "orientation_required": ["left_id", "right_id", "preferred", "confidence"],
+  "preferred_values": ["LEFT", "RIGHT", "TIE", "ABSTAIN"],
+  "position_consistency_values": ["CONSISTENT_ORIGINAL", "CONSISTENT_CHALLENGER", "CONSISTENT_TIE", "POSITION_BIAS_SUSPECTED", "INSUFFICIENT_SWAP_EVIDENCE"],
+  "dimension_result_values": ["ORIGINAL_BETTER", "CHALLENGER_BETTER", "TIE", "UNRESOLVED", "NOT_APPLICABLE"],
+  "rules": [
+    "Blind labels must not encode ORIGINAL, REVISION, writer preference, or candidate ambition.",
+    "orientation_two must reverse left/right order when position swap is available.",
+    "The same substantive winner must remain preferred after the swap to establish directional consistency.",
+    "Pairwise records must retain per-dimension results and cannot contain a universal prose score."
+  ]
+}
