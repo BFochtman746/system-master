@@ -33,8 +33,8 @@ jobs:
           if exist "%EVIDENCE_DIR%\contract-gate.txt" type "%EVIDENCE_DIR%\contract-gate.txt">>"%GITHUB_STEP_SUMMARY%"
           if exist "%EVIDENCE_DIR%\result.txt" type "%EVIDENCE_DIR%\result.txt">>"%GITHUB_STEP_SUMMARY%"
           if exist "%EVIDENCE_DIR%\qualification.txt" type "%EVIDENCE_DIR%\qualification.txt">>"%GITHUB_STEP_SUMMARY%"
-          if exist "%EVIDENCE_DIR%\failure.txt" type "%EVIDENCE_DIR%\failure.txt">>"%GITHUB_STEP_SUMMMARY%"
-       - name: Upload F-WP-009 qualification evidence
+          if exist "%EVIDENCE_DIR%\failure.txt" type "%EVIDENCE_DIR%\failure.txt">>"%GITHUB_STEP_SUMMARY%"
+      - name: Upload F-WP-009 qualification evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
