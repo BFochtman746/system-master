@@ -1,0 +1,1 @@
+This branch is not the final bind. It is retained only as an audit trail of a rejected text-chunk transport attempt.
