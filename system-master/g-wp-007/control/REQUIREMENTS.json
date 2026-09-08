@@ -1,0 +1,11 @@
+{
+  "package": "G-WP-007",
+  "requirements": [
+    {"id":"G-RQ-031","invariant":"Recovery writes are locally transactional; cross-system recovery uses intent/receipt/reconciliation and never claims distributed ACID."},
+    {"id":"G-RQ-036","invariant":"External side effects are never executed as part of pure orchestration replay."},
+    {"id":"G-RQ-037","invariant":"Every retriable effectful operation has stable effect/idempotency identity or a queryable reconciliation contract."},
+    {"id":"G-RQ-038","invariant":"The same idempotency key with materially different intent is rejected as a semantic conflict."},
+    {"id":"G-RQ-039","invariant":"UNKNOWN, PENDING, or DIVERGED external effects block replay when repetition could duplicate or contradict external state."},
+    {"id":"G-RQ-040","invariant":"A confirmed-applied effect is consumed through its receipt without reissuing the external operation."}
+  ]
+}

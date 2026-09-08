@@ -1,0 +1,12 @@
+{
+  "id": "G-WP-007",
+  "objective": "Implement reconcile-before-replay for external side effects and unknown commits.",
+  "prerequisites": ["G-WP-003", "G-WP-005"],
+  "components": ["ExternalEffectRecoveryCoordinator"],
+  "data": ["ExternalEffectRecoveryItem"],
+  "contracts": ["ReconcileExternalEffect", "ListUnknownExternalEffects"],
+  "migration": "Link existing outbox/inbox/effect receipts by stable effect IDs.",
+  "tests": ["IDEMPOTENCY", "UNKNOWN_COMMIT", "INTEGRATION", "ADVERSARIAL"],
+  "completion": "Non-idempotent unknown external outcomes cannot be replayed without evidence.",
+  "production_authorized": false
+}
