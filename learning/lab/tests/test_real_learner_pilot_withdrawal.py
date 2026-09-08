@@ -133,7 +133,7 @@ class RealLearnerPilotWithdrawalTests(unittest.TestCase):
         self.assertEqual(result["withdrawal_stage"], "POST_BASELINE_EVIDENCE")
         self.assertTrue(result["record_materialized"])
         self.assertTrue(result["frozen_v1_validator_used"])
-        self.assertEqual(result["participant_outcome"], "WITHDRAWN")
+        self.assertEqual(result["adjudication"]["participant_outcome"], "WITHDRAWN")
 
 
 if __name__ == "__main__":
