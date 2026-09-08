@@ -32,14 +32,14 @@ jobs:
           $Bundle = Join-Path $env:GITHUB_WORKSPACE 'qualification\book-eval-lemonade-001'
           $Taxonomy = Join-Path $Bundle 'repair005\BOOK-EVAL-HIERARCHICAL-SPECIALIST-TAXONOMY-v1.json'
           $Generator = Join-Path $Bundle 'scripts\generate-repair005-gate-d-teacher.py'
+          $Validator = Join-Path $Bundle 'scripts\validate-repair005-gate-d-teacher.py'
           $Persistent = 'C:\AI Test Kit\Books Testing\BOOK_EVAL_LEMONADE_001_REPAIR005_GATE_D_TEACHER_V1'
           $Evidence = Join-Path $env:RUNNER_TEMP ('book-eval-repair005-gate-d-teacher-' + $env:GITHUB_RUN_ID)
           New-Item -ItemType Directory -Force -Path $Persistent,$Evidence | Out-Null
           "EVIDENCE_DIR=$Evidence" | Out-File -FilePath $env:GITHUB_ENV -Encoding ascii -Append
 
           if (Test-Path (Join-Path $Bundle 'scoring-private')) { throw 'scoring-private material present in repository bundle' }
-          if (-not (Test-Path -LiteralPath $Taxonomy -PathType Leaf)) { throw 'taxonomy missing' }
-          if (-not (Test-Path -LiteralPath $Generator -PathType Leaf)) { throw 'teacher generator missing' }
+          foreach ($p in @($Taxonomy,$Generator,$Validator)) { if (-not (Test-Path -LiteralPath $p -PathType Leaf)) { throw "required file missing: $p" } }
 
           curl.exe --fail --silent --show-error -X POST 'http://127.0.0.1:13305/v1/load' -H 'Content-Type: application/json' --data-binary ('@' + (Join-Path $Bundle 'lemonade-load-request.json')) -o (Join-Path $Evidence 'model-load.json')
           if ($LASTEXITCODE -ne 0) { throw 'model load failed' }
@@ -60,32 +60,7 @@ jobs:
           $Status = Join-Path $Persistent 'GATE-D-TEACHER-STATUS.json'
           if (-not (Test-Path $Rows) -or -not (Test-Path $Status)) { throw 'teacher outputs missing' }
 
-          @'
-import json, os, sys
-from pathlib import Path
-rows=Path(os.environ['ROWS_PATH'])
-tax=Path(os.environ['TAXONOMY_PATH'])
-t=json.load(open(tax,encoding='utf-8'))
-tokens=[]
-for task in t['task_modes'].values():
-    for leaves in task['specialists'].values(): tokens.extend(leaves)
-items=[json.loads(x) for x in rows.read_text(encoding='utf-8').splitlines() if x.strip()]
-expected=len(tokens)*2
-if len(items)!=expected: raise SystemExit(f'expected {expected} records, got {len(items)}')
-ids=set()
-for r in items:
-    if r['teacher_record_id'] in ids: raise SystemExit('duplicate teacher_record_id')
-    ids.add(r['teacher_record_id'])
-    if r.get('hidden_holdout_gold_used') is not False or r.get('visible_regression_gold_used') is not False: raise SystemExit('gold-use flag violation')
-    text=r['input_text']
-    leaked=[tok for tok in tokens if tok in text]
-    if leaked: raise SystemExit(f'ontology token leaked into input_text {r["teacher_record_id"]}: {leaked}')
-    if 'REFERENCE_LABELS:' not in text: raise SystemExit('missing reference labels')
-print(f'GATE-D TEACHER PILOT PASS records={len(items)} canonical_tokens={len(tokens)} token_leaks=0 gold_used=false')
-'@ | Set-Content -Encoding UTF8 (Join-Path $Evidence 'validate_teacher.py')
-          $env:ROWS_PATH = $Rows
-          $env:TAXONOMY_PATH = $Taxonomy
-          & python (Join-Path $Evidence 'validate_teacher.py') 2>&1 | Tee-Object -FilePath (Join-Path $Evidence 'teacher-validation.log')
+          & python $Validator --rows $Rows --taxonomy $Taxonomy --examples-per-token 2 2>&1 | Tee-Object -FilePath (Join-Path $Evidence 'teacher-validation.log')
           if ($LASTEXITCODE -ne 0) { throw 'teacher corpus validation failed' }
 
           Copy-Item $Rows (Join-Path $Evidence 'GATE-D-TEACHER-SYNTHETIC.jsonl') -Force
