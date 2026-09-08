@@ -28,7 +28,26 @@ jobs:
 
       - name: Complete repaired E5 qualification
         shell: powershell
-        run: ./qualification/book-eval-lemonade-001/scripts/run-e5-repair-completion.ps1
+        run: |
+          function Start-Process {
+            [CmdletBinding()]
+            param(
+              [Parameter(Mandatory=$true)][string]$FilePath,
+              [Parameter()][object[]]$ArgumentList,
+              [switch]$Wait,
+              [switch]$PassThru,
+              [switch]$NoNewWindow,
+              [string]$RedirectStandardOutput,
+              [string]$RedirectStandardError
+            )
+            $quoted = @($ArgumentList | ForEach-Object {
+              $s = [string]$_
+              '"' + $s.Replace('"','\"') + '"'
+            })
+            $argumentString = $quoted -join ' '
+            Microsoft.PowerShell.Management\Start-Process -FilePath $FilePath -ArgumentList $argumentString -Wait:$Wait -PassThru:$PassThru -NoNewWindow:$NoNewWindow -RedirectStandardOutput $RedirectStandardOutput -RedirectStandardError $RedirectStandardError
+          }
+          . ./qualification/book-eval-lemonade-001/scripts/run-e5-repair-completion.ps1
 
       - name: Upload completion evidence
         if: always()
