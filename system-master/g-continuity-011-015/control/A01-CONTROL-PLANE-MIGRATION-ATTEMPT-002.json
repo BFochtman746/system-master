@@ -1,0 +1,29 @@
+{
+  "objective":"A01-CONTROL-PLANE-001-CONTINUITY-MIGRATION",
+  "attempt":2,
+  "subject_sha":"c4d1cb0f2dde5189d29e30cb26c2306ee164e938",
+  "run_id":34290951086,
+  "receipt":{
+    "qualification_id":"SYSTEM-MASTER-CONTINUITY-G-WP-011-015-CONSOLIDATED",
+    "workstream_id":"SYSTEM-MASTER-CONTINUITY",
+    "gate_class":"consolidated",
+    "checkout_sha":"c4d1cb0f2dde5189d29e30cb26c2306ee164e938",
+    "result_class":"SUBJECT_FAILURE",
+    "child_exit_code":1,
+    "promotion_authorized":false
+  },
+  "artifact":{
+    "id":10081337830,
+    "sha256":"36f3394cdd26e09b93da163b8a29527148c1fdb083fed82516a428c15fbcaea3",
+    "size_bytes":3368
+  },
+  "failure_boundary":"MIGRATION_WRAPPER_WINDOWS_GIT_SAFE_DIRECTORY",
+  "failure":"The migration wrapper could not query Git shallow state on A-01 because the repository working tree is owned by NETWORK SERVICE while the qualifier process runs as BFoch; wrapper Git probes did not explicitly set safe.directory.",
+  "classification":"SUBJECT_FAILURE",
+  "repair":"Apply git -c safe.directory=<workspace> to every migration-wrapper Git invocation. Preserve authenticated ancestry acquisition and frozen legacy qualifier unchanged.",
+  "legacy_qualification_truth_changed":false,
+  "target_windows_reboot_changed":false,
+  "target_ios_suspend_resume_changed":false,
+  "empirical_human_evidence_changed":false,
+  "production_authorized":false
+}

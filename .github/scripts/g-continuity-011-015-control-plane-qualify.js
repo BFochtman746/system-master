@@ -4,6 +4,7 @@ const path = require('path');
 const cp = require('child_process');
 
 const root = path.resolve(__dirname, '..', '..');
+const safeRoot = root.replace(/\\/g, '/');
 const runId = process.env.GITHUB_RUN_ID || 'local';
 const runnerTemp = process.env.RUNNER_TEMP || path.join(root, '.tmp');
 const legacyEvidenceDir = path.join(runnerTemp, `system-master-continuity-011-015-${runId}`);
@@ -12,7 +13,8 @@ const predecessor = 'ba5713958cd2930c7c54e3d5fdadc41dd7a7a9ca';
 const continuityBranch = 'system-master/g-wp-011-015-continuity-slice';
 
 function run(command, args, options = {}) {
-  return cp.spawnSync(command, args, {
+  const actualArgs = command === 'git' ? ['-c', `safe.directory=${safeRoot}`, ...args] : args;
+  return cp.spawnSync(command, actualArgs, {
     cwd: root,
     encoding: 'utf8',
     shell: false,
@@ -59,6 +61,7 @@ function ensureContinuityAncestry() {
     `predecessor=${predecessor}`,
     `checkout=${run('git', ['rev-parse', 'HEAD']).stdout.trim()}`,
     `repository_was_shallow=${isShallow}`,
+    'safe_directory_explicit=true',
     'ancestor_proven=true'
   ].join('\n') + '\n');
 }
