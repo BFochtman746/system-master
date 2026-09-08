@@ -1,0 +1,11 @@
+{
+  "id": "G-WP-004",
+  "objective": "Implement immutable checkpoint protocol, catalog, integrity checks and orphan cleanup.",
+  "prerequisites": ["G-WP-002"],
+  "components": ["CheckpointCoordinator", "CheckpointCatalog", "RecoveryIntegrityValidator"],
+  "data": ["CheckpointManifest", "CheckpointPayloadRef", "IntegrityFinding"],
+  "contracts": ["RecordCheckpoint", "ValidateCheckpoint", "GetCheckpointLineage"],
+  "tests": ["TRANSACTION", "CRASH_INJECTION", "CORRUPTION", "PROPERTY"],
+  "completion": "Only durable verified checkpoint manifests can become resume pointers.",
+  "production_authorized": false
+}
