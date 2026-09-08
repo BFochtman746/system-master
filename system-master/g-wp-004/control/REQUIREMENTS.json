@@ -1,0 +1,12 @@
+{
+  "package": "G-WP-004",
+  "requirements": [
+    {"id":"G-RQ-017","invariant":"Checkpoint only at declared compatible semantic synchronization boundaries."},
+    {"id":"G-RQ-018","invariant":"Payload bytes are durable and digest-verified before metadata becomes authoritative."},
+    {"id":"G-RQ-019","invariant":"Manifest publication, current pointer and event advance atomically in one local authoritative transaction."},
+    {"id":"G-RQ-020","invariant":"Checkpoint sequence is strictly monotonic and stale-fence writers cannot advance it."},
+    {"id":"G-RQ-022","invariant":"Manifest records monotonic decision-history and external-effect watermarks sufficient for replay boundary decisions."},
+    {"id":"G-RQ-025","invariant":"Orphan payload cleanup requires reference scan plus safety window."},
+    {"id":"G-RQ-026","invariant":"Checkpoint deletion/retention defers to 021M and preserves hold/evidence obligations."}
+  ]
+}
