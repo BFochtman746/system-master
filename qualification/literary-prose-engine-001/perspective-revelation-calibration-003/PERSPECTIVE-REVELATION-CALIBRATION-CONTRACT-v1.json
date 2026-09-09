@@ -1,0 +1,60 @@
+{
+  "contract_id": "LITERARY-PERSPECTIVE-REVELATION-CALIBRATION-003-v1",
+  "standing": "IMPLEMENTATION_ACTIVE__INCREMENTAL_EVIDENCE_TIMING_CALIBRATION",
+  "basis": [
+    "../night-shift-2026-09-09/PRIORITIZED-BUILD-PACKETS-v2.json",
+    "../night-shift-2026-09-09/RESEARCH-PROVENANCE-v2.json",
+    "../extraction-calibration-001/EXTRACTION-CALIBRATION-CONTRACT-v1.json",
+    "../extraction-calibration-001/candidate-002/SOURCE-HELDOUT-002-LABEL-ONTOLOGY-v1.json"
+  ],
+  "objective": "Measure whether perspective and revelation claims become asserted only when the narrative evidence available at that checkpoint supports them, while preserving intentional omniscience, unresolved interpretation and human review.",
+  "existing_semantics_only": [
+    "KNOWS",
+    "BELIEVES",
+    "PERCEIVES",
+    "FOCALIZES",
+    "SETUP",
+    "PAYOFF",
+    "OPEN",
+    "PARTIAL",
+    "CLOSED",
+    "UNRESOLVED",
+    "ASSERTED",
+    "ALTERNATIVE",
+    "ABSTAIN"
+  ],
+  "checkpoint_model": {
+    "source_prefix_bound": true,
+    "prediction_snapshot_required_per_checkpoint": true,
+    "gold_visibility_to_model": false,
+    "later_checkpoint_evidence_may_not_retroactively_justify_earlier_prediction": true
+  },
+  "required_metrics": [
+    "knowledge_before_exposure_false_positive_count",
+    "narrator_focalizer_conflation_count",
+    "premature_question_closure_count",
+    "unsupported_revelation_resolution_count",
+    "intentional_omniscience_representation_rate",
+    "human_review_required_count",
+    "checkpoint_false_certainty_count"
+  ],
+  "acceptance": [
+    "Knowledge-before-exposure false positives are measured independently of end-of-passage accuracy.",
+    "Narrator identity and focalizer identity are independently representable and conflation is measurable.",
+    "Intentional omniscience permits multiple supported focalizers rather than forcing one permanent center.",
+    "Open questions and delayed revelations cannot be counted as correctly closed before the supporting checkpoint.",
+    "Constitutively subjective perspective interpretations retain an explicit human-review path.",
+    "No new perspective taxonomy is introduced unless an observed case cannot be represented by the existing semantics."
+  ],
+  "failure_rule": "A later correct answer does not erase an earlier unsupported ASSERTED claim. Premature certainty remains failure evidence.",
+  "authority": {
+    "canonical_state_write_authorized": false,
+    "manuscript_mutation_authorized": false,
+    "author_intent_authority": false,
+    "promotion_authorized": false
+  },
+  "completion_delta": {
+    "before": "Generic extraction scoring can evaluate final labels, confidence and ambiguity but not evidence-timing errors across narrative checkpoints.",
+    "after": "Perspective/revelation evaluation can distinguish eventual correctness from premature certainty, narrator/focalizer conflation, premature question closure and intentional omniscience while preserving human-review requirements."
+  }
+}
