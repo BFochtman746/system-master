@@ -56,7 +56,7 @@ const tickets = [
   record(base('long', 'TEST-C', 'TEST-LONG', { estimated_minutes: 200, max_runtime_minutes: 200, checkpoint_interval_minutes: 30, priority: 10 }), 'long.json')
 ];
 const plan = planner.buildPlan({ now: new Date('2026-09-08T23:57:00-04:00'), policy, registry: r, ticketRecords: tickets, nightDate: '2026-09-09' });
-assert(plan.plan_version === 3, 'planner v3 required');
+assert(plan.plan_version === 4, 'planner v4 required');
 assert(plan.scheduled_count === 3, `expected 3 slots, got ${plan.scheduled_count}`);
 assert(plan.slots[0].ticket_id === 'normal', 'safe backfill should run before reservation');
 assert(plan.slots[0].overnight_lane === 'FINISH', 'second-shift lane should survive planning');
@@ -75,8 +75,40 @@ badLongRegistry.qualifications['TEST-LONG'].checkpoint_capable = false;
 const bad = planner.buildPlan({ now: new Date('2026-09-08T23:57:00-04:00'), policy, registry: badLongRegistry, ticketRecords: [tickets[2]], nightDate: '2026-09-09' });
 assert(bad.scheduled_count === 0 && bad.rejected.some(x => x.reasons.includes('CHECKPOINT_CAPABILITY_REQUIRED')), 'long non-checkpointable ticket must fail closed');
 
-const duplicate = planner.buildPlan({ now: new Date('2026-09-08T23:57:00-04:00'), policy, registry: r, ticketRecords: [tickets[0], record(base('normal-2', 'TEST-A', 'TEST-NORMAL'), 'normal-2.json')], nightDate: '2026-09-09' });
-assert(duplicate.scheduled_count === 0 && duplicate.rejected.length === 2, 'multiple READY tickets per workstream must be rejected');
+const multiple = planner.buildPlan({
+  now: new Date('2026-09-08T23:57:00-04:00'),
+  policy,
+  registry: r,
+  ticketRecords: [
+    record(base('normal-a', 'TEST-A', 'TEST-NORMAL', { max_runtime_minutes: 20, estimated_minutes: 20, priority: 60 }), 'normal-a.json'),
+    record(base('normal-b', 'TEST-A', 'TEST-NORMAL', { max_runtime_minutes: 20, estimated_minutes: 20, priority: 50 }), 'normal-b.json')
+  ],
+  nightDate: '2026-09-09'
+});
+assert(multiple.scheduled_count === 2, 'multiple independent READY tickets for one workstream should schedule within cap');
+
+const chain = planner.buildPlan({
+  now: new Date('2026-09-08T23:57:00-04:00'),
+  policy,
+  registry: r,
+  ticketRecords: [
+    record(base('chain-1', 'TEST-A', 'TEST-NORMAL', { max_runtime_minutes: 20, estimated_minutes: 20, priority: 70 }), 'chain-1.json'),
+    record(base('chain-2', 'TEST-A', 'TEST-NORMAL', { depends_on_ticket_id: 'chain-1', max_runtime_minutes: 20, estimated_minutes: 20, priority: 80 }), 'chain-2.json')
+  ],
+  nightDate: '2026-09-09'
+});
+assert(chain.scheduled_count === 2, 'dependency chain should schedule');
+assert(chain.slots[0].ticket_id === 'chain-1' && chain.slots[1].ticket_id === 'chain-2', 'dependent must immediately follow predecessor');
+assert(chain.slots[1].requires_previous_pass === true && chain.slots[1].depends_on_ticket_id === 'chain-1', 'dependent slot must carry PASS dependency');
+
+const missingDependency = planner.buildPlan({
+  now: new Date('2026-09-08T23:57:00-04:00'),
+  policy,
+  registry: r,
+  ticketRecords: [record(base('orphan', 'TEST-A', 'TEST-NORMAL', { depends_on_ticket_id: 'missing' }), 'orphan.json')],
+  nightDate: '2026-09-09'
+});
+assert(missingDependency.scheduled_count === 0 && missingDependency.rejected.some(x => x.reasons.includes('DEPENDENCY_NOT_READY')), 'missing predecessor must fail closed');
 
 const missingValue = planner.buildPlan({
   now: new Date('2026-09-08T23:57:00-04:00'),
