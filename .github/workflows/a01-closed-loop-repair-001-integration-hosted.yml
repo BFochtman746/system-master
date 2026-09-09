@@ -16,7 +16,7 @@ jobs:
       - name: Checkout exact integration subject
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
-          ref: 5ac0954bc684429f55a2ccf2edac2306024f87e7
+          ref: 9ba6debf8c8ebda59712cb2f78e8b5a0426c511b
           fetch-depth: 0
           persist-credentials: false
 
@@ -24,8 +24,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD)" = "5ac0954bc684429f55a2ccf2edac2306024f87e7"
-          git diff --exit-code 2391924666e4ef23dcac64490a8e160cb762f2d2 -- \
+          test "$(git rev-parse HEAD)" = "9ba6debf8c8ebda59712cb2f78e8b5a0426c511b"
+          git diff --exit-code 6a7a9b88692dcfdb9846e05bbc533d2148ec120c -- \
             .github/workflows/a01-control-plane-gateway.yml \
             .github/scripts/a01-control-plane.js \
             qualification/a01/a01-policy.json \
@@ -57,8 +57,8 @@ jobs:
         run: |
           mkdir -p "$RUNNER_TEMP/a01-repair-integration"
           {
-            echo "subject_sha=5ac0954bc684429f55a2ccf2edac2306024f87e7"
-            echo "integration_base=2391924666e4ef23dcac64490a8e160cb762f2d2"
+            echo "subject_sha=9ba6debf8c8ebda59712cb2f78e8b5a0426c511b"
+            echo "integration_base=6a7a9b88692dcfdb9846e05bbc533d2148ec120c"
             echo "gateway_modified=false"
             echo "control_plane_executor_modified=false"
             echo "policy_modified=false"
