@@ -2,8 +2,8 @@
   "owner_system_id": "BOOK",
   "owner_path": "SYSTEM_MASTER/BOOK",
   "control_ref": "book-system/control-v1",
-  "last_known_control_head": "166d04dd6e5ec83ce495c6a94e11c6ac6ce56bcc",
-  "delegation_epoch": 8,
+  "last_known_control_head": "690337636664ad7717811c1d4c875a7b4f304034",
+  "delegation_epoch": 9,
   "active_delegations": [
     {
       "delegation_id": "SECOND-SHIFT-BOOK-VERSION-ROLLBACK-001",
@@ -11,29 +11,31 @@
       "objective_id": "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001",
       "state": "READY",
       "valid_for_control_ref": "book-system/control-v1",
-      "valid_for_control_head": "166d04dd6e5ec83ce495c6a94e11c6ac6ce56bcc",
+      "valid_for_control_head": "690337636664ad7717811c1d4c875a7b4f304034",
       "created_at": "2026-09-09T22:59:00Z",
-      "last_revalidated_at": "2026-09-09T23:03:00Z",
+      "last_revalidated_at": "2026-09-09T23:04:00Z",
       "completed_checkpoints": [
         "BOOK-SYSTEM-VERSION-AND-ROLLBACK-PREIMPLEMENTATION-RESEARCH-001 — CLOSED at ced3fc4a7b0009a331787c371b284e8c97078a1e",
-        "BOOK-SYSTEM-VERSION-AND-ROLLBACK-FORENSIC-MAP-001 — CLOSED at 166d04dd6e5ec83ce495c6a94e11c6ac6ce56bcc"
+        "BOOK-SYSTEM-VERSION-AND-ROLLBACK-FORENSIC-MAP-001 — CLOSED at 166d04dd6e5ec83ce495c6a94e11c6ac6ce56bcc",
+        "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001 contract — DEFINED at 690337636664ad7717811c1d4c875a7b4f304034"
       ],
-      "completion_delta": "Continue from the completed research and forensic-reuse checkpoints into the bounded Version/Rollback contract and executable parent version-ledger/restore overlay. Do not repeat research or remap already-adjudicated existing semantics.",
-      "stop_condition": "Define the bounded Version/Rollback contract, implement only the net-new gaps identified by the forensic map, build deterministic adversarial fixtures, and reach hosted prequalification on one exact subject. If a current central A-01 registration is valid for the exact qualification, obtain/adjudicate it; otherwise preserve the hosted-passing subject and stop at the bounded registration handoff. Every completed phase must remain resumable and must not be restarted after a head change.",
+      "completion_delta": "Continue from the completed research, forensic-reuse map and canonical contract into the bounded Version/Rollback executable implementation. Do not repeat closed phases or redesign already-adjudicated semantics unless a concrete implementation contradiction is proven.",
+      "stop_condition": "Implement the contract's net-new parent version-ledger and RESTORE_AS_NEW_SUCCESSOR behavior, build deterministic adversarial fixtures, and reach hosted prequalification on one exact subject. If a current central A-01 registration is valid for the exact qualification, obtain/adjudicate exact-SHA A-01; otherwise preserve the hosted-passing subject and stop at the bounded registration handoff. Completed phases and failed subjects remain preserved and resumable.",
       "implementation_work": [
-        "Create one Book-parent immutable version ledger overlay; do not replace the qualified Canonical State Model.",
-        "Create immutable complete-state snapshot nodes with exact predecessor lineage and active object-version bindings.",
-        "Create immutable governed-object version nodes with exact payload digests/predecessor identities while preserving existing object schemas.",
-        "Require exact expected current state_version/state_digest and deterministic idempotency for successor commit and restore requests.",
-        "Implement RESTORE_AS_NEW_SUCCESSOR rather than moving the current pointer backward or rewriting history.",
-        "Require current dependency/evidence, rights/privacy and author checks before restored content becomes current; Lifecycle authority remains separate.",
-        "Preserve export/proof/publication history without automatically reactivating export freeze or publication authority.",
-        "Commit state snapshot, version receipt and outbox record atomically as one logical transaction; delivery remains idempotent and non-canonical.",
-        "Build adversarial fixtures for stale/concurrent writes, digest mismatch, object-ID collision, restore, re-forward, partial transaction failure, dependency-currentness failure, author-authority failure, export/publication non-restoration and replay.",
+        "Implement one Book-parent immutable version ledger overlay without replacing the qualified Canonical State Model.",
+        "Implement immutable complete-state snapshot nodes with predecessor state version/digest and exact active object-version bindings.",
+        "Implement immutable governed-object version nodes with payload digests/predecessor node identities and fail closed on identity reuse with changed bytes.",
+        "Require exact expected current parent and ledger identities plus deterministic request/idempotency handling for successor commits and restores.",
+        "Implement RESTORE_CONTENT and RESTORE_FULL_STATE as new successor commits; never move the current pointer backward or rewrite historical snapshots.",
+        "Require current dependency/evidence, rights/privacy, binding and author checks before restored content becomes current; lifecycle-status changes require qualified lifecycle receipts.",
+        "Preserve current append-only author-decision, integration-proposal, research-evidence and export-release history during restores.",
+        "Never reactivate export freeze/publication authority from historical state without current exact lifecycle/export/author evidence.",
+        "Commit state snapshot, object-version nodes, receipt and outbox entry atomically as one logical transaction; delivery remains idempotent and non-canonical.",
+        "Build adversarial fixtures for stale/concurrent writes, digest mismatch, object identity collision, restore, re-forward, divergence, partial failure, dependency-currentness failure, author-authority failure, lifecycle/publication non-restoration and replay.",
         "Run hosted deterministic prequalification and preserve exact subject/evidence."
       ],
       "forbidden_authority": [
-        "do not discard, repeat or relabel the completed Version/Rollback research and forensic map",
+        "do not discard, repeat or relabel the completed Version/Rollback research, forensic map or contract",
         "do not transfer Runtime V2, Registry V2, Lifecycle v1 or State Model PASS to changed Version/Rollback bytes",
         "do not mutate/delete historical versions or move a pointer backward to simulate rollback",
         "do not build Git-like source control or a full event-sourcing/CQRS platform inside Book System",
@@ -103,6 +105,6 @@
     }
   ],
   "owner_revalidation_required": false,
-  "reason": "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001 remains the State-013 Book objective. Its bounded research and forensic-reuse phases are now durably closed; the exact next unattended-safe work is contract definition, net-new implementation, adversarial fixtures and hosted prequalification against live head 166d04dd6e5ec83ce495c6a94e11c6ac6ce56bcc.",
+  "reason": "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001 remains the State-013 Book objective. Research, forensic reuse mapping and contract definition are now closed; the dependency-valid unattended-safe phase is executable implementation, adversarial qualification and hosted prequalification against live head 690337636664ad7717811c1d4c875a7b4f304034.",
   "empty_is_valid": true
 }
