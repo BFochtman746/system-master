@@ -1,0 +1,25 @@
+{
+  "contract_id": "LITERARY-NARRATIVE-PROVIDER-BENCHMARK-LABELS-001-v1",
+  "objective": "Ensure provider-facing gold labels are derivable from authorized source semantics rather than opaque fixture-local identifiers that a source-only extractor cannot infer.",
+  "finding": {
+    "classification": "PARTIAL_REPAIR",
+    "problem": "The original SYNTHETIC-STRESS-GOLD-v1 corpus is valid for scorer and safety-harness qualification but contains opaque synthetic identifiers such as A11, EV6, C1, and Q1. Those identifiers are not available in ExtractionRequest and therefore cannot be fairly recovered by a source-only candidate provider.",
+    "disposition": "Retain the original corpus unchanged as a scorer/failure-detection harness. Use a separate provider-facing source-held-out corpus whose labels have deterministic semantic forms derivable from the source text and task contract."
+  },
+  "provider_facing_label_rules": [
+    "Labels must describe an observation, relation, status, or function that is semantically recoverable from the authorized source text.",
+    "A provider must not require case_id, hidden gold, corpus row order, or fixture-local opaque IDs to form a prediction label.",
+    "Entity names may appear when explicitly present in the source.",
+    "Lexical anchor identifiers may be normalized from an explicit source phrase using lowercase underscore normalization.",
+    "Ambiguous evidence must use ALTERNATIVE, UNRESOLVED, or ABSTAIN rather than ASSERTED merely to improve recall.",
+    "A provider may return no semantic claim for a task and instead emit an ABSTAIN prediction.",
+    "Candidate outputs remain observations only and never authorize canonical-state materialization."
+  ],
+  "non_goals": [
+    "Changing the established canonical narrative-state identifiers",
+    "Rewriting the original scorer qualification corpus",
+    "Granting this label surface canonical authority",
+    "Encoding author intent or publication decisions into extraction labels"
+  ],
+  "promotion_requirement": "A future learned/model provider must be evaluated on a frozen source-held-out corpus using the same provider-facing semantic label contract or a versioned successor with an explicit migration receipt."
+}
