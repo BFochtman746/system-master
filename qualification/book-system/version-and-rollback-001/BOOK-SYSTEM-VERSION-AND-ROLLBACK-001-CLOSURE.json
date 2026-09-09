@@ -1,0 +1,68 @@
+{
+  "closure_id": "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001-CLOSURE",
+  "effective_date": "2026-09-09",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "standing": "CLOSED__HOSTED_AND_AUTHORITATIVE_A01_PASS__EXACT_SHA_SCOPED",
+  "objective": "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001",
+  "qualified_subject_sha": "402ab84a14e9d345530d60394ebc36176541dd21",
+  "hosted_evidence": {
+    "run_id": 34416203680,
+    "job_id": 102681527662,
+    "fixture_version": 2,
+    "case_count": 48,
+    "pass_count": 48,
+    "fail_count": 0,
+    "artifact_id": 10129156222,
+    "artifact_digest": "sha256:2d27e447bb60c8c236b7e1b6f4e6d6abcacd30b095f25e49965badec50ae78a8"
+  },
+  "authoritative_a01": {
+    "qualification_id": "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001",
+    "run_id": 34416581801,
+    "job_id": 102682743114,
+    "result": "PASS",
+    "subject_sha": "402ab84a14e9d345530d60394ebc36176541dd21",
+    "evidence_artifact_id": 10129317676,
+    "evidence_artifact_digest": "sha256:d06f280a0276b0961083c298d5f4e4222745e5852af39224d97226753976905e"
+  },
+  "proven_scope": [
+    "immutable complete-state snapshots and governed-object version lineage",
+    "exact active-version binding and immutable payload digests",
+    "exact parent-state and version-ledger compare-and-swap",
+    "append-only research/author/proposal/export history preservation",
+    "rollback implemented as RESTORE_AS_NEW_SUCCESSOR rather than history rewrite",
+    "current dependency/evidence/rights/privacy/binding/author revalidation for restore",
+    "idempotent replay and request/idempotency conflict rejection",
+    "branch-like divergence and re-forward preservation",
+    "atomic receipt/outbox identity",
+    "direct lifecycle-status mutation denied even when a receipt is merely supplied",
+    "exact recording of already-committed qualified parent successors using pre/post authority-receipt identity",
+    "no synthesized author approval, publication authority, provider canonical write, document-engine authority or production authority"
+  ],
+  "preserved_failure_and_intermediate_lineage": [
+    {
+      "subject_sha": "10c37582ed7918c6bd90ccf2536c437e2b72e68e",
+      "run_id": 34415879725,
+      "result": "FAIL_37_OF_40",
+      "artifact_id": 10129034355,
+      "artifact_digest": "sha256:d9afc35814c818645c50f605d96642c983d0437e995c3731467a2602f1a1052a",
+      "finding": "Exposed and strengthened lifecycle-authority separation rather than weakening the runtime."
+    },
+    {
+      "subject_sha": "2db9ef7cbb8a7565427f73b60d565d16fec13ab4",
+      "run_id": 34416112675,
+      "result": "PASS_48_OF_48_HOSTED_ONLY",
+      "artifact_id": 10129120132,
+      "artifact_digest": "sha256:70a217b34c93fd31c11964c6c3d6647fad9712bd76587f2ff3ef913729f65848"
+    }
+  ],
+  "non_transfer_rule": "PASS applies only to exact subject 402ab84a14e9d345530d60394ebc36176541dd21. Later Book code, Author Decision Queue code, Lifecycle changes or any other changed subject require their own applicable evidence and qualification.",
+  "does_not_prove": [
+    "author decision correctness or user intent",
+    "publication authorization",
+    "production deployment readiness",
+    "Document System implementation",
+    "Prose or Book Evaluator child capability accuracy"
+  ],
+  "unlocks": "BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001",
+  "qualification_effect": "AUTHORITATIVE_A01_PASS_EXACT_SHA_ONLY"
+}
