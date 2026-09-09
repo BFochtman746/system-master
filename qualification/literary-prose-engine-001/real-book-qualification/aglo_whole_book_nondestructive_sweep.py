@@ -92,14 +92,18 @@ def detect_findings(chapters):
                 if ns and len(words(s))>=4:
                     sent_rows.append((pi,si,s,ns))
                     if len(words(s))>=8: sentence_occ[ns].append((chapter,pi,si,s))
+            # duplicated adjacent token
             for m in re.finditer(r"\b([A-Za-z][A-Za-z’'-]{1,})\s+\1\b", p, flags=re.I):
                 token=m.group(1)
                 fixed=p[:m.start()] + token + p[m.end():]
                 findings.append({'finding_id':f'AGLO-WBS-C{chapter:02d}-P{pi:03d}-REPEATED-WORD','finding_type':'OBJECTIVE_REPEATED_WORD','chapter':chapter,'paragraph_index':pi,'confidence':'HIGH','severity':'HIGH','original_paragraph_sha256':sha256_text(p+'\n'),'candidate_paragraph_sha256':sha256_text(fixed+'\n'),'candidate_transform':'REMOVE_ONE_IMMEDIATE_DUPLICATE_TOKEN','token_sha256':sha256_text(token.lower()),'raw_text_persisted':False,'candidate_text_persisted':False})
+        # exact neighboring sentence repetition
         for j in range(len(sent_rows)-1):
             p1,s1,t1,n1=sent_rows[j]; p2,s2,t2,n2=sent_rows[j+1]
             if n1==n2 and p2-p1<=1:
+                # candidate removes first exact occurrence, retaining following occurrence in context
                 findings.append({'finding_id':f'AGLO-WBS-C{chapter:02d}-P{p1:03d}-EXACT-SENTENCE-DUP','finding_type':'OBJECTIVE_EXACT_DUPLICATE_SENTENCE_NEAR_ADJACENT','chapter':chapter,'positions':[[p1,s1],[p2,s2]],'confidence':'HIGH','severity':'HIGH','sentence_sha256':sha256_text(n1),'passage_sha256':sha256_text('\n'.join(lines[max(1,p1-1):min(len(lines),p2+2)])+'\n'),'candidate_transform':'REMOVE_FIRST_EXACT_DUPLICATE_OCCURRENCE_ONLY','raw_text_persisted':False,'candidate_text_persisted':False})
+        # low-confidence structural screens
         for pi,p in enumerate(lines[1:],1):
             for si,s in enumerate(split_sentences(p)):
                 sw=len(words(s))
@@ -114,10 +118,12 @@ def detect_findings(chapters):
                 if counts and max(counts.values())>=3:
                     op=max(counts,key=counts.get)
                     findings.append({'finding_id':f'AGLO-WBS-C{chapter:02d}-P{pi:03d}-ANAPHORA','finding_type':'REPETITIVE_SENTENCE_OPENING_SCREEN','chapter':chapter,'paragraph_index':pi,'confidence':'LOW','severity':'SCREEN','repeat_count':counts[op],'opener_sha256':sha256_text(op),'passage_sha256':sha256_text(p+'\n'),'raw_text_persisted':False})
+    # exact repeated sentences across distinct chapters
     for ns,locs in sentence_occ.items():
         chapters_seen=sorted({x[0] for x in locs})
         if len(chapters_seen)>1:
             findings.append({'finding_id':'AGLO-WBS-CROSS-CHAPTER-EXACT-SENTENCE-'+sha256_text(ns)[:12],'finding_type':'EXACT_SENTENCE_REPEATED_ACROSS_CHAPTERS','chapters':chapters_seen,'locations':[[x[0],x[1],x[2]] for x in locs],'confidence':'HIGH','severity':'AUTHOR_INTENT_REVIEW','sentence_sha256':sha256_text(ns),'raw_text_persisted':False})
+    # stable sort
     order={'OBJECTIVE_REPEATED_WORD':0,'OBJECTIVE_EXACT_DUPLICATE_SENTENCE_NEAR_ADJACENT':0,'EXACT_SENTENCE_REPEATED_ACROSS_CHAPTERS':1,'HIGH_SENTENCE_DENSITY_SCREEN':2,'REPETITIVE_SENTENCE_OPENING_SCREEN':3}
     findings.sort(key=lambda x:(order.get(x['finding_type'],9), x.get('chapter',min(x.get('chapters',[999]))), x['finding_id']))
     return findings
