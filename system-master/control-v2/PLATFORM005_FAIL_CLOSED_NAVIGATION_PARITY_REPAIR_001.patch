@@ -1,0 +1,212 @@
+--- a/10_REQUIREMENTS/SMR018-PACKET-CONTRACT.md
++++ b/10_REQUIREMENTS/SMR018-PACKET-CONTRACT.md
+@@ -9,6 +9,9 @@
+ ## Projection law
+ The client projection contains only bounded shell-safe fields. It omits session identifiers, principal identity, role sets, authentication generation, CSRF/device bindings, server authorization rules, capability policy internals, domain data and secrets. Invalid/expired session binding, network loss or stale loads clear dynamic navigation. UNKNOWN upstream health is degraded, never optimistic ONLINE.
+ 
++## Projection-consumer law
++Canonical Java records, JSON Schema and browser rendering must agree on fail-closed navigation semantics. `UNAVAILABLE` navigation cannot be enabled. `OFFLINE` and `REAUTH_REQUIRED` projections cannot carry dynamic navigation. The browser must independently disable any item whose standing is not `AVAILABLE` or `DEGRADED`; schema-valid payloads may not be weaker than Java invariants.
++
+ ## Route law
+ Work-surface routes are origin-relative, non-API, normalized and bounded. Absolute/protocol-relative/credential-bearing/fragment/backslash/traversal/encoded traversal or encoded separator/null forms fail closed. DOM labels are rendered with textContent only.
+ 
+@@ -16,7 +19,7 @@
+ Authenticated shell projection reads are same-origin, credential-bound, no-store, non-redirecting and byte-bounded before JSON parsing. Sensitive/authenticated responses are never admitted to browser cache authority.
+ 
+ ## Offline/service-worker law
+-Only a fixed digest-bound non-sensitive static allowlist may enter Cache API. Service-worker fetch interception is same-origin GET only and excludes /api. Static cache population omits credentials. Updates activate only through SYSTEM_MASTER_ACTIVATE_UPDATE; emergency SYSTEM_MASTER_UNREGISTER_AND_PURGE unregisters the worker and clears owned caches.
++Only a fixed digest-bound non-sensitive static allowlist may enter Cache API. Any change to a cached shell asset requires a new cache generation so an installing worker cannot mutate the active worker cache before explicit activation. Service-worker fetch interception is same-origin GET only and excludes /api. Static cache population omits credentials. Updates activate only through SYSTEM_MASTER_ACTIVATE_UPDATE; emergency SYSTEM_MASTER_UNREGISTER_AND_PURGE unregisters the worker and clears owned caches.
+ 
+ ## Persistence decision
+ PLATFORM-005 creates no PostgreSQL table or durable canonical store. Browser Cache API state is disposable, bounded, non-sensitive shell-only projection state.
+--- a/11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/shell/PwaSessionProjection.java
++++ b/11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/shell/PwaSessionProjection.java
+@@ -7,7 +7,7 @@
+ public record PwaSessionProjection(String projectionId,String projectionDigest,String shellVersion,ShellConnectionState connectionState,long serverSequence,List<PwaNavigationItem> navigation,ShellStatusSummary status,Instant issuedAt,Instant expiresAt) {
+     public PwaSessionProjection {
+         projectionId=ShellRules.id(projectionId,"projectionId");shellVersion=ShellRules.semver(shellVersion,"shellVersion");if(connectionState==null)throw new IllegalArgumentException("connectionState");if(serverSequence<0)throw new IllegalArgumentException("serverSequence");
+-        if(navigation==null||navigation.size()>64)throw new IllegalArgumentException("navigation");navigation=List.copyOf(navigation);if(status==null)throw new IllegalArgumentException("status");issuedAt=ShellRules.instant(issuedAt,"issuedAt");expiresAt=ShellRules.instant(expiresAt,"expiresAt");if(!expiresAt.isAfter(issuedAt))throw new IllegalArgumentException("projection expiry");
++        if(navigation==null||navigation.size()>64)throw new IllegalArgumentException("navigation");navigation=List.copyOf(navigation);if((connectionState==ShellConnectionState.OFFLINE||connectionState==ShellConnectionState.REAUTH_REQUIRED)&&!navigation.isEmpty())throw new IllegalArgumentException("inactive shell state cannot expose navigation");if(status==null)throw new IllegalArgumentException("status");issuedAt=ShellRules.instant(issuedAt,"issuedAt");expiresAt=ShellRules.instant(expiresAt,"expiresAt");if(!expiresAt.isAfter(issuedAt))throw new IllegalArgumentException("projection expiry");
+         String computed=computeDigest(projectionId,shellVersion,connectionState,serverSequence,navigation,status,issuedAt,expiresAt);projectionDigest=ShellRules.digest(projectionDigest,"projectionDigest");if(!computed.equals(projectionDigest))throw new IllegalArgumentException("projection digest mismatch");
+     }
+     public static PwaSessionProjection create(String projectionId,String shellVersion,ShellConnectionState state,long serverSequence,List<PwaNavigationItem> navigation,ShellStatusSummary status,Instant issuedAt,Instant expiresAt){String d=computeDigest(projectionId,shellVersion,state,serverSequence,navigation,status,issuedAt,expiresAt);return new PwaSessionProjection(projectionId,d,shellVersion,state,serverSequence,navigation,status,issuedAt,expiresAt);}
+--- a/11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/shell/OfflineShellPolicy.java
++++ b/11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/shell/OfflineShellPolicy.java
+@@ -9,5 +9,5 @@
+         if(maxEntryBytes<1||maxEntryBytes>2_000_000||maxTotalBytes<maxEntryBytes||maxTotalBytes>16_000_000)throw new IllegalArgumentException("cache bytes");if(maxAge==null||maxAge.isZero()||maxAge.isNegative()||maxAge.compareTo(Duration.ofDays(7))>0)throw new IllegalArgumentException("maxAge");killSwitchMessage=ShellRules.id(killSwitchMessage,"killSwitchMessage");
+     }
+     public boolean cacheable(String method,String path,boolean sensitive){return !sensitive&&"GET".equalsIgnoreCase(method)&&cacheAllowlist.contains(path)&&!path.startsWith("/api/");}
+-    public static OfflineShellPolicy conservative(){return new OfflineShellPolicy("smr018-shell-v1","/",Set.of("/index.html","/app.js","/app.css","/manifest.webmanifest","/offline.html"),256_000,1_500_000,Duration.ofHours(24),"SYSTEM_MASTER_UNREGISTER_AND_PURGE");}
++    public static OfflineShellPolicy conservative(){return new OfflineShellPolicy("smr018-shell-v2","/",Set.of("/index.html","/app.js","/app.css","/manifest.webmanifest","/offline.html"),256_000,1_500_000,Duration.ofHours(24),"SYSTEM_MASTER_UNREGISTER_AND_PURGE");}
+ }
+--- a/11_SOURCE/pwa/app.js
++++ b/11_SOURCE/pwa/app.js
+@@ -27,6 +27,15 @@
+     return normalized;
+   };
+   const safeText = (value, fallback) => typeof value === "string" && value.length > 0 && value.length <= 128 ? value : fallback;
++  const ACTIVE_NAV_STATES = new Set(["ONLINE", "DEGRADED"]);
++  const NAVIGABLE_STANDINGS = new Set(["AVAILABLE", "DEGRADED"]);
++  const projectionState = (projection) => {
++    const state = projection && typeof projection.connectionState === "string" ? projection.connectionState : "";
++    if (!new Set(["ONLINE", "DEGRADED", "OFFLINE", "REAUTH_REQUIRED"]).has(state)) throw new Error("Invalid shell connection state");
++    if (!Array.isArray(projection.navigation)) throw new Error("Invalid shell navigation");
++    if (!ACTIVE_NAV_STATES.has(state) && projection.navigation.length !== 0) throw new Error("Inactive shell state exposed navigation");
++    return state;
++  };
+   const showError = (message) => { error.textContent = message; error.hidden = false; };
+ 
+   const readBoundedJson = async (response) => {
+@@ -47,9 +56,10 @@
+   const hideError = () => { error.textContent = ""; error.hidden = true; };
+ 
+   const renderProjection = (projection) => {
+-    if (!projection || typeof projection !== "object" || !Array.isArray(projection.navigation) || !projection.status) throw new Error("Invalid shell projection");
++    if (!projection || typeof projection !== "object" || !projection.status) throw new Error("Invalid shell projection");
++    const stateName = projectionState(projection);
+     clearDynamic("Status current");
+-    connection.textContent = safeText(projection.connectionState, "Unavailable");
++    connection.textContent = stateName;
+     status.textContent = `System health: ${safeText(projection.status.overallHealth, "UNKNOWN")}`;
+     const categories = Array.isArray(projection.status.attentionCategories) ? projection.status.attentionCategories.slice(0, 32) : [];
+     for (const category of categories) {
+@@ -67,9 +77,11 @@
+       link.textContent = safeText(item.label, "Workspace");
+       const state = document.createElement("span");
+       state.className = "workspace-state";
+-      state.textContent = safeText(item.standing, "UNAVAILABLE");
++      const standing = safeText(item.standing, "UNAVAILABLE");
++      state.textContent = standing;
+       link.append(state);
+-      if (!item.enabled) { link.setAttribute("aria-disabled", "true"); link.removeAttribute("href"); }
++      const enabled = item.enabled === true && NAVIGABLE_STANDINGS.has(standing) && ACTIVE_NAV_STATES.has(stateName);
++      if (!enabled) { link.setAttribute("aria-disabled", "true"); link.removeAttribute("href"); }
+       li.append(link);
+       nav.append(li);
+     }
+@@ -95,9 +107,10 @@
+       renderProjection(projection);
+     } catch (e) {
+       if (e && e.name === "AbortError") return;
+-      connection.textContent = navigator.onLine ? "DEGRADED" : "OFFLINE";
++      const message = e instanceof Error ? e.message : "Shell unavailable";
++      connection.textContent = message === "Authentication required" ? "REAUTH_REQUIRED" : (navigator.onLine ? "DEGRADED" : "OFFLINE");
+       clearDynamic("Authenticated navigation is unavailable until the server can be reached again.");
+-      showError(e instanceof Error ? e.message : "Shell unavailable");
++      showError(message);
+     }
+   };
+ 
+--- a/11_SOURCE/pwa/service-worker.js
++++ b/11_SOURCE/pwa/service-worker.js
+@@ -1,5 +1,5 @@
+ "use strict";
+-const CACHE_VERSION = "smr018-shell-v1";
++const CACHE_VERSION = "smr018-shell-v2";
+ const CACHE_PREFIX = "smr018-shell-";
+ const MAX_ENTRY_BYTES = 256000;
+ const MAX_TOTAL_BYTES = 1500000;
+@@ -7,14 +7,14 @@
+ const KILL_MESSAGE = "SYSTEM_MASTER_UNREGISTER_AND_PURGE";
+ const ASSET_DIGESTS = Object.freeze({
+   "/index.html": "084031e2a0d10abd976d706dd0e334a699ee201b636e0beac46650ebc39d6bf2",
+-  "/app.js": "c9c39362ab3fe95ff3e0b5fb4fdc57fd9c0105e539ce7ffa69ec2024cb736b06",
++  "/app.js": "a90b9063668567e57349af497ff74f039a24e0eaaca789e846778683eb10d9bc",
+   "/app.css": "d656954fe3762ad1f4e474bd97676ec715aaa825fd0ed4b2ac8cddfe1d8cc8e8",
+   "/manifest.webmanifest": "37458f88909d513b9a6056ea0beb6b1774adcb055b2022d1d47a4efffa3451f2",
+   "/offline.html": "036da4af2a29534dd41c242cb3f8e5adecfd183eb2be7fbadfc1d28e1c93d41b"
+ });
+ const ASSET_SIZES = Object.freeze({
+   "/index.html": 1712,
+-  "/app.js": 7117,
++  "/app.js": 7995,
+   "/app.css": 2713,
+   "/manifest.webmanifest": 358,
+   "/offline.html": 771
+--- a/11_SOURCE/pwa/asset-integrity.json
++++ b/11_SOURCE/pwa/asset-integrity.json
+@@ -6,9 +6,9 @@
+       "sha256": "084031e2a0d10abd976d706dd0e334a699ee201b636e0beac46650ebc39d6bf2"
+     },
+     {
+-      "bytes": 7117,
++      "bytes": 7995,
+       "path": "/app.js",
+-      "sha256": "c9c39362ab3fe95ff3e0b5fb4fdc57fd9c0105e539ce7ffa69ec2024cb736b06"
++      "sha256": "a90b9063668567e57349af497ff74f039a24e0eaaca789e846778683eb10d9bc"
+     },
+     {
+       "bytes": 2713,
+@@ -26,7 +26,7 @@
+       "sha256": "036da4af2a29534dd41c242cb3f8e5adecfd183eb2be7fbadfc1d28e1c93d41b"
+     }
+   ],
+-  "cache_version": "smr018-shell-v1",
++  "cache_version": "smr018-shell-v2",
+   "policy": "NON_SENSITIVE_STATIC_SHELL_ONLY",
+-  "service_worker_sha256": "d8af6e724bbd6edca2360d183912fc9c1484947bcfc706badca4e4135d7d4994"
++  "service_worker_sha256": "a04038c0a4c3013b2d06c8b28578ec5f3e9c0bdf39047e7430c96ea0cd48c318"
+ }
+--- a/03_CONTRACTS/schemas/pwa-navigation-item.schema.json
++++ b/03_CONTRACTS/schemas/pwa-navigation-item.schema.json
+@@ -59,5 +59,26 @@
+       "maxLength": 128,
+       "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+     }
+-  }
++  },
++  "allOf": [
++    {
++      "if": {
++        "properties": {
++          "standing": {
++            "const": "UNAVAILABLE"
++          }
++        },
++        "required": [
++          "standing"
++        ]
++      },
++      "then": {
++        "properties": {
++          "enabled": {
++            "const": false
++          }
++        }
++      }
++    }
++  ]
+ }
+--- a/03_CONTRACTS/schemas/pwa-session-projection.schema.json
++++ b/03_CONTRACTS/schemas/pwa-session-projection.schema.json
+@@ -60,5 +60,29 @@
+       "type": "string",
+       "format": "date-time"
+     }
+-  }
++  },
++  "allOf": [
++    {
++      "if": {
++        "properties": {
++          "connectionState": {
++            "enum": [
++              "OFFLINE",
++              "REAUTH_REQUIRED"
++            ]
++          }
++        },
++        "required": [
++          "connectionState"
++        ]
++      },
++      "then": {
++        "properties": {
++          "navigation": {
++            "maxItems": 0
++          }
++        }
++      }
++    }
++  ]
+ }
