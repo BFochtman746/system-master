@@ -1,0 +1,44 @@
+{
+  "work_item": "RECON-001B",
+  "qualification_id": "ASSURANCE-RECON-001B-OVERNIGHT-DEEP-CENSUS",
+  "status": "PREQUALIFIED_STATIC_AND_SCOPE_BOUND",
+  "wrapper": ".github/scripts/a01-assurance-recon-001b-deep-census.js",
+  "wrapper_blob_sha": "68782a6fe297138baf45ffa8ba00e74be8fc4737",
+  "prequalification": {
+    "node_syntax_check": "PASS",
+    "arbitrary_command_input": false,
+    "creates_independent_schedule": false,
+    "uses_shared_control_plane_only": true,
+    "source": "subject",
+    "gate_class": "focused",
+    "disruptive_post_actions": [],
+    "promotion_claim": false,
+    "estimated_runtime_minutes": 60,
+    "maximum_runtime_minutes": 150,
+    "checkpoint_required": false,
+    "reason_checkpoint_not_required": "Maximum runtime is 150 minutes, below the policy threshold requiring checkpoint capability above 180 minutes."
+  },
+  "fixed_execution_scope": [
+    "verify exact subject SHA",
+    "verify reconciliation artifact presence and hashes",
+    "git fsck --full",
+    "run current fwp012 qualifier and chained predecessor regression",
+    "query GitHub REST for material historical SHA reachability",
+    "enumerate repository branches and candidate Assurance/source/evidence trees",
+    "validate canonical policy/registry/ticket binding",
+    "verify clean subject worktree"
+  ],
+  "expected_evidence": [
+    "reconciliation-artifact-manifest.json",
+    "git-fsck.txt",
+    "foundation-chain-regression.txt",
+    "referenced-sha-reachability.json",
+    "branch-assurance-source-census.json",
+    "overnight-ticket-observation.json",
+    "assurance-recon-001b-overnight-result.json",
+    "result.txt",
+    "receipt.json from the canonical A-01 gateway"
+  ],
+  "truth_boundary": "A wrapper PASS proves only that the bounded deep census and current regression campaign executed successfully on the exact A-01 subject. It does not prove ASSURANCE-001 capability completeness, PILOT/PRODUCTION_READY standing, or production authorization.",
+  "a01_execution": "PENDING_OVERNIGHT_TICKET"
+}
