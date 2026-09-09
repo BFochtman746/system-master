@@ -1,0 +1,263 @@
+{
+  "artifact_id": "BOOK-SYSTEM-PROVENANCE-INTEROPERABILITY-PROJECTION-001",
+  "effective_date": "2026-09-09",
+  "standing": "CLOSED__RESEARCH_VERIFIED_PROVENANCE_PROJECTION_DEFINED__INTERNAL_LEDGER_REMAINS_CANONICAL",
+  "owner": "BOOK SYSTEM",
+  "classification": "ARCHITECTURE_PROJECTION_ONLY",
+  "purpose": "Define a bounded, privacy-aware projection from Book System canonical version/provenance evidence into interoperable external provenance representations without transferring internal authority, replacing the parent ledger, or making external provenance standards mandatory runtime dependencies.",
+  "depends_on": [
+    "BOOK-SYSTEM-CANONICAL-BOOK-STATE-MODEL-001",
+    "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-001",
+    "BOOK-SYSTEM-LIFECYCLE-TRANSITION-ENGINE-001",
+    "BOOK-SYSTEM-RESEARCH-VERIFIED-AUTHORING-LIFECYCLE-AMENDMENT-001",
+    "BOOK-SYSTEM-DOCUMENT-SYSTEM-EXPORT-OWNERSHIP-BOUNDARY-001",
+    "BOOK-SYSTEM-PUBLICATION-EXPORT-STANDARDS-PROFILE-001"
+  ],
+  "research_verification": {
+    "w3c_prov": {
+      "baseline": "W3C PROV-O Recommendation",
+      "url": "https://www.w3.org/TR/prov-o/",
+      "verified_properties": [
+        "prov:Entity represents a physical, digital, conceptual or other thing with fixed aspects",
+        "prov:Activity represents an activity that uses, transforms or generates entities",
+        "prov:Agent represents responsibility for an activity, entity or another agent's activity",
+        "prov:wasDerivedFrom represents derivation between entities",
+        "prov:wasRevisionOf can represent revision lineage",
+        "prov:used and prov:wasGeneratedBy connect activities and entities",
+        "prov:wasAssociatedWith and prov:wasAttributedTo represent responsibility relationships",
+        "qualified derivations and roles are available when a simple relationship would lose material context"
+      ],
+      "architecture_decision": "USE_AS_OPTIONAL_INTERCHANGE_PROJECTION__NOT_INTERNAL_STORAGE_AUTHORITY"
+    },
+    "c2pa": {
+      "baseline": "C2PA Content Credentials Specification 2.4",
+      "release": "April 2026",
+      "url": "https://spec.c2pa.org/specifications/specifications/2.4/specs/C2PA_Specification.html",
+      "verified_properties": [
+        "Content Credentials provide cryptographically verifiable provenance assertions bound to an asset",
+        "C2PA validation establishes tamper-evidence and signer/assertion integrity under its trust model; it does not itself judge whether asserted provenance is good, bad or factually true",
+        "creators and publishers should retain control over which provenance data is included",
+        "hard bindings can cryptographically bind a manifest to an exact asset",
+        "update manifests and redaction mechanisms can support bounded provenance changes without silently rewriting history",
+        "C2PA 2.4 supports document-oriented formats including PDF and ZIP-based formats such as EPUB and OOXML"
+      ],
+      "architecture_decision": "OPTIONAL_RELEASE_ARTIFACT_ATTACHMENT_WHERE_SUPPORTED_APPROPRIATE_AND_AUTHORIZED"
+    }
+  },
+  "canonical_authority": {
+    "internal_authority": "BOOK_SYSTEM_PARENT_LEDGER",
+    "rule": "The Book System parent ledger, immutable canonical object versions, exact digests, admission receipts, author decisions and lifecycle receipts remain the only canonical authority for Book System state.",
+    "external_projection_authority": false,
+    "external_round_trip_write_authority": false,
+    "external_projection_may_advance_canonical_pointer": false,
+    "external_projection_may_authorize_publication": false
+  },
+  "projection_model": {
+    "projection_id_required": true,
+    "required_binding": [
+      "book_project_id",
+      "book_id",
+      "parent_state_version",
+      "parent_state_digest",
+      "source_object_ids_and_versions",
+      "source_object_digests",
+      "projection_policy_id_and_version",
+      "projection_format_and_version",
+      "rights_boundary",
+      "privacy_boundary",
+      "created_at",
+      "projection_digest"
+    ],
+    "rules": [
+      "Projection is derived from an exact immutable parent-ledger snapshot and never from floating latest pointers.",
+      "Only claims directly supported by admitted internal evidence may be projected.",
+      "Unknown, disputed, abstained, partial, stale or explicitly unverified claims retain that status or are omitted; they may not be normalized into certainty.",
+      "Projection creation never mutates the source ledger or canonical manuscript.",
+      "A projection that cannot preserve required role, uncertainty, rights or privacy semantics fails closed rather than broadening the claim."
+    ]
+  },
+  "w3c_prov_projection": {
+    "entity_mapping": {
+      "BOOK_PROJECT_OR_CONCEPTUAL_BOOK": "prov:Entity",
+      "GOVERNING_BRIEF_VERSION": "prov:Entity",
+      "CANON_MANIFEST_VERSION": "prov:Entity",
+      "STORY_BIBLE_VERSION": "prov:Entity",
+      "BOOK_PLAN_VERSION": "prov:Entity",
+      "MANUSCRIPT_VERSION": "prov:Entity",
+      "RESEARCH_EVIDENCE_OBJECT": "prov:Entity",
+      "INTEGRATION_PROPOSAL_SNAPSHOT": "prov:Entity",
+      "AUTHOR_DECISION_RECORD": "prov:Entity",
+      "EXPORT_ARTIFACT": "prov:Entity",
+      "PROOF_OR_VALIDATION_RECEIPT": "prov:Entity",
+      "PUBLICATION_RELEASE_RECORD": "prov:Entity"
+    },
+    "activity_mapping": {
+      "AUTHORING_OR_IMPORT": "prov:Activity",
+      "REVISION_OR_CANONICAL_VERSION_CREATION": "prov:Activity",
+      "PROSE_ANALYSIS_OR_REVISION_GENERATION": "prov:Activity",
+      "BOOK_EVALUATION": "prov:Activity",
+      "RESEARCH_ACQUISITION_OR_REVALIDATION": "prov:Activity",
+      "PARENT_PROPOSAL_ADMISSION": "prov:Activity",
+      "AUTHOR_DECISION": "prov:Activity",
+      "DOCUMENT_EXPORT_OR_CONVERSION": "prov:Activity",
+      "FORMAT_VALIDATION_OR_POST_LAYOUT_PROOF": "prov:Activity",
+      "EXPORT_FREEZE": "prov:Activity",
+      "PUBLICATION_OR_DELIVERY_AUTHORIZATION": "prov:Activity"
+    },
+    "agent_mapping": {
+      "HUMAN_AUTHOR_OR_AUTHORIZED_EDITOR": "prov:Agent/prov:Person where disclosure is authorized",
+      "BOOK_SYSTEM_PARENT": "prov:Agent/prov:SoftwareAgent",
+      "PROSE_SYSTEM": "prov:Agent/prov:SoftwareAgent",
+      "BOOK_EVALUATOR": "prov:Agent/prov:SoftwareAgent",
+      "RESEARCH_PROVIDER": "prov:Agent or prov:SoftwareAgent according to actual actor",
+      "DOCUMENT_SYSTEM_OR_EXPORT_PROVIDER": "prov:Agent/prov:SoftwareAgent",
+      "TOOLCHAIN_COMPONENT": "prov:Agent/prov:SoftwareAgent",
+      "ORGANIZATION_OR_PUBLISHER": "prov:Agent/prov:Organization where disclosure is authorized"
+    },
+    "relationship_mapping": [
+      "New immutable manuscript versions use prov:wasRevisionOf and/or prov:wasDerivedFrom only where internal lineage proves that relationship.",
+      "Activities use prov:used for exact input entities and generated outputs use prov:wasGeneratedBy.",
+      "Activities use prov:wasAssociatedWith for the actual responsible human/system/tool roles supported by evidence.",
+      "prov:wasAttributedTo is used only when internal evidence supports attribution; file generation by a software tool must not be confused with human authorship of book content.",
+      "Qualified derivation and qualified association are required when roles, transformation type, source version or tool identity would otherwise be ambiguous.",
+      "External projection identifiers must include or resolve to the Book System immutable object/version/digest identities needed to reconcile the projection back to internal evidence."
+    ],
+    "authorship_separation": {
+      "content_authorship": "Represent only from explicit author/editor evidence and author-decision history.",
+      "artifact_generation": "Represent separately as document/export activity associated with the Document System/toolchain.",
+      "evaluation_or_ai_assistance": "Represent as separate activities/agents when disclosure policy authorizes it; assistance does not automatically become authorship.",
+      "publication_authority": "Represent only from explicit Book System publication/delivery authorization evidence."
+    }
+  },
+  "c2pa_projection": {
+    "default": "OFF_UNLESS_RELEASE_POLICY_REQUESTS_OR_REQUIRES_IT",
+    "eligible_scope": "EXPORTED_OR_RELEASE_CANDIDATE_ASSETS_WHERE_FORMAT_SUPPORT_POLICY_RIGHTS_PRIVACY_AND_SIGNING_INFRASTRUCTURE_PERMIT",
+    "execution_owner": "DOCUMENT SYSTEM or a separately governed provenance/signing provider; Book System supplies the bounded provenance projection and acceptance policy but does not implement a duplicate credential-embedding engine.",
+    "supported_book_document_examples": [
+      "PDF",
+      "EPUB",
+      "OOXML/DOCX"
+    ],
+    "required_book_side_request": [
+      "exact source manuscript version and digest",
+      "exact export candidate identity",
+      "allowed provenance assertion classes",
+      "forbidden/private assertion classes",
+      "rights/privacy policy",
+      "signer role requested if authorized",
+      "publication_authorized flag sourced only from explicit Book System authority"
+    ],
+    "required_response_evidence": [
+      "credentialed artifact ref",
+      "final credentialed artifact digest",
+      "C2PA specification/profile version",
+      "manifest/claim identity",
+      "signer identity or signer-class evidence permitted by privacy policy",
+      "content-binding validation result",
+      "validation warnings/errors",
+      "redaction/update history if present"
+    ],
+    "digest_rule": "If attaching or embedding a Content Credential changes asset bytes, Book System must store a new final credentialed-artifact digest after attachment. A pre-credential export digest remains a predecessor identity and must not be silently reused as the final asset digest.",
+    "claim_boundary": [
+      "A valid Content Credential proves the bounded signed provenance assertions and content binding under the C2PA trust model; it does not prove literary quality, factual truth, authorship beyond the signer/attribution evidence, author approval, canonical admission or publication authorization.",
+      "C2PA assertions must never be broader than internal admitted evidence.",
+      "Private manuscript text, hidden evaluation evidence, private research material, personal data or internal deliberation is excluded unless explicitly authorized and required.",
+      "Use identifiers, digests, transformation classes and bounded public metadata in preference to raw private content.",
+      "C2PA remains optional internally even when a particular release profile requires a credential on the outgoing asset."
+    ]
+  },
+  "privacy_and_rights_projection": {
+    "default_policy": "MINIMUM_NECESSARY_EXTERNAL_PROVENANCE",
+    "classes": {
+      "PRIVATE_INTERNAL_ONLY": "Never project externally.",
+      "EXTERNAL_DIGEST_OR_IDENTIFIER_ONLY": "Project only non-content identity/digest references.",
+      "PUBLIC_METADATA_ALLOWED": "Project bounded metadata authorized for release.",
+      "EXPLICIT_CONTENT_DISCLOSURE_ALLOWED": "Project content only under explicit rights/privacy authorization and a release requirement."
+    },
+    "fail_closed_conditions": [
+      "rights unknown or incompatible",
+      "privacy classification unknown",
+      "requested provenance claim exceeds admitted evidence",
+      "requested signer/author attribution lacks explicit supporting evidence",
+      "projection would expose protected manuscript text or evidence unnecessarily",
+      "external format cannot preserve a material uncertainty/disagreement boundary"
+    ]
+  },
+  "supersession_invalidation_and_redaction": {
+    "source_version_changes": "An existing projection remains historical evidence for the exact old source/artifact it describes but becomes SUPERSEDED_FOR_CURRENT_RELEASE. A new canonical manuscript or artifact requires a new projection; old provenance must never be rebound to new bytes or a new source digest.",
+    "internal_evidence_reclassified": "If rights, privacy, attribution or evidence validity changes, Book System records the new internal state first. External correction, redaction, update-manifest or revocation action is then requested where supported and appropriate; immutable prior evidence is not silently rewritten.",
+    "artifact_changes": "Any changed artifact bytes require new artifact identity/digest and revalidation of the external binding.",
+    "publication_withdrawal": "Withdrawal or supersession is a Book System release-state fact. External credential status may reflect it when supported, but cannot substitute for the parent ledger.",
+    "chain_rule": "Every external successor must retain enough predecessor identity to reconcile the lineage without implying that the predecessor remains current."
+  },
+  "interoperability_receipt": {
+    "required": [
+      "projection_id",
+      "projection_format",
+      "projection_format_version",
+      "source_parent_state_version",
+      "source_parent_state_digest",
+      "source_object_identities_and_digests",
+      "projected_claim_classes",
+      "omitted_or_redacted_claim_classes",
+      "rights_privacy_policy_id",
+      "projection_digest",
+      "external_attachment_or_publication_ref_if_any",
+      "external_validation_result_if_any",
+      "currentness_state"
+    ],
+    "currentness_states": [
+      "CURRENT_FOR_BOUND_SOURCE_AND_ARTIFACT",
+      "SUPERSEDED_FOR_CURRENT_RELEASE",
+      "REDACTION_OR_CORRECTION_REQUIRED",
+      "WITHDRAWN_BY_PARENT_POLICY",
+      "EXTERNAL_VALIDATION_FAILED"
+    ]
+  },
+  "must_not_do": [
+    "replace the Book System parent ledger with W3C PROV, C2PA or another external provenance standard",
+    "make C2PA or W3C PROV a mandatory internal dependency for authoring or canonical state changes",
+    "allow an imported external provenance document to mutate canonical Book state without normal parent intake/admission",
+    "equate a C2PA signature or validation PASS with factual truth, literary quality, authorship, author approval or publication authority",
+    "expose raw private manuscript text or private evidence solely to create provenance metadata",
+    "collapse human author, editor, AI/service provider, document renderer and publisher into one generic agent role",
+    "silently rebind an old provenance projection to a new manuscript version or changed artifact digest",
+    "allow the Document System or provenance provider to infer Book canonical admission or publication status"
+  ],
+  "research_classification": {
+    "KEEP": [
+      "Book System immutable parent ledger as canonical authority",
+      "exact source version/digest binding",
+      "separate human author/provider/toolchain/publication roles",
+      "rights/privacy boundaries",
+      "artifact digests and immutable predecessor lineage"
+    ],
+    "ADD_OR_REFINE": [
+      "W3C PROV-compatible optional interchange projection",
+      "optional C2PA 2.4 release-asset credential projection",
+      "minimum-necessary provenance disclosure policy",
+      "explicit external-projection supersession/redaction/currentness receipt",
+      "pre-credential versus final credentialed-artifact digest distinction"
+    ],
+    "DO_NOT_ADD": [
+      "second internal provenance ledger",
+      "C2PA as canonical Book state",
+      "automatic public disclosure of private authoring/evaluation history",
+      "provenance signature as truth or publication authorization"
+    ],
+    "UNRESOLVED": [
+      "Exact C2PA signer credential/trust-list policy is deployment/distribution-context dependent and remains a later release-infrastructure decision.",
+      "Whether a specific distributor requires or strips Content Credentials must be checked at release time and must not be hard-coded into Book core architecture."
+    ]
+  },
+  "integration_runtime_rereview_requirements": [
+    "Preserve provenance/evidence refs and exact source/provider/projection identity through intake and proposal snapshots.",
+    "Ensure imported external provenance is evidence-only until normal parent admission rules are satisfied.",
+    "Ensure Document/Export provider success and external credential validation cannot imply publication authorization.",
+    "Ensure stale/superseded provenance cannot advance a proposal without explicit parent revalidation.",
+    "Ensure rights/privacy changes can stale or reject affected proposals without erasing historical evidence.",
+    "Ensure any external provenance attachment remains downstream of canonical state and cannot create a backdoor canonical write path."
+  ],
+  "exact_next_objective": "BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-001-CONTRACT-REREVIEW-001",
+  "qualification_effect": "NONE. This artifact defines research-verified architecture/projection law only. It creates no C2PA credential, W3C PROV export, executable provenance adapter, canonical mutation, publication authority or runtime qualification."
+}
