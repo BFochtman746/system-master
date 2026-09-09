@@ -1,31 +1,24 @@
 {
   "objective": "AGLO-REAL-BOOK-WHOLE-BOOK-NONDESTRUCTIVE-SWEEP-001",
   "queue_id": "AGLO-WHOLE-BOOK-AUTHOR-DECISION-QUEUE-001",
-  "standing": "READY__ONE_AUTHOR_DECISION_REQUIRED__DECISION_002_RESOLVED_2A__NO_MANUSCRIPT_MUTATION",
+  "standing": "CLOSED__ALL_AUTHOR_DECISIONS_RESOLVED__NO_MANUSCRIPT_MUTATION",
   "baseline_version_id": "AGLO-REJECT-ALL-NARRATIVE-v1",
   "baseline_text_sha256": "a48378682ee15fd4b24bc97293ce43a37f096db254a0b78f715081a8aa8a59ee",
   "evidence_hardening_record": "AGLO-WHOLE-BOOK-AUTHOR-QUEUE-EVIDENCE-HARDENING-001.json",
-  "items": [
+  "items": [],
+  "resolved": [
     {
-      "priority": 1,
       "decision_id": "AGLO-WBS-DECISION-001",
       "finding_id": "AGLO-WBS-C25-P031-REPEATED-WORD",
-      "chapter": 25,
-      "classification": "OBJECTIVE_MECHANICAL_DEFECT",
-      "confidence": "HIGH",
-      "candidate_transform": "REMOVE_ONE_IMMEDIATE_DUPLICATE_TOKEN",
-      "original_paragraph_sha256": "f1248ab5da621fa4d4ae62e8c755b8b3750b8c2a2ae268f9df4aa3e09a537613",
-      "candidate_paragraph_sha256": "c3cd2208712a7336c2df77170d651d079c6ccdc66b5c6572dd0f9b3aa0619d24",
-      "verification": {"original_word_count":19,"candidate_word_count":18,"exact_single_token_deletion":true,"deleted_token_duplicate_of_neighbor":true},
-      "preservation_precheck": "PASS__NO_CANON_MEANING_OR_VOICE_CHANGE_EXPECTED",
-      "step_k_precheck": "PASS__MECHANICAL_NONSTYLE_EDIT__NO_STYLE_OPTIMIZATION_TARGET",
-      "recommendation": "ACCEPT_REMOVE_DUPLICATE_WORD",
-      "recommendation_confidence": "HIGH",
-      "author_decision_still_required": true,
-      "options": ["ACCEPT_REMOVE_DUPLICATE_WORD","RETAIN_ORIGINAL"]
-    }
-  ],
-  "resolved": [
+      "author_disposition": "ACCEPT_REMOVE_DUPLICATE_WORD",
+      "author_option": "1A",
+      "receipt": "AGLO-WHOLE-BOOK-AUTHOR-ADJUDICATION-RECEIPT-001.json",
+      "step_j_evidence": "../step-j/project-evidence/AGLO-STEP-J-PREFERENCE-EVIDENCE-003.json",
+      "qualification_effect": "ONE_VERIFIED_SINGLE_TOKEN_MECHANICAL_REPAIR_ADMITTED",
+      "preservation_closure": "PASS__EXACT_SINGLE_DUPLICATE_TOKEN_DELETION__NO_CANON_MEANING_OR_VOICE_CHANGE",
+      "step_k_closure": "PASS__MECHANICAL_NONSTYLE_EDIT__NO_HOMOGENIZATION_TARGET",
+      "automatic_manuscript_mutation": false
+    },
     {
       "decision_id": "AGLO-WBS-DECISION-002",
       "finding_id": "AGLO-WBS-CROSS-CHAPTER-EXACT-SENTENCE-b518f34135e8",
@@ -38,10 +31,16 @@
       "automatic_manuscript_mutation": false
     }
   ],
-  "resolved_not_requeued": ["AGLO-WBS-C24-P043-EXACT-SENTENCE-DUP","AGLO-WBS-CROSS-CHAPTER-EXACT-SENTENCE-b518f34135e8"],
+  "resolved_not_requeued": [
+    "AGLO-WBS-C24-P043-EXACT-SENTENCE-DUP",
+    "AGLO-WBS-C25-P031-REPEATED-WORD",
+    "AGLO-WBS-CROSS-CHAPTER-EXACT-SENTENCE-b518f34135e8"
+  ],
+  "unresolved_count": 0,
+  "closure_record": "AGLO-WHOLE-BOOK-REAL-BOOK-QUALIFICATION-CLOSURE-001.json",
   "automatic_manuscript_overwrite_authorized": false,
   "publication_authorized": false,
   "raw_manuscript_text_persisted": false,
   "candidate_text_persisted": false,
-  "next_transition": "AUTHOR_ADJUDICATE_DECISION_001_WITH_1A_OR_1B"
+  "next_transition": "NONE__QUEUE_CLOSED"
 }
