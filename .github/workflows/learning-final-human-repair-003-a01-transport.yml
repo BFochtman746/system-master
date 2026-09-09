@@ -1,0 +1,22 @@
+name: LEARNING Final Human Repair-003 A-01 Transport
+
+on:
+  push:
+    branches:
+      - learning/request-final-human-repair-003-a01
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  qualify:
+    uses: BFochtman746/system-master/.github/workflows/a01-control-plane-gateway.yml@main
+    with:
+      qualification_id: LEARNING-PILOT-001-RUN-001-FINAL-HUMAN-EXECUTION
+      workstream_id: LEARNING
+      subject_sha: 66f25c8fd2eba3c31ed8dd06b6e0f8e90dc43893
+      origin_ref: refs/heads/learning/pilot-001-run-001-final-human-execution-repair-003
+      resume_on_pass: Adjudicate the canonical receipt; require exact subject/checkout SHA match, PASS, required evidence, and promotion_authorized=true. Promote only the exact tested repair-003 SHA unchanged. Do not start a participant session automatically; real execution still requires explicit participant consent.
+      resume_on_failure: Preserve receipt and evidence; classify SUBJECT_FAILURE versus INFRA_FAILURE or CONTROL_PLANE_FAILURE; repair only the proven failing boundary. Do not weaken exact-SHA, frozen PILOT-001-v1, privacy, local-first evidence, consent, retention, transfer, human-attestation, or test-count gates.
+      notification_target: learning-pilot-001-run-001-final-human-execution
