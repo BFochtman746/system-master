@@ -1,0 +1,33 @@
+{
+  "ticket_version": 1,
+  "ticket_id": "BOOK-EVAL-REPAIR-005-GATE-D-TEACHER-FREEZE-2026-09-10",
+  "state": "READY",
+  "night_date": "2026-09-10",
+  "submitted_at": "2026-09-09T01:40:00-04:00",
+  "workstream_id": "BOOK-EVAL-LEMONADE-001",
+  "qualification_id": "BOOK-EVAL-REPAIR-005-GATE-D-TEACHER-FREEZE",
+  "subject_sha": "e3b771dc36800c5f056ff2fd5ab6622f3e014f41",
+  "origin_ref": "refs/heads/book-eval-lemonade-001-blind-resume-003-adapter-repair",
+  "estimated_minutes": 10,
+  "max_runtime_minutes": 30,
+  "priority": 100,
+  "earliest_start_local": "00:00",
+  "latest_start_local": "06:20",
+  "window_end_local": "07:00",
+  "exclusive_window": false,
+  "resource_class": "io",
+  "overnight_lane": "FINISH",
+  "value_class": "BOOK_GATE_D_TEACHER_FREEZE_CRITICAL_PATH",
+  "critical_path_rank": 1,
+  "completion_delta": {
+    "before": "Gate D Teacher v3 generation reached 440/440 unique IDs, but its persistent raw JSONL failed the physical-record-count freeze gate; the exact persistent corpus has not yet been canonical-freeze-qualified independently of missing private student inputs.",
+    "evidence": "Canonical A-01 receipt plus teacher-freeze manifest proving exact raw SHA/status/taxonomy binding, 440 expected IDs, exact-duplicate-only canonicalization or fail-closed conflicting-duplicate classification, canonical 440-row validation, and zero private/development/visible/hidden gold use.",
+    "after_pass": "The exact hosted-prequalified Book subject has authoritative A-01 evidence that the frozen Teacher corpus is an unambiguous canonical 440-row artifact suitable for later student ingest once private authority is separately restored.",
+    "unlocks": "Removes the Teacher freeze uncertainty from the Gate D critical path and leaves exact BASE_TRAINING + DEVELOPMENT_GOLD source custody as the only prerequisite before 612+440=1,052 student ingest/retraining."
+  },
+  "stop_condition": "After an authoritative PASS on this exact Teacher raw SHA/status/taxonomy binding, do not repeat the Teacher freeze qualification unless the frozen raw/status/taxonomy evidence changes. On conflicting duplicate payloads, stop and adjudicate that exact conflict without regenerating Teacher rows or choosing among divergent payloads automatically.",
+  "resume_on_pass": "Adjudicate the canonical A-01 receipt for exact subject e3b771dc36800c5f056ff2fd5ab6622f3e014f41. Require subject_sha == checkout_sha, result_class=PASS, required evidence present, canonical_records=440, unique_teacher_ids=440, forbidden gold-use flags false, and no conflicting duplicate IDs. Record Teacher freeze as closed but do not authorize promotion, student training, selective 120B, visible regression, or hidden/fresh holdout. Continue exact-hash recovery of BASE_TRAINING and DEVELOPMENT_GOLD; only after that independent boundary PASS may the 1,052-record student path resume.",
+  "resume_on_failure": "Classify SUBJECT_FAILURE versus INFRA_FAILURE or CONTROL_PLANE_FAILURE and preserve the teacher-freeze manifest. If the frozen raw SHA/status/taxonomy is missing or changed, repair source custody only. If exact duplicate payloads cannot canonicalize because one teacher_record_id has divergent payloads, stop and adjudicate that exact conflict without regenerating the Teacher corpus, consulting private gold, or weakening the frozen hash/gold boundaries. Rerun only after the proven failing boundary changes.",
+  "notification_target": "book-eval-lemonade-001-repair005-gate-d",
+  "notes": "Exact subject e3b771dc36800c5f056ff2fd5ab6622f3e014f41 passed hosted teacher-freeze prequalification run 34315559004: Python compile PASS, Node wrapper syntax PASS, 440 unique-case PASS, exact-duplicate canonicalization PASS, conflicting-duplicate fail-closed PASS. This ticket intentionally does not depend on or access BASE_TRAINING, DEVELOPMENT_GOLD, visible regression, hidden holdout, student training, or selective 120B. The unchanged private-recovery qualification is not requeued because canonical run 34292412264 already proved BASE_TRAINING and DEVELOPMENT_GOLD missing."
+}
