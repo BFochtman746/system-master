@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import math
 from collections import Counter, defaultdict
 from pathlib import Path
@@ -99,6 +100,9 @@ def _eligible_metrics(packet: Dict[str, Any]) -> Dict[str, float]:
             "PILOT_EFFECTIVENESS_RETENTION_DELAY",
         ),
     }
+    expected_delta = values["independent_verification_fraction"] - values["baseline_fraction"]
+    if abs(values["observed_verification_minus_baseline"] - expected_delta) > 1e-9:
+        _fail("PILOT_EFFECTIVENESS_VERIFICATION_DELTA_INCONSISTENT")
     if values["retention_delay_seconds"] < 3600.0:
         _fail("PILOT_EFFECTIVENESS_RETENTION_DELAY_BELOW_PROTOCOL_MINIMUM")
     return values
@@ -257,8 +261,15 @@ def build_effectiveness_review(*, root: Path, pilot_ids: Sequence[str]) -> Dict[
         },
     }
 
-    lowered = str(result).lower()
-    for forbidden in ("participant_key", "learner_id", "state_key", "raw_response", "free_text", "resolved_state_root"):
-        if forbidden in lowered and forbidden not in result.get("privacy_boundary", {}):
+    rendered = json.dumps(result, sort_keys=True).lower()
+    for forbidden in (
+        '"participant_key":',
+        '"learner_id":',
+        '"state_key":',
+        '"raw_response":',
+        '"free_text":',
+        '"resolved_state_root":',
+    ):
+        if forbidden in rendered:
             _fail("PILOT_EFFECTIVENESS_REVIEW_FORBIDDEN_FIELD")
     return result
