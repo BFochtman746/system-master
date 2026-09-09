@@ -6,10 +6,10 @@ store candidate prose and it never turns judge reliability into literary-quality
 
 from collections import Counter, defaultdict
 
-AXES = {"BASE", "REPEAT", "POSITION", "GENERATOR_IDENTITY", "SCORE_RANGE", "UNCERTAINTY_MARKER", "BELIEF_CONTRAST", "STYLE_VS_STORY"}
+AXES = {"BASE", "REPEAT", "POSITION", "RUBRIC_ORDER", "GENERATOR_IDENTITY", "SCORE_RANGE", "UNCERTAINTY_MARKER", "BELIEF_CONTRAST", "STYLE_VS_STORY"}
 NON_DECISIVE = {"TIE", "ABSTAIN"}
 FORBIDDEN_TEXT_KEYS = {"raw_text", "quoted_text", "manuscript_text", "source_text", "passage_text", "candidate_text", "revision_text"}
-BIAS_AXES = {"POSITION", "GENERATOR_IDENTITY", "SCORE_RANGE", "UNCERTAINTY_MARKER", "BELIEF_CONTRAST"}
+BIAS_AXES = {"POSITION", "RUBRIC_ORDER", "GENERATOR_IDENTITY", "SCORE_RANGE", "UNCERTAINTY_MARKER", "BELIEF_CONTRAST"}
 
 
 def _forbidden(value, path="$", out=None):
@@ -47,7 +47,12 @@ def _guard(trial, candidate_id):
     return item if isinstance(item, dict) else {}
 
 
-def analyze_trials(trials, repeat_identity_agreement_floor=0.8, minimum_repeat_trials=3):
+def analyze_trials(
+    trials,
+    repeat_identity_agreement_floor=0.8,
+    minimum_repeat_trials=3,
+    rubric_order_confidence_span_ceiling=0.15,
+):
     errors, warnings, bias_findings, veto_findings = [], [], [], []
     if not isinstance(trials, list):
         return {"standing": "INVALID", "errors": ["TRIALS_NOT_LIST"], "promotion_authorized": False}
@@ -62,6 +67,12 @@ def analyze_trials(trials, repeat_identity_agreement_floor=0.8, minimum_repeat_t
         floor = -1
     if not 0.5 <= floor <= 1.0:
         errors.append("REPEAT_AGREEMENT_FLOOR_INVALID")
+    try:
+        rubric_confidence_ceiling = float(rubric_order_confidence_span_ceiling)
+    except (TypeError, ValueError):
+        rubric_confidence_ceiling = -1
+    if not 0.0 <= rubric_confidence_ceiling <= 1.0:
+        errors.append("RUBRIC_ORDER_CONFIDENCE_SPAN_CEILING_INVALID")
 
     seen_ids = set()
     normalized = []
@@ -122,18 +133,55 @@ def analyze_trials(trials, repeat_identity_agreement_floor=0.8, minimum_repeat_t
         for axis in sorted(BIAS_AXES):
             axis_trials = [t for t in group if t.get("condition_axis") == axis]
             outcomes = [t.get("winner_candidate_id") for t in axis_trials]
-            condition_values = {t.get("condition_value") for t in axis_trials}
+            condition_counts = Counter(t.get("condition_value") for t in axis_trials)
+            condition_values = set(condition_counts)
+            valid_confidences = [_conf(t.get("confidence")) for t in axis_trials]
+            valid_confidences = [c for c in valid_confidences if c is not None]
+            confidence_span = None
+            if valid_confidences:
+                confidence_span = max(valid_confidences) - min(valid_confidences)
+
+            balanced = None
+            if axis == "RUBRIC_ORDER" and axis_trials:
+                balanced = len(condition_values) >= 2 and len(set(condition_counts.values())) == 1
+                if len(condition_values) < 2:
+                    errors.append(f"RUBRIC_ORDER_REQUIRES_MULTIPLE_ORDERS:{comparison_id}")
+                elif not balanced:
+                    errors.append(f"RUBRIC_ORDER_UNBALANCED:{comparison_id}")
+
             evaluable = len(axis_trials) >= 2 and len(condition_values) >= 2
-            sensitive = evaluable and len(set(outcomes)) > 1
+            if axis == "RUBRIC_ORDER":
+                evaluable = evaluable and balanced is True
+            outcome_sensitive = evaluable and len(set(outcomes)) > 1
+            confidence_sensitive = (
+                axis == "RUBRIC_ORDER"
+                and evaluable
+                and confidence_span is not None
+                and confidence_span > rubric_confidence_ceiling
+            )
+            sensitive = outcome_sensitive or confidence_sensitive
             axis_reports[axis] = {
                 "trial_count": len(axis_trials),
                 "condition_count": len(condition_values),
+                "condition_counts": dict(sorted(condition_counts.items())),
                 "evaluable": evaluable,
                 "outcomes": outcomes,
                 "sensitive": sensitive,
+                "outcome_sensitive": outcome_sensitive,
+                "confidence_span": None if confidence_span is None else round(confidence_span, 4),
+                "confidence_sensitive": confidence_sensitive,
+                "balanced": balanced,
             }
             if sensitive:
-                bias_findings.append({"comparison_id": comparison_id, "axis": axis, "finding": f"{axis}_SENSITIVITY"})
+                finding = {"comparison_id": comparison_id, "axis": axis, "finding": f"{axis}_SENSITIVITY"}
+                if axis == "RUBRIC_ORDER":
+                    finding.update({
+                        "outcome_sensitive": outcome_sensitive,
+                        "confidence_sensitive": confidence_sensitive,
+                        "confidence_span": None if confidence_span is None else round(confidence_span, 4),
+                        "confidence_span_ceiling": rubric_confidence_ceiling,
+                    })
+                bias_findings.append(finding)
 
         for t in group:
             winner = t.get("winner_candidate_id")
@@ -184,4 +232,5 @@ def analyze_trials(trials, repeat_identity_agreement_floor=0.8, minimum_repeat_t
         "promotion_authorized": False,
         "literary_quality_score_emitted": False,
         "candidate_prose_persisted": bool(forbidden),
+        "rubric_order_confidence_span_ceiling": rubric_confidence_ceiling,
     }

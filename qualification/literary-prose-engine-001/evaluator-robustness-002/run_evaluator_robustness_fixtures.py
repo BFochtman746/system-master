@@ -42,6 +42,51 @@ position_bias=[
 r=analyze_trials(position_bias)
 check("position_bias_detected",r["standing"]=="REVIEW_BIAS" and any(f["axis"]=="POSITION" for f in r["bias_findings"]),r)
 
+# Rubric-order permutation: use opaque order IDs only. Balanced orders must preserve
+# material winner identity and stay within the configured confidence-span ceiling.
+rubric_stable=[
+    trial("RO1",axis="RUBRIC_ORDER",value="order_a",winner="CAND",confidence=.88),
+    trial("RO2",axis="RUBRIC_ORDER",value="order_b",winner="CAND",confidence=.86),
+    trial("RO3",axis="RUBRIC_ORDER",value="order_a",winner="CAND",confidence=.89),
+    trial("RO4",axis="RUBRIC_ORDER",value="order_b",winner="CAND",confidence=.87),
+]
+r=analyze_trials(rubric_stable)
+ro=r["comparison_reports"][0]["axis_reports"]["RUBRIC_ORDER"]
+check("rubric_order_balanced_stable",r["standing"]=="STABLE" and ro["balanced"] is True and ro["confidence_span"]==.03,r)
+
+rubric_outcome_flip=[
+    trial("RO5",axis="RUBRIC_ORDER",value="order_a",winner="CAND",confidence=.88),
+    trial("RO6",axis="RUBRIC_ORDER",value="order_b",winner="ORIG",confidence=.87),
+    trial("RO7",axis="RUBRIC_ORDER",value="order_a",winner="CAND",confidence=.89),
+    trial("RO8",axis="RUBRIC_ORDER",value="order_b",winner="ORIG",confidence=.86),
+]
+r=analyze_trials(rubric_outcome_flip)
+check("rubric_order_outcome_bias_detected",r["standing"]=="REVIEW_BIAS" and any(f["axis"]=="RUBRIC_ORDER" and f["outcome_sensitive"] for f in r["bias_findings"]),r)
+
+rubric_confidence_shift=[
+    trial("RO9",axis="RUBRIC_ORDER",value="order_a",winner="CAND",confidence=.92),
+    trial("RO10",axis="RUBRIC_ORDER",value="order_b",winner="CAND",confidence=.70),
+    trial("RO11",axis="RUBRIC_ORDER",value="order_a",winner="CAND",confidence=.90),
+    trial("RO12",axis="RUBRIC_ORDER",value="order_b",winner="CAND",confidence=.68),
+]
+r=analyze_trials(rubric_confidence_shift)
+check("rubric_order_confidence_bias_detected",r["standing"]=="REVIEW_BIAS" and any(f["axis"]=="RUBRIC_ORDER" and f["confidence_sensitive"] and f["confidence_span"]==.24 for f in r["bias_findings"]),r)
+
+rubric_unbalanced=[
+    trial("RO13",axis="RUBRIC_ORDER",value="order_a",winner="CAND"),
+    trial("RO14",axis="RUBRIC_ORDER",value="order_a",winner="CAND"),
+    trial("RO15",axis="RUBRIC_ORDER",value="order_b",winner="CAND"),
+]
+r=analyze_trials(rubric_unbalanced)
+check("rubric_order_unbalanced_fails_closed",r["standing"]=="INVALID" and any("RUBRIC_ORDER_UNBALANCED" in e for e in r["errors"]),r)
+
+rubric_single_order=[
+    trial("RO16",axis="RUBRIC_ORDER",value="order_a",winner="CAND"),
+    trial("RO17",axis="RUBRIC_ORDER",value="order_a",winner="CAND"),
+]
+r=analyze_trials(rubric_single_order)
+check("rubric_order_single_order_fails_closed",r["standing"]=="INVALID" and any("RUBRIC_ORDER_REQUIRES_MULTIPLE_ORDERS" in e for e in r["errors"]),r)
+
 # Identity reveal, score range, uncertainty markers and belief-contrast sensitivity.
 for axis,values in [
     ("GENERATOR_IDENTITY",("hidden","revealed")),
@@ -99,6 +144,7 @@ for key in ["raw_text","quoted_text","manuscript_text","source_text","passage_te
 # Threshold config itself is fail-closed.
 r=analyze_trials(stable,repeat_identity_agreement_floor=.4); check("bad_repeat_floor",r["standing"]=="INVALID",r)
 r=analyze_trials(stable,minimum_repeat_trials=1); check("bad_min_repeat",r["standing"]=="INVALID",r)
+r=analyze_trials(stable,rubric_order_confidence_span_ceiling=1.1); check("bad_rubric_confidence_ceiling",r["standing"]=="INVALID",r)
 
 # Multiple comparisons remain separate; one unstable comparison removes auto eligibility globally.
 records=[
