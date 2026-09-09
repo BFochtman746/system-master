@@ -1,0 +1,41 @@
+name: Request Learning Final Human Execution Hosted Prequalification
+
+on:
+  push:
+    branches: [learning/request-final-human-qualifier-34f1f6f4]
+
+permissions:
+  contents: read
+
+jobs:
+  prequalify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact product subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: 34f1f6f4f33fe006f3bb54e5e2f8ce1d76bed992
+          fetch-depth: 1
+          clean: true
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: '3.13.15'
+          architecture: x64
+          check-latest: false
+      - name: Execute subject-owned final human execution qualifier
+        shell: bash
+        run: |
+          export A01_SUBJECT_SHA=34f1f6f4f33fe006f3bb54e5e2f8ce1d76bed992
+          export A01_EVIDENCE_DIR="$RUNNER_TEMP/final-human-execution-evidence"
+          node .github/scripts/learning-pilot-001-run-001-final-human-execution-qualify.js
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: learning-final-human-execution-${{ github.run_id }}
+          path: ${{ runner.temp }}/final-human-execution-evidence
+          if-no-files-found: error
+          retention-days: 14
