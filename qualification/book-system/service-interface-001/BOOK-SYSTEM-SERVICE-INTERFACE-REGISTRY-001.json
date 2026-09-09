@@ -1,0 +1,319 @@
+{
+  "registry_id": "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-001",
+  "registry_version": 1,
+  "effective_date": "2026-09-09",
+  "standing": "CANONICAL__PARENT_SERVICE_REGISTRY__QUALIFICATION_PENDING",
+  "owner": "BOOK SYSTEM",
+  "depends_on": [
+    "BOOK-SYSTEM-AUTHORING-LIFECYCLE-CONTRACT-001",
+    "BOOK-SYSTEM-PARENT-INTEGRATION-BOUNDARY-001",
+    "BOOK-SYSTEM-BOOK-INTELLIGENCE-UNIFICATION-BINDING-001",
+    "BOOK-SYSTEM-CANONICAL-BOOK-STATE-MODEL-001"
+  ],
+  "governing_law": [
+    "Book System owns canonical book state and canonical mutation authority.",
+    "A service receives only the minimum bounded projection required for its registered operation.",
+    "A service response is evidence, an artifact, an abstention, or an integration proposal; it is never a direct canonical write.",
+    "Exact subject/version/digest identity must survive request -> provider -> response -> parent admission.",
+    "Unknown service IDs, operation IDs, schema versions, provider classes or response classes fail closed.",
+    "Retries and replay must not create duplicate parent proposals or duplicate durable artifacts when an operation is declared idempotent.",
+    "Human, author, publication, rights and promotion authority cannot be inferred from provider success."
+  ],
+  "common_request_envelope": {
+    "schema_version": 1,
+    "required": [
+      "request_id",
+      "correlation_id",
+      "idempotency_key",
+      "service_id",
+      "operation_id",
+      "schema_version",
+      "book_project_id",
+      "book_id",
+      "parent_state_version",
+      "parent_state_digest",
+      "target_refs",
+      "projection",
+      "authority_context"
+    ],
+    "authority_context_required": [
+      "requesting_authority",
+      "canonical_write_allowed",
+      "author_decision_required_if_returned",
+      "rights_boundary",
+      "privacy_boundary"
+    ],
+    "rules": [
+      "canonical_write_allowed must be false for every external child/lane/service request.",
+      "parent_state_digest is sha256 over the exact parent state used to construct the projection.",
+      "request_id identifies one logical request; idempotency_key identifies replay equivalence.",
+      "target_refs must resolve within the referenced parent state or an explicitly admitted artifact set.",
+      "projection must omit data forbidden by the operation's custody policy."
+    ]
+  },
+  "common_response_envelope": {
+    "schema_version": 1,
+    "required": [
+      "response_id",
+      "request_id",
+      "correlation_id",
+      "idempotency_key",
+      "service_id",
+      "operation_id",
+      "schema_version",
+      "provider_class",
+      "provider_subject",
+      "parent_projection_identity",
+      "result_class",
+      "evidence_refs",
+      "proposal_refs",
+      "artifact_refs",
+      "abstentions",
+      "warnings",
+      "requested_parent_action"
+    ],
+    "provider_subject_required": ["subject_sha", "implementation_or_artifact_id"],
+    "parent_projection_identity_required": ["parent_state_version", "parent_state_digest"],
+    "result_classes": ["SUCCESS", "PARTIAL", "ABSTAIN", "REJECTED", "ERROR"],
+    "requested_parent_actions": [
+      "NONE",
+      "REGISTER_EVIDENCE",
+      "REGISTER_INTEGRATION_PROPOSAL",
+      "QUEUE_AUTHOR_DECISION",
+      "REGISTER_ARTIFACT",
+      "REVIEW_REQUIRED"
+    ],
+    "rules": [
+      "SUCCESS is not parent admission.",
+      "PARTIAL and ABSTAIN are first-class results and must not be rewritten as SUCCESS.",
+      "ERROR must preserve an error code and may be retryable only under the registered operation retry policy.",
+      "A response for a stale parent projection cannot be admitted without explicit revalidation against current parent state.",
+      "proposal_refs may enter parent state only through REGISTER_INTEGRATION_PROPOSAL or a later explicit parent-owned admission runtime.",
+      "artifact_refs do not imply canonical manuscript selection, publication, or delivery authority."
+    ]
+  },
+  "services": {
+    "PROSE_ANALYSIS_AND_REVISION": {
+      "service_id": "PROSE_ANALYSIS_AND_REVISION",
+      "provider_class": "PROSE_PROJECT",
+      "provider_project": "PROSE PROJECT",
+      "canonical_branch": "literary-prose-engine-001",
+      "capability_lineage": "LITERARY_PROSE_A_L_PLUS_BOUND_BOOK_INTELLIGENCE",
+      "canonical_write_authority": false,
+      "custody_policy": {
+        "default": "BOUNDED_AUTHORIZED_TEXT_OR_DERIVED_STATE_ONLY",
+        "raw_text_persistence_by_parent_service_contract": false,
+        "rights_and_authorization_required": true
+      },
+      "operations": {
+        "ANALYZE_PASSAGE_OR_UNIT": {
+          "operation_id": "ANALYZE_PASSAGE_OR_UNIT",
+          "idempotent": true,
+          "required_projection": ["exact_manuscript_or_unit_identity", "target_text_or_authorized_projection", "purpose", "canon_constraints", "author_intent_constraints", "protected_language_constraints", "voice_context", "rights_boundary"],
+          "allowed_outputs": ["diagnostic_evidence", "abstention", "warnings"],
+          "requested_parent_action_allowed": ["REGISTER_EVIDENCE", "REVIEW_REQUIRED", "NONE"]
+        },
+        "BUILD_NARRATIVE_STATE_PROJECTION": {
+          "operation_id": "BUILD_NARRATIVE_STATE_PROJECTION",
+          "idempotent": true,
+          "required_projection": ["exact_manuscript_identity", "authorized_unit_set", "canon_constraints", "story_bible_refs", "rights_boundary"],
+          "allowed_outputs": ["narrative_state_evidence", "orchestration_evidence", "abstention", "warnings"],
+          "requested_parent_action_allowed": ["REGISTER_EVIDENCE", "REGISTER_INTEGRATION_PROPOSAL", "REVIEW_REQUIRED", "NONE"]
+        },
+        "DIAGNOSE_LIMITATIONS_AND_OPPORTUNITIES": {
+          "operation_id": "DIAGNOSE_LIMITATIONS_AND_OPPORTUNITIES",
+          "idempotent": true,
+          "required_projection": ["exact_target_identity", "passage_or_unit_state", "purpose", "preservation_constraints", "edit_budget"],
+          "allowed_outputs": ["findings", "ranked_opportunities", "abstention", "warnings"],
+          "requested_parent_action_allowed": ["REGISTER_EVIDENCE", "REVIEW_REQUIRED", "NONE"]
+        },
+        "RETRIEVE_CRAFT_INTELLIGENCE": {
+          "operation_id": "RETRIEVE_CRAFT_INTELLIGENCE",
+          "idempotent": true,
+          "required_projection": ["finding_or_opportunity_refs", "form_genre_audience_context", "rights_boundary", "anti_imitation_boundary"],
+          "allowed_outputs": ["craft_principle_refs", "technique_profiles", "rights_projection", "abstention"],
+          "requested_parent_action_allowed": ["REGISTER_EVIDENCE", "NONE"]
+        },
+        "GENERATE_BOUNDED_REVISION_CANDIDATE": {
+          "operation_id": "GENERATE_BOUNDED_REVISION_CANDIDATE",
+          "idempotent": false,
+          "required_projection": ["exact_original_identity", "authorized_target_text", "admitted_opportunity", "ambition_level", "canon_constraints", "author_intent_constraints", "protected_language_constraints", "voice_context", "edit_budget"],
+          "allowed_outputs": ["candidate_artifact_ref", "change_set", "preservation_report", "abstention", "warnings"],
+          "requested_parent_action_allowed": ["REGISTER_INTEGRATION_PROPOSAL", "QUEUE_AUTHOR_DECISION", "REVIEW_REQUIRED", "NONE"]
+        },
+        "COMPARE_ORIGINAL_AND_CANDIDATE": {
+          "operation_id": "COMPARE_ORIGINAL_AND_CANDIDATE",
+          "idempotent": true,
+          "required_projection": ["exact_original_identity", "exact_candidate_identity", "evaluation_scope", "preservation_constraints"],
+          "allowed_outputs": ["pairwise_evidence", "regressions", "abstention", "warnings"],
+          "requested_parent_action_allowed": ["REGISTER_EVIDENCE", "QUEUE_AUTHOR_DECISION", "REVIEW_REQUIRED", "NONE"]
+        },
+        "ASSESS_VOICE_EVOLUTION_OR_DEGRADATION": {
+          "operation_id": "ASSESS_VOICE_EVOLUTION_OR_DEGRADATION",
+          "idempotent": true,
+          "required_projection": ["exact_original_identity", "exact_candidate_identity", "authorized_voice_evidence", "project_voice_hierarchy"],
+          "allowed_outputs": ["voice_classification", "supporting_evidence", "abstention"],
+          "requested_parent_action_allowed": ["REGISTER_EVIDENCE", "REVIEW_REQUIRED", "NONE"]
+        },
+        "ASSESS_HOMOGENIZATION_RISK": {
+          "operation_id": "ASSESS_HOMOGENIZATION_RISK",
+          "idempotent": true,
+          "required_projection": ["exact_original_identity", "exact_candidate_identity", "project_voice_hierarchy", "authorized_comparison_state"],
+          "allowed_outputs": ["homogenization_risk_evidence", "non_target_regressions", "abstention"],
+          "requested_parent_action_allowed": ["REGISTER_EVIDENCE", "REVIEW_REQUIRED", "NONE"]
+        }
+      }
+    },
+    "BOOK_EVALUATION": {
+      "service_id": "BOOK_EVALUATION",
+      "provider_class": "BOOK_EVALUATOR",
+      "provider_project": null,
+      "classification": "BOOK_SYSTEM_CAPABILITY_OR_QUALIFICATION_LANE",
+      "canonical_write_authority": false,
+      "custody_policy": {
+        "default": "EVALUATION_SCOPE_AND_SPLIT_ISOLATION_BOUND",
+        "private_or_hidden_evidence_may_be_returned_raw": false,
+        "qualification_scope_must_be_explicit": true
+      },
+      "operations": {
+        "INDEPENDENT_BOOK_OR_UNIT_EVALUATION": {
+          "operation_id": "INDEPENDENT_BOOK_OR_UNIT_EVALUATION",
+          "idempotent": true,
+          "required_projection": ["exact_manuscript_or_unit_identity", "evaluation_scope", "applicable_parent_gates", "allowed_evidence", "privacy_and_split_isolation_boundary"],
+          "allowed_outputs": ["evaluation_findings", "uncertainty", "disagreement", "hard_gate_failures", "abstention"],
+          "requested_parent_action_allowed": ["REGISTER_EVIDENCE", "REVIEW_REQUIRED", "NONE"]
+        },
+        "CONTRASTIVE_CANDIDATE_EVALUATION": {
+          "operation_id": "CONTRASTIVE_CANDIDATE_EVALUATION",
+          "idempotent": true,
+          "required_projection": ["exact_original_identity", "exact_candidate_identity", "evaluation_scope", "applicable_parent_gates", "position_swap_policy"],
+          "allowed_outputs": ["pairwise_evidence", "regressions", "uncertainty", "disagreement", "abstention"],
+          "requested_parent_action_allowed": ["REGISTER_EVIDENCE", "QUEUE_AUTHOR_DECISION", "REVIEW_REQUIRED", "NONE"]
+        },
+        "QUALIFICATION_EVIDENCE": {
+          "operation_id": "QUALIFICATION_EVIDENCE",
+          "idempotent": true,
+          "required_projection": ["exact_subject_identity", "gate_id", "qualification_scope", "evidence_boundary"],
+          "allowed_outputs": ["qualification_receipt_ref", "aggregate_metrics", "scope_proven", "scope_not_proven", "abstention"],
+          "requested_parent_action_allowed": ["REGISTER_EVIDENCE", "REGISTER_INTEGRATION_PROPOSAL", "REVIEW_REQUIRED", "NONE"]
+        }
+      }
+    },
+    "RESEARCH_AND_EVIDENCE": {
+      "service_id": "RESEARCH_AND_EVIDENCE",
+      "provider_class": "RESEARCH_SERVICE",
+      "provider_project": null,
+      "canonical_write_authority": false,
+      "custody_policy": {
+        "default": "PROVENANCE_RIGHTS_AND_FRESHNESS_BOUND",
+        "unknown_rights_or_provenance": "FAIL_CLOSED",
+        "research_may_become_canon_automatically": false
+      },
+      "operations": {
+        "ACQUIRE_BOUNDED_EVIDENCE": {
+          "operation_id": "ACQUIRE_BOUNDED_EVIDENCE",
+          "idempotent": true,
+          "required_projection": ["research_question", "target_book_object_refs", "source_policy", "rights_policy", "freshness_requirement"],
+          "allowed_outputs": ["evidence_candidates", "source_provenance", "rights_classification", "freshness_state", "conflict_state", "abstention"],
+          "requested_parent_action_allowed": ["REGISTER_EVIDENCE", "REVIEW_REQUIRED", "NONE"]
+        },
+        "REVALIDATE_EVIDENCE_FRESHNESS": {
+          "operation_id": "REVALIDATE_EVIDENCE_FRESHNESS",
+          "idempotent": true,
+          "required_projection": ["existing_evidence_refs", "source_provenance", "current_freshness_requirement"],
+          "allowed_outputs": ["freshness_state", "conflict_state", "supersession_candidates", "abstention"],
+          "requested_parent_action_allowed": ["REGISTER_EVIDENCE", "REVIEW_REQUIRED", "NONE"]
+        },
+        "CHECK_EVIDENCE_CONFLICTS": {
+          "operation_id": "CHECK_EVIDENCE_CONFLICTS",
+          "idempotent": true,
+          "required_projection": ["evidence_refs", "claim_scope", "conflict_policy"],
+          "allowed_outputs": ["conflict_graph", "agreement_state", "unresolved_conflicts", "abstention"],
+          "requested_parent_action_allowed": ["REGISTER_EVIDENCE", "REVIEW_REQUIRED", "NONE"]
+        }
+      }
+    },
+    "DOCUMENT_ARTIFACT_AND_EXPORT": {
+      "service_id": "DOCUMENT_ARTIFACT_AND_EXPORT",
+      "provider_class": "HEADLESS_ARTIFACT_SERVICE",
+      "provider_project": null,
+      "canonical_write_authority": false,
+      "custody_policy": {
+        "default": "EXACT_INPUT_VERSION_AND_OUTPUT_DIGEST_BOUND",
+        "export_equals_publication": false,
+        "publication_authority_required_separately": true
+      },
+      "operations": {
+        "MATERIALIZE_DURABLE_ARTIFACT": {
+          "operation_id": "MATERIALIZE_DURABLE_ARTIFACT",
+          "idempotent": true,
+          "required_projection": ["exact_source_version", "requested_format", "render_options", "rights_and_export_constraints"],
+          "allowed_outputs": ["artifact_ref", "artifact_digest", "format_metadata", "warnings", "error"],
+          "requested_parent_action_allowed": ["REGISTER_ARTIFACT", "REVIEW_REQUIRED", "NONE"]
+        },
+        "EXPORT_FROZEN_MANUSCRIPT": {
+          "operation_id": "EXPORT_FROZEN_MANUSCRIPT",
+          "idempotent": true,
+          "required_projection": ["exact_frozen_manuscript_version", "requested_format", "export_release_ref", "rights_and_export_constraints"],
+          "allowed_outputs": ["artifact_ref", "artifact_digest", "format_metadata", "warnings", "error"],
+          "requested_parent_action_allowed": ["REGISTER_ARTIFACT", "REVIEW_REQUIRED", "NONE"]
+        },
+        "VERIFY_ARTIFACT_IDENTITY": {
+          "operation_id": "VERIFY_ARTIFACT_IDENTITY",
+          "idempotent": true,
+          "required_projection": ["artifact_ref", "expected_digest", "expected_format"],
+          "allowed_outputs": ["identity_verification", "actual_digest", "format_verification", "error"],
+          "requested_parent_action_allowed": ["REGISTER_EVIDENCE", "REVIEW_REQUIRED", "NONE"]
+        }
+      }
+    }
+  },
+  "provider_classes": [
+    "PROSE_PROJECT",
+    "BOOK_EVALUATOR",
+    "RESEARCH_SERVICE",
+    "HEADLESS_ARTIFACT_SERVICE"
+  ],
+  "retry_and_replay_policy": {
+    "idempotent_operation": {
+      "same_idempotency_key_same_normalized_request": "RETURN_SAME_LOGICAL_RESULT_OR_EXPLICIT_REPLAY_REFERENCE",
+      "same_idempotency_key_different_normalized_request": "REJECT_IDEMPOTENCY_KEY_CONFLICT"
+    },
+    "non_idempotent_operation": {
+      "automatic_retry_after_unknown_outcome": false,
+      "required_behavior": "RECONCILE_BY_REQUEST_ID_BEFORE_NEW_GENERATION"
+    },
+    "stale_parent_projection": "REJECT_OR_REQUIRE_EXPLICIT_PARENT_REVALIDATION",
+    "transient_error": "RETRY_ONLY_IF_OPERATION_POLICY_AND_CUSTODY_BOUNDARY_ALLOW",
+    "permanent_error": "DO_NOT_RETRY_WITHOUT_CHANGED_INPUT_OR_AUTHORITY"
+  },
+  "parent_admission_handoff": {
+    "allowed_parent_state_operations": [
+      "REGISTER_RESEARCH_EVIDENCE_LINK",
+      "REGISTER_AUTHOR_DECISION",
+      "REGISTER_INTEGRATION_PROPOSAL",
+      "REGISTER_EXPORT_RELEASE"
+    ],
+    "forbidden_direct_operations_from_service": [
+      "ADVANCE_PROJECT_STATUS",
+      "SET_ACTIVE_GOVERNING_BRIEF",
+      "SET_ACTIVE_CANON_MANIFEST",
+      "SET_ACTIVE_STORY_BIBLE",
+      "SET_ACTIVE_BOOK_PLAN",
+      "SET_ACTIVE_CANONICAL_MANUSCRIPT"
+    ],
+    "rule": "Service response is translated by a parent-owned integration/admission layer into a permitted parent mutation envelope. The provider cannot submit or sign a parent canonical-pointer mutation."
+  },
+  "compatibility_and_invalidation": {
+    "unknown_registry_version": "FAIL_CLOSED",
+    "unknown_request_schema_version": "FAIL_CLOSED",
+    "unknown_response_schema_version": "FAIL_CLOSED",
+    "operation_removed_or_semantics_changed": "NEW_REGISTRY_VERSION_REQUIRED",
+    "parent_state_advanced_after_projection": "RESPONSE_STALE_UNTIL_REVALIDATED",
+    "provider_subject_changed": "NEW_PROVIDER_SUBJECT_IDENTITY_REQUIRED",
+    "rights_or_privacy_boundary_changed": "INVALIDATE_AFFECTED_PENDING_REQUESTS_AND_RESPONSES"
+  },
+  "qualification_objective": "Adversarially prove service/operation/schema validation, provider-class binding, minimum projection enforcement, exact parent projection identity, canonical-write denial, stale response rejection, idempotency conflict/replay behavior, non-idempotent retry safety, abstention/error preservation and parent-admission handoff boundaries.",
+  "exact_next_objective_after_pass": "BOOK-SYSTEM-LIFECYCLE-TRANSITION-ENGINE-001",
+  "qualification_effect": "NONE until an exact subject SHA passes the registered A-01 qualification for this registry."
+}
