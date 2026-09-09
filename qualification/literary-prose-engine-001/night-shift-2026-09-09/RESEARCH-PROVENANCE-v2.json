@@ -81,6 +81,36 @@
       "system_implication": "Automated literary preference remains evidence, not final authority. Preserve TIE/ABSTAIN, evaluator-robustness checks, and human review for taste/intent boundaries."
     },
     {
+      "source_id": "ACL2026-STYLE-OVER-STORY",
+      "title": "Style over Story: Measuring LLM Narrative Preferences via Structured Selection",
+      "publisher": "Association for Computational Linguistics",
+      "venue": "Findings of ACL 2026",
+      "url": "https://aclanthology.org/2026.findings-acl.1361/",
+      "doi": "10.18653/v1/2026.findings-acl.1361",
+      "finding": "Across six LLMs and three instruction types, model narrative selections consistently favored style over event, character, and setting content dimensions.",
+      "system_implication": "Keep story-function and preservation vetoes separate from surface-style preference. A stylistically attractive candidate cannot win merely because a judge has stable style bias."
+    },
+    {
+      "source_id": "ACL2026-PRAGMATIC-JUDGE-ASYMMETRY",
+      "title": "How Hypocritical Is Your LLM judge? Listener-Speaker Asymmetries in the Pragmatic Competence of Large Language Models",
+      "publisher": "Association for Computational Linguistics",
+      "venue": "Findings of ACL 2026",
+      "url": "https://aclanthology.org/2026.findings-acl.372/",
+      "doi": "10.18653/v1/2026.findings-acl.372",
+      "finding": "Pragmatic judging and pragmatic generation are weakly aligned; many models perform much better as listeners/judges than as speakers/generators.",
+      "system_implication": "Do not infer revision-generation competence from evaluator competence or vice versa. Keep generation and judgment independently qualified."
+    },
+    {
+      "source_id": "ACL2025-METAPHOR-SURFACE",
+      "title": "Metaphor and Large Language Models: When Surface Features Matter More than Deep Understanding",
+      "publisher": "Association for Computational Linguistics",
+      "venue": "Findings of ACL 2025",
+      "url": "https://aclanthology.org/2025.findings-acl.898/",
+      "doi": "10.18653/v1/2025.findings-acl.898",
+      "finding": "Metaphor task performance was strongly influenced by lexical overlap and sentence length, cautioning against interpreting benchmark scores as deep figurative understanding.",
+      "system_implication": "Future metaphor-function qualification needs contextual minimal pairs and preservation/function evidence, not surface novelty detection alone."
+    },
+    {
       "source_id": "CHI2025-CULTURAL-HOMOGENIZATION",
       "title": "AI Suggestions Homogenize Writing Toward Western Styles and Diminish Cultural Nuances",
       "publisher": "ACM",
@@ -89,6 +119,15 @@
       "doi": "10.1145/3706598.3713564",
       "finding": "Controlled cross-cultural writing experiments found AI suggestions shifted Indian participants toward American/Western writing patterns and reduced cultural distinctions.",
       "system_implication": "Keep project-relative voice/cultural preservation and anti-homogenization vetoes; generic fluency or mainstream-style conformity cannot be a monotonic optimization target."
+    },
+    {
+      "source_id": "NHB2026-LINGUISTIC-DIVERSITY",
+      "title": "AI writing assistants shrink linguistic diversity and blur personal identity",
+      "publisher": "Nature Human Behaviour",
+      "published": "2026-08-24",
+      "url": "https://www.nature.com/articles/s41562-026-02549-7",
+      "finding": "Research summarized across 880,000 texts reports reduced linguistic variation and shifts in inferred author traits as AI writing assistance spreads.",
+      "system_implication": "Repeated-revision evaluation should monitor baseline-relative identity/diversity drift while avoiding demographic inference or one ideal diversity target."
     },
     {
       "source_id": "CHBAH2025-CREATIVE-DIVERSITY",
@@ -101,6 +140,6 @@
       "system_implication": "Continue measuring baseline-relative diversity/identity drift across repeated revisions rather than assuming prompt variation solves homogenization."
     }
   ],
-  "research_conclusion": "The v1 architecture direction remains correct. The strongest new 2026 evidence narrows the next unknown further: extraction and anchor localization accuracy, relation-family calibration, ambiguity/perspective preservation, and source-held-out long-context robustness. No evidence justifies reopening a generic prose-quality taxonomy or weakening author/voice/preservation boundaries.",
+  "research_conclusion": "The v1 architecture direction remains correct. The strongest current 2025-2026 evidence narrows the next unknown further: extraction and anchor localization accuracy, relation-family calibration, ambiguity/perspective preservation, source-held-out long-context robustness, and separation of story-function evidence from model style preferences. It also strengthens the need to keep generation, judging, voice preservation and cultural-diversity safeguards independently governed. No evidence justifies reopening a generic prose-quality taxonomy or weakening author/voice/preservation boundaries.",
   "stop_condition": "Do not perform another broad prose literature sweep until a concrete extractor, benchmark result, or implementation boundary exposes a specific missing state/metric or materially newer evidence changes a requirement."
 }
