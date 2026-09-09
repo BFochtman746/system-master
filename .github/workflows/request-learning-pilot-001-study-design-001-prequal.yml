@@ -1,0 +1,93 @@
+name: Request Learning PILOT-001 Study Design Hosted Prequalification
+
+on:
+  push:
+    branches:
+      - learning/hosted-prequal-study-design-001
+
+permissions:
+  contents: read
+
+env:
+  SUBJECT_SHA: 8a1fecea8af2dff49b88815ee141882afa21908a
+
+jobs:
+  prequalify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact product subject
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.SUBJECT_SHA }}
+
+      - name: Verify exact checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual="$(git rev-parse HEAD)"
+          test "$actual" = "$SUBJECT_SHA"
+          mkdir -p "$RUNNER_TEMP/learning-study-design-evidence"
+          printf '%s\n' "$actual" > "$RUNNER_TEMP/learning-study-design-evidence/subject-sha.txt"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Compile study-design boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            learning/lab/learning_lab/real_learner_effectiveness_study_design.py \
+            learning/lab/learning_lab/real_learner_pilot_effectiveness_review.py
+
+      - name: Run focused study-design and effectiveness tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd learning/lab
+          python -m unittest -v \
+            tests.test_real_learner_effectiveness_study_design \
+            tests.test_real_learner_pilot_effectiveness_review \
+            tests.test_real_learner_pilot_review_intake \
+            tests.test_real_learner_pilot_handoff \
+            2>&1 | tee "$RUNNER_TEMP/learning-study-design-evidence/focused-tests.txt"
+
+      - name: Run complete Learning Lab regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd learning/lab
+          python -m unittest discover -s tests -v \
+            2>&1 | tee "$RUNNER_TEMP/learning-study-design-evidence/full-learning-tests.txt"
+
+      - name: Verify design truth boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'DESIGN_READY_FOR_FEASIBILITY_STUDY' learning/lab/learning_lab/real_learner_effectiveness_study_design.py
+          grep -q 'DESIGN_READY_FOR_RANDOMIZED_EFFECTIVENESS_STUDY' learning/lab/learning_lab/real_learner_effectiveness_study_design.py
+          grep -q 'study_executed.*False' learning/lab/learning_lab/real_learner_effectiveness_study_design.py
+          grep -q 'causal_effect_proven.*False' learning/lab/learning_lab/real_learner_effectiveness_study_design.py
+          grep -q 'population_generalization_proven.*False' learning/lab/learning_lab/real_learner_effectiveness_study_design.py
+          grep -q 'statistical_adequacy_independently_verified.*False' learning/lab/learning_lab/real_learner_effectiveness_study_design.py
+          {
+            echo 'PILOT_001_STUDY_DESIGN_PREQUAL=PASS'
+            echo 'REAL_HUMAN_EVIDENCE_CREATED=FALSE'
+            echo 'STUDY_EXECUTED=FALSE'
+            echo 'CAUSAL_EFFECT_PROVEN=FALSE'
+            echo 'POPULATION_GENERALIZATION_PROVEN=FALSE'
+            echo 'STATISTICAL_ADEQUACY_SELF_CERTIFIED=FALSE'
+            echo 'EXTERNAL_STANDARD_COMPLIANCE_PROVEN=FALSE'
+          } > "$RUNNER_TEMP/learning-study-design-evidence/truth-boundary.txt"
+
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: learning-pilot-001-study-design-prequal-${{ github.run_id }}
+          path: ${{ runner.temp }}/learning-study-design-evidence
+          if-no-files-found: error
+          retention-days: 14
