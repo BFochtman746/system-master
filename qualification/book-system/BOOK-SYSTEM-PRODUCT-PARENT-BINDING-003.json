@@ -13,7 +13,7 @@
     "system_id": "BOOK",
     "canonical_name": "BOOK SYSTEM",
     "control_ref": "book-system/control-v1",
-    "current_state_record": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-013.json",
+    "current_state_record": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-014.json",
     "owns": [
       "canonical book state",
       "end-to-end book lifecycle",
@@ -35,19 +35,19 @@
     }
   ],
   "preserved_current_parent_state": {
-    "standing": "ACTIVE__RUNTIME_V2_A01_PASS__VERSION_AND_ROLLBACK_NEXT",
-    "current_objective": "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001",
-    "state_record": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-013.json",
-    "implementation_rule": "Begin Version/Rollback with forensic reuse mapping and the Book research-before-implementation gate. Runtime V2 remains qualified only on exact subject 837e479415afb2d9724e4b913d456ef1d3a62df5 and that PASS does not transfer to Version/Rollback bytes."
+    "standing": "ACTIVE__VERSION_ROLLBACK_HOSTED_48_OF_48_PASS__A01_REGISTRATION_PENDING",
+    "current_objective": "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001-A01-REGISTRATION-AND-QUALIFICATION-001",
+    "state_record": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-014.json",
+    "implementation_rule": "Version/Rollback research, forensic mapping, contract, executable implementation and hosted 48-case authority-v2 qualification are complete checkpoints. Preserve exact hosted subject 402ab84a14e9d345530d60394ebc36176541dd21 and do not repeat them. Full closure requires canonical shared A-01 registration followed by authoritative exact-SHA PASS."
   },
   "shared_core_rule": "BOOK consumes System Master Core platform/data/artifact/model/tool services through governed interfaces. BOOK remains owner of book-product state and lifecycle and does not transfer that ownership to Core or Prose.",
   "second_shift_rule": "Book unattended delegation is owned by governance/second-shift/BOOK-DELEGATIONS.json and must be revalidated against the live book-system/control-v1 head before execution.",
   "control_revalidation": {
-    "reason": "State-012 Runtime V2 implementation/qualification closed PASS on exact subject 837e479415afb2d9724e4b913d456ef1d3a62df5 after 35-case hosted and authoritative A-01 qualification, and State-013 selected Version/Rollback as the dependency-valid successor.",
-    "previous_selected_state": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-012.json",
-    "current_selected_state": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-013.json",
+    "reason": "State-013 Version/Rollback advanced through research, implementation and 48-case hosted prequalification. State-014 preserves the exact hosted candidate while routing the remaining dependency to canonical shared A-01 registration and exact-SHA qualification.",
+    "previous_selected_state": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-013.json",
+    "current_selected_state": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-014.json",
     "semantic_change": true,
-    "qualification_effect": "NONE__CONTROL_SELECTION_ONLY__RUNTIME_V2_PASS_REMAINS_EXACT_SUBJECT_SCOPED"
+    "qualification_effect": "HOSTED_PREQUAL_ONLY__NO_A01_TRANSFER"
   },
-  "qualification_rule": "This parent-product binding changes topology/control metadata only. It does not transfer, broaden or invalidate prior exact-SHA qualification, author, private-data, publication or production authority."
+  "qualification_rule": "This parent-product binding changes topology/control metadata only. It does not transfer, broaden or invalidate prior exact-SHA qualification, author, private-data, publication or production authority. Version/Rollback remains unclosed until its own exact-SHA authoritative A-01 PASS."
 }
