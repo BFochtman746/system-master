@@ -1,0 +1,51 @@
+{
+  "state_id": "BOOK-SYSTEM-RECONCILED-STATE-014",
+  "effective_date": "2026-09-09",
+  "supersedes_for_current_parent_control": "BOOK-SYSTEM-RECONCILED-STATE-013",
+  "supersession_scope": "PARENT_CONTROL_AND_NEXT_STEP_ROUTING_ONLY",
+  "standing": "ACTIVE__VERSION_ROLLBACK_HOSTED_48_OF_48_PASS__A01_REGISTRATION_PENDING",
+  "project": "BOOK SYSTEM",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "control_branch": "book-system/control-v1",
+  "preserved_completed_predecessors": [
+    "BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-002 exact-SHA A-01 PASS remains unchanged",
+    "BOOK-SYSTEM-VERSION-AND-ROLLBACK-PREIMPLEMENTATION-RESEARCH-001 CLOSED",
+    "BOOK-SYSTEM-VERSION-AND-ROLLBACK-FORENSIC-MAP-001 CLOSED",
+    "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001 contract defined",
+    "Version/Rollback executable implementation and authority-v2 fixture set are present"
+  ],
+  "version_rollback_current_evidence": {
+    "hosted_checkpoint": "qualification/book-system/version-and-rollback-001/BOOK-SYSTEM-VERSION-AND-ROLLBACK-001-HOSTED-PREQUAL-CHECKPOINT.json",
+    "hosted_subject_sha": "402ab84a14e9d345530d60394ebc36176541dd21",
+    "hosted_run_id": 34416203680,
+    "hosted_job_id": 102681527662,
+    "fixture_version": 2,
+    "case_count": 48,
+    "result": "PASS_48_OF_48",
+    "evidence_artifact_id": 10129156222,
+    "evidence_artifact_digest": "sha256:2d27e447bb60c8c236b7e1b6f4e6d6abcacd30b095f25e49965badec50ae78a8",
+    "a01_pass": false
+  },
+  "authority_refinement": {
+    "direct_lifecycle_status_change_by_version_rollback": false,
+    "rule": "Version/Rollback records exact already-committed parent successors from qualified parent authorities using pre/post receipt identity. It does not become a second Lifecycle Transition authority.",
+    "historical_failed_and_superseded_test_evidence_preserved": true
+  },
+  "current_parent_critical_path": {
+    "id": "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001-A01-REGISTRATION-AND-QUALIFICATION-001",
+    "classification": "BLOCKED_ON_SHARED_A01_REGISTRATION__HOSTED_EXACT_SUBJECT_READY",
+    "objective": "Preserve the exact 48/48 hosted-passing Version/Rollback candidate, obtain canonical shared A-01 registration for BOOK-SYSTEM-VERSION-AND-ROLLBACK-001, then execute/adjudicate authoritative exact-SHA A-01 without transferring prior Book qualifications or changing shared control authority from the Book lane.",
+    "required_preconditions": [
+      "central qualification/a01/registry.json explicitly registers BOOK-SYSTEM-VERSION-AND-ROLLBACK-001",
+      "the chosen A-01 subject contains the registered qualifier/wrapper required by central policy",
+      "the exact chosen subject has current hosted deterministic PASS after any subject-byte changes",
+      "A-01 gateway checks out and qualifies exactly that subject SHA"
+    ],
+    "pass_proves": "The exact Version/Rollback implementation enforces the qualified immutable-version, rollback-as-successor, concurrency, receipt/outbox, history-preservation and authority-separation contract under authoritative A-01 execution.",
+    "pass_unlocks": "BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001",
+    "on_failure": "Classify SUBJECT_FAILURE versus INFRA_FAILURE or CONTROL_PLANE_FAILURE from the authoritative receipt. Preserve the 48/48 hosted candidate and all prior evidence; repair only the proven failing boundary, and rerun hosted/A-01 on any changed exact subject as required."
+  },
+  "generic_continue_rule": "In Book System control, Continue executes BOOK-SYSTEM-VERSION-AND-ROLLBACK-001-A01-REGISTRATION-AND-QUALIFICATION-001. Do not begin BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001 until Version/Rollback receives exact-SHA authoritative A-01 PASS.",
+  "second_shift_requirement": "Replace the stale implementation delegation with an A-01 registration/qualification handoff bound to this live Book control head; preserve research, implementation and hosted qualification as completed checkpoints.",
+  "qualification_effect": "HOSTED PREQUALIFICATION ONLY. State-014 does not claim A-01 PASS, author approval, canonical manuscript promotion, export freeze, publication or production authority."
+}
