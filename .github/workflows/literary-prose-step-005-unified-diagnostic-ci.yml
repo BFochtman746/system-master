@@ -1,0 +1,28 @@
+name: Literary Prose STEP-005 Unified Diagnostic Qualification
+
+on:
+  push:
+    branches:
+      - literary-prose-engine-001
+    paths:
+      - 'qualification/literary-prose-engine-001/step-f/unified_granular_diagnostics.py'
+      - 'qualification/literary-prose-engine-001/step-f/run_step_005_unified_diagnostic_fixtures.py'
+      - 'qualification/literary-prose-engine-001/unification-001/STEP-005-DIMENSION-AUTHORITY-MAP-v1.json'
+      - '.github/workflows/literary-prose-step-005-unified-diagnostic-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Qualify STEP-005 unified diagnostic runtime
+        run: python qualification/literary-prose-engine-001/step-f/run_step_005_unified_diagnostic_fixtures.py
