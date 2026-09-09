@@ -77,6 +77,9 @@ on:
       target_inbox:
         description: Canonical owner inbox path
         value: ${{ jobs.broker.outputs.target_inbox }}
+      transaction_b64:
+        description: Exact broker transaction envelope encoded as base64 for canonical inbox ingest
+        value: ${{ jobs.broker.outputs.transaction_b64 }}
 
 permissions:
   contents: read
@@ -90,6 +93,7 @@ jobs:
       transaction_id: ${{ steps.meta.outputs.transaction_id }}
       transaction_state: ${{ steps.meta.outputs.transaction_state }}
       target_inbox: ${{ steps.meta.outputs.target_inbox }}
+      transaction_b64: ${{ steps.meta.outputs.transaction_b64 }}
     steps:
       - name: Checkout canonical control plane
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
@@ -140,11 +144,13 @@ jobs:
         run: |
           node - <<'NODE' >> "$GITHUB_OUTPUT"
           const fs = require('fs');
-          const value = JSON.parse(fs.readFileSync('.repair-broker/transaction.json', 'utf8'));
+          const text = fs.readFileSync('.repair-broker/transaction.json', 'utf8');
+          const value = JSON.parse(text);
           const tx = value.transaction || {};
           console.log(`transaction_id=${tx.transaction_id || ''}`);
           console.log(`transaction_state=${tx.state || ''}`);
           console.log(`target_inbox=${tx.target_inbox || ''}`);
+          console.log(`transaction_b64=${Buffer.from(text, 'utf8').toString('base64')}`);
           NODE
 
       - name: Publish broker transaction summary
