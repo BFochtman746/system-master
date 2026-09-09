@@ -1,0 +1,39 @@
+name: Continuity iOS Evidence Contract Selftest
+
+on:
+  push:
+    branches:
+      - system-master/continuity-target-ios-suspend-resume-qualification
+    paths:
+      - '.github/scripts/g-continuity-target-ios-evidence-validate.js'
+      - '.github/workflows/continuity-ios-evidence-contract-selftest.yml'
+      - 'system-master/g-target-ios-suspend-resume/control/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  portable-contract-selftest:
+    name: Portable contract selftest only - not target iOS evidence
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout exact branch subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Parse evidence schema
+        shell: bash
+        run: node -e "const fs=require('fs'); JSON.parse(fs.readFileSync('system-master/g-target-ios-suspend-resume/control/TARGET-IOS-EVIDENCE.schema.json','utf8')); console.log('PASS TARGET-IOS-SCHEMA-PARSE');"
+      - name: Syntax check validator
+        run: node --check .github/scripts/g-continuity-target-ios-evidence-validate.js
+      - name: Run fail-closed evidence contract selftest
+        run: node .github/scripts/g-continuity-target-ios-evidence-validate.js --selftest
+      - name: Publish non-target boundary
+        shell: bash
+        run: |
+          echo '## Continuity iOS evidence contract' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Portable validator/schema selftest only.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'This workflow is NOT iOS target evidence and cannot satisfy G-RQ-049, G-RQ-050, or the iOS arm of G-RQ-072.' >> "$GITHUB_STEP_SUMMARY"
