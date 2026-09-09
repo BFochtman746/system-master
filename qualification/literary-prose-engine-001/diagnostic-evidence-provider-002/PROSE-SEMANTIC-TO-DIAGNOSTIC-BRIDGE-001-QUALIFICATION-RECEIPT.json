@@ -1,0 +1,47 @@
+{
+  "receipt_id": "PROSE-SEMANTIC-TO-DIAGNOSTIC-BRIDGE-001-QUALIFICATION-RECEIPT",
+  "standing": "PASS__SEMANTIC_EVIDENCE_WIRED_INTO_PASSAGE_INTELLIGENCE_AND_STEP_F__REVISION_AUTHORITY_REMAINS_FAIL_CLOSED",
+  "project": "PROSE PROJECT",
+  "qualified_subject_sha": "1249204902921429ef78f3805d86a655477ac64e",
+  "workflow": ".github/workflows/literary-prose-semantic-evidence-validator-ci.yml",
+  "pass_run": {
+    "workflow_run_id": 34378161601,
+    "result": "PASS",
+    "semantic_authority_assertions": "PASS",
+    "semantic_to_diagnostic_bridge_assertions": "PASS"
+  },
+  "preserved_failed_run": {
+    "workflow_run_id": 34377983817,
+    "subject_sha": "8a226a17634b8ca12dd3ee04cc96d6990375aa3a",
+    "result": "FAILURE",
+    "failure_boundary": "SEMANTIC_TO_DIAGNOSTIC_BRIDGE_ASSERTIONS",
+    "repair": "Preserve specialist required-context activation. Pass available passage-state/POV/preservation context into Step-F and expect granular specialists lacking required semantic evidence to emit BLOCKED rather than being treated as active observations.",
+    "rules_weakened": false
+  },
+  "qualified_behavior": [
+    "Validated model semantic hypotheses may populate non-authoritative passage purpose, POV, focalization, pacing, information-release and local voice fields.",
+    "Unresolved hypotheses are not promoted into Passage Intelligence state.",
+    "Model hypotheses cannot satisfy author-intent, protected-language or canon authority requirements.",
+    "SURGICAL diagnosis remains allowed while revision remains blocked when protected-language or canon authority is missing.",
+    "Available passage/POV/preservation context is forwarded into Step-F specialist activation.",
+    "Specialists missing required context fail closed as BLOCKED.",
+    "Active semantic signals remain OBSERVATION, not defect or opportunity.",
+    "No semantic-provider observation creates revision text or manuscript mutation.",
+    "Trusted canon/protected context may satisfy preservation prerequisites, but no proven opportunity still yields NO_ACTION."
+  ],
+  "does_not_prove": [
+    "semantic provider accuracy",
+    "full specialist activation on real passages",
+    "real literary defect detection accuracy",
+    "revision superiority",
+    "independent evaluation",
+    "human/editor agreement",
+    "A-01 qualification",
+    "production promotion authority"
+  ],
+  "a01_consumed": false,
+  "raw_manuscript_committed": false,
+  "candidate_prose_committed": false,
+  "manuscript_mutated": false,
+  "next_transition": "PROSE-SEMANTIC-DIAGNOSTIC-CALIBRATION-004__REAL_PRIVATE_END_TO_END_DIAGNOSTIC_ROUTING"
+}
