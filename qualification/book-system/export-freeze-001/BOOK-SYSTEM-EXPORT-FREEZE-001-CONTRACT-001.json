@@ -1,0 +1,224 @@
+{
+  "contract_id": "BOOK-SYSTEM-EXPORT-FREEZE-001-CONTRACT-001",
+  "effective_date": "2026-09-09",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "objective": "BOOK-SYSTEM-EXPORT-FREEZE-001",
+  "standing": "CANDIDATE__PARENT_EXPORT_RELEASE_FREEZE_CONTRACT__NO_PUBLICATION_AUTHORITY",
+  "depends_on": [
+    "BOOK-SYSTEM-CANONICAL-BOOK-STATE-MODEL-001",
+    "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-002",
+    "BOOK-SYSTEM-LIFECYCLE-TRANSITION-ENGINE-001",
+    "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001",
+    "BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001",
+    "BOOK-SYSTEM-DOCUMENT-SYSTEM-EXPORT-OWNERSHIP-BOUNDARY-001",
+    "BOOK-SYSTEM-PUBLICATION-EXPORT-STANDARDS-PROFILE-001",
+    "BOOK-SYSTEM-PROVENANCE-INTEROPERABILITY-PROJECTION-001"
+  ],
+  "authority": {
+    "book_may": [
+      "validate exact export-freeze prerequisites",
+      "append one immutable EXPORT_RELEASE through parent canonical-state authority",
+      "emit deterministic export-freeze receipt",
+      "emit EXPORT_FREEZE_READY lifecycle handoff evidence"
+    ],
+    "book_must_not": [
+      "generate or modify document bytes",
+      "perform generic format validation or rendering",
+      "change canonical manuscript text",
+      "change project lifecycle status in the freeze operation",
+      "authorize publication or delivery",
+      "fabricate author approval",
+      "mutate provider state"
+    ],
+    "provider_must_not": [
+      "return or claim EXPORT_FROZEN",
+      "return or claim PUBLICATION_AUTHORIZED",
+      "mutate Book canonical state"
+    ]
+  },
+  "request": {
+    "required": [
+      "request_id",
+      "idempotency_key",
+      "book_id",
+      "book_project_id",
+      "expected_parent_state_version",
+      "expected_parent_state_digest",
+      "canonical_manuscript_ref",
+      "canonical_manuscript_version_id",
+      "canonical_manuscript_digest",
+      "artifact_ref",
+      "artifact_digest",
+      "format",
+      "target_medium_profile_id",
+      "target_medium_profile_version",
+      "target_medium_profile_digest",
+      "artifact_evidence",
+      "target_medium_evidence",
+      "provenance_evidence",
+      "rights_privacy_evidence",
+      "proof_correction_state",
+      "requested_release_id"
+    ],
+    "rules": [
+      "The parent state must still be exactly the version and digest supplied by the caller.",
+      "The active canonical manuscript ref, version and digest must exactly match the request.",
+      "The project lifecycle status must be FINALIZATION when a new freeze is created.",
+      "Every artifact, target-medium, provenance, rights/privacy and proof-correction evidence object must bind the exact current manuscript, artifact digest and target-medium profile.",
+      "publication_authorized must be absent or false throughout the freeze request and provider evidence.",
+      "One requested_release_id binds exactly one format artifact digest. Multiple formats require distinct release IDs."
+    ]
+  },
+  "evidence_contract": {
+    "artifact_evidence_required": [
+      "artifact_ref",
+      "artifact_digest",
+      "source_version_identity",
+      "source_digest_identity",
+      "format_identity",
+      "target_profile_identity",
+      "currentness",
+      "format_validation_result",
+      "source_to_render_integrity_result"
+    ],
+    "target_medium_evidence_required": [
+      "technical_state",
+      "validation_state",
+      "source_to_render_integrity_state",
+      "accessibility_state",
+      "proof_state",
+      "correction_ledger_ref",
+      "rendered_artifact_digest",
+      "currentness"
+    ],
+    "provenance_evidence_required": [
+      "artifact_digest",
+      "source_digest",
+      "profile_digest",
+      "currentness",
+      "standing"
+    ],
+    "rights_privacy_evidence_required": [
+      "source_digest",
+      "rights_state",
+      "privacy_state",
+      "currentness"
+    ],
+    "proof_correction_state_required": [
+      "correction_ledger_ref",
+      "open_corrections",
+      "last_validated_artifact_digest",
+      "last_proved_artifact_digest",
+      "currentness"
+    ],
+    "pass_requirements": [
+      "artifact_evidence.currentness=CURRENT",
+      "artifact_evidence.format_validation_result=PASS",
+      "artifact_evidence.source_to_render_integrity_result=PASS",
+      "target_medium_evidence.technical_state=POST_LAYOUT_PROOF_COMPLETE",
+      "target_medium_evidence.validation_state=PASS",
+      "target_medium_evidence.source_to_render_integrity_state=PASS",
+      "target_medium_evidence.proof_state=PASS",
+      "target_medium_evidence.currentness=CURRENT",
+      "accessibility_state is PASS or NOT_APPLICABLE according to the selected target-medium profile",
+      "provenance_evidence.currentness=CURRENT and standing=VALID",
+      "rights_privacy_evidence.rights_state=ELIGIBLE",
+      "rights_privacy_evidence.privacy_state=ELIGIBLE",
+      "rights_privacy_evidence.currentness=CURRENT",
+      "proof_correction_state.open_corrections=0",
+      "proof_correction_state.currentness=CURRENT",
+      "last_validated_artifact_digest and last_proved_artifact_digest both equal artifact_digest"
+    ]
+  },
+  "freeze_record": {
+    "base_required": [
+      "release_id",
+      "frozen_version_id",
+      "format",
+      "digest",
+      "approval_state",
+      "publication_authority_state"
+    ],
+    "additive_required": [
+      "evidence_type",
+      "book_id",
+      "book_project_id",
+      "canonical_manuscript_ref",
+      "canonical_manuscript_digest",
+      "target_medium_profile_id",
+      "target_medium_profile_version",
+      "target_medium_profile_digest",
+      "artifact_ref",
+      "artifact_digest",
+      "proof_bundle_digest",
+      "provenance_digest",
+      "rights_privacy_digest",
+      "release_group_ref",
+      "supersedes_release_ref",
+      "created_from_parent_state_version",
+      "created_from_parent_state_digest"
+    ],
+    "fixed_values": {
+      "approval_state": "FROZEN",
+      "publication_authority_state": "NOT_AUTHORIZED",
+      "evidence_type": "EXPORT_FREEZE_READY"
+    },
+    "immutability": "APPEND_ONLY__NEVER_REWRITE_FROZEN_DIGEST"
+  },
+  "transaction_and_idempotency": {
+    "compare_and_swap": [
+      "expected_parent_state_version",
+      "expected_parent_state_digest"
+    ],
+    "same_idempotency_key_same_normalized_request": "RETURN_SAME_LOGICAL_RELEASE_AND_RECEIPT",
+    "same_idempotency_key_different_normalized_request": "REJECT_IDEMPOTENCY_CONFLICT",
+    "partial_commit_allowed": false,
+    "failure_effect": "NO_EXPORT_RELEASE_APPENDED__NO_LIFECYCLE_MUTATION"
+  },
+  "invalidation_and_supersession": {
+    "old_release_is_immutable_history": true,
+    "requires_new_freeze_when": [
+      "canonical manuscript version or digest changes",
+      "artifact bytes change",
+      "target-medium profile materially changes",
+      "validation/proof/accessibility becomes stale or failed",
+      "rights/privacy eligibility changes",
+      "required provenance becomes stale, withdrawn or invalid",
+      "accepted proof correction changes artifact bytes"
+    ],
+    "when_project_is_export_frozen": "Existing Lifecycle engine must first execute EXPORT_FROZEN->FINALIZATION with EXPORT_FREEZE_INVALIDATED evidence before a replacement freeze can become current.",
+    "replacement_rule": "Append new release identity with supersession lineage; never mutate the prior release."
+  },
+  "success_handoff": {
+    "parent_operation": "REGISTER_EXPORT_RELEASE",
+    "version_rollback_authority_kind": "EXPORT_RELEASE",
+    "lifecycle_evidence_type": "EXPORT_FREEZE_READY",
+    "lifecycle_transition": "FINALIZATION->EXPORT_FROZEN",
+    "lifecycle_transition_executed_by_freeze_runtime": false,
+    "publication_authorization_created": false
+  },
+  "qualification_gates": [
+    "exact parent state/version/digest and active manuscript binding",
+    "exact artifact/profile/source evidence binding",
+    "stale evidence rejection",
+    "changed-byte post-proof rejection",
+    "failed validation/integrity/accessibility/proof rejection",
+    "open correction rejection",
+    "rights/privacy/provenance fail-closed behavior",
+    "publication-authorized input/provider claim rejection",
+    "one-format-one-digest release identity",
+    "append-only immutable release and supersession lineage",
+    "exact idempotent replay and idempotency conflict rejection",
+    "concurrent parent compare-and-swap rejection",
+    "zero same-operation lifecycle mutation",
+    "zero document-generation/validation implementation",
+    "zero publication or author authority synthesis"
+  ],
+  "stable_standard_policy": {
+    "EPUB": "EPUB 3.3 W3C Recommendation for production unless explicitly experimental profile selects a newer draft/candidate",
+    "EPUB_ACCESSIBILITY": "EPUB Accessibility 1.1 W3C Recommendation for production claims unless explicitly experimental profile selects a newer draft/candidate",
+    "draft_or_candidate_status_does_not_auto_replace_stable_profile": true
+  },
+  "pass_unlocks": "BOOK-SYSTEM-EXPORT-FREEZE-001-RUNTIME-001",
+  "qualification_effect": "CONTRACT_ONLY__NO_EXPORT_FREEZE_CREATED__NO_LIFECYCLE_OR_PUBLICATION_AUTHORITY"
+}
