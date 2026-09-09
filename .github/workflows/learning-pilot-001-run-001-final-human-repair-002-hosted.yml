@@ -1,0 +1,87 @@
+name: LEARNING PILOT-001 RUN-001 Final Human Repair-002 Hosted Qualification
+
+on:
+  push:
+    branches:
+      - learning/request-final-human-repair-002-hosted
+
+permissions:
+  contents: read
+
+env:
+  SUBJECT_SHA: 2568265e2b2e179fc9457eed93ec31fee98eb6cc
+
+jobs:
+  hosted-prequalification:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact repaired product subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ env.SUBJECT_SHA }}
+          fetch-depth: 1
+          clean: true
+          persist-credentials: false
+
+      - name: Set up pinned Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: '3.13.15'
+          architecture: x64
+          check-latest: false
+
+      - name: Prepare evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          EVIDENCE_DIR="$RUNNER_TEMP/pilot001-final-human-repair-002-$GITHUB_RUN_ID"
+          mkdir -p "$EVIDENCE_DIR"
+          echo "EVIDENCE_DIR=$EVIDENCE_DIR" >> "$GITHUB_ENV"
+          test "$(git rev-parse HEAD)" = "$SUBJECT_SHA"
+          git status --porcelain=v1 --untracked-files=all > "$EVIDENCE_DIR/checkout-status.txt"
+          test ! -s "$EVIDENCE_DIR/checkout-status.txt"
+          printf '%s\n' "$SUBJECT_SHA" > "$EVIDENCE_DIR/subject-sha.txt"
+          python --version > "$EVIDENCE_DIR/python-version.txt" 2>&1
+          git --version > "$EVIDENCE_DIR/git-version.txt" 2>&1
+
+      - name: Run repaired final-human qualifier
+        shell: bash
+        env:
+          A01_SUBJECT_SHA: ${{ env.SUBJECT_SHA }}
+          A01_EVIDENCE_DIR: ${{ env.EVIDENCE_DIR }}
+        run: |
+          set -euo pipefail
+          node .github/scripts/learning-pilot-001-run-001-final-human-execution-qualify.js \
+            2>&1 | tee "$EVIDENCE_DIR/hosted-qualification.txt"
+          grep -q '^PILOT_RUN001_FINAL_HUMAN_EXECUTION_STATUS=PASS$' "$EVIDENCE_DIR/hosted-qualification.txt"
+          grep -q '^PILOT_RUN001_CLOSED_LOOP_CURRENT_TESTS=54$' "$EVIDENCE_DIR/hosted-qualification.txt"
+          grep -q '^PILOT_RUN001_PREDECESSOR_REGRESSIONS=57$' "$EVIDENCE_DIR/hosted-qualification.txt"
+          grep -q '^PILOT_RUN001_LOCAL_FIRST_EVIDENCE_TESTS=13$' "$EVIDENCE_DIR/hosted-qualification.txt"
+          grep -q '^PILOT_RUN001_FULL_LEARNING_LAB_TESTS=698$' "$EVIDENCE_DIR/hosted-qualification.txt"
+          grep -q '^PILOT_RUN001_CRITICAL_REPEAT_TESTS=216$' "$EVIDENCE_DIR/hosted-qualification.txt"
+          grep -q '^PILOT_RUN001_REAL_PARTICIPANT_EVIDENCE=NOT_CREATED$' "$EVIDENCE_DIR/hosted-qualification.txt"
+
+      - name: Record truth boundary
+        shell: bash
+        run: |
+          cat > "$EVIDENCE_DIR/truth-boundary.txt" <<EOF
+          LEARNING_FINAL_HUMAN_REPAIR_002_HOSTED=PASS
+          SUBJECT_SHA=$SUBJECT_SHA
+          FROZEN_PILOT_001_V1_CHANGED=FALSE
+          TEST_COVERAGE_REDUCED=FALSE
+          FULL_LEARNING_LAB_TESTS=698
+          CRITICAL_REPEAT_TESTS=216
+          TEST_SCHEDULING=BOUNDED_PARALLEL_SUBPROCESSES
+          HUMAN_PARTICIPANT_EVIDENCE=NOT_CREATED
+          HUMAN_CONSENT=NOT_PROVIDED
+          A01_PROMOTION_AUTHORITY=NOT_GRANTED_BY_HOSTED_RUN
+          EOF
+
+      - name: Upload hosted evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: learning-final-human-repair-002-hosted-${{ github.run_id }}
+          path: ${{ env.EVIDENCE_DIR }}
+          if-no-files-found: error
+          retention-days: 30
