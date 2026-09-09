@@ -14,6 +14,8 @@ STEP-I implements the logically independent comparison layer between STEP-H cand
 - writer rationale and writer quality claims are excluded from evaluator authority;
 - presentation order is swapped where practical;
 - order-dependent preference becomes `POSITION_BIAS_SUSPECTED` and cannot authorize acceptance;
+- blind labels must be unique short neutral labels and may not encode original/revision status or ambition;
+- overall and orientation-level confidence must be sufficient before a challenger can win;
 - hard preservation regressions veto candidate preference;
 - conditional historical/theological constraints become hard only when PASSAGE_STATE marks them applicable;
 - target improvement must be purpose-relevant and supported by multidimensional evidence;
@@ -29,11 +31,13 @@ STEP-I implements the logically independent comparison layer between STEP-H cand
 - `ABSTAIN_HUMAN_REVIEW`
 - `REJECT_PRESERVATION_REGRESSION`
 
-`ACCEPT_CANDIDATE` requires preservation PASS, sufficient confidence, purpose-relevant challenger improvement, no unresolved critical regression, and consistent substantive preference under position swap when swap evidence is available.
+`ACCEPT_CANDIDATE` requires preservation PASS, sufficient overall and orientation-level confidence, purpose-relevant challenger improvement, no unresolved critical regression, and consistent substantive preference under position swap when swap evidence is available.
 
 ## Adversarial qualification
 
 Eighteen synthetic fixtures pass. They cover clear challenger win, original win, position bias, malformed swap, canon and protected-language vetoes, unresolved preservation, writer-rationale contamination, blinding leakage, named-author target, low confidence, unavailable swap evidence, tie, unresolved tradeoff, unresolved voice comparison, conditional historical constraint, inapplicable theological constraint, and deterministic identity.
+
+After the initial closure, implementation commit `04fe5454218231fd2346272efa5eed207f8ceb55` hardened neutral-label validation and orientation-confidence gating. The unchanged 18-case qualification suite was rerun against that hardened implementation and passed. The hardened behavior is therefore included in this closure standing.
 
 ## Boundaries
 
