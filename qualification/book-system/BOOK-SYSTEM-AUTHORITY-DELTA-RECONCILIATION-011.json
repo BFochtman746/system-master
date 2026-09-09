@@ -1,0 +1,70 @@
+{
+  "reconciliation_id": "BOOK-SYSTEM-AUTHORITY-DELTA-RECONCILIATION-011",
+  "effective_date": "2026-09-09",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "classification": "AUTHORITY_DELTA",
+  "standing": "CLOSED__LIVE_BOOK_CONTROL_RECONCILED_TO_STATE_010__NO_QUALIFICATION_TRANSFER",
+  "authority_sources": [
+    "governance/CURRENT-AUTHORITY.json@main",
+    "governance/SYSTEM-TOPOLOGY-002.json@main",
+    "SYSTEM-MASTER-WORKSTREAM-BOOTSTRAP.md@main",
+    "governance/SYSTEM-STATE-BASELINE-002.json@main",
+    "governance/COMPLETION-LEDGER-001.json@main",
+    "governance/WORK-OBLIGATION-REGISTRY-001.json@main",
+    "governance/EXPECTATION-REGISTRY-001.json@main",
+    "governance/REALLOCATION-LEDGER-001.json@main",
+    "governance/second-shift/SECOND-SHIFT-REGISTRY-001.json@main",
+    "governance/second-shift/BOOK-DELEGATIONS.json@main"
+  ],
+  "sealed_checkpoint": {
+    "record": "governance/SYSTEM-STATE-BASELINE-002.json",
+    "book_control_head": "bd0afa0341319d6ab4583046223b7f05ad1632bc",
+    "selected_state": "BOOK-SYSTEM-RECONCILED-STATE-008",
+    "objective": "BOOK-SYSTEM-PUBLICATION-EXPORT-STANDARDS-PROFILE-001"
+  },
+  "observed_pre_reconciliation_live": {
+    "book_control_ref": "book-system/control-v1",
+    "book_control_head": "a0beafc1fc92bf9f9790f05dce4b3276bdb03a4a",
+    "ahead_of_sealed_checkpoint_by_commits": 7,
+    "new_successor_state": "BOOK-SYSTEM-RECONCILED-STATE-010",
+    "selected_control_record_still_pointed_to": "BOOK-SYSTEM-RECONCILED-STATE-008",
+    "classification": "AUTHORITY_DELTA_WITH_STALE_SELECTION_AND_GOVERNANCE_POINTERS"
+  },
+  "delta_verified": [
+    "BOOK-SYSTEM-DOCUMENT-SYSTEM-EXPORT-OWNERSHIP-BOUNDARY-001 exists and closes the no-duplicate-document-engine architecture boundary",
+    "BOOK-SYSTEM-PUBLICATION-EXPORT-STANDARDS-PROFILE-001 exists with CLOSED Book-domain requirements standing and delegates reusable document implementation",
+    "BOOK-SYSTEM-PROVENANCE-INTEROPERABILITY-PROJECTION-001 exists with CLOSED projection standing and preserves the Book parent ledger as canonical",
+    "BOOK-SYSTEM-RECONCILED-STATE-009 records publication/export profile closure",
+    "BOOK-SYSTEM-RECONCILED-STATE-010 records provenance closure and selects the Integration Proposal Runtime contract re-review",
+    "no new executable Integration Proposal Runtime qualification or publication authority was created by the delta"
+  ],
+  "governance_mismatches_found": [
+    "BOOK-SYSTEM-PRODUCT-PARENT-BINDING-003 still selected State-008",
+    "COMPLETION-LEDGER-001 omitted the Document ownership, publication/export and provenance closures",
+    "WORK-OBLIGATION-REGISTRY-001 still listed publication/export READY and provenance HOLD",
+    "BOOK-DELEGATIONS.json contained a READY delegation bound to 79cfd15... while the live Book control head had advanced"
+  ],
+  "repairs_completed": [
+    {
+      "action": "SELECT_STATE_010_IN_BOOK_CONTROL_RECORD",
+      "commit": "20649bc4c606644a37dbd7a507e204a9ec6a88ca"
+    },
+    {
+      "action": "APPEND_BOOK_EXPORT_AND_PROVENANCE_COMPLETIONS_TO_MAIN_LEDGER",
+      "main_commit": "b627bff64f832e0a89f3884bba6b439763db2d07"
+    },
+    {
+      "action": "CLOSE_OR_SUPERSEDE_STALE_BOOK_OBLIGATIONS_AND_OPEN_EXACT_STATE_010_REREVIEW_GATE",
+      "main_commit": "72dd1f5f05d780914c1b1cea69f5eb84cc059b73"
+    },
+    {
+      "action": "RETIRE_STALE_BOOK_SECOND_SHIFT_DELEGATION",
+      "main_commit": "8828368d05d817ef969748de7fb71a6278a7a1cf"
+    }
+  ],
+  "current_selected_state": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-010.json",
+  "current_objective": "BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-001-CONTRACT-REREVIEW-001",
+  "implementation_pause": true,
+  "qualification_effect": "NONE. Historical exact-SHA Book foundation qualifications remain bounded to their original subjects; this reconciliation changes current control/governance pointers only.",
+  "next_action": "Execute the State-010 Integration Proposal Runtime contract re-review."
+}
