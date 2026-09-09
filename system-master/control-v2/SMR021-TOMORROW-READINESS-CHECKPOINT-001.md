@@ -2,7 +2,7 @@
 
 Date: 2026-09-09
 Owner lane: `SYSTEM_MASTER/CORE`
-Status: **RESUMABLE CHECKPOINT / CURRENT IMPLEMENTATION BLOCKED ONLY BY EXACT SMR020 RUNNABLE SOURCE CUSTODY**
+Status: **RESUMABLE CHECKPOINT / ALL HIGH-VALUE PRE-SOURCE PREPARATION CLOSED / CURRENT IMPLEMENTATION BLOCKED ONLY BY EXACT SMR020 RUNNABLE SOURCE CUSTODY**
 
 ## 1. Authority standing
 
@@ -12,7 +12,7 @@ Live CORE control ref during this bounded work:
 
 The startup authority delta through `18d0b8eeb9d1a1cd875583cce1cea478f110ef68` was reconciled. The added PLATFORM-003 fresh Library replay is historical replay evidence and did not change the active SMR021 dependency-current objective.
 
-This checkpoint advances only preparation/research evidence. It does not claim implementation closure.
+This checkpoint advances preparation/research evidence only. It does not claim dependency-current implementation closure.
 
 ## 2. Completed phases that must not be restarted
 
@@ -25,7 +25,8 @@ The following are now durable completed phases:
 5. broad exact-SMR020 source-custody recovery audit across current GitHub and Library surfaces, including the September 9 ZIP census;
 6. implementation-ready admission-binding + R025 database-parity repair packet;
 7. current external authorization-context binding research delta;
-8. current offline/server-confirmation + portable accessibility research delta.
+8. current offline/server-confirmation + portable accessibility research delta;
+9. current PostgreSQL persistence/idempotency/concurrency research delta.
 
 Do not rerun these merely because a chat or delegation binding changes.
 
@@ -74,6 +75,20 @@ Findings:
 - add bounded focus-obscuration and Files-surface focus-contract tests;
 - do not convert these portable/headless checks into physical-device or screen-reader PASS.
 
+### Persistence/concurrency research delta
+
+`SMR021-PERSISTENCE-CONCURRENCY-RESEARCH-DELTA-001.md`
+
+Findings:
+
+- preserve database-enforced unique `(work_id,idempotency_key)` identity rather than replacing it with application-only check-then-insert;
+- preserve post-conflict semantic `sameIntent` verification so same key + different intent fails instead of becoming false idempotent success;
+- preserve database race arbitration and post-race re-read;
+- preserve attention dedupe conflict semantics and optimistic exact-state CAS where the recovered current timestamp/version contract reproduces exact round-trip behavior;
+- add a bounded minimum **13-case concurrent integration matrix** covering same-intent races, divergent-intent races, attention dedupe races, stale transitions, exact CAS identity and failure atomicity;
+- do not adopt generic event sourcing/distributed locks without a reproduced current-lineage need;
+- do not treat the currently expired IETF Idempotency-Key Internet-Draft as normative redesign authority.
+
 ## 4. Exact current blocker
 
 Required runnable predecessor source/test digest:
@@ -103,7 +118,7 @@ Execute exactly this sequence:
 6. if no owner-defined action grant exists, stop with `CROSS_OWNER_PLATFORM006_ACTION_GRANT_CONTRACT_REQUIRED` rather than minting UX authority;
 7. otherwise apply only the minimum work/descriptor/action binding repair and dependency-current equivalent of the R025 database-parity transplant;
 8. execute the minimum 20-case authorization-focused adversarial micro-gate first;
-9. on focused PASS, run strict Java + full applicable executable regression + Java/schema/SQL parity + R025 recurrence + persistence/concurrency + offline/accessibility bounded gates + coherence/congruence + exact-subject + release-manifest qualification;
+9. on focused PASS, run strict Java + full applicable executable regression + Java/schema/SQL parity + R025 recurrence + the 13-case persistence/concurrency gate + offline/accessibility bounded gates + coherence/congruence + exact-subject + release-manifest qualification;
 10. assign the changed tree a new exact source/test subject identity;
 11. place that exact subject into ordinary GitHub-native immutable custody and obtain hosted exact-SHA evidence before any A-01 eligibility decision.
 
@@ -115,12 +130,13 @@ Execute exactly this sequence:
 - Do not repeat broad custody search unless a genuinely new custody surface or artifact becomes available.
 - Do not invent a descriptor action grant from generic metadata such as purpose text, semantic tags or protocol names.
 - Do not let a cached response become remote/server confirmation.
+- Do not simplify idempotency into application-only pre-checks or treat a database uniqueness conflict as successful replay without semantic compatibility proof.
 - Do not weaken database, authorization, accessibility or identity tests to obtain PASS.
 - Do not claim physical-device, assistive-technology, usability, live-target-PostgreSQL, A-01 or production authority without exact evidence.
 
 ## 7. Remaining useful unattended work
 
-The high-value reusable preparation is now complete. Further broad authorization/offline/accessibility research would be repetition before current-source inspection.
+The high-value reusable preparation and targeted research are now complete. Further broad authorization, offline/accessibility or persistence/concurrency research would be repetition before current-source inspection.
 
 Second Shift should therefore:
 
@@ -136,6 +152,6 @@ Second Shift should therefore:
 
 **Trigger:** a genuinely new candidate source/archive/reconstruction input for SMR020 becomes available.
 
-**Action:** verify exact `89066e56...` before mutation, then execute `SMR021-ADMISSION-BINDING-TOMORROW-READINESS-001.md` plus both research deltas from the first executable gate.
+**Action:** verify exact `89066e56...` before mutation, then execute `SMR021-ADMISSION-BINDING-TOMORROW-READINESS-001.md` plus the authorization, offline/accessibility and persistence/concurrency research deltas from the first executable gate.
 
 **Until trigger:** remain `BLOCKED — SOURCE_CUSTODY`, preserve completed work, and do not restart discovery from zero.
