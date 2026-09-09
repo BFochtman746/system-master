@@ -7,7 +7,7 @@ on:
     paths:
       - "qualification/book-system/version-and-rollback-001/**"
       - "system-master/book-system/version-and-rollback*.js"
-      - ".github/scripts/book-system-version-and-rollback-001-qualify.js"
+      - ".github/scripts/book-system-version-and-rollback-001-qualify-v2.js"
       - ".github/workflows/book-system-version-and-rollback-001-prequal.yml"
   workflow_dispatch:
 
@@ -30,14 +30,14 @@ jobs:
         run: |
           node --check system-master/book-system/version-and-rollback-core.js
           node --check system-master/book-system/version-and-rollback.js
-          node --check .github/scripts/book-system-version-and-rollback-001-qualify.js
-      - name: Run 40-case Version and Rollback qualifier
-        run: node .github/scripts/book-system-version-and-rollback-001-qualify.js
+          node --check .github/scripts/book-system-version-and-rollback-001-qualify-v2.js
+      - name: Run 48-case Version and Rollback qualifier
+        run: node .github/scripts/book-system-version-and-rollback-001-qualify-v2.js
       - name: Upload hosted evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: book-system-version-and-rollback-001-${{ github.run_id }}-hosted-evidence
-          path: ${{ runner.temp }}/book-version-rollback-evidence
+          path: ${{ runner.temp }}/book-system-version-rollback-v2-${{ github.run_id }}
           if-no-files-found: warn
           retention-days: 30
