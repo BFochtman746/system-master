@@ -1,0 +1,30 @@
+name: Literary Prose Narrative Orchestration Qualification
+
+on:
+  push:
+    branches:
+      - literary-prose-engine-001
+    paths:
+      - 'qualification/literary-prose-engine-001/narrative-orchestration-001/NARRATIVE-ORCHESTRATION-CONTRACT-v1.json'
+      - 'qualification/literary-prose-engine-001/narrative-orchestration-001/orchestration_state.py'
+      - 'qualification/literary-prose-engine-001/narrative-orchestration-001/run_orchestration_fixtures.py'
+      - '.github/workflows/literary-prose-narrative-orchestration-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile orchestration modules
+        run: python -m py_compile qualification/literary-prose-engine-001/narrative-orchestration-001/orchestration_state.py qualification/literary-prose-engine-001/narrative-orchestration-001/run_orchestration_fixtures.py
+      - name: Qualify global narrative orchestration
+        run: python qualification/literary-prose-engine-001/narrative-orchestration-001/run_orchestration_fixtures.py
