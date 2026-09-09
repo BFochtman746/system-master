@@ -1,6 +1,6 @@
 {
   "objective": "LITERARY-PROSE-ENGINE-001-REAL-BOOK-QUALIFICATION",
-  "standing": "ADMITTED_FOR_QUALIFICATION_ONLY__REPRESENTATIVE_SAMPLE_PASS__WHOLE_BOOK_SWEEP_PASS__DECISION_002_RESOLVED_2A__DECISION_001_PENDING",
+  "standing": "PASS__FIRST_29_CHAPTER_REAL_BOOK_QUALIFICATION_CLOSED__QUALIFICATION_ONLY",
   "decision": "ADMITTED",
   "preadmission_status": "COMPLETE",
   "admission_id": "AGLO-REAL-BOOK-ADMISSION-001",
@@ -9,7 +9,7 @@
   "source_ownership_or_authorization": "USER_OWNED_OR_AUTHORIZED",
   "source_reference": "A Gate Left Open - Master .docx",
   "source_package_digest": "ec0f5475c05cf6c11a75d139f2dbd131e6133d6abba9121be8b8ef18454b31df",
-  "qualification_scope": "REPRESENTATIVE_CLOSED_LOOP_PLUS_WHOLE_BOOK_NONDESTRUCTIVE_SWEEP",
+  "qualification_scope": "REPRESENTATIVE_CLOSED_LOOP_PLUS_WHOLE_BOOK_NONDESTRUCTIVE_SWEEP_PLUS_AUTHOR_ADJUDICATION",
   "baseline_version_id": "AGLO-REJECT-ALL-NARRATIVE-v1",
   "baseline_text_digest": "a48378682ee15fd4b24bc97293ce43a37f096db254a0b78f715081a8aa8a59ee",
   "revision_projection": "REJECT_ALL",
@@ -58,7 +58,7 @@
   },
   "whole_book_nondestructive_sweep": {
     "objective": "AGLO-REAL-BOOK-WHOLE-BOOK-NONDESTRUCTIVE-SWEEP-001",
-    "standing": "PASS__WHOLE_BOOK_NONDESTRUCTIVE_SWEEP_COMPLETE__ONE_AUTHOR_DECISION_PENDING",
+    "standing": "PASS__WHOLE_BOOK_NONDESTRUCTIVE_SWEEP_COMPLETE__AUTHOR_QUEUE_CLOSED",
     "exact_tested_repository_subject_sha": "8146b16a9c6eca7304cf19f8273f858264b8fff3",
     "wrapper_blob_sha": "7ad5d587d8aefd20032e9f7dea44b7acc4ba90a1",
     "private_execution_evidence_sha256": "21542552eea6877f3c4346efc817f2985c580b695b1ceda9a2b587b4fdab7f98",
@@ -71,15 +71,24 @@
     "private_passage_states": 201,
     "screened_findings": 10,
     "queued_author_decisions_initial": 2,
-    "queued_author_decisions_remaining": 1,
+    "queued_author_decisions_remaining": 0,
     "automatic_manuscript_mutations": 0
   },
   "whole_book_author_adjudication": {
     "objective": "AGLO-WHOLE-BOOK-AUTHOR-ADJUDICATION-001",
     "record": "AGLO-WHOLE-BOOK-AUTHOR-ADJUDICATION-001.json",
-    "standing": "PARTIAL_PASS__DECISION_002_RESOLVED_2A__BLOCKED_ONLY_ON_DECISION_001",
+    "standing": "PASS__DECISIONS_001_1A_AND_002_2A_RESOLVED__FINAL_CLOSURE_PASS",
     "explicit_author_dispositions_required": 2,
-    "explicit_author_dispositions_recorded": 1,
+    "explicit_author_dispositions_recorded": 2,
+    "decision_001": {
+      "author_option": "1A",
+      "disposition": "ACCEPT_REMOVE_DUPLICATE_WORD",
+      "receipt": "AGLO-WHOLE-BOOK-AUTHOR-ADJUDICATION-RECEIPT-001.json",
+      "step_j_evidence": "../step-j/project-evidence/AGLO-STEP-J-PREFERENCE-EVIDENCE-003.json",
+      "preservation_closure": "PASS__EXACT_SINGLE_DUPLICATE_TOKEN_DELETION__NO_CANON_MEANING_OR_VOICE_CHANGE",
+      "step_k_closure": "PASS__MECHANICAL_NONSTYLE_EDIT__NO_HOMOGENIZATION_TARGET",
+      "cross_project_generalization_allowed": false
+    },
     "decision_002": {
       "author_option": "2A",
       "disposition": "RETAIN_AS_INTENTIONAL_PARALLEL_REFRAIN",
@@ -89,21 +98,32 @@
       "step_k_closure": "PASS_BY_IDENTITY",
       "cross_project_generalization_allowed": false
     },
-    "decision_001": "UNRESOLVED__EXPLICIT_1A_OR_1B_REQUIRED",
-    "step_j_events_appended_for_this_queue": 1,
-    "accepted_bounded_repairs_applied_for_this_queue": 0,
+    "step_j_events_appended_for_this_queue": 2,
+    "accepted_bounded_repairs_applied_for_this_queue": 1,
     "protected_author_intent_patterns_added": 1,
-    "final_preservation_step_k_closure_run": false,
-    "whole_book_qualification_closed": false
+    "final_preservation_step_k_closure_run": true,
+    "final_preservation_step_k_closure": "PASS",
+    "whole_book_qualification_closed": true,
+    "closure_record": "AGLO-WHOLE-BOOK-REAL-BOOK-QUALIFICATION-CLOSURE-001.json"
   },
   "accepted_project_preference_evidence": {
     "event_refs": [
       "step-j/project-evidence/AGLO-STEP-J-PREFERENCE-EVIDENCE-001.json",
-      "step-j/project-evidence/AGLO-STEP-J-PREFERENCE-EVIDENCE-002.json"
+      "step-j/project-evidence/AGLO-STEP-J-PREFERENCE-EVIDENCE-002.json",
+      "step-j/project-evidence/AGLO-STEP-J-PREFERENCE-EVIDENCE-003.json"
     ],
     "store": "CURRENT_PREFERENCE",
     "stable_identity_changed": false,
     "cross_project_generalization_allowed": false
+  },
+  "qualification_result": {
+    "closure_record": "AGLO-WHOLE-BOOK-REAL-BOOK-QUALIFICATION-CLOSURE-001.json",
+    "standing": "PASS__FIRST_29_CHAPTER_REAL_BOOK_QUALIFICATION_CLOSED",
+    "accepted_mechanical_repairs_total": 2,
+    "style_bearing_candidates_admitted": 0,
+    "protected_author_intent_findings": 1,
+    "unresolved_author_queue_items": 0,
+    "unresolved_preservation_conflicts": 0
   },
   "step_l_prerequisite": {
     "standing": "PASS_CLOSED_LOOP_QUALIFICATION__SYNTHETIC_ONLY__REAL_BOOK_QUALIFICATION_NOT_YET_ADMITTED",
@@ -119,7 +139,9 @@
   "whole_book_accuracy_claimed": false,
   "whole_book_structural_screen_claimed": true,
   "automatic_revision_quality_claimed": false,
+  "publication_readiness_claimed": false,
   "raw_manuscript_text_committed": false,
   "candidate_text_committed": false,
-  "next_required_transition": "EXPLICIT_AUTHOR_REPLY_WITH_1A_OR_1B"
+  "original_manuscript_modified": false,
+  "next_required_transition": "EXPAND_FROM_QUALIFICATION_TO_BOOK_LEVEL_LITERARY_INTELLIGENCE_AND_BOUNDED_REVISION_WORKFLOW_WITH_EXISTING_PRESERVATION_CONTROLS"
 }
