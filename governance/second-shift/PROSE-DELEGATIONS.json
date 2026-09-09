@@ -2,10 +2,40 @@
   "owner_system_id": "PROSE",
   "owner_path": "SYSTEM_MASTER/BOOK/PROSE",
   "control_ref": "literary-prose-engine-001",
-  "last_known_control_head": "51b36da8ef4119ebc615d8c6365036e4297a87ec",
-  "delegation_epoch": 2,
-  "active_delegations": [],
-  "owner_revalidation_required": true,
-  "reason": "Prose control was re-bound under Book/System Master. The current critical path is explicit author adjudication and cannot be delegated; only separately identified non-authority work may be admitted after owner re-evaluation.",
+  "last_known_control_head": "65a8a7f6f0c64899d0ee44fc3b2e097a2e2a39e8",
+  "delegation_epoch": 3,
+  "active_delegations": [
+    {
+      "delegation_id": "SECOND-SHIFT-PROSE-CENSUS-001",
+      "owner_path": "SYSTEM_MASTER/BOOK/PROSE",
+      "objective_id": "SYSTEM-MASTER-COMPLETION-CENSUS-002-P4-PROSE",
+      "state": "READY",
+      "valid_for_control_ref": "literary-prose-engine-001",
+      "valid_for_control_head": "65a8a7f6f0c64899d0ee44fc3b2e097a2e2a39e8",
+      "created_at": "2026-09-09T20:45:00Z",
+      "last_revalidated_at": "2026-09-09T20:45:00Z",
+      "completion_delta": "Exhaustively reconcile Prose System, Literary Prose Engine, Book Evaluator, evaluator training, prose training, semantic/Step-F, manuscript-evidence and qualification history into current completion, obligation, expectation, reallocation and evidence standing.",
+      "stop_condition": "Every material Prose/Book-Evaluator boundary inspected for this phase is classified as COMPLETED, OPEN_OBLIGATION, BLOCKED, SUPERSEDED, HISTORICAL_EVIDENCE, UNALLOCATED or EVIDENCE_REVIEW_REQUIRED; author/private/rightsholder boundaries remain explicit; durable checkpoint committed.",
+      "allowed_work": [
+        "repository forensics across Prose, literary-prose and Book-Evaluator branches/records",
+        "completion-ledger additions backed by exact receipts/commits",
+        "open-obligation and expectation reconciliation",
+        "Book-Evaluator-to-Prose ownership normalization",
+        "stale/superseded control-state cleanup",
+        "resumable census checkpoint creation"
+      ],
+      "forbidden_authority": [
+        "do not fabricate author labels, human/editor ground truth or private evidence",
+        "do not grant revision authority from diagnostic evidence",
+        "do not alter Book canonical state",
+        "do not transfer exact-SHA qualification",
+        "do not advance ordinary Prose implementation merely to create activity"
+      ],
+      "on_pass": "Remove this delegation from active_delegations, record P4 Prose census closure/checkpoint, update durable ledgers, then re-evaluate the live Prose control head and admit a successor only if independently justified.",
+      "on_failure": "Preserve the completed census checkpoint, classify the exact unresolved Prose boundary, and resume later from the first incomplete Prose census segment rather than restarting the phase."
+    }
+  ],
+  "owner_revalidation_required": false,
+  "reason": "Tonight is assigned to exhaustive Prose/Book-Evaluator reconciliation under Book/System Master. Any Prose control-head movement invalidates this READY delegation until re-evaluated.",
   "empty_is_valid": true
 }
