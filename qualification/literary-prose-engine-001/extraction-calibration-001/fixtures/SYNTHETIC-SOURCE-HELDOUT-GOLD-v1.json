@@ -1,0 +1,120 @@
+{
+  "corpus_id": "LITERARY-NARRATIVE-EXTRACTION-SOURCE-HELDOUT-v1",
+  "source_class": "SYNTHETIC_SOURCE_HELDOUT_QUALIFICATION_ONLY",
+  "contains_user_manuscript": false,
+  "contains_copyrighted_reference_body": false,
+  "named_author_target": false,
+  "cases": [
+    {
+      "case_id": "heldout-anchor-001",
+      "task": "ANCHOR_LOCALIZATION",
+      "synthetic_source": "Before sunrise, the harbor siren sounded once and went quiet.",
+      "gold_labels": ["anchor:harbor_siren"],
+      "gold_spans": [{"anchor_id": "harbor_siren", "span": [20, 32]}]
+    },
+    {
+      "case_id": "heldout-entity-001",
+      "task": "ENTITY_IDENTITY_COREFERENCE",
+      "synthetic_source": "Elena folded the map. At the gate, she handed it to Tomas.",
+      "gold_labels": ["entity:Elena", "coref:she->Elena"]
+    },
+    {
+      "case_id": "heldout-entity-002",
+      "task": "ENTITY_IDENTITY_COREFERENCE",
+      "synthetic_source": "Marcus locked the cabinet. Later, he checked it again.",
+      "gold_labels": ["entity:Marcus", "coref:he->Marcus"]
+    },
+    {
+      "case_id": "heldout-event-001",
+      "task": "EVENT_IDENTITY",
+      "synthetic_source": "Leah described the lantern falling. Omar later recalled the same fall from the doorway, while the fire that followed was separate.",
+      "gold_labels": ["same_event:fall", "distinct_event:fire"]
+    },
+    {
+      "case_id": "heldout-event-002",
+      "task": "EVENT_IDENTITY",
+      "synthetic_source": "Nora described the tower's collapse. Later, Eli spoke of the structure giving way at noon; both accounts concern one incident.",
+      "gold_labels": ["same_event:collapse"]
+    },
+    {
+      "case_id": "heldout-time-001",
+      "task": "STORY_VS_DISCOURSE_TIME",
+      "synthetic_source": "Cal opens the station. The narration then returns to the summer when his mother gave him the brass key.",
+      "gold_labels": ["story:past_before_present", "discourse:present_before_past"]
+    },
+    {
+      "case_id": "heldout-time-002",
+      "task": "STORY_VS_DISCOURSE_TIME",
+      "synthetic_source": "The courier might have reached town before the blackout, or only after the generators restarted; no one can establish which.",
+      "gold_labels": ["time:relative_unresolved"],
+      "intentionally_ambiguous": true,
+      "allowed_ambiguity_statuses": ["UNRESOLVED", "ALTERNATIVE", "ABSTAIN"]
+    },
+    {
+      "case_id": "heldout-causal-001",
+      "task": "CAUSAL_GOAL_RELATIONS",
+      "synthetic_source": "Mira studies the tide chart because she wants to reach the island before dark. The gulls circle above her, but nothing says her studying caused them to circle.",
+      "gold_labels": ["goal:study_supports_reach_island"],
+      "forbidden_labels": ["causes:study_causes_gulls"]
+    },
+    {
+      "case_id": "heldout-causal-002",
+      "task": "CAUSAL_GOAL_RELATIONS",
+      "synthetic_source": "Dane studies the tide table all afternoon. At sunset he leaves for the island, carrying only the route he memorized.",
+      "gold_labels": ["goal:study_supports_reach_island"]
+    },
+    {
+      "case_id": "heldout-epistemic-001",
+      "task": "EPISTEMIC_FOCALIZATION",
+      "synthetic_source": "From Niko's viewpoint, the porch light seems to pulse. He believes Mara is awake, but he does not know whether anyone is inside.",
+      "gold_labels": ["focalizes:Niko", "perceives:Niko", "believes:Niko"],
+      "forbidden_labels": ["knows:Niko"]
+    },
+    {
+      "case_id": "heldout-epistemic-002",
+      "task": "EPISTEMIC_FOCALIZATION",
+      "synthetic_source": "The narration enters Ava's worry, then Ben's private relief, without settling on either mind as the permanent center.",
+      "gold_labels": ["focalizes:Ava", "focalizes:Ben"],
+      "intentionally_ambiguous": true,
+      "allowed_ambiguity_statuses": ["ALTERNATIVE", "UNRESOLVED", "ABSTAIN"]
+    },
+    {
+      "case_id": "heldout-epistemic-003",
+      "task": "EPISTEMIC_FOCALIZATION",
+      "synthetic_source": "The corridor again. Of course they had left Oren to discover the locked door alone; the thought tightened his chest.",
+      "gold_labels": ["focalizes:Oren"]
+    },
+    {
+      "case_id": "heldout-function-001",
+      "task": "NARRATIVE_FUNCTION",
+      "synthetic_source": "Rosa tucks the blue ticket into her sleeve; the gesture plants an object for later and reveals how carefully she hides her fear.",
+      "gold_labels": ["function:SETUP", "function:CHARACTER_REVEAL"]
+    },
+    {
+      "case_id": "heldout-setup-001",
+      "task": "SETUP_PAYOFF_OPEN_QUESTION",
+      "synthetic_source": "A tiny scratch appears on the compass. Much later, the scratch bends the needle during the crossing, while the origin of a sealed note remains unanswered.",
+      "gold_labels": ["setup:scratch", "payoff:scratch", "status:question=OPEN"]
+    },
+    {
+      "case_id": "heldout-setup-002",
+      "task": "SETUP_PAYOFF_OPEN_QUESTION",
+      "synthetic_source": "A cracked watch stops at 4:12. Much later, its frozen hands reveal when the power failed.",
+      "gold_labels": ["setup:watch", "payoff:watch"]
+    },
+    {
+      "case_id": "heldout-arc-001",
+      "task": "ARC_ORCHESTRATION",
+      "synthetic_source": "Tarin rejects the family bargain, but the story ends before showing whether his sister will forgive him.",
+      "gold_labels": ["arc:STATUS=UNRESOLVED"],
+      "intentionally_ambiguous": true,
+      "allowed_ambiguity_statuses": ["UNRESOLVED", "ALTERNATIVE", "ABSTAIN"]
+    },
+    {
+      "case_id": "heldout-arc-002",
+      "task": "ARC_ORCHESTRATION",
+      "synthetic_source": "At first, a silver ribbon marks a promise. Near the end, the same ribbon returns tied around a locked box, transforming the motif from promise to restraint.",
+      "gold_labels": ["motif:INTRODUCTION", "motif:TRANSFORMATION"]
+    }
+  ]
+}
