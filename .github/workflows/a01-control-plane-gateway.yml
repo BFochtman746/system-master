@@ -231,15 +231,6 @@ jobs:
           if exist "%A01_EVIDENCE_DIR%\result.txt" type "%A01_EVIDENCE_DIR%\result.txt">>"%GITHUB_STEP_SUMMARY%"
           if exist "%A01_EVIDENCE_DIR%\receipt.json" type "%A01_EVIDENCE_DIR%\receipt.json">>"%GITHUB_STEP_SUMMARY%"
 
-      - name: Upload authoritative A-01 evidence
-        if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: ${{ env.A01_ARTIFACT_NAME }}
-          path: ${{ env.A01_EVIDENCE_DIR }}
-          if-no-files-found: error
-          retention-days: 30
-
       - name: Record A-01 postflight and clean stale job temp
         if: always()
         continue-on-error: true
@@ -248,6 +239,15 @@ jobs:
           if (Test-Path "$env:GITHUB_WORKSPACE\control-plane\.github\scripts\a01-runner-guard.ps1") {
             & "$env:GITHUB_WORKSPACE\control-plane\.github\scripts\a01-runner-guard.ps1" -Mode postflight -EvidenceDir $env:A01_EVIDENCE_DIR
           }
+
+      - name: Upload authoritative A-01 evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: ${{ env.A01_ARTIFACT_NAME }}
+          path: ${{ env.A01_EVIDENCE_DIR }}
+          if-no-files-found: error
+          retention-days: 30
 
       - name: Schedule registered Windows reboot handoff
         if: steps.control.outcome == 'success' && steps.control.outputs.post_action == 'windows_reboot'
