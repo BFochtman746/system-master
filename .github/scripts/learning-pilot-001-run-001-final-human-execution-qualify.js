@@ -86,22 +86,24 @@ function assertSuite(name, modules, expectedCount, seed = '0') {
   return count;
 }
 
-function assertParallelFullSuite(expectedCount) {
-  const result = run('full-learning-lab-suite', 'python', [
+function assertParallelRemainingSuite(expectedCount, excludedModules) {
+  const args = [
     PARALLEL_TEST_RUNNER,
     '--lab-dir', LAB,
     '--discover',
     '--pattern', 'test_*.py',
     '--seed', '0',
-    '--workers', '4',
+    '--workers', '8',
     '--expected-total', String(expectedCount),
     '--evidence-dir', evidenceDir,
-    '--evidence-prefix', 'full-module',
-  ]);
+    '--evidence-prefix', 'remaining-module',
+  ];
+  for (const module of excludedModules) args.push('--exclude-module', module);
+  const result = run('remaining-learning-lab-suite', 'python', args);
   const text = result.stdout + result.stderr;
-  const count = observedTestCount(text, 'FULL_LEARNING_LAB');
-  assert(count === expectedCount, `FULL_LEARNING_LAB_EXPECTED_${expectedCount}_GOT_${count}`);
-  assert(/\bOK\b/.test(text), 'FULL_LEARNING_LAB_SUITE_NOT_OK');
+  const count = observedTestCount(text, 'REMAINING_LEARNING_LAB');
+  assert(count === expectedCount, `REMAINING_LEARNING_LAB_EXPECTED_${expectedCount}_GOT_${count}`);
+  assert(/\bOK\b/.test(text), 'REMAINING_LEARNING_LAB_SUITE_NOT_OK');
   return count;
 }
 
@@ -187,13 +189,31 @@ try {
     'tests.test_real_learner_pilot_handoff',
     'tests.test_real_learner_pilot_preflight',
   ];
+  const focusedModules = [...closedLoopModules, ...predecessorModules, ...evidenceModules];
+  assert(new Set(focusedModules).size === focusedModules.length, 'FOCUSED_MODULE_OVERLAP_INVALIDATES_COVERAGE_UNION');
 
   const closedLoopCount = assertSuite('closed-loop-current', closedLoopModules, 54);
   const predecessorCount = assertSuite('predecessor-regressions', predecessorModules, 57);
   const evidenceCount = assertSuite('local-first-evidence-boundary', evidenceModules, 13);
+  const focusedCoverageCount = closedLoopCount + predecessorCount + evidenceCount;
+  assert(focusedCoverageCount === 124, `FOCUSED_COVERAGE_EXPECTED_124_GOT_${focusedCoverageCount}`);
 
-  const fullCount = assertParallelFullSuite(698);
+  // The focused suites above are complete module executions and are part of
+  // the 698-test Learning Lab base regression. Run every remaining module
+  // exactly once instead of duplicating those 124 tests in a second base pass.
+  // This preserves 698/698 base-test coverage while removing redundant reruns.
+  const remainingCount = assertParallelRemainingSuite(574, focusedModules);
+  const fullCount = focusedCoverageCount + remainingCount;
+  assert(fullCount === 698, `FULL_LEARNING_LAB_EXPECTED_698_GOT_${fullCount}`);
   fs.writeFileSync(path.join(evidenceDir, 'full-learning-lab-test-count.txt'), `${fullCount}\n`);
+  fs.writeFileSync(path.join(evidenceDir, 'full-learning-lab-coverage-union.txt'), [
+    `focused_base_tests=${focusedCoverageCount}`,
+    `remaining_base_tests=${remainingCount}`,
+    `base_tests_total=${fullCount}`,
+    'duplicate_base_reruns_eliminated=124',
+    'coverage_reduced=FALSE',
+    '',
+  ].join('\n'));
 
   const seeds = ['1', '7', '42', '99'];
   const repeatedTests = assertParallelCriticalSeeds(closedLoopModules, seeds, 54);
@@ -252,9 +272,13 @@ try {
     `PILOT_RUN001_PREDECESSOR_REGRESSIONS=${predecessorCount}`,
     `PILOT_RUN001_LOCAL_FIRST_EVIDENCE_TESTS=${evidenceCount}`,
     `PILOT_RUN001_FULL_LEARNING_LAB_TESTS=${fullCount}`,
+    `PILOT_RUN001_FULL_LEARNING_LAB_FOCUSED_BASE_TESTS=${focusedCoverageCount}`,
+    `PILOT_RUN001_FULL_LEARNING_LAB_REMAINING_BASE_TESTS=${remainingCount}`,
+    'PILOT_RUN001_BASE_TEST_DUPLICATE_RERUNS_ELIMINATED=124',
+    'PILOT_RUN001_TEST_COVERAGE_REDUCED=FALSE',
     `PILOT_RUN001_CRITICAL_REPEAT_TESTS=${repeatedTests}`,
     'PILOT_RUN001_CRITICAL_HASH_SEEDS=1,7,42,99',
-    'PILOT_RUN001_TEST_SCHEDULING=BOUNDED_PARALLEL_SUBPROCESSES',
+    'PILOT_RUN001_TEST_SCHEDULING=FOCUSED_PLUS_BOUNDED_PARALLEL_REMAINDER',
     'PILOT_RUN001_FROZEN_V1_CHANGED=FALSE',
     'PILOT_RUN001_PARTICIPANT_STORAGE_DEFAULT=LOCAL',
     'PILOT_RUN001_AUTOMATIC_EXTERNAL_UPLOAD=FALSE',
