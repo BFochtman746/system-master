@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -8,6 +9,7 @@ from unittest.mock import patch
 
 import run_pilot001
 import run_pilot001_closed_loop as app
+from learning_lab.real_learner_pilot_preflight import RealLearnerPilotPreflightError
 from learning_lab.real_learner_pilot_withdrawal import withdraw_runtime_bound_pilot
 
 
@@ -150,6 +152,43 @@ class RealLearnerPilotClosedLoopLauncherTests(unittest.TestCase):
             with self.assertRaisesRegex(app.ClosedLoopLauncherError, "PILOT_NONRESPONSE_ACTION_REQUIRES_SYSTEM_ADJUDICATION"):
                 app.run_closed_loop(self.root, dict(self.manifest))
         collect.assert_not_called()
+
+    def test_new_participant_session_fails_before_presence_or_consent_if_preflight_fails(self):
+        with patch.object(sys, "argv", ["run_pilot001.py", "--state-root", str(self.root), "--domain-key", "git"]), \
+             patch.object(app, "run_real_learner_pilot_preflight", side_effect=RealLearnerPilotPreflightError("PREFLIGHT_BLOCKED")), \
+             patch.object(app.console, "initialize") as initialize:
+            self.assertEqual(app.main(), 2)
+        initialize.assert_not_called()
+
+    def test_preflight_only_never_initializes_participant_or_collects_response(self):
+        result = {
+            "standing": "READY_FOR_EXPLICIT_PARTICIPANT_CONSENT",
+            "protocol_version": "PILOT-001-v1",
+            "storage": {"sqlite_roundtrip": "PASS"},
+        }
+        with patch.object(sys, "argv", ["run_pilot001.py", "--state-root", str(self.root), "--preflight-only"]), \
+             patch.object(app, "run_real_learner_pilot_preflight", return_value=result), \
+             patch.object(app.console, "initialize") as initialize, \
+             patch.object(app.console, "collect_and_submit") as collect:
+            self.assertEqual(app.main(), 0)
+        initialize.assert_not_called()
+        collect.assert_not_called()
+
+    def test_withdrawal_remains_available_without_passing_collection_preflight(self):
+        with patch.object(sys, "argv", ["run_pilot001.py", "--state-root", str(self.root), "--withdraw-pilot-id", self.manifest["pilot_id"]]), \
+             patch.object(app, "run_real_learner_pilot_preflight") as preflight, \
+             patch.object(app.console, "withdraw") as withdraw:
+            self.assertEqual(app.main(), 0)
+        preflight.assert_not_called()
+        withdraw.assert_called_once_with(self.root, self.manifest["pilot_id"])
+
+    def test_status_remains_available_without_passing_collection_preflight(self):
+        with patch.object(sys, "argv", ["run_pilot001.py", "--state-root", str(self.root), "--status-pilot-id", self.manifest["pilot_id"]]), \
+             patch.object(app, "run_real_learner_pilot_preflight") as preflight, \
+             patch.object(app, "status_only", return_value={"standing": "RETENTION_WAIT"}) as status:
+            self.assertEqual(app.main(), 0)
+        preflight.assert_not_called()
+        status.assert_called_once_with(self.root, self.manifest["pilot_id"])
 
 
 if __name__ == "__main__":
