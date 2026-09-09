@@ -3,8 +3,35 @@
   "owner_path": "SYSTEM_MASTER/BOOK/PROSE",
   "control_ref": "literary-prose-engine-001",
   "last_known_control_head": "990ccfe7eb8bef46931f7cfd83fc176352ff7d6e",
-  "delegation_epoch": 5,
+  "delegation_epoch": 6,
   "active_delegations": [
+    {
+      "delegation_id": "SECOND-SHIFT-PROSE-BOOK-EVAL-TEACHER-FREEZE-001",
+      "owner_path": "SYSTEM_MASTER/BOOK/PROSE",
+      "objective_id": "BOOK-EVAL-REPAIR-005-GATE-D-TEACHER-FREEZE-2026-09-10",
+      "state": "READY",
+      "valid_for_control_ref": "literary-prose-engine-001",
+      "valid_for_control_head": "990ccfe7eb8bef46931f7cfd83fc176352ff7d6e",
+      "created_at": "2026-09-09T22:48:00Z",
+      "last_revalidated_at": "2026-09-09T22:48:00Z",
+      "completion_delta": "Execute the already-registered, already-hosted-prequalified Book Evaluator Gate-D Teacher-freeze qualification on exact subject e3b771dc36800c5f056ff2fd5ab6622f3e014f41 through the canonical A-01 overnight path. PASS removes Teacher-corpus freeze uncertainty without requiring BASE_TRAINING, DEVELOPMENT_GOLD, visible regression, hidden holdout, student training, or selective 120B.",
+      "stop_condition": "Stop after one authoritative exact-subject A-01 adjudication. PASS requires subject_sha == checkout_sha, canonical_records=440, unique_teacher_ids=440, forbidden gold-use flags false, and no conflicting duplicate IDs. Do not repeat unchanged after PASS; on failure preserve the manifest and classify the exact subject/infrastructure/control-plane boundary.",
+      "allowed_work": [
+        "admit and execute qualification/a01/overnight/requests/2026-09-10--BOOK-EVAL--repair005-gate-d-teacher-freeze.json through the canonical overnight scheduler",
+        "run only the registry-owned BOOK-EVAL-REPAIR-005-GATE-D-TEACHER-FREEZE wrapper on exact subject e3b771dc36800c5f056ff2fd5ab6622f3e014f41",
+        "preserve the authoritative receipt, manifest, exact SHA binding, counts, and failure classification",
+        "on PASS mark only the Teacher-freeze prerequisite closed and re-evaluate the separate private-recovery dependency"
+      ],
+      "forbidden_authority": [
+        "do not access or synthesize DEVELOPMENT_GOLD or BASE_TRAINING for this qualification",
+        "do not start student training or selective 120B from Teacher-freeze PASS alone",
+        "do not consume visible regression or hidden/fresh holdout",
+        "do not upload private raw data or derived private models",
+        "do not transfer PASS to another SHA or grant promotion, revision, manuscript, Book-canonical, or publication authority"
+      ],
+      "on_pass": "Record Teacher-freeze exact-SHA A-01 closure, remove this delegation, then re-evaluate BOOK-EVAL-REPAIR-005-GATE-D-PRIVATE-RECOVERY. Student-selective remains HOLD until both prerequisites independently PASS.",
+      "on_failure": "Classify SUBJECT_FAILURE, INFRA_FAILURE, or CONTROL_PLANE_FAILURE from the canonical receipt; repair only the proven failing boundary and never weaken frozen hashes, regenerate Teacher rows, or use private gold to force PASS."
+    },
     {
       "delegation_id": "SECOND-SHIFT-PROSE-TOMORROW-READINESS-001",
       "owner_path": "SYSTEM_MASTER/BOOK/PROSE",
@@ -13,7 +40,7 @@
       "valid_for_control_ref": "literary-prose-engine-001",
       "valid_for_control_head": "990ccfe7eb8bef46931f7cfd83fc176352ff7d6e",
       "created_at": "2026-09-09T22:38:00Z",
-      "last_revalidated_at": "2026-09-09T22:38:00Z",
+      "last_revalidated_at": "2026-09-09T22:48:00Z",
       "completion_delta": "Preserve and admit the completed Sep-09 Night Shift research/implementation/qualification body; resume the pending P4 Prose completion/evidence census from its first incomplete segment; compare PROSE-EVALUATOR-RESEARCH-DELTA-001 against current implementation; then implement and test only genuinely uncovered nonblind evaluator-robustness support on independent fixtures so day shift starts with a reconciled evidence map and executable next gate rather than repeated research.",
       "stop_condition": "(1) the P4 Prose census has a durable checkpoint covering the material Night Shift/Book-Evaluator/Literary-Prose evidence inspected; (2) completed Night Shift work is preserved as completion/evidence rather than rerun; (3) the five research-delta targets are classified ALREADY_COVERED, PARTIAL, or GAP with exact evidence pointers; (4) at least the highest-priority uncovered independent-fixture robustness gap is implemented and tested, or evidence proves no implementation delta exists; and (5) a tomorrow-ready handoff names the exact next dependency-valid Prose action and remaining authority boundaries.",
       "allowed_work": [
@@ -42,6 +69,18 @@
       "on_failure": "Preserve every completed phase and exact evidence pointer; classify the first unresolved boundary as implementation, evidence, source-custody, infrastructure, human/author, or blindness-related; do not restart the census/research from zero and do not weaken tests."
     }
   ],
+  "blocked_followups": [
+    {
+      "ticket_id": "BOOK-EVAL-REPAIR-005-GATE-D-PRIVATE-RECOVERY-2026-09-10",
+      "state": "HOLD",
+      "reason": "Requires exact saved DEVELOPMENT_GOLD to be securely staged on an A-01-local private path and verified by fixed hash/byte metadata before READY."
+    },
+    {
+      "ticket_id": "BOOK-EVAL-REPAIR-005-GATE-D-STUDENT-SELECTIVE-2026-09-10",
+      "state": "HOLD",
+      "reason": "Requires independent authoritative PASS receipts for both Teacher-freeze and private-gold recovery before 612+440=1,052 student retraining/selective-120B may run."
+    }
+  ],
   "delegation_history": [
     {
       "delegation_id": "SECOND-SHIFT-PROSE-CENSUS-001",
@@ -58,6 +97,6 @@
     }
   ],
   "owner_revalidation_required": false,
-  "reason": "Useful unattended-safe Prose work exists independently of the blind six-case score. Tonight should preserve/reconcile completed Night Shift evidence and perform dedupe-first evaluator robustness research/implementation on independent fixtures while the blind evaluation remains isolated for a fresh evaluator context.",
+  "reason": "Useful unattended-safe Prose work exists independently of the blind six-case score. Tonight has both a registered READY Book Evaluator Teacher-freeze A-01 qualification and nonblind tomorrow-readiness research/implementation work. Completed Night Shift evidence is preserved; blocked private/student followups remain explicit rather than being discarded.",
   "empty_is_valid": true
 }
