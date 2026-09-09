@@ -1,0 +1,46 @@
+name: Book System Version and Rollback A-01 Qualification
+
+on:
+  push:
+    branches:
+      - book-system/control-v1
+    paths:
+      - ".github/workflows/book-system-version-and-rollback-001-gateway.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  revalidate-hosted-subject:
+    name: Revalidate preserved 48-case hosted subject
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout preserved exact subject
+        uses: actions/checkout@v4
+        with:
+          ref: 402ab84a14e9d345530d60394ebc36176541dd21
+          fetch-depth: 1
+      - name: Verify exact subject
+        run: test "$(git rev-parse HEAD)" = "402ab84a14e9d345530d60394ebc36176541dd21"
+      - name: Run 48-case Version and Rollback qualifier
+        run: node .github/scripts/book-system-version-and-rollback-001-qualify-v2.js
+
+  qualify:
+    name: Authoritative A-01 Version and Rollback qualification
+    needs: revalidate-hosted-subject
+    uses: BFochtman746/system-master/.github/workflows/a01-control-plane-gateway.yml@main
+    with:
+      qualification_id: BOOK-SYSTEM-VERSION-AND-ROLLBACK-001
+      workstream_id: BOOK-SYSTEM
+      subject_sha: 402ab84a14e9d345530d60394ebc36176541dd21
+      origin_ref: refs/heads/book-system/control-v1
+      resume_on_pass: Close BOOK-SYSTEM-VERSION-AND-ROLLBACK-001 only for exact subject 402ab84a14e9d345530d60394ebc36176541dd21, preserve hosted and A-01 evidence, reconcile Book control and Second Shift, then advance only to BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001 if current canonical control still selects it.
+      resume_on_failure: Classify the authoritative receipt first. Preserve hosted 48/48 evidence; repair only a proven Book Version/Rollback subject failure on new bytes, and route INFRA_FAILURE or CONTROL_PLANE_FAILURE to the owning shared lane without changing A-01 authority from Book.
+      notification_target: book-system/control-v1
+      execution_context: normal
+      qualifier_timeout_minutes: 10
+      job_timeout_minutes: 15
+    secrets: inherit
