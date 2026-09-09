@@ -1,0 +1,56 @@
+{
+  "schema_id": "SECOND-SHIFT-DELEGATION-SCHEMA-001",
+  "purpose": "Contract for live owner-system delegation to unattended Second Shift. Scheduled workers do not own backlog; they consume current owner delegations and must revalidate before execution.",
+  "required_delegation_fields": [
+    "delegation_id",
+    "owner_path",
+    "objective_id",
+    "state",
+    "valid_for_control_ref",
+    "valid_for_control_head",
+    "created_at",
+    "last_revalidated_at",
+    "completion_delta",
+    "stop_condition",
+    "allowed_work",
+    "forbidden_authority",
+    "on_pass",
+    "on_failure"
+  ],
+  "allowed_states": [
+    "CANDIDATE",
+    "READY",
+    "CLAIMED",
+    "BLOCKED",
+    "SUPERSEDED",
+    "COMPLETED",
+    "CANCELLED"
+  ],
+  "active_states": ["CANDIDATE", "READY", "CLAIMED"],
+  "admission_rules": [
+    "Owner path must resolve through SYSTEM-TOPOLOGY-002.json.",
+    "valid_for_control_head must equal the live canonical owner control head at revalidation time.",
+    "READY requires a concrete completion delta and stop condition.",
+    "A changed control head invalidates READY/CLAIMED until re-evaluated against the new head.",
+    "A completed or superseded objective must be removed from active_delegations before the portfolio plan is generated.",
+    "Human, author, private-data, external-authority and native-platform blockers cannot be bypassed by Second Shift.",
+    "A-01 work additionally requires a currently registered qualifier, exact subject SHA and current policy admission.",
+    "If the owner chat completes the objective during day shift, it must reconcile the delegation in the same control update: retire it, then re-evaluate whether a successor deserves delegation.",
+    "If no useful delegation exists, leave the active list empty; do not invent work merely to fill the night."
+  ],
+  "execution_revalidation": {
+    "required": true,
+    "checks": [
+      "read CURRENT-AUTHORITY.json",
+      "read SYSTEM-TOPOLOGY-002.json",
+      "fetch live owner control head",
+      "compare with valid_for_control_head",
+      "verify objective remains open in current owner state",
+      "verify dependencies/blockers",
+      "verify exact subject and qualifier for A-01 work",
+      "verify remaining night window"
+    ],
+    "on_mismatch": "DO_NOT_EXECUTE_STALE_DELEGATION__REPLAN_FROM_CURRENT_OWNER_STATE"
+  },
+  "repair_rule": "A repair that changes subject code creates a new exact SHA and a replacement delegation linked to the failed receipt/delegation. The failed delegation never silently changes subject identity."
+}
