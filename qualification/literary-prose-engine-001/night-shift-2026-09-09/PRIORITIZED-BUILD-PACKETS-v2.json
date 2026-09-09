@@ -1,0 +1,91 @@
+{
+  "artifact_id": "LITERARY-PROSE-NIGHT-SHIFT-2026-09-09-PRIORITIZED-BUILD-PACKETS-v2",
+  "basis": [
+    "WORLD-CLASS-PROSE-GAP-AUDIT-v2.json",
+    "RESEARCH-PROVENANCE-v2.json",
+    "../extraction-calibration-001/EXTRACTION-CALIBRATION-CONTRACT-v1.json"
+  ],
+  "packets": [
+    {
+      "rank": 1,
+      "packet_id": "LITERARY-NARRATIVE-EXTRACTOR-CANDIDATE-001",
+      "lane": "BUILD_AHEAD",
+      "standing": "READY_AFTER_HOSTED_PROVIDER_BASELINE_PASS",
+      "objective": "Add one candidate source-to-observation extractor behind the source-bound provider interface and evaluate it without granting canonical authority.",
+      "acceptance": [
+        "Provider consumes only authorized source text and binds every result to its source SHA-256.",
+        "Outputs use ASSERTED/ALTERNATIVE/UNRESOLVED/ABSTAIN with calibrated confidence.",
+        "All nine extraction task families receive explicit evidence or documented non-support.",
+        "No provider output can authorize canonical state write.",
+        "Held-out evaluation reports per-task precision/recall/F1, false certainty, ambiguity preservation, calibration and risk-coverage rather than a universal narrative score."
+      ],
+      "stop_condition": "Do not tune repeatedly on the held-out source split. If one candidate cannot be evaluated without leakage or proprietary evidence custody, stop and repair the evaluation boundary first."
+    },
+    {
+      "rank": 2,
+      "packet_id": "LITERARY-EXTRACTION-SOURCE-HELD-OUT-002",
+      "lane": "PREPARE_NEXT",
+      "standing": "READY_FOR_DATASET_DESIGN",
+      "objective": "Expand the synthetic corpus into source-held-out public-domain/human-adjudicated evaluation slices with provenance and work-level split isolation.",
+      "acceptance": [
+        "Entire works/authors held out where practical.",
+        "No adjacent-passage train/test leakage.",
+        "Explicit event/coreference/temporal/causal/perspective/function annotation guidance.",
+        "Ambiguous and intentionally unresolved cases represented rather than forcibly labeled.",
+        "No hidden Book-Eval gold and no bulk copyrighted body acquisition."
+      ],
+      "stop_condition": "Do not enlarge the corpus merely for volume; add cases only when they cover a named stress slice, relation family, disagreement mode or observed extractor failure."
+    },
+    {
+      "rank": 3,
+      "packet_id": "LITERARY-PERSPECTIVE-REVELATION-CALIBRATION-003",
+      "lane": "BUILD_AHEAD",
+      "standing": "DEPENDENT_ON_BASELINE_EXTRACTOR_RESULTS",
+      "objective": "Harden focalization, knowledge/perception/belief and revelation/open-question extraction because current narrative benchmarks identify perspective and revelation as under-evaluated.",
+      "acceptance": [
+        "Knowledge-before-exposure false positives measured.",
+        "Narrator/focalizer identity not conflated.",
+        "Intentional omniscience remains representable.",
+        "Open questions and delayed revelations cannot be auto-closed without evidence.",
+        "Human-review path remains available for constitutively subjective perspective interpretations."
+      ],
+      "stop_condition": "Do not create a new perspective taxonomy unless an observed case cannot be represented by existing KNOWS/BELIEVES/PERCEIVES/FOCALIZES plus status/provenance fields."
+    },
+    {
+      "rank": 4,
+      "packet_id": "LITERARY-EDITORIAL-REVIEW-PACKET-HARDENING-004",
+      "lane": "PREPARE_NEXT",
+      "standing": "INDEPENDENT_LOW_RISK",
+      "objective": "Add explicit editorial stage/scope/query/escalation metadata to future author/editor review packets without changing current manuscript decisions.",
+      "acceptance": [
+        "Developmental/line/copy/mechanical scope is explicit when applicable.",
+        "Reason for human escalation is explicit.",
+        "Original-retained default remains explicit.",
+        "No queued item is auto-resolved or manuscript-mutated by schema migration."
+      ],
+      "stop_condition": "Do not rewrite existing author dispositions; apply the metadata contract prospectively or via evidence-preserving migration only."
+    },
+    {
+      "rank": 5,
+      "packet_id": "LITERARY-IDENTITY-DIVERSITY-DRIFT-005",
+      "lane": "RESEARCH_AHEAD",
+      "standing": "BOUNDED_FOLLOW_ON",
+      "objective": "Measure repeated-revision drift in project voice/cultural/lexical/cadence distributions without named-author targets.",
+      "acceptance": [
+        "Compare against the project/book baseline rather than an external prestige style.",
+        "Track diversity/identity drift across revision rounds.",
+        "Treat drift as a preservation risk signal, not a universal quality penalty.",
+        "Preserve protected irregularity and culturally specific expression."
+      ],
+      "stop_condition": "Do not optimize toward a single diversity statistic or infer demographic identity from prose."
+    }
+  ],
+  "not_prioritized": [
+    "another generic prose-quality rubric",
+    "universal plot template enforcement",
+    "named-author similarity optimization",
+    "automatic resolution of the three book-level AGLO author review items",
+    "bulk copyrighted corpus acquisition"
+  ],
+  "highest_value_next": "LITERARY-NARRATIVE-EXTRACTOR-CANDIDATE-001"
+}
