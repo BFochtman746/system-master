@@ -1,0 +1,25 @@
+{
+  "clarification_id": "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001-LIFECYCLE-CLARIFICATION",
+  "effective_date": "2026-09-09",
+  "standing": "CANONICAL_ADDITIVE_CLARIFICATION__NO_SECOND_LIFECYCLE_AUTHORITY",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "clarifies": "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001",
+  "reason": "Executable design review found that allowing Version/Rollback to reproduce a historical project status in the same operation would duplicate authority already owned and exact-SHA-qualified by BOOK-SYSTEM-LIFECYCLE-TRANSITION-ENGINE-001.",
+  "binding_rule": [
+    "Version/Rollback does not change Book project or unit lifecycle status during restore.",
+    "RESTORE_CONTENT is the executable restore behavior and preserves the current project lifecycle status while restoring exact governed content bindings from the historical target as a new successor state.",
+    "RESTORE_FULL_STATE is accepted only when the target historical project status already equals the current project status; otherwise it fails closed with FULL_STATE_RESTORE_REQUIRES_PRIOR_LIFECYCLE_TRANSITION.",
+    "When a desired historical content target requires a different workflow status, first obtain and commit the exact status transition through BOOK-SYSTEM-LIFECYCLE-TRANSITION-ENGINE-001, then submit the content restore against that new current parent identity.",
+    "Historical author approval, export freeze, publication status or publication authority is never reactivated by content restoration. Any required current author/export/publication authority must be separately re-established through its owning boundary."
+  ],
+  "compatibility": {
+    "contract_version_changed": false,
+    "canonical_state_model_changed": false,
+    "lifecycle_engine_changed": false,
+    "runtime_v2_changed": false,
+    "qualification_transfer": false,
+    "effect": "Narrows Version/Rollback authority to match existing qualified lifecycle ownership; no prior exact-SHA evidence is broadened."
+  },
+  "qualification_requirement": "The Version/Rollback qualifier must prove fail-closed behavior when RESTORE_FULL_STATE would change workflow status and must prove RESTORE_CONTENT preserves current status.",
+  "qualification_effect": "NONE until the changed Version/Rollback executable subject passes its own exact-SHA qualification."
+}
