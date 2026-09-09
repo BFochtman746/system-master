@@ -8,6 +8,7 @@ on:
       - 'qualification/a01/registry.json'
       - '.github/scripts/system-state-reconciler.js'
       - '.github/scripts/a01-closed-loop-repair*.js'
+      - '.github/scripts/a01-repair-broker*.js'
       - '.github/workflows/system-state-reconciler.yml'
   pull_request:
     paths:
@@ -15,6 +16,7 @@ on:
       - 'qualification/a01/registry.json'
       - '.github/scripts/system-state-reconciler.js'
       - '.github/scripts/a01-closed-loop-repair*.js'
+      - '.github/scripts/a01-repair-broker*.js'
       - '.github/workflows/system-state-reconciler.yml'
 
 concurrency:
@@ -36,17 +38,22 @@ jobs:
           fetch-depth: 1
           persist-credentials: true
 
-      - name: Syntax check reconciler and repair sidecar
+      - name: Syntax check reconciler and repair controls
         run: |
           node --check .github/scripts/system-state-reconciler.js
           node --check .github/scripts/a01-closed-loop-repair.js
           node --check .github/scripts/a01-closed-loop-repair-selftest.js
+          node --check .github/scripts/a01-repair-broker.js
+          node --check .github/scripts/a01-repair-broker-selftest.js
 
       - name: Self-test repository-state invariants
         run: node .github/scripts/system-state-reconciler.js --selftest
 
       - name: Self-test bounded closed-loop repair contract
         run: node .github/scripts/a01-closed-loop-repair-selftest.js
+
+      - name: Self-test owner-lane repair broker
+        run: node .github/scripts/a01-repair-broker-selftest.js
 
       - name: Reconcile live System Master state
         run: node .github/scripts/system-state-reconciler.js --out=.state-reconciler
