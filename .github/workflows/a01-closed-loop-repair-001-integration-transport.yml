@@ -1,0 +1,22 @@
+name: A01 Closed-Loop Repair 001 Integration Transport
+
+on:
+  push:
+    branches:
+      - core/a01-closed-loop-repair-001-integration-a01
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  qualify:
+    uses: BFochtman746/system-master/.github/workflows/a01-control-plane-gateway.yml@main
+    with:
+      qualification_id: A01-CLOSED-LOOP-REPAIR-SELFTEST
+      workstream_id: SYSTEM-MASTER
+      subject_sha: e1d5d38b0533d31425706ea761f0a1ee80e72d01
+      origin_ref: refs/heads/core/a01-closed-loop-repair-001-integration
+      resume_on_pass: Adjudicate only exact integration subject e1d5d38b0533d31425706ea761f0a1ee80e72d01. PASS proves the rebased sidecar self-test on A-01 and preserves zero promotion authority; integrate to main only by non-forced fast-forward after re-fetching live main and proving ancestry.
+      resume_on_failure: Preserve receipt/evidence and classify the exact rebased integration failure. Do not transfer the earlier ca3a924e PASS, weaken exact-SHA or repair fences, or overwrite concurrent main work.
+      notification_target: system-master-core-a01-closed-loop-repair-001-integration
