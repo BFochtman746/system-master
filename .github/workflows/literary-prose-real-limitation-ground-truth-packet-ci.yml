@@ -25,7 +25,26 @@ jobs:
           python-version: '3.12'
       - name: Compile packet validator
         run: python -m py_compile qualification/literary-prose-engine-001/step-f/validate_real_limitation_ground_truth_packet.py
-      - name: Validate unlabeled author packet
+      - name: Validate packet structure
         run: >-
           python qualification/literary-prose-engine-001/step-f/validate_real_limitation_ground_truth_packet.py
           qualification/literary-prose-engine-001/step-f/PROSE-REAL-LIMITATION-GROUND-TRUTH-AUTHOR-PACKET-001.json
+      - name: Require labels when author packet is authoritative
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, subprocess
+          from pathlib import Path
+
+          packet = Path('qualification/literary-prose-engine-001/step-f/PROSE-REAL-LIMITATION-GROUND-TRUTH-AUTHOR-PACKET-001.json')
+          data = json.loads(packet.read_text(encoding='utf-8'))
+          if data.get('labels_authoritative') is True:
+              subprocess.run([
+                  'python',
+                  'qualification/literary-prose-engine-001/step-f/validate_real_limitation_ground_truth_packet.py',
+                  str(packet),
+                  '--require-labels',
+              ], check=True)
+          else:
+              print('author labels not yet authoritative; --require-labels gate deferred')
+          PY
