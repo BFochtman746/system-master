@@ -1,0 +1,65 @@
+{
+  "hierarchy_id": "BOOK-SYSTEM-PROJECT-HIERARCHY-002",
+  "effective_date": "2026-09-09",
+  "standing": "CANONICAL__BOOK_PARENT_WITH_PROSE_CHILD_SYSTEM",
+  "supersedes_for_control": "BOOK-SYSTEM-PROJECT-HIERARCHY-001",
+  "global_topology_authority": "governance/SYSTEM-TOPOLOGY-001.json on canonical main",
+  "parent_system": {
+    "system_id": "BOOK",
+    "canonical_name": "BOOK SYSTEM",
+    "role": "PARENT_END_TO_END_BOOK_SYSTEM",
+    "control_branch": "book-system/control-v1",
+    "owns": [
+      "canonical book state",
+      "end-to-end book lifecycle",
+      "planning and orchestration",
+      "provider/service admission",
+      "author decision routing",
+      "version and rollback",
+      "publication and export lifecycle"
+    ]
+  },
+  "child_systems": [
+    {
+      "system_id": "PROSE",
+      "canonical_name": "PROSE SYSTEM",
+      "parent_system_id": "BOOK",
+      "relationship": "SUBORDINATE_CHILD_SYSTEM_BUILT_FOR_BOOK_SYSTEM",
+      "active_branch": "literary-prose-engine-001",
+      "implementation_family": "LITERARY PROSE ENGINE",
+      "owns": [
+        "Book Evaluator capability and qualification lane",
+        "literary/prose evaluation",
+        "evaluator and judge training",
+        "prose and craft training",
+        "diagnostics and calibration",
+        "revision intelligence",
+        "voice/canon/intent/protected-language preservation"
+      ],
+      "may_define_own_critical_path": true,
+      "may_define_book_parent_critical_path": false,
+      "may_self_admit_into_book_canonical_state": false
+    }
+  ],
+  "non_system_lanes": {
+    "BOOK-EVAL-LEMONADE-001": {
+      "classification": "PROSE_SYSTEM_CAPABILITY_AND_QUALIFICATION_LANE",
+      "owner_system_id": "PROSE",
+      "historical_branches_remain_valid": true,
+      "creates_peer_system": false
+    },
+    "LITERARY PROSE ENGINE": {
+      "classification": "PROSE_SYSTEM_IMPLEMENTATION_FAMILY",
+      "owner_system_id": "PROSE",
+      "creates_peer_system": false
+    },
+    "EDITORIAL_CAPABILITY_CROSSWALK": {
+      "classification": "BOOK_PARENT_INTEGRATION_AND_REUSE_LANE",
+      "owner_system_id": "BOOK",
+      "creates_peer_system": false
+    }
+  },
+  "admission_rule": "Prose System qualification proves only its tested child-system boundary. Book System alone admits a qualified Prose output into parent canonical book state or parent lifecycle transitions.",
+  "naming_rule": "Project, engine, branch, workstream, capability, qualification and chat labels cannot redefine this hierarchy. Historical labels remain evidence aliases only.",
+  "qualification_rule": "This successor changes control taxonomy and ownership only. It does not alter or transfer any prior exact-SHA qualification, private-data, human, author, publication or production authority."
+}
