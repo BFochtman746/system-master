@@ -1,0 +1,51 @@
+name: A-01 Repair Broker Transport Selftest
+
+on:
+  push:
+    paths:
+      - '.github/workflows/a01-repair-broker.yml'
+      - '.github/workflows/a01-repair-broker-transport-selftest.yml'
+      - '.github/scripts/a01-repair-broker*.js'
+      - '.github/scripts/a01-closed-loop-repair*.js'
+      - 'governance/repair/**'
+  pull_request:
+    paths:
+      - '.github/workflows/a01-repair-broker.yml'
+      - '.github/workflows/a01-repair-broker-transport-selftest.yml'
+      - '.github/scripts/a01-repair-broker*.js'
+      - '.github/scripts/a01-closed-loop-repair*.js'
+      - 'governance/repair/**'
+
+permissions:
+  contents: read
+
+jobs:
+  broker:
+    uses: ./.github/workflows/a01-repair-broker.yml
+    with:
+      receipt_id: synthetic-receipt-subject-failure-001
+      qualification_id: BOOK-SYSTEM-VERSION-AND-ROLLBACK-001
+      workstream_id: BOOK-SYSTEM
+      failed_subject_sha: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+      result_class: SUBJECT_FAILURE
+      evidence_pointer: synthetic:selftest
+      repair_attempt: 0
+      max_repair_attempts: 1
+
+  assert-route:
+    needs: broker
+    runs-on: ubuntu-latest
+    steps:
+      - name: Assert owner-lane broker outputs
+        env:
+          TRANSACTION_ID: ${{ needs.broker.outputs.transaction_id }}
+          TRANSACTION_STATE: ${{ needs.broker.outputs.transaction_state }}
+          TARGET_INBOX: ${{ needs.broker.outputs.target_inbox }}
+        run: |
+          test -n "$TRANSACTION_ID"
+          test "$TRANSACTION_STATE" = "REPAIR_REQUEST_READY"
+          test "$TARGET_INBOX" = "governance/repair/BOOK-REPAIR-INBOX.json"
+          echo "A01_REPAIR_BROKER_TRANSPORT_SELFTEST_PASS"
+          echo "transaction_id=$TRANSACTION_ID"
+          echo "transaction_state=$TRANSACTION_STATE"
+          echo "target_inbox=$TARGET_INBOX"
