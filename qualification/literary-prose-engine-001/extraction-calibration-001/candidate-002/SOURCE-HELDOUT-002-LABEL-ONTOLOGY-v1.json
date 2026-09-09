@@ -1,0 +1,48 @@
+{
+  "ontology_id": "LITERARY-SOURCE-HELDOUT-002-LABEL-ONTOLOGY-v1",
+  "standing": "PROSPECTIVE_SHARED_MODEL_HUMAN_LABEL_CONTRACT__NO_GOLD_INCLUDED",
+  "purpose": "Make Candidate-002 model predictions and independent human adjudication mechanically comparable without arbitrary per-adjudicator IDs or leakage of gold to the model.",
+  "source_identity": {
+    "required": "exact SOURCE-HELDOUT-002A passage_sha256",
+    "decode": "UTF-8 strict",
+    "unicode_normalization": "NONE",
+    "whitespace_normalization": "NONE",
+    "offset_unit": "Unicode code-point index in the exact decoded passage",
+    "end_offset": "exclusive"
+  },
+  "source_bound_ids": {
+    "anchor": "A<start>-<end>",
+    "entity": "C<start>-<end>",
+    "event": "EV<start>-<end>",
+    "goal": "G<start>-<end>",
+    "question": "Q<start>-<end>",
+    "motif": "M<start>-<end>",
+    "rule": "The span must point to the shortest source phrase sufficient to identify the item. IDs may not be invented from case order, adjudicator preference, or model output order."
+  },
+  "common_statuses": ["ASSERTED", "ALTERNATIVE", "UNRESOLVED", "ABSTAIN"],
+  "task_grammars": {
+    "ANCHOR_LOCALIZATION": ["anchor:A<start>-<end>"],
+    "ENTITY_IDENTITY_COREFERENCE": ["entity:C<start>-<end>", "coref:C<mention_start>-<mention_end>->C<entity_start>-<entity_end>", "distinct_entity:C<id>!=C<id>"],
+    "EVENT_IDENTITY": ["event:EV<start>-<end>", "same_event:EV<id>=EV<id>", "distinct_event:EV<id>!=EV<id>"],
+    "STORY_VS_DISCOURSE_TIME": ["story:EV<id>_<BEFORE|AFTER|OVERLAPS|SIMULTANEOUS|UNRESOLVED>_EV<id>", "discourse:EV<id>_<BEFORE|AFTER|OVERLAPS|SIMULTANEOUS|UNRESOLVED>_EV<id>"],
+    "CAUSAL_GOAL_RELATIONS": ["causes:EV<id>->EV<id>", "enables:EV<id>->EV<id>", "prevents:EV<id>->EV<id>", "goal:EV<id>_SUPPORTS_G<id>", "goal:EV<id>_OPPOSES_G<id>", "causal:EV<id>_REL_EV<id>_UNRESOLVED"],
+    "EPISTEMIC_FOCALIZATION": ["perceives:C<id>_EV<id>", "believes:C<id>_P<start>-<end>", "knows:C<id>_P<start>-<end>", "focalizes:C<id>_A<id>", "epistemic:C<id>_P<id>_UNRESOLVED"],
+    "NARRATIVE_FUNCTION": ["function:A<id>=SETUP", "function:A<id>=PAYOFF", "function:A<id>=CHARACTER_REVEAL", "function:A<id>=TURN", "function:A<id>=ESCALATION", "function:A<id>=REVERSAL", "function:A<id>=FRAME_SHIFT", "function:A<id>=EXPOSITION", "function:A<id>=MOTIF_INTRODUCTION", "function:A<id>=MOTIF_TRANSFORMATION", "function:A<id>=OTHER", "function:A<id>=UNRESOLVED"],
+    "SETUP_PAYOFF_OPEN_QUESTION": ["setup:A<id>->Q<id>", "payoff:A<id>->Q<id>", "status:Q<id>=OPEN", "status:Q<id>=PARTIAL", "status:Q<id>=CLOSED", "status:Q<id>=UNRESOLVED"],
+    "ARC_ORCHESTRATION": ["arc:C<id>_BEAT_A<id>=INTRODUCTION", "arc:C<id>_BEAT_A<id>=ESCALATION", "arc:C<id>_BEAT_A<id>=TURN", "arc:C<id>_BEAT_A<id>=REVERSAL", "arc:C<id>_BEAT_A<id>=RESOLUTION", "arc:C<id>_STATUS=OPEN", "arc:C<id>_STATUS=PARTIAL", "arc:C<id>_STATUS=CLOSED", "arc:C<id>_STATUS=UNRESOLVED", "motif:M<id>_A<id>=INTRODUCTION", "motif:M<id>_A<id>=TRANSFORMATION"]
+  },
+  "comparison_rules": [
+    "Scoring compares canonical labels only after validating every referenced span against the exact passage digest.",
+    "Equivalent arbitrary IDs are forbidden; source offsets supply identity.",
+    "ALTERNATIVE and UNRESOLVED are first-class outcomes and must not be coerced into ASSERTED for scoring convenience.",
+    "A relation unsupported by source evidence is not inferred merely because it creates a cleaner graph.",
+    "ABSTAIN carries no positive semantic label beyond the task-scoped abstention marker.",
+    "Gold, forbidden labels, adjudicator notes and disagreement records remain evaluator-only and are never part of the model request."
+  ],
+  "authority": {
+    "canonical_state_write_authorized": false,
+    "manuscript_mutation_authorized": false,
+    "author_intent_authority": false,
+    "promotion_authorized": false
+  }
+}
