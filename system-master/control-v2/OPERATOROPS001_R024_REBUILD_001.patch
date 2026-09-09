@@ -1,0 +1,47 @@
+OPERATOROPS001_R024_REBUILD_001
+Base dependency-current subject: SMR019 9571b3f4f876980047facbdd77cf17f8a8a2d3255bab9704ceb3fd49cddbd5f3
+Recovered historical semantic donor: SYSTEM_MASTER_OFFICIAL_SPINE_v2.0.23_OPERATOR-OPS-001-REVIEWED_A01-PENDING.zip
+Historical donor SHA-256: 4f900a29b4130d01f489188bd1fd9c36e2f0b53e8247c4634e8bc587dcd3ea9e
+New SMR020 source/test subject: 89066e5662554b1810691473e0ed9bf49d8cc2fd4964444043b878461ed75477
+
+Purpose
+- Reimplement OPERATOR-OPS-001 as projection/control intent only on the current rebuild lineage.
+- Preserve exact R024 60-operation NON_ACTIVATABLE migration semantics.
+- Preserve fail-closed evidence/dependency/capability/caller behavior.
+- Preserve PLATFORM-006 capability admission and PLATFORM-010 effect authority boundaries.
+- Close the demonstrated historical Java/JSON-Schema parity gap.
+
+Primary additions
++ rebuild-native OperatorOperation / OperatorReadiness / OperatorOpsRegistry
++ exact recovered 60-operation migration
++ rebuild-current operator-operation and operator-readiness schemas
++ focused OperatorOpsAuthorityTests
++ migration, contract-parity, persistence-boundary and R024 recurrence verifiers
+
+Control binding
+- OPERATOR-OPS-001 -> REBUILD_IMPLEMENTED_PORTABLE_QUALIFIED at 0.21.0
+- CAP-OPERATOROPS001-001..006 -> IMPLEMENTED_PORTABLE_QUALIFIED
+- ROUTE-AUTH-0082..0087 -> implemented bounded projection routes with side_effect=NONE
+- CONTRACT-OPERATOR-OPERATION / CONTRACT-OPERATOR-READINESS -> rebuild-current 2.0.0
+- FAM-OPERATOR-GOVERNED-PROJECTION + FAM-OPERATOR-FAIL-CLOSED-READINESS authoritative
+- PC-ENDGAME-027 retains live Windows/operator-console/approval/effect/recovery and historical O012/O013 evidence
+- no OPERATOR PostgreSQL canonical objects created
+
+Qualification
+PASS strict Java 21, 399 main + 20 test sources
+PASS 20/20 executable suites
+PASS OPERATOR focused checks=19
+PASS 60/60 migration
+PASS 2/2 contract parity
+PASS PostgreSQL canonical objects=0
+PASS R024 recurrence obligations=13 (11 portable controls, 2 target empirical fences)
+PASS system coherence
+PASS engineering congruence
+PASS exact subject 89066e5662554b1810691473e0ed9bf49d8cc2fd4964444043b878461ed75477
+PASS release manifest 1082/1082
+
+Not claimed
+- A-01/Windows empirical PASS
+- live operator-console/approval-store/effect integration PASS
+- production certification
+- GitHub-native runnable source custody or hosted qualification
