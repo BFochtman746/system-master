@@ -1,0 +1,20 @@
+{
+  "registry_id": "REPAIR-LEDGER-REGISTRY-001",
+  "effective_date": "2026-09-09",
+  "product_root": "SYSTEM_MASTER",
+  "event_schema": "governance/repair/REPAIR-EVENT-SCHEMA-001.json",
+  "event_root": "governance/repair/events",
+  "owner_inbox_registry": "governance/repair/REPAIR-INBOX-REGISTRY-001.json",
+  "replacement_ticket_root": "qualification/a01/repair-requests",
+  "replacement_ticket_schema": "qualification/a01/schema/return-ticket.schema.json",
+  "rules": [
+    "Repair history is append-only. New events are added; earlier events are not rewritten to make current state cleaner.",
+    "One transaction_id represents one failed-receipt lineage. A changed repaired subject remains in the same transaction lineage but always has a new exact SHA.",
+    "TRANSACTION_OPENED is idempotent by transaction_id plus receipt_id; conflicting duplicate lineage fails closed.",
+    "Only REPAIRABLE_SUBJECT transactions may emit changed-SHA replacement tickets.",
+    "A replacement ticket requires deterministic prequalification PASS on the exact replacement SHA and preserves qualification_id, workstream_id and parent receipt lineage.",
+    "Repair events and owner inbox state are routing/control evidence only; they never create A-01 PASS, promotion, author, publication or production authority.",
+    "Human, author, private-data, native-platform and external-authority routes do not emit automated product replacement tickets.",
+    "The System State Reconciler may derive current repair standing from event history and owner inbox projections."
+  ]
+}
