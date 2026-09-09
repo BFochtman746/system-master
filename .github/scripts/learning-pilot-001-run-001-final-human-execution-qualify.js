@@ -41,40 +41,117 @@ function observedTestCount(text, name) {
   return Number(matches[matches.length - 1][1]);
 }
 
+function gitBlob(file) {
+  const result = cp.spawnSync('git', ['hash-object', '--', file], { cwd: ROOT, encoding: 'utf8', shell: false });
+  if (result.status !== 0) throw new Error(`GIT_HASH_OBJECT_FAILED:${file}:${result.stderr || result.stdout}`);
+  return result.stdout.trim();
+}
+
+function assertSuite(name, modules, expectedCount, seed = '0') {
+  const result = run(name, 'python', ['-m', 'unittest', '-v', ...modules], {
+    cwd: LAB,
+    env: { PYTHONHASHSEED: seed },
+  });
+  const text = result.stdout + result.stderr;
+  const count = observedTestCount(text, name.toUpperCase().replace(/-/g, '_'));
+  assert(count === expectedCount, `${name.toUpperCase()}_EXPECTED_${expectedCount}_GOT_${count}`);
+  assert(/\bOK\b/.test(text), `${name.toUpperCase()}_NOT_OK`);
+  return count;
+}
+
 try {
   const subject = (process.env.A01_SUBJECT_SHA || process.env.GITHUB_SHA || '').trim();
   assert(/^[0-9a-f]{40}$/i.test(subject), `INVALID_SUBJECT_SHA:${subject}`);
   fs.writeFileSync(path.join(evidenceDir, 'subject-sha.txt'), `${subject}\n`);
 
-  // Inherit the full closed-loop qualification: frozen protocol authority,
-  // promotion boundary, complete Learning Lab discovery, and repeated critical
-  // integrity tests under deterministic hash seeds. This creates synthetic
-  // qualification evidence only; it cannot stand in for a participant.
-  run('closed-loop-base', 'node', ['.github/scripts/learning-pilot-001-run-001-closed-loop-overnight-qualify.js'], {
-    env: { A01_SUBJECT_SHA: subject, A01_EVIDENCE_DIR: evidenceDir },
-  });
+  const frozen = {
+    'learning/lab/LEARNING_LAB_PILOT_001_PROTOCOL.md': '0db3de824060f4eb7ce3c2c7ffa0ed4b57ba9d35',
+    'learning/lab/learning_lab/real_learner_pilot.py': '0c9f7a8b7850cef15643e3c11899585d2c25a08d',
+    'learning/lab/tests/test_real_learner_pilot.py': 'e77d423078af4662f2c72b0cc1f8501e20d29851',
+    'learning/lab/qualification_pilot001.py': '44aa0124f194f074a421f0a87a0695d96d7bae11',
+  };
+  const frozenLines = [];
+  for (const [file, expected] of Object.entries(frozen)) {
+    const actual = gitBlob(file);
+    assert(actual === expected, `FROZEN_PILOT_BLOB_DRIFT:${file}:expected=${expected}:actual=${actual}`);
+    frozenLines.push(`${file}=${actual}`);
+  }
+  fs.writeFileSync(path.join(evidenceDir, 'frozen-blobs.txt'), frozenLines.join('\n') + '\n');
 
+  run('python-version', 'python', ['--version']);
+  run('compile', 'python', [
+    '-m', 'py_compile',
+    'learning/lab/run_pilot001.py',
+    'learning/lab/run_pilot001_closed_loop.py',
+    'learning/lab/run_pilot001_real_participant.py',
+    'learning/lab/run_pilot001_review_intake.py',
+    'learning/lab/learning_lab/real_learner_pilot_completion.py',
+    'learning/lab/learning_lab/real_learner_pilot_handoff.py',
+    'learning/lab/learning_lab/real_learner_pilot_preflight.py',
+    'learning/lab/learning_lab/real_learner_pilot_review_intake.py',
+    'learning/lab/learning_lab/real_learner_pilot_withdrawal.py',
+    'learning/lab/learning_lab/real_learner_pilot_human_session.py',
+  ]);
+
+  const closedLoopModules = [
+    'tests.test_real_learner_pilot_completion',
+    'tests.test_real_learner_pilot_closed_loop_launcher',
+    'tests.test_real_learner_pilot_console',
+    'tests.test_real_learner_pilot_withdrawal',
+    'tests.test_real_learner_pilot_human_session',
+    'tests.test_real_learner_pilot_runtime_binding',
+    'tests.test_real_learner_pilot',
+  ];
+  const predecessorModules = [
+    'tests.test_unified_fresh_evidence_recovery',
+    'tests.test_fresh_evidence_provider_acquisition',
+    'tests.test_fresh_evidence_configured_http',
+    'tests.test_fresh_evidence_admission',
+    'tests.test_unified_turn_controller',
+    'tests.test_adaptive_journey_continuation',
+    'tests.test_provider_multi_candidate_runtime',
+  ];
   const evidenceModules = [
     'tests.test_real_learner_pilot_review_intake',
     'tests.test_real_learner_pilot_evidence_notice',
     'tests.test_real_learner_pilot_handoff',
     'tests.test_real_learner_pilot_preflight',
   ];
-  const focused = run('local-first-evidence-boundary', 'python', ['-m', 'unittest', '-v', ...evidenceModules], {
-    cwd: LAB,
-    env: { PYTHONHASHSEED: '0' },
-  });
-  const focusedText = focused.stdout + focused.stderr;
-  const focusedCount = observedTestCount(focusedText, 'LOCAL_FIRST_EVIDENCE_BOUNDARY');
-  assert(focusedCount === 13, `LOCAL_FIRST_EVIDENCE_BOUNDARY_EXPECTED_13_GOT_${focusedCount}`);
-  assert(/\bOK\b/.test(focusedText), 'LOCAL_FIRST_EVIDENCE_BOUNDARY_NOT_OK');
+
+  const closedLoopCount = assertSuite('closed-loop-current', closedLoopModules, 54);
+  const predecessorCount = assertSuite('predecessor-regressions', predecessorModules, 57);
+  const evidenceCount = assertSuite('local-first-evidence-boundary', evidenceModules, 13);
+
+  const full = run('full-learning-lab-suite', 'python', [
+    '-m', 'unittest', 'discover', '-v', '-s', 'tests', '-p', 'test_*.py',
+  ], { cwd: LAB, env: { PYTHONHASHSEED: '0' } });
+  const fullText = full.stdout + full.stderr;
+  const fullCount = observedTestCount(fullText, 'FULL_LEARNING_LAB');
+  assert(fullCount === 698, `FULL_LEARNING_LAB_EXPECTED_698_GOT_${fullCount}`);
+  assert(/\bOK\b/.test(fullText), 'FULL_LEARNING_LAB_SUITE_NOT_OK');
+  fs.writeFileSync(path.join(evidenceDir, 'full-learning-lab-test-count.txt'), `${fullCount}\n`);
+
+  const seeds = ['1', '7', '42', '99'];
+  let repeatedTests = 0;
+  for (const seed of seeds) {
+    repeatedTests += assertSuite(`critical-seed-${seed}`, closedLoopModules, 54, seed);
+  }
 
   const policy = fs.readFileSync(path.join(LAB, 'PILOT_001_RUN_001_EVIDENCE_HANDLING.md'), 'utf8');
   const consent = fs.readFileSync(path.join(LAB, 'PILOT_001_RUN_001_PARTICIPANT_CONSENT.md'), 'utf8');
   const entry = fs.readFileSync(path.join(LAB, 'run_pilot001.py'), 'utf8');
+  const launcher = fs.readFileSync(path.join(LAB, 'run_pilot001_closed_loop.py'), 'utf8');
+  const completion = fs.readFileSync(path.join(LAB, 'learning_lab', 'real_learner_pilot_completion.py'), 'utf8');
+  const handoff = fs.readFileSync(path.join(LAB, 'learning_lab', 'real_learner_pilot_handoff.py'), 'utf8');
   const review = fs.readFileSync(path.join(LAB, 'learning_lab', 'real_learner_pilot_review_intake.py'), 'utf8');
   const reviewCli = fs.readFileSync(path.join(LAB, 'run_pilot001_review_intake.py'), 'utf8');
 
+  assert(completion.includes('RETENTION_MINIMUM_DELAY_SECONDS = 3600'), 'RETENTION_DELAY_BOUNDARY_MISSING');
+  assert(completion.includes('PILOT_COMPLETION_CAPTURE_WITHOUT_HUMAN_ATTESTATION'), 'HUMAN_ATTESTATION_FAIL_CLOSED_BOUNDARY_MISSING');
+  assert(completion.includes('COMPLETION_READY'), 'TRANSFER_COMPLETION_AUTHORITY_MISSING');
+  assert(launcher.includes('turn.get("mode") == "WAIT"'), 'WAIT_RESPONSE_GUARD_MISSING');
+  assert(launcher.includes('raw_response_included": False'), 'DIGEST_ONLY_COMPLETION_PACKAGE_BOUNDARY_MISSING');
+  assert(handoff.includes('local_hash_files_alone_prevent_malicious_rewrite": False'), 'HANDOFF_LOCAL_HASH_TRUTH_BOUNDARY_MISSING');
   assert(policy.includes('Local-by-default storage'), 'LOCAL_FIRST_POLICY_MISSING');
   assert(policy.includes('MUST NOT automatically'), 'NO_AUTOMATIC_UPLOAD_POLICY_MISSING');
   assert(policy.includes('Local review-intake generation is NOT external-export authorization'), 'EXPORT_AUTHORITY_BOUNDARY_MISSING');
@@ -96,7 +173,7 @@ try {
   const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'pilot001-final-human-preflight-'));
   try {
     const preflight = run('participant-entry-preflight', 'python', [
-      'learning/lab/run_pilot001.py', '--state-root', tempRoot, '--preflight-only'
+      'learning/lab/run_pilot001.py', '--state-root', tempRoot, '--preflight-only',
     ]);
     const preflightText = preflight.stdout + preflight.stderr;
     assert(preflightText.includes('READY_FOR_EXPLICIT_PARTICIPANT_CONSENT'), 'PARTICIPANT_PREFLIGHT_NOT_READY');
@@ -110,7 +187,13 @@ try {
 
   const truth = [
     'PILOT_RUN001_FINAL_HUMAN_EXECUTION_QUALIFIER=PASS',
-    `PILOT_RUN001_LOCAL_FIRST_EVIDENCE_TESTS=${focusedCount}`,
+    `PILOT_RUN001_CLOSED_LOOP_CURRENT_TESTS=${closedLoopCount}`,
+    `PILOT_RUN001_PREDECESSOR_REGRESSIONS=${predecessorCount}`,
+    `PILOT_RUN001_LOCAL_FIRST_EVIDENCE_TESTS=${evidenceCount}`,
+    `PILOT_RUN001_FULL_LEARNING_LAB_TESTS=${fullCount}`,
+    `PILOT_RUN001_CRITICAL_REPEAT_TESTS=${repeatedTests}`,
+    'PILOT_RUN001_CRITICAL_HASH_SEEDS=1,7,42,99',
+    'PILOT_RUN001_FROZEN_V1_CHANGED=FALSE',
     'PILOT_RUN001_PARTICIPANT_STORAGE_DEFAULT=LOCAL',
     'PILOT_RUN001_AUTOMATIC_EXTERNAL_UPLOAD=FALSE',
     'PILOT_RUN001_REVIEW_INTAKE_IS_EXPORT_AUTHORITY=FALSE',
@@ -126,7 +209,11 @@ try {
   fs.writeFileSync(path.join(evidenceDir, 'final-human-execution-truth-boundary.txt'), truth);
 
   console.log('PILOT_RUN001_FINAL_HUMAN_EXECUTION_STATUS=PASS');
-  console.log(`PILOT_RUN001_LOCAL_FIRST_EVIDENCE_TESTS=${focusedCount}`);
+  console.log(`PILOT_RUN001_CLOSED_LOOP_CURRENT_TESTS=${closedLoopCount}`);
+  console.log(`PILOT_RUN001_PREDECESSOR_REGRESSIONS=${predecessorCount}`);
+  console.log(`PILOT_RUN001_LOCAL_FIRST_EVIDENCE_TESTS=${evidenceCount}`);
+  console.log(`PILOT_RUN001_FULL_LEARNING_LAB_TESTS=${fullCount}`);
+  console.log(`PILOT_RUN001_CRITICAL_REPEAT_TESTS=${repeatedTests}`);
   console.log('PILOT_RUN001_REAL_PARTICIPANT_EVIDENCE=NOT_CREATED');
 } catch (error) {
   fs.writeFileSync(path.join(evidenceDir, 'final-human-execution-qualifier-failure.txt'), `${error.stack || error.message}\n`);
