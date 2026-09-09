@@ -37,7 +37,7 @@ STEP-I implements the logically independent comparison layer between STEP-H cand
 
 Eighteen synthetic fixtures pass. They cover clear challenger win, original win, position bias, malformed swap, canon and protected-language vetoes, unresolved preservation, writer-rationale contamination, blinding leakage, named-author target, low confidence, unavailable swap evidence, tie, unresolved tradeoff, unresolved voice comparison, conditional historical constraint, inapplicable theological constraint, and deterministic identity.
 
-After the initial closure, implementation commit `04fe5454218231fd2346272efa5eed207f8ceb55` hardened neutral-label validation and orientation-confidence gating. The unchanged 18-case qualification suite was rerun against that hardened implementation and passed. The hardened behavior is therefore included in this closure standing.
+After the initial closure, implementation commit `04fe5454218231fd2346272efa5eed207f8ceb55` hardened neutral-label validation and orientation-confidence gating. The unchanged 18-case qualification suite was rerun against that hardened implementation and passed. Nine additional hardening regressions also pass and are preserved in `STEP-I-HARDENING-EVIDENCE.json`; they specifically prove valid 1–2-letter labels, fail-closed missing/duplicate/overlength/numeric/lowercase labels, and rejection of low-confidence forward or swapped orientations. The hardened evaluator blob is `4a36fed5137e71839b8cf0b500a9c1fc1b14f2ca`.
 
 ## Boundaries
 
