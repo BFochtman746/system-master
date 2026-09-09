@@ -1,9 +1,15 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import Path
+import sys
 from typing import Protocol
 
-from ..extractor_provider import ExtractionRequest, validate_provider_output
+PARENT = Path(__file__).resolve().parents[1]
+if str(PARENT) not in sys.path:
+    sys.path.insert(0, str(PARENT))
+
+from extractor_provider import ExtractionRequest, validate_provider_output
 
 
 class ModelBackend(Protocol):
