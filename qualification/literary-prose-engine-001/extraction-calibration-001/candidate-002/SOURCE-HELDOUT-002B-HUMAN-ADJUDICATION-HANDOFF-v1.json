@@ -1,0 +1,36 @@
+{
+  "handoff_id": "LITERARY-EXTRACTION-SOURCE-HELD-OUT-002B__HUMAN_ADJUDICATION",
+  "parent_objective": "LITERARY-EXTRACTION-SOURCE-HELD-OUT-002",
+  "predecessor_gate": "LITERARY-EXTRACTION-SOURCE-HELD-OUT-002A__PREHUMAN_SOURCE_CUSTODY",
+  "predecessor_receipt": "SOURCE-HELDOUT-002A-HOSTED-QUALIFICATION-RECEIPT-v1.json",
+  "predecessor_subject_sha": "c01f6d99c64a14815f788ccd0bbc60da7ee5de29",
+  "predecessor_result": "PASS",
+  "standing": "BLOCKED — HUMAN",
+  "purpose": "Obtain independent leakage-resistant structural gold for the six source-custody-qualified public-domain heldout cases without exposing gold to Candidate-002 and without creating manuscript, canon or promotion authority.",
+  "human_inputs_required": {
+    "case_count": 6,
+    "task_packet_count": 18,
+    "high_risk_tasks_require_independent_reviews": 2,
+    "single_review_allowed_only_as_defined_by_contract": true,
+    "disagreement_must_be_preserved": true,
+    "unresolved_is_allowed": true,
+    "gold_visibility_to_model": "FORBIDDEN"
+  },
+  "required_human_event": "Independent adjudicators complete the gold-empty task packets under HUMAN-ADJUDICATION-PACKET-CONTRACT-v1.json. For high-risk tasks, two independent reviews are required. Any disagreement not resolvable from source evidence remains explicit disagreement/UNRESOLVED rather than fabricated consensus.",
+  "machine_actions_forbidden_until_human_event": [
+    "Do not claim heldout model accuracy or calibration.",
+    "Do not score against fabricated, inferred or assistant-authored gold.",
+    "Do not expose adjudication labels, forbidden labels or adjudication notes to the model backend.",
+    "Do not mutate canonical narrative state, manuscript content, publication state or canon.",
+    "Do not treat hosted source-custody PASS as A-01 or promotion authority."
+  ],
+  "resume_after_human_event": {
+    "first_machine_action": "Validate every completed adjudication packet against HUMAN-ADJUDICATION-PACKET-CONTRACT-v1.json and the exact passage digests in SOURCE-HELDOUT-002A-HOSTED-QUALIFICATION-RECEIPT-v1.json.",
+    "next_gate": "Freeze one real learned/model backend prediction set with model gold visibility false, then expose gold to the scorer only after prediction freeze and compute per-task precision/recall/F1, false-certainty, ambiguity preservation, calibration and anchor-quality evidence.",
+    "pass_proves": "Candidate-002 has real human-adjudicated source-heldout model evidence under leakage-resistant source, provider and scorer boundaries.",
+    "pass_does_not_prove": "Universal literary understanding, author intent, manuscript mutation authority, A-01 authority or production/promotion authority.",
+    "on_failure": "Repair only the failing adjudication-contract, gold-isolation, provider, prediction-freeze, task-family, false-certainty, ambiguity, calibration or scoring boundary; do not replace frozen passages because of model underperformance."
+  },
+  "a01_ticket_justified_now": false,
+  "a01_reason": "The unresolved completion delta is independent human adjudication. A-01 cannot create or substitute that evidence. Reevaluate only after human adjudication and hosted real-model scoring produce a new exact-SHA runner-specific qualification delta."
+}
