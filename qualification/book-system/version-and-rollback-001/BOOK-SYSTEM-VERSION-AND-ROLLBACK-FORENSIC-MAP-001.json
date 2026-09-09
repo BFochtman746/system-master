@@ -1,0 +1,117 @@
+{
+  "map_id": "BOOK-SYSTEM-VERSION-AND-ROLLBACK-FORENSIC-MAP-001",
+  "effective_date": "2026-09-09",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "standing": "CLOSED__EXISTING_VERSION_ROLLBACK_SEMANTICS_MAPPED__NO_DUPLICATE_ENGINE_REQUIRED",
+  "classification_vocabulary": ["KEEP", "ADD_OR_REFINE", "DO_NOT_ADD", "UNRESOLVED"],
+  "reviewed": [
+    "BOOK-SYSTEM-AUTHORING-LIFECYCLE-CONTRACT-001",
+    "BOOK-SYSTEM-CANONICAL-BOOK-STATE-MODEL-001",
+    "BOOK-SYSTEM-LIFECYCLE-TRANSITION-ENGINE-001",
+    "BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-002",
+    "BOOK-SYSTEM-PUBLICATION-EXPORT-STANDARDS-PROFILE-001",
+    "BOOK-SYSTEM-PROVENANCE-INTEROPERABILITY-PROJECTION-001"
+  ],
+  "matrix": [
+    {
+      "area": "STATE_VERSION_AND_DIGEST_PRECONDITION",
+      "classification": "KEEP",
+      "existing": "Canonical State Model mutation envelope requires expected_state_version and expected_state_digest; Lifecycle and Runtime V2 also bind exact parent version/digest.",
+      "decision": "Reuse these exact-current preconditions as the concurrency authority for Version/Rollback."
+    },
+    {
+      "area": "TRANSACTIONAL_ROLLBACK_IDENTITY",
+      "classification": "KEEP",
+      "existing": "Lifecycle Transition Engine receipts preserve pre/post parent and ledger versions/digests plus rollback identities and return pre-transaction state on commit.",
+      "decision": "Reuse receipt-style pre/post/rollback identity; Version/Rollback must not redefine lifecycle transitions."
+    },
+    {
+      "area": "RUNTIME_V2_IMMUTABLE_RECEIPTS_AND_OUTBOX",
+      "classification": "KEEP",
+      "existing": "Runtime V2 already preserves immutable proposal snapshots, exact source/artifact/provenance identities, transactional receipts and append-only outbox entries.",
+      "decision": "Reuse the append-only receipt/outbox pattern; Version/Rollback adds parent canonical-version lineage rather than a second proposal runtime."
+    },
+    {
+      "area": "MANUSCRIPT_VERSION_LINEAGE",
+      "classification": "KEEP",
+      "existing": "MANUSCRIPT_MANIFEST carries version_id, artifact_digest, parent_version_ref and change_set_ref.",
+      "decision": "Preserve these fields and bind them into the unified parent object-version ledger."
+    },
+    {
+      "area": "OTHER_PARENT_OBJECT_VERSION_FIELDS",
+      "classification": "KEEP",
+      "existing": "GOVERNING_BRIEF, CANON_MANIFEST, STORY_BIBLE and BOOK_PLAN already carry object IDs plus version fields.",
+      "decision": "Do not replace their schemas merely to version them; create sidecar immutable object-version nodes binding exact payload digests and predecessor nodes."
+    },
+    {
+      "area": "UNIFIED_PARENT_VERSION_LEDGER",
+      "classification": "ADD_OR_REFINE",
+      "gap": "No single durable parent ledger currently reconstructs complete canonical-state snapshots, exact object-version nodes, active-version bindings and restore lineage across all governed Book objects.",
+      "decision": "Add one Book-parent version ledger as an authority-preserving overlay on the qualified Canonical State Model."
+    },
+    {
+      "area": "ACTIVE_POINTER_EXACT_VERSION_BINDING",
+      "classification": "ADD_OR_REFINE",
+      "gap": "Some current active refs name object IDs without independently proving which version payload/digest is current when multiple versions share an ID.",
+      "decision": "Version ledger records exact active binding node IDs for governing brief, canon manifest, story bible, plan and manuscript at each committed parent state."
+    },
+    {
+      "area": "RESTORE_AS_NEW_SUCCESSOR",
+      "classification": "ADD_OR_REFINE",
+      "gap": "Existing receipts preserve rollback targets but no parent executable boundary currently restores prior accepted content while preserving later history and revalidating current authority.",
+      "decision": "Implement restoration as a new successor state derived from an exact historical snapshot. Never edit or delete the historical target."
+    },
+    {
+      "area": "DEPENDENCY_AWARE_RESTORE",
+      "classification": "ADD_OR_REFINE",
+      "gap": "Lifecycle invalidation covers dependent units after upstream change, but an aggregate content restore needs an explicit bridge back to current dependency/evidence revalidation.",
+      "decision": "Any changed active binding requires explicit current dependency/evidence revalidation refs; lifecycle status changes remain delegated to qualified Lifecycle authority."
+    },
+    {
+      "area": "AUTHOR_DECISION_HISTORY",
+      "classification": "KEEP",
+      "existing": "Author decisions are explicit parent objects and Lifecycle gates verify APPROVED current decisions.",
+      "decision": "Restore operations preserve current author-decision history and may reference existing approved decisions; they cannot create, rewrite or infer an author decision."
+    },
+    {
+      "area": "EXPORT_AND_PUBLICATION_HISTORY",
+      "classification": "KEEP",
+      "existing": "Export releases and publication authorization are distinct parent evidence/authority boundaries; Runtime V2 cannot grant them.",
+      "decision": "Restore preserves export/proof history but cannot reactivate prior export freeze/publication authority. A frozen/published project must be reopened through lifecycle authority before content restoration."
+    },
+    {
+      "area": "GENERIC_SOURCE_CONTROL_SYSTEM",
+      "classification": "DO_NOT_ADD",
+      "decision": "Do not build Git-like branching, merging, repository hosting or user-facing source-control semantics inside Book System. Only the bounded immutable Book version ledger is authorized."
+    },
+    {
+      "area": "FULL_EVENT_SOURCING_PLATFORM",
+      "classification": "DO_NOT_ADD",
+      "decision": "Do not duplicate the existing parent state + ledgers with a general event-sourcing/CQRS platform."
+    },
+    {
+      "area": "LIFECYCLE_TRANSITION_REIMPLEMENTATION",
+      "classification": "DO_NOT_ADD",
+      "decision": "Version/Rollback may require and record a qualified lifecycle receipt but must not independently authorize or reimplement project/unit lifecycle transitions."
+    }
+  ],
+  "net_new_executable_scope": [
+    "parent version ledger creation/validation",
+    "immutable complete-state snapshot nodes with predecessor lineage",
+    "immutable governed-object version nodes with exact digests/predecessor lineage",
+    "exact active-version binding per state snapshot",
+    "successor commit with exact-current concurrency and idempotent request handling",
+    "restore prior content as a new successor after current dependency/rights/privacy/author checks",
+    "append-only version/restore receipts and outbox entries",
+    "stale/concurrent/digest/divergence/partial-failure adversarial qualification"
+  ],
+  "preserved_external_authorities": [
+    "Canonical State Model remains the parent aggregate contract.",
+    "Lifecycle Transition Engine remains lifecycle-status authority.",
+    "Runtime V2 remains provider intake/admission authority.",
+    "Author Decision Queue successor will own decision collection/workflow; Version/Rollback cannot fabricate decisions.",
+    "Document mechanics remain outside Book System."
+  ],
+  "exact_next_action": "Define and implement BOOK-SYSTEM-VERSION-AND-ROLLBACK-001 as the bounded parent version-ledger/restore overlay described by this map and the preimplementation research checkpoint.",
+  "qualification_effect": "NONE. This forensic map is architecture evidence only and transfers no existing exact-SHA qualification to future Version/Rollback bytes."
+}
