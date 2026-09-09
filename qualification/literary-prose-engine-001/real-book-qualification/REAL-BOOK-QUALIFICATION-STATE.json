@@ -1,6 +1,6 @@
 {
   "objective": "LITERARY-PROSE-ENGINE-001-REAL-BOOK-QUALIFICATION",
-  "standing": "ADMITTED_FOR_QUALIFICATION_ONLY__REPRESENTATIVE_SAMPLE_CLOSED_LOOP_PASS",
+  "standing": "ADMITTED_FOR_QUALIFICATION_ONLY__REPRESENTATIVE_SAMPLE_PASS__WHOLE_BOOK_NONDESTRUCTIVE_SWEEP_PASS__AUTHOR_QUEUE_PENDING",
   "decision": "ADMITTED",
   "preadmission_status": "COMPLETE",
   "admission_id": "AGLO-REAL-BOOK-ADMISSION-001",
@@ -9,7 +9,7 @@
   "source_ownership_or_authorization": "USER_OWNED_OR_AUTHORIZED",
   "source_reference": "A Gate Left Open - Master .docx",
   "source_package_digest": "ec0f5475c05cf6c11a75d139f2dbd131e6133d6abba9121be8b8ef18454b31df",
-  "qualification_scope": "MULTI_CHAPTER_SAMPLE",
+  "qualification_scope": "REPRESENTATIVE_CLOSED_LOOP_PLUS_WHOLE_BOOK_NONDESTRUCTIVE_SWEEP",
   "baseline_version_id": "AGLO-REJECT-ALL-NARRATIVE-v1",
   "baseline_text_digest": "a48378682ee15fd4b24bc97293ce43a37f096db254a0b78f715081a8aa8a59ee",
   "revision_projection": "REJECT_ALL",
@@ -56,6 +56,22 @@
     "rejected_projection_false_positives": 1,
     "automatic_manuscript_mutations": 0
   },
+  "whole_book_nondestructive_sweep": {
+    "objective": "AGLO-REAL-BOOK-WHOLE-BOOK-NONDESTRUCTIVE-SWEEP-001",
+    "standing": "PASS__WHOLE_BOOK_NONDESTRUCTIVE_SWEEP_COMPLETE__TWO_AUTHOR_DECISIONS_QUEUED",
+    "exact_tested_repository_subject_sha": "8146b16a9c6eca7304cf19f8273f858264b8fff3",
+    "wrapper_blob_sha": "7ad5d587d8aefd20032e9f7dea44b7acc4ba90a1",
+    "private_execution_evidence_sha256": "21542552eea6877f3c4346efc817f2985c580b695b1ceda9a2b587b4fdab7f98",
+    "chapter_manifest": "AGLO-WHOLE-BOOK-CHAPTER-MANIFEST-001.json",
+    "sweep_evidence": "AGLO-WHOLE-BOOK-NONDESTRUCTIVE-SWEEP-001.json",
+    "author_decision_queue": "AGLO-WHOLE-BOOK-AUTHOR-DECISION-QUEUE-001.json",
+    "narrative_chapters_processed": 29,
+    "total_words_processed": 62611,
+    "private_passage_states": 201,
+    "screened_findings": 10,
+    "queued_author_decisions": 2,
+    "automatic_manuscript_mutations": 0
+  },
   "accepted_project_preference_evidence": {
     "event_ref": "step-j/project-evidence/AGLO-STEP-J-PREFERENCE-EVIDENCE-001.json",
     "store": "CURRENT_PREFERENCE",
@@ -74,8 +90,9 @@
   "real_book_run_authorized": true,
   "representative_sample_accuracy_claimed": true,
   "whole_book_accuracy_claimed": false,
+  "whole_book_structural_screen_claimed": true,
   "automatic_revision_quality_claimed": false,
   "raw_manuscript_text_committed": false,
   "candidate_text_committed": false,
-  "next_required_transition": "EXPAND_REAL_BOOK_QUALIFICATION_TO_ADDITIONAL_HIGH_RISK_CHAPTERS_OR_WHOLE_BOOK_NONDESTRUCTIVE_SWEEP"
+  "next_required_transition": "AUTHOR_ADJUDICATE_AGLO_WHOLE_BOOK_TWO_ITEM_QUEUE"
 }
