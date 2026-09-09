@@ -1,0 +1,263 @@
+{
+  "contract_id": "BOOK-SYSTEM-EXPORT-FREEZE-001",
+  "contract_version": 1,
+  "effective_date": "2026-09-09",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "standing": "CANONICAL_PARENT_EXPORT_FREEZE_CONTRACT__EXECUTABLE_IMPLEMENTATION_PENDING_QUALIFICATION",
+  "depends_on": [
+    "BOOK-SYSTEM-CANONICAL-BOOK-STATE-MODEL-001",
+    "BOOK-SYSTEM-LIFECYCLE-TRANSITION-ENGINE-001",
+    "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-002",
+    "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001",
+    "BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001",
+    "BOOK-SYSTEM-DOCUMENT-SYSTEM-EXPORT-OWNERSHIP-BOUNDARY-001",
+    "BOOK-SYSTEM-PUBLICATION-EXPORT-STANDARDS-PROFILE-001",
+    "BOOK-SYSTEM-PROVENANCE-INTEROPERABILITY-PROJECTION-001",
+    "BOOK-SYSTEM-EXPORT-FREEZE-FORENSIC-MAP-001"
+  ],
+  "purpose": "Create an immutable parent-owned frozen export release only after exact source, artifact, target-medium, proof, rights/privacy and provenance prerequisites are current, without generating document bytes, changing lifecycle state or authorizing publication.",
+  "authority": {
+    "request_actor": "PARENT_SYSTEM",
+    "canonical_append_allowed": "ONE_EXPORT_RELEASE_ONLY",
+    "lifecycle_transition_allowed": false,
+    "canonical_manuscript_mutation_allowed": false,
+    "document_generation_allowed": false,
+    "provider_freeze_authority_allowed": false,
+    "publication_authority_allowed": false,
+    "author_choice_synthesis_allowed": false
+  },
+  "release_granularity": {
+    "unit": "ONE_FORMAT_ARTIFACT_PER_EXPORT_RELEASE",
+    "multi_format_grouping": "OPTIONAL_ADDITIVE_RELEASE_GROUP_REF",
+    "rule": "Each distinct frozen byte artifact has its own release_id, format and digest. A release group never substitutes for per-artifact digest identity."
+  },
+  "freeze_request": {
+    "required": [
+      "freeze_request_id",
+      "idempotency_key",
+      "actor_class",
+      "expected_parent_state_version",
+      "expected_parent_state_digest",
+      "release_id",
+      "release_group_ref",
+      "canonical_manuscript_identity",
+      "artifact_evidence",
+      "target_medium_evidence",
+      "rights_privacy_evidence",
+      "provenance_evidence",
+      "parent_admission_refs",
+      "author_decision_refs",
+      "created_at"
+    ],
+    "canonical_manuscript_identity_required": [
+      "manuscript_id",
+      "version_id",
+      "artifact_digest"
+    ],
+    "artifact_evidence_required": [
+      "artifact_ref",
+      "artifact_digest",
+      "artifact_currentness",
+      "format_identity",
+      "source_manuscript_id",
+      "source_version_id",
+      "source_digest",
+      "generator_or_toolchain_identity"
+    ],
+    "target_medium_evidence_required": [
+      "target_medium_profile_id",
+      "target_medium_profile_version",
+      "technical_state",
+      "format_validation_result",
+      "source_to_render_integrity_result",
+      "accessibility_result",
+      "proof_result",
+      "correction_ledger_ref",
+      "correction_ledger_state",
+      "rendered_candidate_digest"
+    ],
+    "rights_privacy_evidence_required": [
+      "rights_state",
+      "privacy_state",
+      "evidence_ref"
+    ],
+    "provenance_evidence_required": [
+      "currentness_state",
+      "validation_result",
+      "projection_ref",
+      "bound_artifact_digest"
+    ]
+  },
+  "freeze_preconditions": [
+    "Parent state is structurally valid, exact state_digest matches bytes and project status is FINALIZATION.",
+    "Actor is PARENT_SYSTEM.",
+    "expected_parent_state_version and expected_parent_state_digest exactly match the current parent.",
+    "release_id is new and does not collide with any append-only export release.",
+    "The requested canonical manuscript identity exactly matches the active canonical manuscript and its exact artifact digest.",
+    "Artifact evidence source manuscript id/version/digest exactly matches the active canonical manuscript identity.",
+    "artifact_currentness is CURRENT_FOR_BOUND_SOURCE.",
+    "artifact_digest equals rendered_candidate_digest and both are lowercase sha256.",
+    "technical_state is POST_LAYOUT_PROOF_COMPLETE.",
+    "format_validation_result is PASS.",
+    "source_to_render_integrity_result is PASS.",
+    "proof_result is PASS.",
+    "accessibility_result is PASS or NOT_APPLICABLE_WITH_RATIONALE according to the selected target-medium profile; UNKNOWN is not a pass.",
+    "correction_ledger_state is CLOSED_CURRENT and refers to the exact final rendered digest.",
+    "rights_state is CURRENT_AUTHORIZED and privacy_state is CURRENT_ALLOWED.",
+    "provenance currentness is NONE or CURRENT_FOR_BOUND_SOURCE_AND_ARTIFACT; if present, its bound_artifact_digest equals the artifact digest and validation_result is PASS or NOT_APPLICABLE only where policy explicitly permits no external projection.",
+    "Every parent_admission_ref required by the selected release profile is present and bound to the exact source/artifact identity.",
+    "Any configured author-decision requirement is satisfied by an exact current APPROVED decision; no author decision is fabricated merely to freeze an export.",
+    "No prior frozen release is modified or silently rebound."
+  ],
+  "accessibility_states": [
+    "PASS",
+    "NOT_APPLICABLE_WITH_RATIONALE"
+  ],
+  "rights_states": [
+    "CURRENT_AUTHORIZED"
+  ],
+  "privacy_states": [
+    "CURRENT_ALLOWED"
+  ],
+  "provenance_currentness_allowed": [
+    "NONE",
+    "CURRENT_FOR_BOUND_SOURCE_AND_ARTIFACT"
+  ],
+  "freeze_transaction": {
+    "precondition_order": [
+      "validate request schema and actor",
+      "validate exact parent version/digest",
+      "validate project remains FINALIZATION",
+      "resolve exact active canonical manuscript identity",
+      "validate release-id uniqueness and idempotency",
+      "validate artifact/source/profile exact identity",
+      "validate technical validation/proof/accessibility/correction evidence",
+      "validate rights/privacy/provenance currentness",
+      "validate required admission and author-decision references",
+      "construct immutable additive EXPORT_RELEASE",
+      "seal proposed parent successor with state_version+1 and unchanged lifecycle status",
+      "validate append-only preservation",
+      "emit deterministic export release receipt"
+    ],
+    "failure_rule": "Any failed precondition returns an error and commits no parent successor, release record or successful receipt.",
+    "same_transaction_forbidden_effects": [
+      "ADVANCE_PROJECT_STATUS",
+      "SET_ACTIVE_CANONICAL_MANUSCRIPT",
+      "REGISTER_INTEGRATION_PROPOSAL",
+      "AUTHOR_DECISION_SYNTHESIS",
+      "PUBLICATION_AUTHORIZATION",
+      "DOCUMENT_ARTIFACT_GENERATION_OR_MUTATION"
+    ]
+  },
+  "export_release_projection": {
+    "base_required_fields": [
+      "release_id",
+      "frozen_version_id",
+      "format",
+      "digest",
+      "approval_state",
+      "publication_authority_state"
+    ],
+    "required_additive_fields": [
+      "release_group_ref",
+      "evidence_type",
+      "canonical_manuscript_id",
+      "canonical_manuscript_version_id",
+      "canonical_manuscript_digest",
+      "artifact_ref",
+      "artifact_currentness",
+      "target_medium_profile_id",
+      "target_medium_profile_version",
+      "technical_state",
+      "format_validation_result",
+      "source_to_render_integrity_result",
+      "accessibility_result",
+      "proof_result",
+      "correction_ledger_ref",
+      "rights_evidence_ref",
+      "privacy_evidence_ref",
+      "provenance_projection_ref",
+      "provenance_currentness_state",
+      "parent_admission_refs",
+      "author_decision_refs",
+      "freeze_request_id",
+      "frozen_at"
+    ],
+    "fixed_values_at_freeze": {
+      "approval_state": "FROZEN",
+      "publication_authority_state": "NOT_AUTHORIZED",
+      "evidence_type": "EXPORT_FREEZE_READY",
+      "artifact_currentness": "CURRENT_FOR_BOUND_SOURCE",
+      "technical_state": "POST_LAYOUT_PROOF_COMPLETE"
+    },
+    "rule": "The export release is evidence for the separate Lifecycle FINALIZATION->EXPORT_FROZEN gate. Its existence does not itself change project status."
+  },
+  "release_receipt": {
+    "required": [
+      "release_receipt_id",
+      "freeze_request_id",
+      "idempotency_key",
+      "release_id",
+      "pre_parent_state_version",
+      "pre_parent_state_digest",
+      "post_parent_state_version",
+      "post_parent_state_digest",
+      "canonical_manuscript_identity",
+      "artifact_ref",
+      "artifact_digest",
+      "target_medium_profile_id",
+      "target_medium_profile_version",
+      "evidence_bundle_digest",
+      "publication_authority_state",
+      "lifecycle_status_before",
+      "lifecycle_status_after",
+      "lifecycle_handoff_evidence_ref"
+    ],
+    "fixed_lifecycle_rule": "lifecycle_status_before and lifecycle_status_after are both FINALIZATION for the Export Freeze transaction."
+  },
+  "post_freeze_lifecycle_handoff": {
+    "authority": "BOOK-SYSTEM-LIFECYCLE-TRANSITION-ENGINE-001",
+    "transition": "FINALIZATION->EXPORT_FROZEN",
+    "required_evidence_ref": "The newly registered release_id carrying evidence_type EXPORT_FREEZE_READY",
+    "rule": "Only after the release parent successor is committed and recorded by Version/Rollback may the parent issue the separate Lifecycle transition request."
+  },
+  "version_rollback_handoff": {
+    "authority_kind_for_release_successor": "EXPORT_RELEASE",
+    "authority_receipt": "release_receipt",
+    "rule": "Version/Rollback records the already-committed release successor; it does not create the release or change lifecycle status."
+  },
+  "invalidation_and_refreeze": {
+    "immutable_release_records": true,
+    "invalidating_conditions": [
+      "canonical manuscript identity changes",
+      "frozen artifact bytes or digest change",
+      "target-medium profile materially changes",
+      "format/source-integrity/accessibility/proof evidence becomes failed or stale",
+      "proof correction changes artifact bytes",
+      "rights/privacy eligibility changes",
+      "required provenance becomes stale, corrected, withdrawn or validation-failed"
+    ],
+    "when_project_status_is_EXPORT_FROZEN": "First route a parent Lifecycle request EXPORT_FROZEN->FINALIZATION using EXPORT_FREEZE_INVALIDATED evidence. Preserve the prior release unchanged. Generate/revalidate externally as needed, then create a new release_id and execute a fresh freeze transaction.",
+    "silent_rebind_forbidden": true,
+    "same_release_id_reuse_for_changed_bytes_forbidden": true
+  },
+  "idempotency": {
+    "same_idempotency_key_same_normalized_request": "RETURN_EXISTING_RECEIPT_NO_NEW_RELEASE",
+    "same_idempotency_key_different_request": "REJECT_IDEMPOTENCY_KEY_CONFLICT",
+    "same_freeze_request_id_different_idempotency_key": "REJECT_REQUEST_ID_CONFLICT",
+    "same_release_id_different_request": "REJECT_RELEASE_ID_CONFLICT"
+  },
+  "explicit_non_goals": [
+    "No PDF/DOCX/EPUB/print generation",
+    "No generic format/accessibility/provenance validation engine",
+    "No canonical manuscript mutation",
+    "No direct Lifecycle transition",
+    "No publication or delivery authorization",
+    "No author decision synthesis",
+    "No multi-format digest collapsing",
+    "No replacement of the qualified canonical-state model, Lifecycle engine or Version/Rollback runtime"
+  ],
+  "qualification_objective": "Prove exact parent/source/artifact/profile compare-and-swap, strict proof/currentness gates, one-format-per-release identity, additive v1-compatible EXPORT_RELEASE creation, immutable/idempotent release history, zero lifecycle/publication/document authority, deterministic Version/Rollback handoff, and fail-closed invalid/stale evidence handling with adversarial fixtures.",
+  "exact_next_objective_after_contract": "BOOK-SYSTEM-EXPORT-FREEZE-001-IMPLEMENTATION-001",
+  "qualification_effect": "NONE until an executable Export Freeze subject passes hosted and registered A-01 exact-SHA qualification."
+}
