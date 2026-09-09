@@ -27,7 +27,9 @@ function Get-DriveSnapshot([string]$TargetPath) {
 }
 
 if (-not $EvidenceDir) {
-  $EvidenceDir = Join-Path ($env:RUNNER_TEMP ? $env:RUNNER_TEMP : $env:TEMP) ("a01-guard-" + $env:GITHUB_RUN_ID)
+  $baseTemp = $env:RUNNER_TEMP
+  if (-not $baseTemp) { $baseTemp = $env:TEMP }
+  $EvidenceDir = Join-Path $baseTemp ("a01-guard-" + $env:GITHUB_RUN_ID)
 }
 New-Item -ItemType Directory -Force -Path $EvidenceDir | Out-Null
 
@@ -66,6 +68,31 @@ if ($availableMemoryGb -lt [double]$health.min_available_memory_gb) {
   $failures.Add("LOW_MEMORY available_gb=$availableMemoryGb required_gb=$($health.min_available_memory_gb)")
 }
 
+$sleepGuardCapable = $false
+if ($health.prevent_system_sleep_during_qualification) {
+  try {
+    Add-Type -TypeDefinition @'
+using System;
+using System.Runtime.InteropServices;
+public static class A01SleepGuardProbe {
+  [DllImport("kernel32.dll", SetLastError = true)]
+  public static extern uint SetThreadExecutionState(uint esFlags);
+}
+'@
+    $ES_CONTINUOUS = [uint32]0x80000000
+    $ES_SYSTEM_REQUIRED = [uint32]0x00000001
+    $probe = [A01SleepGuardProbe]::SetThreadExecutionState($ES_CONTINUOUS -bor $ES_SYSTEM_REQUIRED)
+    if ($probe -eq 0) {
+      $failures.Add('SLEEP_GUARD_UNAVAILABLE')
+    } else {
+      $sleepGuardCapable = $true
+      [void][A01SleepGuardProbe]::SetThreadExecutionState($ES_CONTINUOUS)
+    }
+  } catch {
+    $failures.Add("SLEEP_GUARD_PROBE_ERROR:$($_.Exception.Message)")
+  }
+}
+
 $networkOk = $null
 try {
   $networkOk = Test-NetConnection api.github.com -Port 443 -InformationLevel Quiet -WarningAction SilentlyContinue
@@ -92,7 +119,7 @@ if ($health.cleanup_stale_a01_temp_after_hours -and $env:RUNNER_TEMP) {
           $entry.error = $_.Exception.Message
           $warnings.Add("STALE_TEMP_CLEANUP_FAILED:$($_.FullName)")
         }
-        $cleanup += $entry
+        $script:cleanup += $entry
       }
   } catch {
     $warnings.Add("STALE_TEMP_ENUMERATION_FAILED:$($_.Exception.Message)")
@@ -100,7 +127,7 @@ if ($health.cleanup_stale_a01_temp_after_hours -and $env:RUNNER_TEMP) {
 }
 
 $snapshot = [ordered]@{
-  guard_version = 1
+  guard_version = 2
   mode = $Mode
   captured_at = (Get-Date).ToUniversalTime().ToString('o')
   runner = [ordered]@{
@@ -119,7 +146,7 @@ $snapshot = [ordered]@{
     drives = @($diskSnapshots)
   }
   network = [ordered]@{ github_https_443 = $networkOk }
-  power = [ordered]@{ active_scheme = $powerScheme }
+  power = [ordered]@{ active_scheme = $powerScheme; sleep_guard_capable = $sleepGuardCapable }
   cleanup = @($cleanup)
   warnings = @($warnings)
   failures = @($failures)
