@@ -1,6 +1,6 @@
 {
   "objective": "AGLO-REAL-BOOK-CLOSED-LOOP-QUALIFICATION-001",
-  "standing": "LIVE_EXECUTION_PARTIAL_PASS__ONE_GENUINE_USER_ADJUDICATION_REQUIRED",
+  "standing": "PASS__REPRESENTATIVE_SAMPLE_CLOSED_LOOP_QUALIFIED__REAL_BOOK_GENERALIZATION_NOT_YET_ESTABLISHED",
   "depends_on": {
     "step_l_standing": "PASS_CLOSED_LOOP_QUALIFICATION__SYNTHETIC_ONLY__REAL_BOOK_QUALIFICATION_NOT_YET_ADMITTED",
     "current_admission_standing": "ADMITTED_FOR_QUALIFICATION_ONLY",
@@ -22,16 +22,18 @@
     "chapter_numbers": [1, 8, 19, 21, 24, 29],
     "sample_manifest_sha256": "f456e13c8eb7beb4dae9e32aefb9af32cf3d44a19f4d7af2808a60bfd371c2d4",
     "total_word_count": 11194,
-    "standing": "PASS__REVERIFIED_AGAINST_RATIFIED_BASELINE"
+    "standing": "PASS__REVERIFIED_AND_CLOSED_LOOP_QUALIFIED"
   },
   "live_execution": {
     "evidence_record": "AGLO-RBQ-LIVE-CLOSED-LOOP-001.json",
     "chapter_8": "RETAIN_ORIGINAL__NO_PROVEN_GAIN",
-    "chapter_21": "RETAIN_ORIGINAL_PENDING_INDEPENDENT_PREFERENCE_EVIDENCE",
-    "chapter_24_witness_duplicate": "BOUNDED_DEDUPLICATION_CANDIDATE_READY__EXPLICIT_USER_DECISION_PENDING",
+    "chapter_21": "RETAIN_ORIGINAL__ABSTAIN_SUBJECTIVE",
+    "chapter_24_witness_duplicate": "AUTHOR_ACCEPTED_BOUNDED_REPAIR__NO_AUTOMATIC_OVERWRITE",
     "chapter_24_concatenated_variants": "REJECTED_FALSE_POSITIVE__TRACKED_CHANGE_PROJECTION_ARTIFACT",
     "chapter_24_projection_audit": "AGLO-RBQ-CH24-TRACKED-CHANGE-PROJECTION-AUDIT-001.json",
     "authority_correction": "AGLO-RBQ-AUTHORITY-CORRECTION-002.json",
+    "user_adjudication": "AGLO-RBQ-USER-ADJUDICATION-001.json",
+    "step_j_project_evidence": "step-j/project-evidence/AGLO-STEP-J-PREFERENCE-EVIDENCE-001.json",
     "controls": [1, 19, 29],
     "control_drift_defense": "PASS"
   },
@@ -71,5 +73,11 @@
     "retain_original_on_uncertainty": true,
     "tracked_change_projection_must_precede_semantic_analysis": true
   },
-  "next_transition": "USER_ADJUDICATE_CH24_WITNESS_DEDUPLICATION_THEN_RECORD_STEP_J_PROJECT_PREFERENCE_EVIDENCE_IF_EXPLICITLY_CHOSEN_AND_CLOSE_REPRESENTATIVE_SAMPLE"
+  "claims": {
+    "representative_sample_closed_loop_qualified": true,
+    "whole_book_closed_loop_accuracy_established": false,
+    "automatic_revision_quality_established": false,
+    "publication_readiness_established": false
+  },
+  "next_transition": "EXPAND_REAL_BOOK_QUALIFICATION_TO_ADDITIONAL_HIGH_RISK_CHAPTERS_OR_WHOLE_BOOK_NONDESTRUCTIVE_SWEEP"
 }
