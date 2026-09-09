@@ -79,8 +79,8 @@ public static class A01SleepGuardProbe {
   public static extern uint SetThreadExecutionState(uint esFlags);
 }
 '@
-    $ES_CONTINUOUS = [uint32]0x80000000
-    $ES_SYSTEM_REQUIRED = [uint32]0x00000001
+    $ES_CONTINUOUS = [Convert]::ToUInt32('80000000', 16)
+    $ES_SYSTEM_REQUIRED = [Convert]::ToUInt32('00000001', 16)
     $probe = [A01SleepGuardProbe]::SetThreadExecutionState($ES_CONTINUOUS -bor $ES_SYSTEM_REQUIRED)
     if ($probe -eq 0) {
       $failures.Add('SLEEP_GUARD_UNAVAILABLE')
@@ -127,7 +127,7 @@ if ($health.cleanup_stale_a01_temp_after_hours -and $env:RUNNER_TEMP) {
 }
 
 $snapshot = [ordered]@{
-  guard_version = 2
+  guard_version = 3
   mode = $Mode
   captured_at = (Get-Date).ToUniversalTime().ToString('o')
   runner = [ordered]@{
