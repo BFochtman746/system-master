@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from hashlib import sha256
 from pathlib import Path
 import sys
 from typing import Protocol
@@ -33,6 +34,10 @@ class ModelBackedNarrativeExtractor:
         return f"MODEL-BACKED-NARRATIVE-EXTRACTOR-v1::{self.backend.backend_id}"
 
     def extract(self, request: ExtractionRequest) -> dict:
+        actual_digest = sha256(request.authorized_source_text.encode("utf-8")).hexdigest()
+        if actual_digest != request.source_sha256:
+            raise ValueError("authorized source digest mismatch before model invocation")
+
         raw = self.backend.infer(
             task=request.task,
             authorized_source_text=request.authorized_source_text,
