@@ -1,0 +1,111 @@
+{
+  "state_id": "LITERARY-PROSE-CONSOLIDATED-WORKSTREAM-STATE-007",
+  "supersedes_for_current_control": "LITERARY-PROSE-CONSOLIDATED-WORKSTREAM-STATE-006.json",
+  "supersession_reason": "A final repository/backend audit found that real learned-model prediction freeze is allowed in parallel with human adjudication but no concrete authorized learned backend exists in the Candidate-002 lane; that optional parallel lane is therefore explicitly BLOCKED — EXTERNAL AUTHORITY rather than silently omitted.",
+  "system_name": "BOOK_WRITING_SYSTEM__LITERARY_PROSE_ENGINE",
+  "workstream": "LITERARY-PROSE / BOOK-WRITING-SYSTEM-LITERARY-LANE",
+  "branch": "literary-prose-engine-001",
+  "state_basis_head": "f2bf810d751c31288aea591fb0becae6809b3d1b",
+  "standing": "ACTIVE__FORMALLY_RECONCILED__NIGHT_SHIFT_CLOSED__PRIMARY_RESET_COMPLETE__SOURCE_HELDOUT_002A_HOSTED_PASS__CRITICAL_PATH_BLOCKED_HUMAN__PARALLEL_MODEL_FREEZE_BLOCKED_EXTERNAL_AUTHORITY__AGLO_BLOCKED_AUTHOR",
+  "canonical_control_surface": "CURRENT_RECONCILED_LITERARY_PROSE_PRIMARY_WORKSTREAM_CHAT",
+  "chat_ui_title_is_authority": false,
+  "repository_state_is_cross_chat_authority": true,
+  "book_system_visibility": "The Book Writing System was not deleted. Its durable literary/prose authority is this branch and state chain. Repository labels do not create or restore a visible ChatGPT UI conversation.",
+  "historical_starter_branch": "books-literary-prose-001",
+  "separate_book_evaluator_lane_preserved": true,
+  "night_shift": {
+    "closure": "night-shift-2026-09-09/NIGHT-SHIFT-CLOSURE-RECONCILIATION-001.json",
+    "active_backlog_count": 0,
+    "historical_packets_preserved": true,
+    "predecessor_missing_authority": [],
+    "predecessor_ready_for_historical_read_only": true
+  },
+  "last_authoritative_a01": {
+    "qualification_id": "LITERARY-PROSE-OVERNIGHT-RESEARCH-REGRESSION-SWEEP",
+    "subject_sha": "137ab3d214972002cd5dca0d2355d1e0ada31d39",
+    "workflow_run_id": 34310540842,
+    "job_id": 102336537429,
+    "result_class": "PASS",
+    "receipt_sha256": "17ba3934cf49b1d9cfcf15ee1525f9d3fed28955f8d4f27b1e651f0f6d4553eb",
+    "artifact_id": 10091050475,
+    "artifact_digest": "sha256:95ffad17481a5216089ac0274fee221919fa0163c0730af31a3e4734cde8acab",
+    "authority_transfers_to_later_sha": false,
+    "production_or_promotion_authority": false
+  },
+  "latest_completed_hosted_gate": {
+    "id": "LITERARY-EXTRACTION-SOURCE-HELD-OUT-002A__PREHUMAN_SOURCE_CUSTODY",
+    "qualified_subject_sha": "c01f6d99c64a14815f788ccd0bbc60da7ee5de29",
+    "workflow_run_id": 34369276424,
+    "job_id": 102525986611,
+    "artifact_id": 10111191915,
+    "artifact_digest": "sha256:35eca5ea0f443793403225648d8659affe08fb836124986ec44a03fbe8bb190d",
+    "result": "PASS",
+    "proves": "All six frozen public-domain TEST_ONLY passages are exact-digest/source-locator bound and all six cases have gold-empty task-packet coverage across all nine task families without raw passage evidence, fabricated human gold or scoring claims.",
+    "does_not_prove": "Human gold correctness, real learned-model quality, A-01 authority, Candidate-002 promotion, canonical narrative authority or manuscript/canon authority."
+  },
+  "qualification_level_separation": {
+    "code_exists": true,
+    "hosted_provider_and_source_custody_gates_pass": true,
+    "real_learned_backend_prediction_frozen": false,
+    "human_adjudicated_scoring_pass": false,
+    "current_head_authoritative_a01_pass": false,
+    "production_or_promotion_authority_exists": false
+  },
+  "unresolved_items": [
+    {
+      "id": "LITERARY-EXTRACTION-SOURCE-HELD-OUT-002B__HUMAN_ADJUDICATION",
+      "classification": "BLOCKED — HUMAN",
+      "critical_path": true,
+      "required_event": "Independent adjudicators complete the 18 task-scoped packets under HUMAN-ADJUDICATION-PACKET-CONTRACT-v1; high-risk tasks receive two independent reviews; disagreement/UNRESOLVED is preserved; model_input_contains_gold remains false.",
+      "handoff": "extraction-calibration-001/candidate-002/SOURCE-HELDOUT-002B-HUMAN-ADJUDICATION-HANDOFF-v1.json"
+    },
+    {
+      "id": "LITERARY-EXTRACTION-SOURCE-HELD-OUT-002__REAL_MODEL_PREDICTION_FREEZE_PARALLEL",
+      "classification": "BLOCKED — EXTERNAL AUTHORITY",
+      "critical_path": false,
+      "required_event": "Provide or authorize one concrete real learned/model backend plus the credential/endpoint authority required for reproducible hosted inference under CANDIDATE-002-CONTRACT-v1.",
+      "handoff": "extraction-calibration-001/candidate-002/SOURCE-HELDOUT-002-PREDICTION-FREEZE-PARALLEL-BOUNDARY-v1.json"
+    },
+    {
+      "id": "AGLO-COMPOSITE-CANDIDATE-PROMOTION-DECISION-001",
+      "classification": "BLOCKED — AUTHOR",
+      "critical_path": false,
+      "required_event": "Explicit author Option A PROMOTE_AS_NEW_EXPLICIT_REVISION_BASELINE or Option B RETAIN_AS_NONCANONICAL_REVIEW_CANDIDATE.",
+      "generic_continue_is_authority": false
+    }
+  ],
+  "no_open_items_classified_as": [
+    "FAILED — REPAIRABLE",
+    "BLOCKED — PREDECESSOR",
+    "BLOCKED — PRIVATE DATA",
+    "BLOCKED — NATIVE PLATFORM"
+  ],
+  "critical_path": {
+    "id": "LITERARY-EXTRACTION-SOURCE-HELD-OUT-002B__HUMAN_ADJUDICATION",
+    "objective": "Obtain independent leakage-resistant human structural gold for the six source-custody-qualified heldout passages.",
+    "first_action": "Distribute the 18 gold-empty task packets to independent human adjudicators under HUMAN-ADJUDICATION-PACKET-CONTRACT-v1.json.",
+    "exact_executable_gate": "Validate that all 18 returned task packets bind to the exact SOURCE-HELDOUT-002A passage digests; required independent reviews are present; disagreement is not collapsed; model_input_contains_gold=false; and no human label was generated by the system under test.",
+    "pass_proves": "Independent structural gold exists for the frozen heldout set and can be admitted to leakage-safe scoring after model prediction freeze.",
+    "pass_unlocks": "Candidate-002 real-model heldout scoring and promotion adjudication; after hosted prequalification, reevaluate whether a new exact-SHA A-01 gate has a legitimate runner-specific completion delta.",
+    "on_failure": "Repair only incomplete or defective human adjudication packets. Preserve exact source digests, frozen passage selection, disagreement and gold isolation; do not infer labels or replace passages."
+  },
+  "a01_next": {
+    "ticket_justified_now": false,
+    "reason": "The prior Literary A-01 subject already has a conforming exact-SHA PASS and cannot be rerun unchanged. SOURCE-HELDOUT-002A did not require A-01. The critical unresolved delta is human adjudication, and the parallel model lane lacks an authorized real backend; A-01 cannot substitute either missing authority.",
+    "reevaluate_when": "Human adjudication and real-model prediction/scoring evidence are complete enough to define a new exact-SHA runner-specific qualification delta that hosted execution cannot supply."
+  },
+  "predecessor_recovery": {
+    "missing_authority_or_decisions": [],
+    "predecessor_may_be_historical_read_only": true
+  },
+  "hard_boundaries": [
+    "No provider output writes canonical narrative state directly.",
+    "No raw private manuscript prose or private candidate prose enters repository evidence.",
+    "No unknown-rights source admission, named-author imitation target or bulk copyrighted corpus acquisition.",
+    "No automatic manuscript overwrite, publication or canon replacement without separate explicit authority.",
+    "Generic Continue is not human or author authority.",
+    "Hosted success, authoritative A-01 PASS and production/promotion authority remain distinct.",
+    "Exact-SHA qualification authority never transfers to a different SHA."
+  ],
+  "exact_next_objective": "LITERARY-EXTRACTION-SOURCE-HELD-OUT-002B__HUMAN_ADJUDICATION"
+}
