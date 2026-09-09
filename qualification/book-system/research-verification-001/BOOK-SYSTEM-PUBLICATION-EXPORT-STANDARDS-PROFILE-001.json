@@ -1,0 +1,230 @@
+{
+  "artifact_id": "BOOK-SYSTEM-PUBLICATION-EXPORT-STANDARDS-PROFILE-001",
+  "effective_date": "2026-09-09",
+  "standing": "CLOSED__BOOK_DOMAIN_REQUIREMENTS_BOUND__DOCUMENT_IMPLEMENTATION_DELEGATED",
+  "owner": "BOOK SYSTEM",
+  "depends_on": [
+    "BOOK-SYSTEM-DOCUMENT-SYSTEM-EXPORT-OWNERSHIP-BOUNDARY-001",
+    "BOOK-SYSTEM-RESEARCH-VERIFIED-AUTHORING-LIFECYCLE-AMENDMENT-001",
+    "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-001"
+  ],
+  "objective": "Define versioned target-medium publication/export requirements and acceptance evidence for Book System without duplicating reusable Document System rendering, conversion, validation or artifact-verification implementation.",
+  "research_status": "VERIFIED_AGAINST_CURRENT_PUBLIC_STANDARDS_2026-09-09",
+  "research_findings": {
+    "epub": {
+      "stable_production_baseline": "EPUB 3.3 W3C Recommendation, 2026-01-13",
+      "newer_draft": "EPUB 3.4 Candidate Recommendation Draft, 2026-08-03",
+      "policy": "Use stable Recommendation for production conformance unless an explicit experimental profile authorizes draft testing."
+    },
+    "epub_accessibility": {
+      "stable_production_baseline": "EPUB Accessibility 1.1 W3C Recommendation, 2024-10-17",
+      "newer_draft": "EPUB Accessibility 1.2 Candidate Recommendation Draft, 2026-08-18",
+      "recommended_target": "latest applicable WCAG 2 Recommendation, normally Level AA where no stricter jurisdiction/distributor requirement overrides",
+      "policy": "Accessibility conformance and accessibility metadata are publication-level evidence; do not infer them from successful EPUB packaging alone."
+    },
+    "onix": {
+      "current_public_profile": "ONIX for Books Release 3.1.2, latest revision listed by BIC, Oct 2024",
+      "role": "supply-chain/distribution metadata projection, not Book System canonical-state authority",
+      "applicability": "only when distribution/supply-chain metadata is needed"
+    },
+    "pdf": {
+      "general_standard_family": "PDF = ISO 32000",
+      "accessible_pdf_profile": "PDF/UA-2 = ISO 14289-2:2024 when an accessible PDF deliverable requires PDF/UA conformance",
+      "print_exchange_profile": "PDF/X family = ISO 15930; PDF/X-6 is ISO 15930-9:2020 when the target print/prepress workflow requires that profile",
+      "policy": "Do not require PDF/UA or PDF/X universally; bind the profile to the actual target medium, accessibility obligation and print-provider workflow."
+    },
+    "docx": {
+      "policy": "Treat DOCX as a target-medium profile with structure, navigation, accessibility and visual review requirements; do not invent a universal Book-System DOCX conformance standard.",
+      "accessibility_guidance": "Use semantic heading/style structure, alt text for meaningful visuals, accessible links/tables and accessibility checking; automated checking is not sufficient by itself and requires human/visual review for issues it cannot detect."
+    }
+  },
+  "authoritative_public_sources": [
+    "https://www.w3.org/TR/epub-33/",
+    "https://www.w3.org/TR/epub-a11y-11/",
+    "https://www.w3.org/TR/epub/all/",
+    "https://www.w3.org/TR/epub-a11y/all/",
+    "https://bic.org.uk/resources/onix-for-books/",
+    "https://pdfa.org/pdf-standards/",
+    "https://support.microsoft.com/en-us/accessibility/office-accessibility/rules-for-the-accessibility-checker",
+    "https://support.microsoft.com/en-us/accessibility/word/make-your-word-documents-accessible-to-people-with-disabilities"
+  ],
+  "common_book_request_profile": {
+    "required": [
+      "book_id",
+      "exact_canonical_manuscript_version",
+      "exact_canonical_manuscript_digest",
+      "export_release_ref",
+      "requested_format",
+      "target_medium_profile_id",
+      "target_medium_profile_version",
+      "book_metadata_projection",
+      "rights_and_export_constraints",
+      "accessibility_requirement_and_jurisdiction_if_applicable",
+      "proof_scope",
+      "publication_authorized"
+    ],
+    "rules": [
+      "publication_authorized defaults false and may become true only through separate Book-System/author authority.",
+      "Every request binds one exact canonical manuscript version and digest.",
+      "A format request does not change canonical manuscript state.",
+      "Book System supplies publication semantics; Document System implements format mechanics."
+    ]
+  },
+  "common_document_response_evidence": {
+    "required": [
+      "artifact_ref",
+      "artifact_digest",
+      "source_version_identity",
+      "source_digest_identity",
+      "format_identity",
+      "target_profile_identity",
+      "generator_or_toolchain_identity_where_reproducibility_requires_it",
+      "format_validation_result",
+      "source_to_render_integrity_result",
+      "proof_result",
+      "warnings",
+      "correction_ledger_ref_if_any",
+      "publication_authorized=false"
+    ],
+    "acceptance_law": [
+      "Artifact generation is not validation.",
+      "Validation is not proof completion.",
+      "Proof completion is not export freeze.",
+      "Export freeze is not publication authorization.",
+      "Any correction that changes artifact bytes creates a new artifact digest and requires the applicable revalidation/reproof loop.",
+      "Any correction that changes canonical manuscript text must route upstream through Book System canonical mutation/version rules before a new export request."
+    ]
+  },
+  "target_medium_profiles": {
+    "EPUB": {
+      "book_system_requires": [
+        "stable EPUB 3.3 conformance unless an explicitly experimental newer profile is selected",
+        "package/navigation/content/resource integrity evidence",
+        "reading-order/navigation integrity",
+        "metadata presence and book-semantic correctness",
+        "EPUB Accessibility 1.1 evidence when accessibility conformance is required or claimed",
+        "applicable WCAG-level evidence, normally current WCAG 2 Level AA target unless a governing requirement differs",
+        "accessibility metadata and conformance-claim evidence where claimed",
+        "source-to-render/content integrity",
+        "proof in representative EPUB reading systems",
+        "no silent structural or line editing during proof"
+      ],
+      "document_system_implements": [
+        "EPUB packaging",
+        "navigation document generation",
+        "resource embedding",
+        "format validation",
+        "accessibility validation tooling",
+        "reading-system render/proof tooling",
+        "artifact digesting"
+      ]
+    },
+    "PDF": {
+      "book_system_requires": [
+        "exact manuscript-to-PDF identity",
+        "visual/layout proof",
+        "page/heading/section integrity",
+        "font/image/resource integrity",
+        "links/bookmarks/navigation checks where applicable",
+        "source-to-render text integrity",
+        "PDF/UA-2 only where accessible-PDF requirements call for it",
+        "no publication authority inferred from PDF conformance"
+      ],
+      "document_system_implements": [
+        "PDF generation",
+        "PDF rendering",
+        "PDF validation",
+        "PDF/UA checks where selected",
+        "visual inspection support",
+        "artifact digesting"
+      ]
+    },
+    "DOCX": {
+      "book_system_requires": [
+        "exact manuscript-to-DOCX identity",
+        "semantic heading/style structure",
+        "chapter/section integrity",
+        "accessible alt text/links/tables where applicable",
+        "Word accessibility-check evidence where available",
+        "visual review because automated accessibility checking is not exhaustive",
+        "source-to-render/content integrity",
+        "no publication authority inferred from DOCX creation"
+      ],
+      "document_system_implements": [
+        "DOCX serialization",
+        "style and section generation",
+        "Word-compatible structure",
+        "accessibility-check invocation/integration where available",
+        "render/visual verification support",
+        "artifact digesting"
+      ]
+    },
+    "PRINT_PREPRESS": {
+      "book_system_requires": [
+        "exact manuscript and edition identity",
+        "trim/page/bleed/color/font/image requirements supplied by the actual printer/distributor profile",
+        "page-order, blank-page, recto/verso and chapter-start proof where applicable",
+        "source-to-render text integrity",
+        "PDF/X profile only when required by the selected print/prepress workflow",
+        "proof correction ledger and deterministic re-render/re-proof",
+        "physical or trusted soft-proof acceptance where required by release policy"
+      ],
+      "document_system_implements": [
+        "print-ready file generation",
+        "preflight tooling",
+        "PDF/X validation where selected",
+        "font/image/output-intent mechanics",
+        "rendered page proof support",
+        "artifact digesting"
+      ]
+    }
+  },
+  "onix_projection": {
+    "applicability": "OPTIONAL_BY_DISTRIBUTION_PATH",
+    "book_system_owns": "semantic product metadata values and their relation to the exact book edition/release",
+    "document_or_distribution_service_owns": "ONIX 3.1.2 serialization/transport/validation implementation",
+    "authority_rule": "ONIX metadata may describe a book product but does not replace Book System canonical state, provenance or author publication authority."
+  },
+  "proof_and_correction_loop": [
+    "BOOK_SYSTEM_FREEZES_EXACT_SOURCE_CANDIDATE",
+    "DOCUMENT_SYSTEM_GENERATES_ARTIFACT",
+    "DOCUMENT_SYSTEM_RETURNS_FORMAT_AND_INTEGRITY_EVIDENCE",
+    "BOOK_SYSTEM_REVIEWS_REQUIRED_PROOF_EVIDENCE",
+    "IF_DOCUMENT_ONLY_DEFECT -> DOCUMENT_SYSTEM_CORRECTS_AND_REGENERATES",
+    "IF_CANONICAL_TEXT_DEFECT -> ROUTE_UPSTREAM_TO_BOOK_CANONICAL_MUTATION_AND_CREATE_NEW_SOURCE_VERSION",
+    "REVALIDATE_AND_REPROOF_NEW_ARTIFACT",
+    "BOOK_SYSTEM_MAY_MARK_EXPORT_FROZEN_ONLY_AFTER_REQUIRED_EVIDENCE_PASSES",
+    "PUBLICATION_OR_DELIVERY_REQUIRES_SEPARATE_EXPLICIT_AUTHORIZATION"
+  ],
+  "explicit_non_goals": [
+    "No Book-owned PDF renderer",
+    "No Book-owned DOCX generator",
+    "No Book-owned EPUB packager",
+    "No Book-owned generic accessibility engine",
+    "No Book-owned generic conversion engine",
+    "No universal PDF/UA or PDF/X mandate",
+    "No draft EPUB 3.4 or Accessibility 1.2 production-conformance claim without explicit experimental profile",
+    "No automatic publication after technical PASS"
+  ],
+  "research_classification": {
+    "KEEP": [
+      "exact version/digest binding",
+      "rendered-medium proof",
+      "separation of technical PASS from publication authority",
+      "format-specific profiles"
+    ],
+    "ADD_OR_REFINE": [
+      "explicit Book-System to Document-System ownership boundary",
+      "stable-versus-draft EPUB standards policy",
+      "conditional PDF/UA and PDF/X applicability",
+      "DOCX automated-check plus visual-review rule",
+      "optional ONIX distribution projection"
+    ],
+    "DO_NOT_ADD": [
+      "duplicate document-generation engines inside Book System",
+      "universal one-format proof rules",
+      "automatic publication authority from exporter success"
+    ]
+  },
+  "qualification_effect": "Research-verified Book-domain architecture/profile closure only. No Document System implementation, file-format validator, render engine, export artifact, runtime qualification or publication authority is created by this artifact."
+}
