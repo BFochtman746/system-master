@@ -10,9 +10,12 @@ on:
       - 'qualification/a01/**'
       - '.github/scripts/a01-control-plane*.js'
       - '.github/scripts/a01-overnight-*.js'
+      - '.github/scripts/a01-closed-loop-repair*.js'
+      - '.github/scripts/a01-repair-broker*.js'
       - '.github/scripts/validate-system-topology.js'
       - '.github/scripts/a01-runner-guard.ps1'
       - '.github/workflows/a01-control-plane-gateway.yml'
+      - '.github/workflows/a01-repair-broker.yml'
       - '.github/workflows/a01-overnight-night-shift.yml'
   workflow_dispatch:
     inputs:
@@ -64,6 +67,16 @@ on:
         description: Overnight admission end ISO timestamp
         required: false
         default: ''
+      repair_attempt:
+        description: Repair attempts already consumed for this exact failure lineage
+        required: false
+        default: 0
+        type: number
+      max_repair_attempts:
+        description: Maximum bounded repair attempts for this lineage, 0-2
+        required: false
+        default: 1
+        type: number
   workflow_call:
     inputs:
       qualification_id:
@@ -107,6 +120,14 @@ on:
         type: string
         required: false
         default: ''
+      repair_attempt:
+        type: number
+        required: false
+        default: 0
+      max_repair_attempts:
+        type: number
+        required: false
+        default: 1
     outputs:
       result_class:
         description: Authoritative receipt result class when emitted, or INFRA_FAILURE when runner preflight blocks execution
@@ -114,6 +135,15 @@ on:
       promotion_authorized:
         description: Exact-subject promotion authorization
         value: ${{ jobs.qualify.outputs.promotion_authorized }}
+      repair_transaction_id:
+        description: Durable broker transaction ID on non-PASS terminal result
+        value: ${{ jobs.repair_broker.outputs.transaction_id }}
+      repair_transaction_state:
+        description: Truthful broker route state on non-PASS terminal result
+        value: ${{ jobs.repair_broker.outputs.transaction_state }}
+      repair_target_inbox:
+        description: Canonical owner repair inbox selected by topology
+        value: ${{ jobs.repair_broker.outputs.target_inbox }}
 
 permissions:
   contents: read
@@ -267,6 +297,21 @@ jobs:
         if: always() && (steps.guard.outcome != 'success' || steps.control.outputs.result_class != 'PASS')
         shell: cmd
         run: exit /b 1
+
+  repair_broker:
+    name: Route non-PASS receipt to durable repair broker
+    needs: qualify
+    if: ${{ always() && needs.qualify.outputs.result_class != '' && needs.qualify.outputs.result_class != 'PASS' }}
+    uses: ./.github/workflows/a01-repair-broker.yml
+    with:
+      receipt_id: ${{ format('a01-run-{0}-{1}', github.run_id, inputs.qualification_id || 'A01-CONTROL-PLANE-SELFTEST') }}
+      qualification_id: ${{ inputs.qualification_id || 'A01-CONTROL-PLANE-SELFTEST' }}
+      workstream_id: ${{ inputs.workstream_id || 'SYSTEM-MASTER' }}
+      failed_subject_sha: ${{ inputs.subject_sha || github.sha }}
+      result_class: ${{ needs.qualify.outputs.result_class }}
+      evidence_pointer: ${{ format('artifact:{0}-{1}-evidence', inputs.qualification_id || 'A01-CONTROL-PLANE-SELFTEST', github.run_id) }}
+      repair_attempt: ${{ inputs.repair_attempt || 0 }}
+      max_repair_attempts: ${{ inputs.max_repair_attempts || 1 }}
 
   disruptive-settle:
     name: Hold A-01 admission through registered reboot window
