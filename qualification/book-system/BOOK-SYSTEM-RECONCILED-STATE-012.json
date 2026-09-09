@@ -1,0 +1,78 @@
+{
+  "state_id": "BOOK-SYSTEM-RECONCILED-STATE-012",
+  "effective_date": "2026-09-09",
+  "supersedes_for_current_parent_control": "BOOK-SYSTEM-RECONCILED-STATE-011",
+  "supersession_scope": "PARENT_CONTROL_AND_NEXT_STEP_ROUTING_ONLY",
+  "standing": "ACTIVE__SERVICE_INTERFACE_REGISTRY_V2_A01_PASS__RUNTIME_V2_IMPLEMENTATION_NEXT",
+  "project": "BOOK SYSTEM",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "control_branch": "book-system/control-v1",
+  "closed_this_transition": [
+    {
+      "id": "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-002",
+      "artifact": "qualification/book-system/BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-002-CLOSURE.json",
+      "qualified_subject_sha": "77db6b550e9aeb1dfb956627376becbb591498f8",
+      "a01_run_id": 34413227457,
+      "result": "PASS__HOSTED_PREQUAL_AND_A01_REGISTERED_EXACT_SHA"
+    }
+  ],
+  "registry_v2_result": {
+    "service_families": 4,
+    "operations": 21,
+    "fixture_cases": 27,
+    "hosted_prequalification": "PASS",
+    "authoritative_a01": "PASS",
+    "control_plane_enforcement": "PASS",
+    "v1_preserved": true,
+    "v1_qualification_transfer": false,
+    "provider_canonical_write_authority": false,
+    "provider_lifecycle_transition_authority": false,
+    "provider_export_freeze_authority": false,
+    "provider_publication_authority": false,
+    "book_owned_document_engine_authority": false
+  },
+  "runtime_v2_release": {
+    "contract": "qualification/book-system/integration-proposal-002/BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-002.json",
+    "service_interface_dependency": "SATISFIED_BY_EXACT_A01_PASS_ON_77db6b550e9aeb1dfb956627376becbb591498f8",
+    "executable_implementation_exists": false,
+    "runtime_v2_qualification_exists": false,
+    "implementation_now_dependency_valid": true,
+    "publication_or_canonical_authority_created": false
+  },
+  "current_parent_critical_path": {
+    "id": "BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-002-IMPLEMENTATION-001",
+    "classification": "READY__EXECUTABLE_PARENT_ADMISSION_RUNTIME__REGISTRY_V2_DEPENDENCY_QUALIFIED",
+    "objective": "Implement and qualify the Runtime V2 parent intake/admission engine against the exact qualified Service Interface Registry V2 so typed Prose, Book Evaluator, Research/Evidence and Headless Artifact provider responses enter one immutable parent-owned admission path with exact source/artifact/provenance identity, editorial responsibility, staleness, author and publication safeguards.",
+    "must_include": [
+      "single parent-owned request/response intake path for all four registered service families",
+      "strict Registry V2 schema and provider-class enforcement",
+      "exact parent projection, provider subject, source-object version/digest, artifact digest and provenance projection identity",
+      "durable SUCCESS/PARTIAL/ABSTAIN/REJECTED/ERROR and disagreement preservation",
+      "response replay and idempotency conflict handling plus non-idempotent reconciliation",
+      "immutable intake records, proposal families/snapshots, currentness indexes, author handoffs and admission receipts",
+      "editorial-stage context/evidence with no provider stage-completion or lifecycle authority",
+      "narrative-consistency/prior-stage regression evidence gates where applicable",
+      "EXPORT_GENERATED / FORMAT_VALIDATED / POST_LAYOUT_PROOF_COMPLETE evidence separation from parent-owned EXPORT_FROZEN and PUBLICATION_AUTHORIZED",
+      "stale parent/source/artifact/profile/provenance rejection or preservation without advancement",
+      "external provenance evidence-only behavior and changed-byte artifact identity preservation",
+      "rights/privacy reclassification staleness without historical evidence erasure",
+      "author-decision queueing without fabricated author choice or approval",
+      "transactional parent/ledger commits and exact rollback identity",
+      "deterministic adversarial fixtures and hosted prequalification",
+      "registered exact-SHA A-01 focused qualification before Runtime V2 is treated as qualified"
+    ],
+    "implementation_constraints": [
+      "Use BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-002 as the implementation interface; do not silently downgrade to V1 envelopes.",
+      "Do not claim Lifecycle Transition Engine v1 enforces newly named editorial substage semantics; Runtime V2 may store/gate evidence only unless a separately versioned lifecycle successor is justified and qualified.",
+      "Do not implement generic PDF, DOCX, EPUB, print, conversion, accessibility or credential-embedding engines in Book System.",
+      "Do not create or imply a new System Master topology node for planned Document System work.",
+      "Do not absorb the Prose child critical path or Book Evaluator ownership into Book parent implementation.",
+      "Do not transfer Registry V2 A-01 PASS to Runtime V2 code; the executable runtime must earn its own exact-SHA evidence."
+    ],
+    "pass_proves": "The exact Runtime V2 implementation enforces parent-safe provider intake/admission and the research-verified editorial, artifact, provenance, author and publication boundaries on one exact subject SHA.",
+    "pass_unlocks": "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001",
+    "on_failure": "Classify the exact hosted/A-01 failure first, repair only the failing Runtime V2 subject boundary, create a new exact SHA and rerun the minimum sufficient gate without altering qualified Registry V2 evidence or A-01 infrastructure unless failure evidence requires it."
+  },
+  "generic_continue_rule": "In Book System control, Continue executes BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-002-IMPLEMENTATION-001. BOOK-SYSTEM-VERSION-AND-ROLLBACK-001 remains blocked until Runtime V2 receives its own exact-SHA qualification.",
+  "qualification_effect": "Registry V2 is authoritative PASS only on exact subject 77db6b550e9aeb1dfb956627376becbb591498f8. State-012 creates no Runtime V2 PASS, canonical manuscript mutation, author decision, export freeze or publication authority."
+}
