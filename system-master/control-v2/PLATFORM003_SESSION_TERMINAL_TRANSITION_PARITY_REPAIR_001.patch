@@ -1,0 +1,69 @@
+--- a/11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/transport/InMemoryTransportContinuityStore.java
++++ b/11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/transport/InMemoryTransportContinuityStore.java
+@@ -52,6 +52,17 @@
+ 
+     private static void requireSessionMonotonic(SessionContinuityRecord prior,SessionContinuityRecord next){
+         if(!prior.principalId().equals(next.principalId())||!prior.deviceBindingDigest().equals(next.deviceBindingDigest())||!prior.csrfBindingDigest().equals(next.csrfBindingDigest())||prior.authenticationGeneration()>next.authenticationGeneration()||next.lastServerSequence()<prior.lastServerSequence()||next.lastClientSequence()<prior.lastClientSequence()||next.lastSeenAt().isBefore(prior.lastSeenAt()))throw new IllegalStateException("session monotonicity");
++        if(prior.terminal())throw new IllegalStateException("terminal transport session cannot transition");
++        if(prior.state()!=next.state()){
++            boolean allowed=switch(prior.state()){
++                case ACTIVE -> true;
++                case BACKGROUNDED -> next.state()==TransportSessionState.ACTIVE||next.state()==TransportSessionState.RESUME_REQUIRED||next.state()==TransportSessionState.REAUTH_REQUIRED||next.state()==TransportSessionState.REVOKED||next.state()==TransportSessionState.CLOSED;
++                case RESUME_REQUIRED -> next.state()==TransportSessionState.ACTIVE||next.state()==TransportSessionState.REAUTH_REQUIRED||next.state()==TransportSessionState.REVOKED||next.state()==TransportSessionState.CLOSED;
++                case REAUTH_REQUIRED -> next.state()==TransportSessionState.REVOKED||next.state()==TransportSessionState.CLOSED;
++                case REVOKED,CLOSED -> false;
++            };
++            if(!allowed)throw new IllegalStateException("illegal transport session transition");
++        }
+     }
+     private static boolean sameTokenBinding(ResumeTokenRecord a,ResumeTokenRecord b){
+         return a.tokenId().equals(b.tokenId())&&a.tokenDigest().equals(b.tokenDigest())&&a.sessionId().equals(b.sessionId())&&a.principalId().equals(b.principalId())&&a.authenticationGeneration()==b.authenticationGeneration()&&a.transportGeneration()==b.transportGeneration()&&a.deviceBindingDigest().equals(b.deviceBindingDigest())&&a.acknowledgedServerSequence()==b.acknowledgedServerSequence()&&a.acknowledgedClientSequence()==b.acknowledgedClientSequence()&&a.issuedAt().equals(b.issuedAt())&&a.expiresAt().equals(b.expiresAt());
+--- a/12_TESTS/src/test/java/org/systemmaster/rebuild/platform/transport/Platform003AuthorityTests.java
++++ b/12_TESTS/src/test/java/org/systemmaster/rebuild/platform/transport/Platform003AuthorityTests.java
+@@ -50,6 +50,7 @@
+         ClientCommand stale=new ClientCommand("cmd-2",rr.session().sessionId(),rr.session().authenticationGeneration(),rr.session().transportGeneration(),"client-1",rr.session().lastClientSequence()+1,"POST_MESSAGE",digest("command-2"),"idem-2",9,csrf,t.plusSeconds(8)); ok(Platform003Authority.evaluateCommand("receipt-2",stale,rr.session(),auth,10,digest("result-2"),"evidence:command",t.plusSeconds(8)).status()==ClientCommandStatus.REJECTED_STALE_VERSION,"stale version rejected");
+ 
+         InMemoryTransportContinuityStore store=new InMemoryTransportContinuityStore(); store.saveSession(established.session(),0); store.issueResumeToken(established.resumeToken()); ok(store.session("session").isPresent(),"session stored"); ResumeResult storeRotation=Platform003Authority.resume(established.session(),established.resumeToken(),auth,policy,profile,device,"token-next",digest("token-next"),t.plusSeconds(2)); ResumeResult storedRotation=store.rotateResume(storeRotation,1); ok(storedRotation.consumedToken().consumedAt()!=null&&store.session("session").orElseThrow().transportGeneration()==2,"resume rotation stored atomically"); throwsIt(()->store.rotateResume(storeRotation,1),"token replay rejected");
++        InMemoryTransportContinuityStore terminalStore=new InMemoryTransportContinuityStore(); terminalStore.saveSession(established.session(),0); SessionContinuityRecord terminal=Platform003Authority.revoke(established.session(),t.plusSeconds(2)); terminalStore.saveSession(terminal,1); SessionContinuityRecord resurrected=new SessionContinuityRecord(terminal.sessionId(),terminal.principalId(),terminal.authenticationGeneration(),terminal.transportGeneration()+1,TransportSessionState.ACTIVE,terminal.deviceBindingDigest(),terminal.csrfBindingDigest(),terminal.lastServerSequence(),terminal.lastClientSequence(),terminal.establishedAt(),t.plusSeconds(3),t.plus(Duration.ofMinutes(10)),terminal.absoluteExpiresAt(),null); throwsIt(()->terminalStore.saveSession(resurrected,2),"terminal session resurrection rejected");
+         store.recordCommand(good,goodReceipt); ok(store.recordCommand(good,goodReceipt).receiptId().equals(goodReceipt.receiptId()),"same command replay stable"); ClientCommand conflict=new ClientCommand("cmd-1",good.sessionId(),good.authenticationGeneration(),good.transportGeneration(),good.clientInstanceId(),good.clientSequence(),good.commandType(),digest("changed"),good.idempotencyKey(),good.expectedServerVersion(),good.csrfBindingDigest(),good.createdAt()); throwsIt(()->store.recordCommand(conflict,goodReceipt),"command digest conflict rejected");
+         store.saveMobileCheckpoint(mobile); ok(store.mobileCheckpoint("session","client-1").isPresent(),"mobile checkpoint stored"); store.appendWebSocketAdmission(ws); throwsIt(()->store.appendWebSocketAdmission(ws),"websocket receipt append-only");
+ 
+--- a/10_REQUIREMENTS/SMR011-PACKET-CONTRACT.md
++++ b/10_REQUIREMENTS/SMR011-PACKET-CONTRACT.md
+@@ -12,7 +12,7 @@
+ 
+ ## Required portable implementation
+ 1. HTTPS/WSS-only security profile with exact HTTPS Origin allowlist, CSRF binding for state-changing paths, host-only Secure/HttpOnly/SameSite session-cookie posture, HSTS/CSP target profile and bounded request/message/connection resources.
+-2. Authentication-generation-bound session continuity with monotonic transport generation, server/client cursors, idle/absolute expiry and fail-closed revocation/reauth behavior.
++2. Authentication-generation-bound session continuity with monotonic transport generation, server/client cursors, idle/absolute expiry and fail-closed revocation/reauth behavior; terminal session states cannot be resurrected and portable in-memory state transitions must match the PostgreSQL transition guard.
+ 3. Digest-only single-use resume tokens bound to principal/session, authentication generation, transport generation, device digest and acknowledged sequences; atomic consume and rotation.
+ 4. Version/sequence/request-digest/idempotency-bound client commands with immutable receipts and conflict rejection. Transport admission does not itself execute a domain side effect.
+ 5. Monotonic mobile background checkpoints and deterministic RESUME_ALLOWED/CATCH_UP_REQUIRED/REAUTH_REQUIRED/EXPIRED derivation.
+--- a/tools/verify_platform003_contract_parity.py
++++ b/tools/verify_platform003_contract_parity.py
+@@ -26,12 +26,14 @@
+ for c in load('02_CAPABILITIES/ATOMIC-CAPABILITY-LEDGER-001.json')['capabilities']:
+  if c.get('owner')=='PLATFORM-003':
+   if c.get('status')!='REBUILD_IMPLEMENTED_PORTABLE_QUALIFIED' or not c.get('contracts') or c.get('qualification_gates')!=['SMR011-PORTABLE-GATE']:issues.append(c['capability_id']+':binding drift')
+-source=(R/'11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/transport/Platform003Authority.java').read_text();store=(R/'11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/transport/TransportContinuityStore.java').read_text();jdbc=(R/'11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/transport/JdbcTransportContinuityStore.java').read_text()
++source=(R/'11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/transport/Platform003Authority.java').read_text();store=(R/'11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/transport/TransportContinuityStore.java').read_text();memory=(R/'11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/transport/InMemoryTransportContinuityStore.java').read_text();jdbc=(R/'11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/transport/JdbcTransportContinuityStore.java').read_text()
+ for tok in ('establish','admitHttp','admitWebSocket','resume','evaluateCommand','checkpointMobile','mobileResumeStanding','requireBoundSession'):
+  if tok not in source:issues.append('authority surface missing '+tok)
+ for tok in ('saveSession','issueResumeToken','rotateResume','recordCommand','saveMobileCheckpoint','appendWebSocketAdmission'):
+  if tok not in store:issues.append('store surface missing '+tok)
+ if 'consumeResumeToken(' in store:issues.append('raw resume-token consume surface exposed')
++for tok in ('terminal transport session cannot transition','illegal transport session transition'):
++ if tok not in memory:issues.append('in-memory transition parity missing '+tok)
+ for tok in ('implements TransportContinuityStore','rotateResume','consumed_at IS NULL','clock_timestamp()','ON CONFLICT DO NOTHING','transport_generation=?','current_resume_token_digest=?','csrf_binding_digest=?','last_server_sequence<=?','last_client_sequence<=?'):
+  if tok not in jdbc:issues.append('JDBC governed surface missing '+tok)
+ print(json.dumps({'qualification':'QUAL-SMR011-CONTRACT-PARITY','status':'PASS' if not issues else 'FAIL','contracts':len(expected),'issues':issues},sort_keys=True));sys.exit(1 if issues else 0)
+--- a/tools/verify_smr011_recurrence.py
++++ b/tools/verify_smr011_recurrence.py
+@@ -9,6 +9,7 @@
+ if not expected.issubset(source):issues.append('unbound reconstructed obligations:'+str(sorted(expected-source)))
+ checks=[
+  ('11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/transport/Platform003Authority.java',['admitHttp','admitWebSocket','csrfBindingDigest','resume binding rejected','REJECTED_STALE_VERSION','mobileResumeStanding','requireBoundSession']),
++ ('11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/transport/InMemoryTransportContinuityStore.java',['terminal transport session cannot transition','illegal transport session transition']),
+  ('11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/transport/JdbcTransportContinuityStore.java',['rotateResume','consumed_at IS NULL','clock_timestamp()','ON CONFLICT DO NOTHING','current_resume_token_digest=?','csrf_binding_digest=?','transport_generation=?','last_server_sequence<=?']),
+  ('05_DATA/postgresql/004_smr011_platform003_transport_continuity.up.sql',['transport session monotonicity violation','resume token single-use violation','csrf_binding_digest','UNIQUE(session_id,idempotency_key)','mobile continuity checkpoint monotonicity violation','append-only PLATFORM-003 record cannot mutate or delete']),
+  ('10_REQUIREMENTS/SMR011-PACKET-CONTRACT.md',['FOUNDATION-004 owns authentication','MUST NOT create a second authentication authority','PC-ENDGAME-018'])]
