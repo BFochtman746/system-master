@@ -10,14 +10,23 @@
   "origin_ref": "refs/heads/system-master/assurance-reconciliation-001",
   "estimated_minutes": 60,
   "max_runtime_minutes": 150,
-  "priority": 90,
+  "priority": 60,
   "earliest_start_local": "00:00",
   "latest_start_local": "04:25",
   "window_end_local": "07:00",
   "exclusive_window": false,
   "resource_class": "mixed",
+  "value_class": "BOUNDED_BLOCKER_RECONCILIATION",
+  "critical_path_rank": 3,
+  "completion_delta": {
+    "before": "Assurance has strong historical portable evidence but unresolved current GitHub source custody/reachability and target-evidence standing.",
+    "evidence": "Frozen-subject A-01 branch/source census, SHA reachability, artifact integrity evidence and current F-WP regressions.",
+    "after_pass": "RECON-001B gains current bounded evidence to separate source-custody gaps from actual capability gaps and target/live qualification gaps.",
+    "unlocks": "A precise recovery/repair decision for ASSURANCE-001; PASS does not itself authorize production or a successor build."
+  },
+  "stop_condition": "After RECON-001B is adjudicated, do not repeat generalized census work unless a new concrete source-custody inconsistency or regression creates a decision that the new census can resolve.",
   "resume_on_pass": "Adjudicate the exact A-01 receipt as evidence for RECON-001B. Ingest the branch/source census, SHA reachability results, artifact integrity evidence and regression evidence into the ASSURANCE-001 capability challenge. Do not treat PASS as Assurance completeness or production authorization; continue current-source capability adjudication.",
   "resume_on_failure": "Classify SUBJECT_FAILURE versus INFRA_FAILURE or CONTROL_PLANE_FAILURE. Preserve partial census evidence, repair only the proven failing boundary, and continue RECON-001B using dependency-valid evidence that does not depend on the failed claim.",
   "notification_target": "system-master-assurance-reconciliation-001",
-  "notes": "No fixed reservation required. Bounded read-only deep census plus current F-WP regression; no secrets/private corpus acquisition, no model training, no reboot and no promotion. Runtime cap 150 minutes is below the greater-than-180 checkpoint threshold."
+  "notes": "Portfolio forensic audit retains this exact older SHA intentionally because RECON-001B-PRELIMINARY-ADJUDICATION.md explicitly freezes 5ae9dfbeff56cc05883d7ba3e9f7a4f0da43191c for overnight evidence acquisition while the broader branch continues. Priority is reduced from 90 to 60 so a product-critical promotion or proven Book recovery gate wins scarce A-01 time. No fixed reservation required. Bounded read-only deep census plus current F-WP regression; no secrets/private corpus acquisition, no model training, no reboot and no promotion. Runtime cap 150 minutes is below the greater-than-180 checkpoint threshold."
 }
