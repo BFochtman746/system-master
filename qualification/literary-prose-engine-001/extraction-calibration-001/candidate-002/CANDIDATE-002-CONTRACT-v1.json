@@ -1,0 +1,54 @@
+{
+  "candidate_id": "LITERARY-NARRATIVE-EXTRACTOR-CANDIDATE-002",
+  "standing": "IMPLEMENTATION_ACTIVE__MODEL_BACKEND_AND_INDEPENDENT_HELDOUT_EVIDENCE_REQUIRED__NOT_PROMOTED",
+  "objective": "Add a genuinely learned/model-backed narrative extractor behind the existing source-bound provider contract and evaluate it on independent public-domain/human-adjudicated source-heldout evidence without granting canonical narrative authority.",
+  "predecessor": "CANDIDATE-001-QUALIFICATION-RECEIPT.json",
+  "provider_contract": "../EXTRACTOR-PROVIDER-CONTRACT-v1.json",
+  "calibration_contract": "../EXTRACTION-CALIBRATION-CONTRACT-v1.json",
+  "required_task_families": [
+    "ANCHOR_LOCALIZATION",
+    "ENTITY_IDENTITY_COREFERENCE",
+    "EVENT_IDENTITY",
+    "STORY_VS_DISCOURSE_TIME",
+    "CAUSAL_GOAL_RELATIONS",
+    "EPISTEMIC_FOCALIZATION",
+    "NARRATIVE_FUNCTION",
+    "SETUP_PAYOFF_OPEN_QUESTION",
+    "ARC_ORCHESTRATION"
+  ],
+  "model_boundary": {
+    "backend_may_receive": ["task", "authorized_source_text", "source_sha256"],
+    "backend_must_not_receive": ["gold_labels", "forbidden_labels", "human_adjudication", "hidden_book_eval_gold", "canonical_state", "author_disposition", "publication_authority"],
+    "backend_output": "candidate predictions only",
+    "allowed_statuses": ["ASSERTED", "ALTERNATIVE", "UNRESOLVED", "ABSTAIN"],
+    "canonical_state_write_authorized": false
+  },
+  "heldout_boundary": {
+    "manifest": "PUBLIC-DOMAIN-SOURCE-HELDOUT-MANIFEST-v1.json",
+    "entire_work_isolation_required": true,
+    "adjacent_passage_leakage_forbidden": true,
+    "human_gold_required_before_scoring": true,
+    "provider_may_not_access_gold": true
+  },
+  "evaluation_required": [
+    "per-task precision/recall/F1",
+    "anchor span overlap/IoU where applicable",
+    "false certainty count/rate",
+    "ambiguity preservation",
+    "premature resolution rate",
+    "coverage and selective accuracy",
+    "risk-coverage behavior",
+    "confidence calibration",
+    "knowledge-before-exposure false positives",
+    "unsupported causality",
+    "event/coreference/temporal relation-family separation"
+  ],
+  "promotion_rule": "No aggregate score can promote Candidate-002. Promotion requires source-heldout evidence by task, false-certainty/ambiguity thresholds, rights provenance, evaluator-robustness compatibility and a separate explicit authority decision.",
+  "failure_rule": "If the model is fluent but uncertain, contradictory or weak on a task family, reduce coverage or abstain; never normalize uncertainty into ASSERTED to improve recall.",
+  "rights_rule": "Use only synthetic qualification text, verified public-domain text, or explicitly user-authorized text. No bulk copyrighted acquisition and no named-author imitation target.",
+  "aglo_isolation": "Candidate-002 work must not modify the AGLO candidate, ratified master, author review dispositions, publication state or canon.",
+  "completion_delta": {
+    "before": "Candidate-001 proves cautious extraction plumbing on synthetic source-heldout fixtures but is not a learned provider and is not promoted.",
+    "after": "One model-backed provider has leakage-resistant source-bound plumbing plus independent public-domain/human-adjudicated heldout evidence sufficient for an explicit promotion adjudication or a bounded failure diagnosis."
+  }
+}
