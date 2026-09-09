@@ -1,0 +1,428 @@
+{
+  "fixture_id": "BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-002-FIXTURES",
+  "fixture_version": 1,
+  "source_identity": {
+    "object_id": "MANUSCRIPT-001",
+    "object_version": 7,
+    "object_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  },
+  "next_source_identity": {
+    "object_id": "MANUSCRIPT-001",
+    "object_version": 8,
+    "object_digest": "999999999999999999999999999999999999999999999999999999999999"
+  },
+  "parent_state_template": {
+    "schema_version": 1,
+    "state_version": 11,
+    "book_project": {
+      "book_project_id": "BOOK-PROJECT-001",
+      "book_id": "BOOK-001",
+      "status": "PROSE_REFINEMENT",
+      "governing_brief_ref": "BRIEF-001",
+      "canonical_manifest_ref": "CANON-001"
+    },
+    "active": {
+      "governing_brief_ref": "BRIEF-001",
+      "canon_manifest_ref": "CANON-001",
+      "story_bible_ref": "STORY-BIBLE-001",
+      "book_plan_ref": "PLAN-001",
+      "canonical_manuscript_ref": "MANUSCRIPT-001:V7"
+    },
+    "manuscripts": [
+      {
+        "manuscript_id": "MANUSCRIPT-001",
+        "version_id": "V7",
+        "artifact_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "authority_state": "CANONICAL"
+      }
+    ],
+    "author_decisions": [],
+    "integration_proposals": [],
+    "export_releases": []
+  },
+  "prose_request_template": {
+    "request_id": "REQ-PROSE-001",
+    "correlation_id": "CORR-PROSE-001",
+    "idempotency_key": "IDEM-PROSE-001",
+    "service_id": "PROSE_ANALYSIS_AND_REVISION",
+    "operation_id": "BUILD_NARRATIVE_STATE_PROJECTION",
+    "schema_version": 2,
+    "book_project_id": "BOOK-PROJECT-001",
+    "book_id": "BOOK-001",
+    "parent_state_version": 0,
+    "parent_state_digest": "",
+    "target_refs": ["MANUSCRIPT-001:V7"],
+    "source_identity_refs": [],
+    "projection": {
+      "exact_manuscript_identity": "MANUSCRIPT-001:V7",
+      "authorized_unit_set": ["CHAPTER-003"],
+      "canon_constraints": ["CANON-001"],
+      "story_bible_refs": ["STORY-BIBLE-001"],
+      "rights_boundary": "AUTHORIZED_PRIVATE_BOOK_CONTENT",
+      "editorial_stage_context": {
+        "stage_token": "STRUCTURAL_EDIT_REVIEW",
+        "applicability": "APPLICABLE",
+        "not_applicable_rationale": null
+      }
+    },
+    "authority_context": {
+      "requesting_authority": "BOOK_SYSTEM_PARENT",
+      "canonical_write_allowed": false,
+      "lifecycle_transition_allowed": false,
+      "export_freeze_allowed": false,
+      "publication_authorized": false,
+      "author_decision_required_if_returned": false,
+      "rights_boundary": "AUTHORIZED_PRIVATE_BOOK_CONTENT",
+      "privacy_boundary": "PRIVATE_INTERNAL_ONLY"
+    }
+  },
+  "prose_response_template": {
+    "response_id": "RESP-PROSE-001",
+    "request_id": "REQ-PROSE-001",
+    "correlation_id": "CORR-PROSE-001",
+    "idempotency_key": "IDEM-PROSE-001",
+    "service_id": "PROSE_ANALYSIS_AND_REVISION",
+    "operation_id": "BUILD_NARRATIVE_STATE_PROJECTION",
+    "schema_version": 2,
+    "provider_class": "PROSE_SYSTEM",
+    "provider_subject": {
+      "subject_sha": "1111111111111111111111111111111111111111",
+      "implementation_or_artifact_id": "PROSE-RUNTIME-001"
+    },
+    "parent_projection_identity": {
+      "parent_state_version": 0,
+      "parent_state_digest": ""
+    },
+    "source_identity_refs": [],
+    "result_class": "SUCCESS",
+    "evidence_refs": ["EVIDENCE:NARRATIVE-STATE-001"],
+    "proposal_refs": [],
+    "artifact_evidence": [],
+    "editorial_stage_evidence": [
+      {
+        "stage_token": "STRUCTURAL_EDIT_REVIEW",
+        "applicability": "APPLICABLE",
+        "not_applicable_rationale": null,
+        "entry_evidence_refs": ["ENTRY:DRAFT-SCOPE-READY", "ENTRY:EXACT-MANUSCRIPT-BOUND"],
+        "exit_evidence_refs": ["EXIT:STRUCTURAL-EVIDENCE-REVIEWABLE"],
+        "narrative_consistency_regression_refs": ["REGRESSION:NARRATIVE-001"],
+        "prior_stage_regression_refs": [],
+        "upstream_defect_routing_refs": [],
+        "author_decision_refs": []
+      }
+    ],
+    "target_medium_evidence": [],
+    "provenance_evidence": [],
+    "abstentions": [],
+    "warnings": [],
+    "disagreement_state": {
+      "state": "NONE",
+      "minority_evidence_refs": []
+    },
+    "requested_parent_action": "REGISTER_INTEGRATION_PROPOSAL"
+  },
+  "author_request_template": {
+    "request_id": "REQ-AUTHOR-001",
+    "correlation_id": "CORR-AUTHOR-001",
+    "idempotency_key": "IDEM-AUTHOR-001",
+    "service_id": "PROSE_ANALYSIS_AND_REVISION",
+    "operation_id": "GENERATE_BOUNDED_REVISION_CANDIDATE",
+    "schema_version": 2,
+    "book_project_id": "BOOK-PROJECT-001",
+    "book_id": "BOOK-001",
+    "parent_state_version": 0,
+    "parent_state_digest": "",
+    "target_refs": ["MANUSCRIPT-001:V7:CHAPTER-003"],
+    "source_identity_refs": [],
+    "projection": {
+      "exact_original_identity": "MANUSCRIPT-001:V7:CHAPTER-003",
+      "authorized_target_text": "AUTHORIZED-TEXT-REF-003",
+      "admitted_opportunity": "OPPORTUNITY-001",
+      "ambition_level": "LEVEL_1_SURGICAL",
+      "canon_constraints": ["CANON-001"],
+      "author_intent_constraints": ["INTENT-001"],
+      "protected_language_constraints": [],
+      "voice_context": "VOICE-001",
+      "edit_budget": "BOUNDED_LOCAL",
+      "editorial_stage_context": {
+        "stage_token": "STYLISTIC_OR_LINE_EDIT_REVIEW",
+        "applicability": "APPLICABLE",
+        "not_applicable_rationale": null
+      }
+    },
+    "authority_context": {
+      "requesting_authority": "BOOK_SYSTEM_PARENT",
+      "canonical_write_allowed": false,
+      "lifecycle_transition_allowed": false,
+      "export_freeze_allowed": false,
+      "publication_authorized": false,
+      "author_decision_required_if_returned": true,
+      "rights_boundary": "AUTHORIZED_PRIVATE_BOOK_CONTENT",
+      "privacy_boundary": "PRIVATE_INTERNAL_ONLY"
+    }
+  },
+  "author_response_template": {
+    "response_id": "RESP-AUTHOR-001",
+    "request_id": "REQ-AUTHOR-001",
+    "correlation_id": "CORR-AUTHOR-001",
+    "idempotency_key": "IDEM-AUTHOR-001",
+    "service_id": "PROSE_ANALYSIS_AND_REVISION",
+    "operation_id": "GENERATE_BOUNDED_REVISION_CANDIDATE",
+    "schema_version": 2,
+    "provider_class": "PROSE_SYSTEM",
+    "provider_subject": {
+      "subject_sha": "1111111111111111111111111111111111111111",
+      "implementation_or_artifact_id": "PROSE-RUNTIME-001"
+    },
+    "parent_projection_identity": {
+      "parent_state_version": 0,
+      "parent_state_digest": ""
+    },
+    "source_identity_refs": [],
+    "result_class": "SUCCESS",
+    "evidence_refs": ["EVIDENCE:REVISION-CANDIDATE-001", "EVIDENCE:PRESERVATION-001"],
+    "proposal_refs": [],
+    "artifact_evidence": [],
+    "editorial_stage_evidence": [
+      {
+        "stage_token": "STYLISTIC_OR_LINE_EDIT_REVIEW",
+        "applicability": "APPLICABLE",
+        "not_applicable_rationale": null,
+        "entry_evidence_refs": ["ENTRY:STRUCTURAL-REVIEW-COMPLETE"],
+        "exit_evidence_refs": ["EXIT:TARGETED-IMPROVEMENT-EVIDENCE"],
+        "narrative_consistency_regression_refs": ["REGRESSION:NARRATIVE-LINE-001"],
+        "prior_stage_regression_refs": ["REGRESSION:STRUCTURAL-001"],
+        "upstream_defect_routing_refs": [],
+        "author_decision_refs": []
+      }
+    ],
+    "target_medium_evidence": [],
+    "provenance_evidence": [],
+    "abstentions": [],
+    "warnings": [],
+    "requested_parent_action": "QUEUE_AUTHOR_DECISION"
+  },
+  "document_request_template": {
+    "request_id": "REQ-DOC-001",
+    "correlation_id": "CORR-DOC-001",
+    "idempotency_key": "IDEM-DOC-001",
+    "service_id": "DOCUMENT_ARTIFACT_AND_EXPORT",
+    "operation_id": "POST_LAYOUT_PROOF_ARTIFACT",
+    "schema_version": 2,
+    "book_project_id": "BOOK-PROJECT-001",
+    "book_id": "BOOK-001",
+    "parent_state_version": 0,
+    "parent_state_digest": "",
+    "target_refs": ["ARTIFACT:EPUB-001"],
+    "source_identity_refs": [],
+    "projection": {
+      "artifact_ref": "ARTIFACT:EPUB-001",
+      "artifact_digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "exact_source_identity": "MANUSCRIPT-001:V7",
+      "target_medium_profile": {
+        "profile_id": "EPUB_3_3_PRODUCTION",
+        "profile_version": 1
+      },
+      "proof_scope": ["TEXT_INTEGRITY", "NAVIGATION", "PRESENTATION"],
+      "editorial_stage_context": {
+        "stage_token": "POST_LAYOUT_PROOFREAD_REVIEW",
+        "applicability": "APPLICABLE",
+        "not_applicable_rationale": null
+      },
+      "publication_authorized": false
+    },
+    "authority_context": {
+      "requesting_authority": "BOOK_SYSTEM_PARENT",
+      "canonical_write_allowed": false,
+      "lifecycle_transition_allowed": false,
+      "export_freeze_allowed": false,
+      "publication_authorized": false,
+      "author_decision_required_if_returned": true,
+      "rights_boundary": "AUTHORIZED_EXPORT",
+      "privacy_boundary": "MINIMUM_NECESSARY_PROVIDER_PROJECTION"
+    }
+  },
+  "document_response_template": {
+    "response_id": "RESP-DOC-001",
+    "request_id": "REQ-DOC-001",
+    "correlation_id": "CORR-DOC-001",
+    "idempotency_key": "IDEM-DOC-001",
+    "service_id": "DOCUMENT_ARTIFACT_AND_EXPORT",
+    "operation_id": "POST_LAYOUT_PROOF_ARTIFACT",
+    "schema_version": 2,
+    "provider_class": "HEADLESS_ARTIFACT_SERVICE",
+    "provider_subject": {
+      "subject_sha": "2222222222222222222222222222222222222222",
+      "implementation_or_artifact_id": "ARTIFACT-PROVIDER-001"
+    },
+    "parent_projection_identity": {
+      "parent_state_version": 0,
+      "parent_state_digest": ""
+    },
+    "source_identity_refs": [],
+    "result_class": "SUCCESS",
+    "evidence_refs": ["EVIDENCE:PROOF-001"],
+    "proposal_refs": [],
+    "artifact_evidence": [
+      {
+        "artifact_ref": "ARTIFACT:EPUB-001",
+        "artifact_digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "artifact_currentness": "CURRENT_FOR_BOUND_SOURCE",
+        "format_identity": "EPUB",
+        "target_medium_profile_id": "EPUB_3_3_PRODUCTION",
+        "target_medium_profile_version": 1,
+        "generator_or_toolchain_identity": "ARTIFACT-PROVIDER-001"
+      }
+    ],
+    "editorial_stage_evidence": [
+      {
+        "stage_token": "POST_LAYOUT_PROOFREAD_REVIEW",
+        "applicability": "APPLICABLE",
+        "not_applicable_rationale": null,
+        "entry_evidence_refs": ["ENTRY:RENDERED-CANDIDATE"],
+        "exit_evidence_refs": ["EXIT:POST-LAYOUT-PROOF-COMPLETE"],
+        "narrative_consistency_regression_refs": [],
+        "prior_stage_regression_refs": ["REGRESSION:COPYEDIT-001"],
+        "upstream_defect_routing_refs": [],
+        "author_decision_refs": []
+      }
+    ],
+    "target_medium_evidence": [
+      {
+        "technical_state": "POST_LAYOUT_PROOF_COMPLETE",
+        "format_validation_result": "PASS",
+        "source_to_render_integrity_result": "PASS",
+        "accessibility_result": "PASS_WHERE_APPLICABLE",
+        "proof_result": "PASS",
+        "correction_ledger_ref": null,
+        "rendered_candidate_digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      }
+    ],
+    "provenance_evidence": [],
+    "abstentions": [],
+    "warnings": [],
+    "requested_parent_action": "QUEUE_AUTHOR_DECISION"
+  },
+  "provenance_request_template": {
+    "request_id": "REQ-PROV-001",
+    "correlation_id": "CORR-PROV-001",
+    "idempotency_key": "IDEM-PROV-001",
+    "service_id": "DOCUMENT_ARTIFACT_AND_EXPORT",
+    "operation_id": "ATTACH_OR_VALIDATE_PROVENANCE",
+    "schema_version": 2,
+    "book_project_id": "BOOK-PROJECT-001",
+    "book_id": "BOOK-001",
+    "parent_state_version": 0,
+    "parent_state_digest": "",
+    "target_refs": ["ARTIFACT:EPUB-001"],
+    "source_identity_refs": [],
+    "projection": {
+      "artifact_ref": "ARTIFACT:EPUB-001",
+      "artifact_digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "exact_source_identity": "MANUSCRIPT-001:V7",
+      "provenance_policy": "C2PA_OPTIONAL_RELEASE_ATTACHMENT",
+      "rights_boundary": "AUTHORIZED_EXPORT",
+      "privacy_boundary": "MINIMUM_NECESSARY_EXTERNAL_PROVENANCE",
+      "publication_authorized": false
+    },
+    "authority_context": {
+      "requesting_authority": "BOOK_SYSTEM_PARENT",
+      "canonical_write_allowed": false,
+      "lifecycle_transition_allowed": false,
+      "export_freeze_allowed": false,
+      "publication_authorized": false,
+      "author_decision_required_if_returned": false,
+      "rights_boundary": "AUTHORIZED_EXPORT",
+      "privacy_boundary": "MINIMUM_NECESSARY_EXTERNAL_PROVENANCE"
+    }
+  },
+  "provenance_response_template": {
+    "response_id": "RESP-PROV-001",
+    "request_id": "REQ-PROV-001",
+    "correlation_id": "CORR-PROV-001",
+    "idempotency_key": "IDEM-PROV-001",
+    "service_id": "DOCUMENT_ARTIFACT_AND_EXPORT",
+    "operation_id": "ATTACH_OR_VALIDATE_PROVENANCE",
+    "schema_version": 2,
+    "provider_class": "HEADLESS_ARTIFACT_SERVICE",
+    "provider_subject": {
+      "subject_sha": "2222222222222222222222222222222222222222",
+      "implementation_or_artifact_id": "ARTIFACT-PROVIDER-001"
+    },
+    "parent_projection_identity": {
+      "parent_state_version": 0,
+      "parent_state_digest": ""
+    },
+    "source_identity_refs": [],
+    "result_class": "SUCCESS",
+    "evidence_refs": ["EVIDENCE:C2PA-001"],
+    "proposal_refs": [],
+    "artifact_evidence": [
+      {
+        "artifact_ref": "ARTIFACT:EPUB-001:CREDENTIALLED",
+        "artifact_digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "artifact_currentness": "CURRENT_FOR_BOUND_SOURCE",
+        "format_identity": "EPUB",
+        "target_medium_profile_id": "EPUB_3_3_PRODUCTION",
+        "target_medium_profile_version": 1,
+        "generator_or_toolchain_identity": "ARTIFACT-PROVIDER-001"
+      }
+    ],
+    "editorial_stage_evidence": [],
+    "target_medium_evidence": [],
+    "provenance_evidence": [
+      {
+        "projection_type": "C2PA",
+        "projection_version": "2.4",
+        "source_object_refs_and_digests": ["MANUSCRIPT-001:V7:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"],
+        "bound_artifact_digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "pre_credential_artifact_digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "credential_attachment_changed_bytes": true,
+        "projection_ref": "C2PA:MANIFEST-001",
+        "projection_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "currentness_state": "CURRENT_FOR_BOUND_SOURCE_AND_ARTIFACT",
+        "validation_result": "PASS"
+      }
+    ],
+    "abstentions": [],
+    "warnings": [],
+    "requested_parent_action": "REGISTER_ARTIFACT"
+  },
+  "case_ids": [
+    "RUNTIME_LEDGER_INITIALIZATION",
+    "VALID_PROPOSAL_INTAKE_PROPOSED_ONLY",
+    "POST_COMMIT_SNAPSHOT_PARENT_BINDING",
+    "PARENT_PROTECTED_STATE_UNCHANGED",
+    "ATOMIC_RECEIPT_AND_OUTBOX",
+    "EXACT_RESPONSE_REPLAY_NO_COMMIT",
+    "RESPONSE_IDENTITY_CONFLICT_REJECTED",
+    "IDEMPOTENCY_KEY_CONFLICT_REJECTED",
+    "SUPERSEDING_RESPONSE_REQUIRES_RECONCILIATION",
+    "STALE_PARENT_RESPONSE_PRESERVED_NO_PROPOSAL",
+    "SUPERSEDED_SOURCE_PRESERVED_NO_PROPOSAL",
+    "PARTIAL_RESULT_PRESERVED_WITH_LIMITATIONS",
+    "ABSTAIN_RESULT_PRESERVED_NO_PROPOSAL",
+    "ERROR_RESULT_PRESERVED_NO_PROPOSAL",
+    "DISAGREEMENT_PRESERVED",
+    "OUTPUT_CLASS_NOT_REGISTERED_REJECTED",
+    "PROVIDER_CANONICAL_AUTHORITY_REJECTED",
+    "PROVIDER_PUBLICATION_AUTHORITY_REJECTED",
+    "PROVIDER_STAGE_COMPLETION_AUTHORITY_REJECTED",
+    "EDITORIAL_INCOMPLETE_BLOCKS_PREQUALIFICATION",
+    "PROPOSAL_STATE_MACHINE_TO_ADMITTED",
+    "ADMISSION_DOES_NOT_MUTATE_CANONICAL_POINTERS",
+    "AUTHOR_HANDOFF_PENDING_NO_FABRICATED_APPROVAL",
+    "AUTHOR_DECISION_REQUIRED_FOR_ADMISSION",
+    "STALE_SOURCE_BLOCKS_ADVANCEMENT",
+    "STALE_ARTIFACT_BLOCKS_ADVANCEMENT",
+    "RIGHTS_PRIVACY_RECLASSIFICATION_BLOCKS_ADVANCEMENT",
+    "POST_LAYOUT_PROOF_IS_NOT_EXPORT_FREEZE",
+    "PROVIDER_EXPORT_FREEZE_TECHNICAL_STATE_REJECTED",
+    "PROVENANCE_CHANGED_BYTES_NEW_DIGEST_ACCEPTED",
+    "PROVENANCE_REUSED_DIGEST_REJECTED",
+    "STALE_PROVENANCE_PRESERVED",
+    "NONIDEMPOTENT_UNKNOWN_RETRY_REQUIRES_RECONCILIATION",
+    "OUTBOX_DELIVERY_REPLAY_IDEMPOTENT",
+    "FAILED_TRANSACTION_LEAVES_INPUTS_UNCHANGED"
+  ]
+}
