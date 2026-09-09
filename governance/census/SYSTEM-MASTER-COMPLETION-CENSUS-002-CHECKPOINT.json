@@ -1,0 +1,94 @@
+{
+  "census_id": "SYSTEM-MASTER-COMPLETION-CENSUS-002",
+  "started_at": "2026-09-09T16:36:00-04:00",
+  "standing": "ACTIVE__RESUMABLE",
+  "purpose": "Exhaustively reconcile what System Master has completed, what remains owed, where all historical/current work belongs, and which expected capabilities still require current evidence. This audit is checkpointed so interruption never requires replaying the whole repository or chat history.",
+  "topology": "governance/SYSTEM-TOPOLOGY-002.json",
+  "authority_pointer": "governance/CURRENT-AUTHORITY.json",
+  "watermark": {
+    "main": "ee4e000a1f71695b95fcf1cbc506162692782fb3",
+    "CORE": "119229a3673dcf24abdbf09cf0da78b78cbd4750",
+    "LEARNING": "c363dfcef9d00d559a8c6ccb4b07112569ea37b4",
+    "BOOK": "bc9961f83ed4d4bccbaaaca87c1ef69f8fa1e91d",
+    "PROSE": "65a8a7f6f0c64899d0ee44fc3b2e097a2e2a39e8"
+  },
+  "watermark_rule": "Audit evidence and classifications against these heads. Do not restart if live refs advance. At finalization compare live refs with this watermark and reconcile only the delta.",
+  "phase_rules": [
+    "Complete and commit one phase before beginning the next.",
+    "Never mark completion from a chat claim alone; bind to a repository record, exact receipt/artifact/commit or explicit bounded control standing.",
+    "Never move exact-SHA qualification authority when reallocating ownership taxonomy.",
+    "Preserve historical/stale records; classify/supersede rather than delete evidence.",
+    "Anything without an owner becomes UNALLOCATED and cannot execute, schedule or promote until assigned.",
+    "Anything with ambiguous evidence becomes EVIDENCE_REVIEW_REQUIRED rather than guessed complete or incomplete."
+  ],
+  "phases": [
+    {
+      "phase_id": "P0",
+      "name": "Authority and watermark",
+      "status": "COMPLETE",
+      "outputs": [
+        "SYSTEM-TOPOLOGY-002",
+        "CURRENT-AUTHORITY-001",
+        "post-reallocation selected controls",
+        "current control-drift PASS checks",
+        "immutable audit watermark"
+      ]
+    },
+    {
+      "phase_id": "P1",
+      "name": "Core/Foundation & Spine completion census",
+      "status": "PENDING",
+      "scope": "Foundation/UAF/SMR/continuity/assurance/data/platform/chat/ops/UX/KEEL/interop closures and exact evidence; separate portable, hosted, A-01, native and production standings."
+    },
+    {
+      "phase_id": "P2",
+      "name": "Learning completion and obligation census",
+      "status": "PENDING",
+      "scope": "Learning impl/qual/pilot/request/repair lineages, frozen authority, machine qualification, human-only boundaries, current technical successor selection."
+    },
+    {
+      "phase_id": "P3",
+      "name": "Book completion and obligation census",
+      "status": "PENDING",
+      "scope": "Book parent foundations, lifecycle/editorial/research/publication/export/versioning/author decision state; distinguish Book parent work from Prose child work."
+    },
+    {
+      "phase_id": "P4",
+      "name": "Prose completion and obligation census",
+      "status": "PENDING",
+      "scope": "Book Evaluator, evaluator training, prose diagnostics/training/calibration/revision/preservation lanes, private/human/author boundaries and exact evidence."
+    },
+    {
+      "phase_id": "P5",
+      "name": "Shared infrastructure and A-01 census",
+      "status": "PENDING",
+      "scope": "A-01 control plane, tickets, receipts, runner, Second Shift, closed-loop repair, historical one-shot transports and other non-system infrastructure."
+    },
+    {
+      "phase_id": "P6",
+      "name": "Expected product-module allocation census",
+      "status": "PENDING",
+      "scope": "Reconcile the August 31 product-module inventory and later requirements to current owners: implemented/partial/planned/headless/deferred/excluded/reconciliation-required. Historical counts are not current proof."
+    },
+    {
+      "phase_id": "P7",
+      "name": "Orphan/unallocated branch-workstream census",
+      "status": "PENDING",
+      "scope": "Branch families, workstream IDs, issues, qualification lanes and control records not yet mapped; classify historical-only, superseded, active-owned or UNALLOCATED."
+    },
+    {
+      "phase_id": "P8",
+      "name": "Ledger reconciliation",
+      "status": "PENDING",
+      "scope": "Update COMPLETION-LEDGER, WORK-OBLIGATION-REGISTRY, EXPECTATION-REGISTRY and REALLOCATION-LEDGER so every discovered item has one truthful durable disposition."
+    },
+    {
+      "phase_id": "P9",
+      "name": "Live delta, stale-state cleanup and seal",
+      "status": "PENDING",
+      "scope": "Compare live control heads/main with watermark; reconcile only post-watermark changes; clean stale live tickets/delegations/control pointers without deleting history; seal successor state baseline and one central next objective."
+    }
+  ],
+  "resume_rule": "A replacement chat/task reads this checkpoint and starts at the first phase whose status is not COMPLETE. It does not replay completed phases unless evidence specifically invalidates them.",
+  "final_exit_condition": "Every evidence-backed completion and every known open obligation is owned and durable; every current control can explain its predecessor chain; expected capabilities have current dispositions; active Second Shift lists contain only live revalidated delegations; no known active work depends on chat memory alone."
+}
