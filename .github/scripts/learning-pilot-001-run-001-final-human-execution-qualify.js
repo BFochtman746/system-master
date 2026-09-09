@@ -7,6 +7,7 @@ const cp = require('child_process');
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const LAB = path.join(ROOT, 'learning', 'lab');
+const PARALLEL_TEST_RUNNER = path.join(ROOT, '.github', 'scripts', 'learning-pilot-001-run-001-parallel-unittest.py');
 const evidenceDir = process.env.A01_EVIDENCE_DIR || path.join(process.env.RUNNER_TEMP || os.tmpdir(), `learning-pilot-run001-final-human-${Date.now()}`);
 fs.mkdirSync(evidenceDir, { recursive: true });
 
@@ -85,6 +86,46 @@ function assertSuite(name, modules, expectedCount, seed = '0') {
   return count;
 }
 
+function assertParallelFullSuite(expectedCount) {
+  const result = run('full-learning-lab-suite', 'python', [
+    PARALLEL_TEST_RUNNER,
+    '--lab-dir', LAB,
+    '--discover',
+    '--pattern', 'test_*.py',
+    '--seed', '0',
+    '--workers', '4',
+    '--expected-total', String(expectedCount),
+    '--evidence-dir', evidenceDir,
+    '--evidence-prefix', 'full-module',
+  ]);
+  const text = result.stdout + result.stderr;
+  const count = observedTestCount(text, 'FULL_LEARNING_LAB');
+  assert(count === expectedCount, `FULL_LEARNING_LAB_EXPECTED_${expectedCount}_GOT_${count}`);
+  assert(/\bOK\b/.test(text), 'FULL_LEARNING_LAB_SUITE_NOT_OK');
+  return count;
+}
+
+function assertParallelCriticalSeeds(modules, seeds, expectedPerSeed) {
+  const expectedTotal = expectedPerSeed * seeds.length;
+  const args = [
+    PARALLEL_TEST_RUNNER,
+    '--lab-dir', LAB,
+    '--workers', String(Math.min(4, seeds.length)),
+    '--expected-total', String(expectedTotal),
+    '--expected-per-run', String(expectedPerSeed),
+    '--evidence-dir', evidenceDir,
+    '--evidence-prefix', 'critical',
+  ];
+  for (const module of modules) args.push('--module', module);
+  for (const seed of seeds) args.push('--seed', seed);
+  const result = run('critical-seeds-parallel', 'python', args);
+  const text = result.stdout + result.stderr;
+  const count = observedTestCount(text, 'CRITICAL_SEEDS');
+  assert(count === expectedTotal, `CRITICAL_SEEDS_EXPECTED_${expectedTotal}_GOT_${count}`);
+  assert(/\bOK\b/.test(text), 'CRITICAL_SEEDS_NOT_OK');
+  return count;
+}
+
 try {
   const subject = (process.env.A01_SUBJECT_SHA || process.env.GITHUB_SHA || '').trim();
   assert(/^[0-9a-f]{40}$/i.test(subject), `INVALID_SUBJECT_SHA:${subject}`);
@@ -109,6 +150,7 @@ try {
   run('python-version', 'python', ['--version']);
   run('compile', 'python', [
     '-m', 'py_compile',
+    '.github/scripts/learning-pilot-001-run-001-parallel-unittest.py',
     'learning/lab/run_pilot001.py',
     'learning/lab/run_pilot001_closed_loop.py',
     'learning/lab/run_pilot001_real_participant.py',
@@ -150,20 +192,11 @@ try {
   const predecessorCount = assertSuite('predecessor-regressions', predecessorModules, 57);
   const evidenceCount = assertSuite('local-first-evidence-boundary', evidenceModules, 13);
 
-  const full = run('full-learning-lab-suite', 'python', [
-    '-m', 'unittest', 'discover', '-v', '-s', 'tests', '-p', 'test_*.py',
-  ], { cwd: LAB, env: { PYTHONHASHSEED: '0' } });
-  const fullText = full.stdout + full.stderr;
-  const fullCount = observedTestCount(fullText, 'FULL_LEARNING_LAB');
-  assert(fullCount === 698, `FULL_LEARNING_LAB_EXPECTED_698_GOT_${fullCount}`);
-  assert(/\bOK\b/.test(fullText), 'FULL_LEARNING_LAB_SUITE_NOT_OK');
+  const fullCount = assertParallelFullSuite(698);
   fs.writeFileSync(path.join(evidenceDir, 'full-learning-lab-test-count.txt'), `${fullCount}\n`);
 
   const seeds = ['1', '7', '42', '99'];
-  let repeatedTests = 0;
-  for (const seed of seeds) {
-    repeatedTests += assertSuite(`critical-seed-${seed}`, closedLoopModules, 54, seed);
-  }
+  const repeatedTests = assertParallelCriticalSeeds(closedLoopModules, seeds, 54);
 
   const policy = fs.readFileSync(path.join(LAB, 'PILOT_001_RUN_001_EVIDENCE_HANDLING.md'), 'utf8');
   const consent = fs.readFileSync(path.join(LAB, 'PILOT_001_RUN_001_PARTICIPANT_CONSENT.md'), 'utf8');
@@ -221,6 +254,7 @@ try {
     `PILOT_RUN001_FULL_LEARNING_LAB_TESTS=${fullCount}`,
     `PILOT_RUN001_CRITICAL_REPEAT_TESTS=${repeatedTests}`,
     'PILOT_RUN001_CRITICAL_HASH_SEEDS=1,7,42,99',
+    'PILOT_RUN001_TEST_SCHEDULING=BOUNDED_PARALLEL_SUBPROCESSES',
     'PILOT_RUN001_FROZEN_V1_CHANGED=FALSE',
     'PILOT_RUN001_PARTICIPANT_STORAGE_DEFAULT=LOCAL',
     'PILOT_RUN001_AUTOMATIC_EXTERNAL_UPLOAD=FALSE',
