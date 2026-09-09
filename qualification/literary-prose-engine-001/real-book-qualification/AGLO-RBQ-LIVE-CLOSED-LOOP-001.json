@@ -1,6 +1,6 @@
 {
   "objective": "AGLO-REAL-BOOK-CLOSED-LOOP-QUALIFICATION-001",
-  "standing": "PARTIAL_PASS__RATIFIED_BASELINE_AUDITED__ONE_GENUINE_USER_DECISION_REMAINS",
+  "standing": "PASS__REPRESENTATIVE_SAMPLE_CLOSED_LOOP_COMPLETE__ONE_AUTHOR_ACCEPTED_BOUNDED_REPAIR",
   "baseline": {
     "version_id": "AGLO-REJECT-ALL-NARRATIVE-v1",
     "sha256": "a48378682ee15fd4b24bc97293ce43a37f096db254a0b78f715081a8aa8a59ee",
@@ -21,8 +21,8 @@
       "target_id": "AGLO-RBQ-CH21-001",
       "chapter": 21,
       "role": "CRAFT_REPAIR_TARGET",
-      "disposition": "RETAIN_ORIGINAL_PENDING_INDEPENDENT_PREFERENCE_EVIDENCE",
-      "reason": "Potential explanatory density remains subjective and cannot justify changing authorial texture without stronger preference evidence.",
+      "disposition": "RETAIN_ORIGINAL__ABSTAIN_SUBJECTIVE",
+      "reason": "Potential explanatory density remains subjective and cannot justify changing authorial texture without stronger independent preference evidence.",
       "candidate_generation": "ABSTAIN_SUBJECTIVE",
       "preservation_regression": null
     },
@@ -31,7 +31,9 @@
       "chapter": 24,
       "role": "OBJECTIVE_REPAIR_TARGET",
       "finding": "EXACT_DUPLICATE_WITNESS_SENTENCE_CONFIRMED_IN_REJECT_ALL",
-      "disposition": "CANDIDATE_ACCEPTABLE_PENDING_EXPLICIT_USER_DECISION",
+      "disposition": "AUTHOR_ACCEPTED_BOUNDED_REPAIR",
+      "author_decision": "ACCEPT_REMOVE_EXACT_DUPLICATE",
+      "author_decision_authority": "EXPLICIT_USER_CHOICE_A_IN_CURRENT_CHAT",
       "candidate_digest_sha256": "eeeb3740493d047e69d637ceafe15fa1e054775cb5963652c17f2465e91de7e4",
       "transform": "REMOVE_FIRST_EXACT_DUPLICATE_OCCURRENCE_ONLY_AND_RETAIN_COMPLETE_FOLLOWING_PARAGRAPH",
       "candidate_digest_verified_against_private_projected_text": true,
@@ -39,19 +41,16 @@
       "meaning_change": false,
       "voice_change_expected": false,
       "preservation_regression": false,
-      "author_decision": null
+      "automatic_manuscript_overwrite_authorized": false
     },
     {
       "target_id": "AGLO-RBQ-CH24-CONCAT-001",
       "chapter": 24,
       "role": "REJECTED_FALSE_POSITIVE",
-      "prior_finding": "TWO_NEAR_DUPLICATE_PARAGRAPH_VARIANTS_CONCATENATED_WITHOUT_SEPARATOR",
       "disposition": "REJECT_FALSE_POSITIVE__TRACKED_CHANGE_PROJECTION_ARTIFACT",
       "audit_record": "AGLO-RBQ-CH24-TRACKED-CHANGE-PROJECTION-AUDIT-001.json",
-      "reason": "The apparent concatenation combined deleted REJECT_ALL text with inserted ACCEPT_ALL replacement text. The ratified REJECT_ALL projection contains only the REJECT_ALL variant, so no author variant selection exists at this target.",
       "user_decision_required": false,
-      "preservation_regression": false,
-      "author_decision": null
+      "preservation_regression": false
     }
   ],
   "controls": [
@@ -59,19 +58,31 @@
     {"chapter": 19, "role": "RETURN_ARC_CONTROL", "disposition": "RETAIN_ORIGINAL", "automatic_revision": false},
     {"chapter": 29, "role": "ENDING_VOICE_AND_THEOLOGICAL_ANCHOR", "disposition": "RETAIN_ORIGINAL", "automatic_revision": false}
   ],
+  "step_k_defense": "PASS_CONTROL_ANCHORS_RETAINED__NO_HOMOGENIZATION_PRESSURE_ADMITTED",
   "step_j_learning_authority": {
-    "explicit_user_preference_available": false,
-    "preference_learning_admitted": false,
-    "reason": "The author has explicitly ratified the REJECT_ALL baseline for qualification-only use but has not yet made a Chapter 24 candidate decision. Baseline ratification is not a revision-preference signal.",
-    "scope": "A-GATE-LEFT-OPEN_PROJECT_ONLY",
+    "explicit_user_preference_available": true,
+    "preference_learning_admitted": true,
+    "event_ref": "step-j/project-evidence/AGLO-STEP-J-PREFERENCE-EVIDENCE-001.json",
+    "store": "CURRENT_PREFERENCE",
+    "scope": "A-GATE-LEFT-OPEN_PROJECT_AND_MATCHING_CONTEXT_ONLY",
+    "stable_identity_changed": false,
     "raw_prose_persisted": false,
-    "universalized": false,
-    "authority_correction_record": "AGLO-RBQ-AUTHORITY-CORRECTION-002.json"
+    "universalized": false
   },
+  "system_behavior_proven": [
+    "CAN_RETAIN_ORIGINAL_WHEN_GAIN_NOT_PROVEN",
+    "CAN_ABSTAIN_ON_SUBJECTIVE_EDIT_UNDER_UNCERTAINTY",
+    "CAN_DETECT_AND_REJECT_TRACKED_CHANGE_PROJECTION_FALSE_POSITIVE",
+    "CAN_PRESENT_ONE_GENUINE_BOUNDED_AUTHOR_DECISION",
+    "CAN_LEARN_FROM_EXPLICIT_USER_ACTION_WITHOUT_OVERGENERALIZING",
+    "CAN_KEEP_RAW_MANUSCRIPT_AND_CANDIDATE_TEXT_OUT_OF_REPOSITORY",
+    "CAN_PRESERVE_AUTHOR_DECISION_BOUNDARY"
+  ],
   "raw_manuscript_text_committed": false,
   "candidate_text_committed": false,
   "publication_authorized": false,
   "automatic_overwrite_authorized": false,
   "canon_replacement_authorized": false,
-  "next_transition": "USER_ADJUDICATE_CH24_WITNESS_DEDUPLICATION_THEN_RECORD_STEP_J_PROJECT_PREFERENCE_EVIDENCE_IF_AND_ONLY_IF_EXPLICITLY_CHOSEN"
+  "real_book_accuracy_claimed_beyond_representative_sample": false,
+  "next_transition": "CLOSE_REPRESENTATIVE_SAMPLE_QUALIFICATION_AND_SELECT_NEXT_REAL_BOOK_EXPANSION_BOUNDARY"
 }
