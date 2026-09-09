@@ -1,36 +1,51 @@
 {
   "objective": "LITERARY-PROSE-ENGINE-001-REAL-BOOK-QUALIFICATION",
-  "standing": "NOT_ADMITTED",
-  "preadmission_status": "PREADMISSION_READY__AWAITING_EXPLICIT_AUTHOR_ADMISSION_AND_CANONICAL_BASELINE_RATIFICATION",
-  "admission_id": null,
-  "project_id": null,
-  "book_id": null,
+  "standing": "ADMITTED",
+  "decision": "ADMITTED",
+  "preadmission_status": "COMPLETE",
+  "admission_id": "AGLO-REAL-BOOK-ADMISSION-001",
+  "project_id": "A-GATE-LEFT-OPEN",
+  "book_id": "AGLO-001",
+  "source_ownership_or_authorization": "USER_OWNED_OR_AUTHORIZED",
   "source_reference": "A Gate Left Open - Master .docx",
+  "source_package_digest": "ec0f5475c05cf6c11a75d139f2dbd131e6133d6abba9121be8b8ef18454b31df",
   "source_digest": "ec0f5475c05cf6c11a75d139f2dbd131e6133d6abba9121be8b8ef18454b31df",
-  "qualification_scope": "REPRESENTATIVE_SAMPLE__EXACT_SAMPLE_NOT_YET_FROZEN",
-  "baseline_version_id": null,
-  "preservation_obligations": [
-    "CANON_AND_CHRONOLOGY",
-    "AUTHORIAL_INTENT",
-    "PROTECTED_LANGUAGE",
-    "POV_AND_FOCALIZATION",
-    "CHARACTER_KNOWLEDGE_AND_INTEGRITY",
-    "EXPLICIT_AUTHOR_CONSTRAINTS",
-    "REQUIRED_AMBIGUITY_AND_SUBTEXT",
-    "APPLICABLE_HISTORICAL_CONSTRAINTS",
-    "APPLICABLE_THEOLOGICAL_CONSTRAINTS",
-    "PROJECT_BOOK_VOICE_AND_PROTECTED_IRREGULARITY"
-  ],
+  "qualification_scope": "MULTI_CHAPTER_SAMPLE",
+  "baseline_version_id": "AGLO-REJECT-ALL-NARRATIVE-v1",
+  "baseline_text_digest": "a48378682ee15fd4b24bc97293ce43a37f096db254a0b78f715081a8aa8a59ee",
+  "revision_projection": "REJECT_ALL",
+  "preservation_obligations": {
+    "canon": "FAIL_CLOSED",
+    "authorial_intent": "FAIL_CLOSED",
+    "protected_language": "FAIL_CLOSED",
+    "pov_focalization": "FAIL_CLOSED",
+    "character_knowledge_integrity": "FAIL_CLOSED",
+    "explicit_user_constraints": "FAIL_CLOSED",
+    "required_ambiguity": "FAIL_CLOSED",
+    "historical_constraints": "FAIL_CLOSED_WHEN_APPLICABLE",
+    "theological_constraints": "FAIL_CLOSED_WHEN_APPLICABLE",
+    "project_book_voice_and_protected_irregularity": "FAIL_CLOSED"
+  },
   "allowed_persistence": {
     "raw_manuscript_text": "PRIVATE_NON_REPOSITORY",
-    "candidate_revision_text": "PRIVATE_NON_REPOSITORY",
-    "source_and_candidate_digests": "ALLOWED",
-    "derived_nonreconstructive_metrics": "ALLOWED",
-    "evidence_references_and_receipts": "ALLOWED",
-    "project_scoped_learning_records_without_raw_prose": "ALLOWED"
+    "derived_metrics": "ALLOWED_NONRECONSTRUCTIVE",
+    "candidate_text": "PRIVATE_NON_REPOSITORY",
+    "digests": "ALLOWED",
+    "evidence_references": "ALLOWED",
+    "learning_records": "ALLOWED_PROJECT_SCOPED_NO_RAW_PROSE"
   },
-  "user_authorization": null,
-  "admitted_at": null,
+  "user_authorization": {
+    "explicit": true,
+    "objective": "LITERARY-PROSE-ENGINE-001-REAL-BOOK-QUALIFICATION",
+    "authorization_received_at": "2026-09-08T20:38:00-04:00",
+    "qualification_only": true,
+    "publication_authorized": false,
+    "automatic_overwrite_authorized": false,
+    "baseline_projection_ratified": "REJECT_ALL"
+  },
+  "admitted_at": "2026-09-08T20:38:00-04:00",
+  "named_author_target": false,
+  "universal_prose_score": false,
   "candidate": {
     "title": "A GATE LEFT OPEN",
     "subtitle": "Famine, Covenant, and the Cost of Leaving",
@@ -42,14 +57,36 @@
     "tracked_changes": {
       "insertions": 23,
       "deletions": 32,
-      "canonical_projection_ratified": false,
+      "canonical_projection_ratified": true,
+      "ratified_projection": "REJECT_ALL",
       "accept_all_narrative_sha256": "34be877efdbe08436177f4d5f996a8629aef781336fa6fa3e9ec086066c532c7",
       "reject_all_narrative_sha256": "a48378682ee15fd4b24bc97293ce43a37f096db254a0b78f715081a8aa8a59ee",
-      "accept_all_known_canon_blocker": "AGLO-HG-001",
-      "recommended_safe_baseline_candidate": "REJECT_ALL",
-      "recommendation_is_canon_ratification": false
-    },
-    "ownership_or_authorization_for_this_qualification": "NOT_YET_EXPLICITLY_BOUND"
+      "accept_all_known_canon_blocker": "AGLO-HG-001"
+    }
+  },
+  "representative_sample": {
+    "sample_id": "AGLO-RBQ-SAMPLE-001",
+    "selection_method": "STRUCTURAL_AND_RISK_COVERAGE",
+    "chapter_numbers": [1, 8, 19, 21, 24, 29],
+    "total_word_count": 11194,
+    "sample_manifest_sha256": "f456e13c8eb7beb4dae9e32aefb9af32cf3d44a19f4d7af2808a60bfd371c2d4",
+    "digest_method": "SHA256_UTF8_OF_REJECT_ALL_PROJECTED_CHAPTER_PARAGRAPHS_JOINED_WITH_LF_INCLUDING_CHAPTER_HEADING",
+    "chapters": [
+      {"chapter": 1, "word_count": 2382, "sha256": "9a99a6b0fe4c9604e43bc84cc3cb4e81b620113eb4e3b42e09e8614e34739b3b"},
+      {"chapter": 8, "word_count": 2428, "sha256": "8c8bc2e85c432e0c1bfadb6b751b38807e705be2d6e009acf4a36c34b4d6a0a8"},
+      {"chapter": 19, "word_count": 1013, "sha256": "bd973decd6c1b97fda74fcb80d310d90e22ec3d68898398dd8865d4a681bb33f"},
+      {"chapter": 21, "word_count": 1854, "sha256": "ab9d5d5e6e881e4d3b2cd58ef60fe4fad9206f1648336f7bbffcded8fb301e36"},
+      {"chapter": 24, "word_count": 971, "sha256": "dd5001c7485608139eae24c9b7c9212612143dd9b4021cc20ebf92f116dc1ca5"},
+      {"chapter": 29, "word_count": 2546, "sha256": "83a724db59f1d0cf5a6d211ba9720ed7cc13a253fbbc031b06bdfb9ff4a555d6"}
+    ],
+    "selection_coverage": [
+      "OPENING_BASELINE",
+      "HIGH_VALUE_REPAIR_POINT",
+      "TRACKED_CHANGE_AND_RETURN_ARC",
+      "CANON_CHRONOLOGY_SENSITIVE_RETURN",
+      "LATE_THRESHOLD_SCENE",
+      "ENDING_BASELINE"
+    ]
   },
   "step_l_prerequisite": {
     "standing": "PASS_CLOSED_LOOP_QUALIFICATION__SYNTHETIC_ONLY__REAL_BOOK_QUALIFICATION_NOT_YET_ADMITTED",
@@ -58,9 +95,9 @@
     "artifact_id": 10082483679,
     "artifact_digest": "sha256:9fa645ba2092977d531e6860d0356c97d7df9db0f926e282756e0fcc62522ab9"
   },
-  "preadmission_record": "AGLO-PREADMISSION-QUALIFICATION.md",
-  "real_book_run_authorized": false,
+  "baseline_ratification_record": "AGLO-REAL-BOOK-BASELINE-RATIFICATION-001.json",
+  "real_book_run_authorized": true,
   "real_book_accuracy_claimed": false,
   "raw_manuscript_text_committed": false,
-  "next_required_transition": "AGLO-REAL-BOOK-BASELINE-RATIFICATION-001"
+  "next_required_transition": "AGLO-REAL-BOOK-CLOSED-LOOP-QUALIFICATION-001"
 }
