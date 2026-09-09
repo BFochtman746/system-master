@@ -1,0 +1,268 @@
+{
+  "registry_id": "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-002",
+  "registry_version": 2,
+  "effective_date": "2026-09-09",
+  "standing": "CANONICAL_SUCCESSOR_CONTRACT__QUALIFICATION_PENDING",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "supersedes_for_future_runtime_integration": "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-001",
+  "v1_preservation_rule": "Registry V1 and its exact-SHA A-01 PASS remain immutable historical evidence. V1 envelopes are not silently upgraded to V2 and V1 PASS never qualifies V2.",
+  "depends_on": [
+    "BOOK-SYSTEM-CANONICAL-BOOK-STATE-MODEL-001",
+    "BOOK-SYSTEM-PARENT-INTEGRATION-BOUNDARY-001",
+    "BOOK-SYSTEM-BOOK-INTELLIGENCE-UNIFICATION-BINDING-001",
+    "BOOK-SYSTEM-RESEARCH-VERIFIED-AUTHORING-LIFECYCLE-AMENDMENT-001",
+    "BOOK-SYSTEM-DOCUMENT-SYSTEM-EXPORT-OWNERSHIP-BOUNDARY-001",
+    "BOOK-SYSTEM-PUBLICATION-EXPORT-STANDARDS-PROFILE-001",
+    "BOOK-SYSTEM-PROVENANCE-INTEROPERABILITY-PROJECTION-001",
+    "BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-002"
+  ],
+  "governing_law": [
+    "Book System owns canonical book state, admission, lifecycle routing, export freeze and publication authority.",
+    "Providers receive only minimum bounded projections required by a registered operation.",
+    "Every provider response is evidence, artifact output, abstention, error, or proposal input; never a direct canonical write.",
+    "Exact parent, source-object, artifact and provider identities survive request through response through parent admission.",
+    "Technical artifact generation, validation, proof or provenance validation never implies export freeze or publication authorization.",
+    "Unknown service IDs, operation IDs, provider classes, schema versions, technical states or response classes fail closed.",
+    "No Book-owned PDF, DOCX, EPUB, print, accessibility, conversion, credential-embedding or generic render engine is authorized by this registry.",
+    "The planning label Document System is not promoted into current System Master topology by this contract; reusable document mechanics remain external or future-allocated implementation behind HEADLESS_ARTIFACT_SERVICE until topology explicitly assigns an owner."
+  ],
+  "schema_compatibility": {
+    "v2_request_schema_version": 2,
+    "v2_response_schema_version": 2,
+    "v1_envelopes_accepted_by_v2_registry": false,
+    "v1_callers": "Remain bound to Registry V1 until an explicitly qualified adapter or V2 caller is used.",
+    "unknown_or_future_schema_version": "FAIL_CLOSED",
+    "automatic_cross_version_field_inference": false,
+    "reason": "V2 adds exact source/artifact currentness, editorial context, target-medium proof and provenance semantics that cannot be inferred safely from V1 envelopes."
+  },
+  "common_request_envelope": {
+    "schema_version": 2,
+    "required": [
+      "request_id",
+      "correlation_id",
+      "idempotency_key",
+      "service_id",
+      "operation_id",
+      "schema_version",
+      "book_project_id",
+      "book_id",
+      "parent_state_version",
+      "parent_state_digest",
+      "target_refs",
+      "source_identity_refs",
+      "projection",
+      "authority_context"
+    ],
+    "source_identity_ref_required": ["object_id", "object_version", "object_digest"],
+    "authority_context_required": [
+      "requesting_authority",
+      "canonical_write_allowed",
+      "lifecycle_transition_allowed",
+      "export_freeze_allowed",
+      "publication_authorized",
+      "author_decision_required_if_returned",
+      "rights_boundary",
+      "privacy_boundary"
+    ],
+    "rules": [
+      "canonical_write_allowed, lifecycle_transition_allowed and export_freeze_allowed must be false for every provider request.",
+      "publication_authorized must be false for every provider request; publication authorization is not delegated to service providers.",
+      "parent_state_digest and source object digests are lowercase sha256 hex over exact immutable identities.",
+      "target_refs and source_identity_refs must resolve to the bound parent state or explicitly admitted immutable artifacts.",
+      "projection must omit data forbidden by rights/privacy/custody policy."
+    ]
+  },
+  "common_response_envelope": {
+    "schema_version": 2,
+    "required": [
+      "response_id",
+      "request_id",
+      "correlation_id",
+      "idempotency_key",
+      "service_id",
+      "operation_id",
+      "schema_version",
+      "provider_class",
+      "provider_subject",
+      "parent_projection_identity",
+      "source_identity_refs",
+      "result_class",
+      "evidence_refs",
+      "proposal_refs",
+      "artifact_evidence",
+      "editorial_stage_evidence",
+      "target_medium_evidence",
+      "provenance_evidence",
+      "abstentions",
+      "warnings",
+      "requested_parent_action"
+    ],
+    "provider_subject_required": ["subject_sha", "implementation_or_artifact_id"],
+    "parent_projection_identity_required": ["parent_state_version", "parent_state_digest"],
+    "result_classes": ["SUCCESS", "PARTIAL", "ABSTAIN", "REJECTED", "ERROR"],
+    "requested_parent_actions": [
+      "NONE",
+      "REGISTER_EVIDENCE",
+      "REGISTER_INTEGRATION_PROPOSAL",
+      "QUEUE_AUTHOR_DECISION",
+      "REGISTER_ARTIFACT",
+      "REVIEW_REQUIRED"
+    ],
+    "provider_technical_states_allowed": ["NONE", "EXPORT_GENERATED", "FORMAT_VALIDATED", "POST_LAYOUT_PROOF_COMPLETE"],
+    "provider_technical_states_forbidden": ["EXPORT_FROZEN", "PUBLICATION_AUTHORIZED"],
+    "rules": [
+      "SUCCESS is not parent admission.",
+      "PARTIAL, ABSTAIN, REJECTED and ERROR remain distinct result classes.",
+      "ABSTAIN requires an explicit reason and ERROR requires an explicit code in evidence/warnings according to the operation contract.",
+      "Stale parent/source/artifact/provenance identity cannot advance parent admission without explicit revalidation.",
+      "A provider may report technical evidence but may not report or infer EXPORT_FROZEN or PUBLICATION_AUTHORIZED.",
+      "External provenance is evidence-only and cannot establish authorship, approval, canonical state or publication authority beyond admitted internal evidence."
+    ]
+  },
+  "editorial_stage_context": {
+    "recognized_stages": ["STRUCTURAL_EDIT_REVIEW", "STYLISTIC_OR_LINE_EDIT_REVIEW", "COPY_EDIT_REVIEW", "POST_LAYOUT_PROOFREAD_REVIEW"],
+    "stage_evidence_fields": [
+      "stage_token",
+      "applicability",
+      "not_applicable_rationale",
+      "entry_evidence_refs",
+      "exit_evidence_refs",
+      "narrative_consistency_regression_refs",
+      "prior_stage_regression_refs",
+      "upstream_defect_routing_refs",
+      "author_decision_refs"
+    ],
+    "provider_stage_completion_authority": false,
+    "rules": [
+      "Stage-scoped providers may return evidence for a recognized stage but cannot advance Book lifecycle state.",
+      "NOT_APPLICABLE requires a rationale and cannot hide unresolved required evidence.",
+      "Later-stage evidence cannot silently widen authority to perform upstream structural or line editing."
+    ]
+  },
+  "artifact_evidence_contract": {
+    "required_when_artifact_returned": [
+      "artifact_ref",
+      "artifact_digest",
+      "artifact_currentness",
+      "format_identity",
+      "target_medium_profile_id",
+      "target_medium_profile_version",
+      "generator_or_toolchain_identity"
+    ],
+    "artifact_currentness_states": ["CURRENT_FOR_BOUND_SOURCE", "STALE_SOURCE", "STALE_PROFILE", "SUPERSEDED_ARTIFACT", "VALIDATION_FAILED"],
+    "rules": [
+      "Any changed artifact bytes require a new artifact digest.",
+      "An artifact bound to a superseded source or target profile is not current for admission/proof.",
+      "Artifact identity never implies canonical manuscript selection or publication authority."
+    ]
+  },
+  "target_medium_evidence_contract": {
+    "required_when_target_medium_operation": [
+      "technical_state",
+      "format_validation_result",
+      "source_to_render_integrity_result",
+      "accessibility_result",
+      "proof_result",
+      "correction_ledger_ref",
+      "rendered_candidate_digest"
+    ],
+    "technical_state_order": ["EXPORT_GENERATED", "FORMAT_VALIDATED", "POST_LAYOUT_PROOF_COMPLETE"],
+    "rules": [
+      "Artifact generation does not imply validation.",
+      "Validation does not imply post-layout proof completion.",
+      "Post-layout proof completion does not imply export freeze or publication authorization.",
+      "Accessibility evidence is required only when the selected target-medium profile requires or claims it, but absence must be explicit rather than silently passing.",
+      "A proof correction that changes bytes invalidates prior digest-bound validation/proof evidence."
+    ]
+  },
+  "provenance_evidence_contract": {
+    "currentness_states": ["NONE", "CURRENT_FOR_BOUND_SOURCE_AND_ARTIFACT", "SUPERSEDED_FOR_CURRENT_RELEASE", "REDACTION_OR_CORRECTION_REQUIRED", "WITHDRAWN_BY_PARENT_POLICY", "EXTERNAL_VALIDATION_FAILED"],
+    "required_when_present": [
+      "projection_type",
+      "projection_version",
+      "source_object_refs_and_digests",
+      "bound_artifact_digest",
+      "projection_ref",
+      "projection_digest",
+      "currentness_state",
+      "validation_result"
+    ],
+    "rules": [
+      "W3C PROV, C2PA and other registered external provenance remain evidence-only projections.",
+      "A provenance projection cannot be rebound from old source/artifact bytes to new bytes.",
+      "If credential attachment changes asset bytes, final credentialed artifact digest must differ from and preserve predecessor identity for the pre-credential digest.",
+      "Private manuscript/evaluation/research content is excluded unless explicitly authorized and necessary."
+    ]
+  },
+  "services": {
+    "PROSE_ANALYSIS_AND_REVISION": {
+      "service_id": "PROSE_ANALYSIS_AND_REVISION",
+      "provider_class": "PROSE_SYSTEM",
+      "canonical_owner_path": "SYSTEM_MASTER/BOOK/PROSE",
+      "historical_v1_provider_alias": "PROSE_PROJECT",
+      "canonical_write_authority": false,
+      "operations": {
+        "ANALYZE_PASSAGE_OR_UNIT": {"operation_id":"ANALYZE_PASSAGE_OR_UNIT","idempotent":true,"stage_scoped":true,"required_projection":["exact_manuscript_or_unit_identity","target_text_or_authorized_projection","purpose","canon_constraints","author_intent_constraints","protected_language_constraints","voice_context","rights_boundary","editorial_stage_context"],"allowed_outputs":["diagnostic_evidence","editorial_stage_evidence","abstention","warnings"],"requested_parent_action_allowed":["REGISTER_EVIDENCE","REVIEW_REQUIRED","NONE"]},
+        "BUILD_NARRATIVE_STATE_PROJECTION": {"operation_id":"BUILD_NARRATIVE_STATE_PROJECTION","idempotent":true,"stage_scoped":true,"required_projection":["exact_manuscript_identity","authorized_unit_set","canon_constraints","story_bible_refs","rights_boundary","editorial_stage_context"],"allowed_outputs":["narrative_state_evidence","orchestration_evidence","editorial_stage_evidence","abstention","warnings"],"requested_parent_action_allowed":["REGISTER_EVIDENCE","REGISTER_INTEGRATION_PROPOSAL","REVIEW_REQUIRED","NONE"]},
+        "DIAGNOSE_LIMITATIONS_AND_OPPORTUNITIES": {"operation_id":"DIAGNOSE_LIMITATIONS_AND_OPPORTUNITIES","idempotent":true,"stage_scoped":true,"required_projection":["exact_target_identity","passage_or_unit_state","purpose","preservation_constraints","edit_budget","editorial_stage_context"],"allowed_outputs":["findings","ranked_opportunities","editorial_stage_evidence","abstention","warnings"],"requested_parent_action_allowed":["REGISTER_EVIDENCE","REVIEW_REQUIRED","NONE"]},
+        "RETRIEVE_CRAFT_INTELLIGENCE": {"operation_id":"RETRIEVE_CRAFT_INTELLIGENCE","idempotent":true,"stage_scoped":false,"required_projection":["finding_or_opportunity_refs","form_genre_audience_context","rights_boundary","anti_imitation_boundary"],"allowed_outputs":["craft_principle_refs","technique_profiles","rights_projection","abstention"],"requested_parent_action_allowed":["REGISTER_EVIDENCE","NONE"]},
+        "GENERATE_BOUNDED_REVISION_CANDIDATE": {"operation_id":"GENERATE_BOUNDED_REVISION_CANDIDATE","idempotent":false,"stage_scoped":true,"required_projection":["exact_original_identity","authorized_target_text","admitted_opportunity","ambition_level","canon_constraints","author_intent_constraints","protected_language_constraints","voice_context","edit_budget","editorial_stage_context"],"allowed_outputs":["candidate_artifact_ref","change_set","preservation_report","editorial_stage_evidence","abstention","warnings"],"requested_parent_action_allowed":["REGISTER_INTEGRATION_PROPOSAL","QUEUE_AUTHOR_DECISION","REVIEW_REQUIRED","NONE"]},
+        "COMPARE_ORIGINAL_AND_CANDIDATE": {"operation_id":"COMPARE_ORIGINAL_AND_CANDIDATE","idempotent":true,"stage_scoped":true,"required_projection":["exact_original_identity","exact_candidate_identity","evaluation_scope","preservation_constraints","editorial_stage_context"],"allowed_outputs":["pairwise_evidence","regressions","editorial_stage_evidence","abstention","warnings"],"requested_parent_action_allowed":["REGISTER_EVIDENCE","QUEUE_AUTHOR_DECISION","REVIEW_REQUIRED","NONE"]},
+        "ASSESS_VOICE_EVOLUTION_OR_DEGRADATION": {"operation_id":"ASSESS_VOICE_EVOLUTION_OR_DEGRADATION","idempotent":true,"stage_scoped":true,"required_projection":["exact_original_identity","exact_candidate_identity","authorized_voice_evidence","project_voice_hierarchy","editorial_stage_context"],"allowed_outputs":["voice_classification","supporting_evidence","editorial_stage_evidence","abstention"],"requested_parent_action_allowed":["REGISTER_EVIDENCE","REVIEW_REQUIRED","NONE"]},
+        "ASSESS_HOMOGENIZATION_RISK": {"operation_id":"ASSESS_HOMOGENIZATION_RISK","idempotent":true,"stage_scoped":true,"required_projection":["exact_original_identity","exact_candidate_identity","project_voice_hierarchy","authorized_comparison_state","editorial_stage_context"],"allowed_outputs":["homogenization_risk_evidence","non_target_regressions","editorial_stage_evidence","abstention"],"requested_parent_action_allowed":["REGISTER_EVIDENCE","REVIEW_REQUIRED","NONE"]}
+      }
+    },
+    "BOOK_EVALUATION": {
+      "service_id": "BOOK_EVALUATION",
+      "provider_class": "BOOK_EVALUATOR",
+      "canonical_owner_path": "SYSTEM_MASTER/BOOK/PROSE",
+      "classification": "PROSE_OWNED_CAPABILITY_AND_QUALIFICATION_LANE",
+      "canonical_write_authority": false,
+      "operations": {
+        "INDEPENDENT_BOOK_OR_UNIT_EVALUATION": {"operation_id":"INDEPENDENT_BOOK_OR_UNIT_EVALUATION","idempotent":true,"stage_scoped":true,"required_projection":["exact_manuscript_or_unit_identity","evaluation_scope","applicable_parent_gates","allowed_evidence","privacy_and_split_isolation_boundary","editorial_stage_context"],"allowed_outputs":["evaluation_findings","uncertainty","disagreement","hard_gate_failures","editorial_stage_evidence","abstention"],"requested_parent_action_allowed":["REGISTER_EVIDENCE","REVIEW_REQUIRED","NONE"]},
+        "CONTRASTIVE_CANDIDATE_EVALUATION": {"operation_id":"CONTRASTIVE_CANDIDATE_EVALUATION","idempotent":true,"stage_scoped":true,"required_projection":["exact_original_identity","exact_candidate_identity","evaluation_scope","applicable_parent_gates","position_swap_policy","editorial_stage_context"],"allowed_outputs":["pairwise_evidence","regressions","uncertainty","disagreement","editorial_stage_evidence","abstention"],"requested_parent_action_allowed":["REGISTER_EVIDENCE","QUEUE_AUTHOR_DECISION","REVIEW_REQUIRED","NONE"]},
+        "QUALIFICATION_EVIDENCE": {"operation_id":"QUALIFICATION_EVIDENCE","idempotent":true,"stage_scoped":false,"required_projection":["exact_subject_identity","gate_id","qualification_scope","evidence_boundary"],"allowed_outputs":["qualification_receipt_ref","aggregate_metrics","scope_proven","scope_not_proven","abstention"],"requested_parent_action_allowed":["REGISTER_EVIDENCE","REGISTER_INTEGRATION_PROPOSAL","REVIEW_REQUIRED","NONE"]}
+      }
+    },
+    "RESEARCH_AND_EVIDENCE": {
+      "service_id": "RESEARCH_AND_EVIDENCE",
+      "provider_class": "RESEARCH_SERVICE",
+      "canonical_owner_path": "EXTERNAL_OR_SHARED_PROVIDER__NO_BOOK_CANONICAL_AUTHORITY",
+      "canonical_write_authority": false,
+      "operations": {
+        "ACQUIRE_BOUNDED_EVIDENCE": {"operation_id":"ACQUIRE_BOUNDED_EVIDENCE","idempotent":true,"stage_scoped":false,"required_projection":["research_question","target_book_object_refs","source_policy","rights_policy","freshness_requirement"],"allowed_outputs":["evidence_candidates","source_provenance","rights_classification","freshness_state","conflict_state","abstention"],"requested_parent_action_allowed":["REGISTER_EVIDENCE","REVIEW_REQUIRED","NONE"]},
+        "REVALIDATE_EVIDENCE_FRESHNESS": {"operation_id":"REVALIDATE_EVIDENCE_FRESHNESS","idempotent":true,"stage_scoped":false,"required_projection":["existing_evidence_refs","source_provenance","current_freshness_requirement"],"allowed_outputs":["freshness_state","conflict_state","supersession_candidates","abstention"],"requested_parent_action_allowed":["REGISTER_EVIDENCE","REVIEW_REQUIRED","NONE"]},
+        "CHECK_EVIDENCE_CONFLICTS": {"operation_id":"CHECK_EVIDENCE_CONFLICTS","idempotent":true,"stage_scoped":false,"required_projection":["evidence_refs","claim_scope","conflict_policy"],"allowed_outputs":["conflict_graph","agreement_state","unresolved_conflicts","abstention"],"requested_parent_action_allowed":["REGISTER_EVIDENCE","REVIEW_REQUIRED","NONE"]}
+      }
+    },
+    "DOCUMENT_ARTIFACT_AND_EXPORT": {
+      "service_id": "DOCUMENT_ARTIFACT_AND_EXPORT",
+      "provider_class": "HEADLESS_ARTIFACT_SERVICE",
+      "canonical_owner_path": "EXTERNAL_OR_FUTURE_ALLOCATED_TOOL__NOT_BOOK",
+      "planned_document_system_label_is_topology_authority": false,
+      "canonical_write_authority": false,
+      "custody_policy": {"default":"EXACT_INPUT_VERSION_AND_OUTPUT_DIGEST_BOUND","export_equals_publication":false,"publication_authority_required_separately":true},
+      "operations": {
+        "MATERIALIZE_DURABLE_ARTIFACT": {"operation_id":"MATERIALIZE_DURABLE_ARTIFACT","idempotent":true,"stage_scoped":false,"required_projection":["exact_source_version","exact_source_digest","requested_format","target_medium_profile","render_options","rights_and_export_constraints","publication_authorized"],"allowed_outputs":["artifact_evidence","target_medium_evidence","warnings","error"],"requested_parent_action_allowed":["REGISTER_ARTIFACT","REGISTER_EVIDENCE","REVIEW_REQUIRED","NONE"]},
+        "EXPORT_FROZEN_MANUSCRIPT": {"operation_id":"EXPORT_FROZEN_MANUSCRIPT","idempotent":true,"stage_scoped":false,"required_projection":["exact_frozen_manuscript_version","exact_frozen_manuscript_digest","requested_format","target_medium_profile","export_release_ref","rights_and_export_constraints","publication_authorized"],"allowed_outputs":["artifact_evidence","target_medium_evidence","warnings","error"],"requested_parent_action_allowed":["REGISTER_ARTIFACT","REGISTER_EVIDENCE","REVIEW_REQUIRED","NONE"]},
+        "VERIFY_ARTIFACT_IDENTITY": {"operation_id":"VERIFY_ARTIFACT_IDENTITY","idempotent":true,"stage_scoped":false,"required_projection":["artifact_ref","expected_digest","expected_format","expected_source_identity","target_medium_profile"],"allowed_outputs":["artifact_evidence","identity_verification","warnings","error"],"requested_parent_action_allowed":["REGISTER_EVIDENCE","REVIEW_REQUIRED","NONE"]},
+        "VALIDATE_TARGET_MEDIUM_ARTIFACT": {"operation_id":"VALIDATE_TARGET_MEDIUM_ARTIFACT","idempotent":true,"stage_scoped":false,"required_projection":["artifact_ref","artifact_digest","exact_source_identity","target_medium_profile","accessibility_requirement","validation_scope","publication_authorized"],"allowed_outputs":["artifact_evidence","target_medium_evidence","warnings","error"],"requested_parent_action_allowed":["REGISTER_EVIDENCE","REVIEW_REQUIRED","NONE"]},
+        "VERIFY_SOURCE_TO_RENDER_INTEGRITY": {"operation_id":"VERIFY_SOURCE_TO_RENDER_INTEGRITY","idempotent":true,"stage_scoped":false,"required_projection":["artifact_ref","artifact_digest","exact_source_identity","expected_content_identity","target_medium_profile"],"allowed_outputs":["artifact_evidence","target_medium_evidence","warnings","error"],"requested_parent_action_allowed":["REGISTER_EVIDENCE","REVIEW_REQUIRED","NONE"]},
+        "POST_LAYOUT_PROOF_ARTIFACT": {"operation_id":"POST_LAYOUT_PROOF_ARTIFACT","idempotent":true,"stage_scoped":true,"required_projection":["artifact_ref","artifact_digest","exact_source_identity","target_medium_profile","proof_scope","editorial_stage_context","publication_authorized"],"allowed_outputs":["artifact_evidence","target_medium_evidence","editorial_stage_evidence","warnings","error"],"requested_parent_action_allowed":["REGISTER_EVIDENCE","QUEUE_AUTHOR_DECISION","REVIEW_REQUIRED","NONE"]},
+        "ATTACH_OR_VALIDATE_PROVENANCE": {"operation_id":"ATTACH_OR_VALIDATE_PROVENANCE","idempotent":false,"stage_scoped":false,"required_projection":["artifact_ref","artifact_digest","exact_source_identity","provenance_policy","rights_boundary","privacy_boundary","publication_authorized"],"allowed_outputs":["artifact_evidence","provenance_evidence","warnings","error"],"requested_parent_action_allowed":["REGISTER_ARTIFACT","REGISTER_EVIDENCE","REVIEW_REQUIRED","NONE"]}
+      }
+    }
+  },
+  "provider_classes": ["PROSE_SYSTEM", "BOOK_EVALUATOR", "RESEARCH_SERVICE", "HEADLESS_ARTIFACT_SERVICE"],
+  "retry_and_replay_policy": {
+    "idempotent_operation": {"same_idempotency_key_same_normalized_request":"RETURN_SAME_LOGICAL_RESULT_OR_EXPLICIT_REPLAY_REFERENCE","same_idempotency_key_different_normalized_request":"REJECT_IDEMPOTENCY_KEY_CONFLICT"},
+    "non_idempotent_operation": {"automatic_retry_after_unknown_outcome":false,"required_behavior":"RECONCILE_BY_REQUEST_ID_BEFORE_NEW_GENERATION"}
+  },
+  "parent_admission_handoff": {
+    "provider_may_request_parent_actions_only": ["NONE","REGISTER_EVIDENCE","REGISTER_INTEGRATION_PROPOSAL","QUEUE_AUTHOR_DECISION","REGISTER_ARTIFACT","REVIEW_REQUIRED"],
+    "forbidden_direct_operations_from_service": ["ADVANCE_PROJECT_STATUS","SET_ACTIVE_GOVERNING_BRIEF","SET_ACTIVE_CANON_MANIFEST","SET_ACTIVE_STORY_BIBLE","SET_ACTIVE_BOOK_PLAN","SET_ACTIVE_CANONICAL_MANUSCRIPT","SET_EXPORT_FROZEN","SET_PUBLICATION_AUTHORIZED"],
+    "rule": "All provider output enters Book parent through evidence/artifact/proposal intake. No provider response can directly mutate canonical pointers, lifecycle state, export-freeze state, author decisions or publication state."
+  },
+  "qualification_objective": "Prove V2 has exactly four service families and twenty-one operations; strict schema-v2 isolation from V1; canonical taxonomy for Prose/Book Evaluator ownership; exact parent/source/artifact identity enforcement; canonical/lifecycle/export-freeze/publication denial; editorial-stage evidence without provider stage authority; target-medium generation/validation/proof separation; source-to-render and accessibility evidence; artifact currentness/digest invalidation; provenance evidence-only/currentness and changed-byte digest law; result-class preservation; idempotent replay and non-idempotent reconciliation; and no Book-owned document engine authority.",
+  "qualification_effect": "NONE until a new exact Registry V2 subject passes its own registered A-01 qualification."
+}
