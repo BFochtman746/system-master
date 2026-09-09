@@ -1,6 +1,6 @@
 {
   "objective": "AGLO-WHOLE-BOOK-AUTHOR-ADJUDICATION-001",
-  "standing": "PARTIAL_PASS__DECISION_002_RESOLVED_2A__BLOCKED_ONLY_ON_DECISION_001",
+  "standing": "PASS__DECISIONS_001_1A_AND_002_2A_RESOLVED__FINAL_CLOSURE_PASS",
   "book_id": "AGLO-001",
   "project_id": "A-GATE-LEFT-OPEN",
   "baseline_version_id": "AGLO-REJECT-ALL-NARRATIVE-v1",
@@ -8,42 +8,30 @@
   "queue_ref": "AGLO-WHOLE-BOOK-AUTHOR-DECISION-QUEUE-001.json",
   "authority_gate": {
     "required": "EXPLICIT_AUTHOR_DISPOSITION_FOR_EACH_QUEUE_ITEM",
+    "current_valid_author_dispositions_recorded": 2,
+    "required_author_dispositions": 2,
+    "satisfied": true,
     "generic_continue_is_not_a_disposition": true,
     "objective_restatement_is_not_a_disposition": true,
     "assistant_recommendation_is_not_authority": true,
-    "current_valid_author_dispositions_recorded": 1,
-    "required_author_dispositions": 2,
     "fail_closed": true
   },
   "decision_001": {
     "decision_id": "AGLO-WBS-DECISION-001",
     "chapter": 25,
     "finding": "OBJECTIVE_MECHANICAL_DUPLICATE_TOKEN",
-    "status": "UNRESOLVED__EXPLICIT_AUTHOR_DISPOSITION_REQUIRED",
-    "recommendation": "ACCEPT_REMOVE_DUPLICATE_WORD",
-    "recommendation_confidence": "HIGH",
-    "valid_options": {
-      "1A": {
-        "disposition": "ACCEPT_REMOVE_DUPLICATE_WORD",
-        "qualification_state_effect": "ADMIT_VERIFIED_SINGLE_TOKEN_DELETION_AS_ACCEPTED_BOUNDED_REPAIR",
-        "automatic_manuscript_overwrite": false,
-        "step_j_event": "USER_ACCEPT_CANDIDATE",
-        "step_j_scope": "A-GATE-LEFT-OPEN_PROJECT_ONLY",
-        "stable_identity_change": false,
-        "preservation_closure": "PASS_PRECHECK__EXACT_SINGLE_DUPLICATE_TOKEN_DELETION",
-        "step_k_closure": "PASS_PRECHECK__MECHANICAL_NONSTYLE_EDIT"
-      },
-      "1B": {
-        "disposition": "RETAIN_ORIGINAL",
-        "qualification_state_effect": "NO_REPAIR_ADMITTED",
-        "automatic_manuscript_overwrite": false,
-        "step_j_event": "USER_RETAIN_ORIGINAL",
-        "step_j_scope": "A-GATE-LEFT-OPEN_PROJECT_ONLY",
-        "stable_identity_change": false,
-        "preservation_closure": "PASS_BY_IDENTITY",
-        "step_k_closure": "PASS_BY_IDENTITY"
-      }
-    }
+    "status": "RESOLVED__EXPLICIT_AUTHOR_1A",
+    "author_disposition": "ACCEPT_REMOVE_DUPLICATE_WORD",
+    "receipt": "AGLO-WHOLE-BOOK-AUTHOR-ADJUDICATION-RECEIPT-001.json",
+    "qualification_state_effect": "ADMIT_VERIFIED_SINGLE_TOKEN_DELETION_AS_ACCEPTED_BOUNDED_REPAIR",
+    "automatic_manuscript_overwrite": false,
+    "step_j_event": "USER_ACCEPT_CANDIDATE",
+    "step_j_evidence": "../step-j/project-evidence/AGLO-STEP-J-PREFERENCE-EVIDENCE-003.json",
+    "step_j_scope": "A-GATE-LEFT-OPEN_PROJECT_AND_MATCHING_OBJECTIVE_MECHANICAL_CONTEXT_ONLY",
+    "stable_identity_change": false,
+    "cross_project_generalization_allowed": false,
+    "preservation_closure": "PASS__EXACT_SINGLE_DUPLICATE_TOKEN_DELETION__NO_CANON_MEANING_OR_VOICE_CHANGE",
+    "step_k_closure": "PASS__MECHANICAL_NONSTYLE_EDIT__NO_HOMOGENIZATION_TARGET"
   },
   "decision_002": {
     "decision_id": "AGLO-WBS-DECISION-002",
@@ -62,16 +50,14 @@
     "preservation_closure": "PASS_BY_IDENTITY__AUTHOR_INTENT_EXPLICITLY_PROTECTED",
     "step_k_closure": "PASS_BY_IDENTITY"
   },
-  "precomputed_closure_rules": {
-    "1A_plus_resolved_2A": "ELIGIBLE_FOR_IMMEDIATE_FINAL_PRESERVATION_STEP_K_CLOSURE_AFTER_EXPLICIT_1A_RECEIPT",
-    "1B_plus_resolved_2A": "ELIGIBLE_FOR_IMMEDIATE_FINAL_PRESERVATION_STEP_K_CLOSURE_AFTER_EXPLICIT_1B_RECEIPT"
-  },
-  "step_j_learning_status": "PARTIAL_PASS__DECISION_002_PROJECT_SCOPED_EVENT_APPENDED__DECISION_001_PENDING",
-  "step_j_events_appended_for_this_queue": 1,
-  "accepted_bounded_repairs_applied_to_qualification_state": 0,
+  "step_j_learning_status": "PASS__TWO_PROJECT_SCOPED_EVENTS_APPENDED__NO_STABLE_IDENTITY_PROMOTION",
+  "step_j_events_appended_for_this_queue": 2,
+  "accepted_bounded_repairs_applied_to_qualification_state": 1,
   "protected_author_intent_patterns_added": 1,
-  "final_preservation_step_k_closure_run": false,
-  "whole_book_qualification_closed": false,
+  "final_preservation_step_k_closure_run": true,
+  "final_preservation_step_k_closure": "PASS",
+  "closure_record": "AGLO-WHOLE-BOOK-REAL-BOOK-QUALIFICATION-CLOSURE-001.json",
+  "whole_book_qualification_closed": true,
   "raw_manuscript_text_persisted": false,
   "candidate_text_persisted": false,
   "original_manuscript_modified": false,
@@ -79,5 +65,5 @@
   "publication_authorized": false,
   "a01_required": false,
   "a01_consumed": false,
-  "next_transition": "EXPLICIT_AUTHOR_REPLY_WITH_1A_OR_1B"
+  "next_transition": "EXPAND_FROM_QUALIFICATION_TO_BOOK_LEVEL_LITERARY_INTELLIGENCE_AND_BOUNDED_REVISION_WORKFLOW_WITH_EXISTING_PRESERVATION_CONTROLS"
 }
