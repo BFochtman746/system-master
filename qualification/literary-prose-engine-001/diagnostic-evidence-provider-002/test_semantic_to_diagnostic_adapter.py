@@ -44,10 +44,12 @@ check("protected_language" in missing and "canon_facts" in missing, "missing tru
 check(r["passage_state"]["voice_state"]["book_voice"] is None, "unresolved model claim was promoted")
 check(r["model_hypotheses_promoted_to_authority"] is False, "model authority escalation")
 
-# Semantic signals remain observations and do not create revision opportunities.
-check(len(r["findings"]) == 2, "diagnostic observations not routed")
-check(all(x["finding_type"] == "OBSERVATION" for x in r["findings"]), "semantic observation became defect")
-check(r["adjudication"]["status"] == "NO_ACTION", "provider observation created revision opportunity")
+# Packet-012 observation routes as observation. Theme remains BLOCKED when its required motif/character evidence is absent.
+check(len(r["findings"]) == 2, "diagnostic evidence not routed")
+by_id = {x["evidence_id"]: x for x in r["findings"]}
+check(by_id["E1"]["finding_type"] == "OBSERVATION", "active semantic observation became defect")
+check(by_id["E2"]["finding_type"] == "BLOCKED", "under-contextualized theme signal did not fail closed")
+check(r["adjudication"]["status"] == "NO_ACTION", "provider evidence created revision opportunity")
 check(r["revision_text_generated"] is False and r["manuscript_mutated"] is False, "adapter crossed mutation boundary")
 
 # Trusted external authority can satisfy SURGICAL preservation prerequisites, but absence of a proven opportunity still means NO_ACTION.
@@ -61,4 +63,4 @@ r3 = adapter.run_governed_diagnostics(packet, requested_scope="NONE")
 check(r3["passage_state"]["readiness"]["status"] == "NO_ACTION", "NONE scope should remain no-action")
 check(r3["diagnosis_allowed"] is True and r3["revision_allowed"] is False, "NONE scope authority wrong")
 
-print("PASS: 15/15 semantic-to-diagnostic bridge assertions")
+print("PASS: 16/16 semantic-to-diagnostic bridge assertions")
