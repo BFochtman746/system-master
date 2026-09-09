@@ -1,0 +1,127 @@
+{
+  "rereview_id": "BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-001-CONTRACT-REREVIEW-001",
+  "effective_date": "2026-09-09",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "standing": "CLOSED__V1_NOT_IMPLEMENTATION_READY__VERSIONED_SUCCESSOR_REQUIRED",
+  "subject_contract": "qualification/book-system/integration-proposal-001/BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-001.json",
+  "subject_contract_version": 1,
+  "review_basis": [
+    "BOOK-SYSTEM-RESEARCH-VERIFIED-AUTHORING-LIFECYCLE-AMENDMENT-001",
+    "BOOK-SYSTEM-DOCUMENT-SYSTEM-EXPORT-OWNERSHIP-BOUNDARY-001",
+    "BOOK-SYSTEM-PUBLICATION-EXPORT-STANDARDS-PROFILE-001",
+    "BOOK-SYSTEM-PROVENANCE-INTEROPERABILITY-PROJECTION-001",
+    "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-001",
+    "BOOK-SYSTEM-PARENT-INTEGRATION-BOUNDARY-001",
+    "BOOK-SYSTEM-RECONCILED-STATE-010"
+  ],
+  "classification_vocabulary": ["KEEP", "REFINE", "REPLACE_OR_VERSION", "NO_CHANGE_REQUIRED"],
+  "matrix": [
+    {
+      "area": "PARENT_OWNED_SINGLE_INTAKE_AND_ADMISSION_PATH",
+      "classification": "KEEP",
+      "finding": "V1 correctly centralizes typed Prose, Book Evaluator, Research/Evidence and Document/Export responses under Book parent intake and forbids direct provider canonical/lifecycle writes."
+    },
+    {
+      "area": "REQUEST_RESPONSE_PROVIDER_PARENT_PROJECTION_IDENTITY",
+      "classification": "KEEP",
+      "finding": "V1 preserves request_id, response_id, correlation_id, idempotency_key, provider subject SHA and parent projection version/digest and rejects mismatches."
+    },
+    {
+      "area": "PARTIAL_ABSTAIN_ERROR_DISAGREEMENT_PRESERVATION",
+      "classification": "KEEP",
+      "finding": "V1 correctly preserves non-success and disagreement states instead of normalizing them into success."
+    },
+    {
+      "area": "DEDUPLICATION_AND_REPLAY",
+      "classification": "KEEP",
+      "finding": "V1 response identity, idempotency conflict and replay rules remain compatible with the research-verified boundaries."
+    },
+    {
+      "area": "IMMUTABLE_PROPOSAL_VERSIONING",
+      "classification": "KEEP",
+      "finding": "V1 immutable proposal families/snapshots and predecessor lineage remain correct."
+    },
+    {
+      "area": "AUTHOR_HANDOFF",
+      "classification": "KEEP",
+      "finding": "V1 may queue an author decision requirement but cannot manufacture author_choice, APPROVED state or AUTHOR_DECISION objects."
+    },
+    {
+      "area": "PARENT_CANONICAL_AND_LIFECYCLE_AUTHORITY",
+      "classification": "KEEP",
+      "finding": "V1 explicitly forbids canonical pointer/project-status/lifecycle transition writes and keeps those authorities parent-owned."
+    },
+    {
+      "area": "ADMISSION_MEANS_BOUNDED_ELIGIBILITY_ONLY",
+      "classification": "KEEP",
+      "finding": "V1 already states ADMITTED does not promote a manuscript candidate or advance lifecycle status."
+    },
+    {
+      "area": "RIGHTS_AND_PRIVACY",
+      "classification": "REFINE",
+      "finding": "V1 handles rights/privacy changes and preserves prior evidence, but V2 must bind rights/privacy currentness to source objects, exported artifacts and external provenance projections as distinct identities."
+    },
+    {
+      "area": "RESEARCH_VERIFIED_DEPENDENCY_SET",
+      "classification": "REFINE",
+      "finding": "V1 depends on the original parent foundation contracts but does not name the later lifecycle amendment, Book/Document ownership boundary, publication/export profile or provenance projection. The implementation contract must make those dependencies explicit."
+    },
+    {
+      "area": "EDITORIAL_STAGE_RESPONSIBILITY_AND_REGRESSION",
+      "classification": "REFINE",
+      "finding": "V1 has generic capability tokens such as STRUCTURAL_REVIEW_COMPLETE and PROSE_REFINEMENT_SCOPE_COMPLETE but does not explicitly preserve structural/line/copy/proof stage context, NOT_APPLICABLE rationale, narrative-consistency regression evidence, prior-stage regression or routed upstream defects."
+    },
+    {
+      "area": "DOCUMENT_EXPORT_STAGE_SEPARATION",
+      "classification": "REFINE",
+      "finding": "V1 forbids provider publication-authority claims, but it does not explicitly distinguish EXPORT_GENERATED, FORMAT_VALIDATED, POST_LAYOUT_PROOF_COMPLETE, EXPORT_FROZEN and PUBLICATION_AUTHORIZED or bind target-medium profile/source-to-render evidence."
+    },
+    {
+      "area": "DOCUMENT_SYSTEM_OWNERSHIP",
+      "classification": "REFINE",
+      "finding": "V1 correctly treats Document/Export as an external provider, but V2 must explicitly prohibit Book-owned rendering/conversion/validation implementation and treat the Document System or Document-owned provider as the execution owner for reusable document mechanics."
+    },
+    {
+      "area": "EXTERNAL_PROVENANCE_EVIDENCE_ONLY_BOUNDARY",
+      "classification": "REFINE",
+      "finding": "V1 has rights/provenance concepts but no explicit W3C PROV/C2PA currentness or evidence-only rule. V2 must forbid imported provenance or credential validation from becoming canonical admission, authorship, approval or publication authority."
+    },
+    {
+      "area": "SOURCE_ARTIFACT_AND_PROVENANCE_STALENESS",
+      "classification": "REFINE",
+      "finding": "V1 handles parent-state, rights/privacy and provider-subject staleness. V2 must additionally stale proposals when bound manuscript/source object versions, artifact digests, target-medium profiles or provenance projections are superseded or changed."
+    },
+    {
+      "area": "TRANSACTION_AND_RECEIPT_IDENTITY",
+      "classification": "REFINE",
+      "finding": "V1 atomic parent/ledger commits remain valid, but V2 receipts must carry source-object/artifact/provenance currentness identities when those evidence classes participate in admission."
+    },
+    {
+      "area": "REGISTERED_DOCUMENT_EXPORT_INTERFACE",
+      "classification": "REPLACE_OR_VERSION",
+      "finding": "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-001 Document/Export operations return artifact identity/format metadata but do not yet register the research-verified target-medium validation, source-to-render integrity, accessibility, proof/correction and optional provenance-credential evidence required by the publication/provenance contracts. A versioned service-interface successor is required before Runtime V2 implementation can be qualified end-to-end."
+    },
+    {
+      "area": "RUNTIME_CONTRACT_V1_AS_IMPLEMENTATION_TARGET",
+      "classification": "REPLACE_OR_VERSION",
+      "finding": "V1 remains valid historical architecture evidence but is not the correct implementation target after the research remediation. Do not edit or relabel V1 as covering the new semantics; use BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-002."
+    },
+    {
+      "area": "EXISTING_EXACT_SHA_QUALIFICATION_TRANSFER",
+      "classification": "NO_CHANGE_REQUIRED",
+      "finding": "No existing exact-SHA Book foundation PASS is transferred to a revised registry, Runtime V2 implementation or future qualifier. Every changed executable subject requires its own evidence chain."
+    }
+  ],
+  "v1_final_finding": {
+    "implementation_ready": false,
+    "historical_contract_preserved": true,
+    "reason": "Core admission safety remains sound, but later research-verified editorial, target-medium proof, Document-System ownership, provenance and expanded staleness semantics materially exceed V1's explicit implementation contract and the registered Document/Export response surface."
+  },
+  "required_successor_contract": "BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-002",
+  "required_preimplementation_dependency": "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-002",
+  "implementation_release": "CONTINUED_PAUSE",
+  "release_rule": "Do not implement Runtime V2 until the service interface successor registers the evidence needed by the research-verified lifecycle/publication/provenance contracts and that changed interface receives its own exact-subject qualification where required.",
+  "lifecycle_engine_compatibility_boundary": "Runtime V2 may preserve editorial evidence/proposal context without claiming Lifecycle Transition Engine v1 enforces new substage semantics. If executable lifecycle gate semantics change, a separately versioned lifecycle successor remains required.",
+  "exact_next_objective": "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-002",
+  "qualification_effect": "NONE. This re-review is architecture/control evidence only; no runtime implementation, A-01 PASS, canonical manuscript mutation, author decision or publication authority is created."
+}
