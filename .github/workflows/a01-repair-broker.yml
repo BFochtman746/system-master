@@ -1,0 +1,167 @@
+name: A-01 Repair Broker
+
+on:
+  workflow_dispatch:
+    inputs:
+      receipt_id:
+        description: Canonical parent A-01 receipt ID
+        required: true
+        type: string
+      qualification_id:
+        description: Qualification ID from the receipt
+        required: true
+        type: string
+      workstream_id:
+        description: Canonical A-01 workstream ID
+        required: true
+        type: string
+      failed_subject_sha:
+        description: Exact subject SHA from the receipt
+        required: true
+        type: string
+      result_class:
+        description: Authoritative receipt classification
+        required: true
+        type: string
+      evidence_pointer:
+        description: Receipt/evidence pointer or artifact reference
+        required: false
+        default: ''
+        type: string
+      repair_attempt:
+        description: Number of repair attempts already consumed
+        required: false
+        default: 0
+        type: number
+      max_repair_attempts:
+        description: Maximum product repair attempts allowed, 0-2
+        required: false
+        default: 1
+        type: number
+  workflow_call:
+    inputs:
+      receipt_id:
+        required: true
+        type: string
+      qualification_id:
+        required: true
+        type: string
+      workstream_id:
+        required: true
+        type: string
+      failed_subject_sha:
+        required: true
+        type: string
+      result_class:
+        required: true
+        type: string
+      evidence_pointer:
+        required: false
+        default: ''
+        type: string
+      repair_attempt:
+        required: false
+        default: 0
+        type: number
+      max_repair_attempts:
+        required: false
+        default: 1
+        type: number
+    outputs:
+      transaction_id:
+        description: Generated repair transaction ID
+        value: ${{ jobs.broker.outputs.transaction_id }}
+      transaction_state:
+        description: Truthful broker route state
+        value: ${{ jobs.broker.outputs.transaction_state }}
+      target_inbox:
+        description: Canonical owner inbox path
+        value: ${{ jobs.broker.outputs.target_inbox }}
+
+permissions:
+  contents: read
+
+jobs:
+  broker:
+    name: Classify receipt and package owner-lane transaction
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      transaction_id: ${{ steps.meta.outputs.transaction_id }}
+      transaction_state: ${{ steps.meta.outputs.transaction_state }}
+      target_inbox: ${{ steps.meta.outputs.target_inbox }}
+    steps:
+      - name: Checkout canonical control plane
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Syntax and contract selftests
+        run: |
+          node --check .github/scripts/a01-closed-loop-repair.js
+          node --check .github/scripts/a01-repair-broker.js
+          node .github/scripts/a01-closed-loop-repair-selftest.js
+          node .github/scripts/a01-repair-broker-selftest.js
+
+      - name: Build immutable broker input
+        env:
+          RECEIPT_ID: ${{ inputs.receipt_id }}
+          QUALIFICATION_ID: ${{ inputs.qualification_id }}
+          WORKSTREAM_ID: ${{ inputs.workstream_id }}
+          FAILED_SUBJECT_SHA: ${{ inputs.failed_subject_sha }}
+          RESULT_CLASS: ${{ inputs.result_class }}
+          EVIDENCE_POINTER: ${{ inputs.evidence_pointer }}
+          REPAIR_ATTEMPT: ${{ inputs.repair_attempt }}
+          MAX_REPAIR_ATTEMPTS: ${{ inputs.max_repair_attempts }}
+        run: |
+          mkdir -p .repair-broker
+          node - <<'NODE'
+          const fs = require('fs');
+          const input = {
+            receipt_id: process.env.RECEIPT_ID,
+            qualification_id: process.env.QUALIFICATION_ID,
+            workstream_id: process.env.WORKSTREAM_ID,
+            failed_subject_sha: process.env.FAILED_SUBJECT_SHA,
+            receipt: { result_class: process.env.RESULT_CLASS },
+            evidence_pointer: process.env.EVIDENCE_POINTER || null,
+            repair_attempt: Number(process.env.REPAIR_ATTEMPT || 0),
+            max_repair_attempts: Number(process.env.MAX_REPAIR_ATTEMPTS || 1),
+            created_at: new Date().toISOString()
+          };
+          fs.writeFileSync('.repair-broker/input.json', JSON.stringify(input, null, 2) + '\n');
+          NODE
+
+      - name: Classify and route receipt
+        run: node .github/scripts/a01-repair-broker.js open < .repair-broker/input.json > .repair-broker/transaction.json
+
+      - name: Expose non-authoritative route metadata
+        id: meta
+        run: |
+          node - <<'NODE' >> "$GITHUB_OUTPUT"
+          const fs = require('fs');
+          const value = JSON.parse(fs.readFileSync('.repair-broker/transaction.json', 'utf8'));
+          const tx = value.transaction || {};
+          console.log(`transaction_id=${tx.transaction_id || ''}`);
+          console.log(`transaction_state=${tx.state || ''}`);
+          console.log(`target_inbox=${tx.target_inbox || ''}`);
+          NODE
+
+      - name: Publish broker transaction summary
+        run: |
+          echo '## A-01 Repair Broker Transaction' >> "$GITHUB_STEP_SUMMARY"
+          echo '' >> "$GITHUB_STEP_SUMMARY"
+          echo 'This output is routing evidence only. It is not A-01 PASS or promotion authority.' >> "$GITHUB_STEP_SUMMARY"
+          echo '```json' >> "$GITHUB_STEP_SUMMARY"
+          cat .repair-broker/transaction.json >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload immutable broker transaction
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: a01-repair-broker-${{ inputs.receipt_id }}
+          path: |
+            .repair-broker/input.json
+            .repair-broker/transaction.json
+          if-no-files-found: error
+          retention-days: 30
