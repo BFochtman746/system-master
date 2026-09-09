@@ -1,6 +1,6 @@
 {
   "$schema":"https://json-schema.org/draft/2020-12/schema",
-  "$id":"system-master/continuity/target-ios-client-suspend-resume-evidence-v1",
+  "$id":"system-master/continuity/target-ios-client-suspend-resume-evidence-v2",
   "type":"object",
   "additionalProperties":false,
   "required":["evidence_class","qualification_id","subject_commit","runtime","client","work_unit_id","lifecycle","reconnect","command_reconciliation","requirements","observed_at_utc","evidence_digest"],
@@ -10,12 +10,14 @@
     "subject_commit":{"type":"string","pattern":"^[0-9a-f]{40}$"},
     "runtime":{
       "type":"object","additionalProperties":false,
-      "required":["platform","os_version","runtime_kind","device_or_simulator_id"],
+      "required":["platform","os_version","runtime_kind","device_or_simulator_id","xcode_version","test_host_os_version"],
       "properties":{
         "platform":{"const":"iOS"},
         "os_version":{"type":"string","minLength":1},
         "runtime_kind":{"enum":["IOS_SIMULATOR","IOS_PHYSICAL_DEVICE"]},
-        "device_or_simulator_id":{"type":"string","minLength":1}
+        "device_or_simulator_id":{"type":"string","minLength":1},
+        "xcode_version":{"type":"string","minLength":1},
+        "test_host_os_version":{"type":"string","minLength":1}
       }
     },
     "client":{
@@ -31,32 +33,42 @@
     "work_unit_id":{"type":"string","minLength":1},
     "lifecycle":{
       "type":"object","additionalProperties":false,
-      "required":["background_or_suspend_observed","reactivation_observed","events"],
+      "required":["control_mechanism","state_before_interruption","state_during_interruption","state_after_reactivation","reactivation_observed","events"],
       "properties":{
-        "background_or_suspend_observed":{"const":true},
+        "control_mechanism":{"enum":["XCUITEST","EQUIVALENT_OS_LEVEL_UI_TEST"]},
+        "state_before_interruption":{"const":"runningForeground"},
+        "state_during_interruption":{"const":"runningBackgroundSuspended"},
+        "state_after_reactivation":{"const":"runningForeground"},
         "reactivation_observed":{"const":true},
-        "events":{"type":"array","minItems":2,"items":{"type":"object","required":["event","observed_at_utc"],"properties":{"event":{"type":"string"},"observed_at_utc":{"type":"string"}}}}
+        "events":{"type":"array","minItems":3,"items":{"type":"object","additionalProperties":false,"required":["event","observed_at_utc"],"properties":{"event":{"type":"string","minLength":1},"observed_at_utc":{"type":"string","format":"date-time"}}}}
       }
     },
     "reconnect":{
       "type":"object","additionalProperties":false,
-      "required":["same_work_unit_id","ephemeral_session_required","status_queried_after_reactivation","progress_basis_explicit"],
+      "required":["same_work_unit_id","ephemeral_session_required","status_queried_after_reactivation","progress_basis_explicit","recovery_status_source"],
       "properties":{
         "same_work_unit_id":{"const":true},
         "ephemeral_session_required":{"const":false},
         "status_queried_after_reactivation":{"const":true},
-        "progress_basis_explicit":{"const":true}
+        "progress_basis_explicit":{"const":true},
+        "recovery_status_source":{"type":"string","minLength":1}
       }
     },
     "command_reconciliation":{
       "type":"object","additionalProperties":false,
-      "required":["unknown_outcome_exercised","reconcile_before_recommand","duplicate_effect_observed","command_id"],
+      "required":["unknown_outcome_exercised","reconcile_before_recommand","duplicate_effect_observed","command_id","idempotency_key","authoritative_outcome","replacement_command_issued_after_reconcile"],
       "properties":{
         "unknown_outcome_exercised":{"const":true},
         "reconcile_before_recommand":{"const":true},
         "duplicate_effect_observed":{"const":false},
-        "command_id":{"type":"string","minLength":1}
-      }
+        "command_id":{"type":"string","minLength":1},
+        "idempotency_key":{"type":"string","minLength":1},
+        "authoritative_outcome":{"enum":["APPLIED","NOT_APPLIED"]},
+        "replacement_command_issued_after_reconcile":{"type":"boolean"}
+      },
+      "allOf":[
+        {"if":{"properties":{"authoritative_outcome":{"const":"APPLIED"}},"required":["authoritative_outcome"]},"then":{"properties":{"replacement_command_issued_after_reconcile":{"const":false}}}}
+      ]
     },
     "requirements":{
       "type":"object","additionalProperties":false,
@@ -67,7 +79,7 @@
         "G-RQ-072":{"const":"PASS_TARGET_IOS_ARM_ONLY"}
       }
     },
-    "observed_at_utc":{"type":"string","minLength":1},
+    "observed_at_utc":{"type":"string","format":"date-time"},
     "evidence_digest":{"type":"string","pattern":"^[0-9a-f]{64}$"}
   }
 }
