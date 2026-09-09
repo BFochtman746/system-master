@@ -1,5 +1,5 @@
 {
-  "registry_version": 13,
+  "registry_version": 14,
   "qualifications": {
     "A01-CONTROL-PLANE-SELFTEST": {
       "workstream_id": "SYSTEM-MASTER",
@@ -69,6 +69,18 @@
       "overnight_max_runtime_minutes": 30,
       "checkpoint_capable": false,
       "description": "Verify the frozen Gate D Teacher v3 persistent corpus independently of private student inputs: bind the exact frozen raw Teacher SHA/status/taxonomy, canonicalize exact duplicate payloads only, fail closed on divergent duplicate IDs, validate the canonical 440-row corpus, and emit hashes/counts only. This qualification does not use BASE_TRAINING, DEVELOPMENT_GOLD, visible regression, hidden holdout, student training, or selective 120B and carries no promotion authority."
+    },
+    "BOOK-EVAL-REPAIR-005-GATE-D-STUDENT-SELECTIVE": {
+      "workstream_id": "BOOK-EVAL-LEMONADE-001",
+      "gate_class": "consolidated",
+      "source": "subject",
+      "executable": "node",
+      "args": [".github/scripts/book-eval-repair005-gate-d-student-selective-qualify.js"],
+      "evidence_artifact": "book-eval-repair005-gate-d-student-selective",
+      "overnight_eligible": true,
+      "overnight_max_runtime_minutes": 240,
+      "checkpoint_capable": false,
+      "description": "Run the exact-subject REPAIR-005 Gate D sequence only after Teacher-freeze and private-recovery prerequisites are authoritative PASS: verify/freeze Teacher v3 440/440, ingest exact 612+440=1052 task-qualified corpus, retrain the source-held-out hierarchical student, then invoke selective 120B only after student advancement and audit bottom-35% escalation plus pairwise swap symmetry. Raw private inputs, source-held-out predictions, selective case rows, and the derived student model remain local to A-01; evidence contains aggregate metrics, hashes, counts, and boundary flags only. No visible-regression or hidden-holdout scoring is performed."
     },
     "LEARNING-PILOT-001-RUN-001-HUMAN-SESSION": {
       "workstream_id": "LEARNING",
