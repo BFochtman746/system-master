@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-import hashlib
 import os
 import sqlite3
+import subprocess
 import tempfile
 from pathlib import Path
 from typing import Any, Dict
@@ -49,10 +49,24 @@ def _is_within(path: Path, parent: Path) -> bool:
         return False
 
 
-def _git_blob_sha1(path: Path) -> str:
-    data = path.read_bytes()
-    header = f"blob {len(data)}\0".encode("ascii")
-    return hashlib.sha1(header + data).hexdigest()
+def _git_filtered_blob_sha1(repo_root: Path, relative: str) -> str:
+    try:
+        result = subprocess.run(
+            ["git", "hash-object", f"--path={relative}", "--", relative],
+            cwd=repo_root,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except OSError as exc:
+        _fail("PREFLIGHT_GIT_HASH_OBJECT_UNAVAILABLE:" + type(exc).__name__)
+    if result.returncode != 0:
+        detail = (result.stderr or result.stdout or "").strip().replace("\r", " ").replace("\n", " ")
+        _fail(f"PREFLIGHT_GIT_HASH_OBJECT_FAILED:{relative}:{detail}")
+    actual = result.stdout.strip().lower()
+    if len(actual) != 40 or any(char not in "0123456789abcdef" for char in actual):
+        _fail(f"PREFLIGHT_GIT_HASH_OBJECT_INVALID:{relative}:{actual}")
+    return actual
 
 
 def _verify_frozen_authority(repo_root: Path) -> Dict[str, str]:
@@ -61,7 +75,7 @@ def _verify_frozen_authority(repo_root: Path) -> Dict[str, str]:
         path = repo_root / relative
         if not path.is_file():
             _fail("PREFLIGHT_FROZEN_AUTHORITY_FILE_MISSING:" + relative)
-        actual = _git_blob_sha1(path)
+        actual = _git_filtered_blob_sha1(repo_root, relative)
         if actual != expected:
             _fail(f"PREFLIGHT_FROZEN_AUTHORITY_DRIFT:{relative}:expected={expected}:actual={actual}")
         observed[relative] = actual
