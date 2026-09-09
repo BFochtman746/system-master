@@ -14,6 +14,8 @@ The current System Master v2 conversation is the primary decision, reconciliatio
 
 Repository evidence and exact qualification results outrank chat chronology. No workstream may redefine central System Master priority or independently dispatch conflicting A-01 work.
 
+This is a system-construction program. Reconciliation work is framed around source custody, exact identity, invariant consistency, qualification coverage, implementation corrections, and target evidence. Historical failure-case labels remain test taxonomy only.
+
 ## 2. Governing repository authority
 
 Canonical overnight chain:
@@ -33,22 +35,32 @@ Do not create product work merely to keep A-01 busy. Do not independently dispat
 
 Current exact continuation:
 
-UAF-S1-FOUNDATION007-RECONCILIATION-QUALIFICATION-001
+`SYSTEM-MASTER-REBUILD-010 / PLATFORM-002 — Durable Persistence + Work Runtime`
 
-Authority: the consolidated main-branch System Master handoff identifies FOUNDATION-007 as the earliest dependency-valid unresolved core-spine component after sealed FOUNDATION-003 closure.
+Historical subject identified for reconciliation:
+`161d66c3b7179fa365472b28f59841effcbba4a7151cce75c0711c4dad7abe3e`
 
-Required bounded challenge:
+The central reconciliation train has advanced through the following dependency-valid authorities:
 
-1. exact current implementation/source/evidence census against FOUNDATION-007 specification and contract registry;
-2. reconcile the existing supply-chain implementation/evidence rather than rebuild it;
-3. strict Java 21 plus FOUNDATION-007 authority/parity/artifact/tamper qualification;
-4. destructive supply-chain trust mutation challenge;
-5. consumer/routing bypass census for release/update/trust decisions;
-6. classify signing/provider/network/advisory/A-01/native obligations separately from portable completeness;
-7. repair only demonstrated portable gaps;
-8. keep production admission false until its actual gates pass.
+- FOUNDATION-007 / SYSTEM-MASTER-REBUILD-006 — reconciled; any exact correction/source-custody obligation is preserved in `FOUNDATION007-RECONCILIATION-001.md` rather than replaying generalized census work.
+- FOUNDATION-008 / SYSTEM-MASTER-REBUILD-007 — reconciled; the demonstrated forensic-hold transition invariant correction and GitHub-native source-custody obligation are preserved in `FOUNDATION008-RECONCILIATION-001.md` and its bounded patch.
+- DATA-001 / SYSTEM-MASTER-REBUILD-008 — reconciled; the demonstrated backup-set/restore blob-manifest identity binding correction is preserved in `DATA001-RECONCILIATION-001.md` and `DATA001_BACKUPSET_RESTORE_BINDING_REPAIR_001.patch`. Historical subject `069994972b410770dca3cc9121b0f7927c3b50a458c033e51582355c9a329636`; local corrected candidate `2df1c3ee58206e652a0a026f360a92c03b5eafedb3b712255fc39ce64b5d7c53`.
+- PLATFORM-001 / SYSTEM-MASTER-REBUILD-009 — reconciled; the demonstrated runtime-fence epoch monotonicity correction is preserved in `PLATFORM001-RECONCILIATION-001.md` and `PLATFORM001_FENCE_EPOCH_MONOTONICITY_REPAIR_001.patch`. Historical subject `cd2a04b962f5a819a76c44dbd468a87f29b78c4aa19dcca191e9bed3f4a0638f`; local corrected candidate `259be69231d2b8613902ebe2a7a749bbfc1bd92a1d9bd3b55108052909e57254`.
 
-FOUNDATION-002, FOUNDATION-003, FOUNDATION-004, and FOUNDATION-006 retain PORTABLE_COMPLETE_TARGET_PENDING standing from the consolidated handoff. Do not replay them merely because older conversations ended before recognizing durable seals.
+These reconciliation records preserve historical sealed identities separately from corrected candidates. A historical PASS is never reused as qualification for changed bytes.
+
+Current PLATFORM-002 bounded challenge:
+
+1. recover and verify the exact historical carrier and source/test subject;
+2. rerun strict Java 21 and dependency-valid upstream portable regressions;
+3. reconcile durable persistence/work-runtime implementation against its contracts and SQL/static persistence rules;
+4. test leases/fencing, claim/renew/release, attempts, retry, idempotency, outbox/inbox, timers/signals, restart/recovery and queue-state invariants where present;
+5. compare Java semantics, persistence semantics and qualification assertions for contradiction or missing binding;
+6. implement only objectively demonstrated portable corrections as new candidate identity;
+7. keep target/runtime/production evidence separate from portable qualification;
+8. preserve any correction/source-custody work in parallel and continue the dependency spine when reconciliation produces an exact successor decision.
+
+FOUNDATION-002, FOUNDATION-003, FOUNDATION-004, and FOUNDATION-006 retain their recognized portable-complete/target-pending standing from the consolidated handoff unless new executable evidence demonstrates a specific regression.
 
 ## 4. Assurance / Reconciliation absorbed into System Master
 
@@ -115,7 +127,7 @@ Native-target lineage includes:
 
 A-01/Windows evidence must never be relabeled as native iOS/macOS suspend/resume proof. Continue native lifecycle evidence only on an appropriate Apple execution target.
 
-Foundation-007 is the central spine continuation; do not let Continuity replay displace it unless a new demonstrated regression or dependency requires that.
+The central spine continuation is now PLATFORM-002. Do not let Continuity replay displace it unless a new demonstrated regression or dependency requires that.
 
 ## 6. Learning System
 
@@ -188,9 +200,10 @@ READ-ONLY / HISTORICAL AFTER HANDOFF:
 
 Specialist chats may produce evidence, implementation, tests, and proposed successor tickets. They may not independently redefine central portfolio priority or dispatch conflicting A-01 work.
 
-## 11. Canonical priority queue at migration
+## 11. Canonical priority queue
 
-P0 — FOUNDATION-007 reconciliation/qualification on the central System Master spine.
+P0 — PLATFORM-002 / SYSTEM-MASTER-REBUILD-010 reconciliation on the central System Master dependency spine.
+P0 — preserve/import/freshly qualify the exact corrected-candidate lineages already demonstrated for FOUNDATION-007, FOUNDATION-008, DATA-001 and PLATFORM-001 without replaying their generalized reconciliation work.
 P0 — RECON-001C exact sealed-history GitHub-native custody import, then its already-prepared post-import A-01 custody successor.
 P1 — Book Gate-D Teacher v3 canonical freeze and dependency-valid private/student successors under central A-01 admission.
 P1 — Learning human-execution boundary and any bounded software build-ahead that does not fabricate human evidence.
@@ -201,8 +214,8 @@ Priority is dependency/value based. P0 items may proceed in parallel when they d
 
 ## 12. Exact next System Master objective
 
-Execute UAF-S1-FOUNDATION007-RECONCILIATION-QUALIFICATION-001 from current repository evidence: reconcile rather than rebuild; classify portable versus target/native obligations; implement only objectively demonstrated portable repairs; run hosted qualification available to this environment; prepare exact A-01 successor tickets only when a new A-01-only evidence need is justified.
+Execute `SYSTEM-MASTER-REBUILD-010 / PLATFORM-002` from recovered exact evidence: verify carrier and historical subject identity; reconcile rather than rebuild; compare Java/persistence/qualification semantics; implement only objectively demonstrated portable corrections as a new candidate; run all hosted qualification available to this environment; preserve target-only obligations separately; and prepare an A-01 successor only when Windows execution adds evidence not otherwise available.
 
-In parallel, preserve RECON-001C as a bounded Assurance custody objective. Do not allow Assurance chat retirement to drop that obligation.
+In parallel, retain the exact source-custody/candidate-qualification obligations already recorded for prior reconciled authorities and preserve RECON-001C as the bounded Assurance custody objective.
 
 This file is the migration anchor for future System Master conversation rollover. A future chat should read this record plus the current A01-PORTFOLIO authority and then verify live branch heads before continuing.
