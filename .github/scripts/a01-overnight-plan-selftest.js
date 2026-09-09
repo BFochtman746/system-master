@@ -28,6 +28,16 @@ function base(id, workstream, qid, overrides = {}) {
     window_end_local: '07:00',
     exclusive_window: false,
     resource_class: 'mixed',
+    overnight_lane: 'FINISH',
+    value_class: 'TEST_VALUE',
+    critical_path_rank: 1,
+    completion_delta: {
+      before: 'before',
+      evidence: 'evidence',
+      after_pass: 'after',
+      unlocks: 'next'
+    },
+    stop_condition: 'stop when the bounded objective is complete',
     resume_on_pass: 'continue',
     resume_on_failure: 'repair',
     notification_target: 'test',
@@ -46,9 +56,10 @@ const tickets = [
   record(base('long', 'TEST-C', 'TEST-LONG', { estimated_minutes: 200, max_runtime_minutes: 200, checkpoint_interval_minutes: 30, priority: 10 }), 'long.json')
 ];
 const plan = planner.buildPlan({ now: new Date('2026-09-08T23:57:00-04:00'), policy, registry: r, ticketRecords: tickets, nightDate: '2026-09-09' });
-assert(plan.plan_version === 2, 'planner v2 required');
+assert(plan.plan_version === 3, 'planner v3 required');
 assert(plan.scheduled_count === 3, `expected 3 slots, got ${plan.scheduled_count}`);
 assert(plan.slots[0].ticket_id === 'normal', 'safe backfill should run before reservation');
+assert(plan.slots[0].overnight_lane === 'FINISH', 'second-shift lane should survive planning');
 assert(plan.slots[0].not_before === '2026-09-09T04:00:00.000Z', 'normal slot should be allowed to compress to its own earliest start');
 assert(plan.slots[0].not_after === '2026-09-09T04:58:00.000Z', 'pre-reservation slot must fail closed before reservation buffer');
 assert(plan.slots[1].ticket_id === 'reserved', 'reserved window must be protected');
@@ -66,5 +77,17 @@ assert(bad.scheduled_count === 0 && bad.rejected.some(x => x.reasons.includes('C
 
 const duplicate = planner.buildPlan({ now: new Date('2026-09-08T23:57:00-04:00'), policy, registry: r, ticketRecords: [tickets[0], record(base('normal-2', 'TEST-A', 'TEST-NORMAL'), 'normal-2.json')], nightDate: '2026-09-09' });
 assert(duplicate.scheduled_count === 0 && duplicate.rejected.length === 2, 'multiple READY tickets per workstream must be rejected');
+
+const missingValue = planner.buildPlan({
+  now: new Date('2026-09-08T23:57:00-04:00'),
+  policy,
+  registry: r,
+  ticketRecords: [record(base('no-value', 'TEST-A', 'TEST-NORMAL', { completion_delta: null, stop_condition: '', overnight_lane: null }), 'no-value.json')],
+  nightDate: '2026-09-09'
+});
+assert(missingValue.scheduled_count === 0, 'second-shift ticket without value metadata must not schedule');
+assert(missingValue.rejected.some(x => x.reasons.includes('SECOND_SHIFT_LANE')), 'missing lane must be rejected');
+assert(missingValue.rejected.some(x => x.reasons.includes('COMPLETION_DELTA_REQUIRED')), 'missing completion delta must be rejected');
+assert(missingValue.rejected.some(x => x.reasons.includes('STOP_CONDITION_REQUIRED')), 'missing stop condition must be rejected');
 
 console.log('A01_OVERNIGHT_PLAN_SELFTEST=PASS');
