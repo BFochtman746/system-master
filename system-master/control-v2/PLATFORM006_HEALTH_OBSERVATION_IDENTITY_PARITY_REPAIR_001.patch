@@ -1,0 +1,72 @@
+--- a/10_REQUIREMENTS/SMR013-PACKET-CONTRACT.md
++++ b/10_REQUIREMENTS/SMR013-PACKET-CONTRACT.md
+@@ -13,7 +13,7 @@
+ - Caller identity is exact/bounded; an empty caller allowlist denies all.
+ - Empty permitted-effects means effect-free `NONE` only, never unconstrained.
+ - Qualification and provenance standing must be externally established.
+-- Health observation is mandatory, monotonic and TTL-bound; missing/expired/unhealthy/zero-slot is ineligible.
++- Health observation is mandatory, monotonic and TTL-bound; missing/expired/unhealthy/zero-slot is ineligible. Health observation identity is globally unique: an identical observation replay remains idempotent even after newer health exists, while reuse of the same observation ID for different content or a different descriptor fails closed.
+ - Degraded health is eligible only when explicitly allowed by the requirement.
+ - Discovery is deterministic and bounded to at most 64 evaluated candidates.
+ - Every route decision binds the exact requirement digest, selected descriptor digest, selected implementation digest, selected health observation and complete candidate-evaluation list.
+--- a/11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/capability/InMemoryCapabilityRegistry.java
++++ b/11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/capability/InMemoryCapabilityRegistry.java
+@@ -7,10 +7,10 @@
+ import java.util.Map;
+ import java.util.Optional;
+ public final class InMemoryCapabilityRegistry implements CapabilityRegistry {
+-    private final Map<String,CapabilityDescriptor> descriptors=new HashMap<>();private final Map<String,CapabilityHealthObservation> health=new HashMap<>();
++    private final Map<String,CapabilityDescriptor> descriptors=new HashMap<>();private final Map<String,CapabilityHealthObservation> health=new HashMap<>();private final Map<String,CapabilityHealthObservation> healthById=new HashMap<>();
+     @Override public synchronized CapabilityDescriptor register(CapabilityDescriptor d){if(d==null)throw new IllegalArgumentException("descriptor");CapabilityDescriptor x=descriptors.get(d.descriptorId());if(x!=null&&!x.canonicalDigest().equals(d.canonicalDigest()))throw new IllegalStateException("descriptor id digest conflict");descriptors.putIfAbsent(d.descriptorId(),d);return descriptors.get(d.descriptorId());}
+     @Override public synchronized Optional<CapabilityDescriptor> descriptor(String id){return Optional.ofNullable(descriptors.get(Platform006Rules.id(id,"descriptorId")));}
+-    @Override public synchronized CapabilityHealthObservation observe(CapabilityHealthObservation o){if(o==null)throw new IllegalArgumentException("observation");if(!descriptors.containsKey(o.descriptorId()))throw new IllegalStateException("unknown descriptor");CapabilityHealthObservation x=health.get(o.descriptorId());if(x!=null){if(x.observationId().equals(o.observationId())){if(!x.equals(o))throw new IllegalStateException("health observation conflict");return x;}if(o.observedAt().isBefore(x.observedAt())||(o.observedAt().equals(x.observedAt())&&o.observationId().compareTo(x.observationId())<=0))throw new IllegalStateException("stale health observation");}health.put(o.descriptorId(),o);return o;}
++    @Override public synchronized CapabilityHealthObservation observe(CapabilityHealthObservation o){if(o==null)throw new IllegalArgumentException("observation");if(!descriptors.containsKey(o.descriptorId()))throw new IllegalStateException("unknown descriptor");CapabilityHealthObservation exact=healthById.get(o.observationId());if(exact!=null){if(!exact.equals(o))throw new IllegalStateException("health observation conflict");return exact;}CapabilityHealthObservation x=health.get(o.descriptorId());if(x!=null&& (o.observedAt().isBefore(x.observedAt())||(o.observedAt().equals(x.observedAt())&&o.observationId().compareTo(x.observationId())<=0)))throw new IllegalStateException("stale health observation");healthById.put(o.observationId(),o);health.put(o.descriptorId(),o);return o;}
+     @Override public synchronized Optional<CapabilityHealthObservation> currentHealth(String descriptorId,Instant at){Platform006Rules.instant(at,"at");CapabilityHealthObservation o=health.get(Platform006Rules.id(descriptorId,"descriptorId"));return o!=null&&o.currentAt(at)?Optional.of(o):Optional.empty();}
+     @Override public synchronized List<CapabilityCandidate> discover(String capabilityId,int limit,Instant at){Platform006Rules.id(capabilityId,"capabilityId");Platform006Rules.range(limit,1,64,"limit");Platform006Rules.instant(at,"at");List<CapabilityDescriptor> found=new ArrayList<>();for(CapabilityDescriptor d:descriptors.values())if(d.capabilityId().equals(capabilityId))found.add(d);found.sort(Comparator.comparingInt(CapabilityDescriptor::priority).reversed().thenComparing(CapabilityDescriptor::canonicalDigest).thenComparing(CapabilityDescriptor::descriptorId));List<CapabilityCandidate> out=new ArrayList<>();for(CapabilityDescriptor d:found){if(out.size()==limit)break;out.add(new CapabilityCandidate(d,currentHealth(d.descriptorId(),at).orElse(null)));}return List.copyOf(out);}
+ }
+--- a/12_TESTS/src/test/java/org/systemmaster/rebuild/platform/capability/Platform006AuthorityTests.java
++++ b/12_TESTS/src/test/java/org/systemmaster/rebuild/platform/capability/Platform006AuthorityTests.java
+@@ -44,6 +44,8 @@
+         CapabilityHealthObservation h=health("health-a",d.descriptorId(),CapabilityHealthStanding.HEALTHY,4,t);ok(registry.observe(h).equals(h),"health stored");ok(registry.observe(h).equals(h),"health replay idempotent");
+         CapabilityHealthObservation hConflict=new CapabilityHealthObservation(h.observationId(),h.descriptorId(),CapabilityHealthStanding.DEGRADED,4,h.observedAt(),h.expiresAt(),h.telemetryRef());throwsIt(()->registry.observe(hConflict),"health id conflict");
+         CapabilityHealthObservation stale=health("health-stale",d.descriptorId(),CapabilityHealthStanding.HEALTHY,4,t.minusSeconds(1));throwsIt(()->registry.observe(stale),"stale health rejected");
++        CapabilityHealthObservation newer=health("health-newer",d.descriptorId(),CapabilityHealthStanding.HEALTHY,4,t.plusSeconds(1));registry.observe(newer);ok(registry.observe(h).equals(h),"older identical health replay remains idempotent");
++        CapabilityDescriptor healthOther=descriptor("descriptor-health-other","cap.health-other",90,Set.of("PLATFORM-009"),Set.of(CapabilityEffect.READ_ONLY),Set.of("AUTH-MODEL"),QualificationStanding.QUALIFIED,Map.of());registry.register(healthOther);CapabilityHealthObservation reusedHealthId=new CapabilityHealthObservation(h.observationId(),healthOther.descriptorId(),CapabilityHealthStanding.HEALTHY,1,t.plusSeconds(2),t.plusSeconds(62),"telemetry:health-reuse");throwsIt(()->registry.observe(reusedHealthId),"health observation id cannot cross descriptors");
+         ok(registry.currentHealth(d.descriptorId(),t.plusSeconds(1)).isPresent(),"current health present");ok(registry.currentHealth(d.descriptorId(),t.plusSeconds(61)).isEmpty(),"expired health absent");
+ 
+         InMemoryCapabilityRouteDecisionStore decisions=new InMemoryCapabilityRouteDecisionStore();
+--- a/tools/verify_platform006_contract_parity.py
++++ b/tools/verify_platform006_contract_parity.py
+@@ -26,7 +26,7 @@
+   if c.get('version')!='0.14.0' or not c.get('status','').startswith('REBUILD_IMPLEMENTED_PORTABLE_') or not c.get('contracts') or c.get('qualification_gates')!=['SMR013-PORTABLE-GATE']: issues.append(c['capability_id']+':binding drift')
+ desc=(R/'11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/capability/CapabilityDescriptor.java').read_text()
+ router=(R/'11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/capability/CapabilityRouter.java').read_text()
+-jdbc=(R/'11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/capability/JdbcCapabilityRegistry.java').read_text()
++memory=(R/'11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/capability/InMemoryCapabilityRegistry.java').read_text();jdbc=(R/'11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/capability/JdbcCapabilityRegistry.java').read_text()
+ route_store=(R/'11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/capability/JdbcCapabilityRouteDecisionStore.java').read_text(); eval_src=(R/'11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/capability/CandidateEvaluation.java').read_text(); decision_src=(R/'11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/capability/CapabilityRouteDecision.java').read_text(); policy_src=(R/'11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/capability/RoutingPolicy.java').read_text()
+ auth=(R/'11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/capability/Platform006Authority.java').read_text()
+ for tok in ('canonicalDigest()','allowedCallers.contains','permittedEffects.isEmpty()?effect==CapabilityEffect.NONE','authorityRequirements'):
+@@ -35,6 +35,8 @@
+  if tok not in router: issues.append('router control missing '+tok)
+ for tok in ('stored descriptor digest mismatch','descriptor id digest conflict','pg_advisory_xact_lock','ORDER BY observed_at DESC,observation_id DESC LIMIT 1'):
+  if tok not in jdbc: issues.append('JDBC registry control missing '+tok)
++for tok in ('healthById','health observation conflict'):
++ if tok not in memory: issues.append('in-memory health identity control missing '+tok)
+ for tok in ('selected_descriptor_digest','selected_implementation_digest','work_id=? AND plan_id=? AND requirement_id=?','stored decision digest mismatch'):
+  if tok not in route_store: issues.append('route store control missing '+tok)
+ for tok in ('grantsAuthority(){return false;}','grantsQualificationStanding(){return false;}'):
+--- a/tools/verify_smr013_recurrence.py
++++ b/tools/verify_smr013_recurrence.py
+@@ -10,10 +10,11 @@
+ checks=[
+ ('11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/capability/CapabilityDescriptor.java',['canonicalDigest()','implementationDigest','allowedCallers.contains','permittedEffects.isEmpty()?effect==CapabilityEffect.NONE']),
+ ('11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/capability/CapabilityRouter.java',['AUTHORITY_REQUIREMENT_MISSING','HEALTH_MISSING_OR_EXPIRED','NO_CAPACITY','DEGRADED_NOT_ALLOWED']),
++('11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/capability/InMemoryCapabilityRegistry.java',['healthById','health observation conflict']),
+ ('11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/capability/JdbcCapabilityRegistry.java',['stored descriptor digest mismatch','descriptor id digest conflict','pg_advisory_xact_lock']),
+ ('11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/capability/JdbcCapabilityRouteDecisionStore.java',['work_id=? AND plan_id=? AND requirement_id=?','selected_descriptor_digest','selected_implementation_digest']),
+ ('05_DATA/postgresql/006_smr013_platform006_capability_routing.up.sql',['cardinality(authority_requirements) <= 64','cardinality(allowed_callers) <= 64','expires_at > observed_at','selected_descriptor_digest','selected_implementation_digest']),
+-('10_REQUIREMENTS/SMR013-PACKET-CONTRACT.md',['empty caller allowlist denies all','effect-free `NONE` only','workId + planId + requirementId','MUST NOT self-promote','PC-ENDGAME-020'])]
++('10_REQUIREMENTS/SMR013-PACKET-CONTRACT.md',['empty caller allowlist denies all','effect-free `NONE` only','globally unique','workId + planId + requirementId','MUST NOT self-promote','PC-ENDGAME-020'])]
+ for rel,tokens in checks:
+  p=R/rel
+  if not p.exists(): issues.append('missing '+rel); continue
