@@ -1,6 +1,6 @@
 {
   "objective": "LITERARY-PROSE-ENGINE-001-REAL-BOOK-QUALIFICATION",
-  "standing": "ADMITTED_FOR_QUALIFICATION_ONLY__REPRESENTATIVE_SAMPLE_PASS__WHOLE_BOOK_NONDESTRUCTIVE_SWEEP_PASS__AUTHOR_ADJUDICATION_GATE_READY_PENDING_EXPLICIT_DISPOSITIONS",
+  "standing": "ADMITTED_FOR_QUALIFICATION_ONLY__REPRESENTATIVE_SAMPLE_PASS__WHOLE_BOOK_SWEEP_PASS__DECISION_002_RESOLVED_2A__DECISION_001_PENDING",
   "decision": "ADMITTED",
   "preadmission_status": "COMPLETE",
   "admission_id": "AGLO-REAL-BOOK-ADMISSION-001",
@@ -58,7 +58,7 @@
   },
   "whole_book_nondestructive_sweep": {
     "objective": "AGLO-REAL-BOOK-WHOLE-BOOK-NONDESTRUCTIVE-SWEEP-001",
-    "standing": "PASS__WHOLE_BOOK_NONDESTRUCTIVE_SWEEP_COMPLETE__TWO_AUTHOR_DECISIONS_QUEUED__EVIDENCE_HARDENED",
+    "standing": "PASS__WHOLE_BOOK_NONDESTRUCTIVE_SWEEP_COMPLETE__ONE_AUTHOR_DECISION_PENDING",
     "exact_tested_repository_subject_sha": "8146b16a9c6eca7304cf19f8273f858264b8fff3",
     "wrapper_blob_sha": "7ad5d587d8aefd20032e9f7dea44b7acc4ba90a1",
     "private_execution_evidence_sha256": "21542552eea6877f3c4346efc817f2985c580b695b1ceda9a2b587b4fdab7f98",
@@ -70,29 +70,37 @@
     "total_words_processed": 62611,
     "private_passage_states": 201,
     "screened_findings": 10,
-    "queued_author_decisions": 2,
-    "automatic_manuscript_mutations": 0,
-    "current_recommendations": {
-      "AGLO-WBS-DECISION-001": "ACCEPT_REMOVE_DUPLICATE_WORD",
-      "AGLO-WBS-DECISION-002": "RETAIN_AS_INTENTIONAL_PARALLEL_REFRAIN"
-    },
-    "author_decisions_recorded_for_queue": 0
+    "queued_author_decisions_initial": 2,
+    "queued_author_decisions_remaining": 1,
+    "automatic_manuscript_mutations": 0
   },
   "whole_book_author_adjudication": {
     "objective": "AGLO-WHOLE-BOOK-AUTHOR-ADJUDICATION-001",
     "record": "AGLO-WHOLE-BOOK-AUTHOR-ADJUDICATION-001.json",
-    "standing": "READY__BLOCKED_ONLY_ON_TWO_EXPLICIT_AUTHOR_DISPOSITIONS",
+    "standing": "PARTIAL_PASS__DECISION_002_RESOLVED_2A__BLOCKED_ONLY_ON_DECISION_001",
     "explicit_author_dispositions_required": 2,
-    "explicit_author_dispositions_recorded": 0,
-    "generic_continue_is_not_authority": true,
-    "objective_restatement_is_not_authority": true,
-    "step_j_events_appended_for_this_queue": 0,
+    "explicit_author_dispositions_recorded": 1,
+    "decision_002": {
+      "author_option": "2A",
+      "disposition": "RETAIN_AS_INTENTIONAL_PARALLEL_REFRAIN",
+      "receipt": "AGLO-WHOLE-BOOK-AUTHOR-ADJUDICATION-RECEIPT-002.json",
+      "step_j_evidence": "../step-j/project-evidence/AGLO-STEP-J-PREFERENCE-EVIDENCE-002.json",
+      "preservation_closure": "PASS_BY_IDENTITY__AUTHOR_INTENT_EXPLICITLY_PROTECTED",
+      "step_k_closure": "PASS_BY_IDENTITY",
+      "cross_project_generalization_allowed": false
+    },
+    "decision_001": "UNRESOLVED__EXPLICIT_1A_OR_1B_REQUIRED",
+    "step_j_events_appended_for_this_queue": 1,
     "accepted_bounded_repairs_applied_for_this_queue": 0,
+    "protected_author_intent_patterns_added": 1,
     "final_preservation_step_k_closure_run": false,
     "whole_book_qualification_closed": false
   },
   "accepted_project_preference_evidence": {
-    "event_ref": "step-j/project-evidence/AGLO-STEP-J-PREFERENCE-EVIDENCE-001.json",
+    "event_refs": [
+      "step-j/project-evidence/AGLO-STEP-J-PREFERENCE-EVIDENCE-001.json",
+      "step-j/project-evidence/AGLO-STEP-J-PREFERENCE-EVIDENCE-002.json"
+    ],
     "store": "CURRENT_PREFERENCE",
     "stable_identity_changed": false,
     "cross_project_generalization_allowed": false
@@ -113,5 +121,5 @@
   "automatic_revision_quality_claimed": false,
   "raw_manuscript_text_committed": false,
   "candidate_text_committed": false,
-  "next_required_transition": "EXPLICIT_AUTHOR_REPLY_WITH_1A_OR_1B_AND_2A_OR_2B"
+  "next_required_transition": "EXPLICIT_AUTHOR_REPLY_WITH_1A_OR_1B"
 }
