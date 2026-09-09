@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 from hashlib import sha256
-
-from model_backed_provider import ModelBackedNarrativeExtractor
 from pathlib import Path
 import sys
+
+from model_backed_provider import ModelBackedNarrativeExtractor
+from source_heldout_label_ontology import validate_task_label, validate_task_labels
 
 PARENT = Path(__file__).resolve().parents[1]
 if str(PARENT) not in sys.path:
@@ -49,18 +50,58 @@ def expect_value_error(fn, contains: str) -> None:
         assert contains in str(exc), (contains, str(exc))
 
 
+def validate_all_task_grammars() -> None:
+    passage_len = 80
+    valid = {
+        "ANCHOR_LOCALIZATION": "anchor:A0-4",
+        "ENTITY_IDENTITY_COREFERENCE": "coref:C5-8->C0-4",
+        "EVENT_IDENTITY": "same_event:EV0-4=EV5-9",
+        "STORY_VS_DISCOURSE_TIME": "story:EV0-4_BEFORE_EV5-9",
+        "CAUSAL_GOAL_RELATIONS": "goal:EV0-4_SUPPORTS_G5-9",
+        "EPISTEMIC_FOCALIZATION": "believes:C0-4_P5-39",
+        "NARRATIVE_FUNCTION": "function:A0-4=SETUP",
+        "SETUP_PAYOFF_OPEN_QUESTION": "setup:A0-4->Q5-9",
+        "ARC_ORCHESTRATION": "arc:C0-4_BEAT_A5-9=INTRODUCTION",
+    }
+    for task, label in valid.items():
+        assert validate_task_label(task, label, passage_len) == label
+        assert validate_task_label(task, f"abstain:{task}", passage_len) == f"abstain:{task}"
+
+    expect_value_error(
+        lambda: validate_task_label("EPISTEMIC_FOCALIZATION", "believes:Mara", passage_len),
+        "label invalid for task",
+    )
+    expect_value_error(
+        lambda: validate_task_label("EPISTEMIC_FOCALIZATION", "believes:C0-4_P5-999", passage_len),
+        "source-bound span exceeds passage length",
+    )
+    expect_value_error(
+        lambda: validate_task_label("ANCHOR_LOCALIZATION", "anchor:A9-4", passage_len),
+        "source-bound span must have start < end",
+    )
+    expect_value_error(
+        lambda: validate_task_labels(
+            "ANCHOR_LOCALIZATION", ["anchor:A0-4", "anchor:A0-4"], passage_len
+        ),
+        "duplicate canonical labels",
+    )
+
+
 def main() -> None:
     req = request()
+    good_label = "believes:C0-4_P5-39"
+
+    validate_all_task_grammars()
 
     good_backend = RecordingBackend(
-        [{"label": "believes:Mara", "confidence": 0.84, "status": "ASSERTED"}]
+        [{"label": good_label, "confidence": 0.84, "status": "ASSERTED"}]
     )
     good = ModelBackedNarrativeExtractor(good_backend).extract(req)
     assert good["case_id"] == req.case_id
     assert good["task"] == req.task
     assert good["source_sha256"] == req.source_sha256
     assert good["canonical_state_write_authorized"] is False
-    assert good["predictions"][0]["label"] == "believes:Mara"
+    assert good["predictions"][0]["label"] == good_label
     assert len(good_backend.calls) == 1
     assert set(good_backend.calls[0]) == {"task", "authorized_source_text", "source_sha256"}
     assert "case_id" not in good_backend.calls[0]
@@ -92,14 +133,28 @@ def main() -> None:
 
     expect_value_error(
         lambda: ModelBackedNarrativeExtractor(
-            RecordingBackend([{"label": "x", "confidence": 1.2, "status": "ASSERTED"}])
+            RecordingBackend([{"label": "believes:Mara", "confidence": 0.84, "status": "ASSERTED"}])
+        ).extract(req),
+        "label invalid for task",
+    )
+
+    expect_value_error(
+        lambda: ModelBackedNarrativeExtractor(
+            RecordingBackend([{"label": "believes:C0-4_P5-999", "confidence": 0.84, "status": "ASSERTED"}])
+        ).extract(req),
+        "source-bound span exceeds passage length",
+    )
+
+    expect_value_error(
+        lambda: ModelBackedNarrativeExtractor(
+            RecordingBackend([{"label": good_label, "confidence": 1.2, "status": "ASSERTED"}])
         ).extract(req),
         "confidence out of range",
     )
 
     expect_value_error(
         lambda: ModelBackedNarrativeExtractor(
-            RecordingBackend([{"label": "x", "confidence": 0.5, "status": "CERTAIN"}])
+            RecordingBackend([{"label": good_label, "confidence": 0.5, "status": "CERTAIN"}])
         ).extract(req),
         "status invalid",
     )
@@ -110,7 +165,10 @@ def main() -> None:
     )
 
     print("CANDIDATE_002_MODEL_PROVIDER_FIXTURES=PASS")
-    print("checks=gold_isolation,digest_binding,forced_non_authority,abstention,confidence,status,shape")
+    print(
+        "checks=all_nine_task_grammars,source_bound_ids,bounds,duplicates,gold_isolation,"
+        "digest_binding,forced_non_authority,abstention,confidence,status,shape"
+    )
 
 
 if __name__ == "__main__":
