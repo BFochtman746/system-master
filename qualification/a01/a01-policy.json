@@ -1,5 +1,5 @@
 {
-  "policy_version": 5,
+  "policy_version": 6,
   "control_plane_id": "A01-CONTROL-PLANE-001",
   "canonical_ref": "main",
   "runner": {
@@ -22,7 +22,7 @@
     }
   },
   "admission": {
-    "max_outstanding_per_workstream": 1,
+    "max_outstanding_per_workstream": 4,
     "require_registered_qualification": true,
     "allow_arbitrary_command_input": false,
     "continue_dependency_valid_work_while_waiting": true
@@ -59,7 +59,16 @@
     "max_ticket_runtime_minutes": 300,
     "checkpoint_required_above_minutes": 180,
     "max_checkpoint_interval_minutes": 30,
-    "one_ready_ticket_per_workstream_per_night": true,
+    "one_ready_ticket_per_workstream_per_night": false,
+    "max_ready_tickets_per_workstream_per_night": 4,
+    "dependency_chains": {
+      "enabled": true,
+      "same_workstream_only": true,
+      "depends_on_ticket_id_requires_predecessor_pass": true,
+      "dependent_ticket_must_follow_predecessor_immediately": true,
+      "max_chain_length": 4,
+      "independent_tickets_continue_after_other_failures": true
+    },
     "reject_disruptive_post_actions": true,
     "do_not_start_if_declared_budget_exceeds_remaining_window": true,
     "ordinary_work_may_backfill_before_reserved_windows": true,
