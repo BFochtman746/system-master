@@ -1,5 +1,3 @@
-'use strict' if False else None
-
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -126,6 +124,7 @@ def score_case(gold_case: dict, prediction_case: dict) -> dict:
         raise ValueError("task mismatch")
 
     gold = {str(x) for x in gold_case.get("gold_labels", [])}
+    forbidden = {str(x) for x in gold_case.get("forbidden_labels", [])}
     preds = [_validate_prediction(p) for p in prediction_case.get("predictions", [])]
     asserted = [p for p in preds if p.status != "ABSTAIN"]
     predicted = {p.label for p in asserted}
@@ -136,11 +135,11 @@ def score_case(gold_case: dict, prediction_case: dict) -> dict:
     recall = _safe_div(tp, tp + fn)
     f1 = _f1(precision, recall)
 
-    high_conf_wrong = [p for p in asserted if p.label not in gold and p.confidence >= FALSE_CERTAINTY_THRESHOLD]
+    high_conf_wrong = [p for p in asserted if (p.label not in gold or p.label in forbidden) and p.confidence >= FALSE_CERTAINTY_THRESHOLD]
     high_conf_total = [p for p in asserted if p.confidence >= FALSE_CERTAINTY_THRESHOLD]
     false_certainty_rate = _safe_div(len(high_conf_wrong), len(high_conf_total))
 
-    correct_predictions = sum(1 for p in asserted if p.label in gold)
+    correct_predictions = sum(1 for p in asserted if p.label in gold and p.label not in forbidden)
     selective_accuracy = _safe_div(correct_predictions, len(asserted))
     universe = gold | predicted
     coverage = _safe_div(len(predicted), len(universe))
@@ -165,6 +164,7 @@ def score_case(gold_case: dict, prediction_case: dict) -> dict:
     return {
         "case_id": gold_case["case_id"],
         "task": gold_case["task"],
+        "intentionally_ambiguous": intentionally_ambiguous,
         "tp": tp,
         "fp": fp,
         "fn": fn,
@@ -218,7 +218,7 @@ def _aggregate(rows: List[dict]) -> dict:
     fn = sum(r["fn"] for r in rows)
     precision = _safe_div(tp, tp + fp)
     recall = _safe_div(tp, tp + fn)
-    ambiguity_rows = [r for r in rows if r["ambiguity_preserved"] in (0, 1) and r["premature_resolution"] in (0, 1)]
+    ambiguity_rows = [r for r in rows if r["intentionally_ambiguous"]]
     span_rows = [r for r in rows if r["span_iou"] is not None]
     high_conf_wrong = sum(r["false_certainty_count"] for r in rows)
     return {
