@@ -1,0 +1,73 @@
+{
+  "receipt_id": "PROSE-REAL-LIMITATION-AUTHOR-ADJUDICATION-001-QUALIFICATION-RECEIPT",
+  "effective_date": "2026-09-09",
+  "standing": "PASS__SIX_AUTHOR_LABELS_FROZEN__ONE_REAL_LIMITATION__REQUIRE_LABELS_HOSTED_PASS__REVISION_AUTHORITY_ZERO__BLIND_SCORING_ISOLATED",
+  "author_packet": "PROSE-REAL-LIMITATION-GROUND-TRUTH-AUTHOR-PACKET-001.json",
+  "author_packet_commit": "338797ecd56ca46efd7ab14e9a2cd9bb7acd1263",
+  "author_packet_blob_sha": "253df17f04717b399a92693ed18c40085e74f12f",
+  "hosted_validation": {
+    "workflow": ".github/workflows/literary-prose-real-limitation-ground-truth-packet-ci.yml",
+    "workflow_run_id": 34404491759,
+    "job_id": 102644077126,
+    "conclusion": "success",
+    "runner": "ubuntu-24.04",
+    "python": "3.12.14",
+    "require_labels_executed": true,
+    "case_count": 6,
+    "labels_recorded": 6,
+    "real_limitation_count": 1,
+    "revision_authority_count": 0,
+    "validator_standing": "PASS__GROUND_TRUTH_PACKET_STRUCTURE_VALID__REVISION_AUTHORITY_ZERO"
+  },
+  "author_label_counts": {
+    "REAL_LIMITATION": 1,
+    "WORKING_AS_INTENDED": 3,
+    "NEUTRAL_OBSERVATION": 2,
+    "UNCERTAIN": 0
+  },
+  "selection_heuristic_comparison": {
+    "HEURISTIC_STRESS_UNLABELED": {
+      "case_ids": ["PROSE-LGT-001", "PROSE-LGT-003", "PROSE-LGT-005"],
+      "author_labels": ["NEUTRAL_OBSERVATION", "WORKING_AS_INTENDED", "WORKING_AS_INTENDED"],
+      "real_limitation_count": 0
+    },
+    "HEURISTIC_CONTROL_UNLABELED": {
+      "case_ids": ["PROSE-LGT-002", "PROSE-LGT-004", "PROSE-LGT-006"],
+      "author_labels": ["REAL_LIMITATION", "NEUTRAL_OBSERVATION", "WORKING_AS_INTENDED"],
+      "real_limitation_count": 1
+    },
+    "finding": "The only author-grounded real limitation occurred in a mechanical CONTROL case; none of the three mechanical STRESS cases were real limitations. The density/abstraction/long-sentence selector is therefore not a valid limitation predictor on this sample and must remain non-authoritative."
+  },
+  "blind_scoring_isolation": {
+    "reason": "The author-label collection context has now observed the ground truth and cannot produce a defensibly blind model score for these same six passages.",
+    "blind_branch": "literary-prose-blind-eval-001",
+    "blind_base_commit": "34c0ab8e37c85793159fee624417bea34663dc1d",
+    "blind_contract_commit": "df8a1be33d4f341353352c130297819d132e6497",
+    "blind_contract": "PROSE-REAL-LIMITATION-BLIND-EVALUATION-CONTRACT-001.json",
+    "blind_packet_labels_authoritative": false,
+    "blind_packet_labels_recorded": 0,
+    "fresh_evaluator_context_required": true,
+    "predictions_must_be_sealed_before_ground_truth_read": true,
+    "ground_truth_read_after_seal_from_commit": "338797ecd56ca46efd7ab14e9a2cd9bb7acd1263"
+  },
+  "privacy_and_authority": {
+    "raw_manuscript_prose_committed": false,
+    "raw_author_commentary_committed": false,
+    "candidate_prose_committed": false,
+    "candidate_generation_authorized": false,
+    "manuscript_mutation_authorized": false,
+    "publication_authorized": false,
+    "revision_authority_count": 0
+  },
+  "what_is_proven": [
+    "Six explicit author labels now exist as authoritative ground truth for the frozen six-passage packet.",
+    "At least one real limitation exists in the sample, so real limitation detection can now be measured once blind predictions are sealed.",
+    "The hosted --require-labels validation passes on the exact labeled commit while revision authority remains zero.",
+    "The original stress/control selection heuristic failed to place the sole real limitation in the stress half of the sample."
+  ],
+  "what_is_not_yet_proven": [
+    "Real limitation detection accuracy is not yet qualified because blind model predictions have not yet been sealed and compared.",
+    "No result authorizes automatic revision, candidate superiority, full-book literary accuracy, canon replacement or publication."
+  ],
+  "exact_next_objective": "PROSE-REAL-LIMITATION-BLIND-MODEL-SCORING-001 — USE A FRESH EVALUATOR CONTEXT ON literary-prose-blind-eval-001 ONLY -> VERIFY THE THREE PRIVATE SOURCE SHA256 VALUES -> RECONSTRUCT ALL SIX DIGEST-BOUND PASSAGES -> RUN THE ALREADY-QUALIFIED SEMANTIC -> PASSAGE INTELLIGENCE -> STEP-F PATH WITHOUT READING ANY AUTHOR LABELS -> COMMIT/SEAL SIX MODEL DISPOSITIONS WITH revision_allowed=false -> ONLY THEN READ GROUND TRUTH AT 338797ecd56ca46efd7ab14e9a2cd9bb7acd1263 -> COMPARE REAL_LIMITATION / WORKING_AS_INTENDED / NEUTRAL_OBSERVATION / ABSTENTION PERFORMANCE."
+}
