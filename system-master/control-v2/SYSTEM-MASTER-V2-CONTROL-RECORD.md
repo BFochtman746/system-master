@@ -27,30 +27,37 @@ Keep these states separate:
 4. authoritative A-01 qualification passes on that exact subject;
 5. production/promotion authority exists.
 
-No historical PASS transfers to changed candidate bytes.
+No historical PASS transfers to changed candidate bytes. A downstream cumulative packet is not dependency-current merely because its own local tests pass if it omitted a corrected predecessor state.
 
 ## 3. Current MASTER dependency spine
 
 Current exact continuation:
 
-`SYSTEM-MASTER-REBUILD-020 / OPERATOR-OPS-001 — Governed Operations + Readiness + Commissioning + Recovery + Human Control Foundation`
+`SYSTEM-MASTER-REBUILD-018 / PLATFORM-005 — parsed-path API-route residual closure on the superseding authenticated PWA/application-shell composite`
 
-SMR019's own `NEXT-PACKET-001.json` authorizes exactly SMR020 after the CHAT-001A portable gate. Its dependency basis identifies DATA-001, PLATFORM-002, PLATFORM-006, PLATFORM-010, PLATFORM-012 and PLATFORM-005 as already portable-qualified prerequisites.
+The last fully qualified SMR018 composite subject is:
 
-Required SMR020 challenge:
-1. independently recover and verify the exact historical carrier and source/test subject;
-2. replay strict Java 21 and the packet's complete portable qualification before modifying any bytes;
-3. reconcile governed operation identity, readiness/blocker state, commissioning/recovery state, next-best-action projection and human-control semantics across memory, contracts and persistence;
-4. challenge operation/version identity, readiness evidence binding, blocker lifecycle, stale state, duplicate/replay behavior, transition monotonicity, cancellation/recovery/commissioning boundaries, concurrency/fencing and terminal mutation;
-5. verify operator projections and next-best-action recommendations cannot bypass PLATFORM-006 routing, PLATFORM-010 effect authority, CHAT-001A canonical conversation truth, or owning domain authorities;
-6. reconcile DATA-001 persistence, PLATFORM-002 work state, PLATFORM-006 capability routing, PLATFORM-010 governed effects, PLATFORM-012 telemetry and PLATFORM-005 shell projection without semantic takeover;
-7. implement only objectively demonstrated portable corrections as a new exact candidate identity;
-8. preserve live operational commissioning, destructive recovery, human approval, native-client behavior and production evidence separately;
-9. prepare A-01 only after a GitHub-native exact candidate exists and Windows execution supplies a real completion delta.
+`0ae86ee36d00d3d5749e20889dafbcf85c1dd84baecbcc4bc34c8d39ba31553c`
+
+That subject combines the previously qualified projection/cache temporal repair with the fail-closed navigation/schema/browser repair. `PLATFORM005-RECONCILIATION-003.md` subsequently proves a residual route-law discrepancy that survives the defined composite merge: inherited Java `ShellRules.route` can admit `/api?view=shell` because it applies the API prohibition to the raw route before URI pathname parsing, while the browser rejects the same route by parsed pathname `/api`.
+
+The focused repair is durable as:
+
+`PLATFORM005_PARSED_PATH_API_ROUTE_REPAIR_002.patch`
+
+No new exact composite+route candidate is claimed yet. The exact `0ae86ee3...` runnable composite source must first be recovered/imported and reproduced, then the route repair must be applied and the complete SMR018 portable gate rerun on the new exact subject.
+
+Dependency-valid continuation after that is:
+
+1. finalize SMR018 on a newly qualified exact composite+route candidate;
+2. cumulatively rebase and requalify SMR019 / CHAT-001A on that final corrected SMR018 subject while preserving its `STREAM_CHECKPOINT` / `FINAL` repair;
+3. only then unblock `SYSTEM-MASTER-REBUILD-020 / OPERATOR-OPS-001`.
+
+SMR020 remains the packet-declared successor of SMR019 but is currently `BLOCKED — PREDECESSOR RECONCILIATION`.
 
 ## 4. Reconciled MASTER predecessor train
 
-The dependency-valid MASTER reconciliation train is complete through:
+The dependency-valid MASTER train is stable through SMR017. SMR018 and SMR019 retain qualified evidence but are under active cumulative reconciliation as described below.
 
 - FOUNDATION-007 / SMR006 — reconciliation complete; source-custody and downstream provenance/rebind obligations preserved.
 - FOUNDATION-008 / SMR007 — historical `62682d90...`; corrected local candidate `857e7a25...`; transition consistency correction locally qualified.
@@ -64,10 +71,10 @@ The dependency-valid MASTER reconciliation train is complete through:
 - PLATFORM-009 / SMR015 — historical `b4b117d9...`; corrected local candidate `029cf879...`; JDBC descriptor conflict-target correction locally qualified; focused 120,056; 15/15 suites, 782/782 manifest PASS.
 - PLATFORM-010 / SMR016 — historical `da3b67bc...`; corrected local candidate `d7f26efa...`; JDBC request/transition INSERT arity correction locally qualified; focused 120,055; 16/16 suites; 841/841 manifest PASS. Durable record: `PLATFORM010-RECONCILIATION-001.md`.
 - PLATFORM-011 / SMR017 — historical `81277d2a66c3bf6da68f0ab2355ce3219e00f2c5b4b188c7cc6c9caa3394e5a3`; corrected local candidate `39871e6c121861d98f25ba8eddce5de16480e633b21666e2b7c364b3fa808e43`; durable communication-record parity correction locally qualified. Candidate focused 450,077; 17/17 suites; 25/25 contracts; 12 SQL objects; 17/17 R021; coherence/congruence; 939/939 manifest PASS. Candidate manifest SHA `4e0c95fe6cad87ef34a98e9b5025e0d183a16796e8cd464fc856be7bf19b9f57`; CURRENT-AUTHORITY SHA `459158130cd513f12318d501d67f5cc5c346cf66f474bbd4f7a235e1454babf5`. Durable record: `PLATFORM011-RECONCILIATION-001.md`.
-- PLATFORM-005 / SMR018 — historical `66657a53d962e045d3f24baee9da4d6a107a152a404b84e3c9973b90b22b906c`; corrected local candidate `baadeae45c024369e16ef718d930e93099411f32cc938f80418c254506c2126d`; client projection-expiry and offline-cache max-age parity correction locally qualified. Candidate focused 120,078; 18/18 suites; 6/6 contracts; persistence boundary PASS with 0 PostgreSQL objects; 13/13 R022; coherence/congruence; 985/985 manifest PASS. Candidate manifest SHA `b7d5ccd4c1b4f937cb93ae6a173c436e30623ccd26e3ab1a58fec5ce24f5863d`; CURRENT-AUTHORITY SHA `5270e8ada0c07dcf269838f0a6934fb8c8b2379019c632ad011342638eafbc52`. Durable record: `PLATFORM005-RECONCILIATION-001.md`; focused patch: `PLATFORM005_TEMPORAL_PROJECTION_CACHE_PARITY_REPAIR_001.patch`.
-- CHAT-001A / SMR019 — historical `f4d5915275974c3d507fb3da0c6844ee21a660eddc40d47f03d867b7b2720727`; corrected local candidate `5c9f5a73855ae9a154ac4ffca6dd57d167fca80e0b3bc55d55a24c180b19eaca`; STREAM_CHECKPOINT/FINAL standing separation corrected in Java and PostgreSQL and migration digest rebound. Candidate focused 150,079; 19/19 suites; 8/8 contracts; 9 SQL objects; 14/14 R023; coherence/congruence; 1054/1054 manifest PASS. Candidate manifest SHA `cb8cfd206d8eef534fea17f5d784300f6c52eaf90ad90ab6f4634ae454cf4461`; CURRENT-AUTHORITY SHA `25b7d15c0eec3f418c1d957dd6981fd16e14ecfa47f5a4a5b84182607bf73ad3`. Durable record: `CHAT001A-RECONCILIATION-001.md`; focused patch: `CHAT001A_STREAM_CHECKPOINT_FINAL_STANDING_REPAIR_001.patch`.
+- PLATFORM-005 / SMR018 — historical `66657a53d962e045d3f24baee9da4d6a107a152a404b84e3c9973b90b22b906c`. Temporal intermediate `baadeae45c024369e16ef718d930e93099411f32cc938f80418c254506c2126d` qualified the client projection-expiry/offline-cache max-age correction. Fail-closed-navigation component `37e904e4666b99af6a5d5a458702104ffb591e3fa0f0d591effc269ae0c2dc3d` addressed projection/schema/browser parity. Superseding composite `0ae86ee36d00d3d5749e20889dafbcf85c1dd84baecbcc4bc34c8d39ba31553c` combined those corrections and qualified at PLATFORM-005 focused 120,087; 18/18 suites; 6/6 contracts; persistence boundary PASS with 0 PostgreSQL objects; 13/13 R022; coherence/congruence; 985/985 manifest PASS. Composite manifest SHA `deaa4aa74339d0c9b56ef6051308354dd43e3c5069b774f3eb23cff5d0f7eea1`; CURRENT-AUTHORITY SHA `5a8f3356a40a094fc5e4b35c2a458b8636c950983202fad4a1ba3ff543109a7b`. Durable records: `PLATFORM005-RECONCILIATION-001.md`, `PLATFORM005-RECONCILIATION-002.md`, `PLATFORM005-COMPOSITE-ASSEMBLY-002.md`. `PLATFORM005-RECONCILIATION-003.md` now records a proven residual parsed-path API-route defect in that composite lineage and the focused repair `PLATFORM005_PARSED_PATH_API_ROUTE_REPAIR_002.patch`; a new exact composite+route subject is pending source recovery and full requalification.
+- CHAT-001A / SMR019 — historical `f4d5915275974c3d507fb3da0c6844ee21a660eddc40d47f03d867b7b2720727`; prior corrected local candidate `5c9f5a73855ae9a154ac4ffca6dd57d167fca80e0b3bc55d55a24c180b19eaca` correctly separated `STREAM_CHECKPOINT` from `FINAL` in Java/PostgreSQL and passed focused 150,079; 19/19 suites; 8/8 contracts; 9 SQL objects; 14/14 R023; coherence/congruence; 1054/1054 manifest PASS. Candidate manifest SHA `cb8cfd206d8eef534fea17f5d784300f6c52eaf90ad90ab6f4634ae454cf4461`; CURRENT-AUTHORITY SHA `25b7d15c0eec3f418c1d957dd6981fd16e14ecfa47f5a4a5b84182607bf73ad3`. Exact reconstruction proved this subject contains only the CHAT repair on the historical SMR019 carrier and does not cumulatively absorb the corrected SMR018 predecessor. It therefore remains valid evidence for its own bytes but is not dependency-current. `CHAT001A-RECONCILIATION-002.md` records the required cumulative rebase after SMR018 finalization.
 
-Each corrected candidate remains distinct from its historical seal. Runnable recovered source is in durable Library/local custody; normal GitHub-native candidate import + fresh hosted qualification remain required before A-01 can qualify changed bytes.
+Each candidate remains distinct from its historical seal and from intermediate candidates. Runnable recovered source is primarily in durable Library/local custody; ordinary GitHub-native candidate import + fresh hosted qualification remain required before A-01 can qualify changed bytes.
 
 ## 5. MASTER Assurance/Reconciliation subsystem standing
 
@@ -98,7 +105,9 @@ Assurance/Reconciliation is a MASTER subsystem/evidence function, not a fifth sy
 
 ## 6. MASTER source-custody and target boundaries
 
-Corrected F008/DATA001/P001/P002/P003/P012/P006/P008/P009/P010/P011/P005/CHAT001A candidate source trees are not yet ordinary GitHub-native source. Exact import, candidate reproduction and fresh hosted qualification remain required.
+Corrected F008/DATA001/P001/P002/P003/P012/P006/P008/P009/P010/P011 candidate source trees are not yet ordinary GitHub-native source. PLATFORM-005's last fully qualified composite `0ae86ee3...` is represented by durable component/assembly evidence but its complete exact runnable source tree must be recovered/imported before the parsed-path route repair can be applied and requalified as a new exact candidate. CHAT-001A then requires a cumulative rebase onto that final SMR018 subject.
+
+Exact import, candidate reproduction and fresh hosted qualification remain required before A-01 qualification of changed bytes.
 
 Target-only obligations remain separate, including PC-ENDGAME-014 through PC-ENDGAME-026 for the reconciled train. Windows/A-01 evidence cannot substitute for Apple-native iOS/macOS claims.
 
@@ -122,13 +131,17 @@ Every A-01 `workstream_id` must map through `governance/SYSTEM-TOPOLOGY-001.json
 
 The dedicated old System Master Night Shift chat is retired. Current second-shift system workers are disposable execution surfaces and cannot override the four canonical system control records.
 
-No corrected MASTER central-spine candidate currently justifies an A-01 ticket because corrected runnable source trees are not yet GitHub-native immutable candidates with hosted PASS and registered Windows-specific completion deltas.
+No corrected MASTER central-spine candidate currently justifies an A-01 ticket because the dependency-current SMR018/SMR019 candidates are not yet finalized as GitHub-native immutable candidates with hosted PASS and registered Windows-specific completion deltas.
 
 ## 9. MASTER-only priority queue
 
-P0 — `UAF-S1-OPERATOROPS001-RECONCILIATION-QUALIFICATION-001` / SMR020.
+P0 — SMR018 / PLATFORM-005 residual closure: recover/import exact composite subject `0ae86ee3...`, reproduce it exactly, apply `PLATFORM005_PARSED_PATH_API_ROUTE_REPAIR_002.patch`, derive a new exact subject and rerun the complete SMR018 portable qualification.
 
-P0 parallel preservation — GitHub-native import/fresh qualification for corrected MASTER F008/DATA001/P001/P002/P003/P012/P006/P008/P009/P010/P011/P005/CHAT001A candidates when exact source transport is available; preserve FOUNDATION-007 rebind obligations; complete MASTER RECON-001C sealed-history import.
+P0 successor — SMR019 / CHAT-001A cumulative rebase: propagate the final corrected SMR018 state into the exact SMR019 carrier, preserve the CHAT standing repair, derive a new exact subject and rerun the complete combined predecessor/CHAT qualification.
+
+P0 blocked successor — `SYSTEM-MASTER-REBUILD-020 / OPERATOR-OPS-001`, blocked until the cumulative SMR019 predecessor is qualified.
+
+P0 parallel preservation — GitHub-native import/fresh qualification for corrected MASTER F008/DATA001/P001/P002/P003/P012/P006/P008/P009/P010/P011 candidates when exact source transport is available; preserve FOUNDATION-007 rebind obligations; complete MASTER RECON-001C sealed-history import.
 
 P1 — MASTER target-only/native obligations when the appropriate execution environment exists.
 
@@ -136,6 +149,6 @@ Learning, Book and Prose priorities are intentionally absent from this MASTER qu
 
 ## 10. Exact MASTER next objective
 
-Execute SMR020 / OPERATOR-OPS-001 from its exact recovered carrier. Verify exact bytes first, replay its complete portable gate, reconcile governed operation/readiness/commissioning/recovery/human-control identity and persistence semantics, repair only an objectively demonstrated portable inconsistency as a new candidate identity, and advance only to the packet's own dependency-valid successor.
+Recover the exact runnable source tree for the fully qualified SMR018 composite `0ae86ee36d00d3d5749e20889dafbcf85c1dd84baecbcc4bc34c8d39ba31553c`. Verify that exact subject before modification. Apply only the durable parsed-path API-route repair, derive a new candidate identity, rerun all SMR018 portable gates, preserve the new exact evidence, then cumulatively rebase SMR019 on that final subject. Do not resume SMR020 until the rebased SMR019 candidate passes on its exact bytes.
 
-This record supersedes prior MASTER current-state statements that treated Learning, Book Evaluation or Literary Prose as entries in the MASTER priority queue. It changes control scope only and transfers no qualification authority.
+This record supersedes prior MASTER current-state statements that treated SMR020 as immediately executable while the cumulative SMR018/SMR019 predecessor chain was stale. It changes control standing only and transfers no qualification authority.
