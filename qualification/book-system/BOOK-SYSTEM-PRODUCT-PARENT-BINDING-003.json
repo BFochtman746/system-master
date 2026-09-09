@@ -13,7 +13,7 @@
     "system_id": "BOOK",
     "canonical_name": "BOOK SYSTEM",
     "control_ref": "book-system/control-v1",
-    "current_state_record": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-010.json",
+    "current_state_record": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-011.json",
     "owns": [
       "canonical book state",
       "end-to-end book lifecycle",
@@ -35,18 +35,17 @@
     }
   ],
   "preserved_current_parent_state": {
-    "standing": "ACTIVE__PROVENANCE_INTEROPERABILITY_CLOSED__INTEGRATION_RUNTIME_CONTRACT_REREVIEW_NEXT",
-    "current_objective": "BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-001-CONTRACT-REREVIEW-001",
-    "state_record": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-010.json",
-    "implementation_pause": "BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-001 executable implementation remains paused until the State-010 contract re-review explicitly releases it."
+    "standing": "ACTIVE__INTEGRATION_RUNTIME_REREVIEW_CLOSED__RUNTIME_V2_CONTRACT_DEFINED__SERVICE_INTERFACE_REGISTRY_V2_NEXT",
+    "current_objective": "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-002",
+    "state_record": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-011.json",
+    "implementation_pause": "BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-002 executable implementation remains paused until Service Interface Registry V2 and its changed-subject evidence gate are satisfied."
   },
   "shared_core_rule": "BOOK consumes System Master Core platform/data/artifact/model/tool services through governed interfaces. BOOK remains owner of book-product state and lifecycle and does not transfer that ownership to Core or Prose.",
   "second_shift_rule": "Book unattended delegation is owned by governance/second-shift/BOOK-DELEGATIONS.json and must be revalidated against the live book-system/control-v1 head before execution.",
   "control_revalidation": {
-    "reason": "Reconcile canonical selected Book state after post-baseline publication/export and provenance remediation advanced the live Book control branch to State-010.",
-    "authority_delta_classification": "AUTHORITY_DELTA",
-    "previous_selected_state": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-008.json",
-    "current_selected_state": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-010.json",
+    "reason": "State-010 contract rereview closed and State-011 selected the versioned Service Interface Registry V2 dependency before Runtime V2 implementation.",
+    "previous_selected_state": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-010.json",
+    "current_selected_state": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-011.json",
     "semantic_change": true,
     "qualification_effect": "NONE"
   },
