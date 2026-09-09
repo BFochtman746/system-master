@@ -1,0 +1,95 @@
+{
+  "contract_id": "PROSE-REAL-LIMITATION-BLIND-EVALUATION-CONTRACT-001",
+  "objective": "PROSE-REAL-LIMITATION-BLIND-MODEL-SCORING-001",
+  "blind_branch": "literary-prose-blind-eval-001",
+  "blind_base_commit": "34c0ab8e37c85793159fee624417bea34663dc1d",
+  "prelabel_packet_blob_sha": "80b55a72bcdbefc0ff7ba0041625fc8d3aaac0c2",
+  "source_packet": "qualification/literary-prose-engine-001/step-f/PROSE-REAL-LIMITATION-GROUND-TRUTH-AUTHOR-PACKET-001.json",
+  "source_packet_expected_state": {
+    "labels_authoritative": false,
+    "labels_recorded": 0,
+    "revision_authority_count": 0
+  },
+  "source_custody": [
+    {
+      "source_id": "MOSES_I",
+      "filename": "Volume I - THE VOICE FROM THE BUSH - Clean.docx",
+      "source_package_sha256": "44d97f6b47c24d69390edebdcc239a0a23133c5201c011ef90f9f1f3a2ffbaf0"
+    },
+    {
+      "source_id": "UNHINDERED_3",
+      "filename": "Unhindered_Book_3.docx",
+      "source_package_sha256": "571f8ca4f6cfa5cb273c50ff0249aea30336ff5e4ff97cfc612b7cac08231514"
+    },
+    {
+      "source_id": "UNHINDERED_4",
+      "filename": "Unhindered-Book_4.docx",
+      "source_package_sha256": "b134df0d766b8189c7e4ee3b391b8243e22bffd87224c97e9afb62df80efcb75"
+    }
+  ],
+  "passage_reconstruction_contract": {
+    "paragraph_index_space": "NONEMPTY_DOCX_PARAGRAPHS",
+    "index_base": 1,
+    "join_rule": "JOIN_SELECTED_NONEMPTY_PARAGRAPHS_WITH_SINGLE_ASCII_SPACE",
+    "digest_rule": "SHA256_UTF8_OF_JOINED_PASSAGE",
+    "raw_prose_commit_allowed": false,
+    "candidate_prose_commit_allowed": false
+  },
+  "cases": [
+    {"case_id":"PROSE-LGT-001","source_id":"MOSES_I","chapter_number":27,"passage_sha256":"22bf2594366ecd143c7b490fc4d312e335077e96f6b8ff7f9bde7d6da315e540","word_count":161,"source_paragraph_start":2505,"source_paragraph_end":2507},
+    {"case_id":"PROSE-LGT-002","source_id":"MOSES_I","chapter_number":2,"passage_sha256":"5b1fecd9f033a76809208cd0c54185b7f61a81055fdc7ee9c9c12f31ff3b3d3f","word_count":171,"source_paragraph_start":121,"source_paragraph_end":126},
+    {"case_id":"PROSE-LGT-003","source_id":"UNHINDERED_3","chapter_number":21,"passage_sha256":"add1860bfb44e441e8379b963710d7c6816d9ecdb46dfc8dba198d6bd1f932f3","word_count":157,"source_paragraph_start":3971,"source_paragraph_end":3982},
+    {"case_id":"PROSE-LGT-004","source_id":"UNHINDERED_3","chapter_number":7,"passage_sha256":"534ba3b9e3b9a11325c66f1dbdb6ce428ca6f7828f90ce96207e4b64687028d9","word_count":166,"source_paragraph_start":1382,"source_paragraph_end":1391},
+    {"case_id":"PROSE-LGT-005","source_id":"UNHINDERED_4","chapter_number":28,"passage_sha256":"5bc39d758446fd9daec6741535db780389fb023badc0d80953fb438b9443573b","word_count":162,"source_paragraph_start":5747,"source_paragraph_end":5768},
+    {"case_id":"PROSE-LGT-006","source_id":"UNHINDERED_4","chapter_number":30,"passage_sha256":"ee0b49a51cf044af9b3bb34596aa1e6f0d17d2aba12c7ef400c867ef359224dd","word_count":175,"source_paragraph_start":6217,"source_paragraph_end":6230}
+  ],
+  "blindness_rules": {
+    "fresh_evaluator_context_required": true,
+    "before_prediction_seal_must_not_read": [
+      "literary-prose-engine-001 at or after commit 338797ecd56ca46efd7ab14e9a2cd9bb7acd1263",
+      "any author adjudication commentary",
+      "any file containing author_label values for PROSE-LGT-001 through PROSE-LGT-006"
+    ],
+    "permitted_before_prediction_seal": [
+      "this blind branch",
+      "the three admitted private source manuscripts after source SHA verification",
+      "qualified semantic evidence validator and semantic-to-diagnostic adapter already present on this branch",
+      "qualified Passage Intelligence and Step-F code already present on this branch"
+    ],
+    "model_predictions_must_be_sealed_before_ground_truth_read": true,
+    "prediction_output_may_contain_raw_prose": false,
+    "prediction_output_may_contain_candidate_prose": false,
+    "prediction_output_may_authorize_revision": false
+  },
+  "required_prediction_output": {
+    "one_record_per_case": true,
+    "fields": [
+      "case_id",
+      "passage_sha256",
+      "semantic_disposition",
+      "step_f_finding_class",
+      "confidence",
+      "abstention_or_downgrade_reason",
+      "diagnosis_allowed",
+      "revision_allowed"
+    ],
+    "revision_allowed_must_equal": false,
+    "seal": "COMMIT PREDICTIONS TO BLIND BRANCH BEFORE ANY GROUND-TRUTH READ"
+  },
+  "comparison_phase": {
+    "ground_truth_branch": "literary-prose-engine-001",
+    "ground_truth_commit": "338797ecd56ca46efd7ab14e9a2cd9bb7acd1263",
+    "ground_truth_packet": "qualification/literary-prose-engine-001/step-f/PROSE-REAL-LIMITATION-GROUND-TRUTH-AUTHOR-PACKET-001.json",
+    "comparison_allowed_only_after_prediction_seal": true,
+    "measure": [
+      "REAL_LIMITATION identification",
+      "downgrade behavior",
+      "abstention behavior",
+      "WORKING_AS_INTENDED preservation",
+      "NEUTRAL_OBSERVATION retention",
+      "false-positive limitation rate"
+    ],
+    "revision_authority_remains_zero": true
+  },
+  "standing": "READY__PRELABEL_BRANCH_ISOLATED__FRESH_BLIND_EVALUATOR_REQUIRED__REVISION_AUTHORITY_ZERO"
+}
