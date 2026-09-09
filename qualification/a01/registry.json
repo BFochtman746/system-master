@@ -1,5 +1,5 @@
 {
-  "registry_version": 20,
+  "registry_version": 21,
   "qualifications": {
     "A01-CONTROL-PLANE-SELFTEST": {
       "workstream_id": "SYSTEM-MASTER",
@@ -70,6 +70,16 @@
       "evidence_artifact": "book-system-lifecycle-transition-engine-001",
       "overnight_eligible": false,
       "description": "Qualify the exact Book System lifecycle transition engine: parent/project and unit transition gates, author-required boundaries, direct-service transition denial, stale service-evidence rejection, exact parent and lifecycle-ledger concurrency, defer/resume, transitive invalidation and revalidation restore, deterministic replay without double commit, request/idempotency conflicts, transaction atomicity, and exact rollback identity. PASS is bounded to the tested subject SHA and grants no autonomous author, publication, promotion, or provider canonical-write authority."
+    },
+    "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001": {
+      "workstream_id": "BOOK-SYSTEM",
+      "gate_class": "focused",
+      "source": "subject",
+      "executable": "node",
+      "args": [".github/scripts/book-system-version-and-rollback-001-qualify.js"],
+      "evidence_artifact": "book-system-version-and-rollback-001",
+      "overnight_eligible": false,
+      "description": "Qualify the exact Book System Version and Rollback boundary: immutable complete-state snapshots and object-version lineage, exact active-version binding, state/ledger concurrency, idempotent replay and identity conflicts, append-only evidence history, lifecycle-receipt separation, restore-as-new-successor semantics, current rights/privacy/evidence and author-decision revalidation, full-state publication-authority refusal, branch-like divergence preservation, atomic failure, and exact rollback receipt identity. PASS is exact-SHA focused evidence only and grants no author, publication, production, or provider canonical-write authority."
     },
     "CONTINUITY-TARGET-WINDOWS-REBOOT": {
       "workstream_id": "SYSTEM-MASTER-CONTINUITY",
