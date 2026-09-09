@@ -1,0 +1,331 @@
+{
+  "queue_id": "BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001",
+  "queue_version": 1,
+  "effective_date": "2026-09-09",
+  "standing": "CANONICAL_PARENT_AUTHOR_AUTHORITY_CAPTURE_CONTRACT__EXECUTABLE_IMPLEMENTATION_PENDING_QUALIFICATION",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "depends_on": [
+    "BOOK-SYSTEM-CANONICAL-BOOK-STATE-MODEL-001",
+    "BOOK-SYSTEM-LIFECYCLE-TRANSITION-ENGINE-001",
+    "BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-002",
+    "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001",
+    "BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-FORENSIC-MAP-001",
+    "BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-PREIMPLEMENTATION-RESEARCH-001"
+  ],
+  "purpose": "Provide the single Book-parent durable queue for unresolved AUTHOR_ONLY decisions, capture an explicit authenticated author choice against exact current subject identities, and atomically append one immutable canonical AUTHOR_DECISION plus a resolution receipt without promoting manuscript, advancing lifecycle, admitting a proposal, freezing export or authorizing publication in the same authority operation.",
+  "non_duplication_law": [
+    "Reuse the existing canonical AUTHOR_DECISION object; do not create a second canonical decision model.",
+    "Reuse Runtime V2 author handoffs as one decision-request source; do not create a second proposal/admission queue.",
+    "Reuse Lifecycle Transition Engine author gates as consumers; do not create a second lifecycle engine.",
+    "Reuse Version/Rollback authorized-successor ingestion for the resulting parent successor; do not create a second state/version ledger.",
+    "Book owns queue semantics and decision evidence; System Master Core/app layer owns actual iPhone rendering and authentication/session presentation mechanics."
+  ],
+  "authority": {
+    "queue_owner": "BOOK_SYSTEM_PARENT",
+    "resolving_authority_class": "AUTHOR_ONLY",
+    "parent_commit_actor": "PARENT_SYSTEM",
+    "author_direct_canonical_write_allowed": false,
+    "provider_resolution_allowed": false,
+    "prose_resolution_allowed": false,
+    "book_evaluator_resolution_allowed": false,
+    "ai_resolution_allowed": false,
+    "timeout_resolution_allowed": false,
+    "rule": "The queue captures an explicit author act and the parent transactionally records it. A service may supply options/evidence only through a registered parent boundary; no service or model may choose, approve or fabricate author authority."
+  },
+  "decision_authority_classes": {
+    "AUTHOR_ONLY": "Resolved only by explicit authenticated author interaction.",
+    "PARENT_OPERATIONAL": "Must stay with the existing owning Book parent runtime and must not be routed here merely because alternatives exist.",
+    "EXTERNAL_OR_LEGAL": "May be tracked as a dependency but cannot be represented as author authority unless the same person independently holds that authority."
+  },
+  "queue_ledger": {
+    "schema_version": 1,
+    "required": [
+      "queue_schema_version",
+      "queue_ledger_version",
+      "bound_parent_state_version",
+      "bound_parent_state_digest",
+      "decision_families",
+      "decision_request_snapshots",
+      "current_request_index",
+      "source_handoff_index",
+      "processed_requests",
+      "resolution_receipts",
+      "outbox_entries"
+    ],
+    "append_only": true,
+    "rule": "Material request-state changes create immutable request snapshots with predecessor lineage. Existing snapshots and resolution receipts are never edited or deleted in place."
+  },
+  "decision_request_snapshot": {
+    "required": [
+      "decision_request_id",
+      "decision_family_id",
+      "decision_request_version",
+      "predecessor_decision_request_id",
+      "book_project_id",
+      "book_id",
+      "decision_type",
+      "authority_class",
+      "subject_ref",
+      "subject_identity_refs",
+      "bound_parent_state_version",
+      "bound_parent_state_digest",
+      "source_authority_kind",
+      "source_handoff_refs",
+      "options",
+      "option_set_digest",
+      "custom_option_allowed",
+      "evidence_refs",
+      "disagreement_refs",
+      "consequence_summary",
+      "confirmation_policy",
+      "queue_state",
+      "presentation_state",
+      "staleness_reason",
+      "supersedes_request_id",
+      "created_at",
+      "created_by"
+    ],
+    "subject_identity_ref_required": ["object_id", "object_version", "object_digest"],
+    "queue_states": ["PENDING", "PRESENTED", "DEFERRED", "STALE", "SUPERSEDED", "RESOLVED", "WITHDRAWN"],
+    "terminal_states": ["SUPERSEDED", "RESOLVED", "WITHDRAWN"],
+    "initial_state": "PENDING",
+    "presentation_states": ["NOT_PRESENTED", "PRESENTED_CURRENT", "PRESENTED_STALE", "CONFIRMATION_REQUIRED", "CONFIRMED"],
+    "authority_class_required": "AUTHOR_ONLY"
+  },
+  "option_contract": {
+    "required": ["option_id", "label", "effect", "consequence_class"],
+    "optional": ["evidence_refs", "tradeoff_summary", "preservation_or_risk_refs"],
+    "consequence_classes": ["ROUTINE_REVERSIBLE", "MATERIAL_REVISION", "CANON_OR_INTENT", "PROTECTED_LANGUAGE", "FINALIZATION", "PUBLICATION_OR_RELEASE"],
+    "rules": [
+      "option_id is stable within one option_set_digest.",
+      "No option is preselected as the author's choice.",
+      "Provider/model ranking may be preserved as evidence but may not become a default selection or author authority.",
+      "Labels and effects must be plain-language and materially distinguish the options.",
+      "A custom author option is accepted only when custom_option_allowed=true and must not be silently normalized into a predefined model-preferred option."
+    ]
+  },
+  "source_types": {
+    "INTEGRATION_RUNTIME_HANDOFF": {
+      "required_source_refs": ["handoff_id", "proposal_family_id", "proposal_snapshot_id", "source_request_id", "source_response_id"],
+      "dedup_rule": "Equivalent current Runtime V2 handoffs may attach to one decision family while every source handoff remains preserved."
+    },
+    "LIFECYCLE_GATE_REQUIREMENT": {
+      "required_source_refs": ["target_ref", "required_decision_type", "current_status_or_gate"],
+      "rule": "The queue captures the decision only; Lifecycle independently revalidates and executes any transition afterward."
+    },
+    "EDITORIAL_STAGE_REQUIREMENT": {
+      "required_source_refs": ["stage_token", "target_ref", "evidence_refs"],
+      "rule": "Editorial evidence may explain a choice but cannot resolve it."
+    },
+    "EXPORT_PUBLICATION_REQUIREMENT": {
+      "required_source_refs": ["release_or_artifact_ref", "exact_artifact_or_release_digest", "target_medium_profile_ref"],
+      "rule": "Technical export/proof never implies PUBLICATION_AUTHORIZATION."
+    },
+    "PARENT_DIRECT_AUTHOR_QUERY": {
+      "required_source_refs": ["parent_query_id", "reason"],
+      "rule": "Parent-created author questions must still bind exact subject/current parent identities and cannot be generic floating prompts."
+    }
+  },
+  "enqueue_request": {
+    "required": [
+      "enqueue_request_id",
+      "idempotency_key",
+      "actor_class",
+      "expected_parent_state_version",
+      "expected_parent_state_digest",
+      "expected_queue_ledger_version",
+      "expected_queue_ledger_digest",
+      "source_authority_kind",
+      "source_handoff_refs",
+      "decision_type",
+      "subject_ref",
+      "subject_identity_refs",
+      "options",
+      "custom_option_allowed",
+      "evidence_refs",
+      "disagreement_refs",
+      "consequence_summary",
+      "confirmation_policy"
+    ],
+    "actor_class": "PARENT_SYSTEM",
+    "rules": [
+      "All exact source identities must resolve against the bound current parent state or explicitly admitted immutable artifacts.",
+      "Unknown decision type/source authority/schema fails closed.",
+      "Equivalent replay returns the existing current queue reference without another queue commit.",
+      "A materially changed subject identity or option set creates a new request snapshot/family successor rather than mutating a presented request."
+    ]
+  },
+  "presentation_projection": {
+    "required": [
+      "decision_request_id",
+      "decision_type",
+      "question",
+      "options",
+      "custom_option_allowed",
+      "evidence_summary_refs",
+      "disagreement_summary_refs",
+      "consequence_summary",
+      "can_defer",
+      "confirmation_required",
+      "subject_currentness"
+    ],
+    "rules": [
+      "No choice is marked selected by default.",
+      "Do not hide or add friction to a valid reject/retain/defer option in order to steer acceptance.",
+      "Expose concise primary information with optional detail rather than forcing raw internal evidence into the decision surface.",
+      "Actual UI components, hit targets, VoiceOver labels and layout remain app/Core responsibilities; the Book projection must carry enough semantics to support them."
+    ],
+    "mobile_acceptance_targets": [
+      "supports clear text labels for every option",
+      "supports at least 44x44 pt iOS hit regions in the renderer",
+      "supports explicit Cancel/Defer where allowed",
+      "supports non-scrolling compact choice presentation for small option sets and a non-action-sheet presentation for larger sets",
+      "supports explicit review/confirmation before consequential immutable commit",
+      "does not require timed interaction or auto-dismiss for author choice"
+    ]
+  },
+  "confirmation_policy": {
+    "values": ["NONE", "REVIEW_SELECTED_CHOICE", "REVIEW_SELECTED_CHOICE_AND_CONSEQUENCE"],
+    "required_minimums": {
+      "ROUTINE_REVERSIBLE": "NONE",
+      "MATERIAL_REVISION": "REVIEW_SELECTED_CHOICE",
+      "CANON_OR_INTENT": "REVIEW_SELECTED_CHOICE",
+      "PROTECTED_LANGUAGE": "REVIEW_SELECTED_CHOICE",
+      "FINALIZATION": "REVIEW_SELECTED_CHOICE",
+      "PUBLICATION_OR_RELEASE": "REVIEW_SELECTED_CHOICE_AND_CONSEQUENCE"
+    },
+    "rule": "A confirmation requirement never means preselection; the author must first make an explicit choice and then confirm the exact selected choice/consequence when required."
+  },
+  "resolution_request": {
+    "required": [
+      "resolution_request_id",
+      "idempotency_key",
+      "author_actor_ref",
+      "author_authority_proof_ref",
+      "expected_parent_state_version",
+      "expected_parent_state_digest",
+      "expected_queue_ledger_version",
+      "expected_queue_ledger_digest",
+      "decision_request_id",
+      "expected_decision_request_version",
+      "expected_decision_request_digest",
+      "selected_option_id",
+      "custom_author_choice",
+      "confirmation_evidence",
+      "rationale_optional"
+    ],
+    "rules": [
+      "The author identity/authority proof must be supplied by the owning System Master identity/session boundary; the Book queue does not self-authenticate or invent the author.",
+      "The exact current parent, queue ledger and queue-item identities must match before author choice is evaluated.",
+      "PENDING or PRESENTED current items may resolve; STALE, SUPERSEDED, WITHDRAWN or already RESOLVED items cannot create a second canonical decision.",
+      "selected_option_id must resolve in the exact bound option set, or custom_author_choice must be present only when custom_option_allowed=true.",
+      "Required confirmation evidence must bind the exact selected choice and decision_request_digest.",
+      "No timeout, inactivity, model confidence or provider result may substitute for resolution_request."
+    ]
+  },
+  "canonical_author_decision_projection": {
+    "existing_object_type": "AUTHOR_DECISION",
+    "required_existing_fields": ["decision_id", "subject_ref", "decision_type", "options", "status", "author_choice", "effective_version"],
+    "optional_existing_field": "rationale_optional",
+    "status_mapping": {
+      "approved_predefined_or_custom_choice": "APPROVED",
+      "explicit_reject_all_or_reject_proposal": "REJECTED",
+      "queue_defer": "NO_CANONICAL_DECISION_CREATED"
+    },
+    "rules": [
+      "The canonical object remains compatible with the already-qualified Canonical State Model.",
+      "Queue-only identity, provenance and concurrency metadata remain in queue ledger/receipt rather than silently changing the canonical object schema.",
+      "A correction or changed choice after commit creates a new decision request and new AUTHOR_DECISION; it never mutates the existing decision under the same decision_id."
+    ]
+  },
+  "resolution_transaction": {
+    "precondition_order": [
+      "validate resolution schema and author authority proof reference",
+      "validate exact parent state version/digest",
+      "validate exact queue ledger version/digest",
+      "resolve exact current decision request snapshot",
+      "validate item state/currentness and subject identities",
+      "validate exact option set and selected/custom choice",
+      "validate confirmation requirement",
+      "construct one canonical AUTHOR_DECISION using existing schema",
+      "construct a parent successor that appends only that AUTHOR_DECISION",
+      "validate no other canonical pointer/project status/proposal/export mutation occurred",
+      "commit parent successor plus resolved queue snapshot plus resolution receipt atomically or expose none",
+      "emit authority receipt for Version/Rollback authorized-successor ingestion"
+    ],
+    "atomic_outputs": ["parent_state_successor", "resolved_queue_snapshot", "resolution_receipt", "version_rollback_authority_handoff"],
+    "failure_rule": "Any failed precondition leaves parent state and queue ledger unchanged and emits no successful author-decision receipt.",
+    "forbidden_same_transaction_effects": ["ADVANCE_PROJECT_STATUS", "SET_ACTIVE_CANONICAL_MANUSCRIPT", "ADMIT_INTEGRATION_PROPOSAL", "SET_EXPORT_FROZEN", "SET_PUBLICATION_AUTHORIZED"]
+  },
+  "resolution_receipt": {
+    "required": [
+      "receipt_id",
+      "resolution_request_id",
+      "idempotency_key",
+      "decision_request_id",
+      "decision_request_version",
+      "decision_request_digest",
+      "decision_id",
+      "decision_type",
+      "author_actor_ref",
+      "author_authority_proof_ref",
+      "selected_option_identity",
+      "pre_parent_state_version",
+      "pre_parent_state_digest",
+      "pre_queue_ledger_version",
+      "pre_queue_ledger_digest",
+      "post_parent_state_version",
+      "post_parent_state_digest",
+      "post_queue_ledger_version",
+      "post_queue_ledger_digest",
+      "subject_identity_refs",
+      "option_set_digest",
+      "confirmation_evidence_ref",
+      "version_rollback_authority_handoff_ref"
+    ]
+  },
+  "staleness_and_supersession": {
+    "material_staleness_triggers": [
+      "bound parent projection materially changed",
+      "bound manuscript/canon/plan/story-bible/artifact/proposal source identity changed",
+      "option set or material consequences changed",
+      "rights/privacy classification changed",
+      "governing author-intent/protected-language constraint changed",
+      "source handoff withdrawn or superseded"
+    ],
+    "rules": [
+      "A stale presented item remains historical and cannot resolve.",
+      "Revalidation that changes material decision meaning creates a successor request snapshot and, when necessary, a new decision family version.",
+      "A previously committed AUTHOR_DECISION remains immutable history but consumers must independently test whether it is current/applicable to their exact subject before acting.",
+      "Withdrawal or supersession never deletes the old request, presentation or decision evidence."
+    ]
+  },
+  "defer_reopen_withdraw": {
+    "defer": "Creates a DEFERRED queue snapshot; it does not create canonical AUTHOR_DECISION or approval.",
+    "reopen": "Creates a new current PENDING/PRESENTED snapshot after currentness revalidation; prior DEFERRED snapshot remains immutable.",
+    "withdraw": "Creates WITHDRAWN only under parent source authority when the underlying requirement legitimately no longer applies; author choice is not fabricated.",
+    "supersede": "Creates SUPERSEDED when a replacement request/current subject makes the old request inapplicable."
+  },
+  "concurrency_idempotency_and_dedup": {
+    "write_identity": "parent_state_version + parent_state_digest + queue_ledger_version + queue_ledger_digest + decision_request_version + decision_request_digest",
+    "same_idempotency_key_same_normalized_request": "RETURN_EXISTING_RECEIPT_NO_NEW_PARENT_OR_QUEUE_COMMIT",
+    "same_idempotency_key_different_payload": "REJECT_IDEMPOTENCY_KEY_CONFLICT",
+    "same_resolution_request_id_different_idempotency_key": "REJECT_REQUEST_ID_CONFLICT",
+    "concurrent_different_choice": "REJECT_STALE_OR_CONFLICTING_RESOLUTION_AND_REQUIRE_CURRENT_REVIEW",
+    "duplicate_handoff_rule": "Coalesce only semantically equivalent current requests while retaining every source_handoff_ref; do not coalesce requests with different subject digests, decision types, option-set digests or authority classes."
+  },
+  "consumer_boundary": {
+    "lifecycle": "Consumes exact APPROVED/type/applicable AUTHOR_DECISION refs under its existing qualified gate; queue cannot invoke transition authority implicitly.",
+    "integration_runtime": "May observe decision refs/currentness for proposal eligibility; queue cannot admit proposal implicitly.",
+    "version_and_rollback": "Records the already-committed author-decision parent successor using authority_kind AUTHOR_DECISION and exact authority receipt identity; it cannot reinterpret the choice.",
+    "export_publication": "May consume PUBLICATION_AUTHORIZATION only after independently verifying exact current release/artifact identity; queue cannot publish."
+  },
+  "provenance_and_privacy": {
+    "minimum_internal_provenance": ["author_actor_ref", "decision_request/source refs", "subject identities", "choice identity", "parent/queue pre-post identities", "timestamp or deterministic commit identity"],
+    "external_projection": "Optional W3C PROV-compatible projection may represent decision entity/activity/author agent attribution, but internal Book ledger remains canonical authority.",
+    "privacy_rule": "Store references/minimum necessary summaries rather than copying private manuscript/evaluator/research content into queue or external provenance solely for presentation."
+  },
+  "qualification_objective": "Prove multi-source enqueue, exact subject/option/parent binding, dedup and replay, no provider/model resolution, no default author choice, presentation semantics, defer/reopen/withdraw/supersede, stale subject and stale option rejection, concurrent resolution conflict, explicit author-authority proof requirement, consequential confirmation, immutable canonical AUTHOR_DECISION append, one-decision-per-request-version, atomic parent+queue receipts, Version/Rollback authority handoff identity, consumer separation, append-only history and zero lifecycle/manuscript/proposal/export/publication mutation on the same authority transaction.",
+  "exact_next_objective_after_contract": "BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001-IMPLEMENTATION-001",
+  "qualification_effect": "NONE until an executable implementation and deterministic adversarial fixtures pass a registered exact-SHA qualification."
+}
