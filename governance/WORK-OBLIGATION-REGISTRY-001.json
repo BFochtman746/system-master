@@ -65,23 +65,38 @@
     {
       "obligation_id": "BOOK-PUBLICATION-EXPORT-STANDARDS-PROFILE-001",
       "owner_path": "SYSTEM_MASTER/BOOK",
-      "state": "READY",
+      "state": "CLOSED",
       "objective": "Define versioned target-medium publication/export profiles and evidence gates for EPUB, PDF, DOCX and print while preserving exact canonical manuscript-version binding and separating technical proof from publication authorization.",
-      "source": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-008.json"
+      "source": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-008.json",
+      "closure_evidence": "qualification/book-system/research-verification-001/BOOK-SYSTEM-PUBLICATION-EXPORT-STANDARDS-PROFILE-001.json",
+      "closure_commit": "a403b9c6391c20f2c7a1e165e5e13c4410f37241"
     },
     {
       "obligation_id": "BOOK-PROVENANCE-INTEROPERABILITY-PROJECTION-001",
       "owner_path": "SYSTEM_MASTER/BOOK",
-      "state": "HOLD",
+      "state": "CLOSED",
       "objective": "Close the Book provenance/interoperability projection research-remediation boundary required before Integration Proposal Runtime implementation resumes.",
-      "dependency": "Book publication/export standards remediation sequence"
+      "dependency": "Book publication/export standards remediation sequence",
+      "closure_evidence": "qualification/book-system/research-verification-001/BOOK-SYSTEM-PROVENANCE-INTEROPERABILITY-PROJECTION-001.json",
+      "closure_commit": "c900aef8c13258a80eaa2f45d8d5652b5f62d6eb"
     },
     {
       "obligation_id": "BOOK-INTEGRATION-PROPOSAL-RUNTIME-001",
       "owner_path": "SYSTEM_MASTER/BOOK",
-      "state": "HOLD",
+      "state": "SUPERSEDED",
       "objective": "Re-review the Integration Proposal Runtime contract and resume executable implementation only after the required publication/export and provenance research-remediation release conditions close.",
-      "must_not_do": "Do not resume executable implementation merely because earlier parent foundations passed."
+      "must_not_do": "Do not resume executable implementation merely because earlier parent foundations passed.",
+      "superseded_by": "BOOK-INTEGRATION-PROPOSAL-RUNTIME-001-CONTRACT-REREVIEW-001",
+      "supersession_reason": "Publication/export and provenance remediation prerequisites are now closed; State-010 selects the contract re-review as the exact current gate before any executable implementation."
+    },
+    {
+      "obligation_id": "BOOK-INTEGRATION-PROPOSAL-RUNTIME-001-CONTRACT-REREVIEW-001",
+      "owner_path": "SYSTEM_MASTER/BOOK",
+      "state": "READY",
+      "objective": "Forensically re-review the existing BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-001 contract against the research-verified editorial lifecycle, publication/export and Document-System ownership boundaries, provenance interoperability, staleness, rights/privacy, author and publication authority constraints; classify KEEP / REFINE / REPLACE_OR_VERSION / NO_CHANGE_REQUIRED before releasing implementation.",
+      "source": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-010.json",
+      "implementation_pause": true,
+      "stop_condition": "A durable re-review matrix explicitly decides whether runtime contract v1 is implementation-ready or requires a versioned successor/additive amendment, with no executable runtime code written before that decision."
     },
     {
       "obligation_id": "PROSE-REAL-LIMITATION-AUTHOR-ADJUDICATION-001",
