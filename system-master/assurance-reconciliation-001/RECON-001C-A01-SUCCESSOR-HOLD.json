@@ -1,0 +1,38 @@
+{
+  "proposal_version": 1,
+  "state": "HOLD_UNTIL_RECON_001C_IMPORT_COMPLETE",
+  "prepared_for_night_date": "2026-09-10",
+  "ticket": {
+    "ticket_version": 1,
+    "ticket_id": "ASSURANCE-RECON-001C-POST-IMPORT-CUSTODY-CENSUS-2026-09-10",
+    "state": "HOLD",
+    "night_date": "2026-09-10",
+    "submitted_at": "2026-09-09T09:15:00Z",
+    "workstream_id": "SYSTEM-MASTER-ASSURANCE-RECON",
+    "qualification_id": "ASSURANCE-RECON-001B-OVERNIGHT-DEEP-CENSUS",
+    "subject_sha": "5ae9dfbeff56cc05883d7ba3e9f7a4f0da43191c",
+    "origin_ref": "refs/heads/system-master/assurance-reconciliation-001",
+    "estimated_minutes": 60,
+    "max_runtime_minutes": 150,
+    "priority": 85,
+    "earliest_start_local": "00:00",
+    "latest_start_local": "04:25",
+    "window_end_local": "07:00",
+    "exclusive_window": false,
+    "resource_class": "mixed",
+    "overnight_lane": "FINISH",
+    "value_class": "POST_IMPORT_SOURCE_CUSTODY_VERIFICATION",
+    "critical_path_rank": 1,
+    "completion_delta": {
+      "before": "Exact CQ-003 Step-003F through FOUNDATION-006 J history is sealed and locally verified but not yet GitHub-native under governed historical refs.",
+      "evidence": "Frozen-subject A-01 census observes the newly imported assurance-history refs, proves current GitHub branch/tree discoverability, reruns F-WP-001..012 and git integrity, and emits a new exact receipt/artifact.",
+      "after_pass": "The bounded GitHub-native source-custody defect is independently rechecked from A-01 after the import state changed.",
+      "unlocks": "Return to ASSURANCE-001 capability challenge with source custody separated from residual capability and target-evidence gaps."
+    },
+    "stop_condition": "Do not admit this ticket until all five exact historical refs exist at the required SHAs without force/rewrite and RECON-001C post-import verification passes. Do not repeat the census again unless custody or implementation state changes materially.",
+    "resume_on_pass": "Adjudicate only the post-import custody claim. Require exact subject/checkout SHA match, source-bearing assurance-history refs visible in the branch census, F-WP-001..012 PASS, git integrity PASS and required artifact present. Then close RECON-001C source-custody repair and resume the ASSURANCE-001 capability challenge. Do not infer production authorization.",
+    "resume_on_failure": "Classify SUBJECT_FAILURE versus INFRA_FAILURE or CONTROL_PLANE_FAILURE. If imported refs are missing or wrong, repair only GitHub-native custody and rerun the minimum sufficient gate. Do not synthesize historical objects or weaken exact-SHA requirements.",
+    "notification_target": "system-master-assurance-reconciliation-001",
+    "notes": "Prepared only. Central portfolio prep may copy/promote this to a canonical READY request after RECON-001C exact-object import and post-import GitHub verification complete. The frozen subject is intentional because its qualifier enumerates current GitHub branches through the API while keeping census code fixed."
+  }
+}
