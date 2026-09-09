@@ -6,11 +6,14 @@ from pathlib import Path
 import sys
 from typing import Protocol
 
-PARENT = Path(__file__).resolve().parents[1]
-if str(PARENT) not in sys.path:
-    sys.path.insert(0, str(PARENT))
+HERE = Path(__file__).resolve().parent
+PARENT = HERE.parent
+for path in (HERE, PARENT):
+    if str(path) not in sys.path:
+        sys.path.insert(0, str(path))
 
 from extractor_provider import ExtractionRequest, validate_provider_output
+from source_heldout_label_ontology import validate_task_label
 
 
 class ModelBackend(Protocol):
@@ -47,12 +50,15 @@ class ModelBackedNarrativeExtractor:
             raise ValueError("model backend must return a prediction list")
 
         predictions: list[dict] = []
+        passage_char_length = len(request.authorized_source_text)
         for item in raw:
             if not isinstance(item, dict):
                 raise ValueError("model backend prediction must be an object")
+            label = str(item.get("label", "")).strip()
+            label = validate_task_label(request.task, label, passage_char_length)
             predictions.append(
                 {
-                    "label": str(item.get("label", "")).strip(),
+                    "label": label,
                     "confidence": float(item.get("confidence", 0.0)),
                     "status": str(item.get("status", "")).strip(),
                 }
