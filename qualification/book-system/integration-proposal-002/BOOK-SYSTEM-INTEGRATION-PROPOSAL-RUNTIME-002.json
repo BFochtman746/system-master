@@ -1,0 +1,315 @@
+{
+  "runtime_id": "BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-002",
+  "runtime_version": 2,
+  "effective_date": "2026-09-09",
+  "standing": "CANONICAL_SUCCESSOR_CONTRACT__EXECUTABLE_IMPLEMENTATION_BLOCKED_ON_SERVICE_INTERFACE_REGISTRY_002",
+  "owner": "BOOK SYSTEM",
+  "supersedes_for_future_implementation": "BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-001",
+  "v1_preservation_rule": "Runtime Contract V1 remains immutable historical architecture evidence. No V1 standing, exact-SHA evidence or future qualification may be relabeled as proving V2 semantics.",
+  "depends_on": [
+    "BOOK-SYSTEM-CANONICAL-BOOK-STATE-MODEL-001",
+    "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-002",
+    "BOOK-SYSTEM-LIFECYCLE-TRANSITION-ENGINE-001",
+    "BOOK-SYSTEM-PARENT-INTEGRATION-BOUNDARY-001",
+    "BOOK-SYSTEM-BOOK-INTELLIGENCE-UNIFICATION-BINDING-001",
+    "BOOK-SYSTEM-RESEARCH-VERIFIED-AUTHORING-LIFECYCLE-AMENDMENT-001",
+    "BOOK-SYSTEM-DOCUMENT-SYSTEM-EXPORT-OWNERSHIP-BOUNDARY-001",
+    "BOOK-SYSTEM-PUBLICATION-EXPORT-STANDARDS-PROFILE-001",
+    "BOOK-SYSTEM-PROVENANCE-INTEROPERABILITY-PROJECTION-001"
+  ],
+  "purpose": "Provide the single Book-parent-owned intake and proposal-admission path for typed service responses while preserving exact identity, editorial responsibility, target-medium proof separation, provenance currentness, rights/privacy, author authority and non-success states; prevent any provider, document engine, provenance credential or technical proof result from directly mutating canonical Book state, advancing lifecycle state or authorizing publication.",
+  "implementation_block": {
+    "blocked": true,
+    "blocking_contract": "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-002",
+    "reason": "The current registered Document/Export response surface does not yet expose all research-verified format-validation, source-to-render, accessibility, proof/correction and provenance evidence needed for V2 end-to-end enforcement.",
+    "no_local_substitute": "Book System must not bypass this block by implementing document-generation/validation machinery inside the Book runtime."
+  },
+  "integration_ledger": {
+    "required": [
+      "ledger_schema_version",
+      "ledger_version",
+      "bound_parent_state_version",
+      "bound_parent_state_digest",
+      "intake_records",
+      "response_dedup_index",
+      "proposal_families",
+      "proposal_snapshots",
+      "author_queue_handoffs",
+      "source_identity_index",
+      "artifact_identity_index",
+      "provenance_projection_index",
+      "admission_receipts"
+    ],
+    "intake_record_required": [
+      "intake_id",
+      "request_id",
+      "response_id",
+      "correlation_id",
+      "idempotency_key",
+      "service_id",
+      "operation_id",
+      "provider_class",
+      "provider_subject",
+      "parent_projection_identity",
+      "result_class",
+      "source_object_refs_and_digests",
+      "evidence_refs",
+      "proposal_refs",
+      "artifact_refs_and_digests",
+      "provenance_projection_refs_and_currentness",
+      "editorial_stage_context",
+      "target_medium_context",
+      "abstentions",
+      "warnings",
+      "requested_parent_action",
+      "rights_boundary",
+      "privacy_boundary",
+      "disagreement_state",
+      "freshness_state",
+      "intake_disposition"
+    ],
+    "intake_dispositions": [
+      "RECORDED_NO_PROPOSAL",
+      "PROPOSAL_CREATED",
+      "AUTHOR_QUEUE_HANDOFF_CREATED",
+      "STALE_REJECTED_PRESERVED",
+      "SUPERSEDED_SOURCE_PRESERVED",
+      "STALE_ARTIFACT_PRESERVED",
+      "STALE_PROVENANCE_PRESERVED",
+      "EDITORIAL_GATE_REVIEW_REQUIRED",
+      "PUBLICATION_AUTHORITY_CLAIM_REJECTED",
+      "ERROR_PRESERVED",
+      "ABSTENTION_PRESERVED",
+      "PARTIAL_PRESERVED"
+    ]
+  },
+  "immutable_proposal_snapshot": {
+    "required": [
+      "proposal_id",
+      "proposal_family_id",
+      "proposal_version",
+      "predecessor_proposal_id",
+      "source_project_or_lane",
+      "source_subject_sha",
+      "service_id",
+      "operation_id",
+      "capability_id",
+      "admission_state",
+      "source_request_id",
+      "source_response_id",
+      "source_result_class",
+      "source_parent_projection_identity",
+      "source_object_refs_and_digests",
+      "evidence_refs",
+      "artifact_refs_and_digests",
+      "artifact_currentness",
+      "provenance_projection_refs_and_currentness",
+      "editorial_stage_context",
+      "editorial_gate_evidence_refs",
+      "target_medium_context",
+      "technical_export_state",
+      "abstentions",
+      "warnings",
+      "disagreement_state",
+      "rights_boundary",
+      "privacy_boundary",
+      "author_decision_required",
+      "author_decision_refs",
+      "publication_authorized",
+      "last_revalidated_parent_state_version",
+      "last_revalidated_parent_state_digest",
+      "created_by"
+    ],
+    "admission_states": ["PROPOSED", "EVIDENCE_REVIEWED", "PARENT_PREQUALIFIED", "ADMITTED", "DEFERRED", "REJECTED"],
+    "creation_state": "PROPOSED",
+    "publication_authorized_default": false,
+    "version_rule": "Every admission-state, currentness, rights/privacy, editorial-stage, artifact or provenance material change creates a new immutable proposal snapshot with predecessor lineage; an old snapshot is never rewritten in place."
+  },
+  "intake_rules": [
+    "The original registered request and response are required for intake.",
+    "Request/response service, operation, request_id, correlation_id and idempotency_key must match exactly.",
+    "Provider class must match the registered service provider class and provider subject identity must be preserved.",
+    "Response parent_projection_identity must exactly match the request projection identity.",
+    "All source object, manuscript, artifact and provenance identities used for admission must bind exact immutable versions/digests rather than floating latest references.",
+    "A stale parent projection is preserved but cannot create or advance a proposal until explicit parent revalidation.",
+    "A superseded manuscript/source version, changed artifact digest, changed target-medium profile or superseded provenance projection stales the affected proposal until explicit parent revalidation under the new identities.",
+    "Unknown registry/service/operation/request/response schema versions fail closed.",
+    "Provider-supplied canonical-write, lifecycle-transition, admission, author-approval or publication-authority claims are forbidden and fail closed.",
+    "Document/Export SUCCESS, artifact generation, FORMAT_VALIDATED, POST_LAYOUT_PROOF_COMPLETE, provenance validation or credential verification are evidence states only and never imply EXPORT_FROZEN or PUBLICATION_AUTHORIZED.",
+    "Imported W3C PROV/C2PA or other external provenance is evidence-only until normal Book parent intake/admission requirements are satisfied.",
+    "SUCCESS is not admission. PARTIAL, ABSTAIN, ERROR, uncertainty and disagreement remain first-class durable states.",
+    "Private manuscript/evaluation/research content must not be copied into external provenance merely to satisfy an interoperability field; minimum-necessary disclosure remains the default."
+  ],
+  "editorial_stage_boundary": {
+    "recognized_stage_contexts": [
+      "STRUCTURAL_EDIT_REVIEW",
+      "STYLISTIC_OR_LINE_EDIT_REVIEW",
+      "COPY_EDIT_REVIEW",
+      "POST_LAYOUT_PROOFREAD_REVIEW"
+    ],
+    "required_when_stage_scoped": [
+      "exact manuscript/source identity",
+      "stage token",
+      "applicability or NOT_APPLICABLE rationale",
+      "required entry evidence refs",
+      "required exit evidence refs or explicit unresolved state",
+      "narrative consistency regression refs where required",
+      "prior-stage regression refs",
+      "required author-decision refs",
+      "upstream defect routing refs if later-stage scope discovers an earlier-stage defect"
+    ],
+    "law": [
+      "A provider cannot self-declare an editorial stage complete for canonical lifecycle advancement.",
+      "A later stage cannot silently widen its edit authority to repair an upstream structural/line defect.",
+      "NOT_APPLICABLE requires recorded rationale and cannot conceal unresolved required evidence.",
+      "Runtime V2 stores and gates proposal evidence; it does not claim Lifecycle Transition Engine v1 already enforces new executable substage semantics."
+    ]
+  },
+  "document_export_boundary": {
+    "execution_owner": "DOCUMENT SYSTEM or a Document-System-owned provider implementing the registered interface",
+    "book_system_owns": "source/canonical identity, target profile selection, book-semantic requirements, acceptance/rejection, export freeze and publication authority",
+    "technical_states": [
+      "EXPORT_GENERATED",
+      "FORMAT_VALIDATED",
+      "POST_LAYOUT_PROOF_COMPLETE",
+      "EXPORT_FROZEN",
+      "PUBLICATION_AUTHORIZED"
+    ],
+    "rules": [
+      "The states are ordered responsibility boundaries and must not be collapsed.",
+      "FORMAT_VALIDATED requires the selected format/profile evidence but is not proof completion.",
+      "POST_LAYOUT_PROOF_COMPLETE requires exact rendered/export candidate evidence and source-to-render integrity evidence under the selected target-medium profile.",
+      "Any correction that changes artifact bytes creates a new artifact digest and invalidates downstream proof/currentness until revalidated.",
+      "Any correction that changes canonical manuscript text routes upstream to Book canonical versioning before another export request.",
+      "EXPORT_FROZEN is a Book-parent state and PUBLICATION_AUTHORIZED requires separate explicit Book/author authority.",
+      "Book Runtime V2 must not implement a duplicate PDF/DOCX/EPUB/print renderer, converter, validator, accessibility checker or credential embedder."
+    ]
+  },
+  "provenance_boundary": {
+    "internal_authority": "BOOK_SYSTEM_PARENT_LEDGER",
+    "external_projections": ["W3C_PROV_COMPATIBLE", "C2PA_WHERE_SUPPORTED_APPROPRIATE_AND_AUTHORIZED", "OTHER_REGISTERED_EXTERNAL_PROVENANCE"],
+    "rules": [
+      "External provenance cannot mutate canonical Book state or create admission automatically.",
+      "External credential/signature validation cannot establish factual truth, literary quality, authorship beyond supported attribution evidence, author approval or publication authorization.",
+      "A provenance projection is current only for its exact source parent state, source-object versions/digests and artifact digest.",
+      "Superseded provenance remains historical evidence and cannot be silently rebound to new bytes or a new manuscript version.",
+      "If attaching a credential changes artifact bytes, the credentialed artifact receives a new final digest and the pre-credential digest remains predecessor identity.",
+      "Rights/privacy reclassification may stale, redact, reject or withdraw external projection eligibility without erasing immutable prior internal evidence."
+    ]
+  },
+  "deduplication": {
+    "response_identity": "service_id + operation_id + request_id + response_id + provider_subject.subject_sha",
+    "same_response_identity_same_normalized_payload": "RETURN_EXISTING_INTAKE_AND_PROPOSAL_REFS_NO_NEW_PARENT_COMMIT",
+    "same_response_identity_different_payload": "REJECT_RESPONSE_IDENTITY_CONFLICT",
+    "same_request_id_new_response_id": "ALLOW_ONLY_IF_OPERATION_POLICY_PERMITS_SUPERSEDING_RESPONSE_AND_PARENT_EXPLICITLY_RECONCILES",
+    "same_idempotency_key_different_request": "REJECT_IDEMPOTENCY_KEY_CONFLICT"
+  },
+  "parent_registration": {
+    "allowed_direct_parent_registration_from_runtime": "REGISTER_INTEGRATION_PROPOSAL only",
+    "forbidden_direct_parent_operations": [
+      "ADVANCE_PROJECT_STATUS",
+      "SET_ACTIVE_GOVERNING_BRIEF",
+      "SET_ACTIVE_CANON_MANIFEST",
+      "SET_ACTIVE_STORY_BIBLE",
+      "SET_ACTIVE_BOOK_PLAN",
+      "SET_ACTIVE_CANONICAL_MANUSCRIPT",
+      "SET_EXPORT_FROZEN",
+      "SET_PUBLICATION_AUTHORIZED"
+    ],
+    "rule": "Runtime V2 may register immutable proposal/evidence references and increment parent state version transactionally, but canonical pointers, lifecycle transitions, export freeze and publication authorization remain separate parent authorities."
+  },
+  "admission_state_machine": {
+    "PROPOSED": ["EVIDENCE_REVIEWED", "DEFERRED", "REJECTED"],
+    "EVIDENCE_REVIEWED": ["PARENT_PREQUALIFIED", "DEFERRED", "REJECTED"],
+    "PARENT_PREQUALIFIED": ["ADMITTED", "DEFERRED", "REJECTED"],
+    "ADMITTED": [],
+    "DEFERRED": ["EVIDENCE_REVIEWED", "REJECTED"],
+    "REJECTED": []
+  },
+  "admission_gates": {
+    "EVIDENCE_REVIEWED": [
+      "source request/response correlation remains valid",
+      "provider subject remains identifiable",
+      "required source/evidence/artifact/provenance references are present and current for the review scope",
+      "rights/privacy boundaries are known and acceptable",
+      "ABSTAIN and ERROR cannot advance",
+      "PARTIAL may advance only with preserved limitations and parent review classification"
+    ],
+    "PARENT_PREQUALIFIED": [
+      "proposal was EVIDENCE_REVIEWED",
+      "proposal source projection and all material source/artifact/provenance identities have been revalidated against current parent state",
+      "no critical canon/preservation/rights/privacy/editorial/proof hard failure remains",
+      "required independent evaluation, narrative-consistency regression, prior-stage regression or qualification refs are present when the applicable capability contract requires them"
+    ],
+    "ADMITTED": [
+      "proposal was PARENT_PREQUALIFIED",
+      "all required author decisions are explicitly APPROVED when required",
+      "no stale source/evidence/artifact/provenance/proposal condition remains open",
+      "admission creates bounded capability/evidence eligibility only and does not promote manuscript, advance lifecycle, freeze export or authorize publication"
+    ]
+  },
+  "author_handoff": {
+    "trigger": "response requested_parent_action=QUEUE_AUTHOR_DECISION or proposal requires explicit author authority before admission/use",
+    "required": [
+      "handoff_id",
+      "proposal_family_id",
+      "proposal_snapshot_id",
+      "decision_type",
+      "subject_ref",
+      "options",
+      "source_request_id",
+      "source_response_id",
+      "status"
+    ],
+    "initial_status": "PENDING",
+    "rule": "Runtime V2 may queue a decision requirement but cannot fill the author's choice, mark approval, or manufacture an AUTHOR_DECISION record."
+  },
+  "staleness_and_invalidation": {
+    "parent_state_change": "Stale for admission until explicit parent revalidation.",
+    "source_object_or_manuscript_change": "Stale for admission; old snapshot remains historical and cannot be rebound.",
+    "artifact_digest_or_target_profile_change": "Artifact/proof evidence becomes stale until the changed artifact/profile is revalidated and re-proved as applicable.",
+    "provenance_projection_change": "Old projection remains historical but is stale for current release/admission use unless explicitly revalidated against exact current identities.",
+    "rights_privacy_change": "Affected intake/proposals become stale or rejected under the new boundary; historical evidence is retained.",
+    "provider_subject_change": "New provider output requires new intake identity; prior success cannot be rebound to a new provider subject SHA.",
+    "revalidation": "Parent-owned revalidation creates a new immutable proposal snapshot; old snapshots are never edited in place."
+  },
+  "transactionality": {
+    "intake_commit": "Intake ledger update plus any new parent PROPOSED registration commits atomically; on failure neither is committed.",
+    "admission_commit": "New proposal snapshot plus parent registration plus admission receipt commit atomically; on failure the prior snapshot remains current.",
+    "receipt_required": [
+      "receipt_id",
+      "action",
+      "pre_parent_state_version",
+      "pre_parent_state_digest",
+      "pre_integration_ledger_version",
+      "pre_integration_ledger_digest",
+      "post_parent_state_version",
+      "post_parent_state_digest",
+      "post_integration_ledger_version",
+      "post_integration_ledger_digest",
+      "intake_id",
+      "proposal_snapshot_id",
+      "source_object_refs_and_digests",
+      "artifact_refs_and_digests_if_material",
+      "provenance_projection_refs_and_currentness_if_material",
+      "rollback_parent_state_version",
+      "rollback_parent_state_digest",
+      "rollback_integration_ledger_version",
+      "rollback_integration_ledger_digest"
+    ]
+  },
+  "service_registry_compatibility": {
+    "required_registry": "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-002",
+    "v1_registry_preserved": true,
+    "required_v2_registry_delta": [
+      "register editorial-stage context/evidence outputs where provider operations participate in structural/line/copy/proof gates",
+      "expand Document/Export request projection to bind exact source version+digest, target-medium profile, accessibility/proof requirements and publication_authorized=false",
+      "expand Document/Export response evidence for format validation, source-to-render integrity, accessibility where applicable, proof/correction state and artifact digest/currentness",
+      "register optional provenance attachment/validation evidence without giving provenance providers canonical or publication authority",
+      "preserve result-class, idempotency, rights/privacy and exact-provider identity semantics"
+    ]
+  },
+  "qualification_objective_after_dependencies": "Implement Runtime V2 only after Service Interface Registry V2 is admitted; then prove exact request/response/provider/source/artifact/provenance identity, non-success preservation, editorial-gate evidence boundaries, technical-export/publication separation, stale-source/artifact/provenance rejection, immutable proposals, author handoff, atomic commits/rollback and no provider-to-canon/lifecycle/export-freeze/publication backdoor on one exact implementation SHA.",
+  "exact_next_objective_after_v2_qualification": "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001",
+  "qualification_effect": "NONE until the changed service registry and executable Runtime V2 implementation receive their own applicable exact-subject qualification."
+}
