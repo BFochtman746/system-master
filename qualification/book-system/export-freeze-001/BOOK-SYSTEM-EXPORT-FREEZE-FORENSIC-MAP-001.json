@@ -2,138 +2,118 @@
   "forensic_map_id": "BOOK-SYSTEM-EXPORT-FREEZE-FORENSIC-MAP-001",
   "effective_date": "2026-09-09",
   "owner_path": "SYSTEM_MASTER/BOOK",
-  "standing": "CLOSED__REUSE_MAP_COMPLETE__PARENT_EXPORT_RELEASE_PLUS_EXISTING_LIFECYCLE_SEQUENCE_SELECTED__NO_DUPLICATE_DOCUMENT_ENGINE",
+  "standing": "CLOSED__REUSE_MAP_COMPLETE__LIFECYCLE_COMPATIBILITY_REPAIR_REQUIRED_BEFORE_EXPORT_FREEZE_IMPLEMENTATION",
   "objective": "BOOK-SYSTEM-EXPORT-FREEZE-001",
   "research_gate": {
     "status": "SATISFIED_BY_EXISTING_RESEARCH_VERIFIED_BOOK_EXPORT_ARCHITECTURE",
-    "reason": "Export freeze is already covered by the research-verified publication/export standards profile, Document ownership boundary, editorial lifecycle amendment and provenance projection. This objective adds a bounded parent runtime over those closed requirements rather than a new unresearched capability.",
     "sources": [
       "BOOK-SYSTEM-DOCUMENT-SYSTEM-EXPORT-OWNERSHIP-BOUNDARY-001",
       "BOOK-SYSTEM-PUBLICATION-EXPORT-STANDARDS-PROFILE-001",
       "BOOK-SYSTEM-RESEARCH-VERIFIED-AUTHORING-LIFECYCLE-AMENDMENT-001",
       "BOOK-SYSTEM-PROVENANCE-INTEROPERABILITY-PROJECTION-001"
-    ]
+    ],
+    "rule": "No additional external research is required for the bounded Export Freeze capability. A strict compatibility repair discovered during implementation readiness is handled under the existing repair exception."
   },
   "existing_authorities_reused": {
     "canonical_parent_state": {
       "artifact": "BOOK-SYSTEM-CANONICAL-BOOK-STATE-MODEL-001",
-      "reuse": [
-        "export_releases append-only collection",
-        "REGISTER_EXPORT_RELEASE parent operation",
-        "EXPORT_RELEASE minimum fields: release_id, frozen_version_id, format, digest, approval_state, publication_authority_state",
-        "FINALIZATION, EXPORT_FROZEN and PUBLISHED_OR_DELIVERED top-level states"
-      ],
-      "finding": "The executable validator accepts additive fields on EXPORT_RELEASE objects, so richer freeze evidence can be bound without replacing the qualified canonical-state model.",
-      "canonical_state_v2_required": false
+      "reuse": ["export_releases", "REGISTER_EXPORT_RELEASE", "FINALIZATION", "EXPORT_FROZEN", "PUBLISHED_OR_DELIVERED"],
+      "canonical_state_v2_required": false,
+      "reason": "The qualified validator permits additive EXPORT_RELEASE fields."
     },
     "lifecycle_transition": {
       "artifact": "BOOK-SYSTEM-LIFECYCLE-TRANSITION-ENGINE-001",
       "reuse": [
-        "FINALIZATION->EXPORT_FROZEN requires EXPORT_FREEZE_READY evidence",
-        "EXPORT_FROZEN->FINALIZATION requires EXPORT_FREEZE_INVALIDATED evidence",
-        "EXPORT_FROZEN->PUBLISHED_OR_DELIVERED separately requires AUTHOR_APPROVED_EXPORT_PRESENT and PUBLICATION_AUTHORIZATION"
+        "FINALIZATION->EXPORT_FROZEN requires EXPORT_FREEZE_READY",
+        "EXPORT_FROZEN->FINALIZATION requires EXPORT_FREEZE_INVALIDATED",
+        "EXPORT_FROZEN->PUBLISHED_OR_DELIVERED separately requires author publication authority"
       ],
-      "finding": "Export Freeze must not mutate project lifecycle status. The existing qualified Lifecycle engine remains the sole status-transition authority."
+      "authority_rule": "Lifecycle v1 remains the policy/gate authority; Export Freeze must never become a second lifecycle engine."
     },
     "version_and_rollback": {
       "artifact": "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001",
-      "reuse": [
-        "EXPORT_RELEASE is already a recognized parent authority kind",
-        "export_releases are append-only",
-        "authorized parent successor ingestion binds exact pre/post parent identities and receipts",
-        "lifecycle status change is explicitly refused outside the qualified Lifecycle engine"
-      ]
+      "reuse": ["EXPORT_RELEASE authority kind", "append-only export history", "exact authority-receipt ingestion", "lifecycle mutation refusal"]
     },
     "service_registry": {
       "artifact": "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-002",
-      "reuse": [
-        "provider technical states stop at POST_LAYOUT_PROOF_COMPLETE",
-        "providers cannot return EXPORT_FROZEN or PUBLICATION_AUTHORIZED",
-        "artifact currentness, target-medium profile, validation, source-to-render integrity, accessibility, proof, correction ledger and provenance are already defined provider evidence"
-      ]
+      "reuse": ["POST_LAYOUT_PROOF_COMPLETE provider ceiling", "artifact currentness", "target-medium proof evidence", "provenance currentness"]
     },
     "author_decision_queue": {
       "artifact": "BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001",
-      "reuse": "Author decisions remain separate and are required only where policy/content/publication authority requires them; export freeze itself does not synthesize or imply publication authorization."
+      "reuse": "Author authority remains separate; freeze never synthesizes publication approval."
     }
   },
-  "selected_authority_sequence": [
-    "1. While project status remains FINALIZATION, parent Export Freeze runtime validates an exact canonical manuscript and exact rendered artifact against current target-medium, proof, rights/privacy and provenance evidence.",
-    "2. Export Freeze runtime appends one immutable EXPORT_RELEASE with approval_state=FROZEN, publication_authority_state=NOT_AUTHORIZED and evidence_type=EXPORT_FREEZE_READY; it does not change project status.",
-    "3. Version/Rollback records that already-committed parent successor with authority_kind=EXPORT_RELEASE and exact release receipt identity.",
-    "4. Existing qualified Lifecycle Transition Engine separately executes FINALIZATION->EXPORT_FROZEN using the registered release as EXPORT_FREEZE_READY evidence.",
-    "5. Version/Rollback separately records the Lifecycle successor under authority_kind=LIFECYCLE_TRANSITION.",
-    "6. Publication/delivery remains a later author-authorized transition and cannot be inferred from freeze."
+  "compatibility_finding": {
+    "artifact": "BOOK-SYSTEM-LIFECYCLE-PARENT-IDENTITY-COMPATIBILITY-FINDING-001",
+    "status": "BLOCKING_BEFORE_EXECUTABLE_EXPORT_FREEZE",
+    "facts": [
+      "Lifecycle v1 was qualified against keyed object parent collections.",
+      "Current Version/Rollback and Author Decision Queue use sealed array collections.",
+      "Lifecycle v1 evidence/author lookup cannot directly consume those arrays.",
+      "Lifecycle v1 digestParentState identity is not the current sealed state_digest identity required by Version/Rollback authority-receipt ingestion.",
+      "The current Lifecycle runtime facade has no adapter."
+    ],
+    "selected_repair": "BOOK-SYSTEM-LIFECYCLE-CURRENT-PARENT-COMPATIBILITY-ADAPTER-001",
+    "repair_scope": "Representation and parent-identity translation only; no new transitions, gate semantics or authority."
+  },
+  "selected_authority_sequence_after_adapter_pass": [
+    "1. In FINALIZATION, Export Freeze validates exact manuscript/artifact/profile/proof/rights/privacy/provenance currentness.",
+    "2. Export Freeze appends one immutable EXPORT_RELEASE with approval_state=FROZEN, publication_authority_state=NOT_AUTHORIZED and evidence_type=EXPORT_FREEZE_READY; status remains FINALIZATION.",
+    "3. Version/Rollback records that parent successor with authority_kind=EXPORT_RELEASE.",
+    "4. Qualified current-parent compatibility adapter delegates FINALIZATION->EXPORT_FROZEN gate evaluation to unchanged Lifecycle v1 and returns a current sealed-parent receipt.",
+    "5. Version/Rollback records the lifecycle successor under authority_kind=LIFECYCLE_TRANSITION.",
+    "6. Publication/delivery remains separately author-authorized."
   ],
   "release_granularity": {
     "decision": "ONE_IMMUTABLE_EXPORT_RELEASE_PER_FORMAT_ARTIFACT",
-    "reason": "The qualified parent EXPORT_RELEASE object has one format and one digest. Avoid changing the base schema or hiding multiple byte identities behind one digest.",
-    "multi_format_rule": "A logical edition/release may group multiple release IDs by additive release_group_ref, but each format artifact is frozen, invalidated and re-frozen independently by exact digest."
+    "multi_format_rule": "Optional release_group_ref may group artifacts, but each byte artifact retains its own release_id and digest."
   },
   "classification": {
     "KEEP": [
-      "existing EXPORT_RELEASE collection and REGISTER_EXPORT_RELEASE operation",
-      "existing FINALIZATION->EXPORT_FROZEN Lifecycle gate",
+      "existing EXPORT_RELEASE and REGISTER_EXPORT_RELEASE",
+      "existing Lifecycle freeze/unfreeze/publication gates",
       "Version/Rollback EXPORT_RELEASE authority kind",
-      "exact manuscript/artifact/profile digest binding",
-      "provider POST_LAYOUT_PROOF_COMPLETE ceiling",
-      "generation vs validation vs proof vs freeze vs publication separation",
-      "Document System implementation ownership",
-      "append-only historical release evidence"
+      "exact source/artifact/profile binding",
+      "generation/validation/proof/freeze/publication separation",
+      "Document implementation ownership",
+      "append-only history"
     ],
     "ADD_OR_REFINE": [
-      "bounded parent Export Freeze runtime and immutable release receipt",
-      "additive EXPORT_RELEASE evidence_type=EXPORT_FREEZE_READY",
-      "exact source manuscript identity and exact artifact currentness fields",
-      "target-medium profile identity and technical proof bundle",
-      "rights/privacy/provenance currentness checks",
-      "closed proof-correction ledger requirement",
-      "release_group_ref for optional multi-format grouping without combining artifact digests",
-      "freeze invalidation/supersession lineage",
-      "idempotency and exact parent compare-and-swap",
-      "explicit handoff to Lifecycle instead of same-operation status mutation"
+      "bounded Export Freeze runtime and receipt",
+      "additive EXPORT_FREEZE_READY release evidence",
+      "strict proof/rights/privacy/provenance currentness",
+      "freeze invalidation/refreeze lineage",
+      "current-parent Lifecycle compatibility adapter"
     ],
     "DO_NOT_ADD": [
-      "Book-owned PDF/DOCX/EPUB/render/conversion/accessibility engine",
-      "provider or Document System export-freeze authority",
-      "a second lifecycle transition engine",
-      "automatic publication after technical PASS",
-      "mutation of a prior frozen release record when bytes/source/profile change",
-      "reuse of stale proof, provenance or rights evidence",
-      "transfer of prior exact-SHA qualification to Export Freeze runtime"
+      "Book document-generation engine",
+      "provider freeze authority",
+      "second lifecycle policy engine",
+      "automatic publication",
+      "silent release rebind",
+      "stale evidence reuse",
+      "prior qualification transfer"
     ],
-    "UNRESOLVED": []
+    "UNRESOLVED": [
+      "Executable Export Freeze remains blocked until BOOK-SYSTEM-LIFECYCLE-CURRENT-PARENT-COMPATIBILITY-ADAPTER-001 passes exact-SHA qualification."
+    ]
   },
   "invalidation_model": {
     "immutable_history": true,
-    "old_release_behavior": "Preserve the old release exactly and append a new invalidation/supersession evidence record or successor release identity; never rewrite the frozen digest.",
-    "requires_unfreeze_transition_when_project_is_frozen": "Use existing EXPORT_FROZEN->FINALIZATION Lifecycle transition with EXPORT_FREEZE_INVALIDATED evidence before a replacement freeze can become current.",
+    "requires_unfreeze_transition_when_project_is_frozen": true,
     "new_freeze_required_when": [
-      "canonical manuscript version or digest changes",
+      "canonical manuscript version/digest changes",
       "artifact bytes change",
-      "target-medium profile/version changes materially",
+      "target profile changes materially",
       "required proof/validation becomes failed or stale",
-      "rights/privacy eligibility changes",
-      "required provenance becomes stale, withdrawn or invalid",
-      "accepted proof correction regenerates artifact bytes"
+      "rights/privacy changes",
+      "required provenance becomes stale/withdrawn/invalid"
     ]
   },
   "implementation_boundary": {
-    "book_runtime_may": [
-      "validate exact freeze prerequisites",
-      "append one parent EXPORT_RELEASE",
-      "emit deterministic release receipt",
-      "emit lifecycle handoff evidence/reference"
-    ],
-    "book_runtime_must_not": [
-      "generate or modify document bytes",
-      "perform generic file-format validation",
-      "change canonical manuscript text",
-      "change project status",
-      "authorize publication",
-      "fabricate author approval"
-    ]
+    "book_runtime_may": ["validate freeze prerequisites", "append one EXPORT_RELEASE", "emit release receipt"],
+    "book_runtime_must_not": ["generate document bytes", "perform generic format validation", "change manuscript", "change lifecycle status", "authorize publication", "fabricate author approval"]
   },
-  "pass_unlocks": "BOOK-SYSTEM-EXPORT-FREEZE-001-CONTRACT-001",
-  "qualification_effect": "FORENSIC_AND_ARCHITECTURE_CLOSURE_ONLY__NO_RUNTIME_OR_FREEZE_CREATED"
+  "pass_unlocks": "BOOK-SYSTEM-LIFECYCLE-CURRENT-PARENT-COMPATIBILITY-ADAPTER-001",
+  "qualification_effect": "FORENSIC_CLOSURE_ONLY__EXPORT_FREEZE_IMPLEMENTATION_PAUSED_ON_PROVEN_COMPATIBILITY_BOUNDARY"
 }
