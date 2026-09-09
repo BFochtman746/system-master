@@ -1,0 +1,86 @@
+{
+  "protocol_id": "LITERARY-EXTRACTION-SOURCE-HELD-OUT-002B-HUMAN-ADJUDICATION-EXECUTION-v1",
+  "standing": "READY_FOR_HUMAN_EXECUTION__NO_GOLD_INCLUDED",
+  "parent_handoff": "SOURCE-HELDOUT-002B-HUMAN-ADJUDICATION-HANDOFF-v1.json",
+  "base_contract": "HUMAN-ADJUDICATION-PACKET-CONTRACT-v1.json",
+  "label_contract": "SOURCE-HELDOUT-002-LABEL-ONTOLOGY-v1.json",
+  "source_custody_receipt": "SOURCE-HELDOUT-002A-HOSTED-CLOSURE-v1.json",
+  "purpose": "Make the human-return boundary mechanically checkable while preserving independent review, exact source custody, disagreement, ambiguity, and model-gold isolation.",
+  "review_blinding": {
+    "model_predictions_visible_to_adjudicators": false,
+    "model_confidence_visible_to_adjudicators": false,
+    "other_adjudicator_labels_visible_before_independent_review_submission": false,
+    "gold_visible_to_model_backend": false,
+    "reason": "Independent structural gold must not be biased by Candidate-002 output or by prior reviewer labels."
+  },
+  "completed_packet_shape": {
+    "packet_id": "<selection_case_id>--<task>",
+    "selection_case_id": "exact frozen SOURCE-HELDOUT-002 selection case",
+    "work_id": "exact source-custody work id",
+    "source_url": "verified public-domain landing/source route",
+    "source_sha256": "exact passage_sha256 from SOURCE-HELDOUT-002A hosted closure",
+    "passage_char_length": "positive integer measured on UTF-8 strict decode of exact passage bytes with no normalization",
+    "passage_locator": "stable source locator bound to the same passage digest",
+    "task": "one of the nine Candidate-002 extraction task families",
+    "adjudicators": [
+      {
+        "adjudicator_id": "stable reviewer pseudonym or reviewer id",
+        "independent_review_digest": "sha256 digest of that reviewer's immutable blind review record",
+        "reviewed_without_model_predictions": true,
+        "reviewed_without_other_adjudicator_labels": true
+      }
+    ],
+    "gold_labels": [
+      {
+        "label": "canonical source-bound label from SOURCE-HELDOUT-002-LABEL-ONTOLOGY-v1",
+        "status": "ASSERTED|ALTERNATIVE|UNRESOLVED|ABSTAIN"
+      }
+    ],
+    "forbidden_labels": ["canonical source-bound label known to be contradicted by source evidence"],
+    "intentionally_ambiguous": "boolean",
+    "allowed_statuses": ["ASSERTED", "ALTERNATIVE", "UNRESOLVED", "ABSTAIN"],
+    "adjudication_notes_digest": "sha256 digest of evaluator-only adjudication notes; notes themselves remain outside model input",
+    "model_input_contains_gold": false
+  },
+  "minimum_review_rule": {
+    "high_risk_tasks": [
+      "EVENT_IDENTITY",
+      "STORY_VS_DISCOURSE_TIME",
+      "CAUSAL_GOAL_RELATIONS",
+      "EPISTEMIC_FOCALIZATION",
+      "SETUP_PAYOFF_OPEN_QUESTION",
+      "ARC_ORCHESTRATION"
+    ],
+    "minimum_distinct_independent_reviews_high_risk": 2,
+    "minimum_distinct_independent_reviews_other_tasks": 1,
+    "duplicate_reviewer_ids_for_one_packet_forbidden": true,
+    "disagreement_may_remain_unresolved": true,
+    "fabricated_consensus_forbidden": true
+  },
+  "source_binding_rules": [
+    "packet selection_case_id, work_id and task must exist in the frozen six-case SOURCE-HELDOUT-002A closure matrix",
+    "source_sha256 must exactly equal the passage_sha256 bound by SOURCE-HELDOUT-002A",
+    "source-bound label offsets use Unicode code-point indices in the exact UTF-8 strict decoded passage with no normalization",
+    "every gold and forbidden label must validate against the task-specific ontology and passage_char_length",
+    "passage replacement remains forbidden except for documented source defect, rights defect or adjudication impossibility"
+  ],
+  "completion_rules": [
+    "All 18 expected case-task packets must be present exactly once.",
+    "Every packet must satisfy the minimum independent-review count for its task.",
+    "Every adjudicator review must assert blind review from model predictions and from other reviewer labels.",
+    "Gold and forbidden labels must be canonical source-bound ontology labels.",
+    "If intentionally_ambiguous is true, at least one gold label must use ALTERNATIVE or UNRESOLVED status unless the packet is a task-scoped ABSTAIN case.",
+    "adjudication_notes_digest must be a 64-character lowercase SHA-256 hex digest.",
+    "model_input_contains_gold must be false.",
+    "No packet completion grants canonical narrative-state, manuscript mutation, author-intent, publication or promotion authority."
+  ],
+  "post_human_resume": "After all returned packets pass the executable validator, freeze one real learned/model backend prediction set against the exact passage digests with gold hidden; only then expose human gold to the scorer.",
+  "a01_required": false,
+  "authority": {
+    "canonical_state_write_authorized": false,
+    "manuscript_mutation_authorized": false,
+    "author_intent_authority": false,
+    "publication_authority": false,
+    "promotion_authorized": false
+  }
+}
