@@ -1,0 +1,76 @@
+{
+  "audit_id": "BOOK-SYSTEM-PROSE-HIERARCHY-FORENSIC-AUDIT-001",
+  "audit_date": "2026-09-09",
+  "standing": "CLOSED__CONTROL_HIERARCHY_REPAIRED",
+  "scope": "Forensic audit of Book System versus Prose Project identity, branch/workstream authority, and recent control-state drift. No qualification evidence, code history or exact-SHA receipts were rewritten by this audit.",
+  "evidence_reviewed": [
+    "qualification/book-eval-lemonade-001/repair005/PROSE-SYSTEM-HANDOFF-NOTE.md",
+    "qualification/book-eval-lemonade-001/repair005/LITERARY-PROSE-SYSTEM-CHAT-BOOTSTRAP.md",
+    "qualification/literary-prose-engine-001/master-001/LITERARY-PROSE-ENGINE-MASTER-PLAN-v1.md",
+    "qualification/literary-prose-engine-001/LITERARY-PROSE-CONSOLIDATED-WORKSTREAM-STATE-008.json",
+    "qualification/book-writing-project/BOOK-WRITING-PROJECT-PRIMARY-AUTHORITY-001.json",
+    "SYSTEM-MASTER-WORKSTREAM-BOOTSTRAP.md",
+    "repository branch inventory and main...literary-prose-engine-001 ancestry comparison"
+  ],
+  "findings": [
+    {
+      "id": "F-01",
+      "severity": "HIGH",
+      "finding": "Original Prose handoff explicitly required a separate prose branch/thread and described the Prose system as shared Books infrastructure. This establishes a subordinate development lane, not replacement of the parent Book System."
+    },
+    {
+      "id": "F-02",
+      "severity": "HIGH",
+      "finding": "The Prose bootstrap created LITERARY-PROSE-ENGINE-001 specifically to help System Master Books draft, diagnose, revise, compare and optimize prose, confirming that the engine is built for broader Books/Book-System use."
+    },
+    {
+      "id": "F-03",
+      "severity": "MEDIUM",
+      "finding": "The Literary Prose master plan correctly scopes itself to literary prose intelligence on branch literary-prose-engine-001. Its technical architecture is not itself evidence of parent Book System authority."
+    },
+    {
+      "id": "F-04",
+      "severity": "HIGH",
+      "finding": "LITERARY-PROSE-CONSOLIDATED-WORKSTREAM-STATE-008 used PRIMARY and CURRENT_RECONCILED_LITERARY_PROSE_PRIMARY_WORKSTREAM_CHAT without an explicit parent-scope qualifier. This allowed a Prose-primary state to be misread as Book-System-primary authority."
+    },
+    {
+      "id": "F-05",
+      "severity": "CRITICAL",
+      "finding": "Commit 44b3f1c94f3af36e96f79e29efe2dd709ebdcdcd attempted to repair that confusion by inventing BOOK WRITING PROJECT as the top-level project and demoting Prose to a mere component. That repair was incorrect: there are two active projects, Book System parent and Prose Project child."
+    },
+    {
+      "id": "F-06",
+      "severity": "MEDIUM",
+      "finding": "No dedicated Book-System-named branch existed in the audited branch inventory. Parent project control therefore lacked an explicit repository control surface, increasing dependence on chat labels and subsystem state."
+    },
+    {
+      "id": "F-07",
+      "severity": "MEDIUM",
+      "finding": "At audit time literary-prose-engine-001 and main were diverged (515 commits ahead and 181 behind from their merge base). Rebase/history rewrite would risk destroying valid work and is unnecessary for authority repair."
+    }
+  ],
+  "root_cause": "CONTROL_PLANE_SCOPE_CONFLATION: project, parent system, child project, implementation engine, branch, workstream, capability lane and chat control surface were used interchangeably. The ambiguity allowed a child-project state to become system-wide authority and then caused an overcorrection that collapsed two projects into one.",
+  "impact": {
+    "technical_code_corruption_found": false,
+    "exact_sha_qualification_corruption_found": false,
+    "control_and_next_step_routing_corruption_found": true,
+    "risk": "Book System continuation could be incorrectly routed into a Prose-only blocker, while Prose could lose its valid status as an independently managed child project."
+  },
+  "repairs": [
+    "Create dedicated Book System parent control branch book-system/control-v1.",
+    "Establish BOOK-SYSTEM-PROJECT-HIERARCHY-001 as the parent-child authority contract.",
+    "Establish an explicit two-project active registry: Book System parent and Prose Project child.",
+    "On literary-prose-engine-001, supersede the incorrect BOOK WRITING PROJECT authority record.",
+    "On literary-prose-engine-001, create a Prose parent-binding record and State-009 control overlay so PRIMARY is explicitly Prose-project-local.",
+    "Preserve all valid technical and qualification evidence; do not rebase or rewrite Prose history."
+  ],
+  "authority_after_repair": {
+    "parent_project": "BOOK SYSTEM",
+    "parent_control_branch": "book-system/control-v1",
+    "child_project": "PROSE PROJECT",
+    "child_branch": "literary-prose-engine-001",
+    "prose_implementation_family": "LITERARY PROSE ENGINE",
+    "book_evaluator_project_status": "NOT_A_THIRD_ACTIVE_PROJECT_UNDER_THIS_MODEL"
+  },
+  "qualification_effect": "NONE. This is a control/identity repair only. Existing qualification authority remains bound to its original exact subject SHA and scope."
+}

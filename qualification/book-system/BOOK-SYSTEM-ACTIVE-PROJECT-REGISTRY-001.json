@@ -1,0 +1,38 @@
+{
+  "registry_id": "BOOK-SYSTEM-ACTIVE-PROJECT-REGISTRY-001",
+  "effective_date": "2026-09-09",
+  "standing": "ACTIVE__TWO_PROJECT_MODEL",
+  "projects": [
+    {
+      "project_id": "BOOK-SYSTEM",
+      "name": "BOOK SYSTEM",
+      "level": "PARENT",
+      "control_branch": "book-system/control-v1",
+      "parent_project": null,
+      "status": "ACTIVE"
+    },
+    {
+      "project_id": "PROSE-PROJECT",
+      "name": "PROSE PROJECT",
+      "level": "CHILD",
+      "parent_project": "BOOK-SYSTEM",
+      "active_branch": "literary-prose-engine-001",
+      "implementation_family": "LITERARY PROSE ENGINE",
+      "status": "ACTIVE"
+    }
+  ],
+  "not_separate_projects": [
+    "Book Evaluator / Qualification",
+    "Candidate-002 extraction calibration",
+    "Perspective / Revelation calibration",
+    "AGLO real-book qualification",
+    "Literary Reference Corpus",
+    "Craft Academy"
+  ],
+  "routing": {
+    "book_system_request": "Resolve at Book System scope first, then delegate to a child/component only when appropriate.",
+    "prose_request": "Resolve on literary-prose-engine-001 and return integration/admission decisions to Book System authority when parent-system changes are proposed.",
+    "generic_continue_in_book_system_context": "Continue the Book System project-level next step, not whichever subordinate lane most recently changed.",
+    "generic_continue_in_prose_context": "Continue the Prose Project next step only."
+  }
+}

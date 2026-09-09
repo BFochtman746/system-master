@@ -1,0 +1,52 @@
+{
+  "authority_id": "BOOK-SYSTEM-PROJECT-HIERARCHY-001",
+  "effective_date": "2026-09-09",
+  "standing": "CANONICAL__PARENT_CHILD_PROJECT_HIERARCHY",
+  "repository": "BFochtman746/system-master",
+  "parent_project": {
+    "canonical_name": "BOOK SYSTEM",
+    "role": "PARENT_BOOK_AUTHORING_SYSTEM_PROJECT",
+    "control_branch": "book-system/control-v1",
+    "owns": [
+      "end-to-end Book System architecture and behavior",
+      "Book-System-wide roadmap and primary next-step selection",
+      "cross-capability integration and admission",
+      "canonical system-level contracts and interfaces",
+      "acceptance of child-project outputs into the Book System"
+    ]
+  },
+  "child_projects": [
+    {
+      "canonical_name": "PROSE PROJECT",
+      "parent": "BOOK SYSTEM",
+      "relationship": "SUBORDINATE_PROJECT_BUILT_FOR_BOOK_SYSTEM",
+      "active_branch": "literary-prose-engine-001",
+      "implementation_family": "LITERARY PROSE ENGINE",
+      "purpose": "Build, qualify and evolve prose intelligence, drafting, diagnosis, revision, comparison and craft-reference capabilities for eventual controlled use by the Book System.",
+      "may_define_own_project_next_step": true,
+      "may_define_parent_project_next_step": false,
+      "may_self_admit_into_parent_system": false
+    }
+  ],
+  "active_project_count_under_this_control_model": 2,
+  "non_project_lanes": [
+    {
+      "name": "Book Evaluator / Qualification",
+      "classification": "BOOK_SYSTEM_CAPABILITY_OR_QUALIFICATION_LANE__NOT_THIRD_ACTIVE_PROJECT"
+    }
+  ],
+  "scope_rules": [
+    "The Book System and Prose Project are distinct project identities.",
+    "The Prose Project is subordinate to and built for the Book System.",
+    "A Prose Project critical path or blocker is not automatically the Book System critical path or blocker.",
+    "The Book System decides whether and how qualified Prose capabilities are admitted or integrated.",
+    "Component, workflow, qualification, branch and chat labels cannot silently redefine this hierarchy.",
+    "Historical implementation names remain evidence labels and do not create new parent projects."
+  ],
+  "qualification_preservation": {
+    "existing_prose_exact_sha_evidence_remains_valid_within_prose_scope": true,
+    "existing_book_evaluator_exact_sha_evidence_remains_valid_within_its_scope": true,
+    "hierarchy_repair_is_not_requalification": true,
+    "exact_sha_authority_never_transfers": true
+  }
+}
