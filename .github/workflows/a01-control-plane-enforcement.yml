@@ -7,7 +7,9 @@ on:
       - '.github/scripts/a01-control-plane*.js'
       - '.github/scripts/a01-overnight-*.js'
       - '.github/scripts/a01-runner-guard.ps1'
+      - '.github/scripts/validate-system-topology.py'
       - 'qualification/a01/**'
+      - 'governance/**'
       - 'SYSTEM-MASTER-WORKSTREAM-BOOTSTRAP.md'
   pull_request:
     paths:
@@ -15,7 +17,9 @@ on:
       - '.github/scripts/a01-control-plane*.js'
       - '.github/scripts/a01-overnight-*.js'
       - '.github/scripts/a01-runner-guard.ps1'
+      - '.github/scripts/validate-system-topology.py'
       - 'qualification/a01/**'
+      - 'governance/**'
       - 'SYSTEM-MASTER-WORKSTREAM-BOOTSTRAP.md'
 
 permissions:
@@ -23,7 +27,7 @@ permissions:
 
 jobs:
   enforce:
-    name: Reject ungoverned direct self-hosted or scheduled A-01 workflows
+    name: Reject ungoverned topology, direct self-hosted or scheduled A-01 workflows
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -32,6 +36,9 @@ jobs:
         with:
           fetch-depth: 1
           persist-credentials: false
+
+      - name: Enforce canonical four-system topology
+        run: python .github/scripts/validate-system-topology.py
 
       - name: Self-test enforcement logic
         run: node .github/scripts/a01-control-plane-enforce.js selftest
