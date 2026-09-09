@@ -1,7 +1,7 @@
 {
   "ticket_version": 1,
   "ticket_id": "LEARNING-PILOT-001-RUN-001-FINAL-HUMAN-EXECUTION-2026-09-09",
-  "state": "READY",
+  "state": "SUPERSEDED",
   "night_date": "2026-09-09",
   "submitted_at": "2026-09-08T22:18:00-04:00",
   "workstream_id": "LEARNING",
@@ -29,5 +29,5 @@
   "resume_on_pass": "Adjudicate the canonical A-01 receipt. Require exact subject_sha == checkout_sha == effcc16b158f16ec5cbc82ea228df9be52d0b75b, result_class=PASS, required evidence present, and promotion_authorized=true. If all pass, promote only that exact tested SHA unchanged to the canonical Learning final-human-execution-ready branch and write a doc-only closure whose parent is the tested subject. Do not start a participant session automatically; real-participant execution still requires explicit human consent.",
   "resume_on_failure": "Classify SUBJECT_FAILURE versus INFRA_FAILURE or CONTROL_PLANE_FAILURE, preserve receipt and evidence, repair only the proven failing boundary, and rerun the minimum sufficient gate when authorized. Do not weaken exact-SHA, consent, privacy, local-first evidence handling, frozen PILOT-001-v1, retention, transfer, or human-attestation gates.",
   "notification_target": "learning-pilot-001-run-001-final-human-execution",
-  "notes": "Second-shift FINISH lane. Exact subject effcc16b158f16ec5cbc82ea228df9be52d0b75b passed hosted prequalification run 34300358374. Qualification covered the current 54-test closed-loop boundary, 57 predecessor regressions, local-first evidence/privacy checks, complete Learning Lab regression, repeated deterministic integrity seeds, and thin-caller verification. Hosted artifact 10084743223 digest sha256:0257de52f6fb22d7512ba2e2b77124b8b8d212890c4b069ee613157f934ac6f2. Qualification fixtures are not real-human evidence; no participant consent or response may be created, inferred, or supplied by A-01."
+  "notes": "SUPERSEDED after authoritative 2026-09-09 A-01 execution returned SUBJECT_FAILURE for the Windows working-tree-byte frozen-authority verification boundary. The failure was repaired without changing Learning runtime/product semantics. Repaired exact subject 5ca70044bebc3205933620da3b7cf2e23585ee9f on refs/heads/learning/pilot-001-run-001-final-human-execution-repair-001 passed hosted repair proof run 34357866531; GitHub Issue #5 freezes the replacement central A-01 request and records CENTRAL_A01_DISPATCHED=FALSE. This historical ticket must not be rerun or treated as authority for the repaired SHA."
 }
