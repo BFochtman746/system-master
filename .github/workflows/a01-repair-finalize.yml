@@ -1,0 +1,112 @@
+name: A-01 Repair Finalize
+
+on:
+  workflow_dispatch:
+    inputs:
+      transaction_id:
+        description: Existing durable repair transaction ID
+        required: true
+        type: string
+      replacement_subject_sha:
+        description: Exact changed candidate SHA
+        required: true
+        type: string
+      repair_branch:
+        description: Repair branch/ref containing the candidate
+        required: true
+        type: string
+      prequalification_evidence_pointer:
+        description: Deterministic prequalification evidence pointer for the exact candidate
+        required: true
+        type: string
+      qualification_id:
+        description: Qualification ID, must match original transaction
+        required: true
+        type: string
+      workstream_id:
+        description: Workstream ID, must match original transaction
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: a01-repair-ledger
+  cancel-in-progress: false
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout current main
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Validate repair control implementation
+        run: |
+          node --check .github/scripts/a01-repair-ledger.js
+          node .github/scripts/a01-closed-loop-repair-selftest.js
+          node .github/scripts/a01-repair-broker-selftest.js
+          node .github/scripts/a01-repair-ledger-selftest.js
+
+      - name: Build exact candidate finalization input
+        env:
+          TRANSACTION_ID: ${{ inputs.transaction_id }}
+          REPLACEMENT_SUBJECT_SHA: ${{ inputs.replacement_subject_sha }}
+          REPAIR_BRANCH: ${{ inputs.repair_branch }}
+          PREQUAL_EVIDENCE: ${{ inputs.prequalification_evidence_pointer }}
+          QUALIFICATION_ID: ${{ inputs.qualification_id }}
+          WORKSTREAM_ID: ${{ inputs.workstream_id }}
+        run: |
+          mkdir -p .repair-ledger
+          node - <<'NODE'
+          const fs = require('fs');
+          const value = {
+            transaction_id: process.env.TRANSACTION_ID,
+            candidate: {
+              replacement_subject_sha: process.env.REPLACEMENT_SUBJECT_SHA,
+              repair_branch: process.env.REPAIR_BRANCH,
+              prequalification: {
+                result: 'PASS',
+                subject_sha: process.env.REPLACEMENT_SUBJECT_SHA,
+                qualification_id: process.env.QUALIFICATION_ID,
+                workstream_id: process.env.WORKSTREAM_ID,
+                evidence_pointer: process.env.PREQUAL_EVIDENCE
+              }
+            },
+            finalized_at: new Date().toISOString()
+          };
+          fs.writeFileSync('.repair-ledger/finalize-input.json', JSON.stringify(value, null, 2) + '\n');
+          NODE
+
+      - name: Finalize candidate and emit A-01 replacement ticket
+        run: node .github/scripts/a01-repair-ledger.js finalize < .repair-ledger/finalize-input.json > .repair-ledger/finalize-result.json
+
+      - name: Commit replacement lineage
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add governance/repair qualification/a01/repair-requests
+          tx=$(node -e "const r=require('./.repair-ledger/finalize-result.json'); console.log(r.transaction_id)")
+          if git diff --cached --quiet; then
+            echo 'No durable finalization delta; refusing silent duplicate finalization.'
+            exit 1
+          fi
+          git commit -m "repair: finalize ${tx} for A-01 requeue"
+          git pull --rebase origin main
+          git push origin HEAD:main
+
+      - name: Publish replacement-ticket summary
+        run: |
+          echo '## A-01 Repair Finalization' >> "$GITHUB_STEP_SUMMARY"
+          echo '' >> "$GITHUB_STEP_SUMMARY"
+          echo 'The emitted ticket is A01_REQUEUE_READY only. It is not an A-01 PASS.' >> "$GITHUB_STEP_SUMMARY"
+          echo '```json' >> "$GITHUB_STEP_SUMMARY"
+          cat .repair-ledger/finalize-result.json >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
