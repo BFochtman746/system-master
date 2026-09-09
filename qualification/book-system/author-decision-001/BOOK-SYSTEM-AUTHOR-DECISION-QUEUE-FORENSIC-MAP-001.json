@@ -1,0 +1,135 @@
+{
+  "map_id": "BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-FORENSIC-MAP-001",
+  "effective_date": "2026-09-09",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "standing": "CLOSED__REUSE_MAP_COMPLETE__QUEUE_RUNTIME_GAP_IS_BOUNDED",
+  "parent_objective": "BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001",
+  "purpose": "Map every existing Book authority related to author-required decisions before defining a queue runtime, so the queue reuses canonical AUTHOR_DECISION, Runtime V2 handoffs, Lifecycle gates and Version/Rollback authority ingestion instead of creating a second canonical, lifecycle, integration or versioning system.",
+  "sources": [
+    "qualification/book-system/BOOK-SYSTEM-AUTHORING-LIFECYCLE-CONTRACT-001.json",
+    "qualification/book-system/canonical-state-001/BOOK-SYSTEM-CANONICAL-BOOK-STATE-MODEL-001.json",
+    "qualification/book-system/lifecycle-transition-001/BOOK-SYSTEM-LIFECYCLE-TRANSITION-ENGINE-001.json",
+    "qualification/book-system/integration-proposal-002/BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-002.json",
+    "qualification/book-system/version-and-rollback-001/BOOK-SYSTEM-VERSION-AND-ROLLBACK-001-AUTHORITY-INGEST-CLARIFICATION.json",
+    "qualification/book-system/research-verification-001/BOOK-SYSTEM-RESEARCH-VERIFIED-AUTHORING-LIFECYCLE-AMENDMENT-001.json",
+    "qualification/book-system/research-verification-001/BOOK-SYSTEM-PUBLICATION-EXPORT-STANDARDS-PROFILE-001.json"
+  ],
+  "existing_authority_surfaces": {
+    "canonical_author_decision_object": {
+      "reuse": true,
+      "existing_fields": ["decision_id", "subject_ref", "decision_type", "options", "status", "author_choice", "rationale_optional", "effective_version"],
+      "role": "Immutable parent evidence of an explicit author decision once validly resolved.",
+      "must_not_do": "Do not silently edit the already-qualified Canonical State Model merely to add queue metadata. Exact subject/digest, queue lineage and concurrency evidence belong in the new queue ledger/receipts unless a separately versioned parent state model is later proven necessary."
+    },
+    "runtime_v2_author_handoff": {
+      "reuse": true,
+      "trigger": "QUEUE_AUTHOR_DECISION or proposal author authority requirement",
+      "existing_fields": ["handoff_id", "proposal_family_id", "proposal_snapshot_id", "decision_type", "subject_ref", "options", "source_request_id", "source_response_id", "status"],
+      "existing_initial_status": "PENDING",
+      "hard_boundary": "Runtime V2 may queue a requirement but cannot fill author_choice, mark approval, or manufacture AUTHOR_DECISION."
+    },
+    "lifecycle_author_gate": {
+      "reuse": true,
+      "required_decision_types_observed": ["REVISION_DIRECTION", "FINALIZATION_APPROVAL", "PUBLICATION_AUTHORIZATION", "REVISION_PROMOTION"],
+      "hard_boundary": "Lifecycle consumes an already-existing exact parent AUTHOR_DECISION with APPROVED status, required decision_type and affirmative applicable author_choice; no inference is permitted."
+    },
+    "version_rollback_authority_ingest": {
+      "reuse": true,
+      "authority_kind": "AUTHOR_DECISION",
+      "hard_boundary": "Version/Rollback may record an already-committed author-decision parent successor and exact authority receipt; it may not create or reinterpret the author decision."
+    },
+    "publication_boundary": {
+      "reuse": true,
+      "hard_boundary": "PUBLICATION_AUTHORIZATION remains a distinct author-required decision. Technical export/proof states never synthesize it."
+    }
+  },
+  "decision_authority_classes": {
+    "AUTHOR_ONLY": {
+      "examples": [
+        "material canon/intent/protected-language choice",
+        "configured revision promotion",
+        "REVISION_DIRECTION",
+        "FINALIZATION_APPROVAL",
+        "PUBLICATION_AUTHORIZATION"
+      ],
+      "resolver": "explicit authenticated author interaction only",
+      "ai_or_provider_resolution_allowed": false
+    },
+    "PARENT_OPERATIONAL": {
+      "examples": ["non-subjective internal disposition that existing parent contracts already authorize without author choice"],
+      "queue_rule": "Do not route through Author Decision Queue merely because a workflow has multiple technical outcomes; retain the owning parent authority."
+    },
+    "EXTERNAL_OR_LEGAL": {
+      "examples": ["rights holder permission", "legal/compliance approval where externally required"],
+      "queue_rule": "May be tracked as an external-authority dependency but must not be represented as an author choice unless the same person legitimately holds that separate authority."
+    }
+  },
+  "true_net_new_queue_gap": [
+    "one parent-owned durable queue ledger/index for unresolved author-required handoffs from multiple Book authorities",
+    "exact subject object/version/digest and parent-state version/digest binding for every queued item",
+    "deduplication of equivalent author handoffs without losing source lineage",
+    "immutable queue-item snapshot/version lineage for material queue-state changes",
+    "author presentation state separate from canonical AUTHOR_DECISION status",
+    "explicit option identity and custom-author-option support without provider-preferred default authority",
+    "evidence/disagreement/consequence refs needed to understand the decision without copying unnecessary private content",
+    "stale/superseded decision invalidation when subject, proposal, manuscript, rights/privacy or governing constraints change",
+    "expected-current concurrency and idempotent resolution so two taps/devices cannot create conflicting author decisions",
+    "defer/reopen/withdraw/supersede handling without rewriting history",
+    "resolution receipt that binds exact queue item, exact choice, exact subject identities and exact pre/post parent identities",
+    "bounded parent commit that may append one canonical AUTHOR_DECISION but may not also promote manuscript, advance lifecycle, admit proposal, freeze export or publish",
+    "handoff from the resulting exact parent successor to Version/Rollback using authority_kind AUTHOR_DECISION",
+    "read-only consumer hooks so Lifecycle/Runtime/Export can observe current decision refs without gaining author authority",
+    "UI projection contract for concise mobile choices, review/confirmation and accessibility while keeping UI rendering in System Master Core/app layer"
+  ],
+  "do_not_build": [
+    "a second canonical author-decision object model",
+    "a second Lifecycle Transition engine",
+    "a second Runtime V2 proposal/admission queue",
+    "a second Version/Rollback ledger",
+    "an AI auto-approval or model-preferred choice mechanism",
+    "a generic BPM/workflow platform",
+    "Book-owned iOS UI framework",
+    "publication authority inside queue mechanics",
+    "provider or Prose ability to resolve an author decision",
+    "silent mutation or deletion of an already-recorded author choice"
+  ],
+  "proposed_queue_ledger_boundary": {
+    "queue_item_identity": "decision_family_id + decision_request_version + decision_request_id",
+    "minimum_exact_bindings": [
+      "book_project_id",
+      "book_id",
+      "decision_type",
+      "subject_ref",
+      "subject_identity_refs with exact versions/digests",
+      "bound_parent_state_version",
+      "bound_parent_state_digest",
+      "source_handoff_refs",
+      "source_authority_kind",
+      "option_set_digest"
+    ],
+    "candidate_queue_states_for_research_validation": [
+      "PENDING",
+      "PRESENTED",
+      "DEFERRED",
+      "STALE",
+      "SUPERSEDED",
+      "RESOLVED"
+    ],
+    "canonical_decision_rule": "RESOLVED is not itself lifecycle/canon/export action. Successful resolution may append exactly one canonical AUTHOR_DECISION in a separate atomic parent successor, after which owning consumers must independently validate and act."
+  },
+  "staleness_rules_to_bind_in_contract": [
+    "A queued item cannot be resolved against a different subject digest or parent projection without explicit revalidation/new queue snapshot.",
+    "A materially changed option set creates a new queue-item version; old presented choices remain historical and cannot be silently substituted.",
+    "A changed proposal/manuscript/canon/rights/privacy condition can make a pending item STALE or SUPERSEDED; prior presentation/interaction evidence remains historical.",
+    "A recorded canonical AUTHOR_DECISION remains immutable historical evidence even when later change makes it no longer current for a new subject identity."
+  ],
+  "concurrency_and_replay_rules_to_bind_in_contract": [
+    "Resolution requires exact expected parent state and exact queue-ledger version/digest.",
+    "Same request/idempotency identity with same normalized resolution returns existing receipt without another parent commit.",
+    "Same decision request resolved concurrently to different choices fails closed and requires explicit current-state review.",
+    "Only one canonical author-decision append may result from one resolved queue-item version."
+  ],
+  "forensic_conclusion": "The queue is a bounded author-authority capture and routing layer. Most semantics already exist elsewhere. The implementation should primarily add durable exact-bound pending-item management, human resolution and immutable receipts, then hand the resulting parent successor back to already-qualified Lifecycle/Runtime/Versioning consumers.",
+  "exact_next_gate": "BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-PREIMPLEMENTATION-RESEARCH-001",
+  "qualification_effect": "NONE. Forensic mapping only; no queue runtime, human decision, canonical mutation, lifecycle transition or publication authority is created."
+}
