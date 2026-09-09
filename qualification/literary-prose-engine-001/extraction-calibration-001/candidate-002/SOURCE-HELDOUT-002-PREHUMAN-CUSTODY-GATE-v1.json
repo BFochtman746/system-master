@@ -1,0 +1,48 @@
+{
+  "gate_id": "LITERARY-EXTRACTION-SOURCE-HELD-OUT-002A__PREHUMAN_SOURCE_CUSTODY",
+  "parent_objective": "LITERARY-EXTRACTION-SOURCE-HELD-OUT-002",
+  "standing": "READY_FOR_EXECUTION__NO_HUMAN_AUTHORITY_REQUIRED_UNTIL_GATE_EXIT",
+  "purpose": "Finish every source-custody step that can be completed without fabricating human adjudication or model-evaluation evidence, then stop cleanly at the human-gold boundary.",
+  "inputs": [
+    "PUBLIC-DOMAIN-SOURCE-HELDOUT-MANIFEST-v1.json",
+    "PUBLIC-DOMAIN-PASSAGE-SELECTION-v1.json",
+    "HUMAN-ADJUDICATION-PACKET-CONTRACT-v1.json",
+    "CANDIDATE-002-CONTRACT-v1.json"
+  ],
+  "required_actions": [
+    "For all six frozen selection cases, retrieve the exact bounded passage bytes only from the verified TEST_ONLY public-domain source route.",
+    "Record a stable source locator and compute SHA-256 over the exact bounded passage bytes supplied to later inference/adjudication.",
+    "Verify each case still belongs to its frozen work and named stress slice; passage replacement is allowed only for documented source defect, rights defect or adjudication impossibility.",
+    "Create adjudication packet shells containing provenance, locator, source digest, task family, ambiguity fields and adjudicator slots but no fabricated gold labels or adjudication notes.",
+    "Preserve raw source bodies and bounded passage text outside durable repository evidence unless a separate rights/custody decision explicitly allows storage; repository evidence should use locators/digests/nonreconstructive metadata.",
+    "Do not run scoring and do not claim model quality before human gold and prediction-freeze evidence exist."
+  ],
+  "pass_condition": {
+    "all_six_cases_exact_passage_digest_bound": true,
+    "all_six_cases_stable_locator_bound": true,
+    "all_six_cases_rights_and_test_only_reverified": true,
+    "all_six_gold_empty_adjudication_shells_prepared": true,
+    "raw_full_work_body_committed": false,
+    "human_gold_fabricated": false,
+    "model_score_claimed": false
+  },
+  "pass_proves": "The six frozen public-domain held-out cases are source-custody-ready for real human adjudication without selection leakage or provenance ambiguity.",
+  "pass_does_not_prove": [
+    "Human gold correctness",
+    "Real model accuracy or calibration",
+    "Candidate-002 promotion eligibility",
+    "Canonical narrative-state authority",
+    "AGLO manuscript mutation, baseline promotion, publication or canon authority"
+  ],
+  "pass_unlocks": "BLOCKED — HUMAN: obtain required independent adjudication under HUMAN-ADJUDICATION-PACKET-CONTRACT-v1, freeze model predictions with gold hidden, then score Candidate-002.",
+  "on_failure": "Repair only the failing source route, rights/provenance, locator or digest boundary. Do not substitute a different passage because a model performs better on it and do not weaken TEST_ONLY isolation.",
+  "a01_required": false,
+  "a01_reason": "This gate is bounded source-custody and metadata preparation; no runner-specific evidence or long execution delta is required.",
+  "do_not": [
+    "Do not fabricate human adjudication.",
+    "Do not expose gold to the model backend.",
+    "Do not commit bulk copyrighted or unnecessary full-text bodies.",
+    "Do not transfer hosted or A-01 authority from another SHA.",
+    "Do not mutate canonical narrative state or AGLO manuscript content."
+  ]
+}
