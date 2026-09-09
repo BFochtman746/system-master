@@ -1,0 +1,27 @@
+{
+  "contract_id": "LPE-STEP-J-VOICE-LEARNING-STATE-v1",
+  "depends_on": [
+    "PROJECT-VOICE-PROFILE-SCHEMA-v1",
+    "LITERARY-PROSE-ENGINE-001-VOICE-EVOLUTION-AND-DEVELOPMENT-v1",
+    "STEP-C",
+    "STEP-I"
+  ],
+  "stores": {
+    "STABLE_IDENTITY": "Only explicit user identity invariants can enter this store automatically. A contradictory invariant requires explicit supersession; prior history remains.",
+    "CURRENT_PREFERENCE": "The highest-authority active preference for one dimension and one context. Explicit user preference outranks user action, which outranks STEP-I evidence.",
+    "DEVELOPMENT_FRONTIER": "Non-governing conflicting directions retained for deliberate exploration rather than silently averaged away.",
+    "REJECTED_DIRECTION": "User-rejected directions remain active anti-preference evidence until a later explicit/user action admits that same direction. Rejection history remains immutable."
+  },
+  "authority_precedence": ["USER_EXPLICIT", "USER_ACTION", "STEP_I_QUALIFIED"],
+  "rules": [
+    "Frequency is evidence volume, not a quality vote and cannot outrank a higher-authority project preference.",
+    "One accepted revision never becomes a universal stable identity rule.",
+    "Preferences remain conditioned by project and context rather than globalizing across scenes, speakers, chapter roles or pacing targets.",
+    "Chronology is replayable from the append-only event ledger.",
+    "Revocation deactivates an earlier event without deleting it and may reveal the next valid lower-authority state.",
+    "Named external authors are not preference targets or quality proxies.",
+    "Raw manuscript prose is not required in the preference-learning store."
+  ],
+  "uncertainty_policy": "PRESERVE_HISTORY_AND_DO_NOT_INFER_A_STRONGER_RULE_THAN_EVIDENCE_SUPPORTS",
+  "frequency_used_as_quality": false
+}
