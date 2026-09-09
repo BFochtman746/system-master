@@ -1,0 +1,194 @@
+{
+  "contract_id": "BOOK-SYSTEM-AUTHORING-LIFECYCLE-CONTRACT-001",
+  "effective_date": "2026-09-09",
+  "standing": "CANONICAL__PARENT_LIFECYCLE_CONTRACT__IMPLEMENTATION_PENDING",
+  "owner": "BOOK SYSTEM",
+  "control_branch": "book-system/control-v1",
+  "design_status": "NEW_CURRENT_VERSIONED_PARENT_ARCHITECTURE__NOT_HISTORICAL_RECOVERY",
+  "depends_on": [
+    "BOOK-SYSTEM-PROJECT-HIERARCHY-001",
+    "BOOK-SYSTEM-ACTIVE-PROJECT-REGISTRY-001",
+    "BOOK-SYSTEM-PARENT-INTEGRATION-BOUNDARY-001",
+    "BOOK-SYSTEM-AUTHORING-LIFECYCLE-RECOVERY-001",
+    "BOOK-SYSTEM-BOOK-INTELLIGENCE-UNIFICATION-BINDING-001"
+  ],
+  "objective": "Define the parent-owned Book System lifecycle that governs book identity, canonical state, planning, drafting, evidence, child/lane services, version authority, author decisions, completion and export while reusing the recovered Book Intelligence and Prose capabilities behind explicit integration boundaries.",
+  "identity": {
+    "book_project_id": "immutable opaque identifier created once by Book System",
+    "book_id": "immutable opaque identifier for the authored work",
+    "governing_brief_id": "versioned parent artifact defining form, genre, audience, purpose, voice goals, constraints and explicit author intent",
+    "rule": "Display titles, filenames and chat names may change without changing book_project_id or book_id."
+  },
+  "parent_owned_state_objects": {
+    "BOOK_PROJECT": ["book_project_id", "book_id", "status", "governing_brief_ref", "active_canonical_manifest_ref"],
+    "GOVERNING_BRIEF": ["brief_id", "version", "author_intent", "form", "genre", "audience", "voice_goals", "hard_constraints", "effective_from"],
+    "CANON_MANIFEST": ["canon_manifest_id", "version", "facts", "entities", "world_rules", "protected_language_refs", "intent_constraints", "approval_state"],
+    "STORY_BIBLE": ["story_bible_id", "version", "entity_refs", "relationship_refs", "timeline_refs", "arc_refs", "motif_theme_refs", "open_questions", "provenance"],
+    "BOOK_PLAN": ["plan_id", "version", "part_refs", "chapter_refs", "scene_refs", "dependency_edges", "purpose_and_payoff_refs"],
+    "MANUSCRIPT_MANIFEST": ["manuscript_id", "version_id", "artifact_digest", "authority_state", "parent_version_ref", "change_set_ref", "created_by", "created_at"],
+    "RESEARCH_EVIDENCE_LINK": ["link_id", "claim_or_evidence_ref", "target_book_object_ref", "freshness_state", "conflict_state", "provenance", "rights_class"],
+    "AUTHOR_DECISION": ["decision_id", "subject_ref", "decision_type", "options", "status", "author_choice", "rationale_optional", "effective_version"],
+    "INTEGRATION_PROPOSAL_REF": ["proposal_id", "source_project_or_lane", "source_subject_sha", "capability_id", "admission_state"],
+    "EXPORT_RELEASE": ["release_id", "frozen_version_id", "format", "digest", "approval_state", "publication_authority_state"]
+  },
+  "project_lifecycle_states": [
+    "CREATED",
+    "BRIEFING",
+    "PLANNING",
+    "DRAFTING",
+    "STRUCTURAL_REVIEW",
+    "PROSE_REFINEMENT",
+    "BOOK_EVALUATION",
+    "AUTHOR_REVIEW",
+    "FINALIZATION",
+    "EXPORT_FROZEN",
+    "PUBLISHED_OR_DELIVERED",
+    "ARCHIVED"
+  ],
+  "unit_lifecycle_states": [
+    "PLANNED",
+    "READY_TO_DRAFT",
+    "DRAFTED",
+    "DIAGNOSTIC_REVIEW",
+    "REVISION_CANDIDATE_AVAILABLE",
+    "AUTHOR_DECISION_REQUIRED",
+    "ACCEPTED_INTO_CANONICAL_MANUSCRIPT",
+    "RETAINED_ORIGINAL",
+    "DEFERRED",
+    "INVALIDATED_BY_UPSTREAM_CHANGE"
+  ],
+  "authority_classes": {
+    "PARENT_CANONICAL": "Book System parent has explicit canonical authority for this exact state/version.",
+    "AUTHOR_REQUIRED": "Only explicit author decision may cross the boundary.",
+    "CHILD_PROPOSAL": "Prose Project may supply bounded evidence/candidates but may not mutate parent canonical state.",
+    "EVALUATOR_EVIDENCE": "Book Evaluator may provide independent findings/qualification evidence but may not mutate parent canonical state.",
+    "RESEARCH_EVIDENCE": "Evidence may inform state but does not itself become canon or author intent.",
+    "HISTORICAL": "Retained for provenance/rollback and not current authority."
+  },
+  "canonical_mutation_protocol": {
+    "required_inputs": [
+      "current canonical manifest/version digest",
+      "bounded proposed change set",
+      "affected object IDs",
+      "source capability and source SHA/artifact identity",
+      "preservation and regression evidence",
+      "rights/provenance status",
+      "required author decisions",
+      "rollback target"
+    ],
+    "required_sequence": [
+      "PROPOSE",
+      "VALIDATE_PRECONDITIONS",
+      "RUN_RELEVANT_PROSE_AND_OR_EVALUATOR_CHECKS",
+      "PRESERVE_DISAGREEMENT_AND_ABSTENTION",
+      "OBTAIN_AUTHOR_DECISION_WHERE_REQUIRED",
+      "PARENT_ACCEPT_OR_REJECT",
+      "CREATE_NEW_IMMUTABLE_VERSION",
+      "ADVANCE_CANONICAL_POINTER_ONLY_AFTER_COMMIT",
+      "RETAIN_PRIOR_VERSION_FOR_ROLLBACK"
+    ],
+    "forbidden": [
+      "in-place silent overwrite of canonical manuscript",
+      "automatic parent mutation from child branch output",
+      "automatic promotion because CI/A-01 passed",
+      "manufactured author approval",
+      "manufactured human evidence",
+      "discarding rejected or deferred candidate provenance"
+    ]
+  },
+  "book_intelligence_service_model": {
+    "architecture_binding": "BOOK-SYSTEM-BOOK-INTELLIGENCE-UNIFICATION-BINDING-001",
+    "macro_services": [
+      "canonical narrative state",
+      "global narrative orchestration",
+      "arc/setup-payoff/open-question state",
+      "whole-book Creative Excellence synthesis and hard gates"
+    ],
+    "meso_services": [
+      "chapter/scene function",
+      "reader-state progression",
+      "pacing/information release",
+      "character/relationship/theme/motif progression"
+    ],
+    "micro_services": [
+      "PCE012 prose-craft dimensions",
+      "granular specialists",
+      "Passage Intelligence",
+      "bounded revision opportunity admission",
+      "controlled revision",
+      "independent Prose evaluation",
+      "homogenization defense"
+    ],
+    "rule": "Parent Book System owns canonical lifecycle state; child/lane services receive bounded projections and return evidence/proposals. Service outputs are not canonical writes."
+  },
+  "prose_project_interface": {
+    "project": "PROSE PROJECT",
+    "branch": "literary-prose-engine-001",
+    "request_types": [
+      "ANALYZE_PASSAGE_OR_UNIT",
+      "BUILD_NARRATIVE_STATE_PROJECTION",
+      "DIAGNOSE_LIMITATIONS_AND_OPPORTUNITIES",
+      "RETRIEVE_CRAFT_INTELLIGENCE",
+      "GENERATE_BOUNDED_REVISION_CANDIDATE",
+      "COMPARE_ORIGINAL_AND_CANDIDATE",
+      "ASSESS_VOICE_EVOLUTION_OR_DEGRADATION",
+      "ASSESS_HOMOGENIZATION_RISK"
+    ],
+    "minimum_request_projection": ["book_id", "exact version digest", "target object IDs", "purpose", "authorized context", "canon/intent/protected-language constraints", "edit budget", "rights boundary"],
+    "minimum_response": ["source subject SHA/artifact identity", "findings/candidate refs", "confidence", "abstentions/disagreements", "preservation results", "non-target regressions", "requested parent action"],
+    "canonical_write_authority": false
+  },
+  "book_evaluator_interface": {
+    "classification": "BOOK_SYSTEM_CAPABILITY_OR_QUALIFICATION_LANE",
+    "request_types": ["INDEPENDENT_BOOK_OR_UNIT_EVALUATION", "CONTRASTIVE_CANDIDATE_EVALUATION", "QUALIFICATION_EVIDENCE"],
+    "minimum_request_projection": ["exact manuscript/version identity", "evaluation scope", "allowed evidence", "privacy/split-isolation boundary", "applicable parent gates"],
+    "minimum_response": ["exact evaluated identity", "findings", "uncertainty/disagreement", "hard-gate failures", "qualification scope actually proven"],
+    "canonical_write_authority": false
+  },
+  "research_evidence_rules": [
+    "Every material research claim attached to a book object must carry provenance and rights class.",
+    "Research evidence may be CURRENT, STALE, CONFLICTING, SUPERSEDED or UNKNOWN.",
+    "A changed source, contradiction or changed book requirement creates an invalidation/review candidate for dependent claims.",
+    "Research evidence cannot silently become canon, author intent or protected language.",
+    "Unknown provenance or rights blocks the affected integration."
+  ],
+  "author_decision_boundaries": [
+    "canon-breaking or canon-changing decisions",
+    "material author-intent changes",
+    "promotion of a revision when configured author authority requires approval",
+    "resolution of protected-language conflicts",
+    "explicit publication/release authorization",
+    "any boundary separately marked AUTHOR_REQUIRED by child/lane contracts"
+  ],
+  "completion_and_export": {
+    "freeze_requirements": [
+      "one exact canonical manuscript version selected",
+      "required parent hard gates resolved or explicitly waived by authorized authority",
+      "open author decisions classified",
+      "rights/provenance checks complete for included material",
+      "export artifact digest recorded",
+      "rollback/restoration source retained"
+    ],
+    "publication_rule": "Export generation does not equal publication authorization. Publication/delivery that crosses the explicit author boundary requires recorded author authority."
+  },
+  "fail_closed_rules": [
+    "Unknown canonical version -> no mutation.",
+    "Unknown rights/provenance for affected material -> no admission.",
+    "Unresolved critical preservation regression -> retain current canonical version.",
+    "Required author decision missing -> queue AUTHOR_DECISION_REQUIRED and do not synthesize approval.",
+    "Conflicting evaluator/specialist evidence -> preserve disagreement and defer or request bounded adjudication.",
+    "Child/lane blocker does not block unrelated Book System lifecycle work unless the parent dependency graph proves it is on the current parent critical path."
+  ],
+  "implementation_order": [
+    "BOOK-SYSTEM-CANONICAL-BOOK-STATE-MODEL-001",
+    "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-001",
+    "BOOK-SYSTEM-LIFECYCLE-TRANSITION-ENGINE-001",
+    "BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-001",
+    "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001",
+    "BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001",
+    "BOOK-SYSTEM-EXPORT-FREEZE-001",
+    "BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001"
+  ],
+  "exact_next_objective": "BOOK-SYSTEM-CANONICAL-BOOK-STATE-MODEL-001",
+  "qualification_effect": "NONE by creation. This contract defines parent lifecycle architecture but does not prove runtime implementation, A-01 qualification, human evidence, author decisions, production standing or publication authority."
+}
