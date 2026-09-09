@@ -1,0 +1,92 @@
+name: A-01 Repair Receipt Ingest
+
+on:
+  workflow_run:
+    workflows: ["A-01 Control Plane Gateway"]
+    types: [completed]
+
+permissions:
+  actions: read
+  contents: write
+
+concurrency:
+  group: a01-repair-ledger
+  cancel-in-progress: false
+
+jobs:
+  persist-repair-transaction:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout current main
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Download repair-broker artifacts from completed gateway run
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          pattern: a01-repair-broker-*
+          path: .repair-broker-artifacts
+          merge-multiple: false
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ github.event.workflow_run.id }}
+        continue-on-error: true
+
+      - name: Locate repair transaction or stop cleanly on PASS/no broker route
+        id: locate
+        shell: bash
+        run: |
+          file=$(find .repair-broker-artifacts -type f -name transaction.json 2>/dev/null | head -n 1 || true)
+          if [ -z "$file" ]; then
+            echo 'found=false' >> "$GITHUB_OUTPUT"
+            echo 'No repair broker transaction artifact exists for this gateway run; nothing to persist.'
+            exit 0
+          fi
+          echo 'found=true' >> "$GITHUB_OUTPUT"
+          echo "file=$file" >> "$GITHUB_OUTPUT"
+
+      - name: Validate ledger implementation
+        if: steps.locate.outputs.found == 'true'
+        run: |
+          node --check .github/scripts/a01-repair-ledger.js
+          node .github/scripts/a01-repair-ledger-selftest.js
+
+      - name: Ingest exact broker transaction into durable owner state
+        if: steps.locate.outputs.found == 'true'
+        run: |
+          mkdir -p .repair-ledger
+          node .github/scripts/a01-repair-ledger.js ingest < "${{ steps.locate.outputs.file }}" > .repair-ledger/ingest-result.json
+
+      - name: Commit durable repair transaction
+        if: steps.locate.outputs.found == 'true'
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add governance/repair qualification/a01/repair-requests 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo 'Transaction was already durably ingested; no duplicate commit required.'
+            exit 0
+          fi
+          tx=$(node -e "const r=require('./.repair-ledger/ingest-result.json'); console.log(r.transaction_id)")
+          git commit -m "repair: ingest gateway transaction ${tx}"
+          git pull --rebase origin main
+          git push origin HEAD:main
+
+      - name: Publish receipt-ingest summary
+        if: always()
+        shell: bash
+        run: |
+          echo '## A-01 Repair Receipt Ingest' >> "$GITHUB_STEP_SUMMARY"
+          echo "Gateway run: ${{ github.event.workflow_run.id }}" >> "$GITHUB_STEP_SUMMARY"
+          if [ -f .repair-ledger/ingest-result.json ]; then
+            echo '```json' >> "$GITHUB_STEP_SUMMARY"
+            cat .repair-ledger/ingest-result.json >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo 'No repair transaction required persistence.' >> "$GITHUB_STEP_SUMMARY"
+          fi
