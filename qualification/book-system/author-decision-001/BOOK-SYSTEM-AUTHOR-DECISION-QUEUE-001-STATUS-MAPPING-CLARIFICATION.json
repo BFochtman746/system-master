@@ -1,0 +1,26 @@
+{
+  "clarification_id": "BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001-STATUS-MAPPING-CLARIFICATION",
+  "effective_date": "2026-09-09",
+  "standing": "CANONICAL_ADDITIVE_CLARIFICATION__OPTION_TO_CANONICAL_STATUS_EXPLICIT",
+  "amends": "BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001",
+  "reason": "A selected option must not be ambiguously mapped to canonical AUTHOR_DECISION.status. In particular, approving the act of rejecting a proposal must not produce an APPROVED decision that a downstream Lifecycle gate could misread as affirmative approval.",
+  "option_contract_addition": {
+    "required_field": "canonical_decision_status",
+    "allowed_values": ["APPROVED", "REJECTED"],
+    "rules": [
+      "Every predefined option explicitly declares the canonical AUTHOR_DECISION.status produced if the author selects it.",
+      "An affirmative direction/selection uses APPROVED; a reject-all/reject-proposal/retain-current option uses REJECTED when the decision type's downstream semantics treat rejection as non-approval.",
+      "The queue must never infer canonical status from option label, display order, provider rank or model preference.",
+      "A custom author choice, when allowed, maps to APPROVED as an affirmative author-supplied direction unless a future versioned decision-type contract explicitly defines another mapping.",
+      "Lifecycle and other consumers continue to require their existing exact decision_type/status/author_choice semantics and receive no new authority from this clarification."
+    ]
+  },
+  "qualification_delta": [
+    "predefined APPROVED option maps to canonical APPROVED",
+    "predefined REJECTED option maps to canonical REJECTED",
+    "reject option cannot accidentally satisfy an APPROVED Lifecycle gate",
+    "invalid/missing canonical_decision_status fails closed",
+    "custom choice mapping remains explicit and no model-selected status is permitted"
+  ],
+  "qualification_effect": "NONE until the Author Decision Queue executable subject is qualified. No prior Book qualification is broadened or transferred."
+}
