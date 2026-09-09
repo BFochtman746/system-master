@@ -1,0 +1,43 @@
+{
+  "clarification_id": "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001-AUTHORITY-INGEST-CLARIFICATION",
+  "effective_date": "2026-09-09",
+  "standing": "CANONICAL_ADDITIVE_CLARIFICATION__AUTHORIZED_PARENT_SUCCESSOR_INGEST_BOUND",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "clarifies": "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001",
+  "problem": "The Book parent already has separately qualified authorities that can commit parent-state successors, including Lifecycle Transition Engine and Integration Proposal Runtime V2. A complete version ledger must record those successors without re-executing their authority or creating a competing state-transition engine.",
+  "authorized_successor_ingest": {
+    "operation": "RECORD_AUTHORIZED_PARENT_SUCCESSOR",
+    "meaning": "Record an already-committed exact Book parent successor and its owning authority receipt into the immutable version ledger. This operation does not create, authorize or alter the supplied parent state.",
+    "allowed_authority_kinds": [
+      "CANONICAL_STATE_MUTATION",
+      "LIFECYCLE_TRANSITION",
+      "INTEGRATION_RUNTIME",
+      "AUTHOR_DECISION",
+      "EXPORT_RELEASE"
+    ],
+    "required": [
+      "exact pre parent state version/digest",
+      "exact committed post parent state version/digest",
+      "post state_version == pre state_version + 1",
+      "immutable book_project_id and book_id",
+      "authority_kind",
+      "authority_receipt with exact matching pre/post parent identities",
+      "exact active object-version bindings",
+      "append-only preservation of evidence/decision/proposal/export history",
+      "no object-version identity reuse with changed bytes"
+    ],
+    "rules": [
+      "The version ledger may accept only the exact already-committed post-state bytes bound by the authority receipt; it may not synthesize a different post state.",
+      "A mismatched, incomplete or unknown authority receipt fails closed.",
+      "Recording a Lifecycle successor does not grant Version/Rollback lifecycle authority.",
+      "Recording an Integration Runtime successor does not grant Version/Rollback provider-admission authority.",
+      "Recording author/export successors does not grant Version/Rollback author or publication authority.",
+      "The recorded successor receives immutable snapshot lineage and any newly observed governed object-version nodes receive exact digest/predecessor lineage.",
+      "Replay is idempotent; a conflicting request/idempotency identity fails closed."
+    ]
+  },
+  "public_executable_surface": "system-master/book-system/version-and-rollback.js",
+  "internal_core_rule": "version-and-rollback-core.js is an internal deterministic primitive. Authority-sensitive calls are exposed only through the registered public executable surface, which narrows lifecycle behavior and adds authorized-successor ingestion.",
+  "qualification_requirement": "Qualification must prove exact authority-receipt binding, post-state identity preservation, lifecycle/runtime authority non-transfer, replay, mismatch rejection, object/history immutability and continued restore-as-new-successor behavior.",
+  "qualification_effect": "NONE until the exact public executable subject and its fixtures pass hosted and registered A-01 qualification."
+}
