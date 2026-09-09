@@ -1,0 +1,32 @@
+name: Book System Canonical State A-01 Submission
+
+on:
+  push:
+    branches:
+      - book-system/control-v1
+    paths:
+      - "qualification/book-system/canonical-state-001/**"
+      - ".github/scripts/book-system-canonical-state-001-qualify.js"
+      - ".github/scripts/a01-book-system-canonical-state-001.js"
+      - ".github/workflows/book-system-canonical-state-001-gateway.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  qualify:
+    uses: BFochtman746/system-master/.github/workflows/a01-control-plane-gateway.yml@main
+    with:
+      qualification_id: BOOK-SYSTEM-CANONICAL-BOOK-STATE-MODEL-001
+      workstream_id: BOOK-SYSTEM
+      subject_sha: ${{ github.sha }}
+      origin_ref: ${{ github.ref }}
+      resume_on_pass: Close BOOK-SYSTEM-CANONICAL-BOOK-STATE-MODEL-001 on this exact SHA and continue BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-001.
+      resume_on_failure: Repair only the failing canonical-state or control-plane boundary and rerun the minimum sufficient registered gate.
+      notification_target: book-system/control-v1
+      execution_context: normal
+      qualifier_timeout_minutes: 10
+      job_timeout_minutes: 15
+    secrets: inherit
