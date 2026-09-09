@@ -1,0 +1,33 @@
+{
+  "ticket_version": 1,
+  "ticket_id": "BOOK-EVAL-REPAIR-005-GATE-D-PRIVATE-RECOVERY-2026-09-10",
+  "state": "HOLD",
+  "night_date": "2026-09-10",
+  "submitted_at": "2026-09-09T01:55:00-04:00",
+  "workstream_id": "BOOK-EVAL-LEMONADE-001",
+  "qualification_id": "BOOK-EVAL-REPAIR-005-GATE-D-PRIVATE-GOLD-RECOVERY",
+  "subject_sha": "e3b771dc36800c5f056ff2fd5ab6622f3e014f41",
+  "origin_ref": "refs/heads/book-eval-lemonade-001-blind-resume-003-adapter-repair",
+  "estimated_minutes": 15,
+  "max_runtime_minutes": 90,
+  "priority": 100,
+  "earliest_start_local": "00:00",
+  "latest_start_local": "05:20",
+  "window_end_local": "07:00",
+  "exclusive_window": false,
+  "resource_class": "io",
+  "overnight_lane": "FINISH",
+  "value_class": "BOOK_GATE_D_PRIVATE_AUTHORITY_CRITICAL_PATH",
+  "critical_path_rank": 1,
+  "completion_delta": {
+    "before": "Canonical A-01 recovery previously found exact PROVIDER and REPAIRED_OUTPUT but lacked DEVELOPMENT_GOLD and therefore could not deterministically rebuild exact BASE_TRAINING. The exact 160-row DEVELOPMENT_GOLD has now been found and verified in saved private custody but is not yet staged on A-01.",
+    "evidence": "After secure local staging of the exact saved gold on A-01, the registered recovery wrapper will require exact hashes, recover PROVIDER/REPAIRED_OUTPUT, deterministically rebuild BASE_TRAINING if absent, and accept only the frozen 612-record base-training SHA without persisting private content in control-plane evidence.",
+    "after_pass": "A-01 has exact-hash BASE_TRAINING + PROVIDER + DEVELOPMENT_GOLD authority and the Gate-D private prerequisite is closed without using visible regression or hidden holdout for adaptive training.",
+    "unlocks": "Together with an independent Teacher-freeze PASS, authorizes the frozen 612+440=1,052 student ingest/retraining path."
+  },
+  "stop_condition": "Remain HOLD until the exact saved BOOK-EVAL-GOLD-CORPUS-v2.jsonl SHA 51cd4790ddd89d067a6e85ee6c6f3092ec3a6fba94faac8e77e31041277da91a has been securely staged onto an A-01-local private path without GitHub or Actions-artifact exposure. Do not set READY merely because the file exists in ChatGPT Library. On PASS, do not repeat unchanged recovery.",
+  "resume_on_pass": "Require exact-hash binding for BASE_TRAINING, PROVIDER, and DEVELOPMENT_GOLD; if BASE_TRAINING was rebuilt, require deterministic_gate_b_rebuild provenance and exact SHA 0e3d237405340ae1abf0706c88c39275360c8c9380388b4f53d73275f4f38473. Preserve visible_regression_used=false and hidden_holdout_used=false. Do not advance student training unless the separate Teacher-freeze boundary also PASSes.",
+  "resume_on_failure": "Preserve exact recovery manifest and classify only the missing/mismatched role or deterministic rebuild defect. Never synthesize gold, weaken hashes, commit private content, upload private content as an Actions artifact, or proceed to student training on a partial recovery.",
+  "notification_target": "book-eval-lemonade-001-repair005-gate-d",
+  "notes": "HOLD is intentional. Saved private custody now contains exact DEVELOPMENT_GOLD: BOOK-EVAL-GOLD-CORPUS-v2.jsonl, 160 rows, 180313 bytes, SHA 51cd4790ddd89d067a6e85ee6c6f3092ec3a6fba94faac8e77e31041277da91a. Saved provider-visible corpus was also independently verified at SHA 30bd9d0b2c348b33e6b17a81d639e64c7e7e8eef63d7d6c0bfc3175e94fe2b53. Canonical A-01 run 34292412264 already recovered PROVIDER and REPAIRED_OUTPUT. Existing recover-repair005-gate-d-inputs.py performs deterministic Gate-B rebuild only when exact PROVIDER + DEVELOPMENT_GOLD + REPAIRED_OUTPUT are present and accepts BASE_TRAINING only at the frozen exact SHA."
+}
