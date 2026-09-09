@@ -60,18 +60,24 @@ def validate_dependency_closures():
     return standing
 
 
-def _retrieve_qualified_transforms(catalog):
+def _retrieve_qualified_transforms(catalog, admitted_opportunity_ids):
     qualified = []
     rejected = []
+    admitted_opportunity_ids = set(admitted_opportunity_ids)
     for item in catalog:
+        transform_id = item.get("transform_id")
+        applicable = set(item.get("applicable_opportunity_ids", []))
+        if not applicable or not (applicable & admitted_opportunity_ids):
+            rejected.append({"transform_id": transform_id, "reason": "TRANSFORM_NOT_BOUND_TO_ADMITTED_OPPORTUNITY"})
+            continue
         pair_record = item.get("foundry_pair")
         if not isinstance(pair_record, dict):
-            rejected.append({"transform_id": item.get("transform_id"), "reason": "STEP_G_PAIR_EVIDENCE_REQUIRED"})
+            rejected.append({"transform_id": transform_id, "reason": "STEP_G_PAIR_EVIDENCE_REQUIRED"})
             continue
         pair = STEP_G.build_pair(pair_record)
         if pair["qualification"]["outcome"] != "QUALIFIED_CONTRAST":
             rejected.append({
-                "transform_id": item.get("transform_id"),
+                "transform_id": transform_id,
                 "reason": "STEP_G_TRANSFORM_NOT_QUALIFIED",
                 "pair_outcome": pair["qualification"]["outcome"],
             })
@@ -206,15 +212,23 @@ def run_closed_loop(spec):
     if state["readiness"].get("revision_allowed") is not True:
         return {"disposition": "NO_ACTION", "stop_stage": "ANALYZE", "trace": trace, "original_unchanged": True, "ledger": list(spec.get("ledger", []))}
 
+    selected_ids = {
+        row.get("opportunity_id")
+        for row in state.get("craft_state", {}).get("opportunity_priority", {}).get("selected", [])
+        if row.get("opportunity_id")
+    }
     diagnostic_case = {"passage_state": state, "signals": deepcopy(spec.get("diagnostic_signals", []))}
     findings = STEP_F.emit(diagnostic_case)
     adjudication = STEP_F.adjudicate(diagnostic_case, findings)
-    trace.append({"stage": "DIAGNOSE", "status": adjudication["status"]})
-    admitted = [x for x in adjudication.get("opportunities", []) if x.get("status") == "ADMIT"]
+    admitted_all = [x for x in adjudication.get("opportunities", []) if x.get("status") == "ADMIT"]
+    admitted = [x for x in admitted_all if x.get("opportunity_id") in selected_ids]
+    bypassed = sorted(x.get("opportunity_id") for x in admitted_all if x.get("opportunity_id") not in selected_ids)
+    trace.append({"stage": "DIAGNOSE", "status": adjudication["status"], "upstream_unselected_rejected": bypassed})
     if not admitted:
         return {"disposition": "NO_ACTION", "stop_stage": "DIAGNOSE", "trace": trace, "original_unchanged": True, "ledger": list(spec.get("ledger", []))}
 
-    transforms, retrieval_rejections = _retrieve_qualified_transforms(deepcopy(spec.get("transform_catalog", [])))
+    admitted_ids = {x["opportunity_id"] for x in admitted}
+    transforms, retrieval_rejections = _retrieve_qualified_transforms(deepcopy(spec.get("transform_catalog", [])), admitted_ids)
     trace.append({"stage": "RETRIEVE", "status": "QUALIFIED" if transforms else "BLOCKED", "rejections": retrieval_rejections})
     if not transforms:
         return {"disposition": "NO_ACTION", "stop_stage": "RETRIEVE", "trace": trace, "original_unchanged": True, "ledger": list(spec.get("ledger", []))}
@@ -277,14 +291,19 @@ def run_closed_loop(spec):
     ledger = STEP_J.append_event(ledger, machine_event)
     trace.append({"stage": "LEARN", "status": "STEP_I_ACCEPT_CANDIDATE_RECORDED", "event_id": machine_event["event_id"]})
 
+    final_disposition = "ACCEPT_CANDIDATE"
     if spec.get("user_learning_event"):
         ledger, learning_state, user_event = apply_user_learning_event(ledger, spec["user_learning_event"], timestamp)
         trace.append({"stage": "LEARN_USER_AUTHORITY", "status": user_event["event_type"], "event_id": user_event["event_id"]})
+        if user_event["event_type"] in {"USER_REJECT_CANDIDATE", "USER_RETAIN_ORIGINAL"}:
+            final_disposition = "RETAIN_ORIGINAL"
+        elif user_event["event_type"] == "USER_MODIFIED_CANDIDATE":
+            final_disposition = "USER_MODIFIED_CANDIDATE"
     else:
         learning_state = STEP_J.derive_state(ledger)
 
     return {
-        "disposition": "ACCEPT_CANDIDATE",
+        "disposition": final_disposition,
         "stop_stage": None,
         "trace": trace,
         "original_unchanged": control["candidate_text"] == original_text,
