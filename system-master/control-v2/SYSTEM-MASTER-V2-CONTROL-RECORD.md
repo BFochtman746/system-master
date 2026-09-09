@@ -28,20 +28,20 @@ No historical PASS transfers to changed candidate bytes.
 
 Current exact continuation:
 
-`SYSTEM-MASTER-REBUILD-018 / PLATFORM-005 — Authenticated PWA + Application Shell + Capability Navigation Foundation`
+`SYSTEM-MASTER-REBUILD-019 / CHAT-001A — Canonical Conversation + Message + Answer + Revision + Branch + Chat-State Foundation`
 
-SMR017's own `NEXT-PACKET-001.json` authorizes exactly SMR018 after the PLATFORM-011 portable gate. PLATFORM-005 direct dependencies PLATFORM-003, PLATFORM-006, and PLATFORM-012 are already portable-qualified in the dependency spine.
+SMR018's own `NEXT-PACKET-001.json` authorizes exactly SMR019 after the PLATFORM-005 portable gate. Its dependency basis identifies FOUNDATION-001, FOUNDATION-005, FOUNDATION-006, DATA-001, PLATFORM-003 and PLATFORM-012 as already portable-qualified prerequisites.
 
-Required SMR018 challenge:
+Required SMR019 challenge:
 1. independently recover and verify the exact historical carrier and source/test subject;
-2. replay strict Java 21 and the packet's complete portable qualification;
-3. reconcile authenticated PWA/application-shell/session/navigation semantics against PLATFORM-003 transport continuity, PLATFORM-006 capability routing and PLATFORM-012 status/notification projection;
-4. test shell/session identity, authenticated entry, capability navigation, stale/unknown/blocked standing, refresh/resume, offline/degraded behavior, route/navigation determinism, UI projection non-authority and persistence boundaries;
-5. compare Java, browser/PWA/static assets, contracts and any persistence/static qualification for contradiction or missing identity/state binding;
-6. preserve the distinction between portable browser/PWA behavior and native iOS lifecycle evidence;
+2. replay strict Java 21 and the packet's complete portable qualification before modifying any bytes;
+3. reconcile canonical conversation, message, answer, revision, branch and chat-state identity/lineage semantics across memory, contracts and persistence;
+4. challenge immutable-message/revision rules, branch ancestry, settled/current lineage, answer/message binding, duplicate/replay behavior, sequence/version monotonicity, stale writes, terminal mutation and concurrency/fencing;
+5. verify projections, summaries and client state cannot become canonical chat truth without CHAT-001A authority;
+6. reconcile FOUNDATION-005 identity, FOUNDATION-006 evidence, DATA-001 persistence, PLATFORM-003 continuity and PLATFORM-012 telemetry without semantic takeover;
 7. implement only objectively demonstrated portable corrections as a new exact candidate identity;
-8. keep target browser/device, native-platform, accessibility/usability and production evidence separate;
-9. prepare A-01 only after a GitHub-native exact candidate exists and Windows/browser execution supplies a real completion delta.
+8. preserve live database concurrency/crash behavior, native-client behavior, human/production evidence and any target-only claims separately;
+9. prepare A-01 only after a GitHub-native exact candidate exists and Windows execution supplies a real completion delta.
 
 ## 4. Reconciled predecessor train
 
@@ -59,8 +59,9 @@ The dependency-valid reconciliation train is complete through:
 - PLATFORM-009 / SMR015 — historical `b4b117d9...`; corrected local candidate `029cf879...`; JDBC descriptor conflict-target correction locally qualified; focused 120,056; 15/15 suites, 782/782 manifest PASS.
 - PLATFORM-010 / SMR016 — historical `da3b67bc...`; corrected local candidate `d7f26efa...`; JDBC request/transition INSERT arity correction locally qualified; focused 120,055; 16/16 suites; 841/841 manifest PASS. Durable record: `PLATFORM010-RECONCILIATION-001.md`.
 - PLATFORM-011 / SMR017 — historical `81277d2a66c3bf6da68f0ab2355ce3219e00f2c5b4b188c7cc6c9caa3394e5a3`; corrected local candidate `39871e6c121861d98f25ba8eddce5de16480e633b21666e2b7c364b3fa808e43`; durable communication-record parity correction locally qualified. Candidate focused 450,077; 17/17 suites; 25/25 contracts; 12 SQL objects; 17/17 R021; coherence/congruence; 939/939 manifest PASS. Candidate manifest SHA `4e0c95fe6cad87ef34a98e9b5025e0d183a16796e8cd464fc856be7bf19b9f57`; CURRENT-AUTHORITY SHA `459158130cd513f12318d501d67f5cc5c346cf66f474bbd4f7a235e1454babf5`. Durable record: `PLATFORM011-RECONCILIATION-001.md`.
+- PLATFORM-005 / SMR018 — historical `66657a53d962e045d3f24baee9da4d6a107a152a404b84e3c9973b90b22b906c`; corrected local candidate `baadeae45c024369e16ef718d930e93099411f32cc938f80418c254506c2126d`; client projection-expiry and offline-cache max-age parity correction locally qualified. Candidate focused 120,078; 18/18 suites; 6/6 contracts; persistence boundary PASS with 0 PostgreSQL objects; 13/13 R022; coherence/congruence; 985/985 manifest PASS. Candidate manifest SHA `b7d5ccd4c1b4f937cb93ae6a173c436e30623ccd26e3ab1a58fec5ce24f5863d`; CURRENT-AUTHORITY SHA `5270e8ada0c07dcf269838f0a6934fb8c8b2379019c632ad011342638eafbc52`. Durable record: `PLATFORM005-RECONCILIATION-001.md`; focused patch: `PLATFORM005_TEMPORAL_PROJECTION_CACHE_PARITY_REPAIR_001.patch`.
 
-Each corrected candidate remains distinct from its historical seal. Runnable recovered source is in durable Library custody; normal GitHub-native candidate import + fresh hosted qualification remain required before A-01 can qualify changed bytes.
+Each corrected candidate remains distinct from its historical seal. Runnable recovered source is in durable Library/local custody; normal GitHub-native candidate import + fresh hosted qualification remain required before A-01 can qualify changed bytes.
 
 ## 5. Assurance standing
 
@@ -89,9 +90,9 @@ Unblock event: credentialed normal Git transport imports the already-verified se
 
 ## 6. Source-custody and target boundaries
 
-Corrected F008/DATA001/P001/P002/P003/P012/P006/P008/P009/P010/P011 candidate source trees are not yet ordinary GitHub-native source. Exact import, candidate reproduction, and fresh hosted qualification remain required.
+Corrected F008/DATA001/P001/P002/P003/P012/P006/P008/P009/P010/P011/P005 candidate source trees are not yet ordinary GitHub-native source. Exact import, candidate reproduction, and fresh hosted qualification remain required.
 
-Target-only obligations remain separate, including PC-ENDGAME-014 through PC-ENDGAME-024 for the reconciled train. Windows/A-01 evidence cannot substitute for Apple-native iOS/macOS claims.
+Target-only obligations remain separate, including PC-ENDGAME-014 through PC-ENDGAME-025 for the reconciled train. Windows/A-01 evidence cannot substitute for Apple-native iOS/macOS claims.
 
 ## 7. Specialist boundaries
 
@@ -114,9 +115,9 @@ No corrected central-spine candidate currently justifies an A-01 ticket because 
 
 ## 9. Canonical priority queue
 
-P0 — `UAF-S1-PLATFORM005-RECONCILIATION-QUALIFICATION-001` / SMR018.
+P0 — `UAF-S1-CHAT001A-RECONCILIATION-QUALIFICATION-001` / SMR019.
 
-P0 parallel preservation — GitHub-native import/fresh qualification for corrected F008/DATA001/P001/P002/P003/P012/P006/P008/P009/P010/P011 candidates when exact source transport is available; preserve FOUNDATION-007 rebind obligations; complete RECON-001C sealed-history import.
+P0 parallel preservation — GitHub-native import/fresh qualification for corrected F008/DATA001/P001/P002/P003/P012/P006/P008/P009/P010/P011/P005 candidates when exact source transport is available; preserve FOUNDATION-007 rebind obligations; complete RECON-001C sealed-history import.
 
 P1 — dependency-valid Book, Learning and Literary specialist work under private-data/human/author boundaries.
 
@@ -124,6 +125,6 @@ P2 — target-only/native obligations when the appropriate execution environment
 
 ## 10. Exact next objective
 
-Execute SMR018 / PLATFORM-005 from its exact recovered carrier. Verify exact bytes first, replay its complete portable gate, reconcile authenticated PWA/application-shell/capability-navigation behavior and projection authority boundaries, repair only an objectively demonstrated portable inconsistency as a new candidate identity, and advance only to the packet's own dependency-valid successor.
+Execute SMR019 / CHAT-001A from its exact recovered carrier. Verify exact bytes first, replay its complete portable gate, reconcile canonical conversation/message/answer/revision/branch/chat-state identity and persistence semantics, repair only an objectively demonstrated portable inconsistency as a new candidate identity, and advance only to the packet's own dependency-valid successor.
 
-This record supersedes prior current-state statements naming PLATFORM-011 or any earlier authority as the central next objective.
+This record supersedes prior current-state statements naming PLATFORM-005 or any earlier authority as the central next objective.
