@@ -1,0 +1,121 @@
+--- a/10_REQUIREMENTS/SMR017-PACKET-CONTRACT.md
++++ b/10_REQUIREMENTS/SMR017-PACKET-CONTRACT.md
+@@ -13,7 +13,7 @@
+ - communication usage/evidence references.
+ 
+ ## Non-ownership
+-PLATFORM-011 does not grant identity/delegation/policy/approval truth, does not grant consequential effect authority, does not own artifact bytes, does not own evidence standing, and cannot convert a provider response into canonical domain truth. Remote content remains UNTRUSTED_EXTERNAL or quarantined.
++PLATFORM-011 does not grant identity/delegation/policy/approval truth, does not grant consequential effect authority, does not own artifact bytes, does not own evidence standing, and cannot convert a provider response into canonical domain truth. Remote content remains UNTRUSTED_EXTERNAL or quarantined. The durable communication-receipt contract preserves both `UNTRUSTED_EXTERNAL` and `QUARANTINED_EXTERNAL` standings exactly as the Java/JSON contract does.
+ 
+ ## Effect law
+ HTTP method is not an effect classifier. READ_ONLY and EXTERNAL_EFFECT are explicit semantics. EXTERNAL_EFFECT requires an exact PLATFORM-010 action request + authorization binding. A GET can be consequential and a POST can be read-only; method names never bypass the effect gate.
+@@ -22,7 +22,7 @@
+ Only HTTPS is admitted. Provider descriptor host and exact port are allowlisted. DNS must resolve to public/non-reserved addresses. The observed peer must be in the authorized resolution set. The raw leaf MUST NOT automatically follow redirects; any redirect target is a new governed request. Target-resolver TOCTOU/connect-time peer enforcement remains PC-ENDGAME-024.
+ 
+ ## Secret law
+-Caller-provided credential headers are forbidden. Durable request/receipt/cache/usage/telemetry records contain no secret material. SecretLease material is short-lived and closed after transport use. Complete memory zeroization of immutable Java String values is not claimed.
++Caller-provided credential headers are forbidden. Durable request/receipt/cache/usage/telemetry records contain no secret material. SecretLease material is short-lived and closed after transport use. Durable provider descriptors persist the non-secret credential prefix needed to reconstruct the exact descriptor while never persisting secret material. Complete memory zeroization of immutable Java String values is not claimed.
+ 
+ ## Cache/source law
+ Cache reuse requires exact privacy partition, freshness and RFC 9111 Vary request-value binding. Cross-provider source identities are canonicalized separately from provider hits. Search coverage must expose COMPLETE/PARTIAL/INSUFFICIENT standing rather than hiding provider failures.
+@@ -35,3 +35,7 @@
+ 
+ ## Target fence
+ PC-ENDGAME-024 remains deferred. Portable code/static SQL is not live provider/DNS/TLS/secret/OAuth/PostgreSQL/security/resilience/soak proof. Production certification remains false.
++
++
++## JDBC durable-record parity
++Portable JDBC INSERT contracts for provider descriptors, communication requests, communication receipts and webhook admissions MUST bind every durable field required to reconstruct the canonical record, with one bind parameter per named column. Partial INSERT shapes that cannot satisfy the PostgreSQL record contract are a qualification failure.
+--- a/05_DATA/postgresql/010_smr017_platform011_external_communication.up.sql
++++ b/05_DATA/postgresql/010_smr017_platform011_external_communication.up.sql
+@@ -15,6 +15,7 @@
+  allowed_methods jsonb NOT NULL CHECK (jsonb_typeof(allowed_methods)='array' AND jsonb_array_length(allowed_methods) BETWEEN 1 AND 8),
+  secret_ref text NULL,
+  secret_header text NULL,
++ secret_prefix text NOT NULL CHECK (length(secret_prefix) <= 64),
+  max_requests_per_window integer NOT NULL CHECK (max_requests_per_window BETWEEN 1 AND 1000000),
+  window_seconds integer NOT NULL CHECK (window_seconds BETWEEN 1 AND 86400),
+  max_attempts integer NOT NULL CHECK (max_attempts BETWEEN 1 AND 8),
+@@ -76,7 +77,7 @@
+  cached boolean NOT NULL,
+  authority_granted boolean NOT NULL DEFAULT false CHECK (authority_granted=false),
+  canonical_truth boolean NOT NULL DEFAULT false CHECK (canonical_truth=false),
+- response_trust text NOT NULL CHECK (response_trust='UNTRUSTED_EXTERNAL'),
++ response_trust text NOT NULL CHECK (response_trust IN ('UNTRUSTED_EXTERNAL','QUARANTINED_EXTERNAL')),
+  started_at timestamptz NOT NULL, completed_at timestamptz NOT NULL CHECK (completed_at >= started_at), evidence_ref text NOT NULL,
+  FOREIGN KEY (request_id,request_digest) REFERENCES platform011_communication_request(request_id,request_digest),
+  FOREIGN KEY (provider_id,provider_descriptor_digest) REFERENCES platform011_provider_descriptor(provider_id,descriptor_digest)
+--- a/05_DATA/DATA001-MIGRATION-MANIFEST-001.json
++++ b/05_DATA/DATA001-MIGRATION-MANIFEST-001.json
+@@ -98,7 +98,7 @@
+       "manifest_ordinal": 10,
+       "version": "0.18.0",
+       "up_path": "05_DATA/postgresql/010_smr017_platform011_external_communication.up.sql",
+-      "up_sha256": "78237e32099db1de137d3f85469d20bbcedf83160af53108ca793a7dfc8a9926",
++      "up_sha256": "9ba904f88efb2a6b1fc5a1a4d515ccbd4a633323b540dc12ae2cabf1e89c3b36",
+       "down_path": "05_DATA/postgresql/010_smr017_platform011_external_communication.down.sql",
+       "down_sha256": "997f074bb4d245f9f707de43985687ed4af41981e52be44b8f01b5dc5be8ae85",
+       "authority": "PLATFORM-011",
+--- a/11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/communication/JdbcPlatform011Repository.java
++++ b/11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/communication/JdbcPlatform011Repository.java
+@@ -1,2 +1,11 @@
+-package org.systemmaster.rebuild.platform.communication;import javax.sql.DataSource;public final class JdbcPlatform011Repository{private final DataSource dataSource;public JdbcPlatform011Repository(DataSource d){if(d==null)throw new IllegalArgumentException("dataSource");dataSource=d;}public DataSource dataSource(){return dataSource;}public static String providerInsertSql(){return "INSERT INTO platform011_provider_descriptor(provider_id,version,descriptor_digest) VALUES(?,?,?) ON CONFLICT (provider_id) DO NOTHING";}public static String requestInsertSql(){return "INSERT INTO platform011_communication_request(request_id,request_digest,provider_id,provider_descriptor_digest) VALUES(?,?,?,?) ON CONFLICT (request_id) DO NOTHING";}public static String receiptInsertSql(){return "INSERT INTO platform011_communication_receipt(receipt_id,request_id,request_digest,provider_id,provider_descriptor_digest) VALUES(?,?,?,?,?)";}public static String webhookInsertSql(){return "INSERT INTO platform011_webhook_admission(admission_id,delivery_id,delivery_digest,replay_key) VALUES(?,?,?,?)";}}
+-
++package org.systemmaster.rebuild.platform.communication;
++import javax.sql.DataSource;
++public final class JdbcPlatform011Repository {
++ private final DataSource dataSource;
++ public JdbcPlatform011Repository(DataSource d){if(d==null)throw new IllegalArgumentException("dataSource");dataSource=d;}
++ public DataSource dataSource(){return dataSource;}
++ public static String providerInsertSql(){return "INSERT INTO platform011_provider_descriptor(provider_id,version,descriptor_digest,classification_ceiling,allowed_hosts,allowed_ports,allowed_operations,allowed_methods,secret_ref,secret_header,secret_prefix,max_requests_per_window,window_seconds,max_attempts,max_cost_micros,health_ttl_seconds,evidence_ref) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT (provider_id) DO NOTHING";}
++ public static String requestInsertSql(){return "INSERT INTO platform011_communication_request(request_id,request_digest,work_id,attempt_id,caller_authority,provider_id,provider_descriptor_digest,operation,semantic,method,uri,headers_digest,body_digest,body_bytes,max_response_bytes,max_cost_micros,timeout_ms,classification,privacy_partition,action_request_digest,action_authorization_binding_id,action_authorization_binding_digest,created_at,evidence_ref) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT (request_id) DO NOTHING";}
++ public static String receiptInsertSql(){return "INSERT INTO platform011_communication_receipt(receipt_id,request_id,request_digest,provider_id,provider_descriptor_digest,provider_health_digest,status_code,response_digest,response_bytes,peer_ip,final_uri,cached,authority_granted,canonical_truth,response_trust,started_at,completed_at,evidence_ref) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";}
++ public static String webhookInsertSql(){return "INSERT INTO platform011_webhook_admission(admission_id,delivery_id,delivery_digest,replay_key,authenticated,admitted_at,evidence_ref) VALUES(?,?,?,?,?,?,?)";}
++}
+--- a/tools/verify_platform011_sql_contract.py
++++ b/tools/verify_platform011_sql_contract.py
+@@ -9,8 +9,19 @@
+ s=up.read_text();tables=['platform011_provider_descriptor','platform011_provider_health','platform011_communication_request','platform011_communication_receipt','platform011_cache_record','platform011_source_identity','platform011_source_snapshot','platform011_freshness_record','platform011_webhook_delivery','platform011_webhook_admission','platform011_external_usage','platform011_secret_lease_metadata']
+ for t in tables:
+  if not re.search(r'CREATE TABLE\s+'+re.escape(t)+r'\b',s,re.I):issues.append('missing table '+t)
+-for tok in ["semantic IN ('READ_ONLY','EXTERNAL_EFFECT')","semantic='EXTERNAL_EFFECT'","action_authorization_binding_digest","FOREIGN KEY (provider_id,provider_descriptor_digest)","authority_granted=false","canonical_truth=false","response_trust='UNTRUSTED_EXTERNAL'","jsonb_object_length(vary_request_values) <= 32","UNIQUE(identity_class,canonical_key)","replay_key text NOT NULL UNIQUE","material_persisted=false","communication receipt exact request/provider binding mismatch","provider health TTL exceeds descriptor","provider health must advance monotonically","immutable PLATFORM-011 record cannot update","No secret material","HTTP verb does not grant effect authority"]:
++for tok in ["semantic IN ('READ_ONLY','EXTERNAL_EFFECT')","semantic='EXTERNAL_EFFECT'","action_authorization_binding_digest","FOREIGN KEY (provider_id,provider_descriptor_digest)","authority_granted=false","canonical_truth=false","response_trust IN ('UNTRUSTED_EXTERNAL','QUARANTINED_EXTERNAL')","secret_prefix text NOT NULL","jsonb_object_length(vary_request_values) <= 32","UNIQUE(identity_class,canonical_key)","replay_key text NOT NULL UNIQUE","material_persisted=false","communication receipt exact request/provider binding mismatch","provider health TTL exceeds descriptor","provider health must advance monotonically","immutable PLATFORM-011 record cannot update","No secret material","HTTP verb does not grant effect authority"]:
+  if tok not in s:issues.append('missing SQL guard '+tok)
++# JDBC contract strings must bind complete required durable record shapes.
++jdbc=(R/'11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/communication/JdbcPlatform011Repository.java').read_text()
++expected_jdbc={'providerInsertSql':17,'requestInsertSql':24,'receiptInsertSql':18,'webhookInsertSql':7}
++for name,count in expected_jdbc.items():
++ m2=re.search(r'public static String '+name+r'\(\)\{return "([^"]+)";\}',jdbc)
++ if not m2: issues.append('missing JDBC statement '+name); continue
++ stmt=m2.group(1); im=re.search(r'INSERT INTO\s+\S+\((.*?)\) VALUES\((.*?)\)',stmt)
++ if not im: issues.append('invalid JDBC INSERT shape '+name); continue
++ cols=len([x for x in im.group(1).split(',') if x.strip()]); binds=im.group(2).count('?')
++ if cols!=count or binds!=count: issues.append(f'JDBC INSERT incomplete {name}:{cols}/{binds}!={count}')
++if 'secret_prefix' not in jdbc: issues.append('JDBC provider descriptor omits secret_prefix')
+ # no durable secret value columns
+ for forbidden in ['secret_material text','secret_value text','authorization_header text','cookie_value text']:
+  if forbidden in s.lower():issues.append('forbidden durable secret field '+forbidden)
+--- a/tools/verify_smr017_recurrence.py
++++ b/tools/verify_smr017_recurrence.py
+@@ -2,7 +2,7 @@
+ import json,sys
+ from pathlib import Path
+ R=Path(__file__).resolve().parents[1];issues=[]
+-checks=[('11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/communication/Platform011Authority.java',['rawApplicationHttpAllowed','createsDomainTruth','robotsIsAuthorization']),('11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/communication/GovernedProviderTransport.java',['provider descriptor binding','provider operation/method denied','classification exceeds provider ceiling','caller credential header forbidden; use secret broker','PLATFORM-010 authorization required']),('11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/communication/InMemoryProviderRegistry.java',['provider descriptor id digest conflict','health time must advance']),('11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/communication/NetworkGuard.java',['private/reserved DNS answer','connect peer not in authorized DNS set','raw transport redirect following forbidden']),('11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/communication/SecretLease.java',['secret lease inactive','Arrays.fill']),('11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/communication/ProviderCircuitBreaker.java',['HALF_OPEN','halfOpenProbe']),('11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/communication/HttpFramingValidator.java',['ambiguous TE+CL framing','conflicting content-length']),('11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/communication/CacheRecord.java',['Vary binding cardinality','privacyPartition']),('11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/communication/SourceIdentityService.java',['DOI','canonical']),('11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/communication/FederatedSearchService.java',['PARTIAL','INSUFFICIENT']),('11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/communication/SitemapParser.java',['disallow-doctype-decl','external-general-entities']),('11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/communication/WebhookVerifier.java',['webhook timestamp skew','webhook HMAC']),('11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/communication/CommunicationRequest.java',['EXTERNAL_EFFECT','effect requires PLATFORM-010 binding','read-only request cannot carry effect authority']),('11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/communication/CommunicationReceipt.java',['remote response cannot grant authority/truth','UNTRUSTED_EXTERNAL']),('05_DATA/postgresql/010_smr017_platform011_external_communication.up.sql',['communication receipt exact request/provider binding mismatch','material_persisted=false','semantic EXTERNAL_EFFECT','immutable PLATFORM-011 record cannot update']),('10_REQUIREMENTS/SMR017-PACKET-CONTRACT.md',['seventeen','reconstructed','single governed external-communication fabric','PC-ENDGAME-024'])]
++checks=[('11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/communication/Platform011Authority.java',['rawApplicationHttpAllowed','createsDomainTruth','robotsIsAuthorization']),('11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/communication/GovernedProviderTransport.java',['provider descriptor binding','provider operation/method denied','classification exceeds provider ceiling','caller credential header forbidden; use secret broker','PLATFORM-010 authorization required']),('11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/communication/InMemoryProviderRegistry.java',['provider descriptor id digest conflict','health time must advance']),('11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/communication/NetworkGuard.java',['private/reserved DNS answer','connect peer not in authorized DNS set','raw transport redirect following forbidden']),('11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/communication/SecretLease.java',['secret lease inactive','Arrays.fill']),('11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/communication/ProviderCircuitBreaker.java',['HALF_OPEN','halfOpenProbe']),('11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/communication/HttpFramingValidator.java',['ambiguous TE+CL framing','conflicting content-length']),('11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/communication/CacheRecord.java',['Vary binding cardinality','privacyPartition']),('11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/communication/SourceIdentityService.java',['DOI','canonical']),('11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/communication/FederatedSearchService.java',['PARTIAL','INSUFFICIENT']),('11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/communication/SitemapParser.java',['disallow-doctype-decl','external-general-entities']),('11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/communication/WebhookVerifier.java',['webhook timestamp skew','webhook HMAC']),('11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/communication/CommunicationRequest.java',['EXTERNAL_EFFECT','effect requires PLATFORM-010 binding','read-only request cannot carry effect authority']),('11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/communication/CommunicationReceipt.java',['remote response cannot grant authority/truth','UNTRUSTED_EXTERNAL','QUARANTINED_EXTERNAL']),('11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/communication/JdbcPlatform011Repository.java',['secret_prefix','action_authorization_binding_digest','response_trust','authenticated']),('05_DATA/postgresql/010_smr017_platform011_external_communication.up.sql',['communication receipt exact request/provider binding mismatch','material_persisted=false','semantic EXTERNAL_EFFECT','immutable PLATFORM-011 record cannot update','secret_prefix','QUARANTINED_EXTERNAL']),('10_REQUIREMENTS/SMR017-PACKET-CONTRACT.md',['seventeen','reconstructed','single governed external-communication fabric','PC-ENDGAME-024'])]
+ for rel,toks in checks:
+  p=R/rel
+  if not p.exists():issues.append('missing '+rel);continue
+
+# Regression delta bound to this patch
+# - PLATFORM-011 focused test now constructs and accepts QUARANTINED_EXTERNAL as contract-valid.
+# - PLATFORM-011 focused test requires provider/request/receipt/webhook JDBC bind arities 17/24/18/7.
+# - provider JDBC statement must include secret_prefix.
+# - request JDBC statement must include action_authorization_binding_digest.
+# - receipt JDBC statement must include response_trust.
+# - webhook JDBC statement must include authenticated.
+# - PLATFORM-011 focused assertions increase 450072 -> 450077.
+# - contract parity remains 25/25 PASS.
+# - SQL contract remains 12/12 durable objects PASS and now checks complete JDBC INSERT shapes.
+# - R021 recurrence remains 17/17 PASS and now binds the durable-record parity controls.
+# - candidate exact source/test subject: 39871e6c121861d98f25ba8eddce5de16480e633b21666e2b7c364b3fa808e43.
