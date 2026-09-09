@@ -2,8 +2,8 @@
   "owner_system_id": "BOOK",
   "owner_path": "SYSTEM_MASTER/BOOK",
   "control_ref": "book-system/control-v1",
-  "last_known_control_head": "e95d2036da050eaa97c80c9e4380a0379e225cf8",
-  "delegation_epoch": 10,
+  "last_known_control_head": "5864bb6a72bd081fe590a2b16622f1909b48bb67",
+  "delegation_epoch": 11,
   "active_delegations": [
     {
       "delegation_id": "SECOND-SHIFT-BOOK-VERSION-ROLLBACK-A01-HANDOFF-001",
@@ -11,17 +11,18 @@
       "objective_id": "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001-A01-REGISTRATION-AND-QUALIFICATION-001",
       "state": "READY",
       "valid_for_control_ref": "book-system/control-v1",
-      "valid_for_control_head": "e95d2036da050eaa97c80c9e4380a0379e225cf8",
+      "valid_for_control_head": "5864bb6a72bd081fe590a2b16622f1909b48bb67",
       "created_at": "2026-09-09T23:20:00Z",
-      "last_revalidated_at": "2026-09-09T23:20:00Z",
+      "last_revalidated_at": "2026-09-09T23:21:00Z",
       "completed_checkpoints": [
         "BOOK-SYSTEM-VERSION-AND-ROLLBACK-PREIMPLEMENTATION-RESEARCH-001 — CLOSED at ced3fc4a7b0009a331787c371b284e8c97078a1e",
         "BOOK-SYSTEM-VERSION-AND-ROLLBACK-FORENSIC-MAP-001 — CLOSED at 166d04dd6e5ec83ce495c6a94e11c6ac6ce56bcc",
         "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001 contract — DEFINED at 690337636664ad7717811c1d4c875a7b4f304034",
         "Version/Rollback executable core + authority-ingest refinement — IMPLEMENTED",
-        "48-case authority-v2 hosted prequalification — PASS on exact subject 402ab84a14e9d345530d60394ebc36176541dd21, run 34416203680, artifact 10129156222"
+        "48-case authority-v2 hosted prequalification — PASS on exact subject 402ab84a14e9d345530d60394ebc36176541dd21, run 34416203680, artifact 10129156222",
+        "A-01 registration handoff packet — PREPARED at qualification/book-system/version-and-rollback-001/BOOK-SYSTEM-VERSION-AND-ROLLBACK-001-A01-REGISTRATION-HANDOFF.json"
       ],
-      "completion_delta": "Do not rebuild Version/Rollback. Preserve the exact 48/48 hosted-passing candidate and move only the remaining shared-authority dependency: verify the live canonical A-01 registry/control plane, and if BOOK-SYSTEM-VERSION-AND-ROLLBACK-001 is centrally registered, execute/adjudicate the exact-SHA A-01 path without changing the candidate. If registration is still absent, preserve a precise shared-registration handoff and do not modify shared A-01 authority from the Book lane.",
+      "completion_delta": "Do not rebuild Version/Rollback. Preserve the exact 48/48 hosted-passing candidate and move only the remaining shared-authority dependency: verify the live canonical A-01 registry/control plane, and if BOOK-SYSTEM-VERSION-AND-ROLLBACK-001 is centrally registered, execute/adjudicate the exact-SHA A-01 path without changing the candidate. If registration is still absent, preserve the prepared shared-registration handoff and do not modify shared A-01 authority from the Book lane.",
       "stop_condition": "Either authoritative A-01 PASS is obtained for the exact Version/Rollback subject and Book control can advance, or the exact hosted candidate remains preserved with a current evidence-backed CENTRAL_A01_REGISTRATION blocker and no completed research/implementation/prequalification phase is repeated.",
       "allowed_work": [
         "revalidate book-system/control-v1 before execution and stop on unadjudicated authority delta",
@@ -31,7 +32,7 @@
         "invoke an already-authorized central A-01 gateway only if registration and exact-subject prerequisites are satisfied",
         "adjudicate A-01 receipt/artifact identity and classify SUBJECT_FAILURE, INFRA_FAILURE or CONTROL_PLANE_FAILURE",
         "preserve exact hosted/A-01 evidence and update Book control/Second Shift on a legitimate result",
-        "prepare a bounded shared-infrastructure registration handoff when registration remains absent"
+        "maintain the bounded shared-infrastructure registration handoff while registration remains absent"
       ],
       "forbidden_authority": [
         "do not repeat Version/Rollback research, forensic mapping, contract design, implementation or hosted tests already closed/passed",
@@ -139,6 +140,6 @@
     }
   ],
   "owner_revalidation_required": false,
-  "reason": "State-014 preserves completed Version/Rollback research, implementation and exact hosted 48/48 evidence and routes only the remaining shared-authority registration/A-01 qualification dependency. Useful unattended work remains: revalidate central registration and execute/adjudicate A-01 if and only if the shared authority admits it.",
+  "reason": "State-014 preserves completed Version/Rollback research, implementation and exact hosted 48/48 evidence and routes only the remaining shared-authority registration/A-01 qualification dependency. The A-01 registration handoff packet is prepared, and useful unattended work remains: revalidate central registration and execute/adjudicate A-01 if and only if the shared authority admits it.",
   "empty_is_valid": true
 }
