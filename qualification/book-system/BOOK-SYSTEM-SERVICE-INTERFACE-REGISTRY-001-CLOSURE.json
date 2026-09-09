@@ -1,0 +1,77 @@
+{
+  "closure_id": "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-001-CLOSURE",
+  "effective_date": "2026-09-09",
+  "standing": "PASS__A01_REGISTERED_EXACT_SHA__SERVICE_INTERFACE_REGISTRY_CLOSED",
+  "project": "BOOK SYSTEM",
+  "control_branch": "book-system/control-v1",
+  "qualification_id": "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-001",
+  "qualified_subject": {
+    "sha": "9245cf9ce56f15020369eb490d9e562480825158",
+    "checkout_sha": "9245cf9ce56f15020369eb490d9e562480825158",
+    "branch": "book-system/control-v1",
+    "exact_sha_match": true
+  },
+  "canonical_control_plane": {
+    "ref": "main",
+    "control_plane_sha": "4fac7e20f165d05e041661e487c2f96f3688ac2f",
+    "registry_version": 16,
+    "policy_version": 6,
+    "registered_workstream_id": "BOOK-SYSTEM",
+    "gate_class": "focused"
+  },
+  "authoritative_a01_run": {
+    "run_id": 34377566232,
+    "job_id": 102554104000,
+    "runner_name": "A-01",
+    "runner_os": "Windows",
+    "runner_arch": "X64",
+    "result_class": "PASS",
+    "child_exit_code": 0,
+    "promotion_authorized": false,
+    "note": "promotion_authorized=false is expected for a focused qualification. This closure proves the exact service-interface subject only and grants no provider canonical-write, manuscript-promotion, production, publication or author authority."
+  },
+  "qualified_registry": {
+    "service_families": 4,
+    "registered_operations": 17,
+    "fixture_cases": 18,
+    "service_operation_schema_validation": "PASS",
+    "provider_class_binding": "PASS",
+    "minimum_projection_enforcement": "PASS",
+    "canonical_write_denial": "PASS",
+    "stale_projection_rejection": "PASS",
+    "idempotent_replay": "PASS",
+    "idempotency_conflict_rejection": "PASS",
+    "nonidempotent_retry_reconciliation": "PASS",
+    "abstention_preservation": "PASS",
+    "parent_admission_handoff": "PASS"
+  },
+  "service_families": [
+    "PROSE_ANALYSIS_AND_REVISION",
+    "BOOK_EVALUATION",
+    "RESEARCH_AND_EVIDENCE",
+    "DOCUMENT_ARTIFACT_AND_EXPORT"
+  ],
+  "authoritative_evidence": {
+    "artifact_id": 10114497453,
+    "artifact_name": "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-001-34377566232-evidence",
+    "artifact_size_bytes": 5688,
+    "artifact_digest": "sha256:2341ae44b9e1148ac19ccec6f2c68c60631977800c2bf5eacadc326567b13d71",
+    "artifact_expiration": "2026-10-09T16:34:38Z",
+    "files_uploaded": 12
+  },
+  "control_plane_enforcement": {
+    "run_id": 34377565766,
+    "subject_sha": "9245cf9ce56f15020369eb490d9e562480825158",
+    "conclusion": "success",
+    "meaning": "The exact qualified subject uses the registered shared A-01 gateway and contains no forbidden direct self-hosted qualification path."
+  },
+  "closure_claim": "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-001 is closed for the exact qualified subject SHA. Book System now has a qualified parent-owned boundary for invoking Prose, Book Evaluator, research/evidence, and document/export providers without transferring canonical-write authority.",
+  "non_claims": [
+    "This qualification does not transfer to later commits automatically.",
+    "It does not prove real provider availability or quality beyond the registered interface and adversarial boundary behavior.",
+    "It does not admit any child output into parent canonical state automatically.",
+    "It does not create author approval, human evidence, production standing, manuscript promotion or publication authority.",
+    "It does not qualify BOOK-SYSTEM-LIFECYCLE-TRANSITION-ENGINE-001."
+  ],
+  "exact_next_objective": "BOOK-SYSTEM-LIFECYCLE-TRANSITION-ENGINE-001"
+}
