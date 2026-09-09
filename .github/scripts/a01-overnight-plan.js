@@ -53,6 +53,17 @@ function validateTicket(raw, file, nightDate, policy, registry) {
   if (!validTime(raw.earliest_start_local) || !validTime(raw.latest_start_local) || !validTime(raw.window_end_local)) errors.push('TIME_FORMAT');
   if (!requiredString(raw.ticket_id) || !requiredString(raw.workstream_id) || !requiredString(raw.qualification_id) || !requiredString(raw.origin_ref)) errors.push('IDENTITY');
   if (!requiredString(raw.resume_on_pass) || !requiredString(raw.resume_on_failure) || !requiredString(raw.notification_target)) errors.push('RETURN_TICKET');
+
+  const secondShift = policy.overnight && policy.overnight.second_shift;
+  if (raw.state === 'READY' && secondShift && secondShift.enabled === true) {
+    if (!Array.isArray(secondShift.lanes) || !secondShift.lanes.includes(raw.overnight_lane)) errors.push('SECOND_SHIFT_LANE');
+    if (secondShift.require_completion_delta_for_ready === true) {
+      const d = raw.completion_delta;
+      if (!d || typeof d !== 'object' || !requiredString(d.before) || !requiredString(d.evidence) || !requiredString(d.after_pass) || !requiredString(d.unlocks)) errors.push('COMPLETION_DELTA_REQUIRED');
+    }
+    if (secondShift.require_stop_condition_for_ready === true && !requiredString(raw.stop_condition)) errors.push('STOP_CONDITION_REQUIRED');
+  }
+
   const est = safeInt(raw.estimated_minutes); const max = safeInt(raw.max_runtime_minutes); const pri = safeInt(raw.priority);
   if (!(est >= 1 && est <= policy.overnight.max_ticket_runtime_minutes)) errors.push('ESTIMATED_MINUTES');
   if (!(max >= 1 && max <= policy.overnight.max_ticket_runtime_minutes && max >= est)) errors.push('MAX_RUNTIME_MINUTES');
@@ -188,6 +199,9 @@ function buildPlan({ now = new Date(), policy, registry, ticketRecords, nightDat
     qualification_id: s.ticket.raw.qualification_id,
     subject_sha: s.ticket.raw.subject_sha,
     origin_ref: s.ticket.raw.origin_ref,
+    overnight_lane: s.ticket.raw.overnight_lane || null,
+    value_class: s.ticket.raw.value_class || null,
+    critical_path_rank: Number.isInteger(s.ticket.raw.critical_path_rank) ? s.ticket.raw.critical_path_rank : null,
     qualifier_timeout_minutes: s.ticket.max_minutes,
     job_timeout_minutes: Math.min(policy.runtime.max_job_timeout_minutes, s.ticket.max_minutes + policy.runtime.cleanup_margin_minutes),
     planned_start: s.start.toISOString(),
@@ -197,8 +211,8 @@ function buildPlan({ now = new Date(), policy, registry, ticketRecords, nightDat
     resume_on_failure: s.ticket.raw.resume_on_failure,
     notification_target: s.ticket.raw.notification_target
   }));
-  while (slots.length < policy.overnight.max_slots) slots.push({ enabled: false, slot: slots.length + 1, ticket_id: '', workstream_id: '', qualification_id: 'A01-CONTROL-PLANE-SELFTEST', subject_sha: '0000000000000000000000000000000000000000', origin_ref: 'refs/heads/main', qualifier_timeout_minutes: policy.runtime.normal_qualifier_timeout_minutes, job_timeout_minutes: policy.runtime.normal_job_timeout_minutes, planned_start: globalStart.toISOString(), not_before: globalStart.toISOString(), not_after: globalEnd.toISOString(), resume_on_pass: 'No slot.', resume_on_failure: 'No slot.', notification_target: 'none' });
-  return { plan_version: 2, policy_version: policy.policy_version, registry_version: registry.registry_version, night_date: target, timezone: policy.overnight.timezone, window_start: globalStart.toISOString(), window_end: globalEnd.toISOString(), generated_at: now.toISOString(), scheduled_count: scheduled.length, rejected, slots };
+  while (slots.length < policy.overnight.max_slots) slots.push({ enabled: false, slot: slots.length + 1, ticket_id: '', workstream_id: '', qualification_id: 'A01-CONTROL-PLANE-SELFTEST', subject_sha: '0000000000000000000000000000000000000000', origin_ref: 'refs/heads/main', overnight_lane: null, value_class: null, critical_path_rank: null, qualifier_timeout_minutes: policy.runtime.normal_qualifier_timeout_minutes, job_timeout_minutes: policy.runtime.normal_job_timeout_minutes, planned_start: globalStart.toISOString(), not_before: globalStart.toISOString(), not_after: globalEnd.toISOString(), resume_on_pass: 'No slot.', resume_on_failure: 'No slot.', notification_target: 'none' });
+  return { plan_version: 3, policy_version: policy.policy_version, registry_version: registry.registry_version, night_date: target, timezone: policy.overnight.timezone, window_start: globalStart.toISOString(), window_end: globalEnd.toISOString(), generated_at: now.toISOString(), scheduled_count: scheduled.length, rejected, slots };
 }
 
 function emit(name, value) {
