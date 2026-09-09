@@ -1,0 +1,86 @@
+{
+  "contract_id": "BOOK-INTELLIGENCE-NARRATIVE-STATE-001-v1",
+  "objective": "Provide one provenance-bearing, nonreconstructive manuscript truth layer for entities, events, causal/goal relations, story/discourse time, character knowledge and downstream invalidation without forcing ambiguous narrative into invented certainty.",
+  "research_authority": [
+    "qualification/literary-prose-engine-001/night-shift-2026-09-09/RESEARCH-PROVENANCE-v1.json",
+    "qualification/literary-prose-engine-001/night-shift-2026-09-09/WORLD-CLASS-PROSE-GAP-AUDIT-v1.json"
+  ],
+  "repository_gap_authority": [
+    "qualification/literary-prose-engine-001/unification-001/BOOK-INTELLIGENCE-GAP-REGISTER-v1.json",
+    "qualification/literary-prose-engine-001/unification-001/BOOK-INTELLIGENCE-UNIFICATION-001-STEP-008-CLOSURE.md"
+  ],
+  "privacy_and_rights": {
+    "raw_manuscript_text_in_state": false,
+    "source_anchor_representation": "chapter/ordinal/token-range identifiers plus SHA-256 digest; downstream tools may resolve text only from an authorized live source",
+    "named_author_target": false,
+    "bulk_copyrighted_reference_body_required": false
+  },
+  "top_level_required": [
+    "state_version",
+    "document_id",
+    "source_sha256",
+    "anchors",
+    "entities",
+    "events",
+    "claims"
+  ],
+  "anchor": {
+    "required": ["anchor_id", "chapter_id", "ordinal", "span_sha256"],
+    "forbidden": ["raw_text", "quoted_text", "manuscript_text"]
+  },
+  "entity": {
+    "required": ["entity_id", "entity_type", "anchor_ids"],
+    "entity_types": ["CHARACTER", "PLACE", "OBJECT", "GROUP", "ABSTRACT", "OTHER"]
+  },
+  "event": {
+    "required": ["event_id", "anchor_ids", "participant_entity_ids"],
+    "optional": ["state_change_tags", "goal_tags", "event_family_id"]
+  },
+  "claim": {
+    "required": ["claim_id", "claim_type", "subject_id", "object_id", "status", "confidence", "provenance_anchor_ids"],
+    "claim_types": [
+      "STORY_TIME_BEFORE",
+      "STORY_TIME_AFTER",
+      "STORY_TIME_OVERLAPS",
+      "SAME_STORY_EVENT",
+      "CAUSES",
+      "ENABLES",
+      "PREVENTS",
+      "GOAL_SUPPORTS",
+      "KNOWS",
+      "BELIEVES",
+      "PERCEIVES",
+      "FOCALIZES",
+      "DISCOURSE_PRECEDES"
+    ],
+    "statuses": ["ASSERTED", "ALTERNATIVE", "UNRESOLVED", "INVALIDATED"],
+    "confidence_range": [0.0, 1.0]
+  },
+  "temporal_rules": [
+    "Story-time relation and discourse-order relation are separate claims.",
+    "A flashback/flashforward is not a contradiction merely because discourse order differs from story-time order.",
+    "Repeated narration of one event may use SAME_STORY_EVENT while retaining multiple discourse anchors.",
+    "Ambiguous chronology must be represented as ALTERNATIVE or UNRESOLVED rather than normalized to one invented ordering.",
+    "Contradictory ASSERTED temporal claims fail validation unless at least one is INVALIDATED or both are explicitly represented as alternatives in a conflict group."
+  ],
+  "perspective_rules": [
+    "KNOWS/BELIEVES/PERCEIVES are distinct claim types.",
+    "FOCALIZES does not imply narrator identity or truth of a character belief.",
+    "Character knowledge claims must be provenance-bearing and temporally compatible with exposure when exposure evidence exists.",
+    "Intentional omniscience or perspective transgression may be represented; the state model is descriptive, not prescriptive."
+  ],
+  "invalidation_rules": [
+    "Every claim depends on provenance_anchor_ids.",
+    "When an anchor changes, all directly dependent claims become invalidation candidates.",
+    "Downstream derived artifacts must consume invalidation candidates before retaining authoritative standing.",
+    "Unrelated claims must not be invalidated merely because another manuscript span changed."
+  ],
+  "non_goals": [
+    "writing or revising prose",
+    "declaring plot quality",
+    "forcing a universal plot template",
+    "resolving author intent",
+    "inventing chronology to eliminate deliberate ambiguity",
+    "replacing human review where narrative interpretation is genuinely contested"
+  ]
+}
