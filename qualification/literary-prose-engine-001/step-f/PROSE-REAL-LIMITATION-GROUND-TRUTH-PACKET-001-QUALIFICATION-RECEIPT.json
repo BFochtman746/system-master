@@ -1,0 +1,53 @@
+{
+  "receipt_id": "PROSE-REAL-LIMITATION-GROUND-TRUTH-PACKET-001-QUALIFICATION-RECEIPT",
+  "effective_date": "2026-09-09",
+  "objective": "PROSE-REAL-LIMITATION-GROUND-TRUTH-001",
+  "standing": "PASS__AUTHOR_PACKET_INFRASTRUCTURE_QUALIFIED__LABELS_ZERO__REVISION_AUTHORITY_ZERO",
+  "packet": "PROSE-REAL-LIMITATION-GROUND-TRUTH-AUTHOR-PACKET-001.json",
+  "validator": "validate_real_limitation_ground_truth_packet.py",
+  "workflow": ".github/workflows/literary-prose-real-limitation-ground-truth-packet-ci.yml",
+  "qualification": {
+    "tested_sha": "42c1412e5c36e0d44875806785d5f009dfb508ca",
+    "workflow_run_id": 34397780523,
+    "conclusion": "success",
+    "case_count": 6,
+    "source_count": 3,
+    "labels_recorded": 0,
+    "revision_authority_count": 0
+  },
+  "source_packages": [
+    {
+      "source_id": "MOSES_I",
+      "package_sha256": "44d97f6b47c24d69390edebdcc239a0a23133c5201c011ef90f9f1f3a2ffbaf0"
+    },
+    {
+      "source_id": "UNHINDERED_3",
+      "package_sha256": "571f8ca4f6cfa5cb273c50ff0249aea30336ff5e4ff97cfc612b7cac08231514"
+    },
+    {
+      "source_id": "UNHINDERED_4",
+      "package_sha256": "b134df0d766b8189c7e4ee3b391b8243e22bffd87224c97e9afb62df80efcb75"
+    }
+  ],
+  "privacy_and_authority": {
+    "raw_prose_committed": false,
+    "candidate_prose_committed": false,
+    "manuscripts_modified": false,
+    "author_labels_authoritative": false,
+    "selection_heuristics_are_ground_truth": false,
+    "automatic_revision_authorized": false,
+    "publication_authorized": false
+  },
+  "what_is_proven": [
+    "Six real private passages across all three admitted manuscript sources are digest-bound in a blinded author-adjudication packet.",
+    "The packet structure and zero-revision-authority boundary are hosted-qualified on the exact tested SHA.",
+    "The packet can accept explicit author labels without persisting raw passage text to the repository."
+  ],
+  "not_proven": [
+    "No real limitation ground truth exists yet because zero author labels have been recorded.",
+    "Real limitation detection accuracy is not qualified.",
+    "No author label authorizes manuscript revision, candidate generation, canon replacement or publication."
+  ],
+  "a01_required": false,
+  "next_transition": "PROSE-REAL-LIMITATION-AUTHOR-ADJUDICATION-001"
+}
