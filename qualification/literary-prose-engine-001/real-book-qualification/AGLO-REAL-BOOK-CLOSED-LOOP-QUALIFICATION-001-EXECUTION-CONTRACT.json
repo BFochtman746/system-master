@@ -1,30 +1,41 @@
 {
   "objective": "AGLO-REAL-BOOK-CLOSED-LOOP-QUALIFICATION-001",
-  "standing": "EXECUTION_PREPARED__PRIVATE_SAMPLE_NOT_YET_RUN",
+  "standing": "EXECUTION_PREPARED__BLOCKED_PENDING_EXPLICIT_AUTHOR_BASELINE_RATIFICATION",
   "depends_on": {
     "step_l_standing": "PASS_CLOSED_LOOP_QUALIFICATION__SYNTHETIC_ONLY__REAL_BOOK_QUALIFICATION_NOT_YET_ADMITTED",
-    "admission_id": "AGLO-REAL-BOOK-ADMISSION-001",
-    "admission_standing": "ADMITTED",
-    "baseline_ratification": "AGLO-REAL-BOOK-BASELINE-RATIFICATION-001"
+    "admission_standing_required": "ADMITTED",
+    "baseline_ratification_required": "EXPLICIT_AUTHOR_RATIFICATION",
+    "current_admission_standing": "NOT_ADMITTED"
   },
-  "source_binding": {
+  "candidate_source_binding": {
     "source_reference": "A Gate Left Open - Master .docx",
     "source_package_sha256": "ec0f5475c05cf6c11a75d139f2dbd131e6133d6abba9121be8b8ef18454b31df",
-    "baseline_version_id": "AGLO-REJECT-ALL-NARRATIVE-v1",
-    "baseline_text_sha256": "a48378682ee15fd4b24bc97293ce43a37f096db254a0b78f715081a8aa8a59ee",
-    "revision_projection": "REJECT_ALL",
+    "candidate_baseline_version_id": "AGLO-REJECT-ALL-NARRATIVE-v1",
+    "candidate_baseline_text_sha256": "a48378682ee15fd4b24bc97293ce43a37f096db254a0b78f715081a8aa8a59ee",
+    "candidate_revision_projection": "REJECT_ALL",
+    "candidate_is_author_ratified": false,
     "original_source_mutation_allowed": false
   },
-  "sample_binding": {
+  "candidate_sample_binding": {
     "sample_id": "AGLO-RBQ-SAMPLE-001",
     "scope": "MULTI_CHAPTER_SAMPLE",
     "chapter_numbers": [1, 8, 19, 21, 24, 29],
     "sample_manifest_sha256": "f456e13c8eb7beb4dae9e32aefb9af32cf3d44a19f4d7af2808a60bfd371c2d4",
-    "total_word_count": 11194
+    "total_word_count": 11194,
+    "standing": "PRECOMPUTED_CANDIDATE_ONLY__REQUIRES_MATCHING_RATIFIED_BASELINE"
   },
-  "execution_sequence": [
-    "VERIFY_PRIVATE_SOURCE_PACKAGE_AND_REJECT_ALL_BASELINE_DIGEST",
-    "VERIFY_FROZEN_SAMPLE_CHAPTER_DIGESTS",
+  "execution_preconditions": [
+    "REAL_BOOK_STATE_EQUALS_ADMITTED",
+    "EXPLICIT_USER_AUTHORIZATION_PRESENT",
+    "RATIFIED_REVISION_PROJECTION_PRESENT",
+    "RATIFIED_BASELINE_TEXT_DIGEST_PRESENT",
+    "SOURCE_PACKAGE_DIGEST_REVERIFIED",
+    "SAMPLE_DIGESTS_REVERIFIED_AGAINST_RATIFIED_BASELINE",
+    "RAW_AND_CANDIDATE_PROSE_REMAIN_PRIVATE_NON_REPOSITORY"
+  ],
+  "execution_sequence_after_preconditions": [
+    "VERIFY_PRIVATE_SOURCE_PACKAGE_AND_RATIFIED_BASELINE_DIGEST",
+    "VERIFY_OR_REBUILD_REPRESENTATIVE_SAMPLE_FOR_RATIFIED_BASELINE",
     "BUILD_PASSAGE_STATES_WITH_STEP_E_AUTHORITIES",
     "RUN_STEP_F_SPECIALIST_DIAGNOSIS_AND_OPPORTUNITY_ADJUDICATION",
     "RETRIEVE_STEP_D_RIGHTS_ADMISSIBLE_CRAFT_PRINCIPLES_AND_STEP_G_TRANSFORMS",
@@ -70,10 +81,5 @@
     "publication_authority": false,
     "retain_original_on_uncertainty": true
   },
-  "overnight_ticket_independence": {
-    "ticket_subject_sha": "0caabd63861041dbfe0d1e057a729139533a1a8a",
-    "ticket_qualification_id": "LITERARY-PROSE-OVERNIGHT-RESEARCH-REGRESSION-SWEEP",
-    "rule": "Any future A-01 receipt for the overnight ticket applies only to its exact ticket subject SHA and does not qualify later real-book execution commits."
-  },
-  "next_transition": "EXECUTE_PRIVATE_SAMPLE_AND_PRODUCE_DIGEST_ONLY_QUALIFICATION_EVIDENCE"
+  "next_transition": "EXPLICIT_AUTHOR_BASELINE_RATIFICATION"
 }
