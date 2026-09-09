@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "REPAIR-EVENT-SCHEMA-001",
+  "title": "System Master repair ledger event",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "event_version",
+    "event_id",
+    "transaction_id",
+    "event_type",
+    "recorded_at",
+    "owner_path",
+    "receipt_id",
+    "qualification_id",
+    "workstream_id",
+    "failed_subject_sha",
+    "state"
+  ],
+  "properties": {
+    "event_version": {"const": 1},
+    "event_id": {"type": "string", "minLength": 1},
+    "transaction_id": {"type": "string", "minLength": 1},
+    "event_type": {
+      "enum": [
+        "TRANSACTION_OPENED",
+        "TRANSACTION_CLAIMED",
+        "CANDIDATE_PREQUALIFIED",
+        "A01_REPLACEMENT_TICKET_EMITTED",
+        "A01_RERUN_RECEIPT_RECORDED",
+        "TRANSACTION_SUPERSEDED",
+        "TRANSACTION_DEAD_LETTERED",
+        "TRANSACTION_CLOSED"
+      ]
+    },
+    "recorded_at": {"type": "string", "format": "date-time"},
+    "owner_path": {"type": "string", "minLength": 1},
+    "receipt_id": {"type": "string", "minLength": 1},
+    "qualification_id": {"type": "string", "minLength": 1},
+    "workstream_id": {"type": "string", "minLength": 1},
+    "failed_subject_sha": {"type": "string", "pattern": "^[0-9a-fA-F]{40}$"},
+    "replacement_subject_sha": {"type": ["string", "null"], "pattern": "^[0-9a-fA-F]{40}$"},
+    "state": {"type": "string", "minLength": 1},
+    "classification": {"type": ["string", "null"]},
+    "repair_attempt": {"type": ["integer", "null"], "minimum": 0, "maximum": 2},
+    "evidence_pointer": {"type": ["string", "null"]},
+    "prequalification_evidence_pointer": {"type": ["string", "null"]},
+    "replacement_ticket_pointer": {"type": ["string", "null"]},
+    "a01_rerun_receipt_pointer": {"type": ["string", "null"]},
+    "payload": {"type": ["object", "null"], "additionalProperties": true}
+  }
+}
