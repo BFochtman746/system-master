@@ -1,5 +1,5 @@
 {
-  "registry_version": 22,
+  "registry_version": 23,
   "qualifications": {
     "A01-CONTROL-PLANE-SELFTEST": {
       "workstream_id": "SYSTEM-MASTER",
@@ -251,6 +251,18 @@
       "overnight_max_runtime_minutes": 150,
       "checkpoint_capable": false,
       "description": "Run the exact-subject RECON-001B deep Assurance evidence/source census: validate reconciliation artifacts, current F-WP-001..012 regression chain, git object integrity, referenced-SHA reachability, and branch-level Assurance source/test/evidence discovery. PASS proves the bounded census executed, not ASSURANCE-001 completeness or production standing."
+    },
+    "BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001": {
+      "workstream_id": "BOOK-SYSTEM",
+      "gate_class": "focused",
+      "source": "subject",
+      "executable": "node",
+      "args": [
+        ".github/scripts/a01-book-system-author-decision-queue-001.js"
+      ],
+      "evidence_artifact": "book-system-author-decision-queue-001",
+      "overnight_eligible": false,
+      "description": "Qualify the exact Book System Author Decision Queue implementation: append-only queue/request/receipt history, exact parent/queue/request compare-and-swap, current subject binding, duplicate-handoff preservation, no-steering presentation, defer/reopen/withdraw/supersede, explicit author identity/session-proof boundary, confirmation binding, explicit option-to-APPROVED-or-REJECTED mapping, stale/concurrent resolution refusal, idempotent replay, one immutable canonical AUTHOR_DECISION append, Version/Rollback authority handoff, and zero same-operation manuscript/lifecycle/proposal/export/publication mutation. Fixtures are synthetic only and PASS grants no real author-choice, publication, production, or provider authority."
     }
   }
 }
