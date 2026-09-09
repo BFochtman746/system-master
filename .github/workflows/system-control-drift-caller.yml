@@ -1,0 +1,18 @@
+name: Prose System Control Drift
+
+on:
+  push:
+    paths:
+      - 'qualification/literary-prose-engine-001/**'
+      - '.github/workflows/system-control-drift-caller.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    uses: BFochtman746/system-master/.github/workflows/system-control-drift-reusable.yml@main
+    with:
+      control_branch: literary-prose-engine-001
+      subject_sha: ${{ github.sha }}
