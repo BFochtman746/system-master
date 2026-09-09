@@ -29,6 +29,8 @@ Current successor evidence includes:
 - `OPERATOROPS001-SOURCE-CUSTODY-RECONCILIATION-002.md`
 - `OPERATOROPS001_R024_REBUILD_001.patch`
 - `OPERATOROPS001-RECONCILIATION-001.md`
+- `USEREXPERIENCE001_R025_DB_PARITY_REPAIR_001.patch`
+- `USEREXPERIENCE001-RECONCILIATION-001.md`
 
 Historical and changed-byte subjects remain distinct evidence classes.
 
@@ -103,19 +105,50 @@ OPERATOR remains catalog/readiness/next-action projection and human-control inte
 
 The local portable SMR020 dependency train is therefore closed. This does **not** establish ordinary GitHub-native runnable source custody for changed subject `89066e56...`, fresh hosted exact-SHA qualification, Windows/A-01 empirical PASS, Apple-native/browser/operator-console evidence, production certification or promotion authority.
 
+### SMR021 / USER-EXPERIENCE-001 — historical replay and bounded repair complete
+
+The exact historical v2.0.24 carrier has been recovered from actual bytes:
+
+`SYSTEM_MASTER_OFFICIAL_SPINE_v2.0.24_USER-EXPERIENCE-001-REVIEWED_A01-PENDING.zip`
+
+Historical carrier identity:
+
+- bytes: `12,828,994`
+- SHA-256: `408e8aaeddad67d983568a05263303ef5e0106f9af62e314d40dda2b738b9ced`
+
+Fresh immutable replay passed strict Java 21 at `578 main / 66 test`, official cumulative portable suites `60/60`, USER-EXPERIENCE authority `21 controls`, `UserExperiencePortableTests` 19 assertions, `FinalWavePortableTests` 22 assertions, Foundation-005 parity `119 controls / 111 contracts`, code quality/toolchain, manifest replay and deterministic byte-identical rebuild of the historical carrier.
+
+Adversarial parity review then demonstrated a real residual database-contract gap: Java/JSON Schema reject USER-EXPERIENCE self-targeting and bound nullable approval/attention references, while migration 051 did not independently encode all four corresponding database invariants. Historical PASS remains evidence for the unchanged historical bytes only.
+
+The bounded historical repair is recorded in `USEREXPERIENCE001_R025_DB_PARITY_REPAIR_001.patch`. A separate corrected historical candidate passed the strengthened authority verifier, 5/5 explicit DB-parity checks, Foundation-005 parity, strict Java 21, all `60/60` portable suites, regenerated 28-migration and 1,354-subject manifests, and deterministic byte-identical rebuild.
+
+Corrected historical candidate archive SHA-256:
+
+`6fe46bd3020a732a2f41a0df4097ac6bcf95632b15696c9e9181fd7f809b8b21`
+
+Candidate release-manifest SHA-256:
+
+`3c8e07b9938d7c886dbd751eed1a9bfa546f6f4b0b8e0b3159bbcacd2c2926ad`
+
+This is **not** the dependency-current SMR021 product subject and is not an A-01 subject. The exact current predecessor remains SMR020 subject `89066e56...`.
+
 ## Current Core objective
 
-`SYSTEM-MASTER-REBUILD-021 / USER-EXPERIENCE-001 — User Experience + Human Intent Projection Foundation`
+`SYSTEM-MASTER-REBUILD-021-DEPENDENCY-CURRENT-REBUILD-001 — USER-EXPERIENCE-001 CURRENT-LINEAGE REBUILD`
 
-Proceed through SMR021's own exact historical carrier/reconciliation/qualification train. Do not transfer SMR020 PASS to SMR021 bytes.
+Derive USER-EXPERIENCE-001 from exact SMR020 dependency-current subject:
 
-Historical v2.0.23/R024 evidence names `USER-EXPERIENCE-001` as the next authority. Begin by recovering/verifying the exact v2.0.24 USER-EXPERIENCE carrier, replaying its complete portable historical qualification without mutation, then adversarially challenging accessibility/human-intent/work-version/attention/control-projection invariants before any changed candidate is created.
+`89066e5662554b1810691473e0ed9bf49d8cc2fd4964444043b878461ed75477`
+
+Transplant the recovered R025 human-intent / attention / PWA semantics plus the proven database-parity repair. Produce a new exact SMR021 source/test subject and replay strict Java, focused UX, contract/SQL, R025 recurrence, coherence/congruence, exact-subject and release-manifest qualification.
+
+Do not use the corrected historical v2.0.24 archive as the current product base. Do not transfer its portable PASS to dependency-current bytes. Do not queue A-01 until the dependency-current candidate exists in ordinary GitHub-native immutable custody, hosted qualification passes on that same exact subject, and a distinct Windows/device evidence delta is justified.
 
 ## Parallel unresolved Core obligations
 
-- Admit corrected SMR018 `cc67826...`, cumulative SMR019 `9571b3f4...`, and changed SMR020 `89066e56...` runnable trees into ordinary GitHub-native immutable custody without mutation; independently reproduce exact subjects; obtain fresh hosted exact-SHA qualification before any A-01 request dependent on those changed bytes.
+- Admit corrected SMR018 `cc67826...`, cumulative SMR019 `9571b3f4...`, changed SMR020 `89066e56...`, and the future dependency-current SMR021 runnable tree into ordinary GitHub-native immutable custody without mutation; independently reproduce exact subjects; obtain fresh hosted exact-SHA qualification before any A-01 request dependent on those changed bytes.
 - `RECON-001C` remains blocked on credentialed sealed-history Git import under Assurance/Reconciliation.
-- PC/target-only empirical obligations remain distinct; SMR020 O012/O013 are retained under `PC-ENDGAME-027`.
+- PC/target-only empirical obligations remain distinct; SMR020 O012/O013 are retained under `PC-ENDGAME-027`; R025 physical device/accessibility/usability evidence remains empirical and unclaimed.
 
 ## Boundary rules
 
