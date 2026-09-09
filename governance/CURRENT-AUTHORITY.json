@@ -13,6 +13,10 @@
   "reallocation_ledger": "governance/REALLOCATION-LEDGER-001.json",
   "second_shift_registry": "governance/second-shift/SECOND-SHIFT-REGISTRY-001.json",
   "second_shift_operating_mode": "governance/second-shift/SECOND-SHIFT-OPERATING-MODE-002.md",
+  "state_reconciler_contract": "governance/reconciler/SYSTEM-STATE-RECONCILER-001.md",
+  "state_reconciler_workflow": ".github/workflows/system-state-reconciler.yml",
+  "closed_loop_repair_sidecar": ".github/scripts/a01-closed-loop-repair.js",
+  "closed_loop_repair_selftest": ".github/scripts/a01-closed-loop-repair-selftest.js",
   "pre_reallocation_backup": "governance/snapshots/PRE-PARENT-TOPOLOGY-20260909-001.json",
   "startup_sequence": [
     "Read this file from current main.",
@@ -21,15 +25,18 @@
     "Read the owner's current control/state record selected on that live head.",
     "Compare the live head/current state with the last sealed state checkpoint. If it moved, classify AUTHORITY_DELTA and reconcile only the delta before making current-state claims.",
     "Check COMPLETION-LEDGER-001 before repeating work, WORK-OBLIGATION-REGISTRY-001 before selecting what is still owed, and EXPECTATION-REGISTRY-001 before declaring scope complete.",
+    "Check the latest System State Reconciler standing when making repository-wide control claims. A red reconciler is a drift signal to adjudicate, not permission to ignore current owner state.",
     "For repository-wide reconciliation, read active_census and resume at the first incomplete phase rather than restarting the audit.",
-    "If work is being delegated to Second Shift, read the owner delegation file and revalidate it against the live control head immediately before admission/execution."
+    "If work is being delegated to Second Shift, read the owner delegation file and revalidate it against the live control head immediately before admission/execution.",
+    "If an executable qualification fails, classify it before repair. Repair-eligible failures may use the bounded closed-loop repair sidecar; non-automatable authority boundaries route to the owner/human/dead-letter path and are never mutated into PASS."
   ],
   "truth_classes": {
     "AUTHORITY_CURRENT": "Owner, live control head, current state and evidence agree.",
     "AUTHORITY_DELTA": "Live owner control head/state moved after the last sealed checkpoint; read and reconcile the delta before continuation.",
     "UNALLOCATED": "Work cannot be mapped to a current owner path; inspection is allowed, execution/promotion/scheduling is not.",
     "STALE_DELEGATION": "Second Shift delegation does not match the live owner control head or current open objective; do not execute.",
-    "EVIDENCE_MISMATCH": "Claimed standing exceeds or conflicts with exact receipt/artifact/subject evidence; fail closed and adjudicate."
+    "EVIDENCE_MISMATCH": "Claimed standing exceeds or conflicts with exact receipt/artifact/subject evidence; fail closed and adjudicate.",
+    "REGISTERED_EXECUTABLE_MISSING": "A registered qualification points to repository-owned executable bytes that are absent from the current subject; fail closed until the implementation is restored or the registration is superseded truthfully."
   },
   "anti_surprise_invariant": "No worker may say it is surprised by repository standing after beginning execution. Repository standing must be resolved before execution; a discovered mismatch becomes AUTHORITY_DELTA or EVIDENCE_MISMATCH and is reconciled first.",
   "write_rules": [
@@ -39,6 +46,7 @@
     "Current-control changes occur in the owning system lane; product-root governance selects/routes them but does not silently edit child objectives.",
     "Any new first-class system or parent relationship requires a superseding topology ADR and topology registry version.",
     "Any new workstream or qualification lane must resolve to an owner before execution.",
-    "Any Second Shift item must be removed from active delegation when completed/superseded and replaced only after a fresh owner re-evaluation."
+    "Any Second Shift item must be removed from active delegation when completed/superseded and replaced only after a fresh owner re-evaluation.",
+    "A closed-loop repair that changes subject bytes creates a new exact SHA, new prequalification evidence and a replacement A-01 request linked to the original failed receipt."
   ]
 }
