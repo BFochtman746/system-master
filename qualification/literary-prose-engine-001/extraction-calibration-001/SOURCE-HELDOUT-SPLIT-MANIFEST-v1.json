@@ -1,0 +1,29 @@
+{
+  "manifest_id": "LITERARY-NARRATIVE-EXTRACTION-SOURCE-HELDOUT-SPLIT-001-v1",
+  "objective": "Freeze distinct scorer-harness and provider-facing source-held-out roles before candidate qualification.",
+  "development_harness": {
+    "path": "qualification/literary-prose-engine-001/extraction-calibration-001/fixtures/SYNTHETIC-STRESS-GOLD-v1.json",
+    "git_blob_sha": "49074e39380755e4a37a1f7090a4d5d43601fc3e",
+    "role": "SCORER_AND_FAILURE_DETECTION_ONLY",
+    "provider_benchmark": false,
+    "reason": "Contains opaque fixture-local identifiers that are intentionally retained for regression compatibility but are not fair source-only provider targets."
+  },
+  "source_heldout": {
+    "path": "qualification/literary-prose-engine-001/extraction-calibration-001/fixtures/SYNTHETIC-SOURCE-HELDOUT-GOLD-v1.json",
+    "git_blob_sha": "77b63f5fe37e0649d7b2f542a71d00a06a621d6f",
+    "role": "PROVIDER_SOURCE_HELDOUT_QUALIFICATION",
+    "provider_benchmark": true,
+    "case_count": 17,
+    "task_count": 9,
+    "source_class": "SYNTHETIC_SOURCE_HELDOUT_QUALIFICATION_ONLY"
+  },
+  "separation_rules": [
+    "The candidate provider consumes only task plus authorized source text plus source digest at extraction time.",
+    "Gold labels, forbidden labels, and corpus case identifiers may not be used as extraction features.",
+    "Case identifiers may be echoed only for receipt correlation and must not alter predictions.",
+    "No user manuscript or hidden Book-Eval evidence is present in either corpus.",
+    "No named-author imitation target or bulk copyrighted reference body is present.",
+    "The synthetic source-held-out set is sufficient for first provider plumbing/calibration but is not a substitute for later public-domain or human-adjudicated held-out evidence."
+  ],
+  "standing": "FROZEN_FOR_CANDIDATE_001"
+}
