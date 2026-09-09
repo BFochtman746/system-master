@@ -1,0 +1,85 @@
+{
+  "state_id": "LITERARY-PROSE-CONSOLIDATED-WORKSTREAM-STATE-014",
+  "effective_date": "2026-09-09",
+  "supersedes_for_current_control": "LITERARY-PROSE-CONSOLIDATED-WORKSTREAM-STATE-013.json",
+  "system_id": "PROSE",
+  "system": "PROSE SYSTEM",
+  "parent_system_id": "BOOK",
+  "parent_system": "BOOK SYSTEM",
+  "implementation_family": "LITERARY PROSE ENGINE",
+  "branch": "literary-prose-engine-001",
+  "standing": "ACTIVE__REAL_LIMITATION_AUTHOR_PACKET_QUALIFIED__EXPLICIT_AUTHOR_LABELS_REQUIRED__REVISION_AUTHORITY_ZERO",
+  "completed_evidence": {
+    "semantic_routing": {
+      "standing": "PASS",
+      "tested_sha": "1de91bcaedcdd18615f685adeab8a451c7926e97",
+      "run_id": 34383845184,
+      "result": "9_OF_9_DIAGNOSIS_ALLOWED__0_OF_9_REVISION_ALLOWED__ONE_LOW_CONFIDENCE_CLAIM_UNRESOLVED"
+    },
+    "strength_observation_calibration": {
+      "standing": "PASS",
+      "tested_sha": "f0cd916930964c294243c26d0a207af69283f74e",
+      "run_id": 34384598508,
+      "result": "8_STRENGTH__1_OBSERVATION__1_ABSTAIN__0_LIMITATION__0_REVISION_ELIGIBLE"
+    },
+    "ground_truth_packet_infrastructure": {
+      "standing": "PASS",
+      "packet": "step-f/PROSE-REAL-LIMITATION-GROUND-TRUTH-AUTHOR-PACKET-001.json",
+      "receipt": "step-f/PROSE-REAL-LIMITATION-GROUND-TRUTH-PACKET-001-QUALIFICATION-RECEIPT.json",
+      "tested_sha": "42c1412e5c36e0d44875806785d5f009dfb508ca",
+      "run_id": 34397780523,
+      "cases": 6,
+      "sources": 3,
+      "labels_recorded": 0,
+      "revision_authority_count": 0
+    }
+  },
+  "evidence_discovery": {
+    "admitted_source_scope": [
+      "Volume I - THE VOICE FROM THE BUSH - Clean.docx",
+      "Unhindered_Book_3.docx",
+      "Unhindered-Book_4.docx"
+    ],
+    "existing_admissible_independent_limitation_labels_found": 0,
+    "docx_comments_or_live_tracked_editor_labels_found": 0,
+    "excluded_substitutes": [
+      "AGLO author adjudication because AGLO is outside this gate's admitted three-source scope",
+      "public-domain extraction held-out human labels because they are not labels on the admitted manuscripts",
+      "model-generated strength/observation hypotheses because they are not independent ground truth"
+    ]
+  },
+  "author_adjudication_contract": {
+    "objective": "PROSE-REAL-LIMITATION-AUTHOR-ADJUDICATION-001",
+    "required_cases": 6,
+    "permitted_labels": [
+      "REAL_LIMITATION",
+      "WORKING_AS_INTENDED",
+      "NEUTRAL_OBSERVATION",
+      "UNCERTAIN"
+    ],
+    "generic_continue_is_authority": false,
+    "selection_heuristic_is_ground_truth": false,
+    "labeling_authorizes_revision": false,
+    "candidate_generation_authorized": false,
+    "manuscript_mutation_authorized": false,
+    "publication_authorized": false
+  },
+  "after_explicit_labels": [
+    "Record only the six explicit author labels and mark labels_authoritative=true with labels_recorded=6.",
+    "Run validate_real_limitation_ground_truth_packet.py with --require-labels and freeze the labeled packet before model scoring.",
+    "Run the qualified semantic -> Passage Intelligence -> Step-F path blind to the author labels.",
+    "Compare model dispositions with the frozen author ground truth while preserving revision authority at zero.",
+    "If at least one case is author-labeled REAL_LIMITATION, measure real limitation identification/downgrade/abstention behavior.",
+    "If zero cases are author-labeled REAL_LIMITATION, do not fabricate positive ground truth; limitation accuracy remains unproven and another independently labeled sample is required."
+  ],
+  "what_is_not_proven": [
+    "Real limitation detection accuracy remains unqualified until explicit independent labels exist and the blind comparison is run.",
+    "The six passage selections themselves are not evidence that a limitation exists.",
+    "No automatic revision, candidate superiority, full-book literary accuracy, canon replacement or publication authority is established."
+  ],
+  "a01_next": {
+    "ticket_justified_now": false,
+    "reason": "The current dependency is explicit author evidence, not compute capacity."
+  },
+  "exact_next_objective": "PROSE-REAL-LIMITATION-AUTHOR-ADJUDICATION-001 — OBTAIN EXPLICIT AUTHOR LABELS FOR THE SIX BLINDED REAL PASSAGES -> FREEZE THE LABELS WITHOUT REVISION AUTHORITY -> THEN RUN BLIND SEMANTIC + STEP-F LIMITATION DETECTION AGAINST THAT GROUND TRUTH."
+}
