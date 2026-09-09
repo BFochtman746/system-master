@@ -1,0 +1,243 @@
+name: A-01 Overnight Night Shift
+
+on:
+  schedule:
+    - cron: '57 23 * * *'
+      timezone: 'America/New_York'
+  workflow_dispatch:
+    inputs:
+      night_date:
+        description: Optional YYYY-MM-DD New York night date; before midnight this is normally tomorrow
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: a01-night-shift
+  queue: max
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    name: Plan tonight's A-01 shift
+    runs-on: ubuntu-slim
+    timeout-minutes: 5
+    outputs:
+      night_date: ${{ steps.plan.outputs.night_date }}
+      scheduled_count: ${{ steps.plan.outputs.scheduled_count }}
+      slot_01: ${{ steps.plan.outputs.slot_01 }}
+      slot_01_enabled: ${{ steps.plan.outputs.slot_01_enabled }}
+      slot_02: ${{ steps.plan.outputs.slot_02 }}
+      slot_02_enabled: ${{ steps.plan.outputs.slot_02_enabled }}
+      slot_03: ${{ steps.plan.outputs.slot_03 }}
+      slot_03_enabled: ${{ steps.plan.outputs.slot_03_enabled }}
+      slot_04: ${{ steps.plan.outputs.slot_04 }}
+      slot_04_enabled: ${{ steps.plan.outputs.slot_04_enabled }}
+      slot_05: ${{ steps.plan.outputs.slot_05 }}
+      slot_05_enabled: ${{ steps.plan.outputs.slot_05_enabled }}
+      slot_06: ${{ steps.plan.outputs.slot_06 }}
+      slot_06_enabled: ${{ steps.plan.outputs.slot_06_enabled }}
+      slot_07: ${{ steps.plan.outputs.slot_07 }}
+      slot_07_enabled: ${{ steps.plan.outputs.slot_07_enabled }}
+      slot_08: ${{ steps.plan.outputs.slot_08 }}
+      slot_08_enabled: ${{ steps.plan.outputs.slot_08_enabled }}
+    steps:
+      - name: Checkout canonical scheduler
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Validate overnight planner
+        run: node .github/scripts/a01-overnight-plan-selftest.js
+      - name: Build immutable night plan
+        id: plan
+        env:
+          A01_NIGHT_DATE: ${{ inputs.night_date || '' }}
+          A01_PLAN_PATH: ${{ runner.temp }}/a01-overnight-plan.json
+        run: node .github/scripts/a01-overnight-plan.js
+      - name: Publish plan summary
+        shell: bash
+        run: |
+          echo '## A-01 NIGHT SHIFT PLAN' >> "$GITHUB_STEP_SUMMARY"
+          echo "Night: ${{ steps.plan.outputs.night_date }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "Scheduled tickets: ${{ steps.plan.outputs.scheduled_count }}" >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload night plan
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: a01-overnight-plan-${{ steps.plan.outputs.night_date }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/a01-overnight-plan.json
+          if-no-files-found: error
+          retention-days: 30
+
+  slot_01:
+    needs: plan
+    if: needs.plan.outputs.slot_01_enabled == 'true'
+    uses: ./.github/workflows/a01-control-plane-gateway.yml
+    with:
+      qualification_id: ${{ fromJSON(needs.plan.outputs.slot_01).qualification_id }}
+      workstream_id: ${{ fromJSON(needs.plan.outputs.slot_01).workstream_id }}
+      subject_sha: ${{ fromJSON(needs.plan.outputs.slot_01).subject_sha }}
+      origin_ref: ${{ fromJSON(needs.plan.outputs.slot_01).origin_ref }}
+      resume_on_pass: ${{ fromJSON(needs.plan.outputs.slot_01).resume_on_pass }}
+      resume_on_failure: ${{ fromJSON(needs.plan.outputs.slot_01).resume_on_failure }}
+      notification_target: ${{ fromJSON(needs.plan.outputs.slot_01).notification_target }}
+      execution_context: overnight
+      qualifier_timeout_minutes: ${{ fromJSON(needs.plan.outputs.slot_01).qualifier_timeout_minutes }}
+      job_timeout_minutes: ${{ fromJSON(needs.plan.outputs.slot_01).job_timeout_minutes }}
+      not_before: ${{ fromJSON(needs.plan.outputs.slot_01).not_before }}
+      not_after: ${{ fromJSON(needs.plan.outputs.slot_01).not_after }}
+
+  slot_02:
+    needs: [plan, slot_01]
+    if: always() && needs.plan.outputs.slot_02_enabled == 'true'
+    uses: ./.github/workflows/a01-control-plane-gateway.yml
+    with:
+      qualification_id: ${{ fromJSON(needs.plan.outputs.slot_02).qualification_id }}
+      workstream_id: ${{ fromJSON(needs.plan.outputs.slot_02).workstream_id }}
+      subject_sha: ${{ fromJSON(needs.plan.outputs.slot_02).subject_sha }}
+      origin_ref: ${{ fromJSON(needs.plan.outputs.slot_02).origin_ref }}
+      resume_on_pass: ${{ fromJSON(needs.plan.outputs.slot_02).resume_on_pass }}
+      resume_on_failure: ${{ fromJSON(needs.plan.outputs.slot_02).resume_on_failure }}
+      notification_target: ${{ fromJSON(needs.plan.outputs.slot_02).notification_target }}
+      execution_context: overnight
+      qualifier_timeout_minutes: ${{ fromJSON(needs.plan.outputs.slot_02).qualifier_timeout_minutes }}
+      job_timeout_minutes: ${{ fromJSON(needs.plan.outputs.slot_02).job_timeout_minutes }}
+      not_before: ${{ fromJSON(needs.plan.outputs.slot_02).not_before }}
+      not_after: ${{ fromJSON(needs.plan.outputs.slot_02).not_after }}
+
+  slot_03:
+    needs: [plan, slot_02]
+    if: always() && needs.plan.outputs.slot_03_enabled == 'true'
+    uses: ./.github/workflows/a01-control-plane-gateway.yml
+    with:
+      qualification_id: ${{ fromJSON(needs.plan.outputs.slot_03).qualification_id }}
+      workstream_id: ${{ fromJSON(needs.plan.outputs.slot_03).workstream_id }}
+      subject_sha: ${{ fromJSON(needs.plan.outputs.slot_03).subject_sha }}
+      origin_ref: ${{ fromJSON(needs.plan.outputs.slot_03).origin_ref }}
+      resume_on_pass: ${{ fromJSON(needs.plan.outputs.slot_03).resume_on_pass }}
+      resume_on_failure: ${{ fromJSON(needs.plan.outputs.slot_03).resume_on_failure }}
+      notification_target: ${{ fromJSON(needs.plan.outputs.slot_03).notification_target }}
+      execution_context: overnight
+      qualifier_timeout_minutes: ${{ fromJSON(needs.plan.outputs.slot_03).qualifier_timeout_minutes }}
+      job_timeout_minutes: ${{ fromJSON(needs.plan.outputs.slot_03).job_timeout_minutes }}
+      not_before: ${{ fromJSON(needs.plan.outputs.slot_03).not_before }}
+      not_after: ${{ fromJSON(needs.plan.outputs.slot_03).not_after }}
+
+  slot_04:
+    needs: [plan, slot_03]
+    if: always() && needs.plan.outputs.slot_04_enabled == 'true'
+    uses: ./.github/workflows/a01-control-plane-gateway.yml
+    with:
+      qualification_id: ${{ fromJSON(needs.plan.outputs.slot_04).qualification_id }}
+      workstream_id: ${{ fromJSON(needs.plan.outputs.slot_04).workstream_id }}
+      subject_sha: ${{ fromJSON(needs.plan.outputs.slot_04).subject_sha }}
+      origin_ref: ${{ fromJSON(needs.plan.outputs.slot_04).origin_ref }}
+      resume_on_pass: ${{ fromJSON(needs.plan.outputs.slot_04).resume_on_pass }}
+      resume_on_failure: ${{ fromJSON(needs.plan.outputs.slot_04).resume_on_failure }}
+      notification_target: ${{ fromJSON(needs.plan.outputs.slot_04).notification_target }}
+      execution_context: overnight
+      qualifier_timeout_minutes: ${{ fromJSON(needs.plan.outputs.slot_04).qualifier_timeout_minutes }}
+      job_timeout_minutes: ${{ fromJSON(needs.plan.outputs.slot_04).job_timeout_minutes }}
+      not_before: ${{ fromJSON(needs.plan.outputs.slot_04).not_before }}
+      not_after: ${{ fromJSON(needs.plan.outputs.slot_04).not_after }}
+
+  slot_05:
+    needs: [plan, slot_04]
+    if: always() && needs.plan.outputs.slot_05_enabled == 'true'
+    uses: ./.github/workflows/a01-control-plane-gateway.yml
+    with:
+      qualification_id: ${{ fromJSON(needs.plan.outputs.slot_05).qualification_id }}
+      workstream_id: ${{ fromJSON(needs.plan.outputs.slot_05).workstream_id }}
+      subject_sha: ${{ fromJSON(needs.plan.outputs.slot_05).subject_sha }}
+      origin_ref: ${{ fromJSON(needs.plan.outputs.slot_05).origin_ref }}
+      resume_on_pass: ${{ fromJSON(needs.plan.outputs.slot_05).resume_on_pass }}
+      resume_on_failure: ${{ fromJSON(needs.plan.outputs.slot_05).resume_on_failure }}
+      notification_target: ${{ fromJSON(needs.plan.outputs.slot_05).notification_target }}
+      execution_context: overnight
+      qualifier_timeout_minutes: ${{ fromJSON(needs.plan.outputs.slot_05).qualifier_timeout_minutes }}
+      job_timeout_minutes: ${{ fromJSON(needs.plan.outputs.slot_05).job_timeout_minutes }}
+      not_before: ${{ fromJSON(needs.plan.outputs.slot_05).not_before }}
+      not_after: ${{ fromJSON(needs.plan.outputs.slot_05).not_after }}
+
+  slot_06:
+    needs: [plan, slot_05]
+    if: always() && needs.plan.outputs.slot_06_enabled == 'true'
+    uses: ./.github/workflows/a01-control-plane-gateway.yml
+    with:
+      qualification_id: ${{ fromJSON(needs.plan.outputs.slot_06).qualification_id }}
+      workstream_id: ${{ fromJSON(needs.plan.outputs.slot_06).workstream_id }}
+      subject_sha: ${{ fromJSON(needs.plan.outputs.slot_06).subject_sha }}
+      origin_ref: ${{ fromJSON(needs.plan.outputs.slot_06).origin_ref }}
+      resume_on_pass: ${{ fromJSON(needs.plan.outputs.slot_06).resume_on_pass }}
+      resume_on_failure: ${{ fromJSON(needs.plan.outputs.slot_06).resume_on_failure }}
+      notification_target: ${{ fromJSON(needs.plan.outputs.slot_06).notification_target }}
+      execution_context: overnight
+      qualifier_timeout_minutes: ${{ fromJSON(needs.plan.outputs.slot_06).qualifier_timeout_minutes }}
+      job_timeout_minutes: ${{ fromJSON(needs.plan.outputs.slot_06).job_timeout_minutes }}
+      not_before: ${{ fromJSON(needs.plan.outputs.slot_06).not_before }}
+      not_after: ${{ fromJSON(needs.plan.outputs.slot_06).not_after }}
+
+  slot_07:
+    needs: [plan, slot_06]
+    if: always() && needs.plan.outputs.slot_07_enabled == 'true'
+    uses: ./.github/workflows/a01-control-plane-gateway.yml
+    with:
+      qualification_id: ${{ fromJSON(needs.plan.outputs.slot_07).qualification_id }}
+      workstream_id: ${{ fromJSON(needs.plan.outputs.slot_07).workstream_id }}
+      subject_sha: ${{ fromJSON(needs.plan.outputs.slot_07).subject_sha }}
+      origin_ref: ${{ fromJSON(needs.plan.outputs.slot_07).origin_ref }}
+      resume_on_pass: ${{ fromJSON(needs.plan.outputs.slot_07).resume_on_pass }}
+      resume_on_failure: ${{ fromJSON(needs.plan.outputs.slot_07).resume_on_failure }}
+      notification_target: ${{ fromJSON(needs.plan.outputs.slot_07).notification_target }}
+      execution_context: overnight
+      qualifier_timeout_minutes: ${{ fromJSON(needs.plan.outputs.slot_07).qualifier_timeout_minutes }}
+      job_timeout_minutes: ${{ fromJSON(needs.plan.outputs.slot_07).job_timeout_minutes }}
+      not_before: ${{ fromJSON(needs.plan.outputs.slot_07).not_before }}
+      not_after: ${{ fromJSON(needs.plan.outputs.slot_07).not_after }}
+
+  slot_08:
+    needs: [plan, slot_07]
+    if: always() && needs.plan.outputs.slot_08_enabled == 'true'
+    uses: ./.github/workflows/a01-control-plane-gateway.yml
+    with:
+      qualification_id: ${{ fromJSON(needs.plan.outputs.slot_08).qualification_id }}
+      workstream_id: ${{ fromJSON(needs.plan.outputs.slot_08).workstream_id }}
+      subject_sha: ${{ fromJSON(needs.plan.outputs.slot_08).subject_sha }}
+      origin_ref: ${{ fromJSON(needs.plan.outputs.slot_08).origin_ref }}
+      resume_on_pass: ${{ fromJSON(needs.plan.outputs.slot_08).resume_on_pass }}
+      resume_on_failure: ${{ fromJSON(needs.plan.outputs.slot_08).resume_on_failure }}
+      notification_target: ${{ fromJSON(needs.plan.outputs.slot_08).notification_target }}
+      execution_context: overnight
+      qualifier_timeout_minutes: ${{ fromJSON(needs.plan.outputs.slot_08).qualifier_timeout_minutes }}
+      job_timeout_minutes: ${{ fromJSON(needs.plan.outputs.slot_08).job_timeout_minutes }}
+      not_before: ${{ fromJSON(needs.plan.outputs.slot_08).not_before }}
+      not_after: ${{ fromJSON(needs.plan.outputs.slot_08).not_after }}
+
+  digest:
+    name: Morning A-01 shift digest
+    needs: [plan, slot_01, slot_02, slot_03, slot_04, slot_05, slot_06, slot_07, slot_08]
+    if: always()
+    runs-on: ubuntu-slim
+    timeout-minutes: 5
+    steps:
+      - name: Publish shift standing
+        shell: bash
+        run: |
+          echo '## A-01 NIGHT SHIFT DIGEST' >> "$GITHUB_STEP_SUMMARY"
+          echo "Night: ${{ needs.plan.outputs.night_date }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "Planned tickets: ${{ needs.plan.outputs.scheduled_count }}" >> "$GITHUB_STEP_SUMMARY"
+          echo '| Slot | Ticket | Workflow result | Receipt class |' >> "$GITHUB_STEP_SUMMARY"
+          echo '|---:|---|---|---|' >> "$GITHUB_STEP_SUMMARY"
+          echo "| 1 | ${{ fromJSON(needs.plan.outputs.slot_01).ticket_id }} | ${{ needs.slot_01.result }} | ${{ needs.slot_01.outputs.result_class }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| 2 | ${{ fromJSON(needs.plan.outputs.slot_02).ticket_id }} | ${{ needs.slot_02.result }} | ${{ needs.slot_02.outputs.result_class }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| 3 | ${{ fromJSON(needs.plan.outputs.slot_03).ticket_id }} | ${{ needs.slot_03.result }} | ${{ needs.slot_03.outputs.result_class }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| 4 | ${{ fromJSON(needs.plan.outputs.slot_04).ticket_id }} | ${{ needs.slot_04.result }} | ${{ needs.slot_04.outputs.result_class }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| 5 | ${{ fromJSON(needs.plan.outputs.slot_05).ticket_id }} | ${{ needs.slot_05.result }} | ${{ needs.slot_05.outputs.result_class }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| 6 | ${{ fromJSON(needs.plan.outputs.slot_06).ticket_id }} | ${{ needs.slot_06.result }} | ${{ needs.slot_06.outputs.result_class }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| 7 | ${{ fromJSON(needs.plan.outputs.slot_07).ticket_id }} | ${{ needs.slot_07.result }} | ${{ needs.slot_07.outputs.result_class }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| 8 | ${{ fromJSON(needs.plan.outputs.slot_08).ticket_id }} | ${{ needs.slot_08.result }} | ${{ needs.slot_08.outputs.result_class }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo '' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Use each ticket receipt and return route as authority. A failed workstream subject does not authorize promotion and does not invalidate unrelated tickets.' >> "$GITHUB_STEP_SUMMARY"

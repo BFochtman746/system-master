@@ -1,15 +1,14 @@
 name: Literary Research Overnight A-01
 
 on:
-  schedule:
-    - cron: '0 1 9 9 *'
-      timezone: 'America/New_York'
   workflow_dispatch:
 
 permissions:
   contents: read
   actions: read
 
+# A01-OVERNIGHT-001 owns all canonical 00:00-07:00 scheduling.
+# This workflow remains manual-only for targeted diagnostics; do not restore a workstream cron.
 jobs:
   qualify:
     uses: ./.github/workflows/a01-control-plane-gateway.yml

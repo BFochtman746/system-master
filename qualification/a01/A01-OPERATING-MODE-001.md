@@ -9,16 +9,19 @@ A01-CONTROL-PLANE-001 is no longer an infrastructure build or migration project.
 
 The proven execution baseline is frozen unless evidence demonstrates a real control-plane defect or an unavoidable platform/security requirement.
 
+A01-OVERNIGHT-001 is an approved additive capability under change-control rule 4: it adds centrally governed long-run scheduling while retaining the same registered-wrapper, exact-SHA, receipt, evidence, failure-classification, and global-serialization authority.
+
 ## Frozen baseline
 
 - Reusable gateway: `.github/workflows/a01-control-plane-gateway.yml@main`
-- Policy: `qualification/a01/a01-policy.json`, policy version 3
+- Policy: `qualification/a01/a01-policy.json`, policy version 4
 - Global admission generation: `a01-global-r2`
 - Registry-owned qualification IDs only
 - Exact subject SHA checkout and receipt binding
 - Result classes: `PASS`, `SUBJECT_FAILURE`, `INFRA_FAILURE`, `CONTROL_PLANE_FAILURE`
 - Evidence upload and return ticket on every authoritative run
 - Registered disruptive reboot handoff with hosted settle window
+- Canonical overnight scheduler: `.github/workflows/a01-overnight-night-shift.yml`
 
 Normal product work MUST NOT modify the gateway, concurrency generation, receipt authority, or admission semantics merely because a workstream test fails or waits in queue.
 
@@ -46,6 +49,14 @@ The following are NOT control-plane defects:
 
 Use focused gates at substantial integration boundaries, consolidated gates for accumulated slices, and promotion gates only for exact promotion subjects.
 
+## Overnight extension
+
+The normal 30-minute gateway envelope remains the default for ordinary work. A01-OVERNIGHT-001 may grant a larger bounded qualifier budget only through a central overnight ticket and only when the qualification explicitly opts into overnight execution in the registry.
+
+The 00:00–07:00 America/New_York window is centrally owned. Independent workstream A-01 cron schedules are prohibited. The scheduler uses reservation-aware backfill rather than fixed chat time blocks, does not start work that cannot fit inside its declared window, and excludes disruptive reboot actions from overnight v1.
+
+The detailed contract is `qualification/a01/overnight/A01-OVERNIGHT-001.md`.
+
 ## Workstream return standing after A01-MIGRATION-001
 
 ### Continuity
@@ -62,11 +73,11 @@ A-01 migration is closed PASS for exact qualified subject `84a4d72dccd05230e6fc8
 
 ### Literary Prose
 
-A-01 migration is closed equivalent. Continue dependency-valid Literary Prose product work. The full deep harvest remains a separate workstream qualification restricted to its authorized 01:00-01:30 America/New_York window and must earn its own PASS. The expected out-of-window refusal is not an A-01 defect.
+A-01 migration is closed equivalent. Continue dependency-valid Literary Prose product work. Its independent overnight cron is retired under A01-OVERNIGHT-001; future deep-harvest execution must enter the central night plan as a ticket with whatever valid source-owned time restrictions remain in force.
 
 ## Cross-chat authority
 
-Every chat working in this repository must treat this file, `A01-OPERATING-CONTRACT.md`, `a01-policy.json`, and `registry.json` as shared authority. A chat may build independently, but it may not invent a new A-01 scheduling or promotion path.
+Every chat working in this repository must treat this file, `A01-OPERATING-CONTRACT.md`, `a01-policy.json`, `registry.json`, and when relevant `overnight/A01-OVERNIGHT-001.md` as shared authority. A chat may build independently, but it may not invent a new A-01 scheduling or promotion path.
 
 When a workstream encounters a failure, adjudicate the receipt classification first. `SUBJECT_FAILURE` returns to the workstream. Only evidence of `INFRA_FAILURE` or `CONTROL_PLANE_FAILURE` may reopen A-01 infrastructure work.
 

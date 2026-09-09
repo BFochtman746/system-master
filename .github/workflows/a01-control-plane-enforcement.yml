@@ -4,13 +4,15 @@ on:
   push:
     paths:
       - '.github/workflows/**'
-      - '.github/scripts/a01-control-plane-enforce.js'
+      - '.github/scripts/a01-control-plane*.js'
+      - '.github/scripts/a01-overnight-*.js'
       - 'qualification/a01/**'
       - 'SYSTEM-MASTER-WORKSTREAM-BOOTSTRAP.md'
   pull_request:
     paths:
       - '.github/workflows/**'
-      - '.github/scripts/a01-control-plane-enforce.js'
+      - '.github/scripts/a01-control-plane*.js'
+      - '.github/scripts/a01-overnight-*.js'
       - 'qualification/a01/**'
       - 'SYSTEM-MASTER-WORKSTREAM-BOOTSTRAP.md'
 
@@ -19,7 +21,7 @@ permissions:
 
 jobs:
   enforce:
-    name: Reject ungoverned direct self-hosted workflows
+    name: Reject ungoverned direct self-hosted or scheduled A-01 workflows
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -32,5 +34,5 @@ jobs:
       - name: Self-test enforcement logic
         run: node .github/scripts/a01-control-plane-enforce.js selftest
 
-      - name: Enforce shared A-01 gateway
+      - name: Enforce shared A-01 gateway and central night scheduler
         run: node .github/scripts/a01-control-plane-enforce.js scan
