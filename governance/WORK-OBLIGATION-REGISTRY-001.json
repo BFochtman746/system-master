@@ -17,23 +17,40 @@
     {
       "obligation_id": "CORE-SMR020-OPERATOR-OPS-001",
       "owner_path": "SYSTEM_MASTER/CORE",
-      "state": "READY",
+      "state": "CLOSED",
       "objective": "SYSTEM-MASTER-REBUILD-020 / OPERATOR-OPS-001 — Governed Operations + Readiness + Commissioning + Recovery + Human Control Foundation",
       "predecessor_standing": "SMR019 local portable cumulative predecessor reconciliation closed on exact subject 9571b3f4f876980047facbdd77cf17f8a8a2d3255bab9704ceb3fd49cddbd5f3.",
       "first_rule": "Proceed through SMR020's own exact historical carrier/reconciliation/qualification train; do not transfer SMR019 PASS to SMR020 bytes.",
-      "source": "system-master/control-v2/SYSTEM-MASTER-CORE-CONTROL-RECORD-001.md"
+      "source": "system-master/control-v2/SYSTEM-MASTER-CORE-CONTROL-RECORD-001.md",
+      "closure_evidence": "system-master/control-v2/OPERATOROPS001-RECONCILIATION-001.md",
+      "custody_closure_evidence": "system-master/control-v2/OPERATOROPS001-SOURCE-CUSTODY-RECONCILIATION-002.md",
+      "historical_carrier_sha256": "4f900a29b4130d01f489188bd1fd9c36e2f0b53e8247c4634e8bc587dcd3ea9e",
+      "exact_subject_sha": "89066e5662554b1810691473e0ed9bf49d8cc2fd4964444043b878461ed75477",
+      "result": "LOCAL_PORTABLE_PASS__HISTORICAL_CARRIER_REPLAYED__GITHUB_SOURCE_HOSTED_A01_TARGET_PRODUCTION_SEPARATE",
+      "unlocks": "CORE-SMR021-USER-EXPERIENCE-001"
+    },
+    {
+      "obligation_id": "CORE-SMR021-USER-EXPERIENCE-001",
+      "owner_path": "SYSTEM_MASTER/CORE",
+      "state": "READY",
+      "objective": "SYSTEM-MASTER-REBUILD-021 / USER-EXPERIENCE-001 — User Experience + Human Intent Projection Foundation",
+      "predecessor_standing": "SMR020 local portable reconciliation closed on exact subject 89066e5662554b1810691473e0ed9bf49d8cc2fd4964444043b878461ed75477 after actual historical v2.0.23 carrier recovery and independent historical replay.",
+      "first_rule": "Recover and verify SMR021's own exact historical USER-EXPERIENCE carrier, replay its complete portable historical qualification without mutation, adversarially reconcile accessibility/human-intent/work-version/attention/control-projection invariants, and change bytes only for an objectively demonstrated discrepancy. Do not transfer SMR020 PASS.",
+      "source": "system-master/control-v2/SYSTEM-MASTER-CORE-CONTROL-RECORD-001.md",
+      "stop_condition": "Historical carrier identity and replay are proven; any repair is minimal and independently qualified on a new exact subject; local portable closure or an explicit evidence-backed blocker is durably recorded."
     },
     {
       "obligation_id": "CORE-CORRECTED-SOURCE-CUSTODY-001",
       "owner_path": "SYSTEM_MASTER/CORE",
       "state": "BLOCKED",
       "blocker_class": "SOURCE_CUSTODY",
-      "objective": "Import/admit corrected SMR018 and cumulative SMR019 runnable source trees into ordinary GitHub-native immutable custody without mutation, independently reproduce exact identities, then obtain fresh hosted exact-SHA qualification before any A-01 request that depends on those changed subjects.",
+      "objective": "Import/admit corrected SMR018, cumulative SMR019 and changed SMR020 runnable source trees into ordinary GitHub-native immutable custody without mutation, independently reproduce exact identities, then obtain fresh hosted exact-SHA qualification before any A-01 request that depends on those changed subjects.",
       "exact_subjects": [
         "cc67826bb608fc82459e23c59d5e0106d10422c6fe79f45f0571be60356b7d54",
-        "9571b3f4f876980047facbdd77cf17f8a8a2d3255bab9704ceb3fd49cddbd5f3"
+        "9571b3f4f876980047facbdd77cf17f8a8a2d3255bab9704ceb3fd49cddbd5f3",
+        "89066e5662554b1810691473e0ed9bf49d8cc2fd4964444043b878461ed75477"
       ],
-      "does_not_block": "Beginning SMR020's own local portable reconciliation train when its required historical carrier/source is available."
+      "does_not_block": "Beginning SMR021's own local portable reconciliation train when its required historical carrier/source is available."
     },
     {
       "obligation_id": "CORE-ASSURANCE-RECON-001C",
