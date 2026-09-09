@@ -6,6 +6,7 @@
   "topology": "governance/SYSTEM-TOPOLOGY-002.json",
   "architecture_decision": "governance/ADR-0002-SYSTEM-MASTER-PARENT-HIERARCHY.md",
   "last_sealed_state_checkpoint": "governance/SYSTEM-STATE-BASELINE-002.json",
+  "active_census": "governance/census/SYSTEM-MASTER-COMPLETION-CENSUS-002-CHECKPOINT.json",
   "completion_ledger": "governance/COMPLETION-LEDGER-001.json",
   "obligation_registry": "governance/WORK-OBLIGATION-REGISTRY-001.json",
   "expectation_registry": "governance/EXPECTATION-REGISTRY-001.json",
@@ -16,10 +17,11 @@
   "startup_sequence": [
     "Read this file from current main.",
     "Read SYSTEM-TOPOLOGY-002.json and resolve the requested work to SYSTEM_MASTER/CORE, SYSTEM_MASTER/LEARNING, SYSTEM_MASTER/BOOK, SYSTEM_MASTER/BOOK/PROSE, shared infrastructure, or UNALLOCATED.",
-    "Fetch the live canonical control_ref for the owning system; never infer the live head from a chat, branch timestamp or this checkpoint.",
+    "Fetch the live canonical control_ref for the owning system; never infer the live head from a chat, branch timestamp or checkpoint.",
     "Read the owner's current control/state record selected on that live head.",
-    "Compare the live head/current state with SYSTEM-STATE-BASELINE-002. If it moved, classify AUTHORITY_DELTA and reconcile only the delta before making current-state claims.",
+    "Compare the live head/current state with the last sealed state checkpoint. If it moved, classify AUTHORITY_DELTA and reconcile only the delta before making current-state claims.",
     "Check COMPLETION-LEDGER-001 before repeating work, WORK-OBLIGATION-REGISTRY-001 before selecting what is still owed, and EXPECTATION-REGISTRY-001 before declaring scope complete.",
+    "For repository-wide reconciliation, read active_census and resume at the first incomplete phase rather than restarting the audit.",
     "If work is being delegated to Second Shift, read the owner delegation file and revalidate it against the live control head immediately before admission/execution."
   ],
   "truth_classes": {
@@ -33,6 +35,7 @@
   "write_rules": [
     "Historical evidence and completed exact-SHA receipts are append-only; do not rewrite them to match new taxonomy.",
     "Open work belongs in the obligation registry with one owner; completion moves to evidence/completion history rather than disappearing.",
+    "Repository-wide censuses are checkpointed and resumable; never rebuild completed phases merely because a chat ended.",
     "Current-control changes occur in the owning system lane; product-root governance selects/routes them but does not silently edit child objectives.",
     "Any new first-class system or parent relationship requires a superseding topology ADR and topology registry version.",
     "Any new workstream or qualification lane must resolve to an owner before execution.",
