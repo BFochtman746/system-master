@@ -31,7 +31,51 @@ jobs:
           qualification/literary-prose-engine-001/extraction-calibration-001/candidate-002/run_candidate_002_provider_fixtures.py
           qualification/literary-prose-engine-001/extraction-calibration-001/candidate-002/validate_source_heldout_human_adjudication.py
           qualification/literary-prose-engine-001/extraction-calibration-001/candidate-002/run_source_heldout_human_adjudication_validator_fixtures.py
+          qualification/literary-prose-engine-001/extraction-calibration-001/candidate-002/prepare_prehuman_custody.py
+          qualification/literary-prose-engine-001/extraction-calibration-001/candidate-002/prepare_human_adjudication_dispatch.py
       - name: Run Candidate-002 provider and ontology fixtures
         run: python qualification/literary-prose-engine-001/extraction-calibration-001/candidate-002/run_candidate_002_provider_fixtures.py
       - name: Run Candidate-002 human adjudication return-boundary fixtures
         run: python qualification/literary-prose-engine-001/extraction-calibration-001/candidate-002/run_source_heldout_human_adjudication_validator_fixtures.py
+      - name: Build exact-source human adjudication dispatch package
+        run: >-
+          python qualification/literary-prose-engine-001/extraction-calibration-001/candidate-002/prepare_human_adjudication_dispatch.py
+          --output-dir "$RUNNER_TEMP/source-heldout-002b-human-dispatch"
+      - name: Verify dispatch contains no gold or model predictions
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          root = Path(os.environ['RUNNER_TEMP']) / 'source-heldout-002b-human-dispatch'
+          manifest = json.loads((root / 'DISPATCH-MANIFEST.json').read_text(encoding='utf-8'))
+          assert manifest['case_count'] == 6
+          assert manifest['completed_packet_template_count'] == 18
+          assert manifest['reviewer_a_assignment_count'] == 18
+          assert manifest['reviewer_b_assignment_count'] == 12
+          assert manifest['total_independent_review_assignments'] == 30
+          assert manifest['model_predictions_in_package'] is False
+          assert manifest['human_gold_in_package'] is False
+          assert len(list((root / 'passages').glob('*.txt'))) == 6
+          assert len(list((root / 'blank-completed-packets').glob('*.json'))) == 18
+          assert len(list((root / 'reviewer-A').glob('*.md'))) == 18
+          assert len(list((root / 'reviewer-B').glob('*.md'))) == 12
+          assert (root / 'SPAN-HELPER.html').is_file()
+          for path in (root / 'blank-completed-packets').glob('*.json'):
+              packet = json.loads(path.read_text(encoding='utf-8'))
+              assert packet['adjudicators'] == []
+              assert packet['gold_labels'] == []
+              assert packet['forbidden_labels'] == []
+              assert packet['intentionally_ambiguous'] is None
+              assert packet['adjudication_notes_digest'] is None
+              assert packet['model_input_contains_gold'] is False
+          print('HUMAN_DISPATCH_NO_GOLD_VERIFY=PASS')
+          PY
+      - name: Upload human adjudication dispatch package
+        uses: actions/upload-artifact@v4
+        with:
+          name: LITERARY-SOURCE-HELDOUT-002B-HUMAN-DISPATCH-${{ github.run_id }}
+          path: ${{ runner.temp }}/source-heldout-002b-human-dispatch
+          if-no-files-found: error
+          retention-days: 30
