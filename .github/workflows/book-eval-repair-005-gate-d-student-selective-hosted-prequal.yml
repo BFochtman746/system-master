@@ -1,0 +1,63 @@
+name: BOOK-EVAL REPAIR-005 Gate D Student Selective A-01 Hosted Prequalification
+
+on:
+  push:
+    branches:
+      - book-eval-lemonade-001-blind-resume-003-adapter-repair
+    paths:
+      - ".github/scripts/book-eval-repair005-gate-d-student-selective-qualify.js"
+      - ".github/scripts/test-book-eval-repair005-gate-d-student-selective-qualify.js"
+      - ".github/workflows/book-eval-repair-005-gate-d-student-selective-hosted-prequal.yml"
+      - "qualification/book-eval-lemonade-001/scripts/freeze-repair005-gate-d-teacher.py"
+      - "qualification/book-eval-lemonade-001/scripts/validate-repair005-gate-d-teacher.py"
+      - "qualification/book-eval-lemonade-001/scripts/compile-repair005-gate-d-student.py"
+      - "qualification/book-eval-lemonade-001/scripts/test-repair005-gate-d-student-ingest.py"
+      - "qualification/book-eval-lemonade-001/scripts/train-repair005-gate-d.py"
+      - "qualification/book-eval-lemonade-001/scripts/adjudicate-repair005-gate-d-selective-120b.py"
+      - "qualification/book-eval-lemonade-001/scripts/audit-repair005-gate-d-selective.py"
+      - "qualification/book-eval-lemonade-001/lemonade-load-request.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  prequal:
+    name: Prove A-01 Gate-D orchestration contract without private authority
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact Book workstream subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Check A-01 qualifier syntax
+        run: |
+          node --check .github/scripts/book-eval-repair005-gate-d-student-selective-qualify.js
+          node --check .github/scripts/test-book-eval-repair005-gate-d-student-selective-qualify.js
+
+      - name: Check Python boundaries compile
+        run: |
+          python -m py_compile \
+            qualification/book-eval-lemonade-001/scripts/freeze-repair005-gate-d-teacher.py \
+            qualification/book-eval-lemonade-001/scripts/validate-repair005-gate-d-teacher.py \
+            qualification/book-eval-lemonade-001/scripts/compile-repair005-gate-d-student.py \
+            qualification/book-eval-lemonade-001/scripts/test-repair005-gate-d-student-ingest.py \
+            qualification/book-eval-lemonade-001/scripts/train-repair005-gate-d.py \
+            qualification/book-eval-lemonade-001/scripts/adjudicate-repair005-gate-d-selective-120b.py \
+            qualification/book-eval-lemonade-001/scripts/audit-repair005-gate-d-selective.py
+
+      - name: Reprove synthetic 1052-record ingest boundary
+        run: python qualification/book-eval-lemonade-001/scripts/test-repair005-gate-d-student-ingest.py
+
+      - name: Prove qualifier ordering and custody contract
+        run: node .github/scripts/test-book-eval-repair005-gate-d-student-selective-qualify.js
+
+      - name: Publish prequalification standing
+        run: |
+          echo '## BOOK EVAL GATE D STUDENT + SELECTIVE A-01 PREQUAL' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Hosted prequalification proves orchestration syntax/order, frozen-hash bindings, synthetic 612+440=1052 ingest behavior, student-before-120B dependency, provider-only selective-120B boundary, and no private-model/raw-private evidence upload path.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'It does not read persistent Teacher v3, BASE_TRAINING, DEVELOPMENT_GOLD, provider corpus, hidden holdout, visible regression, A-01 local student models, or the 120B endpoint.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Real Gate-D qualification remains HOLD until authoritative Teacher-freeze PASS and private-recovery PASS are both adjudicated by the central A-01 portfolio.' >> "$GITHUB_STEP_SUMMARY"
