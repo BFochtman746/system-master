@@ -1,0 +1,52 @@
+name: Book System Canonical State Model Qualification
+
+on:
+  push:
+    branches:
+      - book-system/control-v1
+    paths:
+      - "qualification/book-system/canonical-state-001/**"
+      - ".github/scripts/book-system-canonical-state-001-qualify.js"
+      - ".github/workflows/book-system-canonical-state-001.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: book-system-canonical-state-001
+  cancel-in-progress: false
+
+jobs:
+  qualify:
+    name: Qualify Book System canonical state model
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout exact repository subject
+        uses: actions/checkout@v4
+
+      - name: Execute repository-owned canonical state qualifier
+        shell: cmd
+        run: node .github\scripts\book-system-canonical-state-001-qualify.js
+
+      - name: Publish qualification summary
+        if: always()
+        shell: cmd
+        run: |
+          set "EVIDENCE_DIR=%RUNNER_TEMP%\book-system-canonical-state-001-%GITHUB_RUN_ID%"
+          echo ## BOOK-SYSTEM-CANONICAL-BOOK-STATE-MODEL-001>>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\qualification.txt" type "%EVIDENCE_DIR%\qualification.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\result.txt" type "%EVIDENCE_DIR%\result.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%EVIDENCE_DIR%\failure.txt" type "%EVIDENCE_DIR%\failure.txt">>"%GITHUB_STEP_SUMMARY%"
+          if not exist "%EVIDENCE_DIR%\result.txt" echo result=FAIL_OR_INCOMPLETE>>"%GITHUB_STEP_SUMMARY%"
+
+      - name: Upload canonical state qualification evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: book-system-canonical-state-001-evidence
+          path: ${{ runner.temp }}/book-system-canonical-state-001-${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 30
