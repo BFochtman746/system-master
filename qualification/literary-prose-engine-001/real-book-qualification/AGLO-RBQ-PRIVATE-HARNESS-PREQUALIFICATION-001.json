@@ -1,0 +1,59 @@
+{
+  "objective": "AGLO-REAL-BOOK-CLOSED-LOOP-QUALIFICATION-001",
+  "phase": "PRIVATE_CLOSED_LOOP_HARNESS_PREQUALIFICATION",
+  "standing": "PASS__FAIL_CLOSED_HARNESS_PREQUALIFIED__REAL_BOOK_EXECUTION_BLOCKED_PENDING_EXPLICIT_AUTHOR_BASELINE_RATIFICATION",
+  "harness": {
+    "path": "qualification/literary-prose-engine-001/real-book-qualification/aglo_private_closed_loop_harness.py",
+    "blob_sha": "447142b7adb354e1c01a66bb2822998785c7452b",
+    "raw_manuscript_text_emitted": false,
+    "candidate_revision_text_emitted": false
+  },
+  "private_source": {
+    "reference": "A Gate Left Open - Master .docx",
+    "source_package_sha256": "ec0f5475c05cf6c11a75d139f2dbd131e6133d6abba9121be8b8ef18454b31df",
+    "repository_persistence": false
+  },
+  "qualification_checks": {
+    "python_compile": "PASS",
+    "current_canonical_not_admitted_state": {
+      "expected_exit_code": 2,
+      "observed_exit_code": 2,
+      "standing": "BLOCKED_AUTHORITY_NOT_RATIFIED",
+      "reasons": [
+        "REAL_BOOK_STATE_NOT_ADMITTED",
+        "EXPLICIT_BASELINE_RATIFICATION_MISSING",
+        "EXACT_TRACKED_CHANGE_PROJECTION_MISSING",
+        "EXPLICIT_USER_AUTHORIZATION_MISSING",
+        "QUALIFICATION_ONLY_AUTHORITY_MISSING"
+      ]
+    },
+    "synthetic_explicit_reject_all_authority_fixture": {
+      "purpose": "Prove harness behavior after authority exists; this fixture does not create author authority.",
+      "expected_exit_code": 0,
+      "observed_exit_code": 0,
+      "standing": "PASS__AUTHORIZED_PRIVATE_SAMPLE_GATE__READY_FOR_SEMANTIC_PASSAGE_STATE_BUILD",
+      "sample_chapters": [1, 8, 19, 21, 24, 29],
+      "chapter_digest_matches": 6,
+      "chapter_digest_mismatches": 0,
+      "digest_only_passage_manifest_count": 18,
+      "raw_prose_persisted": false
+    }
+  },
+  "identity_adjudication": {
+    "authoritative_content_identity": "SHA256_CHAPTER_DIGESTS",
+    "word_counts": "ADVISORY_ONLY",
+    "finding": "Several previously stored word counts use a different tokenization convention, while all six cryptographic chapter digests match exactly. Word-count disagreement therefore cannot override exact content identity.",
+    "content_regression_detected": false
+  },
+  "authority_boundary": {
+    "current_author_ratification": false,
+    "execution_authorized": false,
+    "named_author_target_allowed": false,
+    "universal_prose_score_allowed": false,
+    "automatic_manuscript_overwrite_allowed": false,
+    "publication_authority": false
+  },
+  "a01_required": false,
+  "a01_consumed": false,
+  "next_transition": "EXPLICIT_AUTHOR_BASELINE_RATIFICATION"
+}
