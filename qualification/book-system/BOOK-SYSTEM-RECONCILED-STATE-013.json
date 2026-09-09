@@ -1,0 +1,87 @@
+{
+  "state_id": "BOOK-SYSTEM-RECONCILED-STATE-013",
+  "effective_date": "2026-09-09",
+  "supersedes_for_current_parent_control": "BOOK-SYSTEM-RECONCILED-STATE-012",
+  "supersession_scope": "PARENT_CONTROL_AND_NEXT_STEP_ROUTING_ONLY",
+  "standing": "ACTIVE__RUNTIME_V2_A01_PASS__VERSION_AND_ROLLBACK_NEXT",
+  "project": "BOOK SYSTEM",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "control_branch": "book-system/control-v1",
+  "closed_this_transition": [
+    {
+      "id": "BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-002-IMPLEMENTATION-001",
+      "qualification_id": "BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-002",
+      "artifact": "qualification/book-system/BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-002-CLOSURE.json",
+      "qualified_subject_sha": "837e479415afb2d9724e4b913d456ef1d3a62df5",
+      "a01_run_id": 34414628390,
+      "a01_job_id": 102676671368,
+      "result": "PASS__35_ADVERSARIAL_CASES__HOSTED_PREQUAL_AND_A01_REGISTERED_EXACT_SHA"
+    }
+  ],
+  "runtime_v2_result": {
+    "research_decisions_bound": true,
+    "service_interface_dependency_sha": "77db6b550e9aeb1dfb956627376becbb591498f8",
+    "service_interface_dependency_transfer": false,
+    "qualified_runtime_subject_sha": "837e479415afb2d9724e4b913d456ef1d3a62df5",
+    "fixture_cases": 35,
+    "service_families": 4,
+    "registered_operations": 21,
+    "hosted_prequalification": "PASS",
+    "authoritative_a01": "PASS",
+    "control_plane_registry_version": 20,
+    "control_plane_policy_version": 6,
+    "provider_canonical_write_authority": false,
+    "provider_lifecycle_transition_authority": false,
+    "provider_export_freeze_authority": false,
+    "provider_publication_authority": false,
+    "book_owned_document_engine_authority": false,
+    "promotion_authorized": false
+  },
+  "preserved_failure_and_repair_lineage": {
+    "failed_subject_sha": "63e6f55756698f31e6f3a97c00076424ae826993",
+    "failed_hosted_run_id": 34414479414,
+    "failure_class": "SUBJECT_FAILURE",
+    "failure_code": "INVALID_SOURCE_IDENTITY",
+    "failure_detail": "initial_source",
+    "failed_evidence_artifact_id": 10128505080,
+    "repair_commit": "837e479415afb2d9724e4b913d456ef1d3a62df5",
+    "repair_scope": "MALFORMED_STALE_SOURCE_FIXTURE_DIGEST_ONLY",
+    "runtime_validation_weakened": false,
+    "completed_research_or_implementation_restarted": false
+  },
+  "current_parent_critical_path": {
+    "id": "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001",
+    "classification": "READY__PARENT_CANONICAL_VERSION_LINEAGE_AND_RECOVERY",
+    "objective": "Research, define, implement and qualify the Book-parent version and rollback boundary so canonical Book objects, manuscript mutations, author decisions, admitted integration outcomes and release-relevant state use immutable version identities with predecessor lineage, exact digests, concurrency-safe pointer advancement and evidence-preserving rollback/recovery rather than in-place historical mutation.",
+    "first_action": "Forensically map current version/digest/pointer/rollback semantics already present in the Canonical Book State Model, Lifecycle Transition Engine, Runtime V2, authoring lifecycle contract and artifact/export boundaries; then perform bounded current external research on immutable version lineage, optimistic concurrency, append-only recovery and rollback safety. Classify KEEP / ADD_OR_REFINE / DO_NOT_ADD / UNRESOLVED before changing executable semantics.",
+    "must_include": [
+      "immutable successor identity for every canonical Book object whose accepted content or governing state changes",
+      "predecessor and lineage references sufficient to reconstruct the accepted version chain",
+      "exact content/state digest binding and fail-closed digest mismatch behavior",
+      "optimistic-concurrency or equivalent exact-current-version preconditions for pointer advancement",
+      "atomic creation of successor version plus pointer movement, with no in-place mutation of historical versions",
+      "rollback as creation/selection of an explicitly identified prior or recovery successor state rather than deletion or rewriting of history",
+      "dependency-aware invalidation/revalidation when rollback changes canon, story bible, plan, manuscript, research, arc or setup/payoff dependencies",
+      "preservation of integration proposal, author-decision, provenance, artifact and qualification evidence even when current pointers roll back",
+      "explicit rules for stale provider responses and stale artifacts after rollback or restoration",
+      "author authority preservation: rollback cannot synthesize an approval that did not exist for the selected content/state",
+      "publication/export preservation: technical artifact PASS or prior publication state cannot silently authorize a new/rolled-back release",
+      "deterministic adversarial fixtures for concurrent updates, stale writes, partial failure, rollback, re-forward, branch-like divergence, digest mismatch and recovery",
+      "hosted prequalification and a separately registered exact-SHA A-01 qualification for any changed executable subject"
+    ],
+    "implementation_constraints": [
+      "Reuse the qualified canonical state, lifecycle and Runtime V2 authorities where their existing semantics are sufficient; do not rebuild them as parallel engines.",
+      "Do not transfer Runtime V2, Lifecycle v1, State Model or Registry qualification to changed Version/Rollback bytes.",
+      "Do not turn Book System into a generic source-control product or full event-sourcing platform unless research demonstrates a Book-specific requirement that existing append-only ledgers cannot satisfy.",
+      "Do not delete historical manuscript, author-decision, proposal, evidence, artifact or receipt versions to make rollback appear clean.",
+      "Do not absorb Prose child state/version authority; Book may bind exact Prose outputs as evidence/artifacts only through registered interfaces.",
+      "Do not implement document rendering/conversion mechanics inside Book System.",
+      "Do not infer author approval, publication authority or production authority from a rollback operation."
+    ],
+    "pass_proves": "The exact qualified Book Version/Rollback implementation provides immutable, digest-bound, concurrency-safe version lineage and evidence-preserving rollback/recovery for the bounded Book-parent state it owns, without permitting stale writes, hidden history mutation or authority fabrication.",
+    "pass_unlocks": "The next dependency-valid Book parent objective selected after a fresh obligation/expectation review; no later objective is pre-declared complete by this state.",
+    "on_failure": "Preserve every completed forensic/research/contract/test phase, classify the exact failed versioning/rollback boundary, repair only that boundary on a new exact SHA when bytes change, and do not weaken existing qualified parent authorities or delete history to obtain PASS."
+  },
+  "generic_continue_rule": "In Book System control, Continue executes BOOK-SYSTEM-VERSION-AND-ROLLBACK-001 beginning with the forensic existing-semantics map and bounded research gate before executable changes.",
+  "qualification_effect": "Runtime V2 is authoritative PASS only on exact subject 837e479415afb2d9724e4b913d456ef1d3a62df5. State-013 itself is control/routing evidence and does not transfer that PASS, mutate canonical manuscripts, fabricate author decisions, freeze exports or authorize publication."
+}
