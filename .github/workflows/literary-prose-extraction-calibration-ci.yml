@@ -35,6 +35,8 @@ jobs:
               print(f'JSON_PASS {path}')
           PY
       - name: Compile extraction calibration modules
-        run: python -m py_compile qualification/literary-prose-engine-001/extraction-calibration-001/narrative_extraction_calibration.py qualification/literary-prose-engine-001/extraction-calibration-001/run_extraction_calibration_fixtures.py
+        run: python -m py_compile qualification/literary-prose-engine-001/extraction-calibration-001/narrative_extraction_calibration.py qualification/literary-prose-engine-001/extraction-calibration-001/extractor_provider.py qualification/literary-prose-engine-001/extraction-calibration-001/run_extraction_calibration_fixtures.py qualification/literary-prose-engine-001/extraction-calibration-001/run_no_model_baseline.py
       - name: Qualify calibration failure detection and abstention semantics
         run: python qualification/literary-prose-engine-001/extraction-calibration-001/run_extraction_calibration_fixtures.py
+      - name: Qualify source-bound provider contract and no-model baseline
+        run: python qualification/literary-prose-engine-001/extraction-calibration-001/run_no_model_baseline.py
