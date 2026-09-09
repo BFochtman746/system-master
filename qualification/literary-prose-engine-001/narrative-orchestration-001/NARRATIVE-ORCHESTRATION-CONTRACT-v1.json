@@ -1,0 +1,59 @@
+{
+  "contract_id": "BOOK-INTELLIGENCE-NARRATIVE-ORCHESTRATION-001-v1",
+  "objective": "Represent global narrative function and long-range orchestration over canonical narrative-state IDs without imposing a universal plot template or converting structural pattern detection into literary defect claims.",
+  "depends_on": [
+    "BOOK-INTELLIGENCE-NARRATIVE-STATE-001-STEP-001",
+    "BOOK-INTELLIGENCE-NARRATIVE-STATE-001-STEP-002"
+  ],
+  "research_basis": [
+    "LitVISTA 2026: global narrative function+structure and anchor localization remain difficult for frontier models",
+    "Novel benchmark 2025: fiction evaluation benefits from macro/meso/micro separation and ending-sensitive evaluation",
+    "Narrative surprise 2025: surprise requires both expectation violation and retrospective coherence",
+    "Professional structural editing: narrative flow and organization are audience/purpose conditioned"
+  ],
+  "nonreconstructive": true,
+  "raw_manuscript_text_allowed": false,
+  "objects": {
+    "function_assignment": {
+      "required": ["assignment_id", "event_id", "function_type", "status", "confidence", "provenance_claim_ids"],
+      "function_types": ["ORIENTATION", "SETUP", "INCITING_CHANGE", "COMPLICATION", "DECISION", "REVERSAL", "REVELATION", "ESCALATION", "CLIMAX", "PAYOFF", "RESOLUTION", "TRANSITION", "CALLBACK", "FORESHADOW", "OTHER"],
+      "statuses": ["ASSERTED", "ALTERNATIVE", "UNRESOLVED", "INVALIDATED"]
+    },
+    "setup_payoff": {
+      "required": ["link_id", "setup_event_ids", "payoff_event_ids", "status", "confidence", "provenance_claim_ids"],
+      "statuses": ["OPEN", "PARTIAL", "PAID_OFF", "INTENTIONALLY_UNRESOLVED", "INVALIDATED"]
+    },
+    "open_question": {
+      "required": ["question_id", "introduced_event_ids", "status", "confidence", "provenance_claim_ids"],
+      "statuses": ["OPEN", "PARTIAL", "CLOSED", "INTENTIONALLY_UNRESOLVED", "INVALIDATED"],
+      "optional": ["resolution_event_ids", "reopened_event_ids"]
+    },
+    "arc": {
+      "required": ["arc_id", "arc_type", "subject_ids", "beats", "status"],
+      "arc_types": ["CHARACTER", "RELATIONSHIP", "PLOT", "MOTIF", "IDEA", "OTHER"],
+      "statuses": ["ACTIVE", "CLOSED", "INTENTIONALLY_OPEN", "INVALIDATED"],
+      "beat_roles": ["INTRODUCE", "DEVELOP", "COMPLICATE", "REVERSE", "TRANSFORM", "CALLBACK", "PAYOFF", "CLOSE", "REOPEN", "OTHER"]
+    }
+  },
+  "rules": [
+    "Every orchestration object references canonical narrative-state event/entity IDs and provenance; no manuscript text is copied into orchestration state.",
+    "Function labels are descriptive hypotheses with confidence/status, not mandatory plot beats.",
+    "No function type or arc role is required to occur in every book.",
+    "ALTERNATIVE/UNRESOLVED function assignments may coexist for the same event; the validator must not force a winner.",
+    "A setup/payoff link may remain OPEN, PARTIAL or INTENTIONALLY_UNRESOLVED without being labeled defective.",
+    "A question may remain INTENTIONALLY_UNRESOLVED; closure percentage is not a universal quality score.",
+    "An arc may plateau, reopen, reverse, terminate early or remain intentionally open without automatic defect classification.",
+    "PAYOFF/RESOLUTION claims require explicit referenced events; no synthetic payoff is invented to satisfy a template.",
+    "Changing an underlying event/entity/claim creates invalidation candidates for dependent orchestration objects.",
+    "Orchestration state cannot authorize prose revision; revision still requires calibrated findings, opportunity admission, preservation gates and independent evaluation."
+  ],
+  "non_goals": [
+    "three-act or other universal plot enforcement",
+    "automatic defect labels for missing beats",
+    "forcing every open question to close",
+    "scoring prose quality",
+    "resolving author intent",
+    "manuscript rewriting",
+    "named-author imitation"
+  ]
+}
