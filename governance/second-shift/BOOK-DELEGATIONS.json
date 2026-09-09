@@ -2,50 +2,48 @@
   "owner_system_id": "BOOK",
   "owner_path": "SYSTEM_MASTER/BOOK",
   "control_ref": "book-system/control-v1",
-  "last_known_control_head": "690337636664ad7717811c1d4c875a7b4f304034",
-  "delegation_epoch": 9,
+  "last_known_control_head": "e95d2036da050eaa97c80c9e4380a0379e225cf8",
+  "delegation_epoch": 10,
   "active_delegations": [
     {
-      "delegation_id": "SECOND-SHIFT-BOOK-VERSION-ROLLBACK-001",
+      "delegation_id": "SECOND-SHIFT-BOOK-VERSION-ROLLBACK-A01-HANDOFF-001",
       "owner_path": "SYSTEM_MASTER/BOOK",
-      "objective_id": "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001",
+      "objective_id": "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001-A01-REGISTRATION-AND-QUALIFICATION-001",
       "state": "READY",
       "valid_for_control_ref": "book-system/control-v1",
-      "valid_for_control_head": "690337636664ad7717811c1d4c875a7b4f304034",
-      "created_at": "2026-09-09T22:59:00Z",
-      "last_revalidated_at": "2026-09-09T23:04:00Z",
+      "valid_for_control_head": "e95d2036da050eaa97c80c9e4380a0379e225cf8",
+      "created_at": "2026-09-09T23:20:00Z",
+      "last_revalidated_at": "2026-09-09T23:20:00Z",
       "completed_checkpoints": [
         "BOOK-SYSTEM-VERSION-AND-ROLLBACK-PREIMPLEMENTATION-RESEARCH-001 — CLOSED at ced3fc4a7b0009a331787c371b284e8c97078a1e",
         "BOOK-SYSTEM-VERSION-AND-ROLLBACK-FORENSIC-MAP-001 — CLOSED at 166d04dd6e5ec83ce495c6a94e11c6ac6ce56bcc",
-        "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001 contract — DEFINED at 690337636664ad7717811c1d4c875a7b4f304034"
+        "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001 contract — DEFINED at 690337636664ad7717811c1d4c875a7b4f304034",
+        "Version/Rollback executable core + authority-ingest refinement — IMPLEMENTED",
+        "48-case authority-v2 hosted prequalification — PASS on exact subject 402ab84a14e9d345530d60394ebc36176541dd21, run 34416203680, artifact 10129156222"
       ],
-      "completion_delta": "Continue from the completed research, forensic-reuse map and canonical contract into the bounded Version/Rollback executable implementation. Do not repeat closed phases or redesign already-adjudicated semantics unless a concrete implementation contradiction is proven.",
-      "stop_condition": "Implement the contract's net-new parent version-ledger and RESTORE_AS_NEW_SUCCESSOR behavior, build deterministic adversarial fixtures, and reach hosted prequalification on one exact subject. If a current central A-01 registration is valid for the exact qualification, obtain/adjudicate exact-SHA A-01; otherwise preserve the hosted-passing subject and stop at the bounded registration handoff. Completed phases and failed subjects remain preserved and resumable.",
-      "implementation_work": [
-        "Implement one Book-parent immutable version ledger overlay without replacing the qualified Canonical State Model.",
-        "Implement immutable complete-state snapshot nodes with predecessor state version/digest and exact active object-version bindings.",
-        "Implement immutable governed-object version nodes with payload digests/predecessor node identities and fail closed on identity reuse with changed bytes.",
-        "Require exact expected current parent and ledger identities plus deterministic request/idempotency handling for successor commits and restores.",
-        "Implement RESTORE_CONTENT and RESTORE_FULL_STATE as new successor commits; never move the current pointer backward or rewrite historical snapshots.",
-        "Require current dependency/evidence, rights/privacy, binding and author checks before restored content becomes current; lifecycle-status changes require qualified lifecycle receipts.",
-        "Preserve current append-only author-decision, integration-proposal, research-evidence and export-release history during restores.",
-        "Never reactivate export freeze/publication authority from historical state without current exact lifecycle/export/author evidence.",
-        "Commit state snapshot, object-version nodes, receipt and outbox entry atomically as one logical transaction; delivery remains idempotent and non-canonical.",
-        "Build adversarial fixtures for stale/concurrent writes, digest mismatch, object identity collision, restore, re-forward, divergence, partial failure, dependency-currentness failure, author-authority failure, lifecycle/publication non-restoration and replay.",
-        "Run hosted deterministic prequalification and preserve exact subject/evidence."
+      "completion_delta": "Do not rebuild Version/Rollback. Preserve the exact 48/48 hosted-passing candidate and move only the remaining shared-authority dependency: verify the live canonical A-01 registry/control plane, and if BOOK-SYSTEM-VERSION-AND-ROLLBACK-001 is centrally registered, execute/adjudicate the exact-SHA A-01 path without changing the candidate. If registration is still absent, preserve a precise shared-registration handoff and do not modify shared A-01 authority from the Book lane.",
+      "stop_condition": "Either authoritative A-01 PASS is obtained for the exact Version/Rollback subject and Book control can advance, or the exact hosted candidate remains preserved with a current evidence-backed CENTRAL_A01_REGISTRATION blocker and no completed research/implementation/prequalification phase is repeated.",
+      "allowed_work": [
+        "revalidate book-system/control-v1 before execution and stop on unadjudicated authority delta",
+        "read canonical main qualification/a01/registry.json and A-01 policy/control artifacts",
+        "verify whether BOOK-SYSTEM-VERSION-AND-ROLLBACK-001 has been centrally registered",
+        "verify the intended exact A-01 subject still contains the registered qualifier/wrapper and has current hosted PASS",
+        "invoke an already-authorized central A-01 gateway only if registration and exact-subject prerequisites are satisfied",
+        "adjudicate A-01 receipt/artifact identity and classify SUBJECT_FAILURE, INFRA_FAILURE or CONTROL_PLANE_FAILURE",
+        "preserve exact hosted/A-01 evidence and update Book control/Second Shift on a legitimate result",
+        "prepare a bounded shared-infrastructure registration handoff when registration remains absent"
       ],
       "forbidden_authority": [
-        "do not discard, repeat or relabel the completed Version/Rollback research, forensic map or contract",
-        "do not transfer Runtime V2, Registry V2, Lifecycle v1 or State Model PASS to changed Version/Rollback bytes",
-        "do not mutate/delete historical versions or move a pointer backward to simulate rollback",
-        "do not build Git-like source control or a full event-sourcing/CQRS platform inside Book System",
-        "do not reimplement lifecycle transitions or absorb Prose/Book Evaluator objectives",
-        "do not implement document rendering/conversion machinery inside Book System",
-        "do not fabricate author approval, canonical admission, export freeze, publication or production authority",
-        "do not modify shared A-01 authority unless the current canonical shared control explicitly authorizes the exact action"
+        "do not repeat Version/Rollback research, forensic mapping, contract design, implementation or hosted tests already closed/passed",
+        "do not discard the 37/40 failed subject or either 48/48 hosted PASS; they are durable evidence lineage",
+        "do not transfer hosted PASS into an A-01 PASS claim",
+        "do not edit qualification/a01/registry.json or shared A-01 control-plane policy from the Book lane merely to self-unblock",
+        "do not change Version/Rollback subject bytes after hosted PASS without creating a new exact candidate and rerunning hosted qualification",
+        "do not begin BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001 before authoritative Version/Rollback A-01 PASS",
+        "do not reimplement Lifecycle Transition authority, absorb Prose/Book Evaluator objectives, implement document rendering engines, or fabricate author/publication authority"
       ],
-      "on_pass": "Remove this delegation from active work, preserve exact qualification evidence, close BOOK-SYSTEM-VERSION-AND-ROLLBACK-001 only to the scope actually proven, revalidate the live Book control head and select the next dependency-valid Book objective from current control/obligation/expectation evidence.",
-      "on_failure": "Preserve every completed research/map/contract/test checkpoint and exact failed subject. Repair only the proven failing Version/Rollback boundary and resume from the first incomplete phase rather than restarting the objective."
+      "on_pass": "Preserve the exact A-01 run/job/artifact digest, close BOOK-SYSTEM-VERSION-AND-ROLLBACK-001 only to the proven scope, remove this active delegation, revalidate the live Book head and advance to BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001 only if current canonical control still selects it.",
+      "on_failure": "Preserve hosted PASS and the authoritative failing receipt. Repair only the exact failing boundary under the correct owner. Any changed Book subject requires a fresh hosted exact-SHA PASS before another A-01 attempt."
     }
   ],
   "delegation_history": [
@@ -102,9 +100,45 @@
       "result": "PASS__HOSTED_PREQUAL_AND_AUTHORITATIVE_A01_EXACT_SHA",
       "authority_note": "The failed fixture subject, its evidence and minimal repair remain historical evidence. PASS applies only to exact subject 837e479415afb2d9724e4b913d456ef1d3a62df5 and grants no manuscript promotion, author, export-freeze, publication, document-engine or production authority.",
       "history_preserved": true
+    },
+    {
+      "delegation_id": "SECOND-SHIFT-BOOK-VERSION-ROLLBACK-001",
+      "owner_path": "SYSTEM_MASTER/BOOK",
+      "objective_id": "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001",
+      "state": "PHASE_COMPLETE__SUPERSEDED_BY_A01_HANDOFF",
+      "previous_valid_for_control_head": "690337636664ad7717811c1d4c875a7b4f304034",
+      "completed_at": "2026-09-09T23:20:00Z",
+      "completion_classification": "RESEARCH_IMPLEMENTATION_AND_HOSTED_PREQUALIFICATION_COMPLETE__A01_AUTHORITY_SEPARATE",
+      "research_and_map_preserved": true,
+      "contract_preserved": true,
+      "failed_hosted_evidence_preserved": {
+        "subject_sha": "10c37582ed7918c6bd90ccf2536c437e2b72e68e",
+        "run_id": 34415879725,
+        "result": "FAIL_37_OF_40",
+        "artifact_id": 10129034355,
+        "artifact_digest": "sha256:d9afc35814c818645c50f605d96642c983d0437e995c3731467a2602f1a1052a",
+        "finding": "Exposed the need to prevent Version/Rollback from becoming a second lifecycle transition authority."
+      },
+      "intermediate_hosted_pass_preserved": {
+        "subject_sha": "2db9ef7cbb8a7565427f73b60d565d16fec13ab4",
+        "run_id": 34416112675,
+        "job_id": 102681245922,
+        "result": "PASS_48_OF_48",
+        "artifact_id": 10129120132,
+        "artifact_digest": "sha256:70a217b34c93fd31c11964c6c3d6647fad9712bd76587f2ff3ef913729f65848"
+      },
+      "current_hosted_pass": {
+        "subject_sha": "402ab84a14e9d345530d60394ebc36176541dd21",
+        "run_id": 34416203680,
+        "job_id": 102681527662,
+        "result": "PASS_48_OF_48",
+        "artifact_id": 10129156222,
+        "artifact_digest": "sha256:2d27e447bb60c8c236b7e1b6f4e6d6abcacd30b095f25e49965badec50ae78a8"
+      },
+      "history_preserved": true
     }
   ],
   "owner_revalidation_required": false,
-  "reason": "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001 remains the State-013 Book objective. Research, forensic reuse mapping and contract definition are now closed; the dependency-valid unattended-safe phase is executable implementation, adversarial qualification and hosted prequalification against live head 690337636664ad7717811c1d4c875a7b4f304034.",
+  "reason": "State-014 preserves completed Version/Rollback research, implementation and exact hosted 48/48 evidence and routes only the remaining shared-authority registration/A-01 qualification dependency. Useful unattended work remains: revalidate central registration and execute/adjudicate A-01 if and only if the shared authority admits it.",
   "empty_is_valid": true
 }
