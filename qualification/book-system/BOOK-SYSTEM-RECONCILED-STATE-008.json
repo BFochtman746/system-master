@@ -1,0 +1,90 @@
+{
+  "state_id": "BOOK-SYSTEM-RECONCILED-STATE-008",
+  "effective_date": "2026-09-09",
+  "supersedes_for_current_parent_control": "BOOK-SYSTEM-RECONCILED-STATE-007",
+  "supersession_scope": "PARENT_CONTROL_AND_NEXT_STEP_ROUTING_ONLY",
+  "standing": "ACTIVE__RESEARCH_VERIFIED_AUTHORING_LIFECYCLE_AMENDMENT_CLOSED__PUBLICATION_EXPORT_STANDARDS_PROFILE_NEXT",
+  "project": "BOOK SYSTEM",
+  "control_branch": "book-system/control-v1",
+  "closed_objectives": [
+    {
+      "id": "BOOK-SYSTEM-EDITORIAL-CAPABILITY-CROSSWALK-001",
+      "artifact": "qualification/book-system/research-verification-001/BOOK-SYSTEM-EDITORIAL-CAPABILITY-CROSSWALK-001.json",
+      "commit": "f836dfbe26a24ba8cac5c9408d67ea2f7fb863b3"
+    },
+    {
+      "id": "BOOK-SYSTEM-RESEARCH-VERIFIED-AUTHORING-LIFECYCLE-AMENDMENT-001",
+      "artifact": "qualification/book-system/research-verification-001/BOOK-SYSTEM-RESEARCH-VERIFIED-AUTHORING-LIFECYCLE-AMENDMENT-001.json",
+      "commit": "fd3d2acf78cbce30c51a981e36c05c173d652148"
+    }
+  ],
+  "lifecycle_amendment_result": {
+    "top_level_state_vocabulary_replaced": false,
+    "editorial_substage_overlays": {
+      "STRUCTURAL_EDIT_REVIEW": "STRUCTURAL_REVIEW",
+      "STYLISTIC_OR_LINE_EDIT_REVIEW": "PROSE_REFINEMENT",
+      "COPY_EDIT_REVIEW": "FINALIZATION_PRE_LAYOUT",
+      "POST_LAYOUT_PROOFREAD_REVIEW": "FINALIZATION_POST_RENDER_PRE_FREEZE"
+    },
+    "narrative_consistency_regression_bound": true,
+    "existing_transition_invalidation_reused": true,
+    "later_stage_regression_law_bound": true,
+    "research_before_implementation_law_bound": true,
+    "duplicate_editor_engines_authorized": false
+  },
+  "qualified_parent_foundation_preserved": {
+    "canonical_book_state_model": {
+      "qualified_subject_sha": "b6938fcfc5c2c24ac23b558de6dfc7f75c382312",
+      "a01_run_id": 34376939179,
+      "result": "PASS"
+    },
+    "service_interface_registry": {
+      "qualified_subject_sha": "9245cf9ce56f15020369eb490d9e562480825158",
+      "a01_run_id": 34377566232,
+      "result": "PASS"
+    },
+    "lifecycle_transition_engine": {
+      "qualified_subject_sha": "4a6e3459d6ba94b7ce191e426ca64bef00d23582",
+      "a01_run_id": 34378208426,
+      "result": "PASS",
+      "new_editorial_substage_enforcement_claimed_by_v1": false
+    },
+    "rule": "The lifecycle amendment is additive architecture/control law. It does not relabel v1 exact-SHA qualification as proof of new substage semantics. A versioned executable successor is required if runtime enforcement changes beyond existing evidence-overlay compatibility."
+  },
+  "implementation_pause": {
+    "objective": "BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-001 executable implementation",
+    "still_paused": true,
+    "remaining_research_remediation_before_release": [
+      "BOOK-SYSTEM-PUBLICATION-EXPORT-STANDARDS-PROFILE-001",
+      "BOOK-SYSTEM-PROVENANCE-INTEROPERABILITY-PROJECTION-001",
+      "BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-001 contract re-review"
+    ]
+  },
+  "current_parent_critical_path": {
+    "id": "BOOK-SYSTEM-PUBLICATION-EXPORT-STANDARDS-PROFILE-001",
+    "classification": "READY__RESEARCH_REMEDIATION__ARCHITECTURE_PROFILE_ONLY",
+    "objective": "Define versioned target-medium publication/export profiles and evidence gates so EPUB, PDF, DOCX and print outputs are bound to exact canonical manuscript versions, verified in their actual rendered medium, accessibility/metadata requirements are explicit where applicable, and technical export/proof PASS remains separate from publication authorization.",
+    "must_include": [
+      "common exact-version and deterministic artifact-digest binding",
+      "EPUB 3.3 conformance profile when EPUB is requested",
+      "EPUB Accessibility 1.1 / applicable WCAG-derived evidence and accessibility metadata",
+      "ONIX 3.1-compatible distribution metadata projection when needed",
+      "PDF target-medium proof profile",
+      "DOCX target-medium proof profile",
+      "print/prepress target-medium proof profile",
+      "EPUB navigation/render/accessibility proof profile",
+      "source-to-render text-integrity checks",
+      "proof correction ledger and deterministic re-render/re-proof loop",
+      "separate explicit publication/delivery authorization boundary"
+    ],
+    "must_not_do": [
+      "assume one format's proof rules apply unchanged to another format",
+      "replace Book System canonical version/provenance with EPUB or ONIX metadata",
+      "equate successful rendering, validation or proofing with author publication approval",
+      "reopen literary structural/line editing silently during proof",
+      "resume Integration Proposal Runtime implementation before research remediation release"
+    ]
+  },
+  "generic_continue_rule": "In Book System control, Continue executes BOOK-SYSTEM-PUBLICATION-EXPORT-STANDARDS-PROFILE-001. Integration Proposal Runtime implementation remains paused.",
+  "qualification_effect": "Control-state advancement only. No new runtime qualification, manuscript promotion, human/editor evidence, author decision or publication authority is created by State-008."
+}
