@@ -1,0 +1,86 @@
+{
+  "registry_id": "EXPECTATION-REGISTRY-001",
+  "effective_date": "2026-09-09",
+  "product_root": "SYSTEM_MASTER",
+  "topology": "governance/SYSTEM-TOPOLOGY-002.json",
+  "purpose": "Record what System Master is expected to contain and what boundaries must remain true, without converting historical planning claims into current implementation standing.",
+  "architecture_expectations": [
+    {
+      "id": "EXP-ARCH-001",
+      "requirement": "SYSTEM MASTER is the product root/system-of-systems.",
+      "owner": "SYSTEM_MASTER",
+      "standing": "ADOPTED"
+    },
+    {
+      "id": "EXP-ARCH-002",
+      "requirement": "CORE provides the shared Foundation & Spine consumed by product tools; tool systems do not duplicate Core authority silently.",
+      "owner": "CORE",
+      "standing": "ADOPTED"
+    },
+    {
+      "id": "EXP-ARCH-003",
+      "requirement": "LEARNING is a first-class tool system inside SYSTEM MASTER.",
+      "owner": "LEARNING",
+      "standing": "ADOPTED"
+    },
+    {
+      "id": "EXP-ARCH-004",
+      "requirement": "BOOK is a first-class end-to-end tool system inside SYSTEM MASTER.",
+      "owner": "BOOK",
+      "standing": "ADOPTED"
+    },
+    {
+      "id": "EXP-ARCH-005",
+      "requirement": "PROSE is a child system of BOOK and owns Book Evaluator/evaluation and prose-training intelligence without self-authorizing BOOK canonical writes.",
+      "owner": "PROSE",
+      "standing": "ADOPTED"
+    }
+  ],
+  "operating_expectations": [
+    {
+      "id": "EXP-OPS-001",
+      "requirement": "Every executable work item has an explicit owner path, current control head/watermark, completion delta, evidence expectation, stop condition and next-state rule.",
+      "standing": "MANDATORY"
+    },
+    {
+      "id": "EXP-OPS-002",
+      "requirement": "No newer branch/chat/workflow/ticket becomes authority merely because it is newer.",
+      "standing": "MANDATORY"
+    },
+    {
+      "id": "EXP-OPS-003",
+      "requirement": "Completed work is append-only evidence; current state selects from it but does not rewrite it.",
+      "standing": "MANDATORY"
+    },
+    {
+      "id": "EXP-OPS-004",
+      "requirement": "Unallocated work may be inspected but may not execute, schedule, promote or redefine architecture until an owner is assigned.",
+      "standing": "MANDATORY"
+    },
+    {
+      "id": "EXP-OPS-005",
+      "requirement": "Second Shift executes only live delegations revalidated against the current system control head; stale delegated work is superseded before execution.",
+      "standing": "MANDATORY"
+    }
+  ],
+  "historical_product_module_inventory": {
+    "source": "System Master Foundation & Spine Forensic Audit and Workload Hardening Study, 2026-08-31, section 3.3",
+    "historical_statement": "The audit tracked 40 product capability modules. Its old implementation-status counts are historical and must not be reused as current status without present evidence.",
+    "modules": [
+      "DOCX", "EXCEL", "PPTX", "PDF", "OCR", "RESEARCH", "KNOWLEDGE", "WRITING", "MANUSCRIPT", "STORYBIBLE",
+      "LEARNING", "CURRICULUM", "PROJECTS", "CHAT", "EXPECTATION", "FILE", "IMAGE", "PHOTO", "VIDEO", "VOICE",
+      "AUDIOBOOK", "MEDIA", "CODE", "MATH", "CAD", "BROWSER", "COMMS", "CALENDAR", "AUTOMATION", "PLUGINS",
+      "LEDGER", "GEO", "AIINCOME", "PORTFOLIO", "EXPERIENCE", "LOCALAI", "IMG-INGEST"
+    ],
+    "known_current_owner_hints": {
+      "LEARNING": "LEARNING",
+      "CURRICULUM": "LEARNING",
+      "MANUSCRIPT": "BOOK",
+      "STORYBIBLE": "BOOK",
+      "CHAT": "CORE_SHARED_RUNTIME"
+    },
+    "default_current_standing": "CURRENT_RECONCILIATION_REQUIRED",
+    "allocation_rule": "Owner hints are not implementation proof. Each module requires a current-state census and an explicit owner/capability registration before new execution if not already covered by a canonical control record."
+  },
+  "change_rule": "New product expectations require an explicit registry entry with owner and standing. If an expectation changes, supersede it; do not erase the prior expectation from history."
+}
