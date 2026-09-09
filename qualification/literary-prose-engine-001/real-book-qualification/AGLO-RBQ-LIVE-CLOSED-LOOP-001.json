@@ -1,6 +1,6 @@
 {
   "objective": "AGLO-REAL-BOOK-CLOSED-LOOP-QUALIFICATION-001",
-  "standing": "PARTIAL_PASS__LIVE_TARGETS_ADJUDICATED__USER_DECISION_REQUIRED_FOR_SUBJECTIVE_BRANCH",
+  "standing": "PARTIAL_PASS__CH24_AUTHOR_ADJUDICATED__CONTINUE_REAL_BOOK_SAMPLE",
   "baseline": {
     "version_id": "AGLO-REJECT-ALL-NARRATIVE-v1",
     "sha256": "a48378682ee15fd4b24bc97293ce43a37f096db254a0b78f715081a8aa8a59ee",
@@ -13,7 +13,6 @@
       "chapter": 8,
       "role": "CRAFT_REPAIR_TARGET",
       "disposition": "RETAIN_ORIGINAL",
-      "reason": "The ratified baseline already strongly satisfies the intended stranger-quarter pressure, labor classification, outsider status, and lived-system distinction. No bounded revision has yet proven a preservation-safe gain over the original.",
       "candidate_generation": "ABSTAIN_NO_PROVEN_GAIN",
       "preservation_regression": false
     },
@@ -22,7 +21,6 @@
       "chapter": 21,
       "role": "CRAFT_REPAIR_TARGET",
       "disposition": "RETAIN_ORIGINAL_PENDING_INDEPENDENT_PREFERENCE_EVIDENCE",
-      "reason": "Potential explanatory density exists, but removing or compressing it could alter Ruth/Naomi interpretive texture and authorial intent. Qualification fails closed without stronger independent preference evidence.",
       "candidate_generation": "ABSTAIN_SUBJECTIVE",
       "preservation_regression": null
     },
@@ -31,12 +29,12 @@
       "chapter": 24,
       "role": "OBJECTIVE_REPAIR_TARGET",
       "finding": "EXACT_DUPLICATE_WITNESS_SENTENCE",
-      "disposition": "CANDIDATE_ACCEPTABLE_PENDING_USER_DECISION",
+      "author_decision": "DELETE_DUPLICATE",
+      "disposition": "AUTHOR_ACCEPTED_BOUNDED_REPAIR",
       "candidate_digest_sha256": "eeeb3740493d047e69d637ceafe15fa1e054775cb5963652c17f2465e91de7e4",
       "transform": "REMOVE_EXACT_DUPLICATE_ONLY",
       "canon_change": false,
       "meaning_change": false,
-      "voice_change_expected": false,
       "preservation_regression": false
     },
     {
@@ -44,23 +42,12 @@
       "chapter": 24,
       "role": "OBJECTIVE_REPAIR_TARGET_WITH_VARIANT_SELECTION",
       "finding": "TWO_NEAR_DUPLICATE_PARAGRAPH_VARIANTS_CONCATENATED_WITHOUT_SEPARATOR",
-      "disposition": "USER_DECISION_REQUIRED_BETWEEN_BOUNDED_VARIANTS",
-      "variants": [
-        {
-          "variant_id": "KEEP_FIRST_ONLY",
-          "digest_sha256": "8edf0d7aae333604dff83eeff5efce263dd140eb6a4c40d4089ae4c302009010"
-        },
-        {
-          "variant_id": "KEEP_SECOND_ONLY",
-          "digest_sha256": "993029e8cc2ba2b9353a5ad802f48b06573d7add0cedbaa4d72ffb40c4e9dafc"
-        },
-        {
-          "variant_id": "LEVEL_0_NO_CHANGE",
-          "digest_sha256": null
-        }
-      ],
+      "author_decision": "KEEP_SECOND_ONLY",
+      "author_decision_source": "EXPLICIT_USER_MESSAGE_B_AND_CONTINUE",
+      "selected_candidate_digest_sha256": "993029e8cc2ba2b9353a5ad802f48b06573d7add0cedbaa4d72ffb40c4e9dafc",
+      "disposition": "AUTHOR_SELECTED_BOUNDED_VARIANT",
       "automatic_selection_authorized": false,
-      "preservation_regression": null
+      "preservation_regression": false
     }
   ],
   "controls": [
@@ -68,17 +55,17 @@
     {"chapter": 19, "role": "RETURN_ARC_CONTROL", "automatic_revision": false},
     {"chapter": 29, "role": "ENDING_VOICE_AND_THEOLOGICAL_ANCHOR", "automatic_revision": false}
   ],
-  "system_behavior_proven": [
-    "CAN_RETAIN_ORIGINAL_WHEN_GAIN_NOT_PROVEN",
-    "CAN_DISTINGUISH_OBJECTIVE_DUPLICATION_FROM_SUBJECTIVE_CRAFT_EDIT",
-    "CAN_GENERATE_BOUNDED_VARIANTS_WITHOUT_AUTO_SELECTING_AUTHORIAL_PREFERENCE",
-    "CAN_KEEP_RAW_MANUSCRIPT_AND_CANDIDATE_TEXT_OUT_OF_REPOSITORY",
-    "CAN_PRESERVE_AUTHOR_DECISION_BOUNDARY"
-  ],
+  "step_j_learning_authority": {
+    "explicit_user_preference_available": true,
+    "preference": "WHEN_DUPLICATED_OR_CONCATENATED_VARIANTS_EXPRESS_THE_SAME_BEAT_AND_ONE_IS_MORE_CHARACTER_SPECIFIC_AND_LESS_EXPLANATORY_PREFER_THE_CHARACTER_SPECIFIC_VERSION_IF_PRESERVATION_GATES_PASS",
+    "scope": "A-GATE-LEFT-OPEN_PROJECT_ONLY",
+    "raw_prose_persisted": false,
+    "universalized": false
+  },
   "raw_manuscript_text_committed": false,
   "candidate_text_committed": false,
   "publication_authorized": false,
   "automatic_overwrite_authorized": false,
   "canon_replacement_authorized": false,
-  "next_transition": "USER_ADJUDICATE_CH24_BOUNDED_CANDIDATES_THEN_RECORD_STEP_J_PROJECT_PREFERENCE_EVIDENCE"
+  "next_transition": "CONTINUE_REPRESENTATIVE_SAMPLE_CONTROLS_AND_DRIFT_DEFENSE_THEN_CLOSE_OR_EXPAND_REAL_BOOK_QUALIFICATION"
 }
