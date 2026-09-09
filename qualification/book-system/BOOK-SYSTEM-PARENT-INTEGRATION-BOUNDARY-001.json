@@ -1,0 +1,80 @@
+{
+  "contract_id": "BOOK-SYSTEM-PARENT-INTEGRATION-BOUNDARY-001",
+  "effective_date": "2026-09-09",
+  "standing": "CANONICAL__FAIL_CLOSED_PARENT_ADMISSION_BOUNDARY",
+  "owner": "BOOK SYSTEM",
+  "purpose": "Govern admission of child-project and capability-lane outputs into the Book System without transferring qualification authority or allowing subordinate work to mutate parent canonical state implicitly.",
+  "eligible_sources": [
+    "PROSE PROJECT on literary-prose-engine-001",
+    "Book Evaluator / Qualification capability lane",
+    "future Book System capability lanes explicitly registered by parent authority"
+  ],
+  "integration_proposal_required_fields": [
+    "proposal_id",
+    "source_project_or_lane",
+    "source_branch",
+    "source_subject_sha",
+    "capability_id",
+    "requested_parent_change",
+    "input_contract",
+    "output_contract",
+    "qualification_evidence_refs",
+    "rights_and_provenance_boundary",
+    "human_or_author_authority_dependencies",
+    "canonical_state_mutation_requested",
+    "compatibility_and_regression_scope",
+    "rollback_or_rejection_behavior"
+  ],
+  "admission_states": [
+    "PROPOSED",
+    "EVIDENCE_REVIEWED",
+    "PARENT_PREQUALIFIED",
+    "ADMITTED",
+    "DEFERRED",
+    "REJECTED"
+  ],
+  "default_state": "PROPOSED",
+  "fail_closed_rules": [
+    "No child output is ADMITTED merely because its branch CI or A-01 qualification passes.",
+    "No exact-SHA evidence may be cited as qualifying a different implementation SHA.",
+    "No provider, prose engine or evaluator output writes parent canonical book state directly unless a parent contract explicitly grants that mutation for the exact admitted interface.",
+    "Human-gold, author-decision, rights, private-data and publication boundaries remain separate authorities and cannot be synthesized by integration metadata.",
+    "Unknown or incomplete rights/provenance blocks admission of the affected payload or derivation.",
+    "A parent admission may bind a qualified capability interface without merging or rewriting the child branch history.",
+    "On uncertainty, retain current parent behavior/state and classify the proposal DEFERRED rather than silently integrating."
+  ],
+  "prose_project_binding": {
+    "project": "PROSE PROJECT",
+    "branch": "literary-prose-engine-001",
+    "current_control_state": "qualification/literary-prose-engine-001/LITERARY-PROSE-CONSOLIDATED-WORKSTREAM-STATE-009.json",
+    "relationship": "CHILD_PROJECT_BUILT_FOR_BOOK_SYSTEM",
+    "current_parent_admission_by_this_contract": "NONE_AUTOMATIC",
+    "allowed_parent_interaction": "Submit bounded integration proposals for qualified capabilities and requested parent contract/interface changes."
+  },
+  "book_evaluator_binding": {
+    "classification": "BOOK_SYSTEM_CAPABILITY_OR_QUALIFICATION_LANE__NOT_THIRD_PROJECT",
+    "current_branch": "book-eval-lemonade-001-blind-resume-003-adapter-repair",
+    "evidence_role": "Provide evaluation/qualification evidence under its own privacy, split-isolation and exact-SHA boundaries.",
+    "canonical_write_authority": false
+  },
+  "literary_reference_binding": {
+    "source_contract": "qualification/book-eval-lemonade-001/repair005/LITERARY-REFERENCE-CORPUS-CONTRACT-v1.json",
+    "shared_use": "Supports evaluator calibration and Prose drafting/revision craft retrieval under rights/provenance constraints.",
+    "named_author_imitation_allowed": false,
+    "universal_prose_ideal_allowed": false
+  },
+  "parent_admission_decision_must_record": [
+    "exact admitted source SHA or immutable artifact identity",
+    "scope of capability admitted",
+    "interfaces exposed to Book System",
+    "what remains child-local",
+    "qualification level actually proven",
+    "unresolved human/author/external blockers",
+    "rights/private-data restrictions",
+    "parent regression evidence",
+    "whether canonical mutation is permitted and under what guard",
+    "reversal path"
+  ],
+  "qualification_effect": "NONE by creation alone. This is a governance/interface contract. It does not promote Prose, close Book Eval Gate D, transfer A-01 authority, create human gold, or authorize publication.",
+  "next_parent_step_after_contract": "BOOK-SYSTEM-AUTHORING-LIFECYCLE-RECOVERY-001"
+}
