@@ -7,12 +7,14 @@ on:
       - 'governance/**'
       - 'qualification/a01/registry.json'
       - '.github/scripts/system-state-reconciler.js'
+      - '.github/scripts/a01-closed-loop-repair*.js'
       - '.github/workflows/system-state-reconciler.yml'
   pull_request:
     paths:
       - 'governance/**'
       - 'qualification/a01/registry.json'
       - '.github/scripts/system-state-reconciler.js'
+      - '.github/scripts/a01-closed-loop-repair*.js'
       - '.github/workflows/system-state-reconciler.yml'
 
 concurrency:
@@ -34,8 +36,14 @@ jobs:
           fetch-depth: 1
           persist-credentials: true
 
-      - name: Syntax check reconciler
-        run: node --check .github/scripts/system-state-reconciler.js
+      - name: Syntax check reconciler and repair sidecar
+        run: |
+          node --check .github/scripts/system-state-reconciler.js
+          node --check .github/scripts/a01-closed-loop-repair.js
+          node --check .github/scripts/a01-closed-loop-repair-selftest.js
+
+      - name: Self-test bounded closed-loop repair contract
+        run: node .github/scripts/a01-closed-loop-repair-selftest.js
 
       - name: Reconcile live System Master state
         run: node .github/scripts/system-state-reconciler.js --out=.state-reconciler
