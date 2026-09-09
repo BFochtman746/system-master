@@ -117,8 +117,8 @@ def _verify_state_root(state_root: Path, repo_root: Path) -> Dict[str, Any]:
             Path(str(sqlite_path) + "-shm").unlink(missing_ok=True)
 
     return {
-        "resolved_state_root": str(resolved),
         "state_root_existed_before_preflight": existed_before,
+        "state_root_outside_repository": True,
         "state_root_writable": True,
         "sqlite_roundtrip": "PASS",
         "probe_files_removed": True,
