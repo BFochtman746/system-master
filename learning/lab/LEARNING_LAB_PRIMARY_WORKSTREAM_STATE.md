@@ -1,6 +1,6 @@
 # LEARNING LAB — PRIMARY WORKSTREAM STATE
 
-Status: **PRIMARY CANDIDATE / MACHINE PROMOTION CLOSED / HUMAN EXECUTION NEXT**  
+Status: **PRIMARY / MACHINE PROMOTION CLOSED / HUMAN EXECUTION NEXT**  
 Effective date: 2026-09-09  
 Workstream: `LEARNING`
 
@@ -173,8 +173,8 @@ Do not schedule A-01 work merely to keep the runner busy.
 
 ## 10. Primary / predecessor status
 
-This Learning Night Shift chat is ready to become the primary Learning planning/adjudication workstream chat once this repository state is accepted as the durable handoff.
+This chat is the primary Learning planning/adjudication workstream chat for this repository-backed state.
 
-The predecessor Learning/Night Shift chats are thereafter historical/read-only sources. This reconciliation found no unresolved predecessor-only authority required to execute the current Learning critical path. The repository now durably records the exact promoted SHA, authoritative receipt/evidence, repair lineage, Night Shift dispositions, frozen human/privacy boundaries, downstream evidence dependencies, and the single next objective.
+The predecessor Learning/Night Shift chats are historical/read-only sources. This reconciliation found no unresolved predecessor-only authority required to execute the current Learning critical path. The repository durably records the exact promoted SHA, authoritative receipt/evidence, repair lineage, Night Shift dispositions, frozen human/privacy boundaries, downstream evidence dependencies, and the single next objective.
 
-An available prior-context search returned no additional Learning predecessor conversation records to migrate. Therefore no known predecessor-only Learning decision remains a retirement blocker. If a later historical audit discovers a predecessor-only decision that conflicts with this repository-backed state, it must be reconciled explicitly and must not silently override frozen contracts or exact-SHA qualification evidence.
+No known predecessor-only Learning decision remains a retirement blocker. If a later historical audit discovers a predecessor-only decision that conflicts with this repository-backed state, it must be reconciled explicitly and must not silently override frozen contracts or exact-SHA qualification evidence.
