@@ -1,0 +1,79 @@
+{
+  "closure_id": "BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001-CLOSURE",
+  "effective_date": "2026-09-09",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "standing": "CLOSED__HOSTED_AND_AUTHORITATIVE_A01_PASS__EXACT_SHA_SCOPED",
+  "objective": "BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001",
+  "qualified_subject_sha": "9601ae5df8348c1daac8805eaefa1718c431dd49",
+  "hosted_prequalification": {
+    "run_id": 34418414997,
+    "job_id": 102688325856,
+    "case_count": 48,
+    "pass_count": 48,
+    "fail_count": 0,
+    "result": "PASS__EXACT_FINAL_SUBJECT"
+  },
+  "authoritative_a01": {
+    "qualification_id": "BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001",
+    "run_id": 34418414997,
+    "job_id": 102688360562,
+    "policy_version": 6,
+    "registry_version": 23,
+    "runner": "A-01 / Windows / X64",
+    "result": "PASS",
+    "subject_sha": "9601ae5df8348c1daac8805eaefa1718c431dd49",
+    "checkout_sha": "9601ae5df8348c1daac8805eaefa1718c431dd49",
+    "case_count": 48,
+    "pass_count": 48,
+    "fail_count": 0,
+    "evidence_artifact_id": 10129976594,
+    "evidence_artifact_digest": "sha256:d731a193c0c4ee78b753200f5b84eb08e839d334d970569369fe3589c680431b",
+    "promotion_authorized": false
+  },
+  "preserved_failure_lineage": {
+    "subject_sha": "8ddb371c56ab64d4574de06a7745d77db76f27bd",
+    "run_id": 34417514196,
+    "job_id": 102685556970,
+    "result": "FAIL__47_OF_48__QUALIFIER_EXPECTATION_MISMATCH_ONLY",
+    "evidence_artifact_id": 10129641733,
+    "evidence_artifact_digest": "sha256:d17f808676d4d7e696995e721d9cfd5727a158ccdf4ea8c4e8889e2b700683bb",
+    "repair_classification": "QUALIFIER_ONLY__NO_RUNTIME_OR_FIXTURE_SEMANTIC_CHANGE",
+    "stale_case": "ADQ010_WITHDRAWN_REQUEST_CANNOT_RESOLVE",
+    "superseded_expected_error": "DECISION_REQUEST_NOT_CURRENT",
+    "corrected_expected_error": "DECISION_REQUEST_NOT_RESOLVABLE"
+  },
+  "intermediate_hosted_lineage": {
+    "subject_sha": "3ee4916682ed60dd7044b6c98fe0940137d96b92",
+    "run_id": 34417782231,
+    "job_id": 102686391649,
+    "result": "PASS__48_OF_48__HOSTED_ONLY",
+    "evidence_artifact_id": 10129739108,
+    "evidence_artifact_digest": "sha256:269d219b5278138fa7f4010d5fdf188fa07969868907c0d187403a8e616a052c",
+    "superseded_for_authoritative_subject_reason": "Shared A-01 registry required a subject-side canonical wrapper; wrapper and gateway were then added and the final subject was freshly prequalified before A-01."
+  },
+  "proven_scope": [
+    "parent-only enqueue and queue-action authority",
+    "immutable append-only queue/request/resolution lineage",
+    "exact parent, queue-ledger, decision-request and subject compare-and-swap",
+    "no preselected or model-synthesized author choice",
+    "explicit author identity/authority-proof boundary",
+    "explicit option-to-canonical APPROVED or REJECTED mapping",
+    "custom author choice preservation",
+    "consequential confirmation binding",
+    "defer, reopen, withdraw, stale and supersession behavior",
+    "idempotent replay and concurrent-choice conflict safety",
+    "exactly one canonical AUTHOR_DECISION append per resolved request version",
+    "Version/Rollback AUTHOR_DECISION authority handoff",
+    "zero same-operation lifecycle, manuscript-promotion, proposal-admission, export-freeze, publication or document-engine authority"
+  ],
+  "non_transfer_rule": "PASS applies only to exact subject 9601ae5df8348c1daac8805eaefa1718c431dd49. Later Book code or changed qualification-relevant subject bytes require their own applicable exact-SHA evidence.",
+  "does_not_prove": [
+    "that any real author has made a decision",
+    "publication authorization",
+    "export freeze readiness",
+    "Document System implementation",
+    "production deployment readiness"
+  ],
+  "unlocks": "BOOK-SYSTEM-EXPORT-FREEZE-001",
+  "qualification_effect": "AUTHORITATIVE_A01_PASS_EXACT_SHA_ONLY"
+}
