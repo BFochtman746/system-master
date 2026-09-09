@@ -13,6 +13,9 @@
   "reallocation_ledger": "governance/REALLOCATION-LEDGER-001.json",
   "second_shift_registry": "governance/second-shift/SECOND-SHIFT-REGISTRY-001.json",
   "second_shift_operating_mode": "governance/second-shift/SECOND-SHIFT-OPERATING-MODE-002.md",
+  "repair_inbox_registry": "governance/repair/REPAIR-INBOX-REGISTRY-001.json",
+  "repair_broker_contract": "governance/repair/A01-REPAIR-BROKER-001.md",
+  "repair_broker": ".github/scripts/a01-repair-broker.js",
   "state_reconciler_contract": "governance/reconciler/SYSTEM-STATE-RECONCILER-001.md",
   "state_reconciler_workflow": ".github/workflows/system-state-reconciler.yml",
   "closed_loop_repair_sidecar": ".github/scripts/a01-closed-loop-repair.js",
@@ -25,10 +28,11 @@
     "Read the owner's current control/state record selected on that live head.",
     "Compare the live head/current state with the last sealed state checkpoint. If it moved, classify AUTHORITY_DELTA and reconcile only the delta before making current-state claims.",
     "Check COMPLETION-LEDGER-001 before repeating work, WORK-OBLIGATION-REGISTRY-001 before selecting what is still owed, and EXPECTATION-REGISTRY-001 before declaring scope complete.",
+    "Read REPAIR-INBOX-REGISTRY-001 and this lane's repair inbox before selecting unrelated new work. Revalidate any active repair transaction against current owner state; repairable current failures normally outrank unrelated build-ahead, while superseded/irrelevant transactions are closed truthfully rather than repaired unnecessarily.",
     "Check the latest System State Reconciler standing when making repository-wide control claims. A red reconciler is a drift signal to adjudicate, not permission to ignore current owner state.",
     "For repository-wide reconciliation, read active_census and resume at the first incomplete phase rather than restarting the audit.",
     "If work is being delegated to Second Shift, read the owner delegation file and revalidate it against the live control head immediately before admission/execution.",
-    "If an executable qualification fails, classify it before repair. Repair-eligible failures may use the bounded closed-loop repair sidecar; non-automatable authority boundaries route to the owner/human/dead-letter path and are never mutated into PASS."
+    "If an executable qualification fails, classify it before repair. Repair-eligible failures enter the durable Repair Broker/inbox path; non-automatable, admission, dependency, infrastructure and control-plane outcomes retain their truthful routes and are never mutated into product PASS."
   ],
   "truth_classes": {
     "AUTHORITY_CURRENT": "Owner, live control head, current state and evidence agree.",
@@ -36,9 +40,12 @@
     "UNALLOCATED": "Work cannot be mapped to a current owner path; inspection is allowed, execution/promotion/scheduling is not.",
     "STALE_DELEGATION": "Second Shift delegation does not match the live owner control head or current open objective; do not execute.",
     "EVIDENCE_MISMATCH": "Claimed standing exceeds or conflicts with exact receipt/artifact/subject evidence; fail closed and adjudicate.",
-    "REGISTERED_EXECUTABLE_MISSING": "A registered qualification points to repository-owned executable bytes that are absent from the current subject; fail closed until the implementation is restored or the registration is superseded truthfully."
+    "REGISTERED_EXECUTABLE_MISSING": "A control-plane-source qualification points to repository-owned executable bytes that are absent from the current control-plane checkout, or a subject-source qualification is absent on its exact subject checkout; fail closed at the correct authority boundary.",
+    "REPAIR_REQUEST_READY": "An authoritative repairable subject failure has a durable owner-lane repair transaction and may be reproduced/minimally repaired without granting PASS.",
+    "A01_REQUEUE_READY": "A changed repair candidate has deterministic prequalification PASS on the same exact SHA and may return to the canonical A-01 admission path; it is not an authoritative PASS.",
+    "REPAIR_OWNER_MISMATCH": "A repair transaction no longer maps truthfully to the canonical owner/workstream; mutation/requeue is blocked until reconciled."
   },
-  "anti_surprise_invariant": "No worker may say it is surprised by repository standing after beginning execution. Repository standing must be resolved before execution; a discovered mismatch becomes AUTHORITY_DELTA or EVIDENCE_MISMATCH and is reconciled first.",
+  "anti_surprise_invariant": "No worker may say it is surprised by repository standing after beginning execution. Repository standing, active repair transactions and live delegation standing must be resolved before execution; a discovered mismatch becomes AUTHORITY_DELTA, EVIDENCE_MISMATCH, REPAIR_OWNER_MISMATCH or STALE_DELEGATION and is reconciled first.",
   "write_rules": [
     "Historical evidence and completed exact-SHA receipts are append-only; do not rewrite them to match new taxonomy.",
     "Open work belongs in the obligation registry with one owner; completion moves to evidence/completion history rather than disappearing.",
@@ -47,6 +54,8 @@
     "Any new first-class system or parent relationship requires a superseding topology ADR and topology registry version.",
     "Any new workstream or qualification lane must resolve to an owner before execution.",
     "Any Second Shift item must be removed from active delegation when completed/superseded and replaced only after a fresh owner re-evaluation.",
-    "A closed-loop repair that changes subject bytes creates a new exact SHA, new prequalification evidence and a replacement A-01 request linked to the original failed receipt."
+    "An authoritative repairable failure creates a durable owner-lane repair transaction; it may not exist only in chat memory.",
+    "A closed-loop repair that changes subject bytes creates a new exact SHA, new prequalification evidence and a replacement A-01 request linked to the original failed receipt.",
+    "Repair Broker, repair worker, hosted tests and owner chats never grant A-01 PASS, promotion, publication or production authority."
   ]
 }
