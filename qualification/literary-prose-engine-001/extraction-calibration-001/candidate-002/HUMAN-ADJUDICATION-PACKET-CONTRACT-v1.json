@@ -1,0 +1,51 @@
+{
+  "contract_id": "LITERARY-CANDIDATE-002-HUMAN-ADJUDICATION-PACKET-v1",
+  "standing": "ACTIVE__SOURCE_HELDOUT_HUMAN_GOLD_CONTRACT",
+  "purpose": "Create leakage-resistant human structural gold for public-domain heldout literary passages while preserving ambiguity and preventing the extractor from seeing adjudication evidence.",
+  "required_fields": [
+    "packet_id",
+    "work_id",
+    "source_url",
+    "source_sha256",
+    "passage_locator",
+    "task",
+    "adjudicators",
+    "gold_labels",
+    "forbidden_labels",
+    "intentionally_ambiguous",
+    "allowed_statuses",
+    "adjudication_notes_digest",
+    "model_input_contains_gold"
+  ],
+  "rules": [
+    "The selected work must exist in PUBLIC-DOMAIN-SOURCE-HELDOUT-MANIFEST-v1.json and remain TEST_ONLY.",
+    "The passage locator must identify the bounded source location without requiring the repository to store an entire book body.",
+    "The source SHA-256 must bind the exact passage text used for both model inference and human adjudication.",
+    "Gold labels and forbidden labels must never be serialized into the model request.",
+    "model_input_contains_gold must be false.",
+    "Ambiguous chronology, perspective, causality, identity or function may use multiple allowed alternatives or UNRESOLVED; adjudicators must not force one asserted answer merely for scoring convenience.",
+    "A disagreement that cannot be resolved by source evidence remains an explicit disagreement/UNRESOLVED case rather than fabricated consensus.",
+    "Human adjudication is structural evidence only; it does not authorize manuscript mutation, author intent, publication or canon change."
+  ],
+  "allowed_statuses": ["ASSERTED", "ALTERNATIVE", "UNRESOLVED", "ABSTAIN"],
+  "minimum_adjudication": {
+    "high_risk_tasks": [
+      "EVENT_IDENTITY",
+      "STORY_VS_DISCOURSE_TIME",
+      "CAUSAL_GOAL_RELATIONS",
+      "EPISTEMIC_FOCALIZATION",
+      "SETUP_PAYOFF_OPEN_QUESTION",
+      "ARC_ORCHESTRATION"
+    ],
+    "required_independent_reviews": 2,
+    "single_review_allowed_for": ["ANCHOR_LOCALIZATION", "simple explicit entity mentions"],
+    "disagreement_must_be_preserved": true
+  },
+  "gold_visibility_boundary": {
+    "adjudication_store": "EVALUATOR_ONLY",
+    "model_backend": "NO_ACCESS",
+    "scorer": "ACCESS_AFTER_PREDICTION_FREEZE",
+    "prediction_freeze_required": true
+  },
+  "completion_rule": "A heldout case is scorable only after exact source digest, passage locator, human gold, ambiguity/disagreement state and prediction-freeze evidence are complete."
+}
