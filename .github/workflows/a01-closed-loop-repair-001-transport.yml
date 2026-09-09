@@ -1,0 +1,22 @@
+name: A01 Closed-Loop Repair 001 Transport
+
+on:
+  push:
+    branches:
+      - core/a01-closed-loop-repair-001-a01
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  qualify:
+    uses: BFochtman746/system-master/.github/workflows/a01-control-plane-gateway.yml@main
+    with:
+      qualification_id: A01-CLOSED-LOOP-REPAIR-SELFTEST
+      workstream_id: SYSTEM-MASTER
+      subject_sha: ca3a924e6194eca884b9f6ae896bacf1e8718c21
+      origin_ref: refs/heads/core/a01-closed-loop-repair-001
+      resume_on_pass: Adjudicate only the exact ca3a924e6194eca884b9f6ae896bacf1e8718c21 sidecar candidate. PASS proves the bounded repair coordinator self-test on A-01; it grants no promotion and does not authorize automatic code repair or replace the canonical gateway.
+      resume_on_failure: Preserve the exact receipt and evidence. Classify SUBJECT_FAILURE versus INFRA_FAILURE or CONTROL_PLANE_FAILURE. Repair only the proven A01-CLOSED-LOOP-REPAIR-001 candidate boundary; do not weaken receipt lineage, exact-SHA binding, attempt budgets, prequalification requirements, owner routes, command denial, gateway authority, or promotion fences.
+      notification_target: system-master-core-a01-closed-loop-repair-001
