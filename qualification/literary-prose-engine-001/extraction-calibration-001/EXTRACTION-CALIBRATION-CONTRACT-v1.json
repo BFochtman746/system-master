@@ -1,0 +1,72 @@
+{
+  "contract_id": "LITERARY-NARRATIVE-EXTRACTION-CALIBRATION-001-v1",
+  "objective": "Measure whether a candidate extractor can turn authorized prose into provenance-bearing narrative observations without inventing chronology, causality, knowledge, perspective, narrative function, or closure.",
+  "authority": [
+    "qualification/literary-prose-engine-001/night-shift-2026-09-09/NEXT-DAY-EXTRACTION-CALIBRATION-PACKET-v1.json",
+    "qualification/literary-prose-engine-001/narrative-state-001/NARRATIVE-STATE-CONTRACT-v1.json",
+    "qualification/literary-prose-engine-001/narrative-orchestration-001/NARRATIVE-ORCHESTRATION-CONTRACT-v1.json"
+  ],
+  "provider_independent": true,
+  "canonical_state_write_authorized": false,
+  "tasks": [
+    "ANCHOR_LOCALIZATION",
+    "ENTITY_IDENTITY_COREFERENCE",
+    "EVENT_IDENTITY",
+    "STORY_VS_DISCOURSE_TIME",
+    "CAUSAL_GOAL_RELATIONS",
+    "EPISTEMIC_FOCALIZATION",
+    "NARRATIVE_FUNCTION",
+    "SETUP_PAYOFF_OPEN_QUESTION",
+    "ARC_ORCHESTRATION"
+  ],
+  "prediction_statuses": ["ASSERTED", "ALTERNATIVE", "UNRESOLVED", "ABSTAIN"],
+  "required_metrics": {
+    "all_tasks": ["precision", "recall", "f1", "coverage", "selective_accuracy", "false_certainty_rate"],
+    "span_tasks": ["span_iou"],
+    "ambiguity": ["ambiguity_preservation_rate", "premature_resolution_rate"],
+    "calibration": ["brier_score", "expected_calibration_error", "risk_coverage_curve"]
+  },
+  "false_certainty": {
+    "confidence_threshold": 0.8,
+    "definition": "A prediction absent from gold or forbidden by a protected ambiguity with confidence at or above the threshold.",
+    "rule": "False certainty is a first-class failure. Aggregate F1 cannot hide it."
+  },
+  "ambiguity_rule": "When gold marks a case as intentionally ambiguous, a single ASSERTED interpretation is a premature resolution unless the gold explicitly permits it.",
+  "source_policy": {
+    "allowed": [
+      "synthetic qualification narratives",
+      "public-domain text with provenance",
+      "explicitly authorized user-owned text",
+      "human-adjudicated annotations with provenance"
+    ],
+    "forbidden": [
+      "bulk copyrighted book or article bodies",
+      "hidden Book-Eval gold reuse",
+      "named-living-author imitation targets",
+      "fabricated author or reader evidence"
+    ],
+    "split_rule": "Hold out entire source works or authors where practical; do not leak adjacent passages from one work across tune/test boundaries."
+  },
+  "stress_slices": [
+    "flashback and flashforward",
+    "same event retold from multiple anchors",
+    "ambiguous chronology",
+    "belief versus knowledge versus perception",
+    "multiple focalizers and intentional omniscience",
+    "unsupported causal inference",
+    "delayed setup and payoff",
+    "intentionally unresolved question or arc",
+    "motif recurrence with changed function",
+    "surface-style attractiveness conflicting with story function",
+    "middle-book factual and temporal consistency"
+  ],
+  "admission_rule": "A candidate extractor may emit candidate observations only. Canonical narrative state remains downstream of provenance, validation, ambiguity, calibration, preservation, and explicit authority gates.",
+  "promotion_non_goals": [
+    "manuscript mutation",
+    "author-intent resolution",
+    "publication",
+    "universal prose scoring",
+    "named-author similarity",
+    "automatic human preference inference"
+  ]
+}
