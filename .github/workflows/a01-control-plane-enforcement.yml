@@ -7,7 +7,7 @@ on:
       - '.github/scripts/a01-control-plane*.js'
       - '.github/scripts/a01-overnight-*.js'
       - '.github/scripts/a01-runner-guard.ps1'
-      - '.github/scripts/validate-system-topology.py'
+      - '.github/scripts/validate-system-topology.js'
       - 'qualification/a01/**'
       - 'governance/**'
       - 'SYSTEM-MASTER-WORKSTREAM-BOOTSTRAP.md'
@@ -17,7 +17,7 @@ on:
       - '.github/scripts/a01-control-plane*.js'
       - '.github/scripts/a01-overnight-*.js'
       - '.github/scripts/a01-runner-guard.ps1'
-      - '.github/scripts/validate-system-topology.py'
+      - '.github/scripts/validate-system-topology.js'
       - 'qualification/a01/**'
       - 'governance/**'
       - 'SYSTEM-MASTER-WORKSTREAM-BOOTSTRAP.md'
@@ -38,7 +38,7 @@ jobs:
           persist-credentials: false
 
       - name: Enforce canonical four-system topology
-        run: python .github/scripts/validate-system-topology.py
+        run: node .github/scripts/validate-system-topology.js
 
       - name: Self-test enforcement logic
         run: node .github/scripts/a01-control-plane-enforce.js selftest
