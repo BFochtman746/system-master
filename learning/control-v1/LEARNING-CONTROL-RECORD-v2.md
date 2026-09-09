@@ -46,3 +46,7 @@ Learning consumes shared System Master Core services through governed interfaces
 ## Qualification boundary
 
 This record creates control authority only. It grants no participant, human, production, native-platform or broadened exact-SHA qualification authority.
+
+## Current-topology revalidation
+
+This control record was intentionally republished without changing product semantics to trigger the canonical control-drift workflow against current `main` after the System Master parent-topology successor validator landed. The resulting control commit has no qualification-transfer effect.
