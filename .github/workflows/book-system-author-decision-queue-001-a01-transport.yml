@@ -1,0 +1,22 @@
+name: BOOK SYSTEM Author Decision Queue A-01 Transport
+
+on:
+  push:
+    branches:
+      - book-system/request-author-decision-queue-001-a01
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  qualify:
+    uses: BFochtman746/system-master/.github/workflows/a01-control-plane-gateway.yml@main
+    with:
+      qualification_id: BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001
+      workstream_id: BOOK-SYSTEM
+      subject_sha: 3ee4916682ed60dd7044b6c98fe0940137d96b92
+      origin_ref: refs/heads/book-system/control-v1
+      resume_on_pass: Adjudicate the canonical receipt; require exact subject/checkout SHA equality, PASS, complete focused evidence, and no author-choice or publication authority synthesis. Close only BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001 on the exact tested SHA, then refetch live Book control before advancing to the next dependency-valid objective.
+      resume_on_failure: Preserve the authoritative receipt and artifact; classify SUBJECT_FAILURE versus INFRA_FAILURE or CONTROL_PLANE_FAILURE and repair only the proven boundary. Do not fabricate author identity or choice, weaken exact-SHA or concurrency/idempotency gates, or transfer hosted PASS to changed bytes.
+      notification_target: book-system-author-decision-queue-001
