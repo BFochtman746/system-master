@@ -2,39 +2,9 @@
   "owner_system_id": "CORE",
   "owner_path": "SYSTEM_MASTER/CORE",
   "control_ref": "system-master/control-v2",
-  "last_known_control_head": "1edce940dc42424ef0be04bd540d2192b8d49e0c",
-  "delegation_epoch": 4,
-  "active_delegations": [
-    {
-      "delegation_id": "SECOND-SHIFT-CORE-CENSUS-002",
-      "owner_path": "SYSTEM_MASTER/CORE",
-      "objective_id": "SYSTEM-MASTER-COMPLETION-CENSUS-002-P1-CORE",
-      "state": "READY",
-      "valid_for_control_ref": "system-master/control-v2",
-      "valid_for_control_head": "1edce940dc42424ef0be04bd540d2192b8d49e0c",
-      "created_at": "2026-09-09T21:13:18Z",
-      "last_revalidated_at": "2026-09-09T21:13:18Z",
-      "completion_delta": "Continue the exhaustive Core/Foundation/Spine completion census from the first incomplete census segment after the newly closed SMR020 boundary; reconcile history into current completion, obligation, expectation, reallocation and evidence standing without re-running completed SMR018-SMR020 product qualification.",
-      "stop_condition": "Every material Foundation/UAF/SMR/Data/Platform/Chat/Ops/UX/KEEL/Interop/Continuity/Assurance boundary inspected for this phase is classified as COMPLETED, OPEN_OBLIGATION, BLOCKED, SUPERSEDED, HISTORICAL_EVIDENCE, UNALLOCATED or EVIDENCE_REVIEW_REQUIRED, with exact source/evidence pointers where available; a durable resumable census checkpoint is committed before stopping.",
-      "allowed_work": [
-        "repository forensics and branch/commit/evidence inspection",
-        "completion-ledger additions backed by exact evidence",
-        "open-obligation and expectation reconciliation",
-        "reallocation and alias classification",
-        "stale current-state documentation correction that does not alter historical evidence",
-        "resumable census checkpoint creation"
-      ],
-      "forbidden_authority": [
-        "do not transfer exact-SHA qualification between subjects",
-        "do not fabricate native Apple, human, private-data or external-authority evidence",
-        "do not rewrite historical receipts/artifacts to match new taxonomy",
-        "do not advance or implement SMR021 merely to create Second Shift activity",
-        "do not re-run the completed SMR018, SMR019 or SMR020 portable qualification trains unless new evidence invalidates a recorded result"
-      ],
-      "on_pass": "Remove this delegation from active_delegations, record the completed P1 Core census phase/checkpoint, update durable ledgers, then re-evaluate the live Core control head. Admit a successor only if independently justified.",
-      "on_failure": "Preserve the completed census checkpoint, classify the exact unresolved boundary, remove or block this delegation as appropriate, and resume later from the first incomplete census segment rather than restarting P1."
-    }
-  ],
+  "last_known_control_head": "360d9129a7d7f9f1b5e2e1f546e9f1b2c3fa2d81",
+  "delegation_epoch": 5,
+  "active_delegations": [],
   "retired_delegations": [
     {
       "delegation_id": "SECOND-SHIFT-CORE-CENSUS-001",
@@ -48,9 +18,22 @@
       "superseded_at": "2026-09-09T21:13:18Z",
       "superseded_reason": "CORE control head moved through SMR020 source-custody closure and local portable closure to SMR021; schema rule invalidates READY delegation on head mismatch.",
       "replacement_delegation_id": "SECOND-SHIFT-CORE-CENSUS-002"
+    },
+    {
+      "delegation_id": "SECOND-SHIFT-CORE-CENSUS-002",
+      "owner_path": "SYSTEM_MASTER/CORE",
+      "objective_id": "SYSTEM-MASTER-COMPLETION-CENSUS-002-P1-CORE",
+      "state": "SUPERSEDED",
+      "valid_for_control_ref": "system-master/control-v2",
+      "valid_for_control_head": "1edce940dc42424ef0be04bd540d2192b8d49e0c",
+      "created_at": "2026-09-09T21:13:18Z",
+      "last_revalidated_at": "2026-09-09T21:13:18Z",
+      "superseded_at": "2026-09-09T22:40:00-04:00",
+      "superseded_reason": "STALE_DELEGATION: live CORE control head advanced to 360d9129a7d7f9f1b5e2e1f546e9f1b2c3fa2d81. The census obligation is product-governance owned and is not re-admitted from this CORE chat. Re-evaluate only a CORE-owned unattended-safe successor after current SMR021 work changes state.",
+      "replacement_delegation_id": null
     }
   ],
   "owner_revalidation_required": false,
-  "reason": "The prior census delegation became stale when the Core control head moved. The census remains a useful unattended-safe governance obligation, so it was re-evaluated and replaced against the current SMR021 control head. Ordinary SMR021 product implementation remains day-shift/Core-owner work and is not delegated here.",
+  "reason": "Live CORE authority moved beyond the previously delegated census watermark. The stale delegation is retired. This CORE chat remains on the current SMR021 dependency-current rebuild objective and will create a replacement only if useful unattended CORE-owned work remains after re-evaluation.",
   "empty_is_valid": true
 }
