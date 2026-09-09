@@ -1,7 +1,8 @@
 {
   "qualification_id": "LITERARY-PROSE-ENGINE-001-STEP-K-FIXTURE-QUALIFICATION",
   "standing": "PASS",
-  "fixture_count": 20,
+  "fixture_count": 27,
+  "implementation_hardening_commit": "980227b3294af7047258c0ba66ea850b4bc410ba",
   "covered_behaviors": [
     "clean candidate passes",
     "lexical diversity collapse requires review",
@@ -22,15 +23,27 @@
     "clean-control context prevents false register alarm",
     "project-holdout context prevents false convergence alarm",
     "assessment identity is deterministic",
-    "missing holdout evidence fails closed"
+    "missing holdout metric fails closed",
+    "missing clean-control metric fails closed",
+    "missing baseline metric fails closed",
+    "missing candidate metric fails closed",
+    "missing edit-budget evidence fails closed",
+    "missing optimization-history evidence fails closed",
+    "invalid candidate metric fails closed",
+    "invalid optimization history fails closed"
   ],
   "hard_risk_gate": true,
+  "baseline_metrics_required": true,
+  "candidate_metrics_required": true,
   "clean_control_required": true,
   "project_holdout_required": true,
+  "edit_budget_required": true,
+  "optimization_history_required": true,
   "baseline_relative": true,
   "universal_prose_score": false,
   "named_author_target_allowed": false,
   "retain_original_on_uncertainty": true,
+  "user_manuscript_text_committed": false,
   "a01_required": false,
   "real_book_accuracy_claimed": false
 }
