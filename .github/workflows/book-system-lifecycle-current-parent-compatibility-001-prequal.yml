@@ -9,6 +9,7 @@ on:
       - "qualification/book-system/export-freeze-001/BOOK-SYSTEM-LIFECYCLE-PARENT-IDENTITY-COMPATIBILITY-FINDING-001.json"
       - "system-master/book-system/lifecycle-current-parent-compatibility-adapter.js"
       - ".github/scripts/book-system-lifecycle-current-parent-compatibility-001-qualify.js"
+      - ".github/scripts/book-system-lifecycle-current-parent-compatibility-001-qualify-v2.js"
       - ".github/workflows/book-system-lifecycle-current-parent-compatibility-001-prequal.yml"
   workflow_dispatch:
 
@@ -27,12 +28,13 @@ jobs:
         with:
           ref: ${{ github.sha }}
           fetch-depth: 1
-      - name: Syntax check compatibility adapter and qualifier
+      - name: Syntax check compatibility adapter and qualifier repair
         run: |
           node --check system-master/book-system/lifecycle-current-parent-compatibility-adapter.js
           node --check .github/scripts/book-system-lifecycle-current-parent-compatibility-001-qualify.js
-      - name: Run compatibility qualifier and Lifecycle v1 regressions
-        run: node .github/scripts/book-system-lifecycle-current-parent-compatibility-001-qualify.js
+          node --check .github/scripts/book-system-lifecycle-current-parent-compatibility-001-qualify-v2.js
+      - name: Run corrected compatibility qualifier and Lifecycle v1 regressions
+        run: node .github/scripts/book-system-lifecycle-current-parent-compatibility-001-qualify-v2.js
       - name: Upload hosted evidence
         if: always()
         uses: actions/upload-artifact@v4
