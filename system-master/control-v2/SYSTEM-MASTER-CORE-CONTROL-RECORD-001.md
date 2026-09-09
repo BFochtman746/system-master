@@ -31,6 +31,11 @@ Current successor evidence includes:
 - `OPERATOROPS001-RECONCILIATION-001.md`
 - `USEREXPERIENCE001_R025_DB_PARITY_REPAIR_001.patch`
 - `USEREXPERIENCE001-RECONCILIATION-001.md`
+- `SMR020-DEPENDENCY-CURRENT-SOURCE-CUSTODY-RECOVERY-001.md`
+- `SMR021-ADMISSION-BINDING-TOMORROW-READINESS-001.md`
+- `SMR021-AUTHORIZATION-CONTEXT-BINDING-RESEARCH-DELTA-001.md`
+- `SMR021-OFFLINE-ACCESSIBILITY-RESEARCH-DELTA-001.md`
+- `SMR021-TOMORROW-READINESS-CHECKPOINT-001.md`
 
 Historical and changed-byte subjects remain distinct evidence classes.
 
@@ -132,6 +137,8 @@ Candidate release-manifest SHA-256:
 
 This is **not** the dependency-current SMR021 product subject and is not an A-01 subject. The exact current predecessor remains SMR020 subject `89066e56...`.
 
+A prior dependency-current SMR021 overlay on exact SMR020 lineage produced subject `ca2c9348040936a7b11d5367d16aed1251abc3e92dd5ec7b62326ff5c1f7aef8`, but adversarial testing reproduced a material admission/work/action binding bypass. `ca2c9348...` is failed diagnostic evidence only and must not be sealed or promoted.
+
 ## Current Core objective
 
 `SYSTEM-MASTER-REBUILD-021-DEPENDENCY-CURRENT-REBUILD-001 — USER-EXPERIENCE-001 CURRENT-LINEAGE REBUILD`
@@ -140,9 +147,30 @@ Derive USER-EXPERIENCE-001 from exact SMR020 dependency-current subject:
 
 `89066e5662554b1810691473e0ed9bf49d8cc2fd4964444043b878461ed75477`
 
-Transplant the recovered R025 human-intent / attention / PWA semantics plus the proven database-parity repair. Produce a new exact SMR021 source/test subject and replay strict Java, focused UX, contract/SQL, R025 recurrence, coherence/congruence, exact-subject and release-manifest qualification.
+Transplant the recovered R025 human-intent / attention / PWA semantics plus the proven database-parity repair, and close the reproduced admission-context binding defect without moving PLATFORM-006 admission authority into USER-EXPERIENCE. Produce a new exact SMR021 source/test subject and replay strict Java, focused UX/admission, contract/SQL, R025 recurrence, persistence/concurrency, offline/accessibility bounded gates, coherence/congruence, exact-subject and release-manifest qualification.
 
 Do not use the corrected historical v2.0.24 archive as the current product base. Do not transfer its portable PASS to dependency-current bytes. Do not queue A-01 until the dependency-current candidate exists in ordinary GitHub-native immutable custody, hosted qualification passes on that same exact subject, and a distinct Windows/device evidence delta is justified.
+
+### Current execution blocker and resumable readiness
+
+The current objective is **BLOCKED — SOURCE_CUSTODY** because the exact runnable SMR020 predecessor bytes for source/test subject `89066e56...` are not present in the already-audited current GitHub or Library search surfaces.
+
+`SMR020-DEPENDENCY-CURRENT-SOURCE-CUSTODY-RECOVERY-001.md` closes the broad GitHub/Library recovery audit, including the September 9 ZIP census. Do not restart that search absent a genuinely new custody surface or executable reconstruction artifact.
+
+Preparation and targeted research are now complete and durably sealed in:
+
+- `SMR021-ADMISSION-BINDING-TOMORROW-READINESS-001.md`
+- `SMR021-AUTHORIZATION-CONTEXT-BINDING-RESEARCH-DELTA-001.md`
+- `SMR021-OFFLINE-ACCESSIBILITY-RESEARCH-DELTA-001.md`
+- `SMR021-TOMORROW-READINESS-CHECKPOINT-001.md`
+
+Exact resume rule:
+
+`RECOVER GENUINELY NEW SMR020 RUNNABLE SOURCE/RECONSTRUCTION INPUT -> RECOMPUTE 89066e56... BEFORE MUTATION -> VERIFY CURRENT PLATFORM-006 OWNER-DEFINED DESCRIPTOR ACTION-GRANT CONTRACT -> IF PRESENT, APPLY MINIMUM WORK/DESCRIPTOR/ACTION BINDING + R025 DB-PARITY TRANSPLANT -> RUN MINIMUM 20-CASE AUTHORIZATION-FOCUSED MICRO-GATE -> FULL PORTABLE CAMPAIGN -> NEW EXACT SMR021 SUBJECT -> GITHUB-NATIVE IMMUTABLE CUSTODY/HOSTED EXACT-SHA -> DISTINCT A-01 ELIGIBILITY DECISION.`
+
+If the recovered current PLATFORM-006 contract contains no owner-defined immutable action grant, stop with a cross-owner PLATFORM-006 contract dependency. USER-EXPERIENCE may consume admission authority but may not invent it.
+
+Further broad authorization/offline/accessibility research before current-source inspection is repetition rather than progress.
 
 ## Parallel unresolved Core obligations
 
@@ -162,3 +190,5 @@ Do not use the corrected historical v2.0.24 archive as the current product base.
 ## Second Shift
 
 Core Second Shift delegation is owned by `governance/second-shift/CORE-DELEGATIONS.json` on current main. Any delegated item must be revalidated against this branch's live head before execution. A head mismatch makes the delegation stale until re-evaluated.
+
+The completed `SECOND-SHIFT-CORE-SMR021-TOMORROW-READINESS-001` work must be preserved as durable history when its stop condition is closed. Do not leave it READY merely to repeat completed research. Create a replacement only when genuinely new custody evidence or another independently dependency-valid CORE completion delta exists.
