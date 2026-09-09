@@ -8,18 +8,17 @@ Before interpreting a branch, chat title, ticket, workflow, qualification, histo
 
 1. `governance/CURRENT-AUTHORITY.json`
 2. `governance/SYSTEM-TOPOLOGY-002.json`
-3. the live canonical control/state record for the owning system
-4. `governance/COMPLETION-LEDGER-001.json` when deciding whether work is already closed
-5. `governance/EXPECTATION-REGISTRY-001.json` when deciding whether scope is complete
-6. the owner's Second Shift delegation file when unattended work is involved
+3. fetch the **live** canonical control ref for the owning system and read the selected current control/state record
+4. `governance/COMPLETION-LEDGER-001.json` — what is evidence-backed as done
+5. `governance/WORK-OBLIGATION-REGISTRY-001.json` — what is still owed, blocked, held, deferred or awaiting owner selection
+6. `governance/EXPECTATION-REGISTRY-001.json` — what System Master is expected eventually to contain/prove
+7. the owner's Second Shift delegation file when unattended work is involved
 
 Conversation memory is never a substitute for repository authority.
 
 ## Product hierarchy
 
 `SYSTEM MASTER` is the product root / system-of-systems.
-
-Current internal hierarchy:
 
 - **SYSTEM MASTER**
   - **CORE — System Master Core / Foundation & Spine**
@@ -36,24 +35,25 @@ Branches, workstreams, qualification lanes, implementation families, repair line
 ### CORE — `SYSTEM_MASTER/CORE`
 
 - control ref: `system-master/control-v2`
-- control record: `system-master/control-v2/SYSTEM-MASTER-V2-CONTROL-RECORD.md`
-- owns: shared foundation/data/platform/runtime, continuity/recovery, assurance/reconciliation and shared qualification/control-plane integration.
+- selected control: `system-master/control-v2/SYSTEM-MASTER-CORE-CONTROL-RECORD-001.md`
+- owns shared foundation/data/platform/runtime, continuity/recovery, assurance/reconciliation and shared qualification/control-plane integration.
 
 ### LEARNING — `SYSTEM_MASTER/LEARNING`
 
 - control ref: `learning/control-v1`
-- control record: `learning/control-v1/LEARNING-CONTROL-RECORD.md`
-- historical `learning/impl-*`, `learning/qual-*`, `learning/request-*`, `learning/pilot-*` and repair/import refs remain implementation/evidence history unless the live Learning control selects them.
+- selected control: `learning/control-v1/LEARNING-CONTROL-RECORD-v2.md`
+- historical `learning/impl-*`, `learning/qual-*`, `learning/request-*`, `learning/pilot-*` and repair/import refs remain implementation/evidence history unless current Learning control selects them.
 
 ### BOOK — `SYSTEM_MASTER/BOOK`
 
 - control ref: `book-system/control-v1`
-- current parent state is selected on that control ref.
+- selected control: `qualification/book-system/BOOK-SYSTEM-PRODUCT-PARENT-BINDING-003.json`
 - owns canonical book state, end-to-end lifecycle, orchestration/admission, author decisions, version/rollback, editorial lifecycle and publication/export.
 
 ### PROSE — `SYSTEM_MASTER/BOOK/PROSE`
 
-- control/implementation ref: `literary-prose-engine-001`
+- control ref: `literary-prose-engine-001`
+- selected control: `qualification/literary-prose-engine-001/PROSE-SYSTEM-PRODUCT-PARENT-BINDING-003.json`
 - owns Book Evaluator/evaluation, evaluator training, prose/craft training, diagnostics, revision intelligence and preservation checks.
 - may define its own critical path but may not alter BOOK canonical state without explicit BOOK admission.
 
@@ -71,14 +71,25 @@ If an object cannot be mapped through `SYSTEM-TOPOLOGY-002.json`, classify it `U
 
 Every worker/chat must fetch the **live owner control ref** before executing work.
 
-Compare the live head/current state with `governance/SYSTEM-STATE-BASELINE-001.json`:
+Compare the live head/current state with `governance/SYSTEM-STATE-BASELINE-002.json`:
 
-- same standing/head -> continue normally;
-- changed head/state -> classify `AUTHORITY_DELTA`, read the new control/state record and reconcile only the delta before continuing;
-- conflicting evidence -> classify `EVIDENCE_MISMATCH` and fail closed;
-- no owner -> classify `UNALLOCATED` and stop execution.
+- same standing/head -> `AUTHORITY_CURRENT`;
+- changed head/state -> `AUTHORITY_DELTA`: read the new owner control/state and reconcile only the delta before continuing;
+- conflicting evidence -> `EVIDENCE_MISMATCH` and fail closed;
+- no owner -> `UNALLOCATED` and stop execution.
 
 A worker may not begin execution and later claim surprise that the repository is farther ahead or different. Resolving current standing is a prerequisite, not a cleanup step.
+
+## Completion / obligation / expectation discipline
+
+- **Completion ledger** answers: *What has actually been completed, and what evidence proves it?*
+- **Obligation registry** answers: *What is still owed, who owns it, and what blocks/unlocks it?*
+- **Expectation registry** answers: *What is the product/system ultimately expected to cover or prove?*
+- **Reallocation ledger** answers: *Where did historical labels/workstreams move under the current hierarchy?*
+
+Do not use one of these as a substitute for another. A completed exact-SHA gate does not imply an entire expectation is complete; an expected capability does not imply implementation; an open obligation does not invalidate predecessor evidence.
+
+When an obligation closes, preserve/verify its evidence, append the completion ledger, close/supersede the obligation, update current owner state, and reconcile any active Second Shift delegation in the same work session.
 
 ## Required A-01 startup
 
@@ -92,7 +103,7 @@ Before scheduling or adjudicating A-01 machine qualification, also read:
 
 A-01 `workstream_id` is an execution/evidence lane. It must map through `SYSTEM-TOPOLOGY-002.json` to CORE, LEARNING, BOOK or PROSE.
 
-Keep these evidence states separate:
+Keep separate:
 
 1. code/evidence exists;
 2. exact code builds;
@@ -105,23 +116,23 @@ Never promote a different SHA under another SHA's evidence.
 ## Workstream behavior
 
 - Resolve owner path before acting.
-- Read the live owner control/state before selecting work.
-- Check the completion ledger before repeating an objective.
-- Check expectations before declaring the system/tool complete.
+- Read live owner control/state before selecting work.
+- Check completion before repeating work.
+- Check obligations before choosing what remains.
+- Check expectations before declaring a tool/system complete.
 - Build and prequalify before requesting A-01.
 - Use the canonical shared A-01 gateway when applicable.
-- Distinguish `SUBJECT_FAILURE` from infrastructure/control-plane failure before repair.
-- A repair that changes code creates a new exact SHA and new evidence chain.
+- Distinguish subject failure from infrastructure/control-plane/admission failure before repair.
+- A repair that changes code creates a new exact SHA and evidence chain.
 - Human, author, private-data, external-authority and native-platform boundaries remain explicit and cannot be synthesized by automation.
 - A child/system may consume another system's qualified interface but may not silently take over that system's objective or canonical writes.
 
 ## Second Shift — live delegation, not stale prompts
 
-Canonical registry:
+Canonical registry: `governance/second-shift/SECOND-SHIFT-REGISTRY-001.json`  
+Operating mode: `governance/second-shift/SECOND-SHIFT-OPERATING-MODE-002.md`
 
-`governance/second-shift/SECOND-SHIFT-REGISTRY-001.json`
-
-Each owner maintains its own active delegation file:
+Owner files:
 
 - CORE: `governance/second-shift/CORE-DELEGATIONS.json`
 - LEARNING: `governance/second-shift/LEARNING-DELEGATIONS.json`
@@ -130,18 +141,19 @@ Each owner maintains its own active delegation file:
 
 Rules:
 
-- The system/chat owns the delegation; the scheduler only consumes it.
-- When day work completes/supersedes a delegated objective, remove it from `active_delegations` in the same work session and then re-evaluate whether a successor should be delegated.
-- Every READY delegation is bound to a specific live control-head SHA.
-- Control-head mismatch means `STALE_DELEGATION`: do not execute it; re-evaluate from current owner state.
-- The 23:15 portfolio controller plans only from live revalidated delegations.
-- Every worker revalidates again immediately before execution.
+- The owner system/chat owns the delegation; the scheduler only consumes it.
+- Delegation must correspond to an open owner obligation/current objective.
+- If daytime work completes/supersedes it, remove it from `active_delegations` in that same work session, preserve history, then re-evaluate a successor.
+- READY delegation binds to an exact live owner-control head.
+- Head/objective/dependency mismatch = `STALE_DELEGATION`; do not execute it.
+- The 23:15 controller revalidates before planning; each worker revalidates again immediately before execution.
 - Empty delegation is valid. Do not invent work to fill the night.
-- A-01 overnight work still requires registered exact-subject qualification and policy admission.
+- A completed night item may be followed by another only after owner-state re-evaluation and a new/revalidated delegation.
+- A-01 work still requires registered exact-subject qualification and central policy admission.
 
 ## Historical preservation
 
-The pre-parent-topology checkpoint is preserved at:
+Pre-parent-topology checkpoint:
 
 - archive ref: `archive/pre-parent-topology-20260909`
 - manifest: `governance/snapshots/PRE-PARENT-TOPOLOGY-20260909-001.json`
