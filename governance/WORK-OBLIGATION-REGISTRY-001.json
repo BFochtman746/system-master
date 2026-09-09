@@ -1,0 +1,123 @@
+{
+  "registry_id": "WORK-OBLIGATION-REGISTRY-001",
+  "effective_date": "2026-09-09",
+  "product_root": "SYSTEM_MASTER",
+  "topology": "governance/SYSTEM-TOPOLOGY-002.json",
+  "purpose": "Durable index of work that is still owed. Completion history belongs in COMPLETION-LEDGER-001; expectations belong in EXPECTATION-REGISTRY-001; only open/blocked/deferred obligations belong here.",
+  "states": ["READY", "ACTIVE", "BLOCKED", "HOLD", "DEFERRED", "OWNER_SELECTION_REQUIRED", "SUPERSEDED", "CLOSED"],
+  "rules": [
+    "Every non-closed obligation has exactly one canonical owner_path.",
+    "An obligation may depend on another owner, but dependency does not transfer ownership.",
+    "A completed obligation is closed here and appended to the completion ledger with evidence; it is not erased from history.",
+    "A changed objective creates a supersession link rather than silently rewriting what the prior obligation meant.",
+    "Second Shift may execute only the subset explicitly delegated from an open obligation and revalidated against the live owner control head.",
+    "Human, author, private-data, external-authority, native-platform and publication boundaries remain explicit blocker classes."
+  ],
+  "obligations": [
+    {
+      "obligation_id": "CORE-SMR020-OPERATOR-OPS-001",
+      "owner_path": "SYSTEM_MASTER/CORE",
+      "state": "READY",
+      "objective": "SYSTEM-MASTER-REBUILD-020 / OPERATOR-OPS-001 — Governed Operations + Readiness + Commissioning + Recovery + Human Control Foundation",
+      "predecessor_standing": "SMR019 local portable cumulative predecessor reconciliation closed on exact subject 9571b3f4f876980047facbdd77cf17f8a8a2d3255bab9704ceb3fd49cddbd5f3.",
+      "first_rule": "Proceed through SMR020's own exact historical carrier/reconciliation/qualification train; do not transfer SMR019 PASS to SMR020 bytes.",
+      "source": "system-master/control-v2/SYSTEM-MASTER-CORE-CONTROL-RECORD-001.md"
+    },
+    {
+      "obligation_id": "CORE-CORRECTED-SOURCE-CUSTODY-001",
+      "owner_path": "SYSTEM_MASTER/CORE",
+      "state": "BLOCKED",
+      "blocker_class": "SOURCE_CUSTODY",
+      "objective": "Import/admit corrected SMR018 and cumulative SMR019 runnable source trees into ordinary GitHub-native immutable custody without mutation, independently reproduce exact identities, then obtain fresh hosted exact-SHA qualification before any A-01 request that depends on those changed subjects.",
+      "exact_subjects": [
+        "cc67826bb608fc82459e23c59d5e0106d10422c6fe79f45f0571be60356b7d54",
+        "9571b3f4f876980047facbdd77cf17f8a8a2d3255bab9704ceb3fd49cddbd5f3"
+      ],
+      "does_not_block": "Beginning SMR020's own local portable reconciliation train when its required historical carrier/source is available."
+    },
+    {
+      "obligation_id": "CORE-ASSURANCE-RECON-001C",
+      "owner_path": "SYSTEM_MASTER/CORE",
+      "state": "BLOCKED",
+      "blocker_class": "EXTERNAL_AUTHORITY",
+      "objective": "Import already-verified sealed historical Git objects via credentialed normal Git transport to governed assurance-history/* refs without rewrite, verify exact SHAs/ancestry in GitHub, then run the prepared post-import A-01 custody census.",
+      "subsystem": "ASSURANCE_RECONCILIATION"
+    },
+    {
+      "obligation_id": "LEARNING-NEXT-NONHUMAN-SUCCESSOR-001",
+      "owner_path": "SYSTEM_MASTER/LEARNING",
+      "state": "OWNER_SELECTION_REQUIRED",
+      "objective": "Select and record one specific highest-value dependency-valid non-human Learning successor from current Learning architecture/research/qualification needs before unattended work is delegated.",
+      "selection_constraints": [
+        "must not fabricate human evidence",
+        "must be recorded in current Learning control/state",
+        "must have a concrete completion delta and stop condition before Second Shift delegation"
+      ]
+    },
+    {
+      "obligation_id": "LEARNING-REAL-PARTICIPANT-PILOT-001",
+      "owner_path": "SYSTEM_MASTER/LEARNING",
+      "state": "BLOCKED",
+      "blocker_class": "HUMAN_ONLY",
+      "objective": "Execute the real participant Learning pilot only with genuine explicit consent and real learner evidence; preserve no-fabrication, retention and transfer boundaries.",
+      "predecessor": "Machine-side final-human-execution software boundary passed on f49ac9eaf6e0f11894bf47f5d773090b4ef60ebf."
+    },
+    {
+      "obligation_id": "BOOK-PUBLICATION-EXPORT-STANDARDS-PROFILE-001",
+      "owner_path": "SYSTEM_MASTER/BOOK",
+      "state": "READY",
+      "objective": "Define versioned target-medium publication/export profiles and evidence gates for EPUB, PDF, DOCX and print while preserving exact canonical manuscript-version binding and separating technical proof from publication authorization.",
+      "source": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-008.json"
+    },
+    {
+      "obligation_id": "BOOK-PROVENANCE-INTEROPERABILITY-PROJECTION-001",
+      "owner_path": "SYSTEM_MASTER/BOOK",
+      "state": "HOLD",
+      "objective": "Close the Book provenance/interoperability projection research-remediation boundary required before Integration Proposal Runtime implementation resumes.",
+      "dependency": "Book publication/export standards remediation sequence"
+    },
+    {
+      "obligation_id": "BOOK-INTEGRATION-PROPOSAL-RUNTIME-001",
+      "owner_path": "SYSTEM_MASTER/BOOK",
+      "state": "HOLD",
+      "objective": "Re-review the Integration Proposal Runtime contract and resume executable implementation only after the required publication/export and provenance research-remediation release conditions close.",
+      "must_not_do": "Do not resume executable implementation merely because earlier parent foundations passed."
+    },
+    {
+      "obligation_id": "PROSE-REAL-LIMITATION-AUTHOR-ADJUDICATION-001",
+      "owner_path": "SYSTEM_MASTER/BOOK/PROSE",
+      "state": "BLOCKED",
+      "blocker_class": "AUTHOR_ONLY",
+      "objective": "Obtain explicit author labels for the six blinded real passages, freeze those labels without revision authority, then run the qualified semantic + Step-F path blind against the frozen ground truth.",
+      "required_labels": 6,
+      "generic_continue_is_authority": false,
+      "revision_authority": "ZERO"
+    },
+    {
+      "obligation_id": "A01-CLOSED-LOOP-REPAIR-001",
+      "owner_path": "SYSTEM_MASTER/SHARED_INFRASTRUCTURE/A01",
+      "administrative_owner": "SYSTEM_MASTER/CORE",
+      "state": "READY",
+      "objective": "Implement bounded failure classification -> repair worker -> prequalification -> new exact SHA/replacement ticket -> authoritative A-01 rerun, with original receipt lineage, repair-attempt budget and dead-letter/human routes.",
+      "authority_rule": "Repair agent may prepare a changed candidate but may never self-authorize A-01 PASS or transfer evidence from the failed subject."
+    },
+    {
+      "obligation_id": "SYSTEM-MASTER-COMPLETION-CENSUS-002",
+      "owner_path": "SYSTEM_MASTER",
+      "state": "READY",
+      "classification": "PRODUCT_GOVERNANCE",
+      "objective": "Perform an exhaustive resumable census of historical/current completions, closures, receipts and branch-history indexes; allocate every evidence-backed completion to Core, Learning, Book, Prose, shared infrastructure or UNALLOCATED; append missing completion entries and adjudicate duplicate/stale completion claims.",
+      "stop_condition": "Every current owner control can explain its predecessor/completion chain from durable ledger/evidence and no known completed boundary is discoverable only through chat chronology."
+    },
+    {
+      "obligation_id": "SYSTEM-MASTER-EXPECTATION-MODULE-CENSUS-001",
+      "owner_path": "SYSTEM_MASTER",
+      "state": "READY",
+      "classification": "PRODUCT_GOVERNANCE",
+      "objective": "Reconcile the historical August 31 product-module inventory against current repository implementation and ownership; allocate each expected module/capability to Core, Learning, Book, Prose, another explicit System Master tool lane, deferred/headless scope, or intentionally excluded scope without reusing historical status counts as current truth.",
+      "source": "governance/EXPECTATION-REGISTRY-001.json"
+    }
+  ],
+  "second_shift_rule": "Do not copy this entire registry into Second Shift. Each owner explicitly delegates only current unattended-safe slices into its owner delegation file, bound to the current live control head.",
+  "closure_rule": "When an obligation closes, write/verify evidence, append the completion ledger, mark/supersede the obligation, update current owner state, and reconcile any active Second Shift delegation in the same work session."
+}
