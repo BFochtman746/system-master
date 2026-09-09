@@ -1,0 +1,110 @@
+name: Core SMR020 Runner Work Custody Probe
+
+on:
+  push:
+    paths:
+      - ".github/workflows/core-smr020-runner-work-custody-probe.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    name: Search bounded Actions work custody
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 12
+
+    steps:
+      - name: Read-only bounded custody probe
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $evidenceDir = Join-Path $env:RUNNER_TEMP ("smr020-custody-" + $env:GITHUB_RUN_ID)
+          New-Item -ItemType Directory -Force -Path $evidenceDir | Out-Null
+          $report = Join-Path $evidenceDir 'SMR020-RUNNER-WORK-CUSTODY-PROBE.txt'
+
+          $repoWorkspace = [System.IO.Path]::GetFullPath($env:GITHUB_WORKSPACE)
+          $repoCarrier = Split-Path $repoWorkspace -Parent
+          $workRoot = Split-Path $repoCarrier -Parent
+          $targetDiff = '3721b21b26a2b71f762f09f2eab0ba4d1d8809909aa2d129d5960619a7672b34'
+          $targetSmr018 = 'cc67826bb608fc82459e23c59d5e0106d10422c6fe79f45f0571be60356b7d54'
+          $targetSmr019 = '9571b3f4f876980047facbdd77cf17f8a8a2d3255bab9704ceb3fd49cddbd5f3'
+          $targetSmr020 = '89066e5662554b1810691473e0ed9bf49d8cc2fd4964444043b878461ed75477'
+
+          "probe=CORE-SMR020-RUNNER-WORK-CUSTODY-PROBE-001" | Set-Content -Path $report
+          "repository=$env:GITHUB_REPOSITORY" | Add-Content $report
+          "commit=$env:GITHUB_SHA" | Add-Content $report
+          "runner=$env:RUNNER_NAME" | Add-Content $report
+          "scope=READ_ONLY_ACTIONS_WORK_TREE_ONLY" | Add-Content $report
+          "work_root=$workRoot" | Add-Content $report
+          "personal_home_scanned=false" | Add-Content $report
+          "file_contents_uploaded=false" | Add-Content $report
+
+          if (-not (Test-Path -LiteralPath $workRoot)) {
+            "result=WORK_ROOT_NOT_FOUND" | Add-Content $report
+            throw "Actions work root not found: $workRoot"
+          }
+
+          "`n[target_digest_mentions_paths_only]" | Add-Content $report
+          $textExtensions = @('.md','.txt','.json','.jsonl','.yml','.yaml','.log','.sha256','.csv')
+          $needles = @($targetDiff,$targetSmr018,$targetSmr019,$targetSmr020)
+          $mentionFiles = Get-ChildItem -LiteralPath $workRoot -Recurse -File -ErrorAction SilentlyContinue |
+            Where-Object { $textExtensions -contains $_.Extension.ToLowerInvariant() }
+          foreach ($f in $mentionFiles) {
+            try {
+              $matched = Select-String -LiteralPath $f.FullName -Pattern $needles -SimpleMatch -Quiet -ErrorAction Stop
+              if ($matched) { $f.FullName | Add-Content $report }
+            } catch { }
+          }
+
+          "`n[target_named_files]" | Add-Content $report
+          $named = Get-ChildItem -LiteralPath $workRoot -Recurse -File -ErrorAction SilentlyContinue |
+            Where-Object { $_.Name -match '(?i)(SMR020|OPERATOR.?OPS.?001|REBUILD[_-]?020|PLATFORM.?005|CHAT.?001A)' }
+          foreach ($f in $named | Sort-Object FullName -Unique) {
+            try {
+              $h = (Get-FileHash -LiteralPath $f.FullName -Algorithm SHA256 -ErrorAction Stop).Hash.ToLowerInvariant()
+              "path=$($f.FullName)`tsize=$($f.Length)`tsha256=$h" | Add-Content $report
+            } catch {
+              "path=$($f.FullName)`tsize=$($f.Length)`tsha256=HASH_ERROR" | Add-Content $report
+            }
+          }
+
+          "`n[patch_diff_hash_scan]" | Add-Content $report
+          $patches = Get-ChildItem -LiteralPath $workRoot -Recurse -File -ErrorAction SilentlyContinue |
+            Where-Object { $_.Extension -in @('.patch','.diff') }
+          $patchCount = 0
+          $exactDiffMatches = 0
+          foreach ($f in $patches) {
+            $patchCount++
+            try {
+              $h = (Get-FileHash -LiteralPath $f.FullName -Algorithm SHA256 -ErrorAction Stop).Hash.ToLowerInvariant()
+              if ($h -eq $targetDiff) {
+                $exactDiffMatches++
+                "EXACT_TARGET_DIFF path=$($f.FullName)`tsize=$($f.Length)`tsha256=$h" | Add-Content $report
+              } elseif ($f.Name -match '(?i)(PLATFORM|SMR|CHAT|OPERATOR)') {
+                "candidate path=$($f.FullName)`tsize=$($f.Length)`tsha256=$h" | Add-Content $report
+              }
+            } catch { }
+          }
+          "patch_diff_files_hashed=$patchCount" | Add-Content $report
+          "exact_target_diff_matches=$exactDiffMatches" | Add-Content $report
+
+          "`n[target_named_directories]" | Add-Content $report
+          Get-ChildItem -LiteralPath $workRoot -Recurse -Directory -ErrorAction SilentlyContinue |
+            Where-Object { $_.Name -match '(?i)(SMR020|OPERATOR.?OPS.?001|REBUILD[_-]?020|PLATFORM.?005|CHAT.?001A)' } |
+            Select-Object -ExpandProperty FullName -Unique |
+            Add-Content $report
+
+          "`nprobe_complete=true" | Add-Content $report
+          Get-Content -LiteralPath $report
+          "EVIDENCE_DIR=$evidenceDir" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Upload path/hash evidence only
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: core-smr020-runner-work-custody-probe
+          path: ${{ env.EVIDENCE_DIR }}
+          if-no-files-found: error
+          retention-days: 30
