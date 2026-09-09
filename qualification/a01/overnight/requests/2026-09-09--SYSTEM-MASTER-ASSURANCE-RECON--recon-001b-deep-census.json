@@ -1,0 +1,23 @@
+{
+  "ticket_version": 1,
+  "ticket_id": "ASSURANCE-RECON-001B-DEEP-CENSUS-2026-09-09",
+  "state": "READY",
+  "night_date": "2026-09-09",
+  "submitted_at": "2026-09-08T21:10:17-04:00",
+  "workstream_id": "SYSTEM-MASTER-ASSURANCE-RECON",
+  "qualification_id": "ASSURANCE-RECON-001B-OVERNIGHT-DEEP-CENSUS",
+  "subject_sha": "5ae9dfbeff56cc05883d7ba3e9f7a4f0da43191c",
+  "origin_ref": "refs/heads/system-master/assurance-reconciliation-001",
+  "estimated_minutes": 60,
+  "max_runtime_minutes": 150,
+  "priority": 90,
+  "earliest_start_local": "00:00",
+  "latest_start_local": "04:25",
+  "window_end_local": "07:00",
+  "exclusive_window": false,
+  "resource_class": "mixed",
+  "resume_on_pass": "Adjudicate the exact A-01 receipt as evidence for RECON-001B. Ingest the branch/source census, SHA reachability results, artifact integrity evidence and regression evidence into the ASSURANCE-001 capability challenge. Do not treat PASS as Assurance completeness or production authorization; continue current-source capability adjudication.",
+  "resume_on_failure": "Classify SUBJECT_FAILURE versus INFRA_FAILURE or CONTROL_PLANE_FAILURE. Preserve partial census evidence, repair only the proven failing boundary, and continue RECON-001B using dependency-valid evidence that does not depend on the failed claim.",
+  "notification_target": "system-master-assurance-reconciliation-001",
+  "notes": "No fixed reservation required. Bounded read-only deep census plus current F-WP regression; no secrets/private corpus acquisition, no model training, no reboot and no promotion. Runtime cap 150 minutes is below the greater-than-180 checkpoint threshold."
+}
