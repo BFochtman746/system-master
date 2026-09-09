@@ -1,0 +1,67 @@
+{
+  "work_item": "RECON-001C",
+  "standing": "SEALED_HISTORY_VERIFIED_GITHUB_NATIVE_IMPORT_PENDING",
+  "authoritative_branch": "system-master/assurance-reconciliation-001",
+  "a01_recon_001b": {
+    "run_id": 34310540842,
+    "job_id": 102360687233,
+    "qualification_id": "ASSURANCE-RECON-001B-OVERNIGHT-DEEP-CENSUS",
+    "subject_sha": "5ae9dfbeff56cc05883d7ba3e9f7a4f0da43191c",
+    "checkout_sha_match": true,
+    "result_class": "PASS",
+    "promotion_authorized": false,
+    "artifact_id": 10091080357,
+    "artifact_digest": "sha256:91c3ef8f282123cd8405bf6f2ddab5c7695d0d171341a0349033dedde1cefded",
+    "fwp001_through_fwp012": "PASS",
+    "git_fsck": "PASS"
+  },
+  "sealed_history": {
+    "carrier": "UAF_FOUNDATION006_J.gitbundle",
+    "sha256": "ca506ebff084f2194d640a300207d9fa35a617ca2fe27eb0b0262c827cf3c884",
+    "bundle_head": "6274f172ef2a8057bf466e6d552fa355171e2bbb",
+    "complete_history": true,
+    "required_commit_reachability": "PASS_5_OF_5",
+    "required_ancestry": "PASS_4_OF_4",
+    "historical_assurance_main_java": 26,
+    "historical_assurance_test_java": 12
+  },
+  "classifications": {
+    "VERIFIED_CURRENT": [
+      "bounded A-01 census PASS on exact frozen subject",
+      "F-WP-001..012 regression PASS in A-01 evidence",
+      "A-01 artifact integrity bound by immutable digest",
+      "complete-history FOUNDATION-006 J carrier verified",
+      "five exact historical commits recoverable with intact ancestry",
+      "historical Assurance 26/12 source-test tree recoverable"
+    ],
+    "SOURCE_CUSTODY_GAP": [
+      "five exact historical commits are not yet exposed by ordinary GitHub repository refs",
+      "Step-003F exact SHA does not currently resolve through GitHub commit lookup"
+    ],
+    "CAPABILITY_GAP": [],
+    "TARGET_EVIDENCE_REQUIRED": [
+      "live PostgreSQL Assurance persistence/migration evidence where applicable",
+      "FOUNDATION-006 migrations 064/065/066 live PostgreSQL target evidence",
+      "production signer private-key custody",
+      "independent witness trust-domain deployment",
+      "native Apple evidence where claims depend on Apple runtime",
+      "production certification"
+    ],
+    "STALE_EVIDENCE": [
+      "claim that FOUNDATION-006 H is still the next prerequisite",
+      "claim that historical Assurance source bytes are missing rather than non-GitHub-native",
+      "use of historical portable evidence as current target or production standing",
+      "use of RECON-001B PASS as broader ASSURANCE-001 completeness"
+    ]
+  },
+  "completed_repairs": [
+    "registered FOUNDATION-006 J sealed custody on Assurance branch",
+    "adjudicated authoritative RECON-001B A-01 PASS without promotion overclaim",
+    "verified exact sealed recovery carrier and historical source/test counts",
+    "added fail-closed RECON-001C sealed-history verification harness",
+    "hosted selftest qualified the verifier",
+    "prepared non-force exact-object GitHub import handoff",
+    "prepared post-import A-01 successor in HOLD state"
+  ],
+  "exact_next_objective": "RECON-001C — transfer the already-verified sealed Git objects through credentialed normal Git transport into new assurance-history/* refs without rewrite, verify all five GitHub-native SHAs and ancestry, then admit the prepared post-import A-01 custody census."
+}
