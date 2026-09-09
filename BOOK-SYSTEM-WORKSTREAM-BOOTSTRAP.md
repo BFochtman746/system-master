@@ -22,7 +22,7 @@ For Book System control work, read in this order:
 5. `qualification/book-system/BOOK-SYSTEM-AUTHORING-LIFECYCLE-CONTRACT-001.json`
 6. the highest-numbered `qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-*.json`
 
-`BOOK-SYSTEM-RECONCILED-STATE-002` is the current parent control state as of 2026-09-09. Earlier reconciled states remain historical evidence and may preserve facts that were true at their time, but they do not override a later parent control/next-step state.
+`BOOK-SYSTEM-RECONCILED-STATE-003` is the current parent control state as of 2026-09-09. Earlier reconciled states remain historical evidence and may preserve facts that were true at their time, but they do not override a later parent control/next-step state.
 
 Then inspect the live child branch before routing work into the Prose Project.
 
@@ -30,20 +30,28 @@ For Prose Project work, use branch `literary-prose-engine-001` and its latest co
 
 ## Recovered Book Intelligence architecture
 
-The Book System parent now explicitly binds the recovered Book Intelligence unification rather than redesigning it from scratch:
+The Book System parent explicitly binds the recovered Book Intelligence unification rather than redesigning it from scratch:
 
 - **Creative Excellence 012–019** supplies granular prose/reader evidence and whole-book multi-resolution assurance architecture, including the recovered 56-dimension prose-craft system, 64-dimension reader-experience system, and 017 whole-book integration/qualification architecture.
 - **Literary Prose A–L** supplies the governed analysis -> diagnosis -> retrieval -> bounded revision -> independent evaluation -> learning -> homogenization-defense execution loop through the Prose Project.
 
 Neither lineage replaces the other. Book System owns canonical lifecycle state and admission; Prose and evaluator services return bounded evidence/proposals and do not receive automatic parent canonical-write authority.
 
+## Qualified parent foundation
+
+`BOOK-SYSTEM-CANONICAL-BOOK-STATE-MODEL-001` is closed on exact subject SHA `b6938fcfc5c2c24ac23b558de6dfc7f75c382312` through the registered canonical A-01 gateway. The closure receipt is:
+
+`qualification/book-system/BOOK-SYSTEM-CANONICAL-BOOK-STATE-MODEL-001-CLOSURE.json`
+
+That qualification proves the bounded parent state-model behaviors recorded in the receipt; it does not transfer to later SHAs or grant publication/production authority.
+
 ## Current parent next-step rule
 
-A generic **Continue** in Book System control follows the `exact_next_objective` in the highest-numbered reconciled parent state unless newer parent-authoritative evidence changes the dependency graph.
+A generic **Continue** in Book System control follows the `current_parent_critical_path.id` in the highest-numbered reconciled parent state unless newer parent-authoritative evidence changes the dependency graph.
 
-As of `BOOK-SYSTEM-RECONCILED-STATE-002`, the parent critical path is:
+As of `BOOK-SYSTEM-RECONCILED-STATE-003`, the parent critical path is:
 
-`BOOK-SYSTEM-CANONICAL-BOOK-STATE-MODEL-001`
+`BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-001`
 
 Do not route generic Book System continuation to the most recently changed Prose or Book Evaluator lane merely because that subordinate work changed later.
 
