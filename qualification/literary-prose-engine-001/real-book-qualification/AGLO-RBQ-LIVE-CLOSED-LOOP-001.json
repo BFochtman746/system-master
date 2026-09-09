@@ -1,6 +1,6 @@
 {
   "objective": "AGLO-REAL-BOOK-CLOSED-LOOP-QUALIFICATION-001",
-  "standing": "PARTIAL_PASS__CH24_AUTHOR_ADJUDICATED__CONTINUE_REAL_BOOK_SAMPLE",
+  "standing": "PARTIAL_PASS__RATIFIED_BASELINE_AUDITED__ONE_GENUINE_USER_DECISION_REMAINS",
   "baseline": {
     "version_id": "AGLO-REJECT-ALL-NARRATIVE-v1",
     "sha256": "a48378682ee15fd4b24bc97293ce43a37f096db254a0b78f715081a8aa8a59ee",
@@ -13,6 +13,7 @@
       "chapter": 8,
       "role": "CRAFT_REPAIR_TARGET",
       "disposition": "RETAIN_ORIGINAL",
+      "reason": "No bounded preservation-safe gain was proven over the ratified original.",
       "candidate_generation": "ABSTAIN_NO_PROVEN_GAIN",
       "preservation_regression": false
     },
@@ -21,6 +22,7 @@
       "chapter": 21,
       "role": "CRAFT_REPAIR_TARGET",
       "disposition": "RETAIN_ORIGINAL_PENDING_INDEPENDENT_PREFERENCE_EVIDENCE",
+      "reason": "Potential explanatory density remains subjective and cannot justify changing authorial texture without stronger preference evidence.",
       "candidate_generation": "ABSTAIN_SUBJECTIVE",
       "preservation_regression": null
     },
@@ -28,44 +30,48 @@
       "target_id": "AGLO-RBQ-CH24-WITNESS-001",
       "chapter": 24,
       "role": "OBJECTIVE_REPAIR_TARGET",
-      "finding": "EXACT_DUPLICATE_WITNESS_SENTENCE",
-      "author_decision": "DELETE_DUPLICATE",
-      "disposition": "AUTHOR_ACCEPTED_BOUNDED_REPAIR",
+      "finding": "EXACT_DUPLICATE_WITNESS_SENTENCE_CONFIRMED_IN_REJECT_ALL",
+      "disposition": "CANDIDATE_ACCEPTABLE_PENDING_EXPLICIT_USER_DECISION",
       "candidate_digest_sha256": "eeeb3740493d047e69d637ceafe15fa1e054775cb5963652c17f2465e91de7e4",
-      "transform": "REMOVE_EXACT_DUPLICATE_ONLY",
+      "transform": "REMOVE_FIRST_EXACT_DUPLICATE_OCCURRENCE_ONLY_AND_RETAIN_COMPLETE_FOLLOWING_PARAGRAPH",
+      "candidate_digest_verified_against_private_projected_text": true,
       "canon_change": false,
       "meaning_change": false,
-      "preservation_regression": false
+      "voice_change_expected": false,
+      "preservation_regression": false,
+      "author_decision": null
     },
     {
       "target_id": "AGLO-RBQ-CH24-CONCAT-001",
       "chapter": 24,
-      "role": "OBJECTIVE_REPAIR_TARGET_WITH_VARIANT_SELECTION",
-      "finding": "TWO_NEAR_DUPLICATE_PARAGRAPH_VARIANTS_CONCATENATED_WITHOUT_SEPARATOR",
-      "author_decision": "KEEP_SECOND_ONLY",
-      "author_decision_source": "EXPLICIT_USER_MESSAGE_B_AND_CONTINUE",
-      "selected_candidate_digest_sha256": "993029e8cc2ba2b9353a5ad802f48b06573d7add0cedbaa4d72ffb40c4e9dafc",
-      "disposition": "AUTHOR_SELECTED_BOUNDED_VARIANT",
-      "automatic_selection_authorized": false,
-      "preservation_regression": false
+      "role": "REJECTED_FALSE_POSITIVE",
+      "prior_finding": "TWO_NEAR_DUPLICATE_PARAGRAPH_VARIANTS_CONCATENATED_WITHOUT_SEPARATOR",
+      "disposition": "REJECT_FALSE_POSITIVE__TRACKED_CHANGE_PROJECTION_ARTIFACT",
+      "audit_record": "AGLO-RBQ-CH24-TRACKED-CHANGE-PROJECTION-AUDIT-001.json",
+      "reason": "The apparent concatenation combined deleted REJECT_ALL text with inserted ACCEPT_ALL replacement text. The ratified REJECT_ALL projection contains only the REJECT_ALL variant, so no author variant selection exists at this target.",
+      "user_decision_required": false,
+      "preservation_regression": false,
+      "author_decision": null
     }
   ],
   "controls": [
-    {"chapter": 1, "role": "OPENING_VOICE_ANCHOR", "automatic_revision": false},
-    {"chapter": 19, "role": "RETURN_ARC_CONTROL", "automatic_revision": false},
-    {"chapter": 29, "role": "ENDING_VOICE_AND_THEOLOGICAL_ANCHOR", "automatic_revision": false}
+    {"chapter": 1, "role": "OPENING_VOICE_ANCHOR", "disposition": "RETAIN_ORIGINAL", "automatic_revision": false},
+    {"chapter": 19, "role": "RETURN_ARC_CONTROL", "disposition": "RETAIN_ORIGINAL", "automatic_revision": false},
+    {"chapter": 29, "role": "ENDING_VOICE_AND_THEOLOGICAL_ANCHOR", "disposition": "RETAIN_ORIGINAL", "automatic_revision": false}
   ],
   "step_j_learning_authority": {
-    "explicit_user_preference_available": true,
-    "preference": "WHEN_DUPLICATED_OR_CONCATENATED_VARIANTS_EXPRESS_THE_SAME_BEAT_AND_ONE_IS_MORE_CHARACTER_SPECIFIC_AND_LESS_EXPLANATORY_PREFER_THE_CHARACTER_SPECIFIC_VERSION_IF_PRESERVATION_GATES_PASS",
+    "explicit_user_preference_available": false,
+    "preference_learning_admitted": false,
+    "reason": "The author has explicitly ratified the REJECT_ALL baseline for qualification-only use but has not yet made a Chapter 24 candidate decision. Baseline ratification is not a revision-preference signal.",
     "scope": "A-GATE-LEFT-OPEN_PROJECT_ONLY",
     "raw_prose_persisted": false,
-    "universalized": false
+    "universalized": false,
+    "authority_correction_record": "AGLO-RBQ-AUTHORITY-CORRECTION-002.json"
   },
   "raw_manuscript_text_committed": false,
   "candidate_text_committed": false,
   "publication_authorized": false,
   "automatic_overwrite_authorized": false,
   "canon_replacement_authorized": false,
-  "next_transition": "CONTINUE_REPRESENTATIVE_SAMPLE_CONTROLS_AND_DRIFT_DEFENSE_THEN_CLOSE_OR_EXPAND_REAL_BOOK_QUALIFICATION"
+  "next_transition": "USER_ADJUDICATE_CH24_WITNESS_DEDUPLICATION_THEN_RECORD_STEP_J_PROJECT_PREFERENCE_EVIDENCE_IF_AND_ONLY_IF_EXPLICITLY_CHOSEN"
 }
