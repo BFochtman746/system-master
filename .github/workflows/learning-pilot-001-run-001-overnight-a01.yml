@@ -1,0 +1,24 @@
+name: LEARNING PILOT-001 RUN-001 Overnight A-01 Promotion
+
+on:
+  schedule:
+    # One-night transport for 2026-09-09 02:00 America/New_York (06:00 UTC).
+    # GitHub cron has no year field; remove this workflow after adjudication.
+    - cron: '0 6 9 9 *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  qualify:
+    uses: BFochtman746/system-master/.github/workflows/a01-control-plane-gateway.yml@main
+    with:
+      qualification_id: LEARNING-PILOT-001-RUN-001-EXECUTION-PREP
+      workstream_id: LEARNING
+      subject_sha: f36e10ac432a5d949826fe833689a579a9638c44
+      origin_ref: refs/heads/learning/pilot-001-run-001-execution-prep
+      resume_on_pass: Adjudicate the canonical receipt; if promotion_authorized=true, promote exact subject f36e10ac432a5d949826fe833689a579a9638c44 unchanged and write a doc-only closure. Do not create participant consent or responses.
+      resume_on_failure: Classify SUBJECT_FAILURE versus INFRA_FAILURE or CONTROL_PLANE_FAILURE; repair only the proven failing boundary and rerun the minimum sufficient gate when authorized.
+      notification_target: learning-pilot-001-run-001-execution
