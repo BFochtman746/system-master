@@ -2,10 +2,39 @@
   "owner_system_id": "BOOK",
   "owner_path": "SYSTEM_MASTER/BOOK",
   "control_ref": "book-system/control-v1",
-  "last_known_control_head": "bd0afa0341319d6ab4583046223b7f05ad1632bc",
-  "delegation_epoch": 2,
-  "active_delegations": [],
-  "owner_revalidation_required": true,
-  "reason": "Book control was re-parented under System Master. BOOK-SYSTEM-PUBLICATION-EXPORT-STANDARDS-PROFILE-001 remains the selected parent objective, but unattended scope must be freshly revalidated before delegation.",
+  "last_known_control_head": "79cfd15bbc3a7017394d908df2b2a44537f599e5",
+  "delegation_epoch": 3,
+  "active_delegations": [
+    {
+      "delegation_id": "SECOND-SHIFT-BOOK-CENSUS-001",
+      "owner_path": "SYSTEM_MASTER/BOOK",
+      "objective_id": "SYSTEM-MASTER-COMPLETION-CENSUS-002-P3-BOOK",
+      "state": "READY",
+      "valid_for_control_ref": "book-system/control-v1",
+      "valid_for_control_head": "79cfd15bbc3a7017394d908df2b2a44537f599e5",
+      "created_at": "2026-09-09T20:45:00Z",
+      "last_revalidated_at": "2026-09-09T20:45:00Z",
+      "completion_delta": "Exhaustively reconcile Book System parent lifecycle, state, service admission, editorial, provenance, publication/export, research and historical book branches into current completion, obligation, expectation, reallocation and evidence standing.",
+      "stop_condition": "Every material Book parent boundary inspected for this phase is classified as COMPLETED, OPEN_OBLIGATION, BLOCKED, SUPERSEDED, HISTORICAL_EVIDENCE, UNALLOCATED or EVIDENCE_REVIEW_REQUIRED; Prose-owned work is not duplicated; exact Book A-01 evidence is preserved; durable checkpoint committed.",
+      "allowed_work": [
+        "repository forensics across Book parent branches and qualification records",
+        "completion-ledger additions backed by exact receipts/commits",
+        "open-obligation and expectation reconciliation",
+        "Book-vs-Prose ownership correction",
+        "stale/superseded Book control-state cleanup",
+        "resumable census checkpoint creation"
+      ],
+      "forbidden_authority": [
+        "do not absorb Prose child objectives into Book parent ownership",
+        "do not equate technical export/proof with author publication approval",
+        "do not transfer exact-SHA qualification",
+        "do not advance ordinary Book implementation merely to create activity"
+      ],
+      "on_pass": "Remove this delegation from active_delegations, record P3 Book census closure/checkpoint, update durable ledgers, then re-evaluate the live Book control head and admit a successor only if independently justified.",
+      "on_failure": "Preserve the completed census checkpoint, classify the exact unresolved Book boundary, and resume later from the first incomplete Book census segment rather than restarting the phase."
+    }
+  ],
+  "owner_revalidation_required": false,
+  "reason": "Tonight is assigned to exhaustive Book parent reconciliation under the new System Master hierarchy. Any Book control-head movement invalidates this READY delegation until re-evaluated.",
   "empty_is_valid": true
 }
