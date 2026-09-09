@@ -1,0 +1,75 @@
+name: Request Learning Guarded Entrypoint Hosted Qualification
+
+on:
+  push:
+    branches: [learning/request-guarded-entrypoint-86fe6d5e]
+
+permissions:
+  contents: read
+
+jobs:
+  prequalify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact product subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: 86fe6d5eda3d6349b1000eb0a758041fc7a62f6a
+          fetch-depth: 1
+          clean: true
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: '3.13.15'
+          architecture: x64
+          check-latest: false
+      - name: Compile guarded participant boundary
+        run: python -m py_compile learning/lab/run_pilot001.py learning/lab/run_pilot001_closed_loop.py learning/lab/run_pilot001_preflight.py learning/lab/learning_lab/real_learner_pilot_preflight.py
+      - name: Run guarded entrypoint tests and closed-loop regressions
+        working-directory: learning/lab
+        shell: bash
+        run: |
+          set -o pipefail
+          python -m unittest -v \
+            tests.test_real_learner_pilot_preflight \
+            tests.test_real_learner_pilot_completion \
+            tests.test_real_learner_pilot_closed_loop_launcher \
+            tests.test_real_learner_pilot_console \
+            tests.test_real_learner_pilot_withdrawal \
+            tests.test_real_learner_pilot_human_session \
+            tests.test_real_learner_pilot_runtime_binding \
+            tests.test_real_learner_pilot \
+            2>&1 | tee "$RUNNER_TEMP/guarded-entrypoint-tests.txt"
+          grep -q '^OK$' "$RUNNER_TEMP/guarded-entrypoint-tests.txt"
+          grep -q 'Ran 58 tests' "$RUNNER_TEMP/guarded-entrypoint-tests.txt"
+      - name: Exercise guarded preflight-only entrypoint
+        shell: bash
+        run: |
+          STATE="$RUNNER_TEMP/pilot001-guarded-state"
+          python learning/lab/run_pilot001.py --state-root "$STATE" --preflight-only > "$RUNNER_TEMP/guarded-entrypoint-output.txt"
+          grep -q 'Standing: READY_FOR_EXPLICIT_PARTICIPANT_CONSENT' "$RUNNER_TEMP/guarded-entrypoint-output.txt"
+          grep -q 'No participant consent, response, manifest, or participant database was created by preflight.' "$RUNNER_TEMP/guarded-entrypoint-output.txt"
+          test -d "$STATE"
+          test -z "$(find "$STATE" -mindepth 1 -maxdepth 1 -print -quit)"
+          ! grep -Fq "$STATE" "$RUNNER_TEMP/guarded-entrypoint-output.txt"
+
+          FORBIDDEN="$GITHUB_WORKSPACE/learning/lab/pilot-preflight-must-not-exist"
+          if python learning/lab/run_pilot001.py --state-root "$FORBIDDEN" --preflight-only > "$RUNNER_TEMP/guarded-entrypoint-forbidden.txt" 2>&1; then
+            echo "Expected in-repository state root to fail closed" >&2
+            exit 1
+          fi
+          grep -q 'PREFLIGHT_STATE_ROOT_INSIDE_REPOSITORY_FORBIDDEN' "$RUNNER_TEMP/guarded-entrypoint-forbidden.txt"
+          test ! -e "$FORBIDDEN"
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: learning-guarded-entrypoint-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/guarded-entrypoint-tests.txt
+            ${{ runner.temp }}/guarded-entrypoint-output.txt
+            ${{ runner.temp }}/guarded-entrypoint-forbidden.txt
+          if-no-files-found: error
+          retention-days: 14
