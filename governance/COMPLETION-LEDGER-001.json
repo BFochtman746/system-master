@@ -1,0 +1,105 @@
+{
+  "ledger_id": "COMPLETION-LEDGER-001",
+  "effective_date": "2026-09-09",
+  "topology": "governance/SYSTEM-TOPOLOGY-002.json",
+  "standing": "SEED_BASELINE__FORENSIC_EXPANSION_REQUIRED",
+  "purpose": "Register evidence-backed completed boundaries so current chats do not rediscover or accidentally repeat them. This seed records the major current-control closures already verified during the parent-topology migration; it is not yet the exhaustive all-history census.",
+  "append_only_rule": "A completed entry is never deleted to make current state look cleaner. If later evidence changes its interpretation, add a superseding/adjudication entry that references the original.",
+  "entries": [
+    {
+      "completion_id": "CORE-DEPENDENCY-TRAIN-THROUGH-SMR017-001",
+      "owner_path": "SYSTEM_MASTER/CORE",
+      "classification": "RECONCILED_PREDECESSOR_TRAIN",
+      "standing": "COMPLETED_WITH_CURRENT_CONTROL_POINTER",
+      "evidence_pointer": "system-master/control-v2/SYSTEM-MASTER-V2-CONTROL-RECORD.md",
+      "control_ref": "system-master/control-v2",
+      "note": "Selected Core control states the dependency-valid train is stable through SMR017. Individual exact candidates/evidence remain separately scoped."
+    },
+    {
+      "completion_id": "LEARNING-FINAL-HUMAN-EXECUTION-SOFTWARE-BOUNDARY-001",
+      "owner_path": "SYSTEM_MASTER/LEARNING",
+      "classification": "AUTHORITATIVE_A01_SOFTWARE_BOUNDARY",
+      "standing": "PASS",
+      "exact_subject_sha": "f49ac9eaf6e0f11894bf47f5d773090b4ef60ebf",
+      "evidence_pointer": "learning/control-v1/LEARNING-CONTROL-RECORD.md",
+      "does_not_prove": ["real participant consent", "real learner responses", "retention outcome", "transfer outcome"]
+    },
+    {
+      "completion_id": "BOOK-CANONICAL-STATE-MODEL-001",
+      "owner_path": "SYSTEM_MASTER/BOOK",
+      "classification": "AUTHORITATIVE_A01_PARENT_FOUNDATION",
+      "standing": "PASS",
+      "exact_subject_sha": "b6938fcfc5c2c24ac23b558de6dfc7f75c382312",
+      "a01_run_id": 34376939179,
+      "evidence_pointer": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-008.json"
+    },
+    {
+      "completion_id": "BOOK-SERVICE-INTERFACE-REGISTRY-001",
+      "owner_path": "SYSTEM_MASTER/BOOK",
+      "classification": "AUTHORITATIVE_A01_PARENT_FOUNDATION",
+      "standing": "PASS",
+      "exact_subject_sha": "9245cf9ce56f15020369eb490d9e562480825158",
+      "a01_run_id": 34377566232,
+      "evidence_pointer": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-008.json"
+    },
+    {
+      "completion_id": "BOOK-LIFECYCLE-TRANSITION-ENGINE-001",
+      "owner_path": "SYSTEM_MASTER/BOOK",
+      "classification": "AUTHORITATIVE_A01_PARENT_FOUNDATION",
+      "standing": "PASS",
+      "exact_subject_sha": "4a6e3459d6ba94b7ce191e426ca64bef00d23582",
+      "a01_run_id": 34378208426,
+      "evidence_pointer": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-008.json"
+    },
+    {
+      "completion_id": "BOOK-EDITORIAL-CAPABILITY-CROSSWALK-001",
+      "owner_path": "SYSTEM_MASTER/BOOK",
+      "classification": "RESEARCH_VERIFIED_PARENT_ARCHITECTURE",
+      "standing": "CLOSED",
+      "commit": "f836dfbe26a24ba8cac5c9408d67ea2f7fb863b3",
+      "evidence_pointer": "qualification/book-system/research-verification-001/BOOK-SYSTEM-EDITORIAL-CAPABILITY-CROSSWALK-001.json"
+    },
+    {
+      "completion_id": "BOOK-RESEARCH-VERIFIED-AUTHORING-LIFECYCLE-AMENDMENT-001",
+      "owner_path": "SYSTEM_MASTER/BOOK",
+      "classification": "RESEARCH_VERIFIED_PARENT_ARCHITECTURE",
+      "standing": "CLOSED",
+      "commit": "fd3d2acf78cbce30c51a981e36c05c173d652148",
+      "evidence_pointer": "qualification/book-system/research-verification-001/BOOK-SYSTEM-RESEARCH-VERIFIED-AUTHORING-LIFECYCLE-AMENDMENT-001.json"
+    },
+    {
+      "completion_id": "PROSE-REAL-SEMANTIC-DIAGNOSTIC-ROUTING-001",
+      "owner_path": "SYSTEM_MASTER/BOOK/PROSE",
+      "classification": "AUTHORITATIVE_QUALIFIED_DIAGNOSTIC_BOUNDARY",
+      "standing": "PASS",
+      "exact_subject_sha": "1de91bcaedcdd18615f685adeab8a451c7926e97",
+      "run_id": 34383845184,
+      "result_summary": "9/9 diagnosis allowed; 0/9 revision allowed; one low-confidence claim unresolved.",
+      "evidence_pointer": "qualification/literary-prose-engine-001/LITERARY-PROSE-CONSOLIDATED-WORKSTREAM-STATE-014.json"
+    },
+    {
+      "completion_id": "PROSE-STRENGTH-OBSERVATION-CALIBRATION-001",
+      "owner_path": "SYSTEM_MASTER/BOOK/PROSE",
+      "classification": "QUALIFIED_CALIBRATION_BOUNDARY",
+      "standing": "PASS",
+      "exact_subject_sha": "f0cd916930964c294243c26d0a207af69283f74e",
+      "run_id": 34384598508,
+      "evidence_pointer": "qualification/literary-prose-engine-001/LITERARY-PROSE-CONSOLIDATED-WORKSTREAM-STATE-014.json"
+    },
+    {
+      "completion_id": "PROSE-REAL-LIMITATION-GROUND-TRUTH-PACKET-INFRASTRUCTURE-001",
+      "owner_path": "SYSTEM_MASTER/BOOK/PROSE",
+      "classification": "QUALIFIED_EVIDENCE_PACKET_INFRASTRUCTURE",
+      "standing": "PASS",
+      "exact_subject_sha": "42c1412e5c36e0d44875806785d5f009dfb508ca",
+      "run_id": 34397780523,
+      "evidence_pointer": "qualification/literary-prose-engine-001/LITERARY-PROSE-CONSOLIDATED-WORKSTREAM-STATE-014.json",
+      "does_not_prove": ["any real limitation label", "real limitation accuracy", "revision authority"]
+    }
+  ],
+  "next_census": {
+    "id": "SYSTEM-MASTER-COMPLETION-CENSUS-002",
+    "objective": "Scan canonical controls, closures, receipts and branch-history indexes for all previously completed objectives; classify each under SYSTEM_MASTER/CORE, SYSTEM_MASTER/LEARNING, SYSTEM_MASTER/BOOK, SYSTEM_MASTER/BOOK/PROSE or shared infrastructure, and append missing evidence-backed entries without relabeling exact-SHA authority.",
+    "stop_condition": "Every current control record can explain its predecessor chain using ledger entries or explicit historical/evidence pointers; all duplicate/stale completion claims are adjudicated."
+  }
+}
