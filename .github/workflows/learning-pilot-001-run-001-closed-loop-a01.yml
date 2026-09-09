@@ -1,0 +1,24 @@
+name: LEARNING PILOT-001 RUN-001 Closed-Loop A-01 Qualification
+
+on:
+  workflow_dispatch:
+    inputs:
+      subject_sha:
+        description: Exact prequalified 40-character Learning closed-loop subject SHA
+        required: true
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  qualify:
+    uses: BFochtman746/system-master/.github/workflows/a01-control-plane-gateway.yml@main
+    with:
+      qualification_id: LEARNING-PILOT-001-RUN-001-CLOSED-LOOP
+      workstream_id: LEARNING
+      subject_sha: ${{ inputs.subject_sha }}
+      origin_ref: refs/heads/learning/pilot-001-run-001-closed-loop-completion
+      resume_on_pass: Adjudicate the canonical receipt; if promotion_authorized=true, promote only the exact tested closed-loop subject unchanged. Do not create or infer participant consent or responses.
+      resume_on_failure: Classify SUBJECT_FAILURE versus INFRA_FAILURE or CONTROL_PLANE_FAILURE; repair only the proven failing closed-loop or infrastructure boundary and rerun the minimum sufficient gate.
+      notification_target: learning-pilot-001-run-001-closed-loop
