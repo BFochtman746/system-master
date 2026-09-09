@@ -1,0 +1,30 @@
+{
+  "schema_id": "LPE-VOICE-EVOLUTION-EVENT-v1",
+  "purpose": "Append-only chronological evidence for project-specific voice and preference learning without raw manuscript persistence.",
+  "required_fields": [
+    "event_id", "project_id", "sequence", "occurred_at", "event_type", "authority",
+    "dimension", "direction", "context", "subject_digest", "evidence_refs"
+  ],
+  "event_types": [
+    "USER_EXPLICIT_PREFERENCE", "USER_IDENTITY_INVARIANT", "USER_REVOKE_EVENT",
+    "USER_ACCEPT_CANDIDATE", "USER_REJECT_CANDIDATE", "USER_RETAIN_ORIGINAL",
+    "USER_MODIFIED_CANDIDATE", "STEP_I_ACCEPT_CANDIDATE", "STEP_I_RETAIN_ORIGINAL"
+  ],
+  "authorities": ["USER_EXPLICIT", "USER_ACTION", "STEP_I_QUALIFIED"],
+  "context_dimensions": [
+    "genre", "form", "audience", "scene_function", "pov", "character_or_speaker",
+    "chapter_role", "pacing_target"
+  ],
+  "forbidden_raw_fields": [
+    "raw_text", "passage_text", "candidate_text", "original_text", "manuscript_text", "writer_rationale"
+  ],
+  "rules": [
+    "Events are append-only and event_id values are unique.",
+    "sequence and occurred_at are monotonic within one project ledger.",
+    "Project boundaries may not be crossed inside one ledger.",
+    "User identity invariant changes require explicit supersession of the prior active invariant.",
+    "Revocation appends a new event and never deletes prior history.",
+    "named_author_target must be false or absent.",
+    "Only digests, identifiers, contextual dimensions and evidence references are persisted; raw manuscript prose is not required."
+  ]
+}
