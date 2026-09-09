@@ -1,0 +1,26 @@
+name: Literary Prose Granular Specialist Qualification
+
+on:
+  push:
+    branches:
+      - literary-prose-engine-001
+    paths:
+      - 'qualification/literary-prose-engine-001/unification-001/**'
+      - '.github/workflows/literary-prose-granular-specialist-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Qualify granular specialist contracts
+        run: python qualification/literary-prose-engine-001/unification-001/run_granular_specialist_contract_fixtures.py
