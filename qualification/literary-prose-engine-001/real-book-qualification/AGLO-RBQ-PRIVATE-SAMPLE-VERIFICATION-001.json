@@ -1,7 +1,7 @@
 {
   "objective": "AGLO-REAL-BOOK-CLOSED-LOOP-QUALIFICATION-001",
-  "phase": "PRIVATE_SOURCE_AND_CANDIDATE_SAMPLE_VERIFICATION",
-  "standing": "PASS__CANDIDATE_REJECT_ALL_SAMPLE_DIGESTS_VERIFIED__NOT_AUTHORITATIVE_UNTIL_EXPLICIT_BASELINE_RATIFICATION",
+  "phase": "PRIVATE_SOURCE_AND_RATIFIED_SAMPLE_VERIFICATION",
+  "standing": "PASS__RATIFIED_REJECT_ALL_SAMPLE_DIGESTS_VERIFIED__CLOSED_LOOP_EXECUTION_AUTHORIZED",
   "source_package": {
     "reference": "A Gate Left Open - Master .docx",
     "expected_sha256": "ec0f5475c05cf6c11a75d139f2dbd131e6133d6abba9121be8b8ef18454b31df",
@@ -9,13 +9,12 @@
     "pass": true
   },
   "projection": {
-    "candidate_baseline_version_id": "AGLO-REJECT-ALL-NARRATIVE-v1",
-    "candidate_revision_projection": "REJECT_ALL",
-    "author_ratified": false,
+    "baseline_version_id": "AGLO-REJECT-ALL-NARRATIVE-v1",
+    "revision_projection": "REJECT_ALL",
+    "author_ratified": true,
     "tracked_insertions_excluded": true,
     "tracked_deletions_restored": true,
-    "candidate_baseline_text_sha256": "a48378682ee15fd4b24bc97293ce43a37f096db254a0b78f715081a8aa8a59ee",
-    "whole_baseline_digest_independently_recomputed_in_this_phase": false,
+    "baseline_text_sha256": "a48378682ee15fd4b24bc97293ce43a37f096db254a0b78f715081a8aa8a59ee",
     "sample_projection_digest_method": "For each frozen chapter: projected paragraph text is trimmed per paragraph, blank paragraphs are retained, paragraphs are joined with LF, and one terminal LF is included; chapter heading is included."
   },
   "sample_id": "AGLO-RBQ-SAMPLE-001",
@@ -29,9 +28,9 @@
     {"chapter": 24, "word_count": 971, "expected_sha256": "dd5001c7485608139eae24c9b7c9212612143dd9b4021cc20ebf92f116dc1ca5", "observed_sha256": "dd5001c7485608139eae24c9b7c9212612143dd9b4021cc20ebf92f116dc1ca5", "pass": true},
     {"chapter": 29, "word_count": 2546, "expected_sha256": "83a724db59f1d0cf5a6d211ba9720ed7cc13a253fbbc031b06bdfb9ff4a555d6", "observed_sha256": "83a724db59f1d0cf5a6d211ba9720ed7cc13a253fbbc031b06bdfb9ff4a555d6", "pass": true}
   ],
-  "all_sample_chapters_match_candidate_projection": true,
+  "all_sample_chapters_match_ratified_projection": true,
   "raw_manuscript_text_committed": false,
   "candidate_revision_text_committed": false,
-  "execution_authorized": false,
-  "next_transition": "EXPLICIT_AUTHOR_BASELINE_RATIFICATION_THEN_REVERIFY_SAMPLE_AGAINST_RATIFIED_BASELINE"
+  "execution_authorized": true,
+  "next_transition": "BUILD_PRIVATE_PASSAGE_STATES_AND_RUN_PRESERVATION_BOUND_CLOSED_LOOP"
 }
