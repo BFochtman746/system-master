@@ -1,0 +1,177 @@
+{
+  "model_id": "BOOK-SYSTEM-CANONICAL-BOOK-STATE-MODEL-001",
+  "version": 1,
+  "effective_date": "2026-09-09",
+  "standing": "CANONICAL__EXECUTABLE_PARENT_STATE_MODEL__QUALIFICATION_PENDING",
+  "owner": "BOOK SYSTEM",
+  "depends_on": [
+    "BOOK-SYSTEM-AUTHORING-LIFECYCLE-CONTRACT-001",
+    "BOOK-SYSTEM-BOOK-INTELLIGENCE-UNIFICATION-BINDING-001",
+    "BOOK-SYSTEM-PARENT-INTEGRATION-BOUNDARY-001"
+  ],
+  "aggregate": {
+    "type": "BOOK_SYSTEM_CANONICAL_STATE",
+    "required": [
+      "schema_version",
+      "state_version",
+      "book_project",
+      "governing_briefs",
+      "canon_manifests",
+      "story_bibles",
+      "book_plans",
+      "manuscripts",
+      "research_evidence_links",
+      "author_decisions",
+      "integration_proposals",
+      "export_releases",
+      "active"
+    ],
+    "active_required": [
+      "governing_brief_ref",
+      "canon_manifest_ref",
+      "story_bible_ref",
+      "book_plan_ref",
+      "canonical_manuscript_ref"
+    ]
+  },
+  "id_rules": {
+    "format": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",
+    "immutable": true,
+    "display_names_are_not_ids": true
+  },
+  "digest_rules": {
+    "algorithm": "sha256",
+    "format": "^[a-f0-9]{64}$",
+    "exact_bytes_only": true
+  },
+  "project_statuses": [
+    "CREATED",
+    "BRIEFING",
+    "PLANNING",
+    "DRAFTING",
+    "STRUCTURAL_REVIEW",
+    "PROSE_REFINEMENT",
+    "BOOK_EVALUATION",
+    "AUTHOR_REVIEW",
+    "FINALIZATION",
+    "EXPORT_FROZEN",
+    "PUBLISHED_OR_DELIVERED",
+    "ARCHIVED"
+  ],
+  "allowed_project_transitions": {
+    "CREATED": ["BRIEFING"],
+    "BRIEFING": ["PLANNING", "ARCHIVED"],
+    "PLANNING": ["DRAFTING", "BRIEFING", "ARCHIVED"],
+    "DRAFTING": ["STRUCTURAL_REVIEW", "PLANNING", "ARCHIVED"],
+    "STRUCTURAL_REVIEW": ["DRAFTING", "PROSE_REFINEMENT", "ARCHIVED"],
+    "PROSE_REFINEMENT": ["STRUCTURAL_REVIEW", "BOOK_EVALUATION", "ARCHIVED"],
+    "BOOK_EVALUATION": ["PROSE_REFINEMENT", "AUTHOR_REVIEW", "ARCHIVED"],
+    "AUTHOR_REVIEW": ["PROSE_REFINEMENT", "FINALIZATION", "ARCHIVED"],
+    "FINALIZATION": ["AUTHOR_REVIEW", "EXPORT_FROZEN", "ARCHIVED"],
+    "EXPORT_FROZEN": ["FINALIZATION", "PUBLISHED_OR_DELIVERED", "ARCHIVED"],
+    "PUBLISHED_OR_DELIVERED": ["ARCHIVED"],
+    "ARCHIVED": []
+  },
+  "unit_statuses": [
+    "PLANNED",
+    "READY_TO_DRAFT",
+    "DRAFTED",
+    "DIAGNOSTIC_REVIEW",
+    "REVISION_CANDIDATE_AVAILABLE",
+    "AUTHOR_DECISION_REQUIRED",
+    "ACCEPTED_INTO_CANONICAL_MANUSCRIPT",
+    "RETAINED_ORIGINAL",
+    "DEFERRED",
+    "INVALIDATED_BY_UPSTREAM_CHANGE"
+  ],
+  "authority_classes": [
+    "PARENT_SYSTEM",
+    "AUTHOR",
+    "PROSE_PROJECT",
+    "BOOK_EVALUATOR",
+    "RESEARCH_IMPORT"
+  ],
+  "canonical_write_authority": {
+    "PARENT_SYSTEM": true,
+    "AUTHOR": false,
+    "PROSE_PROJECT": false,
+    "BOOK_EVALUATOR": false,
+    "RESEARCH_IMPORT": false
+  },
+  "object_types": {
+    "BOOK_PROJECT": {
+      "required": ["book_project_id", "book_id", "status", "governing_brief_ref", "canonical_manifest_ref"]
+    },
+    "GOVERNING_BRIEF": {
+      "required": ["brief_id", "version", "author_intent", "form", "genre", "audience", "voice_goals", "hard_constraints"]
+    },
+    "CANON_MANIFEST": {
+      "required": ["canon_manifest_id", "version", "facts", "entities", "world_rules", "protected_language_refs", "intent_constraints", "approval_state"]
+    },
+    "STORY_BIBLE": {
+      "required": ["story_bible_id", "version", "entity_refs", "relationship_refs", "timeline_refs", "arc_refs", "motif_theme_refs", "open_questions", "provenance"]
+    },
+    "BOOK_PLAN": {
+      "required": ["plan_id", "version", "part_refs", "chapter_refs", "scene_refs", "dependency_edges", "purpose_and_payoff_refs"]
+    },
+    "MANUSCRIPT_MANIFEST": {
+      "required": ["manuscript_id", "version_id", "artifact_digest", "authority_state", "parent_version_ref", "change_set_ref", "created_by", "created_at"]
+    },
+    "RESEARCH_EVIDENCE_LINK": {
+      "required": ["link_id", "claim_or_evidence_ref", "target_book_object_ref", "freshness_state", "conflict_state", "provenance", "rights_class"]
+    },
+    "AUTHOR_DECISION": {
+      "required": ["decision_id", "subject_ref", "decision_type", "options", "status", "author_choice", "effective_version"]
+    },
+    "INTEGRATION_PROPOSAL_REF": {
+      "required": ["proposal_id", "source_project_or_lane", "source_subject_sha", "capability_id", "admission_state"]
+    },
+    "EXPORT_RELEASE": {
+      "required": ["release_id", "frozen_version_id", "format", "digest", "approval_state", "publication_authority_state"]
+    }
+  },
+  "authority_states": ["CANONICAL", "CANDIDATE", "HISTORICAL", "REJECTED", "DEFERRED"],
+  "research_freshness_states": ["CURRENT", "STALE", "SUPERSEDED", "UNKNOWN"],
+  "research_conflict_states": ["NONE", "CONFLICTING", "UNRESOLVED"],
+  "author_decision_statuses": ["PENDING", "APPROVED", "REJECTED", "DEFERRED"],
+  "integration_admission_states": ["PROPOSED", "EVIDENCE_REVIEWED", "PARENT_PREQUALIFIED", "ADMITTED", "DEFERRED", "REJECTED"],
+  "mutation_envelope": {
+    "required": [
+      "mutation_id",
+      "actor_class",
+      "expected_state_version",
+      "expected_state_digest",
+      "operations",
+      "rollback_state_version"
+    ],
+    "operation_types": [
+      "ADVANCE_PROJECT_STATUS",
+      "SET_ACTIVE_GOVERNING_BRIEF",
+      "SET_ACTIVE_CANON_MANIFEST",
+      "SET_ACTIVE_STORY_BIBLE",
+      "SET_ACTIVE_BOOK_PLAN",
+      "SET_ACTIVE_CANONICAL_MANUSCRIPT",
+      "REGISTER_RESEARCH_EVIDENCE_LINK",
+      "REGISTER_AUTHOR_DECISION",
+      "REGISTER_INTEGRATION_PROPOSAL",
+      "REGISTER_EXPORT_RELEASE"
+    ]
+  },
+  "mutation_rules": [
+    "Every mutation compares expected_state_version and expected_state_digest before any operation is evaluated.",
+    "Canonical-pointer or project-status mutation requires actor_class=PARENT_SYSTEM.",
+    "PROSE_PROJECT and BOOK_EVALUATOR may return proposals/evidence but cannot mutate canonical pointers or project status.",
+    "RESEARCH_IMPORT may only register research evidence links and cannot change canon, manuscript, plan or project status.",
+    "AUTHOR choices are recorded as AUTHOR_DECISION objects; the parent remains the transactional committer of canonical state.",
+    "A transition not present in allowed_project_transitions fails closed.",
+    "Every active pointer must resolve to an object present in the same aggregate.",
+    "A canonical manuscript must reference an exact sha256 artifact digest and an authority_state of CANONICAL.",
+    "Advancing to PUBLISHED_OR_DELIVERED requires an APPROVED author publication decision and an export release whose publication_authority_state is AUTHOR_APPROVED.",
+    "On any failed precondition or operation, no partial mutation is committed.",
+    "The previous complete state version remains a valid rollback target after every successful mutation."
+  ],
+  "service_projection_rule": "Prose Project and Book Evaluator receive bounded projections of parent state and return evidence/proposals. They never receive a capability token that directly advances parent canonical pointers.",
+  "book_intelligence_binding": "BOOK-SYSTEM-BOOK-INTELLIGENCE-UNIFICATION-BINDING-001",
+  "qualification_objective": "Prove object completeness, exact-digest/version preconditions, legal transition enforcement, child/lane canonical-write denial, author-publication boundary, transaction atomicity and rollback retention with deterministic adversarial fixtures.",
+  "qualification_effect": "NONE until an exact repository subject is executed by a qualification workflow and its result is recorded."
+}
