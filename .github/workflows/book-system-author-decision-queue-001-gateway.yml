@@ -1,0 +1,53 @@
+name: Book System Author Decision Queue Qualification
+
+on:
+  push:
+    branches:
+      - book-system/control-v1
+    paths:
+      - "qualification/book-system/author-decision-001/**"
+      - "system-master/book-system/author-decision-queue*.js"
+      - ".github/scripts/book-system-author-decision-queue-001-qualify.js"
+      - ".github/scripts/book-system-author-decision-queue-001-qualify-v2.js"
+      - ".github/scripts/a01-book-system-author-decision-queue-001.js"
+      - ".github/workflows/book-system-author-decision-queue-001-gateway.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  prequalify:
+    name: Deterministic hosted Author Decision Queue prequalification
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - name: Syntax check A-01 wrapper and qualifier repair
+        run: |
+          node --check .github/scripts/a01-book-system-author-decision-queue-001.js
+          node --check .github/scripts/book-system-author-decision-queue-001-qualify-v2.js
+      - name: Run corrected 48-case Author Decision Queue qualifier
+        run: node .github/scripts/book-system-author-decision-queue-001-qualify-v2.js
+
+  qualify:
+    name: Authoritative A-01 Author Decision Queue qualification
+    needs: prequalify
+    uses: BFochtman746/system-master/.github/workflows/a01-control-plane-gateway.yml@main
+    with:
+      qualification_id: BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001
+      workstream_id: BOOK-SYSTEM
+      subject_sha: ${{ github.sha }}
+      origin_ref: ${{ github.ref }}
+      resume_on_pass: Close BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001 on this exact SHA, reconcile Book control, then revalidate before advancing to BOOK-SYSTEM-EXPORT-FREEZE-001.
+      resume_on_failure: Classify the authoritative receipt first; preserve the hosted PASS and repair only the proven failing owner boundary. Do not weaken author authority, lifecycle, manuscript, proposal, export-freeze, publication or shared A-01 boundaries.
+      notification_target: book-system/control-v1
+      execution_context: normal
+      qualifier_timeout_minutes: 10
+      job_timeout_minutes: 15
+    secrets: inherit
