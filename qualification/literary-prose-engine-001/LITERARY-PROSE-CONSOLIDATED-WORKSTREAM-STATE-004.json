@@ -5,9 +5,10 @@
     "night-shift-2026-09-09/NIGHT-SHIFT-CHAT-RETIREMENT-HANDOFF-001.json"
   ],
   "system_name": "BOOK_WRITING_SYSTEM__LITERARY_PROSE_ENGINE",
-  "standing": "ACTIVE__FORMALLY_RECONCILED__NIGHT_SHIFT_CLOSED__PRIMARY_WORKSTREAM_RESET__SOURCE_HELDOUT_002_NEXT__AGLO_PROMOTION_AUTHOR_BLOCKED",
+  "standing": "ACTIVE__FORMALLY_RECONCILED__NIGHT_SHIFT_CLOSED__PRIMARY_WORKSTREAM_RESET__SOURCE_HELDOUT_002_PREHUMAN_CUSTODY_NEXT__AGLO_PROMOTION_AUTHOR_BLOCKED",
   "branch": "literary-prose-engine-001",
   "audit_observed_head_before_state_004": "5181e3361090e445299bfdbfe8e2faadd6b71442",
+  "post_audit_concurrent_selection_commit": "7cf055c308f431f6a9b19bd110a2d17f09a09f59",
   "canonical_control_surface": "CURRENT_RECONCILED_LITERARY_PROSE_PRIMARY_WORKSTREAM_CHAT",
   "chat_ui_title_is_authority": false,
   "repository_state_is_cross_chat_authority": true,
@@ -74,6 +75,14 @@
       "hosted_runs": [34368505224, 34368505248],
       "hosted_conclusion": "success",
       "standing": "CONTRACT_QUALIFIED__HUMAN_GOLD_NOT_YET_CREATED_OR_SCORED"
+    },
+    "candidate_002_passage_selection": {
+      "selection_commit": "7cf055c308f431f6a9b19bd110a2d17f09a09f59",
+      "standing": "FROZEN_BEFORE_MODEL_INFERENCE__HUMAN_GOLD_PENDING",
+      "case_count": 6,
+      "work_count": 3,
+      "all_nine_task_families_selected": true,
+      "raw_passage_text_committed": false
     }
   },
   "aglo_revision_lane": {
@@ -98,20 +107,23 @@
       "Candidate-002 model-provider fail-closed adapter boundary",
       "Candidate-002 public-domain TEST_ONLY source manifest",
       "Candidate-002 human adjudication/gold-visibility contract",
+      "Candidate-002 six-case passage selection frozen before model inference",
       "Editorial review packet metadata hardening"
     ],
-    "active_next_id": "LITERARY-EXTRACTION-SOURCE-HELD-OUT-002",
-    "objective": "Select bounded passages from verified public-domain TEST_ONLY works, create provenance-bound leakage-resistant human adjudication packets spanning all nine extraction task families, preserve ambiguity/disagreement, freeze predictions before scorer gold access, then run one real learned/model backend through Candidate-002 and score per-task precision/recall/F1, false-certainty, ambiguity preservation, calibration and anchor quality.",
-    "first_action": "Freeze the held-out passage set, exact passage digests/locators and adjudication assignments before model tuning or selection.",
-    "pass_gate": "All selected held-out works/passages are independently rights/provenance verified; gold is human-adjudicated with required dual review for high-risk tasks; model requests contain no gold/case identity; predictions are frozen before scoring; real backend evaluation produces task-level metrics and zero unauthorized canonical writes.",
-    "pass_proves": "Real source-heldout model-backed extraction evidence exists under the qualified fail-closed provider and evaluator boundaries. It does not by itself prove universal literary understanding, author intent, manuscript mutation authority, or production promotion.",
-    "pass_unlocks": "Candidate-002 promotion review and the integrated perspective/revelation stress adjudication already folded into the held-out task design.",
-    "on_failure": "Repair only the failing provenance, adjudication leakage, provider, task-family, false-certainty, ambiguity, calibration or scoring boundary; retain predictions/evidence and do not weaken abstention, rights, source-digest or canonical-write protections."
+    "active_next_id": "LITERARY-EXTRACTION-SOURCE-HELD-OUT-002A__PREHUMAN_SOURCE_CUSTODY",
+    "parent_objective": "LITERARY-EXTRACTION-SOURCE-HELD-OUT-002",
+    "gate_contract": "extraction-calibration-001/candidate-002/SOURCE-HELDOUT-002-PREHUMAN-CUSTODY-GATE-v1.json",
+    "objective": "Resolve exact bounded passage bytes for the six already-frozen TEST_ONLY public-domain cases, bind stable locators and SHA-256 digests, reverify rights/provenance, and prepare gold-empty adjudication packet shells without fabricating human evidence or scoring model quality.",
+    "first_action": "Resolve exact bounded passage bytes and compute the passage SHA-256 for all six frozen cases from the verified Project Gutenberg source routes; do not change a case because of model performance.",
+    "pass_gate": "All six frozen cases have exact passage digests, stable locators, TEST_ONLY rights/provenance reverified, and gold-empty adjudication packet shells; no full-work body is committed, no human gold is fabricated, and no model score is claimed.",
+    "pass_proves": "The frozen public-domain held-out set is source-custody-ready for real human adjudication without selection leakage or provenance ambiguity.",
+    "pass_unlocks": "BLOCKED — HUMAN: required independent adjudication for high-risk tasks, followed by gold-hidden prediction freeze and Candidate-002 scoring.",
+    "on_failure": "Repair only the failing source route, rights/provenance, locator or digest boundary. Do not substitute an easier passage, weaken TEST_ONLY isolation or fabricate adjudication."
   },
   "a01_next": {
     "ticket_justified_now": false,
-    "reason": "The old exact subject already has a conforming A-01 PASS and cannot be rerun unchanged. Candidate-002 currently lacks completed frozen human-heldout gold and a real model-backed evaluation subject; A-01 now would not close the critical evidence delta.",
-    "reevaluate_when": "The SOURCE-HELD-OUT-002 dataset/adjudication is frozen, a real backend is wired and hosted-prequalified, and a registered A-01 qualification has a named completion delta that hosted execution cannot supply."
+    "reason": "The old exact subject already has a conforming A-01 PASS and cannot be rerun unchanged. The current next gate is bounded public-domain source custody and metadata preparation; A-01 adds no runner-specific completion delta. Human adjudication then becomes the blocking authority.",
+    "reevaluate_when": "Human-heldout gold and a real model-backed prediction set are frozen, hosted prequalification exists, and a registered A-01 qualification would close a named machine-specific evidence gap."
   },
   "hard_boundaries": [
     "Provider output never writes canonical narrative state directly.",
@@ -128,5 +140,5 @@
     "missing_private_custody_fact": false,
     "predecessor_may_be_historical_read_only": true
   },
-  "exact_next_objective": "LITERARY-EXTRACTION-SOURCE-HELD-OUT-002"
+  "exact_next_objective": "LITERARY-EXTRACTION-SOURCE-HELD-OUT-002A__PREHUMAN_SOURCE_CUSTODY"
 }
