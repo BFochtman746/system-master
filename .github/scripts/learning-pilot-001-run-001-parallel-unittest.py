@@ -167,14 +167,21 @@ def main() -> int:
     if total != args.expected_total:
         failures.append(f"TOTAL_TEST_COUNT_MISMATCH:expected={args.expected_total}:actual={total}")
 
-    print(f"Ran {total} tests in {elapsed:.3f}s")
+    summary = f"Ran {total} tests in {elapsed:.3f}s"
+    print(summary)
     if failures:
         for failure in failures:
             print(failure, file=sys.stderr)
+        print(summary, file=sys.stderr)
         print("FAILED", file=sys.stderr)
         return 1
 
     print("OK")
+    # The parent qualifier historically concatenates stdout + stderr before
+    # parsing the terminal unittest count. Emit the aggregate again at the
+    # terminal end of stderr so per-module unittest summaries cannot shadow it.
+    print(summary, file=sys.stderr)
+    print("OK", file=sys.stderr)
     return 0
 
 
