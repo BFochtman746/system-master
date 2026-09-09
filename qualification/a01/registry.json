@@ -1,5 +1,5 @@
 {
-  "registry_version": 5,
+  "registry_version": 6,
   "qualifications": {
     "A01-CONTROL-PLANE-SELFTEST": {
       "workstream_id": "SYSTEM-MASTER",
@@ -46,6 +46,15 @@
       "args": [".github/scripts/learning-pilot-001-run-001-human-session-qualify.js"],
       "evidence_artifact": "learning-pilot-001-run-001-human-session",
       "description": "Qualify the exact prequalified Learning PILOT-001 RUN-001 software boundary: human-source attestation enforcement, contamination rejection, raw-response exclusion, 3600-second retention boundary, current pilot binding, and predecessor regressions. Qualification fixtures are not real-participant evidence and do not bypass explicit consent."
+    },
+    "LEARNING-PILOT-001-RUN-001-EXECUTION-PREP": {
+      "workstream_id": "LEARNING",
+      "gate_class": "promotion",
+      "source": "subject",
+      "executable": "node",
+      "args": [".github/scripts/learning-pilot-001-run-001-execution-prep-qualify.js"],
+      "evidence_artifact": "learning-pilot-001-run-001-execution-prep",
+      "description": "Qualify the exact Learning PILOT-001 RUN-001 participant execution shell: explicit-consent entry, deterministic baseline selection, hidden transient response handling, contamination lockout, pre-baseline withdrawal without fabricated evidence, frozen PILOT-001-v1 authority, and current Learning regressions. Qualification must not create or infer real-participant consent or responses."
     }
   }
 }
