@@ -10,14 +10,23 @@
   "origin_ref": "refs/heads/learning/pilot-001-run-001-final-human-execution-candidate",
   "estimated_minutes": 20,
   "max_runtime_minutes": 60,
-  "priority": 80,
+  "priority": 100,
   "earliest_start_local": "00:00",
   "latest_start_local": "05:55",
   "window_end_local": "07:00",
   "exclusive_window": false,
   "resource_class": "cpu",
+  "value_class": "PRODUCT_CRITICAL_PROMOTION",
+  "critical_path_rank": 1,
+  "completion_delta": {
+    "before": "Exact final-human-execution candidate is hosted-prequalified but not authoritative on A-01.",
+    "evidence": "Canonical A-01 receipt with exact subject/checkout SHA match, required evidence, result classification and promotion authorization.",
+    "after_pass": "Exact tested subject becomes promotion-eligible for the canonical Learning final-human-execution-ready boundary.",
+    "unlocks": "A real participant session may be offered only after explicit human consent; no additional unattended software qualification is justified by this boundary alone."
+  },
+  "stop_condition": "On authoritative PASS and exact-SHA promotion, stop unattended Learning A-01 work until a genuinely new software boundary or authorized real-participant evidence exists. Never synthesize consent, participant responses or human evidence to keep A-01 occupied.",
   "resume_on_pass": "Adjudicate the canonical A-01 receipt. Require exact subject_sha == checkout_sha == effcc16b158f16ec5cbc82ea228df9be52d0b75b, result_class=PASS, required evidence present, and promotion_authorized=true. If all pass, promote only that exact tested SHA unchanged to the canonical Learning final-human-execution-ready branch and write a doc-only closure whose parent is the tested subject. Do not start a participant session automatically; real-participant execution still requires explicit human consent.",
   "resume_on_failure": "Classify SUBJECT_FAILURE versus INFRA_FAILURE or CONTROL_PLANE_FAILURE, preserve receipt and evidence, repair only the proven failing boundary, and rerun the minimum sufficient gate when authorized. Do not weaken exact-SHA, consent, privacy, local-first evidence handling, frozen PILOT-001-v1, retention, transfer, or human-attestation gates.",
   "notification_target": "learning-pilot-001-run-001-final-human-execution",
-  "notes": "Highest-value current Learning overnight promotion subject. Exact subject effcc16b158f16ec5cbc82ea228df9be52d0b75b passed hosted prequalification run 34300358374. Qualification covered the current 54-test closed-loop boundary, 57 predecessor regressions, local-first evidence/privacy checks, complete Learning Lab regression, repeated deterministic integrity seeds, and thin-caller verification. Hosted artifact 10084743223 digest sha256:0257de52f6fb22d7512ba2e2b77124b8b8d212890c4b069ee613157f934ac6f2. Registry v12 on canonical main contains LEARNING-PILOT-001-RUN-001-FINAL-HUMAN-EXECUTION and main control-plane enforcement run 34300600705 passed. Qualification fixtures are not real-human evidence; no participant consent or response may be created, inferred, or supplied by A-01. This READY ticket supersedes the older f262893ac413a6d933c7ec703b4d6ef5d6137939 closed-loop ticket so overnight capacity is not spent on an obsolete subject."
+  "notes": "Portfolio audit 2026-09-08 ranks this as tonight's highest-value A-01 work because PASS changes authoritative product standing rather than merely collecting information. Exact subject effcc16b158f16ec5cbc82ea228df9be52d0b75b passed hosted prequalification run 34300358374. Qualification covered the current 54-test closed-loop boundary, 57 predecessor regressions, local-first evidence/privacy checks, complete Learning Lab regression, repeated deterministic integrity seeds, and thin-caller verification. Hosted artifact 10084743223 digest sha256:0257de52f6fb22d7512ba2e2b77124b8b8d212890c4b069ee613157f934ac6f2. Registry v12 on canonical main contains LEARNING-PILOT-001-RUN-001-FINAL-HUMAN-EXECUTION and main control-plane enforcement run 34300600705 passed. Qualification fixtures are not real-human evidence; no participant consent or response may be created, inferred, or supplied by A-01. This READY ticket supersedes the older f262893ac413a6d933c7ec703b4d6ef5d6137939 closed-loop ticket so overnight capacity is not spent on an obsolete subject."
 }
