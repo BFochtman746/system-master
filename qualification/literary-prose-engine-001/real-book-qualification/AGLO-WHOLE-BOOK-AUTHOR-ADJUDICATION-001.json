@@ -1,0 +1,98 @@
+{
+  "objective": "AGLO-WHOLE-BOOK-AUTHOR-ADJUDICATION-001",
+  "standing": "READY__BLOCKED_ONLY_ON_TWO_EXPLICIT_AUTHOR_DISPOSITIONS",
+  "book_id": "AGLO-001",
+  "project_id": "A-GATE-LEFT-OPEN",
+  "baseline_version_id": "AGLO-REJECT-ALL-NARRATIVE-v1",
+  "baseline_text_sha256": "a48378682ee15fd4b24bc97293ce43a37f096db254a0b78f715081a8aa8a59ee",
+  "queue_ref": "AGLO-WHOLE-BOOK-AUTHOR-DECISION-QUEUE-001.json",
+  "authority_gate": {
+    "required": "EXPLICIT_AUTHOR_DISPOSITION_FOR_EACH_QUEUE_ITEM",
+    "generic_continue_is_not_a_disposition": true,
+    "objective_restatement_is_not_a_disposition": true,
+    "assistant_recommendation_is_not_authority": true,
+    "current_valid_author_dispositions_recorded": 0,
+    "required_author_dispositions": 2,
+    "fail_closed": true
+  },
+  "decision_001": {
+    "decision_id": "AGLO-WBS-DECISION-001",
+    "chapter": 25,
+    "finding": "OBJECTIVE_MECHANICAL_DUPLICATE_TOKEN",
+    "recommendation": "ACCEPT_REMOVE_DUPLICATE_WORD",
+    "recommendation_confidence": "HIGH",
+    "valid_options": {
+      "1A": {
+        "disposition": "ACCEPT_REMOVE_DUPLICATE_WORD",
+        "qualification_state_effect": "ADMIT_VERIFIED_SINGLE_TOKEN_DELETION_AS_ACCEPTED_BOUNDED_REPAIR",
+        "automatic_manuscript_overwrite": false,
+        "step_j_event": "USER_ACCEPT_CANDIDATE",
+        "step_j_scope": "A-GATE-LEFT-OPEN_PROJECT_ONLY",
+        "stable_identity_change": false,
+        "preservation_closure": "PASS_PRECHECK__EXACT_SINGLE_DUPLICATE_TOKEN_DELETION",
+        "step_k_closure": "PASS_PRECHECK__MECHANICAL_NONSTYLE_EDIT"
+      },
+      "1B": {
+        "disposition": "RETAIN_ORIGINAL",
+        "qualification_state_effect": "NO_REPAIR_ADMITTED",
+        "automatic_manuscript_overwrite": false,
+        "step_j_event": "USER_RETAIN_ORIGINAL",
+        "step_j_scope": "A-GATE-LEFT-OPEN_PROJECT_ONLY",
+        "stable_identity_change": false,
+        "preservation_closure": "PASS_BY_IDENTITY",
+        "step_k_closure": "PASS_BY_IDENTITY"
+      }
+    }
+  },
+  "decision_002": {
+    "decision_id": "AGLO-WBS-DECISION-002",
+    "chapters": [14, 15],
+    "finding": "EXACT_SENTENCE_REPEATED_ACROSS_PARALLEL_ILLNESS_CHAPTERS",
+    "recommendation": "RETAIN_AS_INTENTIONAL_PARALLEL_REFRAIN",
+    "recommendation_confidence": "MEDIUM_HIGH_EVIDENCE__AUTHOR_INTENT_NOT_PROVEN",
+    "valid_options": {
+      "2A": {
+        "disposition": "RETAIN_AS_INTENTIONAL_PARALLEL_REFRAIN",
+        "qualification_state_effect": "PROTECT_REPETITION_AS_EXPLICIT_PROJECT_AUTHOR_INTENT",
+        "automatic_manuscript_overwrite": false,
+        "step_j_event": "USER_RETAIN_ORIGINAL",
+        "step_j_scope": "A-GATE-LEFT-OPEN_PROJECT_ONLY__PARALLEL_ILLNESS_REFRAIN_CONTEXT",
+        "stable_identity_change": false,
+        "preservation_closure": "PASS_BY_IDENTITY__AUTHOR_INTENT_EXPLICITLY_PROTECTED",
+        "step_k_closure": "PASS_BY_IDENTITY"
+      },
+      "2B": {
+        "disposition": "AUTHORIZE_BOUNDED_VARIATION_OF_SECOND_OCCURRENCE",
+        "qualification_state_effect": "AUTHORIZE_CANDIDATE_GENERATION_ONLY__NO_REPAIR_YET_ACCEPTED",
+        "automatic_manuscript_overwrite": false,
+        "step_j_event": null,
+        "step_j_reason": "AUTHORIZATION_TO_GENERATE_IS_NOT_ACCEPTANCE_OR_REJECTION_EVIDENCE",
+        "stable_identity_change": false,
+        "required_before_closure": [
+          "GENERATE_PRIVATE_BOUNDED_SECOND_OCCURRENCE_VARIATION",
+          "RUN_PRESERVATION_CHECK",
+          "RUN_BLIND_STEP_I_COMPARISON",
+          "RUN_STEP_K_DRIFT_DEFENSE",
+          "RETURN_CANDIDATE_TO_AUTHOR_IF_STILL_ADMISSIBLE"
+        ],
+        "whole_book_closure_immediate": false
+      }
+    }
+  },
+  "precomputed_closure_rules": {
+    "1A_2A": "ELIGIBLE_FOR_IMMEDIATE_FINAL_PRESERVATION_STEP_K_CLOSURE_AFTER_EXPLICIT_RECEIPT",
+    "1B_2A": "ELIGIBLE_FOR_IMMEDIATE_FINAL_PRESERVATION_STEP_K_CLOSURE_AFTER_EXPLICIT_RECEIPT",
+    "1A_2B": "DECISION_001_CAN_CLOSE__DECISION_002_REQUIRES_BOUNDED_CANDIDATE_LOOP",
+    "1B_2B": "DECISION_001_CAN_CLOSE__DECISION_002_REQUIRES_BOUNDED_CANDIDATE_LOOP"
+  },
+  "step_j_learning_status": "NOT_APPENDED__NO_NEW_EXPLICIT_AUTHOR_DISPOSITION_YET",
+  "accepted_bounded_repairs_applied_to_qualification_state": 0,
+  "raw_manuscript_text_persisted": false,
+  "candidate_text_persisted": false,
+  "original_manuscript_modified": false,
+  "automatic_overwrite_authorized": false,
+  "publication_authorized": false,
+  "a01_required": false,
+  "a01_consumed": false,
+  "next_transition": "EXPLICIT_AUTHOR_REPLY_WITH_1A_OR_1B_AND_2A_OR_2B"
+}
