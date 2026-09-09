@@ -6,10 +6,10 @@ store candidate prose and it never turns judge reliability into literary-quality
 
 from collections import Counter, defaultdict
 
-AXES = {"BASE", "REPEAT", "POSITION", "RUBRIC_ORDER", "GENERATOR_IDENTITY", "SCORE_RANGE", "UNCERTAINTY_MARKER", "BELIEF_CONTRAST", "STYLE_VS_STORY"}
+AXES = {"BASE", "REPEAT", "POSITION", "RUBRIC_ORDER", "RUBRIC_COUNTERFACTUAL", "GENERATOR_IDENTITY", "SCORE_RANGE", "UNCERTAINTY_MARKER", "BELIEF_CONTRAST", "STYLE_VS_STORY"}
 NON_DECISIVE = {"TIE", "ABSTAIN"}
 FORBIDDEN_TEXT_KEYS = {"raw_text", "quoted_text", "manuscript_text", "source_text", "passage_text", "candidate_text", "revision_text"}
-BIAS_AXES = {"POSITION", "RUBRIC_ORDER", "GENERATOR_IDENTITY", "SCORE_RANGE", "UNCERTAINTY_MARKER", "BELIEF_CONTRAST"}
+BIAS_AXES = {"POSITION", "RUBRIC_ORDER", "RUBRIC_COUNTERFACTUAL", "GENERATOR_IDENTITY", "SCORE_RANGE", "UNCERTAINTY_MARKER", "BELIEF_CONTRAST"}
 
 
 def _forbidden(value, path="$", out=None):
@@ -52,6 +52,7 @@ def analyze_trials(
     repeat_identity_agreement_floor=0.8,
     minimum_repeat_trials=3,
     rubric_order_confidence_span_ceiling=0.15,
+    rubric_counterfactual_confidence_span_ceiling=0.15,
 ):
     errors, warnings, bias_findings, veto_findings = [], [], [], []
     if not isinstance(trials, list):
@@ -73,6 +74,12 @@ def analyze_trials(
         rubric_confidence_ceiling = -1
     if not 0.0 <= rubric_confidence_ceiling <= 1.0:
         errors.append("RUBRIC_ORDER_CONFIDENCE_SPAN_CEILING_INVALID")
+    try:
+        counterfactual_confidence_ceiling = float(rubric_counterfactual_confidence_span_ceiling)
+    except (TypeError, ValueError):
+        counterfactual_confidence_ceiling = -1
+    if not 0.0 <= counterfactual_confidence_ceiling <= 1.0:
+        errors.append("RUBRIC_COUNTERFACTUAL_CONFIDENCE_SPAN_CEILING_INVALID")
 
     seen_ids = set()
     normalized = []
@@ -102,6 +109,10 @@ def analyze_trials(
             errors.append(f"WINNER_INVALID:{tid or i}")
         if _conf(trial.get("confidence")) is None:
             errors.append(f"CONFIDENCE_INVALID:{tid or i}")
+        if axis == "RUBRIC_COUNTERFACTUAL":
+            basis = trial.get("evidence_basis_id")
+            if not isinstance(basis, str) or not basis:
+                errors.append(f"RUBRIC_COUNTERFACTUAL_EVIDENCE_BASIS_REQUIRED:{tid or i}")
         normalized.append(trial)
 
     by_comparison = defaultdict(list)
@@ -142,22 +153,41 @@ def analyze_trials(
                 confidence_span = max(valid_confidences) - min(valid_confidences)
 
             balanced = None
+            evidence_basis_invariant = None
             if axis == "RUBRIC_ORDER" and axis_trials:
                 balanced = len(condition_values) >= 2 and len(set(condition_counts.values())) == 1
                 if len(condition_values) < 2:
                     errors.append(f"RUBRIC_ORDER_REQUIRES_MULTIPLE_ORDERS:{comparison_id}")
                 elif not balanced:
                     errors.append(f"RUBRIC_ORDER_UNBALANCED:{comparison_id}")
+            elif axis == "RUBRIC_COUNTERFACTUAL" and axis_trials:
+                balanced = len(condition_values) >= 2 and len(set(condition_counts.values())) == 1
+                if len(condition_values) < 2:
+                    errors.append(f"RUBRIC_COUNTERFACTUAL_REQUIRES_MULTIPLE_VARIANTS:{comparison_id}")
+                elif not balanced:
+                    errors.append(f"RUBRIC_COUNTERFACTUAL_UNBALANCED:{comparison_id}")
+                basis_ids = [t.get("evidence_basis_id") for t in axis_trials]
+                basis_valid = all(isinstance(x, str) and x for x in basis_ids)
+                evidence_basis_invariant = basis_valid and len(set(basis_ids)) == 1
+                if basis_valid and not evidence_basis_invariant:
+                    errors.append(f"RUBRIC_COUNTERFACTUAL_EVIDENCE_BASIS_DRIFT:{comparison_id}")
 
             evaluable = len(axis_trials) >= 2 and len(condition_values) >= 2
             if axis == "RUBRIC_ORDER":
                 evaluable = evaluable and balanced is True
+            elif axis == "RUBRIC_COUNTERFACTUAL":
+                evaluable = evaluable and balanced is True and evidence_basis_invariant is True
             outcome_sensitive = evaluable and len(set(outcomes)) > 1
+            confidence_ceiling = None
+            if axis == "RUBRIC_ORDER":
+                confidence_ceiling = rubric_confidence_ceiling
+            elif axis == "RUBRIC_COUNTERFACTUAL":
+                confidence_ceiling = counterfactual_confidence_ceiling
             confidence_sensitive = (
-                axis == "RUBRIC_ORDER"
+                confidence_ceiling is not None
                 and evaluable
                 and confidence_span is not None
-                and confidence_span > rubric_confidence_ceiling
+                and confidence_span > confidence_ceiling
             )
             sensitive = outcome_sensitive or confidence_sensitive
             axis_reports[axis] = {
@@ -171,16 +201,19 @@ def analyze_trials(
                 "confidence_span": None if confidence_span is None else round(confidence_span, 4),
                 "confidence_sensitive": confidence_sensitive,
                 "balanced": balanced,
+                "evidence_basis_invariant": evidence_basis_invariant,
             }
             if sensitive:
                 finding = {"comparison_id": comparison_id, "axis": axis, "finding": f"{axis}_SENSITIVITY"}
-                if axis == "RUBRIC_ORDER":
+                if confidence_ceiling is not None:
                     finding.update({
                         "outcome_sensitive": outcome_sensitive,
                         "confidence_sensitive": confidence_sensitive,
                         "confidence_span": None if confidence_span is None else round(confidence_span, 4),
-                        "confidence_span_ceiling": rubric_confidence_ceiling,
+                        "confidence_span_ceiling": confidence_ceiling,
                     })
+                if axis == "RUBRIC_COUNTERFACTUAL":
+                    finding["evidence_basis_invariant"] = evidence_basis_invariant
                 bias_findings.append(finding)
 
         for t in group:
@@ -233,4 +266,5 @@ def analyze_trials(
         "literary_quality_score_emitted": False,
         "candidate_prose_persisted": bool(forbidden),
         "rubric_order_confidence_span_ceiling": rubric_confidence_ceiling,
+        "rubric_counterfactual_confidence_span_ceiling": counterfactual_confidence_ceiling,
     }
