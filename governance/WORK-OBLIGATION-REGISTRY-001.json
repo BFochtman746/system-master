@@ -118,12 +118,27 @@
     {
       "obligation_id": "PROSE-REAL-LIMITATION-AUTHOR-ADJUDICATION-001",
       "owner_path": "SYSTEM_MASTER/BOOK/PROSE",
-      "state": "BLOCKED",
-      "blocker_class": "AUTHOR_ONLY",
+      "state": "CLOSED",
       "objective": "Obtain explicit author labels for the six blinded real passages, freeze those labels without revision authority, then run the qualified semantic + Step-F path blind against the frozen ground truth.",
       "required_labels": 6,
       "generic_continue_is_authority": false,
-      "revision_authority": "ZERO"
+      "revision_authority": "ZERO",
+      "closure_evidence": "qualification/literary-prose-engine-001/step-f/PROSE-REAL-LIMITATION-AUTHOR-ADJUDICATION-001-QUALIFICATION-RECEIPT.json",
+      "closure_commit": "338797ecd56ca46efd7ab14e9a2cd9bb7acd1263",
+      "closure_run_id": 34404491759,
+      "result": "PASS__SIX_AUTHOR_LABELS_FROZEN__ONE_REAL_LIMITATION__REVISION_AUTHORITY_ZERO"
+    },
+    {
+      "obligation_id": "PROSE-REAL-LIMITATION-BLIND-MODEL-SCORING-001",
+      "owner_path": "SYSTEM_MASTER/BOOK/PROSE",
+      "state": "READY",
+      "objective": "Execute the six frozen real-passage cases in a fresh evaluator context that has not observed author ground truth; verify source and passage digests; run the already-qualified semantic -> Passage Intelligence -> Step-F path; seal one model disposition per case with revision_allowed=false before any ground-truth read; only after the prediction seal compare against the frozen author ground truth and measure real-limitation identification, preservation, neutral-observation retention, abstention/downgrade behavior and false-positive limitation rate.",
+      "execution_branch": "literary-prose-blind-eval-001",
+      "blind_contract": "qualification/literary-prose-engine-001/step-f/PROSE-REAL-LIMITATION-BLIND-EVALUATION-CONTRACT-001.json",
+      "dependency": "FRESH_GROUND_TRUTH_BLIND_EVALUATOR_CONTEXT",
+      "eligibility_rule": "Any evaluator context that has read the author labels, author adjudication commentary, or labeled Prose state is ineligible to produce the blind prediction seal.",
+      "stop_condition": "Six predictions are committed/sealed on the blind branch before ground truth is read; comparison metrics are then recorded; revision authority remains zero.",
+      "must_not_do": "Do not score these six cases in a context that has observed author labels; do not read literary-prose-engine-001 at or after commit 338797ecd56ca46efd7ab14e9a2cd9bb7acd1263 before prediction seal; do not generate candidate prose, mutate manuscripts, or grant revision/publication authority."
     },
     {
       "obligation_id": "A01-CLOSED-LOOP-REPAIR-001",
