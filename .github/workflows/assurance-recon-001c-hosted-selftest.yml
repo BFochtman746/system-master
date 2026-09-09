@@ -1,0 +1,27 @@
+name: Assurance RECON-001C Hosted Selftest
+
+on:
+  push:
+    branches:
+      - 'system-master/assurance-reconciliation-001'
+    paths:
+      - '.github/scripts/assurance-recon-001c-sealed-history-verify.js'
+      - '.github/workflows/assurance-recon-001c-hosted-selftest.yml'
+      - 'system-master/assurance-reconciliation-001/RECON-001C-*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verifier-selftest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout exact branch subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Verify RECON-001C sealed-history harness
+        run: node .github/scripts/assurance-recon-001c-sealed-history-verify.js --selftest
