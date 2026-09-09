@@ -1,0 +1,56 @@
+{
+  "contract_id": "BOOK-INTELLIGENCE-UNIFICATION-001-STEP-008-OPPORTUNITY-ADMISSION-v1",
+  "objective": "Convert calibrated diagnostic findings into a small, prioritized, preservation-safe revision-opportunity set before any revision generation.",
+  "authorities": [
+    "qualification/literary-prose-engine-001/step-f/OPPORTUNITY-ADJUDICATION-CONTRACT-v1.json",
+    "qualification/literary-prose-engine-001/step-e/OPPORTUNITY-PRIORITIZATION-CONTRACT-v1.json",
+    "qualification/literary-prose-engine-001/step-h/CONTROLLED-REVISION-ENGINE-CONTRACT-v1.json",
+    "qualification/literary-prose-engine-001/unification-001/BOOK-INTELLIGENCE-UNIFICATION-001-STEP-007-CLOSURE.md"
+  ],
+  "input": "CALIBRATED_FINDING_WITH_OPPORTUNITY_CONTEXT[]",
+  "output": "OPPORTUNITY_ADMISSION_RESULT",
+  "default_max_admitted": 3,
+  "statuses": [
+    "ADMIT",
+    "REJECT_PRESERVATION_RISK",
+    "REJECT_SCOPE",
+    "REVIEW_CONFLICT",
+    "NO_ACTION"
+  ],
+  "required_context": [
+    "opportunity_id",
+    "purpose_relevance",
+    "preservation_risk",
+    "voice_risk",
+    "collateral_regression_risk",
+    "edit_budget_fit"
+  ],
+  "hard_reject_conflicts": [
+    "canon_conflict",
+    "protected_language_conflict",
+    "authorial_intent_conflict",
+    "pov_knowledge_violation",
+    "explicit_user_constraint_conflict",
+    "named_author_target",
+    "rewrite_payload_from_specialist"
+  ],
+  "rules": [
+    "Only STEP-007 LIMITATION or OPPORTUNITY findings marked revision_eligible may support ADMIT.",
+    "Deduplicate findings that refer to the same opportunity_id before ranking.",
+    "Correlated specialists are evidence, not votes; repeated signals from one evidence family do not multiply confidence.",
+    "Any material disagreement or abstention attached to an otherwise eligible opportunity yields REVIEW_CONFLICT unless a hard preservation rejection already applies.",
+    "Explicit preservation conflicts veto admission regardless of expected impact.",
+    "Opportunity ranking is conditional on passage purpose, preservation/voice/collateral risk, and edit-budget fit.",
+    "Internal priority is not a prose-quality score and must not be exposed as universal literary quality.",
+    "When evidence is insufficient, conflicting, out of scope, or below minimum expected value, NO_ACTION or review is preferred to speculative revision.",
+    "At most three opportunities are admitted by default; overflow is rejected for bounded scope rather than silently promoted.",
+    "No revision text, manuscript mutation, author-intent resolution, or named-author target is permitted in STEP-008."
+  ],
+  "research_hardening": {
+    "no_consensus": "LLM judges tend to force a stance in ambiguous/no-consensus settings; explicit REVIEW_CONFLICT is therefore first-class.",
+    "judge_instability": "LLM-as-judge ratings can be inconsistent across runs; repeated model judgments must not be treated as independent votes.",
+    "self_preference": "Evaluator self-preference is a documented risk; admission does not accept generator identity as evidence of quality.",
+    "uncertainty_marker_bias": "LLM judges can penalize epistemic uncertainty markers; uncertainty wording itself is not negative literary evidence."
+  },
+  "promotion_boundary": "STEP-008 produces opportunity admission only. It cannot declare a revision superior, mutate a manuscript, or promote any candidate."
+}
