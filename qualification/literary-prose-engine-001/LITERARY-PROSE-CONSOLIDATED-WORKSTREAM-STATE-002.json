@@ -1,0 +1,29 @@
+{
+  "state_id": "LITERARY-PROSE-CONSOLIDATED-WORKSTREAM-STATE-002",
+  "supersedes": "LITERARY-PROSE-CONSOLIDATED-WORKSTREAM-STATE-001.json",
+  "standing": "ACTIVE__CURRENT_CHAT_CANONICAL__AGLO_PROMOTION_REVIEW_COMPLETE__EXPLICIT_PROMOTION_DECISION_PENDING",
+  "canonical_control_surface": "CURRENT_LITERARY_PROSE_CHAT",
+  "retired_control_surface": "LITERARY_PROSE_NIGHT_SHIFT_CHAT",
+  "branch": "literary-prose-engine-001",
+  "state_basis_head": "902eabfabdcbe6a40d0ca03c87b668191bba5d00",
+  "aglo_revision_lane": {
+    "composite_evidence": "real-book-qualification/AGLO-COMPOSITE-REVISION-PACKAGE-001.json",
+    "promotion_review": "real-book-qualification/AGLO-COMPOSITE-CANDIDATE-PROMOTION-REVIEW-001.json",
+    "candidate_docx_sha256": "cae6abd14c8ea70fb49e257f4487353bf8e0834a78d9dee84fd0be42a8ac0247",
+    "standing": "PROMOTION_ELIGIBLE__PROMOTION_RECOMMENDED__AUTHOR_DECISION_REQUIRED",
+    "recommended_baseline_id": "AGLO-COMPOSITE-REVISION-BASELINE-v2",
+    "canonical_master_modified": false,
+    "promotion_executed": false,
+    "valid_author_options": {
+      "A": "PROMOTE_AS_NEW_EXPLICIT_REVISION_BASELINE__PRESERVE_RATIFIED_MASTER_UNCHANGED",
+      "B": "RETAIN_AS_NONCANONICAL_REVIEW_CANDIDATE__KEEP_CURRENT_RATIFIED_BASELINE"
+    }
+  },
+  "system_lane": {
+    "standing": "CANDIDATE_001_HOSTED_QUALIFIED_SYNTHETIC_SOURCE_HELDOUT__NOT_PROMOTED",
+    "next_objective": "LITERARY-NARRATIVE-EXTRACTOR-CANDIDATE-002 — LEARNED/MODEL-BACKED PROVIDER + INDEPENDENT PUBLIC-DOMAIN/HUMAN-ADJUDICATED SOURCE-HELDOUT CALIBRATION"
+  },
+  "authority_rule": "The promotion review objective, generic Continue, and assistant recommendation do not count as author promotion authority. Promotion requires an explicit author choice or explicit delegation for this promotion decision.",
+  "exact_next_objective": "AGLO-COMPOSITE-CANDIDATE-PROMOTION-DECISION-001 — RECORD EXPLICIT AUTHOR OPTION A PROMOTE OR OPTION B RETAIN NONCANONICAL → IF A, CREATE AGLO-COMPOSITE-REVISION-BASELINE-v2 WITHOUT OVERWRITING THE RATIFIED MASTER; IF B, FREEZE THE CANDIDATE AS REVIEW-ONLY AND KEEP THE CURRENT RATIFIED BASELINE",
+  "parallel_when_authority_blocked": "LITERARY-NARRATIVE-EXTRACTOR-CANDIDATE-002"
+}
