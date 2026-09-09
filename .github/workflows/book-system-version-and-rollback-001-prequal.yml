@@ -20,8 +20,6 @@ jobs:
     name: Deterministic hosted prequalification
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    env:
-      A01_EVIDENCE_DIR: ${{ runner.temp }}/book-version-rollback-evidence
     steps:
       - name: Checkout exact subject
         uses: actions/checkout@v4
