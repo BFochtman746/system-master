@@ -206,8 +206,8 @@ jobs:
             public static extern uint SetThreadExecutionState(uint esFlags);
           }
           '@
-          $ES_CONTINUOUS = [uint32]0x80000000
-          $ES_SYSTEM_REQUIRED = [uint32]0x00000001
+          $ES_CONTINUOUS = [Convert]::ToUInt32('80000000', 16)
+          $ES_SYSTEM_REQUIRED = [Convert]::ToUInt32('00000001', 16)
           $guardState = [A01QualificationSleepGuard]::SetThreadExecutionState($ES_CONTINUOUS -bor $ES_SYSTEM_REQUIRED)
           if ($guardState -eq 0) { throw 'A01_SLEEP_GUARD_START_FAILED' }
           try {
