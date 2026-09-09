@@ -15,8 +15,8 @@ jobs:
     with:
       qualification_id: A01-CLOSED-LOOP-REPAIR-SELFTEST
       workstream_id: SYSTEM-MASTER
-      subject_sha: e1d5d38b0533d31425706ea761f0a1ee80e72d01
-      origin_ref: refs/heads/core/a01-closed-loop-repair-001-integration
-      resume_on_pass: Adjudicate only exact integration subject e1d5d38b0533d31425706ea761f0a1ee80e72d01. PASS proves the rebased sidecar self-test on A-01 and preserves zero promotion authority; integrate to main only by non-forced fast-forward after re-fetching live main and proving ancestry.
-      resume_on_failure: Preserve receipt/evidence and classify the exact rebased integration failure. Do not transfer the earlier ca3a924e PASS, weaken exact-SHA or repair fences, or overwrite concurrent main work.
-      notification_target: system-master-core-a01-closed-loop-repair-001-integration
+      subject_sha: 5ac0954bc684429f55a2ccf2edac2306024f87e7
+      origin_ref: refs/heads/core/a01-closed-loop-repair-001-integration-v2
+      resume_on_pass: Adjudicate only exact atomic integration subject 5ac0954bc684429f55a2ccf2edac2306024f87e7. PASS proves the sidecar on current-main ancestry and preserves zero promotion authority; integrate to main only by non-forced fast-forward after re-fetching live main and proving ancestry.
+      resume_on_failure: Preserve receipt/evidence and classify only the exact atomic integration failure. Do not transfer earlier candidate/integration PASS authority, weaken exact-SHA or repair fences, or overwrite concurrent main work.
+      notification_target: system-master-core-a01-closed-loop-repair-001-integration-v2
