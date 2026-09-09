@@ -53,6 +53,7 @@ function validateTicket(raw, file, nightDate, policy, registry) {
   if (!validTime(raw.earliest_start_local) || !validTime(raw.latest_start_local) || !validTime(raw.window_end_local)) errors.push('TIME_FORMAT');
   if (!requiredString(raw.ticket_id) || !requiredString(raw.workstream_id) || !requiredString(raw.qualification_id) || !requiredString(raw.origin_ref)) errors.push('IDENTITY');
   if (!requiredString(raw.resume_on_pass) || !requiredString(raw.resume_on_failure) || !requiredString(raw.notification_target)) errors.push('RETURN_TICKET');
+  if (raw.depends_on_ticket_id !== undefined && raw.depends_on_ticket_id !== null && !requiredString(raw.depends_on_ticket_id)) errors.push('DEPENDENCY_ID');
 
   const secondShift = policy.overnight && policy.overnight.second_shift;
   if (raw.state === 'READY' && secondShift && secondShift.enabled === true) {
@@ -101,11 +102,106 @@ function chooseCandidate(candidates, cursor, boundary, allocated, bufferMs) {
     const bb = allocated.get(b.raw.workstream_id) || 0;
     if (aa !== bb) return aa - bb;
     if (a.priority !== b.priority) return b.priority - a.priority;
+    const ac = Number.isInteger(a.raw.critical_path_rank) ? a.raw.critical_path_rank : 99;
+    const bc = Number.isInteger(b.raw.critical_path_rank) ? b.raw.critical_path_rank : 99;
+    if (ac !== bc) return ac - bc;
     const as = Date.parse(a.raw.submitted_at) || 0; const bs = Date.parse(b.raw.submitted_at) || 0;
     if (as !== bs) return as - bs;
     return a.max_minutes - b.max_minutes;
   });
   return fit[0] || null;
+}
+
+function dependencyValidate(valid, policy, rejected) {
+  const invalid = new Set();
+  const byId = new Map();
+  for (const v of valid) {
+    if (byId.has(v.raw.ticket_id)) {
+      invalid.add(v); invalid.add(byId.get(v.raw.ticket_id));
+    } else byId.set(v.raw.ticket_id, v);
+  }
+  for (const v of invalid) rejected.push({ file: v.file, ticket_id: v.raw.ticket_id, reasons: ['DUPLICATE_TICKET_ID'] });
+
+  const perWorkstream = new Map();
+  for (const v of valid) {
+    if (invalid.has(v)) continue;
+    const list = perWorkstream.get(v.raw.workstream_id) || [];
+    list.push(v); perWorkstream.set(v.raw.workstream_id, list);
+  }
+  const cap = policy.overnight.max_ready_tickets_per_workstream_per_night || policy.admission.max_outstanding_per_workstream || 1;
+  for (const [workstream, list] of perWorkstream.entries()) {
+    if (list.length > cap) {
+      for (const v of list) {
+        invalid.add(v);
+        rejected.push({ file: v.file, ticket_id: v.raw.ticket_id, reasons: [`READY_TICKET_CAP_EXCEEDED:${workstream}:${cap}`] });
+      }
+    }
+  }
+
+  const activeById = new Map(valid.filter(v => !invalid.has(v)).map(v => [v.raw.ticket_id, v]));
+  const children = new Map();
+  for (const v of valid) {
+    if (invalid.has(v)) continue;
+    const depId = v.raw.depends_on_ticket_id;
+    if (!depId) continue;
+    const dep = activeById.get(depId);
+    const reasons = [];
+    if (depId === v.raw.ticket_id) reasons.push('SELF_DEPENDENCY');
+    if (!dep) reasons.push('DEPENDENCY_NOT_READY');
+    if (dep && policy.overnight.dependency_chains.same_workstream_only === true && dep.raw.workstream_id !== v.raw.workstream_id) reasons.push('CROSS_WORKSTREAM_DEPENDENCY_NOT_SUPPORTED');
+    if (v.raw.exclusive_window === true) reasons.push('DEPENDENT_EXCLUSIVE_WINDOW_NOT_SUPPORTED');
+    if (reasons.length) {
+      invalid.add(v);
+      rejected.push({ file: v.file, ticket_id: v.raw.ticket_id, reasons });
+      continue;
+    }
+    const list = children.get(depId) || [];
+    list.push(v); children.set(depId, list);
+  }
+
+  for (const [parentId, list] of children.entries()) {
+    const live = list.filter(v => !invalid.has(v));
+    if (live.length > 1) {
+      for (const v of live) {
+        invalid.add(v);
+        rejected.push({ file: v.file, ticket_id: v.raw.ticket_id, reasons: [`MULTIPLE_PASS_DEPENDENTS_UNSUPPORTED:${parentId}`] });
+      }
+    }
+  }
+
+  const liveById = new Map(valid.filter(v => !invalid.has(v)).map(v => [v.raw.ticket_id, v]));
+  const maxChain = policy.overnight.dependency_chains.max_chain_length || 4;
+  for (const v of liveById.values()) {
+    const seen = new Set();
+    let current = v;
+    let length = 1;
+    while (current.raw.depends_on_ticket_id) {
+      if (seen.has(current.raw.ticket_id)) {
+        invalid.add(v);
+        rejected.push({ file: v.file, ticket_id: v.raw.ticket_id, reasons: ['DEPENDENCY_CYCLE'] });
+        break;
+      }
+      seen.add(current.raw.ticket_id);
+      const parent = liveById.get(current.raw.depends_on_ticket_id);
+      if (!parent) break;
+      current = parent;
+      length += 1;
+      if (length > maxChain) {
+        invalid.add(v);
+        rejected.push({ file: v.file, ticket_id: v.raw.ticket_id, reasons: [`DEPENDENCY_CHAIN_TOO_LONG:${maxChain}`] });
+        break;
+      }
+    }
+  }
+
+  const clean = valid.filter(v => !invalid.has(v));
+  const cleanById = new Map(clean.map(v => [v.raw.ticket_id, v]));
+  const childByParent = new Map();
+  for (const v of clean) {
+    const depId = v.raw.depends_on_ticket_id;
+    if (depId && cleanById.has(depId)) childByParent.set(depId, v);
+  }
+  return { valid: clean, childByParent };
 }
 
 function buildPlan({ now = new Date(), policy, registry, ticketRecords, nightDate }) {
@@ -123,17 +219,7 @@ function buildPlan({ now = new Date(), policy, registry, ticketRecords, nightDat
     if (!v.ok) rejected.push({ file: record.file, ticket_id: record.ticket && record.ticket.ticket_id, reasons: v.errors });
     else valid.push(v);
   }
-  const byWorkstream = new Map();
-  for (const v of valid) {
-    const list = byWorkstream.get(v.raw.workstream_id) || [];
-    list.push(v); byWorkstream.set(v.raw.workstream_id, list);
-  }
-  for (const [workstream, list] of byWorkstream.entries()) {
-    if (list.length > 1) {
-      for (const v of list) rejected.push({ file: v.file, ticket_id: v.raw.ticket_id, reasons: [`MULTIPLE_READY_TICKETS_FOR_WORKSTREAM:${workstream}`] });
-      valid = valid.filter(v => v.raw.workstream_id !== workstream);
-    }
-  }
+
   valid = valid.filter(v => {
     if (v.earliest < globalStart || v.end > globalEnd) {
       rejected.push({ file: v.file, ticket_id: v.raw.ticket_id, reasons: ['WINDOW_OUTSIDE_GLOBAL_NIGHT_SHIFT'] }); return false;
@@ -141,12 +227,23 @@ function buildPlan({ now = new Date(), policy, registry, ticketRecords, nightDat
     return true;
   });
 
+  const depChecked = dependencyValidate(valid, policy, rejected);
+  valid = depChecked.valid;
+  const childByParent = depChecked.childByParent;
+
   const reservations = valid.filter(v => v.raw.exclusive_window === true).sort((a,b) => a.earliest - b.earliest);
-  const normal = valid.filter(v => v.raw.exclusive_window !== true);
-  const remaining = new Set(normal);
+  const rootNormal = valid.filter(v => v.raw.exclusive_window !== true && !v.raw.depends_on_ticket_id);
+  const dependent = valid.filter(v => !!v.raw.depends_on_ticket_id);
+  const remainingRoots = new Set(rootNormal);
+  const remainingDependents = new Set(dependent);
   const scheduled = [];
   const allocated = new Map();
   let cursor = new Date(globalStart);
+
+  function fits(v, start, boundary) {
+    const finish = new Date(start.getTime() + v.max_minutes * 60000);
+    return start <= v.latest && finish <= v.end && finish.getTime() + bufferMs <= boundary.getTime();
+  }
 
   function place(v, start, gapBoundary) {
     const finish = new Date(start.getTime() + v.max_minutes * 60000);
@@ -157,15 +254,30 @@ function buildPlan({ now = new Date(), policy, registry, ticketRecords, nightDat
     scheduled.push({ ticket: v, start, finish, admissionStart, admissionEnd });
     allocated.set(v.raw.workstream_id, (allocated.get(v.raw.workstream_id) || 0) + v.max_minutes);
     cursor = new Date(finish.getTime() + bufferMs);
-    remaining.delete(v);
+    remainingRoots.delete(v);
+    remainingDependents.delete(v);
   }
+
+  function placeSuccessors(parent, boundary) {
+    let current = parent;
+    while (scheduled.length < policy.overnight.max_slots) {
+      const child = childByParent.get(current.raw.ticket_id);
+      if (!child || !remainingDependents.has(child)) return;
+      const start = new Date(Math.max(cursor.getTime(), child.earliest.getTime()));
+      if (!fits(child, start, boundary)) return;
+      place(child, start, new Date(boundary.getTime() - bufferMs));
+      current = child;
+    }
+  }
+
   function fillUntil(boundary) {
     while (scheduled.length < policy.overnight.max_slots && cursor < boundary) {
-      const candidates = [...remaining];
+      const candidates = [...remainingRoots];
       const choice = chooseCandidate(candidates, cursor, boundary, allocated, bufferMs);
       if (choice) {
         const start = new Date(Math.max(cursor.getTime(), choice.earliest.getTime()));
         place(choice, start, new Date(boundary.getTime() - bufferMs));
+        placeSuccessors(choice, boundary);
         continue;
       }
       const future = candidates.map(c => c.earliest).filter(d => d > cursor && d < boundary).sort((a,b) => a-b)[0];
@@ -184,9 +296,12 @@ function buildPlan({ now = new Date(), policy, registry, ticketRecords, nightDat
       continue;
     }
     place(r, start, r.end);
+    placeSuccessors(r, globalEnd);
   }
   fillUntil(globalEnd);
-  for (const v of remaining) rejected.push({ file: v.file, ticket_id: v.raw.ticket_id, reasons: ['DEFERRED_NO_SAFE_FIT'] });
+
+  for (const v of remainingRoots) rejected.push({ file: v.file, ticket_id: v.raw.ticket_id, reasons: ['DEFERRED_NO_SAFE_FIT'] });
+  for (const v of remainingDependents) rejected.push({ file: v.file, ticket_id: v.raw.ticket_id, reasons: ['DEPENDENCY_NOT_SCHEDULED_OR_NO_SAFE_FIT'] });
   if (scheduled.length >= policy.overnight.max_slots) {
     for (const r of reservations) if (!scheduled.some(s => s.ticket === r) && !rejected.some(x => x.file === r.file)) rejected.push({ file: r.file, ticket_id: r.raw.ticket_id, reasons: ['DEFERRED_SLOT_LIMIT'] });
   }
@@ -199,6 +314,8 @@ function buildPlan({ now = new Date(), policy, registry, ticketRecords, nightDat
     qualification_id: s.ticket.raw.qualification_id,
     subject_sha: s.ticket.raw.subject_sha,
     origin_ref: s.ticket.raw.origin_ref,
+    depends_on_ticket_id: s.ticket.raw.depends_on_ticket_id || null,
+    requires_previous_pass: !!s.ticket.raw.depends_on_ticket_id,
     overnight_lane: s.ticket.raw.overnight_lane || null,
     value_class: s.ticket.raw.value_class || null,
     critical_path_rank: Number.isInteger(s.ticket.raw.critical_path_rank) ? s.ticket.raw.critical_path_rank : null,
@@ -211,8 +328,8 @@ function buildPlan({ now = new Date(), policy, registry, ticketRecords, nightDat
     resume_on_failure: s.ticket.raw.resume_on_failure,
     notification_target: s.ticket.raw.notification_target
   }));
-  while (slots.length < policy.overnight.max_slots) slots.push({ enabled: false, slot: slots.length + 1, ticket_id: '', workstream_id: '', qualification_id: 'A01-CONTROL-PLANE-SELFTEST', subject_sha: '0000000000000000000000000000000000000000', origin_ref: 'refs/heads/main', overnight_lane: null, value_class: null, critical_path_rank: null, qualifier_timeout_minutes: policy.runtime.normal_qualifier_timeout_minutes, job_timeout_minutes: policy.runtime.normal_job_timeout_minutes, planned_start: globalStart.toISOString(), not_before: globalStart.toISOString(), not_after: globalEnd.toISOString(), resume_on_pass: 'No slot.', resume_on_failure: 'No slot.', notification_target: 'none' });
-  return { plan_version: 3, policy_version: policy.policy_version, registry_version: registry.registry_version, night_date: target, timezone: policy.overnight.timezone, window_start: globalStart.toISOString(), window_end: globalEnd.toISOString(), generated_at: now.toISOString(), scheduled_count: scheduled.length, rejected, slots };
+  while (slots.length < policy.overnight.max_slots) slots.push({ enabled: false, slot: slots.length + 1, ticket_id: '', workstream_id: '', qualification_id: 'A01-CONTROL-PLANE-SELFTEST', subject_sha: '0000000000000000000000000000000000000000', origin_ref: 'refs/heads/main', depends_on_ticket_id: null, requires_previous_pass: false, overnight_lane: null, value_class: null, critical_path_rank: null, qualifier_timeout_minutes: policy.runtime.normal_qualifier_timeout_minutes, job_timeout_minutes: policy.runtime.normal_job_timeout_minutes, planned_start: globalStart.toISOString(), not_before: globalStart.toISOString(), not_after: globalEnd.toISOString(), resume_on_pass: 'No slot.', resume_on_failure: 'No slot.', notification_target: 'none' });
+  return { plan_version: 4, policy_version: policy.policy_version, registry_version: registry.registry_version, night_date: target, timezone: policy.overnight.timezone, window_start: globalStart.toISOString(), window_end: globalEnd.toISOString(), generated_at: now.toISOString(), scheduled_count: scheduled.length, rejected, slots };
 }
 
 function emit(name, value) {
