@@ -1,0 +1,319 @@
+{
+  "registry_id": "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-002",
+  "fixture_version": 2,
+  "base_request": {
+    "request_id": "req-001",
+    "correlation_id": "corr-001",
+    "idempotency_key": "idem-001",
+    "service_id": "PROSE_ANALYSIS_AND_REVISION",
+    "operation_id": "ANALYZE_PASSAGE_OR_UNIT",
+    "schema_version": 2,
+    "book_project_id": "book-project-001",
+    "book_id": "book-001",
+    "parent_state_version": 11,
+    "parent_state_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "target_refs": ["manuscript:7:chapter-3"],
+    "source_identity_refs": [
+      {
+        "object_id": "manuscript-001",
+        "object_version": 7,
+        "object_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      }
+    ],
+    "projection": {
+      "exact_manuscript_or_unit_identity": "manuscript-001:v7:chapter-3",
+      "target_text_or_authorized_projection": "authorized-projection-ref-001",
+      "purpose": "line-review",
+      "canon_constraints": ["canon-001"],
+      "author_intent_constraints": ["intent-001"],
+      "protected_language_constraints": [],
+      "voice_context": "voice-context-001",
+      "rights_boundary": "AUTHORIZED_PRIVATE_BOOK_CONTENT",
+      "editorial_stage_context": {
+        "stage_token": "STYLISTIC_OR_LINE_EDIT_REVIEW",
+        "applicability": "APPLICABLE",
+        "not_applicable_rationale": null
+      }
+    },
+    "authority_context": {
+      "requesting_authority": "BOOK_SYSTEM_PARENT",
+      "canonical_write_allowed": false,
+      "lifecycle_transition_allowed": false,
+      "export_freeze_allowed": false,
+      "publication_authorized": false,
+      "author_decision_required_if_returned": false,
+      "rights_boundary": "AUTHORIZED_PRIVATE_BOOK_CONTENT",
+      "privacy_boundary": "PRIVATE_INTERNAL_ONLY"
+    }
+  },
+  "document_request": {
+    "request_id": "req-doc-001",
+    "correlation_id": "corr-doc-001",
+    "idempotency_key": "idem-doc-001",
+    "service_id": "DOCUMENT_ARTIFACT_AND_EXPORT",
+    "operation_id": "VALIDATE_TARGET_MEDIUM_ARTIFACT",
+    "schema_version": 2,
+    "book_project_id": "book-project-001",
+    "book_id": "book-001",
+    "parent_state_version": 11,
+    "parent_state_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "target_refs": ["artifact:epub-001"],
+    "source_identity_refs": [
+      {
+        "object_id": "manuscript-001",
+        "object_version": 7,
+        "object_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      }
+    ],
+    "projection": {
+      "artifact_ref": "artifact:epub-001",
+      "artifact_digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "exact_source_identity": "manuscript-001:v7",
+      "target_medium_profile": {
+        "profile_id": "EPUB_3_3_PRODUCTION",
+        "profile_version": 1
+      },
+      "accessibility_requirement": "EPUB_ACCESSIBILITY_1_1_WHEN_CLAIMED",
+      "validation_scope": ["FORMAT", "NAVIGATION", "ACCESSIBILITY_IF_APPLICABLE"],
+      "publication_authorized": false
+    },
+    "authority_context": {
+      "requesting_authority": "BOOK_SYSTEM_PARENT",
+      "canonical_write_allowed": false,
+      "lifecycle_transition_allowed": false,
+      "export_freeze_allowed": false,
+      "publication_authorized": false,
+      "author_decision_required_if_returned": false,
+      "rights_boundary": "AUTHORIZED_EXPORT",
+      "privacy_boundary": "MINIMUM_NECESSARY_PROVIDER_PROJECTION"
+    }
+  },
+  "base_response": {
+    "response_id": "resp-001",
+    "request_id": "req-001",
+    "correlation_id": "corr-001",
+    "idempotency_key": "idem-001",
+    "service_id": "PROSE_ANALYSIS_AND_REVISION",
+    "operation_id": "ANALYZE_PASSAGE_OR_UNIT",
+    "schema_version": 2,
+    "provider_class": "PROSE_SYSTEM",
+    "provider_subject": {
+      "subject_sha": "1111111111111111111111111111111111111111",
+      "implementation_or_artifact_id": "prose-runtime-001"
+    },
+    "parent_projection_identity": {
+      "parent_state_version": 11,
+      "parent_state_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "source_identity_refs": [
+      {
+        "object_id": "manuscript-001",
+        "object_version": 7,
+        "object_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      }
+    ],
+    "result_class": "SUCCESS",
+    "evidence_refs": ["evidence:diagnostic-001"],
+    "proposal_refs": [],
+    "artifact_evidence": [],
+    "editorial_stage_evidence": [
+      {
+        "stage_token": "STYLISTIC_OR_LINE_EDIT_REVIEW",
+        "applicability": "APPLICABLE",
+        "not_applicable_rationale": null,
+        "entry_evidence_refs": ["entry:001"],
+        "exit_evidence_refs": [],
+        "narrative_consistency_regression_refs": [],
+        "prior_stage_regression_refs": [],
+        "upstream_defect_routing_refs": [],
+        "author_decision_refs": []
+      }
+    ],
+    "target_medium_evidence": [],
+    "provenance_evidence": [],
+    "abstentions": [],
+    "warnings": [],
+    "requested_parent_action": "REGISTER_EVIDENCE"
+  },
+  "document_response": {
+    "response_id": "resp-doc-001",
+    "request_id": "req-doc-001",
+    "correlation_id": "corr-doc-001",
+    "idempotency_key": "idem-doc-001",
+    "service_id": "DOCUMENT_ARTIFACT_AND_EXPORT",
+    "operation_id": "VALIDATE_TARGET_MEDIUM_ARTIFACT",
+    "schema_version": 2,
+    "provider_class": "HEADLESS_ARTIFACT_SERVICE",
+    "provider_subject": {
+      "subject_sha": "2222222222222222222222222222222222222222",
+      "implementation_or_artifact_id": "artifact-provider-001"
+    },
+    "parent_projection_identity": {
+      "parent_state_version": 11,
+      "parent_state_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "source_identity_refs": [
+      {
+        "object_id": "manuscript-001",
+        "object_version": 7,
+        "object_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      }
+    ],
+    "result_class": "SUCCESS",
+    "evidence_refs": ["evidence:format-validation-001"],
+    "proposal_refs": [],
+    "artifact_evidence": [
+      {
+        "artifact_ref": "artifact:epub-001",
+        "artifact_digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "artifact_currentness": "CURRENT_FOR_BOUND_SOURCE",
+        "format_identity": "EPUB",
+        "target_medium_profile_id": "EPUB_3_3_PRODUCTION",
+        "target_medium_profile_version": 1,
+        "generator_or_toolchain_identity": "artifact-provider-001"
+      }
+    ],
+    "editorial_stage_evidence": [],
+    "target_medium_evidence": [
+      {
+        "technical_state": "FORMAT_VALIDATED",
+        "format_validation_result": "PASS",
+        "source_to_render_integrity_result": "NOT_YET_PROVEN",
+        "accessibility_result": "APPLICABILITY_RECORDED",
+        "proof_result": "NOT_YET_PROVEN",
+        "correction_ledger_ref": null,
+        "rendered_candidate_digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      }
+    ],
+    "provenance_evidence": [],
+    "abstentions": [],
+    "warnings": [],
+    "requested_parent_action": "REGISTER_EVIDENCE"
+  },
+  "provenance_request": {
+    "request_id": "req-prov-001",
+    "correlation_id": "corr-prov-001",
+    "idempotency_key": "idem-prov-001",
+    "service_id": "DOCUMENT_ARTIFACT_AND_EXPORT",
+    "operation_id": "ATTACH_OR_VALIDATE_PROVENANCE",
+    "schema_version": 2,
+    "book_project_id": "book-project-001",
+    "book_id": "book-001",
+    "parent_state_version": 11,
+    "parent_state_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "target_refs": ["artifact:epub-001"],
+    "source_identity_refs": [
+      {
+        "object_id": "manuscript-001",
+        "object_version": 7,
+        "object_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      }
+    ],
+    "projection": {
+      "artifact_ref": "artifact:epub-001",
+      "artifact_digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "exact_source_identity": "manuscript-001:v7",
+      "provenance_policy": "C2PA_OPTIONAL_RELEASE_ATTACHMENT",
+      "rights_boundary": "AUTHORIZED_EXPORT",
+      "privacy_boundary": "MINIMUM_NECESSARY_EXTERNAL_PROVENANCE",
+      "publication_authorized": false
+    },
+    "authority_context": {
+      "requesting_authority": "BOOK_SYSTEM_PARENT",
+      "canonical_write_allowed": false,
+      "lifecycle_transition_allowed": false,
+      "export_freeze_allowed": false,
+      "publication_authorized": false,
+      "author_decision_required_if_returned": false,
+      "rights_boundary": "AUTHORIZED_EXPORT",
+      "privacy_boundary": "MINIMUM_NECESSARY_EXTERNAL_PROVENANCE"
+    }
+  },
+  "provenance_response": {
+    "response_id": "resp-prov-001",
+    "request_id": "req-prov-001",
+    "correlation_id": "corr-prov-001",
+    "idempotency_key": "idem-prov-001",
+    "service_id": "DOCUMENT_ARTIFACT_AND_EXPORT",
+    "operation_id": "ATTACH_OR_VALIDATE_PROVENANCE",
+    "schema_version": 2,
+    "provider_class": "HEADLESS_ARTIFACT_SERVICE",
+    "provider_subject": {
+      "subject_sha": "2222222222222222222222222222222222222222",
+      "implementation_or_artifact_id": "artifact-provider-001"
+    },
+    "parent_projection_identity": {
+      "parent_state_version": 11,
+      "parent_state_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "source_identity_refs": [
+      {
+        "object_id": "manuscript-001",
+        "object_version": 7,
+        "object_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      }
+    ],
+    "result_class": "SUCCESS",
+    "evidence_refs": ["evidence:c2pa-001"],
+    "proposal_refs": [],
+    "artifact_evidence": [
+      {
+        "artifact_ref": "artifact:epub-001-credentialed",
+        "artifact_digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "artifact_currentness": "CURRENT_FOR_BOUND_SOURCE",
+        "format_identity": "EPUB",
+        "target_medium_profile_id": "EPUB_3_3_PRODUCTION",
+        "target_medium_profile_version": 1,
+        "generator_or_toolchain_identity": "artifact-provider-001"
+      }
+    ],
+    "editorial_stage_evidence": [],
+    "target_medium_evidence": [],
+    "provenance_evidence": [
+      {
+        "projection_type": "C2PA",
+        "projection_version": "2.4",
+        "source_object_refs_and_digests": ["manuscript-001:v7:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"],
+        "bound_artifact_digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "pre_credential_artifact_digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "credential_attachment_changed_bytes": true,
+        "projection_ref": "c2pa:manifest-001",
+        "projection_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "currentness_state": "CURRENT_FOR_BOUND_SOURCE_AND_ARTIFACT",
+        "validation_result": "PASS"
+      }
+    ],
+    "abstentions": [],
+    "warnings": [],
+    "requested_parent_action": "REGISTER_ARTIFACT"
+  },
+  "cases": [
+    {"case_id":"REGISTRY_STRUCTURE","type":"VALIDATE_REGISTRY","expected":"PASS","expected_service_count":4,"expected_operation_count":21},
+    {"case_id":"VALID_PROSE_REQUEST","type":"VALIDATE_REQUEST","expected":"PASS"},
+    {"case_id":"V1_SCHEMA_REJECTED","type":"VALIDATE_REQUEST","request_patch":{"schema_version":1},"expected":"REJECT","expected_code":"UNKNOWN_REQUEST_SCHEMA_VERSION"},
+    {"case_id":"CANONICAL_WRITE_DENIED","type":"VALIDATE_REQUEST","request_patch":{"authority_context":{"canonical_write_allowed":true}},"expected":"REJECT","expected_code":"SERVICE_CANONICAL_WRITE_FORBIDDEN"},
+    {"case_id":"LIFECYCLE_WRITE_DENIED","type":"VALIDATE_REQUEST","request_patch":{"authority_context":{"lifecycle_transition_allowed":true}},"expected":"REJECT","expected_code":"SERVICE_LIFECYCLE_TRANSITION_FORBIDDEN"},
+    {"case_id":"EXPORT_FREEZE_DENIED","type":"VALIDATE_REQUEST","request_patch":{"authority_context":{"export_freeze_allowed":true}},"expected":"REJECT","expected_code":"SERVICE_EXPORT_FREEZE_FORBIDDEN"},
+    {"case_id":"PUBLICATION_AUTHORITY_DENIED","type":"VALIDATE_REQUEST","request_patch":{"authority_context":{"publication_authorized":true}},"expected":"REJECT","expected_code":"SERVICE_PUBLICATION_AUTHORITY_FORBIDDEN"},
+    {"case_id":"BAD_PARENT_DIGEST_REJECTED","type":"VALIDATE_REQUEST","request_patch":{"parent_state_digest":"bad"},"expected":"REJECT","expected_code":"INVALID_PARENT_STATE_DIGEST"},
+    {"case_id":"SOURCE_DIGEST_REQUIRED","type":"VALIDATE_REQUEST","delete_request_path":"source_identity_refs.0.object_digest","expected":"REJECT","expected_code":"SOURCE_IDENTITY_FIELD_MISSING"},
+    {"case_id":"INVALID_STAGE_TOKEN_REJECTED","type":"VALIDATE_REQUEST","request_patch":{"projection":{"editorial_stage_context":{"stage_token":"DEVELOPMENTAL_MAGIC","applicability":"APPLICABLE","not_applicable_rationale":null}}},"expected":"REJECT","expected_code":"UNKNOWN_EDITORIAL_STAGE"},
+    {"case_id":"NOT_APPLICABLE_REQUIRES_RATIONALE","type":"VALIDATE_REQUEST","request_patch":{"projection":{"editorial_stage_context":{"stage_token":"STYLISTIC_OR_LINE_EDIT_REVIEW","applicability":"NOT_APPLICABLE","not_applicable_rationale":""}}},"expected":"REJECT","expected_code":"NOT_APPLICABLE_RATIONALE_REQUIRED"},
+    {"case_id":"VALID_DOCUMENT_REQUEST","type":"VALIDATE_DOCUMENT_REQUEST","expected":"PASS"},
+    {"case_id":"DOCUMENT_TARGET_PROFILE_REQUIRED","type":"VALIDATE_DOCUMENT_REQUEST","delete_request_path":"projection.target_medium_profile","expected":"REJECT","expected_code":"REQUIRED_PROJECTION_FIELD_MISSING"},
+    {"case_id":"DOCUMENT_PUBLICATION_AUTHORITY_DENIED","type":"VALIDATE_DOCUMENT_REQUEST","request_patch":{"projection":{"publication_authorized":true}},"expected":"REJECT","expected_code":"SERVICE_PUBLICATION_AUTHORITY_FORBIDDEN"},
+    {"case_id":"VALID_PROSE_RESPONSE","type":"VALIDATE_RESPONSE","expected":"PASS","expected_result_class":"SUCCESS"},
+    {"case_id":"PROVIDER_CLASS_MISMATCH","type":"VALIDATE_RESPONSE","response_patch":{"provider_class":"BOOK_EVALUATOR"},"expected":"REJECT","expected_code":"PROVIDER_CLASS_MISMATCH"},
+    {"case_id":"STALE_PARENT_PROJECTION","type":"VALIDATE_RESPONSE","response_patch":{"parent_projection_identity":{"parent_state_version":10}},"expected":"REJECT","expected_code":"STALE_PARENT_PROJECTION"},
+    {"case_id":"ABSTAIN_PRESERVED","type":"VALIDATE_RESPONSE","response_patch":{"result_class":"ABSTAIN","abstentions":["LOW_CONFIDENCE"],"evidence_refs":[],"requested_parent_action":"NONE"},"expected":"PASS","expected_result_class":"ABSTAIN"},
+    {"case_id":"ABSTAIN_REASON_REQUIRED","type":"VALIDATE_RESPONSE","response_patch":{"result_class":"ABSTAIN","abstentions":[],"evidence_refs":[],"requested_parent_action":"NONE"},"expected":"REJECT","expected_code":"ABSTENTION_REASON_REQUIRED"},
+    {"case_id":"FORMAT_VALIDATION_RESPONSE","type":"VALIDATE_DOCUMENT_RESPONSE","expected":"PASS"},
+    {"case_id":"PROVIDER_EXPORT_FROZEN_REJECTED","type":"VALIDATE_DOCUMENT_RESPONSE","response_patch":{"target_medium_evidence":[{"technical_state":"EXPORT_FROZEN","format_validation_result":"PASS","source_to_render_integrity_result":"PASS","accessibility_result":"PASS","proof_result":"PASS","correction_ledger_ref":null,"rendered_candidate_digest":"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"}]},"expected":"REJECT","expected_code":"PROVIDER_TECHNICAL_STATE_FORBIDDEN"},
+    {"case_id":"PROVIDER_PUBLICATION_STATE_REJECTED","type":"VALIDATE_DOCUMENT_RESPONSE","response_patch":{"target_medium_evidence":[{"technical_state":"PUBLICATION_AUTHORIZED","format_validation_result":"PASS","source_to_render_integrity_result":"PASS","accessibility_result":"PASS","proof_result":"PASS","correction_ledger_ref":null,"rendered_candidate_digest":"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"}]},"expected":"REJECT","expected_code":"PROVIDER_TECHNICAL_STATE_FORBIDDEN"},
+    {"case_id":"PROVENANCE_CHANGED_BYTES_NEW_DIGEST","type":"VALIDATE_PROVENANCE_RESPONSE","expected":"PASS"},
+    {"case_id":"PROVENANCE_CHANGED_BYTES_REUSED_DIGEST_REJECTED","type":"VALIDATE_PROVENANCE_RESPONSE","response_patch":{"artifact_evidence":[{"artifact_ref":"artifact:epub-001-credentialed","artifact_digest":"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc","artifact_currentness":"CURRENT_FOR_BOUND_SOURCE","format_identity":"EPUB","target_medium_profile_id":"EPUB_3_3_PRODUCTION","target_medium_profile_version":1,"generator_or_toolchain_identity":"artifact-provider-001"}],"provenance_evidence":[{"projection_type":"C2PA","projection_version":"2.4","source_object_refs_and_digests":["manuscript-001:v7:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"],"bound_artifact_digest":"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc","pre_credential_artifact_digest":"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc","credential_attachment_changed_bytes":true,"projection_ref":"c2pa:manifest-001","projection_digest":"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee","currentness_state":"CURRENT_FOR_BOUND_SOURCE_AND_ARTIFACT","validation_result":"PASS"}]},"expected":"REJECT","expected_code":"CREDENTIAL_CHANGED_BYTES_REQUIRES_NEW_DIGEST"},
+    {"case_id":"IDEMPOTENT_REPLAY","type":"IDEMPOTENCY_SEQUENCE","expected":"PASS","expected_second_disposition":"REPLAY"},
+    {"case_id":"IDEMPOTENCY_CONFLICT","type":"IDEMPOTENCY_SEQUENCE","sequence":"SAME_KEY_DIFFERENT_REQUEST","expected":"REJECT","expected_code":"IDEMPOTENCY_KEY_CONFLICT"},
+    {"case_id":"NONIDEMPOTENT_UNKNOWN_RETRY","type":"NONIDEMPOTENT_RETRY","expected":"REJECT","expected_code":"NONIDEMPOTENT_RETRY_REQUIRES_RECONCILIATION"}
+  ]
+}
