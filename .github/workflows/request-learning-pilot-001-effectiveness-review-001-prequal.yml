@@ -1,0 +1,91 @@
+name: Request Learning PILOT-001 Effectiveness Review Hosted Prequalification
+
+on:
+  push:
+    branches:
+      - learning/request-pilot-001-effectiveness-review-001-prequal
+
+permissions:
+  contents: read
+
+env:
+  SUBJECT_SHA: 5c709c00578dd465644f90f9ca26da8774cbe6e6
+
+jobs:
+  prequalify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact product subject
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.SUBJECT_SHA }}
+
+      - name: Verify exact checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual="$(git rev-parse HEAD)"
+          test "$actual" = "$SUBJECT_SHA"
+          mkdir -p "$RUNNER_TEMP/learning-effectiveness-review-evidence"
+          printf '%s\n' "$actual" > "$RUNNER_TEMP/learning-effectiveness-review-evidence/subject-sha.txt"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Compile effectiveness review boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            learning/lab/learning_lab/real_learner_pilot_effectiveness_review.py \
+            learning/lab/learning_lab/real_learner_pilot_review_intake.py \
+            learning/lab/learning_lab/real_learner_pilot_handoff.py
+
+      - name: Run focused effectiveness and handoff tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd learning/lab
+          python -m unittest -v \
+            tests.test_real_learner_pilot_effectiveness_review \
+            tests.test_real_learner_pilot_review_intake \
+            tests.test_real_learner_pilot_handoff \
+            2>&1 | tee "$RUNNER_TEMP/learning-effectiveness-review-evidence/focused-tests.txt"
+
+      - name: Run complete Learning Lab regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd learning/lab
+          python -m unittest discover -s tests -v \
+            2>&1 | tee "$RUNNER_TEMP/learning-effectiveness-review-evidence/full-learning-tests.txt"
+
+      - name: Verify claim boundary markers
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'SINGLE_RECORD_DESCRIPTIVE_ONLY' learning/lab/learning_lab/real_learner_pilot_effectiveness_review.py
+          grep -q 'MULTI_RECORD_DESCRIPTIVE_ONLY' learning/lab/learning_lab/real_learner_pilot_effectiveness_review.py
+          grep -q 'learning_effectiveness_proven.*False' learning/lab/learning_lab/real_learner_pilot_effectiveness_review.py
+          grep -q 'unique_human_participants_verified.*False' learning/lab/learning_lab/real_learner_pilot_effectiveness_review.py
+          grep -q 'effectiveness_claim_requires_separate_study_design.*True' learning/lab/learning_lab/real_learner_pilot_effectiveness_review.py
+          {
+            echo 'PILOT_001_EFFECTIVENESS_REVIEW_PREQUAL=PASS'
+            echo 'REAL_HUMAN_EVIDENCE_CREATED=FALSE'
+            echo 'CAUSAL_EFFECT_PROVEN=FALSE'
+            echo 'POPULATION_VALIDITY_PROVEN=FALSE'
+            echo 'UNIQUE_HUMAN_COUNT_PROVEN=FALSE'
+            echo 'EXTERNAL_UPLOAD_PERFORMED=FALSE'
+          } > "$RUNNER_TEMP/learning-effectiveness-review-evidence/truth-boundary.txt"
+
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: learning-pilot-001-effectiveness-review-prequal-${{ github.run_id }}
+          path: ${{ runner.temp }}/learning-effectiveness-review-evidence
+          if-no-files-found: error
+          retention-days: 14
