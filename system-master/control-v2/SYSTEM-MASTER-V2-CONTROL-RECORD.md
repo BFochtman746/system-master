@@ -1,17 +1,22 @@
 # SYSTEM MASTER v2 — Canonical Control Record
 
-Status: ACTIVE / PRIMARY CONTROL AUTHORITY
+Status: ACTIVE / PRIMARY MASTER SYSTEM CONTROL AUTHORITY
 Date: 2026-09-09
 Repository: `BFochtman746/system-master`
 Control branch: `system-master/control-v2`
+Global topology authority: `governance/SYSTEM-TOPOLOGY-001.json` on canonical `main`
 
-## 1. Authority model
+## 1. System identity and scope
 
-This file is the durable current-state projection for the System Master primary workstream. Exact repository evidence, candidate identities, qualification receipts, and frozen contracts outrank conversation chronology.
+This file is the durable current-state projection for the **MASTER SYSTEM**, one of exactly four canonical systems: MASTER, LEARNING, BOOK and PROSE.
 
-The current System Master v2 chat is the primary decision/reconciliation/dispatch surface. Prior System Master and dedicated Night Shift chats are historical/read-only after captured handoffs.
+MASTER is the foundation and spine. It owns shared platform/data architecture, execution foundations, continuity/recovery, assurance/reconciliation, operator/runtime foundations and shared integration/control-plane concerns.
 
-This is a system-construction and qualification program. Historical failure-case labels are test taxonomy, not a characterization of the project.
+MASTER does **not** own the Learning System, the Book System or the Prose System. Their control records define their own critical paths. MASTER may record only the interfaces, dependencies or shared infrastructure those systems consume.
+
+A-01 is shared qualification/control infrastructure administratively governed under MASTER; it is not a fifth system.
+
+Exact repository evidence, candidate identities, qualification receipts and frozen contracts outrank conversation chronology. Branch, workflow, workstream and chat labels never create new systems.
 
 ## 2. Qualification hierarchy
 
@@ -24,7 +29,7 @@ Keep these states separate:
 
 No historical PASS transfers to changed candidate bytes.
 
-## 3. Current central dependency spine
+## 3. Current MASTER dependency spine
 
 Current exact continuation:
 
@@ -43,9 +48,9 @@ Required SMR020 challenge:
 8. preserve live operational commissioning, destructive recovery, human approval, native-client behavior and production evidence separately;
 9. prepare A-01 only after a GitHub-native exact candidate exists and Windows execution supplies a real completion delta.
 
-## 4. Reconciled predecessor train
+## 4. Reconciled MASTER predecessor train
 
-The dependency-valid reconciliation train is complete through:
+The dependency-valid MASTER reconciliation train is complete through:
 
 - FOUNDATION-007 / SMR006 — reconciliation complete; source-custody and downstream provenance/rebind obligations preserved.
 - FOUNDATION-008 / SMR007 — historical `62682d90...`; corrected local candidate `857e7a25...`; transition consistency correction locally qualified.
@@ -64,7 +69,7 @@ The dependency-valid reconciliation train is complete through:
 
 Each corrected candidate remains distinct from its historical seal. Runnable recovered source is in durable Library/local custody; normal GitHub-native candidate import + fresh hosted qualification remain required before A-01 can qualify changed bytes.
 
-## 5. Assurance standing
+## 5. MASTER Assurance/Reconciliation subsystem standing
 
 Owning branch: `system-master/assurance-reconciliation-001`
 Last recorded RECON-001C head: `2a7bac4f258ef7e77fa489946c2faaadb7742b3b`
@@ -89,43 +94,48 @@ Current Assurance objective:
 
 Unblock event: credentialed normal Git transport imports the already-verified sealed objects to new `assurance-history/*` refs without rewrite, then exact SHA/ancestry verification. Until then this is `BLOCKED — EXTERNAL AUTHORITY`; its prepared A-01 successor is `BLOCKED — PREDECESSOR`.
 
-## 6. Source-custody and target boundaries
+Assurance/Reconciliation is a MASTER subsystem/evidence function, not a fifth system and not an independent portfolio authority.
 
-Corrected F008/DATA001/P001/P002/P003/P012/P006/P008/P009/P010/P011/P005/CHAT001A candidate source trees are not yet ordinary GitHub-native source. Exact import, candidate reproduction, and fresh hosted qualification remain required.
+## 6. MASTER source-custody and target boundaries
+
+Corrected F008/DATA001/P001/P002/P003/P012/P006/P008/P009/P010/P011/P005/CHAT001A candidate source trees are not yet ordinary GitHub-native source. Exact import, candidate reproduction and fresh hosted qualification remain required.
 
 Target-only obligations remain separate, including PC-ENDGAME-014 through PC-ENDGAME-026 for the reconciled train. Windows/A-01 evidence cannot substitute for Apple-native iOS/macOS claims.
 
-## 7. Specialist boundaries
+Continuity/Recovery is a MASTER subsystem. Its branches and A-01 workstream IDs do not create a separate system.
 
-### Learning
-Real participant consent/responses/retention/transfer evidence are human-only. Software PASS may prove readiness, not participant outcomes.
+## 7. Inter-system interface boundaries
 
-### Book Evaluation
-Private/scoring-secret training or evaluation material requires actual authorized custody. Missing private data is a blocker, not permission to reconstruct it.
+The other three systems are peers/children in the global topology, not MASTER work queues:
 
-### Literary Prose
-Author-only manuscript decisions remain author-controlled. Research, craft intelligence, diagnostics and bounded editorial implementation may proceed without substituting author intent.
+- **LEARNING SYSTEM** owns learning architecture, runtime, pilots, research and learning qualification. MASTER may provide shared execution/data/platform services but does not select Learning's critical path.
+- **BOOK SYSTEM** owns the end-to-end book lifecycle and parent orchestration. MASTER may provide shared platform/data/artifact services but does not select Book's critical path.
+- **PROSE SYSTEM** is a child of BOOK and owns Book Evaluator/evaluation, evaluator training, prose/craft training and preservation-aware prose intelligence. MASTER does not select Prose's critical path.
 
-## 8. A-01 / Night Shift
+Human, author, private-data and external-authority boundaries in those systems remain governed by their own control records. MASTER must not turn a blocked child/peer lane into a MASTER next step merely because it is globally visible.
+
+## 8. A-01 / second-shift infrastructure
 
 A-01 remains the authoritative Windows/X64 execution resource. A valid ticket requires a registered qualifier, exact subject SHA, real completion delta, stop condition, dependency-valid ordering and pass/failure return route.
 
-Sep-9 Learning, Literary and Assurance Night Shift intake files have been forward-superseded after adjudication. The dedicated System Master Night Shift chat is retired.
+Every A-01 `workstream_id` must map through `governance/SYSTEM-TOPOLOGY-001.json` to MASTER, LEARNING, BOOK or PROSE. The workstream ID is an execution lane, not system identity.
 
-No corrected central-spine candidate currently justifies an A-01 ticket because corrected runnable source trees are not yet GitHub-native immutable candidates with hosted PASS and registered Windows-specific completion deltas.
+The dedicated old System Master Night Shift chat is retired. Current second-shift system workers are disposable execution surfaces and cannot override the four canonical system control records.
 
-## 9. Canonical priority queue
+No corrected MASTER central-spine candidate currently justifies an A-01 ticket because corrected runnable source trees are not yet GitHub-native immutable candidates with hosted PASS and registered Windows-specific completion deltas.
+
+## 9. MASTER-only priority queue
 
 P0 — `UAF-S1-OPERATOROPS001-RECONCILIATION-QUALIFICATION-001` / SMR020.
 
-P0 parallel preservation — GitHub-native import/fresh qualification for corrected F008/DATA001/P001/P002/P003/P012/P006/P008/P009/P010/P011/P005/CHAT001A candidates when exact source transport is available; preserve FOUNDATION-007 rebind obligations; complete RECON-001C sealed-history import.
+P0 parallel preservation — GitHub-native import/fresh qualification for corrected MASTER F008/DATA001/P001/P002/P003/P012/P006/P008/P009/P010/P011/P005/CHAT001A candidates when exact source transport is available; preserve FOUNDATION-007 rebind obligations; complete MASTER RECON-001C sealed-history import.
 
-P1 — dependency-valid Book, Learning and Literary specialist work under private-data/human/author boundaries.
+P1 — MASTER target-only/native obligations when the appropriate execution environment exists.
 
-P2 — target-only/native obligations when the appropriate execution environment exists.
+Learning, Book and Prose priorities are intentionally absent from this MASTER queue. Their own control records own them.
 
-## 10. Exact next objective
+## 10. Exact MASTER next objective
 
 Execute SMR020 / OPERATOR-OPS-001 from its exact recovered carrier. Verify exact bytes first, replay its complete portable gate, reconcile governed operation/readiness/commissioning/recovery/human-control identity and persistence semantics, repair only an objectively demonstrated portable inconsistency as a new candidate identity, and advance only to the packet's own dependency-valid successor.
 
-This record supersedes prior current-state statements naming CHAT-001A or any earlier authority as the central next objective.
+This record supersedes prior MASTER current-state statements that treated Learning, Book Evaluation or Literary Prose as entries in the MASTER priority queue. It changes control scope only and transfers no qualification authority.
