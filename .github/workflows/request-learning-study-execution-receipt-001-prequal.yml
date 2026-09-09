@@ -1,0 +1,80 @@
+name: Request Learning Study Execution Receipt Hosted Prequalification
+
+on:
+  push:
+    branches:
+      - learning/hosted-prequal-study-execution-receipt-001
+
+permissions:
+  contents: read
+
+env:
+  SUBJECT_SHA: bf1d1190a7e520e4f68d223f973a73bed80522ec
+
+jobs:
+  prequalify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact product subject
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.SUBJECT_SHA }}
+      - name: Verify exact checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$SUBJECT_SHA"
+          mkdir -p "$RUNNER_TEMP/learning-study-execution-receipt-evidence"
+          printf '%s\n' "$SUBJECT_SHA" > "$RUNNER_TEMP/learning-study-execution-receipt-evidence/subject-sha.txt"
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Compile study execution receipt boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            learning/lab/learning_lab/real_learner_effectiveness_study_execution_receipt.py \
+            learning/lab/learning_lab/real_learner_effectiveness_study_design.py
+      - name: Run focused execution receipt and study-design tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd learning/lab
+          python -m unittest -v \
+            tests.test_real_learner_effectiveness_study_execution_receipt \
+            tests.test_real_learner_effectiveness_study_design \
+            tests.test_real_learner_pilot_effectiveness_review \
+            2>&1 | tee "$RUNNER_TEMP/learning-study-execution-receipt-evidence/focused-tests.txt"
+      - name: Run complete Learning Lab regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd learning/lab
+          python -m unittest discover -s tests -v \
+            2>&1 | tee "$RUNNER_TEMP/learning-study-execution-receipt-evidence/full-learning-tests.txt"
+      - name: Verify receipt truth boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'EXECUTION_RECEIPT_READY_FOR_PRESPECIFIED_CAUSAL_ANALYSIS' learning/lab/learning_lab/real_learner_effectiveness_study_execution_receipt.py
+          grep -q 'EXECUTION_RECEIPT_POST_OUTCOME_ANALYSIS_CHANGE_DESCRIPTIVE_ONLY' learning/lab/learning_lab/real_learner_effectiveness_study_execution_receipt.py
+          grep -q 'inferential_calculation_performed.*False' learning/lab/learning_lab/real_learner_effectiveness_study_execution_receipt.py
+          grep -q 'causal_effect_proven.*False' learning/lab/learning_lab/real_learner_effectiveness_study_execution_receipt.py
+          {
+            echo 'STUDY_EXECUTION_RECEIPT_PREQUAL=PASS'
+            echo 'REAL_HUMAN_EVIDENCE_CREATED=FALSE'
+            echo 'INFERENTIAL_CALCULATION_PERFORMED=FALSE'
+            echo 'CAUSAL_EFFECT_PROVEN=FALSE'
+            echo 'POPULATION_GENERALIZATION_PROVEN=FALSE'
+          } > "$RUNNER_TEMP/learning-study-execution-receipt-evidence/truth-boundary.txt"
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: learning-study-execution-receipt-prequal-${{ github.run_id }}
+          path: ${{ runner.temp }}/learning-study-execution-receipt-evidence
+          if-no-files-found: error
+          retention-days: 14
