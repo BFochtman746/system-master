@@ -1,0 +1,66 @@
+name: LEARNING PILOT-001 RUN-001 Exact Subject Prequalification Request
+
+on:
+  push:
+    branches:
+      - learning/prequal-request-pilot001-run001-f36e10ac
+    paths:
+      - .github/workflows/learning-pilot-001-run-001-exact-prequal-request.yml
+
+permissions:
+  contents: read
+
+jobs:
+  prequalify-exact-subject:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      SUBJECT_SHA: f36e10ac432a5d949826fe833689a579a9638c44
+    steps:
+      - name: Checkout exact Learning subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ env.SUBJECT_SHA }}
+          fetch-depth: 1
+          clean: true
+          persist-credentials: false
+      - name: Verify exact checkout
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "$SUBJECT_SHA"
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: '3.13.15'
+          architecture: x64
+          check-latest: false
+      - name: Prepare evidence directory
+        shell: bash
+        run: |
+          EVIDENCE_DIR="$RUNNER_TEMP/pilot001-run001-exact-prequal-$GITHUB_RUN_ID"
+          mkdir -p "$EVIDENCE_DIR"
+          echo "A01_EVIDENCE_DIR=$EVIDENCE_DIR" >> "$GITHUB_ENV"
+          echo "A01_SUBJECT_SHA=$SUBJECT_SHA" >> "$GITHUB_ENV"
+          printf '%s\n' "$SUBJECT_SHA" > "$EVIDENCE_DIR/subject-sha.txt"
+          python --version > "$EVIDENCE_DIR/python-version.txt" 2>&1
+      - name: Run repository-owned exact-subject qualifier
+        shell: bash
+        run: |
+          node .github/scripts/learning-pilot-001-run-001-execution-prep-qualify.js
+      - name: Verify thin caller remains shared-gateway only
+        shell: bash
+        run: |
+          grep -q 'uses: BFochtman746/system-master/.github/workflows/a01-control-plane-gateway.yml@main' .github/workflows/learning-pilot-001-run-001-execution-a01.yml
+          if grep -q 'runs-on:' .github/workflows/learning-pilot-001-run-001-execution-a01.yml; then
+            echo 'DIRECT_RUNNER_POLICY_FORBIDDEN' >&2
+            exit 1
+          fi
+          printf '%s\n' 'THIN_CALLER_SHARED_GATEWAY=PASS' > "$A01_EVIDENCE_DIR/thin-caller.txt"
+      - name: Upload exact-subject prequalification evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: learning-pilot-001-run-001-exact-prequal-${{ github.run_id }}
+          path: ${{ env.A01_EVIDENCE_DIR }}
+          if-no-files-found: error
+          retention-days: 14
