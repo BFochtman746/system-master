@@ -1,5 +1,5 @@
 {
-  "policy_version": 4,
+  "policy_version": 5,
   "control_plane_id": "A01-CONTROL-PLANE-001",
   "canonical_ref": "main",
   "runner": {
@@ -8,7 +8,18 @@
     "global_concurrency_group": "a01-global-r2",
     "concurrency_generation": 2,
     "queue_mode": "max",
-    "queue_capacity": 100
+    "queue_capacity": 100,
+    "health": {
+      "min_free_disk_gb": 10,
+      "min_available_memory_gb": 4,
+      "require_node": true,
+      "require_git": true,
+      "prevent_system_sleep_during_qualification": true,
+      "record_preflight_postflight": true,
+      "cleanup_stale_a01_temp_after_hours": 24,
+      "cleanup_is_best_effort": true,
+      "fail_closed_on_identity_or_resource_guard": true
+    }
   },
   "admission": {
     "max_outstanding_per_workstream": 1,
@@ -52,7 +63,41 @@
     "reject_disruptive_post_actions": true,
     "do_not_start_if_declared_budget_exceeds_remaining_window": true,
     "ordinary_work_may_backfill_before_reserved_windows": true,
-    "independent_workstream_cron_prohibited": true
+    "independent_workstream_cron_prohibited": true,
+    "allow_idle_capacity": true,
+    "second_shift": {
+      "enabled": true,
+      "goal": "Maximize reduction in next-day work, uncertainty, waiting, and critical-path distance rather than raw runner utilization.",
+      "require_completion_delta_for_ready": true,
+      "require_stop_condition_for_ready": true,
+      "lanes": [
+        "FINISH",
+        "BUILD_AHEAD",
+        "RESEARCH_AHEAD",
+        "PREPARE_NEXT",
+        "EXPLORE"
+      ],
+      "lane_order": [
+        "FINISH",
+        "BUILD_AHEAD",
+        "RESEARCH_AHEAD",
+        "PREPARE_NEXT",
+        "EXPLORE"
+      ],
+      "research_must_produce": [
+        "source_provenance",
+        "gap_or_question_answered",
+        "implementation_or_evaluation_implication",
+        "next_day_handoff"
+      ],
+      "build_ahead_requires": [
+        "bounded_scope",
+        "repository_owned_tests_or_acceptance",
+        "no_human_decision_dependency",
+        "no_promotion_without_registered_gate"
+      ],
+      "never_create_work_for_utilization": true
+    }
   },
   "post_actions": {
     "allowed": ["windows_reboot"],
