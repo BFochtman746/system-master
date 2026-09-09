@@ -3,6 +3,7 @@
 Status: CANONICAL EXTENSION OF A01-OVERNIGHT-001
 Timezone: America/New_York
 Primary window: 00:00–07:00
+Full portfolio authority: `qualification/a01/overnight/A01-PORTFOLIO-003.md`
 
 ## Objective
 
@@ -14,6 +15,8 @@ A-01 and ChatGPT overnight work are complementary:
 - **Scheduled ChatGPT overnight work** performs current web research, forensic gap analysis, implementation preparation, and bounded branch work that does not require A-01.
 - The two may operate in parallel. ChatGPT research must not create independent A-01 cron workflows or bypass the central A-01 scheduler.
 
+The overnight portfolio is not limited to one job per chat. A workstream may submit multiple READY A-01 tickets, currently up to four per night, when each ticket has a distinct completion delta and is either independently valid or carries an explicit PASS dependency on the immediately preceding ticket. The global eight-slot and 00:00–07:00 safety budgets still apply.
+
 ## Second-shift lanes
 
 1. **FINISH** — close an already-defined build, test, evaluation, qualification, recovery, or promotion boundary.
@@ -23,6 +26,15 @@ A-01 and ChatGPT overnight work are complementary:
 5. **EXPLORE** — bounded high-upside discovery only after the other lanes have no safe higher-value work.
 
 A lane does not outrank a higher-value task merely because of its name. Ticket `priority`, exact completion delta, safety, dependencies, and admission window remain authoritative.
+
+## Multi-ticket dependency semantics
+
+- No `depends_on_ticket_id` means the ticket is independently valid and may run after unrelated failures.
+- `depends_on_ticket_id` means the ticket requires that predecessor's authoritative receipt class to be `PASS`.
+- Dependencies are same-workstream, same-night, bounded chains.
+- The planner keeps a dependent immediately behind its predecessor.
+- The night workflow skips a dependent when the predecessor is not PASS; it does not reinterpret a failure as permission to continue.
+- Independent later work may continue after a failed or skipped chain.
 
 ## What A-01 is for
 
@@ -68,7 +80,7 @@ Every A-01 gateway job is protected by the canonical control plane and runner-he
 - no disruptive post-actions in the overnight scheduler;
 - evidence upload even when the qualifier fails;
 - preflight/postflight resource snapshots and best-effort stale A-01 temporary-directory hygiene;
-- later slots continue independently after a subject failure because the night workflow uses explicit sequential `always()` continuation.
+- independent later slots continue after a subject failure, while explicit successors require predecessor PASS.
 
 These controls reduce software and operating-system failure modes. They cannot eliminate physical power loss, hardware failure, an OS/kernel crash, loss of Internet connectivity, a forced external restart, or a GitHub service outage. Those events are infrastructure failures, not subject failures, and must never authorize promotion.
 
@@ -105,21 +117,14 @@ If these conditions are not met, the overnight task produces research or an impl
 
 ## Workstream operating intent
 
-### Book Evaluation
+The full current scopes and exact active objectives are maintained in `A01-PORTFOLIO-003.md`. In summary:
 
-Overnight emphasis: evaluator validity, blind/sequestered evaluation design, calibration, error taxonomy, source-held-out strategy, escalation/selective prediction, reproducible training/evaluation pipelines, and bounded implementation that does not expose or tune on frozen private gold.
-
-### Learning
-
-Overnight emphasis: close exact software qualification boundaries, then research/build ahead on learning-science coverage, mastery/retention/transfer, adaptive sequencing, measurement validity, and implementation packets without fabricating participant evidence.
-
-### Literary Prose
-
-Overnight emphasis: systematically strengthen the prose intelligence system beyond the current manuscript gate — craft-theory coverage, computational linguistics, discourse/narrative structure, POV/focalization, pacing, dialogue, rhythm/prosody, imagery, revision sequencing, evaluation/abstention, voice/canon preservation, professional editorial workflow, and failure cases where automated advice harms good prose. Public research acquisition must remain rights-aware and must not become named-author imitation training.
-
-### System Master / Assurance / Continuity
-
-Overnight emphasis: bounded architecture/reliability/security/background-execution research, evidence/source reconciliation, implementation-ready packets, hosted-portable checks, and Windows qualifications that actually match A-01. Native iOS claims remain reserved for appropriate Apple/native execution evidence.
+- **Book Evaluation:** evaluator validity, private-gold/source custody, Teacher v3 440/440 freeze, 1,052-record hierarchical student path, source-held-out evaluation and selective escalation.
+- **Learning:** exact software qualification plus learning-science, mastery/retention/transfer, adaptive sequencing, measurement validity and human-evaluation preparation without fabricated human evidence.
+- **Literary Prose:** systematic prose-intelligence strengthening beyond current author-dependent manuscript decisions, including craft theory, discourse/narrative structure, POV, pacing, dialogue, rhythm, voice/canon preservation, evaluation and professional editorial workflow.
+- **System Master Foundation/Continuity:** Replacement + Signals + Compatibility closure when executable, Recovery Integrity + Visibility + Resource Admission publication path, next Continuity/Recovery scope, and native iOS suspend/resume preparation without claiming Apple-native proof from Windows.
+- **Assurance/Reconciliation:** evidence/source custody, integrity, reachability, regression standing and exact recovery/repair decisions.
+- **A-01/control plane:** runner/scheduler reliability and truthful evidence classification without inventing work for utilization.
 
 ## Nightly orchestration
 
