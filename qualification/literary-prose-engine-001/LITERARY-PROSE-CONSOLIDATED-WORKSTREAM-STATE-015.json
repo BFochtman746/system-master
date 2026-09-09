@@ -1,0 +1,86 @@
+{
+  "state_id": "LITERARY-PROSE-CONSOLIDATED-WORKSTREAM-STATE-015",
+  "effective_date": "2026-09-09",
+  "supersedes_for_current_control": "LITERARY-PROSE-CONSOLIDATED-WORKSTREAM-STATE-014.json",
+  "system_id": "PROSE",
+  "system": "PROSE SYSTEM",
+  "parent_system_id": "BOOK",
+  "parent_system": "BOOK SYSTEM",
+  "implementation_family": "LITERARY PROSE ENGINE",
+  "branch": "literary-prose-engine-001",
+  "standing": "ACTIVE__EXPLICIT_AUTHOR_GROUND_TRUTH_FROZEN_AND_HOSTED_QUALIFIED__ONE_REAL_LIMITATION_PRESENT__BLIND_SCORING_ISOLATED__REVISION_AUTHORITY_ZERO",
+  "completed_evidence": {
+    "semantic_routing": {
+      "standing": "PASS",
+      "tested_sha": "1de91bcaedcdd18615f685adeab8a451c7926e97",
+      "run_id": 34383845184,
+      "result": "9_OF_9_DIAGNOSIS_ALLOWED__0_OF_9_REVISION_ALLOWED__ONE_LOW_CONFIDENCE_CLAIM_UNRESOLVED"
+    },
+    "strength_observation_calibration": {
+      "standing": "PASS",
+      "tested_sha": "f0cd916930964c294243c26d0a207af69283f74e",
+      "run_id": 34384598508,
+      "result": "8_STRENGTH__1_OBSERVATION__1_ABSTAIN__0_LIMITATION__0_REVISION_ELIGIBLE"
+    },
+    "author_ground_truth": {
+      "standing": "PASS",
+      "packet": "step-f/PROSE-REAL-LIMITATION-GROUND-TRUTH-AUTHOR-PACKET-001.json",
+      "receipt": "step-f/PROSE-REAL-LIMITATION-AUTHOR-ADJUDICATION-001-QUALIFICATION-RECEIPT.json",
+      "labeled_commit": "338797ecd56ca46efd7ab14e9a2cd9bb7acd1263",
+      "hosted_run_id": 34404491759,
+      "hosted_job_id": 102644077126,
+      "labels_recorded": 6,
+      "real_limitation_count": 1,
+      "working_as_intended_count": 3,
+      "neutral_observation_count": 2,
+      "uncertain_count": 0,
+      "revision_authority_count": 0
+    },
+    "control_drift_after_label_freeze": {
+      "standing": "PASS",
+      "run_id": 34404492037,
+      "tested_sha": "338797ecd56ca46efd7ab14e9a2cd9bb7acd1263"
+    }
+  },
+  "new_evidence": {
+    "selection_heuristic_result": "The sole author-grounded REAL_LIMITATION was PROSE-LGT-002, a mechanical CONTROL case. All three mechanical STRESS cases were NEUTRAL_OBSERVATION or WORKING_AS_INTENDED. The stress/control selector is therefore not a limitation detector on this sample.",
+    "blindness_integrity": "The label-collection context is no longer eligible to create a blind model score after observing the author labels. A pre-label branch has been isolated so a fresh evaluator can score without access to ground truth.",
+    "blind_branch": "literary-prose-blind-eval-001",
+    "blind_base_commit": "34c0ab8e37c85793159fee624417bea34663dc1d",
+    "blind_contract_commit": "df8a1be33d4f341353352c130297819d132e6497",
+    "blind_contract": "step-f/PROSE-REAL-LIMITATION-BLIND-EVALUATION-CONTRACT-001.json",
+    "blind_branch_labels_recorded": 0
+  },
+  "authority_boundaries": {
+    "author_labels_are_ground_truth": true,
+    "selection_heuristic_is_ground_truth": false,
+    "model_output_is_ground_truth": false,
+    "labeling_authorizes_revision": false,
+    "candidate_generation_authorized": false,
+    "manuscript_mutation_authorized": false,
+    "publication_authorized": false
+  },
+  "remaining_gate": {
+    "objective": "PROSE-REAL-LIMITATION-BLIND-MODEL-SCORING-001",
+    "classification": "NEXT DEPENDENCY-VALID GATE",
+    "dependency": "fresh evaluator context that has not observed the six author labels",
+    "execution_branch": "literary-prose-blind-eval-001",
+    "sequence": [
+      "Verify the three admitted source package SHA256 values.",
+      "Reconstruct all six passages using the frozen non-empty-DOCX-paragraph extraction contract and verify each passage SHA256.",
+      "Run the already-qualified semantic -> Passage Intelligence -> Step-F path without reading author labels or current labeled branch state.",
+      "Seal one model disposition per case on the blind branch, with diagnosis allowed as governed and revision_allowed=false for every case.",
+      "Only after the prediction seal, read the frozen author ground truth at commit 338797ecd56ca46efd7ab14e9a2cd9bb7acd1263.",
+      "Measure real-limitation identification, downgrade/abstention behavior, working-as-intended preservation, neutral-observation retention and false-positive limitation rate."
+    ]
+  },
+  "what_is_not_yet_proven": [
+    "Real limitation detection accuracy remains unqualified until sealed blind predictions are compared with the frozen author ground truth.",
+    "No automatic revision, candidate superiority, full-book literary accuracy, canon replacement or publication authority is established."
+  ],
+  "a01_next": {
+    "ticket_justified_now": false,
+    "reason": "The next gate is evaluator-isolation and evidence integrity, not compute capacity."
+  },
+  "exact_next_objective": "PROSE-REAL-LIMITATION-BLIND-MODEL-SCORING-001 — EXECUTE THE SIX CASES IN A FRESH, GROUND-TRUTH-BLIND EVALUATOR CONTEXT ON literary-prose-blind-eval-001 -> SEAL MODEL DISPOSITIONS FIRST -> THEN COMPARE AGAINST THE AUTHOR-GROUND-TRUTH COMMIT -> MEASURE TRUE LIMITATION-vs-PRESERVATION-vs-OBSERVATION/ABSTENTION PERFORMANCE WHILE REVISION AUTHORITY REMAINS ZERO."
+}
