@@ -1,0 +1,27 @@
+name: BOOK SYSTEM Export Freeze 001 Hosted Prequalification
+
+on:
+  push:
+    branches:
+      - book-system/export-freeze-001
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 1
+      - name: Verify exact checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          echo "HOSTED_SUBJECT_SHA=$GITHUB_SHA"
+      - name: Qualify export freeze contract and runtime
+        run: node .github/scripts/book-system-export-freeze-001-qualify-v1.js
