@@ -1,0 +1,43 @@
+name: BOOK-EVAL REPAIR-005 Gate D Student Ingest Hosted Prequalification
+
+on:
+  push:
+    branches:
+      - book-eval-lemonade-001-blind-resume-003-adapter-repair
+    paths:
+      - ".github/workflows/book-eval-repair-005-gate-d-student-ingest-hosted-prequal.yml"
+      - "qualification/book-eval-lemonade-001/scripts/compile-repair005-gate-d-student.py"
+      - "qualification/book-eval-lemonade-001/scripts/test-repair005-gate-d-student-ingest.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  prequal:
+    name: Prove 612 plus 440 student-ingest contract without private authority
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact Book workstream subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Compile student-ingest Python boundary
+        run: |
+          python -m py_compile \
+            qualification/book-eval-lemonade-001/scripts/compile-repair005-gate-d-student.py \
+            qualification/book-eval-lemonade-001/scripts/test-repair005-gate-d-student-ingest.py
+
+      - name: Run synthetic 1052-record ingest and fail-closed contract tests
+        run: python qualification/book-eval-lemonade-001/scripts/test-repair005-gate-d-student-ingest.py
+
+      - name: Publish prequalification standing
+        run: |
+          echo '## BOOK EVAL GATE D STUDENT INGEST PREQUAL' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Boundary: deterministic compiler contract only; all fixtures are synthetic and generated during the hosted run.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Checks: 612+440=1052 cardinality, deterministic output, complete specialist coverage, hidden/visible-gold flags fail closed, ontology-token leakage rejected, taxonomy mismatch rejected, duplicate Teacher IDs rejected, Teacher source/rights violations rejected, weak semantic annotations rejected.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'No persistent Teacher corpus, BASE_TRAINING, DEVELOPMENT_GOLD, VISIBLE_REGRESSION, HIDDEN_HOLDOUT, provider corpus, trained model, or 120B endpoint is read or produced by this hosted prequalification.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'PASS here does not qualify the real 1052-record private corpus or Gate D; those remain A-01 exact-subject work after Teacher-freeze and private-authority prerequisites PASS.' >> "$GITHUB_STEP_SUMMARY"
