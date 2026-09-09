@@ -1,0 +1,66 @@
+--- a/07_DATABASE/migrations/051_user_experience_001_hardening.up.sql
++++ b/07_DATABASE/migrations/051_user_experience_001_hardening.up.sql
+@@ -17,13 +17,15 @@
+ ALTER TABLE core_user_interaction_command ADD CONSTRAINT core_user_interaction_session_len CHECK(length(session_id) BETWEEN 1 AND 256);
+ ALTER TABLE core_user_interaction_command ADD CONSTRAINT core_user_interaction_principal_len CHECK(length(principal_id) BETWEEN 1 AND 256);
+ ALTER TABLE core_user_interaction_command ADD CONSTRAINT core_user_interaction_target_authority_len CHECK(length(target_authority) BETWEEN 1 AND 256);
++ALTER TABLE core_user_interaction_command ADD CONSTRAINT core_user_interaction_target_authority_external CHECK(target_authority <> 'USER-EXPERIENCE-001');
+ ALTER TABLE core_user_interaction_command ADD CONSTRAINT core_user_interaction_target_ref_len CHECK(target_ref IS NOT NULL AND length(target_ref) BETWEEN 1 AND 512);
+ ALTER TABLE core_user_interaction_command ADD CONSTRAINT core_user_interaction_digest_sha256 CHECK(payload_digest ~ '^[0-9a-f]{64}$');
+ ALTER TABLE core_user_interaction_command ADD CONSTRAINT core_user_interaction_action_enum CHECK(action IN ('PAUSE','RESUME','CANCEL','CORRECT','RETRY','REPLAN','APPROVE','REJECT','PROVIDE_INPUT','INSPECT','ROLLBACK','CHANGE_GOAL'));
+ ALTER TABLE core_user_interaction_command ADD CONSTRAINT core_user_interaction_status_enum CHECK(status IN ('RECORDED_INTENT','MIGRATED_UNQUALIFIED'));
+ ALTER TABLE core_user_interaction_command ADD CONSTRAINT core_user_interaction_idempotency_len CHECK(length(idempotency_key) BETWEEN 1 AND 256);
+ ALTER TABLE core_user_interaction_command ADD CONSTRAINT core_user_interaction_admission_len CHECK(length(admission_ref) BETWEEN 1 AND 512);
+-ALTER TABLE core_user_interaction_command ADD CONSTRAINT core_user_interaction_approval_bound CHECK(action NOT IN ('APPROVE','REJECT','ROLLBACK') OR (approval_ref IS NOT NULL AND length(approval_ref) BETWEEN 1 AND 512));
++ALTER TABLE core_user_interaction_command ADD CONSTRAINT core_user_interaction_approval_len CHECK(approval_ref IS NULL OR length(approval_ref) BETWEEN 1 AND 512);
++ALTER TABLE core_user_interaction_command ADD CONSTRAINT core_user_interaction_approval_bound CHECK(action NOT IN ('APPROVE','REJECT','ROLLBACK') OR approval_ref IS NOT NULL);
+ CREATE UNIQUE INDEX IF NOT EXISTS core_user_interaction_idempotency_uq ON core_user_interaction_command(work_id,idempotency_key);
+ 
+ ALTER TABLE core_attention_item ADD COLUMN IF NOT EXISTS dedupe_key text;
+@@ -37,6 +39,8 @@
+ ALTER TABLE core_attention_item ADD CONSTRAINT core_attention_title_len CHECK(length(title) BETWEEN 1 AND 512);
+ ALTER TABLE core_attention_item ADD CONSTRAINT core_attention_status_enum CHECK(status IN ('OPEN','ACKNOWLEDGED','RESOLVED','DISMISSED'));
+ ALTER TABLE core_attention_item ADD CONSTRAINT core_attention_time_order CHECK(updated_at >= created_at);
+-ALTER TABLE core_attention_item ADD CONSTRAINT core_attention_critical_evidence CHECK(severity <> 'CRITICAL' OR (evidence_ref IS NOT NULL AND length(evidence_ref) BETWEEN 1 AND 512));
++ALTER TABLE core_attention_item ADD CONSTRAINT core_attention_action_capability_len CHECK(action_capability_id IS NULL OR length(action_capability_id) BETWEEN 1 AND 256);
++ALTER TABLE core_attention_item ADD CONSTRAINT core_attention_evidence_len CHECK(evidence_ref IS NULL OR length(evidence_ref) BETWEEN 1 AND 512);
++ALTER TABLE core_attention_item ADD CONSTRAINT core_attention_critical_evidence CHECK(severity <> 'CRITICAL' OR evidence_ref IS NOT NULL);
+ CREATE UNIQUE INDEX IF NOT EXISTS core_attention_open_dedupe_uq ON core_attention_item(work_id,dedupe_key) WHERE status='OPEN';
+ COMMIT;
+--- a/07_DATABASE/migrations/051_user_experience_001_hardening.down.sql
++++ b/07_DATABASE/migrations/051_user_experience_001_hardening.down.sql
+@@ -1,6 +1,8 @@
+ BEGIN;
+ DROP INDEX IF EXISTS core_attention_open_dedupe_uq;
+ ALTER TABLE core_attention_item DROP CONSTRAINT IF EXISTS core_attention_critical_evidence;
++ALTER TABLE core_attention_item DROP CONSTRAINT IF EXISTS core_attention_evidence_len;
++ALTER TABLE core_attention_item DROP CONSTRAINT IF EXISTS core_attention_action_capability_len;
+ ALTER TABLE core_attention_item DROP CONSTRAINT IF EXISTS core_attention_time_order;
+ ALTER TABLE core_attention_item DROP CONSTRAINT IF EXISTS core_attention_status_enum;
+ ALTER TABLE core_attention_item DROP CONSTRAINT IF EXISTS core_attention_title_len;
+@@ -12,12 +14,14 @@
+ ALTER TABLE core_attention_item DROP COLUMN IF EXISTS dedupe_key;
+ DROP INDEX IF EXISTS core_user_interaction_idempotency_uq;
+ ALTER TABLE core_user_interaction_command DROP CONSTRAINT IF EXISTS core_user_interaction_approval_bound;
++ALTER TABLE core_user_interaction_command DROP CONSTRAINT IF EXISTS core_user_interaction_approval_len;
+ ALTER TABLE core_user_interaction_command DROP CONSTRAINT IF EXISTS core_user_interaction_admission_len;
+ ALTER TABLE core_user_interaction_command DROP CONSTRAINT IF EXISTS core_user_interaction_idempotency_len;
+ ALTER TABLE core_user_interaction_command DROP CONSTRAINT IF EXISTS core_user_interaction_status_enum;
+ ALTER TABLE core_user_interaction_command DROP CONSTRAINT IF EXISTS core_user_interaction_action_enum;
+ ALTER TABLE core_user_interaction_command DROP CONSTRAINT IF EXISTS core_user_interaction_digest_sha256;
+ ALTER TABLE core_user_interaction_command DROP CONSTRAINT IF EXISTS core_user_interaction_target_ref_len;
++ALTER TABLE core_user_interaction_command DROP CONSTRAINT IF EXISTS core_user_interaction_target_authority_external;
+ ALTER TABLE core_user_interaction_command DROP CONSTRAINT IF EXISTS core_user_interaction_target_authority_len;
+ ALTER TABLE core_user_interaction_command DROP CONSTRAINT IF EXISTS core_user_interaction_principal_len;
+ ALTER TABLE core_user_interaction_command DROP CONSTRAINT IF EXISTS core_user_interaction_session_len;
+--- a/tools/verify_userexperience001_authority.py
++++ b/tools/verify_userexperience001_authority.py
+@@ -30,7 +30,7 @@
+         'attention_cas': "where attention_id=? and status=? and updated_at=?" in jdbc,
+         'attention_transition_graph': 'legalTransition' in attention,
+         'deterministic_attention_order': "order by created_at,attention_id" in jdbc,
+-        'database_constraint_set': all(x in migration for x in ['core_user_interaction_digest_sha256','core_user_interaction_action_enum','core_user_interaction_status_enum','core_attention_severity_enum','core_attention_status_enum','core_attention_time_order']),
++        'database_constraint_set': all(x in migration for x in ['core_user_interaction_digest_sha256','core_user_interaction_action_enum','core_user_interaction_status_enum','core_user_interaction_target_authority_external','core_user_interaction_approval_len','core_attention_severity_enum','core_attention_status_enum','core_attention_time_order','core_attention_action_capability_len','core_attention_evidence_len']),
+         'semantic_shell_regions': all(x in html for x in ['Conversation','Attention','Files and artifacts','role="status"','aria-live="polite"']),
+         'offline_not_confirmation': 'Cached shell only; no remote confirmation.' in app and 'Connected — server confirmed' in app,
+         'auth_loss_clears_projection': 'clearProtectedProjection' in app and 'filesButton.disabled=true' in app,
