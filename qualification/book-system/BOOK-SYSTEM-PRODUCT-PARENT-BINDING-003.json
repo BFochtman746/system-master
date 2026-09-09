@@ -13,7 +13,7 @@
     "system_id": "BOOK",
     "canonical_name": "BOOK SYSTEM",
     "control_ref": "book-system/control-v1",
-    "current_state_record": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-008.json",
+    "current_state_record": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-010.json",
     "owns": [
       "canonical book state",
       "end-to-end book lifecycle",
@@ -35,16 +35,19 @@
     }
   ],
   "preserved_current_parent_state": {
-    "standing": "ACTIVE__EDITORIAL_CROSSWALK_AND_AUTHORING_LIFECYCLE_AMENDMENT_CLOSED__PUBLICATION_EXPORT_STANDARDS_PROFILE_NEXT",
-    "current_objective": "BOOK-SYSTEM-PUBLICATION-EXPORT-STANDARDS-PROFILE-001",
-    "state_record": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-008.json",
-    "implementation_pause": "BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-001 executable implementation remains paused until the remaining research-remediation release conditions close."
+    "standing": "ACTIVE__PROVENANCE_INTEROPERABILITY_CLOSED__INTEGRATION_RUNTIME_CONTRACT_REREVIEW_NEXT",
+    "current_objective": "BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-001-CONTRACT-REREVIEW-001",
+    "state_record": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-010.json",
+    "implementation_pause": "BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-001 executable implementation remains paused until the State-010 contract re-review explicitly releases it."
   },
   "shared_core_rule": "BOOK consumes System Master Core platform/data/artifact/model/tool services through governed interfaces. BOOK remains owner of book-product state and lifecycle and does not transfer that ownership to Core or Prose.",
   "second_shift_rule": "Book unattended delegation is owned by governance/second-shift/BOOK-DELEGATIONS.json and must be revalidated against the live book-system/control-v1 head before execution.",
   "control_revalidation": {
-    "reason": "Trigger canonical control-drift validation against current main after the System Master parent-topology successor validator landed.",
-    "semantic_change": false,
+    "reason": "Reconcile canonical selected Book state after post-baseline publication/export and provenance remediation advanced the live Book control branch to State-010.",
+    "authority_delta_classification": "AUTHORITY_DELTA",
+    "previous_selected_state": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-008.json",
+    "current_selected_state": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-010.json",
+    "semantic_change": true,
     "qualification_effect": "NONE"
   },
   "qualification_rule": "This parent-product binding changes topology/control metadata only. It does not transfer, broaden or invalidate prior exact-SHA qualification, author, private-data, publication or production authority."
