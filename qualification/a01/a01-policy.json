@@ -1,5 +1,5 @@
 {
-  "policy_version": 3,
+  "policy_version": 4,
   "control_plane_id": "A01-CONTROL-PLANE-001",
   "canonical_ref": "main",
   "runner": {
@@ -29,6 +29,30 @@
       "purpose": "Exact promotion subject and required regressions",
       "promotion_authority": true
     }
+  },
+  "runtime": {
+    "normal_qualifier_timeout_minutes": 28,
+    "normal_job_timeout_minutes": 30,
+    "cleanup_margin_minutes": 10,
+    "max_qualifier_timeout_minutes": 300,
+    "max_job_timeout_minutes": 310
+  },
+  "overnight": {
+    "enabled": true,
+    "timezone": "America/New_York",
+    "window_start_local": "00:00",
+    "window_end_local": "07:00",
+    "scheduler_kickoff_local": "23:57",
+    "max_slots": 8,
+    "transition_buffer_minutes": 2,
+    "max_ticket_runtime_minutes": 300,
+    "checkpoint_required_above_minutes": 180,
+    "max_checkpoint_interval_minutes": 30,
+    "one_ready_ticket_per_workstream_per_night": true,
+    "reject_disruptive_post_actions": true,
+    "do_not_start_if_declared_budget_exceeds_remaining_window": true,
+    "ordinary_work_may_backfill_before_reserved_windows": true,
+    "independent_workstream_cron_prohibited": true
   },
   "post_actions": {
     "allowed": ["windows_reboot"],

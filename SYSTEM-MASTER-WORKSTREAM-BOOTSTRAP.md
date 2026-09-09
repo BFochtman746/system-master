@@ -10,12 +10,13 @@ Before a workstream schedules or adjudicates A-01 machine qualification, read:
 2. `qualification/a01/A01-OPERATING-CONTRACT.md`
 3. `qualification/a01/a01-policy.json`
 4. `qualification/a01/registry.json`
+5. `qualification/a01/overnight/A01-OVERNIGHT-001.md` when requesting unattended overnight capacity
 
 These repository artifacts, not conversation memory, are authoritative for A-01 usage.
 
 ## Current standing
 
-A01-MIGRATION-001 is closed. A01-CONTROL-PLANE-001 is now the normal qualification path, not an active infrastructure project.
+A01-MIGRATION-001 is closed. A01-CONTROL-PLANE-001 is the normal qualification path. A01-OVERNIGHT-001 is the canonical scheduling extension for unattended 00:00–07:00 America/New_York capacity.
 
 Do not start another A-01 infrastructure objective merely because a workstream has a failing subject, missing workstream artifact, time-window refusal, product regression, or ordinary queue delay. Adjudicate the receipt first. `SUBJECT_FAILURE` belongs to the workstream. Reopen A-01 infrastructure only when evidence demonstrates `INFRA_FAILURE`, `CONTROL_PLANE_FAILURE`, a material platform/security change, or a genuinely new qualification capability that cannot safely use the existing registered gateway model.
 
@@ -30,6 +31,18 @@ Do not start another A-01 infrastructure objective merely because a workstream h
 - On failure, distinguish subject failure from infrastructure/control-plane failure before repair.
 - When adding a new A-01 qualification, add a repository-owned constrained wrapper to `.github/scripts/`, register it in `qualification/a01/registry.json`, and make the workstream workflow a thin caller of the gateway.
 - Do not modify the proven gateway, global admission generation, or receipt semantics as part of ordinary product work.
+
+## Overnight behavior
+
+- The central workflow `.github/workflows/a01-overnight-night-shift.yml` exclusively owns canonical overnight scheduling.
+- Do not add or retain an independent workstream overnight `schedule:` trigger for A-01. Convert the desired work into an overnight ticket instead.
+- Each workstream may submit at most one READY ticket for a night under `qualification/a01/overnight/requests/`.
+- Re-evaluate the workstream before ticketing. Choose the highest-value A-01-executable work that benefits from unattended runtime: long tests, training/evaluation, benchmarks, corpus/API harvesting, deterministic analysis, or similar bounded work.
+- Overnight work is not limited to the normal 30-minute envelope. A registered overnight-eligible qualifier may request up to its registry cap and at most 300 minutes under policy v4.
+- Work above 180 minutes must be checkpoint-capable with checkpoints at least every 30 minutes.
+- Do not spend overnight capacity on a known blocker that cannot change without new authority/input. Do dependency-valid executable work instead.
+- A-01 is not an autonomous ChatGPT reasoning session. Open-ended reasoning must occur in chat or through a separately authorized API-agent design; overnight A-01 work must be executable and evidence-producing.
+- Disruptive reboot qualifications are excluded from overnight v1.
 
 ## Return routing
 

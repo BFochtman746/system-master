@@ -1,5 +1,5 @@
 {
-  "registry_version": 6,
+  "registry_version": 7,
   "qualifications": {
     "A01-CONTROL-PLANE-SELFTEST": {
       "workstream_id": "SYSTEM-MASTER",
@@ -8,7 +8,8 @@
       "executable": "node",
       "args": [".github/scripts/a01-control-plane-selftest.js"],
       "evidence_artifact": "a01-control-plane-selftest",
-      "description": "Qualify policy, registry, schemas, bootstrap, gateway safety, cross-ref subject execution, receipt production, exact-SHA binding, and shared queue behavior for A01-CONTROL-PLANE-001."
+      "overnight_eligible": false,
+      "description": "Qualify policy, registry, schemas, bootstrap, gateway safety, cross-ref subject execution, receipt production, exact-SHA binding, shared queue behavior, and overnight admission policy for A01-CONTROL-PLANE-001."
     },
     "CONTINUITY-TARGET-WINDOWS-REBOOT": {
       "workstream_id": "SYSTEM-MASTER-CONTINUITY",
@@ -18,7 +19,8 @@
       "args": [".github/scripts/a01-continuity-target-windows-reboot.js"],
       "evidence_artifact": "system-master-continuity-target-windows-reboot",
       "allowed_post_actions": ["windows_reboot"],
-      "description": "Run the repository-owned TARGET_WINDOWS_REBOOT ARM or VERIFY phase while preserving durable reboot handoff evidence. ARM may request the registered windows_reboot post-action only after its receipt and evidence are produced."
+      "overnight_eligible": false,
+      "description": "Run the repository-owned TARGET_WINDOWS_REBOOT ARM or VERIFY phase while preserving durable reboot handoff evidence. ARM may request the registered windows_reboot post-action only after its receipt and evidence are produced. Disruptive reboot qualifications are intentionally excluded from A01-OVERNIGHT-001 v1."
     },
     "LITERARY-RESEARCH-OVERNIGHT-DEEP-HARVEST": {
       "workstream_id": "LITERARY-PROSE",
@@ -27,6 +29,9 @@
       "executable": "node",
       "args": [".github/scripts/a01-literary-research-deep-harvest.js"],
       "evidence_artifact": "literary-research-overnight-deep",
+      "overnight_eligible": true,
+      "overnight_max_runtime_minutes": 30,
+      "checkpoint_capable": false,
       "description": "Run the rights-aware, time-budgeted Literary Craft Academy research harvest from an exact Literary Prose subject SHA. Collect bibliographic metadata, OA/license signals, query provenance, public-domain candidate metadata, and curated rights-policy evidence without bulk article/book body acquisition or named-author imitation targets."
     },
     "BOOK-EVAL-REPAIR-005-GATE-D-PRIVATE-GOLD-RECOVERY": {
@@ -36,6 +41,9 @@
       "executable": "node",
       "args": [".github/scripts/book-eval-repair005-private-gold-recovery-qualify.js"],
       "evidence_artifact": "book-eval-repair005-gate-d-private-gold-recovery",
+      "overnight_eligible": true,
+      "overnight_max_runtime_minutes": 90,
+      "checkpoint_capable": false,
       "description": "Recover exact frozen Gate B/scoring-private authority by SHA only without running Teacher verification, student training, selective 120B, visible-regression, or hidden-holdout qualification. The subject wrapper must fail closed until the required private gold material is present on A-01."
     },
     "LEARNING-PILOT-001-RUN-001-HUMAN-SESSION": {
@@ -45,6 +53,9 @@
       "executable": "node",
       "args": [".github/scripts/learning-pilot-001-run-001-human-session-qualify.js"],
       "evidence_artifact": "learning-pilot-001-run-001-human-session",
+      "overnight_eligible": true,
+      "overnight_max_runtime_minutes": 120,
+      "checkpoint_capable": false,
       "description": "Qualify the exact prequalified Learning PILOT-001 RUN-001 software boundary: human-source attestation enforcement, contamination rejection, raw-response exclusion, 3600-second retention boundary, current pilot binding, and predecessor regressions. Qualification fixtures are not real-participant evidence and do not bypass explicit consent."
     },
     "LEARNING-PILOT-001-RUN-001-EXECUTION-PREP": {
@@ -54,6 +65,7 @@
       "executable": "node",
       "args": [".github/scripts/learning-pilot-001-run-001-execution-prep-qualify.js"],
       "evidence_artifact": "learning-pilot-001-run-001-execution-prep",
+      "overnight_eligible": false,
       "description": "Qualify the exact Learning PILOT-001 RUN-001 participant execution shell: explicit-consent entry, deterministic baseline selection, hidden transient response handling, contamination lockout, pre-baseline withdrawal without fabricated evidence, frozen PILOT-001-v1 authority, and current Learning regressions. Qualification must not create or infer real-participant consent or responses."
     }
   }
