@@ -1,7 +1,7 @@
 {
   "objective": "AGLO-BOOK-LEVEL-AUTHOR-REVIEW-001",
   "queue_id": "AGLO-BOOK-LEVEL-AUTHOR-DECISION-QUEUE-001",
-  "standing": "READY__THREE_EXPLICIT_AUTHOR_DISPOSITIONS_REQUIRED__NO_MANUSCRIPT_MUTATION",
+  "standing": "CLOSED__EXPLICIT_USER_DELEGATION__DECISIONS_1A_2A_3A_ACCEPTED_FOR_REVISION_PACKAGE__NO_MANUSCRIPT_MUTATION",
   "baseline_version_id": "AGLO-REJECT-ALL-NARRATIVE-v1",
   "baseline_text_sha256": "a48378682ee15fd4b24bc97293ce43a37f096db254a0b78f715081a8aa8a59ee",
   "authority_gate": {
@@ -9,7 +9,9 @@
     "generic_continue_is_not_authority": true,
     "objective_restatement_is_not_authority": true,
     "assistant_recommendation_is_not_authority": true,
-    "unresolved_decisions": 3,
+    "explicit_user_delegation_to_assistant_decision_is_authority": true,
+    "delegation_instruction": "You decide what is best",
+    "unresolved_decisions": 0,
     "fail_closed": true
   },
   "items": [
@@ -24,8 +26,9 @@
       "step_008": "ADMIT",
       "step_i": "ACCEPT_CANDIDATE",
       "step_k": "PASS_DEFENSE_GATE",
-      "recommendation": "1A_ACCEPT_TRIM",
-      "options": ["1A_ACCEPT_TRIM", "1B_RETAIN_ORIGINAL"]
+      "selected_option": "1A_ACCEPT_TRIM",
+      "selection_authority": "EXPLICIT_USER_DELEGATION_TO_ASSISTANT_DECISION",
+      "applied_to_manuscript": false
     },
     {
       "rank": 2,
@@ -39,8 +42,9 @@
       "step_008": "ADMIT__REBOUND_TO_CURRENT_CONTROL",
       "step_i": "ACCEPT_CANDIDATE",
       "step_k": "PASS_DEFENSE_GATE",
-      "recommendation": "2A_ACCEPT_TRIM",
-      "options": ["2A_ACCEPT_TRIM", "2B_RETAIN_ORIGINAL"]
+      "selected_option": "2A_ACCEPT_TRIM",
+      "selection_authority": "EXPLICIT_USER_DELEGATION_TO_ASSISTANT_DECISION",
+      "applied_to_manuscript": false
     },
     {
       "rank": 3,
@@ -53,14 +57,26 @@
       "step_008": "ADMIT",
       "step_i": "ACCEPT_CANDIDATE",
       "step_k": "PASS_DEFENSE_GATE",
-      "recommendation": "3A_ACCEPT_LOCAL_CADENCE_TRIM",
-      "options": ["3A_ACCEPT_LOCAL_CADENCE_TRIM", "3B_RETAIN_ORIGINAL"]
+      "selected_option": "3A_ACCEPT_LOCAL_CADENCE_TRIM",
+      "selection_authority": "EXPLICIT_USER_DELEGATION_TO_ASSISTANT_DECISION",
+      "applied_to_manuscript": false
     }
   ],
-  "global_cadence_disposition": "NO_GLOBAL_REWRITE__ONLY_ONE_LOCAL_CLUSTER_ADMITTED",
+  "aggregate": {
+    "accepted_candidates": 3,
+    "total_deleted_words": 64,
+    "canonical_book_words": 62611,
+    "book_edit_fraction": 0.001022,
+    "cumulative_preservation": "PASS",
+    "cumulative_step_k": "PASS_DEFENSE_GATE"
+  },
+  "adjudication_record": "AGLO-BOOK-LEVEL-AUTHOR-ADJUDICATION-001.json",
+  "cumulative_closure": "AGLO-BOOK-LEVEL-REVISION-PACKAGE-CLOSURE-001.json",
+  "global_cadence_disposition": "NO_GLOBAL_REWRITE__ONLY_ONE_LOCAL_CLUSTER_ACCEPTED",
+  "step_j_learning_from_delegated_choices": false,
   "automatic_manuscript_overwrite_authorized": false,
   "publication_authorized": false,
   "raw_manuscript_text_persisted": false,
   "candidate_text_persisted": false,
-  "next_transition": "EXPLICIT_AUTHOR_REPLY_WITH_1A_OR_1B__2A_OR_2B__3A_OR_3B"
+  "next_transition": "BUILD_PRIVATE_COMPOSITE_REVISION_CANDIDATE_AND_REVERIFY_DIGESTS__DO_NOT_OVERWRITE_CANONICAL_MANUSCRIPT"
 }
