@@ -1,0 +1,37 @@
+name: Literary Prose STEP-L Closed-Loop Qualification
+
+on:
+  push:
+    branches:
+      - literary-prose-engine-001
+    paths:
+      - 'qualification/literary-prose-engine-001/step-l/**'
+      - 'qualification/literary-prose-engine-001/step-k/**'
+      - '.github/workflows/literary-prose-step-l-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Requalify STEP-K defense
+        run: python qualification/literary-prose-engine-001/step-k/run_step_k_fixtures.py
+      - name: Execute STEP-L closed-loop qualification
+        run: python qualification/literary-prose-engine-001/step-l/run_step_l_fixtures.py
+      - name: Upload STEP-L evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: literary-prose-step-l-${{ github.run_id }}-evidence
+          path: qualification/literary-prose-engine-001/step-l/STEP-L-QUALIFICATION-EVIDENCE.json
+          if-no-files-found: warn
