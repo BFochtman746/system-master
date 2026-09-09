@@ -29,5 +29,36 @@
   "resume_on_pass": "Adjudicate the exact A-01 receipt for subject 137ab3d214972002cd5dca0d2355d1e0ada31d39. Preserve pre/post regressions. Treat harvested material only as provenance-bearing source candidates for next-day gap synthesis and STEP-D rights/task-fit adjudication. Continue the AGLO author-decision path independently; research evidence does not authorize manuscript mutation or publication.",
   "resume_on_failure": "Classify SUBJECT_FAILURE versus INFRA_FAILURE or CONTROL_PLANE_FAILURE. Preserve completed shard evidence. Repair only the proven runner, wrapper, research, or regression boundary. Do not weaken rights, privacy, exact-SHA, preservation, real-book, or author-intent gates and do not rerun an unchanged sweep solely for utilization.",
   "notification_target": "literary-prose-engine-001",
-  "notes": "SUPERSEDED after authoritative A-01 PASS in recovery run 34310540842 on exact subject 137ab3d214972002cd5dca0d2355d1e0ada31d39. The ticket stop condition explicitly forbids repeating the same sweep unchanged. The Literary workstream has since advanced to a new consolidated branch state, so this file is retained only as historical intake/provenance and must not be admitted again."
+  "closure": {
+    "authoritative_pass": {
+      "workflow_run_id": 34310540842,
+      "job_id": 102336537429,
+      "result_class": "PASS",
+      "child_exit_code": 0,
+      "receipt_subject_sha": "137ab3d214972002cd5dca0d2355d1e0ada31d39",
+      "receipt_checkout_sha": "137ab3d214972002cd5dca0d2355d1e0ada31d39",
+      "receipt_sha256": "17ba3934cf49b1d9cfcf15ee1525f9d3fed28955f8d4f27b1e651f0f6d4553eb",
+      "evidence_artifact_id": 10091050475,
+      "evidence_artifact_name": "LITERARY-PROSE-OVERNIGHT-RESEARCH-REGRESSION-SWEEP-34310540842-evidence",
+      "evidence_artifact_digest": "sha256:95ffad17481a5216089ac0274fee221919fa0163c0730af31a3e4734cde8acab",
+      "completed_shards": 6,
+      "pre_regressions_passed": 16,
+      "post_regressions_passed": 16,
+      "promotion_authorized": false
+    },
+    "later_duplicate_attempt": {
+      "workflow_run_id": 34329806613,
+      "result_class": "SUBJECT_FAILURE",
+      "child_exit_code": 124,
+      "reason": "OVERNIGHT_INSUFFICIENT_REMAINING_WINDOW",
+      "evidence_artifact_id": 10095551865,
+      "evidence_artifact_digest": "sha256:b76c8ff0dbf918f7b48bff42017f16cbd4c8d72b867e41e05eca34d5fa4ca07d",
+      "qualification_body_executed": false,
+      "invalidates_prior_exact_sha_pass": false
+    },
+    "rerun_unchanged_authorized": false,
+    "replacement_ticket_required": false,
+    "current_successor": "LITERARY-NARRATIVE-EXTRACTOR-CANDIDATE-002"
+  },
+  "notes": "SUPERSEDED after a conforming A-01 PASS in recovery run 34310540842 on the exact frozen subject. A later duplicate scheduled attempt was refused with SUBJECT_FAILURE/124 because insufficient overnight window remained; it did not execute the qualifier body and does not invalidate the earlier exact-SHA PASS. The stop condition forbids an unchanged retry. Retain this file and both receipts as historical evidence only."
 }

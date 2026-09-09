@@ -2,7 +2,17 @@
 
 This file is the cross-chat entry point for work in `BFochtman746/system-master`.
 
-## Required startup
+## System Master primary-control startup
+
+For central System Master engineering work, first read and verify the live branch head of:
+
+- branch: `system-master/control-v2`
+- control record: `system-master/control-v2/SYSTEM-MASTER-V2-CONTROL-RECORD.md`
+- Night Shift closure/reset: `system-master/control-v2/NIGHT-SHIFT-CLOSURE-RECONCILIATION-2026-09-09.md`
+
+`main` remains the repository umbrella for shared A-01 policy, registry, workflows and cross-workstream ticket state. It is not the current System Master engineering-priority authority. Historical reset/handoff documents on `main` must not override the live `control-v2` record.
+
+## Required A-01 startup
 
 Before a workstream schedules or adjudicates A-01 machine qualification, read:
 
@@ -14,7 +24,7 @@ Before a workstream schedules or adjudicates A-01 machine qualification, read:
 
 These repository artifacts, not conversation memory, are authoritative for A-01 usage.
 
-## Current standing
+## Current A-01 standing
 
 A01-MIGRATION-001 is closed. A01-CONTROL-PLANE-001 is the normal qualification path. A01-OVERNIGHT-001 is the canonical scheduling extension for unattended 00:00–07:00 America/New_York capacity.
 
@@ -36,13 +46,14 @@ Do not start another A-01 infrastructure objective merely because a workstream h
 
 - The central workflow `.github/workflows/a01-overnight-night-shift.yml` exclusively owns canonical overnight scheduling.
 - Do not add or retain an independent workstream overnight `schedule:` trigger for A-01. Convert the desired work into an overnight ticket instead.
-- Each workstream may submit at most one READY ticket for a night under `qualification/a01/overnight/requests/`.
+- Follow the active `qualification/a01/a01-policy.json` cap for READY overnight tickets. Policy v6 currently permits up to four READY tickets per workstream per night and supports bounded same-workstream dependency chains up to the policy limit; dependent tickets execute only after the named predecessor PASS and must follow it immediately.
 - Re-evaluate the workstream before ticketing. Choose the highest-value A-01-executable work that benefits from unattended runtime: long tests, training/evaluation, benchmarks, corpus/API harvesting, deterministic analysis, or similar bounded work.
-- Overnight work is not limited to the normal 30-minute envelope. A registered overnight-eligible qualifier may request up to its registry cap and at most 300 minutes under policy v4.
-- Work above 180 minutes must be checkpoint-capable with checkpoints at least every 30 minutes.
+- Every READY second-shift ticket must carry a real completion delta and stop condition. Never create work merely to keep A-01 utilized.
+- Overnight work is not limited to the normal 30-minute envelope. A registered overnight-eligible qualifier may request up to its registry cap and at most the active policy maximum, currently 300 minutes under policy v6.
+- Work above 180 minutes must be checkpoint-capable with checkpoints no farther than 30 minutes apart.
 - Do not spend overnight capacity on a known blocker that cannot change without new authority/input. Do dependency-valid executable work instead.
 - A-01 is not an autonomous ChatGPT reasoning session. Open-ended reasoning must occur in chat or through a separately authorized API-agent design; overnight A-01 work must be executable and evidence-producing.
-- Disruptive reboot qualifications are excluded from overnight v1.
+- Disruptive reboot qualifications are excluded from overnight scheduling.
 
 ## Return routing
 
