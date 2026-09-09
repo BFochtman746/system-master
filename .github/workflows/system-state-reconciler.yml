@@ -6,17 +6,23 @@ on:
     paths:
       - 'governance/**'
       - 'qualification/a01/registry.json'
+      - 'qualification/a01/repair-requests/**'
       - '.github/scripts/system-state-reconciler.js'
       - '.github/scripts/a01-closed-loop-repair*.js'
       - '.github/scripts/a01-repair-broker*.js'
+      - '.github/scripts/a01-repair-ledger*.js'
+      - '.github/workflows/a01-repair-*.yml'
       - '.github/workflows/system-state-reconciler.yml'
   pull_request:
     paths:
       - 'governance/**'
       - 'qualification/a01/registry.json'
+      - 'qualification/a01/repair-requests/**'
       - '.github/scripts/system-state-reconciler.js'
       - '.github/scripts/a01-closed-loop-repair*.js'
       - '.github/scripts/a01-repair-broker*.js'
+      - '.github/scripts/a01-repair-ledger*.js'
+      - '.github/workflows/a01-repair-*.yml'
       - '.github/workflows/system-state-reconciler.yml'
 
 concurrency:
@@ -45,6 +51,9 @@ jobs:
           node --check .github/scripts/a01-closed-loop-repair-selftest.js
           node --check .github/scripts/a01-repair-broker.js
           node --check .github/scripts/a01-repair-broker-selftest.js
+          node --check .github/scripts/a01-repair-ledger.js
+          node --check .github/scripts/a01-repair-ledger-selftest.js
+          node --check .github/scripts/a01-repair-ledger-reconcile.js
 
       - name: Self-test repository-state invariants
         run: node .github/scripts/system-state-reconciler.js --selftest
@@ -54,6 +63,12 @@ jobs:
 
       - name: Self-test owner-lane repair broker
         run: node .github/scripts/a01-repair-broker-selftest.js
+
+      - name: Self-test durable repair lifecycle
+        run: node .github/scripts/a01-repair-ledger-selftest.js
+
+      - name: Reconcile repair event ledger, inboxes and replacement tickets
+        run: node .github/scripts/a01-repair-ledger-reconcile.js
 
       - name: Reconcile live System Master state
         run: node .github/scripts/system-state-reconciler.js --out=.state-reconciler
