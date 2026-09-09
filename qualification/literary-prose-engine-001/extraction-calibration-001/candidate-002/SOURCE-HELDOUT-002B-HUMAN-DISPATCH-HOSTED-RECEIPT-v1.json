@@ -1,0 +1,65 @@
+{
+  "receipt_id": "LITERARY-EXTRACTION-SOURCE-HELD-OUT-002B-HUMAN-DISPATCH-HOSTED-v1",
+  "standing": "PASS__HUMAN_REVIEW_DISPATCH_READY__NO_GOLD__NO_MODEL_PREDICTIONS__BLOCKED_HUMAN_FOR_ADJUDICATION",
+  "authority_class": "HOSTED_DISPATCH_PREPARATION_EVIDENCE__NOT_HUMAN_GOLD__NOT_A01__NOT_PROMOTION_AUTHORITY",
+  "branch": "literary-prose-engine-001",
+  "qualified_subject_sha": "6d5650ede560630b5f6a3ab03bf73ca2e046c2e6",
+  "workflow": ".github/workflows/literary-prose-candidate-002-provider-ci.yml",
+  "workflow_run_id": 34370797888,
+  "job_id": 102531195137,
+  "workflow_conclusion": "success",
+  "artifact": {
+    "artifact_id": 10111804571,
+    "name": "LITERARY-SOURCE-HELDOUT-002B-HUMAN-DISPATCH-34370797888",
+    "size_bytes": 70384,
+    "digest": "sha256:07cbadef5d2585974f92a094be1a03142161479dfbc950a18ad0e9c467a803db",
+    "expires_at": "2026-10-09T15:31:34Z",
+    "artifact_retention_is_not_durable_authority": true
+  },
+  "verified_package": {
+    "case_count": 6,
+    "public_domain_passage_file_count": 6,
+    "blank_completed_packet_template_count": 18,
+    "reviewer_a_assignment_count": 18,
+    "reviewer_b_high_risk_assignment_count": 12,
+    "total_independent_review_assignments": 30,
+    "span_helper_present": true,
+    "instructions_present": true,
+    "model_predictions_in_package": false,
+    "human_gold_in_package": false,
+    "prefilled_adjudicators": false,
+    "prefilled_gold_labels": false,
+    "prefilled_forbidden_labels": false,
+    "model_input_contains_gold": false
+  },
+  "source_and_review_boundary": {
+    "passages": "Exact public-domain dispatch material re-resolved against SOURCE-HELDOUT-002A source-file and passage digests before artifact creation.",
+    "raw_passages_durable_repository_evidence": false,
+    "reviewer_a_scope": "All 18 case-task packets.",
+    "reviewer_b_scope": "Twelve high-risk case-task packets requiring a second independent review.",
+    "reviewers_must_be_distinct_humans": true,
+    "reviewers_blind_to_model_predictions": true,
+    "reviewers_blind_to_other_reviewer_labels_until_independent_review_freeze": true,
+    "human_gold_may_not_be_generated_by_system_under_test": true
+  },
+  "hosted_steps_proven": [
+    "Provider and source-bound ontology fixtures passed.",
+    "Human adjudication return-boundary fixtures passed.",
+    "Exact-source dispatch package was built from the frozen six-case heldout set.",
+    "Dispatch package was verified to contain no model predictions and no human gold.",
+    "Dispatch artifact was uploaded successfully."
+  ],
+  "not_proven": [
+    "Any independent human adjudication or human gold correctness.",
+    "Any real learned-model prediction quality, calibration or heldout score.",
+    "A-01 authority for 6d5650ede560630b5f6a3ab03bf73ca2e046c2e6 or later SHAs.",
+    "Candidate-002 promotion eligibility.",
+    "Canonical narrative-state, manuscript mutation, author-intent, publication or canon authority."
+  ],
+  "current_blocker": {
+    "classification": "BLOCKED — HUMAN",
+    "id": "LITERARY-EXTRACTION-SOURCE-HELD-OUT-002B__HUMAN_ADJUDICATION",
+    "required_event": "Two distinct independent human reviewers execute the dispatch protocol (Reviewer A all 18; Reviewer B the 12 high-risk tasks), freeze blind reviews, and a human resolver completes the 18 packet templates while preserving disagreement/UNRESOLVED states. The returned packet set must then pass validate_source_heldout_human_adjudication.py before any scoring claim."
+  },
+  "a01_required": false
+}
