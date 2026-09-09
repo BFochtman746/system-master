@@ -5,6 +5,8 @@ on:
     branches: [learning/pilot-001-run-001-closed-loop-completion]
     paths:
       - ".github/workflows/learning-pilot-001-run-001-closed-loop-prequal.yml"
+      - ".github/workflows/learning-pilot-001-run-001-closed-loop-a01.yml"
+      - ".github/scripts/learning-pilot-001-run-001-closed-loop-qualify.js"
       - "learning/lab/LEARNING_LAB_PILOT_001_RUN_001_CLOSED_LOOP_COMPLETION.md"
       - "learning/lab/run_pilot001.py"
       - "learning/lab/run_pilot001_closed_loop.py"
@@ -43,102 +45,22 @@ jobs:
           mkdir -p "$EVIDENCE_DIR"
           echo "EVIDENCE_DIR=$EVIDENCE_DIR" >> "$GITHUB_ENV"
           printf '%s\n' "$GITHUB_SHA" > "$EVIDENCE_DIR/source-sha.txt"
-          python --version > "$EVIDENCE_DIR/python-version.txt" 2>&1
 
-      - name: Verify frozen PILOT-001-v1 authority unchanged
+      - name: Run repository-owned exact-subject qualifier
         shell: bash
         run: |
-          set -euo pipefail
-          declare -A expected
-          expected[learning/lab/LEARNING_LAB_PILOT_001_PROTOCOL.md]=0db3de824060f4eb7ce3c2c7ffa0ed4b57ba9d35
-          expected[learning/lab/learning_lab/real_learner_pilot.py]=0c9f7a8b7850cef15643e3c11899585d2c25a08d
-          expected[learning/lab/tests/test_real_learner_pilot.py]=e77d423078af4662f2c72b0cc1f8501e20d29851
-          expected[learning/lab/qualification_pilot001.py]=44aa0124f194f074a421f0a87a0695d96d7bae11
-          : > "$EVIDENCE_DIR/frozen-blobs.txt"
-          for path in "${!expected[@]}"; do
-            actual="$(git hash-object -- "$path")"
-            test "$actual" = "${expected[$path]}"
-            printf '%s=%s\n' "$path" "$actual" >> "$EVIDENCE_DIR/frozen-blobs.txt"
-          done
+          A01_SUBJECT_SHA="$GITHUB_SHA" A01_EVIDENCE_DIR="$EVIDENCE_DIR" \
+            node .github/scripts/learning-pilot-001-run-001-closed-loop-qualify.js
 
-      - name: Compile closed-loop participant boundary
+      - name: Verify thin caller remains shared-gateway only
         shell: bash
         run: |
-          python -m py_compile \
-            learning/lab/run_pilot001.py \
-            learning/lab/run_pilot001_closed_loop.py \
-            learning/lab/run_pilot001_real_participant.py \
-            learning/lab/learning_lab/real_learner_pilot_completion.py \
-            learning/lab/learning_lab/real_learner_pilot_withdrawal.py \
-            learning/lab/learning_lab/real_learner_pilot_human_session.py
-
-      - name: Run participant closed-loop qualification
-        shell: bash
-        working-directory: learning/lab
-        run: |
-          set -o pipefail
-          python -m unittest -v \
-            tests.test_real_learner_pilot_completion \
-            tests.test_real_learner_pilot_closed_loop_launcher \
-            tests.test_real_learner_pilot_console \
-            tests.test_real_learner_pilot_withdrawal \
-            tests.test_real_learner_pilot_human_session \
-            tests.test_real_learner_pilot_runtime_binding \
-            tests.test_real_learner_pilot \
-            2>&1 | tee "$EVIDENCE_DIR/closed-loop-focused.txt"
-          grep -q "Ran 50 tests" "$EVIDENCE_DIR/closed-loop-focused.txt"
-          grep -q "^OK$" "$EVIDENCE_DIR/closed-loop-focused.txt"
-
-      - name: Run Learning predecessor regressions
-        shell: bash
-        working-directory: learning/lab
-        run: |
-          set -o pipefail
-          python -m unittest -v \
-            tests.test_unified_fresh_evidence_recovery \
-            tests.test_fresh_evidence_provider_acquisition \
-            tests.test_fresh_evidence_configured_http \
-            tests.test_fresh_evidence_admission \
-            tests.test_unified_turn_controller \
-            tests.test_adaptive_journey_continuation \
-            tests.test_provider_multi_candidate_runtime \
-            2>&1 | tee "$EVIDENCE_DIR/regressions.txt"
-          grep -q "Ran 57 tests" "$EVIDENCE_DIR/regressions.txt"
-          grep -q "^OK$" "$EVIDENCE_DIR/regressions.txt"
-
-      - name: Verify shared control-plane enforcement
-        shell: bash
-        run: |
+          grep -q 'uses: BFochtman746/system-master/.github/workflows/a01-control-plane-gateway.yml@main' \
+            .github/workflows/learning-pilot-001-run-001-closed-loop-a01.yml
+          ! grep -q 'runs-on:.*self-hosted' \
+            .github/workflows/learning-pilot-001-run-001-closed-loop-a01.yml
           node .github/scripts/a01-control-plane-enforce.js selftest | tee "$EVIDENCE_DIR/control-plane-selftest.txt"
           node .github/scripts/a01-control-plane-enforce.js scan | tee "$EVIDENCE_DIR/control-plane-scan.txt"
-
-      - name: Verify closed-loop truth boundary
-        shell: bash
-        run: |
-          grep -q 'RETENTION_MINIMUM_DELAY_SECONDS = 3600' learning/lab/learning_lab/real_learner_pilot_completion.py
-          grep -q 'PILOT_COMPLETION_CAPTURE_WITHOUT_HUMAN_ATTESTATION' learning/lab/learning_lab/real_learner_pilot_completion.py
-          grep -q 'COMPLETION_READY' learning/lab/learning_lab/real_learner_pilot_completion.py
-          grep -q 'mode") == "WAIT"' learning/lab/run_pilot001_closed_loop.py
-          grep -q 'raw_response_included": False' learning/lab/run_pilot001_closed_loop.py
-          grep -q 'import run_pilot001_closed_loop as closed_loop' learning/lab/run_pilot001.py
-
-      - name: Record truth boundary
-        shell: bash
-        run: |
-          cat > "$EVIDENCE_DIR/truth-boundary.txt" <<'EOF'
-          PILOT_RUN001_CLOSED_LOOP_PREQUAL=PASS
-          PILOT_RUN001_CLOSED_LOOP_FOCUSED_TESTS=50
-          PILOT_RUN001_PREDECESSOR_REGRESSIONS=57
-          PILOT_RUN001_TOTAL_TESTS=107
-          PILOT_RUN001_FROZEN_V1_CHANGED=FALSE
-          PILOT_RUN001_EARLY_RETENTION_PROMPT_ALLOWED=FALSE
-          PILOT_RUN001_WAIT_RESPONSE_COLLECTION_ALLOWED=FALSE
-          PILOT_RUN001_COMPLETION_REQUIRES_TRANSFER_TO_COURSE_COMPLETE=TRUE
-          PILOT_RUN001_COMPLETION_PACKAGE_RAW_RESPONSE=FALSE
-          PILOT_RUN001_REAL_PARTICIPANT_EVIDENCE=NOT_CREATED
-          PILOT_RUN001_CONSENT_INFERRED=FALSE
-          PILOT_RUN001_A01_MAY_SUPPLY_PARTICIPANT_RESPONSE=FALSE
-          EOF
 
       - name: Upload prequalification evidence
         if: always()
