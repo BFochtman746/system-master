@@ -1,0 +1,224 @@
+{
+  "fixture_set_id": "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-001-FIXTURES",
+  "registry_id": "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-001",
+  "base_request": {
+    "request_id": "REQUEST:001",
+    "correlation_id": "CORRELATION:001",
+    "idempotency_key": "IDEMPOTENCY:001",
+    "service_id": "PROSE_ANALYSIS_AND_REVISION",
+    "operation_id": "ANALYZE_PASSAGE_OR_UNIT",
+    "schema_version": 1,
+    "book_project_id": "BOOKPROJECT:001",
+    "book_id": "BOOK:001",
+    "parent_state_version": 7,
+    "parent_state_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "target_refs": ["MANUSCRIPT:001:V7"],
+    "projection": {
+      "exact_manuscript_or_unit_identity": "MANUSCRIPT:001:V7#CHAPTER:003",
+      "target_text_or_authorized_projection": "AUTHORIZED_PROJECTION:001",
+      "purpose": "DIAGNOSTIC_REVIEW",
+      "canon_constraints": [],
+      "author_intent_constraints": [],
+      "protected_language_constraints": [],
+      "voice_context": "VOICE:BOOK:001",
+      "rights_boundary": "USER_AUTHORIZED"
+    },
+    "authority_context": {
+      "requesting_authority": "PARENT_SYSTEM",
+      "canonical_write_allowed": false,
+      "author_decision_required_if_returned": true,
+      "rights_boundary": "USER_AUTHORIZED",
+      "privacy_boundary": "BOOK_PROJECT_SCOPED"
+    }
+  },
+  "base_response": {
+    "response_id": "RESPONSE:001",
+    "request_id": "REQUEST:001",
+    "correlation_id": "CORRELATION:001",
+    "idempotency_key": "IDEMPOTENCY:001",
+    "service_id": "PROSE_ANALYSIS_AND_REVISION",
+    "operation_id": "ANALYZE_PASSAGE_OR_UNIT",
+    "schema_version": 1,
+    "provider_class": "PROSE_PROJECT",
+    "provider_subject": {
+      "subject_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "implementation_or_artifact_id": "LITERARY-PROSE-ENGINE:CURRENT-SUBJECT"
+    },
+    "parent_projection_identity": {
+      "parent_state_version": 7,
+      "parent_state_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "result_class": "SUCCESS",
+    "evidence_refs": ["EVIDENCE:PROSE:001"],
+    "proposal_refs": [],
+    "artifact_refs": [],
+    "abstentions": [],
+    "warnings": [],
+    "requested_parent_action": "REGISTER_EVIDENCE"
+  },
+  "cases": [
+    {
+      "case_id": "REGISTRY-INVARIANTS-001",
+      "type": "VALIDATE_REGISTRY",
+      "expected": "PASS",
+      "expected_service_count": 4,
+      "expected_operation_count": 17
+    },
+    {
+      "case_id": "VALID-PROSE-REQUEST-001",
+      "type": "VALIDATE_REQUEST",
+      "expected": "PASS"
+    },
+    {
+      "case_id": "REJECT-UNKNOWN-SERVICE-001",
+      "type": "VALIDATE_REQUEST",
+      "request_patch": {"service_id": "UNKNOWN_SERVICE"},
+      "expected": "REJECT",
+      "expected_code": "UNKNOWN_SERVICE_ID"
+    },
+    {
+      "case_id": "REJECT-UNKNOWN-OPERATION-001",
+      "type": "VALIDATE_REQUEST",
+      "request_patch": {"operation_id": "UNKNOWN_OPERATION"},
+      "expected": "REJECT",
+      "expected_code": "UNKNOWN_OPERATION_ID"
+    },
+    {
+      "case_id": "REJECT-REQUEST-SCHEMA-001",
+      "type": "VALIDATE_REQUEST",
+      "request_patch": {"schema_version": 2},
+      "expected": "REJECT",
+      "expected_code": "UNKNOWN_REQUEST_SCHEMA_VERSION"
+    },
+    {
+      "case_id": "REJECT-CANONICAL-WRITE-CAPABILITY-001",
+      "type": "VALIDATE_REQUEST",
+      "request_patch": {"authority_context": {"canonical_write_allowed": true}},
+      "expected": "REJECT",
+      "expected_code": "SERVICE_CANONICAL_WRITE_FORBIDDEN"
+    },
+    {
+      "case_id": "REJECT-MISSING-PROJECTION-FIELD-001",
+      "type": "VALIDATE_REQUEST",
+      "delete_request_projection_field": "protected_language_constraints",
+      "expected": "REJECT",
+      "expected_code": "REQUIRED_PROJECTION_FIELD_MISSING"
+    },
+    {
+      "case_id": "VALID-PROSE-RESPONSE-001",
+      "type": "VALIDATE_RESPONSE",
+      "expected": "PASS"
+    },
+    {
+      "case_id": "REJECT-PROVIDER-CLASS-MISMATCH-001",
+      "type": "VALIDATE_RESPONSE",
+      "response_patch": {"provider_class": "BOOK_EVALUATOR"},
+      "expected": "REJECT",
+      "expected_code": "PROVIDER_CLASS_MISMATCH"
+    },
+    {
+      "case_id": "REJECT-STALE-PARENT-PROJECTION-001",
+      "type": "VALIDATE_RESPONSE",
+      "response_patch": {"parent_projection_identity": {"parent_state_version": 6}},
+      "expected": "REJECT",
+      "expected_code": "STALE_PARENT_PROJECTION"
+    },
+    {
+      "case_id": "VALID-ABSTENTION-PRESERVED-001",
+      "type": "VALIDATE_RESPONSE",
+      "response_patch": {
+        "result_class": "ABSTAIN",
+        "evidence_refs": [],
+        "abstentions": ["INSUFFICIENT_AUTHORIZED_CONTEXT"],
+        "requested_parent_action": "REVIEW_REQUIRED"
+      },
+      "expected": "PASS",
+      "expected_result_class": "ABSTAIN"
+    },
+    {
+      "case_id": "REJECT-DISALLOWED-PARENT-ACTION-001",
+      "type": "VALIDATE_RESPONSE",
+      "response_patch": {"requested_parent_action": "REGISTER_INTEGRATION_PROPOSAL"},
+      "expected": "REJECT",
+      "expected_code": "PARENT_ACTION_NOT_ALLOWED_FOR_OPERATION"
+    },
+    {
+      "case_id": "VALID-IDEMPOTENT-REPLAY-001",
+      "type": "IDEMPOTENCY_SEQUENCE",
+      "expected": "PASS",
+      "sequence": "SAME_KEY_SAME_REQUEST",
+      "expected_second_disposition": "REPLAY"
+    },
+    {
+      "case_id": "REJECT-IDEMPOTENCY-CONFLICT-001",
+      "type": "IDEMPOTENCY_SEQUENCE",
+      "expected": "REJECT",
+      "sequence": "SAME_KEY_DIFFERENT_REQUEST",
+      "expected_code": "IDEMPOTENCY_KEY_CONFLICT"
+    },
+    {
+      "case_id": "REJECT-NONIDEMPOTENT-UNKNOWN-RETRY-001",
+      "type": "NONIDEMPOTENT_RETRY",
+      "request_patch": {
+        "request_id": "REQUEST:GEN:001",
+        "idempotency_key": "IDEMPOTENCY:GEN:001",
+        "operation_id": "GENERATE_BOUNDED_REVISION_CANDIDATE",
+        "projection": {
+          "exact_original_identity": "MANUSCRIPT:001:V7#CHAPTER:003",
+          "authorized_target_text": "AUTHORIZED_PROJECTION:001",
+          "admitted_opportunity": "OPPORTUNITY:001",
+          "ambition_level": "LEVEL_1_SURGICAL",
+          "canon_constraints": [],
+          "author_intent_constraints": [],
+          "protected_language_constraints": [],
+          "voice_context": "VOICE:BOOK:001",
+          "edit_budget": "BOUNDED"
+        }
+      },
+      "expected": "REJECT",
+      "expected_code": "NONIDEMPOTENT_RETRY_REQUIRES_RECONCILIATION"
+    },
+    {
+      "case_id": "VALID-RESEARCH-REQUEST-001",
+      "type": "VALIDATE_REQUEST",
+      "request_patch": {
+        "request_id": "REQUEST:RESEARCH:001",
+        "idempotency_key": "IDEMPOTENCY:RESEARCH:001",
+        "service_id": "RESEARCH_AND_EVIDENCE",
+        "operation_id": "ACQUIRE_BOUNDED_EVIDENCE",
+        "projection": {
+          "research_question": "What evidence is required for this bounded book claim?",
+          "target_book_object_refs": ["BOOK:001"],
+          "source_policy": "QUALIFIED_SOURCES",
+          "rights_policy": "PROVENANCE_REQUIRED",
+          "freshness_requirement": "CURRENT"
+        }
+      },
+      "expected": "PASS"
+    },
+    {
+      "case_id": "VALID-DOCUMENT-EXPORT-REQUEST-001",
+      "type": "VALIDATE_REQUEST",
+      "request_patch": {
+        "request_id": "REQUEST:EXPORT:001",
+        "idempotency_key": "IDEMPOTENCY:EXPORT:001",
+        "service_id": "DOCUMENT_ARTIFACT_AND_EXPORT",
+        "operation_id": "EXPORT_FROZEN_MANUSCRIPT",
+        "projection": {
+          "exact_frozen_manuscript_version": "MANUSCRIPT:001:V7",
+          "requested_format": "DOCX",
+          "export_release_ref": "EXPORT:001",
+          "rights_and_export_constraints": "BOOK_PROJECT_BOUND"
+        }
+      },
+      "expected": "PASS"
+    },
+    {
+      "case_id": "REJECT-RESPONSE-SERVICE-MISMATCH-001",
+      "type": "VALIDATE_RESPONSE",
+      "response_patch": {"service_id": "BOOK_EVALUATION"},
+      "expected": "REJECT",
+      "expected_code": "RESPONSE_REQUEST_BINDING_MISMATCH"
+    }
+  ]
+}
