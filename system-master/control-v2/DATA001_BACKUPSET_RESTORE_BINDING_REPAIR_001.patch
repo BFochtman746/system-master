@@ -1,0 +1,33 @@
+--- a/11_SOURCE/src/main/java/org/systemmaster/rebuild/data/BackupSetRecord.java
++++ b/11_SOURCE/src/main/java/org/systemmaster/rebuild/data/BackupSetRecord.java
+@@ -17,6 +17,7 @@
+     public BackupSetRecord verifyWith(RestoreRun restore, String evidenceRef, Instant at) {
+         if (state!=BackupSetState.CREATED_RESTORE_VERIFICATION_REQUIRED) throw new IllegalStateException("backup set state");
+         if (restore==null || restore.state()!=RestoreState.VERIFIED || !backupSetId.equals(restore.backupSetId())) throw new IllegalArgumentException("verified isolated restore required");
++        if (!blobManifestDigest.equals(restore.blobManifestDigest())) throw new IllegalArgumentException("restore blob manifest mismatch");
+         if (!restore.targetWasEmpty()) throw new IllegalArgumentException("restore target not empty");
+         return new BackupSetRecord(backupSetId,databaseBackupId,blobManifestDigest,blobSnapshotRef,subjectDigest,createdAt,Data001Rules.instant(at,"at"),BackupSetState.VERIFIED,Data001Rules.append(evidenceRefs,evidenceRef,"evidenceRefs"));
+     }
+--- a/11_SOURCE/src/main/java/org/systemmaster/rebuild/data/Data001Authority.java
++++ b/11_SOURCE/src/main/java/org/systemmaster/rebuild/data/Data001Authority.java
+@@ -20,5 +20,7 @@
+     public static void requireRecoveryProvenance(BackupSetRecord set, RestoreRun restore) {
+         if (set==null || restore==null || !set.backupSetId().equals(restore.backupSetId()) || restore.state()!=RestoreState.VERIFIED || !restore.targetWasEmpty())
+             throw new IllegalArgumentException("verified isolated restore required");
++        if (!set.blobManifestDigest().equals(restore.blobManifestDigest()))
++            throw new IllegalArgumentException("restore blob manifest mismatch");
+     }
+ }
+--- a/12_TESTS/src/test/java/org/systemmaster/rebuild/data/Data001AuthorityTests.java
++++ b/12_TESTS/src/test/java/org/systemmaster/rebuild/data/Data001AuthorityTests.java
+@@ -41,6 +41,10 @@
+         var set=Data001Authority.newBackupSet("set-1","b1",h('c'),"blobset:1",h('a'),t.plusSeconds(2)); ok(set.state()==BackupSetState.CREATED_RESTORE_VERIFICATION_REQUIRED);
+         var run=new RestoreRun("r1","set-1","isolated:empty-1",true,t.plusSeconds(3),t.plusSeconds(4),RestoreState.VERIFIED,h('d'),h('c'),h('e'),List.of("ev:restore","ev:digest"));
+         var verified=set.verifyWith(run,"ev:restore-pass",t.plusSeconds(5)); ok(verified.state()==BackupSetState.VERIFIED && !verified.evidenceRefs().isEmpty());
++        var mismatchedManifest=new RestoreRun("r-mismatch","set-1","isolated:empty-2",true,t.plusSeconds(3),t.plusSeconds(4),RestoreState.VERIFIED,h('d'),h('f'),h('e'),List.of("ev:restore"));
++        bad(IllegalArgumentException.class,()->set.verifyWith(mismatchedManifest,"ev:mismatch",t.plusSeconds(5)));
++        bad(IllegalArgumentException.class,()->Data001Authority.requireRecoveryProvenance(set,mismatchedManifest));
++        Data001Authority.requireRecoveryProvenance(set,run); ok(true);
+         var unsafe=new RestoreRun("r2","set-1","existing",false,t.plusSeconds(3),null,RestoreState.RUNNING,null,null,null,List.of());
+         bad(IllegalArgumentException.class,()->set.verifyWith(unsafe,"ev",t.plusSeconds(5)));
+     }
