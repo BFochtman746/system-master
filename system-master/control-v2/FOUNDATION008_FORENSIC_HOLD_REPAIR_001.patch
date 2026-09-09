@@ -1,0 +1,21 @@
+--- 11_SOURCE/src/main/java/org/systemmaster/rebuild/resilience/IncidentTransitionGuard.java
++++ 11_SOURCE/src/main/java/org/systemmaster/rebuild/resilience/IncidentTransitionGuard.java
+@@ -9,6 +9,7 @@
+         if (!next.detectedAt().equals(previous.detectedAt())) throw new IllegalArgumentException("detectedAt immutable");
+         if (previous.declaredAt() != null && !previous.declaredAt().equals(next.declaredAt())) throw new IllegalArgumentException("declaredAt immutable after declaration");
+         if (!next.lastUpdatedAt().isAfter(previous.lastUpdatedAt())) throw new IllegalArgumentException("incident time must advance");
++        if (previous.forensicHold() && !next.forensicHold()) throw new IllegalArgumentException("forensic hold removed");
+         if (next.state() != previous.state()) IncidentStateMachine.require(previous.state(), next.state());
+         requireSuperset(previous.evidenceRefs(), next.evidenceRefs(), "evidenceRefs");
+         requireSuperset(previous.containmentActionRefs(), next.containmentActionRefs(), "containmentActionRefs");
+--- 12_TESTS/src/test/java/org/systemmaster/rebuild/resilience/Foundation008AuthorityTests.java
++++ 12_TESTS/src/test/java/org/systemmaster/rebuild/resilience/Foundation008AuthorityTests.java
+@@ -33,6 +33,8 @@
+         var relapse=c.transition(IncidentState.CONTAINING,t.plusSeconds(6),"ev-relapse"); ok(relapse.state()==IncidentState.CONTAINING);
+         var broken=new IncidentRecord(c.incidentId(),c.version()+1,c.category(),c.severity(),c.state(),c.detectedAt(),c.declaredAt(),c.lastUpdatedAt().plusSeconds(1),c.ownerPrincipalId(),c.affectedResourceRefs(),List.of("ev-0"),c.containmentActionRefs(),c.correctiveActionRefs(),c.breakGlassGrantRefs(),c.communicationRefs(),c.continuityObjectiveRef(),c.operatingMode(),c.forensicHold(),c.summary());
+         bad(IllegalArgumentException.class,()->IncidentTransitionGuard.requireValidNext(c,broken));
++        var holdDropped=new IncidentRecord(c.incidentId(),c.version()+1,c.category(),c.severity(),c.state(),c.detectedAt(),c.declaredAt(),c.lastUpdatedAt().plusSeconds(1),c.ownerPrincipalId(),c.affectedResourceRefs(),c.evidenceRefs(),c.containmentActionRefs(),c.correctiveActionRefs(),c.breakGlassGrantRefs(),c.communicationRefs(),c.continuityObjectiveRef(),c.operatingMode(),false,c.summary());
++        bad(IllegalArgumentException.class,()->IncidentTransitionGuard.requireValidNext(c,holdDropped));
+         var bg=tri.addBreakGlassGrant("grant-1","ev-bg",t.plusSeconds(2)); ok(bg.breakGlassGrantRefs().contains("grant-1") && bg.evidenceRefs().contains("ev-bg"));
+         var cm=bg.addCommunication("comm-1","ev-comm",t.plusSeconds(3)); ok(cm.communicationRefs().contains("comm-1"));
+     }
