@@ -1,0 +1,41 @@
+name: BOOK-EVAL REPAIR-005 Private Gold Staging Hosted Prequalification
+
+on:
+  push:
+    branches:
+      - book-eval-lemonade-001-blind-resume-003-adapter-repair
+    paths:
+      - ".github/scripts/book-eval-repair005-stage-private-gold.js"
+      - ".github/scripts/test-book-eval-repair005-stage-private-gold.js"
+      - ".github/workflows/book-eval-repair-005-private-gold-staging-hosted-prequal.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  prequal:
+    name: Prove local source-custody staging helper with synthetic fixture only
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact Book workstream subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Check staging helper syntax
+        run: |
+          node --check .github/scripts/book-eval-repair005-stage-private-gold.js
+          node --check .github/scripts/test-book-eval-repair005-stage-private-gold.js
+
+      - name: Run synthetic custody-boundary tests
+        run: node .github/scripts/test-book-eval-repair005-stage-private-gold.js
+
+      - name: Publish prequalification standing
+        run: |
+          echo '## BOOK EVAL PRIVATE GOLD LOCAL STAGING PREQUAL' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Synthetic-only hosted tests prove: exact hash/byte verification before copy, atomic destination copy, post-copy verification, idempotent exact re-stage, wrong-hash/size rejection, repository source/destination rejection, conflicting destination rejection, and unchanged source preservation.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'The hosted run does not possess or read BOOK-EVAL-GOLD-CORPUS-v2.jsonl and therefore does not stage or qualify private authority.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'The real operator step remains local to A-01: select the saved exact private file and run the helper; only its fixed SHA/byte identity may unlock the existing private-recovery ticket.' >> "$GITHUB_STEP_SUMMARY"
