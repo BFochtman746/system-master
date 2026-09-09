@@ -1,0 +1,38 @@
+{
+  "objective": "AGLO-REAL-BOOK-CLOSED-LOOP-QUALIFICATION-001",
+  "audit_id": "AGLO-RBQ-CH24-TRACKED-CHANGE-PROJECTION-AUDIT-001",
+  "standing": "PASS__CONCAT_TARGET_REJECTED_AS_TRACKED_CHANGE_PROJECTION_FALSE_POSITIVE",
+  "baseline": {
+    "version_id": "AGLO-REJECT-ALL-NARRATIVE-v1",
+    "revision_projection": "REJECT_ALL",
+    "baseline_text_sha256": "a48378682ee15fd4b24bc97293ce43a37f096db254a0b78f715081a8aa8a59ee",
+    "author_ratified": true
+  },
+  "chapter": 24,
+  "findings": {
+    "witness_duplicate": {
+      "standing": "CONFIRMED_IN_RATIFIED_BASELINE",
+      "first_occurrence_paragraph_sha256": "d2c4d94f6dc85b6f8f280001e8920406492a7810ddc1ebd9cc58a6c0ba1dcb5c",
+      "surviving_deduplicated_paragraph_sha256": "eeeb3740493d047e69d637ceafe15fa1e054775cb5963652c17f2465e91de7e4",
+      "candidate_digest_matches_surviving_paragraph": true,
+      "preservation_regression_detected": false
+    },
+    "concatenated_variants": {
+      "standing": "REJECT_FALSE_POSITIVE",
+      "cause": "UNPROJECTED_TRACKED_CHANGE_READ_COMBINED_DELETED_REJECT_ALL_TEXT_WITH_INSERTED_ACCEPT_ALL_REPLACEMENT_TEXT",
+      "ratified_reject_all_paragraph_sha256": "a75b81f198ad14aef7632401c32eba49439e97b5d50c10fdc31a48eda48470ef",
+      "accept_all_replacement_paragraph_sha256": "993029e8cc2ba2b9353a5ad802f48b06573d7add0cedbaa4d72ffb40c4e9dafc",
+      "prior_keep_second_variant_digest": "993029e8cc2ba2b9353a5ad802f48b06573d7add0cedbaa4d72ffb40c4e9dafc",
+      "prior_keep_second_is_accept_all_replacement": true,
+      "raw_unprojected_combination_sha256": "418cc14b9a465895277df5dad0b63fd3821b7b495b634f21820aef12fb36f40e",
+      "reject_all_additional_inserted_paragraphs_present": false,
+      "user_variant_selection_required": false
+    }
+  },
+  "repair_rule": "All real-book literary analysis must operate on the ratified tracked-change projection before semantic diagnosis or candidate generation. Deleted and inserted revision alternatives must never be concatenated into one live passage state.",
+  "raw_manuscript_text_committed": false,
+  "candidate_text_committed": false,
+  "a01_required": false,
+  "a01_consumed": false,
+  "next_transition": "REPAIR_LIVE_EVIDENCE_TO_SINGLE_GENUINE_CH24_USER_DECISION"
+}
