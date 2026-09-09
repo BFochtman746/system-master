@@ -1,6 +1,6 @@
 {
   "manifest_id": "LITERARY-CANDIDATE-002-PUBLIC-DOMAIN-SOURCE-HELDOUT-v1",
-  "standing": "SOURCE_SELECTION_VERIFIED__PASSAGE_SELECTION_AND_HUMAN_ADJUDICATION_PENDING",
+  "standing": "SOURCE_SELECTION_VERIFIED__PASSAGE_SELECTION_FROZEN__EXACT_PASSAGE_CUSTODY_AND_HUMAN_ADJUDICATION_PENDING",
   "purpose": "Create an independent work-heldout literary evaluation set for Candidate-002 without user manuscript text, hidden Book-Eval gold, adjacent-passage leakage or copyrighted corpus acquisition.",
   "source_policy": {
     "jurisdiction_basis": "Project Gutenberg public-domain-in-USA designation",
@@ -11,6 +11,15 @@
     "adjacent_passage_cross_split_forbidden": true,
     "human_adjudication_required": true,
     "provider_gold_access_forbidden": true
+  },
+  "passage_selection": {
+    "selection_file": "PUBLIC-DOMAIN-PASSAGE-SELECTION-v1.json",
+    "selection_commit": "7cf055c308f431f6a9b19bd110a2d17f09a09f59",
+    "state": "FROZEN_BEFORE_MODEL_INFERENCE__HUMAN_GOLD_PENDING",
+    "case_count": 6,
+    "all_nine_task_families_selected": true,
+    "raw_passage_text_committed": false,
+    "replacement_after_model_result_forbidden": true
   },
   "works": [
     {
@@ -28,7 +37,7 @@
         "NARRATIVE_FUNCTION",
         "SETUP_PAYOFF_OPEN_QUESTION"
       ],
-      "passage_selection_state": "PENDING_BOUNDED_SELECTION",
+      "passage_selection_state": "FROZEN__SEE_PUBLIC_DOMAIN_PASSAGE_SELECTION_v1",
       "human_gold_state": "PENDING"
     },
     {
@@ -46,7 +55,7 @@
         "STORY_VS_DISCOURSE_TIME",
         "ARC_ORCHESTRATION"
       ],
-      "passage_selection_state": "PENDING_BOUNDED_SELECTION",
+      "passage_selection_state": "FROZEN__SEE_PUBLIC_DOMAIN_PASSAGE_SELECTION_v1",
       "human_gold_state": "PENDING"
     },
     {
@@ -65,12 +74,12 @@
         "NARRATIVE_FUNCTION",
         "ARC_ORCHESTRATION"
       ],
-      "passage_selection_state": "PENDING_BOUNDED_SELECTION",
+      "passage_selection_state": "FROZEN__SEE_PUBLIC_DOMAIN_PASSAGE_SELECTION_v1",
       "human_gold_state": "PENDING"
     }
   ],
   "coverage_rule": "The final heldout set must cover all nine extraction task families across multiple works; no single work may be the only evidence for every high-risk relation family.",
   "selection_rule": "Choose bounded passages because they instantiate named stress slices or relation families, not because a candidate model already performs well on them.",
   "adjudication_rule": "Human annotations must explicitly preserve ALTERNATIVE/UNRESOLVED cases and document disagreement; ambiguous perspective, causality or chronology may not be forcibly collapsed to one asserted label.",
-  "next_action": "Select bounded passages and create provenance-bound human-adjudication packets without exposing gold annotations to the Candidate-002 model backend."
+  "next_action": "Resolve the exact bounded passage bytes for the six frozen cases from the verified TEST_ONLY sources, compute exact passage SHA-256 and stable locators, prepare gold-empty adjudication packet shells, then stop at the human-adjudication boundary before any scoring claim."
 }
