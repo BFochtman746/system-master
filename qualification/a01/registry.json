@@ -1,5 +1,5 @@
 {
-  "registry_version": 14,
+  "registry_version": 15,
   "qualifications": {
     "A01-CONTROL-PLANE-SELFTEST": {
       "workstream_id": "SYSTEM-MASTER",
@@ -10,6 +10,16 @@
       "evidence_artifact": "a01-control-plane-selftest",
       "overnight_eligible": false,
       "description": "Qualify policy, registry, schemas, bootstrap, gateway safety, cross-ref subject execution, receipt production, exact-SHA binding, shared queue behavior, and overnight admission policy for A01-CONTROL-PLANE-001."
+    },
+    "BOOK-SYSTEM-CANONICAL-BOOK-STATE-MODEL-001": {
+      "workstream_id": "BOOK-SYSTEM",
+      "gate_class": "focused",
+      "source": "subject",
+      "executable": "node",
+      "args": [".github/scripts/a01-book-system-canonical-state-001.js"],
+      "evidence_artifact": "book-system-canonical-book-state-model-001",
+      "overnight_eligible": false,
+      "description": "Qualify the exact Book System parent canonical-state subject through the repository-owned wrapper: object completeness, exact state-version and state-digest preconditions, legal transition enforcement, Prose and Book Evaluator canonical-write denial, research-scope atomicity, author-decision handling, publication-authority boundary, and exact rollback retention. PASS is bounded to the tested subject SHA and does not create publication or production authority."
     },
     "CONTINUITY-TARGET-WINDOWS-REBOOT": {
       "workstream_id": "SYSTEM-MASTER-CONTINUITY",
