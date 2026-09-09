@@ -1,0 +1,54 @@
+name: Book System Integration Proposal Runtime V2 Hosted Prequalification
+
+on:
+  push:
+    branches:
+      - book-system/control-v1
+    paths:
+      - "system-master/book-system/integration-proposal-runtime-v2.js"
+      - "system-master/book-system/integration-proposal-runtime-v2-core.js"
+      - "qualification/book-system/integration-proposal-002/BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-002.json"
+      - "qualification/book-system/integration-proposal-002/BOOK-SYSTEM-RUNTIME-V2-PREIMPLEMENTATION-RESEARCH-001.json"
+      - "qualification/book-system/integration-proposal-002/INTEGRATION-PROPOSAL-RUNTIME-002-FIXTURES.json"
+      - "qualification/book-system/service-interface-002/BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-002.json"
+      - ".github/scripts/book-system-integration-proposal-runtime-002-qualify.js"
+      - ".github/scripts/a01-book-system-integration-proposal-runtime-002.js"
+      - ".github/workflows/book-system-integration-proposal-runtime-002-prequal.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  FORCE_COLOR: "0"
+
+jobs:
+  prequalify:
+    name: Deterministic hosted Runtime V2 prequalification
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+
+      - name: Verify runtime entrypoint and qualifier syntax
+        run: |
+          node --check system-master/book-system/integration-proposal-runtime-v2-core.js
+          node --check system-master/book-system/integration-proposal-runtime-v2.js
+          node --check .github/scripts/book-system-integration-proposal-runtime-002-qualify.js
+          node --check .github/scripts/a01-book-system-integration-proposal-runtime-002.js
+
+      - name: Run Runtime V2 executable qualifier
+        run: node .github/scripts/book-system-integration-proposal-runtime-002-qualify.js
+
+      - name: Upload hosted prequalification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: book-system-runtime-v2-${{ github.run_id }}-hosted-prequalification
+          path: ${{ runner.temp }}/book-system-runtime-v2-${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 30
