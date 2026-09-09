@@ -92,6 +92,7 @@ def closed_loop_status(*, repo: Repository, pilot_id: str, now: int) -> Dict[str
         )
         result["record_materialized"] = False
         result["withdrawn_stage"] = "PRE_BASELINE"
+        result["terminal_occurred_at"] = terminal.get("occurred_at")
         return result
 
     if not rows:
@@ -123,6 +124,8 @@ def closed_loop_status(*, repo: Repository, pilot_id: str, now: int) -> Dict[str
         )
         result["record_materialized"] = True
         result["record_digest"] = digest(record)
+        result["event_count"] = len(record.get("events", []))
+        result["terminal_occurred_at"] = terminal.get("occurred_at")
         result["adjudication"] = copy.deepcopy(adjudication)
         return result
 
@@ -203,6 +206,7 @@ def finalize_closed_loop_if_ready(
         _fail("PILOT_COMPLETION_OPERATION_ID_REQUIRED")
     status = closed_loop_status(repo=repo, pilot_id=pilot_id, now=completed_at)
     if status["standing"] == "CLOSED_LOOP_COMPLETE":
+        record = materialize_runtime_bound_pilot_record(repo=repo, pilot_id=pilot_id)
         return {
             "status": "PASS",
             "completion_version": REAL_LEARNER_PILOT_COMPLETION_VERSION,
@@ -210,6 +214,8 @@ def finalize_closed_loop_if_ready(
             "standing": "CLOSED_LOOP_COMPLETE",
             "already_complete": True,
             "record_digest": status["record_digest"],
+            "event_count": len(record.get("events", [])),
+            "terminal_occurred_at": status.get("terminal_occurred_at"),
             "adjudication": copy.deepcopy(status["adjudication"]),
             "truth_boundary": copy.deepcopy(status["truth_boundary"]),
         }
@@ -232,6 +238,7 @@ def finalize_closed_loop_if_ready(
         "already_complete": False,
         "record_digest": digest(record),
         "event_count": len(record.get("events", [])),
+        "terminal_occurred_at": completed_at,
         "adjudication": copy.deepcopy(adjudication),
         "truth_boundary": {
             "participant_record_integrity": adjudication.get("truth_boundary", {}).get("pilot_record_integrity"),
