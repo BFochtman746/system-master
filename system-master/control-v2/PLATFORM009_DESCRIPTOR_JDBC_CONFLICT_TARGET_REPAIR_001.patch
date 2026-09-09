@@ -1,0 +1,42 @@
+--- a/10_REQUIREMENTS/SMR015-PACKET-CONTRACT.md
++++ b/10_REQUIREMENTS/SMR015-PACKET-CONTRACT.md
+@@ -8,6 +8,7 @@
+ 
+ ## Non-negotiable invariants
+ - Qualification is external evidence bound to the exact immutable descriptor digest; PLATFORM-009 never self-qualifies a model.
++- Descriptor registration is idempotent only by exact descriptor identity: JDBC replay conflicts on `descriptor_id`, then verifies the stored canonical descriptor digest before accepting replay.
+ - Moving aliases cannot hold QUALIFIED standing. Model/provider/version/artifact/configuration/endpoint/backend identity is exact.
+ - Qualification history is append-only; current standing may advance only with later evaluation evidence. Material descriptor change requires new qualification.
+ - Context projection is digest-bound, expiring, trust-labelled and secret-minimized. Retrieved/tool/file content remains untrusted DATA and cannot become instruction authority.
+--- a/11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/model/JdbcModelRegistry.java
++++ b/11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/model/JdbcModelRegistry.java
+@@ -12,7 +12,7 @@
+     @Override public Optional<ModelQualificationRecord> qualification(String id){try(Connection c=dataSource.getConnection()){return readQualification(c,ModelRules.id(id,"descriptorId"));}catch(SQLException e){throw new IllegalStateException("model qualification read failed",e);}}
+     @Override public Optional<ModelContextProjection> projection(String id){try(Connection c=dataSource.getConnection()){return readProjection(c,ModelRules.id(id,"projectionId"));}catch(SQLException e){throw new IllegalStateException("model projection read failed",e);}}
+     @Override public List<ModelDescriptor> descriptors(){try(Connection c=dataSource.getConnection();PreparedStatement p=c.prepareStatement("SELECT * FROM platform009_model_descriptor ORDER BY priority DESC,descriptor_digest ASC,descriptor_id ASC")){List<ModelDescriptor> out=new ArrayList<>();try(ResultSet r=p.executeQuery()){while(r.next())out.add(readDescriptorRow(r));}return List.copyOf(out);}catch(SQLException e){throw new IllegalStateException("model descriptors read failed",e);}}
+-    public static String descriptorInsertSqlContract(){return "INSERT INTO platform009_model_descriptor(descriptor_id,provider_id,model_id,model_version,descriptor_version,model_artifact_digest,configuration_digest,endpoint_id,backend_id,locality,roles,capabilities,priority,max_input_tokens,max_output_tokens,max_context_tokens,risk_profile_id,provenance_evidence_ref,moving_alias,descriptor_digest) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(qualification_id) DO NOTHING";}
++    public static String descriptorInsertSqlContract(){return "INSERT INTO platform009_model_descriptor(descriptor_id,provider_id,model_id,model_version,descriptor_version,model_artifact_digest,configuration_digest,endpoint_id,backend_id,locality,roles,capabilities,priority,max_input_tokens,max_output_tokens,max_context_tokens,risk_profile_id,provenance_evidence_ref,moving_alias,descriptor_digest) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(descriptor_id) DO NOTHING";}
+     public static String qualificationInsertSqlContract(){return "INSERT INTO platform009_model_qualification(qualification_id,descriptor_id,descriptor_digest,standing,qualification_evidence_ref,evaluation_evidence_ref,adversarial_evidence_ref,misuse_evidence_ref,evaluated_at,expires_at) VALUES(?,?,?,?,?,?,?,?,?,?) ON CONFLICT(qualification_id) DO NOTHING";}
+     public static String projectionInsertSqlContract(){return "INSERT INTO platform009_context_projection(projection_id,work_id,projection_digest,estimated_input_tokens,context_bytes,secret_minimization_evidence_ref,governance_ref,created_at,expires_at) VALUES(?,?,?,?,?,?,?,?,?) ON CONFLICT(projection_id) DO NOTHING";}
+     public static String segmentInsertSqlContract(){return "INSERT INTO platform009_context_segment(projection_id,ordinal,segment_id,content_digest,trust_class,classification,instruction_authority,secret_material_present,provenance_ref) VALUES(?,?,?,?,?,?,?,?,?)";}
+--- a/12_TESTS/src/test/java/org/systemmaster/rebuild/platform/model/Platform009AuthorityTests.java
++++ b/12_TESTS/src/test/java/org/systemmaster/rebuild/platform/model/Platform009AuthorityTests.java
+@@ -48,7 +48,7 @@
+-        ok(JdbcModelRegistry.descriptorInsertSqlContract().contains("model_artifact_digest")&&JdbcModelRegistry.descriptorInsertSqlContract().contains("configuration_digest"),"JDBC model artifact/config identity");ok(JdbcModelRegistry.qualificationInsertSqlContract().contains("descriptor_digest")&&JdbcModelRegistry.qualificationInsertSqlContract().contains("adversarial_evidence_ref"),"JDBC qualification evidence binding");ok(JdbcModelRegistry.discoverySqlContract().contains("priority DESC,descriptor_digest ASC,descriptor_id ASC"),"deterministic JDBC model ordering");ok(JdbcInferenceRouteDecisionStore.decisionInsertSqlContract().contains("selected_provider_id")&&JdbcInferenceRouteDecisionStore.decisionInsertSqlContract().contains("selected_model_version"),"route decision provider/version identity");ok(JdbcInferenceRouteDecisionStore.responseInsertSqlContract().contains("authority_granted")&&JdbcInferenceRouteDecisionStore.responseInsertSqlContract().contains("canonical_truth"),"response non-authority persisted");
++        ok(JdbcModelRegistry.descriptorInsertSqlContract().contains("model_artifact_digest")&&JdbcModelRegistry.descriptorInsertSqlContract().contains("configuration_digest"),"JDBC model artifact/config identity");ok(JdbcModelRegistry.descriptorInsertSqlContract().contains("ON CONFLICT(descriptor_id) DO NOTHING")&&!JdbcModelRegistry.descriptorInsertSqlContract().contains("ON CONFLICT(qualification_id)"),"JDBC descriptor idempotency conflict target");ok(JdbcModelRegistry.qualificationInsertSqlContract().contains("descriptor_digest")&&JdbcModelRegistry.qualificationInsertSqlContract().contains("adversarial_evidence_ref"),"JDBC qualification evidence binding");ok(JdbcModelRegistry.discoverySqlContract().contains("priority DESC,descriptor_digest ASC,descriptor_id ASC"),"deterministic JDBC model ordering");ok(JdbcInferenceRouteDecisionStore.decisionInsertSqlContract().contains("selected_provider_id")&&JdbcInferenceRouteDecisionStore.decisionInsertSqlContract().contains("selected_model_version"),"route decision provider/version identity");ok(JdbcInferenceRouteDecisionStore.responseInsertSqlContract().contains("authority_granted")&&JdbcInferenceRouteDecisionStore.responseInsertSqlContract().contains("canonical_truth"),"response non-authority persisted");
+--- a/tools/verify_platform009_contract_parity.py
++++ b/tools/verify_platform009_contract_parity.py
+@@
+ '11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/model/InMemoryModelRegistry.java':['qualification evaluation must advance monotonically','qualification id conflict','moving alias cannot be qualified'],
++'11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/model/JdbcModelRegistry.java':['ON CONFLICT(descriptor_id) DO NOTHING','descriptor id digest conflict'],
+--- a/tools/verify_platform009_sql_contract.py
++++ b/tools/verify_platform009_sql_contract.py
+@@
+ if 'COALESCE(NEW.decision_id,OLD.decision_id)' in s: issues.append('insert-only validator references OLD')
++jdbc=(R/'11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/model/JdbcModelRegistry.java').read_text()
++if 'platform009_model_descriptor' not in jdbc or 'ON CONFLICT(descriptor_id) DO NOTHING' not in jdbc or 'ON CONFLICT(qualification_id) DO NOTHING' in jdbc.split('public static String qualificationInsertSqlContract()',1)[0]: issues.append('JDBC descriptor conflict target drift')
+--- a/tools/verify_smr015_recurrence.py
++++ b/tools/verify_smr015_recurrence.py
+@@
+ ('11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/model/InMemoryModelRegistry.java',['moving alias cannot be qualified','qualification evaluation must advance monotonically','qualification id conflict']),
++('11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/model/JdbcModelRegistry.java',['ON CONFLICT(descriptor_id) DO NOTHING','descriptor id digest conflict']),
