@@ -118,19 +118,35 @@
     {
       "obligation_id": "BOOK-SERVICE-INTERFACE-REGISTRY-002",
       "owner_path": "SYSTEM_MASTER/BOOK",
-      "state": "READY",
+      "state": "CLOSED",
       "objective": "Create the versioned Book parent service-interface successor required by Runtime V2: preserve the four service families and exact identity/result semantics while registering research-verified editorial-stage, target-medium validation, source-to-render, accessibility/proof/correction and optional provenance evidence without transferring provider, author, canonical, lifecycle or publication authority.",
       "source": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-011.json",
       "research_gate": "SATISFIED_BY_EXISTING_BOOK_RESEARCH_VERIFICATION",
-      "stop_condition": "Registry V2 is a distinct immutable subject with compatibility rules and qualification path; Registry V1 PASS remains scoped only to its original exact subject."
+      "closure_evidence": "qualification/book-system/BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-002-CLOSURE.json",
+      "qualified_subject_sha": "77db6b550e9aeb1dfb956627376becbb591498f8",
+      "a01_run_id": 34413227457,
+      "result": "PASS__HOSTED_PREQUAL_AND_A01_REGISTERED_EXACT_SHA"
     },
     {
       "obligation_id": "BOOK-INTEGRATION-PROPOSAL-RUNTIME-002-IMPLEMENTATION",
       "owner_path": "SYSTEM_MASTER/BOOK",
-      "state": "HOLD",
+      "state": "SUPERSEDED",
       "objective": "Implement and qualify BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-002 only after Registry V2 is admitted and its changed interface evidence gate is satisfied.",
       "dependency": "BOOK-SERVICE-INTERFACE-REGISTRY-002",
+      "superseded_by": "BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-002-IMPLEMENTATION-001",
+      "supersession_reason": "Registry V2 dependency is now exact-SHA A-01 PASS; State-012 selects the concrete Runtime V2 implementation/qualification objective.",
       "must_not_do": "Do not implement Runtime V2 against Registry V1 or transfer Registry V1/Runtime V1 evidence to changed V2 subjects."
+    },
+    {
+      "obligation_id": "BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-002-IMPLEMENTATION-001",
+      "owner_path": "SYSTEM_MASTER/BOOK",
+      "state": "READY",
+      "objective": "Implement Runtime V2 against the exact qualified Registry V2 interface, build deterministic adversarial fixtures and prequalification, then obtain a registered exact-SHA A-01 qualification proving parent-safe admission, staleness, editorial, artifact, provenance, author and publication boundaries.",
+      "source": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-012.json",
+      "dependency": "BOOK-SERVICE-INTERFACE-REGISTRY-002 PASS on 77db6b550e9aeb1dfb956627376becbb591498f8",
+      "stop_condition": "Runtime V2 executable subject receives hosted deterministic prequalification and registered exact-SHA A-01 PASS, or an exact evidence-backed blocker/failure is durably classified without transferring Registry V2 or Runtime V1 evidence.",
+      "on_pass": "Advance Book control to BOOK-SYSTEM-VERSION-AND-ROLLBACK-001.",
+      "must_not_do": "Do not create provider-to-canon/lifecycle/export-freeze/publication backdoors, duplicate document engines, absorb Prose child objectives, or treat Registry V2 PASS as Runtime V2 PASS."
     },
     {
       "obligation_id": "PROSE-REAL-LIMITATION-AUTHOR-ADJUDICATION-001",
