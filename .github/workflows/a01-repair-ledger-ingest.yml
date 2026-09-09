@@ -1,0 +1,102 @@
+name: A-01 Repair Ledger Ingest
+
+on:
+  workflow_dispatch:
+    inputs:
+      transaction_b64:
+        description: Exact broker transaction envelope encoded as base64
+        required: true
+        type: string
+  workflow_call:
+    inputs:
+      transaction_b64:
+        required: true
+        type: string
+    outputs:
+      ingest_commit_sha:
+        description: Main commit containing durable repair transaction ingest
+        value: ${{ jobs.ingest.outputs.ingest_commit_sha }}
+      transaction_id:
+        description: Ingested transaction ID
+        value: ${{ jobs.ingest.outputs.transaction_id }}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: a01-repair-ledger
+  cancel-in-progress: false
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      ingest_commit_sha: ${{ steps.meta.outputs.ingest_commit_sha }}
+      transaction_id: ${{ steps.meta.outputs.transaction_id }}
+    steps:
+      - name: Checkout current main
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Validate repair ledger implementation
+        run: |
+          node --check .github/scripts/a01-repair-ledger.js
+          node .github/scripts/a01-repair-ledger-selftest.js
+
+      - name: Decode exact broker transaction
+        env:
+          TRANSACTION_B64: ${{ inputs.transaction_b64 }}
+        run: |
+          mkdir -p .repair-ledger
+          node - <<'NODE'
+          const fs = require('fs');
+          const text = Buffer.from(process.env.TRANSACTION_B64 || '', 'base64').toString('utf8');
+          if (!text.trim()) throw new Error('EMPTY_BROKER_TRANSACTION');
+          JSON.parse(text);
+          fs.writeFileSync('.repair-ledger/broker-transaction.json', text.endsWith('\n') ? text : text + '\n');
+          NODE
+
+      - name: Persist transaction, owner inbox and dispatch packet
+        run: node .github/scripts/a01-repair-ledger.js ingest < .repair-ledger/broker-transaction.json > .repair-ledger/ingest-result.json
+
+      - name: Commit durable repair state
+        id: commit
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add governance/repair qualification/a01/repair-requests 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo 'changed=false' >> "$GITHUB_OUTPUT"
+            echo 'commit_sha=' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          tx=$(node -e "const r=require('./.repair-ledger/ingest-result.json'); console.log(r.transaction_id)")
+          git commit -m "repair: ingest ${tx}"
+          git pull --rebase origin main
+          git push origin HEAD:main
+          echo 'changed=true' >> "$GITHUB_OUTPUT"
+          echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Expose ingest metadata
+        id: meta
+        shell: bash
+        run: |
+          echo "transaction_id=$(node -e \"const r=require('./.repair-ledger/ingest-result.json'); console.log(r.transaction_id || '')\")" >> "$GITHUB_OUTPUT"
+          if [ "${{ steps.commit.outputs.changed }}" = "true" ]; then
+            echo "ingest_commit_sha=${{ steps.commit.outputs.commit_sha }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "ingest_commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Publish ingest summary
+        if: always()
+        run: |
+          echo '## Durable Repair Ledger Ingest' >> "$GITHUB_STEP_SUMMARY"
+          echo '```json' >> "$GITHUB_STEP_SUMMARY"
+          cat .repair-ledger/ingest-result.json >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
