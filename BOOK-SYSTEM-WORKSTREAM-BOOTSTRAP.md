@@ -22,7 +22,7 @@ For Book System control work, read in this order:
 5. `qualification/book-system/BOOK-SYSTEM-AUTHORING-LIFECYCLE-CONTRACT-001.json`
 6. the highest-numbered `qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-*.json`
 
-`BOOK-SYSTEM-RECONCILED-STATE-003` is the current parent control state as of 2026-09-09. Earlier reconciled states remain historical evidence and may preserve facts that were true at their time, but they do not override a later parent control/next-step state.
+`BOOK-SYSTEM-RECONCILED-STATE-004` is the current parent control state as of 2026-09-09. Earlier reconciled states remain historical evidence and may preserve facts that were true at their time, but they do not override a later parent control/next-step state.
 
 Then inspect the live child branch before routing work into the Prose Project.
 
@@ -39,19 +39,24 @@ Neither lineage replaces the other. Book System owns canonical lifecycle state a
 
 ## Qualified parent foundation
 
-`BOOK-SYSTEM-CANONICAL-BOOK-STATE-MODEL-001` is closed on exact subject SHA `b6938fcfc5c2c24ac23b558de6dfc7f75c382312` through the registered canonical A-01 gateway. The closure receipt is:
+`BOOK-SYSTEM-CANONICAL-BOOK-STATE-MODEL-001` is closed on exact subject SHA `b6938fcfc5c2c24ac23b558de6dfc7f75c382312` through the registered canonical A-01 gateway.
 
-`qualification/book-system/BOOK-SYSTEM-CANONICAL-BOOK-STATE-MODEL-001-CLOSURE.json`
+`BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-001` is closed on exact subject SHA `9245cf9ce56f15020369eb490d9e562480825158` through the registered canonical A-01 gateway. It qualifies four parent-safe service families and seventeen operations without transferring canonical-write authority to providers.
 
-That qualification proves the bounded parent state-model behaviors recorded in the receipt; it does not transfer to later SHAs or grant publication/production authority.
+Closure receipts:
+
+- `qualification/book-system/BOOK-SYSTEM-CANONICAL-BOOK-STATE-MODEL-001-CLOSURE.json`
+- `qualification/book-system/BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-001-CLOSURE.json`
+
+Exact-SHA qualification never transfers automatically to later commits and grants no publication/production authority beyond the bounded proof recorded in each receipt.
 
 ## Current parent next-step rule
 
 A generic **Continue** in Book System control follows the `current_parent_critical_path.id` in the highest-numbered reconciled parent state unless newer parent-authoritative evidence changes the dependency graph.
 
-As of `BOOK-SYSTEM-RECONCILED-STATE-003`, the parent critical path is:
+As of `BOOK-SYSTEM-RECONCILED-STATE-004`, the parent critical path is:
 
-`BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-001`
+`BOOK-SYSTEM-LIFECYCLE-TRANSITION-ENGINE-001`
 
 Do not route generic Book System continuation to the most recently changed Prose or Book Evaluator lane merely because that subordinate work changed later.
 
