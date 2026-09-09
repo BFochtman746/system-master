@@ -1,0 +1,311 @@
+{
+  "fixture_set_id": "BOOK-SYSTEM-CANONICAL-BOOK-STATE-MODEL-001-FIXTURES",
+  "model_id": "BOOK-SYSTEM-CANONICAL-BOOK-STATE-MODEL-001",
+  "base_state": {
+    "schema_version": 1,
+    "state_version": 1,
+    "book_project": {
+      "book_project_id": "BOOKPROJECT:001",
+      "book_id": "BOOK:001",
+      "status": "DRAFTING",
+      "governing_brief_ref": "BRIEF:001",
+      "canonical_manifest_ref": "CANON:001"
+    },
+    "governing_briefs": {
+      "BRIEF:001": {
+        "brief_id": "BRIEF:001",
+        "version": 1,
+        "author_intent": "Preserve project-specific intent and voice while improving the book under explicit evidence and author boundaries.",
+        "form": "BOOK",
+        "genre": "PROJECT_DEFINED",
+        "audience": "PROJECT_DEFINED",
+        "voice_goals": ["PROJECT_SPECIFIC"],
+        "hard_constraints": ["NO_SILENT_CANON_MUTATION"]
+      }
+    },
+    "canon_manifests": {
+      "CANON:001": {
+        "canon_manifest_id": "CANON:001",
+        "version": 1,
+        "facts": [],
+        "entities": [],
+        "world_rules": [],
+        "protected_language_refs": [],
+        "intent_constraints": [],
+        "approval_state": "APPROVED"
+      }
+    },
+    "story_bibles": {
+      "STORYBIBLE:001": {
+        "story_bible_id": "STORYBIBLE:001",
+        "version": 1,
+        "entity_refs": [],
+        "relationship_refs": [],
+        "timeline_refs": [],
+        "arc_refs": [],
+        "motif_theme_refs": [],
+        "open_questions": [],
+        "provenance": []
+      }
+    },
+    "book_plans": {
+      "PLAN:001": {
+        "plan_id": "PLAN:001",
+        "version": 1,
+        "part_refs": [],
+        "chapter_refs": [],
+        "scene_refs": [],
+        "dependency_edges": [],
+        "purpose_and_payoff_refs": []
+      }
+    },
+    "manuscripts": {
+      "MANUSCRIPT:001:V1": {
+        "manuscript_id": "MANUSCRIPT:001",
+        "version_id": "MANUSCRIPT:001:V1",
+        "artifact_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "authority_state": "CANONICAL",
+        "parent_version_ref": null,
+        "change_set_ref": "CHANGESET:000",
+        "created_by": "PARENT_SYSTEM",
+        "created_at": "2026-09-09T16:00:00Z"
+      }
+    },
+    "research_evidence_links": {},
+    "author_decisions": {},
+    "integration_proposals": {},
+    "export_releases": {},
+    "active": {
+      "governing_brief_ref": "BRIEF:001",
+      "canon_manifest_ref": "CANON:001",
+      "story_bible_ref": "STORYBIBLE:001",
+      "book_plan_ref": "PLAN:001",
+      "canonical_manuscript_ref": "MANUSCRIPT:001:V1"
+    }
+  },
+  "cases": [
+    {
+      "case_id": "VALID-STATE-001",
+      "type": "VALIDATE_STATE",
+      "expected": "PASS"
+    },
+    {
+      "case_id": "VALID-PARENT-TRANSITION-001",
+      "type": "APPLY_MUTATION",
+      "mutation": {
+        "mutation_id": "MUTATION:001",
+        "actor_class": "PARENT_SYSTEM",
+        "expected_state_version": 1,
+        "expected_state_digest": "__CURRENT__",
+        "rollback_state_version": 1,
+        "operations": [
+          {"type": "ADVANCE_PROJECT_STATUS", "target_status": "STRUCTURAL_REVIEW"}
+        ]
+      },
+      "expected": "PASS",
+      "expected_next_state_version": 2,
+      "expected_project_status": "STRUCTURAL_REVIEW",
+      "expect_rollback_exact": true
+    },
+    {
+      "case_id": "REJECT-PROSE-CANONICAL-WRITE-001",
+      "type": "APPLY_MUTATION",
+      "mutation": {
+        "mutation_id": "MUTATION:002",
+        "actor_class": "PROSE_PROJECT",
+        "expected_state_version": 1,
+        "expected_state_digest": "__CURRENT__",
+        "rollback_state_version": 1,
+        "operations": [
+          {"type": "SET_ACTIVE_CANONICAL_MANUSCRIPT", "ref": "MANUSCRIPT:001:V1"}
+        ]
+      },
+      "expected": "REJECT",
+      "expected_code": "CANONICAL_WRITE_AUTHORITY_DENIED",
+      "expect_original_unchanged": true
+    },
+    {
+      "case_id": "REJECT-EVALUATOR-STATUS-WRITE-001",
+      "type": "APPLY_MUTATION",
+      "mutation": {
+        "mutation_id": "MUTATION:003",
+        "actor_class": "BOOK_EVALUATOR",
+        "expected_state_version": 1,
+        "expected_state_digest": "__CURRENT__",
+        "rollback_state_version": 1,
+        "operations": [
+          {"type": "ADVANCE_PROJECT_STATUS", "target_status": "STRUCTURAL_REVIEW"}
+        ]
+      },
+      "expected": "REJECT",
+      "expected_code": "CANONICAL_WRITE_AUTHORITY_DENIED",
+      "expect_original_unchanged": true
+    },
+    {
+      "case_id": "REJECT-ILLEGAL-TRANSITION-001",
+      "type": "APPLY_MUTATION",
+      "mutation": {
+        "mutation_id": "MUTATION:004",
+        "actor_class": "PARENT_SYSTEM",
+        "expected_state_version": 1,
+        "expected_state_digest": "__CURRENT__",
+        "rollback_state_version": 1,
+        "operations": [
+          {"type": "ADVANCE_PROJECT_STATUS", "target_status": "PUBLISHED_OR_DELIVERED"}
+        ]
+      },
+      "expected": "REJECT",
+      "expected_code": "ILLEGAL_PROJECT_TRANSITION",
+      "expect_original_unchanged": true
+    },
+    {
+      "case_id": "REJECT-STATE-VERSION-MISMATCH-001",
+      "type": "APPLY_MUTATION",
+      "mutation": {
+        "mutation_id": "MUTATION:005",
+        "actor_class": "PARENT_SYSTEM",
+        "expected_state_version": 99,
+        "expected_state_digest": "__CURRENT__",
+        "rollback_state_version": 1,
+        "operations": [
+          {"type": "ADVANCE_PROJECT_STATUS", "target_status": "STRUCTURAL_REVIEW"}
+        ]
+      },
+      "expected": "REJECT",
+      "expected_code": "STATE_VERSION_MISMATCH",
+      "expect_original_unchanged": true
+    },
+    {
+      "case_id": "REJECT-STATE-DIGEST-MISMATCH-001",
+      "type": "APPLY_MUTATION",
+      "mutation": {
+        "mutation_id": "MUTATION:006",
+        "actor_class": "PARENT_SYSTEM",
+        "expected_state_version": 1,
+        "expected_state_digest": "0000000000000000000000000000000000000000000000000000000000000000",
+        "rollback_state_version": 1,
+        "operations": [
+          {"type": "ADVANCE_PROJECT_STATUS", "target_status": "STRUCTURAL_REVIEW"}
+        ]
+      },
+      "expected": "REJECT",
+      "expected_code": "STATE_DIGEST_MISMATCH",
+      "expect_original_unchanged": true
+    },
+    {
+      "case_id": "VALID-RESEARCH-EVIDENCE-REGISTRATION-001",
+      "type": "APPLY_MUTATION",
+      "mutation": {
+        "mutation_id": "MUTATION:007",
+        "actor_class": "RESEARCH_IMPORT",
+        "expected_state_version": 1,
+        "expected_state_digest": "__CURRENT__",
+        "rollback_state_version": 1,
+        "operations": [
+          {
+            "type": "REGISTER_RESEARCH_EVIDENCE_LINK",
+            "object": {
+              "link_id": "EVIDENCE:001",
+              "claim_or_evidence_ref": "SOURCE:001",
+              "target_book_object_ref": "BOOK:001",
+              "freshness_state": "CURRENT",
+              "conflict_state": "NONE",
+              "provenance": ["SOURCE:001"],
+              "rights_class": "AUTHORIZED"
+            }
+          }
+        ]
+      },
+      "expected": "PASS",
+      "expected_next_state_version": 2,
+      "expect_rollback_exact": true
+    },
+    {
+      "case_id": "REJECT-RESEARCH-CANON-WRITE-ATOMIC-001",
+      "type": "APPLY_MUTATION",
+      "mutation": {
+        "mutation_id": "MUTATION:008",
+        "actor_class": "RESEARCH_IMPORT",
+        "expected_state_version": 1,
+        "expected_state_digest": "__CURRENT__",
+        "rollback_state_version": 1,
+        "operations": [
+          {
+            "type": "REGISTER_RESEARCH_EVIDENCE_LINK",
+            "object": {
+              "link_id": "EVIDENCE:002",
+              "claim_or_evidence_ref": "SOURCE:002",
+              "target_book_object_ref": "BOOK:001",
+              "freshness_state": "CURRENT",
+              "conflict_state": "NONE",
+              "provenance": ["SOURCE:002"],
+              "rights_class": "AUTHORIZED"
+            }
+          },
+          {"type": "SET_ACTIVE_CANON_MANIFEST", "ref": "CANON:001"}
+        ]
+      },
+      "expected": "REJECT",
+      "expected_code": "RESEARCH_WRITE_SCOPE_DENIED",
+      "expect_original_unchanged": true
+    },
+    {
+      "case_id": "VALID-AUTHOR-DECISION-REGISTRATION-001",
+      "type": "APPLY_MUTATION",
+      "mutation": {
+        "mutation_id": "MUTATION:009",
+        "actor_class": "AUTHOR",
+        "expected_state_version": 1,
+        "expected_state_digest": "__CURRENT__",
+        "rollback_state_version": 1,
+        "operations": [
+          {
+            "type": "REGISTER_AUTHOR_DECISION",
+            "object": {
+              "decision_id": "DECISION:001",
+              "subject_ref": "REVISION:001",
+              "decision_type": "REVISION_PROMOTION",
+              "options": ["APPROVE", "REJECT"],
+              "status": "APPROVED",
+              "author_choice": "APPROVE",
+              "effective_version": 1
+            }
+          }
+        ]
+      },
+      "expected": "PASS",
+      "expected_next_state_version": 2,
+      "expect_rollback_exact": true
+    },
+    {
+      "case_id": "REJECT-PUBLICATION-WITHOUT-AUTHOR-001",
+      "type": "APPLY_MUTATION",
+      "precondition_patch": {
+        "book_project": {"status": "EXPORT_FROZEN"},
+        "export_releases": {
+          "EXPORT:001": {
+            "release_id": "EXPORT:001",
+            "frozen_version_id": "MANUSCRIPT:001:V1",
+            "format": "DOCX",
+            "digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "approval_state": "READY",
+            "publication_authority_state": "NOT_AUTHORIZED"
+          }
+        }
+      },
+      "mutation": {
+        "mutation_id": "MUTATION:010",
+        "actor_class": "PARENT_SYSTEM",
+        "expected_state_version": 1,
+        "expected_state_digest": "__CURRENT__",
+        "rollback_state_version": 1,
+        "operations": [
+          {"type": "ADVANCE_PROJECT_STATUS", "target_status": "PUBLISHED_OR_DELIVERED"}
+        ]
+      },
+      "expected": "REJECT",
+      "expected_code": "AUTHOR_PUBLICATION_DECISION_REQUIRED",
+      "expect_original_unchanged": true
+    }
+  ]
+}
