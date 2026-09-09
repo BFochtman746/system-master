@@ -1,0 +1,52 @@
+{
+  "contract_id": "PROSE-SEMANTIC-DIAGNOSTIC-EVIDENCE-PROVIDER-002-v1",
+  "project": "PROSE PROJECT",
+  "purpose": "Admit nonreconstructive, evidence-anchored semantic passage-state hypotheses and text-side diagnostic observations from a model or human provider without granting that provider canon, author-intent, defect, revision or publication authority.",
+  "inputs": {
+    "private_passage": "TRANSIENT_PROVIDER_INPUT_ONLY__NOT_PERSISTED_BY_THIS_CONTRACT",
+    "passage_digest": "SHA256_REQUIRED",
+    "source_id": "REQUIRED",
+    "provider_identity": "REQUIRED",
+    "provider_kind": ["MODEL", "HUMAN", "DETERMINISTIC"]
+  },
+  "passage_state_claims": {
+    "model_hypothesis_allowed": ["scene_or_chapter_function","pov","focalization","reader_state","pacing_target","information_release","relationship_pressure","project_voice","book_voice","continuity"],
+    "explicit_author_authority_only": ["authorial_intent","protected_language"],
+    "canon_bound_authority_only": ["canon_facts"],
+    "evidence_anchor": "locator_id plus SHA256 required",
+    "confidence_range": [0.0,1.0],
+    "confidence_below_0_60": "UNRESOLVED"
+  },
+  "diagnostic_signals": {
+    "text_side_dimension_owner_must_match_step_005_map": true,
+    "reader_experience_dimensions_excluded": true,
+    "provider_finding_type": "OBSERVATION_OR_HYPOTHESIS_ONLY",
+    "provider_may_self_certify_functional_harm": false,
+    "provider_may_self_certify_purpose_miss": false,
+    "provider_may_self_certify_objective_defect": false,
+    "provider_may_self_certify_bounded_gain": false,
+    "normalized_finding_type": "OBSERVATION",
+    "revision_opportunity_id": null
+  },
+  "authority": {
+    "model_hypothesis_is_canon": false,
+    "model_hypothesis_is_author_intent": false,
+    "model_hypothesis_is_protected_language_authority": false,
+    "provider_may_authorize_revision": false,
+    "provider_may_authorize_publication": false,
+    "provider_may_target_named_author": false,
+    "universal_prose_score": false,
+    "step_007_and_step_008_remain_downstream_gates": true
+  },
+  "privacy": {
+    "persist_raw_text": false,
+    "persist_passage_text": false,
+    "persist_source_excerpt": false,
+    "persist_quote": false,
+    "persist_candidate_text": false,
+    "persist_prompt_payload": false,
+    "persist_embedding_payload": false,
+    "nonreconstructive_semantic_codes_and_anchor_digests_allowed": true
+  },
+  "failure_mode": "REJECT_OR_UNRESOLVED__NEVER_INFER_MISSING_AUTHORITY"
+}
