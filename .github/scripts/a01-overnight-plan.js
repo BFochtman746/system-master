@@ -31,6 +31,7 @@ function safeInt(v) { return Number.isInteger(v) ? v : NaN; }
 function validTime(v) { return typeof v === 'string' && /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(v); }
 function validSha(v) { return typeof v === 'string' && /^[0-9a-fA-F]{40}$/.test(v); }
 function requiredString(v) { return typeof v === 'string' && v.trim().length > 0; }
+function minDate(...values) { return new Date(Math.min(...values.map(v => v.getTime()))); }
 function loadTickets(dir) {
   if (!fs.existsSync(dir)) return [];
   return fs.readdirSync(dir).filter(n => n.endsWith('.json')).sort().map(name => {
@@ -136,9 +137,13 @@ function buildPlan({ now = new Date(), policy, registry, ticketRecords, nightDat
   const allocated = new Map();
   let cursor = new Date(globalStart);
 
-  function place(v, start) {
+  function place(v, start, gapBoundary) {
     const finish = new Date(start.getTime() + v.max_minutes * 60000);
-    scheduled.push({ ticket: v, start, finish });
+    const latestBudgetEnd = new Date(v.latest.getTime() + v.max_minutes * 60000);
+    const gapEnd = gapBoundary || v.end;
+    const admissionEnd = minDate(v.end, latestBudgetEnd, gapEnd);
+    const admissionStart = v.raw.exclusive_window === true ? new Date(start) : new Date(Math.max(globalStart.getTime(), v.earliest.getTime()));
+    scheduled.push({ ticket: v, start, finish, admissionStart, admissionEnd });
     allocated.set(v.raw.workstream_id, (allocated.get(v.raw.workstream_id) || 0) + v.max_minutes);
     cursor = new Date(finish.getTime() + bufferMs);
     remaining.delete(v);
@@ -149,7 +154,8 @@ function buildPlan({ now = new Date(), policy, registry, ticketRecords, nightDat
       const choice = chooseCandidate(candidates, cursor, boundary, allocated, bufferMs);
       if (choice) {
         const start = new Date(Math.max(cursor.getTime(), choice.earliest.getTime()));
-        place(choice, start); continue;
+        place(choice, start, new Date(boundary.getTime() - bufferMs));
+        continue;
       }
       const future = candidates.map(c => c.earliest).filter(d => d > cursor && d < boundary).sort((a,b) => a-b)[0];
       if (future) { cursor = new Date(future); continue; }
@@ -166,7 +172,7 @@ function buildPlan({ now = new Date(), policy, registry, ticketRecords, nightDat
       rejected.push({ file: r.file, ticket_id: r.raw.ticket_id, reasons: ['RESERVATION_CONFLICT_OR_INSUFFICIENT_WINDOW'] });
       continue;
     }
-    place(r, start);
+    place(r, start, r.end);
   }
   fillUntil(globalEnd);
   for (const v of remaining) rejected.push({ file: v.file, ticket_id: v.raw.ticket_id, reasons: ['DEFERRED_NO_SAFE_FIT'] });
@@ -184,14 +190,15 @@ function buildPlan({ now = new Date(), policy, registry, ticketRecords, nightDat
     origin_ref: s.ticket.raw.origin_ref,
     qualifier_timeout_minutes: s.ticket.max_minutes,
     job_timeout_minutes: Math.min(policy.runtime.max_job_timeout_minutes, s.ticket.max_minutes + policy.runtime.cleanup_margin_minutes),
-    not_before: s.start.toISOString(),
-    not_after: s.ticket.end.toISOString(),
+    planned_start: s.start.toISOString(),
+    not_before: s.admissionStart.toISOString(),
+    not_after: s.admissionEnd.toISOString(),
     resume_on_pass: s.ticket.raw.resume_on_pass,
     resume_on_failure: s.ticket.raw.resume_on_failure,
     notification_target: s.ticket.raw.notification_target
   }));
-  while (slots.length < policy.overnight.max_slots) slots.push({ enabled: false, slot: slots.length + 1, ticket_id: '', workstream_id: '', qualification_id: 'A01-CONTROL-PLANE-SELFTEST', subject_sha: '0000000000000000000000000000000000000000', origin_ref: 'refs/heads/main', qualifier_timeout_minutes: policy.runtime.normal_qualifier_timeout_minutes, job_timeout_minutes: policy.runtime.normal_job_timeout_minutes, not_before: globalStart.toISOString(), not_after: globalEnd.toISOString(), resume_on_pass: 'No slot.', resume_on_failure: 'No slot.', notification_target: 'none' });
-  return { plan_version: 1, policy_version: policy.policy_version, registry_version: registry.registry_version, night_date: target, timezone: policy.overnight.timezone, window_start: globalStart.toISOString(), window_end: globalEnd.toISOString(), generated_at: now.toISOString(), scheduled_count: scheduled.length, rejected, slots };
+  while (slots.length < policy.overnight.max_slots) slots.push({ enabled: false, slot: slots.length + 1, ticket_id: '', workstream_id: '', qualification_id: 'A01-CONTROL-PLANE-SELFTEST', subject_sha: '0000000000000000000000000000000000000000', origin_ref: 'refs/heads/main', qualifier_timeout_minutes: policy.runtime.normal_qualifier_timeout_minutes, job_timeout_minutes: policy.runtime.normal_job_timeout_minutes, planned_start: globalStart.toISOString(), not_before: globalStart.toISOString(), not_after: globalEnd.toISOString(), resume_on_pass: 'No slot.', resume_on_failure: 'No slot.', notification_target: 'none' });
+  return { plan_version: 2, policy_version: policy.policy_version, registry_version: registry.registry_version, night_date: target, timezone: policy.overnight.timezone, window_start: globalStart.toISOString(), window_end: globalEnd.toISOString(), generated_at: now.toISOString(), scheduled_count: scheduled.length, rejected, slots };
 }
 
 function emit(name, value) {

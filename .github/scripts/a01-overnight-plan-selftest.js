@@ -46,12 +46,18 @@ const tickets = [
   record(base('long', 'TEST-C', 'TEST-LONG', { estimated_minutes: 200, max_runtime_minutes: 200, checkpoint_interval_minutes: 30, priority: 10 }), 'long.json')
 ];
 const plan = planner.buildPlan({ now: new Date('2026-09-08T23:57:00-04:00'), policy, registry: r, ticketRecords: tickets, nightDate: '2026-09-09' });
+assert(plan.plan_version === 2, 'planner v2 required');
 assert(plan.scheduled_count === 3, `expected 3 slots, got ${plan.scheduled_count}`);
 assert(plan.slots[0].ticket_id === 'normal', 'safe backfill should run before reservation');
+assert(plan.slots[0].not_before === '2026-09-09T04:00:00.000Z', 'normal slot should be allowed to compress to its own earliest start');
+assert(plan.slots[0].not_after === '2026-09-09T04:58:00.000Z', 'pre-reservation slot must fail closed before reservation buffer');
 assert(plan.slots[1].ticket_id === 'reserved', 'reserved window must be protected');
 assert(plan.slots[1].not_before === '2026-09-09T05:00:00.000Z', 'reservation must bind 01:00 New York');
+assert(plan.slots[1].not_after === '2026-09-09T05:30:00.000Z', 'reservation admission end must remain protected');
 assert(plan.slots[2].ticket_id === 'long', 'long checkpointable work should use remaining capacity');
 assert(plan.slots[2].qualifier_timeout_minutes === 200, 'long runtime budget must survive planning');
+assert(plan.slots[2].not_before === '2026-09-09T04:00:00.000Z', 'post-reservation normal work should be eligible immediately after dependency completion');
+assert(plan.slots[2].planned_start === '2026-09-09T05:32:00.000Z', 'planned start should retain conservative audit schedule');
 
 const badLongRegistry = JSON.parse(JSON.stringify(r));
 badLongRegistry.qualifications['TEST-LONG'].checkpoint_capable = false;
