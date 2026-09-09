@@ -1,0 +1,57 @@
+{
+  "finding_id": "BOOK-SYSTEM-LIFECYCLE-PARENT-IDENTITY-COMPATIBILITY-FINDING-001",
+  "effective_date": "2026-09-09",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "standing": "BLOCKING_COMPATIBILITY_FINDING__REPRESENTATION_AND_DIGEST_IDENTITY_MISMATCH_PROVEN",
+  "discovered_during": "BOOK-SYSTEM-EXPORT-FREEZE-001 forensic implementation readiness review",
+  "affected_authorities": [
+    "BOOK-SYSTEM-LIFECYCLE-TRANSITION-ENGINE-001",
+    "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001",
+    "BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001",
+    "future BOOK-SYSTEM-EXPORT-FREEZE-001"
+  ],
+  "evidence": {
+    "lifecycle_v1_parent_shape": "Qualified Lifecycle v1 fixtures use keyed object collections for governing_briefs, canon_manifests, story_bibles, book_plans, manuscripts, research_evidence_links, author_decisions, integration_proposals and export_releases.",
+    "lifecycle_v1_lookup_behavior": "Lifecycle v1 evidenceObject/author-decision lookup requires keyed object collections and computes parent identity with digestParentState over the complete projected object.",
+    "current_parent_shape": "Qualified Version/Rollback and Author Decision Queue fixtures/runtime use array collections and an explicit state_digest sealed by computing sha256 over the state with state_digest excluded.",
+    "version_rollback_receipt_requirement": "Version/Rollback recordAuthorizedParentSuccessor requires authority receipt pre/post parent digests to equal the current sealed parent state's state_digest values.",
+    "facade_check": "lifecycle-transition-engine-runtime.js contains no current-parent array/digest compatibility adapter."
+  },
+  "failure_modes_if_unrepaired": [
+    "A current array export_releases collection cannot be resolved as lifecycle evidence by Lifecycle v1 evidenceObject().",
+    "A current array author_decisions collection cannot satisfy Lifecycle v1 author-decision gates without projection.",
+    "Lifecycle v1 receipt parent digests are not guaranteed to equal sealed current parent state_digest identities expected by Version/Rollback.",
+    "Directly modifying Lifecycle v1 would invalidate its exact-SHA qualification and silently broaden the proven subject.",
+    "Letting Export Freeze compensate internally would create an unqualified hidden lifecycle bridge and duplicate lifecycle authority."
+  ],
+  "selected_repair": {
+    "id": "BOOK-SYSTEM-LIFECYCLE-CURRENT-PARENT-COMPATIBILITY-ADAPTER-001",
+    "classification": "STRICT_COMPATIBILITY_REPAIR__NO_NEW_LIFECYCLE_POLICY_OR_GATE_SEMANTICS",
+    "strategy": [
+      "Keep BOOK-SYSTEM-LIFECYCLE-TRANSITION-ENGINE-001 source and gate semantics unchanged.",
+      "Project the current sealed-array parent into the exact keyed collection shape required by Lifecycle v1 for evaluation only.",
+      "Translate evidence refs, author decision refs and integration proposal refs by stable IDs without inventing or dropping records.",
+      "Bind the v1 projected lifecycle ledger to the projected-parent digest only inside the delegated v1 call.",
+      "After a v1 COMMITTED project transition, apply only the proven lifecycle status/state-version delta to the original current parent, then reseal using the current parent state_digest algorithm.",
+      "Emit a compatibility receipt whose canonical pre/post parent digests are current sealed state_digest identities while preserving the underlying v1 receipt and its digest as evidence.",
+      "Translate the lifecycle ledger back so its external bound_parent_state_version/digest match the current sealed parent.",
+      "Reject any projected v1 result that changes parent collections, active pointers, book identity or any parent field other than the lifecycle-authorized status/state-version delta.",
+      "Qualify the adapter on an exact SHA with predecessor Lifecycle v1 regression coverage plus current array/digest integration cases."
+    ]
+  },
+  "research_gate": {
+    "required": false,
+    "reason": "This is a strict compatibility repair of already-qualified behavior with no new capability, policy, provider authority or lifecycle gate semantics; it falls under the research-before-implementation repair exception."
+  },
+  "must_not": [
+    "Modify or relabel Lifecycle v1 qualification in place.",
+    "Create new lifecycle transitions or gate types.",
+    "Permit provider direct transition authority.",
+    "Normalize or reinterpret author decisions.",
+    "Let the adapter mutate manuscript, release, proposal or evidence collections.",
+    "Treat adapter PASS as transfer of Lifecycle v1 qualification to unrelated changed code."
+  ],
+  "blocks": "BOOK-SYSTEM-EXPORT-FREEZE-001 executable implementation",
+  "pass_unlocks": "Resume BOOK-SYSTEM-EXPORT-FREEZE-001 implementation using the qualified compatibility adapter for the separate lifecycle handoff.",
+  "qualification_effect": "NONE__COMPATIBILITY_FINDING_ONLY"
+}
