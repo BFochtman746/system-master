@@ -8,9 +8,11 @@ on:
       - '.github/scripts/a01-overnight-*.js'
       - '.github/scripts/a01-runner-guard.ps1'
       - '.github/scripts/validate-system-topology.js'
+      - '.github/scripts/validate-system-control-branch.js'
       - 'qualification/a01/**'
       - 'governance/**'
       - 'SYSTEM-MASTER-WORKSTREAM-BOOTSTRAP.md'
+      - 'SYSTEMS.md'
   pull_request:
     paths:
       - '.github/workflows/**'
@@ -18,9 +20,11 @@ on:
       - '.github/scripts/a01-overnight-*.js'
       - '.github/scripts/a01-runner-guard.ps1'
       - '.github/scripts/validate-system-topology.js'
+      - '.github/scripts/validate-system-control-branch.js'
       - 'qualification/a01/**'
       - 'governance/**'
       - 'SYSTEM-MASTER-WORKSTREAM-BOOTSTRAP.md'
+      - 'SYSTEMS.md'
 
 permissions:
   contents: read
@@ -37,7 +41,7 @@ jobs:
           fetch-depth: 1
           persist-credentials: false
 
-      - name: Enforce canonical four-system topology
+      - name: Enforce System Master parent topology and authority registries
         run: node .github/scripts/validate-system-topology.js
 
       - name: Self-test enforcement logic
