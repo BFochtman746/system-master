@@ -1,0 +1,28 @@
+{
+  "contract_id": "LITERARY-EDITORIAL-REVIEW-PACKET-HARDENING-004-v1",
+  "standing": "ACTIVE__PROSPECTIVE_REVIEW_PACKET_METADATA_CONTRACT",
+  "purpose": "Make future Literary Prose author/editor review packets explicit about editorial stage, bounded scope, decision query, escalation reason, authority requirement, and retain-original default without changing existing manuscript decisions.",
+  "applies_to": ["FUTURE_REVIEW_PACKETS", "EVIDENCE_PRESERVING_MIGRATIONS_ONLY"],
+  "required_metadata": {
+    "editorial_stage": ["DEVELOPMENTAL", "LINE", "COPY", "MECHANICAL"],
+    "review_scope": "A bounded passage/chapter/book-level scope identifier; must not imply permission beyond the named scope.",
+    "decision_query": "The exact decision being requested from the human/author/editor.",
+    "escalation_reason": ["AUTHOR_INTENT", "CANON", "MEANING", "VOICE", "AMBIGUITY", "PRESERVATION_CONFLICT", "SUBJECTIVE_GAIN", "OTHER_NAMED_REASON"],
+    "authority_requirement": ["AUTHOR", "HUMAN_EDITOR", "DELEGATED_EDITORIAL_JUDGMENT", "NONE_FOR_INFORMATIONAL_REVIEW"],
+    "original_retained_default": true,
+    "automatic_resolution_authorized": false,
+    "automatic_manuscript_mutation_authorized": false
+  },
+  "rules": [
+    "Existing author dispositions must never be rewritten merely to adopt this metadata contract.",
+    "A migration may add metadata only when the underlying historical evidence already supports it; otherwise leave the historical packet unchanged and use the contract prospectively.",
+    "If the decision query needs author intent, a generic Continue or objective restatement is not authority.",
+    "Retain-original remains the default when expected gain or preservation safety is unproven.",
+    "Editorial stage is descriptive routing metadata, not permission to broaden edit scope.",
+    "Escalation reason must name the uncertainty instead of using a generic human-review flag.",
+    "No review packet may authorize publication, canon replacement, or manuscript overwrite unless separate explicit authority exists."
+  ],
+  "schema": "EDITORIAL-REVIEW-PACKET.schema.json",
+  "validator": "validate_editorial_review_packet.py",
+  "night_shift_packet": "../night-shift-2026-09-09/PRIORITIZED-BUILD-PACKETS-v2.json#LITERARY-EDITORIAL-REVIEW-PACKET-HARDENING-004"
+}

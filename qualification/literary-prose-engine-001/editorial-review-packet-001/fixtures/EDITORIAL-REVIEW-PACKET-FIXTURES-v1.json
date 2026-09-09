@@ -1,0 +1,72 @@
+{
+  "fixture_id": "LITERARY-EDITORIAL-REVIEW-PACKET-FIXTURES-v1",
+  "positive": [
+    {
+      "packet_id": "fixture-line-author-intent",
+      "editorial_stage": "LINE",
+      "review_scope": "CHAPTER_27_BOUNDED_PASSAGE",
+      "decision_query": "Retain the original or accept the bounded line-level candidate?",
+      "escalation_reason": "AUTHOR_INTENT",
+      "authority_requirement": "AUTHOR",
+      "original_retained_default": true,
+      "automatic_resolution_authorized": false,
+      "automatic_manuscript_mutation_authorized": false,
+      "publication_authorized": false,
+      "canon_replacement_authorized": false
+    },
+    {
+      "packet_id": "fixture-mechanical-no-authority",
+      "editorial_stage": "MECHANICAL",
+      "review_scope": "ONE_EXACT_DUPLICATE_TOKEN",
+      "decision_query": "Informational verification of a mechanically proven duplicate-token repair.",
+      "escalation_reason": "OTHER_NAMED_REASON",
+      "authority_requirement": "NONE_FOR_INFORMATIONAL_REVIEW",
+      "original_retained_default": true,
+      "automatic_resolution_authorized": false,
+      "automatic_manuscript_mutation_authorized": false
+    }
+  ],
+  "negative": [
+    {
+      "name": "missing_escalation_reason",
+      "packet": {
+        "packet_id": "bad-1",
+        "editorial_stage": "LINE",
+        "review_scope": "CHAPTER",
+        "decision_query": "Choose.",
+        "authority_requirement": "AUTHOR",
+        "original_retained_default": true,
+        "automatic_resolution_authorized": false,
+        "automatic_manuscript_mutation_authorized": false
+      }
+    },
+    {
+      "name": "auto_resolution_forbidden",
+      "packet": {
+        "packet_id": "bad-2",
+        "editorial_stage": "COPY",
+        "review_scope": "PARAGRAPH",
+        "decision_query": "Review.",
+        "escalation_reason": "SUBJECTIVE_GAIN",
+        "authority_requirement": "HUMAN_EDITOR",
+        "original_retained_default": true,
+        "automatic_resolution_authorized": true,
+        "automatic_manuscript_mutation_authorized": false
+      }
+    },
+    {
+      "name": "retain_default_required",
+      "packet": {
+        "packet_id": "bad-3",
+        "editorial_stage": "DEVELOPMENTAL",
+        "review_scope": "ARC",
+        "decision_query": "Review arc change.",
+        "escalation_reason": "MEANING",
+        "authority_requirement": "AUTHOR",
+        "original_retained_default": false,
+        "automatic_resolution_authorized": false,
+        "automatic_manuscript_mutation_authorized": false
+      }
+    }
+  ]
+}

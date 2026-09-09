@@ -1,0 +1,26 @@
+name: Literary Prose Editorial Review Packet Qualification
+
+on:
+  push:
+    branches:
+      - literary-prose-engine-001
+    paths:
+      - 'qualification/literary-prose-engine-001/editorial-review-packet-001/**'
+      - '.github/workflows/literary-prose-editorial-review-packet-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate hardened editorial review packet contract
+        run: python qualification/literary-prose-engine-001/editorial-review-packet-001/validate_editorial_review_packet.py

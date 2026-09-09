@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://system-master.local/literary/editorial-review-packet.schema.json",
+  "title": "Literary Prose Editorial Review Packet",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "packet_id",
+    "editorial_stage",
+    "review_scope",
+    "decision_query",
+    "escalation_reason",
+    "authority_requirement",
+    "original_retained_default",
+    "automatic_resolution_authorized",
+    "automatic_manuscript_mutation_authorized"
+  ],
+  "properties": {
+    "packet_id": {"type": "string", "minLength": 1},
+    "editorial_stage": {"enum": ["DEVELOPMENTAL", "LINE", "COPY", "MECHANICAL"]},
+    "review_scope": {"type": "string", "minLength": 1},
+    "decision_query": {"type": "string", "minLength": 1},
+    "escalation_reason": {"enum": ["AUTHOR_INTENT", "CANON", "MEANING", "VOICE", "AMBIGUITY", "PRESERVATION_CONFLICT", "SUBJECTIVE_GAIN", "OTHER_NAMED_REASON"]},
+    "authority_requirement": {"enum": ["AUTHOR", "HUMAN_EDITOR", "DELEGATED_EDITORIAL_JUDGMENT", "NONE_FOR_INFORMATIONAL_REVIEW"]},
+    "original_retained_default": {"const": true},
+    "automatic_resolution_authorized": {"const": false},
+    "automatic_manuscript_mutation_authorized": {"const": false},
+    "source_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "candidate_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "publication_authorized": {"const": false},
+    "canon_replacement_authorized": {"const": false}
+  }
+}
