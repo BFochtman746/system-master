@@ -1,0 +1,80 @@
+--- a/05_DATA/DATA001-MIGRATION-MANIFEST-001.json
++++ b/05_DATA/DATA001-MIGRATION-MANIFEST-001.json
+@@ -109,7 +109,7 @@
+       "manifest_ordinal": 11,
+       "version": "0.20.0",
+       "up_path": "05_DATA/postgresql/011_smr019_chat001a_canonical_chat.up.sql",
+-      "up_sha256": "8bb200cbe433c2824cd09de10b7416a8c26fdc60c7561ccd160cd80e2996178b",
++      "up_sha256": "17055aa422d4f1cccf3a5d57c163787214f552203c337fba67345b55e1bff11e",
+       "down_path": "05_DATA/postgresql/011_smr019_chat001a_canonical_chat.down.sql",
+       "down_sha256": "ec6c8927a53024e05a6ee949c08499abe2314603eadd3bdf69536da93f7c7559",
+       "authority": "CHAT-001A",
+--- a/05_DATA/postgresql/011_smr019_chat001a_canonical_chat.up.sql
++++ b/05_DATA/postgresql/011_smr019_chat001a_canonical_chat.up.sql
+@@ -56,6 +56,7 @@
+  prior_revision_id text NULL REFERENCES chat001a_answer_revision(revision_id),
+  reason text NOT NULL CHECK (reason IN ('INITIAL_MODEL','STREAM_CHECKPOINT','REGENERATED_MODEL','USER_EDIT','SYSTEM_REPAIR')),
+  standing text NOT NULL CHECK (standing IN ('DRAFT_CHECKPOINT','FINAL')),
++ CHECK (reason<>'STREAM_CHECKPOINT' OR standing='DRAFT_CHECKPOINT'),
+  mutation_key text NOT NULL CHECK (mutation_key ~ '^[A-Za-z0-9][A-Za-z0-9._:/-]{0,159}$'),
+  inference_receipt_ref text NULL,
+  inference_receipt_digest text NULL CHECK (inference_receipt_digest IS NULL OR inference_receipt_digest ~ '^[0-9a-f]{64}$'),
+--- a/11_SOURCE/src/main/java/org/systemmaster/rebuild/chat/AnswerRevision.java
++++ b/11_SOURCE/src/main/java/org/systemmaster/rebuild/chat/AnswerRevision.java
+@@ -6,7 +6,7 @@
+ 
+ public record AnswerRevision(String revisionId,String conversationId,String branchId,String answerMessageId,long revisionOrdinal,String priorRevisionId,AnswerRevisionReason reason,AnswerRevisionStanding standing,String mutationKey,String inferenceReceiptRef,String inferenceReceiptDigest,Instant createdAt,List<ChatContentPart> parts){
+     public AnswerRevision{
+-        revisionId=ChatRules.id(revisionId,"revisionId");conversationId=ChatRules.id(conversationId,"conversationId");branchId=ChatRules.id(branchId,"branchId");answerMessageId=ChatRules.id(answerMessageId,"answerMessageId");if(revisionOrdinal<0)throw new IllegalArgumentException("revisionOrdinal");if(reason==null||standing==null)throw new IllegalArgumentException("reason/standing");mutationKey=ChatRules.id(mutationKey,"mutationKey");createdAt=ChatRules.instant(createdAt,"createdAt");
++        revisionId=ChatRules.id(revisionId,"revisionId");conversationId=ChatRules.id(conversationId,"conversationId");branchId=ChatRules.id(branchId,"branchId");answerMessageId=ChatRules.id(answerMessageId,"answerMessageId");if(revisionOrdinal<0)throw new IllegalArgumentException("revisionOrdinal");if(reason==null||standing==null)throw new IllegalArgumentException("reason/standing");if(reason==AnswerRevisionReason.STREAM_CHECKPOINT&&standing!=AnswerRevisionStanding.DRAFT_CHECKPOINT)throw new IllegalArgumentException("stream checkpoint standing");mutationKey=ChatRules.id(mutationKey,"mutationKey");createdAt=ChatRules.instant(createdAt,"createdAt");
+         if(revisionOrdinal==0&&priorRevisionId!=null)throw new IllegalArgumentException("initial priorRevisionId");if(revisionOrdinal>0)priorRevisionId=ChatRules.id(priorRevisionId,"priorRevisionId");
+         boolean model=reason==AnswerRevisionReason.INITIAL_MODEL||reason==AnswerRevisionReason.REGENERATED_MODEL||reason==AnswerRevisionReason.STREAM_CHECKPOINT;
+         if(model){inferenceReceiptRef=ChatRules.id(inferenceReceiptRef,"inferenceReceiptRef");inferenceReceiptDigest=ChatRules.digest(inferenceReceiptDigest,"inferenceReceiptDigest");}else if((inferenceReceiptRef==null)!=(inferenceReceiptDigest==null))throw new IllegalArgumentException("inference binding");
+--- a/12_TESTS/src/test/java/org/systemmaster/rebuild/chat/Chat001AuthorityTests.java
++++ b/12_TESTS/src/test/java/org/systemmaster/rebuild/chat/Chat001AuthorityTests.java
+@@ -49,6 +49,7 @@
+         ChatMessage assistant=new ChatMessage("m-assistant","chat-1","branch-root",1,ChatRole.ASSISTANT,"model-projection", "m-user","mut-assistant",t.plusSeconds(2),List.of(text(0,"Working...",ChatTrustLabel.MODEL_GENERATED)));
+         ok(runtime.appendMessage(assistant,"event-2")==CommitResult.COMMITTED,"assistant message commit");
+         AnswerRevision draft=new AnswerRevision("rev-0","chat-1","branch-root","m-assistant",0,null,AnswerRevisionReason.STREAM_CHECKPOINT,AnswerRevisionStanding.DRAFT_CHECKPOINT,"mut-rev0","inference:1",sha("inference-1"),t.plusSeconds(3),List.of(text(0,"Partial answer",ChatTrustLabel.MODEL_GENERATED)));
++        bad(()->new AnswerRevision("rev-stream-final","chat-1","branch-root","m-assistant",0,null,AnswerRevisionReason.STREAM_CHECKPOINT,AnswerRevisionStanding.FINAL,"mut-stream-final","inference:1",sha("inference-1"),t.plusSeconds(3),List.of(text(0,"partial cannot be final",ChatTrustLabel.MODEL_GENERATED))),"stream checkpoint cannot be FINAL");
+         ok(runtime.appendRevision(draft,"event-3")==CommitResult.COMMITTED,"stream checkpoint durable");ok(!draft.canonicalAnswer(),"draft not canonical answer");
+         AnswerRevision fin=new AnswerRevision("rev-1","chat-1","branch-root","m-assistant",1,"rev-0",AnswerRevisionReason.INITIAL_MODEL,AnswerRevisionStanding.FINAL,"mut-rev1","inference:1",sha("inference-1"),t.plusSeconds(4),List.of(text(0,"Final answer",ChatTrustLabel.MODEL_GENERATED),ref(1,ChatPartKind.CITATION,"FOUNDATION-006","evidence-1",sha("evidence-1"),"application/vnd.system-master.evidence-ref",ChatTrustLabel.DERIVED)));
+         ok(runtime.appendRevision(fin,"event-4")==CommitResult.COMMITTED,"final revision commit");ok(fin.canonicalAnswer(),"final canonical answer");
+--- a/tools/verify_chat001a_contract_parity.py
++++ b/tools/verify_chat001a_contract_parity.py
+@@ -24,7 +24,7 @@
+ checks={
+ '11_SOURCE/src/main/java/org/systemmaster/rebuild/chat/Chat001Authority.java':['ownsAuthenticationOrAuthorization','ownsTransientModelStreamingOrRouting','ownsToolOrEffectExecution','ownsArtifactBytes','ownsObservabilityTruth','derivedContextBecomesCanonicalTruth','referencedExternalContentGrantsAuthority','portableProofIsTargetPostgresProof'],
+ '11_SOURCE/src/main/java/org/systemmaster/rebuild/chat/ChatContentPart.java':['authorityGranted','canonicalTruthGranted','sourceAuthority','refDigest','ChatTrustLabel'],
+-'11_SOURCE/src/main/java/org/systemmaster/rebuild/chat/AnswerRevision.java':['canonicalAnswer','inferenceReceiptDigest','STREAM_CHECKPOINT'],
++'11_SOURCE/src/main/java/org/systemmaster/rebuild/chat/AnswerRevision.java':['canonicalAnswer','inferenceReceiptDigest','STREAM_CHECKPOINT','stream checkpoint standing','AnswerRevisionStanding.DRAFT_CHECKPOINT'],
+ '11_SOURCE/src/main/java/org/systemmaster/rebuild/chat/AnswerRevisionStanding.java':['DRAFT_CHECKPOINT','FINAL'],
+ '11_SOURCE/src/main/java/org/systemmaster/rebuild/chat/ChatContextProjection.java':['MAX_CONTEXT_SOURCES','canonicalTruth','authorityGranted','sourceEventHeadDigest','modelDescriptorDigest','tokenizerIdentityDigest','ChatContextSourceBinding','source ordinal','duplicate source identity'],
+ '11_SOURCE/src/main/java/org/systemmaster/rebuild/chat/ChatContextSourceBinding.java':['ChatSourceKind','sourceEntityId','sourceEntityDigest','canonicalDigest'],
+--- a/tools/verify_chat001a_sql_contract.py
++++ b/tools/verify_chat001a_sql_contract.py
+@@ -9,7 +9,7 @@
+ s=up.read_text();tables=['chat001a_conversation','chat001a_branch','chat001a_message','chat001a_answer_revision','chat001a_settled_record','chat001a_context_projection','chat001a_context_source','chat001a_event','chat001a_state_binding']
+ for t in tables:
+  if not re.search(r'CREATE TABLE\s+'+re.escape(t)+r'\b',s,re.I):issues.append('missing table '+t)
+-for tok in ["UNIQUE(branch_id,ordinal)","FOR UPDATE","message ordinal must be contiguous","revision ordinal must be contiguous","source_kind text NOT NULL CHECK (source_kind IN ('MESSAGE','ANSWER_REVISION'))","settled source digest/conversation/visibility mismatch","chat001a_single_superseder","source_count integer NOT NULL CHECK (source_count BETWEEN 1 AND 512)","source_bindings text NOT NULL","FOREIGN KEY (message_id,conversation_id,entity_digest)","FOREIGN KEY (revision_id,conversation_id,entity_digest)","chat001a_message_visible","reply lineage/visibility mismatch","context message source invalid or not visible","context revision source must be FINAL and visible","context source cardinality mismatch","event/entity mutation key mismatch","event entity conversation/branch mismatch","event/entity time mismatch","initial event root/time mismatch","exactly one canonical mutation per state version","message event/state delta mismatch","revision event/state delta mismatch","context event/state delta mismatch","canonical_truth=false","authority_granted=false","octet_length(manifest_utf8) BETWEEN 1 AND 65536","immutable CHAT-001A record cannot update/delete","Message/revision bodies are bounded or reference-backed"]:
++for tok in ["UNIQUE(branch_id,ordinal)","FOR UPDATE","message ordinal must be contiguous","revision ordinal must be contiguous","reason<>'STREAM_CHECKPOINT' OR standing='DRAFT_CHECKPOINT'","source_kind text NOT NULL CHECK (source_kind IN ('MESSAGE','ANSWER_REVISION'))","settled source digest/conversation/visibility mismatch","chat001a_single_superseder","source_count integer NOT NULL CHECK (source_count BETWEEN 1 AND 512)","source_bindings text NOT NULL","FOREIGN KEY (message_id,conversation_id,entity_digest)","FOREIGN KEY (revision_id,conversation_id,entity_digest)","chat001a_message_visible","reply lineage/visibility mismatch","context message source invalid or not visible","context revision source must be FINAL and visible","context source cardinality mismatch","event/entity mutation key mismatch","event entity conversation/branch mismatch","event/entity time mismatch","initial event root/time mismatch","exactly one canonical mutation per state version","message event/state delta mismatch","revision event/state delta mismatch","context event/state delta mismatch","canonical_truth=false","authority_granted=false","octet_length(manifest_utf8) BETWEEN 1 AND 65536","immutable CHAT-001A record cannot update/delete","Message/revision bodies are bounded or reference-backed"]:
+  if tok not in s:issues.append('missing SQL guard '+tok)
+ dn=down.read_text()
+ for t in tables:
+--- a/tools/verify_smr019_recurrence.py
++++ b/tools/verify_smr019_recurrence.py
+@@ -9,11 +9,11 @@
+ checks=[
+ ('11_SOURCE/src/main/java/org/systemmaster/rebuild/chat/JdbcChatStore.java',['manifest_digest','WHERE conversation_id=? AND version=? AND manifest_digest=?','requireEvent','chat001a_context_source']),
+ ('11_SOURCE/src/main/java/org/systemmaster/rebuild/chat/InMemoryChatStore.java',['chat state CAS conflict','message branch/ordinal','revision chain','settled source binding','context source binding','mutation key conflict']),
+-('11_SOURCE/src/main/java/org/systemmaster/rebuild/chat/AnswerRevision.java',['canonicalAnswer','STREAM_CHECKPOINT']),
++('11_SOURCE/src/main/java/org/systemmaster/rebuild/chat/AnswerRevision.java',['canonicalAnswer','STREAM_CHECKPOINT','stream checkpoint standing','AnswerRevisionStanding.DRAFT_CHECKPOINT']),
+ ('11_SOURCE/src/main/java/org/systemmaster/rebuild/chat/AnswerRevisionStanding.java',['DRAFT_CHECKPOINT','FINAL']),
+ ('11_SOURCE/src/main/java/org/systemmaster/rebuild/chat/ChatRules.java',['MAX_MESSAGE_INLINE_BYTES','MAX_PAGE','MAX_CONTEXT_SOURCES','MAX_BRANCH_DEPTH']),
+ ('11_SOURCE/src/main/java/org/systemmaster/rebuild/chat/ChatContextProjection.java',['ChatContextSourceBinding','sourceEventHeadDigest','summaryArtifactDigest','modelDescriptorDigest','tokenizerIdentityDigest','canonicalTruth','authorityGranted']),
+-('05_DATA/postgresql/011_smr019_chat001a_canonical_chat.up.sql',['message ordinal must be contiguous','revision ordinal must be contiguous','chat001a_single_superseder','chat001a_message_visible','source_kind','context revision source must be FINAL and visible','event/entity mutation key mismatch','event entity conversation/branch mismatch','event/entity time mismatch','exactly one canonical mutation per state version','chat001a_context_source']),
++('05_DATA/postgresql/011_smr019_chat001a_canonical_chat.up.sql',['message ordinal must be contiguous','revision ordinal must be contiguous',"reason<>'STREAM_CHECKPOINT' OR standing='DRAFT_CHECKPOINT'",'chat001a_single_superseder','chat001a_message_visible','source_kind','context revision source must be FINAL and visible','event/entity mutation key mismatch','event entity conversation/branch mismatch','event/entity time mismatch','exactly one canonical mutation per state version','chat001a_context_source']),
+ ('10_REQUIREMENTS/SMR019-PACKET-CONTRACT.md',['fourteen','reconstructed','DRAFT_CHECKPOINT','FINAL','typed parts','PC-ENDGAME-026'])]
+ for rel,toks in checks:
+  p=R/rel
