@@ -5,7 +5,7 @@ Status: AUTHORITATIVE PRIMARY HANDOFF / NIGHT SHIFT CLOSED
 Repository: `BFochtman746/system-master`
 Primary workstream: `SYSTEM-MASTER`
 Primary branch: `main`
-Prepared against observed main parent: `7b4bfb45774b0b0f0023af90088ee48d022dc071`
+Reset commit parent verified after concurrent-main reconciliation: `7c37d45efc40f4ba6ba3e8ea2acc083da881c2dc`
 Assurance reconciliation branch: `system-master/assurance-reconciliation-001`
 Assurance branch head verified during this reset: `2a7bac4f258ef7e77fa489946c2faaadb7742b3b`
 
@@ -38,7 +38,8 @@ This record supersedes conversational Night Shift status as the current System M
 | RECON-001C sealed recovery-carrier verification | COMPLETED | `UAF_FOUNDATION006_J.gitbundle` verified complete; exact historical Assurance/F006 ancestry recoverable. |
 | RECON-001C exact GitHub-native historical import | BLOCKED — EXTERNAL AUTHORITY | Requires authorized normal Git transport of the verified bundle to new `assurance-history/*` refs while preserving all original object IDs and ancestry. Current chat connector cannot substitute equivalent commits. |
 | RECON-001C post-import A-01 custody successor | BLOCKED — PREDECESSOR | Unblocks only after the exact GitHub-native import resolves the five required historical SHAs and ancestry on GitHub. |
-| FOUNDATION-007 reconciliation/qualification | READY FOR NEXT GATE | Execute current-source reconciliation from the sealed F003 carrier; do not rebuild from sparse `main`. |
+| FOUNDATION-007 focused current-source baseline | COMPLETED | From sealed F003 source carrier: strict Java 21 PASS 769/111; F007 authority 34 PASS; contract parity PASS; artifact verification PASS; tamper PASS; implementation refs 35/35 present. |
+| FOUNDATION-007 destructive mutation + consumer/authority-bypass reconciliation | READY FOR NEXT GATE | Build/run exact-source disproof against the sealed F007 implementation; repair only a proven failing boundary. |
 | Native Apple/iOS/macOS/Xcode evidence where later required | BLOCKED — NATIVE PLATFORM | Unblocks only when the exact native target/application and required native runner/device/toolchain exist. |
 
 No current F007 portable gate requires human, author or private/scoring-secret authority. Such authority must not be fabricated if a later gate introduces it.
@@ -96,7 +97,7 @@ Fresh F007 reset baseline:
 - F007 declared implementation references: `35/35` present
 - F007 declared capabilities: `22`
 
-These results establish a current focused portable baseline only. They do not establish complete F007 reconciliation, A-01 qualification, native/target proof or production admission.
+This focused baseline is COMPLETE for the reset and must not be repeated merely to create activity. It does not establish complete F007 reconciliation, A-01 qualification, native/target proof or production admission.
 
 ### Authoritative A-01 qualification
 
@@ -121,7 +122,7 @@ Current F007 review describes a 162-file active authority/producer/consumer surf
 
 ## 6. One current critical path
 
-The executable primary critical path is FOUNDATION-007 reconciliation.
+The executable primary critical path is FOUNDATION-007 destructive disproof and consumer/authority-bypass reconciliation.
 
 RECON-001C exact-history import remains an independent custody blocker. It must stay visible and must be completed when authorized Git transport is available, but it does not justify blocking the dependency-valid portable F007 reconciliation work.
 
@@ -149,12 +150,15 @@ All material Night Shift execution standing needed to continue has now been capt
 - complete-history Foundation Library bundles and evidence packages;
 - the fresh F007 baseline recorded here.
 
-The predecessor Master/System Night Shift chat is therefore historical/read-only for this workstream. This chat is the candidate primary System Master workstream conversation after this reset.
+The predecessor Master/System Night Shift chat is therefore historical/read-only for this workstream. This chat is the primary System Master workstream conversation after this reset.
 
 Do not return to the predecessor chat for execution authority. If a historical detail is later needed, recover it as evidence and commit the needed authority/decision durably before relying on it.
 
-## 9. Exact next packet
+## 9. Exact next packet and gate
 
-`UAF-S1-FOUNDATION007-RECONCILIATION-QUALIFICATION-001`
+Packet: `UAF-S1-FOUNDATION007-RECONCILIATION-QUALIFICATION-001`
+Next phase: destructive mutation + consumer/authority-bypass reconciliation.
 
-First gate: reproduce and bind the focused F007 baseline from sealed source, then execute destructive mutation and consumer/authority-bypass reconciliation against the exact candidate. Repair only a proven failing boundary. Do not rebuild F007 from zero and do not replay F003.
+The focused baseline is already PASS. The next work must use the exact sealed F007 source to enumerate high-risk release-trust, signature/trust-root, supplier-due-diligence, artifact-lineage, dependency-security, SBOM/provenance/attestation and durable release-head guards; mutate/bypass them one at a time; and scan production consumers for any authority or persistence path outside canonical F007 ownership. Any surviving valid mutation or real consumer bypass is a repair finding. Repair only the smallest proven boundary and rerun the exact failing gate before broader regression.
+
+Do not rebuild F007 from zero. Do not replay F003. Do not create an A-01 ticket merely to continue work. Do not promote portable/hosted evidence to production standing.
