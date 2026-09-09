@@ -6,9 +6,11 @@ on:
       - 'system-master/a01-control-plane-*'
     paths:
       - 'SYSTEM-MASTER-WORKSTREAM-BOOTSTRAP.md'
+      - 'governance/**'
       - 'qualification/a01/**'
       - '.github/scripts/a01-control-plane*.js'
       - '.github/scripts/a01-overnight-*.js'
+      - '.github/scripts/validate-system-topology.js'
       - '.github/scripts/a01-runner-guard.ps1'
       - '.github/workflows/a01-control-plane-gateway.yml'
       - '.github/workflows/a01-overnight-night-shift.yml'
@@ -153,6 +155,10 @@ jobs:
           fetch-depth: 1
           clean: true
           persist-credentials: false
+
+      - name: Enforce canonical four-system topology before A-01 admission
+        shell: cmd
+        run: node "%GITHUB_WORKSPACE%\control-plane\.github\scripts\validate-system-topology.js"
 
       - name: Prepare control-plane roots and evidence
         shell: cmd
