@@ -143,13 +143,30 @@
     {
       "obligation_id": "BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-002-IMPLEMENTATION-001",
       "owner_path": "SYSTEM_MASTER/BOOK",
-      "state": "READY",
+      "state": "CLOSED",
       "objective": "Implement Runtime V2 against the exact qualified Registry V2 interface, build deterministic adversarial fixtures and prequalification, then obtain a registered exact-SHA A-01 qualification proving parent-safe admission, staleness, editorial, artifact, provenance, author and publication boundaries.",
       "source": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-012.json",
       "dependency": "BOOK-SERVICE-INTERFACE-REGISTRY-002 PASS on 77db6b550e9aeb1dfb956627376becbb591498f8",
-      "stop_condition": "Runtime V2 executable subject receives hosted deterministic prequalification and registered exact-SHA A-01 PASS, or an exact evidence-backed blocker/failure is durably classified without transferring Registry V2 or Runtime V1 evidence.",
-      "on_pass": "Advance Book control to BOOK-SYSTEM-VERSION-AND-ROLLBACK-001.",
-      "must_not_do": "Do not create provider-to-canon/lifecycle/export-freeze/publication backdoors, duplicate document engines, absorb Prose child objectives, or treat Registry V2 PASS as Runtime V2 PASS."
+      "closure_evidence": "qualification/book-system/BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-002-CLOSURE.json",
+      "qualified_subject_sha": "837e479415afb2d9724e4b913d456ef1d3a62df5",
+      "hosted_and_a01_run_id": 34414628390,
+      "a01_job_id": 102676671368,
+      "evidence_artifact_id": 10128570228,
+      "evidence_artifact_digest": "sha256:c7a209950a58f968bc1829885bccb1a013dd25637c19e9f8d93416f749bc8c1a",
+      "result": "PASS__35_ADVERSARIAL_CASES__HOSTED_PREQUAL_AND_A01_REGISTERED_EXACT_SHA",
+      "failed_subject_history": "63e6f55756698f31e6f3a97c00076424ae826993 preserved as SUBJECT_FAILURE before minimal fixture-only repair",
+      "unlocks": "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001"
+    },
+    {
+      "obligation_id": "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001",
+      "owner_path": "SYSTEM_MASTER/BOOK",
+      "state": "READY",
+      "objective": "Research, define, implement and qualify the Book-parent version and rollback boundary so accepted canonical Book object/manuscript changes create immutable digest-bound successors with predecessor lineage, concurrency-safe pointer advancement, evidence-preserving rollback/recovery and no hidden historical mutation or fabricated authority.",
+      "source": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-013.json",
+      "dependency": "BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-002 PASS on 837e479415afb2d9724e4b913d456ef1d3a62df5",
+      "research_gate": "REQUIRED_BEFORE_MAJOR_EXECUTABLE_SEMANTIC_CHANGE",
+      "first_action": "Forensically map existing version/digest/pointer/rollback semantics, then perform bounded current research and classify KEEP / ADD_OR_REFINE / DO_NOT_ADD / UNRESOLVED before implementation changes.",
+      "stop_condition": "The exact Version/Rollback scope is research-justified, implemented only for proven gaps, adversarially tested and qualified on its own exact subject, or the first unresolved dependency/failure is durably checkpointed without deleting historical evidence or transferring prior PASS."
     },
     {
       "obligation_id": "PROSE-REAL-LIMITATION-AUTHOR-ADJUDICATION-001",
