@@ -1,0 +1,68 @@
+name: Request Learning Operator Preflight Hosted Qualification
+
+on:
+  push:
+    branches: [learning/request-operator-preflight-e781f6a1]
+
+permissions:
+  contents: read
+
+jobs:
+  prequalify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact product subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: e781f6a1641106a0f059ad5130d912e3e2a39ce9
+          fetch-depth: 1
+          clean: true
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: '3.13.15'
+          architecture: x64
+          check-latest: false
+      - name: Compile preflight boundary
+        run: python -m py_compile learning/lab/run_pilot001_preflight.py learning/lab/learning_lab/real_learner_pilot_preflight.py
+      - name: Run preflight tests and closed-loop regressions
+        working-directory: learning/lab
+        shell: bash
+        run: |
+          set -o pipefail
+          python -m unittest -v \
+            tests.test_real_learner_pilot_preflight \
+            tests.test_real_learner_pilot_completion \
+            tests.test_real_learner_pilot_closed_loop_launcher \
+            tests.test_real_learner_pilot_console \
+            tests.test_real_learner_pilot_withdrawal \
+            tests.test_real_learner_pilot_human_session \
+            tests.test_real_learner_pilot_runtime_binding \
+            tests.test_real_learner_pilot \
+            2>&1 | tee "$RUNNER_TEMP/operator-preflight-tests.txt"
+          grep -q '^OK$' "$RUNNER_TEMP/operator-preflight-tests.txt"
+          grep -q 'Ran 54 tests' "$RUNNER_TEMP/operator-preflight-tests.txt"
+      - name: Execute preflight without participant state
+        shell: bash
+        run: |
+          STATE="$RUNNER_TEMP/pilot001-real-preflight-state"
+          python learning/lab/run_pilot001_preflight.py --state-root "$STATE" > "$RUNNER_TEMP/operator-preflight-output.txt"
+          grep -q '"standing": "READY_FOR_EXPLICIT_PARTICIPANT_CONSENT"' "$RUNNER_TEMP/operator-preflight-output.txt"
+          grep -q '"participant_consent_created_or_inferred": false' "$RUNNER_TEMP/operator-preflight-output.txt"
+          grep -q '"participant_database_created": false' "$RUNNER_TEMP/operator-preflight-output.txt"
+          grep -q '"raw_participant_response_collected": false' "$RUNNER_TEMP/operator-preflight-output.txt"
+          test -d "$STATE"
+          test -z "$(find "$STATE" -mindepth 1 -maxdepth 1 -print -quit)"
+          ! grep -Fq "$STATE" "$RUNNER_TEMP/operator-preflight-output.txt"
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: learning-operator-preflight-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/operator-preflight-tests.txt
+            ${{ runner.temp }}/operator-preflight-output.txt
+          if-no-files-found: error
+          retention-days: 14
