@@ -1,0 +1,41 @@
+{
+  "objective": "AGLO-WHOLE-BOOK-AUTHOR-QUEUE-EVIDENCE-HARDENING-001",
+  "standing": "PASS__QUEUE_EVIDENCE_HARDENED__AUTHOR_DECISIONS_STILL_REQUIRED",
+  "private_context_analysis_sha256": "e484b8b18ef0fd49f388e6796e3d5dcdf96ba29d03ff7dc94b6797b25fae61f1",
+  "source_package_sha256": "ec0f5475c05cf6c11a75d139f2dbd131e6133d6abba9121be8b8ef18454b31df",
+  "baseline_version_id": "AGLO-REJECT-ALL-NARRATIVE-v1",
+  "decision_001": {
+    "chapter": 25,
+    "paragraph_index": 31,
+    "original_paragraph_sha256": "f1248ab5da621fa4d4ae62e8c755b8b3750b8c2a2ae268f9df4aa3e09a537613",
+    "candidate_paragraph_sha256": "c3cd2208712a7336c2df77170d651d079c6ccdc66b5c6572dd0f9b3aa0619d24",
+    "original_word_count": 19,
+    "candidate_word_count": 18,
+    "exact_single_token_deletion": true,
+    "deleted_token_duplicate_of_neighbor": true,
+    "recommendation": "ACCEPT_REMOVE_DUPLICATE_WORD",
+    "author_decision_still_required": true
+  },
+  "decision_002": {
+    "occurrence_count": 2,
+    "chapters": [14, 15],
+    "chapter_positions": [
+      {"chapter": 14, "paragraph_index": 59, "word_position_ratio": 0.81},
+      {"chapter": 15, "paragraph_index": 34, "word_position_ratio": 0.5444}
+    ],
+    "local_context_lexical_jaccard": 0.165,
+    "structural_interpretation": "PARALLEL_HOUSEHOLD_ILLNESS_ESCALATION_REFRAIN",
+    "surrounding_contexts_are_not_duplicates": true,
+    "candidate_generated": false,
+    "recommendation": "RETAIN_AS_INTENTIONAL_PARALLEL_REFRAIN",
+    "recommendation_confidence": "MEDIUM_HIGH_EVIDENCE__AUTHOR_INTENT_NOT_PROVEN",
+    "author_decision_still_required": true
+  },
+  "authority_rule": "A CONTINUE MESSAGE ADVANCES DEPENDENCY_VALID ANALYSIS BUT DOES NOT SELECT AN AUTHOR DECISION OPTION.",
+  "raw_manuscript_text_persisted": false,
+  "candidate_text_persisted": false,
+  "automatic_manuscript_mutation": false,
+  "a01_required": false,
+  "a01_consumed": false,
+  "next_transition": "AUTHOR_ADJUDICATE_EXISTING_TWO_ITEM_QUEUE"
+}
