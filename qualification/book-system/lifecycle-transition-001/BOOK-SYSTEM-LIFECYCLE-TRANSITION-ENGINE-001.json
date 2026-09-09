@@ -1,0 +1,195 @@
+{
+  "engine_id": "BOOK-SYSTEM-LIFECYCLE-TRANSITION-ENGINE-001",
+  "engine_version": 1,
+  "effective_date": "2026-09-09",
+  "standing": "CANONICAL__PARENT_TRANSITION_ENGINE_CONTRACT__EXECUTABLE_IMPLEMENTATION_PENDING_QUALIFICATION",
+  "owner": "BOOK SYSTEM",
+  "depends_on": [
+    "BOOK-SYSTEM-AUTHORING-LIFECYCLE-CONTRACT-001",
+    "BOOK-SYSTEM-CANONICAL-BOOK-STATE-MODEL-001",
+    "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-001",
+    "BOOK-SYSTEM-PARENT-INTEGRATION-BOUNDARY-001"
+  ],
+  "extension_rule": "The exact-SHA-qualified canonical state model remains unchanged. This engine adds a versioned parent-owned lifecycle ledger for unit state, transition receipts, idempotency and invalidation. The ledger references an exact canonical parent state version/digest and does not redefine the base model's qualified claims.",
+  "transition_ledger": {
+    "required": [
+      "ledger_schema_version",
+      "ledger_version",
+      "bound_parent_state_version",
+      "bound_parent_state_digest",
+      "unit_states",
+      "dependency_edges",
+      "processed_requests",
+      "transition_receipts"
+    ],
+    "unit_state_required": [
+      "unit_ref",
+      "unit_type",
+      "status",
+      "status_version",
+      "last_transition_receipt_ref",
+      "deferred_from_status",
+      "invalidated_from_status",
+      "invalidation_causes"
+    ],
+    "unit_types": ["PART", "CHAPTER", "SCENE", "SECTION", "PASSAGE", "OTHER"],
+    "unit_statuses": [
+      "PLANNED",
+      "READY_TO_DRAFT",
+      "DRAFTED",
+      "DIAGNOSTIC_REVIEW",
+      "REVISION_CANDIDATE_AVAILABLE",
+      "AUTHOR_DECISION_REQUIRED",
+      "ACCEPTED_INTO_CANONICAL_MANUSCRIPT",
+      "RETAINED_ORIGINAL",
+      "DEFERRED",
+      "INVALIDATED_BY_UPSTREAM_CHANGE"
+    ]
+  },
+  "transition_request": {
+    "required": [
+      "transition_request_id",
+      "idempotency_key",
+      "actor_class",
+      "scope",
+      "target_ref",
+      "target_status",
+      "expected_parent_state_version",
+      "expected_parent_state_digest",
+      "expected_ledger_version",
+      "expected_ledger_digest",
+      "evidence_refs",
+      "author_decision_refs",
+      "integration_proposal_refs",
+      "cause_refs"
+    ],
+    "actor_class": "PARENT_SYSTEM",
+    "scopes": ["PROJECT", "UNIT"],
+    "rule": "Only PARENT_SYSTEM may submit a transition request. Services may only return evidence/proposals through the qualified Service Interface Registry; they cannot directly call this engine."
+  },
+  "transition_receipt": {
+    "required": [
+      "transition_receipt_id",
+      "transition_request_id",
+      "idempotency_key",
+      "scope",
+      "target_ref",
+      "pre_parent_state_version",
+      "pre_parent_state_digest",
+      "pre_ledger_version",
+      "pre_ledger_digest",
+      "from_status",
+      "to_status",
+      "evidence_refs",
+      "author_decision_refs",
+      "integration_proposal_refs",
+      "cause_refs",
+      "post_parent_state_version",
+      "post_parent_state_digest",
+      "post_ledger_version",
+      "post_ledger_digest",
+      "rollback_parent_state_version",
+      "rollback_parent_state_digest",
+      "rollback_ledger_version",
+      "rollback_ledger_digest",
+      "invalidated_unit_refs"
+    ],
+    "rule": "Every successful transition produces one deterministic receipt binding exact pre-state, post-state and rollback identities. Replayed requests return the same logical receipt and do not increment state or ledger versions again."
+  },
+  "project_transition_gates": {
+    "CREATED->BRIEFING": {"required_evidence_types": [], "required_author_decision_types": []},
+    "BRIEFING->PLANNING": {"required_evidence_types": ["GOVERNING_BRIEF_READY"], "required_author_decision_types": []},
+    "PLANNING->DRAFTING": {"required_evidence_types": ["BOOK_PLAN_READY"], "required_author_decision_types": []},
+    "DRAFTING->STRUCTURAL_REVIEW": {"required_evidence_types": ["DRAFT_SCOPE_READY_FOR_STRUCTURAL_REVIEW"], "required_author_decision_types": []},
+    "STRUCTURAL_REVIEW->DRAFTING": {"required_evidence_types": ["STRUCTURAL_REWORK_REQUIRED"], "required_author_decision_types": []},
+    "STRUCTURAL_REVIEW->PROSE_REFINEMENT": {"required_evidence_types": ["STRUCTURAL_REVIEW_COMPLETE"], "required_author_decision_types": []},
+    "PROSE_REFINEMENT->STRUCTURAL_REVIEW": {"required_evidence_types": ["STRUCTURAL_REGRESSION_FOUND"], "required_author_decision_types": []},
+    "PROSE_REFINEMENT->BOOK_EVALUATION": {"required_evidence_types": ["PROSE_REFINEMENT_SCOPE_COMPLETE"], "required_author_decision_types": []},
+    "BOOK_EVALUATION->PROSE_REFINEMENT": {"required_evidence_types": ["EVALUATION_REVISION_REQUIRED"], "required_author_decision_types": []},
+    "BOOK_EVALUATION->AUTHOR_REVIEW": {"required_evidence_types": ["BOOK_EVALUATION_COMPLETE"], "required_author_decision_types": []},
+    "AUTHOR_REVIEW->PROSE_REFINEMENT": {"required_evidence_types": ["AUTHOR_REQUESTED_REVISION"], "required_author_decision_types": ["REVISION_DIRECTION"]},
+    "AUTHOR_REVIEW->FINALIZATION": {"required_evidence_types": ["AUTHOR_REVIEW_COMPLETE"], "required_author_decision_types": ["FINALIZATION_APPROVAL"]},
+    "FINALIZATION->AUTHOR_REVIEW": {"required_evidence_types": ["FINALIZATION_REVIEW_REOPENED"], "required_author_decision_types": []},
+    "FINALIZATION->EXPORT_FROZEN": {"required_evidence_types": ["EXPORT_FREEZE_READY"], "required_author_decision_types": []},
+    "EXPORT_FROZEN->FINALIZATION": {"required_evidence_types": ["EXPORT_FREEZE_INVALIDATED"], "required_author_decision_types": []},
+    "EXPORT_FROZEN->PUBLISHED_OR_DELIVERED": {"required_evidence_types": ["AUTHOR_APPROVED_EXPORT_PRESENT"], "required_author_decision_types": ["PUBLICATION_AUTHORIZATION"]},
+    "PUBLISHED_OR_DELIVERED->ARCHIVED": {"required_evidence_types": ["ARCHIVE_READY"], "required_author_decision_types": []},
+    "BRIEFING->ARCHIVED": {"required_evidence_types": ["ARCHIVE_READY"], "required_author_decision_types": []},
+    "PLANNING->BRIEFING": {"required_evidence_types": ["GOVERNING_BRIEF_REOPENED"], "required_author_decision_types": []},
+    "PLANNING->ARCHIVED": {"required_evidence_types": ["ARCHIVE_READY"], "required_author_decision_types": []},
+    "DRAFTING->PLANNING": {"required_evidence_types": ["PLAN_REWORK_REQUIRED"], "required_author_decision_types": []},
+    "DRAFTING->ARCHIVED": {"required_evidence_types": ["ARCHIVE_READY"], "required_author_decision_types": []},
+    "STRUCTURAL_REVIEW->ARCHIVED": {"required_evidence_types": ["ARCHIVE_READY"], "required_author_decision_types": []},
+    "PROSE_REFINEMENT->ARCHIVED": {"required_evidence_types": ["ARCHIVE_READY"], "required_author_decision_types": []},
+    "BOOK_EVALUATION->ARCHIVED": {"required_evidence_types": ["ARCHIVE_READY"], "required_author_decision_types": []},
+    "AUTHOR_REVIEW->ARCHIVED": {"required_evidence_types": ["ARCHIVE_READY"], "required_author_decision_types": []},
+    "FINALIZATION->ARCHIVED": {"required_evidence_types": ["ARCHIVE_READY"], "required_author_decision_types": []},
+    "EXPORT_FROZEN->ARCHIVED": {"required_evidence_types": ["ARCHIVE_READY"], "required_author_decision_types": []}
+  },
+  "unit_transition_rules": {
+    "PLANNED": ["READY_TO_DRAFT", "DEFERRED", "INVALIDATED_BY_UPSTREAM_CHANGE"],
+    "READY_TO_DRAFT": ["DRAFTED", "DEFERRED", "INVALIDATED_BY_UPSTREAM_CHANGE"],
+    "DRAFTED": ["DIAGNOSTIC_REVIEW", "DEFERRED", "INVALIDATED_BY_UPSTREAM_CHANGE"],
+    "DIAGNOSTIC_REVIEW": ["REVISION_CANDIDATE_AVAILABLE", "RETAINED_ORIGINAL", "DEFERRED", "INVALIDATED_BY_UPSTREAM_CHANGE"],
+    "REVISION_CANDIDATE_AVAILABLE": ["AUTHOR_DECISION_REQUIRED", "ACCEPTED_INTO_CANONICAL_MANUSCRIPT", "RETAINED_ORIGINAL", "DEFERRED", "INVALIDATED_BY_UPSTREAM_CHANGE"],
+    "AUTHOR_DECISION_REQUIRED": ["ACCEPTED_INTO_CANONICAL_MANUSCRIPT", "RETAINED_ORIGINAL", "DEFERRED", "INVALIDATED_BY_UPSTREAM_CHANGE"],
+    "ACCEPTED_INTO_CANONICAL_MANUSCRIPT": ["DIAGNOSTIC_REVIEW", "INVALIDATED_BY_UPSTREAM_CHANGE"],
+    "RETAINED_ORIGINAL": ["DIAGNOSTIC_REVIEW", "INVALIDATED_BY_UPSTREAM_CHANGE"],
+    "DEFERRED": ["RESUME_PREVIOUS_STATUS", "INVALIDATED_BY_UPSTREAM_CHANGE"],
+    "INVALIDATED_BY_UPSTREAM_CHANGE": ["RESTORE_INVALIDATED_STATUS_AFTER_REVALIDATION"]
+  },
+  "unit_gate_rules": {
+    "READY_TO_DRAFT": {"required_evidence_types": ["UNIT_PLAN_READY"], "required_author_decision_types": []},
+    "DRAFTED": {"required_evidence_types": ["UNIT_DRAFT_ARTIFACT_PRESENT"], "required_author_decision_types": []},
+    "DIAGNOSTIC_REVIEW": {"required_evidence_types": ["EXACT_UNIT_IDENTITY_BOUND"], "required_author_decision_types": []},
+    "REVISION_CANDIDATE_AVAILABLE": {"required_evidence_types": ["ADMITTED_REVISION_CANDIDATE_PRESENT"], "required_author_decision_types": []},
+    "AUTHOR_DECISION_REQUIRED": {"required_evidence_types": ["MATERIAL_REVISION_REQUIRES_AUTHOR"], "required_author_decision_types": []},
+    "ACCEPTED_INTO_CANONICAL_MANUSCRIPT": {"required_evidence_types": ["PARENT_ADMISSION_READY", "PRESERVATION_GATES_PASS"], "required_author_decision_types_if_unit_requires_author": ["REVISION_PROMOTION"]},
+    "RETAINED_ORIGINAL": {"required_evidence_types": ["RETAIN_ORIGINAL_DECISION_EVIDENCE"], "required_author_decision_types": []},
+    "DEFERRED": {"required_evidence_types": [], "required_author_decision_types": []},
+    "INVALIDATED_BY_UPSTREAM_CHANGE": {"required_evidence_types": ["UPSTREAM_CHANGE_CAUSE"], "required_author_decision_types": []},
+    "RESUME_PREVIOUS_STATUS": {"required_evidence_types": ["DEFERRED_WORK_RESUME_READY"], "required_author_decision_types": []},
+    "RESTORE_INVALIDATED_STATUS_AFTER_REVALIDATION": {"required_evidence_types": ["INVALIDATED_UNIT_REVALIDATED"], "required_author_decision_types": []}
+  },
+  "invalidation": {
+    "dependency_edge_required": ["edge_id", "upstream_ref", "downstream_ref", "dependency_class"],
+    "dependency_classes": ["PLAN", "CANON", "STORY_BIBLE", "MANUSCRIPT", "RESEARCH", "ARC", "SETUP_PAYOFF", "OTHER"],
+    "propagation": "When an accepted upstream canonical change invalidates a dependency edge, every reachable downstream unit that is not already INVALIDATED_BY_UPSTREAM_CHANGE is atomically transitioned to INVALIDATED_BY_UPSTREAM_CHANGE, preserving invalidated_from_status and all cause refs.",
+    "service_response_rule": "Any pending service response bound to a parent state version/digest older than the accepted upstream change is stale until explicitly revalidated. Stale provider SUCCESS cannot satisfy a transition gate.",
+    "restoration_rule": "An invalidated unit may restore only its recorded invalidated_from_status after INVALIDATED_UNIT_REVALIDATED evidence is registered against the current parent state."
+  },
+  "author_boundary": {
+    "rule": "A gate requiring author authority passes only when the referenced AUTHOR_DECISION object exists in the exact parent state, has status APPROVED, has the required decision_type, and has an affirmative author_choice applicable to the target transition.",
+    "no_inference": true
+  },
+  "service_boundary": {
+    "rule": "Evidence or proposals produced by Prose, Book Evaluator, research, or artifact services count only after the parent has registered them through operations allowed by BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-001 and they remain current for the exact parent projection.",
+    "service_success_is_not_transition_authority": true
+  },
+  "idempotency": {
+    "same_idempotency_key_same_normalized_request": "RETURN_EXISTING_RECEIPT_NO_NEW_COMMIT",
+    "same_idempotency_key_different_normalized_request": "REJECT_IDEMPOTENCY_KEY_CONFLICT",
+    "same_request_id_different_idempotency_key": "REJECT_REQUEST_ID_CONFLICT"
+  },
+  "transactionality": {
+    "precondition_order": [
+      "validate request schema and actor",
+      "validate exact parent state version/digest",
+      "validate exact ledger version/digest",
+      "resolve current status",
+      "validate legal transition",
+      "validate evidence and author gates against current parent state",
+      "validate service-derived evidence freshness",
+      "calculate invalidation closure",
+      "apply all changes to copies only",
+      "validate post-state and post-ledger",
+      "commit parent state and ledger together",
+      "emit transition receipt"
+    ],
+    "failure_rule": "Any failed step commits neither parent state nor lifecycle ledger and emits no successful transition receipt.",
+    "rollback_rule": "Every receipt records the exact pre-parent and pre-ledger identities required to restore the prior committed pair."
+  },
+  "qualification_objective": "Prove project and unit legal transition enforcement, hard-gate evidence and author boundaries, exact parent/ledger concurrency checks, service-response staleness, deterministic defer/resume and invalidation/restore behavior, transitive invalidation, atomic rollback, duplicate replay, request/idempotency conflicts, and provider inability to invoke transitions directly.",
+  "exact_next_objective_after_pass": "BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-001",
+  "qualification_effect": "NONE until the executable engine and adversarial fixtures pass a registered A-01 exact-SHA qualification."
+}
