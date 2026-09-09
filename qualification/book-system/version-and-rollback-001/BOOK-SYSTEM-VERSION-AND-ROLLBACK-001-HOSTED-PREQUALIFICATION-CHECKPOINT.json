@@ -1,0 +1,73 @@
+{
+  "checkpoint_id": "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001-HOSTED-PREQUALIFICATION-CHECKPOINT",
+  "effective_date": "2026-09-09",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "standing": "PASS__HOSTED_EXACT_SUBJECT__AUTHORITATIVE_A01_NOT_YET_GRANTED",
+  "qualification_id": "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001",
+  "exact_subject_sha": "402ab84a14e9d345530d60394ebc36176541dd21",
+  "hosted_run": {
+    "run_id": 34416203680,
+    "job_id": 102681527662,
+    "workflow": ".github/workflows/book-system-version-and-rollback-001-prequal.yml",
+    "result": "PASS",
+    "fixture_version": 2,
+    "cases": 48,
+    "syntax_check": "PASS",
+    "qualifier": ".github/scripts/book-system-version-and-rollback-001-qualify-v2.js"
+  },
+  "evidence_artifact": {
+    "artifact_id": 10129156222,
+    "name": "book-system-version-and-rollback-001-34416203680-hosted-evidence",
+    "digest": "sha256:2d27e447bb60c8c236b7e1b6f4e6d6abcacd30b095f25e49965badec50ae78a8",
+    "expires_at": "2026-10-09T23:16:51Z"
+  },
+  "preserved_failed_predecessor": {
+    "subject_sha": "10c37582ed7918c6bd90ccf2536c437e2b72e68e",
+    "hosted_run_id": 34415879725,
+    "job_id": 102680536875,
+    "result": "FAIL__37_OF_40",
+    "failure_class": "SUBJECT_QUALIFIER_CONTRACT_MISMATCH_AFTER_AUTHORITY_HARDENING",
+    "failed_cases": [
+      "VR015 old qualifier expected receipt-required instead of fail-closed lifecycle delegation",
+      "VR016 old qualifier expected Version/Rollback to perform a lifecycle transition",
+      "VR030 old qualifier attempted to reach full-state restore through the now-forbidden direct status mutation path"
+    ],
+    "evidence_artifact_id": 10129034355,
+    "evidence_artifact_digest": "sha256:d9afc35814c818645c50f605d96642c983d0437e995c3731467a2602f1a1052a",
+    "repair_rule": "The failure was preserved. The repair strengthened the public authority boundary, introduced authorized-successor ingestion, superseded the obsolete lifecycle test semantics, and expanded qualification to 48 cases rather than weakening the runtime."
+  },
+  "scope_proven_by_hosted_pass": [
+    "immutable initial and successor state snapshots with predecessor identity",
+    "immutable governed-object version nodes with predecessor lineage and digest collision rejection",
+    "exact parent and version-ledger optimistic concurrency",
+    "PARENT_SYSTEM-only direct canonical version commit",
+    "direct lifecycle status mutation denied even when a caller supplies a receipt-shaped object",
+    "exact already-authorized parent successor ingestion with pre/post receipt binding and no authority re-execution",
+    "append-only research/author/proposal/export history",
+    "idempotent replay and request/idempotency conflict rejection",
+    "RESTORE_CONTENT creates a new successor rather than moving the current pointer backward",
+    "rights/privacy, critical-evidence, dependency-binding and author-decision revalidation",
+    "frozen/published restore requires lifecycle reopen first",
+    "RESTORE_FULL_STATE cannot change workflow status inside Version/Rollback",
+    "re-forward and branch divergence preserve lineage",
+    "failed mutation leaves input parent/ledger unchanged",
+    "receipt/outbox exact identity",
+    "authorized Lifecycle and Runtime successors can be recorded without transferring their authority"
+  ],
+  "scope_not_proven": [
+    "authoritative A-01 qualification",
+    "production database durability or PostgreSQL transaction behavior",
+    "author approval beyond fixture-boundary enforcement",
+    "publication or export-freeze authority",
+    "Document System implementation",
+    "Prose or Book Evaluator behavior",
+    "production deployment"
+  ],
+  "central_a01_status": {
+    "registration_found_on_main_at_checkpoint": false,
+    "owner": "SYSTEM_MASTER/CORE",
+    "reason": "CHAT-LANE-OPERATING-PROMPT-001 assigns A-01 and central qualification/control-plane integration to CORE. BOOK must not modify shared A-01 authority merely to complete its own qualification.",
+    "required_next": "CORE must register the exact BOOK-SYSTEM-VERSION-AND-ROLLBACK-001 qualifier/caller under canonical A-01 policy, after which BOOK may run/adjudicate exact-SHA A-01 through the registered gateway."
+  },
+  "qualification_effect": "HOSTED PASS ONLY. No A-01, canonical manuscript promotion, author decision, export freeze, publication, production, Prose or document-engine authority is created by this checkpoint."
+}
