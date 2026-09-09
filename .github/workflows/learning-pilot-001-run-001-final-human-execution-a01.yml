@@ -1,0 +1,24 @@
+name: LEARNING PILOT-001 RUN-001 Final Human Execution A-01 Qualification
+
+on:
+  workflow_dispatch:
+    inputs:
+      subject_sha:
+        description: Exact prequalified 40-character Learning final-human-execution subject SHA
+        required: true
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  qualify:
+    uses: BFochtman746/system-master/.github/workflows/a01-control-plane-gateway.yml@main
+    with:
+      qualification_id: LEARNING-PILOT-001-RUN-001-FINAL-HUMAN-EXECUTION
+      workstream_id: LEARNING
+      subject_sha: ${{ inputs.subject_sha }}
+      origin_ref: refs/heads/learning/pilot-001-run-001-operator-preflight
+      resume_on_pass: Adjudicate the canonical receipt; if promotion_authorized=true, promote only the exact tested final-human-execution SHA unchanged as the machine-authorized local-first real-participant software boundary. Human execution still requires genuine explicit participant consent.
+      resume_on_failure: Classify SUBJECT_FAILURE versus INFRA_FAILURE or CONTROL_PLANE_FAILURE, preserve evidence, repair only the proven failing boundary, and rerun the minimum sufficient qualification. Do not weaken consent, privacy, frozen-protocol, evidence, or exact-SHA gates.
+      notification_target: learning-pilot-001-run-001-final-human-execution
