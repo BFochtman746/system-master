@@ -1,0 +1,24 @@
+name: LEARNING Final Human Repair ec83 A-01 Transport
+
+on:
+  push:
+    branches:
+      - learning/request-final-human-repair-ec83-a01
+    paths:
+      - "qualification/a01/requests/learning-final-human-repair-ec83.trigger"
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  qualify:
+    uses: BFochtman746/system-master/.github/workflows/a01-control-plane-gateway.yml@main
+    with:
+      qualification_id: LEARNING-PILOT-001-RUN-001-FINAL-HUMAN-EXECUTION
+      workstream_id: LEARNING
+      subject_sha: ec83f726b5e026024eaf3a98f83083859ee87259
+      origin_ref: refs/heads/learning/pilot-001-run-001-final-human-execution-repair-001-candidate
+      resume_on_pass: Adjudicate the canonical A-01 receipt. Require subject_sha == checkout_sha == ec83f726b5e026024eaf3a98f83083859ee87259, result_class=PASS, required evidence present, and promotion_authorized=true. If all pass, promote only that exact tested SHA unchanged to learning/pilot-001-run-001-final-human-execution-ready and write a doc-only closure. Do not start a participant session automatically; real-participant execution still requires genuine explicit human consent.
+      resume_on_failure: Classify SUBJECT_FAILURE versus INFRA_FAILURE or CONTROL_PLANE_FAILURE, preserve receipt and evidence, repair only the proven failing boundary, and rerun the minimum sufficient gate. Do not weaken exact-SHA, frozen PILOT-001-v1, consent, privacy, local-first evidence, retention, transfer, or human-attestation gates.
+      notification_target: learning-pilot-001-run-001-final-human-execution-repair-001
