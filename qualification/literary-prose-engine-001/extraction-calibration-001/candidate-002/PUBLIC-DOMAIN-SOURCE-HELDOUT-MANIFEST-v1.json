@@ -1,0 +1,76 @@
+{
+  "manifest_id": "LITERARY-CANDIDATE-002-PUBLIC-DOMAIN-SOURCE-HELDOUT-v1",
+  "standing": "SOURCE_SELECTION_VERIFIED__PASSAGE_SELECTION_AND_HUMAN_ADJUDICATION_PENDING",
+  "purpose": "Create an independent work-heldout literary evaluation set for Candidate-002 without user manuscript text, hidden Book-Eval gold, adjacent-passage leakage or copyrighted corpus acquisition.",
+  "source_policy": {
+    "jurisdiction_basis": "Project Gutenberg public-domain-in-USA designation",
+    "retrieved_date": "2026-09-09",
+    "raw_source_body_committed": false,
+    "entire_work_isolation_required": true,
+    "same_work_train_or_tune_use_forbidden": true,
+    "adjacent_passage_cross_split_forbidden": true,
+    "human_adjudication_required": true,
+    "provider_gold_access_forbidden": true
+  },
+  "works": [
+    {
+      "work_id": "PG-1342-PRIDE-AND-PREJUDICE",
+      "title": "Pride and Prejudice",
+      "author": "Jane Austen",
+      "publication_year": 1813,
+      "project_gutenberg_ebook": 1342,
+      "source_url": "https://www.gutenberg.org/ebooks/1342",
+      "rights_observation": "PUBLIC_DOMAIN_IN_USA",
+      "split": "TEST_ONLY",
+      "candidate_task_slices": [
+        "ENTITY_IDENTITY_COREFERENCE",
+        "EPISTEMIC_FOCALIZATION",
+        "NARRATIVE_FUNCTION",
+        "SETUP_PAYOFF_OPEN_QUESTION"
+      ],
+      "passage_selection_state": "PENDING_BOUNDED_SELECTION",
+      "human_gold_state": "PENDING"
+    },
+    {
+      "work_id": "PG-11-ALICES-ADVENTURES-IN-WONDERLAND",
+      "title": "Alice's Adventures in Wonderland",
+      "author": "Lewis Carroll",
+      "publication_year": 1865,
+      "project_gutenberg_ebook": 11,
+      "source_url": "https://www.gutenberg.org/ebooks/11",
+      "rights_observation": "PUBLIC_DOMAIN_IN_USA",
+      "split": "TEST_ONLY",
+      "candidate_task_slices": [
+        "ANCHOR_LOCALIZATION",
+        "EVENT_IDENTITY",
+        "STORY_VS_DISCOURSE_TIME",
+        "ARC_ORCHESTRATION"
+      ],
+      "passage_selection_state": "PENDING_BOUNDED_SELECTION",
+      "human_gold_state": "PENDING"
+    },
+    {
+      "work_id": "PG-2701-MOBY-DICK",
+      "title": "Moby Dick; Or, The Whale",
+      "author": "Herman Melville",
+      "publication_year": 1851,
+      "project_gutenberg_ebook": 2701,
+      "source_url": "https://www.gutenberg.org/ebooks/2701",
+      "rights_observation": "PUBLIC_DOMAIN_IN_USA",
+      "split": "TEST_ONLY",
+      "candidate_task_slices": [
+        "EVENT_IDENTITY",
+        "CAUSAL_GOAL_RELATIONS",
+        "EPISTEMIC_FOCALIZATION",
+        "NARRATIVE_FUNCTION",
+        "ARC_ORCHESTRATION"
+      ],
+      "passage_selection_state": "PENDING_BOUNDED_SELECTION",
+      "human_gold_state": "PENDING"
+    }
+  ],
+  "coverage_rule": "The final heldout set must cover all nine extraction task families across multiple works; no single work may be the only evidence for every high-risk relation family.",
+  "selection_rule": "Choose bounded passages because they instantiate named stress slices or relation families, not because a candidate model already performs well on them.",
+  "adjudication_rule": "Human annotations must explicitly preserve ALTERNATIVE/UNRESOLVED cases and document disagreement; ambiguous perspective, causality or chronology may not be forcibly collapsed to one asserted label.",
+  "next_action": "Select bounded passages and create provenance-bound human-adjudication packets without exposing gold annotations to the Candidate-002 model backend."
+}
