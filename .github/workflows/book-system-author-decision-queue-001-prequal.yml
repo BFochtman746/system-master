@@ -1,0 +1,57 @@
+name: BOOK-SYSTEM Author Decision Queue 001 Hosted Prequalification
+
+on:
+  push:
+    branches:
+      - book-system/author-decision-queue-001-implementation
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  BOOK_AUTHOR_DECISION_EVIDENCE_DIR: ${{ runner.temp }}/book-system-author-decision-queue-001-evidence
+
+jobs:
+  hosted-prequalification:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Validate runtime and qualifier syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check system-master/book-system/author-decision-queue.js
+          node --check .github/scripts/book-system-author-decision-queue-001-qualify.js
+
+      - name: Execute deterministic adversarial qualification
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$BOOK_AUTHOR_DECISION_EVIDENCE_DIR"
+          node .github/scripts/book-system-author-decision-queue-001-qualify.js | tee "$BOOK_AUTHOR_DECISION_EVIDENCE_DIR/qualifier.log"
+
+      - name: Record exact candidate identity
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$BOOK_AUTHOR_DECISION_EVIDENCE_DIR"
+          printf '%s\n' "subject_sha=${GITHUB_SHA}" > "$BOOK_AUTHOR_DECISION_EVIDENCE_DIR/subject.txt"
+          git rev-parse HEAD >> "$BOOK_AUTHOR_DECISION_EVIDENCE_DIR/subject.txt"
+
+      - name: Upload synthetic qualification evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001-${{ github.run_id }}-hosted-evidence
+          path: ${{ env.BOOK_AUTHOR_DECISION_EVIDENCE_DIR }}
+          if-no-files-found: error
+          retention-days: 30
