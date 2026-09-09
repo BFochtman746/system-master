@@ -1,0 +1,46 @@
+{
+  "contract_id": "BOOK-INTELLIGENCE-NARRATIVE-STATE-001-STEP-002-v1",
+  "objective": "Admit provenance-bound candidate narrative observations into the qualified STEP-001 state without retaining manuscript text, inventing certainty, or converting model confidence into literary truth.",
+  "input": "AUTHORIZED_SOURCE_BINDING + ANCHOR[] + ENTITY_CANDIDATE[] + EVENT_CANDIDATE[] + CLAIM_CANDIDATE[]",
+  "output": "CANONICAL_NARRATIVE_STATE + MATERIALIZATION_RECEIPT",
+  "source_binding": {
+    "required": ["document_id", "source_sha256"],
+    "rule": "Every materialization request is bound to one exact authorized source digest. Candidate records cannot override that binding."
+  },
+  "nonreconstructive": {
+    "durable_raw_manuscript_text": false,
+    "allowed_anchor_material": ["anchor_id", "chapter_id", "ordinal", "token_start", "token_end", "span_sha256"],
+    "forbidden_keys": ["raw_text", "quoted_text", "manuscript_text", "source_text", "passage_text"]
+  },
+  "candidate_support_statuses": ["VERIFIED", "OBSERVED", "INFERRED", "CONTESTED"],
+  "admission": {
+    "entity_min_confidence": 0.5,
+    "event_min_confidence": 0.5,
+    "asserted_claim_min_confidence": 0.8,
+    "inferred_asserted_claim_min_confidence": 0.9,
+    "alternative_claim_min_confidence": 0.35,
+    "unresolved_claim_min_confidence": 0.0
+  },
+  "rules": [
+    "Every candidate must cite at least one valid source anchor.",
+    "VERIFIED/OBSERVED evidence may support ASSERTED claims only above the asserted confidence floor.",
+    "INFERRED evidence may support ASSERTED claims only above the stricter inferred floor and with at least two distinct evidence families.",
+    "CONTESTED evidence cannot materialize as ASSERTED; it must be ALTERNATIVE or UNRESOLVED.",
+    "Conflicting interpretations must remain explicit alternatives/unresolved claims; the materializer never silently picks a winner.",
+    "Duplicate entity/event IDs merge only anchors and non-conflicting tags; contradictory identity payloads fail closed.",
+    "Duplicate claims merge provenance and evidence-family metadata but confidence is max-observed, never summed or vote-inflated.",
+    "Materialized state must pass the STEP-001 validator before PASS.",
+    "No claim type may encode literary quality, defect status, author intent, or a revision instruction.",
+    "Empty or insufficient evidence may produce a valid sparse state and a receipt with rejected candidates; it must not invent missing facts."
+  ],
+  "receipt_required": [
+    "source_sha256",
+    "input_counts",
+    "admitted_counts",
+    "rejected_counts",
+    "rejection_reasons",
+    "state_valid",
+    "raw_manuscript_text_persisted"
+  ],
+  "promotion_boundary": "PASS proves deterministic admission/validation behavior only. It does not establish that model-extracted narrative claims are factually correct without source-grounded evaluation."
+}
