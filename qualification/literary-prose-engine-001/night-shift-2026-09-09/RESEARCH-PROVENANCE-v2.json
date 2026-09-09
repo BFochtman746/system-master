@@ -1,0 +1,106 @@
+{
+  "artifact_id": "LITERARY-PROSE-NIGHT-SHIFT-2026-09-09-RESEARCH-PROVENANCE-v2",
+  "scope": "Current research delta after the v1 broad prose audit; focus on the concrete remaining narrative-extraction/evaluation boundary rather than repeating generic prose taxonomy research.",
+  "retrieved_date": "2026-09-09",
+  "sources": [
+    {
+      "source_id": "ACL2026-LITVISTA",
+      "title": "LitVISTA: A Benchmark for Narrative Orchestration in Literary Text",
+      "publisher": "Association for Computational Linguistics",
+      "venue": "ACL 2026",
+      "url": "https://aclanthology.org/2026.acl-long.1024/",
+      "doi": "10.18653/v1/2026.acl-long.1024",
+      "finding": "Frontier models struggle to jointly capture narrative function and structure; end-to-end failures are dominated by event-anchor identification and localization.",
+      "system_implication": "Keep anchor localization as a separately scored first-class extraction task. Do not infer global orchestration authority from fluent prose analysis alone."
+    },
+    {
+      "source_id": "EACL2026-NARRABENCH",
+      "title": "NarraBench: A Comprehensive Framework for Narrative Benchmarking",
+      "publisher": "Association for Computational Linguistics",
+      "venue": "EACL 2026",
+      "url": "https://aclanthology.org/2026.eacl-long.176/",
+      "doi": "10.18653/v1/2026.eacl-long.176",
+      "finding": "A survey of 78 benchmarks estimates only 27% of narrative tasks are well captured; narrative events, style, perspective, and revelation are especially under-evaluated, and subjective/perspectival tasks often lack one correct answer.",
+      "system_implication": "Retain task-specific metrics, alternative/unresolved states, and human escalation rather than one aggregate narrative score. Explicitly test perspective and revelation/open-question handling."
+    },
+    {
+      "source_id": "ACL2026-CONSTORY",
+      "title": "Lost in Stories: Consistency Bugs in Long Story Generation by LLMs",
+      "publisher": "Association for Computational Linguistics",
+      "venue": "Findings of ACL 2026",
+      "url": "https://aclanthology.org/2026.findings-acl.410/",
+      "doi": "10.18653/v1/2026.findings-acl.410",
+      "finding": "Long-story consistency errors concentrate in factual and temporal dimensions and often appear in the middle of narratives.",
+      "system_implication": "Source-held-out calibration must include middle-book factual/temporal slices, not only openings/endings or short passages."
+    },
+    {
+      "source_id": "EMNLP2025-EVENTRELBENCH",
+      "title": "EventRelBench: A Comprehensive Benchmark for Evaluating Event Relation Understanding in Large Language Models",
+      "publisher": "Association for Computational Linguistics",
+      "venue": "Findings of EMNLP 2025",
+      "url": "https://aclanthology.org/2025.findings-emnlp.482/",
+      "doi": "10.18653/v1/2025.findings-emnlp.482",
+      "finding": "General-purpose LLMs remain weak on event relation understanding across coreference, temporal, causal, and supersub relations at sentence and document level.",
+      "system_implication": "Separate event identity/coreference, temporal and causal extraction scores; a model strong on one relation family must not inherit authority on the others."
+    },
+    {
+      "source_id": "NAACL2025-EVENTFULL",
+      "title": "EventFull: Complete and Consistent Event Relation Annotation",
+      "publisher": "Association for Computational Linguistics",
+      "venue": "NAACL 2025 Demonstrations",
+      "url": "https://aclanthology.org/2025.naacl-demo.40/",
+      "doi": "10.18653/v1/2025.naacl-demo.40",
+      "finding": "Systematic temporal, causal, and coreference annotation is expensive because event-pair space grows quadratically; integrated annotation tooling can improve consistency and agreement.",
+      "system_implication": "Gold construction should use an explicit unified relation annotation schema and targeted candidate-pair generation rather than pretending exhaustive manual relation labeling is cheap."
+    },
+    {
+      "source_id": "ACL2026-EVENT-CAUSALITY",
+      "title": "Suggest-Verify-Revise: A Three-Stage Document-Level Event Causality Identification with Narrative Consistency",
+      "publisher": "Association for Computational Linguistics",
+      "venue": "ACL 2026",
+      "url": "https://aclanthology.org/2026.acl-long.871/",
+      "doi": "10.18653/v1/2026.acl-long.871",
+      "finding": "Document-level causal identification benefits from explicit verification/revision rather than unverified one-shot extraction.",
+      "system_implication": "Candidate extraction should remain noncanonical and flow through validation; unsupported causality must be a first-class false-certainty metric."
+    },
+    {
+      "source_id": "LREC2026-KERNEL-EVENTS",
+      "title": "Once upon a Kernel: Extracting Important Events from Narratives",
+      "publisher": "ELRA Language Resource Association",
+      "venue": "LREC 2026",
+      "url": "https://aclanthology.org/2026.lrec-1.477/",
+      "finding": "Narratologically grounded kernel events can distinguish story-moving events from less structurally important events.",
+      "system_implication": "Future orchestration calibration should distinguish event existence from event narrative role/importance; do not collapse detection and function into one label."
+    },
+    {
+      "source_id": "LITBENCH2025",
+      "title": "LitBench: A Benchmark and Dataset for Reliable Evaluation of Creative Writing",
+      "source": "arXiv 2507.00769",
+      "url": "https://arxiv.org/abs/2507.00769",
+      "finding": "The strongest reported off-the-shelf judge reached about 73% agreement with human preferences, while trained reward models reached about 78%, leaving substantial residual disagreement.",
+      "system_implication": "Automated literary preference remains evidence, not final authority. Preserve TIE/ABSTAIN, evaluator-robustness checks, and human review for taste/intent boundaries."
+    },
+    {
+      "source_id": "CHI2025-CULTURAL-HOMOGENIZATION",
+      "title": "AI Suggestions Homogenize Writing Toward Western Styles and Diminish Cultural Nuances",
+      "publisher": "ACM",
+      "venue": "CHI 2025",
+      "url": "https://doi.org/10.1145/3706598.3713564",
+      "doi": "10.1145/3706598.3713564",
+      "finding": "Controlled cross-cultural writing experiments found AI suggestions shifted Indian participants toward American/Western writing patterns and reduced cultural distinctions.",
+      "system_implication": "Keep project-relative voice/cultural preservation and anti-homogenization vetoes; generic fluency or mainstream-style conformity cannot be a monotonic optimization target."
+    },
+    {
+      "source_id": "CHBAH2025-CREATIVE-DIVERSITY",
+      "title": "Homogenizing effect of large language models (LLMs) on creative diversity: An empirical comparison of human and ChatGPT writing",
+      "publisher": "Computers in Human Behavior: Artificial Humans",
+      "year": 2025,
+      "url": "https://doi.org/10.1016/j.chbah.2025.100207",
+      "doi": "10.1016/j.chbah.2025.100207",
+      "finding": "Across preregistered studies, groups of human essays added semantic diversity faster than GPT-4 outputs; prompt/parameter diversity interventions did not eliminate the gap.",
+      "system_implication": "Continue measuring baseline-relative diversity/identity drift across repeated revisions rather than assuming prompt variation solves homogenization."
+    }
+  ],
+  "research_conclusion": "The v1 architecture direction remains correct. The strongest new 2026 evidence narrows the next unknown further: extraction and anchor localization accuracy, relation-family calibration, ambiguity/perspective preservation, and source-held-out long-context robustness. No evidence justifies reopening a generic prose-quality taxonomy or weakening author/voice/preservation boundaries.",
+  "stop_condition": "Do not perform another broad prose literature sweep until a concrete extractor, benchmark result, or implementation boundary exposes a specific missing state/metric or materially newer evidence changes a requirement."
+}
