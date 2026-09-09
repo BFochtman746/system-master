@@ -1,0 +1,86 @@
+name: A01 Closed-Loop Repair Hosted Prequalification
+
+on:
+  push:
+    branches:
+      - core/a01-closed-loop-repair-001
+    paths:
+      - '.github/scripts/a01-closed-loop-repair.js'
+      - '.github/scripts/a01-closed-loop-repair-selftest.js'
+      - '.github/workflows/a01-closed-loop-repair-hosted-prequalification.yml'
+      - 'qualification/a01/repair/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  hosted-prequalification:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Record exact candidate identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "candidate_sha=$(git rev-parse HEAD)"
+          echo "node=$(node --version)"
+
+      - name: Prove frozen A-01 baseline files are unchanged
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE=22dd2970853edd7e31b9d6a44915c27c4e5271d2
+          git diff --exit-code "$BASE" -- \
+            .github/workflows/a01-control-plane-gateway.yml \
+            .github/scripts/a01-control-plane.js \
+            qualification/a01/a01-policy.json \
+            qualification/a01/registry.json
+          echo A01_FROZEN_BASELINE_DIFF=PASS
+
+      - name: Validate current control plane
+        shell: bash
+        run: |
+          set -euo pipefail
+          node .github/scripts/a01-control-plane.js validate
+
+      - name: Run closed-loop repair adversarial selftest
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/a01-repair-prequal"
+          A01_EVIDENCE_DIR="$RUNNER_TEMP/a01-repair-prequal" node .github/scripts/a01-closed-loop-repair-selftest.js | tee "$RUNNER_TEMP/a01-repair-prequal/stdout.txt"
+
+      - name: Run existing A-01 control-plane regression selftest
+        shell: bash
+        run: |
+          set -euo pipefail
+          A01_EVIDENCE_DIR="$RUNNER_TEMP/a01-repair-prequal" node .github/scripts/a01-control-plane-selftest.js | tee "$RUNNER_TEMP/a01-repair-prequal/control-plane-regression.txt"
+
+      - name: Record prequalification summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "candidate_sha=$(git rev-parse HEAD)"
+            echo "base_sha=22dd2970853edd7e31b9d6a44915c27c4e5271d2"
+            echo "gateway_modified=false"
+            echo "control_plane_executor_modified=false"
+            echo "policy_modified=false"
+            echo "registry_modified=false"
+          } > "$RUNNER_TEMP/a01-repair-prequal/summary.txt"
+
+      - name: Upload hosted prequalification evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: a01-closed-loop-repair-hosted-prequalification-${{ github.run_id }}
+          path: ${{ runner.temp }}/a01-repair-prequal
+          if-no-files-found: error
+          retention-days: 30
