@@ -19,15 +19,18 @@ Historical references to `MASTER`, `MASTER SYSTEM` or `System Master foundation/
 
 Detailed dependency-spine history, exact candidate identities, qualification evidence and source-custody constraints remain preserved in the historical technical records on this branch. Topology changes do not transfer exact-SHA PASS.
 
-Current successor evidence is:
+Current successor evidence includes:
 
 - `PLATFORM005-REDERIVED-ASSEMBLY-004.md`
 - `PLATFORM005-RECONCILIATION-004.md`
 - `CHAT001A-CUMULATIVE-ASSEMBLY-003.md`
 - `CHAT001A-RECONCILIATION-003.md`
 - `OPERATOROPS001-SOURCE-CUSTODY-RECONCILIATION-001.md`
+- `OPERATOROPS001-SOURCE-CUSTODY-RECONCILIATION-002.md`
+- `OPERATOROPS001_R024_REBUILD_001.patch`
+- `OPERATOROPS001-RECONCILIATION-001.md`
 
-These supersede the earlier current-control instruction to recover/modify the unavailable `0ae86ee3...` PLATFORM-005 composite and the earlier statement that SMR020 is blocked by predecessor reconciliation.
+Historical and changed-byte subjects remain distinct evidence classes.
 
 ## Current Core standing
 
@@ -45,35 +48,74 @@ Cumulative predecessor reconciliation is closed locally on exact subject:
 
 `9571b3f4f876980047facbdd77cf17f8a8a2d3255bab9704ceb3fd49cddbd5f3`
 
-The exact candidate passed the recorded strict Java 21, 19/19 executable regression, PLATFORM-005 + CHAT-001A focused/contract/recurrence, CHAT PostgreSQL static-contract, persistence, coherence/congruence, exact-subject and 1,054/1,054 release-manifest gates.
+The exact candidate passed strict Java 21, 19/19 executable regression, PLATFORM-005 + CHAT-001A focused/contract/recurrence, CHAT PostgreSQL static-contract, persistence, coherence/congruence, exact-subject and 1,054/1,054 release-manifest gates.
 
-This clears the **local portable predecessor-reconciliation block** on SMR020. It does not clear source-custody, hosted exact-SHA, A-01, Apple-native or production boundaries.
+This clears the local portable predecessor-reconciliation block. It does not clear GitHub-native source-custody, hosted exact-SHA, A-01, Apple-native or production boundaries.
 
-### SMR020 / OPERATOR-OPS-001
+### SMR020 / OPERATOR-OPS-001 — local portable closure complete
 
-Source-custody reconciliation has now recovered and hash-matched the canonical R024 review artifacts from the September 3 master-backup lineage and freshly replayed the recovered later cumulative OPERATOR implementation.
+The historical v2.0.23 outer carrier has now been recovered from actual bytes:
 
-Recovered canonical R024 standing remains:
+`SYSTEM_MASTER_OFFICIAL_SPINE_v2.0.23_OPERATOR-OPS-001-REVIEWED_A01-PENDING.zip`
 
-- release `v2.0.23 / R024`;
-- `REMEDIATED_INTEGRATED_PORTABLE_PASS / A01_PENDING` historically recorded;
-- 60 operations;
-- 13 findings, 11 remediated and 2 deliberately fenced to A-01;
-- production certification false.
+Actual-byte identity:
 
-Fresh recovery evidence on the later cumulative source is bounded to that recovered source, not v2.0.23: static authority verifier PASS (`60 operations / 18 controls`), strict Java 21 focused compile PASS, `OperatorOpsPortableTests` 9/9 PASS, full recovered source strict compile PASS (`723 main + 84 test`), and recovered-current `FinalWavePortableTests` 22/22 PASS.
+- bytes: `12,798,084`
+- SHA-256: `4f900a29b4130d01f489188bd1fd9c36e2f0b53e8247c4634e8bc587dcd3ea9e`
+- internal release manifest SHA-256: `2311a8f2ca12056bd9993226119273b54eac25e33d54352df1491cecead1be6a`
+- manifest subjects: `1,343/1,343` exact size+SHA PASS
 
-The historical standalone v2.0.23 outer carrier remains unrecovered. The Program Vault index expects 12,798,084 bytes and canonical archive SHA-256 `4f900a29b4130d01f489188bd1fd9c36e2f0b53e8247c4634e8bc587dcd3ea9e`, while a conflicting historical provenance sidecar records `1a5e396817b9214e5f4219fcfbffbbc2de1239ac68b63f1de8af0dc1a5998864` for the same carrier name. Sidecars are not a substitute for actual bytes.
+This resolves the prior `4f900a29...` versus `1a5e3968...` custody conflict from actual bytes: `4f900a29...` is the recovered carrier identity; `1a5e3968...` remains preserved only as a conflicting historical sidecar assertion.
 
-Therefore historical source/test byte identity, exact-subject portable replay and A-01 admission remain unproven. Do not transfer the later UAF source PASS onto the missing v2.0.23 release identity.
+The historical carrier itself proves the canonical R024 input hashes and its complete portable campaign has been freshly replayed:
+
+- strict Java 21: PASS — `576 main / 65 test`
+- authority verifier: PASS — `60 operations / 18 controls`
+- historical OPERATOR focused assertions: `9/9 PASS`
+- official cumulative portable suites: `59/59 PASS`
+- release identity / deterministic archive / manifest / migration / hardening / assurance code-quality: PASS
+- toolchain lanes: `PASS_WITH_EXTERNAL_ADMISSION_LANES_BLOCKED`
+- R024 standing remains `REMEDIATED_INTEGRATED_PORTABLE_PASS / A01_PENDING / production=false`
+
+Adversarial reconciliation demonstrated a real historical Java/JSON-Schema parity defect. Historical PASS was not transferred to changed bytes.
+
+A dependency-current SMR020 rebuild was derived from exact SMR019 subject `9571b3f4...` and independently qualified on new exact source/test subject:
+
+`89066e5662554b1810691473e0ed9bf49d8cc2fd4964444043b878461ed75477`
+
+Changed-candidate local portable qualification:
+
+- strict Java 21: PASS — `399 main / 20 test`
+- executable suites: `20/20 PASS`
+- focused OPERATOR runtime: `19 PASS`
+- exact 60-operation migration: PASS; all `NON_ACTIVATABLE`
+- contract/runtime parity: `2/2 PASS`
+- OPERATOR PostgreSQL canonical objects: `0`
+- R024 recurrence: `13/13`; 11 portable controls PASS, O012/O013 retained under `PC-ENDGAME-027`
+- system coherence: PASS
+- engineering congruence: PASS — 35 authoritative concerns / 0 exceptions
+- exact-subject verification: PASS
+- release manifest: `1,082/1,082 PASS`
+- release-manifest SHA-256: `687b1b550dfe960525a20b3c8bbc9cd8a637bccb4e01f64e84c1d94a515c62a9`
+- CURRENT-AUTHORITY SHA-256: `9c763dac5d750fefc897d5ff1bcb95b5d3279a3bd62d7e934af4a10c5ac77feb`
+
+OPERATOR remains catalog/readiness/next-action projection and human-control intent only. It does not execute effects. PLATFORM-006 remains capability admission authority; PLATFORM-010 remains governed effect authorization/commit/idempotency/reconciliation/receipt authority; Foundation/DATA retain durable approval/audit truth.
+
+The local portable SMR020 dependency train is therefore closed. This does **not** establish ordinary GitHub-native runnable source custody for changed subject `89066e56...`, fresh hosted exact-SHA qualification, Windows/A-01 empirical PASS, Apple-native/browser/operator-console evidence, production certification or promotion authority.
 
 ## Current Core objective
 
-`UAF-S1-OPERATOROPS001-SOURCE-CUSTODY-002 — RECOVER OR INDEPENDENTLY RECONSTRUCT THE HISTORICAL v2.0.23 OPERATOR-OPS SOURCE/TEST SUBJECT -> RESOLVE THE 4f900a29 vs 1a5e3968 OUTER-PROVENANCE DISCREPANCY FROM ACTUAL BYTES -> PROVE R024 INPUT FILE HASH IDENTITY -> REPLAY THE PRESERVED OPERATOR-OPS PORTABLE QUALIFICATION -> ONLY THEN DECIDE WHETHER A DISTINCT WINDOWS A-01 EMPIRICAL DELTA IS JUSTIFIED.`
+`SYSTEM-MASTER-REBUILD-021 / USER-EXPERIENCE-001 — User Experience + Human Intent Projection Foundation`
 
-Do not advance to SMR021 by transferring SMR019 or later-UAF PASS to SMR020 bytes. No SMR020 A-01 ticket is justified until an immutable exact qualification subject is reconstructed/admitted.
+Proceed through SMR021's own exact historical carrier/reconciliation/qualification train. Do not transfer SMR020 PASS to SMR021 bytes.
 
-In parallel, preserve the unresolved custody obligation for the corrected SMR018/SMR019 runnable trees: import/admit them to ordinary GitHub-native immutable source without mutation, independently reproduce exact identities, and obtain fresh hosted exact-SHA qualification before any A-01 admission requiring those changed subjects.
+Historical v2.0.23/R024 evidence names `USER-EXPERIENCE-001` as the next authority. Begin by recovering/verifying the exact v2.0.24 USER-EXPERIENCE carrier, replaying its complete portable historical qualification without mutation, then adversarially challenging accessibility/human-intent/work-version/attention/control-projection invariants before any changed candidate is created.
+
+## Parallel unresolved Core obligations
+
+- Admit corrected SMR018 `cc67826...`, cumulative SMR019 `9571b3f4...`, and changed SMR020 `89066e56...` runnable trees into ordinary GitHub-native immutable custody without mutation; independently reproduce exact subjects; obtain fresh hosted exact-SHA qualification before any A-01 request dependent on those changed bytes.
+- `RECON-001C` remains blocked on credentialed sealed-history Git import under Assurance/Reconciliation.
+- PC/target-only empirical obligations remain distinct; SMR020 O012/O013 are retained under `PC-ENDGAME-027`.
 
 ## Boundary rules
 
