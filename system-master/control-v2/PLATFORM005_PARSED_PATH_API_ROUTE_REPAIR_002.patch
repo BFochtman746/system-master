@@ -1,0 +1,36 @@
+--- a/11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/shell/ShellRules.java
++++ b/11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/shell/ShellRules.java
+@@ -19,9 +19,11 @@
+     static String route(String value,String name){
+         value=text(value,name,256);
+         String lower=value.toLowerCase(java.util.Locale.ROOT);
+-        if(!value.startsWith("/")||value.startsWith("//")||value.indexOf('\\')>=0||lower.contains("%2e")||lower.contains("%2f")||lower.contains("%5c")||lower.contains("%00")||value.startsWith("/api/")||value.equals("/api"))throw new IllegalArgumentException(name);
++        if(!value.startsWith("/")||value.startsWith("//")||value.indexOf('\\')>=0||lower.contains("%2e")||lower.contains("%2f")||lower.contains("%5c")||lower.contains("%00"))throw new IllegalArgumentException(name);
+         URI uri=URI.create(value);
+         if(uri.isAbsolute()||uri.getAuthority()!=null||uri.getHost()!=null||uri.getUserInfo()!=null||uri.getFragment()!=null)throw new IllegalArgumentException(name);
++        String path=uri.getPath();
++        if(path==null||path.equals("/api")||path.startsWith("/api/"))throw new IllegalArgumentException(name);
+         String normalized=uri.normalize().toString();
+         if(!normalized.equals(value)||normalized.contains("/../")||normalized.endsWith("/.."))throw new IllegalArgumentException(name);
+         return value;
+--- a/12_TESTS/src/test/java/org/systemmaster/rebuild/platform/shell/Platform005AuthorityTests.java
++++ b/12_TESTS/src/test/java/org/systemmaster/rebuild/platform/shell/Platform005AuthorityTests.java
+@@ -57,6 +57,7 @@
+         bad(()->new WorkSurfaceDescriptor("x","X","https://evil.example/x","x",Set.of("USER"),"CAP-X","1.0.0",false,1),"absolute route denied");
+         bad(()->new WorkSurfaceDescriptor("x","X","//evil.example/x","x",Set.of("USER"),"CAP-X","1.0.0",false,1),"protocol-relative route denied");
+         bad(()->new WorkSurfaceDescriptor("x","X","/api/secret","x",Set.of("USER"),"CAP-X","1.0.0",false,1),"API navigation denied");
++        bad(()->new WorkSurfaceDescriptor("x","X","/api?view=shell","x",Set.of("USER"),"CAP-X","1.0.0",false,1),"API navigation with query denied");
+         bad(()->new WorkSurfaceDescriptor("x","X","/a/../b","x",Set.of("USER"),"CAP-X","1.0.0",false,1),"noncanonical route denied");bad(()->new WorkSurfaceDescriptor("x","X","/a/%2e%2e/b","x",Set.of("USER"),"CAP-X","1.0.0",false,1),"encoded traversal denied");
+         bad(()->new WorkSurfaceDescriptor("x","X","/x","x",Set.of(),"CAP-X","1.0.0",false,1),"empty role admission denied");
+ 
+--- a/tools/verify_platform005_contract_parity.py
++++ b/tools/verify_platform005_contract_parity.py
+@@ -19,7 +19,7 @@
+  if c.get('version')!='0.19.0' or c.get('status') not in allowedcap or not c.get('contracts'):issues.append(c.get('capability_id','?')+':binding drift')
+ checks={
+ '11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/shell/Platform005Authority.java':['ownsAuthenticationTruth','ownsCapabilityQualificationOrRouting','ownsDomainTruth','ownsDurablePostgresState','browserCacheMayContainSensitiveOrAuthenticatedData','optimisticClientStateMayClaimDurableCompletion','serviceWorkerMayInterceptApiRequests','targetBrowserBehaviorProvenByPortableTests'],
+-'11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/shell/ShellRules.java':['%2e','%2f','%5c','%00','uri.normalize'],
++'11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/shell/ShellRules.java':['%2e','%2f','%5c','%00','uri.normalize','uri.getPath'],
+ '11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/shell/PwaShellService.java':['REAUTH_REQUIRED','OFFLINE','ShellCapabilityResolver.standing','AtlasHealth.HEALTHY','Platform003Authority.mobileResumeStanding'],
+ '11_SOURCE/pwa/app.js':['credentials: "same-origin"','cache: "no-store"','redirect: "error"','AbortController','loadEpoch','readBoundedJson','262144','textContent','projection.expiresAt','projection.issuedAt','setTimeout','Shell projection expired'],
+ '11_SOURCE/pwa/service-worker.js':['credentials: "omit"','crypto.subtle.digest','SYSTEM_MASTER_ACTIVATE_UPDATE','SYSTEM_MASTER_UNREGISTER_AND_PURGE','url.pathname.startsWith("/api/")','MAX_AGE_MS = 86400000','X-System-Master-Cached-At','cachedFreshAsset'],
