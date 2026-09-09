@@ -35,6 +35,7 @@
     "qualification_id": {"type": "string", "minLength": 1, "maxLength": 160},
     "subject_sha": {"type": "string", "pattern": "^[0-9a-fA-F]{40}$"},
     "origin_ref": {"type": "string", "minLength": 1, "maxLength": 300},
+    "depends_on_ticket_id": {"type": ["string", "null"], "minLength": 3, "maxLength": 160, "pattern": "^[A-Za-z0-9._-]+$"},
     "estimated_minutes": {"type": "integer", "minimum": 1, "maximum": 300},
     "max_runtime_minutes": {"type": "integer", "minimum": 1, "maximum": 300},
     "priority": {"type": "integer", "minimum": 1, "maximum": 100},
