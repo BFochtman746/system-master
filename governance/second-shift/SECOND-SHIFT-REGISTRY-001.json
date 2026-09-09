@@ -1,0 +1,17 @@
+{
+  "registry_id": "SECOND-SHIFT-REGISTRY-001",
+  "effective_date": "2026-09-09",
+  "product_root": "SYSTEM_MASTER",
+  "schema": "governance/second-shift/SECOND-SHIFT-DELEGATION-SCHEMA-001.json",
+  "owner_files": {
+    "CORE": "governance/second-shift/CORE-DELEGATIONS.json",
+    "LEARNING": "governance/second-shift/LEARNING-DELEGATIONS.json",
+    "BOOK": "governance/second-shift/BOOK-DELEGATIONS.json",
+    "PROSE": "governance/second-shift/PROSE-DELEGATIONS.json"
+  },
+  "portfolio_rule": "The 23:15 portfolio controller reads the four owner files from current main, revalidates each against the live owner control head, removes stale/non-open items from admission, and plans only READY work. Empty is valid.",
+  "day_shift_rule": "Whenever a system chat closes, supersedes, blocks or materially changes its current objective, it must reconcile its delegation file in the same working session. If the previous delegation is no longer current, remove it from active_delegations and record the closure/supersession in durable system/completion evidence before selecting a successor.",
+  "night_start_rule": "Each worker independently revalidates its selected delegation again immediately before execution. The 23:15 plan is not execution authority if state changed after planning.",
+  "stale_rule": "No job survives a control-head mismatch by default. Re-evaluate first, then create a new/revalidated delegation bound to the new head.",
+  "no_work_rule": "If no dependency-valid unattended work exists, schedule nothing for that owner. Runner utilization is not a goal."
+}
