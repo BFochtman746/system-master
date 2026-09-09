@@ -1,0 +1,82 @@
+{
+  "packet_id": "LITERARY-NARRATIVE-EXTRACTION-CALIBRATION-001-v1",
+  "standing": "IMPLEMENTATION_READY__NO_AUTHOR_DECISION_REQUIRED",
+  "objective": "Empirically qualify narrative-state and orchestration extraction before any automated extractor can become authoritative.",
+  "why_this_is_next": [
+    "STEP-008 opportunity admission is implemented and hosted-qualified.",
+    "Canonical narrative-state representation + provenance-bound materialization are implemented and hosted-qualified.",
+    "Global narrative orchestration representation is implemented and hosted-qualified.",
+    "Creative-judge robustness analyzer is implemented and hosted-qualified.",
+    "The remaining missing evidence is extraction accuracy/calibration, not conceptual coverage."
+  ],
+  "gold_source_policy": {
+    "allowed": [
+      "synthetic narratives authored specifically for qualification",
+      "public-domain literary passages with documented provenance",
+      "user-owned/authorized text only when explicitly supplied for qualification",
+      "human-adjudicated structural annotations with provenance"
+    ],
+    "forbidden": [
+      "bulk copyrighted book/article body acquisition",
+      "hidden Book-Eval gold reuse",
+      "named-living-author imitation targets",
+      "fabricated human/author evidence"
+    ],
+    "split_rule": "Hold out entire source works/authors where practical. Do not split adjacent passages from the same work across train/tune/test when that could leak structure/style."
+  },
+  "tasks": [
+    {"task":"ANCHOR_LOCALIZATION","metrics":["precision","recall","F1","span overlap/IoU when token spans exist"]},
+    {"task":"ENTITY_IDENTITY_COREFERENCE","metrics":["precision","recall","F1","false-merge rate","false-split rate"]},
+    {"task":"EVENT_IDENTITY","metrics":["precision","recall","F1","same-event retelling accuracy"]},
+    {"task":"STORY_VS_DISCOURSE_TIME","metrics":["relation macro-F1","contradictory-assertion rate","ambiguity preservation rate"]},
+    {"task":"CAUSAL_GOAL_RELATIONS","metrics":["precision","recall","F1","unsupported-causality rate"]},
+    {"task":"EPISTEMIC_FOCALIZATION","metrics":["KNOWS/BELIEVES/PERCEIVES/FOCALIZES macro-F1","knowledge-before-exposure false-positive rate","abstention accuracy"]},
+    {"task":"NARRATIVE_FUNCTION","metrics":["multi-label macro-F1","anchor localization F1","alternative-hypothesis preservation"]},
+    {"task":"SETUP_PAYOFF_OPEN_QUESTION","metrics":["link precision/recall","premature-closure rate","intentional-unresolved preservation"]},
+    {"task":"ARC_ORCHESTRATION","metrics":["event-beat anchor F1","role macro-F1","invalid universal-template assertion rate"]}
+  ],
+  "selective_prediction": {
+    "required": true,
+    "metrics": ["coverage", "selective accuracy", "risk-coverage curve", "false-certainty rate", "abstention precision on ambiguous cases"],
+    "rule": "A lower-coverage extractor with materially lower false-certainty may outrank a high-coverage extractor for canonical authority."
+  },
+  "calibration": {
+    "metrics": ["confidence-vs-correctness reliability bins", "Brier score where labels are binary", "expected calibration error where appropriate"],
+    "rule": "Confidence is evidence quality metadata, never prose-quality score."
+  },
+  "stress_slices": [
+    "middle-book factual/temporal consistency",
+    "flashback and flashforward",
+    "repeated narration of the same event",
+    "unresolved/ambiguous chronology",
+    "multiple focalizers or intentional omniscience",
+    "belief vs knowledge vs perception",
+    "delayed setup/payoff across chapters",
+    "intentionally unresolved questions/arcs",
+    "motif recurrence with changing function",
+    "surface-style attractiveness conflicting with story function"
+  ],
+  "implementation_sequence": [
+    "1. Define gold/prediction/receipt schemas and stable source-held-out split manifest.",
+    "2. Build a synthetic qualification corpus designed around the stress slices without copying any user manuscript.",
+    "3. Implement scoring + selective-risk/calibration harness independent of any extractor provider.",
+    "4. Define extractor-provider interface that outputs candidate observations only; provider cannot write canonical state directly.",
+    "5. Run a deterministic/no-model baseline to prove harness failure detection.",
+    "6. Add one candidate extractor/provider and run hosted small calibration where resources permit.",
+    "7. Only after hosted evidence is green, prepare a registered A-01 qualification wrapper for larger source-held-out campaigns if Windows compute materially helps.",
+    "8. Central portfolio prep, not this workstream, decides whether/when to admit an A-01 ticket."
+  ],
+  "promotion_gate": {
+    "required": [
+      "source-held-out results",
+      "no hidden/private Book-Eval leakage",
+      "false-certainty and ambiguity-preservation thresholds",
+      "per-task evidence rather than one aggregate quality score",
+      "evaluator-robustness standing compatible with automated comparison",
+      "rights/privacy provenance"
+    ],
+    "not_required_yet": ["real author-review queue resolution", "manuscript mutation", "named-author targets"]
+  },
+  "daytime_first_action": "Implement the provider-independent calibration schemas + scorer + synthetic stress corpus. Do not start with an LLM prompt; first make incorrect extraction measurable.",
+  "stop_condition": "Do not add more prose taxonomies until extraction calibration exposes a concrete missing label/state/metric. Do not grant automatic extractor authority until source-held-out false-certainty, ambiguity preservation and per-task accuracy are empirically acceptable."
+}
