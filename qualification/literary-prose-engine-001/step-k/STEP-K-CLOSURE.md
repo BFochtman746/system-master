@@ -44,6 +44,16 @@ Repository evidence: `STEP-K-QUALIFICATION-EVIDENCE.json`.
 Reproducible runner: `run_step_k_fixtures.py`.
 Implementation: `overoptimization_defense.py`.
 
+## Hardened STEP-J dependency requalification
+
+`LITERARY-PROSE-ENGINE-001-STEP-K-REQUALIFY-J-HARDENED` is **PASS**.
+
+The requalification binds STEP-K to the hardened STEP-J learning semantics rather than relying on the earlier generic `depends_on: STEP-J` declaration. The tested repository subject is `00e2ad194a2d0bf27e471e86fae5a492508f6bae`, with hardened STEP-J implementation blob `a0e0165dc13c965b27dcec49b6c7737fb65e1d1b` and STEP-K implementation blob `46dc3ebff4a92a5baa60576c59ffa315fe3808f9`.
+
+The STEP-J rejection-hardening suite passes **2/2**, and the unchanged STEP-K defense suite passes **27/27**. No dependency regression appeared. Therefore no STEP-K algorithm repair was required or performed. Exact dependency-binding evidence is preserved in `STEP-K-J-HARDENED-REBIND-EVIDENCE.json`.
+
+Later STEP-L and real-book qualification work already present on the branch was preserved unchanged during this forward requalification.
+
 ## Boundaries
 
 - qualification uses synthetic derived metrics only;
