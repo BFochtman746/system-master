@@ -1,0 +1,160 @@
+{
+  "research_id": "BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-PREIMPLEMENTATION-RESEARCH-001",
+  "effective_date": "2026-09-09",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "standing": "CLOSED__BOUNDED_HUMAN_AUTHORITY_QUEUE_RESEARCH_COMPLETE__IMPLEMENTATION_DECISIONS_BOUND",
+  "parent_objective": "BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001",
+  "forensic_map": "qualification/book-system/author-decision-001/BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-FORENSIC-MAP-001.json",
+  "research_question": "What additional architecture is actually required to capture explicit author choices safely, accessibly and without transferring authority to AI/providers or duplicating the existing Book lifecycle, integration and versioning engines?",
+  "sources": [
+    {
+      "authority": "NIST",
+      "title": "Artificial Intelligence Risk Management Framework (AI RMF 1.0)",
+      "url": "https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.100-1.pdf",
+      "finding": "Human-AI configurations vary; systems may defer decisions to humans, and human-AI interaction can amplify human biases. Human oversight must be designed for context rather than assumed to be automatically effective."
+    },
+    {
+      "authority": "NIST",
+      "title": "AI RMF Playbook / AIRC Core",
+      "url": "https://airc.nist.gov/airmf-resources/airmf/5-sec-core/",
+      "finding": "Roles and responsibilities for human-AI oversight should be explicitly differentiated and oversight processes defined, assessed and documented."
+    },
+    {
+      "authority": "NIST",
+      "title": "Artificial Intelligence Risk Management Framework: Generative Artificial Intelligence Profile (NIST AI 600-1)",
+      "url": "https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.600-1.pdf",
+      "finding": "Generative AI may require additional human review, tracking, documentation and management oversight; accessibility and change-management controls are relevant governance tools."
+    },
+    {
+      "authority": "W3C WAI",
+      "title": "WCAG 2.2",
+      "url": "https://www.w3.org/TR/WCAG22/",
+      "finding": "Consequential submissions that modify stored user data should provide reversibility, error checking, or a review/confirmation/correction opportunity; redundant entry should be avoided where possible."
+    },
+    {
+      "authority": "W3C WAI",
+      "title": "Technique G168: Requesting confirmation to continue with selected action",
+      "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G168",
+      "finding": "For irreversible actions, confirmation should identify the selected action and consequences so the user can stop an unintended submission."
+    },
+    {
+      "authority": "Apple",
+      "title": "Human Interface Guidelines — Action sheets",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/action-sheets",
+      "finding": "Use action sheets for choices related to an intentional action; provide Cancel where needed; make destructive choices clear; avoid scrolling; on Apple Watch keep choices especially small, and on iOS use compact choice surfaces rather than overloaded menus."
+    },
+    {
+      "authority": "Apple",
+      "title": "Human Interface Guidelines — Alerts",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/alerts",
+      "finding": "Use alerts sparingly for essential actionable information; uncommon irreversible destructive actions merit confirmation; avoid making destructive actions the default."
+    },
+    {
+      "authority": "Apple",
+      "title": "Human Interface Guidelines — Accessibility / Buttons",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/accessibility",
+      "finding": "iOS/iPadOS controls should generally provide a 44x44 pt default target, with sufficient spacing to reduce accidental activation."
+    },
+    {
+      "authority": "OMG",
+      "title": "Business Process Model and Notation (BPMN) Version 2.0 — User Task",
+      "url": "https://www.omg.org/spec/BPMN/2.0/PDF",
+      "finding": "A User Task has an explicit actual human owner/performer and leaves rendering technology open; useful as a conceptual role-separation reference, not a reason to add a BPMN engine."
+    }
+  ],
+  "classifications": [
+    {
+      "decision": "KEEP",
+      "item": "Existing canonical AUTHOR_DECISION object",
+      "reason": "It already represents the durable author-authority evidence consumed by Lifecycle and other parent gates."
+    },
+    {
+      "decision": "KEEP",
+      "item": "Runtime V2 author_handoff as a request source",
+      "reason": "It already queues author requirements while explicitly lacking resolution authority."
+    },
+    {
+      "decision": "KEEP",
+      "item": "Lifecycle exact APPROVED/type/affirmative-choice consumption rule",
+      "reason": "It is already qualified and correctly fail-closed."
+    },
+    {
+      "decision": "KEEP",
+      "item": "Version/Rollback RECORD_AUTHORIZED_PARENT_SUCCESSOR with authority_kind AUTHOR_DECISION",
+      "reason": "It preserves author-decision successors without transferring author authority into versioning."
+    },
+    {
+      "decision": "ADD_OR_REFINE",
+      "item": "Dedicated immutable decision-queue ledger",
+      "reason": "Pending requests, presentation, staleness, dedup, resolution concurrency and receipts are not represented by the current canonical AUTHOR_DECISION object."
+    },
+    {
+      "decision": "ADD_OR_REFINE",
+      "item": "Exact subject identity and currentness",
+      "reason": "Every pending item must bind exact object/version/digest and parent-state version/digest so a choice cannot silently apply to changed prose, canon, proposal, artifact or publication candidate."
+    },
+    {
+      "decision": "ADD_OR_REFINE",
+      "item": "No-steering option model",
+      "reason": "NIST notes human-AI interaction can amplify bias. AI/provider-preferred options therefore cannot silently become defaults. Each option requires stable option_id, plain-language effect/consequence, evidence refs where relevant, and explicit custom-author-option support when the decision contract allows it."
+    },
+    {
+      "decision": "ADD_OR_REFINE",
+      "item": "Review/confirmation for consequential choices",
+      "reason": "WCAG error-prevention guidance supports review/confirmation/correction before final submission where the action changes stored data or has serious consequences. High-impact author decisions should present the exact selected option and consequence before the immutable decision commit."
+    },
+    {
+      "decision": "ADD_OR_REFINE",
+      "item": "Mobile/accessibility projection contract",
+      "reason": "The queue data layer should expose concise title, decision question, options, consequences, evidence summary, safe cancel/defer and confirmation requirements so the System Master iPhone UI can render accessible controls. Target UI should use at least 44x44 pt hit regions, visible focus/accessibility labels, and avoid overloaded scrolling action sheets."
+    },
+    {
+      "decision": "ADD_OR_REFINE",
+      "item": "Stale/superseded invalidation and new-decision lineage",
+      "reason": "If subject identity or material options change, the old request remains historical but cannot be resolved for the changed subject. Corrections after an immutable author decision create a new/superseding decision, never edit the old choice."
+    },
+    {
+      "decision": "ADD_OR_REFINE",
+      "item": "Explicit decision owner/authority class",
+      "reason": "NIST and BPMN both support clear human-role ownership. AUTHOR_ONLY must be distinct from external/legal and parent-operational authorities."
+    },
+    {
+      "decision": "DO_NOT_ADD",
+      "item": "Generic BPMN/workflow engine",
+      "reason": "User-task role concepts are useful but Book already has lifecycle/integration/versioning machinery; a generic workflow engine would duplicate authority and scope."
+    },
+    {
+      "decision": "DO_NOT_ADD",
+      "item": "Auto-approval, timeout-approval, majority vote or AI-preferred default",
+      "reason": "These would manufacture or steer author authority rather than capture it. Timeout may create reminder/escalation/defer state only, never approval."
+    },
+    {
+      "decision": "DO_NOT_ADD",
+      "item": "Queue-side manuscript/lifecycle/proposal/export mutation",
+      "reason": "Resolution may append one AUTHOR_DECISION only. Existing qualified authorities independently consume it afterward."
+    },
+    {
+      "decision": "DO_NOT_ADD",
+      "item": "Hard-code Apple UI components into Book runtime",
+      "reason": "Book owns decision semantics/projection; System Master Core/app layer owns actual iPhone presentation."
+    }
+  ],
+  "bound_implementation_decisions": {
+    "queue_role": "PARENT_AUTHOR_AUTHORITY_CAPTURE_AND_ROUTING_ONLY",
+    "queue_source_types": ["INTEGRATION_RUNTIME_HANDOFF", "LIFECYCLE_GATE_REQUIREMENT", "EDITORIAL_STAGE_REQUIREMENT", "EXPORT_PUBLICATION_REQUIREMENT", "PARENT_DIRECT_AUTHOR_QUERY"],
+    "queue_states": ["PENDING", "PRESENTED", "DEFERRED", "STALE", "SUPERSEDED", "RESOLVED", "WITHDRAWN"],
+    "terminal_states": ["SUPERSEDED", "RESOLVED", "WITHDRAWN"],
+    "resolution_outcomes": ["APPROVED", "REJECTED", "CUSTOM_CHOICE"],
+    "timeout_rule": "No automatic resolution. Time may drive reminder/escalation metadata only.",
+    "staleness_rule": "Any material bound subject/version/digest, option set, authority requirement, rights/privacy or governing-constraint change prevents resolution until a new/current queue snapshot is explicitly produced.",
+    "resolution_commit_scope": "Append exactly one immutable canonical AUTHOR_DECISION plus queue/receipt state. Do not advance lifecycle, promote manuscript, admit proposal, freeze export or publish in the same authority operation.",
+    "post_resolution_rule": "Consumers independently validate the exact AUTHOR_DECISION against current state; Version/Rollback records the already-committed author-decision successor using exact authority receipt identity.",
+    "custom_option_rule": "Custom author input is permitted only when the decision type allows OPEN_OR_CUSTOM choice; it is preserved verbatim or through an explicitly defined normalized representation and cannot be silently mapped to a model-preferred predefined option.",
+    "confirmation_rule": "Consequential irreversible or publication-affecting choices require an explicit review/confirm step that states selected choice and material consequence before commit.",
+    "ui_projection_rule": "Data contract must support a compact iPhone decision card with selectable answer controls plus custom option where allowed, evidence/details disclosure, defer/cancel and consequence confirmation; actual UI remains outside Book runtime."
+  },
+  "unresolved": [],
+  "research_gate_result": "PASS",
+  "exact_next_objective": "BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001-CONTRACT-001",
+  "qualification_effect": "NONE. Research closure only; no queue runtime, human choice, canonical state change or publication authority is created."
+}
