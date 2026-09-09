@@ -13,15 +13,39 @@ Book Evaluator / qualification work is a Book System capability/qualification la
 
 ## Startup rule
 
-For Book System control work, read:
+For Book System control work, read in this order:
 
-- `qualification/book-system/BOOK-SYSTEM-PROJECT-HIERARCHY-001.json`
-- `qualification/book-system/BOOK-SYSTEM-ACTIVE-PROJECT-REGISTRY-001.json`
-- `qualification/book-system/BOOK-SYSTEM-PROSE-HIERARCHY-FORENSIC-AUDIT-001.json`
+1. `qualification/book-system/BOOK-SYSTEM-PROJECT-HIERARCHY-001.json`
+2. `qualification/book-system/BOOK-SYSTEM-ACTIVE-PROJECT-REGISTRY-001.json`
+3. `qualification/book-system/BOOK-SYSTEM-PARENT-INTEGRATION-BOUNDARY-001.json`
+4. `qualification/book-system/BOOK-SYSTEM-BOOK-INTELLIGENCE-UNIFICATION-BINDING-001.json`
+5. `qualification/book-system/BOOK-SYSTEM-AUTHORING-LIFECYCLE-CONTRACT-001.json`
+6. the highest-numbered `qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-*.json`
+
+`BOOK-SYSTEM-RECONCILED-STATE-002` is the current parent control state as of 2026-09-09. Earlier reconciled states remain historical evidence and may preserve facts that were true at their time, but they do not override a later parent control/next-step state.
 
 Then inspect the live child branch before routing work into the Prose Project.
 
 For Prose Project work, use branch `literary-prose-engine-001` and its latest consolidated state. The Prose state chain is subordinate evidence and control for Prose only.
+
+## Recovered Book Intelligence architecture
+
+The Book System parent now explicitly binds the recovered Book Intelligence unification rather than redesigning it from scratch:
+
+- **Creative Excellence 012–019** supplies granular prose/reader evidence and whole-book multi-resolution assurance architecture, including the recovered 56-dimension prose-craft system, 64-dimension reader-experience system, and 017 whole-book integration/qualification architecture.
+- **Literary Prose A–L** supplies the governed analysis -> diagnosis -> retrieval -> bounded revision -> independent evaluation -> learning -> homogenization-defense execution loop through the Prose Project.
+
+Neither lineage replaces the other. Book System owns canonical lifecycle state and admission; Prose and evaluator services return bounded evidence/proposals and do not receive automatic parent canonical-write authority.
+
+## Current parent next-step rule
+
+A generic **Continue** in Book System control follows the `exact_next_objective` in the highest-numbered reconciled parent state unless newer parent-authoritative evidence changes the dependency graph.
+
+As of `BOOK-SYSTEM-RECONCILED-STATE-002`, the parent critical path is:
+
+`BOOK-SYSTEM-CANONICAL-BOOK-STATE-MODEL-001`
+
+Do not route generic Book System continuation to the most recently changed Prose or Book Evaluator lane merely because that subordinate work changed later.
 
 ## Authority separation
 
@@ -30,6 +54,7 @@ For Prose Project work, use branch `literary-prose-engine-001` and its latest co
 - Exact-SHA qualification evidence never transfers to another SHA.
 - Hosted CI PASS, A-01 PASS, human evidence, author decisions, integration admission, and production/promotion authority remain distinct.
 - Integration of Prose outputs into the Book System requires Book System authority; Prose qualification alone does not grant parent-system admission.
+- Recovered architecture admission does not equal runtime qualification or publication authority.
 
 ## Historical naming
 
