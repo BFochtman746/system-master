@@ -1,9 +1,10 @@
 {
   "objective": "AGLO-REAL-BOOK-WHOLE-BOOK-NONDESTRUCTIVE-SWEEP-001",
   "queue_id": "AGLO-WHOLE-BOOK-AUTHOR-DECISION-QUEUE-001",
-  "standing": "READY__TWO_AUTHOR_DECISIONS_REQUIRED__NO_MANUSCRIPT_MUTATION",
+  "standing": "READY__TWO_AUTHOR_DECISIONS_REQUIRED__EVIDENCE_HARDENED__NO_MANUSCRIPT_MUTATION",
   "baseline_version_id": "AGLO-REJECT-ALL-NARRATIVE-v1",
   "baseline_text_sha256": "a48378682ee15fd4b24bc97293ce43a37f096db254a0b78f715081a8aa8a59ee",
+  "evidence_hardening_record": "AGLO-WHOLE-BOOK-AUTHOR-QUEUE-EVIDENCE-HARDENING-001.json",
   "items": [
     {
       "priority": 1,
@@ -19,6 +20,8 @@
       "preservation_precheck": "PASS__NO_CANON_MEANING_OR_VOICE_CHANGE_EXPECTED",
       "step_k_precheck": "PASS__MECHANICAL_NONSTYLE_EDIT__NO_STYLE_OPTIMIZATION_TARGET",
       "recommendation": "ACCEPT_REMOVE_DUPLICATE_WORD",
+      "recommendation_confidence": "HIGH",
+      "author_decision_still_required": true,
       "options": ["ACCEPT_REMOVE_DUPLICATE_WORD","RETAIN_ORIGINAL"]
     },
     {
@@ -30,9 +33,17 @@
       "confidence": "HIGH_DETECTION__INTENT_UNRESOLVED",
       "sentence_sha256": "b518f34135e87b89978c1759b55c238ee88ff4765391e1810a02a11bc44d93ee",
       "candidate_generated": false,
+      "context_evidence": {
+        "occurrence_count": 2,
+        "local_context_lexical_jaccard": 0.165,
+        "surrounding_contexts_are_not_duplicates": true,
+        "structural_interpretation": "PARALLEL_HOUSEHOLD_ILLNESS_ESCALATION_REFRAIN"
+      },
       "preservation_precheck": "ABSTAIN__AUTHORIAL_INTENT_REQUIRED_BEFORE_CHANGE",
       "step_k_precheck": "DEFER__NO_CANDIDATE_UNTIL_AUTHOR_INTENT",
-      "recommendation": "AUTHOR_REVIEW_INTENT",
+      "recommendation": "RETAIN_AS_INTENTIONAL_PARALLEL_REFRAIN",
+      "recommendation_confidence": "MEDIUM_HIGH_EVIDENCE__AUTHOR_INTENT_NOT_PROVEN",
+      "author_decision_still_required": true,
       "options": ["RETAIN_AS_INTENTIONAL_PARALLEL_REFRAIN","AUTHORIZE_BOUNDED_VARIATION_OF_SECOND_OCCURRENCE"]
     }
   ],
@@ -40,5 +51,6 @@
   "automatic_manuscript_overwrite_authorized": false,
   "publication_authorized": false,
   "raw_manuscript_text_persisted": false,
-  "candidate_text_persisted": false
+  "candidate_text_persisted": false,
+  "next_transition": "AUTHOR_ADJUDICATE_TWO_ITEM_QUEUE"
 }
