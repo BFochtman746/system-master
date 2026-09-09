@@ -1,0 +1,44 @@
+{
+  "objective": "AGLO-REAL-BOOK-WHOLE-BOOK-NONDESTRUCTIVE-SWEEP-001",
+  "queue_id": "AGLO-WHOLE-BOOK-AUTHOR-DECISION-QUEUE-001",
+  "standing": "READY__TWO_AUTHOR_DECISIONS_REQUIRED__NO_MANUSCRIPT_MUTATION",
+  "baseline_version_id": "AGLO-REJECT-ALL-NARRATIVE-v1",
+  "baseline_text_sha256": "a48378682ee15fd4b24bc97293ce43a37f096db254a0b78f715081a8aa8a59ee",
+  "items": [
+    {
+      "priority": 1,
+      "decision_id": "AGLO-WBS-DECISION-001",
+      "finding_id": "AGLO-WBS-C25-P031-REPEATED-WORD",
+      "chapter": 25,
+      "classification": "OBJECTIVE_MECHANICAL_DEFECT",
+      "confidence": "HIGH",
+      "candidate_transform": "REMOVE_ONE_IMMEDIATE_DUPLICATE_TOKEN",
+      "original_paragraph_sha256": "f1248ab5da621fa4d4ae62e8c755b8b3750b8c2a2ae268f9df4aa3e09a537613",
+      "candidate_paragraph_sha256": "c3cd2208712a7336c2df77170d651d079c6ccdc66b5c6572dd0f9b3aa0619d24",
+      "verification": {"original_word_count":19,"candidate_word_count":18,"exact_single_token_deletion":true,"deleted_token_duplicate_of_neighbor":true},
+      "preservation_precheck": "PASS__NO_CANON_MEANING_OR_VOICE_CHANGE_EXPECTED",
+      "step_k_precheck": "PASS__MECHANICAL_NONSTYLE_EDIT__NO_STYLE_OPTIMIZATION_TARGET",
+      "recommendation": "ACCEPT_REMOVE_DUPLICATE_WORD",
+      "options": ["ACCEPT_REMOVE_DUPLICATE_WORD","RETAIN_ORIGINAL"]
+    },
+    {
+      "priority": 2,
+      "decision_id": "AGLO-WBS-DECISION-002",
+      "finding_id": "AGLO-WBS-CROSS-CHAPTER-EXACT-SENTENCE-b518f34135e8",
+      "chapters": [14,15],
+      "classification": "AUTHOR_INTENT_REVIEW__EXACT_SENTENCE_REPEATED_ACROSS_ADJACENT_ILLNESS_CHAPTERS",
+      "confidence": "HIGH_DETECTION__INTENT_UNRESOLVED",
+      "sentence_sha256": "b518f34135e87b89978c1759b55c238ee88ff4765391e1810a02a11bc44d93ee",
+      "candidate_generated": false,
+      "preservation_precheck": "ABSTAIN__AUTHORIAL_INTENT_REQUIRED_BEFORE_CHANGE",
+      "step_k_precheck": "DEFER__NO_CANDIDATE_UNTIL_AUTHOR_INTENT",
+      "recommendation": "AUTHOR_REVIEW_INTENT",
+      "options": ["RETAIN_AS_INTENTIONAL_PARALLEL_REFRAIN","AUTHORIZE_BOUNDED_VARIATION_OF_SECOND_OCCURRENCE"]
+    }
+  ],
+  "resolved_not_requeued": ["AGLO-WBS-C24-P043-EXACT-SENTENCE-DUP"],
+  "automatic_manuscript_overwrite_authorized": false,
+  "publication_authorized": false,
+  "raw_manuscript_text_persisted": false,
+  "candidate_text_persisted": false
+}
