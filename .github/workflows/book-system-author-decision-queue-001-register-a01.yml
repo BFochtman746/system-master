@@ -1,0 +1,82 @@
+name: BOOK-SYSTEM Author Decision Queue 001 A-01 Registration
+
+on:
+  push:
+    branches:
+      - book-system/author-decision-queue-001-a01-registration
+
+permissions:
+  contents: write
+
+jobs:
+  register:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout repository transport
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Register qualification against latest main without force push
+        shell: bash
+        env:
+          QUALIFICATION_ID: BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001
+        run: |
+          set -euo pipefail
+          cat > "$RUNNER_TEMP/patch-registry.js" <<'NODE'
+          'use strict';
+          const fs = require('fs');
+          const p = 'qualification/a01/registry.json';
+          const r = JSON.parse(fs.readFileSync(p, 'utf8'));
+          const id = 'BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001';
+          const entry = {
+            workstream_id: 'BOOK-SYSTEM',
+            gate_class: 'focused',
+            source: 'subject',
+            executable: 'node',
+            args: ['.github/scripts/a01-book-system-author-decision-queue-001.js'],
+            evidence_artifact: 'book-system-author-decision-queue-001',
+            overnight_eligible: false,
+            description: 'Qualify the exact Book System Author Decision Queue implementation: append-only queue/request/receipt history, exact parent/queue/request compare-and-swap, current subject binding, duplicate-handoff preservation, no-steering presentation, defer/reopen/withdraw/supersede, explicit author identity/session-proof boundary, confirmation binding, explicit option-to-APPROVED-or-REJECTED mapping, stale/concurrent resolution refusal, idempotent replay, one immutable canonical AUTHOR_DECISION append, Version/Rollback authority handoff, and zero same-operation manuscript/lifecycle/proposal/export/publication mutation. Fixtures are synthetic only and PASS grants no real author-choice, publication, production, or provider authority.'
+          };
+          const prior = r.qualifications[id];
+          if (prior) {
+            if (JSON.stringify(prior) !== JSON.stringify(entry)) {
+              throw new Error('QUALIFICATION_REGISTRY_CONFLICT');
+            }
+            console.log('REGISTRY_ENTRY_ALREADY_IDENTICAL');
+            process.exit(0);
+          }
+          r.qualifications[id] = entry;
+          r.registry_version += 1;
+          fs.writeFileSync(p, JSON.stringify(r, null, 2) + '\n');
+          console.log(`REGISTRY_ENTRY_ADDED version=${r.registry_version}`);
+          NODE
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          for attempt in 1 2 3; do
+            echo "registration_attempt=$attempt"
+            git fetch origin main
+            git checkout -B a01-registration-work origin/main
+            node "$RUNNER_TEMP/patch-registry.js"
+            node .github/scripts/validate-system-topology.js
+            node .github/scripts/a01-control-plane-enforce.js selftest
+            node .github/scripts/a01-control-plane-enforce.js scan
+            git add qualification/a01/registry.json
+            if git diff --cached --quiet; then
+              echo "A01_REGISTRATION_ALREADY_PRESENT"
+              exit 0
+            fi
+            git commit -m "a01: register Book author decision queue qualification"
+            if git push origin HEAD:main; then
+              echo "A01_REGISTRATION_PUSHED"
+              exit 0
+            fi
+            echo "main moved during registration; retrying from latest head"
+          done
+          echo "A01_REGISTRATION_FAILED_AFTER_RETRIES" >&2
+          exit 1
