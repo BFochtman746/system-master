@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://system-master.local/literary/extraction-calibration/receipt-v1.json",
+  "title": "Literary Narrative Extraction Calibration Receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_id", "case_count", "task_count", "aggregate", "by_task", "canonical_state_write_authorized"],
+  "properties": {
+    "contract_id": {"const": "LITERARY-NARRATIVE-EXTRACTION-CALIBRATION-001-v1"},
+    "case_count": {"type": "integer", "minimum": 1},
+    "task_count": {"type": "integer", "minimum": 1},
+    "aggregate": {"type": "object"},
+    "by_task": {"type": "object"},
+    "cases": {"type": "array"},
+    "canonical_state_write_authorized": {"const": false}
+  }
+}
