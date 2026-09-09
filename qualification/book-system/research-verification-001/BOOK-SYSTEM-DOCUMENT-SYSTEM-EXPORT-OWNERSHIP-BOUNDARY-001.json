@@ -1,0 +1,87 @@
+{
+  "artifact_id": "BOOK-SYSTEM-DOCUMENT-SYSTEM-EXPORT-OWNERSHIP-BOUNDARY-001",
+  "effective_date": "2026-09-09",
+  "standing": "CANONICAL__NO_DUPLICATE_DOCUMENT_ENGINE__BOOK_POLICY_ORCHESTRATION_ONLY",
+  "owner": "BOOK SYSTEM",
+  "purpose": "Prevent Book System from duplicating document-generation, rendering, conversion, validation or artifact-verification machinery that belongs in the reusable Document System while preserving Book System authority over canonical manuscript state, book lifecycle, book-specific publication requirements and publication authorization.",
+  "existing_service_boundary": {
+    "service_registry": "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-001",
+    "service_id": "DOCUMENT_ARTIFACT_AND_EXPORT",
+    "current_provider_class": "HEADLESS_ARTIFACT_SERVICE",
+    "future_provider_binding": "DOCUMENT SYSTEM or a Document-System-owned provider implementing the registered interface",
+    "canonical_write_authority": false,
+    "export_equals_publication": false
+  },
+  "book_system_owns": [
+    "canonical manuscript and exact canonical version identity",
+    "book lifecycle stage and export-freeze readiness",
+    "book structure, chapters, front matter and author-approved content",
+    "selection of requested output formats and target-medium profiles",
+    "book-specific publication requirements and acceptance criteria",
+    "book-specific metadata semantics and distribution intent",
+    "which accessibility and publication standards apply to the requested release",
+    "required proof evidence and acceptance/rejection of returned evidence",
+    "source-manuscript-to-expected-content identity",
+    "author decision requirements",
+    "publication/delivery authorization",
+    "release rollback and canonical version selection"
+  ],
+  "document_system_owns": [
+    "DOCX materialization and serialization",
+    "PDF generation and rendering",
+    "EPUB generation, packaging and navigation implementation",
+    "format conversion",
+    "layout and pagination implementation",
+    "font/image/resource embedding and format mechanics",
+    "format-specific validation tooling",
+    "accessibility checking implementation",
+    "rendered-artifact inspection machinery",
+    "source-to-render comparison implementation",
+    "artifact digest generation and identity verification",
+    "re-render and re-validation execution",
+    "generic metadata serialization",
+    "print/prepress file-generation mechanics"
+  ],
+  "shared_contract_boundary": {
+    "book_request_must_bind": [
+      "exact_canonical_manuscript_version",
+      "exact_canonical_manuscript_digest",
+      "requested_format",
+      "target_medium_profile_id_and_version",
+      "book_metadata_projection",
+      "accessibility_profile_if_applicable",
+      "rights_and_export_constraints",
+      "proof_requirements",
+      "publication_authorized=false unless separately authorized"
+    ],
+    "document_response_must_return": [
+      "artifact_ref",
+      "artifact_digest",
+      "format_and_profile_identity",
+      "toolchain_or_generator_identity where reproducibility requires it",
+      "format-validation evidence",
+      "source-to-render integrity evidence",
+      "accessibility evidence where applicable",
+      "render/proof evidence",
+      "warnings_and_abstentions",
+      "correction_or_failure findings",
+      "publication_authorized=false"
+    ]
+  },
+  "non_duplication_law": [
+    "Book System MUST NOT implement a second DOCX, PDF, EPUB or print rendering engine.",
+    "Book System MUST NOT own generic conversion, accessibility-checking, layout-validation or artifact-digest machinery.",
+    "Book System MAY define book-domain requirements, target profiles, acceptance gates and publication semantics consumed by the Document System.",
+    "Document System MUST NOT mutate Book canonical state or infer author publication authority from successful generation or validation.",
+    "A returned document artifact is evidence/artifact output until Book System explicitly accepts it into the book release state.",
+    "If the Document System is not yet implemented, Book System records the required interface and leaves executable document-generation capability pending rather than implementing a local substitute."
+  ],
+  "stage_separation": [
+    "EXPORT_GENERATED",
+    "FORMAT_VALIDATED",
+    "POST_LAYOUT_PROOF_COMPLETE",
+    "EXPORT_FROZEN",
+    "PUBLICATION_AUTHORIZED"
+  ],
+  "qualification_effect": "Architecture/ownership boundary only. No Document System runtime, renderer, validator, export artifact or publication authority is created or qualified by this artifact."
+}
