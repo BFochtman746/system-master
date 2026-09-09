@@ -1,0 +1,22 @@
+--- a/11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/runtime/Platform001Authority.java
++++ b/11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/runtime/Platform001Authority.java
+@@ -108,7 +108,7 @@
+
+     public static void requireSingleCurrentFence(RuntimeInstanceFence current,RuntimeInstanceFence candidate,Instant now){
+         if(candidate==null||now==null) throw new IllegalArgumentException("fence");
+-        if(current!=null&&now.isBefore(current.expiresAt())&&candidate.epoch()<=current.epoch()) throw new IllegalStateException("active or stale instance fence");
++        if(current!=null&&candidate.epoch()<=current.epoch()) throw new IllegalStateException("runtime fence epoch must increase");
+     }
+
+     public static Set<String> allowedOperationClasses(RuntimeMode mode){
+--- a/12_TESTS/src/test/java/org/systemmaster/rebuild/platform/runtime/Platform001AuthorityTests.java
++++ b/12_TESTS/src/test/java/org/systemmaster/rebuild/platform/runtime/Platform001AuthorityTests.java
+@@ -64,6 +64,8 @@
+         bad(IllegalStateException.class,()->f.requireWriter("instance-a",4,t.plusSeconds(1)));
+         bad(IllegalStateException.class,()->f.requireWriter("instance-a",5,t.plusSeconds(30)));
+         bad(IllegalStateException.class,()->Platform001Authority.requireSingleCurrentFence(f,new RuntimeInstanceFence("b",5,t.plusSeconds(2),t.plusSeconds(40)),t.plusSeconds(2)));
++        bad(IllegalStateException.class,()->Platform001Authority.requireSingleCurrentFence(f,new RuntimeInstanceFence("b",5,t.plusSeconds(31),t.plusSeconds(60)),t.plusSeconds(31)));
++        bad(IllegalStateException.class,()->Platform001Authority.requireSingleCurrentFence(f,new RuntimeInstanceFence("b",4,t.plusSeconds(31),t.plusSeconds(60)),t.plusSeconds(31)));
+         Platform001Authority.requireSingleCurrentFence(f,new RuntimeInstanceFence("b",6,t.plusSeconds(31),t.plusSeconds(60)),t.plusSeconds(31)); ok(true);
+     }
+     private static UpgradePlan upgradePlan(){
