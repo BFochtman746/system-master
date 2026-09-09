@@ -1,0 +1,184 @@
+{
+  "boundary_id": "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001",
+  "boundary_version": 1,
+  "effective_date": "2026-09-09",
+  "standing": "CANONICAL_PARENT_VERSION_ROLLBACK_CONTRACT__EXECUTABLE_IMPLEMENTATION_PENDING_QUALIFICATION",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "depends_on": [
+    "BOOK-SYSTEM-CANONICAL-BOOK-STATE-MODEL-001",
+    "BOOK-SYSTEM-LIFECYCLE-TRANSITION-ENGINE-001",
+    "BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-002",
+    "BOOK-SYSTEM-VERSION-AND-ROLLBACK-FORENSIC-MAP-001",
+    "BOOK-SYSTEM-VERSION-AND-ROLLBACK-PREIMPLEMENTATION-RESEARCH-001"
+  ],
+  "purpose": "Provide the single Book-parent immutable version ledger and restore boundary for canonical Book state. Every accepted parent successor is digest-bound to its exact predecessor; governed object versions are immutable; current pointer changes are exact-version-bound; rollback restores historical content only by committing a new successor after current dependency/authority revalidation; historical state and evidence are never rewritten or deleted.",
+  "governed_object_types": {
+    "GOVERNING_BRIEF": {"collection":"governing_briefs","id_field":"brief_id","version_field":"version","active_pointer":"governing_brief_ref"},
+    "CANON_MANIFEST": {"collection":"canon_manifests","id_field":"canon_manifest_id","version_field":"version","active_pointer":"canon_manifest_ref"},
+    "STORY_BIBLE": {"collection":"story_bibles","id_field":"story_bible_id","version_field":"version","active_pointer":"story_bible_ref"},
+    "BOOK_PLAN": {"collection":"book_plans","id_field":"plan_id","version_field":"version","active_pointer":"book_plan_ref"},
+    "MANUSCRIPT_MANIFEST": {"collection":"manuscripts","id_field":"manuscript_id","version_field":"version_id","active_pointer":"canonical_manuscript_ref"}
+  },
+  "version_ledger": {
+    "schema_version": 1,
+    "required": [
+      "ledger_schema_version",
+      "ledger_version",
+      "bound_parent_state_version",
+      "bound_parent_state_digest",
+      "current_snapshot_id",
+      "state_snapshots",
+      "object_version_nodes",
+      "object_family_heads",
+      "processed_requests",
+      "version_receipts",
+      "outbox_entries"
+    ],
+    "state_snapshot_required": [
+      "snapshot_id",
+      "state_version",
+      "state_digest",
+      "predecessor_snapshot_id",
+      "predecessor_state_version",
+      "predecessor_state_digest",
+      "active_version_bindings",
+      "canonical_state",
+      "created_by",
+      "created_from_request_id"
+    ],
+    "object_version_node_required": [
+      "node_id",
+      "object_type",
+      "object_id",
+      "object_version",
+      "object_digest",
+      "predecessor_node_id",
+      "payload",
+      "first_seen_state_version"
+    ]
+  },
+  "authority": {
+    "commit_actor": "PARENT_SYSTEM",
+    "restore_actor": "PARENT_SYSTEM",
+    "provider_direct_commit_allowed": false,
+    "prose_direct_commit_allowed": false,
+    "book_evaluator_direct_commit_allowed": false,
+    "research_import_direct_commit_allowed": false,
+    "author_direct_commit_allowed": false,
+    "rule": "External/child outputs and author choices become parent evidence/decision objects through their registered boundaries; this engine only commits already-authorized parent successor state and cannot manufacture those authorities."
+  },
+  "successor_commit_request": {
+    "required": [
+      "request_id",
+      "idempotency_key",
+      "actor_class",
+      "expected_state_version",
+      "expected_state_digest",
+      "expected_ledger_version",
+      "expected_ledger_digest",
+      "proposed_parent_state",
+      "active_version_bindings",
+      "evidence_refs",
+      "author_decision_refs",
+      "lifecycle_transition_receipt"
+    ],
+    "rules": [
+      "actor_class must equal PARENT_SYSTEM.",
+      "expected parent and ledger identities must match the exact current committed identities.",
+      "The engine assigns the next state_version and state_digest; callers cannot select or reuse a historical state identity.",
+      "book_project_id and book_id are immutable.",
+      "Existing object-version identities are immutable; same object type/id/version with different payload digest fails closed.",
+      "Every newly observed object version receives a predecessor_node_id when the object family already has history.",
+      "Every active pointer must bind to one exact object-version node present in the proposed aggregate.",
+      "If project lifecycle status changes, lifecycle_transition_receipt must prove the exact current-to-proposed transition and parent identities; Version/Rollback does not independently authorize lifecycle changes.",
+      "Existing author decisions, integration proposals, research evidence and export release entries cannot be removed or modified in place by a successor commit.",
+      "A canonical manuscript binding requires authority_state=CANONICAL and exact sha256 artifact_digest."
+    ]
+  },
+  "restore_request": {
+    "required": [
+      "request_id",
+      "idempotency_key",
+      "actor_class",
+      "expected_state_version",
+      "expected_state_digest",
+      "expected_ledger_version",
+      "expected_ledger_digest",
+      "target_state_version",
+      "target_state_digest",
+      "mode",
+      "revalidation"
+    ],
+    "modes": ["RESTORE_CONTENT", "RESTORE_FULL_STATE"],
+    "default_mode": "RESTORE_CONTENT",
+    "revalidation_required": [
+      "rights_privacy_current",
+      "critical_evidence_resolved",
+      "dependency_revalidation_refs",
+      "binding_checks",
+      "author_decision_required",
+      "author_decision_refs",
+      "lifecycle_transition_receipt"
+    ],
+    "rules": [
+      "The target must exist in state_snapshots and match exact target state_version/state_digest.",
+      "Restore never makes the historical target current in place; it creates a new successor with new state_version/state_digest and predecessor equal to the pre-restore current state.",
+      "RESTORE_CONTENT restores governed content collections and active bindings from the target while preserving the current project lifecycle status and all current evidence/decision/proposal/export history.",
+      "RESTORE_CONTENT is forbidden while current project status is EXPORT_FROZEN, PUBLISHED_OR_DELIVERED or ARCHIVED; the project must first be reopened through qualified lifecycle authority.",
+      "RESTORE_FULL_STATE may reproduce the target project status only when an exact lifecycle_transition_receipt authorizes that status change. If target status is EXPORT_FROZEN or PUBLISHED_OR_DELIVERED, current explicit export/publication authority evidence is additionally required; otherwise fail closed.",
+      "Every active binding that changes must have an exact revalidation binding_check for the target node and at least one current evidence/dependency reference.",
+      "rights_privacy_current must be true and critical_evidence_resolved must be true.",
+      "When author_decision_required is true, every referenced author decision must already exist in the current parent state and be APPROVED with an affirmative author choice. The restore engine never creates or upgrades a decision.",
+      "Newer object versions not selected by the restore remain in immutable history and are not deleted."
+    ]
+  },
+  "append_only_history": {
+    "collections": ["research_evidence_links","author_decisions","integration_proposals","export_releases"],
+    "rule": "Entries present in the current state may be carried into successors and additional separately-authorized entries may be appended, but Version/Rollback cannot delete or change an existing entry's payload under the same identity."
+  },
+  "concurrency_and_replay": {
+    "identity": "state_version + state_digest + ledger_version + ledger_digest",
+    "same_idempotency_key_same_normalized_request": "RETURN_EXISTING_RECEIPT_AND_CURRENT_RESULT_NO_NEW_COMMIT",
+    "same_idempotency_key_different_request": "REJECT_IDEMPOTENCY_KEY_CONFLICT",
+    "same_request_id_different_idempotency_key": "REJECT_REQUEST_ID_CONFLICT",
+    "stale_expected_identity": "REJECT_STALE_WRITE",
+    "persistent_adapter_rule": "Use one local transaction with SERIALIZABLE or equivalent conditional-write semantics; serialization/conflict failures do not permit silent semantic merge."
+  },
+  "transactionality": {
+    "logical_commit": "new parent state snapshot + new object-version nodes + version receipt + outbox entry commit atomically",
+    "failure_rule": "On any validation or commit failure, the input parent state and ledger remain unchanged and no partial history/outbox entry is exposed.",
+    "receipt_required": [
+      "receipt_id",
+      "request_id",
+      "action",
+      "pre_parent_state_version",
+      "pre_parent_state_digest",
+      "pre_ledger_version",
+      "pre_ledger_digest",
+      "post_parent_state_version",
+      "post_parent_state_digest",
+      "post_ledger_version",
+      "post_ledger_digest",
+      "pre_snapshot_id",
+      "post_snapshot_id",
+      "restored_from_snapshot_id",
+      "new_object_version_node_ids",
+      "active_version_bindings",
+      "rollback_parent_state_version",
+      "rollback_parent_state_digest",
+      "rollback_ledger_version",
+      "rollback_ledger_digest"
+    ]
+  },
+  "lifecycle_dependency_boundary": {
+    "qualified_authority": "BOOK-SYSTEM-LIFECYCLE-TRANSITION-ENGINE-001",
+    "rule": "This boundary does not replace Lifecycle Transition Engine v1. A project-status change must be backed by an exact lifecycle transition receipt. RESTORE_CONTENT normally leaves status unchanged."
+  },
+  "publication_boundary": {
+    "rule": "Rollback or restoration never synthesizes export freeze, publication authorization or production authority. Historical export/proof/publication records remain historical evidence unless separately revalidated under current Book publication rules.",
+    "provider_or_version_engine_may_set_publication_authorized": false
+  },
+  "qualification_objective": "Prove immutable complete-state and object-version lineage; exact active-version binding; no in-place historical mutation; exact digest mismatch failure; stale/concurrent write rejection; idempotent replay and identity conflict; append-only evidence preservation; lifecycle-status authority separation; RESTORE_CONTENT as a new successor; full-state restore fail-closed without exact lifecycle/publication evidence; dependency/currentness and author-decision revalidation; branch-like divergence preservation; partial-failure atomicity; re-forward after restore; and exact rollback receipt identity on one exact subject SHA.",
+  "exact_next_objective_after_pass": "BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001",
+  "qualification_effect": "NONE until the executable implementation, deterministic adversarial fixtures and a registered exact-SHA qualification pass."
+}
