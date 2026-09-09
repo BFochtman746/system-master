@@ -1,0 +1,96 @@
+{
+  "state_id": "BOOK-SYSTEM-RECONCILED-STATE-010",
+  "effective_date": "2026-09-09",
+  "supersedes_for_current_parent_control": "BOOK-SYSTEM-RECONCILED-STATE-009",
+  "supersession_scope": "PARENT_CONTROL_AND_NEXT_STEP_ROUTING_ONLY",
+  "standing": "ACTIVE__PROVENANCE_INTEROPERABILITY_CLOSED__INTEGRATION_RUNTIME_CONTRACT_REREVIEW_NEXT",
+  "project": "BOOK SYSTEM",
+  "control_branch": "book-system/control-v1",
+  "closed_objectives": [
+    {
+      "id": "BOOK-SYSTEM-EDITORIAL-CAPABILITY-CROSSWALK-001",
+      "artifact": "qualification/book-system/research-verification-001/BOOK-SYSTEM-EDITORIAL-CAPABILITY-CROSSWALK-001.json"
+    },
+    {
+      "id": "BOOK-SYSTEM-RESEARCH-VERIFIED-AUTHORING-LIFECYCLE-AMENDMENT-001",
+      "artifact": "qualification/book-system/research-verification-001/BOOK-SYSTEM-RESEARCH-VERIFIED-AUTHORING-LIFECYCLE-AMENDMENT-001.json"
+    },
+    {
+      "id": "BOOK-SYSTEM-DOCUMENT-SYSTEM-EXPORT-OWNERSHIP-BOUNDARY-001",
+      "artifact": "qualification/book-system/research-verification-001/BOOK-SYSTEM-DOCUMENT-SYSTEM-EXPORT-OWNERSHIP-BOUNDARY-001.json",
+      "commit": "11f7e19c6c773b637a271c1ca1f6200eb221dae5"
+    },
+    {
+      "id": "BOOK-SYSTEM-PUBLICATION-EXPORT-STANDARDS-PROFILE-001",
+      "artifact": "qualification/book-system/research-verification-001/BOOK-SYSTEM-PUBLICATION-EXPORT-STANDARDS-PROFILE-001.json",
+      "commit": "a403b9c6391c20f2c7a1e165e5e13c4410f37241"
+    },
+    {
+      "id": "BOOK-SYSTEM-PROVENANCE-INTEROPERABILITY-PROJECTION-001",
+      "artifact": "qualification/book-system/research-verification-001/BOOK-SYSTEM-PROVENANCE-INTEROPERABILITY-PROJECTION-001.json",
+      "commit": "c900aef8c13258a80eaa2f45d8d5652b5f62d6eb"
+    }
+  ],
+  "provenance_result": {
+    "internal_canonical_authority": "BOOK_SYSTEM_PARENT_LEDGER",
+    "w3c_prov_role": "OPTIONAL_INTERCHANGE_PROJECTION_ONLY",
+    "c2pa_baseline": "C2PA 2.4",
+    "c2pa_role": "OPTIONAL_RELEASE_ASSET_CREDENTIAL_WHERE_SUPPORTED_APPROPRIATE_AND_AUTHORIZED",
+    "c2pa_mandatory_internal_dependency": false,
+    "external_projection_can_mutate_canonical_state": false,
+    "external_projection_can_authorize_publication": false,
+    "privacy_default": "MINIMUM_NECESSARY_EXTERNAL_PROVENANCE",
+    "stale_or_superseded_projection_rebind_allowed": false,
+    "credentialed_artifact_requires_final_post_attachment_digest": true,
+    "document_credential_embedding_implementation_delegated": true
+  },
+  "research_remediation_status": {
+    "editorial_capability_crosswalk": "CLOSED",
+    "authoring_lifecycle_amendment": "CLOSED",
+    "publication_export_standards_profile": "CLOSED",
+    "provenance_interoperability_projection": "CLOSED",
+    "research_before_implementation_rule": "BOUND",
+    "remaining_before_runtime_implementation_release": [
+      "BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-001-CONTRACT-REREVIEW-001"
+    ]
+  },
+  "implementation_pause": {
+    "objective": "BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-001 executable implementation",
+    "still_paused": true,
+    "release_condition": "The existing runtime contract must be re-reviewed against the research-verified editorial lifecycle, publication/export ownership boundary and standards profile, and provenance interoperability projection. Only a closed re-review may decide whether executable implementation can resume or a contract revision is required."
+  },
+  "current_parent_critical_path": {
+    "id": "BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-001-CONTRACT-REREVIEW-001",
+    "classification": "READY__RESEARCH_REMEDIATION_FINAL_CONTRACT_GATE__NO_IMPLEMENTATION_YET",
+    "objective": "Forensically re-review the existing BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-001 contract against all research-verified lifecycle, editorial, publication/export, Document-System ownership and provenance boundaries; classify each contract area KEEP, REFINE, REPLACE_OR_VERSION, or NO_CHANGE_REQUIRED; close any authority, staleness, rights/privacy, publication or provenance gap before allowing executable implementation.",
+    "must_check": [
+      "dependency list includes the effective research-verified lifecycle/publication/provenance contracts or explicitly inherits them through an authoritative parent contract",
+      "service response intake preserves exact request/response/provider/parent-projection identity and non-success states",
+      "editorial-stage proposals cannot bypass structural/line/copy/proof responsibility and regression boundaries",
+      "Document/Export service SUCCESS, FORMAT_VALIDATED, POST_LAYOUT_PROOF_COMPLETE or external credential validation cannot imply publication authorization",
+      "external W3C PROV/C2PA data is evidence-only and cannot create a backdoor canonical write or admission path",
+      "stale/superseded provenance, source versions, artifacts and provider responses cannot advance without explicit parent revalidation",
+      "rights/privacy changes stale or reject affected proposals while preserving historical evidence",
+      "author handoff cannot fabricate decisions",
+      "canonical mutation and lifecycle transition remain parent-owned",
+      "proposal admission creates bounded eligibility only and does not silently promote manuscript/export/publication state",
+      "existing exact-SHA qualification is not transferred to any revised contract or future implementation"
+    ],
+    "required_output": [
+      "rereview matrix with KEEP / REFINE / REPLACE_OR_VERSION / NO_CHANGE_REQUIRED classifications",
+      "explicit finding on whether runtime contract v1 remains implementation-ready",
+      "if changes are required, versioned successor or additive amendment rather than relabeling old evidence",
+      "implementation release or continued-pause decision",
+      "exact next executable qualification objective only if release is justified"
+    ],
+    "must_not_do": [
+      "implement runtime code before the contract re-review closes",
+      "create A-01 qualification evidence for unreviewed or changed runtime semantics",
+      "transfer old exact-SHA qualification to a changed contract or implementation",
+      "collapse Document System implementation into Book System",
+      "treat research remediation closure as proof that the full Book System is complete"
+    ]
+  },
+  "generic_continue_rule": "In Book System control, Continue executes BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-001-CONTRACT-REREVIEW-001. Runtime implementation remains paused until that re-review explicitly releases it.",
+  "qualification_effect": "Control-state advancement and architecture/provenance remediation closure only. No executable Integration Proposal Runtime, provenance adapter, external credential, manuscript promotion, author decision or publication authority is created by State-010."
+}
