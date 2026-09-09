@@ -1,0 +1,50 @@
+name: Book System Version and Rollback Hosted Prequalification
+
+on:
+  push:
+    branches:
+      - book-system/version-and-rollback-001-candidate
+    paths:
+      - "system-master/book-system/version-and-rollback.js"
+      - "system-master/book-system/version-and-rollback-core.js"
+      - "qualification/book-system/version-and-rollback-001/BOOK-SYSTEM-VERSION-AND-ROLLBACK-001.json"
+      - "qualification/book-system/version-and-rollback-001/VERSION-AND-ROLLBACK-FIXTURES-001.json"
+      - ".github/scripts/book-system-version-and-rollback-001-qualify.js"
+      - ".github/workflows/book-system-version-and-rollback-001-prequal.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  FORCE_COLOR: "0"
+
+jobs:
+  prequalify:
+    name: Deterministic hosted Version and Rollback prequalification
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+
+      - name: Verify executable syntax
+        run: |
+          node --check system-master/book-system/version-and-rollback-core.js
+          node --check system-master/book-system/version-and-rollback.js
+          node --check .github/scripts/book-system-version-and-rollback-001-qualify.js
+
+      - name: Run Version and Rollback executable qualifier
+        run: node .github/scripts/book-system-version-and-rollback-001-qualify.js
+
+      - name: Upload hosted prequalification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: book-system-version-rollback-${{ github.run_id }}-hosted-prequalification
+          path: ${{ runner.temp }}/book-system-version-rollback-${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 30
