@@ -1,0 +1,36 @@
+{
+  "receipt_id": "LITERARY-SOURCE-HELDOUT-002-LABEL-ONTOLOGY-HOSTED-RECEIPT-v1",
+  "standing": "PASS__SOURCE_BOUND_LABEL_ONTOLOGY_HOSTED_QUALIFIED__NO_HUMAN_GOLD__NO_MODEL_QUALITY_CLAIM",
+  "branch": "literary-prose-engine-001",
+  "qualified_subject_sha": "e7c8d0c6c4c8a85ae17ada8044c2d53e9d9e745b",
+  "workflow": ".github/workflows/literary-prose-candidate-002-provider-ci.yml",
+  "workflow_run_id": 34370228294,
+  "workflow_conclusion": "success",
+  "qualified_contract": "SOURCE-HELDOUT-002-LABEL-ONTOLOGY-v1.json",
+  "qualified_validator": "source_heldout_label_ontology.py",
+  "qualified_provider": "model_backed_provider.py",
+  "qualified_fixture": "run_candidate_002_provider_fixtures.py",
+  "proven": [
+    "All nine Candidate-002 task families have executable source-bound label grammar coverage.",
+    "Semantic identities use exact passage code-point offsets instead of arbitrary case/adjudicator/model numbering.",
+    "Source-bound spans require start < end and may not exceed the exact authorized passage length.",
+    "Duplicate canonical labels fail closed.",
+    "Arbitrary labels such as believes:Mara fail closed before becoming provider output evidence.",
+    "The model backend still receives only task, authorized source text and source SHA-256; gold/case authority remains hidden.",
+    "Source digest mismatch still fails before model invocation.",
+    "Empty model output becomes ABSTAIN rather than fabricated certainty.",
+    "Confidence/status validation and canonical-state non-authority remain enforced."
+  ],
+  "not_proven": [
+    "Human adjudication correctness.",
+    "Any real learned-model accuracy or calibration.",
+    "Candidate-002 promotion eligibility.",
+    "Canonical narrative-state write authority.",
+    "AGLO promotion, manuscript mutation, publication or canon authority."
+  ],
+  "current_external_boundaries": [
+    "LITERARY-EXTRACTION-SOURCE-HELD-OUT-002B__HUMAN_ADJUDICATION — BLOCKED HUMAN",
+    "LITERARY-EXTRACTION-SOURCE-HELD-OUT-002__REAL_MODEL_PREDICTION_FREEZE_PARALLEL — BLOCKED EXTERNAL AUTHORITY"
+  ],
+  "next_machine_safe_objective": "Advance the next independent Book Writing System calibration packet without fabricating human gold or real-model access; perspective/revelation calibration is the next candidate because current research identified perspective and revelation as under-evaluated and the shared source-bound ontology now makes those states mechanically testable."
+}
