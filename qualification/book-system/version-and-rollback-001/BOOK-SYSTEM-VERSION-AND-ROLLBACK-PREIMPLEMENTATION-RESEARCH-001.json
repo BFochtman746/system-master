@@ -1,0 +1,122 @@
+{
+  "research_id": "BOOK-SYSTEM-VERSION-AND-ROLLBACK-PREIMPLEMENTATION-RESEARCH-001",
+  "effective_date": "2026-09-09",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "standing": "CLOSED__BOUNDED_VERSION_ROLLBACK_RESEARCH_COMPLETE__IMPLEMENTATION_DECISIONS_BOUND",
+  "objective": "Verify current standards and durable implementation patterns before building the Book-parent immutable version and rollback boundary, without replacing existing Book canonical-state authority or importing a generic event-sourcing platform.",
+  "existing_parent_law_preserved": [
+    "BOOK-SYSTEM-CANONICAL-BOOK-STATE-MODEL-001 exact state_version/state_digest preconditions",
+    "CREATE_NEW_IMMUTABLE_VERSION before canonical-pointer advancement",
+    "RETAIN_PRIOR_VERSION_FOR_ROLLBACK",
+    "PARENT_SYSTEM-only canonical commit authority",
+    "author decisions remain explicit objects and cannot be synthesized by rollback",
+    "publication and export-freeze authority remain separate from technical state restoration"
+  ],
+  "sources": [
+    {
+      "id": "JSON_SCHEMA_2020_12_CURRENT",
+      "url": "https://json-schema.org/specification",
+      "finding": "JSON Schema 2020-12 remains the current published JSON Schema dialect and is appropriate for deterministic contract/fixture validation where JSON Schema is used."
+    },
+    {
+      "id": "GIT_COMMIT_PARENT_SNAPSHOT_MODEL",
+      "url": "https://git-scm.com/docs/git-commit-tree.html",
+      "finding": "Git commit objects represent a snapshot in time and bind parent commit object IDs; this is a useful conceptual model for immutable Book snapshots and predecessor lineage, but Git itself is not selected as the Book runtime database."
+    },
+    {
+      "id": "GIT_SNAPSHOT_MODEL",
+      "url": "https://git-scm.com/book/en/v2/Getting-Started-What-is-Git",
+      "finding": "Git models committed history as snapshots and references rather than destructive in-place historical edits; this supports the Book rule that restoration creates a new current successor instead of rewriting an old state."
+    },
+    {
+      "id": "POSTGRESQL_18_SERIALIZABLE",
+      "url": "https://www.postgresql.org/docs/current/sql-set-transaction.html",
+      "finding": "PostgreSQL supports SERIALIZABLE transactions and reports serialization_failure when concurrent behavior cannot be represented as a serial execution; a future database-backed implementation may use this or equivalent compare-and-swap protection rather than silent merge."
+    },
+    {
+      "id": "POSTGRESQL_ROLLBACK_SAVEPOINT",
+      "url": "https://www.postgresql.org/docs/17/sql-rollback-to.html",
+      "finding": "Database rollback/savepoint semantics are transaction controls for uncommitted work. They do not justify deleting or rewriting already committed Book historical versions."
+    },
+    {
+      "id": "TRANSACTIONAL_OUTBOX_PATTERN",
+      "url": "https://microservices.io/patterns/data/transactional-outbox",
+      "finding": "Persisting an outbox record in the same local transaction as the aggregate change avoids a committed-state/unpublished-event split; consumers must remain idempotent because relays can publish more than once."
+    }
+  ],
+  "decisions": [
+    {
+      "area": "IMMUTABLE_STATE_MODEL",
+      "classification": "ADOPT",
+      "decision": "Every committed Book parent state is an immutable snapshot with exact state_version, state_digest, predecessor_state_version and predecessor_state_digest. Historical snapshots are never modified in place."
+    },
+    {
+      "area": "OBJECT_VERSION_LINEAGE",
+      "classification": "ADOPT",
+      "decision": "Every changed versioned parent object creates a new immutable object-version node with exact payload digest and predecessor version reference. Reusing an existing object-version identity with different bytes fails closed."
+    },
+    {
+      "area": "ROLLBACK_SEMANTICS",
+      "classification": "ADOPT",
+      "decision": "Rollback is implemented as RESTORE_AS_NEW_SUCCESSOR: read a historical target, revalidate it against current governance/evidence requirements, then commit a new current snapshot whose restored pointers/content are explicitly derived from that historical target. The current pointer never moves backward to mutate history."
+    },
+    {
+      "area": "CONCURRENCY_CONTROL",
+      "classification": "ADOPT",
+      "decision": "Every mutation/restore requires exact expected current state_version and state_digest. A persistent SQL adapter should use one local transaction with SERIALIZABLE or equivalent conditional-write semantics; serialization/conflict failures are retried only as a newly revalidated request, never silently merged."
+    },
+    {
+      "area": "TRANSACTIONAL_STATE_RECEIPT_OUTBOX",
+      "classification": "ADOPT",
+      "decision": "The new state snapshot, version-ledger receipt and any outbox entry form one logical transaction. If any part fails, none become current. Outbox delivery is outside canonical authority and must be idempotent."
+    },
+    {
+      "area": "RESTORE_CURRENTNESS_GATES",
+      "classification": "ADOPT",
+      "decision": "A restore must revalidate current rights/privacy, dependency currentness, unresolved critical evidence and required author decisions. Historical approval cannot be treated as current approval merely because it existed in the target snapshot."
+    },
+    {
+      "area": "PUBLICATION_AND_EXPORT_RESTORE",
+      "classification": "ADOPT",
+      "decision": "RESTORE_CONTENT never restores EXPORT_FROZEN or PUBLISHED_OR_DELIVERED status. RESTORE_FULL_STATE may reproduce a historical workflow status only after current exact export/artifact and author-publication evidence is explicitly revalidated; otherwise the request fails closed."
+    },
+    {
+      "area": "DATABASE_SAVEPOINTS",
+      "classification": "OPTIONAL",
+      "decision": "A future SQL adapter may use savepoints internally for bounded sub-operations, but savepoint behavior is not the canonical Book version model and does not alter committed historical identity."
+    },
+    {
+      "area": "JSON_SCHEMA_VALIDATION",
+      "classification": "ADOPT",
+      "decision": "Use JSON Schema 2020-12 semantics for externalized schemas/fixtures where useful, while keeping the executable core deterministic and fail-closed even if no third-party schema package is present."
+    },
+    {
+      "area": "GIT_AS_RUNTIME_DATABASE",
+      "classification": "DO_NOT_BIND",
+      "decision": "Use Git's immutable snapshot/parent-lineage model only as design evidence. Do not make Git branches/commits the Book application's canonical runtime state database."
+    },
+    {
+      "area": "FULL_EVENT_SOURCING_OR_CQRS_PLATFORM",
+      "classification": "DO_NOT_BIND",
+      "decision": "The Book need is immutable version history plus transactional receipts/outbox, not a new general event-sourcing/CQRS subsystem."
+    },
+    {
+      "area": "DISTRIBUTED_SAGA",
+      "classification": "UNRESOLVED_NOT_REQUIRED",
+      "decision": "No distributed multi-service rollback is required for the current parent-local version boundary. If a later workflow spans independently committed services, research that separately rather than overbuilding now."
+    }
+  ],
+  "implementation_contract": {
+    "storage_model": "STORAGE_AGNOSTIC_EXECUTABLE_CORE_WITH_IMMUTABLE_SNAPSHOT_LEDGER",
+    "current_pointer": "Exactly one current snapshot identity; historical snapshots remain addressable by exact version+digest.",
+    "restore_modes": ["RESTORE_CONTENT", "RESTORE_FULL_STATE"],
+    "default_restore_mode": "RESTORE_CONTENT",
+    "transaction_rule": "State snapshot + version receipt + outbox entry commit atomically as one logical transaction.",
+    "no_history_rewrite": true,
+    "no_author_approval_synthesis": true,
+    "no_publication_authority_synthesis": true,
+    "no_child_or_provider_canonical_write": true
+  },
+  "exact_next_action": "Define BOOK-SYSTEM-VERSION-AND-ROLLBACK-001 contract and implement one deterministic parent-owned executable core plus adversarial fixtures and hosted prequalification.",
+  "qualification_effect": "NONE. Research decisions do not qualify executable bytes or grant canonical, author, publication, production, Prose or document-engine authority."
+}
