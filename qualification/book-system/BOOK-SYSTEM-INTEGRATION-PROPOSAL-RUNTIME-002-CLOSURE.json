@@ -1,0 +1,114 @@
+{
+  "closure_id": "BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-002-CLOSURE",
+  "effective_date": "2026-09-09",
+  "standing": "PASS__HOSTED_PREQUAL_AND_A01_REGISTERED_EXACT_SHA__RUNTIME_V2_CLOSED",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "qualification_id": "BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-002",
+  "objective_id": "BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-002-IMPLEMENTATION-001",
+  "qualified_subject": {
+    "sha": "837e479415afb2d9724e4b913d456ef1d3a62df5",
+    "checkout_sha": "837e479415afb2d9724e4b913d456ef1d3a62df5",
+    "control_ref": "book-system/control-v1",
+    "exact_sha_match": true,
+    "registry_v2_dependency_sha": "77db6b550e9aeb1dfb956627376becbb591498f8",
+    "registry_v2_qualification_transfer": false,
+    "runtime_v1_qualification_transfer": false
+  },
+  "research_decision_checkpoint": {
+    "artifact": "qualification/book-system/integration-proposal-002/BOOK-SYSTEM-RUNTIME-V2-PREIMPLEMENTATION-RESEARCH-001.json",
+    "standing": "CLOSED__BOUNDED_STANDARDS_AND_PATTERN_VERIFICATION_COMPLETE__IMPLEMENTATION_DECISIONS_BOUND",
+    "adopted": ["JSON_SCHEMA_2020_12_SEMANTICS", "TRANSACTIONAL_OUTBOX_PATTERN"],
+    "optional": ["OPENAPI_3_2_FOR_FUTURE_HTTP_ADAPTER_ONLY", "CLOUDEVENTS_1_0_2_FOR_FUTURE_EVENT_PROJECTION_ONLY"],
+    "do_not_bind": ["EXPIRED_IETF_IDEMPOTENCY_KEY_DRAFT_AS_NORMATIVE_DEPENDENCY", "FULL_CQRS_OR_EVENT_SOURCING_PLATFORM"],
+    "unresolved_not_required_for_current_runtime": ["DISTRIBUTED_SAGA"]
+  },
+  "failed_subject_preservation": {
+    "subject_sha": "63e6f55756698f31e6f3a97c00076424ae826993",
+    "hosted_run_id": 34414479414,
+    "job_id": 102676154004,
+    "result": "SUBJECT_FAILURE",
+    "failure": "INVALID_SOURCE_IDENTITY:initial_source",
+    "root_cause": "The stale-source adversarial fixture used a malformed next_source_identity digest and was rejected by the Runtime V2 exact-source validator before the intended staleness test could execute.",
+    "evidence_artifact_id": 10128505080,
+    "evidence_artifact_zip_digest": "sha256:47e90f324d4ad96f8f878489090b15b6b6aed996124eae75935d28300194e9ae",
+    "repair_rule_observed": "Only the malformed fixture digest was changed; the Runtime V2 validation rule was not weakened and all prior research/implementation/checkpoints were preserved."
+  },
+  "repair": {
+    "commit": "837e479415afb2d9724e4b913d456ef1d3a62df5",
+    "classification": "MINIMAL_FIXTURE_REPAIR",
+    "changed_boundary": "qualification/book-system/integration-proposal-002/INTEGRATION-PROPOSAL-RUNTIME-002-FIXTURES.json next_source_identity.object_digest",
+    "runtime_semantics_changed": false
+  },
+  "hosted_prequalification": {
+    "workflow_run_id": 34414628390,
+    "job_id": 102676632408,
+    "conclusion": "success",
+    "fixture_cases": 35,
+    "service_families": 4,
+    "registered_operations": 21
+  },
+  "canonical_control_plane": {
+    "ref": "main",
+    "control_plane_sha": "c8f1e805c0db7572dbef704909452817c607f372",
+    "registry_version": 20,
+    "policy_version": 6,
+    "registered_workstream_id": "BOOK-SYSTEM",
+    "gate_class": "focused"
+  },
+  "authoritative_a01_run": {
+    "run_id": 34414628390,
+    "job_id": 102676671368,
+    "runner_name": "A-01",
+    "runner_os": "Windows",
+    "runner_arch": "X64",
+    "result_class": "PASS",
+    "child_exit_code": 0,
+    "promotion_authorized": false,
+    "subject_sha": "837e479415afb2d9724e4b913d456ef1d3a62df5",
+    "checkout_sha": "837e479415afb2d9724e4b913d456ef1d3a62df5",
+    "fixture_cases": 35,
+    "service_families": 4,
+    "registered_operations": 21
+  },
+  "authoritative_evidence": {
+    "artifact_id": 10128570228,
+    "artifact_name": "BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-002-34414628390-evidence",
+    "artifact_size_bytes": 7075,
+    "artifact_digest": "sha256:c7a209950a58f968bc1829885bccb1a013dd25637c19e9f8d93416f749bc8c1a",
+    "artifact_expiration": "2026-10-09T22:56:52Z",
+    "files_uploaded": 18
+  },
+  "qualified_runtime_boundary": {
+    "single_parent_owned_intake_path_four_service_families": "PASS",
+    "strict_registry_v2_schema_and_provider_enforcement": "PASS",
+    "exact_parent_provider_source_artifact_provenance_identity": "PASS",
+    "success_partial_abstain_rejected_error_preservation": "PASS",
+    "disagreement_preservation": "PASS",
+    "response_replay_and_idempotency_conflict": "PASS",
+    "nonidempotent_reconciliation": "PASS",
+    "immutable_intake_proposal_receipt_outbox_state": "PASS",
+    "editorial_evidence_without_provider_lifecycle_authority": "PASS",
+    "stale_parent_source_artifact_profile_provenance_blocking": "PASS",
+    "rights_privacy_reclassification_blocking": "PASS",
+    "technical_export_proof_separate_from_export_freeze_publication": "PASS",
+    "changed_byte_provenance_digest_preservation": "PASS",
+    "author_handoff_without_fabricated_approval": "PASS",
+    "transactional_rollback_identity": "PASS",
+    "book_owned_document_engine_authority": false,
+    "provider_canonical_write_authority": false,
+    "provider_lifecycle_transition_authority": false,
+    "provider_export_freeze_authority": false,
+    "provider_publication_authority": false
+  },
+  "closure_claim": "BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-002 is closed PASS on exact subject 837e479415afb2d9724e4b913d456ef1d3a62df5. The exact executable Runtime V2 subject passed 35 deterministic adversarial cases through hosted prequalification and the registered authoritative A-01 path, proving the bounded Book-parent intake/admission runtime defined by its contract without transferring canonical, lifecycle, author, export-freeze, publication, production, Prose or document-engine authority.",
+  "non_claims": [
+    "This PASS does not transfer to changed Runtime V2 bytes or future runtime versions.",
+    "This PASS does not promote any manuscript candidate or mutate an author-approved canonical manuscript by itself.",
+    "This PASS does not claim Lifecycle Transition Engine v1 enforces newly named editorial substage semantics.",
+    "This PASS does not implement PDF, DOCX, EPUB, print, accessibility, conversion or provenance-credential engines in Book System.",
+    "This PASS does not absorb Prose or Book Evaluator ownership into Book parent runtime.",
+    "This PASS does not create author approval, export freeze, publication authorization or production authority."
+  ],
+  "exact_next_objective": "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001",
+  "next_objective_contract": "Research, define, implement and qualify the Book-parent version/rollback boundary so every admitted canonical Book object and manuscript mutation creates immutable successor identity with predecessor lineage, exact digests, safe pointer advancement, dependency-aware rollback/recovery, and no rollback path that fabricates author approval, bypasses current evidence gates or mutates historical versions in place."
+}
