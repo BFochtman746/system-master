@@ -2,51 +2,9 @@
   "owner_system_id": "BOOK",
   "owner_path": "SYSTEM_MASTER/BOOK",
   "control_ref": "book-system/control-v1",
-  "last_known_control_head": "5864bb6a72bd081fe590a2b16622f1909b48bb67",
-  "delegation_epoch": 11,
-  "active_delegations": [
-    {
-      "delegation_id": "SECOND-SHIFT-BOOK-VERSION-ROLLBACK-A01-HANDOFF-001",
-      "owner_path": "SYSTEM_MASTER/BOOK",
-      "objective_id": "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001-A01-REGISTRATION-AND-QUALIFICATION-001",
-      "state": "READY",
-      "valid_for_control_ref": "book-system/control-v1",
-      "valid_for_control_head": "5864bb6a72bd081fe590a2b16622f1909b48bb67",
-      "created_at": "2026-09-09T23:20:00Z",
-      "last_revalidated_at": "2026-09-09T23:21:00Z",
-      "completed_checkpoints": [
-        "BOOK-SYSTEM-VERSION-AND-ROLLBACK-PREIMPLEMENTATION-RESEARCH-001 — CLOSED at ced3fc4a7b0009a331787c371b284e8c97078a1e",
-        "BOOK-SYSTEM-VERSION-AND-ROLLBACK-FORENSIC-MAP-001 — CLOSED at 166d04dd6e5ec83ce495c6a94e11c6ac6ce56bcc",
-        "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001 contract — DEFINED at 690337636664ad7717811c1d4c875a7b4f304034",
-        "Version/Rollback executable core + authority-ingest refinement — IMPLEMENTED",
-        "48-case authority-v2 hosted prequalification — PASS on exact subject 402ab84a14e9d345530d60394ebc36176541dd21, run 34416203680, artifact 10129156222",
-        "A-01 registration handoff packet — PREPARED at qualification/book-system/version-and-rollback-001/BOOK-SYSTEM-VERSION-AND-ROLLBACK-001-A01-REGISTRATION-HANDOFF.json"
-      ],
-      "completion_delta": "Do not rebuild Version/Rollback. Preserve the exact 48/48 hosted-passing candidate and move only the remaining shared-authority dependency: verify the live canonical A-01 registry/control plane, and if BOOK-SYSTEM-VERSION-AND-ROLLBACK-001 is centrally registered, execute/adjudicate the exact-SHA A-01 path without changing the candidate. If registration is still absent, preserve the prepared shared-registration handoff and do not modify shared A-01 authority from the Book lane.",
-      "stop_condition": "Either authoritative A-01 PASS is obtained for the exact Version/Rollback subject and Book control can advance, or the exact hosted candidate remains preserved with a current evidence-backed CENTRAL_A01_REGISTRATION blocker and no completed research/implementation/prequalification phase is repeated.",
-      "allowed_work": [
-        "revalidate book-system/control-v1 before execution and stop on unadjudicated authority delta",
-        "read canonical main qualification/a01/registry.json and A-01 policy/control artifacts",
-        "verify whether BOOK-SYSTEM-VERSION-AND-ROLLBACK-001 has been centrally registered",
-        "verify the intended exact A-01 subject still contains the registered qualifier/wrapper and has current hosted PASS",
-        "invoke an already-authorized central A-01 gateway only if registration and exact-subject prerequisites are satisfied",
-        "adjudicate A-01 receipt/artifact identity and classify SUBJECT_FAILURE, INFRA_FAILURE or CONTROL_PLANE_FAILURE",
-        "preserve exact hosted/A-01 evidence and update Book control/Second Shift on a legitimate result",
-        "maintain the bounded shared-infrastructure registration handoff while registration remains absent"
-      ],
-      "forbidden_authority": [
-        "do not repeat Version/Rollback research, forensic mapping, contract design, implementation or hosted tests already closed/passed",
-        "do not discard the 37/40 failed subject or either 48/48 hosted PASS; they are durable evidence lineage",
-        "do not transfer hosted PASS into an A-01 PASS claim",
-        "do not edit qualification/a01/registry.json or shared A-01 control-plane policy from the Book lane merely to self-unblock",
-        "do not change Version/Rollback subject bytes after hosted PASS without creating a new exact candidate and rerunning hosted qualification",
-        "do not begin BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001 before authoritative Version/Rollback A-01 PASS",
-        "do not reimplement Lifecycle Transition authority, absorb Prose/Book Evaluator objectives, implement document rendering engines, or fabricate author/publication authority"
-      ],
-      "on_pass": "Preserve the exact A-01 run/job/artifact digest, close BOOK-SYSTEM-VERSION-AND-ROLLBACK-001 only to the proven scope, remove this active delegation, revalidate the live Book head and advance to BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001 only if current canonical control still selects it.",
-      "on_failure": "Preserve hosted PASS and the authoritative failing receipt. Repair only the exact failing boundary under the correct owner. Any changed Book subject requires a fresh hosted exact-SHA PASS before another A-01 attempt."
-    }
-  ],
+  "last_known_control_head": "26f9df56105780bb8b7d831058f36a40e3ccab0d",
+  "delegation_epoch": 12,
+  "active_delegations": [],
   "delegation_history": [
     {
       "delegation_id": "SECOND-SHIFT-BOOK-CENSUS-001",
@@ -137,9 +95,33 @@
         "artifact_digest": "sha256:2d27e447bb60c8c236b7e1b6f4e6d6abcacd30b095f25e49965badec50ae78a8"
       },
       "history_preserved": true
+    },
+    {
+      "delegation_id": "SECOND-SHIFT-BOOK-VERSION-ROLLBACK-A01-HANDOFF-001",
+      "owner_path": "SYSTEM_MASTER/BOOK",
+      "objective_id": "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001-A01-REGISTRATION-AND-QUALIFICATION-001",
+      "state": "COMPLETED",
+      "previous_valid_for_control_head": "5864bb6a72bd081fe590a2b16622f1909b48bb67",
+      "completed_at": "2026-09-09T23:22:22Z",
+      "completion_classification": "AUTHORITATIVE_A01_EXACT_SHA_PASS",
+      "qualified_subject_sha": "402ab84a14e9d345530d60394ebc36176541dd21",
+      "checkout_sha": "402ab84a14e9d345530d60394ebc36176541dd21",
+      "a01_run_id": 34416581801,
+      "a01_job_id": 102682743114,
+      "a01_policy_version": 6,
+      "a01_registry_version": 22,
+      "runner": "A-01 / Windows / X64",
+      "result_class": "PASS",
+      "fixture_cases": 48,
+      "passed_cases": 48,
+      "evidence_artifact_id": 10129317676,
+      "evidence_artifact_digest": "sha256:d06f280a0276b0961083c298d5f4e4222745e5852af39224d97226753976905e",
+      "promotion_authorized": false,
+      "authority_note": "PASS is bounded to exact Version/Rollback subject 402ab84a14e9d345530d60394ebc36176541dd21. It grants no autonomous author, publication, production, document-engine, Prose, or broader lifecycle authority.",
+      "history_preserved": true
     }
   ],
-  "owner_revalidation_required": false,
-  "reason": "State-014 preserves completed Version/Rollback research, implementation and exact hosted 48/48 evidence and routes only the remaining shared-authority registration/A-01 qualification dependency. The A-01 registration handoff packet is prepared, and useful unattended work remains: revalidate central registration and execute/adjudicate A-01 if and only if the shared authority admits it.",
+  "owner_revalidation_required": true,
+  "reason": "The Version/Rollback A-01 handoff is complete on exact subject 402ab84a14e9d345530d60394ebc36176541dd21. The previous active delegation is retired. The Book owner must re-read its live control state and choose the next dependency-valid Book objective; this governance update does not select that child-system objective.",
   "empty_is_valid": true
 }
