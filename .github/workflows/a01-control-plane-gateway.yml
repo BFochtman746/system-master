@@ -9,6 +9,7 @@ on:
       - 'qualification/a01/**'
       - '.github/scripts/a01-control-plane*.js'
       - '.github/scripts/a01-overnight-*.js'
+      - '.github/scripts/a01-runner-guard.ps1'
       - '.github/workflows/a01-control-plane-gateway.yml'
       - '.github/workflows/a01-overnight-night-shift.yml'
   workflow_dispatch:
@@ -106,7 +107,7 @@ on:
         default: ''
     outputs:
       result_class:
-        description: Authoritative receipt result class when emitted
+        description: Authoritative receipt result class when emitted, or INFRA_FAILURE when runner preflight blocks execution
         value: ${{ jobs.qualify.outputs.result_class }}
       promotion_authorized:
         description: Exact-subject promotion authorization
@@ -128,7 +129,7 @@ jobs:
     timeout-minutes: ${{ inputs.job_timeout_minutes || 30 }}
     outputs:
       post_action: ${{ steps.control.outputs.post_action }}
-      result_class: ${{ steps.control.outputs.result_class }}
+      result_class: ${{ steps.control.outputs.result_class || steps.guard.outputs.result_class }}
       promotion_authorized: ${{ steps.control.outputs.promotion_authorized }}
     env:
       A01_QUALIFICATION_ID: ${{ inputs.qualification_id || 'A01-CONTROL-PLANE-SELFTEST' }}
@@ -153,15 +154,6 @@ jobs:
           clean: true
           persist-credentials: false
 
-      - name: Checkout exact qualification subject
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-        with:
-          ref: ${{ inputs.subject_sha || github.sha }}
-          path: subject
-          fetch-depth: 0
-          clean: true
-          persist-credentials: false
-
       - name: Prepare control-plane roots and evidence
         shell: cmd
         run: |
@@ -175,17 +167,56 @@ jobs:
           echo A01_EVIDENCE_DIR=%A01_EVIDENCE_DIR%>>"%GITHUB_ENV%"
           echo A01_ARTIFACT_NAME=%A01_ARTIFACT_NAME%>>"%GITHUB_ENV%"
 
+      - name: Guard A-01 runner health before subject acquisition
+        id: guard
+        continue-on-error: true
+        shell: powershell
+        run: |
+          & "$env:GITHUB_WORKSPACE\control-plane\.github\scripts\a01-runner-guard.ps1" -Mode preflight -EvidenceDir $env:A01_EVIDENCE_DIR
+          exit $LASTEXITCODE
+
+      - name: Checkout exact qualification subject
+        if: steps.guard.outcome == 'success'
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ inputs.subject_sha || github.sha }}
+          path: subject
+          fetch-depth: 0
+          clean: true
+          persist-credentials: false
+
       - name: Validate canonical control-plane policy and registry
+        if: steps.guard.outcome == 'success'
         shell: cmd
         run: node "%A01_CONTROL_ROOT%\.github\scripts\a01-control-plane.js" validate
 
       - name: Execute registered qualification and emit receipt
         id: control
+        if: steps.guard.outcome == 'success'
         continue-on-error: true
-        shell: cmd
+        shell: powershell
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: node "%A01_CONTROL_ROOT%\.github\scripts\a01-control-plane.js" execute
+        run: |
+          Add-Type -TypeDefinition @'
+          using System;
+          using System.Runtime.InteropServices;
+          public static class A01QualificationSleepGuard {
+            [DllImport("kernel32.dll", SetLastError = true)]
+            public static extern uint SetThreadExecutionState(uint esFlags);
+          }
+          '@
+          $ES_CONTINUOUS = [uint32]0x80000000
+          $ES_SYSTEM_REQUIRED = [uint32]0x00000001
+          $guardState = [A01QualificationSleepGuard]::SetThreadExecutionState($ES_CONTINUOUS -bor $ES_SYSTEM_REQUIRED)
+          if ($guardState -eq 0) { throw 'A01_SLEEP_GUARD_START_FAILED' }
+          try {
+            & node "$env:A01_CONTROL_ROOT\.github\scripts\a01-control-plane.js" execute
+            $exitCode = $LASTEXITCODE
+          } finally {
+            [void][A01QualificationSleepGuard]::SetThreadExecutionState($ES_CONTINUOUS)
+          }
+          exit $exitCode
 
       - name: Publish control-plane receipt summary
         if: always()
@@ -196,6 +227,7 @@ jobs:
           echo Subject: %A01_SUBJECT_SHA%>>"%GITHUB_STEP_SUMMARY%"
           echo Context: %A01_EXECUTION_CONTEXT%>>"%GITHUB_STEP_SUMMARY%"
           echo Artifact: %A01_ARTIFACT_NAME%>>"%GITHUB_STEP_SUMMARY%"
+          if exist "%A01_EVIDENCE_DIR%\runner-preflight.json" type "%A01_EVIDENCE_DIR%\runner-preflight.json">>"%GITHUB_STEP_SUMMARY%"
           if exist "%A01_EVIDENCE_DIR%\result.txt" type "%A01_EVIDENCE_DIR%\result.txt">>"%GITHUB_STEP_SUMMARY%"
           if exist "%A01_EVIDENCE_DIR%\receipt.json" type "%A01_EVIDENCE_DIR%\receipt.json">>"%GITHUB_STEP_SUMMARY%"
 
@@ -208,6 +240,15 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
+      - name: Record A-01 postflight and clean stale job temp
+        if: always()
+        continue-on-error: true
+        shell: powershell
+        run: |
+          if (Test-Path "$env:GITHUB_WORKSPACE\control-plane\.github\scripts\a01-runner-guard.ps1") {
+            & "$env:GITHUB_WORKSPACE\control-plane\.github\scripts\a01-runner-guard.ps1" -Mode postflight -EvidenceDir $env:A01_EVIDENCE_DIR
+          }
+
       - name: Schedule registered Windows reboot handoff
         if: steps.control.outcome == 'success' && steps.control.outputs.post_action == 'windows_reboot'
         shell: powershell
@@ -217,7 +258,7 @@ jobs:
           Write-Host 'WINDOWS_REBOOT_SCHEDULED delay_seconds=30; A-01 job will finish cleanly before reboot.'
 
       - name: Preserve authoritative qualification conclusion
-        if: always() && steps.control.outputs.result_class != 'PASS'
+        if: always() && (steps.guard.outcome != 'success' || steps.control.outputs.result_class != 'PASS')
         shell: cmd
         run: exit /b 1
 
