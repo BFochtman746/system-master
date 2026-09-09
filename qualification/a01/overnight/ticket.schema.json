@@ -27,7 +27,7 @@
   ],
   "properties": {
     "ticket_version": {"const": 1},
-    "ticket_id": {"type": "string", "minLength": 3, "maxLength": 120, "pattern": "^[A-Za-z0-9._-]+$"},
+    "ticket_id": {"type": "string", "minLength": 3, "maxLength": 160, "pattern": "^[A-Za-z0-9._-]+$"},
     "state": {"enum": ["READY", "HOLD", "SUPERSEDED"]},
     "night_date": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$"},
     "submitted_at": {"type": "string", "format": "date-time"},
@@ -44,9 +44,24 @@
     "exclusive_window": {"type": "boolean"},
     "checkpoint_interval_minutes": {"type": ["integer", "null"], "minimum": 1, "maximum": 30},
     "resource_class": {"enum": ["cpu", "memory", "io", "network", "mixed"]},
-    "resume_on_pass": {"type": "string", "minLength": 1, "maxLength": 1200},
-    "resume_on_failure": {"type": "string", "minLength": 1, "maxLength": 1200},
+    "overnight_lane": {"enum": ["FINISH", "BUILD_AHEAD", "RESEARCH_AHEAD", "PREPARE_NEXT", "EXPLORE"]},
+    "value_class": {"type": "string", "minLength": 1, "maxLength": 120},
+    "critical_path_rank": {"type": ["integer", "null"], "minimum": 1, "maximum": 99},
+    "completion_delta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["before", "evidence", "after_pass", "unlocks"],
+      "properties": {
+        "before": {"type": "string", "minLength": 1, "maxLength": 1200},
+        "evidence": {"type": "string", "minLength": 1, "maxLength": 1200},
+        "after_pass": {"type": "string", "minLength": 1, "maxLength": 1200},
+        "unlocks": {"type": "string", "minLength": 1, "maxLength": 1200}
+      }
+    },
+    "stop_condition": {"type": "string", "minLength": 1, "maxLength": 1600},
+    "resume_on_pass": {"type": "string", "minLength": 1, "maxLength": 1600},
+    "resume_on_failure": {"type": "string", "minLength": 1, "maxLength": 1600},
     "notification_target": {"type": "string", "minLength": 1, "maxLength": 200},
-    "notes": {"type": "string", "maxLength": 2000}
+    "notes": {"type": "string", "maxLength": 4000}
   }
 }
