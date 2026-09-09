@@ -9,9 +9,6 @@ on:
 permissions:
   contents: read
 
-env:
-  BOOK_AUTHOR_DECISION_EVIDENCE_DIR: ${{ runner.temp }}/book-system-author-decision-queue-001-evidence
-
 jobs:
   hosted-prequalification:
     runs-on: ubuntu-latest
@@ -35,23 +32,25 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p "$BOOK_AUTHOR_DECISION_EVIDENCE_DIR"
-          node .github/scripts/book-system-author-decision-queue-001-qualify.js | tee "$BOOK_AUTHOR_DECISION_EVIDENCE_DIR/qualifier.log"
+          evidence_dir="$RUNNER_TEMP/book-system-author-decision-queue-001-evidence"
+          mkdir -p "$evidence_dir"
+          BOOK_AUTHOR_DECISION_EVIDENCE_DIR="$evidence_dir" node .github/scripts/book-system-author-decision-queue-001-qualify.js | tee "$evidence_dir/qualifier.log"
 
       - name: Record exact candidate identity
         if: always()
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p "$BOOK_AUTHOR_DECISION_EVIDENCE_DIR"
-          printf '%s\n' "subject_sha=${GITHUB_SHA}" > "$BOOK_AUTHOR_DECISION_EVIDENCE_DIR/subject.txt"
-          git rev-parse HEAD >> "$BOOK_AUTHOR_DECISION_EVIDENCE_DIR/subject.txt"
+          evidence_dir="$RUNNER_TEMP/book-system-author-decision-queue-001-evidence"
+          mkdir -p "$evidence_dir"
+          printf '%s\n' "subject_sha=${GITHUB_SHA}" > "$evidence_dir/subject.txt"
+          git rev-parse HEAD >> "$evidence_dir/subject.txt"
 
       - name: Upload synthetic qualification evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001-${{ github.run_id }}-hosted-evidence
-          path: ${{ env.BOOK_AUTHOR_DECISION_EVIDENCE_DIR }}
+          path: ${{ runner.temp }}/book-system-author-decision-queue-001-evidence
           if-no-files-found: error
           retention-days: 30
