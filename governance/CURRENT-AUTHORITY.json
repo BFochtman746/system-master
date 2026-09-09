@@ -5,18 +5,19 @@
   "product_root": "SYSTEM_MASTER",
   "topology": "governance/SYSTEM-TOPOLOGY-002.json",
   "architecture_decision": "governance/ADR-0002-SYSTEM-MASTER-PARENT-HIERARCHY.md",
-  "last_sealed_state_checkpoint": "governance/SYSTEM-STATE-BASELINE-001.json",
+  "last_sealed_state_checkpoint": "governance/SYSTEM-STATE-BASELINE-002.json",
   "completion_ledger": "governance/COMPLETION-LEDGER-001.json",
   "expectation_registry": "governance/EXPECTATION-REGISTRY-001.json",
   "reallocation_ledger": "governance/REALLOCATION-LEDGER-001.json",
   "second_shift_registry": "governance/second-shift/SECOND-SHIFT-REGISTRY-001.json",
+  "second_shift_operating_mode": "governance/second-shift/SECOND-SHIFT-OPERATING-MODE-002.md",
   "pre_reallocation_backup": "governance/snapshots/PRE-PARENT-TOPOLOGY-20260909-001.json",
   "startup_sequence": [
     "Read this file from current main.",
     "Read SYSTEM-TOPOLOGY-002.json and resolve the requested work to SYSTEM_MASTER/CORE, SYSTEM_MASTER/LEARNING, SYSTEM_MASTER/BOOK, SYSTEM_MASTER/BOOK/PROSE, shared infrastructure, or UNALLOCATED.",
     "Fetch the live canonical control_ref for the owning system; never infer the live head from a chat, branch timestamp or this checkpoint.",
     "Read the owner's current control/state record selected on that live head.",
-    "Compare the live head/current state with SYSTEM-STATE-BASELINE-001. If it moved, reconcile only the delta before making current-state claims.",
+    "Compare the live head/current state with SYSTEM-STATE-BASELINE-002. If it moved, reconcile only the delta before making current-state claims.",
     "Check COMPLETION-LEDGER-001 before repeating work and EXPECTATION-REGISTRY-001 before declaring scope complete.",
     "If work is being delegated to Second Shift, read the owner delegation file and revalidate it against the live control head immediately before admission/execution."
   ],
@@ -30,7 +31,7 @@
   "anti_surprise_invariant": "No worker may say it is surprised by repository standing after beginning execution. Repository standing must be resolved before execution; a discovered mismatch becomes AUTHORITY_DELTA or EVIDENCE_MISMATCH and is reconciled first.",
   "write_rules": [
     "Historical evidence and completed exact-SHA receipts are append-only; do not rewrite them to match new taxonomy.",
-    "Current-control changes occur in the owning system lane; product-root governance selects/routs them but does not silently edit child objectives.",
+    "Current-control changes occur in the owning system lane; product-root governance selects/routes them but does not silently edit child objectives.",
     "Any new first-class system or parent relationship requires a superseding topology ADR and topology registry version.",
     "Any new workstream or qualification lane must resolve to an owner before execution.",
     "Any Second Shift item must be removed from active delegation when completed/superseded and replaced only after a fresh owner re-evaluation."
