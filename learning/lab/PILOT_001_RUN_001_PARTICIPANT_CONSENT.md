@@ -39,6 +39,16 @@ The pilot record must not contain direct personally identifying information or t
 
 The runtime can enforce the software-side storage boundary. It cannot independently prove that the person making a human-source attestation is actually a human; genuine participation is therefore required.
 
+## Storage and later review
+
+Pilot evidence is stored locally on the pilot machine by default, in the configured System Master pilot state directory outside the source-code repository.
+
+The participant launcher does not automatically upload the pilot record, completion evidence, or review material to GitHub, GitHub Actions, or another external service.
+
+A completed pilot may create local digest-only completion and integrity-handoff files so the local record can later be verified before review. Any later external export or evidence anchoring is a separate controlled operation and is not implied or automatically authorized merely by participating in this pilot.
+
+The current tooling does not promise secure deletion from operating-system backups, filesystem snapshots, or copies outside its control.
+
 ## Independent-task rules
 
 For baseline, independent verification, delayed retention, and transfer tasks:
@@ -54,6 +64,8 @@ Instruction/remediation turns are different: assistance provided by the Learning
 
 You may withdraw at any point. A withdrawal remains a valid terminal pilot state and is excluded from effectiveness review. You do not need to complete the pilot once you withdraw.
 
+Withdrawal does not create a software claim that every existing byte has been securely erased from operating-system backups, filesystem snapshots, or copies outside the pilot tool's control.
+
 ## What this pilot cannot prove
 
 One participant record cannot establish population-level effectiveness, psychometric validity, certification, job readiness, or native iPhone performance. A completed record establishes only the recorded outcome for that participant under this protocol.
@@ -62,6 +74,8 @@ One participant record cannot establish population-level effectiveness, psychome
 
 To begin a real participant record, the participant must personally provide this statement or an unambiguous equivalent:
 
-`I consent to participate in PILOT-001-RUN-001. I understand that my participation is voluntary, that I can withdraw, that independent tasks must be my own work without assistance or answer reveal, and that the pilot record retains scored evidence and response digests rather than my raw free-text responses.`
+`I consent to participate in PILOT-001-RUN-001. I understand that my participation is voluntary, that I can withdraw, that independent tasks must be my own work without assistance or answer reveal, that the pilot record retains scored evidence and response digests rather than my raw free-text responses, and that pilot evidence is stored locally by default without automatic external upload.`
 
 No participant record may be created merely from an operator, ChatGPT, A-01, fixture, or model asserting consent on someone else's behalf.
+
+Evidence-handling authority: `learning/lab/PILOT_001_RUN_001_EVIDENCE_HANDLING.md`.
