@@ -1,0 +1,54 @@
+{
+  "handoff_id": "BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001-A01-REGISTRATION-HANDOFF",
+  "effective_date": "2026-09-09",
+  "requesting_owner_path": "SYSTEM_MASTER/BOOK",
+  "target_authority": "SYSTEM_MASTER/SHARED_INFRASTRUCTURE/A01",
+  "state": "READY_FOR_SHARED_AUTHORITY_REVIEW",
+  "qualification_id": "BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001",
+  "workstream_id": "BOOK-SYSTEM",
+  "hosted_pass_subject_sha": "3ee4916682ed60dd7044b6c98fe0940137d96b92",
+  "hosted_evidence": {
+    "run_id": 34417782231,
+    "job_id": 102686391649,
+    "case_count": 48,
+    "pass_count": 48,
+    "fail_count": 0,
+    "artifact_id": 10129739108,
+    "artifact_digest": "sha256:269d219b5278138fa7f4010d5fdf188fa07969868907c0d187403a8e616a052c"
+  },
+  "failed_subject_history": {
+    "subject_sha": "8ddb371c56ab64d4574de06a7745d77db76f27bd",
+    "run_id": 34417514196,
+    "job_id": 102685556970,
+    "result": "FAIL__47_OF_48__QUALIFIER_EXPECTATION_MISMATCH_ONLY",
+    "artifact_id": 10129641733,
+    "artifact_digest": "sha256:d17f808676d4d7e696995e721d9cfd5727a158ccdf4ea8c4e8889e2b700683bb",
+    "repair_classification": "QUALIFIER_ONLY__NO_RUNTIME_OR_FIXTURE_SEMANTIC_CHANGE",
+    "superseded_expectation": "ADQ010 expected DECISION_REQUEST_NOT_CURRENT",
+    "correct_behavior": "WITHDRAWN current request rejects resolution as DECISION_REQUEST_NOT_RESOLVABLE"
+  },
+  "proposed_registry_entry_for_shared_owner_review": {
+    "workstream_id": "BOOK-SYSTEM",
+    "gate_class": "focused",
+    "source": "subject",
+    "executable": "node",
+    "args": [".github/scripts/book-system-author-decision-queue-001-qualify-v2.js"],
+    "evidence_artifact": "book-system-author-decision-queue-001",
+    "overnight_eligible": false,
+    "description": "Qualify the exact Book System Author Decision Queue subject: parent-only enqueue/action authority; immutable pending/presented/deferred/stale/superseded/resolved/withdrawn request lineage; exact parent, queue-ledger, decision-request, subject and option-set binding; no preselected or model-synthesized author choice; explicit author identity/authority proof reference; custom-choice preservation; consequential confirmation; defer/reopen/withdraw/supersede semantics; stale subject and stale option rejection; idempotent replay and concurrent-choice conflict safety; exactly one append-only canonical AUTHOR_DECISION per resolved request version; exact Version/Rollback AUTHOR_DECISION authority handoff; and zero same-transaction lifecycle, manuscript-promotion, proposal-admission, export-freeze, publication or document-engine authority. PASS is exact-SHA focused evidence only and does not create human decisions or transfer prior Book qualification."
+  },
+  "shared_owner_checks_before_registration": [
+    "Confirm .github/scripts/book-system-author-decision-queue-001-qualify-v2.js exists on the intended exact subject and deterministically executes the 48-case matrix without network/private-data dependency.",
+    "Confirm the qualifier-only repair preserves failed subject 8ddb371c56ab64d4574de06a7745d77db76f27bd and does not change runtime or fixture semantics.",
+    "Confirm the qualification is focused, source=subject and compatible with current A-01 policy/registry schema.",
+    "Confirm no direct self-hosted Book workflow bypass is introduced; authoritative execution must use the canonical shared A-01 gateway.",
+    "Confirm exact hosted-passing subject 3ee4916682ed60dd7044b6c98fe0940137d96b92 remains immutable. If qualification-relevant subject bytes change, require a fresh hosted exact-SHA PASS before A-01.",
+    "Confirm PASS cannot manufacture author identity, author choice, lifecycle advancement, manuscript promotion, proposal admission, export freeze, publication or production authority."
+  ],
+  "after_registration": {
+    "required_action": "Invoke the canonical A-01 control-plane gateway with qualification_id BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001, workstream_id BOOK-SYSTEM and exact subject 3ee4916682ed60dd7044b6c98fe0940137d96b92 unchanged, then adjudicate the authoritative receipt and evidence artifact.",
+    "pass_route": "Close BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001 only on exact authoritative PASS; revalidate live Book control before advancing to the next dependency-valid objective, currently expected to be BOOK-SYSTEM-EXPORT-FREEZE-001.",
+    "failure_route": "Classify SUBJECT_FAILURE, INFRA_FAILURE or CONTROL_PLANE_FAILURE from the authoritative receipt. Preserve hosted PASS and repair only the proven owner boundary; changed Book subject bytes require fresh hosted exact-SHA PASS."
+  },
+  "book_lane_authority_statement": "This file is a handoff request/evidence packet only. It does not modify or pre-authorize shared A-01 registry, policy, gateway or qualification standing."
+}
