@@ -68,12 +68,23 @@ for name, c, disposition, reason in tests:
 r1 = assess(case()); r2 = assess(case())
 results.append({"case_id": "deterministic", "pass": r1["assessment_id"] == r2["assessment_id"], "disposition": r1["disposition"], "reason": r1["reason"]})
 
-bad = case(); del bad["project_holdout_metrics"]["lexical_diversity"]
-try:
-    assess(bad); ok = False; detail = "NO_ERROR"
-except ValueError as exc:
-    ok = str(exc).startswith("PROJECT_HOLDOUT_METRICS_MISSING"); detail = str(exc)
-results.append({"case_id": "missing_holdout_metric", "pass": ok, "disposition": "ERROR", "reason": detail})
+
+def expect_error(name, mutate, prefix):
+    bad = case(); mutate(bad)
+    try:
+        assess(bad); ok = False; detail = "NO_ERROR"
+    except ValueError as exc:
+        ok = str(exc).startswith(prefix); detail = str(exc)
+    results.append({"case_id": name, "pass": ok, "disposition": "ERROR", "reason": detail})
+
+expect_error("missing_holdout_metric", lambda c: c["project_holdout_metrics"].pop("lexical_diversity"), "PROJECT_HOLDOUT_METRICS_MISSING")
+expect_error("missing_clean_control_metric", lambda c: c["clean_control_metrics"].pop("lexical_diversity"), "CLEAN_CONTROL_METRICS_MISSING")
+expect_error("missing_baseline_metric", lambda c: c["baseline_metrics"].pop("lexical_diversity"), "BASELINE_METRICS_MISSING")
+expect_error("missing_candidate_metric", lambda c: c["candidate_metrics"].pop("lexical_diversity"), "CANDIDATE_METRICS_MISSING")
+expect_error("missing_edit_budget", lambda c: c.pop("edit_budget"), "EDIT_BUDGET_EVIDENCE_REQUIRED")
+expect_error("missing_optimization_history", lambda c: c.pop("optimization_history"), "OPTIMIZATION_HISTORY_EVIDENCE_REQUIRED")
+expect_error("invalid_candidate_metric", lambda c: c["candidate_metrics"].__setitem__("lexical_diversity", "bad"), "CANDIDATE_METRICS_INVALID")
+expect_error("invalid_optimization_history", lambda c: c.__setitem__("optimization_history", ["bad"]), "OPTIMIZATION_HISTORY_EVIDENCE_INVALID")
 
 all_pass = all(x["pass"] for x in results)
 print(f"STEP-K FIXTURES: {'PASS' if all_pass else 'FAIL'} ({len(results)} cases)")
