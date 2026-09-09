@@ -1,0 +1,38 @@
+{
+  "contract_id": "LITERARY-PROSE-ENGINE-001-REAL-BOOK-ADMISSION-v1",
+  "depends_on": ["STEP-L"],
+  "purpose": "Prevent representative user-owned manuscript material from entering Literary Prose closed-loop qualification without explicit, bounded admission and frozen provenance/preservation authority.",
+  "required_admission_fields": [
+    "admission_id",
+    "decision",
+    "project_id",
+    "book_id",
+    "source_ownership_or_authorization",
+    "source_reference",
+    "source_digest",
+    "qualification_scope",
+    "baseline_version_id",
+    "preservation_obligations",
+    "allowed_persistence",
+    "user_authorization",
+    "admitted_at"
+  ],
+  "decision_values": ["NOT_ADMITTED", "ADMITTED", "REVOKED"],
+  "rules": [
+    "Only an explicit ADMITTED state may authorize representative real-book qualification.",
+    "The admitted source must be user-owned or explicitly authorized for this qualification.",
+    "The exact baseline source identity and digest must be frozen before any revision candidate is generated.",
+    "Qualification scope must state whether the admitted unit is passage, scene, chapter, multi-chapter sample, or full book.",
+    "Preservation obligations must bind canon, authorial intent, protected language, POV/focalization, character knowledge/integrity, explicit user constraints, required ambiguity, and any applicable historical/theological constraints.",
+    "Allowed persistence must explicitly distinguish raw manuscript text, derived metrics, candidate text, digests, evidence references, and learning records.",
+    "No repository commit may contain raw user manuscript prose merely to prove qualification.",
+    "No named-author imitation objective or universal prose score may be admitted.",
+    "Revocation is forward-only; prior qualification evidence remains historically reconstructible but cannot authorize new runs.",
+    "Admission authorizes qualification only; it does not authorize publication, deployment, canon replacement, or automatic manuscript overwrite."
+  ],
+  "default_state": "NOT_ADMITTED",
+  "retain_original_on_uncertainty": true,
+  "named_author_target_allowed": false,
+  "universal_prose_score": false,
+  "raw_manuscript_repository_persistence_default": false
+}
