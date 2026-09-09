@@ -1,0 +1,29 @@
+{
+  "work_item": "RECON-001A",
+  "title": "CURRENT AUTHORITY/SYSTEM CENSUS + EVIDENCE-SOURCE MAP",
+  "status": "INITIAL_CENSUS_MATERIALIZED__CAPABILITY_CHALLENGE_PENDING",
+  "branch": "system-master/assurance-reconciliation-001",
+  "baseline_main_sha": "eb58652474682006396e5894bb6a73599b30c7ce",
+  "artifacts": [
+    "RECONCILIATION-CONTRACT.md",
+    "RECON-001A-CURRENT-AUTHORITY-SYSTEM-CENSUS.csv",
+    "RECON-001A-EVIDENCE-SOURCE-MAP.md"
+  ],
+  "rules": {
+    "historical_complete_label_is_authority": false,
+    "architecture_implies_implementation": false,
+    "portable_implies_target": false,
+    "target_implies_production": false,
+    "every_material_system_requires_independent_capability_challenge": true
+  },
+  "priority_findings": [
+    "ASSURANCE-001 must be challenged first because it is the promotion/standing authority used to adjudicate successor systems.",
+    "SYSTEM-MODEL-001 current registry/DAG is stale across architecture generations and must be regenerated.",
+    "FOUNDATION/DATA/PLATFORM contain substantial reusable implementation and must not be rebuilt from scratch without a proven gap.",
+    "MOD-PROJECTS-001 has a known durable Project repository/long-term Project Memory gap from the recovery audit.",
+    "SYSTEM-ORCHESTRATOR and FOUNDATION-003/PLATFORM-002 are substantially implemented and portable-proven.",
+    "021G is strongly implemented with Windows target evidence; iOS remains a deferred target obligation because the real System Master iOS target is absent.",
+    "021H is the leading implementation-gap candidate after reconciliation, but is not yet authorized as the final next build until the Assurance/System-Model challenge closes."
+  ],
+  "next_objective": "RECON-001B — ASSURANCE-001 CAPABILITY COMPLETENESS CHALLENGE + CURRENT-SUBJECT EVIDENCE ADJUDICATION"
+}
