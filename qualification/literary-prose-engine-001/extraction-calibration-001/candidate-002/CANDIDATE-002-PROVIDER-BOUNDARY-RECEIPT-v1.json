@@ -1,0 +1,34 @@
+{
+  "receipt_id": "LITERARY-NARRATIVE-EXTRACTOR-CANDIDATE-002-PROVIDER-BOUNDARY-v1",
+  "standing": "HOSTED_PROVIDER_BOUNDARY_QUALIFIED__REAL_MODEL_AND_HUMAN_HELDOUT_EVIDENCE_PENDING__NOT_PROMOTED",
+  "branch": "literary-prose-engine-001",
+  "qualified_subject_sha": "17f6b398a95b9fd726fe2eb56f96c252242e1135",
+  "workflow": ".github/workflows/literary-prose-candidate-002-provider-ci.yml",
+  "workflow_run_id": 34368393077,
+  "workflow_conclusion": "success",
+  "qualified_artifacts": [
+    "CANDIDATE-002-CONTRACT-v1.json",
+    "PUBLIC-DOMAIN-SOURCE-HELDOUT-MANIFEST-v1.json",
+    "model_backed_provider.py",
+    "run_candidate_002_provider_fixtures.py"
+  ],
+  "proven": [
+    "Candidate-002 provider adapter compiles under hosted Python 3.12.",
+    "Model backend input is limited to task, authorized source text and exact source SHA-256.",
+    "Case identity and gold/forbidden labels are not supplied to the model backend.",
+    "Source digest mismatch fails before model invocation.",
+    "Provider output is forced through ASSERTED/ALTERNATIVE/UNRESOLVED/ABSTAIN validation.",
+    "Invalid confidence and invalid status fail closed.",
+    "Empty backend output becomes ABSTAIN rather than fabricated certainty.",
+    "Provider cannot authorize canonical narrative state writes."
+  ],
+  "not_proven": [
+    "Any real learned/model backend accuracy.",
+    "Any public-domain passage extraction result.",
+    "Human-adjudicated heldout accuracy or calibration.",
+    "Promotion eligibility.",
+    "Canonical narrative-state authority.",
+    "AGLO manuscript mutation, promotion, publication or canon authority."
+  ],
+  "exact_next_objective": "LITERARY-EXTRACTION-SOURCE-HELD-OUT-002 — SELECT BOUNDED PASSAGES FROM VERIFIED PUBLIC-DOMAIN TEST-ONLY WORKS, CREATE PROVENANCE-BOUND HUMAN ADJUDICATION PACKETS COVERING ALL NINE TASK FAMILIES, KEEP GOLD OUT OF MODEL INPUT, THEN RUN ONE REAL LEARNED/MODEL BACKEND THROUGH THE QUALIFIED CANDIDATE-002 ADAPTER AND SCORE PER-TASK FALSE-CERTAINTY/AMBIGUITY/CALIBRATION EVIDENCE"
+}
