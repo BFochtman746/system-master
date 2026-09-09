@@ -1,0 +1,90 @@
+{
+  "fixture_id": "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001-FIXTURES",
+  "fixture_version": 1,
+  "parent_state_template": {
+    "schema_version": 1,
+    "state_version": 10,
+    "book_project": {
+      "book_project_id": "BOOK-PROJECT-001",
+      "book_id": "BOOK-001",
+      "status": "DRAFTING",
+      "governing_brief_ref": "BRIEF-001",
+      "canonical_manifest_ref": "CANON-001"
+    },
+    "governing_briefs": [
+      {"brief_id":"BRIEF-001","version":1,"author_intent":"Write the intended book","form":"NOVEL","genre":"SPECULATIVE","audience":"ADULT","voice_goals":["DISTINCT"],"hard_constraints":["NO_SILENT_CANON_CHANGE"]}
+    ],
+    "canon_manifests": [
+      {"canon_manifest_id":"CANON-001","version":1,"facts":["FACT-1"],"entities":["ENTITY-1"],"world_rules":["RULE-1"],"protected_language_refs":[],"intent_constraints":[],"approval_state":"APPROVED"}
+    ],
+    "story_bibles": [
+      {"story_bible_id":"STORY-001","version":1,"entity_refs":["ENTITY-1"],"relationship_refs":[],"timeline_refs":[],"arc_refs":[],"motif_theme_refs":[],"open_questions":[],"provenance":["PROV-1"]}
+    ],
+    "book_plans": [
+      {"plan_id":"PLAN-001","version":1,"part_refs":["PART-1"],"chapter_refs":["CHAPTER-1"],"scene_refs":["SCENE-1"],"dependency_edges":[],"purpose_and_payoff_refs":[]}
+    ],
+    "manuscripts": [
+      {"manuscript_id":"MANUSCRIPT-001","version_id":"V1","artifact_digest":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","authority_state":"CANONICAL","parent_version_ref":null,"change_set_ref":"CHANGE-001","created_by":"BOOK_SYSTEM_PARENT","created_at":"2026-09-09T00:00:00Z"}
+    ],
+    "research_evidence_links": [
+      {"link_id":"RESEARCH-001","claim_or_evidence_ref":"CLAIM-001","target_book_object_ref":"MANUSCRIPT-001:V1","freshness_state":"CURRENT","conflict_state":"NONE","provenance":"SOURCE-001","rights_class":"AUTHORIZED"}
+    ],
+    "author_decisions": [
+      {"decision_id":"AUTHOR-APPROVED-001","subject_ref":"MANUSCRIPT-001:V1","decision_type":"CONTENT_RESTORE","options":["APPROVE","REJECT"],"status":"APPROVED","author_choice":"APPROVED","effective_version":"V1"},
+      {"decision_id":"AUTHOR-PENDING-001","subject_ref":"MANUSCRIPT-001:V1","decision_type":"CONTENT_RESTORE","options":["APPROVE","REJECT"],"status":"PENDING","author_choice":null,"effective_version":"V1"}
+    ],
+    "integration_proposals": [
+      {"proposal_id":"PROPOSAL-001","source_project_or_lane":"SYSTEM_MASTER/BOOK/PROSE","source_subject_sha":"1111111111111111111111111111111111111111","capability_id":"PROSE_ANALYSIS_AND_REVISION.BUILD_NARRATIVE_STATE_PROJECTION","admission_state":"ADMITTED"}
+    ],
+    "export_releases": [],
+    "active": {
+      "governing_brief_ref":"BRIEF-001",
+      "canon_manifest_ref":"CANON-001",
+      "story_bible_ref":"STORY-001",
+      "book_plan_ref":"PLAN-001",
+      "canonical_manuscript_ref":"MANUSCRIPT-001:V1"
+    }
+  },
+  "cases": [
+    {"id":"VR001_INITIAL_LEDGER_CREATES_EXACT_SNAPSHOT","expected":"PASS"},
+    {"id":"VR002_MANUSCRIPT_SUCCESSOR_COMMIT","expected":"PASS"},
+    {"id":"VR003_STATE_PREDECESSOR_LINEAGE","expected":"PASS"},
+    {"id":"VR004_OBJECT_PREDECESSOR_LINEAGE","expected":"PASS"},
+    {"id":"VR005_STALE_PARENT_VERSION_REJECTED","expected_error":"STALE_PARENT_WRITE"},
+    {"id":"VR006_STALE_PARENT_DIGEST_REJECTED","expected_error":"STALE_PARENT_WRITE"},
+    {"id":"VR007_STALE_LEDGER_VERSION_REJECTED","expected_error":"STALE_LEDGER_WRITE"},
+    {"id":"VR008_STALE_LEDGER_DIGEST_REJECTED","expected_error":"STALE_LEDGER_WRITE"},
+    {"id":"VR009_PROVIDER_AUTHORITY_REJECTED","expected_error":"VERSION_AUTHORITY_DENIED"},
+    {"id":"VR010_IMMUTABLE_OBJECT_VERSION_CONFLICT","expected_error":"IMMUTABLE_OBJECT_VERSION_CONFLICT"},
+    {"id":"VR011_ACTIVE_BINDING_MISMATCH_REJECTED","expected_error":"ACTIVE_BINDING_TARGET_MISMATCH"},
+    {"id":"VR012_APPEND_ONLY_REMOVAL_REJECTED","expected_error":"APPEND_ONLY_HISTORY_REMOVAL_FORBIDDEN"},
+    {"id":"VR013_APPEND_ONLY_MUTATION_REJECTED","expected_error":"APPEND_ONLY_HISTORY_MUTATION_FORBIDDEN"},
+    {"id":"VR014_FROZEN_CONTENT_MUTATION_REJECTED","expected_error":"FROZEN_OR_PUBLISHED_CONTENT_MUTATION_FORBIDDEN"},
+    {"id":"VR015_STATUS_CHANGE_WITHOUT_LIFECYCLE_RECEIPT_REJECTED","expected_error":"LIFECYCLE_TRANSITION_RECEIPT_REQUIRED"},
+    {"id":"VR016_STATUS_CHANGE_WITH_LIFECYCLE_RECEIPT_ALLOWED","expected":"PASS"},
+    {"id":"VR017_IDEMPOTENT_REPLAY_NO_SECOND_COMMIT","expected":"PASS"},
+    {"id":"VR018_IDEMPOTENCY_KEY_CONFLICT_REJECTED","expected_error":"IDEMPOTENCY_KEY_CONFLICT"},
+    {"id":"VR019_REQUEST_ID_CONFLICT_REJECTED","expected_error":"REQUEST_ID_CONFLICT"},
+    {"id":"VR020_RESTORE_CONTENT_AS_NEW_SUCCESSOR","expected":"PASS"},
+    {"id":"VR021_RESTORE_TARGET_DIGEST_MISMATCH_REJECTED","expected_error":"RESTORE_TARGET_NOT_FOUND"},
+    {"id":"VR022_RESTORE_RIGHTS_NOT_CURRENT_REJECTED","expected_error":"RESTORE_RIGHTS_PRIVACY_NOT_CURRENT"},
+    {"id":"VR023_RESTORE_CRITICAL_EVIDENCE_UNRESOLVED_REJECTED","expected_error":"RESTORE_CRITICAL_EVIDENCE_UNRESOLVED"},
+    {"id":"VR024_RESTORE_DEPENDENCY_REVALIDATION_REQUIRED","expected_error":"RESTORE_DEPENDENCY_REVALIDATION_REQUIRED"},
+    {"id":"VR025_RESTORE_BINDING_CHECK_REQUIRED","expected_error":"RESTORE_BINDING_CHECK_REQUIRED"},
+    {"id":"VR026_RESTORE_AUTHOR_DECISION_REQUIRED","expected_error":"RESTORE_AUTHOR_DECISION_REQUIRED"},
+    {"id":"VR027_RESTORE_PENDING_AUTHOR_DECISION_REJECTED","expected_error":"RESTORE_AUTHOR_DECISION_NOT_APPROVED"},
+    {"id":"VR028_RESTORE_APPROVED_AUTHOR_DECISION_ALLOWED","expected":"PASS"},
+    {"id":"VR029_FROZEN_RESTORE_REQUIRES_REOPEN","expected_error":"FROZEN_OR_PUBLISHED_REOPEN_REQUIRED"},
+    {"id":"VR030_FULL_STATE_STATUS_CHANGE_REQUIRES_LIFECYCLE_FIRST","expected_error":"FULL_STATE_RESTORE_REQUIRES_PRIOR_LIFECYCLE_TRANSITION"},
+    {"id":"VR031_RESTORE_PRESERVES_CURRENT_APPEND_ONLY_HISTORY","expected":"PASS"},
+    {"id":"VR032_REFORWARD_TO_LATER_HISTORICAL_SNAPSHOT","expected":"PASS"},
+    {"id":"VR033_BRANCH_DIVERGENCE_PREDECESSOR_USES_RESTORED_ACTIVE","expected":"PASS"},
+    {"id":"VR034_FAILED_MUTATION_LEAVES_INPUTS_UNCHANGED","expected":"PASS"},
+    {"id":"VR035_STATE_DIGEST_TAMPER_REJECTED","expected_error":"PARENT_STATE_DIGEST_MISMATCH"},
+    {"id":"VR036_RECEIPT_OUTBOX_ATOMIC_IDENTITY","expected":"PASS"},
+    {"id":"VR037_GOVERNED_OBJECT_SUCCESSOR_LINEAGE","expected":"PASS"},
+    {"id":"VR038_MULTIPLE_NEW_VERSIONS_SAME_FAMILY_REJECTED","expected_error":"MULTIPLE_NEW_VERSIONS_SAME_FAMILY_ONE_COMMIT"},
+    {"id":"VR039_INITIAL_MULTI_VERSION_WITHOUT_LINEAGE_REJECTED","expected_error":"INITIAL_LINEAGE_REQUIRED"},
+    {"id":"VR040_ACTIVE_POINTER_AMBIGUITY_REJECTED","expected_error":"ACTIVE_POINTER_VERSION_AMBIGUOUS"}
+  ]
+}
