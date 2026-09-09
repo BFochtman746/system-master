@@ -13,6 +13,11 @@ from learning_lab.real_learner_pilot_completion import (
     closed_loop_status,
     finalize_closed_loop_if_ready,
 )
+from learning_lab.real_learner_pilot_handoff import (
+    RealLearnerPilotHandoffError,
+    verify_pilot_handoff,
+    write_pilot_handoff,
+)
 from learning_lab.real_learner_pilot_preflight import (
     RealLearnerPilotPreflightError,
     run_real_learner_pilot_preflight,
@@ -20,7 +25,7 @@ from learning_lab.real_learner_pilot_preflight import (
 from learning_lab.real_learner_pilot_withdrawal import withdraw_runtime_bound_pilot
 
 
-CLOSED_LOOP_LAUNCHER_VERSION = "PILOT-001-REAL-PARTICIPANT-CLOSED-LOOP-V2"
+CLOSED_LOOP_LAUNCHER_VERSION = "PILOT-001-REAL-PARTICIPANT-CLOSED-LOOP-V3"
 
 # Preserve the qualified zero-evidence withdrawal boundary from the stage-one launcher.
 console.mark_runtime_bound_pilot_withdrawn = withdraw_runtime_bound_pilot
@@ -90,6 +95,24 @@ def write_completion_package(root: Path, manifest: Dict[str, Any], result: Dict[
     return path
 
 
+def write_and_verify_completion_handoff(root: Path, manifest: Dict[str, Any], result: Dict[str, Any]) -> Dict[str, Any]:
+    package_path = write_completion_package(root, manifest, result)
+    handoff = write_pilot_handoff(root=root, manifest=manifest, completion_package_path=package_path)
+    verification = verify_pilot_handoff(
+        root=root,
+        pilot_id=manifest["pilot_id"],
+        state_key=manifest["state_key"],
+    )
+    if verification.get("handoff_digest") != handoff.get("handoff_digest"):
+        _fail("PILOT_HANDOFF_VERIFICATION_DIGEST_MISMATCH")
+    return {
+        "completion_package_path": package_path,
+        "handoff_path": handoff["handoff_path"],
+        "handoff_digest_path": handoff["handoff_digest_path"],
+        "handoff_digest": handoff["handoff_digest"],
+    }
+
+
 def print_status(status: Dict[str, Any]) -> None:
     print(f"Standing: {status['standing']}")
     print(f"Captured participant turns: {status.get('captured_turn_count', 0)}")
@@ -131,22 +154,36 @@ def run_closed_loop(root: Path, manifest: Dict[str, Any]) -> Dict[str, Any]:
             manifest["completed_at"] = completed_at
             manifest["participant_outcome"] = result["adjudication"].get("participant_outcome")
             console.save_manifest(root, manifest)
-            package_path = write_completion_package(root, manifest, result)
+            artifacts = write_and_verify_completion_handoff(root, manifest, result)
             print("\n=== PILOT CLOSED LOOP COMPLETE ===")
             print(f"Participant outcome: {manifest['participant_outcome']}")
-            print(f"Completion package: {package_path}")
-            print("The package contains adjudicated metrics and record digests only; it contains no raw participant answer text.")
+            print(f"Completion package: {artifacts['completion_package_path']}")
+            print(f"Integrity handoff: {artifacts['handoff_path']}")
+            print(f"Handoff SHA-256: {artifacts['handoff_digest']}")
+            print("The completion package and handoff contain adjudicated metrics, identifiers, and cryptographic digests only; they contain no raw participant answer text.")
+            print("The local hashes become tamper-evident evidence only after their digest is anchored in an external evidence store or qualification record.")
             print("One participant record does not prove real-learner effectiveness, psychometric validity, population validity, or job readiness.")
             return result
 
         if standing == "CLOSED_LOOP_COMPLETE":
-            if manifest.get("completed") is not True:
-                manifest["completed"] = True
-                manifest["completed_at"] = int(status.get("adjudication", {}).get("events_completed_at", now) or now)
-                manifest["participant_outcome"] = status.get("participant_outcome")
-                console.save_manifest(root, manifest)
-            print("\nPilot is already closed-loop complete.")
+            terminal_at = status.get("terminal_occurred_at")
+            if not isinstance(terminal_at, int) or isinstance(terminal_at, bool):
+                _fail("PILOT_COMPLETION_TERMINAL_TIME_REQUIRED_FOR_RECOVERY")
+            manifest["completed"] = True
+            manifest["completed_at"] = terminal_at
+            manifest["participant_outcome"] = status.get("participant_outcome")
+            console.save_manifest(root, manifest)
+            result = finalize_closed_loop_if_ready(
+                repo=repo,
+                operation_id=console.safe_token("OP-PILOT-COMPLETE-REPLAY"),
+                pilot_id=manifest["pilot_id"],
+                completed_at=terminal_at,
+            )
+            artifacts = write_and_verify_completion_handoff(root, manifest, result)
+            print("\nPilot is already closed-loop complete. Completion artifacts are present and integrity-verified.")
             print_status(status)
+            print(f"Integrity handoff: {artifacts['handoff_path']}")
+            print(f"Handoff SHA-256: {artifacts['handoff_digest']}")
             return status
 
         if standing == "WITHDRAWN":
@@ -168,8 +205,6 @@ def run_closed_loop(root: Path, manifest: Dict[str, Any]) -> Dict[str, Any]:
         )
 
         if turn.get("mode") == "WAIT":
-            # This should normally be prevented by closed_loop_status. Never collect a
-            # response for a WAIT surface and never burn the participant turn number.
             due = turn.get("earliest_due_at")
             print("\n=== DELAYED RETENTION NOT YET DUE ===")
             if due is not None:
@@ -178,8 +213,6 @@ def run_closed_loop(root: Path, manifest: Dict[str, Any]) -> Dict[str, Any]:
             return closed_loop_status(repo=repo, pilot_id=manifest["pilot_id"], now=now)
 
         if turn.get("mode") == "COMPLETE":
-            # Completion authority comes only from captured transfer evidence, not from
-            # the presentation surface alone.
             status = closed_loop_status(repo=repo, pilot_id=manifest["pilot_id"], now=now)
             if status["standing"] != "COMPLETION_READY":
                 _fail("COURSE_COMPLETE_SURFACE_WITHOUT_PILOT_COMPLETION_AUTHORITY")
@@ -225,8 +258,6 @@ def main() -> int:
 
     root = resolve_state_root_without_creation(args.state_root or os.environ.get("SYSTEM_MASTER_LEARNING_PILOT_STATE_ROOT"))
     try:
-        # Status and withdrawal remain available even if a future software-integrity
-        # preflight fails. Neither operation is allowed to collect a new response.
         if args.withdraw_pilot_id:
             console.withdraw(root, args.withdraw_pilot_id)
             return 0
@@ -234,8 +265,6 @@ def main() -> int:
             status_only(root, args.status_pilot_id)
             return 0
 
-        # Any path that can collect a new participant response must pass the current
-        # environment/privacy/frozen-authority preflight before presence or consent.
         participant_collection_preflight(root)
         if args.preflight_only:
             return 0
@@ -252,6 +281,7 @@ def main() -> int:
     except (
         ClosedLoopLauncherError,
         RealLearnerPilotCompletionError,
+        RealLearnerPilotHandoffError,
         RealLearnerPilotPreflightError,
         console.ConsoleError,
         console.RealLearnerPilotHumanSessionError,
