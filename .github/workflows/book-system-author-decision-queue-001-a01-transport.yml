@@ -1,0 +1,29 @@
+name: Book System Author Decision Queue A-01 Transport
+
+on:
+  push:
+    branches:
+      - book-system/author-decision-queue-001-a01-transport
+    paths:
+      - .github/workflows/book-system-author-decision-queue-001-a01-transport.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  qualify:
+    name: Request canonical A-01 Author Decision Queue qualification
+    uses: BFochtman746/system-master/.github/workflows/a01-control-plane-gateway.yml@main
+    with:
+      qualification_id: BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001
+      workstream_id: BOOK-SYSTEM
+      subject_sha: cf33b920f9de71c21297cdde64ed2e829e0dbc66
+      origin_ref: refs/heads/book-system/author-decision-queue-001-implementation
+      resume_on_pass: Adjudicate the exact Author Decision Queue A-01 PASS, preserve the tested SHA unchanged, close BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001 implementation qualification, and advance only to the next dependency-valid Book parent objective. No real author choice, manuscript promotion, lifecycle mutation, export freeze, publication, or production authority is created by synthetic qualification.
+      resume_on_failure: Preserve the authoritative receipt and repair only the demonstrated Author Decision Queue runtime, evidence, or A-01 boundary. Do not weaken exact parent/queue/request concurrency, author identity/session proof, confirmation, APPROVED-vs-REJECTED mapping, stale-resolution refusal, no-steering, or same-operation mutation prohibitions.
+      notification_target: book-system/control-v1
+      execution_context: normal
+      qualifier_timeout_minutes: 28
+      job_timeout_minutes: 30
