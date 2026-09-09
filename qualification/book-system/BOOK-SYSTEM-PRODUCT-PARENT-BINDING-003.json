@@ -13,7 +13,7 @@
     "system_id": "BOOK",
     "canonical_name": "BOOK SYSTEM",
     "control_ref": "book-system/control-v1",
-    "current_state_record": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-015.json",
+    "current_state_record": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-016.json",
     "owns": [
       "canonical book state",
       "end-to-end book lifecycle",
@@ -35,19 +35,19 @@
     }
   ],
   "preserved_current_parent_state": {
-    "standing": "ACTIVE__VERSION_ROLLBACK_A01_PASS__AUTHOR_DECISION_QUEUE_RESEARCH_AND_FORENSIC_NEXT",
-    "current_objective": "BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001-FORENSIC-AND-RESEARCH-001",
-    "state_record": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-015.json",
-    "implementation_rule": "Version/Rollback is closed on exact subject 402ab84a14e9d345530d60394ebc36176541dd21. Before executable Author Decision Queue work, perform reuse-first forensic mapping and the Book research-before-implementation gate; do not transfer Version/Rollback or other Book PASS to changed queue bytes."
+    "standing": "ACTIVE__AUTHOR_DECISION_QUEUE_IMPLEMENTED__HOSTED_48_OF_48_PASS__CENTRAL_A01_REGISTRATION_PENDING",
+    "current_objective": "BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001-A01-REGISTRATION-AND-QUALIFICATION-001",
+    "state_record": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-016.json",
+    "implementation_rule": "Author Decision Queue research, contract, executable implementation and hosted prequalification are complete. Preserve exact hosted-passing subject 3ee4916682ed60dd7044b6c98fe0940137d96b92 unchanged; do not repeat completed phases or transfer hosted PASS into A-01 authority. Revalidate canonical main A-01 registration and execute the shared gateway only after central admission."
   },
   "shared_core_rule": "BOOK consumes System Master Core platform/data/artifact/model/tool services through governed interfaces. BOOK remains owner of book-product state and lifecycle and does not transfer that ownership to Core or Prose.",
   "second_shift_rule": "Book unattended delegation is owned by governance/second-shift/BOOK-DELEGATIONS.json and must be revalidated against the live book-system/control-v1 head before execution.",
   "control_revalidation": {
-    "reason": "State-014 Version/Rollback received authoritative exact-SHA A-01 PASS on 402ab84a14e9d345530d60394ebc36176541dd21. State-015 selects the Author Decision Queue forensic/research gate as the dependency-valid successor.",
-    "previous_selected_state": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-014.json",
-    "current_selected_state": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-015.json",
+    "reason": "State-015 Author Decision Queue research/forensic work closed, the bounded queue runtime and 48-case qualification matrix were implemented, failed hosted subject 8ddb371c56ab64d4574de06a7745d77db76f27bd was preserved, and qualifier-only repair produced hosted PASS 48/48 on exact subject 3ee4916682ed60dd7044b6c98fe0940137d96b92. Canonical A-01 registry v22 does not yet register BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001, so State-016 routes only the remaining shared-authority dependency.",
+    "previous_selected_state": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-015.json",
+    "current_selected_state": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-016.json",
     "semantic_change": true,
-    "qualification_effect": "NONE__CONTROL_SELECTION_ONLY__VERSION_ROLLBACK_PASS_REMAINS_EXACT_SUBJECT_SCOPED"
+    "qualification_effect": "NONE__CONTROL_SELECTION_ONLY__AUTHOR_DECISION_QUEUE_REMAINS_HOSTED_PASS_ONLY_PENDING_A01"
   },
-  "qualification_rule": "This parent-product binding changes topology/control metadata only. It does not transfer, broaden or invalidate prior exact-SHA qualification, author, private-data, publication or production authority."
+  "qualification_rule": "This parent-product binding changes topology/control metadata only. It does not transfer hosted PASS into authoritative A-01 PASS and does not transfer, broaden or invalidate prior exact-SHA qualification, author, private-data, publication or production authority."
 }
