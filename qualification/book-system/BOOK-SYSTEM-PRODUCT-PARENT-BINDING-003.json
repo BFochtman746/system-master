@@ -1,0 +1,46 @@
+{
+  "binding_id": "BOOK-SYSTEM-PRODUCT-PARENT-BINDING-003",
+  "effective_date": "2026-09-09",
+  "standing": "CANONICAL__BOOK_TOOL_SYSTEM_UNDER_SYSTEM_MASTER__PROSE_CHILD_PRESERVED",
+  "topology_authority": "governance/SYSTEM-TOPOLOGY-002.json on canonical main",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "parent_product": {
+    "product_id": "SYSTEM_MASTER",
+    "canonical_name": "SYSTEM MASTER",
+    "relationship": "FIRST_CLASS_TOOL_SYSTEM_INSIDE_PRODUCT"
+  },
+  "book_system": {
+    "system_id": "BOOK",
+    "canonical_name": "BOOK SYSTEM",
+    "control_ref": "book-system/control-v1",
+    "current_state_record": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-008.json",
+    "owns": [
+      "canonical book state",
+      "end-to-end book lifecycle",
+      "planning/research/orchestration",
+      "provider/service admission",
+      "author decision routing",
+      "version and rollback",
+      "editorial lifecycle",
+      "publication/export"
+    ]
+  },
+  "child_systems": [
+    {
+      "system_id": "PROSE",
+      "owner_path": "SYSTEM_MASTER/BOOK/PROSE",
+      "relationship": "CHILD_TOOL_SYSTEM",
+      "may_define_own_critical_path": true,
+      "may_self_admit_into_book_canonical_state": false
+    }
+  ],
+  "preserved_current_parent_state": {
+    "standing": "ACTIVE__EDITORIAL_CROSSWALK_AND_AUTHORING_LIFECYCLE_AMENDMENT_CLOSED__PUBLICATION_EXPORT_STANDARDS_PROFILE_NEXT",
+    "current_objective": "BOOK-SYSTEM-PUBLICATION-EXPORT-STANDARDS-PROFILE-001",
+    "state_record": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-008.json",
+    "implementation_pause": "BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-001 executable implementation remains paused until the remaining research-remediation release conditions close."
+  },
+  "shared_core_rule": "BOOK consumes System Master Core platform/data/artifact/model/tool services through governed interfaces. BOOK remains owner of book-product state and lifecycle and does not transfer that ownership to Core or Prose.",
+  "second_shift_rule": "Book unattended delegation is owned by governance/second-shift/BOOK-DELEGATIONS.json and must be revalidated against the live book-system/control-v1 head before execution.",
+  "qualification_rule": "This parent-product binding changes topology/control metadata only. It does not transfer, broaden or invalidate prior exact-SHA qualification, author, private-data, publication or production authority."
+}
