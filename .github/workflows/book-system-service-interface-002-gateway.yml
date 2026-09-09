@@ -1,0 +1,47 @@
+name: Book System Service Interface V2 Qualification
+
+on:
+  push:
+    branches:
+      - book-system/control-v1
+    paths:
+      - "qualification/book-system/service-interface-002/**"
+      - ".github/scripts/book-system-service-interface-002-qualify.js"
+      - ".github/scripts/a01-book-system-service-interface-002.js"
+      - ".github/workflows/book-system-service-interface-002-gateway.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  prequalify:
+    name: Deterministic hosted prequalification
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - name: Run Registry V2 qualifier
+        run: node .github/scripts/book-system-service-interface-002-qualify.js
+
+  qualify:
+    name: Authoritative A-01 qualification
+    needs: prequalify
+    uses: BFochtman746/system-master/.github/workflows/a01-control-plane-gateway.yml@main
+    with:
+      qualification_id: BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-002
+      workstream_id: BOOK-SYSTEM
+      subject_sha: ${{ github.sha }}
+      origin_ref: ${{ github.ref }}
+      resume_on_pass: Close BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-002 on this exact SHA, reconcile Book control and Second Shift, then continue the dependency-valid Runtime V2 implementation/prequalification gate.
+      resume_on_failure: Classify the receipt first; repair only the failing Registry V2 contract/fixture/qualifier boundary for SUBJECT_FAILURE, and do not change A-01 infrastructure without INFRA_FAILURE or CONTROL_PLANE_FAILURE evidence.
+      notification_target: book-system/control-v1
+      execution_context: normal
+      qualifier_timeout_minutes: 10
+      job_timeout_minutes: 15
+    secrets: inherit
