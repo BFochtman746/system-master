@@ -1,0 +1,44 @@
+name: BOOK-EVAL REPAIR-005 Gate D Teacher Freeze Hosted Prequalification
+
+on:
+  push:
+    branches:
+      - book-eval-lemonade-001-blind-resume-003-adapter-repair
+    paths:
+      - ".github/scripts/book-eval-repair005-gate-d-teacher-freeze-qualify.js"
+      - ".github/workflows/book-eval-repair-005-gate-d-teacher-freeze-hosted-prequal.yml"
+      - "qualification/book-eval-lemonade-001/scripts/freeze-repair005-gate-d-teacher.py"
+      - "qualification/book-eval-lemonade-001/scripts/validate-repair005-gate-d-teacher.py"
+      - "qualification/book-eval-lemonade-001/scripts/test-repair005-gate-d-teacher-freeze.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  prequal:
+    name: Prove teacher-freeze logic without private gold or A-01
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact Book workstream subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Compile teacher-freeze Python boundary
+        run: |
+          python -m py_compile \
+            qualification/book-eval-lemonade-001/scripts/freeze-repair005-gate-d-teacher.py \
+            qualification/book-eval-lemonade-001/scripts/validate-repair005-gate-d-teacher.py \
+            qualification/book-eval-lemonade-001/scripts/test-repair005-gate-d-teacher-freeze.py
+      - name: Check A-01 qualifier wrapper syntax
+        run: node --check .github/scripts/book-eval-repair005-gate-d-teacher-freeze-qualify.js
+      - name: Run 440-record synthetic canonicalization tests
+        run: python qualification/book-eval-lemonade-001/scripts/test-repair005-gate-d-teacher-freeze.py
+      - name: Publish prequalification standing
+        run: |
+          echo '## BOOK EVAL GATE D TEACHER FREEZE PREQUAL' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Boundary: teacher-only freeze/canonicalization; no BASE_TRAINING, DEVELOPMENT_GOLD, visible regression, hidden holdout, student training, or selective 120B.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Synthetic tests: unique 440 PASS; exact duplicate canonicalization PASS; conflicting duplicate fail-closed PASS.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'This hosted prequalification does not prove the persistent A-01 Teacher corpus; that requires the registered exact-subject A-01 qualifier.' >> "$GITHUB_STEP_SUMMARY"
