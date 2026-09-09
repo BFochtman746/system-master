@@ -1,41 +1,31 @@
 {
   "authority_id": "BOOK-WRITING-PROJECT-PRIMARY-AUTHORITY-001",
-  "project_name": "BOOK WRITING PROJECT",
-  "standing": "PRIMARY_PROJECT_AUTHORITY__CORRECTED_2026-09-09",
-  "correction": "This chat and control thread govern the Book Writing Project. Literary Prose is a subordinate component and must never be promoted to project identity or substituted for the full Book Writing Project.",
-  "scope_hierarchy": {
-    "primary_project": "BOOK WRITING PROJECT",
-    "subordinate_components_include": [
-      "Literary Prose Engine",
-      "Book Evaluator / Qualification",
-      "Narrative Extraction / Candidate-002",
-      "Perspective / Revelation Calibration",
-      "Book-specific revision and preservation qualification",
-      "Other book-writing capabilities added under explicit project authority"
-    ],
-    "rule": "Component branches, subsystem states, qualification gates, and chat labels do not redefine the primary project identity."
+  "standing": "SUPERSEDED__INCORRECT_PROJECT_HIERARCHY__NO_CURRENT_AUTHORITY",
+  "original_commit": "44b3f1c94f3af36e96f79e29efe2dd709ebdcdcd",
+  "supersession_date": "2026-09-09",
+  "error": "This record incorrectly invented BOOK WRITING PROJECT as the single top-level project and demoted the Prose Project to a mere component. The correct model contains two active projects: BOOK SYSTEM as parent and PROSE PROJECT as its subordinate child project built for the Book System.",
+  "correct_hierarchy": {
+    "parent_project": "BOOK SYSTEM",
+    "parent_control_branch": "book-system/control-v1",
+    "parent_control_commit_at_repair": "fbbffd531179f9354741f32f9a34abbd1095fd7f",
+    "child_project": "PROSE PROJECT",
+    "child_branch": "literary-prose-engine-001",
+    "child_implementation_family": "LITERARY PROSE ENGINE"
   },
-  "current_component_branch_context": {
-    "branch": "literary-prose-engine-001",
-    "classification": "SUBSYSTEM_IMPLEMENTATION_BRANCH_ONLY",
-    "not_project_identity": true
+  "superseded_by": [
+    "book-system/control-v1:qualification/book-system/BOOK-SYSTEM-PROJECT-HIERARCHY-001.json",
+    "book-system/control-v1:qualification/book-system/BOOK-SYSTEM-ACTIVE-PROJECT-REGISTRY-001.json",
+    "literary-prose-engine-001:qualification/literary-prose-engine-001/PROSE-PROJECT-PARENT-BINDING-001.json",
+    "literary-prose-engine-001:qualification/literary-prose-engine-001/LITERARY-PROSE-CONSOLIDATED-WORKSTREAM-STATE-009.json"
+  ],
+  "authority_effect": {
+    "may_define_book_system_project_identity": false,
+    "may_define_prose_project_identity": false,
+    "may_define_any_current_next_step": false,
+    "retained_only_as_forensic_history": true
   },
-  "state_008_reclassification": {
-    "artifact": "qualification/literary-prose-engine-001/LITERARY-PROSE-CONSOLIDATED-WORKSTREAM-STATE-008.json",
-    "classification": "SUBSYSTEM_STATE_ONLY",
-    "may_define_book_writing_project_primary_next_step": false,
-    "may_define_literary_prose_component_next_step": true
-  },
-  "chat_authority": {
-    "this_chat_role": "PRIMARY_BOOK_WRITING_PROJECT_EXECUTION_AND_CONTROL_CHAT",
-    "literary_prose_chat_role": "SUBSYSTEM_OR_HISTORICAL_COMPONENT_CONTEXT_ONLY",
-    "repository_authority_rule": "Future continuation must first reason from BOOK WRITING PROJECT scope, then route into the appropriate component."
-  },
-  "next_step_rule": "Do not automatically treat the Literary Prose Candidate-002 human-adjudication gate as the Book Writing Project's primary critical path. Reconcile the full Book Writing Project state and select the project-level next step across all book-writing components.",
   "preservation": {
-    "existing_literary_prose_evidence_remains_valid_within_component_scope": true,
-    "existing_book_evaluator_evidence_remains_valid_within_component_scope": true,
-    "exact_sha_qualification_authority_never_transfers": true,
-    "no_existing_component_evidence_is_deleted_by_this_correction": true
+    "no_technical_or_qualification_evidence_invalidated": true,
+    "exact_sha_qualification_authority_never_transfers": true
   }
 }
