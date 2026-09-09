@@ -1,0 +1,54 @@
+{
+  "objective": "BOOK-INTELLIGENCE-UNIFICATION-001-STEP-006",
+  "standing": "PASS_REAL_PASSAGE_SPARSE_DIAGNOSTIC_APPLICABILITY__NO_FULL_BOOK_ACCURACY_CLAIM",
+  "sample": {
+    "book": "A GATE LEFT OPEN",
+    "baseline_version_id": "AGLO-REJECT-ALL-NARRATIVE-v1",
+    "sample_id": "AGLO-RBQ-SAMPLE-001",
+    "chapters": [1, 8, 19, 21, 24, 29],
+    "word_count": 11194,
+    "exact_sample_hashes_previously_verified": true,
+    "raw_manuscript_text_committed": false
+  },
+  "qualification": {
+    "final_run_id": 34306668581,
+    "exact_tested_subject_sha": "2413415d7f16a215ead4efde6abef41f0e373ae6",
+    "runner": "github-hosted ubuntu-24.04",
+    "python": "3.12",
+    "cases": 34,
+    "result": "PASS",
+    "activation_by_chapter": {
+      "1": {"active_dimensions": 13, "of_214": 214, "rate": 0.0607, "role": "CONTROL"},
+      "8": {"active_dimensions": 18, "of_214": 214, "rate": 0.0841, "role": "CRAFT_REPAIR_TARGET_RETAINED"},
+      "19": {"active_dimensions": 12, "of_214": 214, "rate": 0.0561, "role": "CONTROL"},
+      "21": {"active_dimensions": 19, "of_214": 214, "rate": 0.0888, "role": "CRAFT_REPAIR_TARGET_ABSTAIN_OR_RETAIN"},
+      "24": {"active_dimensions": 18, "of_214": 214, "rate": 0.0841, "role": "BOUNDED_OBJECTIVE_REPAIR"},
+      "29": {"active_dimensions": 25, "of_214": 214, "rate": 0.1168, "role": "CONTROL_ENDING"}
+    }
+  },
+  "failed_predecessor_attempt": {
+    "run_id": 34306589047,
+    "subject_sha": "5a8f64ed3580c6bd3cf6684039a8a26cd81d10ce",
+    "result": "FAIL_EXPECTED_SPARSE_POLICY",
+    "finding": "Specialist-level activation still enabled every dimension inside each active specialist, producing 27.6%-62.6% activation and checklist-flood pressure.",
+    "repair": "Add dimension-level selection inside specialist applicability; do not weaken preservation or promotion thresholds."
+  },
+  "qualified_claims": [
+    "The 214-dimension architecture can remain available without activating every dimension on every passage.",
+    "Applicability is dimension-level, not merely specialist-level.",
+    "Reader simulation remains opt-in and reveal-frontier bounded rather than automatically attached to every passage.",
+    "Activation itself is not a defect, revision recommendation, or promotion vote.",
+    "Known retain-original and abstention passages remain controls rather than hidden positive training labels.",
+    "The known Chapter-24 positive case remains bounded to previously author-adjudicated repairs rather than authorizing a chapter rewrite.",
+    "No manuscript prose or candidate prose is persisted in repository evidence."
+  ],
+  "not_claimed": [
+    "Full-book diagnostic accuracy",
+    "Human-reader calibration",
+    "Universal optimal activation rate",
+    "Automatic manuscript revision authority",
+    "Literary quality from activation counts alone"
+  ],
+  "a01_consumed": false,
+  "next_transition": "BOOK-INTELLIGENCE-UNIFICATION-001-STEP-007__DIAGNOSTIC_FINDING_CALIBRATION_AND_FALSE_POSITIVE_QUALIFICATION"
+}
