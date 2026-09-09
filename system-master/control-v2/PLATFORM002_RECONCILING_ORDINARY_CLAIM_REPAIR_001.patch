@@ -1,0 +1,116 @@
+--- a/05_DATA/DATA001-MIGRATION-MANIFEST-001.json
++++ b/05_DATA/DATA001-MIGRATION-MANIFEST-001.json
+@@ -27,7 +27,7 @@
+       "manifest_ordinal": 3,
+       "version": "0.11.0",
+       "up_path": "05_DATA/postgresql/003_smr010_platform002_durable_runtime.up.sql",
+-      "up_sha256": "5038349eae49d0e23a116e4883a9d22d21896c1b15e5ffcdd3cb795e2b71ee08",
++      "up_sha256": "ba43958da61a1eb40b57d79dd09efb62f51f4c156dab234185030844be8f35c4",
+       "down_path": "05_DATA/postgresql/003_smr010_platform002_durable_runtime.down.sql",
+       "down_sha256": "239154f6e35310e60e13056dc99aec50c92356f22c86d2e75b174e107aeb79a8"
+     }
+--- a/05_DATA/postgresql/003_smr010_platform002_durable_runtime.up.sql
++++ b/05_DATA/postgresql/003_smr010_platform002_durable_runtime.up.sql
+@@ -36,7 +36,7 @@
+ );
+ 
+ CREATE INDEX ix_platform002_work_claim ON platform002_work_item(priority DESC, available_at ASC, submitted_at ASC, work_id ASC)
+-  WHERE state IN ('QUEUED','WAITING','RECONCILING');
++  WHERE state IN ('QUEUED','WAITING');
+ CREATE INDEX ix_platform002_work_running_resource ON platform002_work_item(resource_class, lease_expires_at) WHERE state='RUNNING';
+ 
+ CREATE TABLE platform002_lease_receipt (
+@@ -152,7 +152,8 @@
+     RAISE EXCEPTION 'durable work monotonicity violation';
+   END IF;
+   IF OLD.state<>NEW.state AND NOT (
+-      (OLD.state IN ('QUEUED','WAITING','RECONCILING') AND NEW.state IN ('RUNNING','CANCELLED','QUARANTINED','FAILED')) OR
++      (OLD.state IN ('QUEUED','WAITING') AND NEW.state IN ('RUNNING','CANCELLED','QUARANTINED','FAILED')) OR
++      (OLD.state='RECONCILING' AND NEW.state IN ('CANCELLED','QUARANTINED','FAILED')) OR
+       (OLD.state='RUNNING' AND NEW.state IN ('WAITING','SUCCEEDED','FAILED','CANCELLED','QUARANTINED','RECONCILING'))
+     ) THEN RAISE EXCEPTION 'illegal durable work transition'; END IF;
+   IF OLD.state<>'RUNNING' AND NEW.state='RUNNING' AND (NEW.fence_token<>OLD.fence_token+1 OR NEW.attempts<>OLD.attempts+1) THEN
+--- a/10_REQUIREMENTS/SMR010-PACKET-CONTRACT.md
++++ b/10_REQUIREMENTS/SMR010-PACKET-CONTRACT.md
+@@ -25,7 +25,7 @@
+ - fenced checkpoint sequence/lineage;
+ - transactional outbox sequencing and inbox dedupe;
+ - durable timers/signals with generation/fence controls;
+-- unknown-commit `RECONCILING` state and poison/exhausted-work quarantine/dead-letter handling;
++- unknown-commit `RECONCILING` state is a distinct reconciliation backlog and is excluded from ordinary execution claim/retry until a separate reconciliation disposition is established; poison/exhausted work uses quarantine/dead-letter handling;
+ - fail-closed admission on stale capacity observations and bounded queue/worker/retry/recovery/DB/external/class limits;
+ - ten current JSON Schema contracts and eight PostgreSQL durable objects;
+ - target deferral for live PostgreSQL/JDBC/concurrency/restart/saturation/reboot proof.
+--- a/11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/work/DurableWorkRecord.java
++++ b/11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/work/DurableWorkRecord.java
+@@ -29,6 +29,6 @@
+             leaseOwner=Platform002Rules.text(leaseOwner,"leaseOwner"); leaseExpiresAt=Platform002Rules.instant(leaseExpiresAt,"leaseExpiresAt"); if(fenceToken<1||!leaseExpiresAt.isAfter(updatedAt)) throw new IllegalArgumentException("running lease");
+         } else if(leased) throw new IllegalArgumentException("non-running work cannot hold lease");
+     }
+-    public boolean claimableAt(Instant now){ Platform002Rules.instant(now,"now"); return (state==JobState.QUEUED||state==JobState.WAITING||state==JobState.RECONCILING)&&!availableAt.isAfter(now); }
++    public boolean claimableAt(Instant now){ Platform002Rules.instant(now,"now"); return (state==JobState.QUEUED||state==JobState.WAITING)&&!availableAt.isAfter(now); }
+     public boolean terminal(){ return state==JobState.SUCCEEDED||state==JobState.FAILED||state==JobState.CANCELLED||state==JobState.QUARANTINED; }
+ }
+--- a/11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/work/JdbcDurableRuntimeStore.java
++++ b/11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/work/JdbcDurableRuntimeStore.java
+@@ -41,7 +41,7 @@
+         for(String resourceClass:policy.maxWorkersByResourceClass().keySet()) if(Platform002Authority.admission(policy,snapshot,resourceClass,now,Duration.ofSeconds(30))==AdmissionStanding.ADMIT) allowed.add(resourceClass);
+         allowed.sort(String::compareTo); if(allowed.isEmpty()) return Optional.empty();
+         String placeholders=String.join(",",java.util.Collections.nCopies(allowed.size(),"?"));
+-        String sql="WITH candidate AS (SELECT work_id FROM platform002_work_item WHERE state IN ('QUEUED','WAITING','RECONCILING') AND available_at <= clock_timestamp() AND attempts < max_attempts AND resource_class IN ("+placeholders+") ORDER BY priority DESC, available_at ASC, submitted_at ASC, work_id ASC FOR UPDATE SKIP LOCKED LIMIT 1) UPDATE platform002_work_item w SET state='RUNNING',attempts=w.attempts+1,fence_token=w.fence_token+1,lease_owner=?,lease_expires_at=clock_timestamp()+(w.lease_duration_ms * interval '1 millisecond'),updated_at=clock_timestamp() FROM candidate c WHERE w.work_id=c.work_id RETURNING w.*";
++        String sql="WITH candidate AS (SELECT work_id FROM platform002_work_item WHERE state IN ('QUEUED','WAITING') AND available_at <= clock_timestamp() AND attempts < max_attempts AND resource_class IN ("+placeholders+") ORDER BY priority DESC, available_at ASC, submitted_at ASC, work_id ASC FOR UPDATE SKIP LOCKED LIMIT 1) UPDATE platform002_work_item w SET state='RUNNING',attempts=w.attempts+1,fence_token=w.fence_token+1,lease_owner=?,lease_expires_at=clock_timestamp()+(w.lease_duration_ms * interval '1 millisecond'),updated_at=clock_timestamp() FROM candidate c WHERE w.work_id=c.work_id RETURNING w.*";
+         long claimStart=System.nanoTime();
+         try(Connection c=dataSource.getConnection()){
+             c.setAutoCommit(false); DurableWorkRecord work;
+@@ -191,7 +191,7 @@
+ 
+     @Override public RuntimeCapacitySnapshot metrics(Instant now,int dbPoolInUse,int dbPoolCapacity,int externalPermitsInUse,int externalPermitCapacity,long poolWaitMillis){
+         Platform002Rules.instant(now,"now");
+-        String sql="SELECT clock_timestamp() AS observed_at, count(*) FILTER (WHERE state IN ('QUEUED','WAITING','RECONCILING') AND available_at<=clock_timestamp()) AS queue_depth, count(*) FILTER (WHERE state='RUNNING') AS active_workers, count(*) FILTER (WHERE state='WAITING') AS retry_debt, count(*) FILTER (WHERE state='RECONCILING') AS recovery_backlog, (SELECT count(*) FROM platform002_dead_letter) AS dead_letter_count, COALESCE(max(EXTRACT(EPOCH FROM (clock_timestamp()-submitted_at))*1000) FILTER (WHERE state IN ('QUEUED','WAITING','RECONCILING')),0) AS oldest_queue_age_ms, COALESCE(max(EXTRACT(EPOCH FROM (clock_timestamp()-updated_at))*1000) FILTER (WHERE checkpoint_sequence>0),0) AS checkpoint_age_ms FROM platform002_work_item";
++        String sql="SELECT clock_timestamp() AS observed_at, count(*) FILTER (WHERE state IN ('QUEUED','WAITING') AND available_at<=clock_timestamp()) AS queue_depth, count(*) FILTER (WHERE state='RUNNING') AS active_workers, count(*) FILTER (WHERE state='WAITING') AS retry_debt, count(*) FILTER (WHERE state='RECONCILING') AS recovery_backlog, (SELECT count(*) FROM platform002_dead_letter) AS dead_letter_count, COALESCE(max(EXTRACT(EPOCH FROM (clock_timestamp()-submitted_at))*1000) FILTER (WHERE state IN ('QUEUED','WAITING')),0) AS oldest_queue_age_ms, COALESCE(max(EXTRACT(EPOCH FROM (clock_timestamp()-updated_at))*1000) FILTER (WHERE checkpoint_sequence>0),0) AS checkpoint_age_ms FROM platform002_work_item";
+         try(Connection c=dataSource.getConnection()){
+             Instant observed;int queue,active,retry,recovery,dead;long oldest,checkpointAge;try(PreparedStatement p=c.prepareStatement(sql);ResultSet rs=p.executeQuery()){rs.next();observed=rs.getTimestamp("observed_at").toInstant();queue=rs.getInt("queue_depth");active=rs.getInt("active_workers");retry=rs.getInt("retry_debt");recovery=rs.getInt("recovery_backlog");dead=rs.getInt("dead_letter_count");oldest=rs.getLong("oldest_queue_age_ms");checkpointAge=rs.getLong("checkpoint_age_ms");}
+             Map<String,Integer> byClass=new HashMap<>();try(PreparedStatement p=c.prepareStatement("SELECT resource_class,count(*) AS n FROM platform002_work_item WHERE state='RUNNING' GROUP BY resource_class");ResultSet rs=p.executeQuery()){while(rs.next())byClass.put(rs.getString(1),rs.getInt(2));}
+--- a/12_TESTS/src/test/java/org/systemmaster/rebuild/platform/work/Platform002AuthorityTests.java
++++ b/12_TESTS/src/test/java/org/systemmaster/rebuild/platform/work/Platform002AuthorityTests.java
+@@ -58,7 +58,7 @@
+ 
+         DurableWorkRecord unknown=Platform002Authority.newWork("unknown","SIDE_EFFECT",profile,resources,"idem-unknown",digest("unknown"),t); store.submit(unknown);
+         ClaimResult uc=store.claimNext("lease-unknown","worker-u",t.plusSeconds(40_000),policy,capacity(t.plusSeconds(40_000)),"evidence:claim").orElseThrow(); DurableWorkRecord recon=store.unknownCommit("unknown","worker-u",uc.work().fenceToken(),t.plusSeconds(40_001));
+-        ok(recon.state()==JobState.RECONCILING,"unknown commit state"); ok(recon.fenceToken()==2,"unknown commit invalidates fence"); ok(Platform002Authority.recoveryDecision(recon,t.plusSeconds(40_002)).action()==RecoveryAction.RECONCILE,"reconcile decision");
++        ok(recon.state()==JobState.RECONCILING,"unknown commit state"); ok(recon.fenceToken()==2,"unknown commit invalidates fence"); ok(Platform002Authority.recoveryDecision(recon,t.plusSeconds(40_002)).action()==RecoveryAction.RECONCILE,"reconcile decision"); RuntimeCapacitySnapshot reconCapacity=capacity(t.plusSeconds(40_002)); ok(store.claimNext("lease-recon-ordinary","worker-retry",t.plusSeconds(40_002),policy,reconCapacity,"evidence:ordinary-retry").isEmpty(),"reconciling work excluded from ordinary execution claim");
+ 
+         JobProfile oneAttempt=new JobProfile("ONE",Duration.ofHours(1),Duration.ofSeconds(10),Duration.ofSeconds(3),Duration.ofMinutes(1),1,50,1000,1000); DurableWorkRecord poison=Platform002Authority.newWork("poison","TEST",oneAttempt,new ResourceEnvelope(1,1,1,1,"STANDARD"),"idem-poison",digest("poison"),t); store.submit(poison);
+         ClaimResult pc=store.claimNext("lease-poison","poison-worker",t.plusSeconds(50_000),policy,capacity(t.plusSeconds(50_000)),"evidence:claim").orElseThrow(); DurableWorkRecord quarantined=store.recoverExpired("poison",pc.work().leaseExpiresAt().plusMillis(1)); ok(quarantined.state()==JobState.QUARANTINED,"expired exhausted lease quarantined"); ok(store.deadLetterCount()==1,"dead letter recorded");
+@@ -75,7 +75,7 @@
+         RuntimeCapacitySnapshot slowClaim=new RuntimeCapacitySnapshot(t,1,1,1,10,1,10,1,1,0,100,5000,10,20,Map.of("STANDARD",1)); ok(Platform002Authority.admission(policy,slowClaim,"STANDARD",t.plusSeconds(1),Duration.ofSeconds(30))==AdmissionStanding.BACKPRESSURE,"claim latency backpressure");
+         throwsIt(()->store.submit(Platform002Authority.newWork("conflict","TEST",profile,resources,"idem-1",digest("different"),t.plusSeconds(70_000))),"idempotency mutation rejected");
+ 
+-        RuntimeCapacitySnapshot metrics=store.metrics(t.plusSeconds(80_000),2,16,2,16,12); ok(metrics.deadLetterCount()==1,"metrics dead letters"); ok(metrics.dbPoolInUse()==2&&metrics.dbPoolCapacity()==16,"metrics db pool"); ok(metrics.poolWaitMillis()==12,"metrics pool wait");
++        RuntimeCapacitySnapshot metrics=store.metrics(t.plusSeconds(80_000),2,16,2,16,12); ok(metrics.deadLetterCount()==1,"metrics dead letters"); ok(metrics.dbPoolInUse()==2&&metrics.dbPoolCapacity()==16,"metrics db pool"); ok(metrics.poolWaitMillis()==12,"metrics pool wait"); ok(metrics.recoveryBacklog()==1,"reconciliation backlog separated from ordinary queue");
+         ok(DurableRuntimeStore.class.isAssignableFrom(JdbcDurableRuntimeStore.class),"JDBC adapter implements governed runtime surface"); String claimSql=JdbcDurableRuntimeStore.claimSqlContract(); ok(claimSql.contains("FOR UPDATE SKIP LOCKED"),"skip locked"); ok(claimSql.contains("ORDER BY priority DESC"),"deterministic order"); ok(claimSql.contains("clock_timestamp()"),"database clock"); ok(claimSql.contains("attempts < max_attempts"),"attempt budget SQL"); ok(claimSql.contains("resource_class IN"),"resource class admission SQL"); ok(claimSql.contains("lease_duration_ms"),"durable lease duration SQL");
+ 
+         System.out.println("PLATFORM-002 PASS checks="+checks);
+--- a/tools/verify_platform002_sql_contract.py
++++ b/tools/verify_platform002_sql_contract.py
+@@ -18,6 +18,9 @@
+ jdbc=(R/'11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/work/JdbcDurableRuntimeStore.java').read_text()
+ for tok in ['FOR UPDATE SKIP LOCKED','ORDER BY priority DESC, available_at ASC, submitted_at ASC, work_id ASC','clock_timestamp()','resource_class IN','attempts < max_attempts','lease_duration_ms','dispatch_fence=o.dispatch_fence+1','claim_expires_at=clock_timestamp()','fence_token=t.fence_token+1']:
+  if tok not in jdbc: issues.append('missing JDBC queue/clock guard '+tok)
++if "state IN ('QUEUED','WAITING') AND available_at <= clock_timestamp()" not in jdbc: issues.append('ordinary JDBC claim must exclude RECONCILING')
++if "WHERE state IN ('QUEUED','WAITING');" not in s: issues.append('ordinary SQL claim index must exclude RECONCILING')
++if "OLD.state='RECONCILING' AND NEW.state IN ('CANCELLED','QUARANTINED','FAILED')" not in s: issues.append('RECONCILING must not transition to RUNNING through ordinary SQL state guard')
+ d=down.read_text()
+ for t in tables:
+  if 'DROP TABLE IF EXISTS '+t not in d: issues.append('down migration missing '+t)
+--- a/tools/verify_smr010_recurrence.py
++++ b/tools/verify_smr010_recurrence.py
+@@ -13,7 +13,7 @@
+ checks=[
+  ('11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/work/DurableRuntimeStore.java',['claimNext','checkpoint','unknownCommit','cancel','recoverExpired','claimPendingOutbox','recoverExpiredOutboxClaim','claimDueTimer','recoverExpiredTimerClaim']),
+  ('11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/work/Platform002Authority.java',['admission','claimLatencyMillis','runtime backpressure','retryBackoffMillis','RECONCILING','cancel','recoverExpiredLease','claimOutbox','recoverExpiredOutboxClaim','recoverExpiredTimerClaim']),
+- ('11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/work/JdbcDurableRuntimeStore.java',['implements DurableRuntimeStore','FOR UPDATE SKIP LOCKED','clock_timestamp()','resource_class IN','ON CONFLICT (consumer_id,message_id) DO NOTHING','insertTerminalLease','dispatch_fence=o.dispatch_fence+1','fence_token=t.fence_token+1']),
++ ('11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/work/JdbcDurableRuntimeStore.java',['implements DurableRuntimeStore','FOR UPDATE SKIP LOCKED','clock_timestamp()',"state IN ('QUEUED','WAITING')",'resource_class IN','ON CONFLICT (consumer_id,message_id) DO NOTHING','insertTerminalLease','dispatch_fence=o.dispatch_fence+1','fence_token=t.fence_token+1']),
+  ('05_DATA/postgresql/003_smr010_platform002_durable_runtime.up.sql',['claim must advance fence and attempt exactly once','UNIQUE(aggregate_id,sequence)','UNIQUE(consumer_id,message_id)','signal consume-once violation','outbox recovery/defer must invalidate prior fence','timer recovery must invalidate prior fence']),
+  ('10_REQUIREMENTS/SMR010-PACKET-CONTRACT.md',['FOUNDATION-003 remains canonical owner','PC-ENDGAME-017'])]
+ for rel,tokens in checks:
