@@ -4,10 +4,11 @@
   "title": "Literary Narrative Extraction Gold Case v1",
   "type": "object",
   "additionalProperties": false,
-  "required": ["case_id", "task", "gold_labels"],
+  "required": ["case_id", "task", "synthetic_source", "gold_labels"],
   "properties": {
     "case_id": {"type": "string", "minLength": 1},
     "task": {"enum": ["ANCHOR_LOCALIZATION", "ENTITY_IDENTITY_COREFERENCE", "EVENT_IDENTITY", "STORY_VS_DISCOURSE_TIME", "CAUSAL_GOAL_RELATIONS", "EPISTEMIC_FOCALIZATION", "NARRATIVE_FUNCTION", "SETUP_PAYOFF_OPEN_QUESTION", "ARC_ORCHESTRATION"]},
+    "synthetic_source": {"type": "string", "minLength": 1, "description": "Rights-safe prose authored solely for qualification; never copied from a user manuscript or copyrighted reference body."},
     "gold_labels": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
     "forbidden_labels": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
     "gold_spans": {
