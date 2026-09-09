@@ -1,5 +1,5 @@
 {
-  "registry_version": 17,
+  "registry_version": 18,
   "qualifications": {
     "A01-CONTROL-PLANE-SELFTEST": {
       "workstream_id": "SYSTEM-MASTER",
@@ -30,6 +30,16 @@
       "evidence_artifact": "book-system-service-interface-registry-001",
       "overnight_eligible": false,
       "description": "Qualify the exact Book System parent service-interface registry: four service families and seventeen operations, request/response schema and provider binding, minimum projection enforcement, canonical-write denial, stale projection rejection, idempotent replay and idempotency conflict handling, unsafe non-idempotent retry rejection, abstention/error preservation, and parent-admission handoff boundaries. PASS is bounded to the tested subject SHA and grants no parent canonical-write, publication, or production authority to a provider."
+    },
+    "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-002": {
+      "workstream_id": "BOOK-SYSTEM",
+      "gate_class": "focused",
+      "source": "subject",
+      "executable": "node",
+      "args": [".github/scripts/a01-book-system-service-interface-002.js"],
+      "evidence_artifact": "book-system-service-interface-registry-002",
+      "overnight_eligible": false,
+      "description": "Qualify the exact Book System Service Interface Registry V2 successor: four service families and twenty-one operations, strict V2 schema isolation from V1, canonical Prose/Book Evaluator ownership, exact parent/source/artifact identity, provider canonical/lifecycle/export-freeze/publication denial, editorial-stage evidence without provider stage authority, target-medium generation/validation/proof separation, source-to-render/accessibility/correction evidence, artifact currentness and changed-byte digest invalidation, provenance evidence-only/currentness, idempotent replay and non-idempotent reconciliation, and no Book-owned document engine authority. PASS is exact-SHA only and transfers no V1 qualification, author, publication, production, or future document-tool topology authority."
     },
     "BOOK-SYSTEM-LIFECYCLE-TRANSITION-ENGINE-001": {
       "workstream_id": "BOOK-SYSTEM",
