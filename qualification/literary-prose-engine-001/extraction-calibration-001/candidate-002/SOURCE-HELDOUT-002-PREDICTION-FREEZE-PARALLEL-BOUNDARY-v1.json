@@ -1,0 +1,26 @@
+{
+  "boundary_id": "LITERARY-EXTRACTION-SOURCE-HELD-OUT-002__REAL_MODEL_PREDICTION_FREEZE_PARALLEL",
+  "parent_objective": "LITERARY-EXTRACTION-SOURCE-HELD-OUT-002",
+  "standing": "BLOCKED — EXTERNAL AUTHORITY",
+  "critical_path": false,
+  "parallel_execution_allowed": true,
+  "why_parallel_is_allowed": "SOURCE-HELDOUT-002A-HOSTED-CLOSURE-v1 permits a learned-model prediction set to be frozen before human gold is visible, provided exact source digests remain bound and scoring waits for human adjudication.",
+  "repository_finding": "Candidate-002 currently contains a qualified fail-closed ModelBackend protocol/adapter and fixtures, but no concrete genuinely learned backend implementation or repository-authorized inference endpoint is present in the Candidate-002 lane.",
+  "required_event_to_unblock": "Provide or authorize one concrete real learned/model backend and the credential/endpoint authority required for reproducible hosted inference under CANDIDATE-002-CONTRACT-v1. The backend may receive only task, authorized source text and source SHA-256 and must not receive case identity, gold, forbidden labels, human adjudication, canonical state, author disposition or publication authority.",
+  "safe_work_completed_before_block": [
+    "Fail-closed provider adapter qualified.",
+    "Six public-domain TEST_ONLY passages frozen before inference.",
+    "Exact passage digests and stable source locators qualified on hosted execution.",
+    "Gold-empty human adjudication shells prepared without raw prose in durable evidence."
+  ],
+  "do_not": [
+    "Do not substitute a deterministic fixture, assistant-authored labels or heuristic provider and call it a real learned backend.",
+    "Do not fabricate unavailable credentials or model-service access.",
+    "Do not expose future human gold to the backend.",
+    "Do not score before human adjudication and prediction-freeze evidence both exist.",
+    "Do not treat a prediction freeze as A-01 or promotion authority."
+  ],
+  "resume_on_unblock": "Run the concrete backend through model_backed_provider.py against the exact six SOURCE-HELDOUT-002A passage digests, freeze predictions with gold visibility false, record exact backend/model identity and inference evidence, then hold scoring until SOURCE-HELDOUT-002B human adjudication is complete.",
+  "a01_justified_now": false,
+  "a01_reason": "A-01 cannot substitute unavailable backend authority or credentials and no qualified prediction subject exists yet."
+}
