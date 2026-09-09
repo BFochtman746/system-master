@@ -1,0 +1,76 @@
+{
+  "closure_id": "BOOK-SYSTEM-CANONICAL-BOOK-STATE-MODEL-001-CLOSURE",
+  "effective_date": "2026-09-09",
+  "standing": "PASS__A01_REGISTERED_EXACT_SHA__PARENT_STATE_MODEL_CLOSED",
+  "project": "BOOK SYSTEM",
+  "control_branch": "book-system/control-v1",
+  "qualification_id": "BOOK-SYSTEM-CANONICAL-BOOK-STATE-MODEL-001",
+  "qualified_subject": {
+    "sha": "b6938fcfc5c2c24ac23b558de6dfc7f75c382312",
+    "checkout_sha": "b6938fcfc5c2c24ac23b558de6dfc7f75c382312",
+    "branch": "book-system/control-v1",
+    "exact_sha_match": true
+  },
+  "canonical_control_plane": {
+    "ref": "main",
+    "control_plane_sha": "5e52cde1a6fe3f3c485be7a2fb74aa113fa3a132",
+    "registry_version": 15,
+    "policy_version": 6,
+    "registered_workstream_id": "BOOK-SYSTEM",
+    "gate_class": "focused"
+  },
+  "authoritative_a01_run": {
+    "run_id": 34376939179,
+    "job_id": 102552011035,
+    "runner_name": "A-01",
+    "runner_os": "Windows",
+    "runner_arch": "X64",
+    "result_class": "PASS",
+    "child_exit_code": 0,
+    "promotion_authorized": false,
+    "note": "promotion_authorized=false is expected for a focused qualification. This closure records exact-SHA state-model qualification only and grants no publication, production, child-integration, or manuscript-promotion authority."
+  },
+  "qualified_behavior": {
+    "fixture_count": 11,
+    "object_completeness": "PASS",
+    "state_version_precondition": "PASS",
+    "state_digest_precondition": "PASS",
+    "illegal_transition_fail_closed": "PASS",
+    "prose_canonical_write_denial": "PASS",
+    "book_evaluator_canonical_write_denial": "PASS",
+    "research_scope_and_atomicity": "PASS",
+    "author_decision_registration": "PASS",
+    "publication_authority_boundary": "PASS",
+    "rollback_exact_retention": "PASS"
+  },
+  "authoritative_evidence": {
+    "artifact_id": 10114249165,
+    "artifact_name": "BOOK-SYSTEM-CANONICAL-BOOK-STATE-MODEL-001-34376939179-evidence",
+    "artifact_size_bytes": 5254,
+    "artifact_digest": "sha256:2084d7277a3a49376a231f716619badc58d2833912ea2a9442069d6344e20f43",
+    "artifact_expiration": "2026-10-09T16:28:41Z",
+    "files_uploaded": 12
+  },
+  "control_plane_enforcement": {
+    "run_id": 34376938836,
+    "subject_sha": "b6938fcfc5c2c24ac23b558de6dfc7f75c382312",
+    "conclusion": "success",
+    "meaning": "The exact qualified subject contains no unregistered direct self-hosted A-01 workflow and conforms to repository A-01 routing policy."
+  },
+  "superseded_diagnostic_run": {
+    "run_id": 34376459300,
+    "subject_sha": "2ddf241ace165021fdebdbefb6dd5799feb9c251",
+    "classification": "NONAUTHORITATIVE_DIAGNOSTIC_PREQUALIFICATION__DIRECT_A01_ROUTING_VIOLATION",
+    "model_result": "PASS_11_CASES",
+    "governance_result": "FAIL_DIRECT_SELF_HOSTED_WORKFLOW_NOT_REGISTERED",
+    "effect": "Retained only as diagnostic evidence. It does not establish authoritative A-01 closure and is superseded by run 34376939179 for control-plane-compliant exact-SHA qualification."
+  },
+  "closure_claim": "BOOK-SYSTEM-CANONICAL-BOOK-STATE-MODEL-001 is closed for the exact qualified subject SHA. The Book System now has an executable and adversarially qualified parent-owned canonical state model with fail-closed authority, transition, digest, atomicity and rollback boundaries.",
+  "non_claims": [
+    "This does not qualify later Book System commits automatically.",
+    "This does not qualify the service-interface registry or lifecycle transition engine.",
+    "This does not transfer Prose or Book Evaluator qualification into parent canonical authority.",
+    "This does not create author approval, human evidence, manuscript promotion, production standing or publication authority."
+  ],
+  "exact_next_objective": "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-001"
+}
