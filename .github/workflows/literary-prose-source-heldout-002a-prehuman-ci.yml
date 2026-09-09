@@ -1,0 +1,66 @@
+name: Literary Prose Source Heldout 002A Prehuman Custody
+
+on:
+  push:
+    branches:
+      - literary-prose-engine-001
+    paths:
+      - 'qualification/literary-prose-engine-001/extraction-calibration-001/candidate-002/prepare_prehuman_custody.py'
+      - 'qualification/literary-prose-engine-001/extraction-calibration-001/candidate-002/SOURCE-HELDOUT-002-PREHUMAN-CUSTODY-GATE-v1.json'
+      - '.github/workflows/literary-prose-source-heldout-002a-prehuman-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  prepare-prehuman-custody:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile custody preparation
+        run: python -m py_compile qualification/literary-prose-engine-001/extraction-calibration-001/candidate-002/prepare_prehuman_custody.py
+      - name: Resolve exact source bytes and prepare gold-empty shells
+        run: >-
+          python qualification/literary-prose-engine-001/extraction-calibration-001/candidate-002/prepare_prehuman_custody.py
+          --output-dir "$RUNNER_TEMP/source-heldout-002a"
+      - name: Verify no raw passage bodies were emitted
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          root = Path(os.environ['RUNNER_TEMP']) / 'source-heldout-002a'
+          receipt = json.loads((root / 'SOURCE-HELDOUT-002-PREHUMAN-CUSTODY-RECEIPT.json').read_text(encoding='utf-8'))
+          assert receipt['result'] == 'PASS'
+          assert receipt['case_count'] == 6
+          assert receipt['all_nine_task_families_covered'] is True
+          assert receipt['raw_full_work_body_committed'] is False
+          assert receipt['raw_passage_text_committed'] is False
+          assert receipt['human_gold_fabricated'] is False
+          assert receipt['model_score_claimed'] is False
+          assert receipt['human_boundary_reached'] is True
+          shells = list((root / 'adjudication-shells').glob('*.json'))
+          assert len(shells) == receipt['gold_empty_adjudication_shell_count']
+          for path in shells:
+              obj = json.loads(path.read_text(encoding='utf-8'))
+              assert obj['gold_labels'] == []
+              assert obj['forbidden_labels'] == []
+              assert obj['adjudicators'] == []
+              assert obj['model_input_contains_gold'] is False
+              assert obj['human_gold_fabricated'] is False
+          print(f"verified {len(shells)} gold-empty adjudication shells")
+          PY
+      - name: Upload non-prose custody evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: LITERARY-SOURCE-HELDOUT-002A-${{ github.run_id }}-evidence
+          path: ${{ runner.temp }}/source-heldout-002a
+          if-no-files-found: error
+          retention-days: 30
