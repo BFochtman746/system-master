@@ -115,11 +115,13 @@ def main():
  if ch29['original_chapter_sha256']!=EXPECTED_CH29_ORIGINAL or ch29['candidate_chapter_sha256']!=EXPECTED_CH29_CANDIDATE: raise SystemExit('CH29_CANDIDATE_IDENTITY_REGRESSION')
  ch27=candidate_record(chapters,27,[69,70],'AGLO-BLAR-C27-POST-ENOUGH-TRIM-001','RESIDUE_AFTER_JAR_ENOUGH_IMAGE_LANDING','The jar image lands on explicit scarcity-to-enough contrast; the following two sentences restate recovery conceptually without adding event, dialogue, or character action.')
  ch25=candidate_record(chapters,25,[46],'AGLO-BLAR-C25-CADENCE-BRIDGE-TRIM-001','LOCAL_DECLARATIVE_CADENCE_AND_REDUNDANT_INTERPRETIVE_BRIDGE','Paragraph 45 establishes inhabited; paragraph 47 immediately reopens with the same key term. The intervening That-was bridge is a local restatement inside the only three-hit cadence cluster and adds no event or dialogue.',voice_risk='LOW_MODERATE')
+ # Deep-review retain/abstain screens
  retained=[
   {'chapter':25,'body_paragraphs':[59],'finding':'FINAL_HEARTH_METAPHOR','classification':'INTENTIONAL_FEATURE','disposition':'RETAIN_ORIGINAL','reason':'Final metaphor completes the chamber/fire/hearth transformation; deleting it would remove a distinct chapter-level image payoff rather than only explanation.'},
   {'chapter':26,'body_paragraphs':[81],'finding':'FINAL_BODILY_FACT_APHORISM','classification':'OBSERVATION','disposition':'ABSTAIN_RETAIN_ORIGINAL','reason':'Aphoristic compression is detectable but its gain/loss against the quickening chapter purpose is not sufficiently one-sided.'},
   {'chapter':28,'body_paragraphs':[60,61],'finding':'GENEALOGY_ORIENTATION_CLOSURE','classification':'INTENTIONAL_FEATURE','disposition':'RETAIN_ORIGINAL','reason':'The abstract closure is the functional bridge from household genealogy to the David coda; removing it may weaken chapter-to-chapter orientation.'}
  ]
+ # cadence adjudication: only CH25 44-46 crosses local concentration + redundancy threshold
  chapter_counts=Counter(x['chapter'] for x in instances)
  cadence_review={
   'total_instances':len(instances),'that_was':sum(1 for x in instances if x['opener']=='that was'),'it_was':sum(1 for x in instances if x['opener']=='it was'),
