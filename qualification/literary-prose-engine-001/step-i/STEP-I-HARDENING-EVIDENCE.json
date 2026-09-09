@@ -1,0 +1,28 @@
+{
+  "qualification_id": "LITERARY-PROSE-ENGINE-001-STEP-I-HARDENING-QUALIFICATION",
+  "standing": "PASS",
+  "subject_commit": "04fe5454218231fd2346272efa5eed207f8ceb55",
+  "tested_evaluator_blob": "4a36fed5137e71839b8cf0b500a9c1fc1b14f2ca",
+  "fixture_count": 9,
+  "results": [
+    {"case_id": "I-HARD-VALID-SINGLE", "pass": true, "disposition": "ACCEPT_CANDIDATE", "reason": "CONSISTENT_TARGET_IMPROVEMENT"},
+    {"case_id": "I-HARD-VALID-DOUBLE", "pass": true, "disposition": "ACCEPT_CANDIDATE", "reason": "CONSISTENT_TARGET_IMPROVEMENT"},
+    {"case_id": "I-HARD-MISSING-LABELS", "pass": true, "disposition": "ABSTAIN_HUMAN_REVIEW", "reason": "BLINDING_BROKEN"},
+    {"case_id": "I-HARD-DUPLICATE-LABELS", "pass": true, "disposition": "ABSTAIN_HUMAN_REVIEW", "reason": "BLINDING_BROKEN"},
+    {"case_id": "I-HARD-LONG-LABEL", "pass": true, "disposition": "ABSTAIN_HUMAN_REVIEW", "reason": "BLINDING_BROKEN"},
+    {"case_id": "I-HARD-NUMERIC-LABEL", "pass": true, "disposition": "ABSTAIN_HUMAN_REVIEW", "reason": "BLINDING_BROKEN"},
+    {"case_id": "I-HARD-LOWERCASE-LABEL", "pass": true, "disposition": "ABSTAIN_HUMAN_REVIEW", "reason": "BLINDING_BROKEN"},
+    {"case_id": "I-HARD-LOW-FORWARD-CONFIDENCE", "pass": true, "disposition": "RETAIN_ORIGINAL", "reason": "INSUFFICIENT_CONFIDENCE"},
+    {"case_id": "I-HARD-LOW-SWAP-CONFIDENCE", "pass": true, "disposition": "RETAIN_ORIGINAL", "reason": "INSUFFICIENT_CONFIDENCE"}
+  ],
+  "assertions": {
+    "blind_label_pattern_enforced": true,
+    "blind_label_identity_keys_required": true,
+    "blind_labels_must_be_distinct": true,
+    "orientation_level_confidence_enforced": true,
+    "malformed_blinding_can_authorize_acceptance": false,
+    "low_confidence_orientation_can_authorize_acceptance": false,
+    "user_manuscript_text_committed": false,
+    "a01_required": false
+  }
+}
