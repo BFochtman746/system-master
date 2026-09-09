@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://system-master.local/literary/extraction-calibration/gold-case-v1.json",
+  "title": "Literary Narrative Extraction Gold Case v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["case_id", "task", "gold_labels"],
+  "properties": {
+    "case_id": {"type": "string", "minLength": 1},
+    "task": {"enum": ["ANCHOR_LOCALIZATION", "ENTITY_IDENTITY_COREFERENCE", "EVENT_IDENTITY", "STORY_VS_DISCOURSE_TIME", "CAUSAL_GOAL_RELATIONS", "EPISTEMIC_FOCALIZATION", "NARRATIVE_FUNCTION", "SETUP_PAYOFF_OPEN_QUESTION", "ARC_ORCHESTRATION"]},
+    "gold_labels": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "forbidden_labels": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "gold_spans": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["anchor_id", "span"],
+        "properties": {
+          "anchor_id": {"type": "string"},
+          "span": {"type": "array", "prefixItems": [{"type": "integer", "minimum": 0}, {"type": "integer", "minimum": 1}], "minItems": 2, "maxItems": 2}
+        }
+      }
+    },
+    "intentionally_ambiguous": {"type": "boolean"},
+    "allowed_ambiguity_statuses": {"type": "array", "items": {"enum": ["ALTERNATIVE", "UNRESOLVED", "ABSTAIN"]}, "uniqueItems": true}
+  }
+}
