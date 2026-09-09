@@ -1,5 +1,5 @@
 {
-  "registry_version": 12,
+  "registry_version": 13,
   "qualifications": {
     "A01-CONTROL-PLANE-SELFTEST": {
       "workstream_id": "SYSTEM-MASTER",
@@ -57,6 +57,18 @@
       "overnight_max_runtime_minutes": 90,
       "checkpoint_capable": false,
       "description": "Recover exact frozen Gate B/scoring-private authority by SHA only without running Teacher verification, student training, selective 120B, visible-regression, or hidden-holdout qualification. The subject wrapper must fail closed until the required private gold material is present on A-01."
+    },
+    "BOOK-EVAL-REPAIR-005-GATE-D-TEACHER-FREEZE": {
+      "workstream_id": "BOOK-EVAL-LEMONADE-001",
+      "gate_class": "focused",
+      "source": "subject",
+      "executable": "node",
+      "args": [".github/scripts/book-eval-repair005-gate-d-teacher-freeze-qualify.js"],
+      "evidence_artifact": "book-eval-repair005-gate-d-teacher-freeze",
+      "overnight_eligible": true,
+      "overnight_max_runtime_minutes": 30,
+      "checkpoint_capable": false,
+      "description": "Verify the frozen Gate D Teacher v3 persistent corpus independently of private student inputs: bind the exact frozen raw Teacher SHA/status/taxonomy, canonicalize exact duplicate payloads only, fail closed on divergent duplicate IDs, validate the canonical 440-row corpus, and emit hashes/counts only. This qualification does not use BASE_TRAINING, DEVELOPMENT_GOLD, visible regression, hidden holdout, student training, or selective 120B and carries no promotion authority."
     },
     "LEARNING-PILOT-001-RUN-001-HUMAN-SESSION": {
       "workstream_id": "LEARNING",
