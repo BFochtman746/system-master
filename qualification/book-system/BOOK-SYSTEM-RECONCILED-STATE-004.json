@@ -1,0 +1,118 @@
+{
+  "state_id": "BOOK-SYSTEM-RECONCILED-STATE-004",
+  "effective_date": "2026-09-09",
+  "supersedes_for_current_parent_control": "BOOK-SYSTEM-RECONCILED-STATE-003",
+  "supersession_scope": "PARENT_CONTROL_AND_NEXT_STEP_ROUTING_ONLY",
+  "standing": "ACTIVE__CANONICAL_STATE_AND_SERVICE_REGISTRY_A01_PASS__READY_FOR_LIFECYCLE_TRANSITION_ENGINE",
+  "project": "BOOK SYSTEM",
+  "control_branch": "book-system/control-v1",
+  "completed_parent_milestones": [
+    "BOOK-SYSTEM-PROJECT-HIERARCHY-001",
+    "BOOK-SYSTEM-ACTIVE-PROJECT-REGISTRY-001",
+    "BOOK-SYSTEM-PROSE-HIERARCHY-FORENSIC-AUDIT-001",
+    "BOOK-SYSTEM-PARENT-INTEGRATION-BOUNDARY-001",
+    "BOOK-SYSTEM-AUTHORING-LIFECYCLE-RECOVERY-001",
+    "BOOK-SYSTEM-BOOK-INTELLIGENCE-UNIFICATION-BINDING-001",
+    "BOOK-SYSTEM-AUTHORING-LIFECYCLE-CONTRACT-001",
+    "BOOK-SYSTEM-CANONICAL-BOOK-STATE-MODEL-001",
+    "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-001"
+  ],
+  "qualified_parent_foundation": {
+    "canonical_book_state_model": {
+      "qualified_subject_sha": "b6938fcfc5c2c24ac23b558de6dfc7f75c382312",
+      "a01_run_id": 34376939179,
+      "result": "PASS",
+      "closure": "BOOK-SYSTEM-CANONICAL-BOOK-STATE-MODEL-001-CLOSURE"
+    },
+    "service_interface_registry": {
+      "qualified_subject_sha": "9245cf9ce56f15020369eb490d9e562480825158",
+      "a01_run_id": 34377566232,
+      "a01_job_id": 102554104000,
+      "result": "PASS",
+      "service_families": 4,
+      "operations": 17,
+      "fixture_cases": 18,
+      "artifact_id": 10114497453,
+      "artifact_digest": "sha256:2341ae44b9e1148ac19ccec6f2c68c60631977800c2bf5eacadc326567b13d71",
+      "control_plane_enforcement_run_id": 34377565766,
+      "control_plane_enforcement": "PASS",
+      "closure": "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-001-CLOSURE"
+    }
+  },
+  "book_intelligence_architecture": {
+    "binding": "BOOK-SYSTEM-BOOK-INTELLIGENCE-UNIFICATION-BINDING-001",
+    "creative_excellence": "granular prose/reader intelligence plus whole-book multi-resolution evidence and assurance",
+    "literary_prose": "governed analysis, diagnosis, retrieval, revision, independent evaluation, learning and homogenization defense",
+    "rule": "Reuse/federate recovered authorities; do not rebuild them unless a proven executable ownership gap exists."
+  },
+  "subordinate_state": {
+    "prose_project": {
+      "classification": "CHILD_PROJECT",
+      "branch": "literary-prose-engine-001",
+      "last_observed_control_state": "LITERARY-PROSE-CONSOLIDATED-WORKSTREAM-STATE-011",
+      "canonical_parent_write_authority": false,
+      "child_blockers_do_not_automatically_define_parent_critical_path": true
+    },
+    "book_evaluator": {
+      "classification": "CAPABILITY_OR_QUALIFICATION_LANE",
+      "canonical_parent_write_authority": false,
+      "lane_blockers_do_not_automatically_define_parent_critical_path": true
+    }
+  },
+  "current_parent_critical_path": {
+    "id": "BOOK-SYSTEM-LIFECYCLE-TRANSITION-ENGINE-001",
+    "classification": "READY — MACHINE SAFE",
+    "objective": "Implement the parent-owned transactional state-transition engine that consumes the qualified canonical Book System state model, enforces legal project/unit transitions and transition preconditions, resolves invalidation effects, emits deterministic transition receipts, and integrates service evidence/proposals only through registered parent-safe operations.",
+    "must_reuse": [
+      "BOOK-SYSTEM-AUTHORING-LIFECYCLE-CONTRACT-001",
+      "BOOK-SYSTEM-CANONICAL-BOOK-STATE-MODEL-001",
+      "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-001",
+      "BOOK-SYSTEM-PARENT-INTEGRATION-BOUNDARY-001"
+    ],
+    "must_define": [
+      "transactional transition request/receipt schema",
+      "project-state and unit-state transition tables",
+      "preconditions and hard gates per transition",
+      "expected state-version/digest concurrency checks",
+      "canonical-pointer mutation ordering",
+      "upstream-change invalidation propagation",
+      "service-response staleness/invalidation interaction",
+      "author-required transition blocking",
+      "atomic commit or complete rollback",
+      "deterministic replay/idempotency behavior",
+      "transition audit/provenance record"
+    ],
+    "must_not_do": [
+      "allow services to invoke parent transitions directly",
+      "allow invalid transitions because a provider returned SUCCESS",
+      "manufacture author approval or human evidence",
+      "mutate canonical state partially after any failed precondition",
+      "silently discard stale evidence, disagreements, rejected proposals or rollback state"
+    ],
+    "closure_criteria": [
+      "legal project and unit transitions are executable",
+      "illegal or premature transitions fail closed",
+      "state version/digest races fail closed",
+      "author-required transitions block without explicit recorded author decision",
+      "upstream changes deterministically invalidate dependent units/evidence/proposals",
+      "service responses cannot bypass parent integration/admission",
+      "replay is deterministic and cannot double-commit",
+      "every successful transition emits a receipt linking pre-state, operation set, post-state and rollback identity",
+      "adversarial qualification proves atomicity, invalidation, stale-response and authority boundaries"
+    ]
+  },
+  "after_current_parent_critical_path": [
+    "BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-001",
+    "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001",
+    "BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001",
+    "BOOK-SYSTEM-EXPORT-FREEZE-001",
+    "BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001"
+  ],
+  "generic_continue_rule": "In Book System control, Continue executes BOOK-SYSTEM-LIFECYCLE-TRANSITION-ENGINE-001 unless newer parent-authoritative evidence changes the dependency graph. It does not route to a subordinate Prose or Book Evaluator lane solely because that lane changed later.",
+  "qualification_truth_boundaries": [
+    "Only b6938fcfc5c2c24ac23b558de6dfc7f75c382312 has the recorded A-01 canonical-state-model qualification.",
+    "Only 9245cf9ce56f15020369eb490d9e562480825158 has the recorded A-01 service-interface-registry qualification.",
+    "This State-004 commit records those results but is not itself covered by either exact-SHA qualification."
+  ],
+  "qualification_effect": "State consolidation only. No new runtime, promotion, production, publication, author, human, or child-integration authority is created by this state artifact."
+}
