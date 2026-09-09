@@ -1,0 +1,75 @@
+name: Request Learning Completion Handoff Hosted Qualification
+
+on:
+  push:
+    branches: [learning/request-handoff-1d9fd53b]
+
+permissions:
+  contents: read
+
+jobs:
+  prequalify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout exact product subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: 1d9fd53b4c057f00d9a81bc1043950e93bb20523
+          fetch-depth: 1
+          clean: true
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: '3.13.15'
+          architecture: x64
+          check-latest: false
+      - name: Compile completion handoff boundary
+        run: python -m py_compile learning/lab/run_pilot001.py learning/lab/run_pilot001_closed_loop.py learning/lab/learning_lab/real_learner_pilot_completion.py learning/lab/learning_lab/real_learner_pilot_handoff.py learning/lab/learning_lab/real_learner_pilot_preflight.py
+      - name: Run focused real-participant boundary
+        working-directory: learning/lab
+        shell: bash
+        run: |
+          set -o pipefail
+          python -m unittest -v \
+            tests.test_real_learner_pilot_handoff \
+            tests.test_real_learner_pilot_preflight \
+            tests.test_real_learner_pilot_completion \
+            tests.test_real_learner_pilot_closed_loop_launcher \
+            tests.test_real_learner_pilot_console \
+            tests.test_real_learner_pilot_withdrawal \
+            tests.test_real_learner_pilot_human_session \
+            tests.test_real_learner_pilot_runtime_binding \
+            tests.test_real_learner_pilot \
+            2>&1 | tee "$RUNNER_TEMP/handoff-focused-tests.txt"
+          grep -q '^OK$' "$RUNNER_TEMP/handoff-focused-tests.txt"
+          grep -q 'Ran 62 tests' "$RUNNER_TEMP/handoff-focused-tests.txt"
+      - name: Run complete Learning Lab regression
+        working-directory: learning/lab
+        shell: bash
+        run: |
+          set -o pipefail
+          python -m unittest discover -s tests -p 'test_*.py' -v 2>&1 | tee "$RUNNER_TEMP/handoff-full-regression.txt"
+          grep -q '^OK$' "$RUNNER_TEMP/handoff-full-regression.txt"
+          grep -q 'Ran 693 tests' "$RUNNER_TEMP/handoff-full-regression.txt"
+      - name: Exercise guarded preflight-only entrypoint
+        shell: bash
+        run: |
+          STATE="$RUNNER_TEMP/pilot001-handoff-preflight"
+          python learning/lab/run_pilot001.py --state-root "$STATE" --preflight-only > "$RUNNER_TEMP/handoff-preflight-output.txt"
+          grep -q 'Standing: READY_FOR_EXPLICIT_PARTICIPANT_CONSENT' "$RUNNER_TEMP/handoff-preflight-output.txt"
+          test -d "$STATE"
+          test -z "$(find "$STATE" -mindepth 1 -maxdepth 1 -print -quit)"
+          ! grep -Fq "$STATE" "$RUNNER_TEMP/handoff-preflight-output.txt"
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: learning-completion-handoff-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/handoff-focused-tests.txt
+            ${{ runner.temp }}/handoff-full-regression.txt
+            ${{ runner.temp }}/handoff-preflight-output.txt
+          if-no-files-found: error
+          retention-days: 14
