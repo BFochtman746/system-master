@@ -1,33 +1,37 @@
 {
   "objective": "AGLO-RBQ-USER-ADJUDICATION-001",
-  "standing": "PASS_EXPLICIT_AUTHOR_DECISION_RECORDED",
+  "standing": "SUPERSEDED__NO_VALID_CH24_AUTHOR_DECISION_RECORDED",
   "book_id": "AGLO-001",
   "baseline_version_id": "AGLO-REJECT-ALL-NARRATIVE-v1",
-  "decisions": [
+  "authority_reconciliation": {
+    "valid_authority": "EXPLICIT_REJECT_ALL_BASELINE_RATIFICATION_AND_QUALIFICATION_ONLY_ADMISSION",
+    "chapter_24_candidate_decision_present": false,
+    "prior_decisions_authoritative": false,
+    "correction_record": "AGLO-RBQ-AUTHORITY-CORRECTION-002.json",
+    "history_rewritten": false
+  },
+  "decisions": [],
+  "invalidated_prior_claims": [
     {
       "target_id": "AGLO-RBQ-CH24-WITNESS-001",
-      "decision": "DELETE_EXACT_DUPLICATE",
-      "authority": "EXPLICIT_USER_DECISION",
-      "raw_prose_persisted": false
+      "claimed_decision": "DELETE_EXACT_DUPLICATE",
+      "authority": "INVALID__NOT_EXPLICITLY_PROVIDED_BY_USER"
     },
     {
       "target_id": "AGLO-RBQ-CH24-CONCAT-001",
-      "decision": "KEEP_SECOND_ONLY",
-      "selected_candidate_digest_sha256": "993029e8cc2ba2b9353a5ad802f48b06573d7add0cedbaa4d72ffb40c4e9dafc",
-      "authority": "EXPLICIT_USER_DECISION_B",
-      "raw_prose_persisted": false
+      "claimed_decision": "KEEP_SECOND_ONLY",
+      "authority": "INVALID__NOT_EXPLICITLY_PROVIDED_BY_USER_AND_TARGET_REJECTED_AS_PROJECTION_FALSE_POSITIVE"
     }
   ],
   "step_j_project_preference_evidence": {
-    "scope": "AGLO_ONLY",
-    "preference_class": "DUPLICATE_OR_NEAR_DUPLICATE_VARIANT_SELECTION",
-    "signal": "PREFER_CHARACTER_SPECIFIC_LESS_EXPLANATORY_VARIANT_WHEN_SEMANTIC_BEAT_IS_DUPLICATED_AND_PRESERVATION_GATES_PASS",
-    "strength": "ONE_EXPLICIT_AUTHOR_DECISION__DO_NOT_OVERGENERALIZE",
-    "may_override_canon_or_preservation": false,
+    "standing": "NOT_ADMITTED",
+    "explicit_user_preference_available": false,
+    "reason": "No genuine Chapter 24 candidate choice has yet been made by the author.",
     "may_generalize_to_other_books": false
   },
   "publication_authorized": false,
   "automatic_overwrite_authorized": false,
   "canon_replacement_authorized": false,
-  "next_transition": "CONTROL_ANCHOR_DRIFT_DEFENSE_AND_REPRESENTATIVE_SAMPLE_CLOSURE"
+  "raw_prose_persisted": false,
+  "next_transition": "PRESENT_SINGLE_GENUINE_CH24_WITNESS_DEDUPLICATION_DECISION_TO_AUTHOR"
 }
