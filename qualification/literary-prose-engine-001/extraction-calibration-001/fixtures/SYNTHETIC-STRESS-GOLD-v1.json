@@ -8,27 +8,32 @@
     {
       "case_id": "anchor-001",
       "task": "ANCHOR_LOCALIZATION",
+      "synthetic_source": "At dawn, the bell rang twice, then stopped.",
       "gold_labels": ["anchor:A1"],
-      "gold_spans": [{"anchor_id": "A1", "span": [10, 20]}]
+      "gold_spans": [{"anchor_id": "A1", "span": [13, 22]}]
     },
     {
       "case_id": "entity-coref-001",
       "task": "ENTITY_IDENTITY_COREFERENCE",
+      "synthetic_source": "Mara closed the ledger. Later, she hid it beneath the loose stair.",
       "gold_labels": ["entity:E1=SPEAKER", "coref:M2->E1"]
     },
     {
       "case_id": "event-retelling-001",
       "task": "EVENT_IDENTITY",
+      "synthetic_source": "Jon remembered the bridge collapsing. His sister later described that same collapse, but the rescue the next morning was a different event.",
       "gold_labels": ["same_event:EV1=EV3", "distinct_event:EV2!=EV1"]
     },
     {
       "case_id": "flashback-001",
       "task": "STORY_VS_DISCOURSE_TIME",
+      "synthetic_source": "Nia unlocks the empty shop. Only then does the narration return to the winter when her father first gave her the key.",
       "gold_labels": ["story:EV2_BEFORE_EV1", "discourse:EV1_BEFORE_EV2"]
     },
     {
       "case_id": "chronology-ambiguous-001",
       "task": "STORY_VS_DISCOURSE_TIME",
+      "synthetic_source": "The letter may have arrived before the storm, or perhaps on the quiet morning after it; the account never settles which.",
       "gold_labels": ["time:EV4_REL_EV5_UNRESOLVED"],
       "intentionally_ambiguous": true,
       "allowed_ambiguity_statuses": ["UNRESOLVED", "ALTERNATIVE", "ABSTAIN"]
@@ -36,18 +41,21 @@
     {
       "case_id": "causality-001",
       "task": "CAUSAL_GOAL_RELATIONS",
+      "synthetic_source": "Ivo studies the map because he wants to reach the lighthouse. The rain begins while he studies, but the text gives no reason to say his studying caused the rain.",
       "gold_labels": ["goal:EV6_SUPPORTS_G1"],
       "forbidden_labels": ["causes:EV6_CAUSES_EV7"]
     },
     {
       "case_id": "epistemic-001",
       "task": "EPISTEMIC_FOCALIZATION",
+      "synthetic_source": "From Lina's viewpoint, the lamp seems to blink in code. She believes her brother is signaling, though she has not yet learned who is upstairs.",
       "gold_labels": ["perceives:C1_EV8", "believes:C1_P1", "focalizes:C1_A8"],
       "forbidden_labels": ["knows:C1_P1"]
     },
     {
       "case_id": "omniscience-001",
       "task": "EPISTEMIC_FOCALIZATION",
+      "synthetic_source": "For one paragraph the narration rests with Ada's fear; in the next it enters Bo's private relief, without declaring either mind the permanent center.",
       "gold_labels": ["focalizes:C1_A9", "focalizes:C2_A10"],
       "intentionally_ambiguous": true,
       "allowed_ambiguity_statuses": ["ALTERNATIVE", "UNRESOLVED", "ABSTAIN"]
@@ -55,16 +63,19 @@
     {
       "case_id": "function-001",
       "task": "NARRATIVE_FUNCTION",
+      "synthetic_source": "Tess pockets the brass token while insisting she never keeps souvenirs; the gesture both plants a later object and reveals a contradiction in her self-story.",
       "gold_labels": ["function:A11=SETUP", "function:A11=CHARACTER_REVEAL"]
     },
     {
       "case_id": "setup-payoff-001",
       "task": "SETUP_PAYOFF_OPEN_QUESTION",
+      "synthetic_source": "A hairline crack appears in the observatory lens. Chapters later the crack splits the image at the decisive observation, while the stranger's unsigned note remains unexplained.",
       "gold_labels": ["setup:A12->Q1", "payoff:A18->Q1", "status:Q2=OPEN"]
     },
     {
       "case_id": "arc-unresolved-001",
       "task": "ARC_ORCHESTRATION",
+      "synthetic_source": "Rin finally refuses the old bargain, but the story ends before showing whether that refusal repairs the friendship it endangered.",
       "gold_labels": ["arc:CHAR1_BEAT_A13=ESCALATION", "arc:CHAR1_STATUS=UNRESOLVED"],
       "intentionally_ambiguous": true,
       "allowed_ambiguity_statuses": ["UNRESOLVED", "ALTERNATIVE", "ABSTAIN"]
@@ -72,6 +83,7 @@
     {
       "case_id": "motif-function-001",
       "task": "ARC_ORCHESTRATION",
+      "synthetic_source": "Early, the red thread marks a promise. Near the end, the same thread returns knotted around a key, transforming the motif from pledge to constraint.",
       "gold_labels": ["motif:M1_A14=INTRODUCTION", "motif:M1_A19=TRANSFORMATION"]
     }
   ]
