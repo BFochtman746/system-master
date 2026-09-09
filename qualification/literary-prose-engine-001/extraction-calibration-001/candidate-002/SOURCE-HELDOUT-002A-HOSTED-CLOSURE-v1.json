@@ -1,0 +1,36 @@
+{
+  "closure_id": "LITERARY-EXTRACTION-SOURCE-HELD-OUT-002A-HOSTED-CLOSURE-v1",
+  "standing": "PASS__PREHUMAN_SOURCE_CUSTODY_COMPLETE__BLOCKED_HUMAN_FOR_GOLD_AND_SCORING",
+  "branch": "literary-prose-engine-001",
+  "qualified_subject_sha": "c01f6d99c64a14815f788ccd0bbc60da7ee5de29",
+  "workflow": ".github/workflows/literary-prose-source-heldout-002a-prehuman-ci.yml",
+  "workflow_run_id": 34369276424,
+  "workflow_conclusion": "success",
+  "artifact_id": 10111191915,
+  "artifact_name": "LITERARY-SOURCE-HELDOUT-002A-34369276424-evidence",
+  "artifact_digest": "sha256:35eca5ea0f443793403225648d8659affe08fb836124986ec44a03fbe8bb190d",
+  "artifact_retention_is_not_durable_authority": true,
+  "result": {
+    "case_count": 6,
+    "gold_empty_adjudication_shell_count": 18,
+    "all_nine_task_families_covered": true,
+    "raw_full_work_body_committed": false,
+    "raw_passage_text_committed": false,
+    "human_gold_fabricated": false,
+    "model_score_claimed": false,
+    "human_boundary_reached": true
+  },
+  "cases": [
+    {"selection_case_id":"PD-AUSTEN-CH34-001","work_id":"PG-1342-PRIDE-AND-PREJUDICE","source_file_sha256":"3f6bb9d6f78e0293b56acd4714dd68cb7d6d1d293402031ce9d5a216bcaf9d75","passage_sha256":"c955b0ea296d993387382638ce6b1b3c2d5ef6453c16c9913b014c09f4412c2e","byte_start":382428,"byte_end_exclusive":392305,"byte_length":9877,"tasks":["ENTITY_IDENTITY_COREFERENCE","CAUSAL_GOAL_RELATIONS"]},
+    {"selection_case_id":"PD-AUSTEN-CH36-002","work_id":"PG-1342-PRIDE-AND-PREJUDICE","source_file_sha256":"3f6bb9d6f78e0293b56acd4714dd68cb7d6d1d293402031ce9d5a216bcaf9d75","passage_sha256":"bafa7f982936aa62018c348b7f2309d6a08b77a1be216e548346b1fa395a5db8","byte_start":418598,"byte_end_exclusive":419451,"byte_length":853,"tasks":["EPISTEMIC_FOCALIZATION","NARRATIVE_FUNCTION","SETUP_PAYOFF_OPEN_QUESTION"]},
+    {"selection_case_id":"PD-CARROLL-CH01-003","work_id":"PG-11-ALICES-ADVENTURES-IN-WONDERLAND","source_file_sha256":"01b38ea4c710a84bc18d0bd41271a5a1a92b94e97b2812f4dece97d4a694725e","passage_sha256":"ad8a0a7718bb39ad8d87777125c7bc911d766fa5126e5e9904bd079c5523fd16","byte_start":2185,"byte_end_exclusive":3052,"byte_length":867,"tasks":["ANCHOR_LOCALIZATION","EVENT_IDENTITY","ENTITY_IDENTITY_COREFERENCE"]},
+    {"selection_case_id":"PD-CARROLL-CH12-004","work_id":"PG-11-ALICES-ADVENTURES-IN-WONDERLAND","source_file_sha256":"01b38ea4c710a84bc18d0bd41271a5a1a92b94e97b2812f4dece97d4a694725e","passage_sha256":"3e15dbd82523501d49bf75346f36bc7ebf8c55f70ba88158feb26a8b5c4829aa","byte_start":151744,"byte_end_exclusive":152778,"byte_length":1034,"tasks":["STORY_VS_DISCOURSE_TIME","ARC_ORCHESTRATION","NARRATIVE_FUNCTION"]},
+    {"selection_case_id":"PD-MELVILLE-CH36-005","work_id":"PG-2701-MOBY-DICK","source_file_sha256":"907420db6c4b68c70e2988cd2ad9c8cf79138667a01b63376d18dd17fef1a18b","passage_sha256":"287a3cac73166dfabb95cf92230489b9413c64231223917b78701a51cd796cd6","byte_start":374276,"byte_end_exclusive":387280,"byte_length":13004,"tasks":["CAUSAL_GOAL_RELATIONS","NARRATIVE_FUNCTION","ARC_ORCHESTRATION"]},
+    {"selection_case_id":"PD-MELVILLE-CH41-006","work_id":"PG-2701-MOBY-DICK","source_file_sha256":"907420db6c4b68c70e2988cd2ad9c8cf79138667a01b63376d18dd17fef1a18b","passage_sha256":"e27f59d052f0d273ab1852905140eb4b7a64ab15f12a933c5550b05442d85553","byte_start":416348,"byte_end_exclusive":418326,"byte_length":1978,"tasks":["EVENT_IDENTITY","STORY_VS_DISCOURSE_TIME","SETUP_PAYOFF_OPEN_QUESTION","EPISTEMIC_FOCALIZATION"]}
+  ],
+  "pass_proves": "The six frozen public-domain heldout cases are provenance/digest-bound and ready for human adjudication without passage-selection leakage. No raw passage text is durable repository evidence.",
+  "pass_does_not_prove": ["human gold correctness","real learned-model accuracy","calibration quality","Candidate-002 promotion eligibility","canonical narrative-state authority","AGLO promotion or manuscript mutation authority"],
+  "next_required_event": "Independent human adjudication under HUMAN-ADJUDICATION-PACKET-CONTRACT-v1. High-risk tasks require two independent reviews; unresolved disagreement remains explicit.",
+  "parallel_engineering_allowed": "A learned-model prediction can be frozen before human gold is visible, provided the exact passage digests remain bound and scoring is not performed until human adjudication is complete.",
+  "a01_required": false
+}
