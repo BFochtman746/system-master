@@ -87,6 +87,66 @@ rubric_single_order=[
 r=analyze_trials(rubric_single_order)
 check("rubric_order_single_order_fails_closed",r["standing"]=="INVALID" and any("RUBRIC_ORDER_REQUIRES_MULTIPLE_ORDERS" in e for e in r["errors"]),r)
 
+# Rubric-only counterfactuals: candidate pair and opaque evidence basis remain fixed while
+# only the rubric-artifact variant changes. Balanced variants must preserve winner identity
+# and stay within the configured confidence-span ceiling.
+rubric_cf_stable=[
+    trial("RC1",axis="RUBRIC_COUNTERFACTUAL",value="variant_a",winner="CAND",confidence=.88,evidence_basis_id="basis_v1"),
+    trial("RC2",axis="RUBRIC_COUNTERFACTUAL",value="variant_b",winner="CAND",confidence=.86,evidence_basis_id="basis_v1"),
+    trial("RC3",axis="RUBRIC_COUNTERFACTUAL",value="variant_a",winner="CAND",confidence=.89,evidence_basis_id="basis_v1"),
+    trial("RC4",axis="RUBRIC_COUNTERFACTUAL",value="variant_b",winner="CAND",confidence=.87,evidence_basis_id="basis_v1"),
+]
+r=analyze_trials(rubric_cf_stable)
+rc=r["comparison_reports"][0]["axis_reports"]["RUBRIC_COUNTERFACTUAL"]
+check("rubric_counterfactual_balanced_stable",r["standing"]=="STABLE" and rc["balanced"] is True and rc["evidence_basis_invariant"] is True and rc["confidence_span"]==.03,r)
+
+rubric_cf_outcome_flip=[
+    trial("RC5",axis="RUBRIC_COUNTERFACTUAL",value="variant_a",winner="CAND",confidence=.88,evidence_basis_id="basis_v1"),
+    trial("RC6",axis="RUBRIC_COUNTERFACTUAL",value="variant_b",winner="ORIG",confidence=.87,evidence_basis_id="basis_v1"),
+    trial("RC7",axis="RUBRIC_COUNTERFACTUAL",value="variant_a",winner="CAND",confidence=.89,evidence_basis_id="basis_v1"),
+    trial("RC8",axis="RUBRIC_COUNTERFACTUAL",value="variant_b",winner="ORIG",confidence=.86,evidence_basis_id="basis_v1"),
+]
+r=analyze_trials(rubric_cf_outcome_flip)
+check("rubric_counterfactual_outcome_bias_detected",r["standing"]=="REVIEW_BIAS" and any(f["axis"]=="RUBRIC_COUNTERFACTUAL" and f["outcome_sensitive"] for f in r["bias_findings"]),r)
+
+rubric_cf_confidence_shift=[
+    trial("RC9",axis="RUBRIC_COUNTERFACTUAL",value="variant_a",winner="CAND",confidence=.92,evidence_basis_id="basis_v1"),
+    trial("RC10",axis="RUBRIC_COUNTERFACTUAL",value="variant_b",winner="CAND",confidence=.70,evidence_basis_id="basis_v1"),
+    trial("RC11",axis="RUBRIC_COUNTERFACTUAL",value="variant_a",winner="CAND",confidence=.90,evidence_basis_id="basis_v1"),
+    trial("RC12",axis="RUBRIC_COUNTERFACTUAL",value="variant_b",winner="CAND",confidence=.68,evidence_basis_id="basis_v1"),
+]
+r=analyze_trials(rubric_cf_confidence_shift)
+check("rubric_counterfactual_confidence_bias_detected",r["standing"]=="REVIEW_BIAS" and any(f["axis"]=="RUBRIC_COUNTERFACTUAL" and f["confidence_sensitive"] and f["confidence_span"]==.24 for f in r["bias_findings"]),r)
+
+rubric_cf_unbalanced=[
+    trial("RC13",axis="RUBRIC_COUNTERFACTUAL",value="variant_a",winner="CAND",evidence_basis_id="basis_v1"),
+    trial("RC14",axis="RUBRIC_COUNTERFACTUAL",value="variant_a",winner="CAND",evidence_basis_id="basis_v1"),
+    trial("RC15",axis="RUBRIC_COUNTERFACTUAL",value="variant_b",winner="CAND",evidence_basis_id="basis_v1"),
+]
+r=analyze_trials(rubric_cf_unbalanced)
+check("rubric_counterfactual_unbalanced_fails_closed",r["standing"]=="INVALID" and any("RUBRIC_COUNTERFACTUAL_UNBALANCED" in e for e in r["errors"]),r)
+
+rubric_cf_single=[
+    trial("RC16",axis="RUBRIC_COUNTERFACTUAL",value="variant_a",winner="CAND",evidence_basis_id="basis_v1"),
+    trial("RC17",axis="RUBRIC_COUNTERFACTUAL",value="variant_a",winner="CAND",evidence_basis_id="basis_v1"),
+]
+r=analyze_trials(rubric_cf_single)
+check("rubric_counterfactual_single_variant_fails_closed",r["standing"]=="INVALID" and any("RUBRIC_COUNTERFACTUAL_REQUIRES_MULTIPLE_VARIANTS" in e for e in r["errors"]),r)
+
+rubric_cf_missing_basis=[
+    trial("RC18",axis="RUBRIC_COUNTERFACTUAL",value="variant_a",winner="CAND"),
+    trial("RC19",axis="RUBRIC_COUNTERFACTUAL",value="variant_b",winner="CAND"),
+]
+r=analyze_trials(rubric_cf_missing_basis)
+check("rubric_counterfactual_missing_basis_fails_closed",r["standing"]=="INVALID" and any("RUBRIC_COUNTERFACTUAL_EVIDENCE_BASIS_REQUIRED" in e for e in r["errors"]),r)
+
+rubric_cf_basis_drift=[
+    trial("RC20",axis="RUBRIC_COUNTERFACTUAL",value="variant_a",winner="CAND",evidence_basis_id="basis_v1"),
+    trial("RC21",axis="RUBRIC_COUNTERFACTUAL",value="variant_b",winner="CAND",evidence_basis_id="basis_v2"),
+]
+r=analyze_trials(rubric_cf_basis_drift)
+check("rubric_counterfactual_basis_drift_fails_closed",r["standing"]=="INVALID" and any("RUBRIC_COUNTERFACTUAL_EVIDENCE_BASIS_DRIFT" in e for e in r["errors"]),r)
+
 # Identity reveal, score range, uncertainty markers and belief-contrast sensitivity.
 for axis,values in [
     ("GENERATOR_IDENTITY",("hidden","revealed")),
@@ -145,6 +205,7 @@ for key in ["raw_text","quoted_text","manuscript_text","source_text","passage_te
 r=analyze_trials(stable,repeat_identity_agreement_floor=.4); check("bad_repeat_floor",r["standing"]=="INVALID",r)
 r=analyze_trials(stable,minimum_repeat_trials=1); check("bad_min_repeat",r["standing"]=="INVALID",r)
 r=analyze_trials(stable,rubric_order_confidence_span_ceiling=1.1); check("bad_rubric_confidence_ceiling",r["standing"]=="INVALID",r)
+r=analyze_trials(stable,rubric_counterfactual_confidence_span_ceiling=1.1); check("bad_rubric_counterfactual_confidence_ceiling",r["standing"]=="INVALID",r)
 
 # Multiple comparisons remain separate; one unstable comparison removes auto eligibility globally.
 records=[
