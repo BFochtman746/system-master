@@ -1,0 +1,124 @@
+{
+  "state_id": "BOOK-SYSTEM-RECONCILED-STATE-005",
+  "effective_date": "2026-09-09",
+  "supersedes_for_current_parent_control": "BOOK-SYSTEM-RECONCILED-STATE-004",
+  "supersession_scope": "PARENT_CONTROL_AND_NEXT_STEP_ROUTING_ONLY",
+  "standing": "ACTIVE__STATE_MODEL_SERVICE_REGISTRY_AND_TRANSITION_ENGINE_A01_PASS__READY_FOR_INTEGRATION_PROPOSAL_RUNTIME",
+  "project": "BOOK SYSTEM",
+  "control_branch": "book-system/control-v1",
+  "completed_parent_milestones": [
+    "BOOK-SYSTEM-PROJECT-HIERARCHY-001",
+    "BOOK-SYSTEM-ACTIVE-PROJECT-REGISTRY-001",
+    "BOOK-SYSTEM-PROSE-HIERARCHY-FORENSIC-AUDIT-001",
+    "BOOK-SYSTEM-PARENT-INTEGRATION-BOUNDARY-001",
+    "BOOK-SYSTEM-AUTHORING-LIFECYCLE-RECOVERY-001",
+    "BOOK-SYSTEM-BOOK-INTELLIGENCE-UNIFICATION-BINDING-001",
+    "BOOK-SYSTEM-AUTHORING-LIFECYCLE-CONTRACT-001",
+    "BOOK-SYSTEM-CANONICAL-BOOK-STATE-MODEL-001",
+    "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-001",
+    "BOOK-SYSTEM-LIFECYCLE-TRANSITION-ENGINE-001"
+  ],
+  "qualified_parent_foundation": {
+    "canonical_book_state_model": {
+      "qualified_subject_sha": "b6938fcfc5c2c24ac23b558de6dfc7f75c382312",
+      "a01_run_id": 34376939179,
+      "result": "PASS"
+    },
+    "service_interface_registry": {
+      "qualified_subject_sha": "9245cf9ce56f15020369eb490d9e562480825158",
+      "a01_run_id": 34377566232,
+      "result": "PASS",
+      "service_families": 4,
+      "operations": 17
+    },
+    "lifecycle_transition_engine": {
+      "qualified_subject_sha": "4a6e3459d6ba94b7ce191e426ca64bef00d23582",
+      "a01_run_id": 34378208426,
+      "a01_job_id": 102556250714,
+      "result": "PASS",
+      "fixture_cases": 18,
+      "artifact_id": 10114751592,
+      "artifact_digest": "sha256:aa4eb72cbccceb05aa2966fff2a7684a4dd33d1f1d8ac7590831b99a61d083a3",
+      "control_plane_enforcement_run_id": 34378207964,
+      "control_plane_enforcement": "PASS"
+    }
+  },
+  "book_intelligence_architecture": {
+    "binding": "BOOK-SYSTEM-BOOK-INTELLIGENCE-UNIFICATION-BINDING-001",
+    "creative_excellence": "granular prose/reader intelligence plus whole-book multi-resolution evidence and assurance",
+    "literary_prose": "governed analysis, diagnosis, retrieval, revision, independent evaluation, learning and homogenization defense",
+    "rule": "Recovered Book Intelligence remains federated into the parent lifecycle; later parent runtime work must consume these capabilities rather than replace them."
+  },
+  "subordinate_state": {
+    "prose_project": {
+      "classification": "CHILD_PROJECT",
+      "branch": "literary-prose-engine-001",
+      "last_observed_control_state": "LITERARY-PROSE-CONSOLIDATED-WORKSTREAM-STATE-011",
+      "canonical_parent_write_authority": false,
+      "child_blockers_do_not_automatically_define_parent_critical_path": true
+    },
+    "book_evaluator": {
+      "classification": "CAPABILITY_OR_QUALIFICATION_LANE",
+      "canonical_parent_write_authority": false,
+      "lane_blockers_do_not_automatically_define_parent_critical_path": true
+    }
+  },
+  "current_parent_critical_path": {
+    "id": "BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-001",
+    "classification": "READY — MACHINE SAFE",
+    "objective": "Implement the parent-owned admission runtime that consumes typed responses from the qualified Service Interface Registry, verifies exact subject/projection identity and freshness, preserves abstention/disagreement/error state, deduplicates replay, records evidence and bounded integration proposals into parent state, routes author-required outcomes to the author-decision boundary, and never allows provider SUCCESS to become canonical state without explicit parent admission and lifecycle transition.",
+    "must_reuse": [
+      "BOOK-SYSTEM-CANONICAL-BOOK-STATE-MODEL-001",
+      "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-001",
+      "BOOK-SYSTEM-LIFECYCLE-TRANSITION-ENGINE-001",
+      "BOOK-SYSTEM-PARENT-INTEGRATION-BOUNDARY-001",
+      "BOOK-SYSTEM-BOOK-INTELLIGENCE-UNIFICATION-BINDING-001"
+    ],
+    "must_define": [
+      "service-response intake envelope and exact request/response correlation",
+      "provider subject and parent projection freshness checks",
+      "evidence registration and provenance projection",
+      "integration-proposal creation and admission-state transitions",
+      "duplicate/replay/deduplication semantics",
+      "ABSTAIN/PARTIAL/ERROR/disagreement preservation",
+      "author-decision queue handoff without fabricated approval",
+      "candidate/artifact identity and rights/privacy checks",
+      "stale proposal invalidation after parent state change",
+      "parent admission receipt and rollback identity",
+      "strict separation between REGISTER_INTEGRATION_PROPOSAL and canonical manuscript promotion"
+    ],
+    "must_not_do": [
+      "treat provider SUCCESS or A-01 PASS as parent admission",
+      "allow a child/lane provider to choose ADMITTED state itself",
+      "drop minority/disagreement/abstention evidence to simplify a decision",
+      "replay a provider response into duplicate proposals or decisions",
+      "promote a manuscript candidate without required parent/author transition gates",
+      "silently accept stale evidence after parent state or rights/privacy boundaries change"
+    ],
+    "closure_criteria": [
+      "all four registered service families can enter the same parent-safe intake path",
+      "unknown or stale request/response/provider identities fail closed",
+      "SUCCESS remains evidence/proposal only until parent admission",
+      "ABSTAIN/PARTIAL/ERROR and disagreement are durably preserved",
+      "duplicate responses are deterministic and cannot create duplicate proposals",
+      "author-required outcomes queue rather than auto-approve",
+      "stale proposals invalidate when their exact parent projection changes",
+      "admitted proposals can satisfy later lifecycle gates only through explicit parent-owned state registration",
+      "adversarial qualification proves no direct provider-to-canon path"
+    ]
+  },
+  "after_current_parent_critical_path": [
+    "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001",
+    "BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001",
+    "BOOK-SYSTEM-EXPORT-FREEZE-001",
+    "BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001"
+  ],
+  "generic_continue_rule": "In Book System control, Continue executes BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-001 unless newer parent-authoritative evidence changes the dependency graph. It does not route to a subordinate Prose or Book Evaluator lane solely because that lane changed later.",
+  "qualification_truth_boundaries": [
+    "Canonical state model qualification is exact to b6938fcfc5c2c24ac23b558de6dfc7f75c382312.",
+    "Service interface qualification is exact to 9245cf9ce56f15020369eb490d9e562480825158.",
+    "Lifecycle transition qualification is exact to 4a6e3459d6ba94b7ce191e426ca64bef00d23582.",
+    "This State-005 commit records those results but is not itself covered by those exact-SHA qualifications."
+  ],
+  "qualification_effect": "State consolidation only. No new provider, integration, production, publication, author, human, or manuscript-promotion authority is created by this state artifact."
+}
