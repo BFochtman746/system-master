@@ -1,0 +1,81 @@
+{
+  "state_id": "BOOK-SYSTEM-RECONCILED-STATE-009",
+  "effective_date": "2026-09-09",
+  "supersedes_for_current_parent_control": "BOOK-SYSTEM-RECONCILED-STATE-008",
+  "supersession_scope": "PARENT_CONTROL_AND_NEXT_STEP_ROUTING_ONLY",
+  "standing": "ACTIVE__PUBLICATION_EXPORT_PROFILE_CLOSED__DOCUMENT_IMPLEMENTATION_DELEGATED__PROVENANCE_INTEROPERABILITY_NEXT",
+  "project": "BOOK SYSTEM",
+  "control_branch": "book-system/control-v1",
+  "closed_objectives": [
+    {
+      "id": "BOOK-SYSTEM-EDITORIAL-CAPABILITY-CROSSWALK-001",
+      "artifact": "qualification/book-system/research-verification-001/BOOK-SYSTEM-EDITORIAL-CAPABILITY-CROSSWALK-001.json"
+    },
+    {
+      "id": "BOOK-SYSTEM-RESEARCH-VERIFIED-AUTHORING-LIFECYCLE-AMENDMENT-001",
+      "artifact": "qualification/book-system/research-verification-001/BOOK-SYSTEM-RESEARCH-VERIFIED-AUTHORING-LIFECYCLE-AMENDMENT-001.json"
+    },
+    {
+      "id": "BOOK-SYSTEM-DOCUMENT-SYSTEM-EXPORT-OWNERSHIP-BOUNDARY-001",
+      "artifact": "qualification/book-system/research-verification-001/BOOK-SYSTEM-DOCUMENT-SYSTEM-EXPORT-OWNERSHIP-BOUNDARY-001.json",
+      "commit": "11f7e19c6c773b637a271c1ca1f6200eb221dae5"
+    },
+    {
+      "id": "BOOK-SYSTEM-PUBLICATION-EXPORT-STANDARDS-PROFILE-001",
+      "artifact": "qualification/book-system/research-verification-001/BOOK-SYSTEM-PUBLICATION-EXPORT-STANDARDS-PROFILE-001.json",
+      "commit": "a403b9c6391c20f2c7a1e165e5e13c4410f37241"
+    }
+  ],
+  "document_system_boundary_result": {
+    "book_system_owns": "book-domain policy, canonical manuscript/version identity, requested target-medium profile, acceptance gates, author/publication authority",
+    "document_system_owns": "reusable DOCX/PDF/EPUB/print generation, rendering, conversion, validation, accessibility-check tooling, source-to-render comparison execution and artifact digesting",
+    "duplicate_document_engines_authorized_in_book_system": false,
+    "service_interface_reused": "DOCUMENT_ARTIFACT_AND_EXPORT / HEADLESS_ARTIFACT_SERVICE",
+    "runtime_implementation_created": false
+  },
+  "publication_profile_result": {
+    "stable_epub_baseline": "EPUB 3.3 W3C Recommendation",
+    "stable_epub_accessibility_baseline": "EPUB Accessibility 1.1 W3C Recommendation",
+    "newer_epub_drafts_treated_as_experimental": true,
+    "onix_profile": "3.1.2 when supply-chain metadata projection is needed",
+    "pdf_ua_universal": false,
+    "pdf_x_universal": false,
+    "docx_universal_conformance_claim": false,
+    "format_specific_proof_required": true,
+    "source_to_render_integrity_required": true,
+    "successful_export_equals_publication_authority": false
+  },
+  "implementation_pause": {
+    "objective": "BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-001 executable implementation",
+    "still_paused": true,
+    "remaining_research_remediation_before_release": [
+      "BOOK-SYSTEM-PROVENANCE-INTEROPERABILITY-PROJECTION-001",
+      "BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-001 contract re-review against amended lifecycle/publication/provenance boundaries"
+    ],
+    "research_before_implementation_rule_status": "ALREADY_BOUND_BY_RESEARCH_VERIFIED_AUTHORING_LIFECYCLE_AMENDMENT"
+  },
+  "current_parent_critical_path": {
+    "id": "BOOK-SYSTEM-PROVENANCE-INTEROPERABILITY-PROJECTION-001",
+    "classification": "READY__RESEARCH_REMEDIATION__ARCHITECTURE_PROJECTION_ONLY",
+    "objective": "Define how Book System canonical version/provenance evidence can project into interoperable external provenance representations without transferring internal authority, replacing the parent ledger, or making external provenance standards mandatory internal dependencies.",
+    "must_include": [
+      "BOOK_SYSTEM_PARENT_LEDGER_REMAINS_CANONICAL",
+      "W3C PROV compatible entity/activity/agent/derivation mapping",
+      "C2PA Content Credential attachment projection where supported and appropriate",
+      "exact canonical manuscript/version/artifact digest binding",
+      "author, provider, toolchain and transformation role separation",
+      "rights/privacy-aware external projection",
+      "no external provenance claim broader than internal evidence supports",
+      "external projection invalidation/supersession when source identity changes"
+    ],
+    "must_not_do": [
+      "replace Book System internal ledger with W3C PROV or C2PA",
+      "make C2PA a mandatory internal dependency",
+      "infer authorship, approval or publication authority from a provenance attachment",
+      "expose private manuscript content or private evidence merely to satisfy external provenance interoperability",
+      "resume Integration Proposal Runtime implementation before provenance remediation and contract re-review close"
+    ]
+  },
+  "generic_continue_rule": "In Book System control, Continue executes BOOK-SYSTEM-PROVENANCE-INTEROPERABILITY-PROJECTION-001. Integration Proposal Runtime executable implementation remains paused.",
+  "qualification_effect": "Control-state advancement and research-verified architecture/profile closure only. No Document System implementation, runtime qualification, manuscript promotion, author decision or publication authority is created by State-009."
+}
