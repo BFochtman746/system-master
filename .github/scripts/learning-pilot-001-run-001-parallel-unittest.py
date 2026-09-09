@@ -2,8 +2,9 @@
 """Run immutable unittest scopes in bounded parallel subprocesses.
 
 This helper changes scheduling only. It preserves the requested module/test
-coverage, captures each subprocess result independently, and fails closed on
-any non-zero child, missing unittest count, or aggregate-count mismatch.
+coverage, captures each subprocess result independently as soon as it
+completes, and fails closed on any non-zero child, missing unittest count, or
+aggregate-count mismatch.
 """
 
 from __future__ import annotations
@@ -26,15 +27,19 @@ def _safe_label(value: str) -> str:
     return re.sub(r"[^A-Za-z0-9_.-]+", "-", value).strip("-") or "run"
 
 
-def _discover_modules(lab_dir: Path, pattern: str) -> list[str]:
+def _discover_modules(lab_dir: Path, pattern: str, excluded: set[str]) -> list[str]:
     tests_dir = lab_dir / "tests"
     if not tests_dir.is_dir():
         raise RuntimeError(f"TEST_DIRECTORY_MISSING:{tests_dir}")
-    modules = [
+    discovered = [
         f"tests.{path.stem}"
         for path in sorted(tests_dir.glob(pattern))
         if path.is_file() and path.stem != "__init__"
     ]
+    unknown_exclusions = sorted(excluded.difference(discovered))
+    if unknown_exclusions:
+        raise RuntimeError(f"UNKNOWN_EXCLUDED_MODULES:{','.join(unknown_exclusions)}")
+    modules = [module for module in discovered if module not in excluded]
     if not modules:
         raise RuntimeError(f"NO_TEST_MODULES_DISCOVERED:{pattern}")
     return modules
@@ -82,17 +87,30 @@ def _write_evidence(evidence_dir: Path | None, prefix: str, result: dict[str, ob
     (evidence_dir / f"{stem}.count.txt").write_text(f"{result['count']}\n", encoding="utf-8")
 
 
+def _write_progress(evidence_dir: Path | None, prefix: str, completed: int, total: int, result: dict[str, object]) -> None:
+    if evidence_dir is None:
+        return
+    evidence_dir.mkdir(parents=True, exist_ok=True)
+    progress_path = evidence_dir / f"{_safe_label(prefix)}-progress.txt"
+    with progress_path.open("a", encoding="utf-8") as handle:
+        handle.write(
+            f"completed={completed}/{total} label={result['label']} count={result['count']} "
+            f"elapsed_ms={result['elapsed_ms']} returncode={result['returncode']}\n"
+        )
+
+
 def _emit_result(result: dict[str, object]) -> None:
     print(
         f"=== PARALLEL UNITTEST RESULT label={result['label']} seed={result['seed']} "
-        f"count={result['count']} elapsed_ms={result['elapsed_ms']} returncode={result['returncode']} ==="
+        f"count={result['count']} elapsed_ms={result['elapsed_ms']} returncode={result['returncode']} ===",
+        flush=True,
     )
     stdout = str(result["stdout"])
     stderr = str(result["stderr"])
     if stdout:
-        print(stdout, end="" if stdout.endswith("\n") else "\n")
+        print(stdout, end="" if stdout.endswith("\n") else "\n", flush=True)
     if stderr:
-        print(stderr, file=sys.stderr, end="" if stderr.endswith("\n") else "\n")
+        print(stderr, file=sys.stderr, end="" if stderr.endswith("\n") else "\n", flush=True)
 
 
 def main() -> int:
@@ -101,6 +119,7 @@ def main() -> int:
     parser.add_argument("--discover", action="store_true")
     parser.add_argument("--pattern", default="test_*.py")
     parser.add_argument("--module", action="append", default=[])
+    parser.add_argument("--exclude-module", action="append", default=[])
     parser.add_argument("--seed", action="append", default=[])
     parser.add_argument("--workers", type=int, default=4)
     parser.add_argument("--expected-total", type=int, required=True)
@@ -120,10 +139,13 @@ def main() -> int:
         raise RuntimeError("DISCOVER_AND_EXPLICIT_MODULES_ARE_MUTUALLY_EXCLUSIVE")
     if not args.discover and not args.module:
         raise RuntimeError("TEST_SCOPE_REQUIRED")
+    if not args.discover and args.exclude_module:
+        raise RuntimeError("EXCLUSIONS_REQUIRE_DISCOVERY_MODE")
 
     tasks: list[tuple[str, list[str], str]] = []
     if args.discover:
-        modules = _discover_modules(lab_dir, args.pattern)
+        excluded = set(args.exclude_module)
+        modules = _discover_modules(lab_dir, args.pattern, excluded)
         if len(seeds) != 1:
             raise RuntimeError("DISCOVERY_MODE_REQUIRES_EXACTLY_ONE_SEED")
         seed = seeds[0]
@@ -141,14 +163,16 @@ def main() -> int:
             for label, module_group, seed in tasks
         }
         for future in concurrent.futures.as_completed(future_map):
-            results.append(future.result())
+            result = future.result()
+            results.append(result)
+            _write_evidence(evidence_dir, args.evidence_prefix, result)
+            _write_progress(evidence_dir, args.evidence_prefix, len(results), len(tasks), result)
+            _emit_result(result)
 
     results.sort(key=lambda item: str(item["label"]))
     failures: list[str] = []
     total = 0
     for result in results:
-        _write_evidence(evidence_dir, args.evidence_prefix, result)
-        _emit_result(result)
         count = result["count"]
         if result["returncode"] != 0:
             failures.append(f"CHILD_FAILED:{result['label']}:{result['returncode']}")
@@ -168,20 +192,20 @@ def main() -> int:
         failures.append(f"TOTAL_TEST_COUNT_MISMATCH:expected={args.expected_total}:actual={total}")
 
     summary = f"Ran {total} tests in {elapsed:.3f}s"
-    print(summary)
+    print(summary, flush=True)
     if failures:
         for failure in failures:
-            print(failure, file=sys.stderr)
-        print(summary, file=sys.stderr)
-        print("FAILED", file=sys.stderr)
+            print(failure, file=sys.stderr, flush=True)
+        print(summary, file=sys.stderr, flush=True)
+        print("FAILED", file=sys.stderr, flush=True)
         return 1
 
-    print("OK")
-    # The parent qualifier historically concatenates stdout + stderr before
-    # parsing the terminal unittest count. Emit the aggregate again at the
-    # terminal end of stderr so per-module unittest summaries cannot shadow it.
-    print(summary, file=sys.stderr)
-    print("OK", file=sys.stderr)
+    print("OK", flush=True)
+    # The parent qualifier concatenates stdout + stderr before parsing the
+    # terminal unittest count. Emit the aggregate at the terminal end of stderr
+    # so per-module unittest summaries cannot shadow it.
+    print(summary, file=sys.stderr, flush=True)
+    print("OK", file=sys.stderr, flush=True)
     return 0
 
 
@@ -189,5 +213,5 @@ if __name__ == "__main__":
     try:
         raise SystemExit(main())
     except Exception as exc:
-        print(f"PARALLEL_UNITTEST_RUNNER_ERROR:{exc}", file=sys.stderr)
+        print(f"PARALLEL_UNITTEST_RUNNER_ERROR:{exc}", file=sys.stderr, flush=True)
         raise
