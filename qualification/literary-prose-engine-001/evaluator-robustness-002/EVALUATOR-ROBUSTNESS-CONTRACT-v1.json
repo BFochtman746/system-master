@@ -1,0 +1,49 @@
+{
+  "contract_id": "LITERARY-EVALUATOR-ROBUSTNESS-002-v1",
+  "objective": "Prevent unstable or systematically biased LLM literary judgments from acquiring revision authority by detecting repeat inconsistency, position effects, identity/self-preference effects, score-range sensitivity, epistemic-marker sensitivity, prior-belief sensitivity and style-over-story preservation failures.",
+  "depends_on": [
+    "qualification/literary-prose-engine-001/step-i/INDEPENDENT-LITERARY-EVALUATOR-CONTRACT-v1.json",
+    "qualification/literary-prose-engine-001/step-k/HOMOGENIZATION-OVEROPTIMIZATION-DEFENSE-CONTRACT-v1.json"
+  ],
+  "research_basis": [
+    "LitBench 2026: generic zero-shot creative-writing judges remain materially below human agreement",
+    "Rating Roulette 2025: LLM judges can show poor intra-rater reliability",
+    "Arbiters of Ambivalence 2025: LLM judges tend to force a stance in no-consensus settings",
+    "Uncertainty-marker robustness 2025: tested judges showed negative bias toward epistemic uncertainty markers",
+    "Self-preference 2025: judges may favor their own/model-associated responses",
+    "Score-range bias 2026: predefined score range can affect judgments",
+    "Prior-belief prejudice 2026: alignment-instilled beliefs can contaminate rhetorical-quality evaluation",
+    "Style over Story 2026: models systematically favor style over event/character/setting constraints"
+  ],
+  "trial_required": [
+    "trial_id",
+    "comparison_id",
+    "condition_axis",
+    "condition_value",
+    "left_candidate_id",
+    "right_candidate_id",
+    "winner_candidate_id",
+    "confidence"
+  ],
+  "condition_axes": ["BASE", "REPEAT", "POSITION", "GENERATOR_IDENTITY", "SCORE_RANGE", "UNCERTAINTY_MARKER", "BELIEF_CONTRAST", "STYLE_VS_STORY"],
+  "winner_values": "left candidate ID, right candidate ID, TIE, or ABSTAIN",
+  "rules": [
+    "Candidate identity, not left/right position, is the comparison authority.",
+    "A winner flip across position-swap trials is position-bias evidence.",
+    "A winner flip between generator-identity hidden/revealed conditions is self-preference/identity-bias evidence.",
+    "A winner flip across scoring ranges for an otherwise identical comparison is score-range sensitivity evidence.",
+    "A winner flip across meaning-equivalent uncertainty-marker conditions is uncertainty-marker bias evidence.",
+    "A winner flip across controlled rhetorical-quality belief-contrast conditions is prior-belief sensitivity evidence.",
+    "Repeated-run candidate-identity agreement below the configured floor yields instability and removes automatic promotion authority.",
+    "A preferred candidate that fails story-function/preservation while the alternative passes cannot be promoted merely for surface style.",
+    "TIE and ABSTAIN are valid outcomes; the analyzer must never manufacture consensus.",
+    "Bias/instability statistics are evaluator reliability evidence, not prose-quality scores.",
+    "No manuscript text or candidate prose is persisted in the robustness record."
+  ],
+  "default_thresholds": {
+    "repeat_identity_agreement_floor": 0.8,
+    "minimum_repeat_trials_for_stability_claim": 3
+  },
+  "outputs": ["STABLE", "REVIEW_BIAS", "ABSTAIN_UNSTABLE", "PRESERVATION_VETO"],
+  "promotion_boundary": "Only STABLE evidence with all existing STEP-I preservation and target-improvement gates intact may contribute to automated candidate comparison. This contract cannot itself promote a revision."
+}
