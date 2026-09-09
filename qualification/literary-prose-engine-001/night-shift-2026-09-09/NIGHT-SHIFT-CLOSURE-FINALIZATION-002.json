@@ -1,0 +1,48 @@
+{
+  "finalization_id": "LITERARY-PROSE-NIGHT-SHIFT-CLOSURE-FINALIZATION-002",
+  "supersedes_live_standing_of": "NIGHT-SHIFT-CLOSURE-RECONCILIATION-001.json",
+  "preserves_historical_ledger": true,
+  "standing": "PASS__NIGHT_SHIFT_CLOSED__STATE_004_AUTHORITATIVE__NO_NIGHT_SHIFT_BACKLOG",
+  "reason_for_finalization": "Candidate-002 advanced concurrently after closure ledger 001 was written: provider boundary passed, human adjudication contract was added, six public-domain heldout passage selections were frozen before inference, the manifest was reconciled, and a pre-human source-custody gate was defined. Ledger 001 remains audit evidence but its live next-step text is superseded here.",
+  "authoritative_state": "../LITERARY-PROSE-CONSOLIDATED-WORKSTREAM-STATE-004.json",
+  "night_shift_backlog_open_items": 0,
+  "current_safe_gate": {
+    "id": "LITERARY-EXTRACTION-SOURCE-HELD-OUT-002A__PREHUMAN_SOURCE_CUSTODY",
+    "contract": "../extraction-calibration-001/candidate-002/SOURCE-HELDOUT-002-PREHUMAN-CUSTODY-GATE-v1.json",
+    "standing": "READY FOR NEXT GATE",
+    "first_action": "Resolve exact bounded passage bytes and SHA-256 digests for all six frozen TEST_ONLY cases from the verified source routes; prepare gold-empty adjudication shells; stop before fabricating human gold or scoring.",
+    "pass_unlocks": "BLOCKED — HUMAN adjudication under HUMAN-ADJUDICATION-PACKET-CONTRACT-v1, then gold-hidden prediction freeze and scoring."
+  },
+  "current_blockers": [
+    {
+      "classification": "BLOCKED — AUTHOR",
+      "id": "AGLO-COMPOSITE-CANDIDATE-PROMOTION-DECISION-001",
+      "required_event": "Explicit author Option A PROMOTE or Option B RETAIN NONCANONICAL."
+    }
+  ],
+  "future_blocker_after_prehuman_gate": {
+    "classification": "BLOCKED — HUMAN",
+    "id": "LITERARY-EXTRACTION-SOURCE-HELD-OUT-002__HUMAN_ADJUDICATION",
+    "required_event": "Required independent human structural adjudication, including dual review for high-risk task families, with disagreement/ambiguity preserved and model gold access forbidden."
+  },
+  "a01": {
+    "last_authoritative_pass_subject": "137ab3d214972002cd5dca0d2355d1e0ada31d39",
+    "workflow_run_id": 34310540842,
+    "ticket_state": "SUPERSEDED",
+    "new_ticket_justified_now": false,
+    "reason": "The current gate is source custody/metadata preparation and then human adjudication; neither gains a machine-specific completion delta from A-01. Reevaluate only after human gold and real predictions are frozen and a registered machine qualification would prove a new exact-SHA property."
+  },
+  "retirement": {
+    "current_reconciled_primary_ready": true,
+    "predecessor_missing_authority": [],
+    "predecessor_may_be_historical_read_only": true,
+    "chat_ui_title_is_not_authority": true
+  },
+  "do_not": [
+    "Do not reactivate PRIORITIZED-BUILD-PACKETS-v1/v2 as a live queue.",
+    "Do not rerun the Sep-09 Literary A-01 sweep unchanged.",
+    "Do not infer AGLO author promotion authority from Continue.",
+    "Do not fabricate human heldout gold.",
+    "Do not transfer qualification authority across SHAs."
+  ]
+}
