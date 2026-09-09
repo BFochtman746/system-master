@@ -1,0 +1,137 @@
+{
+  "state_id": "LITERARY-PROSE-CONSOLIDATED-WORKSTREAM-STATE-001",
+  "standing": "ACTIVE__ALL_LITERARY_PROSE_WORK_CONSOLIDATED_IN_CURRENT_CHAT",
+  "canonical_control_surface": "CURRENT_LITERARY_PROSE_CHAT",
+  "retired_control_surface": "LITERARY_PROSE_NIGHT_SHIFT_CHAT",
+  "retirement_handoff": "night-shift-2026-09-09/NIGHT-SHIFT-CHAT-RETIREMENT-HANDOFF-001.json",
+  "branch": "literary-prose-engine-001",
+  "state_basis_head": "924db006aa2dd79164e8110d89debf9a95447c0f",
+  "active_lanes": [
+    {
+      "priority": 1,
+      "lane_id": "AGLO_REAL_BOOK_REVISION",
+      "standing": "READY__ACCEPTED_THREE_CANDIDATE_REVISION_PACKAGE__NO_CANONICAL_MANUSCRIPT_MUTATION",
+      "source_state": "real-book-qualification/REAL-BOOK-QUALIFICATION-STATE.json",
+      "accepted_package": {
+        "chapters": [25, 27, 29],
+        "candidate_count": 3,
+        "total_deleted_words": 64,
+        "book_edit_fraction": 0.001022,
+        "cumulative_preservation": "PASS",
+        "cumulative_step_k": "PASS_DEFENSE_GATE",
+        "applied_to_manuscript": false
+      },
+      "next_objective": "AGLO-COMPOSITE-REVISION-PACKAGE-001 — BUILD A PRIVATE COMPOSITE AGLO CANDIDATE CONTAINING THE ACCEPTED CHAPTER 25 + 27 + 29 TRIMS → REVERIFY ALL THREE CHAPTER DIGESTS + WHOLE-BOOK DIGEST → RUN FINAL COMBINED PRESERVATION / STEP-I REGRESSION / STEP-K DRIFT DEFENSE → PRODUCE A REVIEWABLE REVISED MANUSCRIPT CANDIDATE WITHOUT OVERWRITING THE RATIFIED CANONICAL MASTER"
+    },
+    {
+      "priority": 2,
+      "lane_id": "NARRATIVE_EXTRACTION_CALIBRATION",
+      "standing": "CANDIDATE_001_HOSTED_QUALIFIED_SYNTHETIC_SOURCE_HELDOUT__NOT_PROMOTED",
+      "receipt": "extraction-calibration-001/CANDIDATE-001-QUALIFICATION-RECEIPT.json",
+      "implementation_subject_sha": "6a26ae1c5f1671b4b9eaaa493fc4ca9ba657e741",
+      "receipt_commit": "cac247714914482df1385ddb4ca2a4abcc9acb0c",
+      "workflow_run_id": 34359001911,
+      "metrics": {
+        "precision": 1.0,
+        "recall": 0.827586,
+        "f1": 0.90566,
+        "mean_coverage": 0.764706,
+        "false_certainty_count": 0,
+        "ambiguity_preservation_rate": 1.0,
+        "premature_resolution_rate": 0.0,
+        "mean_brier_score": 0.258224,
+        "mean_expected_calibration_error": 0.362549
+      },
+      "known_gaps": [
+        "paraphrastic same-event identity without explicit same-event cue",
+        "implicit goal/causal relation without explicit because/wants cue",
+        "implicit/free-indirect focalization without explicit viewpoint cue",
+        "setup/payoff recurrence through pronominal/synonym reference rather than literal repeated noun"
+      ],
+      "promotion_blockers": [
+        "No learned/model-backed provider has yet been qualified.",
+        "Held-out evidence is synthetic rather than independently sourced public-domain or human-adjudicated evidence.",
+        "Four deliberately difficult semantic cases currently require abstention.",
+        "Confidence calibration error remains too high for authority-ready use."
+      ],
+      "next_objective": "LITERARY-NARRATIVE-EXTRACTOR-CANDIDATE-002 — LEARNED/MODEL-BACKED PROVIDER + INDEPENDENT PUBLIC-DOMAIN/HUMAN-ADJUDICATED SOURCE-HELDOUT CALIBRATION"
+    },
+    {
+      "priority": 3,
+      "lane_id": "SOURCE_HELDOUT_EVIDENCE_DESIGN",
+      "standing": "READY_FOR_DATASET_DESIGN",
+      "packet": "night-shift-2026-09-09/PRIORITIZED-BUILD-PACKETS-v2.json#LITERARY-EXTRACTION-SOURCE-HELD-OUT-002",
+      "next_objective": "Build independently sourced public-domain/human-adjudicated source-held-out slices with work-level split isolation, provenance, ambiguity cases, and no Book-Eval gold leakage."
+    },
+    {
+      "priority": 4,
+      "lane_id": "PERSPECTIVE_REVELATION_CALIBRATION",
+      "standing": "DEPENDENT_ON_EXTRACTOR_RESULTS",
+      "packet": "night-shift-2026-09-09/PRIORITIZED-BUILD-PACKETS-v2.json#LITERARY-PERSPECTIVE-REVELATION-CALIBRATION-003"
+    },
+    {
+      "priority": 5,
+      "lane_id": "EDITORIAL_REVIEW_PACKET_HARDENING",
+      "standing": "INDEPENDENT_LOW_RISK",
+      "packet": "night-shift-2026-09-09/PRIORITIZED-BUILD-PACKETS-v2.json#LITERARY-EDITORIAL-REVIEW-PACKET-HARDENING-004"
+    },
+    {
+      "priority": 6,
+      "lane_id": "IDENTITY_DIVERSITY_DRIFT",
+      "standing": "BOUNDED_FOLLOW_ON",
+      "packet": "night-shift-2026-09-09/PRIORITIZED-BUILD-PACKETS-v2.json#LITERARY-IDENTITY-DIVERSITY-DRIFT-005"
+    }
+  ],
+  "completed_system_foundations_carried_forward": [
+    "source taxonomy, rights, provenance, and annotation ontology",
+    "admission and ingestion controls",
+    "voice intelligence and voice hierarchy",
+    "Craft Academy principles and schools",
+    "Passage Intelligence",
+    "specialist diagnostics",
+    "controlled revision",
+    "independent literary evaluation",
+    "project-scoped preference learning",
+    "homogenization/overoptimization defense",
+    "closed-loop synthetic qualification",
+    "STEP-008 opportunity admission",
+    "canonical narrative state/materialization",
+    "global narrative orchestration",
+    "evaluator robustness",
+    "provider-independent extraction calibration",
+    "candidate-001 source-heldout hosted qualification"
+  ],
+  "a01_status": {
+    "canonical_operating_mode": "CENTRAL_A01_CONTROL_PLANE_ONLY",
+    "legacy_overnight_ticket": "main:qualification/a01/overnight/requests/2026-09-09--LITERARY-PROSE--research-regression-sweep.json",
+    "legacy_ticket_observed_state": "READY",
+    "legacy_ticket_subject_sha": "137ab3d214972002cd5dca0d2355d1e0ada31d39",
+    "legacy_window": "2026-09-09 00:00-07:00 America/New_York",
+    "current_disposition": "STALE_WINDOW_AND_OBSOLETE_SUBJECT__HISTORICAL_ONLY",
+    "future_policy": "Do not reuse the old ticket or subject. A future Literary overnight run must be centrally planned, materially justified, and freeze the then-current exact Literary SHA. No independent schedule triggers."
+  },
+  "legacy_night_shift_artifacts": {
+    "status": "READ_ONLY_HISTORICAL_EVIDENCE",
+    "world_class_gap_audit": "night-shift-2026-09-09/WORLD-CLASS-PROSE-GAP-AUDIT-v2.json",
+    "research_provenance": "night-shift-2026-09-09/RESEARCH-PROVENANCE-v2.json",
+    "prioritized_packets": "night-shift-2026-09-09/PRIORITIZED-BUILD-PACKETS-v2.json",
+    "a01_candidate": "night-shift-2026-09-09/A01-NEXT-PORTFOLIO-CANDIDATE-v1.json"
+  },
+  "hard_boundaries": {
+    "raw_private_manuscript_prose_in_repo": false,
+    "candidate_prose_in_repo": false,
+    "automatic_manuscript_overwrite": false,
+    "publication_authorized": false,
+    "canon_replacement_authorized": false,
+    "named_author_imitation_target": false,
+    "bulk_copyrighted_body_acquisition": false,
+    "unknown_rights_admitted": false,
+    "retain_original_default_when_gain_unproven": true,
+    "abstention_is_valid": true,
+    "generic_continue_may_create_author_decision": false,
+    "delegated_editorial_judgment_auto_generalizes_as_user_taste": false
+  },
+  "coordination_rule": "All future Literary Prose work, including work previously assigned to the retired night-shift chat, is coordinated from the current Literary Prose chat. Before each repository write, refetch branch head and preserve concurrent work forward-only.",
+  "exact_next_objective": "AGLO-COMPOSITE-REVISION-PACKAGE-001",
+  "system_next_after_or_parallel_when_dependency_valid": "LITERARY-NARRATIVE-EXTRACTOR-CANDIDATE-002"
+}
