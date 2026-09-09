@@ -1,5 +1,5 @@
 {
-  "registry_version": 18,
+  "registry_version": 19,
   "qualifications": {
     "A01-CONTROL-PLANE-SELFTEST": {
       "workstream_id": "SYSTEM-MASTER",
@@ -10,6 +10,16 @@
       "evidence_artifact": "a01-control-plane-selftest",
       "overnight_eligible": false,
       "description": "Qualify policy, registry, schemas, bootstrap, gateway safety, cross-ref subject execution, receipt production, exact-SHA binding, shared queue behavior, and overnight admission policy for A01-CONTROL-PLANE-001."
+    },
+    "A01-CLOSED-LOOP-REPAIR-SELFTEST": {
+      "workstream_id": "SYSTEM-MASTER",
+      "gate_class": "focused",
+      "source": "subject",
+      "executable": "node",
+      "args": [".github/scripts/a01-closed-loop-repair-selftest.js"],
+      "evidence_artifact": "a01-closed-loop-repair-selftest",
+      "overnight_eligible": false,
+      "description": "Qualify the exact A01-CLOSED-LOOP-REPAIR-001 sidecar candidate: authoritative receipt classification, bounded repair-attempt budget, repair-worker zero-authority contract, changed-SHA and deterministic-prequalification binding, exact workstream/qualification lineage, non-automatable owner routes, dead-letter behavior, arbitrary-command denial, replacement-request A01_ELIGIBLE-only standing, and preservation of the frozen gateway/policy execution model. PASS is exact-SHA focused evidence only and grants no promotion or automatic product-repair authority."
     },
     "BOOK-SYSTEM-CANONICAL-BOOK-STATE-MODEL-001": {
       "workstream_id": "BOOK-SYSTEM",
