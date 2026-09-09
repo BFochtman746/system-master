@@ -1,0 +1,53 @@
+name: Request Learning Closed-Loop Overnight Hosted Prequalification
+
+on:
+  push:
+    branches: [learning/request-closed-loop-overnight-prequal-f262893a]
+
+permissions:
+  contents: read
+
+jobs:
+  prequalify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact qualification subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: f262893ac413a6d933c7ec703b4d6ef5d6137939
+          fetch-depth: 1
+          clean: true
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: '3.13.15'
+          architecture: x64
+          check-latest: false
+      - name: Prepare evidence
+        shell: bash
+        run: |
+          D="$RUNNER_TEMP/learning-closed-loop-overnight-$GITHUB_RUN_ID"
+          mkdir -p "$D"
+          echo "A01_EVIDENCE_DIR=$D" >> "$GITHUB_ENV"
+          printf '%s\n' 'f262893ac413a6d933c7ec703b4d6ef5d6137939' > "$D/exact-subject-sha.txt"
+      - name: Run repository-owned overnight qualifier against exact subject
+        shell: bash
+        env:
+          A01_SUBJECT_SHA: f262893ac413a6d933c7ec703b4d6ef5d6137939
+        run: node .github/scripts/learning-pilot-001-run-001-closed-loop-overnight-qualify.js
+      - name: Verify subject has no independent scheduled A-01 workflow
+        shell: bash
+        run: |
+          test ! -e .github/workflows/learning-pilot-001-run-001-overnight-a01.yml
+          grep -q 'uses: BFochtman746/system-master/.github/workflows/a01-control-plane-gateway.yml@main' .github/workflows/learning-pilot-001-run-001-closed-loop-a01.yml
+          ! grep -q 'schedule:' .github/workflows/learning-pilot-001-run-001-closed-loop-a01.yml
+      - name: Upload hosted prequalification evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: learning-closed-loop-overnight-hosted-prequal-${{ github.run_id }}
+          path: ${{ env.A01_EVIDENCE_DIR }}
+          if-no-files-found: error
+          retention-days: 14
