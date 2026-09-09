@@ -59,9 +59,7 @@ def _trusted_claim_value(normalized_packet, field):
 
 def _model_value(normalized_packet, field):
     claim = _best_claim(normalized_packet, field)
-    if not claim:
-        return None
-    if field not in MODEL_FIELDS:
+    if not claim or field not in MODEL_FIELDS:
         return None
     return claim.get("value_code")
 
@@ -80,9 +78,7 @@ def build_passage_state(normalized_packet, trusted_authority=None, requested_sco
     state = {
         "source_id": normalized_packet.get("source_id"),
         "passage_digest": normalized_packet.get("passage_digest"),
-        "purpose_state": {
-            "scene_or_chapter_function": _model_value(normalized_packet, "scene_or_chapter_function")
-        },
+        "purpose_state": {"scene_or_chapter_function": _model_value(normalized_packet, "scene_or_chapter_function")},
         "narrative_state": {
             "pov": _model_value(normalized_packet, "pov"),
             "focalization": _model_value(normalized_packet, "focalization"),
@@ -104,10 +100,7 @@ def build_passage_state(normalized_packet, trusted_authority=None, requested_sco
             "protected_language": protected_language,
             "canon_facts": canon_facts
         },
-        "craft_state": {
-            "current_strengths": [],
-            "candidate_opportunities": []
-        },
+        "craft_state": {"current_strengths": [], "candidate_opportunities": []},
         "semantic_provider_authority": {
             "provider_id": normalized_packet.get("provider_id"),
             "provider_kind": normalized_packet.get("provider_kind"),
@@ -115,8 +108,25 @@ def build_passage_state(normalized_packet, trusted_authority=None, requested_sco
             "revision_authorized": False
         }
     }
-    payload = {"state": state, "requested_scope": requested_scope, "max_opportunities": 3}
-    return STEP_E.construct_passage_state(payload)
+    return STEP_E.construct_passage_state({"state": state, "requested_scope": requested_scope, "max_opportunities": 3})
+
+
+def _specialist_context(passage_state):
+    preservation = passage_state.get("preservation_state") or {}
+    narrative = passage_state.get("narrative_state") or {}
+    purpose = passage_state.get("purpose_state") or {}
+    return {
+        "passage_state": passage_state,
+        "character_state_if_available": passage_state.get("character_state"),
+        "canon_constraints": preservation.get("canon_facts"),
+        "pov_knowledge_boundary": narrative.get("pov"),
+        "project_intent": preservation.get("authorial_intent"),
+        "author_intent_if_declared": preservation.get("authorial_intent"),
+        "book_or_arc_context_when_available": purpose.get("scene_or_chapter_function"),
+        "temporal_context_if_available": narrative.get("pacing_target"),
+        "section_or_arc_context_when_material": purpose.get("scene_or_chapter_function"),
+        "reader_state_evidence_only_as_separate_input": passage_state.get("reader_state")
+    }
 
 
 def build_step_f_case(normalized_packet, passage_state):
@@ -142,7 +152,7 @@ def build_step_f_case(normalized_packet, passage_state):
             "collateral_regression_risk": 0.0,
             "expected_impact": 0.0
         })
-    return STEP_F.build_step_f_case({"passage_state": passage_state, "context": {}, "signals": signals})
+    return STEP_F.build_step_f_case({"passage_state": passage_state, "context": _specialist_context(passage_state), "signals": signals})
 
 
 def run_governed_diagnostics(normalized_packet, trusted_authority=None, requested_scope="SURGICAL"):
