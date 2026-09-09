@@ -1,0 +1,100 @@
+{
+  "research_id": "BOOK-SYSTEM-RUNTIME-V2-PREIMPLEMENTATION-RESEARCH-001",
+  "effective_date": "2026-09-09",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "objective": "BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-002-IMPLEMENTATION-001",
+  "standing": "CLOSED__BOUNDED_STANDARDS_AND_PATTERN_VERIFICATION_COMPLETE__IMPLEMENTATION_DECISIONS_BOUND",
+  "purpose": "Verify current external standards and reliable-processing patterns before implementing the Book parent Runtime V2, while preventing a useful interchange standard or cloud pattern from becoming accidental canonical authority or unnecessary implementation dependency.",
+  "verified_sources": [
+    {
+      "name": "JSON Schema",
+      "version_or_status": "2020-12 current specification/meta-schema",
+      "url": "https://json-schema.org/specification",
+      "verified_fact": "JSON Schema 2020-12 remains the current published specification baseline on the project specification page."
+    },
+    {
+      "name": "OpenAPI Specification",
+      "version_or_status": "3.2.0 published 2025-09-19",
+      "url": "https://spec.openapis.org/oas/v3.2.0.html",
+      "verified_fact": "OAS 3.2.0 is the latest published OpenAPI specification and describes language-agnostic HTTP API interfaces."
+    },
+    {
+      "name": "CloudEvents",
+      "version_or_status": "v1.0.2 latest stable core release",
+      "url": "https://github.com/cloudevents/spec",
+      "verified_fact": "CloudEvents lists v1.0.2 as the latest stable core specification, with working drafts maintained separately."
+    },
+    {
+      "name": "IETF HTTPAPI Idempotency-Key",
+      "version_or_status": "draft-ietf-httpapi-idempotency-key-header-07; expired/archived Internet-Draft",
+      "url": "https://datatracker.ietf.org/doc/draft-ietf-httpapi-idempotency-key-header/",
+      "verified_fact": "The latest Datatracker record is revision -07, latest revision 2025-10-15, but the document is expired and archived rather than an RFC."
+    },
+    {
+      "name": "AWS Transactional Outbox Pattern",
+      "version_or_status": "current prescriptive guidance",
+      "url": "https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/transactional-outbox.html",
+      "verified_fact": "Atomic persistence of domain state plus an outbox record prevents dual-write inconsistency; duplicate delivery requires idempotent consumers and ordering must be preserved when material."
+    },
+    {
+      "name": "Azure Transactional Outbox Pattern",
+      "version_or_status": "current architecture guidance",
+      "url": "https://learn.microsoft.com/en-us/azure/architecture/databases/guide/transactional-out-box-cosmos",
+      "verified_fact": "The pattern commits business state and its events atomically, then relays committed events separately; idempotent processing and ordering remain explicit concerns."
+    }
+  ],
+  "decisions": [
+    {
+      "topic": "JSON_SCHEMA_2020_12",
+      "classification": "ADOPT",
+      "decision": "Use JSON Schema 2020-12 semantics as the external schema baseline for any formal Runtime V2 envelope schemas/validators. The executable Runtime may perform deterministic direct validation without adding a runtime package dependency, but schema meaning must not contradict the 2020-12 baseline.",
+      "authority_effect": "NONE__SCHEMA_VALIDATION_ONLY"
+    },
+    {
+      "topic": "OPENAPI_3_2",
+      "classification": "OPTIONAL",
+      "decision": "Do not bind Runtime V2 core to HTTP or OpenAPI. If a future Book HTTP adapter is authorized, describe that adapter using current OpenAPI rather than changing internal canonical/runtime semantics.",
+      "authority_effect": "NONE__FUTURE_TRANSPORT_DESCRIPTION_ONLY"
+    },
+    {
+      "topic": "CLOUDEVENTS_1_0_2",
+      "classification": "OPTIONAL",
+      "decision": "Keep internal intake/admission/outbox records Book-owned. A future external event publisher may project committed outbox entries into CloudEvents 1.0.2, but CloudEvents identifiers/attributes never replace Book ledger identities or transaction receipts.",
+      "authority_effect": "NONE__OPTIONAL_INTERCHANGE_PROJECTION"
+    },
+    {
+      "topic": "IETF_IDEMPOTENCY_KEY_DRAFT_07",
+      "classification": "DO_NOT_BIND",
+      "decision": "Do not cite or implement the expired Internet-Draft as a normative Book dependency or RFC. Retain the already-designed internal principles of unique idempotency keys, normalized-request fingerprinting, same-key/different-payload rejection and reconciliation after unknown outcomes because they independently satisfy Book reliability requirements.",
+      "authority_effect": "NONE__NON_NORMATIVE_PATTERN_INPUT"
+    },
+    {
+      "topic": "TRANSACTIONAL_OUTBOX",
+      "classification": "ADOPT",
+      "decision": "Represent parent-visible side-effect publication as append-only outbox records written in the same logical transaction as Runtime V2 intake/proposal/receipt state. Publish/relay is downstream and cannot partially commit Book state. Consumers must tolerate replay/duplicate delivery by stable event identity.",
+      "authority_effect": "BOOK_PARENT_LEDGER_REMAINS_CANONICAL"
+    },
+    {
+      "topic": "CQRS_EVENT_SOURCING",
+      "classification": "DO_NOT_BIND",
+      "decision": "Do not turn Runtime V2 into a full CQRS or event-sourcing platform. Immutable proposal snapshots, receipts and outbox entries are sufficient for this bounded runtime objective; adding a second event-store authority would duplicate the Book parent ledger.",
+      "authority_effect": "PREVENT_SECOND_CANONICAL_AUTHORITY"
+    },
+    {
+      "topic": "DISTRIBUTED_SAGA",
+      "classification": "UNRESOLVED",
+      "decision": "No cross-service multi-datastore compensating transaction is required by the current Runtime V2 core. Re-evaluate only if a later implementation actually coordinates independent durable Book-external writes that cannot be handled by parent transaction plus outbox/inbox boundaries.",
+      "authority_effect": "NO_CURRENT_IMPLEMENTATION_REQUIREMENT"
+    }
+  ],
+  "implementation_constraints": [
+    "Runtime V2 core remains transport-neutral and provider-neutral beyond Registry V2 classes.",
+    "No new first-class System Master system is created by adopting an interchange or cloud pattern.",
+    "No external schema/event/API standard becomes canonical Book state or admission authority.",
+    "State mutation plus admission receipt/outbox creation must expose all-or-nothing logical transaction semantics.",
+    "Replay and duplicate notification must be safe under stable identities.",
+    "Runtime V2 must remain testable deterministically without cloud vendor dependencies."
+  ],
+  "implementation_release": "AUTHORIZED_WITHIN_STATE_012_BOUNDARIES",
+  "qualification_effect": "NONE. This research artifact permits bounded Runtime V2 implementation but is not executable evidence, A-01 qualification, author approval, publication authority or production standing."
+}
