@@ -16,6 +16,9 @@
   "repair_inbox_registry": "governance/repair/REPAIR-INBOX-REGISTRY-001.json",
   "repair_ledger_registry": "governance/repair/REPAIR-LEDGER-REGISTRY-001.json",
   "repair_broker_contract": "governance/repair/A01-REPAIR-BROKER-001.md",
+  "repair_001b_closure": "governance/repair/A01-CLOSED-LOOP-REPAIR-001B-CLOSURE.md",
+  "repair_control_current_boundary": "A01-CLOSED-LOOP-REPAIR-001C",
+  "repair_control_next_objective": "REPLACEMENT A-01 RERUN RECEIPT -> SAME-TRANSACTION TERMINAL ADJUDICATION",
   "repair_broker": ".github/scripts/a01-repair-broker.js",
   "repair_ledger": ".github/scripts/a01-repair-ledger.js",
   "repair_receipt_ingest_workflow": ".github/workflows/a01-repair-receipt-ingest.yml",
@@ -36,7 +39,8 @@
     "Check the latest System State Reconciler standing when making repository-wide control claims. A red reconciler is a drift signal to adjudicate, not permission to ignore current owner state.",
     "For repository-wide reconciliation, read active_census and resume at the first incomplete phase rather than restarting the audit.",
     "If work is being delegated to Second Shift, read the owner delegation file and revalidate it against the live control head immediately before admission/execution.",
-    "If an executable qualification fails, classify it before repair. A gateway non-PASS is brokered into a durable transaction after the gateway run; repair-eligible product failures emit an owner-worker dispatch packet. A changed repair candidate may emit a replacement A-01 return ticket only after deterministic prequalification PASS on the same exact replacement SHA."
+    "If an executable qualification fails, classify it before repair. A gateway non-PASS is brokered into a durable transaction after the gateway run; repair-eligible product failures emit an owner-worker dispatch packet. A changed repair candidate may emit a replacement A-01 return ticket only after deterministic prequalification PASS on the same exact replacement SHA.",
+    "For repair-control work, treat A01-CLOSED-LOOP-REPAIR-001B as closed to its hosted-control scope and continue from A01-CLOSED-LOOP-REPAIR-001C unless newer repository evidence supersedes this pointer."
   ],
   "truth_classes": {
     "AUTHORITY_CURRENT": "Owner, live control head, current state and evidence agree.",
