@@ -11,72 +11,60 @@ permissions:
 
 jobs:
   probe:
-    name: Search runner diagnostic custody
+    name: Search pre-probe runner diagnostic custody
     runs-on: [self-hosted, Windows, X64]
     timeout-minutes: 10
 
     steps:
-      - name: Read-only bounded diagnostic probe
+      - name: Read-only bounded pre-probe diagnostic search
         shell: powershell
         run: |
           $ErrorActionPreference = 'Stop'
           $diagRoot = 'C:\actions-runner\_diag'
-          $evidenceDir = Join-Path $env:RUNNER_TEMP ("smr020-diag-custody-" + $env:GITHUB_RUN_ID)
+          $cutoffUtc = [DateTime]::Parse('2026-09-09T23:40:00Z').ToUniversalTime()
+          $evidenceDir = Join-Path $env:RUNNER_TEMP ("smr020-diag-custody-preprobe-" + $env:GITHUB_RUN_ID)
           New-Item -ItemType Directory -Force -Path $evidenceDir | Out-Null
-          $report = Join-Path $evidenceDir 'SMR020-RUNNER-DIAG-CUSTODY-PROBE.txt'
+          $report = Join-Path $evidenceDir 'SMR020-RUNNER-DIAG-PREPROBE-CUSTODY.txt'
           $needles = [ordered]@{
             TARGET_DIFF='3721b21b26a2b71f762f09f2eab0ba4d1d8809909aa2d129d5960619a7672b34'
             SMR018='cc67826bb608fc82459e23c59d5e0106d10422c6fe79f45f0571be60356b7d54'
             SMR019='9571b3f4f876980047facbdd77cf17f8a8a2d3255bab9704ceb3fd49cddbd5f3'
             SMR020='89066e5662554b1810691473e0ed9bf49d8cc2fd4964444043b878461ed75477'
           }
-
-          "probe=CORE-SMR020-RUNNER-DIAG-CUSTODY-PROBE-001" | Set-Content $report
+          "probe=CORE-SMR020-RUNNER-DIAG-CUSTODY-PROBE-002" | Set-Content $report
           "scope=C:\actions-runner\_diag_ONLY" | Add-Content $report
+          "cutoff_utc=$($cutoffUtc.ToString('o'))" | Add-Content $report
           "read_only=true" | Add-Content $report
-          "source_log_contents_uploaded=false" | Add-Content $report
           "personal_home_scanned=false" | Add-Content $report
-
-          if (-not (Test-Path -LiteralPath $diagRoot)) {
-            "result=DIAG_ROOT_NOT_FOUND" | Add-Content $report
-            throw "Diagnostic root not found"
-          }
-
-          $files = Get-ChildItem -LiteralPath $diagRoot -Recurse -File -ErrorAction SilentlyContinue
-          "diag_files_scanned=$($files.Count)" | Add-Content $report
-          $totalMatches = 0
+          "source_log_contents_uploaded=false" | Add-Content $report
+          if (-not (Test-Path -LiteralPath $diagRoot)) { throw "Diagnostic root not found" }
+          $files = @(Get-ChildItem -LiteralPath $diagRoot -Recurse -File -ErrorAction SilentlyContinue | Where-Object { $_.LastWriteTimeUtc -lt $cutoffUtc })
+          "preprobe_files_scanned=$($files.Count)" | Add-Content $report
+          $total = 0
           foreach ($label in $needles.Keys) {
             $token = $needles[$label]
+            $count = 0
             "`n[$label]" | Add-Content $report
-            $labelMatches = 0
             foreach ($f in $files) {
               try {
-                $hits = Select-String -LiteralPath $f.FullName -Pattern $token -SimpleMatch -ErrorAction Stop
-                foreach ($hit in $hits) {
-                  $labelMatches++
-                  $totalMatches++
-                  "match_log=$($f.FullName) line=$($hit.LineNumber)" | Add-Content $report
-                  $pathMatches = [regex]::Matches($hit.Line, '[A-Za-z]:\\[^\r\n\"'']+')
-                  foreach ($pm in $pathMatches) {
-                    $p = $pm.Value.Trim()
-                    if ($p.Length -gt 400) { $p = $p.Substring(0,400) }
-                    "path_hint=$p" | Add-Content $report
-                  }
+                if (Select-String -LiteralPath $f.FullName -Pattern $token -SimpleMatch -Quiet -ErrorAction Stop) {
+                  $count++; $total++
+                  "match_log=$($f.FullName)" | Add-Content $report
                 }
               } catch { }
             }
-            "matches=$labelMatches" | Add-Content $report
+            "matches=$count" | Add-Content $report
           }
-          "`ntotal_token_matches=$totalMatches" | Add-Content $report
+          "`ntotal_preprobe_token_matches=$total" | Add-Content $report
           "probe_complete=true" | Add-Content $report
           Get-Content -LiteralPath $report
           "EVIDENCE_DIR=$evidenceDir" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
-      - name: Upload redacted path evidence only
+      - name: Upload redacted pre-probe evidence only
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: core-smr020-runner-diag-custody-probe
+          name: core-smr020-runner-diag-preprobe-custody
           path: ${{ env.EVIDENCE_DIR }}
           if-no-files-found: error
           retention-days: 30
