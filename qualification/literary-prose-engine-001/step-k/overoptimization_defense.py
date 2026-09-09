@@ -1,5 +1,6 @@
 import hashlib
 import json
+import math
 
 REQUIRED_METRICS = {
     "lexical_diversity", "sentence_length_cv", "rhetorical_top_share",
@@ -24,6 +25,28 @@ def _require_metrics(name, obj):
     missing = sorted(REQUIRED_METRICS - set(obj))
     if missing:
         raise ValueError(f"{name}_METRICS_MISSING:" + ",".join(missing))
+    invalid = sorted(
+        key for key in REQUIRED_METRICS
+        if isinstance(obj.get(key), bool)
+        or not isinstance(obj.get(key), (int, float))
+        or not math.isfinite(obj.get(key))
+    )
+    if invalid:
+        raise ValueError(f"{name}_METRICS_INVALID:" + ",".join(invalid))
+
+
+def _require_evidence(defense_case):
+    edit = defense_case.get("edit_budget")
+    if not isinstance(edit, dict) or "used" not in edit or "allowed" not in edit:
+        raise ValueError("EDIT_BUDGET_EVIDENCE_REQUIRED")
+    for key in ("used", "allowed"):
+        value = edit.get(key)
+        if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or value < 0:
+            raise ValueError("EDIT_BUDGET_EVIDENCE_INVALID")
+    history = defense_case.get("optimization_history")
+    if not isinstance(history, list):
+        raise ValueError("OPTIMIZATION_HISTORY_EVIDENCE_REQUIRED")
+    return edit, history
 
 
 def assess(defense_case):
@@ -35,14 +58,14 @@ def assess(defense_case):
     _require_metrics("CANDIDATE", candidate)
     _require_metrics("CLEAN_CONTROL", control)
     _require_metrics("PROJECT_HOLDOUT", holdout)
+    edit, history = _require_evidence(defense_case)
 
     if defense_case.get("named_author_target"):
         return {"disposition": "REJECT_OVEROPTIMIZATION", "reason": "NAMED_AUTHOR_TARGET_REJECTED", "risks": ["NAMED_AUTHOR_TARGET"]}
     if defense_case.get("universal_prose_score") is not None:
         return {"disposition": "REJECT_OVEROPTIMIZATION", "reason": "UNIVERSAL_PROSE_SCORE_FORBIDDEN", "risks": ["UNIVERSAL_SCORE"]}
 
-    edit = defense_case.get("edit_budget", {})
-    if edit.get("used", 0) > edit.get("allowed", 0):
+    if edit["used"] > edit["allowed"]:
         return {"disposition": "RETAIN_ORIGINAL", "reason": "EDIT_BUDGET_EXCEEDED", "risks": ["EDIT_BUDGET_EXCEEDED"]}
 
     risks = []
@@ -73,10 +96,11 @@ def assess(defense_case):
     if candidate["generic_prestige_similarity"] > max(0.78, baseline["generic_prestige_similarity"] + 0.15):
         risk("GENERIC_PRESTIGE_PROSE_DRIFT", candidate["generic_prestige_similarity"], max(0.78, baseline["generic_prestige_similarity"] + 0.15))
 
-    history = defense_case.get("optimization_history", [])
     if history:
         counts = {}
         for row in history:
+            if not isinstance(row, dict):
+                raise ValueError("OPTIMIZATION_HISTORY_EVIDENCE_INVALID")
             dimension = row.get("target_dimension")
             if dimension:
                 counts[dimension] = counts.get(dimension, 0) + 1
@@ -93,7 +117,7 @@ def assess(defense_case):
         "assessment_id": _stable_id({
             "project_id": defense_case.get("project_id"), "baseline": baseline,
             "candidate": candidate, "control": control, "holdout": holdout,
-            "history": history, "protected_irregularity": protected_irregularity
+            "edit_budget": edit, "history": history, "protected_irregularity": protected_irregularity
         }),
         "risks": risks,
         "risk_evidence": evidence,
