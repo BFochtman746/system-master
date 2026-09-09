@@ -1,0 +1,48 @@
+name: Four-System Control Drift Check
+
+on:
+  workflow_call:
+    inputs:
+      control_branch:
+        description: Canonical system control branch being validated
+        type: string
+        required: true
+      subject_sha:
+        description: Exact pushed commit to validate
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate canonical system control against four-system topology
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout canonical topology policy
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: main
+          path: policy
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Checkout exact system-control subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ inputs.subject_sha }}
+          path: subject
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Validate canonical topology and A-01 ownership map
+        run: node policy/.github/scripts/validate-system-topology.js
+
+      - name: Validate system-control identity and parent boundaries
+        env:
+          SYSTEM_POLICY_ROOT: ${{ github.workspace }}/policy
+          SYSTEM_CONTROL_SUBJECT_ROOT: ${{ github.workspace }}/subject
+          SYSTEM_CONTROL_BRANCH: ${{ inputs.control_branch }}
+        run: node policy/.github/scripts/validate-system-control-branch.js
