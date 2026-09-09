@@ -18,7 +18,6 @@ PREFERENCE_RANK = {
     "STEP_I_ACCEPT_CANDIDATE": 1,
     "STEP_I_RETAIN_ORIGINAL": 1,
     "USER_ACCEPT_CANDIDATE": 2,
-    "USER_REJECT_CANDIDATE": 2,
     "USER_RETAIN_ORIGINAL": 2,
     "USER_MODIFIED_CANDIDATE": 2,
     "USER_EXPLICIT_PREFERENCE": 3,
@@ -209,7 +208,7 @@ def derive_state(ledger):
         for event in group:
             if event["event_id"] == governing["event_id"]:
                 continue
-            if event["direction"] != governing["direction"] and event["event_type"] != "USER_REJECT_CANDIDATE":
+            if event["direction"] != governing["direction"]:
                 alternatives.append({
                     "direction": event["direction"],
                     "source_event_id": event["event_id"],
@@ -221,16 +220,18 @@ def derive_state(ledger):
 
     rejection_history = []
     rejected_direction = {}
-    for event in active:
+    for event in events:
         if event["event_type"] == "USER_REJECT_CANDIDATE":
-            rejection_history.append({
+            history_record = {
                 "event_id": event["event_id"], "dimension": event["dimension"],
                 "context": event["context"], "direction": event["direction"],
-                "sequence": event["sequence"]
-            })
-            key = _state_key(event) + "|" + event["direction"]
-            rejected_direction[key] = dict(rejection_history[-1])
-        elif event["event_type"] in {
+                "sequence": event["sequence"], "revoked": event["event_id"] in revoked
+            }
+            rejection_history.append(history_record)
+            if event["event_id"] not in revoked:
+                key = _state_key(event) + "|" + event["direction"]
+                rejected_direction[key] = dict(history_record)
+        elif event["event_id"] not in revoked and event["event_type"] in {
             "USER_ACCEPT_CANDIDATE", "USER_MODIFIED_CANDIDATE", "USER_EXPLICIT_PREFERENCE"
         }:
             key = _state_key(event) + "|" + event["direction"]
