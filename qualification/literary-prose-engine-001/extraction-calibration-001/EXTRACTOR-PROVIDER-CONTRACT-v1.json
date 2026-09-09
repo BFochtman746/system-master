@@ -1,0 +1,25 @@
+{
+  "contract_id": "LITERARY-NARRATIVE-EXTRACTOR-PROVIDER-001-v1",
+  "objective": "Standardize candidate source-to-observation extraction while preventing any provider from writing canonical narrative state or converting uncertainty into fabricated certainty.",
+  "input": {
+    "required": ["case_id", "task", "authorized_source_text", "source_sha256"],
+    "rights_rule": "Provider input must be authorized by the extraction-calibration source policy."
+  },
+  "output": {
+    "required": ["case_id", "task", "predictions", "provider_id", "source_sha256", "canonical_state_write_authorized"],
+    "prediction_required": ["label", "confidence", "status"],
+    "statuses": ["ASSERTED", "ALTERNATIVE", "UNRESOLVED", "ABSTAIN"],
+    "canonical_state_write_authorized": false
+  },
+  "hard_rules": [
+    "A provider emits candidate observations only.",
+    "Every output binds to the exact source digest it consumed.",
+    "Confidence is calibration metadata, not prose quality.",
+    "Provider uncertainty may reduce coverage; it must not be normalized into an ASSERTED label merely to improve recall.",
+    "A provider may not infer author intent or publication authority.",
+    "A provider may not access hidden Book-Eval gold or bulk copyrighted reference bodies.",
+    "Canonical narrative-state materialization remains a separate validated downstream transition."
+  ],
+  "baseline_rule": "The required no-model baseline abstains on every task. It exists to prove that low false-certainty alone is insufficient: zero-coverage/zero-recall must remain visible in the receipt.",
+  "next_provider_admission": "A model or NLP provider may be added only after the provider-independent scorer and no-model baseline are green. Provider selection must be evaluated on source-held-out evidence, task-level metrics, ambiguity preservation, false certainty and calibration."
+}
