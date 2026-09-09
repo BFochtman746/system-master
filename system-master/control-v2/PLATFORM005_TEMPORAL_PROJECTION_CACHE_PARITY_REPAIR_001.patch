@@ -1,0 +1,187 @@
+--- a/10_REQUIREMENTS/SMR018-PACKET-CONTRACT.md
++++ b/10_REQUIREMENTS/SMR018-PACKET-CONTRACT.md
+@@ -7,7 +7,7 @@
+ PLATFORM-005 does not authenticate principals or own session truth (PLATFORM-003/Foundation), does not qualify/route capabilities (PLATFORM-006), does not own observability truth (PLATFORM-012), does not own domain/durable-work truth, does not own PostgreSQL state, and cannot authorize tool/effect execution. Navigation visibility is never execution authorization.
+ 
+ ## Projection law
+-The client projection contains only bounded shell-safe fields. It omits session identifiers, principal identity, role sets, authentication generation, CSRF/device bindings, server authorization rules, capability policy internals, domain data and secrets. Invalid/expired session binding, network loss or stale loads clear dynamic navigation. UNKNOWN upstream health is degraded, never optimistic ONLINE.
++The client projection contains only bounded shell-safe fields. It omits session identifiers, principal identity, role sets, authentication generation, CSRF/device bindings, server authorization rules, capability policy internals, domain data and secrets. Invalid/expired session binding, expired projection TTL, network loss or stale loads clear dynamic navigation. The browser must fail closed at `expiresAt` even if no network/visibility event occurs. UNKNOWN upstream health is degraded, never optimistic ONLINE.
+ 
+ ## Route law
+ Work-surface routes are origin-relative, non-API, normalized and bounded. Absolute/protocol-relative/credential-bearing/fragment/backslash/traversal/encoded traversal or encoded separator/null forms fail closed. DOM labels are rendered with textContent only.
+@@ -16,7 +16,7 @@
+ Authenticated shell projection reads are same-origin, credential-bound, no-store, non-redirecting and byte-bounded before JSON parsing. Sensitive/authenticated responses are never admitted to browser cache authority.
+ 
+ ## Offline/service-worker law
+-Only a fixed digest-bound non-sensitive static allowlist may enter Cache API. Service-worker fetch interception is same-origin GET only and excludes /api. Static cache population omits credentials. Updates activate only through SYSTEM_MASTER_ACTIVATE_UPDATE; emergency SYSTEM_MASTER_UNREGISTER_AND_PURGE unregisters the worker and clears owned caches.
++Only a fixed digest-bound non-sensitive static allowlist may enter Cache API. Cached shell assets must also expire at the declared offline-policy maximum age (24 hours for the conservative SMR018 policy); missing/future/stale cache timestamps fail closed. Service-worker fetch interception is same-origin GET only and excludes /api. Static cache population omits credentials. Updates activate only through SYSTEM_MASTER_ACTIVATE_UPDATE; emergency SYSTEM_MASTER_UNREGISTER_AND_PURGE unregisters the worker and clears owned caches.
+ 
+ ## Persistence decision
+ PLATFORM-005 creates no PostgreSQL table or durable canonical store. Browser Cache API state is disposable, bounded, non-sensitive shell-only projection state.
+--- a/11_SOURCE/pwa/app.js
++++ b/11_SOURCE/pwa/app.js
+@@ -10,8 +10,13 @@
+   let loadEpoch = 0;
+   let controller = null;
+   let registration = null;
++  let projectionExpiryTimer = null;
+ 
++  const clearProjectionExpiry = () => {
++    if (projectionExpiryTimer !== null) { clearTimeout(projectionExpiryTimer); projectionExpiryTimer = null; }
++  };
+   const clearDynamic = (message) => {
++    clearProjectionExpiry();
+     nav.replaceChildren();
+     attention.replaceChildren();
+     status.textContent = message;
+@@ -48,6 +53,10 @@
+ 
+   const renderProjection = (projection) => {
+     if (!projection || typeof projection !== "object" || !Array.isArray(projection.navigation) || !projection.status) throw new Error("Invalid shell projection");
++    const issuedAt = Date.parse(projection.issuedAt);
++    const expiresAt = Date.parse(projection.expiresAt);
++    const now = Date.now();
++    if (!Number.isFinite(issuedAt) || !Number.isFinite(expiresAt) || expiresAt <= issuedAt || expiresAt <= now) throw new Error("Expired shell projection");
+     clearDynamic("Status current");
+     connection.textContent = safeText(projection.connectionState, "Unavailable");
+     status.textContent = `System health: ${safeText(projection.status.overallHealth, "UNKNOWN")}`;
+@@ -73,6 +82,13 @@
+       li.append(link);
+       nav.append(li);
+     }
++    projectionExpiryTimer = setTimeout(() => {
++      ++loadEpoch;
++      if (controller) controller.abort();
++      connection.textContent = "DEGRADED";
++      clearDynamic("Authenticated navigation expired; refresh required.");
++      showError("Shell projection expired");
++    }, expiresAt - now);
+   };
+ 
+   const loadSession = async () => {
+--- a/11_SOURCE/pwa/service-worker.js
++++ b/11_SOURCE/pwa/service-worker.js
+@@ -3,18 +3,20 @@
+ const CACHE_PREFIX = "smr018-shell-";
+ const MAX_ENTRY_BYTES = 256000;
+ const MAX_TOTAL_BYTES = 1500000;
++const MAX_AGE_MS = 86400000;
++const CACHED_AT_HEADER = "X-System-Master-Cached-At";
+ const ACTIVATE_MESSAGE = "SYSTEM_MASTER_ACTIVATE_UPDATE";
+ const KILL_MESSAGE = "SYSTEM_MASTER_UNREGISTER_AND_PURGE";
+ const ASSET_DIGESTS = Object.freeze({
+   "/index.html": "084031e2a0d10abd976d706dd0e334a699ee201b636e0beac46650ebc39d6bf2",
+-  "/app.js": "c9c39362ab3fe95ff3e0b5fb4fdc57fd9c0105e539ce7ffa69ec2024cb736b06",
++  "/app.js": "4e0ec0c8e16da047d70943ada8d4f23549bdcd59b90132ea4bd6f995c6f81fa4",
+   "/app.css": "d656954fe3762ad1f4e474bd97676ec715aaa825fd0ed4b2ac8cddfe1d8cc8e8",
+   "/manifest.webmanifest": "37458f88909d513b9a6056ea0beb6b1774adcb055b2022d1d47a4efffa3451f2",
+   "/offline.html": "036da4af2a29534dd41c242cb3f8e5adecfd183eb2be7fbadfc1d28e1c93d41b"
+ });
+ const ASSET_SIZES = Object.freeze({
+   "/index.html": 1712,
+-  "/app.js": 7117,
++  "/app.js": 7929,
+   "/app.css": 2713,
+   "/manifest.webmanifest": 358,
+   "/offline.html": 771
+@@ -29,9 +31,21 @@
+   const declared = Number(response.headers.get("Content-Length") || "0"); if (declared && declared > MAX_ENTRY_BYTES) throw new Error("asset length rejected");
+   const bytes = await response.arrayBuffer(); if (bytes.byteLength > MAX_ENTRY_BYTES || bytes.byteLength !== ASSET_SIZES[path]) throw new Error("asset size mismatch");
+   if (await sha256(bytes) !== ASSET_DIGESTS[path]) throw new Error("asset digest mismatch");
+-  return new Response(bytes, { status: response.status, statusText: response.statusText, headers: response.headers });
++  const headers = new Headers(response.headers); headers.set(CACHED_AT_HEADER, String(Date.now()));
++  return new Response(bytes, { status: response.status, statusText: response.statusText, headers });
++};
++const cachedFreshAsset = async (path) => {
++  const cache = await caches.open(CACHE_VERSION);
++  const cached = await cache.match(path); if (!cached) return null;
++  const cachedAt = Number(cached.headers.get(CACHED_AT_HEADER) || "0"); const now = Date.now();
++  if (!Number.isFinite(cachedAt) || cachedAt <= 0 || cachedAt > now || now - cachedAt > MAX_AGE_MS) { await cache.delete(path); return null; }
++  return cached;
++};
++const cachedOrRefreshedAsset = async (path) => {
++  const cached = await cachedFreshAsset(path); if (cached) return cached;
++  const verified = await fetchVerifiedAsset(path); const cache = await caches.open(CACHE_VERSION); await cache.put(path, verified.clone()); return verified;
+ };
+ self.addEventListener("install", event => { event.waitUntil((async () => { let total = 0; const cache = await caches.open(CACHE_VERSION); for (const path of Object.keys(ASSET_DIGESTS)) { total += ASSET_SIZES[path]; if (total > MAX_TOTAL_BYTES) throw new Error("shell cache budget exceeded"); const verified = await fetchVerifiedAsset(path); await cache.put(path, verified); } })()); });
+ self.addEventListener("activate", event => { event.waitUntil((async () => { for (const key of await caches.keys()) if (key.startsWith(CACHE_PREFIX) && key !== CACHE_VERSION) await caches.delete(key); await self.clients.claim(); })()); });
+-self.addEventListener("fetch", event => { const request = event.request; const url = new URL(request.url); if (request.method !== "GET" || url.origin !== self.location.origin || url.pathname === "/api" || url.pathname.startsWith("/api/")) return; if (request.mode === "navigate") { event.respondWith((async () => { try { return await fetch(new Request(request, { cache: "no-store", redirect: "error" })); } catch (_) { return (await caches.open(CACHE_VERSION)).match("/offline.html"); } })()); return; } if (Object.prototype.hasOwnProperty.call(ASSET_DIGESTS, url.pathname)) event.respondWith((async () => (await caches.open(CACHE_VERSION)).match(url.pathname) || fetchVerifiedAsset(url.pathname))()); });
++self.addEventListener("fetch", event => { const request = event.request; const url = new URL(request.url); if (request.method !== "GET" || url.origin !== self.location.origin || url.pathname === "/api" || url.pathname.startsWith("/api/")) return; if (request.mode === "navigate") { event.respondWith((async () => { try { return await fetch(new Request(request, { cache: "no-store", redirect: "error" })); } catch (_) { return await cachedFreshAsset("/offline.html") || new Response("Offline shell cache expired. Reconnect to refresh.", { status: 503, headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" } }); } })()); return; } if (Object.prototype.hasOwnProperty.call(ASSET_DIGESTS, url.pathname)) event.respondWith(cachedOrRefreshedAsset(url.pathname)); });
+ self.addEventListener("message", event => { const type = event.data && event.data.type; if (type === ACTIVATE_MESSAGE) { self.skipWaiting(); return; } if (type !== KILL_MESSAGE) return; event.waitUntil((async () => { for (const key of await caches.keys()) if (key.startsWith(CACHE_PREFIX)) await caches.delete(key); await self.registration.unregister(); })()); });
+--- a/11_SOURCE/pwa/asset-integrity.json
++++ b/11_SOURCE/pwa/asset-integrity.json
+@@ -6,9 +6,9 @@
+       "sha256": "084031e2a0d10abd976d706dd0e334a699ee201b636e0beac46650ebc39d6bf2"
+     },
+     {
+-      "bytes": 7117,
++      "bytes": 7929,
+       "path": "/app.js",
+-      "sha256": "c9c39362ab3fe95ff3e0b5fb4fdc57fd9c0105e539ce7ffa69ec2024cb736b06"
++      "sha256": "4e0ec0c8e16da047d70943ada8d4f23549bdcd59b90132ea4bd6f995c6f81fa4"
+     },
+     {
+       "bytes": 2713,
+@@ -28,5 +28,5 @@
+   ],
+   "cache_version": "smr018-shell-v1",
+   "policy": "NON_SENSITIVE_STATIC_SHELL_ONLY",
+-  "service_worker_sha256": "d8af6e724bbd6edca2360d183912fc9c1484947bcfc706badca4e4135d7d4994"
++  "service_worker_sha256": "c8e566ac341ff86e7df2d9689f9bfa8862db81214b956f130fe5e6a5c0257b9c"
+ }
+--- a/12_TESTS/src/test/java/org/systemmaster/rebuild/platform/shell/Platform005AuthorityTests.java
++++ b/12_TESTS/src/test/java/org/systemmaster/rebuild/platform/shell/Platform005AuthorityTests.java
+@@ -76,11 +76,11 @@
+ 
+         MobileContinuityCheckpoint cp=new MobileContinuityCheckpoint("checkpoint-one",continuity.sessionId(),"client-one",continuity.deviceBindingDigest(),continuity.authenticationGeneration(),continuity.transportGeneration(),continuity.lastServerSequence(),continuity.lastClientSequence(),t.minusSeconds(1),t.plusSeconds(120),t.minusSeconds(1));MobileResumeProjection resume=service.mobileResume(cp,continuity,auth,continuity.lastServerSequence(),t);ok(resume.standing()==MobileResumeStanding.RESUME_ALLOWED,"mobile resume delegates to PLATFORM-003");MobileResumeProjection catchup=service.mobileResume(cp,continuity,auth,continuity.lastServerSequence()+1,t);ok(catchup.standing()==MobileResumeStanding.CATCH_UP_REQUIRED,"mobile catch-up projection");
+ 
+-        OfflineShellPolicy policy=OfflineShellPolicy.conservative();ok(policy.cacheable("GET","/app.js",false),"static shell cacheable");ok(!policy.cacheable("POST","/app.js",false),"POST not cached");ok(!policy.cacheable("GET","/api/shell/session",false),"API never cached");ok(!policy.cacheable("GET","/app.js",true),"sensitive response never cached");bad(()->new OfflineShellPolicy("v","/",Set.of("/api/x"),1,2,Duration.ofSeconds(1),"KILL"),"API allowlist forbidden");ok("no-store".equals(ShellSecurityHeaders.required().get("Cache-Control")),"protected projection no-store header");ok(ShellSecurityHeaders.CSP.contains("frame-ancestors 'none'")&&!ShellSecurityHeaders.CSP.contains("unsafe-inline")&&!ShellSecurityHeaders.CSP.contains("unsafe-eval"),"strict CSP contract");
++        OfflineShellPolicy policy=OfflineShellPolicy.conservative();ok(policy.maxAge().equals(Duration.ofHours(24)),"conservative cache age bound");ok(policy.cacheable("GET","/app.js",false),"static shell cacheable");ok(!policy.cacheable("POST","/app.js",false),"POST not cached");ok(!policy.cacheable("GET","/api/shell/session",false),"API never cached");ok(!policy.cacheable("GET","/app.js",true),"sensitive response never cached");bad(()->new OfflineShellPolicy("v","/",Set.of("/api/x"),1,2,Duration.ofSeconds(1),"KILL"),"API allowlist forbidden");ok("no-store".equals(ShellSecurityHeaders.required().get("Cache-Control")),"protected projection no-store header");ok(ShellSecurityHeaders.CSP.contains("frame-ancestors 'none'")&&!ShellSecurityHeaders.CSP.contains("unsafe-inline")&&!ShellSecurityHeaders.CSP.contains("unsafe-eval"),"strict CSP contract");
+ 
+         Path web=Path.of("11_SOURCE/pwa");String js=Files.readString(web.resolve("app.js"));String sw=Files.readString(web.resolve("service-worker.js"));String html=Files.readString(web.resolve("index.html"));String css=Files.readString(web.resolve("app.css"));
+-        ok(js.contains("credentials: \"same-origin\"")&&js.contains("cache: \"no-store\"")&&js.contains("redirect: \"error\""),"session fetch same-origin no-store nonredirecting");ok(js.contains("AbortController")&&js.contains("loadEpoch"),"stale concurrent shell loads abort");ok(js.contains("readBoundedJson")&&js.contains("262144")&&js.contains("response.body.getReader"),"authenticated projection parsing is byte bounded");ok(js.contains("replaceChildren")&&js.contains("textContent")&&!js.contains("innerHTML")&&!js.contains("eval("),"text-only DOM rendering");ok(!js.contains("localStorage")&&!js.contains("sessionStorage")&&!js.contains("indexedDB"),"no browser auth/domain storage");ok(js.contains("pageshow")&&js.contains("event.persisted")&&js.contains("visibilitychange"),"BFCache/foreground refresh hooks");
+-        ok(sw.contains("request.method !== \"GET\"")&&sw.contains("url.pathname.startsWith(\"/api/\")"),"service worker same-origin GET API exclusion");ok(sw.contains("crypto.subtle.digest")&&sw.contains("asset digest mismatch"),"service worker asset integrity");ok(sw.contains("credentials: \"omit\""),"static cache population sends no credentials");ok(sw.contains("SYSTEM_MASTER_ACTIVATE_UPDATE")&&sw.contains("SYSTEM_MASTER_UNREGISTER_AND_PURGE")&&sw.contains("registration.unregister"),"controlled update and kill switch");ok(!sw.contains("localStorage")&&!sw.contains("indexedDB"),"service worker cache only");ok(html.contains("Skip to main content")&&html.contains("aria-live=\"polite\"")&&!html.contains("<script>"),"accessible external-script shell");ok(css.contains("prefers-reduced-motion")&&css.contains("min-block-size: 44px")&&css.contains("focus-visible"),"WCAG-oriented focus/target/motion CSS");ok(Files.readString(web.resolve("manifest.webmanifest")).contains("\"orientation\": \"portrait\""),"installed mobile shell requests portrait orientation");
++        ok(js.contains("credentials: \"same-origin\"")&&js.contains("cache: \"no-store\"")&&js.contains("redirect: \"error\""),"session fetch same-origin no-store nonredirecting");ok(js.contains("AbortController")&&js.contains("loadEpoch"),"stale concurrent shell loads abort");ok(js.contains("projection.expiresAt")&&js.contains("projection.issuedAt")&&js.contains("setTimeout")&&js.contains("Shell projection expired"),"client enforces projection temporal expiry");ok(js.contains("readBoundedJson")&&js.contains("262144")&&js.contains("response.body.getReader"),"authenticated projection parsing is byte bounded");ok(js.contains("replaceChildren")&&js.contains("textContent")&&!js.contains("innerHTML")&&!js.contains("eval("),"text-only DOM rendering");ok(!js.contains("localStorage")&&!js.contains("sessionStorage")&&!js.contains("indexedDB"),"no browser auth/domain storage");ok(js.contains("pageshow")&&js.contains("event.persisted")&&js.contains("visibilitychange"),"BFCache/foreground refresh hooks");
++        ok(sw.contains("request.method !== \"GET\"")&&sw.contains("url.pathname.startsWith(\"/api/\")"),"service worker same-origin GET API exclusion");ok(sw.contains("crypto.subtle.digest")&&sw.contains("asset digest mismatch"),"service worker asset integrity");ok(sw.contains("MAX_AGE_MS = 86400000")&&sw.contains("X-System-Master-Cached-At")&&sw.contains("cachedFreshAsset"),"service worker enforces cache temporal expiry");ok(sw.contains("credentials: \"omit\""),"static cache population sends no credentials");ok(sw.contains("SYSTEM_MASTER_ACTIVATE_UPDATE")&&sw.contains("SYSTEM_MASTER_UNREGISTER_AND_PURGE")&&sw.contains("registration.unregister"),"controlled update and kill switch");ok(!sw.contains("localStorage")&&!sw.contains("indexedDB"),"service worker cache only");ok(html.contains("Skip to main content")&&html.contains("aria-live=\"polite\"")&&!html.contains("<script>"),"accessible external-script shell");ok(css.contains("prefers-reduced-motion")&&css.contains("min-block-size: 44px")&&css.contains("focus-visible"),"WCAG-oriented focus/target/motion CSS");ok(Files.readString(web.resolve("manifest.webmanifest")).contains("\"orientation\": \"portrait\""),"installed mobile shell requests portrait orientation");
+ 
+         String integrity=Files.readString(web.resolve("asset-integrity.json"));for(String name:List.of("index.html","app.js","app.css","manifest.webmanifest","offline.html")){String digest=Digests.sha256(Files.readAllBytes(web.resolve(name)));ok(integrity.contains(digest),"asset integrity manifest binds "+name);ok(sw.contains(digest),"service worker binds "+name);}
+         ok(Files.readString(web.resolve("required-response-headers.json")).contains("TARGET_HTTP_CONTAINER_EMPIRICAL_PENDING_PC_ENDGAME_025"),"header delivery remains target empirical");
+--- a/tools/verify_platform005_contract_parity.py
++++ b/tools/verify_platform005_contract_parity.py
+@@ -21,8 +21,8 @@
+ '11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/shell/Platform005Authority.java':['ownsAuthenticationTruth','ownsCapabilityQualificationOrRouting','ownsDomainTruth','ownsDurablePostgresState','browserCacheMayContainSensitiveOrAuthenticatedData','optimisticClientStateMayClaimDurableCompletion','serviceWorkerMayInterceptApiRequests','targetBrowserBehaviorProvenByPortableTests'],
+ '11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/shell/ShellRules.java':['%2e','%2f','%5c','%00','uri.normalize'],
+ '11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/shell/PwaShellService.java':['REAUTH_REQUIRED','OFFLINE','ShellCapabilityResolver.standing','AtlasHealth.HEALTHY','Platform003Authority.mobileResumeStanding'],
+-'11_SOURCE/pwa/app.js':['credentials: "same-origin"','cache: "no-store"','redirect: "error"','AbortController','loadEpoch','readBoundedJson','262144','textContent'],
+-'11_SOURCE/pwa/service-worker.js':['credentials: "omit"','crypto.subtle.digest','SYSTEM_MASTER_ACTIVATE_UPDATE','SYSTEM_MASTER_UNREGISTER_AND_PURGE','url.pathname.startsWith("/api/")'],
++'11_SOURCE/pwa/app.js':['credentials: "same-origin"','cache: "no-store"','redirect: "error"','AbortController','loadEpoch','readBoundedJson','262144','textContent','projection.expiresAt','projection.issuedAt','setTimeout','Shell projection expired'],
++'11_SOURCE/pwa/service-worker.js':['credentials: "omit"','crypto.subtle.digest','SYSTEM_MASTER_ACTIVATE_UPDATE','SYSTEM_MASTER_UNREGISTER_AND_PURGE','url.pathname.startsWith("/api/")','MAX_AGE_MS = 86400000','X-System-Master-Cached-At','cachedFreshAsset'],
+ '11_SOURCE/pwa/required-response-headers.json':['no-store','Content-Security-Policy','no-referrer','TARGET_HTTP_CONTAINER_EMPIRICAL_PENDING_PC_ENDGAME_025']}
+ for rel,toks in checks.items():
+  txt=(R/rel).read_text()
+--- a/tools/verify_platform005_persistence_boundary.py
++++ b/tools/verify_platform005_persistence_boundary.py
+@@ -20,6 +20,7 @@
+  if tok in app or tok in sw:issues.append('browser durable storage token:'+tok)
+ if 'cache: "no-store"' not in app or 'credentials: "same-origin"' not in app:issues.append('protected fetch cache/auth binding')
+ if 'credentials: "omit"' not in sw:issues.append('static cache credential omission')
++if 'MAX_AGE_MS = 86400000' not in sw or 'X-System-Master-Cached-At' not in sw or 'cachedFreshAsset' not in sw:issues.append('static cache max-age enforcement')
+ if 'url.pathname.startsWith("/api/")' not in sw:issues.append('API service-worker exclusion')
+ blob=json.dumps(policy)
+ if 'no-store' not in blob:issues.append('protected no-store response requirement')
+--- a/tools/verify_smr018_recurrence.py
++++ b/tools/verify_smr018_recurrence.py
+@@ -7,11 +7,11 @@
+ ('11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/shell/WorkSurfaceDescriptor.java',['allowedRoles','requiredCapabilityId','priority','canonicalDigest']),
+ ('11_SOURCE/src/main/java/org/systemmaster/rebuild/platform/shell/PwaSessionProjection.java',['projectionDigest','navigation.size()>64','computeDigest']),
+ ('11_SOURCE/pwa/app.js',['AbortController','loadEpoch','controller.abort']),
+-('11_SOURCE/pwa/app.js',['replaceChildren','offline','Authentication required']),
++('11_SOURCE/pwa/app.js',['replaceChildren','offline','Authentication required','projection.expiresAt','setTimeout','Shell projection expired']),
+ ('11_SOURCE/pwa/app.js',['credentials: "same-origin"','cache: "no-store"','redirect: "error"','readBoundedJson','262144']),
+ ('11_SOURCE/pwa/app.js',['safeRoute','textContent','%2e','%2f']),
+ ('11_SOURCE/pwa/service-worker.js',['request.method !== "GET"','url.origin !== self.location.origin','url.pathname.startsWith("/api/")']),
+-('11_SOURCE/pwa/service-worker.js',['ASSET_DIGESTS','crypto.subtle.digest','credentials: "omit"']),
++('11_SOURCE/pwa/service-worker.js',['ASSET_DIGESTS','crypto.subtle.digest','credentials: "omit"','MAX_AGE_MS = 86400000','X-System-Master-Cached-At','cachedFreshAsset']),
+ ('11_SOURCE/pwa/service-worker.js',['request.mode === "navigate"','/offline.html']),
+ ('11_SOURCE/pwa/service-worker.js',['CACHE_PREFIX','SYSTEM_MASTER_ACTIVATE_UPDATE','SYSTEM_MASTER_UNREGISTER_AND_PURGE','registration.unregister']),
+ ('11_SOURCE/pwa/required-response-headers.json',['Content-Security-Policy','Referrer-Policy','X-Content-Type-Options','no-store']),
