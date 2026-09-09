@@ -1,16 +1,29 @@
 # A-01 Overnight Requests
 
-Canonical second-shift authority: `qualification/a01/overnight/A01-SECOND-SHIFT-002.md`.
+Canonical second-shift authority:
 
-Each workstream may submit at most one `READY` ticket for a given `night_date`.
+- `qualification/a01/overnight/A01-SECOND-SHIFT-002.md`
+- `qualification/a01/overnight/A01-PORTFOLIO-003.md`
 
-Use a unique filename such as:
+A workstream may submit multiple `READY` tickets for a night when each ticket has a distinct completion delta and is safe under the dependency rules. The current cap is four READY tickets per workstream per night, subject to the global eight-slot night plan and time budget.
+
+Use unique filenames such as:
 
 `2026-09-09--LEARNING--large-regression.json`
 
 Do not edit another workstream's ticket. To withdraw your own ticket before the night shift, change its state to `HOLD` or `SUPERSEDED` in a forward commit.
 
 A ticket is a request for A-01 executable work, not a request for an autonomous ChatGPT conversation. The referenced `qualification_id` must already be registered and explicitly marked overnight-eligible in `qualification/a01/registry.json`.
+
+## Dependency rule
+
+Tickets are independent by default. If a ticket can execute safely only after another ticket has passed, set:
+
+`"depends_on_ticket_id": "<predecessor-ticket-id>"`
+
+The dependency must be in the same workstream, READY for the same night, and within the configured chain-length cap. The planner places a dependent ticket immediately after its predecessor and marks it `requires_previous_pass=true`. The night workflow skips that successor unless the immediately preceding A-01 receipt class is `PASS`.
+
+Do not omit a real dependency merely to keep work running after a failure. Omitting `depends_on_ticket_id` is an assertion that the ticket remains valid even if any other ticket fails.
 
 ## Completion-delta rule
 
@@ -43,12 +56,12 @@ Priority represents expected reduction in next-day work and critical-path distan
 
 Research must produce durable provenance, answer a named gap/question, state implementation/evaluation implications, and create a next-day handoff. A generic reading list is not an A-01 objective.
 
-When the critical path becomes human-dependent, device-incompatible, unavailable, or otherwise non-automatable, use other safe second-shift work only when it has its own measurable completion delta. Otherwise leave the workstream unscheduled.
+When the critical path becomes human-dependent, device-incompatible, unavailable, or otherwise non-automatable, use other safe second-shift work only when it has its own measurable completion delta. Otherwise leave that A-01 ticket unscheduled while the workstream's scheduled ChatGPT shift continues safe research/build/preparation work.
 
 ## Runner protection
 
-All A-01 tickets pass through the canonical gateway runner guard. The gateway checks runner identity, minimum disk and available memory, required tools, and sleep-prevention capability before subject acquisition; long qualification execution prevents Windows system sleep; qualifier and outer job timeouts remain enforced; timed-out child process trees are forcibly terminated; preflight/postflight resource evidence is captured; stale A-01 temp cleanup is best effort; and later slots remain independent after a subject failure.
+All A-01 tickets pass through the canonical gateway runner guard. The gateway checks runner identity, minimum disk and available memory, required tools, and sleep-prevention capability before subject acquisition; long qualification execution prevents Windows system sleep; qualifier and outer job timeouts remain enforced; timed-out child process trees are forcibly terminated; preflight/postflight resource evidence is captured; stale A-01 temp cleanup is best effort; and unrelated later slots remain independent after a subject failure.
 
 For runtime above 180 minutes, the registry must declare the qualifier checkpoint-capable and the ticket must provide `checkpoint_interval_minutes` no greater than 30.
 
-The central workflow `.github/workflows/a01-overnight-night-shift.yml` is the only canonical A-01 overnight schedule. Do not add per-workstream overnight cron schedules. Scheduled ChatGPT research/build work may operate separately and in parallel, but it must not dispatch A-01 independently or bypass the central scheduler.
+The central workflow `.github/workflows/a01-overnight-night-shift.yml` is the only canonical A-01 overnight schedule. Do not add per-workstream overnight cron schedules. Scheduled ChatGPT research/build work operates separately and in parallel, but it must not dispatch A-01 independently or bypass the central scheduler.
