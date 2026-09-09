@@ -23,11 +23,15 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Compile Candidate-002 provider boundary
+      - name: Compile Candidate-002 provider and adjudication boundaries
         run: >-
           python -m py_compile
           qualification/literary-prose-engine-001/extraction-calibration-001/candidate-002/source_heldout_label_ontology.py
           qualification/literary-prose-engine-001/extraction-calibration-001/candidate-002/model_backed_provider.py
           qualification/literary-prose-engine-001/extraction-calibration-001/candidate-002/run_candidate_002_provider_fixtures.py
+          qualification/literary-prose-engine-001/extraction-calibration-001/candidate-002/validate_source_heldout_human_adjudication.py
+          qualification/literary-prose-engine-001/extraction-calibration-001/candidate-002/run_source_heldout_human_adjudication_validator_fixtures.py
       - name: Run Candidate-002 provider and ontology fixtures
         run: python qualification/literary-prose-engine-001/extraction-calibration-001/candidate-002/run_candidate_002_provider_fixtures.py
+      - name: Run Candidate-002 human adjudication return-boundary fixtures
+        run: python qualification/literary-prose-engine-001/extraction-calibration-001/candidate-002/run_source_heldout_human_adjudication_validator_fixtures.py
