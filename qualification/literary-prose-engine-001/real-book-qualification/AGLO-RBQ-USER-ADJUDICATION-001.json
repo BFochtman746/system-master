@@ -1,22 +1,27 @@
 {
   "objective": "AGLO-RBQ-USER-ADJUDICATION-001",
-  "standing": "SUPERSEDED__NO_VALID_CH24_AUTHOR_DECISION_RECORDED",
+  "standing": "PASS__EXPLICIT_AUTHOR_DECISION_RECORDED__CH24_WITNESS_DEDUPLICATION_ACCEPTED",
   "book_id": "AGLO-001",
   "baseline_version_id": "AGLO-REJECT-ALL-NARRATIVE-v1",
   "authority_reconciliation": {
-    "valid_authority": "EXPLICIT_REJECT_ALL_BASELINE_RATIFICATION_AND_QUALIFICATION_ONLY_ADMISSION",
-    "chapter_24_candidate_decision_present": false,
-    "prior_decisions_authoritative": false,
+    "valid_authority": "EXPLICIT_USER_CHOICE_A_IN_CURRENT_CHAT",
+    "chapter_24_candidate_decision_present": true,
+    "prior_invalid_decisions_authoritative": false,
     "correction_record": "AGLO-RBQ-AUTHORITY-CORRECTION-002.json",
     "history_rewritten": false
   },
-  "decisions": [],
-  "invalidated_prior_claims": [
+  "decisions": [
     {
       "target_id": "AGLO-RBQ-CH24-WITNESS-001",
-      "claimed_decision": "DELETE_EXACT_DUPLICATE",
-      "authority": "INVALID__NOT_EXPLICITLY_PROVIDED_BY_USER"
-    },
+      "decision": "ACCEPT_REMOVE_EXACT_DUPLICATE",
+      "candidate_digest_sha256": "eeeb3740493d047e69d637ceafe15fa1e054775cb5963652c17f2465e91de7e4",
+      "authority": "EXPLICIT_USER_DECISION",
+      "scope": "A-GATE-LEFT-OPEN_PROJECT_ONLY",
+      "automatic_manuscript_overwrite_authorized": false,
+      "raw_prose_persisted": false
+    }
+  ],
+  "invalidated_prior_claims": [
     {
       "target_id": "AGLO-RBQ-CH24-CONCAT-001",
       "claimed_decision": "KEEP_SECOND_ONLY",
@@ -24,14 +29,18 @@
     }
   ],
   "step_j_project_preference_evidence": {
-    "standing": "NOT_ADMITTED",
-    "explicit_user_preference_available": false,
-    "reason": "No genuine Chapter 24 candidate choice has yet been made by the author.",
+    "standing": "ADMITTED_AS_ONE_PROJECT_SCOPED_USER_ACTION",
+    "store": "CURRENT_PREFERENCE",
+    "dimension": "EXACT_ACCIDENTAL_DUPLICATION",
+    "direction": "REMOVE_EXACT_DUPLICATE_WHEN_THE_COMPLETE_SURVIVING_PASSAGE_IS_IDENTICAL_IN_MEANING_AND_PRESERVATION_GATES_PASS",
+    "authority": "USER_ACTION",
+    "strength": "ONE_EXPLICIT_AUTHOR_DECISION__DO_NOT_GENERALIZE_TO_STABLE_IDENTITY_OR_OTHER_BOOKS",
+    "may_override_canon_or_preservation": false,
     "may_generalize_to_other_books": false
   },
   "publication_authorized": false,
   "automatic_overwrite_authorized": false,
   "canon_replacement_authorized": false,
   "raw_prose_persisted": false,
-  "next_transition": "PRESENT_SINGLE_GENUINE_CH24_WITNESS_DEDUPLICATION_DECISION_TO_AUTHOR"
+  "next_transition": "APPEND_STEP_J_PROJECT_EVENT_THEN_CLOSE_REAL_BOOK_REPRESENTATIVE_SAMPLE"
 }
