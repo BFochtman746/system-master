@@ -1,5 +1,5 @@
 {
-  "registry_version": 16,
+  "registry_version": 17,
   "qualifications": {
     "A01-CONTROL-PLANE-SELFTEST": {
       "workstream_id": "SYSTEM-MASTER",
@@ -30,6 +30,16 @@
       "evidence_artifact": "book-system-service-interface-registry-001",
       "overnight_eligible": false,
       "description": "Qualify the exact Book System parent service-interface registry: four service families and seventeen operations, request/response schema and provider binding, minimum projection enforcement, canonical-write denial, stale projection rejection, idempotent replay and idempotency conflict handling, unsafe non-idempotent retry rejection, abstention/error preservation, and parent-admission handoff boundaries. PASS is bounded to the tested subject SHA and grants no parent canonical-write, publication, or production authority to a provider."
+    },
+    "BOOK-SYSTEM-LIFECYCLE-TRANSITION-ENGINE-001": {
+      "workstream_id": "BOOK-SYSTEM",
+      "gate_class": "focused",
+      "source": "subject",
+      "executable": "node",
+      "args": [".github/scripts/a01-book-system-lifecycle-transition-001.js"],
+      "evidence_artifact": "book-system-lifecycle-transition-engine-001",
+      "overnight_eligible": false,
+      "description": "Qualify the exact Book System lifecycle transition engine: parent/project and unit transition gates, author-required boundaries, direct-service transition denial, stale service-evidence rejection, exact parent and lifecycle-ledger concurrency, defer/resume, transitive invalidation and revalidation restore, deterministic replay without double commit, request/idempotency conflicts, transaction atomicity, and exact rollback identity. PASS is bounded to the tested subject SHA and grants no autonomous author, publication, promotion, or provider canonical-write authority."
     },
     "CONTINUITY-TARGET-WINDOWS-REBOOT": {
       "workstream_id": "SYSTEM-MASTER-CONTINUITY",
