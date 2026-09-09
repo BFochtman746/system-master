@@ -1,4 +1,4 @@
-ALLOWED = {"OBSERVATION", "LIMITATION", "RISK", "OPPORTUNITY", "INTENTIONAL_FEATURE"}
+ALLOWED = {"OBSERVATION", "LIMITATION", "RISK", "OPPORTUNITY", "INTENTIONAL_FEATURE", "STRENGTH"}
 REVISION_ELIGIBLE = {"LIMITATION", "OPPORTUNITY"}
 
 
@@ -12,8 +12,10 @@ def _clamp01(v, default=0.0):
 def calibrate_finding(raw):
     """Convert an activated-dimension observation into a governed diagnostic finding.
 
-    Activation or feature detection is never sufficient to establish defect. The caller
-    must provide non-textual evidence flags describing what was actually established.
+    Activation or feature detection is never sufficient to establish defect or strength.
+    The caller must provide non-textual evidence flags describing what was actually
+    established. Strength requires both functional-support evidence and purpose-fit
+    evidence; limitation requires both functional-harm evidence and purpose-miss evidence.
     """
     r = dict(raw)
     reasons = []
@@ -48,18 +50,47 @@ def calibrate_finding(raw):
         return _result(r, "INTENTIONAL_FEATURE", "RETAIN_ORIGINAL", False, confidence,
                        min(severity, 0.25), reasons)
 
-    contradiction = bool(r.get("cross_authority_contradiction")) or bool(r.get("material_disagreement"))
-    if contradiction:
-        reasons.append("material evidence disagreement prevents defect claim")
+    # A provider that explicitly abstained cannot be upgraded downstream merely because
+    # the feature is salient or because another model supplies a requested label.
+    if r.get("semantic_unresolved") or r.get("provider_disposition") == "UNRESOLVED":
+        reasons.append("upstream semantic evidence is unresolved")
         return _result(r, "OBSERVATION", "ABSTAIN_REVIEW", False, min(confidence, 0.5),
                        min(severity, 0.25), reasons)
 
+    contradiction = bool(r.get("cross_authority_contradiction")) or bool(r.get("material_disagreement"))
+    if contradiction:
+        reasons.append("material evidence disagreement prevents defect or strength claim")
+        return _result(r, "OBSERVATION", "ABSTAIN_REVIEW", False, min(confidence, 0.5),
+                       min(severity, 0.25), reasons)
+
+    functional_support = bool(r.get("functional_support_evidence"))
+    purpose_fit = bool(r.get("purpose_fit_evidence"))
     functional_harm = bool(r.get("functional_harm_evidence"))
     purpose_miss = bool(r.get("purpose_miss_evidence"))
     plausible_downside = bool(r.get("plausible_downside_evidence"))
     objective_defect = bool(r.get("objective_defect_evidence"))
     bounded_gain = bool(r.get("bounded_gain_evidence"))
     independent_support = bool(r.get("independent_support"))
+
+    # Positive and negative functional evidence cannot be silently reconciled into a
+    # preferred label. Conflicting purpose evidence also requires review.
+    if (functional_support and functional_harm) or (purpose_fit and purpose_miss):
+        reasons.append("positive and negative functional/purpose evidence conflict")
+        return _result(r, "OBSERVATION", "ABSTAIN_REVIEW", False, min(confidence, 0.5),
+                       min(severity, 0.25), reasons)
+
+    # Strength is purpose-relative, not a universal prose score. Both demonstrated
+    # functional support and local-purpose fit are required, and strength never creates
+    # revision eligibility or an opportunity id.
+    if functional_support and purpose_fit:
+        if confidence < 0.70:
+            reasons.append("possible purpose-supporting strength is below confidence floor")
+            return _result(r, "OBSERVATION", "ABSTAIN_REVIEW", False, confidence,
+                           0.0, reasons)
+        reasons.append("feature demonstrably supports the stated local purpose")
+        if independent_support:
+            reasons.append("independent support available")
+        return _result(r, "STRENGTH", "PRESERVE_STRENGTH", False, confidence, 0.0, reasons)
 
     # Objective/bounded defects may become opportunities, but only with adequate confidence
     # and acceptable preservation risk.
@@ -86,8 +117,9 @@ def calibrate_finding(raw):
         return _result(r, "RISK", "MONITOR_OR_REVIEW", False, min(confidence, 0.75),
                        min(max(severity, 0.25), 0.6), reasons)
 
-    # Generic feature detection stays an observation regardless of salience.
-    reasons.append("feature detected without sufficient evidence of harm or bounded gain")
+    # Generic feature detection, one-sided support, or one-sided purpose fit stays an
+    # observation regardless of salience.
+    reasons.append("feature detected without sufficient paired evidence of purpose-relative strength, harm, or bounded gain")
     return _result(r, "OBSERVATION", "RETAIN_ORIGINAL", False, confidence,
                    min(severity, 0.25), reasons)
 
