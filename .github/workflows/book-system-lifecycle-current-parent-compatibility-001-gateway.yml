@@ -1,0 +1,55 @@
+name: Book System Lifecycle Current Parent Compatibility Qualification
+
+on:
+  push:
+    branches:
+      - book-system/control-v1
+    paths:
+      - "qualification/book-system/lifecycle-transition-compatibility-001/**"
+      - "qualification/book-system/export-freeze-001/BOOK-SYSTEM-LIFECYCLE-PARENT-IDENTITY-COMPATIBILITY-FINDING-001.json"
+      - "system-master/book-system/lifecycle-current-parent-compatibility-adapter.js"
+      - ".github/scripts/book-system-lifecycle-current-parent-compatibility-001-qualify.js"
+      - ".github/scripts/book-system-lifecycle-current-parent-compatibility-001-qualify-v2.js"
+      - ".github/scripts/a01-book-system-lifecycle-current-parent-compatibility-001.js"
+      - ".github/workflows/book-system-lifecycle-current-parent-compatibility-001-gateway.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  prequalify:
+    name: Deterministic hosted compatibility prequalification
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - name: Syntax check adapter, qualifier and A-01 wrapper
+        run: |
+          node --check system-master/book-system/lifecycle-current-parent-compatibility-adapter.js
+          node --check .github/scripts/book-system-lifecycle-current-parent-compatibility-001-qualify-v2.js
+          node --check .github/scripts/a01-book-system-lifecycle-current-parent-compatibility-001.js
+      - name: Run 21-case compatibility matrix plus 18-case Lifecycle v1 regression
+        run: node .github/scripts/book-system-lifecycle-current-parent-compatibility-001-qualify-v2.js
+
+  qualify:
+    name: Authoritative A-01 lifecycle current-parent compatibility qualification
+    needs: prequalify
+    uses: BFochtman746/system-master/.github/workflows/a01-control-plane-gateway.yml@main
+    with:
+      qualification_id: BOOK-SYSTEM-LIFECYCLE-CURRENT-PARENT-COMPATIBILITY-ADAPTER-001
+      workstream_id: BOOK-SYSTEM
+      subject_sha: ${{ github.sha }}
+      origin_ref: ${{ github.ref }}
+      resume_on_pass: Close the current-parent Lifecycle compatibility repair on this exact SHA, then resume BOOK-SYSTEM-EXPORT-FREEZE-001 implementation without changing Lifecycle v1 policy semantics.
+      resume_on_failure: Preserve the exact failure and hosted PASS. Repair only the proven compatibility or shared-control boundary; do not modify Lifecycle v1 policy/gates or widen provider, author, document, export-freeze or publication authority.
+      notification_target: book-system/control-v1
+      execution_context: normal
+      qualifier_timeout_minutes: 10
+      job_timeout_minutes: 15
+    secrets: inherit
