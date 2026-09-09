@@ -1,6 +1,6 @@
 # A01-REPAIR-BROKER-001
 
-Status: CANONICAL REPAIR-ROUTING CONTRACT
+Status: CANONICAL REPAIR-ROUTING CONTRACT / 001B IMPLEMENTED CONTROL PATH
 Owner: `SYSTEM_MASTER/SHARED_INFRASTRUCTURE/A01`
 Administrative owner: `SYSTEM_MASTER/CORE`
 
@@ -56,7 +56,34 @@ The owner may reproduce and minimally repair the proven failing boundary. A cand
 4. repair-worker evidence is preserved;
 5. no worker-generated PASS/promotion/publication/production authority is asserted.
 
-The broker then emits only `A01_ELIGIBLE`. The subsequent A-01 receipt is the authority.
+The broker then emits only `A01_ELIGIBLE` / `A01_REQUEUE_READY`. The subsequent A-01 receipt is the authority.
+
+## Durable 001B implementation
+
+The receipt-to-repair transport is now repository-native and restartable:
+
+1. `.github/workflows/a01-control-plane-gateway.yml` invokes `.github/workflows/a01-repair-broker.yml` on a non-PASS terminal A-01 result.
+2. The broker emits an immutable transaction envelope and uploads it as a workflow artifact. The gateway remains read-only with respect to `main`.
+3. `.github/workflows/a01-repair-receipt-ingest.yml` runs after the gateway completes, retrieves the broker artifact, and persists it through `.github/scripts/a01-repair-ledger.js`.
+4. The ledger writes append-only transaction events below `governance/repair/events/<transaction-id>/` and projects current owner state into the registered repair inbox.
+5. A repairable product transaction emits `governance/repair/agent-dispatch/<transaction-id>.json` plus an `AGENT_DISPATCH_READY` event. This is the durable worker task packet.
+6. The owner chat, Second Shift worker, or another explicitly authorized coding agent may claim that packet, reproduce the failure, and prepare the smallest justified changed candidate. The packet itself does not grant mutation or qualification authority.
+7. `.github/workflows/a01-repair-finalize.yml` accepts an existing transaction only after deterministic prequalification PASS on the exact changed SHA. It advances the inbox projection to `A01_REQUEUE_READY` and writes an exact replacement return ticket below `qualification/a01/repair-requests/`.
+8. `governance/repair/REPAIR-LEDGER-REGISTRY-001.json` and `REPAIR-EVENT-SCHEMA-001.json` define the append-only lineage contract.
+9. `.github/scripts/a01-repair-ledger-reconcile.js` cross-checks inbox state, event lineage, agent-dispatch packets, replacement tickets and current authority; it is invoked by the System State Reconciler.
+
+### 001B qualification standing
+
+Hosted workflow `A-01 Repair Ledger Selftest` run `34418505568` passed the deterministic control lifecycle on exact repository subject `b3f9ab677ff00355f33e28cae15a0bf01410f9fa`:
+
+- failure classification selftest PASS;
+- broker owner-routing selftest PASS;
+- durable repair ledger/inbox projection selftest PASS;
+- agent-dispatch packet selftest PASS;
+- changed-SHA prequalification binding selftest PASS;
+- replacement-ticket emission selftest PASS.
+
+This is **hosted control/prequalification evidence only**. It is not A-01 authority and does not prove that a real autonomous coding agent has repaired production/product code.
 
 ## Repair inboxes
 
@@ -76,6 +103,12 @@ A repair request is active only while its state is one of:
 
 Terminal transaction state is preserved in history rather than erased.
 
+## Agent dispatch meaning
+
+`AGENT_DISPATCH_READY` means a durable, owner-bound repair task packet exists. It does **not** mean an autonomous coding agent has necessarily been invoked.
+
+In the current environment the canonical consumers are the owning chat and Second Shift worker; another coding-agent integration may consume the same packet only after its write scope, evidence return contract, and branch isolation are explicitly qualified. No agent may write A-01 PASS into the transaction.
+
 ## Chat and Second Shift rule
 
 Every owner chat and Second Shift worker checks its repair inbox after resolving current authority and before selecting speculative new work.
@@ -86,7 +119,7 @@ A changed owner control head does not erase a repair transaction. The owner reva
 
 ## Authority limits
 
-The broker and repair worker may never:
+The broker, ledger, dispatch packet and repair worker may never:
 
 - emit authoritative A-01 PASS;
 - set promotion/publication/production authority;
@@ -101,4 +134,10 @@ The broker and repair worker may never:
 
 The State Reconciler proves current ownership and state consistency. The Repair Broker acts only after that truth layer resolves the lane and the failure classification.
 
-If the Reconciler reports `UNALLOCATED`, `STALE_DELEGATION`, `EVIDENCE_MISMATCH`, or an unresolved owner conflict relevant to the failed work, repair admission fails closed until the state discrepancy is reconciled.
+If the Reconciler reports `UNALLOCATED`, `STALE_DELEGATION`, `EVIDENCE_MISMATCH`, `REPAIR_OWNER_MISMATCH`, or an unresolved owner conflict relevant to the failed work, repair admission fails closed until the state discrepancy is reconciled.
+
+## Remaining closed-loop boundary
+
+001B closes receipt classification, durable ledgering, owner dispatch packaging, exact-SHA prequalification binding and replacement-ticket emission.
+
+The next control boundary is `A01-CLOSED-LOOP-REPAIR-001C`: execute a replacement ticket through canonical A-01, bind the rerun receipt back to the **same** repair transaction, close it on authoritative PASS, or truthfully reclassify/retry/dead-letter it on another terminal result without creating disconnected repair lineages.
