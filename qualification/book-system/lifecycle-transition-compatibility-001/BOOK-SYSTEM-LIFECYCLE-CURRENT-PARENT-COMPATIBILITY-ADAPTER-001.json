@@ -1,0 +1,115 @@
+{
+  "contract_id": "BOOK-SYSTEM-LIFECYCLE-CURRENT-PARENT-COMPATIBILITY-ADAPTER-001",
+  "contract_version": 1,
+  "effective_date": "2026-09-09",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "standing": "CANONICAL_STRICT_COMPATIBILITY_REPAIR_CONTRACT__EXECUTABLE_IMPLEMENTATION_PENDING_QUALIFICATION",
+  "repair_class": "STRICT_COMPATIBILITY_REPAIR__NO_NEW_LIFECYCLE_POLICY_OR_GATE_SEMANTICS",
+  "depends_on": [
+    "BOOK-SYSTEM-LIFECYCLE-TRANSITION-ENGINE-001",
+    "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001",
+    "BOOK-SYSTEM-LIFECYCLE-PARENT-IDENTITY-COMPATIBILITY-FINDING-001"
+  ],
+  "purpose": "Allow the unchanged qualified Lifecycle v1 gate engine to evaluate the current sealed-array parent representation and return receipts bound to the current sealed state_digest identity, without changing lifecycle policy or becoming a second lifecycle engine.",
+  "research_gate": {
+    "required": false,
+    "reason": "Strict repair of already-qualified behavior; no new capability or authority expansion."
+  },
+  "external_parent_contract": {
+    "representation": "CURRENT_SEALED_ARRAY_PARENT",
+    "required_state_digest": true,
+    "state_digest_algorithm": "Version/Rollback sealState: sha256 of stable parent state with state_digest excluded",
+    "collections_required_as_arrays": ["governing_briefs", "canon_manifests", "story_bibles", "book_plans", "manuscripts", "research_evidence_links", "author_decisions", "integration_proposals", "export_releases"]
+  },
+  "delegated_engine": {
+    "id": "BOOK-SYSTEM-LIFECYCLE-TRANSITION-ENGINE-001",
+    "source_mutation_allowed": false,
+    "gate_semantic_changes_allowed": false,
+    "new_transition_types_allowed": false,
+    "provider_transition_authority_allowed": false
+  },
+  "projection": {
+    "collections": {
+      "governing_briefs": "key by brief_id",
+      "canon_manifests": "key by canon_manifest_id",
+      "story_bibles": "key by story_bible_id",
+      "book_plans": "key by plan_id",
+      "manuscripts": "key by exact active-compatible manuscript identity; reject duplicate projected keys",
+      "research_evidence_links": "key by link_id",
+      "author_decisions": "key by decision_id",
+      "integration_proposals": "key by proposal_id",
+      "export_releases": "key by release_id"
+    },
+    "state_digest": "Excluded from the delegated keyed projection because Lifecycle v1 predates the sealed state_digest field.",
+    "losslessness": "Every array element must appear exactly once in the delegated keyed projection. Duplicate or missing stable IDs fail closed.",
+    "request_ref_rule": "Evidence, author-decision and proposal reference strings are preserved exactly and resolved only by their stable IDs."
+  },
+  "ledger_bridge": {
+    "external_binding": "bound_parent_state_version/digest equal current sealed parent state_version/state_digest",
+    "delegated_binding": "temporarily replace bound_parent_state_digest with Lifecycle v1 digestParentState(projected_parent) for the unchanged v1 call",
+    "external_digest": "Lifecycle v1 digestLedger applied to the externally bound ledger",
+    "delegated_digest": "Lifecycle v1 digestLedger applied after temporary projected-parent binding",
+    "no_hidden_history_rewrite": true
+  },
+  "request_bridge": {
+    "external_required_parent_digest": "current sealed parent state_digest",
+    "delegated_expected_parent_digest": "Lifecycle v1 digestParentState(projected_parent)",
+    "external_expected_ledger_digest": "digest of externally bound lifecycle ledger",
+    "delegated_expected_ledger_digest": "digest of temporarily projected lifecycle ledger",
+    "all_other_fields": "preserved exactly"
+  },
+  "transition_result_bridge": {
+    "unit_transition": "External parent state must remain byte-identical and state_digest-identical; only lifecycle ledger changes are returned.",
+    "project_transition": "Only book_project.status and state_version may differ from the input current parent; the adapter reseals the current parent with Version/Rollback sealState after applying exactly that v1-authorized delta.",
+    "forbidden_parent_delta": ["book identity", "active pointers", "governing briefs", "canon manifests", "story bibles", "plans", "manuscripts", "research evidence", "author decisions", "integration proposals", "export releases", "any field other than project status/state_version for PROJECT scope"],
+    "delta_violation": "FAIL_CLOSED"
+  },
+  "receipt_bridge": {
+    "transition_receipt_id": "preserve v1 deterministic receipt ID",
+    "canonical_pre_parent_digest": "input sealed state_digest",
+    "canonical_post_parent_digest": "output sealed state_digest",
+    "canonical_pre_post_parent_versions": "external current parent versions",
+    "canonical_pre_post_ledger_digests": "external ledger digests",
+    "preserve_underlying_v1": ["legacy_v1_receipt_digest", "legacy_v1_pre_parent_digest", "legacy_v1_post_parent_digest"],
+    "version_rollback_compatibility": "Adapted receipt pre/post parent identity fields satisfy Version/Rollback authority receipt requirements for authority_kind=LIFECYCLE_TRANSITION."
+  },
+  "idempotency": {
+    "adapter_checks_external_request_first": true,
+    "same_idempotency_key_same_external_request": "RETURN_EXISTING_ADAPTED_RECEIPT_NO_NEW_COMMIT",
+    "same_idempotency_key_different_external_request": "REJECT_IDEMPOTENCY_KEY_CONFLICT",
+    "same_transition_request_id_different_idempotency_key": "REJECT_REQUEST_ID_CONFLICT",
+    "rule": "The external request fingerprint is stored in processed_requests; delegated internal digest substitution is not allowed to redefine idempotency identity."
+  },
+  "failure_and_atomicity": {
+    "projection_failure": "No delegated call and no mutation.",
+    "v1_rejection": "Preserve v1 rejection code; no mutation.",
+    "post_delta_violation": "Reject adapter result; no external mutation.",
+    "input_mutation_allowed": false
+  },
+  "qualification_requirements": [
+    "Run unchanged Lifecycle v1 predecessor regression suite or an exact behavioral cross-check against all 18 existing cases.",
+    "Current sealed-array PROJECT transition PASS with exact current digest receipt.",
+    "Current sealed-array UNIT transition PASS with parent byte identity unchanged.",
+    "Array export release resolves EXPORT_FREEZE_READY evidence.",
+    "Array author decision resolves required author gate.",
+    "Array integration proposal refs resolve without authority widening.",
+    "Stale sealed parent version/digest rejects.",
+    "Stale external ledger version/digest rejects.",
+    "Duplicate projected IDs reject.",
+    "Provider direct transition rejects with v1 authority code.",
+    "V1 parent delta outside allowed status/version rejects.",
+    "Idempotent replay returns same adapted receipt and no double commit.",
+    "Version/Rollback accepts adapted project transition receipt as LIFECYCLE_TRANSITION authority identity.",
+    "No modification to lifecycle-transition-engine.js or lifecycle-transition-engine-runtime.js."
+  ],
+  "explicit_non_goals": [
+    "No Lifecycle v2 policy engine",
+    "No new transition or gate semantics",
+    "No canonical-state migration",
+    "No provider authority",
+    "No author-choice reinterpretation",
+    "No document/export authority"
+  ],
+  "pass_unlocks": "BOOK-SYSTEM-EXPORT-FREEZE-001-IMPLEMENTATION-001",
+  "qualification_effect": "NONE until exact executable adapter subject passes hosted and registered A-01 qualification. Lifecycle v1 original qualification remains scoped to its original exact SHA."
+}
