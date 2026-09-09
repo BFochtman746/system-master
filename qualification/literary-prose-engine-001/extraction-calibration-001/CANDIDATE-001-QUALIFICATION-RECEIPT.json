@@ -1,0 +1,73 @@
+{
+  "receipt_id": "LITERARY-NARRATIVE-EXTRACTOR-CANDIDATE-001-QUALIFICATION-v1",
+  "objective": "REAL SOURCE-TO-NARRATIVE-OBSERVATION EXTRACTOR + SOURCE-HELD-OUT CALIBRATION",
+  "implementation_subject_sha": "6a26ae1c5f1671b4b9eaaa493fc4ca9ba657e741",
+  "hosted_qualification": {
+    "workflow": "Literary Prose Extraction Calibration Qualification",
+    "workflow_run_id": 34359001911,
+    "job_id": 102490861461,
+    "conclusion": "success",
+    "candidate_step": "Qualify real source-to-observation candidate on source-heldout evidence",
+    "candidate_step_conclusion": "success"
+  },
+  "provider": {
+    "provider_id": "CAUTIOUS-SEMANTIC-NARRATIVE-EXTRACTOR-v1",
+    "implementation": "qualification/literary-prose-engine-001/extraction-calibration-001/cautious_semantic_extractor.py",
+    "provider_class": "DETERMINISTIC_SEMANTIC_HEURISTIC",
+    "gold_fixture_access": false,
+    "case_id_as_feature": false,
+    "canonical_state_write_authorized": false
+  },
+  "source_heldout": {
+    "fixture": "qualification/literary-prose-engine-001/extraction-calibration-001/fixtures/SYNTHETIC-SOURCE-HELDOUT-GOLD-v1.json",
+    "git_blob_sha": "77b63f5fe37e0649d7b2f542a71d00a06a621d6f",
+    "case_count": 17,
+    "task_count": 9,
+    "source_class": "SYNTHETIC_SOURCE_HELDOUT_QUALIFICATION_ONLY",
+    "contains_user_manuscript": false,
+    "contains_copyrighted_reference_body": false,
+    "named_author_target": false
+  },
+  "aggregate_metrics": {
+    "precision": 1.0,
+    "recall": 0.827586,
+    "f1": 0.90566,
+    "mean_coverage": 0.764706,
+    "false_certainty_count": 0,
+    "ambiguity_preservation_rate": 1.0,
+    "premature_resolution_rate": 0.0,
+    "mean_span_iou": 1.0,
+    "mean_brier_score": 0.258224,
+    "mean_expected_calibration_error": 0.362549
+  },
+  "known_abstention_gaps": [
+    "heldout-event-002: paraphrastic same-event identity without explicit same-event cue",
+    "heldout-causal-002: implicit goal/causal relation without explicit because/wants cue",
+    "heldout-epistemic-003: implicit/free-indirect focalization without explicit viewpoint cue",
+    "heldout-setup-002: setup/payoff recurrence through pronominal/synonym reference rather than literal repeated noun"
+  ],
+  "calibration_gap_repaired": {
+    "problem": "Original scorer harness uses opaque synthetic identifiers that are not source-derivable by an isolated provider.",
+    "repair": "Retained the original harness unchanged and added a provider-facing semantic-label contract plus a frozen separate source-heldout corpus.",
+    "contract": "qualification/literary-prose-engine-001/extraction-calibration-001/PROVIDER-BENCHMARK-LABEL-CONTRACT-v1.json",
+    "split_manifest": "qualification/literary-prose-engine-001/extraction-calibration-001/SOURCE-HELDOUT-SPLIT-MANIFEST-v1.json"
+  },
+  "standing": "SYNTHETIC_SOURCE_HELDOUT_PLUMBING_QUALIFIED__NOT_PROMOTED",
+  "promotion_blockers": [
+    "No learned/model-backed provider has yet been qualified.",
+    "The heldout evidence is synthetic and not a substitute for independently sourced public-domain or human-adjudicated narrative evidence.",
+    "Four deliberately difficult semantic cases currently require abstention.",
+    "Calibration error remains too high to treat confidence as authority-ready."
+  ],
+  "rights_and_authority": {
+    "manuscript_mutated": false,
+    "author_intent_resolved": false,
+    "published": false,
+    "named_living_author_imitated": false,
+    "bulk_copyrighted_body_ingested": false,
+    "preservation_or_rights_gate_weakened": false,
+    "a01_dispatched": false
+  },
+  "next_objective": "LITERARY-NARRATIVE-EXTRACTOR-CANDIDATE-002 — LEARNED/MODEL-BACKED PROVIDER + INDEPENDENT PUBLIC-DOMAIN/HUMAN-ADJUDICATED SOURCE-HELDOUT CALIBRATION",
+  "research_stop_condition": "Do not return to broad prose-taxonomy research. Resume research only for a concrete extractor failure, missing observation state/metric, provider choice, or evidence-set design question exposed by candidate qualification."
+}
