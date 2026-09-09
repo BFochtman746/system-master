@@ -21,7 +21,7 @@ STEP-K adds a project-relative defensive gate around the revision/evaluation/pre
 - monitors generic prestige-prose drift without treating prestige similarity as a target;
 - flags repeated optimization of one dimension as overoptimization risk;
 - enforces edit budgets;
-- requires clean-control and project-holdout evidence and fails closed when defense evidence is missing;
+- requires baseline, candidate, clean-control, project-holdout, edit-budget, and optimization-history evidence and fails closed when required defense evidence is missing or malformed;
 - rejects named-author targets and universal prose scores;
 - defaults to review or retaining the original when risk evidence is unresolved.
 
@@ -36,7 +36,9 @@ All thresholds are contextual/project-relative. STEP-K does not define one ideal
 
 ## Qualification
 
-Twenty deterministic synthetic fixtures pass. They exercise each monitored risk, hard-vs-soft disposition, multi-risk retain-original behavior, edit-budget enforcement, anti-imitation/universal-score rejection, productive-irregularity boundary, clean-control and holdout contextualization, deterministic identity, and fail-closed missing evidence.
+The original twenty deterministic synthetic fixtures pass unchanged against the hardened implementation. Seven additional fail-closed cases qualify missing baseline/candidate/clean-control/edit-budget/optimization-history evidence and malformed metric/history evidence, for **27/27 passing cases** total.
+
+Implementation hardening commit: `980227b3294af7047258c0ba66ea850b4bc410ba`.
 
 Repository evidence: `STEP-K-QUALIFICATION-EVIDENCE.json`.
 Reproducible runner: `run_step_k_fixtures.py`.
