@@ -41,10 +41,36 @@ function observedTestCount(text, name) {
   return Number(matches[matches.length - 1][1]);
 }
 
-function gitBlob(file) {
-  const result = cp.spawnSync('git', ['hash-object', '--', file], { cwd: ROOT, encoding: 'utf8', shell: false });
-  if (result.status !== 0) throw new Error(`GIT_HASH_OBJECT_FAILED:${file}:${result.stderr || result.stdout}`);
-  return result.stdout.trim();
+function gitOutput(args, failureCode) {
+  const result = cp.spawnSync('git', args, { cwd: ROOT, encoding: 'utf8', shell: false });
+  if (result.error) throw result.error;
+  if (result.status !== 0) {
+    throw new Error(`${failureCode}:${result.status}:${(result.stderr || result.stdout || '').trim()}`);
+  }
+  return (result.stdout || '').trim();
+}
+
+function assertCleanCheckout(subject) {
+  const head = gitOutput(['rev-parse', 'HEAD'], 'GIT_HEAD_LOOKUP_FAILED');
+  assert(head.toLowerCase() === subject.toLowerCase(), `SUBJECT_HEAD_MISMATCH:expected=${subject}:actual=${head}`);
+
+  const status = gitOutput(['status', '--porcelain=v1', '--untracked-files=all'], 'GIT_STATUS_FAILED');
+  fs.writeFileSync(path.join(evidenceDir, 'checkout-cleanliness.txt'), [
+    `subject=${subject}`,
+    `head=${head}`,
+    `index_worktree_clean=${status === '' ? 'TRUE' : 'FALSE'}`,
+    status ? `status=${status.replace(/\r?\n/g, ' | ')}` : 'status=',
+    '',
+  ].join('\n'));
+  assert(status === '', `GIT_INDEX_WORKTREE_NOT_CLEAN:${status.replace(/\r?\n/g, '|')}`);
+}
+
+function gitBlobAt(subject, file) {
+  const objectId = gitOutput(['rev-parse', `${subject}:${file}`], `GIT_OBJECT_LOOKUP_FAILED:${file}`);
+  assert(/^[0-9a-f]{40,64}$/i.test(objectId), `INVALID_GIT_OBJECT_ID:${file}:${objectId}`);
+  const type = gitOutput(['cat-file', '-t', objectId], `GIT_OBJECT_TYPE_LOOKUP_FAILED:${file}`);
+  assert(type === 'blob', `FROZEN_AUTHORITY_NOT_BLOB:${file}:${type}`);
+  return objectId;
 }
 
 function assertSuite(name, modules, expectedCount, seed = '0') {
@@ -64,6 +90,8 @@ try {
   assert(/^[0-9a-f]{40}$/i.test(subject), `INVALID_SUBJECT_SHA:${subject}`);
   fs.writeFileSync(path.join(evidenceDir, 'subject-sha.txt'), `${subject}\n`);
 
+  assertCleanCheckout(subject);
+
   const frozen = {
     'learning/lab/LEARNING_LAB_PILOT_001_PROTOCOL.md': '0db3de824060f4eb7ce3c2c7ffa0ed4b57ba9d35',
     'learning/lab/learning_lab/real_learner_pilot.py': '0c9f7a8b7850cef15643e3c11899585d2c25a08d',
@@ -72,7 +100,7 @@ try {
   };
   const frozenLines = [];
   for (const [file, expected] of Object.entries(frozen)) {
-    const actual = gitBlob(file);
+    const actual = gitBlobAt(subject, file);
     assert(actual === expected, `FROZEN_PILOT_BLOB_DRIFT:${file}:expected=${expected}:actual=${actual}`);
     frozenLines.push(`${file}=${actual}`);
   }
