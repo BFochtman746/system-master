@@ -23,9 +23,27 @@ Detailed dependency-spine standing, exact candidate identities, reconciliation e
 
 Where that historical control record describes MASTER/LEARNING/BOOK/PROSE as four peers, that taxonomy is superseded by `SYSTEM-TOPOLOGY-002.json`. Its technical/evidence statements remain scoped exactly as written unless separately superseded.
 
+`PLATFORM005-REDERIVED-ASSEMBLY-004.md` and `PLATFORM005-RECONCILIATION-004.md` supersede the earlier instruction to recover and modify the unavailable `0ae86ee3...` composite. The prior composite remains historical evidence; its PASS does not transfer.
+
 ## Current Core objective
 
-Recover the exact runnable source tree for the fully qualified SMR018 composite `0ae86ee36d00d3d5749e20889dafbcf85c1dd84baecbcc4bc34c8d39ba31553c`; reproduce it exactly; apply only `PLATFORM005_PARSED_PATH_API_ROUTE_REPAIR_002.patch`; derive a new exact subject; rerun all SMR018 portable gates; then cumulatively rebase SMR019 while preserving its CHAT repair. Do not resume SMR020 until rebased SMR019 passes on its exact bytes.
+SMR018 / PLATFORM-005 portable residual closure is complete on the independently qualified re-derived exact subject:
+
+`cc67826bb608fc82459e23c59d5e0106d10422c6fe79f45f0571be60356b7d54`
+
+The remaining SMR018 boundary is source custody, not another portable repair: the complete runnable `cc67826...` tree is still outside ordinary GitHub-native immutable source custody and was not found in the saved-file Library. Do not restart the obsolete attempt to recover `0ae86ee36d00d3d5749e20889dafbcf85c1dd84baecbcc4bc34c8d39ba31553c` as the current product objective.
+
+The dependency-valid next reconciliation step is `SYSTEM-MASTER-REBUILD-019 / CHAT-001A`. Required sequence:
+
+1. import/admit the exact runnable `cc67826...` SMR018 source tree without mutation and independently reproduce its exact source/test subject;
+2. recover/verify the exact historical SMR019 carrier and historical source/test subject;
+3. cumulatively rebuild SMR019 with the complete `cc67826...` predecessor state while preserving `CHAT001A_STREAM_CHECKPOINT_FINAL_STANDING_REPAIR_001.patch`;
+4. derive a new exact SMR019 subject and rerun strict Java 21, all 19 executable suites, PLATFORM-005 + CHAT-001A focused/contract/recurrence gates, CHAT PostgreSQL static contract, persistence, coherence, congruence, exact-subject, control-count and complete release-manifest gates on those same bytes;
+5. preserve the new exact candidate and evidence before unblocking `SYSTEM-MASTER-REBUILD-020 / OPERATOR-OPS-001`.
+
+Until step 4 passes, SMR020 remains `BLOCKED — PREDECESSOR RECONCILIATION`.
+
+Hosted/A-01 admission remains separate: do not create an A-01 ticket until the dependency-current exact candidate is GitHub-native, hosted-qualified and has a real Windows-specific completion delta.
 
 ## Boundary rules
 
