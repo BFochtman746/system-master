@@ -7,6 +7,7 @@ const { execFileSync } = require('child_process');
 const root = path.resolve(__dirname, '..', '..');
 const args = new Set(process.argv.slice(2));
 const noLive = args.has('--no-live');
+const selftest = args.has('--selftest');
 const outArg = process.argv.find((v) => v.startsWith('--out='));
 const outDir = path.resolve(root, outArg ? outArg.slice('--out='.length) : '.state-reconciler');
 
@@ -59,6 +60,45 @@ function liveHead(ref) {
   }
 }
 
+const ownerBases = new Set([
+  'SYSTEM_MASTER/CORE',
+  'SYSTEM_MASTER/LEARNING',
+  'SYSTEM_MASTER/BOOK',
+  'SYSTEM_MASTER/BOOK/PROSE',
+  'SYSTEM_MASTER/SHARED_INFRASTRUCTURE'
+]);
+
+function validOwner(ownerPath) {
+  if (typeof ownerPath !== 'string') return false;
+  if (ownerPath === 'SYSTEM_MASTER') return true;
+  for (const base of ownerBases) {
+    if (ownerPath === base || ownerPath.startsWith(`${base}/`)) return true;
+  }
+  return false;
+}
+
+function registeredExecutableMustExistOnCurrentCheckout(q) {
+  return q?.source === 'control_plane';
+}
+
+if (selftest) {
+  const checks = [
+    ['product_root_owner_is_valid', validOwner('SYSTEM_MASTER') === true],
+    ['known_core_owner_is_valid', validOwner('SYSTEM_MASTER/CORE') === true],
+    ['unknown_peer_owner_is_invalid', validOwner('SYSTEM_MASTER/UNKNOWN') === false],
+    ['control_plane_executable_is_checkout_scoped', registeredExecutableMustExistOnCurrentCheckout({ source: 'control_plane' }) === true],
+    ['subject_executable_is_not_main_scoped', registeredExecutableMustExistOnCurrentCheckout({ source: 'subject' }) === false]
+  ];
+  const failed = checks.filter(([, ok]) => !ok);
+  for (const [name, ok] of checks) console.log(`${ok ? 'PASS' : 'FAIL'}:${name}`);
+  if (failed.length) {
+    console.error(`SYSTEM_STATE_RECONCILER_SELFTEST_FAIL count=${failed.length}`);
+    process.exit(1);
+  }
+  console.log('SYSTEM_STATE_RECONCILER_SELFTEST_PASS');
+  process.exit(0);
+}
+
 const authority = readJson('governance/CURRENT-AUTHORITY.json');
 const topology = readJson('governance/SYSTEM-TOPOLOGY-002.json');
 const completion = readJson('governance/COMPLETION-LEDGER-001.json');
@@ -81,21 +121,6 @@ if (byId.CORE?.parent_id !== 'SYSTEM_MASTER') finding('ERROR', 'EVIDENCE_MISMATC
 if (byId.LEARNING?.parent_id !== 'SYSTEM_MASTER') finding('ERROR', 'EVIDENCE_MISMATCH', 'LEARNING parent must be SYSTEM_MASTER');
 if (byId.BOOK?.parent_id !== 'SYSTEM_MASTER') finding('ERROR', 'EVIDENCE_MISMATCH', 'BOOK parent must be SYSTEM_MASTER');
 if (byId.PROSE?.parent_id !== 'BOOK') finding('ERROR', 'EVIDENCE_MISMATCH', 'PROSE parent must be BOOK');
-
-const ownerBases = new Set([
-  'SYSTEM_MASTER/CORE',
-  'SYSTEM_MASTER/LEARNING',
-  'SYSTEM_MASTER/BOOK',
-  'SYSTEM_MASTER/BOOK/PROSE',
-  'SYSTEM_MASTER/SHARED_INFRASTRUCTURE'
-]);
-function validOwner(ownerPath) {
-  if (typeof ownerPath !== 'string') return false;
-  for (const base of ownerBases) {
-    if (ownerPath === base || ownerPath.startsWith(`${base}/`)) return true;
-  }
-  return false;
-}
 
 const completionEntries = completion.entries || [];
 const obligationEntries = obligations.obligations || [];
@@ -126,11 +151,15 @@ for (const [qualificationId, q] of Object.entries(a01.qualifications || {})) {
   if (!q.workstream_id || !laneMap[q.workstream_id]) {
     finding('ERROR', 'UNALLOCATED', `A-01 qualification has unmapped workstream: ${qualificationId}`, { workstream_id: q.workstream_id || null });
   }
-  if (q.executable === 'node' && Array.isArray(q.args) && q.args[0] && q.args[0].startsWith('.')) {
+  if (!['subject', 'control_plane'].includes(q.source)) {
+    finding('ERROR', 'EVIDENCE_MISMATCH', `A-01 qualification has unsupported source class: ${qualificationId}`, { source: q.source || null });
+  }
+  if (registeredExecutableMustExistOnCurrentCheckout(q) && q.executable === 'node' && Array.isArray(q.args) && q.args[0] && q.args[0].startsWith('.')) {
     if (!exists(q.args[0])) {
-      finding('ERROR', 'REGISTERED_EXECUTABLE_MISSING', `registered A-01 executable missing: ${qualificationId}`, {
+      finding('ERROR', 'REGISTERED_EXECUTABLE_MISSING', `control-plane A-01 executable missing on current checkout: ${qualificationId}`, {
         executable_path: q.args[0],
-        workstream_id: q.workstream_id || null
+        workstream_id: q.workstream_id || null,
+        source: q.source || null
       });
     }
   }
@@ -209,6 +238,7 @@ for (const rel of [
 
 const openByOwner = {};
 for (const owner of ownerBases) openByOwner[owner] = [];
+openByOwner.SYSTEM_MASTER = [];
 for (const o of obligationEntries.filter((x) => !terminalObligationStates.has(x.state))) {
   (openByOwner[o.owner_path] ||= []).push({ obligation_id: o.obligation_id, state: o.state, objective: o.objective, blocker_class: o.blocker_class || null });
 }
@@ -224,6 +254,9 @@ const derived = {
   owners: {},
   shared_infrastructure: {
     open_obligations: obligationEntries.filter((o) => o.owner_path?.startsWith('SYSTEM_MASTER/SHARED_INFRASTRUCTURE') && !terminalObligationStates.has(o.state)).map((o) => ({ obligation_id: o.obligation_id, state: o.state, objective: o.objective }))
+  },
+  product_governance: {
+    open_obligations: obligationEntries.filter((o) => o.owner_path === 'SYSTEM_MASTER' && !terminalObligationStates.has(o.state)).map((o) => ({ obligation_id: o.obligation_id, state: o.state, objective: o.objective }))
   },
   census: census ? { census_id: census.census_id, standing: census.standing, first_incomplete_phase: (census.phases || []).find((p) => p.status !== 'COMPLETE')?.phase_id || null } : null
 };
