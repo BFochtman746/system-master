@@ -1,0 +1,87 @@
+name: LEARNING PILOT-001 RUN-001 Final Human Execution Repair Hosted Qualification
+
+on:
+  push:
+    branches:
+      - learning/pilot-001-run-001-final-human-execution-repair-001
+    paths:
+      - ".github/scripts/learning-pilot-001-run-001-final-human-execution-qualify.js"
+      - ".github/workflows/learning-pilot-001-run-001-final-human-execution-repair-hosted.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  hosted-repair-qualification:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact repaired subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          clean: true
+          persist-credentials: false
+
+      - name: Set up pinned Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: '3.13.15'
+          architecture: x64
+          check-latest: false
+
+      - name: Prepare hosted evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          EVIDENCE_DIR="$RUNNER_TEMP/pilot001-run001-final-human-repair-$GITHUB_RUN_ID"
+          mkdir -p "$EVIDENCE_DIR"
+          echo "EVIDENCE_DIR=$EVIDENCE_DIR" >> "$GITHUB_ENV"
+          printf '%s\n' "$GITHUB_SHA" > "$EVIDENCE_DIR/source-sha.txt"
+          git status --porcelain=v1 --untracked-files=all > "$EVIDENCE_DIR/pre-qualification-status.txt"
+          test ! -s "$EVIDENCE_DIR/pre-qualification-status.txt"
+          python --version > "$EVIDENCE_DIR/python-version.txt" 2>&1
+          node --version > "$EVIDENCE_DIR/node-version.txt" 2>&1
+
+      - name: Run focused and full hosted Learning regressions through repaired qualifier
+        shell: bash
+        env:
+          A01_SUBJECT_SHA: ${{ github.sha }}
+          A01_EVIDENCE_DIR: ${{ env.EVIDENCE_DIR }}
+        run: |
+          set -euo pipefail
+          node .github/scripts/learning-pilot-001-run-001-final-human-execution-qualify.js \
+            2>&1 | tee "$EVIDENCE_DIR/hosted-repair-qualification.txt"
+          grep -q '^PILOT_RUN001_FINAL_HUMAN_EXECUTION_STATUS=PASS$' "$EVIDENCE_DIR/hosted-repair-qualification.txt"
+          grep -q '^PILOT_RUN001_CLOSED_LOOP_CURRENT_TESTS=54$' "$EVIDENCE_DIR/hosted-repair-qualification.txt"
+          grep -q '^PILOT_RUN001_PREDECESSOR_REGRESSIONS=57$' "$EVIDENCE_DIR/hosted-repair-qualification.txt"
+          grep -q '^PILOT_RUN001_LOCAL_FIRST_EVIDENCE_TESTS=13$' "$EVIDENCE_DIR/hosted-repair-qualification.txt"
+          grep -q '^PILOT_RUN001_FULL_LEARNING_LAB_TESTS=698$' "$EVIDENCE_DIR/hosted-repair-qualification.txt"
+          grep -q '^PILOT_RUN001_CRITICAL_REPEAT_TESTS=216$' "$EVIDENCE_DIR/hosted-repair-qualification.txt"
+
+      - name: Record hosted repair truth boundary
+        if: success()
+        shell: bash
+        run: |
+          cat > "$EVIDENCE_DIR/repair-truth-boundary.txt" <<EOF
+          LEARNING_PILOT_RUN001_FINAL_HUMAN_REPAIR_HOSTED=PASS
+          SUBJECT_SHA=$GITHUB_SHA
+          FROZEN_AUTHORITY_SOURCE=CANONICAL_GIT_OBJECT
+          HEAD_INDEX_WORKTREE_CLEAN_ENFORCED=TRUE
+          FOCUSED_CLOSED_LOOP_TESTS=54
+          PREDECESSOR_REGRESSIONS=57
+          LOCAL_FIRST_EVIDENCE_TESTS=13
+          FULL_LEARNING_LAB_TESTS=698
+          CRITICAL_REPEAT_TESTS=216
+          CENTRAL_A01_DISPATCHED=FALSE
+          EOF
+
+      - name: Upload hosted repair evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: learning-pilot-001-run-001-final-human-repair-${{ github.run_id }}
+          path: ${{ env.EVIDENCE_DIR }}
+          if-no-files-found: error
+          retention-days: 30
