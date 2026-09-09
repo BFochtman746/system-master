@@ -5,23 +5,29 @@
   "retired_control_surface": "LITERARY_PROSE_NIGHT_SHIFT_CHAT",
   "retirement_handoff": "night-shift-2026-09-09/NIGHT-SHIFT-CHAT-RETIREMENT-HANDOFF-001.json",
   "branch": "literary-prose-engine-001",
-  "state_basis_head": "924db006aa2dd79164e8110d89debf9a95447c0f",
+  "state_basis_head": "2bba069407004582f71b62f65bc49d6adff1f87f",
   "active_lanes": [
     {
       "priority": 1,
       "lane_id": "AGLO_REAL_BOOK_REVISION",
-      "standing": "READY__ACCEPTED_THREE_CANDIDATE_REVISION_PACKAGE__NO_CANONICAL_MANUSCRIPT_MUTATION",
+      "standing": "PASS__COMPOSITE_REVISION_CANDIDATE_BUILT_AND_158_PAGE_RENDER_VERIFIED__PROMOTION_REVIEW_PENDING__CANONICAL_MASTER_UNTOUCHED",
       "source_state": "real-book-qualification/REAL-BOOK-QUALIFICATION-STATE.json",
+      "composite_evidence": "real-book-qualification/AGLO-COMPOSITE-REVISION-PACKAGE-001.json",
       "accepted_package": {
         "chapters": [25, 27, 29],
         "candidate_count": 3,
         "total_deleted_words": 64,
         "book_edit_fraction": 0.001022,
+        "candidate_narrative_words": 62547,
+        "candidate_docx_package_sha256": "cae6abd14c8ea70fb49e257f4487353bf8e0834a78d9dee84fd0be42a8ac0247",
         "cumulative_preservation": "PASS",
+        "cumulative_step_i_regression": "PASS",
         "cumulative_step_k": "PASS_DEFENSE_GATE",
-        "applied_to_manuscript": false
+        "rendered_pages": 158,
+        "visual_qa": "PASS",
+        "applied_to_canonical_manuscript": false
       },
-      "next_objective": "AGLO-COMPOSITE-REVISION-PACKAGE-001 — BUILD A PRIVATE COMPOSITE AGLO CANDIDATE CONTAINING THE ACCEPTED CHAPTER 25 + 27 + 29 TRIMS → REVERIFY ALL THREE CHAPTER DIGESTS + WHOLE-BOOK DIGEST → RUN FINAL COMBINED PRESERVATION / STEP-I REGRESSION / STEP-K DRIFT DEFENSE → PRODUCE A REVIEWABLE REVISED MANUSCRIPT CANDIDATE WITHOUT OVERWRITING THE RATIFIED CANONICAL MASTER"
+      "next_objective": "AGLO-COMPOSITE-CANDIDATE-PROMOTION-REVIEW-001 — REVIEW THE VERIFIED PRIVATE COMPOSITE CANDIDATE → EITHER PROMOTE IT AS A NEW EXPLICIT REVISION BASELINE OR RETAIN IT AS A NONCANONICAL REVIEW CANDIDATE → DO NOT OVERWRITE THE RATIFIED MASTER"
     },
     {
       "priority": 2,
@@ -99,7 +105,8 @@
     "global narrative orchestration",
     "evaluator robustness",
     "provider-independent extraction calibration",
-    "candidate-001 source-heldout hosted qualification"
+    "candidate-001 source-heldout hosted qualification",
+    "AGLO composite revision package exact-runtime build and 158-page visual verification"
   ],
   "a01_status": {
     "canonical_operating_mode": "CENTRAL_A01_CONTROL_PLANE_ONLY",
@@ -132,6 +139,6 @@
     "delegated_editorial_judgment_auto_generalizes_as_user_taste": false
   },
   "coordination_rule": "All future Literary Prose work, including work previously assigned to the retired night-shift chat, is coordinated from the current Literary Prose chat. Before each repository write, refetch branch head and preserve concurrent work forward-only.",
-  "exact_next_objective": "AGLO-COMPOSITE-REVISION-PACKAGE-001",
+  "exact_next_objective": "AGLO-COMPOSITE-CANDIDATE-PROMOTION-REVIEW-001",
   "system_next_after_or_parallel_when_dependency_valid": "LITERARY-NARRATIVE-EXTRACTOR-CANDIDATE-002"
 }
