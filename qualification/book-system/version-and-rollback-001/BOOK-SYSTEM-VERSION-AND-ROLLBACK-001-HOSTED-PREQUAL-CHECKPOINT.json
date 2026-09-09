@@ -1,0 +1,62 @@
+{
+  "checkpoint_id": "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001-HOSTED-PREQUAL-CHECKPOINT",
+  "effective_date": "2026-09-09",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "standing": "HOSTED_PREQUAL_PASS__A01_CENTRAL_REGISTRATION_PENDING",
+  "objective": "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001",
+  "current_hosted_candidate": {
+    "subject_sha": "402ab84a14e9d345530d60394ebc36176541dd21",
+    "hosted_run_id": 34416203680,
+    "hosted_job_id": 102681527662,
+    "result": "PASS",
+    "fixture_version": 2,
+    "case_count": 48,
+    "pass_count": 48,
+    "fail_count": 0,
+    "evidence_artifact_id": 10129156222,
+    "evidence_artifact_digest": "sha256:2d27e447bb60c8c236b7e1b6f4e6d6abcacd30b095f25e49965badec50ae78a8"
+  },
+  "preserved_predecessor_evidence": [
+    {
+      "subject_sha": "10c37582ed7918c6bd90ccf2536c437e2b72e68e",
+      "hosted_run_id": 34415879725,
+      "result": "FAIL_37_OF_40",
+      "evidence_artifact_id": 10129034355,
+      "evidence_artifact_digest": "sha256:d9afc35814c818645c50f605d96642c983d0437e995c3731467a2602f1a1052a",
+      "finding": "Three failures exposed an authority-model mismatch: Version/Rollback must not execute lifecycle status changes even when handed a lifecycle receipt. The stronger design requires the qualified Lifecycle authority to commit the successor first, after which Version/Rollback may record that exact already-committed successor and authority receipt."
+    },
+    {
+      "subject_sha": "2db9ef7cbb8a7565427f73b60d565d16fec13ab4",
+      "hosted_run_id": 34416112675,
+      "hosted_job_id": 102681245922,
+      "result": "PASS_48_OF_48",
+      "evidence_artifact_id": 10129120132,
+      "evidence_artifact_digest": "sha256:70a217b34c93fd31c11964c6c3d6647fad9712bd76587f2ff3ef913729f65848",
+      "finding": "First 48-case authority-v2 hosted PASS. Preserved because the later 402ab84 subject corrected workflow/qualifier naming and evidence-path alignment and therefore is a distinct exact subject."
+    }
+  ],
+  "authority_boundary_proven_by_hosted_gate": {
+    "immutable_successor_and_object_version_lineage": true,
+    "exact_parent_and_version_ledger_compare_and_swap": true,
+    "restore_as_new_successor_no_history_rewrite": true,
+    "append_only_history_preserved": true,
+    "rollback_revalidation_required": true,
+    "idempotent_replay_and_conflict_detection": true,
+    "direct_lifecycle_status_change_allowed": false,
+    "authorized_parent_successor_ingest_requires_exact_pre_post_receipt_identity": true,
+    "author_approval_synthesis_allowed": false,
+    "publication_authority_synthesis_allowed": false,
+    "child_or_provider_canonical_write_allowed": false,
+    "document_engine_authority_created": false
+  },
+  "central_a01_state_at_checkpoint": {
+    "registry_ref": "main:qualification/a01/registry.json",
+    "observed_registry_version": 20,
+    "qualification_registered": false,
+    "required_qualification_id": "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001",
+    "rule": "Book lane must not mutate shared A-01 registry/control-plane authority merely to unblock itself. A shared-authority registration must explicitly admit the qualification before an authoritative A-01 run may be claimed."
+  },
+  "exact_next_action": "Obtain canonical shared A-01 registration for BOOK-SYSTEM-VERSION-AND-ROLLBACK-001 against the repository-owned qualifier on the intended exact subject; then invoke the central gateway on that exact subject and adjudicate the receipt. If registration requires changed subject bytes, rerun hosted prequalification on the new exact subject before A-01.",
+  "closure_rule": "Do not close BOOK-SYSTEM-VERSION-AND-ROLLBACK-001 or advance to BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001 until authoritative A-01 PASS exists for the exact Version/Rollback subject being claimed.",
+  "qualification_effect": "HOSTED_PREQUALIFICATION_ONLY. No A-01 PASS, author approval, canonical manuscript promotion, export freeze, publication, production or provider authority is created by this checkpoint."
+}
