@@ -1,0 +1,58 @@
+name: System State Reconciler
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'governance/**'
+      - 'qualification/a01/registry.json'
+      - '.github/scripts/system-state-reconciler.js'
+      - '.github/workflows/system-state-reconciler.yml'
+  pull_request:
+    paths:
+      - 'governance/**'
+      - 'qualification/a01/registry.json'
+      - '.github/scripts/system-state-reconciler.js'
+      - '.github/workflows/system-state-reconciler.yml'
+
+concurrency:
+  group: system-state-reconciler
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  reconcile:
+    name: Compile repository truth and reject state drift
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 1
+          persist-credentials: true
+
+      - name: Syntax check reconciler
+        run: node --check .github/scripts/system-state-reconciler.js
+
+      - name: Reconcile live System Master state
+        run: node .github/scripts/system-state-reconciler.js --out=.state-reconciler
+
+      - name: Publish reconciliation summary
+        if: always()
+        shell: bash
+        run: |
+          if [ -f .state-reconciler/SYSTEM-STATE-DRIFT-REPORT.json ]; then
+            echo '## System State Drift Report' >> "$GITHUB_STEP_SUMMARY"
+            echo '```json' >> "$GITHUB_STEP_SUMMARY"
+            cat .state-reconciler/SYSTEM-STATE-DRIFT-REPORT.json >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          fi
+          if [ -f .state-reconciler/DERIVED-CURRENT-STATE.json ]; then
+            echo '## Derived Current State' >> "$GITHUB_STEP_SUMMARY"
+            echo '```json' >> "$GITHUB_STEP_SUMMARY"
+            cat .state-reconciler/DERIVED-CURRENT-STATE.json >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          fi
