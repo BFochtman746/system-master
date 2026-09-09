@@ -1,0 +1,78 @@
+name: Literary Prose Source Heldout 002B Human Dispatch
+
+on:
+  push:
+    branches:
+      - literary-prose-engine-001
+    paths:
+      - 'qualification/literary-prose-engine-001/extraction-calibration-001/candidate-002/prepare_human_adjudication_dispatch.py'
+      - 'qualification/literary-prose-engine-001/extraction-calibration-001/candidate-002/prepare_prehuman_custody.py'
+      - 'qualification/literary-prose-engine-001/extraction-calibration-001/candidate-002/SOURCE-HELDOUT-002A-HOSTED-CLOSURE-v1.json'
+      - 'qualification/literary-prose-engine-001/extraction-calibration-001/candidate-002/SOURCE-HELDOUT-002-LABEL-ONTOLOGY-v1.json'
+      - 'qualification/literary-prose-engine-001/extraction-calibration-001/candidate-002/SOURCE-HELDOUT-002B-HUMAN-ADJUDICATION-EXECUTION-PROTOCOL-v1.json'
+      - '.github/workflows/literary-prose-source-heldout-002b-human-dispatch.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-human-dispatch:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile dispatch generator
+        run: >-
+          python -m py_compile
+          qualification/literary-prose-engine-001/extraction-calibration-001/candidate-002/prepare_prehuman_custody.py
+          qualification/literary-prose-engine-001/extraction-calibration-001/candidate-002/prepare_human_adjudication_dispatch.py
+      - name: Build exact-source human dispatch package
+        run: >-
+          python qualification/literary-prose-engine-001/extraction-calibration-001/candidate-002/prepare_human_adjudication_dispatch.py
+          --output-dir "$RUNNER_TEMP/source-heldout-002b-human-dispatch"
+      - name: Verify dispatch has no gold or model predictions
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          root = Path(os.environ['RUNNER_TEMP']) / 'source-heldout-002b-human-dispatch'
+          manifest = json.loads((root / 'DISPATCH-MANIFEST.json').read_text(encoding='utf-8'))
+          assert manifest['case_count'] == 6
+          assert manifest['completed_packet_template_count'] == 18
+          assert manifest['reviewer_a_assignment_count'] == 18
+          assert manifest['reviewer_b_assignment_count'] == 12
+          assert manifest['total_independent_review_assignments'] == 30
+          assert manifest['model_predictions_in_package'] is False
+          assert manifest['human_gold_in_package'] is False
+          passages = list((root / 'passages').glob('*.txt'))
+          blanks = list((root / 'blank-completed-packets').glob('*.json'))
+          assert len(passages) == 6
+          assert len(blanks) == 18
+          assert len(list((root / 'reviewer-A').glob('*.md'))) == 18
+          assert len(list((root / 'reviewer-B').glob('*.md'))) == 12
+          assert (root / 'SPAN-HELPER.html').is_file()
+          for path in blanks:
+              packet = json.loads(path.read_text(encoding='utf-8'))
+              assert packet['adjudicators'] == []
+              assert packet['gold_labels'] == []
+              assert packet['forbidden_labels'] == []
+              assert packet['intentionally_ambiguous'] is None
+              assert packet['adjudication_notes_digest'] is None
+              assert packet['model_input_contains_gold'] is False
+          print('HUMAN_DISPATCH_NO_GOLD_VERIFY=PASS')
+          PY
+      - name: Upload human adjudication dispatch package
+        uses: actions/upload-artifact@v4
+        with:
+          name: LITERARY-SOURCE-HELDOUT-002B-HUMAN-DISPATCH-${{ github.run_id }}
+          path: ${{ runner.temp }}/source-heldout-002b-human-dispatch
+          if-no-files-found: error
+          retention-days: 30
