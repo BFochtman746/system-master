@@ -1,51 +1,37 @@
 {
   "objective": "AGLO-REAL-BOOK-CLOSED-LOOP-QUALIFICATION-001",
-  "standing": "EXECUTION_PREPARED__BLOCKED_PENDING_EXPLICIT_AUTHOR_BASELINE_RATIFICATION",
+  "standing": "LIVE_EXECUTION_PARTIAL_PASS__USER_ADJUDICATION_REQUIRED",
   "depends_on": {
     "step_l_standing": "PASS_CLOSED_LOOP_QUALIFICATION__SYNTHETIC_ONLY__REAL_BOOK_QUALIFICATION_NOT_YET_ADMITTED",
-    "admission_standing_required": "ADMITTED",
-    "baseline_ratification_required": "EXPLICIT_AUTHOR_RATIFICATION",
-    "current_admission_standing": "NOT_ADMITTED"
+    "current_admission_standing": "ADMITTED_FOR_QUALIFICATION_ONLY",
+    "ratified_revision_projection": "REJECT_ALL",
+    "ratified_baseline_text_sha256": "a48378682ee15fd4b24bc97293ce43a37f096db254a0b78f715081a8aa8a59ee",
+    "sample_reverification": "PASS"
   },
-  "candidate_source_binding": {
+  "source_binding": {
     "source_reference": "A Gate Left Open - Master .docx",
     "source_package_sha256": "ec0f5475c05cf6c11a75d139f2dbd131e6133d6abba9121be8b8ef18454b31df",
-    "candidate_baseline_version_id": "AGLO-REJECT-ALL-NARRATIVE-v1",
-    "candidate_baseline_text_sha256": "a48378682ee15fd4b24bc97293ce43a37f096db254a0b78f715081a8aa8a59ee",
-    "candidate_revision_projection": "REJECT_ALL",
-    "candidate_is_author_ratified": false,
+    "baseline_version_id": "AGLO-REJECT-ALL-NARRATIVE-v1",
+    "revision_projection": "REJECT_ALL",
+    "author_ratified": true,
     "original_source_mutation_allowed": false
   },
-  "candidate_sample_binding": {
+  "sample_binding": {
     "sample_id": "AGLO-RBQ-SAMPLE-001",
     "scope": "MULTI_CHAPTER_SAMPLE",
     "chapter_numbers": [1, 8, 19, 21, 24, 29],
     "sample_manifest_sha256": "f456e13c8eb7beb4dae9e32aefb9af32cf3d44a19f4d7af2808a60bfd371c2d4",
     "total_word_count": 11194,
-    "standing": "PRECOMPUTED_CANDIDATE_ONLY__REQUIRES_MATCHING_RATIFIED_BASELINE"
+    "standing": "PASS__REVERIFIED_AGAINST_RATIFIED_BASELINE"
   },
-  "execution_preconditions": [
-    "REAL_BOOK_STATE_EQUALS_ADMITTED",
-    "EXPLICIT_USER_AUTHORIZATION_PRESENT",
-    "RATIFIED_REVISION_PROJECTION_PRESENT",
-    "RATIFIED_BASELINE_TEXT_DIGEST_PRESENT",
-    "SOURCE_PACKAGE_DIGEST_REVERIFIED",
-    "SAMPLE_DIGESTS_REVERIFIED_AGAINST_RATIFIED_BASELINE",
-    "RAW_AND_CANDIDATE_PROSE_REMAIN_PRIVATE_NON_REPOSITORY"
-  ],
-  "execution_sequence_after_preconditions": [
-    "VERIFY_PRIVATE_SOURCE_PACKAGE_AND_RATIFIED_BASELINE_DIGEST",
-    "VERIFY_OR_REBUILD_REPRESENTATIVE_SAMPLE_FOR_RATIFIED_BASELINE",
-    "BUILD_PASSAGE_STATES_WITH_STEP_E_AUTHORITIES",
-    "RUN_STEP_F_SPECIALIST_DIAGNOSIS_AND_OPPORTUNITY_ADJUDICATION",
-    "RETRIEVE_STEP_D_RIGHTS_ADMISSIBLE_CRAFT_PRINCIPLES_AND_STEP_G_TRANSFORMS",
-    "GENERATE_STEP_H_BOUNDED_CANDIDATES_WITH_LEVEL_0_NO_CHANGE_ALWAYS_PRESENT",
-    "RUN_STEP_I_BLIND_POSITION_SWAPPED_INDEPENDENT_COMPARISON",
-    "RUN_STEP_K_HOMOGENIZATION_AND_OVEROPTIMIZATION_DEFENSE",
-    "FAIL_CLOSED_ON_ANY_PRESERVATION_REGRESSION_OR_UNRESOLVED_AUTHORITY",
-    "BUILD_USER_DECISION_PACKET_WITH_ORIGINAL_RETAIN_OPTION",
-    "LEARN_ONLY_FROM_EXPLICIT_USER_DECISION_OR_ALREADY_QUALIFIED_MACHINE_EVIDENCE_ALLOWED_BY_STEP_J"
-  ],
+  "live_execution": {
+    "evidence_record": "AGLO-RBQ-LIVE-CLOSED-LOOP-001.json",
+    "chapter_8": "RETAIN_ORIGINAL__NO_PROVEN_GAIN",
+    "chapter_21": "RETAIN_ORIGINAL_PENDING_INDEPENDENT_PREFERENCE_EVIDENCE",
+    "chapter_24_witness_duplicate": "BOUNDED_DEDUPLICATION_CANDIDATE_READY",
+    "chapter_24_concatenated_variants": "USER_DECISION_REQUIRED",
+    "controls": [1, 19, 29]
+  },
   "preservation_authorities": [
     "CANON_AND_CHRONOLOGY",
     "AUTHORIAL_INTENT",
@@ -81,5 +67,5 @@
     "publication_authority": false,
     "retain_original_on_uncertainty": true
   },
-  "next_transition": "EXPLICIT_AUTHOR_BASELINE_RATIFICATION"
+  "next_transition": "USER_ADJUDICATE_CH24_BOUNDED_CANDIDATES_THEN_RECORD_STEP_J_PROJECT_PREFERENCE_EVIDENCE"
 }
