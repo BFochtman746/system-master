@@ -1,5 +1,5 @@
 {
-  "registry_version": 8,
+  "registry_version": 9,
   "qualifications": {
     "A01-CONTROL-PLANE-SELFTEST": {
       "workstream_id": "SYSTEM-MASTER",
@@ -33,6 +33,18 @@
       "overnight_max_runtime_minutes": 30,
       "checkpoint_capable": false,
       "description": "Run the rights-aware, time-budgeted Literary Craft Academy research harvest from an exact Literary Prose subject SHA. Collect bibliographic metadata, OA/license signals, query provenance, public-domain candidate metadata, and curated rights-policy evidence without bulk article/book body acquisition or named-author imitation targets."
+    },
+    "LITERARY-PROSE-OVERNIGHT-RESEARCH-REGRESSION-SWEEP": {
+      "workstream_id": "LITERARY-PROSE",
+      "gate_class": "consolidated",
+      "source": "subject",
+      "executable": "node",
+      "args": [".github/scripts/a01-literary-prose-overnight-research-regression-sweep.js"],
+      "evidence_artifact": "literary-prose-overnight-research-regression-sweep",
+      "overnight_eligible": true,
+      "overnight_max_runtime_minutes": 180,
+      "checkpoint_capable": false,
+      "description": "Run a long, rights-aware Literary Prose overnight sweep: deterministic Literary regression suites before and after six bounded public-source metadata research shards, with broader query pagination and explicit evidence aggregation. No raw user manuscript or candidate prose, bulk article/book body acquisition, named-author imitation target, or universal prose score is permitted."
     },
     "BOOK-EVAL-REPAIR-005-GATE-D-PRIVATE-GOLD-RECOVERY": {
       "workstream_id": "BOOK-EVAL-LEMONADE-001",
