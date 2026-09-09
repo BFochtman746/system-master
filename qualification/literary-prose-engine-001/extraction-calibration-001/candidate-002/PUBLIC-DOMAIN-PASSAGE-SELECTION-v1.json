@@ -1,0 +1,72 @@
+{
+  "selection_id": "LITERARY-CANDIDATE-002-PUBLIC-DOMAIN-PASSAGE-SELECTION-v1",
+  "standing": "FROZEN_BEFORE_MODEL_INFERENCE__HUMAN_GOLD_PENDING",
+  "manifest": "PUBLIC-DOMAIN-SOURCE-HELDOUT-MANIFEST-v1.json",
+  "selection_date": "2026-09-09",
+  "selection_rule": "Passages are selected for named structural stress slices before Candidate-002 model inference. No model result may be used to replace a difficult selected passage with an easier one.",
+  "raw_passage_text_committed": false,
+  "cases": [
+    {
+      "selection_case_id": "PD-AUSTEN-CH34-001",
+      "work_id": "PG-1342-PRIDE-AND-PREJUDICE",
+      "passage_locator": "Chapter 34 — Darcy proposal sequence; bounded passage around the proposal and Elizabeth's immediate response",
+      "target_tasks": ["ENTITY_IDENTITY_COREFERENCE", "CAUSAL_GOAL_RELATIONS"],
+      "stress_slice": "dialogue-heavy social causality and referent continuity",
+      "human_gold_state": "PENDING",
+      "model_prediction_state": "NOT_RUN"
+    },
+    {
+      "selection_case_id": "PD-AUSTEN-CH36-002",
+      "work_id": "PG-1342-PRIDE-AND-PREJUDICE",
+      "passage_locator": "Chapter 36 — Elizabeth rereads Darcy's letter and revises prior beliefs; bounded reflective passage",
+      "target_tasks": ["EPISTEMIC_FOCALIZATION", "NARRATIVE_FUNCTION", "SETUP_PAYOFF_OPEN_QUESTION"],
+      "stress_slice": "belief-versus-knowledge revision, delayed revelation and reinterpretation",
+      "human_gold_state": "PENDING",
+      "model_prediction_state": "NOT_RUN"
+    },
+    {
+      "selection_case_id": "PD-CARROLL-CH01-003",
+      "work_id": "PG-11-ALICES-ADVENTURES-IN-WONDERLAND",
+      "passage_locator": "Chapter I — Down the Rabbit-Hole; bounded passage from White Rabbit appearance through Alice's pursuit",
+      "target_tasks": ["ANCHOR_LOCALIZATION", "EVENT_IDENTITY", "ENTITY_IDENTITY_COREFERENCE"],
+      "stress_slice": "salient event anchors, action continuity and explicit entity tracking",
+      "human_gold_state": "PENDING",
+      "model_prediction_state": "NOT_RUN"
+    },
+    {
+      "selection_case_id": "PD-CARROLL-CH12-004",
+      "work_id": "PG-11-ALICES-ADVENTURES-IN-WONDERLAND",
+      "passage_locator": "Chapter XII — Alice's Evidence; bounded ending passage spanning courtroom escalation into waking-frame transition",
+      "target_tasks": ["STORY_VS_DISCOURSE_TIME", "ARC_ORCHESTRATION", "NARRATIVE_FUNCTION"],
+      "stress_slice": "frame transition, ending orchestration and discourse/story boundary",
+      "human_gold_state": "PENDING",
+      "model_prediction_state": "NOT_RUN"
+    },
+    {
+      "selection_case_id": "PD-MELVILLE-CH36-005",
+      "work_id": "PG-2701-MOBY-DICK",
+      "passage_locator": "Chapter 36 — The Quarter-Deck; bounded passage around Ahab revealing the voyage's pursuit objective",
+      "target_tasks": ["CAUSAL_GOAL_RELATIONS", "NARRATIVE_FUNCTION", "ARC_ORCHESTRATION"],
+      "stress_slice": "explicit goal declaration, crew alignment and global narrative objective",
+      "human_gold_state": "PENDING",
+      "model_prediction_state": "NOT_RUN"
+    },
+    {
+      "selection_case_id": "PD-MELVILLE-CH41-006",
+      "work_id": "PG-2701-MOBY-DICK",
+      "passage_locator": "Chapter 41 — Moby Dick; bounded passage explaining Ahab/whale history and retrospective motivation",
+      "target_tasks": ["EVENT_IDENTITY", "STORY_VS_DISCOURSE_TIME", "SETUP_PAYOFF_OPEN_QUESTION", "EPISTEMIC_FOCALIZATION"],
+      "stress_slice": "retrospective event identity, temporal backstory, motivation and narrator knowledge boundary",
+      "human_gold_state": "PENDING",
+      "model_prediction_state": "NOT_RUN"
+    }
+  ],
+  "coverage": {
+    "all_nine_task_families_selected": true,
+    "work_count": 3,
+    "case_count": 6,
+    "works_test_only": true
+  },
+  "freeze_rule": "After this selection is committed, passage replacement requires a documented source defect, rights defect or adjudication impossibility—not model underperformance.",
+  "next_action": "Resolve exact bounded passage bytes from the verified source URLs, compute source SHA-256, freeze model predictions without gold visibility, and obtain human adjudication under HUMAN-ADJUDICATION-PACKET-CONTRACT-v1.json before scoring."
+}
