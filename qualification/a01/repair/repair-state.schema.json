@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:system-master:a01:repair-state:v1",
+  "title": "A-01 Closed-Loop Repair State",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "qualification_id",
+    "workstream_id",
+    "original_subject_sha",
+    "original_result_class",
+    "original_evidence_artifact",
+    "attempts_used",
+    "max_attempts",
+    "decision",
+    "promotion_authorized",
+    "original_receipt_retained"
+  ],
+  "properties": {
+    "version": {"const": 1},
+    "qualification_id": {"type": "string", "minLength": 1},
+    "workstream_id": {"type": "string", "minLength": 1},
+    "original_subject_sha": {"type": "string", "pattern": "^[0-9a-fA-F]{40}$"},
+    "original_result_class": {"enum": ["PASS", "SUBJECT_FAILURE", "INFRA_FAILURE", "CONTROL_PLANE_FAILURE"]},
+    "original_evidence_artifact": {"type": ["string", "null"]},
+    "attempts_used": {"type": "integer", "minimum": 0},
+    "max_attempts": {"type": "integer", "minimum": 1},
+    "decision": {"enum": ["NO_REPAIR_PASS", "REPAIR_REQUIRED", "ROUTE_INFRA", "ROUTE_CONTROL_PLANE", "DEAD_LETTER", "OWNER_ROUTE", "REPLACEMENT_REQUEST_READY"]},
+    "reason": {"type": ["string", "null"]},
+    "candidate_sha": {"type": ["string", "null"], "pattern": "^[0-9a-fA-F]{40}$"},
+    "replacement_request": {"type": ["object", "null"]},
+    "promotion_authorized": {"const": false},
+    "original_receipt_retained": {"const": true}
+  }
+}
