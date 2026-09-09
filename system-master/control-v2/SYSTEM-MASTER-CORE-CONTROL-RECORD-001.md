@@ -25,6 +25,7 @@ Current successor evidence is:
 - `PLATFORM005-RECONCILIATION-004.md`
 - `CHAT001A-CUMULATIVE-ASSEMBLY-003.md`
 - `CHAT001A-RECONCILIATION-003.md`
+- `OPERATOROPS001-SOURCE-CUSTODY-RECONCILIATION-001.md`
 
 These supersede the earlier current-control instruction to recover/modify the unavailable `0ae86ee3...` PLATFORM-005 composite and the earlier statement that SMR020 is blocked by predecessor reconciliation.
 
@@ -48,11 +49,29 @@ The exact candidate passed the recorded strict Java 21, 19/19 executable regress
 
 This clears the **local portable predecessor-reconciliation block** on SMR020. It does not clear source-custody, hosted exact-SHA, A-01, Apple-native or production boundaries.
 
+### SMR020 / OPERATOR-OPS-001
+
+Source-custody reconciliation has now recovered and hash-matched the canonical R024 review artifacts from the September 3 master-backup lineage and freshly replayed the recovered later cumulative OPERATOR implementation.
+
+Recovered canonical R024 standing remains:
+
+- release `v2.0.23 / R024`;
+- `REMEDIATED_INTEGRATED_PORTABLE_PASS / A01_PENDING` historically recorded;
+- 60 operations;
+- 13 findings, 11 remediated and 2 deliberately fenced to A-01;
+- production certification false.
+
+Fresh recovery evidence on the later cumulative source is bounded to that recovered source, not v2.0.23: static authority verifier PASS (`60 operations / 18 controls`), strict Java 21 focused compile PASS, `OperatorOpsPortableTests` 9/9 PASS, full recovered source strict compile PASS (`723 main + 84 test`), and recovered-current `FinalWavePortableTests` 22/22 PASS.
+
+The historical standalone v2.0.23 outer carrier remains unrecovered. The Program Vault index expects 12,798,084 bytes and canonical archive SHA-256 `4f900a29b4130d01f489188bd1fd9c36e2f0b53e8247c4634e8bc587dcd3ea9e`, while a conflicting historical provenance sidecar records `1a5e396817b9214e5f4219fcfbffbbc2de1239ac68b63f1de8af0dc1a5998864` for the same carrier name. Sidecars are not a substitute for actual bytes.
+
+Therefore historical source/test byte identity, exact-subject portable replay and A-01 admission remain unproven. Do not transfer the later UAF source PASS onto the missing v2.0.23 release identity.
+
 ## Current Core objective
 
-`SYSTEM-MASTER-REBUILD-020 / OPERATOR-OPS-001 — Governed Operations + Readiness + Commissioning + Recovery + Human Control Foundation`
+`UAF-S1-OPERATOROPS001-SOURCE-CUSTODY-002 — RECOVER OR INDEPENDENTLY RECONSTRUCT THE HISTORICAL v2.0.23 OPERATOR-OPS SOURCE/TEST SUBJECT -> RESOLVE THE 4f900a29 vs 1a5e3968 OUTER-PROVENANCE DISCREPANCY FROM ACTUAL BYTES -> PROVE R024 INPUT FILE HASH IDENTITY -> REPLAY THE PRESERVED OPERATOR-OPS PORTABLE QUALIFICATION -> ONLY THEN DECIDE WHETHER A DISTINCT WINDOWS A-01 EMPIRICAL DELTA IS JUSTIFIED.`
 
-Proceed through SMR020's own exact historical carrier/reconciliation/qualification train. Do not transfer SMR019 PASS to SMR020 bytes.
+Do not advance to SMR021 by transferring SMR019 or later-UAF PASS to SMR020 bytes. No SMR020 A-01 ticket is justified until an immutable exact qualification subject is reconstructed/admitted.
 
 In parallel, preserve the unresolved custody obligation for the corrected SMR018/SMR019 runnable trees: import/admit them to ordinary GitHub-native immutable source without mutation, independently reproduce exact identities, and obtain fresh hosted exact-SHA qualification before any A-01 admission requiring those changed subjects.
 
