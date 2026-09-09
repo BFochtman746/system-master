@@ -1,18 +1,18 @@
 {
   "objective": "LITERARY-PROSE-ENGINE-001-REAL-BOOK-QUALIFICATION",
-  "standing": "NOT_ADMITTED",
-  "decision": "NOT_ADMITTED",
-  "preadmission_status": "PREADMISSION_READY__AWAITING_EXPLICIT_AUTHOR_BASELINE_RATIFICATION",
-  "admission_id": null,
+  "standing": "ADMITTED_FOR_QUALIFICATION_ONLY",
+  "decision": "ADMITTED",
+  "preadmission_status": "COMPLETE",
+  "admission_id": "AGLO-REAL-BOOK-ADMISSION-001",
   "project_id": "A-GATE-LEFT-OPEN",
   "book_id": "AGLO-001",
-  "source_ownership_or_authorization": "NOT_YET_EXPLICITLY_BOUND_FOR_THIS_QUALIFICATION",
+  "source_ownership_or_authorization": "USER_OWNED_OR_AUTHORIZED",
   "source_reference": "A Gate Left Open - Master .docx",
   "source_package_digest": "ec0f5475c05cf6c11a75d139f2dbd131e6133d6abba9121be8b8ef18454b31df",
-  "qualification_scope": "MULTI_CHAPTER_SAMPLE__CANDIDATE_PREPARED",
-  "baseline_version_id": null,
-  "baseline_text_digest": null,
-  "revision_projection": null,
+  "qualification_scope": "MULTI_CHAPTER_SAMPLE",
+  "baseline_version_id": "AGLO-REJECT-ALL-NARRATIVE-v1",
+  "baseline_text_digest": "a48378682ee15fd4b24bc97293ce43a37f096db254a0b78f715081a8aa8a59ee",
+  "revision_projection": "REJECT_ALL",
   "preservation_obligations": {
     "canon": "FAIL_CLOSED",
     "authorial_intent": "FAIL_CLOSED",
@@ -33,8 +33,15 @@
     "evidence_references": "ALLOWED",
     "learning_records": "ALLOWED_PROJECT_SCOPED_NO_RAW_PROSE"
   },
-  "user_authorization": null,
-  "admitted_at": null,
+  "user_authorization": {
+    "explicit": true,
+    "objective": "LITERARY-PROSE-ENGINE-001-REAL-BOOK-QUALIFICATION",
+    "qualification_only": true,
+    "publication_authorized": false,
+    "automatic_overwrite_authorized": false,
+    "canon_replacement_authorized": false,
+    "baseline_projection_ratified": "REJECT_ALL"
+  },
   "named_author_target": false,
   "universal_prose_score": false,
   "candidate": {
@@ -48,23 +55,21 @@
     "tracked_changes": {
       "insertions": 23,
       "deletions": 32,
-      "canonical_projection_ratified": false,
-      "ratified_projection": null,
+      "canonical_projection_ratified": true,
+      "ratified_projection": "REJECT_ALL",
       "accept_all_narrative_sha256": "34be877efdbe08436177f4d5f996a8629aef781336fa6fa3e9ec086066c532c7",
       "reject_all_narrative_sha256": "a48378682ee15fd4b24bc97293ce43a37f096db254a0b78f715081a8aa8a59ee",
-      "accept_all_known_canon_blocker": "AGLO-HG-001",
-      "recommended_safe_baseline_candidate": "REJECT_ALL",
-      "recommendation_is_canon_ratification": false
+      "accept_all_known_canon_blocker": "AGLO-HG-001"
     }
   },
-  "representative_sample_candidate": {
+  "representative_sample": {
     "sample_id": "AGLO-RBQ-SAMPLE-001",
     "selection_method": "STRUCTURAL_AND_RISK_COVERAGE",
     "chapter_numbers": [1, 8, 19, 21, 24, 29],
     "total_word_count": 11194,
     "sample_manifest_sha256": "f456e13c8eb7beb4dae9e32aefb9af32cf3d44a19f4d7af2808a60bfd371c2d4",
     "projection_assumption": "REJECT_ALL",
-    "standing": "PRECOMPUTED_CANDIDATE_ONLY__NOT_AUTHORITATIVE_UNTIL_REJECT_ALL_RATIFIED"
+    "standing": "AUTHORIZED_PENDING_REVERIFICATION"
   },
   "step_l_prerequisite": {
     "standing": "PASS_CLOSED_LOOP_QUALIFICATION__SYNTHETIC_ONLY__REAL_BOOK_QUALIFICATION_NOT_YET_ADMITTED",
@@ -73,9 +78,9 @@
     "artifact_id": 10082483679,
     "artifact_digest": "sha256:9fa645ba2092977d531e6860d0356c97d7df9db0f926e282756e0fcc62522ab9"
   },
-  "authority_reconciliation": "Prior false admission claim superseded by forward correction; no history rewritten.",
-  "real_book_run_authorized": false,
+  "authority_reconciliation": "Prior false admission claim remains historical but non-authoritative; explicit author ratification is now present and supersedes the corrected pending state.",
+  "real_book_run_authorized": true,
   "real_book_accuracy_claimed": false,
   "raw_manuscript_text_committed": false,
-  "next_required_transition": "EXPLICIT_AUTHOR_BASELINE_RATIFICATION"
+  "next_required_transition": "REVERIFY_RATIFIED_BASELINE_SAMPLE_THEN_EXECUTE_AGLO_REAL_BOOK_CLOSED_LOOP_QUALIFICATION_001"
 }
