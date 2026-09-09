@@ -13,10 +13,14 @@ from learning_lab.real_learner_pilot_completion import (
     closed_loop_status,
     finalize_closed_loop_if_ready,
 )
+from learning_lab.real_learner_pilot_preflight import (
+    RealLearnerPilotPreflightError,
+    run_real_learner_pilot_preflight,
+)
 from learning_lab.real_learner_pilot_withdrawal import withdraw_runtime_bound_pilot
 
 
-CLOSED_LOOP_LAUNCHER_VERSION = "PILOT-001-REAL-PARTICIPANT-CLOSED-LOOP-V1"
+CLOSED_LOOP_LAUNCHER_VERSION = "PILOT-001-REAL-PARTICIPANT-CLOSED-LOOP-V2"
 
 # Preserve the qualified zero-evidence withdrawal boundary from the stage-one launcher.
 console.mark_runtime_bound_pilot_withdrawn = withdraw_runtime_bound_pilot
@@ -28,6 +32,21 @@ class ClosedLoopLauncherError(ValueError):
 
 def _fail(code: str) -> None:
     raise ClosedLoopLauncherError(code)
+
+
+def resolve_state_root_without_creation(path_text: str | None) -> Path:
+    return Path(path_text).expanduser().resolve() if path_text else console.DEFAULT_ROOT.resolve()
+
+
+def participant_collection_preflight(root: Path) -> Dict[str, Any]:
+    result = run_real_learner_pilot_preflight(state_root=root)
+    print("\n=== PILOT-001-RUN-001 ENVIRONMENT PREFLIGHT ===")
+    print(f"Standing: {result['standing']}")
+    print(f"Protocol: {result['protocol_version']}")
+    print(f"SQLite round-trip: {result['storage']['sqlite_roundtrip']}")
+    print("State root is outside the repository and writable.")
+    print("No participant consent, response, manifest, or participant database was created by preflight.\n")
+    return result
 
 
 def completion_package_path(root: Path, pilot_id: str) -> Path:
@@ -196,21 +215,31 @@ def main() -> int:
     parser.add_argument("--resume-pilot-id", help="Resume an already initialized local pilot by pseudonymous pilot ID.")
     parser.add_argument("--status-pilot-id", help="Show closed-loop standing without exposing or collecting a participant response.")
     parser.add_argument("--withdraw-pilot-id", help="Withdraw an existing pilot after an explicit participant withdrawal statement.")
+    parser.add_argument("--preflight-only", action="store_true", help="Verify the local execution environment without requesting participant presence, consent, or a response.")
     args = parser.parse_args()
 
-    selected = [bool(args.resume_pilot_id), bool(args.status_pilot_id), bool(args.withdraw_pilot_id)]
+    selected = [bool(args.resume_pilot_id), bool(args.status_pilot_id), bool(args.withdraw_pilot_id), bool(args.preflight_only)]
     if sum(selected) > 1:
-        print("Choose only one of --resume-pilot-id, --status-pilot-id, or --withdraw-pilot-id.", file=sys.stderr)
+        print("Choose only one of --resume-pilot-id, --status-pilot-id, --withdraw-pilot-id, or --preflight-only.", file=sys.stderr)
         return 2
 
-    root = console.state_root(args.state_root or os.environ.get("SYSTEM_MASTER_LEARNING_PILOT_STATE_ROOT"))
+    root = resolve_state_root_without_creation(args.state_root or os.environ.get("SYSTEM_MASTER_LEARNING_PILOT_STATE_ROOT"))
     try:
+        # Status and withdrawal remain available even if a future software-integrity
+        # preflight fails. Neither operation is allowed to collect a new response.
         if args.withdraw_pilot_id:
             console.withdraw(root, args.withdraw_pilot_id)
             return 0
         if args.status_pilot_id:
             status_only(root, args.status_pilot_id)
             return 0
+
+        # Any path that can collect a new participant response must pass the current
+        # environment/privacy/frozen-authority preflight before presence or consent.
+        participant_collection_preflight(root)
+        if args.preflight_only:
+            return 0
+
         if args.resume_pilot_id:
             manifest = console.load_manifest(root, args.resume_pilot_id)
         else:
@@ -220,7 +249,14 @@ def main() -> int:
     except KeyboardInterrupt:
         print("\nSESSION INTERRUPTED. No consent or response is inferred from interruption. Resume the same pseudonymous pilot or withdraw explicitly.", file=sys.stderr)
         return 130
-    except (ClosedLoopLauncherError, RealLearnerPilotCompletionError, console.ConsoleError, console.RealLearnerPilotHumanSessionError, ValueError) as exc:
+    except (
+        ClosedLoopLauncherError,
+        RealLearnerPilotCompletionError,
+        RealLearnerPilotPreflightError,
+        console.ConsoleError,
+        console.RealLearnerPilotHumanSessionError,
+        ValueError,
+    ) as exc:
         print(f"\nSESSION STOPPED: {exc}", file=sys.stderr)
         return 2
 
