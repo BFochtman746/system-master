@@ -2,7 +2,17 @@
 
 This file is the cross-chat entry point for work in `BFochtman746/system-master`.
 
-## Required startup
+## System Master primary-control startup
+
+For central System Master engineering work, first read and verify the live branch head of:
+
+- branch: `system-master/control-v2`
+- control record: `system-master/control-v2/SYSTEM-MASTER-V2-CONTROL-RECORD.md`
+- Night Shift closure/reset: `system-master/control-v2/NIGHT-SHIFT-CLOSURE-RECONCILIATION-2026-09-09.md`
+
+`main` remains the repository umbrella for shared A-01 policy, registry, workflows and cross-workstream ticket state. It is not the current System Master engineering-priority authority. Historical reset/handoff documents on `main` must not override the live `control-v2` record.
+
+## Required A-01 startup
 
 Before a workstream schedules or adjudicates A-01 machine qualification, read:
 
@@ -14,7 +24,7 @@ Before a workstream schedules or adjudicates A-01 machine qualification, read:
 
 These repository artifacts, not conversation memory, are authoritative for A-01 usage.
 
-## Current standing
+## Current A-01 standing
 
 A01-MIGRATION-001 is closed. A01-CONTROL-PLANE-001 is the normal qualification path. A01-OVERNIGHT-001 is the canonical scheduling extension for unattended 00:00–07:00 America/New_York capacity.
 
