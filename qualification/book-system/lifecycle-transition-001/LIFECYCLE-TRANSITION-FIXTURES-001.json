@@ -1,0 +1,251 @@
+{
+  "fixture_set_id": "BOOK-SYSTEM-LIFECYCLE-TRANSITION-ENGINE-001-FIXTURES",
+  "engine_id": "BOOK-SYSTEM-LIFECYCLE-TRANSITION-ENGINE-001",
+  "base_parent_state": {
+    "schema_version": 1,
+    "state_version": 7,
+    "book_project": {
+      "book_project_id": "BOOKPROJECT:001",
+      "book_id": "BOOK:001",
+      "status": "PLANNING",
+      "governing_brief_ref": "BRIEF:001",
+      "canonical_manifest_ref": "CANON:001"
+    },
+    "governing_briefs": {"BRIEF:001": {"brief_id": "BRIEF:001", "version": 1}},
+    "canon_manifests": {"CANON:001": {"canon_manifest_id": "CANON:001", "version": 1}},
+    "story_bibles": {"STORYBIBLE:001": {"story_bible_id": "STORYBIBLE:001", "version": 1}},
+    "book_plans": {"PLAN:001": {"plan_id": "PLAN:001", "version": 1}},
+    "manuscripts": {"MANUSCRIPT:001:V7": {"manuscript_id": "MANUSCRIPT:001", "version_id": "MANUSCRIPT:001:V7", "artifact_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "authority_state": "CANONICAL"}},
+    "research_evidence_links": {
+      "EVIDENCE:BOOK_PLAN_READY": {"link_id": "EVIDENCE:BOOK_PLAN_READY", "evidence_type": "BOOK_PLAN_READY"},
+      "EVIDENCE:GOVERNING_BRIEF_READY": {"link_id": "EVIDENCE:GOVERNING_BRIEF_READY", "evidence_type": "GOVERNING_BRIEF_READY"},
+      "EVIDENCE:UNIT_PLAN_READY": {"link_id": "EVIDENCE:UNIT_PLAN_READY", "evidence_type": "UNIT_PLAN_READY"},
+      "EVIDENCE:UNIT_DRAFT": {"link_id": "EVIDENCE:UNIT_DRAFT", "evidence_type": "UNIT_DRAFT_ARTIFACT_PRESENT"},
+      "EVIDENCE:EXACT_UNIT": {"link_id": "EVIDENCE:EXACT_UNIT", "evidence_type": "EXACT_UNIT_IDENTITY_BOUND"},
+      "EVIDENCE:CANDIDATE": {"link_id": "EVIDENCE:CANDIDATE", "evidence_type": "ADMITTED_REVISION_CANDIDATE_PRESENT"},
+      "EVIDENCE:MATERIAL_AUTHOR": {"link_id": "EVIDENCE:MATERIAL_AUTHOR", "evidence_type": "MATERIAL_REVISION_REQUIRES_AUTHOR"},
+      "EVIDENCE:PARENT_ADMISSION": {"link_id": "EVIDENCE:PARENT_ADMISSION", "evidence_type": "PARENT_ADMISSION_READY"},
+      "EVIDENCE:PRESERVATION": {"link_id": "EVIDENCE:PRESERVATION", "evidence_type": "PRESERVATION_GATES_PASS"},
+      "EVIDENCE:RETAIN_ORIGINAL": {"link_id": "EVIDENCE:RETAIN_ORIGINAL", "evidence_type": "RETAIN_ORIGINAL_DECISION_EVIDENCE"},
+      "EVIDENCE:UPSTREAM_CHANGE": {"link_id": "EVIDENCE:UPSTREAM_CHANGE", "evidence_type": "UPSTREAM_CHANGE_CAUSE"},
+      "EVIDENCE:RESUME": {"link_id": "EVIDENCE:RESUME", "evidence_type": "DEFERRED_WORK_RESUME_READY"},
+      "EVIDENCE:REVALIDATED": {"link_id": "EVIDENCE:REVALIDATED", "evidence_type": "INVALIDATED_UNIT_REVALIDATED"},
+      "EVIDENCE:AUTHOR_REVIEW_COMPLETE": {"link_id": "EVIDENCE:AUTHOR_REVIEW_COMPLETE", "evidence_type": "AUTHOR_REVIEW_COMPLETE"},
+      "EVIDENCE:EXPORT": {"link_id": "EVIDENCE:EXPORT", "evidence_type": "AUTHOR_APPROVED_EXPORT_PRESENT"},
+      "EVIDENCE:STALE_PLAN": {"link_id": "EVIDENCE:STALE_PLAN", "evidence_type": "BOOK_PLAN_READY", "parent_projection_identity": {"parent_state_version": 6, "parent_state_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"}}
+    },
+    "author_decisions": {
+      "DECISION:FINALIZE": {"decision_id": "DECISION:FINALIZE", "decision_type": "FINALIZATION_APPROVAL", "status": "APPROVED", "author_choice": "APPROVE"},
+      "DECISION:PROMOTE": {"decision_id": "DECISION:PROMOTE", "decision_type": "REVISION_PROMOTION", "status": "APPROVED", "author_choice": "PROMOTE"},
+      "DECISION:PUBLISH": {"decision_id": "DECISION:PUBLISH", "decision_type": "PUBLICATION_AUTHORIZATION", "status": "APPROVED", "author_choice": "APPROVE"}
+    },
+    "integration_proposals": {
+      "PROPOSAL:CURRENT": {"proposal_id": "PROPOSAL:CURRENT", "admission_state": "PARENT_PREQUALIFIED", "capability_id": "PARENT_ADMISSION_READY"}
+    },
+    "export_releases": {
+      "EXPORT:001": {"release_id": "EXPORT:001", "publication_authority_state": "AUTHOR_APPROVED", "evidence_type": "AUTHOR_APPROVED_EXPORT_PRESENT"}
+    },
+    "active": {
+      "governing_brief_ref": "BRIEF:001",
+      "canon_manifest_ref": "CANON:001",
+      "story_bible_ref": "STORYBIBLE:001",
+      "book_plan_ref": "PLAN:001",
+      "canonical_manuscript_ref": "MANUSCRIPT:001:V7"
+    }
+  },
+  "base_lifecycle_ledger": {
+    "ledger_schema_version": 1,
+    "ledger_version": 1,
+    "bound_parent_state_version": "__CURRENT_PARENT_VERSION__",
+    "bound_parent_state_digest": "__CURRENT_PARENT_DIGEST__",
+    "unit_states": {
+      "CHAPTER:001": {
+        "unit_ref": "CHAPTER:001",
+        "unit_type": "CHAPTER",
+        "status": "PLANNED",
+        "status_version": 1,
+        "last_transition_receipt_ref": null,
+        "deferred_from_status": null,
+        "invalidated_from_status": null,
+        "invalidation_causes": [],
+        "author_required": false
+      },
+      "SCENE:001": {
+        "unit_ref": "SCENE:001",
+        "unit_type": "SCENE",
+        "status": "DRAFTED",
+        "status_version": 3,
+        "last_transition_receipt_ref": null,
+        "deferred_from_status": null,
+        "invalidated_from_status": null,
+        "invalidation_causes": [],
+        "author_required": false
+      },
+      "PASSAGE:001": {
+        "unit_ref": "PASSAGE:001",
+        "unit_type": "PASSAGE",
+        "status": "DIAGNOSTIC_REVIEW",
+        "status_version": 4,
+        "last_transition_receipt_ref": null,
+        "deferred_from_status": null,
+        "invalidated_from_status": null,
+        "invalidation_causes": [],
+        "author_required": false
+      }
+    },
+    "dependency_edges": [
+      {"edge_id": "EDGE:001", "upstream_ref": "CHAPTER:001", "downstream_ref": "SCENE:001", "dependency_class": "PLAN"},
+      {"edge_id": "EDGE:002", "upstream_ref": "SCENE:001", "downstream_ref": "PASSAGE:001", "dependency_class": "MANUSCRIPT"}
+    ],
+    "processed_requests": {},
+    "transition_receipts": {}
+  },
+  "cases": [
+    {
+      "case_id": "VALID-PROJECT-PLANNING-TO-DRAFTING-001",
+      "type": "SINGLE",
+      "request": {"transition_request_id": "TRANSITION:001", "idempotency_key": "IDEMPOTENCY:001", "actor_class": "PARENT_SYSTEM", "scope": "PROJECT", "target_ref": "BOOKPROJECT:001", "target_status": "DRAFTING", "evidence_refs": ["EVIDENCE:BOOK_PLAN_READY"], "author_decision_refs": [], "integration_proposal_refs": [], "cause_refs": []},
+      "expected": "PASS",
+      "expected_parent_status": "DRAFTING",
+      "expected_parent_version_delta": 1,
+      "expected_ledger_version_delta": 1
+    },
+    {
+      "case_id": "REJECT-PROJECT-MISSING-GATE-EVIDENCE-001",
+      "type": "SINGLE",
+      "request": {"transition_request_id": "TRANSITION:002", "idempotency_key": "IDEMPOTENCY:002", "actor_class": "PARENT_SYSTEM", "scope": "PROJECT", "target_ref": "BOOKPROJECT:001", "target_status": "DRAFTING", "evidence_refs": [], "author_decision_refs": [], "integration_proposal_refs": [], "cause_refs": []},
+      "expected": "REJECT",
+      "expected_code": "REQUIRED_TRANSITION_EVIDENCE_MISSING",
+      "expect_atomic": true
+    },
+    {
+      "case_id": "REJECT-SERVICE-DIRECT-TRANSITION-001",
+      "type": "SINGLE",
+      "request": {"transition_request_id": "TRANSITION:003", "idempotency_key": "IDEMPOTENCY:003", "actor_class": "PROSE_PROJECT", "scope": "PROJECT", "target_ref": "BOOKPROJECT:001", "target_status": "DRAFTING", "evidence_refs": ["EVIDENCE:BOOK_PLAN_READY"], "author_decision_refs": [], "integration_proposal_refs": [], "cause_refs": []},
+      "expected": "REJECT",
+      "expected_code": "TRANSITION_AUTHORITY_DENIED",
+      "expect_atomic": true
+    },
+    {
+      "case_id": "REJECT-STALE-SERVICE-EVIDENCE-001",
+      "type": "SINGLE",
+      "request": {"transition_request_id": "TRANSITION:004", "idempotency_key": "IDEMPOTENCY:004", "actor_class": "PARENT_SYSTEM", "scope": "PROJECT", "target_ref": "BOOKPROJECT:001", "target_status": "DRAFTING", "evidence_refs": ["EVIDENCE:STALE_PLAN"], "author_decision_refs": [], "integration_proposal_refs": [], "cause_refs": []},
+      "expected": "REJECT",
+      "expected_code": "STALE_SERVICE_EVIDENCE",
+      "expect_atomic": true
+    },
+    {
+      "case_id": "REJECT-PARENT-VERSION-RACE-001",
+      "type": "SINGLE",
+      "request": {"transition_request_id": "TRANSITION:005", "idempotency_key": "IDEMPOTENCY:005", "actor_class": "PARENT_SYSTEM", "scope": "PROJECT", "target_ref": "BOOKPROJECT:001", "target_status": "DRAFTING", "evidence_refs": ["EVIDENCE:BOOK_PLAN_READY"], "author_decision_refs": [], "integration_proposal_refs": [], "cause_refs": [], "expected_parent_state_version": 999},
+      "expected": "REJECT",
+      "expected_code": "PARENT_STATE_VERSION_MISMATCH",
+      "expect_atomic": true
+    },
+    {
+      "case_id": "REJECT-LEDGER-DIGEST-RACE-001",
+      "type": "SINGLE",
+      "request": {"transition_request_id": "TRANSITION:006", "idempotency_key": "IDEMPOTENCY:006", "actor_class": "PARENT_SYSTEM", "scope": "PROJECT", "target_ref": "BOOKPROJECT:001", "target_status": "DRAFTING", "evidence_refs": ["EVIDENCE:BOOK_PLAN_READY"], "author_decision_refs": [], "integration_proposal_refs": [], "cause_refs": [], "expected_ledger_digest": "0000000000000000000000000000000000000000000000000000000000000000"},
+      "expected": "REJECT",
+      "expected_code": "LEDGER_DIGEST_MISMATCH",
+      "expect_atomic": true
+    },
+    {
+      "case_id": "VALID-UNIT-PLANNED-TO-READY-001",
+      "type": "SINGLE",
+      "request": {"transition_request_id": "TRANSITION:007", "idempotency_key": "IDEMPOTENCY:007", "actor_class": "PARENT_SYSTEM", "scope": "UNIT", "target_ref": "CHAPTER:001", "target_status": "READY_TO_DRAFT", "evidence_refs": ["EVIDENCE:UNIT_PLAN_READY"], "author_decision_refs": [], "integration_proposal_refs": [], "cause_refs": []},
+      "expected": "PASS",
+      "expected_unit_status": "READY_TO_DRAFT",
+      "expected_parent_version_delta": 0,
+      "expected_ledger_version_delta": 1
+    },
+    {
+      "case_id": "VALID-DEFER-RESUME-EXACT-001",
+      "type": "DEFER_RESUME",
+      "unit_patch": {"CHAPTER:001": {"status": "DRAFTED", "status_version": 5}},
+      "defer_request": {"transition_request_id": "TRANSITION:008A", "idempotency_key": "IDEMPOTENCY:008A", "actor_class": "PARENT_SYSTEM", "scope": "UNIT", "target_ref": "CHAPTER:001", "target_status": "DEFERRED", "evidence_refs": [], "author_decision_refs": [], "integration_proposal_refs": [], "cause_refs": []},
+      "resume_request": {"transition_request_id": "TRANSITION:008B", "idempotency_key": "IDEMPOTENCY:008B", "actor_class": "PARENT_SYSTEM", "scope": "UNIT", "target_ref": "CHAPTER:001", "target_status": "RESUME_PREVIOUS_STATUS", "evidence_refs": ["EVIDENCE:RESUME"], "author_decision_refs": [], "integration_proposal_refs": [], "cause_refs": []},
+      "expected": "PASS",
+      "expected_restored_status": "DRAFTED"
+    },
+    {
+      "case_id": "VALID-TRANSITIVE-INVALIDATION-001",
+      "type": "INVALIDATE",
+      "request": {"transition_request_id": "TRANSITION:009", "idempotency_key": "IDEMPOTENCY:009", "actor_class": "PARENT_SYSTEM", "scope": "UNIT", "target_ref": "CHAPTER:001", "target_status": "INVALIDATED_BY_UPSTREAM_CHANGE", "evidence_refs": ["EVIDENCE:UPSTREAM_CHANGE"], "author_decision_refs": [], "integration_proposal_refs": [], "cause_refs": ["CANON-CHANGE:001"]},
+      "expected": "PASS",
+      "expected_invalidated": ["CHAPTER:001", "SCENE:001", "PASSAGE:001"]
+    },
+    {
+      "case_id": "VALID-INVALIDATION-RESTORE-001",
+      "type": "INVALIDATE_RESTORE",
+      "invalidate_request": {"transition_request_id": "TRANSITION:010A", "idempotency_key": "IDEMPOTENCY:010A", "actor_class": "PARENT_SYSTEM", "scope": "UNIT", "target_ref": "CHAPTER:001", "target_status": "INVALIDATED_BY_UPSTREAM_CHANGE", "evidence_refs": ["EVIDENCE:UPSTREAM_CHANGE"], "author_decision_refs": [], "integration_proposal_refs": [], "cause_refs": ["PLAN-CHANGE:001"]},
+      "restore_request": {"transition_request_id": "TRANSITION:010B", "idempotency_key": "IDEMPOTENCY:010B", "actor_class": "PARENT_SYSTEM", "scope": "UNIT", "target_ref": "CHAPTER:001", "target_status": "RESTORE_INVALIDATED_STATUS_AFTER_REVALIDATION", "evidence_refs": ["EVIDENCE:REVALIDATED"], "author_decision_refs": [], "integration_proposal_refs": [], "cause_refs": []},
+      "expected": "PASS",
+      "expected_restored_status": "PLANNED",
+      "expected_downstream_remains_invalidated": true
+    },
+    {
+      "case_id": "REJECT-AUTHOR-REQUIRED-UNIT-PROMOTION-001",
+      "type": "SINGLE",
+      "unit_patch": {"CHAPTER:001": {"status": "REVISION_CANDIDATE_AVAILABLE", "status_version": 8, "author_required": true}},
+      "request": {"transition_request_id": "TRANSITION:011", "idempotency_key": "IDEMPOTENCY:011", "actor_class": "PARENT_SYSTEM", "scope": "UNIT", "target_ref": "CHAPTER:001", "target_status": "ACCEPTED_INTO_CANONICAL_MANUSCRIPT", "evidence_refs": ["EVIDENCE:PARENT_ADMISSION", "EVIDENCE:PRESERVATION"], "author_decision_refs": [], "integration_proposal_refs": ["PROPOSAL:CURRENT"], "cause_refs": []},
+      "expected": "REJECT",
+      "expected_code": "REQUIRED_AUTHOR_DECISION_MISSING",
+      "expect_atomic": true
+    },
+    {
+      "case_id": "VALID-AUTHOR-APPROVED-UNIT-PROMOTION-001",
+      "type": "SINGLE",
+      "unit_patch": {"CHAPTER:001": {"status": "REVISION_CANDIDATE_AVAILABLE", "status_version": 8, "author_required": true}},
+      "request": {"transition_request_id": "TRANSITION:012", "idempotency_key": "IDEMPOTENCY:012", "actor_class": "PARENT_SYSTEM", "scope": "UNIT", "target_ref": "CHAPTER:001", "target_status": "ACCEPTED_INTO_CANONICAL_MANUSCRIPT", "evidence_refs": ["EVIDENCE:PARENT_ADMISSION", "EVIDENCE:PRESERVATION"], "author_decision_refs": ["DECISION:PROMOTE"], "integration_proposal_refs": ["PROPOSAL:CURRENT"], "cause_refs": []},
+      "expected": "PASS",
+      "expected_unit_status": "ACCEPTED_INTO_CANONICAL_MANUSCRIPT"
+    },
+    {
+      "case_id": "REJECT-PROJECT-FINALIZATION-WITHOUT-AUTHOR-001",
+      "type": "SINGLE",
+      "parent_patch": {"book_project": {"status": "AUTHOR_REVIEW"}},
+      "request": {"transition_request_id": "TRANSITION:013", "idempotency_key": "IDEMPOTENCY:013", "actor_class": "PARENT_SYSTEM", "scope": "PROJECT", "target_ref": "BOOKPROJECT:001", "target_status": "FINALIZATION", "evidence_refs": ["EVIDENCE:AUTHOR_REVIEW_COMPLETE"], "author_decision_refs": [], "integration_proposal_refs": [], "cause_refs": []},
+      "expected": "REJECT",
+      "expected_code": "REQUIRED_AUTHOR_DECISION_MISSING",
+      "expect_atomic": true
+    },
+    {
+      "case_id": "VALID-PROJECT-FINALIZATION-WITH-AUTHOR-001",
+      "type": "SINGLE",
+      "parent_patch": {"book_project": {"status": "AUTHOR_REVIEW"}},
+      "request": {"transition_request_id": "TRANSITION:014", "idempotency_key": "IDEMPOTENCY:014", "actor_class": "PARENT_SYSTEM", "scope": "PROJECT", "target_ref": "BOOKPROJECT:001", "target_status": "FINALIZATION", "evidence_refs": ["EVIDENCE:AUTHOR_REVIEW_COMPLETE"], "author_decision_refs": ["DECISION:FINALIZE"], "integration_proposal_refs": [], "cause_refs": []},
+      "expected": "PASS",
+      "expected_parent_status": "FINALIZATION"
+    },
+    {
+      "case_id": "VALID-REPLAY-NO-DOUBLE-COMMIT-001",
+      "type": "REPLAY",
+      "request": {"transition_request_id": "TRANSITION:015", "idempotency_key": "IDEMPOTENCY:015", "actor_class": "PARENT_SYSTEM", "scope": "UNIT", "target_ref": "CHAPTER:001", "target_status": "READY_TO_DRAFT", "evidence_refs": ["EVIDENCE:UNIT_PLAN_READY"], "author_decision_refs": [], "integration_proposal_refs": [], "cause_refs": []},
+      "expected": "PASS",
+      "expected_second_disposition": "REPLAY"
+    },
+    {
+      "case_id": "REJECT-IDEMPOTENCY-KEY-CONFLICT-001",
+      "type": "IDEMPOTENCY_CONFLICT",
+      "first_request": {"transition_request_id": "TRANSITION:016", "idempotency_key": "IDEMPOTENCY:016", "actor_class": "PARENT_SYSTEM", "scope": "UNIT", "target_ref": "CHAPTER:001", "target_status": "READY_TO_DRAFT", "evidence_refs": ["EVIDENCE:UNIT_PLAN_READY"], "author_decision_refs": [], "integration_proposal_refs": [], "cause_refs": []},
+      "second_request_patch": {"target_status": "DEFERRED"},
+      "expected": "REJECT",
+      "expected_code": "IDEMPOTENCY_KEY_CONFLICT"
+    },
+    {
+      "case_id": "REJECT-REQUEST-ID-CONFLICT-001",
+      "type": "REQUEST_ID_CONFLICT",
+      "first_request": {"transition_request_id": "TRANSITION:017", "idempotency_key": "IDEMPOTENCY:017A", "actor_class": "PARENT_SYSTEM", "scope": "UNIT", "target_ref": "CHAPTER:001", "target_status": "READY_TO_DRAFT", "evidence_refs": ["EVIDENCE:UNIT_PLAN_READY"], "author_decision_refs": [], "integration_proposal_refs": [], "cause_refs": []},
+      "second_request": {"transition_request_id": "TRANSITION:017", "idempotency_key": "IDEMPOTENCY:017B", "actor_class": "PARENT_SYSTEM", "scope": "UNIT", "target_ref": "CHAPTER:001", "target_status": "DRAFTED", "evidence_refs": ["EVIDENCE:UNIT_DRAFT"], "author_decision_refs": [], "integration_proposal_refs": [], "cause_refs": []},
+      "expected": "REJECT",
+      "expected_code": "REQUEST_ID_CONFLICT"
+    },
+    {
+      "case_id": "VALID-ROLLBACK-IDENTITY-001",
+      "type": "ROLLBACK",
+      "request": {"transition_request_id": "TRANSITION:018", "idempotency_key": "IDEMPOTENCY:018", "actor_class": "PARENT_SYSTEM", "scope": "PROJECT", "target_ref": "BOOKPROJECT:001", "target_status": "DRAFTING", "evidence_refs": ["EVIDENCE:BOOK_PLAN_READY"], "author_decision_refs": [], "integration_proposal_refs": [], "cause_refs": []},
+      "expected": "PASS"
+    }
+  ]
+}
