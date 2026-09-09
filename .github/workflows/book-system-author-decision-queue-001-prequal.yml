@@ -21,20 +21,21 @@ jobs:
           fetch-depth: 1
           persist-credentials: false
 
-      - name: Validate runtime and qualifier syntax
+      - name: Validate runtime qualifier and A-01 wrapper syntax
         shell: bash
         run: |
           set -euo pipefail
           node --check system-master/book-system/author-decision-queue.js
           node --check .github/scripts/book-system-author-decision-queue-001-qualify.js
+          node --check .github/scripts/a01-book-system-author-decision-queue-001.js
 
-      - name: Execute deterministic adversarial qualification
+      - name: Execute deterministic adversarial qualification through canonical wrapper
         shell: bash
         run: |
           set -euo pipefail
           evidence_dir="$RUNNER_TEMP/book-system-author-decision-queue-001-evidence"
           mkdir -p "$evidence_dir"
-          BOOK_AUTHOR_DECISION_EVIDENCE_DIR="$evidence_dir" node .github/scripts/book-system-author-decision-queue-001-qualify.js | tee "$evidence_dir/qualifier.log"
+          BOOK_AUTHOR_DECISION_EVIDENCE_DIR="$evidence_dir" node .github/scripts/a01-book-system-author-decision-queue-001.js | tee "$evidence_dir/qualifier.log"
 
       - name: Record exact candidate identity
         if: always()
