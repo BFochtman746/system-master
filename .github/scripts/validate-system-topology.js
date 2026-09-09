@@ -29,7 +29,7 @@ function requireFile(relative) {
 const authority = readJson(authorityPath);
 if (authority.product_root !== 'SYSTEM_MASTER') fail('CURRENT-AUTHORITY product_root must be SYSTEM_MASTER');
 if (authority.topology !== 'governance/SYSTEM-TOPOLOGY-002.json') fail('CURRENT-AUTHORITY must select SYSTEM-TOPOLOGY-002.json');
-for (const field of ['last_sealed_state_checkpoint', 'completion_ledger', 'expectation_registry', 'reallocation_ledger', 'second_shift_registry']) {
+for (const field of ['last_sealed_state_checkpoint', 'completion_ledger', 'obligation_registry', 'expectation_registry', 'reallocation_ledger', 'second_shift_registry']) {
   if (!authority[field]) fail(`CURRENT-AUTHORITY missing ${field}`);
   requireFile(authority[field]);
 }
@@ -82,6 +82,12 @@ for (const name of ['A-01', 'ASSURANCE', 'RECONCILIATION', 'CONTINUITY', 'BOOK E
   if (!Object.prototype.hasOwnProperty.call(explicitNonSystems, name)) fail(`required non-system classification missing: ${name}`);
 }
 
+const obligations = readJson(requireFile(authority.obligation_registry));
+for (const item of obligations.obligations || []) {
+  if (!item.obligation_id || !item.owner_path || !item.state) fail('every obligation must declare obligation_id, owner_path and state');
+  if (!String(item.owner_path).startsWith('SYSTEM_MASTER')) fail(`obligation ${item.obligation_id} escapes System Master hierarchy`);
+}
+
 const secondShift = readJson(requireFile(authority.second_shift_registry));
 const expectedOwnerFiles = { CORE: 'CORE-DELEGATIONS.json', LEARNING: 'LEARNING-DELEGATIONS.json', BOOK: 'BOOK-DELEGATIONS.json', PROSE: 'PROSE-DELEGATIONS.json' };
 for (const id of expectedSystems) {
@@ -95,4 +101,5 @@ console.log('SYSTEM_TOPOLOGY_PASS');
 console.log('product_root=SYSTEM_MASTER');
 console.log('canonical_internal_systems=CORE,LEARNING,BOOK,PROSE');
 console.log('hierarchy=SYSTEM_MASTER>{CORE,LEARNING,BOOK};BOOK>PROSE');
+console.log(`open_obligations_registered=${(obligations.obligations || []).filter((item) => item.state !== 'CLOSED' && item.state !== 'SUPERSEDED').length}`);
 console.log(`a01_workstream_ids_mapped=${workstreams.size}`);
