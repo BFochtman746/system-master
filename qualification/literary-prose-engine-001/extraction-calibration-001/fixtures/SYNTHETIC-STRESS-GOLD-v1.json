@@ -1,0 +1,78 @@
+{
+  "corpus_id": "LITERARY-NARRATIVE-EXTRACTION-SYNTHETIC-STRESS-v1",
+  "source_class": "SYNTHETIC_QUALIFICATION_ONLY",
+  "contains_user_manuscript": false,
+  "contains_copyrighted_reference_body": false,
+  "named_author_target": false,
+  "cases": [
+    {
+      "case_id": "anchor-001",
+      "task": "ANCHOR_LOCALIZATION",
+      "gold_labels": ["anchor:A1"],
+      "gold_spans": [{"anchor_id": "A1", "span": [10, 20]}]
+    },
+    {
+      "case_id": "entity-coref-001",
+      "task": "ENTITY_IDENTITY_COREFERENCE",
+      "gold_labels": ["entity:E1=SPEAKER", "coref:M2->E1"]
+    },
+    {
+      "case_id": "event-retelling-001",
+      "task": "EVENT_IDENTITY",
+      "gold_labels": ["same_event:EV1=EV3", "distinct_event:EV2!=EV1"]
+    },
+    {
+      "case_id": "flashback-001",
+      "task": "STORY_VS_DISCOURSE_TIME",
+      "gold_labels": ["story:EV2_BEFORE_EV1", "discourse:EV1_BEFORE_EV2"]
+    },
+    {
+      "case_id": "chronology-ambiguous-001",
+      "task": "STORY_VS_DISCOURSE_TIME",
+      "gold_labels": ["time:EV4_REL_EV5_UNRESOLVED"],
+      "intentionally_ambiguous": true,
+      "allowed_ambiguity_statuses": ["UNRESOLVED", "ALTERNATIVE", "ABSTAIN"]
+    },
+    {
+      "case_id": "causality-001",
+      "task": "CAUSAL_GOAL_RELATIONS",
+      "gold_labels": ["goal:EV6_SUPPORTS_G1"],
+      "forbidden_labels": ["causes:EV6_CAUSES_EV7"]
+    },
+    {
+      "case_id": "epistemic-001",
+      "task": "EPISTEMIC_FOCALIZATION",
+      "gold_labels": ["perceives:C1_EV8", "believes:C1_P1", "focalizes:C1_A8"],
+      "forbidden_labels": ["knows:C1_P1"]
+    },
+    {
+      "case_id": "omniscience-001",
+      "task": "EPISTEMIC_FOCALIZATION",
+      "gold_labels": ["focalizes:C1_A9", "focalizes:C2_A10"],
+      "intentionally_ambiguous": true,
+      "allowed_ambiguity_statuses": ["ALTERNATIVE", "UNRESOLVED", "ABSTAIN"]
+    },
+    {
+      "case_id": "function-001",
+      "task": "NARRATIVE_FUNCTION",
+      "gold_labels": ["function:A11=SETUP", "function:A11=CHARACTER_REVEAL"]
+    },
+    {
+      "case_id": "setup-payoff-001",
+      "task": "SETUP_PAYOFF_OPEN_QUESTION",
+      "gold_labels": ["setup:A12->Q1", "payoff:A18->Q1", "status:Q2=OPEN"]
+    },
+    {
+      "case_id": "arc-unresolved-001",
+      "task": "ARC_ORCHESTRATION",
+      "gold_labels": ["arc:CHAR1_BEAT_A13=ESCALATION", "arc:CHAR1_STATUS=UNRESOLVED"],
+      "intentionally_ambiguous": true,
+      "allowed_ambiguity_statuses": ["UNRESOLVED", "ALTERNATIVE", "ABSTAIN"]
+    },
+    {
+      "case_id": "motif-function-001",
+      "task": "ARC_ORCHESTRATION",
+      "gold_labels": ["motif:M1_A14=INTRODUCTION", "motif:M1_A19=TRANSFORMATION"]
+    }
+  ]
+}
