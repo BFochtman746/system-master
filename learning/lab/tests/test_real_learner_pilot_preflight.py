@@ -1,12 +1,19 @@
 from __future__ import annotations
 
+import hashlib
 import json
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
 
 from learning_lab import real_learner_pilot_preflight as preflight
+
+
+def _blob_sha1(data: bytes) -> str:
+    header = f"blob {len(data)}\0".encode("ascii")
+    return hashlib.sha1(header + data).hexdigest()
 
 
 class RealLearnerPilotPreflightTests(unittest.TestCase):
@@ -42,17 +49,30 @@ class RealLearnerPilotPreflightTests(unittest.TestCase):
     def test_preflight_fails_closed_on_frozen_authority_drift(self):
         with tempfile.TemporaryDirectory() as repo_td, tempfile.TemporaryDirectory() as state_td:
             fake_repo = Path(repo_td)
+            subprocess.run(["git", "init"], cwd=fake_repo, capture_output=True, text=True, check=True)
+            subprocess.run(["git", "config", "core.autocrlf", "true"], cwd=fake_repo, capture_output=True, text=True, check=True)
+
             relative = "learning/lab/LEARNING_LAB_PILOT_001_PROTOCOL.md"
             target = fake_repo / relative
             target.parent.mkdir(parents=True, exist_ok=True)
-            target.write_text("drifted protocol\n", encoding="utf-8")
-            with patch.object(preflight, "_FROZEN_PILOT_BLOBS", {relative: "0" * 40}):
+
+            canonical = b"frozen protocol\n"
+            target.write_bytes(b"frozen protocol\r\n")
+            expected = _blob_sha1(canonical)
+            with patch.object(preflight, "_FROZEN_PILOT_BLOBS", {relative: expected}):
+                result = preflight.run_real_learner_pilot_preflight(
+                    state_root=Path(state_td) / "state-clean",
+                    repo_root=fake_repo,
+                )
+                self.assertEqual(result["frozen_authority_blobs"][relative], expected)
+
+                target.write_bytes(b"drifted protocol\r\n")
                 with self.assertRaisesRegex(
                     preflight.RealLearnerPilotPreflightError,
                     "PREFLIGHT_FROZEN_AUTHORITY_DRIFT",
                 ):
                     preflight.run_real_learner_pilot_preflight(
-                        state_root=Path(state_td) / "state",
+                        state_root=Path(state_td) / "state-drift",
                         repo_root=fake_repo,
                     )
 
