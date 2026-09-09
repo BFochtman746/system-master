@@ -1,0 +1,64 @@
+{
+  "checkpoint_id": "BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001-HOSTED-PREQUAL-CHECKPOINT",
+  "effective_date": "2026-09-09",
+  "standing": "HOSTED_PREQUAL_PASS__CENTRAL_A01_REGISTRATION_PENDING",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "objective": "BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001",
+  "qualified_scope": "Hosted deterministic prequalification only; authoritative A-01 qualification remains separate.",
+  "current_hosted_candidate": {
+    "subject_sha": "3ee4916682ed60dd7044b6c98fe0940137d96b92",
+    "run_id": 34417782231,
+    "job_id": 102686391649,
+    "case_count": 48,
+    "pass_count": 48,
+    "fail_count": 0,
+    "result": "PASS",
+    "evidence_artifact_id": 10129739108,
+    "evidence_artifact_digest": "sha256:269d219b5278138fa7f4010d5fdf188fa07969868907c0d187403a8e616a052c",
+    "runtime_sha256": "fe1e3076a2cf558b77adf3f3745f953779039b284fa4a504b26abcf04429b27a",
+    "core_sha256": "92c39cc68b9a0acc0e2bf508c665616efb778eb6aad7c497e917620d7b538804",
+    "qualifier_v2_sha256": "44745623badbce602709f00c829d56aa68e7418ff508e868c5a28f645ccfbcda"
+  },
+  "failed_subject_history": {
+    "subject_sha": "8ddb371c56ab64d4574de06a7745d77db76f27bd",
+    "run_id": 34417514196,
+    "job_id": 102685556970,
+    "case_count": 48,
+    "pass_count": 47,
+    "fail_count": 1,
+    "result": "FAIL",
+    "evidence_artifact_id": 10129641733,
+    "evidence_artifact_digest": "sha256:d17f808676d4d7e696995e721d9cfd5727a158ccdf4ea8c4e8889e2b700683bb",
+    "failure_case": "ADQ010_WITHDRAWN_REQUEST_CANNOT_RESOLVE",
+    "failure_classification": "QUALIFIER_EXPECTATION_MISMATCH__RUNTIME_BEHAVIOR_CORRECT",
+    "expected_error_superseded": "DECISION_REQUEST_NOT_CURRENT",
+    "runtime_error_preserved": "DECISION_REQUEST_NOT_RESOLVABLE",
+    "reason": "WITHDRAWN remains the current immutable request snapshot but is a terminal unresolvable state. No runtime authority or mutation defect was found."
+  },
+  "repair": {
+    "repair_id": "BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001-QUALIFIER-REPAIR-001",
+    "classification": "QUALIFIER_ONLY__NO_RUNTIME_OR_FIXTURE_SEMANTIC_CHANGE",
+    "wrapper": ".github/scripts/book-system-author-decision-queue-001-qualify-v2.js",
+    "hosted_workflow": ".github/workflows/book-system-author-decision-queue-001-prequal.yml",
+    "rule": "The failed subject and evidence remain historical; the repair does not relabel the failed run and does not change Author Decision Queue runtime semantics."
+  },
+  "authority_proven_by_hosted_gate": {
+    "author_choice_synthesis_allowed": false,
+    "provider_resolution_allowed": false,
+    "lifecycle_mutation_allowed": false,
+    "manuscript_promotion_allowed": false,
+    "proposal_admission_allowed": false,
+    "export_freeze_allowed": false,
+    "publication_authority_allowed": false,
+    "document_engine_authority_created": false
+  },
+  "central_a01_check": {
+    "registry_ref": "main:qualification/a01/registry.json",
+    "registry_version_observed": 22,
+    "qualification_id": "BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001",
+    "registered": false,
+    "classification": "CENTRAL_A01_REGISTRATION_REQUIRED"
+  },
+  "exact_next_action": "Revalidate canonical main A-01 registry. If BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001 is admitted, execute the registered shared A-01 gateway against exact hosted-passing subject 3ee4916682ed60dd7044b6c98fe0940137d96b92 unchanged. If registration remains absent, preserve this hosted candidate and route the registration request to shared A-01 ownership without modifying shared authority from the Book lane.",
+  "qualification_effect": "HOSTED_PASS_ONLY. No A-01 PASS, human choice, manuscript promotion, lifecycle advancement, proposal admission, export freeze, publication or production authority is created by this checkpoint."
+}
