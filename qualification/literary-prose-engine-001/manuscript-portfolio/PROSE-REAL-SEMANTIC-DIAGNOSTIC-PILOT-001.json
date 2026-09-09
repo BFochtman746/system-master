@@ -1,0 +1,173 @@
+{
+  "evidence_id": "PROSE-REAL-SEMANTIC-DIAGNOSTIC-PILOT-001",
+  "standing": "PASS__NINE_REAL_PRIVATE_PASSAGES_VALIDATE_THROUGH_SEMANTIC_AUTHORITY_BOUNDARY__PROVIDER_ACCURACY_NOT_YET_QUALIFIED",
+  "project": "PROSE PROJECT",
+  "date": "2026-09-09",
+  "provider": {
+    "kind": "MODEL",
+    "provider_ids": ["CHATGPT_PROSE_PRIVATE_PILOT_001", "CHATGPT_PROSE_PRIVATE_PILOT_002"],
+    "independent_evaluator": false,
+    "ground_truth_provider": false,
+    "author_authority": false,
+    "canon_authority": false,
+    "revision_authority": false
+  },
+  "validation_boundary": {
+    "contract": "../diagnostic-evidence-provider-002/PROSE-SEMANTIC-DIAGNOSTIC-EVIDENCE-PROVIDER-CONTRACT-v1.json",
+    "validator": "../diagnostic-evidence-provider-002/semantic_evidence_validator.py",
+    "hosted_qualification_receipt": "../diagnostic-evidence-provider-002/PROSE-SEMANTIC-DIAGNOSTIC-EVIDENCE-PROVIDER-002-QUALIFICATION-RECEIPT.json"
+  },
+  "private_evidence": {
+    "first_three_normalized_sha256": "cad52aea1334d6881c9fdbf6e986303eb4c03744a885227992e3b99521a61eed",
+    "additional_six_normalized_sha256": "8a4c74074686a1059f200675798c4a9e804583cf44793416d6f8c00d422c5c08",
+    "nine_passage_summary_sha256": "49a1adc9167258b7485975c05fc491ead15acc1234e0841c35bdafda34f41112",
+    "raw_prose_persisted_to_repository": false,
+    "candidate_prose_persisted_to_repository": false
+  },
+  "counts": {
+    "books": 3,
+    "passages": 9,
+    "validator_pass": 9,
+    "validator_reject": 0,
+    "passage_state_hypotheses": 54,
+    "text_side_diagnostic_observations": 41,
+    "unresolved_low_confidence_claims": 1,
+    "revision_candidates_generated": 0,
+    "manuscripts_modified": 0
+  },
+  "samples": [
+    {
+      "source_id": "MOSES_I_CH1",
+      "position": "OPENING",
+      "passage_sha256": "b1f6bd45f5de51102acd02db1340f2c6683509f321ad147c5d64bdabda5c5dd1",
+      "scene_function_code": "OPENING_ORIENTATION_AND_THREAT_THRESHOLD",
+      "pov_code": "THIRD_PERSON_CLOSE_WITH_NARRATORIAL_RANGE",
+      "focalization_code": "SHIPHRAH_DOMINANT_INTERNAL",
+      "pacing_code": "DELIBERATE_IMMERSIVE_ESCALATION",
+      "book_voice_code": "SENSORY_LYRICAL_HISTORICAL_NARRATION",
+      "diagnostic_codes": ["SHORT_EMPHATIC_BEATS_WITH_ACCUMULATIVE_PROSE", "SCENIC_DWELL_WITH_THRESHOLD_APPROACH", "DUST_BIRTH_DEATH_AND_BASKET_PRESSURE_CLUSTER", "MIDWIFE_APPROACHES_AND_ASSESSES_CLOSED_HOUSE"]
+    },
+    {
+      "source_id": "MOSES_I_CH17",
+      "position": "MIDDLE",
+      "passage_sha256": "2018532207663a30d8ddf207bd3b3c07fd5cb791be11d315ab1bc4dc2002cee4",
+      "scene_function_code": "IDENTITY_CONFRONTATION_AND_SPLIT_SELF_RECOGNITION",
+      "pov_code": "THIRD_PERSON_CLOSE_WITH_NARRATORIAL_RANGE",
+      "focalization_code": "RAMOSE_DOMINANT_INTERNAL",
+      "pacing_code": "SLOW_INTROSPECTIVE_DWELL_AND_SYMBOLIC_ESCALATION",
+      "book_voice_code": "LYRICAL_SYMBOLIC_HISTORICAL_INTERIORITY",
+      "book_voice_disposition": "UNRESOLVED",
+      "diagnostic_codes": ["ACCUMULATIVE_REFLECTION_WITH_SHORT_EMPHATIC_BEATS", "NAME_FACE_FOREIGNER_AND_IDENTITY_SPLIT_CLUSTER", "SUSTAINED_SCENIC_INTERIOR_DWELL"]
+    },
+    {
+      "source_id": "MOSES_I_CH33",
+      "position": "ENDING",
+      "passage_sha256": "65283bea19d1fc37a6311a2caf06d3150c9319788d731d6ba10c663f1bf10380",
+      "scene_function_code": "CALL_REVELATION_AND_IDENTITY_RECOMMISSIONING",
+      "pov_code": "THIRD_PERSON_CLOSE_WITH_NARRATORIAL_RANGE",
+      "focalization_code": "RAMOSE_DOMINANT_INTERNAL",
+      "pacing_code": "CEREMONIAL_SLOWING_WITH_REVELATORY_ESCALATION",
+      "book_voice_code": "SENSORY_LYRICAL_HISTORICAL_NARRATION",
+      "diagnostic_codes": ["SHORT_REVELATORY_BEATS_WITH_ACCUMULATIVE_MEMORY", "NAME_FIRE_SEENNESS_AND_CALLING_CLUSTER", "RESPOND_TO_DIVINE_CALL_AND_COMPREHEND_MISSION", "SCENIC_REVELATION_WITH_HIGH_DWELL"]
+    },
+    {
+      "source_id": "UNHINDERED_3_CH1",
+      "position": "OPENING",
+      "passage_sha256": "91e3ba476b5cb1b6b687c3e509d642f123043fd278e894339cc0dff2c1453533",
+      "scene_function_code": "ARRIVAL_ORIENTATION_AND_HOMECOMING_REENTRY",
+      "pov_code": "THIRD_PERSON_FLEXIBLE_MULTIFOCAL",
+      "focalization_code": "ROTATING_JOHN_MARK_BARNABAS_SAUL",
+      "pacing_code": "DIALOGUE_LED_ARRIVAL_WITH_SENSORY_ORIENTATION",
+      "book_voice_code": "DIALOGUE_FORWARD_WARM_IRONIC_HISTORICAL",
+      "diagnostic_codes": ["RELATIONSHIP_AND_WORLD_ORIENTATION", "DIALOGUE_BEATS_ALTERNATE_WITH_SENSORY_NARRATION", "ARRIVE_AND_BEGIN_MISSION", "HOME_CALLING_AND_IDENTITY_TENSION", "SCENIC_CONTINUOUS_ARRIVAL"]
+    },
+    {
+      "source_id": "UNHINDERED_3_CH22",
+      "position": "MIDDLE",
+      "passage_sha256": "756e3b51e0b2f69673926ae661039fbc9570d32835c2e6c442ded894d41eafee",
+      "scene_function_code": "DOCTRINAL_CONFLICT_DELIBERATION_AND_COMMUNAL_DISCERNMENT",
+      "pov_code": "THIRD_PERSON_FLEXIBLE_WITH_PAUL_CENTERED_ACCESS",
+      "focalization_code": "PAUL_DOMINANT_WITH_ENSEMBLE_OBSERVATION",
+      "pacing_code": "DIALOGUE_DRIVEN_DELIBERATIVE_PRESSURE",
+      "book_voice_code": "DIALOGUE_FORWARD_ETHICAL_IRONIC_COMMUNAL",
+      "diagnostic_codes": ["ARGUMENT_DISCERNMENT_STATUS_AND_RELATIONSHIP_NEGOTIATION", "LISTEN_ARGUE_AND_RESTRAIN_OLD_ARGUMENTATIVE_HEAT", "DIALOGUE_EXCHANGE_WITH_REFLECTIVE_PAUSES", "LAW_GRACE_BELONGING_AND_AUTHORITY_TENSION", "SCENIC_COUNCIL_DEBATE"]
+    },
+    {
+      "source_id": "UNHINDERED_3_CH42",
+      "position": "ENDING",
+      "passage_sha256": "d4cc3e20c9bc2f77e1f81bf695ee485b0a74159aac1be8ab0165223470f7a49d",
+      "scene_function_code": "DEPARTURE_WARNING_INTEGRATION_AND_HUMILITY_BEFORE_UNCERTAINTY",
+      "pov_code": "THIRD_PERSON_FLEXIBLE_WITH_PAUL_CENTERED_ACCESS",
+      "focalization_code": "PAUL_DOMINANT_WITH_TIMOTHY_AND_COMPANION_PRESSURE",
+      "pacing_code": "REFLECTIVE_FORWARD_TRAVEL_WITH_INTERPERSONAL_CHECKS",
+      "book_voice_code": "DIALOGUE_FORWARD_WARM_IRONIC_HISTORICAL",
+      "diagnostic_codes": ["CORRECTION_INTIMACY_AND_ACCOUNTABILITY", "CONTINUE_TOWARD_JERUSALEM_WHILE_ADMITTING_UNCERTAINTY", "REFLECTIVE_DIALOGUE_BEATS_WITH_TRAVEL_SUMMARY", "UNCERTAINTY_OBEDIENCE_GRIEF_AND_NONCONTROL", "TRAVEL_FORWARD_MOTION_WITH_REFLECTIVE_INTERRUPTS"]
+    },
+    {
+      "source_id": "UNHINDERED_4_CH1",
+      "position": "OPENING",
+      "passage_sha256": "98d6275ef03a4b571a999f78565128b1cb19572ebde13070a0fff099b13da20e",
+      "scene_function_code": "ARRIVAL_UNDER_SOCIAL_PRESSURE_AND_RUMOR_ACTIVATION",
+      "pov_code": "THIRD_PERSON_FLEXIBLE_ENSEMBLE",
+      "focalization_code": "PAUL_CENTERED_WITH_ENSEMBLE_ACCESS",
+      "pacing_code": "HIGH_DIALOGUE_DENSITY_FORWARD_MOTION",
+      "book_voice_code": "ENSEMBLE_DIALOGUE_WIT_WITH_SOCIAL_THREAT",
+      "diagnostic_codes": ["CHARACTER_RELATIONSHIP_AND_SOCIAL_THREAT", "RAPID_DIALOGUE_AND_ACTION_BEATS", "ENTER_CITY_AND_DELIVER_ENTRUSTED_PACKAGE", "BURDEN_AUTHORITY_REPUTATION_AND_COMMUNITY", "SCENIC_CONTINUOUS_ENTRY"]
+    },
+    {
+      "source_id": "UNHINDERED_4_CH20",
+      "position": "MIDDLE",
+      "passage_sha256": "1ff995461755758be5c5612fde5b3c34a8452c977ae79d6e03cdbd064f3728e6",
+      "scene_function_code": "CUSTODY_TRANSFER_AND_VOYAGE_SOCIAL_ORDER_ESTABLISHMENT",
+      "pov_code": "THIRD_PERSON_FLEXIBLE_ENSEMBLE",
+      "focalization_code": "JULIUS_AND_PAUL_ALTERNATING_CENTER",
+      "pacing_code": "DIALOGUE_LED_LOGISTICAL_FORWARD_MOTION",
+      "book_voice_code": "ENSEMBLE_DIALOGUE_WIT_WITH_INSTITUTIONAL_PRESSURE",
+      "diagnostic_codes": ["POWER_NEGOTIATION_CHARACTERIZATION_AND_ETHICAL_TESTING", "NAVIGATE_CUSTODY_WHILE_PRESERVING_AGENCY", "RAPID_DIALOGUE_WITH_PROCEDURAL_ACTION_BEATS", "AUTHORITY_CUSTODY_JUSTICE_AND_MERCY_TENSION", "SCENIC_TRANSFER_AND_FIRST_NIGHT"]
+    },
+    {
+      "source_id": "UNHINDERED_4_CH38",
+      "position": "ENDING",
+      "passage_sha256": "23e3645103b76ee161e5ed09808c46390a97015340cd03ddd8926239486240a8",
+      "scene_function_code": "EXECUTION_PROCESSION_AND_FINAL_MEMORY_INTEGRATION",
+      "pov_code": "THIRD_PERSON_CLOSE_WITH_PAUL_CENTERED_ACCESS",
+      "focalization_code": "PAUL_DOMINANT_INTERNAL",
+      "pacing_code": "DELIBERATE_PROCESSIONAL_SLOWING_WITH_ORDINARY_DETAIL",
+      "book_voice_code": "RESTRAINED_DIALOGUE_WIT_WITH_MORTALITY_AND_MEMORY",
+      "diagnostic_codes": ["SHORT_PROCEDURAL_BEATS_WITH_REFLECTIVE_EXPANSION", "WALK_TO_EXECUTION_WITH_ATTENTION_TO_FINAL_OBLIGATIONS", "POWER_MEMORY_BODILY_LIMIT_AND_UNHINDERED_WITNESS", "SLOW_SCENIC_FINAL_WALK", "HUMOR_HUMANIZATION_AND_POWER_NEGOTIATION_UNDER_SENTENCE"]
+    }
+  ],
+  "cross_passage_calibration": {
+    "material_authority_contradiction_count": 0,
+    "note": "Variation in focalization, pacing, scene function and local voice code is treated as passage-conditioned variation, not contradiction. No claim is promoted to author intent or canon by consistency alone.",
+    "abstention_behavior": "PASS__LOW_CONFIDENCE_MOSES_I_CH17_BOOK_VOICE_REMAINS_UNRESOLVED",
+    "within_book_code_level_patterns": {
+      "MOSES_I": "POV family is identical across all three passages; focalization shifts from Shiphrah to Ramose with chapter context; lyrical/sensory historical voice is supported at opening and ending while the middle symbolic-interiority variant remains unresolved.",
+      "UNHINDERED_3": "Flexible-third/ensemble access recurs across all three passages; dialogue-forward ironic/communal voice family recurs while scene function and pacing change with local purpose.",
+      "UNHINDERED_4": "Ensemble/flexible access dominates opening and middle, narrowing toward Paul at the ending; dialogue wit persists while pressure shifts from social/institutional to mortality/memory."
+    },
+    "cross_book_collapse_detected": false,
+    "cross_book_distinctiveness_observed": true,
+    "accuracy_claimed": false,
+    "voice_truth_claimed": false
+  },
+  "preservation": {
+    "raw_manuscript_prose_committed": false,
+    "candidate_prose_committed": false,
+    "revision_generated": false,
+    "manuscript_mutated": false,
+    "publication_authorized": false,
+    "named_author_target": false,
+    "universal_prose_score": false
+  },
+  "pass_proves": "The qualified semantic authority boundary can carry differentiated, evidence-anchored semantic hypotheses across beginning/middle/end passages from three real private manuscripts, preserve uncertainty, and prevent those hypotheses from becoming canon, author intent or revision authority.",
+  "does_not_prove": [
+    "that the model hypotheses are correct",
+    "independent semantic accuracy",
+    "human/editor agreement",
+    "full-book semantic coverage",
+    "revision superiority",
+    "production prose mastery"
+  ],
+  "next_transition": "PROSE-SEMANTIC-DIAGNOSTIC-CALIBRATION-003__INDEPENDENT_CONSISTENCY_AND_DEFECT_ADJUDICATION"
+}
