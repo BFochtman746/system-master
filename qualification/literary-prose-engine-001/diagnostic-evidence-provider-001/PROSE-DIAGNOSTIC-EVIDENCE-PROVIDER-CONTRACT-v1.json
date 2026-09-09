@@ -1,0 +1,37 @@
+{
+  "contract_id": "PROSE-DIAGNOSTIC-EVIDENCE-PROVIDER-001-v1",
+  "project": "PROSE PROJECT",
+  "purpose": "Provide a fail-closed bridge from private raw prose to nonreconstructive, directly measurable prose-craft observations that STEP-007 can calibrate without mistaking feature detection for literary defect.",
+  "input": {
+    "raw_text": "PRIVATE_RUNTIME_ONLY",
+    "source_id": "REQUIRED_STABLE_ID",
+    "authority_role": "REQUIRED_BY_CALLER"
+  },
+  "output": {
+    "raw_text_allowed": false,
+    "candidate_text_allowed": false,
+    "input_digest_required": true,
+    "nonreconstructive_metrics_only": true,
+    "observations_may_target_only": ["LENGTH_CONTOUR","PARAGRAPH_MOTION","DIALOGUE_NARRATION_HANDOFF","CADENCE_DISTINCTIVENESS","REPETITION_RHYTHM"],
+    "primary_authority": "PACKET_012_PROSE_CRAFT"
+  },
+  "authority_limits": {
+    "may_infer_literary_quality": false,
+    "may_infer_scene_or_chapter_function": false,
+    "may_infer_pov_or_focalization": false,
+    "may_infer_authorial_intent": false,
+    "may_infer_canon": false,
+    "may_infer_character_state": false,
+    "may_infer_theme_or_subtext": false,
+    "may_infer_reader_state": false,
+    "may_claim_revision_superiority": false,
+    "may_generate_revision_text": false,
+    "may_mutate_manuscript": false,
+    "universal_prose_score": false,
+    "named_author_target": false
+  },
+  "calibration_rule": "All observations must pass through STEP-007. Directly measured repetition remains OBSERVATION unless independent evidence establishes harm/purpose miss or objective defect plus bounded preservation-safe gain.",
+  "mechanical_duplicate_rule": "Only exact same-token repetition separated solely by whitespace may be nominated as an objective mechanical candidate. Punctuation-separated repetition is not a mechanical duplicate-word hit. Even an objective candidate does not become revision-eligible without bounded-gain evidence.",
+  "semantic_fail_closed": "UNRESOLVED_REQUIRES_SEMANTIC_PROVIDER",
+  "privacy": {"repository_raw_prose":false,"repository_candidate_prose":false,"output_reconstructive_payload":false}
+}
