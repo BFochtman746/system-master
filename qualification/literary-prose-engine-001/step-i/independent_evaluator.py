@@ -1,4 +1,4 @@
-import hashlib, json
+import hashlib, json, re
 
 HARD = {
     "meaning", "canon", "authorial_intent", "protected_language",
@@ -6,6 +6,8 @@ HARD = {
     "explicit_user_constraints", "required_ambiguity", "factual_constraints"
 }
 CONDITIONAL = {"historical_constraints", "theological_constraints"}
+BLIND_LABEL_RE = re.compile(r"^[A-Z]{1,2}$")
+VALID_CONFIDENCE = {"MEDIUM", "HIGH"}
 
 
 def stable_id(payload):
@@ -51,6 +53,18 @@ def preservation_gate(regressions, applicable_constraints=None):
     return {"status": "PASS", "dimensions": []}
 
 
+def _blinding_valid(labels, original_id, challenger_id):
+    if not isinstance(labels, dict) or set(labels.keys()) != {original_id, challenger_id}:
+        return False
+    values = list(labels.values())
+    if len(values) != 2 or len(set(values)) != 2:
+        return False
+    if not all(isinstance(v, str) and BLIND_LABEL_RE.fullmatch(v) for v in values):
+        return False
+    forbidden = ("ORIGINAL", "REVISION", "CANDIDATE", "LEVEL_", "WRITER_PICK")
+    return not any(any(tok in v for tok in forbidden) for v in values)
+
+
 def evaluate(case):
     if case.get("writer_rationale") is not None or case.get("writer_quality_claim") is not None:
         return {"disposition": "ABSTAIN_HUMAN_REVIEW", "reason": "FORBIDDEN_WRITER_AUTHORITY_INPUT"}
@@ -60,9 +74,7 @@ def evaluate(case):
     original_id = case["original_id"]
     challenger_id = case["challenger_id"]
     labels = case.get("blind_labels", {})
-    label_values = [str(v).upper() for v in labels.values()]
-    forbidden = ("ORIGINAL", "REVISION", "CANDIDATE", "LEVEL_", "WRITER_PICK")
-    if any(any(tok in v for tok in forbidden) for v in label_values):
+    if not _blinding_valid(labels, original_id, challenger_id):
         return {"disposition": "ABSTAIN_HUMAN_REVIEW", "reason": "BLINDING_BROKEN"}
 
     pgate = preservation_gate(case.get("regressions", []), case.get("applicable_constraints", []))
@@ -71,16 +83,21 @@ def evaluate(case):
     if pgate["status"] == "UNRESOLVED_CRITICAL":
         return {"disposition": "RETAIN_ORIGINAL", "reason": "UNRESOLVED_CRITICAL_PRESERVATION", "preservation_gate": pgate}
 
-    pc = position_consistency(case["orientation_one"], case.get("orientation_two"), original_id, challenger_id)
+    orientation_one = case["orientation_one"]
+    orientation_two = case.get("orientation_two")
+    pc = position_consistency(orientation_one, orientation_two, original_id, challenger_id)
     dims = case.get("dimension_results", {})
     relevant = case.get("purpose_relevant_dimensions", [])
     challenger_gains = [d for d in relevant if dims.get(d) == "CHALLENGER_BETTER"]
     original_gains = [d for d in relevant if dims.get(d) == "ORIGINAL_BETTER"]
     unresolved_critical = [d for d in case.get("critical_comparative_dimensions", []) if dims.get(d) == "UNRESOLVED"]
     confidence = case.get("confidence", "LOW")
+    orientation_confidences = [orientation_one.get("confidence", "LOW")]
+    if orientation_two:
+        orientation_confidences.append(orientation_two.get("confidence", "LOW"))
 
     base = {
-        "evaluation_id": stable_id({"o": original_id, "c": challenger_id, "o1": case["orientation_one"], "o2": case.get("orientation_two"), "dims": dims}),
+        "evaluation_id": stable_id({"o": original_id, "c": challenger_id, "o1": orientation_one, "o2": orientation_two, "dims": dims}),
         "position_consistency": pc,
         "preservation_gate": pgate,
         "tradeoffs": {"challenger_gains": challenger_gains, "original_gains": original_gains, "unresolved_critical": unresolved_critical}
@@ -90,7 +107,7 @@ def evaluate(case):
         return {**base, "disposition": "RETAIN_ORIGINAL", "reason": "POSITION_BIAS_SUSPECTED"}
     if unresolved_critical:
         return {**base, "disposition": "RETAIN_ORIGINAL", "reason": "UNRESOLVED_CRITICAL_COMPARISON"}
-    if confidence not in ("MEDIUM", "HIGH"):
+    if confidence not in VALID_CONFIDENCE or any(c not in VALID_CONFIDENCE for c in orientation_confidences):
         return {**base, "disposition": "RETAIN_ORIGINAL", "reason": "INSUFFICIENT_CONFIDENCE"}
     if pc == "CONSISTENT_CHALLENGER" and challenger_gains and not original_gains:
         return {**base, "disposition": "ACCEPT_CANDIDATE", "reason": "CONSISTENT_TARGET_IMPROVEMENT"}
