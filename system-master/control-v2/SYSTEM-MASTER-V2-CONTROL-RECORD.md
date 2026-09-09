@@ -35,10 +35,10 @@ Do not create product work merely to keep A-01 busy. Do not independently dispat
 
 Current exact continuation:
 
-`SYSTEM-MASTER-REBUILD-010 / PLATFORM-002 — Durable Persistence + Work Runtime`
+`SYSTEM-MASTER-REBUILD-011 / PLATFORM-003 — Transport + Session Continuity + Resume Foundation`
 
 Historical subject identified for reconciliation:
-`161d66c3b7179fa365472b28f59841effcbba4a7151cce75c0711c4dad7abe3e`
+`02e2ac07f24270ab0165b7d7f88e9915530d463ea6cd460a011f59b85371680b`
 
 The central reconciliation train has advanced through the following dependency-valid authorities:
 
@@ -46,19 +46,21 @@ The central reconciliation train has advanced through the following dependency-v
 - FOUNDATION-008 / SYSTEM-MASTER-REBUILD-007 — reconciled; the demonstrated forensic-hold transition invariant correction and GitHub-native source-custody obligation are preserved in `FOUNDATION008-RECONCILIATION-001.md` and its bounded patch.
 - DATA-001 / SYSTEM-MASTER-REBUILD-008 — reconciled; the demonstrated backup-set/restore blob-manifest identity binding correction is preserved in `DATA001-RECONCILIATION-001.md` and `DATA001_BACKUPSET_RESTORE_BINDING_REPAIR_001.patch`. Historical subject `069994972b410770dca3cc9121b0f7927c3b50a458c033e51582355c9a329636`; local corrected candidate `2df1c3ee58206e652a0a026f360a92c03b5eafedb3b712255fc39ce64b5d7c53`.
 - PLATFORM-001 / SYSTEM-MASTER-REBUILD-009 — reconciled; the demonstrated runtime-fence epoch monotonicity correction is preserved in `PLATFORM001-RECONCILIATION-001.md` and `PLATFORM001_FENCE_EPOCH_MONOTONICITY_REPAIR_001.patch`. Historical subject `cd2a04b962f5a819a76c44dbd468a87f29b78c4aa19dcca191e9bed3f4a0638f`; local corrected candidate `259be69231d2b8613902ebe2a7a749bbfc1bd92a1d9bd3b55108052909e57254`.
+- PLATFORM-002 / SYSTEM-MASTER-REBUILD-010 — reconciled; the demonstrated separation between ordinary executable work and the external-outcome reconciliation backlog is preserved in `PLATFORM002-RECONCILIATION-001.md` and `PLATFORM002_RECONCILING_ORDINARY_CLAIM_REPAIR_001.patch`. Historical subject `161d66c3b7179fa365472b28f59841effcbba4a7151cce75c0711c4dad7abe3e`; local corrected candidate `1f0dc131b2599c94766a691a9f519eabde435fba6979274c7197497005cdb5f5`.
 
 These reconciliation records preserve historical sealed identities separately from corrected candidates. A historical PASS is never reused as qualification for changed bytes.
 
-Current PLATFORM-002 bounded challenge:
+Current PLATFORM-003 bounded challenge:
 
 1. recover and verify the exact historical carrier and source/test subject;
 2. rerun strict Java 21 and dependency-valid upstream portable regressions;
-3. reconcile durable persistence/work-runtime implementation against its contracts and SQL/static persistence rules;
-4. test leases/fencing, claim/renew/release, attempts, retry, idempotency, outbox/inbox, timers/signals, restart/recovery and queue-state invariants where present;
-5. compare Java semantics, persistence semantics and qualification assertions for contradiction or missing binding;
-6. implement only objectively demonstrated portable corrections as new candidate identity;
-7. keep target/runtime/production evidence separate from portable qualification;
-8. preserve any correction/source-custody work in parallel and continue the dependency spine when reconciliation produces an exact successor decision.
+3. reconcile transport/session-continuity implementation against its contracts and persistence/static qualification rules;
+4. test connection/session identity, resume cursors/checkpoints, replay and command deduplication, ordering, reconnect, stale-session rejection, lifecycle return, and durable continuity invariants where present;
+5. compare in-memory, JDBC/persistence, HTTP/WebSocket and qualification semantics for contradiction or missing identity/state binding;
+6. preserve a strict boundary between portable browser/session continuity and Apple-native lifecycle claims;
+7. implement only objectively demonstrated portable corrections as a new candidate identity;
+8. keep target/runtime/production evidence separate from portable qualification;
+9. preserve any exact correction/source-custody work in parallel and continue the dependency spine when reconciliation produces an exact successor decision.
 
 FOUNDATION-002, FOUNDATION-003, FOUNDATION-004, and FOUNDATION-006 retain their recognized portable-complete/target-pending standing from the consolidated handoff unless new executable evidence demonstrates a specific regression.
 
@@ -90,9 +92,9 @@ SOURCE_CUSTODY_GAP:
 - the five exact historical commits are not yet exposed by ordinary GitHub repository refs;
 - exact Step-003F SHA is not yet GitHub-native through normal commit lookup.
 
-CAPABILITY_GAP:
-- no new portable implementation defect was demonstrated by RECON-001B/RECON-001C reconciliation;
-- this must not be interpreted as proof that all residual ASSURANCE-001/CQ-003 capability is complete.
+CAPABILITY / INTEGRATION STANDING:
+- no new portable implementation correction was demonstrated by RECON-001B/RECON-001C reconciliation;
+- this does not establish that every residual ASSURANCE-001/CQ-003 capability or target evidence obligation is complete.
 
 TARGET_EVIDENCE_REQUIRED:
 - live PostgreSQL Assurance persistence/migration evidence where applicable;
@@ -102,7 +104,7 @@ TARGET_EVIDENCE_REQUIRED:
 - native Apple evidence where claims depend on Apple runtime;
 - production certification.
 
-STALE_EVIDENCE:
+STALE EVIDENCE / INVALID INFERENCES:
 - FOUNDATION-006 H as the next prerequisite;
 - claims that historical Assurance source bytes are missing rather than non-GitHub-native;
 - historical portable evidence used as current target/production authority;
@@ -127,7 +129,7 @@ Native-target lineage includes:
 
 A-01/Windows evidence must never be relabeled as native iOS/macOS suspend/resume proof. Continue native lifecycle evidence only on an appropriate Apple execution target.
 
-The central spine continuation is now PLATFORM-002. Do not let Continuity replay displace it unless a new demonstrated regression or dependency requires that.
+The central spine continuation is now PLATFORM-003. This layer directly advances portable transport/session continuity while keeping true native lifecycle proof separate.
 
 ## 6. Learning System
 
@@ -202,8 +204,8 @@ Specialist chats may produce evidence, implementation, tests, and proposed succe
 
 ## 11. Canonical priority queue
 
-P0 — PLATFORM-002 / SYSTEM-MASTER-REBUILD-010 reconciliation on the central System Master dependency spine.
-P0 — preserve/import/freshly qualify the exact corrected-candidate lineages already demonstrated for FOUNDATION-007, FOUNDATION-008, DATA-001 and PLATFORM-001 without replaying their generalized reconciliation work.
+P0 — PLATFORM-003 / SYSTEM-MASTER-REBUILD-011 reconciliation on the central System Master dependency spine.
+P0 — preserve/import/freshly qualify the exact corrected-candidate lineages already demonstrated for FOUNDATION-007, FOUNDATION-008, DATA-001, PLATFORM-001, and PLATFORM-002 without replaying their generalized reconciliation work.
 P0 — RECON-001C exact sealed-history GitHub-native custody import, then its already-prepared post-import A-01 custody successor.
 P1 — Book Gate-D Teacher v3 canonical freeze and dependency-valid private/student successors under central A-01 admission.
 P1 — Learning human-execution boundary and any bounded software build-ahead that does not fabricate human evidence.
@@ -214,7 +216,7 @@ Priority is dependency/value based. P0 items may proceed in parallel when they d
 
 ## 12. Exact next System Master objective
 
-Execute `SYSTEM-MASTER-REBUILD-010 / PLATFORM-002` from recovered exact evidence: verify carrier and historical subject identity; reconcile rather than rebuild; compare Java/persistence/qualification semantics; implement only objectively demonstrated portable corrections as a new candidate; run all hosted qualification available to this environment; preserve target-only obligations separately; and prepare an A-01 successor only when Windows execution adds evidence not otherwise available.
+Execute `SYSTEM-MASTER-REBUILD-011 / PLATFORM-003` from recovered exact evidence: verify carrier and historical subject identity; reconcile rather than rebuild; compare Java, persistence, HTTP/WebSocket/session and qualification semantics; exercise reconnect/resume/replay/deduplication/session-freshness invariants; implement only objectively demonstrated portable corrections as a new candidate; run all hosted qualification available to this environment; preserve Apple-native and other target-only obligations separately; and prepare an A-01 successor only when Windows execution adds evidence not otherwise available.
 
 In parallel, retain the exact source-custody/candidate-qualification obligations already recorded for prior reconciled authorities and preserve RECON-001C as the bounded Assurance custody objective.
 
