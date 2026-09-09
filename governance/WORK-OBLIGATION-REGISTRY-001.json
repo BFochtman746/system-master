@@ -160,13 +160,17 @@
     {
       "obligation_id": "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001",
       "owner_path": "SYSTEM_MASTER/BOOK",
-      "state": "READY",
+      "state": "ACTIVE",
       "objective": "Research, define, implement and qualify the Book-parent version and rollback boundary so accepted canonical Book object/manuscript changes create immutable digest-bound successors with predecessor lineage, concurrency-safe pointer advancement, evidence-preserving rollback/recovery and no hidden historical mutation or fabricated authority.",
       "source": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-013.json",
       "dependency": "BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-002 PASS on 837e479415afb2d9724e4b913d456ef1d3a62df5",
-      "research_gate": "REQUIRED_BEFORE_MAJOR_EXECUTABLE_SEMANTIC_CHANGE",
-      "first_action": "Forensically map existing version/digest/pointer/rollback semantics, then perform bounded current research and classify KEEP / ADD_OR_REFINE / DO_NOT_ADD / UNRESOLVED before implementation changes.",
-      "stop_condition": "The exact Version/Rollback scope is research-justified, implemented only for proven gaps, adversarially tested and qualified on its own exact subject, or the first unresolved dependency/failure is durably checkpointed without deleting historical evidence or transferring prior PASS."
+      "research_gate": "SATISFIED__BOOK-SYSTEM-VERSION-AND-ROLLBACK-PREIMPLEMENTATION-RESEARCH-001",
+      "completed_checkpoints": [
+        "qualification/book-system/version-and-rollback-001/BOOK-SYSTEM-VERSION-AND-ROLLBACK-PREIMPLEMENTATION-RESEARCH-001.json at ced3fc4a7b0009a331787c371b284e8c97078a1e",
+        "qualification/book-system/version-and-rollback-001/BOOK-SYSTEM-VERSION-AND-ROLLBACK-FORENSIC-MAP-001.json at 166d04dd6e5ec83ce495c6a94e11c6ac6ce56bcc"
+      ],
+      "exact_next_action": "Define and implement the bounded Book-parent version-ledger/RESTORE_AS_NEW_SUCCESSOR overlay identified by the completed research and forensic map; do not repeat the closed phases.",
+      "stop_condition": "The exact Version/Rollback scope is implemented only for the mapped net-new gaps, adversarially tested and qualified on its own exact subject, or the first unresolved dependency/failure is durably checkpointed without deleting historical evidence or transferring prior PASS."
     },
     {
       "obligation_id": "PROSE-REAL-LIMITATION-AUTHOR-ADJUDICATION-001",
