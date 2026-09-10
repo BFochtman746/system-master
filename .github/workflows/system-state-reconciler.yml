@@ -38,7 +38,7 @@ on:
       - '.github/workflows/system-state-reconciler.yml'
 
 concurrency:
-  group: system-state-reconciler
+  group: system-state-reconciler-${{ github.ref }}
   cancel-in-progress: false
 
 permissions:
@@ -54,7 +54,7 @@ jobs:
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           fetch-depth: 1
-          persist-credentials: true
+          persist-credentials: false
 
       - name: Syntax check reconciler and repair controls
         run: |
@@ -96,6 +96,7 @@ jobs:
 
       - name: Validate Second Shift static control state
         run: |
+          mkdir -p .state-reconciler
           node .github/scripts/second-shift-enforce.js --no-live --out=.state-reconciler/SECOND-SHIFT-ENFORCEMENT-REPORT.json
           node .github/scripts/second-shift-owner-coverage.js --no-live > .state-reconciler/SECOND-SHIFT-OWNER-COVERAGE-REPORT.json
 
@@ -135,3 +136,12 @@ jobs:
             cat .state-reconciler/DERIVED-CURRENT-STATE.json >> "$GITHUB_STEP_SUMMARY"
             echo '```' >> "$GITHUB_STEP_SUMMARY"
           fi
+
+      - name: Preserve reconciliation evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: system-state-reconciler-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .state-reconciler/
+          if-no-files-found: warn
+          retention-days: 30
