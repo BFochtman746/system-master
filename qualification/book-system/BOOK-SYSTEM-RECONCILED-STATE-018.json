@@ -1,0 +1,72 @@
+{
+  "state_id": "BOOK-SYSTEM-RECONCILED-STATE-018",
+  "effective_date": "2026-09-09",
+  "supersedes_for_current_parent_control": "BOOK-SYSTEM-RECONCILED-STATE-017",
+  "supersession_scope": "PARENT_CONTROL_AND_NEXT_STEP_ROUTING_ONLY",
+  "standing": "ACTIVE__EXPORT_FREEZE_A01_CLOSED__END_TO_END_AUTHORING_QUALIFICATION_NEXT",
+  "project": "BOOK SYSTEM",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "control_branch": "book-system/control-v1",
+  "closed_since_state_017": [
+    {
+      "id": "BOOK-SYSTEM-LIFECYCLE-CURRENT-PARENT-COMPATIBILITY-ADAPTER-001",
+      "result": "PASS__21_OF_21_COMPATIBILITY_PLUS_18_OF_18_LIFECYCLE_V1_REGRESSION__HOSTED_AND_AUTHORITATIVE_A01",
+      "qualified_subject_sha": "fc5adf8fd130d7b5324cff0058ab3804d75ec54e",
+      "a01_run_id": 34419773379,
+      "a01_job_id": 102692480301,
+      "evidence_artifact_id": 10130447659,
+      "evidence_artifact_digest": "sha256:735e70112c35ffaee636ee7aeefd9f3bf4952e8cc72c9479bdac449e75044c31"
+    },
+    {
+      "id": "BOOK-SYSTEM-EXPORT-FREEZE-001",
+      "result": "PASS__60_OF_60__HOSTED_AND_AUTHORITATIVE_A01_EXACT_SHA",
+      "qualified_subject_sha": "0bc1f96ed0b8effd22c432a7d727fd13d613b825",
+      "hosted_and_a01_run_id": 34429454895,
+      "hosted_job_id": 102721650530,
+      "a01_job_id": 102721684948,
+      "evidence_artifact_id": 10133909201,
+      "evidence_artifact_digest": "sha256:5d0008dd4dde67cf544d4c1385d484f6458c33cb062ea4de7ef37036901b4bf6",
+      "historical_70_of_70_candidate_qualification_transferred": false
+    }
+  ],
+  "qualified_parent_foundations": [
+    {"id":"BOOK-SYSTEM-CANONICAL-BOOK-STATE-MODEL-001","subject_sha":"b6938fcfc5c2c24ac23b558de6dfc7f75c382312"},
+    {"id":"BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-002","subject_sha":"77db6b550e9aeb1dfb956627376becbb591498f8"},
+    {"id":"BOOK-SYSTEM-LIFECYCLE-TRANSITION-ENGINE-001","subject_sha":"4a6e3459d6ba94b7ce191e426ca64bef00d23582"},
+    {"id":"BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-002","subject_sha":"837e479415afb2d9724e4b913d456ef1d3a62df5"},
+    {"id":"BOOK-SYSTEM-VERSION-AND-ROLLBACK-001","subject_sha":"402ab84a14e9d345530d60394ebc36176541dd21"},
+    {"id":"BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001","subject_sha":"9601ae5df8348c1daac8805eaefa1718c431dd49"},
+    {"id":"BOOK-SYSTEM-LIFECYCLE-CURRENT-PARENT-COMPATIBILITY-ADAPTER-001","subject_sha":"fc5adf8fd130d7b5324cff0058ab3804d75ec54e"},
+    {"id":"BOOK-SYSTEM-EXPORT-FREEZE-001","subject_sha":"0bc1f96ed0b8effd22c432a7d727fd13d613b825"}
+  ],
+  "preserved_authority_law": [
+    "End-to-end qualification is a system-integration proof over existing qualified authorities, not a new Book engine or authority domain.",
+    "No predecessor exact-SHA PASS transfers to changed end-to-end harness bytes; predecessor receipts remain evidence of their own exact subjects only.",
+    "Synthetic author fixtures may exercise software gating but may not be represented as real author decisions, consent, approval or publication authorization.",
+    "Provider SUCCESS, document generation, validation, proof, accessibility PASS, provenance validation, C2PA validation or EXPORT_FROZEN status cannot independently authorize publication or delivery.",
+    "Publication/delivery remains behind an explicit recorded author/release authority boundary.",
+    "Document rendering/conversion/validation mechanics remain outside Book System and must not be duplicated in the end-to-end harness.",
+    "Prose remains a child system/evidence provider and cannot self-admit or mutate Book canonical state."
+  ],
+  "current_parent_critical_path": {
+    "id": "BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001-FORENSIC-MAP-001",
+    "parent_objective": "BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001",
+    "classification": "READY__REUSE_ONLY_INTEGRATION_QUALIFICATION__NO_NEW_RUNTIME_AUTHORITY",
+    "objective": "Forensically map the exact already-qualified Book parent foundations into one deterministic synthetic end-to-end authoring qualification, identify only integration seams not already proven by predecessor qualifications, and define a fail-closed matrix before writing the qualification harness.",
+    "must_prove": [
+      "qualified parent foundations compose without hidden duplicate authority",
+      "exact parent/source/artifact/version identities survive cross-component handoffs",
+      "non-success, disagreement, staleness, rights/privacy and provenance states remain fail-closed across component boundaries",
+      "author-required boundaries cannot be crossed by model/provider/qualification output",
+      "one immutable release can be frozen only after technical/evidence gates",
+      "EXPORT_FROZEN cannot become PUBLISHED_OR_DELIVERED without explicit release/author authority",
+      "rollback or changed bytes invalidate stale downstream evidence and require regeneration/refreeze as applicable",
+      "idempotent replay does not duplicate canonical versions, decisions, proposals or releases"
+    ],
+    "pass_unlocks": "BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001-HARNESS-001",
+    "on_failure": "Preserve the exact integration-gap finding and repair only that seam. Do not create a new engine merely to make the harness pass."
+  },
+  "generic_continue_rule": "In Book System control, Continue executes BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001 beginning with the reuse-only forensic map and then, if no unresolved architecture gap exists, the deterministic integration qualification harness. Do not create real author/publication evidence from synthetic fixtures.",
+  "governance_drift_note": "main governance/WORK-OBLIGATION-REGISTRY-001.json and the older Book parent binding contain stale Book pointers from before Version/Rollback, Author Decision Queue, Lifecycle compatibility and Export Freeze closure. They must not override this fresher Book-local evidence and should be reconciled after the new current state is established.",
+  "qualification_effect": "Export Freeze remains authoritative PASS only on exact subject 0bc1f96ed0b8effd22c432a7d727fd13d613b825. State-018 creates no end-to-end PASS, no real author decision, no publication authorization and no production authority."
+}
