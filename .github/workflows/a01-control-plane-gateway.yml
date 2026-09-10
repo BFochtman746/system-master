@@ -35,10 +35,6 @@ on:
       subject_sha:
         description: Exact 40-character commit SHA to qualify
         required: true
-      control_plane_sha:
-        description: Optional exact control-plane SHA expected by the caller; blank binds the gateway workflow SHA
-        required: false
-        default: ''
       origin_ref:
         description: Workstream branch/ref that owns the return ticket
         required: true
@@ -102,10 +98,6 @@ on:
       subject_sha:
         type: string
         required: true
-      control_plane_sha:
-        type: string
-        required: false
-        default: ''
       origin_ref:
         type: string
         required: true
@@ -152,11 +144,8 @@ on:
         default: ''
     outputs:
       result_class:
-        description: Authoritative receipt result class, or hosted control-plane failure before A-01 admission
-        value: ${{ jobs.qualify.outputs.result_class || jobs.admission_guard.outputs.result_class }}
-      control_plane_sha:
-        description: Exact immutable control-plane SHA used for admission and execution
-        value: ${{ jobs.admission_guard.outputs.control_plane_sha }}
+        description: Authoritative receipt result class when A-01 executes
+        value: ${{ jobs.qualify.outputs.result_class }}
       promotion_authorized:
         description: Exact-subject promotion authorization
         value: ${{ jobs.qualify.outputs.promotion_authorized }}
@@ -164,7 +153,7 @@ on:
         description: Existing rerun transaction ID or newly brokered transaction ID on a first-pass non-PASS
         value: ${{ inputs.repair_transaction_id || jobs.repair_broker.outputs.transaction_id }}
       repair_transaction_state:
-        description: Newly brokered route state on an ordinary non-PASS; rerun state is adjudicated asynchronously against the existing transaction
+        description: Newly brokered route state on an ordinary non-PASS
         value: ${{ jobs.repair_broker.outputs.transaction_state }}
       repair_target_inbox:
         description: Canonical owner inbox selected by the initial broker
@@ -185,10 +174,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 8
     outputs:
-      admission_state: ${{ steps.preflight.outputs.admission_state }}
-      result_class: ${{ steps.preflight.outputs.result_class }}
       control_plane_sha: ${{ steps.bind.outputs.control_plane_sha }}
-      registry_version: ${{ steps.preflight.outputs.registry_version }}
+      admission_state: ${{ steps.preflight.outputs.admission_state }}
     env:
       A01_QUALIFICATION_ID: ${{ inputs.qualification_id || 'A01-CONTROL-PLANE-SELFTEST' }}
       A01_WORKSTREAM_ID: ${{ inputs.workstream_id || 'SYSTEM-MASTER' }}
@@ -209,15 +196,9 @@ jobs:
 
       - name: Bind immutable gateway control-plane SHA
         id: bind
-        env:
-          REQUESTED_CONTROL_PLANE_SHA: ${{ inputs.control_plane_sha }}
         shell: bash
         run: |
           actual=$(git -C control-plane rev-parse HEAD)
-          if [ -n "$REQUESTED_CONTROL_PLANE_SHA" ] && [ "${actual,,}" != "${REQUESTED_CONTROL_PLANE_SHA,,}" ]; then
-            echo "CONTROL_PLANE_SHA_MISMATCH expected=$REQUESTED_CONTROL_PLANE_SHA actual=$actual" >&2
-            exit 2
-          fi
           echo "A01_EXPECTED_CONTROL_PLANE_SHA=$actual" >> "$GITHUB_ENV"
           echo "control_plane_sha=$actual" >> "$GITHUB_OUTPUT"
 
@@ -238,7 +219,6 @@ jobs:
 
       - name: Verify registration, owner, wrapper and exact identities
         id: preflight
-        continue-on-error: true
         shell: bash
         run: node control-plane/.github/scripts/a01-admission-preflight.js
 
@@ -263,13 +243,6 @@ jobs:
           path: ${{ env.A01_ADMISSION_EVIDENCE_PATH }}
           if-no-files-found: error
           retention-days: 30
-
-      - name: Fail closed before A-01 when admission is not READY
-        if: always() && steps.preflight.outcome != 'success'
-        shell: bash
-        run: |
-          echo 'A-01 was not acquired. Use a fresh central admission-broker dispatch after registration/control-plane authority is current.' >&2
-          exit 2
 
   repair_lineage_guard:
     name: Validate optional existing repair lineage against the same control-plane snapshot
