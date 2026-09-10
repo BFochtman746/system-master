@@ -1,0 +1,40 @@
+{
+  "binding_id": "BOOK-SYSTEM-PRODUCT-PARENT-BINDING-004",
+  "effective_date": "2026-09-10",
+  "supersedes_for_current_selection": "BOOK-SYSTEM-PRODUCT-PARENT-BINDING-003",
+  "standing": "CANONICAL__BOOK_TOOL_SYSTEM_UNDER_SYSTEM_MASTER__POST_E2E_CENSUS_SELECTED",
+  "topology_authority": "governance/SYSTEM-TOPOLOGY-002.json on canonical main",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "parent_product": {
+    "product_id": "SYSTEM_MASTER",
+    "canonical_name": "SYSTEM MASTER",
+    "relationship": "FIRST_CLASS_TOOL_SYSTEM_INSIDE_PRODUCT"
+  },
+  "book_system": {
+    "system_id": "BOOK",
+    "canonical_name": "BOOK SYSTEM",
+    "control_ref": "book-system/control-v1",
+    "current_state_record": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-023.json",
+    "current_objective": "SYSTEM-MASTER-COMPLETION-CENSUS-002-P3-BOOK"
+  },
+  "preserved_parent_machine_closure": {
+    "qualification_id": "BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001",
+    "subject_sha": "50a81c3cd3575fe45465584347711d3a7c74413a",
+    "hosted_result": "PASS__48_OF_48",
+    "a01_result": "PASS__48_OF_48",
+    "closure": "qualification/book-system/end-to-end-authoring-001/BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001-CLOSURE.json",
+    "scope": "SYNTHETIC_COMPOSITION_QUALIFICATION_ONLY__NOT_TOTAL_PRODUCT_COMPLETION"
+  },
+  "child_systems": [
+    {
+      "system_id": "PROSE",
+      "owner_path": "SYSTEM_MASTER/BOOK/PROSE",
+      "relationship": "CHILD_TOOL_SYSTEM",
+      "may_define_own_critical_path": true,
+      "may_self_admit_into_book_canonical_state": false
+    }
+  ],
+  "selection_reason": "The canonical Book authoring lifecycle implementation order is now closed through its consolidated end-to-end qualification. The previously preserved SYSTEM-MASTER-COMPLETION-CENSUS-002-P3-BOOK remains unfinished and is the dependency-valid gate for reconciling product expectations, remaining machine gaps, delegated ownership, child dependencies and human/publication boundaries before any Book completion claim.",
+  "second_shift_rule": "Any unattended Book delegation must be rebound only after a durable census checkpoint identifies useful remaining Book-owned work. Completed prior Second Shift work remains append-only history and is not invalidated by old head bindings.",
+  "qualification_rule": "This selector changes control routing only. It does not transfer qualification to later SHAs, create real author/publication evidence or grant production standing."
+}
