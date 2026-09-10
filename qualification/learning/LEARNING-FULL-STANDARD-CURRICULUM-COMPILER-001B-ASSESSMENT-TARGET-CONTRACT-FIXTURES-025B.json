@@ -1,0 +1,62 @@
+{
+  "artifact_id": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001B-ASSESSMENT-TARGET-CONTRACT-FIXTURES-025B",
+  "effective_date": "2026-09-10",
+  "fixture_class": "SYNTHETIC_SOFTWARE_CONTRACT_ONLY__NOT_LEARNER_OR_PSYCHOMETRIC_EVIDENCE",
+  "positive": {
+    "assessment_target_id": "ASSESS::CSSGB-2022::ASQ-CSSGB-2022-I.A.1::value-mechanisms::TARGET::bounded-value-explanation",
+    "subskill_id": "CSSGB-2022::ASQ-CSSGB-2022-I.A.1::SUBSKILL::value-mechanisms",
+    "parent_requirement_id": "ASQ-CSSGB-2022-I.A.1",
+    "source_locator": "ASQ CSSGB BoK 2022 p.3 / I.A.1",
+    "preserved_cognitive_level": "UNDERSTAND",
+    "capability_statement": "Given a bounded organizational scenario, distinguish plausible operational, customer, and financial value mechanisms of Six Sigma and explain the causal link without claiming observed business impact.",
+    "target_type": "SCENARIO_CONSTRAINED_RESPONSE",
+    "evidence_input_class": "BOUNDED_SCENARIO",
+    "response_action_class": "EXPLAIN",
+    "prompt_contract": {
+      "supplied_evidence": "A fictional bounded organization scenario with stated process symptoms, customer effects, and financial constraints.",
+      "required_action": "Identify supported value mechanisms and explain the evidence-bounded link between the Six Sigma intervention concept and those mechanisms.",
+      "must_not_assume": ["observed business impact", "causal effectiveness not present in the scenario", "unstated financial results"]
+    },
+    "scoring_assertions": [
+      {
+        "assertion_id": "IA1-VALUE-MECHANISMS-01",
+        "observable_property": "Response distinguishes at least two relevant value mechanisms using only supplied scenario facts.",
+        "pass_condition": "Named mechanisms are traceable to scenario evidence and are not merely generic labels."
+      },
+      {
+        "assertion_id": "IA1-EVIDENCE-BOUNDARY-02",
+        "observable_property": "Response qualifies any projected benefit and does not claim observed business impact.",
+        "pass_condition": "No unsupported realized-effect claim is asserted as fact."
+      }
+    ],
+    "insufficient_evidence_behavior": {
+      "trigger": "The scenario omits the evidence required to connect an asserted value mechanism to the stated organizational condition.",
+      "required_behavior": "State that the linkage is unsupported or request the missing evidence instead of guessing."
+    },
+    "provenance_refs": [
+      "SOURCE_NODE_INDEX:ASQ-CSSGB-2022-I.A.1",
+      "SUBSKILL:CSSGB-2022::ASQ-CSSGB-2022-I.A.1::SUBSKILL::value-mechanisms"
+    ],
+    "validation_status": "PROVISIONAL_BOUND",
+    "evidence_boundaries": {
+      "psychometric_validity": "UNOBSERVED",
+      "learner_mastery": "UNOBSERVED",
+      "retention": "UNOBSERVED",
+      "transfer": "UNOBSERVED",
+      "workplace_effectiveness": "UNOBSERVED",
+      "sme_approval": "UNOBSERVED",
+      "certification_equivalence": "UNOBSERVED"
+    }
+  },
+  "negative_mutations": [
+    {"fixture_id":"NEG-SOURCE-DRIFT","mutation":"source_locator","value":"ASQ CSSGB BoK 2026 / I.A.1","expected_failure":"SOURCE_LOCATOR_MISMATCH"},
+    {"fixture_id":"NEG-PARENT-MISMATCH","mutation":"parent_requirement_id","value":"ASQ-CSSGB-2022-I.A.2","expected_failure":"SUBSKILL_PARENT_MISMATCH"},
+    {"fixture_id":"NEG-CAPABILITY-REWRITE","mutation":"capability_statement","value":"Prove Six Sigma always creates financial value.","expected_failure":"CAPABILITY_STATEMENT_MISMATCH"},
+    {"fixture_id":"NEG-COGNITIVE-DRIFT","mutation":"preserved_cognitive_level","value":"CREATE","expected_failure":"COGNITIVE_LEVEL_MISMATCH"},
+    {"fixture_id":"NEG-ACTION-MISALIGN","mutation":"response_action_class","value":"CREATE","expected_failure":"COGNITIVE_ACTION_MISALIGNMENT"},
+    {"fixture_id":"NEG-NO-ABSTENTION","mutation":"insufficient_evidence_behavior","value":null,"expected_failure":"INSUFFICIENT_EVIDENCE_BEHAVIOR_REQUIRED"},
+    {"fixture_id":"NEG-HUMAN-CLAIM","mutation":"evidence_boundaries.learner_mastery","value":"PROVEN","expected_failure":"UNAUTHORIZED_EVIDENCE_CLAIM"},
+    {"fixture_id":"NEG-PSYCHOMETRIC-CLAIM","mutation":"evidence_boundaries.psychometric_validity","value":"VALID","expected_failure":"UNAUTHORIZED_EVIDENCE_CLAIM"},
+    {"fixture_id":"NEG-SINGLE-ASSERTION","mutation":"scoring_assertions","value":[{"assertion_id":"ONLY","observable_property":"Generic answer looks correct.","pass_condition":"Evaluator agrees."}],"expected_failure":"SCORING_ASSERTION_COUNT_OR_DETERMINISM"}
+  ]
+}
