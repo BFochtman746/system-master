@@ -8,6 +8,7 @@ on:
       - system-master/book-system/existing-book-recovery.js
       - qualification/book-system/existing-book-recovery-semantic-core-001/**
       - .github/scripts/book-system-existing-book-recovery-semantic-core-001-qualify.js
+      - .github/scripts/book-system-existing-book-recovery-semantic-core-001-qualify-v2.js
       - .github/workflows/book-system-existing-book-recovery-semantic-core-001.yml
   workflow_dispatch:
 
@@ -24,8 +25,8 @@ jobs:
         uses: actions/checkout@v4
       - name: Record Node runtime
         run: node --version
-      - name: Run EBR-SC1 deterministic qualifier
-        run: node .github/scripts/book-system-existing-book-recovery-semantic-core-001-qualify.js
+      - name: Run EBR-SC1 deterministic qualifier v2
+        run: node .github/scripts/book-system-existing-book-recovery-semantic-core-001-qualify-v2.js
       - name: Upload exact qualification evidence
         if: always()
         uses: actions/upload-artifact@v4
