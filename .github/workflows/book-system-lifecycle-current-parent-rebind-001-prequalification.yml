@@ -6,6 +6,10 @@ on:
       - book-system/control-v1
     paths:
       - ".github/workflows/book-system-lifecycle-current-parent-rebind-001-prequalification.yml"
+      - ".github/scripts/a01-book-system-lifecycle-current-parent-rebind-001.js"
+      - ".github/scripts/book-system-lifecycle-current-parent-rebind-001-qualify.js"
+      - "system-master/book-system/lifecycle-current-parent-rebind-adapter.js"
+      - "qualification/book-system/lifecycle-transition-compatibility-001/BOOK-SYSTEM-LIFECYCLE-CURRENT-PARENT-REBIND-001.json"
   workflow_dispatch:
 
 permissions:
@@ -23,9 +27,13 @@ jobs:
           fetch-depth: 0
       - name: Verify exact checkout
         run: test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
-      - name: Syntax check rebind adapter and qualifier
+      - name: Syntax check rebind adapter qualifier and A-01 wrapper
         run: |
           node --check system-master/book-system/lifecycle-current-parent-rebind-adapter.js
           node --check .github/scripts/book-system-lifecycle-current-parent-rebind-001-qualify.js
-      - name: Qualify persistent lifecycle ledger rebind
-        run: node .github/scripts/book-system-lifecycle-current-parent-rebind-001-qualify.js
+          node --check .github/scripts/a01-book-system-lifecycle-current-parent-rebind-001.js
+      - name: Qualify persistent lifecycle ledger rebind through stable wrapper
+        env:
+          A01_SUBJECT_ROOT: ${{ github.workspace }}
+          A01_EVIDENCE_DIR: ${{ runner.temp }}/book-lifecycle-rebind-final-evidence
+        run: node .github/scripts/a01-book-system-lifecycle-current-parent-rebind-001.js
