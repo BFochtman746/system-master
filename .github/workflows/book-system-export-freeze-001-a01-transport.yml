@@ -1,0 +1,22 @@
+name: BOOK SYSTEM Export Freeze 001 A-01 Transport
+
+on:
+  push:
+    branches:
+      - book-system/request-export-freeze-001-a01
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  qualify:
+    uses: BFochtman746/system-master/.github/workflows/a01-control-plane-gateway.yml@main
+    with:
+      qualification_id: BOOK-SYSTEM-EXPORT-FREEZE-001
+      workstream_id: BOOK-SYSTEM
+      subject_sha: 0bbdb5b6809dcd0d8ec0392a1b493641b4ffac85
+      origin_ref: refs/heads/book-system/export-freeze-001
+      resume_on_pass: Adjudicate the canonical receipt; require exact subject/checkout SHA equality, PASS, 70-of-70 export-freeze matrix, hard release-ID conflict without durable idempotency receipt, lifecycle handoff without lifecycle mutation, and zero author-choice, publication, provider, or document-engine authority synthesis. Close only BOOK-SYSTEM-EXPORT-FREEZE-001 on the exact tested SHA, then refetch live Book control before advancing.
+      resume_on_failure: Preserve the authoritative receipt and artifact; classify only the proven export-freeze, infrastructure, or control-plane boundary. Do not weaken exact-SHA, currentness, changed-byte, idempotency, lifecycle, rights/privacy, provenance, accessibility, proof, author, publication, or document-engine boundaries.
+      notification_target: book-system-export-freeze-001
