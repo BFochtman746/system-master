@@ -1,0 +1,65 @@
+name: Learning 001E Batch 01 Prequalification
+
+on:
+  push:
+    branches:
+      - learning/001e-batch-01-20260910
+    paths:
+      - "learning/lab/learning_lab/cssgb_2022_value_mechanisms.py"
+      - "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001E-BATCH-01-CANDIDATE-060A.json"
+      - ".github/scripts/learning-001e-batch-01-qualify.py"
+      - ".github/workflows/learning-001e-batch-01-prequal.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  qualify:
+    name: Ground, score, and runtime-qualify 001E ordinal 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      PYTHONPATH: learning/lab
+    steps:
+      - name: Checkout exact subject with full history
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Record exact subject and durable 001D input
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          git cat-file -e "02dc615fcb5d44b997ed1322848eccc6e37bb172^{commit}"
+          printf 'SUBJECT_SHA=%s\n' "$GITHUB_SHA"
+          printf 'DURABLE_001D_BLUEPRINT_COMMIT=%s\n' "02dc615fcb5d44b997ed1322848eccc6e37bb172"
+
+      - name: Compile-check implementation and qualifier
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            learning/lab/learning_lab/cssgb_2022_value_mechanisms.py \
+            .github/scripts/learning-001e-batch-01-qualify.py
+
+      - name: Execute 001E Batch 01 qualification
+        shell: bash
+        run: |
+          set -euo pipefail
+          export EVIDENCE_DIR="$RUNNER_TEMP"
+          python .github/scripts/learning-001e-batch-01-qualify.py
+
+      - name: Upload Batch 01 hosted evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: LEARNING-001E-BATCH-01-${{ github.sha }}-hosted-evidence
+          path: ${{ runner.temp }}/learning-001e-batch-01-evidence
+          if-no-files-found: warn
+          retention-days: 30
+
+# Portable hosted qualification only. No real-learner mastery, psychometric, SME, certification, A-01, native-platform, or production authority is inferred.
