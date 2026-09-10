@@ -1,0 +1,73 @@
+name: Second Shift Enforcement
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '28,58 0-6 * * *'
+      timezone: 'America/New_York'
+  push:
+    paths:
+      - 'governance/second-shift/**'
+      - '.github/scripts/second-shift-enforce.js'
+      - '.github/workflows/second-shift-enforcement.yml'
+  pull_request:
+    paths:
+      - 'governance/second-shift/**'
+      - '.github/scripts/second-shift-enforce.js'
+      - '.github/workflows/second-shift-enforcement.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: second-shift-enforcement
+  queue: max
+  cancel-in-progress: false
+
+jobs:
+  enforce:
+    name: Reject false idle, stale claims and undispatched READY work
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Syntax check Second Shift enforcement
+        run: node --check .github/scripts/second-shift-enforce.js
+
+      - name: Self-test Second Shift invariants
+        run: node .github/scripts/second-shift-enforce.js --selftest
+
+      - name: Validate current Second Shift state
+        if: github.event_name != 'schedule'
+        run: node .github/scripts/second-shift-enforce.js --out=.second-shift-enforcement/report.json
+
+      - name: Watch active shift
+        if: github.event_name == 'schedule'
+        run: node .github/scripts/second-shift-enforce.js --watchdog --out=.second-shift-enforcement/report.json
+
+      - name: Publish enforcement summary
+        if: always()
+        shell: bash
+        run: |
+          echo '## Second Shift Enforcement' >> "$GITHUB_STEP_SUMMARY"
+          if [ -f .second-shift-enforcement/report.json ]; then
+            echo '```json' >> "$GITHUB_STEP_SUMMARY"
+            cat .second-shift-enforcement/report.json >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo 'No live report was produced.' >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload enforcement evidence
+        if: always() && hashFiles('.second-shift-enforcement/report.json') != ''
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: second-shift-enforcement-${{ github.run_id }}
+          path: .second-shift-enforcement/report.json
+          if-no-files-found: error
+          retention-days: 30
