@@ -1,0 +1,180 @@
+{
+  "registry_id": "WORK-OBLIGATION-REGISTRY-002",
+  "effective_date": "2026-09-10",
+  "product_root": "SYSTEM_MASTER",
+  "topology": "governance/SYSTEM-TOPOLOGY-002.json",
+  "supersedes_current_selection": "governance/WORK-OBLIGATION-REGISTRY-001.json",
+  "historical_registry": "governance/WORK-OBLIGATION-REGISTRY-001.json",
+  "transition_basis": [
+    "governance/census/SYSTEM-MASTER-COMPLETION-CENSUS-002-P8-LEDGER-RECONCILIATION.json",
+    "governance/census/SYSTEM-MASTER-COMPLETION-CENSUS-002-P9-LIVE-DELTA-STALE-STATE-CLEANUP-AND-SEAL.json"
+  ],
+  "purpose": "Current compact index of work still owed after SYSTEM-MASTER-COMPLETION-CENSUS-002. Historical, closed and superseded obligations remain preserved in Registry 001 and the completion ledger; Registry 002 carries only current open work plus explicit transition closures needed to prevent replay.",
+  "states": ["READY", "ACTIVE", "BLOCKED", "HOLD", "DEFERRED", "OWNER_SELECTION_REQUIRED", "SUPERSEDED", "CLOSED"],
+  "rules": [
+    "Every non-closed obligation has exactly one canonical owner_path.",
+    "A dependency never transfers semantic ownership or exact-SHA qualification authority.",
+    "Historical completion remains append-only in Registry 001, completion records and exact evidence; Registry 002 does not rewrite that history.",
+    "Second Shift may execute only owner-selected work revalidated against the current live control head and the canonical owner delegation file.",
+    "Human, author, private-data, external-authority, A-01, native-platform, publication and production boundaries remain explicit and cannot be synthesized.",
+    "A live owner head moving after this registry is an AUTHORITY_DELTA; reconcile only that delta rather than restarting the census."
+  ],
+  "obligations": [
+    {
+      "obligation_id": "CORE-SMR021-USER-EXPERIENCE-001",
+      "owner_path": "SYSTEM_MASTER/CORE",
+      "state": "ACTIVE",
+      "current_control_head_snapshot": "2031f070bd3702185c028733819ec410db36613c",
+      "objective": "Establish ordinary GitHub-native immutable custody of the exact verified SMR021 capsule/source tree, recompute required source/test identity, obtain fresh exact-Git-SHA hosted qualification where permitted, and keep DATA persistence mutation fail-closed until DATA-owner-valid authority exists.",
+      "exact_next_action": "SMR021-GITHUB-NATIVE-EXACT-CAPSULE-IMPORT-AND-RUNNABLE-SOURCE-TRANSPORT-009",
+      "blockers": ["GitHub-native runnable exact-byte custody not yet proven", "DATA-owner-valid persistence/admission interface and migration not yet present"],
+      "authority_boundary": "No hosted/A-01/native/device/human/production PASS is inferred from existing local/custody evidence."
+    },
+    {
+      "obligation_id": "CORE-CORRECTED-SOURCE-CUSTODY-001",
+      "owner_path": "SYSTEM_MASTER/CORE",
+      "state": "BLOCKED",
+      "blocker_class": "SOURCE_CUSTODY",
+      "objective": "Import/admit corrected SMR018, cumulative SMR019 and changed SMR020 runnable source trees into ordinary GitHub-native immutable custody without mutation and independently reproduce exact identities before higher qualification."
+    },
+    {
+      "obligation_id": "CORE-ASSURANCE-RECON-001C",
+      "owner_path": "SYSTEM_MASTER/CORE",
+      "state": "BLOCKED",
+      "blocker_class": "EXTERNAL_AUTHORITY",
+      "objective": "Import already-verified sealed historical assurance Git objects through credentialed normal Git transport without rewrite, verify exact SHAs/ancestry and run the prepared custody census."
+    },
+    {
+      "obligation_id": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001",
+      "owner_path": "SYSTEM_MASTER/LEARNING",
+      "state": "ACTIVE",
+      "current_control_head_snapshot": "262f3f0b5ffa4dea68964b91eacd57a4c39bdda6",
+      "current_progress": "Full 66-node structural graph closure has hosted PASS; assessment-target contract passed; Domain I assessment targets passed 8/8; Domain II assessment targets passed 23/23; cumulative assessment targets validated 31; Domain III is next.",
+      "exact_next_action": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001B-ASSESSMENT-TARGET-DOMAIN-III-BATCH-01-CANDIDATE-033A",
+      "source": "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001B-ASSESSMENT-TARGET-DOMAIN-II-CLOSURE-AND-DOMAIN-III-BATCHING-032.json",
+      "authority_boundary": "Psychometric validity, learner mastery/effectiveness, retention, transfer, workplace effectiveness, SME/ASQ approval, certification equivalence, A-01, native and production remain unobserved unless independently proven."
+    },
+    {
+      "obligation_id": "LEARNING-REAL-PARTICIPANT-PILOT-001",
+      "owner_path": "SYSTEM_MASTER/LEARNING",
+      "state": "BLOCKED",
+      "blocker_class": "HUMAN_ONLY",
+      "objective": "Execute the real participant Learning pilot only with genuine explicit consent and real learner evidence."
+    },
+    {
+      "obligation_id": "BOOK-SYSTEM-CANONICAL-CONTENT-OBJECT-ADMISSION-001-A01-REGISTRATION-AND-QUALIFICATION-PREP",
+      "owner_path": "SYSTEM_MASTER/BOOK",
+      "state": "BLOCKED",
+      "blocker_class": "SHARED_A01_AUTHORITY",
+      "exact_subject_sha": "e993806a1d9a4838d4bd6d162a36921526ef302a",
+      "hosted_result": "PASS__ORIGINAL_SUBJECT_ONLY",
+      "a01_result": "NOT_REGISTERED__NOT_RUN__NO_PASS",
+      "objective": "Route the unchanged original Book canonical-content-admission subject through central registered A-01 authority without mutating or relabeling hosted evidence."
+    },
+    {
+      "obligation_id": "BOOK-SYSTEM-RF012-OWNER-PROMOTION-REBIND-AND-NEXT-OWNER-SELECTION-004",
+      "owner_path": "SYSTEM_MASTER/BOOK",
+      "state": "READY",
+      "current_control_head_snapshot": "05c1f53e2f710f419a99cb99594c53c2f0240b68",
+      "candidate_sha": "67a23c0b09505dc3dd8fd748523fec3868f649b0",
+      "hosted_run_id": 34468928275,
+      "objective": "Revalidate the exact RF012 owner-derived hosted-passing candidate against live Book authority; promote/rebind only if compatible, otherwise preserve it as evidence and select the truthful Book successor.",
+      "authority_boundary": "Hosted PASS grants no A-01, author, Prose, Document, publication, native or production authority."
+    },
+    {
+      "obligation_id": "PROSE-BLIND-EVALUATOR-LAUNCH-PACKET-002",
+      "owner_path": "SYSTEM_MASTER/BOOK/PROSE",
+      "state": "ACTIVE",
+      "current_control_head_snapshot": "309a7876b8e388d115d4d3bde7dc39dd0ef8b6fd",
+      "objective": "Port and hosted-qualify the exact generic prediction-seal validator on the blind execution ref using synthetic nonblind fixtures, refresh owner/startup binding and publish a label-free launch packet without producing the six real predictions."
+    },
+    {
+      "obligation_id": "PROSE-REAL-LIMITATION-BLIND-MODEL-SCORING-001",
+      "owner_path": "SYSTEM_MASTER/BOOK/PROSE",
+      "state": "READY",
+      "blocker_class": "FRESH_CONTEXT_ONLY",
+      "objective": "Execute the six frozen real-passage cases only in a fresh evaluator context that has not observed author ground truth; seal predictions before comparison and keep revision authority zero."
+    },
+    {
+      "obligation_id": "BOOK-EVAL-REPAIR-005-GATE-D-PRIVATE-RECOVERY-2026-09-10",
+      "owner_path": "SYSTEM_MASTER/BOOK/PROSE",
+      "state": "HOLD",
+      "blocker_class": "PRIVATE",
+      "objective": "Stage and hash-verify private DEVELOPMENT_GOLD only through the authorized private path; never synthesize or expose it."
+    },
+    {
+      "obligation_id": "A01-CONTROL-PLANE-SELFTEST-A1-REPLACEMENT-RERUN-001",
+      "owner_path": "SYSTEM_MASTER/SHARED_INFRASTRUCTURE/A01",
+      "administrative_owner": "SYSTEM_MASTER/CORE",
+      "state": "READY",
+      "transaction_id": "A01-REPAIR-a01-run-34431764843-A01-CONTROL-PLANE-SELFTEST-A1",
+      "replacement_subject_sha": "ceb6870546012b789caea56499a1d219a195dc8b",
+      "current_transaction_state": "A01_REQUEUE_READY",
+      "authoritative_pass": false,
+      "objective": "Use the existing repair-rerun transaction to obtain and adjudicate a real authoritative replacement A-01 receipt; do not open a duplicate repair lineage."
+    },
+    {
+      "obligation_id": "SECOND-SHIFT-LIVE-AUTHORITY-SUCCESSOR-ENFORCEMENT-002",
+      "owner_path": "SYSTEM_MASTER/SHARED_INFRASTRUCTURE",
+      "administrative_owner": "SYSTEM_MASTER/CORE",
+      "state": "ACTIVE",
+      "standing": "PARTIALLY_SATISFIED__P9_SELECTOR_REBIND_COMPLETE__SEMANTIC_AND_TELEMETRY_REMAINDER_OPEN",
+      "objective": "Finish remote live-owner/current-objective semantic enforcement and real per-lane utilization reconstruction beyond the schema/lease/watchdog and P9 owner-selector repairs already admitted.",
+      "remaining": ["resolve actual canonical remote owner refs during enforcement", "verify selected objective remains open/current against durable owner state", "reject semantically superseded work even when a stored SHA still matches", "emit real append-only per-lane shift event ledgers and prove useful-work reconstruction"]
+    },
+    {
+      "obligation_id": "SYSTEM-MASTER-HEADLESS-TOOL-OWNER-ALLOCATION-001",
+      "owner_path": "SYSTEM_MASTER",
+      "state": "OWNER_SELECTION_REQUIRED",
+      "classification": "PRODUCT_ARCHITECTURE",
+      "priority": "CENTRAL_NEXT_OBJECTIVE",
+      "objective": "Resolve P6 unresolved headless/module semantics into the smallest non-duplicative owner contracts over Core shared infrastructure without implicitly creating one first-class system per historical module.",
+      "constraints": ["preserve CORE/LEARNING/BOOK/PROSE topology unless explicitly superseded", "preserve headless-first tool interaction", "do not assign domain semantics to Core merely because Core supplies runtime", "reuse and requalify preserved implementation evidence rather than blindly rebuilding"]
+    },
+    {
+      "obligation_id": "SYSTEM-MASTER-DOCUMENT-TOOL-CURRENT-ADMISSION-001",
+      "owner_path": "SYSTEM_MASTER",
+      "state": "OWNER_SELECTION_REQUIRED",
+      "classification": "PRODUCT_ARCHITECTURE_AND_EVIDENCE_CUSTODY",
+      "objective": "Reconcile preserved DOCX/PPTX/PDF document-spine implementation evidence into the current headless document-tool architecture and requalify only changed/current subjects."
+    },
+    {
+      "obligation_id": "SYSTEM-MASTER-AIINCOME-PORTFOLIO-OWNER-DECISION-001",
+      "owner_path": "SYSTEM_MASTER",
+      "state": "OWNER_SELECTION_REQUIRED",
+      "classification": "PRODUCT_ARCHITECTURE",
+      "objective": "Explicitly place AI Income and Living Portfolio within current System Master topology/owner contracts before executable implementation."
+    },
+    {
+      "obligation_id": "SYSTEM-MASTER-MODULE-NAME-COLLISION-ADJUDICATION-001",
+      "owner_path": "SYSTEM_MASTER",
+      "state": "OWNER_SELECTION_REQUIRED",
+      "classification": "PRODUCT_ARCHITECTURE_AND_EVIDENCE_REVIEW",
+      "targets": ["MOD-EXPECTATION-001", "MOD-LEDGER-001"],
+      "objective": "Resolve Response Expectation Engine and Household Ledger identities without conflating them with governance registries/ledgers."
+    }
+  ],
+  "closed_at_transition": [
+    {
+      "obligation_id": "SYSTEM-MASTER-COMPLETION-CENSUS-002",
+      "final_state": "CLOSED",
+      "closure_evidence": "governance/census/SYSTEM-MASTER-COMPLETION-CENSUS-002-FINAL-SEAL.json",
+      "reason": "P0-P9 completed and successor baseline/current obligations were sealed."
+    },
+    {
+      "obligation_id": "SECOND-SHIFT-OWNER-DELEGATION-REBIND-001",
+      "final_state": "CLOSED",
+      "closure_evidence": "governance/census/SYSTEM-MASTER-COMPLETION-CENSUS-002-P9-LIVE-DELTA-STALE-STATE-CLEANUP-AND-SEAL.json",
+      "reason": "All four canonical owner selector files were rebound to current owner-valid objectives and schema-002 required fields; repository-wide control gates passed on the reconciled snapshot."
+    },
+    {
+      "obligation_id": "SYSTEM-MASTER-P9-STALE-REF-AND-POINTER-CLEANUP-001",
+      "final_state": "CLOSED",
+      "closure_evidence": "governance/census/SYSTEM-MASTER-COMPLETION-CENSUS-002-P9-LIVE-DELTA-STALE-STATE-CLEANUP-AND-SEAL.json",
+      "reason": "Stale live Second Shift selectors were repaired; tmp/tmp-noop and other historical refs remain non-authoritative evidence and require no destructive deletion for the seal."
+    }
+  ],
+  "central_next_objective": "SYSTEM-MASTER-HEADLESS-TOOL-OWNER-ALLOCATION-001",
+  "second_shift_rule": "Do not copy this registry wholesale into Second Shift. Each owner delegates only a current unattended-safe slice bound to its live owner control head.",
+  "history_rule": "Registry 001 and all prior Git history remain authoritative historical evidence for closed/superseded obligations; absence from Registry 002 means not-current, not deleted."
+}
