@@ -1,0 +1,86 @@
+{
+  "artifact_id": "BOOK-SYSTEM-AUTHOR-DECISION-CURRENT-SUBJECT-GUARD-001-QUALIFICATION-PLAN-001",
+  "owner": "SYSTEM_MASTER/BOOK",
+  "standing": "READY_FOR_DETERMINISTIC_QUALIFIER_IMPLEMENTATION__NO_AUTHOR_OR_A01_PASS_CLAIMED",
+  "control_head_at_authoring": "837c4f2be180810dbd6f8b6887d69cf242ff6260",
+  "guard_source": "system-master/book-system/author-decision-current-subject-guard.js",
+  "guard_id": "BOOK-SYSTEM-AUTHOR-DECISION-CURRENT-SUBJECT-GUARD-001",
+  "parent_bridge_contract": "qualification/book-system/content-object-admission-001/BOOK-SYSTEM-CONTENT-ADMISSION-AUTHOR-DECISION-APPLICABILITY-BRIDGE-003.json",
+  "original_content_admission_subject": "e993806a1d9a4838d4bd6d162a36921526ef302a",
+  "original_content_admission_a01_standing": "NOT_REGISTERED__NOT_RUN__NO_PASS",
+  "qualification_intent": "Prove that a canonical AUTHOR_DECISION status can affect a governed content-admission subject only when the queue/receipt subject identity is exact and still current. Status alone is never applicability evidence.",
+  "required_deterministic_cases": [
+    {
+      "case_id": "RF012-001",
+      "condition": "exact currently active governed subject identity is present",
+      "expected": "currentness check accepts the exact subject without minting author authority"
+    },
+    {
+      "case_id": "RF012-002",
+      "condition": "same object id but prior/inactive object version",
+      "expected": "fail AUTHOR_DECISION_SUBJECT_NOT_CURRENT"
+    },
+    {
+      "case_id": "RF012-003",
+      "condition": "same object id/version but different object digest",
+      "expected": "fail closed as non-current/nonexistent exact identity"
+    },
+    {
+      "case_id": "RF012-004",
+      "condition": "approved/resolved decision for subject A is replayed against subject B",
+      "expected": "subject B receives no applicability from subject A status or receipt"
+    },
+    {
+      "case_id": "RF012-005",
+      "condition": "parent active pointer advances after a nonterminal decision request was queued",
+      "expected": "revalidation overlays the request STALE with ACTIVE_GOVERNED_SUBJECT_CHANGED_OR_REMOVED"
+    },
+    {
+      "case_id": "RF012-006",
+      "condition": "resolve is attempted after strict stale overlay",
+      "expected": "fail AUTHOR_DECISION_SUBJECT_NOT_CURRENT"
+    },
+    {
+      "case_id": "RF012-007",
+      "condition": "subject identity refs are missing, malformed, duplicate, or use a non-64-hex digest",
+      "expected": "fail closed with the guard's exact validation error and no queue mutation"
+    },
+    {
+      "case_id": "RF012-008",
+      "condition": "append-only identity is valid under its owning currentness semantics",
+      "expected": "guard does not invent governed active-pointer semantics for append-only evidence"
+    },
+    {
+      "case_id": "RF012-009",
+      "condition": "present or reopen uses a request whose frozen exact subject is no longer current",
+      "expected": "operation fails before author presentation/reopen state can be used as applicability evidence"
+    },
+    {
+      "case_id": "RF012-010",
+      "condition": "exact-match valid request is revalidated without parent subject change",
+      "expected": "idempotent currentness disposition; no false STALE overlay"
+    }
+  ],
+  "cross_regressions_required": [
+    "existing author-decision queue deterministic suite remains green",
+    "version-and-rollback regression remains green",
+    "content-admission bridge rejects status-only or wrong-subject applicability",
+    "failed currentness checks produce no content-admission mutation and no publication/export effect"
+  ],
+  "exact_sha_rule": "If qualifier, fixture, guard, bridge, runtime, or other executable subject bytes change, compute a new exact subject SHA and run fresh focused/full hosted qualification. No PASS transfers from e993806a1d9a4838d4bd6d162a36921526ef302a or any earlier author-decision subject.",
+  "protected_boundaries": [
+    "no author approval is inferred or fabricated",
+    "no private manuscript bytes or DEVELOPMENT_GOLD are required or fabricated",
+    "no Prose, Book Evaluator, Document, publication-provider, native-platform, or production authority is absorbed",
+    "hosted qualification is not authoritative A-01 qualification"
+  ],
+  "evidence_target": [
+    "deterministic RF012 qualifier executing all 10 required cases",
+    "focused and full hosted PASS on the exact changed subject if executable bytes change",
+    "zero mutation/effect evidence for every rejected applicability case",
+    "exact subject/fixture/qualifier identities preserved in the qualification summary",
+    "central content-admission A-01 status remains separately truthful"
+  ],
+  "current_executable_successor": "BOOK-SYSTEM-AUTHOR-DECISION-CURRENT-SUBJECT-GUARD-001-DETERMINISTIC-QUALIFIER-002",
+  "successor_instruction": "Implement the bounded RF012 deterministic qualifier against the existing guard and synthetic non-private fixtures; run all objective hosted tests available without A-01; preserve exact changed-software identity and evidence; do not infer an author decision. After RF012 closure, re-read Book authority and continue the next dependency-valid Book-owned successor while time remains."
+}
