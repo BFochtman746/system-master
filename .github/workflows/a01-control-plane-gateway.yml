@@ -122,6 +122,7 @@ jobs:
           A01_WORKSTREAM_ID: ${{ inputs.workstream_id }}
           A01_SUBJECT_SHA: ${{ inputs.subject_sha }}
           A01_EXPECTED_CONTROL_PLANE_SHA: ${{ inputs.expected_control_plane_sha }}
+          A01_CALLER_REF: ${{ github.ref }}
           A01_ADMISSION_EVIDENCE_DIR: ${{ runner.temp }}/a01-admission-${{ github.run_id }}-${{ github.run_attempt }}
         shell: bash
         run: node "$A01_CONTROL_ROOT/.github/scripts/a01-admission-preflight.js"
@@ -132,6 +133,7 @@ jobs:
           echo '## A-01 HOSTED ADMISSION' >> "$GITHUB_STEP_SUMMARY"
           echo "Standing: ${{ steps.preflight.outputs.standing }}" >> "$GITHUB_STEP_SUMMARY"
           echo "Control plane: ${{ steps.preflight.outputs.control_plane_sha }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "Caller ref: $GITHUB_REF" >> "$GITHUB_STEP_SUMMARY"
           echo "Subject: ${{ inputs.subject_sha }}" >> "$GITHUB_STEP_SUMMARY"
           echo "Qualification: ${{ inputs.qualification_id }}" >> "$GITHUB_STEP_SUMMARY"
           echo "Registry version: ${{ steps.preflight.outputs.registry_version }}" >> "$GITHUB_STEP_SUMMARY"
