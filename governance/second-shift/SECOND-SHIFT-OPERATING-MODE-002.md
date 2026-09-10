@@ -1,155 +1,102 @@
 # SECOND-SHIFT-OPERATING-MODE-002
 
-Status: **ACTIVE / OWNER-DRIVEN / REGISTRY-DRIVEN / STALE-FAIL-CLOSED / REPAIR-AWARE**  
+Status: **ACTIVE / OWNER-DRIVEN / REGISTRY-DRIVEN / STALE-FAIL-CLOSED / REPAIR-AWARE**
 Product root: `SYSTEM_MASTER`
 
 ## Core rule
 
-Second Shift does not own a backlog. Each registry-declared canonical owner lane owns a live delegation list **and**, where applicable, a repair inbox. The scheduler may consume only currently valid delegated work and may not lose or silently reinterpret an authoritative failure.
+Second Shift does not own a backlog. Each active owner lane declared by `governance/second-shift/SECOND-SHIFT-REGISTRY-001.json::owner_files` owns a live delegation list and applicable repair inbox. Controllers/workers enumerate the registry; retired lanes are historical evidence only.
 
-Canonical owner delegation files are discovered from `governance/second-shift/SECOND-SHIFT-REGISTRY-001.json`; implementations must not compile a fixed lane list. Current lanes are:
+Current active lanes:
 
-- `SYSTEM_MASTER` -> `governance/second-shift/SYSTEM-MASTER-DELEGATIONS.json`
-- `SYSTEM_MASTER/CORE` -> `governance/second-shift/CORE-DELEGATIONS.json`
-- `SYSTEM_MASTER/LEARNING` -> `governance/second-shift/LEARNING-DELEGATIONS.json`
-- `SYSTEM_MASTER/BOOK` -> `governance/second-shift/BOOK-DELEGATIONS.json`
-- `SYSTEM_MASTER/BOOK/PROSE` -> `governance/second-shift/PROSE-DELEGATIONS.json`
+- `SYSTEM_MASTER/CORE` -> `CORE-DELEGATIONS.json`
+- `SYSTEM_MASTER/LEARNING` -> `LEARNING-DELEGATIONS.json`
+- `SYSTEM_MASTER/BOOK` -> `BOOK-DELEGATIONS.json`
+- `SYSTEM_MASTER/DOCUMENTS` -> `DOCUMENTS-DELEGATIONS.json`
 
-The SYSTEM_MASTER lane is the reusable lane for product-root-owned **non-system headless capability portfolios**. Content & Document Artifacts uses that lane; future root-owned headless tool portfolios inherit it automatically. Do not create a DOCUMENT peer system or per-tool Second Shift lane merely because a tool branch exists.
+PROSE is completed and retired. The temporary SYSTEM_MASTER root worker lane is also retired. Neither receives new Second Shift execution. Historical files/ledgers remain provenance.
 
-Repair inboxes are selected through `governance/repair/REPAIR-INBOX-REGISTRY-001.json`.
+DOCUMENTS is a first-class peer system. Completed Prose capabilities are integrated under Documents and current prose-related work routes to Documents without transferring historical PASS. BOOK and DOCUMENTS are peers: BOOK owns canonical Book state; DOCUMENTS owns document/prose capability implementation.
 
 ## Day-shift lifecycle
 
-Whenever an owner chat, including MASTER_ROOT for SYSTEM_MASTER-owned work, materially changes its current objective:
+Whenever an active owner materially changes its current objective:
 
-1. resolve the current owner control binding;
-2. inspect the owner repair inbox first when one applies and revalidate active repair transactions against current state;
-3. inspect the registry-declared active delegation file;
-4. if a delegation is already completed, superseded, blocked or no longer highest-value, remove it from `active_delegations`;
-5. preserve its result/supersession in durable completion/state/evidence history;
-6. close/supersede any repair transaction whose failed objective is no longer current, preserving receipt/lineage history;
-7. re-evaluate the owner's current critical path;
-8. create a new delegation only if unattended work has a concrete completion delta, stop condition and truthful authority boundary;
-9. bind the new delegation to the exact current owner control binding.
+1. resolve live owner control;
+2. inspect current repair state;
+3. inspect the registry-declared delegation;
+4. retire completed/superseded/stale work while preserving history;
+5. reconcile current obligation/evidence state;
+6. select the highest-value dependency-valid unattended-safe successor when one exists;
+7. bind it to the exact live owner head;
+8. leave empty only with a valid all-eight-rungs exhaustion proof.
 
-For SYSTEM_MASTER, a READY/ACTIVE change to `central_next_objective` and root Second Shift reconciliation are one governance operation. The root working session may not declare the product root ready while its delegation remains bound to a prior central objective.
+For Documents, objective movement must reconcile `DOCUMENTS-DELEGATIONS.json` in the same working session. A current item pointing to retired PROSE is `RETIRED_OWNER_STALE_WORK`, not executable work.
 
-Day Shift does not need to wait until 23:15 to clean stale work.
+## Repair precedence
 
-## Repair transaction precedence
+Current repairable subject failures normally outrank unrelated speculative build-ahead when they remain relevant. Repair ownership comes from current topology/repair registry. Historical Prose failures do not reopen Prose; still-required prose/document repair routes to DOCUMENTS. Changed bytes require a new exact SHA and new deterministic prequalification before A-01 requeue.
 
-A current `REPAIR_REQUEST_READY` transaction normally outranks unrelated speculative build-ahead because it shortens an already-failed critical path. It does not automatically outrank a safety, authority or higher-value dependency boundary.
+## Portfolio preparation and execution
 
-Before delegating a repair transaction, prove:
+Before and during the shift, the portfolio controller:
 
-- canonical owner/workstream still matches;
-- failed objective is still current/relevant;
-- exact failed subject and parent receipt are preserved;
-- failure class is genuinely repairable subject/code/qualifier failure;
-- human/author/private/native/external/publication/production authority is not being disguised as code repair;
-- the repair can be performed unattended within the permitted authority boundary.
+1. reads CURRENT-AUTHORITY and its selected topology/current obligation registry;
+2. enumerates active owner files from the Second Shift registry;
+3. resolves each live owner head;
+4. checks current repair/delegation/claim state and System State Reconciler standing;
+5. rejects stale delegation/control/objective bindings;
+6. admits current READY work or selects a successor through the mandatory work-ahead ladder;
+7. never schedules a retired lane;
+8. leaves an active lane empty only with a durable exhaustion proof.
 
-Changed repair bytes create a new exact SHA. The worker must deterministically prequalify that same SHA before the Repair Broker may mark it `A01_REQUEUE_READY`. That standing is A-01-eligible only; it is not PASS.
-
-## Portfolio-prep lifecycle
-
-At approximately 23:15 America/New_York, the portfolio controller:
-
-1. reads `governance/CURRENT-AUTHORITY.json`;
-2. reads current topology, current headless-tool owner allocation, repair registry/inboxes and **all owner delegation files declared by the Second Shift registry**;
-3. resolves each current owner control binding;
-4. runs/consults the current System State Reconciler and Second Shift owner-coverage standing;
-5. rejects any delegation whose `valid_for_control_head` no longer matches its resolved binding;
-6. validates each active repair transaction against canonical owner/workstream and current objective;
-7. verifies that the objective is still open in the obligation registry selected by CURRENT-AUTHORITY and dependencies are still valid;
-8. verifies A-01 registration/exact subject only for A-01 work;
-9. admits current `READY` work or explicitly delegated current repair work;
-10. when a delegation is absent, stale, completed or blocked, requires the owner/controller to select and bind the highest-value dependency-valid unattended-safe successor from the work-ahead ladder below;
-11. leaves an owner empty only after the all-rungs-exhausted test is durably satisfied.
-
-A control-binding mismatch is `STALE_DELEGATION`, not `SUBJECT_FAILURE`. An admission/window condition is not a product defect. A dependency block is not a product defect.
+Each worker repeats owner/head/objective/dependency checks immediately before execution. Completion or material block is followed by evidence preservation, delegation retirement/reconciliation and successor selection while shift time remains.
 
 ## Mandatory work-ahead ladder
 
-A blocked or unavailable critical-path action does not make the owner lane idle. The controller and worker must evaluate these rungs in order and select the highest-value dependency-valid unattended-safe action:
+1. current repair/control health;
+2. completion/evidence census and capability matrix;
+3. authoritative research and provenance;
+4. architecture/contracts/state/interface/evidence specification;
+5. tests/benchmarks/property/concurrency/failure injection;
+6. bounded implementation with objective verification;
+7. exact-SHA qualification and A-01 preparation;
+8. next successor build packet.
 
-1. current repairable failure or control-health defect;
-2. incomplete completion/evidence census and capability matrix;
-3. current authoritative research and source/provenance closure;
-4. architecture, contracts, state models, interface and evidence-boundary specification;
-5. deterministic test, benchmark, property, concurrency and failure-injection design;
-6. bounded implementation with objective hosted/portable verification;
-7. exact-SHA qualification wrapper, registry and A-01 request preparation without fabricating target evidence;
-8. next dependency-valid successor build packet and risk-reduction work.
+A blocker at one rung blocks only dependent work. An active owner may be IDLE only after all eight rungs are durably exhausted with exact evidence/blockers and `independent_work_remaining=false`.
 
-Each selected project must state its current owner-control binding, objective, before/after completion delta, evidence target, stop condition, allowed work, forbidden authority and continuation rule. When it completes and time remains, the worker must re-read live authority and select the next safe successor. Completion of one item is not the end of the shift.
+## Documents / Prose transition rule
 
-### All-rungs-exhausted test
+- New current prose/evaluator/craft/diagnostic/revision/preservation work belongs to DOCUMENTS.
+- Historical Prose exact-SHA, blind/private/author and qualification evidence remains historical and is never relabeled.
+- Changed Documents integration bytes receive fresh qualification.
+- No worker/controller may create a new PROSE delegation, repair owner, active obligation, chat role or utilization ledger.
+- A historical Prose branch may be inspected as evidence without becoming an active owner.
 
-An owner may be idle only when a durable record shows, for every rung above: `COMPLETED`, `DUPLICATE`, `DEPENDENCY_BLOCKED`, `HUMAN_ONLY`, `AUTHOR_ONLY`, `PRIVATE_DATA_REQUIRED`, `NATIVE_TARGET_REQUIRED`, `EXTERNAL_AUTHORITY_REQUIRED`, or `UNSAFE_WITHOUT_DECISION`; identifies the exact evidence or blocker; and confirms no independent preparation, research, specification, test design or bounded implementation can reduce tomorrow's work. A stale/missing delegation, blocked critical path, unavailable A-01 slot, or idle runner is never by itself sufficient.
+## Claim, retry and telemetry rules
 
-## Execution-time lifecycle
+Only one mutation-capable claim may be live per active lane. At-least-once delivery requires idempotency. Transient retries are finite and classified; exhausted dependencies circuit-open and independent work is selected when possible.
 
-Immediately before a worker begins its selected item it repeats the authority/control-binding/objective/dependency and repair-inbox checks. If state changed after portfolio prep, the old item is not executed. The worker re-evaluates from current owner state and either writes a replacement delegation or performs no work.
+Active lane telemetry is written only for lanes declared by the registry, currently `CORE`, `LEARNING`, `BOOK`, and `DOCUMENTS`. Commit spacing, workflow duration or runner uptime never substitute for factual shift events.
 
-If a repair transaction appeared after portfolio prep and is current, the owner worker evaluates whether it should supersede unrelated build-ahead. The scheduler never repairs merely because a transaction exists; superseded or irrelevant failures are closed truthfully.
+## Failure classification
 
-## Completion lifecycle
-
-On PASS/completion:
-
-- record evidence/receipt/result;
-- remove the delegation from active state;
-- close/supersede the related repair transaction if its boundary is resolved;
-- re-evaluate the owner immediately;
-- if another safe dependency-valid unattended objective is justified and time remains, create a successor delegation bound to the new current owner binding/state;
-- otherwise apply the all-rungs-exhausted test and stop only with a durable evidence-backed blocker record.
-
-This allows multiple useful tasks in one night without preserving stale work.
-
-## Failure lifecycle
-
-- authoritative `SUBJECT_FAILURE` -> Repair Broker creates a durable owner-lane repair transaction; owner reproduces and minimally repairs; changed bytes require new exact SHA + deterministic prequalification + A-01 requeue;
-- infrastructure failure -> shared A-01 route; one bounded same-SHA retry only when policy permits;
-- control-plane failure -> CORE/A-01 owner route, not product repair;
-- human/author/private/external/native/publication/production authority -> owner-authority route without fabrication;
-- changed owner state/control binding -> stale delegation, not failure;
-- stale/window/admission outcome -> replan admission, not subject repair;
-- predecessor/dependency failure -> wait for predecessor; dependent delegation does not execute;
-- unknown/unmapped failure -> fail closed/dead-letter until classified.
-
-## Anti-loop rules
-
-- no infinite repair/retry loop;
-- no repair transaction may exist only in chat memory;
-- no work invented solely for utilization, but useful dependency-valid work-ahead must not be suppressed merely because the current critical path is blocked;
-- no test/evidence weakening merely to obtain PASS;
-- no automatic human/author/private/native evidence;
-- no old delegation silently rebound to a new exact subject;
-- no failed subject silently replaced without parent receipt lineage;
-- no repair worker, broker, hosted test or chat may grant A-01 PASS, promotion, publication or production authority;
-- no worker may redefine system ownership;
-- no tool branch may create a new Second Shift owner lane unless architecture authority creates a new first-class owner system.
+- SUBJECT_FAILURE -> current active product owner repair route;
+- infrastructure/control-plane -> shared CORE/A-01 route;
+- human/author/private/native/external/publication/production -> truthful authority boundary;
+- changed head/objective -> stale delegation;
+- retired Prose route -> `RETIRED_OWNER_STALE_WORK`, preserve history and route current work to DOCUMENTS or close/supersede it;
+- unknown -> fail closed until classified.
 
 ## Morning handoff
 
-Morning handoff reports the hierarchy:
+Report current product hierarchy and active execution owners:
 
-1. System Master product root / root-owned headless portfolios
-2. System Master / Core
-3. Learning
-4. Book
-5. Prose (under Book)
-6. shared infrastructure/control
+1. SYSTEM_MASTER product-root governance;
+2. CORE;
+3. LEARNING;
+4. BOOK;
+5. DOCUMENTS;
+6. shared infrastructure/control.
 
-For each registry-declared owner it reports:
-
-- current control binding and authority delta;
-- completed work;
-- open obligations/blockers;
-- active/closed repair transactions where applicable;
-- current Second Shift delegation status;
-- exact next action.
-
-It reports only deltas that actually occurred and removes completed/superseded delegation or repair work from future active planning.
+PROSE is reported only as retired historical provenance when relevant to Documents integration, never as an active lane.

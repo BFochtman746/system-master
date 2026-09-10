@@ -1,108 +1,60 @@
 {
   "schema_id": "SECOND-SHIFT-DELEGATION-SCHEMA-002",
   "supersedes": "SECOND-SHIFT-DELEGATION-SCHEMA-001",
-  "purpose": "Contract for owner-valid unattended Second Shift work with durable claim/lease semantics, bounded retry behavior, immediate successor reconciliation, all-rungs exhaustion proof and auditable utilization events.",
-  "required_delegation_fields": [
-    "delegation_id",
-    "owner_path",
-    "objective_id",
-    "state",
-    "valid_for_control_ref",
-    "valid_for_control_head",
-    "created_at",
-    "last_revalidated_at",
-    "completion_delta",
-    "stop_condition",
-    "allowed_work",
-    "forbidden_authority",
-    "on_pass",
-    "on_failure"
-  ],
-  "allowed_states": [
-    "CANDIDATE",
-    "READY",
-    "CLAIMED",
-    "BLOCKED",
-    "SUPERSEDED",
-    "COMPLETED",
-    "CANCELLED"
-  ],
-  "active_states": ["CANDIDATE", "READY", "CLAIMED"],
+  "purpose": "Contract for owner-valid unattended Second Shift work with durable claim/lease semantics, bounded retry behavior, successor reconciliation, all-rungs exhaustion proof and auditable utilization events.",
+  "required_delegation_fields": ["delegation_id","owner_path","objective_id","state","valid_for_control_ref","valid_for_control_head","created_at","last_revalidated_at","completion_delta","stop_condition","allowed_work","forbidden_authority","on_pass","on_failure"],
+  "allowed_states": ["CANDIDATE","READY","CLAIMED","BLOCKED","SUPERSEDED","COMPLETED","CANCELLED"],
+  "active_states": ["CANDIDATE","READY","CLAIMED"],
   "owner_control_binding": {
     "default": "BRANCH_HEAD",
-    "supported_types": ["BRANCH_HEAD", "FILE_BLOB"],
-    "branch_head_rule": "Canonical owner systems bind valid_for_control_head to the exact live owner branch head.",
-    "file_blob_rule": "A product-root lane may bind valid_for_control_head to the exact Git blob SHA of an authority-selected repository file declared by the owner selector. This is used when binding the lane to the root authority file avoids a self-invalidating main-commit dependency while still invalidating the delegation whenever root authority changes.",
-    "authority_equivalence": "For validation, the resolved exact hash of the declared owner control binding is the owner control head. A FILE_BLOB binding does not grant different authority; it only defines the exact root control identity."
+    "supported_types": ["BRANCH_HEAD"],
+    "branch_head_rule": "Every active peer/system owner lane binds valid_for_control_head to the exact live canonical owner branch head."
   },
   "claim_required_when_state": "CLAIMED",
-  "required_claim_fields": [
-    "lease_id",
-    "lane",
-    "delegation_id",
-    "objective_id",
-    "control_ref",
-    "control_head_at_claim",
-    "idempotency_key",
-    "claimed_at",
-    "lease_expires_at",
-    "last_heartbeat_at",
-    "attempt",
-    "checkpoint_pointer"
-  ],
+  "required_claim_fields": ["lease_id","lane","delegation_id","objective_id","control_ref","control_head_at_claim","idempotency_key","claimed_at","lease_expires_at","last_heartbeat_at","attempt","checkpoint_pointer"],
   "admission_rules": [
-    "Owner path must resolve through SYSTEM-TOPOLOGY-002.json or be the SYSTEM_MASTER product root itself.",
-    "valid_for_control_head must equal the exact resolved current owner control binding at revalidation time: live branch head for BRANCH_HEAD or declared exact authority-file blob for FILE_BLOB.",
+    "Owner path must resolve to an active canonical system through the topology selected by CURRENT-AUTHORITY or to an explicitly routed shared-infrastructure owner.",
+    "valid_for_control_head must equal the exact live owner branch head at revalidation time.",
     "READY requires a concrete completion delta and stop condition.",
-    "A changed control binding invalidates READY/CLAIMED for mutation until re-evaluated against the new authority.",
-    "Only one mutation-capable claim may be live per owner lane.",
-    "A completed or superseded objective must be removed from active_delegations and successor selection performed in the same reconciliation while shift time remains.",
-    "Human, author, private-data, external-authority and native-platform blockers cannot be bypassed by Second Shift, but they block only dependent work.",
-    "A-01 work additionally requires a currently registered qualifier, exact subject SHA and current policy admission.",
-    "A stale or missing delegation, completed assignment, blocked critical path, transient dependency, unavailable A-01 slot, unavailable runner or empty active list never by itself proves no safe work exists.",
-    "State-changing effects are treated as at-least-once delivery and require durable idempotency keys/deduplication.",
-    "Transient dependency retry is finite and classified; after budget exhaustion the worker records a circuit-open event and switches to independent safe work when available.",
-    "SYSTEM_MASTER-owned non-system headless capability portfolios share the SYSTEM_MASTER product-root lane; tool creation alone does not create a new Second Shift owner lane."
+    "A changed owner head invalidates READY/CLAIMED mutation until re-evaluated.",
+    "Only one mutation-capable claim may be live per active owner lane.",
+    "Completed/superseded objectives leave active_delegations and trigger successor selection while shift time remains.",
+    "Human, author, private-data, external-authority and native-platform blockers cannot be bypassed.",
+    "A-01 work additionally requires registered exact-subject qualification and current policy admission.",
+    "Missing/stale delegation, completed assignment, blocked critical path, transient dependency, unavailable A-01/runner or empty active list never by itself proves no safe work exists.",
+    "State-changing effects require durable idempotency/deduplication.",
+    "Transient dependency retry is finite/classified and switches to independent safe work after budget exhaustion.",
+    "Retired systems cannot receive active delegations. PROSE current work must route to DOCUMENTS or be closed/superseded.",
+    "SYSTEM_MASTER product-root governance is not an active peer-worker lane."
   ],
   "execution_revalidation": {
     "required": true,
     "checks": [
       "read CURRENT-AUTHORITY.json",
-      "read SYSTEM-TOPOLOGY-002.json",
-      "resolve the owner's declared current control binding",
-      "compare the resolved exact control hash with valid_for_control_head",
-      "read the obligation registry selected by CURRENT-AUTHORITY rather than a historical hard-coded registry",
-      "verify objective remains open in current owner state",
+      "read the topology selected by CURRENT-AUTHORITY",
+      "verify the lane remains in SECOND-SHIFT-REGISTRY owner_files",
+      "fetch the active owner's live canonical control head",
+      "compare live head with valid_for_control_head",
+      "read the obligation registry selected by CURRENT-AUTHORITY",
+      "verify objective remains open and owned by this active owner",
       "verify dependencies/blockers",
-      "verify active claim/lease standing and last checkpoint",
-      "verify idempotency/deduplication before any repeated effect",
-      "verify exact subject and qualifier for A-01 work",
-      "verify remaining night window"
+      "verify claim/lease and idempotency standing",
+      "verify exact subject/qualifier for A-01 work",
+      "verify remaining shift window"
     ],
-    "on_mismatch": "DO_NOT_EXECUTE_STALE_DELEGATION__PRESERVE_CHECKPOINT__REPLAN_FROM_CURRENT_OWNER_STATE"
+    "on_mismatch": "DO_NOT_EXECUTE__PRESERVE_CHECKPOINT__CLASSIFY_STALE_OR_RETIRED_OWNER__REPLAN_FROM_CURRENT_AUTHORITY"
   },
-  "completion_rule": "On completion or material block, preserve evidence, release/retire the current claim/delegation, re-read live owner authority and bind the highest-value dependency-valid successor while shift time remains. A worker may stop at a runtime/tool boundary only after leaving a current READY successor or an all-rungs-exhausted proof.",
+  "completion_rule": "On completion/material block, preserve evidence, release/retire the claim/delegation, re-read live owner authority and bind the highest-value dependency-valid successor while shift time remains; stop at a runtime/tool boundary only after leaving READY successor state or a valid exhaustion proof.",
   "empty_lane_rule": {
     "empty_is_valid_requires": "all_rungs_exhausted",
     "required_rungs": 8,
-    "required_rung_fields": [
-      "rung",
-      "disposition",
-      "evidence_or_blocker",
-      "independent_preparation_assessment",
-      "next_executable_condition"
-    ],
-    "allowed_dispositions": [
-      "COMPLETE",
-      "DUPLICATE",
-      "DEPENDENCY_BLOCKED",
-      "HUMAN_AUTHOR_PRIVATE_NATIVE_EXTERNAL_BLOCKED",
-      "UNSAFE_WITHOUT_DECISION"
-    ],
+    "required_rung_fields": ["rung","disposition","evidence_or_blocker","independent_preparation_assessment","next_executable_condition"],
+    "allowed_dispositions": ["COMPLETE","DUPLICATE","DEPENDENCY_BLOCKED","HUMAN_AUTHOR_PRIVATE_NATIVE_EXTERNAL_BLOCKED","UNSAFE_WITHOUT_DECISION"],
     "independent_work_remaining_must_equal": false
   },
+  "retired_lane_rule": "Retired lanes are removed from registry owner_files and do not need empty-lane proofs or new telemetry. Their historical files remain provenance only.",
   "utilization_event_schema": "governance/second-shift/SECOND-SHIFT-UTILIZATION-EVENT-SCHEMA-001.json",
   "execution_control": "governance/second-shift/SECOND-SHIFT-EXECUTION-CONTROL-001.md",
-  "repair_rule": "A repair that changes subject code creates a new exact SHA and a replacement delegation linked to the failed receipt/delegation. The failed delegation never silently changes subject identity.",
-  "authority_boundary": "Execution state and scheduling never grant product, canonical-writer, A-01, human, author, private, blind, native, publication or production authority."
+  "repair_rule": "A repair changing subject code creates a new exact SHA and replacement delegation/repair lineage; historical failed or retired-owner subjects never silently change identity.",
+  "authority_boundary": "Scheduling/execution never grants product, canonical-writer, A-01, human, author, private, blind, native, publication or production authority."
 }
