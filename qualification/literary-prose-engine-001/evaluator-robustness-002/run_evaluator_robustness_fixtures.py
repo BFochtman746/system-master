@@ -162,17 +162,34 @@ for axis,values in [
     check(f"{axis.lower()}_stable_identity",rr["standing"]=="STABLE",rr)
 
 # Preservation/story-function veto overrides surface judge preference.
-guards={"ORIG":{"preservation_pass":True,"story_function_preserved":True},"CAND":{"preservation_pass":False,"story_function_preserved":True}}
+all_story={"preservation_pass":True,"story_function_preserved":True,"event_preserved":True,"character_preserved":True,"narrative_function_preserved":True}
+guards={"ORIG":dict(all_story),"CAND":{**all_story,"preservation_pass":False}}
 r=analyze_trials([trial("V1",axis="STYLE_VS_STORY",value="surface_preference",winner="CAND",guards=guards)])
 check("preservation_veto",r["standing"]=="PRESERVATION_VETO" and any(x["reason"]=="WINNER_FAILS_PRESERVATION" for x in r["preservation_veto_findings"]),r)
-guards={"ORIG":{"preservation_pass":True,"story_function_preserved":True},"CAND":{"preservation_pass":True,"story_function_preserved":False}}
-r=analyze_trials([trial("V2",axis="STYLE_VS_STORY",value="style_boost",winner="CAND",guards=guards)])
-check("style_over_story_veto",r["standing"]=="PRESERVATION_VETO" and any(x["reason"]=="STYLE_WINNER_FAILS_STORY_FUNCTION" for x in r["preservation_veto_findings"]),r)
 
-# If preferred candidate preserves story and preservation, style improvement is not automatically rejected.
-guards={"ORIG":{"preservation_pass":True,"story_function_preserved":True},"CAND":{"preservation_pass":True,"story_function_preserved":True}}
+guards={"ORIG":dict(all_story),"CAND":{**all_story,"story_function_preserved":False,"narrative_function_preserved":False}}
+r=analyze_trials([trial("V2",axis="STYLE_VS_STORY",value="style_boost",winner="CAND",guards=guards)])
+check("style_over_story_veto",r["standing"]=="PRESERVATION_VETO" and any(x["reason"]=="STYLE_WINNER_FAILS_STORY_FUNCTION" for x in r["preservation_veto_findings"]) and any(x["reason"]=="STYLE_WINNER_FAILS_NARRATIVE_FUNCTION_PRESERVATION" for x in r["preservation_veto_findings"]),r)
+
+# If preferred candidate preserves story and all explicit story dimensions, style improvement is not automatically rejected.
+guards={"ORIG":dict(all_story),"CAND":dict(all_story)}
 r=analyze_trials([trial("V3",axis="STYLE_VS_STORY",value="style_and_story",winner="CAND",guards=guards)])
-check("style_without_story_loss_allowed",r["standing"]=="STABLE",r)
+check("style_without_story_loss_allowed",r["standing"]=="STABLE" and r["style_preservation_dimensions"]==["character_preserved","event_preserved","narrative_function_preserved"],r)
+
+# Surface preference must not hide event or character damage.
+guards={"ORIG":dict(all_story),"CAND":{**all_story,"event_preserved":False}}
+r=analyze_trials([trial("V4",axis="STYLE_VS_STORY",value="style_event_loss",winner="CAND",guards=guards)])
+check("style_event_loss_veto",r["standing"]=="PRESERVATION_VETO" and any(x["reason"]=="STYLE_WINNER_FAILS_EVENT_PRESERVATION" for x in r["preservation_veto_findings"]),r)
+
+guards={"ORIG":dict(all_story),"CAND":{**all_story,"character_preserved":False}}
+r=analyze_trials([trial("V5",axis="STYLE_VS_STORY",value="style_character_loss",winner="CAND",guards=guards)])
+check("style_character_loss_veto",r["standing"]=="PRESERVATION_VETO" and any(x["reason"]=="STYLE_WINNER_FAILS_CHARACTER_PRESERVATION" for x in r["preservation_veto_findings"]),r)
+
+# Missing explicit dimension evidence fails closed rather than silently treating surface preference as safe.
+incomplete={"ORIG":dict(all_story),"CAND":dict(all_story)}
+del incomplete["CAND"]["character_preserved"]
+r=analyze_trials([trial("V6",axis="STYLE_VS_STORY",value="missing_guard",winner="CAND",guards=incomplete)])
+check("style_missing_dimension_fails_closed",r["standing"]=="INVALID" and any("STYLE_PRESERVATION_GUARD_REQUIRED:V6:CAND:character_preserved"==e for e in r["errors"]),r)
 
 # Tie and abstain are valid outcomes, not invalid data.
 r=analyze_trials([trial("TIE1",winner="TIE")])

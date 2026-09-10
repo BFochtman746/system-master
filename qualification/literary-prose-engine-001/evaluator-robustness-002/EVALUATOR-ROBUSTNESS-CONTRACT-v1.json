@@ -67,6 +67,23 @@
       "A winner-identity change or confidence span above the configured ceiling while evidence remains invariant yields REVIEW_BIAS."
     ]
   },
+  "style_function_decoupling_evidence": {
+    "condition_axis": "STYLE_VS_STORY",
+    "required_candidate_guard_dimensions": [
+      "event_preserved",
+      "character_preserved",
+      "narrative_function_preserved"
+    ],
+    "guard_scope": "Both candidate identities on every decisive STYLE_VS_STORY trial.",
+    "fail_closed": [
+      "Missing or non-boolean event, character, or narrative-function preservation evidence makes the STYLE_VS_STORY trial INVALID.",
+      "A style-preferred winner with event_preserved=false yields PRESERVATION_VETO.",
+      "A style-preferred winner with character_preserved=false yields PRESERVATION_VETO.",
+      "A style-preferred winner with narrative_function_preserved=false yields PRESERVATION_VETO.",
+      "A style-preferred winner remains comparison-eligible only when the explicit story dimensions and all pre-existing preservation gates pass."
+    ],
+    "privacy_boundary": "Only boolean guard evidence and candidate IDs are stored; candidate prose, manuscript text and protected blind-case content remain forbidden."
+  },
   "rules": [
     "Candidate identity, not left/right position, is the comparison authority.",
     "A winner flip across position-swap trials is position-bias evidence.",
@@ -83,6 +100,8 @@
     "A winner flip across controlled rhetorical-quality belief-contrast conditions is prior-belief sensitivity evidence.",
     "Repeated-run candidate-identity agreement below the configured floor yields instability and removes automatic promotion authority.",
     "A preferred candidate that fails story-function/preservation while the alternative passes cannot be promoted merely for surface style.",
+    "Every decisive STYLE_VS_STORY trial must carry explicit boolean event_preserved, character_preserved, and narrative_function_preserved guards for both candidates.",
+    "Surface-style preference cannot remain automatically comparison-eligible when the preferred candidate fails event, character, or narrative-function preservation.",
     "TIE and ABSTAIN are valid outcomes; the analyzer must never manufacture consensus.",
     "Bias/instability statistics are evaluator reliability evidence, not prose-quality scores.",
     "No manuscript text or candidate prose is persisted in the robustness record.",

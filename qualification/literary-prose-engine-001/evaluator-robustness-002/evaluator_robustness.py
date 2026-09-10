@@ -10,6 +10,11 @@ AXES = {"BASE", "REPEAT", "POSITION", "RUBRIC_ORDER", "RUBRIC_COUNTERFACTUAL", "
 NON_DECISIVE = {"TIE", "ABSTAIN"}
 FORBIDDEN_TEXT_KEYS = {"raw_text", "quoted_text", "manuscript_text", "source_text", "passage_text", "candidate_text", "revision_text"}
 BIAS_AXES = {"POSITION", "RUBRIC_ORDER", "RUBRIC_COUNTERFACTUAL", "GENERATOR_IDENTITY", "SCORE_RANGE", "UNCERTAINTY_MARKER", "BELIEF_CONTRAST"}
+STYLE_PRESERVATION_DIMENSIONS = {
+    "event_preserved": "STYLE_WINNER_FAILS_EVENT_PRESERVATION",
+    "character_preserved": "STYLE_WINNER_FAILS_CHARACTER_PRESERVATION",
+    "narrative_function_preserved": "STYLE_WINNER_FAILS_NARRATIVE_FUNCTION_PRESERVATION",
+}
 
 
 def _forbidden(value, path="$", out=None):
@@ -113,6 +118,12 @@ def analyze_trials(
             basis = trial.get("evidence_basis_id")
             if not isinstance(basis, str) or not basis:
                 errors.append(f"RUBRIC_COUNTERFACTUAL_EVIDENCE_BASIS_REQUIRED:{tid or i}")
+        if axis == "STYLE_VS_STORY" and _winner_valid(trial) and trial.get("winner_candidate_id") not in NON_DECISIVE:
+            for candidate_id in (left, right):
+                guard = _guard(trial, candidate_id)
+                for field in STYLE_PRESERVATION_DIMENSIONS:
+                    if not isinstance(guard.get(field), bool):
+                        errors.append(f"STYLE_PRESERVATION_GUARD_REQUIRED:{tid or i}:{candidate_id}:{field}")
         normalized.append(trial)
 
     by_comparison = defaultdict(list)
@@ -228,8 +239,12 @@ def analyze_trials(
             loser_story = lg.get("story_function_preserved")
             if winner_preservation is False and loser_preservation is True:
                 veto_findings.append({"trial_id": t.get("trial_id"), "comparison_id": comparison_id, "reason": "WINNER_FAILS_PRESERVATION"})
-            if t.get("condition_axis") == "STYLE_VS_STORY" and winner_story is False and loser_story is True:
-                veto_findings.append({"trial_id": t.get("trial_id"), "comparison_id": comparison_id, "reason": "STYLE_WINNER_FAILS_STORY_FUNCTION"})
+            if t.get("condition_axis") == "STYLE_VS_STORY":
+                if winner_story is False and loser_story is True:
+                    veto_findings.append({"trial_id": t.get("trial_id"), "comparison_id": comparison_id, "reason": "STYLE_WINNER_FAILS_STORY_FUNCTION"})
+                for field, reason in STYLE_PRESERVATION_DIMENSIONS.items():
+                    if wg.get(field) is False:
+                        veto_findings.append({"trial_id": t.get("trial_id"), "comparison_id": comparison_id, "reason": reason, "dimension": field})
 
         comparison_reports.append({
             "comparison_id": comparison_id,
@@ -265,6 +280,7 @@ def analyze_trials(
         "promotion_authorized": False,
         "literary_quality_score_emitted": False,
         "candidate_prose_persisted": bool(forbidden),
+        "style_preservation_dimensions": sorted(STYLE_PRESERVATION_DIMENSIONS),
         "rubric_order_confidence_span_ceiling": rubric_confidence_ceiling,
         "rubric_counterfactual_confidence_span_ceiling": counterfactual_confidence_ceiling,
     }
