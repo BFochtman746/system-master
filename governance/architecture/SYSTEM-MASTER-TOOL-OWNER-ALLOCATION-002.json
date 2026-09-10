@@ -1,0 +1,36 @@
+{
+  "allocation_id": "SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-002",
+  "effective_date": "2026-09-10",
+  "standing": "DOCUMENTS_PROMOTED_TO_FIRST_CLASS_PEER__PROSE_RETIRED_INTO_DOCUMENTS",
+  "supersedes": "governance/architecture/SYSTEM-MASTER-HEADLESS-TOOL-OWNER-ALLOCATION-001.json",
+  "topology": "governance/SYSTEM-TOPOLOGY-003.json",
+  "architecture_decision": "governance/ADR-0003-DOCUMENTS-PEER-SYSTEM-AND-PROSE-RETIREMENT.md",
+  "first_class_tool_systems": [
+    {"system_id":"LEARNING","owner_path":"SYSTEM_MASTER/LEARNING"},
+    {"system_id":"BOOK","owner_path":"SYSTEM_MASTER/BOOK"},
+    {"system_id":"DOCUMENTS","owner_path":"SYSTEM_MASTER/DOCUMENTS","control_ref":"documents/control-v1"}
+  ],
+  "documents_decision": {
+    "prior_classification": "NON_SYSTEM_HEADLESS_CAPABILITY_PORTFOLIO",
+    "current_classification": "FIRST_CLASS_TOOL_SYSTEM",
+    "owner_path": "SYSTEM_MASTER/DOCUMENTS",
+    "modules": ["DOCX","PPTX","PDF","OCR","FILE","WRITING","PROSE_EVALUATION","PROSE_CRAFT","REVISION_INTELLIGENCE"],
+    "absorbs_retired_system": "PROSE",
+    "rule": "Documents is one of the main peer tools in System Master. It has its own owner/control/delegation/qualification lifecycle and may be invoked headlessly through Chat without losing first-class system identity."
+  },
+  "remaining_product_root_capability_portfolios": [
+    {"portfolio_id":"HEADLESS-COMPUTE-DATA-001","canonical_name":"Spreadsheet, Math & Data Analysis","semantic_owner_path":"SYSTEM_MASTER"},
+    {"portfolio_id":"HEADLESS-SOFTWARE-MODEL-001","canonical_name":"Software Engineering & Local Model Execution","semantic_owner_path":"SYSTEM_MASTER"},
+    {"portfolio_id":"HEADLESS-RESEARCH-KNOWLEDGE-001","canonical_name":"Research, Knowledge & External Information","semantic_owner_path":"SYSTEM_MASTER"},
+    {"portfolio_id":"HEADLESS-CONNECTED-ACTIONS-001","canonical_name":"Connected Actions & Personal Operations","semantic_owner_path":"SYSTEM_MASTER"},
+    {"portfolio_id":"HEADLESS-MEDIA-001","canonical_name":"Image, Audio & Video Media","semantic_owner_path":"SYSTEM_MASTER"}
+  ],
+  "prose_retirement": {
+    "retirement_record": "governance/retirements/PROSE-SYSTEM-RETIREMENT-001.json",
+    "active_owner": false,
+    "successor_owner_path": "SYSTEM_MASTER/DOCUMENTS",
+    "historical_evidence_preserved": true
+  },
+  "book_documents_boundary": "BOOK and DOCUMENTS are peers. BOOK owns canonical Book state; DOCUMENTS owns document/prose capability semantics. BOOK consumes DOCUMENTS through explicit service contracts and cannot silently acquire Documents implementation ownership; DOCUMENTS cannot silently mutate Book canonical state.",
+  "qualification_rule": "Existing Prose and Document historical PASS remains exact-subject evidence only. Integration into DOCUMENTS requires fresh qualification for changed bytes/semantics."
+}
