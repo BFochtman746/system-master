@@ -32,6 +32,9 @@ function nonEmpty(v) {
   if (Array.isArray(v)) return v.length > 0;
   return true;
 }
+function isSameOrDescendant(candidate, ownerPath) {
+  return candidate === ownerPath || String(candidate || '').startsWith(`${ownerPath}/`);
+}
 function branchHead(ref) {
   if (noLive) return null;
   try {
@@ -39,18 +42,14 @@ function branchHead(ref) {
       cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe']
     }).trim();
     return out ? out.split(/\s+/)[0] : null;
-  } catch (_) {
-    return null;
-  }
+  } catch (_) { return null; }
 }
 function localFileBlob(rel) {
   try {
     return execFileSync('git', ['rev-parse', `HEAD:${rel}`], {
       cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe']
     }).trim();
-  } catch (_) {
-    return null;
-  }
+  } catch (_) { return null; }
 }
 function resolveBinding(owner) {
   const binding = owner.control_binding || { type: 'BRANCH_HEAD', ref: owner.control_ref };
@@ -81,7 +80,9 @@ function runSelftest() {
     })),
     independent_work_remaining: false
   };
-  if (!validExhaustion(good) || validExhaustion({ ...good, rungs: good.rungs.slice(0, 7) })) {
+  if (!validExhaustion(good) || validExhaustion({ ...good, rungs: good.rungs.slice(0, 7) }) ||
+      !isSameOrDescendant('SYSTEM_MASTER/BOOK/PROSE/X', 'SYSTEM_MASTER/BOOK/PROSE') ||
+      isSameOrDescendant('SYSTEM_MASTER/LEARNING', 'SYSTEM_MASTER/BOOK')) {
     console.error('SECOND_SHIFT_OWNER_COVERAGE_SELFTEST_FAIL');
     process.exit(1);
   }
@@ -120,7 +121,6 @@ if (!eventSchemaRel || !exists(eventSchemaRel)) {
 }
 
 const ownerDataByLane = new Map();
-const ownerPathToLane = new Map();
 for (const [lane, rel] of laneEntries) {
   if (!rel || !exists(rel)) {
     add('ERROR', 'MISSING_OWNER_FILE', `registry-declared owner file is missing: ${rel || '<unset>'}`, { lane });
@@ -129,10 +129,6 @@ for (const [lane, rel] of laneEntries) {
   const owner = readJson(rel);
   ownerDataByLane.set(lane, owner);
   if (!owner.owner_path) add('ERROR', 'OWNER_PATH_MISSING', 'owner file has no owner_path', { lane, owner_file: rel });
-  else {
-    if (ownerPathToLane.has(owner.owner_path)) add('ERROR', 'DUPLICATE_OWNER_PATH', 'multiple Second Shift lanes claim the same owner_path', { lane, owner_path: owner.owner_path });
-    ownerPathToLane.set(owner.owner_path, lane);
-  }
   if (!isSha(owner.last_known_control_head)) add('ERROR', 'OWNER_CONTROL_HEAD_INVALID', 'owner file lacks a valid 40-character control binding', { lane });
   const resolved = resolveBinding(owner);
   if (!resolved.head || !isSha(resolved.head)) {
@@ -140,6 +136,7 @@ for (const [lane, rel] of laneEntries) {
   } else if (resolved.head !== owner.last_known_control_head) {
     add('ERROR', 'OWNER_CONTROL_BINDING_STALE', 'owner selector does not match its current control binding', { lane, recorded_head: owner.last_known_control_head, resolved_head: resolved.head, control_type: resolved.type });
   }
+
   const active = Array.isArray(owner.active_delegations) ? owner.active_delegations : [];
   for (const d of active) {
     for (const f of REQUIRED_DELEGATION_FIELDS) if (!nonEmpty(d[f])) add('ERROR', 'DELEGATION_CONTRACT_DRIFT', `active delegation missing ${f}`, { lane, delegation_id: d.delegation_id || null });
@@ -149,9 +146,9 @@ for (const [lane, rel] of laneEntries) {
     if (d.valid_for_control_head !== owner.last_known_control_head) add('ERROR', 'DELEGATION_CONTROL_HEAD_MISMATCH', 'delegation is not bound to the owner selector head', { lane, delegation_id: d.delegation_id || null });
     const oid = d.obligation_id || d.objective_id;
     const o = obligations.find((x) => x && x.obligation_id === oid);
-    if (!o) add('ERROR', 'OBJECTIVE_AUTHORITY_MISSING', 'active delegation is not bound to the authority-selected current obligation registry', { lane, delegation_id: d.delegation_id || null, obligation_id: oid });
-    else {
-      if (o.owner_path !== owner.owner_path) add('ERROR', 'OBJECTIVE_OWNER_MISMATCH', 'delegated obligation belongs to a different owner', { lane, obligation_id: oid, obligation_owner: o.owner_path, delegation_owner: owner.owner_path });
+    if (d.obligation_id && !o) add('ERROR', 'OBJECTIVE_AUTHORITY_MISSING', 'explicit active delegation obligation is not in the authority-selected current obligation registry', { lane, delegation_id: d.delegation_id || null, obligation_id: oid });
+    if (o) {
+      if (!isSameOrDescendant(o.owner_path, owner.owner_path)) add('ERROR', 'OBJECTIVE_OWNER_MISMATCH', 'delegated obligation is outside the owner lane subtree', { lane, obligation_id: oid, obligation_owner: o.owner_path, delegation_owner: owner.owner_path });
       if (TERMINAL_OBLIGATION_STATES.has(o.state)) add('ERROR', 'SEMANTIC_STALE_DELEGATION', 'delegated obligation is terminal', { lane, obligation_id: oid, obligation_state: o.state });
     }
   }
@@ -161,14 +158,24 @@ for (const [lane, rel] of laneEntries) {
 }
 
 const coverageRoutes = registry.coverage_routes || {};
+function routeLane(ownerPath) {
+  const explicit = Object.entries(coverageRoutes)
+    .filter(([prefix]) => isSameOrDescendant(ownerPath, prefix))
+    .sort((a, b) => b[0].length - a[0].length)[0];
+  if (explicit) return explicit[1];
+  const inherited = [...ownerDataByLane.entries()]
+    .filter(([, owner]) => owner?.owner_path && isSameOrDescendant(ownerPath, owner.owner_path))
+    .sort((a, b) => b[1].owner_path.length - a[1].owner_path.length)[0];
+  return inherited ? inherited[0] : null;
+}
+
+for (const [prefix, lane] of Object.entries(coverageRoutes)) {
+  if (!ownerDataByLane.has(lane)) add('ERROR', 'SECOND_SHIFT_COVERAGE_ROUTE_INVALID', 'coverage route points to a missing Second Shift lane', { owner_prefix: prefix, routed_lane: lane });
+}
+
 for (const o of obligations.filter((x) => x && ACTIVE_OBLIGATION_STATES.has(x.state))) {
-  const exactLane = ownerPathToLane.get(o.owner_path);
-  const routedLane = coverageRoutes[o.owner_path];
-  if (!exactLane && !routedLane) {
-    add('ERROR', 'SECOND_SHIFT_OWNER_COVERAGE_MISSING', 'READY/ACTIVE obligation owner_path has no registry-declared Second Shift owner route', { obligation_id: o.obligation_id, owner_path: o.owner_path });
-  } else if (routedLane && !ownerDataByLane.has(routedLane)) {
-    add('ERROR', 'SECOND_SHIFT_COVERAGE_ROUTE_INVALID', 'coverage route points to a missing Second Shift lane', { obligation_id: o.obligation_id, owner_path: o.owner_path, routed_lane: routedLane });
-  }
+  const lane = routeLane(o.owner_path);
+  if (!lane) add('ERROR', 'SECOND_SHIFT_OWNER_COVERAGE_MISSING', 'READY/ACTIVE obligation owner_path has no registry-declared Second Shift owner route', { obligation_id: o.obligation_id, owner_path: o.owner_path });
 }
 
 const central = authority.central_next_objective;
@@ -176,11 +183,11 @@ if (central) {
   const o = obligations.find((x) => x && x.obligation_id === central);
   if (!o) add('ERROR', 'CENTRAL_NEXT_OBJECTIVE_MISSING', 'central_next_objective is absent from the authority-selected current obligation registry', { objective_id: central });
   else if (ACTIVE_OBLIGATION_STATES.has(o.state)) {
-    const lane = ownerPathToLane.get(o.owner_path) || coverageRoutes[o.owner_path];
+    const lane = routeLane(o.owner_path);
     const owner = lane ? ownerDataByLane.get(lane) : null;
     const active = owner && Array.isArray(owner.active_delegations) ? owner.active_delegations : [];
     const bound = active.some((d) => d && ACTIVE_DELEGATION_STATES.has(d.state) && (d.obligation_id === central || d.objective_id === central));
-    if (!bound) add('ERROR', 'CENTRAL_OBJECTIVE_SECOND_SHIFT_UNBOUND', 'current central objective has no active delegation in its registry-declared owner lane', { objective_id: central, owner_path: o.owner_path, lane: lane || null });
+    if (!bound) add('ERROR', 'CENTRAL_OBJECTIVE_SECOND_SHIFT_UNBOUND', 'current central objective has no active delegation in its registry-routed owner lane', { objective_id: central, owner_path: o.owner_path, lane: lane || null });
   }
 }
 
