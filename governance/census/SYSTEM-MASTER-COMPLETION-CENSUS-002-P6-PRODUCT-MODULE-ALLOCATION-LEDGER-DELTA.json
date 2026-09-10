@@ -1,0 +1,93 @@
+{
+  "delta_id": "SYSTEM-MASTER-COMPLETION-CENSUS-002-P6-PRODUCT-MODULE-ALLOCATION-LEDGER-DELTA-001",
+  "effective_date": "2026-09-10",
+  "owner_path": "SYSTEM_MASTER",
+  "source_result": "governance/census/SYSTEM-MASTER-COMPLETION-CENSUS-002-P6-PRODUCT-MODULE-ALLOCATION.json",
+  "standing": "DURABLE_DELTA__APPLY_DURING_P8_LEDGER_RECONCILIATION",
+  "reason": "P6 reconciled the complete historical 40-row module index against current topology and evidence. Shared expectation/obligation registries remain sequence-controlled and are updated at P8 after live revalidation.",
+  "expectation_registry_delta": [
+    {
+      "operation": "RECONCILE_PRODUCT_MODULE_INVENTORY",
+      "inventory_id": "SYSTEM-MASTER-HISTORICAL-PRODUCT-MODULE-INVENTORY-001",
+      "claimed_historical_count": 40,
+      "current_registry_explicit_count": 37,
+      "corrected_explicit_count": 40,
+      "missing_keys_to_restore": ["DATA", "PHONEOPS", "PHYSICALAI"],
+      "corrected_module_keys": [
+        "DOCX", "EXCEL", "PPTX", "PDF", "OCR", "RESEARCH", "KNOWLEDGE", "WRITING", "MANUSCRIPT", "STORYBIBLE",
+        "LEARNING", "CURRICULUM", "PROJECTS", "CHAT", "EXPECTATION", "FILE", "IMAGE", "PHOTO", "VIDEO", "VOICE",
+        "AUDIOBOOK", "MEDIA", "CODE", "MATH", "DATA", "CAD", "BROWSER", "COMMS", "CALENDAR", "AUTOMATION",
+        "PLUGINS", "LEDGER", "GEO", "AIINCOME", "PORTFOLIO", "EXPERIENCE", "PHONEOPS", "PHYSICALAI", "LOCALAI", "IMG-INGEST"
+      ],
+      "current_disposition_pointer": "governance/census/SYSTEM-MASTER-COMPLETION-CENSUS-002-P6-PRODUCT-MODULE-ALLOCATION.json",
+      "rule": "Do not copy historical research/implementation labels into current status. The P6 per-module disposition is the current census finding until superseded by owner-valid evidence."
+    },
+    {
+      "operation": "ADD_CURRENT_SCOPE_CLARIFICATION",
+      "module_key": "PHONEOPS",
+      "disposition": "ABSORBED_NO_STANDALONE__EXPERIENCE_AUTOMATION_FOUNDATION",
+      "rule": "Do not create duplicate Phone Operations authority."
+    },
+    {
+      "operation": "ADD_CURRENT_SCOPE_CLARIFICATION",
+      "module_key": "PHYSICALAI",
+      "disposition": "DEFERRED_OPTIONAL",
+      "rule": "Requires explicit future program authorization plus hardware/safety scope before activation."
+    },
+    {
+      "operation": "ADD_CURRENT_SCOPE_CLARIFICATION",
+      "module_key": "CAD",
+      "disposition": "HEADLESS_INTEROP_ONLY__NO_DEDICATED_SYSTEM",
+      "rule": "Preserve optional CAD-derived import/view/interoperability research; do not maintain a full CAD mini-app absent a concrete need."
+    }
+  ],
+  "obligation_registry_delta": [
+    {
+      "operation": "ADD",
+      "obligation_id": "SYSTEM-MASTER-HEADLESS-TOOL-OWNER-ALLOCATION-001",
+      "owner_path": "SYSTEM_MASTER",
+      "state": "OWNER_SELECTION_REQUIRED",
+      "classification": "PRODUCT_ARCHITECTURE",
+      "objective": "Resolve the P6 headless/module owner-registration set into the smallest non-duplicative current owner contracts over Core shared infrastructure without implicitly creating one first-class system per historical module.",
+      "source": "governance/census/SYSTEM-MASTER-COMPLETION-CENSUS-002-P6-PRODUCT-MODULE-ALLOCATION.json",
+      "constraints": [
+        "preserve current CORE/LEARNING/BOOK/PROSE topology unless explicitly superseded",
+        "preserve headless-first interaction for output/tool modules unless an explicit studio/control surface is required",
+        "do not assign module-specific semantics to Core merely because Core provides shared runtime",
+        "preserve historical implementation evidence for selective import/requalification rather than blind rebuild",
+        "resolve Household Ledger and Response Expectation Engine name collisions separately"
+      ]
+    },
+    {
+      "operation": "ADD",
+      "obligation_id": "SYSTEM-MASTER-DOCUMENT-TOOL-CURRENT-ADMISSION-001",
+      "owner_path": "SYSTEM_MASTER",
+      "state": "OWNER_SELECTION_REQUIRED",
+      "classification": "PRODUCT_ARCHITECTURE_AND_EVIDENCE_CUSTODY",
+      "objective": "Reconcile preserved Document World Class/Universal Document Spine DOCX/PPTX/PDF implementation evidence into the current headless document-tool architecture, identify exact reusable bytes/contracts and requalify only changed/current subjects without restarting closed research.",
+      "source": "governance/census/SYSTEM-MASTER-COMPLETION-CENSUS-002-P6-PRODUCT-MODULE-ALLOCATION.json"
+    },
+    {
+      "operation": "ADD",
+      "obligation_id": "SYSTEM-MASTER-AIINCOME-PORTFOLIO-OWNER-DECISION-001",
+      "owner_path": "SYSTEM_MASTER",
+      "state": "OWNER_SELECTION_REQUIRED",
+      "classification": "PRODUCT_ARCHITECTURE",
+      "objective": "Explicitly place AI Income and Living Portfolio within current System Master topology/owner contracts before implementation; preserve historical research and open implementation-decision evidence without allowing branch names to create systems.",
+      "source": "governance/census/SYSTEM-MASTER-COMPLETION-CENSUS-002-P6-PRODUCT-MODULE-ALLOCATION.json"
+    }
+  ],
+  "completion_ledger_delta": [
+    {
+      "operation": "ADD",
+      "completion_id": "SYSTEM-MASTER-P6-PRODUCT-MODULE-ALLOCATION-CENSUS-001",
+      "owner_path": "SYSTEM_MASTER",
+      "classification": "PRODUCT_MODULE_EXPECTATION_RECONCILIATION",
+      "standing": "COMPLETE__40_ROWS_ACCOUNTED_FOR__IMPLEMENTATION_COMPLETION_NOT_INFERRED",
+      "evidence_pointer": "governance/census/SYSTEM-MASTER-COMPLETION-CENSUS-002-P6-PRODUCT-MODULE-ALLOCATION.json",
+      "result_summary": "Recovered the full 40-row historical module index, restored DATA/PHONEOPS/PHYSICALAI to the census, mapped each module to current canonical owners, owner-registration requirements, absorbed/deferred scope or headless interoperability, and preserved historical research/implementation evidence without authority inflation."
+    }
+  ],
+  "reallocation_ledger_delta": [],
+  "apply_rule": "At P8 re-read current topology, owner heads and any P7 orphan findings before applying. If P7 discovers a valid current owner/admission lineage for a P6 unresolved module, preserve this P6 delta as historical census evidence and apply the newer owner-valid disposition."
+}
