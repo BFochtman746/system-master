@@ -171,6 +171,7 @@ jobs:
       qualification_id: ${{ inputs.qualification_id || 'A01-CONTROL-PLANE-SELFTEST' }}
       workstream_id: ${{ inputs.workstream_id || 'SYSTEM-MASTER' }}
       subject_sha: ${{ inputs.subject_sha || github.sha }}
+      control_plane_sha: ${{ needs.admission.outputs.control_plane_sha }}
       origin_ref: ${{ inputs.origin_ref || github.ref }}
       resume_on_pass: ${{ inputs.resume_on_pass || 'Adjudicate PASS and continue the next dependency-valid objective.' }}
       resume_on_failure: ${{ inputs.resume_on_failure || 'Adjudicate evidence, repair only the proven boundary, and rerun through a fresh admission broker dispatch.' }}
