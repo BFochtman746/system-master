@@ -1,8 +1,8 @@
 # SECOND-SHIFT-EXECUTION-CONTROL-001
 
-Status: PROPOSED_FOR_ADMISSION
-Effective target: 2026-09-10 before the next 00:00-07:00 America/New_York shift
-Scope: execution control and observability only. This contract does not transfer product, A-01, human, author, private, blind, native, external, publication or production authority.
+Status: **ACTIVE__ADMITTED_TO_CANONICAL_SECOND_SHIFT_CONTROL**
+Effective: 2026-09-10 for the 00:00-07:00 America/New_York shift
+Scope: execution control, observability and value measurement only. This contract does not transfer product, A-01, human, author, private, blind, native, external, publication or production authority.
 
 ## Problem closed by this contract
 
@@ -120,12 +120,26 @@ Missing/stale delegation, unavailable A-01, unavailable runner, one blocked crit
 
 ## Utilization event ledger
 
-Commit timestamps and workflow duration are evidence checkpoints, not productivity telemetry. Each lane therefore writes an append-only per-shift event ledger conforming to SECOND-SHIFT-UTILIZATION-EVENT-SCHEMA-001.json.
+Commit timestamps and workflow duration are evidence checkpoints, not productivity telemetry. Each lane writes an append-only per-shift event ledger conforming to SECOND-SHIFT-UTILIZATION-EVENT-SCHEMA-001.json.
 
 Required event classes include:
 SHIFT_OPEN, READY, CLAIMED, RUNNING, HEARTBEAT, PROGRESS, COMPLETED, BLOCKED, STALE, RETRY, CIRCUIT_OPEN, CIRCUIT_HALF_OPEN, CIRCUIT_CLOSED, SUCCESSOR_BOUND, ALL_RUNGS_EXHAUSTED, IDLE_VALID, SHIFT_CLOSE.
 
-The morning audit derives time in READY/RUNNING/BLOCKED/STALE/IDLE only from these state events. Missing telemetry is reported as UNKNOWN, never inferred from commit spacing or runner uptime. Process uptime, CPU use and GitHub job duration may be diagnostic signals but are not substitutes for useful-work state.
+The watchdog validates ledger identity, chronology, exact lane/control-head binding, claim/heartbeat/idempotency linkage, retry/circuit payloads, completed-work value metadata, successor-turn metadata, exhaustion-before-idle and event freshness. Missing or contradictory telemetry is UNKNOWN, never inferred from commit spacing or runner uptime.
+
+## Value measurement law
+
+SECOND-SHIFT-VALUE-SCORECARD-001 and SECOND-SHIFT-VALUE-MEASUREMENT-SCHEMA-001 are the canonical usefulness controls.
+
+- One logical evidence-bearing objective/stage transition earns value once; file, commit, artifact, token and workflow counts never multiply credit.
+- COMPLETED events carry a `value_work_unit` with fixed Verified Progress Unit (VPU) advancement credit, actual accepted VPU, evidence/admission class, work class/complexity, successor/user-intervention flags and rework standing.
+- SUCCESSOR_BOUND records whether the transition was autonomous and whether the established manual chat workflow would have required a user execution/continue turn.
+- Minimum Interactive Turns Avoided (MITA) is the immediate hard lower-bound leverage metric.
+- Daytime Turn Equivalent (DTE) and Counterfactual Chat Elapsed Time Avoided (CCETA) are produced only from observed comparable daytime calibration. Five matching work-class/complexity observations are the minimum; ten or more are preferred.
+- Human Attention Saved remains UNKNOWN until active user attention is directly observed rather than inferred from elapsed tool/model time.
+- The 0-100 Second Shift Value Index (SSVI) combines outcome advancement, evidence acceptance, autonomous leverage, flow/reliability and stability/rework. Raw measures are always shown with it.
+- The morning SSVI is provisional while any scored work remains PENDING_OBSERVATION. Later defect rework, invalid admission, rollback or evidence inflation reduces the finalized score. Normal next-stage work is not rework.
+- Authority/evidence hard-gate violations cap the score and zero unsupported credit rather than allowing apparent velocity to hide unsafe work.
 
 ## Successor admission law
 
@@ -150,11 +164,13 @@ For each shift:
 - 100% retrying operations classified and bounded
 - 100% terminal poison work preserved in durable quarantine rather than endlessly retried
 - 100% canonical admissions exact-head/exact-subject/topology checked
-- 100% time-state claims grounded in the utilization event ledger
+- 100% time-state claims grounded in validated utilization events
+- 100% completed work units carry schema-valid value metadata
+- 100% autonomous successor transitions carry MITA evidence
 - pre-shift queue target of primary plus two dependency-diverse fallbacks per lane when truthful owner-valid candidates exist
 
 These are controller SLOs, not a command to manufacture busywork. Safe truthful stopping remains preferable to violating an authority boundary.
 
 ## Research basis
 
-This control adopts established durable-work principles from queue/orchestration systems: visibility/claim leases and heartbeats for long work, explicit task timeout and heartbeat failure detection, classified retry/catch paths, idempotency for at-least-once delivery, circuit breaking after repeated transient failures, durable quarantine/dead-letter handling for poison work, serialized concurrency where conflicting effects exist, queue depth/fairness safeguards and explicit processing telemetry. The implementation deliberately keeps those mechanics separate from System Master product authority.
+This control adopts established durable-work and engineering-productivity principles: visibility/claim leases and heartbeats for long work, explicit timeout/failure detection, classified retries, idempotency for at-least-once delivery, circuit breaking and quarantine, serialized conflicting effects, queue-depth/fairness safeguards, explicit processing telemetry, multidimensional outcome/quality/flow measures, and empirical rather than perceived counterfactual time savings. These mechanics remain separate from System Master product authority.
