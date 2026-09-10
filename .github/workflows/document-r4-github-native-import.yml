@@ -6,7 +6,6 @@ on:
       - document/cr001-r4-github-native-import-candidate-20260910
     paths:
       - '.github/workflows/document-r4-github-native-import.yml'
-      - '.document-import-staging/cr001-r4/**'
 
 permissions:
   contents: write
@@ -26,104 +25,41 @@ jobs:
           fetch-depth: 0
           persist-credentials: true
 
-      - name: Locate exact CR001 custody packets or complete staged archive
-        id: locate
-        shell: powershell
-        run: |
-          $ErrorActionPreference = 'Stop'
-          $names = @(
-            'CR001_R2B1_PRE_T13_SOURCE_TREE_CUSTODY_PACKET_20260901.zip',
-            'CR001_R3_T13_REBASED_CURRENT_BASELINE_PACKET_20260901.zip',
-            'CR001_R4_T14_REBASED_CURRENT_BASELINE_QUALIFIED_20260901.zip'
-          )
-          $roots = @(
-            (Join-Path $env:USERPROFILE 'Downloads'),
-            (Join-Path $env:USERPROFILE 'Desktop'),
-            (Join-Path $env:USERPROFILE 'Documents'),
-            (Join-Path $env:USERPROFILE 'OneDrive\Downloads'),
-            (Join-Path $env:USERPROFILE 'OneDrive\Desktop'),
-            (Join-Path $env:USERPROFILE 'OneDrive\Documents')
-          ) | Where-Object { Test-Path $_ }
-          $found = @{}
-          foreach ($name in $names) {
-            foreach ($root in $roots) {
-              if ($found.ContainsKey($name)) { break }
-              $hit = Get-ChildItem -LiteralPath $root -Filter $name -File -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
-              if ($hit) { $found[$name] = $hit.FullName }
-            }
-          }
-          if ($found.Count -eq 3) {
-            'mode=packets' >> $env:GITHUB_OUTPUT
-            "r2=$($found[$names[0]])" >> $env:GITHUB_OUTPUT
-            "r3=$($found[$names[1]])" >> $env:GITHUB_OUTPUT
-            "r4=$($found[$names[2]])" >> $env:GITHUB_OUTPUT
-            Write-Host 'FOUND_EXACT_CR001_PACKET_SET'
-            exit 0
-          }
-          $parts = Get-ChildItem '.document-import-staging/cr001-r4/part-*.b64' -File -ErrorAction SilentlyContinue | Sort-Object Name
-          if ($parts.Count -eq 25) {
-            'mode=staged' >> $env:GITHUB_OUTPUT
-            Write-Host 'FOUND_COMPLETE_STAGED_ARCHIVE_25_PARTS'
-            exit 0
-          }
-          throw "SOURCE_CUSTODY_TRANSPORT_INCOMPLETE exact_packets=$($found.Count)/3 staged_parts=$($parts.Count)/25"
-
-      - name: Reconstruct and verify exact R4 source
+      - name: Reconstruct staged source and prove CR001-R4 identity
         id: reconstruct
         shell: powershell
         run: |
           $ErrorActionPreference = 'Stop'
+          $parts = Get-ChildItem '.document-import-staging/cr001-r4/part-*.b64' -File -ErrorAction SilentlyContinue | Sort-Object Name
+          if ($parts.Count -ne 25) { throw "SOURCE_CUSTODY_TRANSPORT_INCOMPLETE staged_parts=$($parts.Count)/25" }
           $work = Join-Path $env:RUNNER_TEMP 'document-r4-import'
           Remove-Item $work -Recurse -Force -ErrorAction SilentlyContinue
           New-Item $work -ItemType Directory | Out-Null
-          $source = Join-Path $work 'source'
-          $manifest = $null
-          if ('${{ steps.locate.outputs.mode }}' -eq 'packets') {
-            $expected = @{
-              '${{ steps.locate.outputs.r2 }}' = 'ed3b9feeb5ad93637b1a5a59598003ca21caf794809c4bec4f09e9454d518637'
-              '${{ steps.locate.outputs.r3 }}' = '66260502655e0840f597b6a2dc06ec941b79d7e02b1c16b0a061ee953b698665'
-              '${{ steps.locate.outputs.r4 }}' = 'cea84e5628af671cabc5dc3ed0b37dce38ff264019b04fefcd6c2b347f2b47e2'
-            }
-            foreach ($entry in $expected.GetEnumerator()) {
-              $actual = (Get-FileHash -LiteralPath $entry.Key -Algorithm SHA256).Hash.ToLowerInvariant()
-              if ($actual -ne $entry.Value) { throw "PACKET_SHA_MISMATCH $($entry.Key)" }
-            }
-            $r2 = Join-Path $work 'r2'; $r3 = Join-Path $work 'r3'; $r4 = Join-Path $work 'r4'
-            Expand-Archive -LiteralPath '${{ steps.locate.outputs.r2 }}' -DestinationPath $r2
-            Expand-Archive -LiteralPath '${{ steps.locate.outputs.r3 }}' -DestinationPath $r3
-            Expand-Archive -LiteralPath '${{ steps.locate.outputs.r4 }}' -DestinationPath $r4
-            $r2root = Get-ChildItem $r2 -Directory | Select-Object -First 1
-            Copy-Item -LiteralPath (Join-Path $r2root.FullName 'materialized-pre-t13\01_CURRENT_DOCUMENT_PROCESSING_MODULE') -Destination $source -Recurse
-            Copy-Item -Path (Join-Path $r3 'source-overlay\01_CURRENT_DOCUMENT_PROCESSING_MODULE\*') -Destination $source -Recurse -Force
-            $r4root = Get-ChildItem $r4 -Directory | Select-Object -First 1
-            Copy-Item -Path (Join-Path $r4root.FullName 'source-overlay\01_CURRENT_DOCUMENT_PROCESSING_MODULE\*') -Destination $source -Recurse -Force
-            $manifest = Join-Path $r4root.FullName 'CANONICAL-SOURCE-TREE-MANIFEST.csv'
-          } else {
-            $b64 = Join-Path $work 'source.tar.xz.b64'
-            Get-ChildItem '.document-import-staging/cr001-r4/part-*.b64' -File | Sort-Object Name | ForEach-Object { Get-Content $_.FullName -Raw } | Set-Content -LiteralPath $b64 -NoNewline
-            $archive = Join-Path $work 'source.tar.xz'
-            [IO.File]::WriteAllBytes($archive, [Convert]::FromBase64String((Get-Content $b64 -Raw)))
-            $actual = (Get-FileHash $archive -Algorithm SHA256).Hash.ToLowerInvariant()
-            if ($actual -ne 'd4a0beffbeae7f72a6c3e0d522ff51b093fdd2fff1178d68e30e4746673ba1dd') { throw 'STAGED_ARCHIVE_SHA_MISMATCH' }
-            tar -xJf $archive -C $work
-            $source = Join-Path $work '01_CURRENT_DOCUMENT_PROCESSING_MODULE'
-            throw 'STAGED_ARCHIVE_NEEDS_CANONICAL_MANIFEST_SIDECAR_BEFORE_EXECUTION'
+          $b64 = Join-Path $work 'source.tar.xz.b64'
+          $parts | ForEach-Object { Get-Content $_.FullName -Raw } | Set-Content -LiteralPath $b64 -NoNewline
+          $archive = Join-Path $work 'source.tar.xz'
+          [IO.File]::WriteAllBytes($archive, [Convert]::FromBase64String((Get-Content $b64 -Raw)))
+          $archiveHash = (Get-FileHash $archive -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($archiveHash -ne 'd4a0beffbeae7f72a6c3e0d522ff51b093fdd2fff1178d68e30e4746673ba1dd') { throw 'STAGED_ARCHIVE_SHA_MISMATCH' }
+          tar -xJf $archive -C $work
+          if ($LASTEXITCODE -ne 0) { throw 'STAGED_ARCHIVE_EXTRACT_FAIL' }
+          $source = Join-Path $work '01_CURRENT_DOCUMENT_PROCESSING_MODULE'
+          $files = Get-ChildItem $source -Filter '*.java' -File -Recurse | Sort-Object FullName
+          if ($files.Count -ne 225) { throw "RECONSTRUCTED_JAVA_COUNT_MISMATCH $($files.Count)" }
+          $sb = [Text.StringBuilder]::new()
+          [void]$sb.Append("path,sha256,bytes`r`n")
+          foreach ($file in $files) {
+            $relative = $file.FullName.Substring($source.Length + 1).Replace('\','/')
+            $path = '01_CURRENT_DOCUMENT_PROCESSING_MODULE/' + $relative
+            $hash = (Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+            [void]$sb.Append($path + ',' + $hash + ',' + $file.Length + "`r`n")
           }
-          $rows = Import-Csv -LiteralPath $manifest
-          if ($rows.Count -ne 225) { throw "CANONICAL_MANIFEST_ROW_COUNT_MISMATCH $($rows.Count)" }
-          $mismatch = @()
-          foreach ($row in $rows) {
-            $relative = $row.path -replace '^01_CURRENT_DOCUMENT_PROCESSING_MODULE/',''
-            $file = Join-Path $source ($relative -replace '/', '\')
-            if (-not (Test-Path -LiteralPath $file)) { $mismatch += "MISSING:$($row.path)"; continue }
-            $hash = (Get-FileHash -LiteralPath $file -Algorithm SHA256).Hash.ToLowerInvariant()
-            $size = (Get-Item -LiteralPath $file).Length
-            if ($hash -ne $row.sha256 -or $size -ne [int64]$row.bytes) { $mismatch += "MISMATCH:$($row.path)" }
-          }
-          $java = Get-ChildItem $source -Filter '*.java' -File -Recurse
-          if ($java.Count -ne 225) { throw "RECONSTRUCTED_JAVA_COUNT_MISMATCH $($java.Count)" }
-          if ($mismatch.Count -ne 0) { throw "SOURCE_IDENTITY_FAILURE $($mismatch -join ',')" }
-          'source=' + $source >> $env:GITHUB_OUTPUT
+          $generated = Join-Path $work 'CANONICAL-SOURCE-TREE-MANIFEST.csv'
+          [IO.File]::WriteAllText($generated, $sb.ToString(), [Text.UTF8Encoding]::new($false))
+          $manifestBytesHash = (Get-FileHash $generated -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($manifestBytesHash -ne 'ed36fc9cfd38b04a8d0174efed06b03e8e25b0a45fc0adc4d47fe3457c2ee367') { throw "CANONICAL_MANIFEST_BYTES_MISMATCH $manifestBytesHash" }
+          "source=$source" >> $env:GITHUB_OUTPUT
+          "manifest_hash=$manifestBytesHash" >> $env:GITHUB_OUTPUT
           Write-Host 'R4_SOURCE_IDENTITY_PASS_225_OF_225'
 
       - name: Commit exact source candidate
@@ -160,11 +96,7 @@ jobs:
           $sources | ForEach-Object { '"' + $_ + '"' } | Set-Content -LiteralPath $argfile
           & javac --release 21 -Xlint:all -Werror -d $build "@$argfile"
           if ($LASTEXITCODE -ne 0) { throw 'STRICT_JAVA21_COMPILE_FAIL' }
-          $tests = @(
-            'org.systemmaster.tools.document.DocumentDocxMasteryT13PortableTests',
-            'org.systemmaster.tools.document.DocumentDocxMasteryT14PortableTests'
-          )
-          foreach ($test in $tests) {
+          foreach ($test in @('org.systemmaster.tools.document.DocumentDocxMasteryT13PortableTests','org.systemmaster.tools.document.DocumentDocxMasteryT14PortableTests')) {
             & java -cp $build $test
             if ($LASTEXITCODE -ne 0) { throw "PORTABLE_TEST_FAIL $test" }
           }
@@ -188,7 +120,8 @@ jobs:
             source_path = 'system-master/headless-content-artifacts/document/cr001-r4/01_CURRENT_DOCUMENT_PROCESSING_MODULE'
             recovered_authority = 'CR001-R4'
             canonical_manifest_rows = 225
-            source_identity = 'PASS__225_OF_225_SHA256_AND_SIZE'
+            canonical_manifest_bytes_sha256 = '${{ steps.reconstruct.outputs.manifest_hash }}'
+            source_identity = 'PASS__225_OF_225_SHA256_AND_SIZE_EQUIVALENT_MANIFEST'
             strict_java_21_compile = '${{ steps.qualify.outputs.compile }}'
             t13_portable = '${{ steps.qualify.outputs.t13 }}'
             t14_portable = '${{ steps.qualify.outputs.t14 }}'
