@@ -1,0 +1,100 @@
+{
+  "artifact_id": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001E-BATCH-01-CANDIDATE-060A",
+  "effective_date": "2026-09-10",
+  "owner_path": "SYSTEM_MASTER/LEARNING",
+  "base_control_head": "507fcb84023998d6f56ef7459959054f85881716",
+  "contract": "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001E-INSTRUCTIONAL-CONTENT-AND-SCORING-CONTRACT-059.json",
+  "predecessor": {
+    "durable_blueprint_commit": "02dc615fcb5d44b997ed1322848eccc6e37bb172",
+    "durable_blueprint_path": "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001D-EXECUTABLE-CURRICULUM-BLUEPRINT-057B.json",
+    "blueprint_digest_sha256": "98aa0b621b0cbe5234d5dd8bdb9890a1692c4c9d91aaf955fd3a459632949e54",
+    "qualified_001d_subject_sha": "913580f4ad0d7653e728ce17976284f88e6dfd60"
+  },
+  "selection": {
+    "batch_index": 1,
+    "selected_node_count": 1,
+    "ordinal": 1,
+    "requirement_id": "ASQ-CSSGB-2022-I.A.1",
+    "skill_id": "CSSGB-2022::ASQ-CSSGB-2022-I.A.1::SUBSKILL::value-mechanisms",
+    "criterion_id": "CRIT::CSSGB-2022::ASQ-CSSGB-2022-I.A.1::SUBSKILL::value-mechanisms",
+    "lesson_id": "LESSON::CSSGB-2022::ASQ-CSSGB-2022-I.A.1::SUBSKILL::value-mechanisms",
+    "assessment_target_id": "ASSESS::CSSGB-2022::ASQ-CSSGB-2022-I.A.1::value-mechanisms::TARGET::bounded-value-explanation"
+  },
+  "implementation": {
+    "module": "learning/lab/learning_lab/cssgb_2022_value_mechanisms.py",
+    "domain_key": "cssgb-2022-i-a-1-value-mechanisms",
+    "generation_adapter": "CSSGB-2022-001E-B01-DETERMINISTIC-CONTENT-V1",
+    "scoring_type": "CSSGB_VALUE_MECHANISMS_V1",
+    "runtime_model": "Course/Skill/Criterion/Lesson/Item",
+    "runtime_engine": "learning.lab.learning_lab.domain_general.DomainGeneralLearningEngine"
+  },
+  "grounding": {
+    "dossier_id": "RSCH-ASQ-CSSGB-2022-I.A.1-001E-B01",
+    "source_count": 1,
+    "claim_count": 4,
+    "source": {
+      "source_id": "SRC-ASQ-SIX-SIGMA-OVERVIEW",
+      "title": "Six Sigma Definition - What is Lean Six Sigma?",
+      "url": "https://asq.org/quality-resources/six-sigma",
+      "authority": "AMERICAN_SOCIETY_FOR_QUALITY_OFFICIAL_RESOURCE",
+      "standing": "ADMITTED",
+      "retrieved_date": "2026-09-10"
+    },
+    "source_bytes_archived": false,
+    "source_bytes_archive_limitation_declared": true,
+    "frozen_2022_requirement_identity_replaced": false
+  },
+  "instructional_realization": {
+    "lesson_count": 1,
+    "worked_example_count": 2,
+    "practice_item_count": 2,
+    "mastery_item_count": 1,
+    "retention_item_count": 1,
+    "required_modes": ["PRACTICE", "MASTERY_CHECK", "RETENTION_CHECK"],
+    "practice_mastery_family_overlap_allowed": false,
+    "mastery_retention_family_overlap_allowed": false,
+    "mastery_answer_exposure_allowed": false
+  },
+  "scoring_realization": {
+    "response_transport": "UTF8_JSON_STRING",
+    "required_response_keys": ["mechanisms", "realized_impact_claimed", "missing_evidence"],
+    "allowed_mechanisms": ["operational", "customer", "financial"],
+    "minimum_supported_mechanisms_for_pass": 2,
+    "fact_link_required_for_every_mechanism": true,
+    "realized_impact_claimed_must_be_false": true,
+    "missing_evidence_required_when_a_value_category_has_no_supporting_scenario_fact": true,
+    "unknown_fact_or_mechanism_pair_rejected": true,
+    "string_equality_to_course_answer_is_scoring_authority": false,
+    "oracle_independent_from_content_builder": true
+  },
+  "qualification_assertions": {
+    "exact_001d_blueprint_digest_verified": true,
+    "exact_first_node_identity_verified": true,
+    "validate_grounding_required_pass": true,
+    "validate_instructional_design_required_pass": true,
+    "reference_item_oracle_required_pass": true,
+    "lesson_example_validator_required_pass": true,
+    "malformed_response_must_fail": true,
+    "unknown_or_unsupported_mechanism_fact_pair_must_fail": true,
+    "realized_impact_claim_must_fail": true,
+    "practice_attempt_must_not_create_mastery": true,
+    "independent_mastery_success_must_yield_retention_due_before_delay": true,
+    "premature_retention_must_not_satisfy_retention_gate": true,
+    "course_state_must_remain_ready_for_review": true,
+    "full_course_activation_allowed": false
+  },
+  "evidence_boundaries": {
+    "learner_mastery": "UNOBSERVED_REAL_LEARNER",
+    "psychometric_validity": "UNOBSERVED",
+    "retention_effectiveness": "UNOBSERVED_REAL_LEARNER",
+    "transfer_effectiveness": "UNOBSERVED",
+    "workplace_effectiveness": "UNOBSERVED",
+    "sme_approval": "UNOBSERVED",
+    "certification_equivalence": "UNOBSERVED",
+    "a01_authority": "NOT_CLAIMED_BY_HOSTED_BATCH",
+    "native_platform_authority": "NOT_CLAIMED",
+    "production_authority": "NOT_CLAIMED"
+  },
+  "on_pass": "Admit the exact hosted Batch 01 receipt into learning/control-v1, mark ordinal 1 instructional/scoring realization complete, and bind the next bounded 001E batch starting at ordinal 2 without replaying 001A-001D or Batch 01.",
+  "on_failure": "Preserve the 001D blueprint and this failing subject; repair only the exact grounding, instructional-design, oracle, or runtime-attempt defect on a new exact subject."
+}
