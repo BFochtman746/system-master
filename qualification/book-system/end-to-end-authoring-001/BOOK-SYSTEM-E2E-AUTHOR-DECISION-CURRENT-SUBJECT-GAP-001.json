@@ -1,0 +1,42 @@
+{
+  "finding_id": "BOOK-SYSTEM-E2E-AUTHOR-DECISION-CURRENT-SUBJECT-GAP-001",
+  "effective_date": "2026-09-09",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "parent_objective": "BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001",
+  "discovered_by": {
+    "hosted_run_id": 34431785904,
+    "subject_sha": "cd96d6d300b73d1a28660d58707624372fee6142",
+    "matrix_result": "46_PASS_2_FAIL",
+    "case_id": "E2E019_CHANGED_AUTHOR_SUBJECT_INVALIDATES_PRIOR_DECISION_FOR_NEW_SUBJECT"
+  },
+  "standing": "OPEN__QUALIFICATION_BLOCKING_CURRENTNESS_GAP__BOUNDED_STRICT_GUARD_REQUIRED",
+  "finding": "Author Decision Queue v1 subject-currentness accepts an exact governed object version whenever that historical version still exists in the append-only parent aggregate. After the active canonical manuscript advances from V1 to V2, a pending decision bound to V1 is therefore still treated as current even though the queue contract defines a changed bound manuscript identity as a material staleness trigger.",
+  "root_cause": [
+    "parentIdentityCatalog indexes every governed object version present in the parent state.",
+    "validateSubjectIdentityRefs tests catalog membership but does not require a governed subject to equal the active pointer binding for its governed object class.",
+    "revalidateAgainstParent therefore can advance the queue ledger to the new parent while leaving an old-version pending decision effectively resolvable."
+  ],
+  "safety_effect": "A human choice requested for an old manuscript version could be captured against a materially changed active manuscript unless a stricter current-subject boundary blocks it.",
+  "qualified_v1_preservation": {
+    "subject_sha": "9601ae5df8348c1daac8805eaefa1718c431dd49",
+    "rule": "Do not modify, relabel, or transfer the exact-SHA Author Decision Queue v1 qualification."
+  },
+  "selected_repair": {
+    "id": "BOOK-SYSTEM-AUTHOR-DECISION-CURRENT-SUBJECT-GUARD-001",
+    "classification": "ADDITIVE_STRICT_CURRENTNESS_ADAPTER__NO_NEW_AUTHOR_AUTHORITY",
+    "requirements": [
+      "delegate canonical queue and resolution behavior to Author Decision Queue v1",
+      "for governed subject identities, require the exact object version to be the active pointer target for that governed class",
+      "allow immutable historical versions to remain stored without treating them as current author-choice targets",
+      "after parent revalidation, preserve base queue history and record an additive strict-currentness overlay for requests whose governed subject is no longer active",
+      "resolution must fail closed when the exact governed subject is no longer active, including when no prior revalidation was performed",
+      "no model/provider/timeout authority and no synthetic author choice",
+      "no lifecycle, manuscript, proposal, export-freeze, publication, or provider authority"
+    ]
+  },
+  "research_gate": {
+    "external_research_required": false,
+    "reason": "This is an internal exact-version/current-pointer custody defect against an already research-verified author-authority contract."
+  },
+  "qualification_effect": "E2E_PAUSED_ON_BOUNDED_REPAIR__NO_E2E_PASS"
+}
