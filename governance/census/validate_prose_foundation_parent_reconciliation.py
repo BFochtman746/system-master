@@ -43,6 +43,7 @@ def main():
     admission = json.loads(ADMISSION.read_text(encoding="utf-8"))
 
     checks = 0
+
     def check(condition, name):
         nonlocal checks
         require(condition, name)
@@ -84,10 +85,15 @@ def main():
     check(len(blocked) == 1 and "FRESH_EVALUATOR_REQUIRED" in blocked[0]["state"], "blind_blocker_preserved")
     check(source_census["rows"][-1]["canonical_owner"] == "SYSTEM_MASTER/BOOK", "book_canonical_writer_preserved")
 
+    seen_runs = set()
     for row in admission["newly_closed_rows"]:
-        run = gh_json(f"https://api.github.com/repos/{REPO}/actions/runs/{row['workflow_run_id']}")
-        check(run["status"] == "completed" and run["conclusion"] == "success", f"workflow_{row['workflow_run_id']}_success")
-        check(run["head_sha"] == row["tested_sha"], f"workflow_{row['workflow_run_id']}_exact_subject")
+        run_id = row["workflow_run_id"]
+        if run_id in seen_runs:
+            continue
+        seen_runs.add(run_id)
+        run = gh_json(f"https://api.github.com/repos/{REPO}/actions/runs/{run_id}")
+        check(run["status"] == "completed" and run["conclusion"] == "success", f"workflow_{run_id}_success")
+        check(run["head_sha"] == row["tested_sha"], f"workflow_{run_id}_exact_subject")
 
     closure = admission["closure_consistency"]
     closure_run = gh_json(f"https://api.github.com/repos/{REPO}/actions/runs/{closure['workflow_run_id']}")
@@ -95,9 +101,22 @@ def main():
     check(closure_run["head_sha"] == closure["tested_sha"], "closure_004_exact_subject")
 
     source_closure = fetch_contents_json(admission["source_owner_closure"], source_ref)
-    check(source_closure["standing"] == "PASS__PROSE_OWNER_LANE_SAFE_FILLABLE_FOUNDATION_ROWS_COMPLETE__GLOBAL_FOUNDATION_NOT_CLAIMED", "source_owner_closure_standing")
-    check(source_closure["global_foundation_closed"] is False, "source_owner_closure_global_nonclaim")
-    check(source_closure["active_safe_foundation_gaps"] == 0, "source_owner_closure_zero_active")
+    check(
+        source_closure["standing"] == "PROSE_OWNER_LANE_FOUNDATION_CENSUS_COMPLETE_WITH_ONE_DURABLE_FRESH_CONTEXT_BLOCKER__GLOBAL_FOUNDATION_NOT_CLAIMED",
+        "source_owner_closure_standing",
+    )
+    check(source_closure["counts"]["active_gap"] == 0, "source_owner_closure_zero_active")
+    check(source_closure["counts"]["complete_with_evidence"] == 5, "source_owner_closure_five_complete")
+    check(source_closure["durable_blocker"]["must_not_be_bypassed"] is True, "source_owner_closure_blocker_fail_closed")
+    check(source_closure["out_of_scope_authority"]["owner"] == "SYSTEM_MASTER/BOOK", "source_owner_closure_book_owner")
+    check(
+        "No global System Master Foundation 1.0 closure is claimed." in source_closure["preserved_nonclaims"],
+        "source_owner_closure_global_nonclaim",
+    )
+    check(
+        "Global Foundation 1.0 is closed." in source_closure["parent_handoff"]["parent_may_not_infer"],
+        "source_owner_closure_parent_inference_guard",
+    )
 
     print(json.dumps({
         "objective": "SYSTEM-MASTER-FOUNDATION-CLOSURE-CENSUS-001-PROSE-OWNER-ADMISSION-001",
