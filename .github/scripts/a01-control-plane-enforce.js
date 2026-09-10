@@ -7,6 +7,8 @@ const crypto = require('crypto');
 const ROOT = path.resolve(__dirname, '..', '..');
 const WORKFLOWS = path.join(ROOT, '.github', 'workflows');
 const GATEWAY = '.github/workflows/a01-control-plane-gateway.yml';
+const BROKER = '.github/workflows/a01-control-plane-admission-broker.yml';
+const EXECUTOR = '.github/workflows/a01-control-plane-executor.yml';
 const NIGHT_SHIFT = '.github/workflows/a01-overnight-night-shift.yml';
 const ALLOWLIST = path.join(ROOT, 'qualification', 'a01', 'legacy-direct-workflows.json');
 
@@ -16,60 +18,95 @@ function gitBlobSha(buffer) {
   const header = Buffer.from(`blob ${canonical.length}\0`, 'utf8');
   return crypto.createHash('sha1').update(Buffer.concat([header, canonical])).digest('hex');
 }
+
+function leadingIndent(line) {
+  const m = /^(\s*)/.exec(line);
+  return m ? m[1].length : 0;
+}
+
 function isDirectSelfHosted(content) {
-  const text = content.toString('utf8');
-  const re = /runs-on\s*:/ig;
-  let match;
-  while ((match = re.exec(text)) !== null) {
-    const stanza = text.slice(match.index, match.index + 350);
-    if (/self-hosted/i.test(stanza)) return true;
+  const lines = content.toString('utf8').replace(/\r\n?/g, '\n').split('\n');
+  for (let i = 0; i < lines.length; i += 1) {
+    const match = /^(\s*)runs-on\s*:\s*(.*)$/i.exec(lines[i]);
+    if (!match) continue;
+    const indent = match[1].length;
+    const inlineValue = match[2].replace(/\s+#.*$/, '').trim();
+    if (inlineValue && /(^|[\[,\s])self-hosted([\],\s]|$)/i.test(inlineValue)) return true;
+    if (inlineValue) continue;
+    for (let j = i + 1; j < lines.length; j += 1) {
+      const line = lines[j];
+      if (!line.trim() || /^\s*#/.test(line)) continue;
+      const childIndent = leadingIndent(line);
+      if (childIndent <= indent) break;
+      if (/^\s*-\s*self-hosted\s*(?:#.*)?$/i.test(line)) return true;
+    }
   }
   return false;
 }
+
 function isScheduled(content) { return /(^|\n)\s*schedule\s*:/m.test(content.toString('utf8')); }
-function callsA01Gateway(content) {
-  const text = content.toString('utf8');
-  return /a01-control-plane-gateway\.yml/i.test(text);
+function calls(content, filename) {
+  const escaped = filename.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp(`^\\s*uses\\s*:\\s*[^\\r\\n]*${escaped}(?:@[^\\s#'\"]+)?\\s*(?:#.*)?$`, 'im').test(content.toString('utf8'));
 }
-function workflowFiles() {
-  return fs.readdirSync(WORKFLOWS).filter(name => /\.ya?ml$/i.test(name)).map(name => `.github/workflows/${name}`).sort();
-}
+function callsGateway(content) { return calls(content, 'a01-control-plane-gateway.yml'); }
+function callsBroker(content) { return calls(content, 'a01-control-plane-admission-broker.yml'); }
+function callsExecutor(content) { return calls(content, 'a01-control-plane-executor.yml'); }
+function workflowFiles() { return fs.readdirSync(WORKFLOWS).filter(name => /\.ya?ml$/i.test(name)).map(name => `.github/workflows/${name}`).sort(); }
 
 function scan() {
   const legacy = JSON.parse(fs.readFileSync(ALLOWLIST, 'utf8'));
   const failures = [];
   const direct = [];
-  for (const rel of workflowFiles()) {
+  const files = workflowFiles();
+  for (const required of [GATEWAY, BROKER, EXECUTOR, NIGHT_SHIFT]) if (!files.includes(required)) failures.push(`${required}: REQUIRED_A01_CONTROL_WORKFLOW_MISSING`);
+
+  for (const rel of files) {
     const full = path.join(ROOT, ...rel.split('/'));
     const bytes = fs.readFileSync(full);
-    if (rel !== NIGHT_SHIFT && isScheduled(bytes) && (callsA01Gateway(bytes) || isDirectSelfHosted(bytes))) {
+    if (rel !== NIGHT_SHIFT && isScheduled(bytes) && (callsGateway(bytes) || callsBroker(bytes) || callsExecutor(bytes) || isDirectSelfHosted(bytes))) {
       failures.push(`${rel}: INDEPENDENT_SCHEDULED_A01_WORKFLOW_PROHIBITED; submit an overnight ticket to ${NIGHT_SHIFT}`);
     }
-    if (rel === GATEWAY) continue;
+    if (callsExecutor(bytes) && rel !== BROKER) failures.push(`${rel}: DIRECT_A01_EXECUTOR_CALL_PROHIBITED; route through ${GATEWAY} -> ${BROKER}`);
+    if (callsBroker(bytes) && rel !== GATEWAY) failures.push(`${rel}: DIRECT_A01_ADMISSION_BROKER_CALL_PROHIBITED_IN_REPO_WORKFLOWS; route through ${GATEWAY}`);
     if (!isDirectSelfHosted(bytes)) continue;
     direct.push(rel);
+    if (rel === EXECUTOR) continue;
     const pinned = legacy.workflows[rel];
     const actual = gitBlobSha(bytes);
     if (!pinned) failures.push(`${rel}: DIRECT_SELF_HOSTED_WORKFLOW_NOT_REGISTERED; use ${GATEWAY}`);
     else if (actual !== pinned) failures.push(`${rel}: LEGACY_DIRECT_WORKFLOW_MODIFIED; pinned=${pinned} actual=${actual}; migrate through ${GATEWAY} instead of updating the legacy pin`);
   }
+
+  const gateway = fs.existsSync(path.join(ROOT, ...GATEWAY.split('/'))) ? fs.readFileSync(path.join(ROOT, ...GATEWAY.split('/')), 'utf8') : '';
+  const broker = fs.existsSync(path.join(ROOT, ...BROKER.split('/'))) ? fs.readFileSync(path.join(ROOT, ...BROKER.split('/')), 'utf8') : '';
+  const executor = fs.existsSync(path.join(ROOT, ...EXECUTOR.split('/'))) ? fs.readFileSync(path.join(ROOT, ...EXECUTOR.split('/')), 'utf8') : '';
+  if (!callsBroker(Buffer.from(gateway))) failures.push(`${GATEWAY}: MUST_ROUTE_THROUGH_HOSTED_ADMISSION_BROKER`);
+  if (!callsExecutor(Buffer.from(broker))) failures.push(`${BROKER}: MUST_ROUTE_ONLY_ADMITTED_REQUESTS_TO_EXECUTOR`);
+  if (!/runs-on:\s*\[self-hosted,\s*Windows,\s*X64\]/i.test(executor)) failures.push(`${EXECUTOR}: CANONICAL_A01_RUNNER_LABELS_MISSING`);
+  if (!/control_plane_sha/i.test(executor)) failures.push(`${EXECUTOR}: CONTROL_PLANE_SHA_BINDING_MISSING`);
   if (failures.length) {
     console.error('A01_ENFORCEMENT=FAIL');
     for (const failure of failures) console.error(failure);
     process.exit(1);
   }
-  console.log(`A01_ENFORCEMENT=PASS direct_legacy=${direct.length} canonical_night_shift=${fs.existsSync(path.join(ROOT, ...NIGHT_SHIFT.split('/')))}`);
+  console.log(`A01_ENFORCEMENT=PASS direct_legacy=${direct.filter(x => x !== EXECUTOR).length} canonical_executor=${EXECUTOR} admission_broker=${BROKER} canonical_night_shift=${fs.existsSync(path.join(ROOT, ...NIGHT_SHIFT.split('/')))}`);
 }
 
 function selftest() {
   if (!isDirectSelfHosted(Buffer.from('jobs:\n  test:\n    runs-on: [self-hosted, Windows, X64]\n'))) throw new Error('inline self-hosted detection failed');
   if (!isDirectSelfHosted(Buffer.from('jobs:\n  test:\n    runs-on:\n      - self-hosted\n      - Windows\n      - X64\n'))) throw new Error('multiline self-hosted detection failed');
-  if (isDirectSelfHosted(Buffer.from('jobs:\n  test:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: ./.github/workflows/a01-control-plane-gateway.yml\n'))) throw new Error('false positive for gateway caller');
+  if (isDirectSelfHosted(Buffer.from('jobs:\n  test:\n    runs-on: ubuntu-latest\n'))) throw new Error('false positive for hosted runner');
+  if (isDirectSelfHosted(Buffer.from("jobs:\n  test:\n    runs-on: ubuntu-latest\n    steps:\n      - run: echo 'No self-hosted runner was acquired'\n"))) throw new Error('self-hosted prose after hosted runs-on must not classify the job as self-hosted');
+  if (!callsGateway(Buffer.from('uses: ./.github/workflows/a01-control-plane-gateway.yml\n'))) throw new Error('gateway call detection failed');
+  if (!callsBroker(Buffer.from('uses: ./.github/workflows/a01-control-plane-admission-broker.yml\n'))) throw new Error('broker call detection failed');
+  if (!callsExecutor(Buffer.from('uses: ./.github/workflows/a01-control-plane-executor.yml\n'))) throw new Error('executor call detection failed');
+  if (callsExecutor(Buffer.from("on:\n  push:\n    paths:\n      - '.github/workflows/a01-control-plane-executor.yml'\n"))) throw new Error('workflow path mention must not count as an executor call');
+  if (callsBroker(Buffer.from("on:\n  push:\n    paths:\n      - '.github/workflows/a01-control-plane-admission-broker.yml'\n"))) throw new Error('workflow path mention must not count as a broker call');
   const scheduledCaller = Buffer.from("on:\n  schedule:\n    - cron: '7 1 * * *'\njobs:\n  q:\n    uses: ./.github/workflows/a01-control-plane-gateway.yml\n");
-  if (!isScheduled(scheduledCaller) || !callsA01Gateway(scheduledCaller)) throw new Error('scheduled gateway caller detection failed');
+  if (!isScheduled(scheduledCaller) || !callsGateway(scheduledCaller)) throw new Error('scheduled gateway caller detection failed');
   const lf = Buffer.from('hello\n'); const crlf = Buffer.from('hello\r\n'); const expected = 'ce013625030ba8dba906f756967f9e9ca394464a';
-  if (gitBlobSha(lf) !== expected) throw new Error('git blob SHA implementation failed');
-  if (gitBlobSha(crlf) !== expected) throw new Error('CRLF canonicalization failed');
+  if (gitBlobSha(lf) !== expected || gitBlobSha(crlf) !== expected) throw new Error('git blob SHA implementation failed');
   console.log('A01_ENFORCEMENT_SELFTEST=PASS');
 }
 
