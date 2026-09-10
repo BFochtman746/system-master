@@ -1,0 +1,96 @@
+{
+  "artifact_id": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001E-INSTRUCTIONAL-CONTENT-AND-SCORING-CONTRACT-059",
+  "effective_date": "2026-09-10",
+  "owner_path": "SYSTEM_MASTER/LEARNING",
+  "base_control_head": "706d5eadd08897d1fa464aff804a245997822bde",
+  "predecessor": {
+    "phase": "001D_EXECUTABLE_CURRICULUM_COMPILATION",
+    "control_checkpoint": "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001D-EXECUTABLE-CURRICULUM-CLOSURE-058.json",
+    "durable_blueprint_commit": "02dc615fcb5d44b997ed1322848eccc6e37bb172",
+    "durable_blueprint_path": "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001D-EXECUTABLE-CURRICULUM-BLUEPRINT-057B.json",
+    "blueprint_digest_sha256": "98aa0b621b0cbe5234d5dd8bdb9890a1692c4c9d91aaf955fd3a459632949e54",
+    "qualified_subject_sha": "913580f4ad0d7653e728ce17976284f88e6dfd60",
+    "course_state": "READY_FOR_REVIEW"
+  },
+  "objective": "Materialize independently grounded instructional content and bind independently executable scoring behavior against the exact 001D runtime blueprint without changing frozen requirement identity, admitted hard prerequisites, or evidence authority boundaries.",
+  "runtime_contract": {
+    "reuse_model": "Course/Skill/Criterion/Lesson/Item",
+    "grounding_validator": "learning/lab/learning_lab/real_course.py::validate_grounding",
+    "instructional_validator": "learning/lab/learning_lab/real_course.py::validate_instructional_design",
+    "scoring_dispatch": "learning/lab/learning_lab/domain_general.py::DomainSpec.behavior_oracle + DomainGeneralLearningEngine.submit_attempt",
+    "oracle_independence_rule": "The course/content builder may provide prompts, rationales and reference examples but may not provide the executable correctness decision used by the behavior oracle.",
+    "course_activation_allowed": false
+  },
+  "grounding_policy": {
+    "frozen_standard_identity_source": "ASQ CSSGB BoK 2022 requirement set already sealed in 001A-001D",
+    "supplemental_instructional_sources_allowed": true,
+    "supplemental_sources_may_replace_frozen_standard_identity": false,
+    "source_record_fields": ["source_id","title","url","authority","standing","retrieved_date"],
+    "claim_record_fields": ["claim_id","source_id","text","kind"],
+    "material_claims_require_admitted_claim_refs": true,
+    "source_bytes_archive_required_for_this_portable_batch": false,
+    "source_bytes_archive_limitation_must_be_declared": true
+  },
+  "batch_policy": {
+    "first_batch_size": 1,
+    "selection_rule": "Take the first unmaterialized execution node in exact 001D ordinal order and prove the complete grounding, instructional-design, oracle, and runtime-attempt path before widening the batch.",
+    "first_requirement_id": "ASQ-CSSGB-2022-I.A.1",
+    "first_skill_id": "CSSGB-2022::ASQ-CSSGB-2022-I.A.1::SUBSKILL::value-mechanisms",
+    "first_criterion_id": "CRIT::CSSGB-2022::ASQ-CSSGB-2022-I.A.1::SUBSKILL::value-mechanisms",
+    "minimum_worked_examples": 2,
+    "minimum_practice_items": 2,
+    "required_modes": ["PRACTICE","MASTERY_CHECK","RETENTION_CHECK"],
+    "assessment_family_independence_required": true,
+    "mastery_answer_exposure_forbidden": true
+  },
+  "first_batch_scoring_contract": {
+    "assessment_target_id": "ASSESS::CSSGB-2022::ASQ-CSSGB-2022-I.A.1::value-mechanisms::TARGET::bounded-value-explanation",
+    "input_class": "BOUNDED_SCENARIO",
+    "response_transport": "UTF8_JSON_STRING",
+    "response_schema": {
+      "mechanisms": "array of objects {mechanism, fact_ids[]}",
+      "realized_impact_claimed": "boolean",
+      "missing_evidence": "array of strings"
+    },
+    "minimum_supported_mechanisms_for_pass": 2,
+    "each_mechanism_must_link_to_supplied_fact": true,
+    "unstated_realized_impact_forbidden": true,
+    "insufficient_evidence_behavior_required": true,
+    "oracle_must_reject_malformed_or_unknown_mechanism_fact_pairs": true,
+    "oracle_must_not_score_by_string_equality_to_course_answer": true
+  },
+  "qualification_requirements": [
+    "exact 001D blueprint digest and first-node identity verified",
+    "all lesson/item material claims trace to admitted claims",
+    "validate_grounding PASS",
+    "validate_instructional_design PASS",
+    "independent oracle accepts canonical passing fixtures and rejects malformed, unsupported, and realized-impact fixtures",
+    "DomainGeneralLearningEngine path records oracle-derived correct/incorrect attempts",
+    "practice remains non-mastery evidence",
+    "independent mastery success advances only to retention-due before delayed retention evidence",
+    "course remains READY_FOR_REVIEW and is not activated",
+    "fresh exact-SHA hosted qualification evidence preserved"
+  ],
+  "evidence_boundaries": {
+    "learner_mastery": "UNOBSERVED_REAL_LEARNER",
+    "psychometric_validity": "UNOBSERVED",
+    "retention_effectiveness": "UNOBSERVED_REAL_LEARNER",
+    "transfer_effectiveness": "UNOBSERVED",
+    "workplace_effectiveness": "UNOBSERVED",
+    "sme_approval": "UNOBSERVED",
+    "certification_equivalence": "UNOBSERVED",
+    "a01_authority": "NOT_CLAIMED_BY_HOSTED_BATCH",
+    "native_platform_authority": "NOT_CLAIMED",
+    "production_authority": "NOT_CLAIMED"
+  },
+  "forbidden": [
+    "do not replay 001A-001D",
+    "do not admit any of the 38 rejected or 8 retained noncanonical dependency candidates as hard prerequisites",
+    "do not use supplemental instructional sources to change the frozen 2022 requirement set",
+    "do not let generated answer text self-authorize correctness",
+    "do not infer human, psychometric, certification, A-01, native, or production evidence",
+    "do not activate the full course from a one-node portable qualification"
+  ],
+  "on_pass": "Admit the exact Batch 01 qualification receipt into Learning control, mark I.A.1 instructional/scoring realization complete, and select the next bounded 001E batch in exact 001D order without reopening prior phases.",
+  "on_failure": "Preserve 001D unchanged, preserve the failing exact subject, repair only the grounding/instructional/oracle/runtime defect, and rerun on a new exact subject."
+}
