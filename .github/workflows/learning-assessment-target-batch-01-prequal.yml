@@ -1,0 +1,50 @@
+name: Learning Assessment Target Batch 01 Prequalification
+
+on:
+  push:
+    branches:
+      - learning/assessment-target-batch-01-20260910
+    paths:
+      - "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001B-ASSESSMENT-TARGET-BATCH-01-CANDIDATE-026A.json"
+      - ".github/scripts/learning-assessment-target-batch-01-qualify.js"
+      - ".github/workflows/learning-assessment-target-batch-01-prequal.yml"
+      - "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001B-ASSESSMENT-TARGET-CONTRACT-025A.json"
+      - "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-66-SOURCE-NODE-INDEX-001.json"
+      - "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-TOPOLOGY-CANDIDATE-003.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  domain-i-assessment-targets:
+    name: Domain I assessment-target exact-source validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - name: Record exact subject
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          printf 'SUBJECT_SHA=%s\n' "${GITHUB_SHA}"
+      - name: Syntax check batch validator
+        run: node --check .github/scripts/learning-assessment-target-batch-01-qualify.js
+      - name: Validate Domain I assessment targets
+        run: node .github/scripts/learning-assessment-target-batch-01-qualify.js
+      - name: Upload hosted evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: LEARNING-ASSESSMENT-TARGET-BATCH-01-${{ github.sha }}-hosted-evidence
+          path: ${{ runner.temp }}/learning-assessment-target-batch-01-evidence
+          if-no-files-found: warn
+          retention-days: 30
+
+# Target-schema/scoring evidence only; no learner, psychometric, SME, certification, A-01, native or production authority is created.
