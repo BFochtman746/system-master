@@ -2,8 +2,8 @@
   "owner_system_id": "CORE",
   "owner_path": "SYSTEM_MASTER/CORE",
   "control_ref": "system-master/control-v2",
-  "last_known_control_head": "f031bccdc8ad13b7950c2ab50143bdfa087dca98",
-  "delegation_epoch": 20,
+  "last_known_control_head": "0bb42ecd542d7e8ade4bed15e66f52ab0c494e39",
+  "delegation_epoch": 21,
   "active_delegations": [
     {
       "delegation_id": "SECOND-SHIFT-CORE-CENSUS-P1-003",
@@ -11,31 +11,32 @@
       "objective_id": "SYSTEM-MASTER-COMPLETION-CENSUS-002-P1-CORE",
       "state": "READY",
       "valid_for_control_ref": "system-master/control-v2",
-      "valid_for_control_head": "f031bccdc8ad13b7950c2ab50143bdfa087dca98",
+      "valid_for_control_head": "0bb42ecd542d7e8ade4bed15e66f52ab0c494e39",
       "created_at": "2026-09-10T05:12:00-04:00",
-      "last_revalidated_at": "2026-09-10T05:12:00-04:00",
+      "last_revalidated_at": "2026-09-10T05:18:00-04:00",
       "repair_transaction_watch": "A01-REPAIR-a01-run-34431764843-A01-CONTROL-PLANE-SELFTEST-A1",
-      "completion_delta": "Produce the first admissible exhaustive Core/Foundation & Spine owner-lane census against exact live Core head f031bccdc8ad13b7950c2ab50143bdfa087dca98; reconcile stale central SMR021 obligation standing and separate local portable, deterministic custody, GitHub-native, hosted, A-01, native/device, human/external and production claims.",
+      "completion_delta": "Produce the first admissible exhaustive Core/Foundation & Spine owner-lane census against exact live Core head 0bb42ecd542d7e8ade4bed15e66f52ab0c494e39; reconcile stale central SMR021 obligation standing and separate local portable, deterministic custody, GitHub-native, hosted, A-01, native/device, human/external and production claims. During revalidation, SMR021 work-ahead also gained a durable DATA-persistence/full-portable closure contract without crossing DATA authority; that contract is prepared for the post-P1 successor.",
       "evidence_target": [
         "governance/census/SYSTEM-MASTER-COMPLETION-CENSUS-002-P1-CORE.json",
         "governance/census/SYSTEM-MASTER-COMPLETION-CENSUS-002-P1-CORE-LEDGER-DELTA.json",
         "updated completion/obligation/checkpoint records with exact evidence pointers",
+        "system-master/control-v2/SMR021-DATA-PERSISTENCE-AND-FULL-PORTABLE-CLOSURE-CONTRACT-003.md as prepared post-P1 work-ahead contract",
         "post-write A-01 Control Plane Enforcement and System State Reconciler results"
       ],
-      "stop_condition": "P1 is durably classified against the live Core head with no evidence-class collapse; the A-01 repair remains only A01_REQUEUE_READY until a real exact-subject receipt arrives.",
+      "stop_condition": "P1 is durably classified against the live Core head with no evidence-class collapse; the A-01 repair remains only A01_REQUEUE_READY until a real exact-subject receipt arrives. After P1, continue the prepared SMR021 full-portable closure packet rather than idling.",
       "allowed_work": [
         "read and classify Core/Foundation & Spine evidence against the live control head",
         "append missing bounded completion entries and update stale open-obligation standing",
         "advance the checkpoint only if the P1 owner-lane result is exhaustive enough for central admission",
-        "after P1, re-fetch Core and continue the SMR021 DATA-persistence/full-portable successor"
+        "after P1, re-fetch Core and continue from SMR021-DATA-PERSISTENCE-AND-FULL-PORTABLE-CLOSURE-CONTRACT-003 into SMR021-FULL-PORTABLE-CLOSURE-QUALIFICATION-PACKET-004"
       ],
       "forbidden_authority": [
         "do not treat hosted enforcement as A-01 PASS",
         "do not transfer PASS between exact subjects or custody classes",
         "do not fabricate GitHub-native runnable-source, Apple/native/device, human, external, promotion or production evidence",
-        "do not mutate non-Core owner control state"
+        "do not mutate non-Core owner control state or absorb DATA authority"
       ],
-      "on_pass": "Retire this census delegation, re-read current authority and Core head, then bind SMR021-MINIMUM-UX-WORK-DESCRIPTOR-ACTION-BINDING-DATA-PERSISTENCE-AND-FULL-PORTABLE-CLOSURE-003.",
+      "on_pass": "Retire this census delegation, re-read current authority and Core head, then bind SMR021-FULL-PORTABLE-CLOSURE-QUALIFICATION-PACKET-004 from the prepared persistence/full-portable contract.",
       "on_failure": "Preserve the first unresolved census evidence mismatch, fail that claim closed, and continue only isolated dependency-valid Core work.",
       "continuation_rule": "Completion is not shift termination. Re-evaluate after every durable item. A canonical A-01 rerun receipt interrupts work-ahead for same-transaction adjudication."
     }
@@ -174,6 +175,6 @@
     }
   ],
   "owner_revalidation_required": false,
-  "reason": "Repair transaction A01-REPAIR-a01-run-34431764843-A01-CONTROL-PLANE-SELFTEST-A1 advanced through the canonical changed-SHA prequalification boundary to A01_REQUEUE_READY on candidate ceb6870546012b789caea56499a1d219a195dc8b; no authoritative A-01 PASS is claimed. Core head remains f031bccdc8ad13b7950c2ab50143bdfa087dca98. The first globally admissible census phase P1 is now selected, with interruption for a real rerun receipt.",
+  "reason": "Rebound after the live CORE head advanced to 0bb42ecd542d7e8ade4bed15e66f52ab0c494e39 through an A-01-independent SMR021 contract artifact. The newly selected P1 Core census remains the active priority and is still executable; the A-01 repair remains A01_REQUEUE_READY only. The SMR021 full-portable closure contract is preserved as the immediate post-P1 work-ahead successor rather than an idle stop.",
   "empty_is_valid": false
 }
