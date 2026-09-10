@@ -1,0 +1,54 @@
+name: Prepare A-01 registration for Book end-to-end authoring
+
+on:
+  push:
+    branches:
+      - book-system/request-end-to-end-authoring-001-a01
+    paths:
+      - ".github/workflows/book-system-end-to-end-authoring-001-prepare-registration.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout canonical main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Add exactly one A-01 registry entry on isolated registration branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git checkout -b a01/register-book-end-to-end-authoring-001
+          node <<'NODE'
+          const fs = require('fs');
+          const p = 'qualification/a01/registry.json';
+          const j = JSON.parse(fs.readFileSync(p,'utf8'));
+          const id = 'BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001';
+          if (j.registry_version !== 28) throw new Error(`REGISTRY_VERSION_MOVED:${j.registry_version}`);
+          if (j.qualifications[id]) throw new Error('QUALIFICATION_ALREADY_REGISTERED');
+          j.registry_version = 29;
+          j.qualifications[id] = {
+            workstream_id: 'BOOK-SYSTEM',
+            gate_class: 'consolidated',
+            source: 'subject',
+            executable: 'node',
+            args: ['.github/scripts/a01-book-system-end-to-end-authoring-001.js'],
+            evidence_artifact: 'book-system-end-to-end-authoring-qualification-001',
+            overnight_eligible: false,
+            description: 'Qualify the exact Book System repaired 48-case synthetic end-to-end authoring composition subject through the stable v2 wrapper: exact predecessor bindings, provider non-success and disagreement preservation, parent-only admission/lifecycle authority, strict current author-subject handling, mandatory parent admission before export freeze, persistent lifecycle-ledger rebinding across non-lifecycle parent successors, version/rollback receipt integration, stale artifact/proof/rights/privacy/provenance blocking, export-freeze versus publication separation, replay/concurrency/atomicity behavior, Prose child non-self-admission, and explicit synthetic-fixture boundaries. PASS is exact-SHA consolidated evidence only and grants no real author, publication, promotion, production, provider canonical-write, document-engine, or new lifecycle authority.'
+          };
+          fs.writeFileSync(p, JSON.stringify(j,null,2)+'\n');
+          NODE
+          git diff --check
+          test "$(git diff --name-only)" = "qualification/a01/registry.json"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add qualification/a01/registry.json
+          git commit -m "a01: register Book end-to-end authoring qualification"
+          git push origin HEAD:a01/register-book-end-to-end-authoring-001
