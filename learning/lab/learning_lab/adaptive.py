@@ -244,6 +244,9 @@ class AdaptiveLearningEngine(GroundedLearningEngine):
         elif mastery_failure and not mastery_success:
             stage = MasteryStage.BUILDING
             reasons.append("MASTERY_CHECK_FAILED")
+        elif not mastery_success:
+            stage = MasteryStage.BUILDING
+            reasons.append("INDEPENDENT_MASTERY_EVIDENCE_REQUIRED")
         elif mastery_success and retention_success is None:
             stage = MasteryStage.RETENTION_DUE
             reasons.append("RETENTION_EVIDENCE_REQUIRED")
