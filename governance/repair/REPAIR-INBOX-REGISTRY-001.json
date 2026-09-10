@@ -1,6 +1,6 @@
 {
   "registry_id": "REPAIR-INBOX-REGISTRY-001",
-  "effective_date": "2026-09-09",
+  "effective_date": "2026-09-10",
   "product_root": "SYSTEM_MASTER",
   "schema": "governance/repair/REPAIR-INBOX-SCHEMA-001.json",
   "broker_contract": "governance/repair/A01-REPAIR-BROKER-001.md",
@@ -8,14 +8,24 @@
     "CORE": "governance/repair/CORE-REPAIR-INBOX.json",
     "LEARNING": "governance/repair/LEARNING-REPAIR-INBOX.json",
     "BOOK": "governance/repair/BOOK-REPAIR-INBOX.json",
-    "PROSE": "governance/repair/PROSE-REPAIR-INBOX.json"
+    "DOCUMENTS": "governance/repair/DOCUMENTS-REPAIR-INBOX.json"
+  },
+  "retired_owner_files": {
+    "PROSE": {
+      "file": "governance/repair/PROSE-REPAIR-INBOX.json",
+      "active": false,
+      "retirement_record": "governance/retirements/PROSE-SYSTEM-RETIREMENT-001.json",
+      "successor_owner": "DOCUMENTS"
+    }
   },
   "rules": [
-    "Every active repair transaction has exactly one canonical owner path resolved through SYSTEM-TOPOLOGY-002.json.",
+    "Every active repair transaction has exactly one canonical active owner path resolved through the topology selected by CURRENT-AUTHORITY.",
+    "PROSE is retired and cannot receive a new repair transaction; genuinely current prose/document integration failures route to DOCUMENTS.",
+    "Historical Prose repair evidence remains immutable and does not transfer PASS, repair budget or qualification authority to Documents.",
     "No repair transaction may create or transfer A-01 PASS, promotion, publication or production authority.",
-    "SUBJECT_FAILURE may create product repair work; admission/window/dependency/human/author/private/native/external/control-plane outcomes route to their truthful non-product-repair boundary.",
-    "An owner chat or Second Shift worker checks its repair inbox after current-authority reconciliation and before selecting unrelated build-ahead.",
+    "SUBJECT_FAILURE may create product repair work; admission/window/dependency/human/author/private/native/external/control-plane outcomes route to their truthful boundary.",
+    "An active owner chat or Second Shift worker checks its repair inbox after current-authority reconciliation and before unrelated build-ahead.",
     "Changed candidate bytes require a new exact SHA and deterministic prequalification PASS on that same SHA before A01_REQUEUE_READY.",
-    "Completed/superseded/dead-letter transactions move to history; history is never erased to make an inbox look clean."
+    "Completed/superseded/dead-letter transactions move to history; history is never erased."
   ]
 }
