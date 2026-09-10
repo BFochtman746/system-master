@@ -27,6 +27,18 @@ IDLE_VALID is not a delegation state. It is a shift disposition that exists only
 4. A READY delegation that remains undispatched across the next eligible owner-worker invocation is SECOND_SHIFT_SCOPE_VIOLATION unless a live claim/lease or a durable platform-execution delay explains the interval.
 5. The 06:45 controller pass is the final refill/reconciliation pass. The shift freezes at 07:00. The definitive handoff runs only after 07:00.
 
+## Queue-depth and starvation law
+
+The pre-shift controller should enter the night with an oversupplied owner-valid queue rather than one brittle task whenever current authority permits it.
+
+- Target per lane: one highest-value primary READY item plus at least two dependency-diverse READY or CANDIDATE fallback items.
+- Fallback items are preparation/dispatch options, not pre-granted mutation authority. They must be revalidated against the live owner head before claim.
+- Only one mutation-capable item may be CLAIMED at a time per lane.
+- Queue order follows owner priority and the mandatory work-ahead ladder, but an item repeatedly bypassed for transient reasons receives an age/attention marker so it cannot starve indefinitely.
+- Independent fallback candidates should not share the same single external dependency when a genuinely independent rung exists.
+- If owner evidence cannot support three truthful candidates, record the exact reason; do not manufacture queue depth.
+- P3-P9 of SYSTEM-MASTER-COMPLETION-CENSUS-002 and active Foundation Closure census gaps are permitted fallback reservoirs only when the work maps to the same canonical owner and does not supersede a higher-priority active repair.
+
 ## Claim and lease law
 
 Mutation-capable work requires one logical claim per owner lane.
@@ -67,9 +79,9 @@ Assume at-least-once invocation. Any state-changing operation must be safe if th
 An idempotency key binds at minimum:
 `shift_id + lane + objective_id + delegation_generation + exact_subject_or_effect_identity`.
 
-The worker must check durable evidence before repeating a mutation, workflow dispatch, promotion, receipt ingestion, artifact publication or canonical pointer advancement. Duplicate delivery may repeat read-only verification but must not duplicate effects.
+The worker must check durable evidence before repeating a mutation, workflow dispatch, promotion, receipt ingestion, artifact publication or canonical pointer advancement. Duplicate delivery may repeat read-only verification but must not duplicate effects. Idempotency must propagate through downstream mutations when the same logical effect crosses more than one component.
 
-## Retry and circuit-breaker law
+## Retry, circuit-breaker and quarantine law
 
 Failures are classified before retry:
 - TRANSIENT_DEPENDENCY: bounded retry with exponential backoff; then open circuit and switch to independent safe work.
@@ -79,6 +91,8 @@ Failures are classified before retry:
 - PERMANENT_INPUT_OR_POLICY_FAILURE: no automatic retry until the invalid input/policy state changes.
 
 Default transient retry budget per dependency per worker invocation: 3 attempts, no more than one immediate retry. After budget exhaustion the dependency is CIRCUIT_OPEN for the remainder of that invocation and the lane must consume independent safe work if available.
+
+A task that repeatedly reaches its terminal retry/policy boundary is moved to a durable quarantine/dead-letter disposition with its exact subject/effect identity, attempts, failure classifications, evidence pointers and unblock condition. Quarantine removes the poison item from the hot dispatch path but does not erase the obligation or grant completion.
 
 ## Mandatory work-ahead ladder
 
@@ -111,7 +125,7 @@ Commit timestamps and workflow duration are evidence checkpoints, not productivi
 Required event classes include:
 SHIFT_OPEN, READY, CLAIMED, RUNNING, HEARTBEAT, PROGRESS, COMPLETED, BLOCKED, STALE, RETRY, CIRCUIT_OPEN, CIRCUIT_HALF_OPEN, CIRCUIT_CLOSED, SUCCESSOR_BOUND, ALL_RUNGS_EXHAUSTED, IDLE_VALID, SHIFT_CLOSE.
 
-The morning audit derives time in READY/RUNNING/BLOCKED/STALE/IDLE only from these state events. Missing telemetry is reported as UNKNOWN, never inferred from commit spacing or runner uptime.
+The morning audit derives time in READY/RUNNING/BLOCKED/STALE/IDLE only from these state events. Missing telemetry is reported as UNKNOWN, never inferred from commit spacing or runner uptime. Process uptime, CPU use and GitHub job duration may be diagnostic signals but are not substitutes for useful-work state.
 
 ## Successor admission law
 
@@ -129,16 +143,18 @@ No PASS transfer is permitted.
 
 For each shift:
 - 0 unexplained IDLE intervals
-- 0 READY delegations left undispatched across an eligible owner-worker cadence
+- 0 READY head items left undispatched across an eligible owner-worker cadence
 - 0 overlapping mutation claims per lane
 - 0 stale claims left unreconciled after the next eligible controller/worker pass
 - 100% completed/materially blocked items followed by successor selection or all-rungs-exhausted proof
 - 100% retrying operations classified and bounded
+- 100% terminal poison work preserved in durable quarantine rather than endlessly retried
 - 100% canonical admissions exact-head/exact-subject/topology checked
 - 100% time-state claims grounded in the utilization event ledger
+- pre-shift queue target of primary plus two dependency-diverse fallbacks per lane when truthful owner-valid candidates exist
 
 These are controller SLOs, not a command to manufacture busywork. Safe truthful stopping remains preferable to violating an authority boundary.
 
 ## Research basis
 
-This control adopts established durable-work principles from queue/orchestration systems: visibility/claim leases and heartbeats for long work, explicit task timeout and heartbeat failure detection, classified retry/catch paths, idempotency for at-least-once delivery, circuit breaking after repeated transient failures, serialized concurrency where conflicting effects exist, and explicit processing telemetry. The implementation deliberately keeps those mechanics separate from System Master product authority.
+This control adopts established durable-work principles from queue/orchestration systems: visibility/claim leases and heartbeats for long work, explicit task timeout and heartbeat failure detection, classified retry/catch paths, idempotency for at-least-once delivery, circuit breaking after repeated transient failures, durable quarantine/dead-letter handling for poison work, serialized concurrency where conflicting effects exist, queue depth/fairness safeguards and explicit processing telemetry. The implementation deliberately keeps those mechanics separate from System Master product authority.
