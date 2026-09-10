@@ -187,13 +187,12 @@ jobs:
     outputs:
       admission_state: ${{ steps.preflight.outputs.admission_state }}
       result_class: ${{ steps.preflight.outputs.result_class }}
-      control_plane_sha: ${{ steps.preflight.outputs.control_plane_sha }}
+      control_plane_sha: ${{ steps.bind.outputs.control_plane_sha }}
       registry_version: ${{ steps.preflight.outputs.registry_version }}
     env:
       A01_QUALIFICATION_ID: ${{ inputs.qualification_id || 'A01-CONTROL-PLANE-SELFTEST' }}
       A01_WORKSTREAM_ID: ${{ inputs.workstream_id || 'SYSTEM-MASTER' }}
       A01_SUBJECT_SHA: ${{ inputs.subject_sha || github.sha }}
-      A01_EXPECTED_CONTROL_PLANE_SHA: ${{ inputs.control_plane_sha || job.workflow_sha }}
       A01_CONTROL_ROOT: ${{ github.workspace }}/control-plane
       A01_SUBJECT_ROOT: ${{ github.workspace }}/subject
       A01_ADMISSION_EVIDENCE_PATH: ${{ runner.temp }}/a01-gateway-admission-${{ github.run_id }}.json
@@ -207,6 +206,20 @@ jobs:
           fetch-depth: 1
           clean: true
           persist-credentials: false
+
+      - name: Bind immutable gateway control-plane SHA
+        id: bind
+        env:
+          REQUESTED_CONTROL_PLANE_SHA: ${{ inputs.control_plane_sha }}
+        shell: bash
+        run: |
+          actual=$(git -C control-plane rev-parse HEAD)
+          if [ -n "$REQUESTED_CONTROL_PLANE_SHA" ] && [ "${actual,,}" != "${REQUESTED_CONTROL_PLANE_SHA,,}" ]; then
+            echo "CONTROL_PLANE_SHA_MISMATCH expected=$REQUESTED_CONTROL_PLANE_SHA actual=$actual" >&2
+            exit 2
+          fi
+          echo "A01_EXPECTED_CONTROL_PLANE_SHA=$actual" >> "$GITHUB_ENV"
+          echo "control_plane_sha=$actual" >> "$GITHUB_OUTPUT"
 
       - name: Checkout exact qualification subject for admission only
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
@@ -234,8 +247,7 @@ jobs:
         shell: bash
         run: |
           echo '## A-01 HOSTED ADMISSION GUARD' >> "$GITHUB_STEP_SUMMARY"
-          echo "Gateway control-plane SHA: ${{ job.workflow_sha }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "Expected control-plane SHA: $A01_EXPECTED_CONTROL_PLANE_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo "Control-plane SHA: $A01_EXPECTED_CONTROL_PLANE_SHA" >> "$GITHUB_STEP_SUMMARY"
           echo "Subject SHA: $A01_SUBJECT_SHA" >> "$GITHUB_STEP_SUMMARY"
           if [ -f "$A01_ADMISSION_EVIDENCE_PATH" ]; then
             echo '```json' >> "$GITHUB_STEP_SUMMARY"
