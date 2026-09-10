@@ -6,16 +6,19 @@ on:
     branches:
       - 'infrastructure/github-reliability-control-plane-001-20260910'
     paths:
+      - 'governance/CURRENT-AUTHORITY.json'
+      - 'governance/WORK-OBLIGATION-REGISTRY-004.json'
       - 'governance/github/**'
       - 'governance/architecture/SYSTEM-MASTER-GITHUB-RELIABILITY-CONTROL-PLANE-001.md'
       - 'governance/morning/MASTER-ROOT-CHAT-OPERATING-CONTRACT-001.md'
       - 'governance/CHAT-LANE-OPERATING-PROMPT-002.md'
-      - 'governance/second-shift/SECOND-SHIFT-CONTINUOUS-DISPATCH-001.md'
-      - 'governance/second-shift/SECOND-SHIFT-REGISTRY-001.json'
+      - 'governance/second-shift/**'
       - '.github/scripts/github-reliability-control-plane-selftest.js'
       - '.github/scripts/github-write-authorization-enforce.js'
       - '.github/scripts/github-control-state.js'
       - '.github/scripts/second-shift-dispatch-controller.js'
+      - '.github/scripts/current-obligation-registry-enforce.js'
+      - '.github/scripts/second-shift-enforce.js'
       - '.github/workflows/github-reliability-control-plane-enforcement.yml'
 
 permissions:
@@ -28,7 +31,7 @@ concurrency:
 
 jobs:
   selftest:
-    name: Prove write authorization, fencing, durable state and dispatch invariants
+    name: Prove authority, fencing, durable state and Second Shift invariants
     runs-on: [self-hosted, Windows, X64]
     timeout-minutes: 10
     steps:
@@ -72,6 +75,8 @@ jobs:
           node --check .github\scripts\github-write-authorization-enforce.js
           node --check .github\scripts\github-control-state.js
           node --check .github\scripts\second-shift-dispatch-controller.js
+          node --check .github\scripts\current-obligation-registry-enforce.js
+          node --check .github\scripts\second-shift-enforce.js
 
       - name: Run foundational control-plane self-test
         shell: powershell
@@ -92,6 +97,20 @@ jobs:
         run: |
           $evidence = Join-Path $env:GITHUB_WORKSPACE '.github-control-plane-evidence'
           & node "$env:GITHUB_WORKSPACE\.github\scripts\github-control-state.js" selftest | Tee-Object -FilePath (Join-Path $evidence 'control-state-selftest.json')
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Validate current obligation authority
+        shell: powershell
+        run: |
+          $evidence = Join-Path $env:GITHUB_WORKSPACE '.github-control-plane-evidence'
+          & node "$env:GITHUB_WORKSPACE\.github\scripts\current-obligation-registry-enforce.js" | Tee-Object -FilePath (Join-Path $evidence 'current-obligation-enforcement.txt')
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Validate Second Shift current state
+        shell: powershell
+        run: |
+          $evidence = Join-Path $env:GITHUB_WORKSPACE '.github-control-plane-evidence'
+          & node "$env:GITHUB_WORKSPACE\.github\scripts\second-shift-enforce.js" --no-live "--out=.github-control-plane-evidence/second-shift-static-enforcement.json"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Run Second Shift dispatcher self-test and current plan
@@ -119,11 +138,11 @@ jobs:
         run: |
           Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value '## GitHub Reliability Control Plane'
           Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value "Subject: $env:GITHUB_SHA"
-          foreach ($name in @('selftest.json','write-authorization-selftest.json','control-state-selftest.json','second-shift-dispatch-selftest.json','second-shift-current-plan.json')) {
+          foreach ($name in @('selftest.json','write-authorization-selftest.json','control-state-selftest.json','current-obligation-enforcement.txt','second-shift-static-enforcement.json','second-shift-dispatch-selftest.json','second-shift-current-plan.json')) {
             $result = Join-Path $env:GITHUB_WORKSPACE ".github-control-plane-evidence\$name"
             if (Test-Path $result) {
               Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value "### $name"
-              Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value '```json'
+              Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value '```'
               Get-Content -LiteralPath $result | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY
               Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value '```'
             }
