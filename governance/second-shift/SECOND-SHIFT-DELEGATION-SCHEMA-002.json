@@ -1,0 +1,99 @@
+{
+  "schema_id": "SECOND-SHIFT-DELEGATION-SCHEMA-002",
+  "supersedes": "SECOND-SHIFT-DELEGATION-SCHEMA-001",
+  "purpose": "Contract for owner-valid unattended Second Shift work with durable claim/lease semantics, bounded retry behavior, immediate successor reconciliation, all-rungs exhaustion proof and auditable utilization events.",
+  "required_delegation_fields": [
+    "delegation_id",
+    "owner_path",
+    "objective_id",
+    "state",
+    "valid_for_control_ref",
+    "valid_for_control_head",
+    "created_at",
+    "last_revalidated_at",
+    "completion_delta",
+    "stop_condition",
+    "allowed_work",
+    "forbidden_authority",
+    "on_pass",
+    "on_failure"
+  ],
+  "allowed_states": [
+    "CANDIDATE",
+    "READY",
+    "CLAIMED",
+    "BLOCKED",
+    "SUPERSEDED",
+    "COMPLETED",
+    "CANCELLED"
+  ],
+  "active_states": ["CANDIDATE", "READY", "CLAIMED"],
+  "claim_required_when_state": "CLAIMED",
+  "required_claim_fields": [
+    "lease_id",
+    "lane",
+    "delegation_id",
+    "objective_id",
+    "control_ref",
+    "control_head_at_claim",
+    "idempotency_key",
+    "claimed_at",
+    "lease_expires_at",
+    "last_heartbeat_at",
+    "attempt",
+    "checkpoint_pointer"
+  ],
+  "admission_rules": [
+    "Owner path must resolve through SYSTEM-TOPOLOGY-002.json.",
+    "valid_for_control_head must equal the live canonical owner control head at revalidation time.",
+    "READY requires a concrete completion delta and stop condition.",
+    "A changed control head invalidates READY/CLAIMED for mutation until re-evaluated against the new head.",
+    "Only one mutation-capable claim may be live per owner lane.",
+    "A completed or superseded objective must be removed from active_delegations and successor selection performed in the same reconciliation while shift time remains.",
+    "Human, author, private-data, external-authority and native-platform blockers cannot be bypassed by Second Shift, but they block only dependent work.",
+    "A-01 work additionally requires a currently registered qualifier, exact subject SHA and current policy admission.",
+    "A stale or missing delegation, completed assignment, blocked critical path, transient dependency, unavailable A-01 slot, unavailable runner or empty active list never by itself proves no safe work exists.",
+    "State-changing effects are treated as at-least-once delivery and require durable idempotency keys/deduplication.",
+    "Transient dependency retry is finite and classified; after budget exhaustion the worker records a circuit-open event and switches to independent safe work when available."
+  ],
+  "execution_revalidation": {
+    "required": true,
+    "checks": [
+      "read CURRENT-AUTHORITY.json",
+      "read SYSTEM-TOPOLOGY-002.json",
+      "fetch live owner control head",
+      "compare with valid_for_control_head",
+      "verify objective remains open in current owner state",
+      "verify dependencies/blockers",
+      "verify active claim/lease standing and last checkpoint",
+      "verify idempotency/deduplication before any repeated effect",
+      "verify exact subject and qualifier for A-01 work",
+      "verify remaining night window"
+    ],
+    "on_mismatch": "DO_NOT_EXECUTE_STALE_DELEGATION__PRESERVE_CHECKPOINT__REPLAN_FROM_CURRENT_OWNER_STATE"
+  },
+  "completion_rule": "On completion or material block, preserve evidence, release/retire the current claim/delegation, re-read live owner authority and bind the highest-value dependency-valid successor while shift time remains. A worker may stop at a runtime/tool boundary only after leaving a current READY successor or an all-rungs-exhausted proof.",
+  "empty_lane_rule": {
+    "empty_is_valid_requires": "all_rungs_exhausted",
+    "required_rungs": 8,
+    "required_rung_fields": [
+      "rung",
+      "disposition",
+      "evidence_or_blocker",
+      "independent_preparation_assessment",
+      "next_executable_condition"
+    ],
+    "allowed_dispositions": [
+      "COMPLETE",
+      "DUPLICATE",
+      "DEPENDENCY_BLOCKED",
+      "HUMAN_AUTHOR_PRIVATE_NATIVE_EXTERNAL_BLOCKED",
+      "UNSAFE_WITHOUT_DECISION"
+    ],
+    "independent_work_remaining_must_equal": false
+  },
+  "utilization_event_schema": "governance/second-shift/SECOND-SHIFT-UTILIZATION-EVENT-SCHEMA-001.json",
+  "execution_control": "governance/second-shift/SECOND-SHIFT-EXECUTION-CONTROL-001.md",
+  "repair_rule": "A repair that changes subject code creates a new exact SHA and a replacement delegation linked to the failed receipt/delegation. The failed delegation never silently changes subject identity.",
+  "authority_boundary": "Execution state and scheduling never grant product, canonical-writer, A-01, human, author, private, blind, native, publication or production authority."
+}
