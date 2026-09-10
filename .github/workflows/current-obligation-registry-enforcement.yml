@@ -15,6 +15,10 @@ on:
       - '.github/scripts/current-obligation-registry-enforce.js'
       - '.github/workflows/current-obligation-registry-enforcement.yml'
 
+concurrency:
+  group: current-obligation-registry-${{ github.ref }}
+  cancel-in-progress: false
+
 permissions:
   contents: read
 
@@ -28,7 +32,21 @@ jobs:
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           fetch-depth: 1
+          persist-credentials: false
+
       - name: Syntax check
         run: node --check .github/scripts/current-obligation-registry-enforce.js
+
       - name: Validate CURRENT-AUTHORITY selected obligation registry
-        run: node .github/scripts/current-obligation-registry-enforce.js
+        run: |
+          mkdir -p .current-obligation-registry
+          node .github/scripts/current-obligation-registry-enforce.js | tee .current-obligation-registry/CURRENT-OBLIGATION-REGISTRY-REPORT.txt
+
+      - name: Preserve current-obligation evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: current-obligation-registry-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .current-obligation-registry/
+          if-no-files-found: warn
+          retention-days: 30
