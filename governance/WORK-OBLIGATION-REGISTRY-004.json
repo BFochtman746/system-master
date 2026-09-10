@@ -5,8 +5,14 @@
   "topology": "governance/SYSTEM-TOPOLOGY-003.json",
   "supersedes_current_selection": "governance/WORK-OBLIGATION-REGISTRY-003.json",
   "historical_registries": ["governance/WORK-OBLIGATION-REGISTRY-001.json","governance/WORK-OBLIGATION-REGISTRY-002.json","governance/WORK-OBLIGATION-REGISTRY-003.json"],
-  "transition_basis": ["governance/ADR-0003-DOCUMENTS-PEER-SYSTEM-AND-PROSE-RETIREMENT.md","governance/retirements/PROSE-SYSTEM-RETIREMENT-001.json","governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-002.json","documents/control-v1/DOCUMENTS-CONTROL-RECORD-001.md"],
-  "purpose": "Current work index after Documents is admitted as a first-class peer system and completed Prose is retired into Documents. No current PROSE owner work remains.",
+  "transition_basis": [
+    "governance/ADR-0003-DOCUMENTS-PEER-SYSTEM-AND-PROSE-RETIREMENT.md",
+    "governance/retirements/PROSE-SYSTEM-RETIREMENT-001.json",
+    "governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-002.json",
+    "documents/control-v1/DOCUMENTS-CONTROL-RECORD-001.md",
+    "governance/architecture/SYSTEM-MASTER-GITHUB-RELIABILITY-CONTROL-PLANE-001.md"
+  ],
+  "purpose": "Current work index after Documents is admitted as a first-class peer system and completed Prose is retired into Documents, with the user-authorized cross-cutting GitHub reliability control plane temporarily promoted as the central product objective. No current PROSE owner work remains.",
   "states": ["READY","ACTIVE","BLOCKED","HOLD","DEFERRED","OWNER_SELECTION_REQUIRED","SUPERSEDED","CLOSED"],
   "rules": [
     "Every non-closed obligation has exactly one canonical owner_path under SYSTEM-TOPOLOGY-003.",
@@ -14,7 +20,10 @@
     "Historical Prose obligations/receipts remain in Registry 003 and earlier evidence but cannot drive current scheduling.",
     "Still-required Prose capability work is translated into SYSTEM_MASTER/DOCUMENTS integration work without PASS transfer.",
     "BOOK and DOCUMENTS are peer owners; Book canonical state remains BOOK-owned while document/prose capability implementation remains DOCUMENTS-owned.",
-    "Historical qualification may seed integration but changed Documents subjects require fresh qualification."
+    "Historical qualification may seed integration but changed Documents subjects require fresh qualification.",
+    "SYSTEM-MASTER-GITHUB-RELIABILITY-CONTROL-PLANE-001 is a cross-cutting shared-infrastructure objective administratively owned by CORE; it does not create a new peer system or root worker lane.",
+    "Documents R4 remains live and becomes acceptance case 1 for native Git transport after the shared control plane is admitted; no completed Documents evidence is discarded.",
+    "Chats may advance already-authorized owner work but may not independently replace the central objective, change topology/ownership, or directly mutate canonical refs outside the admitted writer path."
   ],
   "owner_head_snapshot": {
     "CORE": "2031f070bd3702185c028733819ec410db36613c",
@@ -23,6 +32,18 @@
     "DOCUMENTS": "4fc463a4744671927d92d04f87dc131d3bae310c"
   },
   "obligations": [
+    {
+      "obligation_id": "SYSTEM-MASTER-GITHUB-RELIABILITY-CONTROL-PLANE-001",
+      "owner_path": "SYSTEM_MASTER/CORE",
+      "state": "ACTIVE",
+      "classification": "CROSS_CUTTING_SHARED_INFRASTRUCTURE__USER_AUTHORIZED_CENTRAL_OBJECTIVE",
+      "current_control_head_snapshot": "2031f070bd3702185c028733819ec410db36613c",
+      "priority": "CENTRAL_NEXT_OBJECTIVE",
+      "objective": "Establish universal native-Git source transport, multi-chat work authorization, monotonic repository-writer fencing, durable idempotent GitHub operation state, fast-forward-only canonical admission, rate/retry governance, and continuous Second Shift dispatch/recovery for all System Master components without creating a new peer system or weakening A-01/native/human/private authority boundaries.",
+      "acceptance_case_1": "DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-IMPORT-AND-EXACT-SUBJECT-QUALIFICATION-002",
+      "requires_physical_a01_access": false,
+      "user_authorized_at": "2026-09-10T17:48:00-04:00"
+    },
     {
       "obligation_id": "CORE-SMR021-USER-EXPERIENCE-001",
       "owner_path": "SYSTEM_MASTER/CORE",
@@ -80,7 +101,7 @@
       "owner_path": "SYSTEM_MASTER/DOCUMENTS",
       "state": "READY",
       "current_control_head_snapshot": "4fc463a4744671927d92d04f87dc131d3bae310c",
-      "priority": "CENTRAL_NEXT_OBJECTIVE",
+      "priority": "CONTROL_PLANE_ACCEPTANCE_CASE_1",
       "parent_obligation_id": "DOCUMENTS-CURRENT-ADMISSION-001",
       "supersedes_owner_binding_of": "SYSTEM-MASTER-DOCUMENT-R4-GITHUB-NATIVE-SOURCE-IMPORT-AND-EXACT-SUBJECT-QUALIFICATION-002",
       "objective": "Import the exactly reconstructed 225-file CR001-R4 source tree into ordinary GitHub-native immutable custody, bind the exact Git subject SHA, independently verify source identity, and run fresh portable/hosted qualification on that exact subject without PASS transfer.",
@@ -122,5 +143,7 @@
     {"obligation_id":"BOOK-EVAL-REPAIR-005-GATE-D-PRIVATE-RECOVERY-2026-09-10","final_state":"SUPERSEDED","closure_evidence":"governance/retirements/PROSE-SYSTEM-RETIREMENT-001.json","reason":"Retired Prose private-data obligation cannot remain active. Any still-required private validation must be explicitly re-authorized under DOCUMENTS without synthesizing or transferring private authority."},
     {"obligation_id":"BOOK-PROSE-INTEGRATION-PHASE-1-INPUT-CENSUS-001","final_state":"SUPERSEDED","closure_evidence":"governance/ADR-0003-DOCUMENTS-PEER-SYSTEM-AND-PROSE-RETIREMENT.md","reason":"The integration boundary is now BOOK <-> DOCUMENTS, not BOOK <-> PROSE."}
   ],
-  "central_next_objective": "DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-IMPORT-AND-EXACT-SUBJECT-QUALIFICATION-002"
+  "central_next_objective": "SYSTEM-MASTER-GITHUB-RELIABILITY-CONTROL-PLANE-001",
+  "prior_central_next_objective": "DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-IMPORT-AND-EXACT-SUBJECT-QUALIFICATION-002",
+  "prior_central_objective_disposition": "PRESERVED_AS_CONTROL_PLANE_ACCEPTANCE_CASE_1__NOT_CANCELLED_NOT_SUPERSEDED"
 }
