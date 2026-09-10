@@ -1,0 +1,49 @@
+name: Learning Dependency Adjudication Batch 05 Prequalification
+
+on:
+  push:
+    branches:
+      - learning/dependency-adjudication-batch-05-20260910
+    paths:
+      - "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001C-DEPENDENCY-EVIDENCE-ADJUDICATION-BATCH-05-CANDIDATE-048A.json"
+      - ".github/scripts/learning-dependency-adjudication-batch-generic-qualify.js"
+      - ".github/workflows/learning-dependency-adjudication-batch-05-prequal.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  validate:
+    name: Dependency evidence adjudication batch 05
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      DEPENDENCY_CANDIDATE: LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001C-DEPENDENCY-EVIDENCE-ADJUDICATION-BATCH-05-CANDIDATE-048A.json
+      EXPECTED_CONTROL_HEAD: d993dd6720baf824f685381589b11d3b2a12e8c9
+      START_INDEX: 20
+      EXPECTED_COUNT: 5
+      CUMULATIVE_COUNT: 25
+      REMAINING_COUNT: 21
+      EVIDENCE_DIR: learning-dependency-adjudication-batch-05-evidence
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - name: Record exact subject
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          printf 'SUBJECT_SHA=%s\n' "${GITHUB_SHA}"
+      - name: Syntax check reusable validator
+        run: node --check .github/scripts/learning-dependency-adjudication-batch-generic-qualify.js
+      - name: Validate candidates 21 through 25
+        run: node .github/scripts/learning-dependency-adjudication-batch-generic-qualify.js
+      - name: Upload hosted evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: LEARNING-DEPENDENCY-ADJUDICATION-BATCH-05-${{ github.sha }}-hosted-evidence
+          path: ${{ runner.temp }}/learning-dependency-adjudication-batch-05-evidence
+          if-no-files-found: warn
+          retention-days: 30
