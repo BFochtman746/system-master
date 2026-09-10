@@ -41,7 +41,7 @@ jobs:
           node .github/scripts/a01-repair-ledger-reconcile.js
           echo 'transaction_id=A01-REPAIR-001C-LIVE-PROOF-001' >> "$GITHUB_OUTPUT"
 
-      - name: Commit durable fixture without claiming a real failed product receipt
+      - name: Commit durable fixture with bounded concurrent-main retry
         shell: bash
         run: |
           git config user.name 'github-actions[bot]'
@@ -52,8 +52,21 @@ jobs:
             exit 0
           fi
           git commit -m 'repair: stage synthetic 001C live proof transaction'
-          git pull --rebase origin main
-          git push origin HEAD:main
+          pushed=false
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git rebase origin/main
+            if git push origin HEAD:main; then
+              pushed=true
+              break
+            fi
+            echo "Concurrent main movement during fixture push attempt ${attempt}; rebasing and retrying without rewriting other-lane work."
+            sleep 2
+          done
+          if [ "$pushed" != true ]; then
+            echo 'Unable to persist the fixture after five bounded rebases; fail closed for manual reconciliation.' >&2
+            exit 1
+          fi
 
       - name: Publish fixture authority boundary
         shell: bash
