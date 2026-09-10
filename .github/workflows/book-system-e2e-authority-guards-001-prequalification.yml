@@ -1,0 +1,48 @@
+name: Book System E2E Authority Guards 001 Hosted Prequalification
+
+on:
+  push:
+    branches:
+      - book-system/control-v1
+    paths:
+      - ".github/scripts/book-system-e2e-authority-guards-001-qualify.js"
+      - ".github/scripts/a01-book-system-e2e-authority-guards-001.js"
+      - ".github/workflows/book-system-e2e-authority-guards-001-prequalification.yml"
+      - "system-master/book-system/author-decision-current-subject-guard.js"
+      - "system-master/book-system/export-freeze-parent-admission-guard.js"
+      - "qualification/book-system/end-to-end-authoring-001/BOOK-SYSTEM-E2E-AUTHORITY-GUARDS-001.json"
+      - "qualification/book-system/end-to-end-authoring-001/BOOK-SYSTEM-E2E-AUTHOR-DECISION-CURRENT-SUBJECT-GAP-001.json"
+      - "qualification/book-system/end-to-end-authoring-001/BOOK-SYSTEM-E2E-EXPORT-FREEZE-PARENT-ADMISSION-GAP-001.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact repair candidate
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - name: Verify exact checkout
+        run: test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+      - name: Syntax check guards qualifier and A-01 wrapper
+        run: |
+          node --check system-master/book-system/author-decision-current-subject-guard.js
+          node --check system-master/book-system/export-freeze-parent-admission-guard.js
+          node --check .github/scripts/book-system-e2e-authority-guards-001-qualify.js
+          node --check .github/scripts/a01-book-system-e2e-authority-guards-001.js
+      - name: Run bounded authority-guards qualification through stable wrapper
+        run: node .github/scripts/a01-book-system-e2e-authority-guards-001.js
+      - name: Upload hosted guard evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: book-system-e2e-authority-guards-001-hosted-${{ github.run_id }}
+          path: ${{ runner.temp }}/book-system-e2e-authority-guards-evidence
+          if-no-files-found: error
+          retention-days: 30
