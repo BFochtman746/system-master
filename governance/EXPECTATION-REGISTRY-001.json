@@ -1,6 +1,6 @@
 {
   "registry_id": "EXPECTATION-REGISTRY-001",
-  "effective_date": "2026-09-09",
+  "effective_date": "2026-09-10",
   "product_root": "SYSTEM_MASTER",
   "topology": "governance/SYSTEM-TOPOLOGY-002.json",
   "purpose": "Record what System Master is expected to contain and what boundaries must remain true, without converting historical planning claims into current implementation standing.",
@@ -64,23 +64,54 @@
     }
   ],
   "historical_product_module_inventory": {
-    "source": "System Master Foundation & Spine Forensic Audit and Workload Hardening Study, 2026-08-31, section 3.3",
+    "inventory_id": "SYSTEM-MASTER-HISTORICAL-PRODUCT-MODULE-INVENTORY-001",
+    "source": "System Master Foundation & Spine Forensic Audit and Workload Hardening Study, 2026-08-31, section 3.3 plus recovered 40-row master index",
     "historical_statement": "The audit tracked 40 product capability modules. Its old implementation-status counts are historical and must not be reused as current status without present evidence.",
+    "claimed_historical_count": 40,
+    "explicit_count": 40,
+    "reconciled_by": "governance/census/SYSTEM-MASTER-COMPLETION-CENSUS-002-P6-PRODUCT-MODULE-ALLOCATION.json",
     "modules": [
       "DOCX", "EXCEL", "PPTX", "PDF", "OCR", "RESEARCH", "KNOWLEDGE", "WRITING", "MANUSCRIPT", "STORYBIBLE",
       "LEARNING", "CURRICULUM", "PROJECTS", "CHAT", "EXPECTATION", "FILE", "IMAGE", "PHOTO", "VIDEO", "VOICE",
-      "AUDIOBOOK", "MEDIA", "CODE", "MATH", "CAD", "BROWSER", "COMMS", "CALENDAR", "AUTOMATION", "PLUGINS",
-      "LEDGER", "GEO", "AIINCOME", "PORTFOLIO", "EXPERIENCE", "LOCALAI", "IMG-INGEST"
+      "AUDIOBOOK", "MEDIA", "CODE", "MATH", "DATA", "CAD", "BROWSER", "COMMS", "CALENDAR", "AUTOMATION",
+      "PLUGINS", "LEDGER", "GEO", "AIINCOME", "PORTFOLIO", "EXPERIENCE", "PHONEOPS", "PHYSICALAI", "LOCALAI", "IMG-INGEST"
     ],
     "known_current_owner_hints": {
       "LEARNING": "LEARNING",
       "CURRICULUM": "LEARNING",
       "MANUSCRIPT": "BOOK",
       "STORYBIBLE": "BOOK",
-      "CHAT": "CORE_SHARED_RUNTIME"
+      "CHAT": "CORE_SHARED_RUNTIME",
+      "EXPERIENCE": "CORE_SHARED_RUNTIME",
+      "PHONEOPS": "ABSORBED_NO_STANDALONE__EXPERIENCE_AUTOMATION_FOUNDATION",
+      "PHYSICALAI": "DEFERRED_OPTIONAL",
+      "CAD": "HEADLESS_INTEROP_ONLY__NO_DEDICATED_SYSTEM"
     },
-    "default_current_standing": "CURRENT_RECONCILIATION_REQUIRED",
-    "allocation_rule": "Owner hints are not implementation proof. Each module requires a current-state census and an explicit owner/capability registration before new execution if not already covered by a canonical control record."
+    "default_current_standing": "SEE_P6_PER_MODULE_DISPOSITION__DO_NOT_INFER_COMPLETION",
+    "allocation_rule": "Owner hints are not implementation proof. P6 is the current per-module allocation census. Unresolved headless/domain modules require an explicit current owner/capability registration before executable implementation; branch names may not fill that gap.",
+    "name_collision_rule": "The product Response Expectation Engine is distinct from this governance EXPECTATION registry, and Household Ledger is distinct from governance ledgers. Their current semantic owner/implementation standing remains explicit P7/P8 adjudication work."
+  },
+  "current_scope_clarifications": [
+    {
+      "module_key": "PHONEOPS",
+      "standing": "ABSORBED_NO_STANDALONE__EXPERIENCE_AUTOMATION_FOUNDATION",
+      "rule": "Do not create duplicate Phone Operations authority."
+    },
+    {
+      "module_key": "PHYSICALAI",
+      "standing": "DEFERRED_OPTIONAL",
+      "rule": "Requires explicit future program authorization plus hardware/safety scope before activation."
+    },
+    {
+      "module_key": "CAD",
+      "standing": "HEADLESS_INTEROP_ONLY__NO_DEDICATED_SYSTEM",
+      "rule": "Preserve optional CAD-derived import/view/interoperability support; do not maintain a full CAD mini-app absent a concrete need."
+    }
+  ],
+  "p8_reconciliation": {
+    "date": "2026-09-10",
+    "source_delta": "governance/census/SYSTEM-MASTER-COMPLETION-CENSUS-002-P6-PRODUCT-MODULE-ALLOCATION-LEDGER-DELTA.json",
+    "result": "40_OF_40_MODULE_KEYS_EXPLICIT__CURRENT_DISPOSITIONS_POINTER_BOUND__NO_IMPLEMENTATION_AUTHORITY_TRANSFER"
   },
   "change_rule": "New product expectations require an explicit registry entry with owner and standing. If an expectation changes, supersede it; do not erase the prior expectation from history."
 }
