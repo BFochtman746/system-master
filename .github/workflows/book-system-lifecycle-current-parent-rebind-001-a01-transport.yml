@@ -1,0 +1,27 @@
+name: BOOK SYSTEM Lifecycle Current Parent Rebind A-01 Transport
+
+on:
+  push:
+    branches:
+      - book-system/request-lifecycle-current-parent-rebind-001-a01
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  qualify:
+    uses: BFochtman746/system-master/.github/workflows/a01-control-plane-gateway.yml@main
+    with:
+      qualification_id: BOOK-SYSTEM-LIFECYCLE-CURRENT-PARENT-REBIND-001
+      workstream_id: BOOK-SYSTEM
+      subject_sha: ffbcc2ab36a41afb580224681642105deb62e741
+      origin_ref: refs/heads/book-system/control-v1
+      resume_on_pass: Close the persistent Lifecycle current-parent rebind compatibility repair on exact subject ffbcc2ab36a41afb580224681642105deb62e741, then immediately resume BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001-HARNESS-001 without changing Lifecycle v1 policy semantics.
+      resume_on_failure: Preserve the exact receipt and hosted 39-of-39 PASS. Repair only the proven rebind subject, wrapper, or shared-control boundary; do not modify Lifecycle v1 policy or widen parent-successor, author, provider, document, export-freeze, publication, promotion, or production authority.
+      notification_target: book-system/control-v1
+      execution_context: normal
+      qualifier_timeout_minutes: 10
+      job_timeout_minutes: 15
+    secrets: inherit
