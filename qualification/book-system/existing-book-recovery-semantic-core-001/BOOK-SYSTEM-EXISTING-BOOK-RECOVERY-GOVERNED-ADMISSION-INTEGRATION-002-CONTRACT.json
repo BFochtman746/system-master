@@ -1,0 +1,83 @@
+{
+  "contract_id": "BOOK-SYSTEM-EXISTING-BOOK-RECOVERY-GOVERNED-ADMISSION-INTEGRATION-002",
+  "effective_date": "2026-09-10",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "contract_class": "BOUNDED_SERVICE_ADAPTER__NO_NEW_ORCHESTRATOR",
+  "predecessors": [
+    "BOOK-SYSTEM-EXISTING-BOOK-RECOVERY-SEMANTIC-CORE-001-CLOSURE",
+    "BOOK-SYSTEM-CONTENT-ADMISSION-AUTHOR-DECISION-APPLICABILITY-GUARD-004-CLOSURE",
+    "BOOK-SYSTEM-LIFECYCLE-CURRENT-PARENT-REBIND-001",
+    "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001"
+  ],
+  "goal": "Join a machine-recovered Book proposal to the existing canonical Book parent only after explicit current-subject author ratification, using the qualified author-decision applicability guard, existing content-admission/version authority and existing lifecycle rebind authority. Do not create another workflow engine or lifecycle state machine.",
+  "integration_law": [
+    "EBR-SC1 remains proposal/evidence state and never mutates canonical Book state directly.",
+    "Imported source identities are provenance/evidence, not Author Decision Queue governed-subject identities.",
+    "Recovery ratification is anchored to the current governed BookProject identity and current canonical manuscript identity; imported source refs remain evidence refs.",
+    "A recovered manuscript can be admitted only when the candidate revision graph has one selected candidate and no unresolved BLOCKING recovery finding remains.",
+    "The selected candidate's content digest is admitted as a new immutable MANUSCRIPT_MANIFEST version in the existing manuscript family; no historical edition/version is overwritten.",
+    "Every author-gated admission operation must pass BOOK-SYSTEM-CONTENT-ADMISSION-AUTHOR-DECISION-APPLICABILITY-GUARD-004.",
+    "After successful content admission, lifecycle history is rebound to the authorized parent successor through BOOK-SYSTEM-LIFECYCLE-CURRENT-PARENT-REBIND-001 with authority_kind CANONICAL_STATE_MUTATION.",
+    "Recovery admission does not change Book lifecycle status. Any lifecycle advance is a separate existing lifecycle-transition request subject to the canonical transition contract and evidence gates.",
+    "SYSTEM-ORCHESTRATOR remains durable execution authority; this adapter performs one bounded transactional composition only."
+  ],
+  "ratification_subject": {
+    "primary": "BOOK_PROJECT current state identity: object_id=book_project_id, object_version=STATE-<parent_state_version>, object_digest=digest(book_project)",
+    "secondary": "current canonical MANUSCRIPT_MANIFEST exact object/version/digest identity",
+    "source_evidence": "all RecoveredBookBaseline source_manifest source_ref values plus recovery baseline id/digest"
+  },
+  "required_input": [
+    "current canonical parent state",
+    "current version ledger",
+    "current compatible lifecycle ledger",
+    "current Author Decision Queue ledger containing an approved recovery-ratification resolution receipt",
+    "exact RecoveredBookBaseline output from EBR-SC1",
+    "author decision id and resolution receipt id"
+  ],
+  "output": [
+    "unchanged-base admission operation plan",
+    "Guard-004 applicability receipt",
+    "canonical content-admission/version receipt",
+    "post-admission parent state and version ledger",
+    "lifecycle rebind receipt and post-rebind lifecycle ledger",
+    "recovery admission receipt binding baseline digest, selected candidate, author decision/receipt, pre/post parent and lifecycle identities",
+    "resume directive that names the existing lifecycle exact-next boundary without performing an unauthorized lifecycle transition"
+  ],
+  "fail_closed": [
+    "baseline standing is not PROPOSED_RECOVERED_BASELINE__AWAITING_GOVERNED_ADMISSION",
+    "baseline digest/id is internally inconsistent",
+    "baseline book_project_id conflicts with current BookProject when supplied",
+    "revision graph has no single selected candidate",
+    "any recovery finding severity is BLOCKING",
+    "selected candidate or source provenance is missing",
+    "author decision/queue receipt does not bind the exact current BookProject/manuscript ratification subject",
+    "author decision receipt is stale, mismatched or absent",
+    "selected recovered content is already an ambiguous/conflicting family successor",
+    "content admission fails any existing predecessor/currentness/provenance invariant",
+    "lifecycle ledger is not bound to the exact pre-admission parent",
+    "any attempted recovery admission changes lifecycle status"
+  ],
+  "first_increment": "EBR-GAI-SC1__RECOVERED_MANUSCRIPT_ADMISSION_AND_LIFECYCLE_REBIND",
+  "qualification_cases": [
+    "clean recovered baseline plus exact current-subject ratification admits one immutable manuscript successor and rebinds lifecycle history",
+    "unresolved version ambiguity blocks before author/canonical mutation",
+    "unresolved structure BLOCKING finding blocks",
+    "missing ratification queue evidence blocks",
+    "ratification receipt for a different governed subject blocks",
+    "stale ratification after current manuscript changes blocks",
+    "tampered recovery baseline digest blocks",
+    "selected candidate/source mismatch blocks",
+    "same admitted content cannot overwrite historical predecessor lineage",
+    "successful recovery admission preserves lifecycle project status and lifecycle history",
+    "NEW_EDITION recovery preserves prior-edition lineage in the recovery receipt and does not rewrite the prior edition",
+    "recovery engine output remains unchanged/no direct canonical mutation"
+  ],
+  "deferred": [
+    "chapter/scene content-unit admission when native normalized providers supply exact per-unit content digests",
+    "automatic lifecycle stage advancement/resume placement beyond an exact-next directive",
+    "native PDF/DOCX/OCR provider fidelity",
+    "real private manuscript/author usability evidence",
+    "A-01 qualification",
+    "native-device/production/publication qualification"
+  ]
+}
