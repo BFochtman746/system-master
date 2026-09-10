@@ -1,0 +1,42 @@
+name: Learning Dependency Adjudication Full Closure Prequalification
+on:
+  push:
+    branches: [learning/dependency-adjudication-full-closure-20260910]
+    paths:
+      - "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001C-DEPENDENCY-EVIDENCE-ADJUDICATION-FULL-CLOSURE-CANDIDATE-055A.json"
+      - ".github/scripts/learning-dependency-adjudication-full-closure-qualify.js"
+      - ".github/workflows/learning-dependency-adjudication-full-closure-prequal.yml"
+      - "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001C-DEPENDENCY-EVIDENCE-ADJUDICATION-BATCH-*-CANDIDATE-*.json"
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  validate:
+    name: Full 46-candidate dependency adjudication closure
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - name: Record exact subject
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          printf 'SUBJECT_SHA=%s\n' "${GITHUB_SHA}"
+      - name: Syntax check cumulative validator
+        run: node --check .github/scripts/learning-dependency-adjudication-full-closure-qualify.js
+      - name: Validate all 46 original unresolved candidates exactly once
+        run: node .github/scripts/learning-dependency-adjudication-full-closure-qualify.js
+      - name: Upload hosted evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: LEARNING-DEPENDENCY-ADJUDICATION-FULL-CLOSURE-${{ github.sha }}-hosted-evidence
+          path: ${{ runner.temp }}/learning-dependency-adjudication-full-closure-evidence
+          if-no-files-found: warn
+          retention-days: 30
+
+# This proves machine-evidence disposition completeness only; it does not create learner, SME, psychometric, A-01, native, certification, or production authority.
