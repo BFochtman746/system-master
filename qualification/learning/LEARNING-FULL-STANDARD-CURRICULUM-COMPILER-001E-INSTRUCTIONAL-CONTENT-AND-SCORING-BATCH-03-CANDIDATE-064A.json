@@ -1,0 +1,85 @@
+{
+  "artifact_id": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001E-INSTRUCTIONAL-CONTENT-AND-SCORING-BATCH-03-CANDIDATE-064A",
+  "effective_date": "2026-09-10",
+  "owner_path": "SYSTEM_MASTER/LEARNING",
+  "contract": "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001E-INSTRUCTIONAL-CONTENT-AND-SCORING-CONTRACT-059.json",
+  "base_control_head": "daea871f60879af8f5e257a08b04bb427829c0e7",
+  "batch_index": 3,
+  "batch_size": 1,
+  "selection": {
+    "rule": "NEXT_UNMATERIALIZED_001D_EXECUTION_NODE_IN_EXACT_ORDINAL_ORDER",
+    "001d_durable_blueprint_commit": "02dc615fcb5d44b997ed1322848eccc6e37bb172",
+    "001d_blueprint_path": "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001D-EXECUTABLE-CURRICULUM-BLUEPRINT-057B.json",
+    "001d_blueprint_digest_sha256": "98aa0b621b0cbe5234d5dd8bdb9890a1692c4c9d91aaf955fd3a459632949e54",
+    "001d_ordinal": 3,
+    "requirement_id": "ASQ-CSSGB-2022-I.A.3",
+    "source_code": "I.A.3",
+    "source_locator": "ASQ CSSGB BoK 2022 p.3 / I.A.3",
+    "title": "Organizational drivers and metrics",
+    "highest_cognitive_level": "UNDERSTAND",
+    "skill_id": "CSSGB-2022::ASQ-CSSGB-2022-I.A.3::SUBSKILL::driver-metric-linkage",
+    "criterion_id": "CRIT::CSSGB-2022::ASQ-CSSGB-2022-I.A.3::SUBSKILL::driver-metric-linkage",
+    "lesson_id": "LESSON::CSSGB-2022::ASQ-CSSGB-2022-I.A.3::SUBSKILL::driver-metric-linkage",
+    "assessment_target_id": "ASSESS::CSSGB-2022::ASQ-CSSGB-2022-I.A.3::driver-metric-linkage::TARGET::bounded-driver-metric-explanation"
+  },
+  "runtime_implementation": {
+    "path": "learning/lab/learning_lab/cssgb_full_standard_i_a_3.py",
+    "domain_key": "asq-cssgb-2022-001e-i-a-3",
+    "generation_adapter": "CSSGB-001E-I-A-3-GROUNDED-CONTENT-V1",
+    "behavior_oracle": "CSSGBDriverMetricOracle",
+    "scoring_type": "CSSGB_I_A_3_DRIVER_METRIC_LINKAGE_V1",
+    "course_activation_allowed": false
+  },
+  "grounding": {
+    "admitted_asq_sources": 3,
+    "grounded_claims": 4,
+    "supplemental_sources_replace_frozen_identity": false,
+    "source_bytes_archived": false
+  },
+  "instructional_realization": {
+    "materialized_lessons": 1,
+    "worked_examples": 2,
+    "practice_items": 2,
+    "mastery_items": 1,
+    "retention_items": 1,
+    "transfer_items": 0,
+    "practice_mastery_family_overlap_allowed": false,
+    "mastery_retention_family_overlap_allowed": false
+  },
+  "oracle_negative_fixtures_required": [
+    "MALFORMED_JSON_REJECTED",
+    "WRONG_DRIVER_ID_REJECTED",
+    "WRONG_SELECTED_METRIC_REJECTED",
+    "INCOMPLETE_REJECTED_METRIC_SET_REJECTED",
+    "SELECTED_METRIC_ALSO_REJECTED_REJECTED",
+    "INSUFFICIENT_SCENARIO_FORCED_SELECTION_REJECTED",
+    "INSUFFICIENT_SCENARIO_WITHOUT_MISSING_EVIDENCE_REJECTED",
+    "COURSE_ANSWER_MUTATION_DOES_NOT_CHANGE_ORACLE_CORRECTNESS"
+  ],
+  "runtime_path_assertions": [
+    "exact ordinal-3 001D identity and digest bind",
+    "validate_grounding PASS with 100 percent closed-world claim coverage",
+    "validate_instructional_design PASS",
+    "Batch-01 practice-not-mastery regression remains PASS",
+    "first next action is LESSON",
+    "practice remains BUILDING",
+    "oracle-rejected mastery records incorrect evidence",
+    "oracle-accepted independent mastery advances only to RETENTION_DUE",
+    "one-hour retention delay is enforced",
+    "distinct delayed retention advances the one-skill portable fixture to MASTERED",
+    "full 66-node course remains READY_FOR_REVIEW and unactivated"
+  ],
+  "evidence_boundaries": {
+    "real_learner_mastery": "UNOBSERVED",
+    "psychometric_validity": "UNOBSERVED",
+    "real_learner_retention_effectiveness": "UNOBSERVED",
+    "transfer_effectiveness": "UNOBSERVED",
+    "workplace_effectiveness": "UNOBSERVED",
+    "sme_approval": "UNOBSERVED",
+    "certification_equivalence": "UNOBSERVED",
+    "a01_authority": "NOT_CLAIMED",
+    "native_platform_authority": "NOT_CLAIMED",
+    "production_authority": "NOT_CLAIMED"
+  },
+  "on_pass": "Admit Batch 03 into Learning control as I.A.3 instructional/scoring realization complete and select exact 001D ordinal 4 without replaying prior phases or Batches 01-03."
+}
