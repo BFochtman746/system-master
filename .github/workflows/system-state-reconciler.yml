@@ -8,12 +8,14 @@ on:
       - 'qualification/a01/registry.json'
       - 'qualification/a01/repair-requests/**'
       - '.github/scripts/system-state-reconciler.js'
+      - '.github/scripts/second-shift-enforce.js'
       - '.github/scripts/a01-closed-loop-repair*.js'
       - '.github/scripts/a01-repair-broker*.js'
       - '.github/scripts/a01-repair-ledger*.js'
       - '.github/scripts/a01-repair-rerun*.js'
       - '.github/workflows/a01-control-plane-gateway.yml'
       - '.github/workflows/a01-repair-*.yml'
+      - '.github/workflows/second-shift-enforcement.yml'
       - '.github/workflows/system-state-reconciler.yml'
   pull_request:
     paths:
@@ -21,12 +23,14 @@ on:
       - 'qualification/a01/registry.json'
       - 'qualification/a01/repair-requests/**'
       - '.github/scripts/system-state-reconciler.js'
+      - '.github/scripts/second-shift-enforce.js'
       - '.github/scripts/a01-closed-loop-repair*.js'
       - '.github/scripts/a01-repair-broker*.js'
       - '.github/scripts/a01-repair-ledger*.js'
       - '.github/scripts/a01-repair-rerun*.js'
       - '.github/workflows/a01-control-plane-gateway.yml'
       - '.github/workflows/a01-repair-*.yml'
+      - '.github/workflows/second-shift-enforcement.yml'
       - '.github/workflows/system-state-reconciler.yml'
 
 concurrency:
@@ -51,6 +55,7 @@ jobs:
       - name: Syntax check reconciler and repair controls
         run: |
           node --check .github/scripts/system-state-reconciler.js
+          node --check .github/scripts/second-shift-enforce.js
           node --check .github/scripts/a01-closed-loop-repair.js
           node --check .github/scripts/a01-closed-loop-repair-selftest.js
           node --check .github/scripts/a01-repair-broker.js
@@ -62,6 +67,9 @@ jobs:
 
       - name: Self-test repository-state invariants
         run: node .github/scripts/system-state-reconciler.js --selftest
+
+      - name: Self-test Second Shift execution invariants
+        run: node .github/scripts/second-shift-enforce.js --selftest
 
       - name: Self-test bounded closed-loop repair contract
         run: node .github/scripts/a01-closed-loop-repair-selftest.js
@@ -78,6 +86,9 @@ jobs:
       - name: Reconcile repair event ledger, inboxes and replacement tickets
         run: node .github/scripts/a01-repair-ledger-reconcile.js
 
+      - name: Validate Second Shift static control state
+        run: node .github/scripts/second-shift-enforce.js --out=.state-reconciler/SECOND-SHIFT-ENFORCEMENT-REPORT.json
+
       - name: Reconcile live System Master state
         run: node .github/scripts/system-state-reconciler.js --out=.state-reconciler
 
@@ -85,6 +96,12 @@ jobs:
         if: always()
         shell: bash
         run: |
+          if [ -f .state-reconciler/SECOND-SHIFT-ENFORCEMENT-REPORT.json ]; then
+            echo '## Second Shift Enforcement Report' >> "$GITHUB_STEP_SUMMARY"
+            echo '```json' >> "$GITHUB_STEP_SUMMARY"
+            cat .state-reconciler/SECOND-SHIFT-ENFORCEMENT-REPORT.json >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          fi
           if [ -f .state-reconciler/SYSTEM-STATE-DRIFT-REPORT.json ]; then
             echo '## System State Drift Report' >> "$GITHUB_STEP_SUMMARY"
             echo '```json' >> "$GITHUB_STEP_SUMMARY"

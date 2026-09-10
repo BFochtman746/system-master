@@ -1,0 +1,84 @@
+{
+  "schema_id": "SECOND-SHIFT-UTILIZATION-EVENT-SCHEMA-001",
+  "purpose": "Append-only evidence schema for reconstructing Second Shift lane state and useful execution without inferring utilization from commits, runner uptime or workflow duration.",
+  "shift_timezone": "America/New_York",
+  "shift_window": "00:00-07:00",
+  "storage_rule": "Use one lane-owned ledger per shift date to avoid cross-lane append conflicts: governance/second-shift/execution-events/YYYY-MM-DD/{CORE|LEARNING|BOOK|PROSE}.json",
+  "allowed_lanes": ["CORE", "LEARNING", "BOOK", "PROSE"],
+  "allowed_event_types": [
+    "SHIFT_OPEN",
+    "READY",
+    "CLAIMED",
+    "RUNNING",
+    "HEARTBEAT",
+    "PROGRESS",
+    "COMPLETED",
+    "BLOCKED",
+    "STALE",
+    "RETRY",
+    "CIRCUIT_OPEN",
+    "CIRCUIT_HALF_OPEN",
+    "CIRCUIT_CLOSED",
+    "SUCCESSOR_BOUND",
+    "ALL_RUNGS_EXHAUSTED",
+    "IDLE_VALID",
+    "SHIFT_CLOSE"
+  ],
+  "required_ledger_fields": [
+    "schema_id",
+    "shift_id",
+    "shift_date",
+    "lane",
+    "events"
+  ],
+  "required_event_fields": [
+    "event_id",
+    "occurred_at",
+    "event_type",
+    "lane",
+    "control_ref",
+    "control_head",
+    "delegation_id",
+    "objective_id",
+    "evidence"
+  ],
+  "claim_event_required_fields": [
+    "lease_id",
+    "idempotency_key",
+    "lease_expires_at",
+    "attempt"
+  ],
+  "heartbeat_event_required_fields": [
+    "lease_id",
+    "idempotency_key",
+    "checkpoint_pointer"
+  ],
+  "retry_event_required_fields": [
+    "dependency_or_operation",
+    "failure_class",
+    "attempt",
+    "retry_budget",
+    "next_action"
+  ],
+  "circuit_event_required_fields": [
+    "dependency_or_operation",
+    "failure_class",
+    "next_probe_at_or_condition",
+    "fallback_successor_or_rung"
+  ],
+  "all_rungs_exhausted_required_fields": [
+    "rungs",
+    "independent_work_remaining",
+    "next_external_condition"
+  ],
+  "all_rungs_required_count": 8,
+  "utilization_rules": [
+    "State-duration calculations use occurred_at event boundaries only.",
+    "RUNNING means an owner-valid worker has a live claim and is performing or awaiting a bounded operation that is part of the current objective; runner uptime alone is not RUNNING.",
+    "READY means executable dependency-valid work exists but is not presently claimed.",
+    "BLOCKED applies only to the objective/rung actually blocked; it cannot be promoted to whole-lane idle while another rung is executable.",
+    "IDLE_VALID requires a preceding ALL_RUNGS_EXHAUSTED event for the same live owner head and shift.",
+    "If telemetry is missing or contradictory, the audit reports UNKNOWN rather than inferring productive time."
+  ],
+  "authority_boundary": "This ledger records execution state only. It never grants PASS, promotion, canonical-writer, A-01, human, author, private, blind, native, publication or production authority."
+}
