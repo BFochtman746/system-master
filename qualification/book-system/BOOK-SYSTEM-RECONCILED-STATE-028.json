@@ -1,0 +1,42 @@
+{
+  "state_id": "BOOK-SYSTEM-RECONCILED-STATE-028",
+  "effective_date": "2026-09-10",
+  "supersedes_for_current_parent_control": "BOOK-SYSTEM-RECONCILED-STATE-027",
+  "supersession_scope": "PARENT_CONTROL_AND_WORK_AHEAD_ROUTING_ONLY",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "standing": "POST_RF012_GAP_CENSUS_CLOSED__EXISTING_BOOK_RECOVERY_SEMANTIC_CORE_SELECTED_READY",
+  "predecessor_head": "6304df0b60dbe49ab7be0218b0d588c1b0ba5279",
+  "gap_census": {
+    "record": "qualification/book-system/BOOK-SYSTEM-POST-RF012-IMPLEMENTATION-GAP-CENSUS-001.json",
+    "commit": "84a752a32169f6f26f5cc0915268d42424ce04ec",
+    "result": "FIRST_TRUE_A01_INDEPENDENT_BOOK_PARENT_IMPLEMENTATION_RESIDUAL_SELECTED"
+  },
+  "current_owner_objective": {
+    "objective_id": "BOOK-SYSTEM-EXISTING-BOOK-RECOVERY-SEMANTIC-CORE-001",
+    "state": "READY",
+    "contract": "qualification/book-system/existing-book-recovery-semantic-core-001/BOOK-SYSTEM-EXISTING-BOOK-RECOVERY-SEMANTIC-CORE-001-CONTRACT.json",
+    "contract_commit": "59c0e9a30c7d00c4d8a3dacf3078fc8f8eac2480",
+    "first_increment": "EBR-SC1__PURE_SEMANTIC_ENGINE_SYNTHETIC_NORMALIZED_FIXTURES",
+    "reason": "J01 and BKG-SYS-010 make existing-book recovery a core/high-value Book outcome; R5/R6 close its build spec but explicitly leave runtime semantics partial/deferred. This bounded semantic increment is independent of native parser, A-01 and human-author execution."
+  },
+  "primary_external_or_shared_pending": {
+    "objective_id": "BOOK-SYSTEM-CANONICAL-CONTENT-OBJECT-ADMISSION-001-A01-REGISTRATION-AND-QUALIFICATION-PREP",
+    "state": "BLOCKED_ON_SHARED_A01_AUTHORITY",
+    "exact_subject_sha": "e993806a1d9a4838d4bd6d162a36921526ef302a",
+    "hosted_result": "PASS__ORIGINAL_SUBJECT_ONLY",
+    "a01_result": "NOT_REGISTERED__NOT_RUN__NO_PASS",
+    "does_not_block_current_objective": true
+  },
+  "implementation_boundaries": [
+    "Book implements semantic reconstruction/re-entry only.",
+    "PLATFORM-008 retains raw byte custody.",
+    "DATA/021L retain physical backup/restore/DR mechanics.",
+    "OCR/PDF/DOCX providers retain native extraction mechanics.",
+    "Story Bible retains canon truth; recovered canon-like material is proposal state until ratified.",
+    "Research/Evidence retains external evidence truth.",
+    "Prose remains child authority for literary generation/evaluation.",
+    "Author retains final creative/semantic choice.",
+    "No new Book orchestrator is created."
+  ],
+  "stop_condition": "EBR-SC1 produces a deterministic, idempotent semantic recovery engine and synthetic qualification suite that yields evidence-linked candidate revision graph, reconstructed structure, findings, proposed semantic state, author-decision batch, maturity profile, immutable recovered baseline and prerequisite-derived exact next work without unauthorized canonical mutation."
+}
