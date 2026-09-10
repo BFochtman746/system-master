@@ -1,0 +1,46 @@
+name: Book Lifecycle Compatibility Registered A-01 Rerun
+
+on:
+  push:
+    branches:
+      - book-system/control-v1
+    paths:
+      - ".github/workflows/book-system-lifecycle-current-parent-compatibility-001-registered-rerun.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  prequalify-exact-frozen-subject:
+    name: Revalidate exact frozen compatibility subject
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact frozen subject
+        uses: actions/checkout@v4
+        with:
+          ref: fc5adf8fd130d7b5324cff0058ab3804d75ec54e
+          fetch-depth: 1
+      - name: Verify exact checkout
+        run: test "$(git rev-parse HEAD)" = "fc5adf8fd130d7b5324cff0058ab3804d75ec54e"
+      - name: Re-run hosted exact-subject compatibility qualification
+        run: node .github/scripts/book-system-lifecycle-current-parent-compatibility-001-qualify-v2.js
+
+  qualify:
+    name: Authoritative registered A-01 compatibility qualification
+    needs: prequalify-exact-frozen-subject
+    uses: BFochtman746/system-master/.github/workflows/a01-control-plane-gateway.yml@main
+    with:
+      qualification_id: BOOK-SYSTEM-LIFECYCLE-CURRENT-PARENT-COMPATIBILITY-ADAPTER-001
+      workstream_id: BOOK-SYSTEM
+      subject_sha: fc5adf8fd130d7b5324cff0058ab3804d75ec54e
+      origin_ref: refs/heads/book-system/control-v1
+      resume_on_pass: Close the exact current-parent Lifecycle compatibility repair, then reconcile and requalify Export Freeze on the current sealed parent model.
+      resume_on_failure: Preserve the exact receipt and repair only the proven subject, infrastructure, or control-plane boundary. Do not change Lifecycle v1 semantics or broaden authority.
+      notification_target: book-system/control-v1
+      execution_context: normal
+      qualifier_timeout_minutes: 10
+      job_timeout_minutes: 15
+    secrets: inherit
