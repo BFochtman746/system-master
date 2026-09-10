@@ -1,0 +1,65 @@
+name: Prepare A-01 registration for Book E2E authority guards
+
+on:
+  push:
+    branches:
+      - book-system/request-e2e-authority-guards-001-a01
+    paths:
+      - ".github/workflows/book-system-e2e-authority-guards-001-prepare-registration.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout canonical main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Add exactly one A-01 registry entry on isolated registration branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git checkout -b a01/register-book-e2e-authority-guards-001
+          node <<'NODE'
+          const fs = require('fs');
+          const p = 'qualification/a01/registry.json';
+          const doc = JSON.parse(fs.readFileSync(p, 'utf8'));
+          const id = 'BOOK-SYSTEM-E2E-AUTHORITY-GUARDS-001';
+          if (doc.qualifications[id]) throw new Error('QUALIFICATION_ALREADY_REGISTERED');
+          const before = Number(doc.registry_version);
+          if (!Number.isInteger(before)) throw new Error('INVALID_REGISTRY_VERSION');
+          doc.registry_version = before + 1;
+          const entry = {
+            workstream_id: 'BOOK-SYSTEM',
+            gate_class: 'focused',
+            source: 'subject',
+            executable: 'node',
+            args: ['.github/scripts/a01-book-system-e2e-authority-guards-001.js'],
+            evidence_artifact: 'book-system-e2e-authority-guards-001',
+            overnight_eligible: false,
+            description: 'Qualify the exact Book System E2E authority-guards repair subject: 24 bounded cases proving effective-current governed author subject enforcement, preserved Author Decision Queue v1 bytes/history, required unique parent-admission references before Export Freeze delegation, preserved Export Freeze v1 bytes/validation, atomic failure and replay behavior, and zero synthesized author, provider, lifecycle, document, export-freeze, publication, promotion, or production authority. PASS is exact-SHA focused evidence only and exists solely to unblock the existing end-to-end authoring qualification harness.'
+          };
+          const out = {};
+          let inserted = false;
+          for (const [k, v] of Object.entries(doc.qualifications)) {
+            out[k] = v;
+            if (k === 'BOOK-SYSTEM-EXPORT-FREEZE-001') {
+              out[id] = entry;
+              inserted = true;
+            }
+          }
+          if (!inserted) out[id] = entry;
+          doc.qualifications = out;
+          fs.writeFileSync(p, JSON.stringify(doc, null, 2) + '\n');
+          NODE
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add qualification/a01/registry.json
+          test "$(git diff --cached --name-only)" = "qualification/a01/registry.json"
+          git commit -m "a01: register Book E2E authority guards"
+          git push origin HEAD:a01/register-book-e2e-authority-guards-001
