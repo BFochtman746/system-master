@@ -1,0 +1,89 @@
+{
+  "handoff_id": "BOOK-SYSTEM-LIFECYCLE-CURRENT-PARENT-COMPATIBILITY-ADAPTER-001-A01-REGISTRATION-HANDOFF",
+  "effective_date": "2026-09-09",
+  "requesting_owner_path": "SYSTEM_MASTER/BOOK",
+  "target_authority": "SYSTEM_MASTER/SHARED_INFRASTRUCTURE/A01",
+  "state": "READY_FOR_SHARED_AUTHORITY_REVIEW",
+  "qualification_id": "BOOK-SYSTEM-LIFECYCLE-CURRENT-PARENT-COMPATIBILITY-ADAPTER-001",
+  "workstream_id": "BOOK-SYSTEM",
+  "final_hosted_pass_subject_sha": "fc5adf8fd130d7b5324cff0058ab3804d75ec54e",
+  "final_hosted_prequalification": {
+    "run_id": 34419309748,
+    "job_id": 102691064356,
+    "compatibility_case_count": 21,
+    "compatibility_pass_count": 21,
+    "predecessor_lifecycle_v1_regression_cases": 18,
+    "predecessor_lifecycle_v1_regression_result": "PASS",
+    "result": "PASS__FINAL_EXECUTABLE_SUBJECT"
+  },
+  "intermediate_hosted_pass": {
+    "subject_sha": "2d71e346b047d47cdd9b076801016a61919c0a09",
+    "run_id": 34419253122,
+    "job_id": 102690892491,
+    "result": "PASS__21_OF_21_PLUS_18_PREDECESSOR_REGRESSIONS",
+    "artifact_id": 10130270364,
+    "artifact_digest": "sha256:bc84725d765418272da0bfa47746b6f3321bde451086197bffae4ad908d9a040",
+    "superseded_for_authoritative_subject_reason": "A subject-side A-01 wrapper and canonical gateway were added afterward; final exact executable subject was freshly prequalified before the authoritative attempt."
+  },
+  "preserved_qualifier_only_failure": {
+    "subject_sha": "67d1cdb37c31eeb0e785efcc257dd986aa94b09c",
+    "run_id": 34419187052,
+    "job_id": 102690685013,
+    "result": "FAIL__18_OF_21__THREE_QUALIFIER_SERIALIZATION_HELPER_ERRORS",
+    "artifact_id": 10130245955,
+    "artifact_digest": "sha256:fce389a9f81c8689f02c73b95902200ea6c91237ddd40a05b9d3854b97886de9",
+    "repair_classification": "QUALIFIER_ONLY__NO_ADAPTER_RUNTIME_FIXTURE_OR_LIFECYCLE_V1_SEMANTIC_CHANGE"
+  },
+  "preserved_authoritative_control_plane_failure": {
+    "subject_sha": "fc5adf8fd130d7b5324cff0058ab3804d75ec54e",
+    "run_id": 34419309748,
+    "job_id": 102691090784,
+    "runner": "A-01 / Windows / X64",
+    "classification": "CONTROL_PLANE_FAILURE__UNREGISTERED_QUALIFICATION",
+    "error": "UNREGISTERED_QUALIFICATION:BOOK-SYSTEM-LIFECYCLE-CURRENT-PARENT-COMPATIBILITY-ADAPTER-001",
+    "artifact_id": 10130296221,
+    "artifact_digest": "sha256:9a5d86c743c018673de671d4b74b6d361b992cb92bef257e7a2c2eda59d4fa9d",
+    "subject_execution_reached": false,
+    "runner_preflight": "PASS",
+    "control_plane_validation": "PASS",
+    "meaning": "This is not a subject failure. The exact subject passed hosted qualification and A-01 refused execution solely because the qualification was absent from the canonical registry at the control-plane SHA used by the run."
+  },
+  "proposed_registry_entry_for_shared_owner_review": {
+    "workstream_id": "BOOK-SYSTEM",
+    "gate_class": "focused",
+    "source": "subject",
+    "executable": "node",
+    "args": [".github/scripts/a01-book-system-lifecycle-current-parent-compatibility-001.js"],
+    "evidence_artifact": "book-system-lifecycle-current-parent-compatibility-001",
+    "overnight_eligible": false,
+    "description": "Qualify the exact Book System Lifecycle current-parent compatibility adapter: lossless projection from the current sealed-array Book parent into the unchanged qualified Lifecycle v1 keyed representation; exact external sealed state_digest and lifecycle-ledger compare-and-swap; delegated v1 gate evaluation without changing transitions or policy; array-based export-release, author-decision and proposal evidence resolution; project transitions restricted to the v1-authorized status/state-version delta; unit transitions preserving parent byte identity; adapted receipts carrying canonical sealed pre/post parent digests accepted by Version/Rollback; idempotent replay and conflict safety; duplicate projection-ID refusal; provider transition denial; and all original 18 Lifecycle v1 regression cases unchanged. PASS is exact-SHA focused evidence only and grants no new lifecycle policy, provider, author, document, export-freeze, publication or production authority."
+  },
+  "shared_owner_checks_before_registration": [
+    "Confirm .github/scripts/a01-book-system-lifecycle-current-parent-compatibility-001.js exists on exact subject fc5adf8fd130d7b5324cff0058ab3804d75ec54e and deterministically invokes the v2 qualifier.",
+    "Confirm the exact final subject passed its hosted gateway prequalification: 21/21 compatibility cases plus all 18 original Lifecycle v1 regression cases.",
+    "Confirm system-master/book-system/lifecycle-transition-engine.js and lifecycle-transition-engine-runtime.js are unchanged by this repair.",
+    "Confirm the adapter adds representation/digest compatibility only and no new transition, gate, provider, author, export-freeze or publication authority.",
+    "Confirm execution remains through the shared A-01 gateway rather than any direct self-hosted Book workflow.",
+    "Preserve the qualifier-only failed subject and the UNREGISTERED authoritative attempt as historical evidence."
+  ],
+  "after_registration": {
+    "required_action": "Re-run the failed authoritative A-01 job/run or invoke the canonical shared A-01 gateway using qualification_id BOOK-SYSTEM-LIFECYCLE-CURRENT-PARENT-COMPATIBILITY-ADAPTER-001, workstream_id BOOK-SYSTEM and exact subject fc5adf8fd130d7b5324cff0058ab3804d75ec54e unchanged.",
+    "pass_route": "Close the compatibility adapter only on exact authoritative PASS, then reconcile the already-hosted-passing book-system/export-freeze-001 candidate against the qualified compatibility seam before admitting any Export Freeze implementation to canonical Book control.",
+    "failure_route": "Classify the authoritative receipt. Preserve hosted PASS and repair only the proven owner boundary; any change to compatibility subject bytes requires fresh hosted exact-SHA PASS."
+  },
+  "parallel_export_freeze_candidate_preserved": {
+    "branch": "book-system/export-freeze-001",
+    "subject_sha": "0bbdb5b6809dcd0d8ec0392a1b493641b4ffac85",
+    "hosted_run_id": 34419237350,
+    "hosted_job_id": 102690841850,
+    "result": "PASS__70_OF_70__HOSTED_ONLY",
+    "authority_flags": {
+      "lifecycle_mutation_authorized": false,
+      "publication_authorized": false,
+      "author_choice_created": false,
+      "document_engine_created": false
+    },
+    "reconciliation_rule": "Do not discard this implementation. Audit and reuse it after compatibility A-01 PASS, but do not transfer its hosted PASS across the divergent compatibility/control changes."
+  },
+  "book_lane_authority_statement": "This is a shared-authority registration handoff only. It does not modify or pre-authorize the central A-01 registry and does not broaden any Book or Lifecycle authority."
+}
