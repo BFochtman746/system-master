@@ -1,0 +1,98 @@
+{
+  "contract_id": "BOOK-WORKFLOW-ORCHESTRATOR-CONCURRENCY-RULES-001",
+  "contract_version": 1,
+  "effective_date": "2026-09-10",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "depends_on": [
+    "BOOK-WORKFLOW-ORCHESTRATOR-DEPENDENCY-GRAPH-EXECUTION-PLAN-CONTRACT-001-CLOSURE",
+    "BOOK-WORKFLOW-ORCHESTRATOR-CAPABILITY-ROUTING-INTERFACE-001-CLOSURE"
+  ],
+  "standing": "CANDIDATE_PENDING_PACKET_QUALIFICATION",
+  "scope": "Deterministically classify concurrency eligibility for already-valid Phase 2D plan tasks. This packet does not dispatch, schedule, execute, retry, cache, cancel, resume, compile context, call specialists, perform blind evaluation or admit canonical manuscript changes.",
+  "laws": [
+    "Concurrency eligibility is permission for a later scheduler to consider simultaneous execution; it is never execution itself.",
+    "Correctness, authority, isolation and evidence requirements outrank speed.",
+    "Only tasks in the same Phase 2D topological layer may be considered together; dependency-related tasks are never parallelized.",
+    "Required and optional dependency edges both constrain concurrency because Phase 2D topology treats both as ordering edges.",
+    "A task classified SERIAL_ONLY remains serial even when topologically independent.",
+    "A task classified ISOLATION_GATED remains ineligible until its required qualified isolation seam exists and is explicitly evidenced.",
+    "DECLARED_BLOCKED_CAPABILITY, AUTHORITY_WAIT and BOOK_ADMISSION_HANDOFF are never specialist concurrency candidates.",
+    "No concurrency decision can widen a capability authority domain or make a non-callable capability callable.",
+    "No concurrency decision may grant canonical manuscript-write authority to Prose, evaluator, Research, Story Bible, continuity or the orchestrator.",
+    "Provider availability, rate limits, resource limits and actual worker concurrency remain Phase 6 scheduler concerns.",
+    "A concurrency group must contain at least two independently eligible tasks; singletons are classified but not emitted as parallel groups.",
+    "Derived eligibility output is deterministic and ordered by topological layer then exact task ID.",
+    "Changed plan digest or workflow/source identity requires a newly derived concurrency decision; prior decisions are stale."
+  ],
+  "policy_classes": [
+    "READ_ONLY_PARALLEL_ELIGIBLE",
+    "SERIAL_ONLY_NONIDEMPOTENT_OR_SIDE_EFFECTING",
+    "ISOLATION_GATED",
+    "NONEXECUTABLE_BLOCKER",
+    "BOOK_ADMISSION_SERIAL_ONLY"
+  ],
+  "capability_policy": {
+    "PROSE.ANALYZE_PASSAGE": "READ_ONLY_PARALLEL_ELIGIBLE",
+    "PROSE.BUILD_NARRATIVE_STATE": "READ_ONLY_PARALLEL_ELIGIBLE",
+    "PROSE.DIAGNOSE": "READ_ONLY_PARALLEL_ELIGIBLE",
+    "PROSE.RETRIEVE_CRAFT_INTELLIGENCE": "READ_ONLY_PARALLEL_ELIGIBLE",
+    "PROSE.GENERATE_REVISION_CANDIDATE": "SERIAL_ONLY_NONIDEMPOTENT_OR_SIDE_EFFECTING",
+    "PROSE.COMPARE_ORIGINAL_CANDIDATE": "READ_ONLY_PARALLEL_ELIGIBLE",
+    "PROSE.ASSESS_VOICE": "READ_ONLY_PARALLEL_ELIGIBLE",
+    "PROSE.ASSESS_HOMOGENIZATION": "READ_ONLY_PARALLEL_ELIGIBLE",
+    "EVALUATION.INDEPENDENT_BOOK_OR_UNIT": "ISOLATION_GATED",
+    "EVALUATION.CONTRASTIVE_CANDIDATE": "ISOLATION_GATED",
+    "EVALUATION.QUALIFICATION_EVIDENCE": "ISOLATION_GATED",
+    "RESEARCH.ACQUIRE_BOUNDED_EVIDENCE": "READ_ONLY_PARALLEL_ELIGIBLE",
+    "RESEARCH.REVALIDATE_EVIDENCE_FRESHNESS": "READ_ONLY_PARALLEL_ELIGIBLE",
+    "CANON.CONSISTENCY_CHECK": "NONEXECUTABLE_BLOCKER",
+    "CONTINUITY.CHECK": "NONEXECUTABLE_BLOCKER",
+    "BOOK.CANONICAL_MANUSCRIPT_ADMISSION": "BOOK_ADMISSION_SERIAL_ONLY"
+  },
+  "isolation_gate": {
+    "affected_owner": "SYSTEM_MASTER/BOOK/PROSE",
+    "affected_capabilities": [
+      "EVALUATION.INDEPENDENT_BOOK_OR_UNIT",
+      "EVALUATION.CONTRASTIVE_CANDIDATE",
+      "EVALUATION.QUALIFICATION_EVIDENCE"
+    ],
+    "current_required_evidence": "QUALIFIED_BOOK_CONTEXT_COMPILER_EVALUATOR_ISOLATION_SEAM",
+    "currently_satisfied": false,
+    "rule": "Do not infer true blind/fresh-context isolation from hosted fixtures or shared chat context. Phase 3E must create and qualify the blind-package isolation seam before these capabilities may be promoted to parallel eligibility where isolation is required."
+  },
+  "derived_output_required": [
+    "decision_schema_version",
+    "plan_id",
+    "plan_digest",
+    "workflow_id",
+    "workflow_digest",
+    "source_identity",
+    "task_decisions",
+    "parallel_groups",
+    "withheld_tasks",
+    "decision_digest"
+  ],
+  "task_decision_required": [
+    "task_id",
+    "topological_layer",
+    "policy_class",
+    "parallel_eligible",
+    "reason"
+  ],
+  "qualification_requirements": [
+    "INDEPENDENT_READ_ONLY_TASKS_GROUPED",
+    "DEPENDENT_TASKS_NEVER_GROUPED",
+    "OPTIONAL_DEPENDENCY_PREVENTS_PARALLELISM",
+    "NONIDEMPOTENT_PROSE_GENERATION_SERIAL",
+    "EVALUATOR_ISOLATION_GATED",
+    "BLOCKED_CANON_AND_CONTINUITY_NOT_PARALLEL",
+    "AUTHOR_WAIT_NOT_PARALLEL",
+    "BOOK_ADMISSION_NOT_PARALLEL",
+    "NO_AUTHORITY_WIDENING",
+    "NO_EXECUTION_OR_SCHEDULER_API",
+    "STALE_PLAN_OR_WORKFLOW_REJECTED",
+    "DETERMINISTIC_GROUPING_AND_DIGEST",
+    "NO_FRESH_BLIND_SCORING_CLAIM"
+  ],
+  "required_next_packet_on_pass": "BOOK-WORKFLOW-ORCHESTRATOR-RETRY-IDEMPOTENCY-RULES-001"
+}
