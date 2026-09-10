@@ -1,0 +1,36 @@
+name: Prose Foundation Route Contract Closure 002
+
+on:
+  push:
+    branches:
+      - prose/foundation-closure-final-refill-20260910
+    paths:
+      - 'qualification/literary-prose-engine-001/foundation-closure-002/**'
+      - 'qualification/literary-prose-engine-001/PROSE-SYSTEM-PRODUCT-PARENT-BINDING-003.json'
+      - 'qualification/literary-prose-engine-001/step-d/CRAFT-KNOWLEDGE-DISTILLATION-CONTRACT-v1.json'
+      - 'qualification/literary-prose-engine-001/step-h/CONTROLLED-REVISION-ENGINE-CONTRACT-v1.json'
+      - 'qualification/literary-prose-engine-001/step-h/controlled_revision.py'
+      - '.github/workflows/prose-foundation-route-contract-closure-002.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Validate closure contract JSON
+        run: python -m json.tool qualification/literary-prose-engine-001/foundation-closure-002/PROSE-FOUNDATION-ROUTE-CONTRACT-CLOSURE-002.json > /dev/null
+
+      - name: Run route and negative-authority fixtures
+        run: python qualification/literary-prose-engine-001/foundation-closure-002/run_prose_foundation_route_contract_fixtures.py
