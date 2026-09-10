@@ -1,0 +1,292 @@
+{
+  "census_id": "SYSTEM-MASTER-COMPLETION-CENSUS-002-P3-BOOK",
+  "checkpoint_id": "BOOK-SYSTEM-COMPLETION-CENSUS-002-P3-BOOK-PHASE-001",
+  "effective_date": "2026-09-10",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "control_ref": "book-system/control-v1",
+  "input_control_head": "f7acc6d32072b266017236aa6efea4e91aeba2b0",
+  "standing": "PHASE_001_CLOSED__EVIDENCE_BACKED_CAPABILITY_MATRIX__BOOK_CONTENT_OBJECT_ADMISSION_GAP_PROVEN",
+  "scope": "Book parent only. Prose is a child system; Document rendering/conversion and System Master app presentation remain separately owned; human/author/publication evidence is never synthesized.",
+  "classification_vocabulary": [
+    "QUALIFIED_EXECUTABLE",
+    "IMPLEMENTED_UNQUALIFIED",
+    "CONTRACT_OR_RESEARCH_ONLY",
+    "DELEGATED_TO_OTHER_OWNER",
+    "CHILD_PROSE_DEPENDENCY",
+    "HUMAN_OR_AUTHOR_BLOCKED",
+    "EXTERNAL_OR_NATIVE_BLOCKED",
+    "NOT_REQUIRED",
+    "GAP_REQUIRING_NEW_OBJECTIVE"
+  ],
+  "matrix": [
+    {
+      "capability_id": "BOOK-CENSUS-001-CANONICAL-PARENT-STATE",
+      "capability": "Canonical Book/project state, exact state identity and parent-only mutation authority",
+      "classification": "QUALIFIED_EXECUTABLE",
+      "evidence": [
+        "qualification/book-system/canonical-state-001/BOOK-SYSTEM-CANONICAL-BOOK-STATE-MODEL-001.json",
+        ".github/scripts/book-system-canonical-state-001-qualify.js",
+        "qualified subject b6938fcfc5c2c24ac23b558de6dfc7f75c382312"
+      ],
+      "finding": "The qualified state model validates Book project identity, active pointers, manuscript authority, research/decision/proposal/export collections, exact state version/digest CAS and bounded actor authority."
+    },
+    {
+      "capability_id": "BOOK-CENSUS-002-LONGFORM-OBJECT-REPRESENTATION",
+      "capability": "Representation of governing brief, canon manifest, story bible, book plan and manuscript manifest in canonical parent state",
+      "classification": "QUALIFIED_EXECUTABLE",
+      "evidence": [
+        "qualification/book-system/canonical-state-001/BOOK-SYSTEM-CANONICAL-BOOK-STATE-MODEL-001.json",
+        ".github/scripts/book-system-canonical-state-001-qualify.js",
+        "qualification/book-system/BOOK-SYSTEM-PROJECT-HIERARCHY-001.json"
+      ],
+      "finding": "These object classes and active references are part of validated parent state. This classification is representation/selection only and does not imply that creation/versioning/admission of new instances is implemented."
+    },
+    {
+      "capability_id": "BOOK-CENSUS-003-LONGFORM-OBJECT-CREATION-VERSION-ADMISSION",
+      "capability": "Create, version and canonically admit new governing brief, canon manifest, story bible, book plan and manuscript objects",
+      "classification": "GAP_REQUIRING_NEW_OBJECTIVE",
+      "evidence": [
+        ".github/scripts/book-system-canonical-state-001-qualify.js",
+        "system-master/book-system/integration-proposal-runtime-v2-core.js",
+        "qualification/book-system/BOOK-SYSTEM-BOOK-INTELLIGENCE-UNIFICATION-BINDING-001.json"
+      ],
+      "finding": "The qualified canonical mutation operation set can SET_ACTIVE_* for existing brief/canon/story-bible/book-plan/manuscript objects and can register research links, author decisions, integration proposal refs and export releases, but it exposes no REGISTER/CREATE/VERSION operation for new brief, canon, story-bible, book-plan or manuscript objects. Runtime V2 appends an integration-proposal reference only; it does not materialize the proposed content object into canonical parent state.",
+      "why_material": "Without this parent-owned admission layer, the governance spine can safely reason about and transition already-existing long-form content state but does not itself complete the persistent authoring pipeline that creates and promotes new Book content objects.",
+      "ownership": "SYSTEM_MASTER/BOOK",
+      "candidate_successor_objective": "BOOK-SYSTEM-CANONICAL-CONTENT-OBJECT-ADMISSION-001"
+    },
+    {
+      "capability_id": "BOOK-CENSUS-004-CHAPTER-SCENE-DOMAIN-GRANULARITY",
+      "capability": "Persistent chapter/scene object creation, ordering, versioning and parent admission",
+      "classification": "GAP_REQUIRING_NEW_OBJECTIVE",
+      "evidence": [
+        "qualification/book-system/BOOK-SYSTEM-PROJECT-HIERARCHY-001.json",
+        "qualification/book-system/BOOK-SYSTEM-BOOK-INTELLIGENCE-UNIFICATION-BINDING-001.json",
+        "qualification/book-system/canonical-state-001/BOOK-SYSTEM-CANONICAL-BOOK-STATE-MODEL-001.json"
+      ],
+      "finding": "The canonical project hierarchy defines CHAPTER and SCENE as Book domain levels, and Book Intelligence assigns meso-level chapter/scene goals and transitions to the parent architecture, but the qualified canonical state mutation surface does not expose chapter/scene registration or version/promotion operations. Phase 2 must decide whether this is satisfied inside the same canonical content-object admission successor rather than creating a second engine.",
+      "ownership": "SYSTEM_MASTER/BOOK",
+      "candidate_successor_objective": "SAME_AS_BOOK-CENSUS-003_UNLESS_PHASE_2_PROVES_SEPARATE_CONTRACT_REQUIRED"
+    },
+    {
+      "capability_id": "BOOK-CENSUS-005-SERVICE-INTERFACE",
+      "capability": "Versioned Book service interface across Prose, Book Evaluation, Research/Evidence and Document/Export providers",
+      "classification": "QUALIFIED_EXECUTABLE",
+      "evidence": [
+        "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-002",
+        "qualified subject 77db6b550e9aeb1dfb956627376becbb591498f8"
+      ],
+      "finding": "Registry V2 is separately qualified and preserves provider non-authority, exact identities and output/evidence classes."
+    },
+    {
+      "capability_id": "BOOK-CENSUS-006-PROVIDER-INTAKE-AND-PROPOSAL-ADMISSION",
+      "capability": "Parent intake, deduplication, proposal snapshots, bounded admission state and non-success preservation",
+      "classification": "QUALIFIED_EXECUTABLE",
+      "evidence": [
+        "system-master/book-system/integration-proposal-runtime-v2-core.js",
+        "qualified subject 837e479415afb2d9724e4b913d456ef1d3a62df5"
+      ],
+      "finding": "Runtime V2 provides exact request/response binding, source/artifact/provenance currentness, proposal state, author-handoff and parent-only admission discipline. It registers proposal refs, not canonical content-object materialization."
+    },
+    {
+      "capability_id": "BOOK-CENSUS-007-RESEARCH-EVIDENCE-INTAKE",
+      "capability": "Research/evidence provider intake, freshness/conflict/rights-aware preservation and parent evidence linkage",
+      "classification": "QUALIFIED_EXECUTABLE",
+      "evidence": [
+        "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-002",
+        "system-master/book-system/integration-proposal-runtime-v2-core.js",
+        "qualification/book-system/canonical-state-001/BOOK-SYSTEM-CANONICAL-BOOK-STATE-MODEL-001.json"
+      ],
+      "finding": "The Book parent can consume bounded research/evidence responses and preserve evidence identity/currentness. Acquisition/search execution itself remains provider-owned rather than a Book research crawler."
+    },
+    {
+      "capability_id": "BOOK-CENSUS-008-LIFECYCLE-AND-EDITORIAL-GATES",
+      "capability": "Book lifecycle transitions, editorial-stage gates, stale-evidence blocking and author-required boundaries",
+      "classification": "QUALIFIED_EXECUTABLE",
+      "evidence": [
+        "system-master/book-system/lifecycle-transition-engine.js",
+        "system-master/book-system/lifecycle-transition-engine-runtime.js",
+        "qualified subject 4a6e3459d6ba94b7ce191e426ca64bef00d23582"
+      ],
+      "finding": "Lifecycle v1 remains the sole qualified lifecycle transition authority."
+    },
+    {
+      "capability_id": "BOOK-CENSUS-009-LIFECYCLE-CURRENT-PARENT-COMPATIBILITY",
+      "capability": "Preserve lifecycle semantics and persistent lifecycle history across later sealed parent successors",
+      "classification": "QUALIFIED_EXECUTABLE",
+      "evidence": [
+        "system-master/book-system/lifecycle-current-parent-compatibility-adapter.js",
+        "system-master/book-system/lifecycle-current-parent-rebind-adapter.js",
+        "qualified subjects fc5adf8fd130d7b5324cff0058ab3804d75ec54e and ffbcc2ab36a41afb580224681642105deb62e741"
+      ],
+      "finding": "The compatibility/rebind layer preserves Lifecycle v1 policy and history while rebinding exact parent identity after authorized non-lifecycle successors."
+    },
+    {
+      "capability_id": "BOOK-CENSUS-010-VERSION-ROLLBACK",
+      "capability": "Immutable Book state/version history, exact successor recording, rollback/restore-as-new-successor and concurrency protection",
+      "classification": "QUALIFIED_EXECUTABLE",
+      "evidence": [
+        "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001",
+        "qualified subject 402ab84a14e9d345530d60394ebc36176541dd21"
+      ],
+      "finding": "Separately A-01 qualified. The shared work-obligation registry still marking this ACTIVE is stale control metadata and must be reconciled without reopening the work."
+    },
+    {
+      "capability_id": "BOOK-CENSUS-011-AUTHOR-DECISION-QUEUE",
+      "capability": "Durable pending author decisions, exact human resolution binding, stale decision protection and immutable receipts",
+      "classification": "QUALIFIED_EXECUTABLE",
+      "evidence": [
+        "system-master/book-system/author-decision-queue-core.js",
+        "system-master/book-system/author-decision-queue.js",
+        "system-master/book-system/author-decision-current-subject-guard.js",
+        "qualified queue subject 9601ae5df8348c1daac8805eaefa1718c431dd49",
+        "qualified guard subject a119ccdf77b61011b1093006b55367fc3e5a65c2"
+      ],
+      "finding": "Machine handling is qualified. The runtime does not and must not fabricate the human choice itself."
+    },
+    {
+      "capability_id": "BOOK-CENSUS-012-REAL-AUTHOR-CHOICE",
+      "capability": "Real author consent, revision direction, finalization approval and publication authorization",
+      "classification": "HUMAN_OR_AUTHOR_BLOCKED",
+      "evidence": [
+        "BOOK-SYSTEM-AUTHORING-LIFECYCLE-CONTRACT-001",
+        "BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001-CLOSURE"
+      ],
+      "finding": "Machine gates are qualified, but all qualification author evidence is synthetic. Real author choice remains a human input and is intentionally not machine-completable."
+    },
+    {
+      "capability_id": "BOOK-CENSUS-013-EXPORT-FREEZE-POLICY",
+      "capability": "Parent-owned export-freeze admission after exact format/proof/currentness/rights/privacy evidence",
+      "classification": "QUALIFIED_EXECUTABLE",
+      "evidence": [
+        "system-master/book-system/export-freeze-core.js",
+        "system-master/book-system/export-freeze.js",
+        "system-master/book-system/export-freeze-parent-admission-guard.js",
+        "qualified export subject 0bc1f96ed0b8effd22c432a7d727fd13d613b825"
+      ],
+      "finding": "Book freeze policy is qualified and remains distinct from publication authorization."
+    },
+    {
+      "capability_id": "BOOK-CENSUS-014-DOCUMENT-RENDER-CONVERT-VALIDATE-PROOF",
+      "capability": "DOCX/PDF/EPUB rendering, conversion, layout, generic format/accessibility validation and rendered proof mechanics",
+      "classification": "DELEGATED_TO_OTHER_OWNER",
+      "evidence": [
+        "BOOK-SYSTEM-DOCUMENT-SYSTEM-EXPORT-OWNERSHIP-BOUNDARY-001",
+        "BOOK-SYSTEM-PUBLICATION-EXPORT-STANDARDS-PROFILE-001",
+        "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-002"
+      ],
+      "finding": "Book owns domain/export acceptance policy and release authority boundaries; reusable rendering/conversion/proof implementation belongs to Document System or the registered Document/Export provider. No second Book renderer is required."
+    },
+    {
+      "capability_id": "BOOK-CENSUS-015-PROVENANCE-INTEROPERABILITY",
+      "capability": "W3C PROV and optional C2PA external provenance projection",
+      "classification": "CONTRACT_OR_RESEARCH_ONLY",
+      "evidence": [
+        "BOOK-SYSTEM-PROVENANCE-INTEROPERABILITY-PROJECTION-001"
+      ],
+      "finding": "The projection architecture and privacy/rights/currentness laws are defined; Book does not own a duplicate credential embedding/signing engine. Concrete credential implementation is provider/deployment dependent."
+    },
+    {
+      "capability_id": "BOOK-CENSUS-016-BOOK-INTELLIGENCE-ORCHESTRATION",
+      "capability": "Macro/meso/micro Book Intelligence orchestration across structure, canon, chapter/scene goals, prose intent and evidence",
+      "classification": "CONTRACT_OR_RESEARCH_ONLY",
+      "evidence": [
+        "qualification/book-system/BOOK-SYSTEM-BOOK-INTELLIGENCE-UNIFICATION-BINDING-001.json",
+        "system-master/book-system/ executable directory census"
+      ],
+      "finding": "The orchestration ownership model is defined, but no separately qualified Book Intelligence orchestrator was identified in the current executable Book directory. Phase 2 must determine whether this should be implemented as the canonical content-object admission/orchestration successor or remains satisfied by existing parent services."
+    },
+    {
+      "capability_id": "BOOK-CENSUS-017-PROSE-QUALITY-AND-REVISION",
+      "capability": "Literary prose analysis, revision, line/stylistic refinement and prose-specific qualification",
+      "classification": "CHILD_PROSE_DEPENDENCY",
+      "evidence": [
+        "governance/SYSTEM-TOPOLOGY-002.json",
+        "qualification/book-system/BOOK-SYSTEM-BOOK-INTELLIGENCE-UNIFICATION-BINDING-001.json"
+      ],
+      "finding": "PROSE is a child of BOOK with its own control path. Book may consume Prose evidence/proposals but must not absorb or duplicate the Prose engine."
+    },
+    {
+      "capability_id": "BOOK-CENSUS-018-BOOK-EVALUATOR",
+      "capability": "Book evaluation/qualification capability currently allocated under Prose",
+      "classification": "CHILD_PROSE_DEPENDENCY",
+      "evidence": [
+        "governance/REALLOCATION-LEDGER-001.json",
+        "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-002"
+      ],
+      "finding": "Historical Book Evaluator work and evidence are preserved but current ownership is under SYSTEM_MASTER/BOOK/PROSE/BOOK_EVALUATOR. Book parent consumes the service seam only."
+    },
+    {
+      "capability_id": "BOOK-CENSUS-019-PUBLICATION-DELIVERY-MACHINE-GATE",
+      "capability": "Machine transition from frozen export toward published/delivered state only after required authority evidence",
+      "classification": "QUALIFIED_EXECUTABLE",
+      "evidence": [
+        "BOOK-SYSTEM-AUTHORING-LIFECYCLE-CONTRACT-001",
+        "qualified Lifecycle v1 subject 4a6e3459d6ba94b7ce191e426ca64bef00d23582",
+        "BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001-CLOSURE"
+      ],
+      "finding": "The machine boundary is qualified; technical export success cannot imply publication authorization."
+    },
+    {
+      "capability_id": "BOOK-CENSUS-020-REAL-PUBLICATION-DISTRIBUTION",
+      "capability": "Real publication authorization, distributor submission/delivery and external release acceptance",
+      "classification": "HUMAN_OR_AUTHOR_BLOCKED",
+      "secondary_classification": "EXTERNAL_OR_NATIVE_BLOCKED",
+      "evidence": [
+        "BOOK-SYSTEM-PUBLICATION-EXPORT-STANDARDS-PROFILE-001",
+        "BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001-CLOSURE"
+      ],
+      "finding": "Real publication requires explicit human/author authority and may depend on external distributor/platform rules. Synthetic qualification evidence cannot satisfy it."
+    },
+    {
+      "capability_id": "BOOK-CENSUS-021-SYSTEM-MASTER-APP-PRESENTATION",
+      "capability": "iPhone Book deck, chat-driven Book controls, author-decision presentation and durable artifact presentation",
+      "classification": "DELEGATED_TO_OTHER_OWNER",
+      "evidence": [
+        "governance/SYSTEM-TOPOLOGY-002.json",
+        "qualification/book-system/BOOK-SYSTEM-PARENT-INTEGRATION-BOUNDARY-001.json"
+      ],
+      "finding": "Book supplies semantic state/operations and decision requirements. Native application presentation, identity/session UX and cross-tool artifact surfaces belong to System Master Core/app presentation rather than a second Book UI runtime."
+    },
+    {
+      "capability_id": "BOOK-CENSUS-022-END-TO-END-AUTHORING-COMPOSITION",
+      "capability": "Synthetic composition of canonical state, provider intake, lifecycle, versioning, author decisions, export freeze and publication boundary",
+      "classification": "QUALIFIED_EXECUTABLE",
+      "evidence": [
+        "qualification/book-system/end-to-end-authoring-001/BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001-CLOSURE.json",
+        "qualified subject 50a81c3cd3575fe45465584347711d3a7c74413a"
+      ],
+      "finding": "Hosted and authoritative A-01 both pass 48/48. Scope is synthetic composition only and does not erase the content-object admission gap or prove production/human authority."
+    },
+    {
+      "capability_id": "BOOK-CENSUS-023-PRODUCTION-DEPLOYMENT-READINESS",
+      "capability": "Production deployment, persistence backend, operational observability and live release readiness for Book inside System Master",
+      "classification": "DELEGATED_TO_OTHER_OWNER",
+      "secondary_classification": "EXTERNAL_OR_NATIVE_BLOCKED",
+      "evidence": [
+        "BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001-CLOSURE",
+        "governance/SYSTEM-TOPOLOGY-002.json"
+      ],
+      "finding": "The Book machine qualifications prove deterministic domain behavior, not product-wide deployment/operations. Production host, persistence integration, observability and app release are System Master/Core/platform concerns unless a later census finding proves a Book-specific missing adapter."
+    }
+  ],
+  "phase_001_conclusions": {
+    "qualified_spine": "The Book governance/admission/lifecycle/version/author/export spine is materially executable and exact-SHA qualified through synthetic E2E composition.",
+    "first_proven_book_owned_machine_gap": "Book has no qualified parent operation that creates/versions/admits new long-form content objects (governing brief, canon manifest, story bible, book plan, manuscript; chapter/scene granularity also lacks an explicit qualified admission path).",
+    "do_not_misclassify_as_gap": [
+      "Prose literary refinement: child Prose ownership",
+      "Book Evaluator: child Prose capability ownership",
+      "Document rendering/conversion/proof implementation: Document/provider ownership",
+      "Native iPhone presentation: System Master/Core ownership",
+      "Real author decisions and publication authorization: human authority",
+      "External distributor acceptance: external dependency"
+    ],
+    "book_intelligence_question": "Phase 2 must decide whether Book Intelligence needs a separately executable orchestrator or whether its necessary machine behavior should be satisfied by the same canonical content-object admission layer plus existing qualified services.",
+    "stale_governance_to_reconcile": [
+      "Shared WORK-OBLIGATION-REGISTRY-001 still marks BOOK-SYSTEM-VERSION-AND-ROLLBACK-001 active even though its exact subject is authoritative A-01 PASS.",
+      "Book Second Shift active routing predates State-023 and must be rebound to census work only if useful unattended work remains."
+    ]
+  },
+  "phase_002_objective": "Forensically define the smallest successor contract for the proven Book-owned content-object admission/versioning gap, determine whether chapter/scene and Book Intelligence orchestration belong inside that same boundary, reconcile stale shared Book obligation/completion metadata, and update Second Shift to the resulting exact current objective.",
+  "no_completion_claim": true
+}
