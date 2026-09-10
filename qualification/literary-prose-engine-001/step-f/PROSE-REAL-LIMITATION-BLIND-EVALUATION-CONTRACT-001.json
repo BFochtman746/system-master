@@ -10,6 +10,25 @@
     "labels_recorded": 0,
     "revision_authority_count": 0
   },
+  "forensic_repair": {
+    "repair_id": "PROSE-BLIND-EXECUTION-FORENSIC-REPAIR-001",
+    "reason": "Fresh blind execution could not progress because source retrieval was unspecified and the recorded paragraph index base did not reproduce any frozen passage digest.",
+    "repair_scope": "SOURCE_CUSTODY_AND_RECONSTRUCTION_ONLY__NO_PREDICTIONS__NO_LABEL_TUNING",
+    "digest_authority_preserved": true,
+    "author_labels_used_for_repair": false
+  },
+  "source_retrieval_contract": {
+    "preferred_surface": "CHATGPT_FILES_LIBRARY",
+    "lookup": "EXACT_TITLE_SEARCH_IN_LIBRARY",
+    "materialization": "RAW_FILE_TO_EPHEMERAL_WORKDIR",
+    "selection_rule": "USE_ONLY_A_FILE_WHOSE_SHA256_EQUALS_THE_CONTRACT_SOURCE_PACKAGE_SHA256",
+    "multiple_match_rule": "HASH_ALL_EXACT_TITLE_MATCHES_AND_USE_ONLY_THE_EXACT_DIGEST_MATCH",
+    "missing_or_mismatched_rule": "STOP_SOURCE_CUSTODY_BLOCKED",
+    "repository_persistence_allowed": false,
+    "raw_manuscript_commit_allowed": false,
+    "library_file_id_is_not_authority": true,
+    "rationale": "Library file IDs may vary by context; filename plus exact SHA256 is the durable source identity."
+  },
   "source_custody": [
     {
       "source_id": "MOSES_I",
@@ -29,9 +48,13 @@
   ],
   "passage_reconstruction_contract": {
     "paragraph_index_space": "NONEMPTY_DOCX_PARAGRAPHS",
-    "index_base": 1,
+    "text_extraction_rule": "CONCAT_DESCENDANT_W_T_PER_W_P__STRIP_OUTER_WHITESPACE__DROP_EMPTY",
+    "index_base": 0,
+    "range_end": "INCLUSIVE",
     "join_rule": "JOIN_SELECTED_NONEMPTY_PARAGRAPHS_WITH_SINGLE_ASCII_SPACE",
     "digest_rule": "SHA256_UTF8_OF_JOINED_PASSAGE",
+    "digest_authority": "AUTHORITATIVE",
+    "word_count_authority": "ADVISORY_ONLY",
     "raw_prose_commit_allowed": false,
     "candidate_prose_commit_allowed": false
   },
@@ -43,6 +66,13 @@
     {"case_id":"PROSE-LGT-005","source_id":"UNHINDERED_4","chapter_number":28,"passage_sha256":"5bc39d758446fd9daec6741535db780389fb023badc0d80953fb438b9443573b","word_count":162,"source_paragraph_start":5747,"source_paragraph_end":5768},
     {"case_id":"PROSE-LGT-006","source_id":"UNHINDERED_4","chapter_number":30,"passage_sha256":"ee0b49a51cf044af9b3bb34596aa1e6f0d17d2aba12c7ef400c867ef359224dd","word_count":175,"source_paragraph_start":6217,"source_paragraph_end":6230}
   ],
+  "preflight": {
+    "script": "qualification/literary-prose-engine-001/step-f/prose_blind_source_custody_preflight.py",
+    "required_before_scoring": true,
+    "pass_condition": "3_OF_3_SOURCE_DIGESTS_MATCH__6_OF_6_PASSAGE_DIGESTS_MATCH",
+    "output_must_not_contain_raw_prose": true,
+    "on_failure": "STOP_EVIDENCE_MISMATCH_OR_SOURCE_CUSTODY_BLOCKED"
+  },
   "blindness_rules": {
     "fresh_evaluator_context_required": true,
     "before_prediction_seal_must_not_read": [
@@ -52,6 +82,7 @@
     ],
     "permitted_before_prediction_seal": [
       "this blind branch",
+      "ChatGPT Files Library only to locate the three exact private source filenames and materialize candidate bytes for SHA256 verification",
       "the three admitted private source manuscripts after source SHA verification",
       "qualified semantic evidence validator and semantic-to-diagnostic adapter already present on this branch",
       "qualified Passage Intelligence and Step-F code already present on this branch"
@@ -63,6 +94,8 @@
   },
   "required_prediction_output": {
     "one_record_per_case": true,
+    "artifact_path": "qualification/literary-prose-engine-001/step-f/blind-evaluation-001/PROSE-REAL-LIMITATION-BLIND-PREDICTION-SEAL-001.json",
+    "write_mode": "CREATE_ONLY__NEVER_OVERWRITE_A_SEALED_PREDICTION",
     "fields": [
       "case_id",
       "passage_sha256",
@@ -74,13 +107,16 @@
       "revision_allowed"
     ],
     "revision_allowed_must_equal": false,
-    "seal": "COMMIT PREDICTIONS TO BLIND BRANCH BEFORE ANY GROUND-TRUTH READ"
+    "seal": "CREATE_AND_COMMIT_THE_PREDICTION_ARTIFACT_ON_THE_BLIND_BRANCH_BEFORE_ANY_GROUND_TRUTH_READ",
+    "write_failure": "STOP_PREDICTION_SEAL_WRITE_BLOCKED__DO_NOT_READ_GROUND_TRUTH"
   },
   "comparison_phase": {
     "ground_truth_branch": "literary-prose-engine-001",
     "ground_truth_commit": "338797ecd56ca46efd7ab14e9a2cd9bb7acd1263",
     "ground_truth_packet": "qualification/literary-prose-engine-001/step-f/PROSE-REAL-LIMITATION-GROUND-TRUTH-AUTHOR-PACKET-001.json",
     "comparison_allowed_only_after_prediction_seal": true,
+    "receipt_path": "qualification/literary-prose-engine-001/step-f/blind-evaluation-001/PROSE-REAL-LIMITATION-BLIND-COMPARISON-RECEIPT-001.json",
+    "receipt_write_mode": "CREATE_ONLY",
     "measure": [
       "REAL_LIMITATION identification",
       "downgrade behavior",
@@ -91,5 +127,5 @@
     ],
     "revision_authority_remains_zero": true
   },
-  "standing": "READY__PRELABEL_BRANCH_ISOLATED__FRESH_BLIND_EVALUATOR_REQUIRED__REVISION_AUTHORITY_ZERO"
+  "standing": "REPAIRED__SOURCE_RETRIEVAL_EXPLICIT__0_BASED_INCLUSIVE_RECONSTRUCTION__FRESH_BLIND_EVALUATOR_REQUIRED__REVISION_AUTHORITY_ZERO"
 }
