@@ -1,0 +1,53 @@
+{
+  "census_id": "SYSTEM-MASTER-FOUNDATION-CLOSURE-CENSUS-001",
+  "status": "ACTIVE",
+  "created_at": "2026-09-10T05:41:00-04:00",
+  "purpose": "Prove, rather than assume, whether System Master foundational mapping, tracing, ownership and execution semantics are complete.",
+  "scope": [
+    "all canonical foundational requirements and capability crosswalk entries including C00-C49 and P00-P15",
+    "all first-class and headless capability ownership decisions",
+    "all command, query, API, event and error routes",
+    "transaction, concurrency, idempotency, cache, invalidation and sync semantics where applicable",
+    "canonical writer and persistence/database responsibility",
+    "authority, privacy, native, human and external dependency boundaries",
+    "evidence/provenance, completion, obligation and expectation bindings",
+    "failure, retry, timeout, rollback and recovery behavior",
+    "tests, benchmarks, static/dynamic checks and failure-injection obligations",
+    "build, release, deployment, operations, maintenance and documentation foundation obligations"
+  ],
+  "required_columns": [
+    "requirement_or_capability_id",
+    "canonical_owner",
+    "authority_source",
+    "contract_or_interface",
+    "ingress_routes",
+    "egress_routes",
+    "persistence_or_canonical_writer",
+    "dependencies",
+    "failure_semantics",
+    "evidence_target",
+    "test_or_acceptance_target",
+    "current_state",
+    "gap_or_blocker",
+    "successor",
+    "evidence_pointer"
+  ],
+  "allowed_states": [
+    "COMPLETE_WITH_EVIDENCE",
+    "ACTIVE_GAP",
+    "DURABLY_BLOCKED_EXTERNAL_HUMAN_PRIVATE_NATIVE",
+    "EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY"
+  ],
+  "closure_rule": "Foundation 1.0 may be called complete only when every in-scope row is COMPLETE_WITH_EVIDENCE or EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY, and every durable blocker is separately recorded as preventing only the dependent capability rather than silently closing unrelated work.",
+  "no_silent_gap_rule": "Missing owner, route, contract, canonical writer, authority boundary, failure semantics, evidence target or acceptance target is an ACTIVE_GAP, not completion.",
+  "execution_rule": "Each ACTIVE_GAP must be assigned to its canonical owner and converted into the highest-value safe successor packet. Owners continue after each completion until their dependency-valid ladder is exhausted.",
+  "initial_owner_order": ["CORE", "LEARNING", "BOOK", "PROSE"],
+  "prose_recovery_ref": "governance/second-shift/PROSE-RECOVERY-2026-09-10-0541.json",
+  "forbidden_claims": [
+    "do not infer completion from prior planning volume",
+    "do not fabricate ownership, authority or evidence",
+    "do not treat a stale/absent delegation as an empty valid lane",
+    "do not transfer hosted evidence into A-01/native/private/publication/production authority"
+  ],
+  "final_artifact": "A 100-percent disposition matrix plus unresolved-gap successor register and Foundation 1.0 closure decision."
+}
