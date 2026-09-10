@@ -104,7 +104,7 @@ The exact final evidence is preserved under `/System Assurance/`:
 
 - `SMR019_SUPERSEDING_CUMULATIVE_PORTABLE_001.zip` — SHA-256 `6dadde63ed998cd3300818333fa3204290b0bf13e0dc1933943ec0b6d5871b12`;
 - `SMR019_SUPERSEDING_CUMULATIVE_PORTABLE_001.zip.sha256`;
-- `SMR019_SUPERSEDING_CUMULATIVE_PORTABLE_QUALIFICATION_CAPSULE_001.json` — SHA-256 `bea ac81a88f9efd05a0224e7f3e4e521094c1fc252934fad5192779e95d8ddb8` with the embedded space removed: `beaac81a88f9efd05a0224e7f3e4e521094c1fc252934fad5192779e95d8ddb8`;
+- `SMR019_SUPERSEDING_CUMULATIVE_PORTABLE_QUALIFICATION_CAPSULE_001.json` — SHA-256 `beaac81a88f9efd05a0224e7f3e4e521094c1fc252934fad5192779e95d8ddb8`;
 - `SMR019_SUPERSEDING_CUMULATIVE_PORTABLE_QUALIFICATION_CAPSULE_001.json.sha256`.
 
 The capsule binds the final archive, release manifest, CURRENT-AUTHORITY, fresh-extraction results, deterministic peer archive and qualification-log digests. This prevents the passing runnable lineage from becoming transient local state.
