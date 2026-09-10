@@ -6,13 +6,21 @@
   "execution_control": "governance/second-shift/SECOND-SHIFT-EXECUTION-CONTROL-001.md",
   "utilization_event_schema": "governance/second-shift/SECOND-SHIFT-UTILIZATION-EVENT-SCHEMA-001.json",
   "enforcement_script": ".github/scripts/second-shift-enforce.js",
+  "owner_coverage_enforcement_script": ".github/scripts/second-shift-owner-coverage.js",
   "enforcement_workflow": ".github/workflows/second-shift-enforcement.yml",
   "owner_files": {
+    "SYSTEM_MASTER": "governance/second-shift/SYSTEM-MASTER-DELEGATIONS.json",
     "CORE": "governance/second-shift/CORE-DELEGATIONS.json",
     "LEARNING": "governance/second-shift/LEARNING-DELEGATIONS.json",
     "BOOK": "governance/second-shift/BOOK-DELEGATIONS.json",
     "PROSE": "governance/second-shift/PROSE-DELEGATIONS.json"
   },
+  "coverage_routes": {
+    "SYSTEM_MASTER/SHARED_INFRASTRUCTURE": "CORE",
+    "SYSTEM_MASTER/SHARED_INFRASTRUCTURE/A01": "CORE"
+  },
+  "owner_discovery_rule": "owner_files is the machine-authoritative Second Shift lane set. Enforcement, controller/preflight logic and future dispatcher implementations must enumerate this map rather than compile a fixed CORE/LEARNING/BOOK/PROSE list.",
+  "root_portfolio_rule": "SYSTEM_MASTER-owned non-system headless capability portfolios, including Content & Document Artifacts and future Spreadsheet/Math/Data, Software Engineering/Local Model, Research/Knowledge, Connected Actions and Media portfolios, share the SYSTEM_MASTER Second Shift owner lane. Creating a new tool portfolio does not create a peer system or require a new Second Shift lane. A genuinely new first-class owner system requires explicit topology/ownership admission and a registry owner_files entry in the same change.",
   "p9_selector_reconciliation": {
     "reconciled_at": "2026-09-10T10:12:00-04:00",
     "CORE": "READY__SMR021_GITHUB_NATIVE_TRANSPORT_009__HEAD_2031f070bd3702185c028733819ec410db36613c",
@@ -21,15 +29,16 @@
     "PROSE": "READY__BLIND_EVALUATOR_LAUNCH_PACKET_002__HEAD_309a7876b8e388d115d4d3bde7dc39dd0ef8b6fd",
     "strict_schema_repair": "Canonical owner selector files carry created_at, last_revalidated_at, on_pass and on_failure required by the repository-wide System State Reconciler. Versioned governance/second-shift/p9/* files remain repair evidence only and are not registry targets.",
     "topology_compatibility": "Owner file paths retain canonical *-DELEGATIONS.json endings required by validate-system-topology.js and A-01 Control Plane Enforcement.",
-    "history_rule": "All pre-P9 selector states remain preserved in Git history and P9 repair artifacts. No product completion or exact-SHA evidence is deleted or relabeled."
+    "history_rule": "All pre-P9 selector states remain preserved in Git history and P9 repair artifacts. No product completion or exact-SHA evidence is deleted or relabeled.",
+    "scope_note": "P9 reconciled the four then-existing child/system owner lanes. The later SYSTEM_MASTER root lane is a product-root headless-portfolio extension and does not rewrite the sealed P9 evidence."
   },
-  "portfolio_rule": "The portfolio controller reads the four owner files from current main, revalidates each against the live owner control head, active claim/lease and repair state, removes stale/non-open items from admission, and admits current READY work or selects a new owner-valid successor through the mandatory work-ahead ladder. A stale, missing, completed or blocked delegation never by itself permits idling.",
-  "day_shift_rule": "Whenever a system chat closes, supersedes, blocks or materially changes its current objective, it must reconcile its delegation file in the same working session. If the previous delegation is no longer current, remove it from active_delegations, preserve closure/supersession evidence, and re-evaluate the successor before leaving an overnight-ready state.",
-  "night_start_rule": "The portfolio controller performs a fresh pre-shift launch/reconciliation at 23:45 America/New_York. Each owner worker independently revalidates its selected delegation again immediately before execution; the pre-shift plan is not execution authority if state changes after planning.",
-  "dispatch_rule": "CORE, LEARNING, BOOK and PROSE are each re-invoked once per hour at staggered off-hour minutes during 00:00-07:00; the portfolio controller rechecks all lanes once per hour. Within an invocation, completion or material block is followed immediately by owner re-read, evidence preservation, successor binding and further dependency-valid work while execution capacity remains.",
+  "portfolio_rule": "The portfolio controller reads every owner file declared by owner_files from current main, revalidates each against its declared control binding, current authority-selected obligation registry, active claim/lease and repair state, removes stale/non-open items from admission, and admits current READY work or selects a new owner-valid successor through the mandatory work-ahead ladder. A stale, missing, completed or blocked delegation never by itself permits idling.",
+  "day_shift_rule": "Whenever a system owner chat or the SYSTEM_MASTER root chat closes, supersedes, blocks or materially changes its current objective, it must reconcile its registry-declared delegation file in the same working session. If the previous delegation is no longer current, remove it from active_delegations, preserve closure/supersession evidence, and re-evaluate the successor before leaving an overnight-ready state.",
+  "night_start_rule": "The portfolio controller performs a fresh pre-shift launch/reconciliation at 23:45 America/New_York. Each registry-declared owner worker independently revalidates its selected delegation again immediately before execution; the pre-shift plan is not execution authority if state changes after planning.",
+  "dispatch_rule": "Every registry-declared Second Shift lane is eligible for the configured owner-worker cadence during 00:00-07:00; the portfolio controller rechecks all registry-declared lanes once per hour. Within an invocation, completion or material block is followed immediately by owner re-read, evidence preservation, successor binding and further dependency-valid work while execution capacity remains. Implementations must derive lanes from owner_files rather than hard-code lane names.",
   "claim_rule": "Only one mutation-capable claim/lease may be live per owner lane. CLAIMED work must carry the schema-002 lease, heartbeat, checkpoint and idempotency binding. Stale claims are recovered from the last durable checkpoint after live-authority revalidation.",
   "retry_rule": "Transient dependencies receive a finite classified retry budget with backoff. After budget exhaustion the dependency is circuit-open for that invocation and the lane switches to independent safe work when any work-ahead rung remains executable.",
-  "stale_rule": "No job survives a control-head mismatch by default. Preserve evidence/checkpoint, re-evaluate first, then create a new/revalidated delegation bound to the new head.",
+  "stale_rule": "No job survives a control-binding mismatch by default. Preserve evidence/checkpoint, re-evaluate first, then create a new/revalidated delegation bound to the current owner authority binding.",
   "no_work_rule": "Schedule nothing only after a durable all-rungs-exhausted record proves every work-ahead category is completed, duplicate, dependency-blocked, human/author/private/native/external-authority constrained, or unsafe without a decision, and proves no independent preparation can reduce tomorrow's work. Missing/stale delegation, unavailable A-01, unavailable runner, a transient dependency, completed assignment, blocked critical path or empty active list is never itself proof. Runner utilization alone is not a goal.",
   "successor_rule": "After every completion or material block, the owner worker re-reads live authority and selects the next highest-value dependency-valid unattended-safe project while time remains. Completing one project does not end the shift. A worker hitting a tool/runtime boundary must leave a current READY successor unless all rungs are durably exhausted.",
   "utilization_rule": "Per-lane append-only shift event ledgers are the authority for READY/RUNNING/BLOCKED/STALE/IDLE duration. Commit timestamps, workflow duration and runner uptime are evidence/context only and are never sufficient utilization telemetry.",
