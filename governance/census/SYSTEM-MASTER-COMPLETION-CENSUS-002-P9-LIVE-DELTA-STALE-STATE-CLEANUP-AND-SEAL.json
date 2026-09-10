@@ -1,0 +1,122 @@
+{
+  "census_id": "SYSTEM-MASTER-COMPLETION-CENSUS-002",
+  "phase_id": "P9",
+  "result_id": "SYSTEM-MASTER-COMPLETION-CENSUS-002-P9-LIVE-DELTA-STALE-STATE-CLEANUP-AND-SEAL",
+  "effective_date": "2026-09-10",
+  "owner_path": "SYSTEM_MASTER",
+  "standing": "PHASE_COMPLETE__LIVE_DELTA_RECONCILED__STALE_SELECTORS_REPAIRED__FINAL_SEAL_READY",
+  "purpose": "Reconcile post-watermark and post-P8 owner movement, repair stale live scheduling selectors without deleting historical evidence, preserve exact authority boundaries, and establish the final successor baseline plus one central post-census product objective.",
+  "historical_watermark": {
+    "main": "ee4e000a1f71695b95fcf1cbc506162692782fb3",
+    "CORE": "119229a3673dcf24abdbf09cf0da78b78cbd4750",
+    "LEARNING": "c363dfcef9d00d559a8c6ccb4b07112569ea37b4",
+    "BOOK": "bc9961f83ed4d4bccbaaaca87c1ef69f8fa1e91d",
+    "PROSE": "65a8a7f6f0c64899d0ee44fc3b2e097a2e2a39e8"
+  },
+  "seal_owner_snapshot": {
+    "CORE": {
+      "control_ref": "system-master/control-v2",
+      "control_head": "2031f070bd3702185c028733819ec410db36613c",
+      "current_objective": "SMR021-GITHUB-NATIVE-EXACT-CAPSULE-IMPORT-AND-RUNNABLE-SOURCE-TRANSPORT-009"
+    },
+    "LEARNING": {
+      "control_ref": "learning/control-v1",
+      "control_head": "262f3f0b5ffa4dea68964b91eacd57a4c39bdda6",
+      "current_objective": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001B-ASSESSMENT-TARGET-DOMAIN-III-BATCH-01-CANDIDATE-033A",
+      "progress": "Full 66-node structural graph closure hosted PASS; assessment contract hosted PASS; Domain I targets 8/8 hosted PASS; Domain II targets 23/23 hosted PASS; 31 cumulative targets validated; Domain III Batch 01 selected.",
+      "latest_owner_evidence": "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001B-ASSESSMENT-TARGET-DOMAIN-II-CLOSURE-AND-DOMAIN-III-BATCHING-032.json"
+    },
+    "BOOK": {
+      "control_ref": "book-system/control-v1",
+      "control_head": "05c1f53e2f710f419a99cb99594c53c2f0240b68",
+      "current_objective": "BOOK-SYSTEM-RF012-OWNER-PROMOTION-REBIND-AND-NEXT-OWNER-SELECTION-004",
+      "rf012_candidate_sha": "67a23c0b09505dc3dd8fd748523fec3868f649b0",
+      "original_content_admission_a01_subject": "e993806a1d9a4838d4bd6d162a36921526ef302a"
+    },
+    "PROSE": {
+      "control_ref": "literary-prose-engine-001",
+      "control_head": "309a7876b8e388d115d4d3bde7dc39dd0ef8b6fd",
+      "current_objective": "PROSE-BLIND-EVALUATOR-LAUNCH-PACKET-002",
+      "fresh_context_only_objective": "PROSE-REAL-LIMITATION-BLIND-MODEL-SCORING-001"
+    }
+  },
+  "live_delta_reconciliation": [
+    "CORE, BOOK and PROSE remained stable through the final census window; no owner-history replay was required.",
+    "LEARNING advanced repeatedly after P8 through full-graph closure, assessment-target contract qualification, Domain I target qualification, Domain II target qualification and selection of Domain III Batch 01. Each movement was owner-valid and was reconciled delta-only rather than treated as orphan or census invalidation.",
+    "The immutable census watermark remains historical. Post-watermark owner movement is preserved as AUTHORITY_DELTA evidence rather than rewritten into the original audit starting point."
+  ],
+  "stale_state_cleanup": {
+    "second_shift": {
+      "finding": "The four pre-P9 active scheduling selectors were semantically behind later owner-valid evidence. Initial replacement selector files also exposed two real control-contract defects: missing schema-002 execution fields and noncanonical registry filenames.",
+      "repair": [
+        "Canonical CORE-DELEGATIONS.json now selects SMR021 transport 009 and includes created_at, last_revalidated_at, on_pass and on_failure.",
+        "Canonical LEARNING-DELEGATIONS.json now selects Domain III assessment-target Batch 01 033A on owner head 262f3f0b5ffa4dea68964b91eacd57a4c39bdda6 and includes full schema-002 fields.",
+        "Canonical BOOK-DELEGATIONS.json now selects RF012 owner promotion/rebind 004 and includes full schema-002 fields.",
+        "Canonical PROSE-DELEGATIONS.json now selects label-free blind-evaluator launch packet 002 and includes full schema-002 fields while real six-case scoring remains fresh-context-only.",
+        "SECOND-SHIFT-REGISTRY-001 again points only to canonical *-DELEGATIONS.json filenames required by topology enforcement; versioned p9 selector files remain historical repair evidence, not live selectors."
+      ],
+      "history_preserved": true,
+      "destructive_cleanup_performed": false
+    },
+    "badly_named_refs": {
+      "refs": ["tmp", "tmp-noop"],
+      "disposition": "HISTORICAL_CORE_EVIDENCE__NON_AUTHORITY__NO_LIVE_SELECTOR_DEPENDENCY",
+      "cleanup_action": "No deletion required for final seal. They remain historical refs and cannot execute/promote because current authority and owner controls do not select them."
+    }
+  },
+  "control_gate_evidence": {
+    "clean_reconciled_snapshot_main": "7f1233e8b2d86ae066b2e27a5a115dbff23138ea",
+    "a01_control_plane_enforcement": {"run_id": 34487430968, "result": "PASS"},
+    "second_shift_enforcement": {"run_id": 34487431017, "result": "PASS"},
+    "system_state_reconciler": {"run_id": 34487430905, "result": "PASS"},
+    "meaning": "All three repository-wide control gates passed on the same exact reconciled main snapshot after canonical path/schema repair. Later seal/authority commits must still be treated as changed repository state and are subject to the same automatic gates; a later red gate is a new drift signal, not permission to reinterpret this PASS."
+  },
+  "a01_repair_boundary": {
+    "transaction_id": "A01-REPAIR-a01-run-34431764843-A01-CONTROL-PLANE-SELFTEST-A1",
+    "state": "A01_REQUEUE_READY",
+    "replacement_subject_sha": "ceb6870546012b789caea56499a1d219a195dc8b",
+    "authoritative_pass": false,
+    "rule": "Do not close the transaction or claim PASS until a real authoritative replacement A-01 receipt is adjudicated into this same lineage."
+  },
+  "p9_closures": [
+    "SYSTEM-MASTER-P9-STALE-REF-AND-POINTER-CLEANUP-001",
+    "SECOND-SHIFT-OWNER-DELEGATION-REBIND-001",
+    "SYSTEM-MASTER-COMPLETION-CENSUS-002 after final successor records are selected"
+  ],
+  "still_open_after_census": {
+    "product_owner_lanes": [
+      "CORE-SMR021-USER-EXPERIENCE-001",
+      "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001",
+      "LEARNING-REAL-PARTICIPANT-PILOT-001__HUMAN_ONLY",
+      "BOOK-SYSTEM-CANONICAL-CONTENT-OBJECT-ADMISSION-001-A01-REGISTRATION-AND-QUALIFICATION-PREP",
+      "BOOK-SYSTEM-RF012-OWNER-PROMOTION-REBIND-AND-NEXT-OWNER-SELECTION-004",
+      "PROSE-BLIND-EVALUATOR-LAUNCH-PACKET-002",
+      "PROSE-REAL-LIMITATION-BLIND-MODEL-SCORING-001__FRESH_CONTEXT_ONLY"
+    ],
+    "shared_infrastructure": [
+      "A01-CONTROL-PLANE-SELFTEST-A1-REPLACEMENT-RERUN-001",
+      "SECOND-SHIFT-LIVE-AUTHORITY-SUCCESSOR-ENFORCEMENT-002"
+    ],
+    "product_architecture": [
+      "SYSTEM-MASTER-HEADLESS-TOOL-OWNER-ALLOCATION-001",
+      "SYSTEM-MASTER-DOCUMENT-TOOL-CURRENT-ADMISSION-001",
+      "SYSTEM-MASTER-AIINCOME-PORTFOLIO-OWNER-DECISION-001",
+      "SYSTEM-MASTER-MODULE-NAME-COLLISION-ADJUDICATION-001"
+    ]
+  },
+  "central_next_objective": {
+    "obligation_id": "SYSTEM-MASTER-HEADLESS-TOOL-OWNER-ALLOCATION-001",
+    "selection_reason": "P6 proved that the largest remaining product-root architecture gap is not missing research but missing current semantic ownership for the headless tool portfolio. Resolving this first prevents one-system-per-tool proliferation, prevents Core from accidentally absorbing domain semantics, and gives preserved DOCX/PPTX/PDF/spreadsheet/code/research/media evidence a lawful current admission path.",
+    "required_result": "Define the smallest non-duplicative owner-contract portfolio for unresolved headless modules over Core shared runtime while preserving CORE/LEARNING/BOOK/PROSE topology and explicit AI Income/Portfolio/name-collision decisions."
+  },
+  "authority_boundaries": [
+    "No historical or hosted PASS was transferred to another SHA or authority class.",
+    "No human, author, private, blind, A-01, native, publication or production evidence was fabricated.",
+    "No branch, workstream or qualification name created a product system.",
+    "No historical ref or completed evidence was deleted to make the live state look cleaner.",
+    "P9 completion seals the census and routing truth; it does not declare System Master product implementation complete."
+  ],
+  "successor_baseline": "governance/SYSTEM-STATE-BASELINE-003.json",
+  "successor_obligation_registry": "governance/WORK-OBLIGATION-REGISTRY-002.json",
+  "final_census_seal": "governance/census/SYSTEM-MASTER-COMPLETION-CENSUS-002-FINAL-SEAL.json"
+}
