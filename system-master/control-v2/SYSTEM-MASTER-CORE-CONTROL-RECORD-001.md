@@ -9,150 +9,130 @@ Topology authority: `governance/SYSTEM-TOPOLOGY-002.json` on canonical `main`
 
 ## Scope
 
-CORE is the shared Foundation & Spine inside the System Master product. It owns the shared authority spine, data/platform/runtime foundations, continuity/recovery, assurance/reconciliation and shared A-01/control-plane integration.
+CORE owns the shared System Master Foundation & Spine, including shared authority/data/platform/runtime foundations, Continuity/Recovery, Assurance/Reconciliation, shared Chat/Work/UX foundations, and A-01/control-plane integration. CORE does not own Learning product logic, Book product logic, or Prose product logic.
 
-CORE is **not** the System Master product root and does not own Learning product logic, Book product logic or Prose product logic. LEARNING and BOOK are sibling tool systems under SYSTEM MASTER; PROSE is a child of BOOK.
+Detailed historical subjects, receipts, repair patches, source-custody forensics, and failed candidates remain preserved in the technical records on this branch. This record summarizes only current execution authority. No PASS transfers between different source/test subjects.
 
-Historical references to `MASTER`, `MASTER SYSTEM` or `System Master foundation/spine` in this branch map to `SYSTEM_MASTER/CORE` under the current topology.
+## Source-custody deadlock repair — CLOSED
 
-## Evidence preservation rule
+The prior critical path requiring recovery of lost exact subjects `cc67826... -> 9571b3... -> 89066e56...` is retired as a blocking product dependency.
 
-Detailed dependency-spine history, candidate identities, qualification receipts, repair patches, source-custody forensics and historical blockers remain preserved in the technical records on this branch. This control record is intentionally concise so it does not duplicate large bodies of evidence and become a second stale authority source.
+`SMR020-EXTERNAL-RECONSTRUCTION-OBJECT-RECOVERY-001.md` proved that currently accessible GitHub/ref/PR/release, Library-delta, Google Drive, runner, and workflow-artifact recovery surfaces did not contain the missing exact objects. Requiring an owner-external backup indefinitely would therefore make the product critical path dependent on an object that may not exist.
 
-No evidence is deleted or transferred by this summary. Exact-subject PASS remains bound only to the exact bytes/commit that produced it.
+`CORE-SOURCE-CUSTODY-DEADLOCK-REPAIR-001.md` applied the already-established repository precedent from `PLATFORM005-REDERIVED-ASSEMBLY-004.md`: when prior exact bytes are unavailable but preserved source plus durable repair semantics exist, Core may create a **new superseding exact subject**, transfer no PASS, and freshly qualify it.
 
-Primary evidence records include:
+The old hashes remain immutable evidence labels only. Open-ended hash-preimage/source guessing is prohibited.
 
-- `PLATFORM005-REDERIVED-ASSEMBLY-004.md`
-- `PLATFORM005-RECONCILIATION-004.md`
-- `PLATFORM005_TEMPORAL_PROJECTION_CACHE_PARITY_REPAIR_001.patch`
-- `PLATFORM005_FAIL_CLOSED_NAVIGATION_PARITY_REPAIR_001.patch`
-- `PLATFORM005_PARSED_PATH_API_ROUTE_REPAIR_002.patch`
-- `CHAT001A-CUMULATIVE-ASSEMBLY-003.md`
-- `CHAT001A-RECONCILIATION-003.md`
-- `OPERATOROPS001_R024_REBUILD_001.patch`
-- `OPERATOROPS001-RECONCILIATION-001.md`
-- `USEREXPERIENCE001_R025_DB_PARITY_REPAIR_001.patch`
-- `USEREXPERIENCE001-RECONCILIATION-001.md`
-- `SMR021-ADMISSION-BINDING-TOMORROW-READINESS-001.md`
-- `SMR021-AUTHORIZATION-CONTEXT-BINDING-RESEARCH-DELTA-001.md`
-- `SMR021-OFFLINE-ACCESSIBILITY-RESEARCH-DELTA-001.md`
-- `SMR021-PERSISTENCE-CONCURRENCY-RESEARCH-DELTA-001.md`
-- `SMR021-TOMORROW-READINESS-CHECKPOINT-001.md`
-- `SMR020-DEPENDENCY-CURRENT-SOURCE-CUSTODY-RECOVERY-001.md`
-- `SMR020-RUNNER-CUSTODY-FORENSICS-001.md`
-- `SMR020-EXTERNAL-RECONSTRUCTION-OBJECT-RECOVERY-001.md`
-- `CORE-AUTHORITY-DELTA-DD74915F-RECONCILIATION-001.md`
-- `CORE-SOURCE-CUSTODY-DEADLOCK-REPAIR-001.md`
+## SMR018 / PLATFORM-005 — superseding lineage portable closure
 
-## Current standing
+Evidence: `SMR018-SUPERSEDING-LINEAGE-RECONSTITUTION-001.md`.
 
-### Historical/local exact-subject evidence retained
-
-The following subjects remain valid evidence identities for the exact bytes previously qualified locally:
-
-- SMR018 / PLATFORM-005: `cc67826bb608fc82459e23c59d5e0106d10422c6fe79f45f0571be60356b7d54`
-- SMR019 / CHAT-001A: `9571b3f4f876980047facbdd77cf17f8a8a2d3255bab9704ceb3fd49cddbd5f3`
-- SMR020 / OPERATOR-OPS-001: `89066e5662554b1810691473e0ed9bf49d8cc2fd4964444043b878461ed75477`
-
-They proved important semantics and portable qualification on those exact bytes. Their complete runnable source trees were not preserved in ordinary GitHub-native immutable custody, and exhaustive currently accessible custody searches did not recover them.
-
-Those hashes therefore remain **historical/local evidence identities, not mandatory future product identities**.
-
-The failed SMR021 diagnostic subject `ca2c9348040936a7b11d5367d16aed1251abc3e92dd5ec7b62326ff5c1f7aef8` remains failed evidence only and must never be promoted.
-
-### Historical recovered source available for a fresh lineage
-
-An independently recovered exact historical SMR018 archive/source exists with source/test subject:
+Historical recovered source base:
 
 `66657a53d962e045d3f24baee9da4d6a107a152a404b84e3c9973b90b22b906c`
 
-The repository also preserves the PLATFORM-005 correction streams required to reconstruct the current intended semantics. This makes forward reconstitution executable without recovering the lost textual identity of `cc67826...`.
+A new candidate was reconstituted from that exact base plus the durable PLATFORM-005 temporal projection/cache, fail-closed navigation/schema/browser/cache-generation, and parsed-path API-route repair streams. Contract-derived tests/verifiers were created without attempting to reproduce lost textual bytes.
 
-## Source-custody deadlock adjudication
+New exact SMR018 source/test subject:
 
-The prior recovery path is closed as a blocking critical path.
+`cf2a7e7a2fb882d72162e49d226137bea838a6912c11e84cd7b2be88fdc9d781`
 
-`SMR020-EXTERNAL-RECONSTRUCTION-OBJECT-RECOVERY-001.md` established that all currently accessible GitHub, branch/ref/PR/release, ChatGPT Library delta, Google Drive, current-runner and relevant workflow-artifact surfaces are negative. Its successor required an owner-external backup not available to the workstream.
+Fresh qualification on this exact subject:
 
-That is preserved as an optional historical custody-recovery path only. A future real backup may still be inspected, but the product must not remain indefinitely blocked on a cryptographic preimage or absent owner backup.
+- strict Java 21: PASS — 369 main / 18 test sources;
+- executable suites: 18/18 PASS;
+- PLATFORM-005 focused: 120,085 PASS;
+- contract parity: 6/6 PASS;
+- persistence boundary: PASS — 0 PostgreSQL objects / non-sensitive static browser cache only;
+- R022 recurrence: 13/13 PASS;
+- exact source/test subject: PASS;
+- system coherence: PASS — zero warnings;
+- engineering congruence: PASS — 30 authoritative concerns / 0 exceptions;
+- release manifest: 987/987 PASS;
+- release-manifest SHA-256: `4662e2c4bed9d6f8d34f0274220e0d8a02bd2d910af8bbbd6eced072091d6443`;
+- candidate CURRENT-AUTHORITY SHA-256: `f50c77bffe5b48fa063cb2f70c5c85a9f13507aa130b2ed044e07fac6264272d`.
 
-`CORE-SOURCE-CUSTODY-DEADLOCK-REPAIR-001.md` therefore authorizes a fresh superseding dependency train with **no inherited PASS**.
+Deterministic archive/fresh-extraction replay also passed. Two independently generated archives had identical SHA-256:
+
+`bbd268f4f05a1e220a755ff7db44c5564f737336542255d2cfdacc4588043c3d`
+
+A clean extraction reproduced `cf2a7e7a...`, passed release manifest/coherence/congruence/PLATFORM-005 parity/persistence/R022, strict Java 21, and all 18 executable suites.
+
+The exact source/test reconstruction patch from `66657...` to `cf2a7e...` is 28,215 bytes with SHA-256:
+
+`bbe69ab785a2f2fef5cd27aef28571923023f030cd3e28ea8c85d55512331a43`
+
+The complete deterministic packet, compact qualification capsule, and reconstruction patch were immediately preserved in `/System Assurance/` Library custody. This prevents recurrence of the earlier transient-local-source loss.
+
+### Evidence boundary
+
+`cf2a7e7a...` is **LOCAL PORTABLE PASS + DETERMINISTIC FRESH-EXTRACTION PASS + DURABLE LIBRARY CUSTODY**.
+
+It is not yet an ordinary GitHub-native runnable-source commit. That bulk-source transport boundary remains separate and must close before hosted/A-01/promotion evidence that requires exact repository checkout. It no longer blocks dependency-valid local reconstruction of SMR019/020.
+
+Parallel boundary:
+
+`CORE-GITHUB-NATIVE-BULK-SOURCE-TRANSPORT-001`
+
+No hosted, A-01, Apple-native/browser, target-device, or production authority is claimed from the portable result.
+
+## Historical/local identities retained as evidence only
+
+- prior SMR018 local evidence: `cc67826bb608fc82459e23c59d5e0106d10422c6fe79f45f0571be60356b7d54`;
+- prior SMR019 local evidence: `9571b3f4f876980047facbdd77cf17f8a8a2d3255bab9704ceb3fd49cddbd5f3`;
+- prior SMR020 local evidence: `89066e5662554b1810691473e0ed9bf49d8cc2fd4964444043b878461ed75477`;
+- failed SMR021 diagnostic: `ca2c9348040936a7b11d5367d16aed1251abc3e92dd5ec7b62326ff5c1f7aef8`.
+
+None is a required cryptographic preimage for future product work. No qualification result transfers from them to the new lineage.
 
 ## Current Core objective
 
-`CORE-SMR018-SUPERSEDING-LINEAGE-RECONSTITUTION-001`
+`CORE-SMR019-SUPERSEDING-CUMULATIVE-REBUILD-001`
 
-Build a new dependency-valid PLATFORM-005 / SMR018 exact subject from the recovered historical SMR018 source `66657...` plus the durable repair semantics already recorded in GitHub.
+Rebase the preserved CHAT-001A correction semantics onto exact new SMR018 predecessor:
 
-The new candidate is **not required to reproduce `cc67826...` byte-for-byte**. The `37e904e4...` and `cc67826...` hashes remain historical reconstruction/evidence oracles only; open-ended hash-preimage/source guessing is prohibited.
+`cf2a7e7a2fb882d72162e49d226137bea838a6912c11e84cd7b2be88fdc9d781`
 
-### Phase 1 — SMR018 new exact subject
+The preserved CHAT-001A distinction between resumable `STREAM_CHECKPOINT` and canonical `FINAL` remains design/repair input only; prior SMR019 PASS does not transfer.
 
-Apply and reconcile the three durable PLATFORM-005 correction streams:
+Required outcome:
 
-1. temporal projection/cache parity;
-2. fail-closed navigation/schema/browser/cache-generation parity;
-3. parsed-path `/api` route rejection.
+1. build a fresh cumulative SMR019 runnable candidate from `cf2a7e7a...`;
+2. run strict Java 21 and all applicable executable predecessor regressions;
+3. run CHAT-001A focused, contract, PostgreSQL/static-contract, recurrence, PLATFORM-005, persistence, coherence/congruence, exact-subject, manifest, deterministic archive, and fresh-extraction gates;
+4. assign a new exact SMR019 source/test subject only after PASS;
+5. preserve the passing runnable candidate durably before SMR020 reconstruction.
 
-Recreate corresponding tests/verifier guards from the governing contracts. Run the full applicable SMR018 campaign. On PASS:
+On SMR019 portable closure, reapply the preserved R024 OPERATOR-OPS repair/migration semantics to create a new dependency-current SMR020 subject, then resume the already-sealed SMR021 USER-EXPERIENCE readiness packet on that new predecessor.
 
-- compute a new exact source/test subject;
-- preserve the complete runnable source in ordinary GitHub-native immutable custody;
-- run hosted qualification on that exact GitHub subject when applicable;
-- retain old SMR018 hashes as evidence only.
+## A-01 / hosted boundary
 
-### Phase 2 — SMR019 cumulative rebuild
-
-Rebase the preserved CHAT-001A repair onto the new exact SMR018 subject. Run the full cumulative CHAT-001A + PLATFORM-005 campaign. On PASS, compute and preserve a new exact SMR019 subject in GitHub-native custody.
-
-### Phase 3 — SMR020 dependency-current rebuild
-
-Reapply the preserved R024 OPERATOR-OPS repair/migration semantics onto the new exact SMR019 subject. Run the full applicable OPERATOR + predecessor campaign. On PASS, compute and preserve a new exact SMR020 subject in GitHub-native custody.
-
-### Phase 4 — SMR021 dependency-current rebuild
-
-Use the new exact SMR020 subject as the predecessor for `SYSTEM-MASTER-REBUILD-021 / USER-EXPERIENCE-001`.
-
-The already-completed SMR021 readiness packet remains valid as design/research input but transfers no qualification result. Before mutation, verify the current PLATFORM-006 owner-defined descriptor action-grant contract. If that owner-defined grant is absent, stop with an explicit cross-owner PLATFORM-006 contract dependency; USER-EXPERIENCE may consume admission authority but may not invent it.
-
-If the grant exists, apply the work/descriptor/action binding repair plus R025 database-parity transplant, then run the authorization-focused micro-gate and complete portable, persistence/concurrency, offline/accessibility, coherence/congruence, exact-subject and release-manifest qualification.
-
-## Qualification / A-01 boundary
-
-A-01 infrastructure is unchanged.
-
-- No historical/local PASS transfers to a new subject.
-- The exact tested Git commit SHA is the A-01 qualification subject.
-- Deterministic prequalification must occur before A-01.
-- A-01 is not modified merely because old local source bytes were lost.
-- Hosted/A-01 promotion evidence must bind to the new exact GitHub-native subject.
+A-01 normal operating mode is unchanged. The exact tested Git commit SHA is the qualification subject. No local or historical PASS authorizes another SHA. GitHub-native runnable custody plus hosted exact-SHA qualification must exist before any A-01 request dependent on the new lineage.
 
 ## Parallel unresolved Core obligations
 
-- `RECON-001C` remains blocked on credentialed sealed-history Git import under Assurance/Reconciliation.
-- PC/target-only empirical obligations remain distinct; historical SMR020 O012/O013 remain under `PC-ENDGAME-027` until a superseding current-lineage disposition is produced.
+- `CORE-GITHUB-NATIVE-BULK-SOURCE-TRANSPORT-001`: transport the complete new runnable lineage into ordinary GitHub-native immutable custody without changing the qualified bytes, then qualify the exact repository subject as required.
+- `RECON-001C`: credentialed sealed-history Git import remains an Assurance/Reconciliation obligation.
+- PC/target-only empirical obligations remain distinct; historical O012/O013 remain under `PC-ENDGAME-027` until superseding current-lineage disposition.
 - R025 physical device/accessibility/usability evidence remains empirical and unclaimed.
-- The harmless duplicate `tmp-noop` ref recorded by external-recovery forensics is not authority and may be deleted when a supported branch-deletion path is available.
+- `tmp-noop` is a harmless duplicate ref, not authority; remove when a supported branch-ref deletion path is available.
 
 ## Boundary rules
 
-- Qualification evidence remains bound to exact tested subjects; this control record transfers no PASS.
+- Historical hashes are evidence labels, not future preimage requirements.
+- New bytes receive new exact identities and fresh qualification.
 - Local portable PASS is not hosted/A-01/production authority.
-- Historical hashes are evidence labels, not required preimages for future work.
-- New source/test bytes receive new identities and full qualification.
-- Assurance/Reconciliation and Continuity remain Core subsystem/evidence lanes, not peer systems.
-- A-01 is shared System Master infrastructure, administratively integrated through Core; it is not Core product logic and not a peer product system.
-- Core may expose shared interfaces to Learning, Book and Prose, but may not select or overwrite their product critical paths.
+- Qualification evidence is exact-subject scoped.
+- CORE may expose shared interfaces to Learning, Book, and Prose but may not take their product critical paths.
 
 ## Second Shift
 
-Core Second Shift delegation is owned by `governance/second-shift/CORE-DELEGATIONS.json` on canonical `main` and must be revalidated whenever this control head moves.
+CORE Second Shift is governed by `governance/second-shift/CORE-DELEGATIONS.json` on canonical `main` and must match the current live control head before execution.
 
-The new dependency-valid unattended work is the bounded SMR018 superseding-lineage reconstitution/qualification preparation. Completed custody searches, runner forensics, SMR021 research and failed hash-preimage candidate families must not be repeated.
+Completed custody searches, runner forensics, SMR021 research, and failed hash-preimage candidate families must not be repeated. The active unattended-safe product work is now the bounded SMR019 superseding cumulative rebuild and qualification preparation; GitHub-native bulk-source transport remains a parallel boundary.
 
 ## Exact next step
 
-`CORE-SMR018-SUPERSEDING-LINEAGE-RECONSTITUTION-001`
+`CORE-SMR019-SUPERSEDING-CUMULATIVE-REBUILD-001`
 
-Start from exact recovered historical SMR018 source subject `66657...`, apply the three preserved PLATFORM-005 correction streams, create contract-derived tests/verifiers without attempting to reproduce the lost `cc678...` bytes, run the full applicable SMR018 qualification, and preserve the passing runnable candidate in ordinary GitHub-native immutable custody under its newly computed exact subject.
+Use exact new SMR018 subject `cf2a7e7a...` as the predecessor, rebase the preserved CHAT-001A correction semantics onto it, produce a new exact SMR019 candidate, run the full cumulative portable campaign with no PASS transfer, and preserve the passing candidate durably before advancing to SMR020.
