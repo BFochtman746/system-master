@@ -1,0 +1,50 @@
+name: Book Workflow Orchestrator Evidence Provenance Emission 001
+
+on:
+  push:
+    branches:
+      - book-system/control-v1
+    paths:
+      - 'qualification/book-system/book-prose-integration/orchestrator/BOOK-WORKFLOW-ORCHESTRATOR-EVIDENCE-PROVENANCE-EMISSION-001.json'
+      - 'qualification/book-system/book-prose-integration/orchestrator/BOOK-WORKFLOW-ORCHESTRATOR-RETRY-IDEMPOTENCY-RULES-001-CLOSURE.json'
+      - 'qualification/book-system/book-prose-integration/orchestrator/BOOK-WORKFLOW-ORCHESTRATOR-FAILURE-SEMANTICS-001-CLOSURE.json'
+      - 'qualification/book-system/book-prose-integration/orchestrator/BOOK-WORKFLOW-ORCHESTRATOR-CANCELLATION-RESUME-001-CLOSURE.json'
+      - 'qualification/book-system/service-interface-002/BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-002.json'
+      - 'system-master/book-system/book-workflow-state-model.js'
+      - 'system-master/book-system/book-workflow-execution-plan.js'
+      - 'system-master/book-system/book-capability-routing-interface.js'
+      - 'system-master/book-system/book-workflow-retry-idempotency-rules.js'
+      - 'system-master/book-system/book-workflow-failure-semantics.js'
+      - 'system-master/book-system/book-workflow-cancellation-resume.js'
+      - 'system-master/book-system/book-workflow-evidence-provenance.js'
+      - '.github/scripts/book-workflow-orchestrator-evidence-provenance-emission-001-qualify.js'
+      - '.github/workflows/book-workflow-orchestrator-evidence-provenance-emission-001-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@v4
+      - name: Qualify orchestrator evidence provenance emission
+        env:
+          NODE_OPTIONS: --experimental-default-type=commonjs
+          RUNNER_TEMP: ${{ runner.temp }}
+        run: |
+          set -euo pipefail
+          node --check .github/scripts/book-workflow-orchestrator-evidence-provenance-emission-001-qualify.js
+          node --check system-master/book-system/book-workflow-evidence-provenance.js
+          node .github/scripts/book-workflow-orchestrator-evidence-provenance-emission-001-qualify.js
+          test -s "${RUNNER_TEMP}/book-workflow-orchestrator-evidence-provenance-emission-001-summary.json"
+          cat "${RUNNER_TEMP}/book-workflow-orchestrator-evidence-provenance-emission-001-summary.json"
+      - name: Upload qualification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: book-workflow-orchestrator-evidence-provenance-emission-001-${{ github.run_id }}
+          path: ${{ runner.temp }}/book-workflow-orchestrator-evidence-provenance-emission-001-summary.json
+          if-no-files-found: error
