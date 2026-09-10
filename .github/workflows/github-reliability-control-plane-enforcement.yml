@@ -35,10 +35,29 @@ jobs:
           clean: true
           persist-credentials: false
 
+      - name: Initialize runner evidence
+        shell: powershell
+        run: |
+          $evidence = Join-Path $env:GITHUB_WORKSPACE '.github-control-plane-evidence'
+          New-Item -ItemType Directory -Force -Path $evidence | Out-Null
+          $identity = [ordered]@{
+            github_sha = $env:GITHUB_SHA
+            runner_name = $env:RUNNER_NAME
+            runner_os = $env:RUNNER_OS
+            runner_arch = $env:RUNNER_ARCH
+            shell_identity = (& whoami).Trim()
+            workspace = $env:GITHUB_WORKSPACE
+            workspace_owner = (Get-Acl -LiteralPath $env:GITHUB_WORKSPACE).Owner
+            git_version = (& git --version).Trim()
+            node_version = (& node --version).Trim()
+            recorded_at = [DateTime]::UtcNow.ToString('o')
+          }
+          $identity | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath (Join-Path $evidence 'runner-identity.json') -Encoding utf8
+
       - name: Verify exact checkout before execution
         shell: powershell
         run: |
-          $actual = (& git rev-parse HEAD).Trim()
+          $actual = (& git -c "safe.directory=$env:GITHUB_WORKSPACE" rev-parse HEAD).Trim()
           if ($actual -ne $env:GITHUB_SHA) { throw "SUBJECT_CHECKOUT_MISMATCH:$actual" }
 
       - name: Syntax check
@@ -49,7 +68,6 @@ jobs:
         shell: powershell
         run: |
           $evidence = Join-Path $env:GITHUB_WORKSPACE '.github-control-plane-evidence'
-          New-Item -ItemType Directory -Force -Path $evidence | Out-Null
           & node "$env:GITHUB_WORKSPACE\.github\scripts\github-reliability-control-plane-selftest.js" | Tee-Object -FilePath (Join-Path $evidence 'selftest.json')
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
@@ -57,7 +75,7 @@ jobs:
         shell: powershell
         run: |
           $evidence = Join-Path $env:GITHUB_WORKSPACE '.github-control-plane-evidence'
-          $actual = (& git rev-parse HEAD).Trim()
+          $actual = (& git -c "safe.directory=$env:GITHUB_WORKSPACE" rev-parse HEAD).Trim()
           Set-Content -LiteralPath (Join-Path $evidence 'subject-sha.txt') -Value $env:GITHUB_SHA -Encoding ascii
           Set-Content -LiteralPath (Join-Path $evidence 'checkout-sha.txt') -Value $actual -Encoding ascii
           if ($actual -ne $env:GITHUB_SHA) { throw "SUBJECT_CHECKOUT_MISMATCH_POST:$actual" }
