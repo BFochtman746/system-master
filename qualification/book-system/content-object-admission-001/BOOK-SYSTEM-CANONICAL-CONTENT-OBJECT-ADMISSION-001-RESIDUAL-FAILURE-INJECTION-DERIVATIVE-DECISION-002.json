@@ -1,0 +1,56 @@
+{
+  "decision_id": "BOOK-SYSTEM-CANONICAL-CONTENT-OBJECT-ADMISSION-001-RESIDUAL-FAILURE-INJECTION-DERIVATIVE-DECISION-002",
+  "effective_date": "2026-09-10",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "control_ref": "book-system/control-v1",
+  "input_owner_head": "22b0b31f87f729b3944de15c266a758f121080c0",
+  "implementation_subject_under_a01_preservation": "e993806a1d9a4838d4bd6d162a36921526ef302a",
+  "standing": "DERIVATIVE_REQUIRED__RF012_PROVEN_SEMANTIC_GAP__ORIGINAL_A01_SUBJECT_PRESERVED",
+  "scope": "Adjudicate the residual failure-injection plan without changing, promoting, or transferring qualification from the exact hosted-passed content-admission subject that is awaiting central A-01 registration.",
+  "evidence_basis": {
+    "residual_plan": "qualification/book-system/content-object-admission-001/BOOK-SYSTEM-CANONICAL-CONTENT-OBJECT-ADMISSION-001-RESIDUAL-FAILURE-INJECTION-PLAN-001.json",
+    "author_decision_contract": "qualification/book-system/author-decision-001/BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001.json",
+    "content_admission_implementation": "system-master/book-system/content-object-admission-core.js"
+  },
+  "adjudication": {
+    "RF012": {
+      "case": "approved author-decision reference belongs to a different content subject than the operation being admitted",
+      "classification": "PROVEN_SEMANTIC_GAP__DERIVATIVE_CODE_AND_TEST_REQUIRED",
+      "contract_requirement": "A previously committed AUTHOR_DECISION is immutable history, but every consumer must independently test whether it is current and applicable to its exact subject before acting. Resolution/request evidence is bound to exact decision-request and subject identities.",
+      "observed_implementation_behavior": "assertAuthorDecision currently accepts any referenced parent AUTHOR_DECISION whose decision_id resolves, status is APPROVED, and author_choice is affirmative. The check does not compare the decision subject_ref or exact subject identity to the content object/unit operation being admitted.",
+      "risk": "A valid approval for subject A can be replayed as the author-decision precondition for subject B if the caller supplies its decision_id.",
+      "repair_boundary": "Strengthen the content-admission consumer only. Do not modify the canonical AUTHOR_DECISION schema, author-decision queue authority, lifecycle authority, publication authority, or the already-hosted-passed A-01 candidate in place.",
+      "minimum_required_test": "Construct two distinct exact content subjects; bind an APPROVED AUTHOR_DECISION to subject A; attempt an operation on subject B with requires_author_decision=true and author_decision_refs containing A; require deterministic fail-closed rejection with zero parent-state mutation and zero successful receipt. A correctly bound same-subject control case must still pass."
+    }
+  },
+  "other_residual_cases": {
+    "disposition": "RETAIN_AS_TEST_EXPANSION_UNLESS_EXECUTION_PROVES_ANOTHER_SEMANTIC_GAP",
+    "rule": "RF001-RF011 and RF013-RF016 remain adversarial regression targets. Their existence does not authorize speculative implementation changes before a failing test demonstrates a contract gap."
+  },
+  "exact_sha_law": {
+    "original_subject": "e993806a1d9a4838d4bd6d162a36921526ef302a",
+    "original_hosted_evidence": "PRESERVED_AS_EVIDENCE_FOR_ORIGINAL_SUBJECT_ONLY",
+    "original_a01_status": "NOT_REGISTERED_OR_PASSED",
+    "derivative_rule": "Any code or executable-test change creates a new exact subject SHA. The derivative must receive fresh focused and full hosted qualification. No PASS may transfer from e993806a1d9a4838d4bd6d162a36921526ef302a. Central A-01 authority must separately decide whether to continue with the original subject or register the repaired derivative after hosted qualification."
+  },
+  "next_objective": "BOOK-SYSTEM-CANONICAL-CONTENT-OBJECT-ADMISSION-001-RF012-SUBJECT-BINDING-DERIVATIVE-003",
+  "next_work_contract": {
+    "type": "BOUNDED_IMPLEMENTATION_AND_DETERMINISTIC_TEST",
+    "required_outputs": [
+      "minimal content-admission subject-applicability check for referenced AUTHOR_DECISION evidence",
+      "RF012 negative fixture proving cross-subject decision replay is rejected",
+      "same-subject positive control fixture",
+      "zero-side-effect assertion on failed authorization",
+      "full existing content-admission and Version/Rollback regression suite",
+      "fresh exact derivative SHA and hosted evidence record"
+    ],
+    "forbidden_outputs": [
+      "fabricated author choice or author authority proof",
+      "mutation of the original exact A-01 candidate in place",
+      "claim that hosted PASS is A-01 PASS",
+      "publication, provider, Prose, native or production authority expansion"
+    ]
+  },
+  "completion_delta": "Residual design was converted into an evidence-backed derivative decision. RF012 is no longer an unanswered question: the Author Decision Queue contract requires exact subject applicability while the current consumer checks approval status/choice only. The original A-01 candidate remains preserved, and a bounded repaired derivative with fresh qualification is now the executable successor.",
+  "stop_condition": "SATISFIED for residual derivative adjudication only. Executable RF012 repair and fresh qualification remain open."
+}
