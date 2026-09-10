@@ -1,0 +1,89 @@
+{
+  "closure_id": "BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001-CLOSURE",
+  "effective_date": "2026-09-10",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "qualification_id": "BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001",
+  "standing": "CLOSED__HOSTED_AND_AUTHORITATIVE_A01_PASS__48_OF_48__SYNTHETIC_COMPOSITION_ONLY",
+  "qualified_subject_sha": "50a81c3cd3575fe45465584347711d3a7c74413a",
+  "hosted": {
+    "run_id": 34432694655,
+    "job_id": 102731325871,
+    "result": "PASS__48_OF_48",
+    "evidence_artifact_id": 10135049303,
+    "evidence_artifact_zip_sha256": "63fff2733e1bb6b846235859c4a0cd1d531ff4bc391df2c7e12d62b2217bad97"
+  },
+  "authoritative_a01": {
+    "control_plane_sha": "f38c6ab6a6edae9017534c35b4384454758341f7",
+    "policy_version": 6,
+    "registry_version": 29,
+    "run_id": 34432910119,
+    "job_id": 102732003392,
+    "runner": "A-01 / Windows / X64",
+    "checkout_sha": "50a81c3cd3575fe45465584347711d3a7c74413a",
+    "result": "PASS__48_OF_48",
+    "child_exit_code": 0,
+    "evidence_artifact_id": 10135132377,
+    "evidence_artifact_name": "BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001-34432910119-evidence",
+    "evidence_artifact_zip_sha256": "1abafa5374c5792ed4ecf04793451c6e68a8c2c22fdbb6c66208d64b96832652",
+    "promotion_authorized": false
+  },
+  "qualified_guard_dependency": {
+    "qualification_id": "BOOK-SYSTEM-E2E-AUTHORITY-GUARDS-001",
+    "subject_sha": "a119ccdf77b61011b1093006b55367fc3e5a65c2",
+    "result": "HOSTED_AND_A01_PASS__24_OF_24",
+    "qualification_transfer": false
+  },
+  "predecessor_subjects": {
+    "canonical_state": "b6938fcfc5c2c24ac23b558de6dfc7f75c382312",
+    "service_registry_v2": "77db6b550e9aeb1dfb956627376becbb591498f8",
+    "lifecycle_v1": "4a6e3459d6ba94b7ce191e426ca64bef00d23582",
+    "integration_runtime_v2": "837e479415afb2d9724e4b913d456ef1d3a62df5",
+    "version_and_rollback": "402ab84a14e9d345530d60394ebc36176541dd21",
+    "author_decision_queue": "9601ae5df8348c1daac8805eaefa1718c431dd49",
+    "lifecycle_current_parent_compatibility": "fc5adf8fd130d7b5324cff0058ab3804d75ec54e",
+    "export_freeze": "0bc1f96ed0b8effd22c432a7d727fd13d613b825",
+    "lifecycle_current_parent_rebind": "ffbcc2ab36a41afb580224681642105deb62e741"
+  },
+  "failed_lineage_preserved": [
+    {
+      "subject_sha": "cd96d6d300b73d1a28660d58707624372fee6142",
+      "result": "HOSTED_FAIL__46_OF_48",
+      "failed_cases": ["E2E019", "E2E021"],
+      "evidence_artifact_id": 10134743468,
+      "evidence_artifact_zip_sha256": "f78f37d48ad3c41f379cf6edb6d588d25cf6deef469049ed6d434dd06e13f7a4"
+    },
+    {
+      "subject_sha": "c8c5fef42a3ca21a16de8dc1e497210645b4ed3b",
+      "result": "GUARD_HOSTED_FAIL__15_OF_24",
+      "evidence_artifact_id": 10134854266,
+      "evidence_artifact_zip_sha256": "c201b26c16117213f78aa8d87ad12f3f8c5dd34ecdf3f75723b1e192a1d45b24"
+    },
+    {
+      "subject_sha": "8e9b0d71cf8cb3a99eeba8a6b15eb0cc8ba6b3ef",
+      "result": "HOSTED_FAIL__46_OF_48__HARNESS_ROUTING_DEFECT",
+      "failed_cases": ["E2E019", "E2E021"]
+    }
+  ],
+  "scope_proven": [
+    "All 48 original synthetic end-to-end Book composition cases pass on the exact qualified subject.",
+    "Provider SUCCESS and provider non-success states preserve parent authority boundaries.",
+    "Author-required gates reject synthesized author choice and stale governed author subjects.",
+    "Export Freeze requires exact parent admission and does not create publication authority.",
+    "One persistent Lifecycle ledger survives authorized non-lifecycle parent successors through the qualified rebind boundary.",
+    "Version/Rollback records exact authorized successors without becoming lifecycle authority.",
+    "Stale artifact, failed proof, open correction, rights/privacy and provenance failures block freeze.",
+    "Prose remains a child evidence source with no self-admission authority."
+  ],
+  "scope_not_proven": [
+    "real author consent or real author decisions",
+    "real publication or delivery authorization",
+    "Document System rendering/conversion implementation",
+    "production deployment or production readiness",
+    "real manuscript literary quality or factual correctness",
+    "completion of every Book System product capability expectation",
+    "promotion authority for a changed SHA"
+  ],
+  "synthetic_fixture_notice": "All provider, author, publication and document evidence used by this qualification is synthetic qualification evidence only. It is not human consent, publication authorization or production standing.",
+  "qualification_transfer": "NONE__EXACT_SHA_ONLY",
+  "next_control_gate": "SYSTEM-MASTER-COMPLETION-CENSUS-002-P3-BOOK"
+}
