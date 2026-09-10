@@ -1,0 +1,69 @@
+{
+  "closure_id": "BOOK-WORKFLOW-ORCHESTRATOR-FAILURE-SEMANTICS-001-CLOSURE",
+  "effective_date": "2026-09-10",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "packet_id": "BOOK-WORKFLOW-ORCHESTRATOR-FAILURE-SEMANTICS-001",
+  "standing": "COMPLETE_WITH_EVIDENCE__HOSTED_EXACT_SUBJECT_PASS__STRENGTHENED_2F_DEPENDENCY_BOUND",
+  "qualified_subject": {
+    "branch": "book-system/control-v1",
+    "sha": "1c7ce612ac454d6bda3df69c1162fe1e0e35c33b",
+    "exact_sha_match": true
+  },
+  "compatible_descendant_observed_before_closure": {
+    "sha": "821772053f839d0f4a82872a8f18eb0e0cd618f5",
+    "delta_from_qualified_subject": "Additive BOOK>PROSE canonical-control compatibility representation in BOOK-SYSTEM-PRODUCT-PARENT-BINDING-006 only.",
+    "authority_changed": false,
+    "prose_canonical_manuscript_write_authority": false
+  },
+  "qualification": {
+    "workflow_run_id": 34501848715,
+    "job_id": 102954291264,
+    "result": "PASS",
+    "fixture_class": "SYNTHETIC_NON_PRIVATE_FAILURE_DISPOSITION",
+    "planned_cases": 30,
+    "passed_cases": 30,
+    "assertions": 30
+  },
+  "evidence_artifact": {
+    "artifact_id": 10162160844,
+    "artifact_name": "book-workflow-orchestrator-failure-semantics-001-34501848715",
+    "artifact_size_bytes": 1381,
+    "zip_digest_sha256": "02ed899423b62e2fd3ee1c7127ebd1aee6aae703bef5d10562eb560c39aab023"
+  },
+  "dependency_binding": {
+    "phase_2f_closure": "BOOK-WORKFLOW-ORCHESTRATOR-RETRY-IDEMPOTENCY-RULES-001-CLOSURE",
+    "phase_2f_qualified_subject_sha": "c37ba0d43d6321a5ae4ba889174517cbafebadc9",
+    "phase_2f_result": "PASS_42_OF_42_CORE_PLUS_REGISTRY_PIN",
+    "service_registry_qualified_subject_sha": "77db6b550e9aeb1dfb956627376becbb591498f8",
+    "service_registry_git_blob_sha": "d5c31835cb79e8267fdbe868f073ef311e85214f",
+    "ci_dependency_watch": true
+  },
+  "proven": [
+    "Provider timeout with an idempotent registered operation routes to retry policy without executing retry.",
+    "Provider timeout with a non-idempotent operation routes to reconciliation without executing reconciliation.",
+    "Required provider PARTIAL, ABSTAIN and REJECTED results fail closed.",
+    "Optional provider failure may continue only when no required downstream task depends on it through required dependency edges.",
+    "Required transitive downstream dependencies are surfaced as blocked rather than silently dropped.",
+    "Missing required evidence fails closed.",
+    "Stale source, plan or context supersedes the attempt and cannot advance an old candidate.",
+    "Hard-gate rejection preserves the original manuscript and authorizes no canonical effect.",
+    "Unresolved author/required authority waits rather than being synthesized.",
+    "Declared-but-unavailable canon or specialist interfaces remain explicit blockers and are not replaced with guessed providers.",
+    "Book admission rejection produces no canonical manuscript effect.",
+    "Unknown failure classes, invalid task/failure pairings, missing or duplicate evidence, raw manuscript content and tampered records fail closed.",
+    "All qualified failure dispositions preserve the original manuscript and set canonical_effect_allowed=false.",
+    "Failure records are deterministic and bound to exact workflow, plan, source and task identities.",
+    "Failure semantics delegates retry/reconciliation policy to Phase 2F and exposes no execution/retry/admission/cancel/resume API."
+  ],
+  "non_claims": [
+    "No provider execution occurred.",
+    "No retry or provider reconciliation was executed.",
+    "No canonical manuscript mutation or Book admission was executed.",
+    "No cancellation or resume behavior was executed.",
+    "No Prose runtime was mutated.",
+    "No fresh blind scoring or evaluator-isolation qualification occurred.",
+    "No A-01 PASS is claimed or transferred for this 2G subject.",
+    "No private/native/publication/production readiness is claimed."
+  ],
+  "exact_successor": "BOOK-WORKFLOW-ORCHESTRATOR-CANCELLATION-RESUME-001"
+}
