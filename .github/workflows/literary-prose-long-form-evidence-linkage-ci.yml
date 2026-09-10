@@ -1,0 +1,30 @@
+name: Prose Long-Form Evidence Linkage Qualification
+
+on:
+  push:
+    branches:
+      - literary-prose-engine-001
+    paths:
+      - 'qualification/literary-prose-engine-001/long-form-evidence-linkage-001/LONG-FORM-EVIDENCE-LINKAGE-CONTRACT-v1.json'
+      - 'qualification/literary-prose-engine-001/long-form-evidence-linkage-001/long_form_evidence_linkage.py'
+      - 'qualification/literary-prose-engine-001/long-form-evidence-linkage-001/run_long_form_evidence_linkage_fixtures.py'
+      - '.github/workflows/literary-prose-long-form-evidence-linkage-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile long-form evidence linkage modules
+        run: python -m py_compile qualification/literary-prose-engine-001/long-form-evidence-linkage-001/long_form_evidence_linkage.py qualification/literary-prose-engine-001/long-form-evidence-linkage-001/run_long_form_evidence_linkage_fixtures.py
+      - name: Qualify long-form evidence linkage
+        run: python qualification/literary-prose-engine-001/long-form-evidence-linkage-001/run_long_form_evidence_linkage_fixtures.py
