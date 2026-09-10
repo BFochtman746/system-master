@@ -1,0 +1,135 @@
+{
+  "census_id": "SYSTEM-MASTER-COMPLETION-CENSUS-002-P3-BOOK",
+  "checkpoint_id": "BOOK-SYSTEM-COMPLETION-CENSUS-002-P3-BOOK-PHASE-002",
+  "effective_date": "2026-09-10",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "control_ref": "book-system/control-v1",
+  "input_control_head": "58d69d13b675f12be854d50c80fd9ddce6636e04",
+  "parent_checkpoint": "qualification/book-system/completion-census-002/BOOK-SYSTEM-COMPLETION-CENSUS-002-P3-BOOK-PHASE-001.json",
+  "standing": "PHASE_002_CLOSED__SMALLEST_BOOK_OWNED_CONTENT_ADMISSION_BOUNDARY_SELECTED__IMPLEMENTATION_SUCCESSOR_READY",
+  "decision": {
+    "selected_successor_objective": "BOOK-SYSTEM-CANONICAL-CONTENT-OBJECT-ADMISSION-001",
+    "classification": "BOOK_OWNED_NET_NEW_MACHINE_GAP",
+    "selection_reason": "Phase 1 proves that the qualified parent state can select existing governing brief, canon manifest, story bible, book plan and manuscript objects but cannot create/register/version new instances. The same missing parent admission seam also explains the chapter/scene persistence gap. A second chapter/scene engine would duplicate canonical version/admission authority, so both are bounded into one parent-owned content-object admission successor.",
+    "book_intelligence_decision": "NO_SEPARATE_CANONICAL_WRITE_ORCHESTRATOR. Book Intelligence remains the macro/meso/micro planning, analysis and proposal-orchestration architecture already bound by BOOK-SYSTEM-BOOK-INTELLIGENCE-UNIFICATION-BINDING-001. It may produce bounded plans, evidence and proposals, but canonical materialization/version/admission remains solely in the selected Book parent content-admission seam.",
+    "chapter_scene_decision": "INCLUDE_IN_SAME_ADMISSION_ENGINE. CHAPTER and SCENE are Book domain units with persistent identity, ordered parent relationships and immutable versions, but do not receive an independent canonical-write authority or lifecycle engine.",
+    "document_boundary": "Document rendering, conversion, layout, accessibility validation and rendered proof remain Document System/provider responsibilities. The selected successor stores exact artifact/provenance references only; it does not implement a renderer.",
+    "prose_boundary": "PROSE and Book Evaluator remain child/provider evidence and proposal sources. Neither can directly register or activate canonical Book content.",
+    "human_publication_boundary": "Real author decisions and publication authorization remain human/external authority. Machine admission may record and enforce a valid decision receipt but may not synthesize one."
+  },
+  "proposed_contract": {
+    "aggregate_extension_rule": "Extend the existing canonical Book aggregate rather than create a second store or state authority.",
+    "content_classes": [
+      "GOVERNING_BRIEF",
+      "CANON_MANIFEST",
+      "STORY_BIBLE",
+      "BOOK_PLAN",
+      "MANUSCRIPT_MANIFEST",
+      "CHAPTER",
+      "SCENE"
+    ],
+    "required_identity_fields": [
+      "object_id",
+      "object_type",
+      "version_id",
+      "content_digest_sha256",
+      "parent_version_ref",
+      "created_by",
+      "created_at",
+      "provenance_ref"
+    ],
+    "chapter_scene_relation_fields": [
+      "parent_object_ref",
+      "ordinal",
+      "stable_unit_id",
+      "version_id",
+      "content_digest_sha256"
+    ],
+    "proposed_operations": [
+      "REGISTER_CONTENT_OBJECT_VERSION",
+      "REGISTER_CONTENT_UNIT_VERSION",
+      "SET_ACTIVE_CONTENT_OBJECT_VERSION",
+      "SET_ACTIVE_CONTENT_UNIT_ORDER"
+    ],
+    "transaction_preconditions": [
+      "expected_state_version and expected_state_digest must match the current aggregate before any operation",
+      "new object/version IDs are immutable and collision-free",
+      "content_digest_sha256 binds exact bytes or an exact governed artifact reference",
+      "parent_version_ref resolves to an existing predecessor when a predecessor is required",
+      "CHAPTER and SCENE parent references resolve inside the same Book project and their ordering is deterministic",
+      "proposal/evidence source identities are current and provenance-bound before admission",
+      "any required author decision receipt is explicit, current and subject-bound",
+      "all operations are atomic; one failed precondition aborts the full mutation"
+    ],
+    "authority_rules": [
+      "Only PARENT_SYSTEM may commit canonical registration/activation operations.",
+      "PROSE_PROJECT, BOOK_EVALUATOR, RESEARCH_IMPORT and external providers may supply proposals/evidence but cannot commit canonical content.",
+      "Lifecycle v1 remains the sole project lifecycle transition authority; this successor cannot advance lifecycle status.",
+      "Version/Rollback remains the immutable history and RESTORE_AS_NEW_SUCCESSOR authority; this successor must append compatible version evidence and cannot mutate history.",
+      "Export Freeze remains a separate gate and cannot be inferred from content admission.",
+      "Technical success never implies publication authorization."
+    ],
+    "idempotency_and_concurrency": [
+      "same mutation_id plus byte-identical payload returns the same committed result or a deterministic already-applied result",
+      "same mutation_id with different payload fails closed",
+      "stale expected_state_version or expected_state_digest fails without partial mutation",
+      "duplicate object_id/version_id with non-identical digest fails closed",
+      "concurrent chapter/scene reorder against the same predecessor allows at most one successor and forces the loser to rebase"
+    ]
+  },
+  "deterministic_qualification_plan": {
+    "minimum_fixture_classes": [
+      "register each supported content class with exact digest and provenance",
+      "create a second immutable version linked to its exact predecessor",
+      "reject duplicate object/version identity with divergent bytes",
+      "reject stale aggregate CAS",
+      "reject missing or mismatched provenance",
+      "reject unauthorized child/provider canonical write",
+      "reject missing required author decision receipt without fabricating it",
+      "preserve lifecycle status while content is admitted",
+      "preserve Version/Rollback history and allow later restore-as-new-successor semantics",
+      "register chapter and scene units under valid parents",
+      "reject cross-book chapter/scene parentage",
+      "reject duplicate ordinals or ambiguous ordering under one parent unless contractually resolved",
+      "reject scene/chapter relationship cycles where a hierarchy edge is required to be acyclic",
+      "prove failed multi-operation mutation is atomic",
+      "prove idempotent replay and divergent-replay rejection",
+      "prove export/publication state is not granted by content admission"
+    ],
+    "required_evidence": [
+      "exact changed subject SHA",
+      "deterministic fixture manifest and result counts",
+      "state digest before/after every accepted mutation",
+      "negative authority-boundary receipts",
+      "hosted qualification on the exact final wrapper-bearing SHA before any A-01 admission",
+      "separate authoritative A-01 receipt only if/when the registered qualification is later admitted"
+    ],
+    "pass_does_not_prove": [
+      "real author approval",
+      "publication authorization",
+      "Document System rendering/conversion",
+      "PROSE quality or revision superiority",
+      "native iPhone behavior",
+      "production readiness"
+    ]
+  },
+  "shared_governance_deltas_for_later_reconciliation": [
+    {
+      "registry": "governance/WORK-OBLIGATION-REGISTRY-001.json",
+      "finding": "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001 is still marked ACTIVE although authoritative Book evidence records its exact-subject A-01 closure.",
+      "action": "P8/global reconciliation must close/supersede the stale registry entry without reopening Version/Rollback implementation."
+    }
+  ],
+  "phase_1_gap_disposition": {
+    "BOOK-CENSUS-003-LONGFORM-OBJECT-CREATION-VERSION-ADMISSION": "INCLUDED_IN_SELECTED_SUCCESSOR",
+    "BOOK-CENSUS-004-CHAPTER-SCENE-DOMAIN-GRANULARITY": "INCLUDED_IN_SELECTED_SUCCESSOR",
+    "BOOK-CENSUS-016-BOOK-INTELLIGENCE-ORCHESTRATION": "SATISFIED_AS_NON_CANONICAL_ORCHESTRATION_INPUT_TO_SELECTED_SUCCESSOR__NO_SECOND_WRITE_AUTHORITY",
+    "DOCUMENT_RENDER_CONVERT_VALIDATE_PROOF": "DELEGATED_TO_DOCUMENT_OR_REGISTERED_PROVIDER",
+    "PROSE_AND_BOOK_EVALUATOR": "CHILD_SYSTEM_DEPENDENCY__NO_PARENT_TAKEOVER",
+    "REAL_AUTHOR_AND_PUBLICATION": "HUMAN_OR_EXTERNAL_AUTHORITY__NOT_MACHINE_COMPLETABLE"
+  },
+  "completion_delta": "Before: the Phase 1 matrix proved content creation/version/admission, chapter/scene persistence and Book Intelligence executable-boundary ambiguity but did not select the smallest non-duplicative machine successor. After: one Book-parent canonical content-object admission seam is selected; chapter/scene persistence is included in the same engine; Book Intelligence remains proposal/orchestration rather than a second canonical-write authority; deterministic concurrency/idempotency/failure-injection requirements are defined; and a bounded implementation successor is executable without absorbing Prose, Document, author, publication, native or production authority.",
+  "stop_condition": "SATISFIED. Every Phase 1 Book-owned gap is included in the selected successor or explicitly routed to its true owner/authority boundary, and the bounded implementation can begin from this contract without reopening qualified foundations.",
+  "next_objective": "BOOK-SYSTEM-CANONICAL-CONTENT-OBJECT-ADMISSION-001-IMPLEMENTATION-AND-HOSTED-PREQUALIFICATION",
+  "continuation_rule": "Bind the implementation successor to the post-checkpoint live Book head. Implement only the net-new parent content registration/version/admission seam plus deterministic fixtures. Do not modify already-qualified foundations except where a versioned adapter/extension is necessary; any changed software bytes require fresh exact-SHA hosted qualification, and A-01 remains a later separate authority boundary."
+}
