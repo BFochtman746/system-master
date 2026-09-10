@@ -1,0 +1,45 @@
+{
+  "contract_id": "BOOK-SYSTEM-CANONICAL-CONTENT-OBJECT-ADMISSION-001",
+  "effective_date": "2026-09-10",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "input_book_head": "7d6762de34f25447fe42364bd6e3e558d527180f",
+  "authority_checkpoint": "qualification/book-system/completion-census-002/BOOK-SYSTEM-COMPLETION-CENSUS-002-P3-BOOK-PHASE-002.json",
+  "standing": "BOUNDED_IMPLEMENTATION_CONTRACT__HOSTED_EXACT_SHA_QUALIFICATION_REQUIRED",
+  "canonical_write_authority": "PARENT_SYSTEM",
+  "aggregate_extension": {
+    "rule": "Use the existing canonical Book aggregate and Version/Rollback transaction boundary. Do not create a second canonical store or lifecycle authority.",
+    "content_unit_history_field": "content_unit_versions",
+    "history_semantics": "append-only stable CHAPTER/SCENE version identities; active chapter/scene order is materialized only through a newly versioned BOOK_PLAN so existing Version/Rollback remains the active canonical selection authority",
+    "content_classes": ["GOVERNING_BRIEF", "CANON_MANIFEST", "STORY_BIBLE", "BOOK_PLAN", "MANUSCRIPT_MANIFEST", "CHAPTER", "SCENE"]
+  },
+  "operations": {
+    "REGISTER_CONTENT_OBJECT_VERSION": "append exactly one immutable successor version for an existing parent-governed object family with exact digest, provenance, source subject and predecessor binding",
+    "REGISTER_CONTENT_UNIT_VERSION": "append exactly one immutable CHAPTER or SCENE version with stable unit identity, same-book parentage, deterministic ordinal, exact digest, provenance and predecessor binding",
+    "SET_ACTIVE_CONTENT_OBJECT_VERSION": "move an existing canonical object pointer only under PARENT_SYSTEM authority and preserve governing-brief/canon project pointer mirrors",
+    "SET_ACTIVE_CONTENT_UNIT_ORDER": "bind deterministic CHAPTER/SCENE refs into a newly registered BOOK_PLAN version; this operation does not create a second active-order store"
+  },
+  "transaction_rules": [
+    "expected_state_version and expected_state_digest must match before mutation",
+    "all operations commit atomically through one Version/Rollback successor transaction",
+    "same mutation_id plus byte-identical request replays the prior receipt",
+    "same mutation_id with divergent request content fails closed",
+    "one mutation may create at most one new version in a given object or unit family",
+    "provider/child classes cannot commit canonical admission",
+    "stale or missing provenance fails closed",
+    "a required author decision must already exist as approved evidence; the runtime never fabricates one",
+    "project lifecycle status, export freeze and publication authority are outside this contract"
+  ],
+  "chapter_scene_rules": [
+    "CHAPTER parent_object_ref is BOOK_PROJECT:<book_project_id>",
+    "SCENE parent_object_ref is an exact CHAPTER:<stable_unit_id>:<version_id> in the same Book project",
+    "unit predecessor lineage is linear and immutable",
+    "active unit ordering must be strictly deterministic by ordinal and may reference only exact registered unit versions",
+    "a scene in active order must have its exact parent chapter in the active chapter order",
+    "cross-book unit parentage fails closed"
+  ],
+  "qualification_requirement": {
+    "hosted": "Run the deterministic qualifier plus the existing 48-case Version/Rollback qualifier on the exact final wrapper-bearing SHA.",
+    "a01": "Hosted PASS may only prepare later A-01 admission. It is never A-01 PASS.",
+    "does_not_prove": ["real author approval", "publication authorization", "Document rendering/conversion", "Prose quality or revision superiority", "native iPhone behavior", "production readiness"]
+  }
+}
