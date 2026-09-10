@@ -1,0 +1,114 @@
+{
+  "artifact_id": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001B-ASSESSMENT-TARGET-DOMAIN-VI-BATCH-01-CANDIDATE-040A",
+  "effective_date": "2026-09-10",
+  "owner_path": "SYSTEM_MASTER/LEARNING",
+  "base_control_head": "2306c57387ae429b4e9a73b87c3c060d6bf4e4ed",
+  "contract": "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001B-ASSESSMENT-TARGET-CONTRACT-025A.json",
+  "batch_index": 1,
+  "domain": "VI",
+  "target_count": 5,
+  "targets": [
+    {
+      "assessment_target_id": "ASSESS::CSSGB-2022::ASQ-CSSGB-2022-VI.A.1::spc-concept-interpretation::TARGET::bounded-spc-analysis",
+      "subskill_id": "CSSGB-2022::ASQ-CSSGB-2022-VI.A.1::SUBSKILL::spc-concept-interpretation",
+      "parent_requirement_id": "ASQ-CSSGB-2022-VI.A.1",
+      "source_locator": "ASQ CSSGB BoK 2022 p.8 / VI.A.1",
+      "preserved_cognitive_level": "ANALYZE",
+      "capability_statement": "Given a bounded process-monitoring scenario and observed data context, distinguish common SPC concepts such as process behavior, variation and monitoring purpose without treating a chart or rule as proof of causality or long-term capability.",
+      "target_type": "DATA_INTERPRETATION",
+      "evidence_input_class": "BOUNDED_DATA_OR_SUMMARY",
+      "response_action_class": "ANALYZE",
+      "prompt_contract": {"supplied_evidence": "A synthetic process-monitoring scenario with observed process data or summaries and explicit monitoring context.", "required_action": "Analyze the supplied evidence using basic SPC concepts, distinguish process behavior and variation evidence, and state what the monitoring evidence can and cannot establish.", "must_not_assume": ["root cause", "long-term capability", "future process behavior"]},
+      "scoring_assertions": [
+        {"assertion_id": "VI.A.1-01", "observable_property": "Response distinguishes observed variation/process behavior from monitoring purpose using supplied evidence.", "pass_condition": "Each interpretation is traceable to supplied process data or context."},
+        {"assertion_id": "VI.A.1-02", "observable_property": "Response does not treat SPC signals or rules as proof of causality or long-term capability.", "pass_condition": "Causal and long-term claims remain explicitly unsupported unless separately evidenced."}
+      ],
+      "insufficient_evidence_behavior": {"trigger": "Process data or monitoring context is insufficient for the requested SPC interpretation.", "required_behavior": "State which interpretation is unresolved and identify the missing process-monitoring evidence."},
+      "provenance_refs": ["SOURCE_NODE_INDEX:ASQ-CSSGB-2022-VI.A.1", "SUBSKILL:CSSGB-2022::ASQ-CSSGB-2022-VI.A.1::SUBSKILL::spc-concept-interpretation"],
+      "validation_status": "PROVISIONAL_BOUND",
+      "evidence_boundaries": {"psychometric_validity": "UNOBSERVED", "learner_mastery": "UNOBSERVED", "retention": "UNOBSERVED", "transfer": "UNOBSERVED", "workplace_effectiveness": "UNOBSERVED", "sme_approval": "UNOBSERVED", "certification_equivalence": "UNOBSERVED"}
+    },
+    {
+      "assessment_target_id": "ASSESS::CSSGB-2022::ASQ-CSSGB-2022-VI.A.2::rational-subgroup-design::TARGET::bounded-subgrouping-explanation",
+      "subskill_id": "CSSGB-2022::ASQ-CSSGB-2022-VI.A.2::SUBSKILL::rational-subgroup-design",
+      "parent_requirement_id": "ASQ-CSSGB-2022-VI.A.2",
+      "source_locator": "ASQ CSSGB BoK 2022 p.8 / VI.A.2",
+      "preserved_cognitive_level": "UNDERSTAND",
+      "capability_statement": "Given a bounded process and sampling context, propose a rational subgrouping approach, state the within- and between-subgroup variation it is intended to reveal, and identify assumptions that require process evidence.",
+      "target_type": "SCENARIO_CONSTRAINED_RESPONSE",
+      "evidence_input_class": "BOUNDED_PROCESS_DESCRIPTION",
+      "response_action_class": "EXPLAIN",
+      "prompt_contract": {"supplied_evidence": "A synthetic bounded process and sampling context with explicit timing, grouping options, and known process constraints.", "required_action": "Explain a rational subgrouping approach for the supplied context, including the within- and between-subgroup variation it is intended to reveal and any assumptions requiring evidence.", "must_not_assume": ["unstated process stability", "sampling conditions not supplied", "observed subgroup performance"]},
+      "scoring_assertions": [
+        {"assertion_id": "VI.A.2-01", "observable_property": "Response explains a subgrouping approach that is consistent with the supplied process and sampling context.", "pass_condition": "The proposed grouping logic is tied to explicit timing, sampling, or process evidence."},
+        {"assertion_id": "VI.A.2-02", "observable_property": "Response distinguishes intended within/between variation from assumptions requiring evidence.", "pass_condition": "Unobserved process behavior is not presented as established fact."}
+      ],
+      "insufficient_evidence_behavior": {"trigger": "Sampling or process context is insufficient to justify a subgrouping approach.", "required_behavior": "State that subgroup design remains unresolved and identify the missing process/sampling evidence."},
+      "provenance_refs": ["SOURCE_NODE_INDEX:ASQ-CSSGB-2022-VI.A.2", "SUBSKILL:CSSGB-2022::ASQ-CSSGB-2022-VI.A.2::SUBSKILL::rational-subgroup-design"],
+      "validation_status": "PROVISIONAL_BOUND",
+      "evidence_boundaries": {"psychometric_validity": "UNOBSERVED", "learner_mastery": "UNOBSERVED", "retention": "UNOBSERVED", "transfer": "UNOBSERVED", "workplace_effectiveness": "UNOBSERVED", "sme_approval": "UNOBSERVED", "certification_equivalence": "UNOBSERVED"}
+    },
+    {
+      "assessment_target_id": "ASSESS::CSSGB-2022::ASQ-CSSGB-2022-VI.A.3::control-chart-selection-interpretation::TARGET::bounded-chart-application",
+      "subskill_id": "CSSGB-2022::ASQ-CSSGB-2022-VI.A.3::SUBSKILL::control-chart-selection-interpretation",
+      "parent_requirement_id": "ASQ-CSSGB-2022-VI.A.3",
+      "source_locator": "ASQ CSSGB BoK 2022 p.8 / VI.A.3",
+      "preserved_cognitive_level": "APPLY",
+      "capability_statement": "Given a bounded process variable or attribute context and stated sampling structure, select an appropriate control-chart family, interpret supplied chart evidence, and separate statistical signals from unsupported root-cause claims.",
+      "target_type": "DATA_INTERPRETATION",
+      "evidence_input_class": "BOUNDED_MIXED_EVIDENCE",
+      "response_action_class": "APPLY",
+      "prompt_contract": {"supplied_evidence": "A synthetic process context identifying variable or attribute data, sampling structure, and bounded control-chart evidence.", "required_action": "Apply control-chart selection and interpretation to the supplied case, identify an appropriate chart family, and interpret only the supplied statistical signals.", "must_not_assume": ["root cause", "sampling structure not supplied", "future control"]},
+      "scoring_assertions": [
+        {"assertion_id": "VI.A.3-01", "observable_property": "Response selects a chart family consistent with supplied data type and sampling structure.", "pass_condition": "The chart choice is justified by explicit variable/attribute and subgroup evidence."},
+        {"assertion_id": "VI.A.3-02", "observable_property": "Response interprets supplied chart evidence without turning signals into unsupported root-cause claims.", "pass_condition": "Statistical signals and causal explanations remain explicitly separated."}
+      ],
+      "insufficient_evidence_behavior": {"trigger": "Data type, sampling structure, or chart evidence is insufficient to select or interpret a chart.", "required_behavior": "Do not force a chart selection or root-cause interpretation; identify the missing evidence."},
+      "provenance_refs": ["SOURCE_NODE_INDEX:ASQ-CSSGB-2022-VI.A.3", "SUBSKILL:CSSGB-2022::ASQ-CSSGB-2022-VI.A.3::SUBSKILL::control-chart-selection-interpretation"],
+      "validation_status": "PROVISIONAL_BOUND",
+      "evidence_boundaries": {"psychometric_validity": "UNOBSERVED", "learner_mastery": "UNOBSERVED", "retention": "UNOBSERVED", "transfer": "UNOBSERVED", "workplace_effectiveness": "UNOBSERVED", "sme_approval": "UNOBSERVED", "certification_equivalence": "UNOBSERVED"}
+    },
+    {
+      "assessment_target_id": "ASSESS::CSSGB-2022::ASQ-CSSGB-2022-VI.B.1::control-plan-construction::TARGET::bounded-control-plan-application",
+      "subskill_id": "CSSGB-2022::ASQ-CSSGB-2022-VI.B.1::SUBSKILL::control-plan-construction",
+      "parent_requirement_id": "ASQ-CSSGB-2022-VI.B.1",
+      "source_locator": "ASQ CSSGB BoK 2022 p.8 / VI.B.1",
+      "preserved_cognitive_level": "APPLY",
+      "capability_statement": "Given a bounded improved process, known critical characteristics, monitoring needs and response constraints, construct a control plan that identifies what is controlled, how it is observed, response ownership and escalation without fabricating sustained-control results.",
+      "target_type": "CONSTRUCTION_TASK",
+      "evidence_input_class": "BOUNDED_MIXED_EVIDENCE",
+      "response_action_class": "APPLY",
+      "prompt_contract": {"supplied_evidence": "A synthetic improved-process scenario with critical characteristics, monitoring needs, responsible roles, and response constraints.", "required_action": "Apply control-planning principles to construct a bounded control plan identifying controls, observation methods, response ownership, and escalation.", "must_not_assume": ["sustained control", "unprovided owners or thresholds", "real-world effectiveness"]},
+      "scoring_assertions": [
+        {"assertion_id": "VI.B.1-01", "observable_property": "Response constructs a control plan containing what is controlled, how it is observed, ownership, and escalation.", "pass_condition": "All required plan elements are tied to supplied process characteristics and constraints."},
+        {"assertion_id": "VI.B.1-02", "observable_property": "Response does not claim sustained control or effectiveness not present in the evidence.", "pass_condition": "Future or real-world results remain unobserved unless explicitly supplied."}
+      ],
+      "insufficient_evidence_behavior": {"trigger": "Critical characteristics, monitoring needs, ownership, or escalation constraints are insufficient to complete the control plan.", "required_behavior": "Mark the affected control-plan element unresolved and identify the missing evidence."},
+      "provenance_refs": ["SOURCE_NODE_INDEX:ASQ-CSSGB-2022-VI.B.1", "SUBSKILL:CSSGB-2022::ASQ-CSSGB-2022-VI.B.1::SUBSKILL::control-plan-construction"],
+      "validation_status": "PROVISIONAL_BOUND",
+      "evidence_boundaries": {"psychometric_validity": "UNOBSERVED", "learner_mastery": "UNOBSERVED", "retention": "UNOBSERVED", "transfer": "UNOBSERVED", "workplace_effectiveness": "UNOBSERVED", "sme_approval": "UNOBSERVED", "certification_equivalence": "UNOBSERVED"}
+    },
+    {
+      "assessment_target_id": "ASSESS::CSSGB-2022::ASQ-CSSGB-2022-VI.B.2::document-control-integrity::TARGET::bounded-document-control-classification",
+      "subskill_id": "CSSGB-2022::ASQ-CSSGB-2022-VI.B.2::SUBSKILL::document-control-integrity",
+      "parent_requirement_id": "ASQ-CSSGB-2022-VI.B.2",
+      "source_locator": "ASQ CSSGB BoK 2022 p.8 / VI.B.2",
+      "preserved_cognitive_level": "UNDERSTAND",
+      "capability_statement": "Given bounded process documentation and revision evidence, identify version, approval, access, traceability or supersession gaps and distinguish controlled records from unverified or stale artifacts.",
+      "target_type": "ARTIFACT_ANALYSIS",
+      "evidence_input_class": "BOUNDED_DOCUMENT_OR_ARTIFACT",
+      "response_action_class": "CLASSIFY",
+      "prompt_contract": {"supplied_evidence": "Synthetic process documents and revision records with explicit version, approval, access, traceability, and supersession evidence or gaps.", "required_action": "Classify records as controlled, stale, or unverified based on supplied evidence and explain any document-control gaps.", "must_not_assume": ["approval not evidenced", "current version not evidenced", "organizational compliance"]},
+      "scoring_assertions": [
+        {"assertion_id": "VI.B.2-01", "observable_property": "Response classifies documents using explicit version, approval, access, traceability, and supersession evidence.", "pass_condition": "Each classification is tied to supplied document-control evidence."},
+        {"assertion_id": "VI.B.2-02", "observable_property": "Response identifies control gaps without asserting unsupported approval or compliance.", "pass_condition": "Missing or stale control evidence remains explicit and organizational compliance is not inferred."}
+      ],
+      "insufficient_evidence_behavior": {"trigger": "Revision, approval, access, traceability, or supersession evidence is insufficient to classify a document reliably.", "required_behavior": "Classify the record as unverified or unresolved and identify the missing control evidence."},
+      "provenance_refs": ["SOURCE_NODE_INDEX:ASQ-CSSGB-2022-VI.B.2", "SUBSKILL:CSSGB-2022::ASQ-CSSGB-2022-VI.B.2::SUBSKILL::document-control-integrity"],
+      "validation_status": "PROVISIONAL_BOUND",
+      "evidence_boundaries": {"psychometric_validity": "UNOBSERVED", "learner_mastery": "UNOBSERVED", "retention": "UNOBSERVED", "transfer": "UNOBSERVED", "workplace_effectiveness": "UNOBSERVED", "sme_approval": "UNOBSERVED", "certification_equivalence": "UNOBSERVED"}
+    }
+  ],
+  "batch_boundaries": {"psychometric_validity": "UNOBSERVED", "learner_mastery": "UNOBSERVED", "retention": "UNOBSERVED", "transfer": "UNOBSERVED", "workplace_effectiveness": "UNOBSERVED", "sme_approval": "UNOBSERVED", "certification_equivalence": "UNOBSERVED", "unresolved_dependency_candidates": "UNCHANGED__SEPARATE_LANE"},
+  "next_batch": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001B-ASSESSMENT-TARGET-DOMAIN-VI-BATCH-02-CANDIDATE-041A"
+}
