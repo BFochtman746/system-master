@@ -1,0 +1,143 @@
+{
+  "artifact_id": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001B-ASSESSMENT-TARGET-DOMAIN-IV-BATCH-01-CANDIDATE-036A",
+  "effective_date": "2026-09-10",
+  "owner_path": "SYSTEM_MASTER/LEARNING",
+  "base_control_head": "f775bc19952e8fbe5b3d5300b7254c4e65324543",
+  "contract": "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001B-ASSESSMENT-TARGET-CONTRACT-025A.json",
+  "batch_index": 1,
+  "domain": "IV",
+  "target_count": 5,
+  "targets": [
+    {
+      "assessment_target_id": "ASSESS::CSSGB-2022::ASQ-CSSGB-2022-IV.A.1::multi-vari-study-design::TARGET::bounded-study-construction",
+      "subskill_id": "CSSGB-2022::ASQ-CSSGB-2022-IV.A.1::SUBSKILL::multi-vari-study-design",
+      "parent_requirement_id": "ASQ-CSSGB-2022-IV.A.1",
+      "source_locator": "ASQ CSSGB BoK 2022 p.7 / IV.A.1",
+      "preserved_cognitive_level": "CREATE",
+      "capability_statement": "Given a bounded variation problem, candidate factors, and available observations, create a multi-vari study representation that distinguishes positional, cyclical, and temporal variation where supported and keeps unobserved causes explicit rather than inferred.",
+      "target_type": "CONSTRUCTION_TASK",
+      "evidence_input_class": "BOUNDED_MIXED_EVIDENCE",
+      "response_action_class": "CREATE",
+      "prompt_contract": {
+        "supplied_evidence": "A synthetic bounded variation problem with candidate factors, available observations, and explicit observation limits.",
+        "required_action": "Create a multi-vari study representation that separates positional, cyclical, and temporal variation where supported and marks unsupported causes as unobserved.",
+        "must_not_assume": ["causes not evidenced", "factor effects not observed", "missing temporal or positional structure"]
+      },
+      "scoring_assertions": [
+        {"assertion_id": "IV.A.1-01", "observable_property": "Response constructs a study representation that distinguishes the required variation dimensions using supplied evidence.", "pass_condition": "Positional, cyclical, and temporal elements are represented when supported and traceable to supplied observations."},
+        {"assertion_id": "IV.A.1-02", "observable_property": "Response keeps unsupported causal explanations explicit as unobserved.", "pass_condition": "No candidate cause is promoted to an observed cause without supplied evidence."}
+      ],
+      "insufficient_evidence_behavior": {"trigger": "The supplied observations cannot support one or more requested variation dimensions or causal distinctions.", "required_behavior": "Construct only the supported study elements and identify the missing evidence instead of inventing structure or causes."},
+      "provenance_refs": ["SOURCE_NODE_INDEX:ASQ-CSSGB-2022-IV.A.1", "SUBSKILL:CSSGB-2022::ASQ-CSSGB-2022-IV.A.1::SUBSKILL::multi-vari-study-design"],
+      "validation_status": "PROVISIONAL_BOUND",
+      "evidence_boundaries": {"psychometric_validity": "UNOBSERVED", "learner_mastery": "UNOBSERVED", "retention": "UNOBSERVED", "transfer": "UNOBSERVED", "workplace_effectiveness": "UNOBSERVED", "sme_approval": "UNOBSERVED", "certification_equivalence": "UNOBSERVED"}
+    },
+    {
+      "assessment_target_id": "ASSESS::CSSGB-2022::ASQ-CSSGB-2022-IV.A.2::correlation-regression-evaluation::TARGET::bounded-association-evaluation",
+      "subskill_id": "CSSGB-2022::ASQ-CSSGB-2022-IV.A.2::SUBSKILL::correlation-regression-evaluation",
+      "parent_requirement_id": "ASQ-CSSGB-2022-IV.A.2",
+      "source_locator": "ASQ CSSGB BoK 2022 p.7 / IV.A.2",
+      "preserved_cognitive_level": "EVALUATE",
+      "capability_statement": "Given bounded paired data or summarized regression output, evaluate the direction and strength of association, interpret a simple linear relationship within stated assumptions, and distinguish association from unsupported causal claims.",
+      "target_type": "DATA_INTERPRETATION",
+      "evidence_input_class": "BOUNDED_DATA_OR_SUMMARY",
+      "response_action_class": "EVALUATE",
+      "prompt_contract": {
+        "supplied_evidence": "Synthetic paired data or regression summary with stated assumptions and bounded context.",
+        "required_action": "Evaluate association direction and strength, interpret the supplied linear relationship, and distinguish supported association from unsupported causality.",
+        "must_not_assume": ["causality", "model adequacy beyond supplied evidence", "unstated population properties"]
+      },
+      "scoring_assertions": [
+        {"assertion_id": "IV.A.2-01", "observable_property": "Response evaluates direction and strength using supplied paired data or regression evidence.", "pass_condition": "The evaluation cites explicit data or model-summary evidence and is consistent with it."},
+        {"assertion_id": "IV.A.2-02", "observable_property": "Response distinguishes association from causation and bounds interpretation by stated assumptions.", "pass_condition": "No causal claim is made unless causal evidence is explicitly supplied."}
+      ],
+      "insufficient_evidence_behavior": {"trigger": "Paired data, regression output, or assumptions are insufficient for the requested evaluation.", "required_behavior": "State which relationship judgment is unresolved and identify the missing evidence rather than infer it."},
+      "provenance_refs": ["SOURCE_NODE_INDEX:ASQ-CSSGB-2022-IV.A.2", "SUBSKILL:CSSGB-2022::ASQ-CSSGB-2022-IV.A.2::SUBSKILL::correlation-regression-evaluation"],
+      "validation_status": "PROVISIONAL_BOUND",
+      "evidence_boundaries": {"psychometric_validity": "UNOBSERVED", "learner_mastery": "UNOBSERVED", "retention": "UNOBSERVED", "transfer": "UNOBSERVED", "workplace_effectiveness": "UNOBSERVED", "sme_approval": "UNOBSERVED", "certification_equivalence": "UNOBSERVED"}
+    },
+    {
+      "assessment_target_id": "ASSESS::CSSGB-2022::ASQ-CSSGB-2022-IV.B.1::hypothesis-testing-logic::TARGET::bounded-test-logic-application",
+      "subskill_id": "CSSGB-2022::ASQ-CSSGB-2022-IV.B.1::SUBSKILL::hypothesis-testing-logic",
+      "parent_requirement_id": "ASQ-CSSGB-2022-IV.B.1",
+      "source_locator": "ASQ CSSGB BoK 2022 p.7 / IV.B.1",
+      "preserved_cognitive_level": "APPLY",
+      "capability_statement": "Given a bounded statistical claim, stated null and alternative hypotheses, and decision context, apply basic hypothesis-testing logic and interpret the decision boundary without claiming evidence not present in the supplied data.",
+      "target_type": "SCENARIO_CONSTRAINED_RESPONSE",
+      "evidence_input_class": "BOUNDED_SCENARIO",
+      "response_action_class": "APPLY",
+      "prompt_contract": {
+        "supplied_evidence": "A synthetic statistical claim with explicit null and alternative hypotheses, decision threshold, and bounded result evidence.",
+        "required_action": "Apply basic hypothesis-testing logic to the supplied case and state the justified decision and its evidentiary limits.",
+        "must_not_assume": ["significance not supplied or derived", "effect size", "causality"]
+      },
+      "scoring_assertions": [
+        {"assertion_id": "IV.B.1-01", "observable_property": "Response applies the stated null/alternative and decision boundary consistently to supplied evidence.", "pass_condition": "The decision follows the supplied threshold and result evidence without reversing or inventing criteria."},
+        {"assertion_id": "IV.B.1-02", "observable_property": "Response distinguishes a statistical decision from unsupported substantive claims.", "pass_condition": "The response does not infer effect magnitude, causality, or practical importance from the test decision alone."}
+      ],
+      "insufficient_evidence_behavior": {"trigger": "Hypotheses, decision threshold, or result evidence needed for the decision are missing or inconsistent.", "required_behavior": "Do not force a hypothesis-test decision; identify the missing or conflicting evidence."},
+      "provenance_refs": ["SOURCE_NODE_INDEX:ASQ-CSSGB-2022-IV.B.1", "SUBSKILL:CSSGB-2022::ASQ-CSSGB-2022-IV.B.1::SUBSKILL::hypothesis-testing-logic"],
+      "validation_status": "PROVISIONAL_BOUND",
+      "evidence_boundaries": {"psychometric_validity": "UNOBSERVED", "learner_mastery": "UNOBSERVED", "retention": "UNOBSERVED", "transfer": "UNOBSERVED", "workplace_effectiveness": "UNOBSERVED", "sme_approval": "UNOBSERVED", "certification_equivalence": "UNOBSERVED"}
+    },
+    {
+      "assessment_target_id": "ASSESS::CSSGB-2022::ASQ-CSSGB-2022-IV.B.2::mean-variance-proportion-test-analysis::TARGET::bounded-test-family-analysis",
+      "subskill_id": "CSSGB-2022::ASQ-CSSGB-2022-IV.B.2::SUBSKILL::mean-variance-proportion-test-analysis",
+      "parent_requirement_id": "ASQ-CSSGB-2022-IV.B.2",
+      "source_locator": "ASQ CSSGB BoK 2022 p.7 / IV.B.2",
+      "preserved_cognitive_level": "ANALYZE",
+      "capability_statement": "Given a bounded inferential problem and stated data characteristics, distinguish whether the target concerns means, variances, or proportions, identify the analysis family and assumptions that require evidence, and interpret supplied results without manufacturing significance or effect claims.",
+      "target_type": "DATA_INTERPRETATION",
+      "evidence_input_class": "BOUNDED_MIXED_EVIDENCE",
+      "response_action_class": "ANALYZE",
+      "prompt_contract": {
+        "supplied_evidence": "A synthetic inferential problem with target quantity, data characteristics, supplied analysis output where relevant, and stated assumptions.",
+        "required_action": "Analyze whether the problem concerns means, variances, or proportions, identify the appropriate analysis family, and interpret only the supplied or derivable result evidence.",
+        "must_not_assume": ["assumptions not evidenced", "statistical significance not supplied or derivable", "practical effect"]
+      },
+      "scoring_assertions": [
+        {"assertion_id": "IV.B.2-01", "observable_property": "Response correctly identifies the inferential target and analysis family from supplied data characteristics.", "pass_condition": "Means, variances, or proportions are distinguished correctly and the proposed analysis class is consistent with the bounded evidence."},
+        {"assertion_id": "IV.B.2-02", "observable_property": "Response identifies assumption requirements and interprets supplied results without manufacturing claims.", "pass_condition": "Missing assumptions are flagged and no unsupported significance or effect conclusion is asserted."}
+      ],
+      "insufficient_evidence_behavior": {"trigger": "The target quantity, data characteristics, assumptions, or result evidence are insufficient to identify or interpret the analysis.", "required_behavior": "State the unresolved analysis choice or interpretation and identify the evidence required."},
+      "provenance_refs": ["SOURCE_NODE_INDEX:ASQ-CSSGB-2022-IV.B.2", "SUBSKILL:CSSGB-2022::ASQ-CSSGB-2022-IV.B.2::SUBSKILL::mean-variance-proportion-test-analysis"],
+      "validation_status": "PROVISIONAL_BOUND",
+      "evidence_boundaries": {"psychometric_validity": "UNOBSERVED", "learner_mastery": "UNOBSERVED", "retention": "UNOBSERVED", "transfer": "UNOBSERVED", "workplace_effectiveness": "UNOBSERVED", "sme_approval": "UNOBSERVED", "certification_equivalence": "UNOBSERVED"}
+    },
+    {
+      "assessment_target_id": "ASSESS::CSSGB-2022::ASQ-CSSGB-2022-IV.C.1::gap-analysis-reasoning::TARGET::bounded-gap-analysis",
+      "subskill_id": "CSSGB-2022::ASQ-CSSGB-2022-IV.C.1::SUBSKILL::gap-analysis-reasoning",
+      "parent_requirement_id": "ASQ-CSSGB-2022-IV.C.1",
+      "source_locator": "ASQ CSSGB BoK 2022 p.7 / IV.C.1",
+      "preserved_cognitive_level": "ANALYZE",
+      "capability_statement": "Given explicit current-state and target-state evidence, characterize the gap, identify what evidence supports its magnitude or nature, and separate measured differences from assumptions or unobserved causes.",
+      "target_type": "ARTIFACT_ANALYSIS",
+      "evidence_input_class": "BOUNDED_MIXED_EVIDENCE",
+      "response_action_class": "ANALYZE",
+      "prompt_contract": {
+        "supplied_evidence": "Synthetic current-state and target-state evidence with bounded metrics or observations and explicit evidence gaps.",
+        "required_action": "Analyze the performance gap, characterize its supported magnitude or nature, and separate measured differences from assumptions or unobserved causes.",
+        "must_not_assume": ["causes not evidenced", "target validity not supplied", "missing measurements"]
+      },
+      "scoring_assertions": [
+        {"assertion_id": "IV.C.1-01", "observable_property": "Response characterizes the gap using explicit current-state and target-state evidence.", "pass_condition": "The described gap is traceable to supplied measures or observations and does not substitute unsupported values."},
+        {"assertion_id": "IV.C.1-02", "observable_property": "Response separates measured differences from assumptions and unobserved causes.", "pass_condition": "Causal explanations or unsupported target claims remain explicitly unobserved or qualified."}
+      ],
+      "insufficient_evidence_behavior": {"trigger": "Current-state, target-state, or magnitude evidence is insufficient to characterize the requested gap.", "required_behavior": "State which gap dimension is unresolved and identify the missing evidence rather than infer it."},
+      "provenance_refs": ["SOURCE_NODE_INDEX:ASQ-CSSGB-2022-IV.C.1", "SUBSKILL:CSSGB-2022::ASQ-CSSGB-2022-IV.C.1::SUBSKILL::gap-analysis-reasoning"],
+      "validation_status": "PROVISIONAL_BOUND",
+      "evidence_boundaries": {"psychometric_validity": "UNOBSERVED", "learner_mastery": "UNOBSERVED", "retention": "UNOBSERVED", "transfer": "UNOBSERVED", "workplace_effectiveness": "UNOBSERVED", "sme_approval": "UNOBSERVED", "certification_equivalence": "UNOBSERVED"}
+    }
+  ],
+  "batch_boundaries": {
+    "psychometric_validity": "UNOBSERVED",
+    "learner_mastery": "UNOBSERVED",
+    "retention": "UNOBSERVED",
+    "transfer": "UNOBSERVED",
+    "workplace_effectiveness": "UNOBSERVED",
+    "sme_approval": "UNOBSERVED",
+    "certification_equivalence": "UNOBSERVED",
+    "unresolved_dependency_candidates": "UNCHANGED__SEPARATE_LANE"
+  },
+  "next_batch": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001B-ASSESSMENT-TARGET-DOMAIN-IV-BATCH-02-CANDIDATE-037A"
+}
