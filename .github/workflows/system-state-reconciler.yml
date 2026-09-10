@@ -89,7 +89,12 @@ jobs:
       - name: Validate Second Shift static control state
         run: node .github/scripts/second-shift-enforce.js --no-live --out=.state-reconciler/SECOND-SHIFT-ENFORCEMENT-REPORT.json
 
-      - name: Reconcile live System Master state
+      - name: Reconcile static System Master repository state
+        if: github.event_name != 'workflow_dispatch'
+        run: node .github/scripts/system-state-reconciler.js --no-live --out=.state-reconciler
+
+      - name: Reconcile live System Master owner refs
+        if: github.event_name == 'workflow_dispatch'
         run: node .github/scripts/system-state-reconciler.js --out=.state-reconciler
 
       - name: Publish reconciliation summary
