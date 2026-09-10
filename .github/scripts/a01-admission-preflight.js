@@ -78,6 +78,7 @@ function evaluate(options = {}) {
   return {
     admission_version: 1,
     admission_state: 'READY',
+    result_class: 'PASS',
     control_plane_sha: controlPlaneSha,
     policy_version: policy.policy_version,
     registry_version: registry.registry_version,
@@ -98,6 +99,7 @@ function main() {
     const result = evaluate();
     writeJson(outputPath, result);
     emit('admission_state', result.admission_state);
+    emit('result_class', result.result_class);
     emit('control_plane_sha', result.control_plane_sha);
     emit('policy_version', result.policy_version);
     emit('registry_version', result.registry_version);
@@ -111,6 +113,7 @@ function main() {
     const failure = {
       admission_version: 1,
       admission_state: 'BLOCKED',
+      result_class: 'CONTROL_PLANE_FAILURE',
       classification,
       reason,
       qualification_id: process.env.A01_QUALIFICATION_ID || null,
@@ -120,6 +123,7 @@ function main() {
     };
     writeJson(outputPath, failure);
     emit('admission_state', failure.admission_state);
+    emit('result_class', failure.result_class);
     emit('classification', failure.classification);
     console.error(`A01_ADMISSION_PRECHECK=BLOCKED classification=${classification} reason=${reason}`);
     process.exit(2);
