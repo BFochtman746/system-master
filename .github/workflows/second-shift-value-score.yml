@@ -1,0 +1,76 @@
+name: Second Shift Value Score
+
+on:
+  workflow_dispatch:
+    inputs:
+      shift_date:
+        description: Optional YYYY-MM-DD New York shift date
+        required: false
+        default: ''
+  schedule:
+    - cron: '10 7 * * *'
+      timezone: 'America/New_York'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: second-shift-value-score
+  queue: max
+  cancel-in-progress: false
+
+jobs:
+  score:
+    name: Score verified Second Shift value
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout canonical evidence
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Validate scorer
+        run: |
+          node --check .github/scripts/second-shift-event-ledger.js
+          node --check .github/scripts/second-shift-score.js
+          node .github/scripts/second-shift-score.js --selftest
+
+      - name: Resolve shift date
+        id: date
+        shell: bash
+        env:
+          INPUT_DATE: ${{ inputs.shift_date || '' }}
+        run: |
+          if [ -n "$INPUT_DATE" ]; then
+            echo "shift_date=$INPUT_DATE" >> "$GITHUB_OUTPUT"
+          else
+            echo "shift_date=$(TZ=America/New_York date +%F)" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Calculate evidence-derived scorecard
+        run: node .github/scripts/second-shift-score.js --date=${{ steps.date.outputs.shift_date }} --out=.second-shift-score/score.json
+
+      - name: Publish scorecard
+        if: always()
+        shell: bash
+        run: |
+          echo '## Second Shift Value Scorecard' >> "$GITHUB_STEP_SUMMARY"
+          echo "Shift date: ${{ steps.date.outputs.shift_date }}" >> "$GITHUB_STEP_SUMMARY"
+          if [ -f .second-shift-score/score.json ]; then
+            echo '```json' >> "$GITHUB_STEP_SUMMARY"
+            cat .second-shift-score/score.json >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo 'Score unavailable because canonical measurement evidence was missing or invalid.' >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload score evidence
+        if: always() && hashFiles('.second-shift-score/score.json') != ''
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: second-shift-value-score-${{ steps.date.outputs.shift_date }}-${{ github.run_id }}
+          path: .second-shift-score/score.json
+          if-no-files-found: error
+          retention-days: 90
