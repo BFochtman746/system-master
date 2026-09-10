@@ -1,0 +1,44 @@
+name: Learning Full Standard Topology Validator 003
+
+on:
+  push:
+    branches:
+      - learning/control-v1
+    paths:
+      - 'qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-66-SOURCE-NODE-INDEX-001.json'
+      - 'qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-PREREQUISITE-SUBSKILL-TOPOLOGY-CONTRACT-002.json'
+      - 'qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-TOPOLOGY-CANDIDATE-003.json'
+      - '.github/scripts/learning-full-standard-topology-validator-003.js'
+      - '.github/workflows/learning-full-standard-topology-validator-003.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  topology-validator:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - name: Record exact subject
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          printf 'SUBJECT_SHA=%s\n' "${GITHUB_SHA}"
+      - name: Syntax check validator
+        run: node --check .github/scripts/learning-full-standard-topology-validator-003.js
+      - name: Validate topology foundation
+        run: node .github/scripts/learning-full-standard-topology-validator-003.js | tee learning-topology-validator-003-result.json
+      - name: Upload hosted evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: learning-topology-validator-003-${{ github.sha }}
+          path: learning-topology-validator-003-result.json
+          if-no-files-found: error
