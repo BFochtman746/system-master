@@ -1,0 +1,25 @@
+name: BOOK SYSTEM E2E Authority Guards A-01 Transport
+
+on:
+  push:
+    branches:
+      - book-system/request-e2e-authority-guards-001-a01
+    paths:
+      - ".github/workflows/book-system-e2e-authority-guards-001-a01-transport.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  qualify:
+    uses: BFochtman746/system-master/.github/workflows/a01-control-plane-gateway.yml@main
+    with:
+      qualification_id: BOOK-SYSTEM-E2E-AUTHORITY-GUARDS-001
+      workstream_id: BOOK-SYSTEM
+      subject_sha: a119ccdf77b61011b1093006b55367fc3e5a65c2
+      origin_ref: refs/heads/book-system/control-v1
+      resume_on_pass: Close both bounded E2E authority guard repairs on exact subject a119ccdf77b61011b1093006b55367fc3e5a65c2, then resume BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001-HARNESS-001 using those exact qualified guards without modifying the qualified predecessor v1 subjects.
+      resume_on_failure: Preserve the exact receipt and hosted 24-of-24 PASS. Repair only the proven authority-guard or shared-control boundary; do not modify Author Decision Queue v1 or Export Freeze v1 and do not widen author, provider, lifecycle, document, export-freeze, publication, promotion, or production authority.
+      notification_target: book-system/control-v1
