@@ -1,0 +1,75 @@
+name: Learning 001E Batch 02 Prequalification
+
+on:
+  push:
+    branches:
+      - learning/instructional-scoring-001e-batch-02-20260910
+    paths:
+      - "learning/lab/learning_lab/cssgb_full_standard_i_a_2.py"
+      - "learning/lab/learning_lab/adaptive.py"
+      - "learning/lab/tests/test_adaptive_practice_not_mastery.py"
+      - "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001E-INSTRUCTIONAL-CONTENT-AND-SCORING-BATCH-02-CANDIDATE-062A.json"
+      - ".github/scripts/learning-full-standard-001e-batch-02-qualify.py"
+      - ".github/workflows/learning-001e-batch-02-prequal.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  qualify:
+    name: Ground, score, and execute I.A.2 runtime slice
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      PYTHONPATH: learning/lab
+    steps:
+      - name: Checkout exact 001E Batch 02 subject with history
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Record exact subject and historical 001D input
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          git cat-file -e "02dc615fcb5d44b997ed1322848eccc6e37bb172^{commit}"
+          printf 'SUBJECT_SHA=%s\n' "$GITHUB_SHA"
+          printf '001D_DURABLE_BLUEPRINT_COMMIT=%s\n' "02dc615fcb5d44b997ed1322848eccc6e37bb172"
+
+      - name: Compile-check Batch 02 runtime and qualifier
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            learning/lab/learning_lab/adaptive.py \
+            learning/lab/learning_lab/cssgb_full_standard_i_a_2.py \
+            learning/lab/tests/test_adaptive_practice_not_mastery.py \
+            .github/scripts/learning-full-standard-001e-batch-02-qualify.py
+
+      - name: Preserve Batch 01 adaptive mastery regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m unittest learning.lab.tests.test_adaptive_practice_not_mastery
+
+      - name: Execute 001E Batch 02 qualification
+        shell: bash
+        run: |
+          set -euo pipefail
+          export EVIDENCE_DIR="$RUNNER_TEMP/learning-001e-batch-02-evidence"
+          python .github/scripts/learning-full-standard-001e-batch-02-qualify.py
+
+      - name: Upload 001E Batch 02 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: LEARNING-001E-BATCH-02-${{ github.sha }}-hosted-evidence
+          path: ${{ runner.temp }}/learning-001e-batch-02-evidence
+          if-no-files-found: warn
+          retention-days: 30
+
+# Portable hosted qualification only. The full 66-node course remains READY_FOR_REVIEW; no real learner, psychometric, SME, certification, A-01, native, or production authority is inferred.
