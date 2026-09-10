@@ -1,0 +1,64 @@
+{
+  "closure_id": "BOOK-SYSTEM-CONTENT-ADMISSION-AUTHOR-DECISION-APPLICABILITY-GUARD-004-CLOSURE",
+  "effective_date": "2026-09-10",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "standing": "CLOSED_TO_HOSTED_SYNTHETIC_ADDITIVE_GUARD_BOUNDARY",
+  "qualified_subject_sha": "972ee580890ff73f6fc5d09684b11bcb295e27d5",
+  "implementation": "system-master/book-system/content-admission-author-decision-applicability-guard.js",
+  "hosted_qualification": {
+    "workflow": ".github/workflows/book-system-content-admission-author-decision-applicability-guard-004.yml",
+    "run_id": 34491786739,
+    "job_id": 102920090355,
+    "result": "PASS",
+    "guard_qualifier": "BOOK-SYSTEM-CONTENT-ADMISSION-AUTHOR-DECISION-APPLICABILITY-GUARD-004-DETERMINISTIC-QUALIFIER-001",
+    "required_adversarial_cases": "9/9",
+    "guard_total_cases": "11/11",
+    "guard_assertions": 16,
+    "unchanged_content_admission_regression": "30/30 PASS",
+    "unchanged_strict_current_subject_regression": "10/10 planned cases PASS",
+    "fixture_class": "SYNTHETIC_NON_PRIVATE",
+    "artifact_id": 10158040380,
+    "artifact_zip_sha256": "ea42dce6a69da32594f394f99d0e96334f829379d3c0195317103899c02139cd"
+  },
+  "proved_boundary": [
+    "Every content-admission operation marked requires_author_decision must have an explicit operation-fingerprint-bound applicability binding.",
+    "The binding must reference a canonical approved affirmative AUTHOR_DECISION already present in parent state and in the admission request.",
+    "The binding must resolve to an immutable Author Decision Queue resolution receipt for the same decision_id.",
+    "The queue receipt decision-request digest and subject identities are checked against the stored queue snapshot.",
+    "Receipt subject_identity_refs must exactly match the binding's required subject identities.",
+    "Governed subject identities must remain current under the already-existing strict current-subject semantics.",
+    "Missing, mismatched, stale or unbound evidence fails before base content admission is called.",
+    "Successful applicability validation delegates unchanged canonical mutation to the existing content-admission core.",
+    "The original content-admission core and canonical AUTHOR_DECISION schema were not modified."
+  ],
+  "adversarial_evidence": [
+    "approval for subject A cannot be replayed for subject B",
+    "same exact subject receipt passes the precondition",
+    "missing applicability binding fails closed",
+    "missing resolution receipt fails closed",
+    "receipt decision-id mismatch fails closed",
+    "receipt subject-identity mismatch fails closed",
+    "stale governed subject fails closed",
+    "canonical approved decision without queue evidence fails closed",
+    "failed applicability yields zero parent/version-ledger mutation and no success result",
+    "operation fingerprint mismatch fails closed",
+    "unbound extra author-decision refs fail closed"
+  ],
+  "authority_fences": {
+    "author_choice_synthesized": false,
+    "canonical_author_decision_schema_modified": false,
+    "base_content_admission_modified": false,
+    "a01_pass": false,
+    "lifecycle_or_publication_authority": false,
+    "prose_or_document_authority": false,
+    "native_or_production_pass": false
+  },
+  "preserved_exact_sha_law": {
+    "original_content_admission_subject": "e993806a1d9a4838d4bd6d162a36921526ef302a",
+    "original_subject_hosted_pass": "PRESERVED_FOR_ORIGINAL_SUBJECT_ONLY",
+    "original_subject_a01": "NOT_REGISTERED__NOT_RUN__NO_PASS",
+    "guard_derivative_hosted_subject": "972ee580890ff73f6fc5d09684b11bcb295e27d5",
+    "rule": "Hosted qualification of this additive derivative does not transfer A-01 PASS to either subject."
+  },
+  "next_dependency_valid_direction": "Resume the already-hosted-qualified existing-book recovery work by integrating a ratified RecoveredBookBaseline through this guarded content-admission seam and the existing lifecycle authority, without duplicating author decision, content admission, lifecycle, Story Bible, Research, Prose, Document, DATA or platform ownership."
+}
