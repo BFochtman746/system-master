@@ -1,0 +1,143 @@
+{
+  "schema_id": "SECOND-SHIFT-VALUE-MEASUREMENT-SCHEMA-001",
+  "purpose": "Machine-readable measurement contract for judging Second Shift by verified advancement, evidence acceptance, autonomous leverage, flow health and lagging rework rather than activity volume.",
+  "primary_scorecard": "governance/second-shift/SECOND-SHIFT-VALUE-SCORECARD-001.md",
+  "allowed_work_classes": [
+    "RESEARCH_PROVENANCE",
+    "ARCHITECTURE_CONTRACT_STATE",
+    "TEST_FIXTURE_BENCHMARK",
+    "IMPLEMENTATION",
+    "QUALIFICATION_ADMISSION",
+    "REPAIR_RECOVERY",
+    "CENSUS_RECONCILIATION",
+    "SUCCESSOR_READINESS",
+    "SOURCE_CUSTODY"
+  ],
+  "complexity_bands": ["SMALL", "MEDIUM", "LARGE"],
+  "advancement_classes": {
+    "CANONICAL_OBLIGATION_OR_MAJOR_BOUNDARY_CLOSED": 3.0,
+    "CANONICAL_STAGE_ADVANCED_OR_BLOCKER_UNLOCKED": 2.0,
+    "MEANINGFUL_EVIDENCE_BOUNDARY_CLOSED": 1.0,
+    "VERIFIED_SUCCESSOR_OR_READINESS_REDUCTION": 0.5,
+    "NO_DURABLE_OWNER_EVIDENCE_DELTA": 0.0
+  },
+  "verification_classes": [
+    "AUTHORITATIVE_PASS",
+    "OWNER_ADMITTED_VERIFIED",
+    "HOSTED_PASS_CANDIDATE",
+    "LOCAL_OR_STATIC_PASS",
+    "EVIDENCE_ONLY",
+    "UNEXECUTED",
+    "FAIL"
+  ],
+  "admission_classes": [
+    "CANONICAL_ADMITTED",
+    "OWNER_VALID_CANDIDATE",
+    "BLOCKED_EXTERNAL_OR_HIGHER_AUTHORITY",
+    "NOT_APPLICABLE",
+    "REJECTED_OR_STALE"
+  ],
+  "required_work_unit_fields": [
+    "work_unit_id",
+    "lane",
+    "objective_id",
+    "work_class",
+    "complexity_band",
+    "advancement_class",
+    "vpu",
+    "verification_class",
+    "admission_class",
+    "evidence_pointer",
+    "completed_at",
+    "autonomous_successor_bound",
+    "user_intervention_required",
+    "rework_status"
+  ],
+  "rework_statuses": ["PENDING_OBSERVATION", "NONE_OBSERVED", "REWORK_REQUIRED", "INVALIDATED"],
+  "required_shift_summary_fields": [
+    "shift_id",
+    "shift_date",
+    "measurement_confidence",
+    "work_units",
+    "accepted_vpu_total",
+    "delivered_candidate_vpu_total",
+    "evidence_acceptance_yield",
+    "autonomous_continuations",
+    "minimum_interactive_turns_avoided",
+    "daytime_turn_equivalent",
+    "counterfactual_chat_elapsed_hours",
+    "human_attention_saved_minutes",
+    "rework_instability_rate",
+    "flow_health",
+    "ssvi"
+  ],
+  "uncalibrated_value": "UNCALIBRATED",
+  "unknown_value": "UNKNOWN",
+  "measurement_confidence_classes": ["HIGH", "MEDIUM", "LOW", "UNSCORABLE"],
+  "calibration": {
+    "minimum_samples_per_work_class_complexity_band": 5,
+    "preferred_samples_per_work_class_complexity_band": 10,
+    "required_sample_fields": [
+      "sample_id",
+      "work_class",
+      "complexity_band",
+      "verified_progress_units",
+      "user_execution_turns",
+      "accepted_or_reworked"
+    ],
+    "optional_time_fields": [
+      "elapsed_chat_minutes",
+      "active_user_minutes",
+      "setup_minutes",
+      "review_minutes",
+      "rework_user_minutes"
+    ],
+    "turn_equivalent_formula": "sum(class_band_median_user_turns_per_vpu * accepted_overnight_vpu_in_matching_class_band)",
+    "elapsed_time_formula": "sum(class_band_median_elapsed_chat_minutes_per_vpu * accepted_overnight_vpu_in_matching_class_band) / 60",
+    "human_attention_formula": "counterfactual_active_user_minutes - actual_setup_minutes - morning_review_minutes - correction_or_rework_user_minutes"
+  },
+  "flow_health_fields": [
+    "ready_to_claim_median_minutes",
+    "ready_to_claim_max_minutes",
+    "ready_undispatched_minutes",
+    "unjustified_idle_minutes",
+    "stale_claim_count",
+    "stale_claim_recovery_minutes",
+    "blocked_to_successor_median_minutes",
+    "retry_attempt_count",
+    "retry_waste_count",
+    "circuit_open_count",
+    "circuit_fallback_success_count",
+    "telemetry_unknown_minutes"
+  ],
+  "ssvi_weights": {
+    "outcome_advancement": 35,
+    "evidence_acceptance_quality": 20,
+    "autonomous_leverage": 15,
+    "flow_reliability": 15,
+    "stability_rework": 15
+  },
+  "hard_gate_classes": [
+    "FABRICATED_AUTHORITY_OR_EVIDENCE",
+    "STALE_OWNER_MUTATION_WITHOUT_RECONCILIATION",
+    "CANONICAL_WRITER_VIOLATION",
+    "PASS_TRANSFER",
+    "KNOWING_EVIDENCE_CLASS_INFLATION"
+  ],
+  "hard_gate_score_cap": 49,
+  "confidence_rules": {
+    "HIGH": ">=95 percent shift interval coherent telemetry and exact evidence for all scored VPU",
+    "MEDIUM": ">=80 percent shift interval coherent telemetry and exact evidence for all scored VPU",
+    "LOW": "<80 percent telemetry coverage or material counterfactual calibration gaps",
+    "UNSCORABLE": "material evidence/telemetry contradiction prevents defensible scoring"
+  },
+  "anti_gaming_rules": [
+    "One logical objective/stage transition earns VPU once per shift regardless of file, commit, test or artifact count.",
+    "Process uptime, tokens, commits, lines changed, workflow minutes and artifact count are not VPU.",
+    "Repeated unchanged qualification earns no new VPU unless it closes a previously open authority/evidence boundary.",
+    "Counterfactual hours are never inferred from the seven-hour shift duration or self-reported AI speedup.",
+    "Normal next-stage work is not rework; defect correction, invalid admission, rollback, evidence inflation correction and redo caused by wrong/stale overnight output are rework.",
+    "A later discovered defect adjusts the finalized score rather than rewriting the original evidence history."
+  ],
+  "authority_boundary": "Measurement never grants product, canonical-writer, A-01, human, author, private, blind, native, publication or production authority."
+}
