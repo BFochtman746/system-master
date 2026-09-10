@@ -1,0 +1,100 @@
+{
+  "artifact_id": "PROSE-EVALUATOR-TOMORROW-READINESS-002",
+  "effective_date": "2026-09-09",
+  "owner_path": "SYSTEM_MASTER/BOOK/PROSE",
+  "supersedes": "qualification/literary-prose-engine-001/PROSE-EVALUATOR-TOMORROW-READINESS-001.json",
+  "standing": "PASS__RESEARCH_DELTA_SUPPORT_CLOSED__TARGETS_1_5_HOSTED_QUALIFIED__PRIMARY_CRITICAL_PATH_UNCHANGED",
+  "support_target_matrix": [
+    {
+      "target_id": "PROSE-RUBRIC-ORDER-INVARIANCE-001",
+      "classification": "IMPLEMENTED__HOSTED_QUALIFIED",
+      "implementation_sha": "2fc1d9c9a7b789d537c17deafc6b1d1b0b82cf82",
+      "hosted_qualification_run": 34416542090,
+      "remaining_delta": "NONE__DO_NOT_REPEAT"
+    },
+    {
+      "target_id": "PROSE-RUBRIC-LEAKAGE-COUNTERFACTUAL-001",
+      "classification": "IMPLEMENTED__HOSTED_QUALIFIED",
+      "implementation_sha": "1ffcec493f9d3ca538571a5dd2095a1abe7c8ef9",
+      "hosted_qualification_run": 34417854633,
+      "remaining_delta": "NONE__DO_NOT_REPEAT"
+    },
+    {
+      "target_id": "PROSE-ANCHOR-LOCALIZATION-TIERING-001",
+      "classification": "IMPLEMENTED__HOSTED_QUALIFIED",
+      "implementation_sha": "783a11e38b003916a9c661d265d7df9d676e56cf",
+      "hosted_qualification_run": 34429144845,
+      "remaining_delta": "NONE__DO_NOT_REPEAT"
+    },
+    {
+      "target_id": "PROSE-STYLE-FUNCTION-DECOUPLING-001",
+      "classification": "IMPLEMENTED__HOSTED_QUALIFIED",
+      "implementation_sha": "5ffaaabb84191ee6bd277763409978493b57e4f7",
+      "hosted_qualification_run": 34429823887,
+      "control_drift_run": 34429824076,
+      "completion_delta": "STYLE_VS_STORY now requires explicit event_preserved, character_preserved and narrative_function_preserved evidence on decisive comparisons, fails closed on missing dimensional evidence, and vetoes a surface-preferred winner when any protected story dimension is lost.",
+      "remaining_delta": "NONE__DO_NOT_REPEAT"
+    },
+    {
+      "target_id": "PROSE-LONG-FORM-EVIDENCE-LINKAGE-001",
+      "classification": "IMPLEMENTED__HOSTED_QUALIFIED",
+      "implementation_sha": "5d1ded28ffd483c8f6af8585738286315aed1e11",
+      "hosted_qualification_run": 34430115090,
+      "hosted_fixture_result": "PASS__14_OF_14",
+      "evidence": [
+        "qualification/literary-prose-engine-001/long-form-evidence-linkage-001/LONG-FORM-EVIDENCE-LINKAGE-CONTRACT-v1.json",
+        "qualification/literary-prose-engine-001/long-form-evidence-linkage-001/long_form_evidence_linkage.py",
+        "qualification/literary-prose-engine-001/long-form-evidence-linkage-001/run_long_form_evidence_linkage_fixtures.py",
+        ".github/workflows/literary-prose-long-form-evidence-linkage-ci.yml"
+      ],
+      "completion_delta": "Independent support fixtures now jointly qualify macro-claim correctness, exact locator/digest/chapter evidence linkage, long-range multichapter support, temporal linkage, and required middle-book factual/temporal support while keeping those layers separately visible.",
+      "remaining_delta": "NONE__DO_NOT_REPEAT"
+    }
+  ],
+  "support_closure": {
+    "remaining_research_delta_support_targets": 0,
+    "rule": "Do not repeat targets 1-5 unless new evidence exposes a concrete regression or a materially new requirement.",
+    "long_form_pass_proves": "The support contract can reject fluent or macro-correct analysis when exact localized evidence, temporal grounding, long-range support, or required middle-book factual/temporal linkage is absent or wrong.",
+    "long_form_pass_does_not_prove": [
+      "whole-book literary accuracy",
+      "author intent",
+      "automatic revision eligibility",
+      "candidate superiority",
+      "canon replacement",
+      "publication authority"
+    ]
+  },
+  "primary_critical_path": {
+    "selected_state": "qualification/literary-prose-engine-001/LITERARY-PROSE-CONSOLIDATED-WORKSTREAM-STATE-015.json",
+    "objective_id": "PROSE-REAL-LIMITATION-BLIND-MODEL-SCORING-001",
+    "state": "READY__FRESH_GROUND_TRUTH_BLIND_EVALUATOR_CONTEXT_REQUIRED",
+    "execution_branch": "literary-prose-blind-eval-001",
+    "current_chat_eligible_to_score": false,
+    "reason": "This chat has observed the frozen author-ground-truth state and labeled-branch evidence; it cannot create a valid blind prediction seal.",
+    "revision_authority": false
+  },
+  "blindness_and_authority_boundaries": {
+    "forbidden_case_ids": [
+      "PROSE-LGT-001",
+      "PROSE-LGT-002",
+      "PROSE-LGT-003",
+      "PROSE-LGT-004",
+      "PROSE-LGT-005",
+      "PROSE-LGT-006"
+    ],
+    "support_work_may_score_or_tune_blind_cases": false,
+    "support_work_may_tune_against_author_labels": false,
+    "blind_prediction_must_precede_ground_truth_read": true,
+    "revision_authority": false,
+    "candidate_generation_authorized": false,
+    "manuscript_mutation_authorized": false,
+    "book_canonical_write_authorized": false,
+    "publication_authorized": false
+  },
+  "exact_next_action": {
+    "id": "PROSE-REAL-LIMITATION-BLIND-MODEL-SCORING-001",
+    "objective": "Execute the six frozen cases in a fresh ground-truth-blind evaluator context on literary-prose-blind-eval-001, seal model dispositions first, then compare the sealed predictions with the frozen author ground truth and measure limitation detection, preservation, observation/abstention behavior and false positives.",
+    "current_chat_action": "STOP_BEFORE_BLIND_SCORING__HANDOFF_TO_FRESH_GROUND_TRUTH_BLIND_CONTEXT",
+    "do_not": "Do not expose author labels, labeled-branch state, protected blind-case ground truth, or post-label evidence to the fresh evaluator before its prediction seal. Revision authority remains zero."
+  }
+}
