@@ -1,0 +1,98 @@
+{
+  "checkpoint_id": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-SOURCE-GRAPH-CHECKPOINT-001",
+  "effective_date": "2026-09-10",
+  "owner_path": "SYSTEM_MASTER/LEARNING",
+  "control_ref": "learning/control-v1",
+  "input_control_head": "8d14642dfed242adb3eea4b33125272a8d3d657a",
+  "standing": "SOURCE_VERSION_LOCK_AND_GRAPH_SCHEMA_CLOSED__66_NODE_POPULATION_AND_VALIDATION_NEXT",
+  "objective": "Preserve the Learning owner's frozen 2022 ASQ Certified Six Sigma Green Belt source contract and close the machine-readable requirement/prerequisite/subskill/assessment graph schema before populating all 66 source-bound requirement nodes.",
+  "source_contract": {
+    "authoritative_frozen_source_version": "ASQ_CERTIFIED_SIX_SIGMA_GREEN_BELT__2022",
+    "expected_requirement_count": 66,
+    "authority_basis": "learning/control-v1/LEARNING-CONTROL-RECORD-v2.md",
+    "version_rule": "The compiler remains bound to the frozen 2022 source contract unless Learning owner authority explicitly migrates it. A newer public ASQ Body of Knowledge must be treated as version-drift/revalidation evidence, never silently substituted for the frozen source.",
+    "current_public_revalidation_refs": [
+      {
+        "url": "https://asq.org/cert/six-sigma-green-belt/bok",
+        "classification": "CURRENT_PUBLIC_REVALIDATION_ONLY__NOT_FROZEN_2022_SUBSTITUTE"
+      },
+      {
+        "url": "https://asq.org/-/media/public/gift/cssgb-certification-body-of-knowledge.pdf",
+        "classification": "CURRENT_PUBLIC_REVALIDATION_ONLY__NOT_FROZEN_2022_SUBSTITUTE"
+      }
+    ],
+    "drift_rule": "Observed public-source revision may trigger provenance review and selective invalidation analysis, but cannot rewrite frozen requirement identities or content without explicit version migration authority."
+  },
+  "requirement_node_schema": {
+    "required_fields": [
+      "requirement_id",
+      "source_version",
+      "source_locator",
+      "source_provenance_ref",
+      "source_content_digest_or_governed_ref",
+      "domain",
+      "level",
+      "prerequisite_ids",
+      "subskill_ids",
+      "assessment_profile",
+      "workplace_relevance_profile",
+      "mastery_probe_profile",
+      "delayed_retention_probe_profile",
+      "novel_transfer_probe_profile",
+      "revalidation_triggers",
+      "validation_status"
+    ],
+    "edge_types": [
+      "PREREQUISITE",
+      "DECOMPOSES_TO",
+      "ASSESSED_BY",
+      "APPLIES_IN",
+      "REVISITS",
+      "TRANSFERS_TO"
+    ],
+    "source_text_rule": "Store governed source locators and digests/references. Do not invent or reconstruct missing copyrighted source text from a newer public version."
+  },
+  "graph_validation_contract": {
+    "required_checks": [
+      "exactly 66 unique requirement_id values are present",
+      "every requirement node resolves to exactly one frozen-2022 source locator and provenance reference",
+      "no required node is silently sourced from a newer ASQ revision",
+      "hard prerequisite edges are acyclic or an explicit owner-approved cycle-break classification is present",
+      "every subskill is reachable from at least one requirement node",
+      "every assessment profile is bound to one or more requirement/subskill targets",
+      "every requirement has workplace relevance, mastery, delayed-retention and novel-transfer profile schema",
+      "human-observed response, retention, transfer and effectiveness fields remain UNOBSERVED until real authorized evidence exists",
+      "version drift causes selective revalidation flags rather than automatic wholesale replacement",
+      "unknown or unresolved source mappings fail closed and remain explicit"
+    ],
+    "failure_classes": [
+      "MISSING_FROZEN_SOURCE_LOCATOR",
+      "DUPLICATE_REQUIREMENT_ID",
+      "UNAUTHORIZED_SOURCE_VERSION_SUBSTITUTION",
+      "UNRESOLVED_PREREQUISITE",
+      "UNJUSTIFIED_PREREQUISITE_CYCLE",
+      "ORPHAN_SUBSKILL",
+      "UNBOUND_ASSESSMENT_TARGET",
+      "PROVENANCE_MISMATCH",
+      "UNAUTHORIZED_HUMAN_EVIDENCE_INFERENCE"
+    ]
+  },
+  "completion_delta": "Before: the Learning compiler objective required a full 66-requirement source-bound graph, but the safe overnight path still needed an explicit version-lock and schema checkpoint to prevent current public ASQ revisions from silently changing the frozen 2022 contract. After: the 2022 source version is explicitly locked, current public ASQ material is classified only as drift/revalidation evidence, the requirement-node and edge schemas are closed, deterministic validation/failure classes are defined, and the next machine-safe unit of work is exact 66-node population from preserved 2022 evidence.",
+  "stop_condition": "SATISFIED for the source-version-lock and graph-schema subphase. No claim is made that all 66 requirement nodes have been populated or validated yet.",
+  "next_objective": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-66-NODE-POPULATION-AND-GRAPH-VALIDATION",
+  "evidence_target": [
+    "66 unique source-bound requirement nodes from preserved frozen-2022 evidence",
+    "deterministic graph validation report with zero unresolved missing IDs or silent version substitutions",
+    "explicit unresolved/cycle/provenance findings if any remain",
+    "machine-readable prerequisite/subskill/assessment/workplace/mastery/retention/transfer graph artifact",
+    "next bounded implementation contract only after graph validation closes"
+  ],
+  "forbidden_authority": [
+    "do not infer or fabricate learner consent, responses, retention, transfer or effectiveness evidence",
+    "do not claim certification equivalence or certification outcome",
+    "do not silently migrate from the frozen 2022 standard source to a newer public ASQ revision",
+    "do not claim native-platform or production evidence",
+    "do not transfer A-01 PASS or claim A-01 authority from research/specification work"
+  ],
+  "continuation_rule": "Populate and validate all 66 requirement nodes from preserved frozen-2022 evidence. If a source locator cannot be proven, mark it unresolved and continue all independent graph work. After graph closure, bind the smallest bounded compiler implementation successor and obtain fresh exact-SHA qualification for any changed software."
+}
