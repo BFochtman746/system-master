@@ -86,10 +86,15 @@ def main() -> None:
         fail("BATCH_SELECTION_DRIFT")
 
     blueprint = git_show_json(BLUEPRINT_REF, BLUEPRINT_PATH)
-    observed_blueprint_digest = canonical_digest(blueprint)
+    declared_blueprint_digest = blueprint.get("blueprint_digest_sha256")
+    if declared_blueprint_digest != EXPECTED_BLUEPRINT_DIGEST:
+        fail("001D_DECLARED_BLUEPRINT_DIGEST_DRIFT", str(declared_blueprint_digest))
+    unsigned_blueprint = copy.deepcopy(blueprint)
+    unsigned_blueprint.pop("blueprint_digest_sha256", None)
+    observed_blueprint_digest = canonical_digest(unsigned_blueprint)
     if observed_blueprint_digest != EXPECTED_BLUEPRINT_DIGEST:
         fail("001D_BLUEPRINT_DIGEST_DRIFT", observed_blueprint_digest)
-    if candidate["selection"]["001d_blueprint_digest_sha256"] != observed_blueprint_digest:
+    if candidate["selection"]["001d_blueprint_digest_sha256"] != declared_blueprint_digest:
         fail("CANDIDATE_BLUEPRINT_DIGEST_DRIFT")
     nodes = blueprint.get("execution_nodes", [])
     if len(nodes) != 66:
