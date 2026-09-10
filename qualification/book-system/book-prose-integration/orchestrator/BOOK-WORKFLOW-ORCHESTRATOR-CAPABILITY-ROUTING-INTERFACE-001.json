@@ -1,0 +1,222 @@
+{
+  "contract_id": "BOOK-WORKFLOW-ORCHESTRATOR-CAPABILITY-ROUTING-INTERFACE-001",
+  "contract_version": 1,
+  "effective_date": "2026-09-10",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "depends_on": [
+    "BOOK-WORKFLOW-ORCHESTRATOR-AUTHORITY-CONTRACT-001-CLOSURE",
+    "BOOK-WORKFLOW-ORCHESTRATOR-WORKFLOW-STATE-MODEL-001-CLOSURE",
+    "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-002-CLOSURE"
+  ],
+  "standing": "CANDIDATE_PENDING_PACKET_QUALIFICATION",
+  "scope": "Exact declared-capability lookup/interface only. This packet does not infer capabilities from natural-language objectives, execute providers, schedule tasks, choose concurrency, retry work, compile context, cache results or admit canonical manuscript changes.",
+  "backing_service_registry": {
+    "registry_id": "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-002",
+    "qualified_subject_sha": "77db6b550e9aeb1dfb956627376becbb591498f8",
+    "a01_result": "PASS",
+    "rule": "Reuse qualified service and operation identifiers; do not silently replace or widen Registry V2."
+  },
+  "lookup_request_required": ["capability_id","required_authority_domain"],
+  "lookup_result_required": [
+    "capability_id",
+    "owner_path",
+    "authority_domain",
+    "dispatch_class",
+    "callable",
+    "service_id",
+    "operation_id",
+    "contract_ref",
+    "canonical_write_authority"
+  ],
+  "dispatch_classes": ["QUALIFIED_SERVICE_OPERATION","BOOK_INTERNAL_AUTHORITY_GATE","DECLARED_AUTHORITY_NO_CALLABLE_INTERFACE"],
+  "capabilities": [
+    {
+      "capability_id": "PROSE.ANALYZE_PASSAGE",
+      "owner_path": "SYSTEM_MASTER/BOOK/PROSE",
+      "authority_domain": "LITERARY_DIAGNOSIS",
+      "dispatch_class": "QUALIFIED_SERVICE_OPERATION",
+      "callable": true,
+      "service_id": "PROSE_ANALYSIS_AND_REVISION",
+      "operation_id": "ANALYZE_PASSAGE_OR_UNIT",
+      "contract_ref": "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-002",
+      "canonical_write_authority": false
+    },
+    {
+      "capability_id": "PROSE.BUILD_NARRATIVE_STATE",
+      "owner_path": "SYSTEM_MASTER/BOOK/PROSE",
+      "authority_domain": "LITERARY_NARRATIVE_ANALYSIS",
+      "dispatch_class": "QUALIFIED_SERVICE_OPERATION",
+      "callable": true,
+      "service_id": "PROSE_ANALYSIS_AND_REVISION",
+      "operation_id": "BUILD_NARRATIVE_STATE_PROJECTION",
+      "contract_ref": "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-002",
+      "canonical_write_authority": false
+    },
+    {
+      "capability_id": "PROSE.DIAGNOSE",
+      "owner_path": "SYSTEM_MASTER/BOOK/PROSE",
+      "authority_domain": "LITERARY_DIAGNOSIS",
+      "dispatch_class": "QUALIFIED_SERVICE_OPERATION",
+      "callable": true,
+      "service_id": "PROSE_ANALYSIS_AND_REVISION",
+      "operation_id": "DIAGNOSE_LIMITATIONS_AND_OPPORTUNITIES",
+      "contract_ref": "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-002",
+      "canonical_write_authority": false
+    },
+    {
+      "capability_id": "PROSE.RETRIEVE_CRAFT_INTELLIGENCE",
+      "owner_path": "SYSTEM_MASTER/BOOK/PROSE",
+      "authority_domain": "LITERARY_CRAFT_INTELLIGENCE",
+      "dispatch_class": "QUALIFIED_SERVICE_OPERATION",
+      "callable": true,
+      "service_id": "PROSE_ANALYSIS_AND_REVISION",
+      "operation_id": "RETRIEVE_CRAFT_INTELLIGENCE",
+      "contract_ref": "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-002",
+      "canonical_write_authority": false
+    },
+    {
+      "capability_id": "PROSE.GENERATE_REVISION_CANDIDATE",
+      "owner_path": "SYSTEM_MASTER/BOOK/PROSE",
+      "authority_domain": "LITERARY_CANDIDATE_GENERATION",
+      "dispatch_class": "QUALIFIED_SERVICE_OPERATION",
+      "callable": true,
+      "service_id": "PROSE_ANALYSIS_AND_REVISION",
+      "operation_id": "GENERATE_BOUNDED_REVISION_CANDIDATE",
+      "contract_ref": "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-002",
+      "canonical_write_authority": false
+    },
+    {
+      "capability_id": "PROSE.COMPARE_ORIGINAL_CANDIDATE",
+      "owner_path": "SYSTEM_MASTER/BOOK/PROSE",
+      "authority_domain": "LITERARY_COMPARISON_EVIDENCE",
+      "dispatch_class": "QUALIFIED_SERVICE_OPERATION",
+      "callable": true,
+      "service_id": "PROSE_ANALYSIS_AND_REVISION",
+      "operation_id": "COMPARE_ORIGINAL_AND_CANDIDATE",
+      "contract_ref": "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-002",
+      "canonical_write_authority": false
+    },
+    {
+      "capability_id": "PROSE.ASSESS_VOICE",
+      "owner_path": "SYSTEM_MASTER/BOOK/PROSE",
+      "authority_domain": "VOICE_EVIDENCE",
+      "dispatch_class": "QUALIFIED_SERVICE_OPERATION",
+      "callable": true,
+      "service_id": "PROSE_ANALYSIS_AND_REVISION",
+      "operation_id": "ASSESS_VOICE_EVOLUTION_OR_DEGRADATION",
+      "contract_ref": "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-002",
+      "canonical_write_authority": false
+    },
+    {
+      "capability_id": "PROSE.ASSESS_HOMOGENIZATION",
+      "owner_path": "SYSTEM_MASTER/BOOK/PROSE",
+      "authority_domain": "HOMOGENIZATION_DEFENSE_EVIDENCE",
+      "dispatch_class": "QUALIFIED_SERVICE_OPERATION",
+      "callable": true,
+      "service_id": "PROSE_ANALYSIS_AND_REVISION",
+      "operation_id": "ASSESS_HOMOGENIZATION_RISK",
+      "contract_ref": "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-002",
+      "canonical_write_authority": false
+    },
+    {
+      "capability_id": "EVALUATION.INDEPENDENT_BOOK_OR_UNIT",
+      "owner_path": "SYSTEM_MASTER/BOOK/PROSE",
+      "authority_domain": "LITERARY_EVALUATION_EVIDENCE",
+      "dispatch_class": "QUALIFIED_SERVICE_OPERATION",
+      "callable": true,
+      "service_id": "BOOK_EVALUATION",
+      "operation_id": "INDEPENDENT_BOOK_OR_UNIT_EVALUATION",
+      "contract_ref": "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-002",
+      "canonical_write_authority": false
+    },
+    {
+      "capability_id": "EVALUATION.CONTRASTIVE_CANDIDATE",
+      "owner_path": "SYSTEM_MASTER/BOOK/PROSE",
+      "authority_domain": "LITERARY_EVALUATION_EVIDENCE",
+      "dispatch_class": "QUALIFIED_SERVICE_OPERATION",
+      "callable": true,
+      "service_id": "BOOK_EVALUATION",
+      "operation_id": "CONTRASTIVE_CANDIDATE_EVALUATION",
+      "contract_ref": "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-002",
+      "canonical_write_authority": false
+    },
+    {
+      "capability_id": "EVALUATION.QUALIFICATION_EVIDENCE",
+      "owner_path": "SYSTEM_MASTER/BOOK/PROSE",
+      "authority_domain": "QUALIFICATION_EVIDENCE",
+      "dispatch_class": "QUALIFIED_SERVICE_OPERATION",
+      "callable": true,
+      "service_id": "BOOK_EVALUATION",
+      "operation_id": "QUALIFICATION_EVIDENCE",
+      "contract_ref": "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-002",
+      "canonical_write_authority": false
+    },
+    {
+      "capability_id": "RESEARCH.ACQUIRE_BOUNDED_EVIDENCE",
+      "owner_path": "EXTERNAL_OR_SHARED_PROVIDER__NO_BOOK_CANONICAL_AUTHORITY",
+      "authority_domain": "EXTERNAL_EVIDENCE_TRUTH",
+      "dispatch_class": "QUALIFIED_SERVICE_OPERATION",
+      "callable": true,
+      "service_id": "RESEARCH_AND_EVIDENCE",
+      "operation_id": "ACQUIRE_BOUNDED_EVIDENCE",
+      "contract_ref": "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-002",
+      "canonical_write_authority": false
+    },
+    {
+      "capability_id": "RESEARCH.REVALIDATE_EVIDENCE_FRESHNESS",
+      "owner_path": "EXTERNAL_OR_SHARED_PROVIDER__NO_BOOK_CANONICAL_AUTHORITY",
+      "authority_domain": "EXTERNAL_EVIDENCE_TRUTH",
+      "dispatch_class": "QUALIFIED_SERVICE_OPERATION",
+      "callable": true,
+      "service_id": "RESEARCH_AND_EVIDENCE",
+      "operation_id": "REVALIDATE_EVIDENCE_FRESHNESS",
+      "contract_ref": "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-002",
+      "canonical_write_authority": false
+    },
+    {
+      "capability_id": "CANON.CONSISTENCY_CHECK",
+      "owner_path": "STORY_BIBLE_CANON",
+      "authority_domain": "CANON_TRUTH",
+      "dispatch_class": "DECLARED_AUTHORITY_NO_CALLABLE_INTERFACE",
+      "callable": false,
+      "service_id": null,
+      "operation_id": null,
+      "contract_ref": "BOOK-PROSE-INTEGRATION-INPUT-CENSUS-001",
+      "canonical_write_authority": false
+    },
+    {
+      "capability_id": "CONTINUITY.CHECK",
+      "owner_path": "SYSTEM_MASTER/BOOK",
+      "authority_domain": "BOOK_CONTINUITY_EVIDENCE",
+      "dispatch_class": "DECLARED_AUTHORITY_NO_CALLABLE_INTERFACE",
+      "callable": false,
+      "service_id": null,
+      "operation_id": null,
+      "contract_ref": "BOOK-PROSE-INTEGRATION-INPUT-CENSUS-001",
+      "canonical_write_authority": false
+    },
+    {
+      "capability_id": "BOOK.CANONICAL_MANUSCRIPT_ADMISSION",
+      "owner_path": "SYSTEM_MASTER/BOOK",
+      "authority_domain": "CANONICAL_MANUSCRIPT_MUTATION",
+      "dispatch_class": "BOOK_INTERNAL_AUTHORITY_GATE",
+      "callable": false,
+      "service_id": null,
+      "operation_id": null,
+      "contract_ref": "system-master/book-system/content-object-admission.js",
+      "canonical_write_authority": true
+    }
+  ],
+  "validation_rules": [
+    "Capability IDs are exact and unique; aliases or fuzzy matching are forbidden in this packet.",
+    "Lookup must state the expected authority domain and fails closed when it does not match the registered capability.",
+    "QUALIFIED_SERVICE_OPERATION entries must name a non-empty service_id, operation_id and contract_ref and must have canonical_write_authority=false.",
+    "A declared authority without a qualified callable interface is discoverable but dispatch must fail closed with CAPABILITY_NOT_CALLABLE.",
+    "Unknown capabilities fail closed; the orchestrator may not guess an owner from subsystem names.",
+    "Only SYSTEM_MASTER/BOOK may own CANONICAL_MANUSCRIPT_MUTATION and the only such capability in this registry is BOOK.CANONICAL_MANUSCRIPT_ADMISSION.",
+    "Prose, evaluator, Research, Story Bible and continuity capabilities must all have canonical_write_authority=false.",
+    "A service SUCCESS remains provider evidence only and never changes this routing descriptor into canonical write authority.",
+    "Phase 4 may add task-to-capability selection logic only after this exact lookup boundary is qualified."
+  ],
+  "required_next_packet_on_pass": "BOOK-WORKFLOW-ORCHESTRATOR-DEPENDENCY-GRAPH-EXECUTION-PLAN-CONTRACT-001"
+}
