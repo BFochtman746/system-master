@@ -1,0 +1,36 @@
+name: Book Existing-Book Recovery Semantic Core 001
+
+on:
+  push:
+    branches:
+      - book-system/control-v1
+    paths:
+      - system-master/book-system/existing-book-recovery.js
+      - qualification/book-system/existing-book-recovery-semantic-core-001/**
+      - .github/scripts/book-system-existing-book-recovery-semantic-core-001-qualify.js
+      - .github/workflows/book-system-existing-book-recovery-semantic-core-001.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    name: Deterministic synthetic semantic recovery qualification
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact Book subject
+        uses: actions/checkout@v4
+      - name: Record Node runtime
+        run: node --version
+      - name: Run EBR-SC1 deterministic qualifier
+        run: node .github/scripts/book-system-existing-book-recovery-semantic-core-001-qualify.js
+      - name: Upload exact qualification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: book-existing-recovery-semantic-core-001-${{ github.sha }}
+          path: ${{ runner.temp }}/book-existing-recovery-evidence/qualification-summary.json
+          if-no-files-found: error
+          retention-days: 30
