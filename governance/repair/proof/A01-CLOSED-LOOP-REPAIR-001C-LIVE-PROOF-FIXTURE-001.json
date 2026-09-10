@@ -1,0 +1,41 @@
+{
+  "proof_id": "A01-CLOSED-LOOP-REPAIR-001C-LIVE-PROOF-001",
+  "standing": "SYNTHETIC_CONTROL_FIXTURE__A01_REQUEUE_READY",
+  "transaction_id": "A01-REPAIR-001C-LIVE-PROOF-001",
+  "authority_boundary": "CONTROL_MECHANICS_ONLY",
+  "synthetic_root_seed": {
+    "receipt_id": "SYNTHETIC-CONTROL-SEED-001-NOT-AUTHORITATIVE-A01-RECEIPT",
+    "failed_subject_sha": "49dac6aa75a3b617092c0a20c66fa692ee04f5a2",
+    "authoritative_a01_failure": false,
+    "product_failure_claimed": false,
+    "note": "This seed exists only to exercise same-transaction rerun mechanics. It is not an A-01 failure receipt and must never be cited as product failure evidence."
+  },
+  "replacement_subject_sha": "93c03b424a052cd9fb9f7c47ca4efe33ef6b20d4",
+  "replacement_qualification_id": "A01-CLOSED-LOOP-REPAIR-SELFTEST",
+  "replacement_workstream_id": "SYSTEM-MASTER",
+  "deterministic_prequalification_evidence": "github-actions-run:34429967883:A-01-Repair-Ledger-Selftest:PASS",
+  "expected_live_proof": [
+    "canonical A-01 Repair Rerun resolves this exact transaction",
+    "canonical gateway validates transaction/qualification/workstream/subject/ref binding",
+    "A-01 Windows/X64 executes exact replacement subject",
+    "repair-lineage.json is emitted with the A-01 evidence",
+    "workflow-run adjudicator attaches the actual rerun result to this same transaction",
+    "authoritative PASS closes this transaction without rewriting the synthetic root seed; other outcomes remain truthfully routed"
+  ],
+  "forbidden_claims": [
+    "Do not call the synthetic root seed an authoritative A-01 failure.",
+    "Do not infer any product repair quality from this fixture.",
+    "Do not transfer A-01 PASS beyond the exact replacement subject and registered selftest boundary.",
+    "Do not infer promotion, publication, production, human, author, private-data, native-platform or external authority."
+  ],
+  "generated_at": "2026-09-10T02:38:28.785Z",
+  "finalize_result": {
+    "action": "FINALIZED_A01_REQUEUE_READY",
+    "transaction_id": "A01-REPAIR-001C-LIVE-PROOF-001",
+    "replacement_subject_sha": "93c03b424a052cd9fb9f7c47ca4efe33ef6b20d4",
+    "candidate_repair_attempt": 1,
+    "prequalification_event": "governance/repair/events/A01-REPAIR-001C-LIVE-PROOF-001/0003-candidate_prequalified.json",
+    "replacement_ticket": "qualification/a01/repair-requests/A01-REPAIR-001C-LIVE-PROOF-001.json",
+    "replacement_ticket_event": "governance/repair/events/A01-REPAIR-001C-LIVE-PROOF-001/0004-a01_replacement_ticket_emitted.json"
+  }
+}

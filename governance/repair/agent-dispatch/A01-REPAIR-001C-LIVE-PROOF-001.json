@@ -1,0 +1,25 @@
+{
+  "dispatch_version": 2,
+  "dispatch_id": "AGENT-DISPATCH-A01-REPAIR-001C-LIVE-PROOF-001-A1",
+  "transaction_id": "A01-REPAIR-001C-LIVE-PROOF-001",
+  "owner_path": "SYSTEM_MASTER/CORE",
+  "owner_system_id": "CORE",
+  "state": "OWNER_WORKER_READY",
+  "qualification_id": "A01-CLOSED-LOOP-REPAIR-SELFTEST",
+  "workstream_id": "SYSTEM-MASTER",
+  "root_failed_subject_sha": "49dac6aa75a3b617092c0a20c66fa692ee04f5a2",
+  "repair_subject_sha": "49dac6aa75a3b617092c0a20c66fa692ee04f5a2",
+  "receipt_id": "SYNTHETIC-CONTROL-SEED-001-NOT-AUTHORITATIVE-A01-RECEIPT",
+  "latest_failed_receipt_id": "SYNTHETIC-CONTROL-SEED-001-NOT-AUTHORITATIVE-A01-RECEIPT",
+  "repair_attempts_consumed": 0,
+  "next_repair_attempt": 1,
+  "max_repair_attempts": 1,
+  "evidence_pointer": "synthetic-control-fixture:A01-CLOSED-LOOP-REPAIR-001C:root-seed-only",
+  "objective": "Reproduce the authoritative failure on exact subject 49dac6aa75a3b617092c0a20c66fa692ee04f5a2, make the smallest evidence-justified repair, preserve the root failed-subject lineage 49dac6aa75a3b617092c0a20c66fa692ee04f5a2, produce a new exact SHA for changed bytes, and obtain deterministic prequalification PASS on that exact replacement SHA.",
+  "forbidden_authority": [
+    "Do not create A-01 PASS or promotion authority.",
+    "Do not change qualification/workstream ownership.",
+    "Do not repair human/author/private/native/external authority boundaries as code defects.",
+    "Do not transfer evidence from any failed subject to changed bytes."
+  ]
+}
