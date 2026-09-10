@@ -1,6 +1,6 @@
 {
   "registry_id": "SECOND-SHIFT-REGISTRY-001",
-  "effective_date": "2026-09-09",
+  "effective_date": "2026-09-10",
   "product_root": "SYSTEM_MASTER",
   "schema": "governance/second-shift/SECOND-SHIFT-DELEGATION-SCHEMA-001.json",
   "owner_files": {
@@ -9,9 +9,20 @@
     "BOOK": "governance/second-shift/BOOK-DELEGATIONS.json",
     "PROSE": "governance/second-shift/PROSE-DELEGATIONS.json"
   },
-  "portfolio_rule": "The 23:15 portfolio controller reads the four owner files from current main, revalidates each against the live owner control head, removes stale/non-open items from admission, and plans only READY work. Empty is valid.",
+  "portfolio_rule": "The portfolio controller reads the four owner files from current main, revalidates each against the live owner control head, removes stale/non-open items from admission, and admits current READY work or selects a new owner-valid successor through the mandatory work-ahead ladder. A stale, missing, completed or blocked delegation never by itself permits idling.",
   "day_shift_rule": "Whenever a system chat closes, supersedes, blocks or materially changes its current objective, it must reconcile its delegation file in the same working session. If the previous delegation is no longer current, remove it from active_delegations and record the closure/supersession in durable system/completion evidence before selecting a successor.",
   "night_start_rule": "Each worker independently revalidates its selected delegation again immediately before execution. The 23:15 plan is not execution authority if state changed after planning.",
   "stale_rule": "No job survives a control-head mismatch by default. Re-evaluate first, then create a new/revalidated delegation bound to the new head.",
-  "no_work_rule": "If no dependency-valid unattended work exists, schedule nothing for that owner. Runner utilization is not a goal."
+  "no_work_rule": "Schedule nothing only after a durable all-rungs-exhausted record proves every work-ahead category is completed, duplicate, dependency-blocked, human/author/private/native/external-authority constrained, or unsafe without a decision, and proves no independent preparation can reduce tomorrow's work. Runner utilization alone is not a goal.",
+  "successor_rule": "After every completion or material block, the owner worker re-reads live authority and selects the next highest-value dependency-valid unattended-safe project while time remains. Completing one project does not end the shift.",
+  "work_ahead_ladder": [
+    "current repair/control health",
+    "completion and evidence census",
+    "authoritative research and provenance",
+    "architecture/contracts/state/interface/evidence specification",
+    "tests/benchmarks/property/concurrency/failure injection",
+    "bounded implementation with objective verification",
+    "exact-SHA qualification and A-01 preparation",
+    "next successor build packet"
+  ]
 }

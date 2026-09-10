@@ -59,10 +59,30 @@ At approximately 23:15 America/New_York, the portfolio controller:
 6. validates each active repair transaction against canonical owner/workstream and current objective;
 7. verifies that the objective is still open and dependencies are still valid;
 8. verifies A-01 registration/exact subject only for A-01 work;
-9. admits only current `READY` work or explicitly delegated current repair work;
-10. leaves an owner empty when no useful unattended work exists.
+9. admits current `READY` work or explicitly delegated current repair work;
+10. when a delegation is absent, stale, completed or blocked, requires the owner/controller to select and bind the highest-value dependency-valid unattended-safe successor from the work-ahead ladder below;
+11. leaves an owner empty only after the all-rungs-exhausted test is durably satisfied.
 
 A head mismatch is `STALE_DELEGATION`, not `SUBJECT_FAILURE`. An admission/window condition is not a product defect. A dependency block is not a product defect.
+
+## Mandatory work-ahead ladder
+
+A blocked or unavailable critical-path action does not make the owner system idle. The controller and worker must evaluate these rungs in order and select the highest-value dependency-valid unattended-safe action:
+
+1. current repairable failure or control-health defect;
+2. incomplete completion/evidence census and capability matrix;
+3. current authoritative research and source/provenance closure;
+4. architecture, contracts, state models, interface and evidence-boundary specification;
+5. deterministic test, benchmark, property, concurrency and failure-injection design;
+6. bounded implementation with objective hosted/portable verification;
+7. exact-SHA qualification wrapper, registry and A-01 request preparation without fabricating target evidence;
+8. next dependency-valid successor build packet and risk-reduction work.
+
+Each selected project must state its live owner-control head, objective, before/after completion delta, evidence target, stop condition, allowed work, forbidden authority and continuation rule. When it completes and time remains, the worker must re-read live authority and select the next safe successor. Completion of one item is not the end of the shift.
+
+### All-rungs-exhausted test
+
+An owner may be idle only when a durable record shows, for every rung above: `COMPLETED`, `DUPLICATE`, `DEPENDENCY_BLOCKED`, `HUMAN_ONLY`, `AUTHOR_ONLY`, `PRIVATE_DATA_REQUIRED`, `NATIVE_TARGET_REQUIRED`, `EXTERNAL_AUTHORITY_REQUIRED`, or `UNSAFE_WITHOUT_DECISION`; identifies the exact evidence or blocker; and confirms no independent preparation, research, specification, test design or bounded implementation can reduce tomorrow's work. A stale/missing delegation, blocked critical path, unavailable A-01 slot, or idle runner is never by itself sufficient.
 
 ## Execution-time lifecycle
 
@@ -79,7 +99,7 @@ On PASS/completion:
 - close/supersede the related repair transaction if its boundary is resolved;
 - re-evaluate the owner system immediately;
 - if another safe dependency-valid unattended objective is justified and time remains, create a successor delegation bound to the new current owner head/state;
-- otherwise stop cleanly.
+- otherwise apply the all-rungs-exhausted test and stop only with a durable evidence-backed blocker record.
 
 This allows multiple useful tasks in one night without preserving stale work.
 
@@ -98,7 +118,7 @@ This allows multiple useful tasks in one night without preserving stale work.
 
 - no infinite repair/retry loop;
 - no repair transaction may exist only in chat memory;
-- no work invented for utilization;
+- no work invented solely for utilization, but useful dependency-valid work-ahead must not be suppressed merely because the current critical path is blocked;
 - no test/evidence weakening merely to obtain PASS;
 - no automatic human/author/private/native evidence;
 - no old delegation silently rebound to a new exact subject;

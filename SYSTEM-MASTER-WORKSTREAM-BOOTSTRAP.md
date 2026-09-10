@@ -147,7 +147,8 @@ Rules:
 - READY delegation binds to an exact live owner-control head.
 - Head/objective/dependency mismatch = `STALE_DELEGATION`; do not execute it.
 - The 23:15 controller revalidates before planning; each worker revalidates again immediately before execution.
-- Empty delegation is valid. Do not invent work to fill the night.
+- Empty delegation is valid only after the mandatory work-ahead ladder and all-rungs-exhausted test in `SECOND-SHIFT-OPERATING-MODE-002.md` prove that no dependency-valid unattended-safe research, census, specification, test-design, bounded implementation, qualification-preparation or successor-packet work remains. A stale/missing delegation or blocked critical path is not sufficient.
+- Do not invent work solely for utilization; do not leave a materially incomplete system idle while independent work-ahead can reduce tomorrow's discovery or build time.
 - A completed night item may be followed by another only after owner-state re-evaluation and a new/revalidated delegation.
 - A-01 work still requires registered exact-subject qualification and central policy admission.
 
