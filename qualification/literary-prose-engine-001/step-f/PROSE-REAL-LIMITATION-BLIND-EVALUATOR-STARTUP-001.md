@@ -5,8 +5,9 @@ Owner lane: SYSTEM_MASTER/BOOK/PROSE
 Objective: PROSE-REAL-LIMITATION-BLIND-MODEL-SCORING-001
 Blind branch: literary-prose-blind-eval-001
 Supervising owner control ref: literary-prose-engine-001
-Supervising owner control head revalidated: 9d360ac20839d06765b1b3a68d5c1ebedb2eba50
-Owner admission standing: REVALIDATED__OBJECTIVE_UNCHANGED__BLIND_SCORING_REMAINS_NEXT_CRITICAL_PATH
+Supervising owner control head revalidated: 23dcc5c82816fba4bdc571a8019e13fba4be4b95
+Owner admission standing: REVALIDATED__RECONSTRUCTION_ADJUDICATED__BLIND_SCORING_REMAINS_NEXT_CRITICAL_PATH
+Owner reconstruction adjudication: PROSE-REAL-LIMITATION-BLIND-PASSAGE-RECONSTRUCTION-ADJUDICATION-001 @ 23dcc5c82816fba4bdc571a8019e13fba4be4b95
 Source/reconstruction repair: PROSE-BLIND-EXECUTION-FORENSIC-REPAIR-001
 
 ## Eligibility
@@ -45,10 +46,11 @@ Do not read `literary-prose-engine-001` at or after the ground-truth freeze comm
 ## Execution sequence
 
 1. Verify the blind packet remains `labels_authoritative=false`, `labels_recorded=0`, and revision authority count 0.
-2. Complete the source retrieval/preflight above.
-3. Verify every reconstructed passage SHA256 exactly against the blind contract before scoring.
-4. Run the already-qualified semantic -> Passage Intelligence -> Step-F path on each case without author ground truth.
-5. Produce exactly one prediction record per case with:
+2. Verify this startup's recorded supervising owner head still equals the current `literary-prose-engine-001` head. Do not inspect labeled owner contents while doing so.
+3. Complete the source retrieval/preflight above.
+4. Verify every reconstructed passage SHA256 exactly against the blind contract before scoring.
+5. Run the already-qualified semantic -> Passage Intelligence -> Step-F path on each case without author ground truth.
+6. Produce exactly one prediction record per case with:
    - `case_id`
    - `passage_sha256`
    - `semantic_disposition`
@@ -57,26 +59,27 @@ Do not read `literary-prose-engine-001` at or after the ground-truth freeze comm
    - `abstention_or_downgrade_reason`
    - `diagnosis_allowed`
    - `revision_allowed`
-6. Require `revision_allowed=false` for all six cases. Generate no candidate prose and mutate no manuscript.
-7. Create, do not overwrite, this prediction artifact on the blind branch:
+7. Require `revision_allowed=false` for all six cases. Generate no candidate prose and mutate no manuscript.
+8. Create, do not overwrite, this prediction artifact on the blind branch:
    `qualification/literary-prose-engine-001/step-f/blind-evaluation-001/PROSE-REAL-LIMITATION-BLIND-PREDICTION-SEAL-001.json`
-8. The Git commit containing that newly created artifact is the immutable prediction seal. Capture its exact commit SHA.
-9. If the prediction artifact cannot be committed, stop `PREDICTION_SEAL_WRITE_BLOCKED`. Do not read ground truth.
-10. Only after the prediction-seal commit exists may the evaluator read the frozen author ground truth identified by the blind contract.
-11. Compare the sealed predictions against ground truth and measure:
+9. The Git commit containing that newly created artifact is the immutable prediction seal. Capture its exact commit SHA.
+10. If the prediction artifact cannot be committed, stop `PREDICTION_SEAL_WRITE_BLOCKED`. Do not read ground truth.
+11. Only after the prediction-seal commit exists may the evaluator read the frozen author ground truth identified by the blind contract.
+12. Compare the sealed predictions against ground truth and measure:
     - REAL_LIMITATION identification;
     - downgrade behavior;
     - abstention behavior;
     - WORKING_AS_INTENDED preservation;
     - NEUTRAL_OBSERVATION retention;
     - false-positive limitation rate.
-12. Create, do not overwrite, the comparison receipt at:
+13. Create, do not overwrite, the comparison receipt at:
     `qualification/literary-prose-engine-001/step-f/blind-evaluation-001/PROSE-REAL-LIMITATION-BLIND-COMPARISON-RECEIPT-001.json`
     The receipt must reference the exact prediction-seal commit and frozen ground-truth commit while preserving revision authority at zero.
-13. Stop. Return the prediction-seal SHA, comparison-receipt SHA, comparison result, and exact next step to the canonical Prose owner chat.
+14. Stop. Return the prediction-seal SHA, comparison-receipt SHA, comparison result, and exact next step to the canonical Prose owner chat.
 
 ## Failure rules
 
+- Recorded supervising owner head no longer current -> stop `BLIND_ADMISSION_REVALIDATION_REQUIRED`; do not inspect labeled owner contents.
 - Missing Library source or no exact SHA256 match -> stop `SOURCE_CUSTODY_BLOCKED`; do not reconstruct or substitute text.
 - Source-package or passage digest mismatch -> stop `EVIDENCE_MISMATCH`; do not score.
 - Any accidental author-label exposure before the prediction seal -> stop `BLINDNESS_CONTAMINATED`; discard unsealed predictions and require another fresh evaluator context.
@@ -86,4 +89,4 @@ Do not read `literary-prose-engine-001` at or after the ground-truth freeze comm
 
 ## PASS proves
 
-PASS proves only that a fresh, ground-truth-blind evaluator retrieved the exact admitted source bytes, reproduced all six frozen passage digests under the repaired reconstruction contract, produced and immutably sealed six-case predictions, and compared those sealed predictions against frozen author ground truth while revision authority remained zero. It does not by itself prove production-grade literary accuracy or authorize manuscript changes.
+PASS proves only that a fresh, ground-truth-blind evaluator retrieved the exact admitted source bytes, reproduced all six frozen passage digests under the owner-adjudicated reconstruction contract, produced and immutably sealed six-case predictions, and compared those sealed predictions against frozen author ground truth while revision authority remained zero. It does not by itself prove production-grade literary accuracy or authorize manuscript changes.
