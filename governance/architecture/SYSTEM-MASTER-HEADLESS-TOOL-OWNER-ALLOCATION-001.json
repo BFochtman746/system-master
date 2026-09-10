@@ -1,0 +1,221 @@
+{
+  "allocation_id": "SYSTEM-MASTER-HEADLESS-TOOL-OWNER-ALLOCATION-001",
+  "effective_date": "2026-09-10",
+  "product_root": "SYSTEM_MASTER",
+  "standing": "CLOSED__SIX_NON_SYSTEM_CAPABILITY_PORTFOLIOS_SELECTED__NO_NEW_FIRST_CLASS_SYSTEMS",
+  "authority_inputs": [
+    "governance/CURRENT-AUTHORITY.json",
+    "governance/SYSTEM-TOPOLOGY-002.json",
+    "governance/census/SYSTEM-MASTER-COMPLETION-CENSUS-002-P6-PRODUCT-MODULE-ALLOCATION.json",
+    "governance/census/SYSTEM-MASTER-COMPLETION-CENSUS-002-FINAL-SEAL.json"
+  ],
+  "decision": {
+    "new_first_class_systems_created": 0,
+    "new_child_systems_created": 0,
+    "non_system_capability_portfolios_created": 6,
+    "semantic_owner_class": "SYSTEM_MASTER_PRODUCT_ROOT_CAPABILITY_CONTRACT",
+    "semantic_owner_path": "SYSTEM_MASTER",
+    "shared_runtime_provider": "SYSTEM_MASTER/CORE",
+    "primary_working_surface": "CHAT",
+    "headless_first": true,
+    "dedicated_mini_app_default": false,
+    "rule": "Portfolio contracts own tool semantics at the product-root capability layer. CORE supplies shared execution, model, artifact, connector, data, work and UX infrastructure but does not silently acquire portfolio-specific semantic authority. A future first-class system still requires explicit user instruction plus a superseding topology ADR/registry version."
+  },
+  "portfolios": [
+    {
+      "portfolio_id": "HEADLESS-CONTENT-ARTIFACTS-001",
+      "canonical_name": "Content & Document Artifacts",
+      "classification": "NON_SYSTEM_HEADLESS_CAPABILITY_PORTFOLIO",
+      "semantic_owner_path": "SYSTEM_MASTER",
+      "shared_runtime_provider": "SYSTEM_MASTER/CORE",
+      "modules": ["DOCX", "PPTX", "PDF", "OCR", "FILE", "WRITING"],
+      "owns": [
+        "generic document/content artifact creation and transformation semantics",
+        "DOCX/PPTX/PDF format-specific semantic contracts and preservation requirements",
+        "generic non-Book writing requests and reusable written artifacts",
+        "document/file intake classification needed by these formats",
+        "OCR document extraction contract and provenance handoff",
+        "native-editor/open-in handoff policy for generated artifacts"
+      ],
+      "does_not_own": [
+        "Book canonical manuscript, story bible, book plan or lifecycle state",
+        "Prose literary evaluation/training/revision intelligence",
+        "Core artifact storage implementation or global file custody",
+        "author/publication authority",
+        "native Microsoft/Apple application behavior"
+      ],
+      "routing_rules": [
+        "If output becomes a canonical Book object, BOOK owns canonical state and this portfolio provides document/render/export services through published contracts.",
+        "If the task is literary/prose evaluation or revision intelligence, PROSE owns that semantic decision and this portfolio may only materialize the resulting artifact.",
+        "Generic writing outside Book/Prose remains a product-root headless content capability.",
+        "File storage/custody remains Core infrastructure; file-content semantics remain portfolio-specific."
+      ],
+      "first_current_admission": "SYSTEM-MASTER-DOCUMENT-TOOL-CURRENT-ADMISSION-001"
+    },
+    {
+      "portfolio_id": "HEADLESS-COMPUTE-DATA-001",
+      "canonical_name": "Spreadsheet, Math & Data Analysis",
+      "classification": "NON_SYSTEM_HEADLESS_CAPABILITY_PORTFOLIO",
+      "semantic_owner_path": "SYSTEM_MASTER",
+      "shared_runtime_provider": "SYSTEM_MASTER/CORE",
+      "modules": ["EXCEL", "MATH", "DATA"],
+      "data_scope": "DATA module here means user-facing analysis/database/BI semantics only; shared physical persistence, system records and canonical storage remain CORE/DATA foundation authority.",
+      "owns": [
+        "spreadsheet workbook/sheet/formula/table/chart semantic contracts",
+        "numerical and symbolic calculation semantics",
+        "user-facing structured-data analysis and BI transformations",
+        "analysis artifact provenance and deterministic recomputation requirements"
+      ],
+      "does_not_own": [
+        "Core physical persistence/canonical system databases",
+        "Book/Learning domain records merely because they are tabular",
+        "production data migration authority without owner-specific contract",
+        "native Excel application behavior"
+      ],
+      "routing_rules": [
+        "Domain-owned data remains owned by its domain; this portfolio may compute over an authorized projection without becoming canonical writer.",
+        "Core provides sandbox/compute/artifact/persistence primitives but cannot convert analysis output into domain-canonical state without the owning domain contract."
+      ],
+      "first_current_admission": "HEADLESS-COMPUTE-DATA-SPREADSHEET-CONTRACT-001"
+    },
+    {
+      "portfolio_id": "HEADLESS-SOFTWARE-MODEL-001",
+      "canonical_name": "Software Engineering & Local Model Execution",
+      "classification": "NON_SYSTEM_HEADLESS_CAPABILITY_PORTFOLIO",
+      "semantic_owner_path": "SYSTEM_MASTER",
+      "shared_runtime_provider": "SYSTEM_MASTER/CORE",
+      "modules": ["CODE", "LOCALAI"],
+      "owns": [
+        "headless software-engineering task semantics and code artifact lifecycle",
+        "build/test/static/dynamic qualification task contracts",
+        "local-model selection/use requests at the tool capability layer",
+        "software/model execution evidence and result packaging"
+      ],
+      "does_not_own": [
+        "Core model registry/runtime/resource infrastructure",
+        "A-01 qualification authority",
+        "production deployment authority",
+        "Book/Learning/Prose source semantics when engineering work modifies their owned code"
+      ],
+      "routing_rules": [
+        "A code task modifying an owner system remains change-authorized by that owner; this portfolio supplies engineering execution semantics and evidence tooling only.",
+        "LOCALAI consumes Core model/runtime/routing infrastructure; it cannot self-promote models or override safety/resource/target qualification."
+      ],
+      "first_current_admission": "HEADLESS-SOFTWARE-ENGINEERING-CONTRACT-001"
+    },
+    {
+      "portfolio_id": "HEADLESS-RESEARCH-KNOWLEDGE-001",
+      "canonical_name": "Research, Knowledge & External Information",
+      "classification": "NON_SYSTEM_HEADLESS_CAPABILITY_PORTFOLIO",
+      "semantic_owner_path": "SYSTEM_MASTER",
+      "shared_runtime_provider": "SYSTEM_MASTER/CORE",
+      "modules": ["RESEARCH", "KNOWLEDGE", "BROWSER", "GEO"],
+      "owns": [
+        "research plan/query/synthesis/provenance semantics",
+        "knowledge-item promotion, citation and confidence semantics above shared storage",
+        "browser/web information-work semantics that are read/research oriented",
+        "geospatial/mapping/weather/environmental intelligence synthesis contracts"
+      ],
+      "does_not_own": [
+        "Core connector/browser runtime implementation",
+        "write/action authority in email/calendar/other external services",
+        "domain-canonical Book/Learning state simply because research informs it",
+        "external-source truth beyond captured evidence/provenance"
+      ],
+      "routing_rules": [
+        "Research may propose evidence to Book/Learning/other domains, but canonical admission remains with the receiving owner.",
+        "External information retrieval is separated from connected-account mutation/action semantics."
+      ],
+      "first_current_admission": "HEADLESS-RESEARCH-KNOWLEDGE-CONTRACT-001"
+    },
+    {
+      "portfolio_id": "HEADLESS-CONNECTED-ACTIONS-001",
+      "canonical_name": "Connected Actions & Personal Operations",
+      "classification": "NON_SYSTEM_HEADLESS_CAPABILITY_PORTFOLIO",
+      "semantic_owner_path": "SYSTEM_MASTER",
+      "shared_runtime_provider": "SYSTEM_MASTER/CORE",
+      "modules": ["COMMS", "CALENDAR", "AUTOMATION", "PLUGINS"],
+      "owns": [
+        "user-intent and approval semantics for external write/actions",
+        "email/message/calendar/personal-operations action contracts",
+        "automation trigger/schedule/condition semantics at the user-capability layer",
+        "plugin/app capability registration and permission-use semantics above connector runtime"
+      ],
+      "does_not_own": [
+        "Core connector credential storage/runtime implementation",
+        "Second Shift internal execution-control semantics",
+        "third-party service authority or permissions not granted by the user",
+        "silent autonomous outreach/purchases/publication without required authorization"
+      ],
+      "routing_rules": [
+        "Read-only external information work routes to Research & Knowledge when no account mutation is required.",
+        "Any consequential external action remains approval/permission bounded even when invoked from Chat or an automation.",
+        "Second Shift is internal infrastructure and is not the Automation product capability."
+      ],
+      "first_current_admission": "HEADLESS-CONNECTED-ACTION-AUTHORITY-CONTRACT-001"
+    },
+    {
+      "portfolio_id": "HEADLESS-MEDIA-001",
+      "canonical_name": "Image, Audio & Video Media",
+      "classification": "NON_SYSTEM_HEADLESS_CAPABILITY_PORTFOLIO",
+      "semantic_owner_path": "SYSTEM_MASTER",
+      "shared_runtime_provider": "SYSTEM_MASTER/CORE",
+      "modules": ["IMAGE", "PHOTO", "VIDEO", "VOICE", "AUDIOBOOK", "MEDIA", "IMG-INGEST"],
+      "owns": [
+        "image generation/editing and photo transformation semantics",
+        "video generation/assembly and media-master semantics",
+        "speech/TTS/audio generation semantics",
+        "audiobook production/assembly semantics consuming authorized Book content",
+        "image/media ingestion and region-intelligence contracts",
+        "media provenance and artifact packaging requirements"
+      ],
+      "does_not_own": [
+        "Book canonical text or author decisions",
+        "Core model/provider/artifact runtime infrastructure",
+        "voice identity/rights or private media permissions not explicitly available",
+        "automatic publication/distribution authority"
+      ],
+      "routing_rules": [
+        "Audiobook/media generation consumes a frozen Book-owned content version; media output cannot modify Book canonical text.",
+        "Image/media artifacts referenced by Book/Learning remain media artifacts until admitted by the receiving domain through its own canonical contract.",
+        "Studios may exist as optional control surfaces, but media execution remains headless-capable and a studio does not become a first-class system by default."
+      ],
+      "first_current_admission": "HEADLESS-MEDIA-CAPABILITY-CONTRACT-001"
+    }
+  ],
+  "modules_not_promoted_into_headless_portfolios": [
+    {"module":"MANUSCRIPT","disposition":"BOOK_CAPABILITY"},
+    {"module":"STORYBIBLE","disposition":"BOOK_CAPABILITY"},
+    {"module":"LEARNING","disposition":"LEARNING_SYSTEM"},
+    {"module":"CURRICULUM","disposition":"LEARNING_CAPABILITY"},
+    {"module":"PROJECTS","disposition":"CORE_SHARED_WORK_CAPABILITY"},
+    {"module":"CHAT","disposition":"CORE_PRIMARY_WORKING_SURFACE"},
+    {"module":"EXPERIENCE","disposition":"CORE_SHARED_PRODUCT_EXPERIENCE"},
+    {"module":"PHONEOPS","disposition":"ABSORBED_NO_STANDALONE__EXPERIENCE_AUTOMATION_FOUNDATION"},
+    {"module":"PHYSICALAI","disposition":"DEFERRED_OPTIONAL"},
+    {"module":"CAD","disposition":"HEADLESS_INTEROP_PROFILE_ONLY__NO_DEDICATED_SYSTEM__MAY_CONSUME_CONTENT_COMPUTE_CAPABILITIES"},
+    {"module":"AIINCOME","disposition":"EXPLICIT_PRODUCT_DOMAIN_OWNER_DECISION_REMAINS_REQUIRED"},
+    {"module":"PORTFOLIO","disposition":"EXPLICIT_PRODUCT_DOMAIN_OWNER_DECISION_REMAINS_REQUIRED"},
+    {"module":"EXPECTATION","disposition":"NAME_COLLISION_EVIDENCE_REVIEW_REMAINS_REQUIRED"},
+    {"module":"LEDGER","disposition":"HOUSEHOLD_LEDGER_NAME_COLLISION_PRODUCT_DECISION_REMAINS_REQUIRED"}
+  ],
+  "cross_portfolio_invariants": [
+    "Chat is the primary invocation surface; portfolios are headless capability contracts, not navigation mini-apps.",
+    "Long jobs may use Core work/background infrastructure or Second Shift when explicitly eligible, but execution infrastructure never becomes semantic owner.",
+    "All durable outputs use shared Core artifact/custody infrastructure while retaining portfolio/domain semantic provenance.",
+    "A portfolio may consume another portfolio or owner-system interface but may not write that owner's canonical state without an explicit admitted operation.",
+    "Provider/native-app adapters never become semantic owners.",
+    "Exact-SHA qualification does not transfer across reused historical implementation bytes; changed/current subjects require their own evidence.",
+    "Human, author, private, external-action, native, publication and production authority remain separately gated."
+  ],
+  "implementation_order": [
+    "HEADLESS-CONTENT-ARTIFACTS-001 via SYSTEM-MASTER-DOCUMENT-TOOL-CURRENT-ADMISSION-001 because substantial preserved DOCX/PPTX/PDF implementation evidence already exists and can be selectively re-admitted rather than rebuilt.",
+    "HEADLESS-COMPUTE-DATA-001 spreadsheet contract using preserved EXCEL-QUAL research/build evidence.",
+    "HEADLESS-SOFTWARE-MODEL-001 engineering contract using preserved CODE-QUAL and Core execution infrastructure without conflating qualification with the product tool.",
+    "HEADLESS-RESEARCH-KNOWLEDGE-001 contract over Core retrieval/evidence/connector primitives.",
+    "HEADLESS-CONNECTED-ACTIONS-001 authority/approval contract over Core connector/action primitives.",
+    "HEADLESS-MEDIA-001 contract over model/artifact/provider primitives, preserving Book/media boundaries."
+  ],
+  "completion_rule": "This owner-allocation obligation is complete because every P6 unresolved headless-tool module now has a non-duplicative semantic portfolio or an explicit non-portfolio disposition, no new first-class system was created, Core shared runtime remains separate from tool semantics, and one exact current-admission successor is selected.",
+  "next_central_objective": "SYSTEM-MASTER-DOCUMENT-TOOL-CURRENT-ADMISSION-001"
+}
