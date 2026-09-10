@@ -21,9 +21,9 @@
     "Anything without an owner becomes UNALLOCATED and cannot execute, schedule or promote until assigned.",
     "Anything with ambiguous evidence becomes EVIDENCE_REVIEW_REQUIRED rather than guessed complete or incomplete."
   ],
-  "last_reconciled_at": "2026-09-10T08:55:00-04:00",
-  "last_reconciled_from_main": "76c2e5232381df24903683d37dc4804de8a92a0c",
-  "last_reconciliation_reason": "Admit the already-sealed P2 owner result after P1 completion, remove its stale P1-pending blocker, preserve the already-sealed P4 owner result behind P3 sequence, and bind overnight lane deltas so Second Shift work is not replayed or dismissed.",
+  "last_reconciled_at": "2026-09-10T09:05:56-04:00",
+  "last_reconciled_from_main": "53d27b73adbfe7fe8005d4990652669a65d4cee3",
+  "last_reconciliation_reason": "Seal P3 from the already-completed Book owner-lane census phases plus current Book delta, preserve the original content-admission A-01 subject and RF012 owner-candidate evidence as separate exact-authority lineages, admit the already-sealed P4 Prose owner result by delta-only reconciliation without replay, and advance the first incomplete global phase to P5 shared infrastructure/A-01.",
   "phases": [
     {
       "phase_id": "P0",
@@ -90,26 +90,35 @@
     {
       "phase_id": "P3",
       "name": "Book completion and obligation census",
-      "status": "PENDING",
+      "status": "COMPLETE",
+      "completed_at": "2026-09-10T09:05:56-04:00",
       "scope": "Book parent foundations, lifecycle/editorial/research/publication/export/versioning/author decision state; distinguish Book parent work from Prose child work.",
-      "overnight_delta_preserved": {
-        "live_book_control_head": "05c1f53e2f710f419a99cb99594c53c2f0240b68",
-        "qualified_rf012_candidate_sha": "67a23c0b09505dc3dd8fd748523fec3868f649b0",
-        "hosted_run_id": 34468928275,
-        "standing": "OWNER_DERIVED_BOUNDED_CANDIDATE_PASS__NOT_YET_CANONICALLY_PROMOTED",
-        "evidence": "governance/second-shift/SECOND-SHIFT-FINAL-REFILL-2026-09-10.json",
-        "boundary": "RF012 work and content-admission/A-01 work are preserved as separate Book deltas. Neither substitutes for a sealed P3 owner-lane completion census."
+      "owner_lane_result": "COMPLETE__SEALED_RESULT_ADMITTED",
+      "owner_lane_result_pointer": "governance/census/SYSTEM-MASTER-COMPLETION-CENSUS-002-P3-BOOK.json",
+      "owner_lane_ledger_delta_pointer": "governance/census/SYSTEM-MASTER-COMPLETION-CENSUS-002-P3-BOOK-LEDGER-DELTA.json",
+      "owner_lane_control_head": "05c1f53e2f710f419a99cb99594c53c2f0240b68",
+      "global_admission_basis": "The Book owner lane had already completed three evidence-backed P3 checkpoints. Global P3 is sealed from those artifacts plus delta-only reconciliation from the immutable Book watermark to the live owner head; no Book rebuild or replay was performed.",
+      "post_completion_delta": {
+        "original_content_admission_subject": "e993806a1d9a4838d4bd6d162a36921526ef302a",
+        "original_subject_standing": "HOSTED_PASS__A01_NOT_REGISTERED_NOT_RUN_NO_PASS",
+        "rf012_candidate_sha": "67a23c0b09505dc3dd8fd748523fec3868f649b0",
+        "rf012_hosted_run_id": 34468928275,
+        "rf012_standing": "OWNER_DERIVED_BOUNDED_CANDIDATE_PASS__NOT_CANONICALLY_PROMOTED",
+        "selected_book_successor": "BOOK-SYSTEM-RF012-OWNER-PROMOTION-REBIND-AND-NEXT-OWNER-SELECTION-004",
+        "boundary": "Original content-admission/A-01 and RF012 candidate lineages remain separate. No author, Prose, Document, publication, native, production or A-01 authority is transferred."
       },
-      "exact_next_action": "Execute and seal the P3 Book owner-lane completion and obligation census against the current Book control head, reconciling only delta from the original audit watermark and preserving all RF012 rescue/pass/failure evidence."
+      "next_global_phase": "P4__SEALED_OWNER_RESULT_ADMITTED__DELTA_ONLY"
     },
     {
       "phase_id": "P4",
       "name": "Prose completion and obligation census",
-      "status": "PENDING",
+      "status": "COMPLETE",
+      "completed_at": "2026-09-10T09:05:56-04:00",
       "scope": "Book Evaluator, evaluator training, prose diagnostics/training/calibration/revision/preservation lanes, private/human/author boundaries and exact evidence.",
-      "owner_lane_result": "COMPLETE__SEALED_RESULT_AVAILABLE__GLOBAL_ADMISSION_WAITING_ON_P3",
+      "owner_lane_result": "COMPLETE__SEALED_RESULT_ADMITTED",
       "owner_lane_result_pointer": "governance/census/SYSTEM-MASTER-COMPLETION-CENSUS-002-P4-PROSE.json",
       "owner_lane_ledger_delta_pointer": "governance/census/SYSTEM-MASTER-COMPLETION-CENSUS-002-P4-PROSE-LEDGER-DELTA.json",
+      "global_admission_basis": "P3 is complete. The already-sealed P4 owner-lane forensic result is admitted without replay; only its live post-seal delta is preserved.",
       "post_completion_delta": {
         "through_prose_control_head": "309a7876b8e388d115d4d3bde7dc39dd0ef8b6fd",
         "classification": "P4_OWNER_RESULT_REMAINS_VALID__BLIND_SEAL_VALIDATOR_AND_FOUNDATION_CLOSURE_WORK_PRESERVED",
@@ -119,13 +128,14 @@
         ],
         "boundary": "Fresh-context real six-case blind scoring and private DEVELOPMENT_GOLD/Teacher paths remain separate; no author, Book-canonical, publication or production authority is transferred."
       },
-      "global_admission_rule": "Do not replay the sealed P4 forensic census. After P3 is COMPLETE, reconcile only live Prose delta and admit the sealed result unless evidence invalidates it."
+      "next_global_phase": "P5__SHARED_INFRASTRUCTURE_AND_A01_CENSUS"
     },
     {
       "phase_id": "P5",
       "name": "Shared infrastructure and A-01 census",
       "status": "PENDING",
-      "scope": "A-01 control plane, tickets, receipts, runner, Second Shift, closed-loop repair, historical one-shot transports and other non-system infrastructure."
+      "scope": "A-01 control plane, tickets, receipts, runner, Second Shift, closed-loop repair, historical one-shot transports and other non-system infrastructure.",
+      "exact_next_action": "Execute and seal P5 as a delta-only shared-infrastructure/A-01 census: reconcile current repair transactions, authoritative A-01 receipts versus hosted-only evidence, runner/control-plane standing, Second Shift continuation defects and their corrections, and historical one-shot transports without treating infrastructure as a product system or replaying already-closed repair-control work."
     },
     {
       "phase_id": "P6",
