@@ -7,7 +7,13 @@ const { spawnSync } = require('child_process');
 const root = process.env.GITHUB_WORKSPACE || process.cwd();
 const sourcePath = path.join(root,'qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-66-SOURCE-NODE-INDEX-001.json');
 const candidatePath = path.join(root,'qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-TOPOLOGY-CANDIDATE-003.json');
-const domainIIBatchPaths = [1,2,3,4,5].map((n)=>path.join(root,`qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-DOMAIN-II-BATCH-0${n}-CANDIDATE-0${n+5}.json`));
+const domainIIBatchPaths = [
+  'qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-DOMAIN-II-BATCH-01-CANDIDATE-006.json',
+  'qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-DOMAIN-II-BATCH-02-CANDIDATE-007.json',
+  'qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-DOMAIN-II-BATCH-03-CANDIDATE-008.json',
+  'qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-DOMAIN-II-BATCH-04-CANDIDATE-009.json',
+  'qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-DOMAIN-II-BATCH-05-CANDIDATE-010.json'
+].map(p=>path.join(root,p));
 const domainIIIBatch01Path = path.join(root,'qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-DOMAIN-III-BATCH-01-CANDIDATE-012.json');
 const validatorPath = path.join(root,'.github/scripts/learning-full-standard-topology-validator-003.js');
 const evidenceDir = path.join(process.env.RUNNER_TEMP || root,'learning-domain-iii-batch-01-evidence');
