@@ -172,11 +172,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Checkout canonical control plane
+      - name: Checkout live durable repair state
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           repository: ${{ job.workflow_repository }}
-          ref: ${{ job.workflow_sha }}
+          ref: main
           fetch-depth: 1
           persist-credentials: false
 
