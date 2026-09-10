@@ -1,0 +1,91 @@
+{
+  "contract_id": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-PREREQUISITE-SUBSKILL-TOPOLOGY-CONTRACT-002",
+  "effective_date": "2026-09-10",
+  "owner_path": "SYSTEM_MASTER/LEARNING",
+  "control_ref": "learning/control-v1",
+  "input_owner_head": "995c0a668e55cec1055cc038f7379c55a6c577b6",
+  "frozen_requirement_set": {
+    "standard": "ASQ CSSGB BODY OF KNOWLEDGE",
+    "source_version": "2022",
+    "requirement_count": 66,
+    "requirement_set_digest": "86a1baba495d1f6f85053cd52696c3e18a6ff3c8e6235f8c98622310d84a9e70",
+    "source_node_index": "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-66-SOURCE-NODE-INDEX-001.json",
+    "source_graph_contract": "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-SOURCE-GRAPH-CHECKPOINT-001.json"
+  },
+  "standing": "EXECUTABLE_TOPOLOGY_DERIVATION_CONTRACT__NO_HUMAN_OUTCOME_OR_EXTERNAL_ENDORSEMENT_INFERENCE",
+  "purpose": "Turn the validated 66-node frozen source index into a provenance-honest prerequisite/subskill graph without inventing ASQ-authored prerequisites, SME approval, learner outcomes, or newer-standard substitutions.",
+  "authority_model": {
+    "source_bound_facts": "Requirement identity, 2022 source locator, domain placement, and preserved cognitive level are SOURCE_BOUND_FROZEN facts and must not be rewritten by this topology step.",
+    "owner_derived_structure": "Prerequisite edges and subskill decompositions created by this step are LEARNING_OWNER_DERIVED_PROVISIONAL structure unless an exact evidence reference explicitly supports a stronger classification.",
+    "human_outcomes": "Retention, transfer, workplace effectiveness, psychometric validity, SME approval, certification equivalence, and learner mastery remain UNOBSERVED until separately evidenced.",
+    "version_rule": "No 2026 or later public revision may silently replace or reinterpret a frozen 2022 requirement node."
+  },
+  "edge_contract": {
+    "allowed_types": ["PREREQUISITE", "DECOMPOSES_TO"],
+    "required_fields": ["edge_id", "edge_type", "from_id", "to_id", "derivation_class", "rationale", "evidence_refs", "validation_status"],
+    "derivation_classes": ["SOURCE_EXPLICIT", "LEARNING_OWNER_DERIVED_PROVISIONAL"],
+    "rules": [
+      "Every PREREQUISITE edge must state the exact capability dependency that makes the target materially harder or invalid without the source capability.",
+      "Mere source order, domain order, Bloom/cognitive level, or numerical requirement order is insufficient by itself to create a hard prerequisite.",
+      "A provisional edge must retain LEARNING_OWNER_DERIVED_PROVISIONAL classification; it must not be described as ASQ-authored or SME-approved.",
+      "Every edge must reference both endpoint requirement/subskill identities and at least one exact rationale/evidence locator.",
+      "Uncertain dependency is represented as unresolved evidence work, not as a guessed edge."
+    ]
+  },
+  "subskill_contract": {
+    "identity_format": "CSSGB-2022::<requirement_id>::SUBSKILL::<stable_slug>",
+    "required_fields": ["subskill_id", "parent_requirement_id", "label", "capability_statement", "derivation_class", "evidence_refs", "assessment_target_status", "validation_status"],
+    "rules": [
+      "A subskill must express one independently assessable capability necessary to satisfy its parent requirement.",
+      "Do not create a subskill solely to restate the parent requirement label.",
+      "Every subskill must be reachable from exactly one preserved requirement node through DECOMPOSES_TO.",
+      "Cross-requirement reuse is represented by prerequisite/reference edges; it must not create duplicate canonical subskill identities.",
+      "Assessment target status begins UNBOUND until a deterministic assessment contract is attached."
+    ]
+  },
+  "deterministic_derivation_sequence": [
+    "Load the exact validated 66-node frozen source index and verify the requirement-set digest before transformation.",
+    "For each requirement, preserve source-bound fields byte-for-byte and create zero or more provisional subskills only where the preserved requirement meaning supports an independently assessable decomposition.",
+    "For each proposed prerequisite, record explicit dependency rationale and endpoint evidence; reject order-only or level-only prerequisites.",
+    "Run graph validation after every batch: unique identities, all endpoint resolution, acyclicity of PREREQUISITE, every subskill reachable, no orphan subskills, and no unauthorized source-version substitution.",
+    "Emit unresolved_dependency_candidates separately from accepted edges so ambiguity fails open for research but closed for canonical prerequisite admission.",
+    "Leave assessment/workplace/mastery/retention/transfer profiles unproven until their own evidence-bearing successors execute."
+  ],
+  "validation_gate": {
+    "must_pass": [
+      "66 preserved requirement identities still present exactly once",
+      "requirement-set digest remains bound to 86a1baba495d1f6f85053cd52696c3e18a6ff3c8e6235f8c98622310d84a9e70",
+      "all PREREQUISITE endpoints resolve",
+      "PREREQUISITE graph is acyclic",
+      "all subskills have exactly one canonical parent requirement",
+      "all subskills are reachable",
+      "every provisional edge/subskill carries derivation_class and evidence_refs",
+      "zero human-outcome fields are upgraded from UNOBSERVED without evidence",
+      "zero newer-source substitutions"
+    ],
+    "failure_classes": [
+      "FROZEN_REQUIREMENT_IDENTITY_DRIFT",
+      "UNRESOLVED_PREREQUISITE",
+      "UNJUSTIFIED_PREREQUISITE",
+      "UNJUSTIFIED_PREREQUISITE_CYCLE",
+      "ORPHAN_SUBSKILL",
+      "DUPLICATE_SUBSKILL_IDENTITY",
+      "PROVENANCE_MISMATCH",
+      "UNAUTHORIZED_SOURCE_VERSION_SUBSTITUTION",
+      "UNAUTHORIZED_HUMAN_EVIDENCE_INFERENCE"
+    ]
+  },
+  "next_objective": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-TOPOLOGY-DERIVATION-VALIDATOR-003",
+  "next_work_contract": {
+    "type": "BOUNDED_DETERMINISTIC_IMPLEMENTATION_AND_GRAPH_VALIDATION",
+    "required_outputs": [
+      "machine-readable topology candidate artifact",
+      "unresolved dependency candidate artifact",
+      "deterministic validator for the topology contract",
+      "cycle/orphan/provenance/version-drift negative fixtures",
+      "validation evidence bound to an exact Learning subject SHA"
+    ],
+    "stop_condition": "Stop canonical topology admission on any unresolved endpoint, unjustified hard prerequisite, cycle, orphan, provenance drift, version substitution, or human-evidence inference."
+  },
+  "completion_delta": "The 66-node population phase now has an executable, provenance-safe topology contract. The next worker can implement and validate graph structure without guessing that source order or cognitive level constitutes an authoritative prerequisite and without fabricating learner/SME evidence."
+}
