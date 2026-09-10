@@ -1,0 +1,166 @@
+{
+  "census_id": "SYSTEM-MASTER-COMPLETION-CENSUS-002",
+  "phase_id": "P5",
+  "owner_path": "SYSTEM_MASTER/SHARED_INFRASTRUCTURE",
+  "administrative_owner": "SYSTEM_MASTER/CORE",
+  "result_id": "SYSTEM-MASTER-COMPLETION-CENSUS-002-P5-SHARED-INFRASTRUCTURE-A01",
+  "effective_date": "2026-09-10",
+  "standing": "PHASE_COMPLETE__INFRASTRUCTURE_NOT_GLOBALLY_COMPLETE__OPEN_REPAIR_AND_SECOND_SHIFT_HARDENING_PRESERVED",
+  "scope": [
+    "registered A-01 control plane, registry, gateway, executor and evidence boundary",
+    "A-01 migration and retired direct-workflow history",
+    "closed-loop repair broker, ledger, rerun and adjudication lineage",
+    "current repair inbox and exact active transaction standing",
+    "runner and safe-runner diagnostic/bootstrap surfaces",
+    "Second Shift policy, delegation, controller/enforcement and overnight continuation evidence",
+    "historical one-shot/pending transport fragments"
+  ],
+  "topology_rule": "A-01, runners, qualification, repair control and Second Shift are shared execution/qualification infrastructure inside System Master. They are not first-class product systems and do not receive independent product authority from this census.",
+  "classifications": [
+    {
+      "family": "A01_REGISTERED_CONTROL_PLANE",
+      "disposition": "IMPLEMENTED_AND_CANONICALLY_ACTIVE",
+      "evidence": [
+        "qualification/a01/A01-OPERATING-CONTRACT.md",
+        "qualification/a01/A01-MIGRATION-001-CLOSURE.md",
+        "qualification/a01/registry.json",
+        ".github/workflows/a01-control-plane-gateway.yml",
+        ".github/workflows/a01-control-plane-executor.yml",
+        ".github/workflows/a01-control-plane-admission-broker.yml",
+        ".github/workflows/a01-control-plane-enforcement.yml"
+      ],
+      "finding": "The registered registry/policy/gateway/executor path is the authoritative A-01 operating route. A-01 remains an isolated qualification boundary and does not own product code or promotion authority."
+    },
+    {
+      "family": "A01_EXACT_QUALIFICATION_AUTHORITY",
+      "disposition": "SUBJECT_SPECIFIC_ONLY",
+      "finding": "An A-01 PASS is valid only for the exact registered qualification/subject and evidence receipt. Hosted CI, local tests, migration closure, control-plane enforcement or another subject's A-01 PASS cannot be transferred."
+    },
+    {
+      "family": "A01_CLOSED_LOOP_REPAIR_001B_001C",
+      "disposition": "CLOSED_TO_DECLARED_BOUNDARY__DO_NOT_REPLAY",
+      "evidence": [
+        "governance/repair/A01-CLOSED-LOOP-REPAIR-001B-CLOSURE.md",
+        "governance/repair/A01-CLOSED-LOOP-REPAIR-001C-CLOSURE.md",
+        "governance/repair/events/A01-REPAIR-001C-LIVE-PROOF-001/0006-transaction_closed.json"
+      ],
+      "finding": "The repair loop was proven through a real controlled failure, changed replacement subject, deterministic prequalification, replacement ticket, authoritative A-01 rerun PASS receipt and transaction closure. Current authority explicitly returns repair control to the owner path after 001C; no invented 001D is required."
+    },
+    {
+      "family": "CURRENT_REPAIR_INBOX",
+      "disposition": "ONE_ACTIVE_CORE_TRANSACTION__A01_REQUEUE_READY__NO_PASS",
+      "transaction_id": "A01-REPAIR-a01-run-34431764843-A01-CONTROL-PLANE-SELFTEST-A1",
+      "original_failed_subject_sha": "3a8004813e18d7defbf1f9ebc47f5bd8fcd30fb9",
+      "replacement_subject_sha": "ceb6870546012b789caea56499a1d219a195dc8b",
+      "failed_gateway_run_id": 34431764843,
+      "replacement_hosted_prequalification_run_id": 34435547400,
+      "authoritative_pass": false,
+      "finding": "The replacement candidate has deterministic hosted/control prequalification evidence and a durable replacement ticket, but no authoritative replacement A-01 rerun receipt is present. Learning, Book and Prose repair inboxes contain zero active transactions."
+    },
+    {
+      "family": "RUNNER_AND_A01_PHYSICAL_EXECUTION_PATH",
+      "disposition": "HISTORICALLY_PROVEN_LIVE__CURRENT_AVAILABILITY_IS_RUNTIME_STATE",
+      "evidence": [
+        "governance/repair/A01-CLOSED-LOOP-REPAIR-001C-CLOSURE.md",
+        ".github/workflows/safe-runner-bootstrap.yml",
+        ".github/workflows/runner-identity-path-diagnostic.yml",
+        ".github/scripts/a01-runner-guard.ps1"
+      ],
+      "finding": "The Windows x64 A-01 path accepted and completed the 001C replacement proof. That historical proof does not guarantee the runner is online at every later moment. Properly submitted unavailable work may queue; runner unavailability is not permission to fabricate a PASS or stop unrelated owner-valid work."
+    },
+    {
+      "family": "LEGACY_DIRECT_A01_WORKFLOWS_AND_PENDING_FRAGMENTS",
+      "disposition": "RETIRED_OR_HISTORICAL_STAGING_ONLY",
+      "evidence": [
+        "qualification/a01/A01-MIGRATION-001-CLOSURE.md",
+        "qualification/a01/legacy-direct-workflows.json",
+        "qualification/a01/pending/core-smr020-runner-diag-custody-probe.pending.yml",
+        "qualification/a01/pending/core-smr020-runner-work-custody-probe.pending.yml"
+      ],
+      "finding": "Legacy direct patterns are no longer authoritative operating paths. The two remaining pending fragments are retained historical/staging artifacts with forced activation disabled and do not constitute current direct dispatch authority."
+    },
+    {
+      "family": "SECOND_SHIFT_OPERATING_POLICY",
+      "disposition": "POLICY_PRESENT__CONTINUATION_LAW_DEFINED",
+      "evidence": [
+        "governance/second-shift/SECOND-SHIFT-OPERATING-MODE-002.md",
+        "governance/second-shift/SECOND-SHIFT-MORNING-HANDOFF-2026-09-10.md",
+        "governance/second-shift/SECOND-SHIFT-FINAL-REFILL-2026-09-10.json"
+      ],
+      "finding": "The policy correctly requires re-evaluation after completion/block, an eight-rung work-ahead ladder, no false whole-lane blocking from A-01/unavailable dependencies, and an all-rungs-exhausted proof before idle. The Sep-10 morning audit nevertheless proved continuation defects in all four lanes; the final refill recovered useful work and bound successors without invalidating the completed overnight evidence."
+    },
+    {
+      "family": "SECOND_SHIFT_EXECUTION_CONTROL_AND_ENFORCEMENT",
+      "disposition": "PARTIAL_IMPLEMENTATION__HARDENING_GAP",
+      "evidence": [
+        "governance/second-shift/SECOND-SHIFT-EXECUTION-CONTROL-001.md",
+        ".github/scripts/second-shift-enforce.js",
+        ".github/workflows/second-shift-enforcement.yml",
+        "governance/second-shift/SECOND-SHIFT-REGISTRY-001.json"
+      ],
+      "finding": "The proposed execution-control contract defines leases, heartbeats, successor admission, utilization telemetry, queue depth, retry/circuit-breaker behavior and hourly/final-refill laws. The current enforcement script checks file-local delegation shape, claim leases, stale READY age, false-empty proof and expected event-ledger presence, but it does not independently resolve each remote live owner ref or determine that an objective has already completed and been superseded before accepting an active delegation."
+    },
+    {
+      "family": "SECOND_SHIFT_REQUIRED_CONTROL_ARTIFACTS_AND_TELEMETRY",
+      "disposition": "INCOMPLETE",
+      "finding": "The current Second Shift registry references newer execution-control/schema/telemetry surfaces, but the repository tree at the P5 census does not contain SECOND-SHIFT-DELEGATION-SCHEMA-002.json, SECOND-SHIFT-UTILIZATION-EVENT-SCHEMA-001.json, or a governance/second-shift/execution-events/2026-09-10 ledger. Therefore useful-work time cannot be reconstructed from authoritative event telemetry for the Sep-10 shift, and the execution-control proposal is not fully admitted/implemented."
+    },
+    {
+      "family": "SECOND_SHIFT_ACTIVE_OWNER_ROUTING",
+      "disposition": "SEMANTICALLY_STALE_AFTER_FINAL_REFILL__DO_NOT_REPLAY",
+      "finding": "All four owner delegation files still advertise pre-final-refill active objectives while the durable final-refill record advanced each lane to a later successor. These records remain historical/control evidence but must not cause completed work to be replayed. Owner-valid delegation rebinding belongs to the owning lane and final P8/P9 reconciliation, not silent product-root mutation."
+    }
+  ],
+  "second_shift_stale_routing_examples": {
+    "CORE": {
+      "owner_file_active_objective": "SMR021-EXACT-CAPSULE-RETRY-AND-DATA-CONTRACT-ADVERSARIAL-FIXTURE-PREP-007",
+      "final_refill_successor": "SMR021-GITHUB-NATIVE-EXACT-CAPSULE-IMPORT-AND-RUNNABLE-SOURCE-TRANSPORT-009"
+    },
+    "LEARNING": {
+      "owner_file_active_objective": "Domain II Batch 01",
+      "final_refill_successor": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-DOMAIN-II-TOPOLOGY-CANDIDATE-BATCH-03-008"
+    },
+    "BOOK": {
+      "owner_file_active_objective": "BOOK-SYSTEM-CONTENT-ADMISSION-AUTHOR-DECISION-APPLICABILITY-GUARD-004",
+      "final_refill_successor": "BOOK-SYSTEM-RF012-OWNER-PROMOTION-REBIND-AND-NEXT-OWNER-SELECTION-004"
+    },
+    "PROSE": {
+      "owner_file_active_objective": "PROSE-FOUNDATION-CLOSURE-CENSUS-001",
+      "final_refill_successor": "PROSE-FOUNDATION-ROUTE-CONTRACT-CLOSURE-002"
+    }
+  },
+  "open_infrastructure_obligations": [
+    {
+      "obligation_id": "A01-CONTROL-PLANE-SELFTEST-A1-REPLACEMENT-RERUN-001",
+      "priority": 1,
+      "state": "READY_THROUGH_EXISTING_REPAIR_TRANSACTION",
+      "transaction_id": "A01-REPAIR-a01-run-34431764843-A01-CONTROL-PLANE-SELFTEST-A1",
+      "replacement_subject_sha": "ceb6870546012b789caea56499a1d219a195dc8b",
+      "next_action": "Enter through the canonical repair-rerun workflow using the existing transaction_id and exact replacement SHA. Adjudicate the returned authoritative receipt into the same transaction; do not open a duplicate repair lineage."
+    },
+    {
+      "obligation_id": "SECOND-SHIFT-LIVE-AUTHORITY-SUCCESSOR-ENFORCEMENT-002",
+      "priority": 2,
+      "state": "READY__SHARED_INFRASTRUCTURE_HARDENING",
+      "next_action": "Complete admission/implementation of the execution-control contract: add the missing schema/telemetry artifacts, verify active delegations against actual live owner refs and durable objective/successor state, reject semantically superseded active work, emit utilization ledgers, and prove the dispatcher/final-refill path with deterministic fixtures before relying on it for the next seven-hour shift."
+    },
+    {
+      "obligation_id": "SECOND-SHIFT-OWNER-DELEGATION-REBIND-001",
+      "priority": 3,
+      "state": "OWNER_RECONCILIATION_REQUIRED",
+      "next_action": "Each owner re-reads its live control and current successor evidence, retires/supersedes the stale active delegation, and binds only the current owner-valid successor. Product-root governance records the mismatch but does not silently transfer child authority."
+    }
+  ],
+  "stale_shared_metadata": [
+    {
+      "registry": "governance/WORK-OBLIGATION-REGISTRY-001.json",
+      "item": "A01-CLOSED-LOOP-REPAIR-001",
+      "current_registry_state": "READY",
+      "truthful_disposition": "CLOSED_TO_001C_DECLARED_BOUNDARY",
+      "apply_phase": "P8_LEDGER_RECONCILIATION",
+      "rule": "Do not replay 001B/001C or invent 001D solely because the shared registry entry is stale."
+    }
+  ],
+  "completion_rule": "P5 closes the shared-infrastructure/A-01 census only. It does not say all infrastructure work is finished, does not close the active replacement repair transaction, does not certify the next Second Shift, does not guarantee current runner uptime, and does not convert hosted/control evidence into A-01 PASS.",
+  "next_global_action": "Advance to P6 Expected product-module allocation census and reconcile the historical product/tool inventory against current owner and implementation evidence without using historical counts as present-day proof."
+}
