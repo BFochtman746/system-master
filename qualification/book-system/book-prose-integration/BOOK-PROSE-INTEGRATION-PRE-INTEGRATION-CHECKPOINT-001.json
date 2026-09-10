@@ -1,0 +1,79 @@
+{
+  "checkpoint_id": "BOOK-PROSE-INTEGRATION-PRE-INTEGRATION-CHECKPOINT-001",
+  "effective_date": "2026-09-10",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "control_ref": "book-system/control-v1",
+  "source_live_head_before_phase0": "77a6bcd3f62ca0468c3c8f1f43ab994b73c0ecb2",
+  "checkpoint_parent_head": "1f7a83a1626ddd27cf9d62f855cc1c69d06431d8",
+  "phase0_census": {
+    "path": "qualification/book-system/book-prose-integration/BOOK-PROSE-INTEGRATION-PHASE-0-CURRENT-STATE-CENSUS-001.json",
+    "commit": "0ce538d9a4ffb85d693c469efe70f0842db9f52a"
+  },
+  "current_state": {
+    "path": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-029.json",
+    "commit": "243edcf4a5e8c3d46298b2b637ab38a973594756"
+  },
+  "current_parent_binding": {
+    "path": "qualification/book-system/BOOK-SYSTEM-PRODUCT-PARENT-BINDING-009.json",
+    "commit": "1f7a83a1626ddd27cf9d62f855cc1c69d06431d8"
+  },
+  "standing": "PHASE_0_COMPLETE__PRESERVATION_SAFE__PHASE_1_ADMITTED",
+  "canonical_authority": {
+    "canonical_manuscript_owner": "SYSTEM_MASTER/BOOK",
+    "prose_specialist_owner": "SYSTEM_MASTER/BOOK/PROSE",
+    "prose_canonical_write_authority": false,
+    "book_workflow_orchestrator_future_authority": "COORDINATION_ONLY",
+    "book_admission_gate": "SOLE_CANONICAL_MUTATION_PATH",
+    "author": "FINAL_CREATIVE_AND_SEMANTIC_AUTHORITY"
+  },
+  "preserved_evidence": [
+    "SYSTEM-MASTER-COMPLETION-CENSUS-002-FINAL-SEAL",
+    "BOOK P3 census and all historical Book reconciled states/bindings",
+    "RF012 candidate, hosted qualification and owner promotion lineage",
+    "post-RF012 implementation-gap census and correction",
+    "EBR-SC1 failed predecessor, repaired qualifier, hosted PASS and closure",
+    "content-admission applicability-guard implementation, regressions, hosted PASS and closure",
+    "original content-admission hosted subject and separate A-01 pending fence",
+    "all historical Book branches and Second Shift delegation lineage"
+  ],
+  "known_nonblocking_drift": [
+    {
+      "surface": "governance/second-shift/BOOK-DELEGATIONS.json on main",
+      "classification": "STALE_DELEGATION__DO_NOT_EXECUTE",
+      "reason": "It selects an already-completed post-RF012 gap census on an older Book head."
+    },
+    {
+      "surface": "governance/WORK-OBLIGATION-REGISTRY-002.json on main",
+      "classification": "STALE_BOOK_RF012_ROW__DO_NOT_REPLAY",
+      "reason": "It still marks RF012 owner promotion READY although the live Book owner lineage has already sealed and advanced it."
+    }
+  ],
+  "repair_inbox": "ZERO_ACTIVE_BOOK_TRANSACTIONS_AT_PHASE0_AUDIT",
+  "local_worktree_visibility": "REMOTE_GITHUB_ONLY__NO_CLAIM_ABOUT_UNPUSHED_LOCAL_CHANGES",
+  "qualification_fences": [
+    "No A-01 PASS inferred or transferred.",
+    "No fresh-context blind evaluation executed.",
+    "No author decision synthesized.",
+    "No private manuscript authority inferred.",
+    "No native, publication, distributor or production readiness claimed."
+  ],
+  "phase1_entry_contract": {
+    "objective_id": "BOOK-PROSE-INTEGRATION-PHASE-1-INPUT-CENSUS-001",
+    "mode": "READ_RECONCILE_ONLY",
+    "required_output": "BOOK-PROSE-INTEGRATION-INPUT-CENSUS",
+    "must_verify": [
+      "current Prose owner-lane Foundation work",
+      "Prose system/product parent binding",
+      "craft constitution",
+      "literary evaluation and controlled revision contracts",
+      "preservation, voice, canon, intent and protected-language protections",
+      "hard gates and blind evaluation rules",
+      "homogenization defenses and preference learning",
+      "replay/provenance behavior and qualification evidence",
+      "fresh-context blind limitation",
+      "Book canonical authority boundary"
+    ],
+    "fresh_blind_scoring_forbidden": true
+  },
+  "next_dependency_valid_action": "Retrieve the live Prose control ref and reconcile only the delta from its sealed P4 snapshot before constructing the Book-Prose Integration Input Census."
+}
