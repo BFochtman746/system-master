@@ -1,6 +1,6 @@
 {
   "ledger_id": "REALLOCATION-LEDGER-001",
-  "effective_date": "2026-09-09",
+  "effective_date": "2026-09-10",
   "topology": "governance/SYSTEM-TOPOLOGY-002.json",
   "rule": "Reallocation changes ownership/control taxonomy only. Historical names, commits, receipts and exact-SHA evidence remain valid in their original scope and are not rewritten.",
   "entries": [
@@ -84,6 +84,13 @@
       "action": "CLASSIFY_AS_SHARED_EXECUTION_INFRASTRUCTURE"
     }
   ],
+  "p8_reconciliation": {
+    "date": "2026-09-10",
+    "source_phases": ["P1", "P2", "P3", "P4", "P5", "P6", "P7"],
+    "new_reallocation_entries_required": 0,
+    "result": "NO_NEW_OWNER_REALLOCATION_SUPPORTED_BY_CENSUS_EVIDENCE",
+    "boundary": "P6/P7 unresolved headless modules, AI Income, Living Portfolio, Response Expectation Engine and Household Ledger remain owner-selection/evidence-review obligations. They are not reallocated by inference."
+  },
   "unallocated_rule": "A new or historical workstream not listed in the topology owner maps must be classified UNALLOCATED and may be inspected but not executed, promoted, scheduled or used to redefine architecture until an owning lane is explicitly assigned.",
   "future_rule": "Add new reallocations as successor ledger entries or a new ledger version; do not silently reinterpret an old label."
 }
