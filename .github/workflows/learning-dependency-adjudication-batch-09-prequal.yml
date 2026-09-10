@@ -1,0 +1,49 @@
+name: Learning Dependency Adjudication Batch 09 Prequalification
+
+on:
+  push:
+    branches:
+      - learning/dependency-adjudication-batch-09-20260910
+    paths:
+      - "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001C-DEPENDENCY-EVIDENCE-ADJUDICATION-BATCH-09-CANDIDATE-052A.json"
+      - ".github/scripts/learning-dependency-adjudication-batch-generic-qualify.js"
+      - ".github/workflows/learning-dependency-adjudication-batch-09-prequal.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  validate:
+    name: Dependency evidence adjudication batch 09
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      DEPENDENCY_CANDIDATE: LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001C-DEPENDENCY-EVIDENCE-ADJUDICATION-BATCH-09-CANDIDATE-052A.json
+      EXPECTED_CONTROL_HEAD: 673bab899bc97e3d67e7d30b43a21c3717383167
+      START_INDEX: 40
+      EXPECTED_COUNT: 5
+      CUMULATIVE_COUNT: 45
+      REMAINING_COUNT: 1
+      EVIDENCE_DIR: learning-dependency-adjudication-batch-09-evidence
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - name: Record exact subject
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          printf 'SUBJECT_SHA=%s\n' "${GITHUB_SHA}"
+      - name: Syntax check reusable validator
+        run: node --check .github/scripts/learning-dependency-adjudication-batch-generic-qualify.js
+      - name: Validate candidates 41 through 45
+        run: node .github/scripts/learning-dependency-adjudication-batch-generic-qualify.js
+      - name: Upload hosted evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: LEARNING-DEPENDENCY-ADJUDICATION-BATCH-09-${{ github.sha }}-hosted-evidence
+          path: ${{ runner.temp }}/learning-dependency-adjudication-batch-09-evidence
+          if-no-files-found: warn
+          retention-days: 30
