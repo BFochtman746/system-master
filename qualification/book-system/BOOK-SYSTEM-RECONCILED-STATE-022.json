@@ -1,0 +1,68 @@
+{
+  "state_id": "BOOK-SYSTEM-RECONCILED-STATE-022",
+  "effective_date": "2026-09-10",
+  "supersedes_for_current_parent_control": "BOOK-SYSTEM-RECONCILED-STATE-021",
+  "supersession_scope": "PARENT_CONTROL_HEALTH_AND_NEXT_STEP_ROUTING_ONLY",
+  "standing": "ACTIVE__E2E_AUTHORITY_GUARDS_A01_CLOSED__END_TO_END_48_CASE_REQUALIFICATION_NEXT",
+  "project": "BOOK SYSTEM",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "control_branch": "book-system/control-v1",
+  "historical_e2e_attempt": {
+    "subject_sha": "cd96d6d300b73d1a28660d58707624372fee6142",
+    "hosted_run_id": 34431785904,
+    "result": "FAIL__46_OF_48",
+    "failed_cases": [
+      "E2E019_CHANGED_AUTHOR_SUBJECT_INVALIDATES_PRIOR_DECISION_FOR_NEW_SUBJECT",
+      "E2E021_DOCUMENT_PROVIDER_SUCCESS_ALONE_CANNOT_FREEZE"
+    ],
+    "evidence_artifact_id": 10134743468,
+    "evidence_artifact_zip_sha256": "f78f37d48ad3c41f379cf6edb6d588d25cf6deef469049ed6d434dd06e13f7a4",
+    "authority_transfer": "NONE"
+  },
+  "closed_repair": {
+    "qualification_id": "BOOK-SYSTEM-E2E-AUTHORITY-GUARDS-001",
+    "standing": "CLOSED__HOSTED_AND_AUTHORITATIVE_A01_PASS__EXACT_SHA_SCOPED",
+    "qualified_subject_sha": "a119ccdf77b61011b1093006b55367fc3e5a65c2",
+    "hosted_run_id": 34432197786,
+    "hosted_result": "PASS__24_OF_24",
+    "hosted_evidence_artifact_id": 10134877049,
+    "hosted_evidence_artifact_zip_sha256": "21214bfe7c3996eb6ab80a0b02c1f848623e357ba8ec5895fa3e5074e82b9ceb",
+    "a01_run_id": 34432443775,
+    "a01_job_id": 102730621721,
+    "a01_registry_version": 28,
+    "a01_control_plane_sha": "77fcfc17f34c2bc6bf9c2cc7c343ae5b1f01e86c",
+    "a01_result": "PASS__24_OF_24",
+    "a01_evidence_artifact_id": 10134970501,
+    "a01_evidence_artifact_zip_sha256": "ba34f8a567a3f5fc9756f40438c8da173bb7a158cd3e3c18dda1d28bb4a70bf0",
+    "promotion_authorized": false,
+    "closed_findings": [
+      "BOOK-SYSTEM-E2E-AUTHOR-DECISION-CURRENT-SUBJECT-GAP-001",
+      "BOOK-SYSTEM-E2E-EXPORT-FREEZE-PARENT-ADMISSION-GAP-001"
+    ]
+  },
+  "current_parent_critical_path": {
+    "id": "BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001-HARNESS-001",
+    "parent_objective": "BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001",
+    "classification": "REPAIRED_COMPOSITION_REQUALIFICATION_READY__NO_NEW_RUNTIME_AUTHORITY",
+    "original_forensic_map": "qualification/book-system/end-to-end-authoring-001/BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001-FORENSIC-MAP.json",
+    "repair_amendment": "qualification/book-system/end-to-end-authoring-001/BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001-REPAIR-AMENDMENT-001.json",
+    "target_case_count": 48,
+    "author_surface": "system-master/book-system/author-decision-current-subject-guard.js",
+    "export_freeze_surface": "system-master/book-system/export-freeze-parent-admission-guard.js",
+    "lifecycle_rebind_surface": "system-master/book-system/lifecycle-current-parent-rebind-adapter.js",
+    "objective": "Re-run the unchanged 48-case deterministic synthetic cross-component Book authoring matrix through the exact A-01-qualified authority guards, preserving one lifecycle ledger and all predecessor authority boundaries.",
+    "pass_unlocks": "REGISTER_AND_RUN_BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001_AS_CONSOLIDATED_A01_GATE"
+  },
+  "non_negotiables": [
+    "Do not modify or relabel the exact qualified Author Decision Queue v1 or Export Freeze v1 subjects.",
+    "Do not transfer BOOK-SYSTEM-E2E-AUTHORITY-GUARDS-001 PASS to the E2E qualification.",
+    "All 48 original E2E case IDs remain required.",
+    "Use one persistent Lifecycle ledger and the qualified current-parent rebind; no test-only reset.",
+    "All author and publication fixtures remain explicitly synthetic qualification evidence only.",
+    "Document mechanics remain outside Book.",
+    "Provider SUCCESS, proof PASS, provenance/C2PA validation, document SUCCESS, and EXPORT_FROZEN cannot synthesize publication authority.",
+    "A changed E2E qualifier/runtime route creates a new exact subject and requires fresh hosted plus registered A-01 qualification."
+  ],
+  "generic_continue_rule": "Continue creates or executes the repaired E2E qualifier surface, runs all 48 cases hosted on one exact SHA, and only on 48/48 PASS registers and executes the same exact subject through the shared A-01 control plane as a consolidated gate.",
+  "qualification_effect": "NO_E2E_PASS_YET__NO_REAL_AUTHOR_PUBLICATION_OR_PRODUCTION_AUTHORITY"
+}
