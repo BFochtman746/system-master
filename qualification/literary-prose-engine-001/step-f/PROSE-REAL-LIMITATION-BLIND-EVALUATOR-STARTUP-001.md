@@ -5,7 +5,8 @@ Owner lane: SYSTEM_MASTER/BOOK/PROSE
 Objective: PROSE-REAL-LIMITATION-BLIND-MODEL-SCORING-001
 Blind branch: literary-prose-blind-eval-001
 Supervising owner control ref: literary-prose-engine-001
-Supervising owner control head at preparation: 70cf75fa094ae408389f82c14b48bd43281fa298
+Supervising owner control head revalidated: 9d360ac20839d06765b1b3a68d5c1ebedb2eba50
+Owner admission standing: REVALIDATED__OBJECTIVE_UNCHANGED__BLIND_SCORING_REMAINS_NEXT_CRITICAL_PATH
 
 ## Eligibility
 
@@ -13,7 +14,7 @@ Use this startup only in a fresh evaluator context that has not read any author 
 
 This evaluator is an isolated scoring worker, not the canonical Prose owner chat. It may write only blind prediction evidence on `literary-prose-blind-eval-001` before the prediction seal. It may not redefine Prose control, Book state, product topology, obligations, completion ledgers, Second Shift state, revision authority, publication authority, or canonical manuscript state.
 
-If the supervising owner has not confirmed that the prepared owner-control head remains current, stop and return `BLIND_ADMISSION_REVALIDATION_REQUIRED`. Do not inspect the labeled owner state yourself to resolve that question.
+Owner admission has been revalidated against the supervising owner head recorded above. The evaluator must not inspect labeled owner state to repeat that revalidation. If the recorded supervising owner head is no longer current when execution begins, stop and return `BLIND_ADMISSION_REVALIDATION_REQUIRED`.
 
 ## Before prediction seal — permitted reads only
 
@@ -31,8 +32,9 @@ Do not read `literary-prose-engine-001` at or after the ground-truth freeze comm
 2. Verify all three source-package SHA256 values exactly.
 3. Reconstruct all six passages using the blind contract's `NONEMPTY_DOCX_PARAGRAPHS`, 1-based indexing, single-ASCII-space join rule.
 4. Verify every reconstructed passage SHA256 exactly against the blind contract before scoring.
-5. Run the already-qualified semantic -> Passage Intelligence -> Step-F path on each case without author ground truth.
-6. Produce exactly one prediction record per case with:
+5. Digest equality is authoritative over indexing prose. If the stated indexing interpretation does not reproduce every frozen passage digest, stop with `EVIDENCE_MISMATCH`; do not guess, shift indices, inspect author labels, or score. Return the mismatch to the owner for contract/reconstruction adjudication.
+6. Run the already-qualified semantic -> Passage Intelligence -> Step-F path on each case without author ground truth.
+7. Produce exactly one prediction record per case with:
    - `case_id`
    - `passage_sha256`
    - `semantic_disposition`
@@ -41,18 +43,18 @@ Do not read `literary-prose-engine-001` at or after the ground-truth freeze comm
    - `abstention_or_downgrade_reason`
    - `diagnosis_allowed`
    - `revision_allowed`
-7. Require `revision_allowed=false` for all six cases. Generate no candidate prose and mutate no manuscript.
-8. Commit the six prediction records to this blind branch. The commit SHA is the prediction seal.
-9. Only after the prediction-seal commit exists may the evaluator read the frozen author ground truth identified by the blind contract.
-10. Compare sealed predictions against ground truth and measure:
+8. Require `revision_allowed=false` for all six cases. Generate no candidate prose and mutate no manuscript.
+9. Commit the six prediction records to this blind branch. The commit SHA is the prediction seal.
+10. Only after the prediction-seal commit exists may the evaluator read the frozen author ground truth identified by the blind contract.
+11. Compare sealed predictions against ground truth and measure:
     - REAL_LIMITATION identification;
     - downgrade behavior;
     - abstention behavior;
     - WORKING_AS_INTENDED preservation;
     - NEUTRAL_OBSERVATION retention;
     - false-positive limitation rate.
-11. Commit a comparison receipt that references both the prediction-seal commit and the frozen ground-truth commit while preserving revision authority at zero.
-12. Stop. Return the two new commit SHAs and comparison result to the canonical Prose owner chat for admission/reconciliation.
+12. Commit a comparison receipt that references both the prediction-seal commit and the frozen ground-truth commit while preserving revision authority at zero.
+13. Stop. Return the two new commit SHAs and comparison result to the canonical Prose owner chat for admission/reconciliation.
 
 ## Failure rules
 
