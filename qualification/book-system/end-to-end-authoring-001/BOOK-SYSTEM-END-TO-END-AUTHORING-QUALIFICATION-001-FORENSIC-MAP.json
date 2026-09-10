@@ -1,0 +1,207 @@
+{
+  "map_id": "BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001-FORENSIC-MAP",
+  "effective_date": "2026-09-09",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "parent_objective": "BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001",
+  "standing": "CLOSED__REUSE_ONLY_COMPOSITION_MAP__HARNESS_IMPLEMENTATION_READY",
+  "classification": "QUALIFICATION_ONLY__NO_NEW_RUNTIME_ENGINE_OR_AUTHORITY",
+  "selection_authority": {
+    "source": "qualification/book-system/BOOK-SYSTEM-AUTHORING-LIFECYCLE-CONTRACT-001.json",
+    "implementation_order_successor_after_export_freeze": "BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001"
+  },
+  "qualified_predecessors": [
+    {
+      "id": "BOOK-SYSTEM-CANONICAL-BOOK-STATE-MODEL-001",
+      "subject_sha": "b6938fcfc5c2c24ac23b558de6dfc7f75c382312",
+      "role": "parent canonical state schema, digest/version and canonical authority boundary",
+      "reuse": "KEEP"
+    },
+    {
+      "id": "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-002",
+      "subject_sha": "77db6b550e9aeb1dfb956627376becbb591498f8",
+      "role": "provider operation/schema/ownership/currentness boundary for four service families",
+      "reuse": "KEEP"
+    },
+    {
+      "id": "BOOK-SYSTEM-LIFECYCLE-TRANSITION-ENGINE-001",
+      "subject_sha": "4a6e3459d6ba94b7ce191e426ca64bef00d23582",
+      "role": "project/unit lifecycle policy, gates, atomicity and author boundary",
+      "reuse": "KEEP_UNCHANGED_POLICY"
+    },
+    {
+      "id": "BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-002",
+      "subject_sha": "837e479415afb2d9724e4b913d456ef1d3a62df5",
+      "role": "single parent intake/proposal/admission path for provider results",
+      "reuse": "KEEP"
+    },
+    {
+      "id": "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001",
+      "subject_sha": "402ab84a14e9d345530d60394ebc36176541dd21",
+      "role": "immutable parent snapshots, object lineage, authority-receipt ingest and restore-as-successor",
+      "reuse": "KEEP"
+    },
+    {
+      "id": "BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001",
+      "subject_sha": "9601ae5df8348c1daac8805eaefa1718c431dd49",
+      "role": "explicit author decision request/resolution and immutable AUTHOR_DECISION append",
+      "reuse": "KEEP"
+    },
+    {
+      "id": "BOOK-SYSTEM-LIFECYCLE-CURRENT-PARENT-COMPATIBILITY-ADAPTER-001",
+      "subject_sha": "fc5adf8fd130d7b5324cff0058ab3804d75ec54e",
+      "role": "representation/identity bridge from current sealed-array parent to unchanged Lifecycle v1",
+      "reuse": "KEEP_STRICT_ADAPTER"
+    },
+    {
+      "id": "BOOK-SYSTEM-EXPORT-FREEZE-001",
+      "subject_sha": "0bc1f96ed0b8effd22c432a7d727fd13d613b825",
+      "role": "parent-only immutable one-artifact export-release freeze after technical/evidence gates",
+      "reuse": "KEEP"
+    }
+  ],
+  "composition_seams": [
+    {
+      "seam": "PARENT_STATE_TO_VERSION_LEDGER",
+      "existing_owner": "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001",
+      "existing_proof": "valid sealed parent can seed immutable version ledger",
+      "e2e_delta": "prove the same parent identity is preserved when later provider/author/export/lifecycle successors are recorded",
+      "classification": "TARGETED_CROSS_COMPONENT_TEST"
+    },
+    {
+      "seam": "PROVIDER_RESPONSE_TO_PARENT_PROPOSAL",
+      "existing_owner": "BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-002",
+      "existing_proof": "strict Registry V2 response identity and non-success preservation",
+      "e2e_delta": "prove an admitted synthetic provider result can be consumed downstream only by parent-owned operations and stale/non-success results cannot advance the chain",
+      "classification": "TARGETED_CROSS_COMPONENT_TEST"
+    },
+    {
+      "seam": "PROPOSAL_OR_EVIDENCE_TO_LIFECYCLE",
+      "existing_owner": "BOOK-SYSTEM-LIFECYCLE-TRANSITION-ENGINE-001",
+      "existing_adapter": "BOOK-SYSTEM-LIFECYCLE-CURRENT-PARENT-COMPATIBILITY-ADAPTER-001",
+      "existing_proof": "array proposal refs resolve and providers cannot transition directly",
+      "e2e_delta": "prove parent-controlled sequence across authoring stages and rejection of stale/direct-provider transition attempts",
+      "classification": "TARGETED_CROSS_COMPONENT_TEST"
+    },
+    {
+      "seam": "AUTHOR_HANDOFF_TO_AUTHOR_DECISION_TO_LIFECYCLE",
+      "existing_owner": "BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001",
+      "existing_proof": "explicit author gate, no steering/fabrication, one immutable AUTHOR_DECISION append",
+      "e2e_delta": "prove unresolved author-required boundary blocks; synthetic labeled author fixture can satisfy software gate; changed subject makes prior decision stale for the new subject",
+      "classification": "TARGETED_CROSS_COMPONENT_TEST__SYNTHETIC_ONLY"
+    },
+    {
+      "seam": "DOCUMENT_PROVIDER_EVIDENCE_TO_EXPORT_FREEZE",
+      "existing_owner": "BOOK-SYSTEM-EXPORT-FREEZE-001",
+      "existing_proof": "proof/currentness/rights/privacy/provenance/admission/author refs gate one immutable release",
+      "e2e_delta": "prove technical provider SUCCESS is insufficient until all parent freeze gates are satisfied and no document-engine implementation enters Book",
+      "classification": "TARGETED_CROSS_COMPONENT_TEST"
+    },
+    {
+      "seam": "EXPORT_RELEASE_TO_EXPORT_FROZEN",
+      "existing_owner": "BOOK-SYSTEM-LIFECYCLE-TRANSITION-ENGINE-001",
+      "existing_adapter": "BOOK-SYSTEM-LIFECYCLE-CURRENT-PARENT-COMPATIBILITY-ADAPTER-001",
+      "existing_proof": "qualified adapter accepts current array EXPORT_FREEZE_READY release",
+      "e2e_delta": "prove release successor is Version/Rollback-recorded before separate FINALIZATION->EXPORT_FROZEN transition and lifecycle successor is then recorded",
+      "classification": "TARGETED_CROSS_COMPONENT_TEST"
+    },
+    {
+      "seam": "EXPORT_FROZEN_TO_PUBLISHED_OR_DELIVERED",
+      "existing_owner": "BOOK-SYSTEM-LIFECYCLE-TRANSITION-ENGINE-001 plus explicit author/release authority boundary",
+      "existing_proof": "lifecycle author gates and publication-authority separation exist independently",
+      "e2e_delta": "prove technical export/freeze/proof/provenance evidence alone cannot cross publication boundary; any positive software-gate fixture is explicitly synthetic and cannot be represented as real author authorization",
+      "classification": "CRITICAL_END_TO_END_NEGATIVE_GATE"
+    },
+    {
+      "seam": "ROLLBACK_OR_CHANGED_BYTES_TO_DOWNSTREAM_INVALIDATION",
+      "existing_owner": "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001 plus lifecycle/export currentness contracts",
+      "existing_proof": "restore-as-successor and changed-byte/currentness rules exist independently",
+      "e2e_delta": "prove prior provider evidence, author decision where subject-bound, artifact/provenance and frozen release cannot silently rebind after changed source/artifact bytes",
+      "classification": "TARGETED_CROSS_COMPONENT_TEST"
+    }
+  ],
+  "already_proven_and_not_to_reimplement": [
+    "canonical state schema and generic mutation protocol",
+    "provider schema validation implementation",
+    "Lifecycle v1 transition policy",
+    "current-parent representation bridge",
+    "generic version-control/event-sourcing platform",
+    "author identity/session provider implementation",
+    "document rendering/conversion/accessibility engine",
+    "C2PA credential creation/embedding engine",
+    "publication/distribution platform implementation"
+  ],
+  "net_new_e2e_harness_scope": [
+    "one synthetic valid parent fixture with exact immutable identities",
+    "one deterministic composition harness that invokes existing exported APIs sequentially",
+    "cross-component receipt/state/version/digest assertions",
+    "fail-closed negative cases at every authority boundary",
+    "explicit synthetic-evidence labels for provider/author/publication fixtures",
+    "predecessor byte/blob and closure identity checks sufficient to detect unreviewed replacement",
+    "evidence manifest binding exact E2E subject SHA and all predecessor exact qualified SHAs"
+  ],
+  "target_matrix": [
+    "E2E001_PREDECESSOR_CLOSURES_ALL_EXACT_SHA_BOUND",
+    "E2E002_CURRENT_PARENT_VALID_AND_SEALED",
+    "E2E003_VERSION_LEDGER_BINDS_INITIAL_PARENT",
+    "E2E004_PROVIDER_SUCCESS_HAS_ZERO_CANONICAL_AUTHORITY",
+    "E2E005_PROVIDER_PARTIAL_PRESERVED_NO_ADVANCE",
+    "E2E006_PROVIDER_ABSTAIN_PRESERVED_NO_ADVANCE",
+    "E2E007_PROVIDER_ERROR_PRESERVED_NO_ADVANCE",
+    "E2E008_PROVIDER_DISAGREEMENT_PRESERVED",
+    "E2E009_STALE_PROVIDER_SOURCE_BLOCKS_ADMISSION_OR_ADVANCE",
+    "E2E010_PROVIDER_DIRECT_LIFECYCLE_TRANSITION_DENIED",
+    "E2E011_PROVIDER_EXPORT_FROZEN_CLAIM_DENIED",
+    "E2E012_PROVIDER_PUBLICATION_CLAIM_DENIED",
+    "E2E013_PARENT_PROPOSAL_IDENTITY_SURVIVES_HANDOFF",
+    "E2E014_VERSION_ROLLBACK_RECORDS_PARENT_SUCCESSOR_ONLY_WITH_EXACT_RECEIPT",
+    "E2E015_UNRESOLVED_AUTHOR_REQUIRED_GATE_BLOCKS",
+    "E2E016_MODEL_OR_PROVIDER_CANNOT_SYNTHESIZE_AUTHOR_CHOICE",
+    "E2E017_SYNTHETIC_AUTHOR_FIXTURE_EXPLICITLY_LABELED",
+    "E2E018_SYNTHETIC_AUTHOR_DECISION_CAN_SATISFY_SOFTWARE_GATE",
+    "E2E019_CHANGED_AUTHOR_SUBJECT_INVALIDATES_PRIOR_DECISION_FOR_NEW_SUBJECT",
+    "E2E020_AUTHOR_DECISION_APPEND_RECORDED_BY_VERSION_ROLLBACK",
+    "E2E021_DOCUMENT_PROVIDER_SUCCESS_ALONE_CANNOT_FREEZE",
+    "E2E022_STALE_ARTIFACT_CANNOT_FREEZE",
+    "E2E023_FAILED_PROOF_CANNOT_FREEZE",
+    "E2E024_OPEN_CORRECTION_CANNOT_FREEZE",
+    "E2E025_RIGHTS_OR_PRIVACY_BLOCK_CANNOT_FREEZE",
+    "E2E026_STALE_OR_INVALID_PROVENANCE_CANNOT_FREEZE",
+    "E2E027_VALID_FREEZE_APPENDS_ONE_RELEASE_ONLY",
+    "E2E028_FREEZE_DOES_NOT_MUTATE_LIFECYCLE",
+    "E2E029_VERSION_ROLLBACK_RECORDS_EXPORT_RELEASE_SUCCESSOR",
+    "E2E030_LIFECYCLE_ADAPTER_TRANSITIONS_FINALIZATION_TO_EXPORT_FROZEN",
+    "E2E031_VERSION_ROLLBACK_RECORDS_LIFECYCLE_SUCCESSOR",
+    "E2E032_EXPORT_FROZEN_STILL_HAS_ZERO_PUBLICATION_AUTHORITY",
+    "E2E033_TECHNICAL_PASS_CANNOT_PUBLISH",
+    "E2E034_C2PA_OR_PROVENANCE_PASS_CANNOT_PUBLISH",
+    "E2E035_PUBLICATION_GATE_REQUIRES_EXPLICIT_RECORDED_AUTHORITY",
+    "E2E036_SYNTHETIC_PUBLICATION_GATE_FIXTURE_NOT_REAL_AUTHORIZATION",
+    "E2E037_CHANGED_MANUSCRIPT_MAKES_OLD_ARTIFACT_STALE",
+    "E2E038_CHANGED_ARTIFACT_BYTES_REQUIRE_NEW_DIGEST_AND_RELEASE_ID",
+    "E2E039_ROLLBACK_PRESERVES_OLD_RELEASE_HISTORY_WITHOUT_REBIND",
+    "E2E040_IDEMPOTENT_REPLAY_DOES_NOT_DUPLICATE_PROPOSAL_DECISION_OR_RELEASE",
+    "E2E041_CONCURRENT_PARENT_VERSION_REJECTED",
+    "E2E042_CONCURRENT_LEDGER_VERSION_REJECTED",
+    "E2E043_FAILURE_PATH_PRESERVES_INPUT_STATE",
+    "E2E044_NO_BOOK_DOCUMENT_ENGINE_EXPORTS",
+    "E2E045_NO_NEW_LIFECYCLE_POLICY_OR_TRANSITION_TYPES",
+    "E2E046_PROSE_REMAINS_CHILD_EVIDENCE_SOURCE_NO_SELF_ADMISSION",
+    "E2E047_END_STATE_EVIDENCE_SCOPE_NOT_PRODUCTION_STANDING",
+    "E2E048_NO_PREDECESSOR_QUALIFICATION_TRANSFER_TO_E2E_SUBJECT"
+  ],
+  "harness_rules": [
+    "Prefer a qualification-only JavaScript harness under .github/scripts; do not add a new runtime facade unless an actual composition impossibility is proven first.",
+    "The harness may construct synthetic fixtures and sequentially call existing public APIs, but may not add hidden authority logic to compensate for a failing predecessor boundary.",
+    "If an existing public API cannot support a required valid composition, stop and classify the exact interface gap before changing production code.",
+    "All synthetic author/provider/publication fixtures must carry explicit synthetic markers and the evidence summary must say they are not human evidence or production authorization.",
+    "A hosted PASS is prequalification only; final E2E closure requires a newly registered exact-SHA A-01 run for BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001.",
+    "Any changed harness/wrapper/fixture bytes after hosted PASS require a fresh hosted exact-SHA PASS before A-01."
+  ],
+  "research_gate": {
+    "external_research_required": false,
+    "reason": "This objective introduces no new publishing, provenance, editorial, human-decision or lifecycle semantics. Current research-verified contracts are already bound; the remaining question is executable composition of existing qualified repository authorities."
+  },
+  "forensic_result": "NO_UNRESOLVED_ARCHITECTURE_GAP_FOUND__QUALIFICATION_HARNESS_IMPLEMENTATION_RELEASED",
+  "exact_next_objective": "BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001-HARNESS-001",
+  "qualification_effect": "FORENSIC_MAP_ONLY__NO_E2E_PASS__NO_AUTHOR_OR_PUBLICATION_AUTHORITY"
+}
