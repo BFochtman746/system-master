@@ -12,25 +12,35 @@
       "state": "READY",
       "valid_for_control_ref": "book-system/control-v1",
       "valid_for_control_head": "05c1f53e2f710f419a99cb99594c53c2f0240b68",
-      "revalidated_on": "2026-09-10",
+      "created_at": "2026-09-10T10:04:00-04:00",
+      "last_revalidated_at": "2026-09-10T10:04:00-04:00",
       "owner_evidence": [
         "governance/census/SYSTEM-MASTER-COMPLETION-CENSUS-002-P3-BOOK.json",
         "governance/second-shift/SECOND-SHIFT-FINAL-REFILL-2026-09-10.json",
-        "governance/WORK-OBLIGATION-REGISTRY-001.json"
+        "governance/WORK-OBLIGATION-REGISTRY-001.json",
+        "governance/second-shift/p9/BOOK-DELEGATIONS-001.json"
       ],
       "candidate_sha": "67a23c0b09505dc3dd8fd748523fec3868f649b0",
       "candidate_base_owner_head": "05c1f53e2f710f419a99cb99594c53c2f0240b68",
       "hosted_run_id": 34468928275,
       "hosted_result": "PASS",
-      "completion_delta": "Re-read live Book authority and candidate compatibility. If the exact owner-derived RF012 candidate remains compatible, promote only its bounded qualified delta under Book owner rules, preserve its hosted receipt, rebind canonical Book routing, then select the next Book-owned objective. If incompatible, preserve the candidate as evidence and select the truthful successor.",
-      "stop_condition": "Either the exact candidate is truthfully promoted/rebound under current Book owner authority with evidence preserved, or incompatibility is durably recorded and a correct successor is selected; no PASS or authority is transferred beyond the exact qualified candidate boundary.",
+      "completion_delta": "Re-read live Book authority and candidate compatibility. If exact RF012 candidate 67a23c0b09505dc3dd8fd748523fec3868f649b0 remains compatible, promote only its bounded qualified delta under Book owner rules, preserve hosted evidence, rebind Book routing and select the next Book-owned objective. If incompatible, preserve the candidate as evidence and select the truthful successor.",
+      "stop_condition": "The exact RF012 candidate is either truthfully promoted/rebound under current Book owner authority or incompatibility is durably recorded; one exact next Book objective is then selected; original content-admission A-01 remains separate.",
+      "allowed_work": [
+        "revalidate candidate 67a23c0b09505dc3dd8fd748523fec3868f649b0 against current Book state/binding",
+        "verify hosted RF012 evidence and changed-subject lineage without PASS transfer",
+        "promote/rebind only when owner-valid compatibility is proven",
+        "select the next dependency-valid Book-owned successor after adjudication",
+        "continue A-01-independent Book contract/test/preparation work if central A-01 remains blocked"
+      ],
       "forbidden_authority": [
         "do not replace or relabel original content-admission subject e993806a1d9a4838d4bd6d162a36921526ef302a",
         "do not infer A-01 PASS from hosted PASS",
         "do not fabricate author, private manuscript, publication, provider, native or production evidence",
         "do not absorb Prose, Book Evaluator or Document authority"
       ],
-      "continuation_rule": "Completion or incompatibility is not shift termination. Re-read live Book/current binding and continue only the next owner-valid dependency-safe Book objective."
+      "on_pass": "Preserve owner-valid promotion/rebind evidence, retire this delegation and bind the next Book successor on the resulting live Book head.",
+      "on_failure": "Preserve exact candidate incompatibility evidence, do not mutate Book authority to force admission, and select the next safe Book-owned successor."
     }
   ],
   "retired_delegations": [
@@ -49,6 +59,6 @@
     "standing": "IMMUTABLE_GIT_HISTORY_PRESERVED__DETAILED_PRIOR_DELEGATION_HISTORY_REMAINS_RECOVERABLE"
   },
   "owner_revalidation_required": false,
-  "reason": "The Book head is unchanged but the prior RF012 guard work has been superseded by an exact owner-derived candidate with hosted PASS. P3 explicitly selected promotion/rebind compatibility adjudication as the next Book-owned action.",
+  "reason": "The Book head is unchanged and P3/final-refill evidence selects RF012 promotion/rebind compatibility adjudication. P9 adds the full schema-002 execution fields without altering owner authority or candidate evidence.",
   "empty_is_valid": false
 }
