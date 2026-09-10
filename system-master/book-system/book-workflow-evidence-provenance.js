@@ -8,20 +8,18 @@ const retry = require('./book-workflow-retry-idempotency-rules');
 
 const RECEIPT_SCHEMA_VERSION = 1;
 const RECEIPT_CLASSES = new Set([
-  'WORKFLOW_STATE_OBSERVED',
-  'TASK_RESULT_OBSERVED',
-  'FAILURE_DISPOSITION_OBSERVED',
-  'RETRY_DECISION_OBSERVED',
-  'CHECKPOINT_OBSERVED',
-  'RESUME_DECISION_OBSERVED',
-  'AUTHOR_DECISION_REFERENCE_OBSERVED',
-  'ADMISSION_HANDOFF_REFERENCE_OBSERVED'
+  'WORKFLOW_STATE_OBSERVED','TASK_RESULT_OBSERVED','FAILURE_DISPOSITION_OBSERVED','RETRY_DECISION_OBSERVED',
+  'CHECKPOINT_OBSERVED','RESUME_DECISION_OBSERVED','AUTHOR_DECISION_REFERENCE_OBSERVED','ADMISSION_HANDOFF_REFERENCE_OBSERVED'
 ]);
 const TASK_REQUIRED_CLASSES = new Set([
   'TASK_RESULT_OBSERVED','FAILURE_DISPOSITION_OBSERVED','RETRY_DECISION_OBSERVED',
   'AUTHOR_DECISION_REFERENCE_OBSERVED','ADMISSION_HANDOFF_REFERENCE_OBSERVED'
 ]);
 const PROVIDER_BINDING_CLASSES = new Set(['TASK_RESULT_OBSERVED','FAILURE_DISPOSITION_OBSERVED','RETRY_DECISION_OBSERVED']);
+const CONTROL_REFERENCE_CLASSES = new Set([
+  'FAILURE_DISPOSITION_OBSERVED','RETRY_DECISION_OBSERVED','CHECKPOINT_OBSERVED','RESUME_DECISION_OBSERVED',
+  'AUTHOR_DECISION_REFERENCE_OBSERVED','ADMISSION_HANDOFF_REFERENCE_OBSERVED'
+]);
 const FORBIDDEN_RAW_FIELDS = new Set([
   'manuscript_text','passage_text','candidate_text','raw_manuscript','raw_passage','raw_candidate',
   'raw_research','raw_evaluator_text','private_manuscript_text'
@@ -75,7 +73,7 @@ function assertNoForbiddenFields(value, where = 'evidence') {
   }
 }
 
-function validateRefs(values, label, { allowEmpty = true } = {}) {
+function validateRefs(values, label, allowEmpty = true) {
   if (!Array.isArray(values)) fail('REFERENCE_ARRAY_REQUIRED', label);
   if (!allowEmpty && values.length === 0) fail('REFERENCE_REQUIRED', label);
   const seen = new Set();
@@ -84,7 +82,6 @@ function validateRefs(values, label, { allowEmpty = true } = {}) {
     if (seen.has(ref)) fail('DUPLICATE_REFERENCE', `${label}:${ref}`);
     seen.add(ref);
   }
-  return true;
 }
 
 function validateHashMap(map, label) {
@@ -92,17 +89,20 @@ function validateHashMap(map, label) {
   for (const [key, value] of Object.entries(map)) {
     if (!nonEmpty(key) || !SAFE_REF.test(key) || !SHA256.test(String(value || ''))) fail('INVALID_HASH_BINDING', `${label}:${key}`);
   }
-  return true;
 }
 
-function sameSource(a, b) {
-  return stableStringify(a) === stableStringify(b);
-}
-
+function sameSource(a, b) { return stableStringify(a) === stableStringify(b); }
 function taskById(plan, taskId) {
   const matches = plan.tasks.filter(t => t.task_id === taskId);
   if (matches.length !== 1) fail('TASK_NOT_UNIQUE_IN_PLAN', taskId);
   return matches[0];
+}
+
+function providerDescriptor(task, routingRegistry) {
+  return routing.resolveCallableCapability({
+    capability_id: task.capability_id,
+    required_authority_domain: task.required_authority_domain
+  }, routingRegistry);
 }
 
 function validateProviderIdentity(providerIdentity, task, routingRegistry) {
@@ -110,42 +110,35 @@ function validateProviderIdentity(providerIdentity, task, routingRegistry) {
   for (const field of ['service_id','operation_id','provider_subject_sha','implementation_or_artifact_id']) {
     if (!Object.prototype.hasOwnProperty.call(providerIdentity, field)) fail('PROVIDER_IDENTITY_FIELD_MISSING', field);
   }
-  const cap = routing.resolveCallableCapability({
-    capability_id: task.capability_id,
-    required_authority_domain: task.required_authority_domain
-  }, routingRegistry);
-  if (providerIdentity.service_id !== cap.service_id || providerIdentity.operation_id !== cap.operation_id) {
-    fail('PROVIDER_SERVICE_OPERATION_MISMATCH', task.task_id);
-  }
+  const cap = providerDescriptor(task, routingRegistry);
+  if (providerIdentity.service_id !== cap.service_id || providerIdentity.operation_id !== cap.operation_id) fail('PROVIDER_SERVICE_OPERATION_MISMATCH', task.task_id);
   if (!SUBJECT_HASH.test(String(providerIdentity.provider_subject_sha || ''))) fail('PROVIDER_SUBJECT_SHA_INVALID', task.task_id);
-  if (!nonEmpty(providerIdentity.implementation_or_artifact_id) || !SAFE_REF.test(providerIdentity.implementation_or_artifact_id)) {
-    fail('PROVIDER_IMPLEMENTATION_ID_INVALID', task.task_id);
-  }
+  if (!nonEmpty(providerIdentity.implementation_or_artifact_id) || !SAFE_REF.test(providerIdentity.implementation_or_artifact_id)) fail('PROVIDER_IMPLEMENTATION_ID_INVALID', task.task_id);
   if (cap.canonical_write_authority) fail('PROVIDER_CANONICAL_WRITE_FORBIDDEN', task.task_id);
   return clone(providerIdentity);
 }
 
-function validateOperationIdentityForTask(operationIdentity, plan, workflowState, task, routingRegistry, serviceRegistry) {
-  if (task.task_class !== 'SPECIALIST_SERVICE_TASK') {
-    if (operationIdentity !== null && operationIdentity !== undefined) fail('NONPROVIDER_OPERATION_IDENTITY_FORBIDDEN', task.task_id);
-    return null;
-  }
-  if (!isObject(operationIdentity)) fail('PROVIDER_OPERATION_IDENTITY_REQUIRED', task.task_id);
-  retry.validateOperationIdentity(operationIdentity);
-  const expected = retry.buildOperationIdentity(plan, workflowState, task.task_id, routingRegistry, serviceRegistry);
-  if (stableStringify(expected) !== stableStringify(operationIdentity)) fail('STALE_OR_TAMPERED_OPERATION_IDENTITY', task.task_id);
-  return operationIdentity.operation_digest;
+function expectedOperationIdentity(plan, workflowState, task, routingRegistry, serviceRegistry) {
+  if (task.task_class !== 'SPECIALIST_SERVICE_TASK') return null;
+  return retry.buildOperationIdentity(plan, workflowState, task.task_id, routingRegistry, serviceRegistry);
 }
 
-function validateBinding(input, routingRegistry, serviceRegistry) {
+function validateSuppliedOperationIdentity(operationIdentity, plan, workflowState, task, routingRegistry, serviceRegistry) {
+  if (!isObject(operationIdentity)) fail('PROVIDER_OPERATION_IDENTITY_REQUIRED', task.task_id);
+  retry.validateOperationIdentity(operationIdentity);
+  const expected = expectedOperationIdentity(plan, workflowState, task, routingRegistry, serviceRegistry);
+  if (stableStringify(expected) !== stableStringify(operationIdentity)) fail('STALE_OR_TAMPERED_OPERATION_IDENTITY', task.task_id);
+  return expected.operation_digest;
+}
+
+function validateBinding(input, routingRegistry) {
   const workflowState = input.workflow_state;
   const plan = input.plan;
   stateModel.validateWorkflowState(workflowState);
   planRuntime.validateExecutionPlan(plan, workflowState, routingRegistry);
   if (!sameSource(workflowState.source_identity, plan.source_identity)) fail('SOURCE_IDENTITY_MISMATCH');
   stateModel.assertCurrentSourceIdentity(workflowState, input.current_source_identity || workflowState.source_identity);
-  let task = null;
-  if (input.task_id !== null && input.task_id !== undefined) task = taskById(plan, input.task_id);
+  const task = input.task_id === null || input.task_id === undefined ? null : taskById(plan, input.task_id);
   return { workflowState, plan, task };
 }
 
@@ -156,8 +149,7 @@ function createReceipt(input, routingRegistry = routing.loadDefaultRegistry(), s
   if (!nonEmpty(input.receipt_id) || !SAFE_REF.test(input.receipt_id)) fail('RECEIPT_ID_INVALID');
   if (!Number.isInteger(input.sequence_number) || input.sequence_number < 1) fail('SEQUENCE_NUMBER_INVALID');
   if (!nonEmpty(input.emitted_at)) fail('EMITTED_AT_REQUIRED');
-  const { workflowState, plan, task } = validateBinding(input, routingRegistry, serviceRegistry);
-
+  const { workflowState, plan, task } = validateBinding(input, routingRegistry);
   if (TASK_REQUIRED_CLASSES.has(input.receipt_class) && !task) fail('TASK_REQUIRED_FOR_RECEIPT_CLASS', input.receipt_class);
   if (input.receipt_class === 'WORKFLOW_STATE_OBSERVED' && task) fail('WORKFLOW_RECEIPT_TASK_MUST_BE_NULL');
 
@@ -177,26 +169,22 @@ function createReceipt(input, routingRegistry = routing.loadDefaultRegistry(), s
   validateRefs(outputRefs, 'output_refs');
   validateRefs(evidenceRefs, 'evidence_refs');
   validateRefs(decisionRefs, 'decision_refs');
-  if (!Array.isArray(parentDigests) || parentDigests.some(x => !SHA256.test(String(x || ''))) || new Set(parentDigests).size !== parentDigests.length) {
-    fail('PARENT_RECEIPT_DIGESTS_INVALID');
-  }
+  if (!Array.isArray(parentDigests) || parentDigests.some(x => !SHA256.test(String(x || ''))) || new Set(parentDigests).size !== parentDigests.length) fail('PARENT_RECEIPT_DIGESTS_INVALID');
 
   let providerIdentity = null;
   let operationDigest = null;
   if (task && task.task_class === 'SPECIALIST_SERVICE_TASK' && PROVIDER_BINDING_CLASSES.has(input.receipt_class)) {
     providerIdentity = validateProviderIdentity(input.provider_identity, task, routingRegistry);
-    operationDigest = validateOperationIdentityForTask(input.operation_identity, plan, workflowState, task, routingRegistry, serviceRegistry);
+    operationDigest = validateSuppliedOperationIdentity(input.operation_identity, plan, workflowState, task, routingRegistry, serviceRegistry);
   } else {
     if (input.provider_identity !== null && input.provider_identity !== undefined) fail('PROVIDER_IDENTITY_NOT_ALLOWED_FOR_RECEIPT', input.receipt_class);
     if (input.operation_identity !== null && input.operation_identity !== undefined) fail('OPERATION_IDENTITY_NOT_ALLOWED_FOR_RECEIPT', input.receipt_class);
   }
 
   if (input.receipt_class === 'TASK_RESULT_OBSERVED' && outputRefs.length === 0 && evidenceRefs.length === 0) fail('TASK_RESULT_REFERENCE_REQUIRED');
-  if (['FAILURE_DISPOSITION_OBSERVED','RETRY_DECISION_OBSERVED','AUTHOR_DECISION_REFERENCE_OBSERVED','ADMISSION_HANDOFF_REFERENCE_OBSERVED','RESUME_DECISION_OBSERVED','CHECKPOINT_OBSERVED'].includes(input.receipt_class) && decisionRefs.length === 0) {
-    fail('DECISION_OR_CONTROL_REFERENCE_REQUIRED', input.receipt_class);
-  }
-  if (input.receipt_class === 'AUTHOR_DECISION_REFERENCE_OBSERVED' && task && task.task_class !== 'AUTHORITY_WAIT') fail('AUTHOR_DECISION_REQUIRES_AUTHORITY_WAIT_TASK');
-  if (input.receipt_class === 'ADMISSION_HANDOFF_REFERENCE_OBSERVED' && task && task.task_class !== 'BOOK_ADMISSION_HANDOFF') fail('ADMISSION_REFERENCE_REQUIRES_BOOK_HANDOFF_TASK');
+  if (CONTROL_REFERENCE_CLASSES.has(input.receipt_class) && decisionRefs.length === 0) fail('DECISION_OR_CONTROL_REFERENCE_REQUIRED', input.receipt_class);
+  if (input.receipt_class === 'AUTHOR_DECISION_REFERENCE_OBSERVED' && task.task_class !== 'AUTHORITY_WAIT') fail('AUTHOR_DECISION_REQUIRES_AUTHORITY_WAIT_TASK');
+  if (input.receipt_class === 'ADMISSION_HANDOFF_REFERENCE_OBSERVED' && task.task_class !== 'BOOK_ADMISSION_HANDOFF') fail('ADMISSION_REFERENCE_REQUIRES_BOOK_HANDOFF_TASK');
 
   const receipt = {
     receipt_schema_version: RECEIPT_SCHEMA_VERSION,
@@ -250,16 +238,31 @@ function validateReceipt(receipt, workflowState, plan, routingRegistry = routing
   validateRefs(receipt.decision_refs, 'decision_refs');
   if (!Array.isArray(receipt.parent_receipt_digests) || receipt.parent_receipt_digests.some(x => !SHA256.test(String(x || ''))) || new Set(receipt.parent_receipt_digests).size !== receipt.parent_receipt_digests.length) fail('PARENT_RECEIPT_DIGESTS_INVALID');
 
-  if (receipt.task_id !== null) {
-    const task = taskById(plan, receipt.task_id);
+  const task = receipt.task_id === null ? null : taskById(plan, receipt.task_id);
+  if (TASK_REQUIRED_CLASSES.has(receipt.receipt_class) && !task) fail('TASK_REQUIRED_FOR_RECEIPT_CLASS', receipt.receipt_class);
+  if (receipt.receipt_class === 'WORKFLOW_STATE_OBSERVED' && task) fail('WORKFLOW_RECEIPT_TASK_MUST_BE_NULL');
+  if (CONTROL_REFERENCE_CLASSES.has(receipt.receipt_class) && receipt.decision_refs.length === 0) fail('DECISION_OR_CONTROL_REFERENCE_REQUIRED', receipt.receipt_class);
+  if (receipt.receipt_class === 'TASK_RESULT_OBSERVED' && receipt.output_refs.length === 0 && receipt.evidence_refs.length === 0) fail('TASK_RESULT_REFERENCE_REQUIRED');
+
+  if (task) {
     if (receipt.capability_id !== task.capability_id || receipt.authority_domain !== task.required_authority_domain) fail('RECEIPT_TASK_AUTHORITY_BINDING_MISMATCH', task.task_id);
     if (stableStringify(receipt.input_ref_hashes) !== stableStringify(task.input_ref_hashes)) fail('TASK_INPUT_HASH_BINDING_MISMATCH', task.task_id);
     if (stableStringify(receipt.context_package_refs) !== stableStringify(task.context_package_refs)) fail('TASK_CONTEXT_BINDING_MISMATCH', task.task_id);
-    if (receipt.provider_identity !== null) validateProviderIdentity(receipt.provider_identity, task, routingRegistry);
-    if (receipt.operation_identity_digest !== null && !SHA256.test(String(receipt.operation_identity_digest))) fail('OPERATION_DIGEST_INVALID');
-  } else {
-    if (receipt.capability_id !== null || receipt.authority_domain !== null || receipt.provider_identity !== null || receipt.operation_identity_digest !== null) fail('WORKFLOW_RECEIPT_TASK_FIELDS_MUST_BE_NULL');
+    if (receipt.receipt_class === 'AUTHOR_DECISION_REFERENCE_OBSERVED' && task.task_class !== 'AUTHORITY_WAIT') fail('AUTHOR_DECISION_REQUIRES_AUTHORITY_WAIT_TASK');
+    if (receipt.receipt_class === 'ADMISSION_HANDOFF_REFERENCE_OBSERVED' && task.task_class !== 'BOOK_ADMISSION_HANDOFF') fail('ADMISSION_REFERENCE_REQUIRES_BOOK_HANDOFF_TASK');
+
+    const providerBound = task.task_class === 'SPECIALIST_SERVICE_TASK' && PROVIDER_BINDING_CLASSES.has(receipt.receipt_class);
+    if (providerBound) {
+      validateProviderIdentity(receipt.provider_identity, task, routingRegistry);
+      const expected = expectedOperationIdentity(plan, workflowState, task, routingRegistry, serviceRegistry);
+      if (receipt.operation_identity_digest !== expected.operation_digest) fail('STALE_OR_TAMPERED_OPERATION_DIGEST', task.task_id);
+    } else if (receipt.provider_identity !== null || receipt.operation_identity_digest !== null) {
+      fail('PROVIDER_BINDING_NOT_ALLOWED_FOR_RECEIPT', receipt.receipt_class);
+    }
+  } else if (receipt.capability_id !== null || receipt.authority_domain !== null || receipt.provider_identity !== null || receipt.operation_identity_digest !== null) {
+    fail('WORKFLOW_RECEIPT_TASK_FIELDS_MUST_BE_NULL');
   }
+
   if (receipt.receipt_digest !== receiptDigest(receipt)) fail('RECEIPT_DIGEST_MISMATCH');
   return true;
 }
