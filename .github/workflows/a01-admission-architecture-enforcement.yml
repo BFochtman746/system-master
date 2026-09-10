@@ -1,0 +1,54 @@
+name: A-01 Admission Architecture Enforcement
+
+on:
+  push:
+    paths:
+      - '.github/workflows/a01-admission-broker.yml'
+      - '.github/workflows/a01-control-plane-gateway.yml'
+      - '.github/workflows/a01-repair-rerun.yml'
+      - '.github/workflows/a01-overnight-night-shift.yml'
+      - '.github/scripts/a01-admission-*.js'
+      - '.github/scripts/a01-control-plane-execute-v2.js'
+      - 'qualification/a01/a01-policy.json'
+      - 'qualification/a01/schema/qualification-receipt.schema.json'
+      - 'qualification/a01/research/A01-ADMISSION-DISPATCH-BARRIER-001.md'
+  pull_request:
+    paths:
+      - '.github/workflows/a01-admission-broker.yml'
+      - '.github/workflows/a01-control-plane-gateway.yml'
+      - '.github/workflows/a01-repair-rerun.yml'
+      - '.github/workflows/a01-overnight-night-shift.yml'
+      - '.github/scripts/a01-admission-*.js'
+      - '.github/scripts/a01-control-plane-execute-v2.js'
+      - 'qualification/a01/a01-policy.json'
+      - 'qualification/a01/schema/qualification-receipt.schema.json'
+      - 'qualification/a01/research/A01-ADMISSION-DISPATCH-BARRIER-001.md'
+
+permissions:
+  contents: read
+
+jobs:
+  enforce:
+    name: Enforce fresh-dispatch dual-identity A-01 admission
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout candidate control plane
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Validate policy and registry
+        run: node .github/scripts/a01-control-plane.js validate
+
+      - name: Run admission preflight regression
+        run: node .github/scripts/a01-admission-preflight-selftest.js
+
+      - name: Run all-process admission architecture regression
+        run: node .github/scripts/a01-admission-architecture-selftest.js
+
+      - name: Preserve existing A-01 enforcement regression
+        run: |
+          node .github/scripts/a01-control-plane-enforce.js selftest
+          node .github/scripts/a01-control-plane-enforce.js scan
