@@ -1,88 +1,75 @@
 # A-01 Operating Contract
 
-Status: CANONICAL — A01-CONTROL-PLANE-001 / NORMAL OPERATING MODE
+Status: CANONICAL CANDIDATE - A01-CONTROL-PLANE-001 / REGISTRATION-DISPATCH-BARRIER
 
 ## Purpose
 
-A-01 is the shared authoritative Windows/X64 machine-qualification resource for BFochtman746/system-master. This contract governs every workstream that requests, consumes, interprets, or promotes evidence produced by A-01.
+A-01 is the shared authoritative Windows/X64 machine-qualification resource for `BFochtman746/system-master`. This contract governs every System Master lane that requests, consumes, interprets, retries, or promotes A-01 evidence.
 
-A01-MIGRATION-001 is closed. The proven control-plane execution baseline is now normal operating infrastructure and MUST NOT be modified as part of ordinary product repair merely because a workstream subject fails, waits, or requires different product-level qualification content.
+A-01 is shared infrastructure administratively integrated through `SYSTEM_MASTER/CORE`. It is not a peer product system and it does not transfer product authority between CORE, LEARNING, BOOK, or BOOK/PROSE.
 
 ## Non-negotiable rules
 
-1. A workstream MUST perform all safe, deterministic prequalification possible before requesting A-01.
-2. A workstream MUST NOT use an ad-hoc direct A-01 workflow when a registered control-plane qualification applies.
-3. A-01 qualifications MUST be identified by a registry-owned `qualification_id`; chats and workflows MUST NOT inject arbitrary shell commands into the gateway.
-4. The exact tested commit SHA is the qualification subject. Evidence for one SHA MUST NOT authorize promotion of another SHA.
-5. A milestone that requires A-01 assurance MUST NOT enter `A01_PASSED`, `PROMOTION_ELIGIBLE`, or `CANONICAL` without a valid control-plane receipt.
-6. At most the policy-defined number of outstanding A-01 requests may exist per workstream.
-7. Obsolete queued subjects SHOULD be superseded before consuming A-01. Running subjects may finish when their evidence remains useful.
-8. A focused gate proves the changed boundary and its immediate integration dependencies. A consolidated gate proves an accumulated slice. A promotion gate proves the exact promotion subject.
-9. A workstream waiting on A-01 SHOULD continue dependency-valid work that does not consume the pending subject as authoritative.
-10. Failures MUST be classified as `SUBJECT_FAILURE`, `INFRA_FAILURE`, or `CONTROL_PLANE_FAILURE`. Repair scope SHOULD be limited to the failing boundary unless evidence proves broader repair is required.
-11. Every run MUST preserve a request record, an immutable result receipt, timing telemetry, the exact subject SHA, runner identity, and evidence location.
-12. The authoritative state machine is repository-owned. Conversation memory, prose claims, screenshots, or local reasoning are not substitutes for a receipt.
-13. A `SUBJECT_FAILURE` MUST return to the owning workstream and MUST NOT by itself reopen A-01 control-plane engineering.
-14. A new A-01 infrastructure objective requires evidence meeting the change-control rule in `qualification/a01/A01-OPERATING-MODE-001.md`.
+1. Perform all safe deterministic hosted/local prequalification before requesting A-01.
+2. No workstream may create a direct self-hosted A-01 path when a registered control-plane qualification applies.
+3. Every A-01 request uses a registry-owned `qualification_id`; arbitrary command injection is prohibited.
+4. The exact tested Git commit SHA is the qualification subject. Evidence never transfers to changed bytes.
+5. No subject may enter `A01_PASSED`, `PROMOTION_ELIGIBLE`, or `CANONICAL` without a valid authoritative receipt.
+6. Registration is a prerequisite to runner admission, not a condition discovered after the A-01 runner is acquired.
+7. A hosted admission barrier must prove the requested qualification exists in the exact control-plane registry, the workstream matches, the registered wrapper exists in its declared source, the exact subject checkout matches, and execution-window/runtime policy is valid.
+8. Only an `ADMITTED` request may reach the private A-01 executor.
+9. The private A-01 executor must run policy and registry from the exact admitted `control_plane_sha` and the product qualifier from the exact requested `subject_sha` when `source=subject`.
+10. A receipt must bind both identities: `subject_sha`/`checkout_sha` and `control_plane_sha`/`control_plane_checkout_sha`.
+11. A GitHub Actions rerun is never evidence that a branch reference was refreshed. If registry, policy, gateway, admission, or executor authority changes, create a fresh workflow run. Do not use a specific-job or failed-job rerun as a control-plane refresh mechanism.
+12. `WAITING_FOR_REGISTRATION`, `REGISTERED_EXECUTABLE_MISSING`, or other admission failures are hosted control/admission states. They must not consume A-01 and must not be mislabeled as product subject failures.
+13. If no matching self-hosted runner is online, the admitted A-01 job may remain queued. Runner absence does not change product bytes or authorize bypass.
+14. Workstreams waiting on A-01 should continue dependency-valid work that does not consume the pending subject as authoritative.
+15. Failures are classified as `SUBJECT_FAILURE`, `INFRA_FAILURE`, or `CONTROL_PLANE_FAILURE`; repair scope stays at the proven boundary.
+16. Every authoritative run preserves request, admission, receipt, exact identities, runner identity, telemetry, evidence location, and return ticket.
+17. Product failures return to the owning workstream. Shared control-plane defects route to CORE/shared A-01 repair without replacing the owner's product critical path.
+18. Existing global queue serialization, bounded repair lineage, overnight scheduling, and disruptive-action evidence ordering remain mandatory.
 
-## Standing states
+## Canonical request architecture
 
-`BUILDING -> PREQUALIFIED -> A01_ELIGIBLE -> A01_QUEUED -> A01_RUNNING -> A01_FAILED | A01_PASSED -> PROMOTION_ELIGIBLE -> CANONICAL`
+All normal, repair, and overnight A-01 requests use:
 
-A failure may transition to `REPAIR_REQUIRED`, then back through prequalification. A superseded request transitions to `SUPERSEDED` and cannot authorize promotion.
+`CALLER -> A01 GATEWAY FRONT DOOR -> HOSTED ADMISSION BROKER -> PRIVATE A01 EXECUTOR`
 
-## Return contract
+The gateway is the compatibility surface for workstreams and must not itself own a self-hosted job. The hosted broker is the registration/identity barrier. The private executor is the only canonical non-legacy workflow permitted to use `[self-hosted, Windows, X64]`.
 
-Every request carries a return ticket containing at least:
+## Admission states
 
-- `workstream_id`
-- `qualification_id`
-- `subject_sha`
-- `origin_ref`
-- `resume_on_pass`
-- `resume_on_failure`
-- `notification_target`
+Only `ADMITTED` may reach the executor. Blocked states include `WAITING_FOR_REGISTRATION`, `REGISTERED_EXECUTABLE_MISSING`, `WORKSTREAM_MISMATCH`, `SUBJECT_CHECKOUT_MISMATCH`, `CONTROL_PLANE_CHECKOUT_MISMATCH`, `INVALID_CONTROL_PLANE_POLICY`, `INVALID_REGISTRY`, `INVALID_REGISTERED_WRAPPER_PATH`, `INVALID_REGISTERED_WRAPPER_SOURCE`, `INVALID_EXECUTION_CONTEXT`, `INVALID_QUALIFIER_TIMEOUT`, `QUALIFICATION_NOT_OVERNIGHT_ELIGIBLE`, `QUALIFIER_TIMEOUT_EXCEEDS_REGISTRY`, `DISRUPTIVE_QUALIFICATION_NOT_ALLOWED_OVERNIGHT`, and `CONTROL_PLANE_READ_FAILURE`.
 
-The return ticket tells the control plane where the result belongs and what the next authorized action is. It does not grant permission to bypass qualification policy.
+A blocked admission emits a durable reason and `fresh_dispatch_required` when a later registry/control-plane generation could resolve it. It cannot fabricate an A-01 receipt.
+
+## Fresh-run and retry law
+
+GitHub may preserve the originally resolved reusable-workflow SHA when a failed job or specific job is rerun. Therefore:
+
+- same-subject infrastructure retry with unchanged control-plane bytes may reuse the same admitted control-plane SHA when policy permits;
+- product repair that changes the subject gets a new subject SHA and new deterministic prequalification;
+- registry/policy/gateway/broker/executor changes require a fresh workflow run;
+- a specific-job or failed-job rerun is never used to pick up a new `main` registry entry;
+- a stale attempt remains historical evidence and is never rewritten into a PASS;
+- a fresh dispatch may target the same unchanged product subject while binding a newer admitted control-plane SHA.
+
+## Normal, repair, overnight, and runner-unavailable compatibility
+
+Normal workstreams prequalify the exact subject and enter the gateway. Closed-loop repair preserves its transaction ID and attempt budget but enters the same gateway; its rerun workflow resolves one exact commit and calls the same-commit gateway. The central night planner remains the only independent A-01 schedule and calls the same-commit gateway, so all overnight slots inherit hosted admission. An admitted job may wait for A-01 to come online; queueing is not product failure.
 
 ## Receipt authority
 
-A valid receipt MUST bind all of the following:
+Current receipts bind policy/registry version, qualification/workstream, gate class, exact subject and subject checkout, exact control plane and control-plane checkout, workflow attempt, runner identity, timing, result class, evidence artifact, return ticket, and promotion authorization.
 
-- registered qualification ID and registry version
-- exact subject SHA and verified checkout SHA
-- workstream ID and gate class
-- runner name, labels, OS/architecture, and runner version when available
-- start/completion timestamps and execution telemetry
-- result classification
-- evidence artifact name/path
-- return ticket
-- promotion authorization decision
+## Security
 
-`promotion_authorized=true` is allowed only when the qualification result is `PASS`, the checkout SHA equals the subject SHA, and all required evidence was produced.
+Third-party actions used by the shared control plane remain pinned to full commit SHAs. Registered wrappers remain repository-owned `.github/scripts/` paths. Nested reusable-workflow permissions cannot be elevated. No caller may inject an arbitrary shell command, workflow reference, or post action. Artifact attestations may be added later as supplementary provenance but do not replace semantic qualification or exact-SHA receipts.
 
-## Canonical control-plane / subject separation
+## Disruptive handoff
 
-The reusable gateway MUST execute policy, registry, and control-plane code from the exact commit that defines the called reusable workflow, while the qualification subject is checked out separately at the exact requested `subject_sha`. A feature branch is therefore not required to merge unrelated canonical `main` history merely to consume A-01. Subject-owned qualifier wrappers execute from the exact subject checkout; control-plane-owned wrappers execute from the canonical control-plane checkout.
+Registered post actions such as `windows_reboot` retain the ordering: qualifier PASS -> receipt/evidence upload -> delayed action -> hosted settle window.
 
-A registry entry MUST declare its qualifier `source` as either `control_plane` or `subject`. The gateway verifies the subject checkout SHA independently before any registered qualifier can produce authoritative PASS evidence.
+## Change control
 
-## Registered disruptive handoff
-
-A qualification that must intentionally disrupt A-01, such as a genuine Windows reboot, MAY request only a policy- and registry-approved post action. The qualifier MUST first finish its non-disruptive preparation and produce a PASS receipt. The gateway MUST upload that receipt and evidence before scheduling the disruptive action. A later verification phase MUST prove that the disruptive action actually occurred; the pre-action receipt alone does not prove the reboot or authorize production.
-
-For `windows_reboot`, the gateway MUST NOT reboot immediately while the A-01 worker is still the only process capable of reporting job completion. It MUST schedule the reboot with the policy-defined delay, allow the A-01 qualification job to finish cleanly, and keep the workflow-level global admission lock alive in a GitHub-hosted settle job for the policy-defined reboot window. Only after that hosted settle window completes may another qualification acquire the current A-01 global concurrency generation. This prevents a deliberate reboot from leaving a stale self-hosted job holding the shared queue.
-
-A concurrency generation may be rotated only to recover from a proven stale historical lock after the affected qualification's receipt and evidence are safely preserved and the replacement behavior has been qualified. A generation rotation is an infrastructure recovery action, not a shortcut around a genuinely running A-01 job.
-
-No workstream may inject an arbitrary post-action command. The only permitted actions are those explicitly allowed by the active policy and by that qualification's registry entry.
-
-## Cross-chat rule
-
-All System Master workstreams use this repository contract as shared authority. A chat starting or resuming work MUST read `SYSTEM-MASTER-WORKSTREAM-BOOTSTRAP.md` and this contract before scheduling A-01 work. The repository, not any single conversation, is the communication bus between workstreams.
-
-## Normal operating mode and change control
-
-The active normal-mode baseline, workstream handoffs, and conditions that may legitimately reopen A-01 infrastructure work are defined in `qualification/a01/A01-OPERATING-MODE-001.md`.
-
-Historical migration evidence is preserved in `qualification/a01/A01-MIGRATION-001-CLOSURE.md`. Legacy migration is not an active objective. New direct self-hosted qualification paths are prohibited unless explicitly incorporated into the canonical control plane and enforcement policy.
+A control-plane baseline change requires demonstrated shared infrastructure/platform evidence. `A01-REGISTRATION-DISPATCH-BARRIER-001` is justified by reproduced failures in which a job rerun retained an older reusable-workflow SHA after the registry changed, causing a valid newly registered qualification to be rejected until a genuinely fresh run resolved the newer control plane.

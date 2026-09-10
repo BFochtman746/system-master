@@ -1,86 +1,64 @@
 # A01-OPERATING-MODE-001
 
-Status: ACTIVE — NORMAL QUALIFICATION MODE
-Date activated: 2026-09-08
+Status: ACTIVE - NORMAL QUALIFICATION MODE WITH REGISTRATION/DISPATCH BARRIER
+Date updated: 2026-09-09
 
 ## Purpose
 
-A01-CONTROL-PLANE-001 is no longer an infrastructure build or migration project. It is the normal authoritative A-01 qualification path for System Master workstreams.
+`A01-CONTROL-PLANE-001` is normal shared qualification infrastructure for System Master. Product work should use it, not rebuild it. The registration/dispatch barrier makes normal, repair, overnight, and Second Shift qualification use one deterministic admission path.
 
-The proven execution baseline is frozen unless evidence demonstrates a real control-plane defect or an unavoidable platform/security requirement.
+## Current baseline
 
-A01-OVERNIGHT-001 is an approved additive capability under change-control rule 4: it adds centrally governed long-run scheduling while retaining the same registered-wrapper, exact-SHA, receipt, evidence, failure-classification, and global-serialization authority.
-
-## Frozen baseline
-
-- Reusable gateway: `.github/workflows/a01-control-plane-gateway.yml@main`
-- Policy: `qualification/a01/a01-policy.json`, policy version 4
-- Global admission generation: `a01-global-r2`
-- Registry-owned qualification IDs only
-- Exact subject SHA checkout and receipt binding
-- Result classes: `PASS`, `SUBJECT_FAILURE`, `INFRA_FAILURE`, `CONTROL_PLANE_FAILURE`
-- Evidence upload and return ticket on every authoritative run
-- Registered disruptive reboot handoff with hosted settle window
-- Canonical overnight scheduler: `.github/workflows/a01-overnight-night-shift.yml`
-
-Normal product work MUST NOT modify the gateway, concurrency generation, receipt authority, or admission semantics merely because a workstream test fails or waits in queue.
-
-## Change-control rule
-
-A new A-01 infrastructure objective is justified only by one of the following:
-
-1. A receipt, workflow log, or reproduced test demonstrates `CONTROL_PLANE_FAILURE`.
-2. A reproducible runner/platform fault demonstrates `INFRA_FAILURE` that cannot be repaired inside the affected workstream boundary.
-3. GitHub Actions, Windows runner, security, or repository-platform behavior changes in a way that invalidates the frozen contract.
-4. A genuinely new qualification capability cannot be represented safely by the existing registered-wrapper + thin-caller model.
-
-The following are NOT control-plane defects:
-
-- `SUBJECT_FAILURE`
-- a workstream-specific missing fixture, corpus, private authority, model artifact, or test dependency
-- a time-window guard refusing execution outside its authorized window
-- a product test or regression failure
-- ordinary queue delay or another workstream legitimately occupying A-01
-- a request to change what a workstream qualifier tests
+- Policy: `qualification/a01/a01-policy.json`, policy version **7**.
+- Registry: `qualification/a01/registry.json`, versioned independently.
+- Public compatibility front door: `.github/workflows/a01-control-plane-gateway.yml`.
+- Hosted admission broker: `.github/workflows/a01-control-plane-admission-broker.yml`.
+- Private A-01 executor: `.github/workflows/a01-control-plane-executor.yml`.
+- Global A-01 admission generation: `a01-global-r2`, `queue: max`, `cancel-in-progress: false`.
+- Exact subject SHA and exact control-plane SHA checkouts.
+- Registered qualification IDs only; arbitrary command input disabled.
+- Result classes remain `PASS`, `SUBJECT_FAILURE`, `INFRA_FAILURE`, `CONTROL_PLANE_FAILURE`.
+- Current receipts bind both product subject and control-plane generation.
+- Canonical overnight scheduler: `.github/workflows/a01-overnight-night-shift.yml`.
+- Repair contract: `A01-REGISTRATION-DISPATCH-BARRIER-001`.
 
 ## Normal request flow
 
-`BUILD -> deterministic prequalification -> registered A-01 request -> exact-SHA execution -> receipt/evidence -> workstream adjudication -> repair or continue`
+`BUILD -> deterministic prequalification -> canonical gateway -> hosted registration/identity admission -> ADMITTED -> A-01 queue -> exact-SHA execution -> receipt/evidence -> workstream adjudication`
 
-Use focused gates at substantial integration boundaries, consolidated gates for accumulated slices, and promotion gates only for exact promotion subjects.
+If hosted admission returns `WAITING_FOR_REGISTRATION` or another blocked state, A-01 is not consumed. Land or repair the canonical registration/control-plane boundary, then create a **fresh workflow run**.
+
+## Mandatory retry behavior
+
+GitHub Actions failed-job and specific-job reruns may retain the reusable-workflow SHA from the original attempt. Therefore:
+
+- never use a job-level or failed-job rerun to pick up a newer A-01 registry/policy/gateway;
+- after any control-plane authority change, start a fresh caller run or `workflow_dispatch`;
+- historical failed attempts remain evidence only;
+- same-SHA retries remain allowed only when the control-plane generation is intentionally unchanged and repair policy permits them.
+
+## Runner availability
+
+The A-01 machine does not require an operator physically present for a correctly admitted request. An online idle matching runner receives the job; if no matching runner is online, the job remains queued until one is available or the platform queue limit is reached. Waiting is not product failure.
 
 ## Overnight extension
 
-The normal 30-minute gateway envelope remains the default for ordinary work. A01-OVERNIGHT-001 may grant a larger bounded qualifier budget only through a central overnight ticket and only when the qualification explicitly opts into overnight execution in the registry.
+The 00:00-07:00 America/New_York window remains centrally owned. Independent workstream A-01 cron schedules remain prohibited. The night planner calls the same-commit canonical gateway, so all overnight tickets inherit the registration/identity barrier.
 
-The 00:00–07:00 America/New_York window is centrally owned. Independent workstream A-01 cron schedules are prohibited. The scheduler uses reservation-aware backfill rather than fixed chat time blocks, does not start work that cannot fit inside its declared window, and excludes disruptive reboot actions from overnight v1.
+## Repair extension
 
-The detailed contract is `qualification/a01/overnight/A01-OVERNIGHT-001.md`.
+The closed-loop repair ledger remains authoritative for repair lineage and attempt budgets. Repair reruns enter the same gateway/broker/executor path. A registry or control-plane change requires a new repair workflow dispatch; rerunning an old failed job cannot refresh authority.
 
-## Workstream return standing after A01-MIGRATION-001
+## Change-control rule
 
-### Continuity
+A new A-01 infrastructure objective is justified only by a demonstrated `CONTROL_PLANE_FAILURE`, an `INFRA_FAILURE` outside a product lane, a GitHub/Windows/security/platform change that invalidates the baseline, or a shared qualification need that cannot be represented safely by the registry model. The reproduced stale-reusable-workflow/late-registration failure satisfies this rule.
 
-A-01 migration is closed PASS. Return to Continuity & Recovery product work. Use A-01 only at substantial integration or promotion boundaries; do not reopen A-01 infrastructure because a Continuity subject fails.
+Ordinary `SUBJECT_FAILURE`, missing product fixtures/private data/human authority, a valid overnight-window refusal, another workstream legitimately occupying A-01, or an admitted job waiting on an offline runner are not control-plane defects.
 
-### Book Evaluation
+## Security stance
 
-A-01 migration is closed equivalent. Functional Gate D remains a workstream-owned `SUBJECT_FAILURE` because exact frozen `BASE_TRAINING` and `DEVELOPMENT_GOLD` authority is missing. Recovery must remain fail-closed. Do not run Teacher verification, student training, selective 120B, visible-regression, or hidden-holdout qualification until the exact frozen private authority requirement is satisfied.
-
-### Learning
-
-A-01 migration is closed PASS for exact qualified subject `84a4d72dccd05230e6fc85b3d0ff0a1fa4ec2535`. Return to Learning product/pilot work under its existing consent, privacy, and evidence rules. New product milestones earn their own qualification receipts; the prior PASS does not authorize changed SHAs.
-
-### Literary Prose
-
-A-01 migration is closed equivalent. Continue dependency-valid Literary Prose product work. Its independent overnight cron is retired under A01-OVERNIGHT-001; future deep-harvest execution must enter the central night plan as a ticket with whatever valid source-owned time restrictions remain in force.
+Use immutable full-SHA pins for third-party actions in shared workflows. Keep the Windows executor private behind hosted admission. Do not grant arbitrary shell or workflow references to callers. Artifact attestations are optional future evidence hardening, not a replacement for the A-01 receipt.
 
 ## Cross-chat authority
 
-Every chat working in this repository must treat this file, `A01-OPERATING-CONTRACT.md`, `a01-policy.json`, `registry.json`, and when relevant `overnight/A01-OVERNIGHT-001.md` as shared authority. A chat may build independently, but it may not invent a new A-01 scheduling or promotion path.
-
-When a workstream encounters a failure, adjudicate the receipt classification first. `SUBJECT_FAILURE` returns to the workstream. Only evidence of `INFRA_FAILURE` or `CONTROL_PLANE_FAILURE` may reopen A-01 infrastructure work.
-
-## Closure condition
-
-A01-OPERATING-MODE-001 remains active indefinitely as the normal mode. There is no successor infrastructure objective unless the change-control rule above is met by evidence.
+Every chat must read the repository bootstrap and A-01 operating contract before scheduling or adjudicating A-01. Repository receipts and exact identities are authority; conversation memory is not.

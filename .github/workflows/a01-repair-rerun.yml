@@ -35,29 +35,12 @@ on:
         type: string
   workflow_call:
     inputs:
-      transaction_id:
-        required: true
-        type: string
-      execution_context:
-        required: false
-        default: normal
-        type: string
-      qualifier_timeout_minutes:
-        required: false
-        default: 28
-        type: number
-      job_timeout_minutes:
-        required: false
-        default: 30
-        type: number
-      not_before:
-        required: false
-        default: ''
-        type: string
-      not_after:
-        required: false
-        default: ''
-        type: string
+      transaction_id: {required: true, type: string}
+      execution_context: {required: false, default: normal, type: string}
+      qualifier_timeout_minutes: {required: false, default: 28, type: number}
+      job_timeout_minutes: {required: false, default: 30, type: number}
+      not_before: {required: false, default: '', type: string}
+      not_after: {required: false, default: '', type: string}
 
 permissions:
   contents: read
@@ -80,13 +63,12 @@ jobs:
       repair_attempt: ${{ steps.context.outputs.repair_attempt }}
       max_repair_attempts: ${{ steps.context.outputs.max_repair_attempts }}
     steps:
-      - name: Checkout canonical repair authority
+      - name: Checkout the exact workflow/control-plane generation
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
-          ref: main
+          ref: ${{ github.sha }}
           fetch-depth: 1
           persist-credentials: false
-
       - name: Validate rerun control and resolve transaction
         id: context
         env:
@@ -108,19 +90,18 @@ jobs:
             console.log(`${key}=${value}`);
           }
           NODE
-
       - name: Publish admission context
         run: |
           echo '## A-01 Repair Rerun Admission' >> "$GITHUB_STEP_SUMMARY"
           echo '```json' >> "$GITHUB_STEP_SUMMARY"
           cat .repair-rerun/context.json >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
-          echo 'This context grants A-01 admission only. It is not PASS.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'This context grants only eligibility to enter the hosted registration barrier; it is not PASS.' >> "$GITHUB_STEP_SUMMARY"
 
   execute:
-    name: Execute replacement subject through canonical A-01 gateway
+    name: Execute repair request through same-commit canonical front door
     needs: prepare
-    uses: BFochtman746/system-master/.github/workflows/a01-control-plane-gateway.yml@main
+    uses: ./.github/workflows/a01-control-plane-gateway.yml
     with:
       qualification_id: ${{ needs.prepare.outputs.qualification_id }}
       workstream_id: ${{ needs.prepare.outputs.workstream_id }}

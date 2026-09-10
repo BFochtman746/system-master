@@ -33,6 +33,7 @@ function isDirectSelfHosted(content) {
     const inlineValue = match[2].replace(/\s+#.*$/, '').trim();
     if (inlineValue && /(^|[\[,\s])self-hosted([\],\s]|$)/i.test(inlineValue)) return true;
     if (inlineValue) continue;
+
     for (let j = i + 1; j < lines.length; j += 1) {
       const line = lines[j];
       if (!line.trim() || /^\s*#/.test(line)) continue;
