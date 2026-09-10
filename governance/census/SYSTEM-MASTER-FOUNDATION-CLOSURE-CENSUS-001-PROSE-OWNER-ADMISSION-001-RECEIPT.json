@@ -1,0 +1,63 @@
+{
+  "receipt_id": "SYSTEM-MASTER-FOUNDATION-CLOSURE-CENSUS-001-PROSE-OWNER-ADMISSION-001-RECEIPT",
+  "effective_date": "2026-09-10",
+  "standing": "PROSE_PARENT_RECONCILIATION_PASS__GLOBAL_MERGE_GATE_BLOCKED_BY_CONCURRENT_LEARNING_STATE_DRIFT",
+  "branch": "prose/foundation-parent-reconciliation-v2-20260910",
+  "parent_main_base_sha": "7aac3ad4e13fbe8459c650c74172a6c10059b565",
+  "tested_reconciliation_subject_sha": "0319096c1ce2209f7a9b74b327fc3c442ef266d3",
+  "prose_source_branch": "prose/foundation-closure-final-refill-20260910",
+  "prose_source_sealed_head": "808cb8505c4df343771a553a77a14db85e0cc2c3",
+  "qualification": {
+    "prose_parent_reconciliation": {
+      "workflow_run_id": 34484859044,
+      "status": "PASS",
+      "checks": "39_OF_39_PASS",
+      "tested_sha": "0319096c1ce2209f7a9b74b327fc3c442ef266d3"
+    },
+    "a01_control_plane_enforcement": {
+      "workflow_run_id": 34484859028,
+      "status": "PASS",
+      "tested_sha": "0319096c1ce2209f7a9b74b327fc3c442ef266d3",
+      "authority_effect": "CONTROL_PLANE_GATE_ONLY__NO_A01_TARGET_OR_NATIVE_QUALIFICATION_TRANSFER"
+    },
+    "system_state_reconciler": {
+      "reconciliation_branch_run_id": 34484794479,
+      "reconciliation_branch_subject_sha": "1365c38a92460a02d64197eddaf22d75fc1603b6",
+      "status": "FAIL_EXTERNAL_CONCURRENT_OWNER_STATE",
+      "main_confirmation_run_id": 34484946000,
+      "main_confirmation_sha": "6e1401301c77e9a0f15f08f24fc2d77deefe0dfa",
+      "main_confirmation_status": "FAIL",
+      "classification": "NOT_INTRODUCED_BY_PROSE_DELTA",
+      "observed_learning_governance_defects": [
+        "active Learning delegation missing last_revalidated_at",
+        "active Learning delegation missing allowed_work",
+        "active Learning delegation missing on_pass",
+        "active Learning delegation missing on_failure"
+      ],
+      "concurrent_owner_drift": {
+        "main_learning_delegation_control_head": "97fda5253e4f6ada7714e92aba0a41391c5650c9",
+        "live_learning_control_head_observed_afterward": "12132b42c9aac03273782b058747373065564f0d",
+        "live_learning_state": "DOMAIN_V_PHASE_CLOSED__FINAL_DOMAIN_VI_TOPOLOGY_BOUND"
+      },
+      "merge_rule": "Do not merge this Prose reconciliation while the repository-wide System State Reconciler is red. Let the Learning owner repair/revalidate its own live delegation, then rerun global state against the current merged candidate."
+    }
+  },
+  "admitted_prose_state": {
+    "foundation_rows": 7,
+    "complete_with_evidence": 5,
+    "active_safe_fillable_gap": 0,
+    "durably_blocked_fresh_context": 1,
+    "explicitly_out_of_scope_book_owned": 1,
+    "pass_transfer": false,
+    "global_foundation_closed": false
+  },
+  "preserved_boundaries": [
+    "PROSE-REAL-LIMITATION-BLIND-MODEL-SCORING-001 remains fresh-context-only and blocked in this context",
+    "SYSTEM_MASTER/BOOK retains canonical manuscript write/admission authority",
+    "no Prose revision promotion or publication authority is granted",
+    "hosted evidence does not become A-01/native/private/human/production evidence",
+    "SYSTEM-MASTER-FOUNDATION-CLOSURE-CENSUS-001 remains ACTIVE"
+  ],
+  "handoff_status": "READY_FOR_PR__NOT_MERGE_AUTHORIZED_UNTIL_GLOBAL_SYSTEM_STATE_GREEN",
+  "exact_next_step": "Open the narrow Prose foundation parent-reconciliation PR to main, preserve the external Learning/System-State blocker on the PR, and merge only after the Learning owner restores a schema-valid current delegation and the repository-wide System State Reconciler passes on the then-current merge subject."
+}
