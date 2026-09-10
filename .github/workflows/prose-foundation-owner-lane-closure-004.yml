@@ -1,0 +1,37 @@
+name: Prose Foundation Owner Lane Closure 004
+
+on:
+  push:
+    branches:
+      - prose/foundation-closure-final-refill-20260910
+    paths:
+      - 'qualification/literary-prose-engine-001/foundation-closure-004/**'
+      - 'qualification/literary-prose-engine-001/PROSE-FOUNDATION-CLOSURE-CENSUS-CHECKPOINT-001.json'
+      - 'qualification/literary-prose-engine-001/foundation-closure-002/PROSE-FOUNDATION-ROUTE-CONTRACT-CLOSURE-002-RECEIPT.json'
+      - 'qualification/literary-prose-engine-001/foundation-closure-003/PROSE-FOUNDATION-FAILURE-SEMANTICS-AND-FIXTURE-PACKET-003-RECEIPT.json'
+      - 'qualification/literary-prose-engine-001/PROSE-SYSTEM-PRODUCT-PARENT-BINDING-003.json'
+      - 'qualification/literary-prose-engine-001/LITERARY-PROSE-CONSOLIDATED-WORKSTREAM-STATE-015.json'
+      - '.github/workflows/prose-foundation-owner-lane-closure-004.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Validate closure JSON
+        run: python -m json.tool qualification/literary-prose-engine-001/foundation-closure-004/PROSE-FOUNDATION-OWNER-LANE-CLOSURE-004.json > /dev/null
+
+      - name: Run owner-lane closure validator
+        run: python qualification/literary-prose-engine-001/foundation-closure-004/run_prose_foundation_owner_lane_closure.py
