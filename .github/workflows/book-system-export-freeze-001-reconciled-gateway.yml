@@ -1,0 +1,50 @@
+name: Book System Export Freeze 001 Reconciled Qualification
+
+on:
+  push:
+    branches:
+      - book-system/control-v1
+    paths:
+      - ".github/workflows/book-system-export-freeze-001-reconciled-gateway.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  prequalify:
+    name: Hosted reconciled Export Freeze qualification
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - name: Verify exact checkout
+        run: test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+      - name: Syntax check stable wrapper and reconciled qualifier
+        run: |
+          node --check .github/scripts/book-system-export-freeze-001-qualify-v2.js
+          node --check .github/scripts/book-system-export-freeze-001-reconciled-qualify.js
+      - name: Run reconciled 60-case Export Freeze qualification
+        run: node .github/scripts/book-system-export-freeze-001-qualify-v2.js
+
+  qualify:
+    name: Authoritative A-01 reconciled Export Freeze qualification
+    needs: prequalify
+    uses: BFochtman746/system-master/.github/workflows/a01-control-plane-gateway.yml@main
+    with:
+      qualification_id: BOOK-SYSTEM-EXPORT-FREEZE-001
+      workstream_id: BOOK-SYSTEM
+      subject_sha: ${{ github.sha }}
+      origin_ref: refs/heads/book-system/control-v1
+      resume_on_pass: Close BOOK-SYSTEM-EXPORT-FREEZE-001 on this exact reconciled subject, preserve zero publication authority, and advance Book control to the next dependency-valid parent objective.
+      resume_on_failure: Preserve hosted PASS and the exact A-01 receipt. Repair only the proven Export Freeze subject, A-01 wrapper, or control-plane boundary; do not transfer the historical 70-of-70 candidate qualification or widen lifecycle, author, document, provider, or publication authority.
+      notification_target: book-system/control-v1
+      execution_context: normal
+      qualifier_timeout_minutes: 10
+      job_timeout_minutes: 15
+    secrets: inherit
