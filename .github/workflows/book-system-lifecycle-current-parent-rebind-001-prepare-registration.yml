@@ -1,0 +1,65 @@
+name: Prepare A-01 registration for Book lifecycle rebind
+
+on:
+  push:
+    branches:
+      - book-system/request-lifecycle-current-parent-rebind-001-a01
+    paths:
+      - ".github/workflows/book-system-lifecycle-current-parent-rebind-001-prepare-registration.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout canonical main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Add exactly one A-01 registry entry on isolated registration branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git checkout -b a01/register-book-lifecycle-current-parent-rebind-001
+          node <<'NODE'
+          const fs = require('fs');
+          const p = 'qualification/a01/registry.json';
+          const doc = JSON.parse(fs.readFileSync(p, 'utf8'));
+          const id = 'BOOK-SYSTEM-LIFECYCLE-CURRENT-PARENT-REBIND-001';
+          if (doc.qualifications[id]) throw new Error('QUALIFICATION_ALREADY_REGISTERED');
+          const before = Number(doc.registry_version);
+          if (!Number.isInteger(before)) throw new Error('INVALID_REGISTRY_VERSION');
+          doc.registry_version = before + 1;
+          const entry = {
+            workstream_id: 'BOOK-SYSTEM',
+            gate_class: 'focused',
+            source: 'subject',
+            executable: 'node',
+            args: ['.github/scripts/a01-book-system-lifecycle-current-parent-rebind-001.js'],
+            evidence_artifact: 'book-system-lifecycle-current-parent-rebind-001',
+            overnight_eligible: false,
+            description: 'Qualify the exact Book System persistent Lifecycle current-parent rebind compatibility repair: preserve existing lifecycle unit/dependency/transition history while advancing only the lifecycle-ledger parent binding across one exact already-authorized non-lifecycle parent successor; exercise real Integration Runtime V2, Author Decision Queue, Export Freeze and Version/Rollback receipts; enforce parent-only authority, exact pre/post/ledger identity, unchanged lifecycle status, deterministic replay/conflicts, and zero lifecycle-policy, parent-successor, author, provider, document, export-freeze or publication authority. PASS is exact-SHA focused evidence only and grants no promotion or production authority.'
+          };
+          const out = {};
+          let inserted = false;
+          for (const [k, v] of Object.entries(doc.qualifications)) {
+            out[k] = v;
+            if (k === 'BOOK-SYSTEM-LIFECYCLE-CURRENT-PARENT-COMPATIBILITY-ADAPTER-001') {
+              out[id] = entry;
+              inserted = true;
+            }
+          }
+          if (!inserted) out[id] = entry;
+          doc.qualifications = out;
+          fs.writeFileSync(p, JSON.stringify(doc, null, 2) + '\n');
+          NODE
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add qualification/a01/registry.json
+          test "$(git diff --cached --name-only)" = "qualification/a01/registry.json"
+          git commit -m "a01: register Book lifecycle current-parent rebind"
+          git push origin HEAD:a01/register-book-lifecycle-current-parent-rebind-001
