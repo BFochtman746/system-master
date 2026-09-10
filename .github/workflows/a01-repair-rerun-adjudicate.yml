@@ -1,0 +1,141 @@
+name: A-01 Repair Rerun Adjudicate
+
+on:
+  workflow_run:
+    workflows: ["A-01 Repair Rerun", "A-01 Control Plane Gateway"]
+    types: [completed]
+
+permissions:
+  actions: read
+  contents: write
+
+concurrency:
+  group: a01-repair-ledger
+  cancel-in-progress: false
+
+jobs:
+  adjudicate:
+    name: Attach replacement A-01 result to existing repair transaction
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout current main repair authority
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Download A-01 evidence from completed rerun
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          pattern: '*-evidence'
+          path: .a01-rerun-evidence
+          merge-multiple: false
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ github.event.workflow_run.id }}
+        continue-on-error: true
+
+      - name: Locate repair lineage sidecar
+        id: locate
+        shell: bash
+        run: |
+          lineage=$(find .a01-rerun-evidence -type f -name repair-lineage.json 2>/dev/null | head -n 1 || true)
+          if [ -z "$lineage" ]; then
+            echo 'found=false' >> "$GITHUB_OUTPUT"
+            echo 'Completed A-01 run did not carry repair-lineage.json; this is not a replacement-rerun adjudication.'
+            exit 0
+          fi
+          echo 'found=true' >> "$GITHUB_OUTPUT"
+          echo "lineage=$lineage" >> "$GITHUB_OUTPUT"
+
+      - name: Validate same-transaction rerun control
+        if: steps.locate.outputs.found == 'true'
+        run: |
+          node --check .github/scripts/a01-repair-ledger.js
+          node --check .github/scripts/a01-repair-rerun-selftest.js
+          node .github/scripts/a01-repair-rerun-selftest.js
+
+      - name: Build authoritative rerun adjudication input
+        if: steps.locate.outputs.found == 'true'
+        env:
+          LINEAGE_FILE: ${{ steps.locate.outputs.lineage }}
+          RERUN_ID: ${{ github.event.workflow_run.id }}
+        shell: bash
+        run: |
+          mkdir -p .repair-rerun-adjudicate
+          node - <<'NODE'
+          const fs = require('fs');
+          const path = require('path');
+          const parseJson = (p) => JSON.parse(fs.readFileSync(p, 'utf8').replace(/^\uFEFF/, ''));
+          const lineagePath = process.env.LINEAGE_FILE;
+          const dir = path.dirname(lineagePath);
+          const lineage = parseJson(lineagePath);
+          const receiptPath = path.join(dir, 'receipt.json');
+          const reasonPath = path.join(dir, 'failure-reason.txt');
+          const controlFailurePath = path.join(dir, 'control-plane-failure.txt');
+          const preflightPath = path.join(dir, 'runner-preflight.json');
+          const receipt = fs.existsSync(receiptPath) ? parseJson(receiptPath) : null;
+          let failureReason = null;
+          if (fs.existsSync(reasonPath)) failureReason = fs.readFileSync(reasonPath, 'utf8').trim();
+          else if (fs.existsSync(controlFailurePath)) failureReason = fs.readFileSync(controlFailurePath, 'utf8').split(/\r?\n/)[0].trim();
+          let attemptResultClass = receipt?.result_class || null;
+          if (!attemptResultClass && fs.existsSync(controlFailurePath)) attemptResultClass = 'CONTROL_PLANE_FAILURE';
+          if (!attemptResultClass && fs.existsSync(preflightPath)) {
+            try {
+              const preflight = parseJson(preflightPath);
+              attemptResultClass = preflight.result_class || preflight.classification || 'INFRA_FAILURE';
+            } catch (_) { attemptResultClass = 'INFRA_FAILURE'; }
+          }
+          if (!attemptResultClass) attemptResultClass = 'INFRA_FAILURE';
+          const artifactDir = path.basename(dir);
+          const input = {
+            transaction_id: lineage.transaction_id,
+            rerun_receipt_id: receipt ? `a01-run-${process.env.RERUN_ID}-${receipt.qualification_id}` : null,
+            receipt,
+            attempt_result_class: attemptResultClass,
+            failure_reason: failureReason,
+            receipt_pointer: `github-actions-run:${process.env.RERUN_ID}:artifact:${artifactDir}`,
+            adjudicated_at: new Date().toISOString()
+          };
+          fs.writeFileSync('.repair-rerun-adjudicate/input.json', JSON.stringify(input, null, 2) + '\n');
+          NODE
+
+      - name: Adjudicate rerun into the existing transaction
+        if: steps.locate.outputs.found == 'true'
+        run: node .github/scripts/a01-repair-ledger.js adjudicate-rerun < .repair-rerun-adjudicate/input.json > .repair-rerun-adjudicate/result.json
+
+      - name: Reconcile repair ledger after adjudication
+        if: steps.locate.outputs.found == 'true'
+        run: node .github/scripts/a01-repair-ledger-reconcile.js
+
+      - name: Commit same-transaction terminal or continuation state
+        if: steps.locate.outputs.found == 'true'
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add governance/repair qualification/a01/repair-requests
+          if git diff --cached --quiet; then
+            echo 'No durable rerun adjudication delta; refusing to create a disconnected duplicate lineage.'
+            exit 0
+          fi
+          tx=$(node -e "const r=require('./.repair-rerun-adjudicate/result.json'); console.log(r.transaction_id)")
+          git commit -m "repair: adjudicate A-01 rerun for ${tx}"
+          git pull --rebase origin main
+          git push origin HEAD:main
+
+      - name: Publish same-transaction adjudication summary
+        if: always()
+        shell: bash
+        run: |
+          echo '## A-01 Repair Rerun Adjudication' >> "$GITHUB_STEP_SUMMARY"
+          echo "Source workflow run: ${{ github.event.workflow_run.id }}" >> "$GITHUB_STEP_SUMMARY"
+          if [ -f .repair-rerun-adjudicate/result.json ]; then
+            echo '```json' >> "$GITHUB_STEP_SUMMARY"
+            cat .repair-rerun-adjudicate/result.json >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo 'No repair-lineage sidecar was present; no repair transaction was changed.' >> "$GITHUB_STEP_SUMMARY"
+          fi
