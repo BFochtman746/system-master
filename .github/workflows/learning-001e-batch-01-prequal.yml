@@ -6,6 +6,8 @@ on:
       - learning/instructional-scoring-001e-batch-01-20260910
     paths:
       - "learning/lab/learning_lab/cssgb_full_standard.py"
+      - "learning/lab/learning_lab/adaptive.py"
+      - "learning/lab/tests/test_adaptive_practice_not_mastery.py"
       - "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001E-INSTRUCTIONAL-CONTENT-AND-SCORING-BATCH-01-CANDIDATE-060A.json"
       - ".github/scripts/learning-full-standard-001e-batch-01-qualify.py"
       - ".github/workflows/learning-001e-batch-01-prequal.yml"
@@ -43,8 +45,16 @@ jobs:
         run: |
           set -euo pipefail
           python -m py_compile \
+            learning/lab/learning_lab/adaptive.py \
             learning/lab/learning_lab/cssgb_full_standard.py \
+            learning/lab/tests/test_adaptive_practice_not_mastery.py \
             .github/scripts/learning-full-standard-001e-batch-01-qualify.py
+
+      - name: Prove practice-only evidence cannot reach mastery
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m unittest learning.lab.tests.test_adaptive_practice_not_mastery
 
       - name: Execute 001E Batch 01 qualification
         shell: bash
