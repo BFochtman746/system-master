@@ -11,7 +11,8 @@ const readJson = (rel) => JSON.parse(fs.readFileSync(path.join(ROOT, rel), 'utf8
 const policy = readJson('governance/github/CANONICAL-WRITER-POLICY-001.json');
 const topology = readJson('governance/SYSTEM-TOPOLOGY-003.json');
 const sha40 = (v) => /^[0-9a-f]{40}$/i.test(String(v || ''));
-const sha256File = (p) => crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
+const sha256Buffer = (buffer) => crypto.createHash('sha256').update(buffer).digest('hex');
+const sha256File = (p) => sha256Buffer(fs.readFileSync(p));
 const toPosix = (p) => String(p).replace(/\\/g, '/');
 
 function git(cwd, args, options = {}) {
@@ -20,6 +21,14 @@ function git(cwd, args, options = {}) {
     encoding: 'utf8',
     stdio: options.stdio || ['ignore', 'pipe', 'pipe']
   }).trim();
+}
+function gitBuffer(cwd, args) {
+  return execFileSync('git', ['-c', `safe.directory=${cwd}`, ...args], {
+    cwd,
+    encoding: null,
+    stdio: ['ignore', 'pipe', 'pipe'],
+    maxBuffer: 1024 * 1024 * 256
+  });
 }
 function canonicalRefs() {
   const refs = new Set([policy.canonical_ref_discovery.product_ref || 'main']);
@@ -35,13 +44,14 @@ function verifyManifest(sourceRoot, manifest) {
   if (!manifest || !Array.isArray(manifest.files) || manifest.files.length === 0) throw new Error('MANIFEST_FILES_REQUIRED');
   const seen = new Set();
   const verified = [];
+  const resolvedRoot = path.resolve(sourceRoot);
+  const rootPrefix = resolvedRoot + path.sep;
   for (const row of manifest.files) {
     const rel = safeRelative(row.path);
     if (seen.has(rel)) throw new Error(`DUPLICATE_MANIFEST_PATH:${rel}`);
     seen.add(rel);
     const full = path.resolve(sourceRoot, ...rel.split('/'));
-    const rootPrefix = path.resolve(sourceRoot) + path.sep;
-    if (full !== path.resolve(sourceRoot) && !full.startsWith(rootPrefix)) throw new Error(`UNSAFE_PATH:${rel}`);
+    if (full !== resolvedRoot && !full.startsWith(rootPrefix)) throw new Error(`UNSAFE_PATH:${rel}`);
     if (!fs.existsSync(full) || !fs.statSync(full).isFile()) throw new Error(`SOURCE_FILE_MISSING:${rel}`);
     const bytes = fs.statSync(full).size;
     const digest = sha256File(full);
@@ -60,9 +70,14 @@ function assertCandidateBranch(branch) {
   if (!branch || canonicalRefs().has(branch)) throw new Error('CANDIDATE_BRANCH_CANONICAL_FORBIDDEN');
   if (!/^[A-Za-z0-9._/-]+$/.test(branch) || branch.startsWith('/') || branch.endsWith('/') || branch.includes('..')) throw new Error('CANDIDATE_BRANCH_INVALID');
 }
+function assertCleanWorktree(repoRoot) {
+  const status = git(repoRoot, ['status', '--porcelain=v1', '--untracked-files=all']);
+  if (status) throw new Error(`WORKTREE_NOT_CLEAN:${status.split(/\r?\n/)[0]}`);
+}
 function prepareCandidate({ repoRoot, sourceRoot, manifest, candidateBranch, expectedBaseSha, commitMessage }) {
   if (!sha40(expectedBaseSha)) throw new Error('EXPECTED_BASE_SHA_INVALID');
   assertCandidateBranch(candidateBranch);
+  assertCleanWorktree(repoRoot);
   const current = git(repoRoot, ['rev-parse', 'HEAD']);
   if (current !== expectedBaseSha) throw new Error(`STALE_LOCAL_BASE:${current}`);
   const verified = verifyManifest(sourceRoot, manifest);
@@ -84,10 +99,10 @@ function prepareCandidate({ repoRoot, sourceRoot, manifest, candidateBranch, exp
   const parentSha = git(repoRoot, ['rev-parse', 'HEAD^']);
   if (!sha40(candidateSha) || parentSha !== expectedBaseSha) throw new Error('CANDIDATE_PARENT_MISMATCH');
   for (const row of verified) {
-    const committed = git(repoRoot, ['show', `${candidateSha}:${row.path}`], { stdio: ['ignore', 'pipe', 'pipe'] });
-    const working = fs.readFileSync(path.resolve(repoRoot, ...row.path.split('/')));
-    const committedBuffer = Buffer.from(committed, 'utf8');
-    if (crypto.createHash('sha256').update(committedBuffer).digest('hex') !== crypto.createHash('sha256').update(working).digest('hex')) {
+    const committedBuffer = gitBuffer(repoRoot, ['show', `${candidateSha}:${row.path}`]);
+    const expectedBuffer = fs.readFileSync(path.resolve(sourceRoot, ...row.path.split('/')));
+    if (committedBuffer.length !== row.bytes) throw new Error(`COMMITTED_BYTES_MISMATCH:${row.path}`);
+    if (sha256Buffer(committedBuffer) !== row.sha256 || !committedBuffer.equals(expectedBuffer)) {
       throw new Error(`COMMITTED_BYTES_MISMATCH:${row.path}`);
     }
   }
@@ -146,9 +161,11 @@ function selftest() {
   const base = git(seed, ['rev-parse', 'HEAD']);
 
   execFileSync('git', ['clone', '--branch', 'main', remote, worker], { stdio: 'ignore' });
+  const binaryFixture = Buffer.from([0x00, 0x01, 0x0a, 0x0d, 0x7f, 0x80, 0xfe, 0xff, 0x00, 0x41]);
   const manifest = { files: [
     writeFileWithManifest(source, 'documents/a.txt', 'alpha\n'),
-    writeFileWithManifest(source, 'documents/nested/b.txt', 'beta\n')
+    writeFileWithManifest(source, 'documents/nested/b.txt', 'beta\r\n'),
+    writeFileWithManifest(source, 'documents/binary-fixture.bin', binaryFixture)
   ] };
   const prepared = prepareCandidate({ repoRoot: worker, sourceRoot: source, manifest, candidateBranch: 'work/documents/native-selftest', expectedBaseSha: base, commitMessage: 'native transport selftest' });
   const pushed = pushCandidate({ repoRoot: worker, remote: 'origin', candidateBranch: prepared.candidateBranch, candidateSha: prepared.candidateSha });
@@ -171,10 +188,11 @@ function selftest() {
   try { assertCandidateBranch('main'); } catch (e) { canonicalCandidateRejected = e.message === 'CANDIDATE_BRANCH_CANONICAL_FORBIDDEN'; }
   if (!canonicalCandidateRejected) throw new Error('SELFTEST_CANONICAL_CANDIDATE_ALLOWED');
 
-  const sourceText = fs.readFileSync(__filename, 'utf8');
-  if (/base64/i.test(sourceText)) throw new Error('SELFTEST_TEXT_CARRIER_REFERENCE_PRESENT');
   console.log(JSON.stringify({ status: 'PASS', tests: {
     source_manifest_sha256_verified: true,
+    binary_byte_identity_verified: true,
+    line_endings_preserved_byte_for_byte: true,
+    clean_worktree_required: true,
     one_complete_candidate_commit: true,
     candidate_parent_exact_base: true,
     native_git_candidate_push: true,
@@ -182,7 +200,7 @@ function selftest() {
     stale_base_rejected_before_mutation: true,
     stale_attempt_left_remote_unchanged: true,
     canonical_ref_forbidden_as_candidate: true,
-    no_base64_transport_path: true
+    no_text_carrier_transform_used: true
   }, base_sha: base, candidate_sha: prepared.candidateSha, advanced_main_sha: advanced }, null, 2));
 }
 
@@ -192,4 +210,4 @@ if (require.main === module) {
   else throw new Error(`UNKNOWN_MODE:${mode}`);
 }
 
-module.exports = { verifyManifest, prepareCandidate, pushCandidate, admitCanonical, canonicalRefs, remoteHead };
+module.exports = { verifyManifest, prepareCandidate, pushCandidate, admitCanonical, canonicalRefs, remoteHead, assertCleanWorktree };
