@@ -1,0 +1,53 @@
+{
+  "owner_system_id": "BOOK",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "control_ref": "book-system/control-v1",
+  "last_known_control_head": "05c1f53e2f710f419a99cb99594c53c2f0240b68",
+  "delegation_epoch": 20,
+  "reconciled_at": "2026-09-10T09:57:00-04:00",
+  "supersedes_live_selector_file": "governance/second-shift/BOOK-DELEGATIONS.json",
+  "prior_history_preserved": true,
+  "prior_history_location": "Git history and governance/second-shift/BOOK-DELEGATIONS.json",
+  "active_delegations": [
+    {
+      "delegation_id": "SECOND-SHIFT-BOOK-RF012-OWNER-PROMOTION-REBIND-004-P9",
+      "owner_path": "SYSTEM_MASTER/BOOK",
+      "objective_id": "BOOK-SYSTEM-RF012-OWNER-PROMOTION-REBIND-AND-NEXT-OWNER-SELECTION-004",
+      "state": "CANDIDATE",
+      "valid_for_control_ref": "book-system/control-v1",
+      "valid_for_control_head": "05c1f53e2f710f419a99cb99594c53c2f0240b68",
+      "created_at": "2026-09-10T09:57:00-04:00",
+      "last_revalidated_at": "2026-09-10T09:57:00-04:00",
+      "candidate_sha": "67a23c0b09505dc3dd8fd748523fec3868f649b0",
+      "hosted_run_id": 34468928275,
+      "completion_delta": "The prior RF012 applicability-guard work produced a bounded owner-derived candidate with hosted PASS on 67a23c0b09505dc3dd8fd748523fec3868f649b0. Revalidate that candidate against current Book control/state. If owner-valid and non-conflicting, promote/rebind the Book selector and select the next dependency-valid Book-owned objective; otherwise preserve the candidate as evidence and bind the truthful successor without replaying the guard work.",
+      "stop_condition": "RF012 candidate compatibility with the current Book owner state is explicitly adjudicated; the candidate is either promoted/rebound under owner authority or preserved as non-canonical evidence; and one exact next Book objective is selected. Original content-admission A-01 remains a separate exact-subject boundary.",
+      "allowed_work": [
+        "revalidate candidate 67a23c0b09505dc3dd8fd748523fec3868f649b0 against current Book state and binding",
+        "verify hosted RF012 evidence and changed-subject lineage without PASS transfer",
+        "update Book routing only when owner-valid compatibility is proven",
+        "select the next dependency-valid Book-owned successor after adjudication",
+        "continue A-01-independent Book contract/test/preparation work when central A-01 remains blocked"
+      ],
+      "forbidden_authority": [
+        "do not infer author approval or publication authority",
+        "do not transfer hosted PASS to A-01 or another SHA",
+        "do not merge the original e993806a1d9a4838d4bd6d162a36921526ef302a content-admission A-01 lineage with RF012",
+        "do not absorb Prose or Document authority",
+        "do not claim native/provider/production evidence"
+      ],
+      "on_pass": "Preserve owner-valid promotion/rebind evidence, retire this candidate delegation and bind the next Book successor on the resulting live Book head.",
+      "on_failure": "Preserve the candidate and exact incompatibility evidence, do not mutate Book authority to force admission, and select the next safe Book-owned successor.",
+      "admission_note": "CANDIDATE because P9 may reconcile routing but may not silently promote RF012 into canonical Book control without owner-valid revalidation."
+    }
+  ],
+  "retired_from_prior_live_selector": [
+    {
+      "delegation_id": "SECOND-SHIFT-BOOK-RF012-AUTHOR-DECISION-APPLICABILITY-GUARD-004",
+      "final_state": "COMPLETED__SUPERSEDED",
+      "reason": "Final-refill/P3 evidence records the resulting RF012 candidate and the owner-promotion/rebind successor; replaying the applicability guard would duplicate completed work.",
+      "history_preserved": true
+    }
+  ],
+  "empty_is_valid": false
+}
