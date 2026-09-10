@@ -1,0 +1,95 @@
+name: Learning Executable Curriculum 001D Prequalification
+
+on:
+  push:
+    branches:
+      - learning/executable-curriculum-001d-20260910
+    paths:
+      - "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001D-EXECUTABLE-CURRICULUM-CANDIDATE-057A.json"
+      - ".github/scripts/learning-full-standard-executable-curriculum-001d.js"
+      - ".github/workflows/learning-executable-curriculum-001d-prequal.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  compile-and-qualify:
+    name: Compile and qualify 66-node executable curriculum blueprint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      TOPOLOGY_SUBJECT_SHA: cbbc465a83929ed712dd5d6ed4f13e310a837bd3
+      ASSESSMENT_SUBJECT_SHA: 65496b9d5ec1e3eeef2a98b93763633577078ea6
+      DEPENDENCY_SUBJECT_SHA: 36ffc99c05e15fdcf9233303e035e5ce4159fc23
+    steps:
+      - name: Checkout exact 001D subject with repository history
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Record exact subject and historical inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          for sha in "$TOPOLOGY_SUBJECT_SHA" "$ASSESSMENT_SUBJECT_SHA" "$DEPENDENCY_SUBJECT_SHA"; do
+            git cat-file -e "${sha}^{commit}"
+          done
+          printf 'SUBJECT_SHA=%s\n' "$GITHUB_SHA"
+          printf 'TOPOLOGY_SUBJECT_SHA=%s\n' "$TOPOLOGY_SUBJECT_SHA"
+          printf 'ASSESSMENT_SUBJECT_SHA=%s\n' "$ASSESSMENT_SUBJECT_SHA"
+          printf 'DEPENDENCY_SUBJECT_SHA=%s\n' "$DEPENDENCY_SUBJECT_SHA"
+
+      - name: Syntax-check 001D compiler
+        run: node --check .github/scripts/learning-full-standard-executable-curriculum-001d.js
+
+      - name: Compile-check bound runtime Python schema files
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            learning/lab/learning_lab/models.py \
+            learning/lab/learning_lab/engine.py \
+            learning/lab/learning_lab/open_goal.py \
+            learning/lab/learning_lab/domain_general.py \
+            learning/lab/learning_lab/external_standard.py \
+            learning/lab/learning_lab/professional_rigor.py
+
+      - name: Compile executable curriculum pass A
+        shell: bash
+        run: |
+          set -euo pipefail
+          export EVIDENCE_DIR="$RUNNER_TEMP/learning-executable-curriculum-001d-a"
+          node .github/scripts/learning-full-standard-executable-curriculum-001d.js
+
+      - name: Compile executable curriculum pass B
+        shell: bash
+        run: |
+          set -euo pipefail
+          export EVIDENCE_DIR="$RUNNER_TEMP/learning-executable-curriculum-001d-b"
+          node .github/scripts/learning-full-standard-executable-curriculum-001d.js
+
+      - name: Prove deterministic repeat output
+        shell: bash
+        run: |
+          set -euo pipefail
+          cmp "$RUNNER_TEMP/learning-executable-curriculum-001d-a/compiled-executable-curriculum-blueprint.json" "$RUNNER_TEMP/learning-executable-curriculum-001d-b/compiled-executable-curriculum-blueprint.json"
+          cmp "$RUNNER_TEMP/learning-executable-curriculum-001d-a/qualification-summary.json" "$RUNNER_TEMP/learning-executable-curriculum-001d-b/qualification-summary.json"
+          mkdir -p "$RUNNER_TEMP/learning-executable-curriculum-001d-evidence"
+          cp "$RUNNER_TEMP/learning-executable-curriculum-001d-a/compiled-executable-curriculum-blueprint.json" "$RUNNER_TEMP/learning-executable-curriculum-001d-evidence/"
+          cp "$RUNNER_TEMP/learning-executable-curriculum-001d-a/qualification-summary.json" "$RUNNER_TEMP/learning-executable-curriculum-001d-evidence/"
+          printf '{"subject_sha":"%s","deterministic_repeat":true,"result_class":"PASS"}\n' "$GITHUB_SHA" > "$RUNNER_TEMP/learning-executable-curriculum-001d-evidence/determinism-summary.json"
+
+      - name: Upload hosted 001D evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: LEARNING-EXECUTABLE-CURRICULUM-001D-${{ github.sha }}-hosted-evidence
+          path: ${{ runner.temp }}/learning-executable-curriculum-001d-evidence
+          if-no-files-found: warn
+          retention-days: 30
+
+# Mechanical runtime-blueprint qualification only. No learner, psychometric, SME, A-01, native, production, or certification authority is inferred.
