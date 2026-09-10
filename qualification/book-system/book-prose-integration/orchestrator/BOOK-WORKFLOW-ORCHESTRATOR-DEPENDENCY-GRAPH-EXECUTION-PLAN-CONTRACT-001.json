@@ -1,0 +1,124 @@
+{
+  "contract_id": "BOOK-WORKFLOW-ORCHESTRATOR-DEPENDENCY-GRAPH-EXECUTION-PLAN-CONTRACT-001",
+  "contract_version": 1,
+  "effective_date": "2026-09-10",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "depends_on": [
+    "BOOK-WORKFLOW-ORCHESTRATOR-AUTHORITY-CONTRACT-001-CLOSURE",
+    "BOOK-WORKFLOW-ORCHESTRATOR-WORKFLOW-STATE-MODEL-001-CLOSURE",
+    "BOOK-WORKFLOW-ORCHESTRATOR-CAPABILITY-ROUTING-INTERFACE-001-CLOSURE"
+  ],
+  "standing": "CANDIDATE_PENDING_PACKET_QUALIFICATION",
+  "scope": "Deterministic dependency-graph and execution-plan semantics only. This packet validates plan structure and readiness; it does not execute specialists, choose concurrency, retry operations, persist durable jobs, compile context, cache results, cancel/resume work or perform canonical admission.",
+  "plan_required_fields": [
+    "plan_schema_version",
+    "plan_id",
+    "plan_version",
+    "plan_digest",
+    "workflow_id",
+    "workflow_state_identity",
+    "book_project_id",
+    "source_identity",
+    "objective_ref",
+    "objective_hash_sha256",
+    "tasks",
+    "created_at"
+  ],
+  "workflow_state_identity_required": ["workflow_version","workflow_digest"],
+  "source_identity_required": ["book_state_version","book_state_digest","canonical_manuscript_ref","manuscript_version_id","manuscript_digest_sha256"],
+  "task_required_fields": [
+    "task_id",
+    "task_class",
+    "capability_id",
+    "required_authority_domain",
+    "authority_wait_owner",
+    "required_dependency_ids",
+    "optional_dependency_ids",
+    "input_ref_hashes",
+    "context_package_refs",
+    "required_for_plan_success"
+  ],
+  "task_classes": [
+    "SPECIALIST_SERVICE_TASK",
+    "DECLARED_BLOCKED_CAPABILITY",
+    "AUTHORITY_WAIT",
+    "BOOK_ADMISSION_HANDOFF"
+  ],
+  "plan_readiness_states": ["READY_FOR_EXECUTION_POLICY","BLOCKED_ON_DECLARED_INTERFACE","BLOCKED_ON_AUTHORITY_WAIT","BLOCKED_ON_ADMISSION_HANDOFF","BLOCKED_MULTIPLE"],
+  "dependency_rules": [
+    "Every task_id is exact and unique.",
+    "Required and optional dependency IDs must name tasks in the same plan.",
+    "Self-dependencies and duplicate dependency IDs are forbidden.",
+    "The union of required and optional dependencies must form a directed acyclic graph.",
+    "All dependencies are explicit; the orchestrator may not invent hidden prerequisite edges during execution.",
+    "A downstream task is structurally ready only when all required dependencies are satisfied by later workflow execution state; optional dependencies never masquerade as required evidence.",
+    "Topological layers describe dependency independence only. They do not authorize parallel execution; concurrency authority belongs to Phase 2E and scheduling belongs to Phase 6.",
+    "A BOOK_ADMISSION_HANDOFF node, when present, must be a terminal sink and may not have downstream dependents.",
+    "No specialist service task may request CANONICAL_MANUSCRIPT_MUTATION authority.",
+    "A declared-but-noncallable required capability remains in the graph as DECLARED_BLOCKED_CAPABILITY and makes the plan not executable until a qualified callable interface is bound or the plan is truthfully superseded.",
+    "An AUTHORITY_WAIT node represents genuine external/human authority and cannot be converted to specialist execution merely to unblock a plan."
+  ],
+  "task_class_rules": {
+    "SPECIALIST_SERVICE_TASK": [
+      "capability_id and required_authority_domain are required and must resolve through the exact Phase 2C capability registry.",
+      "Resolved capability must be callable and dispatch_class QUALIFIED_SERVICE_OPERATION.",
+      "canonical_write_authority must be false.",
+      "authority_wait_owner must be null."
+    ],
+    "DECLARED_BLOCKED_CAPABILITY": [
+      "capability_id and required_authority_domain are required and must resolve through the exact Phase 2C capability registry.",
+      "Resolved capability must be non-callable and must not be BOOK.CANONICAL_MANUSCRIPT_ADMISSION.",
+      "The task remains visible and makes plan readiness blocked.",
+      "authority_wait_owner must be null."
+    ],
+    "AUTHORITY_WAIT": [
+      "capability_id and required_authority_domain must be null.",
+      "authority_wait_owner must be a non-empty external authority identifier such as AUTHOR.",
+      "This node cannot execute specialist business logic and makes plan readiness blocked until the external authority event is durably evidenced."
+    ],
+    "BOOK_ADMISSION_HANDOFF": [
+      "capability_id must equal BOOK.CANONICAL_MANUSCRIPT_ADMISSION.",
+      "required_authority_domain must equal CANONICAL_MANUSCRIPT_MUTATION.",
+      "The descriptor must resolve to SYSTEM_MASTER/BOOK and canonical_write_authority true, but remains non-dispatchable in Phase 2D.",
+      "The handoff task must be a terminal sink and makes readiness blocked until the later admission-handoff packet authorizes the interface.",
+      "authority_wait_owner must be null."
+    ]
+  },
+  "content_safety_rules": [
+    "Plan state stores references and hashes only; raw manuscript, passage and candidate text fields are forbidden recursively.",
+    "Every input_ref_hashes value must be lowercase sha256 hex.",
+    "Context package refs are opaque references only until the Book Context Compiler contract is qualified.",
+    "Plan source identity is immutable and must equal the bound workflow source identity before execution is admitted.",
+    "Changed workflow source identity requires a new or superseding plan identity; it is not silently rebound."
+  ],
+  "admission_rules": [
+    "Evaluator acceptance, Prose candidate generation, Story Bible checks, Research evidence or successful plan completion never imply canonical admission.",
+    "Only BOOK_ADMISSION_HANDOFF may point at BOOK.CANONICAL_MANUSCRIPT_ADMISSION, and the handoff itself does not mutate Book state in this packet.",
+    "A plan may terminate with no BOOK_ADMISSION_HANDOFF for LEVEL_0_NO_CHANGE or diagnostic-only workflows.",
+    "If a BOOK_ADMISSION_HANDOFF exists, all evidence tasks required by that specific plan must precede it through explicit required dependency edges."
+  ],
+  "replay_rules": [
+    "Plan digest is deterministic over normalized plan content excluding plan_digest itself.",
+    "A changed task, dependency, source identity, input hash, context ref or authority requirement changes the plan digest.",
+    "Identical normalized inputs reproduce the same plan digest.",
+    "This deterministic identity does not grant retry authority for non-idempotent specialist operations."
+  ],
+  "qualification_requirements": [
+    "VALID_DAG_ACCEPTED",
+    "CYCLE_REJECTED",
+    "MISSING_DEPENDENCY_REJECTED",
+    "SELF_DEPENDENCY_REJECTED",
+    "DUPLICATE_TASK_REJECTED",
+    "UNKNOWN_OR_WRONG_DOMAIN_CAPABILITY_REJECTED",
+    "NONCALLABLE_SPECIALIST_REJECTED",
+    "DECLARED_BLOCKED_CAPABILITY_PRESERVED",
+    "AUTHOR_WAIT_PRESERVED",
+    "BOOK_ADMISSION_ONLY_AS_TERMINAL_HANDOFF",
+    "NO_SPECIALIST_CANONICAL_MUTATION",
+    "RAW_CONTENT_REJECTED",
+    "SOURCE_IDENTITY_STALENESS_REJECTED",
+    "DETERMINISTIC_DIGEST_AND_TOPOLOGICAL_LAYERS",
+    "NO_CONCURRENCY_AUTHORITY_CLAIM"
+  ],
+  "required_next_packet_on_pass": "BOOK-WORKFLOW-ORCHESTRATOR-CONCURRENCY-RULES-001"
+}
