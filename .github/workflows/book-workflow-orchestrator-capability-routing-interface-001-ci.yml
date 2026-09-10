@@ -1,0 +1,31 @@
+name: Book Workflow Orchestrator Capability Routing Interface 001
+
+on:
+  push:
+    branches:
+      - book-system/control-v1
+    paths:
+      - 'qualification/book-system/book-prose-integration/orchestrator/BOOK-WORKFLOW-ORCHESTRATOR-CAPABILITY-ROUTING-INTERFACE-001.json'
+      - 'system-master/book-system/book-capability-routing-interface.js'
+      - '.github/scripts/book-workflow-orchestrator-capability-routing-interface-001-qualify.js'
+      - '.github/workflows/book-workflow-orchestrator-capability-routing-interface-001-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@v4
+      - name: Qualify capability routing interface
+        run: node .github/scripts/book-workflow-orchestrator-capability-routing-interface-001-qualify.js
+      - name: Upload qualification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: book-workflow-orchestrator-capability-routing-interface-001-${{ github.run_id }}
+          path: ${{ runner.temp }}/book-workflow-orchestrator-capability-routing-interface-001-summary.json
+          if-no-files-found: error
