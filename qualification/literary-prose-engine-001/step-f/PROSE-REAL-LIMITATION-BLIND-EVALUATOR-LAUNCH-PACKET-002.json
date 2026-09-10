@@ -1,0 +1,70 @@
+{
+  "packet_id": "PROSE-REAL-LIMITATION-BLIND-EVALUATOR-LAUNCH-PACKET-002",
+  "effective_date": "2026-09-10",
+  "owner_path": "SYSTEM_MASTER/BOOK/PROSE",
+  "objective": "PROSE-REAL-LIMITATION-BLIND-MODEL-SCORING-001",
+  "standing": "READY__LABEL_FREE_STARTUP_AND_VALIDATOR_INSTALLED__FRESH_CONTEXT_REQUIRED__REVISION_AUTHORITY_ZERO",
+  "execution_ref": "literary-prose-blind-eval-001",
+  "supervising_owner_ref": "literary-prose-engine-001",
+  "supervising_owner_head": "309a7876b8e388d115d4d3bde7dc39dd0ef8b6fd",
+  "source_reconstruction_adjudication": {
+    "owner_evidence_commit": "23dcc5c82816fba4bdc571a8019e13fba4be4b95",
+    "source_digests": "3_OF_3_MATCH",
+    "passage_digests": "6_OF_6_MATCH",
+    "author_labels_used": false,
+    "revision_authority": false
+  },
+  "installed_support": {
+    "exact_blind_support_subject_sha": "c96818e5b9c315c71f7b524cbdab717762724573",
+    "contract_blob_sha": "78832996baf1a641e3111ced91a7c15e4dfa6ce9",
+    "validator_blob_sha": "f71d7ca26b0268c5953a416fc319f09a0cc7d05b",
+    "fixture_blob_sha": "7bcf5d05a1db5d724485d411f662b1f173d13721",
+    "startup_blob_sha": "dfd9065eb26b03e454d12092610f8fca8a9f45c2",
+    "validator_hosted_run_id": 34438950277,
+    "validator_hosted_job_id": 102749740475,
+    "validator_result": "PASS__23_OF_23_SYNTHETIC_NONBLIND",
+    "source_custody_preflight_run_id": 34438950296,
+    "source_custody_preflight_job_id": 102749740447,
+    "source_custody_result": "PASS__CONTRACT_SEMANTICS_AND_4_SYNTHETIC_FIXTURES",
+    "control_drift_run_id": 34438950532,
+    "control_drift_job_id": 102749741293,
+    "control_drift_result": "PASS"
+  },
+  "fresh_context_eligibility": [
+    "Evaluator has not read author labels, author adjudication commentary, labeled Prose state, current main completion/obligation records, or literary-prose-engine-001 at/after the frozen ground-truth commit.",
+    "Evaluator starts from the current blind branch and reads the startup and blind contract before any source material.",
+    "If supervising owner head differs from 309a7876b8e388d115d4d3bde7dc39dd0ef8b6fd, stop BLIND_ADMISSION_REVALIDATION_REQUIRED without inspecting labeled owner contents."
+  ],
+  "exact_execution_order": [
+    "Read PROSE-REAL-LIMITATION-BLIND-EVALUATOR-STARTUP-001.md and the blind evaluation contract on this branch only.",
+    "Locate the three private source files by exact title in ChatGPT Files Library and use only exact SHA256 matches in an ephemeral workspace.",
+    "Run the source-custody preflight; require exact 3/3 source and 6/6 passage digest matches.",
+    "Run the qualified semantic to Passage Intelligence to Step-F path without ground truth.",
+    "Produce exactly one candidate prediction record per contract case with revision_allowed=false.",
+    "Run validate_blind_prediction_seal.py; any rejection stops before ground-truth access.",
+    "Create the prediction artifact at the contract path using create-only semantics; commit it and capture the immutable prediction-seal SHA.",
+    "Only after the prediction-seal commit exists, read the frozen ground truth and create the comparison receipt.",
+    "Return both exact SHAs and measured comparison results to the canonical Prose owner; grant no revision, manuscript, Book canonical or publication authority."
+  ],
+  "stop_conditions": [
+    "BLIND_ADMISSION_REVALIDATION_REQUIRED",
+    "SOURCE_CUSTODY_BLOCKED",
+    "EVIDENCE_MISMATCH",
+    "BLINDNESS_CONTAMINATED",
+    "PREDICTION_SEAL_VALIDATION_REJECTED",
+    "PREDICTION_SEAL_WRITE_BLOCKED",
+    "PIPELINE_FAILURE"
+  ],
+  "forbidden_authority": [
+    "no pre-seal author label or ground-truth access",
+    "no raw or candidate prose in repository evidence",
+    "no manuscript mutation",
+    "no revision or candidate-superiority authority",
+    "no Book canonical write",
+    "no A-01, production or publication claim"
+  ],
+  "this_packet_created_predictions": 0,
+  "this_packet_accessed_author_labels": false,
+  "this_packet_accessed_private_manuscript_bytes": false,
+  "revision_authority": false
+}
