@@ -1,0 +1,125 @@
+{
+  "fixture_class": "SYNTHETIC_NON_PRIVATE",
+  "profile": "EBR-SEMANTIC-PROFILE-001",
+  "base_source": {
+    "source_id": "SRC-DRAFT-001",
+    "source_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "source_kind": "NORMALIZED_DOCX_PROJECTION",
+    "filesystem_mtime": "2026-01-01T12:00:00Z",
+    "version_candidate": {
+      "candidate_id": "CANDIDATE-001",
+      "manuscript_id": "MANUSCRIPT-001",
+      "version_id": "V1",
+      "content_digest": "1111111111111111111111111111111111111111111111111111111111111111",
+      "parent_candidate_ids": [],
+      "authority_signal": "UNRATIFIED",
+      "revision_rank": 1,
+      "similarity_key": "BOOK-A-DRAFT"
+    },
+    "normalized_projection": {
+      "structure": [
+        {"structure_id":"ST-001","kind":"CHAPTER","title":"Opening","ordinal":1,"anchor":"p1","confidence":0.99},
+        {"structure_id":"ST-002","kind":"CHAPTER","title":"Second Chapter","ordinal":2,"anchor":"p8","confidence":0.98}
+      ],
+      "metadata": {"title":"Synthetic Book A","author":"Synthetic Author","genre":"historical nonfiction"},
+      "citations": [{"citation_id":"CIT-001","locator":"note-1","raw":"Synthetic Source, 2020"}],
+      "comments": [],
+      "todos": [],
+      "tracked_changes": [],
+      "story_bible_candidates": [],
+      "nonfiction_knowledge_candidates": [
+        {"proposal_id":"NK-001","value":{"claim":"Synthetic claim","truth_standing":"UNVERIFIED_IMPORTED_CANDIDATE"},"evidence_refs":["note-1"]}
+      ],
+      "voice_candidates": [
+        {"proposal_id":"VOICE-001","value":{"sample_ref":"p1-p3","attribution_confidence":1.0}}
+      ]
+    }
+  },
+  "published_source": {
+    "source_id": "SRC-PUBLISHED-001",
+    "source_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "source_kind": "NORMALIZED_PDF_PROJECTION",
+    "filesystem_mtime": "2026-05-01T12:00:00Z",
+    "version_candidate": {
+      "candidate_id": "CANDIDATE-PUBLISHED",
+      "manuscript_id": "MANUSCRIPT-001",
+      "version_id": "EDITION-1",
+      "content_digest": "2222222222222222222222222222222222222222222222222222222222222222",
+      "parent_candidate_ids": [],
+      "authority_signal": "AUTHOR_ACCEPTED",
+      "revision_rank": 1,
+      "similarity_key": "BOOK-A-PUBLISHED"
+    },
+    "normalized_projection": {
+      "structure": [
+        {"structure_id":"PUB-ST-001","kind":"CHAPTER","title":"Published Opening","ordinal":1,"anchor":"pdf-p1","confidence":1.0}
+      ],
+      "metadata": {"title":"Synthetic Published Book","author":"Synthetic Author","edition":"1"},
+      "citations": [],
+      "comments": [],
+      "todos": [],
+      "tracked_changes": [],
+      "story_bible_candidates": [],
+      "nonfiction_knowledge_candidates": [],
+      "voice_candidates": []
+    }
+  },
+  "later_revision_source": {
+    "source_id": "SRC-REVISION-002",
+    "source_digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "source_kind": "NORMALIZED_DOCX_PROJECTION",
+    "filesystem_mtime": "2025-12-01T12:00:00Z",
+    "version_candidate": {
+      "candidate_id": "CANDIDATE-REVISION",
+      "manuscript_id": "MANUSCRIPT-001",
+      "version_id": "V2-PARTIAL",
+      "content_digest": "3333333333333333333333333333333333333333333333333333333333333333",
+      "parent_candidate_ids": ["CANDIDATE-PUBLISHED"],
+      "authority_signal": "UNRATIFIED",
+      "revision_rank": 2,
+      "similarity_key": "BOOK-A-PUBLISHED"
+    },
+    "normalized_projection": {
+      "structure": [
+        {"structure_id":"REV-ST-001","kind":"CHAPTER","title":"Revised Opening","ordinal":1,"anchor":"docx-p1","confidence":0.96},
+        {"structure_id":"REV-ST-002","kind":"CHAPTER","title":"New Partial Chapter","ordinal":2,"anchor":"docx-p9","confidence":0.91}
+      ],
+      "metadata": {"title":"Synthetic Published Book","author":"Synthetic Author","edition":"working revision"},
+      "citations": [],
+      "comments": [{"comment_id":"COM-001","text":"Verify chronology"}],
+      "todos": [{"todo_id":"TODO-001","text":"Add source"}],
+      "tracked_changes": [{"change_id":"TC-001","kind":"INSERTION","anchor":"docx-p9"}],
+      "story_bible_candidates": [],
+      "nonfiction_knowledge_candidates": [],
+      "voice_candidates": []
+    }
+  },
+  "fiction_source": {
+    "source_id": "SRC-FICTION-001",
+    "source_digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "source_kind": "NORMALIZED_DOCX_PROJECTION",
+    "version_candidate": {
+      "candidate_id": "CANDIDATE-FICTION",
+      "manuscript_id": "MANUSCRIPT-FICTION",
+      "version_id": "FV1",
+      "content_digest": "4444444444444444444444444444444444444444444444444444444444444444",
+      "parent_candidate_ids": [],
+      "authority_signal": "UNRATIFIED",
+      "revision_rank": 1,
+      "similarity_key": "FICTION-1"
+    },
+    "normalized_projection": {
+      "structure": [{"structure_id":"F-ST-001","kind":"SCENE","title":"Arrival","ordinal":1,"anchor":"f-p1","confidence":0.99}],
+      "metadata": {"title":"Synthetic Novel","genre":"fiction"},
+      "citations": [],
+      "comments": [],
+      "todos": [],
+      "tracked_changes": [],
+      "story_bible_candidates": [
+        {"proposal_id":"SB-CAND-001","value":{"entity":"Ava","fact":"Arrives in Harbor City"},"evidence_refs":["f-p1"]}
+      ],
+      "nonfiction_knowledge_candidates": [],
+      "voice_candidates": []
+    }
+  }
+}
