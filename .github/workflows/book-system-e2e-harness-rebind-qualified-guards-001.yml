@@ -1,0 +1,53 @@
+name: Book System E2E Harness Rebind Qualified Guards 001
+
+on:
+  push:
+    branches:
+      - book-system/e2e-harness-rebind-guards-001
+    paths:
+      - ".github/workflows/book-system-e2e-harness-rebind-qualified-guards-001.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  rebind:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout canonical Book control
+        uses: actions/checkout@v4
+        with:
+          ref: book-system/control-v1
+          fetch-depth: 0
+      - name: Rebind exactly two E2E harness provider facades
+        shell: bash
+        run: |
+          set -euo pipefail
+          EXPECTED_HEAD="a119ccdf77b61011b1093006b55367fc3e5a65c2"
+          ACTUAL_HEAD="$(git rev-parse HEAD)"
+          test "$ACTUAL_HEAD" = "$EXPECTED_HEAD"
+          node <<'NODE'
+          const fs = require('fs');
+          const p = '.github/scripts/book-system-end-to-end-authoring-001-qualify.js';
+          let s = fs.readFileSync(p, 'utf8');
+          const replacements = [
+            ["author: 'system-master/book-system/author-decision-queue.js'", "author: 'system-master/book-system/author-decision-current-subject-guard.js'"],
+            ["exportFreeze: 'system-master/book-system/export-freeze.js'", "exportFreeze: 'system-master/book-system/export-freeze-parent-admission-guard.js'"]
+          ];
+          for (const [from, to] of replacements) {
+            const count = s.split(from).length - 1;
+            if (count !== 1) throw new Error(`EXPECTED_EXACTLY_ONE_REPLACEMENT:${from}:count=${count}`);
+            s = s.replace(from, to);
+          }
+          fs.writeFileSync(p, s);
+          NODE
+          git diff --check
+          test "$(git diff --name-only)" = ".github/scripts/book-system-end-to-end-authoring-001-qualify.js"
+          grep -F "author: 'system-master/book-system/author-decision-current-subject-guard.js'" .github/scripts/book-system-end-to-end-authoring-001-qualify.js
+          grep -F "exportFreeze: 'system-master/book-system/export-freeze-parent-admission-guard.js'" .github/scripts/book-system-end-to-end-authoring-001-qualify.js
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .github/scripts/book-system-end-to-end-authoring-001-qualify.js
+          git commit -m "books: rebind E2E harness to qualified authority guards"
+          git push origin HEAD:book-system/control-v1
