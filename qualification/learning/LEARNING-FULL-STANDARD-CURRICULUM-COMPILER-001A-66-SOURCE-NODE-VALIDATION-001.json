@@ -1,0 +1,36 @@
+{
+  "validation_id": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-66-SOURCE-NODE-VALIDATION-001",
+  "effective_date": "2026-09-10",
+  "owner_path": "SYSTEM_MASTER/LEARNING",
+  "input_artifact": "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-66-SOURCE-NODE-INDEX-001.json",
+  "source_requirement_set_digest": "86a1baba495d2637ef4d889948befd2c87a9b87a377f04b892b06c5ec980a298",
+  "standing": "SOURCE_NODE_POPULATION_VALIDATED__DEEP_PEDAGOGY_GRAPH_INCOMPLETE__SUCCESSOR_REQUIRED",
+  "checks": [
+    {"check":"exactly 66 unique requirement_id values are present","result":"PASS","observed":66},
+    {"check":"every requirement resolves to a frozen-2022 source locator","result":"PASS","observed":66},
+    {"check":"no required node silently sourced from a newer ASQ revision","result":"PASS","observed_source_version":"2022 CSSGB BoK"},
+    {"check":"source identity binds the preserved IMPL-013 requirement set digest","result":"PASS","digest":"86a1baba495d2637ef4d889948befd2c87a9b87a377f04b892b06c5ec980a298"},
+    {"check":"unknown or unresolved source mappings remain explicit","result":"PASS","unresolved_source_mappings":0},
+    {"check":"hard prerequisite topology is derived and acyclic","result":"PENDING__NO_AUTHORITATIVE_PREREQUISITE_EDGES_YET"},
+    {"check":"subskills are populated and reachable","result":"PENDING__NO_AUTHORITATIVE_SUBSKILLS_YET"},
+    {"check":"human-observed response/retention/transfer/effectiveness evidence exists","result":"UNOBSERVED__CORRECT_BOUNDARY"}
+  ],
+  "counts": {
+    "requirements":66,
+    "by_section":{"I":8,"II":23,"III":13,"IV":6,"V":6,"VI":10},
+    "by_cognitive_level":{"ANALYZE":10,"APPLY":28,"CREATE":3,"EVALUATE":7,"REMEMBER":1,"UNDERSTAND":17}
+  },
+  "derived_graph_findings": [
+    {"class":"PEDAGOGY_TOPOLOGY_NOT_YET_DERIVED","severity":"EXPECTED_NEXT_SUBPHASE","detail":"Prerequisite and subskill edges were not invented from topic names. They require a separate Learning-owned derivation with explicit rationale, acyclicity and reachability validation."}
+  ],
+  "completion_delta": "The previously unresolved source-population part of the 66-requirement compiler objective is now closed from preserved 2022 evidence: 66/66 unique source identities and locators are indexed with zero source-version substitutions. Full graph closure is deliberately not claimed because prerequisite/subskill topology remains to be derived and validated.",
+  "next_objective": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-PREREQUISITE-SUBSKILL-TOPOLOGY-002",
+  "next_evidence_target": [
+    "explicit prerequisite-edge rationale for all hard prerequisites",
+    "acyclicity validation or owner-approved cycle-break classification",
+    "subskill decomposition with every subskill reachable from at least one frozen source requirement",
+    "assessment/workplace/mastery/retention/transfer bindings with all human outcomes UNOBSERVED",
+    "fresh exact-SHA qualification for any changed executable compiler software"
+  ],
+  "stop_condition": "Do not fabricate prerequisites, subskills, learner outcomes, ASQ certification, or missing source text. Planning hypotheses must remain non-authoritative until validated."
+}
