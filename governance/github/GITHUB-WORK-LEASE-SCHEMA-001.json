@@ -1,0 +1,65 @@
+{
+  "schema_id": "GITHUB-WORK-LEASE-SCHEMA-001",
+  "status": "PROPOSED_FOR_ADMISSION",
+  "required_fields": [
+    "work_session_id",
+    "owner_lane",
+    "objective_id",
+    "candidate_branch",
+    "base_sha",
+    "owner_control_ref",
+    "owner_control_head",
+    "fence_epoch",
+    "allowed_paths",
+    "allowed_effects",
+    "forbidden_effects",
+    "authorization_class",
+    "issued_at",
+    "expires_at",
+    "issued_by"
+  ],
+  "authorization_classes": ["AUTONOMOUS", "CONTROLLER_ADMITTED", "USER_REQUIRED"],
+  "rules": [
+    "A chat or worker is never repository authority by identity alone.",
+    "Mutation requires an active lease bound to the current owner objective and control head.",
+    "candidate_branch must not be main or another canonical control ref.",
+    "base_sha and owner_control_head must be exact 40-character Git SHAs.",
+    "fence_epoch is a positive integer and may never move backward.",
+    "The lease holder cannot widen allowed_paths, allowed_effects, owner_lane or objective_id.",
+    "The lease holder cannot mint or renew its own lease.",
+    "Cross-owner writes and central objective replacement require USER_REQUIRED authority.",
+    "Expired, superseded, revoked, stale-base or stale-control leases fail closed for mutation.",
+    "Read-only inspection may continue after mutation authority is lost, but resulting knowledge must be revalidated before later writes."
+  ],
+  "effect_classes": {
+    "AUTONOMOUS": [
+      "READ_REPOSITORY",
+      "RESEARCH",
+      "RUN_TESTS",
+      "BUILD",
+      "WRITE_CANDIDATE_BRANCH",
+      "CREATE_EVIDENCE"
+    ],
+    "CONTROLLER_ADMITTED": [
+      "CLAIM_OWNER_WORK",
+      "CLAIM_REPOSITORY_WRITER",
+      "DISPATCH_WORKFLOW",
+      "QUALIFY_EXACT_SHA",
+      "PROMOTE_CANDIDATE_FAST_FORWARD",
+      "BIND_SUCCESSOR",
+      "RECONCILE_CURRENT_STATE"
+    ],
+    "USER_REQUIRED": [
+      "REPLACE_CENTRAL_OBJECTIVE",
+      "CHANGE_TOPOLOGY",
+      "CHANGE_OWNER_BOUNDARY",
+      "CROSS_OWNER_CANONICAL_WRITE",
+      "SUPERSEDE_MATERIAL_ACTIVE_WORK",
+      "FORCE_CANONICAL_REF",
+      "BYPASS_FAILED_GATE",
+      "CHANGE_PERMANENT_SECURITY_POLICY"
+    ]
+  },
+  "terminal_states": ["EXPIRED", "REVOKED", "SUPERSEDED", "STALE_BASE", "STALE_CONTROL", "COMPLETED"],
+  "canonical_write_requirement": "OWNER_LANE_LEASE_AND_GLOBAL_REPOSITORY_WRITER_FENCE"
+}
