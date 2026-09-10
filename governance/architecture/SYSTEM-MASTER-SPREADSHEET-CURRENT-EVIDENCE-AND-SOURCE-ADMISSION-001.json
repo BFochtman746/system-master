@@ -1,0 +1,134 @@
+{
+  "admission_id": "SYSTEM-MASTER-SPREADSHEET-CURRENT-EVIDENCE-AND-SOURCE-ADMISSION-001",
+  "effective_date": "2026-09-10",
+  "product_root": "SYSTEM_MASTER",
+  "portfolio_id": "HEADLESS-COMPUTE-DATA-001",
+  "semantic_owner_path": "SYSTEM_MASTER",
+  "shared_runtime_provider": "SYSTEM_MASTER/CORE",
+  "contract": "governance/architecture/HEADLESS-COMPUTE-DATA-SPREADSHEET-CONTRACT-001.json",
+  "standing": "CLOSED__RECOVERED_GIT_HIGH_WATER_BF054C__COMPLETE_HISTORY_CUSTODY_PROVEN__FRESH_PORTABLE_REPLAY_PASS__CURRENT_GITHUB_IMPORT_PENDING",
+  "purpose": "Determine the strongest dependency-valid preserved Spreadsheet implementation source, prove exact Git custody and ancestry from immutable preserved objects, independently replay the available portable Spreadsheet/shared verification suites, and select a current import/requalification successor without rebuilding EXCEL-QUAL research or transferring historical PASS to current main.",
+  "recovered_git_custody": {
+    "library_bundle_file_id": "file_0000000099a8822f9d18cf17a7ab0f9d",
+    "library_bundle_path": "/System Master/Architecture 1.0/Checkpoints/CQ_003_STEP_002.gitbundle",
+    "bundle_size_bytes": 15203293,
+    "bundle_sha256_observed_2026_09_10": "774b447db8eaf73e16fba8d2f4975d9abefcb1e208c8eac03c9c1d65c4532681",
+    "git_bundle_verify": "PASS__COMPLETE_HISTORY",
+    "bundle_refs": {
+      "refs/heads/recovered": "bf054c745c0e9951cc6d0cd2bd007182ba3d4283",
+      "refs/heads/cq002-closure-recovered": "707c04bb89d7c6271b12da5f16a73105f5dfa1fb"
+    },
+    "independent_corresponding_verification_record": "CQ_003_STEP_002_GIT_BUNDLE_VERIFY.txt",
+    "secondary_bundle_evidence": "CQ_003_STEP_003A_GIT_BUNDLE_VERIFY.txt also records bf054c745c0e9951cc6d0cd2bd007182ba3d4283 as recovered and origin/verified-output-mandatory-004, with complete history."
+  },
+  "recovered_spreadsheet_high_water": {
+    "commit": "bf054c745c0e9951cc6d0cd2bd007182ba3d4283",
+    "parent": "6839dc3be7aab8e142e3fb81d2a015d700693f8b",
+    "tree": "4e21d683df68e5836a642a997e5799026d7eaa12",
+    "commit_timestamp_utc": "2026-09-07T02:09:36Z",
+    "commit_subject": "Add Spreadsheet portable security verification profile",
+    "tracked_files": 5305,
+    "production_java_sources": 741,
+    "test_java_sources": 98,
+    "spreadsheet_production_java_sources": 7,
+    "spreadsheet_test_java_sources": 5,
+    "why_high_water": "The complete-history bundle shows the linear Spreadsheet source chain ending at bf054c. The later cq002-closure-recovered head descends from bf054c but changes no files under src/main/java/org/systemmaster/tools/spreadsheet or src/test/java/org/systemmaster/tools/spreadsheet. No stronger later Spreadsheet source subject was proven in the recovered bundle."
+  },
+  "exact_spreadsheet_source_chain": [
+    {
+      "commit": "1637235da73ad75de5b93c22abf7dcc7585d0f3d",
+      "parent": "ef331e75dddf3c77ce2d5d62676482c735cd43de",
+      "role": "ADMIT_SPREADSHEET_STRUCTURAL_VERIFICATION_ORACLE"
+    },
+    {
+      "commit": "6a95ae12dbb44d8b8446ebb8743cb28320ddf1b3",
+      "parent": "1637235da73ad75de5b93c22abf7dcc7585d0f3d",
+      "role": "SHARED_REQUIRED_PROFILE_CAMPAIGN"
+    },
+    {
+      "commit": "5f795f108788c9be6d4f451eea68ec8f9b76e4eb",
+      "parent": "6a95ae12dbb44d8b8446ebb8743cb28320ddf1b3",
+      "role": "DECLARED_VERIFICATION_PROFILE_COMPLETENESS"
+    },
+    {
+      "commit": "fb59a36ea5b009ce6e56dffeeef874944420426b",
+      "parent": "5f795f108788c9be6d4f451eea68ec8f9b76e4eb",
+      "role": "CONSERVATIVE_PORTABLE_SAFETY_PROFILES"
+    },
+    {
+      "commit": "6839dc3be7aab8e142e3fb81d2a015d700693f8b",
+      "parent": "fb59a36ea5b009ce6e56dffeeef874944420426b",
+      "role": "CALC_002_ENGINE_ADMISSION_GATE"
+    },
+    {
+      "commit": "bf054c745c0e9951cc6d0cd2bd007182ba3d4283",
+      "parent": "6839dc3be7aab8e142e3fb81d2a015d700693f8b",
+      "role": "VP_SECURITY_PORTABLE_PROFILE"
+    }
+  ],
+  "fresh_independent_replay_2026_09_10": {
+    "subject_commit": "bf054c745c0e9951cc6d0cd2bd007182ba3d4283",
+    "environment": "OpenJDK 21.0.11 Linux portable environment",
+    "compile": {
+      "command_class": "javac --release 21 -Xlint:all -Werror over src/main/java and src/test/java",
+      "result": "PASS",
+      "source_count": 839
+    },
+    "tests": [
+      {"class":"org.systemmaster.tools.spreadsheet.SpreadsheetStructureVerificationAdapterPortableTests","result":"PASS","checks":18},
+      {"class":"org.systemmaster.tools.spreadsheet.SpreadsheetVerificationProfileCatalogPortableTests","result":"PASS","checks":17},
+      {"class":"org.systemmaster.tools.spreadsheet.SpreadsheetPortableSafetyCampaignTests","result":"PASS","checks":16},
+      {"class":"org.systemmaster.tools.spreadsheet.SpreadsheetCalculationEngineAdmissionPortableTests","result":"PASS","checks":9},
+      {"class":"org.systemmaster.tools.spreadsheet.SpreadsheetSecurityProfilePortableTests","result":"PASS","checks":12},
+      {"class":"org.systemmaster.integration.VerifiedOutputCampaignPortableTests","result":"PASS","checks":20},
+      {"class":"org.systemmaster.integration.VerifiedArtifactWorkflowPortableTests","result":"PASS","checks":41},
+      {"class":"org.systemmaster.integration.SystemMasterVerticalSlicePortableTests","result":"PASS","checks":87,"note":"First invocation outside checkout root failed the source-root architecture guard; rerun from the exact checkout root passed 87/87. The first harness-location failure is preserved and is not classified as a product failure."}
+    ],
+    "standing": "FRESH_PORTABLE_REPLAY_PASS_FOR_LISTED_SUITES__NO_NATIVE_A01_PRODUCTION_CLAIM"
+  },
+  "preserved_historical_qualification": {
+    "vp_struct_subject": "286a44d00a62d5a9f0740dbf02634b184cd7ab0b",
+    "vp_struct_result": "PASS_PORTABLE_PROFILE_VP_STRUCT",
+    "multi_profile_campaign_subject": "6a95ae12dbb44d8b8446ebb8743cb28320ddf1b3",
+    "multi_profile_campaign_result": "PASS_PORTABLE_EXACT_COMMIT",
+    "vp_security_subject": "bf054c745c0e9951cc6d0cd2bd007182ba3d4283",
+    "vp_security_result": "PASS_PORTABLE_EXACT_COMMIT",
+    "qualification_boundary": "Historical and fresh replay evidence applies only to its exact recovered subject/environment/suites. It does not transfer to current main or any future imported Git SHA."
+  },
+  "current_truth": {
+    "source_history_custody": "PROVEN_COMPLETE_GIT_BUNDLE",
+    "recovered_exact_subject": "PROVEN",
+    "recovered_spreadsheet_high_water": "bf054c745c0e9951cc6d0cd2bd007182ba3d4283",
+    "current_main_contains_recovered_subject": false,
+    "current_main_git_import": "NOT_PERFORMED",
+    "current_main_exact_subject_qualification": "NOT_RUN",
+    "full_spreadsheet_product_complete": false,
+    "native_excel_qualified": false,
+    "a01_qualified": false,
+    "physical_iphone_qualified": false,
+    "production_certified": false
+  },
+  "remaining_product_gaps": [
+    "full formula syntax/reference/semantic coverage beyond existing bounded checks",
+    "broad calculation correctness and dependency/recalculation behavior beyond declared CALC-002 subset",
+    "cached-value freshness and calculation configuration semantics across real workbook classes",
+    "complete styles/layout/tables/names/validation/filter/chart/drawing/Pivot/data-model fidelity",
+    "connections, queries, refresh, external workbook links and controlled active-content execution",
+    "full structural plus semantic round-trip preservation",
+    "native Excel open/save/recalculation/version compatibility on exact target builds",
+    "performance/resource and large-workbook qualification",
+    "independent disproof and clean-replay fidelity seal for real target workbooks",
+    "live current Core/DATA-001 persistence integration where required",
+    "A-01, physical iPhone and production qualification"
+  ],
+  "selected_next_action": {
+    "objective_id": "SYSTEM-MASTER-SPREADSHEET-BF054C-GITHUB-NATIVE-IMPORT-AND-EXACT-SHA-REQUALIFICATION-002",
+    "state": "READY_AFTER_DOCUMENT_TRANSPORT_OR_PARALLEL_SAFE_IF_CAPACITY_EXISTS",
+    "instruction": "Import the complete-history recovered Git source containing bf054c745c0e9951cc6d0cd2bd007182ba3d4283 into ordinary current GitHub-native custody without semantic rewrite; preserve commit/tree ancestry where transport permits or otherwise create a content-equivalent import with explicit lineage; independently bind the resulting exact current Git SHA/tree; rerun the required portable Spreadsheet/shared suites; then perform a delta census against HEADLESS-COMPUTE-DATA-SPREADSHEET-CONTRACT-001 before implementing additional Spreadsheet profiles.",
+    "success_gate": "CURRENT_GITHUB_CUSTODY_ESTABLISHED__RECOVERED_SOURCE_IDENTITY_OR_EXPLICIT_CONTENT_EQUIVALENCE_PROVEN__FRESH_CURRENT_EXACT_SHA_QUALIFICATION_RECORDED__NO_PASS_TRANSFER",
+    "requires_physical_a01_access": false,
+    "transport_note": "The connected GitHub chat interface presently lacks arbitrary binary gitbundle/tree upload, so this objective remains transport-dependent here. The preserved Library bundle keeps exact history available for a runner/local Git transport path."
+  },
+  "global_sequence_rule": "Document R4 GitHub-native source import remains CURRENT-AUTHORITY.central_next_objective. This Spreadsheet admission is closed safe work-ahead and its GitHub import successor must not silently displace Document sequencing.",
+  "completion_rule": "This admission census is complete because the strongest recovered Spreadsheet source high-water, exact Git ancestry, complete-history custody and fresh portable replay standing are now explicit. It is not current-main implementation admission or Spreadsheet product completion."
+}
