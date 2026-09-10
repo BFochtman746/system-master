@@ -1,0 +1,34 @@
+{
+  "event_version": 1,
+  "event_id": "A01-REPAIR-a01-run-34431764843-A01-CONTROL-PLANE-SELFTEST-A1-E0004",
+  "transaction_id": "A01-REPAIR-a01-run-34431764843-A01-CONTROL-PLANE-SELFTEST-A1",
+  "event_type": "A01_REPLACEMENT_TICKET_EMITTED",
+  "recorded_at": "2026-09-10T09:12:00.001Z",
+  "owner_path": "SYSTEM_MASTER/CORE",
+  "receipt_id": "a01-run-34431764843-A01-CONTROL-PLANE-SELFTEST",
+  "qualification_id": "A01-CONTROL-PLANE-SELFTEST",
+  "workstream_id": "SYSTEM-MASTER",
+  "failed_subject_sha": "3a8004813e18d7defbf1f9ebc47f5bd8fcd30fb9",
+  "replacement_subject_sha": "ceb6870546012b789caea56499a1d219a195dc8b",
+  "state": "A01_REQUEUE_READY",
+  "classification": "REPAIRABLE_SUBJECT",
+  "repair_attempt": 0,
+  "evidence_pointer": "artifact:A01-CONTROL-PLANE-SELFTEST-34431764843-evidence",
+  "prequalification_evidence_pointer": "github-actions-run:34435547400:A-01-Control-Plane-Enforcement:PASS:subject:ceb6870546012b789caea56499a1d219a195dc8b",
+  "replacement_ticket_pointer": "qualification/a01/repair-requests/A01-REPAIR-a01-run-34431764843-A01-CONTROL-PLANE-SELFTEST-A1.json",
+  "a01_rerun_receipt_pointer": null,
+  "payload": {
+    "replacement_ticket": {
+      "workstream_id": "SYSTEM-MASTER",
+      "qualification_id": "A01-CONTROL-PLANE-SELFTEST",
+      "subject_sha": "ceb6870546012b789caea56499a1d219a195dc8b",
+      "origin_ref": "refs/heads/main",
+      "resume_on_pass": "Record authoritative A-01 PASS for replacement subject ceb6870546012b789caea56499a1d219a195dc8b, close repair transaction A01-REPAIR-a01-run-34431764843-A01-CONTROL-PLANE-SELFTEST-A1, preserve root failed subject 3a8004813e18d7defbf1f9ebc47f5bd8fcd30fb9 and immediate repair base 3a8004813e18d7defbf1f9ebc47f5bd8fcd30fb9, then continue the owner lane from current repository authority.",
+      "resume_on_failure": "Record the new authoritative A-01 result against existing repair transaction A01-REPAIR-a01-run-34431764843-A01-CONTROL-PLANE-SELFTEST-A1; do not create a second repair lineage; reclassify truthfully and do not exceed repair budget 1.",
+      "notification_target": "repair-transaction:A01-REPAIR-a01-run-34431764843-A01-CONTROL-PLANE-SELFTEST-A1"
+    },
+    "root_receipt_id": "a01-run-34431764843-A01-CONTROL-PLANE-SELFTEST",
+    "parent_receipt_id": "a01-run-34431764843-A01-CONTROL-PLANE-SELFTEST",
+    "candidate_repair_attempt": 1
+  }
+}
