@@ -6,9 +6,13 @@ on:
       - book-system/control-v1
     paths:
       - ".github/scripts/book-system-end-to-end-authoring-001-qualify.js"
+      - ".github/scripts/book-system-end-to-end-authoring-001-qualify-v2.js"
+      - ".github/scripts/a01-book-system-end-to-end-authoring-001.js"
       - ".github/workflows/book-system-end-to-end-authoring-001-prequalification.yml"
+      - "system-master/book-system/author-decision-current-subject-guard.js"
+      - "system-master/book-system/export-freeze-parent-admission-guard.js"
       - "qualification/book-system/end-to-end-authoring-001/**"
-      - "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-020.json"
+      - "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-022.json"
   workflow_dispatch:
 
 permissions:
@@ -26,10 +30,15 @@ jobs:
           fetch-depth: 0
       - name: Verify exact checkout
         run: test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
-      - name: Syntax check E2E qualifier
-        run: node --check .github/scripts/book-system-end-to-end-authoring-001-qualify.js
-      - name: Run 48-case Book E2E composition qualification
-        run: node .github/scripts/book-system-end-to-end-authoring-001-qualify.js
+      - name: Syntax check E2E qualifier surfaces and stable wrapper
+        run: |
+          node --check .github/scripts/book-system-end-to-end-authoring-001-qualify.js
+          node --check .github/scripts/book-system-end-to-end-authoring-001-qualify-v2.js
+          node --check .github/scripts/a01-book-system-end-to-end-authoring-001.js
+          node --check system-master/book-system/author-decision-current-subject-guard.js
+          node --check system-master/book-system/export-freeze-parent-admission-guard.js
+      - name: Run unchanged 48-case Book E2E matrix through stable wrapper
+        run: node .github/scripts/a01-book-system-end-to-end-authoring-001.js
       - name: Upload hosted qualification evidence
         if: always()
         uses: actions/upload-artifact@v4
