@@ -1,0 +1,47 @@
+name: Learning Assessment Target Domain VI Batch 02 Prequalification
+on:
+  push:
+    branches: [learning/assessment-target-domain-vi-batch-02-20260910]
+    paths:
+      - "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001B-ASSESSMENT-TARGET-DOMAIN-VI-BATCH-02-CANDIDATE-041A.json"
+      - ".github/scripts/learning-assessment-target-batch-qualify.js"
+      - ".github/workflows/learning-assessment-target-domain-vi-batch-02-prequal.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  validate:
+    name: Domain VI assessment-target batch 02 exact-source validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      ASSESSMENT_CANDIDATE: LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001B-ASSESSMENT-TARGET-DOMAIN-VI-BATCH-02-CANDIDATE-041A.json
+      TOPOLOGY_CANDIDATE: LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-DOMAIN-VI-BATCH-02-CANDIDATE-023.json
+      ASSESSMENT_DOMAIN: VI
+      ASSESSMENT_BATCH_INDEX: 2
+      EXPECTED_TARGET_COUNT: 5
+      CUMULATIVE_TARGET_COUNT: 10
+      DOMAIN_TARGET_TOTAL: 10
+      EVIDENCE_DIR: learning-assessment-target-domain-vi-batch-02-evidence
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - name: Record exact subject
+        run: |
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          printf 'SUBJECT_SHA=%s\n' "${GITHUB_SHA}"
+      - name: Syntax check reusable validator
+        run: node --check .github/scripts/learning-assessment-target-batch-qualify.js
+      - name: Validate final Domain VI assessment targets
+        run: node .github/scripts/learning-assessment-target-batch-qualify.js
+      - name: Upload hosted evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: LEARNING-ASSESSMENT-TARGET-DOMAIN-VI-BATCH-02-${{ github.sha }}-hosted-evidence
+          path: ${{ runner.temp }}/learning-assessment-target-domain-vi-batch-02-evidence
+          if-no-files-found: warn
+          retention-days: 30
