@@ -1,0 +1,116 @@
+{
+  "contract_id": "BOOK-SYSTEM-LIFECYCLE-CURRENT-PARENT-REBIND-001",
+  "effective_date": "2026-09-09",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "standing": "CANDIDATE__STRICT_LIFECYCLE_LEDGER_BINDING_COMPATIBILITY_REPAIR__QUALIFICATION_REQUIRED",
+  "classification": "COMPATIBILITY_AND_CUSTODY_ONLY__NO_NEW_LIFECYCLE_POLICY",
+  "depends_on": [
+    "BOOK-SYSTEM-LIFECYCLE-TRANSITION-ENGINE-001",
+    "BOOK-SYSTEM-LIFECYCLE-CURRENT-PARENT-COMPATIBILITY-ADAPTER-001",
+    "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001",
+    "BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-002",
+    "BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001",
+    "BOOK-SYSTEM-EXPORT-FREEZE-001"
+  ],
+  "problem": "The persistent lifecycle ledger is exact-parent-bound. Legitimate non-lifecycle parent successors change parent version/digest and currently leave no qualified way to preserve and rebind the existing lifecycle ledger without resetting its history.",
+  "operation": "REBIND_LIFECYCLE_LEDGER_AFTER_AUTHORIZED_NON_LIFECYCLE_PARENT_SUCCESSOR",
+  "allowed_authority_kinds": [
+    "CANONICAL_STATE_MUTATION",
+    "INTEGRATION_RUNTIME",
+    "AUTHOR_DECISION",
+    "EXPORT_RELEASE",
+    "VERSION_ROLLBACK"
+  ],
+  "forbidden_authority_kinds": [
+    "LIFECYCLE_TRANSITION",
+    "PROVIDER",
+    "PROSE_SYSTEM",
+    "BOOK_EVALUATOR",
+    "DOCUMENT_SYSTEM"
+  ],
+  "request_required": [
+    "rebind_request_id",
+    "idempotency_key",
+    "actor_class",
+    "authority_kind",
+    "expected_pre_parent_state_version",
+    "expected_pre_parent_state_digest",
+    "expected_post_parent_state_version",
+    "expected_post_parent_state_digest",
+    "expected_lifecycle_ledger_version",
+    "expected_lifecycle_ledger_digest",
+    "authority_receipt"
+  ],
+  "actor_class": "PARENT_SYSTEM",
+  "preconditions": [
+    "pre parent validates under the current sealed Book parent contract",
+    "post parent validates under the current sealed Book parent contract",
+    "existing lifecycle ledger validates exactly against pre parent through the already-qualified compatibility adapter",
+    "post parent state_version is exactly pre parent state_version + 1",
+    "book_project_id and book_id are unchanged",
+    "book_project.status is unchanged",
+    "authority kind is explicitly allowed and is not LIFECYCLE_TRANSITION",
+    "authority receipt has one durable receipt identifier and exactly binds pre/post parent state version and digest",
+    "request expected parent and lifecycle-ledger identities exactly match"
+  ],
+  "commit_effect": [
+    "clone the lifecycle ledger",
+    "preserve unit_states byte-equivalent",
+    "preserve dependency_edges byte-equivalent",
+    "preserve processed lifecycle transition requests byte-equivalent",
+    "preserve lifecycle transition_receipts byte-equivalent",
+    "advance lifecycle ledger_version exactly once",
+    "replace only bound_parent_state_version and bound_parent_state_digest with exact post-parent identity",
+    "append one compatibility rebind receipt and one idempotency request index entry",
+    "validate the resulting lifecycle ledger against the exact post parent through the qualified compatibility adapter"
+  ],
+  "rebind_receipt_required": [
+    "rebind_receipt_id",
+    "rebind_request_id",
+    "idempotency_key",
+    "authority_kind",
+    "authority_receipt_ref",
+    "authority_receipt_digest",
+    "pre_parent_state_version",
+    "pre_parent_state_digest",
+    "post_parent_state_version",
+    "post_parent_state_digest",
+    "pre_lifecycle_ledger_version",
+    "pre_lifecycle_ledger_digest",
+    "post_lifecycle_ledger_version",
+    "preserved_lifecycle_history_digest",
+    "lifecycle_status",
+    "lifecycle_transition_performed",
+    "publication_authorized"
+  ],
+  "idempotency": {
+    "same_idempotency_key_same_normalized_request": "RETURN_SAME_LOGICAL_REBIND_RECEIPT_WITH_NO_SECOND_LEDGER_INCREMENT",
+    "same_idempotency_key_different_request": "REJECT_IDEMPOTENCY_KEY_CONFLICT",
+    "same_rebind_request_id_different_idempotency_key": "REJECT_REQUEST_ID_CONFLICT"
+  },
+  "authority_non_claims": [
+    "does not authorize or create the post parent state",
+    "does not validate the business correctness of the parent authority operation beyond exact receipt identity and unchanged lifecycle status",
+    "does not perform a lifecycle transition",
+    "does not change Lifecycle v1 transition policy or add transition types",
+    "does not reinterpret an author choice",
+    "does not create document bytes or provider authority",
+    "does not freeze an export",
+    "does not authorize publication or delivery"
+  ],
+  "qualification_gates": [
+    "real Integration Runtime receipt can rebind persistent lifecycle ledger",
+    "real Author Decision Queue resolution receipt can rebind persistent lifecycle ledger",
+    "real Export Freeze release receipt can rebind persistent lifecycle ledger",
+    "Version/Rollback successor receipt can rebind persistent lifecycle ledger",
+    "existing lifecycle history survives rebind exactly",
+    "next legal Lifecycle v1 transition succeeds using the same rebased ledger and retains prior transition receipts",
+    "status-changing or Lifecycle-transition authority receipt is rejected",
+    "provider/non-parent authority is rejected",
+    "stale/mismatched pre/post/ledger identity is rejected",
+    "replay and conflict behavior is deterministic",
+    "qualified predecessor Lifecycle and compatibility adapter bytes remain unchanged"
+  ],
+  "pass_unlocks": "BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001-HARNESS-001",
+  "qualification_effect": "NONE_UNTIL_HOSTED_AND_REGISTERED_EXACT_SHA_A01_PASS"
+}
