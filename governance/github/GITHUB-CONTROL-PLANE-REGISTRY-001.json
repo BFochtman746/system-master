@@ -1,0 +1,101 @@
+{
+  "registry_id": "GITHUB-CONTROL-PLANE-REGISTRY-001",
+  "status": "PROPOSED_FOR_ADMISSION",
+  "owner": "SYSTEM_MASTER",
+  "effective_date": "2026-09-10",
+  "policy": "governance/github/GITHUB-CONTROL-PLANE-POLICY-001.md",
+  "audit_script": ".github/scripts/github-control-plane-audit.js",
+  "enforcement_workflow": ".github/workflows/github-control-plane-enforcement.yml",
+  "exact_subject_admission_contract": "governance/github/EXACT-SUBJECT-ADMISSION-CONTRACT-001.md",
+  "provenance_schema": "governance/github/EXACT-SUBJECT-PROVENANCE-SCHEMA-001.json",
+  "canonical_authority": "governance/CURRENT-AUTHORITY.json",
+  "second_shift": {
+    "registry": "governance/second-shift/SECOND-SHIFT-REGISTRY-001.json",
+    "root_owner_file": "governance/second-shift/SYSTEM-MASTER-DELEGATIONS.json",
+    "owner_coverage_script": ".github/scripts/second-shift-owner-coverage.js",
+    "rule": "SYSTEM_MASTER-owned headless tool portfolios inherit the SYSTEM_MASTER lane; no per-tool lane is created without topology and registry admission."
+  },
+  "required_server_controls": {
+    "canonical_branch": "main",
+    "protected": true,
+    "require_pull_request": true,
+    "require_status_checks": true,
+    "block_force_push": true,
+    "block_deletion": true,
+    "require_signed_commits_target": true,
+    "routine_bypass": "DENY"
+  },
+  "workflow_policy": {
+    "external_actions": "FULL_40_CHAR_COMMIT_SHA",
+    "container_actions": "IMAGE_DIGEST",
+    "token_permissions": "EXPLICIT_LEAST_PRIVILEGE",
+    "read_checkout_persist_credentials": false,
+    "pull_request_target_default": "DENY",
+    "self_hosted_untrusted_pr": "DENY",
+    "job_timeout": "REQUIRED",
+    "write_workflow_concurrency": "REQUIRED",
+    "write_token_on_pull_request": "DENY",
+    "heavy_qualification_transport_fanout": "DENY",
+    "durable_machine_report": "REQUIRED_FOR_CONTROL_AND_QUALIFICATION",
+    "same_repo_composition_preferred": "SELF_REPOSITORY_EXACT_COMMIT_SYNTAX_WHEN_RUNNER_COMPATIBLE"
+  },
+  "admission_policy": {
+    "lifecycle": [
+      "STAGE",
+      "FREEZE_READY",
+      "VERIFY_CARRIER",
+      "MATERIALIZE",
+      "VERIFY_MANIFEST",
+      "CREATE_IMMUTABLE_SUBJECT_SHA",
+      "QUALIFY_READ_ONLY",
+      "SEAL_PROVENANCE",
+      "PROMOTE"
+    ],
+    "historical_pass_transfer": false,
+    "qualification_write_authority": false,
+    "promotion_force_push": false
+  },
+  "runner_policy": {
+    "a01_preferred_registration": "ONE_JOB_EPHEMERAL_OR_JIT",
+    "persistent_runner_requires_clean_room_guard": true,
+    "untrusted_pull_request_code_on_a01": false,
+    "external_runner_log_preservation": true,
+    "self_repository_syntax_min_runner_version": "2.336.0"
+  },
+  "evidence_policy": {
+    "model": "SLSA_STYLE_PLUS_SYSTEM_MASTER_AUTHORITY_BOUNDARIES",
+    "native_github_attestation": "OPTIONAL_WHEN_PRIVATE_REPOSITORY_PLAN_SUPPORTS_IT",
+    "minimum_fields": [
+      "subject_git_sha",
+      "source_or_carrier_digest",
+      "manifest_digest_when_applicable",
+      "workflow_path",
+      "workflow_digest",
+      "run_id",
+      "run_attempt",
+      "trigger_event",
+      "trigger_ref",
+      "runner_class",
+      "runner_version_or_image",
+      "toolchain_versions",
+      "resolved_external_parameters",
+      "gate_results",
+      "output_digests",
+      "authority_boundaries"
+    ]
+  },
+  "enforcement_levels": {
+    "BLOCKER": "fail immediately",
+    "ERROR": "fail under strict mode and must be retired for full admission",
+    "WARN": "review and record; no authority granted",
+    "INFO": "informational"
+  },
+  "observed_2026_09_10": {
+    "main_protected": false,
+    "main_required_status_checks_enforcement": "off",
+    "rulesets_api": "PRIVATE_REPOSITORY_RULESETS_NOT_ENABLED_FOR_CURRENT_PLAN",
+    "actions_run_count_observed": 2213,
+    "observation_rule": "These values are dated observations and must be re-fetched before any current-state claim."
+  },
+  "completion_gate": "SERVER_SIDE_MAIN_PROTECTION_ENABLED__STRICT_REPO_AUDIT_PASS__SECOND_SHIFT_OWNER_COVERAGE_PASS__REUSABLE_EXACT_SUBJECT_ADMISSION_BOUND__DURABLE_EVIDENCE_ENABLED"
+}
