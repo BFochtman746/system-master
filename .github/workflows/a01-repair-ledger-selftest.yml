@@ -6,10 +6,14 @@ on:
       - '.github/scripts/a01-closed-loop-repair*.js'
       - '.github/scripts/a01-repair-broker*.js'
       - '.github/scripts/a01-repair-ledger*.js'
+      - '.github/scripts/a01-repair-rerun*.js'
+      - '.github/workflows/a01-control-plane-gateway.yml'
       - '.github/workflows/a01-repair-broker.yml'
       - '.github/workflows/a01-repair-ledger-ingest.yml'
       - '.github/workflows/a01-repair-receipt-ingest.yml'
       - '.github/workflows/a01-repair-finalize.yml'
+      - '.github/workflows/a01-repair-rerun.yml'
+      - '.github/workflows/a01-repair-rerun-adjudicate.yml'
       - '.github/workflows/a01-repair-ledger-selftest.yml'
       - 'governance/repair/**'
       - 'qualification/a01/schema/return-ticket.schema.json'
@@ -18,10 +22,14 @@ on:
       - '.github/scripts/a01-closed-loop-repair*.js'
       - '.github/scripts/a01-repair-broker*.js'
       - '.github/scripts/a01-repair-ledger*.js'
+      - '.github/scripts/a01-repair-rerun*.js'
+      - '.github/workflows/a01-control-plane-gateway.yml'
       - '.github/workflows/a01-repair-broker.yml'
       - '.github/workflows/a01-repair-ledger-ingest.yml'
       - '.github/workflows/a01-repair-receipt-ingest.yml'
       - '.github/workflows/a01-repair-finalize.yml'
+      - '.github/workflows/a01-repair-rerun.yml'
+      - '.github/workflows/a01-repair-rerun-adjudicate.yml'
       - '.github/workflows/a01-repair-ledger-selftest.yml'
       - 'governance/repair/**'
       - 'qualification/a01/schema/return-ticket.schema.json'
@@ -45,6 +53,8 @@ jobs:
           node --check .github/scripts/a01-closed-loop-repair.js
           node --check .github/scripts/a01-repair-broker.js
           node --check .github/scripts/a01-repair-ledger.js
+          node --check .github/scripts/a01-repair-ledger-reconcile.js
+          node --check .github/scripts/a01-repair-rerun-selftest.js
           node --check .github/scripts/a01-closed-loop-repair-selftest.js
           node --check .github/scripts/a01-repair-broker-selftest.js
           node --check .github/scripts/a01-repair-ledger-selftest.js
@@ -58,8 +68,14 @@ jobs:
       - name: Durable ledger, owner dispatch and replacement-ticket selftest
         run: node .github/scripts/a01-repair-ledger-selftest.js
 
+      - name: Same-transaction rerun and terminal-adjudication selftest
+        run: node .github/scripts/a01-repair-rerun-selftest.js
+
+      - name: Reconcile durable repair projections
+        run: node .github/scripts/a01-repair-ledger-reconcile.js
+
       - name: Record bounded authority standing
         run: |
-          echo '## A01-CLOSED-LOOP-REPAIR-001B PREQUALIFICATION' >> "$GITHUB_STEP_SUMMARY"
-          echo 'PASS proves deterministic control logic only: receipt routing, durable ledger/inbox projection, owner-worker dispatch packet, changed-SHA prequalification binding, and replacement-ticket emission.' >> "$GITHUB_STEP_SUMMARY"
-          echo 'It does not prove an autonomous coding agent repaired real product code and does not grant A-01 PASS, promotion, publication or production authority.' >> "$GITHUB_STEP_SUMMARY"
+          echo '## A01-CLOSED-LOOP-REPAIR-001C HOSTED PREQUALIFICATION' >> "$GITHUB_STEP_SUMMARY"
+          echo 'PASS proves deterministic control logic only: replacement rerun admission is bound to an existing repair transaction; rerun subject/qualification/workstream/ref are checked; replacement SUBJECT_FAILURE re-dispatches the same transaction within budget; bounded INFRA_FAILURE emits a same-SHA retry without consuming a product repair attempt; authoritative PASS-shaped test evidence closes the synthetic transaction; exhausted repair budget dead-letters it; and historical lineage remains append-only.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'This hosted selftest does NOT prove a real A-01 rerun occurred and does not grant A-01 PASS, promotion, publication, production, human, author, private-data, native-platform or external authority. A real exact-subject A-01 receipt linked to the same transaction is required to close 001C.' >> "$GITHUB_STEP_SUMMARY"
