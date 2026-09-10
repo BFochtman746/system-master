@@ -164,7 +164,7 @@ let staleScenario;
   results.push({case_id:'RF012-010',result:'PASS'});
 }
 
-const uniquePlanCases=new Set(results.map(x=>x.case_id.replace(/-(PRESENT|REOPEN)$/,'')));
+const uniquePlanCases=new Set(results.map(x=>{const m=/^RF012-(\d{3})/.exec(x.case_id);return m?`RF012-${m[1]}`:x.case_id;}));
 const summary={
   qualification_id:'BOOK-SYSTEM-AUTHOR-DECISION-CURRENT-SUBJECT-GUARD-001-DETERMINISTIC-QUALIFIER-002',
   result_class: uniquePlanCases.size===10 ? 'PASS' : 'FAIL',
