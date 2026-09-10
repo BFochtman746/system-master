@@ -9,6 +9,12 @@ const topologyPath = path.join(root, 'governance', 'SYSTEM-TOPOLOGY-002.json');
 const registryPath = path.join(root, 'qualification', 'a01', 'registry.json');
 const expectedSystems = new Set(['CORE', 'LEARNING', 'BOOK', 'PROSE']);
 const expectedParent = { CORE: 'SYSTEM_MASTER', LEARNING: 'SYSTEM_MASTER', BOOK: 'SYSTEM_MASTER', PROSE: 'BOOK' };
+const expectedOwnerPath = {
+  CORE: 'SYSTEM_MASTER/CORE',
+  LEARNING: 'SYSTEM_MASTER/LEARNING',
+  BOOK: 'SYSTEM_MASTER/BOOK',
+  PROSE: 'SYSTEM_MASTER/BOOK/PROSE'
+};
 
 function fail(message) {
   console.error(`SYSTEM_TOPOLOGY_ERROR: ${message}`);
@@ -89,12 +95,31 @@ for (const item of obligations.obligations || []) {
 }
 
 const secondShift = readJson(requireFile(authority.second_shift_registry));
-const expectedOwnerFiles = { CORE: 'CORE-DELEGATIONS.json', LEARNING: 'LEARNING-DELEGATIONS.json', BOOK: 'BOOK-DELEGATIONS.json', PROSE: 'PROSE-DELEGATIONS.json' };
 for (const id of expectedSystems) {
   const rel = (secondShift.owner_files || {})[id];
   if (!rel) fail(`Second Shift registry missing owner file for ${id}`);
-  requireFile(rel);
-  if (!rel.endsWith(expectedOwnerFiles[id])) fail(`unexpected Second Shift owner file for ${id}: ${rel}`);
+
+  const normalized = String(rel).replace(/\\/g, '/');
+  if (!normalized.startsWith('governance/second-shift/')) {
+    fail(`Second Shift owner file for ${id} escapes governance/second-shift: ${rel}`);
+  }
+
+  const selectedFile = requireFile(normalized);
+  const selected = readJson(selectedFile);
+  if (selected.owner_system_id !== id) {
+    fail(`Second Shift registry-selected file identity mismatch for ${id}: ${normalized}`);
+  }
+  if (selected.owner_path !== expectedOwnerPath[id]) {
+    fail(`Second Shift registry-selected owner path mismatch for ${id}: ${selected.owner_path}`);
+  }
+  if (selected.control_ref !== byId[id].control_ref) {
+    fail(`Second Shift registry-selected control ref mismatch for ${id}: ${selected.control_ref}`);
+  }
+  for (const delegation of selected.active_delegations || []) {
+    if (delegation.owner_path !== expectedOwnerPath[id]) {
+      fail(`Second Shift active delegation escapes ${id} owner path in ${normalized}`);
+    }
+  }
 }
 
 console.log('SYSTEM_TOPOLOGY_PASS');
