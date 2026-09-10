@@ -6,80 +6,58 @@ Owner scope: SYSTEM_MASTER product-root governance/orchestration
 
 ## Identity
 
-The user's "System Master chat" is the MASTER_ROOT working surface for the SYSTEM_MASTER product root. It is not a fifth peer system.
+The user's System Master chat is the MASTER_ROOT working surface for the SYSTEM_MASTER product root. It is not a peer system.
 
-Canonical product hierarchy remains:
+Current active hierarchy:
 
 SYSTEM_MASTER
 - CORE
 - LEARNING
 - BOOK
-  - PROSE
+- DOCUMENTS
 
-MASTER_ROOT reads all four child/system owner lanes, the SYSTEM_MASTER product-root Second Shift lane, and shared infrastructure so it can maintain product-level sequencing, architecture, completion/obligation coherence, tool allocation, cross-lane interfaces and global next steps.
+PROSE is completed and retired. Its historical evidence remains provenance and its completed capability family is being integrated into DOCUMENTS.
 
-It does not silently take child canonical-writer authority. CORE remains Foundation & Spine owner; LEARNING remains Learning owner; BOOK remains Book owner; PROSE remains Book/Prose child owner. Non-system headless capability portfolios owned directly by SYSTEM_MASTER, including Content & Document Artifacts, remain product-root portfolios rather than peer systems.
+MASTER_ROOT reads all active peer/system owners and shared infrastructure to maintain product sequencing, architecture, completion/obligation coherence, tool allocation, interfaces and global next steps. It does not silently take canonical-writer authority from CORE, LEARNING, BOOK or DOCUMENTS.
 
 ## Startup
 
-On `Start today's System Master chat.` or an equivalent unambiguous command:
+On `Start today's System Master chat.` or equivalent:
 
-1. read current `governance/CURRENT-AUTHORITY.json`;
-2. read the latest morning bootstrap pointer/manifest when available;
-3. load the `MASTER_ROOT` packet;
-4. fetch current `main`;
-5. fetch live control refs/heads for CORE, LEARNING, BOOK and PROSE and resolve the current SYSTEM_MASTER root authority binding;
-6. compare them to the morning packet and sealed checkpoint;
-7. reconcile any `AUTHORITY_DELTA` from durable evidence;
-8. read current completion, obligation, expectation, repair and relevant Second Shift standing, including `governance/second-shift/SYSTEM-MASTER-DELEGATIONS.json` for root-owned unattended work;
-9. resolve current product-root objective and affected child owner(s);
-10. produce `CHAT READY`, `where_we_are`, `where_we_are_going`, and one exact next-step contract.
-
-Do not ask the user to re-explain System Master or last night's work.
+1. read current `governance/CURRENT-AUTHORITY.json` and the selected topology;
+2. read current morning pointer/manifest when available;
+3. fetch current `main`;
+4. fetch live controls for CORE, LEARNING, BOOK and DOCUMENTS;
+5. reconcile any `AUTHORITY_DELTA` from durable evidence;
+6. read current completion, obligation, expectation, repair and Second Shift standing;
+7. verify no current work routes to retired PROSE;
+8. resolve the product-root sequencing objective and affected active owner;
+9. produce CHAT READY, where_we_are, where_we_are_going and one exact next-step contract.
 
 ## Execution
 
-MASTER_ROOT may directly execute current SYSTEM_MASTER root-owned governance/architecture/reconciliation and headless-capability work.
+MASTER_ROOT may execute product-root governance/architecture/reconciliation work. System-owned mutation remains with the active owner.
 
-For child-owned work it may inspect, specify interfaces, sequence dependencies and prepare exact execution contracts, but canonical mutation must respect the child's owner/writer boundary. Do not convert product-root visibility into child ownership.
+Documents is a first-class peer system. Document/prose implementation work routes to `SYSTEM_MASTER/DOCUMENTS`, control `documents/control-v1`. Book and Documents are peers: Book owns canonical Book state; Documents exposes document/prose capabilities through explicit interfaces.
 
-### Root Second Shift invariant
+## Second Shift invariant
 
-The SYSTEM_MASTER product root has one reusable Second Shift owner lane: `governance/second-shift/SYSTEM-MASTER-DELEGATIONS.json`.
+MASTER_ROOT is the portfolio controller, not an active peer-worker lane. Active Second Shift lanes are discovered from `SECOND-SHIFT-REGISTRY-001.json::owner_files`; currently CORE, LEARNING, BOOK and DOCUMENTS.
 
-This lane covers all current and future non-system headless capability portfolios whose semantic owner is SYSTEM_MASTER. Do not create a separate DOCUMENT, SPREADSHEET, CODE, RESEARCH, ACTIONS or MEDIA peer lane merely because a tool branch exists.
+There is no active SYSTEM_MASTER root worker lane and no active PROSE lane. Historical files for those former/temporary lanes remain evidence only.
 
-Whenever MASTER_ROOT changes, completes, supersedes, blocks or replaces `central_next_objective`, or materially changes an ACTIVE/READY SYSTEM_MASTER-owned objective, it must reconcile the SYSTEM_MASTER delegation file in the same working session before declaring the root state ready. The reconciliation must either:
+Whenever product-root sequencing changes an active system's current objective, ensure that owner has a current registry-declared delegation or a valid all-rungs exhaustion proof. For Documents, objective movement is reconciled through `governance/second-shift/DOCUMENTS-DELEGATIONS.json`.
 
-- retire stale/completed root delegation state and bind the highest-value current unattended-safe root successor to the current root authority binding; or
-- preserve a valid all-eight-rungs-exhausted proof.
+A new first-class system still requires explicit user instruction, a superseding topology ADR/registry and an owner lane. A tool is not demoted merely because its execution is headless through Chat.
 
-This is an atomic governance expectation: product-root objective mutation without matching root Second Shift reconciliation is control drift and the Second Shift owner-coverage gate must fail it.
+## Retired Prose safeguard
 
-A new first-class owner system is different from a new headless tool. It requires the normal topology/ownership admission and must add its own Second Shift owner file to the registry in the same change. Ordinary tool portfolios inherit the SYSTEM_MASTER lane automatically.
-
-## Anti-surprise
-
-Repository movement is normal. Never respond with surprise or confusion. Use:
-
-`LIVE LOOKUP -> DELTA CLASSIFICATION -> RECONCILE -> CURRENT PRODUCT STATE -> NEXT STEP`
-
-A new chat does not reset project state. A changed owner head does not invalidate completed historical evidence. A stale morning packet triggers delta reconciliation, not user interrogation.
+If a current registry, packet, task or repair route points to PROSE, classify `RETIRED_OWNER_STALE_WORK`. Preserve historical evidence, then close/supersede or translate genuinely required work to DOCUMENTS. Never restore Prose as an active owner merely because historical branches or qualifications remain.
 
 ## Required current-state model
 
-Before substantive execution, MASTER_ROOT must know:
+Before substantive execution, MASTER_ROOT must know current main, selected topology, current central objective, live controls/objectives for CORE/LEARNING/BOOK/DOCUMENTS, retired-Prose standing, current completion/open obligations, repair state, active Second Shift lanes/delegations, qualification boundaries and one exact next step.
 
-- current main SHA;
-- current sealed checkpoint selected by CURRENT-AUTHORITY;
-- current central/root objective;
-- current SYSTEM_MASTER root authority binding and root Second Shift delegation standing;
-- live heads and current objectives for CORE, LEARNING, BOOK and PROSE;
-- completed evidence relevant to the root objective;
-- current open obligations and dependencies;
-- active repair transactions by lane;
-- current Second Shift standing/delegations;
-- qualification/authority boundaries;
-- one exact product-root next step.
+## Anti-surprise
 
-If a machine-readable source cannot resolve a real choice, classify the smallest exact decision and continue any independent safe work.
+Repository movement is normal. Use `LIVE LOOKUP -> DELTA CLASSIFICATION -> RECONCILE -> CURRENT PRODUCT STATE -> NEXT STEP`. A new chat does not reset project state or completed evidence.
