@@ -153,8 +153,8 @@ expectError('OCR-E-022-DUPLICATE-TASK-IN-GROUP-REJECTED',()=>concurrency.validat
 const digestTamper = clone(d1); digestTamper.decision_digest=h('tamper');
 expectError('OCR-E-023-DECISION-DIGEST-TAMPER-REJECTED',()=>concurrency.validateConcurrencyDecision(digestTamper,independentPlan,workflow),'CONCURRENCY_DECISION_DIGEST_MISMATCH');
 
-const exports = Object.keys(concurrency);
-if (exports.some(name=>/dispatch|schedule|execute|runTask|retry|admit|worker/i.test(name))) throw new Error(`UNAUTHORIZED_RUNTIME_API:${exports.join(',')}`);
+const exportedNames = Object.keys(concurrency);
+if (exportedNames.some(name=>/dispatch|schedule|execute|runTask|retry|admit|worker/i.test(name))) throw new Error(`UNAUTHORIZED_RUNTIME_API:${exportedNames.join(',')}`);
 pass('OCR-E-024-NO-EXECUTION-SCHEDULER-WORKER-RETRY-OR-ADMISSION-API');
 
 if (d1.task_decisions.some(d=>d.policy_class==='ISOLATION_GATED' && d.parallel_eligible)) throw new Error('BLIND_ISOLATION_FALSELY_ELIGIBLE');
