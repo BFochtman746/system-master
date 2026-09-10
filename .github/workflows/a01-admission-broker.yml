@@ -1,0 +1,185 @@
+name: A-01 Admission Broker
+
+on:
+  workflow_dispatch:
+    inputs:
+      qualification_id:
+        description: Registered qualification ID
+        required: true
+        type: string
+      workstream_id:
+        description: Owning registered workstream
+        required: true
+        type: string
+      subject_sha:
+        description: Exact 40-character subject SHA
+        required: true
+        type: string
+      origin_ref:
+        description: Owner ref for the return ticket
+        required: true
+        type: string
+      resume_on_pass:
+        description: Dependency-valid continuation after PASS
+        required: true
+        type: string
+      resume_on_failure:
+        description: Failure continuation preserving exact evidence
+        required: true
+        type: string
+      notification_target:
+        description: Logical notification target
+        required: true
+        type: string
+      execution_context:
+        description: normal or overnight
+        required: true
+        default: normal
+        type: choice
+        options: [normal, overnight]
+      qualifier_timeout_minutes:
+        description: Registered qualifier runtime budget
+        required: true
+        default: 28
+        type: number
+      job_timeout_minutes:
+        description: Outer A-01 job budget
+        required: true
+        default: 30
+        type: number
+      not_before:
+        description: Optional overnight admission start ISO timestamp
+        required: false
+        default: ''
+        type: string
+      not_after:
+        description: Optional overnight admission end ISO timestamp
+        required: false
+        default: ''
+        type: string
+      repair_attempt:
+        description: Product repair attempts already consumed
+        required: false
+        default: 0
+        type: number
+      max_repair_attempts:
+        description: Maximum bounded repair attempts
+        required: false
+        default: 1
+        type: number
+      repair_transaction_id:
+        description: Existing durable repair transaction ID when this is a rerun
+        required: false
+        default: ''
+        type: string
+  push:
+    branches:
+      - 'system-master/a01-control-plane-*'
+    paths:
+      - '.github/workflows/a01-admission-broker.yml'
+      - '.github/scripts/a01-admission-preflight.js'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  admission:
+    name: Bind fresh control plane and verify admission before A-01
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    outputs:
+      control_plane_sha: ${{ steps.preflight.outputs.control_plane_sha }}
+      registry_version: ${{ steps.preflight.outputs.registry_version }}
+      admission_state: ${{ steps.preflight.outputs.admission_state }}
+    env:
+      A01_QUALIFICATION_ID: ${{ inputs.qualification_id || 'A01-CONTROL-PLANE-SELFTEST' }}
+      A01_WORKSTREAM_ID: ${{ inputs.workstream_id || 'SYSTEM-MASTER' }}
+      A01_SUBJECT_SHA: ${{ inputs.subject_sha || github.sha }}
+      A01_EXPECTED_CONTROL_PLANE_SHA: ${{ github.sha }}
+      A01_CONTROL_ROOT: ${{ github.workspace }}/control-plane
+      A01_SUBJECT_ROOT: ${{ github.workspace }}/subject
+      A01_ADMISSION_EVIDENCE_PATH: ${{ runner.temp }}/a01-admission-${{ github.run_id }}.json
+    steps:
+      - name: Require workflow_dispatch to originate from canonical main
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        shell: bash
+        run: |
+          if [ "$GITHUB_REF" != 'refs/heads/main' ]; then
+            echo "A01_ADMISSION_PRECHECK=BLOCKED classification=CONTROL_PLANE_BLOCKED reason=DISPATCH_REF_MUST_BE_MAIN:${GITHUB_REF}" >&2
+            exit 2
+          fi
+
+      - name: Checkout exact dispatch-time control plane
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          path: control-plane
+          fetch-depth: 1
+          clean: true
+          persist-credentials: false
+
+      - name: Checkout exact qualification subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ inputs.subject_sha || github.sha }}
+          path: subject
+          fetch-depth: 1
+          clean: true
+          persist-credentials: false
+
+      - name: Verify control-plane contract before admission
+        shell: bash
+        run: |
+          node control-plane/.github/scripts/a01-control-plane.js validate
+          node --check control-plane/.github/scripts/a01-admission-preflight.js
+
+      - name: Verify registration, owner, wrapper and both exact SHAs
+        id: preflight
+        shell: bash
+        run: node control-plane/.github/scripts/a01-admission-preflight.js
+
+      - name: Publish immutable admission binding
+        if: always()
+        shell: bash
+        run: |
+          echo '## A-01 ADMISSION BROKER' >> "$GITHUB_STEP_SUMMARY"
+          echo "Event: ${{ github.event_name }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "Control-plane SHA: ${{ github.sha }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "Subject SHA: $A01_SUBJECT_SHA" >> "$GITHUB_STEP_SUMMARY"
+          if [ -f "$A01_ADMISSION_EVIDENCE_PATH" ]; then
+            echo '```json' >> "$GITHUB_STEP_SUMMARY"
+            cat "$A01_ADMISSION_EVIDENCE_PATH" >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload admission evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: a01-admission-${{ github.run_id }}
+          path: ${{ env.A01_ADMISSION_EVIDENCE_PATH }}
+          if-no-files-found: error
+          retention-days: 30
+
+  qualify:
+    name: Execute through same-commit canonical gateway
+    needs: admission
+    if: needs.admission.outputs.admission_state == 'READY'
+    uses: ./.github/workflows/a01-control-plane-gateway.yml
+    with:
+      qualification_id: ${{ inputs.qualification_id || 'A01-CONTROL-PLANE-SELFTEST' }}
+      workstream_id: ${{ inputs.workstream_id || 'SYSTEM-MASTER' }}
+      subject_sha: ${{ inputs.subject_sha || github.sha }}
+      origin_ref: ${{ inputs.origin_ref || github.ref }}
+      resume_on_pass: ${{ inputs.resume_on_pass || 'Adjudicate PASS and continue the next dependency-valid objective.' }}
+      resume_on_failure: ${{ inputs.resume_on_failure || 'Adjudicate evidence, repair only the proven boundary, and rerun through a fresh admission broker dispatch.' }}
+      notification_target: ${{ inputs.notification_target || 'originating-workstream' }}
+      execution_context: ${{ inputs.execution_context || 'normal' }}
+      qualifier_timeout_minutes: ${{ inputs.qualifier_timeout_minutes || 28 }}
+      job_timeout_minutes: ${{ inputs.job_timeout_minutes || 30 }}
+      not_before: ${{ inputs.not_before || '' }}
+      not_after: ${{ inputs.not_after || '' }}
+      repair_attempt: ${{ inputs.repair_attempt || 0 }}
+      max_repair_attempts: ${{ inputs.max_repair_attempts || 1 }}
+      repair_transaction_id: ${{ inputs.repair_transaction_id || '' }}
