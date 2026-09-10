@@ -1,0 +1,51 @@
+name: Book Workflow Orchestrator Book Admission Handoff 001
+
+on:
+  push:
+    branches:
+      - book-system/control-v1
+    paths:
+      - 'qualification/book-system/book-prose-integration/orchestrator/BOOK-WORKFLOW-ORCHESTRATOR-BOOK-ADMISSION-HANDOFF-001.json'
+      - 'qualification/book-system/book-prose-integration/orchestrator/BOOK-WORKFLOW-ORCHESTRATOR-EVIDENCE-PROVENANCE-EMISSION-001-CLOSURE.json'
+      - 'qualification/book-system/book-prose-integration/orchestrator/BOOK-WORKFLOW-ORCHESTRATOR-AUTHORITY-CONTRACT-001-CLOSURE.json'
+      - 'system-master/book-system/book-workflow-state-model.js'
+      - 'system-master/book-system/book-workflow-execution-plan.js'
+      - 'system-master/book-system/book-capability-routing-interface.js'
+      - 'system-master/book-system/book-workflow-retry-idempotency-rules.js'
+      - 'system-master/book-system/book-workflow-evidence-provenance.js'
+      - 'system-master/book-system/book-workflow-book-admission-handoff.js'
+      - 'system-master/book-system/content-object-admission.js'
+      - 'system-master/book-system/content-object-admission-core.js'
+      - 'system-master/book-system/version-and-rollback-core.js'
+      - '.github/scripts/book-workflow-orchestrator-book-admission-handoff-001-qualify.js'
+      - '.github/workflows/book-workflow-orchestrator-book-admission-handoff-001-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@v4
+      - name: Qualify Book admission handoff boundary
+        env:
+          NODE_OPTIONS: --experimental-default-type=commonjs
+          RUNNER_TEMP: ${{ runner.temp }}
+        run: |
+          set -euo pipefail
+          node --check .github/scripts/book-workflow-orchestrator-book-admission-handoff-001-qualify.js
+          node --check system-master/book-system/book-workflow-book-admission-handoff.js
+          node --check system-master/book-system/content-object-admission-core.js
+          node .github/scripts/book-workflow-orchestrator-book-admission-handoff-001-qualify.js
+          test -s "${RUNNER_TEMP}/book-workflow-orchestrator-book-admission-handoff-001-summary.json"
+          cat "${RUNNER_TEMP}/book-workflow-orchestrator-book-admission-handoff-001-summary.json"
+      - name: Upload qualification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: book-workflow-orchestrator-book-admission-handoff-001-${{ github.run_id }}
+          path: ${{ runner.temp }}/book-workflow-orchestrator-book-admission-handoff-001-summary.json
+          if-no-files-found: error
