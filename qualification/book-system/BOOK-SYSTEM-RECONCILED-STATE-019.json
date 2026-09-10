@@ -1,0 +1,73 @@
+{
+  "state_id": "BOOK-SYSTEM-RECONCILED-STATE-019",
+  "effective_date": "2026-09-09",
+  "supersedes_for_current_parent_control": "BOOK-SYSTEM-RECONCILED-STATE-018",
+  "supersession_scope": "PARENT_CONTROL_AND_NEXT_STEP_ROUTING_ONLY",
+  "standing": "ACTIVE__E2E_COMPOSITION_GAP_REPAIRED_HOSTED_39_OF_39__A01_REGISTRATION_PENDING",
+  "project": "BOOK SYSTEM",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "control_branch": "book-system/control-v1",
+  "closed_parent_objective": {
+    "id": "BOOK-SYSTEM-EXPORT-FREEZE-001",
+    "standing": "CLOSED__HOSTED_AND_AUTHORITATIVE_A01_PASS__EXACT_SHA_SCOPED",
+    "qualified_subject_sha": "0bc1f96ed0b8effd22c432a7d727fd13d613b825",
+    "a01_run_id": 34429454895,
+    "a01_job_id": 102721684948,
+    "evidence_artifact_id": 10133909201,
+    "evidence_artifact_zip_sha256": "5d0008dd4dde67cf544d4c1385d484f6458c33cb062ea4de7ef37036901b4bf6"
+  },
+  "end_to_end_objective": {
+    "id": "BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001",
+    "standing": "PAUSED_AT_PROVEN_COMPOSITION_GAP_UNTIL_REBIND_A01_CLOSURE",
+    "forensic_map": "qualification/book-system/end-to-end-authoring-001/BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001-FORENSIC-MAP.json",
+    "corrective_finding": "qualification/book-system/end-to-end-authoring-001/BOOK-SYSTEM-E2E-LIFECYCLE-LEDGER-REBIND-GAP-001.json",
+    "finding": "Persistent Lifecycle history could not safely survive legitimate non-lifecycle parent successors because the exact-parent-bound lifecycle ledger had no qualified custody/rebind operation. Resetting or manually rebinding the ledger would discard history or create hidden authority."
+  },
+  "current_repair": {
+    "id": "BOOK-SYSTEM-LIFECYCLE-CURRENT-PARENT-REBIND-001",
+    "classification": "STRICT_COMPATIBILITY_AND_CUSTODY_REPAIR__NO_NEW_LIFECYCLE_POLICY",
+    "contract": "qualification/book-system/lifecycle-transition-compatibility-001/BOOK-SYSTEM-LIFECYCLE-CURRENT-PARENT-REBIND-001.json",
+    "runtime": "system-master/book-system/lifecycle-current-parent-rebind-adapter.js",
+    "qualifier": ".github/scripts/book-system-lifecycle-current-parent-rebind-001-qualify.js",
+    "a01_wrapper": ".github/scripts/a01-book-system-lifecycle-current-parent-rebind-001.js",
+    "final_hosted_subject_sha": "ffbcc2ab36a41afb580224681642105deb62e741",
+    "hosted_run_id": 34430489049,
+    "hosted_job_id": 102724790047,
+    "hosted_result": "PASS__39_OF_39",
+    "historical_pre_wrapper_hosted_subject_sha": "1266ff9858c3d5df0c352be70207e67d6afe334f",
+    "historical_pre_wrapper_qualification_transfer": false,
+    "shared_registration_handoff": "qualification/book-system/lifecycle-transition-compatibility-001/BOOK-SYSTEM-LIFECYCLE-CURRENT-PARENT-REBIND-001-A01-REGISTRATION-HANDOFF.json",
+    "shared_a01_registry_observed_version": 26,
+    "shared_a01_registration_observed": false,
+    "a01_result": "NOT_RUN_ON_FINAL_SUBJECT__REGISTRATION_PENDING"
+  },
+  "hosted_39_case_proof": [
+    "persistent lifecycle unit/dependency/processed-request/transition-receipt history preserved across rebind",
+    "ledger binding advances exactly one version to exact post-parent identity",
+    "next qualified Lifecycle transition succeeds on the same preserved ledger",
+    "real Integration Runtime V2 receipt rebinds",
+    "real Author Decision Queue receipt rebinds",
+    "real Export Freeze receipt rebinds",
+    "real Version/Rollback receipt rebinds",
+    "provider, non-parent, Lifecycle-transition, lifecycle-status-changing and publication-authority receipts are rejected",
+    "idempotent replay and conflicts are deterministic",
+    "Lifecycle v1 and the already-qualified current-parent compatibility adapter bytes remain unchanged"
+  ],
+  "preserved_authority_law": [
+    "The rebind sidecar never creates or authorizes the post parent successor; it only accepts exact evidence of one already authorized by an existing parent authority.",
+    "The rebind sidecar cannot perform a lifecycle transition or change lifecycle status.",
+    "The rebind sidecar cannot synthesize author choice, provider canonical authority, document authority, Export Freeze authority, publication/delivery authority or production authority.",
+    "The hosted PASS on ffbcc2ab36a41afb580224681642105deb62e741 is prequalification only and is not an A-01 PASS.",
+    "Any executable/wrapper/qualifier change requires a new exact-SHA hosted PASS and A-01 evidence."
+  ],
+  "current_parent_critical_path": {
+    "id": "BOOK-SYSTEM-LIFECYCLE-CURRENT-PARENT-REBIND-001-A01",
+    "classification": "READY__FINAL_HOSTED_PASS__SHARED_A01_REGISTRATION_DEPENDENCY",
+    "exact_subject_sha": "ffbcc2ab36a41afb580224681642105deb62e741",
+    "next_action": "When the shared A-01 registry admits BOOK-SYSTEM-LIFECYCLE-CURRENT-PARENT-REBIND-001, launch a new shared-gateway run against exact subject ffbcc2ab36a41afb580224681642105deb62e741. Do not rerun a workflow attempt pinned to a pre-registration control-plane SHA.",
+    "pass_unlocks": "BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001-HARNESS-001",
+    "on_failure": "Preserve the exact A-01 receipt and repair only the proven rebind subject, wrapper, or control-plane boundary. Do not change Lifecycle v1 semantics or broaden authority."
+  },
+  "generic_continue_rule": "In Book System control, Continue first adjudicates shared A-01 registration and exact-SHA qualification for BOOK-SYSTEM-LIFECYCLE-CURRENT-PARENT-REBIND-001. On authoritative PASS, close the rebind and immediately resume BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001-HARNESS-001.",
+  "qualification_effect": "STATE_ONLY__NO_A01_REBIND_PASS__NO_E2E_PASS__NO_REAL_AUTHOR_OR_PUBLICATION_AUTHORITY"
+}
