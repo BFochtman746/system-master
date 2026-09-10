@@ -1,0 +1,52 @@
+name: Learning Domain II Batch 03 Prequalification
+
+on:
+  push:
+    branches:
+      - learning/domain-ii-batch-03-20260910
+    paths:
+      - "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-DOMAIN-II-BATCH-01-CANDIDATE-006.json"
+      - "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-DOMAIN-II-BATCH-02-CANDIDATE-007.json"
+      - "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-DOMAIN-II-BATCH-03-CANDIDATE-008.json"
+      - ".github/scripts/learning-domain-ii-batch-03-qualify.js"
+      - ".github/workflows/learning-domain-ii-batch-03-prequal.yml"
+      - ".github/scripts/learning-full-standard-topology-validator-003.js"
+      - "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-TOPOLOGY-CANDIDATE-003.json"
+      - "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-66-SOURCE-NODE-INDEX-001.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  batch03:
+    name: Domain II batch 03 exact-source cumulative merge validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - name: Record exact subject
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          printf 'SUBJECT_SHA=%s\n' "${GITHUB_SHA}"
+      - name: Syntax check batch 03 qualifier
+        run: node --check .github/scripts/learning-domain-ii-batch-03-qualify.js
+      - name: Validate batches 01 through 03 and run Validator 003
+        run: node .github/scripts/learning-domain-ii-batch-03-qualify.js
+      - name: Upload hosted batch 03 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: LEARNING-DOMAIN-II-BATCH-03-${{ github.sha }}-hosted-evidence
+          path: ${{ runner.temp }}/learning-domain-ii-batch-03-evidence
+          if-no-files-found: warn
+          retention-days: 30
+
+# Structural hosted evidence only. This workflow creates no learner, SME, certification, A-01, native or production evidence.
