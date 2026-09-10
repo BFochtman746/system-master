@@ -1,0 +1,48 @@
+name: Learning Assessment Target Contract Prequalification
+
+on:
+  push:
+    branches:
+      - learning/assessment-target-contract-20260910
+    paths:
+      - "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001B-ASSESSMENT-TARGET-CONTRACT-025A.json"
+      - "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001B-ASSESSMENT-TARGET-CONTRACT-FIXTURES-025B.json"
+      - ".github/scripts/learning-assessment-target-contract-validator-025.js"
+      - ".github/workflows/learning-assessment-target-contract-prequal.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  assessment-target-contract:
+    name: Assessment target contract and fixture validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - name: Record exact subject
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          printf 'SUBJECT_SHA=%s\n' "${GITHUB_SHA}"
+      - name: Syntax check contract validator
+        run: node --check .github/scripts/learning-assessment-target-contract-validator-025.js
+      - name: Validate assessment-target contract and negative fixtures
+        run: node .github/scripts/learning-assessment-target-contract-validator-025.js
+      - name: Upload hosted evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: LEARNING-ASSESSMENT-TARGET-CONTRACT-${{ github.sha }}-hosted-evidence
+          path: ${{ runner.temp }}/learning-assessment-target-contract-evidence
+          if-no-files-found: warn
+          retention-days: 30
+
+# Contract/software evidence only. No psychometric, learner, SME, certification, A-01, native, or production claim is created.
