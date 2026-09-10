@@ -11,6 +11,7 @@ on:
       - 'governance/second-shift/SECOND-SHIFT-CONTINUOUS-DISPATCH-001.md'
       - 'governance/second-shift/SECOND-SHIFT-REGISTRY-001.json'
       - '.github/scripts/github-reliability-control-plane-selftest.js'
+      - '.github/scripts/github-write-authorization-enforce.js'
       - '.github/workflows/github-reliability-control-plane-enforcement.yml'
 
 permissions:
@@ -62,13 +63,22 @@ jobs:
 
       - name: Syntax check
         shell: cmd
-        run: node --check .github\scripts\github-reliability-control-plane-selftest.js
+        run: |
+          node --check .github\scripts\github-reliability-control-plane-selftest.js
+          node --check .github\scripts\github-write-authorization-enforce.js
 
-      - name: Run control-plane self-test
+      - name: Run foundational control-plane self-test
         shell: powershell
         run: |
           $evidence = Join-Path $env:GITHUB_WORKSPACE '.github-control-plane-evidence'
           & node "$env:GITHUB_WORKSPACE\.github\scripts\github-reliability-control-plane-selftest.js" | Tee-Object -FilePath (Join-Path $evidence 'selftest.json')
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Run write-authorization self-test
+        shell: powershell
+        run: |
+          $evidence = Join-Path $env:GITHUB_WORKSPACE '.github-control-plane-evidence'
+          & node "$env:GITHUB_WORKSPACE\.github\scripts\github-write-authorization-enforce.js" selftest | Tee-Object -FilePath (Join-Path $evidence 'write-authorization-selftest.json')
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Record exact subject
@@ -86,11 +96,14 @@ jobs:
         run: |
           Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value '## GitHub Reliability Control Plane'
           Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value "Subject: $env:GITHUB_SHA"
-          $result = Join-Path $env:GITHUB_WORKSPACE '.github-control-plane-evidence\selftest.json'
-          if (Test-Path $result) {
-            Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value '```json'
-            Get-Content -LiteralPath $result | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY
-            Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value '```'
+          foreach ($name in @('selftest.json','write-authorization-selftest.json')) {
+            $result = Join-Path $env:GITHUB_WORKSPACE ".github-control-plane-evidence\$name"
+            if (Test-Path $result) {
+              Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value "### $name"
+              Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value '```json'
+              Get-Content -LiteralPath $result | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY
+              Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value '```'
+            }
           }
 
       - name: Upload evidence
