@@ -9,9 +9,17 @@
   "enforcement_workflow": ".github/workflows/second-shift-enforcement.yml",
   "owner_files": {
     "CORE": "governance/second-shift/CORE-DELEGATIONS.json",
-    "LEARNING": "governance/second-shift/LEARNING-DELEGATIONS.json",
+    "LEARNING": "governance/second-shift/p9/LEARNING-DELEGATIONS-001.json",
     "BOOK": "governance/second-shift/BOOK-DELEGATIONS.json",
     "PROSE": "governance/second-shift/PROSE-DELEGATIONS.json"
+  },
+  "p9_selector_reconciliation": {
+    "reconciled_at": "2026-09-10T09:57:00-04:00",
+    "CORE": "CURRENT_OWNER_SELECTOR__SMR021_GITHUB_NATIVE_TRANSPORT_009",
+    "LEARNING": "CURRENT_OWNER_SELECTOR__ASSESSMENT_TARGET_DOMAIN_I_BATCH_026A__VERSIONED_P9_FILE",
+    "BOOK": "CURRENT_OWNER_SELECTOR__RF012_OWNER_PROMOTION_REBIND_004",
+    "PROSE": "CURRENT_OWNER_SELECTOR__BLIND_EVALUATOR_LAUNCH_PACKET_002",
+    "history_rule": "Original owner files and all prior retired delegation history remain preserved. The versioned Learning selector exists only because the live Learning owner advanced after its original main selector file was written."
   },
   "portfolio_rule": "The portfolio controller reads the four owner files from current main, revalidates each against the live owner control head, active claim/lease and repair state, removes stale/non-open items from admission, and admits current READY work or selects a new owner-valid successor through the mandatory work-ahead ladder. A stale, missing, completed or blocked delegation never by itself permits idling.",
   "day_shift_rule": "Whenever a system chat closes, supersedes, blocks or materially changes its current objective, it must reconcile its delegation file in the same working session. If the previous delegation is no longer current, remove it from active_delegations, preserve closure/supersession evidence, and re-evaluate the successor before leaving an overnight-ready state.",
