@@ -1,0 +1,39 @@
+name: Book Content Admission Author Decision Applicability Guard 004
+
+on:
+  push:
+    branches:
+      - book-system/control-v1
+    paths:
+      - system-master/book-system/content-admission-author-decision-applicability-guard.js
+      - .github/scripts/book-system-content-admission-author-decision-applicability-guard-004-qualify.js
+      - .github/workflows/book-system-content-admission-author-decision-applicability-guard-004.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    name: Applicability guard plus admission and strict-currentness regressions
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact Book derivative subject
+        uses: actions/checkout@v4
+      - name: Record Node runtime
+        run: node --version
+      - name: Run applicability guard adversarial qualifier
+        run: node .github/scripts/book-system-content-admission-author-decision-applicability-guard-004-qualify.js
+      - name: Run unchanged canonical content-admission 30-case regression
+        run: node .github/scripts/book-system-content-object-admission-001-qualify.js
+      - name: Run unchanged strict current-subject guard regression
+        run: node .github/scripts/book-system-author-decision-current-subject-guard-001-qualify.js
+      - name: Upload applicability guard evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: book-content-admission-applicability-guard-004-${{ github.sha }}
+          path: ${{ runner.temp }}/book-content-admission-applicability-evidence/qualification-summary.json
+          if-no-files-found: error
+          retention-days: 30
