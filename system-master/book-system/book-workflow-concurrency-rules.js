@@ -8,6 +8,8 @@ const routing = require('./book-capability-routing-interface');
 
 const CONTRACT_PATH = path.join(__dirname, '../../qualification/book-system/book-prose-integration/orchestrator/BOOK-WORKFLOW-ORCHESTRATOR-CONCURRENCY-RULES-001.json');
 const DECISION_SCHEMA_VERSION = 1;
+const FORBIDDEN_RAW_FIELDS = new Set(['manuscript_text','passage_text','candidate_text','raw_manuscript','raw_passage','raw_candidate']);
+const FORBIDDEN_EXECUTION_FIELDS = new Set(['execute','dispatch','schedule','scheduler','worker_count','max_concurrency','retry','retry_count','canonical_manuscript','canonical_manuscript_state','apply_revision_to_canonical','admit_canonical_manuscript']);
 
 class BookConcurrencyRulesError extends Error {
   constructor(code, detail = '') {
@@ -37,6 +39,19 @@ function decisionDigest(decision) {
   const copy = clone(decision);
   delete copy.decision_digest;
   return sha256(stableStringify(copy));
+}
+
+function assertNoForbiddenFields(value, where = 'decision') {
+  if (Array.isArray(value)) {
+    value.forEach((item, index) => assertNoForbiddenFields(item, `${where}.${index}`));
+    return;
+  }
+  if (!isObject(value)) return;
+  for (const [key, child] of Object.entries(value)) {
+    if (FORBIDDEN_RAW_FIELDS.has(key)) fail('RAW_MANUSCRIPT_CONTENT_FORBIDDEN', `${where}.${key}`);
+    if (FORBIDDEN_EXECUTION_FIELDS.has(key)) fail('EXECUTION_AUTHORITY_FIELD_FORBIDDEN', `${where}.${key}`);
+    assertNoForbiddenFields(child, `${where}.${key}`);
+  }
 }
 
 function validateContract(contract) {
@@ -77,13 +92,37 @@ function reasonFor(policyClass, task) {
   return 'DECLARED_CAPABILITY_NOT_CALLABLE';
 }
 
+function expectedParallelGroups(taskDecisions) {
+  const byLayer = new Map();
+  for (const decision of taskDecisions) {
+    if (!decision.parallel_eligible) continue;
+    if (!byLayer.has(decision.topological_layer)) byLayer.set(decision.topological_layer, []);
+    byLayer.get(decision.topological_layer).push(decision.task_id);
+  }
+  return [...byLayer.entries()]
+    .sort((a, b) => a[0] - b[0])
+    .filter(([, ids]) => ids.length >= 2)
+    .map(([layer, ids]) => ({ group_id: `LAYER-${layer}`, topological_layer: layer, task_ids: [...ids].sort() }));
+}
+
+function expectedWithheldTasks(taskDecisions) {
+  return taskDecisions
+    .filter(d => !d.parallel_eligible)
+    .map(d => ({ task_id: d.task_id, reason: d.reason }))
+    .sort((a, b) => a.task_id.localeCompare(b.task_id));
+}
+
 function deriveConcurrencyDecision(plan, workflowState, routingRegistry = routing.loadDefaultRegistry(), contract = loadContract()) {
   validateContract(contract);
   const planState = planRuntime.validateExecutionPlan(plan, workflowState, routingRegistry);
   const layerIndex = new Map();
   planState.topological_layers.forEach((layer, index) => layer.forEach(taskId => layerIndex.set(taskId, index)));
+  const orderedTasks = [...plan.tasks].sort((a, b) => {
+    const layerDelta = layerIndex.get(a.task_id) - layerIndex.get(b.task_id);
+    return layerDelta !== 0 ? layerDelta : a.task_id.localeCompare(b.task_id);
+  });
   const decisions = [];
-  for (const task of [...plan.tasks].sort((a, b) => a.task_id.localeCompare(b.task_id))) {
+  for (const task of orderedTasks) {
     const policyClass = taskPolicy(task, contract);
     const parallelEligible = policyClass === 'READ_ONLY_PARALLEL_ELIGIBLE';
     if (parallelEligible && task.task_class !== 'SPECIALIST_SERVICE_TASK') fail('NON_SPECIALIST_PARALLEL_ELIGIBILITY_FORBIDDEN', task.task_id);
@@ -100,12 +139,6 @@ function deriveConcurrencyDecision(plan, workflowState, routingRegistry = routin
     });
   }
 
-  const groups = [];
-  for (let layer = 0; layer < planState.topological_layers.length; layer += 1) {
-    const ids = decisions.filter(d => d.topological_layer === layer && d.parallel_eligible).map(d => d.task_id).sort();
-    if (ids.length >= 2) groups.push({ group_id: `LAYER-${layer}`, topological_layer: layer, task_ids: ids });
-  }
-  const withheld = decisions.filter(d => !d.parallel_eligible).map(d => ({ task_id: d.task_id, reason: d.reason })).sort((a,b) => a.task_id.localeCompare(b.task_id));
   const decision = {
     decision_schema_version: DECISION_SCHEMA_VERSION,
     plan_id: plan.plan_id,
@@ -114,8 +147,8 @@ function deriveConcurrencyDecision(plan, workflowState, routingRegistry = routin
     workflow_digest: plan.workflow_state_identity.workflow_digest,
     source_identity: clone(plan.source_identity),
     task_decisions: decisions,
-    parallel_groups: groups,
-    withheld_tasks: withheld,
+    parallel_groups: expectedParallelGroups(decisions),
+    withheld_tasks: expectedWithheldTasks(decisions),
     decision_digest: ''
   };
   decision.decision_digest = decisionDigest(decision);
@@ -127,6 +160,7 @@ function validateConcurrencyDecision(decision, plan, workflowState, routingRegis
   validateContract(contract);
   const planState = planRuntime.validateExecutionPlan(plan, workflowState, routingRegistry);
   if (!isObject(decision)) fail('CONCURRENCY_DECISION_REQUIRED');
+  assertNoForbiddenFields(decision);
   const required = ['decision_schema_version','plan_id','plan_digest','workflow_id','workflow_digest','source_identity','task_decisions','parallel_groups','withheld_tasks','decision_digest'];
   for (const field of required) if (!Object.prototype.hasOwnProperty.call(decision, field)) fail('CONCURRENCY_DECISION_FIELD_MISSING', field);
   if (decision.decision_schema_version !== DECISION_SCHEMA_VERSION) fail('CONCURRENCY_DECISION_SCHEMA_MISMATCH');
@@ -134,33 +168,51 @@ function validateConcurrencyDecision(decision, plan, workflowState, routingRegis
   if (decision.workflow_id !== plan.workflow_id || decision.workflow_digest !== plan.workflow_state_identity.workflow_digest) fail('STALE_CONCURRENCY_WORKFLOW_BINDING');
   if (stableStringify(decision.source_identity) !== stableStringify(plan.source_identity)) fail('STALE_CONCURRENCY_SOURCE_BINDING');
   if (!Array.isArray(decision.task_decisions) || !Array.isArray(decision.parallel_groups) || !Array.isArray(decision.withheld_tasks)) fail('CONCURRENCY_DECISION_ARRAY_REQUIRED');
+
   const expectedTaskIds = [...plan.tasks].map(t => t.task_id).sort();
   const actualTaskIds = decision.task_decisions.map(d => d.task_id).sort();
   if (stableStringify(expectedTaskIds) !== stableStringify(actualTaskIds)) fail('CONCURRENCY_TASK_COVERAGE_MISMATCH');
+  if (new Set(decision.task_decisions.map(d => d.task_id)).size !== decision.task_decisions.length) fail('DUPLICATE_TASK_DECISION');
 
   const byTask = new Map(decision.task_decisions.map(d => [d.task_id, d]));
-  for (const group of decision.parallel_groups) {
-    if (!Array.isArray(group.task_ids) || group.task_ids.length < 2) fail('PARALLEL_GROUP_TOO_SMALL', group.group_id || '');
-    const unique = new Set(group.task_ids);
-    if (unique.size !== group.task_ids.length) fail('PARALLEL_GROUP_DUPLICATE_TASK', group.group_id || '');
-    for (const taskId of group.task_ids) {
-      const d = byTask.get(taskId);
-      if (!d || !d.parallel_eligible) fail('INELIGIBLE_TASK_IN_PARALLEL_GROUP', taskId);
-      if (d.topological_layer !== group.topological_layer) fail('CROSS_LAYER_PARALLEL_GROUP_FORBIDDEN', taskId);
-    }
-  }
   for (const d of decision.task_decisions) {
     const task = plan.tasks.find(t => t.task_id === d.task_id);
     if (!task) fail('DECISION_TASK_NOT_IN_PLAN', d.task_id);
     const expectedPolicy = taskPolicy(task, contract);
+    const expectedLayer = planState.topological_layers.findIndex(layer => layer.includes(d.task_id));
+    const expectedReason = reasonFor(expectedPolicy, task);
     if (d.policy_class !== expectedPolicy) fail('TASK_POLICY_CLASS_MISMATCH', d.task_id);
-    if (d.topological_layer !== planState.topological_layers.findIndex(layer => layer.includes(d.task_id))) fail('TASK_LAYER_MISMATCH', d.task_id);
+    if (d.topological_layer !== expectedLayer) fail('TASK_LAYER_MISMATCH', d.task_id);
+    if (d.reason !== expectedReason) fail('TASK_REASON_MISMATCH', d.task_id);
     const shouldBeEligible = expectedPolicy === 'READ_ONLY_PARALLEL_ELIGIBLE';
     if (d.parallel_eligible !== shouldBeEligible) fail('TASK_ELIGIBILITY_MISMATCH', d.task_id);
     if (task.task_class === 'BOOK_ADMISSION_HANDOFF' && d.parallel_eligible) fail('BOOK_ADMISSION_PARALLEL_FORBIDDEN');
     if (task.task_class === 'AUTHORITY_WAIT' && d.parallel_eligible) fail('AUTHORITY_WAIT_PARALLEL_FORBIDDEN');
     if (task.task_class === 'DECLARED_BLOCKED_CAPABILITY' && d.parallel_eligible) fail('BLOCKED_CAPABILITY_PARALLEL_FORBIDDEN');
   }
+
+  const expectedOrder = [...decision.task_decisions].sort((a, b) => {
+    const layerDelta = a.topological_layer - b.topological_layer;
+    return layerDelta !== 0 ? layerDelta : a.task_id.localeCompare(b.task_id);
+  }).map(d => d.task_id);
+  if (stableStringify(decision.task_decisions.map(d => d.task_id)) !== stableStringify(expectedOrder)) fail('TASK_DECISION_ORDER_MISMATCH');
+
+  const seenGroupedTasks = new Set();
+  for (const group of decision.parallel_groups) {
+    if (!Array.isArray(group.task_ids) || group.task_ids.length < 2) fail('PARALLEL_GROUP_TOO_SMALL', group.group_id || '');
+    const unique = new Set(group.task_ids);
+    if (unique.size !== group.task_ids.length) fail('PARALLEL_GROUP_DUPLICATE_TASK', group.group_id || '');
+    for (const taskId of group.task_ids) {
+      if (seenGroupedTasks.has(taskId)) fail('TASK_IN_MULTIPLE_PARALLEL_GROUPS', taskId);
+      seenGroupedTasks.add(taskId);
+      const d = byTask.get(taskId);
+      if (!d || !d.parallel_eligible) fail('INELIGIBLE_TASK_IN_PARALLEL_GROUP', taskId);
+      if (d.topological_layer !== group.topological_layer) fail('CROSS_LAYER_PARALLEL_GROUP_FORBIDDEN', taskId);
+    }
+  }
+
+  if (stableStringify(decision.parallel_groups) !== stableStringify(expectedParallelGroups(decision.task_decisions))) fail('PARALLEL_GROUP_DERIVATION_MISMATCH');
+  if (stableStringify(decision.withheld_tasks) !== stableStringify(expectedWithheldTasks(decision.task_decisions))) fail('WITHHELD_TASK_DERIVATION_MISMATCH');
   if (decision.decision_digest !== decisionDigest(decision)) fail('CONCURRENCY_DECISION_DIGEST_MISMATCH');
   return true;
 }
