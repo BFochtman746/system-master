@@ -1,5 +1,5 @@
 {
-  "registry_version": 26,
+  "registry_version": 27,
   "qualifications": {
     "A01-CONTROL-PLANE-SELFTEST": {
       "workstream_id": "SYSTEM-MASTER",
@@ -96,6 +96,18 @@
       "evidence_artifact": "book-system-lifecycle-current-parent-compatibility-adapter-001",
       "overnight_eligible": false,
       "description": "Qualify the exact Book System current-parent Lifecycle compatibility adapter: 21-case current-parent identity compatibility matrix plus 18-case Lifecycle v1 regression, preserving Lifecycle v1 transition policy semantics while adapting only the current parent identity boundary. PASS is exact-SHA focused evidence only and grants no provider, author, document-engine, export-freeze, publication, promotion, or production authority."
+    },
+    "BOOK-SYSTEM-LIFECYCLE-CURRENT-PARENT-REBIND-001": {
+      "workstream_id": "BOOK-SYSTEM",
+      "gate_class": "focused",
+      "source": "subject",
+      "executable": "node",
+      "args": [
+        ".github/scripts/a01-book-system-lifecycle-current-parent-rebind-001.js"
+      ],
+      "evidence_artifact": "book-system-lifecycle-current-parent-rebind-001",
+      "overnight_eligible": false,
+      "description": "Qualify the exact Book System persistent Lifecycle current-parent rebind compatibility repair: preserve existing lifecycle unit/dependency/transition history while advancing only the lifecycle-ledger parent binding across one exact already-authorized non-lifecycle parent successor; exercise real Integration Runtime V2, Author Decision Queue, Export Freeze and Version/Rollback receipts; enforce parent-only authority, exact pre/post/ledger identity, unchanged lifecycle status, deterministic replay/conflicts, and zero lifecycle-policy, parent-successor, author, provider, document, export-freeze or publication authority. PASS is exact-SHA focused evidence only and grants no promotion or production authority."
     },
     "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001": {
       "workstream_id": "BOOK-SYSTEM",
