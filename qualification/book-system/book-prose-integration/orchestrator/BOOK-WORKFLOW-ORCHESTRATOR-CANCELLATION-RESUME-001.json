@@ -33,9 +33,11 @@
     "evidence_receipt_refs",
     "completed_verified_task_ids",
     "interrupted_task_ids",
+    "interrupted_task_records",
     "checkpoint_created_at",
     "checkpoint_digest"
   ],
+  "interrupted_task_record_rule": "Each pre-transition RUNNING task is captured with exact task class/capability and, for provider operations, its Phase-2F operation identity derived while the original execution plan still matches the pre-transition workflow digest. This identity is evidence for resume classification only and does not execute a retry.",
   "laws": [
     "Every pause, cancellation and resume operation binds to exact workflow, plan and immutable Book/manuscript source identity.",
     "A checkpoint records references, hashes and coordination state only; raw manuscript or candidate text is forbidden.",
@@ -43,7 +45,7 @@
     "A paused workflow cannot claim a task is still actively RUNNING; pre-pause RUNNING tasks become interrupted coordination work pending resume classification.",
     "Resume validates the checkpoint against the exact PAUSED workflow state and the current Book/manuscript source identity before changing coordination state.",
     "If the Book/manuscript source identity changed while paused, the old workflow cannot resume; a new workflow identity is required.",
-    "Interrupted registered-idempotent provider work may become READY for later exact-same-operation replay only through Phase 2F identity semantics; this packet does not execute the replay.",
+    "Interrupted registered-idempotent provider work may become READY for later exact-same-operation replay only through its checkpointed Phase-2F operation identity; this packet does not execute the replay.",
     "Interrupted non-idempotent provider work, including PROSE.GENERATE_REVISION_CANDIDATE, is BLOCKED pending reconciliation and may not be regenerated automatically.",
     "Interrupted author/required-authority waits remain blocked on that authority and cannot be synthesized.",
     "Declared-but-unavailable specialist interfaces remain blocked and are never replaced with guessed providers on resume.",
