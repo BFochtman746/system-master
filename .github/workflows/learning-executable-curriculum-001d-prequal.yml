@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   actions: read
 
 jobs:
@@ -82,6 +82,22 @@ jobs:
           cp "$RUNNER_TEMP/learning-executable-curriculum-001d-a/compiled-executable-curriculum-blueprint.json" "$RUNNER_TEMP/learning-executable-curriculum-001d-evidence/"
           cp "$RUNNER_TEMP/learning-executable-curriculum-001d-a/qualification-summary.json" "$RUNNER_TEMP/learning-executable-curriculum-001d-evidence/"
           printf '{"subject_sha":"%s","deterministic_repeat":true,"result_class":"PASS"}\n' "$GITHUB_SHA" > "$RUNNER_TEMP/learning-executable-curriculum-001d-evidence/determinism-summary.json"
+
+      - name: Persist qualified blueprint on the 001D branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p qualification/learning
+          cp "$RUNNER_TEMP/learning-executable-curriculum-001d-a/compiled-executable-curriculum-blueprint.json" \
+            qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001D-EXECUTABLE-CURRICULUM-BLUEPRINT-057B.json
+          cp "$RUNNER_TEMP/learning-executable-curriculum-001d-a/qualification-summary.json" \
+            qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001D-EXECUTABLE-CURRICULUM-QUALIFICATION-057D.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001D-EXECUTABLE-CURRICULUM-BLUEPRINT-057B.json \
+                  qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001D-EXECUTABLE-CURRICULUM-QUALIFICATION-057D.json
+          git commit -m "learning: persist qualified 001D executable curriculum blueprint"
+          git push origin "HEAD:learning/executable-curriculum-001d-20260910"
 
       - name: Upload hosted 001D evidence
         if: always()
