@@ -1,6 +1,6 @@
 # MORNING-CANONICAL-RECONCILIATION-001
 
-Status: PROPOSED_FOR_ADMISSION
+Status: ACTIVE_CANONICAL
 Owner: SYSTEM_MASTER product-root governance
 Schedule target: 07:15 America/New_York after Second Shift closes at 07:00
 Purpose: reconcile overnight execution into live canonical owner state and publish one deterministic chat-start manifest for the new day.
