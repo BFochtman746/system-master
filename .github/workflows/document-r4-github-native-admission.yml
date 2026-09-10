@@ -36,46 +36,63 @@ jobs:
         run: |
           set -euo pipefail
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends libreoffice-writer poppler-utils unzip
+          sudo apt-get install -y --no-install-recommends libreoffice-writer poppler-utils xz-utils
           command -v soffice
           command -v pdfinfo
           command -v pdftotext
           command -v pdftoppm
           command -v pdfimages
 
-      - name: Reconstruct archive and verify exact identity
+      - name: Reconstruct deterministic source transport and verify exact identity
         shell: bash
         run: |
           set -euo pipefail
           STAGE='transport/document-r4'
-          ARCHIVE='/tmp/CR001_R4_EXACT_225_SOURCE_HANDOFF_20260910.zip'
-          EXPECTED='ada701cfa15e6162b6cdf67bc6c0803540a611b08a23aeeeddd1045d8ce2d8ab'
+          STREAM='/tmp/CR001_R4_225_SOURCE_WITH_EVIDENCE_20260910.b85'
+          ARCHIVE='/tmp/CR001_R4_225_SOURCE_WITH_EVIDENCE_20260910.tar.xz'
+          EXPECTED_STREAM='bfd67f2d4033a861fd126f8c55d2e326bee38930a70a09760cc91b24f7e6fdd6'
+          EXPECTED_ARCHIVE='4fce25bc78646f4be3b8152865184e1cee84868ba1a13e4587ccef6a16c23dd9'
           test -f "$STAGE/READY"
-          test "$(find "$STAGE" -maxdepth 1 -name 'chunk-*.b64' -type f | wc -l)" -ge 1
-          cat "$STAGE"/chunk-*.b64 | tr -d '\r\n' | base64 --decode > "$ARCHIVE"
-          echo "$EXPECTED  $ARCHIVE" | sha256sum -c -
-          unzip -t "$ARCHIVE"
+          test "$(find "$STAGE" -maxdepth 1 -name 'chunk-*.b85' -type f | wc -l)" -eq 27
+          cat "$STAGE"/chunk-*.b85 | tr -d '\r\n' > "$STREAM"
+          echo "$EXPECTED_STREAM  $STREAM" | sha256sum -c -
           python3 - <<'PY'
-          import csv, hashlib, io, json, pathlib, zipfile
-          archive = pathlib.Path('/tmp/CR001_R4_EXACT_225_SOURCE_HANDOFF_20260910.zip')
-          expected_archive_sha = 'ada701cfa15e6162b6cdf67bc6c0803540a611b08a23aeeeddd1045d8ce2d8ab'
+          import base64, csv, hashlib, io, json, pathlib, tarfile
+          stream = pathlib.Path('/tmp/CR001_R4_225_SOURCE_WITH_EVIDENCE_20260910.b85')
+          archive = pathlib.Path('/tmp/CR001_R4_225_SOURCE_WITH_EVIDENCE_20260910.tar.xz')
+          expected_stream = 'bfd67f2d4033a861fd126f8c55d2e326bee38930a70a09760cc91b24f7e6fdd6'
+          expected_archive = '4fce25bc78646f4be3b8152865184e1cee84868ba1a13e4587ccef6a16c23dd9'
+          encoded = stream.read_bytes()
+          if hashlib.sha256(encoded).hexdigest() != expected_stream:
+              raise SystemExit('Base85 stream digest mismatch')
+          raw = base64.b85decode(encoded)
+          if hashlib.sha256(raw).hexdigest() != expected_archive:
+              raise SystemExit('tar.xz digest mismatch')
+          archive.write_bytes(raw)
           dest = pathlib.Path('recovered/document/cr001-r4')
           source_dest = dest / 'source'
           evidence_dest = dest / 'evidence'
           if dest.exists():
               raise SystemExit('destination already exists; refusing overwrite')
-          raw = archive.read_bytes()
-          if hashlib.sha256(raw).hexdigest() != expected_archive_sha:
-              raise SystemExit('archive digest mismatch')
-          with zipfile.ZipFile(io.BytesIO(raw)) as z:
-              names = z.namelist()
-              if len(names) != 227:
-                  raise SystemExit(f'expected 227 archive entries, got {len(names)}')
+          with tarfile.open(fileobj=io.BytesIO(raw), mode='r:xz') as tf:
+              members = tf.getmembers()
+              regular = [m for m in members if m.isfile()]
+              if len(regular) != 227:
+                  raise SystemExit(f'expected 227 regular transport entries, got {len(regular)}')
+              by_name = {}
+              for member in regular:
+                  rel = pathlib.PurePosixPath(member.name)
+                  if rel.is_absolute() or '..' in rel.parts or member.name in by_name:
+                      raise SystemExit(f'unsafe/duplicate tar path: {member.name}')
+                  f = tf.extractfile(member)
+                  if f is None:
+                      raise SystemExit(f'cannot read tar member: {member.name}')
+                  by_name[member.name] = f.read()
               manifest_name = 'CANONICAL-SOURCE-TREE-MANIFEST.csv'
               receipt_name = 'RECONSTRUCTION-RECEIPT.json'
-              if manifest_name not in names or receipt_name not in names:
+              if manifest_name not in by_name or receipt_name not in by_name:
                   raise SystemExit('required manifest/receipt missing')
-              manifest_bytes = z.read(manifest_name)
+              manifest_bytes = by_name[manifest_name]
               rows = list(csv.DictReader(io.StringIO(manifest_bytes.decode('utf-8-sig'))))
               if len(rows) != 225:
                   raise SystemExit(f'expected 225 manifest rows, got {len(rows)}')
@@ -85,7 +102,10 @@ jobs:
                   if rel.is_absolute() or '..' in rel.parts or str(rel) in seen:
                       raise SystemExit(f'unsafe/duplicate manifest path: {rel}')
                   seen.add(str(rel))
-                  data = z.read(str(rel))
+                  member_name = 'source/' + str(rel)
+                  if member_name not in by_name:
+                      raise SystemExit(f'missing transport source: {rel}')
+                  data = by_name[member_name]
                   if len(data) != int(row['bytes']):
                       raise SystemExit(f'byte-size mismatch: {rel}')
                   if hashlib.sha256(data).hexdigest() != row['sha256']:
@@ -96,16 +116,18 @@ jobs:
                   target.write_bytes(data)
               evidence_dest.mkdir(parents=True, exist_ok=True)
               (evidence_dest / manifest_name).write_bytes(manifest_bytes)
-              (evidence_dest / receipt_name).write_bytes(z.read(receipt_name))
+              (evidence_dest / receipt_name).write_bytes(by_name[receipt_name])
               evidence = {
-                  'archive_sha256': expected_archive_sha,
-                  'archive_entries': len(names),
+                  'transport_tar_xz_sha256': expected_archive,
+                  'transport_base85_sha256': expected_stream,
+                  'transport_regular_entries': len(regular),
                   'manifest_rows': len(rows),
                   'verified_source_files': len(seen),
                   'identity_result': 'PASS__225_OF_225_EXACT_MATCH'
               }
               (evidence_dest / 'GITHUB-NATIVE-IMPORT-VERIFICATION.json').write_text(json.dumps(evidence, indent=2) + '\n')
           PY
+          echo "$EXPECTED_ARCHIVE  $ARCHIVE" | sha256sum -c -
           git diff --check
 
       - name: Create immutable source-custody subject locally
@@ -195,7 +217,8 @@ jobs:
           receipt = {
               'qualification_id': 'CR001-R4-GITHUB-NATIVE-QUALIFICATION-002',
               'qualified_git_subject_sha': subject_sha,
-              'archive_sha256': 'ada701cfa15e6162b6cdf67bc6c0803540a611b08a23aeeeddd1045d8ce2d8ab',
+              'transport_tar_xz_sha256': '4fce25bc78646f4be3b8152865184e1cee84868ba1a13e4587ccef6a16c23dd9',
+              'transport_base85_sha256': 'bfd67f2d4033a861fd126f8c55d2e326bee38930a70a09760cc91b24f7e6fdd6',
               'source_identity': 'PASS__225_OF_225_EXACT_MATCH',
               'strict_java21_compile': 'PASS',
               'portable_test_classes_passed': portable_count,
