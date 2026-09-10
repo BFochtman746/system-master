@@ -1,0 +1,68 @@
+{
+  "delta_id": "SYSTEM-MASTER-COMPLETION-CENSUS-002-P1-CORE-LEDGER-DELTA",
+  "recorded_at": "2026-09-10T05:20:00-04:00",
+  "owner_path": "SYSTEM_MASTER/CORE",
+  "control_head": "0bb42ecd542d7e8ade4bed15e66f52ab0c494e39",
+  "completion_entries": [
+    {
+      "completion_id": "CORE-SMR018-SUPERSEDING-PORTABLE-RECONSTITUTION-001",
+      "owner_path": "SYSTEM_MASTER/CORE",
+      "classification": "SUPERSEDING_LOCAL_EXACT_SUBJECT_PORTABLE_RECONSTITUTION",
+      "standing": "PASS__DETERMINISTIC_FRESH_EXTRACTION_PASS__DURABLE_CUSTODY__GITHUB_HOSTED_A01_NATIVE_PRODUCTION_SEPARATE",
+      "exact_subject_sha": "cf2a7e7a2fb882d72162e49d226137bea838a6912c11e84cd7b2be88fdc9d781",
+      "deterministic_archive_sha256": "bbd268f4f05a1e220a755ff7db44c5564f737336542255d2cfdacc4588043c3d",
+      "evidence_pointer": "system-master/control-v2/SMR018-SUPERSEDING-LINEAGE-RECONSTITUTION-001.md"
+    },
+    {
+      "completion_id": "CORE-SMR019-SUPERSEDING-CUMULATIVE-REBUILD-001",
+      "owner_path": "SYSTEM_MASTER/CORE",
+      "classification": "SUPERSEDING_CUMULATIVE_LOCAL_EXACT_SUBJECT_PORTABLE_REBUILD",
+      "standing": "PASS__DETERMINISTIC_FRESH_EXTRACTION_PASS__DURABLE_CUSTODY__GITHUB_HOSTED_A01_NATIVE_PRODUCTION_SEPARATE",
+      "exact_subject_sha": "306bbd9c18e041945c6b3dd187b1268816d123d01cff3d17926734cf603a2df4",
+      "deterministic_archive_sha256": "6dadde63ed998cd3300818333fa3204290b0bf13e0dc1933943ec0b6d5871b12",
+      "evidence_pointer": "system-master/control-v2/SMR019-SUPERSEDING-CUMULATIVE-REBUILD-001.md"
+    },
+    {
+      "completion_id": "CORE-SMR020-SUPERSEDING-DEPENDENCY-CURRENT-REBUILD-001",
+      "owner_path": "SYSTEM_MASTER/CORE",
+      "classification": "SUPERSEDING_DEPENDENCY_CURRENT_LOCAL_EXACT_SUBJECT_PORTABLE_REBUILD",
+      "standing": "PASS__DETERMINISTIC_FRESH_EXTRACTION_PASS__DURABLE_CUSTODY__HOSTED_A01_NATIVE_PRODUCTION_SEPARATE",
+      "exact_subject_sha": "e22ecedfd3850be6b744ee82f2c02722cd3d203a5785f6f423ac395011cf821f",
+      "deterministic_archive_sha256": "010ecf0d7bd6e8e1a471dc77aa236215b785a53092f6210ae1d53215a6ebc34f",
+      "evidence_pointer": "system-master/control-v2/SMR020-SUPERSEDING-DEPENDENCY-CURRENT-REBUILD-001.md"
+    },
+    {
+      "completion_id": "CORE-SMR021-MINIMUM-UX-ADMISSION-BINDING-LOCAL-001",
+      "owner_path": "SYSTEM_MASTER/CORE",
+      "classification": "BOUNDED_LOCAL_IMPLEMENTATION_QUALIFICATION",
+      "standing": "PASS__STRICT_JAVA_21__21_OF_21_SUITES__28_CHECK_FOCUSED__FULL_RELEASE_AND_ALL_HIGHER_AUTHORITIES_SEPARATE",
+      "predecessor_subject_sha": "e22ecedfd3850be6b744ee82f2c02722cd3d203a5785f6f423ac395011cf821f",
+      "exact_subject_sha": "fe325804bacfd5c40339a18bc393fb1bdfb2191c8b0f3946219d7d81f1971596",
+      "capsule_sha256": "377afa2c9ff2c7c69e5cd5bc45c66dd95ceb2315c1787afc35df6d907165fca1",
+      "evidence_pointer": "system-master/control-v2/SMR021-MINIMUM-UX-WORK-DESCRIPTOR-ACTION-BINDING-LOCAL-EVIDENCE-001.md",
+      "does_not_prove": [
+        "DATA persistence/full release",
+        "GitHub-native runnable source custody",
+        "hosted exact-SHA qualification",
+        "A-01",
+        "Apple/native/device",
+        "human",
+        "production"
+      ]
+    }
+  ],
+  "obligation_updates": [
+    {
+      "obligation_id": "CORE-SMR021-USER-EXPERIENCE-001",
+      "prior_state": "BLOCKED__SOURCE_CUSTODY",
+      "new_state": "ACTIVE",
+      "reason": "Exact predecessor custody was superseded and closed on e22ecedf...; bounded SMR021 candidate fe325804... and the persistence/full-portable closure contract now exist.",
+      "next_objective": "SMR021-FULL-PORTABLE-CLOSURE-QUALIFICATION-PACKET-004"
+    }
+  ],
+  "nonchanges": [
+    "CORE-CORRECTED-SOURCE-CUSTODY-001 remains blocked for ordinary GitHub-native runnable-source import/hosted evidence.",
+    "CORE-ASSURANCE-RECON-001C remains blocked by external credentialed Git transport.",
+    "A-01 repair transaction remains A01_REQUEUE_READY; no A-01 PASS is recorded."
+  ]
+}

@@ -4,7 +4,16 @@
   "product_root": "SYSTEM_MASTER",
   "topology": "governance/SYSTEM-TOPOLOGY-002.json",
   "purpose": "Durable index of work that is still owed. Completion history belongs in COMPLETION-LEDGER-001; expectations belong in EXPECTATION-REGISTRY-001; only open/blocked/deferred obligations belong here.",
-  "states": ["READY", "ACTIVE", "BLOCKED", "HOLD", "DEFERRED", "OWNER_SELECTION_REQUIRED", "SUPERSEDED", "CLOSED"],
+  "states": [
+    "READY",
+    "ACTIVE",
+    "BLOCKED",
+    "HOLD",
+    "DEFERRED",
+    "OWNER_SELECTION_REQUIRED",
+    "SUPERSEDED",
+    "CLOSED"
+  ],
   "rules": [
     "Every non-closed obligation has exactly one canonical owner_path.",
     "An obligation may depend on another owner, but dependency does not transfer ownership.",
@@ -32,15 +41,16 @@
     {
       "obligation_id": "CORE-SMR021-USER-EXPERIENCE-001",
       "owner_path": "SYSTEM_MASTER/CORE",
-      "state": "BLOCKED",
-      "blocker_class": "SOURCE_CUSTODY",
-      "objective": "SYSTEM-MASTER-REBUILD-021-DEPENDENCY-CURRENT-REBUILD-001 — USER-EXPERIENCE-001 CURRENT-LINEAGE REBUILD",
-      "predecessor_standing": "SMR020 local portable reconciliation closed on exact subject 89066e5662554b1810691473e0ed9bf49d8cc2fd4964444043b878461ed75477 after actual historical v2.0.23 carrier recovery and independent historical replay.",
-      "completed_phase": "SMR021 historical v2.0.24 replay and bounded R025 database-parity repair are complete local portable evidence and must not be repeated.",
-      "blocker_evidence": "system-master/control-v2/SMR021-DEPENDENCY-CURRENT-SOURCE-CUSTODY-RECONCILIATION-002.md",
-      "resume_condition": "Recover the original runnable SMR020 tree/archive or sufficient exact predecessor plus executable reconstruction artifacts, then independently recompute exact source/test digest 89066e5662554b1810691473e0ed9bf49d8cc2fd4964444043b878461ed75477 before deriving the dependency-current SMR021 candidate.",
+      "state": "ACTIVE",
+      "objective": "SYSTEM-MASTER-REBUILD-021 / USER-EXPERIENCE-001 — close DATA persistence and full portable qualification around the bounded admission-binding candidate",
+      "predecessor_standing": "SMR020 superseding dependency-current local exact-subject portable closure PASS on e22ecedfd3850be6b744ee82f2c02722cd3d203a5785f6f423ac395011cf821f with deterministic fresh-extraction evidence.",
+      "completed_phase": "Bounded admission-binding implementation candidate fe325804bacfd5c40339a18bc393fb1bdfb2191c8b0f3946219d7d81f1971596 passed strict Java 21, 21/21 suites and a 28-check focused gate; full release closure is not claimed.",
       "source": "system-master/control-v2/SYSTEM-MASTER-CORE-CONTROL-RECORD-001.md",
-      "stop_condition": "Remain fail-closed until exact runnable predecessor custody is recovered or deterministically reconstructed to the same exact digest; different bytes create a new candidate and new qualification lineage."
+      "stop_condition": "Produce a digest-bound runnable-source/manifest/test packet and execute all dependency-valid portable/static checks; if DATA-owned implementation is required, fail that mutation rung closed and continue independent fixtures, migration/failure-injection design and custody preparation.",
+      "current_control_head": "0bb42ecd542d7e8ade4bed15e66f52ab0c494e39",
+      "current_contract": "system-master/control-v2/SMR021-DATA-PERSISTENCE-AND-FULL-PORTABLE-CLOSURE-CONTRACT-003.md",
+      "exact_next_action": "SMR021-FULL-PORTABLE-CLOSURE-QUALIFICATION-PACKET-004",
+      "authority_boundary": "CORE may specify and qualify the cross-boundary contract but may not mint DATA persistence authority. GitHub-native/hosted/A-01/native/device/human/production evidence remain separate."
     },
     {
       "obligation_id": "CORE-CORRECTED-SOURCE-CUSTODY-001",
