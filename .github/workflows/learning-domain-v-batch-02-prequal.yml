@@ -1,0 +1,47 @@
+name: Learning Domain V Batch 02 Prequalification
+
+on:
+  push:
+    branches:
+      - learning/domain-v-batch-02-20260910
+    paths:
+      - "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-DOMAIN-V-BATCH-02-CANDIDATE-020.json"
+      - ".github/scripts/learning-domain-v-batch-02-qualify.js"
+      - ".github/workflows/learning-domain-v-batch-02-prequal.yml"
+      - ".github/scripts/learning-full-standard-topology-validator-003.js"
+      - "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-TOPOLOGY-CANDIDATE-003.json"
+      - "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-66-SOURCE-NODE-INDEX-001.json"
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  domain-v-batch02:
+    name: Domain V batch 02 exact-source cumulative validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - name: Record exact subject
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          printf 'SUBJECT_SHA=%s\n' "${GITHUB_SHA}"
+      - name: Syntax check qualifier
+        run: node --check .github/scripts/learning-domain-v-batch-02-qualify.js
+      - name: Validate complete Domain V cumulative topology and run Validator 003
+        run: node .github/scripts/learning-domain-v-batch-02-qualify.js
+      - name: Upload hosted evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: LEARNING-DOMAIN-V-BATCH-02-${{ github.sha }}-hosted-evidence
+          path: ${{ runner.temp }}/learning-domain-v-batch-02-evidence
+          if-no-files-found: warn
+          retention-days: 30
+# Structural hosted evidence only. No learner, SME, certification, A-01, native or production authority is created.
