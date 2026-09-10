@@ -1,0 +1,106 @@
+{
+  "artifact_id": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001E-INSTRUCTIONAL-CONTENT-AND-SCORING-BATCH-01-CANDIDATE-060A",
+  "effective_date": "2026-09-10",
+  "owner_path": "SYSTEM_MASTER/LEARNING",
+  "contract": "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001E-INSTRUCTIONAL-CONTENT-AND-SCORING-CONTRACT-059.json",
+  "base_control_head": "507fcb84023998d6f56ef7459959054f85881716",
+  "batch_index": 1,
+  "batch_size": 1,
+  "selection": {
+    "rule": "FIRST_UNMATERIALIZED_001D_EXECUTION_NODE_IN_EXACT_ORDINAL_ORDER",
+    "001d_durable_blueprint_commit": "02dc615fcb5d44b997ed1322848eccc6e37bb172",
+    "001d_blueprint_path": "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001D-EXECUTABLE-CURRICULUM-BLUEPRINT-057B.json",
+    "001d_blueprint_digest_sha256": "98aa0b621b0cbe5234d5dd8bdb9890a1692c4c9d91aaf955fd3a459632949e54",
+    "001d_ordinal": 1,
+    "requirement_id": "ASQ-CSSGB-2022-I.A.1",
+    "source_code": "I.A.1",
+    "source_locator": "ASQ CSSGB BoK 2022 p.3 / I.A.1",
+    "title": "Value of Six Sigma",
+    "highest_cognitive_level": "UNDERSTAND",
+    "skill_id": "CSSGB-2022::ASQ-CSSGB-2022-I.A.1::SUBSKILL::value-mechanisms",
+    "criterion_id": "CRIT::CSSGB-2022::ASQ-CSSGB-2022-I.A.1::SUBSKILL::value-mechanisms",
+    "lesson_id": "LESSON::CSSGB-2022::ASQ-CSSGB-2022-I.A.1::SUBSKILL::value-mechanisms",
+    "assessment_target_id": "ASSESS::CSSGB-2022::ASQ-CSSGB-2022-I.A.1::value-mechanisms::TARGET::bounded-value-explanation"
+  },
+  "runtime_implementation": {
+    "path": "learning/lab/learning_lab/cssgb_full_standard.py",
+    "initial_blob_sha": "03443b4b045c6b80fc6f1e8ab255c7f0ddc0c5d3",
+    "domain_key": "asq-cssgb-2022-001e-i-a-1",
+    "generation_adapter": "CSSGB-001E-I-A-1-GROUNDED-CONTENT-V1",
+    "behavior_oracle": "CSSGBValueMechanismOracle",
+    "scoring_type": "CSSGB_I_A_1_BOUNDED_VALUE_V1",
+    "course_activation_allowed": false
+  },
+  "grounding_sources": [
+    {
+      "source_id": "SRC-ASQ-SIX-SIGMA-DEFINITION",
+      "authority": "AMERICAN_SOCIETY_FOR_QUALITY",
+      "title": "Six Sigma Definition - What is Lean Six Sigma?",
+      "url": "https://asq.org/quality-resources/six-sigma",
+      "retrieved_date": "2026-09-10",
+      "standing": "ADMITTED_SUPPLEMENTAL_INSTRUCTIONAL_NOT_STANDARD_REPLACEMENT"
+    },
+    {
+      "source_id": "SRC-ASQ-PAINT-SHOP-CASE",
+      "authority": "AMERICAN_SOCIETY_FOR_QUALITY",
+      "title": "Improving Customer Satisfaction Through Six Sigma: A Paint Shop Case Study",
+      "url": "https://asq.org/quality-resources/articles/case-studies/improving-customer-satisfaction-through-six-sigma-a-paint-shop-case-study",
+      "retrieved_date": "2026-09-10",
+      "standing": "ADMITTED_SUPPLEMENTAL_CASE_EVIDENCE_NOT_STANDARD_REPLACEMENT"
+    },
+    {
+      "source_id": "SRC-ASQ-3M-CASE",
+      "authority": "AMERICAN_SOCIETY_FOR_QUALITY",
+      "title": "Quality Revolution Reduces Defects, Drives Sales Growth at 3M",
+      "url": "https://asq.org/quality-resources/articles/case-studies/quality-revolution-reduces-defects-drives-sales-growth-at-3m",
+      "retrieved_date": "2026-09-10",
+      "standing": "ADMITTED_SUPPLEMENTAL_CASE_EVIDENCE_NOT_STANDARD_REPLACEMENT"
+    }
+  ],
+  "instructional_realization": {
+    "materialized_lessons": 1,
+    "worked_examples": 2,
+    "practice_items": 2,
+    "mastery_items": 1,
+    "retention_items": 1,
+    "transfer_items": 0,
+    "reason_transfer_not_required_for_slice": "Frozen cognitive level is UNDERSTAND and the existing external-standard evidence profile requires independent knowledge assessment plus delayed retention for this level; no transfer effectiveness claim is made.",
+    "practice_mastery_family_overlap_allowed": false,
+    "mastery_retention_family_overlap_allowed": false
+  },
+  "oracle_negative_fixtures_required": [
+    "MALFORMED_JSON_REJECTED",
+    "REALIZED_IMPACT_TRUE_REJECTED",
+    "UNKNOWN_MECHANISM_FACT_PAIR_REJECTED",
+    "DUPLICATE_OR_TOO_FEW_MECHANISMS_REJECTED",
+    "REQUIRED_MISSING_EVIDENCE_OMITTED_REJECTED",
+    "COURSE_ANSWER_MUTATION_DOES_NOT_CHANGE_ORACLE_CORRECTNESS"
+  ],
+  "runtime_path_assertions": [
+    "DomainGeneralLearningEngine.create_research_grounded_course_job returns READY_FOR_REVIEW",
+    "validate_grounding passes with closed-world claim refs",
+    "validate_instructional_design passes with two worked examples and independent practice/mastery/retention families",
+    "first next action is LESSON",
+    "practice evidence does not satisfy mastery",
+    "an oracle-rejected mastery response records incorrect evidence",
+    "an oracle-accepted unassisted mastery response advances only to RETENTION_DUE",
+    "before the one-hour retention delay next_action returns RETENTION_WAIT",
+    "distinct delayed retention success advances the one-skill qualification slice to MASTERED",
+    "full 66-node course activation remains prohibited"
+  ],
+  "evidence_boundaries": {
+    "real_learner_mastery": "UNOBSERVED",
+    "psychometric_validity": "UNOBSERVED",
+    "real_learner_retention_effectiveness": "UNOBSERVED",
+    "transfer_effectiveness": "UNOBSERVED",
+    "workplace_effectiveness": "UNOBSERVED",
+    "sme_approval": "UNOBSERVED",
+    "certification_equivalence": "UNOBSERVED",
+    "a01_authority": "NOT_CLAIMED",
+    "native_platform_authority": "NOT_CLAIMED",
+    "production_authority": "NOT_CLAIMED"
+  },
+  "source_bytes_archived": false,
+  "source_bytes_archive_limitation": "Portable hosted qualification binds source metadata and paraphrased admitted claims but does not archive the external ASQ page bytes.",
+  "on_pass": "Admit Batch 01 into Learning control as I.A.1 instructional/scoring realization complete and select the next unmaterialized 001D execution node without replaying 001A-001D."
+}
