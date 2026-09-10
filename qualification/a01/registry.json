@@ -1,5 +1,5 @@
 {
-  "registry_version": 25,
+  "registry_version": 26,
   "qualifications": {
     "A01-CONTROL-PLANE-SELFTEST": {
       "workstream_id": "SYSTEM-MASTER",
@@ -84,6 +84,18 @@
       "evidence_artifact": "book-system-lifecycle-transition-engine-001",
       "overnight_eligible": false,
       "description": "Qualify the exact Book System lifecycle transition engine: parent/project and unit transition gates, author-required boundaries, direct-service transition denial, stale service-evidence rejection, exact parent and lifecycle-ledger concurrency, defer/resume, transitive invalidation and revalidation restore, deterministic replay without double commit, request/idempotency conflicts, transaction atomicity, and exact rollback identity. PASS is bounded to the tested subject SHA and grants no autonomous author, publication, promotion, or provider canonical-write authority."
+    },
+    "BOOK-SYSTEM-LIFECYCLE-CURRENT-PARENT-COMPATIBILITY-ADAPTER-001": {
+      "workstream_id": "BOOK-SYSTEM",
+      "gate_class": "focused",
+      "source": "subject",
+      "executable": "node",
+      "args": [
+        ".github/scripts/a01-book-system-lifecycle-current-parent-compatibility-001.js"
+      ],
+      "evidence_artifact": "book-system-lifecycle-current-parent-compatibility-adapter-001",
+      "overnight_eligible": false,
+      "description": "Qualify the exact Book System current-parent Lifecycle compatibility adapter: 21-case current-parent identity compatibility matrix plus 18-case Lifecycle v1 regression, preserving Lifecycle v1 transition policy semantics while adapting only the current parent identity boundary. PASS is exact-SHA focused evidence only and grants no provider, author, document-engine, export-freeze, publication, promotion, or production authority."
     },
     "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001": {
       "workstream_id": "BOOK-SYSTEM",
