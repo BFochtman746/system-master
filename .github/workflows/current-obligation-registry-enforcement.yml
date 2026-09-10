@@ -1,0 +1,34 @@
+name: Current Obligation Registry Enforcement
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'governance/CURRENT-AUTHORITY.json'
+      - 'governance/WORK-OBLIGATION-REGISTRY-*.json'
+      - '.github/scripts/current-obligation-registry-enforce.js'
+      - '.github/workflows/current-obligation-registry-enforcement.yml'
+  pull_request:
+    paths:
+      - 'governance/CURRENT-AUTHORITY.json'
+      - 'governance/WORK-OBLIGATION-REGISTRY-*.json'
+      - '.github/scripts/current-obligation-registry-enforce.js'
+      - '.github/workflows/current-obligation-registry-enforcement.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate-current-registry:
+    name: Validate authority-selected current obligations
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 1
+      - name: Syntax check
+        run: node --check .github/scripts/current-obligation-registry-enforce.js
+      - name: Validate CURRENT-AUTHORITY selected obligation registry
+        run: node .github/scripts/current-obligation-registry-enforce.js
