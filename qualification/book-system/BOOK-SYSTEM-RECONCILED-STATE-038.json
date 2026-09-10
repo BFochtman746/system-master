@@ -1,0 +1,53 @@
+{
+  "state_id": "BOOK-SYSTEM-RECONCILED-STATE-038",
+  "effective_date": "2026-09-10",
+  "supersedes_for_current_parent_control": "BOOK-SYSTEM-RECONCILED-STATE-037",
+  "supersession_scope": "CURRENT_PARENT_CONTROL_AND_BOOK_PROSE_INTEGRATION_ROUTING_ONLY",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "standing": "BOOK_PROSE_PHASE2A_2B_2C_2D_2E_2F_2G_2H_2I_CLOSED__PHASE2J_BOOK_ADMISSION_HANDOFF_SELECTED",
+  "source_live_head": "131a4ce190bfc4713c67d4a99f68502f6afea60e",
+  "current_owner_objective": {
+    "objective_id": "BOOK-WORKFLOW-ORCHESTRATOR-BOOK-ADMISSION-HANDOFF-001",
+    "phase": "2J",
+    "state": "READY",
+    "scope": "Define and qualify the coordination-only handoff from a fully evidenced workflow candidate to the existing Book admission authority. The orchestrator may assemble and present exact identities, evidence references and required authority status, but it must not execute or emulate canonical manuscript mutation, self-approve a candidate, bypass author/canon/Prose/evaluator requirements, or convert evidence receipts into canonical state."
+  },
+  "2i_evidence": {
+    "qualified_subject_sha": "8e15dafe628f6fd661fa002d43d0a177b3518689",
+    "workflow_run_id": 34527738058,
+    "job_id": 103040660084,
+    "artifact_id": 10172223434,
+    "artifact_zip_digest_sha256": "5df6c2d3ed2279328f83acf4f513691cd63111832d659d931652cbb6905f7bfb",
+    "result": "PASS_30_OF_30",
+    "provider_execution_performed": false,
+    "canonical_manuscript_mutated": false,
+    "book_admission_executed": false,
+    "durable_persistence_proven": false,
+    "fresh_blind_scoring_executed": false
+  },
+  "2i_runtime_binding": {
+    "runtime_path": "system-master/book-system/book-workflow-evidence-provenance.js",
+    "runtime_blob_sha": "d66e053ab841231cdaa8f36ba64fdff27af10fd2",
+    "provider_operation_validation": "Exact provider operation digest is rederived through Phase 2F from the current execution plan/task/source and the pinned qualified Service Registry V2; a merely SHA-256-shaped forged digest is rejected."
+  },
+  "authority_fences": {
+    "book_canonical_manuscript_owner": "SYSTEM_MASTER/BOOK",
+    "prose_owner": "SYSTEM_MASTER/BOOK/PROSE",
+    "prose_canonical_write": false,
+    "orchestrator_canonical_write": false,
+    "book_admission_is_sole_canonical_effect_path": true,
+    "author_final_creative_semantic_authority": true,
+    "story_bible_canon_truth_preserved": true,
+    "research_external_evidence_does_not_become_canon_automatically": true,
+    "evidence_or_provenance_receipt_does_not_equal_canonical_admission": true
+  },
+  "qualification_fences": [
+    "Phase 2I proves synthetic evidence/provenance receipt construction, validation, chaining and no-effect replay only.",
+    "No provider execution, retry, reconciliation, Book admission, canonical manuscript mutation or Prose preference write occurred.",
+    "No durable receipt persistence or crash-survival guarantee is proven yet.",
+    "No fresh blind scoring or evaluator-isolation qualification is inferred.",
+    "No A-01 target qualification PASS is claimed or transferred to the 2I software subject.",
+    "No native/private/publication/production readiness is claimed."
+  ],
+  "next_dependency_valid_action": "Inspect any existing Phase 2J candidate work, then define and qualify only the Book admission handoff semantics against the existing canonical Book admission authority. Do not implement a second admission engine or allow the orchestrator, Prose, evaluator, Research or evidence receipts to mutate canonical manuscript state."
+}
