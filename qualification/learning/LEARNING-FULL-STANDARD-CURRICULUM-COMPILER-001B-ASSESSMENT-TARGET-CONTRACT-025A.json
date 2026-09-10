@@ -1,0 +1,107 @@
+{
+  "contract_id": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001B-ASSESSMENT-TARGET-CONTRACT-025A",
+  "effective_date": "2026-09-10",
+  "owner_path": "SYSTEM_MASTER/LEARNING",
+  "control_ref": "learning/control-v1",
+  "input_control_head": "0562ce4754e79832ff980e8e8c698e8120dd6852",
+  "input_full_graph_closure_subject": "02b8c03922cfdf0acdfa62d5c10c8db44a620b91",
+  "source_contract": {
+    "source_index": "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-66-SOURCE-NODE-INDEX-001.json",
+    "requirement_set_digest": "86a1baba495d2637ef4d889948befd2c87a9b87a377f04b892b06c5ec980a298",
+    "source_version": "2022",
+    "expected_requirements": 66,
+    "expected_provisional_subskills": 66
+  },
+  "purpose": "Bind each structurally validated provisional subskill to a deterministic evidence-scored assessment target without claiming that synthetic scoring proves learner mastery, psychometric validity, retention, transfer, workplace effectiveness, SME approval, or certification equivalence.",
+  "target_schema": {
+    "required_fields": [
+      "assessment_target_id",
+      "subskill_id",
+      "parent_requirement_id",
+      "source_locator",
+      "preserved_cognitive_level",
+      "capability_statement",
+      "target_type",
+      "evidence_input_class",
+      "response_action_class",
+      "prompt_contract",
+      "scoring_assertions",
+      "insufficient_evidence_behavior",
+      "provenance_refs",
+      "validation_status",
+      "evidence_boundaries"
+    ],
+    "assessment_target_id_format": "ASSESS::CSSGB-2022::<requirement_id>::<subskill_slug>::TARGET::<stable_slug>",
+    "target_types": [
+      "SCENARIO_CONSTRAINED_RESPONSE",
+      "DATA_INTERPRETATION",
+      "ARTIFACT_ANALYSIS",
+      "CONSTRUCTION_TASK",
+      "CLASSIFICATION_TASK",
+      "CALCULATION_WITH_INTERPRETATION",
+      "RECALL_CHECK"
+    ],
+    "evidence_input_classes": [
+      "BOUNDED_SCENARIO",
+      "BOUNDED_DATA_OR_SUMMARY",
+      "BOUNDED_DOCUMENT_OR_ARTIFACT",
+      "BOUNDED_VISUAL_OR_GRAPH",
+      "BOUNDED_PROCESS_DESCRIPTION",
+      "BOUNDED_MIXED_EVIDENCE",
+      "NO_EXTERNAL_EVIDENCE_RECALL"
+    ],
+    "response_action_classes": ["RECALL", "EXPLAIN", "CLASSIFY", "APPLY", "ANALYZE", "EVALUATE", "CREATE", "CALCULATE_AND_INTERPRET"],
+    "validation_status_values": ["PROVISIONAL_BOUND", "REJECTED"]
+  },
+  "identity_and_provenance_rules": [
+    "subskill_id must resolve to exactly one structurally validated provisional subskill and parent_requirement_id must match that subskill's canonical frozen parent.",
+    "source_locator and preserved_cognitive_level must equal the frozen 2022 source-index values for the parent requirement.",
+    "capability_statement must equal the structurally validated provisional subskill capability statement; target binding may not silently rewrite the capability.",
+    "provenance_refs must include the exact source-node identity and exact subskill identity.",
+    "No 2026 or later standard may substitute for or reinterpret the frozen 2022 requirement identity."
+  ],
+  "assessment_design_rules": [
+    "The target must elicit evidence of the capability_statement rather than only recognition of the requirement title.",
+    "prompt_contract must state what evidence is supplied, what action is required, and which unavailable facts must not be assumed.",
+    "scoring_assertions must contain at least two independent deterministic assertions unless preserved_cognitive_level is REMEMBER, where one exact recall assertion is permitted.",
+    "Each scoring assertion must name an observable response property and a deterministic pass condition; no assertion may depend on hidden evaluator preference or an unobserved real-world outcome.",
+    "insufficient_evidence_behavior must define when the correct behavior is to flag, abstain, qualify, or request missing evidence instead of guessing.",
+    "Synthetic fixtures may validate schema and scoring behavior only; they are not learner or psychometric evidence."
+  ],
+  "cognitive_alignment_rules": {
+    "REMEMBER": ["RECALL"],
+    "UNDERSTAND": ["EXPLAIN", "CLASSIFY"],
+    "APPLY": ["APPLY", "CALCULATE_AND_INTERPRET", "CLASSIFY"],
+    "ANALYZE": ["ANALYZE", "CALCULATE_AND_INTERPRET"],
+    "EVALUATE": ["EVALUATE", "ANALYZE"],
+    "CREATE": ["CREATE"]
+  },
+  "evidence_boundaries": {
+    "psychometric_validity": "UNOBSERVED",
+    "learner_mastery": "UNOBSERVED",
+    "retention": "UNOBSERVED",
+    "transfer": "UNOBSERVED",
+    "workplace_effectiveness": "UNOBSERVED",
+    "sme_approval": "UNOBSERVED",
+    "certification_equivalence": "UNOBSERVED",
+    "a01": "NOT_CLAIMED",
+    "native_platform": "NOT_CLAIMED",
+    "production": "NOT_CLAIMED"
+  },
+  "validation_gate": {
+    "must_pass": [
+      "exact frozen parent/source/cognitive provenance",
+      "exact structurally validated capability statement",
+      "valid target/input/action classes",
+      "cognitive-action alignment",
+      "deterministic scoring assertions",
+      "explicit insufficient-evidence behavior",
+      "all protected evidence boundaries unchanged",
+      "synthetic positive fixture accepted",
+      "source drift, parent mismatch, capability rewrite, cognitive drift, missing evidence handling, nondeterministic scoring, and human/psychometric claim fixtures rejected"
+    ],
+    "canonical_assessment_validity_claim_allowed": false
+  },
+  "next_objective": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001B-ASSESSMENT-TARGET-CONTRACT-VALIDATOR-025B",
+  "on_pass": "Bind assessment targets to all 66 provisional subskills in exact frozen source order using bounded batches, while unresolved dependency candidates remain separate and human/psychometric evidence remains UNOBSERVED."
+}
