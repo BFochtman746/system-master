@@ -9,6 +9,7 @@ on:
       - 'qualification/book-system/service-interface-002/BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-002.json'
       - 'system-master/book-system/book-workflow-retry-idempotency-rules.js'
       - '.github/scripts/book-workflow-orchestrator-retry-idempotency-rules-001-qualify.js'
+      - '.github/scripts/book-workflow-orchestrator-retry-idempotency-registry-pin-001-qualify.js'
       - '.github/workflows/book-workflow-orchestrator-retry-idempotency-rules-001-ci.yml'
   workflow_dispatch:
 
@@ -28,13 +29,19 @@ jobs:
         run: |
           set -euo pipefail
           node --check .github/scripts/book-workflow-orchestrator-retry-idempotency-rules-001-qualify.js
+          node --check .github/scripts/book-workflow-orchestrator-retry-idempotency-registry-pin-001-qualify.js
           node .github/scripts/book-workflow-orchestrator-retry-idempotency-rules-001-qualify.js
+          node .github/scripts/book-workflow-orchestrator-retry-idempotency-registry-pin-001-qualify.js
           test -s "${RUNNER_TEMP}/book-workflow-orchestrator-retry-idempotency-rules-001-summary.json"
+          test -s "${RUNNER_TEMP}/book-workflow-orchestrator-retry-idempotency-registry-pin-001-summary.json"
           cat "${RUNNER_TEMP}/book-workflow-orchestrator-retry-idempotency-rules-001-summary.json"
+          cat "${RUNNER_TEMP}/book-workflow-orchestrator-retry-idempotency-registry-pin-001-summary.json"
       - name: Upload qualification evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: book-workflow-orchestrator-retry-idempotency-rules-001-${{ github.run_id }}
-          path: ${{ runner.temp }}/book-workflow-orchestrator-retry-idempotency-rules-001-summary.json
+          path: |
+            ${{ runner.temp }}/book-workflow-orchestrator-retry-idempotency-rules-001-summary.json
+            ${{ runner.temp }}/book-workflow-orchestrator-retry-idempotency-registry-pin-001-summary.json
           if-no-files-found: error
