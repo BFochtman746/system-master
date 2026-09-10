@@ -27,6 +27,28 @@ The human pilot blocker does not freeze Learning development. Continue dependenc
 
 A specific unattended successor must be explicitly selected by current Learning control/state before Second Shift may execute it. Historical branch chronology is not sufficient to invent one.
 
+## Current selected non-human successor
+
+Objective: `LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001`.
+
+Selection basis: the reconciled Learning implementation/evidence train already closes the generic runtime, provider, adaptive journey, Tutor, learner-action, fresh-evidence, pilot-readiness, effectiveness-review, prospective study-design and study-execution-receipt software boundaries. The real-participant boundary remains human-only. The strongest concrete product gap left by the existing external-standard work is that IMPL-013 froze and decomposed the real 2022 ASQ CSSGB standard into 66 leaf requirements, while IMPL-014 compiled and executed only a two-requirement bounded module; the full 66-requirement curriculum and validated prerequisite/subskill decomposition remain unbuilt.
+
+First executable phase: `LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-RESEARCH-GRAPH-SPEC`.
+
+Completion delta for 001A:
+
+- revalidate the authoritative external-standard source/version and preserve exact source identity;
+- research current curriculum/dependency-graph and assessment-blueprint practices relevant to a full professional learning program;
+- produce a source-bound 66-requirement curriculum coverage map;
+- define a provisional prerequisite/subskill graph and modular sequencing with cycles, unresolved mappings and authority-sensitive judgments surfaced explicitly;
+- bind each requirement/module to intended assessment, workplace-performance, mastery, delayed-retention and novel-transfer evidence profiles;
+- define selective update-training/revalidation behavior for successor-standard changes without forcing unaffected content to be rebuilt or retaken;
+- preserve external certification, psychometric validity, real learner effectiveness, SME approval, native-platform and production authority as separate evidence boundaries.
+
+001A requires no fabricated participant evidence and no A-01 execution. Any later executable implementation or changed software subject must obtain its own exact-SHA qualification when that boundary is reached.
+
+Stop condition: the full-standard research/graph specification is internally complete and source-bound, every one of the 66 frozen requirements has one truthful disposition, unresolved SME/external-authority decisions are explicit rather than guessed, and the exact bounded implementation successor can be selected without duplicating closed Learning work.
+
 ## Branch interpretation
 
 Historical `learning/impl-*`, `learning/qual-*`, `learning/request-*`, `learning/pilot-*`, `learning/proposed-*`, import and repair branches are implementation/evidence history unless this control record or a successor explicitly selects one.
