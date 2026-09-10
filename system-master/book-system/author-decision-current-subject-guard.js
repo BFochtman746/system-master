@@ -58,7 +58,7 @@ function strictSubjectCurrent(parentState, refs) {
   assertIdentityExists(parentState, refs, records);
   for (const ref of refs) {
     const exact = records.find(r => recordKey(r) === key(ref));
-    if (!exact) continue; // append-only/non-governed identities keep their owning currentness semantics.
+    if (!exact) continue;
     const pointer = exact.meta.pointer;
     const activeRef = parentState.active[pointer];
     const active = records.filter(r => r.meta.pointer === pointer && pointerMatches(r, activeRef));
@@ -67,8 +67,16 @@ function strictSubjectCurrent(parentState, refs) {
   return true;
 }
 
+function strictSubjectCurrentOrFalse(parentState, refs) {
+  try { return strictSubjectCurrent(parentState, refs); }
+  catch (e) {
+    if (e && e.code === 'SUBJECT_IDENTITY_NOT_CURRENT') return false;
+    throw e;
+  }
+}
+
 function assertStrictSubjectCurrent(parentState, refs) {
-  if (!strictSubjectCurrent(parentState, refs)) fail('AUTHOR_DECISION_SUBJECT_NOT_CURRENT');
+  if (!strictSubjectCurrentOrFalse(parentState, refs)) fail('AUTHOR_DECISION_SUBJECT_NOT_CURRENT');
   return true;
 }
 
@@ -117,14 +125,25 @@ function resolveDecision(args) {
 }
 
 function revalidateAgainstParent(args) {
+  const strictStaleFamilies = [];
+  for (const [familyId, requestId] of Object.entries((args.queueLedger && args.queueLedger.current_request_index) || {})) {
+    const snap = args.queueLedger.decision_request_snapshots && args.queueLedger.decision_request_snapshots[requestId];
+    if (!snap || TERMINAL_STATES.has(snap.queue_state) || snap.queue_state === 'STALE') continue;
+    if (!strictSubjectCurrentOrFalse(args.currentParentState, snap.subject_identity_refs)) {
+      strictStaleFamilies.push({ familyId, originalRequestId: requestId });
+    }
+  }
+
   const out = base.revalidateAgainstParent(args);
   const next = clone(out.queue_ledger);
   const overlays = overlayFor(next);
   const staleIds = [];
-  for (const requestId of Object.values(next.current_request_index || {})) {
-    const snap = next.decision_request_snapshots[requestId];
-    if (!snap || TERMINAL_STATES.has(snap.queue_state) || snap.queue_state === 'STALE') continue;
-    if (!strictSubjectCurrent(args.currentParentState, snap.subject_identity_refs)) {
+  for (const item of strictStaleFamilies) {
+    const currentRequestId = next.current_request_index && next.current_request_index[item.familyId];
+    const idsToOverlay = [...new Set([item.originalRequestId, currentRequestId].filter(Boolean))];
+    for (const requestId of idsToOverlay) {
+      const snap = next.decision_request_snapshots && next.decision_request_snapshots[requestId];
+      if (!snap || TERMINAL_STATES.has(snap.queue_state)) continue;
       overlays[requestId] = {
         effective_state: 'STALE',
         staleness_reason: 'ACTIVE_GOVERNED_SUBJECT_CHANGED_OR_REMOVED',
@@ -132,14 +151,14 @@ function revalidateAgainstParent(args) {
         observed_parent_state_digest: args.currentParentState.state_digest,
         guard_id: GUARD_ID,
       };
-      staleIds.push(requestId);
     }
+    if (next.decision_request_snapshots && next.decision_request_snapshots[item.originalRequestId]) staleIds.push(item.originalRequestId);
   }
   base.validateQueueLedger(next, args.currentParentState);
   return {
     ...out,
     queue_ledger: next,
-    strict_stale_request_ids: staleIds.sort(),
+    strict_stale_request_ids: [...new Set(staleIds)].sort(),
     disposition: staleIds.length ? 'REVALIDATED_WITH_STRICT_STALENESS' : out.disposition,
   };
 }
