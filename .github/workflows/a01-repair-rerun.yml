@@ -80,10 +80,10 @@ jobs:
       repair_attempt: ${{ steps.context.outputs.repair_attempt }}
       max_repair_attempts: ${{ steps.context.outputs.max_repair_attempts }}
     steps:
-      - name: Checkout canonical repair authority
+      - name: Checkout canonical repair authority for this dispatch
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
-          ref: main
+          ref: ${{ github.sha }}
           fetch-depth: 1
           persist-credentials: false
 
@@ -115,16 +115,18 @@ jobs:
           echo '```json' >> "$GITHUB_STEP_SUMMARY"
           cat .repair-rerun/context.json >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
-          echo 'This context grants A-01 admission only. It is not PASS.' >> "$GITHUB_STEP_SUMMARY"
+          echo "Control plane for this fresh rerun dispatch: $GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo 'This context grants hosted admission only. It is not PASS.' >> "$GITHUB_STEP_SUMMARY"
 
   execute:
-    name: Execute replacement subject through canonical A-01 gateway
+    name: Admit and execute replacement subject through canonical A-01 path
     needs: prepare
-    uses: BFochtman746/system-master/.github/workflows/a01-control-plane-gateway.yml@main
+    uses: ./.github/workflows/a01-control-plane-admission-gateway.yml
     with:
       qualification_id: ${{ needs.prepare.outputs.qualification_id }}
       workstream_id: ${{ needs.prepare.outputs.workstream_id }}
       subject_sha: ${{ needs.prepare.outputs.subject_sha }}
+      expected_control_plane_sha: ${{ github.sha }}
       origin_ref: ${{ needs.prepare.outputs.origin_ref }}
       resume_on_pass: ${{ needs.prepare.outputs.resume_on_pass }}
       resume_on_failure: ${{ needs.prepare.outputs.resume_on_failure }}
@@ -137,3 +139,4 @@ jobs:
       repair_attempt: ${{ fromJSON(needs.prepare.outputs.repair_attempt) }}
       max_repair_attempts: ${{ fromJSON(needs.prepare.outputs.max_repair_attempts) }}
       repair_transaction_id: ${{ needs.prepare.outputs.transaction_id }}
+    secrets: inherit
