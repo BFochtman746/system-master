@@ -1,6 +1,30 @@
 {
   "owner_system_id":"LEARNING","owner_path":"SYSTEM_MASTER/LEARNING","control_ref":"learning/control-v1","last_known_control_head":"12132b42c9aac03273782b058747373065564f0d","delegation_epoch":21,
-  "active_delegations":[{"delegation_id":"SECOND-SHIFT-LEARNING-FULL-STANDARD-CURRICULUM-001A-DOMAIN-VI-BATCH-01-022","owner_path":"SYSTEM_MASTER/LEARNING","objective_id":"LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-DOMAIN-VI-BATCH-01-CANDIDATE-022","parent_objective_id":"LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001","state":"READY","valid_for_control_ref":"learning/control-v1","valid_for_control_head":"12132b42c9aac03273782b058747373065564f0d","created_at":"2026-09-10T09:49:00-04:00","parent_checkpoint":"qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-DOMAIN-VI-TOPOLOGY-021.json","completion_delta":"Domains I-V are structurally covered in exact frozen source order. Domain V closed 6/6 at 2164e3a7068fea6d72a2df74678d23e28c0b284b. The final frozen domain begins with VI.A.1, VI.A.2, VI.A.3, VI.B.1 and VI.B.2.","stop_condition":"Batch 01 receives exact source-order dispositions and hosted cumulative Validator 003 evidence; then continue final Domain VI Batch 02.","forbidden_authority":["learner effectiveness","SME approval","certification equivalence","A-01","native","production"],"continuation_rule":"Completion is not shift termination. Continue through final Domain VI and full-graph closure selection."}],
+  "active_delegations":[{
+    "delegation_id":"SECOND-SHIFT-LEARNING-FULL-STANDARD-CURRICULUM-001A-DOMAIN-VI-BATCH-01-022",
+    "owner_path":"SYSTEM_MASTER/LEARNING",
+    "objective_id":"LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-DOMAIN-VI-BATCH-01-CANDIDATE-022",
+    "parent_objective_id":"LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001",
+    "state":"READY",
+    "valid_for_control_ref":"learning/control-v1",
+    "valid_for_control_head":"12132b42c9aac03273782b058747373065564f0d",
+    "created_at":"2026-09-10T09:49:00-04:00",
+    "last_revalidated_at":"2026-09-10T09:49:00-04:00",
+    "parent_checkpoint":"qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-DOMAIN-VI-TOPOLOGY-021.json",
+    "completion_delta":"Domains I-V are structurally covered in exact frozen source order. Domain V closed 6/6 at 2164e3a7068fea6d72a2df74678d23e28c0b284b. The final frozen domain begins with VI.A.1, VI.A.2, VI.A.3, VI.B.1 and VI.B.2.",
+    "stop_condition":"Batch 01 receives exact source-order dispositions and hosted cumulative Validator 003 evidence; then continue final Domain VI Batch 02.",
+    "allowed_work":[
+      "materialize exact frozen Domain VI nodes VI.A.1, VI.A.2, VI.A.3, VI.B.1 and VI.B.2",
+      "add only evidence-bound Learning-owner provisional subskills/decomposition with exact frozen parent binding",
+      "preserve uncertain prerequisite relationships as UNRESOLVED__NOT_CANONICAL rather than inferring hard dependencies from source order",
+      "validate cumulatively against completed Domains I-V with unchanged Validator 003 while preserving acyclicity and endpoint resolution",
+      "on successful Batch 01 qualification continue final Domain VI Batch 02 rather than declaring the full graph complete"
+    ],
+    "forbidden_authority":["learner effectiveness","SME approval","certification equivalence","A-01","native","production"],
+    "on_pass":"Preserve exact Domain VI Batch 01 structural evidence, re-fetch the live Learning control head and repair inbox, then bind and execute final Domain VI Batch 02 if the owner state still selects it.",
+    "on_failure":"Preserve the exact candidate subject and first structural/provenance failure, repair only deterministic source/graph defects where authorized, and do not invent learner, SME, certification, A-01, native or production evidence.",
+    "continuation_rule":"Completion is not shift termination. Continue through final Domain VI and full-graph closure selection."
+  }],
   "retired_delegations":[
     {"delegation_id":"SECOND-SHIFT-LEARNING-CENSUS-001","state":"SUPERSEDED","history_preserved":true},
     {"delegation_id":"SECOND-SHIFT-LEARNING-FULL-STANDARD-CURRICULUM-001A","state":"PARTIAL_PHASE_COMPLETE__SUPERSEDED_BY_66_NODE_SUCCESSOR","completion_commit":"39187fdee2bdd31810a13eeac7d91f548146bc50","history_preserved":true},
@@ -18,5 +42,7 @@
     {"delegation_id":"SECOND-SHIFT-LEARNING-FULL-STANDARD-CURRICULUM-001A-DOMAIN-V-BATCH-01-019","state":"COMPLETE__HOSTED_STRUCTURAL_PASS","validated_subject_sha":"b672375e81099f205048ff9858b661180ea3e294","hosted_run_id":34484750291,"hosted_artifact_id":10155106086,"hosted_artifact_digest":"sha256:a9dda6fe1e524dcbab189ad1df990d6c2de438a1e3eb80cb2f81933d65fc0310","history_preserved":true},
     {"delegation_id":"SECOND-SHIFT-LEARNING-FULL-STANDARD-CURRICULUM-001A-DOMAIN-V-BATCH-02-020","state":"COMPLETE__DOMAIN_V_STRUCTURAL_PHASE_CLOSED__SUPERSEDED_BY_DOMAIN_VI","validated_subject_sha":"2164e3a7068fea6d72a2df74678d23e28c0b284b","hosted_run_id":34484865475,"hosted_artifact_id":10155154409,"hosted_artifact_digest":"sha256:60067737f17eb3609a978f30de3c74047128959b80e67ab83c1e5d753f99d641","completion_classification":"6_OF_6_DOMAIN_V_EXACT_SOURCE_ORDER__FULL_GRAPH_CANONICAL_ADMISSION_FALSE","history_preserved":true}
   ],
-  "owner_revalidation_required":false,"reason":"Domain V is durably structurally complete. Learning control advanced to 12132b42c9aac03273782b058747373065564f0d; final Domain VI Batch 01 is dependency-valid and non-human.","empty_is_valid":false
+  "owner_revalidation_required":false,
+  "reason":"Domain V is durably structurally complete. Learning control advanced to 12132b42c9aac03273782b058747373065564f0d; final Domain VI Batch 01 is dependency-valid and non-human.",
+  "empty_is_valid":false
 }
