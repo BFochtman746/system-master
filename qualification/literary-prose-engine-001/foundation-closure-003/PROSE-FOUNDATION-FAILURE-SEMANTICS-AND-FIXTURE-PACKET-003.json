@@ -1,0 +1,130 @@
+{
+  "artifact_id": "PROSE-FOUNDATION-FAILURE-SEMANTICS-AND-FIXTURE-PACKET-003",
+  "effective_date": "2026-09-10",
+  "owner_path": "SYSTEM_MASTER/BOOK/PROSE",
+  "objective_id": "PROSE-FOUNDATION-FAILURE-SEMANTICS-AND-FIXTURE-PACKET-003",
+  "base_census": "qualification/literary-prose-engine-001/PROSE-FOUNDATION-CLOSURE-CENSUS-CHECKPOINT-001.json",
+  "standing": "CONTRACT_MATERIALIZED__EXECUTABLE_SYNTHETIC_QUALIFICATION_PENDING",
+  "subject_row": "PROSE-VOICE-CANON-INTENT-PROTECTED-LANGUAGE-PRESERVATION",
+  "authority": {
+    "passage_intelligence": "qualification/literary-prose-engine-001/step-e/PASSAGE-INTELLIGENCE-CONTRACT-v1.json",
+    "preservation_audit": "qualification/literary-prose-engine-001/step-h/PRESERVATION-AUDIT-CONTRACT-v1.json",
+    "controlled_revision": "qualification/literary-prose-engine-001/step-h/controlled_revision.py",
+    "overoptimization_contract": "qualification/literary-prose-engine-001/step-k/HOMOGENIZATION-OVEROPTIMIZATION-DEFENSE-CONTRACT-v1.json",
+    "overoptimization_implementation": "qualification/literary-prose-engine-001/step-k/overoptimization_defense.py",
+    "preference_ledger": "qualification/literary-prose-engine-001/step-j/voice_preference_learning.py",
+    "parent_boundary": "qualification/literary-prose-engine-001/PROSE-SYSTEM-PRODUCT-PARENT-BINDING-003.json"
+  },
+  "foundation_laws": [
+    "Unknown or unresolved critical passage authority may permit diagnosis but may not permit nonzero revision.",
+    "Canon, protected language, authorial intent, POV/knowledge, explicit user constraints, required ambiguity, semantic core and named-author targeting are hard pre-evaluation preservation boundaries.",
+    "Voice identity, character integrity, narrative distance, register and collateral-effect concerns remain review evidence and cannot become a self-issued pass.",
+    "Missing clean-control, project-holdout or required homogenization evidence fails closed rather than silently passing.",
+    "The original passage is the immutable recovery anchor for Prose candidate work; candidate generation never overwrites it.",
+    "Retry of an unchanged deterministic Prose computation must not broaden authority or change its semantic disposition.",
+    "A retry with materially changed input/evidence is a new evaluation attempt and must not reuse prior PASS as authority.",
+    "Technical timeout or crash before a qualified Prose result creates no Book canonical effect because Prose owns no Book canonical writer.",
+    "Candidate rollback is discard/retain-original, not inverse manuscript mutation.",
+    "Preference-learning rollback is append-only USER_REVOKE_EVENT history; prior evidence remains reconstructible.",
+    "No retry, rollback, timeout recovery or failure path may create author, Book canonical, publication, promotion, production, A-01 or native authority."
+  ],
+  "failure_matrix": [
+    {
+      "failure_id": "PF003-F01",
+      "condition": "missing_or_unresolved_critical_passage_authority",
+      "stage": "STEP-E/STEP-H",
+      "required_disposition": "BLOCK_NONZERO_REVISION_RETAIN_ORIGINAL",
+      "retry_rule": "retry only after authoritative context changes or a transient technical attempt failed; unchanged inputs must remain blocked",
+      "rollback_rule": "none required; no nonzero candidate becomes canonical",
+      "evidence": "PASSAGE-INTELLIGENCE-CONTRACT-v1 revision_with_unresolved_critical_authority=false; PRESERVATION-AUDIT unknown critical state blocks nonzero generation"
+    },
+    {
+      "failure_id": "PF003-F02",
+      "condition": "canon_or_protected_language_or_authorial_intent_conflict",
+      "stage": "STEP-H",
+      "required_disposition": "REJECT_NONZERO_CANDIDATE_BEFORE_STEP_I",
+      "retry_rule": "same exact request and conflict must deterministically reject; changed authority/context requires a new attempt",
+      "rollback_rule": "retain immutable original control",
+      "evidence": "controlled_revision HARD_FLAGS + PRESERVATION-AUDIT hard_reject_dimensions"
+    },
+    {
+      "failure_id": "PF003-F03",
+      "condition": "voice_identity_or_other_review_dimension_concern",
+      "stage": "STEP-H->STEP-I",
+      "required_disposition": "CARRY_REVIEW_FLAG_NO_SELF_PASS",
+      "retry_rule": "no automatic escalation; subsequent evaluation remains independent",
+      "rollback_rule": "retain original when downstream evidence is tied/unresolved",
+      "evidence": "PRESERVATION-AUDIT review_dimensions and STEP-I retain/abstain boundary"
+    },
+    {
+      "failure_id": "PF003-F04",
+      "condition": "missing_required_homogenization_baseline_control_or_holdout_metrics",
+      "stage": "STEP-K",
+      "required_disposition": "FAIL_CLOSED_NO_DEFENSE_PASS",
+      "retry_rule": "retry only with valid complete required evidence",
+      "rollback_rule": "candidate cannot pass defense gate; original remains available",
+      "evidence": "HOMOGENIZATION-OVEROPTIMIZATION-DEFENSE-CONTRACT-v1 + overoptimization_defense._require_metrics"
+    },
+    {
+      "failure_id": "PF003-F05",
+      "condition": "hard_identity_collapse_or_multiple_material_homogenization_risks",
+      "stage": "STEP-K",
+      "required_disposition": "REJECT_OVEROPTIMIZATION_OR_RETAIN_ORIGINAL",
+      "retry_rule": "unchanged evidence reproduces same deterministic assessment; changed candidate/evidence is a new subject",
+      "rollback_rule": "retain original; no Book mutation is reversed",
+      "evidence": "STEP-K hard_risks/dispositions"
+    },
+    {
+      "failure_id": "PF003-F06",
+      "condition": "duplicate_or_invalid_preference_event",
+      "stage": "STEP-J",
+      "required_disposition": "REJECT_APPEND_FAIL_CLOSED",
+      "retry_rule": "same duplicate event_id remains invalid; caller must reconcile authoritative ledger before a new append",
+      "rollback_rule": "existing ledger remains unchanged",
+      "evidence": "voice_preference_learning.append_event"
+    },
+    {
+      "failure_id": "PF003-F07",
+      "condition": "accepted_or_learned_preference_must_be_rolled_back",
+      "stage": "STEP-J",
+      "required_disposition": "APPEND_USER_REVOKE_EVENT_PRESERVE_HISTORY",
+      "retry_rule": "replay derives state from complete append-only ledger; no destructive overwrite",
+      "rollback_rule": "revoked event becomes non-governing while remaining in immutable history digest",
+      "evidence": "voice_preference_learning USER_REVOKE_EVENT semantics"
+    },
+    {
+      "failure_id": "PF003-F08",
+      "condition": "technical_timeout_or_crash_before_result_commit",
+      "stage": "ORCHESTRATION_BOUNDARY",
+      "required_disposition": "NO_CANONICAL_EFFECT_UNKNOWN_OR_RETRYABLE_ATTEMPT",
+      "retry_rule": "orchestrator may retry under its durable attempt/idempotency contract; Prose retry cannot expand scope or authority",
+      "rollback_rule": "none inside Book canonical state because Prose has no canonical writer; transient candidate/evidence output may be discarded",
+      "evidence": "PROSE parent binding + pure/non-effecting Step-H/Step-K/Step-J computation boundaries"
+    }
+  ],
+  "required_fixture_families": [
+    "unresolved critical authority retains original",
+    "canon conflict deterministically rejects on repeat",
+    "protected-language conflict deterministically rejects on repeat",
+    "authorial-intent conflict deterministically rejects on repeat",
+    "review flag carries forward without self-pass",
+    "successful candidate replay is byte/structure deterministic and candidate_id stable",
+    "changed candidate input produces a different candidate identity rather than inheriting prior PASS",
+    "missing Step-K required evidence fails closed",
+    "hard Step-K identity-collapse risk rejects or retains original as specified",
+    "Step-K exact replay produces identical assessment identity/disposition",
+    "duplicate preference event leaves caller ledger unchanged",
+    "USER_REVOKE_EVENT removes prior preference from governing state while preserving append-only history",
+    "static effect scan confirms foundation-tested Prose functions contain no direct Book/file/network/process mutation authority"
+  ],
+  "forbidden_authority_preserved": [
+    "no six-case blind author labels",
+    "no private manuscript prose",
+    "no DEVELOPMENT_GOLD",
+    "no blind prediction seal",
+    "no BOOK canonical manuscript mutation",
+    "no publication or production action",
+    "no A-01/native authority claim"
+  ],
+  "pass_condition": "All synthetic fixture families pass on one exact branch subject and the hosted receipt proves no blind/private access, no Book canonical mutation, deterministic unchanged-input replay, append-only rollback, and zero authority escalation."
+}
