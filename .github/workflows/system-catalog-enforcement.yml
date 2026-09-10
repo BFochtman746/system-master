@@ -1,0 +1,44 @@
+name: System Catalog Enforcement
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'SYSTEMS.md'
+      - 'governance/CURRENT-AUTHORITY.json'
+      - 'governance/SYSTEM-TOPOLOGY-*.json'
+      - 'governance/EXPECTATION-REGISTRY-*.json'
+      - 'governance/REALLOCATION-LEDGER-*.json'
+      - 'governance/catalog/**'
+      - 'governance/retirements/**'
+      - '.github/scripts/system-catalog-enforce.js'
+      - '.github/workflows/system-catalog-enforcement.yml'
+  pull_request:
+    paths:
+      - 'SYSTEMS.md'
+      - 'governance/CURRENT-AUTHORITY.json'
+      - 'governance/SYSTEM-TOPOLOGY-*.json'
+      - 'governance/EXPECTATION-REGISTRY-*.json'
+      - 'governance/REALLOCATION-LEDGER-*.json'
+      - 'governance/catalog/**'
+      - 'governance/retirements/**'
+      - '.github/scripts/system-catalog-enforce.js'
+      - '.github/workflows/system-catalog-enforcement.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  enforce-system-catalog:
+    name: Reject catalog, retirement, and candidate-authority drift
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 1
+      - name: Syntax check
+        run: node --check .github/scripts/system-catalog-enforce.js
+      - name: Validate System Master catalog consistency
+        run: node .github/scripts/system-catalog-enforce.js

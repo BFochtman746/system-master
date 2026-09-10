@@ -1,0 +1,127 @@
+{
+  "registry_id": "SYSTEM-MASTER-ARCHIVE-SOURCE-REGISTRY-001",
+  "effective_date": "2026-09-10",
+  "standing": "INITIAL_CONTROL_SURFACE_SEED__FULL_ASSET_CENSUS_PENDING_A01_INGEST",
+  "authority_class": "SOURCE_DISCOVERY_AND_CUSTODY_METADATA__NOT_SYSTEM_AUTHORITY",
+  "rules": [
+    "Every source retains its original locator and historical identity.",
+    "Library file_id/version_id is a stable discovery locator but is not a Git SHA or content digest.",
+    "A-01 may compute and verify digests only for bytes actually presented to it.",
+    "Conflicting or unavailable historical identity remains explicit and is never normalized away.",
+    "Derived summaries are not substitutes for source bytes or exact receipts.",
+    "Full asset census expands this registry append-only or by a versioned successor."
+  ],
+  "sources": [
+    {
+      "source_id":"LIB-MODULE-AUDIT-FULL-QUEUE-001",
+      "surface":"CHATGPT_LIBRARY",
+      "name":"MODULE-AUDIT-001-FULL-QUEUE.csv",
+      "library_file_id":"file_000000001bfc81f68a9725de40910583",
+      "library_version_id":"1",
+      "evidence_class":"HISTORICAL_MODULE_REGISTRY_INPUT",
+      "known_facts":"40 exact module rows with candidate counts and historical source-authority notes",
+      "reuse_disposition":"MIGRATION_INPUT"
+    },
+    {
+      "source_id":"LIB-MODULE-CENSUS-AUDIT-001",
+      "surface":"CHATGPT_LIBRARY",
+      "name":"MODULE-CENSUS-AUDIT-001-REPORT.md",
+      "library_file_id":"file_000000005abc81f6b2b6a88a678b6f07",
+      "library_version_id":"1",
+      "evidence_class":"HISTORICAL_FORENSIC_AUDIT",
+      "known_facts":"40 modules; 36 research closed at audit time; PhoneOps absorbed; PhysicalAI deferred; Experience/LocalAI then-open",
+      "reuse_disposition":"REFERENCE_ONLY"
+    },
+    {
+      "source_id":"LIB-VAULT-INTEGRITY-REBASE-001",
+      "surface":"CHATGPT_LIBRARY",
+      "name":"VAULT-INTEGRITY-REBASE-001_CANONICAL_CONTROL.json",
+      "library_file_id":"file_00000000dde881f6b089abcb138b0500",
+      "library_version_id":"1",
+      "evidence_class":"HISTORICAL_NORMALIZATION_CONTROL",
+      "known_facts":"Federated materialized control state; authority order; normalized module statuses; source manifest; archive conflict quarantine; reopen matrix",
+      "reuse_disposition":"MIGRATION_INPUT"
+    },
+    {
+      "source_id":"LIB-PROGRAMMING-BUILD-EXECUTION-LEDGER-001",
+      "surface":"CHATGPT_LIBRARY",
+      "name":"PROGRAMMING_APP_ATOMIC_CAPABILITY_LEDGER_002Y_AUD037_R5H_BUILD_EXECUTION_002E.xlsx",
+      "library_file_id":"file_00000000c094822fb552553a2e53c590",
+      "library_version_id":"1",
+      "evidence_class":"PROGRAMMING_CAPABILITY_LEDGER",
+      "system_affinity":["PROGRAMMING"],
+      "reuse_disposition":"A01_INGEST_AND_RECONCILE"
+    },
+    {
+      "source_id":"LIB-PROGRAMMING-UIUX-DESIGN-001",
+      "surface":"CHATGPT_LIBRARY",
+      "name":"PROGRAMMING-FOUNDATION-002W_UI-UX-ACCESSIBILITY-HUMAN-INTERACTION-DESIGN-001_CURRENT-v3_REQUALIFICATION_R5AI.md",
+      "library_file_id":"file_0000000060b0822f96b6b73dd33e2c66",
+      "library_version_id":"1",
+      "evidence_class":"PROGRAMMING_DESIGN_AND_REQUALIFICATION_RECORD",
+      "system_affinity":["PROGRAMMING"],
+      "known_facts":"500/500 constitutional rows and 800/800 detailed IDs reported preserved; successor 002X; workbook digest recorded in source",
+      "reuse_disposition":"A01_INGEST_AND_RECONCILE"
+    },
+    {
+      "source_id":"LIB-PROGRAMMING-CROSSCUT-R5U-001",
+      "surface":"CHATGPT_LIBRARY",
+      "name":"PROGRAMMING-CROSSCUT-002_EXISTING-CONSTITUTION-REQUIREMENTS-CLOSURE-AUDIT-001_RECHECK_R5U.md",
+      "library_file_id":"file_000000006ddc822f99727a8d935244a9",
+      "library_version_id":"1",
+      "evidence_class":"PROGRAMMING_REQUIREMENTS_RECHECK",
+      "system_affinity":["PROGRAMMING"],
+      "known_facts":"Six prerequisite build-spec blockers re-adjudicated PASS for repair traversal; implementation/executable qualification explicitly not implied",
+      "reuse_disposition":"A01_INGEST_AND_RECONCILE"
+    },
+    {
+      "source_id":"LIB-PROGRAMMING-CROSSCUT-R5N-001",
+      "surface":"CHATGPT_LIBRARY",
+      "name":"PROGRAMMING-CROSSCUT-002_EXISTING-CONSTITUTION-REQUIREMENTS-CLOSURE-AUDIT-001_CURRENT-v3_REQUALIFICATION_R5N.md",
+      "library_file_id":"file_0000000095f4822fa6ed3b9a2c1c3beb",
+      "library_version_id":"1",
+      "evidence_class":"PROGRAMMING_REQUIREMENTS_AUDIT",
+      "system_affinity":["PROGRAMMING"],
+      "known_facts":"Enumerates repairs 001-006 and later 002K-002X lifecycle/risk gaps; separates build-spec closure from implementation and executable qualification",
+      "reuse_disposition":"A01_INGEST_AND_RECONCILE"
+    },
+    {
+      "source_id":"LIB-PROGRAMMING-STATIC-WAVE-EVIDENCE-001",
+      "surface":"CHATGPT_LIBRARY",
+      "name":"QE-STATIC-WAVE-01.json",
+      "library_file_id":"file_000000008a38822fb3db490e3ac10d25",
+      "library_version_id":"1",
+      "evidence_class":"PROGRAMMING_EXECUTION_EVIDENCE",
+      "system_affinity":["PROGRAMMING"],
+      "known_facts":"Contains recorded static checks including requirement, authority and traceability ledger runs; production environment gate intentionally remained blocked on unresolved bindings/digests",
+      "reuse_disposition":"A01_INGEST_AND_RECONCILE"
+    },
+    {
+      "source_id":"GIT-CURRENT-AUTHORITY-001",
+      "surface":"GITHUB",
+      "repository":"BFochtman746/system-master",
+      "path":"governance/CURRENT-AUTHORITY.json",
+      "ref":"main",
+      "evidence_class":"CURRENT_AUTHORITY_POINTER",
+      "reuse_disposition":"CURRENT_READ_ONLY_AUTHORITY"
+    },
+    {
+      "source_id":"GIT-HISTORICAL-CENSUS-P6-001",
+      "surface":"GITHUB",
+      "repository":"BFochtman746/system-master",
+      "path":"governance/census/SYSTEM-MASTER-COMPLETION-CENSUS-002-P6-PRODUCT-MODULE-ALLOCATION.json",
+      "ref":"main",
+      "evidence_class":"HISTORICAL_MODULE_ALLOCATION_CENSUS",
+      "reuse_disposition":"REFERENCE_ONLY"
+    },
+    {
+      "source_id":"HIST-V033-ARCHIVE-CONFLICT-001",
+      "surface":"HISTORICAL_LIBRARY_REFERENCE",
+      "name":"GENESIS_OMEGA_RESEARCH_VAULT_v0.33.0.zip",
+      "evidence_class":"ARCHIVE_IDENTITY_CONFLICT",
+      "known_conflict":"Two historical SHA-256 sidecars claim different digests for the same basename and actual archive bytes were not established in the rebase input.",
+      "reuse_disposition":"QUARANTINE_CONFLICT"
+    }
+  ],
+  "next_ingest_rule": "Do not claim full archive coverage from this seed. A-01 catalog ingestion must enumerate all discoverable Git/Library/archive/qualification assets, bind exact presented bytes where possible, append source records, and emit an ingest receipt plus coverage report."
+}
