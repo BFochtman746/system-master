@@ -1,0 +1,50 @@
+name: Learning Assessment Target Full Closure Prequalification
+
+on:
+  push:
+    branches:
+      - learning/assessment-target-full-closure-20260910
+    paths:
+      - "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001B-ASSESSMENT-TARGET-FULL-CLOSURE-CANDIDATE-042A.json"
+      - ".github/scripts/learning-assessment-target-full-closure-042.js"
+      - ".github/workflows/learning-assessment-target-full-closure-prequal.yml"
+      - "qualification/learning/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  validate:
+    name: Full 66-target assessment closure
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      EVIDENCE_DIR: learning-assessment-target-full-closure-evidence
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - name: Record exact subject
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          printf 'SUBJECT_SHA=%s\n' "${GITHUB_SHA}"
+      - name: Syntax check full closure validator
+        run: node --check .github/scripts/learning-assessment-target-full-closure-042.js
+      - name: Validate full 66-target assessment closure
+        run: node .github/scripts/learning-assessment-target-full-closure-042.js
+      - name: Upload hosted evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: LEARNING-ASSESSMENT-TARGET-FULL-CLOSURE-${{ github.sha }}-hosted-evidence
+          path: ${{ runner.temp }}/learning-assessment-target-full-closure-evidence
+          if-no-files-found: warn
+          retention-days: 30
+
+# Hosted deterministic assessment-target closure only. Human, psychometric, SME, A-01, native, and production authority remain separate evidence boundaries.
