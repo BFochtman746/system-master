@@ -87,7 +87,7 @@ jobs:
         run: node .github/scripts/a01-repair-ledger-reconcile.js
 
       - name: Validate Second Shift static control state
-        run: node .github/scripts/second-shift-enforce.js --out=.state-reconciler/SECOND-SHIFT-ENFORCEMENT-REPORT.json
+        run: node .github/scripts/second-shift-enforce.js --no-live --out=.state-reconciler/SECOND-SHIFT-ENFORCEMENT-REPORT.json
 
       - name: Reconcile live System Master state
         run: node .github/scripts/system-state-reconciler.js --out=.state-reconciler
