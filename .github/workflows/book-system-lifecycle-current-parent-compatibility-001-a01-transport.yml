@@ -1,0 +1,22 @@
+name: BOOK SYSTEM Lifecycle Current Parent Compatibility A-01 Transport
+
+on:
+  push:
+    branches:
+      - book-system/request-lifecycle-current-parent-compatibility-001-a01
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  qualify:
+    uses: BFochtman746/system-master/.github/workflows/a01-control-plane-gateway.yml@main
+    with:
+      qualification_id: BOOK-SYSTEM-LIFECYCLE-CURRENT-PARENT-COMPATIBILITY-ADAPTER-001
+      workstream_id: BOOK-SYSTEM
+      subject_sha: fc5adf8fd130d7b5324cff0058ab3804d75ec54e
+      origin_ref: refs/heads/book-system/control-v1
+      resume_on_pass: Close the current-parent Lifecycle compatibility repair on this exact SHA, preserving the 21-case compatibility matrix and 18-case Lifecycle v1 regression with no Lifecycle v1 policy change; then bind the already-qualified BOOK-SYSTEM-EXPORT-FREEZE-001 implementation to the current parent before advancing.
+      resume_on_failure: Preserve the exact receipt and hosted PASS. Repair only the proven compatibility or shared-control boundary; do not modify Lifecycle v1 policy semantics or widen provider, author, document-engine, export-freeze, publication, promotion, or production authority.
+      notification_target: book-system-lifecycle-current-parent-compatibility-001
