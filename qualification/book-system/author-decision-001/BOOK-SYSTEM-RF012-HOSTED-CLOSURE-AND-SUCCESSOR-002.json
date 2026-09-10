@@ -1,0 +1,49 @@
+{
+  "artifact_id": "BOOK-SYSTEM-RF012-HOSTED-CLOSURE-AND-SUCCESSOR-002",
+  "effective_date": "2026-09-10",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "standing": "RF012_BOUNDED_RUNTIME_REPAIR_HOSTED_PASS__OWNER_PROMOTION_AND_A01_BOUNDARIES_SEPARATE",
+  "base_owner_head": "05c1f53e2f710f419a99cb99594c53c2f0240b68",
+  "qualified_subject_sha": "590ec915e4d49e8d042c53c0872d3e697cb0710a",
+  "work_branch": "book-system/rf012-rescue-20260910",
+  "hosted_run_id": 34466128592,
+  "hosted_result": "PASS",
+  "focused_qualification": {
+    "qualification_id": "BOOK-SYSTEM-AUTHOR-DECISION-CURRENT-SUBJECT-GUARD-001-DETERMINISTIC-QUALIFIER-002",
+    "planned_cases": 10,
+    "passed_cases": 10,
+    "assertions": 20,
+    "fixture_class": "SYNTHETIC_NON_PRIVATE"
+  },
+  "regression": {
+    "qualification_id": "BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001",
+    "cases": 48,
+    "passed": 48,
+    "failed": 0
+  },
+  "repair_delta": [
+    "strict current-subject checks fail closed when governed subject identity is no longer current",
+    "revalidation identifies strict stale families from the pre-revalidation frozen subject identity",
+    "strict stale overlay is preserved for the original request and its current revalidated snapshot",
+    "present, reopen and resolve cannot use a stale frozen governed subject",
+    "exact-current successor revalidation does not create false strict-stale state"
+  ],
+  "authority_boundaries": {
+    "author_decision_observed_or_created": false,
+    "private_manuscript_or_development_gold_used": false,
+    "a01_pass": false,
+    "native_evidence": false,
+    "publication_authority": false,
+    "production_authority": false,
+    "pass_transfer_from_predecessor": false
+  },
+  "next_objective": "BOOK-SYSTEM-RF012-OWNER-PROMOTION-REBIND-AND-EXACT-HEAD-HOSTED-REGRESSION-003",
+  "next_evidence_target": [
+    "re-read live book-system/control-v1 before promotion",
+    "admit only the exact bounded RF012 delta if owner authority remains compatible",
+    "produce a new owner-head exact SHA and rerun focused 10-case plus 48-case regression on that exact owner subject",
+    "rebind the canonical BOOK second-shift delegation to the resulting live owner head",
+    "keep canonical content-admission A-01 registration/qualification separate"
+  ],
+  "stop_condition": "Do not call RF012 canonical-owner closed until the bounded repair is admitted by current Book owner authority and fresh exact-owner-head hosted qualification passes. Do not infer author or A-01 authority."
+}
