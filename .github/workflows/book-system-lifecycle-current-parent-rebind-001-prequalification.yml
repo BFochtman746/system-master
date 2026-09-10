@@ -1,0 +1,31 @@
+name: Book System Lifecycle Current Parent Rebind 001 Hosted Prequalification
+
+on:
+  push:
+    branches:
+      - book-system/control-v1
+    paths:
+      - ".github/workflows/book-system-lifecycle-current-parent-rebind-001-prequalification.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - name: Verify exact checkout
+        run: test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+      - name: Syntax check rebind adapter and qualifier
+        run: |
+          node --check system-master/book-system/lifecycle-current-parent-rebind-adapter.js
+          node --check .github/scripts/book-system-lifecycle-current-parent-rebind-001-qualify.js
+      - name: Qualify persistent lifecycle ledger rebind
+        run: node .github/scripts/book-system-lifecycle-current-parent-rebind-001-qualify.js
