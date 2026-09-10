@@ -1,0 +1,102 @@
+{
+  "contract_id": "BOOK-SYSTEM-EXISTING-BOOK-RECOVERY-SEMANTIC-CORE-001",
+  "effective_date": "2026-09-10",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "contract_class": "BOUNDED_IMPLEMENTATION_SLICE__A01_INDEPENDENT_SEMANTIC_CORE",
+  "source_authority": [
+    "UAF-BOOK-ARCHITECTURE-CLOSURE-REPAIR-001-R5",
+    "BOOK-EXISTING-BOOK-RECOVERY-001",
+    "P01 existing-book intake/reconstruction 31-step build specification",
+    "PRODUCT-SCOPE-RESET-001 J01 and BKG-SYS-010",
+    "BOOK-SYSTEM-POST-RF012-IMPLEMENTATION-GAP-CENSUS-001"
+  ],
+  "goal": "Given immutable normalized source projections for an existing or previously published book, reconstruct an evidence-linked proposed Book semantic state, preserve uncertainty and competing version interpretations, obtain author decisions only through the existing author-decision boundary, and emit an immutable RecoveredBookBaseline plus prerequisite-derived exact next work without silent invention.",
+  "inputs": [
+    "source admission refs carrying immutable source identity/digest and provenance",
+    "normalized document projections from delegated file/OCR/PDF/DOCX providers",
+    "candidate manuscript/version/revision records",
+    "extracted structural anchors and mechanically provable metadata",
+    "research/citation/source references when present",
+    "optional Story Bible/knowledge candidate projections",
+    "existing Book project state when re-entering an already-known project"
+  ],
+  "outputs": [
+    "CandidateRevisionGraph",
+    "ReconstructedBookStructure with confidence/evidence and unresolved-boundary findings",
+    "ProposedBookSemanticState containing evidence-linked intent/audience/metadata/voice/knowledge candidates without automatic canonization",
+    "RecoveryFinding ledger for conflicts, loss, ambiguity, missing information and unresolved authority",
+    "AuthorDecisionBatch for only the unresolved choices requiring author authority",
+    "BookMaturityProfile across lifecycle prerequisites",
+    "RecoveredBookBaseline with exact input refs/digests, selected revision graph, reconstructed structure, ratified/proposed state, unresolved findings, maturity vector and exact-next work",
+    "RecoveryReceipt supporting deterministic replay/idempotency/checkpoint-resume"
+  ],
+  "required_semantics": [
+    "detect exact duplicates and preserve near-duplicate candidates without collapsing semantic identity",
+    "never select authoritative latest manuscript from filesystem timestamp alone",
+    "recover front matter, parts, chapters, sections/scenes and ordering from evidence-linked structure",
+    "preserve ambiguous structural boundaries as findings instead of guessing",
+    "construct candidate version/revision graph from content and internal revision evidence",
+    "extract mechanically provable metadata separately from semantic proposals",
+    "recover citation/source references in imported form without silently upgrading truth standing",
+    "build proposed VoiceProfile only from sufficiently attributable passages",
+    "detect explicit TODO/TBD/comments/editor queries/missing citations/open questions",
+    "batch author questions and proposed defaults with supporting evidence rather than asking the author to re-enter known facts",
+    "record author ratification/rejection/correction through the existing author-decision service and exact-current-subject guard",
+    "derive BookMaturityProfile from satisfied prerequisites and unresolved blockers",
+    "select exact next work from the first incomplete dependency-valid gate rather than a naive linear stage",
+    "create RecoveredBookBaseline immutably and join the native Book lifecycle only when loss, invention and authority blockers are truthfully represented",
+    "support NEW_EDITION/re-entry lineage without rewriting historical accepted editions"
+  ],
+  "authority_invariants": [
+    "Book owns semantic reconstruction/re-entry meaning; PLATFORM-008 owns raw/original artifact bytes.",
+    "DATA/021L own physical persistence, backup/PITR and disaster-recovery mechanics.",
+    "OCR/PDF/DOCX providers own native extraction mechanics; normalized provider output is untrusted input until Book semantic admission.",
+    "Story Bible owns canon/world-state truth; recovery may propose candidates but cannot silently ratify them.",
+    "Research/Evidence owns external evidence truth; imported research does not auto-become Book canon or accepted manuscript text.",
+    "Writing/Manuscript retain accepted-text/manuscript identity authority; recovery does not create a second textual truth owner.",
+    "Author remains final authority for ambiguous creative/semantic choices.",
+    "SYSTEM-ORCHESTRATOR/Book jobs remain durable execution authority; this slice does not create another orchestrator.",
+    "No hosted result is relabeled as A-01, native, human, empirical, publication or production PASS."
+  ],
+  "idempotency_and_recovery": {
+    "idempotency_key": "book_project_or_recovery_session + ordered exact source identities/digests + recovery_profile_version",
+    "rerun_rule": "Same exact inputs/profile produce the same evidence-normalized recovery proposal and stable semantic identities, excluding explicitly nondeterministic provider fields which must be normalized or rejected from authority decisions.",
+    "checkpoint_rule": "Checkpoint after source census, candidate revision graph, structure reconstruction, semantic candidate extraction, author-decision preparation and baseline assembly. Resume from the latest valid checkpoint after exact input/profile revalidation.",
+    "mutation_rule": "No canonical Book mutation occurs until required author/canonical admission gates pass; intermediate recovery state is proposal/evidence state."
+  },
+  "minimum_qualification_cases": [
+    "single clean incomplete manuscript",
+    "previously published edition plus later partial revision",
+    "exact duplicate files",
+    "near-duplicate conflicting manuscript versions",
+    "filesystem timestamps that disagree with internal revision evidence",
+    "ambiguous heading/scene boundaries",
+    "tracked changes/comments/TODOs/missing citations",
+    "fiction case producing Story Bible candidates without auto-canonization",
+    "nonfiction case producing claims/evidence/term candidates without auto-acceptance",
+    "stale author-decision subject after manuscript successor creation",
+    "repeated identical recovery request proving idempotent output",
+    "checkpoint interruption and deterministic resume",
+    "NEW_EDITION re-entry preserving prior edition lineage"
+  ],
+  "implementation_first_increment": {
+    "id": "EBR-SC1",
+    "scope": "Pure semantic recovery engine over synthetic normalized JSON fixtures; no native parser/provider calls.",
+    "deliverables": [
+      "system-master/book-system/existing-book-recovery.js",
+      "synthetic fixture corpus",
+      "deterministic qualifier covering minimum qualification cases",
+      "qualification summary with exact software subject SHA when hosted"
+    ],
+    "exit": "All semantic invariants and minimum synthetic cases pass with zero canonical mutation outside existing admission/author-decision boundaries."
+  },
+  "deferred_not_blocking_sc1": [
+    "native PDF/DOCX/OCR parser fidelity",
+    "real private manuscript corpus",
+    "A-01 qualification",
+    "target Windows/iPhone integration",
+    "real author usability/adequacy evidence",
+    "production resource calibration",
+    "publication/distributor qualification"
+  ]
+}
