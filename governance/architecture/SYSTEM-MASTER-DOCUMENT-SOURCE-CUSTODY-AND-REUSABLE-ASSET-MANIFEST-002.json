@@ -1,0 +1,120 @@
+{
+  "manifest_id": "SYSTEM-MASTER-DOCUMENT-SOURCE-CUSTODY-AND-REUSABLE-ASSET-MANIFEST-002",
+  "effective_date": "2026-09-10",
+  "product_root": "SYSTEM_MASTER",
+  "portfolio_id": "HEADLESS-CONTENT-ARTIFACTS-001",
+  "semantic_owner_path": "SYSTEM_MASTER",
+  "shared_runtime_provider": "SYSTEM_MASTER/CORE",
+  "standing": "CLOSED__EXACT_LIBRARY_SOURCE_CHAIN_RECONSTRUCTED__225_OF_225_MATCH__GITHUB_NATIVE_IMPORT_PENDING",
+  "purpose": "Recover the strongest dependency-valid Document/DOCX implementation source from preserved exact Library bytes, prove the reconstructed current source tree against its canonical CR001-R4 manifest, and select the smallest truthful next admission step without rebuilding completed Document work or transferring historical qualification to a future GitHub subject.",
+  "authority_inputs": [
+    "governance/architecture/SYSTEM-MASTER-HEADLESS-TOOL-OWNER-ALLOCATION-001.json",
+    "governance/census/SYSTEM-MASTER-COMPLETION-CENSUS-002-P6-PRODUCT-MODULE-ALLOCATION.json"
+  ],
+  "custody_chain": [
+    {
+      "packet": "CR001-R2B1",
+      "library_file_id": "file_000000005a70822fba43ae14fc6fb327",
+      "name": "CR001_R2B1_PRE_T13_SOURCE_TREE_CUSTODY_PACKET_20260901.zip",
+      "size_bytes": 1111202,
+      "observed_outer_zip_sha256": "ed3b9feeb5ad93637b1a5a59598003ca21caf794809c4bec4f09e9454d518637",
+      "zip_integrity": "PASS",
+      "role": "FULL_PRE_T13_SOURCE_CUSTODY",
+      "observed_java_main_files": 166,
+      "observed_java_test_files": 53
+    },
+    {
+      "packet": "CR001-R2B2",
+      "library_file_id": "file_00000000aee4822f8215898fccdb124b",
+      "name": "CR001_R2B2_PRE_T13_REPLACEMENT_BASELINE_QUALIFIED_20260901.zip",
+      "size_bytes": 208212,
+      "observed_outer_zip_sha256": "5cfaa490ba379e5399e6b8b080d305cf420f906768614aa128d40de9b346a2ba",
+      "zip_integrity": "PASS",
+      "role": "PRE_T13_REPLACEMENT_BASELINE_AUTHORITY_AND_QUALIFICATION",
+      "java_source_delta": 0
+    },
+    {
+      "packet": "CR001-R3",
+      "library_file_id": "file_000000004e84822faf0d3d5c0693a53c",
+      "name": "CR001_R3_T13_REBASED_CURRENT_BASELINE_PACKET_20260901.zip",
+      "size_bytes": 1270309,
+      "observed_outer_zip_sha256": "66260502655e0840f597b6a2dc06ec941b79d7e02b1c16b0a061ee953b698665",
+      "zip_integrity": "PASS",
+      "role": "T13_EXACT_SOURCE_OVERLAY_AND_REQUALIFICATION",
+      "t13_range": "UDM-DOCX-0595..0634",
+      "source_delta_paths": 4
+    },
+    {
+      "packet": "CR001-R4",
+      "library_file_id": "file_0000000037a8822f93b3090f34304107",
+      "name": "CR001_R4_T14_REBASED_CURRENT_BASELINE_QUALIFIED_20260901.zip",
+      "size_bytes": 1282263,
+      "observed_outer_zip_sha256": "cea84e5628af671cabc5dc3ed0b37dce38ff264019b04fefcd6c2b347f2b47e2",
+      "zip_integrity": "PASS",
+      "role": "CURRENT_DEPENDENCY_VALID_HIGH_WATER__T14_EXACT_SOURCE_OVERLAY_AND_REQUALIFICATION",
+      "t14_range": "UDM-DOCX-0635..0674",
+      "source_delta_paths": 4
+    }
+  ],
+  "reconstruction": {
+    "method": "R2B1 full pre-T13 materialized source tree + exact R3 source-overlay + exact R4 source-overlay, with later overlay bytes replacing only their declared paths.",
+    "reconstructed_java_files": 225,
+    "r4_canonical_manifest_rows": 225,
+    "missing_manifest_paths": 0,
+    "digest_or_size_mismatches": 0,
+    "row_verification": "PASS__225_OF_225_EXACT_SHA256_AND_BYTE_SIZE_MATCH",
+    "r4_declared_canonical_source_tree_manifest_sha256": "23e65ebdd93e2edf47b06b2743cbc6ffde8e913fefc511d8102a000f7296b088",
+    "r4_manifest_file_bytes_sha256_observed": "ed36fc9cfd38b04a8d0174efed06b03e8e25b0a45fc0adc4d47fe3457c2ee367",
+    "r4_declared_canonical_authority_tree_manifest_sha256": "6bbe15320ff99dacd5e5959bcb399b4e1fb52917c2e2ecea5dd75d7e973b9352",
+    "r4_declared_canonical_qualification_input_sha256": "3df60c8f0af30b2b77ede2c8d972b62824e0d0e9fff89ca446de21818dce384a",
+    "r4_deterministic_t14_jar_sha256": "efd8ad82db839cc832f305e7ed33b395b75b5229261bf7b394dc7f68da83272d"
+  },
+  "preserved_qualification": {
+    "classification": "HISTORICAL_EXACT_PACKET_EVIDENCE__NO_PASS_TRANSFER_TO_FUTURE_GIT_SHA",
+    "r4_exit_gate": "T14_REBASED_CURRENT_BASELINE_QUALIFICATION_PASS",
+    "r4_exit_gate_status": "PASS",
+    "strict_java21_compile": "PASS",
+    "primary_harness_pass_receipts": 45,
+    "primary_harness_fail": 0,
+    "primary_harness_timeout": 0,
+    "primary_harness_unavailable": 0,
+    "replay_harness_pass_receipts": 45,
+    "replay_harness_fail": 0,
+    "replay_harness_timeout": 0,
+    "replay_harness_unavailable": 0,
+    "t13_portable_assertions_each_run": 80,
+    "t13_external_assertions_each_run": 13,
+    "t14_portable_assertions_each_run": 55,
+    "t14_external_assertions_each_run": 14,
+    "deterministic_replay": "PASS",
+    "r4_root_promotion": false,
+    "canonical_root_high_water_at_r4": "UDM-DOCX-0594"
+  },
+  "reusable_asset_disposition": {
+    "current_source_high_water": "CR001-R4",
+    "full_source_bytes_recoverable": true,
+    "github_native_source_custody_proven": false,
+    "rebuild_from_research_required": false,
+    "reuse_rule": "Use the reconstructed 225-file CR001-R4 source tree as the byte-verified import candidate. Do not substitute R3, an older handoff, a style/theme parallel fork, a checksum-only witness, or a historical module label.",
+    "format_scope": ["DOCX", "PPTX", "PDF"],
+    "shared_spine_scope": ["governed artifact intake", "document planning", "canonical document graph", "native preservation", "render/compare/validate", "accessibility/finalization", "immutable version/evidence packaging"],
+    "docx_specific_scope": ["T01-T14 preserved qualification lineage", "T13 markup-compatibility overlay", "T14 conformance-profile overlay"],
+    "pptx_pdf_scope_boundary": "R4 source custody preserves shared Document-spine and existing PPTX/PDF implementation bytes present in the reconstructed tree, but R4's new T13/T14 authority is DOCX-specific and does not manufacture new PPTX/PDF completion claims."
+  },
+  "explicit_nonclaims": [
+    "No GitHub commit currently contains the reconstructed 225-file Document source tree under a current headless-tool owner path.",
+    "No historical CR001 PASS transfers to the SHA of a future GitHub import.",
+    "Full ISO XSD conformance is not claimed.",
+    "Exact Microsoft Word/PowerPoint fidelity is not claimed without a pinned native Office oracle.",
+    "Full tagged-PDF authoring/remediation, complete PDF/UA/PDF-A target validation, target-PC certification, native iPhone qualification and production certification remain separate.",
+    "R4 deliberately did not promote T13/T14 packet-local rows into the canonical root ledger."
+  ],
+  "selected_next_action": {
+    "objective_id": "SYSTEM-MASTER-DOCUMENT-R4-GITHUB-NATIVE-SOURCE-IMPORT-AND-EXACT-SUBJECT-QUALIFICATION-002",
+    "state": "READY",
+    "instruction": "Import the exactly reconstructed 225-file CR001-R4 source tree into ordinary GitHub-native immutable custody under the current Content & Document Artifacts portfolio without semantic rewrite; bind an exact Git subject SHA; independently recompute source identity; run the available portable/hosted qualification against that exact subject; preserve all native/A-01/production boundaries; then decide whether CR001-R5 root-ledger promotion is compatible with the current headless portfolio contract.",
+    "success_gate": "GITHUB_NATIVE_225_OF_225_SOURCE_IDENTITY_MATCH__EXACT_GIT_SHA_QUALIFICATION_RECORDED__NO_PASS_TRANSFER",
+    "blocked_by_a01": false,
+    "requires_physical_a01_access": false
+  }
+}
