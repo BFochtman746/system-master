@@ -12,10 +12,13 @@ on:
       - '.github/scripts/a01-overnight-*.js'
       - '.github/scripts/a01-closed-loop-repair*.js'
       - '.github/scripts/a01-repair-broker*.js'
+      - '.github/scripts/a01-repair-ledger*.js'
       - '.github/scripts/validate-system-topology.js'
       - '.github/scripts/a01-runner-guard.ps1'
       - '.github/workflows/a01-control-plane-gateway.yml'
       - '.github/workflows/a01-repair-broker.yml'
+      - '.github/workflows/a01-repair-rerun.yml'
+      - '.github/workflows/a01-repair-rerun-adjudicate.yml'
       - '.github/workflows/a01-overnight-night-shift.yml'
   workflow_dispatch:
     inputs:
@@ -68,15 +71,20 @@ on:
         required: false
         default: ''
       repair_attempt:
-        description: Repair attempts already consumed for this exact failure lineage
+        description: Product repair attempts already consumed for this failure lineage
         required: false
         default: 0
         type: number
       max_repair_attempts:
-        description: Maximum bounded repair attempts for this lineage, 0-2
+        description: Maximum bounded product repair attempts for this lineage, 0-2
         required: false
         default: 1
         type: number
+      repair_transaction_id:
+        description: Existing durable repair transaction for a replacement or same-SHA retry; blank for ordinary first-pass A-01 requests
+        required: false
+        default: ''
+        type: string
   workflow_call:
     inputs:
       qualification_id:
@@ -128,6 +136,10 @@ on:
         type: number
         required: false
         default: 1
+      repair_transaction_id:
+        type: string
+        required: false
+        default: ''
     outputs:
       result_class:
         description: Authoritative receipt result class when emitted, or INFRA_FAILURE when runner preflight blocks execution
@@ -136,13 +148,13 @@ on:
         description: Exact-subject promotion authorization
         value: ${{ jobs.qualify.outputs.promotion_authorized }}
       repair_transaction_id:
-        description: Durable broker transaction ID on non-PASS terminal result
-        value: ${{ jobs.repair_broker.outputs.transaction_id }}
+        description: Existing rerun transaction ID or newly brokered transaction ID on a first-pass non-PASS
+        value: ${{ inputs.repair_transaction_id || jobs.repair_broker.outputs.transaction_id }}
       repair_transaction_state:
-        description: Truthful broker route state on non-PASS terminal result
+        description: Newly brokered route state on an ordinary non-PASS; rerun state is adjudicated asynchronously against the existing transaction
         value: ${{ jobs.repair_broker.outputs.transaction_state }}
       repair_target_inbox:
-        description: Canonical owner repair inbox selected by topology
+        description: Canonical owner inbox selected by the initial broker
         value: ${{ jobs.repair_broker.outputs.target_inbox }}
 
 permissions:
@@ -155,8 +167,48 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  repair_lineage_guard:
+    name: Validate optional existing repair lineage before A-01 admission
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout canonical control plane
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: ${{ job.workflow_repository }}
+          ref: ${{ job.workflow_sha }}
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Validate existing transaction binding when this is a repair rerun
+        if: ${{ inputs.repair_transaction_id != '' }}
+        env:
+          REPAIR_TRANSACTION_ID: ${{ inputs.repair_transaction_id }}
+          EXPECTED_QUALIFICATION_ID: ${{ inputs.qualification_id }}
+          EXPECTED_WORKSTREAM_ID: ${{ inputs.workstream_id }}
+          EXPECTED_SUBJECT_SHA: ${{ inputs.subject_sha }}
+          EXPECTED_ORIGIN_REF: ${{ inputs.origin_ref }}
+        shell: bash
+        run: |
+          node --check .github/scripts/a01-repair-ledger.js
+          node - <<'NODE'
+          const ledger = require('./.github/scripts/a01-repair-ledger');
+          const c = ledger.prepareRerun({ transaction_id: process.env.REPAIR_TRANSACTION_ID });
+          const same = (a, b) => String(a || '').toLowerCase() === String(b || '').toLowerCase();
+          if (c.qualification_id !== process.env.EXPECTED_QUALIFICATION_ID) throw new Error('REPAIR_RERUN_QUALIFICATION_MISMATCH');
+          if (c.workstream_id !== process.env.EXPECTED_WORKSTREAM_ID) throw new Error('REPAIR_RERUN_WORKSTREAM_MISMATCH');
+          if (!same(c.subject_sha, process.env.EXPECTED_SUBJECT_SHA)) throw new Error('REPAIR_RERUN_SUBJECT_MISMATCH');
+          if (c.origin_ref !== process.env.EXPECTED_ORIGIN_REF) throw new Error('REPAIR_RERUN_ORIGIN_REF_MISMATCH');
+          console.log(`REPAIR_RERUN_LINEAGE_VALID transaction_id=${c.transaction_id} state=${c.transaction_state} subject=${c.subject_sha}`);
+          NODE
+
+      - name: Ordinary A-01 request has no existing repair transaction
+        if: ${{ inputs.repair_transaction_id == '' }}
+        run: echo 'No repair_transaction_id supplied; ordinary initial A-01 request path remains unchanged.'
+
   qualify:
     name: A-01 registered qualification
+    needs: repair_lineage_guard
     runs-on: [self-hosted, Windows, X64]
     timeout-minutes: ${{ inputs.job_timeout_minutes || 30 }}
     outputs:
@@ -175,6 +227,9 @@ jobs:
       A01_QUALIFIER_TIMEOUT_MINUTES: ${{ inputs.qualifier_timeout_minutes || 28 }}
       A01_NOT_BEFORE: ${{ inputs.not_before || '' }}
       A01_NOT_AFTER: ${{ inputs.not_after || '' }}
+      A01_REPAIR_ATTEMPT: ${{ inputs.repair_attempt || 0 }}
+      A01_MAX_REPAIR_ATTEMPTS: ${{ inputs.max_repair_attempts || 1 }}
+      A01_REPAIR_TRANSACTION_ID: ${{ inputs.repair_transaction_id || '' }}
     steps:
       - name: Checkout canonical control plane
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
@@ -202,6 +257,25 @@ jobs:
           echo A01_SUBJECT_ROOT=%A01_SUBJECT_ROOT%>>"%GITHUB_ENV%"
           echo A01_EVIDENCE_DIR=%A01_EVIDENCE_DIR%>>"%GITHUB_ENV%"
           echo A01_ARTIFACT_NAME=%A01_ARTIFACT_NAME%>>"%GITHUB_ENV%"
+
+      - name: Bind optional repair transaction into the A-01 evidence envelope
+        if: ${{ inputs.repair_transaction_id != '' }}
+        shell: powershell
+        run: |
+          $lineage = [ordered]@{
+            lineage_version = 1
+            transaction_id = $env:A01_REPAIR_TRANSACTION_ID
+            qualification_id = $env:A01_QUALIFICATION_ID
+            workstream_id = $env:A01_WORKSTREAM_ID
+            subject_sha = $env:A01_SUBJECT_SHA
+            origin_ref = $env:A01_ORIGIN_REF
+            repair_attempt = [int]$env:A01_REPAIR_ATTEMPT
+            max_repair_attempts = [int]$env:A01_MAX_REPAIR_ATTEMPTS
+            gateway_run_id = $env:GITHUB_RUN_ID
+            gateway_run_attempt = $env:GITHUB_RUN_ATTEMPT
+            recorded_at = [DateTime]::UtcNow.ToString('o')
+          }
+          $lineage | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath (Join-Path $env:A01_EVIDENCE_DIR 'repair-lineage.json') -Encoding utf8
 
       - name: Guard A-01 runner health before subject acquisition
         id: guard
@@ -262,8 +336,10 @@ jobs:
           echo Qualification: %A01_QUALIFICATION_ID%>>"%GITHUB_STEP_SUMMARY%"
           echo Subject: %A01_SUBJECT_SHA%>>"%GITHUB_STEP_SUMMARY%"
           echo Context: %A01_EXECUTION_CONTEXT%>>"%GITHUB_STEP_SUMMARY%"
+          echo Repair transaction: %A01_REPAIR_TRANSACTION_ID%>>"%GITHUB_STEP_SUMMARY%"
           echo Artifact: %A01_ARTIFACT_NAME%>>"%GITHUB_STEP_SUMMARY%"
           if exist "%A01_EVIDENCE_DIR%\runner-preflight.json" type "%A01_EVIDENCE_DIR%\runner-preflight.json">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%A01_EVIDENCE_DIR%\repair-lineage.json" type "%A01_EVIDENCE_DIR%\repair-lineage.json">>"%GITHUB_STEP_SUMMARY%"
           if exist "%A01_EVIDENCE_DIR%\result.txt" type "%A01_EVIDENCE_DIR%\result.txt">>"%GITHUB_STEP_SUMMARY%"
           if exist "%A01_EVIDENCE_DIR%\receipt.json" type "%A01_EVIDENCE_DIR%\receipt.json">>"%GITHUB_STEP_SUMMARY%"
 
@@ -299,9 +375,9 @@ jobs:
         run: exit /b 1
 
   repair_broker:
-    name: Route non-PASS receipt to durable repair broker
+    name: Route ordinary non-PASS receipt to durable repair broker
     needs: qualify
-    if: ${{ always() && needs.qualify.outputs.result_class != '' && needs.qualify.outputs.result_class != 'PASS' }}
+    if: ${{ always() && inputs.repair_transaction_id == '' && needs.qualify.outputs.result_class != '' && needs.qualify.outputs.result_class != 'PASS' }}
     uses: ./.github/workflows/a01-repair-broker.yml
     with:
       receipt_id: ${{ format('a01-run-{0}-{1}', github.run_id, inputs.qualification_id || 'A01-CONTROL-PLANE-SELFTEST') }}
