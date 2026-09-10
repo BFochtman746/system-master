@@ -4,6 +4,13 @@ const base = require('./author-decision-queue.js');
 const vr = require('./version-and-rollback.js');
 
 const GUARD_ID = 'BOOK-SYSTEM-AUTHOR-DECISION-CURRENT-SUBJECT-GUARD-001';
+const TERMINAL_STATES = new Set(['SUPERSEDED','RESOLVED','WITHDRAWN']);
+const APPEND_ONLY = [
+  ['research_evidence_links','link_id'],
+  ['author_decisions','decision_id'],
+  ['integration_proposals','proposal_id'],
+  ['export_releases','release_id'],
+];
 
 class AuthorDecisionCurrentSubjectGuardError extends Error {
   constructor(code, detail = '') {
@@ -21,11 +28,34 @@ function recordKey(record) { return `${record.object_id}|${record.object_version
 function pointerMatches(record, ref) {
   return typeof ref === 'string' && (ref === record.object_id || ref === `${record.object_id}:${record.object_version}`);
 }
+function validDigest(v) { return typeof v === 'string' && /^[a-f0-9]{64}$/.test(v); }
+
+function assertIdentityExists(parentState, refs, records) {
+  if (!Array.isArray(refs) || refs.length === 0) fail('SUBJECT_IDENTITY_REFS_REQUIRED');
+  const governed = new Set(records.map(recordKey));
+  const appendOnly = new Set();
+  for (const [collection,idField] of APPEND_ONLY) {
+    for (const item of parentState[collection] || []) {
+      const id = String(item && item[idField] || '');
+      if (id) appendOnly.add(`${id}|UNVERSIONED|${vr.digest(item)}`);
+    }
+  }
+  appendOnly.add(`${parentState.book_project.book_project_id}|STATE-${parentState.state_version}|${vr.digest(parentState.book_project)}`);
+  const seen = new Set();
+  for (const ref of refs) {
+    if (!ref || typeof ref !== 'object' || Array.isArray(ref)) fail('INVALID_SUBJECT_IDENTITY_REF');
+    if (!String(ref.object_id || '').trim() || !String(ref.object_version || '').trim() || !validDigest(ref.object_digest)) fail('INVALID_SUBJECT_IDENTITY_REF');
+    const k = key(ref);
+    if (seen.has(k)) fail('DUPLICATE_SUBJECT_IDENTITY_REF', k);
+    seen.add(k);
+    if (!governed.has(k) && !appendOnly.has(k)) fail('SUBJECT_IDENTITY_NOT_CURRENT', `${ref.object_id}:${ref.object_version}`);
+  }
+}
 
 function strictSubjectCurrent(parentState, refs) {
   vr.validateParentState(parentState);
-  base.validateSubjectIdentityRefs(parentState, refs);
   const records = vr.objectRecords(parentState);
+  assertIdentityExists(parentState, refs, records);
   for (const ref of refs) {
     const exact = records.find(r => recordKey(r) === key(ref));
     if (!exact) continue; // append-only/non-governed identities keep their owning currentness semantics.
@@ -93,7 +123,7 @@ function revalidateAgainstParent(args) {
   const staleIds = [];
   for (const requestId of Object.values(next.current_request_index || {})) {
     const snap = next.decision_request_snapshots[requestId];
-    if (!snap || base.TERMINAL_STATES.has(snap.queue_state) || snap.queue_state === 'STALE') continue;
+    if (!snap || TERMINAL_STATES.has(snap.queue_state) || snap.queue_state === 'STALE') continue;
     if (!strictSubjectCurrent(args.currentParentState, snap.subject_identity_refs)) {
       overlays[requestId] = {
         effective_state: 'STALE',
