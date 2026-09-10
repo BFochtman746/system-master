@@ -21,9 +21,9 @@
     "Anything without an owner becomes UNALLOCATED and cannot execute, schedule or promote until assigned.",
     "Anything with ambiguous evidence becomes EVIDENCE_REVIEW_REQUIRED rather than guessed complete or incomplete."
   ],
-  "last_reconciled_at": "2026-09-10T09:05:56-04:00",
-  "last_reconciled_from_main": "53d27b73adbfe7fe8005d4990652669a65d4cee3",
-  "last_reconciliation_reason": "Seal P3 from the already-completed Book owner-lane census phases plus current Book delta, preserve the original content-admission A-01 subject and RF012 owner-candidate evidence as separate exact-authority lineages, admit the already-sealed P4 Prose owner result by delta-only reconciliation without replay, and advance the first incomplete global phase to P5 shared infrastructure/A-01.",
+  "last_reconciled_at": "2026-09-10T09:29:00-04:00",
+  "last_reconciled_from_main": "8e6a3ed57fdeb09c147be12f02e755707349948a",
+  "last_reconciliation_reason": "Seal P5 shared infrastructure/A-01 from current repair, registered-control-plane, runner, migration and Second Shift evidence; preserve one active A01_REQUEUE_READY transaction and the Second Shift live-authority/telemetry hardening gap without replaying closed 001B/001C or treating infrastructure as a product system; advance the first incomplete global phase to P6 product-module allocation.",
   "phases": [
     {
       "phase_id": "P0",
@@ -133,15 +133,38 @@
     {
       "phase_id": "P5",
       "name": "Shared infrastructure and A-01 census",
-      "status": "PENDING",
+      "status": "COMPLETE",
+      "completed_at": "2026-09-10T09:29:00-04:00",
       "scope": "A-01 control plane, tickets, receipts, runner, Second Shift, closed-loop repair, historical one-shot transports and other non-system infrastructure.",
-      "exact_next_action": "Execute and seal P5 as a delta-only shared-infrastructure/A-01 census: reconcile current repair transactions, authoritative A-01 receipts versus hosted-only evidence, runner/control-plane standing, Second Shift continuation defects and their corrections, and historical one-shot transports without treating infrastructure as a product system or replaying already-closed repair-control work."
+      "result_pointer": "governance/census/SYSTEM-MASTER-COMPLETION-CENSUS-002-P5-SHARED-INFRASTRUCTURE-A01.json",
+      "ledger_delta_pointer": "governance/census/SYSTEM-MASTER-COMPLETION-CENSUS-002-P5-SHARED-INFRASTRUCTURE-A01-LEDGER-DELTA.json",
+      "standing": "CENSUS_COMPLETE__INFRASTRUCTURE_OPEN_WORK_PRESERVED",
+      "current_open_repair": {
+        "transaction_id": "A01-REPAIR-a01-run-34431764843-A01-CONTROL-PLANE-SELFTEST-A1",
+        "state": "A01_REQUEUE_READY",
+        "replacement_subject_sha": "ceb6870546012b789caea56499a1d219a195dc8b",
+        "authoritative_pass": false
+      },
+      "second_shift_finding": {
+        "classification": "POLICY_PRESENT__EXECUTION_CONTROL_PARTIAL__SEMANTIC_LIVE_AUTHORITY_AND_TELEMETRY_HARDENING_REQUIRED",
+        "continuation_defects_preserved": true,
+        "owner_active_delegations_semantically_stale_after_final_refill": true,
+        "missing_or_unadmitted_control_surfaces": [
+          "SECOND-SHIFT-DELEGATION-SCHEMA-002.json",
+          "SECOND-SHIFT-UTILIZATION-EVENT-SCHEMA-001.json",
+          "per-shift utilization event ledger"
+        ],
+        "selected_hardening_obligation": "SECOND-SHIFT-LIVE-AUTHORITY-SUCCESSOR-ENFORCEMENT-002"
+      },
+      "boundary": "P5 completion means the infrastructure census is complete, not that the active A-01 repair or Second Shift hardening is complete. Hosted/control evidence remains distinct from authoritative A-01 receipts; infrastructure does not become a product system.",
+      "next_global_phase": "P6__EXPECTED_PRODUCT_MODULE_ALLOCATION_CENSUS"
     },
     {
       "phase_id": "P6",
       "name": "Expected product-module allocation census",
       "status": "PENDING",
-      "scope": "Reconcile the August 31 product-module inventory and later requirements to current owners: implemented/partial/planned/headless/deferred/excluded/reconciliation-required. Historical counts are not current proof."
+      "scope": "Reconcile the August 31 product-module inventory and later requirements to current owners: implemented/partial/planned/headless/deferred/excluded/reconciliation-required. Historical counts are not current proof.",
+      "exact_next_action": "Read EXPECTATION-REGISTRY-001 and the historical module inventory; enumerate each expected product/tool capability exactly once; map it to CORE, LEARNING, BOOK, PROSE, shared infrastructure, a required but not-yet-created owner decision, headless/deferred/excluded scope, or UNALLOCATED; then classify current implementation/evidence standing without using historical status counts as present-day proof."
     },
     {
       "phase_id": "P7",
