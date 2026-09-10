@@ -4,7 +4,7 @@
   "owner_path": "SYSTEM_MASTER/CORE",
   "live_binding": {
     "main_head_before_write": "d8415edd0a16325b5edc4488ff536ea30cad0e79",
-    "core_control_head": "ecf40c2e81cb884e4a84f97bb5cda69cc1dc045f"
+    "core_control_head": "2031f070bd3702185c028733819ec410db36613c"
   },
   "execution_order": [
     {
@@ -41,8 +41,14 @@
     {
       "order": 6,
       "item": "Exact capsule retry and DATA contract fixtures",
-      "result": "ACTIVE",
+      "result": "ACTIVE__FIXTURE_SUBRUNG_COMPLETE__CAPSULE_RETRY_REMAINS",
       "delegation": "SECOND-SHIFT-CORE-SMR021-CUSTODY-RETRY-001"
+    },
+    {
+      "order": 7,
+      "item": "SMR021 DATA consumer contract/adversarial fixtures",
+      "result": "COMPLETE__31_CASES__NOT_EXECUTED",
+      "evidence": "system-master/control-v2/SMR021-DATA-CONTRACT-ADVERSARIAL-FIXTURE-PACKET-007.md"
     }
   ],
   "repair_lineage": {
@@ -63,7 +69,7 @@
   },
   "current_blockers": [
     "DATA owner-valid durable admission record/interface/migration absent.",
-    "Exact source capsule outside GitHub; authenticated transfers returned transient 502."
+    "Exact source capsule outside GitHub; authenticated transfers returned transient 502 after four attempts."
   ],
-  "continuation": "Retry exact capsule acquisition, preserve all hash gates, and continue adversarial fixture preparation. Stop only when these safe rungs are exhausted or a real dependency changes."
+  "continuation": "Retry exact capsule acquisition and verify 424,986 bytes plus SHA-256 before extraction/import. If unavailable, retain the active custody blocker; the 31-case fixture packet is ready for DATA-owner-valid implementation."
 }

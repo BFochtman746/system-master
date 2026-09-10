@@ -2,8 +2,8 @@
   "owner_system_id": "CORE",
   "owner_path": "SYSTEM_MASTER/CORE",
   "control_ref": "system-master/control-v2",
-  "last_known_control_head": "ecf40c2e81cb884e4a84f97bb5cda69cc1dc045f",
-  "delegation_epoch": 22,
+  "last_known_control_head": "2031f070bd3702185c028733819ec410db36613c",
+  "delegation_epoch": 23,
   "active_delegations": [
     {
       "delegation_id": "SECOND-SHIFT-CORE-SMR021-CUSTODY-RETRY-001",
@@ -11,16 +11,20 @@
       "objective_id": "SMR021-EXACT-CAPSULE-RETRY-AND-DATA-CONTRACT-ADVERSARIAL-FIXTURE-PREP-007",
       "state": "READY",
       "valid_for_control_ref": "system-master/control-v2",
-      "valid_for_control_head": "ecf40c2e81cb884e4a84f97bb5cda69cc1dc045f",
+      "valid_for_control_head": "2031f070bd3702185c028733819ec410db36613c",
       "created_at": "2026-09-10T05:38:00-04:00",
-      "last_revalidated_at": "2026-09-10T05:38:00-04:00",
+      "last_revalidated_at": "2026-09-10T05:43:00-04:00",
       "repair_transaction_watch": "A01-REPAIR-a01-run-34431764843-A01-CONTROL-PLANE-SELFTEST-A1",
-      "completion_delta": "Retry acquisition of the exact 424,986-byte SMR021 capsule; verify SHA-256 377afa2c... before use. If available, prepare GitHub-native import/hosted qualification on a new exact SHA without scheduling A-01. In parallel, keep the DATA-owned mutation closed and complete adversarial fixtures against the owner handoff contract.",
+      "completion_delta": "The DATA consumer contract schema and 31-case adversarial fixture packet are complete at Core head 2031f070bd3702185c028733819ec410db36613c. Continue retrying the exact capsule; verify size and SHA-256 before any GitHub-native import. DATA-owned implementation and all runtime/higher-authority evidence remain open.",
       "evidence_target": [
         "exact capsule byte count and SHA-256 receipt or durable transient-access blocker",
         "digest-bound GitHub-native source manifest/import commit if exact bytes become available",
         "adversarial fixture inventory mapped to Packet-004 test IDs",
-        "post-write Core control-drift and repository reconciler results"
+        "post-write Core control-drift and repository reconciler results",
+        "system-master/control-v2/SMR021-DATA-CONTRACT-ADVERSARIAL-FIXTURE-PACKET-007.md",
+        "system-master/control-v2/SMR021-EXPERIENCE-ADMISSION-RECORD-CONSUMER-CONTRACT-007.schema.json",
+        "system-master/control-v2/SMR021-DATA-CONTRACT-ADVERSARIAL-FIXTURES-007.json",
+        "Master System Control Drift run 34461199055 PASS on exact Core head 2031f070bd3702185c028733819ec410db36613c"
       ],
       "stop_condition": "Exact capsule is verified and a GitHub-native import candidate is durably created, or repeated transient access plus missing DATA-owner contract exhausts every remaining safe execution rung with a durable blocker. No absent runtime evidence is inferred.",
       "allowed_work": [
@@ -234,6 +238,6 @@
     }
   ],
   "owner_revalidation_required": false,
-  "reason": "Core authority advanced through Packet-004 and hosted/custody Prep-005 to ecf40c2e81cb884e4a84f97bb5cda69cc1dc045f. The prior packet delegation is completed and preserved. Exact capsule byte access and a DATA-owner-valid persistence contract are the remaining gates; retry and independent fixture preparation stay productive while the A-01 repair remains requeue-ready.",
+  "reason": "Core head 2031f070bd3702185c028733819ec410db36613c is control-drift green. The consumer schema and 31 adversarial fixtures are complete but unexecuted. The live delegation remains productive for exact capsule acquisition/hash verification; DATA ownership and GitHub-native custody remain explicit blockers.",
   "empty_is_valid": false
 }
