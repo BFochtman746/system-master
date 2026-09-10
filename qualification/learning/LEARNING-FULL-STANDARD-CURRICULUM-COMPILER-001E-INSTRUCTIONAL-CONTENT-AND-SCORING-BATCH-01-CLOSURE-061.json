@@ -1,0 +1,136 @@
+{
+  "artifact_id": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001E-INSTRUCTIONAL-CONTENT-AND-SCORING-BATCH-01-CLOSURE-061",
+  "effective_date": "2026-09-10",
+  "owner_path": "SYSTEM_MASTER/LEARNING",
+  "phase": "001E_INSTRUCTIONAL_CONTENT_AND_SCORING_REALIZATION",
+  "predecessor_control_head": "507fcb84023998d6f56ef7459959054f85881716",
+  "admitted_lineage_head": "670aec5c42962d64adbc989ac535d0ae21f46594",
+  "contract": "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001E-INSTRUCTIONAL-CONTENT-AND-SCORING-CONTRACT-059.json",
+  "candidate": "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001E-INSTRUCTIONAL-CONTENT-AND-SCORING-BATCH-01-CANDIDATE-060A.json",
+  "001d_binding": {
+    "durable_blueprint_commit": "02dc615fcb5d44b997ed1322848eccc6e37bb172",
+    "blueprint_path": "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001D-EXECUTABLE-CURRICULUM-BLUEPRINT-057B.json",
+    "blueprint_digest_sha256": "98aa0b621b0cbe5234d5dd8bdb9890a1692c4c9d91aaf955fd3a459632949e54",
+    "001a_001d_replayed": false
+  },
+  "batch_result": {
+    "status": "PASS",
+    "batch_index": 1,
+    "001d_ordinal": 1,
+    "requirement_id": "ASQ-CSSGB-2022-I.A.1",
+    "source_code": "I.A.1",
+    "title": "Value of Six Sigma",
+    "skill_id": "CSSGB-2022::ASQ-CSSGB-2022-I.A.1::SUBSKILL::value-mechanisms",
+    "criterion_id": "CRIT::CSSGB-2022::ASQ-CSSGB-2022-I.A.1::SUBSKILL::value-mechanisms",
+    "lesson_id": "LESSON::CSSGB-2022::ASQ-CSSGB-2022-I.A.1::SUBSKILL::value-mechanisms",
+    "assessment_target_id": "ASSESS::CSSGB-2022::ASQ-CSSGB-2022-I.A.1::value-mechanisms::TARGET::bounded-value-explanation",
+    "materialized_lessons": 1,
+    "worked_examples": 2,
+    "practice_items": 2,
+    "mastery_items": 1,
+    "retention_items": 1,
+    "admitted_grounding_sources": 3,
+    "grounding_claim_coverage_percent": 100,
+    "grounding_status": "PASS",
+    "instructional_design_status": "PASS",
+    "oracle_reference_status": "PASS",
+    "lesson_behavior_status": "PASS",
+    "scoring_type": "CSSGB_I_A_1_BOUNDED_VALUE_V1",
+    "runtime_engine_path_verified": true,
+    "practice_not_mastery_verified": true,
+    "oracle_rejection_recorded": true,
+    "mastery_advances_only_to_retention_due": true,
+    "retention_delay_enforced": true,
+    "delayed_distinct_retention_path_verified": true,
+    "full_course_activation_allowed": false,
+    "course_state": "READY_FOR_REVIEW"
+  },
+  "hosted_qualification": {
+    "qualified_subject_sha": "670aec5c42962d64adbc989ac535d0ae21f46594",
+    "run_id": 34527943923,
+    "job_id": 103041340491,
+    "artifact_id": 10172302721,
+    "artifact_digest": "sha256:d2a863163a3909b18a034b18a6d63dfd5d6ea347a206a9a92e22d74bc5355500",
+    "result": "PASS",
+    "regression_test": "learning/lab/tests/test_adaptive_practice_not_mastery.py",
+    "regression_result": "PASS",
+    "oracle_negative_matrix_all_true": true
+  },
+  "forensic_failed_attempts": [
+    {
+      "subject_sha": "4a692e31309d3fda939ab0762f535068249ee982",
+      "run_id": 34527238515,
+      "artifact_id": 10172028753,
+      "artifact_digest": "sha256:de83e34bed1c938ab168770568e493ed85439f3d54609aa73b91391cab522e10",
+      "result": "FAIL",
+      "failure_class": "QUALIFIER_DIGEST_DOMAIN_DEFECT",
+      "failure": "001D blueprint was hashed after its persisted digest field had been appended.",
+      "disposition": "PRESERVED__SUPERSEDED_BY_EXACT_QUALIFIER_REPAIR"
+    },
+    {
+      "subject_sha": "0508b72bcaf9d2b4cb3dc9abb478357cdfdb88eb",
+      "run_id": 34527449442,
+      "artifact_id": 10172110276,
+      "artifact_digest": "sha256:9fa24101624b23b06c3e215c9d2056305f851d2f5c2bad5798c8b596e377ffd5",
+      "result": "FAIL",
+      "failure_class": "QUALIFIER_PERSISTED_FIELD_NAME_DEFECT",
+      "failure": "Qualifier looked for blueprint_digest_sha256 instead of the authoritative persisted field artifact_digest_sha256.",
+      "disposition": "PRESERVED__SUPERSEDED_BY_EXACT_FIELD_BINDING_REPAIR"
+    },
+    {
+      "subject_sha": "fe1496a66fff2e93301b8382cc547fe979fb194b",
+      "run_id": 34527570247,
+      "artifact_id": 10172158288,
+      "artifact_digest": "sha256:3fefd2655626a5e0a31f38c50bbbbadf7910f692ae36977eb5ac52583a9bec3f",
+      "result": "FAIL",
+      "failure_class": "REAL_ADAPTIVE_RUNTIME_STATE_DEFECT",
+      "failure": "A correct PRACTICE-only attempt could fall through to MASTERED while criterion, independence, and retention gates were UNKNOWN.",
+      "disposition": "PRESERVED__RUNTIME_REPAIRED_AND_REGRESSION_GATED"
+    }
+  ],
+  "runtime_repair": {
+    "file": "learning/lab/learning_lab/adaptive.py",
+    "repair_commit": "1385c088f3a9691f219084a827c60ca7237bdc20",
+    "regression_test_commit": "350ab87ff729dc7d920943635bf1ccdcb427c84d",
+    "repair_semantics": "When attempts exist but no admissible independent mastery success exists, projection remains BUILDING and emits INDEPENDENT_MASTERY_EVIDENCE_REQUIRED; PRACTICE_NOT_MASTERY remains explicit.",
+    "scope": "REUSABLE_ADAPTIVE_CORE_STATE_CLASSIFICATION_ONLY",
+    "001d_blueprint_changed": false
+  },
+  "concurrent_lineage_disposition": {
+    "branch": "learning/001e-batch-01-20260910",
+    "observed_head": "e0e351476634693bc97d7c2b9cc11dbadac949c5",
+    "standing": "PARALLEL_COMPATIBLE_UNQUALIFIED_LINEAGE_PRESERVED_NOT_ADMITTED",
+    "reason": "The branch independently implements the same ordinal-1 objective but had zero hosted workflow runs when control admission was decided. Admitting both would create competing I.A.1 runtime modules/oracles. Its Git history remains recoverable and was not overwritten."
+  },
+  "cumulative_001e_state": {
+    "instructional_scoring_requirements_complete": 1,
+    "total_requirements": 66,
+    "remaining_requirements": 65,
+    "completed_ordinals": [1],
+    "full_course_activation_allowed": false
+  },
+  "evidence_boundaries": {
+    "portable_fixture_mastery": "OBSERVED_FOR_MACHINE_QUALIFICATION_ONLY",
+    "real_learner_mastery": "UNOBSERVED",
+    "psychometric_validity": "UNOBSERVED",
+    "real_learner_retention_effectiveness": "UNOBSERVED",
+    "transfer_effectiveness": "UNOBSERVED",
+    "workplace_effectiveness": "UNOBSERVED",
+    "sme_approval": "UNOBSERVED",
+    "certification_equivalence": "UNOBSERVED",
+    "source_bytes_archived": false,
+    "a01_authority": "NOT_CLAIMED_BY_HOSTED_BATCH",
+    "native_platform_authority": "NOT_CLAIMED",
+    "production_authority": "NOT_CLAIMED"
+  },
+  "next_batch": {
+    "phase": "001E",
+    "batch_index": 2,
+    "selection_rule": "CONTINUE_EXACT_001D_ORDINAL_ORDER_WITHOUT_REPLAY",
+    "001d_ordinal": 2,
+    "requirement_id": "ASQ-CSSGB-2022-I.A.2",
+    "source_code": "I.A.2",
+    "title": "Organizational goals and Six Sigma projects",
+    "current_action": "Bind and execute the next bounded instructional-content and independent-scoring realization batch against the exact immutable 001D blueprint."
+  }
+}
