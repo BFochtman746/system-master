@@ -2,8 +2,8 @@
   "owner_system_id": "CORE",
   "owner_path": "SYSTEM_MASTER/CORE",
   "control_ref": "system-master/control-v2",
-  "last_known_control_head": "568f324d52485a8d010dc99c3eb7f637216044fb",
-  "delegation_epoch": 18,
+  "last_known_control_head": "f031bccdc8ad13b7950c2ab50143bdfa087dca98",
+  "delegation_epoch": 19,
   "active_delegations": [
     {
       "delegation_id": "SECOND-SHIFT-CORE-A01-CONTROL-PLANE-REPAIR-001",
@@ -11,35 +11,36 @@
       "objective_id": "A01-CONTROL-PLANE-REGISTRATION-DISPATCH-BARRIER-REPAIR-001",
       "state": "READY",
       "valid_for_control_ref": "system-master/control-v2",
-      "valid_for_control_head": "568f324d52485a8d010dc99c3eb7f637216044fb",
+      "valid_for_control_head": "f031bccdc8ad13b7950c2ab50143bdfa087dca98",
       "created_at": "2026-09-10T00:04:00-04:00",
-      "last_revalidated_at": "2026-09-10T00:04:00-04:00",
+      "last_revalidated_at": "2026-09-10T04:49:00-04:00",
       "repair_transaction_id": "A01-REPAIR-a01-run-34431764843-A01-CONTROL-PLANE-SELFTEST-A1",
       "failed_subject_sha": "3a8004813e18d7defbf1f9ebc47f5bd8fcd30fb9",
       "repair_candidate_sha": "ceb6870546012b789caea56499a1d219a195dc8b",
-      "completion_delta": "Before: current main failed A-01 control-plane enforcement because the required hosted admission broker and self-hosted executor were absent and the gateway still acquired A-01 directly. After: candidate ceb6870546012b789caea56499a1d219a195dc8b installs the split broker/executor barrier and has exact-main hosted enforcement PASS; finish canonical repair-ledger adjudication without bypassing A-01 authority, then reduce SMR021 readiness work.",
+      "completion_delta": "The authoritative A-01 repair receipt remains pending and hosted enforcement is not promoted to A-01 PASS. While that central gate waits, dependency-valid SMR021 work-ahead advanced from design into a bounded local implementation on exact predecessor e22ecedfd3850be6b744ee82f2c02722cd3d203a5785f6f423ac395011cf821f. Candidate source/test fe325804bacfd5c40339a18bc393fb1bdfb2191c8b0f3946219d7d81f1971596 passed strict Java 21 compilation, all 21 executable suites, and the 28-check work/descriptor/action admission gate. Full release, DATA persistence, hosted, A-01, native and production closure remain separate.",
       "evidence_target": [
-        "A-01 Control Plane Enforcement run 34435547400 on exact candidate ceb6870546012b789caea56499a1d219a195dc8b: PASS",
-        "governance/repair/events/A01-REPAIR-a01-run-34431764843-A01-CONTROL-PLANE-SELFTEST-A1 append-only lineage",
-        "canonical Repair Broker candidate-prequalification/requeue event or truthful non-requeue classification",
-        "post-write System State Reconciler result"
+        "A-01 Control Plane Enforcement run 34435547400 on exact candidate ceb6870546012b789caea56499a1d219a195dc8b: hosted PASS only",
+        "governance/repair/events/A01-REPAIR-a01-run-34431764843-A01-CONTROL-PLANE-SELFTEST-A1 append-only lineage and an authoritative exact-subject A-01 receipt before repair closure",
+        "system-master/control-v2/SMR021-MINIMUM-UX-WORK-DESCRIPTOR-ACTION-BINDING-LOCAL-EVIDENCE-001.md for bounded local implementation evidence",
+        "next work-ahead objective SMR021-MINIMUM-UX-WORK-DESCRIPTOR-ACTION-BINDING-DATA-PERSISTENCE-AND-FULL-PORTABLE-CLOSURE-003, preserving DATA ownership and no PASS transfer",
+        "post-write System State Reconciler result when available"
       ],
-      "stop_condition": "The split admission barrier remains enforcement-green on the exact candidate, the existing repair transaction is durably advanced or truthfully held without fabricated PASS, and the next live CORE objective has been re-read. A01_REQUEUE_READY is eligibility only; authoritative closure requires a real exact-subject A-01 PASS receipt.",
+      "stop_condition": "The split admission barrier remains enforcement-green on the exact repair candidate and the existing repair transaction is durably advanced only from canonical receipt evidence. During any wait, continue SMR021 from the exact locally qualified candidate into DATA persistence/full portable closure without inventing A-01 or release PASS. A01_REQUEUE_READY is eligibility only; authoritative repair closure requires a real exact-subject A-01 PASS receipt.",
       "allowed_work": [
         "verify the exact repair candidate and hosted enforcement receipt",
         "use the existing repair transaction and canonical broker/rerun path; do not open a second lineage",
         "inspect and repair only proven registration/dispatch/barrier defects",
-        "while A-01 admission is waiting, continue dependency-valid SMR021 admission-binding, test-design, and readiness work against exact predecessor e22ecedfd3850be6b744ee82f2c02722cd3d203a5785f6f423ac395011cf821f"
+        "while A-01 admission is waiting, continue dependency-valid SMR021 admission-binding, DATA persistence-contract reconciliation, full portable release construction, static/test qualification, and GitHub-native qualification preparation from exact predecessor/candidate evidence"
       ],
       "forbidden_authority": [
-        "do not label hosted enforcement as authoritative A-01 PASS",
+        "do not label hosted enforcement or local SMR021 qualification as authoritative A-01 PASS",
         "do not bypass the hosted broker or execute an unregistered direct self-hosted workflow",
         "do not rewrite failed receipt/event history",
-        "do not transfer PASS between SHAs or grant promotion, native, production, human, author, or private-data authority"
+        "do not transfer PASS between SHAs or grant promotion, native, production, human, author, private-data, publication or DATA authority"
       ],
-      "on_pass": "Close or advance only the existing repair transaction from a canonical receipt, retire this delegation, re-fetch CORE control, and immediately continue to the highest-value safe SMR021 successor while time remains.",
-      "on_failure": "Preserve exact failure evidence, classify subject versus infrastructure/admission/control-plane boundary, fail the unsafe rung closed, and continue isolated dependency-valid CORE readiness/specification/test work when permitted.",
-      "continuation_rule": "Completion is not shift termination. Re-read CURRENT-AUTHORITY, the live CORE head and repair inbox; then bind and execute the next safe successor, normally SMR021 readiness, unless a newer repair outranks it."
+      "on_pass": "Close or advance only the existing repair transaction from a canonical receipt, retire this repair delegation, re-fetch CORE control, and immediately continue the highest-value safe SMR021 successor while time remains.",
+      "on_failure": "Preserve exact failure evidence, classify subject versus infrastructure/admission/control-plane boundary, fail the unsafe rung closed, and continue isolated dependency-valid CORE SMR021 persistence/specification/test/full-portable work when permitted.",
+      "continuation_rule": "Completion is not shift termination. Re-read CURRENT-AUTHORITY, the live CORE head and repair inbox after every item. If the repair receipt remains unavailable, continue with SMR021-MINIMUM-UX-WORK-DESCRIPTOR-ACTION-BINDING-DATA-PERSISTENCE-AND-FULL-PORTABLE-CLOSURE-003 or its next dependency-valid successor rather than idling."
     }
   ],
   "retired_delegations": [
@@ -155,6 +156,6 @@
     }
   ],
   "owner_revalidation_required": false,
-  "reason": "Revalidated against live CORE head 568f324d52485a8d010dc99c3eb7f637216044fb. The active control-plane repair remains highest priority. Exact candidate ceb6870546012b789caea56499a1d219a195dc8b passed hosted enforcement on main; authoritative A-01 repair closure remains separate.",
-  "empty_is_valid": true
+  "reason": "Revalidated against live CORE head f031bccdc8ad13b7950c2ab50143bdfa087dca98. The active control-plane repair remains highest priority and still lacks authoritative A-01 closure. A-01-independent SMR021 work-ahead has advanced through bounded local implementation/qualification to candidate fe325804bacfd5c40339a18bc393fb1bdfb2191c8b0f3946219d7d81f1971596; next safe successor is DATA persistence/full portable closure without PASS transfer.",
+  "empty_is_valid": false
 }
