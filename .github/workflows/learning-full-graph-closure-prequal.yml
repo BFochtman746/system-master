@@ -1,0 +1,49 @@
+name: Learning Full Graph Closure Prequalification
+
+on:
+  push:
+    branches:
+      - learning/full-graph-closure-20260910
+    paths:
+      - "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-FULL-GRAPH-CLOSURE-CANDIDATE-024A.json"
+      - ".github/scripts/learning-full-graph-closure-024.js"
+      - ".github/workflows/learning-full-graph-closure-prequal.yml"
+      - ".github/scripts/learning-full-standard-topology-validator-003.js"
+      - "qualification/learning/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  full-graph-closure:
+    name: Full 66-node structural graph closure
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - name: Record exact subject
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          printf 'SUBJECT_SHA=%s\n' "${GITHUB_SHA}"
+      - name: Syntax check closure validator
+        run: node --check .github/scripts/learning-full-graph-closure-024.js
+      - name: Execute full graph closure and Validator 003
+        run: node .github/scripts/learning-full-graph-closure-024.js
+      - name: Upload closure evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: LEARNING-FULL-GRAPH-CLOSURE-${{ github.sha }}-hosted-evidence
+          path: ${{ runner.temp }}/learning-full-graph-closure-evidence
+          if-no-files-found: warn
+          retention-days: 30
+
+# Structural closure only. Unresolved dependencies remain noncanonical; assessment and human evidence remain separate.
