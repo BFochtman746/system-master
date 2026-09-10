@@ -79,13 +79,25 @@ jobs:
       notification_target: ${{ steps.context.outputs.notification_target }}
       repair_attempt: ${{ steps.context.outputs.repair_attempt }}
       max_repair_attempts: ${{ steps.context.outputs.max_repair_attempts }}
+      control_plane_sha: ${{ steps.control.outputs.control_plane_sha }}
     steps:
-      - name: Checkout canonical repair authority
+      - name: Checkout immutable repair authority
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
-          ref: main
+          ref: ${{ github.sha }}
           fetch-depth: 1
           persist-credentials: false
+
+      - name: Bind repair rerun control-plane SHA
+        id: control
+        shell: bash
+        run: |
+          actual=$(git rev-parse HEAD)
+          if [ "$actual" != "${{ github.sha }}" ]; then
+            echo "REPAIR_CONTROL_PLANE_SHA_MISMATCH expected=${{ github.sha }} actual=$actual" >&2
+            exit 2
+          fi
+          echo "control_plane_sha=$actual" >> "$GITHUB_OUTPUT"
 
       - name: Validate rerun control and resolve transaction
         id: context
@@ -112,19 +124,21 @@ jobs:
       - name: Publish admission context
         run: |
           echo '## A-01 Repair Rerun Admission' >> "$GITHUB_STEP_SUMMARY"
+          echo "Control-plane SHA: ${{ steps.control.outputs.control_plane_sha }}" >> "$GITHUB_STEP_SUMMARY"
           echo '```json' >> "$GITHUB_STEP_SUMMARY"
           cat .repair-rerun/context.json >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
           echo 'This context grants A-01 admission only. It is not PASS.' >> "$GITHUB_STEP_SUMMARY"
 
   execute:
-    name: Execute replacement subject through canonical A-01 gateway
+    name: Execute replacement subject through same-commit canonical A-01 gateway
     needs: prepare
-    uses: BFochtman746/system-master/.github/workflows/a01-control-plane-gateway.yml@main
+    uses: ./.github/workflows/a01-control-plane-gateway.yml
     with:
       qualification_id: ${{ needs.prepare.outputs.qualification_id }}
       workstream_id: ${{ needs.prepare.outputs.workstream_id }}
       subject_sha: ${{ needs.prepare.outputs.subject_sha }}
+      control_plane_sha: ${{ needs.prepare.outputs.control_plane_sha }}
       origin_ref: ${{ needs.prepare.outputs.origin_ref }}
       resume_on_pass: ${{ needs.prepare.outputs.resume_on_pass }}
       resume_on_failure: ${{ needs.prepare.outputs.resume_on_failure }}
