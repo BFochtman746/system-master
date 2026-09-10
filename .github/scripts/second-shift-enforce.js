@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { validateLedger } = require('./second-shift-event-ledger');
 
 const root = path.resolve(__dirname, '..', '..');
 const args = new Set(process.argv.slice(2));
@@ -144,6 +145,37 @@ function validateOwner(data, lane, now, dynamic) {
   return findings;
 }
 
+function makeValidLedger(now) {
+  const sha = 'a'.repeat(40);
+  return {
+    schema_id: 'SECOND-SHIFT-UTILIZATION-EVENT-SCHEMA-001',
+    shift_id: 'SECOND-SHIFT-2026-09-11',
+    shift_date: '2026-09-11',
+    lane: 'CORE',
+    events: [
+      {
+        event_id: 'E1', occurred_at: '2026-09-11T04:02:00Z', event_type: 'SHIFT_OPEN', lane: 'CORE',
+        control_ref: 'system-master/control-v2', control_head: sha, delegation_id: 'D1', objective_id: 'O1', evidence: 'open'
+      },
+      {
+        event_id: 'E2', occurred_at: '2026-09-11T04:04:00Z', event_type: 'CLAIMED', lane: 'CORE',
+        control_ref: 'system-master/control-v2', control_head: sha, delegation_id: 'D1', objective_id: 'O1', evidence: 'claim',
+        lease_id: 'L1', idempotency_key: 'K1', lease_expires_at: '2026-09-11T04:55:00Z', attempt: 1
+      },
+      {
+        event_id: 'E3', occurred_at: '2026-09-11T04:05:00Z', event_type: 'RUNNING', lane: 'CORE',
+        control_ref: 'system-master/control-v2', control_head: sha, delegation_id: 'D1', objective_id: 'O1', evidence: 'running',
+        lease_id: 'L1', idempotency_key: 'K1'
+      },
+      {
+        event_id: 'E4', occurred_at: '2026-09-11T04:20:00Z', event_type: 'HEARTBEAT', lane: 'CORE',
+        control_ref: 'system-master/control-v2', control_head: sha, delegation_id: 'D1', objective_id: 'O1', evidence: 'heartbeat',
+        lease_id: 'L1', idempotency_key: 'K1', checkpoint_pointer: 'checkpoint-1'
+      }
+    ]
+  };
+}
+
 function runSelftest() {
   const now = new Date('2026-09-11T04:30:00Z');
   const baseDelegation = {
@@ -161,6 +193,19 @@ function runSelftest() {
     claimed_at: '2026-09-11T04:10:00Z', lease_expires_at: '2026-09-11T04:55:00Z',
     last_heartbeat_at: '2026-09-11T04:25:00Z', attempt: 1, checkpoint_pointer: 'checkpoint-1'
   };
+  const validLedger = makeValidLedger(now);
+  const duplicateIdLedger = JSON.parse(JSON.stringify(validLedger));
+  duplicateIdLedger.events[3].event_id = 'E3';
+  const outOfOrderLedger = JSON.parse(JSON.stringify(validLedger));
+  outOfOrderLedger.events[3].occurred_at = '2026-09-11T04:03:00Z';
+  const wrongLaneLedger = JSON.parse(JSON.stringify(validLedger));
+  wrongLaneLedger.events[2].lane = 'BOOK';
+  const idleLedger = JSON.parse(JSON.stringify(validLedger));
+  idleLedger.events.push({ event_id: 'E5', occurred_at: '2026-09-11T04:25:00Z', event_type: 'IDLE_VALID', lane: 'CORE', control_ref: 'system-master/control-v2', control_head: 'a'.repeat(40), delegation_id: 'D1', objective_id: 'O1', evidence: 'idle' });
+  const staleLedger = makeValidLedger(now);
+  staleLedger.events = staleLedger.events.slice(0, 2);
+  staleLedger.events[1].occurred_at = '2026-09-11T02:00:00Z';
+
   const cases = [
     ['valid_ready', validateOwner({ active_delegations: [baseDelegation], empty_is_valid: false }, 'CORE', now, true).length === 0],
     ['deep_ready_queue_allowed', validateOwner({ active_delegations: [baseDelegation, { ...baseDelegation, delegation_id: 'D2', objective_id: 'O2' }], empty_is_valid: false }, 'CORE', now, true).length === 0],
@@ -169,7 +214,13 @@ function runSelftest() {
     ['stale_ready_rejected', validateOwner({ active_delegations: [{ ...baseDelegation, last_revalidated_at: '2026-09-11T02:00:00Z' }] }, 'CORE', now, true).some((f) => f.type === 'READY_UNDISPATCHED')],
     ['claimed_without_lease_rejected', validateOwner({ active_delegations: [{ ...baseDelegation, state: 'CLAIMED' }] }, 'CORE', now, true).some((f) => f.type === 'CLAIM_INVALID')],
     ['healthy_claim_suppresses_queued_ready_alarm', validateOwner({ active_delegations: [{ ...baseDelegation, state: 'CLAIMED', claim: healthyClaim }, { ...baseDelegation, delegation_id: 'D2', objective_id: 'O2', last_revalidated_at: '2026-09-11T02:00:00Z' }] }, 'CORE', now, true).every((f) => f.type !== 'READY_UNDISPATCHED')],
-    ['overlapping_claims_rejected', validateOwner({ active_delegations: [{ ...baseDelegation, state: 'CLAIMED', claim: healthyClaim }, { ...baseDelegation, delegation_id: 'D2', objective_id: 'O2', state: 'CLAIMED', claim: { ...healthyClaim, lease_id: 'L2', delegation_id: 'D2', objective_id: 'O2', idempotency_key: 'K2' } }] }, 'CORE', now, true).some((f) => f.type === 'OVERLAPPING_MUTATION_CLAIMS')]
+    ['overlapping_claims_rejected', validateOwner({ active_delegations: [{ ...baseDelegation, state: 'CLAIMED', claim: healthyClaim }, { ...baseDelegation, delegation_id: 'D2', objective_id: 'O2', state: 'CLAIMED', claim: { ...healthyClaim, lease_id: 'L2', delegation_id: 'D2', objective_id: 'O2', idempotency_key: 'K2' } }] }, 'CORE', now, true).some((f) => f.type === 'OVERLAPPING_MUTATION_CLAIMS')],
+    ['valid_event_ledger', validateLedger(validLedger, 'CORE', '2026-09-11', now, true).length === 0],
+    ['duplicate_event_id_rejected', validateLedger(duplicateIdLedger, 'CORE', '2026-09-11', now, true).some((f) => f.type === 'UTILIZATION_EVENT_ID_DUPLICATE')],
+    ['out_of_order_event_rejected', validateLedger(outOfOrderLedger, 'CORE', '2026-09-11', now, true).some((f) => f.type === 'UTILIZATION_EVENT_OUT_OF_ORDER')],
+    ['wrong_lane_event_rejected', validateLedger(wrongLaneLedger, 'CORE', '2026-09-11', now, true).some((f) => f.type === 'UTILIZATION_EVENT_LANE_MISMATCH')],
+    ['idle_without_exhaustion_rejected', validateLedger(idleLedger, 'CORE', '2026-09-11', now, true).some((f) => f.type === 'UTILIZATION_IDLE_WITHOUT_EXHAUSTION')],
+    ['stale_telemetry_rejected', validateLedger(staleLedger, 'CORE', '2026-09-11', now, true).some((f) => f.type === 'UTILIZATION_TELEMETRY_STALE')]
   ];
   let failed = 0;
   for (const [name, ok] of cases) {
@@ -192,7 +243,9 @@ const findings = [];
 for (const required of [
   registry.schema,
   registry.execution_control || 'governance/second-shift/SECOND-SHIFT-EXECUTION-CONTROL-001.md',
-  registry.utilization_event_schema || 'governance/second-shift/SECOND-SHIFT-UTILIZATION-EVENT-SCHEMA-001.json'
+  registry.utilization_event_schema || 'governance/second-shift/SECOND-SHIFT-UTILIZATION-EVENT-SCHEMA-001.json',
+  registry.value_scorecard || 'governance/second-shift/SECOND-SHIFT-VALUE-SCORECARD-001.md',
+  registry.value_measurement_schema || 'governance/second-shift/SECOND-SHIFT-VALUE-MEASUREMENT-SCHEMA-001.json'
 ]) {
   if (!required || !exists(required)) findings.push({ severity: 'ERROR', type: 'MISSING_CONTROL_ARTIFACT', message: `missing Second Shift control artifact: ${required || '<unset>'}` });
 }
@@ -207,7 +260,15 @@ for (const lane of LANES) {
 
   if (watchdog && inShift && (ny.minute >= 28 || ny.hour > 0)) {
     const eventRel = `governance/second-shift/execution-events/${ny.date}/${lane}.json`;
-    if (!exists(eventRel)) findings.push({ severity: 'ERROR', type: 'UTILIZATION_LEDGER_MISSING', lane, message: `shift event ledger missing after first owner-worker cadence: ${eventRel}` });
+    if (!exists(eventRel)) {
+      findings.push({ severity: 'ERROR', type: 'UTILIZATION_LEDGER_MISSING', lane, message: `shift event ledger missing after first owner-worker cadence: ${eventRel}` });
+    } else {
+      try {
+        findings.push(...validateLedger(readJson(eventRel), lane, ny.date, now, true));
+      } catch (error) {
+        findings.push({ severity: 'ERROR', type: 'UTILIZATION_LEDGER_PARSE_FAILURE', lane, message: `could not parse/validate shift event ledger: ${eventRel}`, detail: error.message });
+      }
+    }
   }
 }
 
