@@ -2,49 +2,48 @@
   "owner_system_id": "BOOK",
   "owner_path": "SYSTEM_MASTER/BOOK",
   "control_ref": "book-system/control-v1",
-  "last_known_control_head": "9c32654c9a8aa3cd111900b3a125d0198c39351c",
-  "delegation_epoch": 17,
+  "last_known_control_head": "837c4f2be180810dbd6f8b6887d69cf242ff6260",
+  "delegation_epoch": 18,
   "active_delegations": [
     {
-      "delegation_id": "SECOND-SHIFT-BOOK-CONTENT-ADMISSION-A01-PREP-001",
+      "delegation_id": "SECOND-SHIFT-BOOK-RF012-AUTHOR-DECISION-APPLICABILITY-GUARD-004",
       "owner_path": "SYSTEM_MASTER/BOOK",
-      "objective_id": "BOOK-SYSTEM-CANONICAL-CONTENT-OBJECT-ADMISSION-001-A01-REGISTRATION-AND-QUALIFICATION-PREP",
+      "objective_id": "BOOK-SYSTEM-CONTENT-ADMISSION-AUTHOR-DECISION-APPLICABILITY-GUARD-004",
       "state": "READY",
       "valid_for_control_ref": "book-system/control-v1",
-      "valid_for_control_head": "9c32654c9a8aa3cd111900b3a125d0198c39351c",
-      "created_at": "2026-09-10T02:30:00-04:00",
-      "last_revalidated_at": "2026-09-10T02:38:00-04:00",
-      "parent_checkpoint": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-025.json",
-      "current_owner_binding": "qualification/book-system/BOOK-SYSTEM-PRODUCT-PARENT-BINDING-005.json",
+      "valid_for_control_head": "837c4f2be180810dbd6f8b6887d69cf242ff6260",
+      "created_at": "2026-09-10T04:51:00-04:00",
+      "last_revalidated_at": "2026-09-10T04:51:00-04:00",
+      "parent_checkpoint": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-026.json",
+      "current_owner_binding": "qualification/book-system/BOOK-SYSTEM-PRODUCT-PARENT-BINDING-006.json",
       "implementation_subject_sha": "e993806a1d9a4838d4bd6d162a36921526ef302a",
-      "completion_delta": "Before this rescue pass, the Book delegation still pointed at State-024 and an implementation objective that had not yet been executed. During the pass, the bounded canonical content-object admission seam was implemented on exact software subject e993806a1d9a4838d4bd6d162a36921526ef302a, its 30-case admission qualifier and existing Version/Rollback regression passed hosted qualification, evidence was uploaded, State-025 and Binding-005 were written, and the observed central A-01 registry v29 was confirmed not to contain the new qualification. The current successor therefore preserves the exact hosted-passed software subject and prepares central registration/shared-gateway qualification without fabricating A-01 PASS.",
+      "completion_delta": "The original canonical content-object admission subject e993806a1d9a4838d4bd6d162a36921526ef302a remains hosted-passed but unregistered/unrun on A-01. Book work-ahead inspection found RF012: approved canonical AUTHOR_DECISION status alone does not establish exact subject applicability because exact subject identity belongs in queue/receipt evidence. The live Book owner selected a narrow A-01-independent parent-side applicability guard as the safe executable successor while central registration remains pending.",
       "evidence_target": [
-        "central registry entry for BOOK-SYSTEM-CANONICAL-CONTENT-OBJECT-ADMISSION-001",
-        "A-01 control-plane/registry selftest PASS after any central registration change",
-        "exact hosted-passed implementation subject e993806a1d9a4838d4bd6d162a36921526ef302a remains unchanged unless executable repair is objectively required",
-        "canonical shared-gateway request and authoritative A-01 receipt only after registration",
-        "independent residual Book census/specification/test/successor evidence while central registration or A-01 execution is blocked"
+        "exact current bridge contract qualification/book-system/content-object-admission-001/BOOK-SYSTEM-CONTENT-ADMISSION-AUTHOR-DECISION-APPLICABILITY-BRIDGE-003.json",
+        "bounded additive guard that requires exact author-decision subject applicability rather than status-only acceptance",
+        "fresh exact software SHA for any executable bridge",
+        "focused/full hosted qualification for the changed subject with no PASS transfer from e993806a1d9a4838d4bd6d162a36921526ef302a",
+        "central A-01 registration/qualification of original or changed subject remains separately adjudicated"
       ],
-      "stop_condition": "Do not declare the content-admission A-01 boundary closed until an authoritative exact-subject A-01 receipt exists or owner authority explicitly reclassifies the requirement. If central registration or execution is unavailable, continue the Book work-ahead ladder rather than idling.",
+      "stop_condition": "Close only the bounded RF012 applicability defect with exact-subject tests and fresh hosted evidence. Do not convert an author decision status into author authority, do not reuse predecessor PASS, and do not call the original content-admission A-01 boundary closed without an authoritative exact-subject A-01 receipt. After RF012 closure re-read Book authority and continue the next dependency-valid Book-owned successor.",
       "allowed_work": [
-        "validate and prepare the proposed central A-01 registry entry without changing tested implementation bytes",
-        "prepare the exact shared-gateway request for implementation subject e993806a1d9a4838d4bd6d162a36921526ef302a after registration",
-        "run independent residual completion/evidence census for remaining Book-owned gaps",
-        "prepare architecture/contracts/specification and deterministic tests for the next proven Book-owned gap",
-        "prepare successor packets that require no Prose, Document, author, publication, native or production authority"
+        "implement the narrow parent-side subject-applicability guard defined by Bridge-003",
+        "add deterministic tests for status-only false acceptance, exact subject mismatch, queue/receipt mismatch and idempotent exact-match acceptance",
+        "run focused/full hosted qualification on a new exact changed-software SHA",
+        "preserve e993806a1d9a4838d4bd6d162a36921526ef302a as original hosted evidence unless owner authority explicitly selects a replacement",
+        "continue residual Book census/specification/test/successor work if central A-01 remains blocked"
       ],
       "forbidden_authority": [
-        "do not dispatch an unregistered qualification or a direct self-hosted A-01 job",
-        "do not call hosted PASS A-01 PASS or transfer the Version/Rollback A-01 PASS to the new subject",
-        "do not rewrite already-qualified Lifecycle or Version/Rollback authority",
-        "do not absorb Prose, Book Evaluator or Document implementation",
-        "do not synthesize author decisions or publication/distributor approval",
-        "do not claim native iPhone, production or publication standing"
+        "do not infer author approval or applicability from status alone",
+        "do not fabricate author, private manuscript, publication, provider, native or production evidence",
+        "do not transfer PASS from e993806a1d9a4838d4bd6d162a36921526ef302a or from the existing author-decision guard",
+        "do not absorb Prose, Book Evaluator or Document authority",
+        "do not dispatch unregistered/direct self-hosted A-01 work"
       ],
-      "on_pass": "When an authoritative A-01 exact-subject receipt exists, preserve its subject/checkout identity and evidence, reconcile State-025/Binding-005, retire this delegation, and immediately select the next dependency-valid Book census/implementation successor while shift time remains.",
-      "on_failure": "Classify and preserve only the failing boundary. Do not call hosted or control-plane enforcement PASS an A-01 PASS. If central registration or A-01 qualification is unavailable or fails, preserve exact implementation subject e993806a1d9a4838d4bd6d162a36921526ef302a and its hosted evidence, record the failure truthfully, and continue dependency-valid residual Book census, specification, deterministic test or successor-packet work without unauthorized dispatch or PASS transfer.",
-      "on_blocked": "Record the exact central registration/A-01 blocker, then continue residual Book-owned census, specification, deterministic test design or next-successor packet work that does not depend on the missing authority.",
-      "continuation_rule": "Completion or blocking is not shift termination. Re-read the live Book head, repair inbox, census and current binding after each unit of work; select the next safe successor or produce a durable all-rungs-exhausted record."
+      "on_pass": "Preserve the new exact subject and hosted RF012 evidence, re-read Book State/Binding and repair inbox, retire this delegation and bind the next owner-selected Book successor. A-01 registration/qualification remains a separate exact-subject boundary.",
+      "on_failure": "Preserve exact failing subject/evidence and repair only the bounded RF012 defect if objectively authorized; otherwise fail that rung closed and continue independent Book work-ahead without inventing author or A-01 evidence.",
+      "on_blocked": "Record the exact RF012 implementation/dependency blocker and continue the Book work-ahead ladder where dependency-valid rather than idling.",
+      "continuation_rule": "Completion or blocking is not shift termination. Re-read live Book head/current binding after each unit and immediately select the next safe Book-owned successor while time remains."
     }
   ],
   "delegation_history": [
@@ -193,9 +192,23 @@
       "a01_result": "NOT_REGISTERED__NOT_RUN__NO_PASS",
       "completion_evidence": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-025.json",
       "history_preserved": true
+    },
+    {
+      "delegation_id": "SECOND-SHIFT-BOOK-CONTENT-ADMISSION-A01-PREP-001",
+      "owner_path": "SYSTEM_MASTER/BOOK",
+      "objective_id": "BOOK-SYSTEM-CANONICAL-CONTENT-OBJECT-ADMISSION-001-A01-REGISTRATION-AND-QUALIFICATION-PREP",
+      "state": "SUPERSEDED__CENTRAL_A01_PENDING__RF012_WORK_AHEAD_SELECTED",
+      "previous_valid_for_control_head": "9c32654c9a8aa3cd111900b3a125d0198c39351c",
+      "retired_against_live_control_head": "837c4f2be180810dbd6f8b6887d69cf242ff6260",
+      "retired_at": "2026-09-10T04:51:00-04:00",
+      "completion_classification": "CENTRAL_A01_NOT_CLOSED__OWNER_ADVANCED_INDEPENDENT_WORK_AHEAD",
+      "preserved_original_subject_sha": "e993806a1d9a4838d4bd6d162a36921526ef302a",
+      "a01_result": "NOT_REGISTERED__NOT_RUN__NO_PASS",
+      "replacement_delegation_id": "SECOND-SHIFT-BOOK-RF012-AUTHOR-DECISION-APPLICABILITY-GUARD-004",
+      "history_preserved": true
     }
   ],
   "owner_revalidation_required": false,
-  "reason": "The prior implementation delegation became stale because its objective completed. Book State-025 and Binding-005 now route to central A-01 registration/qualification preparation on live Book head 9c32654c9a8aa3cd111900b3a125d0198c39351c. The exact tested software subject remains e993806a1d9a4838d4bd6d162a36921526ef302a. Empty is not justified because registration preparation and independent residual Book work-ahead remain available. Epoch 17 adds the mandatory on_failure continuation required by System State Reconciler without changing the delegated objective or tested implementation subject.",
+  "reason": "Reconciled stale Book delegation against live head 837c4f2be180810dbd6f8b6887d69cf242ff6260 and Binding-006. The original content-admission A-01 boundary remains pending; Book has an explicit A-01-independent RF012 applicability-guard successor and therefore must not idle.",
   "empty_is_valid": false
 }
