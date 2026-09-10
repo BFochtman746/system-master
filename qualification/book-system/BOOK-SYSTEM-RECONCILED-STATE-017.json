@@ -1,0 +1,100 @@
+{
+  "state_id": "BOOK-SYSTEM-RECONCILED-STATE-017",
+  "effective_date": "2026-09-09",
+  "supersedes_for_current_parent_control": "BOOK-SYSTEM-RECONCILED-STATE-016",
+  "supersession_scope": "PARENT_CONTROL_AND_NEXT_STEP_ROUTING_ONLY",
+  "standing": "ACTIVE__AUTHOR_DECISION_QUEUE_A01_CLOSED__EXPORT_FREEZE_RESEARCH_AND_CONTRACT_BOUND__LIFECYCLE_COMPATIBILITY_HOSTED_PASS__CENTRAL_A01_REGISTRATION_REQUIRED",
+  "project": "BOOK SYSTEM",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "control_branch": "book-system/control-v1",
+  "closed_since_state_016": [
+    {
+      "id": "BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001",
+      "result": "PASS__HOSTED_AND_AUTHORITATIVE_A01_EXACT_SHA",
+      "qualified_subject_sha": "9601ae5df8348c1daac8805eaefa1718c431dd49",
+      "a01_run_id": 34418414997,
+      "a01_job_id": 102688360562,
+      "evidence_artifact_id": 10129976594,
+      "evidence_artifact_digest": "sha256:d731a193c0c4ee78b753200f5b84eb08e839d334d970569369fe3589c680431b",
+      "closure": "qualification/book-system/author-decision-001/BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001-CLOSURE.json"
+    },
+    {
+      "id": "BOOK-SYSTEM-EXPORT-FREEZE-FORENSIC-MAP-001",
+      "result": "CLOSED__REUSE_MAP_COMPLETE__COMPATIBILITY_REPAIR_IDENTIFIED",
+      "finding": "Lifecycle v1 keyed-object and parent-digest identity cannot directly consume the later sealed-array parent representation."
+    },
+    {
+      "id": "BOOK-SYSTEM-EXPORT-FREEZE-001-CONTRACT-GATE",
+      "result": "BOUND__RUNTIME_IMPLEMENTATION_PAUSED_ON_COMPATIBILITY_QUALIFICATION"
+    }
+  ],
+  "current_compatibility_repair": {
+    "id": "BOOK-SYSTEM-LIFECYCLE-CURRENT-PARENT-COMPATIBILITY-ADAPTER-001",
+    "classification": "STRICT_COMPATIBILITY_REPAIR__NO_NEW_LIFECYCLE_POLICY_OR_GATE_SEMANTICS",
+    "final_hosted_subject_sha": "fc5adf8fd130d7b5324cff0058ab3804d75ec54e",
+    "final_hosted_run_id": 34419309748,
+    "final_hosted_job_id": 102691064356,
+    "hosted_result": "PASS__21_OF_21_COMPATIBILITY_CASES__PLUS_18_OF_18_LIFECYCLE_V1_PREDECESSOR_REGRESSIONS",
+    "intermediate_evidence_artifact_id": 10130270364,
+    "intermediate_evidence_artifact_digest": "sha256:bc84725d765418272da0bfa47746b6f3321bde451086197bffae4ad908d9a040",
+    "original_lifecycle_v1_bytes_changed": false,
+    "a01_registration_handoff": "qualification/book-system/lifecycle-transition-compatibility-001/BOOK-SYSTEM-LIFECYCLE-CURRENT-PARENT-COMPATIBILITY-ADAPTER-001-A01-REGISTRATION-HANDOFF.json"
+  },
+  "preserved_compatibility_failure_lineage": [
+    {
+      "subject_sha": "67d1cdb37c31eeb0e785efcc257dd986aa94b09c",
+      "run_id": 34419187052,
+      "job_id": 102690685013,
+      "result": "FAIL__18_OF_21__QUALIFIER_SERIALIZATION_HELPER_ONLY",
+      "artifact_id": 10130245955,
+      "artifact_digest": "sha256:fce389a9f81c8689f02c73b95902200ea6c91237ddd40a05b9d3854b97886de9"
+    },
+    {
+      "subject_sha": "fc5adf8fd130d7b5324cff0058ab3804d75ec54e",
+      "run_id": 34419309748,
+      "job_id": 102691090784,
+      "result": "CONTROL_PLANE_FAILURE__UNREGISTERED_QUALIFICATION",
+      "runner": "A-01 / Windows / X64",
+      "runner_preflight": "PASS",
+      "control_plane_validation": "PASS",
+      "subject_execution_reached": false,
+      "artifact_id": 10130296221,
+      "artifact_digest": "sha256:9a5d86c743c018673de671d4b74b6d361b992cb92bef257e7a2c2eda59d4fa9d"
+    }
+  ],
+  "parallel_export_freeze_candidate": {
+    "branch": "book-system/export-freeze-001",
+    "head_sha": "0bbdb5b6809dcd0d8ec0392a1b493641b4ffac85",
+    "relation_to_current_control": "DIVERGED_FROM_OLDER_BOOK_BASE__PRESERVE_AND_RECONCILE_DO_NOT_DISCARD",
+    "hosted_run_id": 34419237350,
+    "hosted_job_id": 102690841850,
+    "hosted_result": "PASS__70_OF_70",
+    "authority_flags": {
+      "lifecycle_mutation_authorized": false,
+      "publication_authorized": false,
+      "author_choice_created": false,
+      "document_engine_created": false
+    },
+    "admission_rule": "The 70/70 work is valuable implementation evidence but cannot be promoted or have its PASS transferred across the later compatibility/control changes. Audit it against the qualified compatibility seam, reuse compatible code and requalify the final reconciled exact SHA."
+  },
+  "preserved_authority_law": [
+    "Lifecycle v1 remains the lifecycle transition policy/gate authority and its original exact-SHA qualification is not relabeled.",
+    "The compatibility adapter may translate representation and parent digest identity only; it may not add transitions, gates or provider authority.",
+    "Export Freeze may register one immutable frozen release but may not directly change project lifecycle status or authorize publication.",
+    "Document System remains the rendering/conversion/format-validation implementation owner.",
+    "Parallel Export Freeze implementation and research are preserved and must be reconciled rather than discarded.",
+    "No hosted PASS becomes authoritative A-01 PASS without registered exact-SHA execution."
+  ],
+  "current_parent_critical_path": {
+    "id": "BOOK-SYSTEM-LIFECYCLE-CURRENT-PARENT-COMPATIBILITY-ADAPTER-001-A01-REGISTRATION-AND-QUALIFICATION-001",
+    "classification": "BLOCKED__SHARED_AUTHORITY_REGISTRATION_ONLY__SUBJECT_HOSTED_PASS",
+    "observed_registry": "main:qualification/a01/registry.json registry_version 25",
+    "qualification_registered_at_observation": false,
+    "objective": "Obtain shared A-01 registration for the strict Lifecycle current-parent compatibility adapter, then execute the canonical shared gateway against exact final hosted-passing subject fc5adf8fd130d7b5324cff0058ab3804d75ec54e unchanged.",
+    "on_registration": "Re-run the failed A-01 job/run or invoke the shared gateway on exact subject fc5adf8fd130d7b5324cff0058ab3804d75ec54e. Preserve authoritative receipt and evidence identity.",
+    "on_pass": "Close the compatibility repair, then reconcile the parallel 70/70 Export Freeze candidate with current control and compatibility requirements before final exact-SHA Export Freeze qualification.",
+    "on_failure": "Preserve exact receipt. Repair only the proven subject, infrastructure or control-plane boundary; changed subject bytes require fresh hosted qualification."
+  },
+  "generic_continue_rule": "In Book System control, Continue first revalidates central registration for BOOK-SYSTEM-LIFECYCLE-CURRENT-PARENT-COMPATIBILITY-ADAPTER-001. If registered, execute/adjudicate A-01 on exact subject fc5adf8fd130d7b5324cff0058ab3804d75ec54e. If still unregistered, preserve the blocker and continue bounded reconciliation/audit of the parallel Export Freeze candidate without promoting it or transferring its hosted PASS.",
+  "qualification_effect": "Author Decision Queue remains authoritative exact-SHA PASS. Lifecycle compatibility has hosted PASS only. Export Freeze parallel candidate has hosted PASS only. No new lifecycle, export-freeze, publication, document or production authority is created by State-017."
+}
