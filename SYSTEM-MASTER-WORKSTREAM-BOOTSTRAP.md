@@ -7,14 +7,35 @@ This file is the cross-chat entry point for all work in `BFochtman746/system-mas
 Before interpreting a branch, chat title, ticket, workflow, qualification, historical handoff or scheduled task as current authority, read in this order:
 
 1. `governance/CURRENT-AUTHORITY.json`
-2. `governance/SYSTEM-TOPOLOGY-002.json`
-3. fetch the **live** canonical control ref for the owning system and read the selected current control/state record
-4. `governance/COMPLETION-LEDGER-001.json` — what is evidence-backed as done
-5. `governance/WORK-OBLIGATION-REGISTRY-001.json` — what is still owed, blocked, held, deferred or awaiting owner selection
-6. `governance/EXPECTATION-REGISTRY-001.json` — what System Master is expected eventually to contain/prove
-7. the owner's Second Shift delegation file when unattended work is involved
+2. `governance/morning/LATEST-BOOTSTRAP-POINTER.json` when present; if it selects a manifest for the current America/New_York date, read the requested chat-role packet as a fast-start cache
+3. `governance/SYSTEM-TOPOLOGY-002.json`
+4. fetch the **live** canonical control ref for the owning system and read the selected current control/state record
+5. the sealed state checkpoint currently selected by CURRENT-AUTHORITY
+6. the completion ledger currently selected by CURRENT-AUTHORITY — what is evidence-backed as done
+7. the obligation registry currently selected by CURRENT-AUTHORITY — what is still owed, blocked, held, deferred or awaiting owner selection
+8. the expectation and reallocation registries selected by CURRENT-AUTHORITY
+9. repair registry/inbox state relevant to the owner
+10. the owner's Second Shift delegation and current shift ledger when unattended work is involved
 
-Conversation memory is never a substitute for repository authority.
+Conversation memory, a morning manifest, a chat title and a historical handoff are never substitutes for live repository authority.
+
+## Fast-start / morning reconciliation
+
+Canonical contract: `governance/morning/MORNING-CANONICAL-RECONCILIATION-001.md`  
+Chat command contract: `governance/morning/CHAT-START-COMMAND-CONTRACT-001.md`
+
+After the 00:00-07:00 Second Shift window, the 07:15 morning reconciliation consumes overnight execution/evidence as inputs, reconciles admissible deltas into live owner state, and publishes one daily chat bootstrap manifest. That manifest records where each chat role is, where it is going, what changed overnight, and one exact next-step contract.
+
+The daily manifest is a fast-start cache and reconciliation receipt only. At every chat start, current `main` and each relevant live owner head are fetched again. Any movement after the morning seal is `AUTHORITY_DELTA` and is reconciled before execution without asking the user to rediscover the project.
+
+Supported chat roles:
+
+- `MASTER_ROOT` — SYSTEM_MASTER product-root controller. It reads all four owner lanes and shared infrastructure and includes CORE state, but is not a fifth peer system and does not silently take child canonical-writer authority.
+- `LEARNING` — SYSTEM_MASTER/LEARNING.
+- `BOOK` — SYSTEM_MASTER/BOOK.
+- `PROSE` — SYSTEM_MASTER/BOOK/PROSE.
+
+A new chat is a new working surface, not a new project state.
 
 ## Product hierarchy
 
@@ -32,30 +53,23 @@ Branches, workstreams, qualification lanes, implementation families, repair line
 
 ## Canonical routing
 
+Resolve the current routing records from `governance/SYSTEM-TOPOLOGY-002.json`. The current topology defines the owner paths and live control refs; do not duplicate live head SHAs here.
+
 ### CORE — `SYSTEM_MASTER/CORE`
 
-- control ref: `system-master/control-v2`
-- selected control: `system-master/control-v2/SYSTEM-MASTER-CORE-CONTROL-RECORD-001.md`
-- owns shared foundation/data/platform/runtime, continuity/recovery, assurance/reconciliation and shared qualification/control-plane integration.
+Owns shared foundation/data/platform/runtime, continuity/recovery, assurance/reconciliation and shared qualification/control-plane integration.
 
 ### LEARNING — `SYSTEM_MASTER/LEARNING`
 
-- control ref: `learning/control-v1`
-- selected control: `learning/control-v1/LEARNING-CONTROL-RECORD-v2.md`
-- historical `learning/impl-*`, `learning/qual-*`, `learning/request-*`, `learning/pilot-*` and repair/import refs remain implementation/evidence history unless current Learning control selects them.
+Owns Learning product architecture/runtime, curriculum, assessment, mastery/adaptation, retention/transfer and Learning-specific qualification/evidence.
 
 ### BOOK — `SYSTEM_MASTER/BOOK`
 
-- control ref: `book-system/control-v1`
-- selected control: `qualification/book-system/BOOK-SYSTEM-PRODUCT-PARENT-BINDING-006.json`
-- owns canonical book state, end-to-end lifecycle, orchestration/admission, author decisions, version/rollback, editorial lifecycle and publication/export.
+Owns canonical book state, end-to-end lifecycle, orchestration/admission, author decisions, version/rollback, editorial lifecycle and publication/export.
 
 ### PROSE — `SYSTEM_MASTER/BOOK/PROSE`
 
-- control ref: `literary-prose-engine-001`
-- selected control: `qualification/literary-prose-engine-001/PROSE-SYSTEM-PRODUCT-PARENT-BINDING-003.json`
-- owns Book Evaluator/evaluation, evaluator training, prose/craft training, diagnostics, revision intelligence and preservation checks.
-- may define its own critical path but may not alter BOOK canonical state without explicit BOOK admission.
+Owns Book Evaluator/evaluation, evaluator training, prose/craft training, diagnostics, revision intelligence and preservation checks. It may define its own critical path but may not alter BOOK canonical state without explicit BOOK admission.
 
 ## Shared infrastructure / non-system lanes
 
@@ -65,20 +79,22 @@ Branches, workstreams, qualification lanes, implementation families, repair line
 - Literary Prose Engine is a PROSE implementation family.
 - Night Shift / Second Shift are execution workers, not systems.
 
-If an object cannot be mapped through `SYSTEM-TOPOLOGY-002.json`, classify it `UNALLOCATED`. Inspection is allowed; execution, promotion and scheduling are not until ownership is assigned.
+If an object cannot be mapped through the current topology, classify it `UNALLOCATED`. Inspection is allowed; execution, promotion and scheduling are not until ownership is assigned.
 
 ## Anti-surprise startup rule
 
 Every worker/chat must fetch the **live owner control ref** before executing work.
 
-Compare the live head/current state with `governance/SYSTEM-STATE-BASELINE-002.json`:
+Compare the live head/current state with the sealed checkpoint selected by `governance/CURRENT-AUTHORITY.json`:
 
 - same standing/head -> `AUTHORITY_CURRENT`;
 - changed head/state -> `AUTHORITY_DELTA`: read the new owner control/state and reconcile only the delta before continuing;
 - conflicting evidence -> `EVIDENCE_MISMATCH` and fail closed;
 - no owner -> `UNALLOCATED` and stop execution.
 
-A worker may not begin execution and later claim surprise that the repository is farther ahead or different. Resolving current standing is a prerequisite, not a cleanup step.
+Do not say the repository state is surprising, confusing or unknown after execution begins. Resolve standing first. If state moved, report the classified delta and the resulting current objective.
+
+Do not ask the user to restate System Master architecture, prior work, repository identity, lane purpose or overnight history when canonical lookup can resolve it. If a genuine non-machine-resolvable authority decision remains, ask only that exact decision.
 
 ## Completion / obligation / expectation discipline
 
@@ -87,21 +103,17 @@ A worker may not begin execution and later claim surprise that the repository is
 - **Expectation registry** answers: *What is the product/system ultimately expected to cover or prove?*
 - **Reallocation ledger** answers: *Where did historical labels/workstreams move under the current hierarchy?*
 
-Do not use one of these as a substitute for another. A completed exact-SHA gate does not imply an entire expectation is complete; an expected capability does not imply implementation; an open obligation does not invalidate predecessor evidence.
+Always use the files selected by CURRENT-AUTHORITY for current routing. Historical registries remain evidence/provenance and may not override current selectors.
+
+Do not use one registry as a substitute for another. A completed exact-SHA gate does not imply an entire expectation is complete; an expected capability does not imply implementation; an open obligation does not invalidate predecessor evidence.
 
 When an obligation closes, preserve/verify its evidence, append the completion ledger, close/supersede the obligation, update current owner state, and reconcile any active Second Shift delegation in the same work session.
 
 ## Required A-01 startup
 
-Before scheduling or adjudicating A-01 machine qualification, also read:
+Before scheduling or adjudicating A-01 machine qualification, read the current A-01 operating mode, operating contract, policy, registry and overnight contract selected by current repository authority.
 
-1. `qualification/a01/A01-OPERATING-MODE-001.md`
-2. `qualification/a01/A01-OPERATING-CONTRACT.md`
-3. `qualification/a01/a01-policy.json`
-4. `qualification/a01/registry.json`
-5. `qualification/a01/overnight/A01-OVERNIGHT-001.md` when unattended overnight capacity is requested
-
-A-01 `workstream_id` is an execution/evidence lane. It must map through `SYSTEM-TOPOLOGY-002.json` to CORE, LEARNING, BOOK or PROSE.
+A-01 `workstream_id` is an execution/evidence lane. It must map through the current topology to CORE, LEARNING, BOOK or PROSE.
 
 Keep separate:
 
@@ -118,7 +130,7 @@ Never promote a different SHA under another SHA's evidence.
 - Resolve owner path before acting.
 - Read live owner control/state before selecting work.
 - Check completion before repeating work.
-- Check obligations before choosing what remains.
+- Check current obligations before choosing what remains.
 - Check expectations before declaring a tool/system complete.
 - Build and prequalify before requesting A-01.
 - Use the canonical shared A-01 gateway when applicable.
@@ -129,37 +141,24 @@ Never promote a different SHA under another SHA's evidence.
 
 ## Second Shift — live delegation, not stale prompts
 
-Canonical registry: `governance/second-shift/SECOND-SHIFT-REGISTRY-001.json`  
-Operating mode: `governance/second-shift/SECOND-SHIFT-OPERATING-MODE-002.md`
-
-Owner files:
-
-- CORE: `governance/second-shift/CORE-DELEGATIONS.json`
-- LEARNING: `governance/second-shift/LEARNING-DELEGATIONS.json`
-- BOOK: `governance/second-shift/BOOK-DELEGATIONS.json`
-- PROSE: `governance/second-shift/PROSE-DELEGATIONS.json`
+Read the Second Shift registry, operating mode and execution-control files selected by CURRENT-AUTHORITY.
 
 Rules:
 
-- The owner system/chat owns the delegation; the scheduler only consumes it.
+- The owner system/chat owns its delegation; the scheduler consumes it.
 - Delegation must correspond to an open owner obligation/current objective.
-- If daytime work completes/supersedes it, remove it from `active_delegations` in that same work session, preserve history, then re-evaluate a successor.
+- If daytime work completes/supersedes it, reconcile active delegation in the same working session and preserve history.
 - READY delegation binds to an exact live owner-control head.
 - Head/objective/dependency mismatch = `STALE_DELEGATION`; do not execute it.
-- The 23:15 controller revalidates before planning; each worker revalidates again immediately before execution.
-- Empty delegation is valid only after the mandatory work-ahead ladder and all-rungs-exhausted test in `SECOND-SHIFT-OPERATING-MODE-002.md` prove that no dependency-valid unattended-safe research, census, specification, test-design, bounded implementation, qualification-preparation or successor-packet work remains. A stale/missing delegation or blocked critical path is not sufficient.
-- Do not invent work solely for utilization; do not leave a materially incomplete system idle while independent work-ahead can reduce tomorrow's discovery or build time.
-- A completed night item may be followed by another only after owner-state re-evaluation and a new/revalidated delegation.
+- The portfolio controller performs its pre-shift revalidation at the currently configured pre-shift cadence (presently 23:45 America/New_York); every worker revalidates again immediately before execution.
+- Empty delegation is valid only after the current mandatory work-ahead ladder and all-rungs-exhausted proof show no dependency-valid unattended-safe work remains.
+- Do not invent work solely for utilization; do not leave a materially incomplete lane idle while independent work-ahead can reduce tomorrow's discovery/build time.
+- Completion/material block is followed by current-state re-evaluation and successor binding while the shift remains open.
 - A-01 work still requires registered exact-subject qualification and central policy admission.
 
 ## Historical preservation
 
-Pre-parent-topology checkpoint:
-
-- archive ref: `archive/pre-parent-topology-20260909`
-- manifest: `governance/snapshots/PRE-PARENT-TOPOLOGY-20260909-001.json`
-
-Historical branches, receipts, frozen artifacts and exact-SHA evidence are never rewritten merely because ownership taxonomy changed.
+Historical branches, receipts, frozen artifacts and exact-SHA evidence are never rewritten merely because ownership taxonomy, current objectives or chat surfaces changed.
 
 ## Current authority
 
