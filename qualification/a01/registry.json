@@ -1,5 +1,5 @@
 {
-  "registry_version": 24,
+  "registry_version": 25,
   "qualifications": {
     "A01-CONTROL-PLANE-SELFTEST": {
       "workstream_id": "SYSTEM-MASTER",
@@ -263,6 +263,18 @@
       "evidence_artifact": "book-system-author-decision-queue-001",
       "overnight_eligible": false,
       "description": "Qualify the exact Book System Author Decision Queue implementation: append-only queue/request/receipt history, exact parent/queue/request compare-and-swap, current subject binding, duplicate-handoff preservation, no-steering presentation, defer/reopen/withdraw/supersede, explicit author identity/session-proof boundary, confirmation binding, explicit option-to-APPROVED-or-REJECTED mapping, stale/concurrent resolution refusal, idempotent replay, one immutable canonical AUTHOR_DECISION append, Version/Rollback authority handoff, and zero same-operation manuscript/lifecycle/proposal/export/publication mutation. Fixtures are synthetic only and PASS grants no real author-choice, publication, production, or provider authority."
+    },
+    "BOOK-SYSTEM-EXPORT-FREEZE-001": {
+      "workstream_id": "BOOK-SYSTEM",
+      "gate_class": "focused",
+      "source": "subject",
+      "executable": "node",
+      "args": [
+        ".github/scripts/book-system-export-freeze-001-qualify-v2.js"
+      ],
+      "evidence_artifact": "book-system-export-freeze-001",
+      "overnight_eligible": false,
+      "description": "Qualify the exact Book System Export Freeze runtime and contract: exact parent/manuscript/artifact/profile identity, current validation/proof/accessibility/provenance/rights/privacy evidence, changed-byte and open-correction rejection, immutable one-format-one-digest EXPORT_RELEASE append, hard release-ID conflict without a durable idempotency receipt, exact replay/conflict behavior, supersession lineage, lifecycle handoff without lifecycle mutation, and zero author-choice, publication, provider, or generic document-engine authority synthesis. PASS is exact-SHA focused evidence only and does not render, validate, publish, deliver, or authorize a book."
     }
   }
 }
