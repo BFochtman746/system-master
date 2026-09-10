@@ -1,0 +1,24 @@
+name: BOOK SYSTEM End-to-End Authoring 001 A-01 Transport
+
+on:
+  push:
+    branches:
+      - book-system/request-end-to-end-authoring-001-a01
+    paths:
+      - ".github/workflows/book-system-end-to-end-authoring-001-a01-transport.yml"
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  qualify:
+    uses: BFochtman746/system-master/.github/workflows/a01-control-plane-gateway.yml@main
+    with:
+      qualification_id: BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001
+      workstream_id: BOOK-SYSTEM
+      subject_sha: 50a81c3cd3575fe45465584347711d3a7c74413a
+      origin_ref: refs/heads/book-system/control-v1
+      resume_on_pass: Close the exact repaired 48-case synthetic Book end-to-end authoring composition qualification on subject 50a81c3cd3575fe45465584347711d3a7c74413a; preserve all predecessor and guard evidence without qualification transfer; then re-read live Book control, completion obligations and expectations to select the next dependency-valid parent objective.
+      resume_on_failure: Preserve the exact A-01 receipt and hosted 48-of-48 PASS. Classify the failure as subject, infrastructure or control-plane evidence and repair only the proven boundary; do not widen author, publication, provider, document-engine, lifecycle, promotion or production authority.
+      notification_target: book-system/control-v1
