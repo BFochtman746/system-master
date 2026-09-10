@@ -1,0 +1,139 @@
+{
+  "reconciliation_id": "BOOK-SYSTEM-EXPORT-FREEZE-PARALLEL-CANDIDATE-RECONCILIATION-001",
+  "effective_date": "2026-09-09",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "standing": "CLOSED__PARALLEL_70_OF_70_WORK_PRESERVED__REUSE_WITH_REQUIRED_CURRENT_PARENT_REPAIR",
+  "candidate": {
+    "branch": "book-system/export-freeze-001",
+    "subject_sha": "0bbdb5b6809dcd0d8ec0392a1b493641b4ffac85",
+    "hosted_run_id": 34419237350,
+    "hosted_job_id": 102690841850,
+    "hosted_result": "PASS__70_OF_70__CANDIDATE_LOCAL_CONTRACT",
+    "candidate_contract": "qualification/book-system/export-freeze-001/BOOK-SYSTEM-EXPORT-FREEZE-001-CONTRACT-001.json",
+    "candidate_runtime": "system-master/book-system/export-freeze-core.js",
+    "candidate_qualifier": ".github/scripts/book-system-export-freeze-001-qualify-v2.js"
+  },
+  "preservation_rule": "The candidate is not discarded. Its evidence-validation, fail-closed and authority-separation logic is reusable implementation work. Its hosted PASS remains historical evidence for its exact candidate-local contract only and is not transferred to the reconciled current-parent subject.",
+  "audit_findings": [
+    {
+      "id": "EF-REC-001",
+      "classification": "REPAIR_REQUIRED",
+      "area": "parent digest identity",
+      "finding": "Candidate parentDigest(state) hashes the entire object locally. Current Book parent authority uses an explicit sealed state_digest computed with state_digest excluded. Candidate fixtures omit state_digest, so the 70/70 matrix did not exercise the canonical current-parent digest contract.",
+      "required_repair": "Use current Version/Rollback parent validation and sealState/state_digest identity. expected_parent_state_digest must equal the validated current state_digest; the successor must be resealed and carry a valid new state_digest."
+    },
+    {
+      "id": "EF-REC-002",
+      "classification": "REPAIR_REQUIRED",
+      "area": "current parent structural validity",
+      "finding": "Candidate state fixtures use active references to governing brief/canon/story-plan objects while those collections are empty. They are sufficient for candidate-local tests but are not a valid current canonical Book parent under the qualified Version/Rollback parent validator.",
+      "required_repair": "Rebuild final qualification fixtures from a valid current sealed parent fixture and run current parent validation on every positive path."
+    },
+    {
+      "id": "EF-REC-003",
+      "classification": "REPAIR_REQUIRED",
+      "area": "parent-only authority",
+      "finding": "Candidate contract states Book authority, but its request shape and runtime do not require or validate actor_class=PARENT_SYSTEM.",
+      "required_repair": "Require actor_class and fail closed on any provider, Prose, Book Evaluator, Document System or other non-parent actor."
+    },
+    {
+      "id": "EF-REC-004",
+      "classification": "REPAIR_REQUIRED",
+      "area": "Version/Rollback authority handoff",
+      "finding": "Candidate emits a receipt but its 70-case qualifier does not prove that the final receipt is accepted by the current qualified Version/Rollback runtime as authority_kind=EXPORT_RELEASE using exact current sealed pre/post parent identities.",
+      "required_repair": "Add a real recordAuthorizedParentSuccessor integration case with authority_kind=EXPORT_RELEASE and the final release receipt."
+    },
+    {
+      "id": "EF-REC-005",
+      "classification": "REPAIR_REQUIRED",
+      "area": "separate lifecycle handoff",
+      "finding": "Candidate correctly avoids lifecycle mutation and emits EXPORT_FREEZE_READY, but predates the proven Lifecycle keyed-object/current sealed-parent incompatibility and therefore does not prove the release can drive FINALIZATION->EXPORT_FROZEN on the current parent.",
+      "required_repair": "After the compatibility adapter receives authoritative A-01 PASS, add an end-to-end qualification case: release append -> Version/Rollback EXPORT_RELEASE record -> compatibility adapter delegates unchanged Lifecycle v1 FINALIZATION->EXPORT_FROZEN -> Version/Rollback LIFECYCLE_TRANSITION record."
+    },
+    {
+      "id": "EF-REC-006",
+      "classification": "REFINE",
+      "area": "canonical manuscript identity",
+      "finding": "Candidate finder supports manuscript_id/version_id/manuscript_ref matching, but its fixture active canonical_manuscript_ref is manuscript-id-only. Current Book fixtures commonly bind active canonical manuscript to an exact version-qualified ref.",
+      "required_repair": "Resolve manuscript identity through the current parent object-record semantics and bind exact manuscript_id, version_id and artifact_digest rather than relying on permissive ref alternatives."
+    },
+    {
+      "id": "EF-REC-007",
+      "classification": "REFINE",
+      "area": "rights/privacy/provenance vocabulary",
+      "finding": "Candidate uses ELIGIBLE/CURRENT/VALID vocabulary while the current canonical Export Freeze contract uses explicit CURRENT_AUTHORIZED, CURRENT_ALLOWED and CURRENT_FOR_BOUND_SOURCE_AND_ARTIFACT semantics.",
+      "required_repair": "Normalize the final reconciled contract/runtime to the current canonical vocabulary or provide an explicit versioned mapping; do not silently equate weaker states."
+    },
+    {
+      "id": "EF-REC-008",
+      "classification": "REFINE",
+      "area": "accessibility N/A",
+      "finding": "Candidate accepts accessibility_state=NOT_APPLICABLE without requiring an accompanying rationale/profile basis.",
+      "required_repair": "Use NOT_APPLICABLE_WITH_RATIONALE and bind it to the selected target-medium profile."
+    },
+    {
+      "id": "EF-REC-009",
+      "classification": "KEEP",
+      "area": "authority separation",
+      "finding": "Candidate correctly keeps lifecycle status unchanged in the freeze transaction and explicitly denies publication, author-choice synthesis and document-byte mutation."
+    },
+    {
+      "id": "EF-REC-010",
+      "classification": "KEEP",
+      "area": "technical evidence checks",
+      "finding": "Candidate has strong fail-closed validation for exact artifact/source/profile identity, POST_LAYOUT_PROOF_COMPLETE, format validation, source-to-render integrity, accessibility, proof, correction ledger, changed bytes, provenance and rights/privacy currentness."
+    },
+    {
+      "id": "EF-REC-011",
+      "classification": "KEEP",
+      "area": "release immutability and one-format identity",
+      "finding": "Candidate correctly uses one release identity per format artifact digest, append-only supersession lineage and no frozen-digest rewrite."
+    },
+    {
+      "id": "EF-REC-012",
+      "classification": "KEEP_WITH_CURRENT_PARENT_REBIND",
+      "area": "idempotency",
+      "finding": "Candidate snapshot-backed idempotency, exact replay and conflict handling are valuable, but final replay must be rebound to the current sealed parent/receipt identity and tested after Version/Rollback recording."
+    }
+  ],
+  "reuse_disposition": {
+    "reuse_substantially": [
+      "artifact/source/profile evidence validators",
+      "proof/accessibility/correction fail-closed checks",
+      "provider freeze/publication authority denial checks",
+      "release-record construction shape",
+      "append-only release/supersession logic",
+      "runtime idempotency ledger design",
+      "70-case adversarial test ideas and most negative cases"
+    ],
+    "replace_or_rebind": [
+      "parentDigest implementation",
+      "parent fixture model",
+      "parent actor authority check",
+      "successor sealing",
+      "receipt pre/post parent digest semantics",
+      "manuscript lookup semantics",
+      "rights/privacy/provenance/accessibility state vocabulary",
+      "Version/Rollback integration evidence",
+      "Lifecycle compatibility handoff integration evidence"
+    ],
+    "do_not_transfer": [
+      "candidate 70/70 hosted PASS to reconciled runtime",
+      "candidate-local parent digest identity",
+      "candidate-local unsealed fixture authority"
+    ]
+  },
+  "final_reconciled_qualification_minimum": [
+    "All reusable candidate negative cases continue to pass under current sealed parent semantics.",
+    "Positive path begins from validateParentState(current sealed parent).",
+    "PARENT_SYSTEM-only authority is enforced.",
+    "Freeze appends exactly one release and produces a valid sealed parent successor whose lifecycle status remains FINALIZATION.",
+    "Version/Rollback accepts the exact release receipt under EXPORT_RELEASE authority.",
+    "Qualified current-parent Lifecycle adapter accepts the appended release as EXPORT_FREEZE_READY and delegates unchanged Lifecycle v1 to EXPORT_FROZEN.",
+    "Version/Rollback accepts the adapted Lifecycle receipt under LIFECYCLE_TRANSITION authority.",
+    "Publication remains NOT_AUTHORIZED throughout.",
+    "Changed final reconciled bytes receive fresh hosted qualification and registered A-01 exact-SHA qualification."
+  ],
+  "current_blocker": "BOOK-SYSTEM-LIFECYCLE-CURRENT-PARENT-COMPATIBILITY-ADAPTER-001 requires shared A-01 registration and authoritative exact-SHA PASS before Export Freeze implementation is reconciled into canonical Book control.",
+  "qualification_effect": "AUDIT_AND_REUSE_DECISION_ONLY__NO_CANDIDATE_PROMOTION_OR_QUALIFICATION_TRANSFER"
+}
