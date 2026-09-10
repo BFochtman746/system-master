@@ -92,9 +92,13 @@ function validateOwner(data, lane, now, dynamic) {
   const add = (severity, type, message, detail = {}) => findings.push({ severity, type, lane, message, ...detail });
   const active = Array.isArray(data.active_delegations) ? data.active_delegations : [];
   const ids = new Set();
+  const claimed = active.filter((d) => d && d.state === 'CLAIMED');
 
-  if (active.length > 1) add('ERROR', 'OVERLAPPING_ACTIVE_DELEGATIONS', 'more than one active delegation is present; only one mutation-capable lane head may be active');
+  if (claimed.length > 1) {
+    add('ERROR', 'OVERLAPPING_MUTATION_CLAIMS', 'more than one CLAIMED delegation is present; deep READY/CANDIDATE queueing is allowed but only one mutation-capable claim may be live per lane', { claimed_count: claimed.length });
+  }
 
+  let healthyClaim = false;
   for (const d0 of active) {
     const d = { ...d0, __lane: lane };
     if (!d.delegation_id || ids.has(d.delegation_id)) add('ERROR', 'DELEGATION_ID_INVALID', 'missing or duplicate delegation_id', { delegation_id: d.delegation_id || null });
@@ -104,17 +108,29 @@ function validateOwner(data, lane, now, dynamic) {
 
     if (d.state === 'CLAIMED') {
       const claim = d.claim || data.active_claim || null;
-      if (!validClaim(claim, d)) add('ERROR', 'CLAIM_INVALID', 'CLAIMED delegation lacks a valid lease/claim binding');
-      else if (dynamic) {
+      if (!validClaim(claim, d)) {
+        add('ERROR', 'CLAIM_INVALID', 'CLAIMED delegation lacks a valid lease/claim binding');
+      } else if (dynamic) {
         const expires = parseDate(claim.lease_expires_at);
         const heartbeatAge = minutesSince(claim.last_heartbeat_at, now);
-        if (expires <= now || heartbeatAge > 50) add('ERROR', 'STALE_CLAIM', 'claim lease/heartbeat is stale and must be recovered', { lease_id: claim.lease_id, heartbeat_age_minutes: Math.round(heartbeatAge) });
+        if (expires <= now || heartbeatAge > 50) {
+          add('ERROR', 'STALE_CLAIM', 'claim lease/heartbeat is stale and must be recovered', { lease_id: claim.lease_id, heartbeat_age_minutes: Math.round(heartbeatAge) });
+        } else {
+          healthyClaim = true;
+        }
+      } else {
+        healthyClaim = true;
       }
     }
+  }
 
-    if (dynamic && d.state === 'READY') {
-      const age = minutesSince(d.last_revalidated_at || d.created_at, now);
-      if (age > 70) add('ERROR', 'READY_UNDISPATCHED', 'READY delegation exceeded one hourly dispatch cadence without revalidation/claim', { delegation_id: d.delegation_id, age_minutes: Math.round(age) });
+  if (dynamic && !healthyClaim) {
+    const dispatchable = active.find((d) => d && d.state === 'READY');
+    if (dispatchable) {
+      const age = minutesSince(dispatchable.last_revalidated_at || dispatchable.created_at, now);
+      if (age > 70) {
+        add('ERROR', 'READY_UNDISPATCHED', 'head READY delegation exceeded one hourly dispatch cadence without revalidation/claim', { delegation_id: dispatchable.delegation_id, age_minutes: Math.round(age) });
+      }
     }
   }
 
@@ -139,12 +155,21 @@ function runSelftest() {
     rung: i + 1, disposition: 'DEPENDENCY_BLOCKED', evidence_or_blocker: `B${i + 1}`,
     independent_preparation_assessment: 'none remains', next_executable_condition: 'dependency changes'
   }));
+  const healthyClaim = {
+    lease_id: 'L1', lane: 'CORE', delegation_id: 'D1', objective_id: 'O1', control_ref: 'x',
+    control_head_at_claim: 'a'.repeat(40), idempotency_key: 'K1',
+    claimed_at: '2026-09-11T04:10:00Z', lease_expires_at: '2026-09-11T04:55:00Z',
+    last_heartbeat_at: '2026-09-11T04:25:00Z', attempt: 1, checkpoint_pointer: 'checkpoint-1'
+  };
   const cases = [
     ['valid_ready', validateOwner({ active_delegations: [baseDelegation], empty_is_valid: false }, 'CORE', now, true).length === 0],
+    ['deep_ready_queue_allowed', validateOwner({ active_delegations: [baseDelegation, { ...baseDelegation, delegation_id: 'D2', objective_id: 'O2' }], empty_is_valid: false }, 'CORE', now, true).length === 0],
     ['false_empty_rejected', validateOwner({ active_delegations: [], empty_is_valid: true }, 'CORE', now, true).some((f) => f.type === 'FALSE_EMPTY')],
     ['valid_exhaustion', validExhaustion({ rungs: validRungs, independent_work_remaining: false })],
     ['stale_ready_rejected', validateOwner({ active_delegations: [{ ...baseDelegation, last_revalidated_at: '2026-09-11T02:00:00Z' }] }, 'CORE', now, true).some((f) => f.type === 'READY_UNDISPATCHED')],
-    ['claimed_without_lease_rejected', validateOwner({ active_delegations: [{ ...baseDelegation, state: 'CLAIMED' }] }, 'CORE', now, true).some((f) => f.type === 'CLAIM_INVALID')]
+    ['claimed_without_lease_rejected', validateOwner({ active_delegations: [{ ...baseDelegation, state: 'CLAIMED' }] }, 'CORE', now, true).some((f) => f.type === 'CLAIM_INVALID')],
+    ['healthy_claim_suppresses_queued_ready_alarm', validateOwner({ active_delegations: [{ ...baseDelegation, state: 'CLAIMED', claim: healthyClaim }, { ...baseDelegation, delegation_id: 'D2', objective_id: 'O2', last_revalidated_at: '2026-09-11T02:00:00Z' }] }, 'CORE', now, true).every((f) => f.type !== 'READY_UNDISPATCHED')],
+    ['overlapping_claims_rejected', validateOwner({ active_delegations: [{ ...baseDelegation, state: 'CLAIMED', claim: healthyClaim }, { ...baseDelegation, delegation_id: 'D2', objective_id: 'O2', state: 'CLAIMED', claim: { ...healthyClaim, lease_id: 'L2', delegation_id: 'D2', objective_id: 'O2', idempotency_key: 'K2' } }] }, 'CORE', now, true).some((f) => f.type === 'OVERLAPPING_MUTATION_CLAIMS')]
   ];
   let failed = 0;
   for (const [name, ok] of cases) {
@@ -153,6 +178,7 @@ function runSelftest() {
   }
   if (failed) process.exit(1);
   console.log('SECOND_SHIFT_ENFORCE_SELFTEST_PASS');
+  process.exit(0);
 }
 
 if (selftest) runSelftest();
