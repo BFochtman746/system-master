@@ -1,0 +1,82 @@
+{
+  "contract_id": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001C-DEPENDENCY-EVIDENCE-ADJUDICATION-CONTRACT-044",
+  "effective_date": "2026-09-10",
+  "owner_path": "SYSTEM_MASTER/LEARNING",
+  "control_ref": "learning/control-v1",
+  "input_owner_head": "df4602031ea7a3461bb04fa5b023e675170d3ebc",
+  "standing": "EXECUTABLE_DEPENDENCY_EVIDENCE_ADJUDICATION__AMBIGUITY_MUST_REMAIN_NONCANONICAL",
+  "inputs": {
+    "frozen_source_index": "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-66-SOURCE-NODE-INDEX-001.json",
+    "topology_contract": "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-PREREQUISITE-SUBSKILL-TOPOLOGY-CONTRACT-002.json",
+    "structural_closure_subject": "cbbc465a83929ed712dd5d6ed4f13e310a837bd3",
+    "assessment_full_closure_subject": "65496b9d5ec1e3eeef2a98b93763633577078ea6",
+    "assessment_full_closure_artifact_id": 10161346886,
+    "assessment_full_closure_artifact_digest": "sha256:5246dbe62bf2fe013cf6c63ce9c82f1f64d3597aad653f49567f31c565943402"
+  },
+  "purpose": "Adjudicate unresolved prerequisite candidates using exact source, capability, assessment, and graph evidence without converting source order, domain order, cognitive level, intuition, or unsupported pedagogy into a hard prerequisite.",
+  "candidate_universe": {
+    "source": "All unresolved_dependency_candidates emitted by the passed 66-node structural topology population.",
+    "ordering": "Deterministic topology-input order from the full structural closure, then candidate order within each topology artifact.",
+    "batch_size_max": 5,
+    "replay_rule": "A candidate with a sealed adjudication disposition must not be re-adjudicated unless an explicitly newer Learning-owner evidence artifact invalidates the prior evidence basis."
+  },
+  "allowed_dispositions": [
+    "ADMIT_SOURCE_EXPLICIT_PREREQUISITE",
+    "ADMIT_LEARNING_OWNER_DERIVED_PROVISIONAL_PREREQUISITE",
+    "REJECT_AS_HARD_PREREQUISITE",
+    "REMAIN_UNRESOLVED__NOT_CANONICAL",
+    "DEFER_TO_SEPARATE_HUMAN_OR_SME_EVIDENCE"
+  ],
+  "admission_rules": [
+    "A hard prerequisite may be admitted only when the evidence shows that the target capability is materially invalid, uninterpretable, or not independently performable without the source capability.",
+    "Every admitted prerequisite must identify both exact endpoint identities, a concrete dependency rationale, and exact evidence references.",
+    "Source order, domain order, numerical order, cognitive level, topic similarity, common teaching sequence, or evaluator preference is insufficient by itself.",
+    "SOURCE_EXPLICIT may be used only when the frozen source itself explicitly establishes the dependency; otherwise any admitted owner-derived edge remains LEARNING_OWNER_DERIVED_PROVISIONAL.",
+    "Assessment-target evidence may support a dependency only when the target's supplied evidence or required action demonstrably requires the source capability; it may not be used to infer learner mastery or effectiveness.",
+    "If available evidence supports useful sequencing but not a hard prerequisite, reject the hard-prerequisite candidate rather than silently weakening the evidence threshold.",
+    "If the evidence remains incomplete or competing interpretations remain plausible, retain REMAIN_UNRESOLVED__NOT_CANONICAL or DEFER_TO_SEPARATE_HUMAN_OR_SME_EVIDENCE."
+  ],
+  "graph_safety_rules": [
+    "Every admitted endpoint must resolve to an existing frozen requirement or its uniquely parented provisional subskill.",
+    "The admitted PREREQUISITE graph must remain acyclic after every batch.",
+    "No adjudication may alter the 66 frozen requirement identities, source locators, cognitive levels, provisional subskill identities, capability statements, or 66 passed assessment targets.",
+    "No unresolved candidate may disappear without an explicit adjudication record.",
+    "No newer source revision may substitute for the frozen 2022 requirement set."
+  ],
+  "evidence_boundaries": {
+    "learner_mastery": "UNOBSERVED",
+    "psychometric_validity": "UNOBSERVED",
+    "retention": "UNOBSERVED",
+    "transfer": "UNOBSERVED",
+    "workplace_effectiveness": "UNOBSERVED",
+    "sme_approval": "UNOBSERVED",
+    "certification_equivalence": "UNOBSERVED",
+    "a01_authority": "NOT_INFERRED_FROM_HOSTED_ADJUDICATION",
+    "native_platform_authority": "NOT_INFERRED",
+    "production_authority": "NOT_INFERRED"
+  },
+  "validation_gate": {
+    "must_pass": [
+      "Every selected candidate has exactly one explicit disposition.",
+      "Every disposition carries exact endpoint and evidence references.",
+      "Every admitted prerequisite satisfies the material-capability-dependency rule.",
+      "No order-only, level-only, similarity-only, or preference-only prerequisite is admitted.",
+      "All admitted endpoints resolve and the resulting prerequisite graph remains acyclic.",
+      "All untouched unresolved candidates remain present and noncanonical.",
+      "The 66 frozen requirements, 66 provisional subskills, and 66 assessment targets remain unchanged.",
+      "Protected human, SME, psychometric, A-01, native, and production evidence boundaries remain unchanged."
+    ],
+    "failure_classes": [
+      "UNSUPPORTED_PREREQUISITE_ADMISSION",
+      "ORDER_ONLY_PREREQUISITE_ADMISSION",
+      "UNRESOLVED_ENDPOINT",
+      "PREREQUISITE_CYCLE",
+      "CANDIDATE_DISPOSITION_LOSS",
+      "FROZEN_SOURCE_OR_CAPABILITY_DRIFT",
+      "ASSESSMENT_TARGET_DRIFT",
+      "UNAUTHORIZED_HUMAN_OR_AUTHORITY_INFERENCE"
+    ]
+  },
+  "current_executable_successor": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001C-DEPENDENCY-EVIDENCE-ADJUDICATION-BATCH-01-CANDIDATE-044A",
+  "completion_rule": "The machine-evidence adjudication lane completes when every unresolved candidate has an explicit evidence-bounded disposition or is explicitly deferred to a separate human/SME evidence lane; completion does not require forcing every candidate into an admitted prerequisite edge."
+}
