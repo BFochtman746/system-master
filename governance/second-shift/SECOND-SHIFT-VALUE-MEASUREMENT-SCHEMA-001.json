@@ -2,6 +2,10 @@
   "schema_id": "SECOND-SHIFT-VALUE-MEASUREMENT-SCHEMA-001",
   "purpose": "Machine-readable measurement contract for judging Second Shift by verified advancement, evidence acceptance, autonomous leverage, flow health and lagging rework rather than activity volume.",
   "primary_scorecard": "governance/second-shift/SECOND-SHIFT-VALUE-SCORECARD-001.md",
+  "daytime_calibration_schema": "governance/second-shift/SECOND-SHIFT-DAYTIME-CALIBRATION-SCHEMA-001.json",
+  "daytime_baseline": "governance/second-shift/calibration/DAYTIME-BASELINE-001.json",
+  "score_script": ".github/scripts/second-shift-score.js",
+  "score_workflow": ".github/workflows/second-shift-value-score.yml",
   "allowed_work_classes": [
     "RESEARCH_PROVENANCE",
     "ARCHITECTURE_CONTRACT_STATE",
@@ -45,6 +49,7 @@
     "complexity_band",
     "advancement_class",
     "vpu",
+    "accepted_vpu",
     "verification_class",
     "admission_class",
     "evidence_pointer",
@@ -53,6 +58,7 @@
     "user_intervention_required",
     "rework_status"
   ],
+  "accepted_vpu_rule": "accepted_vpu is the portion of fixed advancement credit supported by the actual verification/admission class at handoff. It is zero for FAIL or REJECTED_OR_STALE, cannot exceed vpu, and equals full vpu when CANONICAL_ADMITTED at the claimed advancement class.",
   "rework_statuses": ["PENDING_OBSERVATION", "NONE_OBSERVED", "REWORK_REQUIRED", "INVALIDATED"],
   "required_shift_summary_fields": [
     "shift_id",
