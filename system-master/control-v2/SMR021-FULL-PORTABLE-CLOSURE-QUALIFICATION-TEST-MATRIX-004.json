@@ -1,0 +1,181 @@
+{
+  "packet_id": "SMR021-FULL-PORTABLE-CLOSURE-QUALIFICATION-PACKET-004",
+  "owner_path": "SYSTEM_MASTER/CORE",
+  "recorded_at": "2026-09-10T05:28:00-04:00",
+  "standing": "TEST_AND_CUSTODY_PACKET_COMPLETE__DATA_IMPLEMENTATION_AND_RUNTIME_EXECUTION_OPEN",
+  "exact_binding": {
+    "control_parent_sha": "0bb42ecd542d7e8ade4bed15e66f52ab0c494e39",
+    "predecessor_source_test_sha256": "e22ecedfd3850be6b744ee82f2c02722cd3d203a5785f6f423ac395011cf821f",
+    "bounded_candidate_source_test_sha256": "fe325804bacfd5c40339a18bc393fb1bdfb2191c8b0f3946219d7d81f1971596",
+    "candidate_file_count": 435,
+    "candidate_capsule": {
+      "name": "SMR021_MINIMUM_UX_ADMISSION_BINDING_SOURCE_TEST_CANDIDATE_001.zip",
+      "bytes": 424986,
+      "sha256": "377afa2c9ff2c7c69e5cd5bc45c66dd95ceb2315c1787afc35df6d907165fca1"
+    },
+    "patch": {
+      "name": "SMR021-MINIMUM-UX-WORK-DESCRIPTOR-ACTION-BINDING-IMPLEMENTATION-002.patch",
+      "bytes": 48703,
+      "sha256": "77bb53bfef9a8ff3a49357736ed4aef2c908dda47c9aa7001946fe98a33a90a0"
+    },
+    "prior_suite_receipt_sha256": "91eba12e7d163a55f12b79870d2f92ac7c0d9bc2ae7af04f9754c357f1a519f3",
+    "contract": "system-master/control-v2/SMR021-DATA-PERSISTENCE-AND-FULL-PORTABLE-CLOSURE-CONTRACT-003.md"
+  },
+  "static_inspection_findings": [
+    {
+      "id": "GAP-001",
+      "classification": "DATA_PERSISTENCE_CONTRACT_MISSING",
+      "evidence": "UserExperienceStore exposes command/attention operations only; it has no durable admission-record write/read contract."
+    },
+    {
+      "id": "GAP-002",
+      "classification": "ADMISSION_WORK_VERSION_NOT_IMMUTABLY_BOUND",
+      "evidence": "ExperienceAdmission binds workId, principal/session, capability, descriptor/digests, route digest, action/effect and evidence ref, but not workVersion. submit compares command workVersion to a separately supplied authoritativeWorkVersion, permitting no persisted proof that the admission itself was version-bound."
+    },
+    {
+      "id": "GAP-003",
+      "classification": "COMMAND_TO_ADMISSION_RECONSTRUCTION_UNSPECIFIED",
+      "evidence": "UserInteractionCommand persists admissionRef but the current store contract has no way to resolve that ref to the immutable admission bindings for independent reconstruction."
+    },
+    {
+      "id": "GAP-004",
+      "classification": "MIGRATION_AND_DATABASE_ADAPTER_ABSENT",
+      "evidence": "The bounded patch contains no JDBC/SQL/database migration surface for the new admission fields."
+    },
+    {
+      "id": "GAP-005",
+      "classification": "GITHUB_NATIVE_RUNNABLE_CUSTODY_ABSENT",
+      "evidence": "The exact 435-file capsule is referenced by digest but is not committed as runnable source on the Core ref."
+    }
+  ],
+  "required_tests": [
+    {
+      "id": "RT-01",
+      "class": "round_trip",
+      "expectation": "Persist and reconstruct every admission field byte-for-byte, including workId/workVersion, capability, requirement digest, descriptor identity/digest, route digest, caller, principal/session, action/effect, authority grants/evidence and admission evidence ref."
+    },
+    {
+      "id": "RT-02",
+      "class": "round_trip",
+      "expectation": "Command admissionRef resolves to exactly one immutable admission record and fails closed for zero or multiple matches."
+    },
+    {
+      "id": "MF-01",
+      "class": "missing_field",
+      "expectation": "Each required admission field omitted independently is rejected before command persistence and effect dispatch."
+    },
+    {
+      "id": "TP-01",
+      "class": "tamper",
+      "expectation": "Mutations to work id/version, capability, requirement digest, descriptor identity/digest, route digest, caller, principal/session, action/effect, authority or evidence ref each fail."
+    },
+    {
+      "id": "TP-02",
+      "class": "tamper",
+      "expectation": "A command with a valid admissionRef but mismatched payload/work/action identity fails with zero writes."
+    },
+    {
+      "id": "MG-01",
+      "class": "migration",
+      "expectation": "Legacy record lacking immutable bindings becomes explicitly MIGRATED_UNQUALIFIED or is rejected; never admitted silently."
+    },
+    {
+      "id": "MG-02",
+      "class": "migration",
+      "expectation": "Migration output is deterministic, digest-bound, idempotent and evidence-bearing."
+    },
+    {
+      "id": "RP-01",
+      "class": "replay_idempotency",
+      "expectation": "Same command and idempotency key returns the same durable record without another write."
+    },
+    {
+      "id": "RP-02",
+      "class": "replay_idempotency",
+      "expectation": "Same idempotency key with different work/version/admission/action/payload conflicts."
+    },
+    {
+      "id": "CC-01",
+      "class": "concurrency",
+      "expectation": "Competing admissions for one governed work identity cannot both become current."
+    },
+    {
+      "id": "CC-02",
+      "class": "concurrency",
+      "expectation": "Optimistic-version conflict preserves both evidence records and a deterministic winner/loser disposition."
+    },
+    {
+      "id": "FI-01",
+      "class": "failure_injection",
+      "expectation": "Crash after validation but before commit yields zero durable command/admission mutation."
+    },
+    {
+      "id": "FI-02",
+      "class": "failure_injection",
+      "expectation": "Crash after durable commit but before acknowledgement is recoverable by idempotent replay."
+    },
+    {
+      "id": "FI-03",
+      "class": "failure_injection",
+      "expectation": "Partial/corrupt admission record fails reconstruction and cannot authorize an effect."
+    },
+    {
+      "id": "FI-04",
+      "class": "failure_injection",
+      "expectation": "Transaction rollback leaves zero command writes and zero effect receipts."
+    },
+    {
+      "id": "AU-01",
+      "class": "authority",
+      "expectation": "UX and persistence adapter cannot mint caller/effect authority or execute effects."
+    },
+    {
+      "id": "AU-02",
+      "class": "authority",
+      "expectation": "Approval actions without approvalRef fail with zero durable mutation."
+    },
+    {
+      "id": "AU-03",
+      "class": "authority",
+      "expectation": "PENDING/unqualified descriptor and missing authority grant fail."
+    },
+    {
+      "id": "RC-01",
+      "class": "reconstruction",
+      "expectation": "Fresh exact-capsule extraction recomputes the declared 435-file source/test digest before compilation."
+    },
+    {
+      "id": "RC-02",
+      "class": "reconstruction",
+      "expectation": "Strict Java 21 and all 21 inherited suites plus persistence-focused suites run without hidden machine state."
+    },
+    {
+      "id": "CO-01",
+      "class": "coherence",
+      "expectation": "Source/test digest, release manifest, current-authority record, migration, schema, database contract and qualification receipt identify one exact candidate."
+    },
+    {
+      "id": "NG-01",
+      "class": "negative_authority",
+      "expectation": "Portable/hosted results do not set A-01, native/device, human, promotion or production authority."
+    }
+  ],
+  "execution_plan": [
+    "Acquire exact capsule bytes and verify size plus SHA-256 before extraction.",
+    "Recompute the source/test identity using the governing canonical file-order algorithm; require fe325804... before any unchanged-candidate claim.",
+    "Implement only against a DATA-owner-approved persistence interface/migration; changed bytes receive a new exact source/test SHA.",
+    "Run strict Java 21 compilation, 21 inherited suites, all required focused cases above, static schema/SQL parity, release-manifest and fresh-extraction checks.",
+    "Publish exact logs/digests and a GitHub-native source-custody manifest; hosted/A-01 remain later independent gates."
+  ],
+  "current_stop": {
+    "blocker_class": "DATA_OWNER_AUTHORITY_PLUS_EXACT_CAPSULE_BYTE_ACCESS",
+    "details": "CORE can specify and test the cross-boundary contract but cannot invent the DATA-owned adapter/migration. The exact capsule is not present in the GitHub tree, and remote byte materialization returned a transient 502 in this run; therefore runtime PASS is not claimed.",
+    "safe_successor": "SMR021-GITHUB-NATIVE-SOURCE-CUSTODY-AND-HOSTED-QUALIFICATION-PREP-005"
+  },
+  "forbidden_authority": [
+    "A-01 PASS",
+    "Apple/native/device evidence",
+    "human/private/external evidence",
+    "promotion/publication/production authority"
+  ]
+}
