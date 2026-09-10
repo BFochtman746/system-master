@@ -1,0 +1,47 @@
+{
+  "state_id": "BOOK-SYSTEM-RECONCILED-STATE-033",
+  "effective_date": "2026-09-10",
+  "supersedes_for_current_parent_control": "BOOK-SYSTEM-RECONCILED-STATE-032",
+  "supersession_scope": "CURRENT_PARENT_CONTROL_AND_BOOK_PROSE_INTEGRATION_ROUTING_ONLY",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "standing": "BOOK_PROSE_PHASE2A_2B_2C_2D_CLOSED__PHASE2E_CONCURRENCY_RULES_SELECTED",
+  "source_live_head": "1fcb98dcc954f049740f48dc37922adb1fc151fe",
+  "completed_integration_packets": [
+    "BOOK-PROSE-INTEGRATION-PHASE-0-CURRENT-STATE-CENSUS-001",
+    "BOOK-PROSE-INTEGRATION-PHASE-1-INPUT-CENSUS-001",
+    "BOOK-WORKFLOW-ORCHESTRATOR-AUTHORITY-CONTRACT-001",
+    "BOOK-WORKFLOW-ORCHESTRATOR-WORKFLOW-STATE-MODEL-001",
+    "BOOK-WORKFLOW-ORCHESTRATOR-CAPABILITY-ROUTING-INTERFACE-001",
+    "BOOK-WORKFLOW-ORCHESTRATOR-DEPENDENCY-GRAPH-EXECUTION-PLAN-CONTRACT-001"
+  ],
+  "current_owner_objective": {
+    "objective_id": "BOOK-WORKFLOW-ORCHESTRATOR-CONCURRENCY-RULES-001",
+    "phase": "2E",
+    "state": "READY",
+    "scope": "Define when independent plan tasks may be considered concurrency-eligible without executing them. Correctness and authority boundaries outrank speed; scheduling and worker execution remain Phase 6."
+  },
+  "authority_fences": {
+    "book_canonical_manuscript_owner": "SYSTEM_MASTER/BOOK",
+    "prose_owner": "SYSTEM_MASTER/BOOK/PROSE",
+    "prose_canonical_write": false,
+    "orchestrator_canonical_write": false,
+    "book_admission_is_sole_canonical_effect_path": true,
+    "story_bible_canon_truth_authority_preserved": true,
+    "research_external_evidence_authority_preserved": true,
+    "system_master_shared_execution_authority_preserved": true
+  },
+  "2d_evidence": {
+    "qualified_subject_sha": "ea28d42fc35c4ae5f9fb86c6bf892baed2dec040",
+    "workflow_run_id": 34499978943,
+    "artifact_id": 10161420241,
+    "result": "PASS_30_OF_30"
+  },
+  "qualification_fences": [
+    "No specialist execution.",
+    "No fresh blind scoring.",
+    "No A-01 PASS transfer or inference.",
+    "No private manuscript or DEVELOPMENT_GOLD access.",
+    "No native/publication/production readiness claim."
+  ],
+  "next_dependency_valid_action": "Implement and qualify Phase 2E concurrency eligibility rules against the exact Phase 2D execution-plan runtime without creating scheduler or worker authority."
+}
