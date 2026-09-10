@@ -1,6 +1,6 @@
 # CHAT-START-COMMAND-CONTRACT-001
 
-Status: PROPOSED_FOR_ADMISSION
+Status: ACTIVE_CANONICAL
 Repository: BFochtman746/system-master
 
 ## Purpose
