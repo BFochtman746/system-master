@@ -1,0 +1,115 @@
+{
+  "artifact_id": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001E-INSTRUCTIONAL-CONTENT-AND-SCORING-BATCH-02-CANDIDATE-062A",
+  "effective_date": "2026-09-10",
+  "owner_path": "SYSTEM_MASTER/LEARNING",
+  "contract": "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001E-INSTRUCTIONAL-CONTENT-AND-SCORING-CONTRACT-059.json",
+  "base_control_head": "01b506c52239fa7a89c069401176fb28f4f9b023",
+  "batch_index": 2,
+  "batch_size": 1,
+  "selection": {
+    "rule": "NEXT_UNMATERIALIZED_001D_EXECUTION_NODE_IN_EXACT_ORDINAL_ORDER",
+    "001d_durable_blueprint_commit": "02dc615fcb5d44b997ed1322848eccc6e37bb172",
+    "001d_blueprint_path": "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001D-EXECUTABLE-CURRICULUM-BLUEPRINT-057B.json",
+    "001d_blueprint_digest_sha256": "98aa0b621b0cbe5234d5dd8bdb9890a1692c4c9d91aaf955fd3a459632949e54",
+    "001d_ordinal": 2,
+    "requirement_id": "ASQ-CSSGB-2022-I.A.2",
+    "source_code": "I.A.2",
+    "source_locator": "ASQ CSSGB BoK 2022 p.3 / I.A.2",
+    "title": "Organizational goals and Six Sigma projects",
+    "highest_cognitive_level": "UNDERSTAND",
+    "skill_id": "CSSGB-2022::ASQ-CSSGB-2022-I.A.2::SUBSKILL::goal-project-alignment",
+    "criterion_id": "CRIT::CSSGB-2022::ASQ-CSSGB-2022-I.A.2::SUBSKILL::goal-project-alignment",
+    "lesson_id": "LESSON::CSSGB-2022::ASQ-CSSGB-2022-I.A.2::SUBSKILL::goal-project-alignment",
+    "assessment_target_id": "ASSESS::CSSGB-2022::ASQ-CSSGB-2022-I.A.2::goal-project-alignment::TARGET::bounded-alignment-explanation"
+  },
+  "runtime_implementation": {
+    "path": "learning/lab/learning_lab/cssgb_full_standard_i_a_2.py",
+    "domain_key": "asq-cssgb-2022-001e-i-a-2",
+    "generation_adapter": "CSSGB-001E-I-A-2-GROUNDED-CONTENT-V1",
+    "behavior_oracle": "CSSGBGoalProjectAlignmentOracle",
+    "scoring_type": "CSSGB_I_A_2_GOAL_PROJECT_ALIGNMENT_V1",
+    "course_activation_allowed": false
+  },
+  "grounding_sources": [
+    {
+      "source_id": "SRC-ASQ-PROJECTS-THAT-MATTER",
+      "authority": "AMERICAN_SOCIETY_FOR_QUALITY",
+      "title": "Selecting Six Sigma Projects That Matter",
+      "url": "https://asq.org/quality-resources/articles/selecting-six-sigma-projects-that-matter?id=b373ac1802974020b74bca61c334cff7",
+      "retrieved_date": "2026-09-10",
+      "standing": "ADMITTED_SUPPLEMENTAL_INSTRUCTIONAL_NOT_STANDARD_REPLACEMENT"
+    },
+    {
+      "source_id": "SRC-ASQ-PICK-YOUR-SPOTS",
+      "authority": "AMERICAN_SOCIETY_FOR_QUALITY",
+      "title": "Pick Your Spots",
+      "url": "https://asq.org/quality-progress/articles/pick-your-spots?id=243f1185b24c428cb317daf1acc6568c",
+      "retrieved_date": "2026-09-10",
+      "standing": "ADMITTED_SUPPLEMENTAL_INSTRUCTIONAL_NOT_STANDARD_REPLACEMENT"
+    },
+    {
+      "source_id": "SRC-ASQ-PERFORMANCE-METRICS",
+      "authority": "AMERICAN_SOCIETY_FOR_QUALITY",
+      "title": "Selecting Performance Measures & Metrics",
+      "url": "https://asq.org/quality-resources/metrics/selecting-metrics-tutorial",
+      "retrieved_date": "2026-09-10",
+      "standing": "ADMITTED_SUPPLEMENTAL_INSTRUCTIONAL_NOT_STANDARD_REPLACEMENT"
+    },
+    {
+      "source_id": "SRC-ASQ-DMAIC",
+      "authority": "AMERICAN_SOCIETY_FOR_QUALITY",
+      "title": "DMAIC Process: Define, Measure, Analyze, Improve, Control",
+      "url": "https://asq.org/quality-resources/dmaic",
+      "retrieved_date": "2026-09-10",
+      "standing": "ADMITTED_SUPPLEMENTAL_INSTRUCTIONAL_NOT_STANDARD_REPLACEMENT"
+    }
+  ],
+  "instructional_realization": {
+    "materialized_lessons": 1,
+    "worked_examples": 2,
+    "practice_items": 2,
+    "mastery_items": 1,
+    "retention_items": 1,
+    "transfer_items": 0,
+    "reason_transfer_not_required_for_slice": "Frozen cognitive level is UNDERSTAND and the current internal evidence profile requires independent knowledge assessment plus delayed retention; no transfer-effectiveness claim is made.",
+    "practice_mastery_family_overlap_allowed": false,
+    "mastery_retention_family_overlap_allowed": false
+  },
+  "oracle_negative_fixtures_required": [
+    "MALFORMED_JSON_REJECTED",
+    "WRONG_GOAL_OR_OUTCOME_ID_REJECTED",
+    "IRRELEVANT_METRIC_REJECTED",
+    "ALIGNED_WITHOUT_GOAL_METRIC_REJECTED",
+    "ALIGNED_WITHOUT_OUTCOME_METRIC_REJECTED",
+    "NOT_ESTABLISHED_WITHOUT_MISSING_LINKAGE_REJECTED",
+    "NOT_ESTABLISHED_WITH_METRICS_REJECTED",
+    "COURSE_ANSWER_MUTATION_DOES_NOT_CHANGE_ORACLE_CORRECTNESS"
+  ],
+  "runtime_path_assertions": [
+    "DomainGeneralLearningEngine.create_research_grounded_course_job returns READY_FOR_REVIEW",
+    "validate_grounding passes with closed-world claim refs",
+    "validate_instructional_design passes with two worked examples and independent practice/mastery/retention families",
+    "first next action is LESSON",
+    "practice evidence remains BUILDING and does not satisfy mastery",
+    "an oracle-rejected mastery response records incorrect evidence",
+    "an oracle-accepted unassisted mastery response advances only to RETENTION_DUE",
+    "before the one-hour retention delay next_action returns RETENTION_WAIT",
+    "distinct delayed retention success advances the one-skill qualification slice to MASTERED",
+    "full 66-node course activation remains prohibited"
+  ],
+  "evidence_boundaries": {
+    "real_learner_mastery": "UNOBSERVED",
+    "psychometric_validity": "UNOBSERVED",
+    "real_learner_retention_effectiveness": "UNOBSERVED",
+    "transfer_effectiveness": "UNOBSERVED",
+    "workplace_effectiveness": "UNOBSERVED",
+    "sme_approval": "UNOBSERVED",
+    "certification_equivalence": "UNOBSERVED",
+    "a01_authority": "NOT_CLAIMED",
+    "native_platform_authority": "NOT_CLAIMED",
+    "production_authority": "NOT_CLAIMED"
+  },
+  "source_bytes_archived": false,
+  "source_bytes_archive_limitation": "Portable hosted qualification binds source metadata and paraphrased admitted claims but does not archive the external ASQ page bytes.",
+  "on_pass": "Admit Batch 02 into Learning control as I.A.2 instructional/scoring realization complete and select the next unmaterialized 001D execution node without replaying prior phases or Batch 01."
+}
