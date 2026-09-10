@@ -1,6 +1,6 @@
 # MASTER-ROOT-CHAT-OPERATING-CONTRACT-001
 
-Status: PROPOSED_FOR_ADMISSION
+Status: ACTIVE_CANONICAL
 Chat role: MASTER_ROOT
 Owner scope: SYSTEM_MASTER product-root governance/orchestration
 
