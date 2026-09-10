@@ -1,0 +1,142 @@
+{
+  "contract_id": "BOOK-WORKFLOW-ORCHESTRATOR-AUTHORITY-CONTRACT-001",
+  "contract_version": 1,
+  "effective_date": "2026-09-10",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "component_id": "BOOK_WORKFLOW_ORCHESTRATOR",
+  "component_class": "COORDINATION_ONLY",
+  "standing": "CANDIDATE_PENDING_PACKET_QUALIFICATION",
+  "purpose": "Coordinate dependency-valid Book writing/revision work across qualified specialist capabilities without acquiring literary judgment, canon truth, author, durable-execution, persistence, publication or canonical manuscript-write authority.",
+  "parent_authority": "SYSTEM_MASTER/BOOK",
+  "shared_execution_authority": "EXISTING_SYSTEM_MASTER_SHARED_EXECUTION_CONTROL",
+  "canonical_mutation_authority": {
+    "owner": "SYSTEM_MASTER/BOOK",
+    "entrypoint": "system-master/book-system/content-object-admission.js",
+    "rule": "Only the Book admission path may create canonical manuscript effect. The orchestrator may later construct a handoff request but may never reproduce, bypass or directly invoke internal mutation primitives outside the admitted interface."
+  },
+  "specialist_authority_boundaries": {
+    "PROSE": {
+      "owner": "SYSTEM_MASTER/BOOK/PROSE",
+      "authority": "LITERARY_DIAGNOSIS_CANDIDATE_GENERATION_EVALUATION_VOICE_AND_HOMOGENIZATION_EVIDENCE",
+      "canonical_write": false
+    },
+    "STORY_BIBLE_CANON": {
+      "authority": "CANON_TRUTH_AND_WORLD_STATE",
+      "canonical_manuscript_write": false
+    },
+    "RESEARCH_EVIDENCE": {
+      "authority": "EXTERNAL_EVIDENCE_TRUTH_AND_CITATION_SUPPORT",
+      "canonical_manuscript_write": false
+    },
+    "BOOK_ADMISSION": {
+      "authority": "CANONICAL_MANUSCRIPT_MUTATION_AND_VERSION_ADMISSION",
+      "canonical_manuscript_write": true
+    },
+    "AUTHOR": {
+      "authority": "FINAL_CREATIVE_AND_SEMANTIC_DECISION_WHERE_HUMAN_AUTHORITY_IS_REQUIRED"
+    }
+  },
+  "allowed_responsibilities": [
+    "ACCEPT_BOOK_LEVEL_OBJECTIVE",
+    "DETERMINE_REQUIRED_DECLARED_CAPABILITIES",
+    "CONSTRUCT_EXECUTION_PLAN",
+    "IDENTIFY_DEPENDENCIES",
+    "REQUEST_SAFE_PARALLEL_EXECUTION",
+    "ENFORCE_REQUIRED_SEQUENCE",
+    "REQUEST_MINIMAL_CONTEXT_PACKAGE",
+    "DISPATCH_TO_QUALIFIED_SPECIALIST_INTERFACE",
+    "COLLECT_SPECIALIST_OUTPUT_REFERENCES",
+    "COLLECT_EVIDENCE_RECEIPTS",
+    "DETECT_FAILURE_OR_MISSING_EVIDENCE",
+    "REQUEST_IDEMPOTENT_RETRY_WHEN_LATER_POLICY_ALLOWS",
+    "FAIL_CLOSED_ON_UNRESOLVED_AUTHORITY_OR_EVIDENCE",
+    "PRESENT_QUALIFIED_CANDIDATE_HANDOFF_TO_BOOK_ADMISSION",
+    "EMIT_EXECUTION_PROVENANCE",
+    "PRESERVE_ORIGINAL_MANUSCRIPT_REFERENCE",
+    "REQUEST_CANCEL_OR_RESUME_THROUGH_LATER_WORKFLOW_POLICY"
+  ],
+  "forbidden_capabilities": [
+    "DIRECT_CANONICAL_MANUSCRIPT_WRITE",
+    "DIRECT_MANUSCRIPT_VERSION_PROMOTION",
+    "DIRECT_CONTENT_OBJECT_ADMISSION_MUTATION",
+    "LITERARY_SUPERIORITY_DECISION_BY_ORCHESTRATOR",
+    "CANON_TRUTH_CREATION_OR_RETCON",
+    "RESEARCH_FACT_TRUTH_INVENTION",
+    "PROSE_HARD_GATE_BYPASS",
+    "STORY_BIBLE_CANON_BYPASS",
+    "REQUIRED_EVALUATOR_BYPASS",
+    "BOOK_ADMISSION_BYPASS",
+    "SELF_APPROVE_SPECIALIST_OUTPUT",
+    "SELF_ADMIT_CANDIDATE",
+    "IMPERSONATE_AUTHOR_OR_SYNTHESIZE_AUTHOR_CONSENT",
+    "CONVERT_EVALUATOR_ACCEPTANCE_DIRECTLY_TO_CANONICAL_STATE",
+    "TREAT_PROSE_CANDIDATE_AS_CANONICAL_BECAUSE_GENERATION_SUCCEEDED",
+    "TRANSFER_A01_PASS_BETWEEN_SUBJECTS",
+    "CLAIM_NATIVE_PUBLICATION_OR_PRODUCTION_AUTHORITY_FROM_HOSTED_EVIDENCE",
+    "ACCESS_FRESH_BLIND_GROUND_TRUTH_FROM_CONTAMINATED_OWNER_CONTEXT",
+    "CREATE_SECOND_DURABLE_EXECUTION_AUTHORITY_DOMAIN"
+  ],
+  "authority_precedence": [
+    "AUTHOR_WHEN_REQUIRED",
+    "BOOK_CANONICAL_ADMISSION",
+    "STORY_BIBLE_CANON_FOR_CANON_TRUTH",
+    "RESEARCH_EVIDENCE_FOR_EXTERNAL_FACT_TRUTH",
+    "QUALIFIED_SPECIALIST_DOMAIN_EVIDENCE",
+    "ORCHESTRATOR_COORDINATION"
+  ],
+  "coordination_invariants": [
+    "Every planned task names a declared capability and qualified owner before dispatch.",
+    "No planned task gains authority from orchestration order, retries, concurrency, cache reuse or successful execution alone.",
+    "Specialist outputs are immutable candidate/evidence references until a later authority admits an effect.",
+    "A missing required specialist receipt is a blocked or failed plan state, never implicit PASS.",
+    "Conflicting authority or stale input identity fails closed and returns to Book for re-evaluation.",
+    "The original manuscript/version reference is retained through every workflow until a successful transactional Book admission creates a new canonical version.",
+    "LEVEL_0_NO_CHANGE remains a valid Prose outcome and cannot be removed by orchestration policy.",
+    "An evaluator disposition of ACCEPT_CANDIDATE is evidence only and cannot become canonical effect without Book admission.",
+    "Fresh-context blind evaluation is isolated from candidate identity, writer identity, prior score, expected winner and author ground truth until its own seal rules permit comparison.",
+    "All cross-system execution evidence is reference/hash based where raw manuscript persistence is prohibited."
+  ],
+  "execution_model_boundary": {
+    "orchestrator_may_define_plan": true,
+    "orchestrator_may_hold_coordination_state": true,
+    "orchestrator_may_execute_specialist_business_logic": false,
+    "orchestrator_may_act_as_worker_pool": false,
+    "orchestrator_may_grant_qualification_pass": false,
+    "orchestrator_may_grant_a01_pass": false,
+    "orchestrator_may_mutate_canonical_book_state": false
+  },
+  "fail_closed_conditions": [
+    "UNKNOWN_CAPABILITY_OWNER",
+    "AMBIGUOUS_AUTHORITY",
+    "STALE_MANUSCRIPT_OR_CONTEXT_IDENTITY",
+    "MISSING_REQUIRED_CONTEXT",
+    "MISSING_REQUIRED_SPECIALIST_EVIDENCE",
+    "SPECIALIST_HARD_GATE_FAILURE",
+    "CANON_CONFLICT",
+    "AUTHOR_DECISION_REQUIRED_BUT_ABSENT",
+    "ADMISSION_PRECONDITION_UNRESOLVED",
+    "BLINDNESS_CONTAMINATION",
+    "REPLAY_IDENTITY_MISMATCH"
+  ],
+  "packet_scope_exclusions": [
+    "No workflow state schema in Phase 2A.",
+    "No capability router implementation in Phase 2A.",
+    "No dependency graph runtime in Phase 2A.",
+    "No concurrency, retry, cancellation, caching or admission-handoff runtime in Phase 2A.",
+    "No Prose runtime mutation in Phase 2A.",
+    "No fresh blind scoring in Phase 2A."
+  ],
+  "required_next_packet_on_pass": "BOOK-WORKFLOW-ORCHESTRATOR-WORKFLOW-STATE-MODEL-001",
+  "qualification_requirements": [
+    "REQUIRED_FIELDS_PRESENT",
+    "COMPONENT_CLASS_IS_COORDINATION_ONLY",
+    "BOOK_IS_CANONICAL_MUTATION_OWNER",
+    "PROSE_CANONICAL_WRITE_FALSE",
+    "ALL_FORBIDDEN_CAPABILITIES_PRESENT",
+    "NO_FORBIDDEN_CAPABILITY_APPEARS_IN_ALLOWED_RESPONSIBILITIES",
+    "AUTHOR_AND_STORY_BIBLE_AND_RESEARCH_AUTHORITIES_PRESERVED",
+    "FRESH_BLIND_BOUNDARY_PRESERVED",
+    "LEVEL_0_NO_CHANGE_PRESERVED",
+    "MISSING_EVIDENCE_FAILS_CLOSED"
+  ]
+}
