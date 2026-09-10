@@ -1,0 +1,49 @@
+{
+  "artifact_id": "A01-LEGACY-DIRECT-WORKFLOW-RETIREMENT-001",
+  "status": "MIGRATION_LEDGER__ACTIVE_FILES_RETIRE_ON_001D_ADOPTION",
+  "authority_scope": "SYSTEM_MASTER_SHARED_A01_CONTROL_PLANE",
+  "reason": "A01-REGISTRATION-DISPATCH-BARRIER-001 removes all active direct self-hosted execution outside the frozen internal executor so registration, exact subject identity and exact control-plane identity are checked before A-01 acquisition.",
+  "history_policy": "Git history and prior receipts remain authoritative for the exact historical SHAs. Deleting an active workflow file does not delete, relabel or invalidate prior evidence.",
+  "replacement_paths": {
+    "ordinary_qualification": ".github/workflows/a01-qualification-dispatch.yml",
+    "lane_automated_submission": ".github/workflows/a01-submit-qualification.yml",
+    "hosted_admission": ".github/workflows/a01-control-plane-gateway.yml",
+    "internal_windows_executor": ".github/workflows/a01-control-plane-executor.yml",
+    "repair_rerun": ".github/workflows/a01-repair-rerun.yml",
+    "overnight": ".github/workflows/a01-overnight-night-shift.yml",
+    "runner_health_and_identity": "A01-CONTROL-PLANE-SELFTEST plus a01-runner-guard.ps1 through the canonical gateway"
+  },
+  "retire_from_active_workflow_directory": [
+    ".github/workflows/fwp001-seal-audit.yml",
+    ".github/workflows/runner-identity-path-diagnostic.yml",
+    ".github/workflows/safe-runner-bootstrap.yml",
+    ".github/workflows/system-master-021f-integration-a01.yml",
+    ".github/workflows/system-master-f-wp-001-a01.yml",
+    ".github/workflows/system-master-f-wp-002-a01.yml",
+    ".github/workflows/system-master-f-wp-002-source-rebuild.yml",
+    ".github/workflows/system-master-f-wp-003-a01.yml",
+    ".github/workflows/system-master-f-wp-004-a01.yml",
+    ".github/workflows/system-master-f-wp-005-a01.yml",
+    ".github/workflows/system-master-f-wp-006-a01.yml",
+    ".github/workflows/system-master-f-wp-007-a01.yml",
+    ".github/workflows/system-master-f-wp-008-a01.yml",
+    ".github/workflows/system-master-f-wp-009-a01.yml",
+    ".github/workflows/system-master-f-wp-010-a01.yml",
+    ".github/workflows/system-master-f-wp-011-a01.yml",
+    ".github/workflows/system-master-f-wp-012-a01.yml"
+  ],
+  "migrate_in_place": [
+    {
+      "path": ".github/workflows/literary-research-overnight-a01.yml",
+      "old_behavior": "manual branch-local reusable gateway call",
+      "new_behavior": "manual hosted request submission to canonical main workflow_dispatch front door",
+      "qualification_id": "LITERARY-RESEARCH-OVERNIGHT-DEEP-HARVEST"
+    }
+  ],
+  "non_goals": [
+    "do not erase prior commits or A-01 receipts",
+    "do not transfer old qualification to changed subjects",
+    "do not grant lane workflows canonical registry or policy authority",
+    "do not permit arbitrary command execution on A-01"
+  ]
+}
