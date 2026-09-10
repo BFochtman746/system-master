@@ -17,8 +17,10 @@
   "repair_ledger_registry": "governance/repair/REPAIR-LEDGER-REGISTRY-001.json",
   "repair_broker_contract": "governance/repair/A01-REPAIR-BROKER-001.md",
   "repair_001b_closure": "governance/repair/A01-CLOSED-LOOP-REPAIR-001B-CLOSURE.md",
-  "repair_control_current_boundary": "A01-CLOSED-LOOP-REPAIR-001C",
-  "repair_control_next_objective": "REPLACEMENT A-01 RERUN RECEIPT -> SAME-TRANSACTION TERMINAL ADJUDICATION",
+  "repair_001c_closure": "governance/repair/A01-CLOSED-LOOP-REPAIR-001C-CLOSURE.md",
+  "repair_control_current_boundary": "A01-CLOSED-LOOP-REPAIR-001C__CLOSED",
+  "repair_control_next_objective": null,
+  "repair_control_successor_rule": "Return to the current canonical owner control record after 001C closure; do not invent A01-CLOSED-LOOP-REPAIR-001D unless a newer durable authority record explicitly declares it.",
   "repair_broker": ".github/scripts/a01-repair-broker.js",
   "repair_ledger": ".github/scripts/a01-repair-ledger.js",
   "repair_receipt_ingest_workflow": ".github/workflows/a01-repair-receipt-ingest.yml",
@@ -43,8 +45,8 @@
     "For repository-wide reconciliation, read active_census and resume at the first incomplete phase rather than restarting the audit.",
     "If work is being delegated to Second Shift, read the owner delegation file and revalidate it against the live control head immediately before admission/execution.",
     "If an executable qualification fails, classify it before repair. A gateway non-PASS is brokered into a durable transaction after the gateway run; repair-eligible product failures emit an owner-worker dispatch packet. A changed repair candidate may emit a replacement A-01 return ticket only after deterministic prequalification PASS on the same exact replacement SHA.",
-    "For repair-control work, treat A01-CLOSED-LOOP-REPAIR-001B as closed to its hosted-control scope and continue from A01-CLOSED-LOOP-REPAIR-001C unless newer repository evidence supersedes this pointer.",
-    "For A01-CLOSED-LOOP-REPAIR-001C, a replacement or same-SHA retry must enter through the canonical repair-rerun workflow using the existing durable transaction_id. The gateway validates transaction/qualification/workstream/subject/ref binding and must not invoke the initial Repair Broker for a rerun.",
+    "For repair-control work, treat A01-CLOSED-LOOP-REPAIR-001B and A01-CLOSED-LOOP-REPAIR-001C as closed to their declared boundaries. Read the 001C closure and return to the current canonical owner control record rather than replaying 001C or inventing 001D.",
+    "For any future replacement or same-SHA repair retry, enter through the canonical repair-rerun workflow using the existing durable transaction_id. The gateway validates transaction/qualification/workstream/subject/ref binding and must not invoke the initial Repair Broker for a rerun.",
     "A replacement A-01 result is adjudicated back into the same transaction. Only a real authoritative A-01 PASS receipt closes that transaction as PASS; hosted selftests prove control logic only. Subject failure re-dispatches the same transaction within remaining product-repair budget; infrastructure failure may receive one same-SHA retry; admission/dependency/control-plane/non-automatable outcomes retain truthful routes."
   ],
   "truth_classes": {
