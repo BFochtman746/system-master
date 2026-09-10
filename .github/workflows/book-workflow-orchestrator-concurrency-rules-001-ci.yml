@@ -23,7 +23,13 @@ jobs:
       - name: Qualify orchestrator concurrency rules
         env:
           NODE_OPTIONS: --experimental-default-type=commonjs
-        run: node .github/scripts/book-workflow-orchestrator-concurrency-rules-001-qualify.js
+          RUNNER_TEMP: ${{ runner.temp }}
+        run: |
+          set -euo pipefail
+          node --check .github/scripts/book-workflow-orchestrator-concurrency-rules-001-qualify.js
+          node .github/scripts/book-workflow-orchestrator-concurrency-rules-001-qualify.js
+          test -s "${RUNNER_TEMP}/book-workflow-orchestrator-concurrency-rules-001-summary.json"
+          cat "${RUNNER_TEMP}/book-workflow-orchestrator-concurrency-rules-001-summary.json"
       - name: Upload qualification evidence
         if: always()
         uses: actions/upload-artifact@v4
