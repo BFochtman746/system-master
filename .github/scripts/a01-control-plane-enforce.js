@@ -23,8 +23,9 @@ function leadingIndent(line) {
   const m = /^(\s*)/.exec(line);
   return m ? m[1].length : 0;
 }
+function normalizedLines(content) { return content.toString('utf8').replace(/\r\n?/g, '\n').split('\n'); }
 function isDirectSelfHosted(content) {
-  const lines = content.toString('utf8').replace(/\r\n?/g, '\n').split('\n');
+  const lines = normalizedLines(content);
   for (let i = 0; i < lines.length; i += 1) {
     const match = /^(\s*)runs-on\s*:\s*(.*)$/i.exec(lines[i]);
     if (!match) continue;
@@ -43,8 +44,8 @@ function isDirectSelfHosted(content) {
   return false;
 }
 function parseOn(content) {
-  const lines = content.toString('utf8').replace(/\r\n?/g, '\n').split('\n');
-  const result = { keys: new Set(), pushBranches: [] };
+  const lines = normalizedLines(content);
+  const result = { keys: new Set(), pushBranches: [], workflowDispatchHasInputs: false };
   let onIndex = -1; let onIndent = -1; let inline = '';
   for (let i = 0; i < lines.length; i += 1) {
     const m = /^(\s*)on\s*:\s*(.*?)\s*(?:#.*)?$/i.exec(lines[i]);
@@ -56,6 +57,7 @@ function parseOn(content) {
     return result;
   }
   let currentEvent = null;
+  let eventIndent = -1;
   let branchesIndent = -1;
   for (let i = onIndex + 1; i < lines.length; i += 1) {
     const line = lines[i];
@@ -64,13 +66,33 @@ function parseOn(content) {
     if (indent <= onIndent) break;
     const key = /^\s*([A-Za-z0-9_-]+)\s*:\s*(.*?)\s*(?:#.*)?$/.exec(line);
     if (key && indent === onIndent + 2) {
-      currentEvent = key[1]; branchesIndent = -1; result.keys.add(currentEvent); continue;
+      currentEvent = key[1]; eventIndent = indent; branchesIndent = -1; result.keys.add(currentEvent); continue;
     }
+    if (currentEvent === 'workflow_dispatch' && indent > eventIndent && /^\s*inputs\s*:/i.test(line)) result.workflowDispatchHasInputs = true;
     if (currentEvent === 'push') {
-      if (/^\s*branches\s*:\s*$/.test(line)) { branchesIndent = indent; continue; }
+      if (/^\s*branches\s*:\s*$/i.test(line)) { branchesIndent = indent; continue; }
       const item = /^\s*-\s*['"]?([^'"#]+?)['"]?\s*(?:#.*)?$/.exec(line);
       if (branchesIndent >= 0 && item && indent > branchesIndent) result.pushBranches.push(item[1].trim());
     }
+  }
+  return result;
+}
+function parseTopLevelMap(content, keyName) {
+  const lines = normalizedLines(content);
+  const result = {};
+  let start = -1; let baseIndent = -1;
+  for (let i = 0; i < lines.length; i += 1) {
+    const m = new RegExp(`^(\\s*)${keyName}\\s*:\\s*$`, 'i').exec(lines[i]);
+    if (m) { start = i; baseIndent = m[1].length; break; }
+  }
+  if (start < 0) return result;
+  for (let i = start + 1; i < lines.length; i += 1) {
+    const line = lines[i];
+    if (!line.trim() || /^\s*#/.test(line)) continue;
+    const indent = leadingIndent(line);
+    if (indent <= baseIndent) break;
+    const m = /^\s*([A-Za-z0-9_-]+)\s*:\s*([^#]+?)\s*(?:#.*)?$/.exec(line);
+    if (m && indent === baseIndent + 2) result[m[1]] = m[2].trim();
   }
   return result;
 }
@@ -105,17 +127,18 @@ function validateTrustedControl(rel, bytes, entry) {
     if (JSON.stringify(expected) !== JSON.stringify(actualBranches)) failures.push(`${rel}: TRUSTED_CONTROL_PUSH_BRANCH_SET_MISMATCH expected=${expected.join(',')} actual=${actualBranches.join(',')}`);
   }
   const text = bytes.toString('utf8').replace(/\r\n?/g, '\n');
-  if (entry.allow_arbitrary_inputs !== true && (/workflow_dispatch\s*:\s*\n(?:\s+.*\n)*?\s+inputs\s*:/m.test(text) || /\$\{\{\s*inputs\./i.test(text))) failures.push(`${rel}: TRUSTED_CONTROL_ARBITRARY_INPUTS_FORBIDDEN`);
+  if (entry.allow_arbitrary_inputs !== true && (on.workflowDispatchHasInputs || /\$\{\{\s*inputs\./i.test(text))) failures.push(`${rel}: TRUSTED_CONTROL_ARBITRARY_INPUTS_FORBIDDEN`);
   if (entry.allow_gateway_call !== true && callsGateway(bytes)) failures.push(`${rel}: TRUSTED_CONTROL_GATEWAY_CALL_FORBIDDEN`);
   if (entry.allow_broker_call !== true && callsBroker(bytes)) failures.push(`${rel}: TRUSTED_CONTROL_BROKER_CALL_FORBIDDEN`);
   if (entry.allow_executor_call !== true && callsExecutor(bytes)) failures.push(`${rel}: TRUSTED_CONTROL_EXECUTOR_CALL_FORBIDDEN`);
-  if (entry.qualification_payload_execution === false && /qualification_id\s*:/i.test(text)) failures.push(`${rel}: TRUSTED_CONTROL_QUALIFICATION_PAYLOAD_FORBIDDEN`);
-  if (entry.required_concurrency_group && !new RegExp(`group:\\s*${entry.required_concurrency_group.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`, 'mi').test(text)) failures.push(`${rel}: TRUSTED_CONTROL_CONCURRENCY_GROUP_MISSING`);
+  if (entry.qualification_payload_execution === false && /^\s*qualification_id\s*:/im.test(text)) failures.push(`${rel}: TRUSTED_CONTROL_QUALIFICATION_PAYLOAD_FORBIDDEN`);
+  if (entry.required_concurrency_group && !new RegExp(`^\\s*group:\\s*${entry.required_concurrency_group.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`, 'mi').test(text)) failures.push(`${rel}: TRUSTED_CONTROL_CONCURRENCY_GROUP_MISSING`);
   if (entry.required_exact_subject_checkout === true && !/ref:\s*\$\{\{\s*github\.sha\s*\}\}/i.test(text)) failures.push(`${rel}: TRUSTED_CONTROL_EXACT_SUBJECT_CHECKOUT_MISSING`);
   if (entry.required_persist_credentials_false === true && !/persist-credentials:\s*false/i.test(text)) failures.push(`${rel}: TRUSTED_CONTROL_PERSIST_CREDENTIALS_FALSE_MISSING`);
-  if (entry.max_permissions && entry.max_permissions.contents === 'read') {
-    if (!/permissions:\s*\n\s+contents:\s*read\s*(?:\n|$)/i.test(text)) failures.push(`${rel}: TRUSTED_CONTROL_CONTENTS_READ_PERMISSION_REQUIRED`);
-    if (/permissions:\s*\n(?:\s+.*\n)*?\s+[A-Za-z_-]+:\s*write\b/im.test(text)) failures.push(`${rel}: TRUSTED_CONTROL_WRITE_PERMISSION_FORBIDDEN`);
+  if (entry.max_permissions) {
+    const permissions = parseTopLevelMap(bytes, 'permissions');
+    if (entry.max_permissions.contents === 'read' && String(permissions.contents || '').toLowerCase() !== 'read') failures.push(`${rel}: TRUSTED_CONTROL_CONTENTS_READ_PERMISSION_REQUIRED`);
+    for (const [key, value] of Object.entries(permissions)) if (String(value).toLowerCase() === 'write') failures.push(`${rel}: TRUSTED_CONTROL_WRITE_PERMISSION_FORBIDDEN:${key}`);
   }
   if (!isDirectSelfHosted(bytes)) failures.push(`${rel}: TRUSTED_CONTROL_SELF_HOSTED_RUNNER_MISSING`);
   return failures;
@@ -129,10 +152,7 @@ function scan() {
   const trustedSeen = [];
   const files = workflowFiles();
   for (const required of [GATEWAY, BROKER, EXECUTOR, NIGHT_SHIFT]) if (!files.includes(required)) failures.push(`${required}: REQUIRED_A01_CONTROL_WORKFLOW_MISSING`);
-
-  for (const rel of Object.keys(trusted.workflows || {})) {
-    if (!files.includes(rel)) failures.push(`${rel}: TRUSTED_CONTROL_WORKFLOW_MISSING`);
-  }
+  for (const rel of Object.keys(trusted.workflows || {})) if (!files.includes(rel)) failures.push(`${rel}: TRUSTED_CONTROL_WORKFLOW_MISSING`);
 
   for (const rel of files) {
     const full = path.join(ROOT, ...rel.split('/'));
@@ -142,7 +162,6 @@ function scan() {
       trustedSeen.push(rel);
       failures.push(...validateTrustedControl(rel, bytes, trustedEntry));
     }
-
     if (rel !== NIGHT_SHIFT && isScheduled(bytes) && (callsGateway(bytes) || callsBroker(bytes) || callsExecutor(bytes) || isDirectSelfHosted(bytes)) && !trustedEntry) {
       failures.push(`${rel}: INDEPENDENT_SCHEDULED_A01_WORKFLOW_PROHIBITED; submit an overnight ticket to ${NIGHT_SHIFT}`);
     }
@@ -186,6 +205,10 @@ function selftest() {
   if (!isScheduled(scheduledCaller) || !callsGateway(scheduledCaller)) throw new Error('scheduled gateway caller detection failed');
   const parsed = parseOn(Buffer.from("on:\n  workflow_dispatch:\n  push:\n    branches:\n      - 'candidate/test'\npermissions:\n  contents: read\n"));
   if (!parsed.keys.has('workflow_dispatch') || !parsed.keys.has('push') || parsed.pushBranches.length !== 1 || parsed.pushBranches[0] !== 'candidate/test') throw new Error('trigger parser failed');
+  const dispatchInputs = parseOn(Buffer.from("on:\n  workflow_dispatch:\n    inputs:\n      subject:\n        required: true\n"));
+  if (!dispatchInputs.workflowDispatchHasInputs) throw new Error('workflow_dispatch input detection failed');
+  const permissions = parseTopLevelMap(Buffer.from("permissions:\n  contents: read\n  actions: write\njobs:\n  t:\n    runs-on: ubuntu-latest\n"), 'permissions');
+  if (permissions.contents !== 'read' || permissions.actions !== 'write') throw new Error('permissions parser failed');
   const lf = Buffer.from('hello\n'); const crlf = Buffer.from('hello\r\n'); const expected = 'ce013625030ba8dba906f756967f9e9ca394464a';
   if (gitBlobSha(lf) !== expected || gitBlobSha(crlf) !== expected) throw new Error('git blob SHA implementation failed');
   console.log('A01_ENFORCEMENT_SELFTEST=PASS');
