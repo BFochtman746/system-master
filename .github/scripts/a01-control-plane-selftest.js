@@ -6,6 +6,7 @@ const cp = require('child_process');
 
 const root = path.resolve(__dirname, '..', '..');
 function readJson(rel) { return JSON.parse(fs.readFileSync(path.join(root, rel), 'utf8')); }
+function text(rel) { return fs.readFileSync(path.join(root, rel), 'utf8'); }
 function assert(x, m) { if (!x) throw new Error(m); }
 
 const policy = readJson('qualification/a01/a01-policy.json');
@@ -14,28 +15,45 @@ const receiptSchema = readJson('qualification/a01/schema/qualification-receipt.s
 const ticketSchema = readJson('qualification/a01/schema/return-ticket.schema.json');
 const overnightTicketSchema = readJson('qualification/a01/overnight/ticket.schema.json');
 const legacy = readJson('qualification/a01/legacy-direct-workflows.json');
-const bootstrap = fs.readFileSync(path.join(root, 'SYSTEM-MASTER-WORKSTREAM-BOOTSTRAP.md'), 'utf8');
-const contract = fs.readFileSync(path.join(root, 'qualification/a01/A01-OPERATING-CONTRACT.md'), 'utf8');
-const operatingMode = fs.readFileSync(path.join(root, 'qualification/a01/A01-OPERATING-MODE-001.md'), 'utf8');
-const overnightContract = fs.readFileSync(path.join(root, 'qualification/a01/overnight/A01-OVERNIGHT-001.md'), 'utf8');
-const secondShiftContract = fs.readFileSync(path.join(root, 'qualification/a01/overnight/A01-SECOND-SHIFT-002.md'), 'utf8');
-const workflow = fs.readFileSync(path.join(root, '.github/workflows/a01-control-plane-gateway.yml'), 'utf8');
-const nightWorkflow = fs.readFileSync(path.join(root, '.github/workflows/a01-overnight-night-shift.yml'), 'utf8');
-const enforcementWorkflow = fs.readFileSync(path.join(root, '.github/workflows/a01-control-plane-enforcement.yml'), 'utf8');
-const runnerGuard = fs.readFileSync(path.join(root, '.github/scripts/a01-runner-guard.ps1'), 'utf8');
+const bootstrap = text('SYSTEM-MASTER-WORKSTREAM-BOOTSTRAP.md');
+const contract = text('qualification/a01/A01-OPERATING-CONTRACT.md');
+const operatingMode = text('qualification/a01/A01-OPERATING-MODE-001.md');
+const barrierContract = text('qualification/a01/A01-REGISTRATION-DISPATCH-BARRIER-001.md');
+const overnightContract = text('qualification/a01/overnight/A01-OVERNIGHT-001.md');
+const secondShiftContract = text('qualification/a01/overnight/A01-SECOND-SHIFT-002.md');
+const gateway = text('.github/workflows/a01-control-plane-gateway.yml');
+const broker = text('.github/workflows/a01-control-plane-admission-broker.yml');
+const executor = text('.github/workflows/a01-control-plane-executor.yml');
+const repairRerun = text('.github/workflows/a01-repair-rerun.yml');
+const nightWorkflow = text('.github/workflows/a01-overnight-night-shift.yml');
+const enforcementWorkflow = text('.github/workflows/a01-control-plane-enforcement.yml');
+const runnerGuard = text('.github/scripts/a01-runner-guard.ps1');
+const admission = text('.github/scripts/a01-admission-barrier.js');
 
-assert(policy.policy_version >= 6, 'policy v6 required');
+assert(policy.policy_version >= 7, 'policy v7 admission barrier required');
+assert(policy.control_plane_id === 'A01-CONTROL-PLANE-001', 'control plane id');
 assert(policy.canonical_ref === 'main', 'canonical main authority');
 assert(policy.runner.name === 'A-01', 'runner name');
 assert(policy.runner.global_concurrency_group === 'a01-global-r2', 'current global concurrency generation');
 assert(policy.runner.concurrency_generation === 2, 'concurrency generation');
 assert(policy.runner.queue_mode === 'max' && policy.runner.queue_capacity === 100, 'global queue policy');
+assert(policy.runner.unavailable_state === 'WAITING_FOR_RUNNER', 'runner offline must be waiting, not subject failure');
+assert(policy.runner.github_queue_expiry_hours === 24, 'GitHub self-hosted queue expiry contract');
+assert(policy.runner.assignment_requeue_seconds === 60, 'runner assignment requeue contract');
 assert(policy.runner.health.min_free_disk_gb >= 10, 'runner disk guard');
 assert(policy.runner.health.min_available_memory_gb >= 4, 'runner memory guard');
 assert(policy.runner.health.prevent_system_sleep_during_qualification === true, 'runner sleep guard policy');
 assert(policy.runner.health.record_preflight_postflight === true, 'runner health evidence policy');
 assert(policy.admission.max_outstanding_per_workstream >= 4, 'multi-ticket outstanding limit');
 assert(policy.admission.allow_arbitrary_command_input === false, 'arbitrary commands disabled');
+assert(policy.admission.hosted_barrier_required_before_self_hosted_runner === true, 'hosted admission barrier required');
+assert(policy.admission.verify_control_plane_sha_before_runner === true, 'control-plane SHA precheck required');
+assert(policy.admission.verify_subject_sha_before_runner === true, 'subject SHA precheck required');
+assert(policy.admission.verify_registered_wrapper_before_runner === true, 'registered wrapper precheck required');
+assert(policy.admission.blocked_requests_must_not_acquire_a01 === true, 'blocked admission must not touch A-01');
+assert(policy.retry.never_treat_rerun_as_control_plane_refresh === true, 'rerun refresh prohibition required');
+assert(policy.retry.after_registry_policy_or_gateway_change.includes('FRESH'), 'fresh-run retry rule missing');
+assert(policy.receipt.require_control_plane_sha_binding === true, 'control-plane receipt binding required');
 assert(policy.runtime.normal_job_timeout_minutes === 30, 'normal 30-minute envelope must remain');
 assert(policy.runtime.max_qualifier_timeout_minutes === 300, 'overnight qualifier cap');
 assert(policy.overnight.enabled === true && policy.overnight.timezone === 'America/New_York', 'overnight timezone policy');
@@ -47,24 +65,25 @@ assert(policy.overnight.max_ready_tickets_per_workstream_per_night >= 4, 'multi-
 assert(policy.overnight.dependency_chains.enabled === true, 'dependency chain policy required');
 assert(policy.overnight.dependency_chains.depends_on_ticket_id_requires_predecessor_pass === true, 'dependency PASS rule required');
 assert(policy.overnight.dependency_chains.dependent_ticket_must_follow_predecessor_immediately === true, 'dependent adjacency rule required');
-assert(policy.overnight.reject_disruptive_post_actions === true, 'overnight disruptive actions must be disabled');
-assert(policy.overnight.allow_idle_capacity === true, 'idle capacity must remain valid');
+assert(policy.overnight.reject_disruptive_post_actions === true, 'overnight disruptive actions disabled');
+assert(policy.overnight.allow_idle_capacity === true, 'idle capacity valid');
 assert(policy.overnight.second_shift.enabled === true, 'second shift policy required');
-assert(policy.overnight.second_shift.require_completion_delta_for_ready === true, 'completion delta required by policy');
-assert(policy.overnight.second_shift.require_stop_condition_for_ready === true, 'stop condition required by policy');
+assert(policy.overnight.second_shift.require_completion_delta_for_ready === true, 'completion delta required');
+assert(policy.overnight.second_shift.require_stop_condition_for_ready === true, 'stop condition required');
 for (const lane of ['FINISH','BUILD_AHEAD','RESEARCH_AHEAD','PREPARE_NEXT','EXPLORE']) assert(policy.overnight.second_shift.lanes.includes(lane), `missing second-shift lane ${lane}`);
 assert(policy.post_actions.allowed.includes('windows_reboot'), 'registered reboot action');
 assert(policy.post_actions.receipt_before_action === true && policy.post_actions.evidence_upload_before_action === true, 'disruptive action ordering');
 assert(policy.post_actions.windows_reboot_delay_seconds === 30, 'reboot delay');
 assert(policy.post_actions.disruption_settle_seconds === 90, 'hosted settle duration');
 assert(policy.states.includes('A01_PASSED') && policy.states.includes('SUPERSEDED'), 'standing states');
-assert(registry.registry_version >= 6, 'registry v6 required');
+assert(registry.registry_version >= 26, 'registry generation');
 assert(registry.qualifications['A01-CONTROL-PLANE-SELFTEST'].source === 'control_plane', 'selftest source');
 assert(registry.qualifications['CONTINUITY-TARGET-WINDOWS-REBOOT'].source === 'subject', 'subject qualifier registration');
 assert(registry.qualifications['CONTINUITY-TARGET-WINDOWS-REBOOT'].allowed_post_actions.includes('windows_reboot'), 'continuity post action');
-assert(registry.qualifications['CONTINUITY-TARGET-WINDOWS-REBOOT'].overnight_eligible === false, 'reboot must be excluded overnight');
+assert(registry.qualifications['CONTINUITY-TARGET-WINDOWS-REBOOT'].overnight_eligible === false, 'reboot excluded overnight');
 assert(registry.qualifications['LITERARY-RESEARCH-OVERNIGHT-DEEP-HARVEST'].overnight_eligible === true, 'literary overnight eligibility');
 assert(receiptSchema.required.includes('subject_sha') && receiptSchema.required.includes('promotion_authorized'), 'receipt authority fields');
+assert(receiptSchema.properties.control_plane_sha && receiptSchema.properties.control_plane_checkout_sha && receiptSchema.properties.workflow_run_attempt, 'receipt control-plane provenance fields');
 assert(ticketSchema.required.includes('resume_on_pass') && ticketSchema.required.includes('notification_target'), 'return routing fields');
 assert(overnightTicketSchema.required.includes('max_runtime_minutes') && overnightTicketSchema.required.includes('night_date'), 'overnight ticket authority fields');
 assert(overnightTicketSchema.properties.overnight_lane, 'overnight lane schema missing');
@@ -72,32 +91,42 @@ assert(overnightTicketSchema.properties.completion_delta, 'completion delta sche
 assert(overnightTicketSchema.properties.stop_condition, 'stop condition schema missing');
 assert(overnightTicketSchema.properties.depends_on_ticket_id, 'overnight dependency schema missing');
 assert(bootstrap.includes('A01-OVERNIGHT-001.md'), 'bootstrap overnight authority link');
-assert(contract.includes('No valid receipt') || contract.includes('without a valid control-plane receipt'), 'receipt gate contract');
+assert(contract.includes('hosted admission barrier'), 'operating contract hosted admission law');
+assert(contract.includes('fresh workflow') || contract.includes('fresh run'), 'fresh-run contract law');
 assert(contract.includes('hosted settle'), 'hosted disruption settle contract');
-assert(operatingMode.includes('A01-OVERNIGHT-001'), 'normal mode must acknowledge overnight extension');
+assert(operatingMode.includes('policy version **7**') || operatingMode.includes('policy version 7'), 'operating mode policy v7');
+assert(operatingMode.includes('A01-REGISTRATION-DISPATCH-BARRIER-001'), 'operating mode repair binding');
 assert(overnightContract.includes('00:00') && overnightContract.includes('07:00'), 'overnight contract window');
-assert(secondShiftContract.includes('multiple') || secondShiftContract.includes('four READY'), 'second shift must describe multi-ticket portfolio');
-assert(workflow.includes('group: a01-global-r2'), 'shared concurrency generation in gateway');
-assert(workflow.includes('queue: max'), 'global pending queue');
-assert(workflow.includes('repository: ${{ job.workflow_repository }}'), 'called workflow must checkout its own authority source');
-assert(workflow.includes('ref: ${{ job.workflow_sha }}'), 'called workflow must pin its own authority SHA');
-assert(workflow.includes('path: control-plane') && workflow.includes('path: subject'), 'control/subject checkout split');
-assert(workflow.includes('A01_EXECUTION_CONTEXT'), 'execution context missing');
-assert(workflow.includes('A01_QUALIFIER_TIMEOUT_MINUTES'), 'qualifier runtime budget missing');
-assert(workflow.includes('timeout-minutes: ${{ inputs.job_timeout_minutes || 30 }}'), 'dynamic outer timeout missing');
-assert(workflow.includes('Guard A-01 runner health before subject acquisition'), 'runner preflight missing');
-assert(workflow.includes('a01-runner-guard.ps1'), 'runner guard invocation missing');
-assert(workflow.includes('A01QualificationSleepGuard'), 'qualification sleep prevention missing');
-assert(workflow.includes('Record A-01 postflight and clean stale job temp'), 'runner postflight missing');
-assert(workflow.includes("steps.control.outputs.post_action == 'windows_reboot'"), 'registered disruptive handoff');
-assert(workflow.indexOf('Upload authoritative A-01 evidence') < workflow.indexOf('Schedule registered Windows reboot handoff'), 'evidence must upload before reboot scheduling');
-assert(workflow.includes('shutdown.exe /r /t 30'), 'reboot must be delayed so A-01 job can finish');
-assert(workflow.includes('Hold A-01 admission through registered reboot window'), 'hosted settle job missing');
-assert(workflow.includes('runs-on: ubuntu-latest'), 'hosted settle runner missing');
-assert(workflow.includes('sleep 90'), 'hosted settle interval missing');
-assert(workflow.includes('runs-on: [self-hosted, Windows, X64]'), 'A-01 runner labels');
-assert(!workflow.includes('qualifier_command'), 'gateway must not accept arbitrary qualifier command');
-assert(!workflow.includes('shutdown.exe /r /t 0'), 'immediate reboot would recreate stale runner bookkeeping');
+assert(secondShiftContract.includes('multiple') || secondShiftContract.includes('four READY'), 'second shift multi-ticket portfolio');
+assert(barrierContract.includes('WAITING_FOR_REGISTRATION'), 'barrier admission state');
+assert(barrierContract.includes('failed-job') || barrierContract.includes('specific-job'), 'barrier rerun law');
+
+assert(gateway.includes('a01-control-plane-admission-broker.yml'), 'gateway routes through broker');
+assert(!gateway.includes('runs-on: [self-hosted, Windows, X64]'), 'front-door gateway must not acquire A-01');
+assert(!gateway.includes('qualifier_command'), 'gateway arbitrary commands prohibited');
+assert(broker.includes('runs-on: ubuntu-latest'), 'admission must be hosted');
+assert(broker.includes('a01-admission-barrier.js evaluate'), 'admission evaluator missing');
+assert(broker.includes('Checkout exact qualification subject on hosted runner'), 'hosted subject precheck missing');
+assert(broker.includes("needs.admit.outputs.admitted == 'true'"), 'executor must depend on admission PASS');
+assert(!broker.includes('qualifier_command'), 'broker arbitrary commands prohibited');
+assert(executor.includes('runs-on: [self-hosted, Windows, X64]'), 'executor runner labels');
+assert(executor.includes('control_plane_sha'), 'executor exact control-plane binding');
+assert(executor.includes('ref: ${{ inputs.control_plane_sha }}'), 'executor checks out admitted control SHA');
+assert(executor.includes('group: a01-global-r2') && executor.includes('queue: max'), 'global queue remains serialized');
+assert(executor.includes('Guard A-01 runner health before subject acquisition'), 'runner preflight missing');
+assert(executor.includes('A01QualificationSleepGuard'), 'qualification sleep prevention missing');
+assert(executor.includes('Record A-01 postflight and clean stale job temp'), 'runner postflight missing');
+assert(executor.includes("steps.control.outputs.post_action == 'windows_reboot'"), 'registered disruptive handoff');
+assert(executor.indexOf('Upload authoritative A-01 evidence') < executor.indexOf('Schedule registered Windows reboot handoff'), 'evidence before reboot scheduling');
+assert(executor.includes('shutdown.exe /r /t 30'), 'delayed reboot required');
+assert(executor.includes('Hold A-01 admission through registered reboot window'), 'hosted settle job missing');
+assert(executor.includes('sleep 90'), 'hosted settle interval missing');
+assert(!executor.includes('qualifier_command'), 'executor arbitrary commands prohibited');
+assert(admission.includes('WAITING_FOR_REGISTRATION'), 'admission waiting state missing');
+assert(admission.includes('REGISTERED_EXECUTABLE_MISSING'), 'admission wrapper precheck missing');
+assert(admission.includes('A01_FRESH_DISPATCH_REQUIRED'), 'fresh dispatch instruction missing');
+assert(repairRerun.includes('uses: ./.github/workflows/a01-control-plane-gateway.yml'), 'repair rerun must use same-commit gateway');
+assert(!repairRerun.includes('a01-control-plane-gateway.yml@main'), 'repair rerun floating gateway forbidden');
 assert(runnerGuard.includes('LOW_DISK'), 'runner disk failure classification missing');
 assert(runnerGuard.includes('LOW_MEMORY'), 'runner memory failure classification missing');
 assert(runnerGuard.includes('SetThreadExecutionState'), 'runner sleep capability probe missing');
@@ -111,19 +140,41 @@ assert(nightWorkflow.includes("outputs.result_class == 'PASS'"), 'night successo
 assert(legacy.version === 1 && Object.keys(legacy.workflows).length > 0, 'legacy direct-workflow freeze missing');
 assert(enforcementWorkflow.includes('runs-on: ubuntu-latest'), 'enforcement must not consume A-01');
 assert(enforcementWorkflow.includes('a01-control-plane-enforce.js scan'), 'enforcement scan missing');
+assert(enforcementWorkflow.includes('a01-admission-barrier.js selftest'), 'admission enforcement selftest missing');
 
-const validation = cp.spawnSync('node', ['.github/scripts/a01-control-plane.js', 'validate'], { cwd: root, encoding: 'utf8', shell: false });
-assert(validation.status === 0, `validator failed: ${validation.stderr || validation.stdout}`);
-const overnightSelftest = cp.spawnSync('node', ['.github/scripts/a01-overnight-plan-selftest.js'], { cwd: root, encoding: 'utf8', shell: false });
-assert(overnightSelftest.status === 0, `overnight planner selftest failed: ${overnightSelftest.stderr || overnightSelftest.stdout}`);
-const enforcementSelftest = cp.spawnSync('node', ['.github/scripts/a01-control-plane-enforce.js', 'selftest'], { cwd: root, encoding: 'utf8', shell: false });
-assert(enforcementSelftest.status === 0, `enforcement selftest failed: ${enforcementSelftest.stderr || enforcementSelftest.stdout}`);
-const enforcementScan = cp.spawnSync('node', ['.github/scripts/a01-control-plane-enforce.js', 'scan'], { cwd: root, encoding: 'utf8', shell: false });
-assert(enforcementScan.status === 0, `enforcement scan failed: ${enforcementScan.stderr || enforcementScan.stdout}`);
+for (const [cmd, args] of [
+  ['node', ['.github/scripts/a01-control-plane.js', 'validate']],
+  ['node', ['.github/scripts/a01-admission-barrier.js', 'selftest']],
+  ['node', ['.github/scripts/a01-admission-barrier.js', 'integration-selftest']],
+  ['node', ['.github/scripts/a01-overnight-plan-selftest.js']],
+  ['node', ['.github/scripts/a01-control-plane-enforce.js', 'selftest']],
+  ['node', ['.github/scripts/a01-control-plane-enforce.js', 'scan']],
+]) {
+  const r = cp.spawnSync(cmd, args, { cwd: root, encoding: 'utf8', shell: false });
+  assert(r.status === 0, `${args.join(' ')} failed: ${r.stderr || r.stdout}`);
+}
 
 const evidenceDir = process.env.A01_EVIDENCE_DIR;
 if (evidenceDir) {
   fs.mkdirSync(evidenceDir, { recursive: true });
-  fs.writeFileSync(path.join(evidenceDir, 'selftest.txt'), 'A01_CONTROL_PLANE_SELFTEST=PASS\nA01_ENFORCEMENT=PASS\nA01_GLOBAL_QUEUE=MAX\nA01_CONCURRENCY_GENERATION=2\nA01_CROSS_REF_AUTHORITY=PASS\nA01_DISRUPTIVE_SETTLE=PASS\nA01_OVERNIGHT_POLICY=PASS\nA01_OVERNIGHT_PLANNER=PASS\nA01_SECOND_SHIFT=PASS\nA01_MULTI_TICKET_PORTFOLIO=PASS\nA01_PASS_DEPENDENCY=PASS\nA01_RUNNER_GUARD=PASS\n');
+  fs.writeFileSync(path.join(evidenceDir, 'selftest.txt'), [
+    'A01_CONTROL_PLANE_SELFTEST=PASS',
+    'A01_ENFORCEMENT=PASS',
+    'A01_HOSTED_ADMISSION_BARRIER=PASS',
+    'A01_UNREGISTERED_BLOCKS_BEFORE_RUNNER=PASS',
+    'A01_CONTROL_PLANE_SHA_BINDING=PASS',
+    'A01_FRESH_DISPATCH_RULE=PASS',
+    'A01_GLOBAL_QUEUE=MAX',
+    'A01_CONCURRENCY_GENERATION=2',
+    'A01_CROSS_REF_AUTHORITY=PASS',
+    'A01_DISRUPTIVE_SETTLE=PASS',
+    'A01_OVERNIGHT_POLICY=PASS',
+    'A01_OVERNIGHT_PLANNER=PASS',
+    'A01_SECOND_SHIFT=PASS',
+    'A01_MULTI_TICKET_PORTFOLIO=PASS',
+    'A01_PASS_DEPENDENCY=PASS',
+    'A01_RUNNER_GUARD=PASS',
+    ''
+  ].join('\n'));
 }
 console.log('A01_CONTROL_PLANE_SELFTEST=PASS');

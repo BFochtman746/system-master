@@ -1,0 +1,268 @@
+name: A-01 Control Plane Executor
+
+on:
+  workflow_call:
+    inputs:
+      qualification_id: {type: string, required: true}
+      workstream_id: {type: string, required: true}
+      subject_sha: {type: string, required: true}
+      origin_ref: {type: string, required: true}
+      resume_on_pass: {type: string, required: true}
+      resume_on_failure: {type: string, required: true}
+      notification_target: {type: string, required: true}
+      execution_context: {type: string, required: false, default: normal}
+      qualifier_timeout_minutes: {type: number, required: false, default: 28}
+      job_timeout_minutes: {type: number, required: false, default: 30}
+      not_before: {type: string, required: false, default: ''}
+      not_after: {type: string, required: false, default: ''}
+      repair_attempt: {type: number, required: false, default: 0}
+      max_repair_attempts: {type: number, required: false, default: 1}
+      repair_transaction_id: {type: string, required: false, default: ''}
+      control_plane_sha: {type: string, required: true}
+      admission_state: {type: string, required: true}
+    outputs:
+      result_class:
+        description: Authoritative receipt result class
+        value: ${{ jobs.qualify.outputs.result_class }}
+      promotion_authorized:
+        description: Exact-subject promotion authorization
+        value: ${{ jobs.qualify.outputs.promotion_authorized }}
+      repair_transaction_id:
+        description: Existing rerun transaction or newly brokered transaction
+        value: ${{ inputs.repair_transaction_id || jobs.repair_broker.outputs.transaction_id }}
+      repair_transaction_state:
+        description: Newly brokered route state
+        value: ${{ jobs.repair_broker.outputs.transaction_state }}
+      repair_target_inbox:
+        description: Canonical owner inbox selected by initial broker
+        value: ${{ jobs.repair_broker.outputs.target_inbox }}
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: a01-global-r2
+  queue: max
+  cancel-in-progress: false
+
+jobs:
+  qualify:
+    name: A-01 registered qualification
+    if: inputs.admission_state == 'ADMITTED'
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: ${{ inputs.job_timeout_minutes || 30 }}
+    outputs:
+      post_action: ${{ steps.control.outputs.post_action }}
+      result_class: ${{ steps.control.outputs.result_class || steps.guard.outputs.result_class }}
+      promotion_authorized: ${{ steps.control.outputs.promotion_authorized }}
+    env:
+      A01_QUALIFICATION_ID: ${{ inputs.qualification_id }}
+      A01_WORKSTREAM_ID: ${{ inputs.workstream_id }}
+      A01_SUBJECT_SHA: ${{ inputs.subject_sha }}
+      A01_CONTROL_PLANE_SHA: ${{ inputs.control_plane_sha }}
+      A01_ORIGIN_REF: ${{ inputs.origin_ref }}
+      A01_RESUME_ON_PASS: ${{ inputs.resume_on_pass }}
+      A01_RESUME_ON_FAILURE: ${{ inputs.resume_on_failure }}
+      A01_NOTIFICATION_TARGET: ${{ inputs.notification_target }}
+      A01_EXECUTION_CONTEXT: ${{ inputs.execution_context }}
+      A01_QUALIFIER_TIMEOUT_MINUTES: ${{ inputs.qualifier_timeout_minutes }}
+      A01_NOT_BEFORE: ${{ inputs.not_before }}
+      A01_NOT_AFTER: ${{ inputs.not_after }}
+      A01_REPAIR_ATTEMPT: ${{ inputs.repair_attempt }}
+      A01_MAX_REPAIR_ATTEMPTS: ${{ inputs.max_repair_attempts }}
+      A01_REPAIR_TRANSACTION_ID: ${{ inputs.repair_transaction_id }}
+    steps:
+      - name: Checkout exact admitted control plane
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: ${{ job.workflow_repository }}
+          ref: ${{ inputs.control_plane_sha }}
+          path: control-plane
+          fetch-depth: 1
+          clean: true
+          persist-credentials: false
+      - name: Verify exact control-plane checkout before runner work
+        shell: cmd
+        run: |
+          for /f %%i in ('git -C "%GITHUB_WORKSPACE%\control-plane" rev-parse HEAD') do set ACTUAL_CONTROL_SHA=%%i
+          if /I not "%ACTUAL_CONTROL_SHA%"=="%A01_CONTROL_PLANE_SHA%" exit /b 1
+          echo A01_CONTROL_PLANE_CHECKOUT=%ACTUAL_CONTROL_SHA%
+      - name: Enforce canonical four-system topology
+        shell: cmd
+        run: node "%GITHUB_WORKSPACE%\control-plane\.github\scripts\validate-system-topology.js"
+      - name: Prepare exact evidence envelope
+        shell: cmd
+        run: |
+          set "A01_CONTROL_ROOT=%GITHUB_WORKSPACE%\control-plane"
+          set "A01_SUBJECT_ROOT=%GITHUB_WORKSPACE%\subject"
+          set "A01_EVIDENCE_DIR=%RUNNER_TEMP%\a01-control-plane-%GITHUB_RUN_ID%"
+          set "A01_ARTIFACT_NAME=%A01_QUALIFICATION_ID%-%GITHUB_RUN_ID%-evidence"
+          if not exist "%A01_EVIDENCE_DIR%" mkdir "%A01_EVIDENCE_DIR%"
+          echo A01_CONTROL_ROOT=%A01_CONTROL_ROOT%>>"%GITHUB_ENV%"
+          echo A01_SUBJECT_ROOT=%A01_SUBJECT_ROOT%>>"%GITHUB_ENV%"
+          echo A01_EVIDENCE_DIR=%A01_EVIDENCE_DIR%>>"%GITHUB_ENV%"
+          echo A01_ARTIFACT_NAME=%A01_ARTIFACT_NAME%>>"%GITHUB_ENV%"
+          echo %A01_CONTROL_PLANE_SHA%>"%A01_EVIDENCE_DIR%\control-plane-sha.txt"
+      - name: Bind optional repair transaction into evidence
+        if: ${{ inputs.repair_transaction_id != '' }}
+        shell: powershell
+        run: |
+          $lineage = [ordered]@{
+            lineage_version = 2
+            transaction_id = $env:A01_REPAIR_TRANSACTION_ID
+            qualification_id = $env:A01_QUALIFICATION_ID
+            workstream_id = $env:A01_WORKSTREAM_ID
+            subject_sha = $env:A01_SUBJECT_SHA
+            control_plane_sha = $env:A01_CONTROL_PLANE_SHA
+            origin_ref = $env:A01_ORIGIN_REF
+            repair_attempt = [int]$env:A01_REPAIR_ATTEMPT
+            max_repair_attempts = [int]$env:A01_MAX_REPAIR_ATTEMPTS
+            gateway_run_id = $env:GITHUB_RUN_ID
+            gateway_run_attempt = $env:GITHUB_RUN_ATTEMPT
+            recorded_at = [DateTime]::UtcNow.ToString('o')
+          }
+          $lineage | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath (Join-Path $env:A01_EVIDENCE_DIR 'repair-lineage.json') -Encoding utf8
+      - name: Guard A-01 runner health before subject acquisition
+        id: guard
+        continue-on-error: true
+        shell: powershell
+        run: |
+          & "$env:GITHUB_WORKSPACE\control-plane\.github\scripts\a01-runner-guard.ps1" -Mode preflight -EvidenceDir $env:A01_EVIDENCE_DIR
+          exit $LASTEXITCODE
+      - name: Checkout exact qualification subject
+        if: steps.guard.outcome == 'success'
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: ${{ github.repository }}
+          ref: ${{ inputs.subject_sha }}
+          path: subject
+          fetch-depth: 0
+          clean: true
+          persist-credentials: false
+      - name: Verify subject and admitted control-plane identity
+        if: steps.guard.outcome == 'success'
+        shell: powershell
+        run: |
+          $subject = (& git -C "$env:GITHUB_WORKSPACE\subject" rev-parse HEAD).Trim()
+          $control = (& git -C "$env:GITHUB_WORKSPACE\control-plane" rev-parse HEAD).Trim()
+          if ($subject -ne $env:A01_SUBJECT_SHA) { throw "SUBJECT_CHECKOUT_MISMATCH:$subject" }
+          if ($control -ne $env:A01_CONTROL_PLANE_SHA) { throw "CONTROL_PLANE_CHECKOUT_MISMATCH:$control" }
+      - name: Validate canonical policy and registry
+        if: steps.guard.outcome == 'success'
+        shell: cmd
+        run: node "%A01_CONTROL_ROOT%\.github\scripts\a01-control-plane.js" validate
+      - name: Execute registered qualification and emit receipt
+        id: control
+        if: steps.guard.outcome == 'success'
+        continue-on-error: true
+        shell: powershell
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          Add-Type -TypeDefinition @'
+          using System;
+          using System.Runtime.InteropServices;
+          public static class A01QualificationSleepGuard {
+            [DllImport("kernel32.dll", SetLastError = true)]
+            public static extern uint SetThreadExecutionState(uint esFlags);
+          }
+          '@
+          $ES_CONTINUOUS = [Convert]::ToUInt32('80000000', 16)
+          $ES_SYSTEM_REQUIRED = [Convert]::ToUInt32('00000001', 16)
+          $guardState = [A01QualificationSleepGuard]::SetThreadExecutionState($ES_CONTINUOUS -bor $ES_SYSTEM_REQUIRED)
+          if ($guardState -eq 0) { throw 'A01_SLEEP_GUARD_START_FAILED' }
+          try {
+            & node "$env:A01_CONTROL_ROOT\.github\scripts\a01-control-plane.js" execute
+            $exitCode = $LASTEXITCODE
+          } finally {
+            [void][A01QualificationSleepGuard]::SetThreadExecutionState($ES_CONTINUOUS)
+          }
+          exit $exitCode
+      - name: Bind exact control-plane identity into receipt and request evidence
+        if: always()
+        shell: powershell
+        run: |
+          $control = (& git -C "$env:GITHUB_WORKSPACE\control-plane" rev-parse HEAD).Trim()
+          if ($control -ne $env:A01_CONTROL_PLANE_SHA) { throw "CONTROL_PLANE_CHECKOUT_MISMATCH_POST:$control" }
+          foreach ($name in @('request.json','receipt.json')) {
+            $path = Join-Path $env:A01_EVIDENCE_DIR $name
+            if (Test-Path $path) {
+              $obj = Get-Content -LiteralPath $path -Raw | ConvertFrom-Json
+              $obj | Add-Member -NotePropertyName control_plane_sha -NotePropertyValue $env:A01_CONTROL_PLANE_SHA -Force
+              $obj | Add-Member -NotePropertyName control_plane_checkout_sha -NotePropertyValue $control -Force
+              $obj | Add-Member -NotePropertyName workflow_run_attempt -NotePropertyValue ([int]$env:GITHUB_RUN_ATTEMPT) -Force
+              $obj | ConvertTo-Json -Depth 20 | Set-Content -LiteralPath $path -Encoding utf8
+            }
+          }
+      - name: Publish control-plane receipt summary
+        if: always()
+        shell: cmd
+        run: |
+          echo ## A-01 CONTROL PLANE>>"%GITHUB_STEP_SUMMARY%"
+          echo Qualification: %A01_QUALIFICATION_ID%>>"%GITHUB_STEP_SUMMARY%"
+          echo Subject: %A01_SUBJECT_SHA%>>"%GITHUB_STEP_SUMMARY%"
+          echo Control plane: %A01_CONTROL_PLANE_SHA%>>"%GITHUB_STEP_SUMMARY%"
+          echo Context: %A01_EXECUTION_CONTEXT%>>"%GITHUB_STEP_SUMMARY%"
+          echo Repair transaction: %A01_REPAIR_TRANSACTION_ID%>>"%GITHUB_STEP_SUMMARY%"
+          echo Artifact: %A01_ARTIFACT_NAME%>>"%GITHUB_STEP_SUMMARY%"
+          if exist "%A01_EVIDENCE_DIR%\runner-preflight.json" type "%A01_EVIDENCE_DIR%\runner-preflight.json">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%A01_EVIDENCE_DIR%\repair-lineage.json" type "%A01_EVIDENCE_DIR%\repair-lineage.json">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%A01_EVIDENCE_DIR%\result.txt" type "%A01_EVIDENCE_DIR%\result.txt">>"%GITHUB_STEP_SUMMARY%"
+          if exist "%A01_EVIDENCE_DIR%\receipt.json" type "%A01_EVIDENCE_DIR%\receipt.json">>"%GITHUB_STEP_SUMMARY%"
+      - name: Record A-01 postflight and clean stale job temp
+        if: always()
+        continue-on-error: true
+        shell: powershell
+        run: |
+          if (Test-Path "$env:GITHUB_WORKSPACE\control-plane\.github\scripts\a01-runner-guard.ps1") {
+            & "$env:GITHUB_WORKSPACE\control-plane\.github\scripts\a01-runner-guard.ps1" -Mode postflight -EvidenceDir $env:A01_EVIDENCE_DIR
+          }
+      - name: Upload authoritative A-01 evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: ${{ env.A01_ARTIFACT_NAME }}
+          path: ${{ env.A01_EVIDENCE_DIR }}
+          if-no-files-found: error
+          retention-days: 30
+      - name: Schedule registered Windows reboot handoff
+        if: steps.control.outcome == 'success' && steps.control.outputs.post_action == 'windows_reboot'
+        shell: powershell
+        run: |
+          & shutdown.exe /r /t 30 /d p:4:1 /c 'System Master registered A-01 qualification reboot handoff'
+          if ($LASTEXITCODE -ne 0) { throw "WINDOWS_REBOOT_SCHEDULE_FAILED:$LASTEXITCODE" }
+          Write-Host 'WINDOWS_REBOOT_SCHEDULED delay_seconds=30; A-01 job will finish cleanly before reboot.'
+      - name: Preserve authoritative qualification conclusion
+        if: always() && (steps.guard.outcome != 'success' || steps.control.outputs.result_class != 'PASS')
+        shell: cmd
+        run: exit /b 1
+
+  repair_broker:
+    name: Route ordinary non-PASS receipt to durable repair broker
+    needs: qualify
+    if: ${{ always() && inputs.repair_transaction_id == '' && needs.qualify.outputs.result_class != '' && needs.qualify.outputs.result_class != 'PASS' }}
+    uses: ./.github/workflows/a01-repair-broker.yml
+    with:
+      receipt_id: ${{ format('a01-run-{0}-{1}', github.run_id, inputs.qualification_id) }}
+      qualification_id: ${{ inputs.qualification_id }}
+      workstream_id: ${{ inputs.workstream_id }}
+      failed_subject_sha: ${{ inputs.subject_sha }}
+      result_class: ${{ needs.qualify.outputs.result_class }}
+      evidence_pointer: ${{ format('artifact:{0}-{1}-evidence', inputs.qualification_id, github.run_id) }}
+      repair_attempt: ${{ inputs.repair_attempt }}
+      max_repair_attempts: ${{ inputs.max_repair_attempts }}
+
+  disruptive-settle:
+    name: Hold A-01 admission through registered reboot window
+    needs: qualify
+    if: needs.qualify.outputs.post_action == 'windows_reboot'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Preserve global admission lock while A-01 reboots
+        shell: bash
+        run: |
+          echo 'Registered Windows reboot scheduled; preserving a01-global-r2 admission lock for 90 seconds.'
+          sleep 90
+          echo 'Registered reboot settle window complete; verification may now acquire A-01.'

@@ -5,6 +5,7 @@ on:
     paths:
       - '.github/workflows/**'
       - '.github/scripts/a01-control-plane*.js'
+      - '.github/scripts/a01-admission-*.js'
       - '.github/scripts/a01-overnight-*.js'
       - '.github/scripts/a01-runner-guard.ps1'
       - '.github/scripts/validate-system-topology.js'
@@ -17,6 +18,7 @@ on:
     paths:
       - '.github/workflows/**'
       - '.github/scripts/a01-control-plane*.js'
+      - '.github/scripts/a01-admission-*.js'
       - '.github/scripts/a01-overnight-*.js'
       - '.github/scripts/a01-runner-guard.ps1'
       - '.github/scripts/validate-system-topology.js'
@@ -31,7 +33,7 @@ permissions:
 
 jobs:
   enforce:
-    name: Reject ungoverned topology, direct self-hosted or scheduled A-01 workflows
+    name: Reject ungoverned A-01 admission, direct executor, topology, or scheduling paths
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -40,12 +42,11 @@ jobs:
         with:
           fetch-depth: 1
           persist-credentials: false
-
       - name: Enforce System Master parent topology and authority registries
         run: node .github/scripts/validate-system-topology.js
-
       - name: Self-test enforcement logic
         run: node .github/scripts/a01-control-plane-enforce.js selftest
-
-      - name: Enforce shared A-01 gateway and central night scheduler
+      - name: Enforce gateway broker executor and central night scheduler
         run: node .github/scripts/a01-control-plane-enforce.js scan
+      - name: Self-test hosted registration admission logic
+        run: node .github/scripts/a01-admission-barrier.js selftest

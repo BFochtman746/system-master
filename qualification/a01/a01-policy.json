@@ -1,5 +1,5 @@
 {
-  "policy_version": 6,
+  "policy_version": 7,
   "control_plane_id": "A01-CONTROL-PLANE-001",
   "canonical_ref": "main",
   "runner": {
@@ -9,6 +9,9 @@
     "concurrency_generation": 2,
     "queue_mode": "max",
     "queue_capacity": 100,
+    "unavailable_state": "WAITING_FOR_RUNNER",
+    "github_queue_expiry_hours": 24,
+    "assignment_requeue_seconds": 60,
     "health": {
       "min_free_disk_gb": 10,
       "min_available_memory_gb": 4,
@@ -25,21 +28,27 @@
     "max_outstanding_per_workstream": 4,
     "require_registered_qualification": true,
     "allow_arbitrary_command_input": false,
-    "continue_dependency_valid_work_while_waiting": true
+    "continue_dependency_valid_work_while_waiting": true,
+    "hosted_barrier_required_before_self_hosted_runner": true,
+    "verify_control_plane_sha_before_runner": true,
+    "verify_subject_sha_before_runner": true,
+    "verify_registered_wrapper_before_runner": true,
+    "blocked_requests_must_not_acquire_a01": true,
+    "canonical_gateway": ".github/workflows/a01-control-plane-gateway.yml",
+    "hosted_broker": ".github/workflows/a01-control-plane-admission-broker.yml",
+    "self_hosted_executor": ".github/workflows/a01-control-plane-executor.yml"
+  },
+  "retry": {
+    "after_registry_policy_or_gateway_change": "FRESH_WORKFLOW_DISPATCH_OR_FRESH_CALLER_RUN_REQUIRED",
+    "failed_job_or_specific_job_rerun_may_reuse_old_reusable_workflow_sha": true,
+    "stale_control_plane_admission_result": "FAIL_CLOSED_BEFORE_A01_AND_REQUIRE_FRESH_RUN",
+    "same_control_plane_subject_retry": "FRESH_RUN_PREFERRED",
+    "never_treat_rerun_as_control_plane_refresh": true
   },
   "gate_classes": {
-    "focused": {
-      "purpose": "Changed capability plus immediate integration dependencies",
-      "promotion_authority": false
-    },
-    "consolidated": {
-      "purpose": "Accumulated slice plus broader regressions",
-      "promotion_authority": false
-    },
-    "promotion": {
-      "purpose": "Exact promotion subject and required regressions",
-      "promotion_authority": true
-    }
+    "focused": {"purpose": "Changed capability plus immediate integration dependencies", "promotion_authority": false},
+    "consolidated": {"purpose": "Accumulated slice plus broader regressions", "promotion_authority": false},
+    "promotion": {"purpose": "Exact promotion subject and required regressions", "promotion_authority": true}
   },
   "runtime": {
     "normal_qualifier_timeout_minutes": 28,
@@ -79,32 +88,10 @@
       "goal": "Maximize reduction in next-day work, uncertainty, waiting, and critical-path distance rather than raw runner utilization.",
       "require_completion_delta_for_ready": true,
       "require_stop_condition_for_ready": true,
-      "lanes": [
-        "FINISH",
-        "BUILD_AHEAD",
-        "RESEARCH_AHEAD",
-        "PREPARE_NEXT",
-        "EXPLORE"
-      ],
-      "lane_order": [
-        "FINISH",
-        "BUILD_AHEAD",
-        "RESEARCH_AHEAD",
-        "PREPARE_NEXT",
-        "EXPLORE"
-      ],
-      "research_must_produce": [
-        "source_provenance",
-        "gap_or_question_answered",
-        "implementation_or_evaluation_implication",
-        "next_day_handoff"
-      ],
-      "build_ahead_requires": [
-        "bounded_scope",
-        "repository_owned_tests_or_acceptance",
-        "no_human_decision_dependency",
-        "no_promotion_without_registered_gate"
-      ],
+      "lanes": ["FINISH", "BUILD_AHEAD", "RESEARCH_AHEAD", "PREPARE_NEXT", "EXPLORE"],
+      "lane_order": ["FINISH", "BUILD_AHEAD", "RESEARCH_AHEAD", "PREPARE_NEXT", "EXPLORE"],
+      "research_must_produce": ["source_provenance", "gap_or_question_answered", "implementation_or_evaluation_implication", "next_day_handoff"],
+      "build_ahead_requires": ["bounded_scope", "repository_owned_tests_or_acceptance", "no_human_decision_dependency", "no_promotion_without_registered_gate"],
       "never_create_work_for_utilization": true
     }
   },
@@ -117,33 +104,21 @@
     "disruption_settle_seconds": 90,
     "strategy": "schedule_reboot_then_finish_a01_job_while_hosted_settle_job_preserves_global_admission_lock"
   },
-  "states": [
-    "BUILDING",
-    "PREQUALIFIED",
-    "A01_ELIGIBLE",
-    "A01_QUEUED",
-    "A01_RUNNING",
-    "A01_FAILED",
-    "A01_PASSED",
-    "REPAIR_REQUIRED",
-    "SUPERSEDED",
-    "PROMOTION_ELIGIBLE",
-    "CANONICAL"
-  ],
+  "states": ["BUILDING", "PREQUALIFIED", "A01_ELIGIBLE", "A01_QUEUED", "A01_RUNNING", "A01_FAILED", "A01_PASSED", "REPAIR_REQUIRED", "SUPERSEDED", "PROMOTION_ELIGIBLE", "CANONICAL"],
   "result_classes": ["PASS", "SUBJECT_FAILURE", "INFRA_FAILURE", "CONTROL_PLANE_FAILURE"],
+  "admission_states": ["ADMITTED", "WAITING_FOR_REGISTRATION", "REGISTERED_EXECUTABLE_MISSING", "WORKSTREAM_MISMATCH", "SUBJECT_CHECKOUT_MISMATCH", "CONTROL_PLANE_CHECKOUT_MISMATCH", "INVALID_CONTROL_PLANE_POLICY", "INVALID_REGISTRY", "INVALID_REGISTERED_WRAPPER_PATH", "INVALID_REGISTERED_WRAPPER_SOURCE", "INVALID_EXECUTION_CONTEXT", "INVALID_QUALIFIER_TIMEOUT", "QUALIFICATION_NOT_OVERNIGHT_ELIGIBLE", "QUALIFIER_TIMEOUT_EXCEEDS_REGISTRY", "DISRUPTIVE_QUALIFICATION_NOT_ALLOWED_OVERNIGHT", "CONTROL_PLANE_READ_FAILURE"],
   "stale_request_policy": {
     "queued_superseded_subject": "SUPERSEDE",
     "running_superseded_subject": "FINISH_IF_EVIDENCE_USEFUL",
-    "disconnected_disruptive_run": "ROTATE_CONCURRENCY_GENERATION_ONLY_AFTER_EVIDENCE_PRESERVED_AND_REPAIR_PROVEN"
+    "disconnected_disruptive_run": "ROTATE_CONCURRENCY_GENERATION_ONLY_AFTER_EVIDENCE_PRESERVED_AND_REPAIR_PROVEN",
+    "registry_or_policy_changed_after_run_creation": "DO_NOT_RERUN_FAILED_OR_SPECIFIC_JOB_FOR_REFRESH; START_FRESH_RUN"
   },
   "receipt": {
     "schema": "qualification/a01/schema/qualification-receipt.schema.json",
     "require_subject_checkout_match": true,
+    "require_control_plane_sha_binding": true,
     "require_evidence": true,
     "promotion_requires_pass": true
   },
-  "return_ticket": {
-    "schema": "qualification/a01/schema/return-ticket.schema.json",
-    "required": true
-  }
+  "return_ticket": {"schema": "qualification/a01/schema/return-ticket.schema.json", "required": true}
 }
