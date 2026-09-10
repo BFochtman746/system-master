@@ -172,6 +172,10 @@ function deriveRetryDecision(input, routingRegistry = routing.loadDefaultRegistr
   if (!RECONCILIATION_STATES.has(reconciliationState)) fail('INVALID_RECONCILIATION_STATE', String(reconciliationState));
   const identity = buildOperationIdentity(plan, workflowState, taskId, routingRegistry, serviceRegistry);
   const task = plan.tasks.find(t => t.task_id === taskId);
+  if (input.requested_idempotency_key !== undefined) {
+    if (!identity.provider_operation) fail('IDEMPOTENCY_KEY_NOT_ALLOWED_FOR_NONPROVIDER_TASK');
+    if (!nonEmpty(input.requested_idempotency_key) || input.requested_idempotency_key !== identity.idempotency_key) fail('IDEMPOTENCY_KEY_CONFLICT');
+  }
   let decisionClass;
   if (input.prior_operation_identity) {
     validateOperationIdentity(input.prior_operation_identity);
@@ -185,7 +189,7 @@ function deriveRetryDecision(input, routingRegistry = routing.loadDefaultRegistr
   }
   const evidenceRefs = Array.isArray(input.reconciliation_evidence_refs) ? [...input.reconciliation_evidence_refs] : [];
   if (new Set(evidenceRefs).size !== evidenceRefs.length || evidenceRefs.some(ref => !nonEmpty(ref))) fail('INVALID_RECONCILIATION_EVIDENCE_REFS');
-  if (['CONFIRMED_NO_EFFECT','CONFIRMED_EXISTING_RESULT','UNRESOLVED','CONTRADICTORY'].includes(reconciliationState) && evidenceRefs.length === 0 && !identity.registered_idempotent) fail('RECONCILIATION_EVIDENCE_REQUIRED');
+  if (['CONFIRMED_NO_EFFECT','CONFIRMED_EXISTING_RESULT','UNRESOLVED','CONTRADICTORY'].includes(reconciliationState) && evidenceRefs.length === 0 && identity.provider_operation && identity.registered_idempotent === false) fail('RECONCILIATION_EVIDENCE_REQUIRED');
   const decision = {
     decision_schema_version: DECISION_SCHEMA_VERSION,
     plan_id: plan.plan_id,
