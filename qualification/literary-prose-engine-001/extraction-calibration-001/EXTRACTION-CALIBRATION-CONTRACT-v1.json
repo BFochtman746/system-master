@@ -19,12 +19,29 @@
     "SETUP_PAYOFF_OPEN_QUESTION",
     "ARC_ORCHESTRATION"
   ],
-  "prediction_statuses": ["ASSERTED", "ALTERNATIVE", "UNRESOLVED", "ABSTAIN"],
   "required_metrics": {
     "all_tasks": ["precision", "recall", "f1", "coverage", "selective_accuracy", "false_certainty_rate"],
     "span_tasks": ["span_iou"],
+    "anchor_localization": ["anchor_existence_recall", "anchor_identity_precision", "localized_rate", "exact_localization_rate", "mean_anchor_span_iou", "wrong_anchor_count", "localization_tier"],
     "ambiguity": ["ambiguity_preservation_rate", "premature_resolution_rate"],
     "calibration": ["brier_score", "expected_calibration_error", "risk_coverage_curve"]
+  },
+  "anchor_localization_tiering": {
+    "purpose": "Keep anchor existence, anchor localization quality, and narrative-function correctness as separate evidence layers so fluent global analysis cannot mask localization failure.",
+    "exact_iou_threshold": 0.75,
+    "tiers": {
+      "EXACT": "Every gold anchor identity is recovered and every best same-anchor span overlap is at or above the exact IoU threshold.",
+      "LOCALIZED": "At least one correct anchor identity has positive span overlap but the case does not satisfy EXACT.",
+      "ANCHOR_ONLY": "At least one correct anchor identity is recovered but no same-anchor span overlaps the gold span.",
+      "WRONG_ANCHOR": "Predicted anchor evidence exists but no predicted anchor identity matches a gold anchor identity.",
+      "MISSING": "Gold anchor evidence exists and no predicted anchor span is supplied."
+    },
+    "rules": [
+      "Wrong anchor identity never receives localization credit even when span offsets coincide.",
+      "Anchor existence recall and anchor identity precision are reported separately from span overlap.",
+      "Narrative-function F1 is reported separately from anchor-localization standing and cannot overwrite or average away localization failure.",
+      "Malformed anchor IDs or half-open spans fail closed rather than being silently ignored."
+    ]
   },
   "false_certainty": {
     "confidence_threshold": 0.8,

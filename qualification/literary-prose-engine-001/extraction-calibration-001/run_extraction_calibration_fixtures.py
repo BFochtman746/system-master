@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from narrative_extraction_calibration import score_corpus, score_case, span_iou
+from narrative_extraction_calibration import anchor_localization_diagnostics, score_corpus, score_case, span_iou
 
 
 ROOT = Path(__file__).resolve().parent
@@ -86,6 +86,10 @@ def main() -> None:
     assert perfect["aggregate"]["ambiguity_preservation_rate"] == 1.0
     assert perfect["aggregate"]["premature_resolution_rate"] == 0.0
     assert perfect["aggregate"]["mean_span_iou"] == 1.0
+    assert perfect["anchor_localization_summary"]["mean_anchor_existence_recall"] == 1.0
+    assert perfect["anchor_localization_summary"]["mean_exact_localization_rate"] == 1.0
+    assert perfect["anchor_localization_summary"]["tier_counts"] == {"EXACT": 1}
+    assert perfect["narrative_function_summary"]["f1"] == 1.0
     assert perfect["canonical_state_write_authorized"] is False
 
     bad = score_corpus(gold, bad_prediction(gold))
@@ -95,6 +99,9 @@ def main() -> None:
     assert bad["aggregate"]["ambiguity_preservation_rate"] == 0.0
     assert bad["aggregate"]["premature_resolution_rate"] == 1.0
     assert bad["aggregate"]["mean_span_iou"] == 0.0
+    assert bad["anchor_localization_summary"]["mean_anchor_existence_recall"] == 1.0
+    assert bad["anchor_localization_summary"]["mean_localized_rate"] == 0.0
+    assert bad["anchor_localization_summary"]["tier_counts"] == {"ANCHOR_ONLY": 1}
     assert bad["aggregate"]["mean_brier_score"] > perfect["aggregate"]["mean_brier_score"]
 
     cautious = score_corpus(gold, cautious_prediction(gold))
@@ -121,6 +128,37 @@ def main() -> None:
     assert span_iou([10, 20], [10, 20]) == 1.0
     assert span_iou([10, 20], [15, 25]) == 1 / 3
 
+    # Anchor existence, localization precision, and narrative function are separate evidence layers.
+    anchor_gold = [{"anchor_id": "A1", "span": [10, 20]}]
+    exact = anchor_localization_diagnostics(anchor_gold, [{"anchor_id": "A1", "span": [10, 20]}])
+    assert exact["tier"] == "EXACT" and exact["anchor_existence_recall"] == 1.0 and exact["exact_localization_rate"] == 1.0
+    localized = anchor_localization_diagnostics(anchor_gold, [{"anchor_id": "A1", "span": [15, 25]}])
+    assert localized["tier"] == "LOCALIZED" and localized["mean_anchor_span_iou"] == round(1 / 3, 6)
+    anchor_only = anchor_localization_diagnostics(anchor_gold, [{"anchor_id": "A1", "span": [20, 25]}])
+    assert anchor_only["tier"] == "ANCHOR_ONLY" and anchor_only["anchor_existence_recall"] == 1.0 and anchor_only["localized_rate"] == 0.0
+    wrong = anchor_localization_diagnostics(anchor_gold, [{"anchor_id": "WRONG", "span": [10, 20]}])
+    assert wrong["tier"] == "WRONG_ANCHOR" and wrong["anchor_existence_recall"] == 0.0 and wrong["wrong_anchor_count"] == 1
+    missing = anchor_localization_diagnostics(anchor_gold, [])
+    assert missing["tier"] == "MISSING" and missing["anchor_existence_recall"] == 0.0
+
+    decoupled_gold = {
+        "cases": [
+            {"case_id": "anchor-separation", "task": "ANCHOR_LOCALIZATION", "gold_labels": ["anchor:A1"], "gold_spans": anchor_gold},
+            {"case_id": "function-separation", "task": "NARRATIVE_FUNCTION", "gold_labels": ["function:A1=SETUP"]},
+        ]
+    }
+    decoupled_prediction = {
+        "cases": [
+            {"case_id": "anchor-separation", "task": "ANCHOR_LOCALIZATION", "predictions": [{"label": "anchor:A1", "confidence": 0.95, "status": "ASSERTED"}], "predicted_spans": [{"anchor_id": "WRONG", "span": [10, 20]}]},
+            {"case_id": "function-separation", "task": "NARRATIVE_FUNCTION", "predictions": [{"label": "function:A1=SETUP", "confidence": 0.95, "status": "ASSERTED"}]},
+        ]
+    }
+    decoupled = score_corpus(decoupled_gold, decoupled_prediction)
+    assert decoupled["narrative_function_summary"]["f1"] == 1.0
+    assert decoupled["anchor_localization_summary"]["mean_anchor_existence_recall"] == 0.0
+    assert decoupled["anchor_localization_summary"]["mean_exact_localization_rate"] == 0.0
+    assert decoupled["anchor_localization_summary"]["tier_counts"] == {"WRONG_ANCHOR": 1}
+
     mismatch = prediction_from_gold(gold)
     mismatch["cases"] = mismatch["cases"][:-1]
     try:
@@ -137,10 +175,18 @@ def main() -> None:
     except ValueError as exc:
         assert "confidence out of range" in str(exc)
 
+    try:
+        anchor_localization_diagnostics(anchor_gold, [{"anchor_id": "A1", "span": [20, 20]}])
+        raise AssertionError("invalid anchor span should fail")
+    except ValueError as exc:
+        assert "invalid half-open span" in str(exc)
+
     evidence = {
         "qualification": "LITERARY-NARRATIVE-EXTRACTION-CALIBRATION-001-FIXTURES",
         "fixture_cases": 12,
         "tasks": 9,
+        "anchor_localization_tiers": ["EXACT", "LOCALIZED", "ANCHOR_ONLY", "WRONG_ANCHOR", "MISSING"],
+        "anchor_function_decoupling_detected": True,
         "perfect_harness": perfect["aggregate"],
         "overconfident_failure_detected": True,
         "ambiguity_premature_resolution_detected": True,

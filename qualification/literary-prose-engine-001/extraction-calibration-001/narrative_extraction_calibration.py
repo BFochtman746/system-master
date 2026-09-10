@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections import Counter
 from dataclasses import dataclass
 from typing import Dict, Iterable, List, Tuple
 
@@ -7,6 +8,7 @@ from typing import Dict, Iterable, List, Tuple
 FALSE_CERTAINTY_THRESHOLD = 0.8
 ECE_BINS = 10
 RISK_THRESHOLDS = (0.0, 0.5, 0.7, 0.8, 0.9)
+ANCHOR_EXACT_IOU_THRESHOLD = 0.75
 
 
 @dataclass(frozen=True)
@@ -49,6 +51,90 @@ def span_iou(a: Iterable[int], b: Iterable[int]) -> float:
     inter = max(0, min(a1, b1) - max(a0, b0))
     union = max(a1, b1) - min(a0, b0)
     return _safe_div(inter, union)
+
+
+def _validated_anchor_spans(spans: List[dict], field_name: str) -> List[dict]:
+    out = []
+    for i, item in enumerate(spans):
+        if not isinstance(item, dict):
+            raise ValueError(f"{field_name}[{i}] must be an object")
+        anchor_id = str(item.get("anchor_id", "")).strip()
+        if not anchor_id:
+            raise ValueError(f"{field_name}[{i}] anchor_id required")
+        span = item.get("span")
+        span_iou(span, span)
+        out.append({"anchor_id": anchor_id, "span": list(span)})
+    return out
+
+
+def anchor_localization_diagnostics(
+    gold_spans: List[dict],
+    pred_spans: List[dict],
+    exact_iou_threshold: float = ANCHOR_EXACT_IOU_THRESHOLD,
+) -> dict:
+    threshold = float(exact_iou_threshold)
+    if threshold <= 0.0 or threshold > 1.0:
+        raise ValueError("anchor exact IoU threshold must be in (0, 1]")
+
+    gold = _validated_anchor_spans(list(gold_spans), "gold_spans")
+    pred = _validated_anchor_spans(list(pred_spans), "predicted_spans")
+    if not gold:
+        return {
+            "applicable": False,
+            "tier": "NOT_APPLICABLE",
+            "gold_anchor_count": 0,
+            "predicted_anchor_count": len({x["anchor_id"] for x in pred}),
+            "anchor_existence_recall": None,
+            "anchor_identity_precision": None,
+            "localized_rate": None,
+            "exact_localization_rate": None,
+            "mean_anchor_span_iou": None,
+            "wrong_anchor_count": len({x["anchor_id"] for x in pred}),
+            "exact_iou_threshold": threshold,
+        }
+
+    gold_ids = {x["anchor_id"] for x in gold}
+    pred_ids = {x["anchor_id"] for x in pred}
+    matched_ids = gold_ids & pred_ids
+    wrong_ids = pred_ids - gold_ids
+    best_ious = []
+    for g in gold:
+        best = 0.0
+        for p in pred:
+            if g["anchor_id"] != p["anchor_id"]:
+                continue
+            best = max(best, span_iou(g["span"], p["span"]))
+        best_ious.append(best)
+
+    localized = sum(1 for x in best_ious if x > 0.0)
+    exact = sum(1 for x in best_ious if x >= threshold)
+    existence_recall = _safe_div(len(matched_ids), len(gold_ids))
+    identity_precision = _safe_div(len(matched_ids), len(pred_ids)) if pred_ids else 0.0
+
+    if not pred:
+        tier = "MISSING"
+    elif not matched_ids:
+        tier = "WRONG_ANCHOR"
+    elif all(x >= threshold for x in best_ious):
+        tier = "EXACT"
+    elif any(x > 0.0 for x in best_ious):
+        tier = "LOCALIZED"
+    else:
+        tier = "ANCHOR_ONLY"
+
+    return {
+        "applicable": True,
+        "tier": tier,
+        "gold_anchor_count": len(gold_ids),
+        "predicted_anchor_count": len(pred_ids),
+        "anchor_existence_recall": round(existence_recall, 6),
+        "anchor_identity_precision": round(identity_precision, 6),
+        "localized_rate": round(_safe_div(localized, len(gold)), 6),
+        "exact_localization_rate": round(_safe_div(exact, len(gold)), 6),
+        "mean_anchor_span_iou": round(sum(best_ious) / len(best_ious), 6),
+        "wrong_anchor_count": len(wrong_ids),
+        "exact_iou_threshold": threshold,
+    }
 
 
 def _best_span_iou(gold_spans: List[dict], pred_spans: List[dict]) -> float:
@@ -160,6 +246,7 @@ def score_case(gold_case: dict, prediction_case: dict) -> dict:
     points = _calibration_points(gold, preds)
     gold_spans = list(gold_case.get("gold_spans", []))
     pred_spans = list(prediction_case.get("predicted_spans", []))
+    anchor_diagnostics = anchor_localization_diagnostics(gold_spans, pred_spans) if gold_spans or pred_spans else None
 
     return {
         "case_id": gold_case["case_id"],
@@ -178,6 +265,7 @@ def score_case(gold_case: dict, prediction_case: dict) -> dict:
         "ambiguity_preserved": ambiguity_preserved,
         "premature_resolution": premature_resolution,
         "span_iou": round(_best_span_iou(gold_spans, pred_spans), 6) if gold_spans or pred_spans else None,
+        "anchor_localization": anchor_diagnostics,
         "brier_score": round(brier_score(points), 6),
         "expected_calibration_error": round(expected_calibration_error(points), 6),
         "risk_coverage_curve": risk_coverage_curve(gold, preds),
@@ -205,8 +293,28 @@ def score_corpus(gold_payload: dict, prediction_payload: dict) -> dict:
         "task_count": len(task_names),
         "aggregate": aggregate,
         "by_task": by_task,
+        "anchor_localization_summary": _anchor_summary(scored),
+        "narrative_function_summary": by_task.get("NARRATIVE_FUNCTION"),
         "cases": scored,
         "canonical_state_write_authorized": False,
+    }
+
+
+def _anchor_summary(rows: List[dict]) -> dict | None:
+    anchor_rows = [r["anchor_localization"] for r in rows if r.get("anchor_localization") and r["anchor_localization"]["applicable"]]
+    if not anchor_rows:
+        return None
+    tiers = Counter(r["tier"] for r in anchor_rows)
+    return {
+        "case_count": len(anchor_rows),
+        "tier_counts": {k: tiers[k] for k in sorted(tiers)},
+        "mean_anchor_existence_recall": round(sum(r["anchor_existence_recall"] for r in anchor_rows) / len(anchor_rows), 6),
+        "mean_anchor_identity_precision": round(sum(r["anchor_identity_precision"] for r in anchor_rows) / len(anchor_rows), 6),
+        "mean_localized_rate": round(sum(r["localized_rate"] for r in anchor_rows) / len(anchor_rows), 6),
+        "mean_exact_localization_rate": round(sum(r["exact_localization_rate"] for r in anchor_rows) / len(anchor_rows), 6),
+        "mean_anchor_span_iou": round(sum(r["mean_anchor_span_iou"] for r in anchor_rows) / len(anchor_rows), 6),
+        "wrong_anchor_count": sum(r["wrong_anchor_count"] for r in anchor_rows),
+        "exact_iou_threshold": ANCHOR_EXACT_IOU_THRESHOLD,
     }
 
 
@@ -221,7 +329,7 @@ def _aggregate(rows: List[dict]) -> dict:
     ambiguity_rows = [r for r in rows if r["intentionally_ambiguous"]]
     span_rows = [r for r in rows if r["span_iou"] is not None]
     high_conf_wrong = sum(r["false_certainty_count"] for r in rows)
-    return {
+    out = {
         "precision": round(precision, 6),
         "recall": round(recall, 6),
         "f1": round(_f1(precision, recall), 6),
@@ -235,3 +343,7 @@ def _aggregate(rows: List[dict]) -> dict:
         "mean_brier_score": round(sum(r["brier_score"] for r in rows) / len(rows), 6),
         "mean_expected_calibration_error": round(sum(r["expected_calibration_error"] for r in rows) / len(rows), 6),
     }
+    anchor_summary = _anchor_summary(rows)
+    if anchor_summary is not None:
+        out["anchor_localization"] = anchor_summary
+    return out
