@@ -1,0 +1,114 @@
+{
+  "artifact_id": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001B-ASSESSMENT-TARGET-DOMAIN-II-BATCH-01-CANDIDATE-027A",
+  "effective_date": "2026-09-10",
+  "owner_path": "SYSTEM_MASTER/LEARNING",
+  "base_control_head": "177a25236c838087c4bfa29cebd71ece05cb6f69",
+  "contract": "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001B-ASSESSMENT-TARGET-CONTRACT-025A.json",
+  "batch_index": 1,
+  "domain": "II",
+  "target_count": 5,
+  "targets": [
+    {
+      "assessment_target_id": "ASSESS::CSSGB-2022::ASQ-CSSGB-2022-II.A.1::project-selection-fit::TARGET::bounded-selection-explanation",
+      "subskill_id": "CSSGB-2022::ASQ-CSSGB-2022-II.A.1::SUBSKILL::project-selection-fit",
+      "parent_requirement_id": "ASQ-CSSGB-2022-II.A.1",
+      "source_locator": "ASQ CSSGB BoK 2022 p.4 / II.A.1",
+      "preserved_cognitive_level": "UNDERSTAND",
+      "capability_statement": "Given a bounded improvement scenario and stated selection considerations, evaluate whether a candidate project is an appropriate selection and state what evidence is still needed without claiming observed project success.",
+      "target_type": "SCENARIO_CONSTRAINED_RESPONSE",
+      "evidence_input_class": "BOUNDED_SCENARIO",
+      "response_action_class": "EXPLAIN",
+      "prompt_contract": {"supplied_evidence":"A fictional improvement scenario with stated problem, candidate project, constraints, expected scope, and known selection considerations.","required_action":"Explain whether the candidate project fits the stated selection considerations and identify any evidence still needed before selection can be justified.","must_not_assume":["observed project success","unstated sponsor approval","benefits not present in the scenario"]},
+      "scoring_assertions": [
+        {"assertion_id":"II.A.1-01","observable_property":"Response gives a project-selection fit conclusion tied to supplied selection considerations.","pass_condition":"The conclusion cites at least two explicit scenario facts or considerations rather than generic project-selection advice."},
+        {"assertion_id":"II.A.1-02","observable_property":"Response distinguishes current evidence from evidence still required.","pass_condition":"At least one missing or sufficient evidence condition is stated without claiming unobserved project success."}
+      ],
+      "insufficient_evidence_behavior":{"trigger":"The supplied selection considerations do not support a defensible fit conclusion.","required_behavior":"State that selection fit is not established and identify the missing selection evidence rather than guess."},
+      "provenance_refs":["SOURCE_NODE_INDEX:ASQ-CSSGB-2022-II.A.1","SUBSKILL:CSSGB-2022::ASQ-CSSGB-2022-II.A.1::SUBSKILL::project-selection-fit"],
+      "validation_status":"PROVISIONAL_BOUND",
+      "evidence_boundaries":{"psychometric_validity":"UNOBSERVED","learner_mastery":"UNOBSERVED","retention":"UNOBSERVED","transfer":"UNOBSERVED","workplace_effectiveness":"UNOBSERVED","sme_approval":"UNOBSERVED","certification_equivalence":"UNOBSERVED"}
+    },
+    {
+      "assessment_target_id":"ASSESS::CSSGB-2022::ASQ-CSSGB-2022-II.A.2::process-element-identification::TARGET::bounded-process-analysis",
+      "subskill_id":"CSSGB-2022::ASQ-CSSGB-2022-II.A.2::SUBSKILL::process-element-identification",
+      "parent_requirement_id":"ASQ-CSSGB-2022-II.A.2",
+      "source_locator":"ASQ CSSGB BoK 2022 p.4 / II.A.2",
+      "preserved_cognitive_level":"ANALYZE",
+      "capability_statement":"Given a bounded process description, identify the process elements needed to reason about the process boundary and relationships without inferring unavailable performance evidence.",
+      "target_type":"ARTIFACT_ANALYSIS",
+      "evidence_input_class":"BOUNDED_PROCESS_DESCRIPTION",
+      "response_action_class":"ANALYZE",
+      "prompt_contract":{"supplied_evidence":"A bounded fictional process description containing explicit activities, actors, inputs, outputs, handoffs, and boundary cues.","required_action":"Analyze the description to identify the process elements necessary to represent its boundary and relationships.","must_not_assume":["performance data not supplied","unstated actors or inputs","causes not evidenced by the process description"]},
+      "scoring_assertions":[
+        {"assertion_id":"II.A.2-01","observable_property":"Response identifies process elements traceable to supplied process facts.","pass_condition":"Each required element is tied to an explicit activity, actor, input, output, handoff, or boundary cue in the supplied description."},
+        {"assertion_id":"II.A.2-02","observable_property":"Response analyzes boundary or relationship implications without inventing performance evidence.","pass_condition":"At least one relationship or boundary conclusion is supported by supplied facts and no unavailable performance value is asserted."}
+      ],
+      "insufficient_evidence_behavior":{"trigger":"A requested process element or relationship cannot be determined from the supplied process description.","required_behavior":"Mark that element or relationship unresolved and identify the missing process evidence."},
+      "provenance_refs":["SOURCE_NODE_INDEX:ASQ-CSSGB-2022-II.A.2","SUBSKILL:CSSGB-2022::ASQ-CSSGB-2022-II.A.2::SUBSKILL::process-element-identification"],
+      "validation_status":"PROVISIONAL_BOUND",
+      "evidence_boundaries":{"psychometric_validity":"UNOBSERVED","learner_mastery":"UNOBSERVED","retention":"UNOBSERVED","transfer":"UNOBSERVED","workplace_effectiveness":"UNOBSERVED","sme_approval":"UNOBSERVED","certification_equivalence":"UNOBSERVED"}
+    },
+    {
+      "assessment_target_id":"ASSESS::CSSGB-2022::ASQ-CSSGB-2022-II.A.3::benchmarking-interpretation::TARGET::bounded-benchmark-explanation",
+      "subskill_id":"CSSGB-2022::ASQ-CSSGB-2022-II.A.3::SUBSKILL::benchmarking-interpretation",
+      "parent_requirement_id":"ASQ-CSSGB-2022-II.A.3",
+      "source_locator":"ASQ CSSGB BoK 2022 p.4 / II.A.3",
+      "preserved_cognitive_level":"UNDERSTAND",
+      "capability_statement":"Given a bounded benchmarking scenario, identify the intended comparison basis and explain what the comparison can and cannot support without treating a benchmark as proof of local effectiveness.",
+      "target_type":"SCENARIO_CONSTRAINED_RESPONSE",
+      "evidence_input_class":"BOUNDED_SCENARIO",
+      "response_action_class":"EXPLAIN",
+      "prompt_contract":{"supplied_evidence":"A fictional benchmarking scenario with a defined local process, comparison reference, selected measures, and stated contextual differences.","required_action":"Explain the intended comparison basis and what conclusions the supplied benchmark can and cannot support.","must_not_assume":["local effectiveness from benchmark performance alone","equivalent operating conditions unless stated","causal explanations not supplied"]},
+      "scoring_assertions":[
+        {"assertion_id":"II.A.3-01","observable_property":"Response identifies the comparison basis using the supplied process, reference, and measures.","pass_condition":"The benchmark basis is stated in terms of explicit scenario evidence rather than an invented comparison criterion."},
+        {"assertion_id":"II.A.3-02","observable_property":"Response states a valid evidence boundary for the benchmark.","pass_condition":"At least one supported conclusion and one unsupported or conditional conclusion are distinguished without claiming local effectiveness."}
+      ],
+      "insufficient_evidence_behavior":{"trigger":"The supplied benchmark lacks a comparable measure or sufficient context for the requested conclusion.","required_behavior":"State that the comparison is insufficient for that conclusion and identify the missing comparison evidence."},
+      "provenance_refs":["SOURCE_NODE_INDEX:ASQ-CSSGB-2022-II.A.3","SUBSKILL:CSSGB-2022::ASQ-CSSGB-2022-II.A.3::SUBSKILL::benchmarking-interpretation"],
+      "validation_status":"PROVISIONAL_BOUND",
+      "evidence_boundaries":{"psychometric_validity":"UNOBSERVED","learner_mastery":"UNOBSERVED","retention":"UNOBSERVED","transfer":"UNOBSERVED","workplace_effectiveness":"UNOBSERVED","sme_approval":"UNOBSERVED","certification_equivalence":"UNOBSERVED"}
+    },
+    {
+      "assessment_target_id":"ASSESS::CSSGB-2022::ASQ-CSSGB-2022-II.A.4::sipoc-relationship-analysis::TARGET::bounded-sipoc-analysis",
+      "subskill_id":"CSSGB-2022::ASQ-CSSGB-2022-II.A.4::SUBSKILL::sipoc-relationship-analysis",
+      "parent_requirement_id":"ASQ-CSSGB-2022-II.A.4",
+      "source_locator":"ASQ CSSGB BoK 2022 p.4 / II.A.4",
+      "preserved_cognitive_level":"ANALYZE",
+      "capability_statement":"Given a bounded process scenario, construct or inspect the supplier-input-process-output-customer relationships needed to explain the process boundary and identify an inconsistency in those relationships.",
+      "target_type":"ARTIFACT_ANALYSIS",
+      "evidence_input_class":"BOUNDED_MIXED_EVIDENCE",
+      "response_action_class":"ANALYZE",
+      "prompt_contract":{"supplied_evidence":"A synthetic process scenario and partially completed SIPOC representation containing explicit suppliers, inputs, process steps, outputs, and customers.","required_action":"Analyze the SIPOC relationships, explain the process boundary, and identify any evidence-supported inconsistency.","must_not_assume":["missing supplier or customer identities","performance values not supplied","a prerequisite relationship to II.A.2"]},
+      "scoring_assertions":[
+        {"assertion_id":"II.A.4-01","observable_property":"Response traces supplier-input-process-output-customer relationships using supplied evidence.","pass_condition":"The analysis correctly connects at least one complete supplier-to-customer chain supported by the scenario."},
+        {"assertion_id":"II.A.4-02","observable_property":"Response identifies an inconsistency or explicitly concludes none is evidenced.","pass_condition":"The conclusion is traceable to supplied SIPOC facts and does not rely on an unstated dependency or process assumption."}
+      ],
+      "insufficient_evidence_behavior":{"trigger":"The supplied scenario lacks evidence needed to complete or verify a SIPOC relationship.","required_behavior":"Leave that relationship unresolved and identify the missing supplier, input, process, output, or customer evidence."},
+      "provenance_refs":["SOURCE_NODE_INDEX:ASQ-CSSGB-2022-II.A.4","SUBSKILL:CSSGB-2022::ASQ-CSSGB-2022-II.A.4::SUBSKILL::sipoc-relationship-analysis"],
+      "validation_status":"PROVISIONAL_BOUND",
+      "evidence_boundaries":{"psychometric_validity":"UNOBSERVED","learner_mastery":"UNOBSERVED","retention":"UNOBSERVED","transfer":"UNOBSERVED","workplace_effectiveness":"UNOBSERVED","sme_approval":"UNOBSERVED","certification_equivalence":"UNOBSERVED"}
+    },
+    {
+      "assessment_target_id":"ASSESS::CSSGB-2022::ASQ-CSSGB-2022-II.A.5::owner-stakeholder-role-mapping::TARGET::bounded-role-application",
+      "subskill_id":"CSSGB-2022::ASQ-CSSGB-2022-II.A.5::SUBSKILL::owner-stakeholder-role-mapping",
+      "parent_requirement_id":"ASQ-CSSGB-2022-II.A.5",
+      "source_locator":"ASQ CSSGB BoK 2022 p.4 / II.A.5",
+      "preserved_cognitive_level":"APPLY",
+      "capability_statement":"Given a bounded process or project scenario, distinguish process-owner and stakeholder roles and explain the decision or information relationship relevant to the improvement work.",
+      "target_type":"CLASSIFICATION_TASK",
+      "evidence_input_class":"BOUNDED_SCENARIO",
+      "response_action_class":"APPLY",
+      "prompt_contract":{"supplied_evidence":"A fictional improvement project with named roles, stated decision rights, process responsibilities, interests, and information needs.","required_action":"Apply the owner/stakeholder distinction to the supplied roles and explain the decision or information relationship relevant to the project.","must_not_assume":["authority not stated in the scenario","organizational approval","unstated stakeholder interests"]},
+      "scoring_assertions":[
+        {"assertion_id":"II.A.5-01","observable_property":"Response assigns owner and stakeholder roles using supplied responsibilities and decision rights.","pass_condition":"Each classification is supported by an explicit scenario responsibility, authority, interest, or information need."},
+        {"assertion_id":"II.A.5-02","observable_property":"Response explains a relevant decision or information relationship.","pass_condition":"At least one relationship is tied to supplied project facts without inventing organizational authority."}
+      ],
+      "insufficient_evidence_behavior":{"trigger":"A role lacks enough stated responsibility, authority, interest, or information need for classification.","required_behavior":"Mark the role classification unresolved and identify the missing role evidence."},
+      "provenance_refs":["SOURCE_NODE_INDEX:ASQ-CSSGB-2022-II.A.5","SUBSKILL:CSSGB-2022::ASQ-CSSGB-2022-II.A.5::SUBSKILL::owner-stakeholder-role-mapping"],
+      "validation_status":"PROVISIONAL_BOUND",
+      "evidence_boundaries":{"psychometric_validity":"UNOBSERVED","learner_mastery":"UNOBSERVED","retention":"UNOBSERVED","transfer":"UNOBSERVED","workplace_effectiveness":"UNOBSERVED","sme_approval":"UNOBSERVED","certification_equivalence":"UNOBSERVED"}
+    }
+  ],
+  "batch_boundaries":{"psychometric_validity":"UNOBSERVED","learner_mastery":"UNOBSERVED","retention":"UNOBSERVED","transfer":"UNOBSERVED","workplace_effectiveness":"UNOBSERVED","sme_approval":"UNOBSERVED","certification_equivalence":"UNOBSERVED","unresolved_dependency_candidates":"UNCHANGED__SEPARATE_LANE"},
+  "next_batch":"LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001B-ASSESSMENT-TARGET-DOMAIN-II-BATCH-02-CANDIDATE-028A"
+}
