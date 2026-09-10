@@ -1,0 +1,54 @@
+name: Literary Prose Blind Source Custody Preflight Qualification
+
+on:
+  push:
+    branches:
+      - literary-prose-blind-eval-001
+    paths:
+      - 'qualification/literary-prose-engine-001/step-f/PROSE-REAL-LIMITATION-BLIND-EVALUATION-CONTRACT-001.json'
+      - 'qualification/literary-prose-engine-001/step-f/PROSE-REAL-LIMITATION-BLIND-EVALUATOR-STARTUP-001.md'
+      - 'qualification/literary-prose-engine-001/step-f/prose_blind_source_custody_preflight.py'
+      - 'qualification/literary-prose-engine-001/step-f/run_prose_blind_source_custody_preflight_fixtures.py'
+      - 'qualification/literary-prose-engine-001/step-f/PROSE-BLIND-EXECUTION-FORENSIC-REPAIR-001.json'
+      - '.github/workflows/literary-prose-blind-source-custody-preflight-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile preflight
+        run: >-
+          python -m py_compile
+          qualification/literary-prose-engine-001/step-f/prose_blind_source_custody_preflight.py
+          qualification/literary-prose-engine-001/step-f/run_prose_blind_source_custody_preflight_fixtures.py
+      - name: Validate repaired contract semantics
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('qualification/literary-prose-engine-001/step-f/PROSE-REAL-LIMITATION-BLIND-EVALUATION-CONTRACT-001.json')
+          d = json.loads(p.read_text(encoding='utf-8'))
+          r = d['passage_reconstruction_contract']
+          assert r['index_base'] == 0
+          assert r['range_end'] == 'INCLUSIVE'
+          assert r['digest_authority'] == 'AUTHORITATIVE'
+          assert r['word_count_authority'] == 'ADVISORY_ONLY'
+          assert d['source_retrieval_contract']['preferred_surface'] == 'CHATGPT_FILES_LIBRARY'
+          assert d['required_prediction_output']['write_mode'].startswith('CREATE_ONLY')
+          assert len(d['source_custody']) == 3
+          assert len(d['cases']) == 6
+          print('BLIND CONTRACT SEMANTICS: PASS')
+          PY
+      - name: Run synthetic source-custody fixtures
+        run: python qualification/literary-prose-engine-001/step-f/run_prose_blind_source_custody_preflight_fixtures.py
