@@ -1,0 +1,1 @@
+Document R4 transport repair uses a deterministic tar.xz wrapper over the already byte-verified CR001-R4 225-file source candidate. The wrapper is transport-only and grants no qualification standing. READY remains absent until the complete transport is present and independently reconstructible.
