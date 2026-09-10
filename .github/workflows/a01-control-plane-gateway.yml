@@ -9,12 +9,14 @@ on:
       - 'governance/**'
       - 'qualification/a01/**'
       - '.github/scripts/a01-control-plane*.js'
+      - '.github/scripts/a01-admission-*.js'
       - '.github/scripts/a01-overnight-*.js'
       - '.github/scripts/a01-closed-loop-repair*.js'
       - '.github/scripts/a01-repair-broker*.js'
       - '.github/scripts/a01-repair-ledger*.js'
       - '.github/scripts/validate-system-topology.js'
       - '.github/scripts/a01-runner-guard.ps1'
+      - '.github/workflows/a01-admission-broker.yml'
       - '.github/workflows/a01-control-plane-gateway.yml'
       - '.github/workflows/a01-repair-broker.yml'
       - '.github/workflows/a01-repair-rerun.yml'
@@ -33,6 +35,10 @@ on:
       subject_sha:
         description: Exact 40-character commit SHA to qualify
         required: true
+      control_plane_sha:
+        description: Optional exact control-plane SHA expected by the caller; blank binds the gateway workflow SHA
+        required: false
+        default: ''
       origin_ref:
         description: Workstream branch/ref that owns the return ticket
         required: true
@@ -96,6 +102,10 @@ on:
       subject_sha:
         type: string
         required: true
+      control_plane_sha:
+        type: string
+        required: false
+        default: ''
       origin_ref:
         type: string
         required: true
@@ -142,8 +152,11 @@ on:
         default: ''
     outputs:
       result_class:
-        description: Authoritative receipt result class when emitted, or INFRA_FAILURE when runner preflight blocks execution
-        value: ${{ jobs.qualify.outputs.result_class }}
+        description: Authoritative receipt result class, or hosted control-plane failure before A-01 admission
+        value: ${{ jobs.qualify.outputs.result_class || jobs.admission_guard.outputs.result_class }}
+      control_plane_sha:
+        description: Exact immutable control-plane SHA used for admission and execution
+        value: ${{ jobs.admission_guard.outputs.control_plane_sha }}
       promotion_authorized:
         description: Exact-subject promotion authorization
         value: ${{ jobs.qualify.outputs.promotion_authorized }}
@@ -167,16 +180,96 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  repair_lineage_guard:
-    name: Validate optional existing repair lineage before A-01 admission
+  admission_guard:
+    name: Verify exact control-plane admission before acquiring A-01
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
+    outputs:
+      admission_state: ${{ steps.preflight.outputs.admission_state }}
+      result_class: ${{ steps.preflight.outputs.result_class }}
+      control_plane_sha: ${{ steps.preflight.outputs.control_plane_sha }}
+      registry_version: ${{ steps.preflight.outputs.registry_version }}
+    env:
+      A01_QUALIFICATION_ID: ${{ inputs.qualification_id || 'A01-CONTROL-PLANE-SELFTEST' }}
+      A01_WORKSTREAM_ID: ${{ inputs.workstream_id || 'SYSTEM-MASTER' }}
+      A01_SUBJECT_SHA: ${{ inputs.subject_sha || github.sha }}
+      A01_EXPECTED_CONTROL_PLANE_SHA: ${{ inputs.control_plane_sha || job.workflow_sha }}
+      A01_CONTROL_ROOT: ${{ github.workspace }}/control-plane
+      A01_SUBJECT_ROOT: ${{ github.workspace }}/subject
+      A01_ADMISSION_EVIDENCE_PATH: ${{ runner.temp }}/a01-gateway-admission-${{ github.run_id }}.json
     steps:
-      - name: Checkout live durable repair state
+      - name: Checkout immutable gateway control plane
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           repository: ${{ job.workflow_repository }}
-          ref: main
+          ref: ${{ job.workflow_sha }}
+          path: control-plane
+          fetch-depth: 1
+          clean: true
+          persist-credentials: false
+
+      - name: Checkout exact qualification subject for admission only
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ inputs.subject_sha || github.sha }}
+          path: subject
+          fetch-depth: 1
+          clean: true
+          persist-credentials: false
+
+      - name: Validate admission barrier implementation
+        shell: bash
+        run: |
+          node control-plane/.github/scripts/a01-control-plane.js validate
+          node --check control-plane/.github/scripts/a01-admission-preflight.js
+
+      - name: Verify registration, owner, wrapper and exact identities
+        id: preflight
+        continue-on-error: true
+        shell: bash
+        run: node control-plane/.github/scripts/a01-admission-preflight.js
+
+      - name: Publish hosted admission evidence
+        if: always()
+        shell: bash
+        run: |
+          echo '## A-01 HOSTED ADMISSION GUARD' >> "$GITHUB_STEP_SUMMARY"
+          echo "Gateway control-plane SHA: ${{ job.workflow_sha }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "Expected control-plane SHA: $A01_EXPECTED_CONTROL_PLANE_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo "Subject SHA: $A01_SUBJECT_SHA" >> "$GITHUB_STEP_SUMMARY"
+          if [ -f "$A01_ADMISSION_EVIDENCE_PATH" ]; then
+            echo '```json' >> "$GITHUB_STEP_SUMMARY"
+            cat "$A01_ADMISSION_EVIDENCE_PATH" >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload hosted admission evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: a01-gateway-admission-${{ github.run_id }}
+          path: ${{ env.A01_ADMISSION_EVIDENCE_PATH }}
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Fail closed before A-01 when admission is not READY
+        if: always() && steps.preflight.outcome != 'success'
+        shell: bash
+        run: |
+          echo 'A-01 was not acquired. Use a fresh central admission-broker dispatch after registration/control-plane authority is current.' >&2
+          exit 2
+
+  repair_lineage_guard:
+    name: Validate optional existing repair lineage against the same control-plane snapshot
+    needs: admission_guard
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout immutable repair authority
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: ${{ job.workflow_repository }}
+          ref: ${{ needs.admission_guard.outputs.control_plane_sha }}
           fetch-depth: 1
           persist-credentials: false
 
@@ -208,7 +301,7 @@ jobs:
 
   qualify:
     name: A-01 registered qualification
-    needs: repair_lineage_guard
+    needs: [admission_guard, repair_lineage_guard]
     runs-on: [self-hosted, Windows, X64]
     timeout-minutes: ${{ inputs.job_timeout_minutes || 30 }}
     outputs:
@@ -219,9 +312,10 @@ jobs:
       A01_QUALIFICATION_ID: ${{ inputs.qualification_id || 'A01-CONTROL-PLANE-SELFTEST' }}
       A01_WORKSTREAM_ID: ${{ inputs.workstream_id || 'SYSTEM-MASTER' }}
       A01_SUBJECT_SHA: ${{ inputs.subject_sha || github.sha }}
+      A01_CONTROL_PLANE_SHA: ${{ needs.admission_guard.outputs.control_plane_sha }}
       A01_ORIGIN_REF: ${{ inputs.origin_ref || github.ref }}
       A01_RESUME_ON_PASS: ${{ inputs.resume_on_pass || 'Adjudicate PASS and continue the next dependency-valid objective.' }}
-      A01_RESUME_ON_FAILURE: ${{ inputs.resume_on_failure || 'Adjudicate evidence, repair the failing boundary, and rerun the minimum sufficient gate.' }}
+      A01_RESUME_ON_FAILURE: ${{ inputs.resume_on_failure || 'Adjudicate evidence, repair the failing boundary, and rerun through a fresh admission broker dispatch when control-plane authority changes.' }}
       A01_NOTIFICATION_TARGET: ${{ inputs.notification_target || 'originating-workstream' }}
       A01_EXECUTION_CONTEXT: ${{ inputs.execution_context || 'normal' }}
       A01_QUALIFIER_TIMEOUT_MINUTES: ${{ inputs.qualifier_timeout_minutes || 28 }}
@@ -235,11 +329,19 @@ jobs:
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           repository: ${{ job.workflow_repository }}
-          ref: ${{ job.workflow_sha }}
+          ref: ${{ needs.admission_guard.outputs.control_plane_sha }}
           path: control-plane
           fetch-depth: 1
           clean: true
           persist-credentials: false
+
+      - name: Verify immutable control-plane checkout
+        shell: powershell
+        run: |
+          $actual = (& git -C "$env:GITHUB_WORKSPACE\control-plane" rev-parse HEAD).Trim().ToLowerInvariant()
+          $expected = $env:A01_CONTROL_PLANE_SHA.Trim().ToLowerInvariant()
+          if ($actual -ne $expected) { throw "CONTROL_PLANE_CHECKOUT_MISMATCH expected=$expected actual=$actual" }
+          Write-Host "A01_CONTROL_PLANE_SHA=$actual"
 
       - name: Enforce canonical four-system topology before A-01 admission
         shell: cmd
@@ -263,11 +365,12 @@ jobs:
         shell: powershell
         run: |
           $lineage = [ordered]@{
-            lineage_version = 1
+            lineage_version = 2
             transaction_id = $env:A01_REPAIR_TRANSACTION_ID
             qualification_id = $env:A01_QUALIFICATION_ID
             workstream_id = $env:A01_WORKSTREAM_ID
             subject_sha = $env:A01_SUBJECT_SHA
+            control_plane_sha = $env:A01_CONTROL_PLANE_SHA
             origin_ref = $env:A01_ORIGIN_REF
             repair_attempt = [int]$env:A01_REPAIR_ATTEMPT
             max_repair_attempts = [int]$env:A01_MAX_REPAIR_ATTEMPTS
@@ -335,6 +438,7 @@ jobs:
           echo ## A-01 CONTROL PLANE>>"%GITHUB_STEP_SUMMARY%"
           echo Qualification: %A01_QUALIFICATION_ID%>>"%GITHUB_STEP_SUMMARY%"
           echo Subject: %A01_SUBJECT_SHA%>>"%GITHUB_STEP_SUMMARY%"
+          echo Control plane: %A01_CONTROL_PLANE_SHA%>>"%GITHUB_STEP_SUMMARY%"
           echo Context: %A01_EXECUTION_CONTEXT%>>"%GITHUB_STEP_SUMMARY%"
           echo Repair transaction: %A01_REPAIR_TRANSACTION_ID%>>"%GITHUB_STEP_SUMMARY%"
           echo Artifact: %A01_ARTIFACT_NAME%>>"%GITHUB_STEP_SUMMARY%"
