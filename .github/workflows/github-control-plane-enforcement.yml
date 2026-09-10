@@ -1,0 +1,87 @@
+name: GitHub Control Plane Enforcement
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/**'
+      - '.github/actions/**'
+      - '.github/scripts/github-control-plane-audit.js'
+      - '.github/dependabot.yml'
+      - 'governance/github/**'
+      - 'governance/CURRENT-AUTHORITY.json'
+      - 'governance/WORK-OBLIGATION-REGISTRY-*.json'
+      - 'governance/second-shift/**'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/**'
+      - '.github/actions/**'
+      - '.github/scripts/github-control-plane-audit.js'
+      - '.github/dependabot.yml'
+      - 'governance/github/**'
+      - 'governance/CURRENT-AUTHORITY.json'
+      - 'governance/WORK-OBLIGATION-REGISTRY-*.json'
+      - 'governance/second-shift/**'
+  schedule:
+    - cron: '13 7 * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: github-control-plane-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  enforce:
+    name: Enforce repository-wide GitHub control invariants
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact policy subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Syntax and self-test control-plane audit
+        run: |
+          node --check .github/scripts/github-control-plane-audit.js
+          node .github/scripts/github-control-plane-audit.js --selftest
+
+      - name: Audit all workflow definitions
+        run: |
+          mkdir -p .control-plane-audit
+          node .github/scripts/github-control-plane-audit.js --strict --out=.control-plane-audit/GITHUB-CONTROL-PLANE-AUDIT.json
+
+      - name: Validate current obligation selector
+        run: node .github/scripts/current-obligation-registry-enforce.js > .control-plane-audit/CURRENT-OBLIGATION-REGISTRY-REPORT.txt
+
+      - name: Validate Second Shift root and owner coverage
+        run: |
+          node .github/scripts/second-shift-enforce.js --no-live --out=.control-plane-audit/SECOND-SHIFT-ENFORCEMENT-REPORT.json
+          node .github/scripts/second-shift-owner-coverage.js --no-live > .control-plane-audit/SECOND-SHIFT-OWNER-COVERAGE-REPORT.json
+
+      - name: Publish control-plane summary
+        if: always()
+        shell: bash
+        run: |
+          echo '## GitHub Control Plane Enforcement' >> "$GITHUB_STEP_SUMMARY"
+          for report in .control-plane-audit/*; do
+            if [ -f "$report" ]; then
+              echo "### $(basename "$report")" >> "$GITHUB_STEP_SUMMARY"
+              echo '```' >> "$GITHUB_STEP_SUMMARY"
+              cat "$report" >> "$GITHUB_STEP_SUMMARY"
+              echo '```' >> "$GITHUB_STEP_SUMMARY"
+            fi
+          done
+
+      - name: Preserve machine-readable control evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: github-control-plane-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .control-plane-audit/
+          if-no-files-found: warn
+          retention-days: 30
