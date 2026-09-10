@@ -1,0 +1,40 @@
+{
+  "correction_id": "BOOK-SYSTEM-POST-RF012-IMPLEMENTATION-GAP-CENSUS-001-CORRECTION-001",
+  "effective_date": "2026-09-10",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "supersedes_only": "selected_next_objective priority in BOOK-SYSTEM-POST-RF012-IMPLEMENTATION-GAP-CENSUS-001",
+  "standing": "ADDITIVE_PRIORITY_CORRECTION__EBR_SC1_WORK_PRESERVED_VALID",
+  "newly_reconciled_evidence": {
+    "contract": "qualification/book-system/content-object-admission-001/BOOK-SYSTEM-CONTENT-ADMISSION-AUTHOR-DECISION-APPLICABILITY-BRIDGE-003.json",
+    "required_successor": "BOOK-SYSTEM-CONTENT-ADMISSION-AUTHOR-DECISION-APPLICABILITY-GUARD-004",
+    "current_tree_finding": "No content-admission author-decision applicability guard implementation is present on the current Book control tree.",
+    "current_base_behavior": "content-object-admission-core.js checks only canonical parent AUTHOR_DECISION status plus affirmative author_choice when requires_author_decision=true; it does not consume queue resolution receipt exact subject_identity_refs/currentness evidence."
+  },
+  "correction_reason": "The original gap census correctly identified existing-book recovery as a high-value implementation residual, but it did not re-rank the already-durable RF012 consumer-side applicability contract after promoting the strict current-subject guard. Because the missing adapter is an authority-safety defect on a live canonical admission path, it must precede any recovery-to-admission integration.",
+  "preserved_completed_work": {
+    "objective": "BOOK-SYSTEM-EXISTING-BOOK-RECOVERY-SEMANTIC-CORE-001",
+    "standing": "CLOSED_TO_HOSTED_SYNTHETIC_SEMANTIC_CORE_BOUNDARY",
+    "qualified_subject_sha": "f0e6cf534f6f97e74a9411d34715f2f09bae92b0",
+    "hosted_run_id": 34491031662,
+    "rule": "Do not discard, replay or relabel EBR-SC1. It remains valid independent implementation progress and becomes a downstream consumer of the repaired admission boundary."
+  },
+  "corrected_next_objective": "BOOK-SYSTEM-CONTENT-ADMISSION-AUTHOR-DECISION-APPLICABILITY-GUARD-004",
+  "priority_class": "AUTHORITY_SAFETY_PRECONDITION",
+  "required_behavior": [
+    "accept canonical parent state, version ledger, content-admission request and authoritative queue evidence",
+    "require an explicit applicability binding for every operation requiring author decision",
+    "resolve each referenced canonical AUTHOR_DECISION to an immutable queue resolution receipt",
+    "require exact decision_id and exact subject_identity_refs match",
+    "verify governed subject currentness using existing strict current-subject semantics",
+    "fail closed before base content admission mutation on any missing/mismatched/stale evidence",
+    "delegate unchanged canonical mutation to existing content admission only after applicability checks pass"
+  ],
+  "authority_nonexpansion": [
+    "adapter creates no author choice",
+    "adapter mutates no AUTHOR_DECISION",
+    "adapter grants no A-01 PASS",
+    "adapter grants no lifecycle, publication, Prose, Document, native or production authority",
+    "original content-admission subject e993806a1d9a4838d4bd6d162a36921526ef302a remains preserved as its own hosted-passed/A-01-pending subject"
+  ],
+  "downstream_after_guard": "Resume existing-book recovery governed-admission/lifecycle integration against the newly qualified additive guard rather than the unsafe base consumer path."
+}
