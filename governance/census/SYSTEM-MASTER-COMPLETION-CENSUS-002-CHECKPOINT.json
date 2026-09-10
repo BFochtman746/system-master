@@ -21,6 +21,9 @@
     "Anything without an owner becomes UNALLOCATED and cannot execute, schedule or promote until assigned.",
     "Anything with ambiguous evidence becomes EVIDENCE_REVIEW_REQUIRED rather than guessed complete or incomplete."
   ],
+  "last_reconciled_at": "2026-09-10T08:55:00-04:00",
+  "last_reconciled_from_main": "76c2e5232381df24903683d37dc4804de8a92a0c",
+  "last_reconciliation_reason": "Admit the already-sealed P2 owner result after P1 completion, remove its stale P1-pending blocker, preserve the already-sealed P4 owner result behind P3 sequence, and bind overnight lane deltas so Second Shift work is not replayed or dismissed.",
   "phases": [
     {
       "phase_id": "P0",
@@ -44,40 +47,79 @@
       "owner_lane_result_pointer": "governance/census/SYSTEM-MASTER-COMPLETION-CENSUS-002-P1-CORE.json",
       "owner_lane_ledger_delta_pointer": "governance/census/SYSTEM-MASTER-COMPLETION-CENSUS-002-P1-CORE-LEDGER-DELTA.json",
       "owner_lane_control_head": "0bb42ecd542d7e8ade4bed15e66f52ab0c494e39",
-      "next_global_phase": "P2__SEALED_OWNER_RESULT_AVAILABLE__DELTA_ONLY",
+      "next_global_phase": "P2__SEALED_OWNER_RESULT_ADMITTED__DELTA_ONLY",
       "post_completion_delta": {
-        "through_core_head": "ecf40c2e81cb884e4a84f97bb5cda69cc1dc045f",
-        "classification": "P1_RESULT_REMAINS_VALID__POST_P1_SUCCESSORS_RECORDED",
+        "through_core_head": "2031f070bd3702185c028733819ec410db36613c",
+        "classification": "P1_RESULT_REMAINS_VALID__POST_P1_SUCCESSORS_AND_OVERNIGHT_EVIDENCE_RECORDED",
         "evidence": [
           "system-master/control-v2/SMR021-FULL-PORTABLE-CLOSURE-QUALIFICATION-PACKET-004.md",
           "system-master/control-v2/SMR021-FULL-PORTABLE-CLOSURE-QUALIFICATION-TEST-MATRIX-004.json",
           "system-master/control-v2/SMR021-DATA-PERSISTENCE-OWNER-HANDOFF-005.json",
           "system-master/control-v2/SMR021-GITHUB-NATIVE-SOURCE-CUSTODY-AND-HOSTED-QUALIFICATION-PREP-005.md",
-          "system-master/control-v2/SMR021-HOSTED-PREQUALIFICATION-WORKFLOW-AND-MANIFEST-SPEC-006.json"
-        ]
+          "system-master/control-v2/SMR021-HOSTED-PREQUALIFICATION-WORKFLOW-AND-MANIFEST-SPEC-006.json",
+          "system-master/control-v2/SMR021-EXPERIENCE-ADMISSION-RECORD-CONSUMER-CONTRACT-007.schema.json",
+          "system-master/control-v2/SMR021-DATA-CONTRACT-ADVERSARIAL-FIXTURES-007.json",
+          "system-master/control-v2/SMR021-DATA-CONTRACT-ADVERSARIAL-FIXTURE-PACKET-007.md",
+          "governance/second-shift/SECOND-SHIFT-FINAL-REFILL-2026-09-10.json"
+        ],
+        "boundary": "The exact capsule custody verification and hosted/prequalification work do not create DATA implementation authority or A-01/native/production PASS."
       }
     },
     {
       "phase_id": "P2",
       "name": "Learning completion and obligation census",
-      "status": "PENDING",
+      "status": "COMPLETE",
       "scope": "Learning impl/qual/pilot/request/repair lineages, frozen authority, machine qualification, human-only boundaries, current technical successor selection.",
-      "owner_lane_result": "COMPLETE__SEALED_RESULT_AVAILABLE",
+      "completed_at": "2026-09-10T08:55:00-04:00",
+      "owner_lane_result": "COMPLETE__SEALED_RESULT_ADMITTED",
       "owner_lane_result_pointer": "governance/census/SYSTEM-MASTER-COMPLETION-CENSUS-002-P2-LEARNING.json",
+      "owner_lane_ledger_delta_pointer": "governance/census/SYSTEM-MASTER-COMPLETION-CENSUS-002-P2-LEARNING-LEDGER-DELTA.json",
       "owner_lane_control_head_after_selection": "8d14642dfed242adb3eea4b33125272a8d3d657a",
-      "global_admission_blocker": "P1 remains PENDING under the central phase-sequencing rule. Do not replay the completed Learning owner-lane forensic work when P2 becomes globally admissible; validate only any live delta after the sealed P2 result."
+      "global_admission_basis": "P1 completed at 2026-09-10T05:20:00-04:00. The sealed P2 owner-lane result is admitted without replaying Learning forensics.",
+      "post_completion_delta": {
+        "through_learning_control_head": "24282a16335764ddb018f31a89c75d670e6363c1",
+        "classification": "P2_RESULT_REMAINS_VALID__POST_P2_CURRICULUM_SUCCESSORS_PRESERVED",
+        "preserved_candidate_evidence": [
+          "Domain II batch 01 hosted rescue PASS remains evidence and is not silently promoted to live Learning control.",
+          "Domain II batch 02 exact-subject hosted PASS remains evidence and is not learner, SME, certification, A-01, native or production authority.",
+          "governance/second-shift/SECOND-SHIFT-FINAL-REFILL-2026-09-10.json"
+        ]
+      },
+      "next_global_phase": "P3__BOOK_COMPLETION_AND_OBLIGATION_CENSUS"
     },
     {
       "phase_id": "P3",
       "name": "Book completion and obligation census",
       "status": "PENDING",
-      "scope": "Book parent foundations, lifecycle/editorial/research/publication/export/versioning/author decision state; distinguish Book parent work from Prose child work."
+      "scope": "Book parent foundations, lifecycle/editorial/research/publication/export/versioning/author decision state; distinguish Book parent work from Prose child work.",
+      "overnight_delta_preserved": {
+        "live_book_control_head": "05c1f53e2f710f419a99cb99594c53c2f0240b68",
+        "qualified_rf012_candidate_sha": "67a23c0b09505dc3dd8fd748523fec3868f649b0",
+        "hosted_run_id": 34468928275,
+        "standing": "OWNER_DERIVED_BOUNDED_CANDIDATE_PASS__NOT_YET_CANONICALLY_PROMOTED",
+        "evidence": "governance/second-shift/SECOND-SHIFT-FINAL-REFILL-2026-09-10.json",
+        "boundary": "RF012 work and content-admission/A-01 work are preserved as separate Book deltas. Neither substitutes for a sealed P3 owner-lane completion census."
+      },
+      "exact_next_action": "Execute and seal the P3 Book owner-lane completion and obligation census against the current Book control head, reconciling only delta from the original audit watermark and preserving all RF012 rescue/pass/failure evidence."
     },
     {
       "phase_id": "P4",
       "name": "Prose completion and obligation census",
       "status": "PENDING",
-      "scope": "Book Evaluator, evaluator training, prose diagnostics/training/calibration/revision/preservation lanes, private/human/author boundaries and exact evidence."
+      "scope": "Book Evaluator, evaluator training, prose diagnostics/training/calibration/revision/preservation lanes, private/human/author boundaries and exact evidence.",
+      "owner_lane_result": "COMPLETE__SEALED_RESULT_AVAILABLE__GLOBAL_ADMISSION_WAITING_ON_P3",
+      "owner_lane_result_pointer": "governance/census/SYSTEM-MASTER-COMPLETION-CENSUS-002-P4-PROSE.json",
+      "owner_lane_ledger_delta_pointer": "governance/census/SYSTEM-MASTER-COMPLETION-CENSUS-002-P4-PROSE-LEDGER-DELTA.json",
+      "post_completion_delta": {
+        "through_prose_control_head": "309a7876b8e388d115d4d3bde7dc39dd0ef8b6fd",
+        "classification": "P4_OWNER_RESULT_REMAINS_VALID__BLIND_SEAL_VALIDATOR_AND_FOUNDATION_CLOSURE_WORK_PRESERVED",
+        "evidence": [
+          "governance/census/PROSE-SECOND-SHIFT-2026-09-10-LEDGER-DELTA.json",
+          "governance/second-shift/SECOND-SHIFT-FINAL-REFILL-2026-09-10.json"
+        ],
+        "boundary": "Fresh-context real six-case blind scoring and private DEVELOPMENT_GOLD/Teacher paths remain separate; no author, Book-canonical, publication or production authority is transferred."
+      },
+      "global_admission_rule": "Do not replay the sealed P4 forensic census. After P3 is COMPLETE, reconcile only live Prose delta and admit the sealed result unless evidence invalidates it."
     },
     {
       "phase_id": "P5",
