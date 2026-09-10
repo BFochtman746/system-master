@@ -1,0 +1,162 @@
+{
+  "artifact_id": "PROSE-FOUNDATION-ROUTE-CONTRACT-CLOSURE-002",
+  "effective_date": "2026-09-10",
+  "owner_path": "SYSTEM_MASTER/BOOK/PROSE",
+  "objective_id": "PROSE-FOUNDATION-ROUTE-CONTRACT-CLOSURE-002",
+  "base_census": "qualification/literary-prose-engine-001/PROSE-FOUNDATION-CLOSURE-CENSUS-CHECKPOINT-001.json",
+  "base_control_head": "309a7876b8e388d115d4d3bde7dc39dd0ef8b6fd",
+  "standing": "CONTRACT_MATERIALIZED__EXECUTABLE_NEGATIVE_AUTHORITY_QUALIFICATION_PENDING",
+  "scope": [
+    "PROSE-PROSE-CRAFT-TRAINING",
+    "PROSE-REVISION-INTELLIGENCE"
+  ],
+  "authority": {
+    "prose_binding": "qualification/literary-prose-engine-001/PROSE-SYSTEM-PRODUCT-PARENT-BINDING-003.json",
+    "craft_contract": "qualification/literary-prose-engine-001/step-d/CRAFT-KNOWLEDGE-DISTILLATION-CONTRACT-v1.json",
+    "revision_contract": "qualification/literary-prose-engine-001/step-h/CONTROLLED-REVISION-ENGINE-CONTRACT-v1.json",
+    "revision_implementation": "qualification/literary-prose-engine-001/step-h/controlled_revision.py",
+    "independent_evaluator_boundary": "qualification/literary-prose-engine-001/step-i/STEP-I-CLOSURE.md",
+    "preference_learning_boundary": "qualification/literary-prose-engine-001/step-j/STEP-J-CLOSURE.md",
+    "closed_loop_contract": "qualification/literary-prose-engine-001/step-l/STEP-L-QUALIFICATION-CONTRACT-v1.json"
+  },
+  "global_invariants": [
+    "PROSE owns literary evaluation, craft intelligence, diagnostics, calibration and revision intelligence but does not own BOOK canonical manuscript state.",
+    "Qualified PROSE output requires BOOK admission before any parent canonical effect.",
+    "PROSE may not self-admit into BOOK canonical state.",
+    "Candidate generation preserves the original as a mandatory LEVEL_0_NO_CHANGE control.",
+    "The writer/generator may not declare its own candidate superior.",
+    "Every nonzero candidate remains UNEVALUATED_PENDING_STEP_I until independent evaluation.",
+    "STEP-I disposition is literary evaluation evidence, not BOOK canonical-write authority.",
+    "STEP-J learning records digests/references and user/project preference evidence; it does not write raw manuscript text or grant publication authority.",
+    "No named-author imitation target, blind-label access, private DEVELOPMENT_GOLD access, publication action or production authority is introduced by this packet."
+  ],
+  "route_rows": [
+    {
+      "requirement_or_capability_id": "PROSE-PROSE-CRAFT-TRAINING",
+      "canonical_owner": "SYSTEM_MASTER/BOOK/PROSE",
+      "authority_source": "PROSE-SYSTEM-PRODUCT-PARENT-BINDING-003 owns[]",
+      "contract_or_interface": "CRAFT-KNOWLEDGE-DISTILLATION-CONTRACT-v1",
+      "command_ingress": {
+        "disposition": "INTERNAL_CONTRACT_INVOCATION",
+        "surface": "rights-admitted source/material -> craft distillation",
+        "external_command_api_claimed": false
+      },
+      "query_ingress": {
+        "disposition": "ARTIFACT_READ_ONLY",
+        "surface": "source registry / distilled principle artifacts",
+        "external_query_api_claimed": false
+      },
+      "api_surface": {
+        "disposition": "FILE_CONTRACT_AND_QUALIFICATION_ARTIFACTS_ONLY",
+        "public_or_cross_system_api_claimed": false
+      },
+      "event_surface": {
+        "disposition": "NO_EVENT_BUS_CONTRACT_CLAIMED",
+        "result_form": "derived craft-principle artifacts with provenance"
+      },
+      "error_surface": [
+        "UNRESOLVED_RIGHTS_OR_LICENSE -> quarantine / do not admit payload",
+        "TASK_MISMATCH -> do not universalize source authority",
+        "EVIDENCE_CONFLICT -> preserve competing hypotheses / route to qualification",
+        "NAMED_AUTHOR_IMITATION -> reject",
+        "DERIVED_ONLY_RECONSTRUCTION -> reject",
+        "PROTECTED_CANON_OR_INTENT_CONFLICT -> upstream authority wins"
+      ],
+      "egress": [
+        "conditioned craft principle",
+        "diagnostic signals",
+        "failure modes",
+        "counterconditions",
+        "revision-transform knowledge",
+        "rights/provenance projection"
+      ],
+      "persistence_or_canonical_writer": "PROSE qualification/knowledge artifacts only; BOOK canonical manuscript writer is explicitly outside this capability",
+      "parent_admission_required_for_book_effect": true,
+      "self_admission_allowed": false,
+      "failure_semantics": "fail closed on rights, imitation, reconstruction, authority conflict or unresolved evidence; absence of a runtime command/event bus is explicit and is not guessed into existence",
+      "evidence_pointer": [
+        "qualification/literary-prose-engine-001/step-d/STEP-D-CLOSURE.md",
+        "qualification/literary-prose-engine-001/step-d/CRAFT-KNOWLEDGE-DISTILLATION-CONTRACT-v1.json",
+        "qualification/literary-prose-engine-001/PROSE-SYSTEM-PRODUCT-PARENT-BINDING-003.json"
+      ],
+      "target_state_after_qualification": "COMPLETE_WITH_EVIDENCE"
+    },
+    {
+      "requirement_or_capability_id": "PROSE-REVISION-INTELLIGENCE",
+      "canonical_owner": "SYSTEM_MASTER/BOOK/PROSE",
+      "authority_source": "PROSE-SYSTEM-PRODUCT-PARENT-BINDING-003 owns[] + parent_boundary",
+      "contract_or_interface": "CONTROLLED-REVISION-ENGINE-CONTRACT-v1 / generate_candidate_set",
+      "command_ingress": {
+        "disposition": "INTERNAL_FUNCTION_COMMAND",
+        "surface": "generate_candidate_set(state, original_text, opportunities, transforms, requests, max_nonzero=3)"
+      },
+      "query_ingress": {
+        "disposition": "NO_SEPARATE_QUERY_API_CLAIMED",
+        "surface": "inputs are supplied as exact qualified state/artifact values"
+      },
+      "api_surface": {
+        "disposition": "INTERNAL_PYTHON_FUNCTION",
+        "public_or_cross_system_api_claimed": false
+      },
+      "event_surface": {
+        "disposition": "NO_EXTERNAL_EVENT_EMISSION_CLAIMED_BY_STEP_H",
+        "result_form": "returned REVISION_CANDIDATE_SET plus structured rejections"
+      },
+      "error_surface": [
+        "PASSAGE_STATE_NOT_REVISION_READY",
+        "CANDIDATE_BUDGET_EXHAUSTED",
+        "INVALID_NONZERO_LEVEL",
+        "AMBITION_EXCEEDS_PASSAGE_AUTHORITY",
+        "CHALLENGE_NOT_AUTHORIZED",
+        "OPPORTUNITY_NOT_ADMITTED",
+        "TRANSFORM_NOT_QUALIFIED",
+        "TRANSFORM_SCOPE_EXCEEDED",
+        "TRANSFORM_COUNTERCONDITION_ACTIVE",
+        "HARD_PRESERVATION_FAILURE",
+        "NAMED_AUTHOR_TARGET_REJECTED",
+        "NO_EFFECT_NONZERO_CANDIDATE"
+      ],
+      "egress": [
+        "mandatory unchanged control",
+        "bounded candidate alternatives",
+        "structured rejection records",
+        "UNEVALUATED_PENDING_STEP_I disposition on every nonzero candidate"
+      ],
+      "persistence_or_canonical_writer": "No BOOK canonical write. STEP-H returns candidate data; STEP-I independently evaluates; any parent canonical effect still requires BOOK admission.",
+      "parent_admission_required_for_book_effect": true,
+      "self_admission_allowed": false,
+      "publication_allowed": false,
+      "writer_self_adjudication_allowed": false,
+      "original_mutation_allowed": false,
+      "failure_semantics": "invalid authority, state, scope, transform, preservation or imitation conditions reject the requested nonzero candidate while retaining the unchanged control; no failure path grants mutation/promotion/publication authority",
+      "evidence_pointer": [
+        "qualification/literary-prose-engine-001/step-h/CONTROLLED-REVISION-ENGINE-CONTRACT-v1.json",
+        "qualification/literary-prose-engine-001/step-h/controlled_revision.py",
+        "qualification/literary-prose-engine-001/step-h/STEP-H-CLOSURE.md",
+        "qualification/literary-prose-engine-001/step-i/STEP-I-CLOSURE.md",
+        "qualification/literary-prose-engine-001/step-l/STEP-L-QUALIFICATION-CONTRACT-v1.json",
+        "qualification/literary-prose-engine-001/PROSE-SYSTEM-PRODUCT-PARENT-BINDING-003.json"
+      ],
+      "target_state_after_qualification": "COMPLETE_WITH_EVIDENCE"
+    }
+  ],
+  "negative_authority_acceptance_cases": [
+    "parent binding forbids PROSE self-admission into BOOK canonical state",
+    "synthetic request fields attempting self_admit/book_canonical_write/publish do not create corresponding output authority",
+    "blocked passage state returns mandatory unchanged control only",
+    "canon preservation conflict rejects nonzero candidate",
+    "named-author target rejects nonzero candidate",
+    "successful synthetic candidate preserves original text and writer_quality_claim remains null",
+    "successful nonzero candidate remains UNEVALUATED_PENDING_STEP_I",
+    "revision implementation contains no direct filesystem/process/network effect primitive",
+    "craft contract retains protected canon/intent and rejects named-author imitation/reconstruction"
+  ],
+  "forbidden_authority_preserved": [
+    "no blind author labels read or used",
+    "no private manuscript or DEVELOPMENT_GOLD read",
+    "no immutable blind prediction seal created",
+    "no BOOK canonical manuscript state mutation",
+    "no author, publication, production, A-01 or native authority inferred"
+  ],
+  "pass_condition": "Executable fixture runner passes every route-contract and negative-authority assertion on the exact branch subject; then both census ACTIVE_GAP rows may move to COMPLETE_WITH_EVIDENCE and successor priority advances to PROSE-FOUNDATION-FAILURE-SEMANTICS-AND-FIXTURE-PACKET-003."
+}
