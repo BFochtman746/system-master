@@ -2,53 +2,60 @@
   "owner_system_id": "BOOK",
   "owner_path": "SYSTEM_MASTER/BOOK",
   "control_ref": "book-system/control-v1",
-  "last_known_control_head": "6304df0b60dbe49ab7be0218b0d588c1b0ba5279",
-  "delegation_epoch": 21,
+  "last_known_control_head": "a2820411337b74a00878a1ce9cb82a363a4fb18c",
+  "delegation_epoch": 22,
   "active_delegations": [
     {
-      "delegation_id": "SECOND-SHIFT-BOOK-POST-RF012-IMPLEMENTATION-GAP-CENSUS-001",
+      "delegation_id": "SECOND-SHIFT-BOOK-PROSE-INTEGRATION-PHASE1-INPUT-CENSUS-001",
       "owner_path": "SYSTEM_MASTER/BOOK",
-      "objective_id": "BOOK-SYSTEM-POST-RF012-IMPLEMENTATION-GAP-CENSUS-001",
+      "objective_id": "BOOK-PROSE-INTEGRATION-PHASE-1-INPUT-CENSUS-001",
       "state": "READY",
       "valid_for_control_ref": "book-system/control-v1",
-      "valid_for_control_head": "6304df0b60dbe49ab7be0218b0d588c1b0ba5279",
-      "created_at": "2026-09-10T10:37:00-04:00",
-      "last_revalidated_at": "2026-09-10T10:37:00-04:00",
+      "valid_for_control_head": "a2820411337b74a00878a1ce9cb82a363a4fb18c",
+      "created_at": "2026-09-10T11:00:00-04:00",
+      "last_revalidated_at": "2026-09-10T11:00:00-04:00",
       "owner_evidence": [
-        "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-027.json",
-        "qualification/book-system/BOOK-SYSTEM-PRODUCT-PARENT-BINDING-007.json",
-        "governance/census/SYSTEM-MASTER-COMPLETION-CENSUS-002-P3-BOOK.json",
-        "governance/WORK-OBLIGATION-REGISTRY-001.json"
+        "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-029.json",
+        "qualification/book-system/BOOK-SYSTEM-PRODUCT-PARENT-BINDING-009.json",
+        "qualification/book-system/book-prose-integration/BOOK-PROSE-INTEGRATION-PHASE-0-CURRENT-STATE-CENSUS-001.json",
+        "qualification/book-system/book-prose-integration/BOOK-PROSE-INTEGRATION-PRE-INTEGRATION-CHECKPOINT-001.json"
       ],
-      "preserved_rf012_subject": "67a23c0b09505dc3dd8fd748523fec3868f649b0",
-      "preserved_rf012_hosted_run_id": 34468928275,
-      "preserved_primary_a01_subject": "e993806a1d9a4838d4bd6d162a36921526ef302a",
-      "completion_delta": "Reconcile the live Book executable surfaces against the frozen Book capability and adequacy obligations, disposition each current core/shared capability using owner-valid evidence, and identify exactly one highest-value A-01-independent true implementation gap or prove that no such gap remains.",
-      "stop_condition": "Every current core/shared Book capability is dispositioned against live executable evidence and exactly one highest-value A-01-independent implementation gap is selected, or zero such gaps is proven; the original content-admission A-01 subject remains unchanged and separately pending.",
+      "completion_delta": "Retrieve and verify the current authoritative Prose system and explicitly crosswalk Prose capabilities, contracts and evidence against Book capabilities and authority before any Book-Prose integration implementation or orchestrator mutation.",
+      "stop_condition": "Phase 1 input census is durably sealed with current Prose authority/evidence identity, overlap/conflict/delegation classifications and explicit Book/Prose write-authority boundaries; exactly one dependency-valid Phase 2 successor is selected or a truthful blocker is recorded. No integration runtime mutation occurs in this delegation.",
       "allowed_work": [
-        "inspect the exact live Book control head and executable modules",
-        "reconcile against SYSTEM-MASTER-COMPLETION-CENSUS-002-P3-BOOK and current qualification closures",
-        "reconcile scope-reset W01-W28 and M01-M34 inventory and Class-A Writing/Manuscript adequacy obligations",
-        "classify each capability as implemented-qualified, implemented-hosted-A01-pending, delegated, triggered/external, implementation-gap, empirical-gap, or dormant",
-        "select and prepare the highest-value A-01-independent Book-owned implementation successor when one exists"
+        "read the exact live Book and Prose control heads and current state records",
+        "inventory current Prose capabilities, contracts, qualification evidence and fresh-context-only boundaries",
+        "crosswalk those inputs against Book canonical manuscript ownership, admission gates, lifecycle and evaluator/orchestration needs",
+        "classify overlap, dependency, delegation, conflict and missing-contract surfaces without changing canonical owner boundaries",
+        "prepare the next integration contract/census successor only after the Phase 1 evidence map is sealed"
       ],
       "forbidden_authority": [
-        "do not replace, mutate, relabel or transfer PASS to original content-admission subject e993806a1d9a4838d4bd6d162a36921526ef302a",
-        "do not infer A-01 PASS from hosted PASS",
-        "do not fabricate author, private manuscript, publication, provider, native, empirical or production evidence",
-        "do not absorb Prose, Book Evaluator, Document or System Master/Core authority"
+        "do not mutate Book or Prose implementation during the Phase 1 census",
+        "do not create a second durable execution or manuscript authority",
+        "do not grant Prose direct canonical manuscript write authority",
+        "do not execute the fresh-context six-case blind scoring from a labeled owner context",
+        "do not mutate or relabel original Book content-admission A-01 subject e993806a1d9a4838d4bd6d162a36921526ef302a",
+        "do not fabricate author, private, A-01, native, publication or production evidence"
       ],
-      "on_pass": "Preserve the completed gap census and exact evidence, retire this delegation, re-read the live Book owner head, and bind the highest-value A-01-independent true implementation gap or record truthful zero-gap standing.",
-      "on_failure": "Preserve the exact failing census evidence, do not force a capability disposition, re-read live Book authority, and bind the next safe independent Book-owned repair or preparation successor."
+      "on_pass": "Preserve the sealed Phase 1 crosswalk, retire this delegation, re-read live Book authority and bind only the owner-selected next Book-Prose integration successor.",
+      "on_failure": "Preserve the exact authority/evidence mismatch or missing-contract finding, keep Book/Prose write fences unchanged, and bind only a read/reconcile or contract-preparation successor that does not require fabricated authority."
     }
   ],
   "retired_delegations": [
+    {
+      "delegation_id": "SECOND-SHIFT-BOOK-POST-RF012-IMPLEMENTATION-GAP-CENSUS-001",
+      "state": "COMPLETED__SUPERSEDED_BY_BOOK_PROSE_INTEGRATION_PHASE1",
+      "retirement_classification": "STALE_DELEGATION_RECONCILED_TO_LIVE_BOOK_STATE_029",
+      "prior_bound_control_head": "6304df0b60dbe49ab7be0218b0d588c1b0ba5279",
+      "live_control_head_at_reconciliation": "a2820411337b74a00878a1ce9cb82a363a4fb18c",
+      "replacement_delegation_id": "SECOND-SHIFT-BOOK-PROSE-INTEGRATION-PHASE1-INPUT-CENSUS-001",
+      "history_preserved": true
+    },
     {
       "delegation_id": "SECOND-SHIFT-BOOK-RF012-OWNER-PROMOTION-REBIND-004",
       "state": "COMPLETED__SUPERSEDED_BY_POST_RF012_GAP_CENSUS",
       "completion_subject_sha": "67a23c0b09505dc3dd8fd748523fec3868f649b0",
       "hosted_run_id": 34468928275,
-      "replacement_delegation_id": "SECOND-SHIFT-BOOK-POST-RF012-IMPLEMENTATION-GAP-CENSUS-001",
       "history_preserved": true
     },
     {
@@ -62,10 +69,10 @@
     }
   ],
   "prior_full_history": {
-    "blob_sha": "760c486296e6dcbca899982453a8965152775b13",
+    "blob_sha": "ad8586963395e7e0af9ab3b3421b06f0d729f45c",
     "standing": "IMMUTABLE_GIT_HISTORY_PRESERVED__DETAILED_PRIOR_DELEGATION_HISTORY_REMAINS_RECOVERABLE"
   },
   "owner_revalidation_required": false,
-  "reason": "Live Book authority advanced through RF012 owner promotion and post-promotion routing. The current Book owner selected BOOK-SYSTEM-POST-RF012-IMPLEMENTATION-GAP-CENSUS-001 as the next A-01-independent non-destructive objective; this selector is rebound to the exact live Book head without altering the preserved A-01 fence.",
+  "reason": "Live Book advanced 22 commits beyond the prior 6304df0b selector. Current Binding-009 and State-029 select BOOK-PROSE-INTEGRATION-PHASE-1-INPUT-CENSUS-001 as READY and explicitly mark the prior shared selector stale. This repair rebinds only the scheduler selector to the exact live Book head and preserves all Book/Prose/A-01/author/native/publication authority fences.",
   "empty_is_valid": false
 }
