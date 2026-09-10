@@ -1,0 +1,115 @@
+{
+  "census_id": "BOOK-PROSE-INTEGRATION-PHASE-0-CURRENT-STATE-CENSUS-001",
+  "effective_date": "2026-09-10",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "purpose": "Preserve and reconcile current Book owner truth before controlled Prose integration without replaying, deleting, weakening or transferring prior authority.",
+  "source_control_ref": "book-system/control-v1",
+  "source_live_head_before_phase0": "77a6bcd3f62ca0468c3c8f1f43ab994b73c0ecb2",
+  "global_sealed_book_snapshot": "05c1f53e2f710f419a99cb99594c53c2f0240b68",
+  "authority_delta": {
+    "ahead_by_commits": 22,
+    "behind_by_commits": 0,
+    "classification": "AUTHORITY_DELTA__FORWARD_ONLY__NO_REWIND_OR_DIVERGENCE_OBSERVED",
+    "rule": "Reconcile only the live Book delta; do not reopen or replay sealed P0-P9 census work."
+  },
+  "current_authority": {
+    "canonical_manuscript_owner": "SYSTEM_MASTER/BOOK",
+    "prose_owner": "SYSTEM_MASTER/BOOK/PROSE",
+    "prose_role": "SPECIALIST_LITERARY_INTELLIGENCE__NO_CANONICAL_MANUSCRIPT_WRITE_AUTHORITY",
+    "author_role": "FINAL_CREATIVE_AND_SEMANTIC_AUTHORITY",
+    "content_admission_role": "SOLE_BOOK_CANONICAL_MUTATION_PATH",
+    "system_orchestrator_rule": "Do not create a second durable execution authority. Any Book Workflow Orchestrator introduced by this integration must be coordination-only and subordinate to existing System Master execution authority and Book admission authority."
+  },
+  "preserved_completed_delta": [
+    {
+      "objective": "BOOK-SYSTEM-RF012-OWNER-PROMOTION-REBIND-AND-NEXT-OWNER-SELECTION-004",
+      "standing": "COMPLETED_AND_SEALED_IN_OWNER_LINEAGE",
+      "evidence_commit": "e41287d3c98e196fccfe3ebcced5ae24db8a277e",
+      "candidate_subject_sha": "67a23c0b09505dc3dd8fd748523fec3868f649b0"
+    },
+    {
+      "objective": "BOOK-SYSTEM-POST-RF012-IMPLEMENTATION-GAP-CENSUS-001",
+      "standing": "CLOSED",
+      "evidence_commit": "84a752a32169f6f26f5cc0915268d42424ce04ec"
+    },
+    {
+      "objective": "BOOK-SYSTEM-EXISTING-BOOK-RECOVERY-SEMANTIC-CORE-001",
+      "standing": "CLOSED_TO_HOSTED_SYNTHETIC_SEMANTIC_CORE_BOUNDARY",
+      "closure": "qualification/book-system/existing-book-recovery-semantic-core-001/BOOK-SYSTEM-EXISTING-BOOK-RECOVERY-SEMANTIC-CORE-001-CLOSURE.json",
+      "qualified_subject_sha": "f0e6cf534f6f97e74a9411d34715f2f09bae92b0",
+      "hosted_run_id": 34491031662,
+      "failed_predecessor_run_id_preserved": 34490821256
+    },
+    {
+      "objective": "BOOK-SYSTEM-CONTENT-ADMISSION-AUTHOR-DECISION-APPLICABILITY-GUARD-004",
+      "standing": "CLOSED_TO_HOSTED_SYNTHETIC_ADDITIVE_GUARD_BOUNDARY",
+      "closure": "qualification/book-system/content-object-admission-001/BOOK-SYSTEM-CONTENT-ADMISSION-AUTHOR-DECISION-APPLICABILITY-GUARD-004-CLOSURE.json",
+      "qualified_subject_sha": "972ee580890ff73f6fc5d09684b11bcb295e27d5",
+      "hosted_run_id": 34491786739
+    }
+  ],
+  "preserved_open_fences": [
+    {
+      "objective": "BOOK-SYSTEM-CANONICAL-CONTENT-OBJECT-ADMISSION-001-A01-REGISTRATION-AND-QUALIFICATION-PREP",
+      "state": "BLOCKED_ON_SHARED_A01_AUTHORITY",
+      "exact_subject_sha": "e993806a1d9a4838d4bd6d162a36921526ef302a",
+      "hosted_result": "PASS__ORIGINAL_SUBJECT_ONLY",
+      "a01_result": "NOT_REGISTERED__NOT_RUN__NO_PASS",
+      "integration_blocking": false
+    },
+    {
+      "objective": "REAL_AUTHOR_OR_PUBLICATION_ACTION",
+      "state": "HUMAN_OR_EXTERNAL_ONLY",
+      "integration_blocking": false
+    },
+    {
+      "objective": "NATIVE_DEVICE_AND_PRODUCTION_QUALIFICATION",
+      "state": "UNOBSERVED_OR_DEFERRED",
+      "integration_blocking": false
+    }
+  ],
+  "phase0_findings": [
+    {
+      "finding_id": "P0-F01",
+      "classification": "STALE_CURRENT_SELECTOR",
+      "detail": "BOOK-SYSTEM-RECONCILED-STATE-028 and PRODUCT-PARENT-BINDING-008 still select EBR-SC1 as READY although EBR-SC1 and a later applicability-guard increment are hosted-closed on the live owner head.",
+      "required_action": "Supersede current routing with a new reconciliation state; preserve 028/008 as history."
+    },
+    {
+      "finding_id": "P0-F02",
+      "classification": "STALE_SHARED_SECOND_SHIFT_SELECTOR",
+      "detail": "main governance/second-shift/BOOK-DELEGATIONS.json still advertises the completed post-RF012 gap census at head 6304df0b60dbe49ab7be0218b0d588c1b0ba5279.",
+      "required_action": "Treat as STALE_DELEGATION and do not replay; reconcile shared selector after owner checkpoint without deleting history."
+    },
+    {
+      "finding_id": "P0-F03",
+      "classification": "STALE_SHARED_WORK_OBLIGATION",
+      "detail": "main WORK-OBLIGATION-REGISTRY-002 still lists RF012 promotion READY although the live Book lineage sealed that promotion and advanced through later work.",
+      "required_action": "Owner checkpoint records supersession; product-root/shared registry reconciliation must preserve the old row as historical lineage rather than replay it."
+    },
+    {
+      "finding_id": "P0-F04",
+      "classification": "NO_ACTIVE_BOOK_REPAIR_TRANSACTION",
+      "detail": "BOOK repair inbox contains zero active transactions.",
+      "required_action": "No repair-lineage gate blocks integration."
+    },
+    {
+      "finding_id": "P0-F05",
+      "classification": "ORCHESTRATOR_NAMING_AUTHORITY_RECONCILIATION_REQUIRED_BEFORE_PHASE2",
+      "detail": "Current Book state says no new Book orchestrator because a second durable execution authority is forbidden. The requested Book Workflow Orchestrator is admissible only as a coordination component/facade, not a new authority domain and not a canonical writer.",
+      "required_action": "Phase 2A must make this subordination explicit before implementation."
+    },
+    {
+      "finding_id": "P0-F06",
+      "classification": "LOCAL_UNCOMMITTED_STATE_NOT_OBSERVABLE_FROM_GITHUB",
+      "detail": "Repository authority proves committed branch state only; an unpushed developer-local working tree cannot be inferred clean or dirty from GitHub.",
+      "required_action": "Do not claim absence of local uncommitted work. Integration commits are based on the canonical remote owner branch only."
+    }
+  ],
+  "historical_branch_policy": "Non-selected Book/RF012/recovery branches remain historical evidence unless a newer canonical owner record explicitly selects them. Do not delete them for integration cleanup.",
+  "duplicate_authority_assessment": "NO_SECOND_CANONICAL_MANUSCRIPT_OWNER_FOUND__VERSIONED_STATE_AND_BINDING_FILES_ARE_SUPERSESSION_HISTORY_NOT_DUPLICATE_AUTHORITY",
+  "provenance_assessment": "LIVE_DELTA_COMMITS_AND_CLOSURE_RECORDS_PRESENT__CURRENT_ROUTING_LAG_IDENTIFIED_AND_BOUNDED",
+  "unsafe_to_integrate": false,
+  "phase0_exit": "SAFE_TO_SEAL_PRE_INTEGRATION_BASELINE_AND_ADVANCE_TO_PHASE_1_INPUT_CENSUS",
+  "next_objective": "BOOK-PROSE-INTEGRATION-PHASE-1-INPUT-CENSUS-001"
+}
