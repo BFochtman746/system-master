@@ -23,6 +23,9 @@
   "repair_ledger": ".github/scripts/a01-repair-ledger.js",
   "repair_receipt_ingest_workflow": ".github/workflows/a01-repair-receipt-ingest.yml",
   "repair_finalize_workflow": ".github/workflows/a01-repair-finalize.yml",
+  "repair_rerun_workflow": ".github/workflows/a01-repair-rerun.yml",
+  "repair_rerun_adjudicate_workflow": ".github/workflows/a01-repair-rerun-adjudicate.yml",
+  "repair_rerun_selftest": ".github/scripts/a01-repair-rerun-selftest.js",
   "state_reconciler_contract": "governance/reconciler/SYSTEM-STATE-RECONCILER-001.md",
   "state_reconciler_workflow": ".github/workflows/system-state-reconciler.yml",
   "closed_loop_repair_sidecar": ".github/scripts/a01-closed-loop-repair.js",
@@ -40,17 +43,20 @@
     "For repository-wide reconciliation, read active_census and resume at the first incomplete phase rather than restarting the audit.",
     "If work is being delegated to Second Shift, read the owner delegation file and revalidate it against the live control head immediately before admission/execution.",
     "If an executable qualification fails, classify it before repair. A gateway non-PASS is brokered into a durable transaction after the gateway run; repair-eligible product failures emit an owner-worker dispatch packet. A changed repair candidate may emit a replacement A-01 return ticket only after deterministic prequalification PASS on the same exact replacement SHA.",
-    "For repair-control work, treat A01-CLOSED-LOOP-REPAIR-001B as closed to its hosted-control scope and continue from A01-CLOSED-LOOP-REPAIR-001C unless newer repository evidence supersedes this pointer."
+    "For repair-control work, treat A01-CLOSED-LOOP-REPAIR-001B as closed to its hosted-control scope and continue from A01-CLOSED-LOOP-REPAIR-001C unless newer repository evidence supersedes this pointer.",
+    "For A01-CLOSED-LOOP-REPAIR-001C, a replacement or same-SHA retry must enter through the canonical repair-rerun workflow using the existing durable transaction_id. The gateway validates transaction/qualification/workstream/subject/ref binding and must not invoke the initial Repair Broker for a rerun.",
+    "A replacement A-01 result is adjudicated back into the same transaction. Only a real authoritative A-01 PASS receipt closes that transaction as PASS; hosted selftests prove control logic only. Subject failure re-dispatches the same transaction within remaining product-repair budget; infrastructure failure may receive one same-SHA retry; admission/dependency/control-plane/non-automatable outcomes retain truthful routes."
   ],
   "truth_classes": {
     "AUTHORITY_CURRENT": "Owner, live control head, current state and evidence agree.",
-    "AUTHORITY_DELTA": "Live owner control head/state moved after the last sealed checkpoint; read and reconcile the delta before continuation.",
+    "AUTHORITY_DELTA": "Live owner control head/state moved after the last sealed checkpoint; read and reconcile only the delta before continuation.",
     "UNALLOCATED": "Work cannot be mapped to a current owner path; inspection is allowed, execution/promotion/scheduling is not.",
     "STALE_DELEGATION": "Second Shift delegation does not match the live owner control head or current open objective; do not execute.",
     "EVIDENCE_MISMATCH": "Claimed standing exceeds or conflicts with exact receipt/artifact/subject evidence; fail closed and adjudicate.",
     "REGISTERED_EXECUTABLE_MISSING": "A control-plane-source qualification points to repository-owned executable bytes that are absent from the current control-plane checkout, or a subject-source qualification is absent on its exact subject checkout; fail closed at the correct authority boundary.",
     "REPAIR_REQUEST_READY": "An authoritative repairable subject failure has a durable owner-lane repair transaction and owner-worker dispatch packet; it may be reproduced/minimally repaired without granting PASS.",
     "A01_REQUEUE_READY": "A changed repair candidate has deterministic prequalification PASS on the same exact SHA and a durable replacement return ticket may enter canonical A-01 admission; it is not an authoritative PASS.",
+    "RETRY_REQUEST_READY": "A prior replacement A-01 attempt encountered a bounded infrastructure failure and the same exact subject may be retried once through canonical A-01 without consuming another product-repair attempt.",
     "REPAIR_OWNER_MISMATCH": "A repair transaction no longer maps truthfully to the canonical owner/workstream; mutation/requeue is blocked until reconciled."
   },
   "anti_surprise_invariant": "No worker may say it is surprised by repository standing after beginning execution. Repository standing, active repair transactions and live delegation standing must be resolved before execution; a discovered mismatch becomes AUTHORITY_DELTA, EVIDENCE_MISMATCH, REPAIR_OWNER_MISMATCH or STALE_DELEGATION and is reconciled first.",
@@ -64,6 +70,7 @@
     "Any Second Shift item must be removed from active delegation when completed/superseded and replaced only after a fresh owner re-evaluation.",
     "An authoritative repairable failure creates a durable owner-lane repair transaction and append-only repair events; it may not exist only in chat memory.",
     "A closed-loop repair that changes subject bytes creates a new exact SHA, deterministic prequalification evidence on that exact SHA, and a replacement A-01 request linked to the original failed receipt.",
+    "A replacement A-01 rerun never opens a second repair transaction for the same lineage; its receipt/attempt evidence is appended to the existing transaction and terminal or continuation state is derived there.",
     "Repair Broker, repair worker, hosted tests and owner chats never grant A-01 PASS, promotion, publication or production authority."
   ]
 }
