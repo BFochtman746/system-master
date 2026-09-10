@@ -3,8 +3,8 @@
   "control_plane_id": "A01-CONTROL-PLANE-001",
   "canonical_ref": "main",
   "canonical_front_door": ".github/workflows/a01-qualification-dispatch.yml",
-  "admission_gateway": ".github/workflows/a01-control-plane-admission-gateway.yml",
-  "internal_executor": ".github/workflows/a01-control-plane-gateway.yml",
+  "admission_gateway": ".github/workflows/a01-control-plane-gateway.yml",
+  "internal_executor": ".github/workflows/a01-control-plane-executor.yml",
   "runner": {
     "name": "A-01",
     "required_labels": ["self-hosted", "Windows", "X64"],
@@ -34,8 +34,8 @@
     "require_exact_subject_sha": true,
     "require_registered_wrapper_exists_before_self_hosted": true,
     "ordinary_launch_path": ".github/workflows/a01-qualification-dispatch.yml",
-    "internal_admission_path": ".github/workflows/a01-control-plane-admission-gateway.yml",
-    "internal_executor_path": ".github/workflows/a01-control-plane-gateway.yml",
+    "internal_admission_path": ".github/workflows/a01-control-plane-gateway.yml",
+    "internal_executor_path": ".github/workflows/a01-control-plane-executor.yml",
     "control_plane_change_retry": "FRESH_DEFAULT_BRANCH_DISPATCH_ONLY",
     "failed_or_specific_job_rerun_after_control_plane_change": "PROHIBITED",
     "same_sha_infra_retry_requires_unchanged_control_plane": true,
@@ -43,18 +43,9 @@
     "same_repository_control_workflow_reference": "RELATIVE_SAME_COMMIT_REQUIRED"
   },
   "gate_classes": {
-    "focused": {
-      "purpose": "Changed capability plus immediate integration dependencies",
-      "promotion_authority": false
-    },
-    "consolidated": {
-      "purpose": "Accumulated slice plus broader regressions",
-      "promotion_authority": false
-    },
-    "promotion": {
-      "purpose": "Exact promotion subject and required regressions",
-      "promotion_authority": true
-    }
+    "focused": {"purpose": "Changed capability plus immediate integration dependencies", "promotion_authority": false},
+    "consolidated": {"purpose": "Accumulated slice plus broader regressions", "promotion_authority": false},
+    "promotion": {"purpose": "Exact promotion subject and required regressions", "promotion_authority": true}
   },
   "runtime": {
     "normal_qualifier_timeout_minutes": 28,
@@ -126,8 +117,5 @@
     "require_control_plane_binding_evidence": true,
     "promotion_requires_pass": true
   },
-  "return_ticket": {
-    "schema": "qualification/a01/schema/return-ticket.schema.json",
-    "required": true
-  }
+  "return_ticket": {"schema": "qualification/a01/schema/return-ticket.schema.json", "required": true}
 }
