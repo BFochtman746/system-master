@@ -1,0 +1,41 @@
+{
+  "delta_id": "BOOK-SYSTEM-POST-RF012-WORK-OBLIGATION-DELTA-001",
+  "effective_date": "2026-09-10",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "standing": "OWNER_VALID_DELTA__SHARED_REGISTRY_RECONCILIATION_REQUIRED",
+  "operations": [
+    {
+      "operation": "CLOSE",
+      "obligation_id": "BOOK-SYSTEM-RF012-OWNER-PROMOTION-REBIND-AND-NEXT-OWNER-SELECTION-004",
+      "closure_reason": "Exact candidate 67a23c0b09505dc3dd8fd748523fec3868f649b0 was revalidated as a three-commit fast-forward from the unchanged Book control head, hosted run 34468928275 was successful, and the Book control ref was advanced without force. State 027 preserves the original content-admission A-01 subject separately.",
+      "closure_evidence": [
+        "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-027.json",
+        "qualification/book-system/BOOK-SYSTEM-PRODUCT-PARENT-BINDING-007.json"
+      ]
+    },
+    {
+      "operation": "CLOSE",
+      "obligation_id": "BOOK-SYSTEM-POST-RF012-IMPLEMENTATION-GAP-CENSUS-001",
+      "closure_reason": "Current executable Book parent, scope reset, R5/R6 recovery closure and BOOK-ENG-007 runtime evidence were reconciled; the first highest-value A-01-independent Book-parent implementation residual was selected.",
+      "closure_evidence": "qualification/book-system/BOOK-SYSTEM-POST-RF012-IMPLEMENTATION-GAP-CENSUS-001.json"
+    },
+    {
+      "operation": "ADD",
+      "obligation_id": "BOOK-SYSTEM-EXISTING-BOOK-RECOVERY-SEMANTIC-CORE-001",
+      "owner_path": "SYSTEM_MASTER/BOOK",
+      "state": "READY",
+      "objective": "Implement and deterministically qualify the Book-owned existing-book semantic reconstruction/re-entry core over normalized immutable source projections, producing evidence-linked recovery proposals, maturity/exact-next and an immutable RecoveredBookBaseline without absorbing parser/custody/author/Prose/StoryBible/Data authorities.",
+      "contract": "qualification/book-system/existing-book-recovery-semantic-core-001/BOOK-SYSTEM-EXISTING-BOOK-RECOVERY-SEMANTIC-CORE-001-CONTRACT.json",
+      "first_increment": "EBR-SC1",
+      "dependency_class": "A01_INDEPENDENT",
+      "authority_rule": "Native provider, A-01, author, empirical, native-device, publication and production proof remain separate."
+    }
+  ],
+  "preserve_open_obligation": {
+    "obligation_id": "BOOK-SYSTEM-CANONICAL-CONTENT-OBJECT-ADMISSION-001-A01-REGISTRATION-AND-QUALIFICATION-PREP",
+    "state": "BLOCKED_ON_SHARED_A01_AUTHORITY",
+    "exact_subject_sha": "e993806a1d9a4838d4bd6d162a36921526ef302a",
+    "rule": "Do not close, replace or relabel this obligation from RF012/recovery work."
+  },
+  "apply_rule": "Shared registry reconciliation must preserve any newer central evidence. If the registry moved independently, merge only these owner-valid Book operations rather than overwriting unrelated state."
+}
