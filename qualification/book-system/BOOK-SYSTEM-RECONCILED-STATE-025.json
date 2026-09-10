@@ -1,0 +1,55 @@
+{
+  "state_id": "BOOK-SYSTEM-RECONCILED-STATE-025",
+  "effective_date": "2026-09-10",
+  "supersedes_for_current_parent_control": "BOOK-SYSTEM-RECONCILED-STATE-024",
+  "supersession_scope": "PARENT_CONTROL_AND_NEXT_STEP_ROUTING_ONLY",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "control_branch": "book-system/control-v1",
+  "standing": "CONTENT_ADMISSION_IMPLEMENTED__HOSTED_EXACT_SHA_PASS__A01_REGISTRATION_PREP_NEXT",
+  "implementation_result": {
+    "objective": "BOOK-SYSTEM-CANONICAL-CONTENT-OBJECT-ADMISSION-001-IMPLEMENTATION-AND-HOSTED-PREQUALIFICATION",
+    "exact_implementation_subject_sha": "e993806a1d9a4838d4bd6d162a36921526ef302a",
+    "hosted_run_id": 34445193712,
+    "hosted_job_id": 102768363655,
+    "hosted_result": "PASS",
+    "deterministic_admission_tests": "30/30 PASS",
+    "version_and_rollback_regression": "PASS",
+    "evidence_artifact_id": 10139375364,
+    "evidence_artifact_digest": "sha256:fb12492c6b7a738e2390b2d346e47e93c03168d457acd6f88b9f29d7ca0fc685",
+    "control_plane_enforcement_run_id": 34445193637,
+    "control_plane_enforcement_result": "PASS"
+  },
+  "implemented_boundary": [
+    "parent-only registration/version admission for governing brief, canon manifest, story bible, book plan and manuscript",
+    "append-only stable CHAPTER/SCENE version identity with same-book parentage",
+    "active CHAPTER/SCENE order only through a newly versioned BOOK_PLAN rather than a second canonical order authority",
+    "exact state CAS, immutable predecessor lineage, atomic multi-operation mutation and deterministic idempotent replay",
+    "provenance/currentness enforcement and approved-author-decision preconditions without synthesizing human evidence",
+    "preservation of lifecycle, export-freeze, publication, provider, Document and Prose authority boundaries"
+  ],
+  "a01_standing": {
+    "qualification_registered_in_observed_registry_v29": false,
+    "a01_pass": false,
+    "registration_request": "qualification/book-system/a01-prep/BOOK-SYSTEM-CANONICAL-CONTENT-OBJECT-ADMISSION-001-A01-REGISTRATION-REQUEST.json",
+    "rule": "Hosted PASS does not authorize A-01 PASS or promotion. Central A-01 authority must register and dispatch the exact tested implementation subject through the shared gateway."
+  },
+  "current_parent_critical_path": {
+    "id": "BOOK-SYSTEM-CANONICAL-CONTENT-OBJECT-ADMISSION-001-A01-REGISTRATION-AND-QUALIFICATION-PREP",
+    "classification": "READY__A01_INDEPENDENT_REGISTRATION_PREP__CENTRAL_REGISTRATION_REQUIRED_FOR_DISPATCH",
+    "objective": "Preserve the exact hosted-passed implementation subject, submit the prepared proposed registry entry to central A-01 authority, and prepare the exact shared-gateway ticket without dispatching an unregistered or direct self-hosted job.",
+    "evidence_target": [
+      "central registry entry for BOOK-SYSTEM-CANONICAL-CONTENT-OBJECT-ADMISSION-001",
+      "registry/control-plane selftest PASS after registration",
+      "exact subject SHA e993806a1d9a4838d4bd6d162a36921526ef302a retained unchanged for A-01 submission unless executable repair is required",
+      "canonical shared-gateway request/receipt when later dispatched"
+    ]
+  },
+  "work_ahead_rule": "If central A-01 registration or execution is blocked, Book must not idle. Re-read the completion census and perform only independent residual-gap census, architecture/specification, deterministic test design, or next-successor packet work that does not claim content-admission A-01 closure.",
+  "non_negotiables": [
+    "No PASS transfer between exact subjects.",
+    "Hosted PASS is not A-01 PASS.",
+    "Do not reopen the already qualified Version/Rollback foundation merely because this new seam depends on it.",
+    "Do not absorb Prose, Document System, author, publication, native or production authority.",
+    "Do not call the content-admission objective authoritatively closed until its required A-01 boundary is satisfied or owner authority explicitly reclassifies that requirement."
+  ]
+}

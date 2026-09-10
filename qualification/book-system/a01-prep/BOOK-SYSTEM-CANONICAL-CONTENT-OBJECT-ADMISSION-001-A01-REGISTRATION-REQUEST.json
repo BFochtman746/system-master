@@ -1,0 +1,46 @@
+{
+  "request_id": "BOOK-SYSTEM-CANONICAL-CONTENT-OBJECT-ADMISSION-001-A01-REGISTRATION-REQUEST",
+  "effective_date": "2026-09-10",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "standing": "READY_FOR_CENTRAL_A01_REGISTRATION__NOT_REGISTERED__NO_A01_PASS",
+  "implementation_subject_sha": "e993806a1d9a4838d4bd6d162a36921526ef302a",
+  "implementation_parent_sha": "7d6762de34f25447fe42364bd6e3e558d527180f",
+  "hosted_prequalification": {
+    "workflow": "Book System Canonical Content Object Admission Hosted Prequalification",
+    "run_id": 34445193712,
+    "job_id": 102768363655,
+    "conclusion": "success",
+    "deterministic_admission_tests": "30/30 PASS",
+    "version_and_rollback_regression": "PASS",
+    "artifact_id": 10139375364,
+    "artifact_digest": "sha256:fb12492c6b7a738e2390b2d346e47e93c03168d457acd6f88b9f29d7ca0fc685"
+  },
+  "control_plane_enforcement": {
+    "run_id": 34445193637,
+    "conclusion": "success",
+    "subject_sha": "e993806a1d9a4838d4bd6d162a36921526ef302a"
+  },
+  "registry_observation": {
+    "registry_version_observed": 29,
+    "qualification_present": false,
+    "rule": "Do not dispatch A-01 until central authority registers the exact qualification wrapper. Hosted PASS is not A-01 PASS."
+  },
+  "proposed_registry_entry": {
+    "qualification_id": "BOOK-SYSTEM-CANONICAL-CONTENT-OBJECT-ADMISSION-001",
+    "workstream_id": "BOOK-SYSTEM",
+    "gate_class": "focused",
+    "source": "subject",
+    "executable": "node",
+    "args": [".github/scripts/book-system-content-object-admission-001-qualify.js"],
+    "evidence_artifact": "book-system-canonical-content-object-admission-001",
+    "overnight_eligible": false,
+    "description": "Qualify the exact Book System canonical content-object admission seam: parent-only canonical registration/version/admission for governing brief, canon manifest, story bible, book plan and manuscript plus append-only chapter/scene version identity, exact digest/provenance/currentness, aggregate CAS, immutable predecessor lineage, deterministic order, cross-book denial, atomic multi-operation failure, idempotent replay/conflict rejection, approved-author-decision preconditions, Version/Rollback regression preservation, and no lifecycle/publication/provider authority transfer. PASS is exact-SHA focused evidence only and grants no author, publication, native, production, Document, or Prose authority."
+  },
+  "next_action": "Central A-01 authority validates and registers the proposed entry without changing the tested implementation subject. Then submit the exact implementation subject SHA through the canonical shared gateway. If registration or qualification changes executable bytes, require fresh hosted exact-SHA evidence first.",
+  "forbidden": [
+    "do not call hosted PASS A-01 PASS",
+    "do not run a direct self-hosted A-01 job",
+    "do not transfer the prior Version/Rollback A-01 PASS to this new subject",
+    "do not fabricate author, publication, native, production, Document, or Prose evidence"
+  ]
+}
