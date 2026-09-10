@@ -11,6 +11,8 @@ on:
       - '.github/scripts/a01-closed-loop-repair*.js'
       - '.github/scripts/a01-repair-broker*.js'
       - '.github/scripts/a01-repair-ledger*.js'
+      - '.github/scripts/a01-repair-rerun*.js'
+      - '.github/workflows/a01-control-plane-gateway.yml'
       - '.github/workflows/a01-repair-*.yml'
       - '.github/workflows/system-state-reconciler.yml'
   pull_request:
@@ -22,6 +24,8 @@ on:
       - '.github/scripts/a01-closed-loop-repair*.js'
       - '.github/scripts/a01-repair-broker*.js'
       - '.github/scripts/a01-repair-ledger*.js'
+      - '.github/scripts/a01-repair-rerun*.js'
+      - '.github/workflows/a01-control-plane-gateway.yml'
       - '.github/workflows/a01-repair-*.yml'
       - '.github/workflows/system-state-reconciler.yml'
 
@@ -53,6 +57,7 @@ jobs:
           node --check .github/scripts/a01-repair-broker-selftest.js
           node --check .github/scripts/a01-repair-ledger.js
           node --check .github/scripts/a01-repair-ledger-selftest.js
+          node --check .github/scripts/a01-repair-rerun-selftest.js
           node --check .github/scripts/a01-repair-ledger-reconcile.js
 
       - name: Self-test repository-state invariants
@@ -66,6 +71,9 @@ jobs:
 
       - name: Self-test durable repair lifecycle
         run: node .github/scripts/a01-repair-ledger-selftest.js
+
+      - name: Self-test same-transaction A-01 rerun lifecycle
+        run: node .github/scripts/a01-repair-rerun-selftest.js
 
       - name: Reconcile repair event ledger, inboxes and replacement tickets
         run: node .github/scripts/a01-repair-ledger-reconcile.js

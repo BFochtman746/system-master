@@ -12,9 +12,15 @@
     "One transaction_id represents one failed-receipt lineage. A changed repaired subject remains in the same transaction lineage but always has a new exact SHA.",
     "TRANSACTION_OPENED is idempotent by transaction_id plus receipt_id; conflicting duplicate lineage fails closed.",
     "Only REPAIRABLE_SUBJECT transactions may emit changed-SHA replacement tickets.",
-    "A replacement ticket requires deterministic prequalification PASS on the exact replacement SHA and preserves qualification_id, workstream_id and parent receipt lineage.",
-    "Repair events and owner inbox state are routing/control evidence only; they never create A-01 PASS, promotion, author, publication or production authority.",
+    "A replacement ticket requires deterministic prequalification PASS on the exact replacement SHA and preserves qualification_id, workstream_id, root failed receipt and immediate failed-subject lineage.",
+    "Every replacement A-01 invocation carries the existing repair transaction_id separately from the ordinary return ticket so rerun evidence cannot create a disconnected second repair transaction.",
+    "An authoritative replacement A-01 PASS closes the existing transaction and preserves all prior failed-subject events; it never rewrites the original failure.",
+    "A replacement SUBJECT_FAILURE consumes the current candidate repair attempt. If budget remains, the same transaction is re-dispatched against the newly failed exact subject; otherwise it is dead-lettered.",
+    "A replacement INFRA_FAILURE may emit at most one same-SHA retry ticket without consuming another product repair attempt; repeated infrastructure failure dead-letters the transaction for owner review.",
+    "Admission, dependency, control-plane and non-automatable outcomes remain in the same transaction with truthful route state and never become product PASS.",
+    "Receipt-less rerun attempts may be recorded only for infrastructure/control-plane failures and must never be labeled as authoritative A-01 receipts.",
+    "Repair events and owner inbox state are routing/control evidence only; only an authoritative A-01 receipt can supply A-01 PASS evidence.",
     "Human, author, private-data, native-platform and external-authority routes do not emit automated product replacement tickets.",
-    "The System State Reconciler may derive current repair standing from event history and owner inbox projections."
+    "The System State Reconciler may derive current repair standing from event history, current ticket pointers and owner inbox projections."
   ]
 }
