@@ -1,0 +1,45 @@
+{
+  "state_id": "BOOK-SYSTEM-RECONCILED-STATE-032",
+  "effective_date": "2026-09-10",
+  "supersedes_for_current_parent_control": "BOOK-SYSTEM-RECONCILED-STATE-031",
+  "supersession_scope": "CURRENT_PARENT_CONTROL_AND_BOOK_PROSE_INTEGRATION_ROUTING_ONLY",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "standing": "BOOK_PROSE_PHASE2A_2B_2C_CLOSED__PHASE2D_DEPENDENCY_GRAPH_SELECTED",
+  "source_live_head": "0a7d49b04429641bb822b38cec3af1a2a76f4c5b",
+  "completed_integration_packets": [
+    "BOOK-PROSE-INTEGRATION-PHASE-0-CURRENT-STATE-CENSUS-001",
+    "BOOK-PROSE-INTEGRATION-PHASE-1-INPUT-CENSUS-001",
+    "BOOK-WORKFLOW-ORCHESTRATOR-AUTHORITY-CONTRACT-001",
+    "BOOK-WORKFLOW-ORCHESTRATOR-WORKFLOW-STATE-MODEL-001",
+    "BOOK-WORKFLOW-ORCHESTRATOR-CAPABILITY-ROUTING-INTERFACE-001"
+  ],
+  "current_owner_objective": {
+    "objective_id": "BOOK-WORKFLOW-ORCHESTRATOR-DEPENDENCY-GRAPH-EXECUTION-PLAN-CONTRACT-001",
+    "phase": "2D",
+    "state": "READY",
+    "scope": "Define deterministic dependency graph and execution-plan semantics only. No specialist execution, concurrency scheduling, retries, cancellation, cache, context compiler, canonical admission or fresh blind scoring in this packet."
+  },
+  "authority_fences": {
+    "book_canonical_manuscript_owner": "SYSTEM_MASTER/BOOK",
+    "prose_owner": "SYSTEM_MASTER/BOOK/PROSE",
+    "prose_canonical_write": false,
+    "orchestrator_canonical_write": false,
+    "book_admission_is_sole_canonical_effect_path": true,
+    "story_bible_canon_truth_authority_preserved": true,
+    "research_external_evidence_authority_preserved": true,
+    "system_master_shared_execution_authority_preserved": true
+  },
+  "known_interface_fences": [
+    "CANON.CONSISTENCY_CHECK is declared but not callable until a qualified interface exists.",
+    "CONTINUITY.CHECK is declared but not callable until a qualified interface exists.",
+    "BOOK.CANONICAL_MANUSCRIPT_ADMISSION is an internal authority gate and is not service-dispatchable until the later admission-handoff packet.",
+    "PROSE.GENERATE_REVISION_CANDIDATE remains non-idempotent and no retry semantics are granted by Phase 2D."
+  ],
+  "qualification_fences": [
+    "No fresh blind scoring.",
+    "No A-01 PASS transfer or inference.",
+    "No private manuscript or DEVELOPMENT_GOLD access.",
+    "No native/publication/production readiness claim."
+  ],
+  "next_dependency_valid_action": "Implement and qualify Phase 2D deterministic DAG/execution-plan contract against the exact Phase 2C capability registry."
+}
