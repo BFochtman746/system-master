@@ -6,11 +6,20 @@ Scope: execution control and observability only. This contract does not transfer
 
 ## Problem closed by this contract
 
-SECOND-SHIFT-OPERATING-MODE-002 already requires work-ahead, immediate successor selection, and an all-rungs-exhausted proof before idle. The 2026-09-10 morning audit nevertheless proved four continuation defects because the policy had no durable dispatcher/lease/heartbeat/utilization enforcement. A READY delegation could remain passive until another scheduled invocation arrived; a stale or absent delegation could be mistaken for an empty lane; a critical-path blocker could be promoted to a whole-lane block; and hosted side-branch evidence could remain unattached to live owner lineage.
+SECOND-SHIFT-OPERATING-MODE-002 already requires work-ahead, immediate successor selection, and an all-rungs-exhausted proof before idle. The 2026-09-10 morning audit proved continuation defects because the policy had no durable dispatcher/lease/heartbeat/utilization enforcement. A later product-root audit also proved an owner-discovery defect: the execution code compiled a fixed CORE/LEARNING/BOOK/PROSE lane list, so a valid SYSTEM_MASTER-owned headless portfolio such as Documents could be omitted entirely. This contract now requires registry-driven owner discovery and current-authority obligation selection.
+
+## Owner discovery and coverage law
+
+1. `governance/second-shift/SECOND-SHIFT-REGISTRY-001.json::owner_files` is the machine-authoritative lane set. Controllers, watchdogs, enforcement and future dispatchers must enumerate it; a fixed lane-name array is non-conforming.
+2. `governance/CURRENT-AUTHORITY.json::obligation_registry` selects the current obligation registry. Historical hard-coded registries may be read as evidence but never used as the current work selector.
+3. Every READY/ACTIVE current obligation owner path must resolve to a registry-declared owner lane or an explicit registry coverage route.
+4. A READY/ACTIVE `central_next_objective` must have an active current delegation in its resolved Second Shift owner lane unless a valid all-eight-rungs exhaustion record proves no unattended-safe work is available.
+5. SYSTEM_MASTER-owned non-system headless capability portfolios share the SYSTEM_MASTER root lane. Creating Documents, Spreadsheet, Code, Research, Connected Actions, Media or another root-owned tool portfolio does not create a new peer system or require a per-tool Second Shift lane.
+6. A genuinely new first-class owner system requires explicit topology/ownership admission and must add its owner file to `owner_files` in the same change.
 
 ## Execution state machine
 
-Each owner lane is governed independently by:
+Each registry-declared owner lane is governed independently by:
 
 READY -> CLAIMED -> RUNNING -> {COMPLETED | BLOCKED | STALE}
 COMPLETED -> RECONCILE -> SUCCESSOR_BOUND -> READY
@@ -22,7 +31,7 @@ IDLE_VALID is not a delegation state. It is a shift disposition that exists only
 ## Dispatch law
 
 1. The portfolio controller runs before the shift and once per hour during the shift.
-2. Each owner worker is re-invoked once per hour during 00:00-07:00 at an off-hour minute.
+2. Each registry-declared owner worker is re-invoked once per hour during 00:00-07:00 at an off-hour minute or other configured stagger that preserves the same cadence.
 3. Within one invocation, a worker does not stop after one completed item while safe work remains. It records the completion, re-reads live authority, binds the successor, and continues until a true execution/tool boundary is reached.
 4. A READY delegation that remains undispatched across the next eligible owner-worker invocation is SECOND_SHIFT_SCOPE_VIOLATION unless a live claim/lease or a durable platform-execution delay explains the interval.
 5. The 06:45 controller pass is the final refill/reconciliation pass. The shift freezes at 07:00. The definitive handoff runs only after 07:00.
@@ -32,7 +41,7 @@ IDLE_VALID is not a delegation state. It is a shift disposition that exists only
 The pre-shift controller should enter the night with an oversupplied owner-valid queue rather than one brittle task whenever current authority permits it.
 
 - Target per lane: one highest-value primary READY item plus at least two dependency-diverse READY or CANDIDATE fallback items.
-- Fallback items are preparation/dispatch options, not pre-granted mutation authority. They must be revalidated against the live owner head before claim.
+- Fallback items are preparation/dispatch options, not pre-granted mutation authority. They must be revalidated against the current owner control binding before claim.
 - Only one mutation-capable item may be CLAIMED at a time per lane.
 - Queue order follows owner priority and the mandatory work-ahead ladder, but an item repeatedly bypassed for transient reasons receives an age/attention marker so it cannot starve indefinitely.
 - Independent fallback candidates should not share the same single external dependency when a genuinely independent rung exists.
@@ -41,11 +50,11 @@ The pre-shift controller should enter the night with an oversupplied owner-valid
 
 ## Claim and lease law
 
-Mutation-capable work requires one logical claim per owner lane.
+Mutation-capable work requires one logical claim per registry-declared owner lane.
 
 Required claim fields:
 - lease_id: globally unique within the shift
-- lane: CORE | LEARNING | BOOK | PROSE
+- lane: one key currently declared by `SECOND-SHIFT-REGISTRY-001.json::owner_files`
 - delegation_id
 - objective_id
 - control_ref
@@ -59,10 +68,12 @@ Required claim fields:
 
 Rules:
 - A second mutation worker must not start while a non-expired claim for the same lane is making progress.
-- A changed live control head invalidates the claim for mutation. Preserve evidence and re-plan against current authority.
+- A changed current owner control binding invalidates the claim for mutation. Preserve evidence and re-plan against current authority.
 - Heartbeat/progress checkpoints extend evidence of liveness; they never extend product authority.
 - A stale claim is recoverable from the last durable checkpoint. Recovery uses the same logical idempotency key for the same effect or a new key for a changed exact subject/effect.
 - Claim release and successor binding should occur in the same reconciliation transaction whenever possible.
+
+Owner control binding is normally the exact live owner branch head. For the SYSTEM_MASTER product-root lane it may be the exact Git blob SHA of an authority file explicitly declared by the root selector; this prevents the delegation file's own commit from self-invalidating the root lane while still invalidating it whenever root authority changes.
 
 Default operational values for the ChatGPT hourly dispatcher layer:
 - owner-worker recurrence: once per hour during 00:00-06:59
@@ -120,7 +131,7 @@ Missing/stale delegation, unavailable A-01, unavailable runner, one blocked crit
 
 ## Utilization event ledger
 
-Commit timestamps and workflow duration are evidence checkpoints, not productivity telemetry. Each lane therefore writes an append-only per-shift event ledger conforming to SECOND-SHIFT-UTILIZATION-EVENT-SCHEMA-001.json.
+Commit timestamps and workflow duration are evidence checkpoints, not productivity telemetry. Each registry-declared lane therefore writes an append-only per-shift event ledger conforming to SECOND-SHIFT-UTILIZATION-EVENT-SCHEMA-001.json.
 
 Required event classes include:
 SHIFT_OPEN, READY, CLAIMED, RUNNING, HEARTBEAT, PROGRESS, COMPLETED, BLOCKED, STALE, RETRY, CIRCUIT_OPEN, CIRCUIT_HALF_OPEN, CIRCUIT_CLOSED, SUCCESSOR_BOUND, ALL_RUNGS_EXHAUSTED, IDLE_VALID, SHIFT_CLOSE.
@@ -130,18 +141,20 @@ The morning audit derives time in READY/RUNNING/BLOCKED/STALE/IDLE only from the
 ## Successor admission law
 
 A side-branch or hosted PASS is evidence, not canonical completion. Before a successor is called closed/admitted:
-- re-read the live owner control head
+- re-read current owner authority/control binding
 - compare the candidate base/subject to current owner lineage
 - validate parent/child topology and canonical-writer boundaries
 - preserve exact subject/workflow/artifact evidence
-- run the applicable control-drift/state-reconciler checks
-- then bind the next delegation to the resulting live owner head
+- run the applicable control-drift/state-reconciler/owner-coverage checks
+- then bind the next delegation to the resulting current owner binding
 
 No PASS transfer is permitted.
 
 ## Controller health SLOs
 
 For each shift:
+- 0 READY/ACTIVE current owner paths missing a registry-declared Second Shift route
+- 0 current central objectives left unbound to their routed owner lane
 - 0 unexplained IDLE intervals
 - 0 READY head items left undispatched across an eligible owner-worker cadence
 - 0 overlapping mutation claims per lane

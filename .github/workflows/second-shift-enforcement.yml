@@ -7,13 +7,27 @@ on:
       timezone: 'America/New_York'
   push:
     paths:
+      - 'governance/CURRENT-AUTHORITY.json'
+      - 'governance/WORK-OBLIGATION-REGISTRY-*.json'
+      - 'governance/SYSTEM-TOPOLOGY-*.json'
+      - 'governance/architecture/**'
+      - 'governance/morning/MASTER-ROOT-CHAT-OPERATING-CONTRACT-001.md'
+      - 'SYSTEM-MASTER-WORKSTREAM-BOOTSTRAP.md'
       - 'governance/second-shift/**'
       - '.github/scripts/second-shift-enforce.js'
+      - '.github/scripts/second-shift-owner-coverage.js'
       - '.github/workflows/second-shift-enforcement.yml'
   pull_request:
     paths:
+      - 'governance/CURRENT-AUTHORITY.json'
+      - 'governance/WORK-OBLIGATION-REGISTRY-*.json'
+      - 'governance/SYSTEM-TOPOLOGY-*.json'
+      - 'governance/architecture/**'
+      - 'governance/morning/MASTER-ROOT-CHAT-OPERATING-CONTRACT-001.md'
+      - 'SYSTEM-MASTER-WORKSTREAM-BOOTSTRAP.md'
       - 'governance/second-shift/**'
       - '.github/scripts/second-shift-enforce.js'
+      - '.github/scripts/second-shift-owner-coverage.js'
       - '.github/workflows/second-shift-enforcement.yml'
 
 permissions:
@@ -26,7 +40,7 @@ concurrency:
 
 jobs:
   enforce:
-    name: Reject false idle, stale claims and undispatched READY work
+    name: Reject false idle, stale claims, owner coverage gaps and undispatched READY work
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -37,18 +51,26 @@ jobs:
           persist-credentials: false
 
       - name: Syntax check Second Shift enforcement
-        run: node --check .github/scripts/second-shift-enforce.js
+        run: |
+          node --check .github/scripts/second-shift-enforce.js
+          node --check .github/scripts/second-shift-owner-coverage.js
 
       - name: Self-test Second Shift invariants
-        run: node .github/scripts/second-shift-enforce.js --selftest
+        run: |
+          node .github/scripts/second-shift-enforce.js --selftest
+          node .github/scripts/second-shift-owner-coverage.js --selftest
 
       - name: Validate static Second Shift repository state
         if: github.event_name != 'schedule'
-        run: node .github/scripts/second-shift-enforce.js --no-live --out=.second-shift-enforcement/report.json
+        run: |
+          node .github/scripts/second-shift-enforce.js --no-live --out=.second-shift-enforcement/report.json
+          node .github/scripts/second-shift-owner-coverage.js --no-live > .second-shift-enforcement/owner-coverage.json
 
-      - name: Watch active shift against live owner refs
+      - name: Watch active shift against live owner refs and root authority
         if: github.event_name == 'schedule'
-        run: node .github/scripts/second-shift-enforce.js --watchdog --out=.second-shift-enforcement/report.json
+        run: |
+          node .github/scripts/second-shift-enforce.js --watchdog --out=.second-shift-enforcement/report.json
+          node .github/scripts/second-shift-owner-coverage.js --watchdog > .second-shift-enforcement/owner-coverage.json
 
       - name: Publish enforcement summary
         if: always()
@@ -56,18 +78,27 @@ jobs:
         run: |
           echo '## Second Shift Enforcement' >> "$GITHUB_STEP_SUMMARY"
           if [ -f .second-shift-enforcement/report.json ]; then
+            echo '### Execution-control report' >> "$GITHUB_STEP_SUMMARY"
             echo '```json' >> "$GITHUB_STEP_SUMMARY"
             cat .second-shift-enforcement/report.json >> "$GITHUB_STEP_SUMMARY"
             echo '```' >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo 'No live report was produced.' >> "$GITHUB_STEP_SUMMARY"
+          fi
+          if [ -f .second-shift-enforcement/owner-coverage.json ]; then
+            echo '### Owner-coverage report' >> "$GITHUB_STEP_SUMMARY"
+            echo '```json' >> "$GITHUB_STEP_SUMMARY"
+            cat .second-shift-enforcement/owner-coverage.json >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          fi
+          if [ ! -f .second-shift-enforcement/report.json ] && [ ! -f .second-shift-enforcement/owner-coverage.json ]; then
+            echo 'No enforcement report was produced.' >> "$GITHUB_STEP_SUMMARY"
           fi
 
       - name: Upload enforcement evidence
-        if: always() && hashFiles('.second-shift-enforcement/report.json') != ''
+        if: always() && hashFiles('.second-shift-enforcement/**') != ''
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: second-shift-enforcement-${{ github.run_id }}
-          path: .second-shift-enforcement/report.json
+          path: .second-shift-enforcement/
+          include-hidden-files: true
           if-no-files-found: error
           retention-days: 30

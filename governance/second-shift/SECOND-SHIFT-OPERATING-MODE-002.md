@@ -1,34 +1,39 @@
 # SECOND-SHIFT-OPERATING-MODE-002
 
-Status: **ACTIVE / OWNER-DRIVEN / STALE-FAIL-CLOSED / REPAIR-AWARE**  
+Status: **ACTIVE / OWNER-DRIVEN / REGISTRY-DRIVEN / STALE-FAIL-CLOSED / REPAIR-AWARE**  
 Product root: `SYSTEM_MASTER`
 
 ## Core rule
 
-Second Shift does not own a backlog. Each canonical owner system owns a live delegation list **and** a repair inbox. The scheduler may consume only currently valid delegated work and may not lose or silently reinterpret an authoritative failure.
+Second Shift does not own a backlog. Each registry-declared canonical owner lane owns a live delegation list **and**, where applicable, a repair inbox. The scheduler may consume only currently valid delegated work and may not lose or silently reinterpret an authoritative failure.
 
-Owner delegation files:
+Canonical owner delegation files are discovered from `governance/second-shift/SECOND-SHIFT-REGISTRY-001.json`; implementations must not compile a fixed lane list. Current lanes are:
 
+- `SYSTEM_MASTER` -> `governance/second-shift/SYSTEM-MASTER-DELEGATIONS.json`
 - `SYSTEM_MASTER/CORE` -> `governance/second-shift/CORE-DELEGATIONS.json`
 - `SYSTEM_MASTER/LEARNING` -> `governance/second-shift/LEARNING-DELEGATIONS.json`
 - `SYSTEM_MASTER/BOOK` -> `governance/second-shift/BOOK-DELEGATIONS.json`
 - `SYSTEM_MASTER/BOOK/PROSE` -> `governance/second-shift/PROSE-DELEGATIONS.json`
 
+The SYSTEM_MASTER lane is the reusable lane for product-root-owned **non-system headless capability portfolios**. Content & Document Artifacts uses that lane; future root-owned headless tool portfolios inherit it automatically. Do not create a DOCUMENT peer system or per-tool Second Shift lane merely because a tool branch exists.
+
 Repair inboxes are selected through `governance/repair/REPAIR-INBOX-REGISTRY-001.json`.
 
 ## Day-shift lifecycle
 
-Whenever the owner chat materially changes its current objective:
+Whenever an owner chat, including MASTER_ROOT for SYSTEM_MASTER-owned work, materially changes its current objective:
 
-1. fetch the live owner control head;
-2. inspect the owner repair inbox first and revalidate active repair transactions against current state;
-3. inspect the active delegation file;
+1. resolve the current owner control binding;
+2. inspect the owner repair inbox first when one applies and revalidate active repair transactions against current state;
+3. inspect the registry-declared active delegation file;
 4. if a delegation is already completed, superseded, blocked or no longer highest-value, remove it from `active_delegations`;
 5. preserve its result/supersession in durable completion/state/evidence history;
 6. close/supersede any repair transaction whose failed objective is no longer current, preserving receipt/lineage history;
 7. re-evaluate the owner's current critical path;
 8. create a new delegation only if unattended work has a concrete completion delta, stop condition and truthful authority boundary;
-9. bind the new delegation to the exact live owner control head.
+9. bind the new delegation to the exact current owner control binding.
+
+For SYSTEM_MASTER, a READY/ACTIVE change to `central_next_objective` and root Second Shift reconciliation are one governance operation. The root working session may not declare the product root ready while its delegation remains bound to a prior central objective.
 
 Day Shift does not need to wait until 23:15 to clean stale work.
 
@@ -52,22 +57,22 @@ Changed repair bytes create a new exact SHA. The worker must deterministically p
 At approximately 23:15 America/New_York, the portfolio controller:
 
 1. reads `governance/CURRENT-AUTHORITY.json`;
-2. reads current topology, repair registry/inboxes and all four owner delegation files;
-3. fetches each live owner control head;
-4. runs/consults the current System State Reconciler standing;
-5. rejects any delegation whose `valid_for_control_head` no longer matches;
+2. reads current topology, current headless-tool owner allocation, repair registry/inboxes and **all owner delegation files declared by the Second Shift registry**;
+3. resolves each current owner control binding;
+4. runs/consults the current System State Reconciler and Second Shift owner-coverage standing;
+5. rejects any delegation whose `valid_for_control_head` no longer matches its resolved binding;
 6. validates each active repair transaction against canonical owner/workstream and current objective;
-7. verifies that the objective is still open and dependencies are still valid;
+7. verifies that the objective is still open in the obligation registry selected by CURRENT-AUTHORITY and dependencies are still valid;
 8. verifies A-01 registration/exact subject only for A-01 work;
 9. admits current `READY` work or explicitly delegated current repair work;
 10. when a delegation is absent, stale, completed or blocked, requires the owner/controller to select and bind the highest-value dependency-valid unattended-safe successor from the work-ahead ladder below;
 11. leaves an owner empty only after the all-rungs-exhausted test is durably satisfied.
 
-A head mismatch is `STALE_DELEGATION`, not `SUBJECT_FAILURE`. An admission/window condition is not a product defect. A dependency block is not a product defect.
+A control-binding mismatch is `STALE_DELEGATION`, not `SUBJECT_FAILURE`. An admission/window condition is not a product defect. A dependency block is not a product defect.
 
 ## Mandatory work-ahead ladder
 
-A blocked or unavailable critical-path action does not make the owner system idle. The controller and worker must evaluate these rungs in order and select the highest-value dependency-valid unattended-safe action:
+A blocked or unavailable critical-path action does not make the owner lane idle. The controller and worker must evaluate these rungs in order and select the highest-value dependency-valid unattended-safe action:
 
 1. current repairable failure or control-health defect;
 2. incomplete completion/evidence census and capability matrix;
@@ -78,7 +83,7 @@ A blocked or unavailable critical-path action does not make the owner system idl
 7. exact-SHA qualification wrapper, registry and A-01 request preparation without fabricating target evidence;
 8. next dependency-valid successor build packet and risk-reduction work.
 
-Each selected project must state its live owner-control head, objective, before/after completion delta, evidence target, stop condition, allowed work, forbidden authority and continuation rule. When it completes and time remains, the worker must re-read live authority and select the next safe successor. Completion of one item is not the end of the shift.
+Each selected project must state its current owner-control binding, objective, before/after completion delta, evidence target, stop condition, allowed work, forbidden authority and continuation rule. When it completes and time remains, the worker must re-read live authority and select the next safe successor. Completion of one item is not the end of the shift.
 
 ### All-rungs-exhausted test
 
@@ -86,7 +91,7 @@ An owner may be idle only when a durable record shows, for every rung above: `CO
 
 ## Execution-time lifecycle
 
-Immediately before a worker begins its selected item it repeats the authority/head/objective/dependency and repair-inbox checks. If state changed after portfolio prep, the old item is not executed. The worker re-evaluates from current owner state and either writes a replacement delegation or performs no work.
+Immediately before a worker begins its selected item it repeats the authority/control-binding/objective/dependency and repair-inbox checks. If state changed after portfolio prep, the old item is not executed. The worker re-evaluates from current owner state and either writes a replacement delegation or performs no work.
 
 If a repair transaction appeared after portfolio prep and is current, the owner worker evaluates whether it should supersede unrelated build-ahead. The scheduler never repairs merely because a transaction exists; superseded or irrelevant failures are closed truthfully.
 
@@ -97,8 +102,8 @@ On PASS/completion:
 - record evidence/receipt/result;
 - remove the delegation from active state;
 - close/supersede the related repair transaction if its boundary is resolved;
-- re-evaluate the owner system immediately;
-- if another safe dependency-valid unattended objective is justified and time remains, create a successor delegation bound to the new current owner head/state;
+- re-evaluate the owner immediately;
+- if another safe dependency-valid unattended objective is justified and time remains, create a successor delegation bound to the new current owner binding/state;
 - otherwise apply the all-rungs-exhausted test and stop only with a durable evidence-backed blocker record.
 
 This allows multiple useful tasks in one night without preserving stale work.
@@ -109,7 +114,7 @@ This allows multiple useful tasks in one night without preserving stale work.
 - infrastructure failure -> shared A-01 route; one bounded same-SHA retry only when policy permits;
 - control-plane failure -> CORE/A-01 owner route, not product repair;
 - human/author/private/external/native/publication/production authority -> owner-authority route without fabrication;
-- changed owner state/head -> stale delegation, not failure;
+- changed owner state/control binding -> stale delegation, not failure;
 - stale/window/admission outcome -> replan admission, not subject repair;
 - predecessor/dependency failure -> wait for predecessor; dependent delegation does not execute;
 - unknown/unmapped failure -> fail closed/dead-letter until classified.
@@ -124,24 +129,26 @@ This allows multiple useful tasks in one night without preserving stale work.
 - no old delegation silently rebound to a new exact subject;
 - no failed subject silently replaced without parent receipt lineage;
 - no repair worker, broker, hosted test or chat may grant A-01 PASS, promotion, publication or production authority;
-- no worker may redefine system ownership.
+- no worker may redefine system ownership;
+- no tool branch may create a new Second Shift owner lane unless architecture authority creates a new first-class owner system.
 
 ## Morning handoff
 
 Morning handoff reports the hierarchy:
 
-1. System Master / Core
-2. Learning
-3. Book
-4. Prose (under Book)
-5. shared infrastructure/control
+1. System Master product root / root-owned headless portfolios
+2. System Master / Core
+3. Learning
+4. Book
+5. Prose (under Book)
+6. shared infrastructure/control
 
-For each owner it reports:
+For each registry-declared owner it reports:
 
-- live control head and authority delta;
+- current control binding and authority delta;
 - completed work;
 - open obligations/blockers;
-- active/closed repair transactions;
+- active/closed repair transactions where applicable;
 - current Second Shift delegation status;
 - exact next action.
 
