@@ -8,6 +8,8 @@ const routing = require('./book-capability-routing-interface');
 
 const CONTRACT_PATH = path.join(__dirname, '../../qualification/book-system/book-prose-integration/orchestrator/BOOK-WORKFLOW-ORCHESTRATOR-RETRY-IDEMPOTENCY-RULES-001.json');
 const SERVICE_REGISTRY_PATH = path.join(__dirname, '../../qualification/book-system/service-interface-002/BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-002.json');
+const EXPECTED_SERVICE_REGISTRY_GIT_BLOB_SHA = 'd5c31835cb79e8267fdbe868f073ef311e85214f';
+const EXPECTED_SERVICE_REGISTRY_QUALIFIED_SUBJECT_SHA = '77db6b550e9aeb1dfb956627376becbb591498f8';
 const DECISION_SCHEMA_VERSION = 1;
 const SHA256 = /^[a-f0-9]{64}$/;
 const OBSERVED_OUTCOMES = new Set(['UNKNOWN_OUTCOME','CONFIRMED_FAILURE_NO_EFFECT','CONFIRMED_SUCCESS']);
@@ -39,8 +41,16 @@ function stableNormalize(v) {
 }
 function stableStringify(v) { return JSON.stringify(stableNormalize(v)); }
 function sha256(v) { return crypto.createHash('sha256').update(String(v), 'utf8').digest('hex'); }
+function gitBlobSha(raw) {
+  const bytes = Buffer.from(raw, 'utf8');
+  return crypto.createHash('sha1').update(Buffer.from(`blob ${bytes.length}\0`, 'utf8')).update(bytes).digest('hex');
+}
 function loadContract() { return JSON.parse(fs.readFileSync(CONTRACT_PATH, 'utf8')); }
-function loadServiceRegistry() { return JSON.parse(fs.readFileSync(SERVICE_REGISTRY_PATH, 'utf8')); }
+function loadServiceRegistry() {
+  const raw = fs.readFileSync(SERVICE_REGISTRY_PATH, 'utf8');
+  if (gitBlobSha(raw) !== EXPECTED_SERVICE_REGISTRY_GIT_BLOB_SHA) fail('SERVICE_REGISTRY_EXACT_CONTENT_PIN_MISMATCH');
+  return JSON.parse(raw);
+}
 
 function assertNoRawContent(value, where = 'retry') {
   if (Array.isArray(value)) return value.forEach((item, i) => assertNoRawContent(item, `${where}.${i}`));
@@ -55,12 +65,21 @@ function validateContract(contract) {
   if (!isObject(contract) || contract.contract_id !== 'BOOK-WORKFLOW-ORCHESTRATOR-RETRY-IDEMPOTENCY-RULES-001') fail('RETRY_CONTRACT_ID_MISMATCH');
   if (!isObject(contract.registered_service_policy_source)) fail('REGISTERED_SERVICE_POLICY_SOURCE_REQUIRED');
   if (contract.registered_service_policy_source.registry_id !== 'BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-002') fail('SERVICE_POLICY_REGISTRY_MISMATCH');
+  if (contract.registered_service_policy_source.qualified_subject_sha !== EXPECTED_SERVICE_REGISTRY_QUALIFIED_SUBJECT_SHA) fail('SERVICE_POLICY_QUALIFIED_SUBJECT_MISMATCH');
   const special = contract.non_idempotent_special_case;
   if (!isObject(special) || special.capability_id !== 'PROSE.GENERATE_REVISION_CANDIDATE' || special.registered_idempotent !== false || special.automatic_retry_after_unknown_outcome !== false) fail('NONIDEMPOTENT_PROSE_RULE_INVALID');
   return true;
 }
 
+function validatePinnedServiceRegistry(serviceRegistry) {
+  if (!isObject(serviceRegistry) || serviceRegistry.registry_id !== 'BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-002' || serviceRegistry.registry_version !== 2) fail('SERVICE_REGISTRY_IDENTITY_MISMATCH');
+  const canonical = loadServiceRegistry();
+  if (stableStringify(serviceRegistry) !== stableStringify(canonical)) fail('SERVICE_REGISTRY_EXACT_CONTENT_PIN_MISMATCH');
+  return true;
+}
+
 function registeredOperationPolicy(capability, serviceRegistry) {
+  validatePinnedServiceRegistry(serviceRegistry);
   const service = serviceRegistry.services && serviceRegistry.services[capability.service_id];
   const operation = service && service.operations && service.operations[capability.operation_id];
   if (!operation) fail('REGISTERED_SERVICE_OPERATION_NOT_FOUND', `${capability.service_id}:${capability.operation_id}`);
@@ -229,11 +248,15 @@ function validateRetryDecision(decision, plan, workflowState, routingRegistry = 
 module.exports = {
   CONTRACT_PATH,
   SERVICE_REGISTRY_PATH,
+  EXPECTED_SERVICE_REGISTRY_GIT_BLOB_SHA,
+  EXPECTED_SERVICE_REGISTRY_QUALIFIED_SUBJECT_SHA,
   DECISION_SCHEMA_VERSION,
   BookRetryIdempotencyError,
+  stableStringify,
   loadContract,
   loadServiceRegistry,
   validateContract,
+  validatePinnedServiceRegistry,
   registeredOperationPolicy,
   buildOperationIdentity,
   validateOperationIdentity,
