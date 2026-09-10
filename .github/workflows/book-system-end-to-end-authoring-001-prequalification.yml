@@ -1,0 +1,40 @@
+name: Book System End-to-End Authoring 001 Hosted Prequalification
+
+on:
+  push:
+    branches:
+      - book-system/control-v1
+    paths:
+      - ".github/scripts/book-system-end-to-end-authoring-001-qualify.js"
+      - ".github/workflows/book-system-end-to-end-authoring-001-prequalification.yml"
+      - "qualification/book-system/end-to-end-authoring-001/**"
+      - "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-020.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - name: Verify exact checkout
+        run: test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+      - name: Syntax check E2E qualifier
+        run: node --check .github/scripts/book-system-end-to-end-authoring-001-qualify.js
+      - name: Run 48-case Book E2E composition qualification
+        run: node .github/scripts/book-system-end-to-end-authoring-001-qualify.js
+      - name: Upload hosted qualification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: book-system-end-to-end-authoring-001-hosted-${{ github.run_id }}
+          path: ${{ runner.temp }}/book-system-e2e-authoring-evidence
+          if-no-files-found: error
+          retention-days: 30
