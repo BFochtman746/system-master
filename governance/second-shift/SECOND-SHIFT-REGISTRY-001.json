@@ -8,19 +8,20 @@
   "enforcement_script": ".github/scripts/second-shift-enforce.js",
   "enforcement_workflow": ".github/workflows/second-shift-enforcement.yml",
   "owner_files": {
-    "CORE": "governance/second-shift/p9/CORE-DELEGATIONS-001.json",
-    "LEARNING": "governance/second-shift/p9/LEARNING-DELEGATIONS-001.json",
-    "BOOK": "governance/second-shift/p9/BOOK-DELEGATIONS-001.json",
-    "PROSE": "governance/second-shift/p9/PROSE-DELEGATIONS-001.json"
+    "CORE": "governance/second-shift/CORE-DELEGATIONS.json",
+    "LEARNING": "governance/second-shift/LEARNING-DELEGATIONS.json",
+    "BOOK": "governance/second-shift/BOOK-DELEGATIONS.json",
+    "PROSE": "governance/second-shift/PROSE-DELEGATIONS.json"
   },
   "p9_selector_reconciliation": {
-    "reconciled_at": "2026-09-10T10:04:00-04:00",
+    "reconciled_at": "2026-09-10T10:08:00-04:00",
     "CORE": "READY__SMR021_GITHUB_NATIVE_TRANSPORT_009__HEAD_2031f070bd3702185c028733819ec410db36613c",
-    "LEARNING": "READY__ASSESSMENT_TARGET_DOMAIN_I_BATCH_026A__HEAD_9598c0b6b24a33a306608535110c38f26355b9bf",
+    "LEARNING": "READY__ASSESSMENT_TARGET_DOMAIN_II_BATCH_01_027A__HEAD_177a25236c838087c4bfa29cebd71ece05cb6f69",
     "BOOK": "READY__RF012_OWNER_PROMOTION_REBIND_004__HEAD_05c1f53e2f710f419a99cb99594c53c2f0240b68",
     "PROSE": "READY__BLIND_EVALUATOR_LAUNCH_PACKET_002__HEAD_309a7876b8e388d115d4d3bde7dc39dd0ef8b6fd",
-    "strict_schema_reason": "The immediately preceding owner selector files were semantically current but omitted fields required by SECOND-SHIFT-DELEGATION-SCHEMA-002 and therefore caused System State Reconciler run 34486574113 to fail at Reconcile live System Master state. These versioned P9 selectors preserve the same owner-valid objectives while supplying created_at, last_revalidated_at, on_pass and on_failure required by the repository-wide reconciler.",
-    "history_rule": "The pre-P9 owner files remain intact in Git history/current repository as historical selector evidence. No product completion or exact-SHA evidence is deleted or relabeled."
+    "strict_schema_repair": "Canonical owner selector files now carry created_at, last_revalidated_at, on_pass and on_failure required by the repository-wide System State Reconciler. Versioned governance/second-shift/p9/* files remain repair evidence only and are not registry targets.",
+    "topology_compatibility": "Owner file paths retain canonical *-DELEGATIONS.json endings required by validate-system-topology.js and A-01 Control Plane Enforcement.",
+    "history_rule": "All pre-P9 selector states remain preserved in Git history and P9 repair artifacts. No product completion or exact-SHA evidence is deleted or relabeled."
   },
   "portfolio_rule": "The portfolio controller reads the four owner files from current main, revalidates each against the live owner control head, active claim/lease and repair state, removes stale/non-open items from admission, and admits current READY work or selects a new owner-valid successor through the mandatory work-ahead ladder. A stale, missing, completed or blocked delegation never by itself permits idling.",
   "day_shift_rule": "Whenever a system chat closes, supersedes, blocks or materially changes its current objective, it must reconcile its delegation file in the same working session. If the previous delegation is no longer current, remove it from active_delegations, preserve closure/supersession evidence, and re-evaluate the successor before leaving an overnight-ready state.",
