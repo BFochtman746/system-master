@@ -1,0 +1,47 @@
+{
+  "artifact_id": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001B-ASSESSMENT-TARGET-DOMAIN-IV-BATCH-02-CANDIDATE-037A",
+  "effective_date": "2026-09-10",
+  "owner_path": "SYSTEM_MASTER/LEARNING",
+  "base_control_head": "f775bc19952e8fbe5b3d5300b7254c4e65324543",
+  "contract": "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001B-ASSESSMENT-TARGET-CONTRACT-025A.json",
+  "batch_index": 2,
+  "domain": "IV",
+  "target_count": 1,
+  "targets": [
+    {
+      "assessment_target_id": "ASSESS::CSSGB-2022::ASQ-CSSGB-2022-IV.C.2::root-cause-analysis-evidence::TARGET::bounded-root-cause-analysis",
+      "subskill_id": "CSSGB-2022::ASQ-CSSGB-2022-IV.C.2::SUBSKILL::root-cause-analysis-evidence",
+      "parent_requirement_id": "ASQ-CSSGB-2022-IV.C.2",
+      "source_locator": "ASQ CSSGB BoK 2022 p.7 / IV.C.2",
+      "preserved_cognitive_level": "ANALYZE",
+      "capability_statement": "Given a bounded problem statement, observed evidence, and candidate causes, distinguish symptoms from candidate root causes, organize causal hypotheses, identify evidence needed to discriminate among them, and refuse to declare an unobserved cause established.",
+      "target_type": "ARTIFACT_ANALYSIS",
+      "evidence_input_class": "BOUNDED_MIXED_EVIDENCE",
+      "response_action_class": "ANALYZE",
+      "prompt_contract": {
+        "supplied_evidence": "A synthetic bounded problem statement with observed symptoms, candidate causes, and partial discriminating evidence.",
+        "required_action": "Analyze the observed evidence, distinguish symptoms from candidate root causes, organize causal hypotheses, and identify what additional evidence is required before any root cause can be established.",
+        "must_not_assume": ["unobserved causal links", "candidate cause confirmation", "missing process evidence"]
+      },
+      "scoring_assertions": [
+        {"assertion_id": "IV.C.2-01", "observable_property": "Response distinguishes observed symptoms from candidate root causes and organizes causal hypotheses using supplied evidence.", "pass_condition": "Observed facts and hypotheses are separated explicitly and each causal claim is traceable to supplied evidence or marked provisional."},
+        {"assertion_id": "IV.C.2-02", "observable_property": "Response identifies discriminating evidence needed before declaring a root cause established.", "pass_condition": "At least one concrete missing evidence need is tied to each unresolved causal hypothesis and no unobserved cause is asserted as proven."}
+      ],
+      "insufficient_evidence_behavior": {"trigger": "Observed evidence does not discriminate adequately among candidate root causes.", "required_behavior": "Keep the root cause unresolved, state which hypotheses remain viable, and identify the evidence needed to discriminate among them."},
+      "provenance_refs": ["SOURCE_NODE_INDEX:ASQ-CSSGB-2022-IV.C.2", "SUBSKILL:CSSGB-2022::ASQ-CSSGB-2022-IV.C.2::SUBSKILL::root-cause-analysis-evidence"],
+      "validation_status": "PROVISIONAL_BOUND",
+      "evidence_boundaries": {"psychometric_validity": "UNOBSERVED", "learner_mastery": "UNOBSERVED", "retention": "UNOBSERVED", "transfer": "UNOBSERVED", "workplace_effectiveness": "UNOBSERVED", "sme_approval": "UNOBSERVED", "certification_equivalence": "UNOBSERVED"}
+    }
+  ],
+  "batch_boundaries": {
+    "psychometric_validity": "UNOBSERVED",
+    "learner_mastery": "UNOBSERVED",
+    "retention": "UNOBSERVED",
+    "transfer": "UNOBSERVED",
+    "workplace_effectiveness": "UNOBSERVED",
+    "sme_approval": "UNOBSERVED",
+    "certification_equivalence": "UNOBSERVED",
+    "unresolved_dependency_candidates": "UNCHANGED__SEPARATE_LANE"
+  },
+  "next_batch": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001B-ASSESSMENT-TARGET-DOMAIN-V-BATCHING"
+}
