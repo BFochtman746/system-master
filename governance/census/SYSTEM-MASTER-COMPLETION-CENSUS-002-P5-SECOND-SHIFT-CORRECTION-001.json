@@ -1,0 +1,64 @@
+{
+  "correction_id": "SYSTEM-MASTER-COMPLETION-CENSUS-002-P5-SECOND-SHIFT-CORRECTION-001",
+  "effective_date": "2026-09-10",
+  "source_result": "governance/census/SYSTEM-MASTER-COMPLETION-CENSUS-002-P5-SHARED-INFRASTRUCTURE-A01.json",
+  "standing": "POST_SEAL_CORRECTION__P5_PHASE_REMAINS_COMPLETE__HARDENING_GAP_NARROWED",
+  "reason": "A later exact-path verification of current main proved that two Second Shift control artifacts reported as missing/unadmitted in the P5 census were already present following merged PR #17. Preserve the original P5 record as historical census evidence and supersede only the incorrect missing-artifact subfinding rather than rewriting the sealed result.",
+  "verified_control_change": {
+    "pull_request": 17,
+    "title": "Second Shift: enforce sustained seven-hour execution",
+    "merged_at": "2026-09-10T13:16:03Z",
+    "merge_commit_sha": "8b6b38a65be549f934eef84297c53c41c443d0a5",
+    "scope": "Execution control and observability only; no product-owner or A-01/human/author/private/blind/native/publication/production authority transfer."
+  },
+  "superseded_p5_subfindings": [
+    {
+      "prior_claim": "SECOND-SHIFT-DELEGATION-SCHEMA-002.json missing or unadmitted",
+      "corrected_standing": "PRESENT_ON_CURRENT_MAIN",
+      "pointer": "governance/second-shift/SECOND-SHIFT-DELEGATION-SCHEMA-002.json"
+    },
+    {
+      "prior_claim": "SECOND-SHIFT-UTILIZATION-EVENT-SCHEMA-001.json missing or unadmitted",
+      "corrected_standing": "PRESENT_ON_CURRENT_MAIN",
+      "pointer": "governance/second-shift/SECOND-SHIFT-UTILIZATION-EVENT-SCHEMA-001.json"
+    }
+  ],
+  "still_open": [
+    {
+      "gap": "ACTUAL_PER_SHIFT_UTILIZATION_EVENT_LEDGER",
+      "standing": "NOT_PRESENT_FOR_2026-09-10",
+      "finding": "The utilization schema defines lane-owned ledgers under governance/second-shift/execution-events/YYYY-MM-DD/{CORE|LEARNING|BOOK|PROSE}.json, but the execution-events directory is absent on current main. Historical useful-work duration therefore remains UNKNOWN rather than inferable from commits or runner uptime."
+    },
+    {
+      "gap": "GENERIC_LIVE_OWNER_REF_AND_DURABLE_OBJECTIVE_SEMANTIC_ENFORCEMENT",
+      "standing": "PARTIAL__NOT_PROVEN_BY_CURRENT_ENFORCER",
+      "finding": "Current second-shift-enforce.js validates local delegation structure, exact-SHA syntax, claims/leases/heartbeats, overlapping claims, stale READY work, false-empty/all-rungs proof, required control files and shift event-ledger presence. It does not itself fetch the remote canonical owner ref or independently compare the delegated objective against durable owner completion/successor state before accepting the local active delegation."
+    }
+  ],
+  "current_owner_delegation_reconciliation": {
+    "CORE": "CONTROL_HEAD_MATCHES__OBJECTIVE_SEMANTICALLY_SUPERSEDED_BY_FINAL_REFILL_SUCCESSOR__OWNER_REBIND_REQUIRED",
+    "LEARNING": "CURRENT__CONTROL_ADVANCED_TO_35a12e8d3778b7b0f9b36affbac6b2fb188832f5__DOMAIN_III_BATCH_01_READY",
+    "BOOK": "CONTROL_HEAD_MATCHES__ACTIVE_RF012_GUARD_OBJECTIVE_PRECEDES_FINAL_REFILL_OWNER_PROMOTION_REBIND_SUCCESSOR__OWNER_REBIND_REQUIRED",
+    "PROSE": "CONTROL_HEAD_MATCHES__ACTIVE_FOUNDATION_CENSUS_OBJECTIVE_PRECEDES_FINAL_REFILL_ROUTE_CONTRACT_SUCCESSOR__OWNER_REBIND_REQUIRED"
+  },
+  "revised_hardening_obligation": {
+    "obligation_id": "SECOND-SHIFT-LIVE-AUTHORITY-SUCCESSOR-ENFORCEMENT-002",
+    "standing": "PARTIALLY_SATISFIED_BY_PR17__REMAINDER_OPEN",
+    "satisfied": [
+      "versioned delegation schema",
+      "claim/lease/heartbeat/idempotency/all-rungs contract",
+      "utilization event schema",
+      "basic static/dynamic enforcement for stale READY, overlapping claims and false-empty",
+      "scheduled watchdog/event-ledger expectation",
+      "reconciler integration as declared by merged PR #17"
+    ],
+    "remaining": [
+      "resolve actual canonical live owner refs during enforcement rather than trusting local last-known/head fields",
+      "verify objective remains open/current against durable owner state/completion/successor evidence",
+      "reject semantically completed/superseded active delegations even when their stored control SHA still equals the live owner head",
+      "emit real append-only per-lane shift ledgers and prove useful-work reconstruction on the next shift",
+      "rebind Core, Book and Prose active delegations to their current owner-valid successors before relying on the next shift"
+    ]
+  },
+  "authority_boundary": "This correction narrows an infrastructure defect only. It does not alter P5 completion, product ownership, qualification PASS, the current open A01_REQUEUE_READY transaction, or any human/author/private/native/publication/production boundary."
+}
