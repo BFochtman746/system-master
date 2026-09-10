@@ -1,0 +1,30 @@
+name: Book Workflow Orchestrator Authority Contract 001
+
+on:
+  push:
+    branches:
+      - book-system/control-v1
+    paths:
+      - 'qualification/book-system/book-prose-integration/orchestrator/BOOK-WORKFLOW-ORCHESTRATOR-AUTHORITY-CONTRACT-001.json'
+      - '.github/scripts/book-workflow-orchestrator-authority-contract-001-qualify.js'
+      - '.github/workflows/book-workflow-orchestrator-authority-contract-001-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@v4
+      - name: Qualify orchestrator authority contract
+        run: node .github/scripts/book-workflow-orchestrator-authority-contract-001-qualify.js
+      - name: Upload qualification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: book-workflow-orchestrator-authority-contract-001-${{ github.run_id }}
+          path: ${{ runner.temp }}/book-workflow-orchestrator-authority-contract-001-summary.json
+          if-no-files-found: error
