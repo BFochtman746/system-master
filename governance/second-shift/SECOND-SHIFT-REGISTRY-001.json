@@ -4,6 +4,9 @@
   "product_root": "SYSTEM_MASTER",
   "schema": "governance/second-shift/SECOND-SHIFT-DELEGATION-SCHEMA-002.json",
   "execution_control": "governance/second-shift/SECOND-SHIFT-EXECUTION-CONTROL-001.md",
+  "continuous_dispatch_contract": "governance/second-shift/SECOND-SHIFT-CONTINUOUS-DISPATCH-001.md",
+  "global_controller_schedule": "governance/second-shift/SECOND-SHIFT-GLOBAL-CONTROLLER-SCHEDULE-001.json",
+  "dispatch_controller": ".github/scripts/second-shift-dispatch-controller.js",
   "utilization_event_schema": "governance/second-shift/SECOND-SHIFT-UTILIZATION-EVENT-SCHEMA-001.json",
   "enforcement_script": ".github/scripts/second-shift-enforce.js",
   "owner_coverage_enforcement_script": ".github/scripts/second-shift-owner-coverage.js",
@@ -20,6 +23,7 @@
   },
   "owner_discovery_rule": "owner_files is the machine-authoritative active Second Shift lane set. Controllers, workers, handoffs and enforcement enumerate it rather than compile fixed lane names.",
   "system_lane_rule": "First-class peer systems receive their own owner lane. DOCUMENTS is a first-class peer and therefore has DOCUMENTS-DELEGATIONS.json. PROSE is retired and is not an active lane. Product-root capability portfolios do not automatically become lanes unless architecture authority makes them first-class systems.",
+  "controller_schedule_rule": "There is one global System Master portfolio-controller schedule defined by global_controller_schedule. Owner chats do not create independent overnight schedulers. Scheduled controller runs are reconciliation/recovery points; terminal COMPLETED/BLOCKED/STALE work requires immediate successor evaluation while the shift remains open.",
   "retired_lanes": {
     "PROSE": {
       "retirement_record": "governance/retirements/PROSE-SYSTEM-RETIREMENT-001.json",
@@ -43,13 +47,13 @@
   },
   "portfolio_rule": "The portfolio controller reads every active owner file declared by owner_files from current authority, revalidates each against its control binding and current obligation registry, removes stale/non-open items from admission, and selects dependency-valid work. Retired lanes are never scheduled.",
   "day_shift_rule": "Whenever an active system owner chat closes, supersedes, blocks or materially changes its current objective, it reconciles its registry-declared delegation file in the same working session. Documents follows the same rule as Core, Learning and Book.",
-  "night_start_rule": "The portfolio controller performs fresh pre-shift reconciliation and every active owner worker independently revalidates immediately before execution.",
-  "dispatch_rule": "Every active registry-declared lane is eligible for the configured owner-worker cadence during 00:00-07:00. Implementations derive active lanes from owner_files; retired_lanes are evidence only.",
-  "claim_rule": "Only one mutation-capable claim/lease may be live per active owner lane.",
-  "retry_rule": "Transient dependencies receive a finite classified retry budget; after exhaustion the lane switches to independent safe work when available.",
-  "stale_rule": "No job survives a control-binding mismatch by default. Preserve evidence/checkpoint, re-evaluate, then create a new/revalidated delegation bound to current authority.",
+  "night_start_rule": "The single global portfolio controller performs fresh pre-shift reconciliation at 23:45 America/New_York and every active owner worker independently revalidates immediately before execution.",
+  "dispatch_rule": "Every active registry-declared lane is eligible during 00:00-07:00. Primary continuation is event-first after terminal work; the global controller also reconciles hourly at :45, performs final refill at 06:45, and closes normal new admission at 07:00. Implementations derive active lanes from owner_files; retired_lanes are evidence only.",
+  "claim_rule": "Only one mutation-capable claim/lease may be live per active owner lane. Canonical Git mutation additionally requires the global repository-writer fence selected by CURRENT-AUTHORITY.",
+  "retry_rule": "Transient dependencies receive a finite classified retry budget at the shared control-plane layer; after exhaustion the lane switches to independent safe work when available.",
+  "stale_rule": "No job survives a control-binding, work-lease, expected-base-SHA or writer-fence mismatch by default. Preserve evidence/checkpoint, re-evaluate, then create a new/revalidated operation bound to current authority.",
   "no_work_rule": "An active lane may be idle only after a durable all-eight-rungs-exhausted proof. A retired lane is not idle; it is out of the active scheduling set.",
-  "successor_rule": "After every completion or material block, the active owner worker re-reads live authority and selects the next dependency-valid unattended-safe project while time remains.",
+  "successor_rule": "After every completion, material block or stale result, the active owner worker/controller re-reads live authority and selects the next dependency-valid unattended-safe project while time remains.",
   "utilization_rule": "Per-lane append-only shift event ledgers are authoritative for active lanes only. Historical Prose/root ledgers remain evidence and are not expected after retirement.",
   "work_ahead_ladder": ["current repair/control health","completion and evidence census","authoritative research and provenance","architecture/contracts/state/interface/evidence specification","tests/benchmarks/property/concurrency/failure injection","bounded implementation with objective verification","exact-SHA qualification and A-01 preparation","next successor build packet"]
 }
