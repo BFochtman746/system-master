@@ -1,0 +1,47 @@
+name: Learning Assessment Target Domain III Batch 03 Prequalification
+on:
+  push:
+    branches: [learning/assessment-target-domain-iii-batch-03-20260910]
+    paths:
+      - "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001B-ASSESSMENT-TARGET-DOMAIN-III-BATCH-03-CANDIDATE-035A.json"
+      - ".github/scripts/learning-assessment-target-batch-qualify.js"
+      - ".github/workflows/learning-assessment-target-domain-iii-batch-03-prequal.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  validate:
+    name: Domain III assessment-target batch 03 exact-source validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      ASSESSMENT_CANDIDATE: LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001B-ASSESSMENT-TARGET-DOMAIN-III-BATCH-03-CANDIDATE-035A.json
+      TOPOLOGY_CANDIDATE: LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-DOMAIN-III-BATCH-03-CANDIDATE-014.json
+      ASSESSMENT_DOMAIN: III
+      ASSESSMENT_BATCH_INDEX: 3
+      EXPECTED_TARGET_COUNT: 3
+      CUMULATIVE_TARGET_COUNT: 13
+      DOMAIN_TARGET_TOTAL: 13
+      EVIDENCE_DIR: learning-assessment-target-domain-iii-batch-03-evidence
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - name: Record exact subject
+        run: |
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          printf 'SUBJECT_SHA=%s\n' "${GITHUB_SHA}"
+      - name: Syntax check reusable validator
+        run: node --check .github/scripts/learning-assessment-target-batch-qualify.js
+      - name: Validate final Domain III assessment targets
+        run: node .github/scripts/learning-assessment-target-batch-qualify.js
+      - name: Upload hosted evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: LEARNING-ASSESSMENT-TARGET-DOMAIN-III-BATCH-03-${{ github.sha }}-hosted-evidence
+          path: ${{ runner.temp }}/learning-assessment-target-domain-iii-batch-03-evidence
+          if-no-files-found: warn
+          retention-days: 30
