@@ -2,62 +2,74 @@
   "owner_system_id": "LEARNING",
   "owner_path": "SYSTEM_MASTER/LEARNING",
   "control_ref": "learning/control-v1",
-  "last_known_control_head": "0562ce4754e79832ff980e8e8c698e8120dd6852",
-  "delegation_epoch": 23,
+  "last_known_control_head": "177a25236c838087c4bfa29cebd71ece05cb6f69",
+  "delegation_epoch": 25,
   "active_delegations": [
     {
-      "delegation_id": "SECOND-SHIFT-LEARNING-ASSESSMENT-TARGET-CONTRACT-025A",
+      "delegation_id": "SECOND-SHIFT-LEARNING-ASSESSMENT-TARGET-DOMAIN-II-BATCH-01-027A",
       "owner_path": "SYSTEM_MASTER/LEARNING",
-      "objective_id": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001B-ASSESSMENT-TARGET-CONTRACT-025A",
+      "objective_id": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001B-ASSESSMENT-TARGET-DOMAIN-II-BATCH-01-CANDIDATE-027A",
       "parent_objective_id": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001",
       "state": "READY",
       "valid_for_control_ref": "learning/control-v1",
-      "valid_for_control_head": "0562ce4754e79832ff980e8e8c698e8120dd6852",
-      "revalidated_on": "2026-09-10",
-      "parent_checkpoint": "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001B-ASSESSMENT-TARGET-BINDING-025.json",
+      "valid_for_control_head": "177a25236c838087c4bfa29cebd71ece05cb6f69",
+      "created_at": "2026-09-10T10:08:00-04:00",
+      "last_revalidated_at": "2026-09-10T10:08:00-04:00",
+      "parent_checkpoint": "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001B-ASSESSMENT-TARGET-DOMAIN-II-BATCHING-027.json",
       "predecessor_evidence": {
-        "full_graph_closure_subject_sha": "02b8c03922cfdf0acdfa62d5c10c8db44a620b91",
-        "hosted_run_id": 34485764394,
-        "structural_full_graph_closure_complete": true,
-        "canonical_admission_ready": false
+        "domain_i_assessment_subject_sha": "a4138c8621da305103656b1337fef1e7742d67ce",
+        "hosted_run_id": 34486377414,
+        "domain_i_targets_validated": 8
       },
-      "completion_delta": "Define and validate one deterministic assessment-target contract over the 66 structurally closed provisional subskills, preserving exact frozen source/capability provenance and leaving uncertain prerequisite candidates and all human/SME/psychometric evidence unresolved unless independently proven.",
-      "stop_condition": "A machine-readable assessment-target schema and validator exist; synthetic positive/negative fixtures prove software behavior; prohibited evidence claims remain UNOBSERVED; and the first bounded source-order target-binding batch can be selected without guessing semantic prerequisites or human outcomes.",
+      "completion_delta": "Bind one deterministic assessment target to each of the first five Domain II provisional subskills in exact frozen source order using the passed 025A assessment-target contract; preserve exact parent/capability/source/cognitive identity, deterministic scoring assertions and insufficient-evidence behavior without touching unresolved prerequisite candidates.",
+      "stop_condition": "Domain II Batch 01 has exactly five validated assessment targets with fresh exact-SHA hosted evidence; unresolved prerequisite candidates and all psychometric/learner/SME/certification/native/production fields remain unpromoted; then bind Batch 02 without replaying Domain I or Batch 01.",
       "allowed_work": [
-        "define exact identity, capability, cognitive-level, evidence/input, response/action and scoring-assertion fields",
-        "implement deterministic schema/validator and synthetic non-human fixtures",
-        "preserve source-version provenance and abstention/insufficient-evidence behavior",
-        "select bounded source-order target-binding work after contract validation"
+        "bind exactly the first five frozen Domain II assessment targets",
+        "preserve exact 2022 source locator, parent identity, capability statement and cognitive level",
+        "use deterministic scoring assertions and explicit insufficient-evidence behavior",
+        "validate against the passed 025A contract",
+        "preserve exact-SHA hosted receipt and select Domain II Batch 02 on PASS"
       ],
       "forbidden_authority": [
-        "psychometric validity",
-        "learner mastery/effectiveness",
-        "retention/transfer/workplace effectiveness",
-        "SME or ASQ approval",
-        "certification equivalence",
-        "canonical resolution of uncertain prerequisite candidates",
-        "A-01",
-        "native",
-        "production"
+        "do not resolve, promote, remove or infer UNRESOLVED__NOT_CANONICAL prerequisites",
+        "do not infer psychometric validity, learner mastery, retention, transfer or workplace effectiveness",
+        "do not infer SME or ASQ approval or certification equivalence",
+        "do not substitute a newer standard revision",
+        "do not call hosted validation A-01, native or production qualification",
+        "do not cross Core, Book or Prose ownership"
       ],
-      "continuation_rule": "Completion is not shift termination. Re-read live Learning and continue the next dependency-valid assessment-target successor."
+      "on_pass": "Preserve exact Batch 01 subject/receipt, retire this delegation, re-read live Learning and bind Domain II Batch 02.",
+      "on_failure": "Preserve the prior Domain I and assessment-contract PASS; repair only the exact deterministic target/schema defect on a new subject without fabricating semantic or human authority."
     }
   ],
   "retired_delegations": [
     {
+      "delegation_id": "SECOND-SHIFT-LEARNING-ASSESSMENT-TARGET-CONTRACT-025A",
+      "state": "COMPLETED__SUPERSEDED",
+      "completion_subject_sha": "361a156e883d8f02ddd0302a5a9b6bf89c1f8a60",
+      "hosted_run_id": 34486112848,
+      "history_preserved": true
+    },
+    {
+      "delegation_id": "SECOND-SHIFT-LEARNING-ASSESSMENT-TARGET-BATCH-01-026A-P9",
+      "state": "COMPLETED__SUPERSEDED_BY_DOMAIN_II",
+      "completion_subject_sha": "a4138c8621da305103656b1337fef1e7742d67ce",
+      "hosted_run_id": 34486377414,
+      "history_preserved": true
+    },
+    {
       "delegation_id": "SECOND-SHIFT-LEARNING-FULL-STANDARD-CURRICULUM-001A-FULL-GRAPH-CLOSURE-024A",
-      "state": "COMPLETED__SUPERSEDED_BY_ASSESSMENT_TARGET_CONTRACT",
+      "state": "COMPLETED__SUPERSEDED_BY_ASSESSMENT_TARGET_WORK",
       "completed_subject_sha": "02b8c03922cfdf0acdfa62d5c10c8db44a620b91",
       "hosted_run_id": 34485764394,
-      "replacement_delegation_id": "SECOND-SHIFT-LEARNING-ASSESSMENT-TARGET-CONTRACT-025A",
       "history_preserved": true
     }
   ],
   "prior_full_history": {
-    "blob_sha": "c50aa066415f6310816ed3713e09eaef012e52a3",
-    "standing": "IMMUTABLE_GIT_HISTORY_PRESERVED__DETAILED_PRIOR_DELEGATION_HISTORY_REMAINS_RECOVERABLE"
+    "blob_sha": "fb67164240e0f2075e4a1bb66d03c411a2e9f836",
+    "standing": "IMMUTABLE_GIT_HISTORY_PRESERVED__PRE_P9_DELEGATION_DETAILS_REMAIN_RECOVERABLE"
   },
   "owner_revalidation_required": false,
-  "reason": "The live owner head 0562ce4754e79832ff980e8e8c698e8120dd6852 records full-graph structural closure PASS and explicitly selects deterministic assessment-target contract 025A.",
+  "reason": "Learning advanced owner-valid assessment-target work through Domain I. Control head 177a25236c838087c4bfa29cebd71ece05cb6f69 selects Domain II Batch 01 027A. P9 binds that exact successor with the full schema-002 execution fields.",
   "empty_is_valid": false
 }
