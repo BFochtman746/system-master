@@ -21,9 +21,9 @@
     "Anything without an owner becomes UNALLOCATED and cannot execute, schedule or promote until assigned.",
     "Anything with ambiguous evidence becomes EVIDENCE_REVIEW_REQUIRED rather than guessed complete or incomplete."
   ],
-  "last_reconciled_at": "2026-09-10T09:29:00-04:00",
-  "last_reconciled_from_main": "8e6a3ed57fdeb09c147be12f02e755707349948a",
-  "last_reconciliation_reason": "Seal P5 shared infrastructure/A-01 from current repair, registered-control-plane, runner, migration and Second Shift evidence; preserve one active A01_REQUEUE_READY transaction and the Second Shift live-authority/telemetry hardening gap without replaying closed 001B/001C or treating infrastructure as a product system; advance the first incomplete global phase to P6 product-module allocation.",
+  "last_reconciled_on": "2026-09-10",
+  "last_reconciled_from_main": "c25d0555c8f79e03c062d8d4f06033140e447918",
+  "last_reconciliation_reason": "Seal P6 by recovering the full 40-row historical module index, resolving the 40-versus-37 inventory discrepancy, mapping every historical module exactly once to current canonical owners, owner-registration requirements, absorbed/deferred scope or headless interoperability, and preserving historical research/implementation evidence without promoting it to current authority. Advance to P7 orphan/unallocated branch-workstream census.",
   "phases": [
     {
       "phase_id": "P0",
@@ -162,15 +162,34 @@
     {
       "phase_id": "P6",
       "name": "Expected product-module allocation census",
-      "status": "PENDING",
+      "status": "COMPLETE",
+      "completed_on": "2026-09-10",
       "scope": "Reconcile the August 31 product-module inventory and later requirements to current owners: implemented/partial/planned/headless/deferred/excluded/reconciliation-required. Historical counts are not current proof.",
-      "exact_next_action": "Read EXPECTATION-REGISTRY-001 and the historical module inventory; enumerate each expected product/tool capability exactly once; map it to CORE, LEARNING, BOOK, PROSE, shared infrastructure, a required but not-yet-created owner decision, headless/deferred/excluded scope, or UNALLOCATED; then classify current implementation/evidence standing without using historical status counts as present-day proof."
+      "result_pointer": "governance/census/SYSTEM-MASTER-COMPLETION-CENSUS-002-P6-PRODUCT-MODULE-ALLOCATION.json",
+      "ledger_delta_pointer": "governance/census/SYSTEM-MASTER-COMPLETION-CENSUS-002-P6-PRODUCT-MODULE-ALLOCATION-LEDGER-DELTA.json",
+      "standing": "40_HISTORICAL_ROWS_ACCOUNTED_FOR__CURRENT_OWNER_AND_EVIDENCE_DISPOSITIONS_RECORDED",
+      "inventory_reconciliation": {
+        "historical_claimed_count": 40,
+        "expectation_registry_explicit_count_before_reconciliation": 37,
+        "restored_module_keys": ["DATA", "PHONEOPS", "PHYSICALAI"],
+        "full_index_count": 40,
+        "rule": "The restored historical rows do not become current implementation proof."
+      },
+      "material_open_architecture": [
+        "headless/module semantic owner registration for unresolved tool portfolio items",
+        "current admission/requalification of preserved document-tool implementation evidence",
+        "explicit topology/owner placement for AI Income and Living Portfolio",
+        "Response Expectation Engine and Household Ledger name-collision adjudication"
+      ],
+      "boundary": "P6 allocates/dispositions expectations; it does not create systems, build modules, grant implementation authority or certify native/production readiness.",
+      "next_global_phase": "P7__ORPHAN_UNALLOCATED_BRANCH_WORKSTREAM_CENSUS"
     },
     {
       "phase_id": "P7",
       "name": "Orphan/unallocated branch-workstream census",
       "status": "PENDING",
-      "scope": "Branch families, workstream IDs, issues, qualification lanes and control records not yet mapped; classify historical-only, superseded, active-owned or UNALLOCATED."
+      "scope": "Branch families, workstream IDs, issues, qualification lanes and control records not yet mapped; classify historical-only, superseded, active-owned or UNALLOCATED.",
+      "exact_next_action": "Census repository branch/ref families and durable workstream identifiers against SYSTEM-TOPOLOGY-002 and P6 unresolved module targets. A branch/workstream/qualification name may provide evidence but may not create a system. Classify each discovered family as current-owner-valid, historical-only, superseded, stale-delegation/repair, owner-selection-required or UNALLOCATED; preserve useful evidence and identify exact owner-reconciliation obligations without deleting history."
     },
     {
       "phase_id": "P8",
