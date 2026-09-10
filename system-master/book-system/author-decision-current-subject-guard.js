@@ -58,7 +58,7 @@ function strictSubjectCurrent(parentState, refs) {
   assertIdentityExists(parentState, refs, records);
   for (const ref of refs) {
     const exact = records.find(r => recordKey(r) === key(ref));
-    if (!exact) continue; // append-only/non-governed identities keep their owning currentness semantics.
+    if (!exact) continue;
     const pointer = exact.meta.pointer;
     const activeRef = parentState.active[pointer];
     const active = records.filter(r => r.meta.pointer === pointer && pointerMatches(r, activeRef));
@@ -123,7 +123,7 @@ function revalidateAgainstParent(args) {
   const staleIds = [];
   for (const requestId of Object.values(next.current_request_index || {})) {
     const snap = next.decision_request_snapshots[requestId];
-    if (!snap || TERMINAL_STATES.has(snap.queue_state) || snap.queue_state === 'STALE') continue;
+    if (!snap || TERMINAL_STATES.has(snap.queue_state)) continue;
     if (!strictSubjectCurrent(args.currentParentState, snap.subject_identity_refs)) {
       overlays[requestId] = {
         effective_state: 'STALE',
