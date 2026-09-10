@@ -1,0 +1,42 @@
+{
+  "schedule_id": "SECOND-SHIFT-GLOBAL-CONTROLLER-SCHEDULE-001",
+  "status": "ACTIVE_TARGET__USER_AUTHORIZED_2026-09-10",
+  "timezone": "America/New_York",
+  "controller_role": "SYSTEM_MASTER_PORTFOLIO_CONTROLLER",
+  "execution_model": "ONE_GLOBAL_CONTROLLER__NO_PER_CHAT_SCHEDULERS",
+  "schedule": {
+    "pre_shift": "23:45",
+    "hourly_reconciliation": ["00:45", "01:45", "02:45", "03:45", "04:45", "05:45"],
+    "final_refill": "06:45",
+    "shift_close": "07:00"
+  },
+  "primary_continuation": "EVENT_FIRST_WITHIN_ACTIVE_WORK__TERMINAL_COMPLETED_BLOCKED_STALE_REQUIRES_IMMEDIATE_SUCCESSOR_EVALUATION",
+  "scheduled_runs_are": "PORTFOLIO_RECONCILIATION_AND_RECOVERY_POINTS__NOT_THE_ONLY_CONTINUATION_MECHANISM",
+  "authority_inputs": [
+    "governance/CURRENT-AUTHORITY.json",
+    "governance/SYSTEM-TOPOLOGY-003.json",
+    "governance/WORK-OBLIGATION-REGISTRY-004.json",
+    "governance/second-shift/SECOND-SHIFT-REGISTRY-001.json",
+    "governance/github/CANONICAL-WRITER-POLICY-001.json",
+    "governance/github/GITHUB-WORK-LEASE-SCHEMA-001.json",
+    "governance/github/GITHUB-CONTROL-STATE-SCHEMA-001.json"
+  ],
+  "rules": [
+    "Only one System Master portfolio-controller schedule exists. Owner chats do not create independent overnight schedulers.",
+    "Active owner lanes are discovered from SECOND-SHIFT-REGISTRY-001 owner_files every run; lane names are not compiled into scheduler authority.",
+    "Each run begins from live repository authority and current owner heads rather than chat memory.",
+    "The controller may continue already-authorized unattended-safe work but cannot replace the central objective, change topology/ownership, supersede material work, perform cross-owner canonical writes, bypass failed gates, force canonical refs or change permanent security policy without explicit user authority.",
+    "Workers use isolated candidate branches; canonical admission uses the shared work-lease and repository-writer fence path.",
+    "Completion, BLOCKED and STALE are continuation points, not shift termination, while dependency-valid safe work remains.",
+    "A lane is IDLE_VALID only with durable all-eight-rungs exhaustion proof.",
+    "A-01 remains singleton and executes only trusted exact subjects; generic portfolio reasoning does not require A-01 occupancy.",
+    "At 06:45 only bounded or checkpointable work is refilled. At 07:00 no new normal Second Shift work is admitted and an exact morning handoff is preserved."
+  ],
+  "automation_binding": {
+    "platform": "CHATGPT_AUTOMATION",
+    "title": "System Master Second Shift",
+    "cadence_contract": "23:45 then hourly at :45 through 06:45 America/New_York",
+    "binding_rule": "The automation is an execution binding for this repository contract, not a second source of product authority. If its prompt conflicts with live repository authority, repository authority wins and mutation fails closed.",
+    "identifier_storage": "NOT_REQUIRED_IN_REPOSITORY"
+  }
+}
