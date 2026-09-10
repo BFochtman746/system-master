@@ -47,7 +47,7 @@ Branches, workstreams, qualification lanes, implementation families, repair line
 ### BOOK — `SYSTEM_MASTER/BOOK`
 
 - control ref: `book-system/control-v1`
-- selected control: `qualification/book-system/BOOK-SYSTEM-PRODUCT-PARENT-BINDING-003.json`
+- selected control: `qualification/book-system/BOOK-SYSTEM-PRODUCT-PARENT-BINDING-006.json`
 - owns canonical book state, end-to-end lifecycle, orchestration/admission, author decisions, version/rollback, editorial lifecycle and publication/export.
 
 ### PROSE — `SYSTEM_MASTER/BOOK/PROSE`
