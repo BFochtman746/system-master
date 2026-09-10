@@ -2,7 +2,7 @@
   "artifact_id": "PROSE-EVALUATOR-TOMORROW-READINESS-001",
   "effective_date": "2026-09-09",
   "owner_path": "SYSTEM_MASTER/BOOK/PROSE",
-  "standing": "PASS__TOMORROW_READINESS_CHECKPOINT__TARGETS_1_3_HOSTED_QUALIFIED__TARGETS_4_5_PARTIAL",
+  "standing": "PASS__TOMORROW_READINESS_CHECKPOINT__TARGETS_1_4_HOSTED_QUALIFIED__TARGET_5_PARTIAL",
   "baseline_preservation": {
     "night_shift_closure": "qualification/literary-prose-engine-001/night-shift-2026-09-09/NIGHT-SHIFT-CLOSURE-RECONCILIATION-001.json",
     "research_provenance": "qualification/literary-prose-engine-001/night-shift-2026-09-09/RESEARCH-PROVENANCE-v2.json",
@@ -76,15 +76,18 @@
     {
       "target_id": "PROSE-STYLE-FUNCTION-DECOUPLING-001",
       "priority": 4,
-      "classification": "PARTIAL",
-      "existing_evidence": [
+      "classification": "IMPLEMENTED__HOSTED_QUALIFIED",
+      "implementation_sha": "5ffaaabb84191ee6bd277763409978493b57e4f7",
+      "local_validation": "PASS__JSON_VALIDATION__PY_COMPILE__EVALUATOR_ROBUSTNESS_FIXTURES_54_OF_54",
+      "hosted_qualification_run": 34429823887,
+      "control_drift_run": 34429824076,
+      "evidence": [
         "qualification/literary-prose-engine-001/evaluator-robustness-002/EVALUATOR-ROBUSTNESS-CONTRACT-v1.json",
         "qualification/literary-prose-engine-001/evaluator-robustness-002/evaluator_robustness.py",
-        "qualification/literary-prose-engine-001/evaluator-robustness-002/run_evaluator_robustness_fixtures.py",
-        "qualification/literary-prose-engine-001/extraction-calibration-001/EXTRACTION-CALIBRATION-CONTRACT-v1.json"
+        "qualification/literary-prose-engine-001/evaluator-robustness-002/run_evaluator_robustness_fixtures.py"
       ],
-      "already_covered": "STYLE_VS_STORY can veto a surface-preferred winner when generic preservation_pass or story_function_preserved fails; synthetic extraction contract also names surface-style attractiveness conflicting with story function as a stress slice.",
-      "remaining_delta": "Add the smallest independent-fixture extension that separates event preservation, character preservation and narrative-function preservation under STYLE_VS_STORY rather than collapsing them into one generic story_function_preserved boolean."
+      "completion_delta": "STYLE_VS_STORY now requires explicit boolean event_preserved, character_preserved and narrative_function_preserved guards for both candidates on every decisive trial. A surface-preferred winner is vetoed when any one of those dimensions fails; missing guard evidence is INVALID; a style improvement remains STABLE evidence when all explicit dimensions and pre-existing preservation gates pass.",
+      "remaining_delta": "NONE_FOR_THIS_TARGET__DO_NOT_REPEAT"
     },
     {
       "target_id": "PROSE-LONG-FORM-EVIDENCE-LINKAGE-001",
@@ -131,12 +134,12 @@
     "publication_authorized": false
   },
   "exact_next_action": {
-    "id": "PROSE-STYLE-FUNCTION-DECOUPLING-001",
-    "objective": "Extend existing STYLE_VS_STORY robustness with independent paired fixtures and fail-closed guards that distinguish event, character and narrative-function preservation from surface-style preference.",
-    "first_action": "Re-read the live evaluator-robustness contract/analyzer/fixtures and implement only the three explicit preservation dimensions missing from the current generic story_function_preserved guard.",
-    "pass_proves": "A style-preferred candidate cannot remain automatically comparison-eligible when it loses event, character or narrative-function preservation, while a style improvement that preserves all three remains admissible evidence.",
-    "pass_unlocks": "PROSE-LONG-FORM-EVIDENCE-LINKAGE-001 as the last research-delta support target before tomorrow-readiness support closure.",
-    "on_failure": "Repair only the proven failing evaluator-robustness boundary and rerun qualification on the changed exact SHA.",
+    "id": "PROSE-LONG-FORM-EVIDENCE-LINKAGE-001",
+    "objective": "Close the remaining research-delta gap by jointly qualifying macro literary interpretation against exact localized evidence on independent fixtures, including a middle-book factual/temporal slice.",
+    "first_action": "Re-read the live narrative-orchestration, semantic-evidence, extraction-calibration and book-level-intelligence implementations; dedupe against existing long-context/evidence-linkage logic; then extend the narrowest existing subsystem that can require exact locator/digest/anchor evidence for macro claims.",
+    "pass_proves": "A macro literary claim can be traced to exact localized supporting evidence and middle-book factual/temporal support without turning short-passage success into an unsupported whole-book accuracy claim.",
+    "pass_unlocks": "Closure of PROSE-EVALUATOR-TOMORROW-READINESS-001 support work while preserving PROSE-REAL-LIMITATION-BLIND-MODEL-SCORING-001 as the formal critical path for a fresh evaluator context.",
+    "on_failure": "Repair only the proven long-form evidence-linkage boundary and rerun qualification on the changed exact SHA.",
     "do_not": "Do not touch LGT-001..006, author labels, private manuscript prose, protected blind scoring, revision authority, Book canonical state or publication authority."
   }
 }
