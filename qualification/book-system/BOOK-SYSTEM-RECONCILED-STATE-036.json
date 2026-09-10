@@ -1,0 +1,41 @@
+{
+  "state_id": "BOOK-SYSTEM-RECONCILED-STATE-036",
+  "effective_date": "2026-09-10",
+  "supersedes_for_current_parent_control": "BOOK-SYSTEM-RECONCILED-STATE-035",
+  "supersession_scope": "CURRENT_PARENT_CONTROL_AND_BOOK_PROSE_INTEGRATION_ROUTING_ONLY",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "standing": "BOOK_PROSE_PHASE2A_2B_2C_2D_2E_2F_2G_CLOSED__PHASE2H_CANCELLATION_RESUME_SELECTED",
+  "source_live_head": "20f663ab054ef419d7e6c7c8e29880674e2d3465",
+  "compatible_prose_control_amendment_sha": "821772053f839d0f4a82872a8f18eb0e0cd618f5",
+  "current_owner_objective": {
+    "objective_id": "BOOK-WORKFLOW-ORCHESTRATOR-CANCELLATION-RESUME-001",
+    "phase": "2H",
+    "state": "READY",
+    "scope": "Define cancellation and resume coordination semantics bound to exact workflow/plan/source/task state. Preserve completed verified work, invalidate unsafe in-flight assumptions, resume from the last verified state, and keep Book admission/canonical writes outside orchestrator authority. Do not implement scheduler/worker execution, context compiler, cache or fresh blind evaluation in this packet."
+  },
+  "2g_evidence": {
+    "qualified_subject_sha": "1c7ce612ac454d6bda3df69c1162fe1e0e35c33b",
+    "workflow_run_id": 34501848715,
+    "job_id": 102954291264,
+    "artifact_id": 10162160844,
+    "artifact_zip_digest_sha256": "02ed899423b62e2fd3ee1c7127ebd1aee6aae703bef5d10562eb560c39aab023",
+    "result": "PASS_30_OF_30",
+    "strengthened_2f_dependency_subject_sha": "c37ba0d43d6321a5ae4ba889174517cbafebadc9"
+  },
+  "authority_fences": {
+    "book_canonical_manuscript_owner": "SYSTEM_MASTER/BOOK",
+    "prose_owner": "SYSTEM_MASTER/BOOK/PROSE",
+    "prose_canonical_write": false,
+    "orchestrator_canonical_write": false,
+    "book_admission_is_sole_canonical_effect_path": true,
+    "author_final_creative_semantic_authority": true,
+    "original_manuscript_must_remain_recoverable": true
+  },
+  "qualification_fences": [
+    "Phase 2G proves failure disposition semantics only; it executes no retry, provider reconciliation, cancellation/resume or Book admission.",
+    "No fresh blind scoring or evaluator-isolation qualification is inferred.",
+    "No A-01 PASS is transferred to the 2G integration subject.",
+    "No private/native/publication/production readiness is claimed."
+  ],
+  "next_dependency_valid_action": "Inspect any existing Phase 2H candidate work, then implement and qualify only the missing cancellation/resume coordination semantics before advancing to Phase 2I evidence/provenance emission."
+}
