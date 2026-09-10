@@ -1,0 +1,39 @@
+name: Book Workflow Orchestrator Failure Semantics 001
+
+on:
+  push:
+    branches:
+      - book-system/control-v1
+    paths:
+      - 'qualification/book-system/book-prose-integration/orchestrator/BOOK-WORKFLOW-ORCHESTRATOR-FAILURE-SEMANTICS-001.json'
+      - 'system-master/book-system/book-workflow-failure-semantics.js'
+      - '.github/scripts/book-workflow-orchestrator-failure-semantics-001-qualify.js'
+      - '.github/workflows/book-workflow-orchestrator-failure-semantics-001-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@v4
+      - name: Qualify orchestrator failure semantics
+        env:
+          NODE_OPTIONS: --experimental-default-type=commonjs
+          RUNNER_TEMP: ${{ runner.temp }}
+        run: |
+          set -euo pipefail
+          node --check .github/scripts/book-workflow-orchestrator-failure-semantics-001-qualify.js
+          node .github/scripts/book-workflow-orchestrator-failure-semantics-001-qualify.js
+          test -s "${RUNNER_TEMP}/book-workflow-orchestrator-failure-semantics-001-summary.json"
+          cat "${RUNNER_TEMP}/book-workflow-orchestrator-failure-semantics-001-summary.json"
+      - name: Upload qualification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: book-workflow-orchestrator-failure-semantics-001-${{ github.run_id }}
+          path: ${{ runner.temp }}/book-workflow-orchestrator-failure-semantics-001-summary.json
+          if-no-files-found: error
