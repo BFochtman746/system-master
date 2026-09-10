@@ -86,35 +86,31 @@ function parentWithNewActiveManuscript(parent) {
   next.active.canonical_manuscript_ref=`${old.object_id}:V-RF012-NEXT`;
   return vr.sealState(next);
 }
+function parentSuccessorSameActive(parent) {
+  const next=clone(parent); delete next.state_digest; next.state_version=parent.state_version+1;
+  return vr.sealState(next);
+}
 
-// RF012-001 exact current subject.
 {
   const s=setup(), ref=refOf(activeManuscriptRecord(s.parent));
   ok(guard.strictSubjectCurrent(s.parent,[ref])===true,'RF012-001_CURRENT_NOT_ACCEPTED');
   results.push({case_id:'RF012-001',result:'PASS'});
 }
-
-// RF012-002 prior retained version must no longer be current.
 {
   const s=setup(), oldRef=refOf(activeManuscriptRecord(s.parent)), next=parentWithNewActiveManuscript(s.parent);
   ok(guard.strictSubjectCurrent(next,[oldRef])===false,'RF012-002_OLD_VERSION_ACCEPTED');
   expectCode(()=>guard.assertStrictSubjectCurrent(next,[oldRef]),['AUTHOR_DECISION_SUBJECT_NOT_CURRENT'],'RF012-002');
 }
-
-// RF012-003 wrong digest fails closed.
 {
   const s=setup(), ref=refOf(activeManuscriptRecord(s.parent)); ref.object_digest='c'.repeat(64);
   expectCode(()=>guard.assertStrictSubjectCurrent(s.parent,[ref]),['SUBJECT_IDENTITY_NOT_CURRENT','AUTHOR_DECISION_SUBJECT_NOT_CURRENT'],'RF012-003');
 }
-
-// RF012-004 status/receipt for A cannot make B applicable.
 {
   const s=setup(), a=refOf(activeManuscriptRecord(s.parent)), b={...a,object_digest:'d'.repeat(64)};
   ok(guard.strictSubjectCurrent(s.parent,[a])===true,'RF012-004_A_NOT_CURRENT');
   expectCode(()=>guard.assertStrictSubjectCurrent(s.parent,[b]),['SUBJECT_IDENTITY_NOT_CURRENT','AUTHOR_DECISION_SUBJECT_NOT_CURRENT'],'RF012-004');
 }
 
-// RF012-005 parent advance overlays a queued nonterminal request as strict STALE.
 let staleScenario;
 {
   let s=setup(); const oldRef=refOf(activeManuscriptRecord(s.parent));
@@ -126,14 +122,10 @@ let staleScenario;
   results.push({case_id:'RF012-005',result:'PASS'});
   staleScenario={parent:nextParent,versionLedger:s.versionLedger,queueLedger:out.queue_ledger,decisionRequest:enq.decision_request};
 }
-
-// RF012-006 resolution after strict stale overlay is denied.
 {
   const s=staleScenario;
   expectCode(()=>guard.resolveDecision({parentState:s.parent,versionLedger:s.versionLedger,queueLedger:s.queueLedger,request:resolutionRequest(s,s.decisionRequest,'6')}),['AUTHOR_DECISION_SUBJECT_NOT_CURRENT'],'RF012-006');
 }
-
-// RF012-007 malformed, duplicate and non-hex refs fail without mutating parent input.
 {
   const s=setup(), ref=refOf(activeManuscriptRecord(s.parent)), before=digest(s.parent);
   expectCode(()=>guard.assertStrictSubjectCurrent(s.parent,[]),['SUBJECT_IDENTITY_REFS_REQUIRED'],'RF012-007A');
@@ -142,16 +134,12 @@ let staleScenario;
   ok(digest(s.parent)===before,'RF012-007_PARENT_MUTATED');
   results.push({case_id:'RF012-007',result:'PASS'});
 }
-
-// RF012-008 append-only identity keeps its owning currentness semantics.
 {
   const s=setup(); const item=s.parent.research_evidence_links[0];
   const ref={object_id:item.link_id,object_version:'UNVERSIONED',object_digest:vr.digest(item)};
   ok(guard.strictSubjectCurrent(s.parent,[ref])===true,'RF012-008_APPEND_ONLY_REJECTED');
   results.push({case_id:'RF012-008',result:'PASS'});
 }
-
-// RF012-009 present and reopen are denied when the frozen subject is no longer current.
 {
   let s=setup(); const oldRef=refOf(activeManuscriptRecord(s.parent));
   const enq=guard.enqueueDecision({parentState:s.parent,queueLedger:s.queueLedger,request:enqueueRequest(s,[oldRef],'9')});
@@ -161,17 +149,18 @@ let staleScenario;
   ok(digest(s.queueLedger)===qBefore,'RF012-009_QUEUE_MUTATED');
   results.push({case_id:'RF012-009',result:'PASS'});
 }
-
-// RF012-010 exact-match revalidation is stable and does not create false strict-stale overlays.
 {
   let s=setup(); const ref=refOf(activeManuscriptRecord(s.parent));
   const enq=guard.enqueueDecision({parentState:s.parent,queueLedger:s.queueLedger,request:enqueueRequest(s,[ref],'10')}); s.queueLedger=enq.queue_ledger;
-  const first=guard.revalidateAgainstParent({previousParentState:s.parent,currentParentState:s.parent,queueLedger:s.queueLedger,request:revalidationRequest(s,'10A')});
+  const parent1=parentSuccessorSameActive(s.parent);
+  const first=guard.revalidateAgainstParent({previousParentState:s.parent,currentParentState:parent1,queueLedger:s.queueLedger,request:revalidationRequest(s,'10A')});
   ok(first.strict_stale_request_ids.length===0,'RF012-010_FALSE_STALE_FIRST');
-  s.queueLedger=first.queue_ledger;
-  const second=guard.revalidateAgainstParent({previousParentState:s.parent,currentParentState:s.parent,queueLedger:s.queueLedger,request:revalidationRequest(s,'10B')});
+  s={...s,parent:parent1,queueLedger:first.queue_ledger};
+  const parent2=parentSuccessorSameActive(parent1);
+  const second=guard.revalidateAgainstParent({previousParentState:parent1,currentParentState:parent2,queueLedger:s.queueLedger,request:revalidationRequest(s,'10B')});
   ok(second.strict_stale_request_ids.length===0,'RF012-010_FALSE_STALE_SECOND');
-  ok(guard.effectiveDecisionState(second.queue_ledger,enq.decision_request.decision_request_id)!=='STALE','RF012-010_EFFECTIVE_FALSE_STALE');
+  const currentId=second.queue_ledger.current_request_index[enq.decision_request.decision_family_id];
+  ok(guard.effectiveDecisionState(second.queue_ledger,currentId)!=='STALE','RF012-010_EFFECTIVE_FALSE_STALE');
   results.push({case_id:'RF012-010',result:'PASS'});
 }
 
