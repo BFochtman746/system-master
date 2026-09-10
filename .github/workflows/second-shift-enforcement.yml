@@ -42,11 +42,11 @@ jobs:
       - name: Self-test Second Shift invariants
         run: node .github/scripts/second-shift-enforce.js --selftest
 
-      - name: Validate current Second Shift state
+      - name: Validate static Second Shift repository state
         if: github.event_name != 'schedule'
-        run: node .github/scripts/second-shift-enforce.js --out=.second-shift-enforcement/report.json
+        run: node .github/scripts/second-shift-enforce.js --no-live --out=.second-shift-enforcement/report.json
 
-      - name: Watch active shift
+      - name: Watch active shift against live owner refs
         if: github.event_name == 'schedule'
         run: node .github/scripts/second-shift-enforce.js --watchdog --out=.second-shift-enforcement/report.json
 
