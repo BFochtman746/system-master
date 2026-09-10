@@ -1,0 +1,69 @@
+{
+  "portfolio_id": "CORE-SECOND-SHIFT-PORTFOLIO-2026-09-10",
+  "recorded_at": "2026-09-10T05:38:00-04:00",
+  "owner_path": "SYSTEM_MASTER/CORE",
+  "live_binding": {
+    "main_head_before_write": "d8415edd0a16325b5edc4488ff536ea30cad0e79",
+    "core_control_head": "ecf40c2e81cb884e4a84f97bb5cda69cc1dc045f"
+  },
+  "execution_order": [
+    {
+      "order": 1,
+      "item": "A-01 control-plane selftest repair",
+      "result": "A01_REQUEUE_READY",
+      "evidence": "governance/repair/A01-CONTROL-PLANE-SELFTEST-A1-REPAIR-QUALIFICATION-001.md",
+      "remaining": "Authoritative exact-subject A-01 rerun receipt; no PASS claimed."
+    },
+    {
+      "order": 2,
+      "item": "Completion census P1 Core",
+      "result": "COMPLETE__SEALED",
+      "evidence": "governance/census/SYSTEM-MASTER-COMPLETION-CENSUS-002-P1-CORE.json"
+    },
+    {
+      "order": 3,
+      "item": "SMR021 persistence/full-portable contract",
+      "result": "COMPLETE__CONTRACT",
+      "evidence": "system-master/control-v2/SMR021-DATA-PERSISTENCE-AND-FULL-PORTABLE-CLOSURE-CONTRACT-003.md"
+    },
+    {
+      "order": 4,
+      "item": "SMR021 portable qualification/test packet",
+      "result": "COMPLETE__DESIGN_AND_STATIC_GAP_CLASSIFICATION",
+      "evidence": "system-master/control-v2/SMR021-FULL-PORTABLE-CLOSURE-QUALIFICATION-PACKET-004.md"
+    },
+    {
+      "order": 5,
+      "item": "GitHub-native/hosted preparation",
+      "result": "COMPLETE__EXECUTION_GATES_CLOSED",
+      "evidence": "system-master/control-v2/SMR021-GITHUB-NATIVE-SOURCE-CUSTODY-AND-HOSTED-QUALIFICATION-PREP-005.md"
+    },
+    {
+      "order": 6,
+      "item": "Exact capsule retry and DATA contract fixtures",
+      "result": "ACTIVE",
+      "delegation": "SECOND-SHIFT-CORE-SMR021-CUSTODY-RETRY-001"
+    }
+  ],
+  "repair_lineage": {
+    "transaction_id": "A01-REPAIR-a01-run-34431764843-A01-CONTROL-PLANE-SELFTEST-A1",
+    "failed_subject_sha": "3a8004813e18d7defbf1f9ebc47f5bd8fcd30fb9",
+    "replacement_subject_sha": "ceb6870546012b789caea56499a1d219a195dc8b",
+    "state": "A01_REQUEUE_READY",
+    "authoritative_pass": false
+  },
+  "guards": {
+    "exact_sha": true,
+    "no_pass_transfer": true,
+    "data_owner_boundary": true,
+    "a01_separate": true,
+    "native_device_separate": true,
+    "human_private_external_separate": true,
+    "production_separate": true
+  },
+  "current_blockers": [
+    "DATA owner-valid durable admission record/interface/migration absent.",
+    "Exact source capsule outside GitHub; authenticated transfers returned transient 502."
+  ],
+  "continuation": "Retry exact capsule acquisition, preserve all hash gates, and continue adversarial fixture preparation. Stop only when these safe rungs are exhausted or a real dependency changes."
+}
