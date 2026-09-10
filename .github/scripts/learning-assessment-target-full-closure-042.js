@@ -5,8 +5,14 @@ const path = require('path');
 
 const root = process.env.GITHUB_WORKSPACE || process.cwd();
 const qdir = path.join(root, 'qualification', 'learning');
+const evidenceDir = path.join(process.env.RUNNER_TEMP || root, process.env.EVIDENCE_DIR || 'learning-assessment-target-full-closure-evidence');
+fs.mkdirSync(evidenceDir, { recursive: true });
 const load = (name) => JSON.parse(fs.readFileSync(path.join(qdir, name), 'utf8'));
-const fail = (code, detail = '') => { throw new Error(detail ? `${code}:${detail}` : code); };
+const fail = (code, detail = '') => {
+  const message = detail ? `${code}:${detail}` : code;
+  fs.writeFileSync(path.join(evidenceDir, 'failure-summary.json'), `${JSON.stringify({ subject_sha: process.env.GITHUB_SHA || 'LOCAL', result_class: 'FAIL', failure: message }, null, 2)}\n`);
+  throw new Error(message);
+};
 const text = (value) => typeof value === 'string' && value.trim().length > 0;
 
 const closureName = 'LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001B-ASSESSMENT-TARGET-FULL-CLOSURE-CANDIDATE-042A.json';
@@ -49,11 +55,21 @@ for (let i = 0; i < closure.assessment_batches.length; i += 1) {
   const topology = load(topologyName);
 
   if (!Array.isArray(batch.targets) || batch.target_count !== batch.targets.length) fail('BATCH_TARGET_COUNT', batchName);
-  if (!Array.isArray(topology.requirement_ids) || !Array.isArray(topology.subskills)) fail('TOPOLOGY_SHAPE', topologyName);
-  if (topology.requirement_ids.length !== batch.target_count) fail('TOPOLOGY_TARGET_COUNT', topologyName);
+  if (!Array.isArray(topology.subskills)) fail('TOPOLOGY_SUBSKILLS_REQUIRED', topologyName);
+
+  let topologyRequirementIds;
+  if (Array.isArray(topology.requirement_ids)) {
+    topologyRequirementIds = topology.requirement_ids;
+  } else if (batch.domain === 'I') {
+    topologyRequirementIds = source.nodes.filter((r) => String(r[0]).startsWith('ASQ-CSSGB-2022-I.')).map((r) => r[0]);
+  } else {
+    topologyRequirementIds = topology.subskills.map((s) => s.parent_requirement_id);
+  }
+
+  if (topologyRequirementIds.length !== batch.target_count) fail('TOPOLOGY_TARGET_COUNT', topologyName);
 
   const parentOrder = batch.targets.map((t) => t.parent_requirement_id);
-  if (JSON.stringify(parentOrder) !== JSON.stringify(topology.requirement_ids)) fail('BATCH_SOURCE_ORDER', batchName);
+  if (JSON.stringify(parentOrder) !== JSON.stringify(topologyRequirementIds)) fail('BATCH_SOURCE_ORDER', batchName);
 
   const subskillMap = new Map(topology.subskills.map((s) => [s.subskill_id, s]));
   if (subskillMap.size !== topology.subskills.length) fail('TOPOLOGY_DUPLICATE_SUBSKILL', topologyName);
@@ -159,7 +175,5 @@ const summary = {
   next_objective: closure.next_objective_on_pass
 };
 
-const evidenceDir = path.join(process.env.RUNNER_TEMP || root, process.env.EVIDENCE_DIR || 'learning-assessment-target-full-closure-evidence');
-fs.mkdirSync(evidenceDir, { recursive: true });
 fs.writeFileSync(path.join(evidenceDir, 'qualification-summary.json'), `${JSON.stringify(summary, null, 2)}\n`);
 console.log(JSON.stringify(summary));
