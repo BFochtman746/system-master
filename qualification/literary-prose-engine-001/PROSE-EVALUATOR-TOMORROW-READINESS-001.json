@@ -2,7 +2,7 @@
   "artifact_id": "PROSE-EVALUATOR-TOMORROW-READINESS-001",
   "effective_date": "2026-09-09",
   "owner_path": "SYSTEM_MASTER/BOOK/PROSE",
-  "standing": "PASS__TOMORROW_READINESS_CHECKPOINT__TARGETS_1_4_HOSTED_QUALIFIED__TARGET_5_PARTIAL",
+  "standing": "PASS__TOMORROW_READINESS_SUPPORT_COMPLETE__TARGETS_1_5_HOSTED_QUALIFIED__PRIMARY_BLIND_READY_FRESH_CONTEXT_REQUIRED",
   "baseline_preservation": {
     "night_shift_closure": "qualification/literary-prose-engine-001/night-shift-2026-09-09/NIGHT-SHIFT-CLOSURE-RECONCILIATION-001.json",
     "research_provenance": "qualification/literary-prose-engine-001/night-shift-2026-09-09/RESEARCH-PROVENANCE-v2.json",
@@ -12,13 +12,12 @@
   },
   "authority_reconciliation": {
     "prior_known_head": "2fc1d9c9a7b789d537c17deafc6b1d1b0b82cf82",
-    "intervening_live_head_reconciled": "1ffcec493f9d3ca538571a5dd2095a1abe7c8ef9",
-    "reconciled_commits": [
-      "ba8b11587fb237c21de3c0bb9edfce3bad87a813",
-      "c8fb4074ba5d8b8b0aa7c1d75b381fbdbe212681",
-      "1ffcec493f9d3ca538571a5dd2095a1abe7c8ef9"
+    "intervening_heads_reconciled": [
+      "1ffcec493f9d3ca538571a5dd2095a1abe7c8ef9",
+      "7461d9d9d37aba1137c739e77e57e6827a3340c1",
+      "5d1ded28ffd483c8f6af8585738286315aed1e11"
     ],
-    "classification": "AUTHORITY_DELTA_RECONCILED__RUBRIC_COUNTERFACTUAL_WORK_VALID__NO_REPLAY"
+    "classification": "AUTHORITY_DELTAS_RECONCILED__VALID_COMPLETED_WORK_PRESERVED__NO_REPLAY"
   },
   "primary_critical_path": {
     "selected_state": "qualification/literary-prose-engine-001/LITERARY-PROSE-CONSOLIDATED-WORKSTREAM-STATE-015.json",
@@ -70,7 +69,7 @@
         "qualification/literary-prose-engine-001/extraction-calibration-001/narrative_extraction_calibration.py",
         "qualification/literary-prose-engine-001/extraction-calibration-001/run_extraction_calibration_fixtures.py"
       ],
-      "completion_delta": "Anchor existence, anchor identity precision, localization overlap/tiering and narrative-function accuracy are now separately reported. Independent fixtures prove EXACT, LOCALIZED, ANCHOR_ONLY, WRONG_ANCHOR and MISSING states and prove perfect narrative-function F1 cannot mask wrong-anchor localization.",
+      "completion_delta": "Anchor existence, anchor identity precision, localization overlap/tiering and narrative-function accuracy are separately reported. Independent fixtures prove EXACT, LOCALIZED, ANCHOR_ONLY, WRONG_ANCHOR and MISSING states and prove perfect narrative-function F1 cannot mask wrong-anchor localization.",
       "remaining_delta": "NONE_FOR_THIS_TARGET__DO_NOT_REPEAT"
     },
     {
@@ -86,24 +85,35 @@
         "qualification/literary-prose-engine-001/evaluator-robustness-002/evaluator_robustness.py",
         "qualification/literary-prose-engine-001/evaluator-robustness-002/run_evaluator_robustness_fixtures.py"
       ],
-      "completion_delta": "STYLE_VS_STORY now requires explicit boolean event_preserved, character_preserved and narrative_function_preserved guards for both candidates on every decisive trial. A surface-preferred winner is vetoed when any one of those dimensions fails; missing guard evidence is INVALID; a style improvement remains STABLE evidence when all explicit dimensions and pre-existing preservation gates pass.",
+      "completion_delta": "STYLE_VS_STORY requires explicit boolean event_preserved, character_preserved and narrative_function_preserved guards for both candidates on every decisive trial. Surface preference is vetoed when any dimension fails; missing guard evidence is INVALID; preservation-complete style improvement remains admissible evidence.",
       "remaining_delta": "NONE_FOR_THIS_TARGET__DO_NOT_REPEAT"
     },
     {
       "target_id": "PROSE-LONG-FORM-EVIDENCE-LINKAGE-001",
       "priority": 5,
-      "classification": "PARTIAL",
-      "existing_evidence": [
-        "qualification/literary-prose-engine-001/narrative-orchestration-001/NARRATIVE-ORCHESTRATION-CONTRACT-v1.json",
-        "qualification/literary-prose-engine-001/diagnostic-evidence-provider-002/PROSE-SEMANTIC-DIAGNOSTIC-EVIDENCE-PROVIDER-CONTRACT-v1.json",
-        "qualification/literary-prose-engine-001/extraction-calibration-001/EXTRACTION-CALIBRATION-CONTRACT-v1.json",
-        "qualification/literary-prose-engine-001/book-level-intelligence/AGLO-BOOK-LEVEL-LITERARY-INTELLIGENCE-001.json",
-        "qualification/literary-prose-engine-001/book-level-intelligence/aglo_book_level_literary_intelligence.py"
+      "classification": "IMPLEMENTED__HOSTED_QUALIFIED",
+      "implementation_sha": "7461d9d9d37aba1137c739e77e57e6827a3340c1",
+      "qualification_head_sha": "5d1ded28ffd483c8f6af8585738286315aed1e11",
+      "implementation_control_drift_run": 34430108524,
+      "hosted_qualification_run": 34430115090,
+      "hosted_fixture_result": "PASS__14_OF_14",
+      "evidence": [
+        "qualification/literary-prose-engine-001/long-form-evidence-linkage-001/LONG-FORM-EVIDENCE-LINKAGE-CONTRACT-v1.json",
+        "qualification/literary-prose-engine-001/long-form-evidence-linkage-001/long_form_evidence_linkage.py",
+        "qualification/literary-prose-engine-001/long-form-evidence-linkage-001/run_long_form_evidence_linkage_fixtures.py",
+        ".github/workflows/literary-prose-long-form-evidence-linkage-ci.yml"
       ],
-      "already_covered": "Narrative orchestration requires canonical event/entity IDs plus provenance; semantic evidence requires locator_id plus SHA256; extraction names middle-book factual/temporal consistency; AGLO has qualified 29-chapter book-level coverage.",
-      "remaining_delta": "Add an integrated independent/support qualification slice that jointly tests macro literary interpretation against exact localized evidence, including a middle-book factual/temporal slice, without claiming whole-book accuracy from short-passage success."
+      "completion_delta": "Independent synthetic long-form support now jointly checks macro claim identity, exact anchor locator plus SHA256 plus chapter binding, multi-chapter long-range support, event-grounded temporal direction, and mandatory middle-third factual/temporal evidence. Wrong locators, wrong digests, skipped middle-book support, temporal reversals, unsupported asserted claims, unknown anchors, malformed digests and raw-text payloads fail closed. The hosted exact-SHA fixture run passed all 14 cases.",
+      "authority_boundary": "PASS proves linkage-contract integrity only. whole_book_accuracy_claim_authorized=false; revision_authority=false; candidate_generation_authorized=false; manuscript_mutation_authorized=false; canonical_state_write_authorized=false; publication_authorized=false.",
+      "remaining_delta": "NONE_FOR_THIS_RESEARCH_DELTA__DO_NOT_REPEAT"
     }
   ],
+  "support_lane_closure": {
+    "research_delta_targets_total": 5,
+    "implemented_hosted_qualified": 5,
+    "remaining_support_targets": 0,
+    "standing": "COMPLETE__RETURN_TO_FORMAL_BLIND_CRITICAL_PATH"
+  },
   "book_evaluator_parallel_state": {
     "teacher_freeze": {
       "ticket_id": "BOOK-EVAL-REPAIR-005-GATE-D-TEACHER-FREEZE-2026-09-10",
@@ -134,12 +144,13 @@
     "publication_authorized": false
   },
   "exact_next_action": {
-    "id": "PROSE-LONG-FORM-EVIDENCE-LINKAGE-001",
-    "objective": "Close the remaining research-delta gap by jointly qualifying macro literary interpretation against exact localized evidence on independent fixtures, including a middle-book factual/temporal slice.",
-    "first_action": "Re-read the live narrative-orchestration, semantic-evidence, extraction-calibration and book-level-intelligence implementations; dedupe against existing long-context/evidence-linkage logic; then extend the narrowest existing subsystem that can require exact locator/digest/anchor evidence for macro claims.",
-    "pass_proves": "A macro literary claim can be traced to exact localized supporting evidence and middle-book factual/temporal support without turning short-passage success into an unsupported whole-book accuracy claim.",
-    "pass_unlocks": "Closure of PROSE-EVALUATOR-TOMORROW-READINESS-001 support work while preserving PROSE-REAL-LIMITATION-BLIND-MODEL-SCORING-001 as the formal critical path for a fresh evaluator context.",
-    "on_failure": "Repair only the proven long-form evidence-linkage boundary and rerun qualification on the changed exact SHA.",
-    "do_not": "Do not touch LGT-001..006, author labels, private manuscript prose, protected blind scoring, revision authority, Book canonical state or publication authority."
+    "id": "PROSE-REAL-LIMITATION-BLIND-MODEL-SCORING-001",
+    "objective": "Execute the protected six-case limitation prediction seal in a fresh evaluator context that has not observed author-adjudication ground truth.",
+    "current_chat_eligible": false,
+    "first_action": "Launch a fresh isolated evaluator context using only qualification/literary-prose-engine-001/step-f/PROSE-REAL-LIMITATION-BLIND-EVALUATOR-STARTUP-001.md and its authorized blind inputs. Reconstruct every case and verify each frozen passage SHA256 before scoring.",
+    "digest_guard": "Digest equality outranks index-base prose. If the startup's stated 1-based paragraph indexing does not reproduce every frozen digest but another indexing interpretation does, stop EVIDENCE_MISMATCH and correct/requalify the startup contract before any prediction seal; do not guess or score mismatched passages.",
+    "pass_proves": "A fresh blind evaluator produced sealed limitation predictions without label leakage, after exact source/digest verification, while revision authority remained zero.",
+    "on_failure": "Preserve the exact mismatch or qualification failure. Repair only the proven reconstruction/blindness/evaluator boundary; never inspect author labels to improve predictions before sealing.",
+    "do_not": "This contaminated chat must not score LGT-001..006, tune against author labels, create a blind prediction seal, mutate manuscripts, write Book canonical state or grant revision/publication authority."
   }
 }
