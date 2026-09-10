@@ -1,0 +1,114 @@
+{
+  "artifact_id": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001B-ASSESSMENT-TARGET-DOMAIN-V-BATCH-01-CANDIDATE-038A",
+  "effective_date": "2026-09-10",
+  "owner_path": "SYSTEM_MASTER/LEARNING",
+  "base_control_head": "d1cfbe187f9fb401af19d30fb6f89f235391c5bc",
+  "contract": "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001B-ASSESSMENT-TARGET-CONTRACT-025A.json",
+  "batch_index": 1,
+  "domain": "V",
+  "target_count": 5,
+  "targets": [
+    {
+      "assessment_target_id": "ASSESS::CSSGB-2022::ASQ-CSSGB-2022-V.A.1::doe-basic-terms-reasoning::TARGET::bounded-doe-term-classification",
+      "subskill_id": "CSSGB-2022::ASQ-CSSGB-2022-V.A.1::SUBSKILL::doe-basic-terms-reasoning",
+      "parent_requirement_id": "ASQ-CSSGB-2022-V.A.1",
+      "source_locator": "ASQ CSSGB BoK 2022 p.8 / V.A.1",
+      "preserved_cognitive_level": "UNDERSTAND",
+      "capability_statement": "Given a bounded experimental scenario, distinguish the stated factors, levels, responses, runs, and other explicitly supplied basic DoE terms and explain their role without inventing an experimental design or result not present in the evidence.",
+      "target_type": "CLASSIFICATION_TASK",
+      "evidence_input_class": "BOUNDED_SCENARIO",
+      "response_action_class": "CLASSIFY",
+      "prompt_contract": {"supplied_evidence": "A synthetic bounded experimental scenario containing explicit factors, levels, responses, runs, and contextual terms.", "required_action": "Classify the supplied elements using basic DoE terminology and explain each element's stated role.", "must_not_assume": ["unstated experimental design", "unobserved results", "factor effects"]},
+      "scoring_assertions": [
+        {"assertion_id": "V.A.1-01", "observable_property": "Response correctly distinguishes supplied factors, levels, responses, and runs.", "pass_condition": "Each classified term maps to an explicit scenario element without substituting absent design information."},
+        {"assertion_id": "V.A.1-02", "observable_property": "Response explains roles without fabricating experimental outcomes or design adequacy.", "pass_condition": "Explanations remain bounded to supplied evidence and label unobserved design/result claims as unavailable."}
+      ],
+      "insufficient_evidence_behavior": {"trigger": "The scenario omits information needed to classify a requested experimental element.", "required_behavior": "State which term cannot be classified and identify the missing evidence instead of guessing."},
+      "provenance_refs": ["SOURCE_NODE_INDEX:ASQ-CSSGB-2022-V.A.1", "SUBSKILL:CSSGB-2022::ASQ-CSSGB-2022-V.A.1::SUBSKILL::doe-basic-terms-reasoning"],
+      "validation_status": "PROVISIONAL_BOUND",
+      "evidence_boundaries": {"psychometric_validity": "UNOBSERVED", "learner_mastery": "UNOBSERVED", "retention": "UNOBSERVED", "transfer": "UNOBSERVED", "workplace_effectiveness": "UNOBSERVED", "sme_approval": "UNOBSERVED", "certification_equivalence": "UNOBSERVED"}
+    },
+    {
+      "assessment_target_id": "ASSESS::CSSGB-2022::ASQ-CSSGB-2022-V.A.2::doe-graph-plot-interpretation::TARGET::bounded-doe-visual-application",
+      "subskill_id": "CSSGB-2022::ASQ-CSSGB-2022-V.A.2::SUBSKILL::doe-graph-plot-interpretation",
+      "parent_requirement_id": "ASQ-CSSGB-2022-V.A.2",
+      "source_locator": "ASQ CSSGB BoK 2022 p.8 / V.A.2",
+      "preserved_cognitive_level": "APPLY",
+      "capability_statement": "Given a bounded DoE graph or plot with stated context, extract supported patterns or comparisons and explain what the visual evidence can and cannot establish without fabricating significance, causality, or unobserved experimental outcomes.",
+      "target_type": "DATA_INTERPRETATION",
+      "evidence_input_class": "BOUNDED_VISUAL_OR_GRAPH",
+      "response_action_class": "APPLY",
+      "prompt_contract": {"supplied_evidence": "A synthetic DoE graph or plot with labels, bounded context, and any stated comparison conditions.", "required_action": "Apply DoE visual interpretation to extract supported patterns or comparisons and state the limits of the visual evidence.", "must_not_assume": ["statistical significance", "causality", "unobserved experimental outcomes"]},
+      "scoring_assertions": [
+        {"assertion_id": "V.A.2-01", "observable_property": "Response extracts patterns or comparisons that are visible in the supplied graph or plot.", "pass_condition": "Each interpreted pattern is traceable to an explicit visual feature or supplied context."},
+        {"assertion_id": "V.A.2-02", "observable_property": "Response separates visual pattern evidence from unsupported significance or causal claims.", "pass_condition": "No significance, causality, or outcome claim is made unless explicitly supported by supplied evidence."}
+      ],
+      "insufficient_evidence_behavior": {"trigger": "The visual or its context is insufficient for a requested comparison or interpretation.", "required_behavior": "State which interpretation is unresolved and identify the missing visual/context evidence."},
+      "provenance_refs": ["SOURCE_NODE_INDEX:ASQ-CSSGB-2022-V.A.2", "SUBSKILL:CSSGB-2022::ASQ-CSSGB-2022-V.A.2::SUBSKILL::doe-graph-plot-interpretation"],
+      "validation_status": "PROVISIONAL_BOUND",
+      "evidence_boundaries": {"psychometric_validity": "UNOBSERVED", "learner_mastery": "UNOBSERVED", "retention": "UNOBSERVED", "transfer": "UNOBSERVED", "workplace_effectiveness": "UNOBSERVED", "sme_approval": "UNOBSERVED", "certification_equivalence": "UNOBSERVED"}
+    },
+    {
+      "assessment_target_id": "ASSESS::CSSGB-2022::ASQ-CSSGB-2022-V.B.1::implementation-plan-construction::TARGET::bounded-implementation-plan-application",
+      "subskill_id": "CSSGB-2022::ASQ-CSSGB-2022-V.B.1::SUBSKILL::implementation-plan-construction",
+      "parent_requirement_id": "ASQ-CSSGB-2022-V.B.1",
+      "source_locator": "ASQ CSSGB BoK 2022 p.8 / V.B.1",
+      "preserved_cognitive_level": "APPLY",
+      "capability_statement": "Given a selected improvement, explicit constraints, owners, and available evidence, construct a bounded implementation plan that identifies actions, sequencing, responsibilities, risks, and verification needs while keeping approvals and real-world outcomes unobserved until evidenced.",
+      "target_type": "CONSTRUCTION_TASK",
+      "evidence_input_class": "BOUNDED_MIXED_EVIDENCE",
+      "response_action_class": "APPLY",
+      "prompt_contract": {"supplied_evidence": "A synthetic selected improvement with explicit constraints, available owners, known risks, and bounded verification context.", "required_action": "Apply implementation-planning principles to produce a bounded plan containing actions, sequence, responsibilities, risks, and verification needs.", "must_not_assume": ["stakeholder approval", "resources not supplied", "realized outcomes"]},
+      "scoring_assertions": [
+        {"assertion_id": "V.B.1-01", "observable_property": "Response produces actions, sequencing, responsibilities, risks, and verification needs tied to supplied constraints.", "pass_condition": "The plan contains all required components and each is consistent with the bounded evidence."},
+        {"assertion_id": "V.B.1-02", "observable_property": "Response keeps approval and realized implementation outcomes unobserved.", "pass_condition": "The plan does not claim approval, execution, or outcome success that was not supplied."}
+      ],
+      "insufficient_evidence_behavior": {"trigger": "Owners, constraints, risks, or verification evidence are insufficient to complete part of the implementation plan.", "required_behavior": "Mark that plan element unresolved and identify the required missing evidence instead of inventing it."},
+      "provenance_refs": ["SOURCE_NODE_INDEX:ASQ-CSSGB-2022-V.B.1", "SUBSKILL:CSSGB-2022::ASQ-CSSGB-2022-V.B.1::SUBSKILL::implementation-plan-construction"],
+      "validation_status": "PROVISIONAL_BOUND",
+      "evidence_boundaries": {"psychometric_validity": "UNOBSERVED", "learner_mastery": "UNOBSERVED", "retention": "UNOBSERVED", "transfer": "UNOBSERVED", "workplace_effectiveness": "UNOBSERVED", "sme_approval": "UNOBSERVED", "certification_equivalence": "UNOBSERVED"}
+    },
+    {
+      "assessment_target_id": "ASSESS::CSSGB-2022::ASQ-CSSGB-2022-V.C.1::waste-elimination-analysis::TARGET::bounded-waste-elimination-application",
+      "subskill_id": "CSSGB-2022::ASQ-CSSGB-2022-V.C.1::SUBSKILL::waste-elimination-analysis",
+      "parent_requirement_id": "ASQ-CSSGB-2022-V.C.1",
+      "source_locator": "ASQ CSSGB BoK 2022 p.8 / V.C.1",
+      "preserved_cognitive_level": "APPLY",
+      "capability_statement": "Given a bounded process description and observed activities, identify supported waste candidates and propose an elimination or reduction response while distinguishing observed non-value activity from assumptions that still require process evidence.",
+      "target_type": "SCENARIO_CONSTRAINED_RESPONSE",
+      "evidence_input_class": "BOUNDED_PROCESS_DESCRIPTION",
+      "response_action_class": "APPLY",
+      "prompt_contract": {"supplied_evidence": "A synthetic bounded process description with observed activities, timings or movements where relevant, and explicit evidence gaps.", "required_action": "Apply waste-elimination reasoning to identify supported waste candidates and propose a bounded elimination or reduction response.", "must_not_assume": ["non-value status not evidenced", "process outcomes after change", "unobserved waste causes"]},
+      "scoring_assertions": [
+        {"assertion_id": "V.C.1-01", "observable_property": "Response identifies waste candidates using explicit observed process evidence.", "pass_condition": "Each waste classification is tied to a supplied activity or observation rather than inferred from title or preference."},
+        {"assertion_id": "V.C.1-02", "observable_property": "Response proposes a bounded response while separating observed waste from unobserved improvement outcomes.", "pass_condition": "The proposed action is linked to the identified evidence and does not claim realized improvement."}
+      ],
+      "insufficient_evidence_behavior": {"trigger": "The process description does not support classifying an activity or selecting a reduction response.", "required_behavior": "Leave that classification or response unresolved and identify the process evidence needed."},
+      "provenance_refs": ["SOURCE_NODE_INDEX:ASQ-CSSGB-2022-V.C.1", "SUBSKILL:CSSGB-2022::ASQ-CSSGB-2022-V.C.1::SUBSKILL::waste-elimination-analysis"],
+      "validation_status": "PROVISIONAL_BOUND",
+      "evidence_boundaries": {"psychometric_validity": "UNOBSERVED", "learner_mastery": "UNOBSERVED", "retention": "UNOBSERVED", "transfer": "UNOBSERVED", "workplace_effectiveness": "UNOBSERVED", "sme_approval": "UNOBSERVED", "certification_equivalence": "UNOBSERVED"}
+    },
+    {
+      "assessment_target_id": "ASSESS::CSSGB-2022::ASQ-CSSGB-2022-V.C.2::cycle-time-reduction-analysis::TARGET::bounded-cycle-time-analysis",
+      "subskill_id": "CSSGB-2022::ASQ-CSSGB-2022-V.C.2::SUBSKILL::cycle-time-reduction-analysis",
+      "parent_requirement_id": "ASQ-CSSGB-2022-V.C.2",
+      "source_locator": "ASQ CSSGB BoK 2022 p.8 / V.C.2",
+      "preserved_cognitive_level": "ANALYZE",
+      "capability_statement": "Given bounded process timing evidence and process context, analyze where cycle time is accumulated, identify evidence-supported reduction opportunities, and separate projected improvement from observed post-change performance.",
+      "target_type": "DATA_INTERPRETATION",
+      "evidence_input_class": "BOUNDED_DATA_OR_SUMMARY",
+      "response_action_class": "ANALYZE",
+      "prompt_contract": {"supplied_evidence": "Synthetic bounded process timing data or summaries with process context and explicit measurement limits.", "required_action": "Analyze where cycle time accumulates, identify evidence-supported reduction opportunities, and separate projections from observed post-change performance.", "must_not_assume": ["future reduction realized", "timing components not supplied", "causal mechanism without evidence"]},
+      "scoring_assertions": [
+        {"assertion_id": "V.C.2-01", "observable_property": "Response locates cycle-time accumulation using supplied timing evidence and context.", "pass_condition": "Each identified concentration or delay is traceable to supplied timing data or process evidence."},
+        {"assertion_id": "V.C.2-02", "observable_property": "Response distinguishes evidence-supported opportunities from projected or unobserved performance.", "pass_condition": "No post-change performance is claimed observed unless supplied as observed evidence."}
+      ],
+      "insufficient_evidence_behavior": {"trigger": "Timing or process evidence is insufficient to locate accumulation or support a reduction opportunity.", "required_behavior": "State which analysis is unresolved and identify the missing timing/process evidence."},
+      "provenance_refs": ["SOURCE_NODE_INDEX:ASQ-CSSGB-2022-V.C.2", "SUBSKILL:CSSGB-2022::ASQ-CSSGB-2022-V.C.2::SUBSKILL::cycle-time-reduction-analysis"],
+      "validation_status": "PROVISIONAL_BOUND",
+      "evidence_boundaries": {"psychometric_validity": "UNOBSERVED", "learner_mastery": "UNOBSERVED", "retention": "UNOBSERVED", "transfer": "UNOBSERVED", "workplace_effectiveness": "UNOBSERVED", "sme_approval": "UNOBSERVED", "certification_equivalence": "UNOBSERVED"}
+    }
+  ],
+  "batch_boundaries": {"psychometric_validity": "UNOBSERVED", "learner_mastery": "UNOBSERVED", "retention": "UNOBSERVED", "transfer": "UNOBSERVED", "workplace_effectiveness": "UNOBSERVED", "sme_approval": "UNOBSERVED", "certification_equivalence": "UNOBSERVED", "unresolved_dependency_candidates": "UNCHANGED__SEPARATE_LANE"},
+  "next_batch": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001B-ASSESSMENT-TARGET-DOMAIN-V-BATCH-02-CANDIDATE-039A"
+}
