@@ -21,6 +21,8 @@ jobs:
       - name: Checkout exact subject
         uses: actions/checkout@v4
       - name: Qualify orchestrator concurrency rules
+        env:
+          NODE_OPTIONS: --experimental-default-type=commonjs
         run: node .github/scripts/book-workflow-orchestrator-concurrency-rules-001-qualify.js
       - name: Upload qualification evidence
         if: always()
