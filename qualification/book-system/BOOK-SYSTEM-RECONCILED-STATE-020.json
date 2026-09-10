@@ -1,0 +1,53 @@
+{
+  "state_id": "BOOK-SYSTEM-RECONCILED-STATE-020",
+  "effective_date": "2026-09-09",
+  "supersedes_for_current_parent_control": "BOOK-SYSTEM-RECONCILED-STATE-019",
+  "supersession_scope": "PARENT_CONTROL_AND_NEXT_STEP_ROUTING_ONLY",
+  "standing": "ACTIVE__LIFECYCLE_REBIND_A01_CLOSED__END_TO_END_AUTHORING_HARNESS_RESUMED",
+  "project": "BOOK SYSTEM",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "control_branch": "book-system/control-v1",
+  "closed_since_state_019": {
+    "id": "BOOK-SYSTEM-LIFECYCLE-CURRENT-PARENT-REBIND-001",
+    "standing": "CLOSED__HOSTED_AND_AUTHORITATIVE_A01_PASS__EXACT_SHA_SCOPED",
+    "qualified_subject_sha": "ffbcc2ab36a41afb580224681642105deb62e741",
+    "hosted_result": "PASS__39_OF_39",
+    "a01_run_id": 34430908557,
+    "a01_job_id": 102726063858,
+    "a01_policy_version": 6,
+    "a01_registry_version": 27,
+    "a01_control_plane_sha": "71de7d1a7c66361056cfb02ffce480ab8bedf094",
+    "a01_result": "PASS__39_OF_39",
+    "evidence_artifact_id": 10134444002,
+    "evidence_artifact_zip_sha256": "9c7c33225bf14972d76634f6d35a358883a0a989b78d7712ec0255c8bf8cd861"
+  },
+  "current_parent_critical_path": {
+    "id": "BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001-HARNESS-001",
+    "parent_objective": "BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001",
+    "classification": "READY__QUALIFICATION_ONLY_COMPOSITION_HARNESS__NO_NEW_RUNTIME_AUTHORITY",
+    "objective": "Implement and qualify the deterministic synthetic cross-component Book authoring harness using only existing qualified public APIs and the newly A-01-qualified lifecycle rebind sidecar. Preserve one persistent lifecycle ledger across every non-lifecycle parent successor.",
+    "required_components": [
+      "BOOK-SYSTEM-CANONICAL-BOOK-STATE-MODEL-001",
+      "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-002",
+      "BOOK-SYSTEM-LIFECYCLE-TRANSITION-ENGINE-001",
+      "BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-002",
+      "BOOK-SYSTEM-VERSION-AND-ROLLBACK-001",
+      "BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001",
+      "BOOK-SYSTEM-LIFECYCLE-CURRENT-PARENT-COMPATIBILITY-ADAPTER-001",
+      "BOOK-SYSTEM-EXPORT-FREEZE-001",
+      "BOOK-SYSTEM-LIFECYCLE-CURRENT-PARENT-REBIND-001"
+    ],
+    "non_negotiable_harness_rules": [
+      "Do not reset or manually rewrite the persistent lifecycle ledger after a non-lifecycle parent successor; use BOOK-SYSTEM-LIFECYCLE-CURRENT-PARENT-REBIND-001.",
+      "Do not add a new Book runtime engine to make the harness pass.",
+      "Synthetic author/provider/publication fixtures must be explicitly labeled as synthetic qualification evidence and must never be represented as real author consent or publication authorization.",
+      "Document generation/rendering/conversion/validation mechanics remain outside Book System.",
+      "Technical export/proof/provenance/C2PA success and EXPORT_FROZEN do not authorize publication.",
+      "Any discovered composition gap pauses the harness at that exact seam for bounded repair; do not hide it with test-only mutation."
+    ],
+    "target_case_count": 48,
+    "pass_unlocks": "REGISTER_AND_RUN_BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001_ON_EXACT_FINAL_HARNESS_SHA"
+  },
+  "generic_continue_rule": "In Book System control, Continue executes BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001-HARNESS-001. If hosted qualification passes, bind the final wrapper, requalify the exact final SHA, register the qualification through shared A-01 control, run A-01, and close only on exact-SHA authoritative PASS.",
+  "qualification_effect": "STATE_ONLY__REBIND_REPAIR_CLOSED__NO_END_TO_END_PASS__NO_REAL_AUTHOR_OR_PUBLICATION_AUTHORITY"
+}
