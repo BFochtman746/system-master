@@ -1,0 +1,68 @@
+name: A-01 Submit Qualification Request
+
+on:
+  workflow_call:
+    inputs:
+      qualification_id: {type: string, required: true}
+      workstream_id: {type: string, required: true}
+      subject_sha: {type: string, required: true}
+      origin_ref: {type: string, required: true}
+      resume_on_pass: {type: string, required: true}
+      resume_on_failure: {type: string, required: true}
+      notification_target: {type: string, required: true}
+      execution_context: {type: string, required: false, default: normal}
+      qualifier_timeout_minutes: {type: number, required: false, default: 28}
+      job_timeout_minutes: {type: number, required: false, default: 30}
+      not_before: {type: string, required: false, default: ''}
+      not_after: {type: string, required: false, default: ''}
+      repair_attempt: {type: number, required: false, default: 0}
+      max_repair_attempts: {type: number, required: false, default: 1}
+      repair_transaction_id: {type: string, required: false, default: ''}
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  submit:
+    name: Submit exact subject to canonical main front door
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout submitter implementation
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: ${{ job.workflow_repository }}
+          ref: ${{ job.workflow_sha }}
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Dispatch canonical main qualification workflow
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          A01_QUALIFICATION_ID: ${{ inputs.qualification_id }}
+          A01_WORKSTREAM_ID: ${{ inputs.workstream_id }}
+          A01_SUBJECT_SHA: ${{ inputs.subject_sha }}
+          A01_ORIGIN_REF: ${{ inputs.origin_ref }}
+          A01_RESUME_ON_PASS: ${{ inputs.resume_on_pass }}
+          A01_RESUME_ON_FAILURE: ${{ inputs.resume_on_failure }}
+          A01_NOTIFICATION_TARGET: ${{ inputs.notification_target }}
+          A01_EXECUTION_CONTEXT: ${{ inputs.execution_context }}
+          A01_QUALIFIER_TIMEOUT_MINUTES: ${{ inputs.qualifier_timeout_minutes }}
+          A01_JOB_TIMEOUT_MINUTES: ${{ inputs.job_timeout_minutes }}
+          A01_NOT_BEFORE: ${{ inputs.not_before }}
+          A01_NOT_AFTER: ${{ inputs.not_after }}
+          A01_REPAIR_ATTEMPT: ${{ inputs.repair_attempt }}
+          A01_MAX_REPAIR_ATTEMPTS: ${{ inputs.max_repair_attempts }}
+          A01_REPAIR_TRANSACTION_ID: ${{ inputs.repair_transaction_id }}
+        shell: bash
+        run: node .github/scripts/a01-submit-dispatch.js
+
+      - name: Publish submission boundary
+        shell: bash
+        run: |
+          echo '## A-01 REQUEST SUBMITTED' >> "$GITHUB_STEP_SUMMARY"
+          echo 'This workflow did not qualify the subject and did not acquire A-01.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'The new run on refs/heads/main owns registration admission and authoritative execution.' >> "$GITHUB_STEP_SUMMARY"
+          echo "Qualification: ${{ inputs.qualification_id }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "Subject: ${{ inputs.subject_sha }}" >> "$GITHUB_STEP_SUMMARY"
