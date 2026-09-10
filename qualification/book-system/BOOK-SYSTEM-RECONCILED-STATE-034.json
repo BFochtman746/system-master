@@ -1,0 +1,48 @@
+{
+  "state_id": "BOOK-SYSTEM-RECONCILED-STATE-034",
+  "effective_date": "2026-09-10",
+  "supersedes_for_current_parent_control": "BOOK-SYSTEM-RECONCILED-STATE-033",
+  "supersession_scope": "CURRENT_PARENT_CONTROL_AND_BOOK_PROSE_INTEGRATION_ROUTING_ONLY",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "standing": "BOOK_PROSE_PHASE2A_2B_2C_2D_2E_CLOSED__PHASE2F_RETRY_IDEMPOTENCY_SELECTED",
+  "source_live_head": "0452fa96283ecb9c85c08d2bc162383c1cdd5346",
+  "completed_integration_packets": [
+    "BOOK-PROSE-INTEGRATION-PHASE-0-CURRENT-STATE-CENSUS-001",
+    "BOOK-PROSE-INTEGRATION-PHASE-1-INPUT-CENSUS-001",
+    "BOOK-WORKFLOW-ORCHESTRATOR-AUTHORITY-CONTRACT-001",
+    "BOOK-WORKFLOW-ORCHESTRATOR-WORKFLOW-STATE-MODEL-001",
+    "BOOK-WORKFLOW-ORCHESTRATOR-CAPABILITY-ROUTING-INTERFACE-001",
+    "BOOK-WORKFLOW-ORCHESTRATOR-DEPENDENCY-GRAPH-EXECUTION-PLAN-CONTRACT-001",
+    "BOOK-WORKFLOW-ORCHESTRATOR-CONCURRENCY-RULES-001"
+  ],
+  "current_owner_objective": {
+    "objective_id": "BOOK-WORKFLOW-ORCHESTRATOR-RETRY-IDEMPOTENCY-RULES-001",
+    "phase": "2F",
+    "state": "READY",
+    "scope": "Define deterministic retry eligibility, stable operation identities and unknown-outcome reconciliation rules. No provider retry execution, worker dispatch, canonical admission retry, preference-event write, cache, cancellation/resume or fresh blind scoring in this packet."
+  },
+  "authority_fences": {
+    "book_canonical_manuscript_owner": "SYSTEM_MASTER/BOOK",
+    "prose_owner": "SYSTEM_MASTER/BOOK/PROSE",
+    "prose_canonical_write": false,
+    "orchestrator_canonical_write": false,
+    "book_admission_is_sole_canonical_effect_path": true,
+    "system_master_shared_execution_authority_preserved": true
+  },
+  "2e_evidence": {
+    "qualified_subject_sha": "db9fabb986460d6b70484cbbd6564e7fe7fc4ec1",
+    "workflow_run_id": 34500721796,
+    "artifact_id": 10161716510,
+    "result": "PASS_25_OF_25",
+    "prequalification_failure_runs_preserved": [34500332833,34500427852,34500540569]
+  },
+  "qualification_fences": [
+    "No specialist or worker execution.",
+    "No retry is actually sent to a provider in Phase 2F.",
+    "No fresh blind scoring.",
+    "No A-01 PASS transfer or inference.",
+    "No private manuscript or DEVELOPMENT_GOLD access.",
+    "No native/publication/production readiness claim."
+  ],
+  "next_dependency_valid_action": "Implement and qualify Phase 2F retry/idempotency decision rules against qualified Service Registry V2 operation idempotency and exact Phase 2D plan identities."
+}
