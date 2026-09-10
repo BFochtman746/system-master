@@ -1,0 +1,86 @@
+{
+  "artifact_id": "SECOND-SHIFT-PRETONIGHT-READINESS-2026-09-10",
+  "generated_at": "2026-09-10T10:43:45-04:00",
+  "timezone": "America/New_York",
+  "repository": "BFochtman746/system-master",
+  "verified_main_head_before_readiness_record": "b7c6eb61c1f97e47416e88d6a8f3cdfa17040ccc",
+  "standing": "READY_WITH_REQUIRED_2345_LIVE_REVALIDATION",
+  "claim_boundary": "This artifact verifies the Second Shift control/telemetry mechanism and current preflight inputs. It does not claim that seven hours of productive work has occurred or will occur. Utilization must be proven afterward from the per-lane execution-event ledgers.",
+  "post_merge_static_gates": {
+    "A01_CONTROL_PLANE_ENFORCEMENT": {
+      "run_id": 34490745497,
+      "subject_sha": "b7c6eb61c1f97e47416e88d6a8f3cdfa17040ccc",
+      "conclusion": "success"
+    },
+    "SYSTEM_STATE_RECONCILER": {
+      "run_id": 34490745473,
+      "subject_sha": "b7c6eb61c1f97e47416e88d6a8f3cdfa17040ccc",
+      "conclusion": "success",
+      "mode": "STATIC_NO_LIVE"
+    },
+    "SECOND_SHIFT_ENFORCEMENT": {
+      "run_id": 34490745646,
+      "subject_sha": "b7c6eb61c1f97e47416e88d6a8f3cdfa17040ccc",
+      "conclusion": "success",
+      "mode": "STATIC_NO_LIVE"
+    }
+  },
+  "runtime_control_split": {
+    "static_ci": "Push and pull-request checks validate repository contracts without racing independently advancing owner branches.",
+    "live_runtime": "The scheduled Second Shift watchdog uses live owner-ref comparison and must fail closed on stale control heads during the 00:00-07:00 execution window.",
+    "manual_live_audit": "System State Reconciler workflow_dispatch remains the explicit live remote-owner reconciliation path outside the scheduled watchdog."
+  },
+  "live_owner_census_at_generation": {
+    "CORE": {
+      "control_ref": "system-master/control-v2",
+      "live_head": "2031f070bd3702185c028733819ec410db36613c",
+      "selector_head": "2031f070bd3702185c028733819ec410db36613c",
+      "standing": "ALIGNED"
+    },
+    "LEARNING": {
+      "control_ref": "learning/control-v1",
+      "live_head": "262f3f0b5ffa4dea68964b91eacd57a4c39bdda6",
+      "selector_head": "262f3f0b5ffa4dea68964b91eacd57a4c39bdda6",
+      "standing": "ALIGNED"
+    },
+    "BOOK": {
+      "control_ref": "book-system/control-v1",
+      "live_head": "2a3690d3b3b14682b3029f09f42b963e85cbd77a",
+      "selector_head": "6304df0b60dbe49ab7be0218b0d588c1b0ba5279",
+      "standing": "DAYTIME_OWNER_ADVANCED__REVALIDATION_REQUIRED_BEFORE_MUTATION",
+      "latest_observed_change": "book: add hosted EBR-SC1 qualification workflow",
+      "preflight_rule": "At 23:45, re-read the then-current Book owner head and state. Preserve completed evidence, retire or revalidate stale selector state, and bind the highest-value dependency-valid Book-owned successor before any Book claim is admitted. Do not mechanically rebind to this daytime snapshot if Book advances again."
+    },
+    "PROSE": {
+      "control_ref": "literary-prose-engine-001",
+      "live_head": "b3b0909bc6720a3bc5938de29d4bf3bde9dd4e05",
+      "selector_head": "b3b0909bc6720a3bc5938de29d4bf3bde9dd4e05",
+      "standing": "ALIGNED"
+    }
+  },
+  "execution_requirements_for_tonight": [
+    "Run the 23:45 portfolio preflight against then-live owner refs before admitting overnight mutation work.",
+    "Do not execute a stale delegation; preserve its checkpoint/evidence and select or revalidate a successor against the current owner head.",
+    "Use one mutation-capable claim/lease per lane and reject overlapping live mutation claims.",
+    "Record truthful per-lane execution events; CLAIMED must precede RUNNING and lease/idempotency identity must remain consistent through heartbeat/progress events.",
+    "After completion or material block, preserve evidence, re-read live authority and bind the next dependency-valid successor while shift capacity remains.",
+    "Do not accept IDLE unless all eight work-ahead rungs are durably exhausted for the same live owner head.",
+    "If telemetry is missing or contradictory, classify the affected interval UNKNOWN rather than infer utilization from commits, workflows or runner uptime.",
+    "Preserve exact-SHA, owner/canonical-writer, A-01, human, author, private, blind, native, external, publication and production boundaries."
+  ],
+  "known_nonblocking_followups": [
+    {
+      "id": "EXPLICIT_OBLIGATION_BINDING",
+      "standing": "WARNING_ONLY_FOR_TONIGHT",
+      "detail": "Where a delegation provides an explicit obligation_id it is machine-validated. Some current selectors still lack an explicit obligation_id, so objective-authority binding may be warned rather than failed until all owner writers emit the field reliably."
+    }
+  ],
+  "hard_blockers_before_tonight": [],
+  "required_preflight_actions": [
+    "Re-resolve all four live owner refs at 23:45 America/New_York.",
+    "Repair any stale selector before its lane can claim mutation work; BOOK is already known to require this unless the owner state reconciles earlier.",
+    "Initialize only truthful SHIFT_OPEN/READY ledger state that actually occurs; never backfill daytime or prior-night execution.",
+    "Leave each lane either executing owner-valid work, READY with a current successor, or backed by a valid all-eight-rungs-exhausted proof."
+  ],
+  "morning_acceptance": "At 07:05 America/New_York, audit timestamped lane ledgers and classify the shift as SHIFT_VERIFIED_USEFUL_PROGRESS, SHIFT_PARTIALLY_VERIFIED, or SHIFT_NOT_VERIFIABLE. Do not claim the seven-hour target unless the ledgers support it."
+}
