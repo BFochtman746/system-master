@@ -2,6 +2,7 @@
   "census_id": "SYSTEM-MASTER-FOUNDATION-CLOSURE-CENSUS-001",
   "status": "ACTIVE",
   "created_at": "2026-09-10T05:41:00-04:00",
+  "last_reconciled_at": "2026-09-10T09:45:00-04:00",
   "purpose": "Prove, rather than assume, whether System Master foundational mapping, tracing, ownership and execution semantics are complete.",
   "scope": [
     "all canonical foundational requirements and capability crosswalk entries including C00-C49 and P00-P15",
@@ -43,11 +44,27 @@
   "execution_rule": "Each ACTIVE_GAP must be assigned to its canonical owner and converted into the highest-value safe successor packet. Owners continue after each completion until their dependency-valid ladder is exhausted.",
   "initial_owner_order": ["CORE", "LEARNING", "BOOK", "PROSE"],
   "prose_recovery_ref": "governance/second-shift/PROSE-RECOVERY-2026-09-10-0541.json",
+  "owner_lane_admissions": {
+    "PROSE": {
+      "state": "ADMITTED_DELTA_ONLY__OWNER_LANE_SAFE_FILLABLE_FOUNDATION_ROWS_DISPOSITIONED",
+      "admission_ref": "governance/census/SYSTEM-MASTER-FOUNDATION-CLOSURE-CENSUS-001-PROSE-OWNER-ADMISSION-001.json",
+      "source_branch": "prose/foundation-closure-final-refill-20260910",
+      "sealed_source_head": "808cb8505c4df343771a553a77a14db85e0cc2c3",
+      "owner_rows": 7,
+      "complete_with_evidence": 5,
+      "active_gap": 0,
+      "durably_blocked_external_human_private_native": 1,
+      "explicitly_out_of_scope_with_authority": 1,
+      "global_foundation_effect": "NONE__CENSUS_REMAINS_ACTIVE",
+      "pass_transfer": false
+    }
+  },
   "forbidden_claims": [
     "do not infer completion from prior planning volume",
     "do not fabricate ownership, authority or evidence",
     "do not treat a stale/absent delegation as an empty valid lane",
-    "do not transfer hosted evidence into A-01/native/private/publication/production authority"
+    "do not transfer hosted evidence into A-01/native/private/publication/production authority",
+    "do not infer global Foundation 1.0 closure from one owner-lane admission"
   ],
   "final_artifact": "A 100-percent disposition matrix plus unresolved-gap successor register and Foundation 1.0 closure decision."
 }
