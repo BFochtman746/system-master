@@ -1,7 +1,7 @@
 {
   "ticket_version": 1,
   "ticket_id": "BOOK-EVAL-REPAIR-005-GATE-D-TEACHER-FREEZE-2026-09-10",
-  "state": "READY",
+  "state": "HOLD",
   "night_date": "2026-09-10",
   "submitted_at": "2026-09-09T01:40:00-04:00",
   "workstream_id": "BOOK-EVAL-LEMONADE-001",
@@ -25,9 +25,19 @@
     "after_pass": "The exact hosted-prequalified Book subject has authoritative A-01 evidence that the frozen Teacher corpus is an unambiguous canonical 440-row artifact suitable for later student ingest once private authority is separately restored.",
     "unlocks": "Removes the Teacher freeze uncertainty from the Gate D critical path and leaves exact BASE_TRAINING + DEVELOPMENT_GOLD source custody as the only prerequisite before 612+440=1,052 student ingest/retraining."
   },
-  "stop_condition": "After an authoritative PASS on this exact Teacher raw SHA/status/taxonomy binding, do not repeat the Teacher freeze qualification unless the frozen raw/status/taxonomy evidence changes. On conflicting duplicate payloads, stop and adjudicate that exact conflict without regenerating Teacher rows or choosing among divergent payloads automatically.",
+  "stop_condition": "Remain HOLD for this shift unless the live Prose owner explicitly reselects and rebinds Teacher-freeze after the P4 owner-lane census or a newer repair/authority record makes it the highest-value safe gate. Do not let the central scheduler execute it solely from the obsolete delegation.",
   "resume_on_pass": "Adjudicate the canonical A-01 receipt for exact subject e3b771dc36800c5f056ff2fd5ab6622f3e014f41. Require subject_sha == checkout_sha, result_class=PASS, required evidence present, canonical_records=440, unique_teacher_ids=440, forbidden gold-use flags false, and no conflicting duplicate IDs. Record Teacher freeze as closed but do not authorize promotion, student training, selective 120B, visible regression, or hidden/fresh holdout. Continue exact-hash recovery of BASE_TRAINING and DEVELOPMENT_GOLD; only after that independent boundary PASS may the 1,052-record student path resume.",
   "resume_on_failure": "Classify SUBJECT_FAILURE versus INFRA_FAILURE or CONTROL_PLANE_FAILURE and preserve the teacher-freeze manifest. If the frozen raw SHA/status/taxonomy is missing or changed, repair source custody only. If exact duplicate payloads cannot canonicalize because one teacher_record_id has divergent payloads, stop and adjudicate that exact conflict without regenerating the Teacher corpus, consulting private gold, or weakening the frozen hash/gold boundaries. Rerun only after the proven failing boundary changes.",
   "notification_target": "book-eval-lemonade-001-repair005-gate-d",
-  "notes": "Exact subject e3b771dc36800c5f056ff2fd5ab6622f3e014f41 passed hosted teacher-freeze prequalification run 34315559004: Python compile PASS, Node wrapper syntax PASS, 440 unique-case PASS, exact-duplicate canonicalization PASS, conflicting-duplicate fail-closed PASS. This ticket intentionally does not depend on or access BASE_TRAINING, DEVELOPMENT_GOLD, visible regression, hidden holdout, student training, or selective 120B. The unchanged private-recovery qualification is not requeued because canonical run 34292412264 already proved BASE_TRAINING and DEVELOPMENT_GOLD missing."
+  "notes": "Exact subject e3b771dc36800c5f056ff2fd5ab6622f3e014f41 passed hosted teacher-freeze prequalification run 34315559004: Python compile PASS, Node wrapper syntax PASS, 440 unique-case PASS, exact-duplicate canonicalization PASS, conflicting-duplicate fail-closed PASS. This ticket intentionally does not depend on or access BASE_TRAINING, DEVELOPMENT_GOLD, visible regression, hidden holdout, student training, or selective 120B. The unchanged private-recovery qualification is not requeued because canonical run 34292412264 already proved BASE_TRAINING and DEVELOPMENT_GOLD missing. Final launch-control revalidation moved this request from READY to HOLD after the Prose owner head advanced to 23dcc5c82816fba4bdc571a8019e13fba4be4b95 and selected independent P4 owner-lane census work. Exact subject and historical hosted prequalification remain preserved; no PASS or invalidation is inferred.",
+  "prior_state_history": [
+    {
+      "state": "READY",
+      "recorded_at": "2026-09-09T01:40:00-04:00",
+      "reason": "Preserved pre-launch READY state and exact-subject qualification contract."
+    }
+  ],
+  "last_revalidated_at": "2026-09-10T00:04:00-04:00",
+  "hold_reason": "OWNER_DELEGATION_STALE_AFTER_PROSE_HEAD_ADVANCE__P4_OWNER_LANE_CENSUS_SELECTED_FIRST",
+  "stop_condition_original": "After an authoritative PASS on this exact Teacher raw SHA/status/taxonomy binding, do not repeat the Teacher freeze qualification unless the frozen raw/status/taxonomy evidence changes. On conflicting duplicate payloads, stop and adjudicate that exact conflict without regenerating Teacher rows or choosing among divergent payloads automatically."
 }

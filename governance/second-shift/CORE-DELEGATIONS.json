@@ -3,8 +3,45 @@
   "owner_path": "SYSTEM_MASTER/CORE",
   "control_ref": "system-master/control-v2",
   "last_known_control_head": "568f324d52485a8d010dc99c3eb7f637216044fb",
-  "delegation_epoch": 17,
-  "active_delegations": [],
+  "delegation_epoch": 18,
+  "active_delegations": [
+    {
+      "delegation_id": "SECOND-SHIFT-CORE-A01-CONTROL-PLANE-REPAIR-001",
+      "owner_path": "SYSTEM_MASTER/CORE",
+      "objective_id": "A01-CONTROL-PLANE-REGISTRATION-DISPATCH-BARRIER-REPAIR-001",
+      "state": "READY",
+      "valid_for_control_ref": "system-master/control-v2",
+      "valid_for_control_head": "568f324d52485a8d010dc99c3eb7f637216044fb",
+      "created_at": "2026-09-10T00:04:00-04:00",
+      "last_revalidated_at": "2026-09-10T00:04:00-04:00",
+      "repair_transaction_id": "A01-REPAIR-a01-run-34431764843-A01-CONTROL-PLANE-SELFTEST-A1",
+      "failed_subject_sha": "3a8004813e18d7defbf1f9ebc47f5bd8fcd30fb9",
+      "repair_candidate_sha": "ceb6870546012b789caea56499a1d219a195dc8b",
+      "completion_delta": "Before: current main failed A-01 control-plane enforcement because the required hosted admission broker and self-hosted executor were absent and the gateway still acquired A-01 directly. After: candidate ceb6870546012b789caea56499a1d219a195dc8b installs the split broker/executor barrier and has exact-main hosted enforcement PASS; finish canonical repair-ledger adjudication without bypassing A-01 authority, then reduce SMR021 readiness work.",
+      "evidence_target": [
+        "A-01 Control Plane Enforcement run 34435547400 on exact candidate ceb6870546012b789caea56499a1d219a195dc8b: PASS",
+        "governance/repair/events/A01-REPAIR-a01-run-34431764843-A01-CONTROL-PLANE-SELFTEST-A1 append-only lineage",
+        "canonical Repair Broker candidate-prequalification/requeue event or truthful non-requeue classification",
+        "post-write System State Reconciler result"
+      ],
+      "stop_condition": "The split admission barrier remains enforcement-green on the exact candidate, the existing repair transaction is durably advanced or truthfully held without fabricated PASS, and the next live CORE objective has been re-read. A01_REQUEUE_READY is eligibility only; authoritative closure requires a real exact-subject A-01 PASS receipt.",
+      "allowed_work": [
+        "verify the exact repair candidate and hosted enforcement receipt",
+        "use the existing repair transaction and canonical broker/rerun path; do not open a second lineage",
+        "inspect and repair only proven registration/dispatch/barrier defects",
+        "while A-01 admission is waiting, continue dependency-valid SMR021 admission-binding, test-design, and readiness work against exact predecessor e22ecedfd3850be6b744ee82f2c02722cd3d203a5785f6f423ac395011cf821f"
+      ],
+      "forbidden_authority": [
+        "do not label hosted enforcement as authoritative A-01 PASS",
+        "do not bypass the hosted broker or execute an unregistered direct self-hosted workflow",
+        "do not rewrite failed receipt/event history",
+        "do not transfer PASS between SHAs or grant promotion, native, production, human, author, or private-data authority"
+      ],
+      "on_pass": "Close or advance only the existing repair transaction from a canonical receipt, retire this delegation, re-fetch CORE control, and immediately continue to the highest-value safe SMR021 successor while time remains.",
+      "on_failure": "Preserve exact failure evidence, classify subject versus infrastructure/admission/control-plane boundary, fail the unsafe rung closed, and continue isolated dependency-valid CORE readiness/specification/test work when permitted.",
+      "continuation_rule": "Completion is not shift termination. Re-read CURRENT-AUTHORITY, the live CORE head and repair inbox; then bind and execute the next safe successor, normally SMR021 readiness, unless a newer repair outranks it."
+    }
+  ],
   "retired_delegations": [
     {
       "delegation_id": "SECOND-SHIFT-CORE-CENSUS-001",
@@ -118,6 +155,6 @@
     }
   ],
   "owner_revalidation_required": false,
-  "reason": "CORE was revalidated against live control head 568f324d52485a8d010dc99c3eb7f637216044fb. SMR019 and SMR020 are complete on the superseding lineage and the stale SMR019 active delegation has been retired. The owner has selected SMR021-ADMISSION-BINDING-TOMORROW-READINESS-001 as the next normal Core objective, but no normal Core delegation is active because repair transaction A01-REPAIR-a01-run-34431764843-A01-CONTROL-PLANE-SELFTEST-A1 has explicit Second Shift portfolio priority. After that repair transaction reaches a terminal or reclassified state, re-read the then-live Core head before admitting SMR021 or any successor.",
+  "reason": "Revalidated against live CORE head 568f324d52485a8d010dc99c3eb7f637216044fb. The active control-plane repair remains highest priority. Exact candidate ceb6870546012b789caea56499a1d219a195dc8b passed hosted enforcement on main; authoritative A-01 repair closure remains separate.",
   "empty_is_valid": true
 }

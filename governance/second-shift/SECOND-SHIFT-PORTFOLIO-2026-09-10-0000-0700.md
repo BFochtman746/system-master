@@ -1,134 +1,45 @@
 # SECOND-SHIFT-PORTFOLIO-2026-09-10-0000-0700
 
-Status: **FINAL-REVALIDATED / LIVE-AUTHORITY-BOUND / STALE-FAIL-CLOSED / REPAIR-AWARE**  
-Execution window: **2026-09-10 00:00-07:00 America/New_York**  
-Product root: `SYSTEM_MASTER`
+Status: **FINAL LAUNCH CONTROL / FOUR OWNER LANES PRODUCTIVE / STALE WORK RETIRED / UNSAFE A-01 ADMISSION FAIL-CLOSED**  
+Window: **2026-09-10 00:00-07:00 America/New_York**
 
-This portfolio is a durable planning artifact, not independent execution or qualification authority. Every admitted item must repeat live authority, owner-head, objective, dependency, repair-inbox, exact-subject and remaining-window checks immediately before execution. A later head/objective/dependency mismatch invalidates the item rather than silently rebinding it.
+## Live authority and delta
 
-## Authority basis
+Canonical main repair candidate is `ceb6870546012b789caea56499a1d219a195dc8b`. It installed the hosted admission broker and split self-hosted executor from the tested repair lineage and passed A-01 Control Plane Enforcement run `34435547400`. This hosted PASS proves enforcement logic on that commit; it is not an authoritative A-01 qualification PASS.
 
-Prepared and revalidated from current canonical authority and the owner-control hierarchy required by:
+Owner heads used:
 
-- `governance/CURRENT-AUTHORITY.json`
-- `governance/SYSTEM-TOPOLOGY-002.json`
-- `SYSTEM-MASTER-WORKSTREAM-BOOTSTRAP.md`
-- `governance/repair/REPAIR-INBOX-REGISTRY-001.json`
-- all four owner repair inboxes
-- `governance/second-shift/SECOND-SHIFT-OPERATING-MODE-002.md`
-- `governance/second-shift/SECOND-SHIFT-REGISTRY-001.json`
-- all four owner delegation files
+- CORE `system-master/control-v2@568f324d52485a8d010dc99c3eb7f637216044fb`
+- LEARNING `learning/control-v1@8d14642dfed242adb3eea4b33125272a8d3d657a`
+- BOOK `book-system/control-v1@58d69d13b675f12be854d50c80fd9ddce6636e04`
+- PROSE `literary-prose-engine-001@23dcc5c82816fba4bdc571a8019e13fba4be4b95`
 
-Final owner-head revalidation before this revision:
+All four differ from SYSTEM-STATE-BASELINE-002 and the census watermark. The delta is reconciled here from live owner records; the old baseline is not rewritten ahead of census P9.
 
-| Surface | Live ref/head | Standing used for portfolio |
-|---|---|---|
-| canonical main | `095b2e6c21611d4cb80128183a9d56de4de2d1de` | contains the first durable portfolio revision; this final portfolio write itself advances main metadata only |
-| CORE | `system-master/control-v2` @ `568f324d52485a8d010dc99c3eb7f637216044fb` | current objective `SMR021-ADMISSION-BINDING-TOMORROW-READINESS-001`; SMR020 superseding dependency-current portable closure is sealed |
-| LEARNING | `learning/control-v1` @ `8d14642dfed242adb3eea4b33125272a8d3d657a` | current Full-Standard Curriculum Compiler 001A research/graph phase |
-| BOOK | `book-system/control-v1` @ `58d69d13b675f12be854d50c80fd9ddce6636e04` | P3 Book census Phase 1 capability matrix closed; Book-owned content-object admission/versioning gap proven; Phase 2 contract/boundary definition is next |
-| PROSE | `literary-prose-engine-001` @ `23dcc5c82816fba4bdc571a8019e13fba4be4b95` | blind passage reconstruction semantics adjudicated; fresh blind evaluator restart authorized with revision authority zero |
+## Execution order
 
-## Final System State Reconciler standing
+1. **CORE — FINISH repair, then PREPARE/BUILD AHEAD.** Complete canonical reconciliation of transaction `A01-REPAIR-a01-run-34431764843-A01-CONTROL-PLANE-SELFTEST-A1` using repair candidate `ceb6870546012b789caea56499a1d219a195dc8b` and hosted enforcement run `34435547400`. Do not call it A-01 PASS. While canonical requeue/adjudication waits, continue dependency-valid SMR021 readiness against exact predecessor `e22ecedfd3850be6b744ee82f2c02722cd3d203a5785f6f423ac395011cf821f`.
+2. **LEARNING — RESEARCH AHEAD.** Complete the source-bound 66-requirement Curriculum Compiler 001A graph/specification, including evidence profiles and selective-update law. Then re-read live control and continue to its bounded implementation successor.
+3. **BOOK — FINISH census, then BUILD AHEAD.** Execute P3 Phase 2: define the smallest canonical content-object creation/version/admission contract, decide chapter/scene and Book Intelligence inclusion, capture P8 registry deltas, then continue to the selected bounded implementation/test successor.
+4. **PROSE — FINISH independent census, then PREPARE NEXT.** Retire stale Teacher-freeze delegation, complete the P4 owner-lane evidence/obligation census without reading frozen labels, and select either a separately fresh blind-evaluator handoff or the next nonblind research/specification/test/implementation rung.
 
-Final revalidation used workflow run `34432881978`, rerun job `102733788023`, completed at approximately `2026-09-10T03:29:36Z`.
+Each owner delegation contains its live-head binding, completion delta, evidence target, stop condition, allowed work, forbidden authority and continue-after-completion rule.
 
-- repair-control syntax/selftests: PASS
-- durable repair ledger reconciliation: PASS, 0 errors, 0 warnings, 2 total transactions
-- active repair transactions: 1
-- repository state reconciler: **DRIFT DETECTED**
-- errors: 2 — `STALE_DELEGATION:CORE` and `STALE_DELEGATION:PROSE`
-- warnings: 5 — `AUTHORITY_DELTA` for main, CORE, LEARNING, BOOK and PROSE versus the older census watermark
+## Scheduler and A-01 validation
 
-The red reconciler is treated as a control signal. It does not invalidate completed exact-SHA evidence; it requires stale delegations to be excluded and the current owner state to govern.
+Policy v7 is active. The central scheduler uses America/New_York, kickoff 23:57, window 00:00-07:00, at most 8 slots, 2-minute transition buffers, 300-minute ticket cap, and 30-minute checkpoints above 180 minutes. Dependency chains are same-workstream, maximum length 4, immediate-on-PASS, and isolated lanes continue after unrelated failure.
 
-# CORE — SYSTEM_MASTER/CORE
+Admission now requires the canonical gateway, hosted broker and split A-01 executor; it verifies control-plane SHA, subject SHA and registered wrapper before the self-hosted Windows/X64 runner is acquired. Runner guards require Node, Git, at least 10 GB disk and 4 GB available memory, prevent sleep during qualification, record pre/postflight evidence, upload evidence before disruptive action, and fail closed on identity/resource violations.
 
-## Repair lane — ADMIT FIRST
+The only formerly READY Sep-10 ticket, Book Evaluator Teacher-freeze, is now HOLD because its owner delegation was stale after Prose advanced. Private recovery and student-selective remain HOLD. Historical Sep-09 tickets remain SUPERSEDED. Therefore the A-01 scheduler must not manufacture a slot; owner workers remain productive through the four non-fabricating delegation ladders above.
 
-**Transaction:** `A01-REPAIR-a01-run-34431764843-A01-CONTROL-PLANE-SELFTEST-A1`  
-**State:** `REPAIR_REQUEST_READY`  
-**Owner:** `SYSTEM_MASTER/CORE`  
-**Parent receipt:** `a01-run-34431764843-A01-CONTROL-PLANE-SELFTEST`  
-**Qualification:** `A01-CONTROL-PLANE-SELFTEST`  
-**Workstream:** `SYSTEM-MASTER`  
-**Failed exact subject:** `3a8004813e18d7defbf1f9ebc47f5bd8fcd30fb9`  
-**Dispatch:** `OWNER_WORKER_READY` via `governance/repair/agent-dispatch/A01-REPAIR-a01-run-34431764843-A01-CONTROL-PLANE-SELFTEST-A1.json`
+## Serialization and evidence routing
 
-This is the only active repair transaction and remains a repairable repository-owned subject/control-workflow defect under CORE ownership. It outranks unrelated CORE build-ahead for this portfolio.
+- One global A-01 concurrency group `a01-global-r2`; night scheduler concurrency `a01-night-shift`; no independent workstream cron.
+- No changed repair subject enters A-01 before deterministic exact-SHA prequalification and durable `A01_REQUEUE_READY` in the existing transaction.
+- Every qualification must preserve subject/checkout SHA equality, return ticket, receipt classification, timeout/checkpoint evidence and artifact upload.
+- Morning routing reports only actual deltas per CORE, LEARNING, BOOK, PROSE and shared control. No hosted test, worker, broker, or chat grants A-01 PASS, promotion, author, private, native, publication or production authority.
 
-Permitted Second Shift action: reproduce the exact failed boundary, minimally repair only the proven repository-owned direct-call/self-hosted control-plane selftest defect, preserve the original failed receipt and subject lineage, and deterministically prequalify any changed candidate on its own exact SHA.
+## Final fail-closed rule
 
-**A-01 admission is NOT currently authorized by the repair lane.** The durable transaction event chain contains only transaction-opened and owner-dispatch-ready events. If repair changes bytes, the worker must create a new exact SHA, obtain deterministic prequalification PASS on that same SHA, and have the Repair Broker persist `A01_REQUEUE_READY` before canonical A-01 admission. `A01_REQUEUE_READY` is eligibility only, never PASS.
-
-If reproduction instead proves infrastructure, admission/window, dependency, control-plane-outside-subject, human/author/private/native/external/publication/production, or another non-product boundary, retain that truthful classification and route it to its owner. Do not convert it into product repair.
-
-## Normal CORE delegation — REJECT STALE
-
-`SECOND-SHIFT-CORE-SMR019-SUPERSEDING-CUMULATIVE-001` is excluded. It is bound to obsolete CORE head `6adb23ba1d4836026c1c4aa9bde9c33eba29e52c`; live CORE is `568f324d52485a8d010dc99c3eb7f637216044fb`, and the live control record has already sealed the superseding SMR020 closure and advanced to SMR021 readiness.
-
-No controller-created normal CORE replacement is issued while the current repair transaction is active. After the repair boundary is durably resolved or reclassified, CORE must re-read the then-live head before any SMR021 unattended work is admitted.
-
-# LEARNING — SYSTEM_MASTER/LEARNING
-
-## Normal delegation — ADMIT
-
-**Delegation:** `SECOND-SHIFT-LEARNING-FULL-STANDARD-CURRICULUM-001A`  
-**Live control head:** `8d14642dfed242adb3eea4b33125272a8d3d657a`  
-**Delegation-bound head:** `8d14642dfed242adb3eea4b33125272a8d3d657a`  
-**Objective:** `LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-RESEARCH-GRAPH-SPEC`
-
-The delegation is current and dependency-valid. Execute only its source-bound curriculum/dependency-graph and assessment-blueprint research phase: revalidate the external-standard source/version, disposition all 66 frozen requirements, define provisional prerequisite/subskill/module sequencing, bind intended assessment/workplace/mastery/retention/transfer evidence profiles, and define successor-standard update/revalidation behavior.
-
-Do not fabricate participant consent, learner responses, retention, transfer or effectiveness results; do not claim psychometric validity, SME/external certification, native-platform, production or A-01 authority; do not repeat closed Learning runtime/provider/adaptive/Tutor/fresh-evidence/pilot-study boundaries.
-
-On completion, retire this delegation, preserve the source-bound research/graph artifact, re-fetch the live Learning head, and admit a successor only if that current owner state selects one.
-
-# BOOK — SYSTEM_MASTER/BOOK
-
-## Current state — NO SECOND SHIFT DELEGATION ADMITTED
-
-Live Book head `58d69d13b675f12be854d50c80fd9ddce6636e04` has advanced beyond State-023 selection and durably closed P3 census Phase 1 with `BOOK-SYSTEM-COMPLETION-CENSUS-002-P3-BOOK-PHASE-001`.
-
-The checkpoint establishes an evidence-backed Book capability matrix and proves a Book-owned machine gap: canonical creation/versioning/admission of new governing brief, canon manifest, story bible, book plan and manuscript objects. It identifies candidate successor `BOOK-SYSTEM-CANONICAL-CONTENT-OBJECT-ADMISSION-001`, while requiring Phase 2 to determine whether chapter/scene persistence and Book Intelligence orchestration belong inside that same smallest boundary rather than creating duplicate engines. Phase 2 also must reconcile stale shared Book obligation/completion metadata and update Second Shift to the resulting exact current objective.
-
-The preceding `BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001` remains already closed by authoritative A-01 on exact subject `50a81c3cd3575fe45465584347711d3a7c74413a`, 48/48, run `34432910119`, job `102732003392`, evidence artifact `10135132377`. That PASS is synthetic-composition qualification only and `promotion_authorized=false`; it does not prove real author consent/decisions, publication/delivery, Document System implementation, production readiness, literary quality/factual correctness, total Book completion, or changed-SHA promotion authority.
-
-`governance/second-shift/BOOK-DELEGATIONS.json` still has no active delegation. The new Phase 1 checkpoint gives enough evidence to identify a likely successor boundary, but it explicitly makes Phase 2 responsible for defining the smallest exact successor contract and then updating Second Shift to the resulting exact current objective. The controller therefore leaves Book empty rather than prematurely manufacturing that resulting objective or silently rewriting owner control.
-
-Book may become executable later in the same window only after the Book owner durably closes/advances Phase 2 or publishes a new delegation bound to the then-live Book head. PROSE child work, Document System implementation, real author/human/publication and external/native boundaries must remain with their truthful owners/classifications.
-
-# PROSE — SYSTEM_MASTER/BOOK/PROSE
-
-## Existing Teacher-freeze delegation — REJECT STALE
-
-`SECOND-SHIFT-PROSE-BOOK-EVAL-TEACHER-FREEZE-001` is excluded. It is bound to obsolete Prose head `9d360ac20839d06765b1b3a68d5c1ebedb2eba50`; live Prose is `23dcc5c82816fba4bdc571a8019e13fba4be4b95`. The final System State Reconciler independently flags the Prose delegation as stale.
-
-The underlying overnight request `BOOK-EVAL-REPAIR-005-GATE-D-TEACHER-FREEZE-2026-09-10` remains a separately registered READY request on exact subject `e3b771dc36800c5f056ff2fd5ab6622f3e014f41`, but Second Shift may not execute it through a stale owner delegation. No silent head rebind is allowed.
-
-The live Prose head has meanwhile adjudicated the blind passage-reconstruction semantics: all 3 source digests and all 6 passage digests match under the corrected zero-based-inclusive interpretation; a fresh blind evaluator restart is authorized; author labels/commentary were not used for reconstruction; raw/candidate prose was not persisted; revision authority remains zero. That current blind objective is separate from Teacher-freeze and requires its own fresh-context/owner-valid execution path.
-
-No controller-created Prose replacement is issued. A fresh owner re-evaluation must decide whether Teacher-freeze, the fresh blind evaluator restart, or another current Prose obligation is the dependency-valid unattended action and bind any new delegation to the then-live Prose head.
-
-Private-gold recovery and student-selective training remain HOLD unless their independent prerequisites are actually satisfied. Private-data, author, blind-label, manuscript-custody, revision/publication and production boundaries must not be converted into repair or inferred authority.
-
-# Shared infrastructure / control
-
-1. The repair ledger and repair-control selftests are healthy, but repository-wide state remains red because CORE and PROSE active delegation files are stale. Those stale items are rejected here rather than rebound.
-2. A-01 itself is shared qualification/control infrastructure. The successful Book exact-SHA A-01 run demonstrates that the runner/gateway can execute a registered qualification, but it does not close or reclassify the independent CORE repair transaction and does not create `A01_REQUEUE_READY` for that transaction.
-3. No repair worker, hosted test, portfolio controller or owner chat may grant authoritative A-01 PASS. Only a canonical A-01 exact-subject receipt can do so. Existing A-01 PASS is cited only where it already occurred.
-4. No same-SHA infrastructure retry or changed-SHA product rerun is admitted unless the durable repair transaction is in the exact state required by current repair policy.
-5. No workload is added merely to keep A-01, hosted runners or owner lanes busy.
-
-# Execution order and final fail-closed gate
-
-Priority for the 00:00-07:00 window:
-
-1. **CORE repair transaction** `A01-REPAIR-a01-run-34431764843-A01-CONTROL-PLANE-SELFTEST-A1` — reproduce/minimally repair/prequalify only; do not A-01 requeue unless the durable broker state becomes `A01_REQUEUE_READY`.
-2. **LEARNING delegation** `SECOND-SHIFT-LEARNING-FULL-STANDARD-CURRICULUM-001A` — execute the current research/graph specification within its declared authority boundary.
-3. **BOOK** — empty at final portfolio publication; the Phase 1 checkpoint now proves the gap, but Phase 2/owner control must define the exact successor and publish a current delegation before unattended execution.
-4. **PROSE** — no admitted job from the stale Teacher-freeze delegation; require fresh owner re-evaluation/delegation before any unattended Prose execution.
-
-Immediately before each item begins, re-fetch `main`, the owner control ref, the owner repair inbox and delegation file, and re-check objective/dependencies/exact subject/current policy/window. If anything material changed, do not execute this snapshot. Replan from current authority. Empty remains valid.
-
-No PASS, promotion, publication, production, human, author, private-data, native-platform or external authority is created by this portfolio.
+Immediately before every project or successor, re-read current main, live owner head, repair inbox and delegation. A head/objective/dependency mismatch invalidates only that lane; other proven-isolated lanes continue. Empty is valid only after the full eight-rung work-ahead ladder is durably exhausted.
