@@ -1,0 +1,46 @@
+{
+  "packet_id": "SMR021-DATA-PERSISTENCE-OWNER-HANDOFF-005",
+  "from_owner": "SYSTEM_MASTER/CORE",
+  "required_owner": "SYSTEM_MASTER/CORE/DATA-OWNED-PERSISTENCE-BOUNDARY",
+  "created_at": "2026-09-10T05:34:00-04:00",
+  "state": "OWNER_ACTION_REQUIRED__CORE_INDEPENDENT_PREP_CONTINUES",
+  "exact_input": {
+    "core_control_head": "ce902b740ef4a9577f6266287ea03067050ab57c",
+    "candidate_source_test_sha256": "fe325804bacfd5c40339a18bc393fb1bdfb2191c8b0f3946219d7d81f1971596",
+    "test_matrix": "system-master/control-v2/SMR021-FULL-PORTABLE-CLOSURE-QUALIFICATION-TEST-MATRIX-004.json"
+  },
+  "required_contract_delta": [
+    "Define an immutable durable ExperienceAdmissionRecord including workId and admitted workVersion, capabilityId, requirementDigest, selectedDescriptorId/digest, routeDecisionDigest, caller/principal/session, admittedAction/effect, authority/evidence bindings, createdAt and record digest.",
+    "Define atomic command+admission reference integrity so admissionRef resolves to exactly one immutable record; reject missing, ambiguous or digest-mismatched references.",
+    "Define explicit legacy migration to MIGRATED_UNQUALIFIED or rejection; never synthesize authority from incomplete records.",
+    "Define optimistic concurrency, replay/idempotency and evidence-preserving conflict semantics.",
+    "Provide schema/SQL/JDBC parity and rollback/recovery rules without enabling UX or the persistence adapter to execute effects."
+  ],
+  "acceptance_tests": [
+    "RT-01",
+    "RT-02",
+    "MF-01",
+    "TP-01",
+    "TP-02",
+    "MG-01",
+    "MG-02",
+    "RP-01",
+    "RP-02",
+    "CC-01",
+    "CC-02",
+    "FI-01",
+    "FI-02",
+    "FI-03",
+    "FI-04",
+    "AU-01",
+    "AU-02",
+    "AU-03",
+    "CO-01"
+  ],
+  "forbidden_authority": [
+    "No DATA implementation may be invented by a Core worker without owner-valid authority.",
+    "No prior exact-subject PASS transfers to changed source/test/schema/migration bytes.",
+    "No hosted result is A-01/native/device/production authority."
+  ],
+  "continuation_rule": "DATA owner may return an exact interface/migration candidate or a durable blocker. CORE continues independent source-custody manifest, hosted workflow specification and negative test-fixture preparation."
+}

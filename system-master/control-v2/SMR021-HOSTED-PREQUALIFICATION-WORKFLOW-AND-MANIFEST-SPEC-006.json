@@ -1,0 +1,50 @@
+{
+  "spec_id": "SMR021-HOSTED-PREQUALIFICATION-WORKFLOW-AND-MANIFEST-SPEC-006",
+  "state": "SPECIFICATION_READY__EXECUTION_GATES_CLOSED",
+  "owner_path": "SYSTEM_MASTER/CORE",
+  "exact_parent_control_sha": "ce902b740ef4a9577f6266287ea03067050ab57c",
+  "source_gate": {
+    "capsule_name": "SMR021_MINIMUM_UX_ADMISSION_BINDING_SOURCE_TEST_CANDIDATE_001.zip",
+    "capsule_bytes": 424986,
+    "capsule_sha256": "377afa2c9ff2c7c69e5cd5bc45c66dd95ceb2315c1787afc35df6d907165fca1",
+    "source_test_sha256": "fe325804bacfd5c40339a18bc393fb1bdfb2191c8b0f3946219d7d81f1971596",
+    "file_count": 435
+  },
+  "admission_predicates": [
+    "exact runnable bytes committed to ordinary Git tree",
+    "candidate manifest and canonical verifier committed",
+    "DATA-owner-valid persistence interface/migration present or explicitly excluded from execution",
+    "registration current for exact qualification subject",
+    "hosted workflow reviewed by control-plane enforcement"
+  ],
+  "hosted_policy": {
+    "runner": "ubuntu-latest",
+    "job_timeout_minutes": 30,
+    "qualifier_timeout_minutes": 25,
+    "concurrency_template": "smr021-hosted-prequalification-${subject_sha}",
+    "cancel_in_progress": false,
+    "artifact_retention_days": 30,
+    "credentials_persisted": false
+  },
+  "evidence_files": [
+    "request.json",
+    "environment.json",
+    "custody-manifest.json",
+    "compile.log",
+    "suites.log",
+    "persistence-matrix.json",
+    "fresh-extraction.json",
+    "receipt.json"
+  ],
+  "receipt_boundary": {
+    "authoritative_a01": false,
+    "promotion_authorized": false,
+    "native_authorized": false,
+    "production_authorized": false
+  },
+  "current_blockers": [
+    "GITHUB_NATIVE_RUNNABLE_SOURCE_ABSENT",
+    "DATA_OWNER_VALID_PERSISTENCE_CONTRACT_ABSENT"
+  ],
+  "do_not_dispatch": true
+}
