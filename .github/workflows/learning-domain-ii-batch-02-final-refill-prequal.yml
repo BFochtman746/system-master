@@ -1,0 +1,45 @@
+name: Learning Domain II Batch 02 Final Refill Prequalification
+
+on:
+  push:
+    branches:
+      - learning/domain-ii-batch-01-rescue-20260910
+    paths:
+      - "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-DOMAIN-II-BATCH-01-CANDIDATE-006.json"
+      - "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-DOMAIN-II-BATCH-02-CANDIDATE-007.json"
+      - ".github/scripts/learning-domain-ii-batch-02-final-refill-qualify.js"
+      - ".github/workflows/learning-domain-ii-batch-02-final-refill-prequal.yml"
+      - ".github/scripts/learning-full-standard-topology-validator-003.js"
+      - "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-TOPOLOGY-CANDIDATE-003.json"
+      - "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-66-SOURCE-NODE-INDEX-001.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  batch02:
+    name: Domain II batch 02 exact-source cumulative merge validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - name: Syntax check batch 02 qualifier
+        run: node --check .github/scripts/learning-domain-ii-batch-02-final-refill-qualify.js
+      - name: Validate batches 01 and 02 and run Validator 003
+        run: node .github/scripts/learning-domain-ii-batch-02-final-refill-qualify.js
+      - name: Upload hosted batch 02 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: LEARNING-DOMAIN-II-BATCH-02-${{ github.sha }}-hosted-evidence
+          path: ${{ runner.temp }}/learning-domain-ii-batch-02-evidence
+          if-no-files-found: warn
+          retention-days: 30
+
+# Final-refill gate only. This creates structural hosted evidence; it creates no learner, SME, certification, A-01, native or production evidence.
