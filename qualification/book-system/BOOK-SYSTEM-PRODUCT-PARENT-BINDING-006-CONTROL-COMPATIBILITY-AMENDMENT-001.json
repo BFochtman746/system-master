@@ -1,0 +1,46 @@
+{
+  "amendment_id": "BOOK-SYSTEM-PRODUCT-PARENT-BINDING-006-CONTROL-COMPATIBILITY-AMENDMENT-001",
+  "effective_date": "2026-09-10",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "reason": "Canonical main SYSTEM-TOPOLOGY-002 names BOOK-SYSTEM-PRODUCT-PARENT-BINDING-006.json as the BOOK control record. The canonical validator requires that control record to expose the existing BOOK>PROSE child edge as child_systems[]. Binding 009 already carried the same authority as child_specialist_binding, but the canonical validator did not consume that field.",
+  "repair_class": "ADDITIVE_CONTROL_REPRESENTATION_COMPATIBILITY__NO_AUTHORITY_CHANGE",
+  "pre_amendment": {
+    "file": "qualification/book-system/BOOK-SYSTEM-PRODUCT-PARENT-BINDING-006.json",
+    "git_blob_sha": "03816d21a87685d6118a8ff5e626d6e76e86ffa2",
+    "historical_fields_preserved": true
+  },
+  "post_amendment": {
+    "commit_sha": "821772053f839d0f4a82872a8f18eb0e0cd618f5",
+    "git_blob_sha": "2262e9428f573f3676a3cc9593b30e2ebf5fda5a",
+    "added_child_system": {
+      "system_id": "PROSE",
+      "owner_path": "SYSTEM_MASTER/BOOK/PROSE",
+      "relationship": "SPECIALIST_CHILD_SYSTEM",
+      "canonical_manuscript_write_authority": false
+    }
+  },
+  "authority_sources": [
+    "governance/SYSTEM-TOPOLOGY-002.json on canonical main",
+    "qualification/book-system/BOOK-SYSTEM-PRODUCT-PARENT-BINDING-009.json"
+  ],
+  "failed_drift_evidence_preserved": {
+    "subject_sha": "f18ea8193cc35d2437ba49e88b3b10c557c7701e",
+    "workflow_run_id": 34501768608,
+    "job_id": 102954027033,
+    "result": "FAIL",
+    "error": "BOOK control must bind PROSE at SYSTEM_MASTER/BOOK/PROSE"
+  },
+  "successful_drift_evidence": {
+    "subject_sha": "821772053f839d0f4a82872a8f18eb0e0cd618f5",
+    "workflow_run_id": 34502032140,
+    "job_id": 102954904352,
+    "result": "PASS",
+    "canonical_topology_and_a01_owner_map": "PASS",
+    "system_control_identity_and_parent_boundaries": "PASS"
+  },
+  "non_claims": [
+    "This amendment does not transfer canonical manuscript authority to Prose.",
+    "This amendment does not replace or delete bindings 006-009 history.",
+    "This amendment does not qualify Prose literary behavior, fresh blind evaluation, Book admission, A-01 target behavior, native behavior, publication or production readiness."
+  ]
+}
