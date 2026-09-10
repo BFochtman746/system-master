@@ -9,12 +9,18 @@ on:
     paths:
       - 'governance/second-shift/**'
       - '.github/scripts/second-shift-enforce.js'
+      - '.github/scripts/second-shift-event-ledger.js'
+      - '.github/scripts/second-shift-score.js'
       - '.github/workflows/second-shift-enforcement.yml'
+      - '.github/workflows/second-shift-value-score.yml'
   pull_request:
     paths:
       - 'governance/second-shift/**'
       - '.github/scripts/second-shift-enforce.js'
+      - '.github/scripts/second-shift-event-ledger.js'
+      - '.github/scripts/second-shift-score.js'
       - '.github/workflows/second-shift-enforcement.yml'
+      - '.github/workflows/second-shift-value-score.yml'
 
 permissions:
   contents: read
@@ -26,7 +32,7 @@ concurrency:
 
 jobs:
   enforce:
-    name: Reject false idle, stale claims and undispatched READY work
+    name: Reject false idle, stale claims, bad telemetry and undispatched READY work
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -36,11 +42,17 @@ jobs:
           fetch-depth: 1
           persist-credentials: false
 
-      - name: Syntax check Second Shift enforcement
-        run: node --check .github/scripts/second-shift-enforce.js
+      - name: Syntax check Second Shift controls
+        run: |
+          node --check .github/scripts/second-shift-event-ledger.js
+          node --check .github/scripts/second-shift-enforce.js
+          node --check .github/scripts/second-shift-score.js
 
-      - name: Self-test Second Shift invariants
+      - name: Self-test Second Shift execution invariants
         run: node .github/scripts/second-shift-enforce.js --selftest
+
+      - name: Self-test Second Shift value scorer
+        run: node .github/scripts/second-shift-score.js --selftest
 
       - name: Validate current Second Shift state
         if: github.event_name != 'schedule'
