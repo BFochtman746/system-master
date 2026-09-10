@@ -1,0 +1,81 @@
+{
+  "closure_id": "BOOK-SYSTEM-E2E-AUTHORITY-GUARDS-001-CLOSURE",
+  "effective_date": "2026-09-09",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "standing": "CLOSED__HOSTED_AND_REGISTERED_A01_EXACT_SHA_PASS__E2E_RESUMED",
+  "parent_objective": "BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001",
+  "originating_e2e_failure": {
+    "subject_sha": "cd96d6d300b73d1a28660d58707624372fee6142",
+    "hosted_run_id": 34431785904,
+    "result": "46_PASS_2_FAIL",
+    "failed_cases": [
+      "E2E019_CHANGED_AUTHOR_SUBJECT_INVALIDATES_PRIOR_DECISION_FOR_NEW_SUBJECT",
+      "E2E021_DOCUMENT_PROVIDER_SUCCESS_ALONE_CANNOT_FREEZE"
+    ],
+    "evidence_artifact_id": 10134743468,
+    "evidence_zip_sha256": "f78f37d48ad3c41f379cf6edb6d588d25cf6deef469049ed6d434dd06e13f7a4"
+  },
+  "closed_findings": [
+    "BOOK-SYSTEM-E2E-AUTHOR-DECISION-CURRENT-SUBJECT-GAP-001",
+    "BOOK-SYSTEM-E2E-EXPORT-FREEZE-PARENT-ADMISSION-GAP-001"
+  ],
+  "repair_qualification": {
+    "qualification_id": "BOOK-SYSTEM-E2E-AUTHORITY-GUARDS-001",
+    "exact_subject_sha": "a119ccdf77b61011b1093006b55367fc3e5a65c2",
+    "classification": "BOUNDED_ADDITIVE_STRICT_GUARDS__NO_NEW_DOMAIN_AUTHORITY",
+    "hosted": {
+      "run_id": 34432197786,
+      "job_id": 102729847819,
+      "result": "PASS",
+      "case_count": 24,
+      "pass_count": 24,
+      "fail_count": 0,
+      "evidence_artifact_id": 10134877049,
+      "evidence_artifact_name": "book-system-e2e-authority-guards-001-hosted-34432197786",
+      "evidence_zip_sha256": "21214bfe7c3996eb6ab80a0b02c1f848623e357ba8ec5895fa3e5074e82b9ceb"
+    },
+    "a01": {
+      "run_id": 34432443775,
+      "job_id": 102730621721,
+      "result": "PASS",
+      "case_count": 24,
+      "pass_count": 24,
+      "fail_count": 0,
+      "registry_version": 28,
+      "policy_version": 6,
+      "control_plane_sha": "77fcfc17f34c2bc6bf9c2cc7c343ae5b1f01e86c",
+      "subject_sha": "a119ccdf77b61011b1093006b55367fc3e5a65c2",
+      "checkout_sha": "a119ccdf77b61011b1093006b55367fc3e5a65c2",
+      "runner": {
+        "name": "A-01",
+        "os": "Windows",
+        "arch": "X64",
+        "required_labels": ["self-hosted", "Windows", "X64"]
+      },
+      "evidence_artifact_id": 10134970501,
+      "evidence_artifact_name": "BOOK-SYSTEM-E2E-AUTHORITY-GUARDS-001-34432443775-evidence",
+      "evidence_zip_sha256": "ba34f8a567a3f5fc9756f40438c8da173bb7a158cd3e3c18dda1d28bb4a70bf0",
+      "promotion_authorized": false
+    }
+  },
+  "qualified_repair_boundaries": {
+    "author_current_subject": "system-master/book-system/author-decision-current-subject-guard.js",
+    "export_freeze_parent_admission": "system-master/book-system/export-freeze-parent-admission-guard.js"
+  },
+  "preserved_predecessor_authority": {
+    "author_decision_queue_v1_subject_sha": "9601ae5df8348c1daac8805eaefa1718c431dd49",
+    "export_freeze_v1_subject_sha": "0bc1f96ed0b8effd22c432a7d727fd13d613b825",
+    "rule": "The focused repair PASS does not relabel, replace, or transfer either predecessor exact-SHA qualification. The guards delegate to those predecessors and only narrow fail-closed currentness/admission boundaries."
+  },
+  "authority": {
+    "new_author_authority": false,
+    "new_provider_authority": false,
+    "new_lifecycle_policy": false,
+    "new_document_authority": false,
+    "new_export_freeze_authority": false,
+    "new_publication_authority": false,
+    "promotion_authorized": false
+  },
+  "next_exact_objective": "BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001-HARNESS-001",
+  "next_rule": "Rerun the unchanged 48-case E2E matrix through the exact qualified strict guards. The E2E qualification itself requires a new hosted exact-SHA PASS and registered A-01 consolidated PASS; the guard PASS cannot transfer to it."
+}
