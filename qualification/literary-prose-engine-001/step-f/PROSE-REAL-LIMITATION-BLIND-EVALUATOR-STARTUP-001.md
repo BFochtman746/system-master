@@ -5,10 +5,11 @@ Owner lane: SYSTEM_MASTER/BOOK/PROSE
 Objective: PROSE-REAL-LIMITATION-BLIND-MODEL-SCORING-001
 Blind branch: literary-prose-blind-eval-001
 Supervising owner control ref: literary-prose-engine-001
-Supervising owner control head revalidated: 23dcc5c82816fba4bdc571a8019e13fba4be4b95
-Owner admission standing: REVALIDATED__RECONSTRUCTION_ADJUDICATED__BLIND_SCORING_REMAINS_NEXT_CRITICAL_PATH
+Supervising owner control head revalidated: 309a7876b8e388d115d4d3bde7dc39dd0ef8b6fd
+Owner admission standing: REVALIDATED__RECONSTRUCTION_ADJUDICATED__SEAL_VALIDATOR_HOSTED_QUALIFIED__BLIND_SCORING_REMAINS_NEXT_CRITICAL_PATH
 Owner reconstruction adjudication: PROSE-REAL-LIMITATION-BLIND-PASSAGE-RECONSTRUCTION-ADJUDICATION-001 @ 23dcc5c82816fba4bdc571a8019e13fba4be4b95
 Source/reconstruction repair: PROSE-BLIND-EXECUTION-FORENSIC-REPAIR-001
+Prediction-seal integrity support: PROSE-BLIND-PREDICTION-SEAL-VALIDATOR-001 @ owner qualification subject 8230819eb5409d906a6a5519d3a9a1dac7361fd9, hosted run 34438643674
 
 ## Eligibility
 
@@ -27,6 +28,7 @@ Owner admission has been revalidated against the supervising owner head recorded
 5. The three admitted private source manuscripts only after each materialized file matches its exact source-package SHA256.
 6. `qualification/literary-prose-engine-001/step-f/prose_blind_source_custody_preflight.py` and non-ground-truth qualification fixtures from this blind branch.
 7. Qualified semantic evidence validator, semantic-to-diagnostic adapter, Passage Intelligence, Step-F code, and non-ground-truth fixtures already present on this blind branch.
+8. The generic seal-integrity contract, validator, and synthetic fixtures under `blind-prediction-seal-validator-001/`; they contain no frozen-case predictions or author labels.
 
 Do not read `literary-prose-engine-001` at or after the ground-truth freeze commit named in the blind contract. Do not read current main completion/obligation records, current labeled Prose state, author commentary, or any artifact containing author labels before the prediction seal.
 
@@ -60,22 +62,23 @@ Do not read `literary-prose-engine-001` at or after the ground-truth freeze comm
    - `diagnosis_allowed`
    - `revision_allowed`
 7. Require `revision_allowed=false` for all six cases. Generate no candidate prose and mutate no manuscript.
-8. Create, do not overwrite, this prediction artifact on the blind branch:
+8. Validate the complete candidate seal with `blind-prediction-seal-validator-001/validate_blind_prediction_seal.py`. Do not weaken or bypass a rejection.
+9. Create, do not overwrite, this prediction artifact on the blind branch:
    `qualification/literary-prose-engine-001/step-f/blind-evaluation-001/PROSE-REAL-LIMITATION-BLIND-PREDICTION-SEAL-001.json`
-9. The Git commit containing that newly created artifact is the immutable prediction seal. Capture its exact commit SHA.
-10. If the prediction artifact cannot be committed, stop `PREDICTION_SEAL_WRITE_BLOCKED`. Do not read ground truth.
-11. Only after the prediction-seal commit exists may the evaluator read the frozen author ground truth identified by the blind contract.
-12. Compare the sealed predictions against ground truth and measure:
+10. The Git commit containing that newly created artifact is the immutable prediction seal. Capture its exact commit SHA.
+11. If the prediction artifact cannot be committed, stop `PREDICTION_SEAL_WRITE_BLOCKED`. Do not read ground truth.
+12. Only after the prediction-seal commit exists may the evaluator read the frozen author ground truth identified by the blind contract.
+13. Compare the sealed predictions against ground truth and measure:
     - REAL_LIMITATION identification;
     - downgrade behavior;
     - abstention behavior;
     - WORKING_AS_INTENDED preservation;
     - NEUTRAL_OBSERVATION retention;
     - false-positive limitation rate.
-13. Create, do not overwrite, the comparison receipt at:
+14. Create, do not overwrite, the comparison receipt at:
     `qualification/literary-prose-engine-001/step-f/blind-evaluation-001/PROSE-REAL-LIMITATION-BLIND-COMPARISON-RECEIPT-001.json`
     The receipt must reference the exact prediction-seal commit and frozen ground-truth commit while preserving revision authority at zero.
-14. Stop. Return the prediction-seal SHA, comparison-receipt SHA, comparison result, and exact next step to the canonical Prose owner chat.
+15. Stop. Return the prediction-seal SHA, comparison-receipt SHA, comparison result, and exact next step to the canonical Prose owner chat.
 
 ## Failure rules
 

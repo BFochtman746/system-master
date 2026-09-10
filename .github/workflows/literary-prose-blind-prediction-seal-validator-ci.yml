@@ -1,0 +1,28 @@
+name: Prose Blind Prediction Seal Validator Qualification
+
+on:
+  push:
+    branches:
+      - literary-prose-blind-eval-001
+    paths:
+      - 'qualification/literary-prose-engine-001/blind-prediction-seal-validator-001/**'
+      - '.github/workflows/literary-prose-blind-prediction-seal-validator-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout exact blind-support subject
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile validator and independent fixtures
+        run: python -m py_compile qualification/literary-prose-engine-001/blind-prediction-seal-validator-001/validate_blind_prediction_seal.py qualification/literary-prose-engine-001/blind-prediction-seal-validator-001/run_blind_prediction_seal_validator_fixtures.py
+      - name: Qualify prediction-seal integrity boundary
+        run: python qualification/literary-prose-engine-001/blind-prediction-seal-validator-001/run_blind_prediction_seal_validator_fixtures.py
