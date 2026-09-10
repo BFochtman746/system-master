@@ -121,7 +121,7 @@ jobs:
   execute:
     name: Admit and execute replacement subject through canonical A-01 path
     needs: prepare
-    uses: ./.github/workflows/a01-control-plane-admission-gateway.yml
+    uses: ./.github/workflows/a01-control-plane-gateway.yml
     with:
       qualification_id: ${{ needs.prepare.outputs.qualification_id }}
       workstream_id: ${{ needs.prepare.outputs.workstream_id }}
