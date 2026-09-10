@@ -1,0 +1,128 @@
+{
+  "artifact_id": "PROSE-BLIND-EXECUTION-FORENSIC-REPAIR-001",
+  "effective_date": "2026-09-09",
+  "owner_path": "SYSTEM_MASTER/BOOK/PROSE",
+  "objective": "PROSE-REAL-LIMITATION-BLIND-MODEL-SCORING-001",
+  "audit_type": "FORENSIC_ROOT_CAUSE_AND_EXECUTION_PATH_REPAIR",
+  "starting_blind_head": "3d6dee5384caa9db2427fa92f54d89c500bd54ce",
+  "supervising_owner_head": "9d360ac20839d06765b1b3a68d5c1ebedb2eba50",
+  "standing": "PASS__ROOT_CAUSES_IDENTIFIED__REPAIR_IMPLEMENTED__REAL_SOURCE_PREFLIGHT_3_OF_3_AND_6_OF_6__FRESH_BLIND_RERUN_REQUIRED",
+  "forensic_findings": [
+    {
+      "id": "F001_SOURCE_RETRIEVAL_UNSPECIFIED",
+      "severity": "BLOCKING",
+      "finding": "The blind contract named three private DOCX sources and hashes but provided no governed cross-chat retrieval surface or materialization procedure. The blind Git branch contains no DOCX source files.",
+      "effect": "A correct fresh evaluator can have the contract yet be unable to obtain source bytes and therefore cannot verify custody or reconstruct passages."
+    },
+    {
+      "id": "F002_PARAGRAPH_INDEX_BASE_WRONG",
+      "severity": "BLOCKING",
+      "finding": "The recorded 1-based reconstruction rule reproduces 0 of 6 frozen passage digests. The exact frozen digests reproduce 6 of 6 only when source_paragraph_start/source_paragraph_end are interpreted as 0-based inclusive indices into nonempty DOCX paragraphs.",
+      "effect": "A contract-obedient evaluator must stop EVIDENCE_MISMATCH before scoring."
+    },
+    {
+      "id": "F003_TEXT_EXTRACTION_RULE_UNDERSPECIFIED",
+      "severity": "HIGH",
+      "finding": "NONEMPTY_DOCX_PARAGRAPHS did not define how WordprocessingML text is assembled. The digest-matching rule is concatenate descendant w:t text per w:p, strip outer whitespace, drop empty paragraphs.",
+      "effect": "Different DOCX parsers could reconstruct different byte sequences despite using the same paragraph numbers."
+    },
+    {
+      "id": "F004_PREDICTION_SEAL_WRITE_PATH_UNDERSPECIFIED",
+      "severity": "HIGH",
+      "finding": "The startup required committing predictions but did not define an exact artifact path, create-only immutability rule, or write-failure state.",
+      "effect": "A fresh evaluator could finish analysis without leaving a durable branch seal, or could overwrite a prior seal."
+    },
+    {
+      "id": "F005_REAL_SOURCE_VALIDATION_GAP",
+      "severity": "HIGH",
+      "finding": "Existing hosted ground-truth CI validates packet structure but does not possess or verify the private DOCX packages and therefore cannot prove source-package or reconstructed-passage identity.",
+      "effect": "Metadata could remain green while the executable private-source path is broken."
+    },
+    {
+      "id": "F006_WORD_COUNT_METADATA_DRIFT",
+      "severity": "LOW",
+      "finding": "PROSE-LGT-002 has recorded word_count 171 while the exact digest-matching passage yields 174 under the repair preflight tokenizer. The passage SHA256 still matches exactly.",
+      "effect": "Word count must remain advisory and cannot override cryptographic passage identity."
+    }
+  ],
+  "private_source_preflight": {
+    "execution_surface": "CHATGPT_FILES_LIBRARY_MATERIALIZED_TO_EPHEMERAL_CONTAINER",
+    "raw_prose_committed": false,
+    "author_labels_read_for_repair": false,
+    "source_results": [
+      {
+        "source_id": "MOSES_I",
+        "filename": "Volume I - THE VOICE FROM THE BUSH - Clean.docx",
+        "expected_sha256": "44d97f6b47c24d69390edebdcc239a0a23133c5201c011ef90f9f1f3a2ffbaf0",
+        "observed_sha256": "44d97f6b47c24d69390edebdcc239a0a23133c5201c011ef90f9f1f3a2ffbaf0",
+        "digest_match": true
+      },
+      {
+        "source_id": "UNHINDERED_3",
+        "filename": "Unhindered_Book_3.docx",
+        "expected_sha256": "571f8ca4f6cfa5cb273c50ff0249aea30336ff5e4ff97cfc612b7cac08231514",
+        "observed_sha256": "571f8ca4f6cfa5cb273c50ff0249aea30336ff5e4ff97cfc612b7cac08231514",
+        "digest_match": true
+      },
+      {
+        "source_id": "UNHINDERED_4",
+        "filename": "Unhindered-Book_4.docx",
+        "expected_sha256": "b134df0d766b8189c7e4ee3b391b8243e22bffd87224c97e9afb62df80efcb75",
+        "observed_sha256": "b134df0d766b8189c7e4ee3b391b8243e22bffd87224c97e9afb62df80efcb75",
+        "digest_match": true
+      }
+    ],
+    "source_digest_matches": 3,
+    "source_digest_total": 3,
+    "reconstruction_adjudication": {
+      "1_based_inclusive_passage_digest_matches": 0,
+      "0_based_inclusive_passage_digest_matches": 6,
+      "authoritative_rule": "0_BASED_INCLUSIVE_NONEMPTY_DOCX_PARAGRAPHS",
+      "text_extraction_rule": "CONCAT_DESCENDANT_W_T_PER_W_P__STRIP_OUTER_WHITESPACE__DROP_EMPTY",
+      "join_rule": "SINGLE_ASCII_SPACE",
+      "digest_rule": "SHA256_UTF8"
+    },
+    "passage_results": [
+      {"case_id":"PROSE-LGT-001","expected_sha256":"22bf2594366ecd143c7b490fc4d312e335077e96f6b8ff7f9bde7d6da315e540","observed_sha256":"22bf2594366ecd143c7b490fc4d312e335077e96f6b8ff7f9bde7d6da315e540","digest_match":true,"recorded_word_count":161,"observed_advisory_word_count":161},
+      {"case_id":"PROSE-LGT-002","expected_sha256":"5b1fecd9f033a76809208cd0c54185b7f61a81055fdc7ee9c9c12f31ff3b3d3f","observed_sha256":"5b1fecd9f033a76809208cd0c54185b7f61a81055fdc7ee9c9c12f31ff3b3d3f","digest_match":true,"recorded_word_count":171,"observed_advisory_word_count":174},
+      {"case_id":"PROSE-LGT-003","expected_sha256":"add1860bfb44e441e8379b963710d7c6816d9ecdb46dfc8dba198d6bd1f932f3","observed_sha256":"add1860bfb44e441e8379b963710d7c6816d9ecdb46dfc8dba198d6bd1f932f3","digest_match":true,"recorded_word_count":157,"observed_advisory_word_count":157},
+      {"case_id":"PROSE-LGT-004","expected_sha256":"534ba3b9e3b9a11325c66f1dbdb6ce428ca6f7828f90ce96207e4b64687028d9","observed_sha256":"534ba3b9e3b9a11325c66f1dbdb6ce428ca6f7828f90ce96207e4b64687028d9","digest_match":true,"recorded_word_count":166,"observed_advisory_word_count":166},
+      {"case_id":"PROSE-LGT-005","expected_sha256":"5bc39d758446fd9daec6741535db780389fb023badc0d80953fb438b9443573b","observed_sha256":"5bc39d758446fd9daec6741535db780389fb023badc0d80953fb438b9443573b","digest_match":true,"recorded_word_count":162,"observed_advisory_word_count":162},
+      {"case_id":"PROSE-LGT-006","expected_sha256":"ee0b49a51cf044af9b3bb34596aa1e6f0d17d2aba12c7ef400c867ef359224dd","observed_sha256":"ee0b49a51cf044af9b3bb34596aa1e6f0d17d2aba12c7ef400c867ef359224dd","digest_match":true,"recorded_word_count":175,"observed_advisory_word_count":175}
+    ],
+    "passage_digest_matches": 6,
+    "passage_digest_total": 6
+  },
+  "repair_commits": {
+    "contract": "95e4224f61e61999c9ef913473c0c61dccbcf931",
+    "startup": "c237389eb3a73ca14a2c0c5fe7ee5645e026c3d2",
+    "preflight_script": "09706efe00dbadac85421948cc3a753d0a135238",
+    "synthetic_fixtures": "6623155dbd2dc259b33e9d1d72b08d661dec3f8f",
+    "qualification_workflow": "7554e56b4fbde974c2bed5fc67df4d69213fdfe4"
+  },
+  "synthetic_prequalification": {
+    "local_python_compile": "PASS",
+    "fixture_result": "PASS__4_OF_4",
+    "fixture_coverage": [
+      "0-based inclusive happy path",
+      "1-based contract semantic rejection",
+      "source digest mismatch fail-closed",
+      "missing source fail-closed"
+    ]
+  },
+  "repair_effect": {
+    "source_retrieval": "EXPLICIT_CHATGPT_FILES_LIBRARY_EXACT_TITLE_PLUS_SHA256",
+    "reconstruction": "0_BASED_INCLUSIVE_WITH_EXPLICIT_WORDPROCESSINGML_TEXT_RULE",
+    "prediction_seal": "EXACT_CREATE_ONLY_ARTIFACT_PATH_DEFINED",
+    "comparison_receipt": "EXACT_CREATE_ONLY_ARTIFACT_PATH_DEFINED",
+    "raw_manuscript_repository_persistence": false,
+    "revision_authority": false,
+    "prediction_created_by_this_repair": false,
+    "ground_truth_used_to_tune_prediction": false
+  },
+  "next_action": {
+    "id": "PROSE-REAL-LIMITATION-BLIND-MODEL-SCORING-001",
+    "required_context": "FRESH_GROUND_TRUTH_BLIND_EVALUATOR",
+    "instruction": "Start from the current literary-prose-blind-eval-001 head, obey the repaired startup, retrieve the three sources from ChatGPT Files Library, require the preflight PASS, then score and create the immutable prediction seal before any ground-truth read."
+  }
+}
