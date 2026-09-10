@@ -1,0 +1,96 @@
+{
+  "contract_id": "BOOK-WORKFLOW-ORCHESTRATOR-RETRY-IDEMPOTENCY-RULES-001",
+  "contract_version": 1,
+  "effective_date": "2026-09-10",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "depends_on": [
+    "BOOK-WORKFLOW-ORCHESTRATOR-DEPENDENCY-GRAPH-EXECUTION-PLAN-CONTRACT-001-CLOSURE",
+    "BOOK-WORKFLOW-ORCHESTRATOR-CAPABILITY-ROUTING-INTERFACE-001-CLOSURE",
+    "BOOK-WORKFLOW-ORCHESTRATOR-CONCURRENCY-RULES-001-CLOSURE",
+    "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-002-CLOSURE"
+  ],
+  "standing": "CANDIDATE_PENDING_PACKET_QUALIFICATION",
+  "scope": "Derive stable operation identity and retry/reconciliation decisions for already-valid Phase 2D tasks. This packet does not dispatch providers, perform retries, reconcile external providers, mutate workflow state, write preference events, call Book admission, cache results, cancel/resume work or execute fresh blind evaluation.",
+  "laws": [
+    "Operation identity is derived from authoritative workflow, source, plan, task, capability, service/operation and exact input/context reference identities; timestamps and retry counters never define logical identity.",
+    "Identical authoritative inputs to an idempotent registered service operation reuse the same logical operation identity and idempotency key.",
+    "The same idempotency key with changed normalized authoritative inputs is a conflict and must fail closed.",
+    "Changed manuscript/source, workflow binding, plan digest, task inputs, context package identity, capability, service or operation creates a new logical operation identity; it is not a retry of the old operation.",
+    "Idempotent registered service operations may be classified SAFE_SAME_OPERATION_REPLAY only when the exact operation identity and current source/plan bindings still match.",
+    "Non-idempotent registered service operations are never automatically replayed after an unknown outcome.",
+    "PROSE.GENERATE_REVISION_CANDIDATE remains non-idempotent; unknown outcome requires RECONCILE_BY_REQUEST_ID before any new generation may be considered.",
+    "A reconciliation result proving the prior non-idempotent operation produced no effect may authorize consideration of a NEW_ATTEMPT_AFTER_CONFIRMED_NO_EFFECT, but this packet does not execute that attempt.",
+    "A reconciliation result proving an effect exists requires REUSE_OR_REVIEW_EXISTING_RESULT; duplicate generation is forbidden.",
+    "An unresolved or contradictory reconciliation result remains RECONCILE_REQUIRED and fails closed.",
+    "DECLARED_BLOCKED_CAPABILITY and AUTHORITY_WAIT tasks have no provider retry identity and are classified NOT_EXECUTABLE_BY_RETRY_POLICY.",
+    "BOOK_ADMISSION_HANDOFF is outside orchestrator provider-retry authority and is classified BOOK_ADMISSION_RETRY_NOT_AUTHORIZED.",
+    "Provider SUCCESS or replay does not imply Book admission or canonical manuscript mutation.",
+    "Retry decisions never widen provider authority, bypass author decisions, bypass Story Bible/canon, or convert evaluator evidence into canonical state.",
+    "Retry/reconciliation evidence must be referenced by identity; raw manuscript or candidate text is forbidden in retry decision records.",
+    "Fresh blind evaluation remains isolation-gated independently of retry safety."
+  ],
+  "decision_classes": [
+    "SAFE_SAME_OPERATION_REPLAY",
+    "RECONCILE_REQUIRED",
+    "NEW_ATTEMPT_AFTER_CONFIRMED_NO_EFFECT",
+    "REUSE_OR_REVIEW_EXISTING_RESULT",
+    "NEW_OPERATION_REQUIRED_CHANGED_INPUTS",
+    "NOT_EXECUTABLE_BY_RETRY_POLICY",
+    "BOOK_ADMISSION_RETRY_NOT_AUTHORIZED"
+  ],
+  "operation_identity_components": [
+    "workflow_id",
+    "workflow_digest",
+    "book_project_id",
+    "source_identity",
+    "plan_id",
+    "plan_digest",
+    "task_id",
+    "task_class",
+    "capability_id",
+    "required_authority_domain",
+    "service_id",
+    "operation_id",
+    "input_ref_hashes",
+    "context_package_refs"
+  ],
+  "registered_service_policy_source": {
+    "registry_id": "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-002",
+    "qualified_subject_sha": "77db6b550e9aeb1dfb956627376becbb591498f8",
+    "rule": "Read each callable task's registered operation idempotent boolean from this exact qualified registry; no local override may silently change it."
+  },
+  "non_idempotent_special_case": {
+    "capability_id": "PROSE.GENERATE_REVISION_CANDIDATE",
+    "service_id": "PROSE_ANALYSIS_AND_REVISION",
+    "operation_id": "GENERATE_BOUNDED_REVISION_CANDIDATE",
+    "registered_idempotent": false,
+    "unknown_outcome_behavior": "RECONCILE_REQUIRED",
+    "automatic_retry_after_unknown_outcome": false
+  },
+  "reconciliation_states": [
+    "NOT_APPLICABLE",
+    "NOT_PERFORMED",
+    "CONFIRMED_NO_EFFECT",
+    "CONFIRMED_EXISTING_RESULT",
+    "UNRESOLVED",
+    "CONTRADICTORY"
+  ],
+  "qualification_requirements": [
+    "STABLE_IDENTICAL_OPERATION_IDENTITY",
+    "CHANGED_INPUT_NEW_OPERATION_IDENTITY",
+    "IDEMPOTENT_SAFE_REPLAY_ONLY_EXACT_INPUTS",
+    "IDEMPOTENCY_KEY_CONFLICT_FAILS_CLOSED",
+    "NONIDEMPOTENT_UNKNOWN_OUTCOME_RECONCILES",
+    "NONIDEMPOTENT_CONFIRMED_NO_EFFECT_NEW_ATTEMPT_ONLY",
+    "NONIDEMPOTENT_EXISTING_RESULT_REUSED_OR_REVIEWED",
+    "NONIDEMPOTENT_UNRESOLVED_FAILS_CLOSED",
+    "BOOK_ADMISSION_NOT_PROVIDER_RETRIED",
+    "AUTHOR_AND_NONCALLABLE_TASKS_NOT_RETRIED",
+    "STALE_SOURCE_PLAN_WORKFLOW_REJECTED",
+    "NO_CANONICAL_WRITE_OR_PROVIDER_EXECUTION",
+    "NO_RAW_MANUSCRIPT_IN_RETRY_RECORD",
+    "DETERMINISTIC_DECISION_DIGEST",
+    "NO_FRESH_BLIND_OR_A01_INFERENCE"
+  ],
+  "required_next_packet_on_pass": "BOOK-WORKFLOW-ORCHESTRATOR-FAILURE-SEMANTICS-001"
+}
