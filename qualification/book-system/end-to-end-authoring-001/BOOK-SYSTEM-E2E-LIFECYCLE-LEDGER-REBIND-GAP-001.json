@@ -1,0 +1,49 @@
+{
+  "finding_id": "BOOK-SYSTEM-E2E-LIFECYCLE-LEDGER-REBIND-GAP-001",
+  "effective_date": "2026-09-09",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "parent_objective": "BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001",
+  "standing": "OPEN__QUALIFICATION_BLOCKING_COMPOSITION_GAP__BOUNDED_COMPATIBILITY_REPAIR_REQUIRED",
+  "discovered_during": "BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001-HARNESS-001 implementation",
+  "supersedes_for_harness_readiness": "BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001-FORENSIC-MAP result NO_UNRESOLVED_ARCHITECTURE_GAP_FOUND",
+  "finding": "The persistent Lifecycle ledger is exact-parent-bound. A legitimate non-lifecycle parent successor created by Integration Runtime, Author Decision Queue, canonical Version/Rollback mutation/restore, or Export Freeze changes the parent state version/digest while leaving lifecycle status unchanged. The current qualified Lifecycle compatibility adapter can validate/apply a lifecycle transition only when the ledger is already bound to that exact parent, but it has no qualified operation that advances the existing lifecycle ledger binding across such an authorized non-lifecycle parent successor without discarding lifecycle history.",
+  "evidence": [
+    "Lifecycle v1 validateLedger requires ledger.bound_parent_state_version and ledger.bound_parent_state_digest to equal the current parent identity.",
+    "The current compatibility adapter validateCompatibleLedger enforces the same exact current-parent binding before projection/delegation.",
+    "The current compatibility adapter exports createCompatibleLedger and applyTransition but no authorized non-lifecycle parent-successor rebind operation.",
+    "The isolated Export Freeze qualifier creates a fresh compatible lifecycle ledger after the release successor. That is sufficient for Export Freeze's own gate proof but is not acceptable as an end-to-end lifecycle-history preservation strategy."
+  ],
+  "why_it_matters": [
+    "Resetting the lifecycle ledger after every non-lifecycle parent successor would discard processed transition requests, transition receipts, unit states, dependency edges, defer/resume state and invalidation history.",
+    "Manually editing bound_parent_state_version/digest in an end-to-end test would create a hidden unqualified authority bypass.",
+    "A true end-to-end authoring flow necessarily interleaves lifecycle transitions with non-lifecycle parent successors such as provider proposals, author decisions and export releases."
+  ],
+  "repair_boundary": {
+    "id": "BOOK-SYSTEM-LIFECYCLE-CURRENT-PARENT-REBIND-001",
+    "classification": "STRICT_COMPATIBILITY_AND_CUSTODY_REPAIR__NO_NEW_LIFECYCLE_POLICY",
+    "purpose": "Advance only the lifecycle-ledger binding across one exact already-authorized non-lifecycle parent successor while preserving all lifecycle policy/history unchanged and emitting deterministic custody evidence.",
+    "allowed_authority_kinds": ["CANONICAL_STATE_MUTATION", "INTEGRATION_RUNTIME", "AUTHOR_DECISION", "EXPORT_RELEASE", "VERSION_ROLLBACK"],
+    "forbidden_authority_kinds": ["LIFECYCLE_TRANSITION", "PROVIDER", "DOCUMENT_SYSTEM", "PROSE_SYSTEM", "BOOK_EVALUATOR"],
+    "required_guards": [
+      "pre parent is a valid current sealed parent",
+      "post parent is a valid current sealed parent",
+      "existing lifecycle ledger validates exactly against pre parent",
+      "post parent state_version equals pre parent state_version + 1",
+      "book_project identity is unchanged",
+      "book_project lifecycle status is unchanged",
+      "authorized parent-successor receipt exactly binds pre and post parent version/digest",
+      "all lifecycle unit states, dependency edges, processed transition requests and transition receipts are byte-equivalent before/after rebind",
+      "ledger_version advances exactly once",
+      "bound parent version/digest become the exact post-parent identity",
+      "rebind request/receipt lineage is append-only and idempotent",
+      "no publication, author, provider, document or lifecycle-transition authority is synthesized"
+    ]
+  },
+  "implementation_rule": "Implement the repair as a new additive sidecar that delegates current-parent and Lifecycle validation to already-qualified modules. Do not modify or relabel the qualified Lifecycle v1 or lifecycle-current-parent compatibility adapter subjects.",
+  "research_gate": {
+    "external_research_required": false,
+    "reason": "This is an internal exact-state custody/representation composition defect. It introduces no new lifecycle, publishing, author, provenance or document semantics."
+  },
+  "harness_effect": "BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001 remains paused until the rebind repair itself passes hosted and registered exact-SHA A-01 qualification.",
+  "qualification_effect": "FINDING_ONLY__NO_REBIND_AUTHORITY__NO_E2E_PASS"
+}
