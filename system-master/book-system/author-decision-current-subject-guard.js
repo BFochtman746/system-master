@@ -67,8 +67,16 @@ function strictSubjectCurrent(parentState, refs) {
   return true;
 }
 
+function strictSubjectCurrentOrFalse(parentState, refs) {
+  try { return strictSubjectCurrent(parentState, refs); }
+  catch (e) {
+    if (e && e.code === 'SUBJECT_IDENTITY_NOT_CURRENT') return false;
+    throw e;
+  }
+}
+
 function assertStrictSubjectCurrent(parentState, refs) {
-  if (!strictSubjectCurrent(parentState, refs)) fail('AUTHOR_DECISION_SUBJECT_NOT_CURRENT');
+  if (!strictSubjectCurrentOrFalse(parentState, refs)) fail('AUTHOR_DECISION_SUBJECT_NOT_CURRENT');
   return true;
 }
 
@@ -117,23 +125,29 @@ function resolveDecision(args) {
 }
 
 function revalidateAgainstParent(args) {
+  const strictStaleFamilies = [];
+  for (const [familyId, requestId] of Object.entries((args.queueLedger && args.queueLedger.current_request_index) || {})) {
+    const snap = args.queueLedger.decision_request_snapshots && args.queueLedger.decision_request_snapshots[requestId];
+    if (!snap || TERMINAL_STATES.has(snap.queue_state) || snap.queue_state === 'STALE') continue;
+    if (!strictSubjectCurrentOrFalse(args.currentParentState, snap.subject_identity_refs)) strictStaleFamilies.push(familyId);
+  }
+
   const out = base.revalidateAgainstParent(args);
   const next = clone(out.queue_ledger);
   const overlays = overlayFor(next);
   const staleIds = [];
-  for (const requestId of Object.values(next.current_request_index || {})) {
-    const snap = next.decision_request_snapshots[requestId];
+  for (const familyId of strictStaleFamilies) {
+    const requestId = next.current_request_index && next.current_request_index[familyId];
+    const snap = requestId && next.decision_request_snapshots && next.decision_request_snapshots[requestId];
     if (!snap || TERMINAL_STATES.has(snap.queue_state)) continue;
-    if (!strictSubjectCurrent(args.currentParentState, snap.subject_identity_refs)) {
-      overlays[requestId] = {
-        effective_state: 'STALE',
-        staleness_reason: 'ACTIVE_GOVERNED_SUBJECT_CHANGED_OR_REMOVED',
-        observed_parent_state_version: args.currentParentState.state_version,
-        observed_parent_state_digest: args.currentParentState.state_digest,
-        guard_id: GUARD_ID,
-      };
-      staleIds.push(requestId);
-    }
+    overlays[requestId] = {
+      effective_state: 'STALE',
+      staleness_reason: 'ACTIVE_GOVERNED_SUBJECT_CHANGED_OR_REMOVED',
+      observed_parent_state_version: args.currentParentState.state_version,
+      observed_parent_state_digest: args.currentParentState.state_digest,
+      guard_id: GUARD_ID,
+    };
+    staleIds.push(requestId);
   }
   base.validateQueueLedger(next, args.currentParentState);
   return {
