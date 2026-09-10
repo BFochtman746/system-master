@@ -1,6 +1,6 @@
 {
   "binding_id": "BOOK-SYSTEM-PRODUCT-PARENT-BINDING-003",
-  "effective_date": "2026-09-09",
+  "effective_date": "2026-09-10",
   "standing": "CANONICAL__BOOK_TOOL_SYSTEM_UNDER_SYSTEM_MASTER__PROSE_CHILD_PRESERVED",
   "topology_authority": "governance/SYSTEM-TOPOLOGY-002.json on canonical main",
   "owner_path": "SYSTEM_MASTER/BOOK",
@@ -13,7 +13,7 @@
     "system_id": "BOOK",
     "canonical_name": "BOOK SYSTEM",
     "control_ref": "book-system/control-v1",
-    "current_state_record": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-016.json",
+    "current_state_record": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-021.json",
     "owns": [
       "canonical book state",
       "end-to-end book lifecycle",
@@ -35,19 +35,19 @@
     }
   ],
   "preserved_current_parent_state": {
-    "standing": "ACTIVE__AUTHOR_DECISION_QUEUE_IMPLEMENTED__HOSTED_48_OF_48_PASS__CENTRAL_A01_REGISTRATION_PENDING",
-    "current_objective": "BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001-A01-REGISTRATION-AND-QUALIFICATION-001",
-    "state_record": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-016.json",
-    "implementation_rule": "Author Decision Queue research, contract, executable implementation and hosted prequalification are complete. Preserve exact hosted-passing subject 3ee4916682ed60dd7044b6c98fe0940137d96b92 unchanged; do not repeat completed phases or transfer hosted PASS into A-01 authority. Revalidate canonical main A-01 registration and execute the shared gateway only after central admission."
+    "standing": "ACTIVE__CHAT_REBOOTSTRAPPED__E2E_HARNESS_IMPLEMENTED__HOSTED_QUALIFICATION_NEXT",
+    "current_objective": "BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001-HARNESS-001",
+    "state_record": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-021.json",
+    "implementation_rule": "The 48-case E2E composition harness already exists. Do not rebuild it. Execute hosted qualification first; preserve any exact failing subject and repair only a proven composition seam. A hosted PASS must be re-established on the final wrapper-bearing SHA before canonical A-01 admission."
   },
   "shared_core_rule": "BOOK consumes System Master Core platform/data/artifact/model/tool services through governed interfaces. BOOK remains owner of book-product state and lifecycle and does not transfer that ownership to Core or Prose.",
   "second_shift_rule": "Book unattended delegation is owned by governance/second-shift/BOOK-DELEGATIONS.json and must be revalidated against the live book-system/control-v1 head before execution.",
   "control_revalidation": {
-    "reason": "State-015 Author Decision Queue research/forensic work closed, the bounded queue runtime and 48-case qualification matrix were implemented, failed hosted subject 8ddb371c56ab64d4574de06a7745d77db76f27bd was preserved, and qualifier-only repair produced hosted PASS 48/48 on exact subject 3ee4916682ed60dd7044b6c98fe0940137d96b92. Canonical A-01 registry v22 does not yet register BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001, so State-016 routes only the remaining shared-authority dependency.",
-    "previous_selected_state": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-015.json",
-    "current_selected_state": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-016.json",
-    "semantic_change": true,
-    "qualification_effect": "NONE__CONTROL_SELECTION_ONLY__AUTHOR_DECISION_QUEUE_REMAINS_HOSTED_PASS_ONLY_PENDING_A01"
+    "reason": "Forced chat health rebootstrap found that this selector still pointed to State-016 even though the live Book branch had advanced through authoritative Author Decision Queue, Version/Rollback, Lifecycle compatibility/rebind, Export Freeze and State-020, then added the 48-case E2E harness. State-021 repairs only the current-control selector and routes hosted E2E qualification.",
+    "previous_selected_state": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-016.json",
+    "current_selected_state": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-021.json",
+    "semantic_change": false,
+    "qualification_effect": "NONE__CONTROL_HEALTH_REPAIR_ONLY__NO_PASS_TRANSFER"
   },
-  "qualification_rule": "This parent-product binding changes topology/control metadata only. It does not transfer hosted PASS into authoritative A-01 PASS and does not transfer, broaden or invalidate prior exact-SHA qualification, author, private-data, publication or production authority."
+  "qualification_rule": "This parent-product binding selects current Book control only. It does not transfer hosted or A-01 PASS between SHAs and does not transfer, broaden or invalidate author, private-data, publication or production authority."
 }
