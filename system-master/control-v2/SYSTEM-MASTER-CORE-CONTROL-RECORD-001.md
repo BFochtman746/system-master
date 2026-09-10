@@ -103,27 +103,88 @@ Standing: **LOCAL EXACT-SUBJECT PORTABLE PASS + DETERMINISTIC FRESH-EXTRACTION P
 
 No hosted, A-01, target-device, Apple-native/browser or production authority is claimed. `PC-ENDGAME-026` remains deferred.
 
-## Current Core objective
+## SMR020 / OPERATOR-OPS-001 — dependency-current superseding closure — SEALED
 
-`CORE-SMR020-SUPERSEDING-DEPENDENCY-CURRENT-REBUILD-001`
+Evidence: `SMR020-SUPERSEDING-DEPENDENCY-CURRENT-REBUILD-001.md`.
 
-Use exact new SMR019 predecessor:
+Exact predecessor:
 
 `306bbd9c18e041945c6b3dd187b1268816d123d01cff3d17926734cf603a2df4`
 
-Reapply the preserved R024 OPERATOR-OPS correction/migration semantics to create a new dependency-current SMR020 lineage. Historical/local SMR020 `89066e56...` remains evidence only and does not constrain the new subject identity.
+Exact current SMR020 source/test subject:
 
-Required outcome:
+`e22ecedfd3850be6b744ee82f2c02722cd3d203a5785f6f423ac395011cf821f`
 
-1. start from exact `306bbd9c...` runnable SMR019 bytes in durable Library custody;
-2. derive/replay the historical SMR019-to-SMR020 cumulative packet delta without dropping current PLATFORM-005 or CHAT-001A corrections;
-3. apply the preserved R024 OPERATOR-OPS repair/migration semantics while retaining OPERATOR as readiness/catalog/human-intent projection only — no effect-execution authority;
-4. run strict Java 21 and all cumulative executable suites;
-5. run OPERATOR focused/migration/contract/R024 recurrence plus predecessor PLATFORM-005/CHAT gates, persistence, coherence/congruence, exact-subject, manifest, deterministic archive and fresh-extraction qualification;
-6. assign a new exact SMR020 subject only after PASS;
-7. preserve the passing runnable candidate durably before resuming the sealed SMR021 USER-EXPERIENCE readiness packet.
+Lineage:
 
-On SMR020 portable closure, resume `SMR021-ADMISSION-BINDING-TOMORROW-READINESS-001.md` using the new exact SMR020 predecessor and the already-sealed authorization, offline/accessibility and persistence/concurrency research deltas.
+`SUPERSEDING_CUMULATIVE_REBUILD_NO_PASS_TRANSFER`
+
+Historical/local SMR020 `89066e5662554b1810691473e0ed9bf49d8cc2fd4964444043b878461ed75477` and R024 donor `4f900a29b4130d01f489188bd1fd9c36e2f0b53e8247c4634e8bc587dcd3ea9e` remain evidence only. No PASS transferred.
+
+The dependency-current rebuild preserved the predecessor PLATFORM-005 and CHAT-001A corrections, added only the rebuild-native OPERATOR source/test delta, retained OPERATOR as operation-catalog/readiness/control-intent projection with no effect authority, rebound readiness to exact PLATFORM-006 qualification/caller admission, retained PLATFORM-010 effect authority, preserved all 60 historical R024 operation entries as `NON_ACTIVATABLE`, and closed the historical Java/JSON-Schema parity defect.
+
+Fresh exact-byte qualification:
+
+- strict Java 21: PASS — 399 main / 20 test;
+- executable suites: 20/20 PASS;
+- OPERATOR focused campaign: 19/19 PASS;
+- CHAT-001A predecessor regression: 150,079 PASS;
+- PLATFORM-005 predecessor regression: 120,085 PASS;
+- R024 migration: 60/60 PASS, exact migration SHA-256 `4907a3da65dce9d74740e321cac615200f4897ac14e28242f008c13eabc27efb`;
+- OPERATOR contract parity: 2/2 PASS;
+- OPERATOR canonical PostgreSQL objects: 0;
+- R024 recurrence: 13/13 disposition complete — O001-O011 fresh portable PASS, O012/O013 retained at `PC-ENDGAME-027`;
+- predecessor CHAT/P005 contract, SQL, persistence and recurrence gates: PASS;
+- control-registry count consistency: 17/17 PASS;
+- `TARGET-PC-ENDGAME` aggregate completeness: 27/27 represented, no target gate promoted;
+- full portable static verifier family: 53/53 PASS;
+- system coherence: PASS — 25 authorities / 315 capabilities / 122 routes / 35 programming families / 27 target gates / zero errors / zero warnings;
+- engineering congruence: PASS — 35 authoritative concerns / 0 exceptions;
+- exact-subject verification: PASS;
+- release manifest: 1,090/1,090 governed files PASS;
+- release-manifest SHA-256: `5ed1bb5c6bc5ab608a60df44c4028b666106593688a3f34516a2c0c530468b31`;
+- finalized CURRENT-AUTHORITY SHA-256: `2c5e8f4d02c7f4df8af27b7d8214f162ac55fc621fd1a289413258cc76f0b856`.
+
+Deterministic source/test delta from `306bbd9c...` to `e22ecedf...`:
+
+- 4 added source/test files;
+- 0 modified predecessor source/test files;
+- 0 removed predecessor source/test files;
+- patch bytes: 18,491;
+- patch SHA-256: `a4190bfb6854e0c0ca347cd3a5f710709b3580f5df3a756cf7bee3c60fcc779d`.
+
+Final deterministic archive and replay:
+
+- `SMR020_SUPERSEDING_CUMULATIVE_RECONSTITUTED_PORTABLE_001.zip`;
+- archive bytes: 37,849,892;
+- archive entries: 1,092;
+- archive SHA-256: `010ecf0d7bd6e8e1a471dc77aa236215b785a53092f6210ae1d53215a6ebc34f`;
+- independently generated archives A/B: byte-identical;
+- ZIP integrity: PASS;
+- clean extraction reproduced exact `e22ecedf...`, manifest 1,090/1,090, all 53 static verifiers, coherence/congruence, registry/target aggregate gates, strict Java 21 and all 20 executable suites.
+
+Durable Library custody under `/System Assurance/`:
+
+- `SMR020_SUPERSEDING_CUMULATIVE_RECONSTITUTED_PORTABLE_001.zip`;
+- `SMR020_SUPERSEDING_CUMULATIVE_QUALIFICATION_MIN.zip` — SHA-256 `165841268dffc3d29171d77cea4ad3f3d605908e9b3823c2e04999db4c197c77`;
+- `SMR020-SUPERSEDING-CUMULATIVE-SOURCE-TEST-RECONSTITUTION-001.patch`;
+- `SMR020_SUPERSEDING_CUMULATIVE_PORTABLE_CLOSURE_001.json` — SHA-256 `2ad44de9a0d1329561592e6dd46226fe1618139212af709839790e45038b543a`;
+- `SMR020_STATIC_VERIFIER_FAMILY_RECEIPT.txt`;
+- `SMR020_FRESH_EXTRACTION_REPLAY_RECEIPT.txt`.
+
+Standing: **LOCAL EXACT-SUBJECT PORTABLE PASS + DETERMINISTIC FRESH-EXTRACTION PASS + DURABLE LIBRARY CUSTODY**.
+
+No hosted, A-01, live Windows/operator-console, live approval-store, target-device or production authority is claimed. `PC-ENDGAME-027` remains deferred.
+
+## Current Core objective
+
+`SMR021-ADMISSION-BINDING-TOMORROW-READINESS-001`
+
+Use exact new SMR020 predecessor:
+
+`e22ecedfd3850be6b744ee82f2c02722cd3d203a5785f6f423ac395011cf821f`
+
+Resume the already-sealed USER-EXPERIENCE-001 readiness packet. Reconcile its authorization, offline/accessibility, persistence/concurrency and other sealed research deltas against the new exact predecessor before executing any dependency-valid implementation. No historical or parallel PASS transfers to the new lineage.
 
 ## GitHub-native / hosted boundary
 
@@ -131,7 +192,7 @@ Parallel boundary remains:
 
 `CORE-GITHUB-NATIVE-BULK-SOURCE-TRANSPORT-001`
 
-The superseding runnable lineage is durably preserved in Library custody but is not yet an ordinary GitHub-native runnable-source commit. This boundary must close before hosted/A-01/promotion evidence requiring exact repository checkout. It does not block dependency-valid local SMR020 reconstitution under the current control law.
+The superseding runnable lineage is durably preserved in Library custody but is not yet an ordinary GitHub-native runnable-source commit. This boundary must close before hosted/A-01/promotion evidence requiring exact repository checkout. It does not block dependency-valid local continuation under the current control law.
 
 A-01 normal operating mode is unchanged. Exact tested Git commit SHA remains the authoritative A-01 subject; no local portable result transfers to another SHA.
 
@@ -139,8 +200,7 @@ A-01 normal operating mode is unchanged. Exact tested Git commit SHA remains the
 
 - `CORE-GITHUB-NATIVE-BULK-SOURCE-TRANSPORT-001` — GitHub-native exact runnable-source transport and later hosted exact-SHA qualification.
 - `RECON-001C` — credentialed sealed-history Git import remains Assurance/Reconciliation work.
-- `PC-ENDGAME-025`, `PC-ENDGAME-026` and later target-only obligations remain empirical/deferred.
-- historical SMR020 O012/O013 remain target/A-01 regression obligations until superseding current-lineage disposition.
+- `PC-ENDGAME-025`, `PC-ENDGAME-026`, `PC-ENDGAME-027` and later target-only obligations remain empirical/deferred.
 - R025 physical device/accessibility/usability evidence remains empirical and unclaimed.
 
 ## Boundary rules
@@ -153,6 +213,6 @@ A-01 normal operating mode is unchanged. Exact tested Git commit SHA remains the
 
 ## Exact next step
 
-`CORE-SMR020-SUPERSEDING-DEPENDENCY-CURRENT-REBUILD-001`
+`SMR021-ADMISSION-BINDING-TOMORROW-READINESS-001`
 
-Use exact SMR019 `306bbd9c...` as predecessor, replay the R024 OPERATOR-OPS semantics with no PASS transfer, qualify a new exact SMR020 subject, preserve it durably, then resume the sealed SMR021 readiness packet.
+Use exact SMR020 `e22ecedfd3850be6b744ee82f2c02722cd3d203a5785f6f423ac395011cf821f` as predecessor, reconcile the sealed USER-EXPERIENCE-001 readiness packet against that exact lineage, execute every dependency-valid non-A-01 step available, and preserve target-only evidence as deferred.
