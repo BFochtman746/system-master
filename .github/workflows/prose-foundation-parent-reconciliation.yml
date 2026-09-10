@@ -1,0 +1,35 @@
+name: Prose Foundation Parent Reconciliation
+
+on:
+  push:
+    branches:
+      - prose/foundation-parent-reconciliation-v3-20260910
+    paths:
+      - governance/census/SYSTEM-MASTER-FOUNDATION-CLOSURE-CENSUS-001.json
+      - governance/census/SYSTEM-MASTER-FOUNDATION-CLOSURE-CENSUS-001-PROSE-OWNER-ADMISSION-001.json
+      - governance/census/validate_prose_foundation_parent_reconciliation.py
+      - .github/workflows/prose-foundation-parent-reconciliation.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout exact reconciliation subject
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate parent and admission JSON
+        run: |
+          python -m json.tool governance/census/SYSTEM-MASTER-FOUNDATION-CLOSURE-CENSUS-001.json > /dev/null
+          python -m json.tool governance/census/SYSTEM-MASTER-FOUNDATION-CLOSURE-CENSUS-001-PROSE-OWNER-ADMISSION-001.json > /dev/null
+      - name: Verify exact Prose source evidence and parent nonclaim
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python governance/census/validate_prose_foundation_parent_reconciliation.py
