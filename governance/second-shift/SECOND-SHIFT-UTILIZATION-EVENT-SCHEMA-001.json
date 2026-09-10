@@ -3,8 +3,9 @@
   "purpose": "Append-only evidence schema for reconstructing Second Shift lane state and useful execution without inferring utilization from commits, runner uptime or workflow duration.",
   "shift_timezone": "America/New_York",
   "shift_window": "00:00-07:00",
-  "storage_rule": "Use one lane-owned ledger per shift date to avoid cross-lane append conflicts: governance/second-shift/execution-events/YYYY-MM-DD/{CORE|LEARNING|BOOK|PROSE}.json",
-  "allowed_lanes": ["CORE", "LEARNING", "BOOK", "PROSE"],
+  "storage_rule": "Use one lane-owned ledger per shift date to avoid cross-lane append conflicts: governance/second-shift/execution-events/YYYY-MM-DD/{SYSTEM_MASTER|CORE|LEARNING|BOOK|PROSE}.json. The permitted lane set must remain synchronized with SECOND-SHIFT-REGISTRY-001.json::owner_files.",
+  "allowed_lane_source": "governance/second-shift/SECOND-SHIFT-REGISTRY-001.json::owner_files",
+  "allowed_lanes": ["SYSTEM_MASTER", "CORE", "LEARNING", "BOOK", "PROSE"],
   "allowed_event_types": [
     "SHIFT_OPEN",
     "READY",
@@ -42,13 +43,13 @@
     "CLAIMED opens exactly one mutation-capable lease for the lane; a second live claim is invalid.",
     "RUNNING and PROGRESS require a live preceding CLAIMED lease for the same delegation, control head and idempotency key.",
     "HEARTBEAT must refer to the live lease and preserve the same idempotency key while advancing a durable checkpoint pointer.",
-    "COMPLETED, BLOCKED or STALE releases the live lease for that delegation; successor work requires a new claim after live-owner revalidation.",
+    "COMPLETED, BLOCKED or STALE releases the live lease for that delegation; successor work requires a new claim after current-owner revalidation.",
     "SHIFT_CLOSE is invalid while a mutation-capable lease remains unresolved."
   ],
   "event_order_rules": [
     "event_id values are unique within a lane ledger.",
     "occurred_at values are monotonic nondecreasing within the append-only ledger.",
-    "Every current-state event uses the exact live owner control_ref and control_head observed for that event.",
+    "Every current-state event uses the exact current owner control_ref and control_head/binding observed for that event.",
     "IDLE_VALID requires a preceding same-head ALL_RUNGS_EXHAUSTED event containing exactly eight rung dispositions and independent_work_remaining=false."
   ],
   "retry_rules": [
@@ -62,8 +63,9 @@
     "RUNNING means an owner-valid worker has a live claim and is performing or awaiting a bounded operation that is part of the current objective; runner uptime alone is not RUNNING.",
     "READY means executable dependency-valid work exists but is not presently claimed.",
     "BLOCKED applies only to the objective/rung actually blocked; it cannot be promoted to whole-lane idle while another rung is executable.",
-    "IDLE_VALID requires a preceding ALL_RUNGS_EXHAUSTED event for the same live owner head and shift.",
-    "If telemetry is missing, stale or contradictory, the audit reports UNKNOWN rather than inferring productive time."
+    "IDLE_VALID requires a preceding ALL_RUNGS_EXHAUSTED event for the same current owner control binding and shift.",
+    "If telemetry is missing, stale or contradictory, the audit reports UNKNOWN rather than inferring productive time.",
+    "SYSTEM_MASTER ledger events cover product-root-owned non-system headless capability work; tool names are objective metadata, not new lane identities."
   ],
   "authority_boundary": "This ledger records execution state only. It never grants PASS, promotion, canonical-writer, A-01, human, author, private, blind, native, publication or production authority."
 }
