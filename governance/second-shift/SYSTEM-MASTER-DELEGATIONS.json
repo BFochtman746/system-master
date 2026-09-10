@@ -2,53 +2,20 @@
   "owner_system_id": "SYSTEM_MASTER",
   "owner_path": "SYSTEM_MASTER",
   "control_ref": "governance/CURRENT-AUTHORITY.json",
-  "control_binding": {
-    "type": "FILE_BLOB",
-    "path": "governance/CURRENT-AUTHORITY.json",
-    "reason": "The product root is selected by CURRENT-AUTHORITY on main. Binding to the exact authority-file blob avoids self-invalidating the delegation merely because the delegation file itself is committed, while still invalidating it whenever product-root authority or the central objective changes."
-  },
-  "last_known_control_head": "87cffef49a58731558c8297c93b4fd05ac71fc28",
-  "delegation_epoch": 1,
-  "selection_policy": {
-    "mode": "CURRENT_AUTHORITY_CENTRAL_NEXT_OBJECTIVE",
-    "rule": "When CURRENT-AUTHORITY selects a READY or ACTIVE SYSTEM_MASTER-owned central_next_objective, the MASTER_ROOT working session must reconcile this file before ending. Root-owned non-system headless portfolios share this lane; do not create one Second Shift lane per tool.",
-    "future_tool_rule": "A new SYSTEM_MASTER-owned headless tool or capability portfolio inherits this lane automatically. A genuinely new first-class owner system requires an explicit topology/ownership decision and registry entry."
-  },
-  "active_delegations": [
+  "standing": "HISTORICAL_ONLY__TEMPORARY_ROOT_LANE_RETIRED",
+  "active_delegations": [],
+  "retired_delegations": [
     {
       "delegation_id": "SECOND-SHIFT-SYSTEM-MASTER-DOCUMENT-R4-GITHUB-NATIVE-ADMISSION-001",
-      "owner_path": "SYSTEM_MASTER",
-      "objective_id": "SYSTEM-MASTER-DOCUMENT-R4-GITHUB-NATIVE-SOURCE-IMPORT-AND-EXACT-SUBJECT-QUALIFICATION-002",
-      "obligation_id": "SYSTEM-MASTER-DOCUMENT-R4-GITHUB-NATIVE-SOURCE-IMPORT-AND-EXACT-SUBJECT-QUALIFICATION-002",
-      "state": "READY",
-      "valid_for_control_ref": "governance/CURRENT-AUTHORITY.json",
-      "valid_for_control_head": "87cffef49a58731558c8297c93b4fd05ac71fc28",
-      "created_at": "2026-09-10T16:43:07-04:00",
-      "last_revalidated_at": "2026-09-10T16:43:07-04:00",
-      "completion_delta": "Advance the current product-root Document admission from recovered-but-not-GitHub-native CR001-R4 source custody to an exact GitHub-native immutable source subject: import the authoritative 225-file CR001-R4 source tree, verify exact tree identity/custody, bind the resulting exact Git SHA, run all dependency-valid portable/hosted qualification available without A-01/native evidence, preserve exact receipts, and prepare truthful R5 admission adjudication without transferring historical PASS to the new subject.",
-      "stop_condition": "The 225-file CR001-R4 source is durably present in GitHub-native custody with identity verification and an exact subject SHA, all currently executable portable/hosted qualification is recorded against that exact subject, and the next admission disposition is durably bound; or a concrete authority/dependency blocker is recorded and the highest-value independent SYSTEM_MASTER-owned successor is selected. Do not infer A-01/native/production PASS.",
-      "allowed_work": [
-        "re-read CURRENT-AUTHORITY, current Document admission, source-custody manifest and authority-selected obligation registry",
-        "verify the authoritative CR001-R4 225-file source set and import it into GitHub-native immutable custody",
-        "verify exact source/tree identity and bind the resulting Git subject SHA",
-        "run deterministic portable and hosted qualification that is valid without A-01 or native Apple evidence",
-        "record exact receipts/evidence and prepare the truthful R5 admission adjudication",
-        "after completion or material block, re-read product-root authority and bind the next dependency-valid SYSTEM_MASTER-owned headless-tool successor while shift time remains"
-      ],
-      "forbidden_authority": [
-        "do not treat historical CR001-R4 PASS as PASS for a new Git SHA",
-        "do not fabricate or infer A-01, native Apple, publication, production or promotion authority",
-        "do not create a DOCUMENT first-class system or a per-tool owner lane; Documents remains a SYSTEM_MASTER-owned headless capability portfolio",
-        "do not mutate BOOK or PROSE canonical state while performing product-root Document work",
-        "do not bypass source-custody, exact-subject, owner or evidence boundaries"
-      ],
-      "on_pass": "Preserve exact Git source identity and qualification evidence, update current Document admission/obligation/completion authority through the normal product-root writer path, retire this delegation, then re-read CURRENT-AUTHORITY and bind the next SYSTEM_MASTER-owned central/root objective if unattended-safe work remains.",
-      "on_failure": "Preserve the exact source/subject and failure classification. Repair only deterministic SYSTEM_MASTER-owned source/import/qualification defects. Route A-01/native/external/human authority dependencies truthfully and select independent safe root-owned work when available.",
-      "continuation_rule": "Completion is not shift termination. Reconcile the product-root central objective and continue with the next dependency-valid unattended-safe SYSTEM_MASTER-owned headless capability task while capacity remains."
+      "state": "SUPERSEDED",
+      "retirement_classification": "DOCUMENTS_RECLASSIFIED_FIRST_CLASS_PEER_SYSTEM",
+      "replacement_owner_path": "SYSTEM_MASTER/DOCUMENTS",
+      "replacement_delegation_id": "SECOND-SHIFT-DOCUMENTS-R4-ADMISSION-001",
+      "replacement_file": "governance/second-shift/DOCUMENTS-DELEGATIONS.json",
+      "history_preserved": true
     }
   ],
-  "retired_delegations": [],
-  "owner_revalidation_required": false,
-  "reason": "Documents is a non-system headless capability portfolio owned by SYSTEM_MASTER. The current central Document R4 GitHub-native admission objective is READY in the authority-selected current obligation registry, so it is bound to the reusable product-root Second Shift lane rather than creating a DOCUMENT peer system.",
-  "empty_is_valid": false
+  "reason": "The temporary SYSTEM_MASTER root worker lane was introduced only because Documents had been incorrectly modeled as a product-root non-system portfolio. Documents is now a first-class peer system with its own owner lane, so product-root governance returns to controller/orchestration status rather than a peer execution lane.",
+  "empty_is_valid": true,
+  "historical_only": true
 }
