@@ -1,0 +1,38 @@
+{
+  "ledger_id": "BOOK-PROSE-INTEGRATION-LEDGER-001",
+  "effective_date": "2026-09-10",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "append_policy": "Append packet dispositions in dependency-valid order; never delete historical entries. Superseded packets remain lineage.",
+  "entries": [
+    {
+      "sequence": 0,
+      "packet_id": "BOOK-PROSE-INTEGRATION-PHASE-0-CURRENT-STATE-CENSUS-001",
+      "state": "COMPLETE_WITH_EVIDENCE",
+      "evidence": "qualification/book-system/book-prose-integration/BOOK-PROSE-INTEGRATION-PRE-INTEGRATION-CHECKPOINT-001.json",
+      "result": "Preservation safe; live Book delta sealed; stale selectors bounded; no active Book repair."
+    },
+    {
+      "sequence": 1,
+      "packet_id": "BOOK-PROSE-INTEGRATION-PHASE-1-INPUT-CENSUS-001",
+      "state": "COMPLETE_WITH_EVIDENCE",
+      "evidence": "qualification/book-system/book-prose-integration/BOOK-PROSE-INTEGRATION-PHASE-1-CLOSURE-001.json",
+      "result": "Live Prose verified beneath Book; overlap reconciled; fresh blind limitation preserved; no integration-stopping authority conflict."
+    },
+    {
+      "sequence": 2,
+      "packet_id": "BOOK-WORKFLOW-ORCHESTRATOR-AUTHORITY-CONTRACT-001",
+      "state": "ACTIVE",
+      "evidence": null,
+      "result": null
+    }
+  ],
+  "current_packet": "BOOK-WORKFLOW-ORCHESTRATOR-AUTHORITY-CONTRACT-001",
+  "global_fences": [
+    "SYSTEM_MASTER/BOOK remains canonical manuscript owner.",
+    "SYSTEM_MASTER/BOOK/PROSE remains specialist literary intelligence with zero canonical manuscript-write authority.",
+    "Book admission remains the only canonical manuscript mutation path.",
+    "Author remains final creative and semantic authority.",
+    "Fresh blind Prose scoring remains external/fresh-context-only until genuinely executed.",
+    "No A-01, native, private, publication or production authority is inferred from hosted integration fixtures."
+  ]
+}
