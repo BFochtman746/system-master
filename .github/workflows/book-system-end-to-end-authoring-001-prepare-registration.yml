@@ -1,0 +1,65 @@
+name: Prepare A-01 registration for Book end-to-end authoring
+
+on:
+  push:
+    branches:
+      - book-system/request-end-to-end-authoring-001-registration-prep
+    paths:
+      - ".github/workflows/book-system-end-to-end-authoring-001-prepare-registration.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout canonical main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Add exactly one consolidated A-01 registry entry on isolated registration branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git checkout -b a01/register-book-end-to-end-authoring-001
+          node <<'NODE'
+          const fs = require('fs');
+          const p = 'qualification/a01/registry.json';
+          const doc = JSON.parse(fs.readFileSync(p, 'utf8'));
+          const id = 'BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001';
+          if (doc.qualifications[id]) throw new Error('QUALIFICATION_ALREADY_REGISTERED');
+          const before = Number(doc.registry_version);
+          if (!Number.isInteger(before)) throw new Error('INVALID_REGISTRY_VERSION');
+          doc.registry_version = before + 1;
+          const entry = {
+            workstream_id: 'BOOK-SYSTEM',
+            gate_class: 'consolidated',
+            source: 'subject',
+            executable: 'node',
+            args: ['.github/scripts/a01-book-system-end-to-end-authoring-001.js'],
+            evidence_artifact: 'book-system-end-to-end-authoring-001',
+            overnight_eligible: false,
+            description: 'Qualify the exact Book System end-to-end authoring composition subject through the unchanged 48-case synthetic matrix: exact predecessor SHA binding; parent-owned provider admission; persistent Lifecycle ledger rebinding across non-lifecycle successors; Version/Rollback receipt custody; strict current-subject author decisions; strict Export Freeze parent admission; stale artifact/provenance/rights/privacy rejection; export-freeze/publication separation; synthetic-only author/publication fixtures; no Book document engine; no provider self-admission; and zero qualification transfer. PASS is exact-SHA consolidated evidence only and grants no real author, publication, promotion, or production authority.'
+          };
+          const out = {};
+          let inserted = false;
+          for (const [k, v] of Object.entries(doc.qualifications)) {
+            out[k] = v;
+            if (k === 'BOOK-SYSTEM-E2E-AUTHORITY-GUARDS-001') {
+              out[id] = entry;
+              inserted = true;
+            }
+          }
+          if (!inserted) out[id] = entry;
+          doc.qualifications = out;
+          fs.writeFileSync(p, JSON.stringify(doc, null, 2) + '\n');
+          NODE
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add qualification/a01/registry.json
+          test "$(git diff --cached --name-only)" = "qualification/a01/registry.json"
+          git commit -m "a01: register Book end-to-end authoring qualification"
+          git push origin HEAD:a01/register-book-end-to-end-authoring-001
