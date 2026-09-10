@@ -1,6 +1,6 @@
 # MORNING-CHAT-READINESS-GATE-001
 
-Status: PROPOSED_FOR_ADMISSION
+Status: ACTIVE_CANONICAL
 Target cadence: after the 07:15 morning canonical reconciliation, nominally 07:30 America/New_York
 Purpose: independently verify that the new-day chat bootstrap is current, coherent and executable before the user starts new chats.
 
