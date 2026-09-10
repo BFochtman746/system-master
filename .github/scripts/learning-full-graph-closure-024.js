@@ -88,3 +88,4 @@ const ed=path.join(process.env.RUNNER_TEMP||root,'learning-full-graph-closure-ev
 fs.writeFileSync(path.join(ed,'full-graph-closure-summary.json'),JSON.stringify(summary,null,2)+'\n');
 fs.writeFileSync(path.join(ed,'cumulative-topology.json'),JSON.stringify(merged,null,2)+'\n');
 console.log(JSON.stringify(summary));
+console.log(`::notice title=Learning full graph closure::requirements=${summary.frozen_requirement_nodes}; subskills=${summary.provisional_subskills}; decompositions=${summary.decomposition_edges}; admitted_prerequisites=${summary.admitted_prerequisite_edges}; unresolved=${summary.unresolved_dependency_candidates}; assessments_unbound=${summary.assessment_targets_unbound}; canonical=${summary.canonical_admission_ready}; topology_sha256=${summary.cumulative_topology_sha256}`);
