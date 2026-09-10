@@ -1,0 +1,187 @@
+{
+  "artifact_id": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001B-ASSESSMENT-TARGET-BATCH-01-CANDIDATE-026A",
+  "effective_date": "2026-09-10",
+  "owner_path": "SYSTEM_MASTER/LEARNING",
+  "base_control_head": "9598c0b6b24a33a306608535110c38f26355b9bf",
+  "contract": "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001B-ASSESSMENT-TARGET-CONTRACT-025A.json",
+  "batch_index": 1,
+  "domain": "I",
+  "target_count": 8,
+  "targets": [
+    {
+      "assessment_target_id": "ASSESS::CSSGB-2022::ASQ-CSSGB-2022-I.A.1::value-mechanisms::TARGET::bounded-value-explanation",
+      "subskill_id": "CSSGB-2022::ASQ-CSSGB-2022-I.A.1::SUBSKILL::value-mechanisms",
+      "parent_requirement_id": "ASQ-CSSGB-2022-I.A.1",
+      "source_locator": "ASQ CSSGB BoK 2022 p.3 / I.A.1",
+      "preserved_cognitive_level": "UNDERSTAND",
+      "capability_statement": "Given a bounded organizational scenario, distinguish plausible operational, customer, and financial value mechanisms of Six Sigma and explain the causal link without claiming observed business impact.",
+      "target_type": "SCENARIO_CONSTRAINED_RESPONSE",
+      "evidence_input_class": "BOUNDED_SCENARIO",
+      "response_action_class": "EXPLAIN",
+      "prompt_contract": {
+        "supplied_evidence": "A fictional bounded organization scenario with stated process symptoms, customer effects, and financial constraints.",
+        "required_action": "Identify supported value mechanisms and explain the evidence-bounded link between the Six Sigma intervention concept and those mechanisms.",
+        "must_not_assume": ["observed business impact", "causal effectiveness not present in the scenario", "unstated financial results"]
+      },
+      "scoring_assertions": [
+        {"assertion_id":"I.A.1-01","observable_property":"Response identifies at least two value mechanisms supported by supplied scenario facts.","pass_condition":"Each named mechanism is explicitly tied to at least one stated scenario fact."},
+        {"assertion_id":"I.A.1-02","observable_property":"Response distinguishes plausible value from observed realized impact.","pass_condition":"No unstated realized business result is asserted as fact."}
+      ],
+      "insufficient_evidence_behavior": {"trigger":"Evidence needed to support a claimed value linkage is absent.","required_behavior":"Qualify the linkage as unsupported or identify the missing evidence rather than guess."},
+      "provenance_refs": ["SOURCE_NODE_INDEX:ASQ-CSSGB-2022-I.A.1","SUBSKILL:CSSGB-2022::ASQ-CSSGB-2022-I.A.1::SUBSKILL::value-mechanisms"],
+      "validation_status": "PROVISIONAL_BOUND",
+      "evidence_boundaries": {"psychometric_validity":"UNOBSERVED","learner_mastery":"UNOBSERVED","retention":"UNOBSERVED","transfer":"UNOBSERVED","workplace_effectiveness":"UNOBSERVED","sme_approval":"UNOBSERVED","certification_equivalence":"UNOBSERVED"}
+    },
+    {
+      "assessment_target_id": "ASSESS::CSSGB-2022::ASQ-CSSGB-2022-I.A.2::goal-project-alignment::TARGET::bounded-alignment-explanation",
+      "subskill_id": "CSSGB-2022::ASQ-CSSGB-2022-I.A.2::SUBSKILL::goal-project-alignment",
+      "parent_requirement_id": "ASQ-CSSGB-2022-I.A.2",
+      "source_locator": "ASQ CSSGB BoK 2022 p.3 / I.A.2",
+      "preserved_cognitive_level": "UNDERSTAND",
+      "capability_statement": "Given an organizational goal and a candidate Six Sigma project outcome, determine whether the project supports the goal and state the evidence or metric linkage needed to justify the alignment.",
+      "target_type": "SCENARIO_CONSTRAINED_RESPONSE",
+      "evidence_input_class": "BOUNDED_SCENARIO",
+      "response_action_class": "EXPLAIN",
+      "prompt_contract": {"supplied_evidence":"A stated organizational goal, candidate project outcome, and a bounded set of available metrics.","required_action":"Explain whether and how the project outcome supports the goal and identify the metric linkage required to justify the conclusion.","must_not_assume":["unstated strategic priorities","unobserved project success","metrics not supplied"]},
+      "scoring_assertions": [
+        {"assertion_id":"I.A.2-01","observable_property":"Response states an alignment conclusion and links it to the stated organizational goal.","pass_condition":"The conclusion cites the supplied goal and project outcome rather than generic Six Sigma value."},
+        {"assertion_id":"I.A.2-02","observable_property":"Response identifies the metric or evidence needed to justify the alignment.","pass_condition":"At least one relevant supplied metric is connected to the goal-outcome relationship or missing evidence is explicitly identified."}
+      ],
+      "insufficient_evidence_behavior": {"trigger":"The supplied goal, outcome, or metric evidence is insufficient to justify alignment.","required_behavior":"State that alignment is not established and identify the missing linkage evidence."},
+      "provenance_refs": ["SOURCE_NODE_INDEX:ASQ-CSSGB-2022-I.A.2","SUBSKILL:CSSGB-2022::ASQ-CSSGB-2022-I.A.2::SUBSKILL::goal-project-alignment"],
+      "validation_status":"PROVISIONAL_BOUND",
+      "evidence_boundaries":{"psychometric_validity":"UNOBSERVED","learner_mastery":"UNOBSERVED","retention":"UNOBSERVED","transfer":"UNOBSERVED","workplace_effectiveness":"UNOBSERVED","sme_approval":"UNOBSERVED","certification_equivalence":"UNOBSERVED"}
+    },
+    {
+      "assessment_target_id": "ASSESS::CSSGB-2022::ASQ-CSSGB-2022-I.A.3::driver-metric-linkage::TARGET::bounded-driver-metric-explanation",
+      "subskill_id": "CSSGB-2022::ASQ-CSSGB-2022-I.A.3::SUBSKILL::driver-metric-linkage",
+      "parent_requirement_id": "ASQ-CSSGB-2022-I.A.3",
+      "source_locator": "ASQ CSSGB BoK 2022 p.3 / I.A.3",
+      "preserved_cognitive_level": "UNDERSTAND",
+      "capability_statement": "Given an organizational driver and several candidate measures, identify which measure materially observes progress toward the driver and explain the relationship.",
+      "target_type":"CLASSIFICATION_TASK",
+      "evidence_input_class":"BOUNDED_SCENARIO",
+      "response_action_class":"EXPLAIN",
+      "prompt_contract":{"supplied_evidence":"One organizational driver and a bounded list of candidate measures with definitions.","required_action":"Select the measure that materially observes progress toward the driver and explain the relationship.","must_not_assume":["measurement properties not supplied","causal impact of the metric itself","unstated business drivers"]},
+      "scoring_assertions":[
+        {"assertion_id":"I.A.3-01","observable_property":"Response selects a candidate measure whose defined observation corresponds to the stated driver.","pass_condition":"Selected measure is traceably relevant to the driver using the supplied definitions."},
+        {"assertion_id":"I.A.3-02","observable_property":"Response explains why competing measures are less direct or insufficient when that distinction is supported.","pass_condition":"Explanation uses supplied measure definitions and does not invent measurement evidence."}
+      ],
+      "insufficient_evidence_behavior":{"trigger":"No supplied measure materially observes the stated driver.","required_behavior":"Reject the available measures as insufficient and state what measure evidence is missing."},
+      "provenance_refs":["SOURCE_NODE_INDEX:ASQ-CSSGB-2022-I.A.3","SUBSKILL:CSSGB-2022::ASQ-CSSGB-2022-I.A.3::SUBSKILL::driver-metric-linkage"],
+      "validation_status":"PROVISIONAL_BOUND",
+      "evidence_boundaries":{"psychometric_validity":"UNOBSERVED","learner_mastery":"UNOBSERVED","retention":"UNOBSERVED","transfer":"UNOBSERVED","workplace_effectiveness":"UNOBSERVED","sme_approval":"UNOBSERVED","certification_equivalence":"UNOBSERVED"}
+    },
+    {
+      "assessment_target_id":"ASSESS::CSSGB-2022::ASQ-CSSGB-2022-I.B.1::lean-value-flow-waste::TARGET::bounded-lean-application",
+      "subskill_id":"CSSGB-2022::ASQ-CSSGB-2022-I.B.1::SUBSKILL::lean-value-flow-waste",
+      "parent_requirement_id":"ASQ-CSSGB-2022-I.B.1",
+      "source_locator":"ASQ CSSGB BoK 2022 p.3 / I.B.1",
+      "preserved_cognitive_level":"APPLY",
+      "capability_statement":"Given a bounded process description, identify value-creating versus non-value-creating activity and explain how flow or waste concepts affect improvement reasoning.",
+      "target_type":"CLASSIFICATION_TASK",
+      "evidence_input_class":"BOUNDED_PROCESS_DESCRIPTION",
+      "response_action_class":"APPLY",
+      "prompt_contract":{"supplied_evidence":"A fictional process with explicit activities, waits, handoffs, outputs, and stated customer need.","required_action":"Classify evidence-supported activities or conditions using Lean value, flow, and waste concepts and identify one bounded improvement implication.","must_not_assume":["cycle times not supplied","customer value not stated","observed post-change improvement"]},
+      "scoring_assertions":[
+        {"assertion_id":"I.B.1-01","observable_property":"Response classifies activities using the stated customer need and supplied process facts.","pass_condition":"Each classification is tied to an explicit activity or condition in the supplied process."},
+        {"assertion_id":"I.B.1-02","observable_property":"Response identifies an improvement implication without claiming it has already improved performance.","pass_condition":"Improvement implication addresses an evidence-supported flow or waste condition and remains prospective."}
+      ],
+      "insufficient_evidence_behavior":{"trigger":"Customer need or process facts required for a value/waste classification are absent.","required_behavior":"Mark the affected classification unresolved and identify the missing process or customer evidence."},
+      "provenance_refs":["SOURCE_NODE_INDEX:ASQ-CSSGB-2022-I.B.1","SUBSKILL:CSSGB-2022::ASQ-CSSGB-2022-I.B.1::SUBSKILL::lean-value-flow-waste"],
+      "validation_status":"PROVISIONAL_BOUND",
+      "evidence_boundaries":{"psychometric_validity":"UNOBSERVED","learner_mastery":"UNOBSERVED","retention":"UNOBSERVED","transfer":"UNOBSERVED","workplace_effectiveness":"UNOBSERVED","sme_approval":"UNOBSERVED","certification_equivalence":"UNOBSERVED"}
+    },
+    {
+      "assessment_target_id":"ASSESS::CSSGB-2022::ASQ-CSSGB-2022-I.B.2::vsm-interpretation::TARGET::bounded-map-explanation",
+      "subskill_id":"CSSGB-2022::ASQ-CSSGB-2022-I.B.2::SUBSKILL::vsm-interpretation",
+      "parent_requirement_id":"ASQ-CSSGB-2022-I.B.2",
+      "source_locator":"ASQ CSSGB BoK 2022 p.3 / I.B.2",
+      "preserved_cognitive_level":"UNDERSTAND",
+      "capability_statement":"Given a simplified value-stream map, identify the process-flow information it conveys and explain at least one process condition the map makes visible without inferring unavailable performance evidence.",
+      "target_type":"ARTIFACT_ANALYSIS",
+      "evidence_input_class":"BOUNDED_VISUAL_OR_GRAPH",
+      "response_action_class":"EXPLAIN",
+      "prompt_contract":{"supplied_evidence":"A simplified synthetic value-stream map with explicitly labeled process steps, information flow, inventory or waits, and selected stated metrics.","required_action":"Explain the process-flow information visible in the map and identify at least one supported process condition.","must_not_assume":["unshown process data","unstated causes","post-improvement performance"]},
+      "scoring_assertions":[
+        {"assertion_id":"I.B.2-01","observable_property":"Response correctly references visible map elements and their flow relationship.","pass_condition":"Explanation names at least two map elements connected according to the supplied map."},
+        {"assertion_id":"I.B.2-02","observable_property":"Response identifies a process condition supported by the map and does not infer unshown performance evidence.","pass_condition":"Condition is traceable to a visible map feature and unsupported causal claims are absent."}
+      ],
+      "insufficient_evidence_behavior":{"trigger":"A requested conclusion depends on data or relationships not shown on the map.","required_behavior":"State that the map does not establish the conclusion and identify the missing evidence."},
+      "provenance_refs":["SOURCE_NODE_INDEX:ASQ-CSSGB-2022-I.B.2","SUBSKILL:CSSGB-2022::ASQ-CSSGB-2022-I.B.2::SUBSKILL::vsm-interpretation"],
+      "validation_status":"PROVISIONAL_BOUND",
+      "evidence_boundaries":{"psychometric_validity":"UNOBSERVED","learner_mastery":"UNOBSERVED","retention":"UNOBSERVED","transfer":"UNOBSERVED","workplace_effectiveness":"UNOBSERVED","sme_approval":"UNOBSERVED","certification_equivalence":"UNOBSERVED"}
+    },
+    {
+      "assessment_target_id":"ASSESS::CSSGB-2022::ASQ-CSSGB-2022-I.C.1::dfss-roadmap-recognition::TARGET::bounded-roadmap-explanation",
+      "subskill_id":"CSSGB-2022::ASQ-CSSGB-2022-I.C.1::SUBSKILL::dfss-roadmap-recognition",
+      "parent_requirement_id":"ASQ-CSSGB-2022-I.C.1",
+      "source_locator":"ASQ CSSGB BoK 2022 p.4 / I.C.1",
+      "preserved_cognitive_level":"UNDERSTAND",
+      "capability_statement":"Given a design-oriented improvement scenario, explain what a DfSS road map contributes to sequencing and decision structure without asserting a specific proprietary road map not present in the frozen source evidence.",
+      "target_type":"SCENARIO_CONSTRAINED_RESPONSE",
+      "evidence_input_class":"BOUNDED_SCENARIO",
+      "response_action_class":"EXPLAIN",
+      "prompt_contract":{"supplied_evidence":"A fictional design-oriented improvement scenario with explicit phase decisions and dependencies but no named proprietary DfSS method.","required_action":"Explain the sequencing and decision-structure role a DfSS road map would provide in the scenario.","must_not_assume":["a proprietary DfSS sequence","source details beyond the frozen requirement","observed design success"]},
+      "scoring_assertions":[
+        {"assertion_id":"I.C.1-01","observable_property":"Response explains a sequencing role for a DfSS road map tied to the supplied design scenario.","pass_condition":"Explanation connects stated scenario decisions to an ordered decision structure without naming an unsupported proprietary road map."},
+        {"assertion_id":"I.C.1-02","observable_property":"Response distinguishes structural guidance from evidence that the design outcome succeeded.","pass_condition":"No unobserved design-performance result is asserted."}
+      ],
+      "insufficient_evidence_behavior":{"trigger":"The question requires a specific proprietary DfSS road-map step not supplied or frozen in the source evidence.","required_behavior":"Decline to infer the proprietary step and state the additional source authority required."},
+      "provenance_refs":["SOURCE_NODE_INDEX:ASQ-CSSGB-2022-I.C.1","SUBSKILL:CSSGB-2022::ASQ-CSSGB-2022-I.C.1::SUBSKILL::dfss-roadmap-recognition"],
+      "validation_status":"PROVISIONAL_BOUND",
+      "evidence_boundaries":{"psychometric_validity":"UNOBSERVED","learner_mastery":"UNOBSERVED","retention":"UNOBSERVED","transfer":"UNOBSERVED","workplace_effectiveness":"UNOBSERVED","sme_approval":"UNOBSERVED","certification_equivalence":"UNOBSERVED"}
+    },
+    {
+      "assessment_target_id":"ASSESS::CSSGB-2022::ASQ-CSSGB-2022-I.C.2::fmea-basic-analysis::TARGET::bounded-fmea-analysis",
+      "subskill_id":"CSSGB-2022::ASQ-CSSGB-2022-I.C.2::SUBSKILL::fmea-basic-analysis",
+      "parent_requirement_id":"ASQ-CSSGB-2022-I.C.2",
+      "source_locator":"ASQ CSSGB BoK 2022 p.4 / I.C.2",
+      "preserved_cognitive_level":"ANALYZE",
+      "capability_statement":"Given a bounded design or process example, identify a failure mode and its effect and explain the risk-analysis reasoning needed before an improvement response is selected.",
+      "target_type":"ARTIFACT_ANALYSIS",
+      "evidence_input_class":"BOUNDED_SCENARIO",
+      "response_action_class":"ANALYZE",
+      "prompt_contract":{"supplied_evidence":"A synthetic bounded design or process example with explicit function, failure observation, effect evidence, and limited risk context.","required_action":"Identify the supported failure mode and effect and analyze what risk evidence is needed before selecting an improvement response.","must_not_assume":["severity, occurrence, or detection ratings not supplied","causes not evidenced","effectiveness of a proposed action"]},
+      "scoring_assertions":[
+        {"assertion_id":"I.C.2-01","observable_property":"Response distinguishes the failure mode from its effect using the supplied example.","pass_condition":"Failure mode and effect are separately identified and each is traceable to scenario evidence."},
+        {"assertion_id":"I.C.2-02","observable_property":"Response identifies risk-analysis evidence needed before selecting an improvement response.","pass_condition":"At least one relevant missing or supplied risk factor is identified without inventing ratings or causes."}
+      ],
+      "insufficient_evidence_behavior":{"trigger":"Risk prioritization or action selection requires severity, occurrence, detection, cause, or other evidence not supplied.","required_behavior":"State that prioritization or selection is unsupported and identify the missing evidence."},
+      "provenance_refs":["SOURCE_NODE_INDEX:ASQ-CSSGB-2022-I.C.2","SUBSKILL:CSSGB-2022::ASQ-CSSGB-2022-I.C.2::SUBSKILL::fmea-basic-analysis"],
+      "validation_status":"PROVISIONAL_BOUND",
+      "evidence_boundaries":{"psychometric_validity":"UNOBSERVED","learner_mastery":"UNOBSERVED","retention":"UNOBSERVED","transfer":"UNOBSERVED","workplace_effectiveness":"UNOBSERVED","sme_approval":"UNOBSERVED","certification_equivalence":"UNOBSERVED"}
+    },
+    {
+      "assessment_target_id":"ASSESS::CSSGB-2022::ASQ-CSSGB-2022-I.C.3::design-vs-process-fmea-application::TARGET::bounded-fmea-context-selection",
+      "subskill_id":"CSSGB-2022::ASQ-CSSGB-2022-I.C.3::SUBSKILL::design-vs-process-fmea-application",
+      "parent_requirement_id":"ASQ-CSSGB-2022-I.C.3",
+      "source_locator":"ASQ CSSGB BoK 2022 p.4 / I.C.3",
+      "preserved_cognitive_level":"APPLY",
+      "capability_statement":"Given a bounded problem context, distinguish whether Design FMEA or Process FMEA is the appropriate analysis context and explain the basis for the selection.",
+      "target_type":"CLASSIFICATION_TASK",
+      "evidence_input_class":"BOUNDED_SCENARIO",
+      "response_action_class":"APPLY",
+      "prompt_contract":{"supplied_evidence":"A synthetic problem context stating whether the concern arises in product/design definition or process execution, with bounded supporting facts.","required_action":"Select Design FMEA or Process FMEA and explain the selection using only the supplied context.","must_not_assume":["organizational FMEA policy not supplied","unobserved failure history","an FMEA result not performed"]},
+      "scoring_assertions":[
+        {"assertion_id":"I.C.3-01","observable_property":"Response selects the FMEA context consistent with whether the supplied concern is design- or process-centered.","pass_condition":"Selection matches the explicit problem locus in the scenario."},
+        {"assertion_id":"I.C.3-02","observable_property":"Response explains the basis for the selection without asserting an unperformed FMEA result.","pass_condition":"Explanation cites supplied context facts and contains no fabricated analysis outcome."}
+      ],
+      "insufficient_evidence_behavior":{"trigger":"The scenario does not establish whether the problem concerns design definition or process execution.","required_behavior":"State that the FMEA context cannot be selected reliably and identify the missing context evidence."},
+      "provenance_refs":["SOURCE_NODE_INDEX:ASQ-CSSGB-2022-I.C.3","SUBSKILL:CSSGB-2022::ASQ-CSSGB-2022-I.C.3::SUBSKILL::design-vs-process-fmea-application"],
+      "validation_status":"PROVISIONAL_BOUND",
+      "evidence_boundaries":{"psychometric_validity":"UNOBSERVED","learner_mastery":"UNOBSERVED","retention":"UNOBSERVED","transfer":"UNOBSERVED","workplace_effectiveness":"UNOBSERVED","sme_approval":"UNOBSERVED","certification_equivalence":"UNOBSERVED"}
+    }
+  ],
+  "batch_boundaries": {
+    "psychometric_validity":"UNOBSERVED",
+    "learner_mastery":"UNOBSERVED",
+    "retention":"UNOBSERVED",
+    "transfer":"UNOBSERVED",
+    "workplace_effectiveness":"UNOBSERVED",
+    "sme_approval":"UNOBSERVED",
+    "certification_equivalence":"UNOBSERVED",
+    "unresolved_dependency_candidates":"UNCHANGED__SEPARATE_LANE"
+  },
+  "next_batch": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001B-ASSESSMENT-TARGET-BATCH-02-DOMAIN-II"
+}
