@@ -105,6 +105,20 @@ const ownerFiles = registry.owner_files || {};
 const laneEntries = Object.entries(ownerFiles);
 if (!laneEntries.length) add('ERROR', 'SECOND_SHIFT_REGISTRY_EMPTY', 'Second Shift registry declares no owner lanes');
 
+const eventSchemaRel = registry.utilization_event_schema;
+if (!eventSchemaRel || !exists(eventSchemaRel)) {
+  add('ERROR', 'SECOND_SHIFT_EVENT_SCHEMA_MISSING', 'registry utilization_event_schema is absent or inaccessible', { path: eventSchemaRel || null });
+} else {
+  const eventSchema = readJson(eventSchemaRel);
+  const allowed = new Set(eventSchema.allowed_lanes || []);
+  for (const [lane] of laneEntries) {
+    if (!allowed.has(lane)) add('ERROR', 'SECOND_SHIFT_TELEMETRY_LANE_MISSING', 'registry-declared owner lane is absent from utilization allowed_lanes', { lane, event_schema: eventSchemaRel });
+  }
+  for (const lane of allowed) {
+    if (!ownerFiles[lane]) add('ERROR', 'SECOND_SHIFT_TELEMETRY_LANE_ORPHANED', 'utilization allowed_lanes contains a lane not declared by owner_files', { lane, event_schema: eventSchemaRel });
+  }
+}
+
 const ownerDataByLane = new Map();
 const ownerPathToLane = new Map();
 for (const [lane, rel] of laneEntries) {
@@ -174,6 +188,7 @@ const errors = findings.filter((f) => f.severity === 'ERROR');
 const report = {
   authority_obligation_registry: obligationRel || null,
   registry: registryRel,
+  utilization_event_schema: eventSchemaRel || null,
   registry_declared_lanes: laneEntries.map(([lane]) => lane),
   central_next_objective: central || null,
   standing: errors.length ? 'DRIFT_DETECTED' : 'PASS',
