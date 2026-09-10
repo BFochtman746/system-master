@@ -1,0 +1,44 @@
+name: Book System RF012 Current Subject Guard Rescue Prequalification
+
+on:
+  push:
+    branches:
+      - book-system/rf012-rescue-20260910
+    paths:
+      - ".github/scripts/book-system-author-decision-current-subject-guard-001-qualify.js"
+      - ".github/workflows/book-system-rf012-current-subject-guard-rescue-prequal.yml"
+      - "system-master/book-system/author-decision-current-subject-guard.js"
+      - "system-master/book-system/author-decision-queue*.js"
+      - "system-master/book-system/version-and-rollback*.js"
+      - "qualification/book-system/version-and-rollback-001/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  rf012:
+    name: RF012 deterministic current-subject guard qualification
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - name: Syntax check RF012 qualifier
+        run: node --check .github/scripts/book-system-author-decision-current-subject-guard-001-qualify.js
+      - name: Execute RF012 10-case qualifier
+        run: node .github/scripts/book-system-author-decision-current-subject-guard-001-qualify.js
+      - name: Run existing Author Decision Queue regression
+        run: node .github/scripts/book-system-author-decision-queue-001-qualify-v2.js
+      - name: Upload hosted RF012 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: BOOK-SYSTEM-RF012-${{ github.sha }}-hosted-evidence
+          path: ${{ runner.temp }}/book-rf012-evidence
+          if-no-files-found: warn
+          retention-days: 30
