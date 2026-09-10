@@ -1,0 +1,60 @@
+{
+  "state_id": "BOOK-SYSTEM-RECONCILED-STATE-027",
+  "effective_date": "2026-09-10",
+  "supersedes_for_current_parent_control": "BOOK-SYSTEM-RECONCILED-STATE-026",
+  "supersession_scope": "PARENT_CONTROL_AND_WORK_AHEAD_ROUTING_ONLY",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "control_branch": "book-system/control-v1",
+  "promoted_control_head": "67a23c0b09505dc3dd8fd748523fec3868f649b0",
+  "standing": "RF012_OWNER_CANDIDATE_PROMOTED__HOSTED_QUALIFIED__ORIGINAL_CONTENT_ADMISSION_A01_PENDING__POST_RF012_GAP_CENSUS_READY",
+  "rf012_promotion": {
+    "objective": "BOOK-SYSTEM-RF012-OWNER-PROMOTION-REBIND-AND-NEXT-OWNER-SELECTION-004",
+    "candidate_base_owner_head": "05c1f53e2f710f419a99cb99594c53c2f0240b68",
+    "candidate_sha": "67a23c0b09505dc3dd8fd748523fec3868f649b0",
+    "hosted_run_id": 34468928275,
+    "hosted_result": "PASS",
+    "lineage": "FAST_FORWARD__3_COMMITS_AHEAD__0_BEHIND__MERGE_BASE_EQUALS_PRIOR_BOOK_CONTROL_HEAD",
+    "promotion_result": "PROMOTED_TO_BOOK_CONTROL_REF",
+    "scope": "Bounded Author Decision current-subject applicability guard and its exact hosted qualifier/workflow only."
+  },
+  "preserved_primary_gate": {
+    "objective": "BOOK-SYSTEM-CANONICAL-CONTENT-OBJECT-ADMISSION-001-A01-REGISTRATION-AND-QUALIFICATION-PREP",
+    "exact_original_subject_sha": "e993806a1d9a4838d4bd6d162a36921526ef302a",
+    "hosted_result": "PASS__ORIGINAL_SUBJECT_ONLY",
+    "a01_result": "NOT_REGISTERED__NOT_RUN__NO_PASS",
+    "rule": "RF012 promotion does not replace, mutate, relabel or transfer PASS to the original content-admission subject."
+  },
+  "post_promotion_owner_selection": {
+    "selected_objective": "BOOK-SYSTEM-POST-RF012-IMPLEMENTATION-GAP-CENSUS-001",
+    "classification": "READY__A01_INDEPENDENT__NON_DESTRUCTIVE_OWNER_CENSUS",
+    "reason": "The canonical shared obligation registry contains no second READY Book-parent implementation obligation after RF012; the only other open Book-parent row is blocked on shared A-01 authority. The next owner-valid action is therefore to reconcile current executable Book surfaces against the frozen Book capability/adequacy obligations and identify only genuine missing implementation work.",
+    "required_inputs": [
+      "current Book control head and executable modules",
+      "SYSTEM-MASTER-COMPLETION-CENSUS-002-P3-BOOK",
+      "current Book qualification closures",
+      "current shared work-obligation registry",
+      "scope-reset W01-W28 and M01-M34 inventory",
+      "Class-A Writing/Manuscript adequacy obligations",
+      "Prose and Document delegation boundaries",
+      "original content-admission A-01 fence"
+    ],
+    "required_dispositions": [
+      "IMPLEMENTED_QUALIFIED",
+      "IMPLEMENTED_HOSTED_A01_PENDING",
+      "DELEGATED_SHARED_OR_CHILD",
+      "TRIGGERED_OR_HUMAN_EXTERNAL",
+      "IMPLEMENTATION_GAP",
+      "EMPIRICAL_GAP",
+      "DORMANT"
+    ],
+    "stop_condition": "Every current core/shared Book capability is dispositioned against live executable evidence and exactly one highest-value A-01-independent true implementation gap is selected, or zero such gaps is proven."
+  },
+  "authority_boundaries": [
+    "Hosted PASS is not A-01 PASS.",
+    "Real author choice remains human authority.",
+    "Prose remains SYSTEM_MASTER/BOOK/PROSE authority.",
+    "Reusable Document rendering/proof remains Document/provider authority.",
+    "Native iPhone and production qualification remain System Master/Core/platform concerns.",
+    "No empirical, publication or external-distributor evidence is inferred from machine qualification."
+  ]
+}
