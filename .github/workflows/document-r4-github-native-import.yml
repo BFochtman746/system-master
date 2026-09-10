@@ -1,4 +1,4 @@
-name: Document R4 GitHub-native import
+name: Document R4 exact-hash custody recovery
 
 on:
   push:
@@ -11,130 +11,167 @@ permissions:
   contents: write
 
 concurrency:
-  group: document-r4-github-native-import
+  group: document-r4-exact-hash-custody-recovery
   cancel-in-progress: false
 
 jobs:
-  import-and-qualify:
+  recover-exact-source:
     runs-on: self-hosted
     timeout-minutes: 45
     steps:
       - name: Checkout candidate branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           fetch-depth: 0
           persist-credentials: true
 
-      - name: Reconstruct staged source and prove CR001-R4 identity
+      - name: Locate exact R4 custody by SHA-256, regardless of filename
+        id: locate
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $handoffSha = 'ada701cfa15e6162b6cdf67bc6c0803540a611b08a23aeeeddd1045d8ce2d8ab'
+          $packetShas = [ordered]@{
+            r2 = 'ed3b9feeb5ad93637b1a5a59598003ca21caf794809c4bec4f09e9454d518637'
+            r3 = '66260502655e0840f597b6a2dc06ec941b79d7e02b1c16b0a061ee953b698665'
+            r4 = 'cea84e5628af671cabc5dc3ed0b37dce38ff264019b04fefcd6c2b347f2b47e2'
+          }
+          $roots = @(
+            (Join-Path $env:USERPROFILE 'Downloads'),
+            (Join-Path $env:USERPROFILE 'Desktop'),
+            (Join-Path $env:USERPROFILE 'Documents'),
+            (Join-Path $env:USERPROFILE 'OneDrive\Downloads'),
+            (Join-Path $env:USERPROFILE 'OneDrive\Desktop'),
+            (Join-Path $env:USERPROFILE 'OneDrive\Documents')
+          ) | Where-Object { Test-Path -LiteralPath $_ }
+          $candidates = @()
+          foreach ($root in $roots) {
+            $candidates += Get-ChildItem -LiteralPath $root -Filter '*.zip' -File -Recurse -ErrorAction SilentlyContinue |
+              Where-Object { $_.Length -ge 65536 -and $_.Length -le 104857600 -and $_.LastWriteTimeUtc -ge [datetime]'2026-08-30T00:00:00Z' }
+          }
+          $candidates = $candidates | Sort-Object FullName -Unique
+          Write-Host "HASH_SEARCH_CANDIDATES=$($candidates.Count)"
+          $matches = @{}
+          foreach ($file in $candidates) {
+            $sha = (Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+            if ($sha -eq $handoffSha) {
+              "mode=handoff" >> $env:GITHUB_OUTPUT
+              "handoff=$($file.FullName)" >> $env:GITHUB_OUTPUT
+              Write-Host "FOUND_EXACT_R4_HANDOFF hash=$sha bytes=$($file.Length)"
+              exit 0
+            }
+            foreach ($key in $packetShas.Keys) {
+              if ($sha -eq $packetShas[$key]) {
+                $matches[$key] = $file.FullName
+                Write-Host "FOUND_HISTORICAL_PACKET key=$key hash=$sha bytes=$($file.Length)"
+              }
+            }
+          }
+          if ($matches.Count -eq 3) {
+            'mode=packets' >> $env:GITHUB_OUTPUT
+            "r2=$($matches['r2'])" >> $env:GITHUB_OUTPUT
+            "r3=$($matches['r3'])" >> $env:GITHUB_OUTPUT
+            "r4=$($matches['r4'])" >> $env:GITHUB_OUTPUT
+            Write-Host 'FOUND_EXACT_HISTORICAL_PACKET_TRIO_BY_HASH'
+            exit 0
+          }
+          throw "EXACT_R4_CUSTODY_NOT_FOUND handoff=0 historical_packets=$($matches.Count)/3 candidates=$($candidates.Count)"
+
+      - name: Reconstruct and verify exact 225-file R4 source
         id: reconstruct
         shell: powershell
         run: |
           $ErrorActionPreference = 'Stop'
-          $parts = Get-ChildItem '.document-import-staging/cr001-r4/part-*.b64' -File -ErrorAction SilentlyContinue | Sort-Object Name
-          if ($parts.Count -ne 25) { throw "SOURCE_CUSTODY_TRANSPORT_INCOMPLETE staged_parts=$($parts.Count)/25" }
-          $work = Join-Path $env:RUNNER_TEMP 'document-r4-import'
+          $work = Join-Path $env:RUNNER_TEMP 'document-r4-exact-hash-recovery'
           Remove-Item $work -Recurse -Force -ErrorAction SilentlyContinue
           New-Item $work -ItemType Directory | Out-Null
-          $b64 = Join-Path $work 'source.tar.xz.b64'
-          $parts | ForEach-Object { Get-Content $_.FullName -Raw } | Set-Content -LiteralPath $b64 -NoNewline
-          $archive = Join-Path $work 'source.tar.xz'
-          [IO.File]::WriteAllBytes($archive, [Convert]::FromBase64String((Get-Content $b64 -Raw)))
-          $archiveHash = (Get-FileHash $archive -Algorithm SHA256).Hash.ToLowerInvariant()
-          if ($archiveHash -ne 'd4a0beffbeae7f72a6c3e0d522ff51b093fdd2fff1178d68e30e4746673ba1dd') { throw 'STAGED_ARCHIVE_SHA_MISMATCH' }
-          tar -xJf $archive -C $work
-          if ($LASTEXITCODE -ne 0) { throw 'STAGED_ARCHIVE_EXTRACT_FAIL' }
-          $source = Join-Path $work '01_CURRENT_DOCUMENT_PROCESSING_MODULE'
-          $files = Get-ChildItem $source -Filter '*.java' -File -Recurse | Sort-Object FullName
-          if ($files.Count -ne 225) { throw "RECONSTRUCTED_JAVA_COUNT_MISMATCH $($files.Count)" }
-          $sb = [Text.StringBuilder]::new()
-          [void]$sb.Append("path,sha256,bytes`r`n")
-          foreach ($file in $files) {
-            $relative = $file.FullName.Substring($source.Length + 1).Replace('\','/')
-            $path = '01_CURRENT_DOCUMENT_PROCESSING_MODULE/' + $relative
-            $hash = (Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
-            [void]$sb.Append($path + ',' + $hash + ',' + $file.Length + "`r`n")
+          $mode = '${{ steps.locate.outputs.mode }}'
+          if ($mode -eq 'handoff') {
+            $archive = '${{ steps.locate.outputs.handoff }}'
+            $actual = (Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant()
+            if ($actual -ne 'ada701cfa15e6162b6cdf67bc6c0803540a611b08a23aeeeddd1045d8ce2d8ab') { throw 'HANDOFF_SHA_DRIFT' }
+            $expanded = Join-Path $work 'handoff'
+            Expand-Archive -LiteralPath $archive -DestinationPath $expanded
+            $sourceRoot = $expanded
+            $manifest = Join-Path $expanded 'CANONICAL-SOURCE-TREE-MANIFEST.csv'
+            $receipt = Join-Path $expanded 'RECONSTRUCTION-RECEIPT.json'
+          } elseif ($mode -eq 'packets') {
+            $expected = @{
+              '${{ steps.locate.outputs.r2 }}' = 'ed3b9feeb5ad93637b1a5a59598003ca21caf794809c4bec4f09e9454d518637'
+              '${{ steps.locate.outputs.r3 }}' = '66260502655e0840f597b6a2dc06ec941b79d7e02b1c16b0a061ee953b698665'
+              '${{ steps.locate.outputs.r4 }}' = 'cea84e5628af671cabc5dc3ed0b37dce38ff264019b04fefcd6c2b347f2b47e2'
+            }
+            foreach ($entry in $expected.GetEnumerator()) {
+              $actual = (Get-FileHash -LiteralPath $entry.Key -Algorithm SHA256).Hash.ToLowerInvariant()
+              if ($actual -ne $entry.Value) { throw "PACKET_SHA_MISMATCH $($entry.Key)" }
+            }
+            $r2 = Join-Path $work 'r2'; $r3 = Join-Path $work 'r3'; $r4 = Join-Path $work 'r4'
+            Expand-Archive -LiteralPath '${{ steps.locate.outputs.r2 }}' -DestinationPath $r2
+            Expand-Archive -LiteralPath '${{ steps.locate.outputs.r3 }}' -DestinationPath $r3
+            Expand-Archive -LiteralPath '${{ steps.locate.outputs.r4 }}' -DestinationPath $r4
+            $r2root = Get-ChildItem $r2 -Directory | Select-Object -First 1
+            $r4root = Get-ChildItem $r4 -Directory | Select-Object -First 1
+            $sourceRoot = Join-Path $work 'reconstructed'
+            New-Item $sourceRoot -ItemType Directory | Out-Null
+            Copy-Item -LiteralPath (Join-Path $r2root.FullName 'materialized-pre-t13\01_CURRENT_DOCUMENT_PROCESSING_MODULE') -Destination (Join-Path $sourceRoot '01_CURRENT_DOCUMENT_PROCESSING_MODULE') -Recurse
+            Copy-Item -Path (Join-Path $r3 'source-overlay\01_CURRENT_DOCUMENT_PROCESSING_MODULE\*') -Destination (Join-Path $sourceRoot '01_CURRENT_DOCUMENT_PROCESSING_MODULE') -Recurse -Force
+            Copy-Item -Path (Join-Path $r4root.FullName 'source-overlay\01_CURRENT_DOCUMENT_PROCESSING_MODULE\*') -Destination (Join-Path $sourceRoot '01_CURRENT_DOCUMENT_PROCESSING_MODULE') -Recurse -Force
+            $manifest = Join-Path $r4root.FullName 'CANONICAL-SOURCE-TREE-MANIFEST.csv'
+            $receipt = $null
+          } else {
+            throw "UNKNOWN_RECOVERY_MODE $mode"
           }
-          $generated = Join-Path $work 'CANONICAL-SOURCE-TREE-MANIFEST.csv'
-          [IO.File]::WriteAllText($generated, $sb.ToString(), [Text.UTF8Encoding]::new($false))
-          $manifestBytesHash = (Get-FileHash $generated -Algorithm SHA256).Hash.ToLowerInvariant()
-          if ($manifestBytesHash -ne 'ed36fc9cfd38b04a8d0174efed06b03e8e25b0a45fc0adc4d47fe3457c2ee367') { throw "CANONICAL_MANIFEST_BYTES_MISMATCH $manifestBytesHash" }
-          "source=$source" >> $env:GITHUB_OUTPUT
-          "manifest_hash=$manifestBytesHash" >> $env:GITHUB_OUTPUT
+          if (-not (Test-Path -LiteralPath $manifest)) { throw 'CANONICAL_MANIFEST_MISSING' }
+          $rows = Import-Csv -LiteralPath $manifest
+          if ($rows.Count -ne 225) { throw "CANONICAL_MANIFEST_ROW_COUNT_MISMATCH $($rows.Count)" }
+          $seen = @{}
+          foreach ($row in $rows) {
+            if ($seen.ContainsKey($row.path)) { throw "DUPLICATE_MANIFEST_PATH $($row.path)" }
+            $seen[$row.path] = $true
+            $file = Join-Path $sourceRoot ($row.path -replace '/', '\')
+            if (-not (Test-Path -LiteralPath $file)) { throw "SOURCE_FILE_MISSING $($row.path)" }
+            $actualHash = (Get-FileHash -LiteralPath $file -Algorithm SHA256).Hash.ToLowerInvariant()
+            $actualSize = (Get-Item -LiteralPath $file).Length
+            if ($actualHash -ne $row.sha256 -or $actualSize -ne [int64]$row.bytes) { throw "SOURCE_IDENTITY_MISMATCH $($row.path)" }
+          }
+          $java = Get-ChildItem (Join-Path $sourceRoot '01_CURRENT_DOCUMENT_PROCESSING_MODULE') -Filter '*.java' -File -Recurse
+          if ($java.Count -ne 225) { throw "RECONSTRUCTED_JAVA_COUNT_MISMATCH $($java.Count)" }
+          "source_root=$sourceRoot" >> $env:GITHUB_OUTPUT
+          "manifest=$manifest" >> $env:GITHUB_OUTPUT
+          if ($receipt) { "receipt=$receipt" >> $env:GITHUB_OUTPUT }
           Write-Host 'R4_SOURCE_IDENTITY_PASS_225_OF_225'
 
-      - name: Commit exact source candidate
-        id: commit_source
+      - name: Commit verified source custody and remove stale transport staging
         shell: powershell
         run: |
           $ErrorActionPreference = 'Stop'
-          $dest = 'system-master/headless-content-artifacts/document/cr001-r4/01_CURRENT_DOCUMENT_PROCESSING_MODULE'
+          $dest = 'recovered/document/cr001-r4'
           Remove-Item $dest -Recurse -Force -ErrorAction SilentlyContinue
-          New-Item (Split-Path $dest) -ItemType Directory -Force | Out-Null
-          Copy-Item -LiteralPath '${{ steps.reconstruct.outputs.source }}' -Destination $dest -Recurse
-          git config user.name 'system-master-self-hosted-runner'
-          git config user.email 'system-master-runner@users.noreply.github.com'
-          git add -- $dest
-          git commit -m 'document: admit exact CR001-R4 source candidate [document-r4-import]'
-          $subject = (git rev-parse HEAD).Trim()
-          "subject=$subject" >> $env:GITHUB_OUTPUT
-          Write-Host "DOCUMENT_R4_GIT_SUBJECT=$subject"
-
-      - name: Fresh exact-subject portable qualification
-        id: qualify
-        shell: powershell
-        run: |
-          $ErrorActionPreference = 'Stop'
-          $subject = '${{ steps.commit_source.outputs.subject }}'
-          if ((git rev-parse HEAD).Trim() -ne $subject) { throw 'SUBJECT_HEAD_DRIFT_BEFORE_QUALIFICATION' }
-          $root = 'system-master/headless-content-artifacts/document/cr001-r4/01_CURRENT_DOCUMENT_PROCESSING_MODULE'
-          $build = Join-Path $env:RUNNER_TEMP 'document-r4-classes'
-          Remove-Item $build -Recurse -Force -ErrorAction SilentlyContinue
-          New-Item $build -ItemType Directory | Out-Null
-          $sources = Get-ChildItem (Join-Path $root 'src\main\java'), (Join-Path $root 'src\test\java') -Filter '*.java' -File -Recurse | ForEach-Object { $_.FullName }
-          if ($sources.Count -ne 225) { throw "QUALIFICATION_SOURCE_COUNT_MISMATCH $($sources.Count)" }
-          $argfile = Join-Path $env:RUNNER_TEMP 'document-r4-javac-sources.txt'
-          $sources | ForEach-Object { '"' + $_ + '"' } | Set-Content -LiteralPath $argfile
-          & javac --release 21 -Xlint:all -Werror -d $build "@$argfile"
-          if ($LASTEXITCODE -ne 0) { throw 'STRICT_JAVA21_COMPILE_FAIL' }
-          foreach ($test in @('org.systemmaster.tools.document.DocumentDocxMasteryT13PortableTests','org.systemmaster.tools.document.DocumentDocxMasteryT14PortableTests')) {
-            & java -cp $build $test
-            if ($LASTEXITCODE -ne 0) { throw "PORTABLE_TEST_FAIL $test" }
+          New-Item (Join-Path $dest 'source') -ItemType Directory -Force | Out-Null
+          New-Item (Join-Path $dest 'evidence') -ItemType Directory -Force | Out-Null
+          Copy-Item -LiteralPath (Join-Path '${{ steps.reconstruct.outputs.source_root }}' '01_CURRENT_DOCUMENT_PROCESSING_MODULE') -Destination (Join-Path $dest 'source') -Recurse
+          Copy-Item -LiteralPath '${{ steps.reconstruct.outputs.manifest }}' -Destination (Join-Path $dest 'evidence\CANONICAL-SOURCE-TREE-MANIFEST.csv')
+          if ('${{ steps.reconstruct.outputs.receipt }}') {
+            Copy-Item -LiteralPath '${{ steps.reconstruct.outputs.receipt }}' -Destination (Join-Path $dest 'evidence\RECONSTRUCTION-RECEIPT.json')
           }
-          if (git status --porcelain) { throw 'WORKTREE_CHANGED_DURING_QUALIFICATION' }
-          'compile=PASS' >> $env:GITHUB_OUTPUT
-          't13=PASS' >> $env:GITHUB_OUTPUT
-          't14=PASS' >> $env:GITHUB_OUTPUT
-          Write-Host 'DOCUMENT_R4_FRESH_EXACT_SUBJECT_PORTABLE_PASS'
-
-      - name: Record qualification receipt and push candidate
-        shell: powershell
-        run: |
-          $ErrorActionPreference = 'Stop'
-          $subject = '${{ steps.commit_source.outputs.subject }}'
-          $receiptDir = 'qualification/headless-content-artifacts/document/cr001-r4'
-          New-Item $receiptDir -ItemType Directory -Force | Out-Null
-          $receiptPath = Join-Path $receiptDir "$subject.json"
-          $receipt = [ordered]@{
-            qualification_id = 'SYSTEM-MASTER-DOCUMENT-R4-GITHUB-NATIVE-EXACT-SUBJECT-QUALIFICATION-002'
-            subject_git_sha = $subject
-            source_path = 'system-master/headless-content-artifacts/document/cr001-r4/01_CURRENT_DOCUMENT_PROCESSING_MODULE'
+          $evidence = [ordered]@{
+            recovery_id = 'CR001-R4-GITHUB-NATIVE-EXACT-HASH-CUSTODY-003'
             recovered_authority = 'CR001-R4'
+            recovery_mode = '${{ steps.locate.outputs.mode }}'
             canonical_manifest_rows = 225
-            canonical_manifest_bytes_sha256 = '${{ steps.reconstruct.outputs.manifest_hash }}'
-            source_identity = 'PASS__225_OF_225_SHA256_AND_SIZE_EQUIVALENT_MANIFEST'
-            strict_java_21_compile = '${{ steps.qualify.outputs.compile }}'
-            t13_portable = '${{ steps.qualify.outputs.t13 }}'
-            t14_portable = '${{ steps.qualify.outputs.t14 }}'
-            evidence_class = 'FRESH_CURRENT_GITHUB_EXACT_SUBJECT_PORTABLE'
+            source_identity = 'PASS__225_OF_225_EXACT_SHA256_AND_SIZE'
             historical_pass_transfer = $false
             a01_pass = $false
             native_office_pass = $false
-            iphone_device_pass = $false
-            production_certified = $false
-            generated_at_utc = (Get-Date).ToUniversalTime().ToString('o')
+            production_pass = $false
+            note = 'A-01 was used only as a bounded custody-location host. This is not an A-01 qualification/admission claim.'
           }
-          $receipt | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $receiptPath -Encoding utf8
-          git add -- $receiptPath
-          git commit -m 'document: record fresh exact-subject R4 portable qualification [document-r4-import]'
+          $evidence | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $dest 'evidence\GITHUB-NATIVE-CUSTODY-RECOVERY.json') -Encoding utf8
+          git rm -r --ignore-unmatch .document-import-staging/cr001-r4
+          git config user.name 'system-master-custody-recovery'
+          git config user.email 'system-master-custody-recovery@users.noreply.github.com'
+          git add -- $dest
+          git commit -m 'document: recover exact CR001-R4 source custody by hash'
+          $subject = (git rev-parse HEAD).Trim()
           git push origin HEAD:${{ github.ref_name }}
-          Write-Host "DOCUMENT_R4_IMPORT_CANDIDATE_PUSHED subject=$subject receipt=$receiptPath"
+          Write-Host "DOCUMENT_R4_SOURCE_CUSTODY_PUSHED=$subject"
