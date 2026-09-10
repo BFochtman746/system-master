@@ -1,0 +1,157 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:system-master:core:smr021:experience-admission-record-consumer-test-contract:007",
+  "title": "SMR021 Experience Admission Record Consumer Test Contract 007",
+  "description": "CORE consumer-side test contract only. DATA ownership/acceptance is not implied.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "recordVersion",
+    "admissionId",
+    "workId",
+    "admittedWorkVersion",
+    "principalId",
+    "sessionId",
+    "capabilityId",
+    "requirementDigest",
+    "selectedDescriptorId",
+    "selectedDescriptorDigest",
+    "selectedImplementationDigest",
+    "routeDecisionDigest",
+    "callerAuthority",
+    "admittedAction",
+    "admittedEffect",
+    "grantedAuthoritiesDigest",
+    "admissionEvidenceRef",
+    "createdAt",
+    "recordDigest",
+    "authorityFlags"
+  ],
+  "properties": {
+    "recordVersion": {
+      "const": 1
+    },
+    "admissionId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "workId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "admittedWorkVersion": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "principalId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "sessionId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "capabilityId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "requirementDigest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "selectedDescriptorId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "selectedDescriptorDigest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "selectedImplementationDigest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "routeDecisionDigest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "callerAuthority": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "admittedAction": {
+      "enum": [
+        "PAUSE",
+        "RESUME",
+        "CANCEL",
+        "CORRECT",
+        "RETRY",
+        "REPLAN",
+        "APPROVE",
+        "REJECT",
+        "PROVIDE_INPUT",
+        "INSPECT",
+        "ROLLBACK",
+        "CHANGE_GOAL"
+      ]
+    },
+    "admittedEffect": {
+      "enum": [
+        "READ_ONLY",
+        "REVERSIBLE_WRITE"
+      ]
+    },
+    "grantedAuthoritiesDigest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "admissionEvidenceRef": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "recordDigest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "authorityFlags": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "executesEffect",
+        "mintsAuthority",
+        "a01Pass",
+        "nativePass",
+        "productionAuthorized"
+      ],
+      "properties": {
+        "executesEffect": {
+          "const": false
+        },
+        "mintsAuthority": {
+          "const": false
+        },
+        "a01Pass": {
+          "const": false
+        },
+        "nativePass": {
+          "const": false
+        },
+        "productionAuthorized": {
+          "const": false
+        }
+      }
+    }
+  }
+}

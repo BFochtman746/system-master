@@ -1,0 +1,416 @@
+{
+  "fixture_packet_id": "SMR021-DATA-CONTRACT-ADVERSARIAL-FIXTURES-007",
+  "owner_path": "SYSTEM_MASTER/CORE",
+  "standing": "CONSUMER_FIXTURES_COMPLETE__DATA_IMPLEMENTATION_NOT_AUTHORIZED__NOT_EXECUTED",
+  "exact_parent_control_sha": "ecf40c2e81cb884e4a84f97bb5cda69cc1dc045f",
+  "exact_candidate_source_test_sha256": "fe325804bacfd5c40339a18bc393fb1bdfb2191c8b0f3946219d7d81f1971596",
+  "consumer_schema": "system-master/control-v2/SMR021-EXPERIENCE-ADMISSION-RECORD-CONSUMER-CONTRACT-007.schema.json",
+  "baseline_fixture": {
+    "recordVersion": 1,
+    "admissionId": "admission-001",
+    "workId": "work-A",
+    "admittedWorkVersion": 7,
+    "principalId": "principal-A",
+    "sessionId": "session-A",
+    "capabilityId": "capability-A",
+    "requirementDigest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "selectedDescriptorId": "descriptor-A",
+    "selectedDescriptorDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "selectedImplementationDigest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "routeDecisionDigest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "callerAuthority": "USER-EXPERIENCE-001",
+    "admittedAction": "PAUSE",
+    "admittedEffect": "REVERSIBLE_WRITE",
+    "grantedAuthoritiesDigest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "admissionEvidenceRef": "evidence:route:A",
+    "createdAt": "2026-09-10T09:40:00Z",
+    "recordDigest": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+    "authorityFlags": {
+      "executesEffect": false,
+      "mintsAuthority": false,
+      "a01Pass": false,
+      "nativePass": false,
+      "productionAuthorized": false
+    }
+  },
+  "cases": [
+    {
+      "id": "POS-ROUNDTRIP-001",
+      "operation": "persist_reconstruct",
+      "input": "baseline_fixture",
+      "expect": {
+        "record_equal": true,
+        "record_digest_valid": true,
+        "writes": 1,
+        "effects": 0
+      }
+    },
+    {
+      "id": "NEG-MISSING-001",
+      "operation": "persist",
+      "mutation": {
+        "remove": "admissionId"
+      },
+      "expect": {
+        "classification": "VALIDATION_FAILURE",
+        "writes": 0,
+        "effects": 0
+      }
+    },
+    {
+      "id": "NEG-MISSING-002",
+      "operation": "persist",
+      "mutation": {
+        "remove": "workId"
+      },
+      "expect": {
+        "classification": "VALIDATION_FAILURE",
+        "writes": 0,
+        "effects": 0
+      }
+    },
+    {
+      "id": "NEG-MISSING-003",
+      "operation": "persist",
+      "mutation": {
+        "remove": "admittedWorkVersion"
+      },
+      "expect": {
+        "classification": "VALIDATION_FAILURE",
+        "writes": 0,
+        "effects": 0
+      }
+    },
+    {
+      "id": "NEG-MISSING-004",
+      "operation": "persist",
+      "mutation": {
+        "remove": "principalId"
+      },
+      "expect": {
+        "classification": "VALIDATION_FAILURE",
+        "writes": 0,
+        "effects": 0
+      }
+    },
+    {
+      "id": "NEG-MISSING-005",
+      "operation": "persist",
+      "mutation": {
+        "remove": "sessionId"
+      },
+      "expect": {
+        "classification": "VALIDATION_FAILURE",
+        "writes": 0,
+        "effects": 0
+      }
+    },
+    {
+      "id": "NEG-MISSING-006",
+      "operation": "persist",
+      "mutation": {
+        "remove": "capabilityId"
+      },
+      "expect": {
+        "classification": "VALIDATION_FAILURE",
+        "writes": 0,
+        "effects": 0
+      }
+    },
+    {
+      "id": "NEG-MISSING-007",
+      "operation": "persist",
+      "mutation": {
+        "remove": "requirementDigest"
+      },
+      "expect": {
+        "classification": "VALIDATION_FAILURE",
+        "writes": 0,
+        "effects": 0
+      }
+    },
+    {
+      "id": "NEG-MISSING-008",
+      "operation": "persist",
+      "mutation": {
+        "remove": "selectedDescriptorId"
+      },
+      "expect": {
+        "classification": "VALIDATION_FAILURE",
+        "writes": 0,
+        "effects": 0
+      }
+    },
+    {
+      "id": "NEG-MISSING-009",
+      "operation": "persist",
+      "mutation": {
+        "remove": "selectedDescriptorDigest"
+      },
+      "expect": {
+        "classification": "VALIDATION_FAILURE",
+        "writes": 0,
+        "effects": 0
+      }
+    },
+    {
+      "id": "NEG-MISSING-010",
+      "operation": "persist",
+      "mutation": {
+        "remove": "selectedImplementationDigest"
+      },
+      "expect": {
+        "classification": "VALIDATION_FAILURE",
+        "writes": 0,
+        "effects": 0
+      }
+    },
+    {
+      "id": "NEG-MISSING-011",
+      "operation": "persist",
+      "mutation": {
+        "remove": "routeDecisionDigest"
+      },
+      "expect": {
+        "classification": "VALIDATION_FAILURE",
+        "writes": 0,
+        "effects": 0
+      }
+    },
+    {
+      "id": "NEG-MISSING-012",
+      "operation": "persist",
+      "mutation": {
+        "remove": "callerAuthority"
+      },
+      "expect": {
+        "classification": "VALIDATION_FAILURE",
+        "writes": 0,
+        "effects": 0
+      }
+    },
+    {
+      "id": "NEG-MISSING-013",
+      "operation": "persist",
+      "mutation": {
+        "remove": "admittedAction"
+      },
+      "expect": {
+        "classification": "VALIDATION_FAILURE",
+        "writes": 0,
+        "effects": 0
+      }
+    },
+    {
+      "id": "NEG-MISSING-014",
+      "operation": "persist",
+      "mutation": {
+        "remove": "admittedEffect"
+      },
+      "expect": {
+        "classification": "VALIDATION_FAILURE",
+        "writes": 0,
+        "effects": 0
+      }
+    },
+    {
+      "id": "NEG-MISSING-015",
+      "operation": "persist",
+      "mutation": {
+        "remove": "grantedAuthoritiesDigest"
+      },
+      "expect": {
+        "classification": "VALIDATION_FAILURE",
+        "writes": 0,
+        "effects": 0
+      }
+    },
+    {
+      "id": "NEG-MISSING-016",
+      "operation": "persist",
+      "mutation": {
+        "remove": "admissionEvidenceRef"
+      },
+      "expect": {
+        "classification": "VALIDATION_FAILURE",
+        "writes": 0,
+        "effects": 0
+      }
+    },
+    {
+      "id": "NEG-MISSING-017",
+      "operation": "persist",
+      "mutation": {
+        "remove": "recordDigest"
+      },
+      "expect": {
+        "classification": "VALIDATION_FAILURE",
+        "writes": 0,
+        "effects": 0
+      }
+    },
+    {
+      "id": "NEG-WORK-VERSION-REUSE-001",
+      "operation": "submit_command",
+      "mutation": {
+        "commandWorkVersion": 8,
+        "admissionWorkVersion": 7,
+        "authoritativeWorkVersion": 8
+      },
+      "expect": {
+        "classification": "ADMISSION_VERSION_MISMATCH",
+        "writes": 0,
+        "effects": 0
+      }
+    },
+    {
+      "id": "NEG-ADMISSION-REF-MISSING-001",
+      "operation": "reconstruct_command",
+      "mutation": {
+        "admissionRef": "missing"
+      },
+      "expect": {
+        "classification": "ADMISSION_REFERENCE_NOT_FOUND",
+        "writes": 0,
+        "effects": 0
+      }
+    },
+    {
+      "id": "NEG-ADMISSION-REF-AMBIGUOUS-001",
+      "operation": "reconstruct_command",
+      "mutation": {
+        "duplicateAdmissionId": true
+      },
+      "expect": {
+        "classification": "ADMISSION_REFERENCE_AMBIGUOUS",
+        "writes": 0,
+        "effects": 0
+      }
+    },
+    {
+      "id": "NEG-IDEMPOTENCY-CONFLICT-001",
+      "operation": "replay_command",
+      "mutation": {
+        "sameIdempotencyKey": true,
+        "differentAdmissionOrPayload": true
+      },
+      "expect": {
+        "classification": "IDEMPOTENCY_CONFLICT",
+        "writes_after_first": 1,
+        "effects": 0
+      }
+    },
+    {
+      "id": "POS-IDEMPOTENT-REPLAY-001",
+      "operation": "replay_command",
+      "mutation": {
+        "exactSameIntent": true
+      },
+      "expect": {
+        "same_record": true,
+        "total_writes": 1,
+        "effects": 0
+      }
+    },
+    {
+      "id": "NEG-CONCURRENT-CURRENT-001",
+      "operation": "concurrent_admission",
+      "schedule": [
+        "validate A at version 7",
+        "validate B at version 7",
+        "commit A",
+        "commit B"
+      ],
+      "expect": {
+        "current_records": 1,
+        "loser": "CONCURRENCY_CONFLICT",
+        "evidence_records_preserved": 2,
+        "effects": 0
+      }
+    },
+    {
+      "id": "NEG-CRASH-BEFORE-COMMIT-001",
+      "operation": "failure_injection",
+      "cutpoint": "after_validation_before_commit",
+      "expect": {
+        "writes": 0,
+        "effects": 0
+      }
+    },
+    {
+      "id": "POS-CRASH-AFTER-COMMIT-REPLAY-001",
+      "operation": "failure_injection",
+      "cutpoint": "after_commit_before_ack",
+      "expect": {
+        "replay_idempotent": true,
+        "total_writes": 1,
+        "effects": 0
+      }
+    },
+    {
+      "id": "NEG-CORRUPT-RECORD-001",
+      "operation": "reconstruct",
+      "mutation": {
+        "flip_record_digest_bit": true
+      },
+      "expect": {
+        "classification": "INTEGRITY_FAILURE",
+        "writes": 0,
+        "effects": 0
+      }
+    },
+    {
+      "id": "NEG-LEGACY-PROMOTION-001",
+      "operation": "migrate",
+      "input": {
+        "legacyRecordMissingAdmissionBindings": true
+      },
+      "expect": {
+        "standing": "MIGRATED_UNQUALIFIED_OR_REJECTED",
+        "admitted": false,
+        "effects": 0
+      }
+    },
+    {
+      "id": "POS-MIGRATION-IDEMPOTENCY-001",
+      "operation": "migrate_twice",
+      "expect": {
+        "byte_identical": true,
+        "digest_identical": true,
+        "authority_expansion": false
+      }
+    },
+    {
+      "id": "NEG-AUTHORITY-FLAG-001",
+      "operation": "persist",
+      "mutation": {
+        "authorityFlags": {
+          "a01Pass": true
+        }
+      },
+      "expect": {
+        "classification": "SCHEMA_OR_AUTHORITY_FAILURE",
+        "writes": 0,
+        "effects": 0
+      }
+    },
+    {
+      "id": "NEG-EXECUTE-EFFECT-001",
+      "operation": "execute_effect",
+      "input": "persisted baseline",
+      "expect": {
+        "classification": "FORBIDDEN_OPERATION",
+        "effect_receipts": 0,
+        "effects": 0
+      }
+    }
+  ],
+  "metamorphic_properties": [
+    "Changing any one immutable binding changes recordDigest and invalidates the original command-to-admission relation.",
+    "Reordering granted-authority input cannot change its canonical digest; adding/removing an authority must change it.",
+    "Serialization round-trip is canonical and deterministic across fresh processes.",
+    "Any negative validation result is observationally equivalent to zero durable mutation and zero effect execution.",
+    "A hosted runner or storage adapter cannot change authorityFlags from false."
+  ],
+  "execution_gate": "Requires DATA-owner-valid persistence API/migration plus exact capsule bytes verified by SHA-256 and source/test identity. Until both exist this packet is not executable evidence."
+}
