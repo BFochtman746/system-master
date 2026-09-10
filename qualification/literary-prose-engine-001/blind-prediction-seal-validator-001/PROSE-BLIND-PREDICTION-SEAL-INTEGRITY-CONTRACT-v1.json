@@ -1,0 +1,117 @@
+{
+  "contract_id": "PROSE-BLIND-PREDICTION-SEAL-INTEGRITY-CONTRACT-v1",
+  "objective": "PROSE-BLIND-PREDICTION-SEAL-VALIDATOR-001",
+  "derives_from": {
+    "blind_evaluation_contract": "qualification/literary-prose-engine-001/step-f/PROSE-REAL-LIMITATION-BLIND-EVALUATION-CONTRACT-001.json",
+    "audited_blind_ref": "literary-prose-blind-eval-001",
+    "audited_blind_head": "b6dd4ca8856372db708705f0302369311fed042a",
+    "owner_control_head_at_selection": "23dcc5c82816fba4bdc571a8019e13fba4be4b95"
+  },
+  "purpose": "Validate the integrity and create-only persistence boundary of a blind prediction seal without producing predictions, reading author labels, or accessing manuscript bytes.",
+  "seal_envelope": {
+    "required_fields": [
+      "seal_id",
+      "contract_id",
+      "objective",
+      "evaluation_branch",
+      "prediction_records",
+      "raw_prose_present",
+      "candidate_prose_present",
+      "manuscript_mutated",
+      "revision_authority",
+      "author_labels_accessed_before_seal"
+    ],
+    "additional_fields_forbidden": true,
+    "fixed_values": {
+      "contract_id": "PROSE-REAL-LIMITATION-BLIND-EVALUATION-CONTRACT-001",
+      "objective": "PROSE-REAL-LIMITATION-BLIND-MODEL-SCORING-001",
+      "evaluation_branch": "literary-prose-blind-eval-001",
+      "raw_prose_present": false,
+      "candidate_prose_present": false,
+      "manuscript_mutated": false,
+      "revision_authority": false,
+      "author_labels_accessed_before_seal": false
+    }
+  },
+  "record": {
+    "required_fields": [
+      "case_id",
+      "passage_sha256",
+      "semantic_disposition",
+      "step_f_finding_class",
+      "confidence",
+      "abstention_or_downgrade_reason",
+      "diagnosis_allowed",
+      "revision_allowed"
+    ],
+    "additional_fields_forbidden": true,
+    "one_record_per_contract_case": true,
+    "case_and_digest_must_match_contract": true,
+    "semantic_dispositions": [
+      "REAL_LIMITATION",
+      "WORKING_AS_INTENDED",
+      "NEUTRAL_OBSERVATION",
+      "UNCERTAIN"
+    ],
+    "step_f_finding_classes": [
+      "STRENGTH",
+      "LIMITATION",
+      "RISK",
+      "OPPORTUNITY_SUPPORT",
+      "NO_FINDING",
+      "BLOCKED"
+    ],
+    "confidence": "FINITE_NUMBER_INCLUSIVE_0_1__BOOLEAN_FORBIDDEN",
+    "revision_allowed_must_equal": false,
+    "explanation_required_when": [
+      "semantic_disposition=UNCERTAIN",
+      "step_f_finding_class=BLOCKED",
+      "diagnosis_allowed=false",
+      "confidence<0.60"
+    ]
+  },
+  "prohibited_fields": [
+    "author_label",
+    "ground_truth",
+    "ground_truth_label",
+    "comparison_result",
+    "raw_text",
+    "passage_text",
+    "source_excerpt",
+    "quote",
+    "rewrite_text",
+    "candidate_text",
+    "prompt_payload",
+    "embedding_payload"
+  ],
+  "creation": {
+    "mode": "CREATE_ONLY__EXCLUSIVE_FILE_CREATE",
+    "target_exists": "FAIL_SEAL_ALREADY_EXISTS",
+    "canonicalization": "UTF8_JSON_SORT_KEYS_INDENT_2_TRAILING_NEWLINE",
+    "validation_required_before_write": true
+  },
+  "qualification": {
+    "fixtures": "SYNTHETIC_NONBLIND_ONLY",
+    "frozen_case_ids_or_digests_in_fixtures": false,
+    "hosted_exact_sha_required": true,
+    "a01_required": false
+  },
+  "proves": [
+    "schema and enum integrity",
+    "one-record-per-contract-case completeness",
+    "case/digest binding",
+    "fail-closed authority flags",
+    "create-only collision refusal",
+    "deterministic canonical serialization"
+  ],
+  "does_not_prove": [
+    "a prediction exists",
+    "blind-model accuracy",
+    "author or private evidence",
+    "manuscript custody",
+    "revision quality or authority",
+    "Book canonical state",
+    "A-01 qualification",
+    "production or publication authority"
+  ]
+}
