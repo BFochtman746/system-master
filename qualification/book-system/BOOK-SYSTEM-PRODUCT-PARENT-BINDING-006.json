@@ -18,6 +18,16 @@
     "primary_pending_objective": "BOOK-SYSTEM-CANONICAL-CONTENT-OBJECT-ADMISSION-001-A01-REGISTRATION-AND-QUALIFICATION-PREP",
     "current_second_shift_objective": "BOOK-SYSTEM-CONTENT-ADMISSION-AUTHOR-DECISION-APPLICABILITY-GUARD-004"
   },
+  "child_systems": [
+    {
+      "system_id": "PROSE",
+      "owner_path": "SYSTEM_MASTER/BOOK/PROSE",
+      "relationship": "SPECIALIST_CHILD_SYSTEM",
+      "canonical_manuscript_write_authority": false,
+      "authority_source": "governance/SYSTEM-TOPOLOGY-002.json and BOOK-SYSTEM-PRODUCT-PARENT-BINDING-009",
+      "compatibility_note": "Additive canonical-control representation only. This does not supersede, transfer, broaden or recreate Prose authority."
+    }
+  ],
   "preserved_original_content_admission_subject": {
     "sha": "e993806a1d9a4838d4bd6d162a36921526ef302a",
     "hosted_result": "PASS__ORIGINAL_SUBJECT_ONLY",
@@ -29,5 +39,15 @@
     "reason": "RF012 exposed that approved canonical AUTHOR_DECISION status alone does not establish exact subject applicability. The Author Decision Queue contract keeps exact identities in queue/receipt evidence, so a narrow parent-side applicability bridge is the safe executable successor while central A-01 work remains pending."
   },
   "qualification_rule": "Any executable applicability bridge is changed software with a fresh exact SHA. It must receive its own focused/full hosted qualification and any later separately registered A-01 qualification. No PASS transfers from e993806a1d9a4838d4bd6d162a36921526ef302a or from the existing exact-qualified Author Decision current-subject guard.",
-  "authority_rule": "This selector changes Book routing only. It does not grant author, Prose, Document, lifecycle, export-freeze, publication, native, provider or production authority."
+  "authority_rule": "This selector changes Book routing only. It does not grant author, Prose, Document, lifecycle, export-freeze, publication, native, provider or production authority.",
+  "control_compatibility_amendment": {
+    "amendment_id": "BOOK-SYSTEM-PRODUCT-PARENT-BINDING-006-CONTROL-COMPATIBILITY-AMENDMENT-001",
+    "amendment_date": "2026-09-10",
+    "pre_amendment_git_blob_sha": "03816d21a87685d6118a8ff5e626d6e76e86ffa2",
+    "reason": "Canonical main SYSTEM-TOPOLOGY-002 names this file as the BOOK control record and validate-system-control-branch.js requires child_systems to expose the canonical BOOK>PROSE edge. Later binding 009 already preserved the same Prose child authority under child_specialist_binding; this additive field mirrors that existing authority for canonical control validation.",
+    "historical_fields_changed": false,
+    "authority_changed": false,
+    "prose_owner_path": "SYSTEM_MASTER/BOOK/PROSE",
+    "prose_canonical_manuscript_write_authority": false
+  }
 }
