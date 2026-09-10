@@ -1,0 +1,81 @@
+{
+  "closure_id": "BOOK-SYSTEM-LIFECYCLE-CURRENT-PARENT-COMPATIBILITY-ADAPTER-001-CLOSURE",
+  "effective_date": "2026-09-09",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "standing": "CLOSED__HOSTED_AND_AUTHORITATIVE_A01_PASS__EXACT_SHA_SCOPED",
+  "objective": "BOOK-SYSTEM-LIFECYCLE-CURRENT-PARENT-COMPATIBILITY-ADAPTER-001",
+  "qualified_subject_sha": "fc5adf8fd130d7b5324cff0058ab3804d75ec54e",
+  "authoritative_a01": {
+    "qualification_id": "BOOK-SYSTEM-LIFECYCLE-CURRENT-PARENT-COMPATIBILITY-ADAPTER-001",
+    "run_id": 34419773379,
+    "job_id": 102692480301,
+    "policy_version": 6,
+    "registry_version": 26,
+    "runner": "A-01 / Windows / X64",
+    "result": "PASS",
+    "subject_sha": "fc5adf8fd130d7b5324cff0058ab3804d75ec54e",
+    "checkout_sha": "fc5adf8fd130d7b5324cff0058ab3804d75ec54e",
+    "compatibility_case_count": 21,
+    "compatibility_pass_count": 21,
+    "predecessor_lifecycle_v1_regression_cases": 18,
+    "predecessor_lifecycle_v1_regression_result": "PASS",
+    "evidence_artifact_id": 10130447659,
+    "evidence_artifact_digest": "sha256:735e70112c35ffaee636ee7aeefd9f3bf4952e8cc72c9479bdac449e75044c31",
+    "promotion_authorized": false
+  },
+  "preserved_control_plane_lineage": [
+    {
+      "run_id": 34419309748,
+      "job_id": 102691090784,
+      "subject_sha": "fc5adf8fd130d7b5324cff0058ab3804d75ec54e",
+      "result": "CONTROL_PLANE_FAILURE__UNREGISTERED_QUALIFICATION",
+      "artifact_id": 10130296221,
+      "artifact_digest": "sha256:9a5d86c743c018673de671d4b74b6d361b992cb92bef257e7a2c2eda59d4fa9d",
+      "subject_execution_reached": false
+    },
+    {
+      "run_id": 34419309748,
+      "job_id": 102692264125,
+      "subject_sha": "fc5adf8fd130d7b5324cff0058ab3804d75ec54e",
+      "result": "CONTROL_PLANE_FAILURE__RERUN_PINNED_OLD_REUSABLE_WORKFLOW_SHA__UNREGISTERED",
+      "artifact_id": 10130424247,
+      "artifact_digest": "sha256:de964e2382a13425299f3887d1157e3b5930e888d63e72928e0b0f8712ce7470",
+      "subject_execution_reached": false,
+      "finding": "GitHub rerun preserved reusable gateway resolution to old control-plane SHA 581f5842f17fe191e9faa178c5b62d58008f08a2. A new run was required after registry admission."
+    }
+  ],
+  "preserved_qualifier_lineage": {
+    "failed_subject_sha": "67d1cdb37c31eeb0e785efcc257dd986aa94b09c",
+    "failed_run_id": 34419187052,
+    "failed_job_id": 102690685013,
+    "failed_result": "FAIL__18_OF_21__QUALIFIER_SERIALIZATION_HELPER_ONLY",
+    "failed_artifact_id": 10130245955,
+    "failed_artifact_digest": "sha256:fce389a9f81c8689f02c73b95902200ea6c91237ddd40a05b9d3854b97886de9",
+    "repair_classification": "QUALIFIER_ONLY__NO_ADAPTER_RUNTIME_FIXTURE_OR_LIFECYCLE_V1_SEMANTIC_CHANGE"
+  },
+  "proven_scope": [
+    "lossless current sealed-array parent projection into Lifecycle v1 keyed representation",
+    "duplicate projection identity refusal",
+    "exact current sealed parent and lifecycle-ledger compare-and-swap",
+    "array export-release evidence drives unchanged Lifecycle v1 FINALIZATION->EXPORT_FROZEN gate",
+    "array author decisions satisfy unchanged Lifecycle v1 author gates",
+    "array integration-proposal refs resolve without authority widening",
+    "unit transitions preserve current parent byte identity",
+    "project transitions are restricted to v1-authorized status/state-version delta and resealed using current state_digest identity",
+    "adapted lifecycle receipt is accepted by current Version/Rollback under LIFECYCLE_TRANSITION authority",
+    "idempotent replay and request/idempotency conflicts remain safe",
+    "provider transition authority remains denied",
+    "all original 18 Lifecycle v1 regression cases remain PASS"
+  ],
+  "preserved_authority": {
+    "new_lifecycle_policy": false,
+    "new_transition_types": false,
+    "provider_transition_authority": false,
+    "author_choice_reinterpretation": false,
+    "document_or_export_authority": false,
+    "publication_authority": false
+  },
+  "non_transfer_rule": "PASS is exact-subject scoped to fc5adf8fd130d7b5324cff0058ab3804d75ec54e. Lifecycle v1 retains its own original exact-SHA qualification; neither qualification is relabeled or transferred to later changed bytes.",
+  "unlocks": "BOOK-SYSTEM-EXPORT-FREEZE-001-IMPLEMENTATION-RECONCILIATION-001",
+  "qualification_effect": "AUTHORITATIVE_A01_PASS_EXACT_SHA_ONLY"
+}
