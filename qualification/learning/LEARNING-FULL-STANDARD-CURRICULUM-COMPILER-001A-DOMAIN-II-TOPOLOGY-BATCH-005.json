@@ -1,0 +1,51 @@
+{
+  "artifact_id": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-DOMAIN-II-TOPOLOGY-BATCH-005",
+  "owner": "SYSTEM_MASTER/LEARNING",
+  "standing": "READY_FOR_BOUNDED_CANDIDATE_POPULATION__NO_SEMANTIC_EDGE_ADMITTED_BY_THIS_PLAN",
+  "control_head_at_authoring": "a1402c5460356bc752565e6edde211fae23c142e",
+  "source_contract": {
+    "source_index": "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-66-SOURCE-NODE-INDEX-001.json",
+    "topology_contract": "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-PREREQUISITE-SUBSKILL-TOPOLOGY-CONTRACT-002.json",
+    "validator": ".github/scripts/learning-full-standard-topology-validator-003.js",
+    "frozen_revision": "2022_CSSGB",
+    "expected_total_requirement_nodes": 66,
+    "domain_selection": "select source_nodes whose frozen domain identity is Domain II, preserving source order and exact source identity",
+    "expected_domain_node_count": 23,
+    "newer_revision_substitution_allowed": false
+  },
+  "batching": {
+    "strategy": "deterministic_source_order_chunks",
+    "maximum_nodes_per_candidate_batch": 5,
+    "expected_batch_sizes": [5, 5, 5, 5, 3],
+    "rule": "No node may be omitted, duplicated, renamed, or moved to another frozen requirement identity. The exact selected node IDs must be emitted into each candidate before validation."
+  },
+  "candidate_requirements": {
+    "prerequisite_edges": "Only admit an edge when a concrete source-bound or Learning-owner provisional rationale and evidence reference are present; otherwise emit an unresolved dependency candidate.",
+    "subskills": "Each provisional subskill must bind to exactly one frozen parent requirement, include a capability statement and derivation class accepted by Validator 003, and have a matching decomposition edge.",
+    "unresolved_dependency_candidates": "Uncertain cross-node or cross-domain relations remain UNRESOLVED__NOT_CANONICAL and are not silently admitted.",
+    "acyclicity": "The admitted prerequisite graph must remain acyclic after every bounded batch.",
+    "resolvability": "Every admitted edge endpoint and every subskill parent must resolve to the frozen source index or the candidate's valid provisional subskill set.",
+    "canonical_admission_ready": false
+  },
+  "protected_evidence_boundaries": {
+    "learner_mastery": "UNOBSERVED",
+    "retention": "UNOBSERVED",
+    "transfer": "UNOBSERVED",
+    "workplace_effectiveness": "UNOBSERVED",
+    "psychometric_validity": "UNOBSERVED",
+    "sme_approval": "UNOBSERVED",
+    "certification_equivalence": "UNOBSERVED",
+    "a01": "NOT_CLAIMED_BY_THIS_ARTIFACT",
+    "native_platform": "NOT_CLAIMED_BY_THIS_ARTIFACT",
+    "production": "NOT_CLAIMED_BY_THIS_ARTIFACT"
+  },
+  "evidence_target": [
+    "all 23 frozen Domain II source nodes receive exactly one bounded-batch disposition",
+    "each changed candidate has an exact candidate SHA/digest and Validator 003 result",
+    "all admitted prerequisite/decomposition edges are resolvable and acyclic",
+    "uncertain relations remain explicit unresolved candidates",
+    "no newer ASQ revision, SME approval, learner outcome, certification, native, A-01, or production evidence is inferred"
+  ],
+  "current_executable_successor": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-DOMAIN-II-TOPOLOGY-CANDIDATE-BATCH-01-006",
+  "successor_instruction": "Materialize the first source-order batch of at most five exact frozen Domain II nodes from the 66-node source index; add only evidence-bound provisional subskill/decomposition/prerequisite structure; leave uncertain relations unresolved; run Validator 003 against the exact candidate; preserve the exact candidate identity and evidence; then continue batch 02 rather than stopping if time remains."
+}
