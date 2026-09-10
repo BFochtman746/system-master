@@ -1,0 +1,212 @@
+{
+  "census_id": "SYSTEM-MASTER-COMPLETION-CENSUS-002",
+  "phase_id": "P7",
+  "result_id": "SYSTEM-MASTER-COMPLETION-CENSUS-002-P7-ORPHAN-UNALLOCATED",
+  "effective_date": "2026-09-10",
+  "owner_path": "SYSTEM_MASTER",
+  "standing": "PHASE_COMPLETE__211_BRANCH_REFS_CENSUSED_BY_OWNER_FAMILY__NO_EXECUTABLE_ORPHAN_BRANCH_AUTHORITY_FOUND",
+  "purpose": "Reconcile repository branch/ref families, workstream/qualification lanes and ambiguous historical refs against the current System Master topology and P6 module dispositions without allowing branch names, workstream IDs, qualification IDs or stale transport refs to create architecture or current execution authority.",
+  "authority_inputs": {
+    "topology": "governance/SYSTEM-TOPOLOGY-002.json",
+    "current_authority": "governance/CURRENT-AUTHORITY.json",
+    "p6_module_allocation": "governance/census/SYSTEM-MASTER-COMPLETION-CENSUS-002-P6-PRODUCT-MODULE-ALLOCATION.json",
+    "branch_inventory_count": 211,
+    "branch_inventory_pages": [
+      "GET /repos/BFochtman746/system-master/branches?per_page=100&page=1",
+      "GET /repos/BFochtman746/system-master/branches?per_page=100&page=2",
+      "GET /repos/BFochtman746/system-master/branches?per_page=100&page=3"
+    ],
+    "live_owner_heads_at_census": {
+      "CORE": "2031f070bd3702185c028733819ec410db36613c",
+      "LEARNING": "35a12e8d3778b7b0f9b36affbac6b2fb188832f5",
+      "BOOK": "05c1f53e2f710f419a99cb99594c53c2f0240b68",
+      "PROSE": "309a7876b8e388d115d4d3bde7dc39dd0ef8b6fd"
+    },
+    "main_at_start": "24c9ad0f3b23901b614b11e616a48191911713a4"
+  },
+  "rules": [
+    "A branch name cannot create a system, owner, qualification PASS or product obligation.",
+    "The canonical owner ref outranks implementation, request, repair, transport, qualification, archive and candidate refs.",
+    "Historical branches are preserved as evidence even when superseded; P7 does not delete refs.",
+    "A candidate or hosted-pass branch remains evidence until the canonical owner explicitly admits/promotes it under the correct exact-SHA authority.",
+    "Shared A-01, runner, repair, Second Shift and qualification refs are infrastructure/evidence, not product systems.",
+    "P6 owner-selection-required product modules remain product-architecture obligations even when no matching current branch is found; absence of a branch does not cancel the requirement.",
+    "Ambiguous evidence is classified EVIDENCE_REVIEW_REQUIRED or OWNER_SELECTION_REQUIRED rather than guessed."
+  ],
+  "branch_family_dispositions": [
+    {
+      "family": "main",
+      "disposition": "CURRENT_REPOSITORY_UMBRELLA__PRODUCT_GOVERNANCE",
+      "owner": "SYSTEM_MASTER",
+      "rule": "Main carries shared governance, registries, workflows and cross-owner evidence; it is not a separate product system or substitute for owner control refs."
+    },
+    {
+      "family": "system-master/control-v2",
+      "disposition": "CURRENT_OWNER_VALID",
+      "owner": "SYSTEM_MASTER/CORE"
+    },
+    {
+      "family": "system-master/* excluding control-v2",
+      "disposition": "CORE_OR_SHARED_INFRASTRUCTURE_HISTORY_AND_EVIDENCE",
+      "owner": "SYSTEM_MASTER/CORE_OR_SHARED_INFRASTRUCTURE",
+      "examples": ["a01-*", "assurance-*", "continuity-*", "f-wp-*", "g-wp-*", "021f-integration-a01"],
+      "rule": "These refs preserve Core, continuity, assurance, A-01 and qualification history. None outranks current Core control or creates a new system."
+    },
+    {
+      "family": "core/*",
+      "disposition": "CORE_HISTORICAL_IMPLEMENTATION_REPAIR_OR_INTEGRATION_EVIDENCE",
+      "owner": "SYSTEM_MASTER/CORE",
+      "rule": "Current objectives are selected only by system-master/control-v2 and current durable governance."
+    },
+    {
+      "family": "learning/control-v1",
+      "disposition": "CURRENT_OWNER_VALID",
+      "owner": "SYSTEM_MASTER/LEARNING",
+      "live_head": "35a12e8d3778b7b0f9b36affbac6b2fb188832f5",
+      "live_delta": "Domain II structural phase closed and Domain III topology/batch sequence bound after the earlier P2/P6 snapshots."
+    },
+    {
+      "family": "learning/domain-ii-* and learning/domain-iii-*",
+      "disposition": "CURRENT_OWNER_DERIVED_CANDIDATE_AND_SUCCESSOR_EVIDENCE",
+      "owner": "SYSTEM_MASTER/LEARNING",
+      "rule": "Exact hosted candidate evidence is preserved; branch existence does not imply canonical graph admission, learner mastery, SME approval, certification equivalence, A-01, native or production authority."
+    },
+    {
+      "family": "learning/impl-* learning/qual-* learning/request-* learning/pilot-* learning/proposed-* learning/repo-baseline-* and learning/*repair*",
+      "disposition": "HISTORICAL_SUPERSEDED_QUALIFICATION_REQUEST_IMPORT_REPAIR_OR_HUMAN_BOUNDARY_EVIDENCE",
+      "owner": "SYSTEM_MASTER/LEARNING",
+      "rule": "The current Learning control record explicitly treats these families as history unless a successor selects an exact item. Human-participant branches do not create participant evidence."
+    },
+    {
+      "family": "book-system/control-v1",
+      "disposition": "CURRENT_OWNER_VALID",
+      "owner": "SYSTEM_MASTER/BOOK"
+    },
+    {
+      "family": "book-system/* excluding control-v1",
+      "disposition": "BOOK_HISTORICAL_REQUEST_QUALIFICATION_IMPLEMENTATION_OR_CANDIDATE_EVIDENCE",
+      "owner": "SYSTEM_MASTER/BOOK",
+      "special_current_candidate": {
+        "ref": "book-system/rf012-owner-candidate-final-refill-20260910",
+        "sha": "67a23c0b09505dc3dd8fd748523fec3868f649b0",
+        "standing": "OWNER_DERIVED_BOUNDED_CANDIDATE_PASS__NOT_CANONICAL_CONTROL"
+      },
+      "rule": "A-01 request/registration/transport branches and old implementation candidates remain evidence; only current Book control selects owner state."
+    },
+    {
+      "family": "literary-prose-engine-001",
+      "disposition": "CURRENT_OWNER_VALID",
+      "owner": "SYSTEM_MASTER/BOOK/PROSE"
+    },
+    {
+      "family": "literary-prose-blind-eval-001",
+      "disposition": "PROSE_BOUNDED_FRESH_CONTEXT_EXECUTION_REF",
+      "owner": "SYSTEM_MASTER/BOOK/PROSE",
+      "rule": "This is a special blind-evaluation execution/evidence ref, not a separate product system."
+    },
+    {
+      "family": "book-eval-lemonade-001-*",
+      "disposition": "PROSE_CAPABILITY_HISTORICAL_REPAIR_TRAINING_AND_BLIND_EVIDENCE",
+      "owner": "SYSTEM_MASTER/BOOK/PROSE",
+      "rule": "BOOK-EVAL-LEMONADE-001 is explicitly mapped to PROSE by current topology."
+    },
+    {
+      "family": "books-literary-prose-001",
+      "disposition": "HISTORICAL_PROSE_ALIAS_EVIDENCE",
+      "owner": "SYSTEM_MASTER/BOOK/PROSE",
+      "rule": "Historical Literary Prose naming cannot create a competing Book or Prose authority."
+    },
+    {
+      "family": "prose/* and literary/*",
+      "disposition": "PROSE_OR_PROSE_A01_MIGRATION_EVIDENCE",
+      "owner": "SYSTEM_MASTER/BOOK/PROSE_OR_SHARED_INFRASTRUCTURE",
+      "rule": "Foundation-closure and migration/probe refs remain bounded evidence; current Prose control and shared A-01 authority govern execution."
+    },
+    {
+      "family": "a01/* infra/* runner/* staging/* repair/* qualification/* governance/*",
+      "disposition": "SHARED_INFRASTRUCTURE_CONTROL_EVIDENCE_OR_TRANSPORT",
+      "owner": "SYSTEM_MASTER/SHARED_INFRASTRUCTURE__ADMINISTERED_BY_CORE_WHERE_DECLARED",
+      "rule": "A-01, runner, repair, qualification, Second Shift and staging refs are explicitly non-systems. Current P5 repair and infrastructure records determine live state."
+    },
+    {
+      "family": "archive/*",
+      "disposition": "HISTORICAL_ONLY__PRESERVED_SNAPSHOT",
+      "owner": "SYSTEM_MASTER",
+      "rule": "Archive refs are evidence and never current execution selectors."
+    },
+    {
+      "family": "cq003-step003f-a01",
+      "disposition": "CORE_ASSURANCE_HISTORICAL_QUALIFICATION_EVIDENCE",
+      "owner": "SYSTEM_MASTER/CORE",
+      "evidence": "The branch head contains an exact-source A-01 manifest for org.systemmaster.assurance QualificationStanding tests; CQ-003 naming does not create an owner."
+    },
+    {
+      "family": "tmp",
+      "disposition": "HISTORICAL_CORE_CONTROL_BRIDGE__BADLY_NAMED_REF__NOT_AUTHORITY",
+      "owner": "SYSTEM_MASTER/CORE",
+      "evidence": "Head c408660e0e05ee00d733513b618287f471b1f408 is a control-v2/main-policy reconciliation and explicitly points engineering authority back to system-master/control-v2.",
+      "cleanup": "P9 stale-ref cleanup candidate; preserve history before any deletion decision."
+    },
+    {
+      "family": "tmp-noop",
+      "disposition": "HISTORICAL_CORE_EVIDENCE__BADLY_NAMED_REF__NOT_AUTHORITY",
+      "owner": "SYSTEM_MASTER/CORE",
+      "evidence": "Head f1a38b798d90edf965f03a6d21bfe04d6e0fde02 explicitly records owner SYSTEM_MASTER/CORE and a bounded authority-delta reconciliation.",
+      "cleanup": "P9 stale-ref cleanup candidate; preserve history before any deletion decision."
+    }
+  ],
+  "qualification_and_workstream_reconciliation": {
+    "canonical_lane_map": {
+      "SYSTEM-MASTER": "CORE",
+      "SYSTEM-MASTER-CONTINUITY": "CORE",
+      "SYSTEM-MASTER-ASSURANCE-RECON": "CORE",
+      "A01-CONTROL-PLANE": "CORE",
+      "LEARNING": "LEARNING",
+      "BOOK-SYSTEM": "BOOK",
+      "LITERARY-PROSE": "PROSE",
+      "BOOK-EVAL-LEMONADE-001": "PROSE"
+    },
+    "a01_registry_finding": "Registered qualification entries use declared workstream_id values and remain exact qualification lanes. Registration or a dedicated branch does not create a product owner and does not outrank SYSTEM-TOPOLOGY-002.",
+    "orphan_workstream_finding": "No inspected registered or branch-derived execution lane justifies a fifth product system or an owner transfer outside the current topology."
+  },
+  "p6_unresolved_target_reconciliation": [
+    {
+      "target": "Response Expectation Engine",
+      "disposition": "EVIDENCE_REVIEW_REQUIRED__NAME_COLLISION_REMAINS",
+      "reason": "Governance EXPECTATION-REGISTRY is not implementation proof for the historical product module. P7 found no branch naming evidence strong enough to resolve the semantic owner or current implementation standing.",
+      "next_phase": "P8 owner/registry adjudication; do not conflate product module with governance registry."
+    },
+    {
+      "target": "Household Ledger",
+      "disposition": "EVIDENCE_REVIEW_REQUIRED__NAME_COLLISION_REMAINS",
+      "reason": "Governance completion/obligation/reallocation ledgers are not proof of a Household Ledger product module. No branch name is allowed to resolve that collision by inference.",
+      "next_phase": "P8 owner/registry adjudication."
+    },
+    {
+      "target": "headless tool owner-registration set",
+      "disposition": "OWNER_SELECTION_REQUIRED__P6_OBLIGATION_PRESERVED",
+      "reason": "No orphan branch may silently become semantic owner for DOCX, Excel, PPTX, PDF, OCR, Research, Knowledge, Writing, File/media and other unresolved headless modules."
+    },
+    {
+      "target": "AI Income and Living Portfolio",
+      "disposition": "OWNER_SELECTION_REQUIRED__NO_BRANCH_DERIVED_SYSTEM_CREATION",
+      "reason": "Historical product intent/research remains preserved, but current topology placement still requires explicit product architecture."
+    }
+  ],
+  "unallocated_finding": {
+    "executable_branch_families_classified_unallocated": 0,
+    "finding": "Every observed branch/ref family can be placed as current owner control, owner-derived candidate/evidence, historical/superseded evidence, shared infrastructure/evidence, archive, or a P9 cleanup candidate without inventing architecture.",
+    "important_boundary": "This does not mean every P6 product module has an owner. Product-module owner-selection obligations remain open because a branch ref is not allowed to fill an architecture gap."
+  },
+  "stale_or_cleanup_candidates": [
+    "tmp",
+    "tmp-noop",
+    "superseded request/registration/transport branches once their evidence lineage is proven durable",
+    "historical control/repair branches whose current authority is already superseded"
+  ],
+  "cleanup_rule": "P7 classifies only. P9 may clean stale live pointers/refs after confirming durable evidence and current owner state; history must not be deleted merely for tidiness.",
+  "repository_control_risk": "The enumerated branch records report protected=false, including canonical refs. P7 records this as a governance-hardening risk but does not alter branch protection or claim current connector administration authority.",
+  "live_delta_note": "Learning advanced after the P2/P6 snapshots to control head 35a12e8d3778b7b0f9b36affbac6b2fb188832f5, closing Domain II structure and binding Domain III work. This is owner-valid delta and must be preserved into P8/P9 rather than treated as an orphan.",
+  "completion_rule": "P7 is complete because the finite 211-ref inventory has been covered by current owner/evidence families, ambiguous standalone refs were content-adjudicated, no branch/workstream/qualification name was promoted into architecture, no executable orphan authority remains unexplained, and genuine product owner-selection/name-collision gaps are preserved for P8 rather than guessed.",
+  "next_global_action": "Advance to P8 ledger reconciliation. Apply P1-P7 durable deltas only after re-reading current owner heads and registries; close stale entries, add missing open obligations and completion records, reconcile the 40-module expectation inventory, preserve current Learning/Book/Prose/Core live deltas, and leave human/external/A-01 authority boundaries truthful."
+}
