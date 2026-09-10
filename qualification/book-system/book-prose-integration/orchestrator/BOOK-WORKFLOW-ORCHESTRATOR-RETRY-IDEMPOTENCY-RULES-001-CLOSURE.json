@@ -3,34 +3,87 @@
   "effective_date": "2026-09-10",
   "owner_path": "SYSTEM_MASTER/BOOK",
   "packet_id": "BOOK-WORKFLOW-ORCHESTRATOR-RETRY-IDEMPOTENCY-RULES-001",
-  "standing": "COMPLETE_WITH_EVIDENCE__HOSTED_EXACT_SUBJECT_PASS",
-  "qualified_subject": {"branch":"book-system/control-v1","sha":"5c55fb8ad99b6795621e94a3ce7391736a3dfd0c","exact_sha_match":true},
-  "qualification": {"workflow_run_id":34501194000,"job_id":102952109760,"result":"PASS","fixture_class":"SYNTHETIC_NON_PRIVATE_RETRY_IDEMPOTENCY_DECISIONS","planned_cases":30,"passed_cases":30,"assertions":30},
-  "evidence_artifact": {"artifact_id":10161904243,"artifact_name":"book-workflow-orchestrator-retry-idempotency-rules-001-34501194000","zip_digest_sha256":"9ea8d999d451722c3aa9cb093ce19c14c1a2786dfd86210710976e5f758d9c92"},
+  "standing": "COMPLETE_WITH_EVIDENCE__HOSTED_EXACT_SUBJECT_PASS__QUALIFIED_REGISTRY_EXACTLY_PINNED",
+  "qualified_subject": {
+    "branch": "book-system/control-v1",
+    "sha": "c37ba0d43d6321a5ae4ba889174517cbafebadc9",
+    "exact_sha_match": true
+  },
+  "qualification": {
+    "workflow_run_id": 34501575922,
+    "job_id": 102953385450,
+    "result": "PASS",
+    "suites": [
+      {
+        "qualification_id": "BOOK-WORKFLOW-ORCHESTRATOR-RETRY-IDEMPOTENCY-RULES-001-QUALIFICATION",
+        "fixture_class": "SYNTHETIC_NON_PRIVATE_RETRY_IDEMPOTENCY_DECISIONS",
+        "planned_cases": 30,
+        "passed_cases": 30,
+        "assertions": 30
+      },
+      {
+        "qualification_id": "BOOK-WORKFLOW-ORCHESTRATOR-RETRY-IDEMPOTENCY-REGISTRY-PIN-001-QUALIFICATION",
+        "fixture_class": "SYNTHETIC_NON_PRIVATE_REGISTRY_PIN_ADVERSARIAL",
+        "planned_cases": 12,
+        "passed_cases": 12,
+        "assertions": 12
+      }
+    ],
+    "aggregate_planned_cases": 42,
+    "aggregate_passed_cases": 42,
+    "aggregate_assertions": 42
+  },
+  "evidence_artifact": {
+    "artifact_id": 10162055607,
+    "artifact_name": "book-workflow-orchestrator-retry-idempotency-rules-001-34501575922",
+    "zip_digest_sha256": "a451e41a93a4773a203d0425e207d111045e2d0b59fe23a6c1b79c4a09640907",
+    "files": [
+      "book-workflow-orchestrator-retry-idempotency-rules-001-summary.json",
+      "book-workflow-orchestrator-retry-idempotency-registry-pin-001-summary.json"
+    ]
+  },
+  "qualified_registry_binding": {
+    "registry_id": "BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-002",
+    "qualified_subject_sha": "77db6b550e9aeb1dfb956627376becbb591498f8",
+    "git_blob_sha": "d5c31835cb79e8267fdbe868f073ef311e85214f",
+    "rule": "Retry semantics must come from this exact qualified registry content; look-alike or modified registry objects fail closed."
+  },
+  "superseded_evidence_lineage": [
+    {
+      "qualified_subject_sha": "5c55fb8ad99b6795621e94a3ce7391736a3dfd0c",
+      "workflow_run_id": 34501194000,
+      "artifact_id": 10161904243,
+      "standing": "VALID_FOR_PRIOR_RUNTIME_SUBJECT__SUPERSEDED_BY_STRONGER_REGISTRY_PINNED_SUBJECT",
+      "reason": "The later runtime pins retry semantics to the exact previously-qualified Service Registry V2 content; the earlier exact-subject PASS remains historical evidence and is not deleted."
+    },
+    {
+      "subject_sha": "8066bbed77af605cf57a0c686542bb5a156159b4",
+      "workflow_run_id": 34501418228,
+      "standing": "FAILED_PREQUALIFICATION__PRESERVED",
+      "reason": "The stronger registry pin rejected the old malformed-registry fixture earlier than its prior expected diagnostic. No PASS was admitted; the fixture expectation was reconciled without weakening the pin."
+    }
+  ],
   "proven": [
-    "Identical authoritative inputs produce stable logical operation identity and idempotency key.",
-    "Registered idempotency is read from qualified BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-002.",
-    "Changed authoritative inputs create a new operation identity and are not retried as the prior operation.",
-    "Reusing an old idempotency key with changed inputs fails closed as IDEMPOTENCY_KEY_CONFLICT.",
-    "Registered idempotent operations with unknown or confirmed-no-effect outcomes may be classified SAFE_SAME_OPERATION_REPLAY.",
-    "Confirmed successful idempotent results are reused/reviewed rather than duplicated.",
-    "PROSE.GENERATE_REVISION_CANDIDATE remains non-idempotent and unknown outcomes require reconciliation before new generation.",
-    "Confirmed no-effect reconciliation allows only consideration of a new attempt; confirmed existing result requires reuse/review.",
-    "Unresolved or contradictory non-idempotent reconciliation remains fail-closed.",
-    "Reconciliation conclusions require evidence references.",
-    "Author waits, non-callable canon and Book admission are outside provider retry authority.",
+    "Identical authoritative workflow/source/plan/task/service/input/context identities produce stable logical operation identity and idempotency key.",
+    "Changed authoritative inputs produce a new operation identity; reuse of an old idempotency key fails closed.",
+    "Registered idempotency is read from exact qualified BOOK-SYSTEM-SERVICE-INTERFACE-REGISTRY-002 content, not an injectable look-alike policy table.",
+    "Forged registry identity, version, content, idempotency flips and qualified-subject mismatches fail closed.",
+    "Registered idempotent operations may be classified for exact same-operation replay without implying execution authority.",
+    "PROSE.GENERATE_REVISION_CANDIDATE remains registered non-idempotent; unknown outcomes require reconciliation before any new generation.",
+    "Confirmed no-effect reconciliation permits only consideration of a new attempt; confirmed existing result requires reuse or review.",
+    "Unresolved or contradictory non-idempotent outcomes remain fail closed and require evidence references.",
+    "Author waits, non-callable authorities and Book admission are outside provider retry authority.",
     "Stale plan/workflow/source bindings, operation identity tampering and decision digest tampering fail closed.",
     "Raw manuscript content is forbidden in retry inputs/records.",
     "Runtime exposes no provider execution, Book admission, preference-write, scheduler or worker API."
   ],
   "non_claims": [
-    "No provider retry executed.",
-    "No provider reconciliation executed.",
-    "No canonical manuscript mutation or Book admission executed.",
+    "No provider retry or reconciliation was executed.",
+    "No canonical manuscript mutation or Book admission was executed.",
     "No Prose runtime or preference event was mutated.",
     "No cache, cancellation/resume or scheduler/worker execution occurred.",
-    "No fresh blind scoring occurred.",
-    "No A-01 PASS is claimed for this subject.",
+    "No evaluator fresh-context or blind isolation was established and no fresh blind scoring occurred.",
+    "No A-01 PASS is claimed for this 2F subject.",
     "No private/native/publication/production readiness is claimed."
   ],
   "exact_successor": "BOOK-WORKFLOW-ORCHESTRATOR-FAILURE-SEMANTICS-001"
