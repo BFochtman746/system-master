@@ -44,7 +44,11 @@
       "phase_id": "P2",
       "name": "Learning completion and obligation census",
       "status": "PENDING",
-      "scope": "Learning impl/qual/pilot/request/repair lineages, frozen authority, machine qualification, human-only boundaries, current technical successor selection."
+      "scope": "Learning impl/qual/pilot/request/repair lineages, frozen authority, machine qualification, human-only boundaries, current technical successor selection.",
+      "owner_lane_result": "COMPLETE__SEALED_RESULT_AVAILABLE",
+      "owner_lane_result_pointer": "governance/census/SYSTEM-MASTER-COMPLETION-CENSUS-002-P2-LEARNING.json",
+      "owner_lane_control_head_after_selection": "8d14642dfed242adb3eea4b33125272a8d3d657a",
+      "global_admission_blocker": "P1 remains PENDING under the central phase-sequencing rule. Do not replay the completed Learning owner-lane forensic work when P2 becomes globally admissible; validate only any live delta after the sealed P2 result."
     },
     {
       "phase_id": "P3",
@@ -89,6 +93,6 @@
       "scope": "Compare live control heads/main with watermark; reconcile only post-watermark changes; clean stale live tickets/delegations/control pointers without deleting history; seal successor state baseline and one central next objective."
     }
   ],
-  "resume_rule": "A replacement chat/task reads this checkpoint and starts at the first phase whose status is not COMPLETE. It does not replay completed phases unless evidence specifically invalidates them.",
+  "resume_rule": "A replacement chat/task reads this checkpoint and starts at the first phase whose status is not COMPLETE. It does not replay completed phases unless evidence specifically invalidates them. A phase with owner_lane_result COMPLETE__SEALED_RESULT_AVAILABLE is not replayed when its turn becomes globally admissible; reconcile only the live delta and admit the sealed result.",
   "final_exit_condition": "Every evidence-backed completion and every known open obligation is owned and durable; every current control can explain its predecessor chain; expected capabilities have current dispositions; active Second Shift lists contain only live revalidated delegations; no known active work depends on chat memory alone."
 }

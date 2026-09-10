@@ -1,0 +1,62 @@
+{
+  "delta_id": "SYSTEM-MASTER-COMPLETION-CENSUS-002-P2-LEARNING-LEDGER-DELTA-001",
+  "effective_date": "2026-09-09",
+  "owner_path": "SYSTEM_MASTER/LEARNING",
+  "source_result": "governance/census/SYSTEM-MASTER-COMPLETION-CENSUS-002-P2-LEARNING.json",
+  "control_ref": "learning/control-v1",
+  "control_head": "8d14642dfed242adb3eea4b33125272a8d3d657a",
+  "standing": "DURABLE_DELTA__APPLY_DURING_P8_LEDGER_RECONCILIATION",
+  "reason": "P2 owner-lane work is complete, but the central census phase order keeps P1 ahead of global P2 admission and P8 is the designated shared-ledger reconciliation phase. Preserve the exact required mutations now without rewriting shared registries out of sequence.",
+  "obligation_registry_delta": [
+    {
+      "operation": "CLOSE",
+      "obligation_id": "LEARNING-NEXT-NONHUMAN-SUCCESSOR-001",
+      "from_state": "OWNER_SELECTION_REQUIRED",
+      "to_state": "CLOSED",
+      "closure_reason": "Learning P2 forensic census selected and recorded one highest-value dependency-valid non-human successor in current Learning control.",
+      "selected_successor": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001",
+      "closure_evidence": "governance/census/SYSTEM-MASTER-COMPLETION-CENSUS-002-P2-LEARNING.json"
+    },
+    {
+      "operation": "ADD",
+      "obligation_id": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001",
+      "owner_path": "SYSTEM_MASTER/LEARNING",
+      "state": "ACTIVE",
+      "objective": "Extend the proven external-standard Learning architecture from the existing two-requirement bounded module to a source-bound full-standard curriculum architecture across all 66 frozen 2022 ASQ CSSGB leaf requirements without fabricating SME, certification, psychometric, participant, native-platform or production authority.",
+      "first_phase_id": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-RESEARCH-GRAPH-SPEC",
+      "source": "learning/control-v1/LEARNING-CONTROL-RECORD-v2.md",
+      "predecessor_standing": "IMPL-013 froze/decomposed 66 external-standard requirements; IMPL-014 proved the compiler/update loop for two connected requirements; full 66-requirement curriculum and validated prerequisite/subskill decomposition remain unbuilt.",
+      "stop_condition": "Complete the source-bound 66-requirement research/graph specification, expose unresolved authority-sensitive judgments, and select one bounded implementation successor without repeating closed Learning work."
+    },
+    {
+      "operation": "NO_CHANGE",
+      "obligation_id": "LEARNING-REAL-PARTICIPANT-PILOT-001",
+      "state": "BLOCKED",
+      "blocker_class": "HUMAN_ONLY",
+      "reason": "Machine final-human-execution software boundary is already qualified; genuine consent, learner responses, retention and transfer outcomes remain human evidence."
+    }
+  ],
+  "completion_ledger_delta": [
+    {
+      "operation": "ADD",
+      "completion_id": "LEARNING-P2-COMPLETION-CENSUS-001",
+      "owner_path": "SYSTEM_MASTER/LEARNING",
+      "classification": "OWNER_LANE_FORENSIC_CENSUS_AND_SUCCESSOR_SELECTION",
+      "standing": "COMPLETE__GLOBAL_CENSUS_ADMISSION_PENDING_P1",
+      "evidence_pointer": "governance/census/SYSTEM-MASTER-COMPLETION-CENSUS-002-P2-LEARNING.json",
+      "control_head_after_selection": "8d14642dfed242adb3eea4b33125272a8d3d657a",
+      "result_summary": "Reconciled Learning implementation, qualification, pilot, request, proposed, import and repair lineages; preserved exact-SHA and human-only truth boundaries; identified the full-standard curriculum gap; selected the first non-human successor.",
+      "does_not_prove": [
+        "real participant consent or outcomes",
+        "psychometric or population validity",
+        "external certification or SME approval",
+        "native-platform conformance",
+        "production authority",
+        "A-01 PASS for any future changed implementation bytes"
+      ]
+    }
+  ],
+  "expectation_registry_delta": [],
+  "reallocation_ledger_delta": [],
+  "apply_rule": "P8 must reconcile this delta against the then-current shared registries and live Learning control before mutation. If later evidence supersedes any operation, preserve this delta as historical evidence and record the superseding disposition rather than silently deleting it."
+}
