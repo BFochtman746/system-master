@@ -1,0 +1,66 @@
+{
+  "plan_id": "BOOK-SYSTEM-CANONICAL-CONTENT-OBJECT-ADMISSION-001-RESIDUAL-FAILURE-INJECTION-PLAN-001",
+  "effective_date": "2026-09-10",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "standing": "READY__A01_INDEPENDENT_TEST_DESIGN__IMPLEMENTATION_UNCHANGED",
+  "control_head_before_plan": "bf44922fb505b80ead6b214c1bb818541c1d5420",
+  "bound_implementation_subject_sha": "e993806a1d9a4838d4bd6d162a36921526ef302a",
+  "current_qualification_evidence": {
+    "deterministic_primary_suite": "30/30 PASS",
+    "version_rollback_regression": "PASS",
+    "hosted_run_id": 34445193712,
+    "hosted_job_id": 102768363655,
+    "evidence_artifact_id": 10139375364,
+    "evidence_artifact_digest": "sha256:fb12492c6b7a738e2390b2d346e47e93c03168d457acd6f88b9f29d7ca0fc685",
+    "a01_pass": false
+  },
+  "purpose": "Use the Book work-ahead ladder while central A-01 registration remains pending by designing a second-layer deterministic failure-injection campaign around the already-hosted-passed content-admission seam. This plan does not mutate the tested implementation subject and does not invent a defect where evidence is not yet available.",
+  "primary_suite_already_covers": [
+    "parent-only canonical write authority",
+    "stale aggregate version and digest rejection",
+    "object registration and activation",
+    "manuscript digest binding",
+    "object and unit predecessor lineage",
+    "source currentness",
+    "chapter/scene same-book parentage",
+    "deterministic active ordering through a new BOOK_PLAN",
+    "multi-operation atomic failure",
+    "idempotent exact replay and divergent replay rejection",
+    "no lifecycle/publication authority grant",
+    "author-decision-required fail-closed behavior and approved-decision precondition",
+    "pre/post aggregate digest receipt binding"
+  ],
+  "residual_test_design": [
+    {"id":"RF001_UNKNOWN_OPERATION_TYPE","classification":"FAIL_CLOSED_CONTRACT_SHAPE","expected":"unknown operation is rejected before canonical mutation"},
+    {"id":"RF002_REQUIRED_FIELD_OMISSION","classification":"FAIL_CLOSED_CONTRACT_SHAPE","expected":"missing required operation/request fields are rejected without state mutation"},
+    {"id":"RF003_INVALID_CONTENT_DIGEST_FORMAT","classification":"PROVENANCE_INTEGRITY","expected":"non-SHA-256 content identity is rejected"},
+    {"id":"RF004_INVALID_SOURCE_SUBJECT_IDENTITY","classification":"PROVENANCE_INTEGRITY","expected":"invalid source subject SHA is rejected"},
+    {"id":"RF005_OBJECT_PAYLOAD_ID_MISMATCH","classification":"IDENTITY_BINDING","expected":"payload object identity cannot diverge from admitted operation identity"},
+    {"id":"RF006_OBJECT_PAYLOAD_VERSION_MISMATCH","classification":"IDENTITY_BINDING","expected":"payload version cannot diverge from admitted operation version"},
+    {"id":"RF007_ADMISSION_METADATA_MISMATCH","classification":"PROVENANCE_BINDING","expected":"caller payload cannot override canonical admission metadata"},
+    {"id":"RF008_UNKNOWN_CONTENT_OBJECT_CLASS","classification":"AUTHORITY_SURFACE","expected":"unsupported object class cannot enter the Book canonical aggregate"},
+    {"id":"RF009_INVALID_CHAPTER_PARENT","classification":"SAME_BOOK_PARENTAGE","expected":"chapter parent must be exact BOOK_PROJECT identity"},
+    {"id":"RF010_DUPLICATE_OR_INVALID_ACTIVE_ORDER_REF","classification":"DETERMINISTIC_ORDER","expected":"duplicate, malformed, missing or wrong-type active-order refs fail closed"},
+    {"id":"RF011_NON_APPROVED_AUTHOR_DECISION","classification":"HUMAN_AUTHORITY_BOUNDARY","expected":"pending/rejected/non-affirmative author decision cannot satisfy requires_author_decision"},
+    {"id":"RF012_AUTHOR_DECISION_SCOPE_BINDING_QUESTION","classification":"TEST_NEEDED_NOT_DEFECT_CLAIM","expected":"determine from owner contract whether an approved decision must also bind the exact Book/object/operation subject before accepting it; if the contract requires that binding and runtime lacks it, record a new defect rather than broadening authority silently"},
+    {"id":"RF013_OPERATION_ORDERING_IDEMPOTENCY","classification":"TRANSACTION_IDEMPOTENCY","expected":"semantically different operation ordering under the same mutation_id cannot inherit a prior receipt unless byte-identical under the governed canonical request contract"},
+    {"id":"RF014_REPLAY_AFTER_INTERVENING_STATE_ADVANCE","classification":"REPLAY_STABILITY","expected":"exact prior replay returns only its prior receipt and cannot overwrite or roll back a newer canonical head"},
+    {"id":"RF015_FAILED_AUTHORIZATION_ZERO_SIDE_EFFECTS","classification":"ATOMICITY_AUTHORITY","expected":"all rejected authority/provenance/parentage cases leave aggregate, ledger and active pointers byte-equivalent to pre-request state"},
+    {"id":"RF016_UNAUTHORIZED_LIFECYCLE_EXPORT_PROVIDER_FIELDS","classification":"BOUNDARY_INJECTION","expected":"content-admission operations cannot smuggle lifecycle, export-freeze, publication-provider, Document or Prose authority changes into canonical state"}
+  ],
+  "execution_rule": "Keep this artifact as test design on the Book control branch. Do not modify e993806a1d9a4838d4bd6d162a36921526ef302a merely to preserve its existing hosted/A-01 preparation identity. If a derivative executable/test subject is created to run this supplemental campaign, it receives a new exact SHA and fresh hosted qualification; the pending A-01 request must then be explicitly adjudicated/rebound rather than silently transferring PASS.",
+  "completion_delta": "The Book lane no longer stops at central A-01 registration pending. A concrete, bounded, A-01-independent failure-injection successor is now durably specified against the exact hosted-passed implementation without changing or promoting that subject.",
+  "next_objective": "BOOK-SYSTEM-CANONICAL-CONTENT-OBJECT-ADMISSION-001-RESIDUAL-FAILURE-INJECTION-DERIVATIVE-DECISION-002",
+  "next_evidence_target": [
+    "owner adjudication of RF012 author-decision scope semantics from existing Book authority",
+    "deterministic executable supplemental tests for admitted residual cases on a new exact subject if implementation/test bytes change",
+    "fresh hosted exact-SHA receipt for any derivative subject",
+    "explicit preservation or rebind decision for the existing central A-01 registration request"
+  ],
+  "forbidden": [
+    "no hosted-to-A-01 PASS transfer",
+    "no mutation of the exact e993 implementation under an unchanged identity",
+    "no fabricated author decision or manuscript evidence",
+    "no publication, provider, Document, Prose, native or production authority transfer"
+  ]
+}
