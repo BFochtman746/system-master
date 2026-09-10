@@ -1,0 +1,43 @@
+name: Learning Domain II Batch 01 Rescue Prequalification
+
+on:
+  push:
+    branches:
+      - learning/domain-ii-batch-01-rescue-20260910
+    paths:
+      - "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-DOMAIN-II-BATCH-01-CANDIDATE-006.json"
+      - ".github/scripts/learning-domain-ii-batch-01-rescue-qualify.js"
+      - ".github/workflows/learning-domain-ii-batch-01-rescue-prequal.yml"
+      - ".github/scripts/learning-full-standard-topology-validator-003.js"
+      - "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-TOPOLOGY-CANDIDATE-003.json"
+      - "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-66-SOURCE-NODE-INDEX-001.json"
+      - "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-PREREQUISITE-SUBSKILL-TOPOLOGY-CONTRACT-002.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  batch01:
+    name: Domain II batch 01 exact-source merge validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - name: Syntax check batch qualifier
+        run: node --check .github/scripts/learning-domain-ii-batch-01-rescue-qualify.js
+      - name: Validate batch and run Validator 003 against ephemeral merged candidate
+        run: node .github/scripts/learning-domain-ii-batch-01-rescue-qualify.js
+      - name: Upload hosted batch evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: LEARNING-DOMAIN-II-BATCH-01-${{ github.sha }}-hosted-evidence
+          path: ${{ runner.temp }}/learning-domain-ii-batch-01-evidence
+          if-no-files-found: warn
+          retention-days: 30
