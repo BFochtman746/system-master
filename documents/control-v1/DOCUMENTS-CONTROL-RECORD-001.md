@@ -48,4 +48,4 @@ BOOK and DOCUMENTS are peer systems. BOOK owns canonical book lifecycle/state an
 
 ## Second Shift
 
-DOCUMENTS owns its own Second Shift lane. The lane replaces the retired Prose lane for independent execution scheduling and is separate from the SYSTEM_MASTER root lane used for product-root governance or other root-owned work.
+DOCUMENTS owns its own active Second Shift lane and scheduled worker, exactly like the other active peer/system owners. This lane replaces the retired Prose lane for independent execution scheduling. SYSTEM_MASTER itself remains the portfolio controller/orchestrator and does not have an active peer-worker Second Shift lane.
