@@ -79,11 +79,11 @@ function validatePinnedServiceRegistry(serviceRegistry) {
 }
 
 function registeredOperationPolicy(capability, serviceRegistry) {
-  validatePinnedServiceRegistry(serviceRegistry);
-  const service = serviceRegistry.services && serviceRegistry.services[capability.service_id];
+  const service = serviceRegistry && serviceRegistry.services && serviceRegistry.services[capability.service_id];
   const operation = service && service.operations && service.operations[capability.operation_id];
   if (!operation) fail('REGISTERED_SERVICE_OPERATION_NOT_FOUND', `${capability.service_id}:${capability.operation_id}`);
   if (typeof operation.idempotent !== 'boolean') fail('REGISTERED_IDEMPOTENCY_FLAG_MISSING', `${capability.service_id}:${capability.operation_id}`);
+  validatePinnedServiceRegistry(serviceRegistry);
   return { idempotent: operation.idempotent, service_id: capability.service_id, operation_id: capability.operation_id };
 }
 
