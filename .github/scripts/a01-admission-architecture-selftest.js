@@ -32,6 +32,7 @@ assert(binding.same_commit_gateway_required === true, 'same-commit gateway rule 
 assert(binding.job_level_rerun_is_authority_refresh === false, 'job rerun must not refresh authority');
 assert(binding.receipt_requires_control_plane_sha === true, 'receipt control-plane binding missing');
 assert(binding.unregistered_must_fail_before_self_hosted === true, 'unregistered admission must fail before A-01');
+assert(binding.subject_and_control_plane_are_independent_exact_identities === true, 'dual exact identity law missing');
 
 assert(Array.isArray(receipt.properties.receipt_version.enum) && receipt.properties.receipt_version.enum.includes(1) && receipt.properties.receipt_version.enum.includes(2), 'receipt v1/v2 compatibility missing');
 assert(receipt.properties.control_plane_sha && receipt.properties.control_plane_checkout_sha, 'receipt control-plane properties missing');
@@ -39,25 +40,27 @@ assert(Array.isArray(receipt.allOf) && receipt.allOf.length > 0, 'v2 receipt con
 
 assert(broker.includes('workflow_dispatch:'), 'broker dispatch entry missing');
 assert(broker.includes("refs/heads/main"), 'broker must require canonical main dispatch');
+assert(broker.includes('runs-on: ubuntu-latest'), 'broker admission must be hosted before A-01');
 assert(broker.includes('ref: ${{ github.sha }}'), 'broker must checkout dispatch-time control plane');
 assert(broker.includes('a01-admission-preflight.js'), 'broker preflight missing');
+assert(broker.includes('needs: admission'), 'broker gateway call must wait for hosted admission');
 assert(broker.includes('uses: ./.github/workflows/a01-control-plane-gateway.yml'), 'broker must call local same-commit gateway');
 assert(!broker.includes('a01-control-plane-gateway.yml@main'), 'broker mutable @main gateway forbidden');
 
-assert(gateway.includes('admission_guard:'), 'gateway hosted admission guard missing');
-assert(gateway.includes('runs-on: ubuntu-latest'), 'gateway hosted admission must not consume A-01');
-assert(gateway.includes('a01-admission-preflight.js'), 'gateway admission preflight missing');
-assert(gateway.includes('A01_CONTROL_PLANE_SHA'), 'gateway exact control-plane environment missing');
-assert(gateway.includes('needs: [admission_guard, repair_lineage_guard]'), 'A-01 must depend on hosted admission and lineage guard');
-assert(gateway.includes('ref: ${{ needs.admission_guard.outputs.control_plane_sha }}'), 'gateway downstream control-plane pin missing');
-assert(gateway.includes('ref: ${{ job.workflow_sha }}'), 'gateway must derive control-plane identity from immutable workflow SHA');
+assert(gateway.includes('runs-on: [self-hosted, Windows, X64]'), 'gateway must preserve canonical A-01 runner labels');
+assert(gateway.includes('needs: repair_lineage_guard'), 'gateway must preserve repair lineage gate');
+assert(gateway.includes('ref: ${{ job.workflow_sha }}'), 'gateway repair and execution authority must derive from immutable workflow SHA');
 assert(!gateway.includes('Checkout live durable repair state'), 'live-main repair authority mixing must be removed');
+assert(gateway.includes('A01_CONTROL_PLANE_SHA'), 'gateway exact control-plane environment missing');
+assert(gateway.includes('control-plane-request-binding.json'), 'gateway must persist requested control-plane binding');
 assert(gateway.includes('a01-control-plane-execute-v2.js'), 'v2 receipt binding execution wrapper missing');
+assert(gateway.includes('group: a01-global-r2'), 'global A-01 serialization must remain intact');
+assert(gateway.includes('queue: max'), 'global A-01 queue mode must remain max');
 
-assert(repair.includes('ref: ${{ github.sha }}'), 'repair prepare must use dispatch-time immutable control plane');
+assert(repair.includes('ref: ${{ github.sha }}'), 'repair prepare must use immutable dispatch/call control plane');
 assert(repair.includes('uses: ./.github/workflows/a01-control-plane-gateway.yml'), 'repair rerun must call local gateway');
 assert(!repair.includes('a01-control-plane-gateway.yml@main'), 'repair mutable @main gateway forbidden');
-assert(repair.includes('control_plane_sha: ${{ steps.control.outputs.control_plane_sha }}') || repair.includes('Control-plane SHA:'), 'repair rerun must record exact control-plane SHA');
+assert(repair.includes('Control-plane SHA:'), 'repair rerun must record exact control-plane SHA');
 
 assert(overnight.includes('uses: ./.github/workflows/a01-control-plane-gateway.yml'), 'overnight slots must use same-commit local gateway');
 assert(!overnight.includes('a01-control-plane-gateway.yml@main'), 'overnight mutable @main gateway forbidden');
