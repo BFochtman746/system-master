@@ -1,0 +1,107 @@
+{
+  "checkpoint_id": "BOOK-PROSE-INTEGRATION-PHASE-0-REVALIDATION-CHECKPOINT-002",
+  "effective_at": "2026-09-10T11:15:09-04:00",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "checkpoint_class": "PINNED_READ_RECONCILE_EVIDENCE__NO_CANONICAL_CONTROL_MUTATION",
+  "purpose": "Revalidate the original Phase-0 preservation baseline against the live Book owner branch before further Book-Prose integration, while preventing a concurrent writer race from overwriting or replaying valid work.",
+  "authoritative_control_ref": "book-system/control-v1",
+  "pinned_authoritative_source_sha": "1db07523bba6602dd49d358b55aaa22e5300c77a",
+  "evidence_branch": "book-prose-integration/phase0-revalidation-20260910-1115",
+  "prior_phase0_checkpoint": "qualification/book-system/book-prose-integration/BOOK-PROSE-INTEGRATION-PRE-INTEGRATION-CHECKPOINT-001.json",
+  "observed_live_head_sequence_during_this_audit": [
+    {
+      "sha": "97fee1a7752dcf9f70c02f479ee7741bff5eb4a7",
+      "commit_time": "2026-09-10T11:11:49-04:00",
+      "message": "book: advance prose integration to capability routing interface"
+    },
+    {
+      "sha": "74d73cc061a28d3af6392b1a801bcea4747d748c",
+      "commit_time": "2026-09-10T11:14:07-04:00",
+      "message": "book: add capability routing interface hosted qualification"
+    },
+    {
+      "sha": "1db07523bba6602dd49d358b55aaa22e5300c77a",
+      "commit_time": "2026-09-10T11:15:09-04:00",
+      "message": "book: close capability routing interface packet"
+    }
+  ],
+  "concurrency_finding": {
+    "classification": "ACTIVE_CONCURRENT_CANONICAL_BOOK_BRANCH_WRITER",
+    "proven": true,
+    "safety_effect": "DO_NOT_WRITE_OR_ADVANCE_CANONICAL_BOOK_CONTROL_FROM_THIS_CHAT_UNTIL_SINGLE_WRITER_OR_STABLE_OWNER_REVALIDATION_IS ESTABLISHED",
+    "reason": "The authoritative Book control ref changed multiple times during one preservation audit. Racing it could duplicate packets, stale current selectors, or place a successor on an already-superseded parent."
+  },
+  "preserved_completed_integration_work": [
+    {
+      "packet": "BOOK-PROSE-INTEGRATION-PHASE-0-CURRENT-STATE-CENSUS-001",
+      "standing": "COMPLETE_WITH_EVIDENCE"
+    },
+    {
+      "packet": "BOOK-PROSE-INTEGRATION-PHASE-1-INPUT-CENSUS-001",
+      "standing": "COMPLETE_WITH_EVIDENCE"
+    },
+    {
+      "packet": "BOOK-WORKFLOW-ORCHESTRATOR-AUTHORITY-CONTRACT-001",
+      "standing": "CLOSED__HOSTED_SYNTHETIC_AUTHORITY_CONTRACT_PASS__16_OF_16"
+    },
+    {
+      "packet": "BOOK-WORKFLOW-ORCHESTRATOR-WORKFLOW-STATE-MODEL-001",
+      "standing": "CLOSED__HOSTED_SYNTHETIC_COORDINATION_STATE_PASS__22_OF_22"
+    },
+    {
+      "packet": "BOOK-WORKFLOW-ORCHESTRATOR-CAPABILITY-ROUTING-INTERFACE-001",
+      "standing": "CLOSED__HOSTED_SYNTHETIC_EXACT_CAPABILITY_ROUTING_PASS__20_OF_20",
+      "qualified_subject_sha": "74d73cc061a28d3af6392b1a801bcea4747d748c",
+      "closure_commit": "1db07523bba6602dd49d358b55aaa22e5300c77a"
+    }
+  ],
+  "authority_fences_revalidated": {
+    "book_canonical_manuscript_owner": "SYSTEM_MASTER/BOOK",
+    "prose_owner": "SYSTEM_MASTER/BOOK/PROSE",
+    "prose_role": "SPECIALIST_LITERARY_INTELLIGENCE",
+    "prose_canonical_manuscript_write_authority": false,
+    "book_workflow_orchestrator_authority": "COORDINATION_ONLY",
+    "book_admission_gate_is_sole_canonical_manuscript_effect_path": true,
+    "story_bible_canon_truth_authority_preserved": true,
+    "research_external_evidence_truth_authority_preserved": true,
+    "author_final_creative_and_semantic_authority_preserved": true
+  },
+  "preservation_findings": [
+    {
+      "finding": "PRODUCT_PARENT_BINDING_009_STALE_SELECTION_METADATA",
+      "detail": "Binding-009 still selects Phase 1 while State-031 and the integration ledger had advanced to Phase 2C; do not delete Binding-009, supersede it only from the canonical owner lineage after writer revalidation."
+    },
+    {
+      "finding": "SECOND_SHIFT_BOOK_DELEGATION_STALE",
+      "detail": "main governance/second-shift/BOOK-DELEGATIONS.json remains bound to the earlier Phase-1 owner head and must not replay Phase 1."
+    },
+    {
+      "finding": "WORK_OBLIGATION_REGISTRY_BOOK_RF012_ROW_STALE",
+      "detail": "main governance/WORK-OBLIGATION-REGISTRY-002.json still carries RF012 promotion as READY although owner lineage has advanced well beyond it; preserve row as historical drift until shared registry reconciliation."
+    },
+    {
+      "finding": "QUARANTINED_REPAIR_REF_PRESERVED",
+      "detail": "book-system/control-v1-repair is explicitly quarantined non-authoritative history and must not route integration work."
+    },
+    {
+      "finding": "MORNING_RECONCILIATION_REF_PRESERVED",
+      "detail": "book/reconcile-post-morning-merge-20260910 remains historical Second Shift reconciliation lineage and is not an alternate canonical Book owner."
+    },
+    {
+      "finding": "LOCAL_UNCOMMITTED_WORK_NOT_OBSERVABLE",
+      "detail": "GitHub remote evidence cannot prove whether a developer-local working tree contains unpushed changes. No clean-local claim is made."
+    }
+  ],
+  "open_nonblocking_fences": [
+    "Original Book canonical-content-admission A-01 subject remains separately blocked unless central A-01 evidence says otherwise.",
+    "Fresh-context blind Prose scoring has not been executed in this integration context and must not be faked.",
+    "Story Bible canon check and Book continuity check have declared owners but no qualified callable interface in the Phase-2C routing packet.",
+    "Book canonical admission remains intentionally non-dispatchable until the admission-handoff packet.",
+    "Native-device, private-manuscript, publication and production qualification remain unobserved unless separately evidenced."
+  ],
+  "duplicate_or_conflicting_authority": "NO_SECOND_CANONICAL_MANUSCRIPT_OWNER_FOUND__CONCURRENT_WRITER_IS_A_CONTROL_CONCURRENCY_PROBLEM_NOT_AN_AUTHORITY_TRANSFER",
+  "unresolved_evidence_receipts": "NO_MISSING_RECEIPT_FOUND_FOR_PHASE_1_OR_PHASE_2A_2B_2C_HOSTED_CLOSURES__EXTERNAL_A01_FRESH_BLIND_NATIVE_PRIVATE_AND_PRODUCTION_FENCES_REMAIN EXPLICIT",
+  "phase0_standing": "COMPLETE_WITH_EVIDENCE__INTEGRATION_CONTINUATION_BLOCKED_BY_ACTIVE_CONCURRENT_CANONICAL_WRITER",
+  "stop_reason": "REAL_PRESERVATION_AND_AUTHORITY_CONTROL_HAZARD__CANONICAL_OWNER_REF_MOVED_DURING_AUDIT",
+  "next_dependency_valid_action_after_writer_control_is_restored": "Re-read book-system/control-v1, adopt the newest valid owner-selected integration successor without replaying Phase 0, Phase 1, or closed Phase 2 packets, reconcile stale current-selection metadata, and continue one bounded packet at a time."
+}
