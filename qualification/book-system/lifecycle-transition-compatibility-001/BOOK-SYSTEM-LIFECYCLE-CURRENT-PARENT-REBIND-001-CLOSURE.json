@@ -1,0 +1,70 @@
+{
+  "closure_id": "BOOK-SYSTEM-LIFECYCLE-CURRENT-PARENT-REBIND-001-CLOSURE",
+  "effective_date": "2026-09-09",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "objective": "BOOK-SYSTEM-LIFECYCLE-CURRENT-PARENT-REBIND-001",
+  "standing": "CLOSED__HOSTED_AND_AUTHORITATIVE_A01_PASS__EXACT_SHA_SCOPED",
+  "qualified_subject_sha": "ffbcc2ab36a41afb580224681642105deb62e741",
+  "hosted": {
+    "run_id": 34430489049,
+    "job_id": 102724790047,
+    "case_count": 39,
+    "pass_count": 39,
+    "fail_count": 0,
+    "result_class": "PASS"
+  },
+  "authoritative_a01": {
+    "run_id": 34430908557,
+    "job_id": 102726063858,
+    "policy_version": 6,
+    "registry_version": 27,
+    "control_plane_sha": "71de7d1a7c66361056cfb02ffce480ab8bedf094",
+    "subject_sha": "ffbcc2ab36a41afb580224681642105deb62e741",
+    "checkout_sha": "ffbcc2ab36a41afb580224681642105deb62e741",
+    "runner": "A-01 / Windows / X64",
+    "case_count": 39,
+    "pass_count": 39,
+    "fail_count": 0,
+    "result_class": "PASS",
+    "promotion_authorized": false
+  },
+  "authoritative_evidence": {
+    "artifact_name": "BOOK-SYSTEM-LIFECYCLE-CURRENT-PARENT-REBIND-001-34430908557-evidence",
+    "artifact_id": 10134444002,
+    "artifact_zip_sha256": "9c7c33225bf14972d76634f6d35a358883a0a989b78d7712ec0255c8bf8cd861"
+  },
+  "historical_non_authoritative_runs": [
+    {
+      "subject_sha": "1266ff9858c3d5df0c352be70207e67d6afe334f",
+      "result": "HOSTED_PASS__39_OF_39__PRE_WRAPPER_SUBJECT",
+      "qualification_transfer": false
+    },
+    {
+      "run_id": 34430605483,
+      "result": "CONTROL_PLANE_FAILURE__UNREGISTERED_QUALIFICATION",
+      "subject_failure": false,
+      "qualification_transfer": false
+    }
+  ],
+  "proven_behavior": [
+    "persistent lifecycle unit states, dependency edges, processed transition requests and transition receipts remain preserved across a non-lifecycle parent successor rebind",
+    "lifecycle ledger version advances exactly once and binds the exact post-parent state version/digest",
+    "a subsequent legal Lifecycle v1 transition succeeds using the same preserved lifecycle ledger",
+    "real Integration Proposal Runtime V2 receipts are accepted only as exact already-authorized non-lifecycle successors",
+    "real Author Decision Queue receipts are accepted only as exact already-authorized non-lifecycle successors",
+    "real Export Freeze receipts are accepted only as exact already-authorized non-lifecycle successors",
+    "real Version/Rollback receipts are accepted only as exact already-authorized non-lifecycle successors",
+    "provider, non-parent, Lifecycle-transition, status-changing, stale, mismatched and publication-authority receipts fail closed",
+    "idempotent replay does not increment the lifecycle ledger twice",
+    "Lifecycle v1 and the previously qualified current-parent compatibility adapter bytes remain unchanged"
+  ],
+  "authority_non_claims": [
+    "The rebind adapter does not create or authorize a parent successor.",
+    "The rebind adapter does not perform a lifecycle transition or add transition types.",
+    "The rebind adapter does not reinterpret or synthesize author decisions.",
+    "The rebind adapter does not create provider, document, export-freeze, publication, delivery, promotion or production authority.",
+    "The A-01 PASS is exact-SHA scoped and does not transfer to changed adapter, qualifier, wrapper, contract or fixture bytes."
+  ],
+  "unlocks": "BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001-HARNESS-001",
+  "qualification_effect": "AUTHORITATIVE_FOCUSED_PASS_ON_EXACT_SUBJECT_ONLY__NO_PROMOTION_OR_PUBLICATION_AUTHORITY"
+}
