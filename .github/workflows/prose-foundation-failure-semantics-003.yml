@@ -1,0 +1,39 @@
+name: Prose Foundation Failure Semantics 003
+
+on:
+  push:
+    branches:
+      - prose/foundation-closure-final-refill-20260910
+    paths:
+      - 'qualification/literary-prose-engine-001/foundation-closure-003/**'
+      - 'qualification/literary-prose-engine-001/step-e/PASSAGE-INTELLIGENCE-CONTRACT-v1.json'
+      - 'qualification/literary-prose-engine-001/step-h/PRESERVATION-AUDIT-CONTRACT-v1.json'
+      - 'qualification/literary-prose-engine-001/step-h/controlled_revision.py'
+      - 'qualification/literary-prose-engine-001/step-j/voice_preference_learning.py'
+      - 'qualification/literary-prose-engine-001/step-k/HOMOGENIZATION-OVEROPTIMIZATION-DEFENSE-CONTRACT-v1.json'
+      - 'qualification/literary-prose-engine-001/step-k/overoptimization_defense.py'
+      - 'qualification/literary-prose-engine-001/PROSE-SYSTEM-PRODUCT-PARENT-BINDING-003.json'
+      - '.github/workflows/prose-foundation-failure-semantics-003.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Validate packet JSON
+        run: python -m json.tool qualification/literary-prose-engine-001/foundation-closure-003/PROSE-FOUNDATION-FAILURE-SEMANTICS-AND-FIXTURE-PACKET-003.json > /dev/null
+
+      - name: Run failure semantics fixtures
+        run: python qualification/literary-prose-engine-001/foundation-closure-003/run_prose_foundation_failure_semantics_fixtures.py
