@@ -1,0 +1,86 @@
+{
+  "contract_id": "BOOK-SYSTEM-CONTENT-ADMISSION-AUTHOR-DECISION-APPLICABILITY-BRIDGE-003",
+  "effective_date": "2026-09-10",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "control_ref": "book-system/control-v1",
+  "supersedes_for_rf012_repair_detail": "BOOK-SYSTEM-CANONICAL-CONTENT-OBJECT-ADMISSION-001-RESIDUAL-FAILURE-INJECTION-DERIVATIVE-DECISION-002",
+  "standing": "RF012_CONFIRMED__DIRECT_CANONICAL_DECISION_EQUALITY_FIX_REJECTED__ADDITIVE_APPLICABILITY_BRIDGE_REQUIRED",
+  "finding": "RF012 is real, but the safe repair cannot be a bare comparison against canonical AUTHOR_DECISION.subject_ref. The Author Decision Queue intentionally keeps exact subject identities and concurrency/provenance metadata in its queue ledger and resolution receipt while preserving the legacy canonical AUTHOR_DECISION projection. Content Admission currently receives only canonical parent state plus author_decision_refs, so it lacks sufficient authoritative evidence to prove exact decision applicability.",
+  "evidence": {
+    "queue_contract": "qualification/book-system/author-decision-001/BOOK-SYSTEM-AUTHOR-DECISION-QUEUE-001.json",
+    "queue_rule": "A previously committed AUTHOR_DECISION remains immutable history but consumers must independently test whether it is current/applicable to their exact subject before acting.",
+    "canonical_projection_rule": "Queue-only identity, provenance and concurrency metadata remain in queue ledger/receipt rather than silently changing the canonical AUTHOR_DECISION schema.",
+    "already_qualified_strict_guard": "system-master/book-system/author-decision-current-subject-guard.js",
+    "guard_closure": "qualification/book-system/end-to-end-authoring-001/BOOK-SYSTEM-E2E-AUTHORITY-GUARDS-001-CLOSURE.json",
+    "content_admission_consumer": "system-master/book-system/content-object-admission-core.js"
+  },
+  "rejected_repairs": [
+    "Do not infer exact applicability from APPROVED status plus affirmative author_choice alone.",
+    "Do not treat canonical AUTHOR_DECISION.subject_ref as a substitute for the queue receipt's exact subject_identity_refs when the decision contract requires exact identity/currentness.",
+    "Do not add queue-only metadata silently to the canonical AUTHOR_DECISION schema.",
+    "Do not modify the original hosted-passed content-admission subject e993806a1d9a4838d4bd6d162a36921526ef302a in place.",
+    "Do not transfer the existing Author Decision Current Subject Guard A-01 PASS to a new content-admission bridge or derivative."
+  ],
+  "selected_repair_shape": {
+    "classification": "ADDITIVE_PARENT_SIDE_APPLICABILITY_GUARD__NO_NEW_AUTHOR_AUTHORITY",
+    "rule": "Introduce a narrow adapter around Content Admission that is given authoritative Author Decision Queue evidence by the owning Book parent, verifies the referenced decision and resolution receipt, verifies exact subject-identity applicability/currentness using the already-qualified strict-currentness semantics, then delegates unchanged canonical content admission. The adapter may narrow admission only; it cannot create, choose, approve, resolve, or mutate an AUTHOR_DECISION.",
+    "required_inputs": [
+      "canonical parent state",
+      "content-admission version ledger",
+      "content-admission request",
+      "author-decision queue ledger or exact immutable resolution-receipt projection sufficient to resolve the referenced decision",
+      "per-author-decision applicability binding that states which exact subject_identity_refs the operation requires"
+    ],
+    "required_checks": [
+      "every requires_author_decision operation has an explicit applicability binding",
+      "binding references one canonical AUTHOR_DECISION already present in parent state",
+      "AUTHOR_DECISION status/choice is acceptable to the unchanged Content Admission base contract",
+      "an immutable queue resolution receipt resolves to the same decision_id",
+      "receipt subject_identity_refs exactly match the binding's required subject identities",
+      "those subject identities remain current/applicable under the strict-currentness guard semantics where governed-currentness applies",
+      "decision/receipt/binding mismatch fails closed before base content admission can mutate state",
+      "failed applicability emits no successful admission receipt and no parent mutation"
+    ],
+    "authority_nonexpansion": [
+      "no author choice synthesis",
+      "no AI/provider author authority",
+      "no lifecycle advancement",
+      "no export freeze or publication authority",
+      "no Prose or Document authority",
+      "no native or production claim"
+    ]
+  },
+  "required_adversarial_cases": [
+    "RF012_A_APPROVAL_REPLAYED_FOR_B_REJECTS",
+    "RF012_SAME_EXACT_SUBJECT_RECEIPT_PASSES_PRECONDITION",
+    "MISSING_APPLICABILITY_BINDING_FAILS_CLOSED",
+    "MISSING_RESOLUTION_RECEIPT_FAILS_CLOSED",
+    "RECEIPT_DECISION_ID_MISMATCH_FAILS_CLOSED",
+    "RECEIPT_SUBJECT_IDENTITY_MISMATCH_FAILS_CLOSED",
+    "STALE_GOVERNED_SUBJECT_FAILS_CLOSED",
+    "CANONICAL_DECISION_APPROVED_BUT_QUEUE_EVIDENCE_MISSING_FAILS_CLOSED",
+    "FAILED_APPLICABILITY_ZERO_PARENT_MUTATION_ZERO_SUCCESS_RECEIPT"
+  ],
+  "exact_sha_law": {
+    "original_content_admission_subject": "e993806a1d9a4838d4bd6d162a36921526ef302a",
+    "original_subject_hosted_pass": "PRESERVED_FOR_ORIGINAL_SUBJECT_ONLY",
+    "original_subject_a01": "NOT_REGISTERED_OR_PASSED",
+    "existing_strict_guard_exact_subject": "a119ccdf77b61011b1093006b55367fc3e5a65c2",
+    "existing_strict_guard_a01_pass": "BOUNDED_TO_EXISTING_GUARD_ONLY__NO_TRANSFER",
+    "bridge_rule": "Any adapter/test implementation receives a new exact subject SHA and requires fresh focused plus full hosted qualification; any later A-01 admission is separately registered and adjudicated."
+  },
+  "next_objective": "BOOK-SYSTEM-CONTENT-ADMISSION-AUTHOR-DECISION-APPLICABILITY-GUARD-004",
+  "next_work_contract": {
+    "type": "BOUNDED_ADDITIVE_IMPLEMENTATION_AND_DETERMINISTIC_QUALIFICATION",
+    "required_outputs": [
+      "additive applicability-guard module delegating to unchanged content admission",
+      "author-decision evidence binding schema",
+      "nine required adversarial fixtures",
+      "existing 30-case content-admission regression unchanged and passing",
+      "existing Author Decision guard regression unchanged and passing",
+      "fresh exact derivative SHA and hosted evidence"
+    ],
+    "stop_condition": "Fail closed rather than implement if exact queue receipt identity/currentness cannot be resolved without widening canonical AUTHOR_DECISION or inventing author evidence."
+  },
+  "completion_delta": "RF012 now has a contract-compatible repair architecture. The proven gap is no longer routed to an unsafe subject_ref-only patch: the next executable job is a narrow parent-side evidence bridge that preserves the canonical decision schema and all existing exact-SHA qualifications."
+}
