@@ -1,0 +1,74 @@
+{
+  "qualification_id": "BOOK-SYSTEM-E2E-AUTHORITY-GUARDS-001",
+  "effective_date": "2026-09-09",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "standing": "REPAIR_CONTRACT__EXECUTABLE_QUALIFICATION_PENDING",
+  "classification": "BOUNDED_ADDITIVE_STRICT_GUARDS__NO_NEW_DOMAIN_AUTHORITY",
+  "parent_objective": "BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001",
+  "repairs": [
+    {
+      "id": "BOOK-SYSTEM-AUTHOR-DECISION-CURRENT-SUBJECT-GUARD-001",
+      "finding": "BOOK-SYSTEM-E2E-AUTHOR-DECISION-CURRENT-SUBJECT-GAP-001",
+      "runtime": "system-master/book-system/author-decision-current-subject-guard.js",
+      "preserved_predecessor_subject_sha": "9601ae5df8348c1daac8805eaefa1718c431dd49",
+      "required_behavior": [
+        "governed subject identity is effective-current only when it is the exact active pointer target for that governed class",
+        "historical governed versions remain preserved but cannot receive a new or resolved author choice as if current",
+        "parent revalidation preserves Author Queue v1 history and adds fail-closed effective staleness metadata",
+        "resolution fails closed even if revalidation was skipped",
+        "append-only/non-governed subject identities retain their owning currentness semantics"
+      ]
+    },
+    {
+      "id": "BOOK-SYSTEM-EXPORT-FREEZE-PARENT-ADMISSION-GUARD-001",
+      "finding": "BOOK-SYSTEM-E2E-EXPORT-FREEZE-PARENT-ADMISSION-GAP-001",
+      "runtime": "system-master/book-system/export-freeze-parent-admission-guard.js",
+      "preserved_predecessor_subject_sha": "0bc1f96ed0b8effd22c432a7d727fd13d613b825",
+      "required_behavior": [
+        "parent_admission_refs must be a non-empty unique reference set",
+        "underlying Export Freeze v1 remains responsible for exact admitted-state and evidence validation",
+        "author_decision_refs are not made universally mandatory by this repair",
+        "provider technical SUCCESS cannot substitute for parent admission"
+      ]
+    }
+  ],
+  "shared_invariants": [
+    "qualified Author Decision Queue v1 bytes remain unchanged",
+    "qualified Export Freeze v1 bytes remain unchanged",
+    "no new lifecycle transition type or policy",
+    "no author identity or choice is synthesized",
+    "no provider receives canonical or freeze authority",
+    "no document-generation implementation enters Book",
+    "no publication authorization is synthesized",
+    "failure is atomic and preserves input parent/ledger state",
+    "exact-SHA qualification does not transfer from either predecessor to this repair subject"
+  ],
+  "qualification_plan": {
+    "hosted_prequalification_required": true,
+    "registered_a01_required": true,
+    "a01_gate_class": "focused",
+    "minimum_cases": 20,
+    "must_include": [
+      "active governed author subject accepted",
+      "historical governed author subject rejected",
+      "changed active manuscript produces effective stale state after revalidation",
+      "historical subject cannot resolve without revalidation",
+      "current subject can still resolve",
+      "Author Queue v1 bytes unchanged",
+      "empty freeze admissions rejected",
+      "duplicate freeze admissions rejected",
+      "valid admitted freeze delegates successfully",
+      "invalid/non-admitted ref still rejected by v1",
+      "empty author refs remain allowed when no author requirement is configured",
+      "freeze lifecycle status remains FINALIZATION",
+      "freeze publication authority remains NOT_AUTHORIZED",
+      "Export Freeze v1 bytes unchanged"
+    ]
+  },
+  "research_gate": {
+    "external_research_required": false,
+    "reason": "Both defects are internal fail-closed authority/currentness implementation gaps against already research-verified Book contracts."
+  },
+  "pass_unlocks": "BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001-HARNESS-001",
+  "qualification_effect": "NONE_UNTIL_HOSTED_AND_REGISTERED_A01_EXACT_SHA_PASS"
+}
