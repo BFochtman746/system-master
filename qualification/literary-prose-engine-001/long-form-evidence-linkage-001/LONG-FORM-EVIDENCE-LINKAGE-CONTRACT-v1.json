@@ -1,0 +1,63 @@
+{
+  "contract_id": "PROSE-LONG-FORM-EVIDENCE-LINKAGE-001-v1",
+  "objective": "Qualify that long-form literary interpretations remain coupled to exact localized evidence, including middle-book factual and temporal support, without treating short-passage or macro-only success as proof of whole-book accuracy.",
+  "depends_on": [
+    "qualification/literary-prose-engine-001/narrative-orchestration-001/NARRATIVE-ORCHESTRATION-CONTRACT-v1.json",
+    "qualification/literary-prose-engine-001/diagnostic-evidence-provider-002/PROSE-SEMANTIC-DIAGNOSTIC-EVIDENCE-PROVIDER-CONTRACT-v1.json",
+    "qualification/literary-prose-engine-001/extraction-calibration-001/EXTRACTION-CALIBRATION-CONTRACT-v1.json",
+    "qualification/literary-prose-engine-001/book-level-intelligence/AGLO-BOOK-LEVEL-LITERARY-INTELLIGENCE-001.json"
+  ],
+  "qualification_scope": "Independent synthetic/support fixtures only. This boundary does not score, tune against, or reveal LGT-001..006, author labels, private manuscript prose, or protected blind-evaluator ground truth.",
+  "required_layers": {
+    "macro_interpretation": "Each gold macro claim has a stable claim_id and claim_code; an asserted prediction must match the claim code rather than receiving credit merely for fluent analysis.",
+    "exact_evidence_linkage": "Every asserted claim references exact anchor IDs whose locator_id, SHA256 digest, and chapter index match the held-out support fixture.",
+    "long_range_support": "A claim marked long_range must be supported by exact anchors spanning at least two chapters.",
+    "temporal_linkage": "Temporal relations preserve earlier/later event identity and are linked to exact anchors that ground both referenced events.",
+    "middle_book_support": "When required, the middle-third slice must contain at least one exactly linked factual claim and one exactly linked temporal relation touching a middle-book anchor."
+  },
+  "anchor_required": [
+    "anchor_id",
+    "locator_id",
+    "sha256",
+    "chapter_index"
+  ],
+  "claim_required": [
+    "claim_id",
+    "claim_code",
+    "status",
+    "confidence",
+    "evidence_anchor_ids",
+    "long_range"
+  ],
+  "temporal_relation_required": [
+    "relation_id",
+    "earlier_event_id",
+    "later_event_id",
+    "evidence_anchor_ids"
+  ],
+  "admission_rules": [
+    "Macro correctness and evidence-linkage correctness are reported separately and both must pass for PASS_LINKED.",
+    "Exact evidence linkage requires anchor identity plus locator_id plus SHA256 plus chapter index; a well-formed but wrong locator or digest receives no linkage credit.",
+    "Long-range macro claims cannot pass on single-chapter evidence.",
+    "Middle-book support cannot be inferred from beginning/end anchors; required factual and temporal support must touch the computed middle third of the work.",
+    "Unsupported asserted macro claims fail closed.",
+    "Unknown claim or temporal anchor references fail closed.",
+    "ABSTAIN and UNRESOLVED remain valid non-authoritative outcomes and are never converted into manufactured support.",
+    "Raw manuscript, passage, candidate, quote, or source-excerpt payloads are forbidden in qualification records.",
+    "A passing support slice establishes linkage-contract integrity only; it does not establish whole-book literary accuracy, author intent, revision authority, canon authority, or publication authority."
+  ],
+  "outputs": [
+    "PASS_LINKED",
+    "FAIL_UNLINKED",
+    "ABSTAIN_UNRESOLVED",
+    "INVALID"
+  ],
+  "authority": {
+    "whole_book_accuracy_claim_authorized": false,
+    "revision_authority": false,
+    "candidate_generation_authorized": false,
+    "manuscript_mutation_authorized": false,
+    "canonical_state_write_authorized": false,
+    "publication_authorized": false
+  }
+}
