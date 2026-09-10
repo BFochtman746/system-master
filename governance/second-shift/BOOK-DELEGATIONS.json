@@ -2,8 +2,8 @@
   "owner_system_id": "BOOK",
   "owner_path": "SYSTEM_MASTER/BOOK",
   "control_ref": "book-system/control-v1",
-  "last_known_control_head": "837c4f2be180810dbd6f8b6887d69cf242ff6260",
-  "delegation_epoch": 18,
+  "last_known_control_head": "05c1f53e2f710f419a99cb99594c53c2f0240b68",
+  "delegation_epoch": 19,
   "active_delegations": [
     {
       "delegation_id": "SECOND-SHIFT-BOOK-RF012-AUTHOR-DECISION-APPLICABILITY-GUARD-004",
@@ -11,25 +11,26 @@
       "objective_id": "BOOK-SYSTEM-CONTENT-ADMISSION-AUTHOR-DECISION-APPLICABILITY-GUARD-004",
       "state": "READY",
       "valid_for_control_ref": "book-system/control-v1",
-      "valid_for_control_head": "837c4f2be180810dbd6f8b6887d69cf242ff6260",
+      "valid_for_control_head": "05c1f53e2f710f419a99cb99594c53c2f0240b68",
       "created_at": "2026-09-10T04:51:00-04:00",
-      "last_revalidated_at": "2026-09-10T04:51:00-04:00",
+      "last_revalidated_at": "2026-09-10T05:19:00-04:00",
       "parent_checkpoint": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-026.json",
       "current_owner_binding": "qualification/book-system/BOOK-SYSTEM-PRODUCT-PARENT-BINDING-006.json",
       "implementation_subject_sha": "e993806a1d9a4838d4bd6d162a36921526ef302a",
-      "completion_delta": "The original canonical content-object admission subject e993806a1d9a4838d4bd6d162a36921526ef302a remains hosted-passed but unregistered/unrun on A-01. Book work-ahead inspection found RF012: approved canonical AUTHOR_DECISION status alone does not establish exact subject applicability because exact subject identity belongs in queue/receipt evidence. The live Book owner selected a narrow A-01-independent parent-side applicability guard as the safe executable successor while central registration remains pending.",
+      "completion_delta": "The original canonical content-object admission subject e993806a1d9a4838d4bd6d162a36921526ef302a remains hosted-passed but unregistered/unrun on A-01. RF012 work-ahead has advanced from a generic guard instruction to an exact deterministic qualification plan for the existing BOOK-SYSTEM-AUTHOR-DECISION-CURRENT-SUBJECT-GUARD-001. The plan binds 10 synthetic non-private cases for current-subject exactness, stale-parent revalidation, wrong-subject replay, malformed/duplicate identity refs, append-only semantics, present/reopen/resolve currentness and idempotent exact-match behavior. No author decision or A-01 PASS is inferred.",
       "evidence_target": [
         "exact current bridge contract qualification/book-system/content-object-admission-001/BOOK-SYSTEM-CONTENT-ADMISSION-AUTHOR-DECISION-APPLICABILITY-BRIDGE-003.json",
-        "bounded additive guard that requires exact author-decision subject applicability rather than status-only acceptance",
-        "fresh exact software SHA for any executable bridge",
-        "focused/full hosted qualification for the changed subject with no PASS transfer from e993806a1d9a4838d4bd6d162a36921526ef302a",
-        "central A-01 registration/qualification of original or changed subject remains separately adjudicated"
+        "qualification/book-system/author-decision-001/BOOK-SYSTEM-AUTHOR-DECISION-CURRENT-SUBJECT-GUARD-001-QUALIFICATION-PLAN-001.json",
+        "deterministic qualifier executing all 10 RF012 cases against synthetic non-private fixtures",
+        "fresh exact software SHA plus focused/full hosted qualification if executable bytes change, with no PASS transfer from e993806a1d9a4838d4bd6d162a36921526ef302a",
+        "zero mutation/effect evidence for rejected applicability cases",
+        "central A-01 registration/qualification of original or changed content-admission subject remains separately adjudicated"
       ],
-      "stop_condition": "Close only the bounded RF012 applicability defect with exact-subject tests and fresh hosted evidence. Do not convert an author decision status into author authority, do not reuse predecessor PASS, and do not call the original content-admission A-01 boundary closed without an authoritative exact-subject A-01 receipt. After RF012 closure re-read Book authority and continue the next dependency-valid Book-owned successor.",
+      "stop_condition": "Close only the bounded RF012 applicability defect with exact-subject deterministic tests and fresh hosted evidence for any changed executable subject. Do not convert an author-decision status into author authority, do not reuse predecessor PASS, and do not call the original content-admission A-01 boundary closed without an authoritative exact-subject A-01 receipt. After RF012 closure re-read Book authority and continue the next dependency-valid Book-owned successor.",
       "allowed_work": [
-        "implement the narrow parent-side subject-applicability guard defined by Bridge-003",
-        "add deterministic tests for status-only false acceptance, exact subject mismatch, queue/receipt mismatch and idempotent exact-match acceptance",
-        "run focused/full hosted qualification on a new exact changed-software SHA",
+        "implement BOOK-SYSTEM-AUTHOR-DECISION-CURRENT-SUBJECT-GUARD-001-DETERMINISTIC-QUALIFIER-002 from the qualification plan",
+        "use synthetic non-private fixtures for exact-current, prior-version, digest-mismatch, A-to-B replay, parent-advance staleness, stale resolve, malformed/duplicate ref, append-only, present/reopen and idempotent exact-match cases",
+        "run focused/full hosted qualification on a new exact changed-software SHA when executable bytes change",
         "preserve e993806a1d9a4838d4bd6d162a36921526ef302a as original hosted evidence unless owner authority explicitly selects a replacement",
         "continue residual Book census/specification/test/successor work if central A-01 remains blocked"
       ],
@@ -209,6 +210,6 @@
     }
   ],
   "owner_revalidation_required": false,
-  "reason": "Reconciled stale Book delegation against live head 837c4f2be180810dbd6f8b6887d69cf242ff6260 and Binding-006. The original content-admission A-01 boundary remains pending; Book has an explicit A-01-independent RF012 applicability-guard successor and therefore must not idle.",
+  "reason": "Revalidated against live Book head 05c1f53e2f710f419a99cb99594c53c2f0240b68. The original content-admission A-01 boundary remains pending; RF012 now has a deterministic 10-case qualification plan and an explicit non-private qualifier successor, so Book must not idle.",
   "empty_is_valid": false
 }
