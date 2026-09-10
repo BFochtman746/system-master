@@ -4,6 +4,7 @@
   "shift_timezone": "America/New_York",
   "shift_window": "00:00-07:00",
   "storage_rule": "Use one lane-owned ledger per shift date to avoid cross-lane append conflicts: governance/second-shift/execution-events/YYYY-MM-DD/{CORE|LEARNING|BOOK|PROSE}.json",
+  "value_measurement_schema": "governance/second-shift/SECOND-SHIFT-VALUE-MEASUREMENT-SCHEMA-001.json",
   "allowed_lanes": ["CORE", "LEARNING", "BOOK", "PROSE"],
   "allowed_event_types": [
     "SHIFT_OPEN",
@@ -48,10 +49,39 @@
     "lease_expires_at",
     "attempt"
   ],
+  "running_event_required_fields": [
+    "lease_id",
+    "idempotency_key"
+  ],
   "heartbeat_event_required_fields": [
     "lease_id",
     "idempotency_key",
     "checkpoint_pointer"
+  ],
+  "completion_event_required_fields": [
+    "lease_id",
+    "idempotency_key",
+    "value_work_unit"
+  ],
+  "completion_value_work_unit_required_fields": [
+    "work_unit_id",
+    "work_class",
+    "complexity_band",
+    "advancement_class",
+    "vpu",
+    "accepted_vpu",
+    "verification_class",
+    "admission_class",
+    "evidence_pointer",
+    "autonomous_successor_bound",
+    "user_intervention_required",
+    "rework_status"
+  ],
+  "successor_event_required_fields": [
+    "predecessor_work_unit_id",
+    "successor_delegation_id",
+    "autonomous_transition",
+    "manual_turn_would_be_required"
   ],
   "retry_event_required_fields": [
     "dependency_or_operation",
@@ -78,7 +108,9 @@
     "READY means executable dependency-valid work exists but is not presently claimed.",
     "BLOCKED applies only to the objective/rung actually blocked; it cannot be promoted to whole-lane idle while another rung is executable.",
     "IDLE_VALID requires a preceding ALL_RUNGS_EXHAUSTED event for the same live owner head and shift.",
+    "COMPLETED records one logical evidence-bearing work unit. File, commit, test, tool-call and artifact counts never multiply value credit for the same objective-stage transition.",
+    "SUCCESSOR_BOUND records whether the transition was autonomous and whether the established manual chat workflow would have required a user execution/continue turn; this is the source of autonomous-continuation and minimum-turns-avoided metrics.",
     "If telemetry is missing or contradictory, the audit reports UNKNOWN rather than inferring productive time."
   ],
-  "authority_boundary": "This ledger records execution state only. It never grants PASS, promotion, canonical-writer, A-01, human, author, private, blind, native, publication or production authority."
+  "authority_boundary": "This ledger records execution state and measurement facts only. It never grants PASS, promotion, canonical-writer, A-01, human, author, private, blind, native, publication or production authority."
 }

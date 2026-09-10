@@ -5,6 +5,12 @@
   "schema": "governance/second-shift/SECOND-SHIFT-DELEGATION-SCHEMA-002.json",
   "execution_control": "governance/second-shift/SECOND-SHIFT-EXECUTION-CONTROL-001.md",
   "utilization_event_schema": "governance/second-shift/SECOND-SHIFT-UTILIZATION-EVENT-SCHEMA-001.json",
+  "value_scorecard": "governance/second-shift/SECOND-SHIFT-VALUE-SCORECARD-001.md",
+  "value_measurement_schema": "governance/second-shift/SECOND-SHIFT-VALUE-MEASUREMENT-SCHEMA-001.json",
+  "daytime_calibration_schema": "governance/second-shift/SECOND-SHIFT-DAYTIME-CALIBRATION-SCHEMA-001.json",
+  "daytime_calibration_baseline": "governance/second-shift/calibration/DAYTIME-BASELINE-001.json",
+  "score_script": ".github/scripts/second-shift-score.js",
+  "score_workflow": ".github/workflows/second-shift-value-score.yml",
   "enforcement_script": ".github/scripts/second-shift-enforce.js",
   "enforcement_workflow": ".github/workflows/second-shift-enforcement.yml",
   "owner_files": {
@@ -23,6 +29,9 @@
   "no_work_rule": "Schedule nothing only after a durable all-rungs-exhausted record proves every work-ahead category is completed, duplicate, dependency-blocked, human/author/private/native/external-authority constrained, or unsafe without a decision, and proves no independent preparation can reduce tomorrow's work. Missing/stale delegation, unavailable A-01, unavailable runner, a transient dependency, completed assignment, blocked critical path or empty active list is never itself proof. Runner utilization alone is not a goal.",
   "successor_rule": "After every completion or material block, the owner worker re-reads live authority and selects the next highest-value dependency-valid unattended-safe project while time remains. Completing one project does not end the shift. A worker hitting a tool/runtime boundary must leave a current READY successor unless all rungs are durably exhausted.",
   "utilization_rule": "Per-lane append-only shift event ledgers are the authority for READY/RUNNING/BLOCKED/STALE/IDLE duration. Commit timestamps, workflow duration and runner uptime are evidence/context only and are never sufficient utilization telemetry.",
+  "value_rule": "Second Shift value is measured from evidence-bearing logical work-unit advancement, evidence acceptance, autonomous successor continuation, flow/reliability and later rework. Files, commits, tokens, workflow minutes, runner uptime and artifact counts do not earn value credit. Every COMPLETED execution event records one value_work_unit using the value measurement schema, and every SUCCESSOR_BOUND event records whether the transition was autonomous and whether the established manual workflow would have required a user execution/continue turn.",
+  "time_saved_rule": "Minimum Interactive Turns Avoided is the immediate hard lower-bound leverage metric. Daytime Turn Equivalent and Counterfactual Chat Elapsed Time Avoided are calculated only from observed comparable daytime calibration samples; until at least five matching work-class/complexity samples exist, the result is UNCALIBRATED rather than guessed. Human Attention Saved remains UNKNOWN until active user minutes are directly measured.",
+  "rework_rule": "The morning value score is provisional while work units remain pending observation. Defect correction, invalid admission, rollback, evidence inflation correction or redo caused by wrong/stale overnight work must reduce the finalized rework/stability score; ordinary next-stage work is not rework.",
   "work_ahead_ladder": [
     "current repair/control health",
     "completion and evidence census",

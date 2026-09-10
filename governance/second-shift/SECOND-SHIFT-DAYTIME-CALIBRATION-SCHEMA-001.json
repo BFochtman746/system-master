@@ -1,0 +1,32 @@
+{
+  "schema_id": "SECOND-SHIFT-DAYTIME-CALIBRATION-SCHEMA-001",
+  "purpose": "Observed daytime comparison samples used to convert accepted Second Shift work into defensible interactive-turn and elapsed-chat counterfactuals.",
+  "minimum_samples_per_work_class_complexity_band": 5,
+  "preferred_samples_per_work_class_complexity_band": 10,
+  "required_sample_fields": [
+    "sample_id",
+    "observed_date",
+    "work_class",
+    "complexity_band",
+    "verified_progress_units",
+    "user_execution_turns",
+    "accepted_or_reworked"
+  ],
+  "optional_sample_fields": [
+    "elapsed_chat_minutes",
+    "active_user_minutes",
+    "setup_minutes",
+    "review_minutes",
+    "rework_user_minutes",
+    "evidence_pointer",
+    "notes"
+  ],
+  "rules": [
+    "Record observed comparable daytime work; never backfill a sample from intuition.",
+    "Do not count assistant/tool calls as user_execution_turns.",
+    "A user execution turn is a user message needed to authorize, continue, redirect, adjudicate or request the next execution unit in the established interactive workflow.",
+    "Do not mix materially different complexity bands merely to reach the sample threshold.",
+    "Use median turns-per-VPU and median elapsed-chat-minutes-per-VPU for counterfactual estimates; report sample count and interquartile range.",
+    "Human attention savings remain UNKNOWN unless active_user_minutes are directly observed with enough comparable samples."
+  ]
+}
