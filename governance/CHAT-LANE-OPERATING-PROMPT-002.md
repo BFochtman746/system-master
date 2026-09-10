@@ -1,6 +1,6 @@
 # CHAT-LANE-OPERATING-PROMPT-002
 
-Status: PROPOSED_CANONICAL_OWNER_CHAT_STARTUP_CONTRACT
+Status: ACTIVE_CANONICAL_OWNER_CHAT_STARTUP_CONTRACT
 Supersedes for current startup: `governance/CHAT-LANE-OPERATING-PROMPT-001.md`
 Repository: `BFochtman746/system-master`
 Applies to: CORE, LEARNING, BOOK, PROSE owner chats
