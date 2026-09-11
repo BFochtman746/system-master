@@ -1,0 +1,59 @@
+name: Documents System Master Adapter Qualification
+
+on:
+  push:
+    branches: [documents/control-v1]
+    paths:
+      - 'system-master/021f-integration/src/**'
+      - 'system-master/021f-integration/DOCUMENTS-SERVICE-BINDING-001.json'
+      - '.github/workflows/documents-system-master-adapter-qualification.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact Documents owner subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Verify preserved qualified inputs
+        shell: bash
+        run: |
+          test "$(git hash-object documents/interfaces/DOCUMENTS-SYSTEM-MASTER-SERVICE-CONTRACT-001.json)" = "c852c5f69946a0c2a8e000f9aff152b978d714f9"
+          test "$(git hash-object system-master/f-wp-010/src/main/java/org/systemmaster/core/CrossDomainContracts.java)" = "3b5c36f7be972bf3032e540f6bb9dc7a785be88e"
+          test "$(git hash-object system-master/f-wp-010/src/main/java/org/systemmaster/core/ChangeCoordinatorAdapter.java)" = "93846b8f666b7b042aced7a19c066e42d1b2489f"
+          node - <<'NODE'
+          const fs = require('fs');
+          const c = JSON.parse(fs.readFileSync('documents/interfaces/DOCUMENTS-SYSTEM-MASTER-SERVICE-CONTRACT-001.json','utf8'));
+          const b = JSON.parse(fs.readFileSync('system-master/021f-integration/DOCUMENTS-SERVICE-BINDING-001.json','utf8'));
+          const expected = ['INTAKE','INSPECT_STRUCTURE','CONVERT','PRESERVE','RENDER','EXPORT','ARTIFACT_HANDOFF'];
+          if (JSON.stringify(c.operations) !== JSON.stringify(expected)) throw new Error('DOCUMENTS_OPERATION_SET_DRIFT');
+          if (b.qualified_documents_contract.git_blob_sha !== 'c852c5f69946a0c2a8e000f9aff152b978d714f9') throw new Error('DOCUMENTS_CONTRACT_BINDING_DRIFT');
+          if (b.r4_dependency !== false || b.fwp010_package_mutated !== false || b.production_authorized !== false) throw new Error('DOCUMENTS_AUTHORITY_BOUNDARY_DRIFT');
+          NODE
+
+      - name: Compile Documents integration adapter
+        shell: bash
+        run: |
+          rm -rf .documents-adapter-classes
+          mkdir -p .documents-adapter-classes
+          javac -encoding UTF-8 -d .documents-adapter-classes \
+            system-master/021f-integration/src/main/java/org/systemmaster/integration/documents/DocumentsServiceAdapter.java \
+            system-master/021f-integration/src/test/java/org/systemmaster/integration/documents/DocumentsServiceAdapterTest.java
+
+      - name: Run Documents integration conformance
+        shell: bash
+        run: |
+          java -cp .documents-adapter-classes org.systemmaster.integration.documents.DocumentsServiceAdapterTest

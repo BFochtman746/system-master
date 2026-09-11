@@ -1,0 +1,44 @@
+{
+  "binding_id": "DOCUMENTS-SYSTEM-MASTER-SERVICE-ADAPTER-INTEGRATION-001",
+  "effective_date": "2026-09-11",
+  "owner_system_id": "DOCUMENTS",
+  "owner_path": "SYSTEM_MASTER/DOCUMENTS",
+  "consumer_surface": "SYSTEM_MASTER/021F_INTEGRATION",
+  "system_master_integration_path": "system-master/021f-integration",
+  "documents_control_ref": "documents/control-v1",
+  "qualified_documents_contract": {
+    "path": "documents/interfaces/DOCUMENTS-SYSTEM-MASTER-SERVICE-CONTRACT-001.json",
+    "git_blob_sha": "c852c5f69946a0c2a8e000f9aff152b978d714f9",
+    "qualified_subject_sha": "045113bda0610ef174b677fdea36884b2c0c53be",
+    "hosted_run_id": 34595805122,
+    "cases_passed": 20,
+    "cases_planned": 20
+  },
+  "existing_system_master_pattern": {
+    "contract_path": "system-master/f-wp-010/src/main/java/org/systemmaster/core/CrossDomainContracts.java",
+    "contract_git_blob_sha": "3b5c36f7be972bf3032e540f6bb9dc7a785be88e",
+    "adapter_path": "system-master/f-wp-010/src/main/java/org/systemmaster/core/ChangeCoordinatorAdapter.java",
+    "adapter_git_blob_sha": "93846b8f666b7b042aced7a19c066e42d1b2489f",
+    "rule": "System Master may adapt specialist-owned truth for coordination without taking specialist semantic ownership."
+  },
+  "implementation": {
+    "adapter_path": "system-master/021f-integration/src/main/java/org/systemmaster/integration/documents/DocumentsServiceAdapter.java",
+    "test_path": "system-master/021f-integration/src/test/java/org/systemmaster/integration/documents/DocumentsServiceAdapterTest.java",
+    "language": "Java",
+    "service_owner_system_id": "DOCUMENTS",
+    "operations": ["INTAKE", "INSPECT_STRUCTURE", "CONVERT", "PRESERVE", "RENDER", "EXPORT", "ARTIFACT_HANDOFF"]
+  },
+  "invariants": [
+    "System Master calls Documents through artifact references and exact SHA-256 identities only; raw document/manuscript/source bytes are not part of the adapter contract.",
+    "DOCUMENTS remains semantic owner of document mechanics; the adapter grants no Book, Learning, Core, Programming, retired Prose, author, private, native, A-01, publication or production authority.",
+    "Idempotency key reuse with unchanged semantic request identity is replay-safe; changed semantics under the same key fail with IDEMPOTENCY_CONFLICT.",
+    "Request and correlation identity are preserved at the current invocation boundary, including replay.",
+    "Service protocol or transport violations fail closed as classified BLOCKED responses and never synthesize SUCCEEDED.",
+    "R4 exact-byte GitHub-native custody is independent of this adapter and remains blocked until exact source bytes cross an approved file-capable transport.",
+    "Existing qualified F-WP-010 package bytes and the prior 021F integration binding are not modified by this integration."
+  ],
+  "r4_dependency": false,
+  "fwp010_package_mutated": false,
+  "historical_pass_transfer": false,
+  "production_authorized": false
+}
