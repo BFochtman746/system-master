@@ -37,6 +37,44 @@
         "documents_receives_prose_work": false,
         "claim_state": "UNCLAIMED_READY"
       }
+    },
+    {
+      "event_id": "2026-09-11-BOOK-0003-CLAIMED",
+      "occurred_at": "2026-09-11T00:26:00-04:00",
+      "event_type": "CLAIMED",
+      "lane": "BOOK",
+      "control_ref": "book-system/control-v1",
+      "control_head": "1e8f9e7a37d11ab643ef3cc941f21851149714c8",
+      "delegation_id": "SECOND-SHIFT-BOOK-PROSE-PHASE2-ORCHESTRATOR-CLOSURE-CENSUS-001",
+      "objective_id": "BOOK-PROSE-PHASE-2-ORCHESTRATOR-CLOSURE-CENSUS-001",
+      "lease_id": "BOOK-PHASE2-CENSUS-2026-09-11T0026-0400",
+      "idempotency_key": "BOOK:PHASE2-ORCHESTRATOR-CENSUS:2026-09-11",
+      "lease_expires_at": "2026-09-11T01:16:00-04:00",
+      "attempt": 1,
+      "evidence": {
+        "exact_control_head_validated": true,
+        "competing_live_book_claims_observed": 0,
+        "main_authority_head_observed": "0ed998a42508fd9993eb1fbea32078a701377bab",
+        "prose_dispatch": false,
+        "documents_receives_prose_work": false
+      }
+    },
+    {
+      "event_id": "2026-09-11-BOOK-0004-RUNNING",
+      "occurred_at": "2026-09-11T00:26:01-04:00",
+      "event_type": "RUNNING",
+      "lane": "BOOK",
+      "control_ref": "book-system/control-v1",
+      "control_head": "1e8f9e7a37d11ab643ef3cc941f21851149714c8",
+      "delegation_id": "SECOND-SHIFT-BOOK-PROSE-PHASE2-ORCHESTRATOR-CLOSURE-CENSUS-001",
+      "objective_id": "BOOK-PROSE-PHASE-2-ORCHESTRATOR-CLOSURE-CENSUS-001",
+      "lease_id": "BOOK-PHASE2-CENSUS-2026-09-11T0026-0400",
+      "idempotency_key": "BOOK:PHASE2-ORCHESTRATOR-CENSUS:2026-09-11",
+      "evidence": {
+        "operation": "Verify Phase-2 orchestrator closure evidence and bind the next BOOK-owned integration successor",
+        "stale_metadata": "BOOK-SYSTEM-JOB-LOCK-001 active-Prose child/execution language is historical and non-dispatchable under current authority",
+        "historical_prose_inputs_read_only": true
+      }
     }
   ]
 }
