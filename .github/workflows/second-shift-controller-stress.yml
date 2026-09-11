@@ -58,6 +58,7 @@ jobs:
         with:
           name: second-shift-controller-stress-${{ github.run_id }}
           path: .second-shift-stress-report.json
+          include-hidden-files: true
           if-no-files-found: error
           retention-days: 30
       - name: Fail when controller blind spots exist
