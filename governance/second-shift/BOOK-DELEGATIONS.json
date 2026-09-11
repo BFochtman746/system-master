@@ -5,43 +5,53 @@
   "last_known_control_head": "e2a23e8b1f076e3cd576c11e036e40eaf8a5ce2f",
   "program_job_lock": "governance/SYSTEM-PROGRAM-JOB-LOCK-001.json",
   "system_completion_status": "governance/SYSTEM-COMPLETION-STATUS-001.json",
-  "delegation_epoch": 31,
+  "delegation_epoch": 32,
   "active_delegations": [
     {
-      "delegation_id": "SECOND-SHIFT-BOOK-POST-DURABLE-PERSISTENCE-OPEN-SEAM-CENSUS-001",
+      "delegation_id": "SECOND-SHIFT-BOOK-WORKFLOW-SCHEDULER-EXECUTION-RUNTIME-001",
       "owner_path": "SYSTEM_MASTER/BOOK",
-      "objective_id": "BOOK-POST-DURABLE-PERSISTENCE-OPEN-SEAM-CENSUS-001",
+      "objective_id": "BOOK-WORKFLOW-SCHEDULER-EXECUTION-RUNTIME-001",
       "obligation_id": "BOOK-PROSE-PHASE-2-ORCHESTRATOR-CLOSURE-CENSUS-001",
       "active_prose_execution_owner": null,
-      "state": "CANDIDATE",
-      "priority": "BOOK_OWNER_RECONCILIATION_AFTER_DURABLE_PERSISTENCE_PASS",
+      "state": "READY",
+      "priority": "BOOK_OWNER_DEPENDENCY_VALID_AFTER_DURABLE_PERSISTENCE",
       "valid_for_control_ref": "book-system/control-v1",
       "valid_for_control_head": "e2a23e8b1f076e3cd576c11e036e40eaf8a5ce2f",
-      "created_at": "2026-09-11T07:48:00-04:00",
-      "last_revalidated_at": "2026-09-11T07:48:00-04:00",
-      "parent_checkpoint": "qualification/book-system/phase3a/BOOK-DURABLE-WORKFLOW-PERSISTENCE-HOSTED-QUALIFICATION-001.json",
-      "classification": "BOOK_OWNED_POST_PASS_OPEN_SEAM_RECONCILIATION",
-      "completion_delta": "Re-read current Book owner state after the durable workflow/checkpoint/receipt persistence PASS and select at most one genuinely open dependency-valid Book-owned successor. Preserve completed Prose only as historical input provenance and do not reopen completed Book seams.",
-      "stop_condition": "One exact remaining Book-owned seam is demonstrated and bound READY, or the census proves no further machine-resolvable Book work is currently admissible and records the truthful blocker/authority boundary.",
+      "created_at": "2026-09-11T16:59:00-04:00",
+      "last_revalidated_at": "2026-09-11T16:59:00-04:00",
+      "parent_checkpoint": "qualification/book-system/phase3a/BOOK-POST-DURABLE-PERSISTENCE-OPEN-SEAM-CENSUS-001.json",
+      "classification": "BOOK_OWNED_COORDINATION_SCHEDULER_EXECUTION_RUNTIME",
+      "completion_delta": "Implement the missing Book-owned scheduler/dispatch coordination seam over already-qualified plan, routing, concurrency, retry/idempotency, cancellation/resume, evidence and durable-store contracts without acquiring specialist semantic authority or canonical Book mutation authority.",
+      "stop_condition": "Scheduler execution runtime has fresh exact-subject qualification proving prerequisite enforcement, bounded parallelism, serial/non-idempotent withholding, stale-binding rejection, cancel/resume, worker-failure evidence and zero canonical Book effect; otherwise preserve the exact blocker.",
       "allowed_work": [
-        "inspect current Book owner modules, open obligations and exact qualification lineage",
-        "classify completed versus genuinely open Book-owned seams",
-        "bind at most one dependency-valid Book successor after evidence",
-        "preserve canonical manuscript, Story Bible, author and admission boundaries"
+        "consume existing Book execution-plan and concurrency eligibility decisions",
+        "dispatch only registered callable specialist service tasks after exact prerequisite and authority checks",
+        "use existing retry/idempotency/reconciliation and durable checkpoint contracts",
+        "emit Book-owned coordination evidence and preserve zero canonical effect"
       ],
       "forbidden_authority": [
         "do not create or reactivate PROSE work",
-        "do not route Book work to Documents",
-        "do not replay already-passed context compiler or durable persistence work",
-        "do not mutate canonical manuscript, Story Bible/canon or admission state",
-        "do not claim A-01, native, publication, production, author or private authority",
+        "do not route Book work to Documents or take Documents semantics",
+        "do not execute Book canonical admission or author decisions",
+        "do not dispatch authority-wait, blocked, isolation-unsatisfied or Book-admission tasks",
+        "do not infer provider success, A-01, native, publication or production authority",
         "do not declare BOOK complete"
       ],
-      "on_pass": "Bind only the demonstrated next Book-owned seam and preserve this census as exact evidence.",
-      "on_failure": "Preserve the exact unresolved Book boundary and do not manufacture a successor."
+      "on_pass": "Retire this scheduler delegation with exact evidence, re-read live Book head, and bind at most one demonstrated successor.",
+      "on_failure": "Preserve the exact scheduler/runtime blocker and do not manufacture provider or canonical-effect success."
     }
   ],
   "retired_delegations": [
+    {
+      "delegation_id": "SECOND-SHIFT-BOOK-POST-DURABLE-PERSISTENCE-OPEN-SEAM-CENSUS-001",
+      "state": "COMPLETED__SUPERSEDED_BY_BOOK_WORKFLOW_SCHEDULER_EXECUTION_RUNTIME_001",
+      "completion_evidence": "qualification/book-system/phase3a/BOOK-POST-DURABLE-PERSISTENCE-OPEN-SEAM-CENSUS-001.json",
+      "completion_commit": "cd4839532471ac0934fb246102eef1610a1f2f7c",
+      "selected_successor": "SECOND-SHIFT-BOOK-WORKFLOW-SCHEDULER-EXECUTION-RUNTIME-001",
+      "history_preserved": true,
+      "prose_execution_created": false,
+      "book_completion_claimed": false
+    },
     {
       "delegation_id": "SECOND-SHIFT-BOOK-DURABLE-WORKFLOW-PERSISTENCE-001",
       "state": "COMPLETED__SUPERSEDED_BY_POST_DURABLE_PERSISTENCE_OPEN_SEAM_CENSUS",
@@ -88,6 +98,6 @@
     "standing": "IMMUTABLE_GIT_HISTORY_PRESERVED"
   },
   "owner_revalidation_required": false,
-  "reason": "Exact Book owner subject e2a23e8b received real hosted qualification in run 34595298033/job 103249548721 and passed 14/14 durable persistence cases with zero canonical effect. The persistence seam is closed; only a post-pass Book-owned open-seam census remains as a candidate until current evidence selects one successor.",
+  "reason": "Post-durable census on exact Book owner head e2a23e8b proved Phase 2, Context Compiler and durable persistence already closed and Book admission A-01 blocked. The current concurrency module explicitly classifies eligibility while forbidding scheduler/dispatch authority, proving BOOK-WORKFLOW-SCHEDULER-EXECUTION-RUNTIME-001 is the first dependency-valid machine-resolvable Book-owned seam. No Prose work is reopened and no completed PASS is transferred.",
   "empty_is_valid": false
 }
