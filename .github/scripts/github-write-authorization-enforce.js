@@ -54,6 +54,8 @@ function validateLease(lease, now = new Date()) {
   }
   if (!isSha(lease.base_sha) || !isSha(lease.owner_control_head)) fail('MISSING_WORK_LEASE', 'invalid SHA binding');
   if (!Number.isInteger(lease.fence_epoch) || lease.fence_epoch < 1) fail('MISSING_REPOSITORY_WRITER_FENCE', 'invalid lease epoch');
+  if (!Number.isInteger(lease.owner_claim_epoch) || lease.owner_claim_epoch < 1) fail('MISSING_WORK_LEASE', 'owner_claim_epoch');
+  if (!(leaseSchema.executor_modes || []).includes(lease.executor_mode)) fail('MISSING_WORK_LEASE', 'executor_mode');
   if (!Array.isArray(lease.allowed_paths) || !Array.isArray(lease.allowed_effects) || !Array.isArray(lease.forbidden_effects)) fail('MISSING_WORK_LEASE', 'effect/path arrays');
   if (!(leaseSchema.authorization_classes || []).includes(lease.authorization_class)) fail('MISSING_WORK_LEASE', 'authorization_class');
   const expires = new Date(lease.expires_at);
@@ -70,6 +72,28 @@ function validateOperation(op) {
   if (!isSha(op.expected_base_sha)) fail('STALE_BASE', 'invalid expected_base_sha');
   if (!Number.isInteger(op.fence_epoch) || op.fence_epoch < 1) fail('MISSING_REPOSITORY_WRITER_FENCE');
   if (!Array.isArray(op.paths)) op.paths = [];
+  return true;
+}
+
+function validateCurrentOwnerClaim(lease, context, now = new Date()) {
+  const claim = context.current_owner_claim;
+  if (!claim || typeof claim !== 'object') fail('MISSING_WORK_LEASE', 'current_owner_claim');
+  const expires = new Date(claim.lease_expires_at);
+  if (Number.isNaN(expires.getTime()) || expires <= now) fail('LEASE_EXPIRED', 'owner_claim');
+  const exact = [
+    ['claim_id', 'owner_claim_id'],
+    ['claim_epoch', 'owner_claim_epoch'],
+    ['owner_lane', 'owner_lane'],
+    ['objective_id', 'objective_id'],
+    ['owner_control_ref', 'owner_control_ref'],
+    ['owner_control_head', 'owner_control_head'],
+    ['work_session_id', 'work_session_id'],
+    ['executor_mode', 'executor_mode']
+  ];
+  for (const [claimField, leaseField] of exact) {
+    if (claim[claimField] !== lease[leaseField]) fail('STALE_OWNER_CLAIM', `${claimField}`);
+  }
+  if (context.current_owner_claim_epoch !== undefined && context.current_owner_claim_epoch !== claim.claim_epoch) fail('STALE_OWNER_CLAIM', 'current_owner_claim_epoch');
   return true;
 }
 
@@ -101,6 +125,7 @@ function authorize({ lease, operation: op, context }) {
   if (op.force === true) fail('FORCE_MUTATION_FORBIDDEN');
 
   if (mutation) {
+    validateCurrentOwnerClaim(lease, context, now);
     if (op.fence_epoch !== lease.fence_epoch) fail('STALE_FENCE_EPOCH', 'lease mismatch');
     if (op.fence_epoch !== context.current_repository_writer_epoch) fail('STALE_FENCE_EPOCH', 'not current writer');
   }
@@ -108,7 +133,6 @@ function authorize({ lease, operation: op, context }) {
   if (isCanonical) {
     if (op.operation_class !== 'ADMISSION') fail('USER_AUTHORITY_REQUIRED', 'canonical mutation must use admission');
     if (context.actor_class !== 'CONTROLLER') fail('USER_AUTHORITY_REQUIRED', 'chat cannot admit canonical ref');
-    if (context.owner_lane_lease_valid !== true) fail('MISSING_WORK_LEASE', 'owner lane lease');
     if (context.repository_writer_lease_valid !== true) fail('MISSING_REPOSITORY_WRITER_FENCE');
     if (context.live_target_sha !== op.expected_base_sha) fail('STALE_BASE');
     if (context.qualified_candidate !== true) fail('UNQUALIFIED_CANDIDATE');
@@ -120,6 +144,9 @@ function authorize({ lease, operation: op, context }) {
     decision: 'AUTHORIZED',
     owner_lane: lease.owner_lane,
     objective_id: lease.objective_id,
+    owner_claim_id: lease.owner_claim_id,
+    owner_claim_epoch: lease.owner_claim_epoch,
+    executor_mode: lease.executor_mode,
     target_ref: targetRef,
     canonical: isCanonical,
     fence_epoch: op.fence_epoch,
@@ -139,8 +166,14 @@ function selftest() {
   const now = new Date('2026-09-10T22:00:00Z');
   const base = 'a'.repeat(40);
   const control = 'b'.repeat(40);
+  const ownerClaim = {
+    claim_id: 'owner-docs-1', owner_lane: 'DOCUMENTS', objective_id: 'OBJ-1', owner_control_ref: 'documents/control-v1',
+    owner_control_head: control, work_session_id: 'session-1', executor_id: 'documents-chat', executor_mode: 'FOREGROUND_CHAT',
+    claim_epoch: 4, claimed_at: '2026-09-10T21:00:00Z', lease_expires_at: '2026-09-11T01:00:00Z'
+  };
   const lease = {
     work_session_id: 'session-1', owner_lane: 'DOCUMENTS', objective_id: 'OBJ-1',
+    owner_claim_id: 'owner-docs-1', owner_claim_epoch: 4, executor_mode: 'FOREGROUND_CHAT',
     candidate_branch: 'work/documents/session-1', base_sha: base,
     owner_control_ref: 'documents/control-v1', owner_control_head: control,
     fence_epoch: 8, allowed_paths: ['documents/**', 'governance/second-shift/DOCUMENTS-DELEGATIONS.json'],
@@ -158,16 +191,21 @@ function selftest() {
   };
   const ctx = {
     now: now.toISOString(), current_owner_control_ref: 'documents/control-v1', current_owner_control_head: control,
-    current_repository_writer_epoch: 8, actor_class: 'CHAT', owner_lane_lease_valid: true,
-    repository_writer_lease_valid: true, live_target_sha: base, qualified_candidate: false
+    current_owner_claim: structuredClone(ownerClaim), current_owner_claim_epoch: 4,
+    current_repository_writer_epoch: 8, actor_class: 'CHAT', repository_writer_lease_valid: true,
+    live_target_sha: base, qualified_candidate: false
   };
 
   const candidate = authorize({ lease: structuredClone(lease), operation: structuredClone(op), context: { ...ctx } });
-  if (!candidate || candidate.canonical) throw new Error('CANDIDATE_AUTHORIZATION_FAILED');
+  if (!candidate || candidate.canonical || candidate.owner_claim_epoch !== 4) throw new Error('CANDIDATE_AUTHORIZATION_FAILED');
 
   expectFailure('OWNER_MISMATCH', () => authorize({ lease: structuredClone(lease), operation: { ...structuredClone(op), owner_lane: 'BOOK' }, context: { ...ctx } }));
   expectFailure('STALE_FENCE_EPOCH', () => authorize({ lease: structuredClone(lease), operation: { ...structuredClone(op), fence_epoch: 7 }, context: { ...ctx } }));
   expectFailure('LEASE_EXPIRED', () => authorize({ lease: structuredClone(lease), operation: structuredClone(op), context: { ...ctx, now: '2026-09-12T00:00:00Z' } }));
+  expectFailure('STALE_OWNER_CLAIM', () => authorize({ lease: structuredClone(lease), operation: structuredClone(op), context: { ...ctx, current_owner_claim: { ...structuredClone(ownerClaim), claim_id: 'owner-docs-2' } } }));
+  expectFailure('STALE_OWNER_CLAIM', () => authorize({ lease: structuredClone(lease), operation: structuredClone(op), context: { ...ctx, current_owner_claim: { ...structuredClone(ownerClaim), claim_epoch: 5 } } }));
+  expectFailure('STALE_OWNER_CLAIM', () => authorize({ lease: structuredClone(lease), operation: structuredClone(op), context: { ...ctx, current_owner_claim: { ...structuredClone(ownerClaim), executor_mode: 'SECOND_SHIFT' } } }));
+  expectFailure('MISSING_WORK_LEASE', () => authorize({ lease: structuredClone(lease), operation: structuredClone(op), context: { ...ctx, current_owner_claim: null } }));
   expectFailure('USER_AUTHORITY_REQUIRED', () => authorize({ lease: structuredClone(lease), operation: { ...structuredClone(op), operation_class: 'ADMISSION', target_ref: 'main', effect: 'PROMOTE_CANDIDATE_FAST_FORWARD' }, context: { ...ctx, actor_class: 'CHAT', qualified_candidate: true } }));
 
   const controllerLease = { ...structuredClone(lease), authorization_class: 'CONTROLLER_ADMITTED' };
@@ -187,6 +225,11 @@ function selftest() {
     canonical_refs: [...canonicalRefs()],
     tests: {
       autonomous_candidate_work_allowed: true,
+      exact_current_owner_claim_required: true,
+      stale_owner_claim_id_rejected: true,
+      stale_owner_claim_epoch_rejected: true,
+      executor_mode_mismatch_rejected: true,
+      missing_owner_claim_rejected: true,
       owner_mismatch_rejected: true,
       stale_fence_rejected: true,
       expired_lease_rejected: true,
@@ -210,4 +253,4 @@ if (require.main === module) {
   } else fail('UNKNOWN_MODE', mode);
 }
 
-module.exports = { authorize, canonicalRefs, validateLease, validateOperation, requiresUserAuthority };
+module.exports = { authorize, canonicalRefs, validateLease, validateOperation, validateCurrentOwnerClaim, requiresUserAuthority };
