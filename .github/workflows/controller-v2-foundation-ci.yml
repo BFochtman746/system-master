@@ -3,7 +3,7 @@ name: Controller V2 Foundation CI
 on:
   push:
     branches:
-      - controller-v2/foundation-003
+      - controller-v2/foundation-004
     paths:
       - 'controller-v2/**'
       - '.github/workflows/controller-v2-foundation-ci.yml'
@@ -16,13 +16,17 @@ permissions:
   contents: read
 
 concurrency:
-  group: controller-v2-foundation-ci-${{ github.ref }}
+  group: controller-v2-foundation-ci-${{ github.ref }}-${{ matrix.os }}
   cancel-in-progress: false
 
 jobs:
   foundation:
-    name: Foundation invariants / Python 3.14
-    runs-on: ubuntu-latest
+    name: Foundation invariants / ${{ matrix.os }} / Python 3.14
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     defaults:
       run:
@@ -42,26 +46,13 @@ jobs:
 
       - name: Verify canonical integration line
         env:
-          BRANCH_NAME: ${{ github.ref_name }}
-        run: |
-          python - <<'PY'
-          import json, os
-          from pathlib import Path
-          authority = json.loads(Path('WORK-AUTHORITY.json').read_text())
-          expected = authority['canonical_branch']
-          actual = os.environ['BRANCH_NAME']
-          if actual != expected:
-              raise SystemExit(f'non-canonical Controller 2.0 branch: {actual} != {expected}')
-          print('canonical branch', actual)
-          PY
+          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+        run: python -c "import json,os; from pathlib import Path; a=json.loads(Path('WORK-AUTHORITY.json').read_text()); actual=os.environ['BRANCH_NAME']; expected=a['canonical_branch']; assert actual == expected, f'non-canonical Controller 2.0 branch: {actual} != {expected}'; print('canonical branch', actual)"
 
       - name: Runtime identity
         run: |
           python --version
-          python - <<'PY'
-          import sqlite3
-          print('sqlite', sqlite3.sqlite_version)
-          PY
+          python -c "import platform,sqlite3; print(platform.platform()); print('sqlite', sqlite3.sqlite_version)"
 
       - name: Compile controller
         run: python -m compileall -q controller_v2 tests
