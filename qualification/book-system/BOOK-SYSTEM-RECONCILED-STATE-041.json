@@ -1,0 +1,42 @@
+{
+  "state_id": "BOOK-SYSTEM-RECONCILED-STATE-041",
+  "effective_date": "2026-09-11",
+  "supersedes_for_current_parent_control": "BOOK-SYSTEM-RECONCILED-STATE-040",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "standing": "BOOK_INCOMPLETE__PROSE_COMPLETE_RETIRED__BOOK_ONLY_INTEGRATION_SELECTED",
+  "control_record": "qualification/book-system/BOOK-SYSTEM-CONTROL-RECORD-011.json",
+  "topology_authority": "governance/SYSTEM-TOPOLOGY-005.json on canonical main",
+  "architecture_decision": "governance/ADR-0005-PROSE-TERMINAL-RETIREMENT-BOOK-INTEGRATION.md",
+  "program_job_lock": "governance/SYSTEM-PROGRAM-JOB-LOCK-001.json",
+  "completion_authority": "governance/SYSTEM-COMPLETION-STATUS-001.json",
+  "completion_truth": {
+    "BOOK": "INCOMPLETE",
+    "PROSE": "COMPLETE_RETIRED_TERMINAL",
+    "rule": "No Book phase, packet, hosted run, A-01 receipt or orchestrator component may be promoted to BOOK system completion, and no Book integration packet may resurrect Prose as active work."
+  },
+  "current_owner_objective": {
+    "objective_id": "BOOK-PROSE-PHASE-2-ORCHESTRATOR-CLOSURE-CENSUS-001",
+    "state": "READY",
+    "lineage_name_retained": true,
+    "scope": "Close the already-built Phase 2 orchestrator train as a BOOK evidence census, then continue only dependency-valid BOOK-owned context/compiler, adapter, routing and orchestration integration that consumes preserved completed Prose capability artifacts."
+  },
+  "preserved_phase2_evidence": {
+    "ledger": "qualification/book-system/book-prose-integration/BOOK-PROSE-INTEGRATION-LEDGER-001.json",
+    "last_closed_packet": "BOOK-WORKFLOW-ORCHESTRATOR-BOOK-ADMISSION-HANDOFF-001",
+    "rule": "Reuse valid historical exact-subject evidence; do not replay completed packets without evidence invalidation and do not reinterpret historical Prose evidence as current Prose execution."
+  },
+  "authority_fences": {
+    "book_canonical_manuscript_owner": "SYSTEM_MASTER/BOOK",
+    "prose_retired": true,
+    "prose_active_owner_path": null,
+    "prose_execution_lane": null,
+    "prose_repair_lane": null,
+    "prose_qualification_lane": null,
+    "prose_telemetry_lane": null,
+    "documents_absorbs_prose": false,
+    "book_owns_remaining_completed_prose_integration": true,
+    "book_admission_is_only_canonical_effect_path": true,
+    "author_final_creative_semantic_authority": true
+  },
+  "next_dependency_valid_action": "Execute BOOK-PROSE-PHASE-2-ORCHESTRATOR-CLOSURE-CENSUS-001 only as BOOK-owned integration lineage. If clean, continue Phase 3A and remaining Book-owned adapter/orchestrator integration. Do not create a Prose successor, route Prose work to Documents, declare Book complete, or start another system's product work from the Book lane."
+}
