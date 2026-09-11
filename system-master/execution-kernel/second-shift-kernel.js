@@ -2,11 +2,15 @@
 const { DatabaseSync } = require('node:sqlite');
 const crypto = require('crypto');
 
+const ALLOWED_LANES=new Set(['CORE','LEARNING','BOOK','DOCUMENTS']);
+const MAX_RETRY_BUDGET=3;
+const MAX_LEASE_SECONDS=3600;
 function isoMs(v){ const n=Date.parse(v); if(!Number.isFinite(n)) throw new Error(`INVALID_TIME:${v}`); return n; }
 function norm(v){ return new Date(isoMs(v)).toISOString(); }
 function addSeconds(v,s){ return new Date(isoMs(v)+s*1000).toISOString(); }
 function effectKey(kind,id,generation){ return `${kind}:${id}:${generation}`; }
 function validSha(v){ return /^[0-9a-f]{40}$/i.test(v||''); }
+function validateLeaseSeconds(v){ if(!Number.isInteger(v)||v<1||v>MAX_LEASE_SECONDS) throw new Error('INVALID_LEASE_DURATION'); }
 function nyParts(v){
   const d=new Date(isoMs(v));
   const parts=Object.fromEntries(new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',hourCycle:'h23',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'}).formatToParts(d).filter(p=>p.type!=='literal').map(p=>[p.type,p.value]));
@@ -97,8 +101,10 @@ class SecondShiftKernel {
   }
   enqueue({id,lane,objectiveId,payload={},idempotencyKey,retryBudget=3,priority=0,availableAt,now,controlRef,controlHead,authoritySha}){
     if(!id||!lane||!objectiveId||!idempotencyKey||!controlRef) throw new Error('WORK_IDENTITY_REQUIRED');
+    if(!ALLOWED_LANES.has(lane)) throw new Error('INVALID_LANE');
     if(!validSha(controlHead)||!validSha(authoritySha)) throw new Error('WORK_AUTHORITY_REQUIRED');
-    if(!Number.isInteger(retryBudget)||retryBudget<0||retryBudget>20) throw new Error('INVALID_RETRY_BUDGET');
+    if(!Number.isInteger(retryBudget)||retryBudget<0||retryBudget>MAX_RETRY_BUDGET) throw new Error('INVALID_RETRY_BUDGET');
+    if(!Number.isInteger(priority)) throw new Error('INVALID_PRIORITY');
     const nowN=norm(now), at=norm(availableAt||now);
     return this.tx(()=>{
       const prior=this.db.prepare('SELECT * FROM work_items WHERE lane=? AND idempotency_key=?').get(lane,idempotencyKey);
@@ -118,9 +124,10 @@ class SecondShiftKernel {
     if(!row) throw new Error('WORK_NOT_FOUND'); this.assertMonotonic(row,now); this.assertControl(row,currentControl);
     if(!['CLAIMED','RUNNING'].includes(row.state)) throw new Error('WORK_NOT_LEASED');
     if(row.lease_owner!==worker || row.generation!==generation) throw new Error('FENCING_TOKEN_REJECTED');
-    if(!row.lease_expires_at || isoMs(now)>isoMs(row.lease_expires_at)) throw new Error('LEASE_EXPIRED');
+    if(!row.lease_expires_at || isoMs(now)>=isoMs(row.lease_expires_at)) throw new Error('LEASE_EXPIRED');
   }
   reconcileAuthority(lane,currentControl,now){
+    if(!ALLOWED_LANES.has(lane)) throw new Error('INVALID_LANE');
     const nowN=norm(now); if(!currentControl||!currentControl.controlRef||!validSha(currentControl.controlHead)) throw new Error('CURRENT_CONTROL_REQUIRED');
     return this.tx(()=>{
       const stale=this.db.prepare("SELECT * FROM work_items WHERE lane=? AND state IN ('READY','CLAIMED','RUNNING') AND (control_ref<>? OR control_head<>?) ORDER BY id").all(lane,currentControl.controlRef,currentControl.controlHead);
@@ -132,6 +139,7 @@ class SecondShiftKernel {
     });
   }
   claim(lane,worker,now,leaseSeconds=300,currentControl){
+    if(!ALLOWED_LANES.has(lane)) throw new Error('INVALID_LANE'); validateLeaseSeconds(leaseSeconds);
     const nowN=norm(now); if(!worker) throw new Error('WORKER_REQUIRED'); if(!this.isShiftOpen(nowN)) throw new Error('SHIFT_CLOSED');
     if(!currentControl||!currentControl.controlRef||!validSha(currentControl.controlHead)) throw new Error('CURRENT_CONTROL_REQUIRED');
     this.reconcileAuthority(lane,currentControl,nowN);
@@ -146,10 +154,11 @@ class SecondShiftKernel {
     });
   }
   start(id,worker,generation,now,currentControl){ return this.tx(()=>{ const row=this.get(id); this.assertLease(row,worker,generation,now,currentControl); if(row.state==='RUNNING') return row; const nowN=norm(now); this.db.prepare("UPDATE work_items SET state='RUNNING',updated_at=? WHERE id=?").run(nowN,id); const n=this.get(id); this.event(n,'RUNNING',nowN,{worker,idempotency_key:n.idempotency_key}); return n; }); }
-  heartbeat(id,worker,generation,now,leaseSeconds=300,checkpoint=null,currentControl){ return this.tx(()=>{ const row=this.get(id); this.assertLease(row,worker,generation,now,currentControl); const nowN=norm(now),expires=addSeconds(nowN,leaseSeconds); this.db.prepare('UPDATE work_items SET heartbeat_at=?,lease_expires_at=?,updated_at=? WHERE id=?').run(nowN,expires,nowN,id); const n=this.get(id); this.event(n,'HEARTBEAT',nowN,{checkpoint,lease_expires_at:expires,idempotency_key:n.idempotency_key}); return n; }); }
+  heartbeat(id,worker,generation,now,leaseSeconds=300,checkpoint=null,currentControl){ validateLeaseSeconds(leaseSeconds); return this.tx(()=>{ const row=this.get(id); this.assertLease(row,worker,generation,now,currentControl); const nowN=norm(now),expires=addSeconds(nowN,leaseSeconds); this.db.prepare('UPDATE work_items SET heartbeat_at=?,lease_expires_at=?,updated_at=? WHERE id=?').run(nowN,expires,nowN,id); const n=this.get(id); this.event(n,'HEARTBEAT',nowN,{checkpoint,lease_expires_at:expires,idempotency_key:n.idempotency_key}); return n; }); }
   complete(id,worker,generation,now,result={},currentControl){ return this.tx(()=>{ const row=this.get(id); this.assertLease(row,worker,generation,now,currentControl); const nowN=norm(now); this.db.prepare("UPDATE work_items SET state='COMPLETED',lease_owner=NULL,lease_expires_at=NULL,heartbeat_at=NULL,terminal_reason=NULL,updated_at=? WHERE id=?").run(nowN,id); const n=this.get(id); this.event(n,'COMPLETED',nowN,{result,idempotency_key:n.idempotency_key}); this.outbox(n,'RECONCILE_SUCCESSOR',{terminal:'COMPLETED',result},nowN); return n; }); }
   block(id,worker,generation,now,reason,detail={},currentControl){ return this.tx(()=>{ const row=this.get(id); this.assertLease(row,worker,generation,now,currentControl); const nowN=norm(now); this.db.prepare("UPDATE work_items SET state='BLOCKED',lease_owner=NULL,lease_expires_at=NULL,heartbeat_at=NULL,terminal_reason=?,updated_at=? WHERE id=?").run(reason,nowN,id); const n=this.get(id); this.event(n,'BLOCKED',nowN,{reason,detail,idempotency_key:n.idempotency_key}); this.outbox(n,'SELECT_FALLBACK',{reason,detail},nowN); return n; }); }
   transientFailure(id,worker,generation,now,failureClass,backoffSeconds=30,currentControl){
+    if(!Number.isInteger(backoffSeconds)||backoffSeconds<0||backoffSeconds>3600) throw new Error('INVALID_BACKOFF');
     return this.tx(()=>{ const row=this.get(id); this.assertLease(row,worker,generation,now,currentControl); const nowN=norm(now);
       this.event(row,'RETRY',nowN,{failure_class:failureClass,attempt:row.attempt,retry_budget:row.retry_budget});
       if(row.attempt<row.retry_budget){ const available=addSeconds(nowN,backoffSeconds); this.db.prepare("UPDATE work_items SET state='READY',generation=generation+1,lease_owner=NULL,lease_expires_at=NULL,heartbeat_at=NULL,available_at=?,updated_at=? WHERE id=?").run(available,nowN,id); const n=this.get(id); this.event(n,'READY',nowN,{source:'RETRY',available_at:available}); return n; }
@@ -160,7 +169,7 @@ class SecondShiftKernel {
   ackOutbox(effectKeyValue,now){ return this.tx(()=>{ const r=this.db.prepare("UPDATE outbox SET state='ACKED',acked_at=? WHERE effect_key=? AND state='PENDING'").run(norm(now),effectKeyValue); return Number(r.changes); }); }
   sweepExpired(now){
     const nowN=norm(now); return this.tx(()=>{
-      const rows=this.db.prepare("SELECT * FROM work_items WHERE state IN ('CLAIMED','RUNNING') AND lease_expires_at IS NOT NULL AND lease_expires_at<? ORDER BY lane,id").all(nowN);
+      const rows=this.db.prepare("SELECT * FROM work_items WHERE state IN ('CLAIMED','RUNNING') AND lease_expires_at IS NOT NULL AND lease_expires_at<=? ORDER BY lane,id").all(nowN);
       const results=[];
       for(const row of rows){
         this.event(row,'STALE',nowN,{reason:'LEASE_EXPIRED',expired_generation:row.generation});
@@ -175,4 +184,4 @@ class SecondShiftKernel {
   events(id){ return this.db.prepare('SELECT * FROM events WHERE work_id=? ORDER BY seq').all(id); }
   counts(){ return this.db.prepare('SELECT state,count(*) AS count FROM work_items GROUP BY state ORDER BY state').all(); }
 }
-module.exports={SecondShiftKernel,isSecondShiftOpen,nyParts};
+module.exports={SecondShiftKernel,isSecondShiftOpen,nyParts,ALLOWED_LANES,MAX_RETRY_BUDGET,MAX_LEASE_SECONDS};
