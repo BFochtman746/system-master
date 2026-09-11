@@ -37,7 +37,8 @@ jobs:
       - name: Verify canonical integration line
         env:
           BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
-        run: python -c "import json,os; from pathlib import Path; a=json.loads(Path('WORK-AUTHORITY.json').read_text()); actual=os.environ['BRANCH_NAME']; expected=a['canonical_branch']; assert actual == expected, f'non-canonical Controller 2.0 branch: {actual} != {expected}'; print('canonical branch', actual)"
+        run: |
+          python -c "import json,os; from pathlib import Path; a=json.loads(Path('WORK-AUTHORITY.json').read_text()); actual=os.environ['BRANCH_NAME']; expected=a['canonical_branch']; assert actual == expected, 'non-canonical Controller 2.0 branch'; print('canonical branch', actual)"
       - name: Runtime identity
         run: |
           python --version
@@ -68,7 +69,8 @@ jobs:
       - name: Verify canonical integration line
         env:
           BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
-        run: python -c "import json,os; from pathlib import Path; a=json.loads(Path('WORK-AUTHORITY.json').read_text()); actual=os.environ['BRANCH_NAME']; expected=a['canonical_branch']; assert actual == expected, f'non-canonical Controller 2.0 branch: {actual} != {expected}'; print('canonical branch', actual)"
+        run: |
+          python -c "import json,os; from pathlib import Path; a=json.loads(Path('WORK-AUTHORITY.json').read_text()); actual=os.environ['BRANCH_NAME']; expected=a['canonical_branch']; assert actual == expected, 'non-canonical Controller 2.0 branch'; print('canonical branch', actual)"
       - name: Runtime identity
         run: |
           python --version
