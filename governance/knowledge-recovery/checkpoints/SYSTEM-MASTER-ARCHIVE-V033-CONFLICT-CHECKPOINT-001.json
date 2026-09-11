@@ -1,0 +1,59 @@
+{
+  "checkpoint_id": "SYSTEM-MASTER-ARCHIVE-V033-CONFLICT-CHECKPOINT-001",
+  "effective_date": "2026-09-11",
+  "owner_path": "SYSTEM_MASTER/CORE",
+  "objective_id": "SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001",
+  "source_registry": "governance/catalog/SYSTEM-MASTER-ARCHIVE-SOURCE-REGISTRY-001.json",
+  "subject_name": "GENESIS_OMEGA_RESEARCH_VAULT_v0.33.0.zip",
+  "prior_registry_state": "HIST-V033-ARCHIVE-CONFLICT-001 described two conflicting historical SHA-256 sidecars with target bytes unestablished.",
+  "current_observation": {
+    "exact_sidecars_observed": 3,
+    "target_archive_exact_bytes_observed": false,
+    "target_archive_library_search_result": "NOT_FOUND_AS_ZIP_IN_CURRENT_ACCESSIBLE_LIBRARY_SEARCH",
+    "conflict_state": "THREE_WAY_TARGET_DIGEST_CONFLICT__TARGET_BYTES_UNAVAILABLE"
+  },
+  "sidecars": [
+    {
+      "library_file_id": "file_0000000045c081f68651d29e79e4c331",
+      "library_version_id": "1",
+      "library_name": "GENESIS_OMEGA_RESEARCH_VAULT_v0.33.0.zip.sha256",
+      "observed_byte_length": 117,
+      "observed_sidecar_sha256": "9c8e903d34ea60bb8b16ea89edec924ac48a0905a0e4533cf026f156d2c09693",
+      "claimed_target_sha256": "6615a9065c4914b4995c95ec27761776ccb7d8b1f31178649ea831f7abb827d4",
+      "claimed_target_locator": "/mnt/data/GENESIS_OMEGA_RESEARCH_VAULT_v0.33.0.zip"
+    },
+    {
+      "library_file_id": "file_00000000b67481f58738ca327d5fe915",
+      "library_version_id": "1",
+      "library_name": "GENESIS_OMEGA_RESEARCH_VAULT_v0.33.0.zip(1).sha256",
+      "observed_byte_length": 117,
+      "observed_sidecar_sha256": "7f800f33fd2361643fdeff924732b4f84b66fb54764366a6aaada78de667acea",
+      "claimed_target_sha256": "433e4867e9e032fc69eb913fbc953c4f1a19964d24b1a2f6eba76d0cf0fb9c82",
+      "claimed_target_locator": "/mnt/data/GENESIS_OMEGA_RESEARCH_VAULT_v0.33.0.zip"
+    },
+    {
+      "library_file_id": "file_000000006a9881f598dafc0ac29fc361",
+      "library_version_id": "1",
+      "library_name": "GENESIS_OMEGA_RESEARCH_VAULT_v0.33.0.zip(2).sha256",
+      "observed_byte_length": 117,
+      "observed_sidecar_sha256": "60a09a40af932f959fab11053cf11aacebc56d0c929f18f453eba44a647e95fd",
+      "claimed_target_sha256": "46573fb6d4abd3ecaffbbf59386a1d0d6fe18a8163100140ca638a8e7a8ec605",
+      "claimed_target_locator": "/mnt/data/GENESIS_OMEGA_RESEARCH_VAULT_v0.33.0.zip"
+    }
+  ],
+  "adjudication": {
+    "selected_target_digest": null,
+    "selection_allowed": false,
+    "reason": "Three exact preserved sidecars make mutually incompatible digest claims for the same target basename and the target archive bytes are not currently available for direct hashing.",
+    "custody_disposition": "QUARANTINE_CONFLICT_PRESERVE_ALL_SIDECARS",
+    "authority_effect": "NONE"
+  },
+  "not_claimed": [
+    "identity of the missing v0.33 target archive",
+    "correctness of any one sidecar target digest",
+    "archive content recovery",
+    "A-01 verification",
+    "promotion or production authority"
+  ],
+  "next_action": "Continue authorized archive/catalog recovery using exact source discovery. If exact GENESIS_OMEGA_RESEARCH_VAULT_v0.33.0.zip bytes become available, hash those bytes directly and compare against all three preserved claims; otherwise retain the conflict without selecting a digest."
+}
