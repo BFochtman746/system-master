@@ -8,26 +8,68 @@ on:
       - 'governance/SYSTEM-TOPOLOGY-004.json'
       - 'governance/SYSTEM-PROGRAM-JOB-LOCK-001.json'
       - 'governance/SYSTEM-COMPLETION-STATUS-001.json'
+      - 'governance/COMPLETION-LEDGER-002.json'
       - 'governance/WORK-OBLIGATION-REGISTRY-008.json'
       - 'governance/EXPECTATION-REGISTRY-004.json'
+      - 'governance/REALLOCATION-LEDGER-003.json'
+      - 'governance/catalog/SYSTEM-MASTER-SYSTEM-CATALOG-002.json'
+      - 'governance/morning/DAILY-CHAT-BOOTSTRAP-SCHEMA-001.json'
+      - 'governance/morning/CHAT-START-COMMAND-CONTRACT-001.md'
+      - 'governance/morning/MORNING-CANONICAL-RECONCILIATION-001.md'
+      - 'governance/morning/MORNING-CHAT-READINESS-GATE-001.md'
+      - 'governance/morning/MASTER-ROOT-CHAT-OPERATING-CONTRACT-001.md'
+      - 'governance/CHAT-LANE-OPERATING-PROMPT-002.md'
       - 'governance/second-shift/SECOND-SHIFT-REGISTRY-001.json'
+      - 'governance/second-shift/SECOND-SHIFT-EXECUTION-CONTROL-001.md'
       - 'governance/second-shift/CORE-DELEGATIONS.json'
       - 'governance/second-shift/LEARNING-DELEGATIONS.json'
       - 'governance/second-shift/BOOK-DELEGATIONS.json'
       - 'governance/second-shift/DOCUMENTS-DELEGATIONS.json'
       - '.github/scripts/program-job-lock-enforce.js'
+      - '.github/scripts/current-obligation-registry-enforce.js'
+      - '.github/scripts/second-shift-enforce.js'
+      - '.github/scripts/second-shift-owner-coverage.js'
+      - '.github/workflows/program-job-lock-enforcement.yml'
+  pull_request:
+    paths:
+      - 'governance/CURRENT-AUTHORITY.json'
+      - 'governance/SYSTEM-TOPOLOGY-004.json'
+      - 'governance/SYSTEM-PROGRAM-JOB-LOCK-001.json'
+      - 'governance/SYSTEM-COMPLETION-STATUS-001.json'
+      - 'governance/COMPLETION-LEDGER-002.json'
+      - 'governance/WORK-OBLIGATION-REGISTRY-008.json'
+      - 'governance/EXPECTATION-REGISTRY-004.json'
+      - 'governance/morning/DAILY-CHAT-BOOTSTRAP-SCHEMA-001.json'
+      - 'governance/morning/CHAT-START-COMMAND-CONTRACT-001.md'
+      - 'governance/second-shift/**'
+      - '.github/scripts/program-job-lock-enforce.js'
       - '.github/workflows/program-job-lock-enforcement.yml'
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   enforce:
+    name: Enforce locked program jobs, completion truth, startup and lane routing
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Validate job lock syntax
-        run: node --check .github/scripts/program-job-lock-enforce.js
+      - name: Validate enforcement syntax
+        run: |
+          node --check .github/scripts/program-job-lock-enforce.js
+          node --check .github/scripts/current-obligation-registry-enforce.js
+          node --check .github/scripts/second-shift-enforce.js
+          node --check .github/scripts/second-shift-owner-coverage.js
       - name: Enforce program jobs and completion truth
         run: node .github/scripts/program-job-lock-enforce.js
+      - name: Validate current obligation ownership
+        run: node .github/scripts/current-obligation-registry-enforce.js
+      - name: Validate Second Shift static lane state
+        run: |
+          node .github/scripts/second-shift-enforce.js --no-live
+          node .github/scripts/second-shift-owner-coverage.js --no-live
