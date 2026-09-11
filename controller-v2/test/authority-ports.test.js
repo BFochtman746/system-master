@@ -1,0 +1,14 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { ControllerKernel, ControllerError } from '../src/kernel.js';
+import { createWorkerPort, describeWorkerAuthority } from '../src/authority-ports.js';
+import { uuidv7 } from '../src/canonical.js';
+
+const SUBJECT={algorithm:'sha1',oid:'0123456789abcdef0123456789abcdef01234567'};
+function command(){return {protocol_version:'1.0',schema:'controller://schemas/command/v1',command_id:uuidv7(),created_at:new Date().toISOString(),issuer:{principal:'user:test',source:'chatgpt'},command_type:'controller.work.submit',target:{repository:'BFochtman746/system-master',expected_subject:{...SUBJECT}},preconditions:{},intent:{task:'worker-port'},constraints:{},required_policy_version:null};}
+function running(){const k=new ControllerKernel(':memory:');const tx=k.acceptCommand(command()).transaction_id;k.admitTransaction(tx);k.activateTransaction(tx);const op=k.createOperation(tx,{resourceId:'r'});k.transitionOperation(op,'READY');const lease=k.acquireLease(op,'r','worker',60000,1000);k.startLeasedOperation({leaseId:lease.lease_id,generation:lease.generation,operationId:op,nowMs:1000});return {k,tx,op,lease,port:createWorkerPort(k,{leaseId:lease.lease_id,generation:lease.generation,operationId:op})};}
+
+test('AP-T001 worker port exposes only heartbeat and typed result submission',()=>{const {k,port}=running();assert.deepEqual(Object.keys(port).sort(),['heartbeat','submitResult']);for(const forbidden of ['db','sealAllOutbox','markOutboxSealed','completeTransaction','createQualification','requestPromotion','authorizePromotion','executePromotion'])assert.equal(forbidden in port,false);assert.ok(Object.isFrozen(port));k.close();});
+test('AP-T002 worker port heartbeat is still fenced by exact lease generation',()=>{const {k,port,lease}=running();assert.equal(port.heartbeat(1001),true);k.releaseLease(lease.lease_id,lease.generation,1002);assert.throws(()=>port.heartbeat(1003),e=>e instanceof ControllerError&&e.code==='STALE_LEASE');k.close();});
+test('AP-T003 worker port accepts bounded terminal result but cannot request promotion',()=>{const {k,op,port}=running();assert.throws(()=>port.submitResult({result:'PROMOTE',nowMs:1001}),e=>e instanceof ControllerError&&e.code==='WORKER_AUTHORITY_DENIED');assert.equal(port.submitResult({result:'SUCCEEDED',evidence:{digest:'evidence-1'},nowMs:1002}),'SUCCEEDED');assert.equal(k.db.prepare('SELECT state FROM operations WHERE operation_id=?').get(op).state,'SUCCEEDED');k.close();});
+test('AP-T004 worker authority declaration forbids controller authority surfaces',()=>{const authority=describeWorkerAuthority();assert.deepEqual(authority.allowed,['heartbeat','submitResult']);for(const required of ['db','outbox-seal','transaction-transition','qualification','promotion','policy-mutation','subject-mutation'])assert.ok(authority.forbidden.includes(required));assert.ok(Object.isFrozen(authority));});
