@@ -1,6 +1,6 @@
 # DOCUMENTS-R4-GITHUB-NATIVE-PAYLOAD-STAGING-004
 
-Status: SELECTED / READY_FOR_EXECUTION
+Status: BLOCKED / EXTERNAL FILE-CAPABLE TRANSPORT REQUIRED
 Owner: SYSTEM_MASTER/DOCUMENTS
 Predecessor: DOCUMENTS-R4-TRANSPORT-CONTRACT-RECONCILIATION-003 — CLOSED/PASS
 Date: 2026-09-11
@@ -32,10 +32,40 @@ Commit the five exact base64 payload chunks already derived from the canonical R
 9. Do not transfer historical qualification PASS.
 10. Preserve source custody standing as BLOCKED until the separate admission/arming operation runs on its exact Git subject.
 
+## Current adjudication
+
+The acceptance contract cannot be satisfied with the GitHub transport exposed in this execution environment.
+
+Evidence established during the 004 attempt:
+
+- the exact local source remains verified 225/225 and the canonical five-chunk carrier remains intact;
+- `transport/document-r4/STAGING.json` remains at 0/5 payload chunks, not armed, READY absent;
+- the surviving September 10 R4 final-admission/import/staging/binary-transport branches contain no complete committed payload;
+- the September 10 zip-transport branch contains probe/planning records, not the source tree or a complete carrier;
+- the September 11 Second Shift checkpoint independently records `github_native_source_tree_committed=false` and the same file-capable-transport blocker;
+- an attempted bounded UTF-8 segment bridge was rejected fail-closed because not every transferred segment reproduced its precomputed Git content-addressed object identity;
+- no canonical payload chunk from that bridge was attached to the branch tree;
+- the temporary bridge workflow and segment manifest were removed.
+
+The durable blocker record is:
+`documents/reconciliation/DOCUMENTS-R4-GITHUB-NATIVE-PAYLOAD-STAGING-BLOCKER-004.json`.
+
 ## Acceptance
 
-PASS requires 5/5 remote chunk files exact, canonical carrier reconstruction PASS, 225/225 source identity PASS, staging metadata exact, and READY absent.
+PASS still requires 5/5 remote chunk files exact, canonical carrier reconstruction PASS, 225/225 source identity PASS, staging metadata exact, and READY absent.
 
-## Downstream
+Current result: **BLOCKED**. None of those requirements are waived or weakened.
 
-Only after this package closes may the admission/arming operation create READY and invoke fresh GitHub-native exact-subject qualification.
+## Required unblock
+
+Use a file-capable GitHub transport or an already-authorized runner-visible source capable of transferring the exact local carrier/source bytes without manual transcription. Then rerun this package from the frozen contract and require remote exact-byte verification before PASS.
+
+## Independent continuation rule
+
+This transport-only blocker does not prevent continuing Documents build-readiness organization and bounded pre-build packet preparation. It does prevent any claim that recovered R4 source is in Git-native custody or that fresh qualification is bound to an exact Git source subject.
+
+## Next safe Documents operation
+
+`DOCUMENTS-SPINE-IDENTIFY-PROFILE-COMPLETION-001A — REQUIREMENT / SOURCE / CONTRACT / TEST / DEPENDENCY PREBUILD FREEZE`
+
+This successor prepares the earliest partially complete Documents spine stage for future implementation without modifying or qualifying absent Git-native R4 source bytes.
