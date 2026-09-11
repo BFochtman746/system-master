@@ -8,24 +8,36 @@ on:
   push:
     paths:
       - 'governance/CURRENT-AUTHORITY.json'
+      - 'governance/SYSTEM-PROGRAM-JOB-LOCK-001.json'
+      - 'governance/SYSTEM-COMPLETION-STATUS-001.json'
+      - 'governance/COMPLETION-LEDGER-002.json'
       - 'governance/WORK-OBLIGATION-REGISTRY-*.json'
       - 'governance/SYSTEM-TOPOLOGY-*.json'
       - 'governance/architecture/**'
-      - 'governance/morning/MASTER-ROOT-CHAT-OPERATING-CONTRACT-001.md'
+      - 'governance/morning/**'
+      - 'governance/CHAT-LANE-OPERATING-PROMPT-002.md'
       - 'SYSTEM-MASTER-WORKSTREAM-BOOTSTRAP.md'
       - 'governance/second-shift/**'
+      - '.github/scripts/program-job-lock-enforce.js'
+      - '.github/scripts/current-obligation-registry-enforce.js'
       - '.github/scripts/second-shift-enforce.js'
       - '.github/scripts/second-shift-owner-coverage.js'
       - '.github/workflows/second-shift-enforcement.yml'
   pull_request:
     paths:
       - 'governance/CURRENT-AUTHORITY.json'
+      - 'governance/SYSTEM-PROGRAM-JOB-LOCK-001.json'
+      - 'governance/SYSTEM-COMPLETION-STATUS-001.json'
+      - 'governance/COMPLETION-LEDGER-002.json'
       - 'governance/WORK-OBLIGATION-REGISTRY-*.json'
       - 'governance/SYSTEM-TOPOLOGY-*.json'
       - 'governance/architecture/**'
-      - 'governance/morning/MASTER-ROOT-CHAT-OPERATING-CONTRACT-001.md'
+      - 'governance/morning/**'
+      - 'governance/CHAT-LANE-OPERATING-PROMPT-002.md'
       - 'SYSTEM-MASTER-WORKSTREAM-BOOTSTRAP.md'
       - 'governance/second-shift/**'
+      - '.github/scripts/program-job-lock-enforce.js'
+      - '.github/scripts/current-obligation-registry-enforce.js'
       - '.github/scripts/second-shift-enforce.js'
       - '.github/scripts/second-shift-owner-coverage.js'
       - '.github/workflows/second-shift-enforcement.yml'
@@ -40,7 +52,7 @@ concurrency:
 
 jobs:
   enforce:
-    name: Reject false idle, stale claims, owner coverage gaps and undispatched READY work
+    name: Reject job drift, false completion, stale claims and owner coverage gaps
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -50,10 +62,18 @@ jobs:
           fetch-depth: 1
           persist-credentials: false
 
-      - name: Syntax check Second Shift enforcement
+      - name: Syntax check governance and Second Shift enforcement
         run: |
+          node --check .github/scripts/program-job-lock-enforce.js
+          node --check .github/scripts/current-obligation-registry-enforce.js
           node --check .github/scripts/second-shift-enforce.js
           node --check .github/scripts/second-shift-owner-coverage.js
+
+      - name: Enforce locked program jobs and completion truth
+        run: node .github/scripts/program-job-lock-enforce.js
+
+      - name: Enforce current obligation ownership
+        run: node .github/scripts/current-obligation-registry-enforce.js
 
       - name: Self-test Second Shift invariants
         run: |
