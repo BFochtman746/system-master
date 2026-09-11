@@ -1,0 +1,63 @@
+{
+  "qualification_id": "BOOK-CONTEXT-COMPILER-HOSTED-QUALIFICATION-001",
+  "effective_date": "2026-09-11",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "delegation_id": "SECOND-SHIFT-BOOK-CONTEXT-COMPILER-001",
+  "objective_id": "BOOK-CONTEXT-COMPILER-CONTEXT-PACKAGE-SCHEMA-001-IMPLEMENTATION",
+  "contract": "qualification/book-system/book-prose-integration/BOOK-CONTEXT-COMPILER-CONTEXT-PACKAGE-SCHEMA-001.json",
+  "qualified_subject": {
+    "repository": "BFochtman746/system-master",
+    "ref": "main",
+    "commit_sha": "6a488b45497c3a60fb3a23bab640a6a7ca372246",
+    "runtime_blob_sha": "8b71624cd555e834fb6572cb659ad3d50a1ade2c",
+    "schema_blob_sha": "725f3a16990f096c6fd99fe9e27d026445839efa",
+    "qualifier_blob_sha": "0a903198ea4baff3ceaa3b8b82da1546ef15fb14"
+  },
+  "hosted_execution": {
+    "provider": "GITHUB_ACTIONS_HOSTED",
+    "workflow": ".github/workflows/book-context-compiler-portable-qualification.yml",
+    "run_id": 34564007172,
+    "job_id": 103152279773,
+    "status": "COMPLETED",
+    "conclusion": "SUCCESS",
+    "checkout_sha_observed_in_job_log": "6a488b45497c3a60fb3a23bab640a6a7ca372246",
+    "runner_os": "Ubuntu 24.04.5 LTS",
+    "node_version": "v22.23.2",
+    "cases_executed": 44,
+    "cases_passed": 44,
+    "cases_failed": 0,
+    "terminal_marker": "BOOK_CONTEXT_COMPILER_PORTABLE_PASS cases=44"
+  },
+  "verified_contract_properties": [
+    "compiled durable package emitted",
+    "package_digest_sha256 required and strict 64-hex SHA-256",
+    "compiled digest equals result digest",
+    "compiled package keys are schema-admitted and include every schema-required key",
+    "constraints are deterministically ordered",
+    "canonical_effect remains evidence metadata and is not persisted in the durable package",
+    "caller-supplied digest cannot override compiler-generated digest",
+    "stale source, Book state, Story Bible and service-registry bindings fail closed",
+    "unresolved author decisions fail closed",
+    "hard constraint conflicts fail closed",
+    "retired Prose execution domains are rejected",
+    "Documents ownership of completed-Prose integration is rejected"
+  ],
+  "evidence_boundaries": {
+    "fixture_class": "SYNTHETIC_NONBLIND",
+    "historical_pass_transfer": false,
+    "fresh_blind_execution": false,
+    "canonical_manuscript_effect": false,
+    "author_decision_authority": "NOT_GRANTED",
+    "private_manuscript_access": "NOT_PERFORMED",
+    "a01_authoritative_receipt": "NOT_PRESENT_NOT_CLAIMED",
+    "a01_pass": "NOT_CLAIMED",
+    "native_platform_pass": "NOT_CLAIMED",
+    "publication_pass": "NOT_CLAIMED",
+    "production_pass": "NOT_CLAIMED",
+    "prose_standing": "COMPLETE_RETIRED_TERMINAL__NO_EXECUTION_ROUTE",
+    "documents_receives_prose_work": false
+  },
+  "standing": "HOSTED_EXACT_MAIN_SHA_PASS_44_OF_44__BOUNDED_SYNTHETIC_NONBLIND",
+  "completion_delta": "The selected Book Context Compiler implementation is now merged to canonical main and has fresh hosted qualification on that exact main SHA after the durable-envelope contract repair.",
+  "continuation_rule": "Release the Context Compiler mutation claim, preserve this exact-subject evidence, re-read Book authority, and bind only the next genuinely open BOOK-owned integration seam. Do not create a Prose successor or route completed-Prose integration to Documents."
+}
