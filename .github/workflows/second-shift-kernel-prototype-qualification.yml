@@ -1,0 +1,30 @@
+name: Second Shift Durable Kernel Prototype Qualification
+on:
+  workflow_dispatch:
+  push:
+    branches: [reliability/second-shift-controller-stress-20260911]
+    paths:
+      - 'system-master/execution-kernel/**'
+      - '.github/workflows/second-shift-kernel-prototype-qualification.yml'
+permissions:
+  contents: read
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+      - name: Verify node sqlite availability
+        run: node -e "const {DatabaseSync}=require('node:sqlite'); const d=new DatabaseSync(':memory:'); console.log(d.prepare('select sqlite_version() as v').get()); d.close();"
+      - name: Syntax
+        run: |
+          node --check system-master/execution-kernel/second-shift-kernel.js
+          node --check system-master/execution-kernel/second-shift-kernel.test.js
+      - name: Run crash, lease, idempotency, outbox, retry and soak tests
+        run: node system-master/execution-kernel/second-shift-kernel.test.js
