@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { GitHubGitDatabaseTransport, GitHubApiError } from '../src/github-git-transport.js';
 
-function response(status,body=null){return {ok:status>=200&&status<300,status,async text(){return body===null?'':JSON.stringify(body);}};}
+function response(status,body=null,headers={}){const normalized=new Map(Object.entries(headers).map(([k,v])=>[k.toLowerCase(),String(v)]));return {ok:status>=200&&status<300,status,headers:{get(name){return normalized.get(String(name).toLowerCase())??null;}},async text(){return body===null?'':JSON.stringify(body);}};}
 function makeTransport(handler){const calls=[];const fetchImpl=async(url,options)=>{calls.push({url,options});return handler(url,options,calls);};return {calls,transport:new GitHubGitDatabaseTransport({owner:'o',repo:'r',tokenProvider:async()=> 'token',fetchImpl})};}
 
 test('GHT-T001 ref update always sends force false',async()=>{
@@ -51,4 +51,19 @@ test('GHT-T005 commit creation uses exact parent tree and exactly one parent',as
 test('GHT-T006 authorization and API-version headers are set without persisting credentials',async()=>{
   const {calls,transport}=makeTransport(()=>response(200,{object:{sha:'abc'}}));await transport.getRef('x');
   assert.equal(calls[0].options.headers.Authorization,'Bearer token');assert.equal(calls[0].options.headers['X-GitHub-Api-Version'],'2026-03-10');
+});
+
+test('GHT-T007 primary rate-limit 403 is distinguished from authorization failure',async()=>{
+  const {transport}=makeTransport(()=>response(403,{message:'API rate limit exceeded'},{'x-ratelimit-remaining':'0','x-ratelimit-reset':'1789166400'}));
+  await assert.rejects(transport.getRef('x'),e=>e instanceof GitHubApiError&&e.code==='GITHUB_RATE_LIMITED'&&e.rateLimitRemaining===0&&e.rateLimitResetEpochSeconds===1789166400);
+});
+
+test('GHT-T008 secondary 403 with Retry-After carries retry metadata',async()=>{
+  const {transport}=makeTransport(()=>response(403,{message:'You have exceeded a secondary rate limit.'},{'retry-after':'60','x-ratelimit-remaining':'4999'}));
+  await assert.rejects(transport.getRef('x'),e=>e instanceof GitHubApiError&&e.code==='GITHUB_RATE_LIMITED'&&e.retryAfterSeconds===60&&e.rateLimitRemaining===4999);
+});
+
+test('GHT-T009 ordinary permission 403 remains GITHUB_FORBIDDEN',async()=>{
+  const {transport}=makeTransport(()=>response(403,{message:'Resource not accessible by integration'}));
+  await assert.rejects(transport.getRef('x'),e=>e instanceof GitHubApiError&&e.code==='GITHUB_FORBIDDEN');
 });
