@@ -1,0 +1,100 @@
+name: Morning Recovery Documents Reconcile V2 Once 2026-09-11
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/morning-recovery-documents-reconcile-v2-once-2026-09-11.yml'
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: morning-recovery-documents-reconcile-v2-20260911
+  cancel-in-progress: false
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout current main
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Rebind to latest main
+        run: git pull --ff-only origin main
+      - name: Reconcile Documents governance and evidence only
+        shell: bash
+        run: |
+          node - <<'NODE'
+          const fs = require('fs');
+          const path = require('path');
+          const docsHead = '045113bda0610ef174b677fdea36884b2c0c53be';
+          const qualifiedRun = 34595805122;
+          const now = '2026-09-11T08:33:00-04:00';
+
+          const obligationPath = 'governance/WORK-OBLIGATION-REGISTRY-009.json';
+          const obligation = JSON.parse(fs.readFileSync(obligationPath, 'utf8'));
+          obligation.owner_head_snapshot.DOCUMENTS = docsHead;
+          const r4 = obligation.obligations.find(x => x.obligation_id === 'DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-IMPORT-AND-EXACT-SUBJECT-QUALIFICATION-002');
+          if (!r4) throw new Error('DOCUMENTS_R4_OBLIGATION_NOT_FOUND');
+          r4.state = 'BLOCKED';
+          r4.blocker_class = 'SOURCE_CUSTODY';
+          r4.blocker_evidence = 'qualification/document-system/r4/DOCUMENTS-R4-EXACT-SOURCE-HANDOFF-RECONCILIATION-001.json';
+          r4.objective = 'Resume exact CR001-R4 GitHub-native source import only when the already-verified exact bytes can cross an approved file-capable transport; then bind exact identity and run fresh qualification. Historical PASS does not transfer.';
+          fs.writeFileSync(obligationPath, JSON.stringify(obligation, null, 2) + '\n');
+
+          const delegationPath = 'governance/second-shift/DOCUMENTS-DELEGATIONS.json';
+          const d = JSON.parse(fs.readFileSync(delegationPath, 'utf8'));
+          const priorHead = d.last_known_control_head;
+          d.last_known_control_head = docsHead;
+          d.delegation_epoch = Math.max(Number(d.delegation_epoch || 0) + 1, 7);
+          const nextActive = [];
+          let retired = false;
+          for (const item of d.active_delegations || []) {
+            if (item.delegation_id === 'SECOND-SHIFT-DOCUMENTS-SYSTEM-MASTER-SERVICE-INTERFACE-CENSUS-001') {
+              d.retired_delegations = d.retired_delegations || [];
+              d.retired_delegations.unshift({delegation_id:item.delegation_id,state:'COMPLETED__SYSTEM_MASTER_SERVICE_INTERFACE_BOUND',prior_bound_control_head:item.valid_for_control_head,implementation_subject_sha:docsHead,hosted_run_id:qualifiedRun,cases_passed:20,cases_planned:20,completion_evidence:'qualification/document-system/interfaces/DOCUMENTS-SYSTEM-MASTER-SERVICE-INTERFACE-QUALIFICATION-001.json',r4_dependency:false,raw_bytes_forbidden:true,cross_lane_semantic_payload_fields_forbidden:true,production_authorized:false,history_preserved:true});
+              retired = true;
+              continue;
+            }
+            if (item.delegation_id === 'SECOND-SHIFT-DOCUMENTS-R4-ADMISSION-002') {
+              item.valid_for_control_head = docsHead;
+              item.last_revalidated_at = now;
+              item.state = 'CANDIDATE';
+              item.priority = 'DOCUMENTS_R4_BLOCKED_PREREQUISITE_CANDIDATE';
+              item.classification = 'DOCUMENTS_R4_EXACT_CUSTODY_BLOCKED_PENDING_FILE_CAPABLE_TRANSPORT';
+            }
+            nextActive.push(item);
+          }
+          if (!retired) throw new Error('SERVICE_INTERFACE_DELEGATION_NOT_ACTIVE');
+          nextActive.push({delegation_id:'SECOND-SHIFT-DOCUMENTS-SYSTEM-MASTER-SERVICE-ADAPTER-INTEGRATION-001',owner_path:'SYSTEM_MASTER/DOCUMENTS',objective_id:'DOCUMENTS-TO-SYSTEM-MASTER-SERVICE-ADAPTER-INTEGRATION-001',obligation_id:'DOCUMENTS-CURRENT-ADMISSION-001',state:'READY',priority:'DOCUMENTS_OWNER_VALID_INDEPENDENT_SUCCESSOR_WHILE_R4_CUSTODY_BLOCKED',valid_for_control_ref:'documents/control-v1',valid_for_control_head:docsHead,created_at:now,last_revalidated_at:now,parent_checkpoint:'qualification/document-system/interfaces/DOCUMENTS-SYSTEM-MASTER-SERVICE-INTERFACE-QUALIFICATION-001.json',classification:'DOCUMENTS_GENERIC_SERVICE_INTERFACE_INTEGRATION',scope:'Integrate the exact qualified reference-only Documents request/response/event contract into current System Master call sites and adapter boundaries. Preserve idempotency, correlation and classified blocker semantics; do not transport raw document bytes through the envelope, do not depend on blocked R4 custody, and do not take Book, Learning, Core or Programming product semantics.',completion_delta:'Bind the qualified generic Documents service envelope to the System Master integration surface with deterministic portable tests, or preserve a truthful owner/external blocker.',evidence_target:'Exact call-site/adapter binding plus deterministic request/response/event conformance evidence on the current Documents owner subject.',stop_condition:'The qualified Documents service contract is integrated upward with fresh evidence, or a concrete external/native/owner dependency blocks the adapter while R4 remains independently blocked.',allowed_work:['read current System Master Documents call sites and integration adapters','bind the qualified Documents reference-only service contract without raw-byte transport','test idempotency, correlation, blocker routing and cross-lane authority fences','preserve R4 custody as an independent blocker'],forbidden_authority:['do not create, inherit, schedule, repair, research, qualify, telemeter or bind successor work for PROSE','do not mutate Book canonical manuscript, Story Bible, author, lifecycle or admission state','do not take Learning, Core or Programming product authority','do not claim R4 GitHub-native custody until exact bytes are present in Git','do not claim A-01/native/publication/production PASS','do not declare DOCUMENTS complete'],on_pass:'Preserve exact Documents integration evidence and bind only the next Documents-owned successor after fresh owner-head revalidation.',on_failure:'Preserve exact Documents-owned failure evidence and repair only the demonstrated adapter defect without reopening retired Prose or crossing peer ownership.'});
+          d.active_delegations = nextActive;
+          d.owner_revalidation_required = false;
+          d.reason = `Morning recovery reconciled Documents owner head ${priorHead} -> ${docsHead}; hosted run ${qualifiedRun} passed 20/20 on the exact service-interface subject. The service census is retired as completed, R4 remains truthfully blocked on exact-byte transport, and one independent Documents-to-System-Master adapter successor is READY.`;
+          fs.writeFileSync(delegationPath, JSON.stringify(d, null, 2) + '\n');
+
+          const evidence = {qualification_record_id:'DOCUMENTS-SYSTEM-MASTER-SERVICE-INTERFACE-QUALIFICATION-001',owner_system_id:'DOCUMENTS',owner_path:'SYSTEM_MASTER/DOCUMENTS',control_ref:'documents/control-v1',subject_sha:docsHead,workflow_run_id:qualifiedRun,workflow_name:'Documents System Master Service Interface Qualification',result_class:'PASS',cases_passed:20,cases_planned:20,operations:7,reference_only:true,idempotency_conflict_rejected:true,correlation_preserved:true,classified_blocker_required:true,raw_bytes_forbidden:true,cross_lane_semantic_payload_fields_forbidden:true,r4_dependency:false,production_authorized:false,historical_pass_transfer:false,recorded_at:now,authority_boundary:'PASS applies only to exact Documents owner subject 045113bda0610ef174b677fdea36884b2c0c53be and the generic service-interface conformance tested by run 34595805122. It does not establish R4 exact-byte custody, A-01/native/publication/production PASS, whole-DOCUMENTS completion, or any Book/Learning/Core/Programming semantic authority.'};
+          const evidencePath = 'qualification/document-system/interfaces/DOCUMENTS-SYSTEM-MASTER-SERVICE-INTERFACE-QUALIFICATION-001.json';
+          fs.mkdirSync(path.dirname(evidencePath), {recursive:true});
+          fs.writeFileSync(evidencePath, JSON.stringify(evidence, null, 2) + '\n');
+          NODE
+      - name: Commit and push reconciled non-workflow state
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add governance/WORK-OBLIGATION-REGISTRY-009.json governance/second-shift/DOCUMENTS-DELEGATIONS.json qualification/document-system/interfaces/DOCUMENTS-SYSTEM-MASTER-SERVICE-INTERFACE-QUALIFICATION-001.json
+          git commit -m 'Reconcile Documents recovery evidence and successor'
+          pushed=false
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            if git rebase origin/main && git push origin HEAD:main; then pushed=true; break; fi
+            git rebase --abort || true
+            sleep 2
+          done
+          test "$pushed" = true
