@@ -122,7 +122,7 @@ on:
         description: Canonical repair inbox selected on non-PASS
         value: ${{ jobs.route.outputs.repair_target_inbox }}
       admission_state:
-        description: Hosted pre-run admission result
+        description: Trusted metadata-only pre-run admission result
         value: ${{ jobs.route.outputs.admission_state }}
       control_plane_sha:
         description: Exact control-plane commit used for admission and execution
@@ -134,7 +134,7 @@ permissions:
 
 jobs:
   route:
-    name: Route through hosted admission barrier before A-01
+    name: Route through trusted metadata-only admission before subject execution
     uses: ./.github/workflows/a01-control-plane-admission-broker.yml
     with:
       qualification_id: ${{ inputs.qualification_id || 'A01-CONTROL-PLANE-SELFTEST' }}

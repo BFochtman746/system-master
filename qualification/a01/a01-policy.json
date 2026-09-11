@@ -1,5 +1,5 @@
 {
-  "policy_version": 7,
+  "policy_version": 8,
   "control_plane_id": "A01-CONTROL-PLANE-001",
   "canonical_ref": "main",
   "runner": {
@@ -25,23 +25,30 @@
     }
   },
   "admission": {
+    "mode": "TRUSTED_SELF_HOSTED_METADATA_ONLY_FOR_NONDISRUPTIVE",
     "max_outstanding_per_workstream": 4,
     "require_registered_qualification": true,
     "allow_arbitrary_command_input": false,
     "continue_dependency_valid_work_while_waiting": true,
-    "hosted_barrier_required_before_self_hosted_runner": true,
-    "verify_control_plane_sha_before_runner": true,
-    "verify_subject_sha_before_runner": true,
-    "verify_registered_wrapper_before_runner": true,
-    "blocked_requests_must_not_acquire_a01": true,
+    "hosted_barrier_required_before_self_hosted_runner": false,
+    "trusted_metadata_barrier_required_before_subject_checkout": true,
+    "pre_admission_subject_checkout_forbidden": true,
+    "pre_admission_subject_execution_forbidden": true,
+    "verify_control_plane_sha_before_admission": true,
+    "verify_subject_commit_metadata_before_subject_checkout": true,
+    "verify_registered_wrapper_metadata_before_subject_checkout": true,
+    "non_disruptive_only_without_hosted_runner": true,
+    "disruptive_qualifications_fail_closed_without_hosted_admission": true,
+    "blocked_requests_may_acquire_trusted_admission_runner": true,
+    "blocked_requests_must_not_checkout_or_execute_subject": true,
     "canonical_gateway": ".github/workflows/a01-control-plane-gateway.yml",
-    "hosted_broker": ".github/workflows/a01-control-plane-admission-broker.yml",
+    "trusted_admission_broker": ".github/workflows/a01-control-plane-admission-broker.yml",
     "self_hosted_executor": ".github/workflows/a01-control-plane-executor.yml"
   },
   "retry": {
     "after_registry_policy_or_gateway_change": "FRESH_WORKFLOW_DISPATCH_OR_FRESH_CALLER_RUN_REQUIRED",
     "failed_job_or_specific_job_rerun_may_reuse_old_reusable_workflow_sha": true,
-    "stale_control_plane_admission_result": "FAIL_CLOSED_BEFORE_A01_AND_REQUIRE_FRESH_RUN",
+    "stale_control_plane_admission_result": "FAIL_CLOSED_BEFORE_SUBJECT_CHECKOUT_AND_REQUIRE_FRESH_RUN",
     "same_control_plane_subject_retry": "FRESH_RUN_PREFERRED",
     "never_treat_rerun_as_control_plane_refresh": true
   },
@@ -102,15 +109,16 @@
     "verification_required_after_disruptive_action": true,
     "windows_reboot_delay_seconds": 30,
     "disruption_settle_seconds": 90,
-    "strategy": "schedule_reboot_then_finish_a01_job_while_hosted_settle_job_preserves_global_admission_lock"
+    "trusted_metadata_fallback_supported": false,
+    "strategy": "Disruptive qualifications remain fail-closed unless an independently available hosted settle/admission path is restored; policy v8 metadata-only self-hosted admission is non-disruptive only."
   },
   "states": ["BUILDING", "PREQUALIFIED", "A01_ELIGIBLE", "A01_QUEUED", "A01_RUNNING", "A01_FAILED", "A01_PASSED", "REPAIR_REQUIRED", "SUPERSEDED", "PROMOTION_ELIGIBLE", "CANONICAL"],
   "result_classes": ["PASS", "SUBJECT_FAILURE", "INFRA_FAILURE", "CONTROL_PLANE_FAILURE"],
-  "admission_states": ["ADMITTED", "WAITING_FOR_REGISTRATION", "REGISTERED_EXECUTABLE_MISSING", "WORKSTREAM_MISMATCH", "SUBJECT_CHECKOUT_MISMATCH", "CONTROL_PLANE_CHECKOUT_MISMATCH", "INVALID_CONTROL_PLANE_POLICY", "INVALID_REGISTRY", "INVALID_REGISTERED_WRAPPER_PATH", "INVALID_REGISTERED_WRAPPER_SOURCE", "INVALID_EXECUTION_CONTEXT", "INVALID_QUALIFIER_TIMEOUT", "QUALIFICATION_NOT_OVERNIGHT_ELIGIBLE", "QUALIFIER_TIMEOUT_EXCEEDS_REGISTRY", "DISRUPTIVE_QUALIFICATION_NOT_ALLOWED_OVERNIGHT", "CONTROL_PLANE_READ_FAILURE"],
+  "admission_states": ["ADMITTED", "WAITING_FOR_REGISTRATION", "REGISTERED_EXECUTABLE_MISSING", "WORKSTREAM_MISMATCH", "INVALID_SUBJECT_SHA", "SUBJECT_CHECKOUT_MISMATCH", "SUBJECT_METADATA_READ_FAILURE", "SUBJECT_METADATA_IDENTITY_MISMATCH", "SUBJECT_METADATA_TREE_TRUNCATED", "CONTROL_PLANE_CHECKOUT_MISMATCH", "INVALID_CONTROL_PLANE_POLICY", "INVALID_REGISTRY", "INVALID_REGISTERED_WRAPPER_PATH", "INVALID_REGISTERED_WRAPPER_SOURCE", "INVALID_EXECUTION_CONTEXT", "INVALID_QUALIFIER_TIMEOUT", "QUALIFICATION_NOT_OVERNIGHT_ELIGIBLE", "QUALIFIER_TIMEOUT_EXCEEDS_REGISTRY", "DISRUPTIVE_QUALIFICATION_NOT_ALLOWED_OVERNIGHT", "DISRUPTIVE_QUALIFICATION_REQUIRES_HOSTED_BARRIER", "CONTROL_PLANE_READ_FAILURE"],
   "stale_request_policy": {
     "queued_superseded_subject": "SUPERSEDE",
     "running_superseded_subject": "FINISH_IF_EVIDENCE_USEFUL",
-    "disconnected_disruptive_run": "ROTATE_CONCURRENCY_GENERATION_ONLY_AFTER_EVIDENCE_PRESERVED_AND_REPAIR_PROVEN",
+    "disconnected_disruptive_run": "DO_NOT_ADMIT_THROUGH_METADATA_ONLY_FALLBACK",
     "registry_or_policy_changed_after_run_creation": "DO_NOT_RERUN_FAILED_OR_SPECIFIC_JOB_FOR_REFRESH; START_FRESH_RUN"
   },
   "receipt": {

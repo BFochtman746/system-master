@@ -52,7 +52,7 @@ on:
         description: Canonical repair inbox
         value: ${{ jobs.execute.outputs.repair_target_inbox }}
       admission_state:
-        description: Hosted admission state
+        description: Trusted metadata-only admission state
         value: ${{ jobs.admit.outputs.admission_state }}
       control_plane_sha:
         description: Exact admitted control-plane SHA
@@ -64,8 +64,8 @@ permissions:
 
 jobs:
   admit:
-    name: Verify registration, subject and control plane before A-01
-    runs-on: ubuntu-latest
+    name: Verify registration and immutable subject metadata before subject acquisition
+    runs-on: [self-hosted, Windows, X64]
     timeout-minutes: 8
     outputs:
       admitted: ${{ steps.admission.outputs.admitted }}
@@ -74,27 +74,28 @@ jobs:
       registry_version: ${{ steps.admission.outputs.registry_version }}
       policy_version: ${{ steps.admission.outputs.policy_version }}
     steps:
-      - name: Checkout exact control-plane authority
+      - name: Checkout exact trusted control-plane authority only
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           repository: ${{ job.workflow_repository }}
           ref: ${{ job.workflow_sha }}
           path: control-plane
           fetch-depth: 1
+          clean: true
           persist-credentials: false
-      - name: Checkout exact qualification subject on hosted runner
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-        with:
-          repository: ${{ github.repository }}
-          ref: ${{ inputs.subject_sha || github.sha }}
-          path: subject
-          fetch-depth: 1
-          persist-credentials: false
-      - name: Evaluate immutable admission barrier
+      - name: Verify exact control-plane checkout before admission
+        shell: powershell
+        env:
+          EXPECTED_CONTROL_PLANE_SHA: ${{ job.workflow_sha }}
+        run: |
+          $actual = (& git -C "$env:GITHUB_WORKSPACE\control-plane" rev-parse HEAD).Trim()
+          if ($actual -ne $env:EXPECTED_CONTROL_PLANE_SHA) { throw "CONTROL_PLANE_CHECKOUT_MISMATCH:$actual" }
+          Write-Host "A01_ADMISSION_CONTROL_PLANE=$actual"
+      - name: Evaluate trusted metadata-only admission barrier
         id: admission
         env:
-          A01_ADMISSION_CONTROL_ROOT: ${{ github.workspace }}/control-plane
-          A01_ADMISSION_SUBJECT_ROOT: ${{ github.workspace }}/subject
+          GITHUB_TOKEN: ${{ github.token }}
+          A01_ADMISSION_CONTROL_ROOT: ${{ github.workspace }}\control-plane
           A01_QUALIFICATION_ID: ${{ inputs.qualification_id || 'A01-CONTROL-PLANE-SELFTEST' }}
           A01_WORKSTREAM_ID: ${{ inputs.workstream_id || 'SYSTEM-MASTER' }}
           A01_SUBJECT_SHA: ${{ inputs.subject_sha || github.sha }}
@@ -102,41 +103,51 @@ jobs:
           A01_EXECUTION_CONTEXT: ${{ inputs.execution_context || 'normal' }}
           A01_QUALIFIER_TIMEOUT_MINUTES: ${{ inputs.qualifier_timeout_minutes || 28 }}
           A01_REPAIR_TRANSACTION_ID: ${{ inputs.repair_transaction_id || '' }}
-          A01_ADMISSION_EVIDENCE: ${{ runner.temp }}/a01-admission.json
-        shell: bash
-        run: node control-plane/.github/scripts/a01-admission-barrier.js evaluate
+          A01_ADMISSION_EVIDENCE: ${{ runner.temp }}\a01-admission.json
+        shell: powershell
+        run: node "$env:GITHUB_WORKSPACE\control-plane\.github\scripts\a01-admission-barrier.js" evaluate-remote
       - name: Publish admission result
         if: always()
-        shell: bash
+        shell: powershell
         run: |
-          echo '## A-01 HOSTED ADMISSION BARRIER' >> "$GITHUB_STEP_SUMMARY"
-          if [ -f '${{ runner.temp }}/a01-admission.json' ]; then
-            echo '```json' >> "$GITHUB_STEP_SUMMARY"
-            cat '${{ runner.temp }}/a01-admission.json' >> "$GITHUB_STEP_SUMMARY"
-            echo '```' >> "$GITHUB_STEP_SUMMARY"
-          fi
+          Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value '## A-01 TRUSTED METADATA ADMISSION BARRIER'
+          $evidence = Join-Path $env:RUNNER_TEMP 'a01-admission.json'
+          if (Test-Path -LiteralPath $evidence) {
+            Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value '```json'
+            Get-Content -LiteralPath $evidence | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY
+            Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value '```'
+          }
       - name: Upload admission evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: a01-admission-${{ inputs.qualification_id || 'A01-CONTROL-PLANE-SELFTEST' }}-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ${{ runner.temp }}/a01-admission.json
+          path: ${{ runner.temp }}\a01-admission.json
           if-no-files-found: error
           retention-days: 30
+      - name: Fail closed before subject checkout when admission is not valid
+        if: always() && steps.admission.outputs.admitted != 'true'
+        shell: powershell
+        run: |
+          Write-Host "A01_ADMISSION_BLOCKED state=${{ steps.admission.outputs.admission_state }}"
+          Write-Host 'No qualification subject was checked out or executed during admission.'
+          Write-Host 'After registration/policy/control-plane changes, start a fresh caller run.'
+          exit 1
 
   validate_repair_lineage:
-    name: Validate optional same-transaction repair lineage
+    name: Validate optional same-transaction repair lineage without subject acquisition
     needs: admit
-    if: needs.admit.outputs.admitted == 'true' && inputs.repair_transaction_id != ''
-    runs-on: ubuntu-latest
+    if: needs.admit.result == 'success' && needs.admit.outputs.admitted == 'true' && inputs.repair_transaction_id != ''
+    runs-on: [self-hosted, Windows, X64]
     timeout-minutes: 5
     steps:
-      - name: Checkout the admitted control plane
+      - name: Checkout exact admitted control plane only
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           repository: ${{ github.repository }}
           ref: ${{ needs.admit.outputs.control_plane_sha }}
           fetch-depth: 1
+          clean: true
           persist-credentials: false
       - name: Validate exact durable transaction binding
         env:
@@ -145,10 +156,10 @@ jobs:
           EXPECTED_WORKSTREAM_ID: ${{ inputs.workstream_id }}
           EXPECTED_SUBJECT_SHA: ${{ inputs.subject_sha }}
           EXPECTED_ORIGIN_REF: ${{ inputs.origin_ref }}
-        shell: bash
+        shell: powershell
         run: |
           node --check .github/scripts/a01-repair-ledger.js
-          node - <<'NODE'
+          @'
           const ledger = require('./.github/scripts/a01-repair-ledger');
           const c = ledger.prepareRerun({ transaction_id: process.env.REPAIR_TRANSACTION_ID });
           const same = (a, b) => String(a || '').toLowerCase() === String(b || '').toLowerCase();
@@ -157,12 +168,12 @@ jobs:
           if (!same(c.subject_sha, process.env.EXPECTED_SUBJECT_SHA)) throw new Error('REPAIR_RERUN_SUBJECT_MISMATCH');
           if (c.origin_ref !== process.env.EXPECTED_ORIGIN_REF) throw new Error('REPAIR_RERUN_ORIGIN_REF_MISMATCH');
           console.log(`A01_REPAIR_LINEAGE_ADMITTED transaction=${c.transaction_id} state=${c.transaction_state}`);
-          NODE
+          '@ | node
 
   execute:
-    name: Execute only after hosted admission succeeds
+    name: Execute only after trusted metadata admission succeeds
     needs: [admit, validate_repair_lineage]
-    if: always() && needs.admit.outputs.admitted == 'true' && (inputs.repair_transaction_id == '' || needs.validate_repair_lineage.result == 'success')
+    if: always() && needs.admit.result == 'success' && needs.admit.outputs.admitted == 'true' && (inputs.repair_transaction_id == '' || needs.validate_repair_lineage.result == 'success')
     uses: ./.github/workflows/a01-control-plane-executor.yml
     with:
       qualification_id: ${{ inputs.qualification_id }}
@@ -183,18 +194,3 @@ jobs:
       control_plane_sha: ${{ needs.admit.outputs.control_plane_sha }}
       admission_state: ${{ needs.admit.outputs.admission_state }}
     secrets: inherit
-
-  blocked:
-    name: Stop before A-01 when admission is not valid
-    needs: admit
-    if: needs.admit.outputs.admitted != 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 2
-    steps:
-      - name: Require a fresh request after registration or control-plane repair
-        shell: bash
-        run: |
-          echo "A01_ADMISSION_BLOCKED state=${{ needs.admit.outputs.admission_state }}"
-          echo 'No self-hosted A-01 runner was acquired.'
-          echo 'After registry/policy/control-plane changes, start a fresh workflow_dispatch or fresh caller run; do not use a failed-job/specific-job rerun to pick up new @main bytes.'
-          exit 1
