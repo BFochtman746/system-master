@@ -1,0 +1,44 @@
+{
+  "archive_id": "ACTIONS-WORKFLOW-RETIREMENT-2026-09-10",
+  "date": "2026-09-10",
+  "purpose": "Remove completed one-time and pre-control-plane legacy workflows from .github/workflows so GitHub Actions shows current operational workflows while preserving exact historical identities in Git history and this inventory.",
+  "retirement_rule": "Retiring a workflow file removes it from the active Actions workflow surface. Historical workflow runs, commits, receipts and evidence remain historical evidence and are not rewritten.",
+  "retired_workflows": [
+    {"path":".github/workflows/a01-overnight-recovery-2026-09-09.yml","blob_sha":"1cdaf1c0bcc39d55a37d3c96acf5a985bbb9e1e1","reason":"date-bounded 2026-09-09 recovery workflow; expired"},
+    {"path":".github/workflows/a01-repair-001c-live-proof.yml","blob_sha":"08eb9be3ba6fd438e6691d8c0e0081803fcd60c8","reason":"completed synthetic repair live-proof workflow"},
+    {"path":".github/workflows/literary-research-overnight-a01.yml","blob_sha":"183180c047c7ef14a272c1cccbceb0425336c136","reason":"Prose/Literary execution is completed and retired; no future Prose work"},
+    {"path":".github/workflows/fwp001-seal-audit.yml","blob_sha":"e09627db1cb106fea574c76088838bf23727a86e","reason":"legacy direct self-hosted F-WP-001 seal proof; superseded by shared A-01 control plane"},
+    {"path":".github/workflows/system-master-021f-integration-a01.yml","blob_sha":"1d870d028859ed6d4c8d1987458a439fbc4fadc7","reason":"legacy direct qualification workflow; historical only"},
+    {"path":".github/workflows/system-master-f-wp-001-a01.yml","blob_sha":"4ad88b3f60c8e5719ab393a5e19cacd83ab987ec","reason":"legacy direct A-01 workflow"},
+    {"path":".github/workflows/system-master-f-wp-002-a01.yml","blob_sha":"dface5414caa2a4cde7db068fba35b61018fd594","reason":"legacy direct A-01 workflow"},
+    {"path":".github/workflows/system-master-f-wp-002-source-rebuild.yml","blob_sha":"dcf04ad8d4667ff68db1cd54d0d85f0f70feadbf","reason":"legacy one-purpose source rebuild workflow"},
+    {"path":".github/workflows/system-master-f-wp-003-a01.yml","blob_sha":"c33ede99c3a6290d7b7b46fe14cdfcdb1f57e548","reason":"legacy direct A-01 workflow"},
+    {"path":".github/workflows/system-master-f-wp-004-a01.yml","blob_sha":"2caeca5957d349b27e72f9b1f1d900b95e4bac1b","reason":"legacy direct A-01 workflow"},
+    {"path":".github/workflows/system-master-f-wp-005-a01.yml","blob_sha":"5a19cde9a2ba30de1ef38e25f86bdab6c329c2d0","reason":"legacy direct A-01 workflow"},
+    {"path":".github/workflows/system-master-f-wp-006-a01.yml","blob_sha":"fe8fd632c364f5a255a168f385230378b9daee80","reason":"legacy direct A-01 workflow"},
+    {"path":".github/workflows/system-master-f-wp-007-a01.yml","blob_sha":"405c6afc883a3baedc7125010d0ae8984cf2256c","reason":"legacy direct A-01 workflow"},
+    {"path":".github/workflows/system-master-f-wp-008-a01.yml","blob_sha":"ae4addebbda2243d8200c92900a4f17a56e6f61b","reason":"legacy direct A-01 workflow"},
+    {"path":".github/workflows/system-master-f-wp-009-a01.yml","blob_sha":"85326c58a7ca06edcb70ba2d085671725e72a440","reason":"legacy direct A-01 workflow"},
+    {"path":".github/workflows/system-master-f-wp-010-a01.yml","blob_sha":"9487d0e99ee0daea78834e75bb2216ac192ec4a7","reason":"legacy direct A-01 workflow"},
+    {"path":".github/workflows/system-master-f-wp-011-a01.yml","blob_sha":"5375aa7f833af1bcaa91ddf9bd8d2e96a760525a","reason":"legacy direct A-01 workflow"},
+    {"path":".github/workflows/system-master-f-wp-012-a01.yml","blob_sha":"44b517a6fd543d3bdc22237f2f95fd00541aede9","reason":"legacy direct A-01 workflow"}
+  ],
+  "retained_runner_support": [
+    ".github/workflows/runner-identity-path-diagnostic.yml",
+    ".github/workflows/safe-runner-bootstrap.yml"
+  ],
+  "retained_current_control_plane": [
+    ".github/workflows/a01-control-plane-gateway.yml",
+    ".github/workflows/a01-control-plane-admission-broker.yml",
+    ".github/workflows/a01-control-plane-executor.yml",
+    ".github/workflows/a01-control-plane-enforcement.yml",
+    ".github/workflows/a01-overnight-night-shift.yml",
+    ".github/workflows/system-master-knowledge-recovery-programming-a01.yml",
+    ".github/workflows/system-master-knowledge-recovery-enforcement.yml",
+    ".github/workflows/second-shift-enforcement.yml",
+    ".github/workflows/system-state-reconciler.yml",
+    ".github/workflows/system-catalog-enforcement.yml",
+    ".github/workflows/current-obligation-registry-enforcement.yml",
+    ".github/workflows/program-job-lock-enforcement.yml"
+  ]
+}
