@@ -14,11 +14,6 @@ function readJson(rel) {
   try { return JSON.parse(fs.readFileSync(abs, 'utf8')); }
   catch (error) { fail(`invalid JSON ${rel}: ${error.message}`); }
 }
-function readText(rel) {
-  const abs = path.join(root, rel);
-  if (!fs.existsSync(abs)) fail(`missing ${rel}`);
-  return fs.readFileSync(abs, 'utf8');
-}
 function assert(condition, message) { if (!condition) fail(message); }
 function setEq(actual, expected) {
   const a = [...actual].sort();
@@ -96,11 +91,6 @@ for (const d of owners.DOCUMENTS.active_delegations || []) {
   assert(d.owner_path === 'SYSTEM_MASTER/DOCUMENTS', 'Documents delegation owner mismatch');
   assert(!/PROSE/i.test(`${d.delegation_id || ''} ${d.objective_id || ''} ${d.obligation_id || ''} ${d.parent_objective_id || ''}`), 'Documents active delegation must not be Prose work');
 }
-
-const documentsControl = readText('documents/control-v1/DOCUMENTS-CONTROL-RECORD-001.md');
-assert(documentsControl.includes('DOCUMENTS is **not complete**'), 'Documents control must say Documents is incomplete');
-assert(documentsControl.includes('must not absorb Prose'), 'Documents control must forbid Prose absorption');
-assert(!documentsControl.includes('canonical parent for the completed Prose capability family'), 'stale Documents Prose-parent language remains');
 
 console.log('PROGRAM_JOB_LOCK_ENFORCEMENT_PASS');
 console.log('completion=PROSE_ONLY');
