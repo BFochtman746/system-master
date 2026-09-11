@@ -71,6 +71,7 @@ function parseOn(content) {
     if (currentEvent === 'workflow_dispatch' && indent > eventIndent && /^\s*inputs\s*:/i.test(line)) result.workflowDispatchHasInputs = true;
     if (currentEvent === 'push') {
       if (/^\s*branches\s*:\s*$/i.test(line)) { branchesIndent = indent; continue; }
+      if (branchesIndent >= 0 && indent <= branchesIndent) branchesIndent = -1;
       const item = /^\s*-\s*['"]?([^'"#]+?)['"]?\s*(?:#.*)?$/.exec(line);
       if (branchesIndent >= 0 && item && indent > branchesIndent) result.pushBranches.push(item[1].trim());
     }
@@ -205,6 +206,8 @@ function selftest() {
   if (!isScheduled(scheduledCaller) || !callsGateway(scheduledCaller)) throw new Error('scheduled gateway caller detection failed');
   const parsed = parseOn(Buffer.from("on:\n  workflow_dispatch:\n  push:\n    branches:\n      - 'candidate/test'\npermissions:\n  contents: read\n"));
   if (!parsed.keys.has('workflow_dispatch') || !parsed.keys.has('push') || parsed.pushBranches.length !== 1 || parsed.pushBranches[0] !== 'candidate/test') throw new Error('trigger parser failed');
+  const branchesThenPaths = parseOn(Buffer.from("on:\n  push:\n    branches:\n      - 'candidate/test'\n      - 'candidate/second'\n    paths:\n      - 'governance/github/**'\n      - '.github/scripts/example.js'\njobs:\n  t:\n    runs-on: ubuntu-latest\n"));
+  if (branchesThenPaths.pushBranches.length !== 2 || branchesThenPaths.pushBranches[0] !== 'candidate/test' || branchesThenPaths.pushBranches[1] !== 'candidate/second') throw new Error('push branches parser leaked paths into branch set');
   const dispatchInputs = parseOn(Buffer.from("on:\n  workflow_dispatch:\n    inputs:\n      subject:\n        required: true\n"));
   if (!dispatchInputs.workflowDispatchHasInputs) throw new Error('workflow_dispatch input detection failed');
   const permissions = parseTopLevelMap(Buffer.from("permissions:\n  contents: read\n  actions: write\njobs:\n  t:\n    runs-on: ubuntu-latest\n"), 'permissions');
