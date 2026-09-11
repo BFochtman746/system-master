@@ -106,7 +106,10 @@ function activeIds(owner) { return (owner.active_delegations || []).map((d) => d
 assert(activeIds(owners.CORE).includes('SYSTEM-MASTER-INTEGRATION-COORDINATION-001'), 'CORE Second Shift must carry central integration coordination');
 const kr = (owners.CORE.active_delegations || []).find((d) => d.obligation_id === 'SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001');
 assert(kr && kr.state === 'READY' && kr.priority === 'HIGHEST_DISCRETIONARY_SYSTEM_MASTER_PRIORITY', 'CORE Second Shift must expose Knowledge Recovery as READY highest discretionary work');
-assert((owners.BOOK.active_delegations || []).some((d) => d.owner_path === 'SYSTEM_MASTER/BOOK' && d.active_prose_execution_owner === null), 'BOOK Second Shift must carry Book-owned integration with no active Prose owner');
+for (const d of owners.BOOK.active_delegations || []) {
+  assert(d.owner_path === 'SYSTEM_MASTER/BOOK', `Book delegation owner mismatch: ${d.delegation_id || d.objective_id}`);
+  assert(d.active_prose_execution_owner === undefined || d.active_prose_execution_owner === null, `Book delegation must not create an active Prose execution owner: ${d.delegation_id || d.objective_id}`);
+}
 for (const d of owners.DOCUMENTS.active_delegations || []) {
   assert(d.owner_path === 'SYSTEM_MASTER/DOCUMENTS', 'Documents delegation owner mismatch');
   assert(!/PROSE/i.test(`${d.delegation_id || ''} ${d.objective_id || ''} ${d.obligation_id || ''} ${d.parent_objective_id || ''}`), 'Documents active delegation must not be Prose work');
