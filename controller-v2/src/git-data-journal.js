@@ -135,8 +135,10 @@ export class GitDataJournalAdapter {
     while(cursor&&steps<100000){
       if(cursor===witness.commit_oid)return true;
       const c=await this.client.getCommit(cursor);
-      if((c.parents??[]).length!==1)fail('REMOTE_JOURNAL_NONLINEAR','non-root journal history must remain single-parent');
-      cursor=c.parents[0];steps+=1;
+      const parents=c.parents??[];
+      if(parents.length===0){cursor=null;break;}
+      if(parents.length!==1)fail('REMOTE_JOURNAL_NONLINEAR','non-root journal history must remain single-parent');
+      cursor=parents[0];steps+=1;
     }
     fail('REMOTE_JOURNAL_ROLLBACK_OR_FORK','remote head does not extend local witness');
   }
