@@ -20,8 +20,12 @@ function isSecondShiftOpen(v){ const p=nyParts(v); return p.hour>=0 && p.hour<7;
 
 class SecondShiftKernel {
   constructor(dbPath=':memory:'){
-    this.db=new DatabaseSync(dbPath);
-    this.db.exec('PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL; PRAGMA foreign_keys=ON; PRAGMA busy_timeout=5000;');
+    this.db=new DatabaseSync(dbPath,{timeout:5000});
+    // Busy handling must be active before any pragma that can need a write lock.
+    this.db.exec('PRAGMA busy_timeout=5000; PRAGMA foreign_keys=ON; PRAGMA synchronous=FULL;');
+    const currentMode=String(this.db.prepare('PRAGMA journal_mode').get().journal_mode||'').toLowerCase();
+    // Changing journal mode takes a lock. Do it only when the database is not already WAL.
+    if(currentMode!=='wal') this.db.prepare('PRAGMA journal_mode=WAL').get();
     this.db.exec(`
       CREATE TABLE IF NOT EXISTS work_items(
         id TEXT PRIMARY KEY,
