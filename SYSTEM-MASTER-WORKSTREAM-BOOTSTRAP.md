@@ -12,7 +12,7 @@ Before interpreting a branch, chat title, ticket, workflow, qualification, histo
 4. `governance/catalog/SYSTEM-MASTER-SYSTEM-CATALOG-001.json` for active/retired/future-system discovery; the catalog never overrides topology authority
 5. when the user asks to build/resume a cataloged future system or reuse historical work, load its system packet before broad archive research — currently `governance/catalog/system-packets/PROGRAMMING.json` for Programming
 6. the live canonical control ref for the active owning system, if one exists; cataloged future candidates have no active owner/control until explicitly admitted
-7. the sealed checkpoint, completion ledger and current obligation registry selected by CURRENT-AUTHORITY
+7. the sealed checkpoint, completion ledger and current obligation registry selected by CURRENT-AUTHORITY — currently `governance/WORK-OBLIGATION-REGISTRY-005.json`
 8. expectation/reallocation/repair state relevant to the active owner
 9. `governance/catalog/SYSTEM-MASTER-ARCHIVE-SOURCE-REGISTRY-001.json` and exact source/evidence records when historical reuse is relevant
 10. the registry-declared Second Shift delegation and current shift ledger when unattended work is involved
@@ -42,6 +42,12 @@ Retirement authority: `governance/retirements/PROSE-SYSTEM-RETIREMENT-001.json`
 - `DOCUMENTS` — `SYSTEM_MASTER/DOCUMENTS`.
 
 There is no current `PROSE` owner chat role. A historical Prose chat may be used to inspect provenance, but it may not create current Prose-owned work. Any still-needed work routes to DOCUMENTS or, for Book canonical state, BOOK.
+
+## Highest current System Master priority
+
+`SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001` is the selected central objective and highest active System Master priority until its supervised Programming proving run is accepted or the user explicitly changes priority. The controlling record is `governance/knowledge-recovery/SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001.md`.
+
+This priority does not create a new system or Second Shift lane. Existing safety, evidence-preservation, active-owner integrity and explicit human/private/native authority boundaries remain non-preemptible.
 
 ## Future-system / historical-reuse startup
 
@@ -94,9 +100,9 @@ Then:
 
 ## Completion / obligation discipline
 
-The completion ledger remains append-only historical evidence. Current work selection comes from the obligation registry selected by CURRENT-AUTHORITY — currently `WORK-OBLIGATION-REGISTRY-004.json`.
+The completion ledger remains append-only historical evidence. Current work selection comes from the obligation registry selected by CURRENT-AUTHORITY — currently `WORK-OBLIGATION-REGISTRY-005.json`.
 
-The current Documents objective is owned by `SYSTEM_MASTER/DOCUMENTS`, not the product root. When Documents closes, supersedes or materially changes its current objective, update Documents current state and `governance/second-shift/DOCUMENTS-DELEGATIONS.json` in the same working session.
+The product-root central objective is currently `SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001`. Its semantic owner is SYSTEM_MASTER; CORE administers A-01 execution. DOCUMENTS retains its own owner-lane objective and may continue dependency-valid work that does not consume or block the higher-priority supervised Knowledge Recovery path.
 
 The current Prose completion is not undone by integration. Integration is a new Documents-owned boundary and changed integration bytes require fresh exact-subject qualification.
 
@@ -116,6 +122,14 @@ A reusable asset must preserve:
 A-01 may deterministically inventory/hash/validate/extract/catalog presented evidence and emit receipts/attestations, but it may not create a system, assign semantic ownership or transfer historical PASS to a changed subject.
 
 ## Required A-01 / evidence rule
+
+Canonical A-01 control documents:
+
+- `qualification/a01/A01-OPERATING-CONTRACT.md`
+- `qualification/a01/A01-OPERATING-MODE-001.md`
+- `qualification/a01/A01-REGISTRATION-DISPATCH-BARRIER-001.md`
+- `qualification/a01/overnight/A01-OVERNIGHT-001.md`
+- `qualification/a01/overnight/A01-SECOND-SHIFT-002.md`
 
 Keep separate:
 
@@ -137,6 +151,8 @@ Read `SECOND-SHIFT-REGISTRY-001.json::owner_files` as the machine-authoritative 
 - DOCUMENTS
 
 `PROSE` is retired and must not run. The temporary `SYSTEM_MASTER` root worker lane is also retired; SYSTEM_MASTER remains the portfolio controller/orchestrator, not a peer execution lane.
+
+Knowledge Recovery remains supervised and Second-Shift-ineligible until its exact first successful Programming proving receipt and generated catalog/trace evidence pass the acceptance gate in its control record.
 
 Every active lane owns a delegation file and factual utilization ledger. For Documents these are:
 
