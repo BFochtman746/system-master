@@ -5,6 +5,9 @@
     "work_session_id",
     "owner_lane",
     "objective_id",
+    "owner_claim_id",
+    "owner_claim_epoch",
+    "executor_mode",
     "candidate_branch",
     "base_sha",
     "owner_control_ref",
@@ -19,16 +22,19 @@
     "issued_by"
   ],
   "authorization_classes": ["AUTONOMOUS", "CONTROLLER_ADMITTED", "USER_REQUIRED"],
+  "executor_modes": ["FOREGROUND_CHAT", "SECOND_SHIFT", "SYSTEM_AUTOMATION"],
   "rules": [
     "A chat or worker is never repository authority by identity alone.",
-    "Mutation requires an active lease bound to the current owner objective and control head.",
+    "Mutation requires an active work lease bound to the current owner objective, owner control head, and exact current durable owner-lane claim.",
+    "owner_claim_id, owner_claim_epoch, executor_mode, owner_lane, objective_id and work_session_id must match the current durable owner-lane claim.",
+    "A boolean assertion that an owner lease is valid is insufficient; mutation authorization must validate the current claim identity and epoch.",
     "candidate_branch must not be main or another canonical control ref.",
     "base_sha and owner_control_head must be exact 40-character Git SHAs.",
-    "fence_epoch is a positive integer and may never move backward.",
-    "The lease holder cannot widen allowed_paths, allowed_effects, owner_lane or objective_id.",
-    "The lease holder cannot mint or renew its own lease.",
+    "fence_epoch and owner_claim_epoch are positive integers and may never move backward.",
+    "The lease holder cannot widen allowed_paths, allowed_effects, owner_lane, objective_id, owner_claim_id, owner_claim_epoch or executor_mode.",
+    "The lease holder cannot mint or renew its own lease or owner-lane claim.",
     "Cross-owner writes and central objective replacement require USER_REQUIRED authority.",
-    "Expired, superseded, revoked, stale-base or stale-control leases fail closed for mutation.",
+    "Expired, superseded, revoked, stale-base, stale-control or stale-owner-claim leases fail closed for mutation.",
     "Read-only inspection may continue after mutation authority is lost, but resulting knowledge must be revalidated before later writes."
   ],
   "effect_classes": {
@@ -60,6 +66,6 @@
       "CHANGE_PERMANENT_SECURITY_POLICY"
     ]
   },
-  "terminal_states": ["EXPIRED", "REVOKED", "SUPERSEDED", "STALE_BASE", "STALE_CONTROL", "COMPLETED"],
-  "canonical_write_requirement": "OWNER_LANE_LEASE_AND_GLOBAL_REPOSITORY_WRITER_FENCE"
+  "terminal_states": ["EXPIRED", "REVOKED", "SUPERSEDED", "STALE_BASE", "STALE_CONTROL", "STALE_OWNER_CLAIM", "COMPLETED"],
+  "canonical_write_requirement": "EXACT_CURRENT_OWNER_LANE_CLAIM_AND_WORK_LEASE_AND_GLOBAL_REPOSITORY_WRITER_FENCE"
 }
