@@ -11,15 +11,14 @@ function readJson(rel) {
   if (!fs.existsSync(abs)) fail(`selected registry does not exist: ${rel}`);
   try { return JSON.parse(fs.readFileSync(abs, 'utf8')); } catch (error) { fail(`invalid JSON ${rel}: ${error.message}`); }
 }
-function systemOwnerPath(system) {
-  return system?.owner_path || (system?.system_id ? `SYSTEM_MASTER/${system.system_id}` : null);
-}
-function sameOrDescendant(candidate, parent) {
-  return candidate === parent || String(candidate || '').startsWith(`${parent}/`);
-}
+function systemOwnerPath(system) { return system?.owner_path || (system?.system_id ? `SYSTEM_MASTER/${system.system_id}` : null); }
+function sameOrDescendant(candidate, parent) { return candidate === parent || String(candidate || '').startsWith(`${parent}/`); }
 
 const authority = readJson('governance/CURRENT-AUTHORITY.json');
+if (!authority.program_job_lock || !authority.system_completion_status) fail('CURRENT-AUTHORITY must select program_job_lock and system_completion_status');
 const topology = readJson(authority.topology);
+const jobLock = readJson(authority.program_job_lock);
+const completion = readJson(authority.system_completion_status);
 const registry = readJson(authority.obligation_registry);
 const obligations = Array.isArray(registry.obligations) ? registry.obligations : fail('selected registry obligations must be an array');
 const systems = topology.canonical_internal_systems || [];
@@ -33,16 +32,28 @@ function validOwner(ownerPath) {
   return [...activeOwnerPaths].some((p) => sameOrDescendant(ownerPath, p));
 }
 function resolveSystemForOwner(ownerPath) {
-  return [...byOwnerPath.entries()]
-    .filter(([p]) => sameOrDescendant(ownerPath, p))
-    .sort((a, b) => b[0].length - a[0].length)[0]?.[1] || null;
+  return [...byOwnerPath.entries()].filter(([p]) => sameOrDescendant(ownerPath, p)).sort((a, b) => b[0].length - a[0].length)[0]?.[1] || null;
 }
+function requireLockedCompletion() {
+  const statuses = new Map((completion.systems || []).map((s) => [s.system_id, s]));
+  for (const id of ['SYSTEM_MASTER','CORE','LEARNING','BOOK','PROSE','DOCUMENTS']) if (!statuses.has(id)) fail(`completion status missing ${id}`);
+  if (statuses.get('PROSE').complete !== true) fail('PROSE must be the complete system');
+  for (const id of ['SYSTEM_MASTER','CORE','LEARNING','BOOK','DOCUMENTS']) if (statuses.get(id).complete !== false) fail(`${id} must remain incomplete`);
+  if ((completion.systems || []).filter((s) => s.complete).length !== 1) fail('PROSE must be the only complete system');
+}
+requireLockedCompletion();
 
 if (!registry.registry_id) fail('selected registry missing registry_id');
 if (registry.product_root !== 'SYSTEM_MASTER') fail(`selected registry product_root must be SYSTEM_MASTER, got ${registry.product_root}`);
 if (registry.topology && registry.topology !== authority.topology) fail(`selected registry topology mismatch: authority=${authority.topology} registry=${registry.topology}`);
+if (registry.program_job_lock && registry.program_job_lock !== authority.program_job_lock) fail('selected registry job-lock mismatch');
+if (registry.system_completion_status && registry.system_completion_status !== authority.system_completion_status) fail('selected registry completion-status mismatch');
 if (!authority.central_next_objective) fail('CURRENT-AUTHORITY central_next_objective is missing');
 if (registry.central_next_objective !== authority.central_next_objective) fail(`central objective mismatch: authority=${authority.central_next_objective} registry=${registry.central_next_objective || '<missing>'}`);
+if (jobLock.programs?.PROSE?.completion !== 'COMPLETE' || jobLock.programs?.PROSE?.execution_lane !== 'BOOK') fail('job lock must keep completed Prose under BOOK execution');
+if (jobLock.programs?.BOOK?.authorized_child !== 'SYSTEM_MASTER/BOOK/PROSE') fail('Book job must authorize Prose child');
+if (jobLock.programs?.LEARNING?.integrates_upward_to !== 'SYSTEM_MASTER') fail('Learning must integrate upward into System Master');
+if (jobLock.programs?.DOCUMENTS?.integrates_upward_to !== 'SYSTEM_MASTER') fail('Documents must integrate upward into System Master');
 
 const seen = new Set();
 for (const entry of obligations) {
@@ -53,11 +64,20 @@ for (const entry of obligations) {
   if (!validOwner(entry.owner_path)) fail(`invalid owner_path for ${entry.obligation_id}: ${entry.owner_path || '<missing>'}`);
   if (!entry.state) fail(`missing state for ${entry.obligation_id}`);
   if (!['CLOSED','SUPERSEDED'].includes(entry.state) && !entry.objective) fail(`open obligation missing objective: ${entry.obligation_id}`);
+
   if (entry.owner_path === 'SYSTEM_MASTER/BOOK/PROSE' || entry.owner_path?.startsWith('SYSTEM_MASTER/BOOK/PROSE/')) {
     const prose = systems.find((s) => s.system_id === 'PROSE');
     if (!prose || prose.parent_id !== 'BOOK' || systemOwnerPath(prose) !== 'SYSTEM_MASTER/BOOK/PROSE') fail(`Book Prose child obligation lacks active topology authority: ${entry.obligation_id}`);
   }
+  if (entry.owner_path === 'SYSTEM_MASTER/DOCUMENTS') {
+    if (entry.specialist_owner_path === 'SYSTEM_MASTER/BOOK/PROSE' || /PROSE/i.test(entry.obligation_id)) fail(`Documents obligation crosses into Prose: ${entry.obligation_id}`);
+  }
+  if (entry.owner_path === 'SYSTEM_MASTER/LEARNING' && /BOOK|PROSE|DOCUMENT/i.test(entry.obligation_id)) fail(`Learning obligation crosses peer lane: ${entry.obligation_id}`);
+  if (entry.specialist_owner_path === 'SYSTEM_MASTER/BOOK/PROSE' && entry.owner_path !== 'SYSTEM_MASTER/BOOK') fail(`only BOOK may carry active Prose specialist integration: ${entry.obligation_id}`);
 }
+
+const bookProse = obligations.find((entry) => entry.obligation_id === 'BOOK-PROSE-PHASE-2-ORCHESTRATOR-CLOSURE-CENSUS-001');
+if (!bookProse || bookProse.owner_path !== 'SYSTEM_MASTER/BOOK' || bookProse.specialist_owner_path !== 'SYSTEM_MASTER/BOOK/PROSE') fail('current Book-Prose integration obligation must remain BOOK-owned');
 
 const next = obligations.find((entry) => entry.obligation_id === authority.central_next_objective);
 if (!next) fail(`central_next_objective is not present in selected registry: ${authority.central_next_objective}`);
@@ -80,4 +100,4 @@ for (const row of transitionRows) {
   if (seen.has(row.obligation_id)) fail(`obligation appears both current and transition history: ${row.obligation_id}`);
 }
 
-console.log(`CURRENT_OBLIGATION_REGISTRY_ENFORCEMENT_PASS registry=${registry.registry_id} topology=${topology.topology_id} obligations=${obligations.length} next=${authority.central_next_objective} owner=${next.owner_path}`);
+console.log(`CURRENT_OBLIGATION_REGISTRY_ENFORCEMENT_PASS registry=${registry.registry_id} topology=${topology.topology_id} obligations=${obligations.length} next=${authority.central_next_objective} owner=${next.owner_path} completion=PROSE_ONLY jobs=LOCKED`);
