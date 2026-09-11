@@ -2,6 +2,7 @@
 
 const crypto = require('crypto');
 const { SystemModelError, SystemModelService } = require('./system-model');
+const { AuthorityBoundaryService } = require('./authority-model');
 
 function requiredString(value, field) {
   if (typeof value !== 'string' || value.trim() === '') {
@@ -57,30 +58,64 @@ function makeSnapshot({ workspace_id, parent_snapshot_id = null, model, created_
   });
 }
 
-function hydrateModel(modelState, identityValidator = null) {
+function hydrateRuntime(modelState, identityValidator = null) {
   const model = new SystemModelService({ workspace_id: modelState.workspace_id, identityValidator });
   for (const definition of modelState.entity_types || []) model.registerEntityType(cloneJson(definition));
   for (const definition of modelState.relationship_types || []) model.registerRelationshipType(cloneJson(definition));
   for (const entity of modelState.entities || []) model.upsertEntity(cloneJson(entity));
   for (const relationship of modelState.relationships || []) model.declareRelationship(cloneJson(relationship));
   model.validate();
-  return model;
+
+  let authority = null;
+  if (modelState.authority_state) {
+    authority = new AuthorityBoundaryService({ model });
+    for (const responsibility of modelState.authority_state.responsibilities || []) authority.registerResponsibility(cloneJson(responsibility));
+    for (const assignment of modelState.authority_state.assignments || []) authority.assignAuthority(cloneJson(assignment));
+    for (const boundary of modelState.authority_state.boundaries || []) authority.defineBoundary(cloneJson(boundary));
+  }
+  return { model, authority };
 }
 
-function applyOperation(model, operation) {
+function hydrateModel(modelState, identityValidator = null) {
+  return hydrateRuntime(modelState, identityValidator).model;
+}
+
+function ensureAuthority(runtime) {
+  if (!runtime.authority) runtime.authority = new AuthorityBoundaryService({ model: runtime.model });
+  return runtime.authority;
+}
+
+function applyOperation(runtimeOrModel, operation) {
+  const runtime = runtimeOrModel instanceof SystemModelService
+    ? { model: runtimeOrModel, authority: null }
+    : runtimeOrModel;
+  if (!runtime?.model) throw new SystemModelError('MODEL_REQUIRED', 'Change operation requires a model runtime');
   const kind = requiredString(operation?.kind, 'operation.kind');
   switch (kind) {
     case 'REGISTER_ENTITY_TYPE':
-      return model.registerEntityType(cloneJson(operation.definition));
+      return runtime.model.registerEntityType(cloneJson(operation.definition));
     case 'REGISTER_RELATIONSHIP_TYPE':
-      return model.registerRelationshipType(cloneJson(operation.definition));
+      return runtime.model.registerRelationshipType(cloneJson(operation.definition));
     case 'UPSERT_ENTITY':
-      return model.upsertEntity(cloneJson(operation.entity));
+      return runtime.model.upsertEntity(cloneJson(operation.entity));
     case 'DECLARE_RELATIONSHIP':
-      return model.declareRelationship(cloneJson(operation.relationship));
+      return runtime.model.declareRelationship(cloneJson(operation.relationship));
+    case 'REGISTER_RESPONSIBILITY':
+      return ensureAuthority(runtime).registerResponsibility(cloneJson(operation.responsibility));
+    case 'ASSIGN_AUTHORITY':
+      return ensureAuthority(runtime).assignAuthority(cloneJson(operation.assignment));
+    case 'DEFINE_BOUNDARY':
+      return ensureAuthority(runtime).defineBoundary(cloneJson(operation.boundary));
     default:
       throw new SystemModelError('UNSUPPORTED_CHANGE_OPERATION', `Unsupported change operation: ${kind}`, { kind });
   }
+}
+
+function materializeRuntimeState(baseState, runtime) {
+  const next = { ...cloneJson(baseState), ...runtime.model.exportDraft() };
+  if (runtime.authority) next.authority_state = runtime.authority.exportDraft();
+  else if (baseState.authority_state) next.authority_state = cloneJson(baseState.authority_state);
+  return next;
 }
 
 class SnapshotQueryCache {
@@ -210,7 +245,7 @@ class ModelSnapshotService {
     requiredString(workspace_id, 'workspace_id');
     const state = cloneJson(initial_model || { workspace_id, entity_types: [], relationship_types: [], entities: [], relationships: [] });
     if (state.workspace_id !== workspace_id) throw new SystemModelError('WORKSPACE_ID_MISMATCH', 'Initial model workspace id does not match requested workspace', { workspace_id, model_workspace_id: state.workspace_id });
-    hydrateModel(state, this.identityValidator);
+    hydrateRuntime(state, this.identityValidator);
     const snapshot = makeSnapshot({ workspace_id, model: state });
     this.store.initializeWorkspace({ workspace_id, genesis_snapshot: snapshot });
     return snapshot;
@@ -232,7 +267,7 @@ class ModelSnapshotService {
     if (snapshot.snapshot_id !== expected) {
       throw new SystemModelError('SNAPSHOT_INTEGRITY_FAILED', 'Snapshot digest does not match contents', { snapshot_id: snapshot.snapshot_id, expected_snapshot_id: expected });
     }
-    hydrateModel(snapshot.model, this.identityValidator);
+    hydrateRuntime(snapshot.model, this.identityValidator);
     return true;
   }
 
@@ -264,10 +299,10 @@ class ModelSnapshotService {
     if (changeSet.revision !== expected_revision) throw new SystemModelError('STALE_CHANGESET_REVISION', 'Change set revision changed', { change_set_id, expected_revision, actual_revision: changeSet.revision });
     const base = this.store.getSnapshot(changeSet.base_snapshot_id);
     this.verifySnapshotIntegrity(base);
-    const model = hydrateModel(base.model, this.identityValidator);
-    for (const prior of changeSet.operations) applyOperation(model, prior);
-    applyOperation(model, operation);
-    model.validate();
+    const runtime = hydrateRuntime(base.model, this.identityValidator);
+    for (const prior of changeSet.operations) applyOperation(runtime, prior);
+    applyOperation(runtime, operation);
+    runtime.model.validate();
     changeSet.operations.push(cloneJson(operation));
     changeSet.revision += 1;
     return this.store.updateChangeSet(changeSet);
@@ -277,10 +312,10 @@ class ModelSnapshotService {
     const base = this.store.getSnapshot(changeSet.base_snapshot_id);
     if (!base) throw new SystemModelError('SNAPSHOT_UNKNOWN', `Unknown base snapshot: ${changeSet.base_snapshot_id}`, { snapshot_id: changeSet.base_snapshot_id });
     this.verifySnapshotIntegrity(base);
-    const model = hydrateModel(base.model, this.identityValidator);
-    for (const operation of changeSet.operations) applyOperation(model, operation);
-    model.validate();
-    return model.exportDraft();
+    const runtime = hydrateRuntime(base.model, this.identityValidator);
+    for (const operation of changeSet.operations) applyOperation(runtime, operation);
+    runtime.model.validate();
+    return materializeRuntimeState(base.model, runtime);
   }
 
   commitChangeSet({ change_set_id, command_id, expected_base_snapshot_id }) {
@@ -336,6 +371,24 @@ class ModelSnapshotService {
     }));
   }
 
+  recoverCommand({ command_id, expected_request_fingerprint = null } = {}) {
+    requiredString(command_id, 'command_id');
+    const receipt = this.store.getReceipt(command_id);
+    if (!receipt) return deepFreeze({ command_id, standing: 'NOT_FOUND' });
+    if (expected_request_fingerprint && receipt.request_fingerprint !== expected_request_fingerprint) {
+      return deepFreeze({
+        command_id,
+        standing: 'CONFLICT',
+        expected_request_fingerprint,
+        actual_request_fingerprint: receipt.request_fingerprint
+      });
+    }
+    const snapshot = this.store.getSnapshot(receipt.snapshot_id);
+    if (!snapshot) return deepFreeze({ command_id, standing: 'COMMITTED_SNAPSHOT_MISSING', receipt });
+    this.verifySnapshotIntegrity(snapshot);
+    return deepFreeze({ command_id, standing: 'COMMITTED', receipt, snapshot });
+  }
+
   query({ snapshot_id, query_key, compute }) {
     const snapshot = this.store.getSnapshot(snapshot_id);
     if (!snapshot) throw new SystemModelError('SNAPSHOT_UNKNOWN', `Unknown snapshot: ${snapshot_id}`, { snapshot_id });
@@ -350,7 +403,7 @@ class ModelSnapshotService {
       this.verifySnapshotIntegrity(workspace.active_snapshot_id);
       return { recovered: false, snapshot_id: workspace.active_snapshot_id, recovery_record: null };
     } catch (error) {
-      if (!['SNAPSHOT_UNKNOWN', 'SNAPSHOT_INTEGRITY_FAILED', 'RELATIONSHIP_ENDPOINT_MISSING', 'RELATIONSHIP_CYCLE', 'UNKNOWN_ENTITY_TYPE'].includes(error.code)) throw error;
+      if (!['SNAPSHOT_UNKNOWN', 'SNAPSHOT_INTEGRITY_FAILED', 'RELATIONSHIP_ENDPOINT_MISSING', 'RELATIONSHIP_CYCLE', 'UNKNOWN_ENTITY_TYPE', 'RESPONSIBILITY_UNKNOWN', 'OWNER_ENTITY_UNKNOWN', 'CANONICAL_OWNER_COLLISION', 'BOUNDARY_OWNER_MISMATCH', 'DELEGATE_ENTITY_UNKNOWN'].includes(error.code)) throw error;
     }
     const history = [...(this.store.commitHistory.get(workspaceId) || [])].reverse();
     for (const candidateId of history) {
@@ -376,5 +429,7 @@ module.exports = {
   ModelSnapshotService,
   SnapshotQueryCache,
   canonicalStringify,
+  hydrateModel,
+  hydrateRuntime,
   makeSnapshot
 };
