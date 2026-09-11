@@ -16,17 +16,10 @@ permissions:
   contents: read
 
 jobs:
-  foundation:
-    name: Foundation invariants / ${{ matrix.os }} / Python 3.14
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
+  foundation_ubuntu:
+    name: Foundation invariants / Ubuntu / Python 3.14
+    runs-on: ubuntu-latest
     timeout-minutes: 10
-    concurrency:
-      group: controller-v2-foundation-ci-${{ github.ref }}-${{ matrix.os }}
-      cancel-in-progress: false
     defaults:
       run:
         working-directory: controller-v2
@@ -36,25 +29,51 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 1
-
       - name: Install Python 3.14
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
         with:
           python-version: '3.14'
           check-latest: true
-
       - name: Verify canonical integration line
         env:
           BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
         run: python -c "import json,os; from pathlib import Path; a=json.loads(Path('WORK-AUTHORITY.json').read_text()); actual=os.environ['BRANCH_NAME']; expected=a['canonical_branch']; assert actual == expected, f'non-canonical Controller 2.0 branch: {actual} != {expected}'; print('canonical branch', actual)"
-
       - name: Runtime identity
         run: |
           python --version
           python -c "import platform,sqlite3; print(platform.platform()); print('sqlite', sqlite3.sqlite_version)"
-
       - name: Compile controller
         run: python -m compileall -q controller_v2 tests
+      - name: Run foundation tests
+        run: python -m unittest discover -s tests -p 'test_*.py' -v
 
+  foundation_windows:
+    name: Foundation invariants / Windows / Python 3.14
+    runs-on: windows-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: controller-v2
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Install Python 3.14
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: '3.14'
+          check-latest: true
+      - name: Verify canonical integration line
+        env:
+          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+        run: python -c "import json,os; from pathlib import Path; a=json.loads(Path('WORK-AUTHORITY.json').read_text()); actual=os.environ['BRANCH_NAME']; expected=a['canonical_branch']; assert actual == expected, f'non-canonical Controller 2.0 branch: {actual} != {expected}'; print('canonical branch', actual)"
+      - name: Runtime identity
+        run: |
+          python --version
+          python -c "import platform,sqlite3; print(platform.platform()); print('sqlite', sqlite3.sqlite_version)"
+      - name: Compile controller
+        run: python -m compileall -q controller_v2 tests
       - name: Run foundation tests
         run: python -m unittest discover -s tests -p 'test_*.py' -v
