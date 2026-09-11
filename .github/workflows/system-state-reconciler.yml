@@ -9,8 +9,8 @@ on:
       - 'qualification/a01/repair-requests/**'
       - '.github/scripts/program-job-lock-enforce.js'
       - '.github/scripts/current-obligation-registry-enforce.js'
+      - '.github/scripts/validate-system-topology.js'
       - '.github/scripts/system-state-reconciler.js'
-      - '.github/scripts/system-state-reconciler-legacy.js'
       - '.github/scripts/second-shift-enforce.js'
       - '.github/scripts/second-shift-owner-coverage.js'
       - '.github/scripts/a01-closed-loop-repair*.js'
@@ -30,8 +30,8 @@ on:
       - 'qualification/a01/repair-requests/**'
       - '.github/scripts/program-job-lock-enforce.js'
       - '.github/scripts/current-obligation-registry-enforce.js'
+      - '.github/scripts/validate-system-topology.js'
       - '.github/scripts/system-state-reconciler.js'
-      - '.github/scripts/system-state-reconciler-legacy.js'
       - '.github/scripts/second-shift-enforce.js'
       - '.github/scripts/second-shift-owner-coverage.js'
       - '.github/scripts/a01-closed-loop-repair*.js'
@@ -68,8 +68,8 @@ jobs:
         run: |
           node --check .github/scripts/program-job-lock-enforce.js
           node --check .github/scripts/current-obligation-registry-enforce.js
+          node --check .github/scripts/validate-system-topology.js
           node --check .github/scripts/system-state-reconciler.js
-          node --check .github/scripts/system-state-reconciler-legacy.js
           node --check .github/scripts/second-shift-enforce.js
           node --check .github/scripts/second-shift-owner-coverage.js
           node --check .github/scripts/a01-closed-loop-repair.js
@@ -80,6 +80,9 @@ jobs:
           node --check .github/scripts/a01-repair-ledger-selftest.js
           node --check .github/scripts/a01-repair-rerun-selftest.js
           node --check .github/scripts/a01-repair-ledger-reconcile.js
+
+      - name: Validate current topology and retired-system boundary
+        run: node .github/scripts/validate-system-topology.js
 
       - name: Enforce program jobs and product completion truth
         run: node .github/scripts/program-job-lock-enforce.js
@@ -151,3 +154,13 @@ jobs:
             cat .state-reconciler/DERIVED-CURRENT-STATE.json >> "$GITHUB_STEP_SUMMARY"
             echo '```' >> "$GITHUB_STEP_SUMMARY"
           fi
+
+      - name: Upload reconciler evidence
+        if: always() && hashFiles('.state-reconciler/**') != ''
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: system-state-reconciler-${{ github.run_id }}
+          path: .state-reconciler/
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 30
