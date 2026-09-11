@@ -1,11 +1,21 @@
 # SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001
 
 **Effective date:** 2026-09-10  
-**Standing:** ACTIVE — SUPERVISED FIRST PILOT  
+**Standing:** ACTIVE — HIGHEST SYSTEM MASTER PRIORITY — SUPERVISED FIRST PILOT  
 **Semantic owner:** `SYSTEM_MASTER` product-root governance  
 **Execution administrator:** `SYSTEM_MASTER/CORE`  
 **Verification executor:** shared `A-01` control plane  
 **First proving corpus:** `PROGRAMMING`
+
+## Priority lock
+
+`SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001` is the highest active System Master priority until the supervised Programming proving run is accepted or the user explicitly changes priority.
+
+This priority lock applies to new discretionary System Master planning, research, qualification preparation and repository work. Existing safety, evidence-preservation, active owner integrity and human/private/native-authority boundaries remain non-preemptible. Peer-system work may continue only when it does not consume or block the resources required for the supervised Knowledge Recovery proving path.
+
+The chat is a working surface, not a new system or authority domain. Making this chat highest priority means this selected Knowledge Recovery objective receives priority rank 1; it does not create a new peer system, owner lane, Second Shift worker or architecture authority.
+
+Second Shift remains prohibited for Knowledge Recovery until the supervised-pass acceptance gate below is satisfied.
 
 ## Objective
 
@@ -77,10 +87,15 @@ Before enabling Second Shift processing, review the exact first-run evidence and
 
 Only after this gate passes may Knowledge Recovery be marked `SECOND_SHIFT_ELIGIBLE` and the registered qualification be changed from `overnight_eligible: false` under a reviewed control-plane update.
 
+## Attempt history
+
+`SYSTEM-MASTER-KNOWLEDGE-RECOVERY-PROGRAMMING-001-RUN-001` reached the mandatory GitHub-hosted admission boundary but GitHub assigned no `ubuntu-latest` runner (`runner_id: 0`, no executed steps). A-01 was not consumed. The attempt is `INFRA_FAILURE`, not a pipeline/product result, and cannot be used for Second Shift admission.
+
 ## Current next action
 
-1. Freeze `PROGRAMMING-INGEST-MANIFEST-001.json`.
-2. Register `SYSTEM-MASTER-KNOWLEDGE-RECOVERY-PROGRAMMING-001` as a focused, normal-context A-01 qualification with overnight execution disabled.
-3. Run hosted structural checks.
-4. Submit the exact pilot subject through the canonical A-01 gateway.
-5. Inspect the first receipt and generated evidence before any Second Shift promotion.
+1. Treat Knowledge Recovery as priority rank 1.
+2. Confirm GitHub-hosted admission execution is available again without weakening the canonical admission barrier.
+3. Create a fresh exact-subject supervised Programming caller run; do not rerun the stale Run 001 job.
+4. Monitor hosted admission, A-01 queue/execution and receipt end-to-end.
+5. Inspect generated catalog/trace evidence against the supervised-pass acceptance gate.
+6. Only after accepted PASS, decide whether to promote Knowledge Recovery to Second Shift bulk processing.
