@@ -5,30 +5,35 @@ on:
   push:
     paths:
       - 'governance/CURRENT-AUTHORITY.json'
-      - 'governance/SYSTEM-TOPOLOGY-004.json'
-      - 'governance/SYSTEM-PROGRAM-JOB-LOCK-001.json'
-      - 'governance/SYSTEM-COMPLETION-STATUS-001.json'
-      - 'governance/COMPLETION-LEDGER-002.json'
+      - 'governance/SYSTEM-TOPOLOGY-*.json'
+      - 'governance/SYSTEM-PROGRAM-JOB-LOCK-*.json'
+      - 'governance/SYSTEM-COMPLETION-STATUS-*.json'
+      - 'governance/COMPLETION-LEDGER-*.json'
       - 'governance/WORK-OBLIGATION-REGISTRY-*.json'
-      - 'governance/EXPECTATION-REGISTRY-004.json'
-      - 'governance/second-shift/BOOK-DELEGATIONS.json'
-      - 'governance/second-shift/LEARNING-DELEGATIONS.json'
-      - 'governance/second-shift/DOCUMENTS-DELEGATIONS.json'
+      - 'governance/EXPECTATION-REGISTRY-*.json'
+      - 'governance/REALLOCATION-LEDGER-*.json'
+      - 'governance/second-shift/**'
       - '.github/scripts/program-job-lock-enforce.js'
       - '.github/scripts/current-obligation-registry-enforce.js'
       - '.github/workflows/current-obligation-registry-enforcement.yml'
   pull_request:
     paths:
       - 'governance/CURRENT-AUTHORITY.json'
-      - 'governance/SYSTEM-TOPOLOGY-004.json'
-      - 'governance/SYSTEM-PROGRAM-JOB-LOCK-001.json'
-      - 'governance/SYSTEM-COMPLETION-STATUS-001.json'
-      - 'governance/COMPLETION-LEDGER-002.json'
+      - 'governance/SYSTEM-TOPOLOGY-*.json'
+      - 'governance/SYSTEM-PROGRAM-JOB-LOCK-*.json'
+      - 'governance/SYSTEM-COMPLETION-STATUS-*.json'
+      - 'governance/COMPLETION-LEDGER-*.json'
       - 'governance/WORK-OBLIGATION-REGISTRY-*.json'
-      - 'governance/EXPECTATION-REGISTRY-004.json'
+      - 'governance/EXPECTATION-REGISTRY-*.json'
+      - 'governance/REALLOCATION-LEDGER-*.json'
+      - 'governance/second-shift/**'
       - '.github/scripts/program-job-lock-enforce.js'
       - '.github/scripts/current-obligation-registry-enforce.js'
       - '.github/workflows/current-obligation-registry-enforcement.yml'
+
+concurrency:
+  group: current-obligation-registry-enforcement-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
