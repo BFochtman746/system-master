@@ -1,6 +1,6 @@
 # CHAT-LANE-OPERATING-PROMPT-002
 
-Status: PROPOSED_CANONICAL_OWNER_CHAT_STARTUP_CONTRACT
+Status: PROPOSED_CANONICAL_OWNER_CHAT_STARTUP_CONTRACT / TOPOLOGY-004-RECONCILED
 Supersedes for current startup: `governance/CHAT-LANE-OPERATING-PROMPT-001.md`
 Repository: `BFochtman746/system-master`
 Applies to: CORE, LEARNING, BOOK, DOCUMENTS owner chats
@@ -15,15 +15,17 @@ SYSTEM_MASTER
 - CORE
 - LEARNING
 - BOOK
+  - PROSE (active specialist child; no peer lane)
 - DOCUMENTS
-
-PROSE is completed and retired. Historical Prose material is provenance only and current Prose-family work routes to DOCUMENTS.
 
 Owner paths:
 - CORE -> SYSTEM_MASTER/CORE
 - LEARNING -> SYSTEM_MASTER/LEARNING
 - BOOK -> SYSTEM_MASTER/BOOK
+- PROSE -> SYSTEM_MASTER/BOOK/PROSE, inheriting BOOK execution control
 - DOCUMENTS -> SYSTEM_MASTER/DOCUMENTS
+
+The historical standalone Prose lane/retirement record remains provenance. It does not make the current Book child Prose subsystem retired.
 
 ## Mandatory startup
 
@@ -32,7 +34,7 @@ Before current-state claims or execution:
 1. fetch current `main`;
 2. read `governance/CURRENT-AUTHORITY.json` and its selected topology;
 3. read the current morning packet when available;
-4. fetch this active lane's live canonical control ref/head and state record;
+4. fetch this active lane's live canonical control ref/head and state record; for Book-Prose work also fetch `literary-prose-engine-001` as the specialist child evidence/control ref;
 5. reconcile `AUTHORITY_DELTA` before execution;
 6. read current completion, obligation and expectation registries selected by CURRENT-AUTHORITY;
 7. read this lane's active repair state and Second Shift delegation/ledger when relevant;
@@ -44,15 +46,15 @@ CORE owns shared Foundation & Spine/runtime/infrastructure/assurance/qualificati
 
 LEARNING owns Learning product architecture/runtime, curriculum, learner/mastery/assessment/adaptation and Learning evidence.
 
-BOOK owns canonical Book/manuscript/story-bible/lifecycle state, author decision routing, editorial lifecycle and publication state.
+BOOK owns canonical Book/manuscript/story-bible/lifecycle state, Book Workflow Orchestrator coordination, Book admission, author decision routing, editorial lifecycle, publication state and the active Prose literary-specialist child.
 
-DOCUMENTS owns document/content artifact semantics, DOCX/PDF/PPTX structure/conversion/preservation/render/export behavior, reusable non-Book writing/content artifact semantics, and the completed Prose evaluator/craft/diagnostic/revision/preservation capability family after migration. BOOK and DOCUMENTS are peers; Documents cannot silently write Book canonical state.
+PROSE at `SYSTEM_MASTER/BOOK/PROSE` owns specialist literary diagnosis, controlled revision candidate generation, literary evaluation support, voice/protected-language preservation, homogenization defense and Book-scoped preference-learning behavior. It has zero canonical manuscript-write authority, no Book-admission authority, no author authority and no separate peer/Second-Shift mutation lane.
 
-PROSE has no active owner lane. If requested work names Prose, determine whether it is historical evidence inspection or current Documents integration. Never reopen a Prose system merely from a branch/task/chat name.
+DOCUMENTS owns document/content artifact semantics, DOCX/PDF/PPTX structure/conversion/preservation/render/export behavior and reusable generic non-Book document/writing artifact semantics. BOOK and DOCUMENTS are peers; Documents cannot silently acquire Book-specific Prose literary authority or write Book canonical state.
 
 ## Evidence truth
 
-Keep artifact existence, hosted/local PASS, higher-gate eligibility, exact-subject A-01 PASS, human/author/private/native/external evidence, and production/publication authority separate. Never transfer PASS across SHA/subject or across Prose-to-Documents migration.
+Keep artifact existence, hosted/local PASS, higher-gate eligibility, exact-subject A-01 PASS, human/author/private/native/external evidence, and production/publication authority separate. Never transfer PASS across SHA/subject, across historical Prose retirement/restoration metadata, or from Documents into Book-Prose integration.
 
 ## Completion and current work
 
@@ -62,13 +64,15 @@ A new chat never reopens completed work without evidence invalidation.
 
 ## Repair discipline
 
-Active repair transactions belong only to current active owners. A stale transaction pointing to retired PROSE is `RETIRED_OWNER_STALE_WORK`; preserve its lineage and close/supersede or translate genuinely required repair/integration work to DOCUMENTS without PASS transfer.
+Active Book-Prose repairs route through BOOK owner-lane control. A historical standalone Prose repair transaction cannot create a separate Prose execution lane; preserve lineage and reconcile genuinely current work to BOOK without PASS transfer.
 
 ## Second Shift discipline
 
-Second Shift active lanes come from `SECOND-SHIFT-REGISTRY-001.json::owner_files`; currently CORE, LEARNING, BOOK and DOCUMENTS. PROSE and the temporary SYSTEM_MASTER root worker are not active lanes.
+Second Shift peer owner lanes come from `SECOND-SHIFT-REGISTRY-001.json::owner_files`; currently CORE, LEARNING, BOOK and DOCUMENTS. Active Prose child work inherits BOOK. The historical standalone PROSE lane and temporary SYSTEM_MASTER root worker are not active lanes.
 
-A completed/blocked item does not imply shift completion. IDLE for an active lane requires current all-rungs exhaustion. A retired lane is outside the active set rather than idle.
+Only one mutation-capable claim may be live per owner lane. Until cross-mode foreground/Second-Shift claim arbitration is machine-admitted, a foreground chat that detects branch movement during a mutation packet must fail closed, re-read the live owner head, and adopt/reconcile valid already-written work instead of overwriting it.
+
+A completed/blocked item does not imply shift completion. IDLE for an active lane requires current all-rungs exhaustion. A historical standalone lane is outside the active set rather than idle.
 
 ## Required first response in a new chat
 

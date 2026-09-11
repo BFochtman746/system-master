@@ -1,0 +1,42 @@
+{
+  "allocation_id": "SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-003",
+  "effective_date": "2026-09-10",
+  "standing": "DOCUMENTS_PEER__PROSE_BOOK_CHILD_SPECIALIST",
+  "supersedes": "governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-002.json",
+  "topology": "governance/SYSTEM-TOPOLOGY-004.json",
+  "architecture_decision": "governance/ADR-0004-BOOK-PROSE-CHILD-RESTORATION.md",
+  "first_class_tool_systems": [
+    {"system_id":"LEARNING","owner_path":"SYSTEM_MASTER/LEARNING"},
+    {"system_id":"BOOK","owner_path":"SYSTEM_MASTER/BOOK"},
+    {"system_id":"DOCUMENTS","owner_path":"SYSTEM_MASTER/DOCUMENTS","control_ref":"documents/control-v1"}
+  ],
+  "child_specialist_systems": [
+    {
+      "system_id":"PROSE",
+      "owner_path":"SYSTEM_MASTER/BOOK/PROSE",
+      "parent_system_id":"BOOK",
+      "control_ref":"literary-prose-engine-001",
+      "separate_second_shift_lane":false,
+      "execution_lane":"BOOK",
+      "canonical_manuscript_write_authority":false
+    }
+  ],
+  "documents_decision": {
+    "classification":"FIRST_CLASS_TOOL_SYSTEM",
+    "owner_path":"SYSTEM_MASTER/DOCUMENTS",
+    "modules":["DOCX","PPTX","PDF","OCR","FILE","GENERIC_WRITING_ARTIFACTS"],
+    "rule":"Documents owns document/artifact semantics and services. It does not own Book-specific Prose literary intelligence or canonical Book state."
+  },
+  "book_prose_decision": {
+    "book_owner_path":"SYSTEM_MASTER/BOOK",
+    "prose_owner_path":"SYSTEM_MASTER/BOOK/PROSE",
+    "book_is_canonical_manuscript_owner":true,
+    "prose_is_specialist_literary_intelligence":true,
+    "prose_direct_canonical_write":false,
+    "book_admission_only_canonical_effect":true,
+    "historical_retirement_record":"governance/retirements/PROSE-SYSTEM-RETIREMENT-001.json",
+    "historical_retirement_current_effect":"SUPERSEDED"
+  },
+  "book_documents_boundary":"BOOK and DOCUMENTS remain peers. BOOK owns canonical Book state and its Prose child specialist. DOCUMENTS owns document/artifact mechanics. BOOK may consume DOCUMENTS through explicit service contracts; DOCUMENTS cannot mutate Book canonical state.",
+  "qualification_rule":"Historical Book, Prose and Document PASS remains exact-subject evidence only. Changed integration bytes require fresh qualification."
+}
