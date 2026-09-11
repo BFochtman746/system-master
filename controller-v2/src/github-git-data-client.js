@@ -3,7 +3,12 @@ import { ControllerError } from './errors.js';
 const DEFAULT_API_VERSION='2026-03-10';
 const JSON_ACCEPT='application/vnd.github+json';
 
-function fail(code,message,details={}){throw new ControllerError(code,message,details);}
+function fail(code,message,details={}){
+  const error=new ControllerError(code,message,details);
+  if(Number.isInteger(details.status))error.status=details.status;
+  if(Object.prototype.hasOwnProperty.call(details,'ambiguous'))error.ambiguous=Boolean(details.ambiguous);
+  throw error;
+}
 function encodeRef(ref){return ref.split('/').map(encodeURIComponent).join('/');}
 function header(response,name){return response.headers?.get?.(name)??response.headers?.get?.(name.toLowerCase())??null;}
 
