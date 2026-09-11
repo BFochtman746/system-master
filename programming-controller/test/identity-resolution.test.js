@@ -80,6 +80,7 @@ test('stale locator returns STALE_LOCATOR and never authorizes its candidate ent
 test('external bindings require exact authority plus namespace plus value provenance', () => {
   const external = new ExternalIdentityRegistry({ clock: () => 1700000000000 });
   external.registerNamespace({ external_authority: 'GITHUB', external_namespace: 'repository-id', unique_active: true });
+  external.registerNamespace({ external_authority: 'OTHER', external_namespace: 'repository-id', unique_active: true });
   external.bind({ binding_id: 'B1', entity_id: A, external_authority: 'GITHUB', external_namespace: 'repository-id', external_value: '1360399247', provenance_ref: 'github:repo:1360399247' });
   const resolver = new IdentityResolver({ entitySource: entitySource([{ entity_id: A, entity_kind: 'REPOSITORY' }]), externalRegistry: external });
   assert.equal(resolver.resolveExternal({ external_authority: 'GITHUB', external_namespace: 'repository-id', external_value: '1360399247' }).outcome, 'UNIQUE');
