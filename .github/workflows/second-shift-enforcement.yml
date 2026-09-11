@@ -10,7 +10,7 @@ on:
       - 'governance/CURRENT-AUTHORITY.json'
       - 'governance/SYSTEM-PROGRAM-JOB-LOCK-001.json'
       - 'governance/SYSTEM-COMPLETION-STATUS-001.json'
-      - 'governance/COMPLETION-LEDGER-002.json'
+      - 'governance/COMPLETION-LEDGER-*.json'
       - 'governance/WORK-OBLIGATION-REGISTRY-*.json'
       - 'governance/SYSTEM-TOPOLOGY-*.json'
       - 'governance/architecture/**'
@@ -28,7 +28,7 @@ on:
       - 'governance/CURRENT-AUTHORITY.json'
       - 'governance/SYSTEM-PROGRAM-JOB-LOCK-001.json'
       - 'governance/SYSTEM-COMPLETION-STATUS-001.json'
-      - 'governance/COMPLETION-LEDGER-002.json'
+      - 'governance/COMPLETION-LEDGER-*.json'
       - 'governance/WORK-OBLIGATION-REGISTRY-*.json'
       - 'governance/SYSTEM-TOPOLOGY-*.json'
       - 'governance/architecture/**'
@@ -47,7 +47,6 @@ permissions:
 
 concurrency:
   group: second-shift-enforcement
-  queue: max
   cancel-in-progress: false
 
 jobs:
@@ -68,6 +67,10 @@ jobs:
           node --check .github/scripts/current-obligation-registry-enforce.js
           node --check .github/scripts/second-shift-enforce.js
           node --check .github/scripts/second-shift-owner-coverage.js
+          node --check .github/scripts/validate-system-topology.js
+
+      - name: Validate current topology and retired-system boundary
+        run: node .github/scripts/validate-system-topology.js
 
       - name: Enforce locked program jobs and completion truth
         run: node .github/scripts/program-job-lock-enforce.js
