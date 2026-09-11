@@ -1,55 +1,8 @@
 {
   "owner_system_id": "CORE",
   "owner_path": "SYSTEM_MASTER/CORE",
-  "inbox_version": 5,
-  "active_transactions": [
-    {
-      "transaction_id": "A01-REPAIR-a01-run-34431764843-A01-CONTROL-PLANE-SELFTEST-A1",
-      "state": "A01_REQUEUE_READY",
-      "route": "REQUEUE_CHANGED_SHA",
-      "owner_path": "SYSTEM_MASTER/CORE",
-      "inbox_owner_system_id": "CORE",
-      "target_inbox": "governance/repair/CORE-REPAIR-INBOX.json",
-      "receipt_id": "a01-run-34431764843-A01-CONTROL-PLANE-SELFTEST",
-      "qualification_id": "A01-CONTROL-PLANE-SELFTEST",
-      "workstream_id": "SYSTEM-MASTER",
-      "failed_subject_sha": "3a8004813e18d7defbf1f9ebc47f5bd8fcd30fb9",
-      "classification": "REPAIRABLE_SUBJECT",
-      "repair_attempt": 0,
-      "max_repair_attempts": 1,
-      "created_at": "2026-09-10T03:02:52.987Z",
-      "evidence_pointer": "artifact:A01-CONTROL-PLANE-SELFTEST-34431764843-evidence",
-      "failed_control_head": null,
-      "promotion_authorized": false,
-      "authoritative_pass": false,
-      "publication_authorized": false,
-      "production_authorized": false,
-      "dispatch_state": "OWNER_WORKER_READY",
-      "dispatch_packet_pointer": "governance/repair/agent-dispatch/A01-REPAIR-a01-run-34431764843-A01-CONTROL-PLANE-SELFTEST-A1.json",
-      "replacement_subject_sha": "ceb6870546012b789caea56499a1d219a195dc8b",
-      "repair_branch": "refs/heads/main",
-      "prequalification_evidence_pointer": "github-actions-run:34435547400:A-01-Control-Plane-Enforcement:PASS:subject:ceb6870546012b789caea56499a1d219a195dc8b",
-      "replacement_request": {
-        "qualification_id": "A01-CONTROL-PLANE-SELFTEST",
-        "workstream_id": "SYSTEM-MASTER",
-        "subject_sha": "ceb6870546012b789caea56499a1d219a195dc8b",
-        "origin_ref": "refs/heads/main",
-        "parent_receipt_id": "a01-run-34431764843-A01-CONTROL-PLANE-SELFTEST",
-        "replacement_of_subject_sha": "3a8004813e18d7defbf1f9ebc47f5bd8fcd30fb9",
-        "repair_attempt": 1,
-        "retry_kind": "CHANGED_SHA_SUBJECT_REPAIR",
-        "promotion_authorized": false,
-        "root_receipt_id": "a01-run-34431764843-A01-CONTROL-PLANE-SELFTEST"
-      },
-      "finalized_at": "2026-09-10T09:12:00.000Z",
-      "repair_base_subject_sha": "3a8004813e18d7defbf1f9ebc47f5bd8fcd30fb9",
-      "candidate_repair_attempt": 1,
-      "same_sha_infra_retry_count": 0,
-      "replacement_ticket_pointer": "qualification/a01/repair-requests/A01-REPAIR-a01-run-34431764843-A01-CONTROL-PLANE-SELFTEST-A1.json",
-      "retry_ticket_pointer": null,
-      "last_event_pointer": "governance/repair/events/A01-REPAIR-a01-run-34431764843-A01-CONTROL-PLANE-SELFTEST-A1/0004-a01_replacement_ticket_emitted.json"
-    }
-  ],
+  "inbox_version": 6,
+  "active_transactions": [],
   "transaction_history": [
     {
       "transaction_id": "A01-REPAIR-001C-LIVE-PROOF-001",
@@ -66,6 +19,22 @@
       "candidate_repair_attempt": 1,
       "a01_rerun_receipt_pointer": "github-actions-run:34430481452:artifact:A01-CLOSED-LOOP-REPAIR-SELFTEST-34430481452-evidence",
       "terminal_event_pointer": "governance/repair/events/A01-REPAIR-001C-LIVE-PROOF-001/0006-transaction_closed.json"
+    },
+    {
+      "transaction_id": "A01-REPAIR-a01-run-34431764843-A01-CONTROL-PLANE-SELFTEST-A1",
+      "final_state": "DEAD_LETTER",
+      "closed_at": "2026-09-11T11:49:24.890Z",
+      "receipt_id": "a01-run-34431764843-A01-CONTROL-PLANE-SELFTEST",
+      "qualification_id": "A01-CONTROL-PLANE-SELFTEST",
+      "workstream_id": "SYSTEM-MASTER",
+      "failed_subject_sha": "3a8004813e18d7defbf1f9ebc47f5bd8fcd30fb9",
+      "final_subject_sha": "ceb6870546012b789caea56499a1d219a195dc8b",
+      "final_result_class": "SUBJECT_FAILURE",
+      "final_classification": "REPAIRABLE_SUBJECT",
+      "repair_attempts_consumed": 1,
+      "candidate_repair_attempt": 0,
+      "a01_rerun_receipt_pointer": "github-actions-run:34595673549:artifact:A01-CONTROL-PLANE-SELFTEST-34595673549-evidence",
+      "terminal_event_pointer": "governance/repair/events/A01-REPAIR-a01-run-34431764843-A01-CONTROL-PLANE-SELFTEST-A1/0006-transaction_dead_lettered.json"
     }
   ],
   "notes": "CORE receives Core-owned product failures plus control-plane owner routes. Shared A-01 infrastructure retry/admission handling remains separately classified and must not become a Core product defect."
