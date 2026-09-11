@@ -339,40 +339,40 @@ jobs:
               'payload_mutated': False,
               'nonclaims': ['A01_PASS', 'NATIVE_OFFICE_PASS', 'PRODUCTION_PASS', 'DOCUMENTS_COMPLETE']
           }
-          p = pathlib.Path('documents/reconciliation/DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-ADMISSION-CLOSURE-RECEIPT-005.json')
-          p.write_text(json.dumps(receipt, indent=2)+'\n')
-          status = f'''# DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-ADMISSION-005
-
-Status: CLOSED / PASS — READY ARMED / GITHUB-NATIVE SOURCE CUSTODY ADMITTED
-Owner: SYSTEM_MASTER/DOCUMENTS
-Date: 2026-09-11
-
-## Exact admitted subject
-
-- Git subject: `{subject}`
-- Source identity: 225/225 exact path + size + SHA
-- Carrier SHA-256: `77a6e2288d475865622bad4b2c66647a599c26a3899c6617b33d7b2b334855bd`
-- Historical qualification transfer: false
-
-## Fresh qualification
-
-- Strict Java 21 compile: PASS
-- Portable Document suites: PASS
-- T13 external qualification: PASS
-- T14 external qualification: PASS
-- Qualification evidence: `qualification/document-r4/CR001-R4-GITHUB-NATIVE-QUALIFICATION-005/`
-
-## Admission
-
-`transport/document-r4/READY` was created only after all fresh qualification gates passed. `STAGING.json` is now `FULL_TRANSPORT_STAGED__ARMED`, and GitHub-native source custody is PASS.
-
-The five frozen 004 payload chunk Git identities were rechecked before push and were not changed by 005.
-
-## Nonclaims
-
-005 does not claim A-01 PASS, native Office PASS, production PASS, or Documents-module completion.
-'''
-          pathlib.Path('documents/reconciliation/DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-ADMISSION-005.md').write_text(status)
+          pathlib.Path('documents/reconciliation/DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-ADMISSION-CLOSURE-RECEIPT-005.json').write_text(json.dumps(receipt, indent=2)+'\n')
+          status_lines = [
+              '# DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-ADMISSION-005',
+              '',
+              'Status: CLOSED / PASS — READY ARMED / GITHUB-NATIVE SOURCE CUSTODY ADMITTED',
+              'Owner: SYSTEM_MASTER/DOCUMENTS',
+              'Date: 2026-09-11',
+              '',
+              '## Exact admitted subject',
+              '',
+              f'- Git subject: `{subject}`',
+              '- Source identity: 225/225 exact path + size + SHA',
+              '- Carrier SHA-256: `77a6e2288d475865622bad4b2c66647a599c26a3899c6617b33d7b2b334855bd`',
+              '- Historical qualification transfer: false',
+              '',
+              '## Fresh qualification',
+              '',
+              '- Strict Java 21 compile: PASS',
+              '- Portable Document suites: PASS',
+              '- T13 external qualification: PASS',
+              '- T14 external qualification: PASS',
+              '- Qualification evidence: `qualification/document-r4/CR001-R4-GITHUB-NATIVE-QUALIFICATION-005/`',
+              '',
+              '## Admission',
+              '',
+              '`transport/document-r4/READY` was created only after all fresh qualification gates passed. `STAGING.json` is now `FULL_TRANSPORT_STAGED__ARMED`, and GitHub-native source custody is PASS.',
+              '',
+              'The five frozen 004 payload chunk Git identities were rechecked before push and were not changed by 005.',
+              '',
+              '## Nonclaims',
+              '',
+              '005 does not claim A-01 PASS, native Office PASS, production PASS, or Documents-module completion.',
+          ]
+          pathlib.Path('documents/reconciliation/DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-ADMISSION-005.md').write_text('\n'.join(status_lines)+'\n')
           PY
 
       - name: Seal final admission commit and prove frozen payload unchanged
