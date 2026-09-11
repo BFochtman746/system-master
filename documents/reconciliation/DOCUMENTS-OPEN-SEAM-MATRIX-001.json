@@ -41,23 +41,37 @@
       "id": "DOC-REC-001",
       "class": "TRANSPORT_CONTRACT_DRIFT",
       "severity": "BLOCKING_FOR_R4_ADMISSION",
-      "staging_expected_sha256": "4fce25bc78646f4be3b8152865184e1cee84868ba1a13e4587ccef6a16c23dd9",
-      "staging_expected_chunks": 81,
-      "workflow_expected_sha256": "b6d0f8a98cea0615513eda07873b38532123585336de87c40350afeafa474edf",
-      "workflow_expected_chunks": 100,
-      "canonical_transport_identity": "UNRESOLVED_MUST_BE_DERIVED_FROM_EXACT_HANDOFF"
+      "state": "CLOSED_PASS_BY_DOCUMENTS-R4-TRANSPORT-CONTRACT-RECONCILIATION-003",
+      "superseded_staging_expected_sha256": "4fce25bc78646f4be3b8152865184e1cee84868ba1a13e4587ccef6a16c23dd9",
+      "superseded_staging_expected_chunks": 81,
+      "superseded_workflow_expected_sha256": "b6d0f8a98cea0615513eda07873b38532123585336de87c40350afeafa474edf",
+      "superseded_workflow_expected_chunks": 100,
+      "canonical_transport_sha256": "77a6e2288d475865622bad4b2c66647a599c26a3899c6617b33d7b2b334855bd",
+      "canonical_transport_bytes": 301008,
+      "canonical_chunks": 5,
+      "canonical_full_chunk_raw_bytes": 65536,
+      "adversarial_fail_closed_cases": 12,
+      "source_identity_reverified": "PASS__225_OF_225",
+      "source_custody_after_closure": "BLOCKED__PAYLOAD_NOT_STAGED"
+    }
+  ],
+  "closed_work_packages": [
+    {
+      "id": "DOCUMENTS-R4-TRANSPORT-CONTRACT-RECONCILIATION-003",
+      "state": "CLOSED_PASS",
+      "receipt": "DOCUMENTS-R4-TRANSPORT-CONTRACT-CLOSURE-RECEIPT-003.json"
     }
   ],
   "selected_successor": {
-    "id": "DOCUMENTS-R4-TRANSPORT-CONTRACT-RECONCILIATION-003",
-    "class": "PRE_BUILD_CONTROL_REPAIR",
-    "state": "SELECTED",
-    "rationale": "Demonstrated machine-resolvable source-admission defect that must be closed before exact R4 GitHub admission."
+    "id": "DOCUMENTS-R4-GITHUB-NATIVE-PAYLOAD-STAGING-004",
+    "class": "SOURCE_CUSTODY_PREPARATION",
+    "state": "SELECTED_READY_FOR_EXECUTION",
+    "rationale": "The transport contract is now coherent; exact payload bytes must be committed and remotely reverified before arming admission."
   },
   "queued_feature_candidate_not_bound": {
     "id": "DOCUMENTS-SPINE-IDENTIFY-PROFILE-COMPLETION-001",
     "state": "QUEUED_CANDIDATE_ONLY",
-    "rationale": "INTAKE is verified and IDENTIFY is the earliest partial governed execution stage."
+    "rationale": "INTAKE is verified and IDENTIFY is the earliest partial governed execution stage; feature promotion remains gated by current source custody/qualification."
   },
   "nonclaims": [
     "DOCUMENTS_COMPLETE",
