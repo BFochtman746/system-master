@@ -1,4 +1,5 @@
 from .database import ControllerStore
+from .lifecycle import ControllerAlreadyRunning, ControllerRuntime, ProcessOwnershipLock
 from .migrations import (
     MigrationChecksumMismatch,
     MigrationError,
@@ -28,6 +29,8 @@ __all__ = [
     "BackupResult",
     "CanonicalizationError",
     "CommandResult",
+    "ControllerAlreadyRunning",
+    "ControllerRuntime",
     "ControllerStore",
     "EffectResult",
     "IdempotencyConflict",
@@ -37,6 +40,7 @@ __all__ = [
     "MigrationChecksumMismatch",
     "MigrationError",
     "MigrationSequenceError",
+    "ProcessOwnershipLock",
     "RecoveryReport",
     "ReliabilityManager",
     "UntrackedSchema",

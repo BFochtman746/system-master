@@ -120,6 +120,15 @@ class LifecycleTests(unittest.TestCase):
         finally:
             lock.release()
 
+    def test_unheld_lock_file_is_not_authority(self):
+        self.lock_path.write_bytes(b"\0")
+        lock = ProcessOwnershipLock(self.lock_path)
+        lock.acquire()
+        try:
+            self.assertTrue(lock.owned)
+        finally:
+            lock.release()
+
     def test_ownership_descriptor_is_non_inheritable(self):
         lock = ProcessOwnershipLock(self.lock_path)
         lock.acquire()
@@ -127,6 +136,14 @@ class LifecycleTests(unittest.TestCase):
             self.assertFalse(os.get_inheritable(lock.fileno()))
         finally:
             lock.release()
+
+    def test_equivalent_database_paths_share_one_ownership_path(self):
+        events: list[str] = []
+        alternate = self.root / "subdir" / ".." / "controller.db"
+        first = ControllerRuntime(DummyStore(self.db, events), recovery_manager=DummyRecovery(events))
+        second = ControllerRuntime(DummyStore(alternate, []), recovery_manager=DummyRecovery([]))
+        self.assertEqual(first.db_path, second.db_path)
+        self.assertEqual(first.lock_path, second.lock_path)
 
     def test_runtime_initializes_then_recovers_then_becomes_ready(self):
         events: list[str] = []
@@ -200,6 +217,21 @@ class LifecycleTests(unittest.TestCase):
                 second.start()
             self.assertFalse(second.ready)
             self.assertEqual(second_events, [])
+        finally:
+            first.stop()
+
+    def test_rejected_second_owner_cannot_overwrite_live_status(self):
+        first = ControllerRuntime(DummyStore(self.db, []), recovery_manager=DummyRecovery([]))
+        first.start()
+        try:
+            before = json.loads(first.status_path.read_text(encoding="utf-8"))
+            second = ControllerRuntime(DummyStore(self.db, []), recovery_manager=DummyRecovery([]))
+            with self.assertRaises(ControllerAlreadyRunning):
+                second.start()
+            after = json.loads(first.status_path.read_text(encoding="utf-8"))
+            self.assertEqual(after["state"], "READY")
+            self.assertEqual(after["instance_id"], before["instance_id"])
+            self.assertEqual(after["instance_id"], first.instance_id)
         finally:
             first.stop()
 
