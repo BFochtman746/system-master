@@ -10,6 +10,7 @@ const MANIFEST_REL = 'governance/catalog/ingest/programming/PROGRAMMING-INGEST-M
 const AUTHORITY_REL = 'governance/CURRENT-AUTHORITY.json';
 const PACKET_REL = 'governance/catalog/system-packets/PROGRAMMING.json';
 const EXPECTED_PEERS = ['BOOK', 'CORE', 'DOCUMENTS', 'LEARNING'];
+const EXPECTED_KNOWLEDGE_RECOVERY_CONTROL = 'governance/knowledge-recovery/SYSTEM-MASTER-KNOWLEDGE-RECOVERY-002.md';
 
 function fail(message) { throw new Error(message); }
 function assert(condition, message) { if (!condition) fail(message); }
@@ -107,7 +108,10 @@ function main() {
 
   const authority = readJson(AUTHORITY_REL);
   assert(authority.product_root === 'SYSTEM_MASTER', 'CURRENT_AUTHORITY_ROOT');
-  assert(authority.programming_ingest_manifest === MANIFEST_REL, 'CURRENT_AUTHORITY_MANIFEST_POINTER');
+  assert(authority.knowledge_recovery_control === EXPECTED_KNOWLEDGE_RECOVERY_CONTROL, 'CURRENT_KNOWLEDGE_RECOVERY_CONTROL_POINTER');
+  assert(typeof authority.system_catalog === 'string' && authority.system_catalog, 'CURRENT_SYSTEM_CATALOG_POINTER');
+  assert(typeof authority.archive_source_registry === 'string' && authority.archive_source_registry, 'CURRENT_ARCHIVE_SOURCE_REGISTRY_POINTER');
+  assert(typeof authority.knowledge_recovery_next_contract === 'string' && authority.knowledge_recovery_next_contract, 'CURRENT_KNOWLEDGE_RECOVERY_NEXT_CONTRACT_POINTER');
   assert(typeof authority.topology === 'string' && authority.topology, 'CURRENT_TOPOLOGY_POINTER');
   const topology = readJson(authority.topology);
   assert(topology.topology_id === 'SYSTEM-TOPOLOGY-004', 'EXPECTED_TOPOLOGY_004');
@@ -120,9 +124,11 @@ function main() {
   assert(bySystemId.PROSE, 'PROSE_CHILD_MISSING');
   assert(bySystemId.PROSE.parent_id === 'BOOK', 'PROSE_PARENT_MUST_BE_BOOK');
   assert((bySystemId.PROSE.owner_path || '') === 'SYSTEM_MASTER/BOOK/PROSE', 'PROSE_OWNER_PATH');
-  assert(bySystemId.PROSE.classification === 'ACTIVE_CHILD_SPECIALIST_SUBSYSTEM', 'PROSE_CHILD_CLASSIFICATION');
+  assert(bySystemId.PROSE.classification === 'COMPLETED_CHILD_SPECIALIST_SYSTEM__AVAILABLE_FOR_BOOK_INTEGRATION', 'PROSE_COMPLETED_CHILD_CLASSIFICATION');
+  assert(bySystemId.PROSE.completion === 'COMPLETE', 'PROSE_MUST_REMAIN_COMPLETE');
+  assert(bySystemId.PROSE.execution_lane === 'BOOK', 'PROSE_INTEGRATION_EXECUTION_MUST_INHERIT_BOOK');
   assert(!(topology.peer_system_ids || []).includes('PROSE'), 'PROSE_MUST_NOT_BE_PEER');
-  assert((topology.child_system_ids || []).includes('PROSE'), 'PROSE_MUST_BE_ACTIVE_CHILD');
+  assert((topology.child_system_ids || []).includes('PROSE'), 'PROSE_MUST_REMAIN_COMPLETED_BOOK_CHILD');
   assert((topology.execution_lane_owner_map || {})['LITERARY-PROSE'] === 'BOOK', 'PROSE_EXECUTION_MUST_INHERIT_BOOK');
 
   const packet = readJson(PACKET_REL);
@@ -138,8 +144,8 @@ function main() {
     { node_id: 'SYSTEM_CANDIDATE::PROGRAMMING', node_kind: 'SYSTEM_CANDIDATE', label: 'Programming / Software Engineering System' }
   ];
   for (const id of peerSystems) nodes.push({ node_id: `ACTIVE_SYSTEM::${id}`, node_kind: 'ACTIVE_PEER_SYSTEM', label: id });
-  nodes.push({ node_id: 'ACTIVE_CHILD_SYSTEM::PROSE', node_kind: 'ACTIVE_CHILD_SPECIALIST_SUBSYSTEM', label: 'PROSE' });
-  const edges = [{ edge_id: 'EDGE::TOPOLOGY::BOOK::PROSE', from: 'ACTIVE_SYSTEM::BOOK', to: 'ACTIVE_CHILD_SYSTEM::PROSE', relation: 'OWNS_CHILD', source_ids: ['GIT-SYSTEM-TOPOLOGY-004'] }];
+  nodes.push({ node_id: 'COMPLETED_CHILD_SYSTEM::PROSE', node_kind: 'COMPLETED_CHILD_SPECIALIST_SYSTEM', label: 'PROSE' });
+  const edges = [{ edge_id: 'EDGE::TOPOLOGY::BOOK::PROSE', from: 'ACTIVE_SYSTEM::BOOK', to: 'COMPLETED_CHILD_SYSTEM::PROSE', relation: 'OWNS_COMPLETED_CHILD', source_ids: ['GIT-SYSTEM-TOPOLOGY-004'] }];
   const locatorOwners = new Map();
   const digestOwners = new Map();
   let actualByteCount = 0;
@@ -180,7 +186,7 @@ function main() {
       if (affinity === 'PROGRAMMING') target = 'SYSTEM_CANDIDATE::PROGRAMMING';
       else if (affinity === 'SYSTEM_MASTER') target = 'PRODUCT_ROOT::SYSTEM_MASTER';
       else if (peerSystems.includes(affinity)) target = `ACTIVE_SYSTEM::${affinity}`;
-      else if (affinity === 'PROSE') target = 'ACTIVE_CHILD_SYSTEM::PROSE';
+      else if (affinity === 'PROSE') target = 'COMPLETED_CHILD_SYSTEM::PROSE';
       if (target) edges.push({ edge_id: `EDGE::${assetId}::AFFINITY::${affinity}`, from: assetId, to: target, relation: 'HAS_AFFINITY_TO', source_ids: [source.source_id] });
     }
 
@@ -261,7 +267,6 @@ function main() {
   const graphDigest = canonicalDigest(traceGraph);
   const observationDigest = canonicalDigest(sourceObservationCanonical);
   const total = manifest.sources.length;
-  const allActive = [...peerSystems, 'PROSE'].sort();
   const report = {
     report_id: 'SYSTEM-MASTER-KNOWLEDGE-RECOVERY-PROGRAMMING-001',
     manifest_id: manifest.manifest_id,
@@ -271,10 +276,11 @@ function main() {
     architecture_mutation_performed: false,
     second_shift_eligible: false,
     a01_runner_observed: isA01,
-    active_systems_unchanged: allActive,
+    active_systems_unchanged: peerSystems,
     peer_systems_unchanged: peerSystems,
-    child_systems_unchanged: ['PROSE'],
-    prose_child_execution_inherits_book: true,
+    completed_child_systems_unchanged: ['PROSE'],
+    prose_independent_execution_forbidden: true,
+    prose_book_integration_only: true,
     source_count: total,
     source_records_processed: observations.length,
     metadata_coverage: { processed: observations.length, total, percent: total ? 100 : 0 },
@@ -295,7 +301,7 @@ function main() {
     standing: externalPendingCount || identityUnprovenCount || quarantineCount ? 'PASS_PIPELINE__EXTERNAL_BYTE_RECOVERY_REMAINS' : 'PASS_PIPELINE__FULL_FROZEN_BYTES_OBSERVED',
     claims_not_made: [
       'PROGRAMMING is an active peer system',
-      'PROSE is an independent peer or Second Shift owner lane',
+      'PROSE has remaining independent execution work',
       'all historical Programming bytes were verified',
       'historical research/build-spec closure implies implementation',
       'portable evidence implies Apple-native or production evidence',
