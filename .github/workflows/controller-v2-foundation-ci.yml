@@ -15,10 +15,6 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: controller-v2-foundation-ci-${{ github.ref }}-${{ matrix.os }}
-  cancel-in-progress: false
-
 jobs:
   foundation:
     name: Foundation invariants / ${{ matrix.os }} / Python 3.14
@@ -28,6 +24,9 @@ jobs:
         os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
+    concurrency:
+      group: controller-v2-foundation-ci-${{ github.ref }}-${{ matrix.os }}
+      cancel-in-progress: false
     defaults:
       run:
         working-directory: controller-v2
