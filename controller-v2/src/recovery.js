@@ -155,7 +155,7 @@ export function rebuildControllerStore(path, durableEvents) {
       kernel.db.prepare('INSERT INTO qualifications VALUES (?,?,?,?,?,?,?)').run(q.qualification_id, q.transaction_id, q.subject_sha, q.policy_version, q.state, q.created_at, q.updated_at);
     }
     for (const p of Object.values(state.promotions)) {
-      kernel.db.prepare('INSERT INTO promotions VALUES (?,?,?,?,?,?,?,?,?)').run(p.promotion_id, p.transaction_id, p.subject_sha, p.qualification_id, p.state, p.authorization_event_id, p.created_at, p.updated_at);
+      kernel.db.prepare('INSERT INTO promotions VALUES (?,?,?,?,?,?,?,?)').run(p.promotion_id, p.transaction_id, p.subject_sha, p.qualification_id, p.state, p.authorization_event_id, p.created_at, p.updated_at);
     }
     for (const event of durableEvents) {
       kernel.db.prepare('INSERT INTO events VALUES (?,?,?,?,?,?,?,?,?)').run(event.event_id, event.event_schema, event.stream_id, event.stream_version, event.event_type, event.occurred_at, canonicalize(event.data), event.prev_event_digest, event.event_digest);
