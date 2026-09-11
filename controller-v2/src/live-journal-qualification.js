@@ -1,5 +1,8 @@
 import { ControllerError } from './errors.js';
 
+export const CANONICAL_JOURNAL_REPOSITORY='bfochtman746/system-master-controller-journal';
+export const CANONICAL_SUBJECT_REPOSITORY='bfochtman746/system-master';
+
 function fail(code,message,details={}){throw new ControllerError(code,message,details);}
 function normalizeRepo(value){return String(value??'').trim().toLowerCase();}
 
@@ -10,6 +13,8 @@ export function validateLiveQualificationConfig(config={}){
   if(!subjectRepository||!subjectRepository.includes('/'))fail('LIVE_SUBJECT_REPOSITORY_REQUIRED','subjectRepository must be owner/name');
   if(journalRepository===subjectRepository)fail('LIVE_JOURNAL_SUBJECT_COLLISION','journal repository must be independent from subject repository');
   if(journalRepository==='bfochtman746/system-master')fail('LIVE_SYSTEM_MASTER_JOURNAL_FORBIDDEN','System Master may never be used as the controller journal repository');
+  if(journalRepository!==CANONICAL_JOURNAL_REPOSITORY)fail('LIVE_JOURNAL_REPOSITORY_NOT_CANONICAL','journal repository does not match the frozen C1 target',{expected:CANONICAL_JOURNAL_REPOSITORY,actual:journalRepository});
+  if(subjectRepository!==CANONICAL_SUBJECT_REPOSITORY)fail('LIVE_SUBJECT_REPOSITORY_NOT_CANONICAL','subject repository does not match the frozen C1 target',{expected:CANONICAL_SUBJECT_REPOSITORY,actual:subjectRepository});
   if(config.destructiveQualification!==true)fail('LIVE_DESTRUCTIVE_OPT_IN_REQUIRED','destructiveQualification must be explicitly true');
   if(config.expectedOwner&&journalRepository.split('/')[0]!==String(config.expectedOwner).trim().toLowerCase())fail('LIVE_REPOSITORY_OWNER_MISMATCH','journal repository owner does not match expected owner');
   if(!config.qualificationId||typeof config.qualificationId!=='string')fail('LIVE_QUALIFICATION_ID_REQUIRED','qualificationId is required');
