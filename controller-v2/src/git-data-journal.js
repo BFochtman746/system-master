@@ -18,7 +18,7 @@ function parseJson(text,code){try{return JSON.parse(text);}catch{fail(code,'inva
 
 function validateSemanticEvent(event){
   if(!event||typeof event!=='object'||Array.isArray(event))fail('JOURNAL_EVENT_INVALID','event object required');
-  for(const key of Object.keys(event))if(!ALLOWED_EVENT_KEYS.has(key))fail('JOURNAL_EVENT_INVALID',`unknown event field ${key}`);
+  for(const key of Object.keys(event))if(!ALLOWED_EVENT_KEYS.has(key))fail('JOURNAL_EVENT_UNKNOWN_FIELD',`unknown event field ${key}`);
   for(const key of REQUIRED_EVENT_KEYS)if(!(key in event))fail('JOURNAL_EVENT_INVALID',`missing ${key}`);
   if(event.event_schema!=='controller.event.v1')fail('UNSUPPORTED_EVENT_SCHEMA',`unsupported ${event.event_schema}`);
   if(!Number.isSafeInteger(event.stream_version)||event.stream_version<1)fail('JOURNAL_EVENT_INVALID','stream_version must be positive integer');
