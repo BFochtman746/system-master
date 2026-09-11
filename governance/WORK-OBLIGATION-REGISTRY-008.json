@@ -1,0 +1,135 @@
+{
+  "registry_id": "WORK-OBLIGATION-REGISTRY-008",
+  "effective_date": "2026-09-10",
+  "product_root": "SYSTEM_MASTER",
+  "topology": "governance/SYSTEM-TOPOLOGY-004.json",
+  "supersedes_current_selection": "governance/WORK-OBLIGATION-REGISTRY-007.json",
+  "program_job_lock": "governance/SYSTEM-PROGRAM-JOB-LOCK-001.json",
+  "system_completion_status": "governance/SYSTEM-COMPLETION-STATUS-001.json",
+  "purpose": "Lock current work to the user-directed system jobs: Prose is the only complete system; Book finishes Book plus Prose adapters/orchestrator and integrates upward; Learning finishes Learning and integrates upward; Documents finishes Documents and integrates upward; Core/System Master finishes shared spine and product integration without taking peer ownership.",
+  "states": ["READY","ACTIVE","BLOCKED","HOLD","DEFERRED","OWNER_SELECTION_REQUIRED","SUPERSEDED","CLOSED"],
+  "rules": [
+    "Every non-closed obligation has exactly one executable owner_path valid under SYSTEM-TOPOLOGY-004.",
+    "PROSE is the only system currently complete; active Prose integration executes under BOOK without creating a separate peer or Second Shift lane.",
+    "BOOK and PROSE may cross their parent/child boundary for the Book literary integration only. Other active peer systems remain inside their product lanes and integrate upward through System Master/shared interfaces.",
+    "DOCUMENTS may not absorb, schedule, repair or claim Book-specific Prose work.",
+    "LEARNING may not cross into Book, Prose or Documents product work.",
+    "CORE supplies shared Foundation/Spine and integration primitives but may not take peer-system semantic ownership.",
+    "Knowledge Recovery remains valid support work under CORE but is no longer the central product priority and may not preempt independent Book, Learning or Documents work.",
+    "Phase/packet/test closure never means system completion unless SYSTEM-COMPLETION-STATUS-001 explicitly says so.",
+    "Changed subjects require fresh qualification; no PASS transfers across SHA, ownership or system boundaries."
+  ],
+  "owner_head_snapshot": {
+    "CORE": "2031f070bd3702185c028733819ec410db36613c",
+    "LEARNING": "cf6db676c0058b79c0b32b7300d425852958f83f",
+    "BOOK": "efb2ca4f234d223bf2a69b9fa1205b226d1e0b46",
+    "PROSE_CHILD": "b3b0909bc6720a3bc5938de29d4bf3bde9dd4e05",
+    "DOCUMENTS": "4fc463a4744671927d92d04f87dc131d3bae310c"
+  },
+  "obligations": [
+    {
+      "obligation_id": "SYSTEM-MASTER-INTEGRATION-COORDINATION-001",
+      "owner_path": "SYSTEM_MASTER/CORE",
+      "semantic_owner_path": "SYSTEM_MASTER",
+      "state": "ACTIVE",
+      "priority": "CENTRAL_NEXT_OBJECTIVE",
+      "objective": "Coordinate and finish the integration of the incomplete CORE, LEARNING, BOOK and DOCUMENTS systems into System Master through explicit interfaces while preserving each owner's product authority. Track Book's completed PROSE child integration as part of BOOK, not as a separate peer lane. Do not declare any system except PROSE complete without explicit future product-level authority."
+    },
+    {
+      "obligation_id": "SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001",
+      "owner_path": "SYSTEM_MASTER/CORE",
+      "semantic_owner_path": "SYSTEM_MASTER",
+      "state": "ACTIVE",
+      "priority": "SUPPORTING_PROGRAM",
+      "second_shift_state": "ELIGIBLE_WHEN_NONBLOCKING",
+      "objective": "Continue deterministic Programming source/custody/provenance recovery as supporting work without creating a Programming peer system, redefining lane jobs, or preempting independent Book, Learning or Documents progress."
+    },
+    {
+      "obligation_id": "CORE-SMR021-USER-EXPERIENCE-001",
+      "owner_path": "SYSTEM_MASTER/CORE",
+      "state": "ACTIVE",
+      "objective": "Finish the current Core Foundation/Spine dependency-valid SMR021 work and expose only shared System Master primitives; do not take Learning, Book, Prose or Documents product semantics."
+    },
+    {
+      "obligation_id": "CORE-CORRECTED-SOURCE-CUSTODY-001",
+      "owner_path": "SYSTEM_MASTER/CORE",
+      "state": "BLOCKED",
+      "blocker_class": "SOURCE_CUSTODY",
+      "objective": "Preserve and recover corrected Core runnable-source custody without taking peer-system work."
+    },
+    {
+      "obligation_id": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001",
+      "owner_path": "SYSTEM_MASTER/LEARNING",
+      "state": "ACTIVE",
+      "objective": "Finish the Learning system through the frozen-source curriculum/compiler, assessment, mastery/adaptation and evidence train, then bind the Learning-to-System-Master interface without crossing into Book, Prose, Documents or Core product ownership."
+    },
+    {
+      "obligation_id": "LEARNING-REAL-PARTICIPANT-PILOT-001",
+      "owner_path": "SYSTEM_MASTER/LEARNING",
+      "state": "BLOCKED",
+      "blocker_class": "HUMAN_ONLY",
+      "objective": "Execute the real participant Learning pilot only with genuine explicit consent and real learner evidence."
+    },
+    {
+      "obligation_id": "BOOK-SYSTEM-CANONICAL-CONTENT-OBJECT-ADMISSION-001-A01-REGISTRATION-AND-QUALIFICATION-PREP",
+      "owner_path": "SYSTEM_MASTER/BOOK",
+      "state": "BLOCKED",
+      "blocker_class": "SHARED_A01_AUTHORITY",
+      "objective": "Route the unchanged original Book canonical-content-admission subject through central registered A-01 authority without mutating or relabeling hosted evidence."
+    },
+    {
+      "obligation_id": "BOOK-PROSE-PHASE-2-ORCHESTRATOR-CLOSURE-CENSUS-001",
+      "owner_path": "SYSTEM_MASTER/BOOK",
+      "specialist_owner_path": "SYSTEM_MASTER/BOOK/PROSE",
+      "state": "READY",
+      "priority": "BOOK_OWNER_LANE_PRIORITY",
+      "objective": "Finish Book-Prose integration from the completed Prose system into the incomplete Book system. Close the current Phase-2 orchestrator census, then continue the dependency-valid adapters/context/compiler/router/orchestrator work until Prose is fully usable by Book end-to-end while Book alone retains canonical manuscript, Story Bible, author, lifecycle and admission authority."
+    },
+    {
+      "obligation_id": "DOCUMENTS-CURRENT-ADMISSION-001",
+      "owner_path": "SYSTEM_MASTER/DOCUMENTS",
+      "state": "ACTIVE",
+      "objective": "Finish the Documents system under SYSTEM_MASTER/DOCUMENTS using preserved DOCX/PDF/PPTX/document implementation, exact custody and fresh current-subject qualification; then integrate Documents upward into System Master. Do not absorb Prose or Book literary authority."
+    },
+    {
+      "obligation_id": "DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-IMPORT-AND-EXACT-SUBJECT-QUALIFICATION-002",
+      "owner_path": "SYSTEM_MASTER/DOCUMENTS",
+      "state": "READY",
+      "priority": "DOCUMENTS_OWNER_LANE_PRIORITY",
+      "parent_obligation_id": "DOCUMENTS-CURRENT-ADMISSION-001",
+      "objective": "Import the exactly reconstructed CR001-R4 source tree into GitHub-native custody, bind exact identity, run fresh qualification, and continue only Documents-owned implementation/integration toward System Master."
+    },
+    {
+      "obligation_id": "A01-CONTROL-PLANE-SELFTEST-A1-REPLACEMENT-RERUN-001",
+      "owner_path": "SYSTEM_MASTER/SHARED_INFRASTRUCTURE/A01",
+      "administrative_owner": "SYSTEM_MASTER/CORE",
+      "state": "READY",
+      "objective": "Use the existing repair-rerun transaction to obtain and adjudicate a real authoritative replacement A-01 receipt without opening duplicate lineage."
+    },
+    {
+      "obligation_id": "SECOND-SHIFT-LIVE-AUTHORITY-SUCCESSOR-ENFORCEMENT-002",
+      "owner_path": "SYSTEM_MASTER/SHARED_INFRASTRUCTURE",
+      "administrative_owner": "SYSTEM_MASTER/CORE",
+      "state": "ACTIVE",
+      "objective": "Enforce live owner/objective semantics, lane-wide mutation arbitration and truthful utilization without allowing Second Shift to redefine program jobs or cross owner lanes."
+    },
+    {"obligation_id":"HEADLESS-COMPUTE-DATA-SPREADSHEET-CONTRACT-001","owner_path":"SYSTEM_MASTER","state":"HOLD","objective":"Bind spreadsheet/math/user-data-analysis semantics over Core shared execution/artifact/data primitives after the current system-integration priorities permit."},
+    {"obligation_id":"HEADLESS-SOFTWARE-ENGINEERING-CONTRACT-001","owner_path":"SYSTEM_MASTER","state":"HOLD","objective":"Bind software-engineering and local-model tool semantics over Core execution/model infrastructure after the current system-integration priorities permit."},
+    {"obligation_id":"HEADLESS-RESEARCH-KNOWLEDGE-CONTRACT-001","owner_path":"SYSTEM_MASTER","state":"HOLD","objective":"Bind research/knowledge/external-information semantics over Core retrieval/evidence/connector primitives after the current system-integration priorities permit."},
+    {"obligation_id":"HEADLESS-CONNECTED-ACTION-AUTHORITY-CONTRACT-001","owner_path":"SYSTEM_MASTER","state":"HOLD","objective":"Bind email/calendar/automation/plugin user-action semantics over Core connector/action infrastructure after the current system-integration priorities permit."},
+    {"obligation_id":"HEADLESS-MEDIA-CAPABILITY-CONTRACT-001","owner_path":"SYSTEM_MASTER","state":"HOLD","objective":"Bind image/audio/video/media semantics over Core model/artifact/provider primitives after the current system-integration priorities permit."}
+  ],
+  "superseded_at_transition": [
+    {
+      "obligation_id": "DOCUMENTS-PROSE-ABSORPTION-INTEGRATION-001",
+      "final_state": "SUPERSEDED",
+      "reason": "Prose is the completed Book child specialist. Documents must not absorb Prose."
+    },
+    {
+      "obligation_id": "BOOK-DOCUMENTS-PROSE-SERVICE-INTEGRATION-PHASE-1-001",
+      "final_state": "SUPERSEDED",
+      "reason": "Book literary integration is BOOK <-> BOOK/PROSE. Documents remains a peer document/artifact system."
+    }
+  ],
+  "central_next_objective": "SYSTEM-MASTER-INTEGRATION-COORDINATION-001"
+}
