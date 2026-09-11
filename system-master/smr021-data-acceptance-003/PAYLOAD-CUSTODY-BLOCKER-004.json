@@ -1,0 +1,25 @@
+{
+  "record_id": "SMR021-GITHUB-PAYLOAD-CUSTODY-TRANSFER-004",
+  "owner_path": "SYSTEM_MASTER/CORE",
+  "data_authority": "DATA-001",
+  "state": "BLOCKED__FILE_CAPABLE_GITHUB_TRANSPORT_REQUIRED",
+  "branch": "core/smr021-data-acceptance-003",
+  "core_parent_sha": "d88a5952e93b5bae4ce96e4017f334aeb8abaa00",
+  "transport_archive": {
+    "name": "SMR021_DATA001_PORTABLE_ACCEPTED_SOURCE_TEST_CANDIDATE_003.tar.xz",
+    "bytes": 189936,
+    "sha256": "02ef249ca7c8a549e3a9a3d21a671f32b3d15432272b218f53c1844176150197",
+    "runnable_files": 447,
+    "runnable_manifest_sha256": "89c31fafd3134f6faf3496e6eddc3307f204b8d67cf5382e5c7d03fadeb042cd"
+  },
+  "required_payload_paths": [
+    "system-master/smr021-data-acceptance-003/source-payload/part-000.b64",
+    "system-master/smr021-data-acceptance-003/source-payload/part-001.b64",
+    "system-master/smr021-data-acceptance-003/source-payload/part-002.b64",
+    "system-master/smr021-data-acceptance-003/source-payload/part-003.b64",
+    "system-master/smr021-data-acceptance-003/RUNNABLE_SHA256_MANIFEST.txt"
+  ],
+  "admission_rule": "Do not run or claim hosted qualification until rebuild-and-verify.sh reconstructs the exact tar.xz SHA-256 and all 447 per-file hashes from one immutable Git commit.",
+  "after_custody": "Execute HOSTED-POSTGRES-QUALIFICATION-SPEC-003 against PostgreSQL 18.6 and pgJDBC 42.7.13 on the exact immutable candidate commit.",
+  "false_authority_flags": ["githubNativeCustodyPass","hostedPass","a01Pass","nativePass","productionAuthorized","promotionAuthorized"]
+}
