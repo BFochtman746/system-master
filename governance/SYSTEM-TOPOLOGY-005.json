@@ -1,0 +1,177 @@
+{
+  "topology_id": "SYSTEM-TOPOLOGY-005",
+  "effective_date": "2026-09-11",
+  "standing": "CANONICAL__PROGRAM_JOBS_LOCKED__PROSE_COMPLETE_RETIRED__BOOK_INTEGRATION_OWNER",
+  "supersedes": "governance/SYSTEM-TOPOLOGY-004.json",
+  "architecture_decision": "governance/ADR-0005-PROSE-TERMINAL-RETIREMENT-BOOK-INTEGRATION.md",
+  "retirement_record": "governance/retirements/PROSE-SYSTEM-RETIREMENT-001.json",
+  "program_job_lock": "governance/SYSTEM-PROGRAM-JOB-LOCK-001.json",
+  "system_completion_status": "governance/SYSTEM-COMPLETION-STATUS-001.json",
+  "product_root": {
+    "product_id": "SYSTEM_MASTER",
+    "canonical_name": "SYSTEM MASTER",
+    "classification": "PRODUCT_ROOT__SYSTEM_OF_SYSTEMS",
+    "owns_product_architecture": true,
+    "job": "Integrate the incomplete CORE, LEARNING, BOOK and DOCUMENTS systems into one product without taking their semantic ownership."
+  },
+  "canonical_internal_systems": [
+    {
+      "system_id": "CORE",
+      "canonical_name": "SYSTEM MASTER CORE / FOUNDATION & SPINE",
+      "classification": "SHARED_CORE_SYSTEM",
+      "parent_id": "SYSTEM_MASTER",
+      "control_ref": "system-master/control-v2",
+      "control_record": "system-master/control-v2/SYSTEM-MASTER-CORE-CONTROL-RECORD-003.md",
+      "completion": "INCOMPLETE"
+    },
+    {
+      "system_id": "LEARNING",
+      "canonical_name": "LEARNING SYSTEM",
+      "classification": "FIRST_CLASS_TOOL_SYSTEM",
+      "parent_id": "SYSTEM_MASTER",
+      "control_ref": "learning/control-v1",
+      "control_record": "learning/control-v1/LEARNING-CONTROL-RECORD-v4.md",
+      "completion": "INCOMPLETE"
+    },
+    {
+      "system_id": "BOOK",
+      "canonical_name": "BOOK SYSTEM",
+      "classification": "FIRST_CLASS_TOOL_SYSTEM",
+      "parent_id": "SYSTEM_MASTER",
+      "control_ref": "book-system/control-v1",
+      "control_record": "qualification/book-system/BOOK-SYSTEM-CONTROL-RECORD-011.json",
+      "completion": "INCOMPLETE",
+      "owns": [
+        "canonical book and manuscript state",
+        "end-to-end Book lifecycle",
+        "Book Workflow Orchestrator coordination",
+        "Book admission authority",
+        "Story Bible/canon truth",
+        "Book-specific literary workflow and author-decision routing",
+        "versioning and rollback",
+        "publication state",
+        "all remaining integration of preserved completed Prose capability into Book"
+      ],
+      "consumes": [
+        "preserved completed Prose capability evidence/artifacts as historical integration inputs",
+        "DOCUMENTS document/artifact services through admitted interfaces"
+      ]
+    },
+    {
+      "system_id": "DOCUMENTS",
+      "canonical_name": "DOCUMENTS SYSTEM",
+      "classification": "FIRST_CLASS_TOOL_SYSTEM",
+      "parent_id": "SYSTEM_MASTER",
+      "control_ref": "documents/control-v1",
+      "control_record": "documents/control-v1/DOCUMENTS-CONTROL-RECORD-002.md",
+      "completion": "INCOMPLETE",
+      "owns": [
+        "DOCX/PDF/PPTX/document artifact semantics",
+        "document structure/conversion/preservation/render/export contracts",
+        "generic reusable writing/content artifact semantics outside another system canonical state",
+        "Documents-specific qualification/evidence/state/Second Shift",
+        "document service interfaces consumed by peer systems"
+      ],
+      "does_not_own": [
+        "Book canonical manuscript/story-bible/lifecycle state",
+        "completed or historical Prose literary-specialist semantics",
+        "any remaining completed-Prose-to-Book integration work",
+        "Learning canonical learner/curriculum state",
+        "Core shared runtime/storage/connector implementation"
+      ]
+    }
+  ],
+  "peer_system_ids": ["CORE", "LEARNING", "BOOK", "DOCUMENTS"],
+  "child_system_ids": [],
+  "hierarchy_edges": [
+    ["SYSTEM_MASTER", "CORE"],
+    ["SYSTEM_MASTER", "LEARNING"],
+    ["SYSTEM_MASTER", "BOOK"],
+    ["SYSTEM_MASTER", "DOCUMENTS"]
+  ],
+  "retired_systems": [
+    {
+      "system_id": "PROSE",
+      "final_completion": "COMPLETE",
+      "lifecycle": "RETIRED_TERMINAL",
+      "historical_owner_path": "SYSTEM_MASTER/BOOK/PROSE",
+      "historical_control_ref": "literary-prose-engine-001",
+      "retirement_record": "governance/retirements/PROSE-SYSTEM-RETIREMENT-001.json",
+      "current_execution_lane": null,
+      "current_repair_lane": null,
+      "current_qualification_lane": null,
+      "current_telemetry_lane": null,
+      "successor_system": null,
+      "integration_owner": "SYSTEM_MASTER/BOOK",
+      "rule": "No new Prose work is dispatchable. Any genuinely open integration of preserved completed Prose capability is ordinary BOOK-owned work and must not resurrect a Prose execution domain."
+    }
+  ],
+  "execution_lane_owner_map": {
+    "SYSTEM-MASTER": "CORE",
+    "SYSTEM-MASTER-CONTINUITY": "CORE",
+    "SYSTEM-MASTER-ASSURANCE-RECON": "CORE",
+    "A01-CONTROL-PLANE": "CORE",
+    "LEARNING": "LEARNING",
+    "BOOK-SYSTEM": "BOOK",
+    "BOOK-EVAL-LEMONADE-001": "BOOK",
+    "DOCUMENTS": "DOCUMENTS",
+    "DOCUMENT-ARTIFACTS": "DOCUMENTS"
+  },
+  "legacy_route_dispositions": {
+    "LITERARY-PROSE": "RETIRED_NO_DISPATCH__BOOK_OWNS_ONLY_GENUINELY_OPEN_INTEGRATION_RESULT",
+    "SYSTEM_MASTER/BOOK/PROSE": "STALE_ARCHITECTURE_PENDING_RECONCILIATION__NO_ACTIVE_EXECUTION"
+  },
+  "historical_records": {
+    "prose_retirement": "governance/retirements/PROSE-SYSTEM-RETIREMENT-001.json",
+    "prose_child_restoration_attempt": "governance/ADR-0004-BOOK-PROSE-CHILD-RESTORATION.md",
+    "prose_child_restoration_current_effect": "SUPERSEDED_BY_ADR_0005",
+    "documents_absorption_attempt": "governance/ADR-0003-DOCUMENTS-PEER-SYSTEM-AND-PROSE-RETIREMENT.md",
+    "documents_absorption_current_effect": "SUPERSEDED_BY_ADR_0005",
+    "history_preserved": true
+  },
+  "explicit_non_systems": {
+    "A-01": "SHARED_QUALIFICATION_AND_CONTROL_INFRASTRUCTURE",
+    "ASSURANCE": "CORE_SUBSYSTEM_OR_EVIDENCE_FUNCTION",
+    "RECONCILIATION": "CORE_CONTROL_AND_EVIDENCE_FUNCTION",
+    "CONTINUITY": "CORE_SUBSYSTEM",
+    "FOUNDATION": "CORE_SCOPE",
+    "PLATFORM": "CORE_SCOPE",
+    "SECOND SHIFT": "EXECUTION_WORKER",
+    "QUALIFICATION": "EVIDENCE_PROCESS",
+    "RUNNER": "INFRASTRUCTURE",
+    "CHAT": "WORKING_SURFACE",
+    "PROGRAMMING_KNOWLEDGE_RECOVERY": "CORE_SUPPORT_PROGRAM"
+  },
+  "creation_rule": {
+    "implicit_system_creation_forbidden": true,
+    "branch_name_cannot_create_system": true,
+    "workstream_id_cannot_create_system": true,
+    "chat_or_task_title_cannot_create_system": true,
+    "qualification_id_cannot_create_system": true,
+    "new_first_class_system_requires_explicit_user_instruction": true,
+    "missing_second_shift_coverage_cannot_create_system": true,
+    "retired_system_cannot_be_auto_provisioned": true
+  },
+  "second_shift_autoprovision_rule": {
+    "compare_peer_system_ids_to_registry_owner_files": true,
+    "machine_resolvable_missing_peer_coverage_must_be_provisioned": true,
+    "may_create_new_system": false,
+    "may_resurrect_retired_system": false,
+    "active_peer_set": ["CORE", "LEARNING", "BOOK", "DOCUMENTS"]
+  },
+  "authority_order": [
+    "governance/CURRENT-AUTHORITY.json",
+    "governance/SYSTEM-PROGRAM-JOB-LOCK-001.json",
+    "governance/SYSTEM-COMPLETION-STATUS-001.json",
+    "governance/SYSTEM-TOPOLOGY-005.json",
+    "canonical system control record",
+    "system-owned state/obligation/delegation registry",
+    "qualification/evidence record",
+    "branch/workflow label",
+    "chat/task title"
+  ],
+  "cross_lane_rule": "CORE, LEARNING, BOOK and DOCUMENTS stay in their own product lanes and integrate upward through explicit System Master/shared interfaces without ownership transfer. There is no active Prose cross-lane exception.",
+  "canonical_write_rule": "SYSTEM_MASTER/BOOK is the sole canonical Book/manuscript owner. Retired Prose evidence, Documents, Research, evaluators and orchestration evidence cannot directly mutate canonical manuscript state.",
+  "completion_rule": "SYSTEM_MASTER, CORE, LEARNING, BOOK and DOCUMENTS remain incomplete until explicit product-level completion authority changes that standing. PROSE is historically complete and terminally retired, not active work.",
+  "qualification_rule": "Topology/control changes never transfer or broaden exact-SHA qualification, human, author, private-data, publication, production or native-platform authority."
+}
