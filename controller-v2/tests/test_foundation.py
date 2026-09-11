@@ -93,20 +93,24 @@ class FoundationTest(unittest.TestCase):
         tx = self.submit()
         self.drive_to_executing(tx)
         attempt1 = self.store.create_attempt(tx, 'test')
-        lease1, token1 = self.store.acquire_lease(
+        lease1, epoch1, token1 = self.store.acquire_lease(
             resource_key='repo:system-master:ref:main', transaction_id=tx, attempt_id=attempt1,
             holder_id='worker-a', ttl_ms=60_000, actor_id='test')
-        self.store.release_lease(lease1, token1, 'test')
-        self.store.conn.execute("UPDATE execution_attempts SET state='RUNNING' WHERE attempt_id=?", (attempt1,))
-        self.store.conn.execute("UPDATE execution_attempts SET state='FAILED' WHERE attempt_id=?", (attempt1,))
+        self.store.transition_attempt(attempt_id=attempt1, expected_state='CLAIMED', new_state='RUNNING',
+                                      actor_id='worker-a', lease_id=lease1, authority_epoch=epoch1, fencing_token=token1)
+        self.store.transition_attempt(attempt_id=attempt1, expected_state='RUNNING', new_state='FAILED',
+                                      actor_id='worker-a', lease_id=lease1, authority_epoch=epoch1,
+                                      fencing_token=token1, error_code='TEST_FAILURE')
+        self.store.release_lease(lease1, epoch1, token1, 'test')
         attempt2 = self.store.create_attempt(tx, 'test')
-        lease2, token2 = self.store.acquire_lease(
+        lease2, epoch2, token2 = self.store.acquire_lease(
             resource_key='repo:system-master:ref:main', transaction_id=tx, attempt_id=attempt2,
             holder_id='worker-b', ttl_ms=60_000, actor_id='test')
+        self.assertEqual(epoch2, epoch1)
         self.assertGreater(token2, token1)
         with self.assertRaises(StaleFence):
-            self.store.assert_fence(lease1, token1)
-        self.store.assert_fence(lease2, token2)
+            self.store.assert_fence(lease1, epoch1, token1)
+        self.store.assert_fence(lease2, epoch2, token2)
 
     def test_only_one_active_lease_per_resource(self):
         tx1 = self.submit(payload={'x': 1})
