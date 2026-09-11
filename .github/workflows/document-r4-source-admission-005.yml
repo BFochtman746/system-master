@@ -1,0 +1,288 @@
+name: Document R4 Git-Native Source Admission 005
+
+on:
+  push:
+    branches:
+      - documents/r4-github-native-source-admission-005
+    paths:
+      - .github/workflows/document-r4-source-admission-005.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: document-r4-source-admission-005
+  cancel-in-progress: false
+
+jobs:
+  admit:
+    runs-on: ubuntu-latest
+    env:
+      BASE_004_SHA: 0e645a49e36b7cd0dc05017571f91b999f0c70c0
+      CARRIER_SHA256: 77a6e2288d475865622bad4b2c66647a599c26a3899c6617b33d7b2b334855bd
+      CARRIER_BYTES: '301008'
+      SOURCE_ROWS: '225'
+      CONTRACT_BLOB: e171d148dfb4e267031b00d62740ef1ede6a0552
+      CHUNK_MANIFEST_BLOB: d9f04e99454f792424c24d82a01eae484b803990
+      CLOSURE_004_BLOB: 4708c1495b86c7c0cbf1c2790b43f43f6276dc7c
+      CHUNK_000_BLOB: 64034670dbbe18f6b629108bd1d9b1d8d81c4ac8
+      CHUNK_001_BLOB: 562ec2e184b6068e0f123c9e097d344a42c67dce
+      CHUNK_002_BLOB: 7b592c67e39a998301be7e5146533b842d724db2
+      CHUNK_003_BLOB: d67f828a421b0af4c75d3c5b6a2c25b8ca2a1c20
+      CHUNK_004_BLOB: 3518bf5ac92360b07f86c6107670da40f5830d1f
+    steps:
+      - name: Checkout exact admission subject
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Gate 1 - prove frozen 004 subject and READY absence
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = "documents/r4-github-native-source-admission-005"
+          test ! -e transport/document-r4/READY
+          git cat-file -e "$BASE_004_SHA^{commit}"
+          git diff --exit-code "$BASE_004_SHA" "$GITHUB_SHA" -- transport/document-r4
+          test "$(git rev-parse "$GITHUB_SHA:transport/document-r4/TRANSPORT-CONTRACT.json")" = "$CONTRACT_BLOB"
+          test "$(git rev-parse "$GITHUB_SHA:transport/document-r4/CHUNK-MANIFEST.json")" = "$CHUNK_MANIFEST_BLOB"
+          test "$(git rev-parse "$GITHUB_SHA:documents/reconciliation/DOCUMENTS-R4-GITHUB-NATIVE-PAYLOAD-STAGING-CLOSURE-RECEIPT-004.json")" = "$CLOSURE_004_BLOB"
+          test "$(git rev-parse "$GITHUB_SHA:transport/document-r4/chunk-000.b64")" = "$CHUNK_000_BLOB"
+          test "$(git rev-parse "$GITHUB_SHA:transport/document-r4/chunk-001.b64")" = "$CHUNK_001_BLOB"
+          test "$(git rev-parse "$GITHUB_SHA:transport/document-r4/chunk-002.b64")" = "$CHUNK_002_BLOB"
+          test "$(git rev-parse "$GITHUB_SHA:transport/document-r4/chunk-003.b64")" = "$CHUNK_003_BLOB"
+          test "$(git rev-parse "$GITHUB_SHA:transport/document-r4/chunk-004.b64")" = "$CHUNK_004_BLOB"
+          python3 - <<'PY'
+          import json, pathlib
+          s=json.loads(pathlib.Path('transport/document-r4/STAGING.json').read_text())
+          expected={
+            'status':'FULL_TRANSPORT_STAGED__NOT_ARMED',
+            'staged_chunks':5,
+            'staged_chunk_range':'000-004',
+            'staged_raw_bytes':301008,
+            'source_manifest_rows':225,
+            'ready_marker_present':False,
+            'historical_pass_transfer':False,
+            'github_native_source_custody':'BLOCKED',
+          }
+          for k,v in expected.items():
+            if s.get(k)!=v: raise SystemExit(f'STAGING precondition mismatch {k}: {s.get(k)!r} != {v!r}')
+          r=json.loads(pathlib.Path('documents/reconciliation/DOCUMENTS-R4-GITHUB-NATIVE-PAYLOAD-STAGING-CLOSURE-RECEIPT-004.json').read_text())
+          if r.get('standing')!='CLOSED_PASS__FULL_TRANSPORT_STAGED__NOT_ARMED': raise SystemExit('004 closure standing mismatch')
+          if r.get('remote_source_verification')!='225/225 exact path+size+SHA via canonical carrier reconstruction': raise SystemExit('004 evidence mismatch')
+          if r.get('ready_marker_present') is not False or r.get('historical_pass_transfer') is not False: raise SystemExit('004 nonclaim mismatch')
+          PY
+
+      - name: Gate 2 - verify tooling provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib, json, pathlib
+          c=json.loads(pathlib.Path('transport/document-r4/TRANSPORT-CONTRACT.json').read_text())
+          expected=c['tooling_provenance']
+          paths={
+            'build_transport_py_sha256':'tools/document-r4/build_transport.py',
+            'verify_and_extract_transport_py_sha256':'tools/document-r4/verify_and_extract_transport.py',
+            'test_transport_contract_py_sha256':'tools/document-r4/test_transport_contract.py',
+          }
+          for key,path in paths.items():
+            got=hashlib.sha256(pathlib.Path(path).read_bytes()).hexdigest()
+            if got!=expected[key]: raise SystemExit(f'tool provenance mismatch {path}: {got} != {expected[key]}')
+            print(f'{path}={got}')
+          PY
+
+      - name: Gate 3 - fresh exact-subject 225 of 225 qualification
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/r4-admission-005
+          mkdir -p /tmp/r4-admission-005/chunks
+          cp transport/document-r4/chunk-*.b64 /tmp/r4-admission-005/chunks/
+          python3 tools/document-r4/verify_and_extract_transport.py \
+            --contract transport/document-r4/TRANSPORT-CONTRACT.json \
+            --chunk-manifest transport/document-r4/CHUNK-MANIFEST.json \
+            --chunks /tmp/r4-admission-005/chunks \
+            --carrier-out /tmp/r4-admission-005/carrier.tar.xz \
+            --extract-out /tmp/r4-admission-005/extracted \
+            | tee /tmp/r4-admission-005/qualification.json
+          python3 - <<'PY'
+          import json, pathlib
+          q=json.loads(pathlib.Path('/tmp/r4-admission-005/qualification.json').read_text())
+          expected={'result':'PASS','carrier_sha256':'77a6e2288d475865622bad4b2c66647a599c26a3899c6617b33d7b2b334855bd','carrier_bytes':301008,'chunks_verified':5,'source_rows_verified':225}
+          if q!=expected: raise SystemExit(f'fresh qualification mismatch: {q!r}')
+          print('FRESH_QUALIFICATION=225/225_PASS')
+          PY
+
+      - name: Gate 4 - fail-closed adversarial qualification suite
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/document-r4/test_transport_contract.py \
+            --verifier tools/document-r4/verify_and_extract_transport.py \
+            --contract transport/document-r4/TRANSPORT-CONTRACT.json \
+            --chunk-manifest transport/document-r4/CHUNK-MANIFEST.json \
+            --chunks /tmp/r4-admission-005/chunks \
+            | tee /tmp/r4-admission-005/adversarial.txt
+          grep -qx 'ADVERSARIAL_CASES_PASS=12' /tmp/r4-admission-005/adversarial.txt
+          test -z "$(git status --porcelain)"
+
+      - name: Gate 5 - arm READY and admit exact Git subject
+        shell: bash
+        run: |
+          set -euo pipefail
+          SUBJECT_SHA="$GITHUB_SHA"
+          SUBJECT_TREE="$(git show -s --format=%T "$SUBJECT_SHA")"
+          export SUBJECT_SHA SUBJECT_TREE
+          python3 - <<'PY'
+          import json, os, pathlib
+          subject=os.environ['SUBJECT_SHA']; tree=os.environ['SUBJECT_TREE']; run=os.environ['GITHUB_RUN_ID']
+          p=pathlib.Path('transport/document-r4/STAGING.json')
+          s=json.loads(p.read_text())
+          for k,v in {
+            'status':'FULL_TRANSPORT_STAGED__NOT_ARMED','staged_chunks':5,'staged_chunk_range':'000-004',
+            'staged_raw_bytes':301008,'source_manifest_rows':225,'ready_marker_present':False,
+            'historical_pass_transfer':False,'github_native_source_custody':'BLOCKED'
+          }.items():
+            if s.get(k)!=v: raise SystemExit(f'pre-arm drift {k}')
+          s['status']='FULL_TRANSPORT_ADMITTED__READY_ARMED'
+          s['ready_marker_present']=True
+          s['github_native_source_custody']='PASS'
+          s['admission_work_package']='DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-ADMISSION-005'
+          s['admitted_subject_sha']=subject
+          s['admitted_subject_tree_sha']=tree
+          s['fresh_qualification']={
+            'result':'PASS','chunks_verified':5,'source_rows_verified':225,
+            'carrier_sha256':'77a6e2288d475865622bad4b2c66647a599c26a3899c6617b33d7b2b334855bd',
+            'historical_pass_transfer':False,'workflow_run_id':int(run)
+          }
+          s['rule']='READY is armed only by DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-ADMISSION-005 after fresh exact-subject 225/225 qualification. Canonical chunks remain immutable; historical qualification PASS was not transferred.'
+          p.write_text(json.dumps(s,indent=2)+'\n')
+          ready={
+            'ready_id':'DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-ADMISSION-005',
+            'state':'READY_ARMED',
+            'admitted_subject_sha':subject,
+            'admitted_subject_tree_sha':tree,
+            'carrier_sha256':'77a6e2288d475865622bad4b2c66647a599c26a3899c6617b33d7b2b334855bd',
+            'carrier_bytes':301008,'chunks_verified':5,'source_rows_verified':225,
+            'fresh_qualification':True,'historical_pass_transfer':False,
+            'workflow_run_id':int(run)
+          }
+          pathlib.Path('transport/document-r4/READY').write_text(json.dumps(ready,indent=2)+'\n')
+          evidence={
+            'evidence_id':'DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-ADMISSION-EVIDENCE-005',
+            'work_package':'DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-ADMISSION-005',
+            'admission_subject_sha':subject,'admission_subject_tree_sha':tree,
+            'base_004_sha':'0e645a49e36b7cd0dc05017571f91b999f0c70c0',
+            'workflow_run_id':int(run),
+            'qualification':{'result':'PASS','fresh':True,'chunks_verified':5,'source_rows_verified':225,'adversarial_cases_pass':12},
+            'carrier':{'bytes':301008,'sha256':'77a6e2288d475865622bad4b2c66647a599c26a3899c6617b33d7b2b334855bd'},
+            'chunk_git_blobs':[
+              '64034670dbbe18f6b629108bd1d9b1d8d81c4ac8','562ec2e184b6068e0f123c9e097d344a42c67dce',
+              '7b592c67e39a998301be7e5146533b842d724db2','d67f828a421b0af4c75d3c5b6a2c25b8ca2a1c20',
+              '3518bf5ac92360b07f86c6107670da40f5830d1f'],
+            'historical_pass_transfer':False,'ready_armed':True,'github_native_source_custody':'PASS'
+          }
+          pathlib.Path('documents/reconciliation/DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-ADMISSION-EVIDENCE-005.json').write_text(json.dumps(evidence,indent=2)+'\n')
+          PY
+          mapfile -t changed < <(git status --porcelain | sed 's/^...//' | sort)
+          printf '%s\n' "${changed[@]}"
+          expected=$(printf '%s\n' \
+            documents/reconciliation/DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-ADMISSION-EVIDENCE-005.json \
+            transport/document-r4/READY \
+            transport/document-r4/STAGING.json | sort)
+          actual=$(printf '%s\n' "${changed[@]}" | sort)
+          test "$actual" = "$expected"
+          git config user.name system-master-admission-bot
+          git config user.email system-master-admission-bot@users.noreply.github.com
+          git add documents/reconciliation/DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-ADMISSION-EVIDENCE-005.json transport/document-r4/READY transport/document-r4/STAGING.json
+          git commit -m 'documents: admit exact R4 Git subject and arm READY (005)'
+          ADMISSION_COMMIT="$(git rev-parse HEAD)"
+          echo "ADMISSION_COMMIT=$ADMISSION_COMMIT" >> "$GITHUB_ENV"
+          git push origin "HEAD:$GITHUB_REF_NAME"
+
+      - name: Gate 6 - independently verify remote admission commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin "$GITHUB_REF_NAME"
+          REMOTE="$(git rev-parse FETCH_HEAD)"
+          test "$REMOTE" = "$ADMISSION_COMMIT"
+          test "$(git rev-parse "$REMOTE:transport/document-r4/chunk-000.b64")" = "$CHUNK_000_BLOB"
+          test "$(git rev-parse "$REMOTE:transport/document-r4/chunk-001.b64")" = "$CHUNK_001_BLOB"
+          test "$(git rev-parse "$REMOTE:transport/document-r4/chunk-002.b64")" = "$CHUNK_002_BLOB"
+          test "$(git rev-parse "$REMOTE:transport/document-r4/chunk-003.b64")" = "$CHUNK_003_BLOB"
+          test "$(git rev-parse "$REMOTE:transport/document-r4/chunk-004.b64")" = "$CHUNK_004_BLOB"
+          git cat-file -e "$REMOTE:transport/document-r4/READY"
+          git show "$REMOTE:transport/document-r4/STAGING.json" > /tmp/r4-admission-005/remote-staging.json
+          git show "$REMOTE:transport/document-r4/READY" > /tmp/r4-admission-005/remote-ready.json
+          python3 - <<'PY'
+          import json, os, pathlib
+          s=json.loads(pathlib.Path('/tmp/r4-admission-005/remote-staging.json').read_text())
+          r=json.loads(pathlib.Path('/tmp/r4-admission-005/remote-ready.json').read_text())
+          if s.get('status')!='FULL_TRANSPORT_ADMITTED__READY_ARMED' or s.get('github_native_source_custody')!='PASS' or s.get('ready_marker_present') is not True: raise SystemExit('remote admitted STAGING mismatch')
+          if s.get('admitted_subject_sha')!=os.environ['GITHUB_SHA']: raise SystemExit('remote subject binding mismatch')
+          if r.get('state')!='READY_ARMED' or r.get('admitted_subject_sha')!=os.environ['GITHUB_SHA'] or r.get('source_rows_verified')!=225: raise SystemExit('remote READY mismatch')
+          if r.get('historical_pass_transfer') is not False: raise SystemExit('historical PASS transfer forbidden')
+          PY
+
+      - name: Gate 7 - seal admission closure receipt
+        shell: bash
+        run: |
+          set -euo pipefail
+          SUBJECT_TREE="$(git show -s --format=%T "$GITHUB_SHA")"
+          export SUBJECT_TREE
+          python3 - <<'PY'
+          import json, os, pathlib
+          subject=os.environ['GITHUB_SHA']; tree=os.environ['SUBJECT_TREE']; admission=os.environ['ADMISSION_COMMIT']; run=int(os.environ['GITHUB_RUN_ID'])
+          receipt={
+            'receipt_id':'DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-ADMISSION-CLOSURE-RECEIPT-005',
+            'date':'2026-09-11','owner':'SYSTEM_MASTER/DOCUMENTS','work_package':'DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-ADMISSION-005',
+            'standing':'CLOSED_PASS__GITHUB_NATIVE_SOURCE_CUSTODY_ADMITTED__READY_ARMED',
+            'base_004_sha':'0e645a49e36b7cd0dc05017571f91b999f0c70c0',
+            'admission_subject_sha':subject,'admission_subject_tree_sha':tree,'admission_commit':admission,
+            'workflow_run_id':run,'fresh_qualification':{'result':'PASS','chunks_verified':'5/5','source_rows_verified':'225/225 exact path+size+SHA','adversarial_cases_pass':'12/12'},
+            'carrier':{'bytes':301008,'sha256':'77a6e2288d475865622bad4b2c66647a599c26a3899c6617b33d7b2b334855bd'},
+            'remote_chunk_git_blobs_verified':'5/5','ready_marker_present':True,'staging_status':'FULL_TRANSPORT_ADMITTED__READY_ARMED',
+            'github_native_source_custody':'PASS','historical_pass_transfer':False,'payload_mutated_during_admission':False,
+            'nonclaims':['HISTORICAL_QUALIFICATION_TRANSFER','DOCUMENTS_COMPLETE'],
+            'next_permitted_operation':'Use the admitted exact R4 Git subject as source custody for the next Documents implementation/qualification operation; any payload change requires a new superseding custody admission.'
+          }
+          pathlib.Path('documents/reconciliation/DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-ADMISSION-CLOSURE-RECEIPT-005.json').write_text(json.dumps(receipt,indent=2)+'\n')
+          md=f'''# DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-ADMISSION-005\n\nStatus: CLOSED / PASS — GITHUB-NATIVE SOURCE CUSTODY ADMITTED / READY ARMED  \nOwner: SYSTEM_MASTER/DOCUMENTS  \nDate: 2026-09-11\n\n## Exact admitted subject\n\n- Git subject: `{subject}`\n- Git tree: `{tree}`\n- Admission commit: `{admission}`\n- Workflow run: `{run}`\n\n## Fresh qualification\n\n- Canonical chunks: 5/5 exact remote Git blobs\n- Carrier SHA-256: `77a6e2288d475865622bad4b2c66647a599c26a3899c6617b33d7b2b334855bd`\n- Source identity: 225/225 exact path + size + SHA\n- Fail-closed adversarial transport cases: 12/12\n- Historical PASS transferred: false\n\n## Admission result\n\n`transport/document-r4/READY` is armed. `transport/document-r4/STAGING.json` records `FULL_TRANSPORT_ADMITTED__READY_ARMED` and GitHub-native source custody `PASS`. The five canonical payload chunks were not mutated by admission.\n\n## Nonclaims\n\nThis package does not claim historical qualification transfer or Documents module completion. Any future mutation of the admitted payload invalidates this custody binding and requires a new admission.\n'''
+          pathlib.Path('documents/reconciliation/DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-ADMISSION-005.md').write_text(md)
+          PY
+          git add documents/reconciliation/DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-ADMISSION-CLOSURE-RECEIPT-005.json documents/reconciliation/DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-ADMISSION-005.md
+          git commit -m 'documents: seal R4 Git-native source admission 005 closure'
+          CLOSURE_COMMIT="$(git rev-parse HEAD)"
+          echo "CLOSURE_COMMIT=$CLOSURE_COMMIT" >> "$GITHUB_ENV"
+          git push origin "HEAD:$GITHUB_REF_NAME"
+
+      - name: Gate 8 - final remote closure verification
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin "$GITHUB_REF_NAME"
+          REMOTE="$(git rev-parse FETCH_HEAD)"
+          test "$REMOTE" = "$CLOSURE_COMMIT"
+          test "$(git rev-parse "$REMOTE:transport/document-r4/chunk-000.b64")" = "$CHUNK_000_BLOB"
+          test "$(git rev-parse "$REMOTE:transport/document-r4/chunk-001.b64")" = "$CHUNK_001_BLOB"
+          test "$(git rev-parse "$REMOTE:transport/document-r4/chunk-002.b64")" = "$CHUNK_002_BLOB"
+          test "$(git rev-parse "$REMOTE:transport/document-r4/chunk-003.b64")" = "$CHUNK_003_BLOB"
+          test "$(git rev-parse "$REMOTE:transport/document-r4/chunk-004.b64")" = "$CHUNK_004_BLOB"
+          git cat-file -e "$REMOTE:transport/document-r4/READY"
+          git cat-file -e "$REMOTE:documents/reconciliation/DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-ADMISSION-CLOSURE-RECEIPT-005.json"
+          git show "$REMOTE:documents/reconciliation/DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-ADMISSION-CLOSURE-RECEIPT-005.json" > /tmp/r4-admission-005/final-receipt.json
+          python3 - <<'PY'
+          import json, os, pathlib
+          r=json.loads(pathlib.Path('/tmp/r4-admission-005/final-receipt.json').read_text())
+          if r.get('standing')!='CLOSED_PASS__GITHUB_NATIVE_SOURCE_CUSTODY_ADMITTED__READY_ARMED': raise SystemExit('closure standing mismatch')
+          if r.get('admission_subject_sha')!=os.environ['GITHUB_SHA']: raise SystemExit('closure subject mismatch')
+          if r.get('admission_commit')!=os.environ['ADMISSION_COMMIT']: raise SystemExit('closure admission commit mismatch')
+          if r.get('github_native_source_custody')!='PASS' or r.get('ready_marker_present') is not True: raise SystemExit('closure custody mismatch')
+          if r.get('payload_mutated_during_admission') is not False or r.get('historical_pass_transfer') is not False: raise SystemExit('closure nonclaim mismatch')
+          print('DOCUMENTS_R4_SOURCE_ADMISSION_005=CLOSED_PASS')
+          PY
