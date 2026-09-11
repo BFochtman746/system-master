@@ -7,6 +7,7 @@ const CHECKPOINT_PATH='checkpoint.json';
 const SEGMENT_PREFIX='segments/';
 const CHECKPOINT_SCHEMA='controller.journal.checkpoint.v1';
 const PROTOCOL_SCHEMA='controller.journal.protocol.v1';
+const SEGMENT_PATH_RE=/^segments\/(\d{20})-(\d{20})-([0-9a-f]{64})\.jsonl$/;
 
 function fail(code,message,details={}){throw new ControllerError(code,message,details);}
 function pad(n){return String(n).padStart(20,'0');}
@@ -29,25 +30,26 @@ function validateCheckpoint(cp){
   if(cp.size===0&&cp.head_digest!==null)fail('REMOTE_CHECKPOINT_INVALID','empty checkpoint must have null head');
   if(cp.size>0&&!/^[0-9a-f]{64}$/.test(cp.head_digest??''))fail('REMOTE_CHECKPOINT_INVALID','head digest invalid');
   if(!cp.stream_heads||typeof cp.stream_heads!=='object'||Array.isArray(cp.stream_heads))fail('REMOTE_CHECKPOINT_INVALID','stream_heads object required');
+  if(cp.size===0&&cp.last_segment!==null)fail('REMOTE_CHECKPOINT_INVALID','empty checkpoint cannot name a segment');
+  if(cp.size>0&&(!cp.last_segment||typeof cp.last_segment!=='object'))fail('REMOTE_CHECKPOINT_INVALID','non-empty checkpoint requires last_segment');
   return cp;
-}
-
-function validateProtocol(p){
-  if(!p||p.schema!==PROTOCOL_SCHEMA||p.protocol_version!=='1'||p.event_schema!=='controller.event.v1'||p.digest!=='sha256'||p.segment_encoding!=='canonical-jsonl')fail('REMOTE_PROTOCOL_MISMATCH','journal protocol mismatch');
-  return p;
 }
 
 function deterministicSegment(entries){return entries.map(e=>canonicalize(e)).join('\n')+'\n';}
 function segmentPath(start,end,digest){return `${SEGMENT_PREFIX}${pad(start)}-${pad(end)}-${digest}.jsonl`;}
 
 export class GitDataJournalAdapter {
-  constructor(client,{ref='heads/journal',repositoryIdentity='UNSET',maxConflictRetries=4}={}){
-    this.client=client;this.ref=ref;this.repositoryIdentity=repositoryIdentity;this.maxConflictRetries=maxConflictRetries;
+  constructor(client,{ref='heads/journal',repositoryIdentity=null,subjectRepositoryIdentity=null,maxConflictRetries=4}={}){
+    this.client=client;this.ref=ref;this.repositoryIdentity=repositoryIdentity;this.subjectRepositoryIdentity=subjectRepositoryIdentity;this.maxConflictRetries=maxConflictRetries;
     if(!client)fail('GIT_CLIENT_REQUIRED','Git data client required');
+    if(typeof repositoryIdentity!=='string'||repositoryIdentity.length===0)fail('JOURNAL_REPOSITORY_ID_REQUIRED','stable journal repository identity required');
+    if(subjectRepositoryIdentity&&repositoryIdentity===subjectRepositoryIdentity)fail('JOURNAL_SUBJECT_REPOSITORY_FORBIDDEN','journal repository must be independent from subject repository');
+    if(typeof ref!=='string'||!ref.startsWith('heads/'))fail('JOURNAL_REF_INVALID','journal ref must be a branch ref without refs/ prefix');
   }
 
   protocolDescriptor(){return {schema:PROTOCOL_SCHEMA,protocol_version:'1',event_schema:'controller.event.v1',digest:'sha256',segment_encoding:'canonical-jsonl'};}
   emptyCheckpoint(){return {schema:CHECKPOINT_SCHEMA,protocol_version:'1',size:0,head_digest:null,stream_heads:{},last_segment:null,previous_git_commit_oid:null};}
+  witnessFrom(state){return {repository_identity:this.repositoryIdentity,ref:this.ref,commit_oid:state.commit_oid,size:state.checkpoint.size,head_digest:state.checkpoint.head_digest};}
 
   async initialize(){
     const existing=await this.client.getRef(this.ref).catch(e=>e?.status===404?null:Promise.reject(e));
@@ -65,8 +67,16 @@ export class GitDataJournalAdapter {
     const tree=await this.client.getTree(commit.tree);
     const protocolOid=tree.files?.[PROTOCOL_PATH],checkpointOid=tree.files?.[CHECKPOINT_PATH];
     if(!protocolOid||!checkpointOid)fail('REMOTE_JOURNAL_INCOMPLETE','protocol/checkpoint missing from journal tree');
-    validateProtocol(parseJson(await this.client.getBlob(protocolOid),'REMOTE_PROTOCOL_INVALID'));
+    const protocol=parseJson(await this.client.getBlob(protocolOid),'REMOTE_PROTOCOL_INVALID');
+    if(canonicalize(protocol)!==canonicalize(this.protocolDescriptor()))fail('REMOTE_PROTOCOL_MISMATCH','journal protocol bytes/semantics changed');
     const checkpoint=validateCheckpoint(parseJson(await this.client.getBlob(checkpointOid),'REMOTE_CHECKPOINT_INVALID'));
+    const parents=commit.parents??[];
+    if(checkpoint.size===0){
+      if(parents.length!==0||checkpoint.previous_git_commit_oid!==null)fail('REMOTE_JOURNAL_NONLINEAR','initial journal commit must be parentless');
+    }else{
+      if(parents.length!==1)fail('REMOTE_JOURNAL_NONLINEAR','journal append commit must have exactly one parent');
+      if(checkpoint.previous_git_commit_oid!==parents[0])fail('REMOTE_CHECKPOINT_PARENT_MISMATCH','checkpoint previous commit does not equal Git parent');
+    }
     return {commit_oid:commitOid,commit,tree,checkpoint};
   }
 
@@ -78,13 +88,25 @@ export class GitDataJournalAdapter {
   async _allEntries(state){
     const paths=Object.keys(state.tree.files??{}).filter(p=>p.startsWith(SEGMENT_PREFIX)).sort();
     const entries=[];
+    let lastMeta=null;
     for(const path of paths){
-      const oid=state.tree.files[path];
-      const bytes=await this.client.getBlob(oid);
+      const match=SEGMENT_PATH_RE.exec(path);
+      if(!match)fail('REMOTE_SEGMENT_PATH_INVALID',`invalid segment path: ${path}`);
+      const expectedStart=Number(match[1]),expectedEnd=Number(match[2]),pathDigest=match[3];
+      if(!Number.isSafeInteger(expectedStart)||!Number.isSafeInteger(expectedEnd)||expectedStart<1||expectedEnd<expectedStart)fail('REMOTE_SEGMENT_PATH_INVALID',`invalid segment range: ${path}`);
+      const blobOid=state.tree.files[path];
+      const bytes=await this.client.getBlob(blobOid);
       const digest=sha256(bytes);
-      if(!path.endsWith(`-${digest}.jsonl`))fail('REMOTE_SEGMENT_DIGEST_MISMATCH',`segment path digest mismatch: ${path}`);
-      for(const line of bytes.split('\n')){if(!line)continue;entries.push(parseJson(line,'REMOTE_SEGMENT_INVALID'));}
+      if(digest!==pathDigest)fail('REMOTE_SEGMENT_DIGEST_MISMATCH',`segment path digest mismatch: ${path}`);
+      const segment=[];
+      for(const line of bytes.split('\n')){if(!line)continue;segment.push(parseJson(line,'REMOTE_SEGMENT_INVALID'));}
+      if(segment.length===0)fail('REMOTE_SEGMENT_EMPTY',`segment has no entries: ${path}`);
+      if(segment[0].journal_position!==expectedStart||segment.at(-1).journal_position!==expectedEnd||segment.length!==expectedEnd-expectedStart+1)fail('REMOTE_SEGMENT_RANGE_MISMATCH',`segment path range does not match contents: ${path}`);
+      entries.push(...segment);
+      lastMeta={start:expectedStart,end:expectedEnd,sha256:digest,path};
     }
+    if(state.checkpoint.size===0){if(paths.length!==0)fail('REMOTE_CHECKPOINT_SEGMENT_MISMATCH','empty checkpoint has segment files');}
+    else if(canonicalize(lastMeta)!==canonicalize(state.checkpoint.last_segment))fail('REMOTE_CHECKPOINT_SEGMENT_MISMATCH','checkpoint last_segment does not match final segment');
     return entries;
   }
 
@@ -106,14 +128,15 @@ export class GitDataJournalAdapter {
 
   async assertExtendsWitness(headOid,witness){
     if(!witness||typeof witness.commit_oid!=='string')fail('LOCAL_WITNESS_INVALID','witness commit_oid required');
+    if(witness.repository_identity!==this.repositoryIdentity||witness.ref!==this.ref)fail('LOCAL_WITNESS_IDENTITY_MISMATCH','witness belongs to a different repository/ref');
     const witnessState=await this._readCommitState(witness.commit_oid).catch(()=>fail('LOCAL_WITNESS_NOT_FOUND','witness commit unavailable'));
     if(witnessState.checkpoint.size!==witness.size||witnessState.checkpoint.head_digest!==witness.head_digest)fail('LOCAL_WITNESS_MISMATCH','stored witness does not match its Git commit');
     let cursor=headOid,steps=0;
     while(cursor&&steps<100000){
       if(cursor===witness.commit_oid)return true;
       const c=await this.client.getCommit(cursor);
-      if((c.parents??[]).length>1)fail('REMOTE_JOURNAL_NONLINEAR','journal commit has multiple parents');
-      cursor=c.parents?.[0]??null;steps+=1;
+      if((c.parents??[]).length!==1)fail('REMOTE_JOURNAL_NONLINEAR','non-root journal history must remain single-parent');
+      cursor=c.parents[0];steps+=1;
     }
     fail('REMOTE_JOURNAL_ROLLBACK_OR_FORK','remote head does not extend local witness');
   }
@@ -170,7 +193,7 @@ export class GitDataJournalAdapter {
         return {duplicate:false,commit_oid:candidate,checkpoint:clone(checkpoint),positions:{start:checkpoint.last_segment.start,end:checkpoint.last_segment.end}};
       }catch(error){
         const observed=await this.client.getRef(this.ref).catch(()=>null);
-        if(observed===candidate){return {duplicate:false,recovered_after_error:true,commit_oid:candidate,checkpoint:clone(checkpoint),positions:{start:checkpoint.last_segment.start,end:checkpoint.last_segment.end}};}
+        if(observed===candidate)return {duplicate:false,recovered_after_error:true,commit_oid:candidate,checkpoint:clone(checkpoint),positions:{start:checkpoint.last_segment.start,end:checkpoint.last_segment.end}};
         if(observed){
           const observedState=await this.verifyHead({expectedWitness:witness});
           const included=this._containsExactBatch(observedState.entries,events);
