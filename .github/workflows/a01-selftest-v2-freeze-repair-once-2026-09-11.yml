@@ -29,7 +29,7 @@ jobs:
       - name: Rebind to latest main
         run: git pull --ff-only origin main
 
-      - name: Repair stale v1 legacy-freeze invariant and retrigger fresh A-01 selftest
+      - name: Repair stale v1 legacy-freeze invariant
         shell: bash
         run: |
           node - <<'NODE'
@@ -53,21 +53,16 @@ jobs:
           if (s.includes(oldAssert)) s = s.replace(oldAssert, newAssert);
           else if (!s.includes("legacy direct-workflow freeze generation")) throw new Error('LEGACY_V1_ASSERTION_NOT_FOUND');
           fs.writeFileSync(selftestPath, s);
-
-          const launcherPath = '.github/workflows/a01-current-control-plane-selftest-once-2026-09-11.yml';
-          let launcher = fs.readFileSync(launcherPath, 'utf8');
-          if (!launcher.includes('# retry-generation: 2')) launcher += '\n# retry-generation: 2\n';
-          fs.writeFileSync(launcherPath, launcher);
           NODE
           node --check .github/scripts/a01-control-plane-selftest.js
-          rm -f .github/workflows/a01-selftest-v2-freeze-repair-once-2026-09-11.yml
 
-      - name: Commit exact selftest repair
+      - name: Commit script-only correction
         shell: bash
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add .github/scripts/a01-control-plane-selftest.js .github/workflows/a01-current-control-plane-selftest-once-2026-09-11.yml .github/workflows/a01-selftest-v2-freeze-repair-once-2026-09-11.yml
+          git add .github/scripts/a01-control-plane-selftest.js
+          git diff --cached --quiet && exit 0
           git commit -m 'Repair stale A-01 v1 legacy-freeze selftest invariant'
           pushed=false
           for attempt in 1 2 3 4 5; do
