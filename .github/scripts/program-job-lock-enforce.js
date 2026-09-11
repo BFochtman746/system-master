@@ -34,6 +34,10 @@ assert(authority.prior_completion_ledger === 'governance/COMPLETION-LEDGER-001.j
 assert(authority.obligation_registry === 'governance/WORK-OBLIGATION-REGISTRY-008.json', 'CURRENT-AUTHORITY must select obligation registry 008');
 assert(authority.expectation_registry === 'governance/EXPECTATION-REGISTRY-004.json', 'CURRENT-AUTHORITY must select expectation registry 004');
 assert(authority.central_next_objective === 'SYSTEM-MASTER-INTEGRATION-COORDINATION-001', 'System Master integration coordination must be central objective');
+assert(authority.core_control_record === 'system-master/control-v2/SYSTEM-MASTER-CORE-CONTROL-RECORD-002.md', 'CURRENT-AUTHORITY must select Core Control 002');
+assert(authority.learning_control_record === 'learning/control-v1/LEARNING-CONTROL-RECORD-v3.md', 'CURRENT-AUTHORITY must select Learning Control v3');
+assert(authority.book_control_record === 'qualification/book-system/BOOK-SYSTEM-CONTROL-RECORD-010.json', 'CURRENT-AUTHORITY must select Book Control 010');
+assert(authority.book_current_state_record === 'qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-040.json', 'CURRENT-AUTHORITY must select Book State 040');
 
 const topology = readJson(authority.topology);
 assert(topology.topology_id === 'SYSTEM-TOPOLOGY-004', `unexpected topology ${topology.topology_id}`);
@@ -109,6 +113,16 @@ for (const d of owners.DOCUMENTS.active_delegations || []) {
   assert(!/PROSE/i.test(`${d.delegation_id || ''} ${d.objective_id || ''} ${d.obligation_id || ''} ${d.parent_objective_id || ''}`), 'Documents active delegation must not be Prose work');
 }
 
+for (const lane of ['CORE','LEARNING','BOOK','DOCUMENTS']) {
+  const snapshot = obligations.owner_head_snapshot?.[lane];
+  assert(typeof snapshot === 'string' && /^[0-9a-f]{40}$/.test(snapshot), `missing/invalid owner snapshot ${lane}`);
+  assert(owners[lane].last_known_control_head === snapshot, `${lane} delegation last-known head must equal obligation snapshot`);
+  for (const d of owners[lane].active_delegations || []) {
+    assert(d.valid_for_control_head === snapshot, `${lane} active delegation ${d.delegation_id} must bind obligation snapshot head`);
+  }
+}
+assert(obligations.owner_head_snapshot?.PROSE_CHILD === 'b3b0909bc6720a3bc5938de29d4bf3bde9dd4e05', 'completed Prose child snapshot must remain exact final completed control head');
+
 const bootstrap = readJson(authority.morning_bootstrap_schema);
 assert(bootstrap.compatibility_focus_roles?.PROSE?.startsWith('BOOK@SYSTEM_MASTER/BOOK/PROSE'), 'morning bootstrap must route Prose focus through BOOK');
 assert(Object.keys(bootstrap.retired_chat_roles || {}).length === 0, 'morning bootstrap must not classify active Book-child Prose as a retired chat role');
@@ -126,5 +140,6 @@ assert(chatStart.includes('Documents must not absorb'), 'chat startup must forbi
 console.log('PROGRAM_JOB_LOCK_ENFORCEMENT_PASS');
 console.log('completion=PROSE_ONLY');
 console.log('central_objective=SYSTEM-MASTER-INTEGRATION-COORDINATION-001');
+console.log('heads=OWNER_SNAPSHOT_MATCH');
 console.log('lanes=CORE,LEARNING,BOOK,DOCUMENTS;PROSE->BOOK');
 console.log('startup=JOB_LOCKED');
