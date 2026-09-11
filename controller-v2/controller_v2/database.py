@@ -413,7 +413,7 @@ class ControllerStore(_BaseControllerStore):
             receipt_id = new_uuid7()
             con.execute(
                 "INSERT INTO evidence_receipts(receipt_id,transaction_id,subject_id,receipt_kind,digest_algorithm,digest,storage_uri,manifest_json,created_at_ms) "
-                "VALUES(?,?,?,'QUALIFICATION','sha256',?,?,?,?,?)",
+                "VALUES(?,?,?,'QUALIFICATION','sha256',?,?,?,?)",
                 (receipt_id, q["transaction_id"], q["subject_id"], digest, storage_uri, manifest_json, ts),
             )
             con.execute(
