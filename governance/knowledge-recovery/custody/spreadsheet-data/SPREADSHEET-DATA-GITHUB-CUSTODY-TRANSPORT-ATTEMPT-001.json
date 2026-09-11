@@ -1,0 +1,52 @@
+{
+  "attempt_id": "SPREADSHEET-DATA-GITHUB-CUSTODY-TRANSPORT-ATTEMPT-001",
+  "effective_date": "2026-09-11",
+  "owner_path": "SYSTEM_MASTER/CORE",
+  "objective_id": "SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001",
+  "delegation_id": "SECOND-SHIFT-CORE-KNOWLEDGE-RECOVERY-PROGRAMMING-001",
+  "branch": "core/kr001-spreadsheet-data-custody-20260911",
+  "architecture_effect": "NONE__RECOVERY_AND_CUSTODY_ONLY__NO_NEW_SYSTEM",
+  "source_set": [
+    {"name":"EXCEL-QUALIFICATION-PACK_v1.0.md","library_file_id":"file_000000004290822fa757d689f603432c","version_id":"1","size_bytes":9738,"sha256":"df353e38a9e5f1a6d9853fe235da8ce937af2f1294bfc6a8bf559e32dcba158c","local_git_blob_sha":"aa30d7517d03e06ca1e8d889001ba94dd21dec60"},
+    {"name":"EXCEL-QUAL-RESEARCH-RECEIPT_v1.0.yaml","library_file_id":"file_000000003468822f8dba14ff73fb7e7e","version_id":"1","size_bytes":5115,"sha256":"a7ac247ffc9fe666afbe4c523ed33ba5600d769e559a7fa573ff0f4254b2ab3e"},
+    {"name":"EXCEL-QUALIFICATION-EVIDENCE_v1.0.schema.json","library_file_id":"file_00000000b11c822f807a30ffcb1e6f39","version_id":"1","size_bytes":5589,"sha256":"fcc08f1014b068228fc69e9b127fdd0b7107c8a415dbd7fe570b21d27fd54d64"},
+    {"name":"EXCEL-QUALIFICATION-POLICY_v1.0.yaml","library_file_id":"file_00000000485c822fb77771ef508ce557","version_id":"1","size_bytes":3481,"sha256":"3e019885261fda0e60b955a9ed8e747bb02f55e5329646012432bce897c703b7","local_git_blob_sha":"2d8c974b1608210bbeeb51f9cd70837249e023a3"},
+    {"name":"EXCEL-QUALIFICATION-RECORD_v1.0.schema.json","library_file_id":"file_00000000b8a0822fbce99c78dc95d470","version_id":"1","size_bytes":18226,"sha256":"082662a1c0580f7649f6ff8397faa8cbfb2d3e6eb1965fe3dc4f055973af2ab0"}
+  ],
+  "source_verification": {
+    "files_materialized": 5,
+    "bytes_materialized": 42149,
+    "sha256_matches_seed": "5_OF_5",
+    "size_matches_seed": "5_OF_5",
+    "source_identity_status": "EXACT_LIBRARY_BYTES_VERIFIED"
+  },
+  "transport_probe": {
+    "verified_exact_git_objects": [
+      {"source":"EXCEL-QUALIFICATION-POLICY_v1.0.yaml","scope":"FULL_FILE","git_blob_sha":"2d8c974b1608210bbeeb51f9cd70837249e023a3","identity_check":"MATCH_LOCAL_GIT_HASH_OBJECT"},
+      {"source":"EXCEL-QUAL-RESEARCH-RECEIPT_v1.0.yaml","scope":"BYTES_0_2999","git_blob_sha":"5463ee27c306d20d49b2ed4c7a712bfa6a0822c6","identity_check":"MATCH_LOCAL_GIT_HASH_OBJECT"},
+      {"source":"EXCEL-QUAL-RESEARCH-RECEIPT_v1.0.yaml","scope":"BYTES_3000_5114","git_blob_sha":"aff2c4a53f86eb796156e30915d6d56758850f0b","identity_check":"MATCH_LOCAL_GIT_HASH_OBJECT"},
+      {"source":"EXCEL-QUALIFICATION-EVIDENCE_v1.0.schema.json","scope":"BYTES_0_2999","git_blob_sha":"65c3ecceaaff9f35de84d86d12311623707c6d73","identity_check":"MATCH_LOCAL_GIT_HASH_OBJECT"},
+      {"source":"EXCEL-QUALIFICATION-EVIDENCE_v1.0.schema.json","scope":"BYTES_3000_5588","git_blob_sha":"f02bce3efd4d40002777dce2aede58559d99675d","identity_check":"MATCH_LOCAL_GIT_HASH_OBJECT"},
+      {"source":"EXCEL-QUALIFICATION-PACK_v1.0.md","scope":"BYTES_0_2999","git_blob_sha":"9fd719ccd798cf330e6854f39cb7089f907236ea","identity_check":"MATCH_LOCAL_GIT_HASH_OBJECT"}
+    ],
+    "failed_identity_probes": [
+      {"source":"EXCEL-QUALIFICATION-PACK_v1.0.md","scope":"FULL_FILE","expected_git_blob_sha":"aa30d7517d03e06ca1e8d889001ba94dd21dec60","observed_git_blob_sha":"f4c4772474a4eb43c95100d13542af28fdfed780","disposition":"UNREFERENCED_ORPHAN_BLOB__DO_NOT_USE"},
+      {"source":"EXCEL-QUALIFICATION-PACK_v1.0.md","scope":"BYTES_3000_5999","expected_git_blob_sha":"ebcc51c69a6bf9fb47d927725d5a9e3db3edbf74","observed_git_blob_sha":"4fa390862aec25287a5757042c75f58399ad9d8a","disposition":"UNREFERENCED_ORPHAN_BLOB__DO_NOT_USE"}
+    ],
+    "finding": "The connector can preserve some exact Git objects, including the complete 3481-byte policy file and multiple 3000-byte chunks, but the current large/manual payload path is not sufficiently reliable to assert exact custody for the complete five-file set in this run.",
+    "single_file_native_custody_complete": false,
+    "reconstructable_full_set_custody_complete": false
+  },
+  "boundaries": {
+    "github_branch_contains_source_bytes": false,
+    "verified_git_objects_are_referenced_by_branch_tree": false,
+    "a01_read_exact_bytes": false,
+    "a01_verified": false,
+    "native_excel_executed": false,
+    "historical_pass_transferred": false,
+    "production_authorized": false,
+    "prose": "COMPLETE_RETIRED_TERMINAL__NO_ROUTE"
+  },
+  "standing": "SOURCE_IDENTITIES_EXACTLY_RECOVERED__GITHUB_TRANSPORT_PARTIALLY_PROVEN__FULL_CUSTODY_NOT_YET_COMPLETE",
+  "next_safe_action": "Continue only with smaller deterministic chunks whose returned Git blob SHA is checked against local git hash-object before any tree reference. Build an atomic reconstructable-custody manifest only after every chunk matches. Keep the work isolated from main while the live CORE A-01 control-plane repair transaction remains unresolved. Do not claim A-01/native/final PASS and do not create a Spreadsheet/Data peer system."
+}
