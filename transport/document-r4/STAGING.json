@@ -1,6 +1,6 @@
 {
   "transport_id": "DOCUMENT-R4-BINARY-TRANSPORT-002",
-  "status": "FULL_TRANSPORT_STAGED__NOT_ARMED",
+  "status": "FULL_TRANSPORT_STAGED__ARMED",
   "transport_contract_path": "transport/document-r4/TRANSPORT-CONTRACT.json",
   "transport_contract_sha256": "80509f1f2ddaa7ad2d46f9e94e88400758e40634c44243e1136c28f4c2ae7ba1",
   "chunk_manifest_path": "transport/document-r4/CHUNK-MANIFEST.json",
@@ -14,8 +14,11 @@
   "staged_raw_bytes": 301008,
   "source_manifest_rows": 225,
   "source_manifest_sha256": "ed36fc9cfd38b04a8d0174efed06b03e8e25b0a45fc0adc4d47fe3457c2ee367",
-  "ready_marker_present": false,
+  "ready_marker_present": true,
   "historical_pass_transfer": false,
-  "github_native_source_custody": "BLOCKED",
-  "rule": "All 5 exact canonical payload chunks are committed and verified. READY remains forbidden in DOCUMENTS-R4-GITHUB-NATIVE-PAYLOAD-STAGING-004; GitHub-native source custody remains BLOCKED until the separate arming/admission operation runs fresh exact-subject qualification."
+  "github_native_source_custody": "PASS",
+  "rule": "READY was armed only after fresh exact-subject 225/225 reconstruction, strict Java 21 compile, portable suites, and T13/T14 external qualification all passed. Frozen five-chunk payload identities remain unchanged.",
+  "admitted_source_subject_sha": "ded21b569e29b7d162c50f7cb0692874e3f3acc2",
+  "qualification_id": "CR001-R4-GITHUB-NATIVE-QUALIFICATION-005",
+  "qualification_run_id": 34654634787
 }
