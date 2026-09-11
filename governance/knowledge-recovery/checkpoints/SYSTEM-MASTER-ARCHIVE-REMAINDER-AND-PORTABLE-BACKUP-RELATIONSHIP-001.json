@@ -1,0 +1,83 @@
+{
+  "checkpoint_id": "SYSTEM-MASTER-ARCHIVE-REMAINDER-AND-PORTABLE-BACKUP-RELATIONSHIP-001",
+  "effective_date": "2026-09-11",
+  "owner_path": "SYSTEM_MASTER/CORE",
+  "objective_id": "SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001",
+  "predecessor": "governance/knowledge-recovery/checkpoints/SYSTEM-MASTER-ARCHIVE-DELTA-FAMILY-CENSUS-001.json",
+  "authority_snapshot": "CURRENT-AUTHORITY-003",
+  "method": "Exact Library materialization of both portable-master copies, archive remainder and 021V handoff; direct SHA-256; read-only ZIP CRC/integrity; embedded partition-manifest verification; 29-entry three-way byte comparison. No archive-contained code executed.",
+  "subjects": {
+    "portable_master": {
+      "name": "SYSTEM_MASTER_PORTABLE_MASTER_BACKUP_20260903.zip",
+      "library_file_ids": ["file_0000000021e0822fa5904dc9751dbf2e","file_00000000e0d0822f98bccdb4005c18f6"],
+      "object_count": 2,
+      "classification": "BYTE_IDENTICAL_DUPLICATE_TARGETS",
+      "size_bytes": 173430489,
+      "sha256": "e92de025cdd204eb105dc76efaddf820653f28f574e5d9d2b31a748e34002004",
+      "entry_count": 29,
+      "uncompressed_bytes": 174687538,
+      "zip_integrity": "PASS",
+      "receipt_file_ids": ["file_000000005dd4822fa51aa5c1c62c4365","file_00000000fdbc822f92295d4910075bc6"],
+      "receipt_hash_match": "PASS"
+    },
+    "archive_remainder": {
+      "name": "SYSTEM_MASTER_ARCHIVE_REMAINDER_20260903.zip",
+      "library_file_id": "file_00000000ac98822f95374b56f7470258",
+      "size_bytes": 173170128,
+      "sha256": "f30492659a47789c54bf8c7efc0e0209b54fec5aa61a1b159331f66cd6f59a21",
+      "entry_count_total": 15,
+      "original_master_entries": 12,
+      "partition_control_entries": 3,
+      "uncompressed_bytes": 174413708,
+      "zip_integrity": "PASS"
+    },
+    "handoff_021v": {
+      "name": "SYSTEM_MASTER_HANDOFF_021V_RESILIENCE_20260903.zip",
+      "library_file_id": "file_0000000050b4822f814f55f642ab5560",
+      "size_bytes": 269110,
+      "sha256": "e0c7631b387c94f8af61d4a6d7aa99970a3fe30c902c9a664facf4cbcf08f3d8",
+      "entry_count_total": 21,
+      "original_master_entries": 17,
+      "partition_control_entries": 4,
+      "uncompressed_bytes": 292579,
+      "zip_integrity": "PASS"
+    }
+  },
+  "partition_receipt": {
+    "file_id": "file_000000001384822fb46be7c08076bde7",
+    "source_master_sha256": "e92de025cdd204eb105dc76efaddf820653f28f574e5d9d2b31a748e34002004",
+    "source_original_entries": 29,
+    "handoff_original_entries": 17,
+    "archive_remainder_original_entries": 12,
+    "assigned_once": 29,
+    "missing_original_entries": 0,
+    "duplicate_original_assignments": 0,
+    "receipt_partition_pass": true
+  },
+  "independent_partition_verification": {
+    "manifest_source_entry_count": 29,
+    "manifest_entries_checked": 29,
+    "exact_three_way_matches": 29,
+    "mismatches": 0,
+    "comparison": "For every original source entry: embedded partition-manifest size+SHA256 == source-master entry size+SHA256 == assigned partition entry size+SHA256.",
+    "partition_payload_union": "ALL_29_ORIGINAL_SOURCE_ENTRIES_PRESENT_EXACTLY_ONCE",
+    "partition_payload_intersection_original_entries": 0,
+    "new_partition_control_entries": 7,
+    "new_control_entry_distribution": {"archive_remainder":3,"handoff_021v":4},
+    "standing": "LOSSLESS_EXACT_PARTITION_OF_ORIGINAL_MASTER_PAYLOAD"
+  },
+  "adjudication": [
+    "The archive remainder is not a competing portable-master version; it is the preserved archive partition created from the exact e92de025... portable master when the 021V working handoff was split out.",
+    "The 021V handoff plus archive remainder preserve all 29 original portable-master entries exactly once; seven partition/control files are additive packaging metadata and are not original-master payload duplication.",
+    "Both preserved portable-master Library objects are byte-identical and match the preserved portable-master receipts.",
+    "The remainder and 021V handoff hashes match the preserved split receipt.",
+    "The archive remainder should remain available for recovery/audit and should not be treated as an ordinary working-chat package unless a missing dependency requires it."
+  ],
+  "non_claims": [
+    "This Library-byte verification is not A-01 verification or approved immutable A-01 intake.",
+    "Historical partition integrity does not grant execution, production, promotion or current System Master authority.",
+    "No original payload entry was executed during verification.",
+    "This checkpoint establishes the relationship only for the exact hashes recorded above."
+  ],
+  "next_successor": "SYSTEM-MASTER-PORTABLE-MASTER-INTERNAL-ASSET-CENSUS-001"
+}
