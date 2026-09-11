@@ -11,7 +11,7 @@ permissions:
 jobs:
   qualify:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
@@ -26,5 +26,12 @@ jobs:
         run: |
           node --check system-master/execution-kernel/second-shift-kernel.js
           node --check system-master/execution-kernel/second-shift-kernel.test.js
-      - name: Run crash, lease, idempotency, outbox, retry and soak tests
+          node --check system-master/execution-kernel/second-shift-kernel-boundary.test.js
+          node --check system-master/execution-kernel/second-shift-kernel-fault-child.js
+          node --check system-master/execution-kernel/second-shift-kernel-fault.test.js
+      - name: Run core crash lease idempotency outbox authority DST and soak tests
         run: node system-master/execution-kernel/second-shift-kernel.test.js
+      - name: Run exact-expiry and operational boundaries
+        run: node system-master/execution-kernel/second-shift-kernel-boundary.test.js
+      - name: Run hard-kill multiprocess disk-full and corruption fault injection
+        run: node system-master/execution-kernel/second-shift-kernel-fault.test.js
