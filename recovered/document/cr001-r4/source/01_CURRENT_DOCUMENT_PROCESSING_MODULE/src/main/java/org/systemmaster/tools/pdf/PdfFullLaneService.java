@@ -1,0 +1,9 @@
+package org.systemmaster.tools.pdf;
+import java.time.Instant;import java.util.*;
+/** Canonical PDF full-lane transaction authority: source truth, routing, engine evidence, absence proofs and receipts. */
+final class PdfFullLaneService {
+ public record Receipt(String action,String sourceSha256,String resultSha256,String engineId,String engineVersion,boolean verified,List<String> diagnostics,Instant observedAt){}
+ private final PdfStructuralEngine structural=new PdfStructuralEngine();
+ public PdfStructuralEngine.Inspection inspect(byte[] source){return structural.inspect(source);} public byte[] create(List<String> lines){byte[] b=structural.createTextPdf(lines);structural.inspect(b);return b;}
+ public Receipt executeWith(PdfEnginePort engine,String action,byte[] source,Map<String,String> parameters) throws Exception {Objects.requireNonNull(engine);var spec=PdfSemanticActions.find(action).orElseThrow(()->new IllegalArgumentException("unknown PDF semantic action"));var id=engine.identity();if(!id.healthy()||!id.capabilities().contains(action))throw new IllegalStateException("PDF engine not qualified/healthy for "+action);String src=source==null?null:PdfStructuralEngine.sha256(source);var result=engine.execute(new PdfEnginePort.Request(action,source,parameters));String dst=result.output()==null?src:PdfStructuralEngine.sha256(result.output());boolean verified=true;if(result.output()!=null&&result.output().length>0&&result.output()[0]=='%')structural.inspect(result.output());if(action.contains("redact")||action.contains("sanitize")){String forbidden=parameters.get("forbiddenToken");if(forbidden!=null&&result.output()!=null)verified=structural.absenceProof(result.output(),List.of(forbidden));}return new Receipt(spec.action(),src,dst,id.engineId(),id.version(),verified,result.diagnostics(),Instant.now());}
+ public List<String> diagnose(byte[] source){return structural.diagnose(source);} }
