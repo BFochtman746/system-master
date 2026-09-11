@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:system-master:learning:command-response:0.1.0",
+  "title": "Learning to System Master Command Response",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["request_id","result_class","learning_state_version","presentation","evidence_refs","next_actions","warnings"],
+  "properties": {
+    "request_id": {"type":"string","minLength":1},
+    "result_class": {"enum":["SUCCESS","NO_CHANGE","INSUFFICIENT_EVIDENCE","HUMAN_ACTION_REQUIRED","NOT_DUE","CONFLICT__LEARNING_STATE_ADVANCED","REJECTED_INVALID_INPUT","REJECTED_AUTHORITY_BOUNDARY","TRANSIENT_DEPENDENCY_FAILURE","INTERNAL_ERROR"]},
+    "learning_state_version": {"type":["string","integer"]},
+    "presentation": {"type":["object","array","string","null"]},
+    "evidence_refs": {"type":"array","items":{"type":"string"}},
+    "next_actions": {"type":"array"},
+    "warnings": {"type":"array","items":{"type":"string"}}
+  }
+}
