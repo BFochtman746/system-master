@@ -1,71 +1,65 @@
 # A-01 Operating Contract
 
-Status: CANONICAL CANDIDATE - A01-CONTROL-PLANE-001 / REGISTRATION-DISPATCH-BARRIER
+Status: CANONICAL CANDIDATE - A01-CONTROL-PLANE-001 / POLICY V8 TRUSTED METADATA ADMISSION
 
 ## Purpose
 
 A-01 is the shared authoritative Windows/X64 machine-qualification resource for `BFochtman746/system-master`. This contract governs every System Master lane that requests, consumes, interprets, retries, or promotes A-01 evidence.
 
-A-01 is shared infrastructure administratively integrated through `SYSTEM_MASTER/CORE`. It is not a peer product system and it does not transfer product authority between the current peer systems CORE, LEARNING, BOOK, and DOCUMENTS. PROSE is completed/retired; historical Prose/Literary/Book-Evaluator qualification and workstream identities remain provenance and resolve to DOCUMENTS for any newly authorized execution under current topology.
+A-01 is shared infrastructure administratively integrated through `SYSTEM_MASTER/CORE`. It is not a peer product system and it does not transfer product authority between CORE, LEARNING, BOOK, and DOCUMENTS. PROSE is completed/retired; historical Prose/Literary/Book-Evaluator qualification identities remain provenance only and newly authorized execution resolves through current topology.
 
 ## Non-negotiable rules
 
-1. Perform all safe deterministic hosted/local prequalification before requesting A-01.
-2. No workstream may create a direct self-hosted A-01 path when a registered control-plane qualification applies.
-3. Every A-01 request uses a registry-owned `qualification_id`; arbitrary command injection is prohibited.
+1. Perform all safe deterministic prequalification before requesting A-01.
+2. No workstream may create a direct subject-execution path when a registered control-plane qualification applies.
+3. Every request uses a registry-owned `qualification_id`; arbitrary command injection is prohibited.
 4. The exact tested Git commit SHA is the qualification subject. Evidence never transfers to changed bytes.
 5. No subject may enter `A01_PASSED`, `PROMOTION_ELIGIBLE`, or `CANONICAL` without a valid authoritative receipt.
-6. Registration is a prerequisite to runner admission, not a condition discovered after the A-01 runner is acquired.
-7. A hosted admission barrier must prove the requested qualification exists in the exact control-plane registry, the workstream matches, the registered wrapper exists in its declared source, the exact subject checkout matches, and execution-window/runtime policy is valid.
-8. Only an `ADMITTED` request may reach the private A-01 executor.
-9. The private A-01 executor must run policy and registry from the exact admitted `control_plane_sha` and the product qualifier from the exact requested `subject_sha` when `source=subject`.
+6. Registration and immutable subject metadata admission are prerequisites to subject checkout and execution.
+7. Policy v8 admission is a trusted metadata-only preflight on A-01 for non-disruptive qualifications. Before `ADMITTED`, it may checkout only the exact canonical control plane. It must not checkout, load, or execute qualification-subject bytes.
+8. The metadata barrier must prove the exact control-plane SHA, registered qualification/workstream, safe wrapper path/source, execution context/runtime, exact subject commit existence, and registered subject-wrapper presence from GitHub commit/tree metadata.
+9. Only a successful `ADMITTED` preflight may invoke the private subject executor. The executor then independently checks out and verifies the exact control-plane SHA and exact subject SHA before running the registered wrapper.
 10. A receipt must bind both identities: `subject_sha`/`checkout_sha` and `control_plane_sha`/`control_plane_checkout_sha`.
 11. A GitHub Actions rerun is never evidence that a branch reference was refreshed. If registry, policy, gateway, admission, or executor authority changes, create a fresh workflow run.
-12. `WAITING_FOR_REGISTRATION`, `REGISTERED_EXECUTABLE_MISSING`, or other admission failures are hosted control/admission states. They must not consume A-01 and must not be mislabeled as product subject failures.
-13. If no matching self-hosted runner is online, the admitted A-01 job may remain queued. Runner absence does not change product bytes or authorize bypass.
+12. Blocked requests may consume a short trusted A-01 admission slot, but may not checkout or execute subject bytes and may not be mislabeled as product failures.
+13. If no matching self-hosted runner is online, admission or execution may remain queued. Runner absence does not change product bytes or authorize bypass.
 14. Workstreams waiting on A-01 should continue dependency-valid work that does not consume the pending subject as authoritative.
-15. Failures are classified as `SUBJECT_FAILURE`, `INFRA_FAILURE`, or `CONTROL_PLANE_FAILURE`; repair scope stays at the proven boundary.
-16. Every authoritative run preserves request, admission, receipt, exact identities, runner identity, telemetry, evidence location, and return ticket.
-17. Product failures return to the current owner resolved through CURRENT-AUTHORITY/topology, not through a historical workstream name. Shared control-plane defects route to CORE/shared A-01 repair.
-18. Existing global queue serialization, bounded repair lineage, overnight scheduling, and disruptive-action evidence ordering remain mandatory.
+15. Failures remain `SUBJECT_FAILURE`, `INFRA_FAILURE`, or `CONTROL_PLANE_FAILURE`; repair scope stays at the proven boundary.
+16. Every authoritative run preserves request, admission evidence, receipt, exact identities, runner identity, telemetry, evidence location, and return ticket.
+17. Product failures return to the current owner resolved through CURRENT-AUTHORITY/topology. Shared control-plane defects route to CORE/shared A-01 repair.
+18. Existing global queue serialization, bounded repair lineage, overnight scheduling, and evidence ordering remain mandatory.
 19. A-01 may deterministically inventory, hash, validate, classify machine-verifiable evidence, emit manifests/attestations, run registered extractors and qualification, and verify trace/custody integrity for the System Master catalog program.
-20. A-01 may not create a first-class system, assign semantic ownership, reinterpret ambiguous historical evidence as fact, erase historical taxonomy, or turn catalog metadata into product authority. System identity and ownership remain governed by explicit System Master topology/ADR decisions.
-21. Historical qualification IDs such as `LITERARY-PROSE` or `BOOK-EVAL-LEMONADE-001` may remain in the registry to preserve evidence continuity. Their names do not resurrect PROSE. Any new request must resolve through current topology to DOCUMENTS and satisfy current owner/delegation/qualification authority.
+20. A-01 may not create a first-class system, assign semantic ownership, reinterpret ambiguous historical evidence as fact, erase historical taxonomy, or turn catalog metadata into product authority.
+21. Historical qualification IDs may remain in the registry to preserve evidence continuity. Names do not resurrect retired systems.
+22. Policy v8 trusted metadata admission is non-disruptive only. Any qualification with a registered post action such as `windows_reboot` fails closed with `DISRUPTIVE_QUALIFICATION_REQUIRES_HOSTED_BARRIER` until an independently safe hosted/lease-based disruptive path is restored and requalified.
 
 ## Canonical request architecture
 
-All normal, repair, overnight, and catalog-processing A-01 requests use:
+For non-disruptive normal, repair, overnight, and catalog-processing requests:
 
-`CALLER -> A01 GATEWAY FRONT DOOR -> HOSTED ADMISSION BROKER -> PRIVATE A01 EXECUTOR`
+`CALLER -> A01 GATEWAY -> TRUSTED A01 METADATA-ONLY ADMISSION -> ADMITTED -> PRIVATE A01 SUBJECT EXECUTOR -> RECEIPT/EVIDENCE`
 
-The gateway is the compatibility surface for workstreams and must not itself own a self-hosted job. The hosted broker is the registration/identity barrier. The private A-01 executor is the only canonical non-legacy workflow permitted to use `[self-hosted, Windows, X64]`.
+The gateway is the compatibility surface. The admission job runs only canonical control-plane code and GitHub metadata reads. It does not acquire subject bytes. The separate executor job is the only phase allowed to checkout and execute an admitted subject.
+
+Using A-01 for the trusted admission preflight does not merge admission and execution authority: they remain separate jobs, and the executor requires both a successful admission job result and `admitted == true`.
 
 ## Admission states
 
-Only `ADMITTED` may reach the executor. Blocked states include `WAITING_FOR_REGISTRATION`, `REGISTERED_EXECUTABLE_MISSING`, `WORKSTREAM_MISMATCH`, `SUBJECT_CHECKOUT_MISMATCH`, `CONTROL_PLANE_CHECKOUT_MISMATCH`, `INVALID_CONTROL_PLANE_POLICY`, `INVALID_REGISTRY`, `INVALID_REGISTERED_WRAPPER_PATH`, `INVALID_REGISTERED_WRAPPER_SOURCE`, `INVALID_EXECUTION_CONTEXT`, `INVALID_QUALIFIER_TIMEOUT`, `QUALIFICATION_NOT_OVERNIGHT_ELIGIBLE`, `QUALIFIER_TIMEOUT_EXCEEDS_REGISTRY`, `DISRUPTIVE_QUALIFICATION_NOT_ALLOWED_OVERNIGHT`, and `CONTROL_PLANE_READ_FAILURE`.
+Only `ADMITTED` may reach subject checkout/execution. Blocked states include `WAITING_FOR_REGISTRATION`, `REGISTERED_EXECUTABLE_MISSING`, `WORKSTREAM_MISMATCH`, `INVALID_SUBJECT_SHA`, `SUBJECT_METADATA_READ_FAILURE`, `SUBJECT_METADATA_IDENTITY_MISMATCH`, `SUBJECT_METADATA_TREE_TRUNCATED`, `CONTROL_PLANE_CHECKOUT_MISMATCH`, `INVALID_CONTROL_PLANE_POLICY`, `INVALID_REGISTRY`, `INVALID_REGISTERED_WRAPPER_PATH`, `INVALID_REGISTERED_WRAPPER_SOURCE`, `INVALID_EXECUTION_CONTEXT`, `INVALID_QUALIFIER_TIMEOUT`, `QUALIFICATION_NOT_OVERNIGHT_ELIGIBLE`, `QUALIFIER_TIMEOUT_EXCEEDS_REGISTRY`, `DISRUPTIVE_QUALIFICATION_NOT_ALLOWED_OVERNIGHT`, `DISRUPTIVE_QUALIFICATION_REQUIRES_HOSTED_BARRIER`, and `CONTROL_PLANE_READ_FAILURE`.
 
-A blocked admission emits a durable reason and `fresh_dispatch_required` when a later registry/control-plane generation could resolve it. It cannot fabricate an A-01 receipt.
+A blocked admission emits a durable reason and `fresh_dispatch_required`. It cannot fabricate a qualification receipt.
 
 ## Fresh-run and retry law
 
-GitHub may preserve the originally resolved reusable-workflow SHA when a failed job or specific job is rerun. Therefore:
-
-- same-subject infrastructure retry with unchanged control-plane bytes may reuse the same admitted control-plane SHA when policy permits;
-- product repair that changes the subject gets a new subject SHA and new deterministic prequalification;
-- registry/policy/gateway/broker/executor changes require a fresh workflow run;
-- a specific-job or failed-job rerun is never used to pick up a new `main` registry entry;
-- a stale attempt remains historical evidence and is never rewritten into a PASS;
-- a fresh dispatch may target the same unchanged product subject while binding a newer admitted control-plane SHA.
+GitHub may preserve the originally resolved reusable-workflow SHA when a failed job or specific job is rerun. Therefore registry/policy/gateway/broker/executor changes require a fresh workflow run. A stale attempt remains historical evidence and is never rewritten into PASS. Product repair that changes bytes gets a new subject SHA and new deterministic prequalification.
 
 ## Historical/archive processing law
 
-A-01 catalog processing is evidence production, not architecture promotion. Every ingest/process run must bind an immutable input identity where possible, produce an `ingest_run_id`, record exact inputs/outputs, classify uncertainty explicitly, and preserve rejected/quarantined/conflicting material rather than silently deleting it. Source bytes remain outside the derived catalog when custody rules require it; the catalog stores stable locators, digests, lifecycle/evidence classes, relationships, and reuse dispositions.
-
-When archived material lacks trustworthy exact identity, A-01 may compute a new digest for the bytes actually presented and label the result as newly observed custody evidence. It may not claim that digest proves identity with an unavailable historical archive.
+A-01 catalog processing is evidence production, not architecture promotion. Every ingest/process run binds immutable input identity where possible, produces an ingest/run identity, records exact inputs/outputs, classifies uncertainty explicitly, and preserves rejected/quarantined/conflicting material. A newly computed digest proves only the bytes actually presented, not identity with unavailable historical archives.
 
 ## Normal, repair, overnight, and runner-unavailable compatibility
 
-Normal workstreams prequalify the exact subject and enter the gateway. Closed-loop repair preserves its transaction ID and attempt budget but enters the same gateway. The central night planner remains the only independent A-01 schedule and calls the same-commit gateway, so all overnight slots inherit hosted admission. An admitted job may wait for A-01 to come online; queueing is not product failure.
+Normal workstreams prequalify and enter the gateway. Closed-loop repair preserves transaction identity and enters the same gateway. The central night planner remains the only independent A-01 schedule. Non-disruptive overnight tickets may use trusted metadata admission; disruptive tickets are rejected by policy v8. Queueing for the self-hosted runner is infrastructure waiting, not product failure.
 
 ## Receipt authority
 
@@ -73,12 +67,12 @@ Current receipts bind policy/registry version, qualification/workstream, gate cl
 
 ## Security
 
-Third-party actions used by the shared control plane remain pinned to full commit SHAs. Registered wrappers remain repository-owned `.github/scripts/` paths. Nested reusable-workflow permissions cannot be elevated. No caller may inject an arbitrary shell command, workflow reference, or post action. Provenance/attestations supplement semantic qualification; they never replace exact-subject qualification or product authority.
+Third-party actions remain pinned to full commit SHAs. Registered wrappers remain repository-owned `.github/scripts/` paths. Nested reusable-workflow permissions cannot be elevated. No caller may inject an arbitrary shell command, workflow reference, or post action. Pre-admission subject checkout/execution is prohibited. Provenance/attestations supplement semantic qualification; they never replace exact-subject qualification or product authority.
 
 ## Disruptive handoff
 
-Registered post actions such as `windows_reboot` retain the ordering: qualifier PASS -> receipt/evidence upload -> delayed action -> hosted settle window.
+The historical reboot ordering remains a required invariant, but policy v8 does not admit disruptive qualifications through the metadata-only fallback. Reboot-capable requests stay blocked until a separately qualified safe admission/settle mechanism exists.
 
 ## Change control
 
-A control-plane baseline change requires demonstrated shared infrastructure/platform evidence. New catalog-processing capability is admitted through the same registry/qualification discipline; it is not a bypass around A-01's existing registration and exact-identity controls.
+A control-plane baseline change requires demonstrated shared infrastructure/platform evidence. Policy v8 is justified by repeated GitHub-hosted runner non-assignment (`runner_id:0`, zero executed steps) while A-01 itself remained online. New catalog-processing capability still enters through registry/qualification discipline; the metadata-only preflight is not a bypass around exact identity or registration controls.
