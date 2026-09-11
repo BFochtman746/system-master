@@ -32,7 +32,7 @@ function sameOrDescendant(candidate, parent) {
 const authority = readJson(authorityPath);
 if (authority.product_root !== 'SYSTEM_MASTER') fail('CURRENT-AUTHORITY product_root must be SYSTEM_MASTER');
 if (authority.topology !== 'governance/SYSTEM-TOPOLOGY-004.json') fail('CURRENT-AUTHORITY must select SYSTEM-TOPOLOGY-004.json');
-for (const field of ['last_sealed_state_checkpoint','completion_ledger','obligation_registry','expectation_registry','reallocation_ledger','second_shift_registry']) {
+for (const field of ['program_job_lock','system_completion_status','completion_ledger','obligation_registry','expectation_registry','reallocation_ledger','second_shift_registry']) {
   if (!authority[field]) fail(`CURRENT-AUTHORITY missing ${field}`);
   requireFile(authority[field]);
 }
