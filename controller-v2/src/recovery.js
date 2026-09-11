@@ -19,7 +19,10 @@ export function rebuildControllerStore(path, durableEvents) {
       kernel.db.prepare('INSERT INTO commands VALUES (?,?,?,?)').run(commandId, record.fingerprint, canonicalize(record.command), record.created_at);
     }
     for (const tx of Object.values(state.transactions)) {
-      kernel.db.prepare('INSERT INTO transactions VALUES (?,?,?,?,?,?,?,?,?)').run(tx.transaction_id, tx.command_id, tx.state, tx.controller_version, tx.policy_version, tx.subject_repo, tx.subject_sha, tx.created_at, tx.updated_at);
+      kernel.db.prepare('INSERT INTO transactions(transaction_id,command_id,state,controller_version,policy_version,subject_repo,subject_sha,completion_contract_json,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?)').run(
+        tx.transaction_id, tx.command_id, tx.state, tx.controller_version, tx.policy_version, tx.subject_repo, tx.subject_sha,
+        tx.completion_contract ? canonicalize(tx.completion_contract) : null, tx.created_at, tx.updated_at
+      );
     }
     for (const op of Object.values(state.operations)) {
       kernel.db.prepare('INSERT INTO operations VALUES (?,?,?,?,?,?)').run(op.operation_id, op.transaction_id, op.state, op.resource_id, op.created_at, op.updated_at);
