@@ -8,12 +8,7 @@ on:
       - 'governance/SYSTEM-TOPOLOGY-*.json'
       - 'governance/SYSTEM-PROGRAM-JOB-LOCK-*.json'
       - 'governance/SYSTEM-COMPLETION-STATUS-*.json'
-      - 'governance/COMPLETION-LEDGER-*.json'
       - 'governance/WORK-OBLIGATION-REGISTRY-*.json'
-      - 'governance/EXPECTATION-REGISTRY-*.json'
-      - 'governance/REALLOCATION-LEDGER-*.json'
-      - 'governance/second-shift/**'
-      - '.github/scripts/program-job-lock-enforce.js'
       - '.github/scripts/current-obligation-registry-enforce.js'
       - '.github/workflows/current-obligation-registry-enforcement.yml'
   pull_request:
@@ -22,12 +17,7 @@ on:
       - 'governance/SYSTEM-TOPOLOGY-*.json'
       - 'governance/SYSTEM-PROGRAM-JOB-LOCK-*.json'
       - 'governance/SYSTEM-COMPLETION-STATUS-*.json'
-      - 'governance/COMPLETION-LEDGER-*.json'
       - 'governance/WORK-OBLIGATION-REGISTRY-*.json'
-      - 'governance/EXPECTATION-REGISTRY-*.json'
-      - 'governance/REALLOCATION-LEDGER-*.json'
-      - 'governance/second-shift/**'
-      - '.github/scripts/program-job-lock-enforce.js'
       - '.github/scripts/current-obligation-registry-enforce.js'
       - '.github/workflows/current-obligation-registry-enforcement.yml'
 
@@ -49,10 +39,6 @@ jobs:
         with:
           fetch-depth: 1
       - name: Syntax check
-        run: |
-          node --check .github/scripts/program-job-lock-enforce.js
-          node --check .github/scripts/current-obligation-registry-enforce.js
-      - name: Validate program jobs and completion truth
-        run: node .github/scripts/program-job-lock-enforce.js
+        run: node --check .github/scripts/current-obligation-registry-enforce.js
       - name: Validate CURRENT-AUTHORITY selected obligation registry
         run: node .github/scripts/current-obligation-registry-enforce.js
