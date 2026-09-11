@@ -3,7 +3,9 @@ import sqlite3
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
+import controller_v2.reliability as reliability_module
 from controller_v2 import ControllerStore, IdempotencyConflict, InvalidState, new_uuid7
 from controller_v2.reliability import ReliabilityManager, create_verified_backup
 
@@ -72,6 +74,17 @@ class ReliabilityTests(unittest.TestCase):
         finally:
             con.close()
 
+    def test_backup_publish_failure_preserves_prior_destination_and_cleans_temp(self):
+        self.new_tx()
+        backup_path = self.root / "backup" / "controller.sqlite3"
+        backup_path.parent.mkdir(parents=True, exist_ok=True)
+        backup_path.write_bytes(b"previous-known-good-backup")
+        with patch("controller_v2.reliability.os.replace", side_effect=OSError("injected replace failure")):
+            with self.assertRaises(OSError):
+                create_verified_backup(self.db, backup_path)
+        self.assertEqual(backup_path.read_bytes(), b"previous-known-good-backup")
+        self.assertEqual(list(backup_path.parent.glob(f".{backup_path.name}.*.tmp")), [])
+
     def test_effect_prepare_is_idempotent_but_semantic_reuse_conflicts(self):
         tx = self.new_tx()
         manager = ReliabilityManager(self.store)
@@ -94,6 +107,35 @@ class ReliabilityTests(unittest.TestCase):
                 target_key="refs/heads/candidate", idempotency_key="effect-key-1",
                 request_payload={"sha": "c" * 40, "force": False}, expected_remote_version="a" * 40,
             )
+
+    def test_effect_send_increments_once_and_outcomes_require_evidence(self):
+        tx = self.new_tx()
+        manager = ReliabilityManager(self.store)
+        effect = manager.prepare_effect(
+            transaction_id=tx, provider="github", effect_type="UPDATE_REF",
+            target_key="refs/heads/candidate", idempotency_key="effect-key-proof",
+            request_payload={"sha": "b" * 40, "force": False},
+        )
+        manager.mark_effect_inflight(effect.effect_id)
+        self.assertEqual(manager.get_effect(effect.effect_id)["attempt_count"], 1)
+        with self.assertRaises(InvalidState):
+            manager.mark_effect_inflight(effect.effect_id)
+        with self.assertRaises(InvalidState):
+            manager.record_effect_outcome(effect.effect_id, "SUCCEEDED")
+        with self.assertRaises(InvalidState):
+            manager.record_effect_outcome(effect.effect_id, "UNKNOWN")
+        manager.record_effect_outcome(
+            effect.effect_id, "SUCCEEDED", remote_result_ref="provider:verified-result"
+        )
+        con = self.store.connect()
+        try:
+            with self.assertRaises(sqlite3.IntegrityError):
+                con.execute(
+                    "UPDATE external_effects SET attempt_count=0 WHERE effect_id=?",
+                    (effect.effect_id,),
+                )
+        finally:
+            con.close()
 
     def test_unknown_effect_must_reconcile_before_resolution(self):
         tx = self.new_tx()
@@ -188,6 +230,30 @@ class ReliabilityTests(unittest.TestCase):
             manager.advance_projection("chat-bootstrap", "github:control-state", 999999, "missing")
         manager.mark_projection_stale("chat-bootstrap", "PUBLISH_LAG")
         self.assertEqual(manager.get_projection("chat-bootstrap")["status"], "STALE")
+
+    def test_projection_destination_is_immutable(self):
+        tx = self.new_tx()
+        manager = ReliabilityManager(self.store)
+        con = self.store.connect()
+        try:
+            row = con.execute(
+                "SELECT event_seq,event_id FROM controller_events WHERE transaction_id=? ORDER BY event_seq DESC LIMIT 1",
+                (tx,),
+            ).fetchone()
+        finally:
+            con.close()
+        manager.advance_projection(
+            "chat-bootstrap", "github:control-state", int(row["event_seq"]), str(row["event_id"])
+        )
+        with self.assertRaises(InvalidState):
+            manager.advance_projection(
+                "chat-bootstrap", "different:destination", int(row["event_seq"]), str(row["event_id"])
+            )
+
+    def test_reliability_kernel_has_no_provider_network_client(self):
+        source = Path(reliability_module.__file__).read_text(encoding="utf-8")
+        for forbidden in ("api.github.com", "requests.", "urllib.request", "http.client"):
+            self.assertNotIn(forbidden, source)
 
 
 if __name__ == "__main__":
