@@ -8,6 +8,7 @@ on:
     paths:
       - 'tools/second_shift_supervisor_v2.py'
       - 'tests/test_second_shift_supervisor_v2.py'
+      - 'tests/run_second_shift_supervisor_v2_optimized.py'
       - '.github/workflows/second-shift-supervisor-v2-stress.yml'
 
 permissions:
@@ -40,8 +41,9 @@ jobs:
         run: |
           python -m py_compile tools/second_shift_supervisor_v2.py
           python -m py_compile tests/test_second_shift_supervisor_v2.py
+          python -m py_compile tests/run_second_shift_supervisor_v2_optimized.py
       - name: Run supervisor reliability stress
-        run: python tests/test_second_shift_supervisor_v2.py
+        run: python tests/run_second_shift_supervisor_v2_optimized.py
       - name: Upload exact stress evidence
         if: always() && hashFiles('.second-shift-supervisor-v2-stress.json') != ''
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
