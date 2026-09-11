@@ -97,6 +97,8 @@ Book continues only genuinely open Book-owned completed-Prose integration lineag
 
 `governance/second-shift/SECOND-SHIFT-REGISTRY-001.json::owner_files` is the machine execution-lane set. It must match the topology `peer_system_ids` set.
 
+A-01 overnight execution authority is defined by `qualification/a01/overnight/A01-OVERNIGHT-001.md`; Second Shift integration with that control plane remains bounded by the current A-01 policy, registry, admission barrier and exact-subject evidence rules.
+
 Current active peer worker lanes are exactly:
 
 - CORE

@@ -1,0 +1,29 @@
+name: A-01 Current Control Plane Selftest Once 2026-09-11
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/a01-current-control-plane-selftest-once-2026-09-11.yml'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  selftest:
+    name: Fresh exact-current-control-plane qualification
+    uses: ./.github/workflows/a01-control-plane-gateway.yml
+    with:
+      qualification_id: A01-CONTROL-PLANE-SELFTEST
+      workstream_id: SYSTEM-MASTER
+      subject_sha: ${{ github.sha }}
+      origin_ref: refs/heads/main
+      resume_on_pass: Record fresh authoritative A-01 PASS for the exact current control-plane bootstrap-link repair, close A01-CONTROL-PLANE-SELFTEST-CURRENT-SHA-QUALIFICATION-001, preserve the exhausted prior repair transaction as terminal, then resume current owner-valid work.
+      resume_on_failure: Record the authoritative result for this new current-SHA qualification, create only the canonical new repair route if it is a genuine current control-plane failure, and do not reopen or extend the exhausted prior transaction.
+      notification_target: obligation:A01-CONTROL-PLANE-SELFTEST-CURRENT-SHA-QUALIFICATION-001
+      execution_context: normal
+      qualifier_timeout_minutes: 28
+      job_timeout_minutes: 30
+      repair_attempt: 0
+      max_repair_attempts: 1
