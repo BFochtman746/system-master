@@ -105,9 +105,28 @@ if ((secondShift.owner_files || {}).SYSTEM_MASTER) fail('Second Shift must not s
 if (Object.keys(secondShift.coverage_routes || {}).some((prefix) => sameOrDescendant(prefix, 'SYSTEM_MASTER/BOOK/PROSE'))) fail('Second Shift must not route retired Prose through an active lane');
 if (secondShift.retired_routes?.PROSE?.dispatchable !== false || secondShift.retired_routes?.PROSE?.auto_provisionable !== false || secondShift.retired_routes?.PROSE?.inherited_execution !== false) fail('Second Shift must preserve retired Prose non-dispatch/non-provision/non-inheritance');
 
+const secondShiftRoot = path.join(root, 'governance', 'second-shift');
+const retiredProseActiveSurfaceArtifacts = fs.readdirSync(secondShiftRoot)
+  .filter((name) => /^PROSE-.*\.json$/i.test(name));
+if (retiredProseActiveSurfaceArtifacts.length) {
+  fail(`retired PROSE artifacts must not remain on the active Second Shift control surface; archive them as historical evidence instead: ${retiredProseActiveSurfaceArtifacts.join(', ')}`);
+}
+
 const schema = readJson(requireFile(secondShift.utilization_event_schema));
 if (!setEq(new Set(schema.allowed_lanes || []), expectedPeers)) fail('telemetry allowed_lanes must match active peers exactly');
 if ((schema.allowed_lanes || []).includes('PROSE')) fail('PROSE must not be an active telemetry lane');
+
+const eventRoot = path.join(secondShiftRoot, 'execution-events');
+const authorityEffectiveDate = String(authority.effective_date || '');
+if (fs.existsSync(eventRoot)) {
+  for (const entry of fs.readdirSync(eventRoot, { withFileTypes: true })) {
+    if (!entry.isDirectory() || !/^\d{4}-\d{2}-\d{2}$/.test(entry.name)) continue;
+    if (authorityEffectiveDate && entry.name < authorityEffectiveDate) continue;
+    if (fs.existsSync(path.join(eventRoot, entry.name, 'PROSE.json'))) {
+      fail(`retired PROSE telemetry is forbidden on or after current authority effective date: governance/second-shift/execution-events/${entry.name}/PROSE.json`);
+    }
+  }
+}
 
 console.log('SYSTEM_TOPOLOGY_PASS');
 console.log('product_root=SYSTEM_MASTER');
