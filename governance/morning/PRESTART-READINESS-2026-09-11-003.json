@@ -1,0 +1,95 @@
+{
+  "checkpoint_id": "PRESTART-READINESS-2026-09-11-003",
+  "created_for_local_date": "2026-09-11",
+  "timezone": "America/New_York",
+  "source_candidate_sha_before_checkpoint_write": "5a3858f84771a5522671e404c70aa77edd9c95d3",
+  "standing": "FINAL_PRESTART_CONTROL_SEAL__PROGRAM_JOBS_LOCKED__PROSE_ONLY_COMPLETE__REPAIR_ROUTES_ALIGNED__HOSTED_REVALIDATION_PENDING_RUNNER",
+  "authority": {
+    "current_authority": "governance/CURRENT-AUTHORITY.json",
+    "topology": "governance/SYSTEM-TOPOLOGY-004.json",
+    "state_baseline": "governance/SYSTEM-STATE-BASELINE-004.json",
+    "program_job_lock": "governance/SYSTEM-PROGRAM-JOB-LOCK-001.json",
+    "system_completion_status": "governance/SYSTEM-COMPLETION-STATUS-001.json",
+    "completion_ledger": "governance/COMPLETION-LEDGER-002.json",
+    "obligation_registry": "governance/WORK-OBLIGATION-REGISTRY-008.json",
+    "expectation_registry": "governance/EXPECTATION-REGISTRY-004.json",
+    "tool_owner_allocation": "governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-003.json",
+    "reallocation_ledger": "governance/REALLOCATION-LEDGER-003.json",
+    "central_next_objective": "SYSTEM-MASTER-INTEGRATION-COORDINATION-001"
+  },
+  "completion_truth": {
+    "only_complete_system": "PROSE",
+    "incomplete_active_systems": ["SYSTEM_MASTER", "CORE", "LEARNING", "BOOK", "DOCUMENTS"],
+    "packet_phase_or_test_completion_is_not_system_completion": true
+  },
+  "locked_jobs": {
+    "SYSTEM_MASTER": "Integrate CORE, LEARNING, BOOK and DOCUMENTS into one coherent product without taking their product semantics.",
+    "CORE": "Finish shared Foundation/Spine and System Master integration primitives; no peer-system semantic ownership.",
+    "LEARNING": "Finish Learning and integrate upward into System Master; no Book, Prose or Documents product work.",
+    "BOOK": "Finish Book, including bringing the completed Prose child into Book through adapters and the Book Workflow Orchestrator, then integrate upward into System Master while retaining canonical Book authority.",
+    "PROSE": "Remain the completed Book literary specialist; Book-controlled integration and demonstrated-defect repair only; no independent lane or canonical manuscript write.",
+    "DOCUMENTS": "Finish Documents document/artifact mechanics and integrate upward into System Master; no Prose absorption or peer ownership drift.",
+    "KNOWLEDGE_RECOVERY": "Supporting Core-administered custody/provenance program only."
+  },
+  "owner_heads": {
+    "CORE": "5724f77ebe149c49278a099ce67b8385f0e30eea",
+    "LEARNING": "2a34d20d8db9897e3958bb119d2921043fff9b3d",
+    "BOOK": "2df0f53447628f0ef54a5c59689b528dbbce1632",
+    "PROSE": "b3b0909bc6720a3bc5938de29d4bf3bde9dd4e05",
+    "DOCUMENTS": "79eba4bfa035c677aa5b5616172377f11501db06"
+  },
+  "owner_next_work": {
+    "CORE": "SYSTEM-MASTER-INTEGRATION-COORDINATION-001 plus dependency-valid CORE-SMR021 work inside Core's job.",
+    "LEARNING": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001 / current Batch 06 qualification boundary; stay Learning-only.",
+    "BOOK": "BOOK-PROSE-PHASE-2-ORCHESTRATOR-CLOSURE-CENSUS-001, then Phase 3A context/compiler and remaining adapters/router/orchestrator integration until completed Prose is usable end-to-end in Book.",
+    "DOCUMENTS": "DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-IMPORT-AND-EXACT-SUBJECT-QUALIFICATION-002, then Documents-only completion and upward System Master integration."
+  },
+  "lane_and_repair_controls": {
+    "active_second_shift_lanes": ["CORE", "LEARNING", "BOOK", "DOCUMENTS"],
+    "sole_direct_specialist_exception": "BOOK <-> PROSE",
+    "prose_second_shift_route": "BOOK",
+    "prose_repair_route": "BOOK",
+    "standalone_prose_repair_inbox": "HISTORICAL_ONLY",
+    "documents_prose_absorption": "FORBIDDEN",
+    "one_mutation_claim_per_peer_lane": true,
+    "topology_validator_prose_rule": "INDEPENDENT_PROSE_EXECUTION_FORBIDDEN__BOOK_CONTROLLED_PROSE_INTEGRATION_ALLOWED"
+  },
+  "management_surfaces_checked": [
+    "SYSTEM-MASTER-WORKSTREAM-BOOTSTRAP.md",
+    "governance/CURRENT-AUTHORITY.json",
+    "governance/SYSTEM-TOPOLOGY-004.json",
+    "governance/SYSTEM-PROGRAM-JOB-LOCK-001.json",
+    "governance/SYSTEM-COMPLETION-STATUS-001.json",
+    "governance/SYSTEM-STATE-BASELINE-004.json",
+    "governance/COMPLETION-LEDGER-002.json",
+    "governance/WORK-OBLIGATION-REGISTRY-008.json",
+    "governance/EXPECTATION-REGISTRY-004.json",
+    "governance/REALLOCATION-LEDGER-003.json",
+    "governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-003.json",
+    "governance/CHAT-LANE-OPERATING-PROMPT-002.md",
+    "governance/morning/CHAT-START-COMMAND-CONTRACT-001.md",
+    "governance/morning/MASTER-ROOT-CHAT-OPERATING-CONTRACT-001.md",
+    "governance/morning/MORNING-CANONICAL-RECONCILIATION-001.md",
+    "governance/morning/MORNING-CHAT-READINESS-GATE-001.md",
+    "governance/second-shift/SECOND-SHIFT-REGISTRY-001.json",
+    "governance/second-shift/SECOND-SHIFT-EXECUTION-CONTROL-001.md",
+    "governance/second-shift/SECOND-SHIFT-OPERATING-MODE-002.md",
+    "governance/repair/REPAIR-INBOX-REGISTRY-001.json",
+    "governance/repair/A01-REPAIR-BROKER-001.md",
+    ".github/scripts/a01-repair-broker-selftest.js",
+    ".github/scripts/validate-system-topology.js"
+  ],
+  "hosted_enforcement": {
+    "standing": "NOT_YET_EXECUTED_AFTER_FINAL_CONTROL_REPAIR__GITHUB_HOSTED_RUNNER_ALLOCATION_FAILURE_OBSERVED",
+    "prior_program_job_lock_run_id": 34555782154,
+    "prior_program_job_lock_retry_job_id": 103133614271,
+    "prior_state_reconciler_run_id": 34556242944,
+    "prior_state_reconciler_retry_job_id": 103133630088,
+    "prior_retry_step_count": 0,
+    "semantic_pass_claimed": false,
+    "semantic_failure_claimed": false,
+    "required_morning_action": "Re-run current exact-subject control enforcement when GitHub-hosted runner allocation is available and inspect executed steps before CHAT_READY."
+  },
+  "morning_start_contract": "At 07:15 America/New_York, fetch current main and live owner heads, compare with this checkpoint, reconcile overnight deltas, inspect Second Shift/repair state, run or inspect current enforcement, then publish the daily bootstrap. This checkpoint never overrides newer valid live owner state.",
+  "success_condition": "No JOB_LANE_VIOLATION, false non-Prose system completion, Prose-to-Documents route, independent Prose mutation lane, stale owner/delegation binding, or repair-owner mismatch remains after live morning reconciliation."
+}
