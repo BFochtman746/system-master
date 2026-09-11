@@ -89,8 +89,9 @@ class LifecycleTests(unittest.TestCase):
             stderr=subprocess.PIPE,
             text=True,
         )
-        self.assertEqual(proc.stdout.readline().strip(), "ACQUIRED")
-        self.assertEqual(proc.wait(timeout=10), 0)
+        stdout, stderr = proc.communicate(timeout=10)
+        self.assertEqual(proc.returncode, 0, stdout + stderr)
+        self.assertIn("ACQUIRED", stdout)
 
         deadline = time.monotonic() + 5.0
         while True:
