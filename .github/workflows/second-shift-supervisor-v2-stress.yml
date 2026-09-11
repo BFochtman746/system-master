@@ -1,0 +1,53 @@
+name: Second Shift Supervisor V2 Crash Concurrency Stress
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - reliability/second-shift-controller-v2-20260911
+    paths:
+      - 'tools/second_shift_supervisor_v2.py'
+      - 'tests/test_second_shift_supervisor_v2.py'
+      - '.github/workflows/second-shift-supervisor-v2-stress.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: second-shift-supervisor-v2-stress-${{ github.ref }}
+  queue: max
+  cancel-in-progress: false
+
+jobs:
+  stress:
+    name: Crash restart, races, fencing, SQLite durability, and 20000 transitions
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact supervisor subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Show Python and SQLite runtime
+        run: |
+          python --version
+          python - <<'PY'
+          import sqlite3
+          print('sqlite', sqlite3.sqlite_version)
+          PY
+      - name: Syntax check
+        run: |
+          python -m py_compile tools/second_shift_supervisor_v2.py
+          python -m py_compile tests/test_second_shift_supervisor_v2.py
+      - name: Run supervisor reliability stress
+        run: python tests/test_second_shift_supervisor_v2.py
+      - name: Upload exact stress evidence
+        if: always() && hashFiles('.second-shift-supervisor-v2-stress.json') != ''
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: second-shift-supervisor-v2-${{ github.run_id }}
+          path: .second-shift-supervisor-v2-stress.json
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 30
