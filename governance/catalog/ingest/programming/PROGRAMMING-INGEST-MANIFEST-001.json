@@ -1,0 +1,117 @@
+{
+  "manifest_id": "PROGRAMMING-INGEST-MANIFEST-001",
+  "schema_version": 1,
+  "candidate_system_id": "PROGRAMMING",
+  "architecture_authority": false,
+  "frozen_date": "2026-09-10",
+  "purpose": "Supervised first proving corpus for SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001. Process all frozen source records truthfully; do not infer byte verification for external Library/archive objects.",
+  "coverage_contract": {
+    "metadata_scope": "Known Programming-affinity sources recovered from the current System Packet, Archive Source Registry and the 2026-09-10 Library discovery pass, plus current repository authority inputs.",
+    "byte_scope": "A-01 verifies exact bytes for SUBJECT_REPO entries only. Library digests marked CHATGPT_PRESTAGE_OBSERVED are pre-stage observations and remain non-A01 until those exact bytes are presented to A-01.",
+    "full_byte_verification_required_for_catalog_processing_pass": false
+  },
+  "sources": [
+    {
+      "source_id":"GIT-CURRENT-AUTHORITY-001","surface":"GITHUB","locator":{"path":"governance/CURRENT-AUTHORITY.json"},"evidence_class":"CURRENT_AUTHORITY_POINTER","system_affinity":["SYSTEM_MASTER","PROGRAMMING"],"byte_availability":"SUBJECT_REPO","expected_sha256":null,"digest_authority":"A01_VERIFY_ON_RUN","reuse_disposition":"REFERENCE_ONLY","notes":"Controls current topology and cannot be overwritten by ingest output."
+    },
+    {
+      "source_id":"GIT-SYSTEM-TOPOLOGY-003","surface":"GITHUB","locator":{"path":"governance/SYSTEM-TOPOLOGY-003.json"},"evidence_class":"CURRENT_TOPOLOGY_AUTHORITY","system_affinity":["SYSTEM_MASTER"],"byte_availability":"SUBJECT_REPO","expected_sha256":null,"digest_authority":"A01_VERIFY_ON_RUN","reuse_disposition":"REFERENCE_ONLY","notes":"Programming must remain non-active during this pilot."
+    },
+    {
+      "source_id":"GIT-KNOWLEDGE-REUSE-DESIGN-001","surface":"GITHUB","locator":{"path":"governance/architecture/SYSTEM-MASTER-KNOWLEDGE-REUSE-CATALOG-DESIGN-001.md"},"evidence_class":"KNOWLEDGE_RECOVERY_DESIGN","system_affinity":["SYSTEM_MASTER"],"byte_availability":"SUBJECT_REPO","expected_sha256":null,"digest_authority":"A01_VERIFY_ON_RUN","reuse_disposition":"REUSE_AS_IS","notes":"Non-authoritative design constraints for catalog recovery."
+    },
+    {
+      "source_id":"GIT-KNOWLEDGE-RECOVERY-CONTROL-001","surface":"GITHUB","locator":{"path":"governance/knowledge-recovery/SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001.md"},"evidence_class":"CURRENT_KNOWLEDGE_RECOVERY_CONTROL","system_affinity":["SYSTEM_MASTER"],"byte_availability":"SUBJECT_REPO","expected_sha256":null,"digest_authority":"A01_VERIFY_ON_RUN","reuse_disposition":"REUSE_AS_IS","notes":"Supervised pilot authority and acceptance gate."
+    },
+    {
+      "source_id":"GIT-ARCHIVE-SOURCE-REGISTRY-001","surface":"GITHUB","locator":{"path":"governance/catalog/SYSTEM-MASTER-ARCHIVE-SOURCE-REGISTRY-001.json"},"evidence_class":"SOURCE_DISCOVERY_REGISTRY","system_affinity":["SYSTEM_MASTER","PROGRAMMING"],"byte_availability":"SUBJECT_REPO","expected_sha256":null,"digest_authority":"A01_VERIFY_ON_RUN","reuse_disposition":"MIGRATION_INPUT","notes":"Seed registry; full census is not claimed."
+    },
+    {
+      "source_id":"GIT-PROGRAMMING-SYSTEM-PACKET-001","surface":"GITHUB","locator":{"path":"governance/catalog/system-packets/PROGRAMMING.json"},"evidence_class":"SYSTEM_REUSE_PACKET","system_affinity":["PROGRAMMING"],"byte_availability":"SUBJECT_REPO","expected_sha256":null,"digest_authority":"A01_VERIFY_ON_RUN","reuse_disposition":"MIGRATION_INPUT","notes":"Programming is PLANNED_CANDIDATE, not active architecture."
+    },
+    {
+      "source_id":"LIB-PROGRAMMING-BUILD-EXECUTION-LEDGER-001","surface":"CHATGPT_LIBRARY","locator":{"file_id":"file_00000000c094822fb552553a2e53c590","version_id":"1","name":"PROGRAMMING_APP_ATOMIC_CAPABILITY_LEDGER_002Y_AUD037_R5H_BUILD_EXECUTION_002E.xlsx"},"evidence_class":"PROGRAMMING_CAPABILITY_LEDGER","system_affinity":["PROGRAMMING"],"byte_availability":"EXTERNAL_REFERENCE_ONLY","expected_sha256":"fcd985e496c40f3578ad989cc216d81d1cc9311b3cbe9b235fde8a9dfdee7181","digest_authority":"CHATGPT_PRESTAGE_OBSERVED","reuse_disposition":"A01_INGEST_AND_RECONCILE","notes":"Materialized in ChatGPT on 2026-09-10; 1,831,588 bytes. A-01 has not yet observed these bytes."
+    },
+    {
+      "source_id":"LIB-PROGRAMMING-UIUX-DESIGN-001","surface":"CHATGPT_LIBRARY","locator":{"file_id":"file_0000000060b0822f96b6b73dd33e2c66","version_id":"1","name":"PROGRAMMING-FOUNDATION-002W_UI-UX-ACCESSIBILITY-HUMAN-INTERACTION-DESIGN-001_CURRENT-v3_REQUALIFICATION_R5AI.md"},"evidence_class":"PROGRAMMING_DESIGN_AND_REQUALIFICATION_RECORD","system_affinity":["PROGRAMMING"],"byte_availability":"EXTERNAL_REFERENCE_ONLY","expected_sha256":"bb5b6abebccaea3b735d089ee40a414ed665e5178d9d90c6c7d040c273fb6818","digest_authority":"CHATGPT_PRESTAGE_OBSERVED","reuse_disposition":"A01_INGEST_AND_RECONCILE","notes":"Materialized in ChatGPT on 2026-09-10; A-01 has not yet observed these bytes."
+    },
+    {
+      "source_id":"LIB-PROGRAMMING-CROSSCUT-R5U-001","surface":"CHATGPT_LIBRARY","locator":{"file_id":"file_000000006ddc822f99727a8d935244a9","version_id":"1","name":"PROGRAMMING-CROSSCUT-002_EXISTING-CONSTITUTION-REQUIREMENTS-CLOSURE-AUDIT-001_RECHECK_R5U.md"},"evidence_class":"PROGRAMMING_REQUIREMENTS_RECHECK","system_affinity":["PROGRAMMING"],"byte_availability":"EXTERNAL_REFERENCE_ONLY","expected_sha256":"e62e0014c3ecf99fa0d58e07a87e8f4fc925835a8f00ec329702e69eaaca2793","digest_authority":"CHATGPT_PRESTAGE_OBSERVED","reuse_disposition":"A01_INGEST_AND_RECONCILE","notes":"Recheck PASS for repair traversal does not imply implementation or executable qualification."
+    },
+    {
+      "source_id":"LIB-PROGRAMMING-CROSSCUT-R5N-001","surface":"CHATGPT_LIBRARY","locator":{"file_id":"file_0000000095f4822fa6ed3b9a2c1c3beb","version_id":"1","name":"PROGRAMMING-CROSSCUT-002_EXISTING-CONSTITUTION-REQUIREMENTS-CLOSURE-AUDIT-001_CURRENT-v3_REQUALIFICATION_R5N.md"},"evidence_class":"PROGRAMMING_REQUIREMENTS_AUDIT","system_affinity":["PROGRAMMING"],"byte_availability":"EXTERNAL_REFERENCE_ONLY","expected_sha256":"33c9fd3254c09e4bab38f40fc73a80258d688a24f6afcd5d754f656f2ab62551","digest_authority":"CHATGPT_PRESTAGE_OBSERVED","reuse_disposition":"A01_INGEST_AND_RECONCILE","notes":"Preserves build-spec/implementation/qualification distinctions."
+    },
+    {
+      "source_id":"LIB-PROGRAMMING-STATIC-WAVE-EVIDENCE-001","surface":"CHATGPT_LIBRARY","locator":{"file_id":"file_000000008a38822fb3db490e3ac10d25","version_id":"1","name":"QE-STATIC-WAVE-01.json"},"evidence_class":"PROGRAMMING_EXECUTION_EVIDENCE","system_affinity":["PROGRAMMING"],"byte_availability":"EXTERNAL_REFERENCE_ONLY","expected_sha256":"79a9c9d73981144dd97fab710ea3ad55817f075179cd5f03a1da05f0a1eb32d3","digest_authority":"CHATGPT_PRESTAGE_OBSERVED","reuse_disposition":"A01_INGEST_AND_RECONCILE","notes":"Static evidence only; does not imply product semantic runtime or production qualification."
+    },
+    {
+      "source_id":"LIB-PROGRAMMING-R5AJ-BASELINE-001","surface":"CHATGPT_LIBRARY","locator":{"file_id":"file_00000000eb48822fae083ed9df2821d2","version_id":"1","name":"R5AJ_BASELINE.xlsx"},"evidence_class":"PROGRAMMING_LATE_BUILD_SPEC_BASELINE","system_affinity":["PROGRAMMING"],"byte_availability":"EXTERNAL_REFERENCE_ONLY","expected_sha256":null,"digest_authority":"NONE","reuse_disposition":"A01_INGEST_AND_RECONCILE","notes":"Later baseline discovered after seed registry; bytes not yet staged for A-01."
+    },
+    {
+      "source_id":"LIB-PROGRAMMING-AUD038-001","surface":"CHATGPT_LIBRARY","locator":{"file_id":"file_000000002bcc822f82a344ae23813df1","version_id":"1","name":"AUD-038 BUILD STANDARD AMENDMENT AND REMEDIATION REPORT.md"},"evidence_class":"PROGRAMMING_FORENSIC_BUILD_STANDARD_AUDIT","system_affinity":["PROGRAMMING"],"byte_availability":"EXTERNAL_REFERENCE_ONLY","expected_sha256":null,"digest_authority":"NONE","reuse_disposition":"MIGRATION_INPUT","notes":"Critical corrective evidence: measured R5AJ as over-specified yet under-buildable; must influence reuse classification."
+    },
+    {
+      "source_id":"LIB-PROGRAMMING-R4-LEDGER-001","surface":"CHATGPT_LIBRARY","locator":{"file_id":"file_0000000002bc822f87ade96c8c2bc70c","version_id":"1","name":"PROGRAMMING_APP_ATOMIC_CAPABILITY_LEDGER_002Y_AUD037_R4.xlsx"},"evidence_class":"PROGRAMMING_HISTORICAL_CAPABILITY_LEDGER","system_affinity":["PROGRAMMING"],"byte_availability":"EXTERNAL_REFERENCE_ONLY","expected_sha256":null,"digest_authority":"NONE","reuse_disposition":"SUPERSEDED_HISTORY","notes":"Historical predecessor; preserve lineage."
+    },
+    {
+      "source_id":"LIB-PROGRAMMING-R5W-002K-001","surface":"CHATGPT_LIBRARY","locator":{"file_id":"file_00000000af30822f857e912f479199d4","version_id":"1","name":"PROGRAMMING_APP_ATOMIC_CAPABILITY_LEDGER_002Y_AUD037_R5W_FUZZING_GENERATIVE_002K.xlsx"},"evidence_class":"PROGRAMMING_BUILD_SPEC_LEDGER","system_affinity":["PROGRAMMING"],"byte_availability":"EXTERNAL_REFERENCE_ONLY","expected_sha256":null,"digest_authority":"NONE","reuse_disposition":"A01_INGEST_AND_RECONCILE","notes":"002K fuzz/property/generative testing wave."
+    },
+    {
+      "source_id":"LIB-PROGRAMMING-R5Y-002M-001","surface":"CHATGPT_LIBRARY","locator":{"file_id":"file_000000001814822f9e79cbd34088d807","version_id":"1","name":"PROGRAMMING_APP_ATOMIC_CAPABILITY_LEDGER_002Y_AUD037_R5Y_PERFORMANCE_SCALABILITY_RESOURCE_002M.xlsx"},"evidence_class":"PROGRAMMING_BUILD_SPEC_LEDGER","system_affinity":["PROGRAMMING"],"byte_availability":"EXTERNAL_REFERENCE_ONLY","expected_sha256":null,"digest_authority":"NONE","reuse_disposition":"A01_INGEST_AND_RECONCILE","notes":"002M performance/scalability/resource wave."
+    },
+    {
+      "source_id":"LIB-PROGRAMMING-R5AJ-002X-001","surface":"CHATGPT_LIBRARY","locator":{"file_id":"file_000000003a90822fbbb1e3dc61a27eb7","version_id":"1","name":"PROGRAMMING_APP_ATOMIC_CAPABILITY_LEDGER_002Y_AUD037_R5AJ_AUTONOMOUS_ENGINEERING_LOOP_INTEGRATION_002X.xlsx"},"evidence_class":"PROGRAMMING_BUILD_SPEC_LEDGER","system_affinity":["PROGRAMMING"],"byte_availability":"EXTERNAL_REFERENCE_ONLY","expected_sha256":null,"digest_authority":"NONE","reuse_disposition":"A01_INGEST_AND_RECONCILE","notes":"002X autonomous engineering loop integration."
+    },
+    {
+      "source_id":"LIB-PROGRAMMING-R5AN-001T-001","surface":"CHATGPT_LIBRARY","locator":{"file_id":"file_00000000a960822fbd6cc9c78eba1719","version_id":"1","name":"PROGRAMMING_APP_ATOMIC_CAPABILITY_LEDGER_002Y_AUD037_R5AN_ENVIRONMENT_001T.xlsx"},"evidence_class":"PROGRAMMING_BUILD_SPEC_LEDGER","system_affinity":["PROGRAMMING"],"byte_availability":"EXTERNAL_REFERENCE_ONLY","expected_sha256":null,"digest_authority":"NONE","reuse_disposition":"A01_INGEST_AND_RECONCILE","notes":"001T environment requalification lineage."
+    },
+    {
+      "source_id":"LIB-PROGRAMMING-R5AM-001S-001","surface":"CHATGPT_LIBRARY","locator":{"file_id":"file_00000000ec88822f96339b8737a81e70","version_id":"1","name":"PROGRAMMING_APP_ATOMIC_CAPABILITY_LEDGER_002Y_AUD037_R5AM_EVIDENCE_OBSERVABILITY_001S.xlsx"},"evidence_class":"PROGRAMMING_BUILD_SPEC_LEDGER","system_affinity":["PROGRAMMING"],"byte_availability":"EXTERNAL_REFERENCE_ONLY","expected_sha256":null,"digest_authority":"NONE","reuse_disposition":"A01_INGEST_AND_RECONCILE","notes":"001S evidence/observability lineage."
+    },
+    {
+      "source_id":"LIB-PROGRAMMING-R5AF-002T-001","surface":"CHATGPT_LIBRARY","locator":{"file_id":"file_000000005bac822fa05a169fc710013e","version_id":"1","name":"PROGRAMMING_APP_ATOMIC_CAPABILITY_LEDGER_002Y_AUD037_R5AF_PRODUCT_OPERATIONS_UPDATE_PATCH_OBSERVABILITY_002T.xlsx"},"evidence_class":"PROGRAMMING_BUILD_SPEC_LEDGER","system_affinity":["PROGRAMMING"],"byte_availability":"EXTERNAL_REFERENCE_ONLY","expected_sha256":null,"digest_authority":"NONE","reuse_disposition":"A01_INGEST_AND_RECONCILE","notes":"002T product operations/update/patch lineage."
+    },
+    {
+      "source_id":"LIB-PROGRAMMING-R5AE-002S-001","surface":"CHATGPT_LIBRARY","locator":{"file_id":"file_00000000509c822f980f212287c27b82","version_id":"1","name":"PROGRAMMING_APP_ATOMIC_CAPABILITY_LEDGER_002Y_AUD037_R5AE_DEPLOYMENT_TRANSITION_ROLLBACK_002S(1).xlsx"},"evidence_class":"PROGRAMMING_BUILD_SPEC_LEDGER","system_affinity":["PROGRAMMING"],"byte_availability":"EXTERNAL_REFERENCE_ONLY","expected_sha256":null,"digest_authority":"NONE","reuse_disposition":"A01_INGEST_AND_RECONCILE","notes":"002S deployment/transition/rollback lineage."
+    },
+    {
+      "source_id":"LIB-PROGRAMMING-REPAIR002-001","surface":"CHATGPT_LIBRARY","locator":{"file_id":"file_000000009c44822fb1fed35e2627d459","version_id":"1","name":"PROGRAMMING_APP_ATOMIC_CAPABILITY_LEDGER_REPAIR002.xlsx"},"evidence_class":"PROGRAMMING_REPAIR_LEDGER","system_affinity":["PROGRAMMING"],"byte_availability":"EXTERNAL_REFERENCE_ONLY","expected_sha256":null,"digest_authority":"NONE","reuse_disposition":"SUPERSEDED_HISTORY","notes":"Repair lineage input."
+    },
+    {
+      "source_id":"LIB-PROGRAMMING-002R-001","surface":"CHATGPT_LIBRARY","locator":{"file_id":"file_00000000f92c822f9c945d950568491c","version_id":"1","name":"PROGRAMMING_APP_ATOMIC_CAPABILITY_LEDGER_002R.xlsx"},"evidence_class":"PROGRAMMING_HISTORICAL_LEDGER","system_affinity":["PROGRAMMING"],"byte_availability":"EXTERNAL_REFERENCE_ONLY","expected_sha256":null,"digest_authority":"NONE","reuse_disposition":"SUPERSEDED_HISTORY","notes":"Earlier lifecycle ledger."
+    },
+    {
+      "source_id":"LIB-PROGRAMMING-002V-001","surface":"CHATGPT_LIBRARY","locator":{"file_id":"file_00000000694c822f9dd396d0bb7fdc6e","version_id":"1","name":"PROGRAMMING_APP_ATOMIC_CAPABILITY_LEDGER_002V.xlsx"},"evidence_class":"PROGRAMMING_HISTORICAL_LEDGER","system_affinity":["PROGRAMMING"],"byte_availability":"EXTERNAL_REFERENCE_ONLY","expected_sha256":null,"digest_authority":"NONE","reuse_disposition":"SUPERSEDED_HISTORY","notes":"Earlier documentation/knowledge ledger."
+    },
+    {
+      "source_id":"LIB-PROGRAMMING-002W-001","surface":"CHATGPT_LIBRARY","locator":{"file_id":"file_0000000010b0822f8dc1799d8130137d","version_id":"1","name":"PROGRAMMING_APP_ATOMIC_CAPABILITY_LEDGER_002W.xlsx"},"evidence_class":"PROGRAMMING_HISTORICAL_LEDGER","system_affinity":["PROGRAMMING"],"byte_availability":"EXTERNAL_REFERENCE_ONLY","expected_sha256":null,"digest_authority":"NONE","reuse_disposition":"SUPERSEDED_HISTORY","notes":"Earlier UI/UX ledger."
+    },
+    {
+      "source_id":"LIB-PROGRAMMING-MASTER-DEPENDENCY-GRAPH-001","surface":"CHATGPT_LIBRARY","locator":{"file_id":"file_00000000ac9c822f8345983bfe7e0579","version_id":"1","name":"MASTER-DEPENDENCY-WORKFLOW-GRAPH.json"},"evidence_class":"PROGRAMMING_DEPENDENCY_GRAPH","system_affinity":["PROGRAMMING"],"byte_availability":"EXTERNAL_REFERENCE_ONLY","expected_sha256":null,"digest_authority":"NONE","reuse_disposition":"MIGRATION_INPUT","notes":"Historical dependency graph; must be reconciled against current generations rather than treated as current architecture."
+    },
+    {
+      "source_id":"LIB-PROGRAMMING-AUTHORITY-MANIFEST-V18-001","surface":"CHATGPT_LIBRARY","locator":{"file_id":"file_000000001a6c822f83d35795cadb78ae","version_id":"1","name":"AUTHORITY-MANIFEST_v1.8.yaml"},"evidence_class":"PROGRAMMING_HISTORICAL_AUTHORITY_MANIFEST","system_affinity":["PROGRAMMING"],"byte_availability":"EXTERNAL_REFERENCE_ONLY","expected_sha256":null,"digest_authority":"NONE","reuse_disposition":"MIGRATION_INPUT","notes":"Historical authority manifest; includes CODE-QUAL-001 active at that generation."
+    },
+    {
+      "source_id":"LIB-PROGRAMMING-FOUNDATION-COVERAGE-001","surface":"CHATGPT_LIBRARY","locator":{"file_id":"file_00000000a2ec822f8981aa2435c18987","version_id":"1","name":"FOUNDATION-COVERAGE-MATRIX.json"},"evidence_class":"PROGRAMMING_FOUNDATION_COVERAGE","system_affinity":["PROGRAMMING","CORE"],"byte_availability":"EXTERNAL_REFERENCE_ONLY","expected_sha256":null,"digest_authority":"NONE","reuse_disposition":"MIGRATION_INPUT","notes":"Cross-generation ownership/coverage input; not current topology authority."
+    },
+    {
+      "source_id":"LIB-PROGRAMMING-MASTER-DECOMPOSITION-001","surface":"CHATGPT_LIBRARY","locator":{"file_id":"file_00000000140c822fa50d9113b498d231","version_id":"1","name":"MASTER-DECOMPOSITION-REGISTRY.json"},"evidence_class":"PROGRAMMING_DECOMPOSITION_REGISTRY","system_affinity":["PROGRAMMING"],"byte_availability":"EXTERNAL_REFERENCE_ONLY","expected_sha256":null,"digest_authority":"NONE","reuse_disposition":"MIGRATION_INPUT","notes":"Contains historical authority/artifact decomposition including CODE-QUAL records."
+    },
+    {
+      "source_id":"LIB-PROGRAMMING-GENESIS-BACKUP-SHA-001","surface":"CHATGPT_LIBRARY","locator":{"file_id":"file_0000000058d481f591635500fe137841","version_id":"1","name":"PROGRAMMING_VAULT_GENESIS_INTEGRATION_v2.0.37_IMPLEMENTATION-DELTA-004_BACKUP.zip.sha256"},"evidence_class":"HISTORICAL_DIGEST_CLAIM","system_affinity":["PROGRAMMING"],"byte_availability":"EXTERNAL_REFERENCE_ONLY","expected_sha256":null,"digest_authority":"HISTORICAL_CLAIM","reuse_disposition":"IDENTITY_UNPROVEN","notes":"Sidecar claims backup archive digest 3643c50f2e1b0d942b7ae6c1a869a36040ac1d81cb93a613f669aee2aba8ba68; target archive bytes must be obtained before identity is proven."
+    },
+    {
+      "source_id":"LIB-PROGRAMMING-DETERMINISM-001","surface":"CHATGPT_LIBRARY","locator":{"file_id":"file_00000000f974822f84246a2425bc78e2","version_id":"1","name":"DETERMINISM-RESULTS.json"},"evidence_class":"PROGRAMMING_DETERMINISM_EVIDENCE","system_affinity":["PROGRAMMING"],"byte_availability":"EXTERNAL_REFERENCE_ONLY","expected_sha256":null,"digest_authority":"NONE","reuse_disposition":"A01_INGEST_AND_RECONCILE","notes":"Historical report states 100 runs / one unique hash; exact subject relation must be recovered before reuse."
+    },
+    {
+      "source_id":"LIB-SYSTEM-MASTER-GLOBAL-COVERAGE-001","surface":"CHATGPT_LIBRARY","locator":{"file_id":"file_000000003504822fafd9f30225c2866c","version_id":"1","name":"SYSTEM_MASTER_GLOBAL_COVERAGE_001_REPORT.md"},"evidence_class":"CROSS_SYSTEM_FORENSIC_CENSUS","system_affinity":["SYSTEM_MASTER","PROGRAMMING"],"byte_availability":"EXTERNAL_REFERENCE_ONLY","expected_sha256":null,"digest_authority":"NONE","reuse_disposition":"REFERENCE_ONLY","notes":"Cross-system context; explicitly says historical research closure is not current v3 build-spec closure."
+    },
+    {
+      "source_id":"HIST-PROGRAMMING-R64-CANDIDATE-FAMILY-001","surface":"HISTORICAL_REFERENCE","locator":{"historical_anchor":"MOD-CODE-001","reported_candidate_count":14,"family":"R64"},"evidence_class":"HISTORICAL_PROGRAMMING_SOURCE_FAMILY","system_affinity":["PROGRAMMING"],"byte_availability":"HISTORICAL_BYTES_UNAVAILABLE","expected_sha256":null,"digest_authority":"NONE","reuse_disposition":"IDENTITY_UNPROVEN","notes":"Programming packet reports 14 R64 candidates. Individual exact locators/bytes still require recovery."
+    },
+    {
+      "source_id":"HIST-PROGRAMMING-ORIVELLUM-CANDIDATE-FAMILY-001","surface":"HISTORICAL_REFERENCE","locator":{"historical_anchor":"MOD-CODE-001","reported_candidate_count":350,"family":"ORIVELLUM"},"evidence_class":"HISTORICAL_PROGRAMMING_SOURCE_FAMILY","system_affinity":["PROGRAMMING"],"byte_availability":"HISTORICAL_BYTES_UNAVAILABLE","expected_sha256":null,"digest_authority":"NONE","reuse_disposition":"IDENTITY_UNPROVEN","notes":"Programming packet reports 350 Orivellum candidates. Individual exact locators/bytes still require recovery."
+    }
+  ]
+}
