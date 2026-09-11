@@ -1,0 +1,47 @@
+name: Second Shift State Kernel V2 Stress
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - reliability/second-shift-controller-v2-20260911
+    paths:
+      - '.github/scripts/second-shift-state-kernel-v2.js'
+      - 'tests/second-shift-state-kernel-v2.stress.js'
+      - '.github/workflows/second-shift-state-kernel-v2-stress.yml'
+      - 'governance/second-shift/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: second-shift-state-kernel-v2-stress-${{ github.ref }}
+  queue: max
+  cancel-in-progress: false
+
+jobs:
+  stress:
+    name: Named invariants, 10000 fault mutations, and real-ledger replay
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact kernel subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Syntax check
+        run: |
+          node --check .github/scripts/second-shift-state-kernel-v2.js
+          node --check tests/second-shift-state-kernel-v2.stress.js
+      - name: Run strict kernel stress
+        run: node tests/second-shift-state-kernel-v2.stress.js
+      - name: Upload exact stress evidence
+        if: always() && hashFiles('.second-shift-kernel-v2-stress.json') != ''
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: second-shift-state-kernel-v2-${{ github.run_id }}
+          path: .second-shift-kernel-v2-stress.json
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 30
