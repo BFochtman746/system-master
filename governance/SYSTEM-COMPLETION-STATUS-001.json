@@ -1,0 +1,61 @@
+{
+  "status_id": "SYSTEM-COMPLETION-STATUS-001",
+  "effective_date": "2026-09-10",
+  "authority": "USER_DIRECTED_CURRENT_COMPLETION_TRUTH",
+  "topology": "governance/SYSTEM-TOPOLOGY-004.json",
+  "rule": "System completion is a product-level standing and must not be inferred from a completed phase, packet, hosted qualification, A-01 receipt, branch label, or subsystem closure. Only explicit product-level completion authority may mark an active system complete.",
+  "systems": [
+    {
+      "system_id": "SYSTEM_MASTER",
+      "owner_path": "SYSTEM_MASTER",
+      "standing": "INCOMPLETE_ACTIVE_PRODUCT_ROOT",
+      "complete": false,
+      "job": "Assemble and integrate the active systems into one System Master product while preserving each system's semantic ownership and shared Core boundaries."
+    },
+    {
+      "system_id": "CORE",
+      "owner_path": "SYSTEM_MASTER/CORE",
+      "standing": "INCOMPLETE_ACTIVE_SHARED_CORE",
+      "complete": false,
+      "job": "Finish the shared Foundation and Spine, shared runtime/data/platform/assurance/continuity/A-01 infrastructure, and the explicit integration surfaces used by the peer systems."
+    },
+    {
+      "system_id": "LEARNING",
+      "owner_path": "SYSTEM_MASTER/LEARNING",
+      "standing": "INCOMPLETE_ACTIVE_SYSTEM",
+      "complete": false,
+      "job": "Finish the Learning system and its explicit integration into System Master without taking Book, Documents, Prose, or Core product ownership."
+    },
+    {
+      "system_id": "BOOK",
+      "owner_path": "SYSTEM_MASTER/BOOK",
+      "standing": "INCOMPLETE_ACTIVE_SYSTEM__PROSE_INTEGRATION_IN_PROGRESS",
+      "complete": false,
+      "job": "Finish the Book system, including integration of the completed Prose child through adapters and the Book Workflow Orchestrator, then integrate Book into System Master while retaining canonical manuscript, Story Bible, author-decision, lifecycle, admission, and publication authority."
+    },
+    {
+      "system_id": "PROSE",
+      "owner_path": "SYSTEM_MASTER/BOOK/PROSE",
+      "standing": "COMPLETE_SYSTEM__ACTIVE_AS_BOOK_CHILD_FOR_INTEGRATION",
+      "complete": true,
+      "job": "Remain the completed Book literary-specialist system. Supply literary diagnosis, evaluation, controlled revision-candidate, voice/preservation, homogenization-defense, and related Prose capabilities to Book. Integration adapters and orchestration may be added around Prose; completed Prose semantics are not reopened absent demonstrated defect or explicit user direction."
+    },
+    {
+      "system_id": "DOCUMENTS",
+      "owner_path": "SYSTEM_MASTER/DOCUMENTS",
+      "standing": "INCOMPLETE_ACTIVE_SYSTEM",
+      "complete": false,
+      "job": "Finish the Documents system and its explicit integration into System Master for DOCX/PDF/PPTX/document artifact mechanics, conversion, preservation, rendering, and export. Documents does not absorb or own Book-specific Prose intelligence."
+    }
+  ],
+  "non_system_programs": [
+    {
+      "program_id": "PROGRAMMING_KNOWLEDGE_RECOVERY",
+      "owner_path": "SYSTEM_MASTER/CORE",
+      "standing": "ACTIVE_SUPPORT_PROGRAM__NOT_A_SYSTEM_COMPLETION",
+      "complete": false,
+      "job": "Recover and preserve Programming source/custody/provenance for reuse by System Master. It may not create a Programming peer system, redefine another lane, or supersede the product-integration jobs."
+    }
+  ],
+  "completion_lock": "PROSE is the only system currently authorized to be described as complete. SYSTEM_MASTER, CORE, LEARNING, BOOK, and DOCUMENTS remain incomplete until explicit future product-level completion authority says otherwise."
+}
