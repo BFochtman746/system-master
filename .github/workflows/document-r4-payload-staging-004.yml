@@ -1,0 +1,122 @@
+name: Document R4 Payload Staging 004
+
+on:
+  push:
+    branches:
+      - documents/full-build-readiness-reconciliation-001
+    paths:
+      - 'transport/document-r4/.stage-fragments/TRIGGER'
+
+concurrency:
+  group: document-r4-payload-staging-004
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  assemble-verify-freeze:
+    if: "${{ github.event.head_commit.message == 'transport: stage Document R4 payload fragments' }}"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact staging subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Assemble carrier and five exact chunks
+        shell: bash
+        run: |
+          set -euo pipefail
+          STAGE='transport/document-r4'
+          FRAG="$STAGE/.stage-fragments"
+          CARRIER='/tmp/document-r4-carrier.tar.xz'
+          test -f "$FRAG/TRIGGER"
+          test "$(find "$FRAG" -maxdepth 1 -name 'frag-*.bin' -type f | wc -l)" -eq 21
+          cat "$FRAG"/frag-*.bin > "$CARRIER"
+          echo '77a6e2288d475865622bad4b2c66647a599c26a3899c6617b33d7b2b334855bd  /tmp/document-r4-carrier.tar.xz' | sha256sum -c -
+          python3 - <<'PY'
+          import base64, hashlib, json, pathlib
+          stage = pathlib.Path('transport/document-r4')
+          carrier = pathlib.Path('/tmp/document-r4-carrier.tar.xz').read_bytes()
+          manifest = json.loads((stage / 'CHUNK-MANIFEST.json').read_text())
+          if len(carrier) != manifest['carrier_bytes']:
+              raise SystemExit('carrier byte length mismatch')
+          if hashlib.sha256(carrier).hexdigest() != manifest['carrier_sha256']:
+              raise SystemExit('carrier digest mismatch')
+          chunk_size = manifest['raw_bytes_per_full_chunk']
+          rows = manifest['chunks']
+          if len(rows) != 5:
+              raise SystemExit('manifest chunk count mismatch')
+          for row in rows:
+              i = int(row['ordinal'])
+              raw = carrier[i*chunk_size:(i+1)*chunk_size]
+              if len(raw) != int(row['raw_bytes']):
+                  raise SystemExit(f'raw size mismatch for {i}')
+              if hashlib.sha256(raw).hexdigest() != row['raw_sha256']:
+                  raise SystemExit(f'raw digest mismatch for {i}')
+              encoded = base64.b64encode(raw) + b'\n'
+              if len(encoded) != int(row['base64_file_bytes']):
+                  raise SystemExit(f'base64 size mismatch for {i}')
+              if hashlib.sha256(encoded).hexdigest() != row['base64_file_sha256']:
+                  raise SystemExit(f'base64 digest mismatch for {i}')
+              (stage / row['filename']).write_bytes(encoded)
+          PY
+
+      - name: Verify exact 225-file source identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT='/tmp/document-r4-staging-verify'
+          rm -rf "$OUT"
+          python3 tools/document-r4/verify_and_extract_transport.py \
+            --contract transport/document-r4/TRANSPORT-CONTRACT.json \
+            --chunk-manifest transport/document-r4/CHUNK-MANIFEST.json \
+            --chunks transport/document-r4 \
+            --carrier-out /tmp/document-r4-verified.tar.xz \
+            --extract-out "$OUT"
+          test "$(find "$OUT/source" -type f -name '*.java' | wc -l)" -eq 225
+
+      - name: Freeze full staging without arming
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, pathlib
+          path = pathlib.Path('transport/document-r4/STAGING.json')
+          s = json.loads(path.read_text())
+          s['status'] = 'FULL_TRANSPORT_STAGED__NOT_ARMED'
+          s['staged_chunk_range'] = '000-004'
+          s['staged_chunks'] = 5
+          s['staged_raw_bytes'] = 301008
+          s['ready_marker_present'] = False
+          s['github_native_source_custody'] = 'BLOCKED'
+          s['historical_pass_transfer'] = False
+          s['rule'] = 'All 5 exact payload chunks are committed and verified. READY remains forbidden in this package; GitHub-native source custody stays BLOCKED until the separate admission/arming operation runs and fresh exact-subject qualification passes.'
+          path.write_text(json.dumps(s, indent=2) + '\n')
+          PY
+          test ! -e transport/document-r4/READY
+          rm -rf transport/document-r4/.stage-fragments
+          git rm .github/workflows/document-r4-payload-staging-004.yml
+          git add transport/document-r4/chunk-*.b64 transport/document-r4/STAGING.json
+          git diff --cached --check
+
+      - name: Commit full unarmed staging
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'system-master-staging-bot'
+          git config user.email 'system-master-staging-bot@users.noreply.github.com'
+          git commit -m 'transport: freeze Document R4 full payload staging'
+          git push origin HEAD:documents/full-build-readiness-reconciliation-001
+
+      - name: Summary
+        shell: bash
+        run: |
+          echo 'DOCUMENT_R4_PAYLOAD_STAGING_004=PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'payload_chunks=5/5' >> "$GITHUB_STEP_SUMMARY"
+          echo 'source_identity=225/225 exact manifest match' >> "$GITHUB_STEP_SUMMARY"
+          echo 'READY=ABSENT' >> "$GITHUB_STEP_SUMMARY"
+          echo 'source_custody=BLOCKED pending separate arming/admission' >> "$GITHUB_STEP_SUMMARY"
