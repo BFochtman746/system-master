@@ -32,10 +32,11 @@ export class GitHubAuthorityInspector {
   async inspect({journalBranch,anchorBranch}){
     const owner=encodeURIComponent(this.transport.owner);const repo=encodeURIComponent(this.transport.repo);
     let metadata;
-    try{metadata=await this.transport.request('GET',`/repos/${owner}/${repo}`);}catch(e){if(e instanceof GitHubApiError&&e.status===404)return {repository_exists:false,repository_full_name:`${this.transport.owner}/${this.transport.repo}`,journal:null,anchor:null};throw e;}
+    try{metadata=await this.transport.request('GET',`/repos/${owner}/${repo}`);}catch(e){if(e instanceof GitHubApiError&&e.status===404)return {repository_exists:false,repository_full_name:`${this.transport.owner}/${this.transport.repo}`,repository_id:null,journal:null,anchor:null};throw e;}
     return {
       repository_exists:true,
       repository_full_name:metadata.full_name,
+      repository_id:Number(metadata.id),
       journal:await this.inspectBranch(journalBranch),
       anchor:await this.inspectBranch(anchorBranch)
     };
