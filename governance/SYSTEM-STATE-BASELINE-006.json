@@ -1,0 +1,75 @@
+{
+  "baseline_id": "SYSTEM-STATE-BASELINE-006",
+  "effective_date": "2026-09-11",
+  "timezone": "America/New_York",
+  "supersedes_for_current_checkpoint": "governance/SYSTEM-STATE-BASELINE-005.json",
+  "subject_head_before_baseline_write": "c80902308003c3bf70146ecb84e2b8d367ad6f54",
+  "topology": "governance/SYSTEM-TOPOLOGY-005.json",
+  "architecture_decision": "governance/ADR-0005-PROSE-TERMINAL-RETIREMENT-BOOK-INTEGRATION.md",
+  "program_job_lock": "governance/SYSTEM-PROGRAM-JOB-LOCK-001.json",
+  "system_completion_status": "governance/SYSTEM-COMPLETION-STATUS-001.json",
+  "completion_ledger": "governance/COMPLETION-LEDGER-003.json",
+  "obligation_registry": "governance/WORK-OBLIGATION-REGISTRY-009.json",
+  "expectation_registry": "governance/EXPECTATION-REGISTRY-005.json",
+  "reallocation_ledger": "governance/REALLOCATION-LEDGER-004.json",
+  "standing": "SEALED_CURRENT_CONTROL_BASELINE__PROSE_TERMINALLY_RETIRED__FOUR_PEER_LANES__TELEMETRY_OPENED",
+  "completion_truth": {
+    "SYSTEM_MASTER": "INCOMPLETE_ACTIVE",
+    "CORE": "INCOMPLETE_ACTIVE",
+    "LEARNING": "INCOMPLETE_ACTIVE",
+    "BOOK": "INCOMPLETE_ACTIVE",
+    "DOCUMENTS": "INCOMPLETE_ACTIVE",
+    "PROSE": "COMPLETE_RETIRED_TERMINAL"
+  },
+  "owner_heads": {
+    "CORE": "d88a5952e93b5bae4ce96e4017f334aeb8abaa00",
+    "LEARNING": "e3196089f77dde376944a08eac78a697e57d1535",
+    "BOOK": "1e8f9e7a37d11ab643ef3cc941f21851149714c8",
+    "DOCUMENTS": "8c81b9a2e7622805e973eda33bdeb8b743948249"
+  },
+  "second_shift": {
+    "active_lanes": ["CORE", "LEARNING", "BOOK", "DOCUMENTS"],
+    "coverage": "MATCH_4_OF_4__NO_AUTOPROVISION_REQUIRED",
+    "live_claims_observed_at_reconciliation": 0,
+    "overlapping_claims_observed": false,
+    "telemetry_ledgers": {
+      "CORE": "governance/second-shift/execution-events/2026-09-11/CORE.json",
+      "LEARNING": "governance/second-shift/execution-events/2026-09-11/LEARNING.json",
+      "BOOK": "governance/second-shift/execution-events/2026-09-11/BOOK.json",
+      "DOCUMENTS": "governance/second-shift/execution-events/2026-09-11/DOCUMENTS.json"
+    },
+    "prose_telemetry": null,
+    "prose_execution": null
+  },
+  "current_lane_work": {
+    "CORE": "SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001 READY as highest discretionary priority; Programming proving corpus first, then authorized catalog/archive recovery.",
+    "LEARNING": "Batch 06 exact subject bd3f7de8490c7cfb6a7dcdd37cc1fa1d4656bced READY; prior three hosted attempts were zero-step infrastructure failures, not semantic execution.",
+    "BOOK": "BOOK-PROSE-PHASE-2-ORCHESTRATOR-CLOSURE-CENSUS-001 READY only as BOOK-owned historical integration lineage with no active Prose owner or successor.",
+    "DOCUMENTS": "DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-IMPORT-AND-EXACT-SUBJECT-QUALIFICATION-002 READY; no Prose work allowed."
+  },
+  "repair_state": {
+    "CORE": "A01_REQUEUE_READY transaction remains active",
+    "LEARNING": "NO_ACTIVE_REPAIR_TRANSACTION",
+    "BOOK": "NO_ACTIVE_REPAIR_TRANSACTION",
+    "DOCUMENTS": "NO_ACTIVE_REPAIR_TRANSACTION",
+    "PROSE": "RETIRED_NO_ACTIVE_REPAIR_ROUTE"
+  },
+  "hosted_execution_observation": {
+    "second_shift_enforcement_run": 34560716525,
+    "second_shift_enforcement_job": 103142693208,
+    "second_shift_enforcement_steps_executed": 0,
+    "a01_control_plane_run": 34560716546,
+    "a01_control_plane_job": 103142693004,
+    "a01_control_plane_steps_executed": 0,
+    "classification": "INFRASTRUCTURE_NOT_EXECUTED__NO_SEMANTIC_PASS_OR_FAIL",
+    "semantic_topology_005_enforcement_pass_claimed": false
+  },
+  "reconciler_state": {
+    "contract": "governance/reconciler/SYSTEM-STATE-RECONCILER-001.md",
+    "script": ".github/scripts/system-state-reconciler.js",
+    "workflow": ".github/workflows/system-state-reconciler.yml",
+    "legacy_script_current_execution": false,
+    "topology_005_retirement_invariants_bound": true
+  },
+  "qualification_boundary": "This baseline is a control-state checkpoint only. It transfers no PASS and grants no A-01, human, author, private, native, external, publication, production or canonical-write authority."
+}
