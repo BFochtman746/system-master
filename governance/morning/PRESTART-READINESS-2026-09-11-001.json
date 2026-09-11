@@ -1,0 +1,94 @@
+{
+  "checkpoint_id": "PRESTART-READINESS-2026-09-11-001",
+  "created_for_local_date": "2026-09-11",
+  "timezone": "America/New_York",
+  "source_main_sha": "bce92c9128b5ebf7b9475175a709d1d40b9d6d03",
+  "standing": "PROGRAM_JOBS_LOCKED__PROSE_ONLY_COMPLETE__OWNER_HEADS_ALIGNED__MORNING_LIVE_REVALIDATION_REQUIRED",
+  "authority": {
+    "current_authority": "governance/CURRENT-AUTHORITY.json",
+    "topology": "governance/SYSTEM-TOPOLOGY-004.json",
+    "program_job_lock": "governance/SYSTEM-PROGRAM-JOB-LOCK-001.json",
+    "system_completion_status": "governance/SYSTEM-COMPLETION-STATUS-001.json",
+    "completion_ledger": "governance/COMPLETION-LEDGER-002.json",
+    "obligation_registry": "governance/WORK-OBLIGATION-REGISTRY-008.json",
+    "expectation_registry": "governance/EXPECTATION-REGISTRY-004.json",
+    "central_next_objective": "SYSTEM-MASTER-INTEGRATION-COORDINATION-001"
+  },
+  "completion_truth": {
+    "only_complete_system": "PROSE",
+    "incomplete_active_systems": ["SYSTEM_MASTER", "CORE", "LEARNING", "BOOK", "DOCUMENTS"],
+    "packet_or_phase_completion_is_not_system_completion": true
+  },
+  "locked_jobs": {
+    "SYSTEM_MASTER": "Integrate CORE, LEARNING, BOOK and DOCUMENTS into one coherent System Master product without taking their product semantics.",
+    "CORE": "Finish shared Foundation/Spine and System Master integration/runtime/data/platform/continuity/assurance/A-01 infrastructure without taking peer-system product work.",
+    "LEARNING": "Finish Learning and integrate upward into System Master; no Book, Prose or Documents product work.",
+    "BOOK": "Finish Book, including integration of the completed Prose child through adapters and the Book Workflow Orchestrator, then integrate upward into System Master while retaining all canonical Book authority.",
+    "PROSE": "Remain the completed Book literary-specialist child; supply completed capabilities under Book control with zero direct canonical manuscript-write authority and no separate peer/Second Shift lane.",
+    "DOCUMENTS": "Finish document/artifact mechanics and integrate upward into System Master; do not absorb Prose or take Book/Learning/Core product semantics.",
+    "KNOWLEDGE_RECOVERY": "Supporting CORE-administered custody/provenance work only; not a peer system or product-wide priority override."
+  },
+  "lane_crossing": {
+    "sole_direct_specialist_exception": "BOOK <-> PROSE",
+    "all_other_peer_systems": "OWN_LANE_THEN_UPWARD_SYSTEM_MASTER_INTEGRATION_OR_EXPLICIT_INTERFACE",
+    "service_use_transfers_ownership": false
+  },
+  "owner_heads_verified": {
+    "CORE": {
+      "control_ref": "system-master/control-v2",
+      "head": "5724f77ebe149c49278a099ce67b8385f0e30eea",
+      "delegation_file": "governance/second-shift/CORE-DELEGATIONS.json",
+      "delegation_head_match": true
+    },
+    "LEARNING": {
+      "control_ref": "learning/control-v1",
+      "head": "2a34d20d8db9897e3958bb119d2921043fff9b3d",
+      "delegation_file": "governance/second-shift/LEARNING-DELEGATIONS.json",
+      "delegation_head_match": true
+    },
+    "BOOK": {
+      "control_ref": "book-system/control-v1",
+      "head": "2df0f53447628f0ef54a5c59689b528dbbce1632",
+      "delegation_file": "governance/second-shift/BOOK-DELEGATIONS.json",
+      "delegation_head_match": true,
+      "current_objective": "BOOK-PROSE-PHASE-2-ORCHESTRATOR-CLOSURE-CENSUS-001"
+    },
+    "PROSE": {
+      "control_ref": "literary-prose-engine-001",
+      "head": "b3b0909bc6720a3bc5938de29d4bf3bde9dd4e05",
+      "completion": "COMPLETE",
+      "execution_lane": "BOOK",
+      "separate_second_shift_lane": false
+    },
+    "DOCUMENTS": {
+      "control_ref": "documents/control-v1",
+      "head": "79eba4bfa035c677aa5b5616172377f11501db06",
+      "delegation_file": "governance/second-shift/DOCUMENTS-DELEGATIONS.json",
+      "delegation_head_match": true
+    }
+  },
+  "startup_and_management_controls": {
+    "repository_bootstrap": "SYSTEM-MASTER-WORKSTREAM-BOOTSTRAP.md",
+    "chat_start_contract": "governance/morning/CHAT-START-COMMAND-CONTRACT-001.md",
+    "owner_chat_contract": "governance/CHAT-LANE-OPERATING-PROMPT-002.md",
+    "morning_reconciliation": "governance/morning/MORNING-CANONICAL-RECONCILIATION-001.md",
+    "morning_readiness_gate": "governance/morning/MORNING-CHAT-READINESS-GATE-001.md",
+    "morning_bootstrap_schema": "governance/morning/DAILY-CHAT-BOOTSTRAP-SCHEMA-001.json",
+    "program_job_enforcement": ".github/workflows/program-job-lock-enforcement.yml",
+    "obligation_enforcement": ".github/workflows/current-obligation-registry-enforcement.yml",
+    "second_shift_enforcement": ".github/workflows/second-shift-enforcement.yml",
+    "state_reconciler": ".github/workflows/system-state-reconciler.yml"
+  },
+  "known_external_infrastructure_condition": {
+    "class": "GITHUB_HOSTED_RUNNER_ALLOCATION_FAILURE",
+    "evidence": [
+      {"workflow":"Program Job Lock Enforcement","run_id":34555782154,"job_id":103128064094,"runner_id":0,"executed_steps":0},
+      {"workflow":"System State Reconciler","run_id":34556242944,"job_id":103129431281,"runner_id":0,"executed_steps":0}
+    ],
+    "semantic_validation_executed_in_those_runs": false,
+    "semantic_failure_proven": false,
+    "rule": "Do not classify zero-step runner allocation as semantic failure or PASS. Re-run/reconcile when GitHub-hosted execution is available; do not weaken job/lane controls to make a workflow green."
+  },
+  "morning_rule": "This checkpoint is a pre-start baseline, not authority over later movement. The 07:15 reconciliation must re-fetch current main and every live owner head, apply CURRENT-AUTHORITY/job/completion locks, reconcile Second Shift results, then publish the daily bootstrap manifest before CHAT_READY.",
+  "success_condition_for_tomorrow": "Morning reconciliation finds no current JOB_LANE_VIOLATION, FALSE_SYSTEM_COMPLETION, stale owner/delegation binding or Prose-to-Documents redirect; any overnight owner-head movement is reconciled before work begins."
+}
