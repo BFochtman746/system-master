@@ -1,0 +1,26 @@
+name: Book Durable Persistence Qualification
+
+on:
+  push:
+    branches:
+      - book-system/control-v1
+    paths:
+      - 'system-master/book-system/book-workflow-durable-store.js'
+      - 'system-master/book-system/book-workflow-durable-store.test.js'
+      - '.github/workflows/book-durable-persistence-qualification.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run Book durable persistence qualification
+        run: node system-master/book-system/book-workflow-durable-store.test.js
