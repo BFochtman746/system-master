@@ -1,83 +1,79 @@
 # CHAT-LANE-OPERATING-PROMPT-002
 
-Status: PROPOSED_CANONICAL_OWNER_CHAT_STARTUP_CONTRACT / TOPOLOGY-004-RECONCILED
+Status: ACTIVE CANONICAL OWNER CHAT STARTUP CONTRACT / TOPOLOGY-004 / JOB-LOCKED
 Supersedes for current startup: `governance/CHAT-LANE-OPERATING-PROMPT-001.md`
 Repository: `BFochtman746/system-master`
-Applies to: CORE, LEARNING, BOOK, DOCUMENTS owner chats
+Applies to: CORE, LEARNING, BOOK, DOCUMENTS owner chats; Prose-focused work opens BOOK at the child boundary.
 
-## Identity
+## Identity and completion truth
 
 A chat is a working surface for one active canonical owner lane. It is not project state and cannot create architecture identity.
 
 Current hierarchy:
 
 SYSTEM_MASTER
-- CORE
-- LEARNING
-- BOOK
-  - PROSE (active specialist child; no peer lane)
-- DOCUMENTS
+- CORE — incomplete
+- LEARNING — incomplete
+- BOOK — incomplete
+  - PROSE — complete system, active Book child specialist for integration
+- DOCUMENTS — incomplete
 
-Owner paths:
-- CORE -> SYSTEM_MASTER/CORE
-- LEARNING -> SYSTEM_MASTER/LEARNING
-- BOOK -> SYSTEM_MASTER/BOOK
-- PROSE -> SYSTEM_MASTER/BOOK/PROSE, inheriting BOOK execution control
-- DOCUMENTS -> SYSTEM_MASTER/DOCUMENTS
+`governance/SYSTEM-COMPLETION-STATUS-001.json` is the product-level completion authority. PROSE is the only system currently complete. A completed packet, phase, qualification or branch does not make SYSTEM_MASTER, CORE, LEARNING, BOOK or DOCUMENTS complete.
 
-The historical standalone Prose lane/retirement record remains provenance. It does not make the current Book child Prose subsystem retired.
+`governance/SYSTEM-PROGRAM-JOB-LOCK-001.json` is the current program-job/lane boundary. Owner chats must conform to it before selecting or executing work.
 
 ## Mandatory startup
 
 Before current-state claims or execution:
 
 1. fetch current `main`;
-2. read `governance/CURRENT-AUTHORITY.json` and its selected topology;
-3. read the current morning packet when available;
-4. fetch this active lane's live canonical control ref/head and state record; for Book-Prose work also fetch `literary-prose-engine-001` as the specialist child evidence/control ref;
-5. reconcile `AUTHORITY_DELTA` before execution;
-6. read current completion, obligation and expectation registries selected by CURRENT-AUTHORITY;
-7. read this lane's active repair state and Second Shift delegation/ledger when relevant;
-8. identify current objective, exact evidence standing and one executable next-step contract.
+2. read `governance/CURRENT-AUTHORITY.json`;
+3. read its `program_job_lock` and `system_completion_status` before making any completion or ownership claim;
+4. read the selected topology, obligation registry and expectation registry;
+5. read the current morning packet when available;
+6. fetch this lane's exact live canonical control ref/head and current state; for Book-Prose work also fetch `literary-prose-engine-001` as the completed specialist source/control lineage;
+7. reconcile any live-head or selector delta before mutation;
+8. read active repair and Second Shift delegation/claim state;
+9. select one dependency-valid next step inside this lane's locked job.
 
-## Ownership
+## Locked jobs
 
-CORE owns shared Foundation & Spine/runtime/infrastructure/assurance/qualification integration.
+CORE: finish the shared Foundation & Spine, shared runtime/data/platform/continuity/assurance/A-01 infrastructure and System-Master integration primitives. CORE does not take peer-system product semantics.
 
-LEARNING owns Learning product architecture/runtime, curriculum, learner/mastery/assessment/adaptation and Learning evidence.
+LEARNING: finish the Learning system, including curriculum/compiler, learner/mastery, assessment/adaptation and Learning evidence, then integrate Learning upward into System Master. Do not cross into Book, Prose or Documents product work.
 
-BOOK owns canonical Book/manuscript/story-bible/lifecycle state, Book Workflow Orchestrator coordination, Book admission, author decision routing, editorial lifecycle, publication state and the active Prose literary-specialist child.
+BOOK: finish the Book system. Bring the completed Prose child into Book through adapters and the Book Workflow Orchestrator; preserve Book canonical manuscript, Story Bible/canon, author-decision, lifecycle, admission and publication authority; then integrate Book upward into System Master.
 
-PROSE at `SYSTEM_MASTER/BOOK/PROSE` owns specialist literary diagnosis, controlled revision candidate generation, literary evaluation support, voice/protected-language preservation, homogenization defense and Book-scoped preference-learning behavior. It has zero canonical manuscript-write authority, no Book-admission authority, no author authority and no separate peer/Second-Shift mutation lane.
+PROSE: already complete. Operate only as the literary specialist child `SYSTEM_MASTER/BOOK/PROSE`, under BOOK execution control, providing literary diagnosis, evaluation support, controlled revision candidates, voice/preservation and homogenization-defense capabilities. Do not reopen Prose feature development absent a demonstrated defect or explicit user direction. Prose never gets canonical manuscript-write, Book-admission, author or separate peer/Second-Shift authority.
 
-DOCUMENTS owns document/content artifact semantics, DOCX/PDF/PPTX structure/conversion/preservation/render/export behavior and reusable generic non-Book document/writing artifact semantics. BOOK and DOCUMENTS are peers; Documents cannot silently acquire Book-specific Prose literary authority or write Book canonical state.
+DOCUMENTS: finish the Documents system for DOCX/PDF/PPTX/general document artifact mechanics, structure/conversion/preservation/render/export and generic document services, then integrate Documents upward into System Master. Documents must not absorb Prose or take Book/Learning/Core product semantics.
 
-## Evidence truth
+PROGRAMMING/KNOWLEDGE RECOVERY: supporting CORE-administered custody/provenance work, not a peer system and not a product-priority override.
 
-Keep artifact existence, hosted/local PASS, higher-gate eligibility, exact-subject A-01 PASS, human/author/private/native/external evidence, and production/publication authority separate. Never transfer PASS across SHA/subject, across historical Prose retirement/restoration metadata, or from Documents into Book-Prose integration.
+## Lane crossing
 
-## Completion and current work
+The only direct specialist parent/child crossing is BOOK <-> PROSE. CORE, LEARNING, BOOK and DOCUMENTS remain peer owner lanes. Peer integration happens upward through System Master/shared interfaces and never transfers ownership.
 
-Before repeating work, check completion. Before selecting work, check the current obligation registry. On meaningful completion, preserve exact evidence, close/supersede current obligation where warranted, reconcile repair/current state and the active owner's Second Shift delegation, then re-read live state and select the successor.
+Documents may provide document/artifact services to Book through explicit interfaces, but it may not absorb Prose or mutate Book canonical state.
 
-A new chat never reopens completed work without evidence invalidation.
+## Evidence and completion discipline
 
-## Repair discipline
+Keep artifact existence, hosted/local PASS, exact-subject A-01 PASS, human/author/private/native/external evidence, publication/production authority and product completion separate. No PASS or completion transfers across SHA, subject, owner or system boundary.
 
-Active Book-Prose repairs route through BOOK owner-lane control. A historical standalone Prose repair transaction cannot create a separate Prose execution lane; preserve lineage and reconcile genuinely current work to BOOK without PASS transfer.
+Completed Prose evidence remains valid at its exact historical boundary. Adapter/orchestrator work around Prose is Book integration work and does not reopen Prose completion by default.
 
-## Second Shift discipline
+## Second Shift and mutation discipline
 
-Second Shift peer owner lanes come from `SECOND-SHIFT-REGISTRY-001.json::owner_files`; currently CORE, LEARNING, BOOK and DOCUMENTS. Active Prose child work inherits BOOK. The historical standalone PROSE lane and temporary SYSTEM_MASTER root worker are not active lanes.
+Active peer worker lanes are CORE, LEARNING, BOOK and DOCUMENTS. Prose child work shares BOOK scheduling, claim and telemetry. Only one mutation-capable claim may exist per active owner lane.
 
-Only one mutation-capable claim may be live per owner lane. Until cross-mode foreground/Second-Shift claim arbitration is machine-admitted, a foreground chat that detects branch movement during a mutation packet must fail closed, re-read the live owner head, and adopt/reconcile valid already-written work instead of overwriting it.
+A delegation that conflicts with the job lock, completion status, current obligation, or live control head is stale and must not dispatch. If a foreground chat detects branch movement, re-read and reconcile; never overwrite valid concurrent progress.
 
-A completed/blocked item does not imply shift completion. IDLE for an active lane requires current all-rungs exhaustion. A historical standalone lane is outside the active set rather than idle.
+Completion or blocking of one item is not system or lane completion. Continue to the next dependency-valid objective within the same locked job while safe work remains.
 
 ## Required first response in a new chat
 
-Return concise operational status: CHAT READY / CHAT READY_WITH_DECISION / NOT_READY; WHERE WE ARE; WHAT CHANGED; WHERE WE ARE GOING; and one exact NEXT STEP with objective, first action, PASS boundary, successor, failure route and forbidden authority.
+Return: CHAT READY / CHAT READY_WITH_DECISION / NOT_READY; WHERE WE ARE; SYSTEM COMPLETION STANDING; LOCKED JOB; WHAT CHANGED; WHERE WE ARE GOING; and one exact NEXT STEP with objective, first action, PASS boundary, successor, failure route and forbidden authority.
 
 ## End-of-work rule
 
-Before ending substantive work, perform a final live-head delta check. Reconcile any movement, update durable current/Second Shift state as required, and leave one exact next-step contract.
+Before ending substantive work, perform a final live-head delta check, reconcile current obligations/delegations, preserve exact evidence, and leave one exact successor inside the lane's locked job.
