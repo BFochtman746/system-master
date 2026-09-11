@@ -1,0 +1,20 @@
+name: Second Shift Owner Coverage Stress
+on:
+  workflow_dispatch:
+  push:
+    branches: [reliability/second-shift-controller-stress-20260911]
+    paths:
+      - '.github/scripts/second-shift-owner-coverage-stress.js'
+      - '.github/workflows/second-shift-owner-coverage-stress.yml'
+permissions:
+  contents: read
+jobs:
+  stress:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - run: node .github/scripts/second-shift-owner-coverage-stress.js
