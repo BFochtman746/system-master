@@ -62,18 +62,18 @@ Canonical output digests from that exact subject remain preserved:
 
 That acceptance proves the deterministic pipeline only for its exact Topology-004 subject. The Topology-005 architecture change does not transfer PASS to a changed current-authority subject. Fresh qualification is required when the frozen subject changes.
 
-## Remaining Programming corpus gap
+## Current Programming corpus gap
 
-The accepted pilot processed 36 source records:
+`PROGRAMMING-INGEST-MANIFEST-003` is now the current Topology-005 successor manifest. It preserves the 36-source pilot lineage and records the current unresolved census without transferring historical PASS:
 
-- 8 exact subject-byte sources;
-- 26 `EXTERNAL_BYTES_PENDING` sources;
-- 2 `IDENTITY_UNPROVEN` sources;
-- 0 quarantine conflicts;
-- metadata disposition coverage: 100%;
-- full historical byte verification: false.
+- 26 inherited external-byte-pending records;
+- 5 exact external objects have been observed and hashed in the supervised workspace, but 0 are staged in an approved immutable A-01-readable intake location;
+- 21 external objects remain not yet observed;
+- 2 historical records remain `IDENTITY_UNPROVEN`;
+- 0 exact external objects are A-01 verified;
+- full historical byte verification remains false.
 
-A Library file id/version, filename, chat reference, or pre-stage digest is discovery evidence until exact bytes are presented through an approved custody path. `A01_VERIFIED` requires A-01 to actually read the exact bytes.
+The five observed objects remain progress, not terminal custody. Their active blocker is `REPOSITORY_BINARY_TRANSPORT_BOUNDARY`. A Library file id/version, filename, chat reference, workspace hash or pre-stage digest remains discovery/observation evidence until exact bytes cross an approved custody path. `A01_VERIFIED` requires A-01 to actually read those exact bytes.
 
 ## Second Shift decision
 
@@ -98,16 +98,16 @@ Second Shift may not fabricate bytes or identities; claim A-01 verification befo
 
 ## Manifest lineage
 
-`PROGRAMMING-INGEST-MANIFEST-001` and `PROGRAMMING-INGEST-MANIFEST-002` remain immutable historical proving inputs. The next full-corpus version is Manifest 003 or later and must preserve prior records rather than rewrite them.
+`PROGRAMMING-INGEST-MANIFEST-001` and `PROGRAMMING-INGEST-MANIFEST-002` remain immutable historical proving inputs. `PROGRAMMING-INGEST-MANIFEST-003` is the current Topology-005 successor and preserves both predecessors. Any later manifest must append/supersede for current qualification without rewriting historical manifests.
 
 ## Current next action
 
-Execute `PROGRAMMING-EXTERNAL-BYTE-MATERIALIZATION-AND-FULL-CORPUS-INGEST-001`:
+Continue `PROGRAMMING-EXTERNAL-BYTE-MATERIALIZATION-AND-FULL-CORPUS-INGEST-001` from Manifest 003 rather than recreating it:
 
-1. resolve the 26 external-byte-pending sources and 2 identity-unproven sources to exact staged bytes or durable explicit blockers;
-2. preserve original source identity, hashes, conflicts and provenance;
-3. create `PROGRAMMING-INGEST-MANIFEST-003` rather than rewriting prior manifests;
-4. regenerate deterministic full-corpus asset/trace candidates;
-5. prepare `PROGRAMMING-FULL-CORPUS-A01-QUALIFICATION-001` on an exact frozen current-authority subject;
+1. resolve the 21 not-yet-observed external records and 2 identity-unproven records to exact observations or durable explicit blockers;
+2. separately move the 5 already-observed exact objects through an approved immutable A-01-readable transport without substitution, preserving their recorded lengths and SHA-256 identities;
+3. preserve original source identity, hashes, conflicts, uncertainty and provenance for every record;
+4. only after all 28 inherited unresolved records have durable terminal custody dispositions, freeze the exact staged corpus and generate the next append-only manifest/catalog/trace qualification subject as needed;
+5. prepare `PROGRAMMING-FULL-CORPUS-A01-QUALIFICATION-001` only when the exact current-authority subject exists and deterministic hosted prequalification passes;
 6. execute A-01 only when the current registry/policy explicitly admits that exact qualification/execution context;
-7. after the Programming proving-corpus boundary is durable, proceed to remaining authorized catalog/archive recovery.
+7. do not let the transport blocker on the 5 observed objects stop independent authorized discovery of the remaining 21 external records or other catalog/archive recovery work.
