@@ -2,50 +2,61 @@
   "status_id": "SYSTEM-COMPLETION-STATUS-001",
   "effective_date": "2026-09-11",
   "authority": "USER_DIRECTED_CURRENT_COMPLETION_TRUTH",
-  "topology": "governance/SYSTEM-TOPOLOGY-004.json",
-  "rule": "System completion is a product-level standing and must not be inferred from a completed phase, packet, hosted qualification, A-01 receipt, branch label, subsystem closure, or work-program milestone. Only explicit product-level completion authority may mark an active system complete.",
+  "topology": "governance/SYSTEM-TOPOLOGY-005.json",
+  "rule": "System completion is product-level standing and must not be inferred from a completed phase, packet, hosted qualification, A-01 receipt, branch label, subsystem closure, or work-program milestone. Retired systems are historical completion records and cannot be used as active execution domains.",
   "systems": [
     {
       "system_id": "SYSTEM_MASTER",
       "owner_path": "SYSTEM_MASTER",
       "standing": "INCOMPLETE_ACTIVE_PRODUCT_ROOT",
       "complete": false,
-      "job": "Assemble and integrate the active systems into one System Master product while preserving each system's semantic ownership and shared Core boundaries."
+      "job": "Assemble and integrate CORE, LEARNING, BOOK and DOCUMENTS into one System Master product while preserving each system's semantic ownership and shared Core boundaries."
     },
     {
       "system_id": "CORE",
       "owner_path": "SYSTEM_MASTER/CORE",
       "standing": "INCOMPLETE_ACTIVE_SHARED_CORE",
       "complete": false,
-      "job": "Finish the shared Foundation and Spine, shared runtime/data/platform/assurance/continuity/A-01 infrastructure, and the explicit integration surfaces used by the peer systems."
+      "job": "Finish the shared Foundation and Spine, shared runtime/data/platform/assurance/continuity/A-01 infrastructure, and explicit integration surfaces used by peer systems."
     },
     {
       "system_id": "LEARNING",
       "owner_path": "SYSTEM_MASTER/LEARNING",
       "standing": "INCOMPLETE_ACTIVE_SYSTEM",
       "complete": false,
-      "job": "Finish the Learning system and its explicit integration into System Master without taking Book, Documents, Prose, Core, or Programming work."
+      "job": "Finish Learning and its explicit integration into System Master without taking Book, Documents, Core or Programming work."
     },
     {
       "system_id": "BOOK",
       "owner_path": "SYSTEM_MASTER/BOOK",
-      "standing": "INCOMPLETE_ACTIVE_SYSTEM__PROSE_INTEGRATION_IN_PROGRESS",
+      "standing": "INCOMPLETE_ACTIVE_SYSTEM__BOOK_OWNED_COMPLETED_PROSE_INTEGRATION_MAY_REMAIN",
       "complete": false,
-      "job": "Finish the Book system, including integration of the completed Prose child through adapters and the Book Workflow Orchestrator, then integrate Book into System Master while retaining canonical manuscript, Story Bible, author-decision, lifecycle, admission, and publication authority."
-    },
-    {
-      "system_id": "PROSE",
-      "owner_path": "SYSTEM_MASTER/BOOK/PROSE",
-      "standing": "COMPLETE_SYSTEM__ACTIVE_AS_BOOK_CHILD_FOR_INTEGRATION",
-      "complete": true,
-      "job": "Remain the completed Book literary-specialist system. Supply literary diagnosis, evaluation, controlled revision-candidate, voice/preservation, homogenization-defense, and related Prose capabilities to Book. Integration adapters and orchestration may be added around Prose; completed Prose semantics are not reopened absent demonstrated defect or explicit user direction."
+      "job": "Finish Book, including only genuinely unfinished Book-owned integration of preserved completed Prose capability, then integrate Book into System Master while retaining canonical manuscript, Story Bible, author-decision, lifecycle, admission and publication authority."
     },
     {
       "system_id": "DOCUMENTS",
       "owner_path": "SYSTEM_MASTER/DOCUMENTS",
       "standing": "INCOMPLETE_ACTIVE_SYSTEM",
       "complete": false,
-      "job": "Finish the Documents system and its explicit integration into System Master for DOCX/PDF/PPTX/document artifact mechanics, conversion, preservation, rendering, and export. Documents does not absorb or own Book-specific Prose intelligence."
+      "job": "Finish Documents and its explicit integration into System Master for DOCX/PDF/PPTX/document artifact mechanics, conversion, preservation, rendering and export. Documents receives no Prose work."
+    }
+  ],
+  "retired_systems": [
+    {
+      "system_id": "PROSE",
+      "historical_owner_path": "SYSTEM_MASTER/BOOK/PROSE",
+      "standing": "COMPLETE_RETIRED_TERMINAL",
+      "complete": true,
+      "active": false,
+      "retirement_record": "governance/retirements/PROSE-SYSTEM-RETIREMENT-001.json",
+      "remaining_product_work": false,
+      "integration_owner_if_genuinely_open": "SYSTEM_MASTER/BOOK",
+      "active_execution_lane": null,
+      "active_repair_lane": null,
+      "active_qualification_lane": null,
+      "active_research_task": null,
+      "active_telemetry_lane": null,
+      "successor_task": null
     }
   ],
   "non_system_programs": [
@@ -59,11 +70,11 @@
     {
       "program_id": "PROGRAMMING_KNOWLEDGE_RECOVERY",
       "owner_path": "SYSTEM_MASTER/CORE",
-      "standing": "ACTIVE_SUPPORT_SUBPROGRAM__NOT_PROGRAMMING_PRODUCT_OWNER__NOT_A_SYSTEM_COMPLETION",
+      "standing": "ACTIVE_SUPPORT_SUBPROGRAM__HIGHEST_DISCRETIONARY_WHILE_SELECTED__NOT_PROGRAMMING_PRODUCT_OWNER",
       "complete": false,
       "parent_program_id": "PROGRAMMING",
-      "job": "Recover and preserve Programming source/custody/provenance for the Programming work program and System Master. It may not replace the Programming engineering program, create a Programming peer system, redefine another lane, or supersede product-integration jobs."
+      "job": "Recover and preserve Programming source/custody/provenance first, then remaining authorized catalog/archive evidence while SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001 remains selected."
     }
   ],
-  "completion_lock": "PROSE is the only system currently authorized to be described as complete. SYSTEM_MASTER, CORE, LEARNING, BOOK, and DOCUMENTS remain incomplete. PROGRAMMING is an incomplete active work program and is not yet an admitted peer system."
+  "completion_lock": "SYSTEM_MASTER, CORE, LEARNING, BOOK and DOCUMENTS are active and incomplete. PROSE is historically complete and terminally retired, with no active work. PROGRAMMING is an incomplete active work program and is not yet an admitted peer system."
 }
