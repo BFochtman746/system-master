@@ -1,227 +1,226 @@
 # CONTROLLER-FOUNDATION-002C — GitHub Durable Journal + Checkpoint Anchor
 
-Status: **RESEARCH COMPLETE / PROVISIONAL DESIGN / IMPLEMENTATION ACTIVE / NOT FROZEN**
+Status: **REFERENCE IMPLEMENTATION QUALIFIED / FROZEN / PRODUCTION ACTIVATION BLOCKED_EXTERNAL_SETUP**
 
 Parent contract: `CONTROLLER-FOUNDATION-002B` qualified subject `f15a5e7bfd910ed2239af954ee29ad42e9b866d7`.
 
+Qualified 002C code subject: `8b0f9517570fa29f3f09bc7f1db38c34fcbe84fa`.
+
+Hosted qualification run: `34654594735`.
+
+- Node 22: **157/157 PASS**
+- Node 24: **157/157 PASS**
+- workflow permissions during qualification: `contents: read`, `metadata: read`
+
+This document-only freeze commit is not a replacement qualification subject; the exact code subject above is the qualified implementation.
+
 ## Objective
 
-Implement the real low-cost remote durability adapter for Controller 2.0 without turning the System Master subject repository into controller state. Preserve all frozen 002B semantics: exact event identity, per-stream continuity, controller-wide journal positions and SHA-256 chain, compare-and-swap head behavior, lost-ack recovery, disaster replay, and external checkpoint anchoring.
+Provide Controller 2.0 with a low-cost GitHub-backed durable semantic journal and independent checkpoint-anchor path without turning the System Master subject repository into controller state. Preserve the frozen 002B semantics for exact event identity, per-stream continuity, controller-wide journal positions/digests, compare-and-swap heads, lost-ack recovery, disaster replay, and durability barriers.
 
-## Research findings
+## Frozen architecture
 
-1. GitHub raw Git objects are a better authority substrate than the Contents API for this use case. GitHub exposes blobs, trees, commits, and refs directly.
-2. Updating a Git ref with `force=false` requires a fast-forward and rejects competing sibling commits. This supplies the transport-level CAS/fork detector needed by the journal.
-3. The Contents API is convenient but concurrent content mutations conflict and hide the exact tree/commit/ref sequence we need to reason about.
-4. GitHub Actions artifacts/logs are retention-bound and therefore cannot be semantic authority.
-5. Webhooks and `repository_dispatch` are notifications/wakeup mechanisms only. Failed webhook deliveries are not automatically redelivered, so command/event durability must not depend on notification delivery.
-6. GitHub recommends no more than 6 pushes/minute per repository. Physical Git commits therefore cannot be assumed to equal logical semantic events. The adapter must support bounded batching while preserving one logical journal position/digest per event.
-7. GitHub rulesets/branch protection can block force pushes/deletions and restrict update actors. Protection is mandatory for production but is not a substitute for the controller's cryptographic journal verification.
-8. GitHub App installation tokens can be scoped to selected repositories/permissions and expire after one hour. A dedicated App is preferred to a long-lived PAT.
-9. Journal and checkpoint-anchor authority should be separated. A controller bug/credential that can append the journal should not automatically be able to rewrite the independent tail anchor.
-10. The connected account currently has no dedicated control-state repository and the available connector cannot create one. Therefore live qualification inside `system-master` is test-only and must never be treated as the production journal.
-
-## Rejected authority substrates
-
-- **Actions artifacts/logs:** expire.
-- **Issues/comments:** mutable UI records, awkward ordering/CAS, not a Git append log.
-- **Webhooks:** notification delivery is not durable queue storage.
-- **`repository_dispatch`:** wakeup only; workflow must exist on default branch and payload limits apply.
-- **Contents API as the primary journal primitive:** usable for ordinary files but weaker control over raw commit/ref CAS semantics.
-- **System Master `main` or any product branch:** violates subject/control separation.
-
-## Provisional production topology
-
-Dedicated repository required before activation, tentatively:
+Production requires a dedicated repository, tentatively:
 
 `BFochtman746/system-master-control-state`
 
-Protected refs:
+Authoritative refs:
 
-- `refs/heads/controller-journal/v1` — journal writer authority
-- `refs/heads/controller-anchor/v1` — independent checkpoint-anchor authority
+- `controller-journal/v1`
+- `controller-anchor/v1`
 
-Recommended identities:
+The System Master repository is not a valid production control-state repository.
 
-- **Controller Journal GitHub App:** Contents write only to the control-state repository; ruleset permits journal-ref updates and denies force-push/delete.
-- **Anchor authority:** separate GitHub-hosted workflow identity or second GitHub App; ruleset permits only anchor-ref updates. The journal writer must not be the anchor bypass actor.
+### Journal
 
-## Journal storage model
+Logical semantic events retain their 002B bytes and event digests. Git commits are transport containers only and may batch multiple logical events.
 
-Logical semantic events remain individually ordered and hashed exactly as Foundation 002B defines. Git is only the durable transport container.
+Stored material includes:
 
-A physical journal commit may contain a bounded ordered batch of logical events. One batch commit adds:
+- immutable event objects: `journal/events/<2>/<2>/<event-id>.json`
+- content-addressed batch manifests: `journal/batches/<2>/<2>/<batch-id>.json`
+- per-stream heads: `journal/streams/<2>/<2>/<sha256(stream-id)>.json`
+- current checkpoint: `journal/state/checkpoint.json`
 
-- immutable event files at `journal/events/<2>/<2>/<event-id>.json`
-- immutable batch manifest at `journal/batches/<shard>/<batch-id>.json`
-- current per-stream head files at `journal/streams/<2>/<2>/<sha256(stream-id)>.json`
-- current `journal/state/checkpoint.json`
+The checkpoint binds at least `{size, head_digest, last_batch_path, last_batch_digest, protocol_version}`.
 
-The event file contains the original semantic event plus:
+Append authority requires both:
 
-- `journal_position`
-- `prev_journal_digest`
-- `journal_digest`
+1. semantic checkpoint compare-and-swap, and
+2. Git transport compare-and-swap through a non-forced fast-forward ref update.
 
-The checkpoint contains at least:
+A competing sibling commit loses. Unreachable Git objects from a failed race are not authority.
 
-- `size`
-- `head_digest`
-- `last_batch_path`
-- `protocol_version`
+### Batching
 
-The batch manifest contains:
+Physical Git commits may batch bounded ordered semantic events to remain well below GitHub push-frequency limits. Batching may never alter local outbox order, semantic event bytes/digests, stream order, global journal positions, global predecessor digests, or durability-barrier semantics.
 
-- batch identity
-- previous batch path
-- expected checkpoint
-- resulting checkpoint
-- ordered event IDs/paths/digests/positions
+The SQLite publisher seals a confirmed batch atomically. A failed batch remains pending and later outbox rows cannot bypass it.
 
-## Append algorithm
+### Checkpoint anchor
 
-1. Read the journal branch ref and exact head commit.
-2. Read and verify the head checkpoint.
-3. Require the caller's expected checkpoint to equal the remote checkpoint.
-4. If a transport revision was supplied, require it to equal the observed head commit SHA.
-5. For every event, validate event digest and per-stream continuation against the stored stream head.
-6. Assign logical journal positions and controller-wide journal digests in caller order.
-7. Create event, stream-head, batch-manifest, and checkpoint blobs/tree from the exact parent tree.
-8. Create one Git commit whose only parent is the observed journal head.
-9. Update `controller-journal/v1` with `force=false`.
-10. If the ref update conflicts, return `JOURNAL_HEAD_CONFLICT`; never force.
-11. If the response is ambiguous/lost, observe the deterministic event path at the current ref before retrying. Exact matching event bytes mean the append succeeded.
-12. Unreachable blobs/trees/commits from failed CAS attempts are harmless and are never authority because the protected ref did not advance to them.
+The anchor is a second append-only hash-linked chain. An anchor record binds:
 
-## Batching rule
-
-Batching is a transport optimization only. It may not alter:
-
-- semantic event bytes/digest
-- local outbox order
-- per-stream order
-- global journal position
-- global predecessor digest
-- durability-barrier semantics
-
-Production publisher will flush at a durability barrier even if the current batch is below its normal size/time threshold.
-
-## Recovery/read model
-
-- `get(eventId)` uses the deterministic sharded event path at the selected journal head.
-- `list()/verify()` walks the immutable batch-manifest chain from `checkpoint.last_batch_path`, loads referenced event files, and runs the frozen 002B whole-journal verifier.
-- Recovery never treats an unreferenced Git object as durable authority.
-- A current tree that deletes/modifies a historical journal object is invalid even if the Git update was a fast-forward.
-
-## Independent checkpoint anchor
-
-The journal ref alone cannot prove that its tail was not removed if a privileged actor later rewrites/deletes the ref. A second append-only anchor ref stores checkpoints independently.
-
-An anchor record binds:
-
-- journal repository identity
-- journal ref name
+- control-state repository identity
+- journal ref
 - exact journal commit SHA
-- `{size, head_digest}`
-- previous anchor digest
+- exact `{size, head_digest}`
+- previous anchor identity/digest
+- timestamp
 - anchor digest
-- controller/policy identity where applicable
-- creation time
 
-Before anchoring, the anchor authority reads `journal/state/checkpoint.json` at the exact journal commit SHA and requires an exact match.
+Before writing an anchor, the anchor authority reads the checkpoint from the exact journal commit SHA and requires an exact match. The journal must continue to extend the latest anchor.
 
-Anchor policy:
+### Runtime credentials
 
-- periodic anchors for ordinary progress
-- mandatory anchor before any irreversible/high-impact external effect such as canonical promotion
-- force-push/delete prohibited on both refs
-- anchor authority distinct from journal writer authority in production
+Production uses two distinct GitHub Apps:
 
-## Failure model
+- Journal App
+- Anchor App
 
-The implementation must fail closed for:
+Each receives a short-lived installation token scoped to the single control-state repository with only `contents: write`. The reference implementation creates RS256 App JWTs, uses short JWT lifetime, requests one-repository installation-token scope, caches only until the safety refresh window, and never stores the App private key in Git or journal state.
 
-- stale expected checkpoint
-- stale Git head/competing writer
-- non-fast-forward update
-- duplicate event ID with altered digest
-- duplicate exact event after lost acknowledgement
-- missing/mutated prior stream head
-- invalid semantic event digest
-- branch ref deletion
-- branch rewind/truncation against anchor
-- batch-manifest gap/loop
-- event file missing from a referenced batch
-- event path collision
-- current checkpoint inconsistent with batch tail
-- GitHub outage/rate limiting
-- partial object creation before ref update
-- response loss after successful ref update
-- anchor referencing the wrong journal commit/checkpoint
-- anchor ref fork/update/delete
+Journal and anchor runtime transports are bound to:
 
-## Production protection requirements
+- configured repository `owner/name`
+- immutable numeric repository ID
+- expected GitHub App ID
+- expected authoritative branch
 
-The control-state repository is not authoritative until protections are configured and verified:
+Runtime authority is update-only. It may not create either authority ref.
 
-- block force pushes
-- block deletion of journal and anchor refs
-- restrict updates to intended app/authority identity
-- no broad human/admin bypass for normal operation
-- controller token scoped only to the control-state repository and minimum Contents permission
-- anchor identity separated from journal writer identity
-- no secrets in journal event payloads
+### Provisioning/runtime split
 
-## Capacity/retention constraints
+Production setup order is:
 
-GitHub recommends keeping individual objects below 1 MB and repository on-disk size below 10 GB, and recommends no more than 6 pushes/minute per repository. 002C therefore uses small canonical JSON objects, sharded paths, batching, and an explicit future archive/compaction design. Compaction may create a new journal epoch only; it may never rewrite an already anchored epoch.
+1. create dedicated control-state repository and initial Git object
+2. privileged provisioner creates explicit empty journal and anchor refs
+3. configure and activate layered branch rulesets
+4. install/configure two separate GitHub Apps
+5. privileged authority inspector resolves effective rulesets including bypass actors
+6. authoritative preflight verifies repository name/ID, branches, apps, protections, and actual bytes
+7. only then construct writable runtime journal/anchor authority
 
-## 002C initial qualification denominator
+Bootstrap is idempotent and never rewrites an existing authority ref.
 
-- GHJ-T001 genesis checkpoint is exact and non-authoritative until remote ref exists
-- GHJ-T002 one event appends with exact logical journal digest
-- GHJ-T003 ordered batch preserves local event order
-- GHJ-T004 same-stream events within one batch chain correctly
-- GHJ-T005 two writers from one parent: exactly one ref update wins
-- GHJ-T006 stale semantic checkpoint rejected
-- GHJ-T007 stale transport revision rejected
-- GHJ-T008 failed ref CAS leaves unreachable objects but no durable event
-- GHJ-T009 lost ref-update acknowledgement is recovered by observation
-- GHJ-T010 exact duplicate is idempotent
-- GHJ-T011 duplicate event ID with changed digest fails closed
-- GHJ-T012 stream predecessor/version fork fails closed
-- GHJ-T013 tampered event file detected
-- GHJ-T014 missing event file referenced by batch detected
-- GHJ-T015 altered batch manifest detected
-- GHJ-T016 checkpoint/batch-tail mismatch detected
-- GHJ-T017 batch-chain loop/gap detected
-- GHJ-T018 whole journal recreates exact 002B checkpoint
-- GHJ-T019 GitHub 409/422 non-fast-forward maps to head conflict, never force retry
-- GHJ-T020 403/429/5xx/network outage leaves local outbox unsealed
-- GHA-T001 anchor verifies checkpoint at exact journal commit before append
-- GHA-T002 exact duplicate anchor idempotent
-- GHA-T003 anchor with changed bytes at same identity conflicts
-- GHA-T004 anchor stale-parent race fails without force
-- GHA-T005 journal rollback below anchored checkpoint detected
-- GHA-T006 anchor-chain deletion/tamper detected
+## Ruleset topology — frozen
+
+A single ruleset with a writer bypass is insufficient because bypass applies to every rule in that ruleset.
+
+Each authoritative branch therefore requires layered protection:
+
+### Writer-authorization ruleset
+
+- branch-targeted `update` restriction
+- active enforcement
+- exactly the designated GitHub App as the sole `always` bypass actor
+
+### Integrity ruleset
+
+- active `deletion` restriction
+- active `non_fast_forward` / block-force-push rule
+- **no always-bypass actors**
+
+All applicable rulesets remain enforced together. This allows the designated App to append while preventing that same runtime credential from deleting or rewriting the authoritative ref.
+
+Protection inspection is a privileged provisioning/audit operation. Runtime App tokens do not gain Administration permission merely to inspect rulesets.
+
+## Live GitHub CAS proof
+
+A non-authoritative disposable test ref `controller-v2/journal-transport-test` was created from parent `36ef2009cf2e44000becd4f66954a1121bbf2857`.
+
+Two sibling commits were created from that same parent:
+
+- candidate A: `b3d6b5f74634cf95280329a23405c8ffaabcbf1e`
+- candidate B: `d35066c7bd4bc1b8aa6ef2107cd5023b8632e145`
+
+Candidate A advanced the ref with `force:false`. The subsequent attempt to update the same ref to sibling candidate B with `force:false` was rejected by GitHub with HTTP 422 `Update is not a fast forward`.
+
+This verifies the core transport CAS assumption against live GitHub. The test ref is explicitly non-authoritative evidence and is not a production journal.
+
+## Failure behavior — frozen
+
+002C fails closed for, among other cases:
+
+- stale semantic checkpoint
+- stale Git transport revision
+- sibling/non-fast-forward race
+- duplicate event ID with changed bytes
+- partial duplicate batch
+- stream gap/fork
+- semantic event tamper
+- missing event/batch
+- batch content-address mismatch
+- checkpoint/tail mismatch
+- anchor chain gap/tamper
+- journal rollback against anchor
+- deleted authority refs after preflight
+- GitHub outage
+- ambiguous network response
+- primary/secondary GitHub rate limiting
+- true permission denial
+- lost acknowledgement after successful ref update
+- token permission mismatch
+- token repository-scope mismatch
+- runtime App identity mismatch
+- runtime repository name or numeric-ID mismatch
+- hidden/incomplete ruleset bypass data
+- missing or evaluate-only protection
+
+Lost acknowledgement is resolved by observation before retry. Consequential controller operations still require the 002B durability barrier.
+
+## Threat boundary
+
+The journal/anchor separation, distinct Apps, cryptographic chains, CAS, and layered rulesets are designed to contain controller bugs, stale writers, worker compromise, and compromise of one runtime App credential.
+
+They do **not** claim to defeat a malicious or compromised GitHub repository administrator who can edit/delete the rulesets themselves. GitHub repository administrators can manage repository rulesets. Defending against that higher threat requires a checkpoint witness outside that administrator's authority (for example, an external append-only/transparency witness or separately administered authority). That is a future hardening option, not silently claimed by 002C.
+
+## Production activation blocker
+
+The connected GitHub account currently has no dedicated `system-master-control-state` repository, and the available connector cannot create repositories or install/configure the required GitHub Apps/rulesets.
+
+Therefore:
+
+- **002C reference implementation qualification: PASS / FROZEN**
+- **002C production activation qualification: BLOCKED_EXTERNAL_SETUP**
+
+No state inside `system-master`, including the test transport branch, is to be interpreted as production Controller 2.0 authority.
+
+## Qualification evidence
+
+Exact code subject: `8b0f9517570fa29f3f09bc7f1db38c34fcbe84fa`
+
+Hosted run: `34654594735`
+
+Result:
+
+- Node 22 — 157 tests / 157 passed / 0 failed
+- Node 24 — 157 tests / 157 passed / 0 failed
+
+The denominator includes all frozen 002B kernel tests plus 002C journal, raw REST transport, rate-limit, anchor, batching, preflight, ruleset inspection, GitHub App token, authoritative-construction, and bootstrap tests.
 
 ## Gate status
 
 - 01 Discovery: PASS
 - 02 Legacy forensics: PASS
-- 03 External research: PASS first full pass
+- 03 External research: PASS
 - 04 Requirement extraction: PASS
 - 05 Design alternatives: PASS
 - 06 Provisional design: PASS
-- 07 Adversarial analysis: PASS first pass
-- 08 Design repair: PASS first pass
-- 09 Formal specification: IN PROGRESS
-- 10 Test design: initial 26-test denominator defined
-- 11 Implementation: ACTIVE
-- 12 Verification: PENDING
-- 13 Failure injection: PENDING
-- 14 Integration: PENDING
-- 15 Qualification: PENDING
-- 16 Freeze: PENDING
+- 07 Adversarial analysis: PASS
+- 08 Design repair: PASS
+- 09 Formal specification: PASS
+- 10 Test design: PASS
+- 11 Implementation: PASS
+- 12 Verification: PASS
+- 13 Failure injection: PASS
+- 14 Integration with frozen 002B kernel: PASS
+- 15 Reference qualification: PASS
+- 16 Reference freeze: PASS
+- Production activation: BLOCKED_EXTERNAL_SETUP
 
-**Activation blocker:** create a dedicated control-state repository and configure the required protections/credentials. Until then, any live GitHub transport test inside `system-master` is explicitly non-authoritative test evidence only.
+## Exact successor
+
+`CONTROLLER-FOUNDATION-002D — DURABLE COMMAND INBOX + CHAT-TO-CONTROLLER INGRESS`
+
+002D must design how ChatGPT/user intent is durably deposited while the local controller is offline, authenticated/admitted exactly once when it comes online, and separated from notification/wakeup delivery. It must consume 002B transaction/idempotency semantics and 002C durable Git transport without making GitHub notification delivery authoritative.
