@@ -1,7 +1,7 @@
 # SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001
 
-**Effective date:** 2026-09-10  
-**Standing:** ACTIVE — HIGHEST SYSTEM MASTER PRIORITY — SUPERVISED PIPELINE ACCEPTED — SECOND SHIFT BULK PREPARATION ACTIVE  
+**Effective date:** 2026-09-11  
+**Standing:** ACTIVE — HIGHEST DISCRETIONARY SYSTEM MASTER PRIORITY — PROGRAMMING PROVING CORPUS FIRST  
 **Semantic owner:** `SYSTEM_MASTER` product-root governance  
 **Execution administrator:** `SYSTEM_MASTER/CORE`  
 **Verification executor:** shared `A-01` control plane  
@@ -9,69 +9,60 @@
 
 ## Priority lock
 
-`SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001` remains the highest active System Master priority until the Programming external-byte recovery/full-corpus qualification path reaches its next durable acceptance boundary or the user explicitly changes priority.
+While this control is selected by `governance/CURRENT-AUTHORITY.json`, `SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001` is the highest discretionary System Master priority.
 
-This priority lock applies to new discretionary System Master planning, research, qualification preparation and repository work. Existing safety, evidence preservation, active owner integrity and human/private/native/external-authority boundaries remain non-preemptible.
+Non-discretionary safety, current-authority reconciliation, exact owner integrity, active repair/control obligations, and human/private/native/external boundaries remain non-preemptible. Independent LEARNING, BOOK, and DOCUMENTS owner work continues in its own lanes.
 
-The chat is a working surface, not a new system or authority domain. This objective does not create a new peer system, owner lane, root worker, or architecture authority.
+Within discretionary System Master/CORE capacity, execute in this order:
 
-## Objective
+1. recover and prove the Programming corpus;
+2. finish the Programming external-byte, identity, custody, manifest, asset-catalog and trace/provenance path to the next durable boundary;
+3. then recover the remaining authorized catalog/archive sources using the same source-custody discipline;
+4. only then select lower-priority discretionary Core discovery/research work.
 
-Build and operate a deterministic source-ingest, manifest, asset-catalog and trace/provenance pipeline that lets future System Master chats recover what already exists before doing new research or implementation. Programming is the first proving corpus.
-
-This control does **not** admit Programming as a first-class peer system. Only explicit user authority plus a superseding topology/ADR/control/obligation/repair/Second-Shift/startup transaction may do that.
+This control does not create a Programming peer system, a Programming peer Second Shift lane, or architecture authority.
 
 ## Current architecture boundary
 
-Current authority is `SYSTEM-TOPOLOGY-004`:
+Current authority selects `SYSTEM-TOPOLOGY-005`:
 
-- peer systems: `CORE`, `LEARNING`, `BOOK`, `DOCUMENTS`;
-- `PROSE` is active only as child specialist `SYSTEM_MASTER/BOOK/PROSE`;
-- PROSE has no independent peer-system or Second Shift owner lane and inherits BOOK execution control;
-- Programming remains a cataloged, non-active candidate.
+- active peer systems: `CORE`, `LEARNING`, `BOOK`, `DOCUMENTS`;
+- `PROSE` is complete and terminally retired;
+- Prose has no active owner path, child or inherited execution, repair lane, qualification lane, research task, telemetry lane, successor task, or mutation claim domain;
+- any genuinely unfinished integration of preserved completed Prose capability is ordinary `SYSTEM_MASTER/BOOK` work;
+- `DOCUMENTS` receives no Prose work;
+- `PROGRAMMING` remains an active non-peer work program until explicit future admission.
 
-Knowledge Recovery must preserve this boundary exactly. Historic Prose-retirement evidence is provenance only where superseded by topology 004 / ADR-0004.
+Historical metadata that describes Prose as active is `STALE_ARCHITECTURE_PENDING_RECONCILIATION` and cannot dispatch work.
 
-## Supervised proving result — ACCEPTED
+## Objective
 
-The current-authority supervised proving subject is:
+Build and operate deterministic source-ingest, manifest, asset-catalog and trace/provenance recovery so System Master reuses what already exists before new research or implementation. Programming remains the proving corpus.
 
+Every source must preserve original locator, source identity/version, observed bytes when available, byte length, digest, conflicts, duplicate/supersession relations, custody state and explicit non-claims.
+
+## Preserved supervised proving evidence
+
+The previously accepted supervised proving subject remains exact historical evidence:
+
+- topology at execution: `SYSTEM-TOPOLOGY-004`;
 - exact subject SHA: `4a2d4f7168f48728ef67d187ff43afb97c9568d9`;
 - exact control-plane SHA: `c23dec17b907a3bdf6c1fac8ca1a6f829abea19f`;
-- topology: `SYSTEM-TOPOLOGY-004`;
 - manifest: `PROGRAMMING-INGEST-MANIFEST-002`;
 - workflow run: `34548900531`;
 - executor: A-01 / Windows / X64;
-- admission: `ADMITTED`;
-- result: PASS on attempt 1 and PASS on a same-subject repeat.
+- admission/result: ADMITTED / PASS, including same-subject deterministic repeat;
+- durable acceptance record: `governance/knowledge-recovery/SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001-SUPERVISED-ACCEPTANCE.json`.
 
-Both A-01 executions produced identical canonical digests:
+Canonical output digests from that exact subject remain preserved:
 
 - asset catalog: `6e7b66655678f09ba3835ec50fea68a48e267741e3dc3503c6bcea5df166422f`;
 - trace graph: `dadbb337037e399c3aaf66b81dbe5171c2a6011c2b819f6f40614feed86809a9`;
 - source observations: `ac3435de9e1028b1aeee55d7546463eaa94e84671d78fa201eb4ebbfaddc4efe`.
 
-The durable acceptance record is `governance/knowledge-recovery/SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001-SUPERVISED-ACCEPTANCE.json`.
+That acceptance proves the deterministic pipeline only for its exact Topology-004 subject. The Topology-005 architecture change does not transfer PASS to a changed current-authority subject. Fresh qualification is required when the frozen subject changes.
 
-The supervised acceptance gate is therefore **PASSED** for the current topology and exact proving subject.
-
-## What the acceptance proves
-
-It proves that the current Knowledge Recovery pipeline can, for the frozen proving subject:
-
-- pass the trusted metadata-only admission barrier;
-- execute on the real A-01 runner;
-- preserve topology 004 and BOOK > PROSE authority;
-- prevent Programming promotion;
-- process every manifest record to an explicit disposition;
-- hash exact repository-present subject bytes;
-- preserve unavailable external bytes as unavailable;
-- emit a non-dangling deterministic asset catalog, trace graph, source observations and receipt envelope;
-- reproduce the same canonical output digests on a second invocation of the same exact subject.
-
-It does **not** prove that every historical Programming byte has been recovered or verified.
-
-## Remaining corpus gap
+## Remaining Programming corpus gap
 
 The accepted pilot processed 36 source records:
 
@@ -82,84 +73,32 @@ The accepted pilot processed 36 source records:
 - metadata disposition coverage: 100%;
 - full historical byte verification: false.
 
-A Library file id/version or ChatGPT pre-stage digest remains discovery/pre-stage evidence until the exact bytes are presented through an approved custody path and, for `A01_VERIFIED`, actually read by A-01.
+A Library file id/version, filename, chat reference, or pre-stage digest is discovery evidence until exact bytes are presented through an approved custody path. `A01_VERIFIED` requires A-01 to actually read the exact bytes.
 
 ## Second Shift decision
 
-Knowledge Recovery is now **SECOND_SHIFT_ELIGIBLE for deterministic custody recovery and preparation** under the CORE administrative lane.
+Knowledge Recovery is Second-Shift eligible under the CORE lane for deterministic, owner-valid, unattended-safe custody/provenance work. It uses the CORE claim domain only; it does not create a Programming lane.
 
-Second Shift may:
+Second Shift may inventory unresolved Programming sources; retrieve/materialize through already-authorized source access; hash bytes actually observed; stage exact custody where supported; build versioned manifests/catalog/trace candidates; detect duplicates/conflicts; preserve source-specific blockers; and prepare exact-subject A-01 qualification requests.
 
-- inventory the unresolved Programming sources;
-- retrieve/materialize exact bytes through already-authorized source access;
-- hash bytes actually observed;
-- stage exact source custody where supported;
-- build versioned manifests, asset-catalog deltas and trace/provenance edges;
-- detect duplicates and preserve conflicts/quarantine;
-- produce source-specific missing-byte/identity blockers;
-- prepare a later exact-subject full-corpus A-01 request.
-
-Second Shift may not:
-
-- claim external bytes are A-01 verified before A-01 reads them;
-- promote Programming or create a Programming owner lane;
-- change current topology or BOOK/PROSE/DOCUMENTS ownership;
-- fabricate missing bytes, identities or PASS evidence;
-- bypass human/private/external/native authority;
-- run the current Knowledge Recovery qualification as overnight A-01 work while its A-01 registry entry remains `overnight_eligible:false`.
-
-Knowledge Recovery eligibility and A-01 overnight qualification admission are separate controls.
+Second Shift may not fabricate bytes or identities; claim A-01 verification before A-01 reads the bytes; change topology; resurrect Prose; route Prose work to Documents; bypass human/private/native/external authority; or infer publication/production authority.
 
 ## Required invariants
 
-1. Current architecture comes only from `governance/CURRENT-AUTHORITY.json` and its selected topology. Ingest cannot create, promote, retire or re-parent a system.
-2. Every recovered source keeps its original locator, source name/version and historical identity.
-3. A digest is `A01_VERIFIED` only when A-01 actually reads those bytes during qualification.
-4. A Library file id/version is a discovery locator, not a content digest.
-5. Historical digest claims remain claims until compared with actual bytes.
-6. Conflicting claims are preserved and quarantined; they are never silently normalized.
-7. Research closure, build-spec closure, implementation, portable qualification, target-native qualification and production standing remain distinct.
-8. Historical PASS never transfers to changed bytes or a different subject.
-9. Duplicate detection never deletes provenance.
-10. Every derived asset and trace edge identifies its source records.
-11. Human, author, private-data, external-provider, Apple-native and production authority cannot be synthesized.
-12. Same exact manifest/subject processing must be deterministic and idempotent except for runtime timestamps in the outer receipt.
-13. PROSE may appear as active only at `SYSTEM_MASTER/BOOK/PROSE`; no independent PROSE peer or worker lane may be synthesized.
-14. A topology/authority change invalidates any unreviewed acceptance transfer to the new subject until reconciled.
-
-## Pipeline products
-
-A-01 qualification emits:
-
-- `knowledge-recovery-report.json`
-- `programming-asset-catalog.json`
-- `programming-trace-graph.json`
-- `programming-source-observations.json`
-- normal A-01 `request.json`, `receipt.json`, stdout/stderr and runner evidence.
-
-Canonical catalog/trace state is admitted only by a separate reviewed repository transaction.
+1. Architecture comes only from CURRENT-AUTHORITY and its selected topology/ADR.
+2. Ingest cannot create, promote, retire, re-parent or auto-provision a system.
+3. Every recovered source keeps original locator, identity/version, claims and provenance.
+4. Observed digest claims never exceed bytes actually observed.
+5. Conflicting claims are preserved and quarantined, never silently normalized.
+6. Historical PASS never transfers across changed SHA, topology, ownership, subject or execution boundary.
+7. Duplicate detection never deletes provenance.
+8. Human, author, private-data, external-provider, native-platform, publication and production authority cannot be synthesized.
+9. Same exact manifest/subject processing must remain deterministic and idempotent except for outer receipt timestamps.
+10. PROSE is retired and non-dispatchable; Book-only integration of preserved completed capability does not create Prose work.
 
 ## Manifest lineage
 
-`PROGRAMMING-INGEST-MANIFEST-001` is the immutable topology-003 proving input.
-
-`PROGRAMMING-INGEST-MANIFEST-002` is the accepted topology-004 proving input. It extends Manifest 001 without rewriting it, replaces stale topology-003 current authority with topology 004, and adds System Catalog 002 plus ADR-0004 as exact-subject authority inputs.
-
-The next full-corpus version must be Manifest 003 or later; Manifest 001/002 remain preserved historical inputs.
-
-## Historical attempts
-
-### RUN-001
-
-The original attempt reached GitHub-hosted admission but no hosted runner was assigned (`runner_id: 0`, no executed steps). A-01 was not consumed. Standing: `INFRA_FAILURE`, not a pipeline result.
-
-### Topology-003 RUN-004
-
-Workflow `34548195760` passed twice deterministically on subject `98361fe491dc55fff6789f71db506680303a6fdc`. That remains valid exact-subject historical evidence but cannot substitute for the later topology-004 acceptance.
-
-### Topology-004 current acceptance
-
-Workflow `34548900531` passed twice deterministically on subject `4a2d4f7168f48728ef67d187ff43afb97c9568d9`, satisfying the current supervised acceptance gate.
+`PROGRAMMING-INGEST-MANIFEST-001` and `PROGRAMMING-INGEST-MANIFEST-002` remain immutable historical proving inputs. The next full-corpus version is Manifest 003 or later and must preserve prior records rather than rewrite them.
 
 ## Current next action
 
@@ -169,5 +108,6 @@ Execute `PROGRAMMING-EXTERNAL-BYTE-MATERIALIZATION-AND-FULL-CORPUS-INGEST-001`:
 2. preserve original source identity, hashes, conflicts and provenance;
 3. create `PROGRAMMING-INGEST-MANIFEST-003` rather than rewriting prior manifests;
 4. regenerate deterministic full-corpus asset/trace candidates;
-5. prepare `PROGRAMMING-FULL-CORPUS-A01-QUALIFICATION-001` on an exact frozen subject;
-6. execute A-01 only when the current registry/policy explicitly admits that exact qualification/execution context.
+5. prepare `PROGRAMMING-FULL-CORPUS-A01-QUALIFICATION-001` on an exact frozen current-authority subject;
+6. execute A-01 only when the current registry/policy explicitly admits that exact qualification/execution context;
+7. after the Programming proving-corpus boundary is durable, proceed to remaining authorized catalog/archive recovery.
