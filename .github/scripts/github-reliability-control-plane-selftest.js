@@ -38,17 +38,28 @@ function consumeTerminalEvent(seen, eventId) {
 }
 
 const leaseSchema = readJson('governance/github/GITHUB-WORK-LEASE-SCHEMA-001.json');
+const stateSchema = readJson('governance/github/GITHUB-CONTROL-STATE-SCHEMA-001.json');
 const opSchema = readJson('governance/github/GITHUB-OPERATION-LEDGER-SCHEMA-001.json');
 const secondShift = readJson('governance/second-shift/SECOND-SHIFT-REGISTRY-001.json');
 
 const requiredLease = new Set(leaseSchema.required_fields || []);
-for (const f of ['work_session_id','owner_lane','objective_id','candidate_branch','base_sha','owner_control_head','fence_epoch','allowed_paths','allowed_effects','forbidden_effects','authorization_class','issued_at','expires_at','issued_by']) {
+for (const f of ['work_session_id','owner_lane','objective_id','owner_claim_id','owner_claim_epoch','executor_mode','candidate_branch','base_sha','owner_control_head','fence_epoch','allowed_paths','allowed_effects','forbidden_effects','authorization_class','issued_at','expires_at','issued_by']) {
   assert(requiredLease.has(f), `lease schema missing ${f}`);
 }
+assert((leaseSchema.executor_modes || []).includes('FOREGROUND_CHAT'), 'FOREGROUND_CHAT mode missing');
+assert((leaseSchema.executor_modes || []).includes('SECOND_SHIFT'), 'SECOND_SHIFT mode missing');
 assert((leaseSchema.authorization_classes || []).includes('USER_REQUIRED'), 'USER_REQUIRED authorization class missing');
 assert((leaseSchema.effect_classes?.USER_REQUIRED || []).includes('REPLACE_CENTRAL_OBJECTIVE'), 'central objective replacement must require user authority');
 assert((leaseSchema.effect_classes?.USER_REQUIRED || []).includes('CROSS_OWNER_CANONICAL_WRITE'), 'cross-owner canonical write must require user authority');
-assert(leaseSchema.canonical_write_requirement === 'OWNER_LANE_LEASE_AND_GLOBAL_REPOSITORY_WRITER_FENCE', 'two-lock write law missing');
+assert(leaseSchema.canonical_write_requirement === 'EXACT_CURRENT_OWNER_LANE_CLAIM_AND_WORK_LEASE_AND_GLOBAL_REPOSITORY_WRITER_FENCE', 'exact owner-claim write law missing');
+
+const stateFields = new Set(stateSchema.required_state_fields || []);
+for (const f of ['owner_claim_epochs','active_owner_claims','active_work_leases','active_repository_writer','repository_writer_epoch']) {
+  assert(stateFields.has(f), `control state missing ${f}`);
+}
+assert(Array.isArray(stateSchema.owner_claim_executor_modes), 'owner claim executor modes missing');
+assert(stateSchema.owner_claim_executor_modes.includes('FOREGROUND_CHAT') && stateSchema.owner_claim_executor_modes.includes('SECOND_SHIFT'), 'foreground/Second Shift arbitration modes missing');
+assert(stateSchema.initial_state && stateSchema.initial_state.owner_claim_epochs && typeof stateSchema.initial_state.owner_claim_epochs === 'object', 'owner claim epoch state missing');
 
 const requiredOp = new Set(opSchema.required_fields || []);
 for (const f of ['operation_id','idempotency_key','owner_lane','objective_id','work_session_id','operation_class','resource','expected_base_sha','fence_epoch','payload_sha256','priority','attempt','state']) {
@@ -61,7 +72,7 @@ assert(opSchema.retry_law?.poison_work === 'QUARANTINE', 'poison work must quara
 const lanes = Object.keys(secondShift.owner_files || {});
 assert(lanes.length > 0, 'Second Shift registry has no active lanes');
 assert(lanes.includes('DOCUMENTS'), 'DOCUMENTS must be registry-discovered');
-assert(!lanes.includes('PROSE'), 'retired PROSE must not be active');
+assert(!lanes.includes('PROSE'), 'PROSE must not be an independent owner lane');
 assert(!lanes.includes('SYSTEM_MASTER'), 'MASTER_ROOT must not be an active worker lane');
 assert(String(secondShift.owner_discovery_rule || '').includes('owner_files'), 'owner discovery must be registry-driven');
 
@@ -96,6 +107,9 @@ console.log(JSON.stringify({
   status: 'PASS',
   tests: {
     lease_contract: true,
+    exact_owner_claim_binding_contract: true,
+    foreground_second_shift_mutual_exclusion_contract: true,
+    durable_owner_claim_epoch_state: true,
     user_authority_boundary: true,
     dynamic_second_shift_lanes: lanes,
     idempotent_replay: true,
