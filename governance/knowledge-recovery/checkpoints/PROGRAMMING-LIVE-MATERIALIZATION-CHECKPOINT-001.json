@@ -1,0 +1,87 @@
+{
+  "checkpoint_id": "PROGRAMMING-LIVE-MATERIALIZATION-CHECKPOINT-001",
+  "objective_id": "SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001",
+  "child_contract": "PROGRAMMING-EXTERNAL-BYTE-MATERIALIZATION-AND-FULL-CORPUS-INGEST-001",
+  "candidate_system_id": "PROGRAMMING",
+  "observed_at": "2026-09-10T22:14:00-04:00",
+  "executor_class": "CHATGPT_SUPERVISED_LIVE_SESSION",
+  "standing": "EXACT_BYTES_OBSERVED__REPOSITORY_A01_TRANSPORT_BLOCKED",
+  "architecture_authority": false,
+  "a01_verification_claimed": false,
+  "terminal_custody_claimed": false,
+  "sources": [
+    {
+      "source_id": "LIB-PROGRAMMING-BUILD-EXECUTION-LEDGER-001",
+      "file_id": "file_00000000c094822fb552553a2e53c590",
+      "version_id": "1",
+      "name": "PROGRAMMING_APP_ATOMIC_CAPABILITY_LEDGER_002Y_AUD037_R5H_BUILD_EXECUTION_002E.xlsx",
+      "observed_byte_length": 1831588,
+      "observed_sha256": "fcd985e496c40f3578ad989cc216d81d1cc9311b3cbe9b235fde8a9dfdee7181",
+      "prior_digest_claim": "fcd985e496c40f3578ad989cc216d81d1cc9311b3cbe9b235fde8a9dfdee7181",
+      "prior_claim_match": true,
+      "checkpoint_state": "MATERIALIZED_EXACT_BYTES_IN_CHATGPT_WORKSPACE",
+      "terminal_custody_state": "PENDING_APPROVED_IMMUTABLE_TRANSPORT"
+    },
+    {
+      "source_id": "LIB-PROGRAMMING-UIUX-DESIGN-001",
+      "file_id": "file_0000000060b0822f96b6b73dd33e2c66",
+      "version_id": "1",
+      "name": "PROGRAMMING-FOUNDATION-002W_UI-UX-ACCESSIBILITY-HUMAN-INTERACTION-DESIGN-001_CURRENT-v3_REQUALIFICATION_R5AI.md",
+      "observed_byte_length": 6494,
+      "observed_sha256": "bb5b6abebccaea3b735d089ee40a414ed665e5178d9d90c6c7d040c273fb6818",
+      "prior_digest_claim": "bb5b6abebccaea3b735d089ee40a414ed665e5178d9d90c6c7d040c273fb6818",
+      "prior_claim_match": true,
+      "checkpoint_state": "MATERIALIZED_EXACT_BYTES_IN_CHATGPT_WORKSPACE",
+      "terminal_custody_state": "PENDING_APPROVED_IMMUTABLE_TRANSPORT"
+    },
+    {
+      "source_id": "LIB-PROGRAMMING-CROSSCUT-R5U-001",
+      "file_id": "file_000000006ddc822f99727a8d935244a9",
+      "version_id": "1",
+      "name": "PROGRAMMING-CROSSCUT-002_EXISTING-CONSTITUTION-REQUIREMENTS-CLOSURE-AUDIT-001_RECHECK_R5U.md",
+      "observed_byte_length": 3171,
+      "observed_sha256": "e62e0014c3ecf99fa0d58e07a87e8f4fc925835a8f00ec329702e69eaaca2793",
+      "prior_digest_claim": "e62e0014c3ecf99fa0d58e07a87e8f4fc925835a8f00ec329702e69eaaca2793",
+      "prior_claim_match": true,
+      "checkpoint_state": "MATERIALIZED_EXACT_BYTES_IN_CHATGPT_WORKSPACE",
+      "terminal_custody_state": "PENDING_APPROVED_IMMUTABLE_TRANSPORT"
+    },
+    {
+      "source_id": "LIB-PROGRAMMING-STATIC-WAVE-EVIDENCE-001",
+      "file_id": "file_000000008a38822fb3db490e3ac10d25",
+      "version_id": "1",
+      "name": "QE-STATIC-WAVE-01.json",
+      "observed_byte_length": 9223,
+      "observed_sha256": "79a9c9d73981144dd97fab710ea3ad55817f075179cd5f03a1da05f0a1eb32d3",
+      "prior_digest_claim": "79a9c9d73981144dd97fab710ea3ad55817f075179cd5f03a1da05f0a1eb32d3",
+      "prior_claim_match": true,
+      "checkpoint_state": "MATERIALIZED_EXACT_BYTES_IN_CHATGPT_WORKSPACE",
+      "terminal_custody_state": "PENDING_APPROVED_IMMUTABLE_TRANSPORT"
+    },
+    {
+      "source_id": "LIB-PROGRAMMING-AUD038-001",
+      "file_id": "file_000000002bcc822f82a344ae23813df1",
+      "version_id": "1",
+      "name": "AUD-038 BUILD STANDARD AMENDMENT AND REMEDIATION REPORT.md",
+      "observed_byte_length": 19717,
+      "observed_sha256": "5df043fd4d2a16483e9a6242255aa2eca28878ad1b297df737b56658d5c319d2",
+      "prior_digest_claim": null,
+      "prior_claim_match": null,
+      "checkpoint_state": "MATERIALIZED_EXACT_BYTES_IN_CHATGPT_WORKSPACE",
+      "terminal_custody_state": "PENDING_APPROVED_IMMUTABLE_TRANSPORT"
+    }
+  ],
+  "verified_facts": [
+    "Five exact Library objects were materialized during this supervised session.",
+    "Four sources with existing ChatGPT pre-stage digest claims matched the bytes observed in this session exactly.",
+    "AUD-038 received a first observed byte length and SHA-256 checkpoint.",
+    "No source in this checkpoint is claimed A01_VERIFIED because A-01 has not read these exact external bytes.",
+    "No source is claimed STAGED_EXACT_BYTES because the current GitHub connector path cannot place these original binary/text objects into an A-01-readable approved immutable repository intake location from the materialized workspace path."
+  ],
+  "blocker": {
+    "class": "REPOSITORY_BINARY_TRANSPORT_BOUNDARY",
+    "detail": "The supervised session can materialize exact ChatGPT Library bytes and compute hashes, but the available GitHub contents/connector write path does not accept local file paths and cannot directly stream the large original binary workbook bytes into immutable repository custody. Text metadata can be committed, but that is not equivalent to staging original source bytes.",
+    "next_executable_condition": "Provide or implement an approved byte transport from materialized Library files to an A-01-readable immutable intake location, or use an execution surface that can access both the Library bytes and authenticated repository storage without content substitution."
+  },
+  "continuation": "Continue materializing and hashing unresolved Programming sources where exact Library access is available; preserve observed identities as append-only checkpoints; do not call them A01_VERIFIED or terminally staged until the exact bytes cross the approved immutable custody boundary."
+}
