@@ -1,7 +1,14 @@
+from .database import ControllerStore
+from .migrations import (
+    MigrationChecksumMismatch,
+    MigrationError,
+    MigrationSequenceError,
+    UntrackedSchema,
+    verify_migrations,
+)
 from .store import (
     CanonicalizationError,
     CommandResult,
-    ControllerStore,
     IdempotencyConflict,
     InvalidState,
     LeaseHeld,
@@ -18,6 +25,11 @@ __all__ = [
     "InvalidState",
     "LeaseHeld",
     "LeaseResult",
+    "MigrationChecksumMismatch",
+    "MigrationError",
+    "MigrationSequenceError",
+    "UntrackedSchema",
     "canonical_json",
     "new_uuid7",
+    "verify_migrations",
 ]
