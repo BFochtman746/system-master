@@ -1,5 +1,6 @@
 {
   "receipt_id": "DOCUMENTS-R4-GITHUB-NATIVE-PAYLOAD-STAGING-CLOSURE-RECEIPT-004",
+  "receipt_revision": 2,
   "date": "2026-09-11",
   "owner": "SYSTEM_MASTER/DOCUMENTS",
   "work_package": "DOCUMENTS-R4-GITHUB-NATIVE-PAYLOAD-STAGING-004",
@@ -7,12 +8,23 @@
   "transfer_commit": "cf32b706e05f2b2b1927c77dd2e87e5d3b76d5aa",
   "carrier_commit": "46ac901de294fe7609d5b4d2ea0bceaa2ed8419a",
   "staging_commit": "9f2854deefbcb8b7600634666e9a5b1664401eac",
+  "assembler_closure_commit": "6c795d315dac668ab6d3b363e99818a15bb30b6e",
+  "workflow_run_id": 34646813282,
+  "workflow_result": "SUCCESS",
   "transfer": {
-    "method": "26 SHA-gated whole Git blobs carrying RFC4648 base64 carrier text; no manually retyped payload bytes",
-    "part_count": 26,
+    "method": "37 SHA-gated Git blobs carrying RFC4648 base64 carrier text with adaptive bounded part sizes; every blob identity was precomputed and verified before branch binding",
+    "part_count": 37,
+    "part_size_profile_bytes": {
+      "20000": 12,
+      "10000": 8,
+      "5000": 16,
+      "1344": 1
+    },
     "encoded_bytes": 401344,
     "encoded_sha256": "67e6e82c1b713c1939ccc3aa345ca2ceb0f3b086e0f849e27725c66b254f6f4f",
-    "transfer_manifest_sha256": "58bba549fa395da331c86251be98645b7995c7318c0dfca9d15911b3fcb84a0f"
+    "transfer_manifest_bytes": 6896,
+    "transfer_manifest_git_blob_sha1": "f1eb46480269222683e60deffb8ba5d1a29558f9",
+    "transfer_manifest_sha256": "64c826213b54660c0ffc858a44800fad683f68b6c496c15f7adbc715039ffc1c"
   },
   "carrier": {
     "filename": "CR001_R4_225_SOURCE_WITH_EVIDENCE_20260910.tar.xz",
@@ -55,6 +67,12 @@
   "staging_frozen": true,
   "historical_pass_transfer": false,
   "github_native_source_custody": "BLOCKED_PENDING_SEPARATE_ARMING_ADMISSION",
+  "audit_correction": {
+    "reason": "Revision 1 retained stale pre-repair transfer metadata (26 parts and an obsolete manifest SHA) even though the executed transfer used the persisted 37-part manifest. Revision 2 reconciles the receipt to the exact committed manifest without changing the frozen payload, chunk set, staging state, or qualification claims.",
+    "payload_mutated": false,
+    "staging_mutated": false,
+    "ready_mutated": false
+  },
   "nonclaims": [
     "READY_ARMED",
     "GITHUB_NATIVE_SOURCE_CUSTODY_PASS",
