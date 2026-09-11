@@ -28,12 +28,12 @@ CR001-R4 exact 225-Java-file source tree reconstructed from Library evidence and
 Preserved R2/R3/R4, Document World Class, DOCX mastery, render, accessibility and oracle evidence. Historical PASS remains evidence only for its exact subject.
 
 ### REQUIREMENT / CAPABILITY INTAKE DENOMINATOR
-Historical Universal Document + Presentation ledger: 2,855 atomic capabilities. It is an intake denominator, not a blindly current owner denominator. Every row must retain provenance and receive current ownership/disposition before build closure.
+Best recovered atomic ledger: 2,935 unique capabilities in `ATOMIC_CAPABILITY_LEDGER_CR001_PROMOTED.xlsx`. The older build tracker contains 2,855 rows. The promoted ledger adds 80 DOCX rows (`UDM-DOCX-0595..0674`) and changes 60 predecessor rows. The 2,935 rows are the build-readiness intake denominator; they are not a blanket claim that every row is currently implemented or exclusively Documents-owned.
 
 ## 3. Recovered requirement families
 
-Historical 2,855-capability corpus includes these major families:
-- DOCX — 594
+Best recovered 2,935-capability corpus includes these major families:
+- DOCX — 674
 - PPTX — 542
 - FORMAT_COVERAGE — 480
 - PDF — 333
@@ -64,7 +64,8 @@ Current recovered high-water handoff:
 - SHA-256: ada701cfa15e6162b6cdf67bc6c0803540a611b08a23aeeeddd1045d8ce2d8ab
 - Canonical manifest: CANONICAL-SOURCE-TREE-MANIFEST(2).csv
 - Manifest rows: 225 Java source/test files
-- Reconstruction result: 225/225 present and digest-matching in prior fresh verification
+- Canonical manifest SHA-256: ed36fc9cfd38b04a8d0174efed06b03e8e25b0a45fc0adc4d47fe3457c2ee367
+- Current reconciliation re-verification: 225/225 path + byte-size + SHA-256 PASS against the exact handoff ZIP
 
 The source manifest visibly contains shared Document-spine infrastructure and concrete DOCX, PPTX, PDF, OCR/vision, design and qualification implementation. This source must be reused rather than recreated.
 
@@ -81,8 +82,24 @@ Preserved evidence includes:
 - Document World Class 001C portable/local completion with 819/819 explicit checks PASS on its historical subject.
 - 001C portable authority 78/78 PASS.
 - Accessibility became a required finalization gate for implemented DOCX/PPTX paths.
-- R4/T14 historical source and qualification exists through UDM-DOCX-0635..0674, but those packet-local rows were not promoted into the canonical root ledger and their PASS cannot transfer to a changed GitHub subject.
+- Earlier source-custody records described T13/T14 packet-local rows as not yet root-promoted. A later recovered `ATOMIC_CAPABILITY_LEDGER_CR001_PROMOTED.xlsx` does contain all 80 added rows `UDM-DOCX-0595..0674`. This reconciliation therefore treats requirement-ledger promotion as recovered, while preserving the separate fact that GitHub-native runnable source custody and fresh qualification are still pending. Historical PASS still cannot transfer to a changed GitHub subject.
 - Exact Microsoft Word/PowerPoint native fidelity, target-PC validator/oracle qualification, fully tagged PDF authoring/remediation, and production certification remain unclaimed.
+
+## 6A. Row-level build map
+
+A machine-usable workbook, `DOCUMENTS_BUILD_READY_MASTER_INDEX_001.xlsx`, now indexes all 2,935 capability rows and carries forward the supporting governance/build ledgers:
+
+- 2,935 unique atomic capability rows;
+- 633 recovered rows classified `REUSE_REQUALIFY_CURRENT_SUBJECT`;
+- 2,302 rows requiring some combination of partial completion, pending implementation, depth audit, dependency/oracle evidence, source review, or other disposition — **not** 2,302 new features;
+- 617 current-claim rows;
+- 52 defect-knowledge rows;
+- 118 coding rules;
+- 123 residual-capability dispositions, all preserved as adjudicated-not-promoted;
+- all 225 exact source-manifest rows with current 225/225 path/size/SHA verification;
+- CR001 delta sheet identifying the 80 new capability rows and 60 changed predecessor rows.
+
+Each capability is indexed by original status/evidence plus reconciled owner disposition, evidence class, build disposition, delta class, residual action/repair family, defect references, next-packet pointer and queue class.
 
 ## 7. Documents spine current-state map
 
