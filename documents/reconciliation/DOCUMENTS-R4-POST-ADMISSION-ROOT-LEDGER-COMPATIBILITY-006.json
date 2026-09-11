@@ -1,0 +1,76 @@
+{
+  "decision_id": "DOCUMENTS-R4-POST-ADMISSION-ROOT-LEDGER-COMPATIBILITY-006",
+  "date": "2026-09-11",
+  "work_package_owner": "SYSTEM_MASTER/DOCUMENTS",
+  "semantic_portfolio": "HEADLESS-CONTENT-ARTIFACTS-001",
+  "semantic_owner_path": "SYSTEM_MASTER",
+  "shared_runtime_provider": "SYSTEM_MASTER/CORE",
+  "base_005_branch_head": "2b80473616e9924d0efe06cf42ad68cda1e0bb7f",
+  "admitted_source_subject_sha": "ded21b569e29b7d162c50f7cb0692874e3f3acc2",
+  "qualification_id": "CR001-R4-GITHUB-NATIVE-QUALIFICATION-005",
+  "decision": "COMPATIBLE_WITH_CONSTRAINED_CURRENT_OWNER_REBIND",
+  "success_gate": "ROOT_LEDGER_PROMOTION_COMPATIBILITY_ADJUDICATED__OWNER_BOUNDARIES_PRESERVED__NO_COMPLETION_INFLATION",
+  "historical_promotion_evidence": {
+    "repair_packet": "DOCUMENT-DOCX-CLOSURE-REPAIR-001",
+    "repair_exit_gate": "CUMULATIVE_DOCX_SOURCE_AND_LEDGER_RECONCILIATION_PASS",
+    "repair_exit_gate_status": "PASS",
+    "repair_status": "PASS_RECONSTRUCTED_EQUIVALENCE_PROMOTED",
+    "promoted_docx_rows": 674,
+    "t13_rows_promoted": 40,
+    "t14_rows_promoted": 40,
+    "promoted_range": "UDM-DOCX-0595..0674",
+    "promoted_ledger_sha256": "dee2126069ef769983e305b2a351d7583cab02722dbdf32c82a5c36ff6a8b8bc",
+    "post_promotion_residual_rows": 123,
+    "document_system_architecture_changed": false,
+    "production_certified": false,
+    "microsoft_word_exact_fidelity": "NOT_CLAIMED_NATIVE_ORACLE_PENDING"
+  },
+  "current_intake_denominator": {
+    "artifact": "ATOMIC_CAPABILITY_LEDGER_CR001_PROMOTED.xlsx",
+    "unique_capabilities": 2935,
+    "older_tracker_rows": 2855,
+    "added_docx_rows": 80,
+    "docx_rows": 674,
+    "classification": "REQUIREMENT_CAPABILITY_INTAKE_DENOMINATOR",
+    "blanket_current_implementation_claim": false,
+    "blanket_exclusive_documents_ownership_claim": false
+  },
+  "compatibility_rules": [
+    "The 80 promoted T13/T14 rows are admissible as governed capability requirements because the prerequisite cumulative T09-T12 reconstruction and canonical-ledger reconciliation exit gate passed before promotion.",
+    "Historical packet/module owner labels are provenance only. Current DOCX semantic authority is rebound to HEADLESS-CONTENT-ARTIFACTS-001 at SYSTEM_MASTER; SYSTEM_MASTER/CORE remains shared runtime provider and does not acquire DOCX semantics.",
+    "The 2935-row promoted ledger is a capability denominator, not evidence that all 2935 capabilities are currently implemented, qualified, production-ready, native-oracle-verified, or exclusively Documents-owned.",
+    "Historical current_status and evidence fields remain evidence about their exact historical subjects. They do not transfer PASS to a changed Git subject merely through ledger admission.",
+    "The admitted CR001-R4 Git subject and fresh 005 qualification may be referenced as current exact-subject evidence only for checks actually executed by 005; row-level standing must remain evidence-bound and may not be inflated by association.",
+    "UDM-DOCX-0674 remains an explicit nonclaim boundary: full ISO XSD conformance and exact Microsoft Word fidelity stay unclaimed until independent validators/native oracles are bound.",
+    "Promotion does not create a first-class Document system or mini-app. It remains a headless product-root capability portfolio under the current topology.",
+    "Promotion does not alter Book, Learning, Prose, Core, native-application, A-01, publication, or production authority boundaries."
+  ],
+  "adjudicated_boundaries": {
+    "requirement_promotion": "ALLOWED",
+    "promotion_provenance": "ACCEPTED",
+    "current_owner_rebind_required": true,
+    "historical_pass_transfer": false,
+    "global_completion_inference": false,
+    "native_word_fidelity_inference": false,
+    "iso_xsd_full_conformance_inference": false,
+    "production_inference": false,
+    "first_class_system_promotion": false,
+    "source_mutation_authorized": false,
+    "transport_payload_mutation_authorized": false,
+    "ready_rebinding_authorized": false
+  },
+  "frozen_005_invariants": {
+    "source_subject_sha": "ded21b569e29b7d162c50f7cb0692874e3f3acc2",
+    "source_rows": 225,
+    "ready_armed": true,
+    "transport_chunk_git_blobs": {
+      "chunk-000.b64": "64034670dbbe18f6b629108bd1d9b1d8d81c4ac8",
+      "chunk-001.b64": "562ec2e184b6068e0f123c9e097d344a42c67dce",
+      "chunk-002.b64": "7b592c67e39a998301be7e5146533b842d724db2",
+      "chunk-003.b64": "d67f828a421b0af4c75d3c5b6a2c25b8ca2a1c20",
+      "chunk-004.b64": "3518bf5ac92360b07f86c6107670da40f5830d1f"
+    }
+  },
+  "result": "CLOSED_PASS__PROMOTION_COMPATIBLE_WITH_CURRENT_OWNER_REBIND__NO_LEDGER_MUTATION_IN_006",
+  "next_permitted_operation": "DOCUMENTS-R4-CURRENT-CAPABILITY-LEDGER-ADMISSION-007 — import the exact promoted 2935-capability denominator into GitHub-native current Documents authority with explicit current-owner/evidence-standing overlay, verify 2935 uniqueness and DOCX 674/T13 40/T14 40 counts, bind immutable source artifact digest/provenance, and preserve all 005 source/transport/READY identities without transferring historical PASS or native/production claims."
+}
