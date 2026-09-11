@@ -1,0 +1,30 @@
+name: Programming Controller Portable Qualification
+
+on:
+  pull_request:
+    paths:
+      - 'programming-controller/**'
+      - '.github/workflows/programming-controller-portable.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: programming-controller-portable-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  portable-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@v4
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run Programming controller portable tests
+        working-directory: programming-controller
+        run: npm test
