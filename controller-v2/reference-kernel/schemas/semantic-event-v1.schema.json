@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "controller://schemas/semantic-event-envelope/v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "specversion",
+    "id",
+    "source",
+    "type",
+    "subject",
+    "time",
+    "dataschema",
+    "streamid",
+    "streamversion",
+    "correlationid",
+    "controllerdigest",
+    "policydigest",
+    "preveventdigest",
+    "eventdigest",
+    "data"
+  ],
+  "properties": {
+    "specversion": {"const": "1.0"},
+    "id": {"type": "string", "format": "uuid"},
+    "source": {"type": "string", "minLength": 1},
+    "type": {"type": "string", "minLength": 1},
+    "subject": {"type": "string", "minLength": 1},
+    "time": {"type": "string", "format": "date-time"},
+    "dataschema": {"type": "string", "minLength": 1},
+    "streamid": {"type": "string", "minLength": 1},
+    "streamversion": {"type": "integer", "minimum": 1},
+    "correlationid": {"type": "string", "minLength": 1},
+    "causationid": {"type": ["string", "null"]},
+    "controllerdigest": {"type": "string", "minLength": 1},
+    "policydigest": {"type": "string", "minLength": 1},
+    "preveventdigest": {"type": ["string", "null"], "pattern": "^sha256:[0-9a-f]{64}$"},
+    "eventdigest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "data": {"type": "object"}
+  }
+}

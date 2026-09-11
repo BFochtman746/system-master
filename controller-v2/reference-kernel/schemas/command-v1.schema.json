@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "controller://schemas/command/v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "protocol_version",
+    "schema",
+    "command_id",
+    "created_at",
+    "issuer",
+    "command_type",
+    "target",
+    "intent",
+    "fingerprint"
+  ],
+  "properties": {
+    "protocol_version": {"const": "1.0"},
+    "schema": {"const": "controller://schemas/command/v1"},
+    "command_id": {"type": "string", "format": "uuid"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "issuer": {
+      "type": "object",
+      "required": ["principal"],
+      "additionalProperties": true,
+      "properties": {
+        "principal": {"type": "string", "minLength": 1},
+        "source": {"type": "string"}
+      }
+    },
+    "command_type": {"type": "string", "minLength": 1},
+    "target": {
+      "type": "object",
+      "required": ["repository"],
+      "additionalProperties": false,
+      "properties": {
+        "repository": {"type": "string", "minLength": 1},
+        "expected_subject_sha": {
+          "type": ["string", "null"],
+          "pattern": "^[0-9a-fA-F]{40}$"
+        }
+      }
+    },
+    "preconditions": {"type": "object"},
+    "intent": {"type": "object"},
+    "constraints": {"type": "object"},
+    "required_policy_version": {"type": ["string", "null"]},
+    "fingerprint": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+  }
+}
