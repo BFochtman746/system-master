@@ -2,10 +2,10 @@
   "owner_system_id": "LEARNING",
   "owner_path": "SYSTEM_MASTER/LEARNING",
   "control_ref": "learning/control-v1",
-  "last_known_control_head": "2a34d20d8db9897e3958bb119d2921043fff9b3d",
+  "last_known_control_head": "e3196089f77dde376944a08eac78a697e57d1535",
   "program_job_lock": "governance/SYSTEM-PROGRAM-JOB-LOCK-001.json",
   "system_completion_status": "governance/SYSTEM-COMPLETION-STATUS-001.json",
-  "delegation_epoch": 33,
+  "delegation_epoch": 34,
   "active_delegations": [
     {
       "delegation_id": "SECOND-SHIFT-LEARNING-CURRICULUM-001E-BATCH-06",
@@ -15,9 +15,9 @@
       "obligation_id": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001",
       "state": "READY",
       "valid_for_control_ref": "learning/control-v1",
-      "valid_for_control_head": "2a34d20d8db9897e3958bb119d2921043fff9b3d",
+      "valid_for_control_head": "e3196089f77dde376944a08eac78a697e57d1535",
       "created_at": "2026-09-10T20:31:44-04:00",
-      "last_revalidated_at": "2026-09-10T22:49:00-04:00",
+      "last_revalidated_at": "2026-09-10T23:45:00-04:00",
       "parent_checkpoint": "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001E-INSTRUCTIONAL-CONTENT-AND-SCORING-BATCH-05-CLOSURE-069.json",
       "predecessor_evidence": {
         "batch_05_requirement_id": "ASQ-CSSGB-2022-I.B.2",
@@ -29,46 +29,51 @@
         "cumulative_requirements_realized": 5,
         "adaptive_practice_not_mastery_regression": "PASS"
       },
-      "selection": {
-        "001d_ordinal": 6,
-        "requirement_id": "ASQ-CSSGB-2022-I.C.1",
-        "source_code": "I.C.1",
-        "title": "Road maps for DfSS",
-        "highest_cognitive_level": "UNDERSTAND",
-        "skill_id": "CSSGB-2022::ASQ-CSSGB-2022-I.C.1::SUBSKILL::dfss-roadmap-recognition",
-        "hard_prerequisite_skill_ids": []
-      },
       "candidate_evidence": {
         "branch": "learning/instructional-scoring-001e-batch-06-20260910",
         "exact_subject_sha": "bd3f7de8490c7cfb6a7dcdd37cc1fa1d4656bced",
         "workflow": ".github/workflows/learning-001e-batch-06-prequal.yml",
         "run_id": 34545605665,
         "attempts": [
-          {"attempt":1,"job_id":103097425177,"standing":"ZERO_STEP_RUNNER_ALLOCATION_FAILURE","runner_id":0},
-          {"attempt":2,"job_id":103097600062,"standing":"ZERO_STEP_RUNNER_ALLOCATION_FAILURE","runner_id":0},
-          {"attempt":3,"job_id":103100539078,"standing":"ZERO_STEP_RUNNER_ALLOCATION_FAILURE","runner_id":0}
+          {"attempt": 1, "job_id": 103097425177, "standing": "ZERO_STEP_RUNNER_ALLOCATION_FAILURE", "runner_id": 0},
+          {"attempt": 2, "job_id": 103097600062, "standing": "ZERO_STEP_RUNNER_ALLOCATION_FAILURE", "runner_id": 0},
+          {"attempt": 3, "job_id": 103100539078, "standing": "ZERO_STEP_RUNNER_ALLOCATION_FAILURE", "runner_id": 0}
         ],
         "semantic_qualification_executed": false,
         "semantic_failure_observed": false,
         "infrastructure_classification": "TRANSIENT_GITHUB_HOSTED_RUNNER_UNAVAILABLE_OR_ACCOUNT_ALLOCATION_BLOCK__ACCOUNT_SPECIFIC_CAUSE_UNPROVEN"
       },
-      "completion_delta": "Execute the already-materialized exact Batch 06 subject through full semantic qualification. Only an executed PASS may authorize Batch 06 closure and Learning-control admission; zero-step runner failures do not change semantic standing.",
-      "stop_condition": "Exact subject bd3f7de8490c7cfb6a7dcdd37cc1fa1d4656bced executes the Batch 06 qualifier and all required grounding/oracle/adaptive/runtime/READY_FOR_REVIEW checks PASS; evidence is preserved; Batch 06 closure is admitted; then select ordinal 7 without replaying prior work.",
-      "allowed_work": ["reuse the exact immutable 001D blueprint and current Learning runtime without replaying 001A-001D or Batches 01-05","retry the same exact Batch 06 SHA after finite transient GitHub-hosted runner allocation failures","inspect run/job standing and preserve zero-step infrastructure failures separately from semantic failures","perform only Learning-owned work-ahead while hosted execution is unavailable","prepare explicit Learning-to-System-Master interfaces when dependency-valid without moving Learning semantics to Core"],
-      "forbidden_authority": ["do not treat zero-step runner allocation as semantic qualification","do not alter the exact Batch 06 subject merely to force execution","do not bypass the A-01/control-plane model","do not replay completed 001A-001D or Batches 01-05","do not infer real learner/psychometric/SME/certification/native/production authority","do not cross into Core, Book, Prose or Documents product ownership","do not declare Learning complete until product-level completion authority changes"],
-      "on_pass": "Admit the exact Batch 06 closure, advance cumulative realization to 6/66, select exact ordinal 7 and continue the Learning system toward its System Master integration boundary.",
-      "on_failure": "If the qualifier executes and fails semantically, repair only the demonstrated Learning defect on a new subject. If no step runs, preserve the same subject and classify transient infrastructure without fabricating product repair."
+      "completion_delta": "Execute the already-materialized exact Batch 06 subject through full semantic qualification when an owner-valid execution path is available. Only an executed PASS authorizes closure; zero-step runner failures do not change semantic standing.",
+      "stop_condition": "Exact subject bd3f7de8490c7cfb6a7dcdd37cc1fa1d4656bced executes the Batch 06 qualifier and all required checks PASS; evidence is preserved; Batch 06 closure is admitted; then select ordinal 7 without replaying prior work.",
+      "allowed_work": [
+        "reuse the exact immutable 001D blueprint and current Learning runtime without replaying 001A-001D or Batches 01-05",
+        "inspect current run/job standing and preserve zero-step infrastructure failures separately from semantic failures",
+        "perform only Learning-owned work-ahead while hosted execution is unavailable",
+        "prepare explicit Learning-to-System-Master interfaces when dependency-valid without moving Learning semantics to Core"
+      ],
+      "forbidden_authority": [
+        "do not treat zero-step runner allocation as semantic qualification",
+        "do not alter the exact Batch 06 subject merely to force execution",
+        "do not bypass the A-01/control-plane model",
+        "do not replay completed 001A-001D or Batches 01-05",
+        "do not infer real learner/psychometric/SME/certification/native/production authority",
+        "do not cross into Core, Book, Documents or Programming product ownership",
+        "do not create or dispatch retired Prose work",
+        "do not declare Learning complete until product-level completion authority changes"
+      ],
+      "on_pass": "Admit the exact Batch 06 closure, advance cumulative realization to 6/66, select exact ordinal 7 and continue Learning toward its System Master integration boundary.",
+      "on_failure": "If the qualifier executes and fails semantically, repair only the demonstrated Learning defect on a new subject. If no step runs, preserve the same subject and classify infrastructure without fabricating product repair."
     }
   ],
   "retired_delegations": [
-    {"delegation_id":"SECOND-SHIFT-LEARNING-CURRICULUM-001E-BATCH-05","state":"COMPLETED__SUPERSEDED_BY_001E_BATCH_06","batch_05_qualified_subject_sha":"ab974136a7080e2a491d6cebbbcc7aec3e0960b1","hosted_run_id":34529688697,"hosted_job_id":103047108576,"hosted_artifact_id":10172972043,"history_preserved":true},
-    {"delegation_id":"SECOND-SHIFT-LEARNING-CURRICULUM-001E-BATCH-04","state":"COMPLETED__SUPERSEDED_BY_001E_BATCH_05","batch_04_qualified_subject_sha":"faa2985e2d936259a39e365f105d7361857c2a34","hosted_run_id":34529296668,"history_preserved":true},
-    {"delegation_id":"SECOND-SHIFT-LEARNING-CURRICULUM-001E-BATCH-03","state":"COMPLETED__SUPERSEDED_BY_001E_BATCH_04","batch_03_qualified_subject_sha":"eb7a410ee23634ac29780224cb954a798cea890b","hosted_run_id":34528922356,"history_preserved":true},
-    {"delegation_id":"SECOND-SHIFT-LEARNING-CURRICULUM-001E-BATCH-02","state":"COMPLETED__SUPERSEDED_BY_001E_BATCH_03","batch_02_qualified_subject_sha":"d63a8f4a0b698ef446dd5e3a0658e85d72a8864b","hosted_run_id":34528568336,"history_preserved":true},
-    {"delegation_id":"SECOND-SHIFT-LEARNING-CURRICULUM-001E-INSTRUCTIONAL-CONTENT-SCORING-REALIZATION","state":"COMPLETED__SUPERSEDED_BY_001E_BATCH_02","batch_01_qualified_subject_sha":"670aec5c42962d64adbc989ac535d0ae21f46594","hosted_run_id":34527943923,"history_preserved":true}
+    {"delegation_id": "SECOND-SHIFT-LEARNING-CURRICULUM-001E-BATCH-05", "state": "COMPLETED__SUPERSEDED_BY_001E_BATCH_06", "batch_05_qualified_subject_sha": "ab974136a7080e2a491d6cebbbcc7aec3e0960b1", "hosted_run_id": 34529688697, "hosted_job_id": 103047108576, "hosted_artifact_id": 10172972043, "history_preserved": true},
+    {"delegation_id": "SECOND-SHIFT-LEARNING-CURRICULUM-001E-BATCH-04", "state": "COMPLETED__SUPERSEDED_BY_001E_BATCH_05", "batch_04_qualified_subject_sha": "faa2985e2d936259a39e365f105d7361857c2a34", "hosted_run_id": 34529296668, "history_preserved": true},
+    {"delegation_id": "SECOND-SHIFT-LEARNING-CURRICULUM-001E-BATCH-03", "state": "COMPLETED__SUPERSEDED_BY_001E_BATCH_04", "batch_03_qualified_subject_sha": "eb7a410ee23634ac29780224cb954a798cea890b", "hosted_run_id": 34528922356, "history_preserved": true},
+    {"delegation_id": "SECOND-SHIFT-LEARNING-CURRICULUM-001E-BATCH-02", "state": "COMPLETED__SUPERSEDED_BY_001E_BATCH_03", "batch_02_qualified_subject_sha": "d63a8f4a0b698ef446dd5e3a0658e85d72a8864b", "hosted_run_id": 34528568336, "history_preserved": true},
+    {"delegation_id": "SECOND-SHIFT-LEARNING-CURRICULUM-001E-INSTRUCTIONAL-CONTENT-SCORING-REALIZATION", "state": "COMPLETED__SUPERSEDED_BY_001E_BATCH_02", "batch_01_qualified_subject_sha": "670aec5c42962d64adbc989ac535d0ae21f46594", "hosted_run_id": 34527943923, "history_preserved": true}
   ],
-  "prior_full_history": {"blob_sha":"1be12b1586aacb841bf1cba526890fb0592ec88d","standing":"IMMUTABLE_GIT_HISTORY_PRESERVED"},
+  "prior_full_history": {"blob_sha": "1be12b1586aacb841bf1cba526890fb0592ec88d", "standing": "IMMUTABLE_GIT_HISTORY_PRESERVED"},
   "owner_revalidation_required": false,
-  "reason": "Learning control record v3 is current at exact head 2a34d20d and locks Learning to its product job plus upward System Master integration; all prior Batch evidence remains preserved.",
+  "reason": "Learning control v4 is current at exact head e3196089 and preserves the Batch 06 subject and infrastructure-only failure evidence under Topology 005 without cross-lane drift.",
   "empty_is_valid": false
 }
