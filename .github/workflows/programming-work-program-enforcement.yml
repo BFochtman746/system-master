@@ -5,18 +5,36 @@ on:
     branches: [main]
     paths:
       - 'governance/CURRENT-AUTHORITY.json'
-      - 'governance/SYSTEM-TOPOLOGY-004.json'
-      - 'governance/SYSTEM-PROGRAM-JOB-LOCK-001.json'
-      - 'governance/SYSTEM-COMPLETION-STATUS-001.json'
-      - 'governance/WORK-OBLIGATION-REGISTRY-008.json'
-      - 'governance/programs/PROGRAMMING-WORK-PROGRAM-LOCK-001.json'
+      - 'governance/SYSTEM-TOPOLOGY-*.json'
+      - 'governance/SYSTEM-PROGRAM-JOB-LOCK-*.json'
+      - 'governance/SYSTEM-COMPLETION-STATUS-*.json'
+      - 'governance/WORK-OBLIGATION-REGISTRY-*.json'
+      - 'governance/programs/PROGRAMMING-WORK-PROGRAM-LOCK-*.json'
       - 'governance/catalog/system-packets/PROGRAMMING.json'
-      - 'governance/morning/CHAT-START-COMMAND-CONTRACT-001.md'
-      - 'governance/morning/DAILY-CHAT-BOOTSTRAP-SCHEMA-001.json'
-      - 'governance/second-shift/SECOND-SHIFT-REGISTRY-001.json'
+      - 'governance/morning/CHAT-START-COMMAND-CONTRACT-*.md'
+      - 'governance/morning/DAILY-CHAT-BOOTSTRAP-SCHEMA-*.json'
+      - 'governance/second-shift/SECOND-SHIFT-REGISTRY-*.json'
+      - '.github/scripts/programming-work-program-enforce.js'
+      - '.github/workflows/programming-work-program-enforcement.yml'
+  pull_request:
+    paths:
+      - 'governance/CURRENT-AUTHORITY.json'
+      - 'governance/SYSTEM-TOPOLOGY-*.json'
+      - 'governance/SYSTEM-PROGRAM-JOB-LOCK-*.json'
+      - 'governance/SYSTEM-COMPLETION-STATUS-*.json'
+      - 'governance/WORK-OBLIGATION-REGISTRY-*.json'
+      - 'governance/programs/PROGRAMMING-WORK-PROGRAM-LOCK-*.json'
+      - 'governance/catalog/system-packets/PROGRAMMING.json'
+      - 'governance/morning/CHAT-START-COMMAND-CONTRACT-*.md'
+      - 'governance/morning/DAILY-CHAT-BOOTSTRAP-SCHEMA-*.json'
+      - 'governance/second-shift/SECOND-SHIFT-REGISTRY-*.json'
       - '.github/scripts/programming-work-program-enforce.js'
       - '.github/workflows/programming-work-program-enforcement.yml'
   workflow_dispatch:
+
+concurrency:
+  group: programming-work-program-enforcement-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
