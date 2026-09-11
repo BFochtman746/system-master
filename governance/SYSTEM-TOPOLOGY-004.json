@@ -6,27 +6,34 @@
   "architecture_decision": "governance/ADR-0004-BOOK-PROSE-CHILD-RESTORATION.md",
   "product_root": {
     "product_id": "SYSTEM_MASTER",
+    "canonical_name": "SYSTEM MASTER",
     "classification": "PRODUCT_ROOT__SYSTEM_OF_SYSTEMS",
     "owns_product_architecture": true
   },
   "canonical_internal_systems": [
     {
       "system_id": "CORE",
+      "canonical_name": "SYSTEM MASTER CORE / FOUNDATION & SPINE",
       "classification": "SHARED_CORE_SYSTEM",
       "parent_id": "SYSTEM_MASTER",
-      "control_ref": "system-master/control-v2"
+      "control_ref": "system-master/control-v2",
+      "control_record": "system-master/control-v2/SYSTEM-MASTER-CORE-CONTROL-RECORD-001.md"
     },
     {
       "system_id": "LEARNING",
+      "canonical_name": "LEARNING SYSTEM",
       "classification": "FIRST_CLASS_TOOL_SYSTEM",
       "parent_id": "SYSTEM_MASTER",
-      "control_ref": "learning/control-v1"
+      "control_ref": "learning/control-v1",
+      "control_record": "learning/control-v1/LEARNING-CONTROL-RECORD-v2.md"
     },
     {
       "system_id": "BOOK",
+      "canonical_name": "BOOK SYSTEM",
       "classification": "FIRST_CLASS_TOOL_SYSTEM",
       "parent_id": "SYSTEM_MASTER",
       "control_ref": "book-system/control-v1",
+      "control_record": "qualification/book-system/BOOK-SYSTEM-PRODUCT-PARENT-BINDING-006.json",
       "owns": [
         "canonical book and manuscript state",
         "end-to-end Book lifecycle",
@@ -42,6 +49,7 @@
     },
     {
       "system_id": "PROSE",
+      "canonical_name": "PROSE SPECIALIST SUBSYSTEM",
       "classification": "ACTIVE_CHILD_SPECIALIST_SUBSYSTEM",
       "parent_id": "BOOK",
       "owner_path": "SYSTEM_MASTER/BOOK/PROSE",
@@ -65,9 +73,11 @@
     },
     {
       "system_id": "DOCUMENTS",
+      "canonical_name": "DOCUMENTS SYSTEM",
       "classification": "FIRST_CLASS_TOOL_SYSTEM",
       "parent_id": "SYSTEM_MASTER",
       "control_ref": "documents/control-v1",
+      "control_record": "documents/control-v1/DOCUMENTS-CONTROL-RECORD-001.md",
       "owns": [
         "DOCX/PDF/PPTX/document artifact semantics",
         "document structure/conversion/preservation/render/export contracts",
@@ -84,6 +94,8 @@
       ]
     }
   ],
+  "peer_system_ids": ["CORE", "LEARNING", "BOOK", "DOCUMENTS"],
+  "child_system_ids": ["PROSE"],
   "hierarchy_edges": [
     ["SYSTEM_MASTER", "CORE"],
     ["SYSTEM_MASTER", "LEARNING"],
@@ -110,6 +122,11 @@
   },
   "explicit_non_systems": {
     "A-01": "SHARED_QUALIFICATION_AND_CONTROL_INFRASTRUCTURE",
+    "ASSURANCE": "CORE_SUBSYSTEM_OR_EVIDENCE_FUNCTION",
+    "RECONCILIATION": "CORE_CONTROL_AND_EVIDENCE_FUNCTION",
+    "CONTINUITY": "CORE_SUBSYSTEM",
+    "FOUNDATION": "CORE_SCOPE",
+    "PLATFORM": "CORE_SCOPE",
     "SECOND SHIFT": "EXECUTION_WORKER",
     "QUALIFICATION": "EVIDENCE_PROCESS",
     "RUNNER": "INFRASTRUCTURE",
@@ -127,7 +144,9 @@
   "creation_rule": {
     "implicit_system_creation_forbidden": true,
     "branch_name_cannot_create_system": true,
+    "workstream_id_cannot_create_system": true,
     "chat_or_task_title_cannot_create_system": true,
+    "qualification_id_cannot_create_system": true,
     "new_first_class_system_requires_explicit_user_instruction": true,
     "child_specialist_restoration_authority": "ADR-0004 records explicit user-directed Book-Prose integration and does not create a new peer system."
   },
