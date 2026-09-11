@@ -4,7 +4,7 @@
   "title": "Book Context Compiler Package",
   "type": "object",
   "additionalProperties": false,
-  "required": ["context_package_id","schema_version","package_class","book_project_id","source_identity","book_state_binding","story_bible_binding","author_authority_binding","constraint_set","capability_request","privacy_class","created_at","expires_at","compiler_version","compiler_subject_sha"],
+  "required": ["context_package_id","schema_version","package_class","book_project_id","source_identity","book_state_binding","story_bible_binding","author_authority_binding","constraint_set","capability_request","privacy_class","created_at","expires_at","compiler_version","compiler_subject_sha","package_digest_sha256"],
   "properties": {
     "context_package_id": {"type":"string","minLength":1},
     "schema_version": {"const":"1.0.0-proposed"},
@@ -21,6 +21,7 @@
     "expires_at": {"type":"string","format":"date-time"},
     "compiler_version": {"type":"string"},
     "compiler_subject_sha": {"type":"string"},
+    "package_digest_sha256": {"type":"string","pattern":"^[0-9a-f]{64}$"},
     "research_evidence_refs": {"type":"array"},
     "prior_decision_refs": {"type":"array","items":{"type":"string"}},
     "artifact_refs": {"type":"array"},

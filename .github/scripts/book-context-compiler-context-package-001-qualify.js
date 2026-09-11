@@ -1,6 +1,9 @@
 'use strict';
 const assert = require('assert');
+const fs = require('fs');
+const path = require('path');
 const { compileContext, stable, semanticProjection, digestProjection } = require('../../system-master/book-system/context-compiler/book-context-compiler');
+const schema = JSON.parse(fs.readFileSync(path.join(__dirname, '../../system-master/book-system/context-compiler/book-context-package.schema.json'), 'utf8'));
 const H = 'a'.repeat(64), H2 = 'b'.repeat(64);
 const NOW = new Date('2026-09-11T04:40:00Z');
 function base() {
@@ -17,6 +20,12 @@ function base() {
   };
 }
 function live(x){return {source_identity:x.source_identity,book_state_binding:x.book_state_binding,story_bible_binding:x.story_bible_binding,capability_request:{service_registry_id:x.capability_request.service_registry_id,service_registry_subject_sha:x.capability_request.service_registry_subject_sha}};}
+function assertDurablePackageShape(pkg) {
+  assert(pkg && typeof pkg === 'object' && !Array.isArray(pkg));
+  for (const key of schema.required) assert(Object.prototype.hasOwnProperty.call(pkg, key), `missing durable key ${key}`);
+  for (const key of Object.keys(pkg)) assert(Object.prototype.hasOwnProperty.call(schema.properties, key), `unexpected durable key ${key}`);
+  assert(/^[0-9a-f]{64}$/.test(pkg.package_digest_sha256));
+}
 let n=0; function t(name, fn){fn(); n++; console.log(`PASS ${String(n).padStart(2,'0')} ${name}`);} 
 
 t('valid generation package ready',()=>assert.equal(compileContext(base(),live(base()),NOW).result_class,'PACKAGE_READY'));
@@ -54,5 +63,14 @@ t('expires hour bucket affects digest',()=>{const x=base(),y=base(); y.expires_a
 t('raw candidate forbidden deeply',()=>{const x=base(); x.research_evidence_refs=[{nested:{raw_candidate_text:'x'}}]; assert.equal(compileContext(x,live(x),NOW).result_class,'REJECTED_AUTHORITY_BOUNDARY');});
 t('publication credentials forbidden',()=>{const x=base(); x.research_evidence_refs=[{publication_credentials:'x'}]; assert.equal(compileContext(x,live(x),NOW).result_class,'REJECTED_AUTHORITY_BOUNDARY');});
 t('canonical mutation command forbidden',()=>{const x=base(); x.artifact_refs=[{canonical_mutation_command:'write'}]; assert.equal(compileContext(x,live(x),NOW).result_class,'REJECTED_AUTHORITY_BOUNDARY');});
-assert(n >= 30);
+t('compiled durable package emitted',()=>{const r=compileContext(base(),live(base()),NOW); assertDurablePackageShape(r.package);});
+t('schema requires package digest',()=>assert(schema.required.includes('package_digest_sha256')));
+t('schema digest is strict sha256',()=>assert.equal(schema.properties.package_digest_sha256.pattern,'^[0-9a-f]{64}$'));
+t('compiled digest matches result digest',()=>{const r=compileContext(base(),live(base()),NOW); assert.equal(r.package.package_digest_sha256,r.package_digest_sha256);});
+t('all compiled package keys admitted by schema',()=>{const r=compileContext(base(),live(base()),NOW); for(const k of Object.keys(r.package)) assert(schema.properties[k]);});
+t('compiled package contains every schema-required key',()=>{const r=compileContext(base(),live(base()),NOW); for(const k of schema.required) assert(Object.prototype.hasOwnProperty.call(r.package,k));});
+t('compiled constraints are deterministically ordered',()=>{const r=compileContext(base(),live(base()),NOW); assert.deepStrictEqual(r.package.constraint_set.map(x=>x.constraint_id),['C-1','C-2']);});
+t('canonical effect is evidence metadata not durable package state',()=>{const r=compileContext(base(),live(base()),NOW); assert.equal(r.canonical_effect,false); assert(!Object.prototype.hasOwnProperty.call(r.package,'canonical_effect'));});
+t('caller supplied digest cannot override compiler digest',()=>{const x=base(); x.package_digest_sha256=H2; const r=compileContext(x,live(x),NOW); assert.notEqual(r.package.package_digest_sha256,H2); assert.equal(r.package.package_digest_sha256,r.package_digest_sha256);});
+assert(n >= 40);
 console.log(`BOOK_CONTEXT_COMPILER_PORTABLE_PASS cases=${n}`);

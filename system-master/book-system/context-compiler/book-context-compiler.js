@@ -8,6 +8,13 @@ const FORBIDDEN_KEYS = new Set([
   'author_secret','provider_chain_of_thought','canonical_mutation_command',
   'publication_credentials','production_credentials'
 ]);
+const DURABLE_PACKAGE_KEYS = [
+  'context_package_id','schema_version','package_class','book_project_id','source_identity',
+  'book_state_binding','story_bible_binding','author_authority_binding','constraint_set',
+  'capability_request','privacy_class','created_at','expires_at','compiler_version',
+  'compiler_subject_sha','research_evidence_refs','prior_decision_refs','artifact_refs',
+  'evaluation_policy_ref'
+];
 
 function stable(value) {
   if (Array.isArray(value)) return value.map(stable);
@@ -65,6 +72,16 @@ function semanticProjection(input) {
 
 function digestProjection(projection) {
   return crypto.createHash('sha256').update(JSON.stringify(projection), 'utf8').digest('hex');
+}
+
+function buildDurablePackage(input, digest) {
+  const out = {};
+  for (const key of DURABLE_PACKAGE_KEYS) {
+    if (input[key] === undefined) continue;
+    out[key] = key === 'constraint_set' ? normalizeConstraints(input[key]) : input[key];
+  }
+  out.package_digest_sha256 = digest;
+  return stable(out);
 }
 
 function sameBinding(actual, expected, keys) {
@@ -135,14 +152,16 @@ function compileContext(input, live = {}, now = new Date()) {
 
   const projection = semanticProjection(input);
   const digest = digestProjection(projection);
+  const durablePackage = buildDurablePackage(input, digest);
   return {
     result_class: 'PACKAGE_READY',
     context_package_id: input.context_package_id,
     package_class: input.package_class,
     package_digest_sha256: digest,
     canonical_effect: false,
+    package: durablePackage,
     semantic_projection: projection
   };
 }
 
-module.exports = { compileContext, stable, semanticProjection, digestProjection, hasForbidden, normalizeConstraints };
+module.exports = { compileContext, stable, semanticProjection, digestProjection, buildDurablePackage, hasForbidden, normalizeConstraints };
