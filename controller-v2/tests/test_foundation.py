@@ -176,10 +176,9 @@ class FoundationTest(unittest.TestCase):
                 except LeaseConflict:
                     return ('lost', None)
             with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:
-                outcomes = [
-                    pool.submit(compete, s1, tx1, a1, 'worker-1').result(),
-                    pool.submit(compete, s2, tx2, a2, 'worker-2').result(),
-                ]
+                f1 = pool.submit(compete, s1, tx1, a1, 'worker-1')
+                f2 = pool.submit(compete, s2, tx2, a2, 'worker-2')
+                outcomes = [f1.result(), f2.result()]
             self.assertEqual([x[0] for x in outcomes].count('won'), 1)
             self.assertEqual([x[0] for x in outcomes].count('lost'), 1)
         finally:
