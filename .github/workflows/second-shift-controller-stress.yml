@@ -1,0 +1,65 @@
+name: Second Shift Controller Exhaustive Stress
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - reliability/second-shift-controller-stress-20260911
+    paths:
+      - '.github/scripts/second-shift-controller-stress.js'
+      - '.github/scripts/second-shift-enforce.js'
+      - '.github/scripts/second-shift-owner-coverage.js'
+      - '.github/workflows/second-shift-controller-stress.yml'
+      - 'governance/second-shift/**'
+      - 'governance/CURRENT-AUTHORITY.json'
+      - 'governance/SYSTEM-TOPOLOGY-*.json'
+      - 'governance/WORK-OBLIGATION-REGISTRY-*.json'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: second-shift-controller-stress-${{ github.ref }}
+  cancel-in-progress: false
+  queue: max
+
+jobs:
+  exhaustive:
+    name: Named faults + owner coverage + randomized state machine
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact stress subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Syntax-check production and stress controls
+        run: |
+          node --check .github/scripts/second-shift-enforce.js
+          node --check .github/scripts/second-shift-owner-coverage.js
+          node --check .github/scripts/second-shift-controller-stress.js
+      - name: Run existing production self-tests
+        run: |
+          node .github/scripts/second-shift-enforce.js --selftest
+          node .github/scripts/second-shift-owner-coverage.js --selftest
+      - name: Run exhaustive black-box fault injection
+        id: stress
+        continue-on-error: true
+        run: node .github/scripts/second-shift-controller-stress.js
+      - name: Publish stress report
+        if: always()
+        run: |
+          test -f .second-shift-stress-report.json
+          cat .second-shift-stress-report.json >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload stress evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: second-shift-controller-stress-${{ github.run_id }}
+          path: .second-shift-stress-report.json
+          if-no-files-found: error
+          retention-days: 30
+      - name: Fail when controller blind spots exist
+        if: steps.stress.outcome != 'success'
+        run: exit 1
