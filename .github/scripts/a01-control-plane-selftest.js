@@ -30,7 +30,7 @@ const enforcementWorkflow = text('.github/workflows/a01-control-plane-enforcemen
 const runnerGuard = text('.github/scripts/a01-runner-guard.ps1');
 const admission = text('.github/scripts/a01-admission-barrier.js');
 
-assert(policy.policy_version >= 7, 'policy v7 admission barrier required');
+assert(policy.policy_version >= 8, 'policy v8 trusted metadata admission required');
 assert(policy.control_plane_id === 'A01-CONTROL-PLANE-001', 'control plane id');
 assert(policy.canonical_ref === 'main', 'canonical main authority');
 assert(policy.runner.name === 'A-01', 'runner name');
@@ -46,11 +46,18 @@ assert(policy.runner.health.prevent_system_sleep_during_qualification === true, 
 assert(policy.runner.health.record_preflight_postflight === true, 'runner health evidence policy');
 assert(policy.admission.max_outstanding_per_workstream >= 4, 'multi-ticket outstanding limit');
 assert(policy.admission.allow_arbitrary_command_input === false, 'arbitrary commands disabled');
-assert(policy.admission.hosted_barrier_required_before_self_hosted_runner === true, 'hosted admission barrier required');
-assert(policy.admission.verify_control_plane_sha_before_runner === true, 'control-plane SHA precheck required');
-assert(policy.admission.verify_subject_sha_before_runner === true, 'subject SHA precheck required');
-assert(policy.admission.verify_registered_wrapper_before_runner === true, 'registered wrapper precheck required');
-assert(policy.admission.blocked_requests_must_not_acquire_a01 === true, 'blocked admission must not touch A-01');
+assert(policy.admission.mode === 'TRUSTED_SELF_HOSTED_METADATA_ONLY_FOR_NONDISRUPTIVE', 'metadata-only admission mode');
+assert(policy.admission.hosted_barrier_required_before_self_hosted_runner === false, 'hosted runner must not be mandatory for non-disruptive admission');
+assert(policy.admission.trusted_metadata_barrier_required_before_subject_checkout === true, 'trusted metadata barrier required');
+assert(policy.admission.pre_admission_subject_checkout_forbidden === true, 'subject checkout must be forbidden before admission');
+assert(policy.admission.pre_admission_subject_execution_forbidden === true, 'subject execution must be forbidden before admission');
+assert(policy.admission.verify_control_plane_sha_before_admission === true, 'control-plane SHA precheck required');
+assert(policy.admission.verify_subject_commit_metadata_before_subject_checkout === true, 'subject metadata precheck required');
+assert(policy.admission.verify_registered_wrapper_metadata_before_subject_checkout === true, 'registered wrapper metadata precheck required');
+assert(policy.admission.non_disruptive_only_without_hosted_runner === true, 'metadata fallback must be non-disruptive only');
+assert(policy.admission.disruptive_qualifications_fail_closed_without_hosted_admission === true, 'disruptive work must fail closed');
+assert(policy.admission.blocked_requests_may_acquire_trusted_admission_runner === true, 'trusted admission may use A-01');
+assert(policy.admission.blocked_requests_must_not_checkout_or_execute_subject === true, 'blocked requests may not touch subject bytes');
 assert(policy.retry.never_treat_rerun_as_control_plane_refresh === true, 'rerun refresh prohibition required');
 assert(policy.retry.after_registry_policy_or_gateway_change.includes('FRESH'), 'fresh-run retry rule missing');
 assert(policy.receipt.require_control_plane_sha_binding === true, 'control-plane receipt binding required');
@@ -73,10 +80,9 @@ assert(policy.overnight.second_shift.require_stop_condition_for_ready === true, 
 for (const lane of ['FINISH','BUILD_AHEAD','RESEARCH_AHEAD','PREPARE_NEXT','EXPLORE']) assert(policy.overnight.second_shift.lanes.includes(lane), `missing second-shift lane ${lane}`);
 assert(policy.post_actions.allowed.includes('windows_reboot'), 'registered reboot action');
 assert(policy.post_actions.receipt_before_action === true && policy.post_actions.evidence_upload_before_action === true, 'disruptive action ordering');
-assert(policy.post_actions.windows_reboot_delay_seconds === 30, 'reboot delay');
-assert(policy.post_actions.disruption_settle_seconds === 90, 'hosted settle duration');
+assert(policy.post_actions.trusted_metadata_fallback_supported === false, 'disruptive fallback must remain disabled');
 assert(policy.states.includes('A01_PASSED') && policy.states.includes('SUPERSEDED'), 'standing states');
-assert(registry.registry_version >= 26, 'registry generation');
+assert(registry.registry_version >= 30, 'registry generation');
 assert(registry.qualifications['A01-CONTROL-PLANE-SELFTEST'].source === 'control_plane', 'selftest source');
 assert(registry.qualifications['CONTINUITY-TARGET-WINDOWS-REBOOT'].source === 'subject', 'subject qualifier registration');
 assert(registry.qualifications['CONTINUITY-TARGET-WINDOWS-REBOOT'].allowed_post_actions.includes('windows_reboot'), 'continuity post action');
@@ -91,22 +97,25 @@ assert(overnightTicketSchema.properties.completion_delta, 'completion delta sche
 assert(overnightTicketSchema.properties.stop_condition, 'stop condition schema missing');
 assert(overnightTicketSchema.properties.depends_on_ticket_id, 'overnight dependency schema missing');
 assert(bootstrap.includes('A01-OVERNIGHT-001.md'), 'bootstrap overnight authority link');
-assert(contract.includes('hosted admission barrier'), 'operating contract hosted admission law');
+assert(contract.includes('trusted metadata') || contract.includes('metadata-only'), 'operating contract metadata admission law');
 assert(contract.includes('fresh workflow') || contract.includes('fresh run'), 'fresh-run contract law');
-assert(contract.includes('hosted settle'), 'hosted disruption settle contract');
-assert(operatingMode.includes('policy version **7**') || operatingMode.includes('policy version 7'), 'operating mode policy v7');
+assert(operatingMode.includes('policy version **8**') || operatingMode.includes('policy version 8'), 'operating mode policy v8');
+assert(operatingMode.includes('metadata-only') || operatingMode.includes('trusted metadata'), 'operating mode metadata admission');
 assert(operatingMode.includes('A01-REGISTRATION-DISPATCH-BARRIER-001'), 'operating mode repair binding');
 assert(overnightContract.includes('00:00') && overnightContract.includes('07:00'), 'overnight contract window');
 assert(secondShiftContract.includes('multiple') || secondShiftContract.includes('four READY'), 'second shift multi-ticket portfolio');
 assert(barrierContract.includes('WAITING_FOR_REGISTRATION'), 'barrier admission state');
 assert(barrierContract.includes('failed-job') || barrierContract.includes('specific-job'), 'barrier rerun law');
+assert(barrierContract.includes('metadata-only') || barrierContract.includes('trusted metadata'), 'barrier metadata-only law');
 
 assert(gateway.includes('a01-control-plane-admission-broker.yml'), 'gateway routes through broker');
-assert(!gateway.includes('runs-on: [self-hosted, Windows, X64]'), 'front-door gateway must not acquire A-01');
 assert(!gateway.includes('qualifier_command'), 'gateway arbitrary commands prohibited');
-assert(broker.includes('runs-on: ubuntu-latest'), 'admission must be hosted');
-assert(broker.includes('a01-admission-barrier.js evaluate'), 'admission evaluator missing');
-assert(broker.includes('Checkout exact qualification subject on hosted runner'), 'hosted subject precheck missing');
+assert(broker.includes('runs-on: [self-hosted, Windows, X64]'), 'trusted admission must use A-01');
+assert(broker.includes('a01-admission-barrier.js" evaluate-remote'), 'remote metadata admission evaluator missing');
+assert(broker.includes('Checkout exact trusted control-plane authority only'), 'trusted control-plane checkout missing');
+assert(!/^\s*path\s*:\s*subject\s*$/im.test(broker), 'admission broker must never checkout subject');
+assert(!/^\s*ref\s*:\s*\$\{\{\s*inputs\.subject_sha\s*\}\}\s*$/im.test(broker), 'admission broker must never fetch subject checkout');
+assert(broker.includes("needs.admit.result == 'success'"), 'executor requires successful admission job');
 assert(broker.includes("needs.admit.outputs.admitted == 'true'"), 'executor must depend on admission PASS');
 assert(!broker.includes('qualifier_command'), 'broker arbitrary commands prohibited');
 assert(executor.includes('runs-on: [self-hosted, Windows, X64]'), 'executor runner labels');
@@ -114,16 +123,17 @@ assert(executor.includes('control_plane_sha'), 'executor exact control-plane bin
 assert(executor.includes('ref: ${{ inputs.control_plane_sha }}'), 'executor checks out admitted control SHA');
 assert(executor.includes('group: a01-global-r2') && executor.includes('queue: max'), 'global queue remains serialized');
 assert(executor.includes('Guard A-01 runner health before subject acquisition'), 'runner preflight missing');
+assert(executor.indexOf('Guard A-01 runner health before subject acquisition') < executor.indexOf('Checkout exact qualification subject'), 'subject checkout must follow runner guard');
 assert(executor.includes('A01QualificationSleepGuard'), 'qualification sleep prevention missing');
 assert(executor.includes('Record A-01 postflight and clean stale job temp'), 'runner postflight missing');
 assert(executor.includes("steps.control.outputs.post_action == 'windows_reboot'"), 'registered disruptive handoff');
 assert(executor.indexOf('Upload authoritative A-01 evidence') < executor.indexOf('Schedule registered Windows reboot handoff'), 'evidence before reboot scheduling');
-assert(executor.includes('shutdown.exe /r /t 30'), 'delayed reboot required');
-assert(executor.includes('Hold A-01 admission through registered reboot window'), 'hosted settle job missing');
-assert(executor.includes('sleep 90'), 'hosted settle interval missing');
 assert(!executor.includes('qualifier_command'), 'executor arbitrary commands prohibited');
 assert(admission.includes('WAITING_FOR_REGISTRATION'), 'admission waiting state missing');
 assert(admission.includes('REGISTERED_EXECUTABLE_MISSING'), 'admission wrapper precheck missing');
+assert(admission.includes('TRUSTED_SELF_HOSTED_METADATA_ONLY'), 'metadata-only admission identity missing');
+assert(admission.includes('pre_admission_subject_checkout: false'), 'metadata admission must record no subject checkout');
+assert(admission.includes('DISRUPTIVE_QUALIFICATION_REQUIRES_HOSTED_BARRIER'), 'disruptive fail-closed state missing');
 assert(admission.includes('A01_FRESH_DISPATCH_REQUIRED'), 'fresh dispatch instruction missing');
 assert(repairRerun.includes('uses: ./.github/workflows/a01-control-plane-gateway.yml'), 'repair rerun must use same-commit gateway');
 assert(!repairRerun.includes('a01-control-plane-gateway.yml@main'), 'repair rerun floating gateway forbidden');
@@ -138,7 +148,7 @@ assert(nightWorkflow.includes('execution_context: overnight'), 'night slots must
 assert(nightWorkflow.includes('requires_previous_pass'), 'night successor PASS dependency missing');
 assert(nightWorkflow.includes("outputs.result_class == 'PASS'"), 'night successor must require predecessor PASS');
 assert(legacy.version === 1 && Object.keys(legacy.workflows).length > 0, 'legacy direct-workflow freeze missing');
-assert(enforcementWorkflow.includes('runs-on: ubuntu-latest'), 'enforcement must not consume A-01');
+assert(enforcementWorkflow.includes('runs-on: ubuntu-latest'), 'repository enforcement remains separate from A-01 qualification capacity');
 assert(enforcementWorkflow.includes('a01-control-plane-enforce.js scan'), 'enforcement scan missing');
 assert(enforcementWorkflow.includes('a01-admission-barrier.js selftest'), 'admission enforcement selftest missing');
 
@@ -160,14 +170,15 @@ if (evidenceDir) {
   fs.writeFileSync(path.join(evidenceDir, 'selftest.txt'), [
     'A01_CONTROL_PLANE_SELFTEST=PASS',
     'A01_ENFORCEMENT=PASS',
-    'A01_HOSTED_ADMISSION_BARRIER=PASS',
-    'A01_UNREGISTERED_BLOCKS_BEFORE_RUNNER=PASS',
+    'A01_TRUSTED_METADATA_ADMISSION_BARRIER=PASS',
+    'A01_PRE_ADMISSION_SUBJECT_CHECKOUT=FORBIDDEN',
+    'A01_PRE_ADMISSION_SUBJECT_EXECUTION=FORBIDDEN',
+    'A01_DISRUPTIVE_METADATA_FALLBACK=DISABLED',
     'A01_CONTROL_PLANE_SHA_BINDING=PASS',
     'A01_FRESH_DISPATCH_RULE=PASS',
     'A01_GLOBAL_QUEUE=MAX',
     'A01_CONCURRENCY_GENERATION=2',
     'A01_CROSS_REF_AUTHORITY=PASS',
-    'A01_DISRUPTIVE_SETTLE=PASS',
     'A01_OVERNIGHT_POLICY=PASS',
     'A01_OVERNIGHT_PLANNER=PASS',
     'A01_SECOND_SHIFT=PASS',
