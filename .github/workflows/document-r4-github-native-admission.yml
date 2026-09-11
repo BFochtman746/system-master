@@ -100,7 +100,7 @@ jobs:
             --chunks "$STAGE" \
             --carrier-out "$ARCHIVE" \
             --extract-out "$DEST" | tee /tmp/document-r4-transport-verification.json
-          test -f "$DEST/evidence/SOURCE-MANIFEST.csv"
+          test -f "$DEST/evidence/CANONICAL-SOURCE-TREE-MANIFEST.csv"
           test -d "$DEST/source/01_CURRENT_DOCUMENT_PROCESSING_MODULE"
           test "$(find "$DEST/source/01_CURRENT_DOCUMENT_PROCESSING_MODULE" -type f -name '*.java' | wc -l)" -eq 225
           test -z "$(find "$DEST" -type l -print -quit)"
@@ -256,7 +256,6 @@ jobs:
           s['qualification_run_id'] = int(os.environ['GITHUB_RUN_ID'])
           s['rule'] = 'READY was armed only after fresh exact-subject 225/225 reconstruction, strict Java 21 compile, portable suites, and T13/T14 external qualification all passed. Frozen five-chunk payload identities remain unchanged.'
           stage_path.write_text(json.dumps(s, indent=2)+'\n')
-
           ready = {
               'ready_id': 'DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-ADMISSION-005',
               'armed': True,
@@ -270,31 +269,17 @@ jobs:
               'standing': 'READY__FRESH_QUALIFICATION_PASS'
           }
           pathlib.Path('transport/document-r4/READY').write_text(json.dumps(ready, indent=2)+'\n')
-
           custody_path = pathlib.Path('governance/architecture/SYSTEM-MASTER-DOCUMENT-SOURCE-CUSTODY-AND-REUSABLE-ASSET-MANIFEST-002.json')
           custody = json.loads(custody_path.read_text())
           custody['version'] = '0.3.0-github-native-admitted'
           custody['status'] = 'PASS__GITHUB_NATIVE_SOURCE_CUSTODY_ADMITTED'
           cc = custody.setdefault('current_custody', {})
           cc['github_native_source_tree_committed'] = True
-          cc['canonical_git_subject'] = {
-              'sha': subject,
-              'path': 'recovered/document/cr001-r4/source/01_CURRENT_DOCUMENT_PROCESSING_MODULE',
-              'source_manifest_sha256': 'ed36fc9cfd38b04a8d0174efed06b03e8e25b0a45fc0adc4d47fe3457c2ee367',
-              'source_rows': 225
-          }
+          cc['canonical_git_subject'] = {'sha': subject, 'path': 'recovered/document/cr001-r4/source/01_CURRENT_DOCUMENT_PROCESSING_MODULE', 'source_manifest_sha256': 'ed36fc9cfd38b04a8d0174efed06b03e8e25b0a45fc0adc4d47fe3457c2ee367', 'source_rows': 225}
           cc['working_copy_location'] = 'recovered/document/cr001-r4/source/01_CURRENT_DOCUMENT_PROCESSING_MODULE'
           cc['strict_jdk17_compile_complete'] = False
           cc['strict_java21_compile_complete'] = True
-          custody['admission_005'] = {
-              'standing': 'PASS',
-              'qualified_git_subject_sha': subject,
-              'qualification_id': 'CR001-R4-GITHUB-NATIVE-QUALIFICATION-005',
-              'qualification_run_id': int(os.environ['GITHUB_RUN_ID']),
-              'source_identity': 'PASS__225_OF_225_EXACT_PATH_SIZE_SHA',
-              'historical_qualification_transfer': False,
-              'ready_armed': True
-          }
+          custody['admission_005'] = {'standing': 'PASS', 'qualified_git_subject_sha': subject, 'qualification_id': 'CR001-R4-GITHUB-NATIVE-QUALIFICATION-005', 'qualification_run_id': int(os.environ['GITHUB_RUN_ID']), 'source_identity': 'PASS__225_OF_225_EXACT_PATH_SIZE_SHA', 'historical_qualification_transfer': False, 'ready_armed': True}
           custody_path.write_text(json.dumps(custody, indent=2)+'\n')
           PY
 
@@ -307,70 +292,23 @@ jobs:
           import json, os, pathlib
           subject = os.environ['SUBJECT_SHA']
           receipt = {
-              'receipt_id': 'DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-ADMISSION-CLOSURE-RECEIPT-005',
-              'date': '2026-09-11',
-              'owner': 'SYSTEM_MASTER/DOCUMENTS',
-              'work_package': 'DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-ADMISSION-005',
-              'standing': 'CLOSED_PASS__READY_ARMED__GITHUB_NATIVE_SOURCE_CUSTODY_ADMITTED',
-              'frozen_004_base_commit': '0e645a49e36b7cd0dc05017571f91b999f0c70c0',
-              'workflow_trigger_sha': os.environ['GITHUB_SHA'],
-              'workflow_run_id': int(os.environ['GITHUB_RUN_ID']),
-              'source_subject_sha': subject,
-              'carrier_sha256': '77a6e2288d475865622bad4b2c66647a599c26a3899c6617b33d7b2b334855bd',
-              'source_manifest_sha256': 'ed36fc9cfd38b04a8d0174efed06b03e8e25b0a45fc0adc4d47fe3457c2ee367',
-              'source_rows_verified': '225/225',
-              'frozen_chunk_git_blobs': {
-                  'chunk-000.b64': '64034670dbbe18f6b629108bd1d9b1d8d81c4ac8',
-                  'chunk-001.b64': '562ec2e184b6068e0f123c9e097d344a42c67dce',
-                  'chunk-002.b64': '7b592c67e39a998301be7e5146533b842d724db2',
-                  'chunk-003.b64': 'd67f828a421b0af4c75d3c5b6a2c25b8ca2a1c20',
-                  'chunk-004.b64': '3518bf5ac92360b07f86c6107670da40f5830d1f'
-              },
-              'fresh_qualification': {
-                  'qualification_id': 'CR001-R4-GITHUB-NATIVE-QUALIFICATION-005',
-                  'strict_java21_compile': 'PASS',
-                  'portable_suites': 'PASS',
-                  't13_external': 'PASS',
-                  't14_external': 'PASS',
-                  'historical_pass_transfer': False
-              },
-              'ready_armed': True,
-              'github_native_source_custody': 'PASS',
-              'payload_mutated': False,
+              'receipt_id': 'DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-ADMISSION-CLOSURE-RECEIPT-005', 'date': '2026-09-11', 'owner': 'SYSTEM_MASTER/DOCUMENTS',
+              'work_package': 'DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-ADMISSION-005', 'standing': 'CLOSED_PASS__READY_ARMED__GITHUB_NATIVE_SOURCE_CUSTODY_ADMITTED',
+              'frozen_004_base_commit': '0e645a49e36b7cd0dc05017571f91b999f0c70c0', 'workflow_trigger_sha': os.environ['GITHUB_SHA'], 'workflow_run_id': int(os.environ['GITHUB_RUN_ID']), 'source_subject_sha': subject,
+              'carrier_sha256': '77a6e2288d475865622bad4b2c66647a599c26a3899c6617b33d7b2b334855bd', 'source_manifest_sha256': 'ed36fc9cfd38b04a8d0174efed06b03e8e25b0a45fc0adc4d47fe3457c2ee367', 'source_rows_verified': '225/225',
+              'frozen_chunk_git_blobs': {'chunk-000.b64': '64034670dbbe18f6b629108bd1d9b1d8d81c4ac8', 'chunk-001.b64': '562ec2e184b6068e0f123c9e097d344a42c67dce', 'chunk-002.b64': '7b592c67e39a998301be7e5146533b842d724db2', 'chunk-003.b64': 'd67f828a421b0af4c75d3c5b6a2c25b8ca2a1c20', 'chunk-004.b64': '3518bf5ac92360b07f86c6107670da40f5830d1f'},
+              'fresh_qualification': {'qualification_id': 'CR001-R4-GITHUB-NATIVE-QUALIFICATION-005', 'strict_java21_compile': 'PASS', 'portable_suites': 'PASS', 't13_external': 'PASS', 't14_external': 'PASS', 'historical_pass_transfer': False},
+              'ready_armed': True, 'github_native_source_custody': 'PASS', 'payload_mutated': False,
               'nonclaims': ['A01_PASS', 'NATIVE_OFFICE_PASS', 'PRODUCTION_PASS', 'DOCUMENTS_COMPLETE']
           }
           pathlib.Path('documents/reconciliation/DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-ADMISSION-CLOSURE-RECEIPT-005.json').write_text(json.dumps(receipt, indent=2)+'\n')
           status_lines = [
-              '# DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-ADMISSION-005',
-              '',
-              'Status: CLOSED / PASS — READY ARMED / GITHUB-NATIVE SOURCE CUSTODY ADMITTED',
-              'Owner: SYSTEM_MASTER/DOCUMENTS',
-              'Date: 2026-09-11',
-              '',
-              '## Exact admitted subject',
-              '',
-              f'- Git subject: `{subject}`',
-              '- Source identity: 225/225 exact path + size + SHA',
-              '- Carrier SHA-256: `77a6e2288d475865622bad4b2c66647a599c26a3899c6617b33d7b2b334855bd`',
-              '- Historical qualification transfer: false',
-              '',
-              '## Fresh qualification',
-              '',
-              '- Strict Java 21 compile: PASS',
-              '- Portable Document suites: PASS',
-              '- T13 external qualification: PASS',
-              '- T14 external qualification: PASS',
-              '- Qualification evidence: `qualification/document-r4/CR001-R4-GITHUB-NATIVE-QUALIFICATION-005/`',
-              '',
-              '## Admission',
-              '',
-              '`transport/document-r4/READY` was created only after all fresh qualification gates passed. `STAGING.json` is now `FULL_TRANSPORT_STAGED__ARMED`, and GitHub-native source custody is PASS.',
-              '',
-              'The five frozen 004 payload chunk Git identities were rechecked before push and were not changed by 005.',
-              '',
-              '## Nonclaims',
-              '',
-              '005 does not claim A-01 PASS, native Office PASS, production PASS, or Documents-module completion.',
+              '# DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-ADMISSION-005', '',
+              'Status: CLOSED / PASS — READY ARMED / GITHUB-NATIVE SOURCE CUSTODY ADMITTED', 'Owner: SYSTEM_MASTER/DOCUMENTS', 'Date: 2026-09-11', '',
+              '## Exact admitted subject', '', f'- Git subject: `{subject}`', '- Source identity: 225/225 exact path + size + SHA', '- Carrier SHA-256: `77a6e2288d475865622bad4b2c66647a599c26a3899c6617b33d7b2b334855bd`', '- Historical qualification transfer: false', '',
+              '## Fresh qualification', '', '- Strict Java 21 compile: PASS', '- Portable Document suites: PASS', '- T13 external qualification: PASS', '- T14 external qualification: PASS', '- Qualification evidence: `qualification/document-r4/CR001-R4-GITHUB-NATIVE-QUALIFICATION-005/`', '',
+              '## Admission', '', '`transport/document-r4/READY` was created only after all fresh qualification gates passed. `STAGING.json` is now `FULL_TRANSPORT_STAGED__ARMED`, and GitHub-native source custody is PASS.', '', 'The five frozen 004 payload chunk Git identities were rechecked before push and were not changed by 005.', '',
+              '## Nonclaims', '', '005 does not claim A-01 PASS, native Office PASS, production PASS, or Documents-module completion.'
           ]
           pathlib.Path('documents/reconciliation/DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-ADMISSION-005.md').write_text('\n'.join(status_lines)+'\n')
           PY
@@ -380,11 +318,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git add transport/document-r4/STAGING.json transport/document-r4/READY \
-            governance/architecture/SYSTEM-MASTER-DOCUMENT-SOURCE-CUSTODY-AND-REUSABLE-ASSET-MANIFEST-002.json \
-            qualification/document-r4/CR001-R4-GITHUB-NATIVE-QUALIFICATION-005 \
-            documents/reconciliation/DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-ADMISSION-005.md \
-            documents/reconciliation/DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-ADMISSION-CLOSURE-RECEIPT-005.json
+          git add transport/document-r4/STAGING.json transport/document-r4/READY governance/architecture/SYSTEM-MASTER-DOCUMENT-SOURCE-CUSTODY-AND-REUSABLE-ASSET-MANIFEST-002.json qualification/document-r4/CR001-R4-GITHUB-NATIVE-QUALIFICATION-005 documents/reconciliation/DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-ADMISSION-005.md documents/reconciliation/DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-ADMISSION-CLOSURE-RECEIPT-005.json
           git commit -m 'documents: arm READY and seal R4 source admission 005'
           FINAL_SHA="$(git rev-parse HEAD)"
           git merge-base --is-ancestor "$SOURCE_SUBJECT_SHA" "$FINAL_SHA"
