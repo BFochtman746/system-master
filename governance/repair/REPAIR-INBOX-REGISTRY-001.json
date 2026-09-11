@@ -2,6 +2,9 @@
   "registry_id": "REPAIR-INBOX-REGISTRY-001",
   "effective_date": "2026-09-10",
   "product_root": "SYSTEM_MASTER",
+  "topology": "governance/SYSTEM-TOPOLOGY-004.json",
+  "program_job_lock": "governance/SYSTEM-PROGRAM-JOB-LOCK-001.json",
+  "system_completion_status": "governance/SYSTEM-COMPLETION-STATUS-001.json",
   "schema": "governance/repair/REPAIR-INBOX-SCHEMA-001.json",
   "broker_contract": "governance/repair/A01-REPAIR-BROKER-001.md",
   "owner_files": {
@@ -10,18 +13,31 @@
     "BOOK": "governance/repair/BOOK-REPAIR-INBOX.json",
     "DOCUMENTS": "governance/repair/DOCUMENTS-REPAIR-INBOX.json"
   },
-  "retired_owner_files": {
+  "child_routes": {
+    "SYSTEM_MASTER/BOOK/PROSE": {
+      "system_id": "PROSE",
+      "standing": "COMPLETE_ACTIVE_BOOK_CHILD",
+      "execution_owner_system_id": "BOOK",
+      "execution_owner_path": "SYSTEM_MASTER/BOOK",
+      "target_inbox": "governance/repair/BOOK-REPAIR-INBOX.json",
+      "separate_active_inbox_allowed": false,
+      "rule": "Current Book-Prose integration or demonstrated Prose-subject repair routes through BOOK. Completed Prose feature scope is not reopened absent demonstrated defect or explicit user direction."
+    }
+  },
+  "historical_owner_files": {
     "PROSE": {
       "file": "governance/repair/PROSE-REPAIR-INBOX.json",
-      "active": false,
-      "retirement_record": "governance/retirements/PROSE-SYSTEM-RETIREMENT-001.json",
-      "successor_owner": "DOCUMENTS"
+      "active_for_new_transactions": false,
+      "historical_standalone_lane_effect": "SUPERSEDED_BY_TOPOLOGY_004",
+      "current_execution_route": "BOOK",
+      "history_preserved": true
     }
   },
   "rules": [
-    "Every active repair transaction has exactly one canonical active owner path resolved through the topology selected by CURRENT-AUTHORITY.",
-    "PROSE is retired and cannot receive a new repair transaction; genuinely current prose/document integration failures route to DOCUMENTS.",
-    "Historical Prose repair evidence remains immutable and does not transfer PASS, repair budget or qualification authority to Documents.",
+    "Every active repair transaction has exactly one canonical active execution owner resolved through the topology selected by CURRENT-AUTHORITY.",
+    "PROSE is the completed active child of BOOK. It has no separate repair lane; current LITERARY-PROSE and Book-evaluator work routes through BOOK and the BOOK repair inbox.",
+    "DOCUMENTS owns only Documents product/document-artifact repairs and may not absorb, schedule, repair or claim Book-specific Prose literary work.",
+    "Historical standalone Prose repair evidence remains immutable and does not transfer PASS, repair budget or qualification authority to any changed subject.",
     "No repair transaction may create or transfer A-01 PASS, promotion, publication or production authority.",
     "SUBJECT_FAILURE may create product repair work; admission/window/dependency/human/author/private/native/external/control-plane outcomes route to their truthful boundary.",
     "An active owner chat or Second Shift worker checks its repair inbox after current-authority reconciliation and before unrelated build-ahead.",
