@@ -74,6 +74,110 @@
         "drive_discovery": "NO_MATCHING_AUTHORITATIVE_CSSGB_OR_CURRICULUM_FILE_FOUND",
         "frozen_blueprint_remains_authoritative": true
       }
+    },
+    {
+      "event_id": "2026-09-11-LEARNING-0005-CIRCUIT-OPEN",
+      "occurred_at": "2026-09-11T00:18:00-04:00",
+      "event_type": "CIRCUIT_OPEN",
+      "lane": "LEARNING",
+      "control_ref": "learning/control-v1",
+      "control_head": "e3196089f77dde376944a08eac78a697e57d1535",
+      "delegation_id": "SECOND-SHIFT-LEARNING-CURRICULUM-001E-BATCH-06",
+      "objective_id": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001E-INSTRUCTIONAL-CONTENT-AND-SCORING-BATCH-06",
+      "lease_id": "LEARNING-001E-2026-09-11T0016-0400",
+      "idempotency_key": "LEARNING:001E:BATCH-06-INFRA-CHECKPOINT:BATCH-07-PREP:2026-09-11",
+      "dependency_or_operation": "GITHUB_HOSTED_RUNNER_ALLOCATION_FOR_EXACT_BATCH_06_SUBJECT",
+      "failure_class": "ZERO_STEP_RUNNER_ALLOCATION_FAILURE__ACCOUNT_SPECIFIC_CAUSE_UNPROVEN",
+      "next_probe_at_or_condition": "A later owner-valid invocation may probe only when hosted runner assignment is available; keep exact subject bd3f7de8490c7cfb6a7dcdd37cc1fa1d4656bced unchanged.",
+      "fallback_successor_or_rung": "SOURCE_BOUND_ORDINAL_7_SPECIFICATION_THEN_LEARNING_INTERFACE_CONTRACT",
+      "evidence": {
+        "retry_budget": 3,
+        "attempts_consumed": 3,
+        "semantic_steps_executed": 0,
+        "semantic_failure_observed": false,
+        "checkpoint": "qualification/learning/LEARNING-001E-BATCH-06-HOSTED-INFRASTRUCTURE-CHECKPOINT-070B.json"
+      }
+    },
+    {
+      "event_id": "2026-09-11-LEARNING-0006-PROGRESS",
+      "occurred_at": "2026-09-11T00:20:00-04:00",
+      "event_type": "PROGRESS",
+      "lane": "LEARNING",
+      "control_ref": "learning/control-v1",
+      "control_head": "e3196089f77dde376944a08eac78a697e57d1535",
+      "delegation_id": "SECOND-SHIFT-LEARNING-CURRICULUM-001E-BATCH-06",
+      "objective_id": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001E-INSTRUCTIONAL-CONTENT-AND-SCORING-BATCH-06",
+      "lease_id": "LEARNING-001E-2026-09-11T0016-0400",
+      "idempotency_key": "LEARNING:001E:BATCH-06-INFRA-CHECKPOINT:BATCH-07-PREP:2026-09-11",
+      "evidence": {
+        "completed_subunit": "ORDINAL_7_SOURCE_BOUND_BUILD_PACKET",
+        "artifact": "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001E-BATCH-07-SOURCE-BOUND-BUILD-PACKET-071.json",
+        "commit": "ba1947da54ba9b7dd1cc93845c288c6781109821",
+        "drive_authoritative_matches": 0,
+        "drive_absence_inferred": false,
+        "frozen_requirement": "ASQ-CSSGB-2022-I.C.2",
+        "ordinal_advanced": false
+      }
+    },
+    {
+      "event_id": "2026-09-11-LEARNING-0007-PROGRESS",
+      "occurred_at": "2026-09-11T00:21:30-04:00",
+      "event_type": "PROGRESS",
+      "lane": "LEARNING",
+      "control_ref": "learning/control-v1",
+      "control_head": "e3196089f77dde376944a08eac78a697e57d1535",
+      "delegation_id": "SECOND-SHIFT-LEARNING-CURRICULUM-001E-BATCH-06",
+      "objective_id": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001E-INSTRUCTIONAL-CONTENT-AND-SCORING-BATCH-06",
+      "lease_id": "LEARNING-001E-2026-09-11T0016-0400",
+      "idempotency_key": "LEARNING:001E:BATCH-06-INFRA-CHECKPOINT:BATCH-07-PREP:2026-09-11",
+      "evidence": {
+        "completed_subunit": "LEARNING_TO_SYSTEM_MASTER_INTERFACE_CONTRACT",
+        "artifact": "governance/architecture/LEARNING-TO-SYSTEM-MASTER-INTERFACE-CONTRACT-001.json",
+        "commit": "b81ea732df0778e84e089379abac54a03747f82e",
+        "semantic_owner_preserved": "SYSTEM_MASTER/LEARNING",
+        "product_pass_claimed": false
+      }
+    },
+    {
+      "event_id": "2026-09-11-LEARNING-0008-COMPLETED",
+      "occurred_at": "2026-09-11T00:23:00-04:00",
+      "event_type": "COMPLETED",
+      "lane": "LEARNING",
+      "control_ref": "learning/control-v1",
+      "control_head": "e3196089f77dde376944a08eac78a697e57d1535",
+      "delegation_id": "SECOND-SHIFT-LEARNING-CURRICULUM-001E-BATCH-06",
+      "objective_id": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001E-INSTRUCTIONAL-CONTENT-AND-SCORING-BATCH-06",
+      "lease_id": "LEARNING-001E-2026-09-11T0016-0400",
+      "idempotency_key": "LEARNING:001E:BATCH-06-INFRA-CHECKPOINT:BATCH-07-PREP:2026-09-11",
+      "evidence": {
+        "completed_unit": "BATCH_06_INFRASTRUCTURE_CONTAINMENT_PLUS_TWO_INDEPENDENT_WORK_AHEAD_ARTIFACTS",
+        "batch_06_semantic_status": "UNOBSERVED__NOT_COMPLETE",
+        "batch_06_subject_preserved": "bd3f7de8490c7cfb6a7dcdd37cc1fa1d4656bced",
+        "artifacts": [
+          "qualification/learning/LEARNING-001E-BATCH-06-HOSTED-INFRASTRUCTURE-CHECKPOINT-070B.json",
+          "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001E-BATCH-07-SOURCE-BOUND-BUILD-PACKET-071.json",
+          "governance/architecture/LEARNING-TO-SYSTEM-MASTER-INTERFACE-CONTRACT-001.json"
+        ],
+        "delegation_registry_commit": "cfa4ee0596e917303d1f915bdb93153aba6fc61c"
+      }
+    },
+    {
+      "event_id": "2026-09-11-LEARNING-0009-SUCCESSOR-BOUND",
+      "occurred_at": "2026-09-11T00:23:01-04:00",
+      "event_type": "SUCCESSOR_BOUND",
+      "lane": "LEARNING",
+      "control_ref": "learning/control-v1",
+      "control_head": "e3196089f77dde376944a08eac78a697e57d1535",
+      "delegation_id": "SECOND-SHIFT-LEARNING-SYSTEM-MASTER-INTERFACE-PORTABLE-SCHEMAS-001",
+      "objective_id": "LEARNING-TO-SYSTEM-MASTER-INTERFACE-PORTABLE-SCHEMAS-001",
+      "evidence": {
+        "state": "CANDIDATE_UNCLAIMED",
+        "primary_ready": "Batch 06 exact subject when a runner can execute semantic steps",
+        "fallback_ready": "Implement transport-neutral schemas and portable tests from LEARNING-TO-SYSTEM-MASTER-INTERFACE-CONTRACT-001",
+        "batch_07_state": "SOURCE_SPEC_READY__IMPLEMENTATION_WAITING_ON_BATCH_06_PASS",
+        "independent_work_remaining": true,
+        "delegation_registry": "governance/second-shift/LEARNING-DELEGATIONS.json"
+      }
     }
   ]
 }
