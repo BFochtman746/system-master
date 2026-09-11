@@ -92,7 +92,18 @@ export class GitHubGitDataClient {
   async getCommit(sha){const r=await this._request('GET',`/git/commits/${encodeURIComponent(sha)}`);if(!r?.tree?.sha||!Array.isArray(r?.parents))fail('GITHUB_RESPONSE_INVALID','commit response incomplete');return {message:r.message??'',tree:r.tree.sha,parents:r.parents.map(p=>p.sha)};}
 
   async createRef(ref,commitOid){const r=await this._request('POST','/git/refs',{body:{ref:`refs/${ref}`,sha:commitOid}});return r?.object?.sha??commitOid;}
-  async getRef(ref){const r=await this._request('GET',`/git/ref/${encodeRef(ref)}`);if(!r?.object?.sha)fail('GITHUB_RESPONSE_INVALID','ref response missing object sha');return r.object.sha;}
+  async getRef(ref){
+    try{
+      const r=await this._request('GET',`/git/ref/${encodeRef(ref)}`);
+      if(!r?.object?.sha)fail('GITHUB_RESPONSE_INVALID','ref response missing object sha');
+      return r.object.sha;
+    }catch(error){
+      if(error?.status!==404)throw error;
+      const repository=await this._request('GET','');
+      if(!repository?.default_branch)fail('JOURNAL_REPOSITORY_UNSEEDED','GitHub cannot create the first ref in a repository with no existing branch',{repository:`${this.owner}/${this.repo}`});
+      throw error;
+    }
+  }
 
   async updateRef(ref,commitOid,{force=false,expectedOldOid=null}={}){
     if(force!==false)fail('GITHUB_FORCE_UPDATE_FORBIDDEN','journal client never permits force ref updates');
