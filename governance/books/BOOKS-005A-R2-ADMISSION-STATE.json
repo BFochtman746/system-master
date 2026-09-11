@@ -1,0 +1,49 @@
+{
+  "operation": "BOOKS-IMPLEMENTATION-EXECUTION-005A-R2",
+  "state": "EXECUTED_PARTIAL__SOURCE_BYTES_NOT_YET_ADMITTED__W01_OPEN__W02_FORBIDDEN",
+  "base_main_commit": "cf331c362c1bfbf1cb41c2a298eb4853f541efc1",
+  "branch": "books/005a-r2-source-admission",
+  "required_subjects": 750,
+  "required_set_sha256": "f2e4908df48cb6c3f4f6a8e99acf1cf04a3aac7fa49e11da14353939873502c8",
+  "r1_binding_sha256": "07176f547168c1416df4fdcd24633ff3cc2861c4fddc01cbf0a27db8c7367c9c",
+  "source_admission_candidate": {
+    "format": "tar.xz",
+    "sha256": "c4ee3b344819294ff5e5e5315555361352c429c24ab9b6d8119943dd9e73b3b3",
+    "bytes": 122644,
+    "files": 74,
+    "java_main": 43,
+    "java_test": 22,
+    "java_total": 65,
+    "shared_core_compatibility_sources": 18
+  },
+  "fresh_portable_qualification": {
+    "strict_java21_compile": "PASS",
+    "compiler_output_bytes": 0,
+    "test_mains_passed": 22,
+    "test_mains_failed": 0,
+    "assertions_passed": 586,
+    "book_collab_001_assertions": 21,
+    "historical_collab_contract_verifier_assertions": 24
+  },
+  "book_collab_001": {
+    "work_package": "BIDAG-004-FND-02",
+    "required_subject": "BOOK98::SB-26",
+    "runtime_candidate_source_sha256": "3c30376972cc2bdba946a00b262fbfa25acf514292bc1af48defde0adb0ed129",
+    "test_source_sha256": "63a8109a1dc5a6bde179b9ef308b6a82dfa2e01be6a86fe999c0bd7f884901f2",
+    "standing": "BOUNDED_RUNTIME_CANDIDATE_PORTABLE_PASS__CURRENT_REPO_SOURCE_ADMISSION_PENDING",
+    "authority_fence": "BOOK-COLLAB-001 owns Book-local principal/role/ACL/visibility authorization and receipts only; Story Bible retains canon meaning and Writing/Manuscript retain accepted text/manuscript semantics."
+  },
+  "reuse_repair_rows": {
+    "reuse": 4,
+    "repair": 67,
+    "total": 71,
+    "product_closed": 0
+  },
+  "hard_gates_remaining": [
+    "transfer exact candidate source bytes into this Git branch and hosted-requalify exact bytes",
+    "bind the 4 model-dependent REUSE rows to current PLATFORM-009 execution/config/provider receipts",
+    "bind durable Book jobs/recovery to the current production SYSTEM-ORCHESTRATOR and run crash/replay/idempotency integration",
+    "complete exact current-repo route/data/direct-test/integration/qualification evidence for all 71 REUSE/REPAIR rows"
+  ],
+  "closure_fence": "Portable compile/test PASS and source discovery do not close any 004B-R1 row by themselves. W02 remains forbidden until every W01 hard predecessor gate is satisfied."
+}
