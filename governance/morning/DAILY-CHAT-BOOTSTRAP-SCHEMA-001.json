@@ -1,13 +1,16 @@
 {
   "schema_id": "DAILY-CHAT-BOOTSTRAP-SCHEMA-001",
-  "purpose": "Machine-readable morning reconciliation receipt and fast-start manifest for MASTER_ROOT, LEARNING, BOOK and DOCUMENTS chats under the current program-job and completion locks.",
-  "allowed_chat_roles": ["MASTER_ROOT", "LEARNING", "BOOK", "DOCUMENTS"],
+  "purpose": "Machine-readable morning reconciliation receipt and fast-start manifest for MASTER_ROOT, LEARNING, BOOK, DOCUMENTS and the named PROGRAMMING_WORK_PROGRAM under current program-job and completion locks.",
+  "allowed_chat_roles": ["MASTER_ROOT", "LEARNING", "BOOK", "DOCUMENTS", "PROGRAMMING_WORK_PROGRAM"],
   "retired_chat_roles": {},
   "compatibility_focus_roles": {
     "PROSE": "BOOK@SYSTEM_MASTER/BOOK/PROSE__NO_SEPARATE_OWNER_ROLE"
   },
+  "non_peer_work_program_roles": {
+    "PROGRAMMING_WORK_PROGRAM": "governance/programs/PROGRAMMING-WORK-PROGRAM-LOCK-001.json"
+  },
   "allowed_readiness": ["CHAT_READY", "CHAT_READY_WITH_DECISION", "NOT_READY"],
-  "allowed_delta_classes": ["ALREADY_CANONICAL", "ADMISSIBLE_DELTA", "CANDIDATE_ONLY", "BLOCKED_HIGHER_AUTHORITY", "SUPERSEDED", "STALE", "REWORK_REQUIRED", "INVALID", "JOB_LANE_VIOLATION", "FALSE_SYSTEM_COMPLETION", "PROSE_SCOPE_REOPEN"],
+  "allowed_delta_classes": ["ALREADY_CANONICAL", "ADMISSIBLE_DELTA", "CANDIDATE_ONLY", "BLOCKED_HIGHER_AUTHORITY", "SUPERSEDED", "STALE", "REWORK_REQUIRED", "INVALID", "JOB_LANE_VIOLATION", "FALSE_SYSTEM_COMPLETION", "PROSE_SCOPE_REOPEN", "PROGRAMMING_SCOPE_DRIFT"],
   "required_manifest_fields": ["schema_id","date","timezone","generated_at","source_main_sha","reconciliation_completion_sha","current_authority_ref","topology_ref","sealed_checkpoint_ref","second_shift_shift_id","second_shift_score_ref","repository_reconciler_standing","packets"],
   "required_packet_fields": ["chat_role","owner_path","control_refs","live_control_heads","selected_state_records","current_standing","current_objective_id","where_we_are","where_we_are_going","overnight_deltas","completed_predecessor_refs","open_obligation_ids","active_repair_transactions","second_shift_delegation_status","qualification_standing","next_step_contract","chat_ready"],
   "required_next_step_fields": ["id","objective","first_action","pass_proves","pass_unlocks","on_failure","do_not"],
@@ -15,13 +18,15 @@
     "Every morning reconciliation must read CURRENT-AUTHORITY and its selected program_job_lock and system_completion_status before interpreting packet completion or selecting work.",
     "PROSE is the only complete system. SYSTEM_MASTER, CORE, LEARNING, BOOK and DOCUMENTS remain incomplete until explicit product-level completion authority changes that standing.",
     "BOOK must finish Book, including integration of the completed PROSE child through adapters and the Book Workflow Orchestrator, then integrate BOOK upward into SYSTEM_MASTER.",
-    "LEARNING must finish Learning and integrate upward into SYSTEM_MASTER without crossing into BOOK, PROSE or DOCUMENTS product work.",
-    "DOCUMENTS must finish document/artifact behavior and integrate upward into SYSTEM_MASTER without absorbing PROSE or taking BOOK literary authority.",
-    "CORE supplies shared Foundation/Spine and System Master integration primitives without taking peer-system semantics."
+    "LEARNING must finish Learning and integrate upward into SYSTEM_MASTER without crossing into BOOK, PROSE, DOCUMENTS or PROGRAMMING work.",
+    "DOCUMENTS must finish document/artifact behavior and integrate upward into SYSTEM_MASTER without absorbing PROSE or taking BOOK, LEARNING, CORE or PROGRAMMING semantics.",
+    "CORE supplies shared Foundation/Spine and System Master integration primitives without taking peer-system or Programming-specific engineering semantics.",
+    "PROGRAMMING is an incomplete named work program with preserved engineering evidence continuity. It continues its existing foundation/build/assurance work, does not restart generic research, and does not become a Topology-004 peer without explicit admission.",
+    "PROGRAMMING_KNOWLEDGE_RECOVERY is a supporting source/custody/provenance subprogram, not the Programming product definition."
   ],
   "master_root_rules": [
     "MASTER_ROOT is a chat role over SYSTEM_MASTER product-root governance, not a peer system.",
-    "MASTER_ROOT reads CORE, LEARNING, BOOK and DOCUMENTS plus the BOOK child PROSE when relevant and shared infrastructure, but does not silently take their canonical-writer or product authority.",
+    "MASTER_ROOT reads CORE, LEARNING, BOOK and DOCUMENTS plus the BOOK child PROSE when relevant, named work-program boundaries such as PROGRAMMING, and shared infrastructure, but does not silently take their product authority.",
     "MASTER_ROOT has no active peer-worker Second Shift lane; execution lanes are discovered from the Second Shift registry."
   ],
   "book_prose_rules": [
@@ -32,8 +37,16 @@
   "documents_rules": [
     "DOCUMENTS is the active incomplete first-class peer system at SYSTEM_MASTER/DOCUMENTS with control ref documents/control-v1.",
     "DOCUMENTS owns DOCX/PDF/PPTX/document artifact mechanics and generic document services and integrates upward into SYSTEM_MASTER.",
-    "DOCUMENTS must not absorb, schedule, repair or claim BOOK-specific PROSE literary work.",
+    "DOCUMENTS must not absorb, schedule, repair or claim BOOK-specific PROSE literary work or PROGRAMMING engineering work.",
     "BOOK and DOCUMENTS are peers; BOOK canonical state and BOOK/PROSE literary-specialist authority remain BOOK-owned."
+  ],
+  "programming_rules": [
+    "PROGRAMMING_WORK_PROGRAM must load CURRENT-AUTHORITY.programming_work_program_lock and CURRENT-AUTHORITY.programming_system_packet before selecting work.",
+    "The Programming packet preserves PROGRAMMING-FOUNDATION-002A through 002X, capability-ledger, crosscut, closure-repair, programming-core/source-code, CODE-QUAL and Genesis-related evidence as reusable continuity inputs; do not restart them merely because the chat is new.",
+    "Programming-specific software-engineering semantics remain Programming work even when shared Core execution/model/storage/A-01 primitives are consumed.",
+    "Programming may prepare explicit System Master integration/admission contracts but has no canonical peer owner path, repair inbox or Second Shift peer lane before topology admission.",
+    "For bootstrap compatibility, owner_path for PROGRAMMING_WORK_PROGRAM is SYSTEM_MASTER product-root architecture scope only and must not be interpreted as permission to mutate Core, Learning, Book, Prose or Documents owner state.",
+    "Knowledge Recovery supports Programming source/custody/provenance but may not replace the Programming engineering objective."
   ],
   "freshness_rules": [
     "The morning manifest is a cache and reconciliation receipt, not authority over later repository movement.",
@@ -44,8 +57,9 @@
     "Do not ask the user to explain System Master, its topology, repository, lane purpose, prior work or project setup when canonical lookup can resolve it.",
     "Do not redirect active PROSE child work to DOCUMENTS; a Prose focus resolves to BOOK at SYSTEM_MASTER/BOOK/PROSE.",
     "Do not restart or expand completed PROSE semantics absent a demonstrated defect or explicit user direction; integration adapters/orchestration around Prose remain BOOK work.",
+    "Do not restart completed Programming foundation/capability/assurance work or reduce Programming to Knowledge Recovery; load the Programming work-program lock and packet first.",
     "Do not restart sealed/completed packets because a chat is new, and do not mistake packet completion for whole-system completion.",
     "If durable authority cannot resolve a decision, ask only the smallest exact human/author/private/native/external decision required."
   ],
-  "authority_boundary": "This manifest accelerates startup and records reconciliation. It does not transfer PASS, owner, canonical-writer, A-01, human, author, private, blind, native, publication or production authority."
+  "authority_boundary": "This manifest accelerates startup and records reconciliation. It does not transfer PASS, owner, canonical-writer, peer-system topology, A-01, human, author, private, blind, native, publication or production authority."
 }
