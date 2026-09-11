@@ -90,6 +90,16 @@ class IntakeTests(unittest.TestCase):
         self.assertEqual(tx["controller_commit_oid"], "d" * 40)
         self.assertEqual(tx["policy_version"], "foundation-005-policy")
         self.assertEqual(tx["policy_digest_sha256"], POLICY)
+        con = self.store.connect()
+        try:
+            command = con.execute(
+                "SELECT caller_type,caller_id FROM commands WHERE command_id=?",
+                (response["command_id"],),
+            ).fetchone()
+        finally:
+            con.close()
+        self.assertEqual(command["caller_type"], "CHAT")
+        self.assertEqual(command["caller_id"], "local-controller-client")
 
     def test_exact_replay_returns_original_transaction(self):
         request = self.request()

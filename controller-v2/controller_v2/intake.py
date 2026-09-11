@@ -208,7 +208,7 @@ class CommandIntake:
             return _error_frame(str(getattr(exc, "code", "CONTROLLER_ERROR")))
         except (KeyError, TypeError, ValueError, sqlite3.IntegrityError):
             return _error_frame("PROTOCOL_INVALID_REQUEST")
-        except BaseException:
+        except Exception:
             return _error_frame("INTERNAL_ERROR")
 
 
