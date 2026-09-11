@@ -1,0 +1,293 @@
+{
+  "contract_id": "BOOK-CONTEXT-COMPILER-CONTEXT-PACKAGE-SCHEMA-001",
+  "effective_date": "2026-09-11",
+  "standing": "BOOK_OWNED_SPECIFICATION_COMPLETE__IMPLEMENTATION_NOT_STARTED",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "control_binding": {
+    "control_ref": "book-system/control-v1",
+    "control_head": "1e8f9e7a37d11ab643ef3cc941f21851149714c8",
+    "control_record": "qualification/book-system/BOOK-SYSTEM-CONTROL-RECORD-011.json",
+    "state_record": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-041.json"
+  },
+  "predecessor": {
+    "census": "qualification/book-system/book-prose-integration/BOOK-PHASE-2-ORCHESTRATOR-CLOSURE-CENSUS-001.json",
+    "phase2_packets_closed": 10,
+    "phase2_cases_passed": 275,
+    "phase2_cases_planned": 275
+  },
+  "objective": "Define the deterministic, authority-bounded Book Context Compiler package consumed by Book-owned generation, evaluation, routing and orchestration. Completed Prose capability may be referenced only as an immutable historical provider input; this contract creates no Prose execution domain.",
+  "schema_version": "1.0.0-proposed",
+  "package_classes": [
+    {
+      "class": "GENERATION_CONTEXT",
+      "consumer_role": "BOOK_OWNED_GENERATION_ADAPTER",
+      "candidate_visibility": "source and constraints allowed; no evaluator private/blind labels",
+      "canonical_effect": false
+    },
+    {
+      "class": "EVALUATION_CONTEXT",
+      "consumer_role": "BOOK_OWNED_EVALUATION_ADAPTER",
+      "candidate_visibility": "candidate reference/content through authorized ephemeral channel; generator identity/reasoning and protected labels excluded",
+      "canonical_effect": false
+    },
+    {
+      "class": "ADMISSION_CONTEXT",
+      "consumer_role": "BOOK_CANONICAL_CONTENT_ADMISSION",
+      "candidate_visibility": "exact candidate reference/digest plus admitted evidence and author decision references",
+      "canonical_effect": "Only the existing Book admission authority may decide or commit effect."
+    }
+  ],
+  "durable_envelope": {
+    "required": [
+      "context_package_id",
+      "schema_version",
+      "package_class",
+      "book_project_id",
+      "source_identity",
+      "book_state_binding",
+      "story_bible_binding",
+      "author_authority_binding",
+      "constraint_set",
+      "capability_request",
+      "privacy_class",
+      "created_at",
+      "expires_at",
+      "compiler_version",
+      "compiler_subject_sha",
+      "package_digest_sha256"
+    ],
+    "optional": [
+      "research_evidence_refs",
+      "prior_decision_refs",
+      "artifact_refs",
+      "evaluation_policy_ref"
+    ],
+    "forbidden": [
+      "raw_manuscript_text",
+      "raw_candidate_text",
+      "private_gold_labels",
+      "blind_case_labels",
+      "author_secret",
+      "provider_chain_of_thought",
+      "canonical_mutation_command",
+      "publication_credentials",
+      "production_credentials"
+    ]
+  },
+  "bindings": {
+    "source_identity": [
+      "source_manuscript_ref",
+      "source_manuscript_sha256",
+      "source_version_id"
+    ],
+    "book_state_binding": [
+      "expected_book_state_version",
+      "expected_book_state_digest_sha256"
+    ],
+    "story_bible_binding": [
+      "story_bible_snapshot_ref",
+      "story_bible_snapshot_sha256",
+      "canon_version"
+    ],
+    "author_authority_binding": [
+      "decision_required",
+      "observed_author_decision_refs",
+      "unresolved_author_questions"
+    ],
+    "capability_request": [
+      "capability_id",
+      "authority_domain",
+      "service_registry_id",
+      "service_registry_subject_sha"
+    ],
+    "constraint_set": [
+      "constraint_id",
+      "class",
+      "source_ref",
+      "priority",
+      "hard_or_advisory",
+      "conflict_group?"
+    ],
+    "research_evidence_refs": [
+      "evidence_id",
+      "source_locator",
+      "source_identity_or_uncertainty",
+      "standing",
+      "retrieved_or_observed_at"
+    ]
+  },
+  "authority_rules": [
+    "SYSTEM_MASTER/BOOK is the sole canonical Book/manuscript, Story Bible, lifecycle, admission, versioning/rollback and publication owner.",
+    "The compiler packages context; it does not decide canon, author choices, admission, publication or production.",
+    "Completed Prose artifacts or capability IDs are historical inputs consumed by a Book-owned adapter. They create no Prose owner, worker, repair, research, qualification, telemetry or successor.",
+    "Documents may supply admitted generic artifact services but receives no Prose work and cannot mutate Book canonical state.",
+    "Research evidence remains external evidence truth until Book/author admission promotes a claim through the existing authority path.",
+    "Historical PASS is exact-subject evidence only and never qualifies a changed context compiler or package."
+  ],
+  "deterministic_compilation": {
+    "canonicalization": "UTF-8 JSON, recursively sorted object keys, array order preserved only where semantically ordered, timestamps excluded from semantic digest except expires_at policy bucket.",
+    "digest_inputs": [
+      "schema_version",
+      "package_class",
+      "source_identity",
+      "book_state_binding",
+      "story_bible_binding",
+      "author_authority_binding",
+      "normalized constraint_set",
+      "capability_request",
+      "privacy_class",
+      "admitted reference lists",
+      "compiler_version",
+      "compiler_subject_sha"
+    ],
+    "stale_input_rule": "If live source, Book state, Story Bible, service registry or author-decision bindings differ, compilation fails STALE_CONTEXT and emits no executable package.",
+    "conflict_rule": "Conflicting hard constraints yield CONSTRAINT_CONFLICT with exact conflict IDs; no priority guessing is allowed.",
+    "unresolved_author_rule": "Required unresolved author decisions yield AUTHOR_DECISION_REQUIRED; automation may prepare questions but cannot synthesize answers."
+  },
+  "ephemeral_payload_boundary": {
+    "purpose": "Permit an authorized Book execution adapter to load exact source/candidate bytes without persisting them into coordination state or evidence receipts.",
+    "transport": "opaque capability-scoped handle bound to package ID, consumer role, expiry and expected byte digest",
+    "durable_record": "handle identity, digest, expiry and access result only",
+    "raw_bytes_in_telemetry": false,
+    "private_data_authority_inferred": false,
+    "expiration_behavior": "Expired handles fail closed and require recompilation/re-authorization."
+  },
+  "evaluator_isolation": {
+    "separate_package_required": true,
+    "generator_context_reuse_forbidden": true,
+    "forbidden_inputs": [
+      "generator hidden reasoning",
+      "generator self-score",
+      "protected blind labels",
+      "private gold answers",
+      "unadmitted author preference",
+      "future revision outcome"
+    ],
+    "allowed_inputs": [
+      "exact candidate under authorized ephemeral handle",
+      "applicable rubric/criteria refs",
+      "source/canon constraints required for evaluation",
+      "public or admitted evidence refs"
+    ],
+    "audit_result": "Evaluator output is evidence-only and cannot mutate canon or execute admission.",
+    "blind_claim_rule": "This contract can test isolation structure with synthetic nonblind fixtures; it cannot claim fresh-blind execution until a genuinely isolated fresh context runs."
+  },
+  "result_classes": [
+    "PACKAGE_READY",
+    "NO_CHANGE",
+    "STALE_CONTEXT",
+    "CONSTRAINT_CONFLICT",
+    "AUTHOR_DECISION_REQUIRED",
+    "PRIVATE_AUTHORITY_REQUIRED",
+    "CAPABILITY_UNAVAILABLE",
+    "INVALID_SOURCE_IDENTITY",
+    "INVALID_SERVICE_REGISTRY_BINDING",
+    "EXPIRED",
+    "REJECTED_AUTHORITY_BOUNDARY"
+  ],
+  "nonblind_fixture_matrix": [
+    {
+      "id": "CTX-001",
+      "case": "same normalized inputs in different object-key order",
+      "expected": "identical semantic digest"
+    },
+    {
+      "id": "CTX-002",
+      "case": "source digest changes",
+      "expected": "new package identity; stale old package rejected"
+    },
+    {
+      "id": "CTX-003",
+      "case": "Book state version advances",
+      "expected": "STALE_CONTEXT"
+    },
+    {
+      "id": "CTX-004",
+      "case": "two hard canon constraints conflict",
+      "expected": "CONSTRAINT_CONFLICT with both IDs"
+    },
+    {
+      "id": "CTX-005",
+      "case": "required author question unresolved",
+      "expected": "AUTHOR_DECISION_REQUIRED"
+    },
+    {
+      "id": "CTX-006",
+      "case": "provider capability claims canonical manuscript write",
+      "expected": "REJECTED_AUTHORITY_BOUNDARY"
+    },
+    {
+      "id": "CTX-007",
+      "case": "historical Prose owner path supplied as active consumer",
+      "expected": "REJECTED_AUTHORITY_BOUNDARY"
+    },
+    {
+      "id": "CTX-008",
+      "case": "Documents target supplied for completed-Prose integration",
+      "expected": "REJECTED_AUTHORITY_BOUNDARY"
+    },
+    {
+      "id": "CTX-009",
+      "case": "private/blind label appears in durable envelope",
+      "expected": "REJECTED_AUTHORITY_BOUNDARY"
+    },
+    {
+      "id": "CTX-010",
+      "case": "ephemeral handle expires",
+      "expected": "EXPIRED with zero canonical effect"
+    },
+    {
+      "id": "CTX-011",
+      "case": "evaluator receives generation package",
+      "expected": "REJECTED_AUTHORITY_BOUNDARY"
+    },
+    {
+      "id": "CTX-012",
+      "case": "valid admission package targets existing Book admission authority",
+      "expected": "PACKAGE_READY with canonical_effect=false until admission acts"
+    }
+  ],
+  "property_and_metamorphic_tests": [
+    "compile is deterministic for identical semantic inputs",
+    "irrelevant object key order and nonsemantic whitespace do not change digest",
+    "any authority-bearing binding change changes package identity or fails closed",
+    "removing a required evidence reference never increases readiness",
+    "adding an unresolved hard conflict never produces PACKAGE_READY",
+    "no output may contain forbidden raw/private/blind fields at any nesting depth",
+    "no package class except ADMISSION_CONTEXT may target the Book admission boundary",
+    "even ADMISSION_CONTEXT always has canonical_effect=false before the existing admission authority executes",
+    "historical Prose labels are inert references and never become execution owners"
+  ],
+  "implementation_packet": {
+    "proposed_schema_path": "system-master/book-system/context-compiler/book-context-package.schema.json",
+    "proposed_runtime_path": "system-master/book-system/context-compiler/book-context-compiler.js",
+    "proposed_test_path": ".github/scripts/book-context-compiler-context-package-001-qualify.js",
+    "portable_first": true,
+    "synthetic_nonblind_only": true,
+    "fresh_subject_required": true,
+    "expected_case_floor": 30,
+    "no_dependency_on_a01_for_portable_start": true
+  },
+  "evidence_boundaries": {
+    "author_decision": "UNOBSERVED_UNLESS_EXPLICIT_REFERENCE_EXISTS",
+    "private_manuscript": "NOT_ACCESSED_BY_THIS_SPECIFICATION",
+    "fresh_blind_isolation": "NOT_EXECUTED",
+    "historical_prose_pass": "NOT_TRANSFERRED",
+    "book_admission": "NOT_EXECUTED",
+    "canonical_manuscript_effect": false,
+    "a01_target_pass": "NOT_CLAIMED",
+    "native_platform": "NOT_CLAIMED",
+    "publication": "NOT_CLAIMED",
+    "production": "NOT_CLAIMED"
+  },
+  "completion_delta": "A concrete Book-owned context-package schema, deterministic digest boundary, ephemeral/private payload boundary, evaluator-isolation model, failure classes and 30-case-minimum qualification packet are now specified. No runtime code or product PASS is claimed.",
+  "evidence_target": "Fresh exact-SHA portable and hosted qualification of the context schema/compiler using synthetic nonblind fixtures, with zero provider execution and zero canonical manuscript effect.",
+  "stop_condition": "The schema and failure/test contracts are sufficient for bounded portable implementation without resolving author/private/native/A-01/publication/production dependencies.",
+  "forbidden_authority": [
+    "No Prose worker, repair, research, qualification, telemetry or successor.",
+    "No Documents ownership of completed-Prose integration.",
+    "No direct canonical manuscript mutation.",
+    "No fabricated author/private/blind/native/A-01/publication/production evidence."
+  ],
+  "continuation_rule": "Implement the proposed schema/compiler/tests on a fresh Book-owned subject; qualify portable behavior; then prepare hosted exact-SHA evidence. After completion, re-read Book authority and select the next genuinely open Book-owned adapter, persistence, scheduler or end-to-end integration seam. PROSE remains retired."
+}
