@@ -1,6 +1,6 @@
 # DOCUMENTS-R4-GITHUB-NATIVE-PAYLOAD-STAGING-004
 
-Status: BLOCKED / EXTERNAL FILE-CAPABLE TRANSPORT REQUIRED
+Status: CLOSED / PASS — FULL TRANSPORT STAGED / NOT ARMED
 Owner: SYSTEM_MASTER/DOCUMENTS
 Predecessor: DOCUMENTS-R4-TRANSPORT-CONTRACT-RECONCILIATION-003 — CLOSED/PASS
 Date: 2026-09-11
@@ -69,3 +69,13 @@ This transport-only blocker does not prevent continuing Documents build-readines
 `DOCUMENTS-SPINE-IDENTIFY-PROFILE-COMPLETION-001A — REQUIREMENT / SOURCE / CONTRACT / TEST / DEPENDENCY PREBUILD FREEZE`
 
 This successor prepares the earliest partially complete Documents spine stage for future implementation without modifying or qualifying absent Git-native R4 source bytes.
+
+## Closure resolution
+- Closure receipt: `DOCUMENTS-R4-GITHUB-NATIVE-PAYLOAD-STAGING-CLOSURE-RECEIPT-004.json`
+- Staging commit: `9f2854deefbcb8b7600634666e9a5b1664401eac`
+- Remote canonical chunk Git blobs: 5/5 verified.
+- Remote carrier SHA-256: `77a6e2288d475865622bad4b2c66647a599c26a3899c6617b33d7b2b334855bd`.
+- Exact source reconstruction: 225/225 verified.
+- `READY`: absent.
+- Historical PASS transfer: false.
+- GitHub-native source custody remains pending the separate arming/admission operation.
