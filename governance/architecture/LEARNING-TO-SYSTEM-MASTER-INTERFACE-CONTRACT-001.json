@@ -1,0 +1,286 @@
+{
+  "contract_id": "LEARNING-TO-SYSTEM-MASTER-INTERFACE-CONTRACT-001",
+  "effective_date": "2026-09-11",
+  "standing": "PROPOSED_OWNER_VALID_BUILD_AHEAD_CONTRACT__NO_PRODUCT_PASS",
+  "semantic_owner": "SYSTEM_MASTER/LEARNING",
+  "integration_consumer": "SYSTEM_MASTER/CORE",
+  "authority_binding": {
+    "learning_control_ref": "learning/control-v1",
+    "learning_control_head": "e3196089f77dde376944a08eac78a697e57d1535",
+    "topology": "SYSTEM-TOPOLOGY-005"
+  },
+  "purpose": "Define the smallest headless interface by which System Master Chat can invoke and display Learning work while Learning retains learner, curriculum, assessment, mastery, adaptation and Learning-evidence semantics.",
+  "ownership": {
+    "learning_owns": [
+      "learner-state semantics",
+      "course and curriculum identities",
+      "lesson/assessment selection",
+      "attempt scoring through independent behavior oracles",
+      "mastery/retention/transfer state transitions",
+      "Learning-specific evidence and qualification"
+    ],
+    "core_owns": [
+      "shared request transport",
+      "authentication/authorization plumbing",
+      "generic idempotency and trace envelopes",
+      "shared artifact references",
+      "system-wide routing and presentation shell"
+    ],
+    "system_master_owns": [
+      "product-level orchestration",
+      "cross-system user intent routing",
+      "integration admission and product completion"
+    ],
+    "forbidden_transfers": [
+      "Core does not calculate or overwrite mastery",
+      "Chat text does not self-authorize correctness",
+      "generic artifact success does not become Learning PASS",
+      "Learning does not mutate Book, Documents or Programming state",
+      "retired Prose has no route"
+    ]
+  },
+  "versioning": {
+    "interface_version": "0.1.0-proposed",
+    "compatibility_rule": "Additive optional fields are backward compatible; changes to command meaning, state transition authority, scoring authority or evidence classification require a new major version and fresh qualification.",
+    "exact_schema_subject_required_for_admission": true
+  },
+  "envelope": {
+    "required": [
+      "request_id",
+      "idempotency_key",
+      "occurred_at",
+      "actor_context_class",
+      "command",
+      "learning_context",
+      "evidence_policy"
+    ],
+    "response_required": [
+      "request_id",
+      "result_class",
+      "learning_state_version",
+      "presentation",
+      "evidence_refs",
+      "next_actions",
+      "warnings"
+    ],
+    "actor_context_classes": [
+      "USER_PRESENT",
+      "SYSTEM_AUTOMATION",
+      "TEST_FIXTURE"
+    ],
+    "evidence_policy_values": [
+      "NO_HUMAN_EVIDENCE",
+      "USER_AUTHORIZED_LEARNER_EVIDENCE",
+      "READ_ONLY_STATUS"
+    ]
+  },
+  "commands": [
+    {
+      "command": "LEARNING_STATUS_GET",
+      "mutation": false,
+      "input": [
+        "learner_scope",
+        "course_id?"
+      ],
+      "output": [
+        "active_courses",
+        "progress_views",
+        "blocked_boundaries",
+        "next_actions"
+      ],
+      "rule": "Progress is descriptive durable state only; it does not infer effectiveness."
+    },
+    {
+      "command": "COURSE_CONTINUE",
+      "mutation": true,
+      "input": [
+        "course_id",
+        "expected_learning_state_version"
+      ],
+      "output": [
+        "lesson_or_assessment_card",
+        "new_learning_state_version"
+      ],
+      "rule": "Learning selects the next valid node; Core cannot override prerequisites or evidence gates."
+    },
+    {
+      "command": "ATTEMPT_SUBMIT",
+      "mutation": true,
+      "input": [
+        "course_id",
+        "item_id",
+        "response_payload",
+        "mode",
+        "expected_learning_state_version"
+      ],
+      "output": [
+        "oracle_result",
+        "feedback",
+        "evidence_admission",
+        "new_learning_state_version"
+      ],
+      "rule": "Only the Learning-owned oracle decides correctness; PRACTICE cannot count as mastery."
+    },
+    {
+      "command": "RETENTION_CHECK_REQUEST",
+      "mutation": true,
+      "input": [
+        "course_id",
+        "skill_id",
+        "expected_learning_state_version"
+      ],
+      "output": [
+        "availability",
+        "due_at?",
+        "item?",
+        "new_learning_state_version"
+      ],
+      "rule": "A check cannot be served before its durable delay/evidence gate."
+    },
+    {
+      "command": "LEARNING_ARTIFACT_LIST",
+      "mutation": false,
+      "input": [
+        "course_id?",
+        "learner_scope"
+      ],
+      "output": [
+        "artifact_refs"
+      ],
+      "rule": "Artifact availability is not curriculum completion or mastery."
+    },
+    {
+      "command": "LEARNING_ACTION_CANCEL",
+      "mutation": true,
+      "input": [
+        "target_request_id",
+        "expected_learning_state_version"
+      ],
+      "output": [
+        "cancellation_state",
+        "new_learning_state_version"
+      ],
+      "rule": "Cancellation is best-effort and cannot rewrite already-admitted evidence."
+    }
+  ],
+  "concurrency_and_idempotency": {
+    "mutation_precondition": "expected_learning_state_version must equal the live Learning-owned version",
+    "stale_write_result": "CONFLICT__LEARNING_STATE_ADVANCED",
+    "idempotency_scope": "owner + command + idempotency_key",
+    "replay_rule": "Same key and same canonical input returns the original result; same key with different canonical input fails closed.",
+    "serialization_key": "learner_scope + course_id",
+    "cross_course_parallelism": "Allowed only when no shared Learning-state invariant is touched."
+  },
+  "result_classes": [
+    "SUCCESS",
+    "NO_CHANGE",
+    "INSUFFICIENT_EVIDENCE",
+    "HUMAN_ACTION_REQUIRED",
+    "NOT_DUE",
+    "CONFLICT__LEARNING_STATE_ADVANCED",
+    "REJECTED_INVALID_INPUT",
+    "REJECTED_AUTHORITY_BOUNDARY",
+    "TRANSIENT_DEPENDENCY_FAILURE",
+    "INTERNAL_ERROR"
+  ],
+  "privacy_and_human_boundary": {
+    "default_data_minimization": "Do not place raw learner responses in cross-system telemetry. Return stable evidence references and bounded feedback.",
+    "consent_required_for_real_learner_evidence": true,
+    "automation_may_generate": [
+      "synthetic fixtures",
+      "machine qualification receipts",
+      "schema conformance evidence"
+    ],
+    "automation_may_not_generate": [
+      "participant consent",
+      "actual learner responses",
+      "real mastery",
+      "real delayed retention",
+      "real novel transfer",
+      "effectiveness",
+      "psychometric validity",
+      "SME approval",
+      "certification"
+    ]
+  },
+  "events": [
+    {
+      "event": "LEARNING_STATE_CHANGED",
+      "payload": [
+        "event_id",
+        "learner_scope",
+        "course_id",
+        "prior_version",
+        "new_version",
+        "change_class",
+        "evidence_refs"
+      ],
+      "delivery": "AT_LEAST_ONCE__CONSUMER_DEDUP_BY_EVENT_ID"
+    },
+    {
+      "event": "LEARNING_ACTION_REQUIRED",
+      "payload": [
+        "event_id",
+        "action_class",
+        "reason",
+        "safe_next_actions"
+      ],
+      "delivery": "AT_LEAST_ONCE"
+    },
+    {
+      "event": "LEARNING_EVIDENCE_ADMITTED",
+      "payload": [
+        "event_id",
+        "evidence_class",
+        "subject_ref",
+        "receipt_ref"
+      ],
+      "delivery": "AT_LEAST_ONCE__NO_PASS_TRANSFER"
+    }
+  ],
+  "failure_injection_and_tests": [
+    "duplicate ATTEMPT_SUBMIT with identical idempotency key returns original result without a second state transition",
+    "same idempotency key with changed response fails closed",
+    "stale expected version rejects mutation",
+    "Core-supplied correctness flag is ignored and rejected",
+    "PRACTICE success never emits mastery",
+    "RETENTION_CHECK_REQUEST before due time returns NOT_DUE",
+    "missing consent/evidence policy rejects admission of real learner evidence",
+    "event redelivery is deduplicated",
+    "transport timeout after commit is recoverable by idempotent replay",
+    "Book, Documents, Programming and retired-Prose identifiers cannot be targeted as Learning state"
+  ],
+  "qualification_plan": {
+    "portable": [
+      "JSON-schema validation",
+      "deterministic canonicalization tests",
+      "state-version property tests",
+      "idempotency replay tests",
+      "authority-boundary negative tests",
+      "privacy-minimization snapshot tests"
+    ],
+    "hosted": [
+      "exact-SHA integration adapter tests",
+      "concurrent mutation failure injection",
+      "event redelivery/dedup tests",
+      "artifact-reference round trip"
+    ],
+    "excluded_until_available": [
+      "real participant execution",
+      "native assistive-technology conformance",
+      "A-01 execution unless admitted",
+      "production deployment"
+    ],
+    "pass_transfer_forbidden": true
+  },
+  "completion_delta": "A concrete owner-preserving command/event/state contract now exists for headless System Master integration; no runtime adapter, product admission or Learning completion is claimed.",
+  "evidence_target": "Portable contract/schema tests followed by an exact-SHA hosted adapter qualification on a fresh integration subject.",
+  "stop_condition": "Stop this contract unit when ownership, schemas, commands, state concurrency, idempotency, privacy, evidence classes, failure modes and qualification targets are explicit enough for bounded implementation.",
+  "forbidden_authority": [
+    "may not mutate Learning semantics from Core",
+    "may not write Book, Documents or Programming canonical state",
+    "may not create retired Prose work",
+    "may not fabricate learner/human/private/native/A-01/production evidence"
+  ],
+  "continuation_rule": "After Batch 06 semantic PASS and ordinal-7 continuation are unblocked, Learning prioritizes the ordered curriculum compiler. Otherwise, an owner-valid successor may implement only the transport-neutral schemas and portable contract tests on a fresh exact subject."
+}
