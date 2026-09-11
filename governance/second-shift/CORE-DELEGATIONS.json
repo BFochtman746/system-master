@@ -3,73 +3,87 @@
   "owner_path": "SYSTEM_MASTER/CORE",
   "control_ref": "system-master/control-v2",
   "last_known_control_head": "2031f070bd3702185c028733819ec410db36613c",
-  "delegation_epoch": 25,
+  "program_job_lock": "governance/SYSTEM-PROGRAM-JOB-LOCK-001.json",
+  "system_completion_status": "governance/SYSTEM-COMPLETION-STATUS-001.json",
+  "delegation_epoch": 26,
   "active_delegations": [
+    {
+      "delegation_id": "SECOND-SHIFT-CORE-SYSTEM-MASTER-INTEGRATION-COORDINATION-001",
+      "owner_path": "SYSTEM_MASTER/CORE",
+      "semantic_owner_path": "SYSTEM_MASTER",
+      "objective_id": "SYSTEM-MASTER-INTEGRATION-COORDINATION-001",
+      "obligation_id": "SYSTEM-MASTER-INTEGRATION-COORDINATION-001",
+      "state": "READY",
+      "valid_for_control_ref": "system-master/control-v2",
+      "valid_for_control_head": "2031f070bd3702185c028733819ec410db36613c",
+      "created_at": "2026-09-10T22:35:00-04:00",
+      "last_revalidated_at": "2026-09-10T22:35:00-04:00",
+      "completion_delta": "Keep the System Master product integration controls coherent while CORE, LEARNING, BOOK and DOCUMENTS finish independently. Verify each lane is bound to its locked job, Prose is the only complete system and remains under BOOK, and no cross-lane ownership drift is admitted.",
+      "stop_condition": "Current authority, job/completion locks, obligations, owner delegations and morning/startup controls all agree; each incomplete peer has one valid owner job and current executable path; Book-Prose integration remains under BOOK; Documents and Learning are independently pointed toward System Master integration; no false system-completion or cross-lane selector remains.",
+      "allowed_work": [
+        "reconcile central authority and integration selectors",
+        "verify live owner heads and current obligations without taking peer-system mutation authority",
+        "repair stale governance/delegation metadata that violates the current job lock",
+        "prepare shared System Master interface/integration contracts owned by CORE",
+        "preserve independent BOOK, LEARNING and DOCUMENTS execution"
+      ],
+      "forbidden_authority": [
+        "do not implement Learning product logic",
+        "do not implement Book or Prose product logic",
+        "do not implement Documents product logic",
+        "do not declare SYSTEM_MASTER, CORE, LEARNING, BOOK or DOCUMENTS complete",
+        "do not create a separate PROSE or SYSTEM_MASTER root worker lane"
+      ],
+      "on_pass": "Preserve the reconciliation evidence, re-read live authority, and bind only the next CORE/shared integration successor while independent peer lanes continue their own jobs.",
+      "on_failure": "Preserve the exact cross-lane/stale/completion mismatch, fail the invalid selector closed, and repair only governance/shared integration metadata without taking peer product authority."
+    },
     {
       "delegation_id": "SECOND-SHIFT-CORE-KNOWLEDGE-RECOVERY-PROGRAMMING-001",
       "owner_path": "SYSTEM_MASTER/CORE",
       "semantic_owner_path": "SYSTEM_MASTER",
       "objective_id": "SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001",
       "obligation_id": "SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001",
-      "next_contract": "PROGRAMMING-EXTERNAL-BYTE-MATERIALIZATION-AND-FULL-CORPUS-INGEST-001",
-      "state": "READY",
+      "state": "CANDIDATE",
       "valid_for_control_ref": "system-master/control-v2",
       "valid_for_control_head": "2031f070bd3702185c028733819ec410db36613c",
       "created_at": "2026-09-10T21:03:00-04:00",
-      "last_revalidated_at": "2026-09-10T21:03:00-04:00",
-      "selection_evidence": [
-        "governance/CURRENT-AUTHORITY.json",
-        "governance/WORK-OBLIGATION-REGISTRY-007.json",
-        "governance/knowledge-recovery/SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001.md",
-        "governance/knowledge-recovery/SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001-SUPERVISED-ACCEPTANCE.json",
-        "governance/knowledge-recovery/PROGRAMMING-EXTERNAL-BYTE-MATERIALIZATION-AND-FULL-CORPUS-INGEST-001.md",
-        "governance/catalog/ingest/programming/PROGRAMMING-INGEST-MANIFEST-002.json"
-      ],
-      "completion_delta": "The current-topology supervised A-01 proving run has passed twice deterministically. Continue from the proven pipeline by recovering and staging externally held Programming source bytes where available, preserving exact Library/archive identity and digest custody, and preparing the full-corpus exact-subject qualification without repeating generic Programming research or promoting Programming into active topology.",
-      "stop_condition": "Every Programming manifest source has either exact staged byte custody with digest/provenance sufficient for A-01 presentation, or a durable source-specific MISSING_BYTES / IDENTITY_UNPROVEN / CONFLICT_QUARANTINED blocker; the next exact-subject full-corpus A-01 qualification candidate is prepared but not executed overnight unless its registry entry is explicitly overnight-admitted under current control-plane authority.",
+      "last_revalidated_at": "2026-09-10T22:35:00-04:00",
+      "completion_delta": "Continue deterministic Programming source/custody/provenance recovery only as supporting CORE capacity permits, without preempting System Master integration or independent owner lanes.",
+      "stop_condition": "Programming recovery reaches the next exact custody/manifest/A-01-preparation boundary or a durable blocker, without changing topology, system jobs or peer-lane progress.",
       "allowed_work": [
-        "inventory the 26 external-byte-pending and 2 identity-unproven Programming records against current source registries and exact locators",
-        "materialize or stage exact source bytes only through an approved available custody path without substitution",
-        "compute digests only for bytes actually observed and preserve prestage versus A-01 verification classes",
-        "generate deterministic intake manifests, asset-catalog deltas, trace/provenance edges and source-specific blocker records",
-        "detect duplicates, conflicting digest claims and missing-byte conditions without deleting provenance",
-        "prepare an exact-subject A-01 full-corpus qualification request after staged inputs and current authority are frozen",
-        "perform non-A-01 validation, schema checks and repository-safe preparation that do not synthesize external, human, native or architecture authority"
+        "recover exact Programming bytes/custody/provenance through authorized sources",
+        "prepare versioned manifests and full-corpus qualification candidates",
+        "perform deterministic non-admitting support validation"
       ],
       "forbidden_authority": [
-        "do not claim a ChatGPT Library locator or prestage digest is A-01 byte verification",
-        "do not run SYSTEM-MASTER-KNOWLEDGE-RECOVERY-PROGRAMMING-001 as an overnight A-01 qualification while its A-01 registry entry remains overnight_eligible=false",
-        "do not promote PROGRAMMING to an active peer system or create a Programming Second Shift owner lane",
-        "do not change CORE, LEARNING, BOOK, BOOK/PROSE or DOCUMENTS topology/ownership",
-        "do not revive a standalone PROSE lane; active PROSE work routes through BOOK",
-        "do not collapse conflicting archive identity claims or fabricate missing bytes, historical PASS, Apple-native, production, human or external authority"
+        "do not promote Programming to a peer system",
+        "do not redefine CORE, LEARNING, BOOK, PROSE or DOCUMENTS jobs",
+        "do not block independent BOOK, LEARNING or DOCUMENTS work",
+        "do not bypass current A-01 policy"
       ],
-      "on_pass": "Preserve exact source custody and trace evidence, retire this preparation delegation, re-read current authority, and bind the minimum sufficient exact-subject full-corpus A-01 qualification/admission step. If A-01 overnight admission is still false, leave that qualification READY for supervised/day-shift execution rather than bypassing policy.",
-      "on_failure": "Preserve the exact per-source failure/blocker and completed custody work, fail only the affected source path closed, continue independent safe source recovery while available, and leave a deterministic checkpoint plus next executable condition."
+      "on_pass": "Preserve exact support evidence and return capacity to the current CORE/System Master integration objective unless a dependency-valid support successor is explicitly selected.",
+      "on_failure": "Preserve source-specific blockers and continue only independent supporting recovery; do not create product-lane workarounds."
     }
   ],
   "retired_delegations": [
     {
-      "delegation_id": "SECOND-SHIFT-CORE-SMR021-GITHUB-NATIVE-TRANSPORT-009",
+      "delegation_id": "SECOND-SHIFT-CORE-KNOWLEDGE-RECOVERY-PROGRAMMING-001__PRIOR_PRIORITY_FORM",
       "state": "SUPERSEDED",
-      "retirement_classification": "DELEGATION_PREEMPTED_BY_SYSTEM_MASTER_PRIORITY_LOCK__OWNER_OBJECTIVE_REMAINS_OPEN",
-      "replacement_delegation_id": "SECOND-SHIFT-CORE-KNOWLEDGE-RECOVERY-PROGRAMMING-001",
-      "history_preserved": true,
-      "resume_rule": "Re-read live Core authority after Knowledge Recovery no longer consumes the priority lock; do not infer SMR021 completion from this delegation retirement."
+      "retirement_classification": "USER_PRIORITY_CHANGED__KNOWLEDGE_RECOVERY_RETAINED_AS_SUPPORTING_PROGRAM",
+      "history_preserved": true
     },
     {
-      "delegation_id": "SECOND-SHIFT-CORE-SMR021-CUSTODY-RETRY-001",
+      "delegation_id": "SECOND-SHIFT-CORE-SMR021-GITHUB-NATIVE-TRANSPORT-009",
       "state": "SUPERSEDED",
-      "retirement_classification": "SEMANTIC_STALE_DELEGATION__CAPSULE_ACQUISITION_BLOCKER_ALREADY_CLEARED_BY_FINAL_REFILL",
-      "replacement_delegation_id": "SECOND-SHIFT-CORE-SMR021-GITHUB-NATIVE-TRANSPORT-009",
+      "retirement_classification": "OWNER_OBJECTIVE_REMAINS_OPEN__CURRENT_CORE_PRIORITY_RECONCILED",
       "history_preserved": true
     }
   ],
   "prior_full_history": {
     "blob_sha": "3512aef6067ec5a0a1eeab7791f0f401e56b8ac0",
-    "standing": "IMMUTABLE_GIT_HISTORY_PRESERVED__OLDER_RETIRED_DELEGATION_DETAILS_NOT_DELETED_FROM_REPOSITORY_HISTORY"
+    "standing": "IMMUTABLE_GIT_HISTORY_PRESERVED"
   },
   "owner_revalidation_required": false,
-  "reason": "SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001 is the current highest System Master priority. The supervised topology-004 Programming proving run passed twice deterministically, so unattended deterministic intake preparation is now safe under CORE administration. A-01 overnight execution remains separately fail-closed until explicit registry admission.",
+  "reason": "User explicitly selected System Master integration/job-lock coherence as the central product objective. Knowledge Recovery remains valid supporting work but no longer owns the product-wide priority lock.",
   "empty_is_valid": false
 }
