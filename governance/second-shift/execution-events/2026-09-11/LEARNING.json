@@ -220,6 +220,41 @@
         "batch_06_subject_preserved": "bd3f7de8490c7cfb6a7dcdd37cc1fa1d4656bced",
         "real_learner_data_used": false
       }
+    },
+    {
+      "event_id": "2026-09-11-LEARNING-0012-STALE",
+      "occurred_at": "2026-09-11T01:14:33.147-04:00",
+      "event_type": "STALE",
+      "lane": "LEARNING",
+      "control_ref": "learning/control-v1",
+      "control_head": "e3196089f77dde376944a08eac78a697e57d1535",
+      "delegation_id": "SECOND-SHIFT-LEARNING-SYSTEM-MASTER-INTERFACE-PORTABLE-SCHEMAS-001",
+      "objective_id": "LEARNING-TO-SYSTEM-MASTER-INTERFACE-PORTABLE-SCHEMAS-001",
+      "lease_id": "LEARNING-INTERFACE-20260911T0110-0400",
+      "idempotency_key": "LEARNING:INTERFACE:PORTABLE-SCHEMAS:001:2026-09-11",
+      "evidence": {
+        "classification": "INVOCATION_SUPERSEDED_BEFORE_REPOSITORY_SUBJECT_CREATION",
+        "repository_artifact_committed": false,
+        "local_scratch_draft_not_evidence": true,
+        "batch_06_subject_preserved": "bd3f7de8490c7cfb6a7dcdd37cc1fa1d4656bced",
+        "safe_recovery": "Reclaim the existing interface-schema candidate under a fresh exact Learning head; do not infer work from discarded scratch."
+      }
+    },
+    {
+      "event_id": "2026-09-11-LEARNING-0013-SUCCESSOR-BOUND",
+      "occurred_at": "2026-09-11T01:14:34.147-04:00",
+      "event_type": "SUCCESSOR_BOUND",
+      "lane": "LEARNING",
+      "control_ref": "learning/control-v1",
+      "control_head": "e3196089f77dde376944a08eac78a697e57d1535",
+      "delegation_id": "SECOND-SHIFT-LEARNING-SYSTEM-MASTER-INTERFACE-PORTABLE-SCHEMAS-001",
+      "objective_id": "LEARNING-TO-SYSTEM-MASTER-INTERFACE-PORTABLE-SCHEMAS-001",
+      "evidence": {
+        "state": "CANDIDATE_UNCLAIMED",
+        "checkpoint": "governance/architecture/LEARNING-TO-SYSTEM-MASTER-INTERFACE-CONTRACT-001.json",
+        "repository_subject_created": false,
+        "independent_work_remaining": true
+      }
     }
   ]
 }
