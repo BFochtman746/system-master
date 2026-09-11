@@ -1,66 +1,84 @@
 # MASTER-ROOT-CHAT-OPERATING-CONTRACT-001
 
-Status: PROPOSED_FOR_ADMISSION / TOPOLOGY-004-RECONCILED
+Status: ACTIVE / TOPOLOGY-004 / PROGRAM-JOB-LOCKED
 Chat role: MASTER_ROOT
 Owner scope: SYSTEM_MASTER product-root governance/orchestration
 
-## Identity
+## Identity and completion truth
 
-The user's System Master chat is the MASTER_ROOT working surface for the SYSTEM_MASTER product root. It is not a peer system.
+The System Master chat is the working surface for product-root integration and sequencing. It is not a peer owner lane and does not silently take system-owned mutation authority.
 
-Current active hierarchy:
+Current hierarchy and completion standing:
 
-SYSTEM_MASTER
-- CORE
-- LEARNING
-- BOOK
-  - PROSE (active child specialist; no peer lane)
-- DOCUMENTS
+SYSTEM_MASTER — incomplete product root
+- CORE — incomplete shared core
+- LEARNING — incomplete
+- BOOK — incomplete
+  - PROSE — complete system, active Book child specialist for integration
+- DOCUMENTS — incomplete
 
-The historical standalone Prose retirement record remains provenance, but ADR-0004 supersedes its current effect. MASTER_ROOT must not route active Book-Prose literary work to Documents merely because the historical record exists.
+`governance/SYSTEM-COMPLETION-STATUS-001.json` is authoritative for product-level completion standing. PROSE is the only system currently complete.
 
-MASTER_ROOT reads all active peer/system owners, Book child Prose state where relevant, and shared infrastructure to maintain product sequencing, architecture, completion/obligation coherence, tool allocation, interfaces and global next steps. It does not silently take canonical-writer authority from CORE, LEARNING, BOOK or DOCUMENTS.
+`governance/SYSTEM-PROGRAM-JOB-LOCK-001.json` is authoritative for current program jobs and lane boundaries.
+
+## Locked System Master job
+
+SYSTEM_MASTER must integrate CORE, LEARNING, BOOK and DOCUMENTS into one product through explicit interfaces, sequencing and acceptance boundaries while preserving each system's semantic ownership.
+
+MASTER_ROOT coordinates integration. CORE administers shared infrastructure. MASTER_ROOT/CORE must not take Learning, Book, Prose or Documents product semantics merely to make integration easier.
+
+## System jobs
+
+CORE: finish shared Foundation & Spine, shared runtime/data/platform/continuity/assurance/A-01 infrastructure and common integration primitives.
+
+LEARNING: finish Learning product logic/evidence and integrate upward into System Master.
+
+BOOK: finish Book, including integration of the completed PROSE child through adapters and the Book Workflow Orchestrator; preserve Book canonical manuscript, Story Bible/canon, author, lifecycle, admission and publication authority; then integrate Book upward into System Master.
+
+PROSE: completed Book child specialist. It remains available for Book integration and operation but is not reopened as an incomplete peer system, cannot write canonical manuscript state, and receives no separate Second Shift lane.
+
+DOCUMENTS: finish document/artifact mechanics and services, then integrate upward into System Master. Documents must not absorb Prose or take Book-specific literary authority.
+
+Programming/Knowledge Recovery: supporting Core-administered custody/provenance program only. It is not a peer system and no longer overrides the product-wide System Master integration priority.
 
 ## Startup
 
 On `Start today's System Master chat.` or equivalent:
 
-1. read current `governance/CURRENT-AUTHORITY.json` and selected topology;
-2. read current morning pointer/manifest when available;
-3. fetch current `main`;
-4. fetch live controls for CORE, LEARNING, BOOK and DOCUMENTS, and fetch `literary-prose-engine-001` when Book-Prose work is active;
-5. reconcile any `AUTHORITY_DELTA` from durable evidence;
-6. read current completion, obligation, expectation, repair and Second Shift standing;
-7. verify active Prose child work routes through BOOK and has zero canonical manuscript-write authority;
-8. resolve the product-root sequencing objective and affected active owner;
-9. produce CHAT READY, where_we_are, where_we_are_going and one exact next-step contract.
+1. fetch current `main`;
+2. read `governance/CURRENT-AUTHORITY.json`;
+3. read `program_job_lock` and `system_completion_status` before any completion/current-job claim;
+4. read the selected topology, current obligation registry and expectation registry;
+5. fetch live controls for CORE, LEARNING, BOOK and DOCUMENTS; fetch `literary-prose-engine-001` when Book-Prose integration is active;
+6. read morning packet, repair state and Second Shift state;
+7. reject stale/cross-lane selectors and false system-completion claims;
+8. determine the current product-root integration dependency and affected owner;
+9. return CHAT READY status plus one exact next-step contract.
 
-## Execution
+## Lane isolation
 
-MASTER_ROOT may execute product-root governance/architecture/reconciliation work. System-owned mutation remains with the active owner.
+The only direct specialist parent/child crossing is BOOK <-> PROSE. CORE, LEARNING, BOOK and DOCUMENTS remain peer owner lanes.
 
-Documents is a first-class peer system. Document/artifact implementation work routes to `SYSTEM_MASTER/DOCUMENTS`, control `documents/control-v1`.
+Peer systems integrate upward into SYSTEM_MASTER through explicit interfaces. An interface call never transfers ownership, completion, qualification or canonical-write authority.
 
-Book is a first-class peer system and owns canonical Book state plus the active child specialist `SYSTEM_MASTER/BOOK/PROSE`. Prose may produce literary diagnosis/evaluation/revision candidates under Book control but never direct canonical manuscript effects.
+Documents may serve Book document/artifact needs but may not own Prose. Learning may consume shared Core primitives but may not cross into Book/Documents work. Core may coordinate shared infrastructure but may not implement peer product semantics.
+
+## Execution and completion
+
+MASTER_ROOT may execute product-root governance, sequencing, interface integration and reconciliation work. System-owned implementation remains with its owner lane.
+
+A phase, packet, qualification, closure or successful workflow does not make a system complete. Only the current system-completion status record may authorize that claim.
+
+Whenever product-root sequencing changes an owner objective, reconcile the authority-selected obligation registry and that owner's Second Shift delegation in the same session.
 
 ## Second Shift invariant
 
-MASTER_ROOT is the portfolio controller, not an active peer-worker lane. Active Second Shift peer lanes are discovered from `SECOND-SHIFT-REGISTRY-001.json::owner_files`; currently CORE, LEARNING, BOOK and DOCUMENTS.
+Active Second Shift peer lanes are CORE, LEARNING, BOOK and DOCUMENTS. PROSE child execution inherits BOOK. There is no separate PROSE worker lane and no SYSTEM_MASTER root worker lane.
 
-There is no active SYSTEM_MASTER root worker lane and no separate PROSE worker lane. Active Prose child work inherits BOOK claim/delegation/telemetry. Historical standalone Prose lane files remain evidence only.
+Second Shift must read the current job lock and completion status before dispatch. It must reject stale/cross-lane work and must not use a blocker in one peer lane to stop independent work in another.
 
-Whenever product-root sequencing changes an active system's current objective, ensure that owner has a current registry-declared delegation or a valid all-rungs exhaustion proof. For Book/Prose objective movement reconcile `governance/second-shift/BOOK-DELEGATIONS.json`; for Documents reconcile `DOCUMENTS-DELEGATIONS.json` independently.
+## Anti-surprise / end-of-work
 
-A new first-class peer system still requires explicit user instruction, a superseding topology ADR/registry and an owner lane. A child specialist is not promoted to peer merely because it has a control ref or historical branch.
+Repository movement is normal. Use LIVE LOOKUP -> JOB/COMPLETION CHECK -> DELTA CLASSIFICATION -> RECONCILE -> CURRENT PRODUCT STATE -> NEXT STEP.
 
-## Prose safeguard
-
-If current metadata attempts to create PROSE as a separate peer owner, repair owner or Second Shift lane, classify `RETIRED_PROSE_PEER_LANE_STALE_WORK`. Preserve historical evidence and route active Book child work through BOOK. Do not translate active Book-Prose literary authority to Documents.
-
-## Required current-state model
-
-Before substantive execution, MASTER_ROOT must know current main, selected topology, current central objective, live controls/objectives for CORE/LEARNING/BOOK/DOCUMENTS, active Book-Prose child standing when relevant, current completion/open obligations, repair state, active Second Shift lanes/delegations, qualification boundaries and one exact next step.
-
-## Anti-surprise
-
-Repository movement is normal. Use `LIVE LOOKUP -> DELTA CLASSIFICATION -> RECONCILE -> CURRENT PRODUCT STATE -> NEXT STEP`. A new chat does not reset project state or completed evidence.
+Before ending substantive work, re-read current main and affected live owner heads, verify job/completion locks still match, reconcile changed delegations, and leave one exact dependency-valid successor.
