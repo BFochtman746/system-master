@@ -12,6 +12,7 @@ const selftest = argSet.has('--selftest');
 const outArg = args.find((v) => v.startsWith('--out='));
 const outDir = path.resolve(root, outArg ? outArg.slice('--out='.length) : '.state-reconciler');
 const coverageScript = path.join(root, '.github/scripts/second-shift-owner-coverage.js');
+const expectedPeers = new Set(['CORE', 'LEARNING', 'BOOK', 'DOCUMENTS']);
 
 function readJson(rel) {
   const p = path.join(root, rel);
@@ -28,30 +29,38 @@ function liveHead(ref) {
     return out ? out.split(/\s+/)[0] : null;
   } catch (_) { return null; }
 }
-function runNode(script, childArgs) {
-  return spawnSync(process.execPath, [script, ...childArgs], { cwd: root, encoding: 'utf8' });
+function runNode(script, childArgs) { return spawnSync(process.execPath, [script, ...childArgs], { cwd: root, encoding: 'utf8' }); }
+function systemOwnerPath(system) { return system?.owner_path || (system?.system_id ? `SYSTEM_MASTER/${system.system_id}` : null); }
+function isSameOrDescendant(candidate, ownerPath) { return candidate === ownerPath || String(candidate || '').startsWith(`${ownerPath}/`); }
+function setEq(a, b) {
+  const aa = [...a].sort(), bb = [...b].sort();
+  return aa.length === bb.length && aa.every((v, i) => v === bb[i]);
 }
-function systemOwnerPath(system) {
-  return system?.owner_path || (system?.system_id ? `SYSTEM_MASTER/${system.system_id}` : null);
-}
-function isSameOrDescendant(candidate, ownerPath) {
-  return candidate === ownerPath || String(candidate || '').startsWith(`${ownerPath}/`);
+function completionRows(doc) {
+  if (Array.isArray(doc.system_completion_entries)) return doc.system_completion_entries;
+  if (Array.isArray(doc.entries)) return doc.entries;
+  return [];
 }
 
 if (selftest) {
   const authority = readJson('governance/CURRENT-AUTHORITY.json');
   const topology = readJson(authority.topology);
   const systems = topology.canonical_internal_systems || [];
-  const byId = Object.fromEntries(systems.map((s) => [s.system_id, s]));
+  const peerIds = new Set(topology.peer_system_ids || []);
   const registry = readJson(authority.second_shift_registry);
+  const retiredProse = (topology.retired_systems || []).find((s) => s.system_id === 'PROSE');
   const checks = [
     ['product_root', authority.product_root === 'SYSTEM_MASTER'],
-    ['documents_is_active_peer', Boolean(byId.DOCUMENTS)],
-    ['prose_is_active_child', Boolean(byId.PROSE) && byId.PROSE.parent_id === 'BOOK'],
-    ['prose_owner_path_is_book_child', systemOwnerPath(byId.PROSE) === 'SYSTEM_MASTER/BOOK/PROSE'],
-    ['prose_has_no_separate_second_shift_lane', !registry.owner_files?.PROSE && registry.coverage_routes?.['SYSTEM_MASTER/BOOK/PROSE'] === 'BOOK'],
+    ['topology_005_selected', topology.topology_id === 'SYSTEM-TOPOLOGY-005'],
+    ['active_peers_exact', setEq(peerIds, expectedPeers)],
+    ['active_systems_exclude_prose', !systems.some((s) => s.system_id === 'PROSE')],
+    ['prose_terminally_retired', Boolean(retiredProse) && retiredProse.lifecycle === 'RETIRED_TERMINAL' && retiredProse.final_completion === 'COMPLETE'],
+    ['prose_has_no_execution_lane', Boolean(retiredProse) && retiredProse.current_execution_lane === null],
+    ['prose_integration_owner_is_book', Boolean(retiredProse) && retiredProse.integration_owner === 'SYSTEM_MASTER/BOOK'],
+    ['second_shift_matches_peers', setEq(new Set(Object.keys(registry.owner_files || {})), expectedPeers)],
+    ['prose_has_no_second_shift_lane', !registry.owner_files?.PROSE && registry.retired_routes?.PROSE?.dispatchable === false],
+    ['knowledge_recovery_selected', authority.highest_discretionary_objective === 'SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001'],
     ['current_obligation_registry_selected', exists(authority.obligation_registry)],
-    ['current_second_shift_registry_selected', exists(authority.second_shift_registry)],
     ['owner_coverage_guard_present', fs.existsSync(coverageScript)]
   ];
   let failed = 0;
@@ -69,6 +78,8 @@ const finding = (severity, type, message, detail = {}) => findings.push({ severi
 const authority = readJson('governance/CURRENT-AUTHORITY.json');
 const selected = {
   topology: authority.topology,
+  program_job_lock: authority.program_job_lock,
+  system_completion_status: authority.system_completion_status,
   completion_ledger: authority.completion_ledger,
   obligation_registry: authority.obligation_registry,
   expectation_registry: authority.expectation_registry,
@@ -79,57 +90,90 @@ const selected = {
 for (const [key, rel] of Object.entries(selected)) if (!exists(rel)) finding('ERROR', 'CURRENT_AUTHORITY_REFERENCE_MISSING', `CURRENT-AUTHORITY selected ${key} is missing`, { path: rel || null });
 
 const topology = exists(selected.topology) ? readJson(selected.topology) : {};
+const completionStatus = exists(selected.system_completion_status) ? readJson(selected.system_completion_status) : {};
 const completion = exists(selected.completion_ledger) ? readJson(selected.completion_ledger) : {};
 const obligationsDoc = exists(selected.obligation_registry) ? readJson(selected.obligation_registry) : {};
 const secondShift = exists(selected.second_shift_registry) ? readJson(selected.second_shift_registry) : {};
 const repairRegistry = exists(selected.repair_inbox_registry) ? readJson(selected.repair_inbox_registry) : {};
 const obligations = obligationsDoc.obligations || [];
-const completionEntries = completion.entries || [];
+const completionEntries = completionRows(completion);
 const terminal = new Set(['CLOSED', 'SUPERSEDED']);
 
 if (topology.product_root?.product_id !== 'SYSTEM_MASTER') finding('ERROR', 'TOPOLOGY_ROOT_MISMATCH', 'topology product root must be SYSTEM_MASTER');
+if (topology.topology_id !== 'SYSTEM-TOPOLOGY-005') finding('ERROR', 'TOPOLOGY_VERSION_MISMATCH', 'current authority must select SYSTEM-TOPOLOGY-005', { topology_id: topology.topology_id || null });
 const systems = topology.canonical_internal_systems || [];
 const activeIds = new Set(systems.map((s) => s.system_id));
-for (const required of ['CORE', 'LEARNING', 'BOOK', 'PROSE', 'DOCUMENTS']) if (!activeIds.has(required)) finding('ERROR', 'CANONICAL_SYSTEM_MISSING', `canonical active system missing: ${required}`);
-const prose = systems.find((s) => s.system_id === 'PROSE');
-if (prose && prose.parent_id !== 'BOOK') finding('ERROR', 'PROSE_PARENT_MISMATCH', 'PROSE must be an active child of BOOK', { parent_id: prose.parent_id || null });
-if (prose && systemOwnerPath(prose) !== 'SYSTEM_MASTER/BOOK/PROSE') finding('ERROR', 'PROSE_OWNER_PATH_MISMATCH', 'PROSE owner path must be SYSTEM_MASTER/BOOK/PROSE', { owner_path: systemOwnerPath(prose) });
+if (!setEq(activeIds, expectedPeers)) finding('ERROR', 'ACTIVE_SYSTEM_SET_MISMATCH', 'active canonical systems must be exactly CORE, LEARNING, BOOK, DOCUMENTS', { active: [...activeIds] });
+if (!setEq(new Set(topology.peer_system_ids || []), expectedPeers)) finding('ERROR', 'PEER_SET_MISMATCH', 'peer_system_ids must be exactly CORE, LEARNING, BOOK, DOCUMENTS');
+if ((topology.child_system_ids || []).length !== 0) finding('ERROR', 'ACTIVE_CHILD_SYSTEMS_PRESENT', 'terminal Prose retirement requires no active child execution systems', { child_system_ids: topology.child_system_ids || [] });
 
 const retiredSystems = topology.retired_systems || [];
-if (retiredSystems.some((s) => s.system_id === 'PROSE' && s.status && !String(s.status).includes('HISTORICAL'))) {
-  finding('ERROR', 'PROSE_CURRENT_RETIREMENT_CONFLICT', 'topology simultaneously marks active PROSE as currently retired');
+const retiredProse = retiredSystems.find((s) => s.system_id === 'PROSE');
+if (!retiredProse || retiredProse.lifecycle !== 'RETIRED_TERMINAL' || retiredProse.final_completion !== 'COMPLETE') finding('ERROR', 'PROSE_RETIREMENT_MISSING', 'PROSE must be complete and terminally retired');
+if (retiredProse) {
+  for (const field of ['current_execution_lane', 'current_repair_lane', 'current_qualification_lane', 'current_telemetry_lane', 'successor_system']) {
+    if (retiredProse[field] !== null) finding('ERROR', 'RETIRED_SYSTEM_RESURRECTION', `PROSE ${field} must remain null`, { field, value: retiredProse[field] });
+  }
+  if (retiredProse.integration_owner !== 'SYSTEM_MASTER/BOOK') finding('ERROR', 'PROSE_INTEGRATION_OWNER_MISMATCH', 'any genuinely open completed-Prose integration must be BOOK-owned');
 }
 
+const activeCompletion = new Map((completionStatus.systems || []).map((s) => [s.system_id, s]));
+for (const id of ['SYSTEM_MASTER', 'CORE', 'LEARNING', 'BOOK', 'DOCUMENTS']) {
+  if (!activeCompletion.has(id) || activeCompletion.get(id).complete !== false) finding('ERROR', 'FALSE_SYSTEM_COMPLETION', `${id} must remain an active incomplete system`);
+}
+if (activeCompletion.has('PROSE')) finding('ERROR', 'RETIRED_SYSTEM_RESURRECTION', 'PROSE must not appear in active completion systems');
+const retiredCompletion = (completionStatus.retired_systems || []).find((s) => s.system_id === 'PROSE');
+if (!retiredCompletion || retiredCompletion.complete !== true || retiredCompletion.active !== false || retiredCompletion.remaining_product_work !== false) finding('ERROR', 'PROSE_COMPLETION_TRUTH_MISMATCH', 'completion status must record PROSE complete, inactive and with no remaining product work');
+
+const retiredPaths = new Set(retiredSystems.map((s) => s.historical_owner_path).filter(Boolean));
 const validOwnerPaths = new Set(['SYSTEM_MASTER', 'SYSTEM_MASTER/SHARED_INFRASTRUCTURE', 'SYSTEM_MASTER/SHARED_INFRASTRUCTURE/A01']);
 for (const s of systems) {
   const p = systemOwnerPath(s);
   if (p) validOwnerPaths.add(p);
 }
+function ownerIsRetired(ownerPath) { return [...retiredPaths].some((p) => isSameOrDescendant(ownerPath, p)); }
 for (const o of obligations) {
   if (!o?.obligation_id || !o?.owner_path || !o?.state) { finding('ERROR', 'OBLIGATION_SHAPE_INVALID', 'current obligation lacks obligation_id/owner_path/state', { obligation_id: o?.obligation_id || null }); continue; }
   if (!terminal.has(o.state) && !o.objective) finding('ERROR', 'OBLIGATION_OBJECTIVE_MISSING', `open obligation lacks objective: ${o.obligation_id}`);
+  if (ownerIsRetired(o.owner_path)) finding('ERROR', 'RETIRED_SYSTEM_RESURRECTION', `current obligation uses retired Prose owner path: ${o.obligation_id}`, { owner_path: o.owner_path });
+  if (o.specialist_owner_path && ownerIsRetired(o.specialist_owner_path)) finding('ERROR', 'RETIRED_SYSTEM_RESURRECTION', `current obligation uses retired Prose specialist owner: ${o.obligation_id}`, { specialist_owner_path: o.specialist_owner_path });
   const directValid = [...validOwnerPaths].some((p) => isSameOrDescendant(o.owner_path, p));
   if (!directValid) finding('ERROR', 'UNALLOCATED', `current obligation has invalid owner path: ${o.obligation_id}`, { owner_path: o.owner_path });
+  if (o.owner_path === 'SYSTEM_MASTER/DOCUMENTS' && /PROSE/i.test(String(o.obligation_id || ''))) finding('ERROR', 'JOB_LANE_VIOLATION', `Documents obligation cannot be Prose work: ${o.obligation_id}`);
 }
 
+const bookIntegration = obligations.find((o) => o.obligation_id === 'BOOK-PROSE-PHASE-2-ORCHESTRATOR-CLOSURE-CENSUS-001');
+if (bookIntegration && (bookIntegration.owner_path !== 'SYSTEM_MASTER/BOOK' || bookIntegration.active_prose_owner !== null)) finding('ERROR', 'PROSE_INTEGRATION_OWNER_MISMATCH', 'historical Book-Prose lineage must be BOOK-owned with no active Prose owner');
+const knowledge = obligations.find((o) => o.obligation_id === 'SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001');
+if (!knowledge || knowledge.owner_path !== 'SYSTEM_MASTER/CORE' || knowledge.priority !== 'HIGHEST_DISCRETIONARY_SYSTEM_MASTER_PRIORITY' || authority.highest_discretionary_objective !== knowledge.obligation_id) finding('ERROR', 'KNOWLEDGE_RECOVERY_PRIORITY_DRIFT', 'Knowledge Recovery 001 must remain CORE-administered highest discretionary System Master priority while selected');
+
 const ownerFiles = secondShift.owner_files || {};
-if (ownerFiles.PROSE) finding('ERROR', 'DUPLICATE_PROSE_EXECUTION_LANE', 'PROSE is a BOOK child and must not have a separate Second Shift owner lane');
-if (secondShift.coverage_routes?.['SYSTEM_MASTER/BOOK/PROSE'] !== 'BOOK') finding('ERROR', 'PROSE_BOOK_LANE_ROUTE_MISSING', 'active Prose child path must route through BOOK Second Shift lane');
+if (!setEq(new Set(Object.keys(ownerFiles)), expectedPeers)) finding('ERROR', 'SECOND_SHIFT_PEER_COVERAGE_MISMATCH', 'Second Shift active owner files must exactly match topology peers', { owner_lanes: Object.keys(ownerFiles) });
+if (ownerFiles.PROSE) finding('ERROR', 'RETIRED_SYSTEM_RESURRECTION', 'PROSE must not have a Second Shift owner lane');
 if (ownerFiles.SYSTEM_MASTER) finding('ERROR', 'ROOT_WORKER_LANE_ACTIVE', 'SYSTEM_MASTER product-root controller must not be an active peer worker lane');
-for (const required of ['CORE', 'LEARNING', 'BOOK', 'DOCUMENTS']) if (!ownerFiles[required]) finding('ERROR', 'SECOND_SHIFT_OWNER_FILE_MISSING', `Second Shift registry missing active lane ${required}`);
+if (Object.keys(secondShift.coverage_routes || {}).some((prefix) => ownerIsRetired(prefix))) finding('ERROR', 'RETIRED_SYSTEM_RESURRECTION', 'Second Shift active coverage route points into retired Prose');
+if (secondShift.retired_routes?.PROSE?.dispatchable !== false || secondShift.retired_routes?.PROSE?.auto_provisionable !== false || secondShift.retired_routes?.PROSE?.inherited_execution !== false) finding('ERROR', 'PROSE_RETIREMENT_ROUTE_DRIFT', 'Second Shift retired Prose route must remain non-dispatchable, non-provisionable and non-inherited');
 
 const owners = {};
 for (const [lane, rel] of Object.entries(ownerFiles)) {
   if (!exists(rel)) { finding('ERROR', 'SECOND_SHIFT_OWNER_FILE_MISSING', `owner file missing for ${lane}`, { path: rel }); continue; }
   const data = readJson(rel);
   const system = systems.find((s) => s.system_id === lane);
-  if (!system) finding('ERROR', 'SECOND_SHIFT_UNKNOWN_ACTIVE_SYSTEM', `Second Shift lane ${lane} is not an active canonical peer/owner system`);
+  if (!system) finding('ERROR', 'SECOND_SHIFT_UNKNOWN_ACTIVE_SYSTEM', `Second Shift lane ${lane} is not an active topology peer`);
   const expectedPath = systemOwnerPath(system);
   if (system && data.owner_path !== expectedPath) finding('ERROR', 'SECOND_SHIFT_OWNER_PATH_MISMATCH', `${lane} owner_path mismatch`, { owner_path: data.owner_path, expected: expectedPath });
   if (system && data.control_ref !== system.control_ref) finding('ERROR', 'SECOND_SHIFT_CONTROL_REF_MISMATCH', `${lane} delegation control_ref differs from topology`, { delegation_control_ref: data.control_ref, topology_control_ref: system.control_ref });
   const live = noLive ? data.last_known_control_head : liveHead(data.control_ref);
   if (!isSha(data.last_known_control_head)) finding('ERROR', 'OWNER_CONTROL_HEAD_INVALID', `${lane} last_known_control_head is invalid`);
   if (live && live !== data.last_known_control_head) finding('ERROR', 'STALE_DELEGATION', `${lane} owner selector is stale`, { recorded_head: data.last_known_control_head, live_head: live });
+  const active = Array.isArray(data.active_delegations) ? data.active_delegations : [];
+  const claimed = active.filter((d) => d && d.state === 'CLAIMED');
+  if (claimed.length > 1) finding('ERROR', 'OVERLAPPING_MUTATION_CLAIM', `${lane} has more than one active mutation-capable claim`, { claim_count: claimed.length });
+  for (const d of active) {
+    if (d.owner_path !== data.owner_path) finding('ERROR', 'JOB_LANE_VIOLATION', `${lane} delegation owner_path differs from lane owner`, { delegation_id: d.delegation_id });
+    if (d.valid_for_control_head !== data.last_known_control_head) finding('ERROR', 'STALE_DELEGATION', `${lane} delegation is not bound to owner selector head`, { delegation_id: d.delegation_id, delegated_head: d.valid_for_control_head, owner_head: data.last_known_control_head });
+    if (lane === 'DOCUMENTS' && /PROSE/i.test(`${d.delegation_id || ''} ${d.objective_id || ''} ${d.obligation_id || ''} ${d.parent_objective_id || ''}`)) finding('ERROR', 'JOB_LANE_VIOLATION', 'Documents active delegation contains Prose work', { delegation_id: d.delegation_id });
+  }
   owners[lane] = {
     owner_path: data.owner_path,
     control_ref: data.control_ref,
@@ -137,7 +181,8 @@ for (const [lane, rel] of Object.entries(ownerFiles)) {
     recorded_control_head: data.last_known_control_head,
     completion_count: completionEntries.filter((e) => e.owner_path === data.owner_path).length,
     open_obligations: obligations.filter((o) => isSameOrDescendant(o.owner_path, data.owner_path) && !terminal.has(o.state)).map((o) => ({ obligation_id: o.obligation_id, state: o.state, objective: o.objective, owner_path: o.owner_path })),
-    active_delegations: (data.active_delegations || []).map((d) => ({ delegation_id: d.delegation_id, objective_id: d.objective_id, obligation_id: d.obligation_id || null, state: d.state, valid_for_control_head: d.valid_for_control_head }))
+    active_delegations: active.map((d) => ({ delegation_id: d.delegation_id, objective_id: d.objective_id, obligation_id: d.obligation_id || null, state: d.state, valid_for_control_head: d.valid_for_control_head })),
+    live_claim_count: claimed.length
   };
 }
 
@@ -156,24 +201,32 @@ if (coverage.status !== 0) finding('ERROR', 'SECOND_SHIFT_OWNER_COVERAGE_FAILED'
 
 const repairInboxes = {};
 for (const [lane, rel] of Object.entries(repairRegistry.owner_files || {})) {
-  if (!exists(rel)) continue;
+  if (!expectedPeers.has(lane)) finding('ERROR', 'REPAIR_OWNER_SET_MISMATCH', `repair registry contains non-peer active owner ${lane}`);
+  if (!exists(rel)) { finding('ERROR', 'REPAIR_INBOX_MISSING', `repair inbox missing for ${lane}`, { path: rel }); continue; }
   const inbox = readJson(rel);
-  if (lane === 'PROSE' && (inbox.active_transactions || []).length) finding('ERROR', 'LEGACY_PROSE_REPAIR_LANE_ACTIVE', 'standalone Prose repair inbox contains active transactions; active Prose child repair work must be reconciled to BOOK');
   repairInboxes[lane] = inbox.active_transactions || [];
 }
+if (repairRegistry.child_routes && Object.keys(repairRegistry.child_routes).length) finding('ERROR', 'RETIRED_SYSTEM_RESURRECTION', 'repair registry must not contain active child routes after terminal Prose retirement');
+if (repairRegistry.retired_system_routes?.PROSE?.active_for_new_transactions !== false || repairRegistry.retired_system_routes?.PROSE?.inherited_repair_route_allowed !== false) finding('ERROR', 'PROSE_REPAIR_ROUTE_DRIFT', 'retired Prose repair route must reject new/inherited transactions');
 
 const derived = {
   generated_at: now(),
   product_root: 'SYSTEM_MASTER',
   topology_id: topology.topology_id || null,
   central_next_objective: central || null,
+  highest_discretionary_objective: authority.highest_discretionary_objective || null,
   active_systems: systems.map((s) => ({ system_id: s.system_id, parent_id: s.parent_id || null, owner_path: systemOwnerPath(s) })),
-  historical_retired_systems: retiredSystems.map((s) => ({ system_id: s.system_id, successor_system_id: s.successor_system_id || null, retirement_record: s.retirement_record || null })),
+  retired_systems: retiredSystems.map((s) => ({ system_id: s.system_id, standing: s.lifecycle || null, historical_owner_path: s.historical_owner_path || null, integration_owner: s.integration_owner || null })),
   owners,
   product_governance: { open_obligations: obligations.filter((o) => o.owner_path === 'SYSTEM_MASTER' && !terminal.has(o.state)).map((o) => ({ obligation_id: o.obligation_id, state: o.state, objective: o.objective })) },
   shared_infrastructure: { open_obligations: obligations.filter((o) => o.owner_path?.startsWith('SYSTEM_MASTER/SHARED_INFRASTRUCTURE') && !terminal.has(o.state)).map((o) => ({ obligation_id: o.obligation_id, state: o.state, objective: o.objective })) },
   second_shift_active_lanes: Object.keys(ownerFiles),
-  prose_execution_lane: secondShift.coverage_routes?.['SYSTEM_MASTER/BOOK/PROSE'] || null,
+  prose_execution_lane: null,
+  prose_standing: retiredProse ? 'COMPLETE_RETIRED_TERMINAL' : 'MISSING',
+  book_owns_genuinely_open_completed_prose_integration: retiredProse?.integration_owner === 'SYSTEM_MASTER/BOOK',
+  documents_receives_prose_work: false,
+  repair_active_lanes: Object.keys(repairRegistry.owner_files || {}),
+  repair_inboxes: repairInboxes,
   second_shift_owner_coverage: coverage.status === 0 ? 'PASS' : 'DRIFT_DETECTED'
 };
 
@@ -185,6 +238,7 @@ fs.writeFileSync(path.join(outDir, 'DERIVED-CURRENT-STATE.json'), JSON.stringify
 fs.writeFileSync(path.join(outDir, 'SYSTEM-STATE-DRIFT-REPORT.json'), JSON.stringify(report, null, 2) + '\n');
 console.log(`SYSTEM_STATE_RECONCILER_${report.standing}`);
 console.log(`active_systems=${derived.active_systems.map((s) => s.system_id).join(',')}`);
+console.log(`retired_systems=${derived.retired_systems.map((s) => s.system_id).join(',')}`);
 console.log(`second_shift_lanes=${derived.second_shift_active_lanes.join(',')}`);
 for (const f of findings) console.log(`${f.severity}:${f.type}:${f.message}`);
 process.exit(errors.length ? 1 : 0);
