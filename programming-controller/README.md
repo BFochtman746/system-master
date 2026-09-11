@@ -8,39 +8,58 @@ This directory is the **external development control plane** used to coordinate 
 
 ### Implemented candidate slices
 
-`IMPL-001M-01`:
+`IMPL-001M-01` — core metamodel and hard structural validation:
 
 - typed model entity and relationship registries;
-- hard structural validation;
 - explicit unknown-type / missing-endpoint failures;
-- per-relationship cycle policy;
-- dependency-cycle detection with rollback of a rejected edge;
-- an explicit identity-validation port owned by 001N rather than reimplementing identity semantics here.
+- per-relationship cycle policy and rejected-edge rollback;
+- explicit 001N identity-validation port.
 
-`IMPL-001M-02`:
+`IMPL-001M-02` — responsibility / authority / boundary graph:
 
 - stable responsibility records;
 - exactly-one active canonical owner enforcement;
-- explicit boundary/delegation rules without ownership transfer;
-- deterministic owner resolution;
-- missing-owner detection;
-- deterministic dependency/dependent traversal;
-- bounded impact analysis with explicit truncation rather than silent omission.
+- explicit delegation without ownership transfer;
+- deterministic owner resolution and missing-owner detection;
+- bounded dependency/impact traversal with explicit truncation.
+
+`IMPL-001M-03` — immutable snapshots and change-set consistency core:
+
+- content-addressed immutable model snapshots;
+- exact-base draft change sets and revision compare-and-set;
+- stale-base rejection;
+- idempotent command receipts and semantic replay conflict detection;
+- atomic persistence-port commit of snapshot, active pointer, change set, receipt, and evidence outbox record;
+- snapshot-keyed query cache;
+- restart continuity and explicit integrity-recovery records.
+
+`IMPL-001M-04` — engineer views and canonical import/export projections:
+
+- seven required engineer viewpoints bound to immutable snapshot identity;
+- explicit unsupported-semantics reporting instead of inference;
+- deterministic canonical JSON model envelope;
+- validated imports remain non-authoritative candidates;
+- explicit LOSSLESS/LOSSY projection manifests;
+- lossy projection import is fail-closed;
+- declared lossless adapters support explicit round-trip import.
 
 ### Current qualification standing
 
-Portable local Node qualification: **12/12 tests PASS**.
+Portable local Node qualification: **28/28 tests PASS**.
 
-This is not yet a merge/production claim. Hosted GitHub/A01 qualification has not yet been established for this branch.
+Exact-head hosted qualification for `IMPL-001M-01` through `IMPL-001M-04`:
 
-### Not yet implemented
+- **Programming Controller Portable Qualification: PASS**;
+- **A-01 Control Plane Enforcement: PASS**.
 
-- `IMPL-001M-03`: snapshots, drafts/change sets, optimistic concurrency, idempotent commit, query cache, crash recovery;
-- `IMPL-001M-04`: viewpoints and canonical import/export/projection adapters;
-- `IMPL-001M-05`: conformance contracts, security/resource guards, evidence outbox, integrity and migration;
-- `IMPL-001M-06`: downstream integration and full 001M qualification.
+This is still a draft candidate, not a merge or production claim.
 
-Persistence, authorization, evidence delivery, identity semantics, and durable orchestration remain behind their owning downstream authority/port boundaries rather than being silently reimplemented here.
+### Remaining WP-001M slices
+
+- `IMPL-001M-05`: conformance contracts, security/resource guards, evidence outbox delivery, integrity controls and copy-on-write migration;
+- `IMPL-001M-06`: downstream authority integration and complete 001M qualification.
+
+Persistence, authorization, evidence standing/delivery, identity semantics, and durable orchestration remain behind their owning authority/port boundaries rather than being silently reimplemented here.
 
 ## Test
 
