@@ -1,0 +1,82 @@
+name: A-01 Selftest V2 Freeze Repair Once 2026-09-11
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/a01-selftest-v2-freeze-repair-once-2026-09-11.yml'
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: a01-control-plane-maintenance
+  cancel-in-progress: false
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout current main
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Rebind to latest main
+        run: git pull --ff-only origin main
+
+      - name: Repair stale v1 legacy-freeze invariant and retrigger fresh A-01 selftest
+        shell: bash
+        run: |
+          node - <<'NODE'
+          const fs = require('fs');
+          const selftestPath = '.github/scripts/a01-control-plane-selftest.js';
+          let s = fs.readFileSync(selftestPath, 'utf8');
+          const legacyDecl = "const legacy = readJson('qualification/a01/legacy-direct-workflows.json');";
+          const retirementDecl = "const workflowRetirement = readJson('governance/archive/ACTIONS-WORKFLOW-RETIREMENT-2026-09-10.json');";
+          if (!s.includes(retirementDecl)) {
+            if (!s.includes(legacyDecl)) throw new Error('LEGACY_DECLARATION_NOT_FOUND');
+            s = s.replace(legacyDecl, legacyDecl + '\n' + retirementDecl);
+          }
+          const oldAssert = "assert(legacy.version === 1 && Object.keys(legacy.workflows).length > 0, 'legacy direct-workflow freeze missing');";
+          const newAssert = [
+            "assert(legacy.version === 2, 'legacy direct-workflow freeze generation');",
+            "const frozenLegacyWorkflows = Object.keys(legacy.workflows || {}).sort();",
+            "const retainedRunnerSupport = [...(workflowRetirement.retained_runner_support || [])].sort();",
+            "assert(frozenLegacyWorkflows.length > 0, 'legacy direct-workflow freeze missing');",
+            "assert(JSON.stringify(frozenLegacyWorkflows) === JSON.stringify(retainedRunnerSupport), 'legacy direct-workflow freeze must match retained runner support');"
+          ].join('\n');
+          if (s.includes(oldAssert)) s = s.replace(oldAssert, newAssert);
+          else if (!s.includes("legacy direct-workflow freeze generation")) throw new Error('LEGACY_V1_ASSERTION_NOT_FOUND');
+          fs.writeFileSync(selftestPath, s);
+
+          const launcherPath = '.github/workflows/a01-current-control-plane-selftest-once-2026-09-11.yml';
+          let launcher = fs.readFileSync(launcherPath, 'utf8');
+          if (!launcher.includes('# retry-generation: 2')) launcher += '\n# retry-generation: 2\n';
+          fs.writeFileSync(launcherPath, launcher);
+          NODE
+          node --check .github/scripts/a01-control-plane-selftest.js
+          rm -f .github/workflows/a01-selftest-v2-freeze-repair-once-2026-09-11.yml
+
+      - name: Commit exact selftest repair
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .github/scripts/a01-control-plane-selftest.js .github/workflows/a01-current-control-plane-selftest-once-2026-09-11.yml .github/workflows/a01-selftest-v2-freeze-repair-once-2026-09-11.yml
+          git commit -m 'Repair stale A-01 v1 legacy-freeze selftest invariant'
+          pushed=false
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git rebase origin/main
+            if git push origin HEAD:main; then
+              pushed=true
+              break
+            fi
+            sleep 2
+          done
+          test "$pushed" = true
