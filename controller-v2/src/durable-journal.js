@@ -34,7 +34,7 @@ export class MemoryDurableJournal {
   }
 
   async list() {
-    return [...this.events.values()].map(structuredClone);
+    return [...this.events.values()].map((event) => structuredClone(event));
   }
 }
 
