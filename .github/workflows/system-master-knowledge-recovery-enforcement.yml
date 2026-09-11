@@ -1,0 +1,67 @@
+name: System Master Knowledge Recovery Enforcement
+
+on:
+  pull_request:
+    paths:
+      - 'governance/knowledge-recovery/**'
+      - 'governance/catalog/ingest/**'
+      - 'governance/catalog/schemas/SYSTEM-MASTER-*'
+      - 'governance/catalog/system-packets/PROGRAMMING.json'
+      - '.github/scripts/a01-system-master-knowledge-recovery-001.js'
+      - 'qualification/a01/registry.json'
+      - '.github/workflows/system-master-knowledge-recovery-enforcement.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deterministic-pilot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Parse contracts and manifest
+        shell: bash
+        run: |
+          node -e "for (const p of ['governance/catalog/schemas/SYSTEM-MASTER-INGEST-MANIFEST-001.schema.json','governance/catalog/schemas/SYSTEM-MASTER-ASSET-CATALOG-001.schema.json','governance/catalog/schemas/SYSTEM-MASTER-TRACE-GRAPH-001.schema.json','governance/catalog/ingest/programming/PROGRAMMING-INGEST-MANIFEST-001.json','qualification/a01/registry.json']) JSON.parse(require('fs').readFileSync(p,'utf8'));"
+          node --check .github/scripts/a01-system-master-knowledge-recovery-001.js
+      - name: Enforce supervised registration
+        shell: bash
+        run: |
+          node - <<'NODE'
+          const r=require('./qualification/a01/registry.json');
+          const q=r.qualifications['SYSTEM-MASTER-KNOWLEDGE-RECOVERY-PROGRAMMING-001'];
+          if (r.registry_version < 30) throw new Error('REGISTRY_V30_REQUIRED');
+          if (!q) throw new Error('KNOWLEDGE_RECOVERY_REGISTRATION_MISSING');
+          if (q.workstream_id !== 'SYSTEM-MASTER' || q.gate_class !== 'focused' || q.source !== 'subject') throw new Error('KNOWLEDGE_RECOVERY_REGISTRATION_BOUNDARY');
+          if (q.overnight_eligible !== false) throw new Error('FIRST_RUN_MUST_NOT_BE_OVERNIGHT_ELIGIBLE');
+          console.log('KNOWLEDGE_RECOVERY_SUPERVISED_REGISTRATION=PASS');
+          NODE
+      - name: Run deterministic pass one
+        env:
+          A01_EVIDENCE_DIR: ${{ runner.temp }}/kr-pass-1
+        run: node .github/scripts/a01-system-master-knowledge-recovery-001.js
+      - name: Run deterministic pass two
+        env:
+          A01_EVIDENCE_DIR: ${{ runner.temp }}/kr-pass-2
+        run: node .github/scripts/a01-system-master-knowledge-recovery-001.js
+      - name: Compare deterministic products
+        shell: bash
+        run: |
+          cmp '${{ runner.temp }}/kr-pass-1/programming-asset-catalog.json' '${{ runner.temp }}/kr-pass-2/programming-asset-catalog.json'
+          cmp '${{ runner.temp }}/kr-pass-1/programming-trace-graph.json' '${{ runner.temp }}/kr-pass-2/programming-trace-graph.json'
+          cmp '${{ runner.temp }}/kr-pass-1/programming-source-observations.json' '${{ runner.temp }}/kr-pass-2/programming-source-observations.json'
+          cmp '${{ runner.temp }}/kr-pass-1/knowledge-recovery-report.json' '${{ runner.temp }}/kr-pass-2/knowledge-recovery-report.json'
+          echo 'KNOWLEDGE_RECOVERY_DETERMINISM=PASS'
+      - name: Upload hosted pilot evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: knowledge-recovery-hosted-${{ github.run_id }}
+          path: ${{ runner.temp }}/kr-pass-1
+          if-no-files-found: error
+          retention-days: 30

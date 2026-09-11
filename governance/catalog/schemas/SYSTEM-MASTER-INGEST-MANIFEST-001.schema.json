@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "system-master://knowledge-recovery/ingest-manifest/v1",
+  "title": "System Master Knowledge Recovery Ingest Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["manifest_id","schema_version","candidate_system_id","architecture_authority","frozen_date","purpose","coverage_contract","sources"],
+  "properties": {
+    "manifest_id": {"type":"string","minLength":1},
+    "schema_version": {"const":1},
+    "candidate_system_id": {"type":"string","minLength":1},
+    "architecture_authority": {"const":false},
+    "frozen_date": {"type":"string","format":"date"},
+    "purpose": {"type":"string","minLength":1},
+    "coverage_contract": {
+      "type":"object",
+      "additionalProperties": false,
+      "required":["metadata_scope","byte_scope","full_byte_verification_required_for_catalog_processing_pass"],
+      "properties": {
+        "metadata_scope":{"type":"string","minLength":1},
+        "byte_scope":{"type":"string","minLength":1},
+        "full_byte_verification_required_for_catalog_processing_pass":{"type":"boolean"}
+      }
+    },
+    "sources": {
+      "type":"array",
+      "minItems":1,
+      "items": {
+        "type":"object",
+        "additionalProperties": false,
+        "required":["source_id","surface","locator","evidence_class","byte_availability","digest_authority","reuse_disposition"],
+        "properties": {
+          "source_id":{"type":"string","minLength":1},
+          "surface":{"enum":["GITHUB","CHATGPT_LIBRARY","HISTORICAL_REFERENCE"]},
+          "locator":{"type":"object"},
+          "evidence_class":{"type":"string","minLength":1},
+          "system_affinity":{"type":"array","items":{"type":"string"}},
+          "byte_availability":{"enum":["SUBJECT_REPO","EXTERNAL_REFERENCE_ONLY","HISTORICAL_BYTES_UNAVAILABLE","QUARANTINED"]},
+          "expected_sha256":{"type":["string","null"],"pattern":"^[0-9a-f]{64}$"},
+          "digest_authority":{"enum":["A01_VERIFY_ON_RUN","CHATGPT_PRESTAGE_OBSERVED","HISTORICAL_CLAIM","NONE","CONFLICT"]},
+          "reuse_disposition":{"enum":["REUSE_AS_IS","REUSE_WITH_REQUALIFICATION","REFERENCE_ONLY","MIGRATION_INPUT","DELTA_RESEARCH_REQUIRED","SUPERSEDED_HISTORY","DUPLICATE","QUARANTINE_CONFLICT","IDENTITY_UNPROVEN","OWNER_DECISION_REQUIRED","A01_INGEST_AND_RECONCILE"]},
+          "notes":{"type":"string"}
+        }
+      }
+    }
+  }
+}

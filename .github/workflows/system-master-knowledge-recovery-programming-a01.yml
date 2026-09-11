@@ -1,0 +1,32 @@
+name: System Master Knowledge Recovery Programming A-01 Pilot
+
+on:
+  push:
+    branches:
+      - 'qualification/knowledge-recovery-programming-001-request'
+    paths:
+      - 'qualification/a01/requests/SYSTEM-MASTER-KNOWLEDGE-RECOVERY-PROGRAMMING-001.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  qualify:
+    uses: BFochtman746/system-master/.github/workflows/a01-control-plane-gateway.yml@main
+    with:
+      qualification_id: SYSTEM-MASTER-KNOWLEDGE-RECOVERY-PROGRAMMING-001
+      workstream_id: SYSTEM-MASTER
+      subject_sha: ${{ github.sha }}
+      origin_ref: ${{ github.ref }}
+      resume_on_pass: Review the exact supervised Knowledge Recovery evidence; do not enable Second Shift until the acceptance gate in SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001 passes.
+      resume_on_failure: Preserve the receipt, repair only the failing ingest/manifest/trace boundary, and rerun the minimum sufficient supervised gate.
+      notification_target: system-master-knowledge-recovery-001
+      execution_context: normal
+      qualifier_timeout_minutes: 20
+      job_timeout_minutes: 25
+      repair_attempt: 0
+      max_repair_attempts: 1
+      repair_transaction_id: ''
+    secrets: inherit

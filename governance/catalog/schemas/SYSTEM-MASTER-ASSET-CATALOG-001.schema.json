@@ -1,0 +1,30 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"system-master://knowledge-recovery/asset-catalog/v1",
+  "title":"System Master Recovered Asset Catalog",
+  "type":"object",
+  "additionalProperties":false,
+  "required":["catalog_id","schema_version","candidate_system_id","architecture_authority","assets"],
+  "properties":{
+    "catalog_id":{"type":"string","minLength":1},
+    "schema_version":{"const":1},
+    "candidate_system_id":{"type":"string","minLength":1},
+    "architecture_authority":{"const":false},
+    "assets":{"type":"array","items":{
+      "type":"object","additionalProperties":false,
+      "required":["asset_id","source_id","asset_kind","reuse_disposition","identity_state","system_affinity"],
+      "properties":{
+        "asset_id":{"type":"string","minLength":1},
+        "source_id":{"type":"string","minLength":1},
+        "asset_kind":{"type":"string","minLength":1},
+        "system_affinity":{"type":"array","minItems":1,"items":{"type":"string"}},
+        "reuse_disposition":{"type":"string","minLength":1},
+        "identity_state":{"enum":["A01_VERIFIED","SUBJECT_REPO_VERIFIED","EXTERNAL_BYTES_PENDING","IDENTITY_UNPROVEN","QUARANTINE_CONFLICT"]},
+        "sha256":{"type":["string","null"],"pattern":"^[0-9a-f]{64}$"},
+        "locator":{"type":"object"},
+        "evidence_class":{"type":"string"},
+        "notes":{"type":"string"}
+      }
+    }}
+  }
+}
