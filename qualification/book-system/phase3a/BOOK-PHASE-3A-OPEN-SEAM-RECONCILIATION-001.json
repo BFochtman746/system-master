@@ -1,0 +1,84 @@
+{
+  "evidence_id": "BOOK-PHASE-3A-OPEN-SEAM-RECONCILIATION-001",
+  "owner_system_id": "BOOK",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "control_ref": "book-system/control-v1",
+  "control_head": "1e8f9e7a37d11ab643ef3cc941f21851149714c8",
+  "objective_id": "BOOK-PHASE-3A-NEXT-OPEN-INTEGRATION-SEAM-001",
+  "claim_lease_id": "BOOK-PHASE3A-SEAM-2026-09-11T0115-0400",
+  "main_head_observed_before_disposition": "3e82946e1ca7cac44d887f7b4f82abe0565aa90a",
+  "authority": {
+    "book_complete": false,
+    "prose": "COMPLETE_RETIRED_TERMINAL",
+    "prose_execution_owner": null,
+    "completed_prose_inputs": "READ_ONLY_HISTORICAL_INPUTS_ONLY",
+    "documents_receives_prose_work": false,
+    "book_admission_only_canonical_effect_path": true,
+    "author_final_creative_semantic_authority": true
+  },
+  "implementation_subject": {
+    "owner_tree_sha": "bf60249549f1f9f01db9febb045e64946d433605",
+    "book_workflow_state_model_blob": "81d17b4f71735821799eb4008b3b4db294aba7ba",
+    "book_workflow_cancellation_resume_blob": "614b9eab521ebc7937d81e33e16b2ada5fa426d9",
+    "book_workflow_evidence_provenance_blob": "d66e053ab841231cdaa8f36ba64fdff27af10fd2",
+    "book_workflow_concurrency_rules_blob": "c691c12d11ea3502b4d44bc2907ddb2e57034bc3"
+  },
+  "seam_census": [
+    {
+      "seam": "workflow_state_model",
+      "standing": "CLOSED_FOR_CURRENT_PHASE",
+      "basis": "Digest-bound workflow state creation, validation and transition rules exist in the exact owner tree."
+    },
+    {
+      "seam": "capability_routing_and_execution_plan_contracts",
+      "standing": "CLOSED_FOR_CURRENT_PHASE",
+      "basis": "Current owner tree contains capability routing and execution-plan modules; Phase 2 exact-subject evidence already closed their governed contracts."
+    },
+    {
+      "seam": "concurrency_eligibility",
+      "standing": "CLOSED_AS_CLASSIFICATION_ONLY",
+      "basis": "Concurrency module deliberately derives eligibility only and forbids execution/schedule/scheduler fields. This does not establish a scheduler runtime."
+    },
+    {
+      "seam": "cancellation_resume_checkpoint_semantics",
+      "standing": "CLOSED_AS_IN_MEMORY_SEMANTICS_ONLY",
+      "basis": "Checkpoint creation and validation are implemented and digest-bound, but prior exact-subject closure explicitly made no durable-persistence claim."
+    },
+    {
+      "seam": "evidence_provenance_emission",
+      "standing": "CLOSED_AS_RECEIPT_SEMANTICS_ONLY",
+      "basis": "Receipt creation/validation is implemented with immutable bindings and zero canonical effect, while prior closure explicitly made no durable-persistence claim."
+    },
+    {
+      "seam": "book_admission_handoff",
+      "standing": "CLOSED_AS_COORDINATION_ONLY",
+      "basis": "Existing handoff is intentionally unable to execute or emulate canonical Book admission."
+    },
+    {
+      "seam": "durable_workflow_checkpoint_and_receipt_persistence",
+      "standing": "OPEN__NEXT_DEPENDENCY_VALID_BOOK_OWNED_SEAM",
+      "basis": "The complete exact Book implementation subtree contains no durable workflow/checkpoint/receipt store or repository adapter. State, checkpoint and evidence modules construct and validate objects in memory; Phase 2 cancellation/resume and evidence/provenance closures explicitly withheld durable-persistence claims. Durable storage can be added as Book-owned coordination-state infrastructure with zero canonical manuscript effect and without requiring author/private/native/A-01/publication/production authority."
+    },
+    {
+      "seam": "scheduler_execution_runtime",
+      "standing": "OPEN_BUT_NOT_SELECTED",
+      "basis": "Concurrency rules explicitly prohibit execution/scheduler authority and classify work for later scheduling. This remains downstream/parallel open work but is not selected by this one-seam reconciliation."
+    }
+  ],
+  "selected_successor": {
+    "delegation_id": "SECOND-SHIFT-BOOK-DURABLE-WORKFLOW-PERSISTENCE-001",
+    "objective_id": "BOOK-DURABLE-WORKFLOW-CHECKPOINT-RECEIPT-PERSISTENCE-001",
+    "classification": "BOOK_OWNED_COORDINATION_STATE_PERSISTENCE",
+    "scope": "Implement a transport-neutral Book-owned durable store contract and reference adapter for workflow states, cancellation/resume checkpoints and evidence/provenance receipts using exact digest/version identity, append-only receipt semantics and stale-write/idempotency guards. The store may persist coordination metadata and immutable references only; it may not persist raw manuscript text through this seam or mutate Book canonical manuscript/Story Bible/canon/admission state.",
+    "machine_resolvable": true,
+    "canonical_effect": false,
+    "requires_prose_execution": false,
+    "requires_author_private_blind_native_a01_publication_production_authority": false
+  },
+  "disposition": "PASS__ONE_GENUINELY_OPEN_BOOK_OWNED_SEAM_PROVEN_AND_BOUND",
+  "historical_pass_transferred": false,
+  "prose_work_created": false,
+  "prose_telemetry_created": false,
+  "documents_work_created": false,
+  "book_completion_claimed": false
+}
