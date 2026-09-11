@@ -1,26 +1,28 @@
 {
   "retirement_id": "PROSE-SYSTEM-RETIREMENT-001",
   "effective_date": "2026-09-10",
-  "standing": "RETIRED__COMPLETED_CAPABILITY_FAMILY_ABSORBED_BY_DOCUMENTS",
+  "standing": "RETIRED__COMPLETED_CAPABILITY_FAMILY_INTEGRATES_INTO_BOOK",
   "retired_system_id": "PROSE",
   "historical_owner_path": "SYSTEM_MASTER/BOOK/PROSE",
   "historical_control_ref": "literary-prose-engine-001",
   "final_known_control_head": "b3b0909bc6720a3bc5938de29d4bf3bde9dd4e05",
-  "successor_system_id": "DOCUMENTS",
-  "successor_owner_path": "SYSTEM_MASTER/DOCUMENTS",
-  "successor_control_ref": "documents/control-v1",
-  "reason": "User architecture decision on 2026-09-10: Prose was completed and is retired as an independently operated/scheduled system. Its completed capabilities are now integrated into its parent peer system, Documents.",
+  "successor_system_id": "BOOK",
+  "successor_owner_path": "SYSTEM_MASTER/BOOK",
+  "successor_control_ref": "book-system/control-v1",
+  "reason": "User architecture decision on 2026-09-10: Prose is complete and retired. There is no remaining Prose work. Any remaining integration of the completed Prose capability belongs to the parent Book System. Documents is not the Prose integration target.",
   "preservation_rules": [
     "All historical Prose branches, exact SHAs, A-01/hosted receipts, blind/private/author boundaries, census records and completion evidence remain immutable provenance.",
-    "Retirement never transfers PASS from a historical Prose subject to changed Documents integration bytes.",
-    "No new active PROSE owner obligation, Second Shift delegation, repair transaction, chat role or scheduled worker may be created.",
-    "Existing unresolved items are adjudicated as completed/superseded, authority-only historical limitations, or translated into DOCUMENTS-owned integration work when still materially required.",
-    "BOOK remains canonical owner of Book state and consumes Documents prose/document capabilities through explicit interfaces."
+    "Retirement never transfers PASS from a historical Prose subject to changed Book integration bytes.",
+    "No new active PROSE owner obligation, Second Shift delegation, repair transaction, research task, qualification task, chat role, telemetry lane or scheduled worker may be created.",
+    "Any still-required integration work is represented only as BOOK-owned integration work; it must not be represented as continuing Prose development.",
+    "Documents remains a separate peer system for generic document/artifact capabilities and receives no Prose ownership or successor work."
   ],
   "retired_second_shift": {
     "lane": "PROSE",
-    "disposition": "REMOVE_FROM_ACTIVE_OWNER_REGISTRY__PRESERVE_HISTORY",
-    "replacement_lane": "DOCUMENTS"
+    "disposition": "REMOVE_FROM_ACTIVE_EXECUTION__PRESERVE_HISTORY",
+    "replacement_lane": null,
+    "book_integration_rule": "If integration remains incomplete, it is ordinary BOOK-owned work in the BOOK lane, not successor PROSE work."
   },
-  "integration_target": "documents/control-v1/DOCUMENTS-CONTROL-RECORD-001.md"
+  "integration_target": "SYSTEM_MASTER/BOOK",
+  "terminal_rule": "PROSE remains terminally complete after Book integration. Completing Book integration must not create another Prose successor."
 }
