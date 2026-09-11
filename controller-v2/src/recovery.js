@@ -2,10 +2,13 @@ import { ControllerKernel } from './kernel.js';
 import { ControllerError } from './errors.js';
 import { canonicalize, uuidv7 } from './canonical.js';
 import { reduceSemanticEvents } from './semantic-events.js';
+import { verifyDurableJournal } from './journal-integrity.js';
 
 export { reduceSemanticEvents } from './semantic-events.js';
 
-export function rebuildControllerStore(path, durableEvents) {
+export function rebuildControllerStore(path, durableEntries, { expectedCheckpoint = null } = {}) {
+  const verified=verifyDurableJournal(durableEntries,{expectedCheckpoint});
+  const durableEvents=verified.entries;
   const state=reduceSemanticEvents(durableEvents);
   const kernel=new ControllerKernel(path);
   const existing=Number(kernel.db.prepare('SELECT COUNT(*) n FROM events').get().n);
@@ -19,6 +22,7 @@ export function rebuildControllerStore(path, durableEvents) {
     for(const p of Object.values(state.promotions)) kernel.db.prepare('INSERT INTO promotions(promotion_id,transaction_id,subject_oid,qualification_id,state,authorization_event_id,created_at,updated_at,subject_algorithm) VALUES (?,?,?,?,?,?,?,?,?)').run(p.promotion_id,p.transaction_id,p.subject.oid,p.qualification_id,p.state,p.authorization_event_id,p.created_at,p.updated_at,p.subject.algorithm);
     for(const event of durableEvents){kernel.db.prepare('INSERT INTO events VALUES (?,?,?,?,?,?,?,?,?)').run(event.event_id,event.event_schema,event.stream_id,event.stream_version,event.event_type,event.occurred_at,canonicalize(event.data),event.prev_event_digest,event.event_digest);kernel.db.prepare("INSERT INTO outbox(outbox_id,event_id,status,attempts,created_at,sealed_at) VALUES (?,?,'SEALED',0,?,?)").run(uuidv7(),event.event_id,event.occurred_at,event.occurred_at);}
   });
+  Object.defineProperty(kernel,'recoveredJournalCheckpoint',{value:verified.checkpoint,writable:false,enumerable:true,configurable:false});
   return kernel;
 }
 
