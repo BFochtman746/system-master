@@ -1,0 +1,61 @@
+{
+  "control_record_id": "BOOK-SYSTEM-CONTROL-RECORD-010",
+  "effective_date": "2026-09-10",
+  "standing": "ACTIVE_INCOMPLETE_BOOK__PROSE_COMPLETE_CHILD__INTEGRATION_IN_PROGRESS",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "parent_product": "SYSTEM_MASTER",
+  "control_ref": "book-system/control-v1",
+  "topology_authority": "governance/SYSTEM-TOPOLOGY-004.json on canonical main",
+  "program_job_lock": "governance/SYSTEM-PROGRAM-JOB-LOCK-001.json",
+  "completion_authority": "governance/SYSTEM-COMPLETION-STATUS-001.json",
+  "completion_truth": {
+    "book_complete": false,
+    "prose_complete": true,
+    "rule": "PROSE is the only complete system. Completed Book phases, packets, hosted qualifications, or orchestrator components do not make BOOK complete."
+  },
+  "locked_book_job": "Finish the Book system. Integrate the completed Prose child into Book through adapters and the Book Workflow Orchestrator; preserve Book canonical manuscript, Story Bible/canon, author-decision, lifecycle, admission, versioning/rollback and publication authority; then integrate Book upward into System Master.",
+  "prose_child": {
+    "system_id": "PROSE",
+    "owner_path": "SYSTEM_MASTER/BOOK/PROSE",
+    "control_ref": "literary-prose-engine-001",
+    "standing": "COMPLETE_SPECIALIST_CHILD",
+    "execution_lane": "BOOK",
+    "canonical_manuscript_write_authority": false,
+    "allowed_integration": [
+      "literary analysis and diagnosis",
+      "craft intelligence retrieval",
+      "bounded revision candidate generation",
+      "literary evaluation support",
+      "voice and protected-language preservation checks",
+      "homogenization-defense checks",
+      "Book-controlled adapter and orchestrator invocation"
+    ],
+    "forbidden": [
+      "independent peer or Second Shift lane",
+      "canonical manuscript mutation",
+      "Book admission",
+      "Story Bible/canon ownership",
+      "author or publication authority",
+      "feature-scope reopening absent demonstrated defect or explicit user direction"
+    ]
+  },
+  "current_objective": {
+    "objective_id": "BOOK-PROSE-PHASE-2-ORCHESTRATOR-CLOSURE-CENSUS-001",
+    "state": "READY",
+    "next_on_clean_close": "Phase 3A Book Context Compiler context-package schema and the remaining dependency-valid adapter/orchestrator integration train",
+    "completion_target": "Continue until the completed Prose system is fully usable by Book end-to-end through qualified adapters/orchestration and the Book system itself reaches its genuine product completion boundary."
+  },
+  "document_service_boundary": "DOCUMENTS may provide generic document/artifact services through explicit interfaces but does not absorb or own Prose and cannot mutate Book canonical state.",
+  "lane_rules": [
+    "BOOK <-> PROSE is the authorized direct parent/child specialist crossing.",
+    "BOOK must not take Learning or Documents product ownership.",
+    "Book canonical writes remain Book-owned and pass only through the Book admission authority.",
+    "If the live Book head changes during execution, re-read and reconcile before mutation; do not overwrite valid concurrent progress."
+  ],
+  "evidence_rule": "All prior exact-subject Book and Prose evidence remains exact-subject scoped. This control record changes current routing/control metadata only and transfers no PASS or human/author/private/native/publication/production authority.",
+  "supersession": {
+    "supersedes_for_current_control": "BOOK-SYSTEM-PRODUCT-PARENT-BINDING-006",
+    "historical_binding_preserved": true,
+    "latest_reconciled_state_before_this_record": "BOOK-SYSTEM-RECONCILED-STATE-039"
+  }
+}
