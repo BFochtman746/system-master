@@ -68,6 +68,12 @@ function validExhaustion(record) {
       nonEmpty(r.evidence_or_blocker) && nonEmpty(r.independent_preparation_assessment) &&
       nonEmpty(r.next_executable_condition)));
 }
+function isExplicitNonPeerObligation(o) {
+  if (!o) return false;
+  if (o.second_shift_state === 'NO_PEER_LANE_BEFORE_TOPOLOGY_ADMISSION') return true;
+  if (o.program_id && o.owner_path === 'SYSTEM_MASTER') return true;
+  return false;
+}
 
 function runSelftest() {
   const good = {
@@ -81,8 +87,9 @@ function runSelftest() {
     independent_work_remaining: false
   };
   if (!validExhaustion(good) || validExhaustion({ ...good, rungs: good.rungs.slice(0, 7) }) ||
-      !isSameOrDescendant('SYSTEM_MASTER/BOOK/PROSE/X', 'SYSTEM_MASTER/BOOK/PROSE') ||
-      isSameOrDescendant('SYSTEM_MASTER/LEARNING', 'SYSTEM_MASTER/BOOK')) {
+      !isSameOrDescendant('SYSTEM_MASTER/BOOK/X', 'SYSTEM_MASTER/BOOK') ||
+      isSameOrDescendant('SYSTEM_MASTER/LEARNING', 'SYSTEM_MASTER/BOOK') ||
+      !isExplicitNonPeerObligation({ program_id: 'PROGRAMMING', owner_path: 'SYSTEM_MASTER', second_shift_state: 'NO_PEER_LANE_BEFORE_TOPOLOGY_ADMISSION' })) {
     console.error('SECOND_SHIFT_OWNER_COVERAGE_SELFTEST_FAIL');
     process.exit(1);
   }
@@ -95,6 +102,14 @@ const findings = [];
 const add = (severity, type, message, detail = {}) => findings.push({ severity, type, message, ...detail });
 
 const authority = readJson('governance/CURRENT-AUTHORITY.json');
+const topologyRel = authority.topology;
+if (!topologyRel || !exists(topologyRel)) {
+  add('ERROR', 'CURRENT_TOPOLOGY_MISSING', `CURRENT-AUTHORITY does not select an accessible topology: ${topologyRel || '<unset>'}`);
+}
+const topology = topologyRel && exists(topologyRel) ? readJson(topologyRel) : { peer_system_ids: [], retired_systems: [] };
+const topologyPeers = new Set(topology.peer_system_ids || []);
+const retiredSystems = new Map((topology.retired_systems || []).filter(Boolean).map((r) => [r.system_id, r]));
+
 const registryRel = authority.second_shift_registry || 'governance/second-shift/SECOND-SHIFT-REGISTRY-001.json';
 const registry = readJson(registryRel);
 const obligationRel = authority.obligation_registry;
@@ -105,6 +120,31 @@ const obligations = obligationRel && exists(obligationRel) ? (readJson(obligatio
 const ownerFiles = registry.owner_files || {};
 const laneEntries = Object.entries(ownerFiles);
 if (!laneEntries.length) add('ERROR', 'SECOND_SHIFT_REGISTRY_EMPTY', 'Second Shift registry declares no owner lanes');
+
+for (const peer of topologyPeers) {
+  if (!ownerFiles[peer]) {
+    const system = (topology.canonical_internal_systems || []).find((s) => s && s.system_id === peer);
+    const candidates = obligations.filter((o) => o && ACTIVE_OBLIGATION_STATES.has(o.state) && isSameOrDescendant(o.owner_path, system?.owner_path || `SYSTEM_MASTER/${peer}`));
+    const machineResolvable = Boolean(system?.control_ref && system?.parent_id === 'SYSTEM_MASTER' && candidates.length > 0);
+    add('ERROR', 'SECOND_SHIFT_PEER_COVERAGE_MISSING', 'topology-declared active peer has no Second Shift owner file', {
+      lane: peer,
+      control_ref: system?.control_ref || null,
+      owner_path: system?.owner_path || `SYSTEM_MASTER/${peer}`,
+      machine_resolvable_for_controller_autoprovision: machineResolvable
+    });
+  }
+}
+for (const [lane] of laneEntries) {
+  if (!topologyPeers.has(lane)) {
+    const retired = retiredSystems.get(lane);
+    add('ERROR', retired ? 'RETIRED_SYSTEM_PROVISIONED' : 'SECOND_SHIFT_ORPHAN_ACTIVE_LANE', retired ?
+      'retired system appears in active Second Shift owner_files and must be removed without replacement' :
+      'registry declares an active lane that is not a topology peer', { lane, retired: Boolean(retired) });
+  }
+}
+for (const [retiredId] of retiredSystems) {
+  if (ownerFiles[retiredId]) add('ERROR', 'RETIRED_SYSTEM_PROVISIONED', 'retired system must never be auto-provisioned or retained as an active owner lane', { lane: retiredId });
+}
 
 const eventSchemaRel = registry.utilization_event_schema;
 if (!eventSchemaRel || !exists(eventSchemaRel)) {
@@ -117,6 +157,10 @@ if (!eventSchemaRel || !exists(eventSchemaRel)) {
   }
   for (const lane of allowed) {
     if (!ownerFiles[lane]) add('ERROR', 'SECOND_SHIFT_TELEMETRY_LANE_ORPHANED', 'utilization allowed_lanes contains a lane not declared by owner_files', { lane, event_schema: eventSchemaRel });
+    if (!topologyPeers.has(lane)) add('ERROR', 'SECOND_SHIFT_TELEMETRY_NONPEER_LANE', 'utilization allowed_lanes contains a non-peer or retired system', { lane, event_schema: eventSchemaRel });
+  }
+  for (const [retiredId] of retiredSystems) {
+    if (allowed.has(retiredId)) add('ERROR', 'RETIRED_SYSTEM_TELEMETRY_ACTIVE', 'retired system is present in active utilization allowed_lanes', { lane: retiredId });
   }
 }
 
@@ -171,9 +215,20 @@ function routeLane(ownerPath) {
 
 for (const [prefix, lane] of Object.entries(coverageRoutes)) {
   if (!ownerDataByLane.has(lane)) add('ERROR', 'SECOND_SHIFT_COVERAGE_ROUTE_INVALID', 'coverage route points to a missing Second Shift lane', { owner_prefix: prefix, routed_lane: lane });
+  for (const [, retired] of retiredSystems) {
+    if (retired?.historical_owner_path && isSameOrDescendant(prefix, retired.historical_owner_path)) {
+      add('ERROR', 'RETIRED_SYSTEM_COVERAGE_ROUTE_ACTIVE', 'active coverage route points into a retired system path', { owner_prefix: prefix, routed_lane: lane, retired_system_id: retired.system_id });
+    }
+  }
 }
 
 for (const o of obligations.filter((x) => x && ACTIVE_OBLIGATION_STATES.has(x.state))) {
+  if (isExplicitNonPeerObligation(o)) continue;
+  const retired = [...retiredSystems.values()].find((r) => r?.historical_owner_path && isSameOrDescendant(o.owner_path, r.historical_owner_path));
+  if (retired) {
+    add('ERROR', 'RETIRED_SYSTEM_ACTIVE_OBLIGATION', 'active obligation is owned by or beneath a retired system path', { obligation_id: o.obligation_id, owner_path: o.owner_path, retired_system_id: retired.system_id });
+    continue;
+  }
   const lane = routeLane(o.owner_path);
   if (!lane) add('ERROR', 'SECOND_SHIFT_OWNER_COVERAGE_MISSING', 'READY/ACTIVE obligation owner_path has no registry-declared Second Shift owner route', { obligation_id: o.obligation_id, owner_path: o.owner_path });
 }
@@ -193,10 +248,13 @@ if (central) {
 
 const errors = findings.filter((f) => f.severity === 'ERROR');
 const report = {
+  authority_topology: topologyRel || null,
   authority_obligation_registry: obligationRel || null,
   registry: registryRel,
   utilization_event_schema: eventSchemaRel || null,
+  topology_peer_lanes: [...topologyPeers],
   registry_declared_lanes: laneEntries.map(([lane]) => lane),
+  retired_system_ids: [...retiredSystems.keys()],
   central_next_objective: central || null,
   standing: errors.length ? 'DRIFT_DETECTED' : 'PASS',
   error_count: errors.length,
