@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:system-master:learning:command-request:0.1.0",
+  "title": "Learning to System Master Command Request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["request_id","idempotency_key","occurred_at","actor_context_class","command","learning_context","evidence_policy"],
+  "properties": {
+    "request_id": {"type":"string","minLength":1},
+    "idempotency_key": {"type":"string","minLength":1},
+    "occurred_at": {"type":"string","format":"date-time"},
+    "actor_context_class": {"enum":["USER_PRESENT","SYSTEM_AUTOMATION","TEST_FIXTURE"]},
+    "command": {"enum":["LEARNING_STATUS_GET","COURSE_CONTINUE","ATTEMPT_SUBMIT","RETENTION_CHECK_REQUEST","LEARNING_ARTIFACT_LIST","LEARNING_ACTION_CANCEL"]},
+    "learning_context": {
+      "type":"object",
+      "additionalProperties": true,
+      "properties": {
+        "target_owner_path": {"const":"SYSTEM_MASTER/LEARNING"},
+        "learner_scope": {"type":"string","minLength":1},
+        "course_id": {"type":"string"}
+      }
+    },
+    "evidence_policy": {"enum":["NO_HUMAN_EVIDENCE","USER_AUTHORIZED_LEARNER_EVIDENCE","READ_ONLY_STATUS"]},
+    "command_input": {"type":"object","additionalProperties":true}
+  }
+}
