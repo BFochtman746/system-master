@@ -4,7 +4,7 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { spawn, spawnSync } from 'node:child_process';
+import { spawn } from 'node:child_process';
 import { ControllerKernel } from '../src/kernel.js';
 import { canonicalize, uuidv7, isUuidV7 } from '../src/canonical.js';
 
@@ -31,6 +31,11 @@ function makeCommand(commandId = uuidv7()) {
 function tempDb() {
   const dir = mkdtempSync(join(tmpdir(), 'controller-v2-fi-'));
   return { dir, db: join(dir, 'controller.sqlite') };
+}
+
+function initializeDb(db) {
+  const k = new ControllerKernel(db);
+  k.close();
 }
 
 function runNode(script, args = []) {
@@ -80,15 +85,20 @@ test('FI-T002 separate processes contend for one lease and exactly one wins', as
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
 
-test('FI-T003 separate processes accept same command into one transaction', async () => {
+test('FI-T003 separate processes accept same command into one transaction after controlled bootstrap', async () => {
   const { dir, db } = tempDb();
   try {
+    // Controller v2 has one bootstrap owner. Workers never bootstrap/open the controller DB.
+    // This test isolates the actual property under test: idempotent command contention.
+    initializeDb(db);
     const c = makeCommand();
     const payload = JSON.stringify(c);
     const [a, b] = await Promise.all([
       runNode('command-contender.js', [db, payload]),
       runNode('command-contender.js', [db, payload])
     ]);
+    assert.equal(a.code, 0, a.stderr);
+    assert.equal(b.code, 0, b.stderr);
     const outcomes = [a, b].map(x => JSON.parse(x.stdout));
     assert.ok(outcomes.every(x => x.ok));
     assert.equal(outcomes[0].result.transaction_id, outcomes[1].result.transaction_id);
