@@ -1,0 +1,268 @@
+{
+  "$id": "urn:programming-app:excel-qualification-evidence:1.0.0",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "artifacts": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "ref": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "sha256": {
+            "pattern": "^[A-Fa-f0-9]{64}$",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "kind",
+          "ref",
+          "sha256"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "evidence_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "evidence_kind": {
+      "enum": [
+        "CUSTODY_HASH",
+        "PACKAGE_INVENTORY",
+        "RELATIONSHIP_VALIDATION",
+        "CELL_TYPE_AUDIT",
+        "FORMULA_AUDIT",
+        "CALCULATION_PROFILE",
+        "NATIVE_RECALC",
+        "STYLE_LAYOUT_AUDIT",
+        "TABLE_NAME_VALIDATION_AUDIT",
+        "CHART_DRAWING_AUDIT",
+        "PIVOT_AUDIT",
+        "CONNECTION_QUERY_AUDIT",
+        "EXTERNAL_LINK_AUDIT",
+        "MACRO_ACTIVE_CONTENT_AUDIT",
+        "HIDDEN_PROTECTION_AUDIT",
+        "ROUND_TRIP_STRUCTURAL_DIFF",
+        "ROUND_TRIP_SEMANTIC_DIFF",
+        "NATIVE_OPEN_SAVE",
+        "COMPATIBILITY_CHECK",
+        "PERFORMANCE_RESOURCE_TEST",
+        "REGRESSION_TEST",
+        "INDEPENDENT_REVIEW",
+        "CLEAN_REPLAY",
+        "OTHER"
+      ]
+    },
+    "execution_mode": {
+      "enum": [
+        "PACKAGE_INSPECTION",
+        "LIBRARY_EXECUTION",
+        "NATIVE_EXCEL_EXECUTION",
+        "VISUAL_RENDER_COMPARISON",
+        "STATIC_ANALYSIS",
+        "TARGET_NATIVE_PENDING"
+      ]
+    },
+    "gate_id": {
+      "enum": [
+        "XQ-G01",
+        "XQ-G02",
+        "XQ-G03",
+        "XQ-G04",
+        "XQ-G05",
+        "XQ-G06",
+        "XQ-G07",
+        "XQ-G08",
+        "XQ-G09",
+        "XQ-G10",
+        "XQ-G11",
+        "XQ-G12",
+        "XQ-G13",
+        "XQ-G14",
+        "XQ-G15",
+        "XQ-G16",
+        "XQ-G17",
+        "XQ-G18",
+        "XQ-G19"
+      ]
+    },
+    "notes": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "result": {
+      "additionalProperties": false,
+      "properties": {
+        "assertions_passed": {
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "assertions_total": {
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "failures": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "summary": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "verdict": {
+          "enum": [
+            "PASS",
+            "FAIL",
+            "BLOCKED",
+            "PENDING",
+            "NOT_APPLICABLE",
+            "TARGET_NATIVE_PENDING"
+          ]
+        },
+        "warnings": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "verdict",
+        "summary",
+        "assertions_total",
+        "assertions_passed",
+        "failures",
+        "warnings"
+      ],
+      "type": "object"
+    },
+    "schema_id": {
+      "const": "EXCEL-QUALIFICATION-EVIDENCE"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "status": {
+      "enum": [
+        "PASS",
+        "FAIL",
+        "BLOCKED",
+        "NOT_APPLICABLE",
+        "PENDING",
+        "TARGET_NATIVE_PENDING"
+      ]
+    },
+    "subject_binding": {
+      "additionalProperties": false,
+      "properties": {
+        "environment_identity": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "input_sha256": {
+          "pattern": "^[A-Fa-f0-9]{64}$",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "output_sha256": {
+          "pattern": "^[A-Fa-f0-9]{64}$",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "subject_id": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "subject_id",
+        "input_sha256",
+        "output_sha256",
+        "environment_identity"
+      ],
+      "type": "object"
+    },
+    "tool_or_method": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "native_excel": {
+          "type": "boolean"
+        },
+        "route_decision_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "version_state": {
+          "enum": [
+            "PROVEN",
+            "SUPPORTED",
+            "UNVERIFIED",
+            "NOT_APPLICABLE"
+          ]
+        }
+      },
+      "required": [
+        "name",
+        "version",
+        "version_state",
+        "route_decision_ref",
+        "native_excel"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "schema_id",
+    "schema_version",
+    "evidence_id",
+    "gate_id",
+    "evidence_kind",
+    "execution_mode",
+    "status",
+    "subject_binding",
+    "tool_or_method",
+    "result",
+    "artifacts",
+    "notes"
+  ],
+  "type": "object"
+}

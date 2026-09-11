@@ -1,0 +1,93 @@
+policy_id: EXCEL-QUAL-001-POLICY
+version: 1.0.0
+authority: EXCEL-QUAL-001@1.0.0
+canonical_rules:
+- EXACT_WORKBOOK_BYTES_AND_CUSTODY_BEFORE_MUTATION
+- OPENXML_PACKAGE_IS_NOT_EQUIVALENT_TO_EXCEL_SEMANTICS
+- VALUE_ONLY_DIFF_IS_INSUFFICIENT_WHEN_FORMULAS_OR_CALCULATION_ARE_MATERIAL
+- CACHED_FORMULA_VALUES_ARE_NOT_RECALCULATION_PROOF
+- CALCULATION_CHAIN_IS_NOT_A_FORMULA_DEPENDENCY_GRAPH
+- UNSUPPORTED_OR_OPAQUE_PARTS_MUST_BE_PRESERVED_OR_EXPLICITLY_DISPOSITIONED
+- FORMAT_CONVERSION_REQUIRES_EXPLICIT_FEATURE_LOSS_ANALYSIS
+- MACRO_OR_ACTIVE_CONTENT_INSPECTION_DOES_NOT_AUTHORIZE_EXECUTION
+- EXTERNAL_LINKS_AND_CONNECTIONS_REQUIRE_TRUST_AND_REFRESH_DISPOSITION
+- ROUND_TRIP_PASS_REQUIRES_STRUCTURAL_AND_SEMANTIC_COMPARISON
+- NATIVE_EXCEL_CLAIMS_REQUIRE_NATIVE_EVIDENCE_OR_TARGET_NATIVE_PENDING
+- KNOWN_ISSUE_PREFLIGHT_REQUIRED_BEFORE_REPAIR
+- AFFECTED_SHEETS_AND_DEPENDENTS_MUST_BE_REGRESSION_TESTED
+- BUILDER_CANNOT_SELF_CERTIFY
+- CLEAN_REPLAY_AND_FIDELITY_SEAL_REQUIRED
+- ALL_EXECUTABLE_WORK_ROUTES_THROUGH_CAPABILITY_ROUTER_AND_RESOURCE_JOBS
+gate_ids:
+- XQ-G01
+- XQ-G02
+- XQ-G03
+- XQ-G04
+- XQ-G05
+- XQ-G06
+- XQ-G07
+- XQ-G08
+- XQ-G09
+- XQ-G10
+- XQ-G11
+- XQ-G12
+- XQ-G13
+- XQ-G14
+- XQ-G15
+- XQ-G16
+- XQ-G17
+- XQ-G18
+- XQ-G19
+gate_names:
+  XQ-G01: Workbook, package and custody identity
+  XQ-G02: Package structure, relationships and part inventory
+  XQ-G03: Cell values, data types, errors and date/time fidelity
+  XQ-G04: Formula syntax, references and cached-result semantics
+  XQ-G05: Calculation configuration, dependencies, iteration and precision
+  XQ-G06: Styles, number formats, conditional formatting and layout
+  XQ-G07: Tables, defined names, validation and filtering
+  XQ-G08: Charts, drawings, images, shapes and embedded objects
+  XQ-G09: PivotTables, PivotCaches, slicers and data-model state
+  XQ-G10: Connections, queries, refresh state and external data
+  XQ-G11: External workbook links and linked-object references
+  XQ-G12: VBA, macros, controls, XML maps and active/opaque features
+  XQ-G13: Hidden state, workbook/worksheet protection and trust controls
+  XQ-G14: Round-trip structural and semantic preservation
+  XQ-G15: Native Excel open/save/recalculation/compatibility verification
+  XQ-G16: Performance, resource use and large-workbook behavior
+  XQ-G17: Affected-sheet and dependent regression
+  XQ-G18: Independent disproof
+  XQ-G19: Clean replay and fidelity seal
+execution_routing:
+  capability_authority: CAPABILITY-ROUTER-001@1.0.0
+  resource_authority: RESOURCE-JOBS-001@1.0.0
+custody:
+  archive_authority: ARCHIVE-001@1.0.0
+  mutation_only_after_identity: true
+  original_bytes_immutable: true
+repair:
+  defect_authority: DEFECT-KNOWLEDGE-001@1.0.0
+  preflight_required: true
+  regression_required: true
+pass_prohibitions:
+- UNVERIFIED_WORKBOOK_IDENTITY
+- MISSING_REQUIRED_GATE_EVIDENCE
+- VALUE_ONLY_FORMULA_PROOF
+- UNSUPPORTED_FEATURE_LOSS
+- ROUND_TRIP_WITHOUT_STRUCTURAL_AND_SEMANTIC_PROOF
+- NATIVE_CLAIM_WITHOUT_NATIVE_EVIDENCE
+- AFFECTED_DEPENDENT_GAP
+- BUILDER_SELF_CERTIFICATION
+- OPEN_DISPROOF_FINDING
+- STALE_OR_WRONG_WORKBOOK_EVIDENCE
+native_excel:
+  authoritative_for:
+  - Excel recalculation behavior
+  - Excel open/save compatibility behavior
+  - Excel-specific rendering/feature behavior when material
+  absence_behavior: TARGET_NATIVE_PENDING_NOT_PASS
+  installed_runtime_assumed: false
+source_truth:
+  actual_programming_app_source: SOURCE_NOT_SUPPLIED
+  actual_target_workbook: NOT_SUPPLIED
+  workbook_specific_pass_allowed: false

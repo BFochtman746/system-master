@@ -1,0 +1,85 @@
+receipt_id: EXCEL-QUAL-001-RESEARCH-2026-08-31
+status: CURRENT_AS_OF_2026-08-31
+scope: Official Microsoft/Open XML guidance materially affecting Excel qualification
+  design
+sources:
+- authority: Microsoft Learn
+  title: Working with formulas - Open XML SDK
+  url: https://learn.microsoft.com/en-us/office/open-xml/spreadsheet/working-with-formulas
+  finding: SpreadsheetML formula cells can contain a cached <v> result from the last
+    calculation; cached results are not proof of a fresh Excel recalculation.
+  design_binding: XQ-G04 and XQ-G15 distinguish formula text/cached values from executed
+    native recalculation.
+- authority: Microsoft Learn
+  title: Working with the calculation chain - Open XML SDK
+  url: https://learn.microsoft.com/en-us/office/open-xml/spreadsheet/working-with-the-calculation-chain
+  finding: calcChain records last calculation order, not formula dependencies, and
+    applications may rebuild it.
+  design_binding: XQ-G05 forbids treating calcChain as a dependency graph or correctness
+    proof.
+- authority: Microsoft Learn
+  title: Structure of a SpreadsheetML document
+  url: https://learn.microsoft.com/en-us/office/open-xml/spreadsheet/structure-of-a-spreadsheetml-document
+  finding: SpreadsheetML workbooks are multi-part packages containing workbook/worksheet
+    parts and may include tables, charts, PivotTables, PivotCaches, calculation chain,
+    shared strings and other parts.
+  design_binding: XQ-G02 requires complete part/relationship inventory rather than
+    cell-only inspection.
+- authority: Microsoft Support
+  title: Change formula recalculation, iteration, or precision in Excel
+  url: https://support.microsoft.com/en-us/Excel/change-formula-recalculation-iteration-or-precision-in-excel
+  finding: Excel calculation mode, iterative calculation and precision-as-displayed
+    materially affect results; precision-as-displayed can permanently change stored
+    values.
+  design_binding: XQ-G05 records calculation mode, iteration and precision semantics
+    and elevates native calculation when material.
+- authority: Microsoft Learn
+  title: Application.CalculateFullRebuild method (Excel)
+  url: https://learn.microsoft.com/en-us/office/vba/api/excel.application.calculatefullrebuild
+  finding: CalculateFullRebuild forces full calculation and rebuilds dependencies
+    in Excel.
+  design_binding: XQ-G15 permits full native recalculation/rebuild evidence when required,
+    without hardwiring a single automation technique.
+- authority: Microsoft Support
+  title: Excel formatting and features that are not transferred to other file formats
+  url: https://support.microsoft.com/en-US/Excel/excel-formatting-and-features-that-are-not-transferred-to-other-file-formats
+  finding: Saving to other formats can lose formatting and features; .xlsm preserves
+    macros whereas other formats may not.
+  design_binding: XQ-G12 and XQ-G14 require format-aware feature-loss analysis and
+    forbid silent downgrade.
+- authority: Microsoft Support
+  title: Edit a workbook that contains features unsupported by Excel for the web
+  url: https://support.microsoft.com/en-US/Excel/edit-a-workbook-that-contains-features-unsupported-by-excel-for-the-web
+  finding: Some features are unsupported in Excel for the web; copies may remove unsupported
+    features and VBA/XML maps can block browser editing.
+  design_binding: XQ-G12 and XQ-G15 distinguish provider/library capability from preservation
+    truth and native Excel evidence.
+- authority: Microsoft Support
+  title: Manage workbook links
+  url: https://support.microsoft.com/en-US/Excel/manage-workbook-links
+  finding: Workbook links have refresh policies and breaking links converts formulas
+    to current values, a semantic mutation.
+  design_binding: XQ-G11 treats external-link refresh/break operations as explicit
+    semantic changes with regression evidence.
+- authority: Microsoft Support
+  title: Create, edit, and manage connections to external data
+  url: https://support.microsoft.com/en-US/Excel/create-edit-and-manage-connections-to-external-data
+  finding: Workbook connections and queries can depend on external data and Trust
+    Center state.
+  design_binding: XQ-G10 requires connection/query inventory, trust disposition and
+    refresh evidence.
+- authority: Microsoft Learn
+  title: Workbook.SaveAs method (Excel)
+  url: https://learn.microsoft.com/en-us/office/vba/api/excel.workbook.saveas
+  finding: Native Excel SaveAs behavior is file-format dependent and supports explicit
+    target FileFormat.
+  design_binding: XQ-G15 native save evidence records exact target format and resulting
+    bytes; file extension alone is not format proof.
+conclusions:
+- A single OOXML library is not sufficient proof of Excel semantic fidelity.
+- Cached formula values and calcChain metadata are not substitutes for fresh native
+  recalculation when Excel behavior is material.
+- Unsupported/opaque workbook parts and format conversions must be preserved or explicitly
+  dispositioned before PASS.
+- The target Windows installation and Excel version are not assumed by this portable
+  packet.
