@@ -323,14 +323,21 @@ class ContractVersionRegistry {
 }
 
 class ContractService {
-  constructor({ identityAllocator }) {
+  constructor({ identityAllocator, artifactResolver = null }) {
     this.identity = new DelegatedIdentityPort(identityAllocator);
     this.schemes = new VersionSchemeRegistry();
     this.families = new ContractFamilyRegistry({ identityPort: this.identity });
     this.versions = new ContractVersionRegistry();
     this.drafts = new ContractDraftManager({ identityPort: this.identity, families: this.families, versions: this.versions });
     this.receipts = new Map();
+    this.artifactResolver = artifactResolver;
     this.persistence_standing = 'PORTABLE_IN_MEMORY_CANDIDATE__001P_NOT_BOUND';
+  }
+
+  bindArtifactResolver(resolver) {
+    if (!resolver || typeof resolver.getArtifact !== 'function') throw new ContractVersioningError('INCOMPLETE_CONTRACT_INPUT', 'artifact resolver must expose getArtifact');
+    this.artifactResolver = resolver;
+    return this;
   }
 
   registerVersionScheme(definition) { return this.schemes.registerVersionScheme(definition); }
@@ -385,12 +392,18 @@ class ContractService {
       throw new ContractVersioningError('INCOMPLETE_CONTRACT_INPUT', 'candidate_artifact_ref is required before publish');
     }
 
+    const artifact = this.artifactResolver ? this.artifactResolver.getArtifact(draft.candidate_artifact_ref) : null;
     const version = this.versions.publish({
       contract_version_id: this.identity.issue('CONTRACT_VERSION'),
       contract_family_id: draft.contract_family_id,
       version_scheme_id: schemeId,
       version_label: versionLabel,
       artifact_ref: draft.candidate_artifact_ref,
+      raw_digest: artifact?.raw_digest || null,
+      canonical_digest: artifact?.canonical_digest || null,
+      canonicalization_profile_id: artifact?.canonicalization_profile_id || null,
+      canonicalization_profile_version: artifact?.canonicalization_profile_version || null,
+      artifact_integrity_standing: artifact ? 'DIGEST_BOUND' : 'ARTIFACT_RESOLVER_NOT_BOUND',
       semantic_metadata: clone(draft.semantic_metadata),
       state: 'PUBLISHED',
       published_at: record.published_at || null,
