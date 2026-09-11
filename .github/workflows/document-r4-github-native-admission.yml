@@ -1,25 +1,26 @@
-name: Document R4 GitHub Native Admission
+name: Document R4 GitHub-Native Source Admission 005
 
 on:
   push:
-    branches: [main]
+    branches:
+      - documents/r4-source-admission-005
     paths:
-      - 'transport/document-r4/READY'
+      - '.github/workflows/document-r4-github-native-admission.yml'
 
 concurrency:
-  group: document-r4-github-native-admission
+  group: document-r4-source-admission-005
   cancel-in-progress: false
 
 permissions:
   contents: write
 
 jobs:
-  admit-and-qualify:
-    if: "${{ github.event.head_commit.message == 'transport: arm Document R4 import' }}"
+  admit-qualify-and-arm:
+    if: "${{ github.event.head_commit.message == 'ci: install fail-closed R4 source admission 005' }}"
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
     steps:
-      - name: Checkout trigger subject
+      - name: Checkout exact trigger subject
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           fetch-depth: 0
@@ -43,29 +44,47 @@ jobs:
           command -v pdftoppm
           command -v pdfimages
 
-      - name: Verify armed staging state
+      - name: Verify frozen 004 subject and exact payload identities
         shell: bash
         run: |
           set -euo pipefail
+          test "${GITHUB_REF_NAME}" = 'documents/r4-source-admission-005'
+          git merge-base --is-ancestor 0e645a49e36b7cd0dc05017571f91b999f0c70c0 HEAD
+          test ! -e transport/document-r4/READY
+          test ! -e recovered/document/cr001-r4
+          test "$(git rev-parse HEAD:transport/document-r4/CHUNK-MANIFEST.json)" = d9f04e99454f792424c24d82a01eae484b803990
+          test "$(git rev-parse HEAD:transport/document-r4/TRANSPORT-CONTRACT.json)" = e171d148dfb4e267031b00d62740ef1ede6a0552
+          test "$(git rev-parse HEAD:transport/document-r4/STAGING.json)" = e20f24d27a2bba6c81a239b21a80004e5dccace0
+          test "$(git rev-parse HEAD:transport/document-r4/chunk-000.b64)" = 64034670dbbe18f6b629108bd1d9b1d8d81c4ac8
+          test "$(git rev-parse HEAD:transport/document-r4/chunk-001.b64)" = 562ec2e184b6068e0f123c9e097d344a42c67dce
+          test "$(git rev-parse HEAD:transport/document-r4/chunk-002.b64)" = 7b592c67e39a998301be7e5146533b842d724db2
+          test "$(git rev-parse HEAD:transport/document-r4/chunk-003.b64)" = d67f828a421b0af4c75d3c5b6a2c25b8ca2a1c20
+          test "$(git rev-parse HEAD:transport/document-r4/chunk-004.b64)" = 3518bf5ac92360b07f86c6107670da40f5830d1f
           python3 - <<'PY'
           import hashlib, json, pathlib
           stage = pathlib.Path('transport/document-r4')
-          staging = json.loads((stage / 'STAGING.json').read_text())
-          contract = stage / 'TRANSPORT-CONTRACT.json'
-          manifest = stage / 'CHUNK-MANIFEST.json'
-          if not (stage / 'READY').is_file():
-              raise SystemExit('READY marker missing')
-          if staging.get('status') != 'FULL_TRANSPORT_STAGED__ARMED':
-              raise SystemExit('staging is not explicitly armed')
-          if staging.get('ready_marker_present') is not True:
-              raise SystemExit('STAGING does not acknowledge READY')
-          def digest(path): return hashlib.sha256(path.read_bytes()).hexdigest()
-          if digest(contract) != staging.get('transport_contract_sha256'):
-              raise SystemExit('transport contract digest drift')
-          if digest(manifest) != staging.get('chunk_manifest_sha256'):
-              raise SystemExit('chunk manifest digest drift')
-          if staging.get('staged_chunks') != staging.get('expected_total_chunks'):
-              raise SystemExit('staged chunk count is incomplete')
+          s = json.loads((stage/'STAGING.json').read_text())
+          expected = {
+              'status': 'FULL_TRANSPORT_STAGED__NOT_ARMED',
+              'staged_chunks': 5,
+              'staged_chunk_range': '000-004',
+              'staged_raw_bytes': 301008,
+              'ready_marker_present': False,
+              'historical_pass_transfer': False,
+              'github_native_source_custody': 'BLOCKED',
+          }
+          for k, v in expected.items():
+              if s.get(k) != v:
+                  raise SystemExit(f'STAGING drift: {k}={s.get(k)!r}, expected {v!r}')
+          def sha(path): return hashlib.sha256(path.read_bytes()).hexdigest()
+          if sha(stage/'TRANSPORT-CONTRACT.json') != s['transport_contract_sha256']:
+              raise SystemExit('transport contract SHA drift')
+          if sha(stage/'CHUNK-MANIFEST.json') != s['chunk_manifest_sha256']:
+              raise SystemExit('chunk manifest SHA drift')
+          if s.get('expected_transport_tar_xz_sha256') != '77a6e2288d475865622bad4b2c66647a599c26a3899c6617b33d7b2b334855bd':
+              raise SystemExit('carrier SHA drift')
+          if s.get('source_manifest_rows') != 225:
+              raise SystemExit('source row count drift')
           PY
 
       - name: Reconstruct carrier and verify exact 225-file identity
@@ -75,30 +94,35 @@ jobs:
           STAGE='transport/document-r4'
           ARCHIVE='/tmp/CR001_R4_225_SOURCE_WITH_EVIDENCE_20260910.tar.xz'
           DEST='recovered/document/cr001-r4'
-          test ! -e "$DEST"
           python3 tools/document-r4/verify_and_extract_transport.py \
             --contract "$STAGE/TRANSPORT-CONTRACT.json" \
             --chunk-manifest "$STAGE/CHUNK-MANIFEST.json" \
             --chunks "$STAGE" \
             --carrier-out "$ARCHIVE" \
-            --extract-out "$DEST"
-          python3 - <<'PY'
-          import json, pathlib
-          contract = json.loads(pathlib.Path('transport/document-r4/TRANSPORT-CONTRACT.json').read_text())
-          verification = {
-              'transport_contract_id': contract['contract_id'],
-              'transport_tar_xz_sha256': contract['deterministic_carrier']['carrier_sha256'],
-              'transport_regular_entries': contract['source_subject']['regular_carrier_entries'],
-              'manifest_rows': contract['source_subject']['source_rows'],
-              'verified_source_files': contract['source_subject']['source_rows'],
-              'identity_result': 'PASS__225_OF_225_EXACT_MATCH'
-          }
+            --extract-out "$DEST" | tee /tmp/document-r4-transport-verification.json
+          test -f "$DEST/evidence/SOURCE-MANIFEST.csv"
+          test -d "$DEST/source/01_CURRENT_DOCUMENT_PROCESSING_MODULE"
+          test "$(find "$DEST/source/01_CURRENT_DOCUMENT_PROCESSING_MODULE" -type f -name '*.java' | wc -l)" -eq 225
+          test -z "$(find "$DEST" -type l -print -quit)"
+          test -z "$(find "$DEST/source" -type f -name '*.class' -print -quit)"
+          GITHUB_TRIGGER_SHA="${GITHUB_SHA}" python3 - <<'PY'
+          import json, os, pathlib
           dest = pathlib.Path('recovered/document/cr001-r4/evidence')
-          (dest / 'GITHUB-NATIVE-IMPORT-VERIFICATION.json').write_text(json.dumps(verification, indent=2) + '\n')
+          receipt = {
+              'verification_id': 'DOCUMENTS-R4-GITHUB-NATIVE-IMPORT-VERIFICATION-005',
+              'trigger_commit': os.environ['GITHUB_TRIGGER_SHA'],
+              'carrier_sha256': '77a6e2288d475865622bad4b2c66647a599c26a3899c6617b33d7b2b334855bd',
+              'source_manifest_sha256': 'ed36fc9cfd38b04a8d0174efed06b03e8e25b0a45fc0adc4d47fe3457c2ee367',
+              'source_rows_verified': 225,
+              'identity_result': 'PASS__225_OF_225_EXACT_PATH_SIZE_SHA',
+              'historical_qualification_transfer': False,
+          }
+          (dest/'GITHUB-NATIVE-IMPORT-VERIFICATION.json').write_text(json.dumps(receipt, indent=2)+'\n')
           PY
+          rm -f "$ARCHIVE"
           git diff --check
 
-      - name: Commit immutable source-custody subject
+      - name: Commit immutable exact source subject
         id: subject
         shell: bash
         run: |
@@ -106,10 +130,12 @@ jobs:
           git config user.name 'system-master-admission-bot'
           git config user.email 'system-master-admission-bot@users.noreply.github.com'
           git add recovered/document/cr001-r4
-          git commit -m 'document: admit exact CR001-R4 source custody'
+          git commit -m 'documents: admit exact CR001-R4 source subject for fresh qualification'
           SUBJECT_SHA="$(git rev-parse HEAD)"
           echo "sha=$SUBJECT_SHA" >> "$GITHUB_OUTPUT"
+          echo "SOURCE_SUBJECT_SHA=$SUBJECT_SHA" >> "$GITHUB_ENV"
           echo "DOCUMENT_R4_SOURCE_SUBJECT_SHA=$SUBJECT_SHA" >> "$GITHUB_STEP_SUMMARY"
+          test -z "$(git status --porcelain --untracked-files=all)"
 
       - name: Strict Java 21 compile exact source subject
         shell: bash
@@ -121,11 +147,11 @@ jobs:
           mkdir -p "$OUT" "$QUAL"
           mapfile -d '' JAVA_FILES < <(find "$ROOT/src/main/java" "$ROOT/src/test/java" -type f -name '*.java' -print0 | sort -z)
           test "${#JAVA_FILES[@]}" -eq 225
-          printf 'java_source_files=%s\n' "${#JAVA_FILES[@]}" | tee "$QUAL/compile.log"
+          printf 'qualified_subject=%s\njava_source_files=%s\n' "$SOURCE_SUBJECT_SHA" "${#JAVA_FILES[@]}" | tee "$QUAL/compile.log"
           javac --release 21 -Xlint:all -Werror -d "$OUT" "${JAVA_FILES[@]}" 2>&1 | tee -a "$QUAL/compile.log"
           echo 'STRICT_JAVA21_COMPILE=PASS' | tee -a "$QUAL/compile.log"
 
-      - name: Run every portable Document suite
+      - name: Run every portable Document suite fresh
         shell: bash
         run: |
           set -euo pipefail
@@ -147,7 +173,7 @@ jobs:
           echo "PORTABLE_TEST_CLASSES_PASS=$COUNT" | tee -a "$QUAL/portable.log"
           echo "$COUNT" > "$QUAL/portable-count.txt"
 
-      - name: Run T13 and T14 external qualification
+      - name: Run T13 and T14 external qualification fresh
         shell: bash
         run: |
           set -euo pipefail
@@ -167,62 +193,228 @@ jobs:
           done
           echo 'R4_EXTERNAL_T13_T14=PASS' | tee -a "$QUAL/external.log"
 
-      - name: Seal exact-subject receipt
+      - name: Prove qualification did not mutate exact source subject
         shell: bash
-        env:
-          SUBJECT_SHA: ${{ steps.subject.outputs.sha }}
+        run: |
+          set -euo pipefail
+          ROOT='recovered/document/cr001-r4/source/01_CURRENT_DOCUMENT_PROCESSING_MODULE'
+          test "$(git rev-parse HEAD)" = "$SOURCE_SUBJECT_SHA"
+          test -z "$(git status --porcelain --untracked-files=all -- "$ROOT")"
+          git diff --exit-code "$SOURCE_SUBJECT_SHA" -- "$ROOT"
+          test "$(find "$ROOT" -type f -name '*.java' | wc -l)" -eq 225
+
+      - name: Seal fresh exact-subject qualification evidence
+        shell: bash
         run: |
           set -euo pipefail
           QUAL='/tmp/document-r4-qual'
-          DEST='qualification/document-r4/CR001-R4-GITHUB-NATIVE-QUALIFICATION-002'
+          DEST='qualification/document-r4/CR001-R4-GITHUB-NATIVE-QUALIFICATION-005'
           mkdir -p "$DEST"
           cp "$QUAL/compile.log" "$DEST/STRICT-JAVA21-COMPILE.log"
           cp "$QUAL/portable.log" "$DEST/PORTABLE-SUITES.log"
           cp "$QUAL/external.log" "$DEST/T13-T14-EXTERNAL.log"
           PORTABLE_COUNT="$(cat "$QUAL/portable-count.txt")"
-          python3 - "$SUBJECT_SHA" "$PORTABLE_COUNT" <<'PY'
-          import json, pathlib, sys
-          subject_sha, portable_count = sys.argv[1], int(sys.argv[2])
-          contract = json.loads(pathlib.Path('transport/document-r4/TRANSPORT-CONTRACT.json').read_text())
+          SUBJECT_SHA="$SOURCE_SUBJECT_SHA" PORTABLE_COUNT="$PORTABLE_COUNT" python3 - <<'PY'
+          import json, os, pathlib
           receipt = {
-              'qualification_id': 'CR001-R4-GITHUB-NATIVE-QUALIFICATION-002',
-              'qualified_git_subject_sha': subject_sha,
-              'transport_contract_id': contract['contract_id'],
-              'transport_tar_xz_sha256': contract['deterministic_carrier']['carrier_sha256'],
-              'source_identity': 'PASS__225_OF_225_EXACT_MATCH',
+              'qualification_id': 'CR001-R4-GITHUB-NATIVE-QUALIFICATION-005',
+              'date': '2026-09-11',
+              'qualified_git_subject_sha': os.environ['SUBJECT_SHA'],
+              'workflow_run_id': os.environ['GITHUB_RUN_ID'],
+              'workflow_trigger_sha': os.environ['GITHUB_SHA'],
+              'carrier_sha256': '77a6e2288d475865622bad4b2c66647a599c26a3899c6617b33d7b2b334855bd',
+              'source_manifest_sha256': 'ed36fc9cfd38b04a8d0174efed06b03e8e25b0a45fc0adc4d47fe3457c2ee367',
+              'source_identity': 'PASS__225_OF_225_EXACT_PATH_SIZE_SHA',
+              'source_java_files': 225,
               'strict_java21_compile': 'PASS',
-              'portable_test_classes_passed': portable_count,
+              'portable_test_classes_passed': int(os.environ['PORTABLE_COUNT']),
               'r4_t13_external': 'PASS',
               'r4_t14_external': 'PASS',
-              'a01_pass': False,
-              'native_office_pass': False,
-              'production_pass': False,
-              'standing': 'GITHUB_NATIVE_SOURCE_CUSTODY_PASS__FRESH_EXACT_GIT_SHA_PORTABLE_HOSTED_QUALIFICATION_PASS__A01_NATIVE_PRODUCTION_NOT_CLAIMED',
-              'authority_boundary': 'Historical qualification did not transfer. Fresh hosted execution is bound to this exact Git subject.'
+              'historical_qualification_transfer': False,
+              'standing': 'PASS__FRESH_EXACT_GIT_SUBJECT_HOSTED_QUALIFICATION',
+              'nonclaims': ['A01_PASS', 'NATIVE_OFFICE_PASS', 'PRODUCTION_PASS']
           }
-          pathlib.Path('qualification/document-r4/CR001-R4-GITHUB-NATIVE-QUALIFICATION-002/receipt.json').write_text(json.dumps(receipt, indent=2) + '\n')
+          pathlib.Path('qualification/document-r4/CR001-R4-GITHUB-NATIVE-QUALIFICATION-005/receipt.json').write_text(json.dumps(receipt, indent=2)+'\n')
+          pathlib.Path('qualification/document-r4/CR001-R4-GITHUB-NATIVE-QUALIFICATION-005/QUALIFIED-SUBJECT-SHA.txt').write_text(os.environ['SUBJECT_SHA']+'\n')
           PY
-          printf '%s\n' "$SUBJECT_SHA" > "$DEST/QUALIFIED-SUBJECT-SHA.txt"
-          git add "$DEST"
-          git rm -r transport/document-r4
-          git commit -m 'document: seal CR001-R4 exact-subject qualification'
 
-      - name: Push only if trigger remains current main
+      - name: Arm READY and admit GitHub-native source custody only after PASS
         shell: bash
         run: |
           set -euo pipefail
-          git fetch origin main
-          test "$(git rev-parse origin/main)" = "${{ github.sha }}"
-          git push origin HEAD:main
+          SUBJECT_SHA="$SOURCE_SUBJECT_SHA" python3 - <<'PY'
+          import json, os, pathlib
+          subject = os.environ['SUBJECT_SHA']
+          stage_path = pathlib.Path('transport/document-r4/STAGING.json')
+          s = json.loads(stage_path.read_text())
+          s['status'] = 'FULL_TRANSPORT_STAGED__ARMED'
+          s['ready_marker_present'] = True
+          s['historical_pass_transfer'] = False
+          s['github_native_source_custody'] = 'PASS'
+          s['admitted_source_subject_sha'] = subject
+          s['qualification_id'] = 'CR001-R4-GITHUB-NATIVE-QUALIFICATION-005'
+          s['qualification_run_id'] = int(os.environ['GITHUB_RUN_ID'])
+          s['rule'] = 'READY was armed only after fresh exact-subject 225/225 reconstruction, strict Java 21 compile, portable suites, and T13/T14 external qualification all passed. Frozen five-chunk payload identities remain unchanged.'
+          stage_path.write_text(json.dumps(s, indent=2)+'\n')
+
+          ready = {
+              'ready_id': 'DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-ADMISSION-005',
+              'armed': True,
+              'source_subject_sha': subject,
+              'qualification_id': 'CR001-R4-GITHUB-NATIVE-QUALIFICATION-005',
+              'qualification_run_id': int(os.environ['GITHUB_RUN_ID']),
+              'carrier_sha256': '77a6e2288d475865622bad4b2c66647a599c26a3899c6617b33d7b2b334855bd',
+              'source_manifest_sha256': 'ed36fc9cfd38b04a8d0174efed06b03e8e25b0a45fc0adc4d47fe3457c2ee367',
+              'source_rows': 225,
+              'historical_qualification_transfer': False,
+              'standing': 'READY__FRESH_QUALIFICATION_PASS'
+          }
+          pathlib.Path('transport/document-r4/READY').write_text(json.dumps(ready, indent=2)+'\n')
+
+          custody_path = pathlib.Path('governance/architecture/SYSTEM-MASTER-DOCUMENT-SOURCE-CUSTODY-AND-REUSABLE-ASSET-MANIFEST-002.json')
+          custody = json.loads(custody_path.read_text())
+          custody['version'] = '0.3.0-github-native-admitted'
+          custody['status'] = 'PASS__GITHUB_NATIVE_SOURCE_CUSTODY_ADMITTED'
+          cc = custody.setdefault('current_custody', {})
+          cc['github_native_source_tree_committed'] = True
+          cc['canonical_git_subject'] = {
+              'sha': subject,
+              'path': 'recovered/document/cr001-r4/source/01_CURRENT_DOCUMENT_PROCESSING_MODULE',
+              'source_manifest_sha256': 'ed36fc9cfd38b04a8d0174efed06b03e8e25b0a45fc0adc4d47fe3457c2ee367',
+              'source_rows': 225
+          }
+          cc['working_copy_location'] = 'recovered/document/cr001-r4/source/01_CURRENT_DOCUMENT_PROCESSING_MODULE'
+          cc['strict_jdk17_compile_complete'] = False
+          cc['strict_java21_compile_complete'] = True
+          custody['admission_005'] = {
+              'standing': 'PASS',
+              'qualified_git_subject_sha': subject,
+              'qualification_id': 'CR001-R4-GITHUB-NATIVE-QUALIFICATION-005',
+              'qualification_run_id': int(os.environ['GITHUB_RUN_ID']),
+              'source_identity': 'PASS__225_OF_225_EXACT_PATH_SIZE_SHA',
+              'historical_qualification_transfer': False,
+              'ready_armed': True
+          }
+          custody_path.write_text(json.dumps(custody, indent=2)+'\n')
+          PY
+
+      - name: Write 005 closure records
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p documents/reconciliation
+          SUBJECT_SHA="$SOURCE_SUBJECT_SHA" python3 - <<'PY'
+          import json, os, pathlib
+          subject = os.environ['SUBJECT_SHA']
+          receipt = {
+              'receipt_id': 'DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-ADMISSION-CLOSURE-RECEIPT-005',
+              'date': '2026-09-11',
+              'owner': 'SYSTEM_MASTER/DOCUMENTS',
+              'work_package': 'DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-ADMISSION-005',
+              'standing': 'CLOSED_PASS__READY_ARMED__GITHUB_NATIVE_SOURCE_CUSTODY_ADMITTED',
+              'frozen_004_base_commit': '0e645a49e36b7cd0dc05017571f91b999f0c70c0',
+              'workflow_trigger_sha': os.environ['GITHUB_SHA'],
+              'workflow_run_id': int(os.environ['GITHUB_RUN_ID']),
+              'source_subject_sha': subject,
+              'carrier_sha256': '77a6e2288d475865622bad4b2c66647a599c26a3899c6617b33d7b2b334855bd',
+              'source_manifest_sha256': 'ed36fc9cfd38b04a8d0174efed06b03e8e25b0a45fc0adc4d47fe3457c2ee367',
+              'source_rows_verified': '225/225',
+              'frozen_chunk_git_blobs': {
+                  'chunk-000.b64': '64034670dbbe18f6b629108bd1d9b1d8d81c4ac8',
+                  'chunk-001.b64': '562ec2e184b6068e0f123c9e097d344a42c67dce',
+                  'chunk-002.b64': '7b592c67e39a998301be7e5146533b842d724db2',
+                  'chunk-003.b64': 'd67f828a421b0af4c75d3c5b6a2c25b8ca2a1c20',
+                  'chunk-004.b64': '3518bf5ac92360b07f86c6107670da40f5830d1f'
+              },
+              'fresh_qualification': {
+                  'qualification_id': 'CR001-R4-GITHUB-NATIVE-QUALIFICATION-005',
+                  'strict_java21_compile': 'PASS',
+                  'portable_suites': 'PASS',
+                  't13_external': 'PASS',
+                  't14_external': 'PASS',
+                  'historical_pass_transfer': False
+              },
+              'ready_armed': True,
+              'github_native_source_custody': 'PASS',
+              'payload_mutated': False,
+              'nonclaims': ['A01_PASS', 'NATIVE_OFFICE_PASS', 'PRODUCTION_PASS', 'DOCUMENTS_COMPLETE']
+          }
+          p = pathlib.Path('documents/reconciliation/DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-ADMISSION-CLOSURE-RECEIPT-005.json')
+          p.write_text(json.dumps(receipt, indent=2)+'\n')
+          status = f'''# DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-ADMISSION-005
+
+Status: CLOSED / PASS — READY ARMED / GITHUB-NATIVE SOURCE CUSTODY ADMITTED
+Owner: SYSTEM_MASTER/DOCUMENTS
+Date: 2026-09-11
+
+## Exact admitted subject
+
+- Git subject: `{subject}`
+- Source identity: 225/225 exact path + size + SHA
+- Carrier SHA-256: `77a6e2288d475865622bad4b2c66647a599c26a3899c6617b33d7b2b334855bd`
+- Historical qualification transfer: false
+
+## Fresh qualification
+
+- Strict Java 21 compile: PASS
+- Portable Document suites: PASS
+- T13 external qualification: PASS
+- T14 external qualification: PASS
+- Qualification evidence: `qualification/document-r4/CR001-R4-GITHUB-NATIVE-QUALIFICATION-005/`
+
+## Admission
+
+`transport/document-r4/READY` was created only after all fresh qualification gates passed. `STAGING.json` is now `FULL_TRANSPORT_STAGED__ARMED`, and GitHub-native source custody is PASS.
+
+The five frozen 004 payload chunk Git identities were rechecked before push and were not changed by 005.
+
+## Nonclaims
+
+005 does not claim A-01 PASS, native Office PASS, production PASS, or Documents-module completion.
+'''
+          pathlib.Path('documents/reconciliation/DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-ADMISSION-005.md').write_text(status)
+          PY
+
+      - name: Seal final admission commit and prove frozen payload unchanged
+        id: final
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add transport/document-r4/STAGING.json transport/document-r4/READY \
+            governance/architecture/SYSTEM-MASTER-DOCUMENT-SOURCE-CUSTODY-AND-REUSABLE-ASSET-MANIFEST-002.json \
+            qualification/document-r4/CR001-R4-GITHUB-NATIVE-QUALIFICATION-005 \
+            documents/reconciliation/DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-ADMISSION-005.md \
+            documents/reconciliation/DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-ADMISSION-CLOSURE-RECEIPT-005.json
+          git commit -m 'documents: arm READY and seal R4 source admission 005'
+          FINAL_SHA="$(git rev-parse HEAD)"
+          git merge-base --is-ancestor "$SOURCE_SUBJECT_SHA" "$FINAL_SHA"
+          test "$(git rev-parse HEAD:transport/document-r4/chunk-000.b64)" = 64034670dbbe18f6b629108bd1d9b1d8d81c4ac8
+          test "$(git rev-parse HEAD:transport/document-r4/chunk-001.b64)" = 562ec2e184b6068e0f123c9e097d344a42c67dce
+          test "$(git rev-parse HEAD:transport/document-r4/chunk-002.b64)" = 7b592c67e39a998301be7e5146533b842d724db2
+          test "$(git rev-parse HEAD:transport/document-r4/chunk-003.b64)" = d67f828a421b0af4c75d3c5b6a2c25b8ca2a1c20
+          test "$(git rev-parse HEAD:transport/document-r4/chunk-004.b64)" = 3518bf5ac92360b07f86c6107670da40f5830d1f
+          test -f transport/document-r4/READY
+          test -z "$(git status --porcelain --untracked-files=all)"
+          echo "sha=$FINAL_SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Fast-forward exact 005 branch only if trigger remains current
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin documents/r4-source-admission-005
+          test "$(git rev-parse origin/documents/r4-source-admission-005)" = "$GITHUB_SHA"
+          git push origin HEAD:documents/r4-source-admission-005
 
       - name: Publish admission summary
         if: success()
         shell: bash
         run: |
-          echo 'DOCUMENT_R4_GITHUB_NATIVE_ADMISSION=PASS' >> "$GITHUB_STEP_SUMMARY"
-          echo 'source_identity=225/225 exact manifest match' >> "$GITHUB_STEP_SUMMARY"
+          echo 'DOCUMENT_R4_GITHUB_NATIVE_SOURCE_ADMISSION_005=PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo "source_subject=$SOURCE_SUBJECT_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo 'source_identity=225/225 exact path+size+SHA' >> "$GITHUB_STEP_SUMMARY"
           echo 'strict_java21_compile=PASS' >> "$GITHUB_STEP_SUMMARY"
           echo 'portable_suites=PASS' >> "$GITHUB_STEP_SUMMARY"
           echo 't13_external=PASS' >> "$GITHUB_STEP_SUMMARY"
           echo 't14_external=PASS' >> "$GITHUB_STEP_SUMMARY"
-          echo 'A-01/native Office/production authority not claimed.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'READY=ARMED_AFTER_FRESH_PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'historical_qualification_transfer=false' >> "$GITHUB_STEP_SUMMARY"
