@@ -5,61 +5,91 @@
   "last_known_control_head": "1e8f9e7a37d11ab643ef3cc941f21851149714c8",
   "program_job_lock": "governance/SYSTEM-PROGRAM-JOB-LOCK-001.json",
   "system_completion_status": "governance/SYSTEM-COMPLETION-STATUS-001.json",
-  "delegation_epoch": 26,
+  "delegation_epoch": 27,
   "active_delegations": [
     {
-      "delegation_id": "SECOND-SHIFT-BOOK-PROSE-PHASE2-ORCHESTRATOR-CLOSURE-CENSUS-001",
+      "delegation_id": "SECOND-SHIFT-BOOK-CONTEXT-COMPILER-001",
       "owner_path": "SYSTEM_MASTER/BOOK",
-      "objective_id": "BOOK-PROSE-PHASE-2-ORCHESTRATOR-CLOSURE-CENSUS-001",
+      "objective_id": "BOOK-CONTEXT-COMPILER-CONTEXT-PACKAGE-SCHEMA-001-IMPLEMENTATION",
       "obligation_id": "BOOK-PROSE-PHASE-2-ORCHESTRATOR-CLOSURE-CENSUS-001",
       "state": "READY",
-      "historical_lineage_name_contains_retired_system": true,
-      "retired_input_system": "PROSE",
-      "active_prose_execution_owner": null,
+      "priority": "BOOK_OWNER_LANE_SUCCESSOR_AFTER_PHASE2_CENSUS",
       "valid_for_control_ref": "book-system/control-v1",
       "valid_for_control_head": "1e8f9e7a37d11ab643ef3cc941f21851149714c8",
-      "created_at": "2026-09-10T20:52:00-04:00",
-      "last_revalidated_at": "2026-09-10T23:45:00-04:00",
-      "owner_evidence": [
-        "qualification/book-system/BOOK-SYSTEM-CONTROL-RECORD-011.json",
-        "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-041.json",
-        "qualification/book-system/BOOK-SYSTEM-JOB-LOCK-001.json",
-        "qualification/book-system/book-prose-integration/BOOK-PROSE-INTEGRATION-LEDGER-001.json",
-        "qualification/book-system/book-prose-integration/orchestrator/BOOK-WORKFLOW-ORCHESTRATOR-BOOK-ADMISSION-HANDOFF-001-CLOSURE.json",
-        "governance/retirements/PROSE-SYSTEM-RETIREMENT-001.json"
-      ],
-      "completion_delta": "As BOOK-owned integration lineage only, finish the Phase-2 orchestrator closure census from existing exact evidence, then continue the dependency-valid Book context/compiler/adapter/router/orchestrator work only while genuinely unfinished. Preserved completed Prose capability is an historical input, not an active child or execution owner.",
-      "stop_condition": "The current Phase-2 census is sealed with exact evidence and one valid BOOK successor if integration remains open; Book-owned integration continues until the completed capability is usable end-to-end or the obligation is proven already satisfied. No Prose successor, claim, repair lane, qualification lane, research task or telemetry is created.",
+      "created_at": "2026-09-11T00:34:00-04:00",
+      "last_revalidated_at": "2026-09-11T00:34:00-04:00",
+      "parent_checkpoint": "qualification/book-system/book-prose-integration/BOOK-PHASE-2-ORCHESTRATOR-CLOSURE-CENSUS-001.json",
+      "contract": "qualification/book-system/book-prose-integration/BOOK-CONTEXT-COMPILER-CONTEXT-PACKAGE-SCHEMA-001.json",
+      "completed_prose_input_rule": "Historical completed Prose artifacts may be referenced only through Book-owned adapters as immutable inputs. This delegation creates no Prose execution domain.",
+      "completion_delta": "Implement the Book-owned context package schema/compiler and portable deterministic tests for identity, constraints, stale state, idempotent canonicalization, private payload exclusion and evaluator isolation.",
+      "evidence_target": "Fresh exact-SHA portable qualification with at least 30 synthetic nonblind cases, followed by hosted evidence when available; zero canonical manuscript effect.",
+      "stop_condition": "Portable schema/compiler/tests pass on a fresh exact subject and a hosted qualification candidate is durable; author/private/blind/native/A-01/publication/production work remains excluded.",
       "allowed_work": [
-        "read and reconcile exact Phase 2A-2J closures/artifacts as BOOK evidence",
-        "consume preserved completed Prose capability artifacts only as historical integration inputs",
-        "continue Book Context Compiler/context-package work after Phase-2 census closure when genuinely open",
-        "build and qualify Book-side adapters/routing needed to consume preserved completed capability",
-        "continue Book Workflow Orchestrator integration without duplicating canonical authority",
-        "preserve Book admission as the only canonical manuscript mutation path",
-        "bind subsequent BOOK-owned integration successors after exact evidence checks"
+        "implement the Book Context Compiler package JSON schema",
+        "implement deterministic canonicalization and semantic digesting",
+        "implement stale-input, hard-conflict, author-wait and authority-boundary failures",
+        "implement synthetic nonblind property/metamorphic/failure-injection tests",
+        "prepare fresh exact-SHA hosted qualification",
+        "after completion select the next genuinely open BOOK-owned persistence/scheduler/adapter/integration successor"
       ],
       "forbidden_authority": [
-        "do not create, inherit, schedule or resurrect a Prose execution lane",
-        "do not create Prose repair, qualification, research, telemetry or successor work",
-        "do not move any Prose work into Documents",
-        "do not grant orchestrator, retired Prose artifacts, evaluator, Research or Documents canonical manuscript-write authority",
-        "do not infer A-01/native/private/human/fresh-blind/publication/production PASS",
-        "do not declare Book complete from a Phase-2 or adapter/orchestrator packet",
-        "do not cross into Learning, Documents, Core or Programming product ownership"
+        "do not create, inherit, schedule, repair, research, qualify, telemeter or bind successor work for PROSE",
+        "do not route completed-Prose integration to Documents",
+        "do not grant compiler, orchestrator, evaluator, Research or Documents canonical manuscript-write authority",
+        "do not access or fabricate author/private/blind evidence",
+        "do not claim A-01/native/publication/production PASS",
+        "do not declare BOOK complete"
       ],
-      "on_pass": "Seal the exact Phase-2 census, re-read live Book authority, and bind Phase 3A or the next dependency-valid BOOK integration successor only if genuinely open. If integration is already satisfied, close this lineage and select the next Book-owned product objective without a Prose successor.",
-      "on_failure": "Preserve the exact mismatch, keep Book canonical authority fences unchanged, and bind only the smallest BOOK-owned reconciliation/repair successor."
+      "on_pass": "Preserve fresh exact evidence, re-read Book authority, then select the next genuinely open Book-owned adapter, durable-persistence, scheduler or end-to-end integration seam. PROSE remains retired.",
+      "on_failure": "Preserve the exact failing Book-owned subject and repair only the demonstrated compiler/schema defect; never reopen or route a Prose repair."
     }
   ],
   "retired_delegations": [
-    {"delegation_id": "SECOND-SHIFT-BOOK-PROSE-INTEGRATION-PHASE1-INPUT-CENSUS-001", "state": "COMPLETED__SUPERSEDED_BY_PHASE2_ORCHESTRATOR_CLOSURE_CENSUS", "prior_bound_control_head": "a2820411337b74a00878a1ce9cb82a363a4fb18c", "live_control_head_at_reconciliation": "efb2ca4f234d223bf2a69b9fa1205b226d1e0b46", "history_preserved": true},
-    {"delegation_id": "SECOND-SHIFT-BOOK-POST-RF012-IMPLEMENTATION-GAP-CENSUS-001", "state": "COMPLETED__SUPERSEDED_BY_BOOK_PROSE_INTEGRATION_PHASE1", "prior_bound_control_head": "6304df0b60dbe49ab7be0218b0d588c1b0ba5279", "history_preserved": true},
-    {"delegation_id": "SECOND-SHIFT-BOOK-RF012-OWNER-PROMOTION-REBIND-004", "state": "COMPLETED__SUPERSEDED_BY_POST_RF012_GAP_CENSUS", "completion_subject_sha": "67a23c0b09505dc3dd8fd748523fec3868f649b0", "hosted_run_id": 34468928275, "history_preserved": true},
-    {"delegation_id": "SECOND-SHIFT-BOOK-RF012-AUTHOR-DECISION-APPLICABILITY-GUARD-004", "state": "SUPERSEDED", "candidate_sha": "67a23c0b09505dc3dd8fd748523fec3868f649b0", "hosted_run_id": 34468928275, "history_preserved": true}
+    {
+      "delegation_id": "SECOND-SHIFT-BOOK-PROSE-PHASE2-ORCHESTRATOR-CLOSURE-CENSUS-001",
+      "state": "COMPLETED__SUPERSEDED_BY_BOOK_CONTEXT_COMPILER_001",
+      "prior_bound_control_head": "1e8f9e7a37d11ab643ef3cc941f21851149714c8",
+      "completion_evidence": "qualification/book-system/book-prose-integration/BOOK-PHASE-2-ORCHESTRATOR-CLOSURE-CENSUS-001.json",
+      "completion_commit": "a2095cd5ee315a336abfa0f41e4a7c25033c93e0",
+      "phase2_packets_closed": 10,
+      "phase2_cases_passed": 275,
+      "phase2_cases_planned": 275,
+      "history_preserved": true,
+      "prose_execution_created": false
+    },
+    {
+      "delegation_id": "SECOND-SHIFT-BOOK-PROSE-INTEGRATION-PHASE1-INPUT-CENSUS-001",
+      "state": "COMPLETED__SUPERSEDED_BY_PHASE2_ORCHESTRATOR_CLOSURE_CENSUS",
+      "prior_bound_control_head": "a2820411337b74a00878a1ce9cb82a363a4fb18c",
+      "live_control_head_at_reconciliation": "efb2ca4f234d223bf2a69b9fa1205b226d1e0b46",
+      "history_preserved": true
+    },
+    {
+      "delegation_id": "SECOND-SHIFT-BOOK-POST-RF012-IMPLEMENTATION-GAP-CENSUS-001",
+      "state": "COMPLETED__SUPERSEDED_BY_BOOK_PROSE_INTEGRATION_PHASE1",
+      "prior_bound_control_head": "6304df0b60dbe49ab7be0218b0d588c1b0ba5279",
+      "history_preserved": true
+    },
+    {
+      "delegation_id": "SECOND-SHIFT-BOOK-RF012-OWNER-PROMOTION-REBIND-004",
+      "state": "COMPLETED__SUPERSEDED_BY_POST_RF012_GAP_CENSUS",
+      "completion_subject_sha": "67a23c0b09505dc3dd8fd748523fec3868f649b0",
+      "hosted_run_id": 34468928275,
+      "history_preserved": true
+    },
+    {
+      "delegation_id": "SECOND-SHIFT-BOOK-RF012-AUTHOR-DECISION-APPLICABILITY-GUARD-004",
+      "state": "SUPERSEDED",
+      "candidate_sha": "67a23c0b09505dc3dd8fd748523fec3868f649b0",
+      "hosted_run_id": 34468928275,
+      "history_preserved": true
+    }
   ],
-  "prior_full_history": {"blob_sha": "ad8586963395e7e0af9ab3b3421b06f0d729f45c", "standing": "IMMUTABLE_GIT_HISTORY_PRESERVED"},
+  "prior_full_history": {
+    "blob_sha": "3b1612a86b553cbc2de76b091fe2a201dacbea4a",
+    "standing": "IMMUTABLE_GIT_HISTORY_PRESERVED"
+  },
   "owner_revalidation_required": false,
-  "reason": "Book Control 011 and State 041 are current at exact head 1e8f9e7a. PROSE is complete and terminally retired; any genuinely open completed-capability integration is ordinary BOOK-owned work with no inherited Prose execution domain.",
+  "reason": "Book Control 011 and State 041 remain current at exact head 1e8f9e7a. The Book-owned Phase-2 orchestrator census is sealed; PROSE remains complete and terminally retired. The next active Book delegation is the Context Compiler implementation from a Book-owned schema with no Prose or Documents execution route.",
   "empty_is_valid": false
 }
