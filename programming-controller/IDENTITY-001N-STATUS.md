@@ -1,26 +1,32 @@
 # PROGRAMMING-FOUNDATION-001N / IDENTITY-SEMANTICS-001
 
-This is a stacked Programming-controller implementation branch based on the exact qualified `WP-001M` candidate head `97ab2bac56c55a195e20897c15902e15ae6d648e`.
+This is a stacked Programming-controller implementation branch on the exact qualified `WP-001M / SYSTEM-MODEL-001` candidate head `a231f6f7ea9fe47d7d58f4328cfd67a37c8933ec`.
 
-It is external development-controller code, not System Master iPhone runtime code and not a replacement for the shared A-01 control plane.
+It is external development-controller code. It is not System Master iPhone runtime code and it does not replace or take ownership of the shared A-01 control plane.
 
-## Current slice
+## Candidate implementation standing
 
-`IMPL-001N-01 — canonical ID types, scheme profiles and allocator`
+All seven R5C implementation packages are present as portable/controller-contract candidates:
 
-Candidate implementation includes:
+- `IMPL-001N-01` — canonical opaque ID types, RFC 9562 UUIDv7/v4 scheme profiles, allocator, CSPRNG boundary and bounded collision handling.
+- `IMPL-001N-02` — namespaces, normalization profiles, aliases, locators and Unicode-security findings.
+- `IMPL-001N-03` — exact typed resolution, external-identity bindings, reference validation and disposable revision-keyed cache semantics.
+- `IMPL-001N-04` — evidence-bound correlation/adjudication, lifecycle, retirement/tombstones and explicit replacement/merge/split/derivation lineage.
+- `IMPL-001N-05` — logical 001P durability transaction port, 001R consistency/idempotency behavior, 001Q authorization boundary, privacy classification and 001S evidence outbox semantics.
+- `IMPL-001N-06` — brownfield migration planning, legacy crosswalk closure, stale-source rebase, cutover delegation, versioned import/export and rollback-safe preservation.
+- `IMPL-001N-07` — 42/42 qualification-destination profile, explicit resource budgets, exact-store/workload performance-evidence registry, RFC 9562 portability probes and target-only evidence register.
 
-- immutable canonical UUID identity values independent of mutable names/paths/locators;
-- versioned `IdentitySchemeProfile` registry;
-- RFC 9562 UUIDv7 internal default with monotonic same-millisecond handling;
-- RFC 9562 UUIDv4 opaque profile for external/security-sensitive identifiers;
-- CSPRNG abstraction with fail-closed generator errors;
-- bounded collision-probe contract with no overwrite semantics;
-- canonical 128-bit bytes/text round-trip helpers;
-- explicit `UNPROBED_NOT_COMMITTED` / `PROBED_NOT_COMMITTED` standing so allocation never implies persistence or authorization.
+## Boundary and evidence rules
 
-Full transactional uniqueness, authorization, persistence, idempotency and evidence remain later `001N` slices bound to 001P/001Q/001R/001S.
+Portable qualification can prove the platform-independent controller contract. It cannot prove target-native providers or physical-store performance.
 
-## Current evidence rule
+- Physical database/index and transactional storage remain owned by `001P` and require exact provider/store evidence.
+- Authorization/trust remains owned by `001Q`; possession of an `EntityId` is never authorization.
+- Generic consistency/idempotency remains owned by `001R`.
+- Evidence projection/transport remains owned by `001S` and never becomes a second identity truth store.
+- Performance claims are valid only for an exact store adapter + version + workload profile + environment fingerprint actually measured.
+- `BS-001N-042` remains `TARGET_NATIVE_PENDING` until `AUD-036` evidence exists for the target UUID library, physical database/index, encryption provider and OS-specific normalization behavior.
 
-No implementation PASS is claimed until the stacked PR exact head completes hosted portable qualification and A-01 control-plane enforcement.
+## Closure rule
+
+Do not claim `PORTABLE_HOSTED_QUALIFIED` until the exact current stacked head passes the complete hosted Node suite with the 001N qualification tests included. Do not claim production/target qualification while any required `AUD-036` target evidence is missing.
