@@ -1,0 +1,70 @@
+{
+  "job_lock_id": "SYSTEM-PROGRAM-JOB-LOCK-001",
+  "effective_date": "2026-09-10",
+  "authority": "USER_DIRECTED_CURRENT_PROGRAM_JOB_LOCK",
+  "topology": "governance/SYSTEM-TOPOLOGY-004.json",
+  "purpose": "Prevent lane drift, duplicate ownership, and completion confusion while the current systems are being finished and integrated into System Master.",
+  "global_rules": [
+    "Each active peer system owns and executes only its assigned product job plus explicit admitted interfaces to System Master.",
+    "The Book-Prose parent/child relationship is the only direct specialist cross-lane relationship authorized by this lock. Prose executes under BOOK lane control and has no independent peer/Second Shift lane.",
+    "Peer systems may integrate upward into SYSTEM_MASTER through explicit interfaces, but may not take another peer's implementation, semantic authority, current objective, completion state, repair lane, or canonical writes.",
+    "SYSTEM_MASTER/CORE may provide shared infrastructure and integration surfaces but may not silently implement or own Learning, Book, Prose, or Documents product semantics.",
+    "Completed Prose evidence and semantics are preserved. Adapters/orchestrator integration around Prose does not make Book complete and does not reopen Prose feature development absent demonstrated defect or explicit user direction.",
+    "A packet/phase/test closure never means the owning system is complete unless SYSTEM-COMPLETION-STATUS-001 says so.",
+    "Second Shift, repair, morning startup, obligation selection, and owner chats must reject work that violates these job boundaries."
+  ],
+  "programs": {
+    "SYSTEM_MASTER": {
+      "owner_path": "SYSTEM_MASTER",
+      "job": "Integrate CORE, LEARNING, BOOK, and DOCUMENTS into one coherent product; maintain product architecture, sequencing, interface boundaries, and cross-system acceptance without taking their product ownership.",
+      "must_integrate": ["SYSTEM_MASTER/CORE", "SYSTEM_MASTER/LEARNING", "SYSTEM_MASTER/BOOK", "SYSTEM_MASTER/DOCUMENTS"],
+      "forbidden": ["declare child systems complete without product-level authority", "take peer-system semantic ownership", "create duplicate peer systems from chats/branches/workstreams"]
+    },
+    "CORE": {
+      "owner_path": "SYSTEM_MASTER/CORE",
+      "job": "Finish shared Foundation and Spine plus shared runtime/data/platform/continuity/assurance/A-01 infrastructure and Master-facing integration primitives.",
+      "integrates_upward_to": "SYSTEM_MASTER",
+      "forbidden": ["own Learning curriculum/learner logic", "own Book manuscript/canon/author state", "own Prose literary intelligence", "own Documents artifact semantics"]
+    },
+    "LEARNING": {
+      "owner_path": "SYSTEM_MASTER/LEARNING",
+      "job": "Finish Learning product behavior, curriculum/compiler, mastery/assessment/adaptation/evidence, then integrate Learning upward into System Master through explicit interfaces.",
+      "integrates_upward_to": "SYSTEM_MASTER",
+      "forbidden": ["cross into Book or Prose work", "cross into Documents implementation", "redefine Core shared contracts instead of consuming them"]
+    },
+    "BOOK": {
+      "owner_path": "SYSTEM_MASTER/BOOK",
+      "job": "Finish the Book system. Integrate the completed Prose child into Book through adapters and the Book Workflow Orchestrator; preserve Book canonical manuscript/Story Bible/author/lifecycle/admission/publication ownership; then integrate Book upward into System Master.",
+      "integrates_upward_to": "SYSTEM_MASTER",
+      "authorized_child": "SYSTEM_MASTER/BOOK/PROSE",
+      "authorized_shared_consumption": ["SYSTEM_MASTER/CORE shared services", "SYSTEM_MASTER/DOCUMENTS document/artifact services"],
+      "forbidden": ["grant Prose canonical manuscript writes", "grant Documents Book semantic ownership", "treat orchestrator evidence as admission", "declare Book complete before the full Book product completion boundary"]
+    },
+    "PROSE": {
+      "owner_path": "SYSTEM_MASTER/BOOK/PROSE",
+      "job": "Operate as the completed literary specialist beneath Book. Provide Prose analysis, craft intelligence, diagnosis, revision candidates, evaluation support, voice/preservation and homogenization-defense capabilities through Book-controlled adapters/orchestration.",
+      "completion": "COMPLETE",
+      "execution_lane": "BOOK",
+      "forbidden": ["independent peer lane", "independent Second Shift lane", "canonical manuscript write", "Book admission", "Story Bible/canon ownership", "author/publication authority", "feature-scope expansion without demonstrated defect or explicit user direction"]
+    },
+    "DOCUMENTS": {
+      "owner_path": "SYSTEM_MASTER/DOCUMENTS",
+      "job": "Finish Documents product behavior for DOCX/PDF/PPTX/general document artifact structure, conversion, preservation, rendering/export and generic document services, then integrate Documents upward into System Master.",
+      "integrates_upward_to": "SYSTEM_MASTER",
+      "forbidden": ["absorb Prose", "own Book-specific literary intelligence", "mutate Book canonical state", "own Learning product behavior", "take Core shared runtime authority"]
+    },
+    "PROGRAMMING_KNOWLEDGE_RECOVERY": {
+      "owner_path": "SYSTEM_MASTER/CORE",
+      "classification": "SUPPORT_PROGRAM_NOT_PEER_SYSTEM",
+      "job": "Recover exact Programming assets/custody/provenance and prepare reusable evidence without changing current product topology or taking priority over system finishing/integration work unless explicitly selected for a bounded dependency.",
+      "forbidden": ["promote Programming to peer system", "create Programming owner lane", "redefine system jobs", "block independent Book/Learning/Documents work"]
+    }
+  },
+  "lane_crossing_policy": {
+    "direct_specialist_exception": "BOOK <-> PROSE only, because Prose is Book's child specialist.",
+    "peer_integration_rule": "CORE, LEARNING, BOOK, and DOCUMENTS remain in their own lanes. Their only cross-system product integration is through explicit System Master/shared-service interfaces; ownership never crosses with the call.",
+    "documents_prose_rule": "DOCUMENTS must not absorb, schedule, repair, or claim Book-specific PROSE work.",
+    "learning_rule": "LEARNING remains fully isolated from BOOK/PROSE/DOCUMENTS product work except shared System Master interfaces.",
+    "core_rule": "CORE supplies shared primitives and product-root integration support; it does not become the implementation owner of peer systems."
+  }
+}
