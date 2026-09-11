@@ -1,32 +1,36 @@
 {
   "registry_id": "EXPECTATION-REGISTRY-004",
-  "effective_date": "2026-09-10",
+  "effective_date": "2026-09-11",
   "product_root": "SYSTEM_MASTER",
   "topology": "governance/SYSTEM-TOPOLOGY-004.json",
   "supersedes": "governance/EXPECTATION-REGISTRY-003.json",
   "program_job_lock": "governance/SYSTEM-PROGRAM-JOB-LOCK-001.json",
+  "programming_work_program_lock": "governance/programs/PROGRAMMING-WORK-PROGRAM-LOCK-001.json",
   "system_completion_status": "governance/SYSTEM-COMPLETION-STATUS-001.json",
-  "purpose": "Bind current expectations to the user-directed system jobs, completion truth, and lane isolation required for tomorrow's work.",
+  "purpose": "Bind current expectations to the user-directed system/work-program jobs, completion truth, and lane isolation required for tomorrow's work.",
   "completion_expectations": [
     {"id":"EXP-COMP-001","requirement":"PROSE is the only system currently complete.","standing":"MANDATORY"},
     {"id":"EXP-COMP-002","requirement":"SYSTEM_MASTER, CORE, LEARNING, BOOK and DOCUMENTS remain incomplete regardless of completed packets, tests, phases or subsystem evidence.","standing":"MANDATORY"},
-    {"id":"EXP-COMP-003","requirement":"A system becomes complete only through explicit product-level completion authority; no chat, branch, workflow or phase may infer it.","standing":"MANDATORY"}
+    {"id":"EXP-COMP-003","requirement":"A system becomes complete only through explicit product-level completion authority; no chat, branch, workflow or phase may infer it.","standing":"MANDATORY"},
+    {"id":"EXP-COMP-004","requirement":"PROGRAMMING is an incomplete active work program and must not be described as a completed or admitted peer system until explicit future authority establishes that boundary.","standing":"MANDATORY"}
   ],
   "job_expectations": [
-    {"id":"EXP-JOB-001","owner":"SYSTEM_MASTER","requirement":"Integrate CORE, LEARNING, BOOK and DOCUMENTS into the System Master product without taking their product semantics.","standing":"MANDATORY"},
-    {"id":"EXP-JOB-002","owner":"CORE","requirement":"Finish shared Foundation/Spine and integration primitives only; do not take Learning, Book, Prose or Documents product ownership.","standing":"MANDATORY"},
-    {"id":"EXP-JOB-003","owner":"LEARNING","requirement":"Finish Learning and integrate it upward into System Master; do not cross into Book, Prose or Documents product work.","standing":"MANDATORY"},
+    {"id":"EXP-JOB-001","owner":"SYSTEM_MASTER","requirement":"Integrate CORE, LEARNING, BOOK and DOCUMENTS into the System Master product without taking their product semantics; coordinate named work-program admission/integration boundaries without absorbing their semantics.","standing":"MANDATORY"},
+    {"id":"EXP-JOB-002","owner":"CORE","requirement":"Finish shared Foundation/Spine and integration primitives only; do not take Learning, Book, Prose, Documents or Programming-specific product ownership.","standing":"MANDATORY"},
+    {"id":"EXP-JOB-003","owner":"LEARNING","requirement":"Finish Learning and integrate it upward into System Master; do not cross into Book, Prose, Documents or Programming product work.","standing":"MANDATORY"},
     {"id":"EXP-JOB-004","owner":"BOOK","requirement":"Finish Book, including bringing the completed Prose child in through adapters and the Book Workflow Orchestrator, then integrate Book upward into System Master while retaining canonical Book authority.","standing":"MANDATORY"},
     {"id":"EXP-JOB-005","owner":"PROSE","requirement":"Remain the completed literary specialist beneath Book; participate only in Book-controlled integration/adapter/orchestration and demonstrated defect repair, never as an independent peer lane or canonical writer.","standing":"MANDATORY"},
-    {"id":"EXP-JOB-006","owner":"DOCUMENTS","requirement":"Finish Documents and integrate it upward into System Master for document/artifact mechanics; do not absorb Prose or take Book/Learning/Core semantics.","standing":"MANDATORY"},
-    {"id":"EXP-JOB-007","owner":"PROGRAMMING_KNOWLEDGE_RECOVERY","requirement":"Remain a Core-administered support program for asset/custody/provenance recovery, not a peer system and not a product-priority override.","standing":"MANDATORY"}
+    {"id":"EXP-JOB-006","owner":"DOCUMENTS","requirement":"Finish Documents and integrate it upward into System Master for document/artifact mechanics; do not absorb Prose or take Book/Learning/Core/Programming semantics.","standing":"MANDATORY"},
+    {"id":"EXP-JOB-007","owner":"PROGRAMMING_KNOWLEDGE_RECOVERY","requirement":"Remain a Core-administered supporting source/custody/provenance subprogram for Programming, not the Programming product definition, not a peer system and not a product-priority override.","standing":"MANDATORY"},
+    {"id":"EXP-JOB-008","owner":"PROGRAMMING","requirement":"Continue the existing Programming engineering work program from preserved foundation/capability/build/test/assurance/Genesis evidence; recover only missing source/custody evidence, continue from the first genuinely unclosed package, keep Programming semantics isolated from other lanes, and prepare explicit System Master admission/integration without silent peer promotion.","standing":"MANDATORY"}
   ],
   "lane_expectations": [
     {"id":"EXP-LANE-001","requirement":"The only direct specialist cross-lane relationship is BOOK <-> PROSE because Prose is Book's child specialist.","standing":"MANDATORY"},
     {"id":"EXP-LANE-002","requirement":"CORE, LEARNING, BOOK and DOCUMENTS remain peer owner lanes. Their integration is upward through System Master/shared interfaces and never transfers ownership.","standing":"MANDATORY"},
-    {"id":"EXP-LANE-003","requirement":"Documents may provide document/artifact services to Book but may not absorb or own Prose literary intelligence or mutate Book canonical state.","standing":"MANDATORY"},
-    {"id":"EXP-LANE-004","requirement":"Second Shift, repair routing, obligations, startup and current-state reconciliation must fail closed on job/lane violations.","standing":"MANDATORY"}
+    {"id":"EXP-LANE-003","requirement":"Documents may provide document/artifact services to Book but may not absorb or own Prose literary intelligence, mutate Book canonical state, or take Programming engineering work.","standing":"MANDATORY"},
+    {"id":"EXP-LANE-004","requirement":"Second Shift, repair routing, obligations, startup and current-state reconciliation must fail closed on job/lane violations.","standing":"MANDATORY"},
+    {"id":"EXP-LANE-005","requirement":"Programming remains a named non-peer work program until explicit topology admission. It has no peer Second Shift lane, but its engineering semantics and evidence continuity must not be absorbed into Core or any other system.","standing":"MANDATORY"}
   ],
-  "carried_forward_expectations": "All non-conflicting expectations from EXPECTATION-REGISTRY-003 remain historical/current guidance; this registry controls when there is a conflict about completion, program job, or lane ownership.",
-  "change_rule": "Changing a system job, completion standing, parent/child relation or cross-lane exception requires explicit user direction and a successor current registry/lock."
+  "carried_forward_expectations": "All non-conflicting expectations from EXPECTATION-REGISTRY-003 remain historical/current guidance; this registry controls when there is a conflict about completion, program job, work-program scope, or lane ownership.",
+  "change_rule": "Changing a system/work-program job, completion standing, parent/child relation, peer admission or cross-lane exception requires explicit user direction and a successor current registry/lock."
 }
