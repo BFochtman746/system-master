@@ -46,13 +46,33 @@ def sha256_text(value: str) -> str:
     return hashlib.sha256(value.encode('utf-8')).hexdigest()
 
 
-def command_fingerprint(command_type: str, payload: Any) -> tuple[str, str]:
-    canonical = canonical_json(payload)
-    return canonical, sha256_text(command_type + '\n' + canonical)
+def command_fingerprint(
+    *,
+    caller_id: str,
+    command_type: str,
+    payload: Any,
+    base_subject_id: str,
+    controller_subject_id: str,
+    policy_subject_id: str,
+) -> tuple[str, str]:
+    canonical_payload = canonical_json(payload)
+    semantic_envelope = canonical_json(
+        {
+            'caller_id': caller_id,
+            'command_type': command_type,
+            'payload': payload,
+            'base_subject_id': base_subject_id,
+            'controller_subject_id': controller_subject_id,
+            'policy_subject_id': policy_subject_id,
+        }
+    )
+    return canonical_payload, sha256_text(semantic_envelope)
 
 
 class ControllerStore:
     OUTBOX_DESTINATION = 'github-control-state'
+    ACTIVE_ATTEMPT_STATES = frozenset({'CREATED', 'CLAIMABLE', 'CLAIMED', 'RUNNING', 'VERIFYING'})
+    TERMINAL_ATTEMPT_STATES = frozenset({'SUCCEEDED', 'FAILED', 'ABANDONED', 'CANCELLED'})
 
     def __init__(self, db_path: str | Path, migrations_dir: str | Path):
         self.db_path = Path(db_path)
@@ -65,10 +85,14 @@ class ControllerStore:
             check_same_thread=False,
         )
         self.conn.row_factory = sqlite3.Row
-        self._configure()
-        self._bootstrap_migrations()
-        self.apply_migrations()
-        self._ensure_controller_meta()
+        try:
+            self._configure()
+            self._bootstrap_migrations()
+            self.apply_migrations()
+            self._ensure_controller_meta()
+        except BaseException:
+            self.conn.close()
+            raise
 
     def close(self) -> None:
         self.conn.close()
@@ -151,6 +175,51 @@ class ControllerStore:
         seq = self.conn.execute('SELECT COALESCE(MAX(event_seq),0) FROM controller_events').fetchone()[0]
         return int(epoch), int(seq)
 
+    def begin_recovery_epoch(self, *, remote_epoch: int, remote_event_seq: int, actor_id: str) -> tuple[int, int]:
+        if remote_epoch < 1 or remote_event_seq < 0:
+            raise ValueError('remote authority position is invalid')
+        ts = now_ms()
+        with self.immediate():
+            active = self.conn.execute(
+                "SELECT lease_id,attempt_id,resource_key,fencing_token,authority_epoch FROM leases WHERE state='ACTIVE'"
+            ).fetchall()
+            for lease in active:
+                self.conn.execute(
+                    "UPDATE execution_attempts SET state='ABANDONED',completed_at_ms=? WHERE attempt_id=? AND state IN ('CLAIMED','RUNNING','VERIFYING')",
+                    (ts, lease['attempt_id']),
+                )
+                self.conn.execute(
+                    "UPDATE leases SET state='REVOKED',released_at_ms=? WHERE lease_id=?",
+                    (ts, lease['lease_id']),
+                )
+
+            current_epoch = int(
+                self.conn.execute('SELECT authority_epoch FROM controller_meta WHERE singleton=1').fetchone()[0]
+            )
+            target_epoch = max(current_epoch, remote_epoch) + 1
+            while current_epoch < target_epoch:
+                current_epoch += 1
+                self.conn.execute(
+                    'UPDATE controller_meta SET authority_epoch=? WHERE singleton=1',
+                    (current_epoch,),
+                )
+
+            seq = self._append_event(
+                aggregate_type='CONTROLLER',
+                aggregate_id='authority',
+                event_type='AUTHORITY_EPOCH_ADVANCED',
+                payload={
+                    'remote_epoch': remote_epoch,
+                    'remote_event_seq': remote_event_seq,
+                    'revoked_lease_count': len(active),
+                    'new_epoch': current_epoch,
+                },
+                actor_id=actor_id,
+                publish=True,
+                occurred_at_ms=ts,
+            )
+            return current_epoch, seq
+
     @staticmethod
     def _split_sql(sql: str) -> list[str]:
         statements: list[str] = []
@@ -202,9 +271,25 @@ class ControllerStore:
             )
             return subject_id
 
-    def submit_command(self, *, command_id: str, caller_id: str, command_type: str, payload: Any,
-                       base_subject_id: str, controller_subject_id: str, policy_subject_id: str) -> str:
-        canonical, fingerprint = command_fingerprint(command_type, payload)
+    def submit_command(
+        self,
+        *,
+        command_id: str,
+        caller_id: str,
+        command_type: str,
+        payload: Any,
+        base_subject_id: str,
+        controller_subject_id: str,
+        policy_subject_id: str,
+    ) -> str:
+        canonical, fingerprint = command_fingerprint(
+            caller_id=caller_id,
+            command_type=command_type,
+            payload=payload,
+            base_subject_id=base_subject_id,
+            controller_subject_id=controller_subject_id,
+            policy_subject_id=policy_subject_id,
+        )
         ts = now_ms()
         with self.immediate():
             existing = self.conn.execute(
@@ -212,13 +297,14 @@ class ControllerStore:
             ).fetchone()
             if existing:
                 if existing['fingerprint_sha256'] != fingerprint:
-                    raise IdempotencyConflict('same command_id used with different semantic payload')
+                    raise IdempotencyConflict('same command_id used with different semantic command envelope')
                 tx = self.conn.execute(
                     'SELECT transaction_id FROM transactions WHERE command_id=?', (command_id,)
                 ).fetchone()
                 if tx is None:
                     raise ControllerError('idempotent command exists without transaction')
                 return tx['transaction_id']
+
             transaction_id = new_id()
             self.conn.execute(
                 '''INSERT INTO commands(command_id,caller_id,command_type,payload_canonical,fingerprint_sha256,received_at_ms)
@@ -233,14 +319,25 @@ class ControllerStore:
                 (transaction_id, command_id, 'RECEIVED', base_subject_id, controller_subject_id, policy_subject_id, ts, ts),
             )
             self._append_event(
-                aggregate_type='TRANSACTION', aggregate_id=transaction_id, event_type='COMMAND_RECEIVED',
-                payload={'command_id': command_id, 'command_type': command_type}, actor_id=caller_id,
-                correlation_id=command_id, publish=True, occurred_at_ms=ts,
+                aggregate_type='TRANSACTION',
+                aggregate_id=transaction_id,
+                event_type='COMMAND_RECEIVED',
+                payload={'command_id': command_id, 'command_type': command_type},
+                actor_id=caller_id,
+                correlation_id=command_id,
+                publish=True,
+                occurred_at_ms=ts,
             )
             return transaction_id
 
-    def transition_transaction(self, transaction_id: str, expected_state: str, new_state: str,
-                               actor_id: str, detail: Any | None = None) -> int:
+    def transition_transaction(
+        self,
+        transaction_id: str,
+        expected_state: str,
+        new_state: str,
+        actor_id: str,
+        detail: Any | None = None,
+    ) -> int:
         ts = now_ms()
         with self.immediate():
             row = self.conn.execute(
@@ -252,16 +349,21 @@ class ControllerStore:
             if row['state'] != expected_state:
                 raise ControllerError(f'expected {expected_state}, found {row["state"]}')
             version = row['state_version'] + 1
-            terminal = new_state in {'SUCCEEDED','FAILED','REJECTED','CANCELLED'}
+            terminal = new_state in {'SUCCEEDED', 'FAILED', 'REJECTED', 'CANCELLED'}
             self.conn.execute(
                 '''UPDATE transactions SET state=?, state_version=?, updated_at_ms=?,
                    terminal_at_ms=CASE WHEN ? THEN ? ELSE terminal_at_ms END WHERE transaction_id=?''',
                 (new_state, version, ts, 1 if terminal else 0, ts, transaction_id),
             )
             return self._append_event(
-                aggregate_type='TRANSACTION', aggregate_id=transaction_id,
-                event_type='TRANSACTION_STATE_CHANGED', payload={'from': expected_state, 'to': new_state, 'detail': detail},
-                actor_id=actor_id, correlation_id=row['command_id'], publish=True, occurred_at_ms=ts,
+                aggregate_type='TRANSACTION',
+                aggregate_id=transaction_id,
+                event_type='TRANSACTION_STATE_CHANGED',
+                payload={'from': expected_state, 'to': new_state, 'detail': detail},
+                actor_id=actor_id,
+                correlation_id=row['command_id'],
+                publish=True,
+                occurred_at_ms=ts,
             )
 
     def bind_candidate(self, transaction_id: str, subject_id: str, actor_id: str) -> None:
@@ -281,9 +383,13 @@ class ControllerStore:
                 (subject_id, now_ms(), transaction_id),
             )
             self._append_event(
-                aggregate_type='TRANSACTION', aggregate_id=transaction_id, event_type='CANDIDATE_BOUND',
-                payload={'subject_id': subject_id}, actor_id=actor_id,
-                correlation_id=row['command_id'], publish=True,
+                aggregate_type='TRANSACTION',
+                aggregate_id=transaction_id,
+                event_type='CANDIDATE_BOUND',
+                payload={'subject_id': subject_id},
+                actor_id=actor_id,
+                correlation_id=row['command_id'],
+                publish=True,
             )
 
     def create_attempt(self, transaction_id: str, actor_id: str) -> str:
@@ -306,14 +412,27 @@ class ControllerStore:
             )
             self.conn.execute('UPDATE execution_attempts SET state=? WHERE attempt_id=?', ('CLAIMABLE', attempt_id))
             self._append_event(
-                aggregate_type='ATTEMPT', aggregate_id=attempt_id, event_type='ATTEMPT_CLAIMABLE',
-                payload={'transaction_id': transaction_id, 'attempt_no': n}, actor_id=actor_id,
-                correlation_id=tx['command_id'], publish=True, occurred_at_ms=ts,
+                aggregate_type='ATTEMPT',
+                aggregate_id=attempt_id,
+                event_type='ATTEMPT_CLAIMABLE',
+                payload={'transaction_id': transaction_id, 'attempt_no': n},
+                actor_id=actor_id,
+                correlation_id=tx['command_id'],
+                publish=True,
+                occurred_at_ms=ts,
             )
             return attempt_id
 
-    def acquire_lease(self, *, resource_key: str, transaction_id: str, attempt_id: str,
-                      holder_id: str, ttl_ms: int, actor_id: str) -> tuple[str, int]:
+    def acquire_lease(
+        self,
+        *,
+        resource_key: str,
+        transaction_id: str,
+        attempt_id: str,
+        holder_id: str,
+        ttl_ms: int,
+        actor_id: str,
+    ) -> tuple[str, int, int]:
         if ttl_ms <= 0:
             raise ValueError('ttl_ms must be positive')
         ts = now_ms()
@@ -324,87 +443,228 @@ class ControllerStore:
             ).fetchone()
             if attempt is None or attempt['state'] != 'CLAIMABLE':
                 raise LeaseConflict('attempt is not claimable')
+
             expired = self.conn.execute(
-                'SELECT lease_id,fencing_token FROM leases WHERE resource_key=? AND state=? AND expires_at_ms<=?',
-                (resource_key, 'ACTIVE', ts),
+                '''SELECT lease_id,attempt_id,fencing_token,authority_epoch
+                   FROM leases WHERE resource_key=? AND state='ACTIVE' AND expires_at_ms<=?''',
+                (resource_key, ts),
             ).fetchall()
             for row in expired:
                 self.conn.execute(
-                    'UPDATE leases SET state=?, released_at_ms=? WHERE lease_id=?',
-                    ('EXPIRED', ts, row['lease_id']),
+                    "UPDATE execution_attempts SET state='ABANDONED',completed_at_ms=? WHERE attempt_id=? AND state IN ('CLAIMED','RUNNING','VERIFYING')",
+                    (ts, row['attempt_id']),
+                )
+                self.conn.execute(
+                    "UPDATE leases SET state='EXPIRED',released_at_ms=? WHERE lease_id=?",
+                    (ts, row['lease_id']),
                 )
                 self._append_event(
-                    aggregate_type='LEASE', aggregate_id=row['lease_id'], event_type='LEASE_EXPIRED',
-                    payload={'resource_key': resource_key, 'fencing_token': row['fencing_token']},
-                    actor_id=actor_id, publish=True, occurred_at_ms=ts,
+                    aggregate_type='LEASE',
+                    aggregate_id=row['lease_id'],
+                    event_type='LEASE_EXPIRED',
+                    payload={
+                        'resource_key': resource_key,
+                        'authority_epoch': row['authority_epoch'],
+                        'fencing_token': row['fencing_token'],
+                        'attempt_id': row['attempt_id'],
+                    },
+                    actor_id=actor_id,
+                    publish=True,
+                    occurred_at_ms=ts,
                 )
+
             if self.conn.execute(
-                'SELECT 1 FROM leases WHERE resource_key=? AND state=?', (resource_key, 'ACTIVE')
+                "SELECT 1 FROM leases WHERE resource_key=? AND state='ACTIVE'", (resource_key,)
             ).fetchone():
                 raise LeaseConflict('resource already has an active lease')
-            token = self.conn.execute(
-                '''INSERT INTO resource_fences(resource_key,current_token) VALUES(?,1)
-                   ON CONFLICT(resource_key) DO UPDATE SET current_token=current_token+1
-                   RETURNING current_token''',
-                (resource_key,),
-            ).fetchone()['current_token']
+
+            token = int(
+                self.conn.execute(
+                    '''INSERT INTO resource_fences(resource_key,current_token) VALUES(?,1)
+                       ON CONFLICT(resource_key) DO UPDATE SET current_token=current_token+1
+                       RETURNING current_token''',
+                    (resource_key,),
+                ).fetchone()['current_token']
+            )
+            epoch = int(
+                self.conn.execute('SELECT authority_epoch FROM controller_meta WHERE singleton=1').fetchone()[0]
+            )
             lease_id = new_id()
             self.conn.execute(
                 '''INSERT INTO leases(
                      lease_id,resource_key,transaction_id,attempt_id,holder_id,fencing_token,state,
-                     acquired_at_ms,last_heartbeat_at_ms,expires_at_ms
-                   ) VALUES(?,?,?,?,?,?,?,?,?,?)''',
-                (lease_id, resource_key, transaction_id, attempt_id, holder_id, token, 'ACTIVE', ts, ts, ts + ttl_ms),
+                     acquired_at_ms,last_heartbeat_at_ms,expires_at_ms,authority_epoch
+                   ) VALUES(?,?,?,?,?,?,?,?,?,?,?)''',
+                (
+                    lease_id,
+                    resource_key,
+                    transaction_id,
+                    attempt_id,
+                    holder_id,
+                    token,
+                    'ACTIVE',
+                    ts,
+                    ts,
+                    ts + ttl_ms,
+                    epoch,
+                ),
             )
             self.conn.execute('UPDATE execution_attempts SET state=? WHERE attempt_id=?', ('CLAIMED', attempt_id))
             self._append_event(
-                aggregate_type='LEASE', aggregate_id=lease_id, event_type='LEASE_ACQUIRED',
-                payload={'resource_key': resource_key, 'fencing_token': token, 'attempt_id': attempt_id},
-                actor_id=actor_id, publish=True, occurred_at_ms=ts,
+                aggregate_type='LEASE',
+                aggregate_id=lease_id,
+                event_type='LEASE_ACQUIRED',
+                payload={
+                    'resource_key': resource_key,
+                    'authority_epoch': epoch,
+                    'fencing_token': token,
+                    'attempt_id': attempt_id,
+                },
+                actor_id=actor_id,
+                publish=True,
+                occurred_at_ms=ts,
             )
-            return lease_id, token
+            return lease_id, epoch, token
 
-    def assert_fence(self, lease_id: str, fencing_token: int, *, at_ms: int | None = None) -> None:
+    def assert_fence(
+        self,
+        lease_id: str,
+        authority_epoch: int,
+        fencing_token: int,
+        *,
+        at_ms: int | None = None,
+    ) -> None:
         ts = now_ms() if at_ms is None else at_ms
         row = self.conn.execute(
-            '''SELECT l.state,l.expires_at_ms,l.resource_key,l.fencing_token,f.current_token
-               FROM leases l JOIN resource_fences f ON f.resource_key=l.resource_key
+            '''SELECT l.state,l.expires_at_ms,l.resource_key,l.fencing_token,l.authority_epoch,
+                      f.current_token,m.authority_epoch AS current_epoch
+               FROM leases l
+               JOIN resource_fences f ON f.resource_key=l.resource_key
+               JOIN controller_meta m ON m.singleton=1
                WHERE l.lease_id=?''',
             (lease_id,),
         ).fetchone()
         if row is None or row['state'] != 'ACTIVE' or row['expires_at_ms'] <= ts:
             raise StaleFence('lease is not active')
+        if row['authority_epoch'] != authority_epoch or row['current_epoch'] != authority_epoch:
+            raise StaleFence('authority epoch is stale')
         if row['fencing_token'] != fencing_token or row['current_token'] != fencing_token:
             raise StaleFence('fencing token is stale')
 
-    def heartbeat_lease(self, lease_id: str, fencing_token: int, ttl_ms: int, actor_id: str) -> None:
+    def transition_attempt(
+        self,
+        *,
+        attempt_id: str,
+        expected_state: str,
+        new_state: str,
+        actor_id: str,
+        lease_id: str | None = None,
+        authority_epoch: int | None = None,
+        fencing_token: int | None = None,
+        error_code: str | None = None,
+    ) -> None:
+        ts = now_ms()
+        with self.immediate():
+            row = self.conn.execute(
+                '''SELECT a.state,a.transaction_id,t.command_id
+                   FROM execution_attempts a JOIN transactions t ON t.transaction_id=a.transaction_id
+                   WHERE a.attempt_id=?''',
+                (attempt_id,),
+            ).fetchone()
+            if row is None:
+                raise ControllerError('attempt not found')
+            if row['state'] != expected_state:
+                raise ControllerError(f'expected attempt {expected_state}, found {row["state"]}')
+
+            lease_required = expected_state in {'CLAIMED', 'RUNNING', 'VERIFYING'} and new_state not in {'ABANDONED', 'CANCELLED'}
+            if lease_required:
+                if lease_id is None or authority_epoch is None or fencing_token is None:
+                    raise StaleFence('active attempt transition requires lease epoch and fencing token')
+                lease = self.conn.execute(
+                    'SELECT attempt_id FROM leases WHERE lease_id=?', (lease_id,)
+                ).fetchone()
+                if lease is None or lease['attempt_id'] != attempt_id:
+                    raise StaleFence('lease is not bound to this attempt')
+                self.assert_fence(lease_id, authority_epoch, fencing_token, at_ms=ts)
+
+            terminal = new_state in self.TERMINAL_ATTEMPT_STATES
+            started = ts if new_state == 'RUNNING' else None
+            self.conn.execute(
+                '''UPDATE execution_attempts
+                   SET state=?,
+                       started_at_ms=CASE WHEN ? IS NOT NULL AND started_at_ms IS NULL THEN ? ELSE started_at_ms END,
+                       completed_at_ms=CASE WHEN ? THEN ? ELSE completed_at_ms END,
+                       error_code=CASE WHEN ? IS NOT NULL THEN ? ELSE error_code END
+                   WHERE attempt_id=?''',
+                (new_state, started, started, 1 if terminal else 0, ts, error_code, error_code, attempt_id),
+            )
+            self._append_event(
+                aggregate_type='ATTEMPT',
+                aggregate_id=attempt_id,
+                event_type='ATTEMPT_STATE_CHANGED',
+                payload={'from': expected_state, 'to': new_state, 'error_code': error_code},
+                actor_id=actor_id,
+                correlation_id=row['command_id'],
+                publish=True,
+                occurred_at_ms=ts,
+            )
+
+    def heartbeat_lease(
+        self,
+        lease_id: str,
+        authority_epoch: int,
+        fencing_token: int,
+        ttl_ms: int,
+        actor_id: str,
+    ) -> None:
         if ttl_ms <= 0:
             raise ValueError('ttl_ms must be positive')
         ts = now_ms()
         with self.immediate():
-            self.assert_fence(lease_id, fencing_token, at_ms=ts)
+            self.assert_fence(lease_id, authority_epoch, fencing_token, at_ms=ts)
             self.conn.execute(
                 'UPDATE leases SET last_heartbeat_at_ms=?, expires_at_ms=? WHERE lease_id=?',
                 (ts, ts + ttl_ms, lease_id),
             )
             self._append_event(
-                aggregate_type='LEASE', aggregate_id=lease_id, event_type='LEASE_HEARTBEAT',
-                payload={'fencing_token': fencing_token}, actor_id=actor_id,
-                publish=False, occurred_at_ms=ts,
+                aggregate_type='LEASE',
+                aggregate_id=lease_id,
+                event_type='LEASE_HEARTBEAT',
+                payload={'authority_epoch': authority_epoch, 'fencing_token': fencing_token},
+                actor_id=actor_id,
+                publish=False,
+                occurred_at_ms=ts,
             )
 
-    def release_lease(self, lease_id: str, fencing_token: int, actor_id: str) -> None:
+    def release_lease(self, lease_id: str, authority_epoch: int, fencing_token: int, actor_id: str) -> None:
         ts = now_ms()
         with self.immediate():
-            self.assert_fence(lease_id, fencing_token, at_ms=ts)
-            row = self.conn.execute('SELECT resource_key FROM leases WHERE lease_id=?', (lease_id,)).fetchone()
+            self.assert_fence(lease_id, authority_epoch, fencing_token, at_ms=ts)
+            row = self.conn.execute(
+                '''SELECT l.resource_key,l.attempt_id,a.state AS attempt_state
+                   FROM leases l JOIN execution_attempts a ON a.attempt_id=l.attempt_id
+                   WHERE l.lease_id=?''',
+                (lease_id,),
+            ).fetchone()
+            if row['attempt_state'] not in self.TERMINAL_ATTEMPT_STATES:
+                raise ControllerError('lease may be released only after its attempt is terminal')
             self.conn.execute(
-                'UPDATE leases SET state=?, released_at_ms=? WHERE lease_id=?', ('RELEASED', ts, lease_id)
+                "UPDATE leases SET state='RELEASED',released_at_ms=? WHERE lease_id=?",
+                (ts, lease_id),
             )
             self._append_event(
-                aggregate_type='LEASE', aggregate_id=lease_id, event_type='LEASE_RELEASED',
-                payload={'resource_key': row['resource_key'], 'fencing_token': fencing_token},
-                actor_id=actor_id, publish=True, occurred_at_ms=ts,
+                aggregate_type='LEASE',
+                aggregate_id=lease_id,
+                event_type='LEASE_RELEASED',
+                payload={
+                    'resource_key': row['resource_key'],
+                    'authority_epoch': authority_epoch,
+                    'fencing_token': fencing_token,
+                    'attempt_id': row['attempt_id'],
+                },
+                actor_id=actor_id,
+                publish=True,
+                occurred_at_ms=ts,
             )
 
     def record_inbox(self, source: str, delivery_id: str, payload: Any) -> bool:
@@ -428,35 +688,59 @@ class ControllerStore:
 
     def next_outbox(self, destination: str = OUTBOX_DESTINATION) -> sqlite3.Row | None:
         return self.conn.execute(
-            '''SELECT o.*, e.event_id,e.aggregate_type,e.aggregate_id,e.event_type,e.payload_canonical,e.actor_id,e.occurred_at_ms,e.authority_epoch
+            '''SELECT o.*,e.event_id,e.aggregate_type,e.aggregate_id,e.event_type,e.payload_canonical,
+                      e.actor_id,e.occurred_at_ms,e.authority_epoch
                FROM outbox o JOIN controller_events e ON e.event_seq=o.event_seq
                WHERE o.destination=? AND o.state='PENDING' AND o.available_at_ms<=?
-               ORDER BY o.event_seq LIMIT 1''',
+               ORDER BY e.authority_epoch,o.event_seq LIMIT 1''',
             (destination, now_ms()),
         ).fetchone()
 
     def mark_outbox_published(self, event_seq: int, destination: str = OUTBOX_DESTINATION) -> None:
         with self.immediate():
-            self.conn.execute(
-                '''UPDATE outbox SET state='PUBLISHED', attempts=attempts+1, published_at_ms=?, last_error=NULL
+            cursor = self.conn.execute(
+                '''UPDATE outbox SET state='PUBLISHED',attempts=attempts+1,published_at_ms=?,last_error=NULL
                    WHERE event_seq=? AND destination=? AND state='PENDING' ''',
                 (now_ms(), event_seq, destination),
             )
+            if cursor.rowcount != 1:
+                raise ControllerError('outbox item is missing or no longer pending')
 
-    def _append_event(self, *, aggregate_type: str, aggregate_id: str, event_type: str, payload: Any,
-                      actor_id: str, correlation_id: str | None = None,
-                      causation_event_id: str | None = None, publish: bool,
-                      occurred_at_ms: int | None = None) -> int:
+    def _append_event(
+        self,
+        *,
+        aggregate_type: str,
+        aggregate_id: str,
+        event_type: str,
+        payload: Any,
+        actor_id: str,
+        correlation_id: str | None = None,
+        causation_event_id: str | None = None,
+        publish: bool,
+        occurred_at_ms: int | None = None,
+    ) -> int:
         ts = now_ms() if occurred_at_ms is None else occurred_at_ms
         event_id = new_id()
-        epoch = self.conn.execute('SELECT authority_epoch FROM controller_meta WHERE singleton=1').fetchone()[0]
+        epoch = int(
+            self.conn.execute('SELECT authority_epoch FROM controller_meta WHERE singleton=1').fetchone()[0]
+        )
         cursor = self.conn.execute(
             '''INSERT INTO controller_events(
                  event_id,aggregate_type,aggregate_id,event_type,payload_canonical,actor_id,
                  correlation_id,causation_event_id,occurred_at_ms,authority_epoch
                ) VALUES(?,?,?,?,?,?,?,?,?,?)''',
-            (event_id, aggregate_type, aggregate_id, event_type, canonical_json(payload), actor_id,
-             correlation_id, causation_event_id, ts, epoch),
+            (
+                event_id,
+                aggregate_type,
+                aggregate_id,
+                event_type,
+                canonical_json(payload),
+                actor_id,
+                correlation_id,
+                causation_event_id,
+                ts,
+                epoch,
+            ),
         )
         event_seq = int(cursor.lastrowid)
         if publish:
