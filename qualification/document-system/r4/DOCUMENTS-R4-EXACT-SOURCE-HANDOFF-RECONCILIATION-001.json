@@ -1,0 +1,52 @@
+{
+  "evidence_id": "DOCUMENTS-R4-EXACT-SOURCE-HANDOFF-RECONCILIATION-001",
+  "owner_system_id": "DOCUMENTS",
+  "control_ref": "documents/control-v1",
+  "control_head": "8c81b9a2e7622805e973eda33bdeb8b743948249",
+  "objective_id": "DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-IMPORT-AND-EXACT-SUBJECT-QUALIFICATION-002",
+  "observed_current_main_before_claim": "dbc1f6904c6a2fe51b6bd5a0e2a15f9291bae189",
+  "claim_commit": "485061d4e2d756462959d48cbb15faa6372d9197",
+  "library_handoff": {
+    "file_id": "file_0000000037b881f5bd297e259f8f34ae",
+    "name": "CR001_R4_EXACT_225_SOURCE_HANDOFF_20260910.zip",
+    "bytes": 611479,
+    "sha256": "ada701cfa15e6162b6cdf67bc6c0803540a611b08a23aeeeddd1045d8ce2d8ab"
+  },
+  "canonical_manifest": {
+    "file_id": "file_0000000058c082109859515a3533290e",
+    "name": "CANONICAL-SOURCE-TREE-MANIFEST(2).csv",
+    "bytes": 41796,
+    "sha256": "ed36fc9cfd38b04a8d0174efed06b03e8e25b0a45fc0adc4d47fe3457c2ee367",
+    "rows": 225
+  },
+  "fresh_materialization_verification": {
+    "archive_sha256_match": true,
+    "archive_entries": 227,
+    "java_source_files": 225,
+    "manifest_rows": 225,
+    "missing_manifest_paths": 0,
+    "sha256_or_byte_size_mismatches": 0,
+    "extra_non_subject_files": [
+      "RECONSTRUCTION-RECEIPT.json",
+      "CANONICAL-SOURCE-TREE-MANIFEST.csv"
+    ],
+    "result": "PASS__225_OF_225_EXACT_SHA256_AND_BYTE_SIZE_MATCH"
+  },
+  "github_native_custody": {
+    "work_branch": "documents/r4-exact-source-custody-20260911",
+    "branch_base": "485061d4e2d756462959d48cbb15faa6372d9197",
+    "source_tree_committed": false,
+    "blocker_class": "CONNECTED_GITHUB_FILE_BRIDGE_UNAVAILABLE_FOR_EXACT_MOUNTED_BYTES",
+    "blocker": "The exact 611479-byte ZIP and 225-file source tree are materialized and freshly verified, but the connected GitHub write contracts accept UTF-8/base64 strings and expose no mounted-file/file-ref parameter. The source bytes therefore cannot be transferred atomically from the mounted Library artifact into GitHub custody without a separate file-capable bridge or a separately integrity-gated chunk transport. Exact-custody rules prohibit treating model-mediated or truncated byte transport as equivalent.",
+    "partial_or_approximate_import_claimed": false
+  },
+  "disposition": "MATERIAL_BLOCK_ON_GITHUB_NATIVE_CUSTODY_ONLY__EXACT_HANDOFF_VERIFIED",
+  "independent_documents_work_remaining": true,
+  "next_owner_valid_work": "Census and bind the explicit Documents-to-System-Master generic document-service interface while preserving R4 exact-source custody as an unresolved Documents blocker.",
+  "prose_work_performed": false,
+  "book_work_performed": false,
+  "historical_pass_transferred": false,
+  "a01_pass_claimed": false,
+  "native_office_pass_claimed": false,
+  "publication_or_production_pass_claimed": false
+}
