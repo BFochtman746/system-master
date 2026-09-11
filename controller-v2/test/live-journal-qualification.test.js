@@ -1,0 +1,21 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { validateLiveQualificationConfig, preflightLiveJournalQualification } from '../src/live-journal-qualification.js';
+import { ControllerError } from '../src/errors.js';
+
+function code(e,c){return e instanceof ControllerError&&e.code===c;}
+function config(overrides={}){return {journalRepository:'BFochtman746/controller-journal',subjectRepository:'BFochtman746/system-master',destructiveQualification:true,expectedOwner:'BFochtman746',qualificationId:'002C-C-test',...overrides};}
+function metadata(overrides={}){return {full_name:'BFochtman746/controller-journal',name:'controller-journal',owner:{login:'BFochtman746'},default_branch:'main',archived:false,permissions:{push:true},...overrides};}
+function missingRefClient(){return {async getRef(){const e=new ControllerError('GITHUB_NOT_FOUND','missing',{status:404});e.status=404;throw e;}};}
+
+test('LQ-T001 System Master is forbidden as journal even if subject config is changed',()=>{assert.throws(()=>validateLiveQualificationConfig(config({journalRepository:'BFochtman746/system-master',subjectRepository:'BFochtman746/other'})),e=>code(e,'LIVE_SYSTEM_MASTER_JOURNAL_FORBIDDEN'));});
+test('LQ-T002 subject and journal repositories must be distinct',()=>{assert.throws(()=>validateLiveQualificationConfig(config({subjectRepository:'BFochtman746/controller-journal'})),e=>code(e,'LIVE_JOURNAL_SUBJECT_COLLISION'));});
+test('LQ-T003 destructive live qualification requires explicit boolean opt-in',()=>{assert.throws(()=>validateLiveQualificationConfig(config({destructiveQualification:false})),e=>code(e,'LIVE_DESTRUCTIVE_OPT_IN_REQUIRED'));});
+test('LQ-T004 expected owner mismatch fails before repository lookup',()=>{assert.throws(()=>validateLiveQualificationConfig(config({expectedOwner:'someoneelse'})),e=>code(e,'LIVE_REPOSITORY_OWNER_MISMATCH'));});
+test('LQ-T005 qualification identity is mandatory',()=>{assert.throws(()=>validateLiveQualificationConfig(config({qualificationId:''})),e=>code(e,'LIVE_QUALIFICATION_ID_REQUIRED'));});
+test('LQ-T006 resolved repository identity must equal configured dedicated repository',async()=>{await assert.rejects(()=>preflightLiveJournalQualification({config:config(),repositoryReader:async()=>metadata({full_name:'BFochtman746/not-the-journal'}),journalClient:missingRefClient()}),e=>code(e,'LIVE_REPOSITORY_IDENTITY_MISMATCH'));});
+test('LQ-T007 archived repository is rejected',async()=>{await assert.rejects(()=>preflightLiveJournalQualification({config:config(),repositoryReader:async()=>metadata({archived:true}),journalClient:missingRefClient()}),e=>code(e,'LIVE_REPOSITORY_ARCHIVED'));});
+test('LQ-T008 branchless repository is rejected before journal ref lookup',async()=>{let refReads=0;await assert.rejects(()=>preflightLiveJournalQualification({config:config(),repositoryReader:async()=>metadata({default_branch:null}),journalClient:{async getRef(){refReads+=1;}}}),e=>code(e,'LIVE_REPOSITORY_UNSEEDED'));assert.equal(refReads,0);});
+test('LQ-T009 known missing write permission is rejected',async()=>{await assert.rejects(()=>preflightLiveJournalQualification({config:config(),repositoryReader:async()=>metadata({permissions:{push:false}}),journalClient:missingRefClient()}),e=>code(e,'LIVE_REPOSITORY_WRITE_PERMISSION_MISSING'));});
+test('LQ-T010 preexisting heads/journal is rejected for destructive fresh-repo qualification',async()=>{await assert.rejects(()=>preflightLiveJournalQualification({config:config(),repositoryReader:async()=>metadata(),journalClient:{async getRef(){return 'abc';}}}),e=>code(e,'LIVE_JOURNAL_REF_ALREADY_EXISTS'));});
+test('LQ-T011 seeded dedicated fresh repository passes preflight without mutation',async()=>{let reads=0;const result=await preflightLiveJournalQualification({config:config(),repositoryReader:async()=>{reads+=1;return metadata();},journalClient:missingRefClient()});assert.equal(reads,1);assert.equal(result.qualified_for_mutation,true);assert.equal(result.journalRepository,'bfochtman746/controller-journal');assert.equal(result.defaultBranch,'main');});
