@@ -13,136 +13,19 @@ const SUPPORT = join(HERE, '..', 'test-support');
 const SHA = '0123456789abcdef0123456789abcdef01234567';
 
 function makeCommand(commandId = uuidv7()) {
-  return {
-    protocol_version: '1.0',
-    schema: 'controller://schemas/command/v1',
-    command_id: commandId,
-    created_at: new Date().toISOString(),
-    issuer: { principal: 'user:test', source: 'chatgpt' },
-    command_type: 'controller.work.submit',
-    target: { repository: 'BFochtman746/system-master', expected_subject_sha: SHA },
-    preconditions: {},
-    intent: { task: 'failure-injection' },
-    constraints: {},
-    required_policy_version: null
-  };
+  return { protocol_version:'1.0',schema:'controller://schemas/command/v1',command_id:commandId,created_at:new Date().toISOString(),issuer:{principal:'user:test',source:'chatgpt'},command_type:'controller.work.submit',target:{repository:'BFochtman746/system-master',expected_subject_sha:SHA},preconditions:{},intent:{task:'failure-injection'},constraints:{},required_policy_version:null };
 }
+function tempDb(){const dir=mkdtempSync(join(tmpdir(),'controller-v2-fi-'));return {dir,db:join(dir,'controller.sqlite')};}
+function initializeDb(db){const k=new ControllerKernel(db);k.close();}
+function runNode(script,args=[]){return new Promise((resolve)=>{const p=spawn(process.execPath,[join(SUPPORT,script),...args],{stdio:['ignore','pipe','pipe']});let stdout='',stderr='';p.stdout.on('data',d=>{stdout+=d;});p.stderr.on('data',d=>{stderr+=d;});p.on('close',(code,signal)=>resolve({code,signal,stdout,stderr}));});}
 
-function tempDb() {
-  const dir = mkdtempSync(join(tmpdir(), 'controller-v2-fi-'));
-  return { dir, db: join(dir, 'controller.sqlite') };
-}
+test('FI-T001 abrupt death rolls back uncommitted WAL transaction',async()=>{const {dir,db}=tempDb();try{const c=makeCommand();const r=await runNode('crash-writer.js',[db,JSON.stringify(c)]);assert.ok(r.signal||r.code!==0,'helper must die abruptly');const k=new ControllerKernel(db);const tx=k.db.prepare('SELECT state FROM transactions WHERE command_id=?').get(c.command_id);assert.equal(tx.state,'OPEN');assert.equal(k.db.prepare('PRAGMA integrity_check').get().integrity_check,'ok');k.close();}finally{rmSync(dir,{recursive:true,force:true});}});
 
-function initializeDb(db) {
-  const k = new ControllerKernel(db);
-  k.close();
-}
+test('FI-T002 separate processes contend for one READY resource lease and exactly one wins',async()=>{const {dir,db}=tempDb();try{const k=new ControllerKernel(db);const tx=k.acceptCommand(makeCommand()).transaction_id;k.admitTransaction(tx);k.activateTransaction(tx);const op=k.createOperation(tx,{resourceId:'shared-resource'});k.transitionOperation(op,'READY');k.close();const now=String(Date.now());const [a,b]=await Promise.all([runNode('lease-contender.js',[db,op,'shared-resource','worker-A',now]),runNode('lease-contender.js',[db,op,'shared-resource','worker-B',now])]);const outcomes=[a,b].map(x=>JSON.parse(x.stdout));assert.equal(outcomes.filter(x=>x.ok).length,1);assert.equal(outcomes.filter(x=>!x.ok&&x.code==='LEASE_CONFLICT').length,1);const verify=new ControllerKernel(db);assert.equal(verify.db.prepare("SELECT COUNT(*) n FROM leases WHERE status='ACTIVE'").get().n,1);verify.close();}finally{rmSync(dir,{recursive:true,force:true});}});
 
-function runNode(script, args = []) {
-  return new Promise((resolve) => {
-    const p = spawn(process.execPath, [join(SUPPORT, script), ...args], { stdio: ['ignore', 'pipe', 'pipe'] });
-    let stdout = '', stderr = '';
-    p.stdout.on('data', d => { stdout += d; });
-    p.stderr.on('data', d => { stderr += d; });
-    p.on('close', (code, signal) => resolve({ code, signal, stdout, stderr }));
-  });
-}
+test('FI-T003 separate processes accept same command into one transaction after controlled bootstrap',async()=>{const {dir,db}=tempDb();try{initializeDb(db);const c=makeCommand(),payload=JSON.stringify(c);const [a,b]=await Promise.all([runNode('command-contender.js',[db,payload]),runNode('command-contender.js',[db,payload])]);assert.equal(a.code,0,a.stderr);assert.equal(b.code,0,b.stderr);const outcomes=[a,b].map(x=>JSON.parse(x.stdout));assert.ok(outcomes.every(x=>x.ok));assert.equal(outcomes[0].result.transaction_id,outcomes[1].result.transaction_id);const verify=new ControllerKernel(db);assert.equal(verify.db.prepare('SELECT COUNT(*) n FROM transactions').get().n,1);verify.close();}finally{rmSync(dir,{recursive:true,force:true});}});
 
-test('FI-T001 abrupt death rolls back uncommitted WAL transaction', async () => {
-  const { dir, db } = tempDb();
-  try {
-    const c = makeCommand();
-    const r = await runNode('crash-writer.js', [db, JSON.stringify(c)]);
-    assert.ok(r.signal || r.code !== 0, 'helper must die abruptly');
-    const k = new ControllerKernel(db);
-    const tx = k.db.prepare('SELECT state FROM transactions WHERE command_id=?').get(c.command_id);
-    assert.equal(tx.state, 'OPEN');
-    assert.equal(k.db.prepare('PRAGMA integrity_check').get().integrity_check, 'ok');
-    k.close();
-  } finally { rmSync(dir, { recursive: true, force: true }); }
-});
-
-test('FI-T002 separate processes contend for one lease and exactly one wins', async () => {
-  const { dir, db } = tempDb();
-  try {
-    const k = new ControllerKernel(db);
-    const tx = k.acceptCommand(makeCommand()).transaction_id;
-    const op = k.createOperation(tx, { resourceId: 'shared-resource' });
-    k.transitionOperation(op, 'READY');
-    k.transitionOperation(op, 'RUNNING');
-    k.close();
-    const now = String(Date.now());
-    const [a, b] = await Promise.all([
-      runNode('lease-contender.js', [db, op, 'shared-resource', 'worker-A', now]),
-      runNode('lease-contender.js', [db, op, 'shared-resource', 'worker-B', now])
-    ]);
-    const outcomes = [a, b].map(x => JSON.parse(x.stdout));
-    assert.equal(outcomes.filter(x => x.ok).length, 1);
-    assert.equal(outcomes.filter(x => !x.ok && x.code === 'LEASE_CONFLICT').length, 1);
-    const verify = new ControllerKernel(db);
-    assert.equal(verify.db.prepare("SELECT COUNT(*) n FROM leases WHERE status='ACTIVE'").get().n, 1);
-    verify.close();
-  } finally { rmSync(dir, { recursive: true, force: true }); }
-});
-
-test('FI-T003 separate processes accept same command into one transaction after controlled bootstrap', async () => {
-  const { dir, db } = tempDb();
-  try {
-    // Controller v2 has one bootstrap owner. Workers never bootstrap/open the controller DB.
-    // This test isolates the actual property under test: idempotent command contention.
-    initializeDb(db);
-    const c = makeCommand();
-    const payload = JSON.stringify(c);
-    const [a, b] = await Promise.all([
-      runNode('command-contender.js', [db, payload]),
-      runNode('command-contender.js', [db, payload])
-    ]);
-    assert.equal(a.code, 0, a.stderr);
-    assert.equal(b.code, 0, b.stderr);
-    const outcomes = [a, b].map(x => JSON.parse(x.stdout));
-    assert.ok(outcomes.every(x => x.ok));
-    assert.equal(outcomes[0].result.transaction_id, outcomes[1].result.transaction_id);
-    const verify = new ControllerKernel(db);
-    assert.equal(verify.db.prepare('SELECT COUNT(*) n FROM transactions').get().n, 1);
-    verify.close();
-  } finally { rmSync(dir, { recursive: true, force: true }); }
-});
-
-test('FI-T004 RFC 8785 canonical sample matches expected serialization', () => {
-  const input = {
-    numbers: [333333333.33333329, 1E30, 4.50, 2e-3, 0.000000000000000000000000001],
-    string: '\u20ac$\u000f\nA\'B\"\\\\\"/',
-    literals: [null, true, false]
-  };
-  const expected = '{"literals":[null,true,false],"numbers":[333333333.3333333,1e+30,4.5,0.002,1e-27],"string":"€$\\u000f\\nA\'B\\\"\\\\\\\\\\\"/"}';
-  assert.equal(canonicalize(input), expected);
-});
-
-test('FI-T005 RFC 8785/ECMAScript numeric edge serialization remains stable', () => {
-  const values = [0, -0, Number.MIN_VALUE, Number.MAX_VALUE, 9007199254740992, -9007199254740992];
-  assert.equal(canonicalize(values), '[0,0,5e-324,1.7976931348623157e+308,9007199254740992,-9007199254740992]');
-});
-
-test('FI-T006 100000 UUIDv7 identities are unique and version-correct', () => {
-  const ids = new Set();
-  for (let i = 0; i < 100000; i += 1) {
-    const id = uuidv7();
-    assert.ok(isUuidV7(id));
-    ids.add(id);
-  }
-  assert.equal(ids.size, 100000);
-});
-
-test('FI-T007 migration is idempotent across file-backed restart', () => {
-  const { dir, db } = tempDb();
-  try {
-    let k = new ControllerKernel(db);
-    k.acceptCommand(makeCommand());
-    k.close();
-    k = new ControllerKernel(db);
-    assert.equal(k.db.prepare('SELECT COUNT(*) n FROM schema_migrations WHERE version=1').get().n, 1);
-    assert.equal(k.db.prepare('SELECT COUNT(*) n FROM transactions').get().n, 1);
-    assert.equal(k.db.prepare('PRAGMA integrity_check').get().integrity_check, 'ok');
-    k.close();
-  } finally { rmSync(dir, { recursive: true, force: true }); }
-});
+test('FI-T004 RFC 8785 canonical sample matches expected serialization',()=>{const input={numbers:[333333333.33333329,1E30,4.50,2e-3,0.000000000000000000000000001],string:'\u20ac$\u000f\nA\'B\"\\\\\"/',literals:[null,true,false]};const expected='{"literals":[null,true,false],"numbers":[333333333.3333333,1e+30,4.5,0.002,1e-27],"string":"€$\\u000f\\nA\'B\\\"\\\\\\\\\\\"/"}';assert.equal(canonicalize(input),expected);});
+test('FI-T005 RFC 8785/ECMAScript numeric edge serialization remains stable',()=>{const values=[0,-0,Number.MIN_VALUE,Number.MAX_VALUE,9007199254740992,-9007199254740992];assert.equal(canonicalize(values),'[0,0,5e-324,1.7976931348623157e+308,9007199254740992,-9007199254740992]');});
+test('FI-T006 100000 UUIDv7 identities are unique and version-correct',()=>{const ids=new Set();for(let i=0;i<100000;i+=1){const id=uuidv7();assert.ok(isUuidV7(id));ids.add(id);}assert.equal(ids.size,100000);});
+test('FI-T007 migration is idempotent and reaches schema v2 across file-backed restart',()=>{const {dir,db}=tempDb();try{let k=new ControllerKernel(db);k.acceptCommand(makeCommand());k.close();k=new ControllerKernel(db);assert.equal(k.db.prepare('SELECT MAX(version) version FROM schema_migrations').get().version,2);assert.equal(k.db.prepare('SELECT COUNT(*) n FROM schema_migrations').get().n,2);assert.equal(k.db.prepare('SELECT COUNT(*) n FROM transactions').get().n,1);assert.equal(k.db.prepare('PRAGMA integrity_check').get().integrity_check,'ok');k.close();}finally{rmSync(dir,{recursive:true,force:true});}});
