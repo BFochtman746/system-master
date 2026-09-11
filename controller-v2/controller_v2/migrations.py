@@ -7,23 +7,21 @@ import sqlite3
 from dataclasses import dataclass
 from pathlib import Path
 
-_MIGRATION_RE = re.compile(r"^(?P<version>[0-9]{3})_(?P<name>[a-z0-9_]+)\.sql$")
-
 
 class MigrationError(RuntimeError):
-    code = "MIGRATION_ERROR"
+    pass
 
 
 class MigrationChecksumMismatch(MigrationError):
-    code = "MIGRATION_CHECKSUM_MISMATCH"
+    pass
 
 
 class MigrationSequenceError(MigrationError):
-    code = "MIGRATION_SEQUENCE_ERROR"
+    pass
 
 
 class UntrackedSchema(MigrationError):
-    code = "UNTRACKED_SCHEMA"
+    pass
 
 
 @dataclass(frozen=True)
@@ -35,97 +33,78 @@ class Migration:
     sql: str
 
 
-def _sha256_bytes(data: bytes) -> str:
-    return hashlib.sha256(data).hexdigest()
-
-
-def discover_migrations(schema_dir: str | Path) -> list[Migration]:
-    directory = Path(schema_dir)
-    migrations: list[Migration] = []
-    for path in directory.glob("*.sql"):
-        match = _MIGRATION_RE.fullmatch(path.name)
-        if not match:
-            continue
-        raw = path.read_bytes()
-        migrations.append(
-            Migration(
-                version=int(match.group("version")),
-                name=match.group("name"),
-                path=path,
-                checksum_sha256=_sha256_bytes(raw),
-                sql=raw.decode("utf-8"),
-            )
-        )
-    migrations.sort(key=lambda item: item.version)
-    if not migrations or migrations[0].version != 1:
-        raise MigrationSequenceError("migration sequence must begin at version 001")
-    expected = list(range(1, len(migrations) + 1))
-    actual = [item.version for item in migrations]
-    if actual != expected:
-        raise MigrationSequenceError(f"migration versions must be contiguous: expected {expected}, got {actual}")
-    if len({item.name for item in migrations}) != len(migrations):
-        raise MigrationSequenceError("migration names must be unique")
-    return migrations
+_MIGRATION_RE = re.compile(r"^(\d{3})_(.+)\.sql$")
 
 
 def _connect(path: Path) -> sqlite3.Connection:
-    con = sqlite3.connect(path, timeout=5.0, isolation_level=None)
+    con = sqlite3.connect(str(path), timeout=5.0, isolation_level=None)
     con.row_factory = sqlite3.Row
     con.execute("PRAGMA foreign_keys=ON")
     con.execute("PRAGMA synchronous=FULL")
     con.execute("PRAGMA busy_timeout=5000")
+    con.execute("PRAGMA trusted_schema=OFF")
     return con
 
 
-def _sql_quote(value: str) -> str:
-    return "'" + value.replace("'", "''") + "'"
+def _checksum(sql: str) -> str:
+    return hashlib.sha256(sql.encode("utf-8")).hexdigest()
 
 
-def _migration_table_exists(con: sqlite3.Connection) -> bool:
-    return con.execute(
-        "SELECT 1 FROM sqlite_schema WHERE type='table' AND name='schema_migrations'"
-    ).fetchone() is not None
+def discover_migrations(schema_dir: str | Path) -> list[Migration]:
+    root = Path(schema_dir)
+    migrations: list[Migration] = []
+    for path in sorted(root.glob("*.sql")):
+        match = _MIGRATION_RE.match(path.name)
+        if not match:
+            continue
+        version = int(match.group(1))
+        sql = path.read_text(encoding="utf-8")
+        migrations.append(Migration(version, path.stem, path, _checksum(sql), sql))
+    if not migrations:
+        raise MigrationSequenceError("no migrations found")
+    expected = list(range(1, len(migrations) + 1))
+    actual = [migration.version for migration in migrations]
+    if actual != expected:
+        raise MigrationSequenceError(f"migration versions must be contiguous from 1: {actual}")
+    return migrations
 
 
 def _verify_integrity(con: sqlite3.Connection) -> None:
-    result = con.execute("PRAGMA integrity_check").fetchone()
-    if not result or result[0] != "ok":
-        raise MigrationError(f"integrity_check failed: {result[0] if result else 'no result'}")
-    violations = con.execute("PRAGMA foreign_key_check").fetchall()
-    if violations:
-        raise MigrationError(f"foreign_key_check failed with {len(violations)} violation(s)")
+    integrity = str(con.execute("PRAGMA integrity_check").fetchone()[0])
+    if integrity.lower() != "ok":
+        raise MigrationError(f"integrity_check failed: {integrity}")
+    foreign_key_errors = list(con.execute("PRAGMA foreign_key_check"))
+    if foreign_key_errors:
+        raise MigrationError(f"foreign_key_check failed: {foreign_key_errors!r}")
 
 
-def _record_sql(migration: Migration) -> str:
-    return (
-        "INSERT INTO schema_migrations(version,name,checksum_sha256,applied_at_ms) VALUES("
-        f"{migration.version},{_sql_quote(migration.name)},{_sql_quote(migration.checksum_sha256)},"
-        "CAST(unixepoch('subsec')*1000 AS INTEGER));"
+def _record_migration(con: sqlite3.Connection, migration: Migration) -> None:
+    con.execute(
+        "INSERT INTO schema_migrations(version,name,checksum_sha256,applied_at_ms) "
+        "VALUES(?,?,?,CAST(strftime('%s','now') AS INTEGER)*1000)",
+        (migration.version, migration.name, migration.checksum_sha256),
     )
 
 
 def _apply_bootstrap(con: sqlite3.Connection, migration: Migration) -> None:
-    # 001 contains journal-mode PRAGMAs that must run outside a transaction.
-    # A brand-new DB is built in a temporary file, so a crash cannot expose a
-    # half-created canonical runtime database.
+    if migration.version != 1:
+        raise MigrationSequenceError("bootstrap migration must be version 1")
     con.executescript(migration.sql)
-    if not _migration_table_exists(con):
-        raise MigrationError("bootstrap migration did not create schema_migrations")
-    con.execute("BEGIN IMMEDIATE")
-    try:
-        con.execute(
-            "INSERT INTO schema_migrations(version,name,checksum_sha256,applied_at_ms) VALUES(?,?,?,CAST(unixepoch('subsec')*1000 AS INTEGER))",
-            (migration.version, migration.name, migration.checksum_sha256),
-        )
-        con.execute("COMMIT")
-    except BaseException:
-        if con.in_transaction:
-            con.execute("ROLLBACK")
-        raise
+    _record_migration(con, migration)
 
 
 def _apply_upgrade(con: sqlite3.Connection, migration: Migration) -> None:
-    script = "BEGIN IMMEDIATE;\n" + migration.sql + "\n" + _record_sql(migration) + "\nCOMMIT;"
+    script = (
+        "BEGIN IMMEDIATE;\n"
+        + migration.sql
+        + "\n"
+        + "INSERT INTO schema_migrations(version,name,checksum_sha256,applied_at_ms) VALUES("
+        + f"{migration.version},"
+        + "'" + migration.name.replace("'", "''") + "',"
+        + "'" + migration.checksum_sha256 + "',"
+        + "CAST(strftime('%s','now') AS INTEGER)*1000);\n"
+        + "COMMIT;\n"
+    )
     try:
         con.executescript(script)
     except BaseException:
@@ -135,29 +114,21 @@ def _apply_upgrade(con: sqlite3.Connection, migration: Migration) -> None:
 
 
 def _verify_applied(con: sqlite3.Connection, migrations: list[Migration]) -> int:
-    if not _migration_table_exists(con):
-        user_version = int(con.execute("PRAGMA user_version").fetchone()[0])
-        if user_version != 0:
-            raise UntrackedSchema(f"database has user_version={user_version} but no migration ledger")
+    table = con.execute(
+        "SELECT 1 FROM sqlite_master WHERE type='table' AND name='schema_migrations'"
+    ).fetchone()
+    if table is None:
         return 0
-
-    rows = con.execute(
-        "SELECT version,name,checksum_sha256 FROM schema_migrations ORDER BY version"
-    ).fetchall()
-    if not rows:
-        user_version = int(con.execute("PRAGMA user_version").fetchone()[0])
-        if user_version != 0:
-            raise UntrackedSchema(
-                f"database has user_version={user_version} but schema_migrations is empty"
-            )
-        return 0
-
-    versions = [int(row["version"]) for row in rows]
-    expected = list(range(1, len(rows) + 1))
-    if versions != expected:
-        raise MigrationSequenceError(
-            f"applied migration ledger has a gap: expected {expected}, got {versions}"
+    rows = list(
+        con.execute(
+            "SELECT version,name,checksum_sha256 FROM schema_migrations ORDER BY version"
         )
+    )
+    if not rows:
+        return 0
+    versions = [int(row["version"]) for row in rows]
+    if versions != list(range(1, versions[-1] + 1)):
+        raise MigrationSequenceError(f"applied migrations are not contiguous: {versions}")
     by_version = {migration.version: migration for migration in migrations}
     for row in rows:
         version = int(row["version"])
@@ -180,7 +151,10 @@ def _apply_pending(con: sqlite3.Connection, migrations: list[Migration], current
 
 
 def _fsync_file(path: Path) -> None:
-    with path.open("rb") as handle:
+    # Windows' CRT commit primitive, used by os.fsync(), requires a writable
+    # descriptor. Open read/write even though this helper does not modify bytes.
+    with path.open("r+b") as handle:
+        handle.flush()
         os.fsync(handle.fileno())
 
 
