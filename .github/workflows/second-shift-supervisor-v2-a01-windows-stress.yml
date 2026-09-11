@@ -1,0 +1,53 @@
+name: Second Shift Supervisor V2 A-01 Windows Stress
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - reliability/second-shift-controller-v2-20260911
+    paths:
+      - 'tools/second_shift_supervisor_v2.py'
+      - 'tests/test_second_shift_supervisor_v2.py'
+      - '.github/workflows/second-shift-supervisor-v2-a01-windows-stress.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: second-shift-supervisor-v2-a01-windows-stress
+  queue: max
+  cancel-in-progress: false
+
+jobs:
+  a01-windows:
+    name: Exact A-01 Windows crash, concurrency, fencing and SQLite stress
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact supervisor subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Runtime diagnostics
+        shell: powershell
+        run: |
+          python --version
+          python -c "import sqlite3,sys,platform; print('python',sys.version); print('sqlite',sqlite3.sqlite_version); print('platform',platform.platform())"
+      - name: Syntax check
+        shell: powershell
+        run: |
+          python -m py_compile tools/second_shift_supervisor_v2.py
+          python -m py_compile tests/test_second_shift_supervisor_v2.py
+      - name: Run exact supervisor reliability stress
+        shell: powershell
+        run: python tests/test_second_shift_supervisor_v2.py
+      - name: Upload exact A-01 stress evidence
+        if: always() && hashFiles('.second-shift-supervisor-v2-stress.json') != ''
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: second-shift-supervisor-v2-a01-${{ github.run_id }}
+          path: .second-shift-supervisor-v2-stress.json
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 30
