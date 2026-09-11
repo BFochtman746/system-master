@@ -2,53 +2,55 @@
   "owner_system_id": "BOOK",
   "owner_path": "SYSTEM_MASTER/BOOK",
   "control_ref": "book-system/control-v1",
-  "last_known_control_head": "a2820411337b74a00878a1ce9cb82a363a4fb18c",
-  "delegation_epoch": 22,
+  "last_known_control_head": "efb2ca4f234d223bf2a69b9fa1205b226d1e0b46",
+  "delegation_epoch": 23,
   "active_delegations": [
     {
-      "delegation_id": "SECOND-SHIFT-BOOK-PROSE-INTEGRATION-PHASE1-INPUT-CENSUS-001",
+      "delegation_id": "SECOND-SHIFT-BOOK-PROSE-PHASE2-ORCHESTRATOR-CLOSURE-CENSUS-001",
       "owner_path": "SYSTEM_MASTER/BOOK",
-      "objective_id": "BOOK-PROSE-INTEGRATION-PHASE-1-INPUT-CENSUS-001",
+      "objective_id": "BOOK-PROSE-PHASE-2-ORCHESTRATOR-CLOSURE-CENSUS-001",
       "state": "READY",
       "valid_for_control_ref": "book-system/control-v1",
-      "valid_for_control_head": "a2820411337b74a00878a1ce9cb82a363a4fb18c",
-      "created_at": "2026-09-10T11:00:00-04:00",
-      "last_revalidated_at": "2026-09-10T11:00:00-04:00",
+      "valid_for_control_head": "efb2ca4f234d223bf2a69b9fa1205b226d1e0b46",
+      "created_at": "2026-09-10T20:52:00-04:00",
+      "last_revalidated_at": "2026-09-10T20:52:00-04:00",
       "owner_evidence": [
-        "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-029.json",
-        "qualification/book-system/BOOK-SYSTEM-PRODUCT-PARENT-BINDING-009.json",
-        "qualification/book-system/book-prose-integration/BOOK-PROSE-INTEGRATION-PHASE-0-CURRENT-STATE-CENSUS-001.json",
-        "qualification/book-system/book-prose-integration/BOOK-PROSE-INTEGRATION-PRE-INTEGRATION-CHECKPOINT-001.json"
+        "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-039.json",
+        "qualification/book-system/book-prose-integration/BOOK-PROSE-INTEGRATION-LEDGER-001.json",
+        "qualification/book-system/book-prose-integration/orchestrator/BOOK-WORKFLOW-ORCHESTRATOR-BOOK-ADMISSION-HANDOFF-001-CLOSURE.json"
       ],
-      "completion_delta": "Retrieve and verify the current authoritative Prose system and explicitly crosswalk Prose capabilities, contracts and evidence against Book capabilities and authority before any Book-Prose integration implementation or orchestrator mutation.",
-      "stop_condition": "Phase 1 input census is durably sealed with current Prose authority/evidence identity, overlap/conflict/delegation classifications and explicit Book/Prose write-authority boundaries; exactly one dependency-valid Phase 2 successor is selected or a truthful blocker is recorded. No integration runtime mutation occurs in this delegation.",
+      "completion_delta": "Reconcile Phase 2A through 2J as one orchestrator closure census, verify exact evidence and authority boundaries, and select Phase 3A only if the census is clean.",
+      "stop_condition": "Phase-2 orchestrator closure census is durably sealed with 2A-2J evidence accounted, duplicate-authority check clean, non-claims preserved and exactly one dependency-valid Phase 3 successor selected or a truthful blocker recorded.",
       "allowed_work": [
-        "read the exact live Book and Prose control heads and current state records",
-        "inventory current Prose capabilities, contracts, qualification evidence and fresh-context-only boundaries",
-        "crosswalk those inputs against Book canonical manuscript ownership, admission gates, lifecycle and evaluator/orchestration needs",
-        "classify overlap, dependency, delegation, conflict and missing-contract surfaces without changing canonical owner boundaries",
-        "prepare the next integration contract/census successor only after the Phase 1 evidence map is sealed"
+        "read and reconcile exact Phase 2A-2J closures and artifacts",
+        "verify Book remains canonical manuscript owner and Prose remains a Book child specialist with zero canonical write authority",
+        "verify Book admission remains the only canonical manuscript mutation path",
+        "enumerate hosted versus A-01/native/private/human/fresh-blind/production qualification boundaries",
+        "select Phase 3A context-package schema only if closure census is clean"
       ],
       "forbidden_authority": [
-        "do not mutate Book or Prose implementation during the Phase 1 census",
-        "do not create a second durable execution or manuscript authority",
-        "do not grant Prose direct canonical manuscript write authority",
-        "do not execute the fresh-context six-case blind scoring from a labeled owner context",
-        "do not mutate or relabel original Book content-admission A-01 subject e993806a1d9a4838d4bd6d162a36921526ef302a",
-        "do not fabricate author, private, A-01, native, publication or production evidence"
+        "do not recreate Prose as a peer system or independent mutation lane",
+        "do not transfer Prose ownership to Documents",
+        "do not implement Phase 3 inside the Phase-2 closure census",
+        "do not infer A-01/native/private/human/fresh-blind/publication/production PASS",
+        "do not grant orchestrator, Prose, evaluator, Research or Documents canonical manuscript-write authority"
       ],
-      "on_pass": "Preserve the sealed Phase 1 crosswalk, retire this delegation, re-read live Book authority and bind only the owner-selected next Book-Prose integration successor.",
-      "on_failure": "Preserve the exact authority/evidence mismatch or missing-contract finding, keep Book/Prose write fences unchanged, and bind only a read/reconcile or contract-preparation successor that does not require fabricated authority."
+      "on_pass": "Retire this delegation, re-read live Book authority, and bind only the owner-selected Phase 3A Book Context Compiler successor.",
+      "on_failure": "Preserve the exact mismatch, keep Book/Prose authority fences unchanged, and bind only the smallest reconciliation/repair successor."
     }
   ],
   "retired_delegations": [
     {
+      "delegation_id": "SECOND-SHIFT-BOOK-PROSE-INTEGRATION-PHASE1-INPUT-CENSUS-001",
+      "state": "COMPLETED__SUPERSEDED_BY_PHASE2_ORCHESTRATOR_CLOSURE_CENSUS",
+      "prior_bound_control_head": "a2820411337b74a00878a1ce9cb82a363a4fb18c",
+      "live_control_head_at_reconciliation": "efb2ca4f234d223bf2a69b9fa1205b226d1e0b46",
+      "history_preserved": true
+    },
+    {
       "delegation_id": "SECOND-SHIFT-BOOK-POST-RF012-IMPLEMENTATION-GAP-CENSUS-001",
       "state": "COMPLETED__SUPERSEDED_BY_BOOK_PROSE_INTEGRATION_PHASE1",
-      "retirement_classification": "STALE_DELEGATION_RECONCILED_TO_LIVE_BOOK_STATE_029",
       "prior_bound_control_head": "6304df0b60dbe49ab7be0218b0d588c1b0ba5279",
-      "live_control_head_at_reconciliation": "a2820411337b74a00878a1ce9cb82a363a4fb18c",
-      "replacement_delegation_id": "SECOND-SHIFT-BOOK-PROSE-INTEGRATION-PHASE1-INPUT-CENSUS-001",
       "history_preserved": true
     },
     {
@@ -61,8 +63,6 @@
     {
       "delegation_id": "SECOND-SHIFT-BOOK-RF012-AUTHOR-DECISION-APPLICABILITY-GUARD-004",
       "state": "SUPERSEDED",
-      "retirement_classification": "SEMANTIC_STALE_DELEGATION__RF012_OWNER_DERIVED_CANDIDATE_ALREADY_QUALIFIED",
-      "replacement_delegation_id": "SECOND-SHIFT-BOOK-RF012-OWNER-PROMOTION-REBIND-004",
       "candidate_sha": "67a23c0b09505dc3dd8fd748523fec3868f649b0",
       "hosted_run_id": 34468928275,
       "history_preserved": true
@@ -73,6 +73,6 @@
     "standing": "IMMUTABLE_GIT_HISTORY_PRESERVED__DETAILED_PRIOR_DELEGATION_HISTORY_REMAINS_RECOVERABLE"
   },
   "owner_revalidation_required": false,
-  "reason": "Live Book advanced 22 commits beyond the prior 6304df0b selector. Current Binding-009 and State-029 select BOOK-PROSE-INTEGRATION-PHASE-1-INPUT-CENSUS-001 as READY and explicitly mark the prior shared selector stale. This repair rebinds only the scheduler selector to the exact live Book head and preserves all Book/Prose/A-01/author/native/publication authority fences.",
+  "reason": "Product-root authority is being reconciled to topology 004, where Prose is an active Book child specialist and inherits the BOOK execution lane. The prior Phase-1 selector was stale relative to the live Book Phase-2 closure-census head and is preserved as superseded history.",
   "empty_is_valid": false
 }
