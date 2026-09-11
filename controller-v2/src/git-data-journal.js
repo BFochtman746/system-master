@@ -8,7 +8,8 @@ const SEGMENT_PREFIX='segments/';
 const CHECKPOINT_SCHEMA='controller.journal.checkpoint.v1';
 const PROTOCOL_SCHEMA='controller.journal.protocol.v1';
 const SEGMENT_PATH_RE=/^segments\/(\d{20})-(\d{20})-([0-9a-f]{64})\.jsonl$/;
-const EVENT_KEYS=new Set(['event_id','event_schema','stream_id','stream_version','event_type','occurred_at','data','prev_event_digest','event_digest']);
+const REQUIRED_EVENT_KEYS=['event_id','event_schema','stream_id','stream_version','event_type','occurred_at','data','prev_event_digest','event_digest'];
+const ALLOWED_EVENT_KEYS=new Set([...REQUIRED_EVENT_KEYS,'journal_position','prev_journal_digest','journal_digest']);
 
 function fail(code,message,details={}){throw new ControllerError(code,message,details);}
 function pad(n){return String(n).padStart(20,'0');}
@@ -17,8 +18,8 @@ function parseJson(text,code){try{return JSON.parse(text);}catch{fail(code,'inva
 
 function validateSemanticEvent(event){
   if(!event||typeof event!=='object'||Array.isArray(event))fail('JOURNAL_EVENT_INVALID','event object required');
-  for(const key of Object.keys(event))if(!EVENT_KEYS.has(key))fail('JOURNAL_EVENT_INVALID',`unknown event field ${key}`);
-  for(const key of EVENT_KEYS)if(!(key in event))fail('JOURNAL_EVENT_INVALID',`missing ${key}`);
+  for(const key of Object.keys(event))if(!ALLOWED_EVENT_KEYS.has(key))fail('JOURNAL_EVENT_INVALID',`unknown event field ${key}`);
+  for(const key of REQUIRED_EVENT_KEYS)if(!(key in event))fail('JOURNAL_EVENT_INVALID',`missing ${key}`);
   if(event.event_schema!=='controller.event.v1')fail('UNSUPPORTED_EVENT_SCHEMA',`unsupported ${event.event_schema}`);
   if(!Number.isSafeInteger(event.stream_version)||event.stream_version<1)fail('JOURNAL_EVENT_INVALID','stream_version must be positive integer');
   const core={event_id:event.event_id,event_schema:event.event_schema,stream_id:event.stream_id,stream_version:event.stream_version,event_type:event.event_type,occurred_at:event.occurred_at,prev_event_digest:event.prev_event_digest,data:event.data};
