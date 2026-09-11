@@ -1,0 +1,42 @@
+{
+  "job_control_id": "BOOK-SYSTEM-JOB-LOCK-001",
+  "effective_date": "2026-09-10",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "control_ref": "book-system/control-v1",
+  "standing": "ACTIVE__INCOMPLETE_BOOK__COMPLETED_PROSE_INTEGRATION_REQUIRED",
+  "completion_truth": {
+    "book_complete": false,
+    "prose_complete": true,
+    "system_master_complete": false,
+    "authority": "governance/SYSTEM-COMPLETION-STATUS-001.json"
+  },
+  "locked_job": "Finish the Book system. Bring the completed Prose child system into Book through the required adapters and Book Workflow Orchestrator, preserve Book canonical manuscript/Story Bible/author/lifecycle/admission/publication authority, and then integrate the completed Book system upward into System Master.",
+  "prose_binding": {
+    "owner_path": "SYSTEM_MASTER/BOOK/PROSE",
+    "control_ref": "literary-prose-engine-001",
+    "completed_control_head": "b3b0909bc6720a3bc5938de29d4bf3bde9dd4e05",
+    "execution_lane": "BOOK",
+    "canonical_manuscript_write": false,
+    "separate_peer_lane": false,
+    "integration_rule": "Preserve completed Prose semantics and exact evidence. Add/qualify Book-side adapters, context/routing/orchestration and admission handoff needed to use Prose end-to-end. Reopen Prose feature semantics only for a demonstrated defect or explicit user instruction."
+  },
+  "current_book_state": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-039.json",
+  "current_objective": "BOOK-PROSE-PHASE-2-ORCHESTRATOR-CLOSURE-CENSUS-001",
+  "required_continuation": [
+    "Close the Phase-2 orchestrator census from existing 2A-2J exact evidence.",
+    "Continue the dependency-valid Book Context Compiler/context-package work.",
+    "Finish Book-to-Prose adapters and exact capability routing without granting Prose canonical writes.",
+    "Finish workflow orchestration, durable state, scheduler/worker, idempotency/cache/sync/admission/provenance boundaries required by the Book plan.",
+    "Run adversarial and end-to-end qualification proving the completed Prose system is usable by Book through the orchestrator.",
+    "Do not call Book complete until the remaining Book completion census and product-level completion boundary are actually closed.",
+    "After Book completion, integrate Book upward into System Master through explicit product interfaces."
+  ],
+  "authorized_crossing": "BOOK <-> SYSTEM_MASTER/BOOK/PROSE only for the Book parent/child literary integration. Book may consume shared Core and Documents services through explicit interfaces without ownership transfer.",
+  "forbidden": [
+    "Do not move Prose into Documents.",
+    "Do not create a separate Prose peer or Second Shift mutation lane.",
+    "Do not grant Prose, Documents, evaluator, Research or orchestrator canonical manuscript-write authority.",
+    "Do not treat Phase 2, an adapter, a hosted PASS or an A-01 receipt as completion of the whole Book system.",
+    "Do not cross into Learning product work or take Documents/Core product semantics."
+  ]
+}
