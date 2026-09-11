@@ -2,6 +2,7 @@
   "registry_id": "SECOND-SHIFT-REGISTRY-001",
   "effective_date": "2026-09-11",
   "product_root": "SYSTEM_MASTER",
+  "topology": "governance/SYSTEM-TOPOLOGY-005.json",
   "schema": "governance/second-shift/SECOND-SHIFT-DELEGATION-SCHEMA-002.json",
   "execution_control": "governance/second-shift/SECOND-SHIFT-EXECUTION-CONTROL-001.md",
   "program_job_lock": "governance/SYSTEM-PROGRAM-JOB-LOCK-001.json",
@@ -19,8 +20,23 @@
   },
   "coverage_routes": {
     "SYSTEM_MASTER/SHARED_INFRASTRUCTURE": "CORE",
-    "SYSTEM_MASTER/SHARED_INFRASTRUCTURE/A01": "CORE",
-    "SYSTEM_MASTER/BOOK/PROSE": "BOOK"
+    "SYSTEM_MASTER/SHARED_INFRASTRUCTURE/A01": "CORE"
+  },
+  "retired_routes": {
+    "PROSE": {
+      "historical_owner_path": "SYSTEM_MASTER/BOOK/PROSE",
+      "standing": "COMPLETE_RETIRED_TERMINAL",
+      "dispatchable": false,
+      "auto_provisionable": false,
+      "inherited_execution": false,
+      "repair_lane": false,
+      "qualification_lane": false,
+      "research_task": false,
+      "telemetry_lane": false,
+      "successor_task": false,
+      "integration_owner_if_genuinely_open": "BOOK",
+      "rule": "Old Prose routes are STALE_ARCHITECTURE_PENDING_RECONCILIATION. Any genuinely open integration result is an ordinary BOOK obligation, not a Prose route."
+    }
   },
   "non_peer_work_programs": {
     "PROGRAMMING": {
@@ -28,22 +44,31 @@
       "peer_second_shift_lane": false,
       "product_work_dispatch": "NOT_AUTHORIZED_UNTIL_EXPLICIT_TOPOLOGY_ADMISSION",
       "support_subprogram_route": "PROGRAMMING_KNOWLEDGE_RECOVERY -> CORE",
-      "rule": "Programming engineering/product work is not dispatchable as CORE work. Only the separately bounded Knowledge Recovery support subprogram may use CORE Second Shift capacity before Programming peer admission."
+      "rule": "Programming engineering/product work is not dispatchable as CORE work. Only bounded Knowledge Recovery custody/provenance support uses CORE Second Shift capacity before Programming peer admission."
     }
   },
-  "owner_discovery_rule": "owner_files is the machine-authoritative active Second Shift lane set. Controllers/workers enumerate it; PROSE child work routes through BOOK, PROGRAMMING has no peer lane before explicit topology admission, and no SYSTEM_MASTER root worker exists.",
-  "job_lock_rule": "Before dispatch, every delegation must conform to SYSTEM-PROGRAM-JOB-LOCK-001 and SYSTEM-COMPLETION-STATUS-001. A delegation that crosses another peer system's product job, routes Prose to Documents, dispatches Programming product work as CORE, silently creates a Programming peer lane, or claims completion of a non-Prose system is stale/invalid and must not dispatch.",
-  "system_lane_rule": "CORE, LEARNING, BOOK and DOCUMENTS are the active peer worker lanes. PROSE is the completed Book child specialist and inherits BOOK scheduling/claim/telemetry. PROGRAMMING is a named non-peer work program and has no peer worker lane until explicit topology admission.",
-  "portfolio_rule": "The portfolio controller reads CURRENT-AUTHORITY, the program job lock, Programming work-program lock, completion status, current obligation registry and every owner file. It rejects stale/non-open/cross-lane work before dispatch and preserves independent lane/program progress.",
-  "day_shift_rule": "When an active owner materially changes objective or completion standing, reconcile its delegation in the same working session. BOOK reconciliation includes PROSE child integration; DOCUMENTS must never absorb Prose. Programming work-program changes update its work-program lock/obligation but do not create a peer delegation before admission.",
-  "night_start_rule": "Freshly re-read CURRENT-AUTHORITY, program job lock, completion status, obligation registry, Programming work-program lock and live owner heads before the shift; never trust stale daytime snapshots.",
-  "dispatch_rule": "Dispatch only job-conforming READY/CANDIDATE work in active peer lanes. Knowledge Recovery is supporting CORE work and may use spare safe capacity but must not replace Programming product work or preempt independent BOOK, LEARNING or DOCUMENTS progress. PROGRAMMING product work itself has no Second Shift peer dispatch before explicit admission.",
-  "claim_rule": "Only one mutation-capable claim/lease may be live per active owner lane. PROSE child work shares BOOK's claim. Programming has no peer claim domain before topology admission.",
+  "owner_discovery_rule": "Controllers enumerate owner_files as active lanes and compare its keys against CURRENT-AUTHORITY topology peer_system_ids on every run. The sets must match exactly after machine-resolvable auto-provisioning. A missing owner file for an already-declared peer is provisioned only when control_ref, current owner head and current obligation are unambiguous; otherwise fail closed. Missing coverage never creates a new system and retired systems are never provisioned.",
+  "auto_provisioning_invariant": {
+    "topology_peer_source": "governance/SYSTEM-TOPOLOGY-005.json::peer_system_ids",
+    "registry_lane_source": "owner_files",
+    "expected_active_peers": ["CORE", "LEARNING", "BOOK", "DOCUMENTS"],
+    "current_coverage_complete": true,
+    "machine_resolvable_missing_peer_must_be_provisioned": true,
+    "implicit_system_creation_forbidden": true,
+    "retired_system_provisioning_forbidden": true
+  },
+  "job_lock_rule": "Before dispatch every delegation must conform to current topology, SYSTEM-PROGRAM-JOB-LOCK-001 and SYSTEM-COMPLETION-STATUS-001. A delegation that crosses another peer job, routes any Prose work to Documents, creates active Prose execution, dispatches Programming product work as CORE, silently creates a Programming peer lane, or claims completion of an incomplete active system is stale/invalid and must not dispatch.",
+  "system_lane_rule": "CORE, LEARNING, BOOK and DOCUMENTS are the active peer worker lanes. PROSE is terminally retired with no active or inherited lane. Programming remains a named non-peer work program with no peer worker lane until explicit topology admission.",
+  "portfolio_rule": "The portfolio controller reads CURRENT-AUTHORITY, selected topology, job lock, Programming work-program lock, completion status, current obligation registry, repair registries, every owner file and live owner head. It rejects stale/non-open/cross-lane/retired-system work before dispatch and preserves independent lane/program progress.",
+  "day_shift_rule": "When an active owner materially changes objective or completion standing, reconcile its delegation in the same working session. BOOK owns any remaining completed-Prose integration; DOCUMENTS receives none. Programming changes update its work-program lock/obligation but do not create a peer delegation before admission.",
+  "night_start_rule": "Freshly re-read CURRENT-AUTHORITY, selected topology, job lock, completion status, obligation registry, Programming work-program lock, repair state and live owner heads before execution; never trust stale snapshots.",
+  "dispatch_rule": "Dispatch only job-conforming READY/CANDIDATE work in active peer lanes. While Knowledge Recovery 001 is selected, CORE uses owner-valid unattended-safe discretionary capacity for Programming proving-corpus recovery first, then remaining authorized catalog/archive recovery. PROGRAMMING product work itself has no peer Second Shift dispatch before explicit admission.",
+  "claim_rule": "Only one mutation-capable claim/lease may be live per active owner lane. PROSE has no claim domain. Programming has no peer claim domain before topology admission.",
   "retry_rule": "Transient dependencies receive finite classified retries; after exhaustion select independent safe work within the same owner job.",
-  "stale_rule": "No job survives a live-head, current-obligation, job-lock, work-program-lock or completion-status mismatch. Preserve evidence/checkpoint, re-evaluate, then bind a current delegation or work-program continuation as authorized.",
-  "no_work_rule": "An active peer lane may be idle only after durable all-eight-rungs exhaustion for its own locked job. A blocker in another lane does not justify idling an independent lane. Programming work-program readiness is tracked separately and is not evidence of a missing peer dispatch before admission.",
-  "successor_rule": "After completion/material block, re-read live authority and select the next dependency-valid successor inside that lane's locked job; do not cross into another peer's work. Programming successors remain inside its work-program lock until explicit admission.",
-  "utilization_rule": "Active peer ledgers are CORE, LEARNING, BOOK and DOCUMENTS. PROSE activity is recorded under BOOK. Programming product work has no peer utilization ledger before admission; Knowledge Recovery support is recorded under CORE. Historical standalone Prose/root ledgers remain evidence only.",
+  "stale_rule": "No job survives a live-head, current-obligation, job-lock, work-program-lock, topology, completion-status or retired-system mismatch. Preserve evidence/checkpoint, re-evaluate, then bind a current owner-valid delegation or work-program continuation.",
+  "no_work_rule": "An active peer lane may be idle only after durable all-eight-rungs exhaustion for its own locked job. A blocker in another lane does not justify idling independent work. Retired systems require no lane or exhaustion proof.",
+  "successor_rule": "After completion/material block, re-read live authority and select the next dependency-valid successor inside the same active lane job. Never bind a Prose successor. Programming successors remain inside its work-program lock until explicit admission.",
+  "utilization_rule": "Active peer ledgers are CORE, LEARNING, BOOK and DOCUMENTS only. Book-owned completed-Prose integration is recorded as BOOK work, not Prose activity. No new Prose telemetry is created or expected. Programming product work has no peer utilization ledger before admission; Knowledge Recovery support is recorded under CORE.",
   "work_ahead_ladder": [
     "current repair/control health",
     "completion and evidence census",
