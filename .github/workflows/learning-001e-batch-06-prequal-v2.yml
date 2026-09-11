@@ -1,0 +1,85 @@
+name: Learning 001E Batch 06 Repaired Prequalification
+
+on:
+  push:
+    branches:
+      - learning/instructional-scoring-001e-batch-06-20260910
+    paths:
+      - "learning/lab/learning_lab/cssgb_full_standard_i_c_1.py"
+      - "learning/lab/learning_lab/domain_general_evidence_safe.py"
+      - "learning/lab/tests/test_domain_general_literal_response_evidence.py"
+      - "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001E-INSTRUCTIONAL-CONTENT-AND-SCORING-BATCH-06-CANDIDATE-070B.json"
+      - ".github/scripts/learning-full-standard-001e-batch-06-qualify.py"
+      - ".github/scripts/learning-full-standard-001e-batch-06-qualify-v2.py"
+      - ".github/workflows/learning-001e-batch-06-prequal-v2.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  qualify:
+    name: Ground, preserve evidence, score, and execute I.C.1 runtime slice
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      PYTHONPATH: learning/lab
+    steps:
+      - name: Checkout exact repaired Batch 06 subject with history
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Record exact subject and immutable 001D input
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          git cat-file -e "02dc615fcb5d44b997ed1322848eccc6e37bb172^{commit}"
+          printf 'SUBJECT_SHA=%s\n' "$GITHUB_SHA"
+
+      - name: Compile-check repaired Batch 06 runtime and qualifiers
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            learning/lab/learning_lab/adaptive.py \
+            learning/lab/learning_lab/domain_general.py \
+            learning/lab/learning_lab/domain_general_evidence_safe.py \
+            learning/lab/learning_lab/cssgb_full_standard_i_c_1.py \
+            learning/lab/tests/test_adaptive_practice_not_mastery.py \
+            learning/lab/tests/test_domain_general_literal_response_evidence.py \
+            .github/scripts/learning-full-standard-001e-batch-06-qualify.py \
+            .github/scripts/learning-full-standard-001e-batch-06-qualify-v2.py
+
+      - name: Preserve adaptive practice-not-mastery regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m unittest learning.lab.tests.test_adaptive_practice_not_mastery
+
+      - name: Preserve literal learner response and oracle-scoring regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m unittest learning.lab.tests.test_domain_general_literal_response_evidence
+
+      - name: Execute repaired 001E Batch 06 qualification
+        shell: bash
+        run: |
+          set -euo pipefail
+          export EVIDENCE_DIR="$RUNNER_TEMP/learning-001e-batch-06-v2-evidence"
+          python .github/scripts/learning-full-standard-001e-batch-06-qualify-v2.py
+
+      - name: Upload repaired Batch 06 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: LEARNING-001E-BATCH-06-V2-${{ github.sha }}-hosted-evidence
+          path: ${{ runner.temp }}/learning-001e-batch-06-v2-evidence
+          if-no-files-found: warn
+          retention-days: 30
+
+# Portable I.C.1 instructional/oracle/runtime qualification only. The repaired path preserves the literal learner response after independent domain-oracle scoring. No real-learner, psychometric, SME, certification, A-01, native-platform, or production authority is inferred.
