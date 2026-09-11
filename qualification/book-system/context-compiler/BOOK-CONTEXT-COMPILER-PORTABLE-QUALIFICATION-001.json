@@ -1,0 +1,60 @@
+{
+  "qualification_id": "BOOK-CONTEXT-COMPILER-PORTABLE-QUALIFICATION-001",
+  "effective_date": "2026-09-11",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "delegation_id": "SECOND-SHIFT-BOOK-CONTEXT-COMPILER-001",
+  "objective_id": "BOOK-CONTEXT-COMPILER-CONTEXT-PACKAGE-SCHEMA-001-IMPLEMENTATION",
+  "contract": "qualification/book-system/book-prose-integration/BOOK-CONTEXT-COMPILER-CONTEXT-PACKAGE-SCHEMA-001.json",
+  "qualified_subject": {
+    "repository": "BFochtman746/system-master",
+    "branch": "book/context-compiler-001-second-shift-20260911",
+    "commit_sha": "ac880f7ddc72b9fc45d93709d855e81d89556e55",
+    "files": [
+      {
+        "path": "system-master/book-system/context-compiler/book-context-compiler.js",
+        "blob_sha": "8b71624cd555e834fb6572cb659ad3d50a1ade2c"
+      },
+      {
+        "path": "system-master/book-system/context-compiler/book-context-package.schema.json",
+        "blob_sha": "725f3a16990f096c6fd99fe9e27d026445839efa"
+      },
+      {
+        "path": ".github/scripts/book-context-compiler-context-package-001-qualify.js",
+        "blob_sha": "0a903198ea4baff3ceaa3b8b82da1546ef15fb14"
+      }
+    ]
+  },
+  "execution": {
+    "executed_at": "2026-09-11T00:52:00-04:00",
+    "environment_class": "CONTROLLER_LOCAL_PORTABLE_NODE_RUNTIME",
+    "node_version": "v22.16.0",
+    "command": "node .github/scripts/book-context-compiler-context-package-001-qualify.js",
+    "cases_planned_floor": 30,
+    "cases_executed": 44,
+    "cases_passed": 44,
+    "cases_failed": 0,
+    "result": "PASS_PORTABLE_SYNTHETIC_NONBLIND_44_OF_44"
+  },
+  "contract_alignment_repair": {
+    "gap_detected": "The selected contract requires package_digest_sha256 in the durable envelope, while the first implementation schema omitted it and the first qualifier did not verify the compiled durable package envelope.",
+    "repair_commit": "ac880f7ddc72b9fc45d93709d855e81d89556e55",
+    "repair_result": "Compiled durable package now contains compiler-generated package_digest_sha256; schema requires a strict 64-hex digest; portable qualification verifies schema-required keys, admitted keys, digest consistency, deterministic constraint order and non-persistence of canonical_effect.",
+    "caller_digest_override_rejected": true
+  },
+  "authority_boundary_results": {
+    "retired_prose_execution_domain_rejected": true,
+    "documents_completed_prose_integration_owner_rejected": true,
+    "canonical_manuscript_effect": false,
+    "historical_pass_transferred": false,
+    "fresh_blind_execution": false,
+    "author_decision_authority": "NOT_GRANTED",
+    "private_manuscript_access": "NOT_PERFORMED",
+    "a01_pass": "NOT_CLAIMED",
+    "github_hosted_pass": "NOT_CLAIMED",
+    "native_platform_pass": "NOT_CLAIMED",
+    "publication_pass": "NOT_CLAIMED",
+    "production_pass": "NOT_CLAIMED"
+  },
+  "standing": "PORTABLE_EXACT_SUBJECT_PASS__HOSTED_AND_A01_UNCLAIMED",
+  "next_safe_action": "Preserve this exact subject and evidence. Attempt hosted exact-SHA execution only through an owner-valid executable runner path; do not transfer this portable PASS to changed bytes. After hosted evidence or a truthful infrastructure block, re-read Book authority and select the next genuinely open Book-owned integration seam. PROSE remains retired and DOCUMENTS receives no Prose work."
+}
