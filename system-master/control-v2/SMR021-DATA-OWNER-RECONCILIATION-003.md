@@ -3,8 +3,13 @@
 Date: 2026-09-11
 Owner lane: `DATA-001`
 Consumer: `USER-EXPERIENCE-001`
-Control parent: `d88a5952e93b5bae4ce96e4017f334aeb8abaa00`
+Authoring control parent: `d88a5952e93b5bae4ce96e4017f334aeb8abaa00`
+Revalidated control head: `e78754c0cfdd7194d204caa55f3bc69f44dd7bab`
 Standing: **DATA OWNER PORTABLE CONTRACT ACCEPTED / LIVE POSTGRESQL + GITHUB-NATIVE RUNNABLE SOURCE CUSTODY + HOSTED EXACT-SHA QUALIFICATION OPEN**
+
+## Control-drift revalidation
+
+While this packet was being prepared, `system-master/control-v2` advanced from the authoring parent to `e78754c0cfdd7194d204caa55f3bc69f44dd7bab`. The four intervening changes add archive/knowledge-recovery checkpoint files only: `PROGRAMMING-IMMUTABLE-TRANSPORT-BLOCKER-001.json`, `PROGRAMMING-LIVE-MATERIALIZATION-CHECKPOINT-002.json`, `SYSTEM-MASTER-ARCHIVE-V033-CONFLICT-CHECKPOINT-001.json`, and `SYSTEM-MASTER-GENESIS-OMEGA-ARCHIVE-FAMILY-CENSUS-001.json`. No SMR021, DATA-001, USER-EXPERIENCE-001, migration, claim, or authority contract changed. Reconciliation 003 therefore remains dependency-valid against the revalidated head; no PASS is transferred to any changed source/test subject.
 
 ## Authority disposition
 
