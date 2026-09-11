@@ -1,0 +1,85 @@
+{
+  "contract_id": "SYSTEM-MASTER-DOCUMENT-R4-CANONICAL-TRANSPORT-003",
+  "owner": "SYSTEM_MASTER",
+  "portfolio": "HEADLESS-CONTENT-ARTIFACTS-001",
+  "capability": "DOCUMENT",
+  "parent_objective": "SYSTEM-MASTER-DOCUMENT-R4-GITHUB-NATIVE-SOURCE-IMPORT-AND-EXACT-SUBJECT-QUALIFICATION-002",
+  "standing": "ACTIVE__CANONICAL_CARRIER_BOUND__PARTIAL_GIT_TRANSPORT__HOSTED_ACTIONS_START_FAILURE__NO_ADMISSION_PASS",
+  "canonical_source_handoff": {
+    "filename": "CR001_R4_EXACT_225_SOURCE_HANDOFF_20260910.zip",
+    "sha256": "ada701cfa15e6162b6cdf67bc6c0803540a611b08a23aeeeddd1045d8ce2d8ab",
+    "source_files": 225,
+    "manifest_rows": 225,
+    "reconstruction_identity": "PASS__225_OF_225_EXACT_SHA256_AND_SIZE"
+  },
+  "canonical_transport": {
+    "format": "PAX_TAR_XZ_PRESET_9_EXTREME",
+    "member_order": "225_SOURCE_FILES_THEN_CANONICAL_MANIFEST_THEN_RECONSTRUCTION_RECEIPT",
+    "member_metadata": "MTIME_0__MODE_0644__UID_0__GID_0__EMPTY_USER_GROUP_NAMES",
+    "bytes": 301076,
+    "sha256": "47b95cfbf4eb5352cbbb6de4f1294b1b4c1e7870c354d51b504f0378f4869207",
+    "chunking": "RAW_12500_BYTES_PER_CHUNK__EACH_CHUNK_BASE64_ENCODED_INDEPENDENTLY",
+    "chunk_count": 25,
+    "decode_rule": "BASE64_DECODE_EACH_CHUNK_IN_00_TO_24_ORDER_AND_APPEND_DECODED_BYTES; DO_NOT_CONCAT_BASE64_TEXT_BEFORE_DECODING"
+  },
+  "expected_chunk_git_blob_sha1": {
+    "00": "8e8b86bf5e2de42a093cd7f8843db25aa8e67150",
+    "01": "985296bc242d6b39f9b50b95c0ac7ec9195d83a7",
+    "02": "bfdb5c5d8d775a7d1be6518c35e746a6c206ecfd",
+    "03": "d24eb8273ac722ca44a5e30cc66a92aa6af8a148",
+    "04": "b08bf92ba1a72c2f3920b36718d5b96211259fdb",
+    "05": "7bda1b7c604a88568da812309693eac5dccbb7e2",
+    "06": "450980f0f1fb47e74b64a9b28c51fe7d03757fb1",
+    "07": "5ae2e417380909a81ffc313ec5168db63c9a0193",
+    "08": "3a4a1473325f6d385b2d27889d2fbcc062793303",
+    "09": "89eb25c315cdf640ceb7271610cc7444440ca827",
+    "10": "941482bb3705c4a849d87626c192b85f43f2f245",
+    "11": "5903eb4bf1b0c4f16c87b5965ef4535e7d37bacf",
+    "12": "73699455b48a48da04a0675dd1045a8ea2cef0ac",
+    "13": "5924ef6baa87c788fbcc023b2643adf90fdf4baa",
+    "14": "0dec3872107ae1d278736ace46216c2a7d3c1e96",
+    "15": "554189570f1b46ca427ba58aa24da0c67c47c90a",
+    "16": "9e2987db62da7a383aca595085504acad559efd2",
+    "17": "ca5402e002715e1ce84e92f60690a3bbb2137e47",
+    "18": "fba562e1db8c89ffb2af4de17e06e88abebb3843",
+    "19": "eda3ff738870a66ebc6f1c733dbb6bcda1d86e4d",
+    "20": "65a124697ade98ef2c783026a253c11fb0c45b7e",
+    "21": "deb13500e129e05578c00964b1dfb2b0404ac7e4",
+    "22": "70e85501294cca84ec0459605aadf94cfb2cd759",
+    "23": "94ad13771bb4f11818fda6079f87d7c98e753b7e",
+    "24": "c5538b207e18d0036eb59ec25cc2f8b5da7adb21"
+  },
+  "git_transport_branch": "document/cr001-r4-import-v2-20260910",
+  "current_git_chunk_state": {
+    "valid": ["00", "01", "02", "03", "04", "05", "09", "24"],
+    "valid_count": 8,
+    "missing": ["06", "07", "08", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23"],
+    "missing_count": 17,
+    "known_corrupt_chunks_removed": ["06", "07", "08"],
+    "ready_marker_present": false
+  },
+  "workflow_state": {
+    "noncanonical_4fce_auto_admission_retired": true,
+    "superseded_main_100_chunk_wrapper_retired": true,
+    "canonical_preflight_path": ".github/workflows/document-r4-v2-canonical-preflight.yml",
+    "canonical_preflight_commit": "3f9f9e2805920028a203099ba6835f8d5d367bc2",
+    "latest_observed_hosted_behavior": "JOB_CREATED__ZERO_STEPS_EXECUTED__FAILURE",
+    "hosted_qualification_available": false
+  },
+  "authority_boundaries": {
+    "github_native_source_admitted": false,
+    "exact_git_subject_qualified": false,
+    "a01_pass": false,
+    "native_office_pass": false,
+    "production_pass": false,
+    "historical_pass_transfer_allowed": false
+  },
+  "exact_next": "RESTORE_ONLY_MISSING_CANONICAL_CHUNKS_06_08_AND_10_23_USING_EXPECTED_GIT_BLOB_IDENTITIES; THEN_RECONSTRUCT_47B95_CARRIER; THEN_225_OF_225_SOURCE_IDENTITY; THEN_FRESH_EXACT_GIT_SUBJECT_QUALIFICATION_WHEN_AN_EXECUTION_LANE_IS_AVAILABLE",
+  "anti_replay_rules": [
+    "DO_NOT_USE_4FCE25BC_AS_CANONICAL_CARRIER",
+    "DO_NOT_RECREATE_OR_REVERIFY_CHUNKS_ALREADY_LISTED_VALID",
+    "DO_NOT_CONCAT_INDEPENDENT_BASE64_CHUNKS_BEFORE_DECODING",
+    "DO_NOT_CLAIM_DOCUMENT_R4_GITHUB_NATIVE_PASS_UNTIL_ALL_GATES_EXECUTE_ON_ONE_EXACT_GIT_SUBJECT",
+    "DO_NOT_OVERWRITE_CONCURRENT_LEARNING_BOOK_PROSE_OR_CORE_WORK"
+  ]
+}
