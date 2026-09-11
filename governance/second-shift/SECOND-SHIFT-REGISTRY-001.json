@@ -4,6 +4,8 @@
   "product_root": "SYSTEM_MASTER",
   "schema": "governance/second-shift/SECOND-SHIFT-DELEGATION-SCHEMA-002.json",
   "execution_control": "governance/second-shift/SECOND-SHIFT-EXECUTION-CONTROL-001.md",
+  "program_job_lock": "governance/SYSTEM-PROGRAM-JOB-LOCK-001.json",
+  "system_completion_status": "governance/SYSTEM-COMPLETION-STATUS-001.json",
   "utilization_event_schema": "governance/second-shift/SECOND-SHIFT-UTILIZATION-EVENT-SCHEMA-001.json",
   "enforcement_script": ".github/scripts/second-shift-enforce.js",
   "owner_coverage_enforcement_script": ".github/scripts/second-shift-owner-coverage.js",
@@ -19,40 +21,27 @@
     "SYSTEM_MASTER/SHARED_INFRASTRUCTURE/A01": "CORE",
     "SYSTEM_MASTER/BOOK/PROSE": "BOOK"
   },
-  "owner_discovery_rule": "owner_files is the machine-authoritative active Second Shift lane set. Controllers, workers, handoffs and enforcement enumerate it rather than compile fixed lane names.",
-  "system_lane_rule": "First-class peer systems receive their own owner lane. PROSE is an active child specialist of BOOK and therefore inherits the BOOK lane instead of receiving a separate lane. Historical standalone Prose lane files remain immutable evidence only.",
-  "historical_retired_lanes": {
-    "PROSE_STANDALONE_LANE": {
-      "retirement_record": "governance/retirements/PROSE-SYSTEM-RETIREMENT-001.json",
-      "historical_delegation_file": "governance/second-shift/PROSE-DELEGATIONS.json",
-      "current_subsystem_owner_path": "SYSTEM_MASTER/BOOK/PROSE",
-      "current_execution_lane": "BOOK",
-      "standalone_lane_active": false,
-      "history_preserved": true
-    },
-    "SYSTEM_MASTER": {
-      "reason": "The temporary root owner lane remains retired; product-root governance is a portfolio controller rather than a peer worker lane.",
-      "historical_delegation_file": "governance/second-shift/SYSTEM-MASTER-DELEGATIONS.json",
-      "active": false
-    }
-  },
-  "p9_selector_reconciliation": {
-    "reconciled_at": "2026-09-10T10:12:00-04:00",
-    "CORE": "READY__SMR021_GITHUB_NATIVE_TRANSPORT_009__HEAD_2031f070bd3702185c028733819ec410db36613c",
-    "LEARNING": "READY__ASSESSMENT_TARGET_DOMAIN_III_BATCH_01_033A__HEAD_262f3f0b5ffa4dea68964b91eacd57a4c39bdda6",
-    "BOOK": "READY__RF012_OWNER_PROMOTION_REBIND_004__HEAD_05c1f53e2f710f419a99cb99594c53c2f0240b68",
-    "PROSE_HISTORICAL": "READY__BLIND_EVALUATOR_LAUNCH_PACKET_002__HEAD_309a7876b8e388d115d4d3bde7dc39dd0ef8b6fd",
-    "history_rule": "P9 remains historical evidence. Current scheduling follows this registry and topology 004; active Prose child work inherits BOOK rather than reviving the historical standalone Prose lane."
-  },
-  "portfolio_rule": "The portfolio controller reads every active owner file declared by owner_files from current authority, revalidates each against its control binding and current obligation registry, removes stale/non-open items from admission, and selects dependency-valid work. Child paths use coverage_routes and never create duplicate mutation lanes.",
-  "day_shift_rule": "Whenever an active owner chat closes, supersedes, blocks or materially changes its current objective, it reconciles its registry-declared delegation file in the same working session. BOOK reconciliation includes current work performed by its PROSE child.",
-  "night_start_rule": "The portfolio controller performs fresh pre-shift reconciliation and every active owner worker independently revalidates immediately before execution.",
-  "dispatch_rule": "Every active registry-declared lane is eligible for the configured owner-worker cadence during 00:00-07:00. Child specialist paths route through coverage_routes; historical standalone lanes are never dispatched.",
-  "claim_rule": "Only one mutation-capable claim/lease may be live per active owner lane. Cross-mode foreground/Second-Shift arbitration is specified separately and must not create an additional per-child mutation lane.",
-  "retry_rule": "Transient dependencies receive a finite classified retry budget; after exhaustion the lane switches to independent safe work when available.",
-  "stale_rule": "No job survives a control-binding mismatch by default. Preserve evidence/checkpoint, re-evaluate, then create a new/revalidated delegation bound to current authority.",
-  "no_work_rule": "An active lane may be idle only after a durable all-eight-rungs-exhausted proof. A historical standalone lane is outside the active scheduling set.",
-  "successor_rule": "After every completion or material block, the active owner worker re-reads live authority and selects the next dependency-valid unattended-safe project while time remains.",
-  "utilization_rule": "Per-lane append-only shift event ledgers are authoritative for active lanes only. Historical Prose/root ledgers remain evidence and are not expected after standalone-lane retirement.",
-  "work_ahead_ladder": ["current repair/control health","completion and evidence census","authoritative research and provenance","architecture/contracts/state/interface/evidence specification","tests/benchmarks/property/concurrency/failure injection","bounded implementation with objective verification","exact-SHA qualification and A-01 preparation","next successor build packet"]
+  "owner_discovery_rule": "owner_files is the machine-authoritative active Second Shift lane set. Controllers/workers enumerate it; PROSE child work routes through BOOK and no SYSTEM_MASTER root worker exists.",
+  "job_lock_rule": "Before dispatch, every delegation must conform to SYSTEM-PROGRAM-JOB-LOCK-001 and SYSTEM-COMPLETION-STATUS-001. A delegation that crosses another peer system's product job, routes Prose to Documents, or claims completion of a non-Prose system is stale/invalid and must not dispatch.",
+  "system_lane_rule": "CORE, LEARNING, BOOK and DOCUMENTS are the active peer worker lanes. PROSE is the completed active Book child specialist and inherits BOOK scheduling/claim/telemetry; it has no separate lane.",
+  "portfolio_rule": "The portfolio controller reads CURRENT-AUTHORITY, the program job lock, completion status, current obligation registry and every owner file. It rejects stale/non-open/cross-lane work before dispatch and preserves independent lane progress.",
+  "day_shift_rule": "When an active owner materially changes objective or completion standing, reconcile its delegation in the same working session. BOOK reconciliation includes PROSE child integration; DOCUMENTS must never absorb Prose.",
+  "night_start_rule": "Freshly re-read CURRENT-AUTHORITY, program job lock, completion status, obligation registry and live owner heads before the shift; never trust stale daytime snapshots.",
+  "dispatch_rule": "Dispatch only job-conforming READY/CANDIDATE work. Knowledge Recovery is supporting CORE work and may use spare safe capacity but must not preempt or block independent BOOK, LEARNING or DOCUMENTS progress.",
+  "claim_rule": "Only one mutation-capable claim/lease may be live per active owner lane. PROSE child work shares BOOK's claim.",
+  "retry_rule": "Transient dependencies receive finite classified retries; after exhaustion select independent safe work within the same owner job.",
+  "stale_rule": "No job survives a live-head, current-obligation, job-lock or completion-status mismatch. Preserve evidence/checkpoint, re-evaluate, then bind a current delegation.",
+  "no_work_rule": "An active peer lane may be idle only after durable all-eight-rungs exhaustion for its own locked job. A blocker in another lane does not justify idling an independent lane.",
+  "successor_rule": "After completion/material block, re-read live authority and select the next dependency-valid successor inside that lane's locked job; do not cross into another peer's work.",
+  "utilization_rule": "Active ledgers are CORE, LEARNING, BOOK and DOCUMENTS. PROSE activity is recorded under BOOK. Historical standalone Prose/root ledgers remain evidence only.",
+  "work_ahead_ladder": [
+    "current repair/control health",
+    "completion and evidence census",
+    "authoritative research and provenance",
+    "architecture/contracts/state/interface/evidence specification",
+    "tests/benchmarks/property/concurrency/failure injection",
+    "bounded implementation with objective verification",
+    "exact-SHA qualification and A-01 preparation",
+    "next successor build packet"
+  ]
 }
