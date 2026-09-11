@@ -53,11 +53,13 @@ jobs:
 
           expected_chunk_names = [x['filename'] for x in chunk_manifest['chunks']]
           for chunk in chunk_manifest['chunks']:
-              prefix = chunk['filename'].replace('.b64', '.seg-')
-              segments = sorted(p for p in incoming.glob(prefix + '*.txt') if p.is_file())
+              segments = sorted(
+                  (incoming / x['filename']) for x in bridge['segments']
+                  if x.get('chunk') == chunk['filename']
+              )
               if not segments:
                   raise SystemExit(f'no segments for {chunk["filename"]}')
-              assembled = b''.join(p.read_bytes() for p in segments) + b'\n'
+              assembled = b''.join(p.read_bytes() for p in segments)
               if len(assembled) != chunk['base64_file_bytes']:
                   raise SystemExit(f'chunk encoded-size mismatch: {chunk["filename"]}')
               if hashlib.sha256(assembled).hexdigest() != chunk['base64_file_sha256']:
