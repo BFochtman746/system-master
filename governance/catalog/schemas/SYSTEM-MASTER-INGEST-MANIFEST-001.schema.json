@@ -4,12 +4,14 @@
   "title": "System Master Knowledge Recovery Ingest Manifest",
   "type": "object",
   "additionalProperties": false,
-  "required": ["manifest_id","schema_version","candidate_system_id","architecture_authority","coverage_contract","sources"],
+  "required": ["manifest_id","schema_version","candidate_system_id","architecture_authority","frozen_date","purpose","coverage_contract","sources"],
   "properties": {
     "manifest_id": {"type":"string","minLength":1},
     "schema_version": {"const":1},
     "candidate_system_id": {"type":"string","minLength":1},
     "architecture_authority": {"const":false},
+    "frozen_date": {"type":"string","format":"date"},
+    "purpose": {"type":"string","minLength":1},
     "coverage_contract": {
       "type":"object",
       "additionalProperties": false,
