@@ -56,8 +56,8 @@ class HardeningTests(unittest.TestCase):
             versions = [row[0] for row in con.execute(
                 "SELECT version FROM schema_migrations ORDER BY version"
             )]
-            self.assertEqual(versions, [1, 2, 3])
-            self.assertEqual(con.execute("PRAGMA user_version").fetchone()[0], 3)
+            self.assertEqual(versions, [1, 2, 3, 4])
+            self.assertEqual(con.execute("PRAGMA user_version").fetchone()[0], 4)
         finally:
             con.close()
         verify_migrations(self.db, ROOT / "schema")

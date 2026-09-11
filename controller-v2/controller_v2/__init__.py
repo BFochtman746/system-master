@@ -6,6 +6,13 @@ from .migrations import (
     UntrackedSchema,
     verify_migrations,
 )
+from .reliability import (
+    BackupResult,
+    EffectResult,
+    RecoveryReport,
+    ReliabilityManager,
+    create_verified_backup,
+)
 from .store import (
     CanonicalizationError,
     CommandResult,
@@ -18,9 +25,11 @@ from .store import (
 )
 
 __all__ = [
+    "BackupResult",
     "CanonicalizationError",
     "CommandResult",
     "ControllerStore",
+    "EffectResult",
     "IdempotencyConflict",
     "InvalidState",
     "LeaseHeld",
@@ -28,8 +37,11 @@ __all__ = [
     "MigrationChecksumMismatch",
     "MigrationError",
     "MigrationSequenceError",
+    "RecoveryReport",
+    "ReliabilityManager",
     "UntrackedSchema",
     "canonical_json",
+    "create_verified_backup",
     "new_uuid7",
     "verify_migrations",
 ]

@@ -13,7 +13,7 @@ POLICY = hashlib.sha256(b"policy-v1").hexdigest()
 
 
 class AcceptanceDenominatorTests(unittest.TestCase):
-    """Executable coverage for Foundation-002 criteria that were previously schema-only."""
+    """Executable coverage for Foundation-002 guarantees under the current schema."""
 
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
@@ -65,7 +65,7 @@ class AcceptanceDenominatorTests(unittest.TestCase):
         try:
             self.assertEqual(con.execute("PRAGMA foreign_keys").fetchone()[0], 1)
             self.assertEqual(str(con.execute("PRAGMA journal_mode").fetchone()[0]).lower(), "wal")
-            self.assertEqual(con.execute("PRAGMA synchronous").fetchone()[0], 2)  # FULL
+            self.assertEqual(con.execute("PRAGMA synchronous").fetchone()[0], 2)
             self.assertEqual(con.execute("PRAGMA trusted_schema").fetchone()[0], 0)
         finally:
             con.close()
@@ -83,24 +83,17 @@ class AcceptanceDenominatorTests(unittest.TestCase):
         con = self.store.connect()
         try:
             with self.assertRaises(sqlite3.IntegrityError):
-                con.execute(
-                    "UPDATE commands SET command_type='DIFFERENT' WHERE command_id=?",
-                    (command_id,),
-                )
+                con.execute("UPDATE commands SET command_type='DIFFERENT' WHERE command_id=?", (command_id,))
             con.execute(
                 "INSERT INTO evidence_receipts(receipt_id,transaction_id,subject_id,receipt_kind,digest_algorithm,digest,storage_uri,manifest_json,created_at_ms) "
                 "VALUES(?,?,?,'AUDIT','sha256',?,?,?,?)",
                 (new_uuid7(), tx, self.base, "f" * 64, "memory://audit/original", "{}", now),
             )
             receipt = con.execute(
-                "SELECT receipt_id FROM evidence_receipts WHERE transaction_id=? AND receipt_kind='AUDIT'",
-                (tx,),
+                "SELECT receipt_id FROM evidence_receipts WHERE transaction_id=? AND receipt_kind='AUDIT'", (tx,)
             ).fetchone()[0]
             with self.assertRaises(sqlite3.IntegrityError):
-                con.execute(
-                    "UPDATE evidence_receipts SET storage_uri='memory://audit/changed' WHERE receipt_id=?",
-                    (receipt,),
-                )
+                con.execute("UPDATE evidence_receipts SET storage_uri='memory://audit/changed' WHERE receipt_id=?", (receipt,))
         finally:
             con.close()
 
@@ -109,26 +102,28 @@ class AcceptanceDenominatorTests(unittest.TestCase):
         con = self.store.connect()
         try:
             with self.assertRaises(sqlite3.IntegrityError):
-                con.execute(
-                    "UPDATE transactions SET row_version=row_version+2 WHERE transaction_id=?",
-                    (tx,),
-                )
+                con.execute("UPDATE transactions SET row_version=row_version+2 WHERE transaction_id=?", (tx,))
         finally:
             con.close()
         self.store.set_execution_state(tx, "PLANNED")
         self.assertEqual(self.store.get_transaction(tx)["row_version"], 1)
 
     def test_projection_sequence_cannot_regress_and_stale_is_explicit(self):
+        _, tx = self.new_tx()
         con = self.store.connect()
         try:
+            event = con.execute(
+                "SELECT event_seq,event_id FROM controller_events WHERE transaction_id=? ORDER BY event_seq DESC LIMIT 1",
+                (tx,),
+            ).fetchone()
             con.execute(
                 "INSERT INTO projection_state(projection_name,destination,last_event_seq,last_event_id,published_at_ms,status,last_error_code) "
-                "VALUES('chat-bootstrap','github:control-state',5,'evt-5',?, 'CURRENT', NULL)",
-                (int(time.time() * 1000),),
+                "VALUES('chat-bootstrap','github:control-state',?,?,?, 'CURRENT', NULL)",
+                (event["event_seq"], event["event_id"], int(time.time() * 1000)),
             )
             with self.assertRaises(sqlite3.IntegrityError):
                 con.execute(
-                    "UPDATE projection_state SET last_event_seq=4 WHERE projection_name='chat-bootstrap'"
+                    "UPDATE projection_state SET last_event_seq=last_event_seq-1 WHERE projection_name='chat-bootstrap'"
                 )
             con.execute(
                 "UPDATE projection_state SET status='STALE', last_error_code='PUBLISH_LAG' WHERE projection_name='chat-bootstrap'"
@@ -136,7 +131,7 @@ class AcceptanceDenominatorTests(unittest.TestCase):
             row = con.execute(
                 "SELECT last_event_seq,status,last_error_code FROM projection_state WHERE projection_name='chat-bootstrap'"
             ).fetchone()
-            self.assertEqual(row["last_event_seq"], 5)
+            self.assertEqual(row["last_event_seq"], event["event_seq"])
             self.assertEqual(row["status"], "STALE")
             self.assertEqual(row["last_error_code"], "PUBLISH_LAG")
         finally:
@@ -153,7 +148,6 @@ class AcceptanceDenominatorTests(unittest.TestCase):
                     "VALUES(?,?, 'github','UPDATE_REF','refs/heads/test','bad-initial',?,NULL,'SUCCEEDED',0,NULL,NULL,?,?)",
                     (new_uuid7(), tx, "e" * 64, now, now),
                 )
-
             effect_id = new_uuid7()
             con.execute(
                 "INSERT INTO external_effects(effect_id,transaction_id,provider,effect_type,target_key,idempotency_key,request_digest_sha256,expected_remote_version,state,attempt_count,remote_result_ref,last_error_code,created_at_ms,updated_at_ms) "
@@ -161,11 +155,7 @@ class AcceptanceDenominatorTests(unittest.TestCase):
                 (effect_id, tx, "e" * 64, now, now),
             )
             with self.assertRaises(sqlite3.IntegrityError):
-                con.execute(
-                    "UPDATE external_effects SET state='SUCCEEDED',updated_at_ms=? WHERE effect_id=?",
-                    (now + 1, effect_id),
-                )
-
+                con.execute("UPDATE external_effects SET state='SUCCEEDED',updated_at_ms=? WHERE effect_id=?", (now + 1, effect_id))
             con.execute(
                 "UPDATE external_effects SET state='INFLIGHT',attempt_count=1,updated_at_ms=? WHERE effect_id=?",
                 (now + 1, effect_id),
@@ -175,65 +165,39 @@ class AcceptanceDenominatorTests(unittest.TestCase):
                 (now + 2, effect_id),
             )
             with self.assertRaises(sqlite3.IntegrityError):
-                con.execute(
-                    "UPDATE external_effects SET state='PREPARED',updated_at_ms=? WHERE effect_id=?",
-                    (now + 3, effect_id),
-                )
-            con.execute(
-                "UPDATE external_effects SET state='RECONCILING',updated_at_ms=? WHERE effect_id=?",
-                (now + 3, effect_id),
-            )
+                con.execute("UPDATE external_effects SET state='PREPARED',updated_at_ms=? WHERE effect_id=?", (now + 3, effect_id))
+            con.execute("UPDATE external_effects SET state='RECONCILING',updated_at_ms=? WHERE effect_id=?", (now + 3, effect_id))
             con.execute(
                 "UPDATE external_effects SET state='SUCCEEDED',remote_result_ref='remote-1',updated_at_ms=? WHERE effect_id=?",
                 (now + 4, effect_id),
             )
-            state = con.execute(
-                "SELECT state FROM external_effects WHERE effect_id=?", (effect_id,)
-            ).fetchone()[0]
-            self.assertEqual(state, "SUCCEEDED")
+            self.assertEqual(con.execute("SELECT state FROM external_effects WHERE effect_id=?", (effect_id,)).fetchone()[0], "SUCCEEDED")
         finally:
             con.close()
 
     def test_expired_worker_result_is_rejected_without_replacement_worker(self):
         tx = self.make_claimable()
-        lease = self.store.acquire_lease(
-            transaction_id=tx,
-            resource_key=self.resource,
-            worker_id="worker-1",
-            ttl_ms=1_000,
-        )
+        lease = self.store.acquire_lease(transaction_id=tx, resource_key=self.resource, worker_id="worker-1", ttl_ms=1_000)
         self.store.set_execution_state(tx, "RUNNING")
         attempt = self.store.start_execution_attempt(
-            transaction_id=tx,
-            worker_id="worker-1",
-            lease_id=lease.lease_id,
-            fencing_token=lease.fencing_token,
+            transaction_id=tx, worker_id="worker-1", lease_id=lease.lease_id, fencing_token=lease.fencing_token
         )
         con = self.store.connect()
         try:
-            expiry = int(con.execute(
-                "SELECT expires_at_ms FROM leases WHERE lease_id=?", (lease.lease_id,)
-            ).fetchone()[0])
+            expiry = int(con.execute("SELECT expires_at_ms FROM leases WHERE lease_id=?", (lease.lease_id,)).fetchone()[0])
         finally:
             con.close()
         self.store._clock_ms = lambda: expiry
         with self.assertRaises(InvalidState):
             self.store.record_worker_result(
-                transaction_id=tx,
-                attempt_id=attempt,
-                lease_id=lease.lease_id,
-                fencing_token=lease.fencing_token,
-                result_type="PROGRESS",
-                payload={"progress": 1},
+                transaction_id=tx, attempt_id=attempt, lease_id=lease.lease_id,
+                fencing_token=lease.fencing_token, result_type="PROGRESS", payload={"progress": 1}
             )
 
     def test_kernel_has_no_legacy_controller_or_scheduler_runtime_dependency(self):
         forbidden = (
-            "CURRENT-AUTHORITY",
-            "SECOND-SHIFT-REGISTRY",
-            "WORK-OBLIGATION-REGISTRY",
-            "github.event",
-            "workflow_dispatch",
+            "CURRENT-AUTHORITY", "SECOND-SHIFT-REGISTRY", "WORK-OBLIGATION-REGISTRY",
+            "github.event", "workflow_dispatch",
         )
         package_dir = ROOT / "controller_v2"
         for source in package_dir.glob("*.py"):
