@@ -52,10 +52,45 @@ export function uuidv7(nowMs = Date.now()) {
   return `${h.slice(0,8)}-${h.slice(8,12)}-${h.slice(12,16)}-${h.slice(16,20)}-${h.slice(20)}`;
 }
 
-export function isUuidV7(v) { return /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v); }
-export function isSha1(v) { return /^[0-9a-f]{40}$/i.test(v); }
-export function isRfc3339(v) {
-  if (typeof v !== 'string' || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z$/.test(v)) return false;
-  const t = Date.parse(v);
-  return Number.isFinite(t);
+export function isUuidV7(v) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v);
 }
+
+export function isGitObjectId(algorithm, oid) {
+  if (algorithm === 'sha1') return /^[0-9a-f]{40}$/i.test(String(oid || ''));
+  if (algorithm === 'sha256') return /^[0-9a-f]{64}$/i.test(String(oid || ''));
+  return false;
+}
+
+export function isSha1(v) { return isGitObjectId('sha1', v); }
+
+function leapYear(year) {
+  return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+}
+
+function daysInMonth(year, month) {
+  if (month === 2) return leapYear(year) ? 29 : 28;
+  if ([4, 6, 9, 11].includes(month)) return 30;
+  return 31;
+}
+
+// Controller timestamp profile: RFC 3339 full-date/time shape, normalized to UTC Z,
+// with seconds 00..59. Leap-second literals are intentionally rejected at ingress
+// so semantic time has one deterministic internal representation.
+export function isControllerTimestamp(v) {
+  if (typeof v !== 'string') return false;
+  const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.(\d+))?Z$/.exec(v);
+  if (!m) return false;
+  const year = Number(m[1]);
+  const month = Number(m[2]);
+  const day = Number(m[3]);
+  const hour = Number(m[4]);
+  const minute = Number(m[5]);
+  const second = Number(m[6]);
+  if (month < 1 || month > 12) return false;
+  if (day < 1 || day > daysInMonth(year, month)) return false;
+  if (hour < 0 || hour > 23 || minute < 0 || minute > 59 || second < 0 || second > 59) return false;
+  return true;
+}
+
+export function isRfc3339(v) { return isControllerTimestamp(v); }
