@@ -1,0 +1,37 @@
+{
+  "qualification_id": "BOOK-DURABLE-WORKFLOW-PERSISTENCE-HOSTED-QUALIFICATION-001",
+  "effective_date": "2026-09-11",
+  "owner_system_id": "BOOK",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "control_ref": "book-system/control-v1",
+  "exact_owner_subject_sha": "e2a23e8b1f076e3cd576c11e036e40eaf8a5ce2f",
+  "objective_id": "BOOK-DURABLE-WORKFLOW-CHECKPOINT-RECEIPT-PERSISTENCE-001",
+  "workflow_run_id": 34595298033,
+  "workflow_job_id": 103249548721,
+  "result": "PASS",
+  "cases_passed": 14,
+  "cases_planned": 14,
+  "checks": {
+    "durable_reload": true,
+    "optimistic_stale_write_rejection": true,
+    "idempotent_workflow_write": true,
+    "idempotent_checkpoint_write": true,
+    "append_only_receipts": true,
+    "raw_manuscript_persistence_forbidden": true,
+    "canonical_effect_persistence_forbidden": true,
+    "canonical_effect_performed": false
+  },
+  "artifact": {
+    "artifact_id": 10262021446,
+    "name": "BOOK-DURABLE-PERSISTENCE-e2a23e8b-hosted-evidence",
+    "size_bytes": 307,
+    "uploaded_artifact_zip_sha256": "9fe887359a1757be37400323e810d3fdca46812c63b2fe4e8390a4dc5cebac44"
+  },
+  "implementation_paths": [
+    "system-master/book-system/book-workflow-durable-store.js",
+    "system-master/book-system/book-workflow-durable-store.test.js"
+  ],
+  "closure": "COMPLETE_PASS__EXACT_BOOK_OWNER_SUBJECT",
+  "scope_boundary": "This PASS proves the portable Book-owned durable coordination-state seam on the exact owner subject only. It does not declare BOOK complete and does not transfer A-01, native, publication, production, author, private, canonical manuscript, Story Bible or admission authority.",
+  "prose_effect": "NONE__PROSE_REMAINS_COMPLETE_RETIRED_TERMINAL"
+}
