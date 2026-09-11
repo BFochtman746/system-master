@@ -51,20 +51,21 @@ for (const id of expectedPeers) {
   if (byId[id].parent_id !== expectedPeerParent[id]) fail(`${id} parent is invalid; expected SYSTEM_MASTER`);
   if (!byId[id].control_ref || !byId[id].control_record) fail(`${id} must declare control_ref and control_record`);
 }
-if (byId.PROSE.parent_id !== 'BOOK') fail('completed PROSE record must remain under BOOK for historical/integration provenance');
-if (ownerPath(byId.PROSE) !== 'SYSTEM_MASTER/BOOK/PROSE') fail('PROSE historical owner_path must remain SYSTEM_MASTER/BOOK/PROSE');
-if (byId.PROSE.classification !== 'COMPLETED_CHILD_SPECIALIST_SYSTEM__AVAILABLE_FOR_BOOK_INTEGRATION') fail('PROSE must be classified complete and available only as Book integration input');
+if (byId.PROSE.parent_id !== 'BOOK') fail('completed PROSE must remain the Book child specialist');
+if (ownerPath(byId.PROSE) !== 'SYSTEM_MASTER/BOOK/PROSE') fail('PROSE owner_path must remain SYSTEM_MASTER/BOOK/PROSE');
+if (byId.PROSE.classification !== 'COMPLETED_CHILD_SPECIALIST_SYSTEM__AVAILABLE_FOR_BOOK_INTEGRATION') fail('PROSE must be classified complete and available for Book integration');
 if (byId.PROSE.completion !== 'COMPLETE') fail('PROSE completion must remain COMPLETE');
-if (byId.PROSE.execution_lane !== 'BOOK') fail('completed PROSE evidence may only be consumed through BOOK-owned integration');
+if (byId.PROSE.execution_lane !== 'BOOK') fail('PROSE integration execution must inherit the BOOK lane');
 
 const peerIds = new Set(topology.peer_system_ids || []);
 if (peerIds.size !== 4 || [...expectedPeers].some((id) => !peerIds.has(id)) || peerIds.has('PROSE')) fail('peer_system_ids must be exactly CORE,LEARNING,BOOK,DOCUMENTS');
 const childIds = new Set(topology.child_system_ids || []);
-if (!childIds.has('PROSE')) fail('child_system_ids must preserve PROSE only as completed child provenance');
+if (!childIds.has('PROSE')) fail('child_system_ids must contain completed Book child PROSE');
 
 const history = topology.historical_records || {};
 if (!history.prose_retirement_attempt) fail('historical Prose retirement record pointer must be preserved');
 requireFile(history.prose_retirement_attempt);
+if (history.prose_retirement_current_effect !== 'SUPERSEDED_BY_ADR_0004') fail('historical Prose retirement current effect must remain superseded by ADR-0004');
 
 const edges = new Set((topology.hierarchy_edges || []).map((edge) => `${edge[0]}>${edge[1]}`));
 for (const edge of ['SYSTEM_MASTER>CORE','SYSTEM_MASTER>LEARNING','SYSTEM_MASTER>BOOK','BOOK>PROSE','SYSTEM_MASTER>DOCUMENTS']) if (!edges.has(edge)) fail(`required hierarchy edge missing: ${edge}`);
@@ -74,8 +75,8 @@ for (const flag of ['implicit_system_creation_forbidden','branch_name_cannot_cre
 
 const laneMap = topology.execution_lane_owner_map || {};
 for (const [lane, owner] of Object.entries(laneMap)) if (!expectedPeers.has(owner)) fail(`execution lane ${lane} maps to non-peer owner ${owner}`);
-if (laneMap['LITERARY-PROSE'] !== 'BOOK') fail('historical LITERARY-PROSE qualification identity must map to BOOK, never an active PROSE lane');
-if (laneMap['BOOK-EVAL-LEMONADE-001'] !== 'BOOK') fail('historical BOOK-EVAL qualification identity must map to BOOK');
+if (laneMap['LITERARY-PROSE'] !== 'BOOK') fail('LITERARY-PROSE qualification/integration work must map to BOOK, never an independent PROSE lane');
+if (laneMap['BOOK-EVAL-LEMONADE-001'] !== 'BOOK') fail('BOOK-EVAL qualification/integration work must map to BOOK');
 const a01 = readJson(registryPath);
 const workstreams = new Set(Object.values(a01.qualifications || {}).map((entry) => entry.workstream_id).filter(Boolean));
 const unmapped = [...workstreams].filter((id) => !laneMap[id]).sort();
@@ -87,7 +88,7 @@ const obligations = readJson(requireFile(authority.obligation_registry));
 for (const item of obligations.obligations || []) {
   if (!item.obligation_id || !item.owner_path || !item.state) fail('every obligation must declare obligation_id, owner_path and state');
   if (!String(item.owner_path).startsWith('SYSTEM_MASTER')) fail(`obligation ${item.obligation_id} escapes System Master hierarchy`);
-  if (!['CLOSED','SUPERSEDED'].includes(item.state) && sameOrDescendant(item.owner_path, 'SYSTEM_MASTER/BOOK/PROSE')) fail(`open obligation ${item.obligation_id} attempts to reactivate completed PROSE; integration work must be BOOK-owned`);
+  if (!['CLOSED','SUPERSEDED'].includes(item.state) && sameOrDescendant(item.owner_path, 'SYSTEM_MASTER/BOOK/PROSE')) fail(`open obligation ${item.obligation_id} attempts to create an independent PROSE owner path; active integration work must be BOOK-owned`);
   if (![...activeOwnerPaths].some((p) => sameOrDescendant(item.owner_path, p)) && !sameOrDescendant(item.owner_path, 'SYSTEM_MASTER/BOOK/PROSE')) fail(`obligation ${item.obligation_id} has no active topology owner path: ${item.owner_path}`);
 }
 
@@ -101,12 +102,14 @@ for (const id of expectedPeers) {
 }
 if ((secondShift.owner_files || {}).PROSE) fail('Second Shift registry must not schedule a separate PROSE lane');
 if ((secondShift.owner_files || {}).SYSTEM_MASTER) fail('Second Shift registry must not schedule SYSTEM_MASTER root as a peer worker lane');
+if ((secondShift.coverage_routes || {})['SYSTEM_MASTER/BOOK/PROSE'] !== 'BOOK') fail('Second Shift must route completed Prose child integration through BOOK');
 
 console.log('SYSTEM_TOPOLOGY_PASS');
 console.log('product_root=SYSTEM_MASTER');
 console.log('peer_systems=CORE,LEARNING,BOOK,DOCUMENTS');
-console.log('prose_status=COMPLETE_HISTORICAL_INPUT_ONLY');
-console.log('prose_execution=FORBIDDEN');
+console.log('prose_status=COMPLETE_BOOK_CHILD');
+console.log('prose_independent_execution=FORBIDDEN');
+console.log('prose_integration_execution=BOOK_CONTROLLED');
 console.log('book_integration_owner=BOOK');
 console.log(`open_obligations_registered=${(obligations.obligations || []).filter((item) => item.state !== 'CLOSED' && item.state !== 'SUPERSEDED').length}`);
 console.log(`a01_workstream_ids_mapped=${workstreams.size}`);
