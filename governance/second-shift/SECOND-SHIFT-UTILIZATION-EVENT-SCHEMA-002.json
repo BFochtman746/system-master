@@ -1,0 +1,61 @@
+{
+  "schema_id": "SECOND-SHIFT-UTILIZATION-EVENT-SCHEMA-002",
+  "status": "PROPOSED_RELIABILITY_BRANCH_ONLY",
+  "supersedes_for_new_execution": "SECOND-SHIFT-UTILIZATION-EVENT-SCHEMA-001",
+  "historical_read_compatibility": ["SECOND-SHIFT-UTILIZATION-EVENT-SCHEMA-001"],
+  "shift_timezone": "America/New_York",
+  "shift_window": "00:00-07:00",
+  "allowed_lanes": ["CORE", "LEARNING", "BOOK", "DOCUMENTS"],
+  "allowed_event_types": ["SHIFT_OPEN", "READY", "CLAIMED", "DISPATCH_INTENT", "DISPATCHED", "RUNNING", "HEARTBEAT", "PROGRESS", "COMPLETED", "BLOCKED", "STALE", "RETRY", "CIRCUIT_OPEN", "CIRCUIT_HALF_OPEN", "CIRCUIT_CLOSED", "SUCCESSOR_BOUND", "ALL_RUNGS_EXHAUSTED", "IDLE_VALID", "SHIFT_CLOSE"],
+  "required_ledger_fields": ["schema_id", "shift_id", "shift_date", "lane", "events"],
+  "required_event_fields": ["event_id", "occurred_at", "event_type", "lane", "control_ref", "control_head", "delegation_id", "objective_id", "controller_epoch", "evidence"],
+  "claim_event_required_fields": ["lease_id", "idempotency_key", "fencing_token", "lease_expires_at", "attempt"],
+  "dispatch_event_required_fields": ["dispatch_id", "idempotency_key", "fencing_token"],
+  "execution_event_required_fields": ["lease_id", "idempotency_key", "fencing_token"],
+  "heartbeat_event_required_fields": ["lease_id", "idempotency_key", "fencing_token", "checkpoint_pointer"],
+  "retry_event_required_fields": ["dependency_or_operation", "failure_class", "attempt", "retry_budget", "next_action"],
+  "circuit_event_required_fields": ["dependency_or_operation", "failure_class", "next_probe_at_or_condition", "fallback_successor_or_rung"],
+  "all_rungs_exhausted_required_fields": ["rungs", "independent_work_remaining", "next_external_condition"],
+  "all_rungs_required_count": 8,
+  "operational_limits": {
+    "supervisor_tick_sla_seconds": 60,
+    "dispatch_ack_sla_seconds": 120,
+    "heartbeat_sla_minutes": 5,
+    "ready_dispatch_sla_minutes": 5,
+    "telemetry_freshness_sla_minutes": 10,
+    "max_retry_budget": 3,
+    "max_clock_skew_seconds": 60
+  },
+  "atomicity_rules": [
+    "Claim creation and durable dispatch intent are one local database transaction.",
+    "A worker may not mutate unless its fencing_token equals the lane's current fencing token.",
+    "Owner-head invalidation increments the fencing token before any replacement claim can be created.",
+    "A terminal transition and lease release are one local database transaction.",
+    "Git is an audit/evidence export target, not the live lease/queue database."
+  ],
+  "claim_lifecycle_rules": [
+    "READY -> CLAIMED requires exact current owner head, one live claim maximum per lane, a globally unique idempotency key and a monotonically increasing fencing token.",
+    "CLAIMED -> DISPATCH_INTENT is committed atomically with the claim.",
+    "DISPATCH_INTENT -> DISPATCHED records the external/local execution identity; duplicate acknowledgement with the same identity is idempotent and conflicting acknowledgement fails closed.",
+    "RUNNING, HEARTBEAT and PROGRESS require the exact live lease_id, delegation_id, objective_id, control_head, idempotency_key and fencing_token.",
+    "COMPLETED, BLOCKED or STALE releases only the exact live claim and fences all stale workers.",
+    "Owner-head change during a claim terminalizes that claim as STALE and increments the lane fence before successor selection.",
+    "SUCCESSOR_BOUND follows a terminal/reconciliation boundary and creates a new READY generation; it never reuses the prior idempotency key.",
+    "SHIFT_CLOSE is invalid while a mutation-capable lease remains live."
+  ],
+  "retry_rules": [
+    "Every new retry is a durable RETRY event; retry counts may not exist only inside free-form evidence.",
+    "retry_budget is an integer from 1 through max_retry_budget and attempt never exceeds retry_budget.",
+    "CIRCUIT_OPEN requires the immediately applicable dependency retry budget to be exhausted.",
+    "CIRCUIT_HALF_OPEN requires prior CIRCUIT_OPEN; CIRCUIT_CLOSED requires prior CIRCUIT_HALF_OPEN.",
+    "An open circuit blocks only that dependency; the lane continues through dependency-valid fallback work when available."
+  ],
+  "recovery_rules": [
+    "Supervisor restart reconstructs live work from the transactional database before reading Git audit exports.",
+    "An expired lease is terminalized STALE before any replacement claim is admitted.",
+    "A pending dispatch intent survives process and machine restart and is reconciled before redispatch.",
+    "Missed GitHub schedules do not prevent work because the supervisor uses wall-clock shift state and immediate restart catch-up.",
+    "Unknown external dispatch outcome is reconciled by dispatch_id/idempotency_key before another mutation-capable execution is permitted."
+  ],
+  "authority_boundary": "This schema controls execution reliability only. It grants no product, A-01, native, author, private, publication, promotion or production authority."
+}
