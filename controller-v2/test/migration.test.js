@@ -33,7 +33,8 @@ test('MG-T001 real v1 rows migrate losslessly through v2 and v3 with implicit SH
     assert.equal(k.db.prepare('SELECT COUNT(*) n FROM schema_migrations').get().n,3);
     for(const table of ['transactions','qualifications','promotions']){
       const row=k.db.prepare(`SELECT subject_algorithm,subject_oid FROM ${table}`).get();
-      assert.deepEqual(row,{subject_algorithm:'sha1',subject_oid:OID});
+      assert.equal(row.subject_algorithm,'sha1');
+      assert.equal(row.subject_oid,OID);
       assert.equal(columns(k.db,table).includes('subject_sha'),false);
     }
     assert.equal(k.db.prepare('SELECT completion_contract_json FROM transactions').get().completion_contract_json,null);
