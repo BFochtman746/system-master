@@ -2,10 +2,10 @@
   "owner_system_id": "BOOK",
   "owner_path": "SYSTEM_MASTER/BOOK",
   "control_ref": "book-system/control-v1",
-  "last_known_control_head": "1e8f9e7a37d11ab643ef3cc941f21851149714c8",
+  "last_known_control_head": "e2a23e8b1f076e3cd576c11e036e40eaf8a5ce2f",
   "program_job_lock": "governance/SYSTEM-PROGRAM-JOB-LOCK-001.json",
   "system_completion_status": "governance/SYSTEM-COMPLETION-STATUS-001.json",
-  "delegation_epoch": 29,
+  "delegation_epoch": 30,
   "active_delegations": [
     {
       "delegation_id": "SECOND-SHIFT-BOOK-DURABLE-WORKFLOW-PERSISTENCE-001",
@@ -14,20 +14,25 @@
       "obligation_id": "BOOK-PROSE-PHASE-2-ORCHESTRATOR-CLOSURE-CENSUS-001",
       "active_prose_execution_owner": null,
       "state": "READY",
-      "priority": "BOOK_OWNER_VALID_PHASE3A_DURABLE_COORDINATION_STATE_SEAM",
+      "priority": "BOOK_IMPLEMENTATION_PRESENT__EXACT_HOSTED_QUALIFICATION_PENDING",
       "valid_for_control_ref": "book-system/control-v1",
-      "valid_for_control_head": "1e8f9e7a37d11ab643ef3cc941f21851149714c8",
+      "valid_for_control_head": "e2a23e8b1f076e3cd576c11e036e40eaf8a5ce2f",
       "created_at": "2026-09-11T01:18:00-04:00",
-      "last_revalidated_at": "2026-09-11T06:46:26-04:00",
+      "last_revalidated_at": "2026-09-11T07:40:51-04:00",
       "parent_checkpoint": "qualification/book-system/phase3a/BOOK-PHASE-3A-OPEN-SEAM-RECONCILIATION-001.json",
+      "implementation_subject_sha": "e2a23e8b1f076e3cd576c11e036e40eaf8a5ce2f",
+      "implementation_paths": [
+        "system-master/book-system/book-workflow-durable-store.js",
+        "system-master/book-system/book-workflow-durable-store.test.js"
+      ],
       "classification": "BOOK_OWNED_COORDINATION_STATE_PERSISTENCE",
-      "scope": "Implement a transport-neutral Book-owned durable store contract and reference adapter for workflow states, cancellation/resume checkpoints and evidence/provenance receipts. Preserve exact workflow/source/digest/version identity, optimistic stale-write rejection, idempotent checkpoint writes and append-only receipt semantics. Persist coordination metadata and immutable references only; do not persist raw manuscript text through this seam and do not mutate canonical Book manuscript, Story Bible/canon or admission state.",
+      "scope": "Qualify the newly implemented transport-neutral Book-owned durable store contract and filesystem reference adapter for workflow states, cancellation/resume checkpoints and evidence/provenance receipts. Preserve exact workflow/source/digest/version identity, optimistic stale-write rejection, idempotent checkpoint writes and append-only receipt semantics. Persist coordination metadata and immutable references only; do not persist raw manuscript text through this seam and do not mutate canonical Book manuscript, Story Bible/canon or admission state.",
       "completed_prose_input_rule": "Historical completed Prose artifacts remain immutable Book-consumed inputs only. This successor creates no Prose execution, requirement, repair, research, test, qualification, telemetry, delegation or successor work.",
-      "completion_delta": "Close the demonstrated Book durable coordination-state persistence gap with fresh portable exact-subject tests for stale writes, idempotency, digest preservation, append-only receipt behavior and crash/reload continuity, while preserving zero canonical manuscript effect.",
-      "evidence_target": "Store contract, reference adapter, exact-subject portable tests and evidence showing workflow/checkpoint/receipt persistence survives reload without identity drift or canonical effect.",
-      "stop_condition": "Durable Book workflow/checkpoint/receipt persistence passes fresh exact-subject portable qualification, or a durable Book-owned blocker is preserved. Bind only the next Book-owned successor after re-reading owner head.",
+      "completion_delta": "Run fresh hosted exact-subject tests over e2a23e8b for reload/crash continuity, stale-write contention, idempotent workflow/checkpoint persistence, append-only receipts and forbidden raw/canonical-effect content. Close only if those tests execute and pass on that exact owner subject.",
+      "evidence_target": "Hosted exact-subject qualification receipt for e2a23e8b showing the durable coordination-store contract survives reload, rejects stale writes, preserves immutable checkpoint/receipt identity and performs zero canonical manuscript effect.",
+      "stop_condition": "Hosted tests execute on exact owner subject e2a23e8b and pass, or a durable Book-owned defect/blocker is preserved. Bind only the next Book-owned successor after re-reading owner head.",
       "allowed_work": [
-        "implement Book-owned workflow/checkpoint/receipt durable persistence interfaces and reference adapter",
+        "qualify the Book-owned workflow/checkpoint/receipt durable persistence interfaces and reference adapter",
         "persist coordination metadata and immutable references only",
         "test stale-write rejection, idempotent checkpoint persistence, append-only receipts and crash/reload continuity",
         "preserve exact source, workflow, checkpoint and receipt digests across persistence"
@@ -54,8 +59,8 @@
     {"delegation_id": "SECOND-SHIFT-BOOK-RF012-OWNER-PROMOTION-REBIND-004", "state": "COMPLETED__SUPERSEDED_BY_POST_RF012_GAP_CENSUS", "completion_subject_sha": "67a23c0b09505dc3dd8fd748523fec3868f649b0", "hosted_run_id": 34468928275, "history_preserved": true},
     {"delegation_id": "SECOND-SHIFT-BOOK-RF012-AUTHOR-DECISION-APPLICABILITY-GUARD-004", "state": "SUPERSEDED", "candidate_sha": "67a23c0b09505dc3dd8fd748523fec3868f649b0", "hosted_run_id": 34468928275, "history_preserved": true}
   ],
-  "prior_full_history": {"blob_sha": "3b1612a86b553cbc2de76b091fe2a201dacbea4a", "standing": "IMMUTABLE_GIT_HISTORY_PRESERVED"},
+  "prior_full_history": {"blob_sha": "54c54ae41e17d2b67a352da27a9ffd245fe75b95", "standing": "IMMUTABLE_GIT_HISTORY_PRESERVED"},
   "owner_revalidation_required": false,
-  "reason": "Morning reconciliation at 2026-09-11T06:46:26-04:00 re-fetched live Book control head 1e8f9e7a. Phase 3A durable workflow/checkpoint/receipt persistence remains READY and owner-valid; no new Book mutation claim is live. PROSE remains complete and retired, Documents receives no Prose work, and no canonical manuscript, author, A-01, native, publication or production authority was inferred.",
+  "reason": "The Book owner branch advanced to exact head e2a23e8b with the Phase 3A durable coordination-state implementation. Morning recovery re-fetched that head at 07:40:51 ET and preserved the objective as READY until hosted exact-subject qualification actually executes. PROSE remains complete and retired; Documents receives no Prose work; no canonical manuscript, author, A-01, native, publication or production authority is inferred.",
   "empty_is_valid": false
 }

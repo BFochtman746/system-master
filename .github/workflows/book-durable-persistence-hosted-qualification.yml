@@ -1,0 +1,37 @@
+name: Book Durable Persistence Hosted Qualification
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'governance/second-shift/BOOK-DELEGATIONS.json'
+      - '.github/workflows/book-durable-persistence-hosted-qualification.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact Book owner subject
+        uses: actions/checkout@v4
+        with:
+          ref: e2a23e8b1f076e3cd576c11e036e40eaf8a5ce2f
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Verify exact subject and run durable persistence qualification
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "e2a23e8b1f076e3cd576c11e036e40eaf8a5ce2f"
+          mkdir -p hosted-evidence
+          node system-master/book-system/book-workflow-durable-store.test.js | tee hosted-evidence/result.json
+      - name: Upload exact-subject evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: BOOK-DURABLE-PERSISTENCE-e2a23e8b-hosted-evidence
+          path: hosted-evidence/result.json
+          if-no-files-found: error
