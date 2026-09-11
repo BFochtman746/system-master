@@ -31,4 +31,13 @@ jobs:
         with:
           node-version: '20'
       - name: Run Book scheduler runtime qualification
-        run: node system-master/book-system/book-workflow-scheduler-runtime.test.js
+        shell: bash
+        run: |
+          set -o pipefail
+          node system-master/book-system/book-workflow-scheduler-runtime.test.js | tee scheduler-result.json
+      - name: Upload scheduler qualification evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: BOOK-WORKFLOW-SCHEDULER-RUNTIME-${{ github.sha }}-evidence
+          path: scheduler-result.json
+          if-no-files-found: error
