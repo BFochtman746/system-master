@@ -116,6 +116,29 @@
       "lease_id": "CORE-KR001-CATALOG-CUSTODY-2026-09-11T0058-0400",
       "idempotency_key": "CORE:KR001:SPREADSHEET-DATA:EXACT-BYTE-CUSTODY:2026-09-11",
       "evidence": {"operation":"Place the five exact Spreadsheet/Data qualification assets into immutable GitHub-readable custody on an isolated CORE Knowledge Recovery branch, verify post-transfer identities, and preserve A-01/native boundaries.","architecture_effect":"NONE__NO_NEW_SYSTEM","prose":"COMPLETE_RETIRED_TERMINAL__NO_ROUTE"}
+    },
+    {
+      "event_id": "2026-09-11-CORE-0010-STALE",
+      "occurred_at": "2026-09-11T06:46:26-04:00",
+      "event_type": "STALE",
+      "lane": "CORE",
+      "control_ref": "system-master/control-v2",
+      "control_head": "d88a5952e93b5bae4ce96e4017f334aeb8abaa00",
+      "delegation_id": "SECOND-SHIFT-CORE-KNOWLEDGE-RECOVERY-PROGRAMMING-001",
+      "objective_id": "SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001",
+      "lease_id": "CORE-KR001-CATALOG-CUSTODY-2026-09-11T0058-0400",
+      "idempotency_key": "CORE:KR001:SPREADSHEET-DATA:EXACT-BYTE-CUSTODY:2026-09-11",
+      "evidence": {
+        "classification": "EXPIRED_LEASE_RECONCILED_DURING_MORNING_CANONICAL_CLEANUP",
+        "lease_expired_at": "2026-09-11T01:48:00-04:00",
+        "terminal_event_previously_present": false,
+        "completion_inferred": false,
+        "pass_transferred": false,
+        "current_main_head_observed": "c06af792bab593c2a5f3b5c714539a1a2152e068",
+        "live_owner_head_revalidated": "d88a5952e93b5bae4ce96e4017f334aeb8abaa00",
+        "preserved_checkpoint": "governance/knowledge-recovery/families/SPREADSHEET-DATA-RECOVERY-SEED-001.json",
+        "recovery_rule": "Treat the abandoned catalog-custody invocation as stale only. Preserve exact observed evidence and re-dispatch later only under a fresh owner-valid claim."
+      }
     }
   ]
 }

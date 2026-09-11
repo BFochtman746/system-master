@@ -18,7 +18,7 @@
       "valid_for_control_ref": "book-system/control-v1",
       "valid_for_control_head": "1e8f9e7a37d11ab643ef3cc941f21851149714c8",
       "created_at": "2026-09-11T01:18:00-04:00",
-      "last_revalidated_at": "2026-09-11T01:18:00-04:00",
+      "last_revalidated_at": "2026-09-11T06:46:26-04:00",
       "parent_checkpoint": "qualification/book-system/phase3a/BOOK-PHASE-3A-OPEN-SEAM-RECONCILIATION-001.json",
       "classification": "BOOK_OWNED_COORDINATION_STATE_PERSISTENCE",
       "scope": "Implement a transport-neutral Book-owned durable store contract and reference adapter for workflow states, cancellation/resume checkpoints and evidence/provenance receipts. Preserve exact workflow/source/digest/version identity, optimistic stale-write rejection, idempotent checkpoint writes and append-only receipt semantics. Persist coordination metadata and immutable references only; do not persist raw manuscript text through this seam and do not mutate canonical Book manuscript, Story Bible/canon or admission state.",
@@ -46,78 +46,16 @@
     }
   ],
   "retired_delegations": [
-    {
-      "delegation_id": "SECOND-SHIFT-BOOK-PHASE3A-OPEN-SEAM-RECONCILIATION-001",
-      "state": "COMPLETED__SUPERSEDED_BY_BOOK_DURABLE_WORKFLOW_PERSISTENCE_001",
-      "prior_bound_control_head": "1e8f9e7a37d11ab643ef3cc941f21851149714c8",
-      "completion_evidence": "qualification/book-system/phase3a/BOOK-PHASE-3A-OPEN-SEAM-RECONCILIATION-001.json",
-      "completion_commit": "f8e78f52f1c5b4320342d387bc14446ab42d79e9",
-      "selected_open_seam": "BOOK-DURABLE-WORKFLOW-CHECKPOINT-RECEIPT-PERSISTENCE-001",
-      "historical_pass_transfer": false,
-      "canonical_effect": false,
-      "prose_execution_created": false,
-      "history_preserved": true
-    },
-    {
-      "delegation_id": "SECOND-SHIFT-BOOK-CONTEXT-COMPILER-001",
-      "state": "COMPLETED__SUPERSEDED_BY_PHASE3A_OPEN_SEAM_RECONCILIATION",
-      "prior_bound_control_head": "1e8f9e7a37d11ab643ef3cc941f21851149714c8",
-      "implementation_merge_sha": "6a488b45497c3a60fb3a23bab640a6a7ca372246",
-      "hosted_run_id": 34564007172,
-      "hosted_job_id": 103152279773,
-      "cases_passed": 44,
-      "cases_planned": 44,
-      "completion_evidence": "qualification/book-system/context-compiler/BOOK-CONTEXT-COMPILER-HOSTED-QUALIFICATION-001.json",
-      "historical_pass_transfer": false,
-      "canonical_effect": false,
-      "prose_execution_created": false,
-      "history_preserved": true
-    },
-    {
-      "delegation_id": "SECOND-SHIFT-BOOK-PROSE-PHASE2-ORCHESTRATOR-CLOSURE-CENSUS-001",
-      "state": "COMPLETED__SUPERSEDED_BY_BOOK_CONTEXT_COMPILER_001",
-      "prior_bound_control_head": "1e8f9e7a37d11ab643ef3cc941f21851149714c8",
-      "completion_evidence": "qualification/book-system/book-prose-integration/BOOK-PHASE-2-ORCHESTRATOR-CLOSURE-CENSUS-001.json",
-      "completion_commit": "a2095cd5ee315a336abfa0f41e4a7c25033c93e0",
-      "phase2_packets_closed": 10,
-      "phase2_cases_passed": 275,
-      "phase2_cases_planned": 275,
-      "history_preserved": true,
-      "prose_execution_created": false
-    },
-    {
-      "delegation_id": "SECOND-SHIFT-BOOK-PROSE-INTEGRATION-PHASE1-INPUT-CENSUS-001",
-      "state": "COMPLETED__SUPERSEDED_BY_PHASE2_ORCHESTRATOR_CLOSURE_CENSUS",
-      "prior_bound_control_head": "a2820411337b74a00878a1ce9cb82a363a4fb18c",
-      "live_control_head_at_reconciliation": "efb2ca4f234d223bf2a69b9fa1205b226d1e0b46",
-      "history_preserved": true
-    },
-    {
-      "delegation_id": "SECOND-SHIFT-BOOK-POST-RF012-IMPLEMENTATION-GAP-CENSUS-001",
-      "state": "COMPLETED__SUPERSEDED_BY_BOOK_PROSE_INTEGRATION_PHASE1",
-      "prior_bound_control_head": "6304df0b60dbe49ab7be0218b0d588c1b0ba5279",
-      "history_preserved": true
-    },
-    {
-      "delegation_id": "SECOND-SHIFT-BOOK-RF012-OWNER-PROMOTION-REBIND-004",
-      "state": "COMPLETED__SUPERSEDED_BY_POST_RF012_GAP_CENSUS",
-      "completion_subject_sha": "67a23c0b09505dc3dd8fd748523fec3868f649b0",
-      "hosted_run_id": 34468928275,
-      "history_preserved": true
-    },
-    {
-      "delegation_id": "SECOND-SHIFT-BOOK-RF012-AUTHOR-DECISION-APPLICABILITY-GUARD-004",
-      "state": "SUPERSEDED",
-      "candidate_sha": "67a23c0b09505dc3dd8fd748523fec3868f649b0",
-      "hosted_run_id": 34468928275,
-      "history_preserved": true
-    }
+    {"delegation_id": "SECOND-SHIFT-BOOK-PHASE3A-OPEN-SEAM-RECONCILIATION-001", "state": "COMPLETED__SUPERSEDED_BY_BOOK_DURABLE_WORKFLOW_PERSISTENCE_001", "prior_bound_control_head": "1e8f9e7a37d11ab643ef3cc941f21851149714c8", "completion_evidence": "qualification/book-system/phase3a/BOOK-PHASE-3A-OPEN-SEAM-RECONCILIATION-001.json", "completion_commit": "f8e78f52f1c5b4320342d387bc14446ab42d79e9", "selected_open_seam": "BOOK-DURABLE-WORKFLOW-CHECKPOINT-RECEIPT-PERSISTENCE-001", "historical_pass_transfer": false, "canonical_effect": false, "prose_execution_created": false, "history_preserved": true},
+    {"delegation_id": "SECOND-SHIFT-BOOK-CONTEXT-COMPILER-001", "state": "COMPLETED__SUPERSEDED_BY_PHASE3A_OPEN_SEAM_RECONCILIATION", "prior_bound_control_head": "1e8f9e7a37d11ab643ef3cc941f21851149714c8", "implementation_merge_sha": "6a488b45497c3a60fb3a23bab640a6a7ca372246", "hosted_run_id": 34564007172, "hosted_job_id": 103152279773, "cases_passed": 44, "cases_planned": 44, "completion_evidence": "qualification/book-system/context-compiler/BOOK-CONTEXT-COMPILER-HOSTED-QUALIFICATION-001.json", "historical_pass_transfer": false, "canonical_effect": false, "prose_execution_created": false, "history_preserved": true},
+    {"delegation_id": "SECOND-SHIFT-BOOK-PROSE-PHASE2-ORCHESTRATOR-CLOSURE-CENSUS-001", "state": "COMPLETED__SUPERSEDED_BY_BOOK_CONTEXT_COMPILER_001", "prior_bound_control_head": "1e8f9e7a37d11ab643ef3cc941f21851149714c8", "completion_evidence": "qualification/book-system/book-prose-integration/BOOK-PHASE-2-ORCHESTRATOR-CLOSURE-CENSUS-001.json", "completion_commit": "a2095cd5ee315a336abfa0f41e4a7c25033c93e0", "phase2_packets_closed": 10, "phase2_cases_passed": 275, "phase2_cases_planned": 275, "history_preserved": true, "prose_execution_created": false},
+    {"delegation_id": "SECOND-SHIFT-BOOK-PROSE-INTEGRATION-PHASE1-INPUT-CENSUS-001", "state": "COMPLETED__SUPERSEDED_BY_PHASE2_ORCHESTRATOR_CLOSURE_CENSUS", "prior_bound_control_head": "a2820411337b74a00878a1ce9cb82a363a4fb18c", "live_control_head_at_reconciliation": "efb2ca4f234d223bf2a69b9fa1205b226d1e0b46", "history_preserved": true},
+    {"delegation_id": "SECOND-SHIFT-BOOK-POST-RF012-IMPLEMENTATION-GAP-CENSUS-001", "state": "COMPLETED__SUPERSEDED_BY_BOOK_PROSE_INTEGRATION_PHASE1", "prior_bound_control_head": "6304df0b60dbe49ab7be0218b0d588c1b0ba5279", "history_preserved": true},
+    {"delegation_id": "SECOND-SHIFT-BOOK-RF012-OWNER-PROMOTION-REBIND-004", "state": "COMPLETED__SUPERSEDED_BY_POST_RF012_GAP_CENSUS", "completion_subject_sha": "67a23c0b09505dc3dd8fd748523fec3868f649b0", "hosted_run_id": 34468928275, "history_preserved": true},
+    {"delegation_id": "SECOND-SHIFT-BOOK-RF012-AUTHOR-DECISION-APPLICABILITY-GUARD-004", "state": "SUPERSEDED", "candidate_sha": "67a23c0b09505dc3dd8fd748523fec3868f649b0", "hosted_run_id": 34468928275, "history_preserved": true}
   ],
-  "prior_full_history": {
-    "blob_sha": "3b1612a86b553cbc2de76b091fe2a201dacbea4a",
-    "standing": "IMMUTABLE_GIT_HISTORY_PRESERVED"
-  },
+  "prior_full_history": {"blob_sha": "3b1612a86b553cbc2de76b091fe2a201dacbea4a", "standing": "IMMUTABLE_GIT_HISTORY_PRESERVED"},
   "owner_revalidation_required": false,
-  "reason": "Book Control 011 remains current at exact head 1e8f9e7a. Phase 3A census proved durable workflow/checkpoint/receipt persistence as the next machine-resolvable Book-owned seam: current modules construct and validate coordination objects in memory, while prior cancellation/resume and evidence/provenance closure explicitly withheld durable-persistence claims. PROSE remains complete and retired; Documents receives no Prose work.",
+  "reason": "Morning reconciliation at 2026-09-11T06:46:26-04:00 re-fetched live Book control head 1e8f9e7a. Phase 3A durable workflow/checkpoint/receipt persistence remains READY and owner-valid; no new Book mutation claim is live. PROSE remains complete and retired, Documents receives no Prose work, and no canonical manuscript, author, A-01, native, publication or production authority was inferred.",
   "empty_is_valid": false
 }
