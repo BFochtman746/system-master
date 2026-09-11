@@ -2,10 +2,10 @@
   "owner_system_id": "DOCUMENTS",
   "owner_path": "SYSTEM_MASTER/DOCUMENTS",
   "control_ref": "documents/control-v1",
-  "last_known_control_head": "045113bda0610ef174b677fdea36884b2c0c53be",
+  "last_known_control_head": "cff6c9a1c6674fc84484fdb8207c3559499e4c2e",
   "program_job_lock": "governance/SYSTEM-PROGRAM-JOB-LOCK-001.json",
   "system_completion_status": "governance/SYSTEM-COMPLETION-STATUS-001.json",
-  "delegation_epoch": 7,
+  "delegation_epoch": 8,
   "active_delegations": [
     {
       "delegation_id": "SECOND-SHIFT-DOCUMENTS-R4-ADMISSION-002",
@@ -16,9 +16,9 @@
       "priority": "DOCUMENTS_R4_BLOCKED_PREREQUISITE_CANDIDATE",
       "classification": "DOCUMENTS_R4_EXACT_CUSTODY_BLOCKED_PENDING_FILE_CAPABLE_TRANSPORT",
       "valid_for_control_ref": "documents/control-v1",
-      "valid_for_control_head": "045113bda0610ef174b677fdea36884b2c0c53be",
+      "valid_for_control_head": "cff6c9a1c6674fc84484fdb8207c3559499e4c2e",
       "created_at": "2026-09-10T22:35:00-04:00",
-      "last_revalidated_at": "2026-09-11T08:33:00-04:00",
+      "last_revalidated_at": "2026-09-11T08:49:10-04:00",
       "completion_delta": "Exact CR001-R4 source handoff was freshly materialized and verified 225/225 against the canonical manifest. GitHub-native source custody remains unresolved because the connected GitHub write contracts expose no mounted-file/file-ref bridge for the exact bytes. No changed-subject PASS was transferred.",
       "blocker_evidence": "qualification/document-system/r4/DOCUMENTS-R4-EXACT-SOURCE-HANDOFF-RECONCILIATION-001.json",
       "resume_condition": "A file-capable GitHub transport or separately integrity-gated exact-byte bridge becomes available; then import the already-verified exact handoff without reconstructing or reinterpreting source bytes and run fresh current-subject qualification.",
@@ -42,41 +42,57 @@
       "on_failure": "Preserve the exact Documents-owned custody or qualification failure evidence and repair only the demonstrated Documents defect; keep PROSE retired, Book integration Book-owned, and unrelated peer authority unchanged."
     },
     {
-      "delegation_id": "SECOND-SHIFT-DOCUMENTS-SYSTEM-MASTER-SERVICE-ADAPTER-INTEGRATION-001",
+      "delegation_id": "SECOND-SHIFT-DOCUMENTS-POST-ADAPTER-OPEN-SEAM-CENSUS-001",
       "owner_path": "SYSTEM_MASTER/DOCUMENTS",
-      "objective_id": "DOCUMENTS-TO-SYSTEM-MASTER-SERVICE-ADAPTER-INTEGRATION-001",
+      "objective_id": "DOCUMENTS-POST-SYSTEM-MASTER-ADAPTER-OPEN-SEAM-CENSUS-001",
       "obligation_id": "DOCUMENTS-CURRENT-ADMISSION-001",
       "state": "READY",
-      "priority": "DOCUMENTS_OWNER_VALID_INDEPENDENT_SUCCESSOR_WHILE_R4_CUSTODY_BLOCKED",
+      "priority": "DOCUMENTS_OWNER_VALID_POST_ADAPTER_SUCCESSOR_WHILE_R4_CUSTODY_BLOCKED",
       "valid_for_control_ref": "documents/control-v1",
-      "valid_for_control_head": "045113bda0610ef174b677fdea36884b2c0c53be",
-      "created_at": "2026-09-11T08:33:00-04:00",
-      "last_revalidated_at": "2026-09-11T08:33:00-04:00",
-      "parent_checkpoint": "qualification/document-system/interfaces/DOCUMENTS-SYSTEM-MASTER-SERVICE-INTERFACE-QUALIFICATION-001.json",
-      "classification": "DOCUMENTS_GENERIC_SERVICE_INTERFACE_INTEGRATION",
-      "scope": "Integrate the exact qualified reference-only Documents request/response/event contract into current System Master call sites and adapter boundaries. Preserve idempotency, correlation and classified blocker semantics; do not transport raw document bytes through the envelope, do not depend on blocked R4 custody, and do not take Book, Learning, Core or Programming product semantics.",
-      "completion_delta": "Bind the qualified generic Documents service envelope to the System Master integration surface with deterministic portable tests, or preserve a truthful owner/external blocker.",
-      "evidence_target": "Exact call-site/adapter binding plus deterministic request/response/event conformance evidence on the current Documents owner subject.",
-      "stop_condition": "The qualified Documents service contract is integrated upward with fresh evidence, or a concrete external/native/owner dependency blocks the adapter while R4 remains independently blocked.",
+      "valid_for_control_head": "cff6c9a1c6674fc84484fdb8207c3559499e4c2e",
+      "created_at": "2026-09-11T08:49:10-04:00",
+      "last_revalidated_at": "2026-09-11T08:49:10-04:00",
+      "parent_checkpoint": "qualification/document-system/interfaces/DOCUMENTS-SYSTEM-MASTER-SERVICE-ADAPTER-QUALIFICATION-001.json",
+      "classification": "DOCUMENTS_POST_ADAPTER_OPEN_SEAM_CENSUS",
+      "scope": "Re-read current Documents control, obligations, expectations and exact owner implementation after the qualified System Master adapter PASS. Identify the first genuinely open Documents-owned implementation or qualification seam that can advance independently of the blocked R4 exact-byte custody prerequisite. Bind at most one demonstrated successor and do not invent peer semantics.",
+      "completion_delta": "Produce an evidence-backed post-adapter open-seam matrix and bind only one dependency-valid Documents-owned successor, or prove all remaining machine-resolvable work is blocked by explicit external/native/source/human authority.",
+      "evidence_target": "Current Documents owner-head census with existing-versus-missing implementation/evidence boundaries and at most one exact successor.",
+      "stop_condition": "One genuinely open Documents-owned successor is bound, or durable evidence proves no independent machine-resolvable Documents work remains while R4 stays separately blocked.",
       "allowed_work": [
-        "read current System Master Documents call sites and integration adapters",
-        "bind the qualified Documents reference-only service contract without raw-byte transport",
-        "test idempotency, correlation, blocker routing and cross-lane authority fences",
-        "preserve R4 custody as an independent blocker"
+        "read current Documents control/obligations/expectations and owner implementation",
+        "census remaining Documents-owned document mechanics and integration evidence",
+        "bind at most one demonstrated dependency-valid Documents successor",
+        "preserve R4 exact-byte custody as a separate blocker"
       ],
       "forbidden_authority": [
-        "do not create, inherit, schedule, repair, research, qualify, telemeter or bind successor work for PROSE",
-        "do not mutate Book canonical manuscript, Story Bible, author, lifecycle or admission state",
-        "do not take Learning, Core or Programming product authority",
-        "do not claim R4 GitHub-native custody until exact bytes are present in Git",
+        "do not create or resurrect PROSE work",
+        "do not mutate Book canonical manuscript/Story Bible/author/lifecycle/admission state",
+        "do not take Learning, Core or Programming product semantics",
+        "do not claim R4 custody before exact bytes exist in Git",
         "do not claim A-01/native/publication/production PASS",
         "do not declare DOCUMENTS complete"
       ],
-      "on_pass": "Preserve exact Documents integration evidence and bind only the next Documents-owned successor after fresh owner-head revalidation.",
-      "on_failure": "Preserve exact Documents-owned failure evidence and repair only the demonstrated adapter defect without reopening retired Prose or crossing peer ownership."
+      "on_pass": "Preserve the census evidence and bind only the demonstrated Documents-owned successor after fresh owner-head revalidation.",
+      "on_failure": "Preserve the exact Documents-owned blocker/defect without crossing owner boundaries."
     }
   ],
   "retired_delegations": [
+    {
+      "delegation_id": "SECOND-SHIFT-DOCUMENTS-SYSTEM-MASTER-SERVICE-ADAPTER-INTEGRATION-001",
+      "state": "COMPLETED__SYSTEM_MASTER_SERVICE_ADAPTER_INTEGRATED",
+      "prior_bound_control_head": "045113bda0610ef174b677fdea36884b2c0c53be",
+      "implementation_subject_sha": "cff6c9a1c6674fc84484fdb8207c3559499e4c2e",
+      "hosted_run_id": 34600881422,
+      "cases_passed": 43,
+      "cases_planned": 43,
+      "completion_evidence": "qualification/document-system/interfaces/DOCUMENTS-SYSTEM-MASTER-SERVICE-ADAPTER-QUALIFICATION-001.json",
+      "binding_path": "system-master/021f-integration/DOCUMENTS-SERVICE-BINDING-001.json",
+      "adapter_path": "system-master/021f-integration/src/main/java/org/systemmaster/integration/documents/DocumentsServiceAdapter.java",
+      "fwp010_package_mutated": false,
+      "r4_dependency": false,
+      "production_authorized": false,
+      "history_preserved": true
+    },
     {
       "delegation_id": "SECOND-SHIFT-DOCUMENTS-SYSTEM-MASTER-SERVICE-INTERFACE-CENSUS-001",
       "state": "COMPLETED__SYSTEM_MASTER_SERVICE_INTERFACE_BOUND",
@@ -100,6 +116,6 @@
     }
   ],
   "owner_revalidation_required": false,
-  "reason": "Morning recovery reconciled Documents owner head 8c81b9a2e7622805e973eda33bdeb8b743948249 -> 045113bda0610ef174b677fdea36884b2c0c53be; hosted run 34595805122 passed 20/20 on the exact service-interface subject. The service census is retired as completed, R4 remains truthfully blocked on exact-byte transport, and one independent Documents-to-System-Master adapter successor is READY.",
+  "reason": "Morning recovery reconciled Documents owner head 045113bda0610ef174b677fdea36884b2c0c53be -> cff6c9a1c6674fc84484fdb8207c3559499e4c2e. Hosted run 34600881422 compiled and passed 43/43 on the exact System Master adapter subject while preserving the qualified Documents contract and F-WP-010 bytes. The adapter successor is retired as completed; R4 remains SOURCE_CUSTODY blocked; one bounded post-adapter census successor is READY.",
   "empty_is_valid": false
 }
