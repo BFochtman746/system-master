@@ -3,11 +3,14 @@
   "purpose": "Permit a minimal exact-blob-pinned class of trusted self-hosted control-plane health workflows without weakening the canonical A-01 qualification gateway. These workflows may validate controller/governance state but may not execute arbitrary qualification subjects or untrusted pull-request code.",
   "workflows": {
     ".github/workflows/github-reliability-control-plane-enforcement.yml": {
-      "blob_sha": "ffc1661d3a9d844de6efd7ddf326b220bd15df63",
+      "blob_sha": "4d798a5c690feb6ca18e9f67c138ba6826cfc13f",
       "class": "TRUSTED_CONTROL_PLANE_HEALTH",
       "runner_labels": ["self-hosted", "Windows", "X64"],
       "required_concurrency_group": "a01-global-r2",
-      "allowed_push_branches": ["infrastructure/github-reliability-control-plane-001-20260910"],
+      "allowed_push_branches": [
+        "infrastructure/github-reliability-control-plane-001-20260910",
+        "infrastructure/github-reliability-control-plane-001-rebase-20260910"
+      ],
       "allow_workflow_dispatch": true,
       "allow_schedule": false,
       "allow_pull_request": false,
