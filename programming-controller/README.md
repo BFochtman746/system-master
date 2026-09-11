@@ -1,6 +1,6 @@
 # System Master Programming Controller
 
-This directory is the **external development control plane** used to coordinate Programming/GitHub work while System Master is being built. It is not linked into the System Master iPhone product runtime.
+This directory is the **external development control plane** used to coordinate Programming/GitHub work while System Master is being built. It is not linked into the System Master iPhone product runtime and does not replace the existing shared A-01 control plane.
 
 ## Current implementation authority
 
@@ -43,23 +43,33 @@ This directory is the **external development control plane** used to coordinate 
 - lossy projection import is fail-closed;
 - declared lossless adapters support explicit round-trip import.
 
-### Current qualification standing
+`IMPL-001M-05` — conformance, guards, evidence, integrity and migration:
 
-Portable local Node qualification: **28/28 tests PASS**.
+- hard/soft conformance constraints with `CANNOT_DETERMINE` fail-closed standing;
+- 001Q authorization wrappers with publication-time recheck;
+- explicit traversal/import/projection/migration resource budgets;
+- 001S evidence-outbox acknowledgement adapter;
+- snapshot-integrity inspection;
+- copy-on-write schema migration, stale-plan rejection, atomic activation and history-preserving rollback.
 
-Exact-head hosted qualification for `IMPL-001M-01` through `IMPL-001M-04`:
+`IMPL-001M-06` — downstream authority integration and qualification contract:
 
-- **Programming Controller Portable Qualification: PASS**;
-- **A-01 Control Plane Enforcement: PASS**.
+- explicit bindings to 001L, 001N, 001O, 001P, 001Q, 001R, 001S, 001W and REPAIR-002;
+- startup fails on missing/invalid delegated-authority bindings rather than silently reimplementing them;
+- no binding transfers canonical ownership to 001M;
+- integrated mutation path consumes 001R consistency validation and 001Q authorization;
+- 001S evidence, 001W durable scheduling and REPAIR-002 observed architecture remain delegated calls;
+- machine-readable `QualificationProfile001M` binds all 32/32 build-spec requirements to implementation packages and test families.
 
-This is still a draft candidate, not a merge or production claim.
+## Qualification standing
 
-### Remaining WP-001M slices
+`IMPL-001M-01` through `IMPL-001M-05` have passed prior exact-head hosted Programming Controller Portable Qualification and existing A-01 Control Plane Enforcement gates.
 
-- `IMPL-001M-05`: conformance contracts, security/resource guards, evidence outbox delivery, integrity controls and copy-on-write migration;
-- `IMPL-001M-06`: downstream authority integration and complete 001M qualification.
+The current branch includes all six 001M candidate implementation slices. **Exact-head hosted qualification of the current branch remains the closure gate.** Do not infer a PASS from an earlier head.
 
-Persistence, authorization, evidence standing/delivery, identity semantics, and durable orchestration remain behind their owning authority/port boundaries rather than being silently reimplemented here.
+Even after 001M-owned code qualifies, real production provider bindings remain separately evidenced: durable persistence backend, live 001Q authorization provider, 001S evidence transport, 001W durable scheduler, exact project-architecture source and other downstream provider/runtime facts are not proven merely by 001M contract tests.
+
+This PR remains a draft candidate and is not a merge or production claim.
 
 ## Test
 
