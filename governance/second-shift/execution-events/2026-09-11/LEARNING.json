@@ -36,6 +36,44 @@
         "semantic_qualification_executed": false,
         "claim_state": "UNCLAIMED_READY"
       }
+    },
+    {
+      "event_id": "2026-09-11-LEARNING-0003-CLAIMED",
+      "occurred_at": "2026-09-11T00:16:00-04:00",
+      "event_type": "CLAIMED",
+      "lane": "LEARNING",
+      "control_ref": "learning/control-v1",
+      "control_head": "e3196089f77dde376944a08eac78a697e57d1535",
+      "delegation_id": "SECOND-SHIFT-LEARNING-CURRICULUM-001E-BATCH-06",
+      "objective_id": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001E-INSTRUCTIONAL-CONTENT-AND-SCORING-BATCH-06",
+      "lease_id": "LEARNING-001E-2026-09-11T0016-0400",
+      "idempotency_key": "LEARNING:001E:BATCH-06-INFRA-CHECKPOINT:BATCH-07-PREP:2026-09-11",
+      "lease_expires_at": "2026-09-11T01:06:00-04:00",
+      "attempt": 1,
+      "evidence": {
+        "exact_control_head_validated": true,
+        "competing_live_learning_claims_observed": 0,
+        "batch_06_subject": "bd3f7de8490c7cfb6a7dcdd37cc1fa1d4656bced",
+        "main_authority_head_observed": "84fad302f94694c6c3d4526ad54ee39b5e7b1a4e"
+      }
+    },
+    {
+      "event_id": "2026-09-11-LEARNING-0004-RUNNING",
+      "occurred_at": "2026-09-11T00:16:01-04:00",
+      "event_type": "RUNNING",
+      "lane": "LEARNING",
+      "control_ref": "learning/control-v1",
+      "control_head": "e3196089f77dde376944a08eac78a697e57d1535",
+      "delegation_id": "SECOND-SHIFT-LEARNING-CURRICULUM-001E-BATCH-06",
+      "objective_id": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001E-INSTRUCTIONAL-CONTENT-AND-SCORING-BATCH-06",
+      "lease_id": "LEARNING-001E-2026-09-11T0016-0400",
+      "idempotency_key": "LEARNING:001E:BATCH-06-INFRA-CHECKPOINT:BATCH-07-PREP:2026-09-11",
+      "evidence": {
+        "rung": 1,
+        "operation": "Verify Batch 06 result class, contain exhausted hosted dependency, and prepare independent ordinal-7 source-bound successor",
+        "drive_discovery": "NO_MATCHING_AUTHORITATIVE_CSSGB_OR_CURRICULUM_FILE_FOUND",
+        "frozen_blueprint_remains_authoritative": true
+      }
     }
   ]
 }
