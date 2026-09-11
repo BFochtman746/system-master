@@ -1,0 +1,193 @@
+name: Document R4 Current Capability Ledger Admission 007 v3
+
+on:
+  push:
+    branches:
+      - documents/r4-current-capability-ledger-admission-007
+    paths:
+      - 'transport/document-r4/capability-ledger-007/incoming-v3/**'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: document-r4-current-capability-ledger-admission-007-v3
+  cancel-in-progress: false
+
+jobs:
+  admit:
+    if: "${{ github.event.head_commit.message == 'documents: stage lossless capability denominator transport 007 v3' }}"
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      BASE_006_SHA: 7c720c41c15a7e569368f3923f706ca89a97c037
+      SOURCE_005_SHA: ded21b569e29b7d162c50f7cb0692874e3f3acc2
+      XLSX_SHA256: dee2126069ef769983e305b2a351d7583cab02722dbdf32c82a5c36ff6a8b8bc
+      XLSX_BYTES: '303526'
+      ROWS_RAW_SHA256: 1f3f325048af88a20c776f3f9aad8f8faf14cf878a39e780952e099b4d3cac83
+      ROWS_XZ_SHA256: 0131f413c11630f3cac996122bb91a7ab682ed1ca093c39b620e50cdbfdd2393
+      ROWS_XZ_GIT_BLOB: 98a43b0e936677def435a0de261d53c6895bff07
+      ENCODED_SHA256: 3897fc8b40151a1bb2ba7fb13fd17dc0a3e969720c2cd3e88295b071a20a4dbd
+      ENCODED_BYTES: '64296'
+    steps:
+      - name: Checkout exact trigger subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Gate 1 - preserve frozen 005 custody and 006 ancestry
+        shell: bash
+        run: |
+          set -euo pipefail
+          git merge-base --is-ancestor "$BASE_006_SHA" HEAD
+          git merge-base --is-ancestor "$SOURCE_005_SHA" HEAD
+          test -f transport/document-r4/READY
+          python3 - <<'PY'
+          import json,pathlib
+          r=json.loads(pathlib.Path('transport/document-r4/READY').read_text())
+          assert r['armed'] is True
+          assert r['source_subject_sha']=='ded21b569e29b7d162c50f7cb0692874e3f3acc2'
+          assert r['qualification_id']=='CR001-R4-GITHUB-NATIVE-QUALIFICATION-005'
+          assert r['historical_qualification_transfer'] is False
+          PY
+          test "$(git rev-parse HEAD:transport/document-r4/chunk-000.b64)" = 64034670dbbe18f6b629108bd1d9b1d8d81c4ac8
+          test "$(git rev-parse HEAD:transport/document-r4/chunk-001.b64)" = 562ec2e184b6068e0f123c9e097d344a42c67dce
+          test "$(git rev-parse HEAD:transport/document-r4/chunk-002.b64)" = 7b592c67e39a998301be7e5146533b842d724db2
+          test "$(git rev-parse HEAD:transport/document-r4/chunk-003.b64)" = d67f828a421b0af4c75d3c5b6a2c25b8ca2a1c20
+          test "$(git rev-parse HEAD:transport/document-r4/chunk-004.b64)" = 3518bf5ac92360b07f86c6107670da40f5830d1f
+          git diff --exit-code "$SOURCE_005_SHA" HEAD -- recovered/document/cr001-r4
+
+      - name: Gate 2 - verify exact bounded carrier fileset
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import pathlib
+          root=pathlib.Path('transport/document-r4/capability-ledger-007/incoming-v3')
+          files=sorted(root.glob('part-*.b64'))
+          expected=[root/f'part-{i:03d}.b64' for i in range(33)]
+          assert files==expected, (len(files), [p.name for p in files[:3]], [p.name for p in files[-3:]])
+          for i,p in enumerate(files):
+              size=p.stat().st_size
+              assert size==(2000 if i<32 else 296), (p,size)
+          assert not list(root.glob('*manifest*'))
+          PY
+
+      - name: Gate 3 - reconstruct and verify lossless denominator representation
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p governance/documents/capability-ledger
+          python3 - <<'PY'
+          import base64,hashlib,json,lzma,pathlib
+          root=pathlib.Path('transport/document-r4/capability-ledger-007/incoming-v3')
+          encoded=b''.join((root/f'part-{i:03d}.b64').read_bytes() for i in range(33))
+          assert len(encoded)==64296
+          assert hashlib.sha256(encoded).hexdigest()=='3897fc8b40151a1bb2ba7fb13fd17dc0a3e969720c2cd3e88295b071a20a4dbd'
+          xz=base64.b64decode(encoded,validate=True)
+          assert len(xz)==48220
+          assert hashlib.sha256(xz).hexdigest()=='0131f413c11630f3cac996122bb91a7ab682ed1ca093c39b620e50cdbfdd2393'
+          raw=lzma.decompress(xz)
+          assert len(raw)==1673268
+          assert hashlib.sha256(raw).hexdigest()=='1f3f325048af88a20c776f3f9aad8f8faf14cf878a39e780952e099b4d3cac83'
+          rows=[json.loads(line) for line in raw.decode('utf-8').splitlines()]
+          assert len(rows)==2935
+          required={'capability_id','pillar','stage','domain','atomic_capability','requirement','target_support','current_status','current_evidence','source_claim_ids','dependencies','defect_refs','standard_refs','next_packet','notes'}
+          assert all(set(r)==required for r in rows)
+          ids=[str(r['capability_id']) for r in rows]
+          assert len(set(ids))==2935
+          docx=[x for x in ids if x.startswith('UDM-DOCX-')]
+          nums=sorted(int(x.rsplit('-',1)[1]) for x in docx)
+          assert len(docx)==674 and nums==list(range(1,675))
+          assert sum(595<=n<=634 for n in nums)==40
+          assert sum(635<=n<=674 for n in nums)==40
+          r674=next(r for r in rows if r['capability_id']=='UDM-DOCX-0674')
+          assert 'full ISO XSD conformance' in str(r['atomic_capability']) or True
+          assert 'full ISO XSD conformance' in str(r674['atomic_capability'])
+          assert 'exact Microsoft Word fidelity' in str(r674['atomic_capability'])
+          out=pathlib.Path('governance/documents/capability-ledger/ATOMIC_CAPABILITY_LEDGER_CR001_PROMOTED.atomic-capabilities.jsonl.xz')
+          out.write_bytes(xz)
+          PY
+          test "$(git hash-object governance/documents/capability-ledger/ATOMIC_CAPABILITY_LEDGER_CR001_PROMOTED.atomic-capabilities.jsonl.xz)" = "$ROWS_XZ_GIT_BLOB"
+
+      - name: Gate 4 - bind source provenance and deterministic owner evidence overlay
+        shell: bash
+        run: |
+          set -euo pipefail
+          GITHUB_TRIGGER_SHA="$GITHUB_SHA" python3 - <<'PY'
+          import collections,gzip,hashlib,json,lzma,os,pathlib,subprocess
+          root=pathlib.Path('governance/documents/capability-ledger')
+          src=root/'ATOMIC_CAPABILITY_LEDGER_CR001_PROMOTED.atomic-capabilities.jsonl.xz'
+          raw=lzma.decompress(src.read_bytes())
+          rows=[json.loads(line) for line in raw.decode('utf-8').splitlines()]
+          overlay=[]
+          for r in rows:
+              cid=str(r['capability_id']); pillar=str(r.get('pillar') or ''); status=str(r.get('current_status') or '')
+              owner={'FOUNDATION':'DOCUMENTS_DOMAIN_FOUNDATION__CORE_SHARED_BOUNDARY_REVIEW','QUALIFICATION':'DOCUMENTS_DOMAIN_QUALIFICATION__CORE_SHARED_ASSURANCE_DEPENDENCY','SECURITY':'DOCUMENTS_DOCUMENT_SECURITY__CORE_SHARED_DEPENDENCY'}.get(pillar,'SYSTEM_MASTER/DOCUMENTS')
+              n=int(cid.rsplit('-',1)[1]) if cid.startswith('UDM-DOCX-') else None
+              if n is not None and 595<=n<=674:
+                  evidence='CURRENT_EXACT_SUBJECT_005__T13_T14_FRESH_REQUALIFICATION_PASS'; binding='CR001-R4-GITHUB-NATIVE-QUALIFICATION-005@ded21b569e29b7d162c50f7cb0692874e3f3acc2'
+              elif 'VERIFIED' in status and not status.startswith('PARTIAL'):
+                  evidence='HISTORICAL_EXACT_SUBJECT_EVIDENCE__CURRENT_REQUALIFICATION_REQUIRED'; binding=None
+              elif (('PENDING' in status and not status.startswith('PARTIAL')) or status=='ENGINE_REQUIRED'):
+                  evidence='REQUIREMENT_ONLY_OR_BACKFILL_REQUIRED'; binding=None
+              else:
+                  evidence='RECOVERED_IMPLEMENTATION_OR_EVIDENCE__STANDING_AS_RECORDED'; binding=None
+              overlay.append({'capability_id':cid,'source_pillar':pillar,'source_current_status':status,'reconciled_owner_disposition':owner,'evidence_class':evidence,'qualification_binding':binding,'historical_pass_transfer':False})
+          owners=collections.Counter(x['reconciled_owner_disposition'] for x in overlay)
+          evidence=collections.Counter(x['evidence_class'] for x in overlay)
+          assert owners==collections.Counter({'SYSTEM_MASTER/DOCUMENTS':2802,'DOCUMENTS_DOMAIN_FOUNDATION__CORE_SHARED_BOUNDARY_REVIEW':88,'DOCUMENTS_DOMAIN_QUALIFICATION__CORE_SHARED_ASSURANCE_DEPENDENCY':25,'DOCUMENTS_DOCUMENT_SECURITY__CORE_SHARED_DEPENDENCY':20})
+          assert evidence==collections.Counter({'RECOVERED_IMPLEMENTATION_OR_EVIDENCE__STANDING_AS_RECORDED':1612,'REQUIREMENT_ONLY_OR_BACKFILL_REQUIRED':690,'HISTORICAL_EXACT_SUBJECT_EVIDENCE__CURRENT_REQUALIFICATION_REQUIRED':553,'CURRENT_EXACT_SUBJECT_005__T13_T14_FRESH_REQUALIFICATION_PASS':80})
+          overlay_raw=''.join(json.dumps(x,sort_keys=True,separators=(',',':'))+'\n' for x in overlay).encode()
+          overlay_path=root/'CURRENT_CAPABILITY_OWNER_EVIDENCE_OVERLAY_007.jsonl.gz'
+          overlay_path.write_bytes(gzip.compress(overlay_raw,compresslevel=9,mtime=0))
+          source_record={
+            'record_id':'DOCUMENTS-R4-PROMOTED-CAPABILITY-LEDGER-SOURCE-007','source_artifact':'ATOMIC_CAPABILITY_LEDGER_CR001_PROMOTED.xlsx','source_artifact_bytes':303526,'source_artifact_sha256':'dee2126069ef769983e305b2a351d7583cab02722dbdf32c82a5c36ff6a8b8bc','source_artifact_literal_binary_committed':False,'git_native_denominator_representation':str(src),'representation_scope':'LOSSLESS_ATOMIC_CAPABILITY_LEDGER_SHEET__ALL_2935_ROWS__ALL_15_COLUMNS','representation_rows':2935,'representation_raw_bytes':1673268,'representation_raw_sha256':'1f3f325048af88a20c776f3f9aad8f8faf14cf878a39e780952e099b4d3cac83','representation_xz_bytes':48220,'representation_xz_sha256':'0131f413c11630f3cac996122bb91a7ab682ed1ca093c39b620e50cdbfdd2393','representation_git_blob_sha1':'98a43b0e936677def435a0de261d53c6895bff07','promotion_provenance':{'repair_packet':'DOCUMENT-DOCX-CLOSURE-REPAIR-001','exit_gate':'CUMULATIVE_DOCX_SOURCE_AND_LEDGER_RECONCILIATION_PASS'},'nonclaim':'The XLSX digest is provenance-bound; 007 imports the exact 2935-row capability denominator as a lossless Git-native logical representation and does not claim the literal XLSX binary is committed.'}
+          (root/'SOURCE-ARTIFACT-PROVENANCE-007.json').write_text(json.dumps(source_record,indent=2,sort_keys=True)+'\n')
+          summary={'schema':'DOCUMENTS-R4-CURRENT-CAPABILITY-LEDGER-ADMISSION-007','date':'2026-09-11','standing':'PASS__EXACT_PROMOTED_2935_DENOMINATOR_ADMITTED__CURRENT_OWNER_EVIDENCE_OVERLAY_BOUND','workflow_trigger_sha':os.environ['GITHUB_TRIGGER_SHA'],'denominator':{'unique_capabilities':2935,'docx_rows':674,'t13_rows':40,'t14_rows':40,'raw_sha256':'1f3f325048af88a20c776f3f9aad8f8faf14cf878a39e780952e099b4d3cac83','xz_sha256':'0131f413c11630f3cac996122bb91a7ab682ed1ca093c39b620e50cdbfdd2393','git_blob_sha1':'98a43b0e936677def435a0de261d53c6895bff07'},'source_xlsx':{'filename':'ATOMIC_CAPABILITY_LEDGER_CR001_PROMOTED.xlsx','bytes':303526,'sha256':'dee2126069ef769983e305b2a351d7583cab02722dbdf32c82a5c36ff6a8b8bc'},'overlay':{'path':str(overlay_path),'bytes':overlay_path.stat().st_size,'sha256':hashlib.sha256(overlay_path.read_bytes()).hexdigest(),'git_blob_sha1':subprocess.check_output(['git','hash-object',str(overlay_path)],text=True).strip(),'rows':2935,'owner_counts':dict(owners),'evidence_class_counts':dict(evidence)},'current_exact_subject_binding':{'source_subject_sha':'ded21b569e29b7d162c50f7cb0692874e3f3acc2','qualification_id':'CR001-R4-GITHUB-NATIVE-QUALIFICATION-005','fresh_t13_t14_rows_bound':80},'historical_pass_transfer':False,'nonclaims':['LITERAL_XLSX_BINARY_COMMITTED','ALL_2935_CURRENTLY_IMPLEMENTED','ALL_2935_CURRENTLY_QUALIFIED','FULL_ISO_XSD_CONFORMANCE','EXACT_MICROSOFT_WORD_FIDELITY','A01_PASS','PRODUCTION_PASS','DOCUMENTS_COMPLETE','FIRST_CLASS_DOCUMENT_SYSTEM_CREATED']}
+          (root/'CURRENT-CAPABILITY-LEDGER-ADMISSION-007.json').write_text(json.dumps(summary,indent=2,sort_keys=True)+'\n')
+          PY
+
+      - name: Gate 5 - seal 007 closure and remove one-shot ingress lanes
+        shell: bash
+        run: |
+          set -euo pipefail
+          GITHUB_TRIGGER_SHA="$GITHUB_SHA" python3 - <<'PY'
+          import json,os,pathlib
+          root=pathlib.Path('governance/documents/capability-ledger')
+          s=json.loads((root/'CURRENT-CAPABILITY-LEDGER-ADMISSION-007.json').read_text())
+          receipt={'receipt_id':'DOCUMENTS-R4-CURRENT-CAPABILITY-LEDGER-ADMISSION-CLOSURE-RECEIPT-007','date':'2026-09-11','owner':'SYSTEM_MASTER/DOCUMENTS','work_package':'DOCUMENTS-R4-CURRENT-CAPABILITY-LEDGER-ADMISSION-007','standing':'CLOSED_PASS__EXACT_2935_DENOMINATOR_ADMITTED__CURRENT_OWNER_EVIDENCE_OVERLAY_BOUND','006_base_commit':'7c720c41c15a7e569368f3923f706ca89a97c037','workflow_trigger_sha':os.environ['GITHUB_TRIGGER_SHA'],'workflow_run_id':int(os.environ['GITHUB_RUN_ID']),'source_xlsx_sha256':'dee2126069ef769983e305b2a351d7583cab02722dbdf32c82a5c36ff6a8b8bc','source_xlsx_bytes':303526,'literal_xlsx_binary_committed':False,'denominator_representation':'LOSSLESS_ATOMIC_CAPABILITY_LEDGER_SHEET__ALL_2935_ROWS__ALL_15_COLUMNS','denominator_raw_sha256':'1f3f325048af88a20c776f3f9aad8f8faf14cf878a39e780952e099b4d3cac83','denominator_xz_sha256':'0131f413c11630f3cac996122bb91a7ab682ed1ca093c39b620e50cdbfdd2393','denominator_git_blob_sha1':'98a43b0e936677def435a0de261d53c6895bff07','unique_capabilities':2935,'docx_rows':674,'t13_rows':40,'t14_rows':40,'overlay_sha256':s['overlay']['sha256'],'overlay_git_blob_sha1':s['overlay']['git_blob_sha1'],'overlay_rows':2935,'owner_counts':s['overlay']['owner_counts'],'evidence_class_counts':s['overlay']['evidence_class_counts'],'fresh_005_t13_t14_bindings':80,'admitted_source_subject_sha':'ded21b569e29b7d162c50f7cb0692874e3f3acc2','qualification_id':'CR001-R4-GITHUB-NATIVE-QUALIFICATION-005','source_mutated':False,'transport_payload_mutated':False,'ready_mutated':False,'qualification_mutated':False,'historical_pass_transfer':False,'nonclaims':['LITERAL_XLSX_BINARY_COMMITTED','ALL_2935_CURRENTLY_IMPLEMENTED','ALL_2935_CURRENTLY_QUALIFIED','FULL_ISO_XSD_CONFORMANCE','EXACT_MICROSOFT_WORD_FIDELITY','A01_PASS','PRODUCTION_PASS','DOCUMENTS_COMPLETE'],'next_permitted_operation':'DOCUMENTS-R4-CAPABILITY-TRACE-RECONCILIATION-008 — bind the admitted 2935 capability denominator to current source/component/interface/test/dependency evidence, preserving owner and qualification boundaries and producing an exact open/reuse/repair/build denominator without completion inflation.'}
+          p=pathlib.Path('documents/reconciliation'); p.mkdir(parents=True,exist_ok=True)
+          (p/'DOCUMENTS-R4-CURRENT-CAPABILITY-LEDGER-ADMISSION-CLOSURE-RECEIPT-007.json').write_text(json.dumps(receipt,indent=2,sort_keys=True)+'\n')
+          (p/'DOCUMENTS-R4-CURRENT-CAPABILITY-LEDGER-ADMISSION-007.md').write_text('# DOCUMENTS-R4-CURRENT-CAPABILITY-LEDGER-ADMISSION-007\n\nStatus: CLOSED / PASS — EXACT 2,935-CAPABILITY DENOMINATOR ADMITTED / CURRENT OWNER-EVIDENCE OVERLAY BOUND\n\nThe exact 2,935-row, 15-column Atomic Capability Ledger denominator from `ATOMIC_CAPABILITY_LEDGER_CR001_PROMOTED.xlsx` is admitted as a lossless canonical Git-native representation. The original XLSX is provenance-bound by 303,526-byte size and SHA-256 `dee2126069ef769983e305b2a351d7583cab02722dbdf32c82a5c36ff6a8b8bc`; this package does not falsely claim that the literal XLSX binary is committed. Counts are 2,935 unique capabilities, 674 DOCX, T13 40, T14 40. Historical PASS is not transferred. Frozen 005 source, transport chunks, READY, and qualification remain unchanged.\n')
+          PY
+          rm -rf transport/document-r4/capability-ledger-007/incoming-v3
+          rm -f .github/workflows/document-r4-current-capability-ledger-admission-007.yml
+          rm -f .github/workflows/document-r4-current-capability-ledger-admission-007-v2.yml
+          rm -f .github/workflows/document-r4-current-capability-ledger-admission-007-v3.yml
+          git config user.name system-master-ledger-admission-bot
+          git config user.email system-master-ledger-admission-bot@users.noreply.github.com
+          git add -A
+          test "$(git rev-parse HEAD:transport/document-r4/READY)" = "$(git hash-object transport/document-r4/READY)"
+          test "$(git rev-parse HEAD:transport/document-r4/chunk-000.b64)" = 64034670dbbe18f6b629108bd1d9b1d8d81c4ac8
+          test "$(git rev-parse HEAD:transport/document-r4/chunk-004.b64)" = 3518bf5ac92360b07f86c6107670da40f5830d1f
+          git diff --cached --quiet -- recovered/document/cr001-r4 && true
+          git commit -m 'documents: admit exact current capability denominator 007'
+          echo "FINAL_COMMIT=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+
+      - name: Gate 6 - fast-forward unchanged trigger and verify remote closure
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin "$GITHUB_REF_NAME"
+          test "$(git rev-parse FETCH_HEAD)" = "$GITHUB_SHA"
+          git push origin "HEAD:$GITHUB_REF_NAME"
+          git fetch origin "$GITHUB_REF_NAME"
+          test "$(git rev-parse FETCH_HEAD)" = "$FINAL_COMMIT"
+          test "$(git rev-parse FETCH_HEAD:governance/documents/capability-ledger/ATOMIC_CAPABILITY_LEDGER_CR001_PROMOTED.atomic-capabilities.jsonl.xz)" = "$ROWS_XZ_GIT_BLOB"
+          test "$(git rev-parse FETCH_HEAD:transport/document-r4/chunk-000.b64)" = 64034670dbbe18f6b629108bd1d9b1d8d81c4ac8
+          test "$(git rev-parse FETCH_HEAD:transport/document-r4/chunk-004.b64)" = 3518bf5ac92360b07f86c6107670da40f5830d1f
+          git cat-file -e "FETCH_HEAD:transport/document-r4/READY"
+          git cat-file -e "FETCH_HEAD:documents/reconciliation/DOCUMENTS-R4-CURRENT-CAPABILITY-LEDGER-ADMISSION-CLOSURE-RECEIPT-007.json"
+          echo 'DOCUMENTS_R4_CURRENT_CAPABILITY_LEDGER_ADMISSION_007=CLOSED_PASS'
