@@ -1,51 +1,65 @@
 # DOCUMENTS-CONTROL-RECORD-001
 
-Status: ACTIVE / FIRST-CLASS PEER SYSTEM
-System ID: DOCUMENTS
-Canonical owner path: SYSTEM_MASTER/DOCUMENTS
-Parent: SYSTEM_MASTER
-Control ref: documents/control-v1
-Effective date: 2026-09-10
+Status: ACTIVE / INCOMPLETE / FIRST-CLASS PEER SYSTEM  
+System ID: DOCUMENTS  
+Canonical owner path: `SYSTEM_MASTER/DOCUMENTS`  
+Parent: `SYSTEM_MASTER`  
+Control ref: `documents/control-v1`  
+Effective date: 2026-09-10  
+Current topology: `governance/SYSTEM-TOPOLOGY-004.json`  
+Current job lock: `governance/SYSTEM-PROGRAM-JOB-LOCK-001.json`
 
-## Purpose
+## Completion truth
 
-DOCUMENTS is a first-class peer tool system inside SYSTEM MASTER. It owns document/content artifact semantics and is the canonical parent for the completed Prose capability family now being absorbed into Documents.
+DOCUMENTS is **not complete**. `governance/SYSTEM-COMPLETION-STATUS-001.json` is authoritative for product-level completion standing. A completed source import, qualification packet, renderer, converter, format family or integration phase does not by itself make Documents complete.
 
-## Current architecture
+PROSE is the only system currently complete. Prose belongs to BOOK at `SYSTEM_MASTER/BOOK/PROSE` and is not a Documents capability family or Documents integration target.
 
-Active peer systems under SYSTEM_MASTER are CORE, LEARNING, BOOK and DOCUMENTS. Prose is no longer an active peer/child owner. Its completed code, qualification evidence, evaluator/prose intelligence, preservation logic and historical receipts remain immutable provenance and are integrated into DOCUMENTS through explicit migration/crosswalk work.
+## Locked Documents job
+
+Finish the Documents system and integrate it upward into System Master.
 
 DOCUMENTS owns:
 
-- DOCX, PDF, PPTX and general document/content artifact creation/transformation semantics;
-- document intake, structure, conversion, preservation, rendering/export and document-specific provenance contracts;
-- reusable writing/prose generation and transformation capabilities not owned as canonical Book state;
-- the completed Prose evaluator/craft/diagnostic/revision-intelligence capability family after retirement migration;
-- document/prose service interfaces consumed by BOOK and other systems;
-- Documents-specific qualification, evidence, lifecycle and Second Shift delegation.
+- DOCX, PDF, PPTX and general document/content artifact mechanics;
+- document intake, structure, conversion, preservation, rendering and export semantics;
+- generic reusable document/writing artifact behavior outside another system's canonical state;
+- Documents-specific qualification, evidence, lifecycle and Second Shift work;
+- explicit document-service interfaces consumed by System Master and peer systems.
 
-DOCUMENTS does not own:
+DOCUMENTS does **not** own:
 
-- BOOK canonical manuscript, story bible, author decisions or publication state;
-- CORE shared artifact storage, execution/model/connector/runtime infrastructure;
-- LEARNING canonical learner/curriculum state;
-- historical Prose receipts by rewriting or relabeling them;
+- Book canonical manuscript, Story Bible/canon, author decisions, lifecycle, admission or publication state;
+- Book-specific Prose literary diagnosis, evaluation, revision, voice/preservation or homogenization-defense intelligence;
+- Learning learner/curriculum/mastery/assessment product behavior;
+- Core shared runtime/data/platform/connector/A-01 authority;
 - human, author, private, native, publication or production authority not explicitly granted.
 
-## Prose retirement and absorption
+## Prose boundary
 
-PROSE is complete and retired as an independently scheduled system. Historical path `SYSTEM_MASTER/BOOK/PROSE` and all exact-SHA evidence remain preserved for provenance only. New Prose-related work routes to `SYSTEM_MASTER/DOCUMENTS` unless the work is specifically a BOOK canonical-state decision, in which case BOOK remains the canonical owner and consumes DOCUMENTS through an admitted interface.
+The prior Topology-003 instruction to absorb Prose into Documents is superseded. Do not schedule, repair, implement, absorb, rename or claim active Book-Prose work in the Documents lane.
 
-No new active Prose delegation, repair lane, chat role, current obligation or scheduled Second Shift worker may be created. Any stale Prose work discovered after this control record is classified `RETIRED_OWNER_STALE_WORK` and is either closed as already completed/superseded or translated into a DOCUMENTS-owned integration obligation without transferring historical PASS.
+Documents may provide document/artifact services to Book through explicit admitted interfaces. That service relationship never transfers Book or Prose semantic ownership and never permits Documents to mutate canonical Book state.
 
 ## Current objective
 
-Continue the active Document R4 GitHub-native source/import/exact-subject qualification work under DOCUMENTS ownership, then integrate the completed Prose capability family into DOCUMENTS through an evidence-preserving interface/capability migration. Historical qualification does not transfer to changed integration bytes.
+Continue `DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-IMPORT-AND-EXACT-SUBJECT-QUALIFICATION-002`:
 
-## Book relationship
+1. preserve/reconstruct the exact CR001-R4 source tree in ordinary GitHub-native custody;
+2. bind exact current subject identity;
+3. run fresh dependency-valid portable/hosted qualification without PASS transfer;
+4. continue Documents-owned implementation only where evidence shows a real gap;
+5. bind explicit Documents-to-System-Master service/integration interfaces;
+6. continue until the Documents product completion boundary is genuinely satisfied or a truthful external/human/native dependency blocks it.
 
-BOOK and DOCUMENTS are peer systems. BOOK owns canonical book lifecycle/state and invokes DOCUMENTS for document/prose capabilities through explicit interfaces. DOCUMENTS may return document/prose artifacts, diagnostics or transformation results but may not silently mutate BOOK canonical state.
+## System Master relationship
+
+Documents integrates **upward into SYSTEM_MASTER**. System Master/Core may provide shared execution, storage, model, connector, artifact and qualification infrastructure but does not take Documents product semantics.
+
+Documents remains a peer of Book and Learning. Cross-system calls use explicit interfaces; ownership does not cross with the call.
 
 ## Second Shift
 
-DOCUMENTS owns its own active Second Shift lane and scheduled worker, exactly like the other active peer/system owners. This lane replaces the retired Prose lane for independent execution scheduling. SYSTEM_MASTER itself remains the portfolio controller/orchestrator and does not have an active peer-worker Second Shift lane.
+Documents has its own active Second Shift lane. Every delegation must remain within the locked Documents job, bind the exact live `documents/control-v1` head, and reject any Prose-absorption or other peer-lane work as stale/invalid.
+
+Completion of one Documents packet is not lane completion. Continue to the next dependency-valid Documents-owned objective while safe work remains.
