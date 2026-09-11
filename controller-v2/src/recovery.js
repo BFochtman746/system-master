@@ -1,5 +1,5 @@
 import { ControllerKernel, ControllerError } from './kernel.js';
-import { canonicalize, sha256 } from './canonical.js';
+import { canonicalize, sha256, uuidv7 } from './canonical.js';
 
 function verifyAndGroup(events) {
   const grouped = new Map();
@@ -105,6 +105,7 @@ export function reduceSemanticEvents(events) {
         }
         case 'promotion.requested':
         case 'promotion.authorized':
+        case 'promotion.reconciled-not-applied':
         case 'promotion.succeeded':
         case 'promotion.failed':
         case 'promotion.reconciliation-required': {
@@ -122,7 +123,6 @@ export function reduceSemanticEvents(events) {
           break;
         }
         default:
-          // Known envelope with an event type not needed by the current semantic projection.
           break;
       }
     }
@@ -159,6 +159,7 @@ export function rebuildControllerStore(path, durableEvents) {
     }
     for (const event of durableEvents) {
       kernel.db.prepare('INSERT INTO events VALUES (?,?,?,?,?,?,?,?,?)').run(event.event_id, event.event_schema, event.stream_id, event.stream_version, event.event_type, event.occurred_at, canonicalize(event.data), event.prev_event_digest, event.event_digest);
+      kernel.db.prepare("INSERT INTO outbox(outbox_id,event_id,status,attempts,created_at,sealed_at) VALUES (?,?,'SEALED',0,?,?)").run(uuidv7(), event.event_id, event.occurred_at, event.occurred_at);
     }
   });
   return kernel;
