@@ -6,9 +6,10 @@ const crypto = require('crypto');
 
 const REPO_ROOT = path.resolve(process.env.A01_SUBJECT_ROOT || path.join(__dirname, '..', '..'));
 const EVIDENCE_DIR = path.resolve(process.env.A01_EVIDENCE_DIR || path.join(REPO_ROOT, 'build', 'evidence', 'knowledge-recovery-programming-001'));
-const MANIFEST_REL = 'governance/catalog/ingest/programming/PROGRAMMING-INGEST-MANIFEST-001.json';
+const MANIFEST_REL = 'governance/catalog/ingest/programming/PROGRAMMING-INGEST-MANIFEST-002.json';
 const AUTHORITY_REL = 'governance/CURRENT-AUTHORITY.json';
 const PACKET_REL = 'governance/catalog/system-packets/PROGRAMMING.json';
+const EXPECTED_PEERS = ['BOOK', 'CORE', 'DOCUMENTS', 'LEARNING'];
 
 function fail(message) { throw new Error(message); }
 function assert(condition, message) { if (!condition) fail(message); }
@@ -30,10 +31,46 @@ function canonicalDigest(value) { return sha256Bytes(Buffer.from(JSON.stringify(
 function stableAssetId(sourceId) { return `PROGRAMMING-ASSET-${sha256Bytes(Buffer.from(sourceId)).slice(0, 16).toUpperCase()}`; }
 function locatorKey(locator) { return JSON.stringify(canonicalize(locator)); }
 function isSha256(v) { return typeof v === 'string' && /^[0-9a-f]{64}$/i.test(v); }
+function sameMembers(actual, expected) {
+  const a = [...actual].sort(); const b = [...expected].sort();
+  return a.length === b.length && a.every((x, i) => x === b[i]);
+}
+
+function resolveManifest(rel) {
+  const manifest = readJson(rel);
+  if (manifest.schema_version === 1) return manifest;
+  assert(manifest.schema_version === 2, 'MANIFEST_SCHEMA_VERSION');
+  assert(typeof manifest.extends_manifest === 'string' && manifest.extends_manifest, 'MANIFEST_EXTENDS_REQUIRED');
+  const base = resolveManifest(manifest.extends_manifest);
+  assert(base.candidate_system_id === manifest.candidate_system_id, 'MANIFEST_CANDIDATE_MISMATCH');
+  const byId = new Map((base.sources || []).map((s) => [s.source_id, JSON.parse(JSON.stringify(s))]));
+  for (const replacement of manifest.source_replacements || []) {
+    assert(replacement && replacement.replace_source_id && replacement.source, 'MANIFEST_REPLACEMENT_SHAPE');
+    assert(byId.has(replacement.replace_source_id), `MANIFEST_REPLACEMENT_TARGET_MISSING:${replacement.replace_source_id}`);
+    byId.delete(replacement.replace_source_id);
+    assert(!byId.has(replacement.source.source_id), `MANIFEST_REPLACEMENT_COLLISION:${replacement.source.source_id}`);
+    byId.set(replacement.source.source_id, replacement.source);
+  }
+  for (const source of manifest.source_additions || []) {
+    assert(!byId.has(source.source_id), `MANIFEST_ADDITION_COLLISION:${source.source_id}`);
+    byId.set(source.source_id, source);
+  }
+  return {
+    manifest_id: manifest.manifest_id,
+    schema_version: manifest.schema_version,
+    candidate_system_id: manifest.candidate_system_id,
+    architecture_authority: manifest.architecture_authority,
+    frozen_date: manifest.frozen_date,
+    purpose: manifest.purpose,
+    coverage_contract: manifest.coverage_contract,
+    manifest_lineage: [manifest.extends_manifest, rel],
+    sources: [...byId.values()].sort((a, b) => a.source_id.localeCompare(b.source_id))
+  };
+}
 
 function validateManifest(manifest) {
-  assert(manifest && manifest.schema_version === 1, 'MANIFEST_SCHEMA_VERSION');
-  assert(manifest.manifest_id === 'PROGRAMMING-INGEST-MANIFEST-001', 'MANIFEST_ID');
+  assert(manifest && [1, 2].includes(manifest.schema_version), 'MANIFEST_SCHEMA_VERSION');
+  assert(manifest.manifest_id === 'PROGRAMMING-INGEST-MANIFEST-002', 'MANIFEST_ID');
   assert(manifest.candidate_system_id === 'PROGRAMMING', 'MANIFEST_CANDIDATE_SYSTEM');
   assert(manifest.architecture_authority === false, 'INGEST_MUST_NOT_HAVE_ARCHITECTURE_AUTHORITY');
   assert(manifest.coverage_contract && manifest.coverage_contract.full_byte_verification_required_for_catalog_processing_pass === false, 'COVERAGE_CONTRACT_REQUIRED');
@@ -44,11 +81,11 @@ function validateManifest(manifest) {
     assert(typeof source.source_id === 'string' && source.source_id, 'SOURCE_ID_REQUIRED');
     assert(!ids.has(source.source_id), `DUPLICATE_SOURCE_ID:${source.source_id}`);
     ids.add(source.source_id);
-    assert(['GITHUB','CHATGPT_LIBRARY','HISTORICAL_REFERENCE'].includes(source.surface), `SOURCE_SURFACE:${source.source_id}`);
+    assert(['GITHUB', 'CHATGPT_LIBRARY', 'HISTORICAL_REFERENCE'].includes(source.surface), `SOURCE_SURFACE:${source.source_id}`);
     assert(source.locator && typeof source.locator === 'object', `SOURCE_LOCATOR:${source.source_id}`);
     assert(typeof source.evidence_class === 'string' && source.evidence_class, `SOURCE_EVIDENCE_CLASS:${source.source_id}`);
-    assert(['SUBJECT_REPO','EXTERNAL_REFERENCE_ONLY','HISTORICAL_BYTES_UNAVAILABLE','QUARANTINED'].includes(source.byte_availability), `SOURCE_BYTE_AVAILABILITY:${source.source_id}`);
-    assert(['A01_VERIFY_ON_RUN','CHATGPT_PRESTAGE_OBSERVED','HISTORICAL_CLAIM','NONE','CONFLICT'].includes(source.digest_authority), `SOURCE_DIGEST_AUTHORITY:${source.source_id}`);
+    assert(['SUBJECT_REPO', 'EXTERNAL_REFERENCE_ONLY', 'HISTORICAL_BYTES_UNAVAILABLE', 'QUARANTINED'].includes(source.byte_availability), `SOURCE_BYTE_AVAILABILITY:${source.source_id}`);
+    assert(['A01_VERIFY_ON_RUN', 'CHATGPT_PRESTAGE_OBSERVED', 'HISTORICAL_CLAIM', 'NONE', 'CONFLICT'].includes(source.digest_authority), `SOURCE_DIGEST_AUTHORITY:${source.source_id}`);
     if (source.expected_sha256 !== null && source.expected_sha256 !== undefined) assert(isSha256(source.expected_sha256), `SOURCE_SHA256_FORMAT:${source.source_id}`);
     if (source.surface === 'CHATGPT_LIBRARY') {
       assert(typeof source.locator.file_id === 'string' && source.locator.file_id, `LIBRARY_FILE_ID_REQUIRED:${source.source_id}`);
@@ -65,18 +102,28 @@ function validateManifest(manifest) {
 }
 
 function main() {
-  const manifest = readJson(MANIFEST_REL);
+  const manifest = resolveManifest(MANIFEST_REL);
   validateManifest(manifest);
+
   const authority = readJson(AUTHORITY_REL);
   assert(authority.product_root === 'SYSTEM_MASTER', 'CURRENT_AUTHORITY_ROOT');
+  assert(authority.programming_ingest_manifest === MANIFEST_REL, 'CURRENT_AUTHORITY_MANIFEST_POINTER');
   assert(typeof authority.topology === 'string' && authority.topology, 'CURRENT_TOPOLOGY_POINTER');
   const topology = readJson(authority.topology);
-  const activeSystems = (topology.canonical_internal_systems || []).map(x => x.system_id).sort();
-  assert(activeSystems.includes('CORE') && activeSystems.includes('LEARNING') && activeSystems.includes('BOOK') && activeSystems.includes('DOCUMENTS'), 'EXPECTED_ACTIVE_PEERS_MISSING');
-  assert(!activeSystems.includes('PROGRAMMING'), 'PROGRAMMING_MUST_REMAIN_NONACTIVE_DURING_INGEST');
-  assert(!activeSystems.includes('PROSE'), 'PROSE_MUST_REMAIN_RETIRED');
-  const retired = new Set((topology.retired_systems || []).map(x => x.system_id));
-  assert(retired.has('PROSE'), 'PROSE_RETIREMENT_MISSING');
+  assert(topology.topology_id === 'SYSTEM-TOPOLOGY-004', 'EXPECTED_TOPOLOGY_004');
+
+  const systems = topology.canonical_internal_systems || [];
+  const bySystemId = Object.fromEntries(systems.map((s) => [s.system_id, s]));
+  const peerSystems = [...(topology.peer_system_ids || [])].sort();
+  assert(sameMembers(peerSystems, EXPECTED_PEERS), 'EXPECTED_PEER_SYSTEMS_MISMATCH');
+  assert(!bySystemId.PROGRAMMING, 'PROGRAMMING_MUST_REMAIN_NONACTIVE_DURING_INGEST');
+  assert(bySystemId.PROSE, 'PROSE_CHILD_MISSING');
+  assert(bySystemId.PROSE.parent_id === 'BOOK', 'PROSE_PARENT_MUST_BE_BOOK');
+  assert((bySystemId.PROSE.owner_path || '') === 'SYSTEM_MASTER/BOOK/PROSE', 'PROSE_OWNER_PATH');
+  assert(bySystemId.PROSE.classification === 'ACTIVE_CHILD_SPECIALIST_SUBSYSTEM', 'PROSE_CHILD_CLASSIFICATION');
+  assert(!(topology.peer_system_ids || []).includes('PROSE'), 'PROSE_MUST_NOT_BE_PEER');
+  assert((topology.child_system_ids || []).includes('PROSE'), 'PROSE_MUST_BE_ACTIVE_CHILD');
+  assert((topology.execution_lane_owner_map || {})['LITERARY-PROSE'] === 'BOOK', 'PROSE_EXECUTION_MUST_INHERIT_BOOK');
 
   const packet = readJson(PACKET_REL);
   assert(packet.candidate_system_id === 'PROGRAMMING', 'PROGRAMMING_PACKET_ID');
@@ -86,10 +133,13 @@ function main() {
   const isA01 = String(process.env.RUNNER_NAME || '').toUpperCase() === 'A-01' && String(process.env.RUNNER_OS || '').toLowerCase() === 'windows';
   const observations = [];
   const assets = [];
-  const nodes = [{ node_id: 'SYSTEM_CANDIDATE::PROGRAMMING', node_kind: 'SYSTEM_CANDIDATE', label: 'Programming / Software Engineering System' }];
-  for (const id of activeSystems) nodes.push({ node_id: `ACTIVE_SYSTEM::${id}`, node_kind: 'ACTIVE_SYSTEM', label: id });
-  nodes.push({ node_id: 'RETIRED_SYSTEM::PROSE', node_kind: 'RETIRED_SYSTEM', label: 'PROSE' });
-  const edges = [];
+  const nodes = [
+    { node_id: 'PRODUCT_ROOT::SYSTEM_MASTER', node_kind: 'PRODUCT_ROOT', label: 'SYSTEM_MASTER' },
+    { node_id: 'SYSTEM_CANDIDATE::PROGRAMMING', node_kind: 'SYSTEM_CANDIDATE', label: 'Programming / Software Engineering System' }
+  ];
+  for (const id of peerSystems) nodes.push({ node_id: `ACTIVE_SYSTEM::${id}`, node_kind: 'ACTIVE_PEER_SYSTEM', label: id });
+  nodes.push({ node_id: 'ACTIVE_CHILD_SYSTEM::PROSE', node_kind: 'ACTIVE_CHILD_SPECIALIST_SUBSYSTEM', label: 'PROSE' });
+  const edges = [{ edge_id: 'EDGE::TOPOLOGY::BOOK::PROSE', from: 'ACTIVE_SYSTEM::BOOK', to: 'ACTIVE_CHILD_SYSTEM::PROSE', relation: 'OWNS_CHILD', source_ids: ['GIT-SYSTEM-TOPOLOGY-004'] }];
   const locatorOwners = new Map();
   const digestOwners = new Map();
   let actualByteCount = 0;
@@ -97,7 +147,7 @@ function main() {
   let identityUnprovenCount = 0;
   let quarantineCount = 0;
 
-  for (const source of [...manifest.sources].sort((a,b) => a.source_id.localeCompare(b.source_id))) {
+  for (const source of [...manifest.sources].sort((a, b) => a.source_id.localeCompare(b.source_id))) {
     let observedSha = null;
     let identityState = 'IDENTITY_UNPROVEN';
     if (source.byte_availability === 'SUBJECT_REPO') {
@@ -124,8 +174,13 @@ function main() {
     nodes.push({ node_id: sourceNode, node_kind: 'SOURCE', label: source.locator.name || source.locator.path || source.source_id });
     nodes.push({ node_id: assetId, node_kind: 'ASSET', label: source.evidence_class });
     edges.push({ edge_id: `EDGE::${assetId}::DERIVED_FROM`, from: assetId, to: sourceNode, relation: 'DERIVED_FROM', source_ids: [source.source_id] });
+
     for (const affinity of source.system_affinity || ['PROGRAMMING']) {
-      const target = affinity === 'PROGRAMMING' ? 'SYSTEM_CANDIDATE::PROGRAMMING' : (activeSystems.includes(affinity) ? `ACTIVE_SYSTEM::${affinity}` : null);
+      let target = null;
+      if (affinity === 'PROGRAMMING') target = 'SYSTEM_CANDIDATE::PROGRAMMING';
+      else if (affinity === 'SYSTEM_MASTER') target = 'PRODUCT_ROOT::SYSTEM_MASTER';
+      else if (peerSystems.includes(affinity)) target = `ACTIVE_SYSTEM::${affinity}`;
+      else if (affinity === 'PROSE') target = 'ACTIVE_CHILD_SYSTEM::PROSE';
       if (target) edges.push({ edge_id: `EDGE::${assetId}::AFFINITY::${affinity}`, from: assetId, to: target, relation: 'HAS_AFFINITY_TO', source_ids: [source.source_id] });
     }
 
@@ -167,31 +222,33 @@ function main() {
   for (const [digest, ids] of digestOwners.entries()) if (ids.length > 1) duplicateGroups.push({ basis: 'SHA256', key: digest, source_ids: ids.sort() });
   let dupCounter = 0;
   for (const group of duplicateGroups) {
-    const ids = group.source_ids;
-    for (let i = 1; i < ids.length; i += 1) {
-      const from = stableAssetId(ids[i]); const to = stableAssetId(ids[0]);
-      edges.push({ edge_id: `EDGE::DUPLICATE::${String(++dupCounter).padStart(4,'0')}`, from, to, relation: 'DUPLICATES', source_ids: [ids[0], ids[i]].sort() });
+    for (let i = 1; i < group.source_ids.length; i += 1) {
+      const from = stableAssetId(group.source_ids[i]);
+      const to = stableAssetId(group.source_ids[0]);
+      edges.push({ edge_id: `EDGE::DUPLICATE::${String(++dupCounter).padStart(4, '0')}`, from, to, relation: 'DUPLICATES', source_ids: [group.source_ids[0], group.source_ids[i]].sort() });
     }
   }
 
   const assetCatalog = {
-    catalog_id: 'PROGRAMMING-RECOVERED-ASSET-CATALOG-PILOT-001',
+    catalog_id: 'PROGRAMMING-RECOVERED-ASSET-CATALOG-PILOT-002',
     schema_version: 1,
+    manifest_id: manifest.manifest_id,
     candidate_system_id: 'PROGRAMMING',
     architecture_authority: false,
-    assets: assets.sort((a,b) => a.asset_id.localeCompare(b.asset_id))
+    assets: assets.sort((a, b) => a.asset_id.localeCompare(b.asset_id))
   };
   const traceGraph = {
-    graph_id: 'PROGRAMMING-RECOVERED-TRACE-GRAPH-PILOT-001',
+    graph_id: 'PROGRAMMING-RECOVERED-TRACE-GRAPH-PILOT-002',
     schema_version: 1,
+    manifest_id: manifest.manifest_id,
     candidate_system_id: 'PROGRAMMING',
     architecture_authority: false,
-    nodes: nodes.sort((a,b) => a.node_id.localeCompare(b.node_id)),
-    edges: edges.sort((a,b) => a.edge_id.localeCompare(b.edge_id))
+    nodes: nodes.sort((a, b) => a.node_id.localeCompare(b.node_id)),
+    edges: edges.sort((a, b) => a.edge_id.localeCompare(b.edge_id))
   };
 
-  const nodeIds = new Set(traceGraph.nodes.map(n => n.node_id));
-  const sourceIds = new Set(manifest.sources.map(s => s.source_id));
+  const nodeIds = new Set(traceGraph.nodes.map((n) => n.node_id));
+  const sourceIds = new Set(manifest.sources.map((s) => s.source_id));
   for (const edge of traceGraph.edges) {
     assert(nodeIds.has(edge.from), `DANGLING_EDGE_FROM:${edge.edge_id}`);
     assert(nodeIds.has(edge.to), `DANGLING_EDGE_TO:${edge.edge_id}`);
@@ -199,19 +256,25 @@ function main() {
   }
   assert(assetCatalog.architecture_authority === false && traceGraph.architecture_authority === false, 'DERIVED_OUTPUT_CANNOT_HAVE_ARCHITECTURE_AUTHORITY');
 
+  const sourceObservationCanonical = observations.sort((a, b) => a.source_id.localeCompare(b.source_id));
   const assetDigest = canonicalDigest(assetCatalog);
   const graphDigest = canonicalDigest(traceGraph);
-  const sourceObservationCanonical = observations.map(x => ({...x})).sort((a,b) => a.source_id.localeCompare(b.source_id));
   const observationDigest = canonicalDigest(sourceObservationCanonical);
   const total = manifest.sources.length;
+  const allActive = [...peerSystems, 'PROSE'].sort();
   const report = {
     report_id: 'SYSTEM-MASTER-KNOWLEDGE-RECOVERY-PROGRAMMING-001',
+    manifest_id: manifest.manifest_id,
+    topology_id: topology.topology_id,
     qualification_scope: 'PIPELINE_INTEGRITY_AND_FROZEN_CORPUS_METADATA_PROCESSING',
     candidate_system_id: 'PROGRAMMING',
     architecture_mutation_performed: false,
     second_shift_eligible: false,
     a01_runner_observed: isA01,
-    active_systems_unchanged: activeSystems,
+    active_systems_unchanged: allActive,
+    peer_systems_unchanged: peerSystems,
+    child_systems_unchanged: ['PROSE'],
+    prose_child_execution_inherits_book: true,
     source_count: total,
     source_records_processed: observations.length,
     metadata_coverage: { processed: observations.length, total, percent: total ? 100 : 0 },
@@ -232,6 +295,7 @@ function main() {
     standing: externalPendingCount || identityUnprovenCount || quarantineCount ? 'PASS_PIPELINE__EXTERNAL_BYTE_RECOVERY_REMAINS' : 'PASS_PIPELINE__FULL_FROZEN_BYTES_OBSERVED',
     claims_not_made: [
       'PROGRAMMING is an active peer system',
+      'PROSE is an independent peer or Second Shift owner lane',
       'all historical Programming bytes were verified',
       'historical research/build-spec closure implies implementation',
       'portable evidence implies Apple-native or production evidence',
@@ -243,9 +307,10 @@ function main() {
   writeJson('programming-asset-catalog.json', assetCatalog);
   writeJson('programming-trace-graph.json', traceGraph);
   writeJson('knowledge-recovery-report.json', report);
-  console.log(`SYSTEM_MASTER_KNOWLEDGE_RECOVERY=PASS sources=${total} subject_bytes=${actualByteCount} external_pending=${externalPendingCount} identity_unproven=${identityUnprovenCount} quarantine=${quarantineCount}`);
+  console.log(`SYSTEM_MASTER_KNOWLEDGE_RECOVERY=PASS manifest=${manifest.manifest_id} topology=${topology.topology_id} sources=${total} subject_bytes=${actualByteCount} external_pending=${externalPendingCount} identity_unproven=${identityUnprovenCount} quarantine=${quarantineCount}`);
   console.log(`PROGRAMMING_ASSET_CATALOG_SHA256=${assetDigest}`);
   console.log(`PROGRAMMING_TRACE_GRAPH_SHA256=${graphDigest}`);
+  console.log(`PROGRAMMING_SOURCE_OBSERVATIONS_SHA256=${observationDigest}`);
   console.log('SECOND_SHIFT_ELIGIBLE=false');
 }
 
