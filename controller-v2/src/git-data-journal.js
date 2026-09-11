@@ -8,6 +8,7 @@ const SEGMENT_PREFIX='segments/';
 const CHECKPOINT_SCHEMA='controller.journal.checkpoint.v1';
 const PROTOCOL_SCHEMA='controller.journal.protocol.v1';
 const SEGMENT_PATH_RE=/^segments\/(\d{20})-(\d{20})-([0-9a-f]{64})\.jsonl$/;
+const EVENT_KEYS=new Set(['event_id','event_schema','stream_id','stream_version','event_type','occurred_at','data','prev_event_digest','event_digest']);
 
 function fail(code,message,details={}){throw new ControllerError(code,message,details);}
 function pad(n){return String(n).padStart(20,'0');}
@@ -16,7 +17,8 @@ function parseJson(text,code){try{return JSON.parse(text);}catch{fail(code,'inva
 
 function validateSemanticEvent(event){
   if(!event||typeof event!=='object'||Array.isArray(event))fail('JOURNAL_EVENT_INVALID','event object required');
-  for(const key of ['event_id','event_schema','stream_id','stream_version','event_type','occurred_at','data','prev_event_digest','event_digest'])if(!(key in event))fail('JOURNAL_EVENT_INVALID',`missing ${key}`);
+  for(const key of Object.keys(event))if(!EVENT_KEYS.has(key))fail('JOURNAL_EVENT_INVALID',`unknown event field ${key}`);
+  for(const key of EVENT_KEYS)if(!(key in event))fail('JOURNAL_EVENT_INVALID',`missing ${key}`);
   if(event.event_schema!=='controller.event.v1')fail('UNSUPPORTED_EVENT_SCHEMA',`unsupported ${event.event_schema}`);
   if(!Number.isSafeInteger(event.stream_version)||event.stream_version<1)fail('JOURNAL_EVENT_INVALID','stream_version must be positive integer');
   const core={event_id:event.event_id,event_schema:event.event_schema,stream_id:event.stream_id,stream_version:event.stream_version,event_type:event.event_type,occurred_at:event.occurred_at,prev_event_digest:event.prev_event_digest,data:event.data};
@@ -39,12 +41,15 @@ function deterministicSegment(entries){return entries.map(e=>canonicalize(e)).jo
 function segmentPath(start,end,digest){return `${SEGMENT_PREFIX}${pad(start)}-${pad(end)}-${digest}.jsonl`;}
 
 export class GitDataJournalAdapter {
-  constructor(client,{ref='heads/journal',repositoryIdentity=null,subjectRepositoryIdentity=null,maxConflictRetries=4}={}){
-    this.client=client;this.ref=ref;this.repositoryIdentity=repositoryIdentity;this.subjectRepositoryIdentity=subjectRepositoryIdentity;this.maxConflictRetries=maxConflictRetries;
+  constructor(client,{ref='heads/journal',repositoryIdentity=null,subjectRepositoryIdentity=null,maxConflictRetries=4,maxBatchEvents=128,maxSegmentBytes=1024*1024}={}){
+    this.client=client;this.ref=ref;this.repositoryIdentity=repositoryIdentity;this.subjectRepositoryIdentity=subjectRepositoryIdentity;this.maxConflictRetries=maxConflictRetries;this.maxBatchEvents=maxBatchEvents;this.maxSegmentBytes=maxSegmentBytes;
     if(!client)fail('GIT_CLIENT_REQUIRED','Git data client required');
     if(typeof repositoryIdentity!=='string'||repositoryIdentity.length===0)fail('JOURNAL_REPOSITORY_ID_REQUIRED','stable journal repository identity required');
     if(subjectRepositoryIdentity&&repositoryIdentity===subjectRepositoryIdentity)fail('JOURNAL_SUBJECT_REPOSITORY_FORBIDDEN','journal repository must be independent from subject repository');
     if(typeof ref!=='string'||!ref.startsWith('heads/'))fail('JOURNAL_REF_INVALID','journal ref must be a branch ref without refs/ prefix');
+    if(!Number.isSafeInteger(maxConflictRetries)||maxConflictRetries<0)fail('JOURNAL_CONFIG_INVALID','maxConflictRetries must be a nonnegative safe integer');
+    if(!Number.isSafeInteger(maxBatchEvents)||maxBatchEvents<1)fail('JOURNAL_CONFIG_INVALID','maxBatchEvents must be a positive safe integer');
+    if(!Number.isSafeInteger(maxSegmentBytes)||maxSegmentBytes<1)fail('JOURNAL_CONFIG_INVALID','maxSegmentBytes must be a positive safe integer');
   }
 
   protocolDescriptor(){return {schema:PROTOCOL_SCHEMA,protocol_version:'1',event_schema:'controller.event.v1',digest:'sha256',segment_encoding:'canonical-jsonl'};}
@@ -65,7 +70,9 @@ export class GitDataJournalAdapter {
   async _readCommitState(commitOid){
     const commit=await this.client.getCommit(commitOid);
     const tree=await this.client.getTree(commit.tree);
-    const protocolOid=tree.files?.[PROTOCOL_PATH],checkpointOid=tree.files?.[CHECKPOINT_PATH];
+    const files=tree.files??{};
+    for(const path of Object.keys(files))if(path!==PROTOCOL_PATH&&path!==CHECKPOINT_PATH&&!path.startsWith(SEGMENT_PREFIX))fail('REMOTE_TREE_UNEXPECTED_PATH',`unexpected journal tree path: ${path}`);
+    const protocolOid=files[PROTOCOL_PATH],checkpointOid=files[CHECKPOINT_PATH];
     if(!protocolOid||!checkpointOid)fail('REMOTE_JOURNAL_INCOMPLETE','protocol/checkpoint missing from journal tree');
     const protocol=parseJson(await this.client.getBlob(protocolOid),'REMOTE_PROTOCOL_INVALID');
     if(canonicalize(protocol)!==canonicalize(this.protocolDescriptor()))fail('REMOTE_PROTOCOL_MISMATCH','journal protocol bytes/semantics changed');
@@ -155,6 +162,19 @@ export class GitDataJournalAdapter {
     return null;
   }
 
+  _committedPrefixLength(entries,events){
+    const byId=new Map(entries.map((e,i)=>[e.event_id,{event:e,index:i}]));
+    let matched=0,lastIndex=-1;
+    for(const event of events){
+      const hit=byId.get(event.event_id);
+      if(!hit)break;
+      if(hit.event.event_digest!==event.event_digest)fail('JOURNAL_CONFLICT','event id exists with different digest');
+      if(hit.index<=lastIndex)fail('JOURNAL_CONFLICT','committed batch prefix is not in journal order');
+      matched+=1;lastIndex=hit.index;
+    }
+    return matched;
+  }
+
   _buildEntries(events,checkpoint){
     let size=checkpoint.size,head=checkpoint.head_digest;
     const streamHeads=clone(checkpoint.stream_heads);
@@ -164,6 +184,7 @@ export class GitDataJournalAdapter {
       const prior=streamHeads[event.stream_id]??{version:0,digest:null};
       if(event.stream_version!==prior.version+1)fail('JOURNAL_STREAM_GAP',`expected ${prior.version+1}, got ${event.stream_version}`);
       if(event.prev_event_digest!==prior.digest)fail('JOURNAL_STREAM_FORK','semantic predecessor mismatch');
+      if(size>=Number.MAX_SAFE_INTEGER)fail('JOURNAL_POSITION_OVERFLOW','journal position exceeds safe integer range');
       size+=1;
       const entry={...clone(event),journal_position:size,prev_journal_digest:head};
       entry.journal_digest=journalDigest(entry);
@@ -176,12 +197,18 @@ export class GitDataJournalAdapter {
 
   async append(events,{witness=null}={}){
     if(!Array.isArray(events)||events.length===0)fail('EMPTY_JOURNAL_BATCH','non-empty event batch required');
+    if(events.length>this.maxBatchEvents)fail('JOURNAL_BATCH_EVENT_LIMIT',`batch exceeds configured event limit ${this.maxBatchEvents}`);
+    for(const event of events)validateSemanticEvent(event);
     for(let attempt=0;attempt<=this.maxConflictRetries;attempt+=1){
       const state=await this.verifyHead({expectedWitness:witness});
       const duplicate=this._containsExactBatch(state.entries,events);
       if(duplicate)return {duplicate:true,commit_oid:state.commit_oid,checkpoint:clone(state.checkpoint),positions:duplicate};
-      const built=this._buildEntries(events,state.checkpoint);
+      const prefix=this._committedPrefixLength(state.entries,events);
+      const suffix=events.slice(prefix);
+      if(suffix.length===0)return {duplicate:true,commit_oid:state.commit_oid,checkpoint:clone(state.checkpoint),positions:{start:state.checkpoint.size-events.length+1,end:state.checkpoint.size}};
+      const built=this._buildEntries(suffix,state.checkpoint);
       const segmentBytes=deterministicSegment(built.entries);
+      if(Buffer.byteLength(segmentBytes,'utf8')>this.maxSegmentBytes)fail('JOURNAL_SEGMENT_BYTE_LIMIT',`segment exceeds configured byte limit ${this.maxSegmentBytes}`);
       const segmentDigest=sha256(segmentBytes);
       const path=segmentPath(built.entries[0].journal_position,built.entries.at(-1).journal_position,segmentDigest);
       if(state.tree.files?.[path])fail('REMOTE_SEGMENT_PATH_COLLISION','segment path already exists');
@@ -201,7 +228,10 @@ export class GitDataJournalAdapter {
           const included=this._containsExactBatch(observedState.entries,events);
           if(included)return {duplicate:true,recovered_after_error:true,commit_oid:observedState.commit_oid,checkpoint:clone(observedState.checkpoint),positions:included};
         }
-        if((error?.status===409||error?.code==='NON_FAST_FORWARD')&&attempt<this.maxConflictRetries)continue;
+        if(error?.status===409||error?.code==='NON_FAST_FORWARD'){
+          if(attempt<this.maxConflictRetries)continue;
+          fail('JOURNAL_CONFLICT_RETRY_EXHAUSTED','concurrent journal append retries exhausted');
+        }
         if(error?.ambiguous)fail('REMOTE_STATE_UNKNOWN','could not determine whether journal ref mutation took effect',{cause:error.message});
         throw error;
       }
