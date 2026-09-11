@@ -1,0 +1,61 @@
+{
+  "schema_id": "SECOND-SHIFT-DELEGATION-SCHEMA-003",
+  "status": "PROPOSED_RELIABILITY_BRANCH_ONLY",
+  "supersedes_for_new_delegations": "SECOND-SHIFT-DELEGATION-SCHEMA-002",
+  "purpose": "Make READY mean exact owner-valid, machine-dispatchable work with a registered executor contract, immutable subject identity, durable idempotency/fencing semantics and current Topology-005 retirement boundaries.",
+  "required_delegation_fields": ["delegation_id", "owner_path", "objective_id", "state", "valid_for_control_ref", "valid_for_control_head", "created_at", "last_revalidated_at", "completion_delta", "stop_condition", "allowed_work", "forbidden_authority", "on_pass", "on_failure"],
+  "allowed_states": ["CANDIDATE", "READY", "CLAIMED", "BLOCKED", "STALE", "SUPERSEDED", "COMPLETED", "CANCELLED"],
+  "active_states": ["CANDIDATE", "READY", "CLAIMED"],
+  "ready_additional_required_fields": ["executor"],
+  "executor_contract": {
+    "required_fields": ["executor_id", "executor_kind", "subject_identity", "timeout_seconds", "heartbeat_seconds", "idempotency_scope"],
+    "allowed_executor_kinds": ["LOCAL_REGISTERED_SCRIPT", "GITHUB_REGISTERED_WORKFLOW", "A01_REGISTERED_QUALIFICATION", "AGENT_REGISTERED_TASK"],
+    "subject_identity_required_fields": ["kind", "value"],
+    "allowed_subject_identity_kinds": ["GIT_SHA", "ARTIFACT_DIGEST", "AUTHORITY_SNAPSHOT_DIGEST"],
+    "rules": [
+      "executor_id must resolve through SECOND-SHIFT-EXECUTOR-REGISTRY-001.json and the registered kind must equal executor_kind.",
+      "Delegations never contain an arbitrary shell command, arbitrary workflow path, arbitrary model/tool instruction or arbitrary executable URL.",
+      "GIT_SHA subject values are exact 40-hex commits; artifact/snapshot subjects are exact cryptographic digests.",
+      "timeout_seconds must not exceed the registered executor maximum.",
+      "heartbeat_seconds must be shorter than the applicable claim heartbeat SLA.",
+      "idempotency_scope is stable for the intended side effect and unique across distinct mutation identities.",
+      "A01_REGISTERED_QUALIFICATION additionally binds qualification_id, workstream_id, exact subject SHA and current A-01 policy admission.",
+      "AGENT_REGISTERED_TASK binds a versioned task-contract reference and a registered tool policy; natural-language scope alone is not executable authority."
+    ]
+  },
+  "owner_control_binding": {
+    "type": "BRANCH_HEAD",
+    "rule": "Every active peer owner lane binds valid_for_control_head to the exact live canonical owner branch head immediately before claim."
+  },
+  "claim_required_when_state": "CLAIMED",
+  "required_claim_fields": ["lease_id", "lane", "delegation_id", "objective_id", "control_ref", "control_head_at_claim", "idempotency_key", "fencing_token", "dispatch_id", "claimed_at", "lease_expires_at", "last_heartbeat_at", "attempt", "checkpoint_pointer"],
+  "admission_rules": [
+    "Owner path must resolve through the topology selected by CURRENT-AUTHORITY or an explicit shared-infrastructure route.",
+    "valid_for_control_head must equal the live owner branch head at claim time.",
+    "READY requires a registered executor contract in addition to a concrete completion delta and stop condition.",
+    "CANDIDATE may remain non-dispatchable while an executor contract, dependency or authority prerequisite is being prepared.",
+    "A changed owner head invalidates READY/CLAIMED work until reconciled.",
+    "Only one mutation-capable claim is live per active peer lane.",
+    "State-changing execution requires durable idempotency and a current fencing token.",
+    "Human, author, private-data, external-authority and native-platform boundaries remain fail-closed.",
+    "A-01 work requires its registered exact-subject gateway; Second Shift never bypasses A-01 policy.",
+    "PROSE is COMPLETE_RETIRED_TERMINAL under Topology-005 and has no executor, claim, repair, telemetry, successor or inherited execution domain.",
+    "Any genuinely open use/integration of preserved Prose capability is BOOK-owned work with BOOK executor/evidence identity.",
+    "DOCUMENTS receives no Prose execution authority.",
+    "PROGRAMMING remains a non-peer work program until explicit topology admission; only explicitly routed CORE custody/provenance support may use CORE Second Shift execution."
+  ],
+  "execution_revalidation": {
+    "required": true,
+    "checks": ["CURRENT-AUTHORITY", "selected topology", "program job lock", "system completion/retirement status", "owner registry coverage", "live owner control head", "current obligation", "repair precedence", "executor registration", "exact subject identity", "claim/idempotency/fence standing", "remaining shift window"],
+    "on_mismatch": "DO_NOT_EXECUTE__FENCE_STALE_WORKER__PRESERVE_CHECKPOINT__REPLAN_FROM_CURRENT_AUTHORITY"
+  },
+  "completion_rule": "Terminalize and release the exact claim transactionally, preserve evidence, re-read authority, then bind at most one dependency-valid same-owner successor as READY only when its registered executor contract is complete. Otherwise bind it as CANDIDATE or preserve eight-rung exhaustion.",
+  "empty_lane_rule": {
+    "required_rungs": 8,
+    "independent_work_remaining_must_equal": false,
+    "rule": "No active peer lane is IDLE solely because its current executor is blocked; dependency-valid CANDIDATE preparation remains possible when authorized."
+  },
+  "utilization_event_schema": "governance/second-shift/SECOND-SHIFT-UTILIZATION-EVENT-SCHEMA-002.json",
+  "executor_registry": "governance/second-shift/SECOND-SHIFT-EXECUTOR-REGISTRY-001.json",
+  "authority_boundary": "Execution plumbing never grants product, canonical-writer, A-01, human, author, private, native, publication, promotion or production authority."
+}
