@@ -1,18 +1,20 @@
 import { canonicalize, sha256 } from './canonical.js';
 
 function oid(kind,value){return sha256(`${kind}\0${typeof value==='string'?value:canonicalize(value)}`).slice(0,40);}
-function httpError(status,message,{ambiguous=false,code=null}={}){const e=new Error(message);e.status=status;e.ambiguous=ambiguous;if(code)e.code=code;return e;}
+function httpError(status,message,{ambiguous=false,code=null,headers={}}={}){const e=new Error(message);e.status=status;e.ambiguous=ambiguous;e.headers={...headers};if(code)e.code=code;return e;}
 
 export class SimulatedGitDataApi {
   constructor(){
     this.blobs=new Map();this.trees=new Map();this.commits=new Map();this.refs=new Map();this.calls=[];this.faults=[];
   }
-  injectFault({method,when='before',times=1,status=500,code=null,ambiguous=false,message=`simulated ${method} failure`}){
-    this.faults.push({method,when,times,status,code,ambiguous,message});
+  injectFault({method,when='before',times=1,skip=0,status=500,code=null,ambiguous=false,headers={},message=`simulated ${method} failure`}){
+    this.faults.push({method,when,times,skip,status,code,ambiguous,headers,message});
   }
   _fault(method,when){
     const f=this.faults.find(x=>x.method===method&&x.when===when&&x.times>0);
-    if(!f)return;f.times-=1;throw httpError(f.status,f.message,{ambiguous:f.ambiguous,code:f.code});
+    if(!f)return;
+    if(f.skip>0){f.skip-=1;return;}
+    f.times-=1;throw httpError(f.status,f.message,{ambiguous:f.ambiguous,code:f.code,headers:f.headers});
   }
   _call(method,args){this.calls.push({method,args:structuredClone(args)});this._fault(method,'before');}
   _after(method){this._fault(method,'after');}
@@ -55,5 +57,7 @@ export class SimulatedGitDataApi {
   deleteRef(ref){this.refs.delete(ref);}
   mutateBlobForTest(blobOid,newContent){if(!this.blobs.has(blobOid))throw new Error('blob not found');this.blobs.set(blobOid,newContent);}
   removeBlobForTest(blobOid){this.blobs.delete(blobOid);}
+  mutateTreeForTest(treeOid,mutator){const tree=this.trees.get(treeOid);if(!tree)throw new Error('tree not found');mutator(tree.files);}
+  removeCommitForTest(commitOid){this.commits.delete(commitOid);}
   resetCalls(){this.calls=[];}
 }
