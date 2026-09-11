@@ -9,6 +9,7 @@ from controller_v2 import (
     ControllerStore,
     IdempotencyConflict,
     MigrationChecksumMismatch,
+    InvalidState,
     new_uuid7,
     verify_migrations,
 )
@@ -55,8 +56,8 @@ class HardeningTests(unittest.TestCase):
             versions = [row[0] for row in con.execute(
                 "SELECT version FROM schema_migrations ORDER BY version"
             )]
-            self.assertEqual(versions, [1, 2])
-            self.assertEqual(con.execute("PRAGMA user_version").fetchone()[0], 2)
+            self.assertEqual(versions, [1, 2, 3])
+            self.assertEqual(con.execute("PRAGMA user_version").fetchone()[0], 3)
         finally:
             con.close()
         verify_migrations(self.db, ROOT / "schema")
@@ -65,7 +66,7 @@ class HardeningTests(unittest.TestCase):
         schema_copy = Path(self.tmp.name) / "schema-copy"
         shutil.copytree(ROOT / "schema", schema_copy)
         verify_migrations(self.db, schema_copy)
-        with (schema_copy / "002_hardening.sql").open("a", encoding="utf-8") as handle:
+        with (schema_copy / "003_proof_boundaries.sql").open("a", encoding="utf-8") as handle:
             handle.write("\n-- unauthorized historical edit\n")
         with self.assertRaises(MigrationChecksumMismatch):
             verify_migrations(self.db, schema_copy)
@@ -101,6 +102,18 @@ class HardeningTests(unittest.TestCase):
         self.store.register_worker(
             "promoter", "PROMOTER", "PROMOTION_AUTHORITY"
         )
+
+    def test_repository_identity_collision_is_rejected(self):
+        with self.assertRaises(InvalidState):
+            self.store.register_repository(
+                "repo-1", "BFochtman746", "different-name",
+                "https://github.com/BFochtman746/different-name"
+            )
+        with self.assertRaises(InvalidState):
+            self.store.register_repository(
+                "repo-2", "BFochtman746", "system-master",
+                "https://github.com/BFochtman746/system-master"
+            )
 
 
 if __name__ == "__main__":

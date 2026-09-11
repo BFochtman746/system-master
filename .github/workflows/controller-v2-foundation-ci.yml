@@ -3,7 +3,7 @@ name: Controller V2 Foundation CI
 on:
   push:
     branches:
-      - controller-v2-foundation
+      - controller-v2/foundation-002
     paths:
       - 'controller-v2/**'
       - '.github/workflows/controller-v2-foundation-ci.yml'
@@ -39,6 +39,21 @@ jobs:
         with:
           python-version: '3.14'
           check-latest: true
+
+      - name: Verify canonical integration line
+        env:
+          BRANCH_NAME: ${{ github.ref_name }}
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          authority = json.loads(Path('WORK-AUTHORITY.json').read_text())
+          expected = authority['canonical_branch']
+          actual = os.environ['BRANCH_NAME']
+          if actual != expected:
+              raise SystemExit(f'non-canonical Controller 2.0 branch: {actual} != {expected}')
+          print('canonical branch', actual)
+          PY
 
       - name: Runtime identity
         run: |

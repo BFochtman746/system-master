@@ -1,0 +1,25 @@
+{
+  "authority_id": "CONTROLLER-V2-BUILD-AUTHORITY-001",
+  "scope": "GITHUB_CONTROLLER_SECOND_SHIFT_REBUILD",
+  "stage": "CONTROLLER-FOUNDATION-002",
+  "status": "ACTIVE_SINGLE_INTEGRATION_LINE",
+  "canonical_branch": "controller-v2/foundation-002",
+  "origin_snapshot_sha": "a4ee34c881d87320fc0b3ea7f58047cb99937571",
+  "legacy_or_evidence_branches": [
+    "controller-v2-foundation",
+    "controller-v2/foundation-002-rebuild",
+    "reliability/second-shift-controller-v2-20260911"
+  ],
+  "write_rules": [
+    "Read this authority from the canonical branch before Controller 2.0 work.",
+    "Re-read the canonical branch head immediately before every write.",
+    "Every write must be a non-force fast-forward from the exact head inspected by that operation.",
+    "If the canonical head changed after inspection, stop the write, reconcile the delta, and retry from the new head.",
+    "Do not create a competing Controller 2.0 branch for the same stage.",
+    "Do not merge another branch wholesale; transplant only adjudicated changes with tests.",
+    "Do not weaken an invariant or replace a failure-mode test merely to obtain green CI.",
+    "Main remains untouched until a separately qualified promotion stage authorizes it."
+  ],
+  "source_of_truth": "This file selects the build line only. Runtime controller authority will be the Controller 2.0 transactional store, not this Git file.",
+  "supersession_rule": "A successor authority record must be an explicit reviewed change on the canonical branch; branch names or chat statements alone cannot supersede this authority."
+}

@@ -1,34 +1,38 @@
 # CONTROLLER-FOUNDATION-002 — Acceptance Criteria
 
-Foundation-002 is acceptable only when all of the following are true:
+Foundation-002 is acceptable only when every criterion below is demonstrated by executable tests and the exact candidate commit passes CI. A green test run cannot waive or weaken an invariant.
 
-1. Runtime state is stored transactionally in SQLite, not inferred from Git files or chat history.
-2. SQLite is configured with foreign keys enabled, WAL journal mode, FULL synchronous durability, and explicit write transactions.
-3. Commands are immutable and idempotent by command ID plus semantic fingerprint.
-4. Duplicate replay of the same command produces one logical transaction.
-5. Reuse of a command ID with changed semantics is rejected.
-6. Subject identity is immutable and includes explicit Git object format plus object ID.
-7. Candidate identity is write-once for a transaction.
-8. Repair/rebase/successor work creates explicit transaction lineage rather than rewriting an earlier transaction.
-9. Execution, qualification, and promotion use independent state machines.
-10. Qualification cannot start before a successful immutable candidate exists.
-11. Promotion cannot become eligible before execution succeeds and qualification is QUALIFIED.
-12. Exactly one active mutation lease may exist per protected resource.
-13. Every lease is assigned a monotonically increasing fencing token.
-14. CLAIMED/RUNNING/VERIFYING states require a live lease.
-15. A stale or zombie worker cannot submit an accepted result after a newer fence exists.
-16. State mutation and its controller event plus publication intent are committed in one SQLite transaction.
-17. Controller events, subjects, commands, and evidence receipts are append-only/immutable.
-18. Outbox delivery is at-least-once and has an irreversible PUBLISHED terminal state.
-19. External side effects have durable PREPARED/INFLIGHT/UNKNOWN/reconciliation states.
-20. Projection sequence cannot move backward.
-21. Database transaction row versions cannot regress or skip their required increment on mutation.
-22. Concurrent command replay converges to one transaction.
-23. Concurrent lease acquisition has exactly one winner.
-24. A process crash before COMMIT rolls back; a process crash after COMMIT preserves state.
-25. Database integrity and foreign-key checks are clean after the full test suite.
-26. No existing legacy controller/Second Shift/A-01 file is used as Controller 2.0 runtime authority.
-27. No GitHub Actions workflow or branch scheduling behavior is relied upon for correctness.
-28. The Foundation-002 code is isolated on `controller-v2-foundation`; `main` remains unchanged.
+1. Runtime authority is transactional SQLite, not Git files or chat history.
+2. SQLite uses foreign keys, WAL, FULL synchronous durability and explicit write transactions on a local controller host.
+3. Commands are immutable and idempotent by command ID plus semantic target fingerprint.
+4. Duplicate replay creates one logical transaction; retargeting the same command ID is rejected.
+5. Repository identity collisions fail rather than being silently ignored.
+6. Subject identity is immutable and includes explicit Git object format plus OID; candidate identity is write-once.
+7. Repair/rebase/successor work creates explicit new transaction/subject lineage.
+8. Execution, qualification and promotion are separate state machines.
+9. A transaction cannot become `SUCCEEDED` without a successful execution attempt and matching `CANDIDATE_READY` result from the exact lease/fence.
+10. An execution attempt cannot be inserted directly in a terminal success state.
+11. A qualification terminal verdict cannot exist without a matching exact-candidate/exact-policy attempt and immutable qualification evidence receipt.
+12. A transaction cannot become `QUALIFIED`, `REJECTED` or `INDETERMINATE` merely through a state setter.
+13. Promotion cannot become eligible before proof-backed qualification and cannot become `PROMOTED` without a matching promotion attempt whose resulting target OID equals the qualified subject OID.
+14. Exactly one active mutation lease may exist per protected resource.
+15. Every lease has a monotonically increasing fencing token; result acceptance checks the current resource fence.
+16. Expired leases cannot be renewed or revived, including before another worker acquires the resource.
+17. A released/expired/superseded worker cannot submit an accepted result.
+18. State mutation, controller event and required publication intent commit atomically.
+19. Controller events, subjects, commands and evidence receipts are append-only/immutable.
+20. Outbox publication is at-least-once and published records cannot silently reopen.
+21. External side effects have durable PREPARED/INFLIGHT/UNKNOWN/reconciliation semantics.
+22. Projection sequence cannot regress; stale projections are explicitly detectable.
+23. Transaction row versions are monotonic and state transitions are database-guarded.
+24. Concurrent command replay converges to one transaction; concurrent lease acquisition has one winner.
+25. Crash-before-COMMIT rolls back; crash-after-COMMIT preserves state.
+26. Applied migration source is checksum-pinned, contiguous and immutable; integrity and foreign-key checks pass after migration.
+27. Worker kind/trust-class mismatches are rejected by the database.
+28. No legacy Controller/Second Shift/A-01 file is runtime authority for Controller 2.0.
+29. No GitHub scheduler ordering or webhook delivery guarantee is relied upon for correctness.
+30. `controller-v2/foundation-002` is the sole active Foundation-002 integration line; competing branches remain evidence only.
+31. CI runs against the exact commit on the canonical Foundation-002 branch and has read-only repository contents permission.
+32. The true expired-worker test remains present; replacing expiry with graceful release is not equivalent coverage.
 
-Passing these criteria freezes the data/transaction primitive layer only. It does not yet authorize Second Shift execution, qualification, GitHub promotion, or replacement of the legacy controller.
+Passing these criteria freezes only the transactional kernel. It does not authorize Second Shift execution against production branches, GitHub promotion, or replacement of the legacy controller.

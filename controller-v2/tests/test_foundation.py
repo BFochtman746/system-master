@@ -29,6 +29,7 @@ class FoundationTests(unittest.TestCase):
         self.base = self.store.register_subject("repo-1", SHA_A)
         self.store.register_worker("worker-1", "SECOND_SHIFT", "BOUNDED_MUTATOR")
         self.store.register_worker("worker-2", "SECOND_SHIFT", "BOUNDED_MUTATOR")
+        self.store.register_worker("qualifier-1", "QUALIFIER", "READ_ONLY_QUALIFIER")
         self.resource = "github:BFochtman746/system-master:refs/heads/controller-candidate"
         self.store.ensure_resource(self.resource)
 
@@ -62,7 +63,22 @@ class FoundationTests(unittest.TestCase):
             transaction_id=tx, resource_key=self.resource, worker_id="worker-1"
         )
         self.store.set_execution_state(tx, "RUNNING")
-        self.store.bind_candidate(tx, SHA_B)
+        attempt = self.store.start_execution_attempt(
+            transaction_id=tx,
+            worker_id="worker-1",
+            lease_id=lease.lease_id,
+            fencing_token=lease.fencing_token,
+        )
+        candidate = self.store.bind_candidate(tx, SHA_B)
+        _, digest = self.store.record_worker_result(
+            transaction_id=tx,
+            attempt_id=attempt,
+            lease_id=lease.lease_id,
+            fencing_token=lease.fencing_token,
+            result_type="CANDIDATE_READY",
+            payload={"candidate_subject_id": candidate},
+        )
+        self.store.finish_execution_attempt(attempt, "SUCCEEDED", result_digest_sha256=digest)
         self.store.set_execution_state(tx, "VERIFYING")
         self.store.set_execution_state(tx, "SUCCEEDED")
         self.store.release_lease(lease.lease_id, lease.fencing_token)
@@ -109,12 +125,17 @@ class FoundationTests(unittest.TestCase):
         self.store.set_qualification_state(tx, "PENDING")
         self.assertEqual(self.store.get_transaction(tx)["qualification_state"], "PENDING")
 
-    def test_promotion_requires_qualification(self):
+    def test_promotion_requires_evidence_backed_qualification(self):
         tx = self.make_succeeded_candidate()
         with self.assertRaises(InvalidState):
             self.store.set_promotion_state(tx, "ELIGIBLE")
-        for state in ("PENDING", "RUNNING", "QUALIFIED"):
-            self.store.set_qualification_state(tx, state)
+        qualification_id = self.store.start_qualification(tx, "qualifier-1")
+        self.store.complete_qualification(
+            qualification_id,
+            "QUALIFIED",
+            storage_uri="memory://qualification/foundation-test",
+            manifest={"result": "PASS"},
+        )
         self.store.set_promotion_state(tx, "ELIGIBLE")
         self.assertEqual(self.store.get_transaction(tx)["promotion_state"], "ELIGIBLE")
 
