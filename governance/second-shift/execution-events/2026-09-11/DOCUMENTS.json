@@ -59,6 +59,50 @@
         "claim_scope": "ADOPT_AND_RECONCILE_EXISTING_R4_EXACT_SOURCE_CHECKPOINT_WITHOUT_REBUILDING_BYTES",
         "prose_work_allowed": false
       }
+    },
+    {
+      "event_id": "2026-09-11-DOCUMENTS-0004-BLOCKED",
+      "occurred_at": "2026-09-11T01:13:30-04:00",
+      "event_type": "BLOCKED",
+      "lane": "DOCUMENTS",
+      "control_ref": "documents/control-v1",
+      "control_head": "8c81b9a2e7622805e973eda33bdeb8b743948249",
+      "delegation_id": "SECOND-SHIFT-DOCUMENTS-R4-ADMISSION-002",
+      "objective_id": "DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-IMPORT-AND-EXACT-SUBJECT-QUALIFICATION-002",
+      "lease_id": "DOCUMENTS-R4-RECONCILE-2026-09-11T0108-0400",
+      "idempotency_key": "DOCUMENTS:R4:EXACT-SOURCE-RECONCILE:2026-09-11",
+      "evidence": {
+        "blocker_class": "CONNECTED_GITHUB_FILE_BRIDGE_UNAVAILABLE_FOR_EXACT_MOUNTED_BYTES",
+        "exact_handoff_sha256": "ada701cfa15e6162b6cdf67bc6c0803540a611b08a23aeeeddd1045d8ce2d8ab",
+        "canonical_manifest_sha256": "ed36fc9cfd38b04a8d0174efed06b03e8e25b0a45fc0adc4d47fe3457c2ee367",
+        "verified_java_files": 225,
+        "missing_manifest_paths": 0,
+        "digest_or_size_mismatches": 0,
+        "github_native_source_tree_committed": false,
+        "checkpoint": "qualification/document-system/r4/DOCUMENTS-R4-EXACT-SOURCE-HANDOFF-RECONCILIATION-001.json",
+        "independent_work_remaining": true,
+        "prose_work_performed": false,
+        "historical_pass_transferred": false
+      }
+    },
+    {
+      "event_id": "2026-09-11-DOCUMENTS-0005-SUCCESSOR-BOUND",
+      "occurred_at": "2026-09-11T01:13:31-04:00",
+      "event_type": "SUCCESSOR_BOUND",
+      "lane": "DOCUMENTS",
+      "control_ref": "documents/control-v1",
+      "control_head": "8c81b9a2e7622805e973eda33bdeb8b743948249",
+      "delegation_id": "SECOND-SHIFT-DOCUMENTS-SYSTEM-MASTER-SERVICE-INTERFACE-CENSUS-001",
+      "objective_id": "DOCUMENTS-TO-SYSTEM-MASTER-SERVICE-INTERFACE-CENSUS-001",
+      "evidence": {
+        "state": "READY_UNCLAIMED",
+        "delegation_registry_commit": "0f36cd91940f42a4effb0cbe48dfc7823f53181c",
+        "r4_blocker_preserved": true,
+        "purpose": "Census current generic Documents-to-System-Master request/response/event seams and bind at most one demonstrated Documents-owned interface contract or portable qualification successor.",
+        "prose": "COMPLETE_RETIRED_TERMINAL__NO_WORK_ROUTE",
+        "documents_receives_prose_work": false,
+        "independent_work_remaining": true
+      }
     }
   ]
 }
