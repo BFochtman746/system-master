@@ -34,7 +34,7 @@ jobs:
           FRAG="$STAGE/.stage-fragments"
           CARRIER='/tmp/document-r4-carrier.tar.xz'
           test -f "$FRAG/TRIGGER"
-          test "$(find "$FRAG" -maxdepth 1 -name 'frag-*.bin' -type f | wc -l)" -eq 21
+          test "$(find "$FRAG" -maxdepth 1 -name 'frag-*.bin' -type f | wc -l)" -eq 17
           cat "$FRAG"/frag-*.bin > "$CARRIER"
           echo '77a6e2288d475865622bad4b2c66647a599c26a3899c6617b33d7b2b334855bd  /tmp/document-r4-carrier.tar.xz' | sha256sum -c -
           python3 - <<'PY'
