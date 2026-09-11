@@ -24,14 +24,18 @@ assert(finalized.transaction.state === 'A01_REQUEUE_READY', 'changed candidate m
 assert(finalized.transaction.replacement_request.subject_sha === B, 'replacement must bind changed SHA');
 assert(finalized.transaction.authoritative_pass === false, 'broker cannot emit authoritative pass');
 
-const proseSuccessor = openTransaction(base({ receipt_id:'receipt-prose-successor', workstream_id:'BOOK-EVAL-LEMONADE-001', qualification_id:'BOOK-EVAL-EXAMPLE', receipt:{result_class:'DEPENDENCY_BLOCKED'} }));
-assert(proseSuccessor.transaction.state === 'WAIT_FOR_PREDECESSOR', 'dependency block must wait');
-assert(proseSuccessor.transaction.owner_path === 'SYSTEM_MASTER/DOCUMENTS', 'retired Prose-family workstream must route to Documents');
-assert(proseSuccessor.transaction.target_inbox === 'governance/repair/DOCUMENTS-REPAIR-INBOX.json', 'retired Prose-family repair must target Documents inbox');
+const proseChild = openTransaction(base({ receipt_id:'receipt-prose-child', workstream_id:'BOOK-EVAL-LEMONADE-001', qualification_id:'BOOK-EVAL-EXAMPLE', receipt:{result_class:'DEPENDENCY_BLOCKED'} }));
+assert(proseChild.transaction.state === 'WAIT_FOR_PREDECESSOR', 'dependency block must wait');
+assert(proseChild.transaction.owner_path === 'SYSTEM_MASTER/BOOK', 'Book evaluator/Prose-child workstream must route through Book');
+assert(proseChild.transaction.target_inbox === 'governance/repair/BOOK-REPAIR-INBOX.json', 'Book evaluator/Prose-child repair must target Book inbox');
 
 const literary = openTransaction(base({ receipt_id:'receipt-literary', workstream_id:'LITERARY-PROSE', qualification_id:'LITERARY-EXAMPLE', receipt:{result_class:'SUBJECT_FAILURE'} }));
-assert(literary.transaction.owner_path === 'SYSTEM_MASTER/DOCUMENTS', 'LITERARY-PROSE must route to Documents after Prose retirement');
-assert(literary.transaction.target_inbox === 'governance/repair/DOCUMENTS-REPAIR-INBOX.json', 'LITERARY-PROSE repair must target Documents');
+assert(literary.transaction.owner_path === 'SYSTEM_MASTER/BOOK', 'LITERARY-PROSE must execute and repair through Book');
+assert(literary.transaction.target_inbox === 'governance/repair/BOOK-REPAIR-INBOX.json', 'LITERARY-PROSE repair must target Book inbox');
+
+const documents = openTransaction(base({ receipt_id:'receipt-documents', workstream_id:'DOCUMENTS', qualification_id:'DOCUMENTS-EXAMPLE', receipt:{result_class:'SUBJECT_FAILURE'} }));
+assert(documents.transaction.owner_path === 'SYSTEM_MASTER/DOCUMENTS', 'Documents workstream must remain Documents-owned');
+assert(documents.transaction.target_inbox === 'governance/repair/DOCUMENTS-REPAIR-INBOX.json', 'Documents repair must target Documents inbox');
 
 const infra = openTransaction(base({ receipt_id:'receipt-infra', workstream_id:'LEARNING', qualification_id:'LEARNING-EXAMPLE', receipt:{result_class:'INFRA_FAILURE'} }));
 assert(infra.transaction.state === 'RETRY_REQUEST_READY', 'first infra failure should allow bounded same-SHA retry');
@@ -50,5 +54,6 @@ expectThrow(() => finalizeTransaction({ transaction:subject.transaction, candida
 
 console.log('A01_REPAIR_BROKER_SELFTEST_PASS');
 console.log('active_product_repair_routes=CORE,LEARNING,BOOK,DOCUMENTS');
-console.log('retired_prose_successor=DOCUMENTS');
+console.log('prose_child_repair_route=BOOK');
+console.log('documents_repair_route=DOCUMENTS_ONLY');
 console.log('replacement_standing=A01_ELIGIBLE_ONLY');
