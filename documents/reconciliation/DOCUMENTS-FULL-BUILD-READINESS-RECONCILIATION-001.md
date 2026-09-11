@@ -137,52 +137,47 @@ Each capability is indexed by original status/evidence plus reconciled owner dis
 
 ## 9. Current hard blocker — R4 GitHub source custody
 
-R4 exact source bytes are known and independently verified in Library custody, but not yet GitHub-native runnable source. A file-capable exact-byte bridge remains required before current exact-subject qualification can legitimately run.
+R4 exact source bytes are known and independently verified in Library custody, but are not yet GitHub-native runnable source. The deterministic transport contract is now closed, but the exact five payload chunks have not yet been committed and the transport remains unarmed.
 
-This does NOT block organizing the corpus, fixing admission metadata, or preparing future work packages. It DOES block calling the recovered R4 code current GitHub source or transferring its historical PASS.
+This does NOT block continued organization or source-custody preparation. It DOES block calling the recovered R4 code current GitHub source or transferring its historical PASS.
 
-## 10. Newly demonstrated reconciliation defect
+## 10. Transport reconciliation result — CLOSED/PASS
 
-The current R4 transport metadata is internally inconsistent:
+`DOCUMENTS-R4-TRANSPORT-CONTRACT-RECONCILIATION-003` closed the previously demonstrated transport drift.
 
-- transport/document-r4/STAGING.json declares:
-  - expected transport SHA-256 = 4fce25bc78646f4be3b8152865184e1cee84868ba1a13e4587ccef6a16c23dd9
-  - expected total chunks = 81
-  - currently staged chunks = 000..009
+Superseded metadata:
+- old STAGING carrier `4fce25bc...` / 81 chunks;
+- old workflow carrier `b6d0f8a9...` / 100 chunks;
+- stale claim that 10 payload chunks were staged when no chunk payload files were present.
 
-- .github/workflows/document-r4-github-native-admission.yml expects:
-  - transport SHA-256 = b6d0f8a98cea0615513eda07873b38532123585336de87c40350afeafa474edf
-  - exactly 100 chunk files
+Canonical replacement:
+- `transport/document-r4/TRANSPORT-CONTRACT.json`
+- contract SHA-256 `80509f1f2ddaa7ad2d46f9e94e88400758e40634c44243e1136c28f4c2ae7ba1`
+- deterministic TAR SHA-256 `e05167645dda63ae4d33ad66f08fa9cc5e53ab03369ec50c4ec5cb811d025267`
+- canonical TAR.XZ SHA-256 `77a6e2288d475865622bad4b2c66647a599c26a3899c6617b33d7b2b334855bd`
+- carrier bytes `301008`
+- exact chunks `5`
+- full raw chunk size `65536`
+- `CHUNK-MANIFEST.json` SHA-256 `daa71c58fbcb38e3a8daf1b146531d80147825a1efc15a95928dbca3ffbcd108`
+- two independent carrier builds byte-identical PASS
+- 12/12 adversarial transport cases failed closed
+- simulated fully armed reconstruction PASS with 225/225 source rows
 
-Neither derived tar.xz identity is promoted as canonical by this reconciliation because the exact handoff ZIP identity alone does not prove the deterministic tar derivation. The mismatch is a real fail-closed admission defect.
+The admission workflow now consumes the shared contract/manifest rather than independent magic constants and still requires fresh exact-subject qualification after source admission.
 
-## 11. FIRST GENUINELY UNCLOSED WORK PACKAGE — SELECTED
+Current standing after closure: payload `0/5`, READY absent, GitHub-native source custody BLOCKED, no historical PASS transfer.
 
-### DOCUMENTS-R4-TRANSPORT-CONTRACT-RECONCILIATION-003
+## 11. Current genuinely unclosed work package — SELECTED
 
-State: SELECTED / PRE-BUILD CONTROL REPAIR
+### DOCUMENTS-R4-GITHUB-NATIVE-PAYLOAD-STAGING-004
+
+State: SELECTED / READY_FOR_EXECUTION
 Owner: SYSTEM_MASTER/DOCUMENTS
 
 Objective:
-Derive one deterministic R4 transport carrier directly from the exact ada701cf... handoff and the 225-row canonical manifest; record one canonical transport digest, chunk size/count and reconstruction procedure; make STAGING.json and the GitHub admission workflow consume the same immutable transport contract; prove full chunk reconstruction fails closed on missing/reordered/modified/extra chunks; do not set READY until every exact chunk is present.
+Commit the five exact base64 chunks produced by the frozen transport contract, fetch/reverify the remote GitHub bytes against the chunk manifest, reconstruct the canonical carrier from those remote-confirmed bytes, reverify 225/225 source rows, and update STAGING to `FULL_TRANSPORT_STAGED__NOT_ARMED` while keeping READY absent.
 
-Required outputs:
-1. deterministic carrier recipe and tool/version identity;
-2. canonical tar.xz digest;
-3. canonical chunk size/count and ordered chunk manifest;
-4. updated STAGING transport metadata;
-5. updated admission workflow constants/verification logic;
-6. local deterministic reconstruction test;
-7. corruption/missing/reorder/extra-chunk adversarial tests;
-8. exact source reconstruction verification against all 225 manifest rows;
-9. no historical PASS transfer;
-10. durable receipt that the transport contract is coherent but source custody remains blocked until all bytes are actually present in Git.
-
-Why selected first:
-- It is a demonstrated present-tense defect, not a speculative feature gap.
-- It is machine-resolvable now without inventing missing source.
-- It is a prerequisite to safely admitting the exact R4 implementation later.
-- Leaving it unresolved would make the future build-start path ambiguous even after the bytes become transportable.
+This is still source-custody preparation, not Documents feature implementation.
 
 ## 12. First feature-build candidate — indexed, NOT YET BOUND
 
@@ -191,7 +186,7 @@ Why selected first:
 Reason for queue position:
 INTAKE is verified; IDENTIFY is the first partial stage in the governed Documents execution pipeline. The known gap is exhaustive format subtype/profile/active-content identification. It therefore precedes deeper SECURE/FORENSICS/PARSE/CREATE completion in dependency order.
 
-Standing: QUEUED_CANDIDATE_ONLY. Do not treat this as current authority until source custody/current source subject is available and the transport-contract repair is closed/reconciled.
+Standing: QUEUED_CANDIDATE_ONLY. Do not treat this as current authority until GitHub-native source custody/current exact-subject qualification is established.
 
 ## 13. Build dossier indexing rule
 
