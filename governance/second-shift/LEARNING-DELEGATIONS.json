@@ -5,76 +5,54 @@
   "last_known_control_head": "e3196089f77dde376944a08eac78a697e57d1535",
   "program_job_lock": "governance/SYSTEM-PROGRAM-JOB-LOCK-001.json",
   "system_completion_status": "governance/SYSTEM-COMPLETION-STATUS-001.json",
-  "delegation_epoch": 35,
+  "delegation_epoch": 36,
   "active_delegations": [
     {
-      "delegation_id": "SECOND-SHIFT-LEARNING-CURRICULUM-001E-BATCH-06",
+      "delegation_id": "SECOND-SHIFT-LEARNING-CURRICULUM-001E-BATCH-07",
       "owner_path": "SYSTEM_MASTER/LEARNING",
-      "objective_id": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001E-INSTRUCTIONAL-CONTENT-AND-SCORING-BATCH-06",
+      "objective_id": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001E-INSTRUCTIONAL-CONTENT-AND-SCORING-BATCH-07",
       "parent_objective_id": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001E-INSTRUCTIONAL-CONTENT-AND-SCORING-REALIZATION",
       "obligation_id": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001",
       "state": "READY",
       "valid_for_control_ref": "learning/control-v1",
       "valid_for_control_head": "e3196089f77dde376944a08eac78a697e57d1535",
-      "created_at": "2026-09-10T20:31:44-04:00",
-      "last_revalidated_at": "2026-09-11T06:46:26-04:00",
-      "parent_checkpoint": "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001E-INSTRUCTIONAL-CONTENT-AND-SCORING-BATCH-05-CLOSURE-069.json",
+      "created_at": "2026-09-11T07:33:07-04:00",
+      "last_revalidated_at": "2026-09-11T07:33:07-04:00",
+      "parent_checkpoint": "qualification/learning/LEARNING-001E-BATCH-06-EXECUTED-HOSTED-CLOSURE-070C.json",
       "predecessor_evidence": {
-        "batch_05_requirement_id": "ASQ-CSSGB-2022-I.B.2",
-        "batch_05_qualified_subject_sha": "ab974136a7080e2a491d6cebbbcc7aec3e0960b1",
-        "batch_05_hosted_run_id": 34529688697,
-        "batch_05_hosted_job_id": 103047108576,
-        "batch_05_hosted_artifact_id": 10172972043,
-        "hosted_artifact_digest": "sha256:5e3078c06b8fa0a4a5237f1092f9bcbc7ac433e39208cd9de1f42537dbaa0fa9",
-        "cumulative_requirements_realized": 5,
+        "batch_06_requirement_id": "ASQ-CSSGB-2022-I.C.1",
+        "batch_06_qualified_subject_sha": "bd3f7de8490c7cfb6a7dcdd37cc1fa1d4656bced",
+        "batch_06_hosted_run_id": 34545605665,
+        "batch_06_hosted_job_id": 103245942833,
+        "batch_06_hosted_artifact_id": 10260842444,
+        "hosted_artifact_digest": "sha256:f5460b3273391ee537c1e596e8bbd5088a5e8fc54860c67502a7e4a8167dcf62",
+        "cumulative_requirements_realized": 6,
         "adaptive_practice_not_mastery_regression": "PASS"
       },
-      "candidate_evidence": {
-        "branch": "learning/instructional-scoring-001e-batch-06-20260910",
-        "exact_subject_sha": "bd3f7de8490c7cfb6a7dcdd37cc1fa1d4656bced",
-        "workflow": ".github/workflows/learning-001e-batch-06-prequal.yml",
-        "run_id": 34545605665,
-        "attempts": [
-          {"attempt": 1, "job_id": 103097425177, "standing": "ZERO_STEP_RUNNER_ALLOCATION_FAILURE", "runner_id": 0},
-          {"attempt": 2, "job_id": 103097600062, "standing": "ZERO_STEP_RUNNER_ALLOCATION_FAILURE", "runner_id": 0},
-          {"attempt": 3, "job_id": 103100539078, "standing": "ZERO_STEP_RUNNER_ALLOCATION_FAILURE", "runner_id": 0}
-        ],
-        "semantic_qualification_executed": false,
-        "semantic_failure_observed": false,
-        "infrastructure_classification": "TRANSIENT_GITHUB_HOSTED_RUNNER_UNAVAILABLE_OR_ACCOUNT_ALLOCATION_BLOCK__ACCOUNT_SPECIFIC_CAUSE_UNPROVEN"
-      },
-      "completion_delta": "Execute the already-materialized exact Batch 06 subject through full semantic qualification when an owner-valid execution path is available. Only an executed PASS authorizes closure; zero-step runner failures do not change semantic standing.",
-      "stop_condition": "Exact subject bd3f7de8490c7cfb6a7dcdd37cc1fa1d4656bced executes the Batch 06 qualifier and all required checks PASS; evidence is preserved; Batch 06 closure is admitted; then select ordinal 7 without replaying prior work.",
+      "build_packet": "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001E-BATCH-07-SOURCE-BOUND-BUILD-PACKET-071.json",
+      "selected_ordinal": 7,
+      "selected_requirement_id": "ASQ-CSSGB-2022-I.C.2",
+      "selected_title": "Basic failure mode and effects analysis (FMEA)",
+      "completion_delta": "Materialize and qualify exact ordinal 7 from the already-durable source-bound Batch 07 packet now that unchanged Batch 06 has executed and passed semantically. Preserve the frozen blueprint/source evidence and keep the full course unactivated.",
+      "stop_condition": "A fresh exact Batch 07 subject implements the bounded FMEA learning/oracle contract, portable checks pass, hosted semantic qualification executes and passes, evidence is preserved, cumulative realization advances to 7/66, and ordinal 8 is selected without replaying prior work.",
       "allowed_work": [
-        "reuse the exact immutable 001D blueprint and current Learning runtime without replaying 001A-001D or Batches 01-05",
-        "inspect current run/job standing and preserve zero-step infrastructure failures separately from semantic failures",
-        "perform only Learning-owned work-ahead while hosted execution is unavailable",
-        "prepare explicit Learning-to-System-Master interfaces when dependency-valid without moving Learning semantics to Core"
+        "implement the isolated ordinal-7 Learning runtime from the existing source-bound packet",
+        "implement deterministic nonblind fixtures, oracle checks and property/metamorphic tests already specified",
+        "preserve exact frozen blueprint identity and supplemental-source provenance",
+        "run portable and hosted qualification on a fresh exact subject",
+        "preserve Batch-01 practice-not-mastery regression and keep full-course activation false"
       ],
       "forbidden_authority": [
-        "do not treat zero-step runner allocation as semantic qualification",
-        "do not alter the exact Batch 06 subject merely to force execution",
-        "do not bypass the A-01/control-plane model",
-        "do not replay completed 001A-001D or Batches 01-05",
-        "do not infer real learner/psychometric/SME/certification/native/production authority",
-        "do not cross into Core, Book, Documents or Programming product ownership",
+        "do not replay completed 001A-001D or Batches 01-06",
+        "do not mutate or relabel the passed Batch 06 subject",
+        "do not infer real learner mastery, psychometric validity, SME approval or certification equivalence",
+        "do not claim A-01, native or production authority unless actually executed there",
+        "do not cross into Core, Book, Documents or Programming ownership",
         "do not create or dispatch retired Prose work",
         "do not declare Learning complete until product-level completion authority changes"
       ],
-      "on_pass": "Admit the exact Batch 06 closure, advance cumulative realization to 6/66, select exact ordinal 7 and continue Learning toward its System Master integration boundary.",
-      "on_failure": "If the qualifier executes and fails semantically, repair only the demonstrated Learning defect on a new subject. If no step runs, preserve the same subject and classify infrastructure without fabricating product repair.",
-      "current_checkpoint": "qualification/learning/LEARNING-001E-BATCH-06-HOSTED-INFRASTRUCTURE-CHECKPOINT-070B.json",
-      "hosted_dependency": {
-        "state": "CIRCUIT_OPEN_FOR_PRIOR_INVOCATION_AFTER_3_ZERO_STEP_ATTEMPTS",
-        "retry_budget_consumed": 3,
-        "semantic_result": "UNOBSERVED",
-        "exact_subject_preserved": true,
-        "retry_condition": "An owner-valid hosted execution path assigns a runner and can execute the unchanged exact subject."
-      },
-      "completed_work_ahead": [
-        {"artifact": "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001E-BATCH-07-SOURCE-BOUND-BUILD-PACKET-071.json", "standing": "SOURCE_BOUND_SPECIFICATION_COMPLETE__NO_ORDINAL_ADVANCEMENT"},
-        {"artifact": "governance/architecture/LEARNING-TO-SYSTEM-MASTER-INTERFACE-CONTRACT-001.json", "standing": "PROPOSED_OWNER_VALID_BUILD_AHEAD_CONTRACT__NO_PRODUCT_PASS"}
-      ]
+      "on_pass": "Admit Batch 07 closure, advance cumulative realization to 7/66, re-read Learning authority and select exact ordinal 8.",
+      "on_failure": "Preserve the exact failing Batch 07 subject and repair only the demonstrated Learning defect; infrastructure-only nonexecution remains separate from semantic failure."
     },
     {
       "delegation_id": "SECOND-SHIFT-LEARNING-SYSTEM-MASTER-INTERFACE-PORTABLE-SCHEMAS-001",
@@ -83,14 +61,13 @@
       "parent_objective_id": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001",
       "obligation_id": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001",
       "state": "CANDIDATE",
-      "priority": "FALLBACK_WHILE_BATCH_06_HOSTED_EXECUTION_IS_UNAVAILABLE",
+      "priority": "INDEPENDENT_WORK_AHEAD_BEHIND_ACTIVE_BATCH_07",
       "valid_for_control_ref": "learning/control-v1",
       "valid_for_control_head": "e3196089f77dde376944a08eac78a697e57d1535",
       "created_at": "2026-09-11T00:22:00-04:00",
-      "last_revalidated_at": "2026-09-11T06:46:26-04:00",
+      "last_revalidated_at": "2026-09-11T07:33:07-04:00",
       "parent_checkpoint": "governance/architecture/LEARNING-TO-SYSTEM-MASTER-INTERFACE-CONTRACT-001.json",
       "completion_delta": "Implement transport-neutral request/response/event schemas and portable conformance/property tests for the Learning-owned System Master interface, without building a production adapter or moving learner/mastery/scoring state to Core.",
-      "evidence_target": "Deterministic portable schema, idempotency, stale-version, authority-boundary and privacy-minimization tests on a fresh exact subject.",
       "stop_condition": "Portable schemas and tests deterministically pass; a fresh exact hosted qualification subject is prepared; production/native/A-01 admission remains unclaimed.",
       "allowed_work": [
         "implement JSON schemas for the admitted command and event envelopes",
@@ -100,24 +77,25 @@
       ],
       "forbidden_authority": [
         "do not calculate or overwrite mastery in Core",
-        "do not alter the Batch 06 exact subject",
+        "do not interfere with the active Batch 07 subject",
         "do not implement Book, Documents or Programming semantics",
         "do not create or route retired Prose work",
         "do not fabricate human, learner, psychometric, SME, certification, A-01, native or production evidence"
       ],
-      "on_pass": "Preserve exact portable evidence and hosted-candidate SHA; return priority to unchanged Batch 06 when an executable runner exists, otherwise select the next independent Learning contract/test rung.",
+      "on_pass": "Preserve exact portable evidence and hosted-candidate SHA; then select the next dependency-valid Learning contract/test rung after the active curriculum batch.",
       "on_failure": "Preserve the exact failing interface subject, repair only demonstrated Learning interface defects, and do not relabel transport or runner absence as semantic failure."
     }
   ],
   "retired_delegations": [
+    {"delegation_id": "SECOND-SHIFT-LEARNING-CURRICULUM-001E-BATCH-06", "state": "COMPLETED__SUPERSEDED_BY_001E_BATCH_07", "batch_06_qualified_subject_sha": "bd3f7de8490c7cfb6a7dcdd37cc1fa1d4656bced", "hosted_run_id": 34545605665, "hosted_job_id": 103245942833, "hosted_artifact_id": 10260842444, "hosted_artifact_digest": "sha256:f5460b3273391ee537c1e596e8bbd5088a5e8fc54860c67502a7e4a8167dcf62", "closure_evidence": "qualification/learning/LEARNING-001E-BATCH-06-EXECUTED-HOSTED-CLOSURE-070C.json", "cumulative_requirements_realized": 6, "history_preserved": true},
     {"delegation_id": "SECOND-SHIFT-LEARNING-CURRICULUM-001E-BATCH-05", "state": "COMPLETED__SUPERSEDED_BY_001E_BATCH_06", "batch_05_qualified_subject_sha": "ab974136a7080e2a491d6cebbbcc7aec3e0960b1", "hosted_run_id": 34529688697, "hosted_job_id": 103047108576, "hosted_artifact_id": 10172972043, "history_preserved": true},
     {"delegation_id": "SECOND-SHIFT-LEARNING-CURRICULUM-001E-BATCH-04", "state": "COMPLETED__SUPERSEDED_BY_001E_BATCH_05", "batch_04_qualified_subject_sha": "faa2985e2d936259a39e365f105d7361857c2a34", "hosted_run_id": 34529296668, "history_preserved": true},
     {"delegation_id": "SECOND-SHIFT-LEARNING-CURRICULUM-001E-BATCH-03", "state": "COMPLETED__SUPERSEDED_BY_001E_BATCH_04", "batch_03_qualified_subject_sha": "eb7a410ee23634ac29780224cb954a798cea890b", "hosted_run_id": 34528922356, "history_preserved": true},
     {"delegation_id": "SECOND-SHIFT-LEARNING-CURRICULUM-001E-BATCH-02", "state": "COMPLETED__SUPERSEDED_BY_001E_BATCH_03", "batch_02_qualified_subject_sha": "d63a8f4a0b698ef446dd5e3a0658e85d72a8864b", "hosted_run_id": 34528568336, "history_preserved": true},
     {"delegation_id": "SECOND-SHIFT-LEARNING-CURRICULUM-001E-INSTRUCTIONAL-CONTENT-SCORING-REALIZATION", "state": "COMPLETED__SUPERSEDED_BY_001E_BATCH_02", "batch_01_qualified_subject_sha": "670aec5c42962d64adbc989ac535d0ae21f46594", "hosted_run_id": 34527943923, "history_preserved": true}
   ],
-  "prior_full_history": {"blob_sha": "1be12b1586aacb841bf1cba526890fb0592ec88d", "standing": "IMMUTABLE_GIT_HISTORY_PRESERVED"},
+  "prior_full_history": {"blob_sha": "c9a1941e83fc5f72142fec0d2464aa6581cc81c3", "standing": "IMMUTABLE_GIT_HISTORY_PRESERVED"},
   "owner_revalidation_required": false,
-  "reason": "Morning reconciliation at 2026-09-11T06:46:26-04:00 re-fetched live Learning control head e3196089. Batch 06 remains READY with semantic qualification still unobserved after three zero-step hosted allocation failures; the portable System Master interface remains a CANDIDATE fallback. No completion, PASS, learner, A-01, native or production authority was inferred.",
+  "reason": "At 2026-09-11T07:28 ET the unchanged Batch 06 exact subject finally received real hosted execution and passed every semantic qualifier. The prior three zero-step attempts are therefore classified as transient infrastructure nonexecution, Batch 06 is closed at 6/66, and the already-prepared exact ordinal-7 FMEA packet is now the READY Learning successor.",
   "empty_is_valid": false
 }
