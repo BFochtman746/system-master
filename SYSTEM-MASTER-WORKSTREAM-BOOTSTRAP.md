@@ -7,23 +7,21 @@ This file is the cross-chat entry point for all work in `BFochtman746/system-mas
 Before interpreting a branch, chat title, ticket, workflow, qualification, historical handoff or scheduled task as current authority, read in this order:
 
 1. `governance/CURRENT-AUTHORITY.json` from current `main`;
-2. the `program_job_lock` and `system_completion_status` selected by CURRENT-AUTHORITY;
-3. the current morning bootstrap pointer/manifest when present;
-4. the topology selected by CURRENT-AUTHORITY — currently `governance/SYSTEM-TOPOLOGY-004.json`;
-5. the `system_catalog` selected by CURRENT-AUTHORITY for active/historical/future-system discovery; the catalog never overrides topology authority;
-6. the live canonical control ref/head for the active owning system;
-7. the current completion ledger, obligation registry and expectation registry selected by CURRENT-AUTHORITY;
-8. expectation/reallocation/repair state relevant to the active owner;
-9. archive/source/evidence records when historical reuse is relevant;
-10. the registry-declared Second Shift delegation and current shift ledger when unattended work is involved.
+2. selected topology, `program_job_lock` and `system_completion_status`;
+3. current morning bootstrap pointer/manifest when present, as cache only;
+4. selected system catalog for active/historical/future-system discovery;
+5. live canonical control ref/head for the active owning system;
+6. current completion ledger, obligation registry, expectation registry and reallocation ledger;
+7. repair state and registry-declared Second Shift owner/claim state;
+8. archive/source/evidence records when historical reuse is relevant.
 
 Conversation memory, morning packets, branch names, catalog entries and historical handoffs never override current repository authority.
 
 ## Current completion truth
 
-`PROSE` is the **only complete system**.
+`SYSTEM_MASTER`, `CORE`, `LEARNING`, `BOOK` and `DOCUMENTS` are incomplete and active. A completed packet, phase, branch, subsystem, hosted test or A-01 qualification does not make an owning active system complete unless current product-level completion authority explicitly says so.
 
-`SYSTEM_MASTER`, `CORE`, `LEARNING`, `BOOK` and `DOCUMENTS` are incomplete and active. A completed packet, phase, branch, subsystem, hosted test or A-01 qualification does not make an owning system complete unless the authority-selected system completion record explicitly says so.
+`PROSE` is historically complete and terminally retired. There is no remaining Prose product work.
 
 ## Active product hierarchy
 
@@ -33,89 +31,86 @@ Conversation memory, morning packets, branch names, catalog entries and historic
   - **CORE — System Master Core / Foundation & Spine** — incomplete
   - **LEARNING SYSTEM** — incomplete
   - **BOOK SYSTEM** — incomplete
-    - **PROSE SYSTEM** — complete Book child specialist
   - **DOCUMENTS SYSTEM** — incomplete
 
-Current architecture authority is `governance/SYSTEM-TOPOLOGY-004.json` plus `governance/ADR-0004-BOOK-PROSE-CHILD-RESTORATION.md`.
+Current architecture authority is the topology/ADR selected by `CURRENT-AUTHORITY`, currently `governance/SYSTEM-TOPOLOGY-005.json` and `governance/ADR-0005-PROSE-TERMINAL-RETIREMENT-BOOK-INTEGRATION.md`.
 
-The historical Prose retirement/Documents-reallocation records remain provenance only. They do not control current execution and must not redirect active Book-Prose work to Documents.
+PROSE is not in the active hierarchy. Historical Prose branches, exact SHAs, receipts and retirement/restoration records remain provenance only. Any metadata that still labels PROSE active is `STALE_ARCHITECTURE_PENDING_RECONCILIATION` and cannot dispatch.
 
 ## Locked program jobs
 
 ### SYSTEM MASTER
 
-Integrate CORE, LEARNING, BOOK and DOCUMENTS into one coherent product through explicit interfaces and shared infrastructure. The product root coordinates integration but does not take peer-system product semantics or create a separate root worker lane.
+Integrate CORE, LEARNING, BOOK and DOCUMENTS into one coherent product through explicit interfaces and shared infrastructure. Product-root coordination does not take peer-system product semantics or create a separate root worker lane.
 
 ### CORE — `SYSTEM_MASTER/CORE`
 
-Finish shared Foundation/Spine, runtime, data/platform, continuity/recovery, assurance/reconciliation, shared connector/model/artifact infrastructure and A-01/control-plane integration. CORE administers shared System Master integration infrastructure but does not implement Learning, Book/Prose or Documents product semantics.
+Finish shared Foundation/Spine, runtime, data/platform, continuity/recovery, assurance/reconciliation, shared connector/model/artifact infrastructure and A-01/control-plane integration. CORE administers shared System Master integration infrastructure but does not implement Learning, Book, Documents or Programming product semantics.
+
+While `SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001` is selected, the highest discretionary System Master/CORE priority is Programming proving-corpus source/custody/provenance recovery, followed by remaining authorized catalog/archive recovery. This does not create a Programming peer lane or replace Programming engineering work.
 
 ### LEARNING — `SYSTEM_MASTER/LEARNING`
 
-Finish the Learning system: product/runtime, curriculum, learner/mastery model, assessment/adaptation, retention/transfer and Learning evidence/qualification. Then integrate Learning upward into System Master through explicit interfaces. Do not cross into Book, Prose or Documents product work.
+Finish Learning product/runtime, curriculum, learner/mastery, assessment/adaptation, retention/transfer and Learning evidence/qualification, then integrate upward into System Master. Do not cross into Book, Documents or Programming product work.
 
 ### BOOK — `SYSTEM_MASTER/BOOK`
 
-Finish the Book system. This specifically includes bringing the already-complete PROSE child into Book through the required adapters and the Book Workflow Orchestrator, then completing the remaining Book lifecycle/orchestration/context/routing/admission work and integrating Book upward into System Master.
-
-BOOK remains the sole canonical owner of Book/manuscript, Story Bible/canon, author decisions, lifecycle, admission and publication state.
-
-### PROSE — `SYSTEM_MASTER/BOOK/PROSE`
-
-PROSE is complete and remains the Book literary-specialist child. It supplies literary diagnosis, controlled revision candidates, evaluation support, voice/protected-language preservation, homogenization defense and Book-scoped preference-learning behavior.
-
-PROSE has zero direct canonical manuscript-write authority, no Book-admission authority, no author authority and no separate peer/Second Shift mutation lane. Integration adapters/orchestration around completed Prose are BOOK work. Do not restart or expand Prose feature scope absent a demonstrated defect or explicit user direction.
+Finish Book. Any genuinely unfinished integration of preserved completed Prose capability is ordinary BOOK-owned adapter/context/compiler/routing/orchestrator work. BOOK remains sole canonical owner of manuscript, Story Bible/canon, author decisions, lifecycle, admission, versioning/rollback and publication state. Then integrate Book upward into System Master.
 
 ### DOCUMENTS — `SYSTEM_MASTER/DOCUMENTS`
 
 Finish Documents document/artifact mechanics: DOCX, PDF, PPTX and general document intake, structure, conversion, preservation, rendering/export and generic reusable non-Book document/writing artifact behavior. Then integrate Documents upward into System Master through explicit interfaces.
 
-DOCUMENTS must not absorb, schedule, repair or claim Book-specific PROSE literary work and may not mutate Book canonical state.
+DOCUMENTS receives no Prose work and may not mutate Book canonical state.
 
-### Knowledge Recovery / Programming
+### PROSE — retired historical system
 
-Knowledge Recovery is a supporting CORE-administered source/custody/provenance program. It is not a peer system and is not the product-wide priority. It may proceed when dependency-valid without blocking the independent Book, Learning or Documents lanes or redefining their jobs.
+PROSE is complete and terminally retired. It has no active owner path, child/inherited execution, repair lane, qualification lane, research task, telemetry lane, successor task or mutation claim domain.
 
-## Sole direct specialist exception
+Preserved completed Prose capability artifacts and exact historical evidence may be consumed by BOOK only as integration inputs. Changed Book integration bytes require fresh Book-owned evidence. Historical Prose PASS does not transfer.
 
-The only direct specialist parent/child lane exception is:
+### PROGRAMMING work program
 
-`BOOK <-> PROSE`
+PROGRAMMING remains an incomplete active engineering work program outside current peer topology. Continue from preserved Programming foundation/capability/build/test/assurance/source-code/Genesis evidence, recover only missing exact source/custody information, perform warranted current deltas and continue from the first genuinely unclosed package.
 
-All other active systems remain inside their own product lanes and integrate upward into System Master or communicate through explicit admitted interfaces. A service call never transfers ownership with it.
+Programming is not generic Core work and does not receive a peer control/repair/Second Shift lane before explicit topology admission.
 
 ## Supported chat roles
 
 - `MASTER_ROOT` — SYSTEM_MASTER product-root controller.
 - `LEARNING` — `SYSTEM_MASTER/LEARNING`.
 - `BOOK` — `SYSTEM_MASTER/BOOK`.
-- `PROSE` compatibility focus — opens BOOK focused at `SYSTEM_MASTER/BOOK/PROSE`; it is not a separate owner lane.
 - `DOCUMENTS` — `SYSTEM_MASTER/DOCUMENTS`.
+- `PROGRAMMING_WORK_PROGRAM` — named non-peer Programming work program.
 
-Every new chat must re-fetch current `main`, CURRENT-AUTHORITY, job/completion locks and its live owner control head before current-state claims or writes.
+PROSE is not an active chat role. Prose history is read as provenance; genuinely open completed-capability integration resolves to BOOK.
+
+Every new chat re-fetches current `main`, CURRENT-AUTHORITY, job/completion locks and the live active owner control head before current-state claims or writes.
 
 ## Current work selection
 
-The authority-selected current obligation registry controls current work. The current product-root coordination objective is `SYSTEM-MASTER-INTEGRATION-COORDINATION-001` under CORE administrative execution, while BOOK, LEARNING and DOCUMENTS continue independently inside their locked jobs.
+The authority-selected current obligation registry controls current work. Product-root integration coordination remains mandatory. While Knowledge Recovery 001 remains selected, Programming proving-corpus recovery is the highest discretionary System Master priority and remaining authorized catalog/archive recovery follows it.
 
-Book’s current lane continues Book-Prose integration from the completed Prose system through adapters/orchestration. Learning continues Learning-only product completion/integration. Documents continues Documents-only completion/integration. A blocker in one peer lane does not stop dependency-valid safe work in another.
+Book continues only genuinely open Book-owned completed-Prose integration lineage and subsequent Book product completion. Learning continues Learning-only completion/integration. Documents continues Documents-only completion/integration. A blocker in one active peer lane does not stop dependency-valid safe work in another.
 
 ## Second Shift
 
-`governance/second-shift/SECOND-SHIFT-REGISTRY-001.json::owner_files` is the machine-authoritative active worker-lane set. Current active peer worker lanes are:
+`governance/second-shift/SECOND-SHIFT-REGISTRY-001.json::owner_files` is the machine execution-lane set. It must match the topology `peer_system_ids` set.
+
+Current active peer worker lanes are exactly:
 
 - CORE
 - LEARNING
 - BOOK
 - DOCUMENTS
 
-PROSE work inherits the BOOK lane and BOOK mutation claim. There is no separate active Prose worker lane. SYSTEM_MASTER root remains portfolio controller rather than a peer worker.
+On every run, compare topology peers to registry owner coverage. If an already-declared peer lacks coverage and owner path, control ref, live head and current obligation are machine-unambiguous, provision the missing coverage. Missing coverage never creates a new system. Retired systems are never provisioned or resurrected.
 
-Before dispatch, every controller/worker must read CURRENT-AUTHORITY, the current job lock, completion status, topology, obligation registry and its exact live owner head. Cross-lane work, false non-Prose system completion, stale head bindings and overlapping mutation claims fail closed.
+PROSE has no standalone or inherited worker lane and no telemetry. Any Book integration around preserved completed Prose capability is BOOK work and BOOK telemetry.
+
+Before dispatch, every controller/worker reads current authority, job/completion/retirement locks, topology, obligation registry and exact live owner head. Cross-lane work, retired-system resurrection, false active-system completion, stale head bindings and overlapping mutation claims fail closed.
 
 ## Completion and evidence discipline
-
-The current completion interpretation is selected by CURRENT-AUTHORITY. Older completion ledgers remain append-only historical/boundary evidence.
 
 Keep separate:
 
@@ -124,54 +119,41 @@ Keep separate:
 3. exact current code builds/tests;
 4. hosted/local qualification passes;
 5. exact-subject A-01 qualification passes;
-6. whole-system product completion;
+6. whole-system product completion or retirement standing;
 7. human/author/private/native/external/publication/production authority.
 
-No PASS transfers across changed SHA, changed integration subject, changed ownership boundary or different qualification class.
+No PASS transfers across changed SHA, topology, integration subject, owner boundary or qualification class.
 
-## Book / Prose authority rule
+## Book / Documents / retired Prose authority rule
 
-Book may orchestrate Prose analysis, evaluation and controlled candidate generation through adapters. Prose output remains evidence/candidate material until Book admission. Only BOOK may create canonical manuscript effects.
+Only BOOK may create canonical Book/manuscript effects. Documents may provide document/artifact services through explicit interfaces but receives no Prose work and gains no Book literary/canonical authority.
 
-Documents may provide document/artifact services to Book through explicit interfaces, but that does not make Documents owner of Prose, Book literary semantics or canonical Book state.
+Retired Prose evidence may inform Book integration without reopening Prose or transferring PASS to changed Book integration subjects.
 
 ## Future-system / historical-reuse startup
 
 The System Catalog is a discovery/reuse index, not architecture authority. A catalog candidate does not become a system automatically.
 
-When the user asks to build/resume a cataloged future system:
-
-1. resolve CURRENT-AUTHORITY and the authority-selected System Catalog;
-2. load its system packet and archive/source registry before broad rediscovery;
-3. recover and reconcile existing research/spec/code/test/qualification material;
-4. apply only current material-delta research to historically closed research unless a real reopen trigger exists;
-5. explicitly admit a new first-class system only with user-authorized topology/ADR/owner changes;
-6. begin implementation at the first genuinely unclosed evidence-backed work package.
+When the user asks to build/resume a cataloged future system, resolve current authority/catalog, load its packet/source registry, reconcile existing work/evidence, apply only current material-delta research to historically closed research, explicitly admit a new first-class system only with user-authorized topology/ADR/owner changes, and begin implementation at the first genuinely unclosed evidence-backed work package.
 
 ## Repair discipline
 
-Repair routing follows current topology and program jobs. Book-Prose repairs route through BOOK. Documents repairs stay Documents-owned. Learning repairs stay Learning-owned. Shared infrastructure/A-01 failures route through CORE/shared infrastructure as defined by current repair controls.
+Repair routing follows current topology and program jobs. Current Book integration defects route through BOOK. Documents repairs stay Documents-owned. Learning repairs stay Learning-owned. Shared infrastructure/A-01 failures route through CORE/shared infrastructure as current controls define.
 
-Historical standalone Prose repair/delegation records are provenance only and cannot create a separate active lane.
+PROSE has no active repair route. Historical Prose repair records are provenance only.
 
 ## Anti-surprise rule
 
 At every chat/work start:
 
-`LIVE MAIN -> CURRENT AUTHORITY -> JOB/COMPLETION LOCK -> LIVE OWNER HEAD -> OBLIGATION/DELEGATION -> DELTA CLASSIFICATION -> RECONCILE -> CURRENT OBJECTIVE -> EXECUTE/NEXT STEP`
+`LIVE MAIN -> CURRENT AUTHORITY -> TOPOLOGY/JOB/COMPLETION/RETIREMENT LOCK -> LIVE OWNER HEAD -> OBLIGATION/DELEGATION/REPAIR -> PEER-COVERAGE CHECK -> DELTA CLASSIFICATION -> RECONCILE -> CURRENT OBJECTIVE -> EXECUTE/NEXT STEP`
 
-Do not ask the user to reconstruct architecture, program jobs, completion truth, archive history or prior research that current repository authority can resolve.
+Do not ask the user to reconstruct architecture, program jobs, completion truth, Prose retirement, archive history or prior research that current repository authority can resolve.
 
 ## End-of-work rule
 
-Before ending substantive work:
-
-1. re-read the live owner head;
-2. classify/reconcile any delta;
-3. preserve exact evidence;
-4. update current obligation/repair/Second Shift state if materially changed;
-5. bind one dependency-valid successor inside the same locked job.
+Before ending substantive work, re-read the live owner head, classify/reconcile any delta, preserve exact evidence, update current obligation/repair/Second Shift state if materially changed and bind one dependency-valid successor inside the same active job. Never bind a Prose successor.
 
 ## Current authority
 
-`governance/CURRENT-AUTHORITY.json` is the cross-chat current-routing selector. Any file, chat, task, branch, historical retirement record or generated packet that conflicts with current authority, the selected program job lock or the selected system completion status is stale for current execution until explicitly reconciled.
+`governance/CURRENT-AUTHORITY.json` is the cross-chat current-routing selector. Any file, chat, task, branch, historical record or generated packet that conflicts with current authority, selected topology, program job lock or completion/retirement standing is stale for current execution until reconciled.
