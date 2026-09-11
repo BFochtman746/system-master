@@ -1,0 +1,26 @@
+name: Second Shift Lifecycle Validator V2
+on:
+  workflow_dispatch:
+  push:
+    branches: [reliability/second-shift-controller-stress-20260911]
+    paths:
+      - '.github/scripts/second-shift-lifecycle-validator-v2.js'
+      - '.github/scripts/second-shift-lifecycle-validator-v2.test.js'
+      - '.github/workflows/second-shift-lifecycle-validator-v2.yml'
+permissions:
+  contents: read
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Syntax
+        run: |
+          node --check .github/scripts/second-shift-lifecycle-validator-v2.js
+          node --check .github/scripts/second-shift-lifecycle-validator-v2.test.js
+      - name: Boundary and property tests
+        run: node .github/scripts/second-shift-lifecycle-validator-v2.test.js
