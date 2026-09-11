@@ -1,0 +1,72 @@
+{
+  "qualification_id": "BOOK-WORKFLOW-SCHEDULER-EXECUTION-RUNTIME-HOSTED-QUALIFICATION-001",
+  "effective_date": "2026-09-11",
+  "owner_system_id": "BOOK",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "control_ref": "book-system/control-v1",
+  "exact_owner_subject_sha": "27fe9a3621c92e414874ce229341e58e71b76375",
+  "predecessor_owner_subject_sha": "e2a23e8b1f076e3cd576c11e036e40eaf8a5ce2f",
+  "objective_id": "BOOK-WORKFLOW-SCHEDULER-EXECUTION-RUNTIME-001",
+  "implementation_paths": [
+    "system-master/book-system/book-workflow-scheduler-runtime.js",
+    "system-master/book-system/book-workflow-scheduler-runtime.test.js"
+  ],
+  "contract_path": "qualification/book-system/phase3a/BOOK-WORKFLOW-SCHEDULER-EXECUTION-RUNTIME-001.json",
+  "workflow_path": ".github/workflows/book-workflow-scheduler-runtime-qualification.yml",
+  "hosted_execution": {
+    "provider": "GITHUB_ACTIONS_HOSTED",
+    "workflow_run_id": 34654507158,
+    "workflow_job_id": 103443850502,
+    "status": "COMPLETED",
+    "conclusion": "SUCCESS",
+    "head_sha": "27fe9a3621c92e414874ce229341e58e71b76375",
+    "cases_executed": 39,
+    "cases_passed": 39,
+    "cases_failed": 0
+  },
+  "evidence_artifact": {
+    "artifact_id": 10284893217,
+    "name": "BOOK-WORKFLOW-SCHEDULER-RUNTIME-27fe9a3621c92e414874ce229341e58e71b76375-evidence",
+    "size_bytes": 334,
+    "artifact_zip_sha256": "27011ca48120808ae66d0c243893bcb39fc01546c472e7bbe84264a524a1a0b7",
+    "scheduler_result_json_sha256": "1cc7f73927645bfd6d3f740b034b591bf120b913d5c660753d7cc6cdd8b35fb3"
+  },
+  "result": {
+    "result": "PASS",
+    "cases": 39,
+    "max_parallel_workers_observed": 2,
+    "idempotent_unknown_outcome_replayed": true,
+    "durable_pause_resume": true,
+    "completed_tasks_not_redispatched": true,
+    "retired_prose_dispatches": 0,
+    "book_admission_dispatches": 0,
+    "canonical_effect_performed": false
+  },
+  "control_plane_enforcement": {
+    "workflow_run_id": 34654507134,
+    "head_sha": "27fe9a3621c92e414874ce229341e58e71b76375",
+    "conclusion": "SUCCESS"
+  },
+  "verified_boundaries": [
+    "bounded same-layer parallelism",
+    "required dependency ordering",
+    "safe same-operation replay only for registered idempotent work after unknown outcome",
+    "durable pause/reload/resume",
+    "completed-task non-replay after resume",
+    "retired Prose and Book Evaluator execution withheld",
+    "authority-wait and declared-blocked work withheld",
+    "Book canonical admission never dispatched",
+    "worker canonical-effect fields rejected",
+    "stale scheduler run bindings rejected",
+    "zero canonical Book effect"
+  ],
+  "non_claims": [
+    "No real external provider execution was performed by the synthetic worker fixtures.",
+    "No fresh blind literary evaluation was performed.",
+    "No Prose execution lane was recreated.",
+    "No Book canonical admission, manuscript mutation or Story Bible mutation was performed.",
+    "No A-01 subject qualification, native, publication or production PASS is inferred from this hosted scheduler test.",
+    "BOOK remains incomplete."
+  ],
+  "standing": "COMPLETE_PASS__EXACT_BOOK_OWNER_SUBJECT"
+}
