@@ -1,0 +1,73 @@
+{
+  "contract_id": "SYSTEM-MASTER-OWNER-LANE-EXECUTION-LEASE-BINDING-001",
+  "contract_version": 1,
+  "effective_date": "2026-09-10",
+  "owner_path": "SYSTEM_MASTER",
+  "purpose": "Bind the existing F-WP-007 epoch/fence/expiry lease primitive to owner-lane packet execution so foreground chats, Second Shift, and system automations cannot concurrently hold mutation authority for the same owner lane.",
+  "existing_authority_reused": {
+    "component": "system-master/f-wp-007/src/main/java/org/systemmaster/core/ExecutionLeaseManager.java",
+    "role": "epoch_fence_expiry_and_stale_executor_rejection",
+    "new_lease_authority_created": false
+  },
+  "active_owner_lanes": [
+    "SYSTEM_MASTER/CORE",
+    "SYSTEM_MASTER/LEARNING",
+    "SYSTEM_MASTER/BOOK",
+    "SYSTEM_MASTER/DOCUMENTS"
+  ],
+  "executor_modes": [
+    "FOREGROUND_CHAT",
+    "SECOND_SHIFT",
+    "SYSTEM_AUTOMATION"
+  ],
+  "scope_identity": [
+    "owner_path",
+    "canonical_branch",
+    "current_packet"
+  ],
+  "claim_binding": [
+    "executor_id",
+    "executor_mode",
+    "base_head_sha",
+    "expected_head_sha",
+    "lease_epoch",
+    "fence_token",
+    "acquired_at",
+    "expires_at"
+  ],
+  "laws": [
+    "At most one unexpired mutation-capable owner-lane claim may exist for an owner_path at a time.",
+    "A second claimant MUST fail closed while the current owner-lane claim is live; implicit preemption is forbidden.",
+    "The same holder renews through the exact current epoch and fence token; reacquisition is not renewal.",
+    "An expired claim may be replaced through a new F-WP-007 lease epoch; the old fence MUST remain stale.",
+    "Foreground Chat and Second Shift are peer execution modes for exclusion purposes: neither may displace the other's live mutation claim.",
+    "Read-only inspection does not require a mutation lease and MUST NOT create one.",
+    "Every mutation authorization MUST match owner_path, canonical_branch, current_packet, executor_id, executor_mode, epoch, fence token, and the exact current branch head.",
+    "A branch-head mismatch MUST fail closed before mutation; reconciliation is required before a new write authorization.",
+    "A current_packet mismatch MUST fail closed; a lease for one packet does not authorize its successor.",
+    "After an authorized repository mutation, the holder may advance expected_head_sha only from the exact previously authorized head to the observed resulting head.",
+    "Release MUST require the exact holder identity, executor mode, epoch, and fence token.",
+    "A successor packet requires release or an explicit governed transition; mutation authority does not silently roll forward to a new packet.",
+    "The owner-lane lease grants execution exclusivity only. It does not grant product, semantic, manuscript, canon, admission, publication, A-01, or human authority.",
+    "The durable adoption layer MUST use compare-and-swap semantics for the shared claim record so two external executors cannot both successfully acquire the same owner lane from one prior state."
+  ],
+  "foreground_second_shift_arbitration": {
+    "foreground_live_second_shift_attempt": "REJECT",
+    "second_shift_live_foreground_attempt": "REJECT",
+    "expired_live_holder": "REQUIRE_EXPIRED_CLAIM_REPLACEMENT_WITH_NEW_EPOCH",
+    "read_only_observer": "ALLOW_WITHOUT_MUTATION_AUTHORITY"
+  },
+  "durable_adoption_requirement": {
+    "required": true,
+    "target": "GitHub-backed owner-lane claim registry with compare-and-swap update, plus mandatory foreground-chat and Second-Shift admission checks",
+    "this_contract_alone_proves_cross_process_exclusion": false
+  },
+  "non_claims": [
+    "This contract does not modify or supersede the qualified F-WP-007 generic lease primitive.",
+    "This contract does not itself provide durable cross-chat or cross-process storage.",
+    "This contract does not grant Second Shift authority over a foreground-owned packet or vice versa.",
+    "This contract does not alter Book, Prose, Story Bible, Research, Documents, Learning, or author semantic authority.",
+    "No A-01 target qualification is inferred from hosted qualification of this binding."
+  ],
+  "exact_successor_if_qualified": "SYSTEM-MASTER-OWNER-LANE-EXECUTION-LEASE-ADOPTION-001"
+}
