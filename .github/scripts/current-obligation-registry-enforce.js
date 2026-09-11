@@ -24,11 +24,14 @@ const obligations = Array.isArray(registry.obligations) ? registry.obligations :
 const systems = topology.canonical_internal_systems || [];
 const byOwnerPath = new Map(systems.map((s) => [systemOwnerPath(s), s]).filter(([p]) => Boolean(p)));
 const peerSystems = new Set(topology.peer_system_ids || []);
+const retiredSystems = topology.retired_systems || [];
+const retiredPaths = retiredSystems.map((r) => r.historical_owner_path).filter(Boolean);
 const activeOwnerPaths = new Set(['SYSTEM_MASTER', ...byOwnerPath.keys()]);
 
 function validOwner(ownerPath) {
   if (typeof ownerPath !== 'string') return false;
   if (ownerPath.startsWith('SYSTEM_MASTER/SHARED_INFRASTRUCTURE')) return true;
+  if (retiredPaths.some((p) => sameOrDescendant(ownerPath, p))) return false;
   return [...activeOwnerPaths].some((p) => sameOrDescendant(ownerPath, p));
 }
 function resolveSystemForOwner(ownerPath) {
@@ -36,10 +39,13 @@ function resolveSystemForOwner(ownerPath) {
 }
 function requireLockedCompletion() {
   const statuses = new Map((completion.systems || []).map((s) => [s.system_id, s]));
-  for (const id of ['SYSTEM_MASTER','CORE','LEARNING','BOOK','PROSE','DOCUMENTS']) if (!statuses.has(id)) fail(`completion status missing ${id}`);
-  if (statuses.get('PROSE').complete !== true) fail('PROSE must be the complete system');
-  for (const id of ['SYSTEM_MASTER','CORE','LEARNING','BOOK','DOCUMENTS']) if (statuses.get(id).complete !== false) fail(`${id} must remain incomplete`);
-  if ((completion.systems || []).filter((s) => s.complete).length !== 1) fail('PROSE must be the only complete system');
+  for (const id of ['SYSTEM_MASTER', 'CORE', 'LEARNING', 'BOOK', 'DOCUMENTS']) {
+    if (!statuses.has(id)) fail(`active completion status missing ${id}`);
+    if (statuses.get(id).complete !== false) fail(`${id} must remain incomplete`);
+  }
+  if (statuses.has('PROSE')) fail('PROSE must not remain in active completion systems');
+  const retired = (completion.retired_systems || []).find((s) => s.system_id === 'PROSE');
+  if (!retired || retired.complete !== true || retired.active !== false || retired.remaining_product_work !== false) fail('PROSE must be complete, inactive and terminally retired with no remaining product work');
 }
 requireLockedCompletion();
 
@@ -50,10 +56,12 @@ if (registry.program_job_lock && registry.program_job_lock !== authority.program
 if (registry.system_completion_status && registry.system_completion_status !== authority.system_completion_status) fail('selected registry completion-status mismatch');
 if (!authority.central_next_objective) fail('CURRENT-AUTHORITY central_next_objective is missing');
 if (registry.central_next_objective !== authority.central_next_objective) fail(`central objective mismatch: authority=${authority.central_next_objective} registry=${registry.central_next_objective || '<missing>'}`);
-if (jobLock.programs?.PROSE?.completion !== 'COMPLETE' || jobLock.programs?.PROSE?.execution_lane !== 'BOOK') fail('job lock must keep completed Prose under BOOK execution');
-if (jobLock.programs?.BOOK?.authorized_child !== 'SYSTEM_MASTER/BOOK/PROSE') fail('Book job must authorize Prose child');
+if (authority.highest_discretionary_objective !== 'SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001' || registry.highest_discretionary_objective !== authority.highest_discretionary_objective) fail('Knowledge Recovery 001 must be the selected highest discretionary objective');
+if (jobLock.retired_systems?.PROSE?.standing !== 'RETIRED_TERMINAL' || jobLock.retired_systems?.PROSE?.active_execution !== false) fail('job lock must keep PROSE terminally retired and non-executable');
+if (jobLock.retired_systems?.PROSE?.integration_owner_if_needed !== 'SYSTEM_MASTER/BOOK') fail('any genuinely open completed-Prose integration must be BOOK-owned');
 if (jobLock.programs?.LEARNING?.integrates_upward_to !== 'SYSTEM_MASTER') fail('Learning must integrate upward into System Master');
 if (jobLock.programs?.DOCUMENTS?.integrates_upward_to !== 'SYSTEM_MASTER') fail('Documents must integrate upward into System Master');
+if (jobLock.programs?.BOOK?.integrates_upward_to !== 'SYSTEM_MASTER') fail('Book must integrate upward into System Master');
 
 const seen = new Set();
 for (const entry of obligations) {
@@ -61,32 +69,28 @@ for (const entry of obligations) {
   if (!entry.obligation_id) fail('obligation entry missing obligation_id');
   if (seen.has(entry.obligation_id)) fail(`duplicate obligation_id: ${entry.obligation_id}`);
   seen.add(entry.obligation_id);
-  if (!validOwner(entry.owner_path)) fail(`invalid owner_path for ${entry.obligation_id}: ${entry.owner_path || '<missing>'}`);
+  if (!validOwner(entry.owner_path)) fail(`invalid or retired owner_path for ${entry.obligation_id}: ${entry.owner_path || '<missing>'}`);
   if (!entry.state) fail(`missing state for ${entry.obligation_id}`);
-  if (!['CLOSED','SUPERSEDED'].includes(entry.state) && !entry.objective) fail(`open obligation missing objective: ${entry.obligation_id}`);
-
-  if (entry.owner_path === 'SYSTEM_MASTER/BOOK/PROSE' || entry.owner_path?.startsWith('SYSTEM_MASTER/BOOK/PROSE/')) {
-    const prose = systems.find((s) => s.system_id === 'PROSE');
-    if (!prose || prose.parent_id !== 'BOOK' || systemOwnerPath(prose) !== 'SYSTEM_MASTER/BOOK/PROSE') fail(`Book Prose child obligation lacks active topology authority: ${entry.obligation_id}`);
-  }
-  if (entry.owner_path === 'SYSTEM_MASTER/DOCUMENTS') {
-    if (entry.specialist_owner_path === 'SYSTEM_MASTER/BOOK/PROSE' || /PROSE/i.test(entry.obligation_id)) fail(`Documents obligation crosses into Prose: ${entry.obligation_id}`);
-  }
+  if (!['CLOSED', 'SUPERSEDED'].includes(entry.state) && !entry.objective) fail(`open obligation missing objective: ${entry.obligation_id}`);
+  if (retiredPaths.some((p) => sameOrDescendant(entry.owner_path, p))) fail(`active registry contains retired Prose owner path: ${entry.obligation_id}`);
+  if (entry.specialist_owner_path && retiredPaths.some((p) => sameOrDescendant(entry.specialist_owner_path, p))) fail(`active registry contains retired specialist owner: ${entry.obligation_id}`);
+  if (entry.owner_path === 'SYSTEM_MASTER/DOCUMENTS' && /PROSE/i.test(entry.obligation_id)) fail(`Documents obligation crosses into Prose: ${entry.obligation_id}`);
   if (entry.owner_path === 'SYSTEM_MASTER/LEARNING' && /BOOK|PROSE|DOCUMENT/i.test(entry.obligation_id)) fail(`Learning obligation crosses peer lane: ${entry.obligation_id}`);
-  if (entry.specialist_owner_path === 'SYSTEM_MASTER/BOOK/PROSE' && entry.owner_path !== 'SYSTEM_MASTER/BOOK') fail(`only BOOK may carry active Prose specialist integration: ${entry.obligation_id}`);
 }
 
 const bookProse = obligations.find((entry) => entry.obligation_id === 'BOOK-PROSE-PHASE-2-ORCHESTRATOR-CLOSURE-CENSUS-001');
-if (!bookProse || bookProse.owner_path !== 'SYSTEM_MASTER/BOOK' || bookProse.specialist_owner_path !== 'SYSTEM_MASTER/BOOK/PROSE') fail('current Book-Prose integration obligation must remain BOOK-owned');
+if (!bookProse || bookProse.owner_path !== 'SYSTEM_MASTER/BOOK' || bookProse.active_prose_owner !== null || bookProse.historical_lineage_name_contains_retired_system !== true) fail('Book-Prose historical integration lineage must be BOOK-owned with no active Prose owner');
+
+const knowledge = obligations.find((entry) => entry.obligation_id === 'SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001');
+if (!knowledge || knowledge.owner_path !== 'SYSTEM_MASTER/CORE' || knowledge.priority !== 'HIGHEST_DISCRETIONARY_SYSTEM_MASTER_PRIORITY') fail('Knowledge Recovery 001 must remain CORE-administered highest discretionary work');
 
 const next = obligations.find((entry) => entry.obligation_id === authority.central_next_objective);
 if (!next) fail(`central_next_objective is not present in selected registry: ${authority.central_next_objective}`);
-if (!['READY','ACTIVE'].includes(next.state)) fail(`central_next_objective must be READY or ACTIVE, got ${next.state}`);
+if (!['READY', 'ACTIVE'].includes(next.state)) fail(`central_next_objective must be READY or ACTIVE, got ${next.state}`);
 if (!validOwner(next.owner_path) || next.owner_path === 'SYSTEM_MASTER') fail(`central_next_objective must be assigned to an active executable owner, got ${next.owner_path}`);
-
 const nextSystem = resolveSystemForOwner(next.owner_path);
 if (!nextSystem && !next.owner_path.startsWith('SYSTEM_MASTER/SHARED_INFRASTRUCTURE')) fail(`central_next_objective owner is not an active topology system: ${next.owner_path}`);
-if (nextSystem?.system_id === 'PROSE' && !peerSystems.has('BOOK')) fail('Prose child cannot execute without active BOOK peer owner');
+if (!peerSystems.has(nextSystem?.system_id) && !next.owner_path.startsWith('SYSTEM_MASTER/SHARED_INFRASTRUCTURE')) fail(`central_next_objective must resolve to an active peer system: ${next.owner_path}`);
 
 const transitionRows = [
   ...(Array.isArray(registry.closed_at_transition) ? registry.closed_at_transition : []),
@@ -100,4 +104,4 @@ for (const row of transitionRows) {
   if (seen.has(row.obligation_id)) fail(`obligation appears both current and transition history: ${row.obligation_id}`);
 }
 
-console.log(`CURRENT_OBLIGATION_REGISTRY_ENFORCEMENT_PASS registry=${registry.registry_id} topology=${topology.topology_id} obligations=${obligations.length} next=${authority.central_next_objective} owner=${next.owner_path} completion=PROSE_ONLY jobs=LOCKED`);
+console.log(`CURRENT_OBLIGATION_REGISTRY_ENFORCEMENT_PASS registry=${registry.registry_id} topology=${topology.topology_id} obligations=${obligations.length} next=${authority.central_next_objective} owner=${next.owner_path} prose=RETIRED knowledge_recovery=HIGHEST_DISCRETIONARY`);
