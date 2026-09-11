@@ -1,0 +1,131 @@
+name: A-01 Repair Adjudicate Once 2026-09-11
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/a01-repair-adjudicate-once-2026-09-11.yml'
+
+permissions:
+  actions: read
+  contents: write
+
+concurrency:
+  group: a01-repair-ledger
+  cancel-in-progress: false
+
+jobs:
+  adjudicate:
+    name: Adjudicate exact failed replacement receipt into existing transaction
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout current main repair authority
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Download authoritative A-01 evidence from executed rerun
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          pattern: 'A01-CONTROL-PLANE-SELFTEST-34595673549-evidence'
+          path: .a01-rerun-evidence
+          merge-multiple: false
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: 34595673549
+
+      - name: Locate and validate repair lineage
+        id: locate
+        shell: bash
+        run: |
+          lineage=$(find .a01-rerun-evidence -type f -name repair-lineage.json | head -n 1)
+          test -n "$lineage"
+          echo "lineage=$lineage" >> "$GITHUB_OUTPUT"
+          node --check .github/scripts/a01-repair-ledger.js
+          node --check .github/scripts/a01-repair-rerun-selftest.js
+          node .github/scripts/a01-repair-rerun-selftest.js
+
+      - name: Build authoritative same-transaction adjudication input
+        env:
+          LINEAGE_FILE: ${{ steps.locate.outputs.lineage }}
+          RERUN_ID: '34595673549'
+        shell: bash
+        run: |
+          mkdir -p .repair-rerun-adjudicate
+          node - <<'NODE'
+          const fs = require('fs');
+          const path = require('path');
+          const parseJson = (p) => JSON.parse(fs.readFileSync(p, 'utf8').replace(/^\uFEFF/, ''));
+          const lineagePath = process.env.LINEAGE_FILE;
+          const dir = path.dirname(lineagePath);
+          const lineage = parseJson(lineagePath);
+          const receiptPath = path.join(dir, 'receipt.json');
+          const reasonPath = path.join(dir, 'failure-reason.txt');
+          const controlFailurePath = path.join(dir, 'control-plane-failure.txt');
+          const preflightPath = path.join(dir, 'runner-preflight.json');
+          const receipt = fs.existsSync(receiptPath) ? parseJson(receiptPath) : null;
+          let failureReason = null;
+          if (fs.existsSync(reasonPath)) failureReason = fs.readFileSync(reasonPath, 'utf8').trim();
+          else if (fs.existsSync(controlFailurePath)) failureReason = fs.readFileSync(controlFailurePath, 'utf8').split(/\r?\n/)[0].trim();
+          let attemptResultClass = receipt?.result_class || null;
+          if (!attemptResultClass && fs.existsSync(controlFailurePath)) attemptResultClass = 'CONTROL_PLANE_FAILURE';
+          if (!attemptResultClass && fs.existsSync(preflightPath)) {
+            try {
+              const preflight = parseJson(preflightPath);
+              attemptResultClass = preflight.result_class || preflight.classification || 'INFRA_FAILURE';
+            } catch (_) { attemptResultClass = 'INFRA_FAILURE'; }
+          }
+          if (!attemptResultClass) attemptResultClass = 'INFRA_FAILURE';
+          if (lineage.transaction_id !== 'A01-REPAIR-a01-run-34431764843-A01-CONTROL-PLANE-SELFTEST-A1') throw new Error(`UNEXPECTED_TRANSACTION:${lineage.transaction_id}`);
+          if (!receipt || receipt.subject_sha !== 'ceb6870546012b789caea56499a1d219a195dc8b') throw new Error('UNEXPECTED_OR_MISSING_RECEIPT_SUBJECT');
+          const artifactDir = path.basename(dir);
+          const input = {
+            transaction_id: lineage.transaction_id,
+            rerun_receipt_id: `a01-run-${process.env.RERUN_ID}-${receipt.qualification_id}`,
+            receipt,
+            attempt_result_class: attemptResultClass,
+            failure_reason: failureReason,
+            receipt_pointer: `github-actions-run:${process.env.RERUN_ID}:artifact:${artifactDir}`,
+            adjudicated_at: new Date().toISOString()
+          };
+          fs.writeFileSync('.repair-rerun-adjudicate/input.json', JSON.stringify(input, null, 2) + '\n');
+          NODE
+
+      - name: Adjudicate rerun into the existing repair transaction
+        run: node .github/scripts/a01-repair-ledger.js adjudicate-rerun < .repair-rerun-adjudicate/input.json > .repair-rerun-adjudicate/result.json
+
+      - name: Reconcile repair ledger after adjudication
+        run: node .github/scripts/a01-repair-ledger-reconcile.js
+
+      - name: Remove temporary one-shot launch/adjudication workflows
+        shell: bash
+        run: |
+          rm -f .github/workflows/a01-repair-resume-once.yml
+          rm -f .github/workflows/a01-repair-adjudicate-once-2026-09-11.yml
+
+      - name: Commit canonical same-transaction result
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add governance/repair qualification/a01/repair-requests .github/workflows
+          test -n "$(git status --porcelain)"
+          tx=$(node -e "const r=require('./.repair-rerun-adjudicate/result.json'); console.log(r.transaction_id)")
+          git commit -m "repair: adjudicate A-01 replacement failure for ${tx}"
+          git pull --rebase origin main
+          git push origin HEAD:main
+
+      - name: Publish adjudication result
+        if: always()
+        shell: bash
+        run: |
+          echo '## A-01 one-shot repair adjudication' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Source run: 34595673549' >> "$GITHUB_STEP_SUMMARY"
+          if [ -f .repair-rerun-adjudicate/result.json ]; then
+            echo '```json' >> "$GITHUB_STEP_SUMMARY"
+            cat .repair-rerun-adjudicate/result.json >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          fi
