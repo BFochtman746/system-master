@@ -6,175 +6,172 @@ This file is the cross-chat entry point for all work in `BFochtman746/system-mas
 
 Before interpreting a branch, chat title, ticket, workflow, qualification, historical handoff or scheduled task as current authority, read in this order:
 
-1. `governance/CURRENT-AUTHORITY.json`
-2. the current morning bootstrap pointer/manifest when present
-3. the topology selected by CURRENT-AUTHORITY — currently `governance/SYSTEM-TOPOLOGY-003.json`
-4. `governance/catalog/SYSTEM-MASTER-SYSTEM-CATALOG-001.json` for active/retired/future-system discovery; the catalog never overrides topology authority
-5. when the user asks to build/resume a cataloged future system or reuse historical work, load its system packet before broad archive research — currently `governance/catalog/system-packets/PROGRAMMING.json` for Programming
-6. the live canonical control ref for the active owning system, if one exists; cataloged future candidates have no active owner/control until explicitly admitted
-7. the sealed checkpoint, completion ledger and current obligation registry selected by CURRENT-AUTHORITY — currently `governance/WORK-OBLIGATION-REGISTRY-005.json`
-8. expectation/reallocation/repair state relevant to the active owner
-9. `governance/catalog/SYSTEM-MASTER-ARCHIVE-SOURCE-REGISTRY-001.json` and exact source/evidence records when historical reuse is relevant
-10. the registry-declared Second Shift delegation and current shift ledger when unattended work is involved
+1. `governance/CURRENT-AUTHORITY.json` from current `main`;
+2. the `program_job_lock` and `system_completion_status` selected by CURRENT-AUTHORITY;
+3. the current morning bootstrap pointer/manifest when present;
+4. the topology selected by CURRENT-AUTHORITY — currently `governance/SYSTEM-TOPOLOGY-004.json`;
+5. the `system_catalog` selected by CURRENT-AUTHORITY for active/historical/future-system discovery; the catalog never overrides topology authority;
+6. the live canonical control ref/head for the active owning system;
+7. the current completion ledger, obligation registry and expectation registry selected by CURRENT-AUTHORITY;
+8. expectation/reallocation/repair state relevant to the active owner;
+9. archive/source/evidence records when historical reuse is relevant;
+10. the registry-declared Second Shift delegation and current shift ledger when unattended work is involved.
 
 Conversation memory, morning packets, branch names, catalog entries and historical handoffs never override current repository authority.
+
+## Current completion truth
+
+`PROSE` is the **only complete system**.
+
+`SYSTEM_MASTER`, `CORE`, `LEARNING`, `BOOK` and `DOCUMENTS` are incomplete and active. A completed packet, phase, branch, subsystem, hosted test or A-01 qualification does not make an owning system complete unless the authority-selected system completion record explicitly says so.
 
 ## Active product hierarchy
 
 `SYSTEM_MASTER` is the product root / system-of-systems.
 
-- **SYSTEM MASTER**
-  - **CORE — System Master Core / Foundation & Spine**
-  - **LEARNING SYSTEM**
-  - **BOOK SYSTEM**
-  - **DOCUMENTS SYSTEM**
+- **SYSTEM MASTER** — incomplete product root / integration controller
+  - **CORE — System Master Core / Foundation & Spine** — incomplete
+  - **LEARNING SYSTEM** — incomplete
+  - **BOOK SYSTEM** — incomplete
+    - **PROSE SYSTEM** — complete Book child specialist
+  - **DOCUMENTS SYSTEM** — incomplete
 
-`PROSE SYSTEM` is **completed and retired**. It is not an active owner. Historical Prose branches, receipts, exact SHAs, qualification evidence and census records remain immutable provenance; its completed capability family is being integrated into DOCUMENTS.
+Current architecture authority is `governance/SYSTEM-TOPOLOGY-004.json` plus `governance/ADR-0004-BOOK-PROSE-CHILD-RESTORATION.md`.
 
-Architecture authority: `governance/ADR-0003-DOCUMENTS-PEER-SYSTEM-AND-PROSE-RETIREMENT.md`  
-Retirement authority: `governance/retirements/PROSE-SYSTEM-RETIREMENT-001.json`
+The historical Prose retirement/Documents-reallocation records remain provenance only. They do not control current execution and must not redirect active Book-Prose work to Documents.
 
-## Supported chat roles
+## Locked program jobs
 
-- `MASTER_ROOT` — SYSTEM_MASTER product-root controller; reads all active peer systems and shared infrastructure but is not another peer system.
-- `LEARNING` — `SYSTEM_MASTER/LEARNING`.
-- `BOOK` — `SYSTEM_MASTER/BOOK`.
-- `DOCUMENTS` — `SYSTEM_MASTER/DOCUMENTS`.
+### SYSTEM MASTER
 
-There is no current `PROSE` owner chat role. A historical Prose chat may be used to inspect provenance, but it may not create current Prose-owned work. Any still-needed work routes to DOCUMENTS or, for Book canonical state, BOOK.
-
-## Highest current System Master priority
-
-`SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001` is the selected central objective and highest active System Master priority until its supervised Programming proving run is accepted or the user explicitly changes priority. The controlling record is `governance/knowledge-recovery/SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001.md`.
-
-This priority does not create a new system or Second Shift lane. Existing safety, evidence-preservation, active-owner integrity and explicit human/private/native authority boundaries remain non-preemptible.
-
-## Future-system / historical-reuse startup
-
-The System Catalog is the durable discovery index for future-system candidates and archived capability families. It is intentionally non-authoritative: cataloging a candidate does not create a peer system.
-
-When the user says something such as **“let’s build the Programming System”**:
-
-1. resolve CURRENT-AUTHORITY and the System Catalog;
-2. load `governance/catalog/system-packets/PROGRAMMING.json` before generic research;
-3. load the Archive Source Registry and exact referenced source/evidence records;
-4. recover and reconcile existing research/specification/code/test/qualification material before proposing new work;
-5. apply only the current material-delta research gate to historically closed research unless evidence triggers a real reopen;
-6. explicitly admit Programming into topology only if the user intends it to become a first-class peer; catalog presence alone is not admission;
-7. after admission, create the full system control package atomically: topology/ADR, canonical control, current obligations, repair inbox, Second Shift delegation/worker/telemetry, morning/chat startup, and validator coverage;
-8. begin at the first genuinely unclosed evidence-backed work package rather than rediscovering the domain.
-
-The same pattern applies to every future system packet added later.
-
-## Canonical routing
+Integrate CORE, LEARNING, BOOK and DOCUMENTS into one coherent product through explicit interfaces and shared infrastructure. The product root coordinates integration but does not take peer-system product semantics or create a separate root worker lane.
 
 ### CORE — `SYSTEM_MASTER/CORE`
 
-Owns shared foundation/data/platform/runtime, continuity/recovery, assurance/reconciliation and shared qualification/control-plane integration.
+Finish shared Foundation/Spine, runtime, data/platform, continuity/recovery, assurance/reconciliation, shared connector/model/artifact infrastructure and A-01/control-plane integration. CORE administers shared System Master integration infrastructure but does not implement Learning, Book/Prose or Documents product semantics.
 
 ### LEARNING — `SYSTEM_MASTER/LEARNING`
 
-Owns Learning product architecture/runtime, curriculum, assessment, mastery/adaptation, retention/transfer and Learning-specific qualification/evidence.
+Finish the Learning system: product/runtime, curriculum, learner/mastery model, assessment/adaptation, retention/transfer and Learning evidence/qualification. Then integrate Learning upward into System Master through explicit interfaces. Do not cross into Book, Prose or Documents product work.
 
 ### BOOK — `SYSTEM_MASTER/BOOK`
 
-Owns canonical Book state, manuscript/story-bible/lifecycle orchestration, author decisions, version/rollback, editorial lifecycle and publication state. BOOK consumes document/prose capabilities from DOCUMENTS through explicit admitted interfaces and does not become the Documents implementation owner.
+Finish the Book system. This specifically includes bringing the already-complete PROSE child into Book through the required adapters and the Book Workflow Orchestrator, then completing the remaining Book lifecycle/orchestration/context/routing/admission work and integrating Book upward into System Master.
+
+BOOK remains the sole canonical owner of Book/manuscript, Story Bible/canon, author decisions, lifecycle, admission and publication state.
+
+### PROSE — `SYSTEM_MASTER/BOOK/PROSE`
+
+PROSE is complete and remains the Book literary-specialist child. It supplies literary diagnosis, controlled revision candidates, evaluation support, voice/protected-language preservation, homogenization defense and Book-scoped preference-learning behavior.
+
+PROSE has zero direct canonical manuscript-write authority, no Book-admission authority, no author authority and no separate peer/Second Shift mutation lane. Integration adapters/orchestration around completed Prose are BOOK work. Do not restart or expand Prose feature scope absent a demonstrated defect or explicit user direction.
 
 ### DOCUMENTS — `SYSTEM_MASTER/DOCUMENTS`
 
-DOCUMENTS is a first-class peer tool system with control ref `documents/control-v1`. It owns document/content artifact semantics including DOCX/PDF/PPTX, structure/conversion/preservation/render/export behavior, generic reusable writing/content artifact semantics, and the completed Prose evaluator/craft/diagnostic/revision/preservation capability family after evidence-preserving migration.
+Finish Documents document/artifact mechanics: DOCX, PDF, PPTX and general document intake, structure, conversion, preservation, rendering/export and generic reusable non-Book document/writing artifact behavior. Then integrate Documents upward into System Master through explicit interfaces.
 
-DOCUMENTS does not silently write BOOK canonical state. Historical Prose evidence remains historical exact-subject evidence and is not relabeled or transferred to changed Documents integration bytes.
+DOCUMENTS must not absorb, schedule, repair or claim Book-specific PROSE literary work and may not mutate Book canonical state.
 
-## Retired Prose handling
+### Knowledge Recovery / Programming
 
-If any current artifact tries to route an obligation, delegation, repair transaction, scheduled worker or new canonical write to `SYSTEM_MASTER/BOOK/PROSE`, classify it `RETIRED_OWNER_STALE_WORK`.
+Knowledge Recovery is a supporting CORE-administered source/custody/provenance program. It is not a peer system and is not the product-wide priority. It may proceed when dependency-valid without blocking the independent Book, Learning or Documents lanes or redefining their jobs.
 
-Then:
+## Sole direct specialist exception
 
-1. preserve the historical evidence unchanged;
-2. close/supersede the stale Prose current-state item;
-3. translate genuinely unfinished capability integration into `SYSTEM_MASTER/DOCUMENTS`;
-4. route any Book canonical-state decision to `SYSTEM_MASTER/BOOK`;
-5. never create a new active Prose lane merely because a historical branch/qualification still exists.
+The only direct specialist parent/child lane exception is:
 
-## Completion / obligation discipline
+`BOOK <-> PROSE`
 
-The completion ledger remains append-only historical evidence. Current work selection comes from the obligation registry selected by CURRENT-AUTHORITY — currently `WORK-OBLIGATION-REGISTRY-005.json`.
+All other active systems remain inside their own product lanes and integrate upward into System Master or communicate through explicit admitted interfaces. A service call never transfers ownership with it.
 
-The product-root central objective is currently `SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001`. Its semantic owner is SYSTEM_MASTER; CORE administers A-01 execution. DOCUMENTS retains its own owner-lane objective and may continue dependency-valid work that does not consume or block the higher-priority supervised Knowledge Recovery path.
+## Supported chat roles
 
-The current Prose completion is not undone by integration. Integration is a new Documents-owned boundary and changed integration bytes require fresh exact-subject qualification.
+- `MASTER_ROOT` — SYSTEM_MASTER product-root controller.
+- `LEARNING` — `SYSTEM_MASTER/LEARNING`.
+- `BOOK` — `SYSTEM_MASTER/BOOK`.
+- `PROSE` compatibility focus — opens BOOK focused at `SYSTEM_MASTER/BOOK/PROSE`; it is not a separate owner lane.
+- `DOCUMENTS` — `SYSTEM_MASTER/DOCUMENTS`.
 
-## Historical evidence / catalog discipline
+Every new chat must re-fetch current `main`, CURRENT-AUTHORITY, job/completion locks and its live owner control head before current-state claims or writes.
 
-The Archive Source Registry and generated system packets are discovery/reuse indexes. Exact source bytes, Git refs/SHAs, Library file/version IDs, receipts and qualification artifacts remain the evidence layer.
+## Current work selection
 
-A reusable asset must preserve:
+The authority-selected current obligation registry controls current work. The current product-root coordination objective is `SYSTEM-MASTER-INTEGRATION-COORDINATION-001` under CORE administrative execution, while BOOK, LEARNING and DOCUMENTS continue independently inside their locked jobs.
 
-- source locator and exact digest/identity when available;
-- lifecycle/evidence class;
-- system/capability affinity;
-- research, implementation and qualification standing as separate dimensions;
-- provenance/dependency relations;
-- reuse disposition such as `REUSE_AS_IS`, `REUSE_WITH_REQUALIFICATION`, `REFERENCE_ONLY`, `MIGRATION_INPUT`, `DELTA_RESEARCH_REQUIRED`, `QUARANTINE_CONFLICT` or `IDENTITY_UNPROVEN`.
-
-A-01 may deterministically inventory/hash/validate/extract/catalog presented evidence and emit receipts/attestations, but it may not create a system, assign semantic ownership or transfer historical PASS to a changed subject.
-
-## Required A-01 / evidence rule
-
-Canonical A-01 control documents:
-
-- `qualification/a01/A01-OPERATING-CONTRACT.md`
-- `qualification/a01/A01-OPERATING-MODE-001.md`
-- `qualification/a01/A01-REGISTRATION-DISPATCH-BARRIER-001.md`
-- `qualification/a01/overnight/A01-OVERNIGHT-001.md`
-- `qualification/a01/overnight/A01-SECOND-SHIFT-002.md`
-
-Keep separate:
-
-1. historical code/evidence exists;
-2. exact current code builds;
-3. hosted/local portable tests pass;
-4. authoritative A-01 qualification passes on the exact current subject;
-5. production/publication/native/human/private authority exists.
-
-Historical Prose or Document PASS never transfers to changed Documents integration subjects. Historical Programming research/build-spec evidence likewise does not imply current implementation or target qualification.
+Book’s current lane continues Book-Prose integration from the completed Prose system through adapters/orchestration. Learning continues Learning-only product completion/integration. Documents continues Documents-only completion/integration. A blocker in one peer lane does not stop dependency-valid safe work in another.
 
 ## Second Shift
 
-Read `SECOND-SHIFT-REGISTRY-001.json::owner_files` as the machine-authoritative active lane set. Active lanes are currently:
+`governance/second-shift/SECOND-SHIFT-REGISTRY-001.json::owner_files` is the machine-authoritative active worker-lane set. Current active peer worker lanes are:
 
 - CORE
 - LEARNING
 - BOOK
 - DOCUMENTS
 
-`PROSE` is retired and must not run. The temporary `SYSTEM_MASTER` root worker lane is also retired; SYSTEM_MASTER remains the portfolio controller/orchestrator, not a peer execution lane.
+PROSE work inherits the BOOK lane and BOOK mutation claim. There is no separate active Prose worker lane. SYSTEM_MASTER root remains portfolio controller rather than a peer worker.
 
-Knowledge Recovery remains supervised and Second-Shift-ineligible until its exact first successful Programming proving receipt and generated catalog/trace evidence pass the acceptance gate in its control record.
+Before dispatch, every controller/worker must read CURRENT-AUTHORITY, the current job lock, completion status, topology, obligation registry and its exact live owner head. Cross-lane work, false non-Prose system completion, stale head bindings and overlapping mutation claims fail closed.
 
-Every active lane owns a delegation file and factual utilization ledger. For Documents these are:
+## Completion and evidence discipline
 
-- `governance/second-shift/DOCUMENTS-DELEGATIONS.json`
-- `governance/second-shift/execution-events/YYYY-MM-DD/DOCUMENTS.json`
+The current completion interpretation is selected by CURRENT-AUTHORITY. Older completion ledgers remain append-only historical/boundary evidence.
 
-A stale/missing delegation, blocked critical path or completed item does not justify idle while dependency-valid independent owner work remains. Retired lanes, however, are not idle lanes and require no future events.
+Keep separate:
+
+1. historical code/evidence exists;
+2. a packet/phase/subsystem is complete;
+3. exact current code builds/tests;
+4. hosted/local qualification passes;
+5. exact-subject A-01 qualification passes;
+6. whole-system product completion;
+7. human/author/private/native/external/publication/production authority.
+
+No PASS transfers across changed SHA, changed integration subject, changed ownership boundary or different qualification class.
+
+## Book / Prose authority rule
+
+Book may orchestrate Prose analysis, evaluation and controlled candidate generation through adapters. Prose output remains evidence/candidate material until Book admission. Only BOOK may create canonical manuscript effects.
+
+Documents may provide document/artifact services to Book through explicit interfaces, but that does not make Documents owner of Prose, Book literary semantics or canonical Book state.
+
+## Future-system / historical-reuse startup
+
+The System Catalog is a discovery/reuse index, not architecture authority. A catalog candidate does not become a system automatically.
+
+When the user asks to build/resume a cataloged future system:
+
+1. resolve CURRENT-AUTHORITY and the authority-selected System Catalog;
+2. load its system packet and archive/source registry before broad rediscovery;
+3. recover and reconcile existing research/spec/code/test/qualification material;
+4. apply only current material-delta research to historically closed research unless a real reopen trigger exists;
+5. explicitly admit a new first-class system only with user-authorized topology/ADR/owner changes;
+6. begin implementation at the first genuinely unclosed evidence-backed work package.
+
+## Repair discipline
+
+Repair routing follows current topology and program jobs. Book-Prose repairs route through BOOK. Documents repairs stay Documents-owned. Learning repairs stay Learning-owned. Shared infrastructure/A-01 failures route through CORE/shared infrastructure as defined by current repair controls.
+
+Historical standalone Prose repair/delegation records are provenance only and cannot create a separate active lane.
 
 ## Anti-surprise rule
 
 At every chat/work start:
 
-`LIVE LOOKUP -> OWNER/TOPOLOGY RESOLUTION -> CATALOG/PACKET RESOLUTION -> DELTA CLASSIFICATION -> RECONCILE -> CURRENT STATE -> NEXT STEP`
+`LIVE MAIN -> CURRENT AUTHORITY -> JOB/COMPLETION LOCK -> LIVE OWNER HEAD -> OBLIGATION/DELEGATION -> DELTA CLASSIFICATION -> RECONCILE -> CURRENT OBJECTIVE -> EXECUTE/NEXT STEP`
 
-Do not ask the user to reconstruct architecture, archive history or previous research that current authority/catalog/source evidence can resolve. A new chat is a new working surface, not a new project state.
+Do not ask the user to reconstruct architecture, program jobs, completion truth, archive history or prior research that current repository authority can resolve.
 
-## Historical preservation
+## End-of-work rule
 
-Historical branches, receipts, frozen artifacts, exact-SHA evidence and prior topology records are never rewritten because ownership changed. `SYSTEM-TOPOLOGY-002` and pre-retirement Prose records remain provenance; `SYSTEM-TOPOLOGY-003` controls current execution.
+Before ending substantive work:
 
-The historical 40-module/vault inventory is retained as discovery/reuse evidence. Its historical research status never by itself creates active topology or current implementation authority.
+1. re-read the live owner head;
+2. classify/reconcile any delta;
+3. preserve exact evidence;
+4. update current obligation/repair/Second Shift state if materially changed;
+5. bind one dependency-valid successor inside the same locked job.
 
 ## Current authority
 
-`governance/CURRENT-AUTHORITY.json` is the cross-chat current-routing selector. Any file, chat, task or branch that conflicts with it is historical/stale until explicitly admitted by current authority.
+`governance/CURRENT-AUTHORITY.json` is the cross-chat current-routing selector. Any file, chat, task, branch, historical retirement record or generated packet that conflicts with current authority, the selected program job lock or the selected system completion status is stale for current execution until explicitly reconciled.
