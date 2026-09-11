@@ -13,7 +13,7 @@ POLICY = hashlib.sha256(b"policy-v1").hexdigest()
 
 
 class FencingTests(unittest.TestCase):
-    def test_expired_worker_cannot_write_after_new_fence(self):
+    def test_retired_worker_cannot_write_after_new_fence(self):
         with tempfile.TemporaryDirectory() as temp:
             store = ControllerStore(Path(temp) / "controller.db", SCHEMA)
             store.initialize()
@@ -38,7 +38,7 @@ class FencingTests(unittest.TestCase):
             store.set_execution_state(tx, "PLANNED")
             store.set_execution_state(tx, "CLAIMABLE")
             first = store.acquire_lease(
-                transaction_id=tx, resource_key=resource, worker_id="worker-1", ttl_ms=2
+                transaction_id=tx, resource_key=resource, worker_id="worker-1"
             )
 
             con = store.connect()
@@ -51,7 +51,9 @@ class FencingTests(unittest.TestCase):
             finally:
                 con.close()
 
-            time.sleep(0.01)
+            # Deterministically retire the first worker's authority before
+            # recovering the transaction and issuing the next fencing token.
+            store.release_lease(first.lease_id, first.fencing_token, "TEST_REPLACEMENT")
             store.set_execution_state(tx, "RECOVERING")
             store.set_execution_state(tx, "CLAIMABLE")
             second = store.acquire_lease(
