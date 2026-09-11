@@ -16,19 +16,22 @@
   },
   "coverage_routes": {
     "SYSTEM_MASTER/SHARED_INFRASTRUCTURE": "CORE",
-    "SYSTEM_MASTER/SHARED_INFRASTRUCTURE/A01": "CORE"
+    "SYSTEM_MASTER/SHARED_INFRASTRUCTURE/A01": "CORE",
+    "SYSTEM_MASTER/BOOK/PROSE": "BOOK"
   },
   "owner_discovery_rule": "owner_files is the machine-authoritative active Second Shift lane set. Controllers, workers, handoffs and enforcement enumerate it rather than compile fixed lane names.",
-  "system_lane_rule": "First-class peer systems receive their own owner lane. DOCUMENTS is a first-class peer and therefore has DOCUMENTS-DELEGATIONS.json. PROSE is retired and is not an active lane. Product-root capability portfolios do not automatically become lanes unless architecture authority makes them first-class systems.",
-  "retired_lanes": {
-    "PROSE": {
+  "system_lane_rule": "First-class peer systems receive their own owner lane. PROSE is an active child specialist of BOOK and therefore inherits the BOOK lane instead of receiving a separate lane. Historical standalone Prose lane files remain immutable evidence only.",
+  "historical_retired_lanes": {
+    "PROSE_STANDALONE_LANE": {
       "retirement_record": "governance/retirements/PROSE-SYSTEM-RETIREMENT-001.json",
       "historical_delegation_file": "governance/second-shift/PROSE-DELEGATIONS.json",
-      "successor_lane": "DOCUMENTS",
-      "active": false
+      "current_subsystem_owner_path": "SYSTEM_MASTER/BOOK/PROSE",
+      "current_execution_lane": "BOOK",
+      "standalone_lane_active": false,
+      "history_preserved": true
     },
     "SYSTEM_MASTER": {
-      "reason": "The temporary root owner lane was introduced while Documents was incorrectly modeled as a non-system portfolio. It is removed from active scheduling; product-root governance remains the portfolio controller rather than a peer worker lane.",
+      "reason": "The temporary root owner lane remains retired; product-root governance is a portfolio controller rather than a peer worker lane.",
       "historical_delegation_file": "governance/second-shift/SYSTEM-MASTER-DELEGATIONS.json",
       "active": false
     }
@@ -39,17 +42,17 @@
     "LEARNING": "READY__ASSESSMENT_TARGET_DOMAIN_III_BATCH_01_033A__HEAD_262f3f0b5ffa4dea68964b91eacd57a4c39bdda6",
     "BOOK": "READY__RF012_OWNER_PROMOTION_REBIND_004__HEAD_05c1f53e2f710f419a99cb99594c53c2f0240b68",
     "PROSE_HISTORICAL": "READY__BLIND_EVALUATOR_LAUNCH_PACKET_002__HEAD_309a7876b8e388d115d4d3bde7dc39dd0ef8b6fd",
-    "history_rule": "P9 remains historical evidence. The 2026-09-10 Documents/Prose architecture transition does not rewrite P9; current scheduling follows this registry owner_files set."
+    "history_rule": "P9 remains historical evidence. Current scheduling follows this registry and topology 004; active Prose child work inherits BOOK rather than reviving the historical standalone Prose lane."
   },
-  "portfolio_rule": "The portfolio controller reads every active owner file declared by owner_files from current authority, revalidates each against its control binding and current obligation registry, removes stale/non-open items from admission, and selects dependency-valid work. Retired lanes are never scheduled.",
-  "day_shift_rule": "Whenever an active system owner chat closes, supersedes, blocks or materially changes its current objective, it reconciles its registry-declared delegation file in the same working session. Documents follows the same rule as Core, Learning and Book.",
+  "portfolio_rule": "The portfolio controller reads every active owner file declared by owner_files from current authority, revalidates each against its control binding and current obligation registry, removes stale/non-open items from admission, and selects dependency-valid work. Child paths use coverage_routes and never create duplicate mutation lanes.",
+  "day_shift_rule": "Whenever an active owner chat closes, supersedes, blocks or materially changes its current objective, it reconciles its registry-declared delegation file in the same working session. BOOK reconciliation includes current work performed by its PROSE child.",
   "night_start_rule": "The portfolio controller performs fresh pre-shift reconciliation and every active owner worker independently revalidates immediately before execution.",
-  "dispatch_rule": "Every active registry-declared lane is eligible for the configured owner-worker cadence during 00:00-07:00. Implementations derive active lanes from owner_files; retired_lanes are evidence only.",
-  "claim_rule": "Only one mutation-capable claim/lease may be live per active owner lane.",
+  "dispatch_rule": "Every active registry-declared lane is eligible for the configured owner-worker cadence during 00:00-07:00. Child specialist paths route through coverage_routes; historical standalone lanes are never dispatched.",
+  "claim_rule": "Only one mutation-capable claim/lease may be live per active owner lane. Cross-mode foreground/Second-Shift arbitration is specified separately and must not create an additional per-child mutation lane.",
   "retry_rule": "Transient dependencies receive a finite classified retry budget; after exhaustion the lane switches to independent safe work when available.",
   "stale_rule": "No job survives a control-binding mismatch by default. Preserve evidence/checkpoint, re-evaluate, then create a new/revalidated delegation bound to current authority.",
-  "no_work_rule": "An active lane may be idle only after a durable all-eight-rungs-exhausted proof. A retired lane is not idle; it is out of the active scheduling set.",
+  "no_work_rule": "An active lane may be idle only after a durable all-eight-rungs-exhausted proof. A historical standalone lane is outside the active scheduling set.",
   "successor_rule": "After every completion or material block, the active owner worker re-reads live authority and selects the next dependency-valid unattended-safe project while time remains.",
-  "utilization_rule": "Per-lane append-only shift event ledgers are authoritative for active lanes only. Historical Prose/root ledgers remain evidence and are not expected after retirement.",
+  "utilization_rule": "Per-lane append-only shift event ledgers are authoritative for active lanes only. Historical Prose/root ledgers remain evidence and are not expected after standalone-lane retirement.",
   "work_ahead_ladder": ["current repair/control health","completion and evidence census","authoritative research and provenance","architecture/contracts/state/interface/evidence specification","tests/benchmarks/property/concurrency/failure injection","bounded implementation with objective verification","exact-SHA qualification and A-01 preparation","next successor build packet"]
 }
