@@ -1,0 +1,73 @@
+{
+  "contract_id": "BOOK-WORKFLOW-SCHEDULER-EXECUTION-RUNTIME-001",
+  "effective_date": "2026-09-11",
+  "owner_system_id": "BOOK",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "control_ref": "book-system/control-v1",
+  "predecessor_subject_sha": "e2a23e8b1f076e3cd576c11e036e40eaf8a5ce2f",
+  "classification": "BOOK_OWNED_COORDINATION_SCHEDULER_EXECUTION_RUNTIME",
+  "purpose": "Execute only already-valid, registered, non-retired specialist service tasks under the Book execution-plan, concurrency, retry/idempotency and durable-coordination contracts. The scheduler owns coordination only and never acquires specialist semantic authority or canonical Book mutation authority.",
+  "depends_on": [
+    "BOOK-WORKFLOW-ORCHESTRATOR-DEPENDENCY-GRAPH-EXECUTION-PLAN-CONTRACT-001",
+    "BOOK-WORKFLOW-ORCHESTRATOR-CAPABILITY-ROUTING-INTERFACE-001",
+    "BOOK-WORKFLOW-ORCHESTRATOR-CONCURRENCY-RULES-001",
+    "BOOK-WORKFLOW-ORCHESTRATOR-RETRY-IDEMPOTENCY-RULES-001",
+    "BOOK-WORKFLOW-ORCHESTRATOR-CANCELLATION-RESUME-001",
+    "BOOK-WORKFLOW-ORCHESTRATOR-EVIDENCE-PROVENANCE-EMISSION-001",
+    "BOOK-DURABLE-WORKFLOW-CHECKPOINT-RECEIPT-PERSISTENCE-001"
+  ],
+  "laws": [
+    "Validate the exact plan, workflow, source, routing and concurrency decision before dispatch.",
+    "Dispatch only SPECIALIST_SERVICE_TASK entries whose registered capability is callable, non-canonical-write and not owned by retired Prose or the retired Book Evaluator lane.",
+    "PROSE and BOOK_EVALUATION provider execution remains forbidden under CURRENT-AUTHORITY-003 and SYSTEM-TOPOLOGY-005 even when historical routing descriptors remain callable provenance.",
+    "BOOK_ADMISSION_HANDOFF, AUTHORITY_WAIT and DECLARED_BLOCKED_CAPABILITY are represented and evidenced but never dispatched by this runtime.",
+    "ISOLATION_GATED work remains withheld until a separately qualified current isolation seam changes that standing.",
+    "Only tasks in the same validated topological layer may share a parallel batch, and max_concurrency is hard-bounded to 1 through 8.",
+    "Required dependencies must succeed before a task becomes runnable. A failed, withheld or blocked required dependency blocks the dependent task.",
+    "Optional dependencies constrain ordering but do not become success prerequisites once terminal.",
+    "Every provider operation uses the existing exact operation identity and idempotency key. Automatic replay after unknown outcome is allowed only when the registered operation is idempotent and the existing retry contract returns SAFE_SAME_OPERATION_REPLAY.",
+    "Interrupted idempotent RUNNING work may be requeued with the same exact operation identity. Interrupted non-idempotent work requires reconciliation and is blocked rather than replayed.",
+    "Scheduler durable state stores coordination metadata and immutable references only. Raw manuscript content and canonical-effect fields are forbidden.",
+    "Worker results are evidence-only references with exact digests. Provider success never equals Book admission, lifecycle transition, export freeze, publication authority, author decision or production standing.",
+    "No scheduler run may create or reactivate Prose work, route Book work to Documents, or claim A-01/native/publication/production authority.",
+    "Changed plan/workflow/source identity or execution policy cannot reuse a prior scheduler run ID. Stale bindings fail closed.",
+    "BOOK remains incomplete after this runtime passes."
+  ],
+  "execution_limits": {
+    "max_concurrency_min": 1,
+    "max_concurrency_max": 8,
+    "max_task_attempts_min": 1,
+    "max_task_attempts_max": 3,
+    "automatic_non_idempotent_retry": false
+  },
+  "qualification_requirements": [
+    "EXACT_PLAN_WORKFLOW_SOURCE_BINDING",
+    "INDEPENDENT_RESEARCH_TASKS_BOUNDED_PARALLEL",
+    "DEPENDENT_TASKS_WAIT_FOR_REQUIRED_PREDECESSORS",
+    "IDEMPOTENT_UNKNOWN_OUTCOME_SAME_KEY_REPLAY_ONLY",
+    "DURABLE_PAUSE_RELOAD_RESUME",
+    "COMPLETED_TASKS_NOT_REDISPATCHED_AFTER_RESUME",
+    "RETIRED_PROSE_AND_EVALUATOR_NEVER_DISPATCHED",
+    "AUTHORITY_WAIT_AND_DECLARED_BLOCKED_NEVER_DISPATCHED",
+    "BOOK_ADMISSION_NEVER_DISPATCHED",
+    "CANONICAL_EFFECT_AND_RAW_CONTENT_RESULT_FIELDS_REJECTED",
+    "WORKER_FAILURE_EVIDENCE_HASHED_AND_FAIL_CLOSED",
+    "STALE_RUN_BINDING_REJECTED",
+    "CONCURRENCY_LIMIT_HARD_BOUNDED",
+    "ZERO_CANONICAL_BOOK_EFFECT"
+  ],
+  "non_claims": [
+    "No real provider execution is performed by qualification fixtures.",
+    "No fresh blind literary evaluation is claimed.",
+    "No Prose execution lane is recreated.",
+    "No Book admission is executed.",
+    "No canonical manuscript or Story Bible mutation is performed.",
+    "No A-01, native, publication or production PASS is inferred.",
+    "No BOOK completion claim is made."
+  ],
+  "implementation_paths": [
+    "system-master/book-system/book-workflow-scheduler-runtime.js",
+    "system-master/book-system/book-workflow-scheduler-runtime.test.js"
+  ],
+  "standing": "CANDIDATE_PENDING_EXACT_SUBJECT_HOSTED_QUALIFICATION"
+}
