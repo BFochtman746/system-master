@@ -8,7 +8,16 @@
   "programming_work_program_lock": "governance/programs/PROGRAMMING-WORK-PROGRAM-LOCK-001.json",
   "system_completion_status": "governance/SYSTEM-COMPLETION-STATUS-001.json",
   "purpose": "Lock current work to active peer jobs while preserving terminal Prose retirement, Book-only ownership of any genuinely unfinished completed-Prose integration, Programming work-program continuity, and Knowledge Recovery 001 as the highest discretionary System Master priority while selected.",
-  "states": ["READY", "ACTIVE", "BLOCKED", "HOLD", "DEFERRED", "OWNER_SELECTION_REQUIRED", "SUPERSEDED", "CLOSED"],
+  "states": [
+    "READY",
+    "ACTIVE",
+    "BLOCKED",
+    "HOLD",
+    "DEFERRED",
+    "OWNER_SELECTION_REQUIRED",
+    "SUPERSEDED",
+    "CLOSED"
+  ],
   "rules": [
     "Every non-closed peer-system obligation has one executable owner_path valid under SYSTEM-TOPOLOGY-005.",
     "PROSE is complete and retired. No active obligation may be owned by PROSE or SYSTEM_MASTER/BOOK/PROSE.",
@@ -131,11 +140,21 @@
       "obligation_id": "A01-CONTROL-PLANE-SELFTEST-CURRENT-SHA-QUALIFICATION-001",
       "owner_path": "SYSTEM_MASTER/SHARED_INFRASTRUCTURE/A01",
       "administrative_owner": "SYSTEM_MASTER/CORE",
-      "state": "READY",
+      "state": "CLOSED",
       "priority": "NONDISCRETIONARY_CONTROL_PLANE_REQUALIFICATION",
       "predecessor": "A01-CONTROL-PLANE-SELFTEST-A1-REPLACEMENT-RERUN-001",
       "demonstrated_defect": "SYSTEM-MASTER-WORKSTREAM-BOOTSTRAP.md omitted the A01-OVERNIGHT-001.md authority link required by the registered control-plane self-test.",
-      "objective": "After repairing the missing bootstrap overnight-authority link, execute a fresh registered A01-CONTROL-PLANE-SELFTEST on the exact changed current-control-plane SHA. Preserve the exhausted repair transaction as terminal and create a new repair lineage only if this genuinely new current-SHA qualification fails."
+      "objective": "Closed by authoritative A-01 PASS on exact subject/control-plane SHA 7df303eafdc425d51d9be964c7e0ffd4ae21cf13 after repairing the bootstrap overnight-authority link and aligning the stale legacy-workflow freeze selftest invariant to the authoritative v2 retirement contract. This PASS is exact-subject evidence only and does not transfer to later changed bytes.",
+      "final_standing": "A01_EXACT_SUBJECT_PASS",
+      "final_result_class": "PASS",
+      "exact_subject_sha": "7df303eafdc425d51d9be964c7e0ffd4ae21cf13",
+      "exact_control_plane_sha": "7df303eafdc425d51d9be964c7e0ffd4ae21cf13",
+      "a01_run_id": 34596555005,
+      "a01_artifact_id": 10262098747,
+      "a01_artifact_name": "A01-CONTROL-PLANE-SELFTEST-34596555005-evidence",
+      "a01_artifact_sha256": "b8362c117a4975d7b02e3bb6d44050aa377511b5365752487bd8e20c93bae6ff",
+      "promotion_authorized": true,
+      "closed_at": "2026-09-11T11:58:40Z"
     },
     {
       "obligation_id": "SECOND-SHIFT-LIVE-AUTHORITY-SUCCESSOR-ENFORCEMENT-002",
@@ -144,16 +163,53 @@
       "state": "ACTIVE",
       "objective": "Enforce live owner/objective semantics, topology-peer coverage, lane-wide mutation arbitration, truthful utilization and retired-system non-resurrection without crossing owner lanes."
     },
-    {"obligation_id": "HEADLESS-COMPUTE-DATA-SPREADSHEET-CONTRACT-001", "owner_path": "SYSTEM_MASTER", "state": "HOLD", "objective": "Bind spreadsheet/math/user-data-analysis semantics over Core shared execution/artifact/data primitives after current system-integration priorities permit."},
-    {"obligation_id": "HEADLESS-SOFTWARE-ENGINEERING-CONTRACT-001", "owner_path": "SYSTEM_MASTER", "state": "HOLD", "objective": "Define the eventual System Master headless software-engineering service boundary after the Programming work-program architecture/admission decision; this HOLD is not the Programming work program itself."},
-    {"obligation_id": "HEADLESS-RESEARCH-KNOWLEDGE-CONTRACT-001", "owner_path": "SYSTEM_MASTER", "state": "HOLD", "objective": "Bind research/knowledge/external-information semantics after current system-integration priorities permit."},
-    {"obligation_id": "HEADLESS-CONNECTED-ACTION-AUTHORITY-CONTRACT-001", "owner_path": "SYSTEM_MASTER", "state": "HOLD", "objective": "Bind email/calendar/automation/plugin user-action semantics after current system-integration priorities permit."},
-    {"obligation_id": "HEADLESS-MEDIA-CAPABILITY-CONTRACT-001", "owner_path": "SYSTEM_MASTER", "state": "HOLD", "objective": "Bind image/audio/video/media semantics after current system-integration priorities permit."}
+    {
+      "obligation_id": "HEADLESS-COMPUTE-DATA-SPREADSHEET-CONTRACT-001",
+      "owner_path": "SYSTEM_MASTER",
+      "state": "HOLD",
+      "objective": "Bind spreadsheet/math/user-data-analysis semantics over Core shared execution/artifact/data primitives after current system-integration priorities permit."
+    },
+    {
+      "obligation_id": "HEADLESS-SOFTWARE-ENGINEERING-CONTRACT-001",
+      "owner_path": "SYSTEM_MASTER",
+      "state": "HOLD",
+      "objective": "Define the eventual System Master headless software-engineering service boundary after the Programming work-program architecture/admission decision; this HOLD is not the Programming work program itself."
+    },
+    {
+      "obligation_id": "HEADLESS-RESEARCH-KNOWLEDGE-CONTRACT-001",
+      "owner_path": "SYSTEM_MASTER",
+      "state": "HOLD",
+      "objective": "Bind research/knowledge/external-information semantics after current system-integration priorities permit."
+    },
+    {
+      "obligation_id": "HEADLESS-CONNECTED-ACTION-AUTHORITY-CONTRACT-001",
+      "owner_path": "SYSTEM_MASTER",
+      "state": "HOLD",
+      "objective": "Bind email/calendar/automation/plugin user-action semantics after current system-integration priorities permit."
+    },
+    {
+      "obligation_id": "HEADLESS-MEDIA-CAPABILITY-CONTRACT-001",
+      "owner_path": "SYSTEM_MASTER",
+      "state": "HOLD",
+      "objective": "Bind image/audio/video/media semantics after current system-integration priorities permit."
+    }
   ],
   "superseded_at_transition": [
-    {"obligation_id": "DOCUMENTS-PROSE-ABSORPTION-INTEGRATION-001", "final_state": "SUPERSEDED", "reason": "PROSE is complete and retired. Documents receives no Prose work."},
-    {"obligation_id": "BOOK-DOCUMENTS-PROSE-SERVICE-INTEGRATION-PHASE-1-001", "final_state": "SUPERSEDED", "reason": "Any remaining completed-Prose integration is ordinary BOOK-owned integration; Documents remains a peer document/artifact service system."},
-    {"obligation_id": "PROSE-STANDALONE-OR-CHILD-EXECUTION", "final_state": "CLOSED", "reason": "Terminal retirement: no active Prose owner, child, inherited execution, repair, qualification, research, telemetry or successor task."}
+    {
+      "obligation_id": "DOCUMENTS-PROSE-ABSORPTION-INTEGRATION-001",
+      "final_state": "SUPERSEDED",
+      "reason": "PROSE is complete and retired. Documents receives no Prose work."
+    },
+    {
+      "obligation_id": "BOOK-DOCUMENTS-PROSE-SERVICE-INTEGRATION-PHASE-1-001",
+      "final_state": "SUPERSEDED",
+      "reason": "Any remaining completed-Prose integration is ordinary BOOK-owned integration; Documents remains a peer document/artifact service system."
+    },
+    {
+      "obligation_id": "PROSE-STANDALONE-OR-CHILD-EXECUTION",
+      "final_state": "CLOSED",
+      "reason": "Terminal retirement: no active Prose owner, child, inherited execution, repair, qualification, research, telemetry or successor task."
+    }
   ],
   "central_next_objective": "SYSTEM-MASTER-INTEGRATION-COORDINATION-001",
   "highest_discretionary_objective": "SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001"
