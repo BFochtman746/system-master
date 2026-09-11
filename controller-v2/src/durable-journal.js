@@ -78,8 +78,16 @@ function eventFromOutbox(row) {
   };
 }
 
+// The durable journal must observe the controller's local commit order, never wall-clock order.
+// SQLite rowid is used only by this reference storage adapter as its monotonic append cursor;
+// it is not part of the Controller protocol or durable journal format.
+function pendingOutboxInLocalCommitOrder(kernel) {
+  if (!kernel?.db?.prepare) throw new ControllerError('OUTBOX_ADAPTER_INVALID', 'reference SQLite kernel required');
+  return kernel.db.prepare("SELECT o.rowid AS local_outbox_sequence,o.*,e.event_schema,e.stream_id,e.stream_version,e.event_type,e.occurred_at,e.data_json,e.prev_event_digest,e.event_digest FROM outbox o JOIN events e ON e.event_id=o.event_id WHERE o.status='PENDING' ORDER BY o.rowid").all();
+}
+
 export async function publishPendingOutbox(kernel, journal, { limit = Infinity } = {}) {
-  const pending = kernel.pendingOutbox().slice(0, limit);
+  const pending = pendingOutboxInLocalCommitOrder(kernel).slice(0, limit);
   const results = [];
   for (const row of pending) {
     const event = eventFromOutbox(row);
@@ -102,10 +110,10 @@ export async function publishPendingOutbox(kernel, journal, { limit = Infinity }
       }
       if (!receipt || receipt.event_digest !== event.event_digest || typeof receipt.journal_digest !== 'string') throw new ControllerError('JOURNAL_INTEGRITY_FAILURE', 'journal did not confirm exact event and journal digest');
       kernel.markOutboxSealed(row.outbox_id);
-      results.push({ outbox_id: row.outbox_id, event_id: event.event_id, sealed: true, ...receipt });
+      results.push({ outbox_id: row.outbox_id, event_id: event.event_id, sealed: true, local_outbox_sequence: Number(row.local_outbox_sequence), ...receipt });
     } catch (error) {
       kernel.recordOutboxFailure(row.outbox_id, error.code || error.message || String(error));
-      results.push({ outbox_id: row.outbox_id, event_id: event.event_id, sealed: false, code: error.code || 'JOURNAL_ERROR' });
+      results.push({ outbox_id: row.outbox_id, event_id: event.event_id, sealed: false, local_outbox_sequence: Number(row.local_outbox_sequence), code: error.code || 'JOURNAL_ERROR' });
     }
   }
   return results;
