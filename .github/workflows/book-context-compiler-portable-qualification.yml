@@ -1,0 +1,28 @@
+name: Book Context Compiler Portable Qualification
+
+on:
+  push:
+    branches:
+      - book/context-compiler-001-second-shift-20260911
+    paths:
+      - 'system-master/book-system/context-compiler/**'
+      - '.github/scripts/book-context-compiler-context-package-001-qualify.js'
+      - '.github/workflows/book-context-compiler-portable-qualification.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Qualify Book context compiler
+        run: node .github/scripts/book-context-compiler-context-package-001-qualify.js
