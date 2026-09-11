@@ -1,0 +1,58 @@
+{
+  "manifest_id": "PROGRAMMING-INGEST-MANIFEST-002",
+  "schema_version": 2,
+  "extends_manifest": "governance/catalog/ingest/programming/PROGRAMMING-INGEST-MANIFEST-001.json",
+  "supersedes": "governance/catalog/ingest/programming/PROGRAMMING-INGEST-MANIFEST-001.json",
+  "candidate_system_id": "PROGRAMMING",
+  "architecture_authority": false,
+  "frozen_date": "2026-09-10",
+  "purpose": "Current-authority supervised proving corpus for SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001 after topology 004 restored PROSE as a BOOK child. Preserve the original frozen manifest as historical input and apply only explicit current-authority deltas.",
+  "coverage_contract": {
+    "metadata_scope": "All sources inherited from PROGRAMMING-INGEST-MANIFEST-001 plus current topology 004, current system catalog 002 and ADR-0004 authority inputs.",
+    "byte_scope": "A-01 verifies exact bytes for SUBJECT_REPO entries only. Library digests marked CHATGPT_PRESTAGE_OBSERVED remain pre-stage observations until those exact bytes are presented to A-01.",
+    "full_byte_verification_required_for_catalog_processing_pass": false
+  },
+  "source_replacements": [
+    {
+      "replace_source_id": "GIT-SYSTEM-TOPOLOGY-003",
+      "source": {
+        "source_id": "GIT-SYSTEM-TOPOLOGY-004",
+        "surface": "GITHUB",
+        "locator": {"path": "governance/SYSTEM-TOPOLOGY-004.json"},
+        "evidence_class": "CURRENT_TOPOLOGY_AUTHORITY",
+        "system_affinity": ["SYSTEM_MASTER"],
+        "byte_availability": "SUBJECT_REPO",
+        "expected_sha256": null,
+        "digest_authority": "A01_VERIFY_ON_RUN",
+        "reuse_disposition": "REFERENCE_ONLY",
+        "notes": "Current topology 004. Programming remains non-active; PROSE is active only as SYSTEM_MASTER/BOOK/PROSE child specialist and not a peer lane."
+      }
+    }
+  ],
+  "source_additions": [
+    {
+      "source_id": "GIT-SYSTEM-CATALOG-002",
+      "surface": "GITHUB",
+      "locator": {"path": "governance/catalog/SYSTEM-MASTER-SYSTEM-CATALOG-002.json"},
+      "evidence_class": "CURRENT_SYSTEM_DISCOVERY_CATALOG",
+      "system_affinity": ["SYSTEM_MASTER", "PROGRAMMING"],
+      "byte_availability": "SUBJECT_REPO",
+      "expected_sha256": null,
+      "digest_authority": "A01_VERIFY_ON_RUN",
+      "reuse_disposition": "REFERENCE_ONLY",
+      "notes": "Current discovery/reuse catalog selected by CURRENT-AUTHORITY; cannot promote Programming or override topology."
+    },
+    {
+      "source_id": "GIT-ADR-0004-BOOK-PROSE-CHILD-RESTORATION",
+      "surface": "GITHUB",
+      "locator": {"path": "governance/ADR-0004-BOOK-PROSE-CHILD-RESTORATION.md"},
+      "evidence_class": "CURRENT_ARCHITECTURE_DECISION",
+      "system_affinity": ["SYSTEM_MASTER", "BOOK"],
+      "byte_availability": "SUBJECT_REPO",
+      "expected_sha256": null,
+      "digest_authority": "A01_VERIFY_ON_RUN",
+      "reuse_disposition": "REFERENCE_ONLY",
+      "notes": "Current authority for PROSE as an active BOOK child; ingest must preserve but cannot alter this architecture decision."
+    }
+  ]
+}

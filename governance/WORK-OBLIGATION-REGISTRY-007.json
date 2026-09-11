@@ -1,0 +1,170 @@
+{
+  "registry_id": "WORK-OBLIGATION-REGISTRY-007",
+  "effective_date": "2026-09-10",
+  "product_root": "SYSTEM_MASTER",
+  "topology": "governance/SYSTEM-TOPOLOGY-004.json",
+  "supersedes_current_selection": "governance/WORK-OBLIGATION-REGISTRY-006.json",
+  "historical_registries": [
+    "governance/WORK-OBLIGATION-REGISTRY-001.json",
+    "governance/WORK-OBLIGATION-REGISTRY-002.json",
+    "governance/WORK-OBLIGATION-REGISTRY-003.json",
+    "governance/WORK-OBLIGATION-REGISTRY-004.json",
+    "governance/WORK-OBLIGATION-REGISTRY-005.json",
+    "governance/WORK-OBLIGATION-REGISTRY-006.json"
+  ],
+  "transition_basis": [
+    "governance/ADR-0004-BOOK-PROSE-CHILD-RESTORATION.md",
+    "governance/SYSTEM-TOPOLOGY-004.json",
+    "governance/knowledge-recovery/SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001-SUPERVISED-ACCEPTANCE.json",
+    "governance/knowledge-recovery/PROGRAMMING-EXTERNAL-BYTE-MATERIALIZATION-AND-FULL-CORPUS-INGEST-001.md",
+    "governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-003.json",
+    "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-039.json",
+    "qualification/book-system/book-prose-integration/BOOK-PROSE-INTEGRATION-LEDGER-001.json"
+  ],
+  "purpose": "Current work index under topology 004 after supervised acceptance of the Programming Knowledge Recovery proving pipeline. Preserve Knowledge Recovery as the product-root central objective, move its deterministic external-byte recovery/preparation portion to Second Shift under CORE administration, keep A-01 overnight execution separately fail-closed by the A-01 registry, and preserve current Book-Prose child ownership.",
+  "states": ["READY","ACTIVE","BLOCKED","HOLD","DEFERRED","OWNER_SELECTION_REQUIRED","SUPERSEDED","CLOSED"],
+  "rules": [
+    "Every non-closed obligation has exactly one executable owner_path valid under SYSTEM-TOPOLOGY-004; child specialist work may use SYSTEM_MASTER/BOOK/PROSE while execution control inherits BOOK.",
+    "SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001 remains semantically owned by product-root governance and administratively executed by CORE because shared qualification/custody infrastructure is Core-administered.",
+    "The current-topology supervised Knowledge Recovery proving gate is accepted by SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001-SUPERVISED-ACCEPTANCE.json; deterministic custody recovery and full-corpus preparation are Second Shift eligible.",
+    "Knowledge Recovery Second Shift eligibility does not change A-01 registry policy. The registered A-01 qualification remains overnight-ineligible until explicitly updated under current control-plane authority.",
+    "PROSE is active only as the Book child specialist SYSTEM_MASTER/BOOK/PROSE. It has no peer owner lane and no canonical manuscript-write authority.",
+    "Book-Prose integration work belongs to SYSTEM_MASTER/BOOK or SYSTEM_MASTER/BOOK/PROSE and executes through the BOOK lane.",
+    "DOCUMENTS remains a peer owner of document/artifact mechanics and generic document services; it does not own Book-specific Prose literary intelligence.",
+    "Historical Registry 005 Prose-retirement/absorption routing remains preserved evidence but is superseded for current scheduling by ADR-0004 and topology 004.",
+    "Historical qualification may seed integration but changed subjects require fresh qualification and no PASS transfers across ownership or SHA boundaries."
+  ],
+  "owner_head_snapshot": {
+    "CORE": "2031f070bd3702185c028733819ec410db36613c",
+    "LEARNING": "262f3f0b5ffa4dea68964b91eacd57a4c39bdda6",
+    "BOOK": "efb2ca4f234d223bf2a69b9fa1205b226d1e0b46",
+    "PROSE_CHILD": "b3b0909bc6720a3bc5938de29d4bf3bde9dd4e05",
+    "DOCUMENTS": "4fc463a4744671927d92d04f87dc131d3bae310c"
+  },
+  "obligations": [
+    {
+      "obligation_id": "SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001",
+      "owner_path": "SYSTEM_MASTER/CORE",
+      "semantic_owner_path": "SYSTEM_MASTER",
+      "administrative_executor": "SYSTEM_MASTER/CORE",
+      "verification_executor": "SYSTEM_MASTER/SHARED_INFRASTRUCTURE/A01",
+      "state": "ACTIVE",
+      "priority": "CENTRAL_NEXT_OBJECTIVE",
+      "supervision": "SUPERVISED_PIPELINE_GATE_ACCEPTED__FULL_CORPUS_A01_GATE_REMAINS_POLICY_CONTROLLED",
+      "second_shift_state": "READY_FOR_DETERMINISTIC_EXTERNAL_BYTE_RECOVERY_AND_PREPARATION",
+      "first_proving_system": "PROGRAMMING",
+      "qualification_id": "SYSTEM-MASTER-KNOWLEDGE-RECOVERY-PROGRAMMING-001",
+      "accepted_subject_sha": "4a2d4f7168f48728ef67d187ff43afb97c9568d9",
+      "acceptance_record": "governance/knowledge-recovery/SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001-SUPERVISED-ACCEPTANCE.json",
+      "next_contract": "governance/knowledge-recovery/PROGRAMMING-EXTERNAL-BYTE-MATERIALIZATION-AND-FULL-CORPUS-INGEST-001.md",
+      "objective": "Recover the remaining Programming external-byte and identity gaps using the accepted deterministic ingest/manifest/asset-catalog/trace pipeline, preserve truthful custody/provenance, prepare Manifest 003 and the exact full-corpus A-01 candidate, and preserve system-promotion authority at the product root."
+    },
+    {
+      "obligation_id": "CORE-SMR021-USER-EXPERIENCE-001",
+      "owner_path": "SYSTEM_MASTER/CORE",
+      "state": "ACTIVE",
+      "current_control_head_snapshot": "2031f070bd3702185c028733819ec410db36613c",
+      "objective": "Establish ordinary GitHub-native immutable custody of the exact verified SMR021 capsule/source tree, recompute required source/test identity, obtain fresh exact-Git-SHA hosted qualification where permitted, and keep DATA persistence mutation fail-closed until DATA-owner-valid authority exists."
+    },
+    {
+      "obligation_id": "CORE-CORRECTED-SOURCE-CUSTODY-001",
+      "owner_path": "SYSTEM_MASTER/CORE",
+      "state": "BLOCKED",
+      "blocker_class": "SOURCE_CUSTODY",
+      "objective": "Import/admit corrected SMR018, cumulative SMR019 and changed SMR020 runnable source trees into ordinary GitHub-native immutable custody without mutation and independently reproduce exact identities before higher qualification."
+    },
+    {
+      "obligation_id": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001",
+      "owner_path": "SYSTEM_MASTER/LEARNING",
+      "state": "ACTIVE",
+      "current_control_head_snapshot": "262f3f0b5ffa4dea68964b91eacd57a4c39bdda6",
+      "objective": "Continue the frozen-source full-standard curriculum compiler through Domain III assessment-target binding without inferring psychometric, learner, SME, certification, A-01, native or production authority."
+    },
+    {
+      "obligation_id": "LEARNING-REAL-PARTICIPANT-PILOT-001",
+      "owner_path": "SYSTEM_MASTER/LEARNING",
+      "state": "BLOCKED",
+      "blocker_class": "HUMAN_ONLY",
+      "objective": "Execute the real participant Learning pilot only with genuine explicit consent and real learner evidence."
+    },
+    {
+      "obligation_id": "BOOK-SYSTEM-CANONICAL-CONTENT-OBJECT-ADMISSION-001-A01-REGISTRATION-AND-QUALIFICATION-PREP",
+      "owner_path": "SYSTEM_MASTER/BOOK",
+      "state": "BLOCKED",
+      "blocker_class": "SHARED_A01_AUTHORITY",
+      "objective": "Route the unchanged original Book canonical-content-admission subject through central registered A-01 authority without mutating or relabeling hosted evidence."
+    },
+    {
+      "obligation_id": "BOOK-PROSE-PHASE-2-ORCHESTRATOR-CLOSURE-CENSUS-001",
+      "owner_path": "SYSTEM_MASTER/BOOK",
+      "specialist_owner_path": "SYSTEM_MASTER/BOOK/PROSE",
+      "state": "READY",
+      "priority": "BOOK_OWNER_LANE_PRIORITY",
+      "current_control_head_snapshot": "efb2ca4f234d223bf2a69b9fa1205b226d1e0b46",
+      "prose_control_head_snapshot": "b3b0909bc6720a3bc5938de29d4bf3bde9dd4e05",
+      "objective": "Reconcile Book-Prose Phase 2A through 2J as one orchestrator closure census, verify every bounded packet and exact evidence, confirm no duplicate manuscript or execution authority was introduced, preserve all qualification non-claims, and select Phase 3A Context Package Schema only if the census is clean."
+    },
+    {
+      "obligation_id": "DOCUMENTS-CURRENT-ADMISSION-001",
+      "owner_path": "SYSTEM_MASTER/DOCUMENTS",
+      "state": "ACTIVE",
+      "current_control_head_snapshot": "4fc463a4744671927d92d04f87dc131d3bae310c",
+      "classification": "DOCUMENTS_FIRST_CLASS_SYSTEM_CURRENT_ADMISSION",
+      "objective": "Admit preserved Document/DOCX/PPTX/PDF implementation under the DOCUMENTS peer-system owner using exact source custody and fresh current-subject qualification rather than rebuilding completed work."
+    },
+    {
+      "obligation_id": "DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-IMPORT-AND-EXACT-SUBJECT-QUALIFICATION-002",
+      "owner_path": "SYSTEM_MASTER/DOCUMENTS",
+      "state": "READY",
+      "current_control_head_snapshot": "4fc463a4744671927d92d04f87dc131d3bae310c",
+      "priority": "OWNER_LANE_PRIORITY",
+      "parent_obligation_id": "DOCUMENTS-CURRENT-ADMISSION-001",
+      "objective": "Import the exactly reconstructed 225-file CR001-R4 source tree into ordinary GitHub-native immutable custody, bind the exact Git subject SHA, independently verify source identity, and run fresh portable/hosted qualification on that exact subject without PASS transfer.",
+      "requires_physical_a01_access": false
+    },
+    {
+      "obligation_id": "A01-CONTROL-PLANE-SELFTEST-A1-REPLACEMENT-RERUN-001",
+      "owner_path": "SYSTEM_MASTER/SHARED_INFRASTRUCTURE/A01",
+      "administrative_owner": "SYSTEM_MASTER/CORE",
+      "state": "READY",
+      "objective": "Use the existing repair-rerun transaction to obtain and adjudicate a real authoritative replacement A-01 receipt; do not open a duplicate repair lineage."
+    },
+    {
+      "obligation_id": "SECOND-SHIFT-LIVE-AUTHORITY-SUCCESSOR-ENFORCEMENT-002",
+      "owner_path": "SYSTEM_MASTER/SHARED_INFRASTRUCTURE",
+      "administrative_owner": "SYSTEM_MASTER/CORE",
+      "state": "ACTIVE",
+      "objective": "Finish remote live-owner/current-objective semantic enforcement and real per-lane utilization reconstruction beyond schema/lease/watchdog and owner-selector repairs, including cross-mode owner-lane mutation arbitration, without treating Second Shift as a product system."
+    },
+    {"obligation_id":"HEADLESS-COMPUTE-DATA-SPREADSHEET-CONTRACT-001","owner_path":"SYSTEM_MASTER","state":"HOLD","objective":"Bind spreadsheet/math/user-data-analysis semantics over Core shared execution/artifact/data primitives."},
+    {"obligation_id":"HEADLESS-SOFTWARE-ENGINEERING-CONTRACT-001","owner_path":"SYSTEM_MASTER","state":"HOLD","objective":"Bind software-engineering and local-model tool semantics over Core execution/model infrastructure."},
+    {"obligation_id":"HEADLESS-RESEARCH-KNOWLEDGE-CONTRACT-001","owner_path":"SYSTEM_MASTER","state":"HOLD","objective":"Bind research/knowledge/external-information semantics over Core retrieval/evidence/connector primitives."},
+    {"obligation_id":"HEADLESS-CONNECTED-ACTION-AUTHORITY-CONTRACT-001","owner_path":"SYSTEM_MASTER","state":"HOLD","objective":"Bind email/calendar/automation/plugin user-action semantics over Core connector/action infrastructure."},
+    {"obligation_id":"HEADLESS-MEDIA-CAPABILITY-CONTRACT-001","owner_path":"SYSTEM_MASTER","state":"HOLD","objective":"Bind image/audio/video/media semantics over Core model/artifact/provider primitives."}
+  ],
+  "superseded_at_transition": [
+    {
+      "obligation_id": "BOOK-DOCUMENTS-PROSE-SERVICE-INTEGRATION-PHASE-1-001",
+      "prior_registry": "WORK-OBLIGATION-REGISTRY-005",
+      "final_state": "SUPERSEDED",
+      "authority": "governance/ADR-0004-BOOK-PROSE-CHILD-RESTORATION.md",
+      "reason": "Current Book literary integration is BOOK -> BOOK/PROSE. Documents remains a peer document service owner and does not own the Book Prose specialist."
+    },
+    {
+      "obligation_id": "DOCUMENTS-PROSE-ABSORPTION-INTEGRATION-001",
+      "prior_registry": "WORK-OBLIGATION-REGISTRY-005",
+      "final_state": "SUPERSEDED",
+      "authority": "governance/ADR-0004-BOOK-PROSE-CHILD-RESTORATION.md",
+      "reason": "Prose literary-specialist authority is restored beneath BOOK; Documents no longer absorbs that capability family."
+    },
+    {
+      "obligation_id": "BOOK-PROSE-INTEGRATION-PHASE-1-INPUT-CENSUS-001",
+      "prior_registry": "WORK-OBLIGATION-REGISTRY-005.closed_at_transition",
+      "final_state": "CLOSED_WITH_EVIDENCE",
+      "closure_evidence": "qualification/book-system/book-prose-integration/BOOK-PROSE-INTEGRATION-PHASE-1-CLOSURE-001.json",
+      "reason": "The prior registry's supersession was itself superseded by ADR-0004; Phase 1 was actually completed and current Book-Prose integration has advanced through Phase 2J."
+    }
+  ],
+  "historical_closed_items_preserved_in_prior_registries": true,
+  "central_next_objective": "SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001"
+}
