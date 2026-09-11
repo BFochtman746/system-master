@@ -1,6 +1,6 @@
 {
   "authority_id": "CURRENT-AUTHORITY-002",
-  "effective_date": "2026-09-10",
+  "effective_date": "2026-09-11",
   "standing": "CANONICAL_ENTRY_POINT__PROGRAM_JOBS_LOCKED__PROSE_ONLY_COMPLETE__SYSTEM_INTEGRATION_ACTIVE",
   "product_root": "SYSTEM_MASTER",
   "topology": "governance/SYSTEM-TOPOLOGY-004.json",
@@ -9,6 +9,8 @@
   "system_completion_status": "governance/SYSTEM-COMPLETION-STATUS-001.json",
   "program_job_lock_enforcement_script": ".github/scripts/program-job-lock-enforce.js",
   "program_job_lock_enforcement_workflow": ".github/workflows/program-job-lock-enforcement.yml",
+  "last_sealed_state_checkpoint": "governance/SYSTEM-STATE-BASELINE-004.json",
+  "prior_state_checkpoint": "governance/SYSTEM-STATE-BASELINE-003.json",
   "completion_ledger": "governance/COMPLETION-LEDGER-002.json",
   "prior_completion_ledger": "governance/COMPLETION-LEDGER-001.json",
   "obligation_registry": "governance/WORK-OBLIGATION-REGISTRY-008.json",
@@ -56,8 +58,9 @@
   "completion_truth": "PROSE is the only complete system. SYSTEM_MASTER, CORE, LEARNING, BOOK and DOCUMENTS are incomplete and active.",
   "startup_sequence": [
     "Read this file from current main.",
+    "Read last_sealed_state_checkpoint as the latest coherent checkpoint, but always re-fetch live owner heads before execution.",
     "Read program_job_lock and system_completion_status before making any completion claim or selecting work.",
-    "Require program_job_lock_enforcement to be green or explicitly adjudicated before trusting current lane assignment.",
+    "Require program_job_lock_enforcement to have an executed green result on the current subject or explicitly classify a zero-step hosted attempt as infrastructure-only; never treat zero-step as semantic PASS or FAIL.",
     "Read the selected completion_ledger for current product-level interpretation and its prior_completion_ledger only for detailed historical boundary evidence.",
     "Read SYSTEM-TOPOLOGY-004.json. Active peers are CORE, LEARNING, BOOK and DOCUMENTS; PROSE is the completed Book child specialist and has no independent peer/Second Shift lane.",
     "Fetch the relevant live owner control head and selected current control record; never use a stale snapshot as current authority.",
@@ -68,7 +71,8 @@
     "LEARNING job is to finish Learning and integrate it upward into System Master; do not cross into Book/Prose/Documents product work.",
     "DOCUMENTS job is to finish Documents and integrate it upward into System Master; do not absorb Prose or take Book-specific literary authority.",
     "Knowledge Recovery is supporting Core-administered custody/provenance work, not the central product priority and not a peer system.",
-    "Second Shift active peer lanes remain CORE, LEARNING, BOOK and DOCUMENTS. Enforce one mutation-capable claim per lane and reject cross-lane job drift.",
+    "Second Shift active peer lanes remain CORE, LEARNING, BOOK and DOCUMENTS. Prose child work routes through BOOK. Enforce one mutation-capable claim per lane and reject cross-lane job drift.",
+    "Current Book-Prose repair work and demonstrated Prose-subject defects route through the BOOK repair inbox; the standalone Prose repair inbox is historical only.",
     "Before ending substantive work, re-read the live head, reconcile owner delegation/current objective, and leave one exact dependency-valid successor."
   ],
   "truth_classes": {
@@ -88,7 +92,7 @@
   "write_rules": [
     "Historical evidence and exact-SHA receipts remain append-only.",
     "Only PROSE may currently be described as a complete system.",
-    "BOOK <-> PROSE is the only direct specialist parent/child integration exception; Prose execution inherits BOOK lane control.",
+    "BOOK <-> PROSE is the only direct specialist parent/child integration exception; Prose integration execution inherits BOOK lane control.",
     "CORE, LEARNING, BOOK and DOCUMENTS remain in their own product lanes and integrate upward through System Master/shared interfaces without ownership transfer.",
     "Documents may provide document/artifact services to Book but may not absorb Prose or mutate Book canonical state.",
     "Knowledge Recovery remains supporting work and may not redefine system jobs or block independent Book/Learning/Documents progress.",
