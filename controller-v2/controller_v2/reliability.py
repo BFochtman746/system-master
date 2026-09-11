@@ -91,7 +91,8 @@ def create_verified_backup(db_path: str | Path, destination: str | Path) -> Back
         finally:
             verifier.close()
 
-        with temp_path.open("rb") as handle:
+        with temp_path.open("r+b") as handle:
+            handle.flush()
             os.fsync(handle.fileno())
         os.replace(temp_path, target_path)
         _fsync_parent(target_path.parent)
