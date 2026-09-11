@@ -1,0 +1,74 @@
+name: Document R4 Canonical Transport Preflight
+
+on:
+  push:
+    branches:
+      - document/cr001-r4-import-v2-20260910
+    paths:
+      - 'transport/document-r4-v2/**'
+      - '.github/workflows/document-r4-v2-canonical-preflight.yml'
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Verify canonical chunk inventory
+        shell: bash
+        run: |
+          set -euo pipefail
+          STAGE='transport/document-r4-v2'
+          cat > /tmp/expected.tsv <<'EOF'
+          00 8e8b86bf5e2de42a093cd7f8843db25aa8e67150
+          01 985296bc242d6b39f9b50b95c0ac7ec9195d83a7
+          02 bfdb5c5d8d775a7d1be6518c35e746a6c206ecfd
+          03 d24eb8273ac722ca44a5e30cc66a92aa6af8a148
+          04 b08bf92ba1a72c2f3920b36718d5b96211259fdb
+          05 7bda1b7c604a88568da812309693eac5dccbb7e2
+          06 450980f0f1fb47e74b64a9b28c51fe7d03757fb1
+          07 5ae2e417380909a81ffc313ec5168db63c9a0193
+          08 3a4a1473325f6d385b2d27889d2fbcc062793303
+          09 89eb25c315cdf640ceb7271610cc7444440ca827
+          10 941482bb3705c4a849d87626c192b85f43f2f245
+          11 5903eb4bf1b0c4f16c87b5965ef4535e7d37bacf
+          12 73699455b48a48da04a0675dd1045a8ea2cef0ac
+          13 5924ef6baa87c788fbcc023b2643adf90fdf4baa
+          14 0dec3872107ae1d278736ace46216c2a7d3c1e96
+          15 554189570f1b46ca427ba58aa24da0c67c47c90a
+          16 9e2987db62da7a383aca595085504acad559efd2
+          17 ca5402e002715e1ce84e92f60690a3bbb2137e47
+          18 fba562e1db8c89ffb2af4de17e06e88abebb3843
+          19 eda3ff738870a66ebc6f1c733dbb6bcda1d86e4d
+          20 65a124697ade98ef2c783026a253c11fb0c45b7e
+          21 deb13500e129e05578c00964b1dfb2b0404ac7e4
+          22 70e85501294cca84ec0459605aadf94cfb2cd759
+          23 94ad13771bb4f11818fda6079f87d7c98e753b7e
+          24 c5538b207e18d0036eb59ec25cc2f8b5da7adb21
+          EOF
+          missing=0
+          corrupt=0
+          valid=0
+          while read -r idx expected; do
+            file="$STAGE/chunk-$idx.b64"
+            if [ ! -f "$file" ]; then
+              echo "MISSING chunk-$idx"
+              missing=$((missing+1))
+              continue
+            fi
+            actual="$(git hash-object "$file")"
+            if [ "$actual" != "$expected" ]; then
+              echo "CORRUPT chunk-$idx expected=$expected actual=$actual"
+              corrupt=$((corrupt+1))
+            else
+              echo "VALID chunk-$idx $actual"
+              valid=$((valid+1))
+            fi
+          done < /tmp/expected.tsv
+          echo "CANONICAL_R4_TRANSPORT valid=$valid missing=$missing corrupt=$corrupt total=25" | tee -a "$GITHUB_STEP_SUMMARY"
+          if [ "$missing" -eq 0 ] && [ "$corrupt" -eq 0 ]; then
+            archive=/tmp/r4.tar.xz
+            : > "$archive"
+            for i in $(seq -w 0 24); do base64 --decode "$STAGE/chunk-$i.b64" >> "$archive"; done
+            echo '47b95cfbf4eb5352cbbb6de4f1294b1b4c1e7870c354d51b504f0378f4869207  /tmp/r4.tar.xz' | sha256sum -c -
+            echo 'CANONICAL_R4_CARRIER=PASS' | tee -a "$GITHUB_STEP_SUMMARY"
+          fi
