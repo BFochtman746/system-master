@@ -1,12 +1,12 @@
 {
   "authority_id": "CONTROLLER-V2-BUILD-AUTHORITY-001",
   "scope": "GITHUB_CONTROLLER_SECOND_SHIFT_REBUILD",
-  "stage": "CONTROLLER-FOUNDATION-004",
+  "stage": "CONTROLLER-FOUNDATION-005",
   "status": "ACTIVE_SINGLE_INTEGRATION_LINE",
-  "canonical_branch": "controller-v2/foundation-004",
+  "canonical_branch": "controller-v2/foundation-005",
   "frozen_predecessor": {
-    "stage": "CONTROLLER-FOUNDATION-003",
-    "commit_sha": "ec2fcbf188acfad20dd640cf14c2dbb5bf79c0dd"
+    "stage": "CONTROLLER-FOUNDATION-004",
+    "commit_sha": "bfbe868d46ed4b2c59b57fbfef11b3ab0a2ddd59"
   },
   "legacy_or_evidence_branches": [
     "controller-v2-foundation",
@@ -22,8 +22,9 @@
     "Do not merge another branch wholesale; transplant only adjudicated changes with tests.",
     "Do not weaken an invariant or replace a failure-mode test merely to obtain green CI.",
     "A predecessor marked frozen is immutable; all changes belong on its explicit successor stage.",
+    "Qualification is observational: never commit a closure/freeze receipt into the exact subject after it passes.",
     "Main remains untouched until a separately qualified promotion stage authorizes it."
   ],
-  "source_of_truth": "This file selects the build line only. Runtime controller authority will be the Controller 2.0 transactional store, not this Git file.",
+  "source_of_truth": "This file selects the build line only. Runtime controller authority is the Controller 2.0 transactional store, not this Git file or chat memory.",
   "supersession_rule": "A successor authority record must be an explicit reviewed change on the canonical branch; branch names or chat statements alone cannot supersede this authority."
 }
