@@ -1,0 +1,49 @@
+name: Controller V2 Foundation CI
+
+on:
+  pull_request:
+    paths:
+      - 'controller-v2/**'
+      - '.github/workflows/controller-v2-foundation-ci.yml'
+  push:
+    branches:
+      - 'controller-v2/**'
+    paths:
+      - 'controller-v2/**'
+      - '.github/workflows/controller-v2-foundation-ci.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: controller-v2-foundation-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  foundation:
+    name: Python ${{ matrix.python-version }} foundation invariants
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.13', '3.14']
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Compile controller foundation
+        run: python -m compileall -q controller-v2/src controller-v2/tests
+
+      - name: Execute controller foundation tests
+        env:
+          PYTHONPATH: controller-v2/src
+        run: python -m unittest discover -s controller-v2/tests -v
