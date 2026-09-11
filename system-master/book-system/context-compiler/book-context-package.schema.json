@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "BOOK-CONTEXT-PACKAGE-SCHEMA-001",
+  "title": "Book Context Compiler Package",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["context_package_id","schema_version","package_class","book_project_id","source_identity","book_state_binding","story_bible_binding","author_authority_binding","constraint_set","capability_request","privacy_class","created_at","expires_at","compiler_version","compiler_subject_sha","package_digest_sha256"],
+  "properties": {
+    "context_package_id": {"type":"string","minLength":1},
+    "schema_version": {"const":"1.0.0-proposed"},
+    "package_class": {"enum":["GENERATION_CONTEXT","EVALUATION_CONTEXT","ADMISSION_CONTEXT"]},
+    "book_project_id": {"type":"string","minLength":1},
+    "source_identity": {"type":"object","additionalProperties":false,"required":["source_manuscript_ref","source_manuscript_sha256","source_version_id"],"properties":{"source_manuscript_ref":{"type":"string"},"source_manuscript_sha256":{"type":"string","pattern":"^[0-9a-f]{64}$"},"source_version_id":{"type":"string"}}},
+    "book_state_binding": {"type":"object","additionalProperties":false,"required":["expected_book_state_version","expected_book_state_digest_sha256"],"properties":{"expected_book_state_version":{"type":["string","integer"]},"expected_book_state_digest_sha256":{"type":"string","pattern":"^[0-9a-f]{64}$"}}},
+    "story_bible_binding": {"type":"object","additionalProperties":false,"required":["story_bible_snapshot_ref","story_bible_snapshot_sha256","canon_version"],"properties":{"story_bible_snapshot_ref":{"type":"string"},"story_bible_snapshot_sha256":{"type":"string","pattern":"^[0-9a-f]{64}$"},"canon_version":{"type":["string","integer"]}}},
+    "author_authority_binding": {"type":"object","additionalProperties":false,"required":["decision_required","observed_author_decision_refs","unresolved_author_questions"],"properties":{"decision_required":{"type":"boolean"},"observed_author_decision_refs":{"type":"array","items":{"type":"string"}},"unresolved_author_questions":{"type":"array","items":{"type":"string"}}}},
+    "constraint_set": {"type":"array","items":{"type":"object","required":["constraint_id","class","source_ref","priority","hard_or_advisory"],"properties":{"constraint_id":{"type":"string"},"class":{"type":"string"},"source_ref":{"type":"string"},"priority":{"type":"integer"},"hard_or_advisory":{"enum":["hard","advisory"]},"conflict_group":{"type":"string"}},"additionalProperties":false}},
+    "capability_request": {"type":"object","required":["capability_id","authority_domain","service_registry_id","service_registry_subject_sha"],"properties":{"capability_id":{"type":"string"},"authority_domain":{"type":"string"},"service_registry_id":{"type":"string"},"service_registry_subject_sha":{"type":"string"},"consumer_role":{"type":"string"},"integration_owner":{"type":"string"},"completed_prose_input":{"type":"boolean"}},"additionalProperties":false},
+    "privacy_class": {"type":"string"},
+    "created_at": {"type":"string","format":"date-time"},
+    "expires_at": {"type":"string","format":"date-time"},
+    "compiler_version": {"type":"string"},
+    "compiler_subject_sha": {"type":"string"},
+    "package_digest_sha256": {"type":"string","pattern":"^[0-9a-f]{64}$"},
+    "research_evidence_refs": {"type":"array"},
+    "prior_decision_refs": {"type":"array","items":{"type":"string"}},
+    "artifact_refs": {"type":"array"},
+    "evaluation_policy_ref": {"type":["string","null"]}
+  }
+}
