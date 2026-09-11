@@ -1,0 +1,63 @@
+{
+  "policy_id": "CANONICAL-WRITER-POLICY-001",
+  "status": "PROPOSED_FOR_ADMISSION",
+  "authority_order": [
+    "explicit user-authorized governance decision",
+    "governance/CURRENT-AUTHORITY.json",
+    "governance/SYSTEM-TOPOLOGY-003.json",
+    "active owner control",
+    "active work lease",
+    "durable operation ledger"
+  ],
+  "canonical_ref_discovery": {
+    "product_ref": "main",
+    "owner_refs_from": "governance/SYSTEM-TOPOLOGY-003.json::canonical_internal_systems[].control_ref",
+    "hard_coded_owner_ref_lists_forbidden": true
+  },
+  "protected_path_classes": {
+    "USER_REQUIRED": [
+      "governance/CURRENT-AUTHORITY.json",
+      "governance/SYSTEM-TOPOLOGY-*.json",
+      "governance/ADR-*",
+      "governance/github/CANONICAL-WRITER-POLICY-*.json",
+      ".github/workflows/**"
+    ],
+    "OWNER_OR_CONTROLLER": [
+      "governance/second-shift/**",
+      "governance/repair/**",
+      "governance/census/**"
+    ]
+  },
+  "rules": [
+    "A chat may not write a canonical ref directly.",
+    "A chat may write only an isolated candidate branch within an active work lease.",
+    "Canonical admission requires both a valid owner-lane lease and the current global repository-writer fence.",
+    "Canonical admission must bind expected_base_sha to the live canonical head observed after lease validation.",
+    "Canonical ref movement is fast-forward-only compare-and-set; ordinary force mutation is forbidden.",
+    "A stale fence epoch is permanently invalid even after lease expiration or worker restart.",
+    "A changed owner control head invalidates mutation authority until the operation is revalidated.",
+    "Central objective replacement, topology/ownership change, cross-owner canonical write, failed-gate bypass, force mutation and permanent security-policy change require USER_REQUIRED authorization.",
+    "A worker cannot widen its own lease or alter its authorization class.",
+    "Workflow files targeting self-hosted runners are security-sensitive USER_REQUIRED changes and must never execute from pull_request events.",
+    "Untrusted pull-request code must never run on A-01 or another persistent self-hosted runner.",
+    "Repository state is the source of truth; chat memory is never sufficient authority for a mutation."
+  ],
+  "admission_failures": [
+    "MISSING_WORK_LEASE",
+    "LEASE_EXPIRED",
+    "LEASE_REVOKED",
+    "OWNER_MISMATCH",
+    "OBJECTIVE_MISMATCH",
+    "CONTROL_HEAD_STALE",
+    "PATH_OUTSIDE_LEASE",
+    "EFFECT_OUTSIDE_LEASE",
+    "USER_AUTHORITY_REQUIRED",
+    "MISSING_REPOSITORY_WRITER_FENCE",
+    "STALE_FENCE_EPOCH",
+    "STALE_BASE",
+    "DIVERGENT_IDEMPOTENCY_REUSE",
+    "UNQUALIFIED_CANDIDATE",
+    "FORCE_MUTATION_FORBIDDEN"
+  ],
+  "safe_behavior": "FAIL_CLOSED_FOR_MUTATION__PRESERVE_READ_ONLY_INSPECTION_AND_EVIDENCE"
+}

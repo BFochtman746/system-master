@@ -1,0 +1,76 @@
+{
+  "schema_id": "GITHUB-OPERATION-LEDGER-SCHEMA-001",
+  "status": "PROPOSED_FOR_ADMISSION",
+  "operation_states": [
+    "READY",
+    "CLAIMED",
+    "RUNNING",
+    "PASS",
+    "BLOCKED",
+    "STALE",
+    "RETRY_WAIT",
+    "CIRCUIT_OPEN",
+    "QUARANTINED"
+  ],
+  "operation_classes": ["READ", "GIT_WRITE", "DISPATCH", "EVIDENCE", "ADMISSION"],
+  "required_fields": [
+    "operation_id",
+    "idempotency_key",
+    "owner_lane",
+    "objective_id",
+    "work_session_id",
+    "operation_class",
+    "resource",
+    "expected_base_sha",
+    "fence_epoch",
+    "payload_sha256",
+    "priority",
+    "attempt",
+    "state",
+    "created_at",
+    "updated_at"
+  ],
+  "conditional_fields": {
+    "CLAIMED": ["lease_id", "claimed_at", "lease_expires_at"],
+    "RETRY_WAIT": ["failure_class", "next_eligible_at"],
+    "PASS": ["before_sha", "after_sha", "receipt"],
+    "BLOCKED": ["failure_class", "blocker_evidence"],
+    "STALE": ["failure_class", "observed_live_sha"],
+    "QUARANTINED": ["failure_class", "quarantine_reason"]
+  },
+  "idempotency_law": [
+    "operation_id is globally unique.",
+    "idempotency_key is unique for one canonical semantic intent.",
+    "Exact replay of the same canonical intent returns the prior logical outcome or resumes its durable state.",
+    "Reuse of an idempotency_key with a different owner, objective, resource, expected_base_sha or payload digest fails closed.",
+    "A worker crash after side effect but before receipt is reconciled by inspecting the actual target state before any retry."
+  ],
+  "writer_law": [
+    "GIT_WRITE and ADMISSION require a valid owner-lane lease and global repository-writer fence.",
+    "The candidate fence_epoch must be strictly greater than every previously admitted repository-writer epoch for the same canonical writer domain.",
+    "A stale fence epoch never becomes valid again after expiration or restart.",
+    "Canonical admission binds expected_base_sha and performs fast-forward-only compare-and-set.",
+    "If live head differs from expected_base_sha, classify STALE_BASE; do not force update."
+  ],
+  "retry_law": {
+    "owner": "GITHUB_RELIABILITY_CONTROL_PLANE",
+    "single_retry_layer": true,
+    "bounded": true,
+    "backoff": "EXPONENTIAL_WITH_JITTER",
+    "honor_retry_after": true,
+    "poison_work": "QUARANTINE",
+    "independent_work_after_circuit_open": true
+  },
+  "receipt_minimum": [
+    "operation_id",
+    "idempotency_key",
+    "owner_lane",
+    "objective_id",
+    "resource",
+    "fence_epoch",
+    "before_sha",
+    "after_sha",
+    "payload_sha256",
+    "completed_at"
+  ]
+}

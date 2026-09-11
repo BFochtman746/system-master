@@ -1,0 +1,170 @@
+name: GitHub Reliability Control Plane Enforcement
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'infrastructure/github-reliability-control-plane-001-20260910'
+    paths:
+      - 'governance/CURRENT-AUTHORITY.json'
+      - 'governance/WORK-OBLIGATION-REGISTRY-004.json'
+      - 'governance/github/**'
+      - 'governance/architecture/SYSTEM-MASTER-GITHUB-RELIABILITY-CONTROL-PLANE-001.md'
+      - 'governance/morning/MASTER-ROOT-CHAT-OPERATING-CONTRACT-001.md'
+      - 'governance/CHAT-LANE-OPERATING-PROMPT-002.md'
+      - 'governance/second-shift/**'
+      - 'qualification/a01/trusted-control-workflows.json'
+      - '.github/scripts/github-reliability-control-plane-selftest.js'
+      - '.github/scripts/github-write-authorization-enforce.js'
+      - '.github/scripts/github-control-state.js'
+      - '.github/scripts/second-shift-dispatch-controller.js'
+      - '.github/scripts/current-obligation-registry-enforce.js'
+      - '.github/scripts/second-shift-enforce.js'
+      - '.github/scripts/a01-control-plane-enforce.js'
+      - '.github/workflows/github-reliability-control-plane-enforcement.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: a01-global-r2
+  queue: max
+  cancel-in-progress: false
+
+jobs:
+  selftest:
+    name: Prove authority, fencing, durable state and Second Shift invariants
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact trusted subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          clean: true
+          persist-credentials: false
+
+      - name: Initialize runner evidence
+        shell: powershell
+        run: |
+          $evidence = Join-Path $env:GITHUB_WORKSPACE '.github-control-plane-evidence'
+          New-Item -ItemType Directory -Force -Path $evidence | Out-Null
+          $identity = [ordered]@{
+            github_sha = $env:GITHUB_SHA
+            runner_name = $env:RUNNER_NAME
+            runner_os = $env:RUNNER_OS
+            runner_arch = $env:RUNNER_ARCH
+            shell_identity = (& whoami).Trim()
+            workspace = $env:GITHUB_WORKSPACE
+            workspace_owner = (Get-Acl -LiteralPath $env:GITHUB_WORKSPACE).Owner
+            git_version = (& git --version).Trim()
+            node_version = (& node --version).Trim()
+            recorded_at = [DateTime]::UtcNow.ToString('o')
+          }
+          $identity | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath (Join-Path $evidence 'runner-identity.json') -Encoding utf8
+
+      - name: Verify exact checkout before execution
+        shell: powershell
+        run: |
+          $actual = (& git -c "safe.directory=$env:GITHUB_WORKSPACE" rev-parse HEAD).Trim()
+          if ($actual -ne $env:GITHUB_SHA) { throw "SUBJECT_CHECKOUT_MISMATCH:$actual" }
+
+      - name: Syntax check
+        shell: cmd
+        run: |
+          node --check .github\scripts\github-reliability-control-plane-selftest.js
+          node --check .github\scripts\github-write-authorization-enforce.js
+          node --check .github\scripts\github-control-state.js
+          node --check .github\scripts\second-shift-dispatch-controller.js
+          node --check .github\scripts\current-obligation-registry-enforce.js
+          node --check .github\scripts\second-shift-enforce.js
+          node --check .github\scripts\a01-control-plane-enforce.js
+
+      - name: Run foundational control-plane self-test
+        shell: powershell
+        run: |
+          $evidence = Join-Path $env:GITHUB_WORKSPACE '.github-control-plane-evidence'
+          & node "$env:GITHUB_WORKSPACE\.github\scripts\github-reliability-control-plane-selftest.js" | Tee-Object -FilePath (Join-Path $evidence 'selftest.json')
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Run write-authorization self-test
+        shell: powershell
+        run: |
+          $evidence = Join-Path $env:GITHUB_WORKSPACE '.github-control-plane-evidence'
+          & node "$env:GITHUB_WORKSPACE\.github\scripts\github-write-authorization-enforce.js" selftest | Tee-Object -FilePath (Join-Path $evidence 'write-authorization-selftest.json')
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Run durable control-state self-test
+        shell: powershell
+        run: |
+          $evidence = Join-Path $env:GITHUB_WORKSPACE '.github-control-plane-evidence'
+          & node "$env:GITHUB_WORKSPACE\.github\scripts\github-control-state.js" selftest | Tee-Object -FilePath (Join-Path $evidence 'control-state-selftest.json')
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Validate current obligation authority
+        shell: powershell
+        run: |
+          $evidence = Join-Path $env:GITHUB_WORKSPACE '.github-control-plane-evidence'
+          & node "$env:GITHUB_WORKSPACE\.github\scripts\current-obligation-registry-enforce.js" | Tee-Object -FilePath (Join-Path $evidence 'current-obligation-enforcement.txt')
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Validate Second Shift current state
+        shell: powershell
+        run: |
+          & node "$env:GITHUB_WORKSPACE\.github\scripts\second-shift-enforce.js" --no-live "--out=.github-control-plane-evidence/second-shift-static-enforcement.json"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Validate A-01 routing and trusted control-workflow policy
+        shell: powershell
+        run: |
+          $evidence = Join-Path $env:GITHUB_WORKSPACE '.github-control-plane-evidence'
+          & node "$env:GITHUB_WORKSPACE\.github\scripts\a01-control-plane-enforce.js" selftest | Tee-Object -FilePath (Join-Path $evidence 'a01-enforcement-selftest.txt')
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & node "$env:GITHUB_WORKSPACE\.github\scripts\a01-control-plane-enforce.js" scan | Tee-Object -FilePath (Join-Path $evidence 'a01-enforcement-scan.txt')
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Run Second Shift dispatcher self-test and current plan
+        shell: powershell
+        run: |
+          $evidence = Join-Path $env:GITHUB_WORKSPACE '.github-control-plane-evidence'
+          & node "$env:GITHUB_WORKSPACE\.github\scripts\second-shift-dispatch-controller.js" selftest | Tee-Object -FilePath (Join-Path $evidence 'second-shift-dispatch-selftest.json')
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $env:SECOND_SHIFT_PLAN_PATH = Join-Path $evidence 'second-shift-current-plan.json'
+          & node "$env:GITHUB_WORKSPACE\.github\scripts\second-shift-dispatch-controller.js" plan | Out-Null
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Record exact subject
+        shell: powershell
+        run: |
+          $evidence = Join-Path $env:GITHUB_WORKSPACE '.github-control-plane-evidence'
+          $actual = (& git -c "safe.directory=$env:GITHUB_WORKSPACE" rev-parse HEAD).Trim()
+          Set-Content -LiteralPath (Join-Path $evidence 'subject-sha.txt') -Value $env:GITHUB_SHA -Encoding ascii
+          Set-Content -LiteralPath (Join-Path $evidence 'checkout-sha.txt') -Value $actual -Encoding ascii
+          if ($actual -ne $env:GITHUB_SHA) { throw "SUBJECT_CHECKOUT_MISMATCH_POST:$actual" }
+
+      - name: Publish summary
+        if: always()
+        shell: powershell
+        run: |
+          Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value '## GitHub Reliability Control Plane'
+          Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value "Subject: $env:GITHUB_SHA"
+          foreach ($name in @('selftest.json','write-authorization-selftest.json','control-state-selftest.json','current-obligation-enforcement.txt','second-shift-static-enforcement.json','a01-enforcement-selftest.txt','a01-enforcement-scan.txt','second-shift-dispatch-selftest.json','second-shift-current-plan.json')) {
+            $result = Join-Path $env:GITHUB_WORKSPACE ".github-control-plane-evidence\$name"
+            if (Test-Path $result) {
+              Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value "### $name"
+              Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value '```'
+              Get-Content -LiteralPath $result | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY
+              Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value '```'
+            }
+          }
+
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: github-reliability-control-plane-${{ github.run_id }}
+          path: .github-control-plane-evidence/
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 30

@@ -3,14 +3,58 @@
   "owner_path": "SYSTEM_MASTER/CORE",
   "control_ref": "system-master/control-v2",
   "last_known_control_head": "2031f070bd3702185c028733819ec410db36613c",
-  "delegation_epoch": 24,
+  "delegation_epoch": 25,
   "active_delegations": [
+    {
+      "delegation_id": "SECOND-SHIFT-CORE-GITHUB-RELIABILITY-CONTROL-PLANE-001",
+      "owner_path": "SYSTEM_MASTER/CORE",
+      "objective_id": "SYSTEM-MASTER-GITHUB-RELIABILITY-CONTROL-PLANE-001",
+      "obligation_id": "SYSTEM-MASTER-GITHUB-RELIABILITY-CONTROL-PLANE-001",
+      "state": "READY",
+      "priority": 100,
+      "valid_for_control_ref": "system-master/control-v2",
+      "valid_for_control_head": "2031f070bd3702185c028733819ec410db36613c",
+      "created_at": "2026-09-10T17:48:00-04:00",
+      "last_revalidated_at": "2026-09-10T18:00:00-04:00",
+      "selection_evidence": [
+        "governance/architecture/SYSTEM-MASTER-GITHUB-RELIABILITY-CONTROL-PLANE-001.md",
+        "governance/github/CANONICAL-WRITER-POLICY-001.json",
+        "governance/github/GITHUB-WORK-LEASE-SCHEMA-001.json",
+        "governance/github/GITHUB-OPERATION-LEDGER-SCHEMA-001.json",
+        "governance/github/GITHUB-CONTROL-STATE-SCHEMA-001.json",
+        "governance/second-shift/SECOND-SHIFT-CONTINUOUS-DISPATCH-001.md"
+      ],
+      "completion_delta": "Replace chat-by-chat GitHub mutation behavior and one-shot overnight scheduling with one shared, fenced, durable, idempotent GitHub reliability control plane that lets owner chats work concurrently on isolated candidates while preventing unauthorized canonical/current-objective changes and continuously reconciles Second Shift successors.",
+      "stop_condition": "Shared work-lease/write-authorization, monotonic repository-writer fencing, durable control state, exact-base fast-forward-only admission, native-Git transport path, and continuous Second Shift dispatch/recovery are admitted and freshly qualified on the exact Git subject; DOCUMENTS R4 is then executed as acceptance case 1, or a concrete infrastructure blocker is preserved with independent safe work selected.",
+      "allowed_work": [
+        "implement and qualify shared work-lease, idempotency and canonical-writer controls",
+        "implement durable operation/control state and stale-writer recovery",
+        "implement native-Git source transport without Base64/chunk carriers",
+        "integrate Second Shift registry-driven successor planning, dispatch and watchdog recovery",
+        "bind owner chat startup contracts to shared GitHub authorization",
+        "prepare DOCUMENTS R4 as acceptance case 1 without changing Documents ownership or transferring historical PASS",
+        "preserve A-01 singleton execution and exact-subject evidence boundaries"
+      ],
+      "forbidden_authority": [
+        "do not create a new first-class system or SYSTEM_MASTER root worker lane",
+        "do not replace another central objective after this user-authorized transition without fresh user authority",
+        "do not silently take BOOK, LEARNING or DOCUMENTS canonical ownership",
+        "do not force-update canonical Git refs",
+        "do not execute untrusted pull-request code on A-01",
+        "do not transfer PASS across changed Git SHA",
+        "do not fabricate human/private/native/external/publication/production authority"
+      ],
+      "on_pass": "Preserve exact control-plane evidence, retire this delegation after canonical admission, execute DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-IMPORT-AND-EXACT-SUBJECT-QUALIFICATION-002 as acceptance case 1 through the new path, and re-read CORE to resume SMR021 or the highest-value current CORE successor.",
+      "on_failure": "Preserve the exact subject/failure class, repair only deterministic shared-infrastructure defects under the same user-authorized objective, use bounded retry/circuit-breaker rules, and continue independent owner-lane work when safe.",
+      "continuation_rule": "Completion or material block is not Second Shift termination. Re-read current authority and continue dependency-valid safe successor work while the shift remains open."
+    },
     {
       "delegation_id": "SECOND-SHIFT-CORE-SMR021-GITHUB-NATIVE-TRANSPORT-009",
       "owner_path": "SYSTEM_MASTER/CORE",
       "objective_id": "SMR021-GITHUB-NATIVE-EXACT-CAPSULE-IMPORT-AND-RUNNABLE-SOURCE-TRANSPORT-009",
       "parent_objective_id": "CORE-SMR021-USER-EXPERIENCE-001",
       "state": "READY",
+      "priority": 50,
       "valid_for_control_ref": "system-master/control-v2",
       "valid_for_control_head": "2031f070bd3702185c028733819ec410db36613c",
       "created_at": "2026-09-10T10:04:00-04:00",
@@ -54,6 +98,6 @@
     "standing": "IMMUTABLE_GIT_HISTORY_PRESERVED__OLDER_RETIRED_DELEGATION_DETAILS_NOT_DELETED_FROM_REPOSITORY_HISTORY"
   },
   "owner_revalidation_required": false,
-  "reason": "The live Core head is unchanged; exact capsule acquisition is closed and current owner evidence selects GitHub-native transport 009. P9 adds the full schema-002 execution fields required by repository-wide reconciliation without changing the owner objective.",
+  "reason": "The live CORE control head is unchanged. The user-authorized cross-cutting GitHub reliability objective is temporarily highest priority within CORE/shared infrastructure while the prior SMR021 GitHub-native transport work remains preserved and READY rather than cancelled or rewritten.",
   "empty_is_valid": false
 }

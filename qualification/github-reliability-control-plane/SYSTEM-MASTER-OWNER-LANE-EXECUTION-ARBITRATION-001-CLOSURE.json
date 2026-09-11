@@ -1,0 +1,62 @@
+{
+  "closure_id": "SYSTEM-MASTER-OWNER-LANE-EXECUTION-ARBITRATION-001-CLOSURE",
+  "effective_date": "2026-09-10",
+  "owner_path": "SYSTEM_MASTER/CORE",
+  "parent_objective": "SYSTEM-MASTER-GITHUB-RELIABILITY-CONTROL-PLANE-001",
+  "standing": "COMPLETE_WITH_EVIDENCE__A01_EXACT_SUBJECT_PASS__ADOPTION_TO_CANONICAL_MAIN_SEPARATE",
+  "problem_repaired": "Foreground chats, Second Shift, and system automation could independently reason that the same owner lane/current objective was writable because owner-lane exclusivity was not durably bound into the shared GitHub control-state and write-authorization path.",
+  "qualified_subject": {
+    "branch": "infrastructure/github-reliability-control-plane-001-20260910",
+    "sha": "daf901974da9c3c6f4091c56281fa863fdd0a5f0",
+    "exact_sha_match": true
+  },
+  "qualification": {
+    "workflow": "GitHub Reliability Control Plane Enforcement",
+    "workflow_run_id": 34546528333,
+    "job_id": 103100254174,
+    "runner_name": "A-01",
+    "runner_id": 26,
+    "result": "PASS"
+  },
+  "evidence_artifact": {
+    "artifact_id": 10179208612,
+    "artifact_name": "github-reliability-control-plane-34546528333",
+    "artifact_size_bytes": 5450,
+    "zip_digest_sha256": "dddd4dac01536b7063f1d5bd45fff0f1de6ba744e24c8aa094484379d37e0e8c"
+  },
+  "implemented": [
+    "Durable owner_claim_epochs per owner lane in GitHub control state.",
+    "At most one unexpired mutation-capable owner claim per owner lane.",
+    "FOREGROUND_CHAT, SECOND_SHIFT, and SYSTEM_AUTOMATION are mutually exclusive mutation claimant modes for the same lane.",
+    "Exact replay of the same owner claim is idempotent; a different live claimant fails with OWNER_LANE_BUSY.",
+    "Renewal preserves claim epoch; release requires the exact current claim; expiry replacement advances the epoch and permanently stales the prior claim.",
+    "Work leases bind owner_claim_id, owner_claim_epoch, executor_mode, objective, owner control ref/head, and work session.",
+    "Mutation authorization validates the actual current durable owner claim; a boolean owner-lease assertion is insufficient.",
+    "Stale owner claim ID, epoch, executor mode, owner/objective/control mismatch, stale repository-writer fence, stale base, and force mutation fail closed.",
+    "Canonical mutation still requires controller admission plus the exact current owner claim/work lease and global repository-writer fence.",
+    "A-01 trusted-workflow parser no longer leaks push.paths list entries into the allowed push branch set; a regression fixture covers branches followed by paths."
+  ],
+  "exact_subject_proven": [
+    "Foundational GitHub reliability control-plane self-test PASS.",
+    "Write-authorization self-test PASS including exact owner-claim binding and stale-claim rejection.",
+    "Durable control-state self-test PASS including foreground blocking Second Shift, Second Shift blocking foreground, monotonic owner claim epochs, release, renewal, and expiry replacement.",
+    "Current obligation authority validation PASS.",
+    "Second Shift static enforcement PASS.",
+    "A-01 routing and trusted control-workflow policy validation PASS after parser repair.",
+    "Second Shift dispatcher self-test/current-plan step PASS.",
+    "Exact subject recording and evidence upload PASS."
+  ],
+  "preserved_lineage": [
+    "The earlier isolated branch system-master/owner-lane-execution-lease-binding-001 is preserved as diagnostic/prototype lineage and is not canonical authority.",
+    "The failed reliability run 34546348493 is preserved; owner-claim tests passed there, while the overall run failed because of the pre-existing A-01 push-branch parser defect.",
+    "The hosted A-01 watchdog run 34546528337 failed before runner assignment and is not classified as a semantic/code failure."
+  ],
+  "non_claims": [
+    "This candidate has not yet been admitted to canonical main.",
+    "Foreground and Second Shift callers on current main do not automatically inherit these protections until the reliability control plane is canonically adopted and their execution paths use its durable state transitions.",
+    "This repair grants execution exclusivity only; it changes no Book, Prose, Story Bible, Research, Documents, Learning, author, admission, publication, or semantic authority.",
+    "This repair does not by itself complete the entire SYSTEM-MASTER-GITHUB-RELIABILITY-CONTROL-PLANE-001 acceptance boundary.",
+    "No Book/Prose integration Phase 3 work is inferred or completed by this repair."
+  ],
+  "exact_successor": "SYSTEM-MASTER-GITHUB-RELIABILITY-CONTROL-PLANE-001-CANONICAL-ADMISSION-AND-CALLER-ADOPTION"
+}

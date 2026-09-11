@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "purpose": "Permit a minimal exact-blob-pinned class of trusted self-hosted control-plane health workflows without weakening the canonical A-01 qualification gateway. These workflows may validate controller/governance state but may not execute arbitrary qualification subjects or untrusted pull-request code.",
+  "workflows": {
+    ".github/workflows/github-reliability-control-plane-enforcement.yml": {
+      "blob_sha": "ffc1661d3a9d844de6efd7ddf326b220bd15df63",
+      "class": "TRUSTED_CONTROL_PLANE_HEALTH",
+      "runner_labels": ["self-hosted", "Windows", "X64"],
+      "required_concurrency_group": "a01-global-r2",
+      "allowed_push_branches": ["infrastructure/github-reliability-control-plane-001-20260910"],
+      "allow_workflow_dispatch": true,
+      "allow_schedule": false,
+      "allow_pull_request": false,
+      "allow_repository_dispatch": false,
+      "max_permissions": {"contents": "read"},
+      "allow_arbitrary_inputs": false,
+      "allow_gateway_call": false,
+      "allow_broker_call": false,
+      "allow_executor_call": false,
+      "qualification_payload_execution": false,
+      "required_exact_subject_checkout": true,
+      "required_persist_credentials_false": true
+    }
+  },
+  "rules": [
+    "The frozen legacy-direct-workflows registry remains unchanged; this is a separate trusted-control class.",
+    "Canonical A-01 qualification payloads still route through a01-control-plane-gateway -> admission broker -> executor.",
+    "A trusted-control workflow must match its registered Git blob SHA exactly or fail closed.",
+    "A trusted-control workflow may not run on pull_request, schedule, or repository_dispatch unless explicitly permitted by this registry.",
+    "A trusted-control workflow may not accept arbitrary command/input payloads.",
+    "A trusted-control workflow must use the shared a01-global-r2 concurrency domain so it cannot overlap native qualification on the single A-01 runner.",
+    "A trusted-control workflow cannot call the A-01 gateway, broker or executor unless explicitly permitted.",
+    "A workflow registration or policy change is a permanent security/governance change and requires explicit user authority under CANONICAL-WRITER-POLICY-001.",
+    "Native branch/ruleset protection remains the desired hard GitHub boundary when private-repository plan capabilities permit it."
+  ]
+}
