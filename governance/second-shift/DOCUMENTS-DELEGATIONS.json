@@ -5,26 +5,25 @@
   "last_known_control_head": "8c81b9a2e7622805e973eda33bdeb8b743948249",
   "program_job_lock": "governance/SYSTEM-PROGRAM-JOB-LOCK-001.json",
   "system_completion_status": "governance/SYSTEM-COMPLETION-STATUS-001.json",
-  "delegation_epoch": 5,
+  "delegation_epoch": 6,
   "active_delegations": [
     {
       "delegation_id": "SECOND-SHIFT-DOCUMENTS-R4-ADMISSION-002",
       "owner_path": "SYSTEM_MASTER/DOCUMENTS",
       "objective_id": "DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-IMPORT-AND-EXACT-SUBJECT-QUALIFICATION-002",
       "obligation_id": "DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-IMPORT-AND-EXACT-SUBJECT-QUALIFICATION-002",
-      "state": "READY",
+      "state": "BLOCKED_MATERIAL__GITHUB_FILE_BRIDGE",
       "valid_for_control_ref": "documents/control-v1",
       "valid_for_control_head": "8c81b9a2e7622805e973eda33bdeb8b743948249",
       "created_at": "2026-09-10T22:35:00-04:00",
-      "last_revalidated_at": "2026-09-10T23:45:00-04:00",
-      "completion_delta": "Finish the Documents-owned CR001-R4 source/import/exact-subject qualification path, then continue only Documents product work and explicit upward integration into System Master. PROSE is complete and terminally retired and is not a Documents work source, dependency lane, repair target, qualification target, research task or telemetry source.",
-      "stop_condition": "CR001-R4 has exact GitHub-native custody plus fresh current-subject qualification or a durable Documents-specific blocker; the next Documents-owned successor advances Documents toward System Master integration without claiming Book, retired-Prose, Learning, Core or Programming semantics.",
+      "last_revalidated_at": "2026-09-11T01:13:00-04:00",
+      "completion_delta": "Exact CR001-R4 source handoff was freshly materialized and verified 225/225 against the canonical manifest. GitHub-native source custody remains unresolved because the connected GitHub write contracts expose no mounted-file/file-ref bridge for the exact bytes. No changed-subject PASS was transferred.",
+      "blocker_evidence": "qualification/document-system/r4/DOCUMENTS-R4-EXACT-SOURCE-HANDOFF-RECONCILIATION-001.json",
+      "resume_condition": "A file-capable GitHub transport or separately integrity-gated exact-byte bridge becomes available; then import the already-verified exact handoff without reconstructing or reinterpreting source bytes and run fresh current-subject qualification.",
       "allowed_work": [
-        "complete exact CR001-R4 GitHub-native source import and identity verification",
-        "run dependency-valid portable/hosted qualification on the exact Documents subject",
-        "finish DOCX/PDF/PPTX/document structure, conversion, preservation, render/export and generic document-service work",
-        "prepare and qualify explicit Documents-to-System-Master integration interfaces",
-        "bind the next Documents-owned successor after completion or material block"
+        "resume exact CR001-R4 GitHub-native source import only from the verified handoff bytes",
+        "run dependency-valid portable/hosted qualification only after exact GitHub subject custody exists",
+        "preserve exact custody evidence without PASS transfer"
       ],
       "forbidden_authority": [
         "do not absorb, schedule, repair, qualify, research, telemeter or claim Prose work",
@@ -33,11 +32,43 @@
         "do not take Learning product work",
         "do not take Core shared runtime authority",
         "do not take Programming engineering work",
-        "do not declare Documents complete until explicit product-level completion authority",
+        "do not claim GitHub-native custody before exact bytes are present in Git",
         "do not transfer historical Document or Prose PASS to changed Documents bytes"
+      ]
+    },
+    {
+      "delegation_id": "SECOND-SHIFT-DOCUMENTS-SYSTEM-MASTER-SERVICE-INTERFACE-CENSUS-001",
+      "owner_path": "SYSTEM_MASTER/DOCUMENTS",
+      "objective_id": "DOCUMENTS-TO-SYSTEM-MASTER-SERVICE-INTERFACE-CENSUS-001",
+      "obligation_id": "DOCUMENTS-CURRENT-ADMISSION-001",
+      "state": "READY",
+      "priority": "DOCUMENTS_OWNER_VALID_INDEPENDENT_SUCCESSOR_WHILE_R4_CUSTODY_BLOCKED",
+      "valid_for_control_ref": "documents/control-v1",
+      "valid_for_control_head": "8c81b9a2e7622805e973eda33bdeb8b743948249",
+      "created_at": "2026-09-11T01:13:00-04:00",
+      "last_revalidated_at": "2026-09-11T01:13:00-04:00",
+      "parent_checkpoint": "qualification/document-system/r4/DOCUMENTS-R4-EXACT-SOURCE-HANDOFF-RECONCILIATION-001.json",
+      "classification": "DOCUMENTS_GENERIC_SERVICE_INTERFACE_CENSUS",
+      "scope": "Read current Documents control, canonical main implementation/evidence and current System Master integration contracts. Produce an evidence-backed census of existing versus missing generic document-service request/response/event boundaries for DOCX/PDF/PPTX/document structure, conversion, preservation, render/export and artifact handoff. Bind at most one demonstrated Documents-owned interface contract or portable qualification successor; do not invent product semantics owned by another peer.",
+      "completion_delta": "Identify exactly one genuinely open Documents-to-System-Master service-interface seam, or prove the currently machine-resolvable interface surface closed/blocked, while keeping the R4 exact-source custody blocker independent and explicit.",
+      "evidence_target": "Existing interface/call-site matrix, owner classification, exact main/control references, missing-seam proof, and at most one owner-valid successor contract or test target.",
+      "stop_condition": "One evidence-backed Documents-owned interface seam is bound, or all permitted generic service seams are shown blocked on external/native/A-01/human authority.",
+      "allowed_work": [
+        "read and census current Documents generic service interfaces and System Master call sites",
+        "classify existing request/response/event contracts without mutating other peer semantics",
+        "write a Documents-owned transport-neutral interface contract only for a demonstrated missing seam",
+        "prepare portable conformance/idempotency/error-routing tests for that Documents-owned interface"
       ],
-      "on_pass": "Preserve exact Documents evidence, reconcile Documents control/obligation state, retire this delegation and bind the next Documents-owned build/integration successor toward System Master.",
-      "on_failure": "Preserve exact Documents subject/blocker, repair only demonstrated Documents-owned defects, and continue independent Documents work inside the locked job when available."
+      "forbidden_authority": [
+        "do not create, inherit, schedule, repair, research, qualify, telemeter or bind successor work for PROSE",
+        "do not route completed-Prose integration through Documents",
+        "do not mutate Book canonical manuscript or Story Bible state",
+        "do not take Learning, Core or Programming product authority",
+        "do not claim A-01/native/publication/production PASS",
+        "do not declare DOCUMENTS complete"
+      ],
+      "on_pass": "Bind only the proven next Documents-owned service interface or qualification successor after fresh owner-head revalidation.",
+      "on_failure": "Preserve exact Documents-owned failure evidence and repair only the demonstrated Documents interface defect; do not reopen PROSE or convert the R4 custody blocker into whole-lane idle."
     }
   ],
   "retired_delegations": [
@@ -49,6 +80,6 @@
     }
   ],
   "owner_revalidation_required": false,
-  "reason": "Documents Control 002 is current at exact head 8c81b9a2. Documents is an incomplete peer owning document/artifact mechanics only, integrates upward into System Master and receives no Prose work.",
+  "reason": "Documents Control 002 remains current at exact head 8c81b9a2. R4 exact handoff identity is freshly verified but GitHub-native byte custody is materially blocked by the connected transport boundary, so independent Documents-to-System-Master generic service-interface census work is bound without transferring PASS or crossing peer ownership. Documents receives no Prose work.",
   "empty_is_valid": false
 }
