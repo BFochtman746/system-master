@@ -1,9 +1,9 @@
 {
   "status_id": "SYSTEM-COMPLETION-STATUS-001",
-  "effective_date": "2026-09-10",
+  "effective_date": "2026-09-11",
   "authority": "USER_DIRECTED_CURRENT_COMPLETION_TRUTH",
   "topology": "governance/SYSTEM-TOPOLOGY-004.json",
-  "rule": "System completion is a product-level standing and must not be inferred from a completed phase, packet, hosted qualification, A-01 receipt, branch label, or subsystem closure. Only explicit product-level completion authority may mark an active system complete.",
+  "rule": "System completion is a product-level standing and must not be inferred from a completed phase, packet, hosted qualification, A-01 receipt, branch label, subsystem closure, or work-program milestone. Only explicit product-level completion authority may mark an active system complete.",
   "systems": [
     {
       "system_id": "SYSTEM_MASTER",
@@ -24,7 +24,7 @@
       "owner_path": "SYSTEM_MASTER/LEARNING",
       "standing": "INCOMPLETE_ACTIVE_SYSTEM",
       "complete": false,
-      "job": "Finish the Learning system and its explicit integration into System Master without taking Book, Documents, Prose, or Core product ownership."
+      "job": "Finish the Learning system and its explicit integration into System Master without taking Book, Documents, Prose, Core, or Programming work."
     },
     {
       "system_id": "BOOK",
@@ -50,12 +50,20 @@
   ],
   "non_system_programs": [
     {
+      "program_id": "PROGRAMMING",
+      "program_lock": "governance/programs/PROGRAMMING-WORK-PROGRAM-LOCK-001.json",
+      "standing": "INCOMPLETE_ACTIVE_WORK_PROGRAM__NOT_YET_PEER_TOPOLOGY",
+      "complete": false,
+      "job": "Continue the existing Programming engineering program from preserved foundation, capability, build/test, assurance and Genesis evidence; finish only genuinely unclosed Programming work and prepare explicit System Master integration/admission without crossing another system's job or silently promoting topology."
+    },
+    {
       "program_id": "PROGRAMMING_KNOWLEDGE_RECOVERY",
       "owner_path": "SYSTEM_MASTER/CORE",
-      "standing": "ACTIVE_SUPPORT_PROGRAM__NOT_A_SYSTEM_COMPLETION",
+      "standing": "ACTIVE_SUPPORT_SUBPROGRAM__NOT_PROGRAMMING_PRODUCT_OWNER__NOT_A_SYSTEM_COMPLETION",
       "complete": false,
-      "job": "Recover and preserve Programming source/custody/provenance for reuse by System Master. It may not create a Programming peer system, redefine another lane, or supersede the product-integration jobs."
+      "parent_program_id": "PROGRAMMING",
+      "job": "Recover and preserve Programming source/custody/provenance for the Programming work program and System Master. It may not replace the Programming engineering program, create a Programming peer system, redefine another lane, or supersede product-integration jobs."
     }
   ],
-  "completion_lock": "PROSE is the only system currently authorized to be described as complete. SYSTEM_MASTER, CORE, LEARNING, BOOK, and DOCUMENTS remain incomplete until explicit future product-level completion authority says otherwise."
+  "completion_lock": "PROSE is the only system currently authorized to be described as complete. SYSTEM_MASTER, CORE, LEARNING, BOOK, and DOCUMENTS remain incomplete. PROGRAMMING is an incomplete active work program and is not yet an admitted peer system."
 }
