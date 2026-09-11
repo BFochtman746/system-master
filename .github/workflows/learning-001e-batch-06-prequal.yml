@@ -1,0 +1,72 @@
+name: Learning 001E Batch 06 Prequalification
+
+on:
+  push:
+    branches:
+      - learning/instructional-scoring-001e-batch-06-20260910
+    paths:
+      - "learning/lab/learning_lab/cssgb_full_standard_i_c_1.py"
+      - "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001E-INSTRUCTIONAL-CONTENT-AND-SCORING-BATCH-06-CANDIDATE-070A.json"
+      - ".github/scripts/learning-full-standard-001e-batch-06-qualify.py"
+      - ".github/workflows/learning-001e-batch-06-prequal.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  qualify:
+    name: Ground, score, and execute I.C.1 runtime slice
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      PYTHONPATH: learning/lab
+    steps:
+      - name: Checkout exact Batch 06 subject with history
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Record exact subject and immutable 001D input
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          git cat-file -e "02dc615fcb5d44b997ed1322848eccc6e37bb172^{commit}"
+          printf 'SUBJECT_SHA=%s\n' "$GITHUB_SHA"
+
+      - name: Compile-check Batch 06 runtime and qualifier
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            learning/lab/learning_lab/adaptive.py \
+            learning/lab/learning_lab/cssgb_full_standard_i_c_1.py \
+            learning/lab/tests/test_adaptive_practice_not_mastery.py \
+            .github/scripts/learning-full-standard-001e-batch-06-qualify.py
+
+      - name: Preserve adaptive practice-not-mastery regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m unittest learning.lab.tests.test_adaptive_practice_not_mastery
+
+      - name: Execute 001E Batch 06 qualification
+        shell: bash
+        run: |
+          set -euo pipefail
+          export EVIDENCE_DIR="$RUNNER_TEMP/learning-001e-batch-06-evidence"
+          python .github/scripts/learning-full-standard-001e-batch-06-qualify.py
+
+      - name: Upload Batch 06 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: LEARNING-001E-BATCH-06-${{ github.sha }}-hosted-evidence
+          path: ${{ runner.temp }}/learning-001e-batch-06-evidence
+          if-no-files-found: warn
+          retention-days: 30
+
+# Portable I.C.1 oracle/runtime qualification only. It preserves the frozen 2022 requirement identity, refuses unsupported proprietary roadmap inference, and creates no real-learner, psychometric, SME, certification, A-01, native-platform, or production authority.
