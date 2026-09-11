@@ -1,0 +1,33 @@
+name: Program Job Lock Enforcement
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'governance/CURRENT-AUTHORITY.json'
+      - 'governance/SYSTEM-TOPOLOGY-004.json'
+      - 'governance/SYSTEM-PROGRAM-JOB-LOCK-001.json'
+      - 'governance/SYSTEM-COMPLETION-STATUS-001.json'
+      - 'governance/WORK-OBLIGATION-REGISTRY-008.json'
+      - 'governance/EXPECTATION-REGISTRY-004.json'
+      - 'governance/second-shift/SECOND-SHIFT-REGISTRY-001.json'
+      - 'governance/second-shift/CORE-DELEGATIONS.json'
+      - 'governance/second-shift/LEARNING-DELEGATIONS.json'
+      - 'governance/second-shift/BOOK-DELEGATIONS.json'
+      - 'governance/second-shift/DOCUMENTS-DELEGATIONS.json'
+      - '.github/scripts/program-job-lock-enforce.js'
+      - '.github/workflows/program-job-lock-enforcement.yml'
+  workflow_dispatch:
+
+jobs:
+  enforce:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Validate job lock syntax
+        run: node --check .github/scripts/program-job-lock-enforce.js
+      - name: Enforce program jobs and completion truth
+        run: node .github/scripts/program-job-lock-enforce.js
