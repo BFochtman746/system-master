@@ -1,0 +1,68 @@
+{
+  "record_id": "PROGRAMMING-CORPUS-CENSUS-002-EXPANSION-002",
+  "supersedes": "PROGRAMMING-CORPUS-CENSUS-002-EXPANSION-001",
+  "parent_census": "governance/catalog/ingest/programming/PROGRAMMING-CORPUS-CENSUS-002.json",
+  "hash_manifest": "governance/catalog/ingest/programming/PROGRAMMING-PRESTAGE-SHA256-003.txt",
+  "status": "CANDIDATE__FOCUSED_LIBRARY_SEARCH_FULLY_MATERIALIZED__SUPERVISED_PRESTAGE_ONLY",
+  "architecture_authority": false,
+  "second_shift_eligible": false,
+  "a01_verified": false,
+  "evidence_standing": "CHATGPT_PRESTAGE_OBSERVED__NOT_A01_VERIFIED",
+  "counts": {
+    "focused_library_search_locators_observed": 69,
+    "focused_library_search_locators_materialized": 69,
+    "additional_seed_or_adjacent_programming_locators_materialized": 6,
+    "total_materialized_source_files": 75,
+    "unique_content_identities": 50,
+    "duplicate_content_groups": 24,
+    "source_locators_participating_in_duplicate_groups": 49,
+    "focused_search_materialization_complete": true,
+    "global_programming_corpus_complete": false
+  },
+  "correction": {
+    "prior_expansion_remaining_count": 24,
+    "correct_remaining_count_before_final_materialization": 30,
+    "reason": "The prior estimate incorrectly treated all 45 pre-staged files as members of the 69-result focused Library search. Several were seed-manifest/adjacent Programming artifacts outside that search result set. All remaining focused locators were subsequently materialized, eliminating the estimate from current standing."
+  },
+  "duplicate_model": {
+    "rule": "Preserve every source locator while normalizing byte-identical files to one content identity.",
+    "relation": "DUPLICATES / CONTENT_IDENTITY_MATCH",
+    "source_deletion_authorized": false,
+    "semantic_role_collapse_authorized": false,
+    "notable_three_locator_group": {
+      "sha256": "083b6c6f76186622a6cc3ab519a4ea26c0f9107cdae3dff761fa7cba12632a64",
+      "locators": [
+        "R5AJ_BASELINE.xlsx",
+        "PROGRAMMING_APP_ATOMIC_CAPABILITY_LEDGER_002Y_AUD037_R5AJ_AUTONOMOUS_ENGINEERING_LOOP_INTEGRATION_002X.xlsx",
+        "PROGRAMMING_APP_ATOMIC_CAPABILITY_LEDGER_002Y_AUD037_R5AJ_AUTONOMOUS_ENGINEERING_LOOP_INTEGRATION_002X(1).xlsx"
+      ],
+      "note": "Three locator roles share one exact byte identity. The graph must retain baseline and ledger locator semantics separately."
+    }
+  },
+  "lineage_observations": [
+    "R5B, R5C, R5D, R5E and R5F are byte-distinct earlier generations and must remain ordered historical lineage, not duplicates.",
+    "Many later capability-specific ledgers have base and (1) source locators that are byte-identical.",
+    "001L contract v4 and v6 are byte-distinct versions and must be linked by version/supersession evidence rather than filename heuristics.",
+    "The focused 69-result set is now fully byte-observed in ChatGPT prestage custody, but that is not the same as proving every Programming-affinity artifact in the entire Library/archive corpus has been discovered.",
+    "The historical 14 R64 and 350 Orivellum candidate families still require individual locator/identity recovery before global corpus completion can be claimed."
+  ],
+  "system_boundary_findings_preserved": [
+    "PROGRAM-VAULT is whole-System-Master provenance and must not be treated as Programming-owned evidence.",
+    "021AA is Risk Management and must not be classified as Programming by numeric adjacency.",
+    "PROGRAMMING remains PLANNED_CANDIDATE__NOT_ACTIVE_ARCHITECTURE."
+  ],
+  "next_gate": "RECONCILE_75_MATERIALIZED_LOCATORS_AND_50_CONTENT_IDENTITIES_INTO_EXPANDED_INGEST_MANIFEST_AND_TRACE_GRAPH_CANDIDATE",
+  "after_next_gate": [
+    "Recover remaining Programming-affinity sources outside the focused search, including historical R64 and Orivellum families.",
+    "Resolve exact approved transport/custody for external Library bytes so A-01 can re-hash the same content rather than trusting ChatGPT pre-stage observations.",
+    "Create a fresh supervised A-01 request pinned to the reconciled current subject after canonical admission is healthy.",
+    "Require a clean A-01 receipt and deterministic repeat before any Second Shift eligibility proposal."
+  ],
+  "prohibited_claims": [
+    "Do not claim full global Programming corpus recovery yet.",
+    "Do not claim A-01 verification of Library bytes.",
+    "Do not claim Programming activation.",
+    "Do not enable unattended/Second Shift Knowledge Recovery.",
+    "Do not discard duplicate or superseded source provenance."
+  ]
+}
