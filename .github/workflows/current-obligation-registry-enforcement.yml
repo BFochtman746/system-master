@@ -5,13 +5,28 @@ on:
   push:
     paths:
       - 'governance/CURRENT-AUTHORITY.json'
+      - 'governance/SYSTEM-TOPOLOGY-004.json'
+      - 'governance/SYSTEM-PROGRAM-JOB-LOCK-001.json'
+      - 'governance/SYSTEM-COMPLETION-STATUS-001.json'
+      - 'governance/COMPLETION-LEDGER-002.json'
       - 'governance/WORK-OBLIGATION-REGISTRY-*.json'
+      - 'governance/EXPECTATION-REGISTRY-004.json'
+      - 'governance/second-shift/BOOK-DELEGATIONS.json'
+      - 'governance/second-shift/LEARNING-DELEGATIONS.json'
+      - 'governance/second-shift/DOCUMENTS-DELEGATIONS.json'
+      - '.github/scripts/program-job-lock-enforce.js'
       - '.github/scripts/current-obligation-registry-enforce.js'
       - '.github/workflows/current-obligation-registry-enforcement.yml'
   pull_request:
     paths:
       - 'governance/CURRENT-AUTHORITY.json'
+      - 'governance/SYSTEM-TOPOLOGY-004.json'
+      - 'governance/SYSTEM-PROGRAM-JOB-LOCK-001.json'
+      - 'governance/SYSTEM-COMPLETION-STATUS-001.json'
+      - 'governance/COMPLETION-LEDGER-002.json'
       - 'governance/WORK-OBLIGATION-REGISTRY-*.json'
+      - 'governance/EXPECTATION-REGISTRY-004.json'
+      - '.github/scripts/program-job-lock-enforce.js'
       - '.github/scripts/current-obligation-registry-enforce.js'
       - '.github/workflows/current-obligation-registry-enforcement.yml'
 
@@ -20,7 +35,7 @@ permissions:
 
 jobs:
   validate-current-registry:
-    name: Validate authority-selected current obligations
+    name: Validate authority-selected obligations against locked jobs
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -29,6 +44,10 @@ jobs:
         with:
           fetch-depth: 1
       - name: Syntax check
-        run: node --check .github/scripts/current-obligation-registry-enforce.js
+        run: |
+          node --check .github/scripts/program-job-lock-enforce.js
+          node --check .github/scripts/current-obligation-registry-enforce.js
+      - name: Validate program jobs and completion truth
+        run: node .github/scripts/program-job-lock-enforce.js
       - name: Validate CURRENT-AUTHORITY selected obligation registry
         run: node .github/scripts/current-obligation-registry-enforce.js
