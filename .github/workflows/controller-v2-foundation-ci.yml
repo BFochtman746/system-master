@@ -1,0 +1,55 @@
+name: Controller V2 Foundation CI
+
+on:
+  push:
+    branches:
+      - controller-v2-foundation
+    paths:
+      - 'controller-v2/**'
+      - '.github/workflows/controller-v2-foundation-ci.yml'
+  pull_request:
+    paths:
+      - 'controller-v2/**'
+      - '.github/workflows/controller-v2-foundation-ci.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: controller-v2-foundation-ci-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  foundation:
+    name: Foundation invariants / Python 3.14
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: controller-v2
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Install Python 3.14
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: '3.14'
+          check-latest: true
+
+      - name: Runtime identity
+        run: |
+          python --version
+          python - <<'PY'
+          import sqlite3
+          print('sqlite', sqlite3.sqlite_version)
+          PY
+
+      - name: Compile controller
+        run: python -m compileall -q controller_v2 tests
+
+      - name: Run foundation tests
+        run: python -m unittest discover -s tests -p 'test_*.py' -v
