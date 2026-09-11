@@ -1,0 +1,99 @@
+{
+  "qualification_id": "BOOK-PROSE-AUTHORITY-RECONCILIATION-001",
+  "effective_date": "2026-09-10",
+  "owner_path": "SYSTEM_MASTER",
+  "classification": "AUTHORITY_RECONCILIATION_AND_ADMISSION_RECEIPT",
+  "user_directed_target": {
+    "book_canonical_manuscript_owner": "SYSTEM_MASTER/BOOK",
+    "prose_specialist_owner_path": "SYSTEM_MASTER/BOOK/PROSE",
+    "prose_canonical_manuscript_write_authority": false,
+    "documents_peer_system_preserved": true,
+    "book_admission_only_canonical_effect_path": true
+  },
+  "problem_observed": {
+    "book_branch_state": "Book-Prose integration had advanced through Phase 2J and selected the Phase-2 orchestrator closure census.",
+    "product_root_conflict": "Current main topology/authority/startup/obligation/expectation/reallocation/catalog rules still treated standalone Prose retirement/Prose-to-Documents transfer as current and rejected SYSTEM_MASTER/BOOK/PROSE.",
+    "execution_race": "Foreground Book work and another mutation-capable execution path repeatedly advanced the same Book branch without a shared cross-mode owner-lane claim.",
+    "root_cause_order": [
+      "Product-root authority contradiction had to be repaired before execution arbitration, otherwise a stronger lease would serialize the wrong ownership model.",
+      "Existing Second Shift leases arbitrate Second Shift workers but do not yet provide one shared mutation claim across foreground chat and Second Shift."
+    ]
+  },
+  "historical_records_preserved": [
+    "governance/SYSTEM-TOPOLOGY-003.json",
+    "governance/ADR-0003-DOCUMENTS-PEER-SYSTEM-AND-PROSE-RETIREMENT.md",
+    "governance/retirements/PROSE-SYSTEM-RETIREMENT-001.json",
+    "governance/WORK-OBLIGATION-REGISTRY-005.json",
+    "governance/EXPECTATION-REGISTRY-002.json",
+    "governance/REALLOCATION-LEDGER-002.json",
+    "governance/catalog/SYSTEM-MASTER-SYSTEM-CATALOG-001.json"
+  ],
+  "current_replacement_records": [
+    "governance/ADR-0004-BOOK-PROSE-CHILD-RESTORATION.md",
+    "governance/SYSTEM-TOPOLOGY-004.json",
+    "governance/WORK-OBLIGATION-REGISTRY-006.json",
+    "governance/EXPECTATION-REGISTRY-003.json",
+    "governance/REALLOCATION-LEDGER-003.json",
+    "governance/catalog/SYSTEM-MASTER-SYSTEM-CATALOG-002.json",
+    "governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-003.json"
+  ],
+  "control_surfaces_reconciled": [
+    "governance/CURRENT-AUTHORITY.json",
+    "governance/CHAT-LANE-OPERATING-PROMPT-002.md",
+    "governance/morning/CHAT-START-COMMAND-CONTRACT-001.md",
+    "governance/morning/MASTER-ROOT-CHAT-OPERATING-CONTRACT-001.md",
+    "governance/morning/MORNING-CANONICAL-RECONCILIATION-001.md",
+    "governance/morning/MORNING-CHAT-READINESS-GATE-001.md",
+    "governance/second-shift/SECOND-SHIFT-REGISTRY-001.json",
+    "governance/second-shift/BOOK-DELEGATIONS.json",
+    "governance/second-shift/SECOND-SHIFT-EXECUTION-CONTROL-001.md",
+    "governance/second-shift/SECOND-SHIFT-OPERATING-MODE-002.md",
+    ".github/scripts/validate-system-topology.js",
+    ".github/scripts/system-state-reconciler.js",
+    ".github/scripts/current-obligation-registry-enforce.js"
+  ],
+  "rebase": {
+    "original_repair_branch": "governance/book-prose-authority-reconcile-001",
+    "original_repair_head": "1fa060abe157ec2c49c65e7114a8765320b5cc55",
+    "original_pr": 42,
+    "original_pr_mergeability": "CONFLICTING_AFTER_MAIN_MOVED__PRESERVED_NOT_FORCED",
+    "rebase_source_main_sha": "9b1b7a8044743e6bbf77b6e7f8d3006c22b2714a",
+    "rebase_tree_sha": "4d91220d4003477bd0600e0a8f92da10a28deca4",
+    "rebase_commit_sha": "61b1dfbf91df8b5f83fa9029d64594ba7bd74bd0",
+    "rebased_branch": "governance/book-prose-authority-reconcile-002",
+    "rebased_pr": 44,
+    "rebased_pr_git_mergeable": true,
+    "rebase_method": "Exact current-main tree plus only the 20 final authority-repair blob identities; newer Learning, Knowledge Recovery and Document R4 files were not replaced."
+  },
+  "semantic_invariants": [
+    "Peer systems remain CORE, LEARNING, BOOK and DOCUMENTS.",
+    "PROSE is an active child specialist of BOOK, not a fifth peer.",
+    "PROSE has no separate Second Shift mutation lane and active Prose execution resolves through BOOK.",
+    "BOOK remains the sole canonical Book/manuscript owner and Book admission remains the sole canonical manuscript effect path.",
+    "DOCUMENTS remains a peer document/artifact owner and does not own Book-specific Prose literary intelligence.",
+    "Historical Prose retirement and Prose-to-Documents records remain immutable history whose current execution effect is superseded.",
+    "No historical Book, Prose or Documents PASS is transferred to changed integration/governance subjects."
+  ],
+  "workflow_evidence": {
+    "system_state_reconciler_run_id": 34548143584,
+    "system_state_reconciler_job_id": 103105112821,
+    "current_obligation_enforcement_run_id": 34548143640,
+    "current_obligation_enforcement_job_id": 103105112995,
+    "observed_common_result": "INFRASTRUCTURE_NOT_EXECUTED",
+    "runner_label": "ubuntu-latest",
+    "runner_id": 0,
+    "executed_steps": 0,
+    "semantic_pass_claimed": false,
+    "semantic_failure_claimed": false,
+    "reason": "GitHub assigned no hosted runner; jobs terminated before any repository validation step executed."
+  },
+  "standing": "ADMISSION_CANDIDATE__GIT_MERGEABLE__SEMANTIC_HOSTED_EXECUTION_BLOCKED_BY_RUNNER_ALLOCATION",
+  "non_claims": [
+    "No hosted semantic qualification PASS is claimed for the governance subject.",
+    "No A-01 target PASS is claimed or transferred.",
+    "No human, author, private, native, fresh-blind, publication or production authority is inferred.",
+    "This reconciliation does not itself implement cross-mode owner-lane mutation arbitration."
+  ],
+  "exact_successor_after_admission": "SECOND-SHIFT-LIVE-AUTHORITY-SUCCESSOR-ENFORCEMENT-002__CROSS_MODE_OWNER_LANE_MUTATION_ARBITRATION",
+  "return_to_book_after_successor": "BOOK-PROSE-PHASE-2-ORCHESTRATOR-CLOSURE-CENSUS-001"
+}
