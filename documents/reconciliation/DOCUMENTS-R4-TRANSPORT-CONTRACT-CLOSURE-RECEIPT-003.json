@@ -1,0 +1,78 @@
+{
+  "receipt_id": "DOCUMENTS-R4-TRANSPORT-CONTRACT-CLOSURE-RECEIPT-003",
+  "date": "2026-09-11",
+  "owner": "SYSTEM_MASTER/DOCUMENTS",
+  "work_package": "DOCUMENTS-R4-TRANSPORT-CONTRACT-RECONCILIATION-003",
+  "standing": "PASS__TRANSPORT_CONTRACT_CLOSED__SOURCE_CUSTODY_STILL_BLOCKED",
+  "immutable_source": {
+    "handoff_sha256": "ada701cfa15e6162b6cdf67bc6c0803540a611b08a23aeeeddd1045d8ce2d8ab",
+    "canonical_manifest_sha256": "ed36fc9cfd38b04a8d0174efed06b03e8e25b0a45fc0adc4d47fe3457c2ee367",
+    "source_rows_verified": 225,
+    "source_rows_expected": 225,
+    "path_size_sha_result": "PASS__225_OF_225"
+  },
+  "determinism": {
+    "independent_builds": 2,
+    "tar_byte_identity": "PASS",
+    "carrier_byte_identity": "PASS",
+    "chunk_manifest_byte_identity": "PASS",
+    "tar_sha256": "e05167645dda63ae4d33ad66f08fa9cc5e53ab03369ec50c4ec5cb811d025267",
+    "tar_bytes": 2754560,
+    "carrier_sha256": "77a6e2288d475865622bad4b2c66647a599c26a3899c6617b33d7b2b334855bd",
+    "carrier_bytes": 301008,
+    "raw_bytes_per_full_chunk": 65536,
+    "chunk_count": 5
+  },
+  "contract_identity": {
+    "transport_contract_sha256": "80509f1f2ddaa7ad2d46f9e94e88400758e40634c44243e1136c28f4c2ae7ba1",
+    "chunk_manifest_sha256": "daa71c58fbcb38e3a8daf1b146531d80147825a1efc15a95928dbca3ffbcd108"
+  },
+  "adversarial_qualification": {
+    "baseline": "PASS",
+    "cases_pass_fail_closed": 12,
+    "cases": [
+      "MISSING_CHUNK",
+      "UNEXPECTED_EXTRA_CHUNK",
+      "DUPLICATE_PAYLOAD_AS_EXTRA",
+      "REORDERED_NAME_PAYLOAD_MAPPING",
+      "MODIFIED_CHUNK_BYTE",
+      "WRONG_CHUNK_COUNT",
+      "WRONG_CHUNK_DIGEST",
+      "WRONG_CARRIER_DIGEST",
+      "WRONG_CHUNK_ORDINAL",
+      "WRONG_CHUNK_FILENAME_ORDER",
+      "WRONG_CHUNK_MANIFEST_BINDING",
+      "WRONG_SOURCE_MANIFEST_BINDING"
+    ]
+  },
+  "admission_contract": {
+    "staging_contract_parity": "PASS",
+    "stale_81_chunk_contract_removed": true,
+    "stale_100_chunk_contract_removed": true,
+    "stale_carrier_digests_removed_from_workflow": true,
+    "workflow_reads_versioned_contract": true,
+    "workflow_requires_explicit_armed_state": true,
+    "workflow_requires_ready_marker": true,
+    "workflow_requires_complete_staged_chunk_count": true,
+    "simulated_fully_armed_preflight": "PASS",
+    "simulated_fully_armed_reconstruction": "PASS__225_OF_225"
+  },
+  "current_repository_standing": {
+    "branch": "documents/full-build-readiness-reconciliation-001",
+    "payload_chunks_committed": 0,
+    "expected_payload_chunks": 5,
+    "ready_marker_present": false,
+    "github_native_source_custody": "BLOCKED",
+    "historical_pass_transferred": false
+  },
+  "repository_mutation_commits": [
+    "59053c0a158a6cc102ed598086c8379f0ef66b45",
+    "d46d96ab7a34644492317a5a2e6b3e9fbe449318",
+    "8f51cb2d736096f0696482bd27a528afa1a1f0ad",
+    "1be1cd49020b5fec859de4485755a967d61f2bc9",
+    "1afa071c05965dad998b597e7a417bef818e93bf",
+    "ce1fa707203f7f9ba4539c4349109f45c33cc044",
+    "ff2e7f37cc696ca8ce1287db468908ddd10307d9"
+  ],
+  "next_operation": "DOCUMENTS-R4-GITHUB-NATIVE-PAYLOAD-STAGING-004"
+}
