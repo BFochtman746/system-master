@@ -10,6 +10,32 @@ function encodeContentPath(path) {
   return path.split('/').map(encodeURIComponent).join('/');
 }
 
+function header(response, name) {
+  if (!response?.headers || typeof response.headers.get !== 'function') return null;
+  return response.headers.get(name);
+}
+
+function classifyRateLimit(response, parsed) {
+  const status = response.status;
+  if (status !== 403 && status !== 429) return null;
+  const remaining = header(response, 'x-ratelimit-remaining');
+  const retryAfter = header(response, 'retry-after');
+  const message = typeof parsed === 'object' && parsed?.message ? String(parsed.message).toLowerCase() : '';
+  const secondary = message.includes('secondary rate limit') || message.includes('abuse detection');
+  if (status === 429 || remaining === '0' || retryAfter !== null || secondary) {
+    return {
+      code: 'GITHUB_RATE_LIMITED',
+      retry_after_seconds: retryAfter === null ? null : Number(retryAfter),
+      rate_limit_remaining: remaining === null ? null : Number(remaining),
+      rate_limit_reset_epoch_seconds: (() => {
+        const raw = header(response, 'x-ratelimit-reset');
+        return raw === null ? null : Number(raw);
+      })()
+    };
+  }
+  return null;
+}
+
 function errorCode(status) {
   if (status === 401) return 'GITHUB_AUTH_FAILED';
   if (status === 403) return 'GITHUB_FORBIDDEN';
@@ -21,11 +47,20 @@ function errorCode(status) {
 }
 
 export class GitHubApiError extends ControllerError {
-  constructor(code, message, { status = null, body = null, cause = null } = {}) {
-    super(code, message, { status, body });
+  constructor(code, message, { status = null, body = null, cause = null, retryAfterSeconds = null, rateLimitResetEpochSeconds = null, rateLimitRemaining = null } = {}) {
+    super(code, message, {
+      status,
+      body,
+      retry_after_seconds: retryAfterSeconds,
+      rate_limit_reset_epoch_seconds: rateLimitResetEpochSeconds,
+      rate_limit_remaining: rateLimitRemaining
+    });
     this.name = 'GitHubApiError';
     this.status = status;
     this.body = body;
+    this.retryAfterSeconds = retryAfterSeconds;
+    this.rateLimitResetEpochSeconds = rateLimitResetEpochSeconds;
+    this.rateLimitRemaining = rateLimitRemaining;
     if (cause) this.cause = cause;
   }
 }
@@ -66,9 +101,16 @@ export class GitHubGitDatabaseTransport {
       try { parsed = JSON.parse(text); } catch { parsed = text; }
     }
     if (!response.ok) {
-      const code = errorCode(response.status);
+      const rate = classifyRateLimit(response, parsed);
+      const code = rate?.code ?? errorCode(response.status);
       const message = typeof parsed === 'object' && parsed?.message ? parsed.message : `GitHub API ${response.status}`;
-      throw new GitHubApiError(code, message, { status: response.status, body: parsed });
+      throw new GitHubApiError(code, message, {
+        status: response.status,
+        body: parsed,
+        retryAfterSeconds: rate?.retry_after_seconds ?? null,
+        rateLimitResetEpochSeconds: rate?.rate_limit_reset_epoch_seconds ?? null,
+        rateLimitRemaining: rate?.rate_limit_remaining ?? null
+      });
     }
     return parsed;
   }
