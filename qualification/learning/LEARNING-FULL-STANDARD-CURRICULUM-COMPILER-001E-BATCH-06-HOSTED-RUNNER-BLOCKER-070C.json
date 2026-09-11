@@ -1,0 +1,90 @@
+{
+  "artifact_id": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001E-BATCH-06-HOSTED-RUNNER-BLOCKER-070C",
+  "effective_date": "2026-09-10",
+  "owner_path": "SYSTEM_MASTER/LEARNING",
+  "standing": "EXTERNAL_EXECUTION_BLOCKER__NO_CONTROL_PROMOTION",
+  "formal_control_head": "cf6db676c0058b79c0b32b7300d425852958f83f",
+  "formal_progress": {
+    "requirements_complete": 5,
+    "requirements_total": 66,
+    "requirements_remaining": 61,
+    "current_001d_ordinal": 6,
+    "current_requirement_id": "ASQ-CSSGB-2022-I.C.1"
+  },
+  "repaired_batch06_subject": {
+    "sha": "d33d41a226b0717a6cc968f2bd2f561fc299db01",
+    "candidate": "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001E-INSTRUCTIONAL-CONTENT-AND-SCORING-BATCH-06-CANDIDATE-070B.json",
+    "qualifier": ".github/scripts/learning-full-standard-001e-batch-06-qualify-v2.py",
+    "workflow": ".github/workflows/learning-001e-batch-06-prequal-v2.yml",
+    "runtime_successor": "learning/lab/learning_lab/domain_general_evidence_safe.py",
+    "literal_response_regression": "learning/lab/tests/test_domain_general_literal_response_evidence.py"
+  },
+  "preserved_execution_history": [
+    {
+      "subject_sha": "bd3f7de8490c7cfb6a7dcdd37cc1fa1d4656bced",
+      "workflow_run_id": 34545605665,
+      "attempts": 3,
+      "standing": "FAILED_BEFORE_STEP_EXECUTION",
+      "semantic_qualification_failure": false
+    },
+    {
+      "subject_sha": "d33d41a226b0717a6cc968f2bd2f561fc299db01",
+      "workflow_run_id": 34547748954,
+      "job_id": 103103920198,
+      "standing": "FAILED_BEFORE_STEP_EXECUTION",
+      "job_steps_executed": 0,
+      "billable_runner_class": "UBUNTU",
+      "billable_duration_ms": 0,
+      "semantic_qualification_failure": false
+    },
+    {
+      "subject_sha": "d33d41a226b0717a6cc968f2bd2f561fc299db01",
+      "workflow_run_id": 34547748862,
+      "workflow_name": "A-01 Control Plane Enforcement",
+      "job_id": 103103920184,
+      "standing": "FAILED_BEFORE_STEP_EXECUTION",
+      "job_steps_executed": 0,
+      "purpose": "SAME_SUBJECT_INDEPENDENT_HOSTED_CONTROL_SAMPLE"
+    }
+  ],
+  "runner_diagnosis": {
+    "classification": "GITHUB_HOSTED_RUNNER_ALLOCATION_BLOCKED_OR_UNAVAILABLE_FOR_PRIVATE_REPOSITORY",
+    "confidence": "HIGH_FOR_PRE_STEP_HOSTED_ALLOCATION_FAILURE__CAUSE_NOT_ACCOUNT_API_VERIFIED",
+    "evidence": [
+      "repaired Batch 06 Ubuntu job exists but records zero billable execution milliseconds",
+      "repaired Batch 06 job exposes no executed workflow steps",
+      "independent A-01 enforcement job on the same repaired subject also exposes no executed steps",
+      "repository successes observed after the first Batch 06 failure used self-hosted Windows runner A-01 rather than GitHub-hosted Ubuntu"
+    ],
+    "not_proven": [
+      "included Actions minutes exhausted",
+      "payment method absent or invalid",
+      "Actions budget configured to stop usage",
+      "other account-level hosted-runner entitlement or billing restriction"
+    ]
+  },
+  "contract_effect": {
+    "fresh_exact_sha_hosted_qualification_required": true,
+    "batch06_admission_allowed": false,
+    "batch07_selection_allowed": false,
+    "reason": "001E contract requires fresh exact-SHA hosted qualification evidence before advancing the exact ordinal sequence"
+  },
+  "required_external_recovery": {
+    "owner": "GITHUB_ACCOUNT_OWNER",
+    "action": "RESTORE_GITHUB_HOSTED_ACTIONS_EXECUTION_FOR_PRIVATE_REPOSITORY",
+    "checks": [
+      "Actions included usage / metered usage",
+      "Actions budget and any Stop usage when budget limit is reached setting",
+      "valid payment method if included quota has been consumed and paid continuation is desired"
+    ],
+    "after_recovery": "Rerun exact repaired subject d33d41a226b0717a6cc968f2bd2f561fc299db01 through Learning 001E Batch 06 Repaired Prequalification; do not create a new subject unless the semantic gate itself identifies a product defect."
+  },
+  "authority_boundaries": {
+    "real_learner_mastery": "UNOBSERVED",
+    "psychometric_validity": "UNOBSERVED",
+    "sme_approval": "UNOBSERVED",
+    "certification_equivalence": "UNOBSERVED",
+    "a01_native_production_authority": "NOT_INFERRED",
+    "full_course_activation_allowed": false
+  }
+}
