@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:system-master:learning:event:0.1.0",
+  "title": "Learning to System Master Event",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["event_id","event","occurred_at","owner_path","payload"],
+  "properties": {
+    "event_id": {"type":"string","minLength":1},
+    "event": {"enum":["LEARNING_STATE_CHANGED","LEARNING_ACTION_REQUIRED","LEARNING_EVIDENCE_ADMITTED"]},
+    "occurred_at": {"type":"string","format":"date-time"},
+    "owner_path": {"const":"SYSTEM_MASTER/LEARNING"},
+    "payload": {"type":"object","additionalProperties":true}
+  }
+}
