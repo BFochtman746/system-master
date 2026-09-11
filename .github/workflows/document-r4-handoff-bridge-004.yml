@@ -1,0 +1,67 @@
+name: Document R4 exact handoff bridge 004
+
+on:
+  push:
+    branches:
+      - documents/full-build-readiness-reconciliation-001
+    paths:
+      - '.github/workflows/document-r4-handoff-bridge-004.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: document-r4-exact-handoff-bridge-004
+  cancel-in-progress: false
+
+jobs:
+  bridge-exact-handoff:
+    runs-on: self-hosted
+    timeout-minutes: 30
+    steps:
+      - name: Checkout staging branch
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Locate exact handoff and commit binary bridge
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $expectedSha = 'ada701cfa15e6162b6cdf67bc6c0803540a611b08a23aeeeddd1045d8ce2d8ab'
+          $expectedBytes = 611479
+          $roots = @(
+            (Join-Path $env:USERPROFILE 'Downloads'),
+            (Join-Path $env:USERPROFILE 'Desktop'),
+            (Join-Path $env:USERPROFILE 'Documents'),
+            (Join-Path $env:USERPROFILE 'OneDrive\Downloads'),
+            (Join-Path $env:USERPROFILE 'OneDrive\Desktop'),
+            (Join-Path $env:USERPROFILE 'OneDrive\Documents')
+          ) | Where-Object { Test-Path -LiteralPath $_ }
+
+          $match = $null
+          foreach ($root in $roots) {
+            $files = Get-ChildItem -LiteralPath $root -Filter '*.zip' -File -Recurse -ErrorAction SilentlyContinue |
+              Where-Object { $_.Length -eq $expectedBytes -and $_.LastWriteTimeUtc -ge [datetime]'2026-08-30T00:00:00Z' }
+            foreach ($file in $files) {
+              $sha = (Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+              if ($sha -eq $expectedSha) { $match = $file; break }
+            }
+            if ($match) { break }
+          }
+          if (-not $match) { throw 'EXACT_R4_HANDOFF_NOT_FOUND_BY_SHA256' }
+
+          $dest = 'transport/document-r4/.temporary-handoff.zip'
+          Copy-Item -LiteralPath $match.FullName -Destination $dest -Force
+          $actualSha = (Get-FileHash -LiteralPath $dest -Algorithm SHA256).Hash.ToLowerInvariant()
+          $actualBytes = (Get-Item -LiteralPath $dest).Length
+          if ($actualSha -ne $expectedSha) { throw "HANDOFF_SHA_MISMATCH $actualSha" }
+          if ($actualBytes -ne $expectedBytes) { throw "HANDOFF_SIZE_MISMATCH $actualBytes" }
+
+          git config user.name 'system-master-r4-bridge'
+          git config user.email 'system-master-r4-bridge@users.noreply.github.com'
+          git add -f -- $dest
+          git commit -m 'transport: stage exact Document R4 handoff bridge'
+          git push origin "HEAD:$env:GITHUB_REF_NAME"
+          Write-Host "R4_EXACT_HANDOFF_BRIDGED sha256=$actualSha bytes=$actualBytes"
