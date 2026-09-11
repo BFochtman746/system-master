@@ -15,6 +15,7 @@ const receiptSchema = readJson('qualification/a01/schema/qualification-receipt.s
 const ticketSchema = readJson('qualification/a01/schema/return-ticket.schema.json');
 const overnightTicketSchema = readJson('qualification/a01/overnight/ticket.schema.json');
 const legacy = readJson('qualification/a01/legacy-direct-workflows.json');
+const workflowRetirement = readJson('governance/archive/ACTIONS-WORKFLOW-RETIREMENT-2026-09-10.json');
 const bootstrap = text('SYSTEM-MASTER-WORKSTREAM-BOOTSTRAP.md');
 const contract = text('qualification/a01/A01-OPERATING-CONTRACT.md');
 const operatingMode = text('qualification/a01/A01-OPERATING-MODE-001.md');
@@ -147,7 +148,11 @@ assert(nightWorkflow.includes('a01-overnight-plan.js'), 'night planner missing')
 assert(nightWorkflow.includes('execution_context: overnight'), 'night slots must use overnight context');
 assert(nightWorkflow.includes('requires_previous_pass'), 'night successor PASS dependency missing');
 assert(nightWorkflow.includes("outputs.result_class == 'PASS'"), 'night successor must require predecessor PASS');
-assert(legacy.version === 1 && Object.keys(legacy.workflows).length > 0, 'legacy direct-workflow freeze missing');
+assert(legacy.version === 2, 'legacy direct-workflow freeze generation');
+const frozenLegacyWorkflows = Object.keys(legacy.workflows || {}).sort();
+const retainedRunnerSupport = [...(workflowRetirement.retained_runner_support || [])].sort();
+assert(frozenLegacyWorkflows.length > 0, 'legacy direct-workflow freeze missing');
+assert(JSON.stringify(frozenLegacyWorkflows) === JSON.stringify(retainedRunnerSupport), 'legacy direct-workflow freeze must match retained runner support');
 assert(enforcementWorkflow.includes('runs-on: ubuntu-latest'), 'repository enforcement remains separate from A-01 qualification capacity');
 assert(enforcementWorkflow.includes('a01-control-plane-enforce.js scan'), 'enforcement scan missing');
 assert(enforcementWorkflow.includes('a01-admission-barrier.js selftest'), 'admission enforcement selftest missing');
