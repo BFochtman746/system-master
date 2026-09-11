@@ -1,0 +1,26 @@
+name: Documents System Master Service Interface Qualification
+
+on:
+  push:
+    branches:
+      - documents/control-v1
+    paths:
+      - 'documents/interfaces/DOCUMENTS-SYSTEM-MASTER-SERVICE-CONTRACT-001.json'
+      - 'documents/interfaces/documents-system-master-service-contract.test.js'
+      - '.github/workflows/documents-system-master-service-interface-qualification.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run Documents service interface conformance
+        run: node documents/interfaces/documents-system-master-service-contract.test.js

@@ -1,0 +1,38 @@
+{
+  "contract_id": "DOCUMENTS-SYSTEM-MASTER-SERVICE-CONTRACT-001",
+  "schema_version": 1,
+  "owner_system_id": "DOCUMENTS",
+  "owner_path": "SYSTEM_MASTER/DOCUMENTS",
+  "control_ref": "documents/control-v1",
+  "purpose": "Transport-neutral reference-only request/response/event boundary for generic Documents services consumed by System Master or peers without transferring semantic ownership.",
+  "operations": ["INTAKE","INSPECT_STRUCTURE","CONVERT","PRESERVE","RENDER","EXPORT","ARTIFACT_HANDOFF"],
+  "request": {
+    "required": ["schema_version","request_id","operation","input_artifact","idempotency_key","correlation_id"],
+    "input_artifact_required": ["artifact_id","digest_sha256"],
+    "optional": ["target_format","options","caller_system_id"]
+  },
+  "response": {
+    "required": ["schema_version","request_id","correlation_id","status","evidence_refs"],
+    "statuses": ["ACCEPTED","SUCCEEDED","FAILED","BLOCKED"],
+    "output_artifact_required": ["artifact_id","digest_sha256"],
+    "error_required_when_failed_or_blocked": ["code","class","retryable"]
+  },
+  "event": {
+    "required": ["schema_version","event_id","event_type","request_id","correlation_id","sequence","evidence_refs"],
+    "event_types": ["DOCUMENT_SERVICE_ACCEPTED","DOCUMENT_SERVICE_SUCCEEDED","DOCUMENT_SERVICE_FAILED","DOCUMENT_SERVICE_BLOCKED"]
+  },
+  "invariants": [
+    "Requests, responses and events carry artifact references and exact digests, never raw document/manuscript bytes.",
+    "The idempotency key binds the canonical semantic request digest; reuse with changed semantics is rejected.",
+    "Responses and events preserve request_id and correlation_id exactly.",
+    "Output artifacts require exact digest identity before SUCCEEDED is emitted.",
+    "FAILED and BLOCKED responses require a classified error and do not synthesize success.",
+    "Document service consumption never transfers Book, Learning, Core, Programming or retired Prose semantic ownership.",
+    "No A-01, native, publication, production, author or private authority is created by this contract."
+  ],
+  "forbidden_payload_fields": ["raw_bytes","content_bytes","payload_base64","manuscript_text","canonical_manuscript_state","story_bible_state","learner_state","programming_source_bytes"],
+  "canonicalization": "Recursively sort object keys; preserve array order; JSON encode without insignificant whitespace; SHA-256 the canonical UTF-8 bytes.",
+  "idempotency": "Same idempotency_key plus same canonical semantic digest is replay-safe; same key plus different semantic digest is IDEMPOTENCY_CONFLICT.",
+  "r4_dependency": "NONE_FOR_INTERFACE_CONTRACT__R4_EXACT_BYTE_CUSTODY_REMAINS_SEPARATE_BLOCKER",
+  "production_authorized": false
+}
