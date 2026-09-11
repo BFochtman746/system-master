@@ -1,0 +1,116 @@
+{
+  "artifact_id": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001E-INSTRUCTIONAL-CONTENT-AND-SCORING-BATCH-06-CANDIDATE-070B",
+  "effective_date": "2026-09-10",
+  "owner_path": "SYSTEM_MASTER/LEARNING",
+  "contract": "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001E-INSTRUCTIONAL-CONTENT-AND-SCORING-CONTRACT-059.json",
+  "base_control_head": "cf6db676c0058b79c0b32b7300d425852958f83f",
+  "batch_index": 6,
+  "batch_size": 1,
+  "supersedes_candidate": "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001E-INSTRUCTIONAL-CONTENT-AND-SCORING-BATCH-06-CANDIDATE-070A.json",
+  "repair_lineage": {
+    "preserved_subject_sha": "bd3f7de8490c7cfb6a7dcdd37cc1fa1d4656bced",
+    "preserved_hosted_run_id": 34545605665,
+    "preserved_attempts": 3,
+    "hosted_attempt_standing": "FAILED_BEFORE_STEP_EXECUTION__RUNNER_ID_ZERO__NOT_SEMANTIC_QUALIFICATION_EVIDENCE",
+    "audit_discovery": "LEGACY_DOMAIN_GENERAL_SUBMIT_ATTEMPT_SUBSTITUTES_REFERENCE_ANSWER_OR_REJECTION_SENTINEL_BEFORE_BASE_PERSISTENCE",
+    "risk": "LITERAL_LEARNER_RESPONSE_AND_LITERAL_IDEMPOTENCY_REQUEST_EVIDENCE_NOT_PRESERVED",
+    "repair_strategy": "ADD_FORWARD_COMPATIBLE_EVIDENCE_SAFE_DOMAIN_GENERAL_SUCCESSOR_WITHOUT_REWRITING_PRIOR_QUALIFIED_BATCHES"
+  },
+  "selection": {
+    "rule": "NEXT_UNMATERIALIZED_001D_EXECUTION_NODE_IN_EXACT_ORDINAL_ORDER",
+    "001d_durable_blueprint_commit": "02dc615fcb5d44b997ed1322848eccc6e37bb172",
+    "001d_blueprint_path": "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001D-EXECUTABLE-CURRICULUM-BLUEPRINT-057B.json",
+    "001d_blueprint_digest_sha256": "98aa0b621b0cbe5234d5dd8bdb9890a1692c4c9d91aaf955fd3a459632949e54",
+    "001d_ordinal": 6,
+    "requirement_id": "ASQ-CSSGB-2022-I.C.1",
+    "source_code": "I.C.1",
+    "source_locator": "ASQ CSSGB BoK 2022 p.4 / I.C.1",
+    "title": "Road maps for DfSS",
+    "highest_cognitive_level": "UNDERSTAND",
+    "skill_id": "CSSGB-2022::ASQ-CSSGB-2022-I.C.1::SUBSKILL::dfss-roadmap-recognition",
+    "criterion_id": "CRIT::CSSGB-2022::ASQ-CSSGB-2022-I.C.1::SUBSKILL::dfss-roadmap-recognition",
+    "lesson_id": "LESSON::CSSGB-2022::ASQ-CSSGB-2022-I.C.1::SUBSKILL::dfss-roadmap-recognition",
+    "assessment_target_id": "ASSESS::CSSGB-2022::ASQ-CSSGB-2022-I.C.1::dfss-roadmap-recognition::TARGET::bounded-roadmap-explanation",
+    "hard_prerequisite_skill_ids": []
+  },
+  "runtime_implementation": {
+    "content_path": "learning/lab/learning_lab/cssgb_full_standard_i_c_1.py",
+    "domain_key": "asq-cssgb-2022-001e-i-c-1",
+    "generation_adapter": "CSSGB-001E-I-C-1-GROUNDED-CONTENT-V1",
+    "behavior_oracle": "CSSGBDFSSRoadmapRoleOracle",
+    "scoring_type": "CSSGB_I_C_1_DFSS_ROADMAP_ROLE_V1",
+    "engine_successor_path": "learning/lab/learning_lab/domain_general_evidence_safe.py",
+    "engine_successor_class": "EvidenceSafeDomainGeneralLearningEngine",
+    "engine_evidence_contract_version": 1,
+    "course_activation_allowed": false
+  },
+  "grounding": {
+    "admitted_asq_sources": 3,
+    "grounded_claims": 5,
+    "source_ids": [
+      "SRC-ASQ-DFSS-TRAINING",
+      "SRC-ASQ-CSSGB-HANDBOOK-SAMPLER",
+      "SRC-ASQ-DFSS-CASE"
+    ],
+    "supplemental_sources_replace_frozen_identity": false,
+    "source_bytes_archived": false,
+    "pdf_visual_verification": "ATTEMPTED__SCREENSHOT_ENDPOINT_CACHE_MISS__NO_VISUAL_VERIFICATION_CLAIM"
+  },
+  "instructional_realization": {
+    "materialized_lessons": 1,
+    "worked_examples": 2,
+    "practice_items": 2,
+    "mastery_items": 1,
+    "retention_items": 1,
+    "required_behavior": "ORDER_ONLY_SUPPLIED_DESIGN_DEPENDENCIES__IDENTIFY_ROADMAP_SEQUENCE_AND_GATE_ROLE__REFUSE_UNSUPPORTED_PROPRIETARY_STEP__DO_NOT_INFER_DESIGN_SUCCESS"
+  },
+  "oracle_negative_fixtures_required": [
+    "MALFORMED_JSON_REJECTED",
+    "MISSING_DEPENDENCY_LINK_REJECTED",
+    "WRONG_DECISION_ORDER_REJECTED",
+    "WRONG_ROADMAP_ROLE_REJECTED",
+    "PROPRIETARY_ROADMAP_CLAIM_REJECTED",
+    "OBSERVED_DESIGN_SUCCESS_CLAIM_REJECTED",
+    "UNSUPPORTED_SPECIFIC_STEP_OMISSION_REJECTED",
+    "MISSING_AUTHORITY_OMISSION_REJECTED",
+    "COURSE_ANSWER_MUTATION_DOES_NOT_CHANGE_ORACLE_CORRECTNESS"
+  ],
+  "evidence_safe_runtime_assertions": [
+    "custom CSSGB correctness is determined by the owning domain behavior oracle",
+    "a semantically correct noncanonical JSON response is accepted by the oracle",
+    "the literal learner response is persisted byte-for-text exactly as submitted",
+    "the persisted literal response is not replaced by the reference answer",
+    "idempotent replay of the same literal request returns the prior result without a second attempt",
+    "same operation id with a changed literal response is rejected with IDEMPOTENCY_DIGEST_MISMATCH"
+  ],
+  "runtime_path_assertions": [
+    "exact ordinal-6 001D identity and digest bind",
+    "ordinal 6 has no hard prerequisite",
+    "validate_grounding PASS with 100 percent closed-world claim coverage",
+    "validate_instructional_design PASS",
+    "Batch-01 practice-not-mastery regression remains PASS",
+    "literal-response evidence regression remains PASS",
+    "first action is LESSON",
+    "practice remains BUILDING",
+    "oracle-rejected mastery records incorrect evidence",
+    "oracle-accepted mastery advances only to RETENTION_DUE",
+    "one-hour retention delay is enforced",
+    "distinct delayed retention advances only the isolated portable fixture to MASTERED",
+    "full 66-node course remains READY_FOR_REVIEW and unactivated"
+  ],
+  "evidence_boundaries": {
+    "portable_fixture_mastery": "MACHINE_QUALIFICATION_ONLY",
+    "real_learner_mastery": "UNOBSERVED",
+    "psychometric_validity": "UNOBSERVED",
+    "real_learner_retention_effectiveness": "UNOBSERVED",
+    "transfer_effectiveness": "UNOBSERVED",
+    "workplace_effectiveness": "UNOBSERVED",
+    "sme_approval": "UNOBSERVED",
+    "certification_equivalence": "UNOBSERVED",
+    "a01_authority": "NOT_CLAIMED",
+    "native_platform_authority": "NOT_CLAIMED",
+    "production_authority": "NOT_CLAIMED"
+  },
+  "on_pass": "Admit repaired Batch 06 into Learning control as I.C.1 instructional/scoring realization complete and select exact 001D ordinal 7 without replaying prior work.",
+  "on_failure": "Preserve Batches 01-05 and all Batch 06 failed/preliminary subjects; repair only the exact Batch 06 grounding, oracle, evidence-persistence, or runtime defect on a new subject."
+}
