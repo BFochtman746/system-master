@@ -1,0 +1,217 @@
+{
+  "artifact_id": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001E-BATCH-07-SOURCE-BOUND-BUILD-PACKET-071",
+  "effective_date": "2026-09-11",
+  "owner_path": "SYSTEM_MASTER/LEARNING",
+  "standing": "SOURCE_BOUND_SPECIFICATION_COMPLETE__IMPLEMENTATION_WAITING_ON_BATCH_06_SEMANTIC_PASS",
+  "architecture_authority": false,
+  "control_binding": {
+    "control_ref": "learning/control-v1",
+    "control_head": "e3196089f77dde376944a08eac78a697e57d1535"
+  },
+  "predecessor": {
+    "delegation_id": "SECOND-SHIFT-LEARNING-CURRICULUM-001E-BATCH-06",
+    "exact_subject_sha": "bd3f7de8490c7cfb6a7dcdd37cc1fa1d4656bced",
+    "workflow_run_id": 34545605665,
+    "attempts": [
+      {
+        "attempt": 1,
+        "job_id": 103097425177,
+        "result": "ZERO_STEP_RUNNER_ALLOCATION_FAILURE"
+      },
+      {
+        "attempt": 2,
+        "job_id": 103097600062,
+        "result": "ZERO_STEP_RUNNER_ALLOCATION_FAILURE"
+      },
+      {
+        "attempt": 3,
+        "job_id": 103100539078,
+        "result": "ZERO_STEP_RUNNER_ALLOCATION_FAILURE"
+      }
+    ],
+    "executed_steps": 0,
+    "semantic_result": "UNOBSERVED",
+    "retry_budget_exhausted": true,
+    "circuit_state": "OPEN_FOR_THIS_INVOCATION",
+    "exact_subject_preserved": true
+  },
+  "selection": {
+    "rule": "NEXT_001D_EXECUTION_NODE_RESEARCH_SPECIFICATION_ONLY__NO_ORDINAL_ADVANCEMENT_BEFORE_BATCH_06_PASS",
+    "blueprint_commit": "02dc615fcb5d44b997ed1322848eccc6e37bb172",
+    "blueprint_path": "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001D-EXECUTABLE-CURRICULUM-BLUEPRINT-057B.json",
+    "blueprint_blob_sha": "58a6be6ae81224c8e663456d590a4f384bb98125",
+    "blueprint_digest_sha256": "98aa0b621b0cbe5234d5dd8bdb9890a1692c4c9d91aaf955fd3a459632949e54",
+    "ordinal": 7,
+    "requirement_id": "ASQ-CSSGB-2022-I.C.2",
+    "source_code": "I.C.2",
+    "source_locator": "ASQ CSSGB BoK 2022 p.4 / I.C.2",
+    "highest_cognitive_level": "ANALYZE",
+    "title": "Basic failure mode and effects analysis (FMEA)",
+    "skill_id": "CSSGB-2022::ASQ-CSSGB-2022-I.C.2::SUBSKILL::fmea-basic-analysis",
+    "criterion_id": "CRIT::CSSGB-2022::ASQ-CSSGB-2022-I.C.2::SUBSKILL::fmea-basic-analysis",
+    "hard_prerequisite_skill_ids": []
+  },
+  "source_contract": {
+    "frozen_authoritative_identity": {
+      "identity": "ASQ-CSSGB-2022",
+      "authority": "IMMUTABLE_001D_BLUEPRINT_BINDING",
+      "replacement_allowed": false,
+      "note": "Supplemental public sources explain FMEA mechanics but do not replace or broaden the frozen CSSGB requirement identity."
+    },
+    "google_drive_discovery": {
+      "checked_at": "2026-09-11",
+      "queries": [
+        "ASQ CSSGB 2022",
+        "Learning Full Standard Curriculum Compiler",
+        "CSSGB Body of Knowledge",
+        "Six Sigma Green Belt",
+        "ASQ"
+      ],
+      "matching_authoritative_files": 0,
+      "classification": "NO_MATCH_IN_ACCESSIBLE_DRIVE_SEARCH__NOT_PROOF_OF_GLOBAL_ABSENCE",
+      "private_or_unseen_source_claimed": false
+    },
+    "supplemental_public_sources": [
+      {
+        "source_id": "SRC-ASQ-FMEA-QUALITY-RESOURCE",
+        "publisher": "American Society for Quality",
+        "url": "https://asq.org/quality-resources/fmea",
+        "observed_on": "2026-09-11",
+        "role": "Defines FMEA as a systematic method to identify potential failure modes, analyze effects, and prioritize risk; distinguishes the way a function fails from consequences.",
+        "authority_class": "AUTHORITATIVE_PUBLISHER_PUBLIC_GUIDANCE",
+        "source_bytes_archived": false
+      },
+      {
+        "source_id": "SRC-NASA-GSFC-HDBK-8004",
+        "publisher": "NASA Goddard Space Flight Center",
+        "url": "https://standards.nasa.gov/standard/GSFC/GSFC-HDBK-8004",
+        "document_date": "2024-08-20",
+        "observed_on": "2026-09-11",
+        "role": "Current public FMECA guidance supporting the function/failure-mode/effect/cause/detection/mitigation separation and iterative living-risk-analysis model.",
+        "authority_class": "PUBLIC_GOVERNMENT_TECHNICAL_GUIDANCE",
+        "source_bytes_archived": false
+      },
+      {
+        "source_id": "SRC-NIST-AMS-300-7",
+        "publisher": "National Institute of Standards and Technology",
+        "url": "https://doi.org/10.6028/NIST.AMS.300-7",
+        "published": "2019-05-16",
+        "observed_on": "2026-09-11",
+        "role": "Public information-model evidence for explicit relationships among subject, function, requirement, failure mode, effect, cause, prevention, detection and risk fields.",
+        "authority_class": "PUBLIC_GOVERNMENT_INFORMATION_MODEL",
+        "source_bytes_archived": false
+      }
+    ],
+    "use_constraints": [
+      "Do not reproduce proprietary ASQ Body of Knowledge text beyond the frozen requirement identity already preserved in the repository.",
+      "Do not infer certification equivalence, SME approval, psychometric validity or curriculum effectiveness from supplemental sources.",
+      "Do not invent severity, occurrence, detection, cause, action or prioritization values not supplied by a bounded fixture."
+    ]
+  },
+  "learning_contract": {
+    "objective": "Given a bounded design or process example, identify a supported failure mode and its effect, keep those concepts distinct, and analyze what risk evidence is needed before any improvement response is selected.",
+    "observable_success": [
+      "names the supported function or process step",
+      "identifies one supported failure mode as the way the function or step fails",
+      "identifies its separately supported effect as the consequence",
+      "cites scenario evidence for both",
+      "states which risk or causal evidence remains missing before prioritization or action selection"
+    ],
+    "abstention_conditions": [
+      "the scenario lacks a function or process-step boundary",
+      "the alleged failure mode is only an effect",
+      "the alleged effect is not supported by an observed consequence",
+      "prioritization is requested without the necessary rating/evidence context",
+      "a cause or corrective action is requested without supporting evidence"
+    ],
+    "course_activation_allowed": false
+  },
+  "nonblind_fixture_design": {
+    "fixture_class": "SYNTHETIC_INDEPENDENT_NONBLIND",
+    "minimum_cases": [
+      {
+        "case_id": "FMEA-07-A",
+        "shape": "explicit function + observed loss of function + downstream consequence; no ratings",
+        "expected": "identify mode/effect; abstain from prioritization"
+      },
+      {
+        "case_id": "FMEA-07-B",
+        "shape": "process step + defect description + customer consequence + supplied severity only",
+        "expected": "identify mode/effect/severity evidence; do not invent occurrence or detection"
+      },
+      {
+        "case_id": "FMEA-07-C",
+        "shape": "effect-only narrative with no supported way-of-failure",
+        "expected": "insufficient-evidence abstention"
+      },
+      {
+        "case_id": "FMEA-07-D",
+        "shape": "mode and effect supplied but proposed action has no cause evidence",
+        "expected": "analyze supported chain; refuse action-effectiveness claim"
+      }
+    ],
+    "blind_or_private_cases_used": false,
+    "real_learner_data_used": false
+  },
+  "oracle_contract": {
+    "scoring_type": "CSSGB_I_C_2_BASIC_FMEA_ANALYSIS_V1",
+    "required_fields": [
+      "function_or_step",
+      "failure_mode",
+      "effect",
+      "evidence_refs",
+      "missing_risk_evidence",
+      "action_selection_supported"
+    ],
+    "invariants": [
+      "failure_mode and effect are independently evidenced and nonempty",
+      "action_selection_supported is false when required risk or cause evidence is absent",
+      "unsupported numeric ratings are rejected",
+      "course answer text cannot alter oracle correctness",
+      "real learner mastery is never emitted by fixture execution"
+    ],
+    "negative_fixtures": [
+      "MODE_EFFECT_CONFLATION_REJECTED",
+      "UNSUPPORTED_CAUSE_REJECTED",
+      "UNSUPPORTED_RATING_REJECTED",
+      "UNSUPPORTED_ACTION_EFFECTIVENESS_REJECTED",
+      "MISSING_EVIDENCE_REFERENCE_REJECTED",
+      "MALFORMED_JSON_REJECTED"
+    ],
+    "metamorphic_properties": [
+      "swapping a supported mode and effect must fail role checks",
+      "removing consequence evidence must force effect abstention",
+      "removing risk context must not change mode/effect identification but must force prioritization abstention",
+      "adding irrelevant narrative must not change supported field extraction",
+      "meaning-preserving paraphrase must preserve the evidence relation and score"
+    ]
+  },
+  "implementation_packet": {
+    "isolated_runtime_path": "learning/lab/learning_lab/cssgb_full_standard_i_c_2.py",
+    "proposed_adapter": "CSSGB-001E-I-C-2-GROUNDED-CONTENT-V1",
+    "proposed_domain_key": "asq-cssgb-2022-001e-i-c-2",
+    "changed_subject_required": true,
+    "implementation_admission_condition": "Batch 06 exact subject executes and passes semantically, then current Learning authority reselects ordinal 7.",
+    "qualification_requirements": [
+      "portable static/unit/property/metamorphic tests pass",
+      "exact ordinal-7 blueprint identity and digest bind",
+      "all supplemental claims trace to listed public sources",
+      "Batch-01 practice-not-mastery regression remains PASS",
+      "full 66-node course remains unactivated",
+      "fresh exact subject SHA and hosted execution evidence are recorded",
+      "A-01 is not claimed unless the exact subject is actually admitted and executed there"
+    ]
+  },
+  "completion_delta": "Source and evidence boundaries, nonblind fixtures, oracle invariants, metamorphic properties and a bounded implementation packet for exact ordinal 7 are now durable. No Batch 07 implementation or ordinal advancement is claimed.",
+  "evidence_target": "A future Batch 07 candidate and qualifier derived from this packet after Batch 06 semantic PASS, with exact source/blueprint binding and objective hosted results.",
+  "stop_condition": "This preparation unit is complete when the packet is durable and current authority still selects the same frozen blueprint. Implementation remains stopped until Batch 06 semantic PASS and owner revalidation.",
+  "forbidden_authority": [
+    "no participant consent, learner response, mastery, retention, transfer or effectiveness evidence",
+    "no psychometric validity, SME approval or certification equivalence",
+    "no private/blind source use or tuning",
+    "no native-platform, A-01 or production PASS",
+    "no cross-lane ownership or retired Prose work",
+    "no mutation of the exact Batch 06 subject"
+  ],
+  "continuation_rule": "Keep Batch 06 exact subject immutable and ready for an owner-valid runner. While its hosted circuit is open, use independent Learning rungs for ordinal-7 specification/test preparation and Learning-to-System-Master interface work. After executed Batch 06 PASS, re-read authority, materialize ordinal 7 from this packet on a fresh subject, qualify it, preserve evidence, then select ordinal 8."
+}
