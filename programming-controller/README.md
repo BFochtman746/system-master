@@ -30,8 +30,9 @@ This directory is the **external development control plane** used to coordinate 
 - stale-base rejection;
 - idempotent command receipts and semantic replay conflict detection;
 - atomic persistence-port commit of snapshot, active pointer, change set, receipt, and evidence outbox record;
+- responsibility/authority/boundary state included in the digest-covered canonical snapshot instead of living as restart-volatile side state;
 - snapshot-keyed query cache;
-- restart continuity and explicit integrity-recovery records.
+- explicit command-outcome recovery plus integrity/restart recovery.
 
 `IMPL-001M-04` — engineer views and canonical import/export projections:
 
@@ -63,9 +64,9 @@ This directory is the **external development control plane** used to coordinate 
 
 ## Qualification standing
 
-`IMPL-001M-01` through `IMPL-001M-05` have passed prior exact-head hosted Programming Controller Portable Qualification and existing A-01 Control Plane Enforcement gates.
+Historical prior-head evidence: exact head `97ab2bac56c55a195e20897c15902e15ae6d648e` passed Programming Controller Portable Qualification with 48/48 Node tests and passed existing A-01 Control Plane Enforcement.
 
-The current branch includes all six 001M candidate implementation slices. **Exact-head hosted qualification of the current branch remains the closure gate.** Do not infer a PASS from an earlier head.
+The branch has since changed to repair the canonical `IMPL-001M-03` snapshot boundary. **Qualification does not transfer across heads.** The current exact head must pass its own hosted Programming Controller Portable Qualification and A-01 Control Plane Enforcement before the candidate is requalified.
 
 Even after 001M-owned code qualifies, real production provider bindings remain separately evidenced: durable persistence backend, live 001Q authorization provider, 001S evidence transport, 001W durable scheduler, exact project-architecture source and other downstream provider/runtime facts are not proven merely by 001M contract tests.
 
