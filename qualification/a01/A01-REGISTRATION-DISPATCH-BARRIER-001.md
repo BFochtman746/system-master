@@ -1,69 +1,75 @@
 # A01-REGISTRATION-DISPATCH-BARRIER-001
 
-Status: IMPLEMENTATION CANDIDATE — REQUIRES EXACT-SHA QUALIFICATION
+Status: POLICY V8 IMPLEMENTATION CANDIDATE — REQUIRES EXACT-SHA QUALIFICATION
 Owner: SYSTEM_MASTER/CORE
 Scope: Shared A-01 control-plane admission and retry semantics
 
 ## Authority
 
-This is an additive shared-control-plane repair justified by reproduced `CONTROL_PLANE_FAILURE`. It does not change product qualification semantics, A-01 Windows/X64 identity, registry ownership, promotion authority, global concurrency generation, or any product lane objective.
+This shared-control-plane repair is justified by repeated GitHub-hosted runner non-assignment before any hosted step executed, while the private A-01 Windows/X64 runner remained operational. It does not change product qualification semantics, A-01 identity, registry ownership, promotion authority, product topology, or any product lane objective.
 
 ## Canonical flow
 
-`request -> gateway -> hosted admission -> exact control-plane binding -> A-01 executor -> receipt/evidence -> return/repair`
+For non-disruptive qualifications:
 
-Only `ADMITTED` may invoke the private executor.
+`request -> gateway -> trusted A-01 metadata-only admission -> ADMITTED -> exact subject executor -> receipt/evidence -> return/repair`
 
-## Hosted admission
+Only `ADMITTED` may invoke subject checkout or the private subject executor.
 
-The broker must validate before a self-hosted job exists:
+## Trusted metadata-only admission
+
+The admission job may acquire A-01, but before admission it may checkout only the exact canonical control-plane commit. It must not checkout, read, load, or execute qualification-subject bytes.
+
+Using canonical control-plane code plus authenticated GitHub repository metadata, the broker validates:
 
 - exact control-plane checkout SHA;
-- exact subject checkout SHA;
-- registered qualification ID at that control-plane SHA;
+- exact requested subject commit SHA exists in the repository;
+- registered qualification ID at the exact control-plane SHA;
 - registered workstream equality;
 - safe registered wrapper path and declared source;
-- wrapper existence in exact subject or exact control-plane source;
+- wrapper existence in the exact subject tree by Git metadata, or in exact control-plane bytes when `source=control_plane`;
 - normal/overnight context and timeout policy;
-- overnight eligibility and no disruptive post-action when overnight;
+- overnight eligibility;
+- absence of disruptive post actions under the metadata-only fallback;
 - repair lineage when an existing repair transaction is supplied.
 
-Canonical states are `ADMITTED`, `WAITING_FOR_REGISTRATION`, `REGISTERED_EXECUTABLE_MISSING`, `WORKSTREAM_MISMATCH`, `SUBJECT_CHECKOUT_MISMATCH`, `CONTROL_PLANE_CHECKOUT_MISMATCH`, `INVALID_CONTROL_PLANE_POLICY`, `INVALID_REGISTRY`, `INVALID_REGISTERED_WRAPPER_PATH`, `INVALID_REGISTERED_WRAPPER_SOURCE`, `INVALID_EXECUTION_CONTEXT`, `INVALID_QUALIFIER_TIMEOUT`, `QUALIFICATION_NOT_OVERNIGHT_ELIGIBLE`, `QUALIFIER_TIMEOUT_EXCEEDS_REGISTRY`, `DISRUPTIVE_QUALIFICATION_NOT_ALLOWED_OVERNIGHT`, and `CONTROL_PLANE_READ_FAILURE`.
+The admission evidence records `admission_mode=TRUSTED_SELF_HOSTED_METADATA_ONLY`, `pre_admission_subject_checkout=false`, and `pre_admission_subject_execution=false`.
 
-Blocked admission must preserve evidence, must not acquire A-01, and must not be classified as a product subject failure.
+Canonical states include `ADMITTED`, `WAITING_FOR_REGISTRATION`, `REGISTERED_EXECUTABLE_MISSING`, `WORKSTREAM_MISMATCH`, `INVALID_SUBJECT_SHA`, `SUBJECT_METADATA_READ_FAILURE`, `SUBJECT_METADATA_IDENTITY_MISMATCH`, `SUBJECT_METADATA_TREE_TRUNCATED`, `CONTROL_PLANE_CHECKOUT_MISMATCH`, `INVALID_CONTROL_PLANE_POLICY`, `INVALID_REGISTRY`, `INVALID_REGISTERED_WRAPPER_PATH`, `INVALID_REGISTERED_WRAPPER_SOURCE`, `INVALID_EXECUTION_CONTEXT`, `INVALID_QUALIFIER_TIMEOUT`, `QUALIFICATION_NOT_OVERNIGHT_ELIGIBLE`, `QUALIFIER_TIMEOUT_EXCEEDS_REGISTRY`, `DISRUPTIVE_QUALIFICATION_NOT_ALLOWED_OVERNIGHT`, `DISRUPTIVE_QUALIFICATION_REQUIRES_HOSTED_BARRIER`, and `CONTROL_PLANE_READ_FAILURE`.
+
+A blocked request may consume only the trusted admission slot. It must fail before subject checkout/execution and must not be classified as a product subject failure.
 
 ## Exact identity
 
-The broker emits one exact `control_plane_sha`. The private executor must checkout that SHA rather than a floating branch and must independently verify it. The exact product `subject_sha` remains independently verified. Current evidence adds `control_plane_sha`, `control_plane_checkout_sha`, and `workflow_run_attempt` alongside existing subject identity fields.
+The broker emits one exact `control_plane_sha` and verifies one exact subject commit identity by repository metadata. After admission, the executor independently checks out that control-plane SHA and subject SHA and verifies both working-tree identities before executing the registered wrapper. Receipt fields remain `subject_sha`, `checkout_sha`, `control_plane_sha`, `control_plane_checkout_sha`, and `workflow_run_attempt`.
 
 ## Retry law
 
-GitHub failed-job or specific-job reruns of a branch-referenced reusable workflow can reuse the original resolved reusable-workflow SHA. Therefore a rerun is never considered an authority refresh.
-
-If registry, policy, gateway, broker, executor, or qualifier registration changes, use a fresh workflow run. A stale run may be retained/retried only for diagnostics against its frozen generation and cannot claim newer `main` authority.
+GitHub failed-job or specific-job reruns can retain the original resolved reusable-workflow SHA. Therefore a rerun is never an authority refresh. If registry, policy, gateway, broker, executor, or qualifier registration changes, use a fresh workflow run. Stale attempts remain historical evidence.
 
 ## All-process contract
 
 ### Normal
-All CORE/LEARNING/BOOK/PROSE callers continue using `.github/workflows/a01-control-plane-gateway.yml`; that filename remains the compatibility front door.
+All active System Master owner/candidate callers use `.github/workflows/a01-control-plane-gateway.yml`; that filename remains the compatibility front door.
 
 ### Repair
-`.github/workflows/a01-repair-rerun.yml` must resolve its request against one exact workflow commit and use the same-commit gateway. Existing repair transaction identity and bounded attempt semantics remain intact.
+`.github/workflows/a01-repair-rerun.yml` preserves exact transaction identity and uses the same-commit gateway. Optional repair lineage is validated using trusted control-plane bytes only before subject execution.
 
 ### Overnight / Second Shift
-The central night scheduler remains the only independent A-01 schedule and continues using the same-commit gateway. Every slot passes hosted admission before reaching A-01.
+The central night scheduler remains the only independent A-01 schedule. Non-disruptive registered tickets use the same metadata-only admission. Second Shift cannot bypass registration, exact SHA, owner, or qualification rules.
 
 ### Runner offline
-If admission passed but A-01 is offline, the job may wait in GitHub's self-hosted queue. This is `WAITING_FOR_RUNNER`, not product failure. No physical operator is required while the runner service is online or once it returns.
+If A-01 is offline, admission or execution may wait in GitHub's self-hosted queue. This is infrastructure waiting, not product failure.
 
-### Reboot
-The executor preserves existing health guard, receipt/evidence upload, delayed reboot, and hosted settle-window ordering.
+### Reboot / disruptive actions
+Policy v8 metadata-only admission is deliberately non-disruptive. A qualification with a registered post action such as `windows_reboot` returns `DISRUPTIVE_QUALIFICATION_REQUIRES_HOSTED_BARRIER` and does not reach subject execution until a separately safe hosted/lease-based disruptive path is restored and requalified.
 
 ## Enforcement
 
-- Gateway must call hosted broker.
-- Broker alone may call private executor.
-- Executor is the only canonical new direct self-hosted workflow.
+- Gateway must call the canonical broker.
+- Broker may use A-01 only for trusted metadata-only admission and must not checkout subject bytes.
+- Broker alone may call the private subject executor.
+- Executor remains the only canonical phase allowed to checkout/execute admitted subject bytes.
 - Legacy pinned direct workflows remain immutable historical exceptions.
 - Independent scheduled A-01 callers remain prohibited outside central Night Shift.
 - Arbitrary qualifier commands remain prohibited.
@@ -72,12 +78,12 @@ The executor preserves existing health guard, receipt/evidence upload, delayed r
 
 Exact candidate must prove:
 1. admission barrier selftest PASS;
-2. synthetic unregistered ID yields `WAITING_FOR_REGISTRATION` and no runner acquisition;
-3. registered selftest yields `ADMITTED`;
-4. control-plane and subject SHA verification PASS;
-5. enforcement rejects bypass architecture;
-6. A-01 predecessor selftest regressions PASS;
-7. overnight planner/enforcement regressions PASS;
-8. repair lineage still validates;
-9. global queue generation and reboot ordering remain unchanged;
-10. authoritative A-01 selftest PASS on the exact candidate.
+2. synthetic unregistered ID blocks before subject checkout/execution;
+3. registered non-disruptive qualification can return `ADMITTED` from exact repository metadata;
+4. pre-admission subject checkout is absent from the broker workflow;
+5. control-plane SHA and subject metadata identity checks PASS;
+6. enforcement rejects any broker that checks out subject bytes before admission;
+7. disruptive qualification is rejected by metadata-only admission;
+8. repair/overnight/global-queue invariants remain intact;
+9. executor independently verifies exact subject and control-plane checkouts after admission;
+10. authoritative A-01 control-plane selftest PASS on the exact candidate.
