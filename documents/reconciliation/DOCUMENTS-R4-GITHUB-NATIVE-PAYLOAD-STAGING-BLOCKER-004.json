@@ -1,0 +1,52 @@
+{
+  "blocker_id": "DOCUMENTS-R4-GITHUB-NATIVE-PAYLOAD-STAGING-BLOCKER-004",
+  "date": "2026-09-11",
+  "owner": "SYSTEM_MASTER/DOCUMENTS",
+  "work_package": "DOCUMENTS-R4-GITHUB-NATIVE-PAYLOAD-STAGING-004",
+  "standing": "BLOCKED_EXTERNAL_FILE_CAPABLE_TRANSPORT_REQUIRED",
+  "immutable_payload_contract": {
+    "source_handoff_sha256": "ada701cfa15e6162b6cdf67bc6c0803540a611b08a23aeeeddd1045d8ce2d8ab",
+    "source_manifest_sha256": "ed36fc9cfd38b04a8d0174efed06b03e8e25b0a45fc0adc4d47fe3457c2ee367",
+    "source_rows_verified_local": 225,
+    "carrier_sha256": "77a6e2288d475865622bad4b2c66647a599c26a3899c6617b33d7b2b334855bd",
+    "carrier_bytes": 301008,
+    "canonical_chunk_count": 5,
+    "chunk_manifest_sha256": "daa71c58fbcb38e3a8daf1b146531d80147825a1efc15a95928dbca3ffbcd108"
+  },
+  "repository_census": {
+    "current_canonical_payload_chunks_committed": 0,
+    "ready_marker_present": false,
+    "github_native_source_tree_committed": false,
+    "historical_final_admission_branch_payload_found": false,
+    "historical_import_v3_branch_payload_found": false,
+    "historical_staging_v3_branch_payload_found": false,
+    "historical_binary_transport_repair_payload_found": false,
+    "historical_zip_transport_final_payload_found": false,
+    "historical_zip_transport_final_source_tree_found": false
+  },
+  "independent_checkpoint_evidence": {
+    "branch": "documents/r4-second-shift-20260911",
+    "checkpoint": "recovered/document/cr001-r4/evidence/GITHUB-NATIVE-IMPORT-VERIFICATION-20260911.json",
+    "checkpoint_result": "PASS__225_OF_225_EXACT_SHA256_AND_BYTE_SIZE_MATCH",
+    "checkpoint_github_native_source_tree_committed": false,
+    "checkpoint_transport_blocker": "Connected GitHub write actions expose no local-container/file parameter for exact source/carrier transfer."
+  },
+  "attempted_bridge": {
+    "method": "bounded UTF-8 segment transfer through connector create_blob",
+    "result": "ABANDONED_FAIL_CLOSED",
+    "reason": "Not all manually ferried segments produced the precomputed content-addressed Git object identity; therefore the path is not accepted as evidence-grade exact-byte transport.",
+    "branch_payload_tree_mutated": false,
+    "canonical_chunks_committed": 0,
+    "temporary_bridge_workflow_removed": true,
+    "temporary_segment_manifest_removed": true
+  },
+  "required_unblock": "A file-capable GitHub transport or already-authorized runner-visible source that can move the exact local carrier/source bytes without manual transcription. After transfer, require remote byte/digest verification, carrier reconstruction, and 225/225 source verification before marking 004 PASS.",
+  "nonclaims": [
+    "PAYLOAD_STAGING_PASS",
+    "GITHUB_NATIVE_SOURCE_CUSTODY_PASS",
+    "HISTORICAL_QUALIFICATION_TRANSFER",
+    "READY_ARMED",
+    "DOCUMENTS_COMPLETE"
+  ],
+  "independent_work_allowed": "Documents build-readiness reconciliation and bounded pre-build packet preparation may continue while this transport-only blocker remains open; no exact-Git-subject implementation/qualification claim may depend on the absent source bytes."
+}
