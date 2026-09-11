@@ -43,3 +43,19 @@ export function rebuildControllerStore(path, durableEvents) {
   });
   return kernel;
 }
+
+export function reconcileRecoveredStore(kernel) {
+  const orphaned = kernel.db.prepare(`
+    SELECT o.operation_id,o.state
+    FROM operations o
+    LEFT JOIN leases l ON l.operation_id=o.operation_id AND l.status='ACTIVE'
+    WHERE o.state IN ('RUNNING','VERIFYING') AND l.lease_id IS NULL
+  `).all();
+
+  const staled = [];
+  for (const op of orphaned) {
+    kernel.transitionOperation(op.operation_id,'STALE',op.state);
+    staled.push(op.operation_id);
+  }
+  return { orphaned_operations_staled: staled };
+}
