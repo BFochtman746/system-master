@@ -1,23 +1,37 @@
 {
   "catalog_id": "SYSTEM-MASTER-SYSTEM-CATALOG-002",
-  "effective_date": "2026-09-10",
+  "effective_date": "2026-09-11",
   "supersedes_current_selection": "governance/catalog/SYSTEM-MASTER-SYSTEM-CATALOG-001.json",
   "catalog_class": "DISCOVERY_AND_REUSE_INDEX__NOT_ARCHITECTURE_AUTHORITY",
-  "authority_rule": "This catalog makes active peer systems, active child specialists, historical systems, candidate future systems and archived module families discoverable. It cannot create, promote, retire or reparent a system. CURRENT-AUTHORITY plus the selected topology/ADR remains architecture authority.",
+  "authority_rule": "This catalog makes active peer systems, completed child specialists, named active non-peer work programs, historical systems, future candidates and archived module families discoverable. It cannot create, promote, retire or reparent a system. CURRENT-AUTHORITY plus the selected topology/ADR remains architecture authority.",
   "active_peer_systems": [
-    {"system_id":"CORE","owner_path":"SYSTEM_MASTER/CORE","lifecycle":"ACTIVE","control_ref":"system-master/control-v2","source":"governance/SYSTEM-TOPOLOGY-004.json"},
-    {"system_id":"LEARNING","owner_path":"SYSTEM_MASTER/LEARNING","lifecycle":"ACTIVE","control_ref":"learning/control-v1","source":"governance/SYSTEM-TOPOLOGY-004.json"},
-    {"system_id":"BOOK","owner_path":"SYSTEM_MASTER/BOOK","lifecycle":"ACTIVE","control_ref":"book-system/control-v1","source":"governance/SYSTEM-TOPOLOGY-004.json","children":["PROSE"]},
-    {"system_id":"DOCUMENTS","owner_path":"SYSTEM_MASTER/DOCUMENTS","lifecycle":"ACTIVE","control_ref":"documents/control-v1","source":"governance/SYSTEM-TOPOLOGY-004.json"}
+    {"system_id":"CORE","owner_path":"SYSTEM_MASTER/CORE","lifecycle":"ACTIVE_INCOMPLETE","control_ref":"system-master/control-v2","source":"governance/SYSTEM-TOPOLOGY-004.json"},
+    {"system_id":"LEARNING","owner_path":"SYSTEM_MASTER/LEARNING","lifecycle":"ACTIVE_INCOMPLETE","control_ref":"learning/control-v1","source":"governance/SYSTEM-TOPOLOGY-004.json"},
+    {"system_id":"BOOK","owner_path":"SYSTEM_MASTER/BOOK","lifecycle":"ACTIVE_INCOMPLETE","control_ref":"book-system/control-v1","source":"governance/SYSTEM-TOPOLOGY-004.json","children":["PROSE"]},
+    {"system_id":"DOCUMENTS","owner_path":"SYSTEM_MASTER/DOCUMENTS","lifecycle":"ACTIVE_INCOMPLETE","control_ref":"documents/control-v1","source":"governance/SYSTEM-TOPOLOGY-004.json"}
   ],
-  "active_child_specialists": [
-    {"system_id":"PROSE","owner_path":"SYSTEM_MASTER/BOOK/PROSE","parent_system_id":"BOOK","lifecycle":"ACTIVE_CHILD_SPECIALIST","control_ref":"literary-prose-engine-001","execution_lane":"BOOK","canonical_manuscript_write_authority":false,"source":"governance/SYSTEM-TOPOLOGY-004.json"}
+  "completed_child_specialists": [
+    {"system_id":"PROSE","owner_path":"SYSTEM_MASTER/BOOK/PROSE","parent_system_id":"BOOK","lifecycle":"COMPLETE__AVAILABLE_FOR_BOOK_INTEGRATION","control_ref":"literary-prose-engine-001","execution_lane":"BOOK","canonical_manuscript_write_authority":false,"source":"governance/SYSTEM-TOPOLOGY-004.json"}
+  ],
+  "active_non_peer_work_programs": [
+    {
+      "program_id":"PROGRAMMING",
+      "display_name":"Programming / Software Engineering Work Program",
+      "lifecycle":"ACTIVE_INCOMPLETE_WORK_PROGRAM__CANDIDATE_SYSTEM_BOUNDARY",
+      "architecture_authority":false,
+      "work_program_lock":"governance/programs/PROGRAMMING-WORK-PROGRAM-LOCK-001.json",
+      "system_packet":"governance/catalog/system-packets/PROGRAMMING.json",
+      "current_obligation":"PROGRAMMING-WORK-PROGRAM-CONTINUATION-001",
+      "peer_topology_status":"NOT_ADMITTED",
+      "second_shift_peer_lane":false,
+      "reuse_rule":"Preserve and continue existing Programming foundation/capability/build/test/assurance/Genesis evidence. Knowledge Recovery is supporting source/custody work only and must not replace the Programming engineering objective."
+    }
   ],
   "historical_system_records": [
     {"system_id":"PROSE","historical_event":"STANDALONE_CHILD_RETIREMENT_AND_DOCUMENTS_REALLOCATION_ATTEMPT","retirement_record":"governance/retirements/PROSE-SYSTEM-RETIREMENT-001.json","current_effect":"SUPERSEDED_BY_ADR_0004","reuse_rule":"Preserve historical evidence and exact-subject qualification; do not use the retirement record to redirect current Book-Prose work or transfer PASS."}
   ],
   "future_system_candidates": [
-    {"candidate_id":"PROGRAMMING","display_name":"Programming / Software Engineering System","lifecycle":"PLANNED_CANDIDATE__USER_SIGNALLED_FUTURE_BUILD","architecture_authority":false,"historical_module_keys":["CODE"],"adjacent_module_keys":["LOCALAI","AUTOMATION","PLUGINS","DATA"],"build_start_rule":"Recover/catalog exact source and prior ledgers first; run current comparative/standards delta only; then perform explicit first-class-system admission if still desired before active implementation."},
+    {"candidate_id":"PROGRAMMING","display_name":"Programming / Software Engineering System","lifecycle":"ACTIVE_WORK_PROGRAM__PEER_ADMISSION_PENDING","architecture_authority":false,"work_program_lock":"governance/programs/PROGRAMMING-WORK-PROGRAM-LOCK-001.json","historical_module_keys":["CODE"],"adjacent_module_keys":["LOCALAI","AUTOMATION","PLUGINS","DATA"],"build_start_rule":"Do not restart. Continue the active Programming work program from preserved evidence and prepare explicit first-class-system admission only when the current engineering/evidence boundary is ready."},
     {"candidate_id":"SPREADSHEET_DATA","display_name":"Spreadsheet / Math / Data System Candidate","lifecycle":"CANDIDATE_REVIEW_REQUIRED","architecture_authority":false,"historical_module_keys":["EXCEL","MATH","DATA"]},
     {"candidate_id":"RESEARCH_KNOWLEDGE","display_name":"Research / Knowledge / Browser / Geo System Candidate","lifecycle":"CANDIDATE_REVIEW_REQUIRED","architecture_authority":false,"historical_module_keys":["RESEARCH","KNOWLEDGE","BROWSER","GEO"]},
     {"candidate_id":"CONNECTED_ACTIONS","display_name":"Communications / Calendar / Automation / Plugins System Candidate","lifecycle":"CANDIDATE_REVIEW_REQUIRED","architecture_authority":false,"historical_module_keys":["COMMS","CALENDAR","AUTOMATION","PLUGINS"]},
@@ -29,7 +43,8 @@
     {"module_key":"MANUSCRIPT","current_disposition":"BOOK_CAPABILITY"},
     {"module_key":"STORYBIBLE","current_disposition":"BOOK_CAPABILITY"},
     {"module_key":"WRITING","current_disposition":"CONTEXTUAL_CAPABILITY","rule":"Book/manuscript expressive writing belongs to BOOK and may use PROSE; generic reusable non-Book document writing belongs to DOCUMENTS."},
-    {"module_key":"PROSE","current_disposition":"BOOK_CHILD_SPECIALIST","owner_path":"SYSTEM_MASTER/BOOK/PROSE","execution_lane":"BOOK"},
+    {"module_key":"PROSE","current_disposition":"COMPLETE_BOOK_CHILD_SPECIALIST","owner_path":"SYSTEM_MASTER/BOOK/PROSE","execution_lane":"BOOK"},
+    {"module_key":"CODE","current_disposition":"PROGRAMMING_ACTIVE_WORK_PROGRAM","program_lock":"governance/programs/PROGRAMMING-WORK-PROGRAM-LOCK-001.json"},
     {"module_key":"CURRICULUM","current_disposition":"LEARNING_CAPABILITY"},
     {"module_key":"CHAT","current_disposition":"CORE_SHARED_RUNTIME"},
     {"module_key":"PROJECTS","current_disposition":"CORE_SHARED_WORK_CAPABILITY"},
@@ -50,5 +65,5 @@
     "module_keys":["DOCX","EXCEL","PPTX","PDF","OCR","RESEARCH","KNOWLEDGE","WRITING","MANUSCRIPT","STORYBIBLE","LEARNING","CURRICULUM","PROJECTS","CHAT","EXPECTATION","FILE","IMAGE","PHOTO","VIDEO","VOICE","AUDIOBOOK","MEDIA","CODE","MATH","DATA","CAD","BROWSER","COMMS","CALENDAR","AUTOMATION","PLUGINS","LEDGER","GEO","AIINCOME","PORTFOLIO","EXPERIENCE","PHONEOPS","PHYSICALAI","LOCALAI","IMG-INGEST"],
     "rule":"Archived module names are discovery keys, not active owners."
   },
-  "chat_rule":"Resolve this catalog and exact source packets before broad rediscovery, but always defer current ownership/lifecycle decisions to CURRENT-AUTHORITY and topology 004."
+  "chat_rule":"Resolve this catalog, CURRENT-AUTHORITY, the applicable system/work-program job lock and exact source packets before broad rediscovery. For Programming, active work-program continuity outranks the older candidate-only interpretation, while peer-system authority still requires explicit topology admission."
 }
