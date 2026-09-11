@@ -1,40 +1,46 @@
 # SECOND-SHIFT-EXECUTION-CONTROL-001
 
-Status: ACTIVE / TOPOLOGY-004 / PROGRAM-JOB-LOCKED
+Status: ACTIVE / TOPOLOGY-005 / PROGRAM-JOB-LOCKED
 Effective date: 2026-09-11
 Scope: execution control and observability only. This contract does not transfer product, work-program, canonical-writer, A-01, human, author, private, blind, native, external, publication or production authority.
 
 ## Required authority before dispatch
 
-Every controller/worker must read current `CURRENT-AUTHORITY`, its `program_job_lock`, `system_completion_status`, selected topology, current obligation registry and Second Shift registry before dispatch. When Programming-related work is present, it must also read `programming_work_program_lock` and distinguish Programming engineering/product work from the supporting Knowledge Recovery subprogram.
+Every controller/worker reads current `CURRENT-AUTHORITY`, its selected topology, `program_job_lock`, `system_completion_status`, current obligation registry, Second Shift registry, repair registries, and every declared active peer owner file. It re-fetches each live owner head before mutation.
 
-PROSE is the only complete system. SYSTEM_MASTER, CORE, LEARNING, BOOK and DOCUMENTS remain incomplete. PROGRAMMING is an incomplete active work program outside current peer topology. A packet/phase/test completion cannot be promoted to system or work-program completion.
+Active peer systems are CORE, LEARNING, BOOK and DOCUMENTS. PROSE is complete and terminally retired. PROGRAMMING is an incomplete active work program outside current peer topology.
 
-## Owner discovery and coverage law
+## Owner discovery and auto-provisioning
 
-1. `SECOND-SHIFT-REGISTRY-001.json::owner_files` is the machine-authoritative active peer-lane set.
-2. Current peer worker lanes are CORE, LEARNING, BOOK and DOCUMENTS.
-3. `SYSTEM_MASTER/BOOK/PROSE` is the completed Book child specialist and routes through BOOK. It never gets a separate mutation lane.
-4. PROGRAMMING is a named active work program but has no peer Second Shift lane before explicit topology admission.
-5. The SYSTEM_MASTER root is portfolio controller, not a peer worker lane.
-6. Every READY/CANDIDATE peer-lane delegation must match the current obligation registry, exact live control head and program job lock.
-7. A job-lock, work-program-lock or completion-status mismatch is stale/invalid and must not dispatch.
+1. `SYSTEM-TOPOLOGY-005.json::peer_system_ids` is the architecture source for active peers.
+2. `SECOND-SHIFT-REGISTRY-001.json::owner_files` is the execution source for active lanes.
+3. On every controller run, compare the two sets. They must match exactly.
+4. If a topology-declared peer lacks coverage and its control ref, live owner head, owner path and current obligation are machine-unambiguous, provision the missing owner coverage automatically and bind it to that exact head.
+5. Never create a new system to fill a lane. Never provision or resurrect a retired system.
+6. If missing peer coverage is ambiguous, fail closed and preserve a durable blocker rather than inventing ownership.
+7. The current active lane set is exactly CORE, LEARNING, BOOK and DOCUMENTS.
+
+## Retired Prose boundary
+
+PROSE has no standalone lane, inherited child execution, repair lane, qualification lane, research task, telemetry ledger, successor task or mutation claim domain.
+
+Historical metadata that labels PROSE active is `STALE_ARCHITECTURE_PENDING_RECONCILIATION` and cannot dispatch. A historical objective name containing PROSE may remain for lineage only when the current executable owner is BOOK and the work is genuinely unfinished Book integration of preserved completed capability.
+
+DOCUMENTS receives no Prose work. Book-owned completed-Prose integration is recorded only as BOOK work.
 
 ## Locked work domains
 
-CORE: shared Foundation/Spine, runtime/data/platform/continuity/assurance/A-01 infrastructure and System-Master integration primitives only. CORE may administer shared services but may not absorb Programming-specific engineering semantics.
+CORE: shared Foundation/Spine, runtime/data/platform/continuity/assurance/A-01 infrastructure and System-Master integration primitives. While `SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001` is selected, Programming proving-corpus recovery is the highest discretionary Core/System-Master priority, followed by remaining authorized catalog/archive recovery.
 
 LEARNING: Learning product/runtime/curriculum/mastery/assessment/adaptation/evidence and upward System-Master integration only.
 
-BOOK: Book product plus integration of the completed PROSE child through adapters and the Book Workflow Orchestrator, with Book retaining canonical manuscript/Story Bible/author/lifecycle/admission/publication authority.
+BOOK: Book product, including only genuinely open BOOK-owned adapter/context/compiler/router/orchestrator integration that consumes preserved completed Prose capability evidence, with Book retaining canonical manuscript/Story Bible/author/lifecycle/admission/publication authority.
 
-PROSE: complete specialist capability source under BOOK. Integration/adapter/orchestrator work is allowed under Book control; independent peer scheduling, canonical writes and feature expansion without demonstrated defect/user direction are forbidden.
+DOCUMENTS: document/artifact mechanics and upward System-Master integration only. Documents receives no Prose integration, repair, qualification, research or telemetry work.
 
-DOCUMENTS: document/artifact mechanics and upward System-Master integration only. Documents must not absorb or own Prose and must not take Programming engineering work.
+PROGRAMMING: active software-engineering work program with its own preserved engineering evidence. Before explicit topology admission, Programming product work is outside peer Second Shift mutation lanes.
 
-PROGRAMMING: active software-engineering work program with its own preserved foundation/capability/build/test/assurance/Genesis evidence. It is not generic Core work. Before explicit topology admission, Programming product work may progress in foreground/program-scoped evidence branches but is not eligible for a peer Second Shift mutation lane.
-
-PROGRAMMING KNOWLEDGE RECOVERY: supporting CORE-administered source/custody/provenance subprogram only. It may use nonblocking Core capacity, but it must not replace the Programming engineering objective, mutate Programming product semantics, regain product-wide priority or create a Programming peer lane.
+PROGRAMMING KNOWLEDGE RECOVERY: CORE-administered source/custody/provenance support. It may use owner-valid unattended-safe CORE capacity under the current priority lock but does not become the Programming product or a peer lane.
 
 ## Execution state machine
 
@@ -43,26 +49,25 @@ COMPLETED -> RECONCILE -> SUCCESSOR_BOUND -> READY
 BLOCKED -> RECONCILE -> {SUCCESSOR_BOUND -> READY | ALL_RUNGS_EXHAUSTED -> IDLE_VALID}
 STALE -> RECONCILE -> {SUCCESSOR_BOUND -> READY | ALL_RUNGS_EXHAUSTED -> IDLE_VALID}
 
-Child Prose work uses the BOOK state machine and claim. Programming product work remains outside this peer-lane state machine until explicit topology admission; its foreground/work-program continuation is tracked by the Programming work-program lock and current obligation.
+Retired systems do not enter this state machine.
 
 ## Claim and live-head law
 
 One mutation-capable claim per active peer owner lane. Required claim fields remain: lease_id, lane, delegation_id, objective_id, control_ref, control_head_at_claim, idempotency_key, claimed_at, lease_expires_at, last_heartbeat_at, attempt and checkpoint_pointer.
 
-Changed live owner head invalidates mutation until revalidation. A Book claim covers mutation-capable Prose child integration for that objective. No child claim may overlap or bypass BOOK.
+Changed live owner head invalidates mutation until revalidation. PROSE has no claim or inherited claim. Programming has no peer claim domain before topology admission. A CORE claim for Knowledge Recovery authorizes only bounded custody/provenance work.
 
-Programming has no peer-lane claim domain before topology admission. A Core claim for Knowledge Recovery authorizes only the bounded recovery/custody work described by that delegation; it does not authorize Programming product implementation.
-
-Until foreground/Second-Shift arbitration is fully machine-admitted, any detected concurrent mutation attempt must fail closed, re-read the live head, and adopt/reconcile valid existing progress rather than overwrite it.
+Until foreground/Second-Shift arbitration is fully machine-admitted, any detected concurrent mutation attempt fails closed, re-reads the live head and adopts/reconciles valid existing progress rather than overwriting it.
 
 ## Dispatch and successor law
 
-- Dispatch only dependency-valid work inside the lane's locked job.
+- Dispatch only dependency-valid work inside the active lane's locked job.
+- Repair/control health and exact owner integrity are non-discretionary gates.
 - A blocker in one peer lane does not block independent safe work in another.
-- After completion or material block, preserve evidence, re-read live authority and bind the next successor inside the same locked job.
+- After completion or material block, preserve evidence, re-read live authority and bind the next successor inside the same active lane.
+- Never bind a Prose successor.
 - A lane is IDLE only after durable all-eight-rungs exhaustion for its own job.
-- Knowledge Recovery may run as supporting Core capacity but cannot displace the central System Master integration coordination, the Programming foreground/work-program objective, or independent Book/Learning/Documents execution.
-- Do not create or simulate a Programming peer Second Shift successor until an explicit topology admission creates that lane.
+- While Knowledge Recovery 001 remains selected, CORE chooses Programming proving-corpus recovery before other discretionary System Master work, then remaining authorized catalog/archive recovery.
 
 ## Retry / idempotency / quarantine
 
@@ -71,20 +76,20 @@ Assume at-least-once invocation. State-changing effects require durable idempote
 ## Mandatory work-ahead ladder
 
 1. repair/control health
-2. completion/evidence census
-3. authoritative research/provenance
+2. completion and evidence census
+3. authoritative research and provenance
 4. architecture/contracts/state/interface/evidence specification
 5. tests/benchmarks/property/concurrency/failure injection
 6. bounded implementation with objective verification
 7. exact-SHA qualification and A-01 preparation
 8. successor build packet
 
-## Utilization and morning handoff
+## Utilization and handoff
 
-Active peer ledgers are CORE, LEARNING, BOOK and DOCUMENTS. Prose activity is recorded under BOOK. Programming product work has no peer utilization ledger before admission; Programming Knowledge Recovery support is recorded under CORE. Morning handoff must report each system/work-program completion standing and locked job, not just its latest packet.
+Active peer ledgers are CORE, LEARNING, BOOK and DOCUMENTS only. No new Prose telemetry is created or expected. Book-owned integration involving preserved completed Prose capability is BOOK telemetry. Programming product work has no peer utilization ledger before admission; Knowledge Recovery support is CORE telemetry.
 
-The following are execution-control defects: a Documents delegation containing active Prose absorption or Programming product work; a Learning delegation taking Book/Documents/Programming work; a Core delegation taking peer product or Programming engineering semantics; a separate Prose lane; a Programming peer lane before admission; Knowledge Recovery represented as the Programming product; or a non-Prose system-completion claim.
+Telemetry is factual. If ledger evidence is missing, stale or contradictory, report UNKNOWN rather than infer activity from commits, runner uptime or workflow duration.
 
 ## Safe stopping
 
-Safe truthful stopping is preferable to authority violation. Preserve exact evidence and blockers; never synthesize completion, peer admission, PASS, author/private/native/external/publication/production authority.
+Safe truthful stopping is preferable to authority violation. Preserve exact evidence and blockers; never synthesize system completion, peer admission, PASS, author/private/native/external/publication/production authority or retired-system resurrection.
