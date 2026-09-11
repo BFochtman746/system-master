@@ -1,84 +1,111 @@
 # DOCUMENTS-R4-TRANSPORT-CONTRACT-RECONCILIATION-003
 
-Status: SELECTED / READY_FOR_EXECUTION
+Status: CLOSED / PASS
 Owner: SYSTEM_MASTER/DOCUMENTS
 Parent reconciliation: DOCUMENTS-FULL-BUILD-READINESS-RECONCILIATION-001
 Date: 2026-09-11
+Closure receipt: `DOCUMENTS-R4-TRANSPORT-CONTRACT-CLOSURE-RECEIPT-003.json`
 
 ## Objective
 
 Remove the demonstrated R4 source-admission ambiguity before exact source transfer by deriving one deterministic transport contract from the exact recovered R4 handoff and its 225-row canonical source manifest.
 
-## Immutable inputs
+## Immutable inputs verified
 
 - Exact source handoff: `CR001_R4_EXACT_225_SOURCE_HANDOFF_20260910.zip`
 - Source handoff SHA-256: `ada701cfa15e6162b6cdf67bc6c0803540a611b08a23aeeeddd1045d8ce2d8ab`
-- Canonical source manifest: `CANONICAL-SOURCE-TREE-MANIFEST(2).csv`
-- Canonical Java source/test row count: `225`
+- Canonical source manifest SHA-256: `ed36fc9cfd38b04a8d0174efed06b03e8e25b0a45fc0adc4d47fe3457c2ee367`
+- Canonical Java source/test rows: `225`
+- Verification result: `225/225 path + byte-size + SHA-256 PASS`
 
-## Demonstrated defect
+## Closed defect
 
-Current transport authorities disagree:
+The predecessor authorities disagreed:
 
-- `transport/document-r4/STAGING.json`: transport SHA `4fce25bc78646f4be3b8152865184e1cee84868ba1a13e4587ccef6a16c23dd9`, expected chunks `81`.
-- `.github/workflows/document-r4-github-native-admission.yml`: transport SHA `b6d0f8a98cea0615513eda07873b38532123585336de87c40350afeafa474edf`, expected chunks `100`.
+- prior `STAGING.json`: carrier `4fce25bc...`, 81 chunks;
+- prior workflow: carrier `b6d0f8a9...`, 100 chunks;
+- predecessor metadata also claimed 10 staged chunks although no chunk payload files were present on the reconciliation branch.
 
-Neither derived carrier identity is accepted merely because it already appears in metadata.
+Those values are superseded by one versioned transport contract and one exact chunk manifest.
 
-## Execution contract
+## Canonical deterministic carrier
 
-1. Materialize the exact handoff bytes and verify SHA-256 equals the immutable input digest.
-2. Verify the archive contains the exact 225 Java source/test files matching the canonical manifest by path, size and SHA-256.
-3. Define one deterministic carrier recipe including archive format, member ordering, normalized metadata/timestamps/ownership/modes, compression implementation and version, compression settings, and chunking rule.
-4. Generate the carrier twice from independent fresh extraction directories and require byte-identical output.
-5. Compute the canonical carrier SHA-256 from those reproduced bytes.
-6. Split the carrier using one explicit fixed chunk-size rule and emit an ordered chunk manifest containing ordinal, filename, byte length and SHA-256.
-7. Reassemble from the ordered chunks and require byte identity with the canonical carrier.
-8. Adversarially prove fail-closed behavior for: missing chunk, duplicate chunk, reordered ordinal/name mapping, modified byte, unexpected extra chunk, wrong chunk count, wrong chunk digest, wrong carrier digest, and wrong reconstructed source-manifest row.
-9. Reconcile `STAGING.json` and the admission workflow to the new single canonical carrier/chunk contract. Do not preserve conflicting magic constants.
-10. Keep the transport unarmed and READY absent until every exact required chunk exists at the admitted paths.
-11. Do not import source into current authority merely because the transport contract is repaired; GitHub-native source custody becomes true only after exact bytes are actually committed and reverified.
-12. Transfer no historical R4/T14 PASS to any new GitHub subject.
+- Contract: `transport/document-r4/TRANSPORT-CONTRACT.json`
+- Contract SHA-256: `80509f1f2ddaa7ad2d46f9e94e88400758e40634c44243e1136c28f4c2ae7ba1`
+- Deterministic TAR SHA-256: `e05167645dda63ae4d33ad66f08fa9cc5e53ab03369ec50c4ec5cb811d025267`
+- Deterministic TAR bytes: `2,754,560`
+- Canonical TAR.XZ SHA-256: `77a6e2288d475865622bad4b2c66647a599c26a3899c6617b33d7b2b334855bd`
+- Canonical TAR.XZ bytes: `301,008`
+- Two independent builds: byte-identical TAR PASS; byte-identical carrier PASS; byte-identical chunk manifest PASS.
 
-## Required evidence
+Normalized recipe:
+- GNU tar format;
+- lexicographically ordered ASCII member names;
+- regular files only;
+- mode 0644;
+- uid/gid 0;
+- empty uname/gname;
+- mtime 0;
+- source files under `source/`;
+- canonical manifest and reconstruction receipt at carrier root;
+- `xz -9e --threads=1 --check=crc64 --stdout`;
+- qualified builder environment recorded as XZ Utils 5.8.1.
 
-- deterministic-carrier recipe record;
-- two-build byte-identity receipt;
-- canonical carrier SHA-256;
-- ordered chunk manifest;
-- reassembly receipt;
-- adversarial transport verification receipt;
-- 225/225 source-manifest verification receipt;
-- STAGING/workflow contract-parity receipt;
-- source-custody standing explicitly remaining BLOCKED until all payload bytes are present;
-- exact successor after fresh owner-head revalidation.
+## Canonical chunk contract
 
-## Acceptance criteria
+- Manifest: `transport/document-r4/CHUNK-MANIFEST.json`
+- Manifest SHA-256: `daa71c58fbcb38e3a8daf1b146531d80147825a1efc15a95928dbca3ffbcd108`
+- Encoding: RFC 4648 base64, one unwrapped line plus final LF;
+- Full raw chunk bytes: `65,536`;
+- Required chunks: `5`;
+- Names: `chunk-000.b64` through `chunk-004.b64`;
+- Final raw chunk bytes: `38,864`.
 
-PASS only when all of the following are simultaneously true:
+## Adversarial qualification
 
-- exact input handoff digest matches `ada701cf...d8ab`;
-- 225/225 source rows match the canonical manifest;
-- independent carrier generation is byte-identical;
-- one and only one canonical carrier digest is recorded;
-- one and only one chunk-count/size/order contract is recorded;
-- STAGING and admission workflow consume that exact same contract;
-- all adversarial chunk/reassembly cases fail closed;
-- no READY marker is created by this package;
-- no GitHub-native source-custody PASS is claimed by this package;
-- no historical qualification PASS is transferred.
+Baseline reconstruction PASS. Twelve required failure cases all failed closed:
 
-Any mismatch yields BLOCKED/FAIL with raw evidence preserved.
+1. missing chunk;
+2. unexpected extra chunk;
+3. duplicate payload as extra chunk;
+4. reordered name/payload mapping;
+5. modified chunk byte;
+6. wrong chunk count;
+7. wrong chunk digest;
+8. wrong carrier digest;
+9. wrong chunk ordinal;
+10. wrong chunk filename/order;
+11. wrong chunk-manifest binding;
+12. wrong source-manifest binding.
 
-## Explicit non-scope
+A simulated fully staged/armed state passed the admission preflight, reconstructed the canonical carrier, and reverified all `225/225` source rows.
 
-- no DOCX/PDF/PPTX/OCR feature implementation;
-- no UI work;
-- no Book, Learning, Programming or Prose semantics;
-- no production certification;
-- no native Microsoft Office fidelity claim;
-- no A-01 claim.
+## Admission workflow closure
 
-## Queued feature candidate after source admission
+`.github/workflows/document-r4-github-native-admission.yml` now:
 
-`DOCUMENTS-SPINE-IDENTIFY-PROFILE-COMPLETION-001` remains a candidate only. It is not promoted by this package.
+- consumes `TRANSPORT-CONTRACT.json` and `CHUNK-MANIFEST.json` rather than embedding an independent carrier digest/chunk count;
+- requires an explicit `FULL_TRANSPORT_STAGED__ARMED` state;
+- requires `READY` and STAGING acknowledgement of READY;
+- validates contract and chunk-manifest SHA-256 against STAGING;
+- requires staged chunk count to equal expected count;
+- invokes the shared verifier/extractor;
+- preserves fresh strict Java 21, portable, T13 and T14 qualification after exact source admission;
+- still transfers no historical PASS.
+
+## Current repository standing after closure
+
+- Payload chunks committed: `0/5`
+- `READY`: absent
+- `STAGING.status`: `CANONICAL_TRANSPORT_CONTRACT_FROZEN__PAYLOAD_NOT_STAGED__NOT_ARMED`
+- GitHub-native R4 source custody: `BLOCKED`
+- Historical R4/T14 PASS transferred: `NO`
+- Documents production certification: `NO`
+
+This is intentional. Contract closure does not equal source-custody admission.
+
+## Exact successor
+
+`DOCUMENTS-R4-GITHUB-NATIVE-PAYLOAD-STAGING-004 — COMMIT 5 EXACT CHUNKS / REMOTE BYTE VERIFICATION / FULL-STAGING FREEZE`
+
+The queued feature candidate `DOCUMENTS-SPINE-IDENTIFY-PROFILE-COMPLETION-001` remains unpromoted until source custody/current exact-subject qualification is established.
