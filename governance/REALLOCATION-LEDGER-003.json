@@ -1,0 +1,30 @@
+{
+  "ledger_id": "REALLOCATION-LEDGER-003",
+  "effective_date": "2026-09-10",
+  "topology": "governance/SYSTEM-TOPOLOGY-004.json",
+  "supersedes_current_selection": "governance/REALLOCATION-LEDGER-002.json",
+  "historical_ledgers": ["governance/REALLOCATION-LEDGER-001.json","governance/REALLOCATION-LEDGER-002.json"],
+  "rule": "Reallocation changes current ownership/control taxonomy only. Historical names, branches, commits, qualification IDs, receipts and exact-SHA evidence remain valid only in their original scope and are never rewritten.",
+  "entries": [
+    {"source_label":"MASTER","source_classification":"HISTORICAL_FOUNDATION_IDENTITY","current_owner":"CORE","current_path":"SYSTEM_MASTER/CORE","action":"PRESERVE_HISTORICAL_ALIAS_ROUTE_CURRENT_TO_CORE"},
+    {"source_label":"MASTER SYSTEM","source_classification":"HISTORICAL_FOUNDATION_NAME","current_owner":"CORE","current_path":"SYSTEM_MASTER/CORE","action":"PRESERVE_HISTORICAL_ALIAS_ROUTE_CURRENT_TO_CORE"},
+    {"source_label":"LEARNING SYSTEM","source_classification":"FIRST_CLASS_TOOL_SYSTEM","current_owner":"LEARNING","current_path":"SYSTEM_MASTER/LEARNING","action":"PRESERVE_ACTIVE_PEER"},
+    {"source_label":"BOOK SYSTEM","source_classification":"FIRST_CLASS_TOOL_SYSTEM","current_owner":"BOOK","current_path":"SYSTEM_MASTER/BOOK","action":"PRESERVE_ACTIVE_PEER_AND_CANONICAL_MANUSCRIPT_OWNER"},
+    {"source_label":"DOCUMENT / DOCUMENTS / CONTENT & DOCUMENT ARTIFACTS","source_classification":"FIRST_CLASS_TOOL_SYSTEM","current_owner":"DOCUMENTS","current_path":"SYSTEM_MASTER/DOCUMENTS","action":"PRESERVE_ACTIVE_PEER_DOCUMENT_ARTIFACT_OWNER"},
+    {"source_label":"PROSE SYSTEM","source_classification":"ACTIVE_CHILD_SPECIALIST_SUBSYSTEM","historical_path":"SYSTEM_MASTER/BOOK/PROSE","current_owner":"BOOK","current_path":"SYSTEM_MASTER/BOOK/PROSE","execution_lane":"BOOK","action":"RESTORE_ACTIVE_BOOK_CHILD_SPECIALIST__NO_PEER_LANE__NO_CANONICAL_WRITE","authority":"governance/ADR-0004-BOOK-PROSE-CHILD-RESTORATION.md","historical_retirement_record":"governance/retirements/PROSE-SYSTEM-RETIREMENT-001.json"},
+    {"source_label":"LITERARY-PROSE","source_classification":"A01_WORKSTREAM_ID_AND_BOOK_CHILD_CAPABILITY","historical_owner":"PROSE","current_owner":"BOOK","current_path":"SYSTEM_MASTER/BOOK/PROSE","execution_lane":"BOOK","action":"PRESERVE_QUALIFICATION_IDENTITY_ROUTE_CURRENT_EXECUTION_TO_BOOK_CHILD","rule":"Existing receipts retain original workstream identity. Current Book-specific literary execution resolves through the active Prose child and BOOK lane; no historical PASS transfers."},
+    {"source_label":"BOOK-EVAL-LEMONADE-001","source_classification":"QUALIFICATION_AND_IMPLEMENTATION_LANE","historical_owner":"PROSE","current_owner":"BOOK","current_path":"SYSTEM_MASTER/BOOK/PROSE","execution_lane":"BOOK","action":"PRESERVE_EVIDENCE_IDENTITY_ROUTE_CURRENT_EXECUTION_TO_BOOK_CHILD"},
+    {"source_label":"LITERARY PROSE ENGINE","source_classification":"ACTIVE_SPECIALIST_IMPLEMENTATION_FAMILY_WITH_HISTORICAL_LINEAGE","historical_owner":"PROSE","current_owner":"BOOK","current_path":"SYSTEM_MASTER/BOOK/PROSE","action":"PRESERVE_IMPLEMENTATION_PROVENANCE_AND_ACTIVE_CHILD_CONTROL"},
+    {"source_label":"SYSTEM-MASTER-CONTINUITY","source_classification":"A01_WORKSTREAM_OR_SUBWORKSTREAM","current_owner":"CORE","current_path":"SYSTEM_MASTER/CORE/CONTINUITY","action":"PRESERVE_CORE_SUBSYSTEM_ROUTE"},
+    {"source_label":"SYSTEM-MASTER-ASSURANCE-RECON","source_classification":"A01_WORKSTREAM_OR_EVIDENCE_FUNCTION","current_owner":"CORE","current_path":"SYSTEM_MASTER/CORE/ASSURANCE_RECONCILIATION","action":"PRESERVE_CORE_CONTROL_ROUTE"},
+    {"source_label":"A-01","source_classification":"SHARED_INFRASTRUCTURE","current_owner":"SYSTEM_MASTER","administrative_owner":"CORE","current_path":"SYSTEM_MASTER/SHARED_INFRASTRUCTURE/A01","action":"PRESERVE_SHARED_INFRASTRUCTURE"},
+    {"source_label":"SECOND SHIFT / NIGHT SHIFT","source_classification":"SCHEDULED_EXECUTION_SURFACE","current_owner":"SYSTEM_MASTER","current_path":"SYSTEM_MASTER/SHARED_INFRASTRUCTURE/SECOND_SHIFT","action":"PRESERVE_SHARED_EXECUTION_INFRASTRUCTURE"}
+  ],
+  "superseded_reallocation": {
+    "prior_ledger":"governance/REALLOCATION-LEDGER-002.json",
+    "prior_action":"PROSE_TO_DOCUMENTS",
+    "current_effect":"SUPERSEDED_BY_ADR_0004",
+    "history_preserved":true
+  },
+  "future_rule": "Candidate future systems and archived module families may be cataloged without becoming owners. Current ownership changes require explicit user instruction plus the applicable topology/ADR/registry transaction."
+}
