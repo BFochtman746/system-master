@@ -1,0 +1,95 @@
+{
+  "evidence_id": "BOOK-POST-DURABLE-PERSISTENCE-OPEN-SEAM-CENSUS-001",
+  "effective_date": "2026-09-11",
+  "owner_system_id": "BOOK",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "control_ref": "book-system/control-v1",
+  "control_head": "e2a23e8b1f076e3cd576c11e036e40eaf8a5ce2f",
+  "main_head_before_binding": "cf331c362c1bfbf1cb41c2a298eb4853f541efc1",
+  "parent_checkpoint": "qualification/book-system/phase3a/BOOK-DURABLE-WORKFLOW-PERSISTENCE-HOSTED-QUALIFICATION-001.json",
+  "authority_basis": {
+    "current_authority": "CURRENT-AUTHORITY-003",
+    "topology": "SYSTEM-TOPOLOGY-005",
+    "book_complete": false,
+    "prose": "COMPLETE_RETIRED_TERMINAL",
+    "prose_execution_owner": null,
+    "book_owns_remaining_completed_prose_integration": true,
+    "documents_receives_prose_work": false,
+    "book_admission_only_canonical_effect_path": true
+  },
+  "closed_or_blocked_seams": [
+    {
+      "seam": "phase2_orchestrator_contract_train",
+      "standing": "CLOSED_EXACT_HOSTED_EVIDENCE",
+      "evidence": "qualification/book-system/book-prose-integration/BOOK-PHASE-2-ORCHESTRATOR-CLOSURE-CENSUS-001.json",
+      "cases": "275/275"
+    },
+    {
+      "seam": "book_context_compiler",
+      "standing": "CLOSED_EXACT_HOSTED_EVIDENCE",
+      "evidence": "qualification/book-system/context-compiler/BOOK-CONTEXT-COMPILER-HOSTED-QUALIFICATION-001.json",
+      "cases": "44/44"
+    },
+    {
+      "seam": "durable_workflow_checkpoint_receipt_persistence",
+      "standing": "CLOSED_EXACT_HOSTED_EVIDENCE",
+      "evidence": "qualification/book-system/phase3a/BOOK-DURABLE-WORKFLOW-PERSISTENCE-HOSTED-QUALIFICATION-001.json",
+      "cases": "14/14"
+    },
+    {
+      "seam": "canonical_content_object_admission_a01",
+      "standing": "BLOCKED_SHARED_A01_AUTHORITY",
+      "evidence": "governance/WORK-OBLIGATION-REGISTRY-009.json"
+    },
+    {
+      "seam": "fresh_blind_evaluator_execution",
+      "standing": "OPEN_EXTERNAL_PRIVATE_QUALITY_EVIDENCE_BOUNDARY",
+      "selected": false
+    }
+  ],
+  "demonstrated_open_seam": {
+    "seam": "book_workflow_scheduler_execution_runtime",
+    "standing": "OPEN__DEPENDENCY_VALID__MACHINE_RESOLVABLE",
+    "evidence": [
+      "qualification/book-system/phase3a/BOOK-PHASE-3A-OPEN-SEAM-RECONCILIATION-001.json",
+      "system-master/book-system/book-workflow-concurrency-rules.js"
+    ],
+    "proof": "The current concurrency component derives task eligibility and topological parallel groups but expressly rejects execute, dispatch, schedule, scheduler, worker-count, retry and canonical-write authority fields. No scheduler/execution runtime is present in the exact Book owner module set. Durable coordination persistence is now closed, removing its predecessor blocker.",
+    "canonical_effect": false,
+    "requires_prose_execution": false,
+    "requires_a01": false,
+    "requires_author_decision": false,
+    "requires_private_data": false,
+    "requires_native_or_publication_authority": false
+  },
+  "selected_successor": {
+    "delegation_id": "SECOND-SHIFT-BOOK-WORKFLOW-SCHEDULER-EXECUTION-RUNTIME-001",
+    "objective_id": "BOOK-WORKFLOW-SCHEDULER-EXECUTION-RUNTIME-001",
+    "state": "READY",
+    "owner_path": "SYSTEM_MASTER/BOOK",
+    "scope": "Implement a Book-owned coordination scheduler that consumes the already-qualified execution plan, concurrency eligibility decision, retry/idempotency rules, cancellation/resume checkpoints and durable coordination store. It may dispatch only registered callable specialist service tasks whose prerequisites and authority bindings are satisfied; it must preserve serial-only, isolation-gated, authority-wait and Book-admission withholding rules. It must not perform canonical Book admission, author decisions, Prose execution, document ownership transfer, or invent provider success.",
+    "acceptance": [
+      "exact source/control/plan/workflow/provider-or-service-registry bindings are required before dispatch",
+      "topological prerequisites are enforced and withheld tasks never dispatch",
+      "parallel execution is limited to tasks already classified READ_ONLY_PARALLEL_ELIGIBLE",
+      "serial and non-idempotent tasks remain serialized and use existing retry/reconciliation rules",
+      "cancel/resume and durable checkpoint state remain exact-subject bound",
+      "worker failure, timeout, stale binding and unknown effect fail closed with evidence receipts",
+      "Book admission remains a separate non-executed handoff",
+      "zero canonical manuscript, Story Bible/canon, author-decision, publication or production effect"
+    ]
+  },
+  "legacy_004b_r1_reconciliation": {
+    "standing": "EXECUTION_DISPOSITIONS_REQUIRE_CURRENT_AUTHORITY_REBASE",
+    "rule": "Preserve 004B-R1 as immutable historical planning evidence. Do not dispatch retired Prose work or replay already-closed Phase-2/context-compiler/durable-persistence work. Rebind only genuinely open Book-owned implementation obligations against CURRENT-AUTHORITY-003, TOPOLOGY-005 and the exact live Book control head.",
+    "product_rows_promoted_closed_by_this_census": 0
+  },
+  "central_registry_finding": {
+    "classification": "STALE_SELECTION_METADATA",
+    "detail": "WORK-OBLIGATION-REGISTRY-009 records the current Book head e2a23e8b but still lists the older Phase-2 census as READY after its closure and later Context Compiler/durable-persistence PASS. Book owner routing is corrected in BOOK-DELEGATIONS; central registry reconciliation remains a Core/System Master control responsibility."
+  },
+  "disposition": "PASS__ONE_GENUINELY_OPEN_BOOK_OWNED_SUCCESSOR_BOUND__NO_COMPLETED_WORK_REPLAY",
+  "historical_pass_transferred": false,
+  "book_completion_claimed": false,
+  "canonical_effect_performed": false
+}
