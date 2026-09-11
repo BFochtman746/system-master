@@ -1,4 +1,15 @@
 from .database import ControllerStore
+from .intake import (
+    MAX_FRAME_BYTES,
+    MIN_AUTHKEY_BYTES,
+    PROTOCOL_VERSION,
+    CommandIntake,
+    ControllerNotReady,
+    LocalCommandClient,
+    LocalCommandServer,
+    ProtocolError,
+    local_endpoint_for_database,
+)
 from .lifecycle import ControllerAlreadyRunning, ControllerRuntime, ProcessOwnershipLock
 from .migrations import (
     MigrationChecksumMismatch,
@@ -28,8 +39,10 @@ from .store import (
 __all__ = [
     "BackupResult",
     "CanonicalizationError",
+    "CommandIntake",
     "CommandResult",
     "ControllerAlreadyRunning",
+    "ControllerNotReady",
     "ControllerRuntime",
     "ControllerStore",
     "EffectResult",
@@ -37,15 +50,22 @@ __all__ = [
     "InvalidState",
     "LeaseHeld",
     "LeaseResult",
+    "LocalCommandClient",
+    "LocalCommandServer",
+    "MAX_FRAME_BYTES",
+    "MIN_AUTHKEY_BYTES",
     "MigrationChecksumMismatch",
     "MigrationError",
     "MigrationSequenceError",
+    "PROTOCOL_VERSION",
     "ProcessOwnershipLock",
+    "ProtocolError",
     "RecoveryReport",
     "ReliabilityManager",
     "UntrackedSchema",
     "canonical_json",
     "create_verified_backup",
+    "local_endpoint_for_database",
     "new_uuid7",
     "verify_migrations",
 ]
