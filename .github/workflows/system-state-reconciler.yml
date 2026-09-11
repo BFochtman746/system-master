@@ -7,6 +7,8 @@ on:
       - 'governance/**'
       - 'qualification/a01/registry.json'
       - 'qualification/a01/repair-requests/**'
+      - '.github/scripts/program-job-lock-enforce.js'
+      - '.github/scripts/current-obligation-registry-enforce.js'
       - '.github/scripts/system-state-reconciler.js'
       - '.github/scripts/system-state-reconciler-legacy.js'
       - '.github/scripts/second-shift-enforce.js'
@@ -17,6 +19,8 @@ on:
       - '.github/scripts/a01-repair-rerun*.js'
       - '.github/workflows/a01-control-plane-gateway.yml'
       - '.github/workflows/a01-repair-*.yml'
+      - '.github/workflows/program-job-lock-enforcement.yml'
+      - '.github/workflows/current-obligation-registry-enforcement.yml'
       - '.github/workflows/second-shift-enforcement.yml'
       - '.github/workflows/system-state-reconciler.yml'
   pull_request:
@@ -24,6 +28,8 @@ on:
       - 'governance/**'
       - 'qualification/a01/registry.json'
       - 'qualification/a01/repair-requests/**'
+      - '.github/scripts/program-job-lock-enforce.js'
+      - '.github/scripts/current-obligation-registry-enforce.js'
       - '.github/scripts/system-state-reconciler.js'
       - '.github/scripts/system-state-reconciler-legacy.js'
       - '.github/scripts/second-shift-enforce.js'
@@ -34,6 +40,8 @@ on:
       - '.github/scripts/a01-repair-rerun*.js'
       - '.github/workflows/a01-control-plane-gateway.yml'
       - '.github/workflows/a01-repair-*.yml'
+      - '.github/workflows/program-job-lock-enforcement.yml'
+      - '.github/workflows/current-obligation-registry-enforcement.yml'
       - '.github/workflows/second-shift-enforcement.yml'
       - '.github/workflows/system-state-reconciler.yml'
 
@@ -46,7 +54,7 @@ permissions:
 
 jobs:
   reconcile:
-    name: Compile repository truth and reject state drift
+    name: Compile repository truth and reject job/state drift
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -56,8 +64,10 @@ jobs:
           fetch-depth: 1
           persist-credentials: true
 
-      - name: Syntax check reconciler and repair controls
+      - name: Syntax check reconciler, job locks and repair controls
         run: |
+          node --check .github/scripts/program-job-lock-enforce.js
+          node --check .github/scripts/current-obligation-registry-enforce.js
           node --check .github/scripts/system-state-reconciler.js
           node --check .github/scripts/system-state-reconciler-legacy.js
           node --check .github/scripts/second-shift-enforce.js
@@ -70,6 +80,12 @@ jobs:
           node --check .github/scripts/a01-repair-ledger-selftest.js
           node --check .github/scripts/a01-repair-rerun-selftest.js
           node --check .github/scripts/a01-repair-ledger-reconcile.js
+
+      - name: Enforce program jobs and product completion truth
+        run: node .github/scripts/program-job-lock-enforce.js
+
+      - name: Enforce current obligation ownership
+        run: node .github/scripts/current-obligation-registry-enforce.js
 
       - name: Self-test repository-state invariants
         run: node .github/scripts/system-state-reconciler.js --selftest
