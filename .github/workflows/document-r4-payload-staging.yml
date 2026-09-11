@@ -1,0 +1,120 @@
+name: Document R4 Payload Staging
+
+on:
+  push:
+    branches:
+      - documents/r4-payload-staging-004
+    paths:
+      - 'transport/document-r4/STAGE-PAYLOAD'
+
+concurrency:
+  group: document-r4-payload-staging-004
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  stage-payload:
+    if: "${{ github.event.head_commit.message == 'transport: trigger exact Document R4 payload staging' }}"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout staging subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Verify bridge segments and assemble canonical chunks
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib, json, pathlib
+          root = pathlib.Path('transport/document-r4')
+          incoming = root / 'incoming'
+          bridge = json.loads((incoming / 'SEGMENT-MANIFEST.json').read_text())
+          chunk_manifest = json.loads((root / 'CHUNK-MANIFEST.json').read_text())
+
+          expected_segment_names = [x['filename'] for x in bridge['segments']]
+          actual_segment_names = sorted(p.name for p in incoming.glob('chunk-*.seg-*.txt') if p.is_file())
+          if actual_segment_names != sorted(expected_segment_names):
+              raise SystemExit(f'segment inventory mismatch expected={len(expected_segment_names)} actual={len(actual_segment_names)}')
+
+          by_name = {x['filename']: x for x in bridge['segments']}
+          for name in actual_segment_names:
+              data = (incoming / name).read_bytes()
+              spec = by_name[name]
+              if len(data) != spec['bytes']:
+                  raise SystemExit(f'segment byte-size mismatch: {name}')
+              if hashlib.sha256(data).hexdigest() != spec['sha256']:
+                  raise SystemExit(f'segment digest mismatch: {name}')
+
+          expected_chunk_names = [x['filename'] for x in chunk_manifest['chunks']]
+          for chunk in chunk_manifest['chunks']:
+              prefix = chunk['filename'].replace('.b64', '.seg-')
+              segments = sorted(p for p in incoming.glob(prefix + '*.txt') if p.is_file())
+              if not segments:
+                  raise SystemExit(f'no segments for {chunk["filename"]}')
+              assembled = b''.join(p.read_bytes() for p in segments) + b'\n'
+              if len(assembled) != chunk['base64_file_bytes']:
+                  raise SystemExit(f'chunk encoded-size mismatch: {chunk["filename"]}')
+              if hashlib.sha256(assembled).hexdigest() != chunk['base64_file_sha256']:
+                  raise SystemExit(f'chunk encoded-digest mismatch: {chunk["filename"]}')
+              (root / chunk['filename']).write_bytes(assembled)
+
+          actual_chunks = sorted(p.name for p in root.glob('chunk-*.b64') if p.is_file())
+          if actual_chunks != expected_chunk_names:
+              raise SystemExit(f'assembled chunk inventory mismatch: {actual_chunks}')
+          print(f'SEGMENTS_VERIFIED={len(actual_segment_names)}')
+          print(f'CHUNKS_ASSEMBLED={len(actual_chunks)}')
+          PY
+
+      - name: Verify canonical carrier and exact 225-file source identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/document-r4-staged-source
+          python3 tools/document-r4/verify_and_extract_transport.py \
+            --contract transport/document-r4/TRANSPORT-CONTRACT.json \
+            --chunk-manifest transport/document-r4/CHUNK-MANIFEST.json \
+            --chunks transport/document-r4 \
+            --carrier-out /tmp/CR001_R4_225_SOURCE_WITH_EVIDENCE_20260910.tar.xz \
+            --extract-out /tmp/document-r4-staged-source
+          test "$(find /tmp/document-r4-staged-source/source -type f -name '*.java' | wc -l)" -eq 225
+
+      - name: Freeze full staging state without arming
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, pathlib
+          path = pathlib.Path('transport/document-r4/STAGING.json')
+          staging = json.loads(path.read_text())
+          staging.update({
+              'status': 'FULL_TRANSPORT_STAGED__NOT_ARMED',
+              'staged_chunk_range': '000-004',
+              'staged_chunks': 5,
+              'staged_raw_bytes': 301008,
+              'ready_marker_present': False,
+              'github_native_source_custody': 'BLOCKED',
+              'historical_pass_transfer': False,
+              'rule': 'All 5 exact canonical payload chunks are committed and verified. READY remains forbidden in this package; GitHub-native source custody remains BLOCKED until the separate arming/admission operation runs fresh exact-subject qualification.'
+          })
+          path.write_text(json.dumps(staging, indent=2) + '\n')
+          PY
+          test ! -e transport/document-r4/READY
+          rm -rf transport/document-r4/incoming
+          rm -f transport/document-r4/STAGE-PAYLOAD
+          git diff --check
+
+      - name: Commit verified full-but-unarmed payload staging
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'system-master-staging-bot'
+          git config user.email 'system-master-staging-bot@users.noreply.github.com'
+          git add transport/document-r4
+          git commit -m 'transport: freeze exact Document R4 payload staged not armed'
+          git push origin HEAD:documents/r4-payload-staging-004
