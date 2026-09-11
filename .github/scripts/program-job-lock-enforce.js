@@ -4,10 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const root = path.resolve(__dirname, '..', '..');
 
-function fail(message) {
-  console.error(`PROGRAM_JOB_LOCK_ENFORCEMENT_FAIL: ${message}`);
-  process.exit(1);
-}
+function fail(message) { console.error(`PROGRAM_JOB_LOCK_ENFORCEMENT_FAIL: ${message}`); process.exit(1); }
 function readJson(rel) {
   const abs = path.join(root, rel);
   if (!fs.existsSync(abs)) fail(`missing ${rel}`);
@@ -20,126 +17,120 @@ function readText(rel) {
   return fs.readFileSync(abs, 'utf8');
 }
 function assert(condition, message) { if (!condition) fail(message); }
-function setEq(actual, expected) {
-  const a = [...actual].sort();
-  const e = [...expected].sort();
-  return a.length === e.length && a.every((v, i) => v === e[i]);
+function setEq(a, b) {
+  const aa = [...a].sort(), bb = [...b].sort();
+  return aa.length === bb.length && aa.every((v, i) => v === bb[i]);
 }
 
 const authority = readJson('governance/CURRENT-AUTHORITY.json');
 assert(authority.program_job_lock === 'governance/SYSTEM-PROGRAM-JOB-LOCK-001.json', 'CURRENT-AUTHORITY must select SYSTEM-PROGRAM-JOB-LOCK-001');
 assert(authority.system_completion_status === 'governance/SYSTEM-COMPLETION-STATUS-001.json', 'CURRENT-AUTHORITY must select SYSTEM-COMPLETION-STATUS-001');
-assert(authority.completion_ledger === 'governance/COMPLETION-LEDGER-002.json', 'CURRENT-AUTHORITY must select current completion ledger 002');
-assert(authority.prior_completion_ledger === 'governance/COMPLETION-LEDGER-001.json', 'CURRENT-AUTHORITY must preserve prior completion ledger 001');
-assert(authority.obligation_registry === 'governance/WORK-OBLIGATION-REGISTRY-008.json', 'CURRENT-AUTHORITY must select obligation registry 008');
-assert(authority.expectation_registry === 'governance/EXPECTATION-REGISTRY-004.json', 'CURRENT-AUTHORITY must select expectation registry 004');
-assert(authority.central_next_objective === 'SYSTEM-MASTER-INTEGRATION-COORDINATION-001', 'System Master integration coordination must be central objective');
-assert(authority.core_control_record === 'system-master/control-v2/SYSTEM-MASTER-CORE-CONTROL-RECORD-002.md', 'CURRENT-AUTHORITY must select Core Control 002');
-assert(authority.learning_control_record === 'learning/control-v1/LEARNING-CONTROL-RECORD-v3.md', 'CURRENT-AUTHORITY must select Learning Control v3');
-assert(authority.book_control_record === 'qualification/book-system/BOOK-SYSTEM-CONTROL-RECORD-010.json', 'CURRENT-AUTHORITY must select Book Control 010');
-assert(authority.book_current_state_record === 'qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-040.json', 'CURRENT-AUTHORITY must select Book State 040');
+assert(authority.topology === 'governance/SYSTEM-TOPOLOGY-005.json', 'CURRENT-AUTHORITY must select SYSTEM-TOPOLOGY-005.json');
+assert(authority.completion_ledger === 'governance/COMPLETION-LEDGER-003.json', 'CURRENT-AUTHORITY must select completion ledger 003');
+assert(authority.obligation_registry === 'governance/WORK-OBLIGATION-REGISTRY-009.json', 'CURRENT-AUTHORITY must select obligation registry 009');
+assert(authority.expectation_registry === 'governance/EXPECTATION-REGISTRY-005.json', 'CURRENT-AUTHORITY must select expectation registry 005');
+assert(authority.reallocation_ledger === 'governance/REALLOCATION-LEDGER-004.json', 'CURRENT-AUTHORITY must select reallocation ledger 004');
+assert(authority.central_next_objective === 'SYSTEM-MASTER-INTEGRATION-COORDINATION-001', 'System Master integration coordination must remain central objective');
+assert(authority.highest_discretionary_objective === 'SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001', 'Knowledge Recovery 001 must be highest discretionary objective');
+assert(authority.knowledge_recovery_control === 'governance/knowledge-recovery/SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001.md', 'CURRENT-AUTHORITY must select Knowledge Recovery 001');
+assert(authority.core_control_record === 'system-master/control-v2/SYSTEM-MASTER-CORE-CONTROL-RECORD-003.md', 'CURRENT-AUTHORITY must select Core Control 003');
+assert(authority.learning_control_record === 'learning/control-v1/LEARNING-CONTROL-RECORD-v4.md', 'CURRENT-AUTHORITY must select Learning Control v4');
+assert(authority.book_control_record === 'qualification/book-system/BOOK-SYSTEM-CONTROL-RECORD-011.json', 'CURRENT-AUTHORITY must select Book Control 011');
+assert(authority.book_current_state_record === 'qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-041.json', 'CURRENT-AUTHORITY must select Book State 041');
+assert(authority.documents_control_record === 'documents/control-v1/DOCUMENTS-CONTROL-RECORD-002.md', 'CURRENT-AUTHORITY must select Documents Control 002');
+assert(authority.prose_active_control_ref === null, 'PROSE must have no active control ref');
 
 const topology = readJson(authority.topology);
-assert(topology.topology_id === 'SYSTEM-TOPOLOGY-004', `unexpected topology ${topology.topology_id}`);
-assert(setEq(new Set(topology.peer_system_ids || []), new Set(['CORE','LEARNING','BOOK','DOCUMENTS'])), 'peer systems must be CORE, LEARNING, BOOK, DOCUMENTS');
-const proseTopology = (topology.canonical_internal_systems || []).find((s) => s.system_id === 'PROSE');
-assert(proseTopology && proseTopology.parent_id === 'BOOK' && proseTopology.owner_path === 'SYSTEM_MASTER/BOOK/PROSE', 'PROSE must be active Book child');
-assert(topology.execution_lane_owner_map?.['LITERARY-PROSE'] === 'BOOK', 'LITERARY-PROSE must execute through BOOK');
-assert(topology.execution_lane_owner_map?.['BOOK-EVAL-LEMONADE-001'] === 'BOOK', 'Book evaluator must execute through BOOK');
+const peers = new Set(['CORE', 'LEARNING', 'BOOK', 'DOCUMENTS']);
+assert(topology.topology_id === 'SYSTEM-TOPOLOGY-005', `unexpected topology ${topology.topology_id}`);
+assert(setEq(new Set(topology.peer_system_ids || []), peers), 'peer systems must be exactly CORE, LEARNING, BOOK, DOCUMENTS');
+assert(Array.isArray(topology.child_system_ids) && topology.child_system_ids.length === 0, 'current topology must have no child execution systems');
+assert(!(topology.canonical_internal_systems || []).some((s) => s.system_id === 'PROSE'), 'PROSE must not be an active canonical internal system');
+const retiredProse = (topology.retired_systems || []).find((s) => s.system_id === 'PROSE');
+assert(retiredProse && retiredProse.lifecycle === 'RETIRED_TERMINAL', 'PROSE must be terminally retired');
+assert(retiredProse.current_execution_lane === null && retiredProse.current_repair_lane === null && retiredProse.current_qualification_lane === null && retiredProse.current_telemetry_lane === null && retiredProse.successor_system === null, 'PROSE must have no active execution/repair/qualification/telemetry/successor lane');
+assert(retiredProse.integration_owner === 'SYSTEM_MASTER/BOOK', 'any genuinely open completed-Prose integration must be BOOK-owned');
+assert(topology.legacy_route_dispositions?.['LITERARY-PROSE']?.startsWith('RETIRED_NO_DISPATCH'), 'LITERARY-PROSE must be a retired no-dispatch route');
 
 const completion = readJson(authority.system_completion_status);
 const statuses = new Map((completion.systems || []).map((s) => [s.system_id, s]));
-for (const id of ['SYSTEM_MASTER','CORE','LEARNING','BOOK','PROSE','DOCUMENTS']) assert(statuses.has(id), `missing completion status ${id}`);
-assert(statuses.get('PROSE').complete === true, 'PROSE must be complete');
-for (const id of ['SYSTEM_MASTER','CORE','LEARNING','BOOK','DOCUMENTS']) assert(statuses.get(id).complete === false, `${id} must remain incomplete`);
-assert((completion.systems || []).filter((s) => s.complete === true).map((s) => s.system_id).join(',') === 'PROSE', 'PROSE must be the only complete system');
+for (const id of ['SYSTEM_MASTER', 'CORE', 'LEARNING', 'BOOK', 'DOCUMENTS']) {
+  assert(statuses.has(id), `missing active completion status ${id}`);
+  assert(statuses.get(id).complete === false, `${id} must remain incomplete`);
+}
+assert(!statuses.has('PROSE'), 'PROSE must not appear in active completion systems');
+const retiredCompletion = (completion.retired_systems || []).find((s) => s.system_id === 'PROSE');
+assert(retiredCompletion && retiredCompletion.complete === true && retiredCompletion.active === false, 'completion status must mark PROSE complete and inactive');
+assert(retiredCompletion.remaining_product_work === false, 'PROSE must have no remaining product work');
 
 const completionLedger = readJson(authority.completion_ledger);
-assert(completionLedger.topology === authority.topology, 'current completion ledger must bind current topology');
-assert(completionLedger.system_completion_status === authority.system_completion_status, 'current completion ledger must bind current system completion status');
-assert(completionLedger.historical_boundary_ledger === authority.prior_completion_ledger, 'current completion ledger must preserve historical boundary ledger');
-const ledgerStatuses = new Map((completionLedger.system_completion_entries || []).map((s) => [s.system_id, s]));
-for (const id of ['SYSTEM_MASTER','CORE','LEARNING','BOOK','PROSE','DOCUMENTS']) assert(ledgerStatuses.has(id), `current completion ledger missing ${id}`);
-assert(ledgerStatuses.get('PROSE').complete === true, 'current completion ledger must mark PROSE complete');
-for (const id of ['SYSTEM_MASTER','CORE','LEARNING','BOOK','DOCUMENTS']) assert(ledgerStatuses.get(id).complete === false, `current completion ledger must keep ${id} incomplete`);
+assert(completionLedger.topology === authority.topology, 'completion ledger must bind current topology');
+assert(completionLedger.system_completion_status === authority.system_completion_status, 'completion ledger must bind current completion status');
+assert((completionLedger.retired_system_entries || []).some((s) => s.system_id === 'PROSE' && s.complete === true && s.active === false), 'completion ledger must preserve terminal Prose retirement');
 
 const lock = readJson(authority.program_job_lock);
-assert(lock.programs?.BOOK?.authorized_child === 'SYSTEM_MASTER/BOOK/PROSE', 'BOOK job must authorize PROSE child');
-assert(lock.programs?.PROSE?.completion === 'COMPLETE', 'PROSE job must remain complete');
-assert(lock.programs?.PROSE?.execution_lane === 'BOOK', 'PROSE must execute in BOOK lane');
+assert(lock.programs?.BOOK?.integrates_upward_to === 'SYSTEM_MASTER', 'BOOK must integrate upward to System Master');
 assert(lock.programs?.DOCUMENTS?.integrates_upward_to === 'SYSTEM_MASTER', 'DOCUMENTS must integrate upward to System Master');
 assert(lock.programs?.LEARNING?.integrates_upward_to === 'SYSTEM_MASTER', 'LEARNING must integrate upward to System Master');
-assert(lock.programs?.BOOK?.integrates_upward_to === 'SYSTEM_MASTER', 'BOOK must integrate upward to System Master');
-assert(lock.lane_crossing_policy?.direct_specialist_exception?.includes('BOOK <-> PROSE'), 'Book-Prose must be the sole direct specialist exception');
+assert(lock.programs?.CORE?.discretionary_priority?.includes('SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001'), 'CORE job must preserve Knowledge Recovery 001 priority');
+assert(lock.retired_systems?.PROSE?.standing === 'RETIRED_TERMINAL', 'job lock must classify PROSE as retired terminal');
+assert(lock.retired_systems?.PROSE?.active_execution === false && lock.retired_systems?.PROSE?.active_repair === false && lock.retired_systems?.PROSE?.active_qualification === false && lock.retired_systems?.PROSE?.active_research === false && lock.retired_systems?.PROSE?.active_telemetry === false && lock.retired_systems?.PROSE?.successor_allowed === false, 'job lock must forbid all active Prose lanes/tasks');
+assert(lock.programs?.DOCUMENTS?.forbidden?.some((v) => /Prose/i.test(v)), 'Documents job must forbid Prose work');
 
 const obligations = readJson(authority.obligation_registry);
 assert(obligations.central_next_objective === authority.central_next_objective, 'obligation central objective mismatch');
+assert(obligations.highest_discretionary_objective === authority.highest_discretionary_objective, 'obligation highest discretionary objective mismatch');
 const byId = new Map((obligations.obligations || []).map((o) => [o.obligation_id, o]));
 const central = byId.get('SYSTEM-MASTER-INTEGRATION-COORDINATION-001');
-assert(central && central.owner_path === 'SYSTEM_MASTER/CORE' && ['READY','ACTIVE'].includes(central.state), 'central integration obligation must be active under CORE administration');
+assert(central && central.owner_path === 'SYSTEM_MASTER/CORE' && ['READY', 'ACTIVE'].includes(central.state), 'central integration obligation must be active under CORE administration');
 const knowledge = byId.get('SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001');
-assert(knowledge && knowledge.owner_path === 'SYSTEM_MASTER/CORE', 'Knowledge Recovery must remain CORE-administered');
-assert(knowledge.priority !== 'CENTRAL_NEXT_OBJECTIVE', 'Knowledge Recovery must not regain central priority');
+assert(knowledge && knowledge.owner_path === 'SYSTEM_MASTER/CORE' && knowledge.priority === 'HIGHEST_DISCRETIONARY_SYSTEM_MASTER_PRIORITY', 'Knowledge Recovery 001 must be CORE-administered highest discretionary priority');
 const book = byId.get('BOOK-PROSE-PHASE-2-ORCHESTRATOR-CLOSURE-CENSUS-001');
-assert(book && book.owner_path === 'SYSTEM_MASTER/BOOK' && book.specialist_owner_path === 'SYSTEM_MASTER/BOOK/PROSE', 'Book-Prose integration must remain BOOK-owned');
-const learning = byId.get('LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001');
-assert(learning && learning.owner_path === 'SYSTEM_MASTER/LEARNING', 'Learning compiler must remain LEARNING-owned');
+assert(book && book.owner_path === 'SYSTEM_MASTER/BOOK' && book.active_prose_owner === null, 'Book-Prose lineage must be BOOK-owned with no active Prose owner');
 const docs = byId.get('DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-IMPORT-AND-EXACT-SUBJECT-QUALIFICATION-002');
 assert(docs && docs.owner_path === 'SYSTEM_MASTER/DOCUMENTS', 'Documents R4 must remain DOCUMENTS-owned');
 for (const o of obligations.obligations || []) {
-  if (o.owner_path === 'SYSTEM_MASTER/DOCUMENTS') {
-    assert(o.specialist_owner_path !== 'SYSTEM_MASTER/BOOK/PROSE', `Documents obligation cannot claim Prose specialist: ${o.obligation_id}`);
-    assert(!/PROSE/i.test(String(o.obligation_id || '')), `Documents current obligation id cannot be Prose work: ${o.obligation_id}`);
-  }
-  if (o.owner_path === 'SYSTEM_MASTER/LEARNING') {
-    assert(!/BOOK|PROSE|DOCUMENT/i.test(String(o.obligation_id || '')), `Learning current obligation id crosses product lanes: ${o.obligation_id}`);
-  }
+  assert(!String(o.owner_path || '').startsWith('SYSTEM_MASTER/BOOK/PROSE'), `active registry cannot own work under retired Prose path: ${o.obligation_id}`);
+  if (o.owner_path === 'SYSTEM_MASTER/DOCUMENTS') assert(!/PROSE/i.test(String(o.obligation_id || '')), `Documents current obligation id cannot be Prose work: ${o.obligation_id}`);
 }
 
 const secondShift = readJson(authority.second_shift_registry);
-assert(setEq(new Set(Object.keys(secondShift.owner_files || {})), new Set(['CORE','LEARNING','BOOK','DOCUMENTS'])), 'Second Shift active lanes must be CORE, LEARNING, BOOK, DOCUMENTS');
-assert(secondShift.coverage_routes?.['SYSTEM_MASTER/BOOK/PROSE'] === 'BOOK', 'Second Shift must route Prose child through BOOK');
-assert(secondShift.program_job_lock === authority.program_job_lock, 'Second Shift must bind current job lock');
-assert(secondShift.system_completion_status === authority.system_completion_status, 'Second Shift must bind current completion status');
+assert(setEq(new Set(Object.keys(secondShift.owner_files || {})), peers), 'Second Shift active lanes must be exactly CORE, LEARNING, BOOK, DOCUMENTS');
+assert(!Object.keys(secondShift.coverage_routes || {}).some((k) => k.startsWith('SYSTEM_MASTER/BOOK/PROSE')), 'Second Shift must not route retired Prose through any active lane');
+assert(secondShift.retired_routes?.PROSE?.dispatchable === false && secondShift.retired_routes?.PROSE?.inherited_execution === false, 'Second Shift must classify Prose retired/non-dispatchable/non-inherited');
+assert(secondShift.auto_provisioning_invariant?.current_coverage_complete === true, 'Second Shift current peer coverage must be complete');
 
 const owners = {};
 for (const [lane, rel] of Object.entries(secondShift.owner_files || {})) owners[lane] = readJson(rel);
 function activeIds(owner) { return (owner.active_delegations || []).map((d) => d.obligation_id || d.objective_id); }
 assert(activeIds(owners.CORE).includes('SYSTEM-MASTER-INTEGRATION-COORDINATION-001'), 'CORE Second Shift must carry central integration coordination');
-assert((owners.BOOK.active_delegations || []).some((d) => d.owner_path === 'SYSTEM_MASTER/BOOK' && /BOOK-PROSE/i.test(`${d.objective_id || ''} ${d.obligation_id || ''}`)), 'BOOK Second Shift must carry Book-Prose integration');
-assert((owners.LEARNING.active_delegations || []).every((d) => d.owner_path === 'SYSTEM_MASTER/LEARNING'), 'Learning delegations must stay in Learning lane');
+const kr = (owners.CORE.active_delegations || []).find((d) => d.obligation_id === 'SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001');
+assert(kr && kr.state === 'READY' && kr.priority === 'HIGHEST_DISCRETIONARY_SYSTEM_MASTER_PRIORITY', 'CORE Second Shift must expose Knowledge Recovery as READY highest discretionary work');
+assert((owners.BOOK.active_delegations || []).some((d) => d.owner_path === 'SYSTEM_MASTER/BOOK' && d.active_prose_execution_owner === null), 'BOOK Second Shift must carry Book-owned integration with no active Prose owner');
 for (const d of owners.DOCUMENTS.active_delegations || []) {
   assert(d.owner_path === 'SYSTEM_MASTER/DOCUMENTS', 'Documents delegation owner mismatch');
   assert(!/PROSE/i.test(`${d.delegation_id || ''} ${d.objective_id || ''} ${d.obligation_id || ''} ${d.parent_objective_id || ''}`), 'Documents active delegation must not be Prose work');
 }
-
-for (const lane of ['CORE','LEARNING','BOOK','DOCUMENTS']) {
+for (const lane of peers) {
   const snapshot = obligations.owner_head_snapshot?.[lane];
   assert(typeof snapshot === 'string' && /^[0-9a-f]{40}$/.test(snapshot), `missing/invalid owner snapshot ${lane}`);
-  assert(owners[lane].last_known_control_head === snapshot, `${lane} delegation last-known head must equal obligation snapshot`);
-  for (const d of owners[lane].active_delegations || []) {
-    assert(d.valid_for_control_head === snapshot, `${lane} active delegation ${d.delegation_id} must bind obligation snapshot head`);
-  }
+  assert(owners[lane].last_known_control_head === snapshot, `${lane} delegation head must equal obligation snapshot`);
+  for (const d of owners[lane].active_delegations || []) assert(d.valid_for_control_head === snapshot, `${lane} delegation ${d.delegation_id} must bind snapshot head`);
 }
-assert(obligations.owner_head_snapshot?.PROSE_CHILD === 'b3b0909bc6720a3bc5938de29d4bf3bde9dd4e05', 'completed Prose child snapshot must remain exact final completed control head');
+assert(!obligations.owner_head_snapshot?.PROSE && !obligations.owner_head_snapshot?.PROSE_CHILD, 'current obligation snapshot must not create an active Prose head');
 
 const bootstrap = readJson(authority.morning_bootstrap_schema);
-assert(bootstrap.compatibility_focus_roles?.PROSE?.startsWith('BOOK@SYSTEM_MASTER/BOOK/PROSE'), 'morning bootstrap must route Prose focus through BOOK');
-assert(Object.keys(bootstrap.retired_chat_roles || {}).length === 0, 'morning bootstrap must not classify active Book-child Prose as a retired chat role');
-const bootstrapText = JSON.stringify(bootstrap);
-assert(!bootstrapText.includes('REDIRECT_TO_DOCUMENTS'), 'morning bootstrap must not redirect Prose to Documents');
-assert(!bootstrapText.includes('integrated under DOCUMENTS'), 'morning bootstrap contains stale Prose-under-Documents language');
-assert((bootstrap.documents_rules || []).some((v) => /must not absorb/i.test(v)), 'morning bootstrap must forbid Documents Prose absorption');
+assert(bootstrap.retired_chat_roles?.PROSE?.includes('RETIRED'), 'morning bootstrap must classify PROSE as retired');
+assert(!bootstrap.allowed_chat_roles?.includes('PROSE'), 'morning bootstrap must not allow a PROSE chat role');
+assert((bootstrap.documents_rules || []).some((v) => /no Prose work/i.test(v)), 'morning bootstrap must forbid Documents Prose work');
 
 const chatStart = readText(authority.chat_start_command_contract);
-assert(chatStart.includes('system_catalog` selected by CURRENT-AUTHORITY'), 'chat startup must read authority-selected system catalog');
-assert(!chatStart.includes('SYSTEM-MASTER-SYSTEM-CATALOG-001.json'), 'chat startup must not hard-code superseded catalog 001');
-assert(chatStart.includes('PROSE is the only system currently complete'), 'chat startup must preserve Prose-only completion truth');
-assert(chatStart.includes('Documents must not absorb'), 'chat startup must forbid Documents Prose absorption');
+assert(chatStart.includes('PROSE is complete and terminally retired'), 'chat startup must preserve terminal Prose retirement');
+assert(chatStart.includes('DOCUMENTS never receives Prose work'), 'chat startup must forbid Documents Prose routing');
 
 console.log('PROGRAM_JOB_LOCK_ENFORCEMENT_PASS');
-console.log('completion=PROSE_ONLY');
-console.log('central_objective=SYSTEM-MASTER-INTEGRATION-COORDINATION-001');
+console.log('topology=SYSTEM-TOPOLOGY-005');
+console.log('active_peers=CORE,LEARNING,BOOK,DOCUMENTS');
+console.log('prose=COMPLETE_RETIRED_TERMINAL_NO_DISPATCH');
+console.log('knowledge_recovery=HIGHEST_DISCRETIONARY');
 console.log('heads=OWNER_SNAPSHOT_MATCH');
-console.log('lanes=CORE,LEARNING,BOOK,DOCUMENTS;PROSE->BOOK');
-console.log('startup=JOB_LOCKED');
