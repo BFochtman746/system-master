@@ -48,8 +48,8 @@ The kernel defines the semantics they must preserve.
 python -m unittest discover -s controller-v2/reference-kernel -p 'test_*.py' -v
 ```
 
-The required denominator is `CF-T001` through `CF-T030`; three additional
-transition-guard tests are included.
+The required denominator is `CF-T001` through `CF-T030`; seven additional
+adversarial/transition-guard tests are included (37 total).
 
 ## Safety rule
 

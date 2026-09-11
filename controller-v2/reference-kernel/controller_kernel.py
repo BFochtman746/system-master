@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import secrets
 import sqlite3
 import time
@@ -58,6 +59,18 @@ class AmbiguousExternalResult(ControllerError):
     pass
 
 
+class JournalCollision(ControllerError):
+    pass
+
+
+class DurableJournal(Protocol):
+    def put_if_absent(self, *, event_id: str, body: str) -> None:
+        ...
+
+    def get(self, *, event_id: str) -> str | None:
+        ...
+
+
 class PromotionAdapter(Protocol):
     def promote(self, *, subject_repo: str, subject_sha: str, idempotency_key: str) -> None:
         ...
@@ -70,9 +83,14 @@ def utc_now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
 
 
+RFC3339_RE = re.compile(
+    r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$"
+)
+
+
 def validate_timestamp(value: str) -> None:
-    if not isinstance(value, str) or not value:
-        raise ValidationError("timestamp must be a non-empty string")
+    if not isinstance(value, str) or not RFC3339_RE.fullmatch(value):
+        raise ValidationError("timestamp must be RFC3339 with T separator and timezone")
     try:
         parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
     except ValueError as exc:
@@ -661,6 +679,21 @@ class ControllerKernel:
         now_dt = datetime.fromisoformat(when.replace("Z", "+00:00"))
         exp = datetime.fromisoformat(row["expires_at"].replace("Z", "+00:00"))
         if exp <= now_dt:
+            self.conn.execute(
+                "UPDATE leases SET status='EXPIRED' WHERE lease_id=?", (lease_id,)
+            )
+            if row["operation_state"] in {"READY", "RUNNING"}:
+                self.conn.execute(
+                    "UPDATE operations SET state='STALE', version=version+1 WHERE operation_id=?",
+                    (row["operation_id"],),
+                )
+                self._append_event_tx(
+                    stream_id=f"operation:{row['operation_id']}",
+                    event_type="controller.operation.staled",
+                    subject=f"operation/{row['operation_id']}",
+                    correlation_id=row["command_id"],
+                    data={"state": "STALE", "reason": "lease_expired"},
+                )
             raise StaleLease("lease expired")
         return row
 
@@ -674,6 +707,10 @@ class ControllerKernel:
                 "UPDATE leases SET last_heartbeat_at=? WHERE lease_id=?", (when, lease_id)
             )
             self._commit()
+        except StaleLease:
+            if self.conn.in_transaction:
+                self._commit()
+            raise
         except Exception:
             if self.conn.in_transaction:
                 self._rollback()
@@ -697,6 +734,10 @@ class ControllerKernel:
                 data={"state": "RUNNING", "lease_id": lease_id, "generation": generation},
             )
             self._commit()
+        except StaleLease:
+            if self.conn.in_transaction:
+                self._commit()
+            raise
         except Exception:
             if self.conn.in_transaction:
                 self._rollback()
@@ -736,6 +777,10 @@ class ControllerKernel:
                 },
             )
             self._commit()
+        except StaleLease:
+            if self.conn.in_transaction:
+                self._commit()
+            raise
         except Exception:
             if self.conn.in_transaction:
                 self._rollback()
@@ -749,13 +794,41 @@ class ControllerKernel:
             "controller.operation.succeeded" if accepted else "controller.operation.failed",
         )
 
-    def mark_outbox_sealed(self, event_id: str, *, when: str | None = None) -> None:
+    def publish_outbox_event(self, event_id: str, journal: DurableJournal, *, when: str | None = None) -> None:
+        """Seal only after durable put-if-absent plus byte-for-byte readback verification."""
         when = when or utc_now()
         validate_timestamp(when)
-        self.conn.execute(
-            "UPDATE outbox SET state='SEALED', sealed_at=COALESCE(sealed_at, ?) WHERE event_id=?",
-            (when, event_id),
-        )
+        row = self.conn.execute(
+            "SELECT o.state, e.envelope_json FROM outbox o "
+            "JOIN semantic_events e ON e.event_id=o.event_id WHERE o.event_id=?",
+            (event_id,),
+        ).fetchone()
+        if row is None:
+            raise ValidationError("outbox event not found")
+        body = row["envelope_json"]
+        journal.put_if_absent(event_id=event_id, body=body)
+        observed = journal.get(event_id=event_id)
+        if observed != body:
+            raise JournalCollision("durable journal readback differs from local canonical event")
+        try:
+            self._begin()
+            current = self.conn.execute(
+                "SELECT state FROM outbox WHERE event_id=?", (event_id,)
+            ).fetchone()
+            if current is None:
+                raise ValidationError("outbox event disappeared")
+            if current["state"] == "SEALED":
+                self._commit()
+                return
+            self.conn.execute(
+                "UPDATE outbox SET state='SEALED', sealed_at=? WHERE event_id=?",
+                (when, event_id),
+            )
+            self._commit()
+        except Exception:
+            if self.conn.in_transaction:
+                self._rollback()
+            raise
 
     def outbox_state(self, event_id: str) -> str | None:
         row = self.conn.execute("SELECT state FROM outbox WHERE event_id=?", (event_id,)).fetchone()
@@ -1078,6 +1151,21 @@ class ControllerKernel:
         if row is None:
             raise ValidationError("object not found")
         return row["state"]
+
+
+class MemoryJournal:
+    """Deterministic test adapter implementing put-if-absent journal semantics."""
+    def __init__(self) -> None:
+        self._events: dict[str, str] = {}
+
+    def put_if_absent(self, *, event_id: str, body: str) -> None:
+        prior = self._events.get(event_id)
+        if prior is not None and prior != body:
+            raise JournalCollision("event_id already exists with different bytes")
+        self._events.setdefault(event_id, body)
+
+    def get(self, *, event_id: str) -> str | None:
+        return self._events.get(event_id)
 
 
 class WorkerFacade:

@@ -17,6 +17,8 @@ from controller_kernel import (
     DurabilityBarrierNotMet,
     IdempotencyConflict,
     IllegalTransition,
+    JournalCollision,
+    MemoryJournal,
     QualifierFacade,
     StaleLease,
     UnsupportedSchema,
@@ -162,10 +164,8 @@ class KernelTestCase(unittest.TestCase):
         lease = self.k.acquire_lease(op, "worker-a", ttl_seconds=1, now=ts())
         with self.assertRaises(StaleLease):
             self.k.heartbeat(lease.lease_id, lease.generation, now=ts(2))
-        self.assertEqual(self.k.get_state("leases", "lease_id", lease.lease_id), "ACTIVE")
-        _, _, op2 = self.admitted_operation("repo:main")
-        self.k.acquire_lease(op2, "worker-b", now=ts(2))
         self.assertEqual(self.k.get_state("leases", "lease_id", lease.lease_id), "EXPIRED")
+        self.assertEqual(self.k.get_state("operations", "operation_id", op), "STALE")
 
     def test_007_heartbeat_loss_does_not_erase_semantic_events(self):
         _, _, op = self.admitted_operation()
@@ -173,7 +173,10 @@ class KernelTestCase(unittest.TestCase):
         before = self.k.events(f"operation:{op}")
         with self.assertRaises(StaleLease):
             self.k.heartbeat(lease.lease_id, lease.generation, now=ts(2))
-        self.assertEqual(before, self.k.events(f"operation:{op}"))
+        after = self.k.events(f"operation:{op}")
+        self.assertEqual(after[:len(before)], before)
+        self.assertEqual(after[-1]["type"], "controller.operation.staled")
+        self.assertEqual(after[-1]["data"]["reason"], "lease_expired")
 
     def test_008_clock_reversal_does_not_define_event_order(self):
         self.k.append_semantic_event(stream_id="test:clock", event_type="test.one", subject="test/clock", data={"state":"A"}, correlation_id="c", expected_current_version=0)
@@ -240,8 +243,9 @@ class KernelTestCase(unittest.TestCase):
         cmd = make_command()
         self.k.accept_command(cmd)
         event_id = self.k.pending_outbox()[0]["event_id"]
-        self.k.mark_outbox_sealed(event_id, when=ts())
-        self.k.mark_outbox_sealed(event_id, when=ts(1))
+        journal = MemoryJournal()
+        self.k.publish_outbox_event(event_id, journal, when=ts())
+        self.k.publish_outbox_event(event_id, journal, when=ts(1))
         self.assertEqual(self.k.outbox_state(event_id), "SEALED")
         row = self.k.conn.execute("SELECT sealed_at FROM outbox WHERE event_id=?", (event_id,)).fetchone()
         self.assertEqual(row["sealed_at"], ts())
@@ -259,7 +263,7 @@ class KernelTestCase(unittest.TestCase):
         _, q = self.passed_qualification()
         p = self.k.request_promotion(q)
         auth_event = self.k.authorize_promotion(p)
-        self.k.mark_outbox_sealed(auth_event)
+        self.k.publish_outbox_event(auth_event, MemoryJournal())
         adapter = FakePromotionAdapter(mode="ambiguous")
         self.k.execute_promotion(p, adapter)
         self.assertEqual(self.k.get_state("promotions", "promotion_id", p), "RECONCILIATION_REQUIRED")
@@ -344,7 +348,7 @@ class KernelTestCase(unittest.TestCase):
         _, q = self.passed_qualification()
         p = self.k.request_promotion(q)
         auth = self.k.authorize_promotion(p)
-        self.k.mark_outbox_sealed(auth)
+        self.k.publish_outbox_event(auth, MemoryJournal())
         adapter = FakePromotionAdapter(mode="ambiguous")
         self.k.execute_promotion(p, adapter)
         self.k.reconcile_promotion(p, adapter)
@@ -365,6 +369,48 @@ class KernelTestCase(unittest.TestCase):
         events[0]["specversion"] = "2.0"
         with self.assertRaises(UnsupportedSchema):
             ControllerKernel.project_events(events)
+
+    def test_031_space_separated_timestamp_rejected(self):
+        cmd = make_command(created_at="2026-09-11 20:00:00+00:00")
+        cmd["fingerprint"] = command_fingerprint(cmd)
+        with self.assertRaises(ValidationError):
+            self.k.accept_command(cmd)
+
+    def test_032_outbox_cannot_seal_without_verified_journal_roundtrip(self):
+        cmd = make_command()
+        self.k.accept_command(cmd)
+        event_id = self.k.pending_outbox()[0]["event_id"]
+
+        class BadJournal:
+            def put_if_absent(self, *, event_id, body):
+                self.body = body
+            def get(self, *, event_id):
+                return self.body + " "
+
+        with self.assertRaises(JournalCollision):
+            self.k.publish_outbox_event(event_id, BadJournal(), when=ts())
+        self.assertEqual(self.k.outbox_state(event_id), "PENDING")
+
+    def test_033_journal_id_collision_with_different_bytes_rejected(self):
+        cmd = make_command()
+        self.k.accept_command(cmd)
+        event_id = self.k.pending_outbox()[0]["event_id"]
+        journal = MemoryJournal()
+        journal.put_if_absent(event_id=event_id, body="different")
+        with self.assertRaises(JournalCollision):
+            self.k.publish_outbox_event(event_id, journal, when=ts())
+        self.assertEqual(self.k.outbox_state(event_id), "PENDING")
+
+    def test_034_outbox_publish_retry_is_idempotent(self):
+        cmd = make_command()
+        self.k.accept_command(cmd)
+        event_id = self.k.pending_outbox()[0]["event_id"]
+        journal = MemoryJournal()
+        self.k.publish_outbox_event(event_id, journal, when=ts())
+        first = journal.get(event_id=event_id)
+        self.k.publish_outbox_event(event_id, journal, when=ts(1))
+        self.assertEqual(journal.get(event_id=event_id), first)
+        self.assertEqual(self.k.outbox_state(event_id), "SEALED")
 
     def test_illegal_transaction_completion_rejected(self):
         tx = self.k.accept_command(make_command())
