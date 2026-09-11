@@ -1,32 +1,50 @@
 {
   "schema_id": "DAILY-CHAT-BOOTSTRAP-SCHEMA-001",
-  "purpose": "Machine-readable morning reconciliation receipt and fast-start manifest for MASTER_ROOT, LEARNING, BOOK and DOCUMENTS chats.",
+  "purpose": "Machine-readable morning reconciliation receipt and fast-start manifest for MASTER_ROOT, LEARNING, BOOK and DOCUMENTS chats under the current program-job and completion locks.",
   "allowed_chat_roles": ["MASTER_ROOT", "LEARNING", "BOOK", "DOCUMENTS"],
-  "retired_chat_roles": {"PROSE":"REDIRECT_TO_DOCUMENTS__HISTORICAL_ONLY"},
+  "retired_chat_roles": {},
+  "compatibility_focus_roles": {
+    "PROSE": "BOOK@SYSTEM_MASTER/BOOK/PROSE__NO_SEPARATE_OWNER_ROLE"
+  },
   "allowed_readiness": ["CHAT_READY", "CHAT_READY_WITH_DECISION", "NOT_READY"],
-  "allowed_delta_classes": ["ALREADY_CANONICAL", "ADMISSIBLE_DELTA", "CANDIDATE_ONLY", "BLOCKED_HIGHER_AUTHORITY", "SUPERSEDED", "STALE", "REWORK_REQUIRED", "INVALID", "RETIRED_OWNER_STALE_WORK"],
+  "allowed_delta_classes": ["ALREADY_CANONICAL", "ADMISSIBLE_DELTA", "CANDIDATE_ONLY", "BLOCKED_HIGHER_AUTHORITY", "SUPERSEDED", "STALE", "REWORK_REQUIRED", "INVALID", "JOB_LANE_VIOLATION", "FALSE_SYSTEM_COMPLETION", "PROSE_SCOPE_REOPEN"],
   "required_manifest_fields": ["schema_id","date","timezone","generated_at","source_main_sha","reconciliation_completion_sha","current_authority_ref","topology_ref","sealed_checkpoint_ref","second_shift_shift_id","second_shift_score_ref","repository_reconciler_standing","packets"],
   "required_packet_fields": ["chat_role","owner_path","control_refs","live_control_heads","selected_state_records","current_standing","current_objective_id","where_we_are","where_we_are_going","overnight_deltas","completed_predecessor_refs","open_obligation_ids","active_repair_transactions","second_shift_delegation_status","qualification_standing","next_step_contract","chat_ready"],
   "required_next_step_fields": ["id","objective","first_action","pass_proves","pass_unlocks","on_failure","do_not"],
+  "program_job_rules": [
+    "Every morning reconciliation must read CURRENT-AUTHORITY and its selected program_job_lock and system_completion_status before interpreting packet completion or selecting work.",
+    "PROSE is the only complete system. SYSTEM_MASTER, CORE, LEARNING, BOOK and DOCUMENTS remain incomplete until explicit product-level completion authority changes that standing.",
+    "BOOK must finish Book, including integration of the completed PROSE child through adapters and the Book Workflow Orchestrator, then integrate BOOK upward into SYSTEM_MASTER.",
+    "LEARNING must finish Learning and integrate upward into SYSTEM_MASTER without crossing into BOOK, PROSE or DOCUMENTS product work.",
+    "DOCUMENTS must finish document/artifact behavior and integrate upward into SYSTEM_MASTER without absorbing PROSE or taking BOOK literary authority.",
+    "CORE supplies shared Foundation/Spine and System Master integration primitives without taking peer-system semantics."
+  ],
   "master_root_rules": [
     "MASTER_ROOT is a chat role over SYSTEM_MASTER product-root governance, not a peer system.",
-    "MASTER_ROOT reads CORE, LEARNING, BOOK and DOCUMENTS plus shared infrastructure but does not silently take their canonical-writer authority.",
+    "MASTER_ROOT reads CORE, LEARNING, BOOK and DOCUMENTS plus the BOOK child PROSE when relevant and shared infrastructure, but does not silently take their canonical-writer or product authority.",
     "MASTER_ROOT has no active peer-worker Second Shift lane; execution lanes are discovered from the Second Shift registry."
   ],
+  "book_prose_rules": [
+    "PROSE is the completed literary specialist child at SYSTEM_MASTER/BOOK/PROSE and executes under the BOOK lane.",
+    "A Prose-focused chat is a BOOK-role focus and never creates a separate Prose peer, repair, mutation or Second Shift lane.",
+    "Prose adapters and orchestration may be added by BOOK to make completed Prose capabilities usable end-to-end, but Prose never receives canonical manuscript, Story Bible, author, lifecycle, admission or publication authority."
+  ],
   "documents_rules": [
-    "DOCUMENTS is the active first-class peer system at SYSTEM_MASTER/DOCUMENTS with control ref documents/control-v1.",
-    "Completed Prose capabilities are integrated under DOCUMENTS; historical Prose evidence is provenance only and cannot create a current PROSE packet.",
-    "BOOK and DOCUMENTS are peers; BOOK canonical state remains BOOK-owned."
+    "DOCUMENTS is the active incomplete first-class peer system at SYSTEM_MASTER/DOCUMENTS with control ref documents/control-v1.",
+    "DOCUMENTS owns DOCX/PDF/PPTX/document artifact mechanics and generic document services and integrates upward into SYSTEM_MASTER.",
+    "DOCUMENTS must not absorb, schedule, repair or claim BOOK-specific PROSE literary work.",
+    "BOOK and DOCUMENTS are peers; BOOK canonical state and BOOK/PROSE literary-specialist authority remain BOOK-owned."
   ],
   "freshness_rules": [
     "The morning manifest is a cache and reconciliation receipt, not authority over later repository movement.",
     "Every chat start re-fetches current main and every relevant live active-owner control head.",
-    "A head or state change after manifest generation is AUTHORITY_DELTA and is reconciled before work."
+    "A head, job-lock, completion-status or state change after manifest generation is AUTHORITY_DELTA and is reconciled before work."
   ],
   "anti_surprise_rules": [
     "Do not ask the user to explain System Master, its topology, repository, lane purpose, prior work or project setup when canonical lookup can resolve it.",
-    "Do not recreate PROSE because an old chat command or historical branch mentions it; redirect current work to DOCUMENTS.",
-    "Do not restart sealed/completed work because a chat is new.",
+    "Do not redirect active PROSE child work to DOCUMENTS; a Prose focus resolves to BOOK at SYSTEM_MASTER/BOOK/PROSE.",
+    "Do not restart or expand completed PROSE semantics absent a demonstrated defect or explicit user direction; integration adapters/orchestration around Prose remain BOOK work.",
+    "Do not restart sealed/completed packets because a chat is new, and do not mistake packet completion for whole-system completion.",
     "If durable authority cannot resolve a decision, ask only the smallest exact human/author/private/native/external decision required."
   ],
   "authority_boundary": "This manifest accelerates startup and records reconciliation. It does not transfer PASS, owner, canonical-writer, A-01, human, author, private, blind, native, publication or production authority."
