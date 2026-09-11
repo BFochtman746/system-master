@@ -1,0 +1,39 @@
+{
+  "verification_id": "DOCUMENTS-R4-GITHUB-NATIVE-CUSTODY-PREP-20260911",
+  "delegation_id": "SECOND-SHIFT-DOCUMENTS-R4-ADMISSION-002",
+  "objective_id": "DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-IMPORT-AND-EXACT-SUBJECT-QUALIFICATION-002",
+  "control_ref": "documents/control-v1",
+  "control_head": "8c81b9a2e7622805e973eda33bdeb8b743948249",
+  "source_packets": {
+    "CR001-R2B1": {
+      "library_file_id": "file_000000005a70822fba43ae14fc6fb327",
+      "observed_outer_sha256": "ed3b9feeb5ad93637b1a5a59598003ca21caf794809c4bec4f09e9454d518637"
+    },
+    "CR001-R3": {
+      "library_file_id": "file_000000004e84822faf0d3d5c0693a53c",
+      "observed_outer_sha256": "66260502655e0840f597b6a2dc06ec941b79d7e02b1c16b0a061ee953b698665"
+    },
+    "CR001-R4": {
+      "library_file_id": "file_0000000037a8822f93b3090f34304107",
+      "observed_outer_sha256": "cea84e5628af671cabc5dc3ed0b37dce38ff264019b04fefcd6c2b347f2b47e2"
+    }
+  },
+  "reconstruction_method": "R2B1 materialized-pre-t13 base + exact R3 source-overlay + exact R4 source-overlay",
+  "canonical_manifest_rows": 225,
+  "verified_source_files": 225,
+  "reconstructed_java_files": 225,
+  "missing_manifest_paths": 0,
+  "digest_or_size_mismatches": 0,
+  "canonical_manifest_file_sha256": "ed36fc9cfd38b04a8d0174efed06b03e8e25b0a45fc0adc4d47fe3457c2ee367",
+  "reconstructed_carrier_sha256": "88af5bd94e32457fa893507001c7195524dfa3647cb24623fb1b08a7febe4768",
+  "reconstructed_carrier_bytes": 306812,
+  "result": "PASS__225_OF_225_EXACT_SHA256_AND_BYTE_SIZE_MATCH",
+  "github_native_source_tree_committed": false,
+  "transport_blocker": "The connected GitHub write actions accept UTF-8 content but expose no local-container/file parameter for transferring the already-materialized 2.3 MB exact source tree or its 306812-byte binary carrier atomically. The bytes are verified in the current execution runtime but are not yet in GitHub-native custody.",
+  "next_safe_action": "Transfer these exact verified bytes through a file-capable GitHub transport or an already-authorized runner-visible source, then bind the resulting Git SHA and run fresh portable/hosted qualification. Do not rebuild or reinterpret source bytes.",
+  "prose_work_performed": false,
+  "historical_pass_transferred": false,
+  "a01_pass_claimed": false,
+  "native_office_pass_claimed": false,
+  "production_pass_claimed": false
+}
