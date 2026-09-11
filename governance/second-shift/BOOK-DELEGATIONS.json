@@ -2,10 +2,10 @@
   "owner_system_id": "BOOK",
   "owner_path": "SYSTEM_MASTER/BOOK",
   "control_ref": "book-system/control-v1",
-  "last_known_control_head": "5e100520ececb8714f54057551ebef2bfec92c88",
+  "last_known_control_head": "2df0f53447628f0ef54a5c59689b528dbbce1632",
   "program_job_lock": "governance/SYSTEM-PROGRAM-JOB-LOCK-001.json",
   "system_completion_status": "governance/SYSTEM-COMPLETION-STATUS-001.json",
-  "delegation_epoch": 24,
+  "delegation_epoch": 25,
   "active_delegations": [
     {
       "delegation_id": "SECOND-SHIFT-BOOK-PROSE-PHASE2-ORCHESTRATOR-CLOSURE-CENSUS-001",
@@ -14,12 +14,13 @@
       "obligation_id": "BOOK-PROSE-PHASE-2-ORCHESTRATOR-CLOSURE-CENSUS-001",
       "state": "READY",
       "valid_for_control_ref": "book-system/control-v1",
-      "valid_for_control_head": "5e100520ececb8714f54057551ebef2bfec92c88",
+      "valid_for_control_head": "2df0f53447628f0ef54a5c59689b528dbbce1632",
       "created_at": "2026-09-10T20:52:00-04:00",
-      "last_revalidated_at": "2026-09-10T22:50:00-04:00",
+      "last_revalidated_at": "2026-09-10T22:53:00-04:00",
       "owner_evidence": [
+        "qualification/book-system/BOOK-SYSTEM-CONTROL-RECORD-010.json",
+        "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-040.json",
         "qualification/book-system/BOOK-SYSTEM-JOB-LOCK-001.json",
-        "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-039.json",
         "qualification/book-system/book-prose-integration/BOOK-PROSE-INTEGRATION-LEDGER-001.json",
         "qualification/book-system/book-prose-integration/orchestrator/BOOK-WORKFLOW-ORCHESTRATOR-BOOK-ADMISSION-HANDOFF-001-CLOSURE.json"
       ],
@@ -55,6 +56,6 @@
   ],
   "prior_full_history": {"blob_sha":"ad8586963395e7e0af9ab3b3421b06f0d729f45c","standing":"IMMUTABLE_GIT_HISTORY_PRESERVED"},
   "owner_revalidation_required": false,
-  "reason": "Book job-control overlay at 5e100520 explicitly locks the incomplete Book job to completed-Prose adapter/orchestrator integration and upward System Master integration while preserving Book canonical authority.",
+  "reason": "Book Control 010 and State 040 are current at exact head 2df0f534 and lock the incomplete Book job to completed-Prose adapter/orchestrator integration followed by upward System Master integration while preserving Book canonical authority.",
   "empty_is_valid": false
 }
