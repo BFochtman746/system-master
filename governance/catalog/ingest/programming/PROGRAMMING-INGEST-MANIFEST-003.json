@@ -1,0 +1,220 @@
+{
+  "manifest_id": "PROGRAMMING-INGEST-MANIFEST-003",
+  "schema_version": 3,
+  "extends_manifest": "governance/catalog/ingest/programming/PROGRAMMING-INGEST-MANIFEST-002.json",
+  "supersedes_for_current_qualification": "governance/catalog/ingest/programming/PROGRAMMING-INGEST-MANIFEST-002.json",
+  "preserves_historical_manifests": [
+    "governance/catalog/ingest/programming/PROGRAMMING-INGEST-MANIFEST-001.json",
+    "governance/catalog/ingest/programming/PROGRAMMING-INGEST-MANIFEST-002.json"
+  ],
+  "candidate_system_id": "PROGRAMMING",
+  "architecture_authority": false,
+  "frozen_date": "2026-09-11",
+  "preparation_base_main_sha": "7eba1c793539514cd8cbf655e3a64b57280a443e",
+  "core_control_ref": "system-master/control-v2",
+  "core_control_head": "d88a5952e93b5bae4ce96e4017f334aeb8abaa00",
+  "purpose": "Current-authority Topology-005 successor manifest for the Programming proving corpus. Preserve the accepted Topology-004 exact-subject result as historical evidence, reconcile current architecture inputs, and bind only exact external-byte observations actually recorded by the supervised materialization checkpoint. This manifest does not transfer PASS or promote Programming.",
+  "coverage_contract": {
+    "metadata_scope": "All 36 logical sources produced by Manifest 001 plus Manifest 002 deltas, with current Topology-005, System Catalog 003, ADR-0005 and the Prose retirement record replacing superseded current-execution inputs.",
+    "byte_scope": "Repository sources are frozen only by a future exact qualification subject. Five Library sources have exact bytes observed in the supervised workspace checkpoint but none is claimed staged in an approved immutable A-01-readable intake location. All other external or historical bytes retain their prior uncertainty.",
+    "full_byte_verification_required_for_catalog_processing_pass": false,
+    "full_byte_verification_required_for_full_corpus_qualification": true
+  },
+  "lineage": {
+    "accepted_historical_subject_sha": "4a2d4f7168f48728ef67d187ff43afb97c9568d9",
+    "accepted_historical_topology": "SYSTEM-TOPOLOGY-004",
+    "accepted_historical_workflow_run_id": 34548900531,
+    "accepted_historical_result": "PASS",
+    "pass_transfer_to_manifest_003": false,
+    "reason": "Topology and current-authority inputs changed; external observed bytes have not crossed the approved immutable transport boundary."
+  },
+  "source_replacements": [
+    {
+      "replace_source_id": "GIT-SYSTEM-TOPOLOGY-004",
+      "source": {
+        "source_id": "GIT-SYSTEM-TOPOLOGY-005",
+        "surface": "GITHUB",
+        "locator": {
+          "path": "governance/SYSTEM-TOPOLOGY-005.json"
+        },
+        "observed_git_blob_sha": "ceed8790ec4435b2dcff1d0389b04bf9845d7f67",
+        "evidence_class": "CURRENT_TOPOLOGY_AUTHORITY",
+        "system_affinity": [
+          "SYSTEM_MASTER"
+        ],
+        "byte_availability": "SUBJECT_REPO",
+        "expected_sha256": null,
+        "digest_authority": "A01_VERIFY_ON_RUN",
+        "reuse_disposition": "REFERENCE_ONLY",
+        "notes": "Active peers are CORE, LEARNING, BOOK and DOCUMENTS; PROSE is terminally retired; Programming remains a non-peer work program."
+      }
+    },
+    {
+      "replace_source_id": "GIT-SYSTEM-CATALOG-002",
+      "source": {
+        "source_id": "GIT-SYSTEM-CATALOG-003",
+        "surface": "GITHUB",
+        "locator": {
+          "path": "governance/catalog/SYSTEM-MASTER-SYSTEM-CATALOG-003.json"
+        },
+        "observed_git_blob_sha": "b7b0a195d51376bfd5a1b7f89c4c0d1c16c01282",
+        "evidence_class": "CURRENT_SYSTEM_DISCOVERY_CATALOG",
+        "system_affinity": [
+          "SYSTEM_MASTER",
+          "PROGRAMMING"
+        ],
+        "byte_availability": "SUBJECT_REPO",
+        "expected_sha256": null,
+        "digest_authority": "A01_VERIFY_ON_RUN",
+        "reuse_disposition": "REFERENCE_ONLY",
+        "notes": "Discovery and reuse metadata only; cannot promote a candidate system."
+      }
+    },
+    {
+      "replace_source_id": "GIT-ADR-0004-BOOK-PROSE-CHILD-RESTORATION",
+      "source": {
+        "source_id": "GIT-ADR-0005-PROSE-TERMINAL-RETIREMENT",
+        "surface": "GITHUB",
+        "locator": {
+          "path": "governance/ADR-0005-PROSE-TERMINAL-RETIREMENT-BOOK-INTEGRATION.md"
+        },
+        "observed_git_blob_sha": "08c24abd9f69c1b968d3e8b2242f0bc8b6c1c4f6",
+        "evidence_class": "CURRENT_ARCHITECTURE_DECISION",
+        "system_affinity": [
+          "SYSTEM_MASTER",
+          "BOOK"
+        ],
+        "byte_availability": "SUBJECT_REPO",
+        "expected_sha256": null,
+        "digest_authority": "A01_VERIFY_ON_RUN",
+        "reuse_disposition": "REFERENCE_ONLY",
+        "notes": "PROSE is complete and terminally retired; any remaining integration is BOOK-owned."
+      }
+    }
+  ],
+  "source_additions": [
+    {
+      "source_id": "GIT-PROSE-SYSTEM-RETIREMENT-001",
+      "surface": "GITHUB",
+      "locator": {
+        "path": "governance/retirements/PROSE-SYSTEM-RETIREMENT-001.json"
+      },
+      "observed_git_blob_sha": "d0f90a382eba78919e42229b940021dea2637575",
+      "evidence_class": "CURRENT_RETIREMENT_AUTHORITY",
+      "system_affinity": [
+        "SYSTEM_MASTER",
+        "BOOK"
+      ],
+      "byte_availability": "SUBJECT_REPO",
+      "expected_sha256": null,
+      "digest_authority": "A01_VERIFY_ON_RUN",
+      "reuse_disposition": "REFERENCE_ONLY",
+      "notes": "Historical Prose evidence is preserved; this record dispatches no Prose work."
+    },
+    {
+      "source_id": "GIT-PROGRAMMING-LIVE-MATERIALIZATION-CHECKPOINT-001",
+      "surface": "GITHUB",
+      "locator": {
+        "path": "governance/knowledge-recovery/checkpoints/PROGRAMMING-LIVE-MATERIALIZATION-CHECKPOINT-001.json"
+      },
+      "observed_git_blob_sha": "177eb05c99f3e2e19d5e50d2bf4ead3e782108fb",
+      "evidence_class": "EXTERNAL_BYTE_OBSERVATION_CHECKPOINT",
+      "system_affinity": [
+        "PROGRAMMING"
+      ],
+      "byte_availability": "SUBJECT_REPO",
+      "expected_sha256": null,
+      "digest_authority": "A01_VERIFY_ON_RUN",
+      "reuse_disposition": "MIGRATION_INPUT",
+      "notes": "Carries five exact workspace observations and an explicit repository transport blocker; it is metadata, not the original external bytes."
+    }
+  ],
+  "external_byte_observations": [
+    {
+      "source_id": "LIB-PROGRAMMING-BUILD-EXECUTION-LEDGER-001",
+      "file_id": "file_00000000c094822fb552553a2e53c590",
+      "version_id": "1",
+      "observed_byte_length": 1831588,
+      "observed_sha256": "fcd985e496c40f3578ad989cc216d81d1cc9311b3cbe9b235fde8a9dfdee7181",
+      "prior_claim_match": true,
+      "custody_state": "MATERIALIZED_EXACT_BYTES__NOT_STAGED",
+      "a01_verified": false
+    },
+    {
+      "source_id": "LIB-PROGRAMMING-UIUX-DESIGN-001",
+      "file_id": "file_0000000060b0822f96b6b73dd33e2c66",
+      "version_id": "1",
+      "observed_byte_length": 6494,
+      "observed_sha256": "bb5b6abebccaea3b735d089ee40a414ed665e5178d9d90c6c7d040c273fb6818",
+      "prior_claim_match": true,
+      "custody_state": "MATERIALIZED_EXACT_BYTES__NOT_STAGED",
+      "a01_verified": false
+    },
+    {
+      "source_id": "LIB-PROGRAMMING-CROSSCUT-R5U-001",
+      "file_id": "file_000000006ddc822f99727a8d935244a9",
+      "version_id": "1",
+      "observed_byte_length": 3171,
+      "observed_sha256": "e62e0014c3ecf99fa0d58e07a87e8f4fc925835a8f00ec329702e69eaaca2793",
+      "prior_claim_match": true,
+      "custody_state": "MATERIALIZED_EXACT_BYTES__NOT_STAGED",
+      "a01_verified": false
+    },
+    {
+      "source_id": "LIB-PROGRAMMING-STATIC-WAVE-EVIDENCE-001",
+      "file_id": "file_000000008a38822fb3db490e3ac10d25",
+      "version_id": "1",
+      "observed_byte_length": 9223,
+      "observed_sha256": "79a9c9d73981144dd97fab710ea3ad55817f075179cd5f03a1da05f0a1eb32d3",
+      "prior_claim_match": true,
+      "custody_state": "MATERIALIZED_EXACT_BYTES__NOT_STAGED",
+      "a01_verified": false
+    },
+    {
+      "source_id": "LIB-PROGRAMMING-AUD038-001",
+      "file_id": "file_000000002bcc822f82a344ae23813df1",
+      "version_id": "1",
+      "observed_byte_length": 19717,
+      "observed_sha256": "5df043fd4d2a16483e9a6242255aa2eca28878ad1b297df737b56658d5c319d2",
+      "prior_claim_match": null,
+      "custody_state": "MATERIALIZED_EXACT_BYTES__NOT_STAGED",
+      "a01_verified": false
+    }
+  ],
+  "unresolved_census": {
+    "inherited_pilot_external_bytes_pending": 26,
+    "inherited_pilot_identity_unproven": 2,
+    "exact_external_objects_observed": 5,
+    "exact_external_objects_staged_in_approved_immutable_intake": 0,
+    "exact_external_objects_a01_verified": 0,
+    "external_objects_not_yet_observed": 21,
+    "historical_identity_unproven_records": 2,
+    "terminally_resolved_unresolved_pilot_records": 0,
+    "note": "Workspace observation is progress but is not a terminal custody state under the active contract."
+  },
+  "blocker": {
+    "class": "REPOSITORY_BINARY_TRANSPORT_BOUNDARY",
+    "affected_sources": [
+      "LIB-PROGRAMMING-BUILD-EXECUTION-LEDGER-001",
+      "LIB-PROGRAMMING-UIUX-DESIGN-001",
+      "LIB-PROGRAMMING-CROSSCUT-R5U-001",
+      "LIB-PROGRAMMING-STATIC-WAVE-EVIDENCE-001",
+      "LIB-PROGRAMMING-AUD038-001"
+    ],
+    "next_condition": "An approved transport must move the exact observed bytes into an immutable A-01-readable intake location without substitution. Until then, preserve hashes and locators and continue independent source discovery."
+  },
+  "qualification_state": {
+    "candidate_ready": false,
+    "a01_requeue_ready": false,
+    "a01_pass": false,
+    "overnight_eligible": false,
+    "required_before_request": [
+      "all 28 unresolved pilot records receive durable terminal custody dispositions",
+      "exact staged corpus is frozen",
+      "current-authority subject SHA is created",
+      "deterministic hosted prequalification passes",
+      "current A-01 registry/policy admits that exact subject"
+    ]
+  },
+  "successor": "Continue authorized source discovery for the 21 unobserved external records and two historical identity-unproven families; separately build system packets and trace candidates for repository-visible catalog sources. Do not let the transport blocker stop independent catalog/archive recovery."
+}
