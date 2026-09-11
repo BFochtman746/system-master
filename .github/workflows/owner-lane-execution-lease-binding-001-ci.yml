@@ -1,0 +1,46 @@
+name: Owner Lane Execution Lease Binding 001
+
+on:
+  push:
+    branches:
+      - system-master/owner-lane-execution-lease-binding-001
+    paths:
+      - 'governance/execution/SYSTEM-MASTER-OWNER-LANE-EXECUTION-LEASE-BINDING-001.json'
+      - 'system-master/f-wp-007/src/main/java/org/systemmaster/core/CoordinationContracts.java'
+      - 'system-master/f-wp-007/src/main/java/org/systemmaster/core/ExecutionLeaseManager.java'
+      - 'system-master/f-wp-007/src/main/java/org/systemmaster/core/ConflictDetector.java'
+      - 'system-master/f-wp-007/src/main/java/org/systemmaster/core/ChangeCoordinator.java'
+      - 'system-master/f-wp-007/src/main/java/org/systemmaster/core/OwnerLaneExecutionLeaseCoordinator.java'
+      - 'system-master/f-wp-007/src/test/java/org/systemmaster/core/Fwp007QualificationTest.java'
+      - 'system-master/f-wp-007/src/test/java/org/systemmaster/core/OwnerLaneExecutionLeaseCoordinatorTest.java'
+      - '.github/scripts/owner-lane-execution-lease-binding-001-qualify.js'
+      - '.github/workflows/owner-lane-execution-lease-binding-001-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Qualify owner-lane execution lease binding
+        env:
+          RUNNER_TEMP: ${{ runner.temp }}
+        run: |
+          set -euo pipefail
+          node --check .github/scripts/owner-lane-execution-lease-binding-001-qualify.js
+          node .github/scripts/owner-lane-execution-lease-binding-001-qualify.js
+          test -s "${RUNNER_TEMP}/owner-lane-execution-lease-binding-${GITHUB_RUN_ID}/summary.json"
+          cat "${RUNNER_TEMP}/owner-lane-execution-lease-binding-${GITHUB_RUN_ID}/summary.json"
+      - name: Upload qualification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: owner-lane-execution-lease-binding-001-${{ github.run_id }}
+          path: ${{ runner.temp }}/owner-lane-execution-lease-binding-${{ github.run_id }}
+          if-no-files-found: error
