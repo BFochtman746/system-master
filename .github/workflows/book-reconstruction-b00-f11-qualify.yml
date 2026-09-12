@@ -1,0 +1,119 @@
+name: BOOK Reconstruction B00 F11 Qualification
+
+on:
+  push:
+    branches:
+      - book-system/reconstruction-b00-f11-v1-v2-migration
+    paths:
+      - 'system-master/book-system/**'
+      - 'qualification/book-system/**'
+      - '.github/scripts/book-*.js'
+      - '.github/workflows/book-reconstruction-b00-f11-qualify.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    name: Node ${{ matrix.node }} — B00 96-case + frozen predecessor regression
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['22','24']
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Record exact subject
+        run: |
+          echo "subject_sha=${GITHUB_SHA}" | tee b00-f11-subject-${{ matrix.node }}.txt
+          git rev-parse HEAD | tee -a b00-f11-subject-${{ matrix.node }}.txt
+          node --version | tee -a b00-f11-subject-${{ matrix.node }}.txt
+
+      # Frozen 96-case reconstructed denominator.
+      - name: Q001-Q036 canonical parent pure core
+        run: node .github/scripts/book-system-canonical-parent-v2-core-001-qualify.js | tee denom-q001-q036-${{ matrix.node }}.log
+      - name: Q037-Q050 durable canonical parent store
+        run: node .github/scripts/book-system-canonical-parent-v2-store-001-qualify.js | tee denom-q037-q050-${{ matrix.node }}.log
+      - name: Q051-Q058 version admission rebind
+        run: node .github/scripts/book-reconstruction-b00-f5-version-admission-001-qualify.js | tee denom-q051-q058-${{ matrix.node }}.log
+      - name: Q059-Q060 lifecycle rebind
+        run: node .github/scripts/book-reconstruction-b00-f6b-lifecycle-rebind-001-qualify.js | tee denom-q059-q060-${{ matrix.node }}.log
+      - name: Q061-Q062 author decision rebind
+        run: node .github/scripts/book-reconstruction-b00-f7-author-decision-rebind-001-qualify.js | tee denom-q061-q062-${{ matrix.node }}.log
+      - name: Q063 integration proposal rebind
+        run: node .github/scripts/book-reconstruction-b00-f8-integration-proposal-rebind-001-qualify.js | tee denom-q063-${{ matrix.node }}.log
+      - name: Q064 Q066 Q085-Q090 workflow evidence and authority boundary
+        run: node .github/scripts/book-reconstruction-b00-f10-evidence-recovery-seam-001-qualify.js | tee denom-q064-q066-q085-q090-${{ matrix.node }}.log
+      - name: Q065 export freeze publication fence
+        run: node .github/scripts/book-reconstruction-b00-f9-export-freeze-rebind-001-qualify.js | tee denom-q065-${{ matrix.node }}.log
+      - name: Q067-Q076 rights custody denominator
+        run: node .github/scripts/book-system-rights-custody-evidence-001-qualify.js | tee denom-q067-q076-${{ matrix.node }}.log
+      - name: Q077-Q084 governing style denominator
+        run: node .github/scripts/book-system-governing-style-profile-001-qualify.js | tee denom-q077-q084-${{ matrix.node }}.log
+      - name: Q091-Q096 v1 to v2 lossless migration
+        run: node .github/scripts/book-reconstruction-b00-f11-v1-v2-migration-001-qualify.js | tee denom-q091-q096-${{ matrix.node }}.log
+
+      # Frozen cumulative predecessor regression set from B00 E1 design lock.
+      - name: PRE01 recovered canonical state
+        run: node .github/scripts/book-system-canonical-state-001-qualify.js | tee pred-01-canonical-state-${{ matrix.node }}.log
+      - name: PRE02 recovered version rollback
+        run: node .github/scripts/book-system-version-and-rollback-001-qualify-v2.js | tee pred-02-version-rollback-${{ matrix.node }}.log
+      - name: PRE03 recovered content admission
+        run: node .github/scripts/book-system-content-object-admission-001-qualify.js | tee pred-03-content-admission-${{ matrix.node }}.log
+      - name: PRE04 recovered author applicability guard
+        run: node .github/scripts/book-system-content-admission-author-decision-applicability-guard-004-qualify.js | tee pred-04-author-applicability-${{ matrix.node }}.log
+      - name: PRE05 recovered lifecycle transition
+        run: node .github/scripts/book-system-lifecycle-transition-001-qualify.js | tee pred-05-lifecycle-transition-${{ matrix.node }}.log
+      - name: PRE06 lifecycle parent compatibility
+        run: node .github/scripts/book-system-lifecycle-current-parent-compatibility-001-qualify-v2.js | tee pred-06-lifecycle-compatibility-${{ matrix.node }}.log
+      - name: PRE07 lifecycle parent rebind
+        run: node .github/scripts/book-system-lifecycle-current-parent-rebind-001-qualify.js | tee pred-07-lifecycle-rebind-${{ matrix.node }}.log
+      - name: PRE08 recovered author decision queue
+        run: node .github/scripts/book-system-author-decision-queue-001-qualify-v2.js | tee pred-08-author-queue-${{ matrix.node }}.log
+      - name: PRE09 recovered author current subject guard
+        run: node .github/scripts/book-system-author-decision-current-subject-guard-001-qualify.js | tee pred-09-author-current-${{ matrix.node }}.log
+      - name: PRE10 recovered integration proposal runtime
+        run: node .github/scripts/book-system-integration-proposal-runtime-002-qualify.js | tee pred-10-integration-${{ matrix.node }}.log
+      - name: PRE11 recovered export freeze
+        run: node .github/scripts/book-system-export-freeze-001-reconciled-qualify.js | tee pred-11-export-freeze-${{ matrix.node }}.log
+      - name: PRE12 existing book recovery semantic core
+        run: node .github/scripts/book-system-existing-book-recovery-semantic-core-001-qualify-v2.js | tee pred-12-existing-recovery-${{ matrix.node }}.log
+      - name: PRE13 end to end authority guards
+        run: node .github/scripts/book-system-e2e-authority-guards-001-qualify.js | tee pred-13-e2e-authority-${{ matrix.node }}.log
+      - name: PRE14 end to end authoring
+        run: node .github/scripts/book-system-end-to-end-authoring-001-qualify-v2.js | tee pred-14-e2e-authoring-${{ matrix.node }}.log
+      - name: PRE15 workflow authority contract
+        run: node .github/scripts/book-workflow-orchestrator-authority-contract-001-qualify.js | tee pred-15-workflow-authority-${{ matrix.node }}.log
+      - name: PRE16 workflow admission handoff
+        run: node .github/scripts/book-workflow-orchestrator-book-admission-handoff-001-qualify.js | tee pred-16-workflow-admission-${{ matrix.node }}.log
+      - name: PRE17 workflow concurrency
+        run: node .github/scripts/book-workflow-orchestrator-concurrency-rules-001-qualify.js | tee pred-17-workflow-concurrency-${{ matrix.node }}.log
+      - name: PRE18 workflow failure semantics
+        run: node .github/scripts/book-workflow-orchestrator-failure-semantics-001-qualify.js | tee pred-18-workflow-failure-${{ matrix.node }}.log
+      - name: PRE19 workflow retry idempotency
+        run: node .github/scripts/book-workflow-orchestrator-retry-idempotency-rules-001-qualify.js | tee pred-19-workflow-retry-${{ matrix.node }}.log
+      - name: PRE20 workflow cancellation resume
+        run: node .github/scripts/book-workflow-orchestrator-cancellation-resume-001-qualify.js | tee pred-20-workflow-resume-${{ matrix.node }}.log
+      - name: PRE21 workflow evidence provenance
+        run: node .github/scripts/book-workflow-orchestrator-evidence-provenance-emission-001-qualify.js | tee pred-21-workflow-evidence-${{ matrix.node }}.log
+
+      - name: Hash complete evidence set
+        if: always()
+        run: sha256sum b00-f11-subject-${{ matrix.node }}.txt denom-*.log pred-*.log > b00-f11-node-${{ matrix.node }}.sha256
+      - name: Upload complete evidence set
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: book-reconstruction-b00-f11-node-${{ matrix.node }}-${{ github.sha }}
+          path: |
+            b00-f11-subject-${{ matrix.node }}.txt
+            denom-*.log
+            pred-*.log
+            b00-f11-node-${{ matrix.node }}.sha256
+          if-no-files-found: error
