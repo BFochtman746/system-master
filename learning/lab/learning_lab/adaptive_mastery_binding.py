@@ -1,20 +1,127 @@
 from __future__ import annotations
 
 from dataclasses import asdict
-from typing import Any, Dict
+from typing import Any, Dict, Iterable, List, Mapping, Tuple
 
 from .mastery_conditions import MASTERY_CONDITION_POLICY_VERSION, evaluate_mastery_conditions
 from .mastery_evidence_reader import validated_attempts_for_skill
 from .models import GateState, MasteryProjection, MasteryStage
 
 
-S04_ADAPTIVE_MASTERY_BINDING_VERSION = "001M-S04-ADAPTIVE-CONSUMES-S03-V2"
+S04_ADAPTIVE_MASTERY_BINDING_VERSION = "001M-S04-ADAPTIVE-CONSUMES-S03-V3"
 
 
 def _latest_correct(attempts, attempt_ids):
     allowed = set(attempt_ids)
     values = [a for a in attempts if a.get("attempt_id") in allowed and bool(a.get("correct"))]
     return max(values, key=lambda a: int(a.get("submitted_at", 0)), default=None)
+
+
+def _material_transfer_task(task: Mapping[str, Any] | None) -> bool:
+    if not task:
+        return False
+    novelty = task.get("novelty")
+    if isinstance(novelty, str):
+        return novelty.upper() in {"MATERIALLY_NOVEL", "NOVEL_CONTEXT"}
+    if not isinstance(novelty, Mapping):
+        return False
+    changed = any(value is True for key, value in novelty.items() if key != "preserved_construct")
+    preserved_construct = bool(novelty.get("preserved_construct"))
+    return changed and preserved_construct
+
+
+def _copy_with_authoritative_transfer_context(self, attempts: Iterable[Mapping[str, Any]]) -> List[Dict[str, Any]]:
+    """Translate frozen Curriculum transfer-task metadata into S03 evidence input.
+
+    Historical adaptive attempts intentionally stored the task identity, while the
+    materially-novel declaration remained on the versioned transfer task. S03
+    requires novelty to be explicit at evaluation time. This bridge reads that
+    already-admitted task metadata and enriches only the in-memory evaluation copy;
+    it does not rewrite attempt evidence or create a new mastery authority.
+    """
+    values: List[Dict[str, Any]] = []
+    for original in attempts:
+        attempt = dict(original)
+        if str(attempt.get("mode")) == "TRANSFER_CHECK" and not attempt.get("transfer_novelty"):
+            task = self.repo.get_object("transfer_task", str(attempt.get("item_id", "")), 1)
+            if _material_transfer_task(task):
+                attempt["transfer_novelty"] = "MATERIALLY_NOVEL"
+                attempt["transfer_context_id"] = str(attempt.get("item_id", ""))
+        values.append(attempt)
+    return values
+
+
+def _mark_adaptive_freshness_exclusions(
+    attempts: List[Dict[str, Any]],
+    *,
+    retention_qualified_ids: Iterable[str],
+) -> Tuple[List[Dict[str, Any]], Dict[str, str]]:
+    """Apply adaptive freshness fences without changing S03 gate semantics.
+
+    S03 decides whether evidence is admissible for mastery conditions. S04 adds the
+    already-frozen adaptive rule that repeating the same successful retention family
+    is not fresh maintenance evidence, and that transfer evidence must be current to
+    the latest qualifying retention and use an uncompromised transfer family.
+    """
+    values = [dict(a) for a in attempts]
+    by_id = {str(a.get("attempt_id", "")): a for a in values}
+    exclusions: Dict[str, str] = {}
+
+    seen_successful_retention_families = set()
+    qualified = set(str(x) for x in retention_qualified_ids)
+    for attempt in values:
+        aid = str(attempt.get("attempt_id", ""))
+        if aid not in qualified or not bool(attempt.get("correct")):
+            continue
+        family = str(attempt.get("item_family_id", ""))
+        if family in seen_successful_retention_families:
+            attempt["evidence_standing"] = "STALE"
+            exclusions[aid] = "REPEATED_RETENTION_FAMILY_NOT_FRESH"
+        else:
+            seen_successful_retention_families.add(family)
+
+    return values, exclusions
+
+
+def _mark_transfer_freshness_exclusions(
+    attempts: List[Dict[str, Any]],
+    *,
+    current_retention: Mapping[str, Any] | None,
+    exclusions: Dict[str, str],
+) -> Tuple[List[Dict[str, Any]], Dict[str, str]]:
+    values = [dict(a) for a in attempts]
+    compromised_families = {
+        str(a.get("item_family_id", ""))
+        for a in values
+        if str(a.get("mode")) == "TRANSFER_CHECK"
+        and (
+            not bool(a.get("correct"))
+            or bool(a.get("assisted"))
+            or bool(a.get("answer_revealed_before_commit"))
+        )
+    }
+    current_retention_time = (
+        int(current_retention.get("submitted_at", 0)) if current_retention is not None else None
+    )
+
+    for attempt in values:
+        if str(attempt.get("mode")) != "TRANSFER_CHECK":
+            continue
+        aid = str(attempt.get("attempt_id", ""))
+        if not bool(attempt.get("correct")):
+            continue
+        if bool(attempt.get("assisted")) or bool(attempt.get("answer_revealed_before_commit")):
+            continue
+        family = str(attempt.get("item_family_id", ""))
+        submitted_at = int(attempt.get("submitted_at", 0))
+        if family in compromised_families:
+            attempt["evidence_standing"] = "STALE"
+            exclusions[aid] = "EXPOSED_TRANSFER_FAMILY_CANNOT_QUALIFY_AFTER_FAILURE"
+        elif current_retention_time is not None and submitted_at < current_retention_time:
+            attempt["evidence_standing"] = "STALE"
+            exclusions[aid] = "TRANSFER_BEFORE_CURRENT_RETENTION"
+
+    return values, exclusions
 
 
 def _s03_bound_compute_projection(
@@ -36,21 +143,42 @@ def _s03_bound_compute_projection(
     """
     all_attempts = validated_attempts_for_skill(self.repo, learner_id, course_id, skill_id)
     as_of = int(now)
-    attempts = [a for a in all_attempts if int(a.get("submitted_at", 0)) <= as_of]
+    attempts = [dict(a) for a in all_attempts if int(a.get("submitted_at", 0)) <= as_of]
     future_attempt_ids = sorted(
         str(a.get("attempt_id"))
         for a in all_attempts
         if int(a.get("submitted_at", 0)) > as_of
     )
+    attempts = _copy_with_authoritative_transfer_context(self, attempts)
     transfer_required = bool(self._transfer_required(skill_id))
-    evaluated = evaluate_mastery_conditions(
+
+    def evaluate(values):
+        return evaluate_mastery_conditions(
+            values,
+            retention_delay_seconds=int(self.RETENTION_DELAY_SECONDS),
+            retention_required=True,
+            transfer_required=transfer_required,
+            independence_required=True,
+            policy_version=MASTERY_CONDITION_POLICY_VERSION,
+        )
+
+    preliminary = evaluate(attempts)
+    attempts, adaptive_exclusions = _mark_adaptive_freshness_exclusions(
         attempts,
-        retention_delay_seconds=int(self.RETENTION_DELAY_SECONDS),
-        retention_required=True,
-        transfer_required=transfer_required,
-        independence_required=True,
-        policy_version=MASTERY_CONDITION_POLICY_VERSION,
+        retention_qualified_ids=preliminary["retention"]["qualifying_attempt_ids"],
     )
+    retention_evaluation = evaluate(attempts)
+    current_retention = _latest_correct(
+        attempts,
+        retention_evaluation["retention"]["qualifying_attempt_ids"],
+    )
+    attempts, adaptive_exclusions = _mark_transfer_freshness_exclusions(
+        attempts,
+        current_retention=current_retention,
+        exclusions=adaptive_exclusions,
+    )
+    evaluated = evaluate(attempts)
+    evaluated["excluded_attempts"].update(adaptive_exclusions)
 
     stage = evaluated["stage"]
     gates = dict(evaluated["gate_states"])
