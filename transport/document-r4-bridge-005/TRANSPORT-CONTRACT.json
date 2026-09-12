@@ -1,0 +1,58 @@
+{
+  "contract_id": "DOCUMENT-R4-TRANSPORT-CONTRACT-002",
+  "contract_version": 2,
+  "owner": "SYSTEM_MASTER/DOCUMENTS",
+  "source_subject": {
+    "handoff_name": "CR001_R4_EXACT_225_SOURCE_HANDOFF_20260910.zip",
+    "handoff_sha256": "ada701cfa15e6162b6cdf67bc6c0803540a611b08a23aeeeddd1045d8ce2d8ab",
+    "canonical_manifest_name": "CANONICAL-SOURCE-TREE-MANIFEST.csv",
+    "canonical_manifest_sha256": "ed36fc9cfd38b04a8d0174efed06b03e8e25b0a45fc0adc4d47fe3457c2ee367",
+    "source_rows": 225,
+    "regular_carrier_entries": 227
+  },
+  "deterministic_carrier": {
+    "filename": "CR001_R4_225_SOURCE_WITH_EVIDENCE_20260910.tar.xz",
+    "tar_sha256": "e05167645dda63ae4d33ad66f08fa9cc5e53ab03369ec50c4ec5cb811d025267",
+    "tar_bytes": 2754560,
+    "carrier_sha256": "77a6e2288d475865622bad4b2c66647a599c26a3899c6617b33d7b2b334855bd",
+    "carrier_bytes": 301008,
+    "recipe": {
+      "tar_format": "GNU_FORMAT",
+      "member_order": "bytewise lexicographic member name",
+      "member_mode": "0644",
+      "uid": 0,
+      "gid": 0,
+      "uname": "",
+      "gname": "",
+      "mtime": 0,
+      "member_types": "regular-files-only",
+      "source_prefix": "source/",
+      "root_evidence": [
+        "CANONICAL-SOURCE-TREE-MANIFEST.csv",
+        "RECONSTRUCTION-RECEIPT.json"
+      ],
+      "compression": "xz -9e --threads=1 --check=crc64 --stdout",
+      "qualified_xz_version": "xz (XZ Utils) 5.8.1"
+    }
+  },
+  "chunk_contract": {
+    "encoding": "RFC4648_BASE64_SINGLE_LINE_PLUS_LF",
+    "raw_bytes_per_full_chunk": 65536,
+    "chunk_count": 5,
+    "naming": "chunk-%03d.b64",
+    "chunk_manifest_path": "transport/document-r4/CHUNK-MANIFEST.json",
+    "chunk_manifest_sha256": "daa71c58fbcb38e3a8daf1b146531d80147825a1efc15a95928dbca3ffbcd108"
+  },
+  "repository_admission": {
+    "payload_path": "transport/document-r4",
+    "ready_marker": "transport/document-r4/READY",
+    "ready_policy": "READY is forbidden until all 5 exact chunk files exist and verify against this contract and the chunk manifest.",
+    "historical_pass_transfer": false,
+    "source_custody_before_payload_commit": "BLOCKED"
+  },
+  "tooling_provenance": {
+    "build_transport_py_sha256": "673bcc719b4e4e7e0f8dc00c49799615585cb45d53b2bc8529355a00dd031f81",
+    "verify_and_extract_transport_py_sha256": "6e2bc3702a96ee02afd4d49ce2118814599ca68569d2828e182d23661e82ea03",
+    "test_transport_contract_py_sha256": "b203fed825770fa1cb6eb32b3b74b427085b04b657336981b9e92c39c4bf9829"
+  }
+}
