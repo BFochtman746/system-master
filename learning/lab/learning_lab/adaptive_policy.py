@@ -90,6 +90,7 @@ def evaluate_adaptive_candidates(
     rejected = [item for item in normalized if not item["eligible"]]
     safe_context = _sanitize_ranking_context(ranking_context)
     model_may_rank = bool(model_scores) and bool(model_calibrated) and bool(model_approved)
+    model_participated = False
 
     if not eligible:
         return {
@@ -140,6 +141,7 @@ def evaluate_adaptive_candidates(
         top_priority = _reason_priority(selected.get("reason_codes", []))
         tied = [item for item in deterministic_ranked if _reason_priority(item.get("reason_codes", [])) == top_priority]
         if model_may_rank and len(tied) > 1:
+            model_participated = True
             selected = sorted(
                 tied,
                 key=lambda item: (
@@ -176,7 +178,7 @@ def evaluate_adaptive_candidates(
         "rejected_candidate_ids": [item["candidate_id"] for item in rejected],
         "selected_candidate_id": selected["candidate_id"],
         "selection_reason_codes": list(selected_action["selection_reason_codes"]),
-        "model_participated": bool(model_may_rank and not learner_override_used),
+        "model_participated": model_participated,
         "model_standing": model_standing,
         "learner_choice_candidate_id": learner_choice_candidate_id,
         "learner_override_used": learner_override_used,
