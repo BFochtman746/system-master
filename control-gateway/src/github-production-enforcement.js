@@ -39,6 +39,24 @@ export function validateProductionEnforcementPolicy(policy) {
   return true;
 }
 
+function parseWriterActorId(actorId) {
+  const value = typeof actorId === 'string' && /^[1-9][0-9]*$/.test(actorId.trim()) ? Number(actorId.trim()) : actorId;
+  if (!Number.isSafeInteger(value) || value <= 0) fail('WRITER_IDENTITY_BINDING_INVALID', 'dedicated production writer Integration actor ID must be a positive safe integer');
+  return value;
+}
+
+export function bindProductionWriterIdentity(policy, actorId) {
+  validateProductionEnforcementPolicy(policy);
+  const boundActorId = parseWriterActorId(actorId);
+  if (policy.writer_identity.actor_id !== null && policy.writer_identity.actor_id !== boundActorId) {
+    fail('WRITER_IDENTITY_BINDING_MISMATCH', 'runtime Integration actor ID conflicts with the policy-bound writer identity');
+  }
+  const bound = structuredClone(policy);
+  bound.writer_identity.actor_id = boundActorId;
+  validateProductionEnforcementPolicy(bound);
+  return Object.freeze(bound);
+}
+
 export function desiredRepositoryRuleset(policy) {
   validateProductionEnforcementPolicy(policy);
   if (!Number.isSafeInteger(policy.writer_identity.actor_id) || policy.writer_identity.actor_id <= 0) fail('WRITER_IDENTITY_UNBOUND', 'dedicated production writer GitHub App integration ID is not bound');
