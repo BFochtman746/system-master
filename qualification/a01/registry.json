@@ -1,5 +1,5 @@
 {
-  "registry_version": 31,
+  "registry_version": 32,
   "qualifications": {
     "A01-CONTROL-PLANE-SELFTEST": {
       "workstream_id": "SYSTEM-MASTER",
@@ -24,12 +24,12 @@
     "SECOND-SHIFT-SUPERVISOR-V2-A01-STRESS": {
       "workstream_id": "SECOND-SHIFT-CONTROL-GATEWAY",
       "gate_class": "consolidated",
-      "source": "subject",
+      "source": "control_plane",
       "executable": "node",
       "args": [".github/scripts/a01-second-shift-supervisor-v2-qualify.js"],
       "evidence_artifact": "second-shift-supervisor-v2-a01-stress",
       "overnight_eligible": false,
-      "description": "Qualify the exact admitted SecondShiftSupervisorV2 and Control Gateway handoff boundary on A-01: exact subject identity, gateway-to-supervisor admission binding, sole A-01 supervisor scheduling ownership, SQLite lease/fencing/idempotency/outbox semantics, crash/concurrency stress, and deterministic evidence production. PASS is exact-SHA A-01 evidence only and does not production-activate the Control Gateway."
+      "description": "Run the cumulative CG-008 through CG-011 Foundation qualification wrapper from the admitted control plane against the immutable exact subject checkout, preserving exact subject bytes while validating handoff, coordination, authority closure, night scheduling, failure/restart idempotency, dispatch replay, adversarial closure, and 20,000-transition stress on A-01 Windows."
     },
     "BOOK-SYSTEM-CANONICAL-BOOK-STATE-MODEL-001": {
       "workstream_id": "BOOK-SYSTEM",
