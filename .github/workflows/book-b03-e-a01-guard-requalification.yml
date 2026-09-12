@@ -1,0 +1,22 @@
+name: Book B03 E A01 Guard Requalification
+
+on:
+  push:
+    branches: [book-system/control-v1]
+    paths: ['.github/workflows/book-b03-e-a01-guard-requalification.yml']
+  workflow_dispatch:
+
+jobs:
+  qualify:
+    uses: ./.github/workflows/a01-control-plane-gateway.yml
+    with:
+      qualification_id: BOOK-SYSTEM-E2E-AUTHORITY-GUARDS-001
+      workstream_id: BOOK-SYSTEM
+      subject_sha: ${{ github.sha }}
+      origin_ref: ${{ github.ref }}
+      resume_on_pass: Rebind PRE14 guard dependency to this exact A01-qualified subject, rerun consolidated E2E authoring, then rerun B03-E cumulative qualification.
+      resume_on_failure: Diagnose only the current Book E2E authority-guard qualification failure and rerun the minimum sufficient gate.
+      notification_target: book-system-control-v1
+      execution_context: normal
+      qualifier_timeout_minutes: 28
+      job_timeout_minutes: 30
