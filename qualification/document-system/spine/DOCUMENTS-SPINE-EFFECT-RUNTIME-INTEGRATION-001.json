@@ -7,16 +7,16 @@
   "current_authority": "CURRENT-AUTHORITY-003",
   "topology": "TOPOLOGY-005",
   "candidate_branch": "documents/spine-effect-runtime-001-20260912",
-  "exact_qualified_subject_sha": "e6358b90ea92fff8f2e70e59d90c705f0dc3e88c",
-  "qualification_workflow_run_id": 34689307899,
-  "qualification_job_id": 103541658239,
+  "exact_qualified_subject_sha": "194d347d1cde9f385456f64fc91d9bbff0a51dc1",
+  "qualification_workflow_run_id": 34689366267,
+  "qualification_job_id": 103541813329,
   "environment": {
     "runner": "github-hosted",
     "os": "ubuntu-24.04",
     "java": "Temurin 21",
     "standing": "HOSTED_PORTABLE_ONLY"
   },
-  "status": "QUALIFIED_PORTABLE__EXTERNAL_FENCE_RESTORED__OWNER_CONTROL_FREEZE_PENDING",
+  "status": "QUALIFIED_PORTABLE__EXTERNAL_FENCE_RESTORED__INVALID_WORKFLOW_REMOVED__OWNER_CONTROL_FREEZE_PENDING",
   "route_integration": {
     "effectful_routes": ["REBUILD", "MASTER"],
     "runtime": "DocumentExistingArtifactEffectExecutor",
@@ -49,6 +49,10 @@
         "class": "QUALIFIER_EXTERNAL_FENCE_OVERSCOPE",
         "evidence": "qualification/document-system/spine/DOCUMENTS-SPINE-EFFECT-RUNTIME-EXTERNAL-FENCE-RECONCILIATION-001.json",
         "repair": "restore ExternalQualification callers to the no-test-provider path so real external admission is still required and effectful execution otherwise fails closed"
+      },
+      {
+        "class": "QUALIFICATION_WORKFLOW_NOISE",
+        "repair": "remove malformed documents-spine-effect-runtime-cumulative-rebind.yml after its diagnostic use; final exact subject requalified after cleanup"
       }
     ]
   },
@@ -83,7 +87,7 @@
     "required_work": [
       "re-read CURRENT-AUTHORITY and exact documents/control-v1 live head",
       "re-read Documents delegation and repair state and fail closed on any new overlap",
-      "reconcile exact qualified subject e6358b90ea92fff8f2e70e59d90c705f0dc3e88c onto the live Documents owner lineage without importing non-Documents semantics",
+      "reconcile exact qualified subject 194d347d1cde9f385456f64fc91d9bbff0a51dc1 onto the live Documents owner lineage without importing non-Documents semantics",
       "preserve exact qualification receipt and update Documents control evidence",
       "rerun changed-subject qualification if reconciliation changes executable bytes",
       "do not claim native, external-provider, publication, production or A-01 standing"
