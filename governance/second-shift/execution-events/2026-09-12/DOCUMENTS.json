@@ -1,0 +1,106 @@
+{
+  "schema_id": "SECOND-SHIFT-UTILIZATION-EVENT-SCHEMA-001",
+  "shift_id": "SYSTEM-MASTER-SECOND-SHIFT-2026-09-12",
+  "shift_date": "2026-09-12",
+  "lane": "DOCUMENTS",
+  "events": [
+    {
+      "event_id": "DOC-20260912-011207-SHIFT-OPEN",
+      "occurred_at": "2026-09-12T01:12:07-04:00",
+      "event_type": "SHIFT_OPEN",
+      "lane": "DOCUMENTS",
+      "control_ref": "documents/control-v1",
+      "control_head": "cff6c9a1c6674fc84484fdb8207c3559499e4c2e",
+      "delegation_id": "SECOND-SHIFT-DOCUMENTS-POST-ADAPTER-OPEN-SEAM-CENSUS-001",
+      "objective_id": "DOCUMENTS-POST-SYSTEM-MASTER-ADAPTER-OPEN-SEAM-CENSUS-001",
+      "evidence": "governance/second-shift/TONIGHT-2026-09-12-FORENSIC-WORKLIST.md; live authority/topology/repair/delegation re-read"
+    },
+    {
+      "event_id": "DOC-20260912-011208-CLAIMED",
+      "occurred_at": "2026-09-12T01:12:08-04:00",
+      "event_type": "CLAIMED",
+      "lane": "DOCUMENTS",
+      "control_ref": "documents/control-v1",
+      "control_head": "cff6c9a1c6674fc84484fdb8207c3559499e4c2e",
+      "delegation_id": "SECOND-SHIFT-DOCUMENTS-POST-ADAPTER-OPEN-SEAM-CENSUS-001",
+      "objective_id": "DOCUMENTS-POST-SYSTEM-MASTER-ADAPTER-OPEN-SEAM-CENSUS-001",
+      "lease_id": "documents-20260912-transport-reconcile-001",
+      "idempotency_key": "DOCUMENTS-R4-TRANSPORT-CONTRACT-RECONCILIATION-003@cff6c9a1",
+      "lease_expires_at": "2026-09-12T01:42:08-04:00",
+      "attempt": 1,
+      "evidence": "No active Documents repair transaction or overlapping mutation claim observed; exact owner head revalidated before mutation."
+    },
+    {
+      "event_id": "DOC-20260912-011209-RUNNING",
+      "occurred_at": "2026-09-12T01:12:09-04:00",
+      "event_type": "RUNNING",
+      "lane": "DOCUMENTS",
+      "control_ref": "documents/control-v1",
+      "control_head": "cff6c9a1c6674fc84484fdb8207c3559499e4c2e",
+      "delegation_id": "SECOND-SHIFT-DOCUMENTS-POST-ADAPTER-OPEN-SEAM-CENSUS-001",
+      "objective_id": "DOCUMENTS-POST-SYSTEM-MASTER-ADAPTER-OPEN-SEAM-CENSUS-001",
+      "lease_id": "documents-20260912-transport-reconcile-001",
+      "idempotency_key": "DOCUMENTS-R4-TRANSPORT-CONTRACT-RECONCILIATION-003@cff6c9a1",
+      "evidence": "Recovered exact R4 handoff/manifest from Library custody and began deterministic transport-contract reconciliation."
+    },
+    {
+      "event_id": "DOC-20260912-011944-PROGRESS",
+      "occurred_at": "2026-09-12T01:19:44-04:00",
+      "event_type": "PROGRESS",
+      "lane": "DOCUMENTS",
+      "control_ref": "documents/control-v1",
+      "control_head": "cff6c9a1c6674fc84484fdb8207c3559499e4c2e",
+      "delegation_id": "SECOND-SHIFT-DOCUMENTS-POST-ADAPTER-OPEN-SEAM-CENSUS-001",
+      "objective_id": "DOCUMENTS-POST-SYSTEM-MASTER-ADAPTER-OPEN-SEAM-CENSUS-001",
+      "lease_id": "documents-20260912-transport-reconcile-001",
+      "idempotency_key": "DOCUMENTS-R4-TRANSPORT-CONTRACT-RECONCILIATION-003@cff6c9a1",
+      "evidence": "Deterministic carrier built twice byte-identically; 225/225 source identity reverified; adversarial transport qualification passed; repair branch advanced through qualification evidence."
+    },
+    {
+      "event_id": "DOC-20260912-012017-COMPLETED",
+      "occurred_at": "2026-09-12T01:20:17-04:00",
+      "event_type": "COMPLETED",
+      "lane": "DOCUMENTS",
+      "control_ref": "documents/control-v1",
+      "control_head": "6a43895dea7b373798e0772f45497b765f3f1260",
+      "delegation_id": "SECOND-SHIFT-DOCUMENTS-POST-ADAPTER-OPEN-SEAM-CENSUS-001",
+      "objective_id": "DOCUMENTS-R4-TRANSPORT-CONTRACT-RECONCILIATION-003",
+      "lease_id": "documents-20260912-transport-reconcile-001",
+      "idempotency_key": "DOCUMENTS-R4-TRANSPORT-CONTRACT-RECONCILIATION-003@cff6c9a1",
+      "evidence": "documents/control-v1/DOCUMENTS-R4-TRANSPORT-CONTRACT-RECONCILIATION-003-CHECKPOINT.md; qualification/document-system/r4/DOCUMENTS-R4-TRANSPORT-CONTRACT-RECONCILIATION-003.json"
+    },
+    {
+      "event_id": "DOC-20260912-012133-PROGRESS",
+      "occurred_at": "2026-09-12T01:21:33-04:00",
+      "event_type": "PROGRESS",
+      "lane": "DOCUMENTS",
+      "control_ref": "documents/control-v1",
+      "control_head": "3e1336f8f4a1285b19fb8dd76ea903412be07cd9",
+      "delegation_id": "SECOND-SHIFT-DOCUMENTS-SPINE-IDENTIFY-DESIGN-LOCK-001",
+      "objective_id": "DOCUMENTS-SPINE-IDENTIFY-PROFILE-DESIGN-LOCK-001",
+      "evidence": "documents/control-v1/DOCUMENTS-SPINE-IDENTIFY-PROFILE-FORENSIC-PREP-001.md — independent source/evidence-based work-ahead prepared while runtime build remains custody-gated."
+    },
+    {
+      "event_id": "DOC-20260912-012215-BLOCKED",
+      "occurred_at": "2026-09-12T01:22:15-04:00",
+      "event_type": "BLOCKED",
+      "lane": "DOCUMENTS",
+      "control_ref": "documents/control-v1",
+      "control_head": "3e1336f8f4a1285b19fb8dd76ea903412be07cd9",
+      "delegation_id": "SECOND-SHIFT-DOCUMENTS-R4-CANONICAL-PAYLOAD-DEPOSIT-004",
+      "objective_id": "DOCUMENTS-R4-CANONICAL-PAYLOAD-DEPOSIT-004",
+      "evidence": "Five exact contract-listed payload chunks are derived locally but are not yet present/re-read from GitHub; READY remains absent and GitHub-native source custody is not claimed."
+    },
+    {
+      "event_id": "DOC-20260912-012215-SUCCESSOR",
+      "occurred_at": "2026-09-12T01:22:15-04:00",
+      "event_type": "SUCCESSOR_BOUND",
+      "lane": "DOCUMENTS",
+      "control_ref": "documents/control-v1",
+      "control_head": "3e1336f8f4a1285b19fb8dd76ea903412be07cd9",
+      "delegation_id": "SECOND-SHIFT-DOCUMENTS-SPINE-IDENTIFY-DESIGN-LOCK-001",
+      "objective_id": "DOCUMENTS-SPINE-IDENTIFY-PROFILE-DESIGN-LOCK-001",
+      "evidence": "governance/second-shift/DOCUMENTS-DELEGATIONS.json epoch 9 at main commit b33f1f55279f8496d1b2dfc25d64073529d5caa8"
+    }
+  ]
+}
