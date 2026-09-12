@@ -172,7 +172,8 @@ public final class DocumentDocxMasteryT01ExternalQualification {
                 new FileDocumentSpineCheckpointStore(root.resolve("spine-checkpoints")),
                 new FileDocumentSpineVersionStore(root.resolve("spine-versions")),
                 new DocumentSpineProofService(new DocumentProcessingService(), worker, clock),
-                clock);
+                clock,
+                org.systemmaster.tools.document.PortableTestDocumentEffectAdmission.provider(clock));
     }
 
     private static DocumentSpineJob job(String sourceId, String resultId) {

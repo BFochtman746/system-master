@@ -406,7 +406,8 @@ public final class DocumentWorldClass001CPortableTests {
                 repository,
                 CLOCK);
         DocumentSpineProofService proofs = new DocumentSpineProofService(new DocumentProcessingService(), worker, CLOCK, validator);
-        return new UniversalDocumentSpine(gateway, checkpointStore(root), versionStore(root), proofs, CLOCK);
+        return new UniversalDocumentSpine(gateway, checkpointStore(root), versionStore(root), proofs, CLOCK,
+                org.systemmaster.tools.document.PortableTestDocumentEffectAdmission.provider(CLOCK));
     }
 
     private static FileDocumentSpineCheckpointStore checkpointStore(Path root) throws Exception {

@@ -342,7 +342,8 @@ public final class DocumentDocxMasteryT01PortableTests {
         DocumentSpineCheckpointStore checkpoints = checkpointStore(root);
         DocumentSpineVersionStore versions = new FileDocumentSpineVersionStore(root.resolve("spine-versions"));
         DocumentSpineProofService proofs = new DocumentSpineProofService(new DocumentProcessingService(), new SyntheticRenderer(), CLOCK);
-        return new UniversalDocumentSpine(gateway, checkpoints, versions, proofs, CLOCK);
+        return new UniversalDocumentSpine(gateway, checkpoints, versions, proofs, CLOCK,
+                org.systemmaster.tools.document.PortableTestDocumentEffectAdmission.provider(CLOCK));
     }
 
     private static FileDocumentSpineCheckpointStore checkpointStore(Path root) throws Exception {

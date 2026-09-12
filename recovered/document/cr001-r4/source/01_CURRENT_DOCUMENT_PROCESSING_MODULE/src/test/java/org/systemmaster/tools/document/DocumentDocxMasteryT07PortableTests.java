@@ -274,7 +274,8 @@ public final class DocumentDocxMasteryT07PortableTests {
     private static UniversalDocumentSpine spine(Path root, RenderProofWorker worker) throws Exception {
         FilePlatform008Repository repo = new FilePlatform008Repository(root.resolve("meta"));
         GovernedArtifactGateway gateway = new GovernedArtifactGateway(root.resolve("bytes"), ArtifactIntakePolicy.conservative(64L * 1024 * 1024), repo, CLOCK);
-        return new UniversalDocumentSpine(gateway, new FileDocumentSpineCheckpointStore(root.resolve("cp")), new FileDocumentSpineVersionStore(root.resolve("versions")), new DocumentSpineProofService(new DocumentProcessingService(), worker, CLOCK), CLOCK);
+        return new UniversalDocumentSpine(gateway, new FileDocumentSpineCheckpointStore(root.resolve("cp")), new FileDocumentSpineVersionStore(root.resolve("versions")), new DocumentSpineProofService(new DocumentProcessingService(), worker, CLOCK), CLOCK,
+                org.systemmaster.tools.document.PortableTestDocumentEffectAdmission.provider(CLOCK));
     }
     private static DocumentSpineJob job(String sourceId, String resultId) { return new DocumentSpineJob(UuidV7.create().toString(), UuidV7.create().toString(), sourceId, resultId, sourceId + ".docx", DocumentFormat.DOCX.mediaType(), DocumentSpineMode.MASTER, DocumentFormat.DOCX, DocumentSpinePublicationClass.VERIFIED_DRAFT, allCapabilities(), "DOCUMENT-DOCX-MASTERY-T07-PORTABLE", "qualification", FIXED); }
 
