@@ -1,0 +1,98 @@
+{
+  "protocol_version": "github-a01-controller.bootstrap-admission.v1",
+  "operation_id": "GITHUB-A01-CONTROLLER-FORENSIC-RECONCILIATION-001A",
+  "title": "NEW-WORKSTREAM BOOTSTRAP ADMISSION CONTRACT + LOSSLESS CANONICAL PORT MANIFEST",
+  "status": "BOOTSTRAP_ADMISSION_FROZEN",
+  "repository": "BFochtman746/system-master",
+  "work_branch": "github-a01-controller-forensic-reconciliation-001a-20260912",
+  "base": {
+    "ref": "refs/heads/main",
+    "sha": "c41884bf9cc66c24fb7f245d68eefc6dbbd1139f",
+    "rule": "All reconciliation work begins from the exact current main product state. No reset of main to a historical controller branch is authorized."
+  },
+  "mission_authority": {
+    "mission_version": "SECOND-SHIFT-CONTROL-GATEWAY-CG-001/v1.0",
+    "relationship": "NEW_MAINTENANCE_WORKSTREAM_DEPENDENT_ON_TERMINAL_CG011_NOT_CG012",
+    "cg012_started": false
+  },
+  "terminal_controller_dependency": {
+    "exact_subject_sha": "bad4708ba91b533c333ba2659ab99bf071710ba6",
+    "frozen_ref": "second-shift-control-gateway/cg-011-a01-qualified-frozen",
+    "qualification_run_id": 34704481930,
+    "qualification_id": "SECOND-SHIFT-SUPERVISOR-V2-A01-STRESS",
+    "runner": "A-01",
+    "os": "Windows",
+    "arch": "X64",
+    "evidence_artifact_id": 10301701961,
+    "evidence_artifact_sha256": "4d55819c486bbde8c0dcb7870921741312293988f40ae09827473e2be92686b0",
+    "result": "PASS",
+    "production_activation": false,
+    "authority_rule": "This PASS is source evidence for the controller baseline only. Any changed host-dependent controller bytes require fresh exact-subject qualification and may not inherit this PASS."
+  },
+  "mastery_contract_source": {
+    "exact_subject_sha": "5905da7deadbc9d227d9976dae91804365dbe99d",
+    "relationship_to_main": "DESCENDANT_BY_2_COMMITS",
+    "changed_file_count": 6,
+    "qualification_run_id": 34704266500,
+    "standing": "DESIGN_LOCK_CONTRACT_QUALIFIED_NOT_PRODUCTION_ACTIVE",
+    "rule": "Mastery contract artifacts are preserved losslessly but do not activate Mastery or replace CG-011 reliability authority."
+  },
+  "bootstrap_authority": {
+    "reason": "The current repository has no production-enforced unavoidable Control Gateway write boundary, so a bounded isolated bootstrap is required to establish the new reconciliation workstream without mutating main or claiming production authority.",
+    "authorized_effects": [
+      "CREATE_ISOLATED_BRANCH_FROM_EXACT_MAIN_SHA",
+      "WRITE_BOOTSTRAP_ADMISSION_CONTRACT",
+      "WRITE_LOSSLESS_CANONICAL_PORT_MANIFEST",
+      "WRITE_001A_FREEZE_RECORD"
+    ],
+    "authorized_paths": [
+      "governance/control-gateway/GITHUB-A01-CONTROLLER-FORENSIC-RECONCILIATION-001A-BOOTSTRAP-ADMISSION.json",
+      "governance/control-gateway/GITHUB-A01-CONTROLLER-FORENSIC-RECONCILIATION-001A-CANONICAL-PORT-MANIFEST.json",
+      "governance/control-gateway/GITHUB-A01-CONTROLLER-FORENSIC-RECONCILIATION-001A-FREEZE.md"
+    ],
+    "forbidden_effects": [
+      "UPDATE_MAIN",
+      "FORCE_UPDATE_ANY_REF",
+      "MOVE_OR_REWRITE_CG011_FROZEN_REF",
+      "DELETE_OR_REWRITE_CONTROLLER_HISTORY",
+      "PORT_EXECUTABLE_CONTROLLER_BYTES_DURING_001A",
+      "MODIFY_A01_REGISTRY_DURING_001A",
+      "MODIFY_GITHUB_RULESETS_OR_BRANCH_PROTECTION_DURING_001A",
+      "DISPATCH_A01_WORK_DURING_001A",
+      "PRODUCTION_ACTIVATE_CONTROLLER",
+      "PRODUCTION_ACTIVATE_MASTERY",
+      "START_CG012",
+      "IMPORT_UNRELATED_PRODUCT_OR_PLANNING_WORK"
+    ]
+  },
+  "qualification_policy": {
+    "documentation_only_001a": {
+      "repository_exact_sha_verification": "REQUIRED",
+      "json_parse_validation": "REQUIRED",
+      "a01_runtime_execution": "NOT_REQUIRED_BECAUSE_NO_EXECUTABLE_OR_HOST_DEPENDENT_BYTES_CHANGE"
+    },
+    "later_controller_changes": {
+      "hosted_portable_qualification": "REQUIRED_FOR_EACH_EXECUTABLE_CANDIDATE",
+      "a01_windows_x64_qualification": "REQUIRED_BEFORE_FREEZE_FOR_HOST_DEPENDENT_CONTROLLER_OR_SUPERVISOR_BYTES",
+      "cumulative_controller_regression": "REQUIRED",
+      "pass_transfer_across_changed_sha": "FORBIDDEN"
+    },
+    "mastery_runtime_changes": {
+      "contract_regression": "REQUIRED",
+      "shadow_or_simulated_night": "REQUIRED_BEFORE_ACTIVATION",
+      "a01_adversarial_night_qualification": "REQUIRED_BEFORE_PRODUCTION_PROMOTION"
+    }
+  },
+  "production_enforcement_gap": {
+    "standing": "OPEN_CRITICAL",
+    "observed_main_protected": false,
+    "observed_repository_rulesets": 0,
+    "consequence": "Control Gateway admission is presently contractual rather than technically unavoidable.",
+    "closure_owner": "GITHUB-A01-CONTROLLER-FORENSIC-RECONCILIATION-001C"
+  },
+  "successor": {
+    "operation_id": "GITHUB-A01-CONTROLLER-FORENSIC-RECONCILIATION-001B",
+    "title": "MAIN-DERIVED CONTROLLER CANONICALIZATION CANDIDATE",
+    "admission_precondition": "001A freeze exists and the lossless port manifest accounts for every controller and Mastery source path without broad branch merge authority."
+  }
+}
