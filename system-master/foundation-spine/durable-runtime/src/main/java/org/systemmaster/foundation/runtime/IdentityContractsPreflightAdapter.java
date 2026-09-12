@@ -59,7 +59,7 @@ public final class IdentityContractsPreflightAdapter {
         public PreflightRequest {
             capabilityUse = Objects.requireNonNull(capabilityUse, "capabilityUse");
             contractUse = Objects.requireNonNull(contractUse, "contractUse");
-            String digest = semanticDigest(capabilityUse, contractUse);
+            String digest = IdentityContractsPreflightAdapter.semanticDigest(capabilityUse, contractUse);
             String expected = requestIdForDigest(digest);
             if (!expected.equals(requestId)) {
                 throw new IllegalArgumentException("REQUEST_ID_DIGEST_CONFLICT");
@@ -67,12 +67,12 @@ public final class IdentityContractsPreflightAdapter {
         }
 
         public static PreflightRequest create(CapabilityUseRequest capabilityUse, ContractUse contractUse) {
-            String digest = semanticDigest(capabilityUse, contractUse);
+            String digest = IdentityContractsPreflightAdapter.semanticDigest(capabilityUse, contractUse);
             return new PreflightRequest(requestIdForDigest(digest), capabilityUse, contractUse);
         }
 
         public String semanticDigest() {
-            return semanticDigest(capabilityUse, contractUse);
+            return IdentityContractsPreflightAdapter.semanticDigest(capabilityUse, contractUse);
         }
     }
 
