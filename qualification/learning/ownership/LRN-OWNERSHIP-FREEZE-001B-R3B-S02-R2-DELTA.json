@@ -1,0 +1,78 @@
+{
+  "interface_deltas": {
+    "I005": {
+      "input_or_payload": "goal_id, goal_version, constraints, source_policy, accessibility_needs, client_operation_id",
+      "notes": "Owns workflow intent only; compilation is downstream I066; does not create generic job authority",
+      "output_or_semantics": "Creates/deduplicates one high-level CurriculumGenerationRequest; generic job authority may return a durable external job reference",
+      "preconditions_or_trigger": "Versioned LearningGoal ref and research scope valid; owner-local readiness preflight"
+    },
+    "I006": {
+      "input_or_payload": "curriculum_id, version, expected_goal_version, approval_receipt_ref, validation_report_ref, client_operation_id",
+      "notes": "Cannot infer approval from transport/chat metadata; I035 only after commit",
+      "output_or_semantics": "Sole Curriculum state-transition authority: pins the exact immutable CurriculumVersion ACTIVE and supersedes the prior active pointer",
+      "preconditions_or_trigger": "Exact CurriculumVersion is READY_FOR_ACTIVATION; current I068 approval receipt and validation/readiness receipts admitted"
+    },
+    "I066": {
+      "input_or_payload": "generation_request_ref; goal_id; goal_version; source_plan_ref; compiler_policy_version; requested_modalities; job_request_id",
+      "notes": "Cannot mint a second high-level generation intent; generic job authority owns lifecycle",
+      "output_or_semantics": "Creates/deduplicates a downstream course-compilation request for the admitted generation workflow",
+      "preconditions_or_trigger": "Admitted I005 generation_request_ref exists; normalized source plan permitted"
+    },
+    "I068": {
+      "input_or_payload": "curriculum_version; validation_report_ref; expected_goal_version; approval_decision; client_operation_id",
+      "notes": "Explicit user approval default v1; this command has no activation mutation side effect",
+      "output_or_semantics": "Records an immutable CourseActivationApproval decision receipt only; Curriculum state transition is exclusively I006",
+      "preconditions_or_trigger": "Exact CurriculumVersion validation has no blocking findings and explicit user approval decision is available"
+    },
+    "I072": {
+      "input_or_payload": "diff_ref; decision; client_operation_id",
+      "notes": "Activation is never bundled in v1; I068 approval then I006 transition remain mandatory",
+      "output_or_semantics": "Records accept/postpone/reject for the refresh diff; accept may make the candidate eligible for I068 review but never activates",
+      "preconditions_or_trigger": "Immutable refresh diff available"
+    }
+  },
+  "requirement_splits": {
+    "LRN-064": [
+      [
+        "LRN-064-L",
+        "MOD-LEARNING-001",
+        "LEARNER_STATE",
+        "Learning-owned learner/assessment action launch SHALL preflight exact required versions and applicable learner-state evidence/integrity/dependency references; unavailable external facts remain explicit UNKNOWN/BLOCKED rather than locally fabricated."
+      ],
+      [
+        "LRN-064-C",
+        "MOD-CURRICULUM-001",
+        "LEARNING_PROGRAM",
+        "Curriculum generation, validation, activation and offline/package readiness SHALL preflight exact Curriculum versions plus required source, artifact, rights, accessibility and dependency receipts; generic job readiness remains external and unavailable facts fail closed."
+      ]
+    ],
+    "LRN-138": [
+      [
+        "LRN-138-L",
+        "MOD-LEARNING-001",
+        "LEARNER_STATE",
+        "Every consequential Learning mastery change, adaptive recommendation, evidence admission/rejection and qualification-package formation SHALL have an immutable decision trace referencing exact policy/input versions and reason codes."
+      ],
+      [
+        "LRN-138-C",
+        "MOD-CURRICULUM-001",
+        "LEARNING_PROGRAM",
+        "Every consequential Curriculum generation, validation, refresh approval and activation decision SHALL have an immutable decision trace referencing exact policy/input versions, readiness/approval references and reason codes."
+      ]
+    ],
+    "LRN-140": [
+      [
+        "LRN-140-L",
+        "MOD-LEARNING-001",
+        "LEARNER_STATE",
+        "When required learner evidence, integrity state or an external dependency needed by a Learning-owned action is unavailable, Learning SHALL expose UNKNOWN/BLOCKED/DEGRADED explicitly and SHALL NOT silently substitute weaker semantics."
+      ],
+      [
+        "LRN-140-C",
+        "MOD-CURRICULUM-001",
+        "LEARNING_PROGRAM",
+        "When required source quality, rights, accessibility, validation, approval or external dependency needed by a Curriculum-owned action is unavailable, Curriculum SHALL expose UNKNOWN/BLOCKED/DEGRADED explicitly and SHALL NOT silently substitute weaker semantics."
+      ]
+    ]
+  }
+}
