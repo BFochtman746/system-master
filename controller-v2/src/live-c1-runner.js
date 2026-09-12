@@ -36,8 +36,10 @@ export async function runC1Preflight({env=process.env,fetchImpl=globalThis.fetch
     result:'PASS',
     qualified_for_live_journal_mutation:true,
     journal_repository:result.journalRepository,
+    journal_repository_id:result.journalRepositoryId,
     subject_repository:result.subjectRepository,
-    default_branch:result.defaultBranch
+    default_branch:result.defaultBranch,
+    seed_head:result.seedHead
   };
 }
 
