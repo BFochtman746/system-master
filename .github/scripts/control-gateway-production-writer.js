@@ -10,9 +10,9 @@ async function main() {
   const { GitHubMutationAdmissionGate } = await import('../../control-gateway/src/github-mutation-admission.js');
   const {
     GitHubProductionMutationGate,
-    GitHubReceiptConsumingCasWriter,
-    GitHubReceiptCasRestTransport
+    GitHubReceiptConsumingCasWriter
   } = await import('../../control-gateway/src/github-production-mutation.js');
+  const { GitHubReadConsistentReceiptCasRestTransport } = await import('../../control-gateway/src/github-production-read-consistency.js');
   const fs = await import('node:fs');
   const path = await import('node:path');
 
@@ -41,7 +41,7 @@ async function main() {
   const admissionReceipt = await admissionGate.admit(request);
   const productionGate = new GitHubProductionMutationGate({ admissionGate });
   const productionGrant = await productionGate.authorize({ receipt: admissionReceipt, request, plan });
-  const writerTransport = new GitHubReceiptCasRestTransport({ owner, repo, tokenProvider });
+  const writerTransport = new GitHubReadConsistentReceiptCasRestTransport({ owner, repo, tokenProvider });
   const writer = new GitHubReceiptConsumingCasWriter({ transport: writerTransport });
   const executionReceipt = await writer.execute({ grant: productionGrant, plan });
 
