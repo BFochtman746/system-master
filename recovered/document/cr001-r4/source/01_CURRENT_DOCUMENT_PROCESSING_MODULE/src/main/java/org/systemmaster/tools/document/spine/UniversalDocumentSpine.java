@@ -11,10 +11,8 @@ import org.systemmaster.tools.document.DocumentOperationContract;
 import org.systemmaster.tools.document.DocumentProcessingService;
 import org.systemmaster.tools.document.DocumentProofReceipt;
 import org.systemmaster.tools.document.FinalDocumentProofPolicy;
-import org.systemmaster.tools.document.GovernedCdg2MutationCoordinator;
 import org.systemmaster.tools.document.NativePartPreservationMap;
 import org.systemmaster.tools.document.OpenWorldFeatureDiscovery;
-import org.systemmaster.tools.document.SemanticCdg2NativeAdapter;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -38,15 +36,16 @@ import java.util.Set;
  * persisted before later proof stages so restart can continue without replaying the native mutation.
  */
 public final class UniversalDocumentSpine {
-    private static final String ENGINE_ID = "SemanticCdg2NativeAdapter/DOCUMENT-SPINE-002A";
-
     private final GovernedArtifactGateway gateway;
     private final DocumentSpineCheckpointStore checkpoints;
     private final DocumentSpineVersionStore versions;
     private final DocumentSpineProofService proofs;
     private final Clock clock;
+    // DOCUMENTS-SPINE-EFFECT-RUNTIME-INTEGRATION-001
+    // Null is permitted only so read-only routes retain the legacy five-argument construction surface.
+    // Every effectful route fails closed unless an explicit external admission provider was supplied.
+    private final DocumentExistingArtifactEffectExecutor effectExecutor;
     private final DocumentProcessingService documents = new DocumentProcessingService();
-    private final GovernedCdg2MutationCoordinator mutationCoordinator = new GovernedCdg2MutationCoordinator();
     private final OpenWorldFeatureDiscovery openWorld = new OpenWorldFeatureDiscovery();
     private final DocumentFinalizationGate finalizationGate = new DocumentFinalizationGate();
 
@@ -56,11 +55,24 @@ public final class UniversalDocumentSpine {
             DocumentSpineVersionStore versions,
             DocumentSpineProofService proofs,
             Clock clock) {
+        this(gateway, checkpoints, versions, proofs, clock, null);
+    }
+
+    public UniversalDocumentSpine(
+            GovernedArtifactGateway gateway,
+            DocumentSpineCheckpointStore checkpoints,
+            DocumentSpineVersionStore versions,
+            DocumentSpineProofService proofs,
+            Clock clock,
+            DocumentEffectAdmissionProvider effectAdmissionProvider) {
         this.gateway = Objects.requireNonNull(gateway, "gateway");
         this.checkpoints = Objects.requireNonNull(checkpoints, "checkpoints");
         this.versions = Objects.requireNonNull(versions, "versions");
         this.proofs = Objects.requireNonNull(proofs, "proofs");
         this.clock = Objects.requireNonNull(clock, "clock");
+        this.effectExecutor = effectAdmissionProvider == null
+                ? null
+                : new DocumentExistingArtifactEffectExecutor(gateway, checkpoints, effectAdmissionProvider, clock);
     }
 
     public DocumentSpineResult executeExisting(
@@ -375,103 +387,36 @@ public final class UniversalDocumentSpine {
                 : DocumentSpineStage.MASTER;
         recordActionStagesBefore(job, actionStage, sourceGraph.sourceSha256(), plan.digest());
         String key = stageKey(job, actionStage, sourceGraph.sourceSha256(), null, plan.digest());
-        Optional<DocumentSpineStageReceipt> prior = checkpoints.latest(job.jobId(), actionStage);
-        if (prior.isPresent() && prior.get().resumable(key)) {
-            String resultSha = requireOutputDigest(prior.get(), actionStage);
-            byte[] resultBytes = gateway.readVerified(resultSha, gateway.maxBytes());
-            CanonicalDocumentGraphV2 resultGraph = documents.projectCanonicalGraphV2(format, resultBytes);
-            NativePartPreservationMap.Assessment preservation = documents.assessNativePreservation(
-                    format,
-                    sourceBytes,
-                    resultBytes,
-                    plan.operation().expectedChangedNativeParts());
-            if (!preservation.pass()) {
-                throw new IllegalStateException("resumed candidate no longer satisfies preservation assessment");
-            }
-            recordActionStagesAfter(job, actionStage, sourceGraph.sourceSha256(), plan.digest());
-            return new EffectResult(resultBytes, resultGraph, preservation, resultSha);
+
+        if (effectExecutor == null) {
+            failStage(
+                    job,
+                    actionStage,
+                    sourceGraph.sourceSha256(),
+                    sourceGraph.sourceSha256(),
+                    key,
+                    List.of(
+                            "effect-runtime=" + DocumentExistingArtifactEffectExecutor.ENGINE_ID,
+                            "effect-admission-provider=ABSENT"),
+                    List.of("EFFECT_ADMISSION_PROVIDER_REQUIRED__EFFECTFUL_ROUTE_BLOCKED"));
+            throw new SecurityException(
+                    "effectful document execution requires explicit DocumentEffectAdmissionProvider");
         }
 
-        SemanticCdg2NativeAdapter adapter = new SemanticCdg2NativeAdapter(format);
-        GovernedCdg2MutationCoordinator.OperationResult mutation;
-        try {
-            mutation = mutationCoordinator.executeOperation(
-                    adapter,
-                    plan.operation(),
-                    sourceBytes,
-                    sourceGraph,
-                    plan.targetedElementIds(),
-                    List.of(),
-                    ENGINE_ID);
-        } catch (Exception exception) {
-            failStage(
-                    job,
-                    actionStage,
-                    sourceGraph.sourceSha256(),
-                    sourceGraph.sourceSha256(),
-                    key,
-                    List.of(
-                            "mutation-engine=" + ENGINE_ID,
-                            "operation-intent=" + plan.operation().intentDigest()),
-                    List.of(
-                            "MUTATION_ABORTED_BEFORE_CANDIDATE",
-                            exception.getClass().getName() + ":" + Objects.requireNonNullElse(exception.getMessage(), "")));
-            throw exception;
-        }
-        if (!mutation.preservation().pass()) {
-            failStage(
-                    job,
-                    actionStage,
-                    sourceGraph.sourceSha256(),
-                    mutation.mutation().resultSha256(),
-                    key,
-                    mutation.mutation().diagnostics(),
-                    mutation.preservation().diagnostics());
-            throw new IllegalStateException("native preservation failed");
-        }
-        ArtifactIntakeRequest candidateRequest = new ArtifactIntakeRequest(
-                "spine-candidate-" + job.jobId(),
-                job.resultArtifactId() + "#candidate",
-                ENGINE_ID,
-                format.mediaType(),
-                mutation.mutation().resultSha256(),
-                (long) mutation.mutation().resultBytes().length,
-                List.of(job.sourceArtifactId()),
-                List.of("project:" + job.projectId(), "job:" + job.jobId(), "operation:" + plan.operation().intentDigest()),
-                Instant.now(clock));
-        ArtifactIntakeReceipt candidateReceipt = gateway.ingest(
-                candidateRequest,
-                new java.io.ByteArrayInputStream(mutation.mutation().resultBytes()));
-        if (!"VERIFIED".equals(candidateReceipt.disposition())) {
-            failStage(
-                    job,
-                    actionStage,
-                    sourceGraph.sourceSha256(),
-                    candidateReceipt.digest(),
-                    key,
-                    List.of("candidate-intake=" + candidateReceipt.intakeId()),
-                    List.of(candidateReceipt.reason()));
-            throw new SecurityException("candidate artifact failed governed intake");
-        }
-        passStage(
+        DocumentExistingArtifactEffectExecutor.Outcome outcome = effectExecutor.executeOrResume(
                 job,
+                plan,
+                format,
+                sourceBytes,
+                sourceGraph,
                 actionStage,
-                sourceGraph.sourceSha256(),
-                candidateReceipt.digest(),
-                key,
-                List.of(
-                        "candidate-intake=" + candidateReceipt.intakeId(),
-                        "operation-intent=" + plan.operation().intentDigest(),
-                        "result-semantic=" + mutation.resultGraph().semanticDigest(),
-                        "changed-native-parts=" + mutation.preservation().changedParts(),
-                        "mutation-engine=" + ENGINE_ID),
-                concatDiagnostics(mutation.mutation().diagnostics(), mutation.preservation().diagnostics()));
+                key);
         recordActionStagesAfter(job, actionStage, sourceGraph.sourceSha256(), plan.digest());
         return new EffectResult(
-                mutation.mutation().resultBytes(),
-                mutation.resultGraph(),
-                mutation.preservation(),
-                candidateReceipt.digest());
+                outcome.resultBytes(),
+                outcome.resultGraph(),
+                outcome.preservation(),
+                outcome.resultSha256());
     }
 
     private void collectRender(

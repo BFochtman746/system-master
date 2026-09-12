@@ -4,6 +4,8 @@ import org.systemmaster.core.ArtifactIntakePolicy;
 import org.systemmaster.core.FilePlatform008Repository;
 import org.systemmaster.core.GovernedArtifactGateway;
 import org.systemmaster.core.UuidV7;
+import org.systemmaster.tools.document.spine.DocumentEffectAdmissionDecision;
+import org.systemmaster.tools.document.spine.DocumentEffectAdmissionProvider;
 import org.systemmaster.tools.document.spine.DocumentSpineCheckpointStore;
 import org.systemmaster.tools.document.spine.DocumentSpineExecutionPlan;
 import org.systemmaster.tools.document.spine.DocumentSpineJob;
@@ -49,6 +51,7 @@ public final class DocumentSpine002APortableTests {
         testPptxMasterAndPdfRebuild();
         testFinalPublicationFailsClosedUntilAccessibility();
         testMaliciousIntakeFailsClosed();
+        testEffectAdmissionBoundary();
         testCreateRouteDoesNotInflateCompletion();
         System.out.println("DOCUMENT_SPINE_002A_PORTABLE_PASS assertions=" + assertions);
     }
@@ -273,6 +276,74 @@ public final class DocumentSpine002APortableTests {
         }
     }
 
+    // DOCUMENTS-SPINE-EFFECT-RUNTIME-INTEGRATION-001_TEST
+    private static void testEffectAdmissionBoundary() throws Exception {
+        Path root = Files.createTempDirectory("spine-effect-admission-");
+        try {
+            byte[] source = new DocxFullLaneEngine().createDocument(List.of("Alpha", "Preserve this"));
+            DocumentProcessingService documents = new DocumentProcessingService();
+            CanonicalDocumentGraphV2 graph = documents.projectCanonicalGraphV2(DocumentFormat.DOCX, source);
+            String targetId = textElement(graph, "Alpha");
+            DocumentOperationContract operation = DocumentOperationContract.replaceText(
+                    "spine-effect-admission-replace",
+                    graph,
+                    List.of(targetId),
+                    "Alpha",
+                    "Omega",
+                    Set.of("word/document.xml"),
+                    false);
+            DocumentSpineJob job = job(
+                    DocumentSpineMode.MASTER,
+                    DocumentFormat.DOCX,
+                    DocumentSpinePublicationClass.VERIFIED_DRAFT,
+                    "effect-admission-source",
+                    "effect-admission-result");
+            DocumentSpineExecutionPlan plan = plan(job, operation, Set.of(targetId));
+
+            FilePlatform008Repository repository = new FilePlatform008Repository(root.resolve("platform008-meta"));
+            GovernedArtifactGateway gateway = new GovernedArtifactGateway(
+                    root.resolve("platform008-bytes"),
+                    ArtifactIntakePolicy.conservative(32L * 1024 * 1024),
+                    repository,
+                    CLOCK);
+            DocumentSpineCheckpointStore checkpoints = checkpointStore(root);
+            DocumentSpineVersionStore versions = versionStore(root);
+            DocumentSpineProofService proofs = new DocumentSpineProofService(
+                    new DocumentProcessingService(), new CountingRenderWorker(), CLOCK);
+
+            UniversalDocumentSpine withoutAdmission = new UniversalDocumentSpine(
+                    gateway, checkpoints, versions, proofs, CLOCK);
+            expectFailure(
+                    () -> withoutAdmission.executeExisting(job, new ByteArrayInputStream(source), plan),
+                    "effectful route must fail closed without external admission",
+                    SecurityException.class);
+            List<DocumentSpineStageReceipt> blocked = checkpointStore(root).receipts(job.jobId());
+            check(count(blocked, DocumentSpineStage.MASTER, DocumentSpineStageReceipt.Status.PASS) == 0,
+                    "missing admission cannot create MASTER PASS");
+            check(count(blocked, DocumentSpineStage.MASTER, DocumentSpineStageReceipt.Status.FAIL) == 1,
+                    "missing admission records one durable MASTER failure");
+            check(blocked.stream().anyMatch(receipt -> receipt.stage() == DocumentSpineStage.MASTER
+                            && receipt.diagnostics().contains("EFFECT_ADMISSION_PROVIDER_REQUIRED__EFFECTFUL_ROUTE_BLOCKED")),
+                    "missing admission failure carries bounded reason code");
+
+            UniversalDocumentSpine admitted = new UniversalDocumentSpine(
+                    gateway, checkpoints, versions, proofs, CLOCK, effectAdmission());
+            DocumentSpineResult completed = admitted.executeExisting(job, null, plan);
+            check(documents.extractPlainText(DocumentFormat.DOCX, completed.resultBytes()).contains("Omega"),
+                    "explicit admission allows governed MASTER execution");
+            DocumentSpineStageReceipt master = completed.stageReceipts().stream()
+                    .filter(receipt -> receipt.stage() == DocumentSpineStage.MASTER
+                            && receipt.status() == DocumentSpineStageReceipt.Status.PASS)
+                    .findFirst().orElseThrow();
+            check(master.evidence().stream().anyMatch(value -> value.startsWith("effect-admission-decision=")),
+                    "MASTER PASS binds immutable external admission decision");
+            check(master.evidence().stream().anyMatch(value -> value.startsWith("effect-policy-digest=")),
+                    "MASTER PASS binds immutable policy digest rather than mutable transport metadata");
+        } finally {
+            deleteTree(root);
+        }
+    }
+
     private static void testCreateRouteDoesNotInflateCompletion() throws Exception {
         Path root = Files.createTempDirectory("spine-create-pending-");
         try {
@@ -306,7 +377,25 @@ public final class DocumentSpine002APortableTests {
         DocumentSpineCheckpointStore checkpoints = checkpointStore(root);
         DocumentSpineVersionStore versions = versionStore(root);
         DocumentSpineProofService proofs = new DocumentSpineProofService(new DocumentProcessingService(), worker, CLOCK);
-        return new UniversalDocumentSpine(gateway, checkpoints, versions, proofs, CLOCK);
+        return new UniversalDocumentSpine(gateway, checkpoints, versions, proofs, CLOCK, effectAdmission());
+    }
+
+    private static DocumentEffectAdmissionProvider effectAdmission() {
+        return (job, plan, sourceGraph) -> new DocumentEffectAdmissionDecision(
+                DocumentEffectAdmissionDecision.SCHEMA_V1,
+                "portable-explicit-" + job.jobId(),
+                DocumentEffectAdmissionDecision.Disposition.ALLOW,
+                job.jobId(),
+                job.mode(),
+                sourceGraph.sourceSha256(),
+                sourceGraph.semanticDigest(),
+                plan.operation().intentDigest(),
+                plan.digest(),
+                DocumentEffectAdmissionDecision.capabilitySetDigest(plan),
+                "portable-integration-r1",
+                sha("portable-integration-policy-r1".getBytes(StandardCharsets.UTF_8)),
+                "TEST_ONLY_EXPLICIT_ALLOW",
+                FIXED);
     }
 
     private static FileDocumentSpineCheckpointStore checkpointStore(Path root) throws Exception {
