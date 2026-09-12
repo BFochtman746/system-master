@@ -25,6 +25,10 @@ jobs:
       fail-fast: false
       matrix:
         node: ['22', '24']
+    env:
+      CG004_LIVE_REF: control-gateway-state/active-work/second-shift-control-gateway-dev
+      CG004_EXPECTED_PUBLICATION_COMMIT: b214018761dd7d444352252f36a006b95cb105a1
+      CG004_GITHUB_TOKEN: ${{ github.token }}
     steps:
       - name: Checkout exact CG-004 subject
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -41,6 +45,6 @@ jobs:
       - name: Show runtime
         run: node --version
 
-      - name: Run CG-003 + CG-004 qualification suite
+      - name: Run CG-003 + CG-004 qualification suite including live GitHub reconstruction
         working-directory: control-gateway
         run: node --test
