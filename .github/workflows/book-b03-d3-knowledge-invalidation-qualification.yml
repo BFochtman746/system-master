@@ -1,0 +1,67 @@
+name: Book B03 D3 Knowledge Invalidation Qualification
+
+on:
+  push:
+    branches:
+      - book-system/control-v1
+    paths:
+      - 'system-master/book-system/book-story-bible-knowledge-v1.js'
+      - 'system-master/book-system/book-story-bible-knowledge-v1.test.js'
+      - 'system-master/book-system/book-knowledge-materializer-v1.js'
+      - 'system-master/book-system/book-knowledge-materializer-v1.test.js'
+      - 'system-master/book-system/book-knowledge-invalidation-v1.js'
+      - 'system-master/book-system/book-knowledge-invalidation-v1.test.js'
+      - '.github/workflows/book-b03-d3-knowledge-invalidation-qualification.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  d1-d2-d3-deterministic:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['22', '24']
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Record and bind exact D3 bytes
+        run: |
+          set -euo pipefail
+          git rev-parse HEAD
+          test "$(git hash-object system-master/book-system/book-knowledge-invalidation-v1.js)" = 'f22dabe0909eeddacd9a9e9ee55dbc0bd163750a'
+          test "$(git hash-object system-master/book-system/book-knowledge-invalidation-v1.test.js)" = '1c81bd6f705129d1e3ef7d5a9ecf434effa4b4c6'
+      - name: Run B03 D1 K01-K32
+        run: |
+          set -euo pipefail
+          node system-master/book-system/book-story-bible-knowledge-v1.test.js | tee b03-d1-k01-k32.log
+          grep -F '"result":"PASS"' b03-d1-k01-k32.log
+          grep -F '"denominator":"K01-K32"' b03-d1-k01-k32.log
+          grep -F '"cases":32' b03-d1-k01-k32.log
+      - name: Run B03 D2 M01-M20
+        run: |
+          set -euo pipefail
+          node system-master/book-system/book-knowledge-materializer-v1.test.js | tee b03-d2-m01-m20.log
+          grep -F '"result":"PASS"' b03-d2-m01-m20.log
+          grep -F '"denominator":"M01-M20"' b03-d2-m01-m20.log
+          grep -F '"cases":20' b03-d2-m01-m20.log
+      - name: Run B03 D3 I01-I16
+        run: |
+          set -euo pipefail
+          node system-master/book-system/book-knowledge-invalidation-v1.test.js | tee b03-d3-i01-i16.log
+          grep -F '"result":"PASS"' b03-d3-i01-i16.log
+          grep -F '"denominator":"I01-I16"' b03-d3-i01-i16.log
+          grep -F '"cases":16' b03-d3-i01-i16.log
+          grep -F '"invalidation_engine_implemented":true' b03-d3-i01-i16.log
+          grep -F '"successor_reconciliation_implemented":true' b03-d3-i01-i16.log
+          grep -F '"canonical_admission_implemented":false' b03-d3-i01-i16.log
+          grep -F '"b01_registry_modified":false' b03-d3-i01-i16.log
+          grep -F '"historical_pass_transferred":0' b03-d3-i01-i16.log
+          grep -F '"historical_story_bible_mutated":false' b03-d3-i01-i16.log
+          grep -F '"canonical_effect":false' b03-d3-i01-i16.log
