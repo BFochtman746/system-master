@@ -20,6 +20,14 @@ from tools.second_shift_supervisor_v2 import SupervisorStore, in_shift, iso, par
 NIGHT_SCHEDULER_PROTOCOL = "control-gateway.a01-night-scheduler.v1"
 QUEUE_STATES = {"BINDING", "QUEUED", "CLAIMED", "TERMINAL", "CANCELLED", "RECONCILE"}
 ACTIVE_STAGE_STATES = {"BINDING", "QUEUED", "CLAIMED", "RECONCILE"}
+_SCHEDULER_SCHEMA_OBJECTS = frozenset(
+    {
+        "night_scheduler_queue",
+        "ix_night_scheduler_queue_state",
+        "night_scheduler_claim_authorizations",
+        "cg010_night_scheduler_claim_guard",
+    }
+)
 
 
 class NightSchedulerError(CoordinationError):
@@ -45,43 +53,64 @@ class A01NightScheduler:
         self.coordination = SupervisorCoordinationAdapter(store)
         self._init_schema()
 
+    def _schema_ready(self) -> bool:
+        rows = self.store.conn.execute(
+            "SELECT name FROM sqlite_master WHERE "
+            "(type='table' AND name IN ('night_scheduler_queue','night_scheduler_claim_authorizations')) "
+            "OR (type='index' AND name='ix_night_scheduler_queue_state') "
+            "OR (type='trigger' AND name='cg010_night_scheduler_claim_guard')"
+        ).fetchall()
+        return {str(row[0]) for row in rows} == _SCHEDULER_SCHEMA_OBJECTS
+
     def _init_schema(self) -> None:
-        self.store.conn.executescript(
-            """
-            CREATE TABLE IF NOT EXISTS night_scheduler_queue (
-              delegation_id TEXT PRIMARY KEY,
-              handoff_json TEXT NOT NULL,
-              contract_json TEXT NOT NULL,
-              scheduler_digest TEXT NOT NULL,
-              state TEXT NOT NULL,
-              enqueued_at TEXT NOT NULL,
-              updated_at TEXT NOT NULL
-            );
-            CREATE INDEX IF NOT EXISTS ix_night_scheduler_queue_state
-              ON night_scheduler_queue(state);
-            CREATE TABLE IF NOT EXISTS night_scheduler_claim_authorizations (
-              delegation_id TEXT NOT NULL,
-              idempotency_key TEXT NOT NULL,
-              authorization_id TEXT NOT NULL,
-              PRIMARY KEY(delegation_id, idempotency_key)
-            );
-            DROP TRIGGER IF EXISTS cg010_night_scheduler_claim_guard;
-            CREATE TRIGGER cg010_night_scheduler_claim_guard
-            BEFORE INSERT ON claims
-            WHEN EXISTS (
-              SELECT 1 FROM night_scheduler_queue q
-              WHERE q.delegation_id=NEW.delegation_id
+        # Reopened scheduler processes are readers of already-frozen schema. This
+        # prevents two simultaneous restarts from both rewriting the CG-010 trigger
+        # before they can compete for the transactional scheduler claim.
+        if self._schema_ready():
+            return
+        try:
+            self.store.conn.executescript(
+                """
+                BEGIN IMMEDIATE;
+                CREATE TABLE IF NOT EXISTS night_scheduler_queue (
+                  delegation_id TEXT PRIMARY KEY,
+                  handoff_json TEXT NOT NULL,
+                  contract_json TEXT NOT NULL,
+                  scheduler_digest TEXT NOT NULL,
+                  state TEXT NOT NULL,
+                  enqueued_at TEXT NOT NULL,
+                  updated_at TEXT NOT NULL
+                );
+                CREATE INDEX IF NOT EXISTS ix_night_scheduler_queue_state
+                  ON night_scheduler_queue(state);
+                CREATE TABLE IF NOT EXISTS night_scheduler_claim_authorizations (
+                  delegation_id TEXT NOT NULL,
+                  idempotency_key TEXT NOT NULL,
+                  authorization_id TEXT NOT NULL,
+                  PRIMARY KEY(delegation_id, idempotency_key)
+                );
+                DROP TRIGGER IF EXISTS cg010_night_scheduler_claim_guard;
+                CREATE TRIGGER cg010_night_scheduler_claim_guard
+                BEFORE INSERT ON claims
+                WHEN EXISTS (
+                  SELECT 1 FROM night_scheduler_queue q
+                  WHERE q.delegation_id=NEW.delegation_id
+                )
+                AND NOT EXISTS (
+                  SELECT 1 FROM night_scheduler_claim_authorizations a
+                  WHERE a.delegation_id=NEW.delegation_id
+                    AND a.idempotency_key=NEW.idempotency_key
+                )
+                BEGIN
+                  SELECT RAISE(ABORT, 'CG010_NIGHT_SCHEDULER_AUTH_REQUIRED');
+                END;
+                COMMIT;
+                """
             )
-            AND NOT EXISTS (
-              SELECT 1 FROM night_scheduler_claim_authorizations a
-              WHERE a.delegation_id=NEW.delegation_id
-                AND a.idempotency_key=NEW.idempotency_key
-            )
-            BEGIN
-              SELECT RAISE(ABORT, 'CG010_NIGHT_SCHEDULER_AUTH_REQUIRED');
-            END;
-            """
-        )
+        except Exception:
+            if self.store.conn.in_transaction:
+                self.store.conn.execute("ROLLBACK")
+            raise
 
     @staticmethod
     def _scheduler_digest(handoff: dict[str, Any], contract: dict[str, Any]) -> str:
