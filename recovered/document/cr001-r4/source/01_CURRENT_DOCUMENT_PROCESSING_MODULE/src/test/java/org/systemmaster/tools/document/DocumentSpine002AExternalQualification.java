@@ -150,8 +150,7 @@ public final class DocumentSpine002AExternalQualification {
                 new FileDocumentSpineCheckpointStore(root.resolve("spine-checkpoints")),
                 new FileDocumentSpineVersionStore(root.resolve("spine-versions")),
                 new DocumentSpineProofService(new DocumentProcessingService(), worker, clock),
-                clock,
-                org.systemmaster.tools.document.PortableTestDocumentEffectAdmission.provider(clock));
+                clock);
     }
 
     private static DocumentSpineJob job(DocumentSpineMode mode, DocumentFormat format, String sourceId, String resultId) {
