@@ -6,7 +6,7 @@ import { assertCanonicalSubjectRef, normalizeSubjectRef, sameSubject } from './s
 
 export { ControllerError } from './errors.js';
 
-const SCHEMA_VERSION = 3;
+const SCHEMA_VERSION = 4;
 const TX_STATES = new Set(['OPEN','ADMITTED','ACTIVE','WAITING','SUCCEEDED','REJECTED','FAILED','CANCELLED','SUPERSEDED']);
 const TX_TERMINAL = new Set(['SUCCEEDED','REJECTED','FAILED','CANCELLED','SUPERSEDED']);
 const TX_TRANSITIONS = new Map([
@@ -110,6 +110,39 @@ export class ControllerKernel {
           ALTER TABLE promotions ADD COLUMN subject_algorithm TEXT NOT NULL DEFAULT 'sha1';
         `);
         this.db.prepare("INSERT INTO schema_migrations(version,applied_at) VALUES (3,strftime('%Y-%m-%dT%H:%M:%fZ','now'))").run();
+      }
+      const afterV3 = Number(this.db.prepare('SELECT COALESCE(MAX(version),0) version FROM schema_migrations').get().version);
+      if (afterV3 < 4) {
+        this.db.exec(`
+          CREATE TABLE external_effects(
+            effect_id TEXT PRIMARY KEY,
+            transaction_id TEXT NOT NULL REFERENCES transactions(transaction_id),
+            operation_id TEXT NOT NULL REFERENCES operations(operation_id),
+            provider TEXT NOT NULL,
+            effect_type TEXT NOT NULL,
+            target_key TEXT NOT NULL,
+            idempotency_key TEXT NOT NULL,
+            request_digest TEXT NOT NULL,
+            expected_remote_version TEXT,
+            state TEXT NOT NULL CHECK(state IN ('PREPARED','UNKNOWN','RECONCILING','SUCCEEDED','FAILED','CANCELLED')),
+            terminal_evidence_json TEXT,
+            last_error_code TEXT,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            UNIQUE(provider,idempotency_key)
+          );
+          CREATE TABLE external_effect_attempts(
+            attempt_id TEXT PRIMARY KEY,
+            effect_id TEXT NOT NULL REFERENCES external_effects(effect_id),
+            attempt_number INTEGER NOT NULL CHECK(attempt_number > 0),
+            lease_id TEXT NOT NULL REFERENCES leases(lease_id),
+            resource_id TEXT NOT NULL,
+            generation INTEGER NOT NULL CHECK(generation > 0),
+            authorized_at TEXT NOT NULL,
+            UNIQUE(effect_id,attempt_number)
+          );
+        `);
+        this.db.prepare("INSERT INTO schema_migrations(version,applied_at) VALUES (4,strftime('%Y-%m-%dT%H:%M:%fZ','now'))").run();
       }
       this.db.exec('COMMIT');
     } catch (error) {
