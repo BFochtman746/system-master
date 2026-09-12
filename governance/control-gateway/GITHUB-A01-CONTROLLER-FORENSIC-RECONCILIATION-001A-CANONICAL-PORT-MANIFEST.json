@@ -1,0 +1,172 @@
+{
+  "protocol_version": "github-a01-controller.canonical-port-manifest.v1",
+  "operation_id": "GITHUB-A01-CONTROLLER-FORENSIC-RECONCILIATION-001A",
+  "status": "LOSSLESS_PORT_MANIFEST_FROZEN",
+  "target_strategy": "MAIN_DERIVED_SELECTIVE_PORT_ONLY",
+  "target_base": {
+    "ref": "refs/heads/main",
+    "sha": "c41884bf9cc66c24fb7f245d68eefc6dbbd1139f"
+  },
+  "sources": {
+    "qualified_controller": {
+      "sha": "bad4708ba91b533c333ba2659ab99bf071710ba6",
+      "merge_base_with_main": "ebf4caece051fe94b7428e218c2d0d2e56db70a9",
+      "compare_status": "diverged",
+      "ahead_by": 88,
+      "behind_by": 32,
+      "standing": "LAST_FULLY_A01_QUALIFIED_CONTROLLER_SOURCE_BASELINE",
+      "whole_branch_merge": "FORBIDDEN"
+    },
+    "mastery_contract": {
+      "sha": "5905da7deadbc9d227d9976dae91804365dbe99d",
+      "merge_base_with_main": "c41884bf9cc66c24fb7f245d68eefc6dbbd1139f",
+      "compare_status": "ahead",
+      "ahead_by": 2,
+      "behind_by": 0,
+      "changed_file_count": 6,
+      "standing": "CONTRACT_QUALIFIED_DESIGN_LOCK_NOT_ACTIVE",
+      "whole_branch_merge": "NOT_REQUIRED"
+    }
+  },
+  "lossless_coverage_rule": {
+    "controller_compare": "git diff --name-status c41884bf9cc66c24fb7f245d68eefc6dbbd1139f...bad4708ba91b533c333ba2659ab99bf071710ba6",
+    "mastery_compare": "git diff --name-status c41884bf9cc66c24fb7f245d68eefc6dbbd1139f...5905da7deadbc9d227d9976dae91804365dbe99d",
+    "rule": "Before 001B may freeze, every path in each exact compare must resolve to one and only one disposition below. Any newly observed, missing, renamed, or unmatched path is a hard blocker. Patterns describe exact source families and do not authorize unrelated current or future files."
+  },
+  "controller_source_dispositions": [
+    {
+      "disposition": "PORT_AND_REQUALIFY",
+      "paths": [
+        "control-gateway/**",
+        "tools/second_shift_supervisor_v2.py",
+        ".github/scripts/a01-second-shift-supervisor-v2-qualify.js",
+        ".github/scripts/second-shift-state-kernel-v2.js",
+        "tests/run_control_gateway_failure_restart_idempotency_bounded.py",
+        "tests/run_second_shift_supervisor_v2_optimized.py",
+        "tests/second-shift-execution-control-contract.test.js",
+        "tests/second-shift-state-kernel-v2.stress.js",
+        "tests/test_control_gateway_a01_night_scheduler.py",
+        "tests/test_control_gateway_a01_supervisor_adapter.py",
+        "tests/test_control_gateway_a01_supervisor_coordination.py",
+        "tests/test_control_gateway_a01_supervisor_coordination_authority.py",
+        "tests/test_control_gateway_cg011_adversarial_closure.py",
+        "tests/test_control_gateway_cg011_dispatch_failure_replay.py",
+        "tests/test_control_gateway_failure_restart_idempotency.py",
+        "tests/test_second_shift_supervisor_v2.py",
+        "governance/second-shift/SECOND-SHIFT-DELEGATION-SCHEMA-003.json",
+        "governance/second-shift/SECOND-SHIFT-EXECUTOR-REGISTRY-001.json",
+        "governance/second-shift/SECOND-SHIFT-SUPERVISOR-V2-RFC-001.md",
+        "governance/second-shift/SECOND-SHIFT-UTILIZATION-EVENT-SCHEMA-002.json"
+      ],
+      "rule": "These are executable runtime, supervisor, schema, validator, and regression mechanics. They may be copied or adapted onto the main-derived candidate only with exact-byte provenance. Any adaptation changes the subject and requires fresh qualification."
+    },
+    {
+      "disposition": "PORT_FOR_PROVENANCE_AND_QUALIFICATION_NOT_NEW_SUCCESSOR_AUTHORITY",
+      "paths": [
+        "governance/control-gateway/A01-EXTERNAL-INFRASTRUCTURE-WORKSTREAMS.json",
+        "governance/control-gateway/SECOND-SHIFT-CONTROL-GATEWAY-ACTIVE-WORK-LOCATOR.json",
+        "governance/control-gateway/SECOND-SHIFT-CONTROL-GATEWAY-ACTIVE-WORK-PACKET.json",
+        "governance/control-gateway/SECOND-SHIFT-CONTROL-GATEWAY-CG-001.lock.json",
+        "governance/control-gateway/SECOND-SHIFT-CONTROL-GATEWAY-CG-001.md",
+        "governance/control-gateway/SECOND-SHIFT-CONTROL-GATEWAY-CG-002.lock.json",
+        "governance/control-gateway/SECOND-SHIFT-CONTROL-GATEWAY-CG-002.md",
+        "governance/control-gateway/SECOND-SHIFT-CONTROL-GATEWAY-CG-003.lock.json",
+        "governance/control-gateway/SECOND-SHIFT-CONTROL-GATEWAY-CG-003.md",
+        "governance/control-gateway/SECOND-SHIFT-CONTROL-GATEWAY-CG-004.lock.json",
+        "governance/control-gateway/SECOND-SHIFT-CONTROL-GATEWAY-CG-004.md",
+        "governance/control-gateway/SECOND-SHIFT-CONTROL-GATEWAY-CG-005.lock.json",
+        "governance/control-gateway/SECOND-SHIFT-CONTROL-GATEWAY-CG-005.md",
+        "governance/control-gateway/SECOND-SHIFT-CONTROL-GATEWAY-CG-006.lock.json",
+        "governance/control-gateway/SECOND-SHIFT-CONTROL-GATEWAY-CG-006.md",
+        "governance/control-gateway/SECOND-SHIFT-CONTROL-GATEWAY-CG-007.lock.json",
+        "governance/control-gateway/SECOND-SHIFT-CONTROL-GATEWAY-CG-007.md",
+        "governance/control-gateway/SECOND-SHIFT-CONTROL-GATEWAY-CG-008.lock.json",
+        "governance/control-gateway/SECOND-SHIFT-CONTROL-GATEWAY-CG-008.md",
+        "governance/control-gateway/SECOND-SHIFT-CONTROL-GATEWAY-CG-009-CLOSURE-REPAIR.lock.json",
+        "governance/control-gateway/SECOND-SHIFT-CONTROL-GATEWAY-CG-009.lock.json",
+        "governance/control-gateway/SECOND-SHIFT-CONTROL-GATEWAY-CG-009.md",
+        "governance/control-gateway/SECOND-SHIFT-CONTROL-GATEWAY-CG-010.lock.json",
+        "governance/control-gateway/SECOND-SHIFT-CONTROL-GATEWAY-CG-010.md",
+        "governance/control-gateway/SECOND-SHIFT-CONTROL-GATEWAY-CG-011.lock.json"
+      ],
+      "rule": "Preserve the complete CG authority/evidence chain and terminal locator. Importing these records must not rewrite history, create CG-012, or turn historical workflow operations into a new legal successor."
+    },
+    {
+      "disposition": "PORT_QUALIFICATION_WORKFLOW_OR_TEST_HARNESS_ONLY",
+      "paths": [
+        ".github/workflows/second-shift-control-gateway-cg-003.yml",
+        ".github/workflows/second-shift-control-gateway-cg-004.yml",
+        ".github/workflows/second-shift-control-gateway-cg-005.yml",
+        ".github/workflows/second-shift-control-gateway-cg-006.yml",
+        ".github/workflows/second-shift-control-gateway-cg-007.yml",
+        ".github/workflows/second-shift-control-gateway-cg-008.yml",
+        ".github/workflows/second-shift-control-gateway-cg-009.yml",
+        ".github/workflows/second-shift-control-gateway-cg-010-closure-repair.yml",
+        ".github/workflows/second-shift-control-gateway-cg-010.yml",
+        ".github/workflows/second-shift-control-gateway-cg-011-a01-closure-repair.yml",
+        ".github/workflows/second-shift-control-gateway-cg-011.yml",
+        ".github/workflows/second-shift-controller-reliability-stress.yml",
+        ".github/workflows/second-shift-state-kernel-v2-stress.yml",
+        ".github/workflows/second-shift-supervisor-v2-a01-windows-stress.yml",
+        ".github/workflows/second-shift-supervisor-v2-stress.yml"
+      ],
+      "rule": "These may be retained for exact regression/provenance where still dependency-valid. They do not independently authorize a successor, scheduler, direct self-hosted bypass, or production mutation path. Any workflow that conflicts with the canonical A-01 gateway is retired or adapted before activation."
+    },
+    {
+      "disposition": "RECONCILE_WITH_CURRENT_MAIN_DO_NOT_BLIND_COPY",
+      "paths": [
+        ".github/scripts/validate-system-topology.js",
+        ".github/workflows/a01-overnight-night-shift.yml",
+        "qualification/a01/registry.json"
+      ],
+      "rule": "Current main and the qualified controller both contain authority-relevant state. Reconstruct intended semantics field-by-field. The overnight workflow must lose GitHub scheduler authority; the A-01 registry must retain all current-main registrations while adding the exact controller qualification; topology validation must preserve current topology facts while enforcing the controller boundary."
+    }
+  ],
+  "mastery_source_dispositions": [
+    {
+      "disposition": "PRESERVE_EXACT_DEFER_RUNTIME_ACTIVATION",
+      "source_sha": "5905da7deadbc9d227d9976dae91804365dbe99d",
+      "paths": [
+        ".github/scripts/second-shift-mastery-contract-validate.js",
+        ".github/workflows/second-shift-mastery-001-contracts.yml",
+        "governance/second-shift/SECOND-SHIFT-ASSIGNMENT-CONTRACT-SCHEMA-003.json",
+        "governance/second-shift/SECOND-SHIFT-MASTERY-001-ALL-NIGHT-OPERATING-MODEL.md",
+        "governance/second-shift/SECOND-SHIFT-NIGHT-SELECTION-GATE-SCHEMA-001.json",
+        "tests/test_second_shift_mastery_contracts.js"
+      ],
+      "rule": "These six files are the complete two-commit Mastery delta over current main. Preserve them losslessly. Contract qualification may be rerun at any integration SHA, but production activation waits for runtime integration, shadow/calibration, exact A-01 adversarial qualification, canary, and explicit promotion."
+    }
+  ],
+  "explicit_non_ports": [
+    {
+      "subject": "PLANNING_ORCHESTRATION_WORK_CREATED_DURING_CONTROLLER_CONTEXT_DRIFT",
+      "disposition": "QUARANTINE_FROM_CONTROLLER_CANONICALIZATION",
+      "rule": "Do not import unrelated Foundation Planning/Orchestration work into this controller workstream. Its own branch/history remains separate."
+    },
+    {
+      "subject": "WHOLE_BAD4708_BRANCH",
+      "disposition": "FORBIDDEN_WHOLESALE_MERGE",
+      "reason": "The qualified controller branch is 32 commits behind current main and contains a different product/governance lineage."
+    },
+    {
+      "subject": "MAIN_RESET_TO_BAD4708",
+      "disposition": "FORBIDDEN",
+      "reason": "Would destroy or orphan newer product state and would not itself constitute exact-subject requalification."
+    },
+    {
+      "subject": "CG012",
+      "disposition": "NOT_STARTED_NOT_IMPLIED",
+      "reason": "CG-011 terminal authority remains NO_LEGAL_SUCCESSOR. This reconciliation is a separately authorized maintenance workstream."
+    }
+  ],
+  "build_order": [
+    "PORT_CONTROLLER_RUNTIME_AND_TESTS_ON_MAIN_DERIVED_BRANCH",
+    "RECONCILE_TOPOLOGY_OVERNIGHT_WORKFLOW_AND_A01_REGISTRY",
+    "VERIFY_LOSSLESS_COMPARE_COVERAGE",
+    "RUN_HOSTED_CONTROLLER_QUALIFICATION",
+    "RUN_EXACT_A01_WINDOWS_X64_QUALIFICATION_FOR_HOST_DEPENDENT_BYTES",
+    "CLOSE_GITHUB_MUTATION_PRODUCTION_ENFORCEMENT_GAP",
+    "ONLY_THEN_INTEGRATE_MASTERY_RUNTIME_ON_THE_QUALIFIED_CONTROLLER_BASE"
+  ],
+  "freeze_rule": "001B cannot freeze merely because source files were copied. The candidate must preserve current main product state, account for every exact source-delta path, pass controller regressions on its own SHA, and earn fresh A-01 evidence before any host-dependent controller freeze."
+}
