@@ -124,7 +124,7 @@ widenedCanon.binding_digest = binding.digestBinding(widenedCanon);
 widenedCanon.binding_id = `book-capability-binding-v1:${widenedCanon.binding_digest}`;
 expectCode(() => binding.validateBinding(widenedCanon), 'AUTHORITY_WIDENING_FORBIDDEN');
 expectCode(() => binding.createBinding({ ...sourceInput, private_data_authority: 'GRANTED' }), 'PRIVATE_AUTHORITY_WIDENING_FORBIDDEN');
-expectCode(() => binding.createBinding({ ...sourceInput, current_capability_id: 'PROSE.ANALYZE_PASSAGE' }), 'INVALID_CURRENT_CAPABILITY_ID');
+expectCode(() => binding.createBinding({ ...sourceInput, current_capability_id: 'PROSE.ANALYZE_PASSAGE' }), 'RETIRED_PROSE_EXECUTION_ID');
 
 const duplicateSource = {
   ...source,
