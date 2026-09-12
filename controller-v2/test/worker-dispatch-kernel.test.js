@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { ControllerKernel, ControllerError } from '../src/kernel.js';
+import { ControllerError } from '../src/kernel.js';
 import { ExecutionGraphKernel } from '../src/execution-graph-kernel.js';
 import { uuidv7, sha256 } from '../src/canonical.js';
 import { MemoryDurableJournal, publishPendingOutbox } from '../src/durable-journal.js';
@@ -16,9 +16,6 @@ import {
 } from '../src/external-effect-authority.js';
 import {
   WorkerDispatchKernel,
-  WORKER_BINDING_PROTOCOL,
-  EXECUTION_CONTRACT_PROTOCOL,
-  WORKER_DISPATCH_PROTOCOL,
   WORKER_DISPATCH_ENVELOPE_PROTOCOL,
   workerDispatchEnvelope,
   rebuildWorkerDispatchStore
@@ -54,7 +51,7 @@ function setup({now=Date.now(),ready=true,capabilities=['exec.node','repo.read']
   if(ready) k.markOperationReadyIfEligible(op);
   const binding=k.recordWorkerBinding(receipt(now,{capabilities}));
   const contract=k.recordExecutionContract({operation_id:op,executor_kind:'node',protocol_version:'1',payload_ref:'artifact:payload',payload_digest:D('4'),required_capabilities:required});
-  const lease=k.acquireLease(op,'resource:1','worker:test',60000,now);
+  const lease=ready ? k.acquireLease(op,'resource:1','worker:test',60000,now) : null;
   return {k,tx,op,bindingId:binding.binding_id,contractId:contract.contract_id,lease,now};
 }
 function intent(s) {
@@ -93,7 +90,7 @@ test('WDI-012 invalid digest shape is rejected',()=>{const k=new WorkerDispatchK
 test('WDI-013 valid_until not after observed_at is rejected',()=>{const k=new WorkerDispatchKernel(':memory:');const now=Date.now();assertCode(()=>k.recordWorkerBinding(receipt(now,{observed_at:new Date(now).toISOString(),valid_until:new Date(now).toISOString()})),'WORKER_BINDING_VALIDITY_INVALID');k.close();});
 test('WDI-014 raw credential/token/private-key fields are rejected by strict schema',()=>{const k=new WorkerDispatchKernel(':memory:');assertCode(()=>k.recordWorkerBinding({...receipt(),bearer_token:'secret'}),'WORKER_DISPATCH_SCHEMA_UNKNOWN_FIELD');k.close();});
 test('WDI-015 CURRENT standing requires observed <= now < valid_until and no revocation',()=>{const k=new WorkerDispatchKernel(':memory:');const now=Date.now(),id=k.recordWorkerBinding(receipt(now)).binding_id;assert.equal(k.workerBindingStanding(id,now),'CURRENT');k.close();});
-test('WDI-016 expired binding cannot authorize new intent',()=>{const s=setup();assert.equal(s.k.workerBindingStanding(s.bindingId,s.now+130000),'EXPIRED');assertCode(()=>s.k.createDispatchIntent({operationId:s.op,contractId:s.contractId,workerBindingId:s.bindingId,leaseId:s.lease.lease_id,nowMs:s.now+130000}),'WORKER_BINDING_NOT_CURRENT');s.k.close();});
+test('WDI-016 expired binding cannot authorize new intent',()=>{const s=setup();s.k.db.prepare('UPDATE leases SET expires_at=? WHERE lease_id=?').run(new Date(s.now+200000).toISOString(),s.lease.lease_id);assert.equal(s.k.workerBindingStanding(s.bindingId,s.now+130000),'EXPIRED');assertCode(()=>s.k.createDispatchIntent({operationId:s.op,contractId:s.contractId,workerBindingId:s.bindingId,leaseId:s.lease.lease_id,nowMs:s.now+130000}),'WORKER_BINDING_NOT_CURRENT');s.k.close();});
 test('WDI-017 not-yet-valid binding cannot authorize new intent',()=>{const now=Date.now(),k=new WorkerDispatchKernel(':memory:');const tx=k.acceptCommand(command()).transaction_id;k.admitTransaction(tx,{operations:'all_succeeded',qualification:'not_required',promotion:'not_required'});const op=k.createOperation(tx,{resourceId:'resource:1'});k.markOperationReadyIfEligible(op);const b=k.recordWorkerBinding(receipt(now,{observed_at:new Date(now+5000).toISOString(),valid_until:new Date(now+120000).toISOString()}));const c=k.recordExecutionContract({operation_id:op,executor_kind:'node',protocol_version:'1',payload_ref:'p',payload_digest:D('4'),required_capabilities:['exec.node']});const l=k.acquireLease(op,'resource:1','worker:test',60000,now);assert.equal(k.workerBindingStanding(b.binding_id,now),'NOT_YET_VALID');assertCode(()=>k.createDispatchIntent({operationId:op,contractId:c.contract_id,workerBindingId:b.binding_id,leaseId:l.lease_id,nowMs:now}),'WORKER_BINDING_NOT_CURRENT');k.close();});
 test('WDI-018 exact revocation evidence is append-only and idempotent',()=>{const k=new WorkerDispatchKernel(':memory:');const id=k.recordWorkerBinding(receipt()).binding_id;const r={authority:'idp',evidence_ref:'rev:1',evidence_digest:D('5'),observed_at:new Date().toISOString()};assert.equal(k.revokeWorkerBinding(id,r).duplicate,false);assert.equal(k.revokeWorkerBinding(id,r).duplicate,true);assert.equal(k.db.prepare('SELECT COUNT(*) n FROM worker_binding_revocations').get().n,1);k.close();});
 test('WDI-019 conflicting revocation evidence fails closed',()=>{const k=new WorkerDispatchKernel(':memory:');const id=k.recordWorkerBinding(receipt()).binding_id;const r={authority:'idp',evidence_ref:'rev:1',evidence_digest:D('5'),observed_at:new Date().toISOString()};k.revokeWorkerBinding(id,r);assertCode(()=>k.revokeWorkerBinding(id,{...r,evidence_digest:D('6')}),'WORKER_BINDING_REVOCATION_CONFLICT');k.close();});
@@ -119,7 +116,7 @@ test('WDI-034 non-ACTIVE lease rejects intent',()=>{for(const status of ['RELEAS
 test('WDI-035 non-READY operation rejects new intent',()=>{const s=setup();s.k.transitionOperation(s.op,'CANCELLED');assertCode(()=>intent(s),'DISPATCH_OPERATION_NOT_READY');s.k.close();});
 test('WDI-036 transaction outside ADMITTED/ACTIVE rejects new intent',()=>{const s=setup();s.k.db.prepare("UPDATE transactions SET state='WAITING' WHERE transaction_id=?").run(s.tx);assertCode(()=>intent(s),'DISPATCH_TRANSACTION_NOT_EXECUTABLE');s.k.close();});
 test('WDI-037 missing required capability rejects intent',()=>{const s=setup({capabilities:['repo.read'],required:['exec.node']});assertCode(()=>intent(s),'WORKER_CAPABILITY_MISSING');s.k.close();});
-test('WDI-038 expired binding rejects intent',()=>{const s=setup();assertCode(()=>s.k.createDispatchIntent({operationId:s.op,contractId:s.contractId,workerBindingId:s.bindingId,leaseId:s.lease.lease_id,nowMs:s.now+130000}),'WORKER_BINDING_NOT_CURRENT');s.k.close();});
+test('WDI-038 expired binding rejects intent',()=>{const s=setup();s.k.db.prepare('UPDATE leases SET expires_at=? WHERE lease_id=?').run(new Date(s.now+200000).toISOString(),s.lease.lease_id);assertCode(()=>s.k.createDispatchIntent({operationId:s.op,contractId:s.contractId,workerBindingId:s.bindingId,leaseId:s.lease.lease_id,nowMs:s.now+130000}),'WORKER_BINDING_NOT_CURRENT');s.k.close();});
 test('WDI-039 revoked binding rejects intent',()=>{const s=setup();s.k.revokeWorkerBinding(s.bindingId,{authority:'idp',evidence_ref:'rev',evidence_digest:D('6'),observed_at:new Date(s.now+1).toISOString()});assertCode(()=>intent(s),'WORKER_BINDING_NOT_CURRENT');s.k.close();});
 test('WDI-040 one lease cannot bind two semantic dispatch identities',()=>{const s=setup();intent(s);const b2=s.k.recordWorkerBinding(receipt(s.now,{identity_evidence_digest:D('9')})).binding_id;assertCode(()=>s.k.createDispatchIntent({operationId:s.op,contractId:s.contractId,workerBindingId:b2,leaseId:s.lease.lease_id,nowMs:s.now+10}),'DISPATCH_INTENT_CONFLICT');s.k.close();});
 test('WDI-041 claim-without-intent has no external-send state and reconciles deterministic intent',()=>{const s=setup();assert.equal(s.k.db.prepare('SELECT COUNT(*) n FROM dispatch_intents').get().n,0);assert.equal(s.k.db.prepare('SELECT COUNT(*) n FROM external_effects').get().n,0);const a=intent(s),b=intent(s);assert.equal(a.dispatch_id,b.dispatch_id);s.k.close();});
