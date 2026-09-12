@@ -6,7 +6,7 @@ import { assertCanonicalSubjectRef, normalizeSubjectRef, sameSubject } from './s
 
 export { ControllerError } from './errors.js';
 
-const SCHEMA_VERSION = 4;
+const SCHEMA_VERSION = 5;
 const TX_STATES = new Set(['OPEN','ADMITTED','ACTIVE','WAITING','SUCCEEDED','REJECTED','FAILED','CANCELLED','SUPERSEDED']);
 const TX_TERMINAL = new Set(['SUCCEEDED','REJECTED','FAILED','CANCELLED','SUPERSEDED']);
 const TX_TRANSITIONS = new Map([
@@ -144,6 +144,37 @@ export class ControllerKernel {
         `);
         this.db.prepare("INSERT INTO schema_migrations(version,applied_at) VALUES (4,strftime('%Y-%m-%dT%H:%M:%fZ','now'))").run();
       }
+      const afterV4 = Number(this.db.prepare('SELECT COALESCE(MAX(version),0) version FROM schema_migrations').get().version);
+      if (afterV4 < 5) {
+        this.db.exec(`
+          CREATE TABLE admission_decisions(
+            decision_id TEXT PRIMARY KEY,
+            transaction_id TEXT NOT NULL UNIQUE REFERENCES transactions(transaction_id),
+            command_id TEXT NOT NULL REFERENCES commands(command_id),
+            command_fingerprint TEXT NOT NULL,
+            repository TEXT NOT NULL,
+            subject_algorithm TEXT NOT NULL,
+            subject_oid TEXT NOT NULL,
+            outcome TEXT NOT NULL CHECK(outcome IN ('ALLOW','DENY')),
+            policy_version TEXT NOT NULL,
+            policy_revision TEXT NOT NULL,
+            policy_digest TEXT NOT NULL,
+            input_digest TEXT NOT NULL,
+            decision_fingerprint TEXT NOT NULL UNIQUE,
+            reason_codes_json TEXT NOT NULL,
+            determining_policy_ids_json TEXT NOT NULL,
+            diagnostic_error_codes_json TEXT NOT NULL,
+            principal_refs_json TEXT NOT NULL,
+            delegation_refs_json TEXT NOT NULL,
+            approval_refs_json TEXT NOT NULL,
+            approval_required INTEGER NOT NULL CHECK(approval_required IN (0,1)),
+            completion_contract_json TEXT,
+            valid_until TEXT,
+            committed_at TEXT NOT NULL
+          );
+        `);
+        this.db.prepare("INSERT INTO schema_migrations(version,applied_at) VALUES (5,strftime('%Y-%m-%dT%H:%M:%fZ','now'))").run();
+      }
       this.db.exec('COMMIT');
     } catch (error) {
       if (this.db.isTransaction) this.db.exec('ROLLBACK');
@@ -169,7 +200,7 @@ export class ControllerKernel {
     const digest=sha256(core);
     this.db.prepare('INSERT INTO events VALUES (?,?,?,?,?,?,?,?,?)').run(eventId,eventSchema,streamId,version,eventType,occurredAt,canonicalize(data),prev,digest);
     const outboxId=uuidv7();
-    this.db.prepare("INSERT INTO outbox(outbox_id,event_id,status,created_at) VALUES (?,?,'PENDING',?)").run(outboxId,eventId,occurredAt);
+    this.db.prepare("INSERT INTO outbox(outbox_id,event_id,status,created_at) VALUES (?,?,'PENDING',?)").run(outboxId,eventId,'PENDING',occurredAt);
     return {...core,event_digest:digest,outbox_id:outboxId};
   }
 
