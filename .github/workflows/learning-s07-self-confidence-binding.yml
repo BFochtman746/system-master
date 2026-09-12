@@ -1,0 +1,77 @@
+name: Learning S07 Self Confidence Interface Binding
+
+on:
+  push:
+    branches:
+      - learning/ownership-freeze-001b-20260912
+    paths:
+      - '.github/workflows/learning-s07-self-confidence-binding.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  bind:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: learning/ownership-freeze-001b-20260912
+          fetch-depth: 0
+      - name: Bind exact S07 self confidence interface
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import base64, csv, gzip, hashlib, io, json, pathlib
+
+          source = pathlib.Path('qualification/learning/ownership/LRN-OWNERSHIP-FREEZE-001B-R3B-S02-R2-INTERFACES.csv.gz.b64')
+          raw = gzip.decompress(base64.b64decode(source.read_text(encoding='utf-8').strip()))
+          digest = hashlib.sha256(raw).hexdigest()
+          expected = '4f4387956bd8189b7a65f5de94ab3c722cb34f249ebe8a94ad74b4c0d0c3cbc0'
+          if digest != expected:
+              raise SystemExit(f'FAIL decoded ledger sha256 {digest} != {expected}')
+          reader = csv.DictReader(io.StringIO(raw.decode('utf-8-sig')))
+          rows = list(reader)
+          if len(rows) != 112:
+              raise SystemExit(f'FAIL active interface row count {len(rows)} != 112')
+          matches = [r for r in rows if str(r.get('name','')).strip() == 'SubmitSelfConfidence']
+          if len(matches) != 1:
+              raise SystemExit(f'FAIL SubmitSelfConfidence count {len(matches)} != 1')
+          row = matches[0]
+          if row.get('interface_id') != 'I011' or row.get('canonical_owner') != 'MOD-LEARNING-001':
+              raise SystemExit('FAIL I011 owner/identity mismatch')
+          report = {
+              'artifact_id': 'LRN-OWNERSHIP-FREEZE-001B-R3B-S07-R1-SELF-CONFIDENCE-INTERFACE-BINDING',
+              'date': '2026-09-12',
+              'owner_path': 'SYSTEM_MASTER/LEARNING',
+              'source_path': str(source),
+              'decoded_ledger_sha256': digest,
+              'active_interface_rows': len(rows),
+              'matched_count': 1,
+              'matched_row': row,
+              'standing': 'EXACT_REPOSITORY_NATIVE_S07_INTERFACE_BINDING_COMPLETE__DESIGN_ADJUDICATION_REQUIRED',
+              'non_claims': [
+                  'self confidence is not competence or mastery evidence by itself',
+                  'no runtime implementation claim',
+                  'no participant consent mastery retention transfer psychometric SME certification claim',
+                  'no native A-01 production claim'
+              ]
+          }
+          out = pathlib.Path('qualification/learning/ownership/LRN-OWNERSHIP-FREEZE-001B-R3B-S07-R1-SELF-CONFIDENCE-INTERFACE-BINDING.json')
+          out.write_text(json.dumps(report, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
+          print('BOUND=I011 SubmitSelfConfidence')
+          PY
+      - name: Commit exact S07 binding report
+        shell: bash
+        run: |
+          path='qualification/learning/ownership/LRN-OWNERSHIP-FREEZE-001B-R3B-S07-R1-SELF-CONFIDENCE-INTERFACE-BINDING.json'
+          if [ -z "$(git status --porcelain -- "$path")" ]; then
+            echo 'No binding delta.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add "$path"
+          git commit -m 'learning: persist exact S07 self confidence binding'
+          git push origin HEAD:learning/ownership-freeze-001b-20260912
