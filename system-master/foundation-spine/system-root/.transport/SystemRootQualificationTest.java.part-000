@@ -1,0 +1,128 @@
+package org.systemmaster.foundation.root;
+
+import org.systemmaster.foundation.root.SystemRootStore.RootSnapshot;
+
+import static org.systemmaster.foundation.root.SystemAuthority.*;
+import static org.systemmaster.foundation.root.SystemRootRegistry.*;
+import static org.systemmaster.foundation.root.SystemRootGuards.*;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
+public final class SystemRootQualificationTest {
+    private static int tests;
+    private static final Clock CLOCK = Clock.fixed(Instant.parse("2026-09-12T03:30:00Z"), ZoneOffset.UTC);
+
+    public static void main(String[] args) throws Exception {
+        testCanonicalCatalogIsCompleteAndCollisionFree();
+        testCanonicalEncodingIsUnambiguous();
+        testBootstrapPersistsCanonicalRosterAndRootAdmission();
+        testIdempotentReplayAndOperationCollision();
+        testMutationAuthorizationFailsClosed();
+        testAdmissionVerificationFailsClosed();
+        testTruthOwnerCollisionRejected();
+        testVersionAdmissionAndStaleGeneration();
+        testDrainResumeAndRetireLifecycle();
+        testTopologyRulesAndRetirementCleanup();
+        testAtomicReplacementTransfersAuthority();
+        testRootIdentityCannotRetire();
+        testCrashBeforeDurableAppendPreservesPriorTruth();
+        testTornTailRecovery();
+        testLosslessJournalCompaction();
+        testCorruptStoreFailsClosed();
+        testConcurrentWritersConvergeWithoutLostUpdate();
+        testCrossProcessWritersConvergeWithoutLostUpdate();
+        testClockRegressionFailsClosed();
+        testSnapshotDigestStableAcrossReload();
+        System.out.println("PASS SYSTEM-ROOT tests=" + tests);
+    }
+
+    private static void testCanonicalCatalogIsCompleteAndCollisionFree() {
+        List<Descriptor> all = FoundationAuthorityCatalog.canonical();
+        check(all.size() == 27, "expected 26 Foundation systems plus Creative Fabric");
+        Set<String> ids = new HashSet<>();
+        Set<String> truths = new HashSet<>();
+        for (Descriptor d : all) {
+            check(ids.add(d.systemId()), "duplicate system id " + d.systemId());
+            for (String truth : d.ownedTruthKeys()) check(truths.add(truth), "duplicate truth key " + truth);
+        }
+        check(ids.contains("system-root"), "system-root missing");
+        check(ids.contains("creative-fabric"), "creative-fabric missing");
+        pass();
+    }
+
+
+    private static void testCanonicalEncodingIsUnambiguous() {
+        Descriptor a = new Descriptor("canon-a", "A|B", "C", AuthorityKind.FOUNDATION_SHARED,
+                Set.of("canon.a.truth"), Set.of("N|1"));
+        Descriptor b = new Descriptor("canon-a", "A", "B|C", AuthorityKind.FOUNDATION_SHARED,
+                Set.of("canon.a.truth"), Set.of("N|1"));
+        check(!a.canonical().equals(b.canonical()), "length framing prevents delimiter ambiguity");
+        TopologyEdge e1 = new TopologyEdge("canon-a", "system-root", EdgeKind.OPTIONAL_DEPENDENCY, "x|y");
+        TopologyEdge e2 = new TopologyEdge("canon-a", "system-root", EdgeKind.OPTIONAL_DEPENDENCY, "x|y|z");
+        check(!e1.canonical().equals(e2.canonical()), "topology canonical identity is unambiguous");
+        pass();
+    }
+
+    private static void testBootstrapPersistsCanonicalRosterAndRootAdmission() throws Exception {
+        Harness h = harness();
+        MutationResult result = h.registry.bootstrap(FoundationAuthorityCatalog.canonical(), rootVersion(), rootBasis(),
+                "principal:bootstrap", "decision:architecture-lock", "op:bootstrap");
+        check(!result.replayed(), "first bootstrap cannot be replay");
+        check(result.snapshot().storeRevision() == 1, "bootstrap revision");
+        check(result.snapshot().systems().size() == 27, "bootstrap roster size");
+        SystemAuthority.Record root = result.snapshot().systems().get("system-root");
+        check(root.lifecycle() == Lifecycle.ADMITTED, "root admitted");
+        check(root.currentVersion().equals(rootVersion()), "root version current");
+        check(result.snapshot().systems().get("identity-delegation").lifecycle() == Lifecycle.DECLARED,
+                "non-root systems declared but not falsely admitted");
+        check(h.registry.authorityForTruth("foundation.topology").orElseThrow().equals("system-root"),
+                "truth owner query");
+
+        SystemRootRegistry reloaded = registry(new FileSystemRootStore(h.path));
+        check(reloaded.snapshot().systems().size() == 27, "restart reconstruction");
+        check(reloaded.snapshot().events().size() == 1, "event reconstruction");
+        pass();
+    }
+
+    private static void testIdempotentReplayAndOperationCollision() throws Exception {
+        Harness h = bootstrappedHarness();
+        Descriptor extra = descriptor("diagnostic-service", "diag.truth");
+        MutationResult first = h.registry.declare(extra, "principal:op", "decision:declare", "op:declare-diag");
+        MutationResult replay = h.registry.declare(extra, "principal:op", "decision:declare", "op:declare-diag");
+        check(replay.replayed(), "same operation should replay");
+        check(replay.snapshot().storeRevision() == first.snapshot().storeRevision(), "replay cannot advance revision");
+        expect(OperationIdConflictException.class,
+                () -> h.registry.declare(descriptor("other-service", "other.truth"),
+                        "principal:op", "decision:declare", "op:declare-diag"));
+        expect(OperationIdConflictException.class,
+                () -> h.registry.declare(extra, "principal:other", "decision:declare", "op:declare-diag"));
+        SystemRootRegistry restarted = registry(new FileSystemRootStore(h.path));
+        MutationResult restartReplay = restarted.declare(extra, "principal:op", "decision:declare", "op:declare-diag");
+        check(restartReplay.replayed(), "idempotency receipt survives process reconstruction");
+        check(restartReplay.snapshot().storeRevision() == first.snapshot().storeRevision(), "restart replay cannot advance revision");
+        pass();
+    }
+
+
+    private static void testMutationAuthorizationFailsClosed() throws Exception {
+        Path dir = Files.createTempDirectory("system-root-authz-");
+        Path path = dir.resolve("root.store");
+        SystemRootRegistry denied = new SystemRootRegistry(
+                new FileSystemRootStore(path), ignored -> false, ignored -> true, CLOCK);
+        expect(MutationAuthorizationException.class,
+                () -> denied.bootstrap(FoundationAuthorityCatalog.canonical(), rootVersion(), rootBasis(),
+                        "principal:deni
