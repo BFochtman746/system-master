@@ -230,7 +230,7 @@ expectCode(() => runtime.createAdmissionHandoff({
   candidate_digest: h('invalid-candidate')
 }, { binding_registry: registry }), 'ADMISSION_CANDIDATE_CAPABILITY_REQUIRED');
 
-// Receipt/binding mismatch and raw/private state fail closed.
+// Receipt integrity fails first; a resealed wrong-binding receipt must reach and fail the binding guard.
 const tamperedReceipt = { ...syntheticReceipt, capability_binding_digest: '0'.repeat(64) };
 expectCode(() => runtime.createAdmissionHandoff({
   plan,
@@ -240,6 +240,20 @@ expectCode(() => runtime.createAdmissionHandoff({
   candidate_ref: 'synthetic-test://candidate/2',
   candidate_digest: h('candidate-2')
 }, { binding_registry: registry }), 'EXECUTION_RECEIPT_DIGEST_MISMATCH');
+const resealedBindingMismatch = JSON.parse(JSON.stringify(tamperedReceipt));
+delete resealedBindingMismatch.receipt_id;
+delete resealedBindingMismatch.receipt_digest;
+resealedBindingMismatch.receipt_digest = runtime.sha256(runtime.stableStringify(resealedBindingMismatch));
+resealedBindingMismatch.receipt_id = `book-b01-execution-receipt-v1:${resealedBindingMismatch.receipt_digest}`;
+ok(runtime.validateExecutionReceipt(resealedBindingMismatch));
+expectCode(() => runtime.createAdmissionHandoff({
+  plan,
+  binding_plan: bindingPlan,
+  task_id: 'generate',
+  execution_receipt: resealedBindingMismatch,
+  candidate_ref: 'synthetic-test://candidate/resealed-binding-mismatch',
+  candidate_digest: h('candidate-resealed-binding-mismatch')
+}, { binding_registry: registry }), 'ADMISSION_RECEIPT_BINDING_MISMATCH');
 const rawFailureInput = {
   plan,
   binding_plan: bindingPlan,
