@@ -1,0 +1,36 @@
+name: Book B01 D1 Capability Binding Qualification
+
+on:
+  push:
+    branches:
+      - book-system/control-v1
+    paths:
+      - 'system-master/book-system/book-capability-binding-v1.js'
+      - 'system-master/book-system/book-capability-binding-v1.registry.json'
+      - 'system-master/book-system/book-capability-binding-v1.test.js'
+      - '.github/workflows/book-b01-d1-capability-binding-qualification.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  isolated-binding-qualification:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [22, 24]
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Record exact subject
+        run: |
+          echo "QUALIFIED_SUBJECT=${GITHUB_SHA}"
+          node --version
+      - name: Run B01 D1 isolated binding qualification
+        run: node system-master/book-system/book-capability-binding-v1.test.js
