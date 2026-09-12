@@ -13,6 +13,12 @@ def validated_attempts_for_skill(
 
     Attempt bytes are existing Learning evidence state. This helper adds no writer
     authority; it prevents corrupted bytes from becoming inputs to mastery.
+
+    S05 may append a corrected owner-valid assessment result as successor evidence.
+    The historical attempt remains durably stored, but a later attempt that names it
+    in ``supersedes_attempt_id`` becomes the active evidence input for subsequent
+    projections. This preserves history without allowing two contradictory active
+    score versions to masquerade as independent evidence.
     """
     with repo.connect() as con:
         rows = con.execute(
@@ -29,4 +35,9 @@ def validated_attempts_for_skill(
             and body.get("skill_id") == skill_id
         ):
             values.append(body)
-    return values
+    superseded = {
+        str(a["supersedes_attempt_id"])
+        for a in values
+        if a.get("supersedes_attempt_id")
+    }
+    return [a for a in values if str(a.get("attempt_id")) not in superseded]
