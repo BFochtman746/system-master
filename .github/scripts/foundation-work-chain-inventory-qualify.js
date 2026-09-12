@@ -63,7 +63,8 @@ try {
     'Capability Route',
     'Durable Job',
     'Effect Receipt',
-    'Completion / Recovery'
+    '| Completion |',
+    '| Recovery |'
   ];
   for (const phrase of requiredPhrases) if (!inventory.includes(phrase)) fail(`missing required phrase: ${phrase}`);
 
