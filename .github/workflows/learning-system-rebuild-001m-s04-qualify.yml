@@ -12,6 +12,7 @@ on:
       - learning/lab/learning_lab/instructional_policy.py
       - learning/lab/learning_lab/policy_governed_tutor.py
       - learning/lab/tests/test_tutoring_adaptive_s04.py
+      - learning/lab/tests/test_tutoring_adaptive_s04_binding_scope.py
       - qualification/learning/rebuild/LEARNING-SYSTEM-REBUILD-001M-S04-72CASE-QUALIFICATION-CONTRACT.json
       - .github/scripts/learning-system-rebuild-001m-s04-qualify.py
       - .github/scripts/learning-system-rebuild-001m-s03-qualify.py
@@ -47,9 +48,11 @@ jobs:
           python -m py_compile \
             learning/lab/learning_lab/adaptive_mastery_binding.py \
             learning/lab/learning_lab/adaptive_policy.py \
+            learning/lab/learning_lab/domain_tutor_compat.py \
             learning/lab/learning_lab/instructional_policy.py \
             learning/lab/learning_lab/policy_governed_tutor.py \
             learning/lab/tests/test_tutoring_adaptive_s04.py \
+            learning/lab/tests/test_tutoring_adaptive_s04_binding_scope.py \
             .github/scripts/learning-system-rebuild-001m-s04-qualify.py
 
       - name: Run S04 isolated and cumulative qualification
