@@ -71,8 +71,8 @@ public final class DelegationQualificationTest {
         Fixture f = new Fixture();
         GrantBody body = f.rootBody("grant-c02", true, 3, f.now.minusSeconds(5), f.now.plusSeconds(600), 1);
         ActorChain chain = f.rootChain();
-        CapabilityGrant a = f.issue("command-c02", body, chain);
-        CapabilityGrant b = f.issue("command-c02", body, chain);
+        CapabilityGrant a = f.issue("same-command-c02", body, chain);
+        CapabilityGrant b = f.issue("same-command-c02", body, chain);
         check(a.equals(b), "idempotent result differs");
         pass();
     }
@@ -80,13 +80,13 @@ public final class DelegationQualificationTest {
     private static void commandConflict() throws Exception {
         Fixture f = new Fixture();
         GrantBody body = f.rootBody("grant-c03", true, 3, f.now.minusSeconds(5), f.now.plusSeconds(600), 1);
-        f.issue("command-c03", body, f.rootChain());
+        f.issue("same-command-c03", body, f.rootChain());
         GrantBody changed = f.copy(body, body.subjectPrincipalId(), body.delegatorPrincipalId(), body.delegatePrincipalId(),
                 body.parentGrantId(), body.parentGrantDigest(), body.actorChainDigest(), Set.of("read", "write"),
                 body.resourceRefs(), body.purposeRefs(), body.audienceRefs(), body.targetRefs(), body.notBefore(),
                 body.expiresAt(), body.maySubdelegate(), body.remainingSubdelegationDepth(), body.authorityGeneration(),
                 body.keelCeilingRef(), body.keelCeilingDigest());
-        expect(ErrorCode.CONFLICT, () -> f.issue("command-c03", changed, f.rootChain()));
+        expect(ErrorCode.CONFLICT, () -> f.issue("same-command-c03", changed, f.rootChain()));
         pass();
     }
 
@@ -438,13 +438,13 @@ public final class DelegationQualificationTest {
         ActorChain rootChain() { return ActorChain.create("principal-user", "principal-user", List.of()); }
 
         CapabilityGrant issueRoot(String suffix, boolean subdelegate, int depth) throws Exception {
-            return issue("command-" + suffix,
+            return issue("root-command-" + suffix,
                     rootBody("grant-" + suffix, subdelegate, depth, now.minusSeconds(5), now.plusSeconds(600), 1),
                     rootChain());
         }
 
         CapabilityGrant issueRootWithTimes(String suffix, Instant from, Instant to) throws Exception {
-            return issue("command-" + suffix, rootBody("grant-" + suffix, true, 3, from, to, 1), rootChain());
+            return issue("root-command-" + suffix, rootBody("grant-" + suffix, true, 3, from, to, 1), rootChain());
         }
 
         GrantBody rootBody(String grantId, boolean subdelegate, int depth, Instant from, Instant to, long generation) {
