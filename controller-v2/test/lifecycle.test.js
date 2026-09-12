@@ -10,7 +10,7 @@ import { ControllerProcessOwnership, ControllerRuntime, readControllerRuntimeSta
 
 function workspace() {
   const dir = mkdtempSync(join(tmpdir(), 'controller-v2-lifecycle-'));
-  return { dir, db: join(dir, 'controller.sqlite'), cleanup: () => rmSync(dir, { recursive: true, force: true }) };
+  return { dir, db: join(dir, 'controller.sqlite'), cleanup: () => rmSync(dir, { recursive: true, force: true, maxRetries: 20, retryDelay: 50 }) };
 }
 
 function expectCode(fn, code) {
@@ -144,11 +144,9 @@ test('LC-T009 semantic kernel migration/open occurs only after ownership acquisi
     let sawOwnership = false;
     let runtime;
     runtime = new ControllerRuntime(w.db, {
-      kernelFactory: path => {
+      kernelFactory: () => {
         sawOwnership = runtime.ownership.owned;
-        const { ControllerKernel } = globalThis.__controllerKernelImport ?? {};
-        if (ControllerKernel) return new ControllerKernel(path);
-        return { close() {}, db: { prepare: () => ({ all: () => [] }) } };
+        return { close() {} };
       },
       reconcile: () => ({})
     });
