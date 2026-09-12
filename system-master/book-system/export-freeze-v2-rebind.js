@@ -122,7 +122,7 @@ function validateRequest(parent,state,request) {
   if (request.expected_export_freeze_identity!==identity) fail('EXPORT_FREEZE_IDENTITY_MISMATCH');
   if (!nonEmpty(request.created_at)||Number.isNaN(Date.parse(request.created_at))) fail('INVALID_EFFECT_TIME');
   if (request.publication_authorized===true||request.publication_authority_state==='AUTHORIZED') fail('EXPORT_CANNOT_AUTHORIZE_PUBLICATION');
-  if (!['REVISING','EXPORT_FROZEN'].includes(parent.book_project.status)) fail('EXPORT_FREEZE_REQUIRES_REVISING_OR_EXPORT_FROZEN');
+  if (parent.book_project.status!=='FINALIZATION') fail('EXPORT_FREEZE_REQUIRES_FINALIZATION');
   if ((parent.export_releases||[]).some(r=>r&&r.release_id===request.release_id)) fail('RELEASE_ID_CONFLICT',request.release_id);
   return identity;
 }
