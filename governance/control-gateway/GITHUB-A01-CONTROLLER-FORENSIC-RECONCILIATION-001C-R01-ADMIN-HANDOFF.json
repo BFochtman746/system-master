@@ -1,0 +1,101 @@
+{
+  "protocol_version": "github-a01-controller.001c-r01-admin-handoff.v1",
+  "operation_id": "GITHUB-A01-CONTROLLER-FORENSIC-RECONCILIATION-001C-R01",
+  "status": "BLOCKED_ON_ONE_TIME_GITHUB_ADMIN_ACTIONS",
+  "repository": "BFochtman746/system-master",
+  "qualified_001c_executable_sha": "ece3a58f628236e75d5090ddf3f4d7bf4f1d836d",
+  "qualified_001c_evidence_ref": "github-a01-controller-forensic-reconciliation-001c-qualified-frozen",
+  "qualified_001c_evidence_head": "1daebd0aaddb858deb8c165e313c70f57801b825",
+  "current_main_sha_at_r01_start": "c41884bf9cc66c24fb7f245d68eefc6dbbd1139f",
+  "current_live_ruleset_count_at_r01_start": 0,
+  "production_activation": false,
+  "critical_requalification_rule": {
+    "finding": "The qualified 001C enforcement policy contains writer_identity.actor_id=null. Binding the real dedicated GitHub App Integration actor ID changes policy bytes/configuration and therefore cannot inherit the ece3a58f qualification.",
+    "required_action": "After the dedicated GitHub App is created and its exact Integration actor ID is known, bind that ID on a new R01 executable candidate and run fresh hosted Node22+Node24, independent adversarial, and exact-subject A-01 Windows/X64 qualification before main cutover.",
+    "no_pass_transfer": true
+  },
+  "dedicated_writer_app": {
+    "name": "System Master Control Gateway Writer",
+    "owner_scope": "BFochtman746",
+    "installation_scope": "BFochtman746/system-master_ONLY",
+    "webhook_required": false,
+    "repository_permissions": {
+      "contents": "write",
+      "metadata": "read"
+    },
+    "forbidden_permissions": [
+      "administration",
+      "actions",
+      "issues",
+      "pull_requests"
+    ],
+    "integration_actor_id": null,
+    "client_id": null,
+    "private_key_created": false
+  },
+  "production_environment": {
+    "name": "control-gateway-production",
+    "deployment_branch_policy": "SELECTED_BRANCHES_AND_TAGS",
+    "allowed_branch_pattern": "main",
+    "environment_variable": "CONTROL_GATEWAY_WRITER_CLIENT_ID",
+    "environment_secret": "CONTROL_GATEWAY_WRITER_PRIVATE_KEY",
+    "must_not_store_private_key_in_repository": true
+  },
+  "repository_ruleset": {
+    "name": "System Master Control Gateway Production Mutation Boundary",
+    "target": "branch",
+    "enforcement": "active",
+    "include_refs": ["~ALL"],
+    "exclude_refs": [],
+    "rules": [
+      "creation",
+      "update",
+      "deletion",
+      "non_fast_forward"
+    ],
+    "update_allows_fetch_and_merge": false,
+    "bypass": {
+      "actor_type": "Integration",
+      "actor_id": null,
+      "bypass_mode": "always",
+      "additional_bypass_actors_forbidden": true
+    }
+  },
+  "cutover_sequence": [
+    "ADMIN_CREATE_DEDICATED_GITHUB_APP",
+    "ADMIN_INSTALL_APP_ONLY_ON_SYSTEM_MASTER",
+    "ADMIN_CREATE_PRIVATE_KEY_AND_RECORD_CLIENT_ID",
+    "ADMIN_CREATE_CONTROL_GATEWAY_PRODUCTION_ENVIRONMENT_RESTRICTED_TO_MAIN",
+    "ADMIN_STORE_CLIENT_ID_VARIABLE_AND_PRIVATE_KEY_SECRET",
+    "RECOVER_EXACT_GITHUB_APP_INTEGRATION_ACTOR_ID",
+    "BIND_ACTOR_ID_ON_NEW_R01_EXECUTABLE_CANDIDATE",
+    "FRESH_HOSTED_NODE22_NODE24_AND_ADVERSARIAL_QUALIFICATION_ON_NEW_EXACT_SHA",
+    "FRESH_A01_WINDOWS_X64_QUALIFICATION_ON_SAME_NEW_EXACT_SHA",
+    "FAST_FORWARD_MAIN_FROM_CURRENT_MAIN_TO_NEW_QUALIFIED_R01_SHA",
+    "ADMIN_CREATE_ACTIVE_ALL_BRANCH_RULESET_WITH_ONLY_DEDICATED_APP_BYPASS",
+    "READ_BACK_LIVE_RULESET_AND_VERIFY_EXACT_POLICY",
+    "NEGATIVE_PROVE_ORDINARY_CHATGPT_GITHUB_CREATE_OR_UPDATE_IS_DENIED",
+    "POSITIVE_PROVE_RECEIPT_CONSUMING_WRITER_APPLIES_ONE_ADMITTED_DISPOSABLE_MUTATION",
+    "POSITIVE_PROVE_EXACT_REPLAY_IS_IDEMPOTENT",
+    "FREEZE_R01_PRODUCTION_ACTIVE_ONLY_IF_ALL_GATES_PASS"
+  ],
+  "forbidden_shortcuts": [
+    "NO_FAST_FORWARD_MAIN_BEFORE_POST_ACTOR_ID_REQUALIFICATION",
+    "NO_USER_REPOSITORY_ROLE_OR_TEAM_BYPASS",
+    "NO_GENERIC_GITHUB_ACTIONS_APP_BYPASS",
+    "NO_CHATGPT_CONNECTOR_BYPASS",
+    "NO_HUMAN_PAT_AS_PRODUCTION_WRITER",
+    "NO_FORCE_PUSH",
+    "NO_MAIN_RESET",
+    "NO_CG012_START",
+    "NO_SECOND_SHIFT_MASTERY_ACTIVATION",
+    "NO_PRODUCTION_ACTIVE_CLAIM_WITHOUT_LIVE_NEGATIVE_AND_POSITIVE_PROOF"
+  ],
+  "current_tooling_limit": {
+    "github_ruleset_read": true,
+    "github_ruleset_admin_write": false,
+    "github_app_creation": false,
+    "environment_secret_admin": false,
+    "meaning": "The current ChatGPT GitHub connection cannot perform the required one-time repository-administration actions. It must not substitute ordinary repository write authority for those admin actions."
+  }
+}
