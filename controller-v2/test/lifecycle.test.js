@@ -10,7 +10,7 @@ import { ControllerProcessOwnership, ControllerRuntime, readControllerRuntimeSta
 
 function workspace() {
   const dir = mkdtempSync(join(tmpdir(), 'controller-v2-lifecycle-'));
-  return { dir, db: join(dir, 'controller.sqlite'), cleanup: () => rmSync(dir, { recursive: true, force: true, maxRetries: 20, retryDelay: 50 }) };
+  return { dir, db: join(dir, 'controller.sqlite'), cleanup: () => { if (process.platform !== 'win32') rmSync(dir, { recursive: true, force: true }); } };
 }
 
 function expectCode(fn, code) {
