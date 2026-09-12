@@ -1,0 +1,44 @@
+name: Foundation System Root Qualification
+
+on:
+  pull_request:
+    branches:
+      - system-master/control-v2
+    paths:
+      - 'system-master/foundation-spine/system-root/**'
+      - 'system-master/foundation-spine/SYSTEM-SPECIFICATION.md'
+      - 'system-master/foundation-spine/IMPLEMENTATION-STATUS.md'
+      - '.github/scripts/foundation-system-root-qualify.js'
+      - '.github/workflows/foundation-system-root-qualification.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify-system-root:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact subject with product boundary history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Compile, qualify, measure, and validate product boundary
+        run: node .github/scripts/foundation-system-root-qualify.js
+
+      - name: Preserve qualification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: foundation-system-root-evidence-${{ github.run_id }}
+          path: ${{ runner.temp }}/foundation-system-root-*/
+          if-no-files-found: error
+          retention-days: 30
