@@ -8,7 +8,7 @@
 
 This operation does **not** restart `SYSTEM-MASTER-COMPLETION-CENSUS-002`. That census is sealed P0–P9 and remains historical evidence. This operation consumes its findings and rebases them onto current authority.
 
-Current control facts at reconstruction time:
+Current control facts at finalization:
 
 - authority: `CURRENT-AUTHORITY-003`
 - topology: `SYSTEM-TOPOLOGY-005`
@@ -18,11 +18,11 @@ Current control facts at reconstruction time:
 - Programming: active non-peer work program; not a product peer and not a fifth system
 - central mandatory coordination objective: `SYSTEM-MASTER-INTEGRATION-COORDINATION-001`
 - live Core head: `54de1268b1036f966dd9235f5463e430ab1fcd19`
-- live Learning head: `e319b2bccb2fffb3e5fa2a4b24f09ae464f9afcd`
-- live Book head: `91e811619aa79eadd7c29ecfadc47364b2286aaa`
-- live Documents head: `92cdf48936bdc8fd3caa99ab1f52f8fad7026566`
+- live Learning head: `e3196089f77dde376944a08eac78a697e57d1535`
+- live Book head: `de94db0c92ca689290c4068e37b394d85acbeb52`
+- live Documents head: `92cdf489d5b3d4294f6b90104ec1753cc2da289f`
 
-The Work Obligation Registry snapshot is useful but not sufficient when a live peer head has advanced past its registered snapshot. Core, Book, and Documents have advanced; therefore exact peer dispatch must re-read each live control record before execution.
+The Work Obligation Registry snapshot is useful but not sufficient when a live peer head has advanced past its registered snapshot. Core, Book, and Documents have advanced; therefore exact peer dispatch must re-read each live control record before execution. Book advanced again during this 001D operation, which is direct evidence that this re-read rule is mandatory rather than ceremonial.
 
 ## 2. Completion semantics
 
