@@ -198,7 +198,7 @@ def main():
     require("supersedes_attempt_id" in runtime_text and "supersedes_attempt_id" in reader_text, "successor regrade evidence filter missing")
     require(all(token not in runtime_text.lower() for token in ("race", "ethnicity", "gender", "religion")), "sensitive fairness attributes copied into Learning runtime")
     require("external_score_callback" not in runtime_text.lower(), "authoritative external score callback invented")
-    require("standing\": \"PENDING_REVIEW"" in runtime_text and "canonical_score_created\": False" in runtime_text, "external score ingress is not fail-closed")
+    require("\"standing\": \"PENDING_REVIEW\"" in runtime_text and "\"canonical_score_created\": False" in runtime_text, "external score ingress is not fail-closed")
     require("INSERT INTO objects" in runtime_text and "INSERT INTO attempts" in runtime_text and "INSERT INTO events" in runtime_text and "INSERT INTO operations" in runtime_text and "with self.repo.connect() as con" in runtime_text, "atomic finalization commit markers missing")
     require("model_confidence_can_finalize\": False" in runtime_text, "model confidence authority guard missing")
     require("ai_detector_can_invalidate\": False" in runtime_text, "AI detector authority guard missing")
