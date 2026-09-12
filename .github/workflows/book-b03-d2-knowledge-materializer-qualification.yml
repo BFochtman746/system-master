@@ -1,0 +1,60 @@
+name: Book B03 D2 Knowledge Materializer Qualification
+
+on:
+  push:
+    branches:
+      - book-system/control-v1
+    paths:
+      - 'system-master/book-system/book-story-bible-knowledge-v1.js'
+      - 'system-master/book-system/book-story-bible-knowledge-v1.test.js'
+      - 'system-master/book-system/book-knowledge-materializer-v1.js'
+      - 'system-master/book-system/book-knowledge-materializer-v1.test.js'
+      - '.github/workflows/book-b03-d2-knowledge-materializer-qualification.yml'
+      - '.github/workflows/book-b03-d2-knowledge-materializer-bootstrap.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  d1-d2-deterministic:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['22', '24']
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Record and bind exact D2 bytes
+        run: |
+          set -euo pipefail
+          git rev-parse HEAD
+          test "$(git hash-object system-master/book-system/book-knowledge-materializer-v1.js)" = '37b34b4c5d137d11630d410c24fe8a5c93af289a'
+          test "$(git hash-object system-master/book-system/book-knowledge-materializer-v1.test.js)" = '080b4686ec2f3c683df34846cda9014ae39aab2d'
+      - name: Run B03 D1 K01-K32
+        run: |
+          set -euo pipefail
+          node system-master/book-system/book-story-bible-knowledge-v1.test.js | tee b03-d1-k01-k32.log
+          grep -F '"result":"PASS"' b03-d1-k01-k32.log
+          grep -F '"denominator":"K01-K32"' b03-d1-k01-k32.log
+          grep -F '"cases":32' b03-d1-k01-k32.log
+      - name: Run B03 D2 M01-M20
+        run: |
+          set -euo pipefail
+          node system-master/book-system/book-knowledge-materializer-v1.test.js | tee b03-d2-m01-m20.log
+          grep -F '"result":"PASS"' b03-d2-m01-m20.log
+          grep -F '"denominator":"M01-M20"' b03-d2-m01-m20.log
+          grep -F '"cases":20' b03-d2-m01-m20.log
+          grep -F '"materializer_implemented":true' b03-d2-m01-m20.log
+          grep -F '"calibration_policy_implemented":true' b03-d2-m01-m20.log
+          grep -F '"invalidation_engine_implemented":false' b03-d2-m01-m20.log
+          grep -F '"canonical_admission_implemented":false' b03-d2-m01-m20.log
+          grep -F '"b01_registry_modified":false' b03-d2-m01-m20.log
+          grep -F '"model_accuracy_claimed":false' b03-d2-m01-m20.log
+          grep -F '"historical_pass_transferred":0' b03-d2-m01-m20.log
+          grep -F '"canonical_effect":false' b03-d2-m01-m20.log
