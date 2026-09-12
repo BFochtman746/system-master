@@ -2,10 +2,10 @@
   "owner_system_id": "DOCUMENTS",
   "owner_path": "SYSTEM_MASTER/DOCUMENTS",
   "control_ref": "documents/control-v1",
-  "last_known_control_head": "3d3de02bb9a3b79b70e2cae35c7cbbea55825b23",
+  "last_known_control_head": "69ae54924c66f74697ea22a84c160eff46a4b771",
   "program_job_lock": "governance/SYSTEM-PROGRAM-JOB-LOCK-001.json",
   "system_completion_status": "governance/SYSTEM-COMPLETION-STATUS-001.json",
-  "delegation_epoch": 12,
+  "delegation_epoch": 13,
   "active_delegations": [
     {
       "delegation_id": "SECOND-SHIFT-DOCUMENTS-R4-CANONICAL-PAYLOAD-DEPOSIT-004",
@@ -16,9 +16,9 @@
       "priority": "DOCUMENTS_R4_BLOCKED_EXACT_PAYLOAD_CANDIDATE",
       "classification": "DOCUMENTS_R4_CANONICAL_TRANSPORT_RECONCILED__PAYLOAD_BYTES_NOT_YET_IN_GITHUB",
       "valid_for_control_ref": "documents/control-v1",
-      "valid_for_control_head": "3d3de02bb9a3b79b70e2cae35c7cbbea55825b23",
+      "valid_for_control_head": "69ae54924c66f74697ea22a84c160eff46a4b771",
       "created_at": "2026-09-12T01:21:33-04:00",
-      "last_revalidated_at": "2026-09-12T01:41:09-04:00",
+      "last_revalidated_at": "2026-09-12T02:36:43-04:00",
       "completion_delta": "DOCUMENTS-R4-TRANSPORT-CONTRACT-RECONCILIATION-003 closed the prior 81/4fce versus 100/b6d0 transport ambiguity. Exact Library handoff and 225-row manifest were reverified; a deterministic carrier was built twice byte-identically as SHA-256 166f31ae9a6b2580ab14dc43af22fcd7fc6063817427289c8686d77f2cccd07d, 300832 bytes, five 65536-byte raw chunks (final chunk 38688 bytes). Contract, builder, fail-closed verifier, reconciled STAGING and admission workflow are on the live Documents control branch. GitHub-native source custody is still not claimed because the five exact payload chunks are not yet present in GitHub.",
       "blocker_evidence": "qualification/document-system/r4/DOCUMENTS-R4-TRANSPORT-CONTRACT-RECONCILIATION-003.json",
       "stop_condition": "All five contract-listed exact payload chunks are present in GitHub, re-read from GitHub, reconstructed to the exact canonical carrier and verified 225/225 before READY is armed; otherwise preserve the transport blocker and continue independent Documents-owned design/evidence work.",
@@ -39,39 +39,56 @@
       "on_failure": "Preserve exact chunk/carrier/source verification failure evidence, keep READY absent, repair only the demonstrated Documents transport/custody defect and continue independent safe Documents work."
     },
     {
-      "delegation_id": "SECOND-SHIFT-DOCUMENTS-SPINE-PARSE-FORENSIC-PREP-001",
+      "delegation_id": "SECOND-SHIFT-DOCUMENTS-SPINE-EXTRACT-FORENSIC-PREP-001",
       "owner_path": "SYSTEM_MASTER/DOCUMENTS",
-      "objective_id": "DOCUMENTS-SPINE-PARSE-FORENSIC-PREP-001",
+      "objective_id": "DOCUMENTS-SPINE-EXTRACT-FORENSIC-PREP-001",
       "obligation_id": "DOCUMENTS-CURRENT-ADMISSION-001",
       "state": "READY",
       "priority": "DOCUMENTS_OWNER_VALID_INDEPENDENT_WORK_AHEAD_WHILE_R4_PAYLOAD_BLOCKED",
-      "classification": "DOCUMENTS_SPINE_PARSE_RECOVERY_AND_ANALYSIS_ONLY",
+      "classification": "DOCUMENTS_SPINE_EXTRACT_RECOVERY_AND_ANALYSIS_ONLY",
       "valid_for_control_ref": "documents/control-v1",
-      "valid_for_control_head": "3d3de02bb9a3b79b70e2cae35c7cbbea55825b23",
-      "created_at": "2026-09-12T01:41:09-04:00",
-      "last_revalidated_at": "2026-09-12T01:41:09-04:00",
-      "parent_checkpoint": "documents/control-v1/DOCUMENTS-SPINE-FORENSICS-DESIGN-LOCK-001.md",
-      "completion_delta": "Recover, inventory and analyze UDM-SPINE-0005 loss-aware native/CDG-2 parsing without mutating recovered runtime. Separate low-level native reachability from semantic projection, preserve open-world/unknown native parts, classify parser errors and unsupported semantics explicitly, and map the FORENSICS -> PARSE -> EXTRACT handoff to current Documents ownership and evidence.",
-      "stop_condition": "A lossless PARSE evidence/capability matrix identifies current parser/projector implementation, durable state, interface contracts, semantic coverage, unknown/open-world preservation rules, tests, evidence, environments, blockers and one dependency-valid design-lock successor; no runtime mutation while exact R4 source custody/current-subject qualification remains unresolved.",
+      "valid_for_control_head": "69ae54924c66f74697ea22a84c160eff46a4b771",
+      "created_at": "2026-09-12T02:36:43-04:00",
+      "last_revalidated_at": "2026-09-12T02:36:43-04:00",
+      "parent_checkpoint": "documents/control-v1/DOCUMENTS-SPINE-PARSE-DESIGN-LOCK-001.md",
+      "completion_delta": "Recover, inventory and analyze UDM-SPINE-0006 EXTRACT semantics without mutating recovered runtime. Separate exact native/CDG-2 source coverage from text/content extraction, classify omissions and loss explicitly, preserve source anchors and parse standing, and map OCR/fallback boundaries plus the PARSE -> EXTRACT -> UNDERSTAND handoff.",
+      "stop_condition": "A lossless EXTRACT evidence/capability matrix identifies current extractors, source/parse binding, durable state, interface contracts, format coverage, omissions/loss accounting, OCR/fallback boundaries, tests, evidence, environments, blockers and one dependency-valid design-lock successor; no runtime mutation while exact R4 source custody/current-subject qualification remains unresolved.",
       "allowed_work": [
-        "recover and inventory current Documents PARSE/CDG-2 implementation, tests, historical evidence and defect lessons",
-        "separate native package/object parsing from semantic projection and downstream extraction/understanding",
-        "classify unsupported, unknown, malformed, partial and bounds-limited parse results fail-closed",
-        "map per-format semantic coverage and preservation/source-anchor requirements",
-        "prepare at most one PARSE design-lock packet without runtime mutation"
+        "recover and inventory current Documents EXTRACT implementation, tests, historical evidence and defect lessons",
+        "separate native/CDG-2 source coverage from extracted text/content projections",
+        "classify omitted, unsupported, partial, OCR-required and fallback extraction semantics explicitly",
+        "map source anchors, loss accounting and parse-receipt handoff requirements",
+        "prepare at most one EXTRACT design-lock packet without runtime mutation"
       ],
       "forbidden_authority": [
         "do not mutate recovered Documents runtime before exact R4 source custody/current-subject qualification",
-        "do not claim semantic mastery from low-level native-part reachability",
+        "do not claim full semantic mastery from successful plain-text extraction",
         "do not absorb Book, Learning, Programming, spreadsheet or retired Prose semantics",
-        "do not discard unknown/native content merely because it lacks a current CDG-2 semantic projector",
+        "do not fabricate OCR/native/external evidence or silently discard non-extracted native content",
         "do not claim A-01, native, external, publication or production PASS"
       ],
-      "on_pass": "Preserve the PARSE lossless evidence matrix and bind at most one specification/design-lock successor after exact owner-head revalidation; runtime implementation remains separately custody-gated.",
-      "on_failure": "Preserve the exact parse/semantic/source-evidence ambiguity or blocker and continue another independent Documents work-ahead rung without fabricating semantic coverage."
+      "on_pass": "Preserve the EXTRACT lossless evidence matrix and bind at most one specification/design-lock successor after exact owner-head revalidation; runtime implementation remains separately custody-gated.",
+      "on_failure": "Preserve the exact extract/source/parse/loss-evidence ambiguity or blocker and continue another independent Documents work-ahead rung without fabricating extraction completeness."
     }
   ],
   "retired_delegations": [
+    {
+      "delegation_id": "SECOND-SHIFT-DOCUMENTS-SPINE-PARSE-DESIGN-LOCK-001",
+      "state": "COMPLETED__DESIGN_LOCK_FROZEN__RUNTIME_IMPLEMENTATION_CUSTODY_GATED",
+      "prior_bound_control_head": "387844991e8e1cf65e194c3727c0043cf4114d3f",
+      "implementation_subject_sha": "69ae54924c66f74697ea22a84c160eff46a4b771",
+      "completion_evidence": "documents/control-v1/DOCUMENTS-SPINE-PARSE-DESIGN-LOCK-001.md",
+      "runtime_build_authorized": false,
+      "history_preserved": true
+    },
+    {
+      "delegation_id": "SECOND-SHIFT-DOCUMENTS-SPINE-PARSE-FORENSIC-PREP-001",
+      "state": "COMPLETED__FORENSIC_MATRIX_CLOSED__DESIGN_LOCK_COMPLETED",
+      "prior_bound_control_head": "3d3de02bb9a3b79b70e2cae35c7cbbea55825b23",
+      "implementation_subject_sha": "387844991e8e1cf65e194c3727c0043cf4114d3f",
+      "completion_evidence": "documents/control-v1/DOCUMENTS-SPINE-PARSE-FORENSIC-PREP-001.md",
+      "history_preserved": true
+    },
     {
       "delegation_id": "SECOND-SHIFT-DOCUMENTS-SPINE-FORENSICS-DESIGN-LOCK-001",
       "state": "COMPLETED__DESIGN_LOCK_FROZEN__RUNTIME_IMPLEMENTATION_CUSTODY_GATED",
@@ -168,6 +185,6 @@
     }
   ],
   "owner_revalidation_required": false,
-  "reason": "Documents owner advanced through SECURE and FORENSICS forensic recovery plus frozen semantic design locks while exact R4 payload chunks remain outside GitHub. IDENTIFY, SECURE and FORENSICS runtime implementation/qualification therefore stay custody-gated truthfully; UDM-SPINE-0005 PARSE recovery/analysis is the next independent specification-only successor.",
+  "reason": "Documents owner completed PARSE forensic recovery and froze its semantic/open-world/reprojection contract while exact R4 payload chunks remain outside GitHub. IDENTIFY, SECURE, FORENSICS and PARSE runtime implementation/qualification remain custody-gated truthfully; UDM-SPINE-0006 EXTRACT recovery/analysis is the next independent specification-only successor.",
   "empty_is_valid": false
 }
