@@ -1,1 +1,114 @@
-{"schema":"second-shift-control-gateway.cg011-freeze.v1","operation_id":"SECOND-SHIFT-CONTROL-GATEWAY-CG-011","status":"REPAIRED_FAILURE_RESTART_IDEMPOTENCY_QUALIFIED_ADVERSARIAL_AUDIT_PASSED_DEVELOPMENT_FROZEN","mission_version":"SECOND-SHIFT-CONTROL-GATEWAY-CG-001/v1.0","predecessor_receipt_id":"SECOND-SHIFT-CONTROL-GATEWAY-CG-010-CLOSURE-REPAIR-34673025004","qualified_implementation_sha":"bee130cff1b8845c7f793ca14fd9c0b9028faf96","qualification_run_id":34703609882,"qualification_receipt_id":"SECOND-SHIFT-CONTROL-GATEWAY-CG-011-CLOSURE-REPAIR-34703609882","separate_adversarial_closure_audit":{"job_id":103579659768,"conclusion":"SUCCESS","same_exact_qualified_subject":true,"publication_history_reverified":true,"authority_bypass_attacks_passed":true,"ambiguous_dispatch_passed":true,"stale_capacity_retention_passed":true,"terminal_replay_passed":true,"dispatch_failure_replay_passed":true,"retired_github_scheduler_recheck_passed":true},"host_qualification":{"node_22":"SUCCESS","node_24":"SUCCESS","control_gateway_suite_passed":true,"cg008_regression_passed":true,"cg009_coordination_passed":true,"cg009_authority_closure_passed":true,"cg010_scheduler_regression_passed":true,"cg011_failure_restart_idempotency_passed":true,"cg011_dispatch_failure_replay_passed":true,"supervisor_stress_tests":28,"randomized_transitions":20000,"rigor_reduced":false},"closed_scope":{"durable_restart_reconstruction":"QUALIFIED","duplicate_command_admission_enqueue_claim_dispatch_result_replay":"QUALIFIED_FAIL_CLOSED_OR_IDEMPOTENT","dispatch_failure_delivery_idempotency":"QUALIFIED","late_failure_after_external_dispatch_ack":"REJECTED_NO_RESURRECTION","late_failure_after_cancel":"REJECTED_NO_RESURRECTION","late_failure_after_circuit_open":"REJECTED_NO_RETRY_BUDGET_OVERRUN","stale_dispatched_resource_capacity":"HELD_UNTIL_EXTERNAL_RESOLUTION","stale_lease_and_fencing":"QUALIFIED","late_worker_completion_after_fence":"REJECTED","cancellation_across_restart":"QUALIFIED","dependency_and_resource_state_across_restart":"QUALIFIED","parallel_scheduler_ticks":"NO_DOUBLE_CLAIM_OR_DISPATCH","concurrent_store_reopen":"BOUNDED_AND_QUALIFIED","terminal_receipt_replay":"IDEMPOTENT_EXACT_REPLAY_CONFLICT_ON_DIFFERENT_REPLAY","active_work_publication_history":"RECOVERED_VERIFIED_CONTIGUOUS_R24_TO_R28"},"freeze":{"frozen_ref":"second-shift-control-gateway/cg-011-failure-restart-idempotency-frozen","freeze_head_sha":"f4f3787f90788e964fcd2b12872a7a10392d78c1","freeze_parent_sha":"bee130cff1b8845c7f793ca14fd9c0b9028faf96","single_parent_directly_above_qualified_subject":true,"freeze_head_change_scope":"GOVERNANCE_LOCATOR_ONLY","qualified_subject_bytes_changed_by_freeze":false},"development_state":{"ref":"control-gateway-state/active-work/second-shift-control-gateway-dev-recovery-001","head_commit_sha":"11ce292c3efac87ecf7758e6d2eb747a25d62127","publication_revision":28,"authority_epoch":16,"packet_digest":"18e5dbefce2428383c2d431d2c4f096fee2d2c0d42caf2811827660eba673b64","publication_digest":"70852d6af3772f264addfa80d9a88768cbf4d51bf4205b958e08dcae7774240a","qualification_state":"PASSED","github_admission_state":"ADMITTED","a01_state":"NOT_REQUIRED","current_operation_state":"TERMINAL","next_legal_operation":"NO_LEGAL_SUCCESSOR","production":false},"post_terminal_workflow_invocation":{"run_id":34703970849,"conclusion":"FAILURE_EXPECTED_STALE_EXPECTATION_AFTER_TERMINAL_PUBLICATION","authoritative":false,"semantic_product_failure":false,"reason":"Closure bookkeeping pushed governance files after terminal publication r28 while the pre-retirement qualification workflow was intentionally pinned to ACTIVE r27. The run failed its live-authority expectation because actual state was terminal commit 11ce292c3efac87ecf7758e6d2eb747a25d62127 instead of obsolete expected ACTIVE commit 6c8773f81f7701e2638dfbc128f6f9fdd19bd3b1.","automatic_trigger_retired_commit_sha":"758112d1b2bf4c1c530e974ec78931b929f6a45e"},"recovery_lineage":{"quarantined_ref":"control-gateway-state/active-work/second-shift-control-gateway-dev","quarantined_history_rewritten":false,"force_ref_update_used":false,"recovery_ref_created_from_last_verified_r24":true,"recovery_history_verified_through_revision":28},"production_blockers":[{"id":"A01-ACTUAL-WINDOWS-QUALIFICATION","status":"OPEN","reason":"GitHub/host qualification cannot substitute for actual A-01 Windows execution/adjudication before production activation."},{"id":"SECOND-SHIFT-MASTERY-001-ACTIVATION","status":"OPEN","reason":"The all-night operating model is design-locked but not yet implemented, calibrated, adversarially qualified, or promoted to active-night authority."}],"successor_started":false,"a01_windows_qualified":false,"production_activation":false}
+{
+  "schema": "second-shift-control-gateway.cg011-freeze.v1",
+  "operation_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-011",
+  "status": "A01_WINDOWS_CUMULATIVE_FOUNDATION_QUALIFIED_FROZEN",
+  "mission_version": "SECOND-SHIFT-CONTROL-GATEWAY-CG-001/v1.0",
+  "predecessor_receipt_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-010-CLOSURE-REPAIR-34673025004",
+  "foundation_build_rule": "INDIVIDUAL_THEN_CUMULATIVE_THEN_REAL_TARGET_HOST_BEFORE_FREEZE",
+  "exact_a01_qualified_subject_sha": "bad4708ba91b533c333ba2659ab99bf071710ba6",
+  "qualification_run_id": 34704481930,
+  "qualification_receipt_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-011-A01-CLOSURE-REPAIR-34704481930",
+  "historical_development_freeze": {
+    "qualified_implementation_sha": "bee130cff1b8845c7f793ca14fd9c0b9028faf96",
+    "development_freeze_head_sha": "f4f3787f90788e964fcd2b12872a7a10392d78c1",
+    "receipt_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-011-CLOSURE-REPAIR-34703609882",
+    "disposition": "PRESERVED_HISTORY_SUPERSEDED_BY_A01_CUMULATIVE_FOUNDATION_FREEZE"
+  },
+  "portable_cumulative_qualification": {
+    "run_id": 34704481930,
+    "node_22_job_id": 103581947101,
+    "node_22": "SUCCESS",
+    "node_24_job_id": 103581946982,
+    "node_24": "SUCCESS",
+    "cg008_regression_passed": true,
+    "cg009_coordination_passed": true,
+    "cg009_authority_closure_passed": true,
+    "cg010_scheduler_regression_passed": true,
+    "cg011_failure_restart_idempotency_passed": true,
+    "cg011_dispatch_failure_replay_passed": true,
+    "supervisor_randomized_transitions": 20000,
+    "rigor_reduced": false
+  },
+  "independent_adversarial_closure_audit": {
+    "run_id": 34704481930,
+    "job_id": 103582062441,
+    "conclusion": "SUCCESS",
+    "same_exact_subject": true
+  },
+  "a01_windows_qualification": {
+    "run_id": 34704481930,
+    "admission_job_id": 103582076267,
+    "execution_job_id": 103582108305,
+    "result_class": "PASS",
+    "runner_name": "A-01",
+    "runner_os": "Windows",
+    "runner_arch": "X64",
+    "exact_subject_sha": "bad4708ba91b533c333ba2659ab99bf071710ba6",
+    "cg008_supervisor_adapter": "PASS",
+    "cg009_coordination_base": "PASS",
+    "cg009_coordination_authority": "PASS",
+    "cg010_night_scheduler": "PASS",
+    "cg011_failure_restart_idempotency": "PASS",
+    "cg011_dispatch_failure_replay": "PASS",
+    "cg011_adversarial_closure": "PASS",
+    "supervisor_stress_tests": 28,
+    "randomized_transitions": 20000,
+    "random_seed": "0x5EC0D5",
+    "rigor_reduced": false,
+    "evidence_artifact_id": 10301701961,
+    "evidence_artifact_name": "SECOND-SHIFT-SUPERVISOR-V2-A01-STRESS-34704481930-evidence",
+    "evidence_artifact_sha256": "4d55819c486bbde8c0dcb7870921741312293988f40ae09827473e2be92686b0"
+  },
+  "closed_scope": {
+    "durable_restart_reconstruction": "QUALIFIED",
+    "duplicate_command_admission_enqueue_claim_dispatch_result_replay": "QUALIFIED_FAIL_CLOSED_OR_IDEMPOTENT",
+    "dispatch_failure_delivery_idempotency": "QUALIFIED",
+    "late_failure_after_external_dispatch_ack": "REJECTED_NO_RESURRECTION",
+    "late_failure_after_cancel": "REJECTED_NO_RESURRECTION",
+    "late_failure_after_circuit_open": "REJECTED_NO_RETRY_BUDGET_OVERRUN",
+    "stale_dispatched_resource_capacity": "HELD_UNTIL_EXTERNAL_RESOLUTION",
+    "stale_lease_and_fencing": "QUALIFIED",
+    "late_worker_completion_after_fence": "REJECTED",
+    "cancellation_across_restart": "QUALIFIED",
+    "dependency_and_resource_state_across_restart": "QUALIFIED",
+    "parallel_scheduler_ticks": "NO_DOUBLE_CLAIM_OR_DISPATCH",
+    "concurrent_store_reopen": "BOUNDED_AND_QUALIFIED",
+    "terminal_receipt_replay": "IDEMPOTENT_EXACT_REPLAY_CONFLICT_ON_DIFFERENT_REPLAY",
+    "a01_actual_windows_execution": "QUALIFIED",
+    "bottom_up_cumulative_foundation_chain": "CG008_THROUGH_CG011_PASS"
+  },
+  "foundation_freeze": {
+    "frozen_ref": "second-shift-control-gateway/cg-011-a01-qualified-frozen",
+    "frozen_ref_head_sha": "bad4708ba91b533c333ba2659ab99bf071710ba6",
+    "durable_terminal_state_ref": "control-gateway-state/active-work/second-shift-control-gateway-dev-recovery-001",
+    "durable_terminal_commit_sha": "e7b87dd35d9368aa1add03bc8dd8bd05b398eb89",
+    "publication_revision": 31,
+    "authority_epoch": 17,
+    "packet_digest": "ef770ff4adf6b77c1890b8b45f97b425dc17dc7e4a01b810d6c011a7f70215dd",
+    "publication_digest": "a78112114949cd14734791ebe0f7627eb882a4469a757fbe230526799060ba9b",
+    "current_operation_state": "TERMINAL",
+    "next_legal_operation": "NO_LEGAL_SUCCESSOR"
+  },
+  "authority_preservation": {
+    "cg008_replaced": false,
+    "cg009_replaced": false,
+    "cg010_replaced": false,
+    "later_module_silent_authority_replacement_allowed": false
+  },
+  "production_blockers": [
+    {
+      "id": "A01-ACTUAL-WINDOWS-QUALIFICATION",
+      "status": "CLOSED",
+      "evidence_run_id": 34704481930
+    },
+    {
+      "id": "SECOND-SHIFT-MASTERY-001-ACTIVATION",
+      "status": "OPEN",
+      "reason": "The all-night operating model remains design-locked and is not yet implemented, cumulatively qualified, or promoted to active-night authority."
+    }
+  ],
+  "a01_windows_qualified": true,
+  "foundation_frozen": true,
+  "production_activation": false,
+  "successor_started": false
+}

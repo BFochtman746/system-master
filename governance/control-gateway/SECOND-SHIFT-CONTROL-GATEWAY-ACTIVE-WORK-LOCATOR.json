@@ -4,10 +4,10 @@
   "mission_version": "SECOND-SHIFT-CONTROL-GATEWAY-CG-001/v1.0",
   "status": "CURRENT_RECOVERY_LOCATOR",
   "current_ref": "control-gateway-state/active-work/second-shift-control-gateway-dev-recovery-001",
-  "current_publication_commit_sha": "11ce292c3efac87ecf7758e6d2eb747a25d62127",
-  "current_publication_revision": 28,
-  "current_packet_digest": "18e5dbefce2428383c2d431d2c4f096fee2d2c0d42caf2811827660eba673b64",
-  "current_publication_digest": "70852d6af3772f264addfa80d9a88768cbf4d51bf4205b958e08dcae7774240a",
+  "current_publication_commit_sha": "e7b87dd35d9368aa1add03bc8dd8bd05b398eb89",
+  "current_publication_revision": 31,
+  "current_packet_digest": "ef770ff4adf6b77c1890b8b45f97b425dc17dc7e4a01b810d6c011a7f70215dd",
+  "current_publication_digest": "a78112114949cd14734791ebe0f7627eb882a4469a757fbe230526799060ba9b",
   "recovery_base": {
     "revision": 24,
     "commit_sha": "ccfab34389347f5d5d9d41f1ea0f950703ab2f3f",
@@ -18,30 +18,43 @@
     "ref": "control-gateway-state/active-work/second-shift-control-gateway-dev",
     "observed_head_sha": "0356887ac98b1a0fa992a2b42513f8b855bb1bd7",
     "standing": "QUARANTINED_NONAUTHORITATIVE_AFTER_PUBLICATION_CHAIN_DEFECT",
-    "defect": "Revision 25 was finalized by a second Git commit after its revision mirror was first written. Its envelope predecessor remained r24 while the final Git parent became the intermediate revision-file commit, and its stored publication digest does not recompute from the stored envelope. Revision 26 therefore cannot provide a fully verified history through revision 25.",
-    "preserve_for_evidence": true
+    "preserve_for_evidence": true,
+    "history_rewritten": false
   },
-  "terminal_freeze": {
+  "foundation_terminal_freeze": {
+    "operation_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-011-A01-CLOSURE-REPAIR",
+    "exact_a01_qualified_subject_sha": "bad4708ba91b533c333ba2659ab99bf071710ba6",
+    "qualification_run_id": 34704481930,
+    "receipt_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-011-A01-CLOSURE-REPAIR-34704481930",
+    "frozen_ref": "second-shift-control-gateway/cg-011-a01-qualified-frozen",
+    "frozen_ref_head_sha": "bad4708ba91b533c333ba2659ab99bf071710ba6",
+    "a01_runner": "A-01",
+    "a01_os": "Windows",
+    "a01_arch": "X64",
+    "a01_windows_qualified": true,
+    "portable_node_22_qualified": true,
+    "portable_node_24_qualified": true,
+    "independent_adversarial_audit_passed": true,
+    "cumulative_foundation_chain": "CG008_THROUGH_CG011_PASS",
+    "randomized_transitions": 20000,
+    "rigor_reduced": false,
+    "production_activation": false
+  },
+  "historical_development_freeze": {
+    "publication_revision": 28,
     "qualified_subject_sha": "bee130cff1b8845c7f793ca14fd9c0b9028faf96",
-    "qualification_run_id": 34703609882,
-    "separate_adversarial_closure_audit_job_id": 103579659768,
     "receipt_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-011-CLOSURE-REPAIR-34703609882",
-    "frozen_ref": "second-shift-control-gateway/cg-011-failure-restart-idempotency-frozen",
-    "freeze_head_sha": "f4f3787f90788e964fcd2b12872a7a10392d78c1",
-    "freeze_parent_sha": "bee130cff1b8845c7f793ca14fd9c0b9028faf96",
-    "single_parent_directly_above_qualified_subject": true,
-    "production_activation": false,
-    "a01_windows_qualified": false
+    "disposition": "PRESERVED_HISTORY_SUPERSEDED_BY_A01_CUMULATIVE_FOUNDATION_FREEZE"
   },
   "recovery_rules": {
     "force_ref_update_used": false,
     "quarantined_ref_rewritten": false,
     "history_deleted": false,
     "recovery_ref_created_from_last_verified_revision": true,
-    "recovery_r25_single_parent_matches_envelope_predecessor": true,
-    "recovery_r25_digest_recomputed_with_repository_canonical_algorithm": true,
-    "recovery_history_contiguous_through_revision": 28,
-    "current_state": "TERMINAL"
+    "recovery_history_contiguous_through_revision": 31,
+    "current_state": "TERMINAL",
+    "next_legal_operation": "NO_LEGAL_SUCCESSOR"
   },
-  "rule": "Fresh reconstruction must resolve this locator first, verify the referenced terminal publication envelope and complete recovery history, then verify the named frozen ref is the single-parent governance freeze directly above the exact qualified subject. The quarantined ref is historical evidence only and must not be selected as current authority. No successor is started by this terminal locator."
+  "foundation_build_rule": "Every Foundation module passes individually, cumulatively with every previously frozen Foundation module, and on its actual target host when host-dependent before freeze. Later modules may not silently replace earlier frozen authority.",
+  "rule": "Fresh reconstruction must resolve this locator first, verify publication revision 31 and the complete predecessor-bound recovery history, then verify the exact frozen ref and A-01 qualification receipt for subject bad4708ba91b533c333ba2659ab99bf071710ba6. The quarantined ref is historical evidence only. CG-012 and Mastery activation are not implied or started by this terminal locator."
 }
