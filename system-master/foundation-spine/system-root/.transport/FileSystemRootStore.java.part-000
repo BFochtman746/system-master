@@ -1,0 +1,151 @@
+package org.systemmaster.foundation.root;
+
+import static org.systemmaster.foundation.root.SystemAuthority.*;
+import static org.systemmaster.foundation.root.SystemRootStore.*;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.AtomicMoveNotSupportedException;
+import java.nio.file.StandardOpenOption;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
+import java.security.MessageDigest;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
+
+/**
+ * Crash-safe append-only journal adapter for the System Root authority.
+ *
+ * <p>Each committed frame contains the complete current authority state but only the new operation
+ * receipt and event. Historical receipts/events are reconstructed by replaying frames. This keeps
+ * each durable mutation independent of total event history while retaining exact audit/idempotency
+ * history. A torn final frame is treated as uncommitted and removed before the next write; corruption
+ * of any complete frame fails closed.</p>
+ */
+public final class FileSystemRootStore implements SystemRootStore {
+    public static final String FORMAT = "SYSTEM_ROOT_JOURNAL_V2";
+    private static final byte[] HEADER = (FORMAT + "\n").getBytes(StandardCharsets.UTF_8);
+    private static final long MAX_JOURNAL_BYTES = 256L * 1024L * 1024L;
+    private static final int MAX_FRAME_TEXT_BYTES = 8 * 1024 * 1024;
+    private static final long AUTO_COMPACT_BYTES = 4L * 1024L * 1024L;
+
+    @FunctionalInterface
+    public interface FaultInjector {
+        void beforeDurableAppend(Path journalPath, byte[] frameBytes) throws IOException;
+    }
+
+    private record CacheEntry(long size, FileTime modifiedTime, Object fileKey, long lastGoodOffset, RootSnapshot snapshot) {}
+    private record ParsedJournal(RootSnapshot snapshot, long lastGoodOffset) {}
+    private record FrameState(
+            long revision,
+            Map<String, SystemAuthority.Record> systems,
+            Set<TopologyEdge> topology,
+            Map<String, List<VersionPointer>> versionHistory,
+            OperationReceipt receipt,
+            Event event) {}
+
+    private static final ConcurrentHashMap<Path, Object> JVM_LOCKS = new ConcurrentHashMap<>();
+
+    private final Path dataPath;
+    private final Path lockPath;
+    private final FaultInjector faultInjector;
+    private final Object localMutex;
+    private volatile CacheEntry cache;
+
+    public FileSystemRootStore(Path dataPath) throws IOException {
+        this(dataPath, (path, frame) -> {});
+    }
+
+    public FileSystemRootStore(Path dataPath, FaultInjector faultInjector) throws IOException {
+        this.dataPath = dataPath.toAbsolutePath().normalize();
+        this.faultInjector = java.util.Objects.requireNonNull(faultInjector, "faultInjector");
+        Path parent = this.dataPath.getParent();
+        if (parent != null) Files.createDirectories(parent);
+        this.lockPath = this.dataPath.resolveSibling(this.dataPath.getFileName() + ".lock");
+        this.localMutex = JVM_LOCKS.computeIfAbsent(this.lockPath, ignored -> new Object());
+    }
+
+    @Override
+    public RootSnapshot load() throws IOException {
+        synchronized (localMutex) {
+            try (FileChannel lockChannel = FileChannel.open(lockPath,
+                    StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+                 FileLock lock = lockChannel.lock()) {
+                if (!lock.isValid()) throw new IOException("ROOT_STORE_LOCK_INVALID");
+                return loadUnlocked().snapshot();
+            }
+        }
+    }
+
+    @Override
+    public void save(long expectedStoreRevision, RootSnapshot next) throws IOException {
+        if (expectedStoreRevision < 0) throw new IllegalArgumentException("expectedStoreRevision");
+        if (next.storeRevision() != expectedStoreRevision + 1) {
+            throw new IllegalArgumentException("next revision must equal expected + 1");
+        }
+        SystemRootRegistry.validateSnapshot(next);
+
+        synchronized (localMutex) {
+            try (FileChannel lockChannel = FileChannel.open(lockPath,
+                    StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+                 FileLock lock = lockChannel.lock()) {
+                if (!lock.isValid()) throw new IOException("ROOT_STORE_LOCK_INVALID");
+                ParsedJournal parsed = loadUnlocked();
+                RootSnapshot current = parsed.snapshot();
+                if (current.storeRevision() != expectedStoreRevision) {
+                    throw new StaleStoreRevisionException(
+                            "STALE_ROOT_STORE expected=" + expectedStoreRevision + " actual=" + current.storeRevision());
+                }
+
+                long currentSize = Files.exists(dataPath) ? Files.size(dataPath) : 0L;
+                if (current.storeRevision() > 0 && currentSize > AUTO_COMPACT_BYTES
+                        && parsed.lastGoodOffset() == currentSize) {
+                    compactUnlocked(current);
+                    parsed = new ParsedJournal(current, Files.size(dataPath));
+                    currentSize = Files.size(dataPath);
+                }
+
+                byte[] frame = encodeFrame(next);
+                faultInjector.beforeDurableAppend(dataPath, frame);
+
+                long required = (currentSize == 0 ? HEADER.length : 0L) + frame.length;
+                if (parsed.lastGoodOffset() < currentSize) {
+                    required -= (currentSize - parsed.lastGoodOffset());
+                    currentSize = parsed.lastGoodOffset();
+                }
+                if (currentSize + required > MAX_JOURNAL_BYTES) {
+                    throw new IOException("SYSTEM_ROOT_JOURNAL_CAPACITY_EXCEEDED");
+                }
+
+                try (FileChannel channel = FileChannel.open(dataPath,
+                        StandardOpenOption.CREATE, StandardOpenOption.READ, StandardOpenOption.WRITE)) {
+                    if (channel.size() != parsed.lastGoodOffset()) {
+                        channel.truncate(parsed.lastGoodOffset());
+                    }
+                    channel.position(channel.size());
+                    if (channel.size() == 0) writeFully(channel, ByteBuffer.wrap(HEADER));
+                    writeFully(channel, ByteBuffer.wrap(frame));
+                    channel.force(true);
+                }
+                
