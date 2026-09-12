@@ -10,12 +10,13 @@ It is a status bridge, not architecture authority. The architecture remains stab
 
 Repository: `BFochtman746/system-master`
 
-Current implementation/evidence baseline used for this initial mapping: `system-master/control-v2` at `6a44171bf4a8570d5e2fb8a489d194a9e704915b`, plus archival Foundation & Spine implementation/audit material and the current F-WP implementation lineage.
+The original implementation/evidence mapping used `system-master/control-v2` at `6a44171bf4a8570d5e2fb8a489d194a9e704915b`, plus archival Foundation & Spine implementation/audit material and the current F-WP implementation lineage.
 
-Documentation-only commits made after that baseline do not change runtime standing.
+The System Root & Authority Registry has now been rebuilt and qualified on `foundation-system-root-build` from the locked Foundation & Spine architecture. Its status below therefore supersedes the original System Root mapping. Documentation-only commits do not change runtime standing.
 
 ## Status vocabulary
 
+- **CURRENT — IMPLEMENTED + PORTABLE/HOSTED QUALIFIED**: the current implementation covers the component's locked standalone responsibilities and has passed its portable/hosted component qualification. This does not imply later pair/integrated/native/production standing.
 - **CURRENT — SUBSTANTIAL**: direct current implementation exists for a major portion of the target authority.
 - **CURRENT — PARTIAL**: current implementation exists but does not yet cover/prove the full target authority.
 - **HISTORICAL SUBSTRATE — REBIND**: substantial reusable implementation exists in prior/recovered spine material, but it must be mapped and qualified against the fresh contracts.
@@ -28,7 +29,7 @@ These labels do not imply A-01 failure. If an A-01 test did not run because A-01
 
 | Logical system | Current standing | What this means now |
 |---|---|---|
-| System Root & Authority Registry | CURRENT — SUBSTANTIAL | Current governance/authority/traceability/change-control implementation exists. It must be kept aligned with the simplified Foundation & Spine documentation root. |
+| System Root & Authority Registry | CURRENT — IMPLEMENTED + PORTABLE/HOSTED QUALIFIED | A distinct canonical runtime Root now owns the system roster, unique shared-truth ownership map, exact current implementation/version pointers, authority lifecycle, atomic replacement lineage and static Foundation integration topology. Mutations and admissions fail closed through external authorization/admission ports. The standalone component passed strict compile, correctness, recovery, concurrency and performance qualification. Real pair qualification with Identity/Delegation and release/qualification authorities remains future accumulated-spine work, not a Root implementation gap. |
 | Identity, Principal & Delegation | CURRENT — PARTIAL | Current authorization/approval substrate plus historical identity/security layers exist. Full fresh actor/workload identity and descendant-delegation binding still needs one current mapping. |
 | Contracts & Versioning | CURRENT — SUBSTANTIAL | Current contract registry/migration/portability implementation exists plus historical contract infrastructure. Fresh spine seam contracts still need complete registration. |
 | Intent / Keel | HISTORICAL SUBSTRATE — REBIND | Strong prior goal/requirements/constraints/delegation/resource-ceiling semantics exist. The current spine needs a clean governed-goal implementation binding and end-to-end descendant propagation proof. |
@@ -56,6 +57,32 @@ These labels do not imply A-01 failure. If an A-01 test did not run because A-01
 | Change, Migration, Release & Operator Governance | CURRENT — SUBSTANTIAL / PARTIAL ENDGAME | Current change, approval, verification, recovery, query, migration and portability packages provide substantial implementation. Release/operator/production endgame still needs full target mapping. |
 | Creative Fabric shared overlay | CURRENT/PORTABLE — PARTIAL | Creative architecture/ownership is mature and substantial portable implementation evidence exists. Federated integration, target/native and production admission remain separate closure gates; Creative Fabric does not become a spine control authority. |
 
+## System Root & Authority Registry — current evidence
+
+The System Root was not produced by renaming F-WP-001. The forensic census found that F-WP-001 contains useful traceability/change-governance substrate but does not own the live Foundation system roster, exact authority versions, topology, admission/retirement state or unique runtime truth-owner map. The new Root is therefore a distinct authority and the older governance code remains reusable supporting substrate only.
+
+The current Root implementation establishes:
+
+- the locked roster of 26 Foundation & Spine logical systems plus the Creative Fabric federated overlay;
+- unique active truth ownership with collision rejection;
+- declared/admitted/draining/retired authority lifecycle;
+- exact implementation/artifact/source/contract version pointers and version history;
+- optimistic generation and store-revision concurrency control;
+- request idempotency with actor/decision binding;
+- external fail-closed mutation authorization and admission-verification ports;
+- static integration topology with retired-endpoint protection;
+- atomic authority replacement and replacement lineage;
+- an append-only checksummed crash-safe journal with torn-tail recovery, corruption fail-closed behavior and lossless checkpoint compaction;
+- immutable event/operation receipt reconstruction and stable snapshot identity;
+- same-process and cross-process writer exclusion/CAS behavior;
+- monotonic event-time protection against wall-clock regression.
+
+Portable/hosted qualification compiles under Java 21 with `-Xlint:all -Werror` and currently passes 20/20 standalone correctness/security/recovery/concurrency tests. The hosted performance acceptance run executed 2,000 mutations in 3.293 seconds (1.647 ms average), 1,000 cached reads at 0.137 ms average, cold reconstruction in 247 ms, and produced a 954,057-byte compacted journal. These measurements are environment-specific evidence, not universal production SLOs.
+
+Two material weaknesses were found and repaired during qualification rather than accepted: the first persistence design rewrote the complete historical snapshot on every mutation and degraded approximately O(history²); it was replaced with the append-only journal/checkpoint design. A same-size corruption case could also evade the first cache freshness check when timestamp precision was too coarse; cache identity was hardened to full file modification time plus file identity and the corruption test now fails closed.
+
+The Root is therefore conditionally frozen at **standalone component + portable/hosted qualification**. It is not being declared native-qualified, A-01-qualified or production-admitted. Pair qualification against real Identity/Delegation and external qualification/release authorities will occur when those components exist; accumulated-spine qualification will then re-test the Root and can reopen it if integration exposes a wrong boundary, performance assumption or invariant.
+
 ## Current implementation facts that must be preserved
 
 The current Core lineage contains the F-WP-001 through F-WP-012 implementation/test packages. These include current code for traceability/change governance, policy/authority assessment, maintenance/recovery planning, approvals/authorization, execution grants, coordination/leases, verification/evidence/quarantine, recovery coordination, cross-domain adapters, queries and contract/migration/portability services.
@@ -64,25 +91,18 @@ That is meaningful implementation evidence. It does **not** imply that every log
 
 The historical/recovered spine also contains strong reusable durable runtime, routing, data, artifact, observability, model/tool and security primitives. The correct strategy is reuse and rebind where they satisfy the fresh specification, not rewrite-for-rewrite's-sake.
 
-## Highest-value implementation convergence work
+## Component-by-component convergence order
 
-The current gaps should be closed in dependency order rather than by historical document order:
+The Foundation & Spine now follows the operational blueprint in `README.md`: one logical system is forensically evaluated, design-closed, fully implemented, isolated-tested, performance-tested and conditionally frozen before the next system begins. Each later system must also trigger pair/boundary and accumulated-spine requalification of the components already completed.
 
-1. **Lock the canonical Work Chain in implementation.** One durable causal identity must connect intent, goal revision, work, plan, admission, route, grant, assignment, job, attempt, context, invocation, effect, artifact/state, evidence and completion/recovery.
-2. **Rebind Keel and Orchestrator.** Preserve goal semantics, repair Orchestrator persistence/lifecycle inconsistencies, and make plan execution reference the durable runtime rather than duplicate job truth.
-3. **Complete Resource Admission & Budgeting.** Durable hierarchical budgets, protected lanes, fairness/backpressure, route-bound grants, accounting and safe reclaim are a major remaining runtime gap.
-4. **Complete Execution Placement.** Build/prove full eligibility → filter → score → assignment → drain/fence/reassignment behavior against the real runtime.
-5. **Make the Durable Runtime the sole attempt truth.** Reuse the strong existing engine, then harden it for multi-hour/multi-day operation and high pressure.
-6. **Converge context/model/tool/effect boundaries.** Context assembly, model calls and tool calls must consume current policy/resource/safety/rights standing; effects remain separately authorized at commit time.
-7. **Close shared Data/Artifact/Evidence integration.** Exact lineage, concurrency, large-object behavior, recovery and evidence freshness must work through the same Work Chain.
-8. **Unify Recovery classes.** Reuse existing primitives but explicitly close work continuity, worker failure, delivery, unknown effects, resource reclaim, state reconciliation and disaster recovery as distinct cases.
-9. **Implement missing AI Safety and Rights authorities.** These cannot remain design-only if the system will operate autonomously or create/use/publish third-party/generated assets.
-10. **Run integrated qualification and endurance.** Portable/hosted first; target/native environments including A-01 when available. Unavailable environments remain evidence gaps, not failures.
+The System Root & Authority Registry is the first conditionally frozen component. The next component is **Identity, Principal & Delegation**. After that, work continues through the remaining Foundation systems in dependency order, while the canonical Work Chain is progressively made executable rather than being postponed to one final integration event.
+
+As components accumulate, the most important cross-system convergence targets remain: one causal Work identity, Keel/plan/runtime authority separation, durable resource grants, route→grant→placement lineage, a single durable attempt truth, context/model/tool/effect separation, exact Data/Artifact/Evidence lineage, distinct Recovery classes, explicit AI Safety/Rights authorities, and integrated endurance/target qualification.
 
 ## What this file does not claim
 
-This initial status mapping is not the final implementation census. Before the Foundation & Spine can be declared complete, every logical system must receive an exact mapping of:
+This status file is not a blanket completion declaration. Before the Foundation & Spine can be declared complete, every logical system must receive an exact mapping of:
 
 **Requirement / invariant → current component → durable state → interface/contract → tests → evidence → environment → remaining blocker**.
 
-That census should be generated from code and evidence after the target documentation is locked. It must update this file rather than create another parallel architecture hierarchy.
+That census is generated from code and evidence as each component is built. It must update this file rather than create another parallel architecture hierarchy.
