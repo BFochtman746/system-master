@@ -1,0 +1,80 @@
+{
+  "objective": "LRN-OWNERSHIP-FREEZE-001B-R3B-S01B",
+  "status": "PASS_PORTABLE_OWNER_LOCAL_BUILD_PATCH_FROZEN",
+  "date": "2026-09-12",
+  "authority": {
+    "canonical_learning_head_observed": "e3196089f77dde376944a08eac78a697e57d1535",
+    "reconstruction_parent_head": "eb40597a8a901acd2b9b3ee7c7401c736a299305",
+    "foundation_head_observed_during_design": "38c80514298fd1b1509f9fb55bd817b95a5f9f0b"
+  },
+  "source_subject": {
+    "name": "LRN_CUR_PRODUCTION_BINDING_001_REBOUND_SOURCE.zip",
+    "sha256": "28e3317e5494c9df7df2f8aefb7f83f7c69fbc9d0ababfb696700542c831edc3",
+    "custody": "LIBRARY_MATERIALIZED_AND_LOCALLY_HASH_VERIFIED",
+    "repo_native_canonical_source": false
+  },
+  "build_artifact": {
+    "name": "LRN-OWNERSHIP-FREEZE-001B-R3B-S01B-BUILD.patch",
+    "sha256": "b3ce4bc021c657f7dffb6ad9f628bcd8d63783281b7af55252059f0b5d61454b",
+    "patch_apply_check": "PASS",
+    "patch_reapplied_to_pristine_source": "PASS",
+    "changed_files": {
+      "authority_boundary/repository.py": "c27466e050bfcabea3d8dd1bff5bd9f43e39b4dfdace7e1cac97dc5c7de06fc4",
+      "learning_runtime/goal_controller.py": "bbfc8969f59b8c28d6290270dce9a0fe7f43cc93673d1b4546661681f3b8f705",
+      "learning_runtime/goal_routes.py": "8d695ce711410e3d8369282157511cbba924ba03fb1a368c6daf35cdeed8f276",
+      "production_binding/postgres_domain_repository.py": "2d12834f5d23b386ff99ffb5796f748f717aa8b17d9f42e1346246309fa25b2c",
+      "tests_r3a_current/test_r3a_route_authority.py": "6a8ecb251518f52cdeb7eec1ec6f1de14d7d95a520cb9fa60317baf2fea426bf",
+      "tests_r3b_s01/test_learning_goal_handlers.py": "402dd01a80b0213a98901481e275c04f32deae4c17764d2f0b1ca2456f999bf8"
+    }
+  },
+  "implementation": {
+    "exact_inbound_handlers_materialized": ["I001", "I002", "I003", "I004"],
+    "exact_inbound_handler_count_current_slice": 4,
+    "inbound_command_query_denominator": 63,
+    "event_materialized": "I033 LearningGoalCreated",
+    "learning_goal_initial_state": "DRAFT",
+    "persistence": "owner-scoped immutable version + operation receipt + optional outbox in one atomic mutation",
+    "idempotency": "semantic client operation id; same payload returns prior durable result; mismatch fails closed",
+    "concurrency": "expected-version plus current-body-digest compare-and-append",
+    "read_after_write": "NOT_ASSUMED_FRESH",
+    "shared_public_activation": "BLOCKED_EXTERNAL_FOUNDATION_CONTRACT_ADMISSION"
+  },
+  "qualification": {
+    "isolated_s01": {"tests": 38, "passed": 38, "failed": 0, "errors": 0, "skipped": 0},
+    "r3a_current_invariant_regression": {"tests": 10, "passed": 10},
+    "production_binding_regression": {"tests": 15, "passed": 15},
+    "rebind_001_regression": {"tests": 20, "passed": 20},
+    "rebind_002_regression": {"tests": 34, "passed": 34},
+    "impl016_owner_seam_regression": {"tests": 25, "passed": 25},
+    "exact_cumulative": {"tests": 142, "passed": 142, "failed": 0, "errors": 0, "skipped": 0},
+    "cumulative_log_sha256": "19c7ec2ff6405ba3a0b4423e44db8f07e18264b8e078ae917af09b8e29343bb7",
+    "compileall_changed_surfaces": "PASS",
+    "additional_owner_seam_campaign": {"runs": 100, "status": "PASS", "owner_bypass_checks": 700},
+    "full_historical_main_suite": "NOT_COUNTED_CURRENT_PASS__TWO_ATTEMPTS_EXCEEDED_LOCAL_120S_AND_180S_EXECUTION_WINDOWS_BEFORE_COMPLETION"
+  },
+  "truth_boundary": {
+    "portable_changed_subject": true,
+    "canonical_learning_branch_mutated": false,
+    "repository_native_source_tree_applied": false,
+    "live_postgresql_executed": false,
+    "deployed_master_core_route_activation": false,
+    "native_iphone_execution": false,
+    "a01": false,
+    "human_consent_or_participant_response": false,
+    "real_mastery_retention_transfer": false,
+    "psychometric_validity": false,
+    "sme_approval": false,
+    "certification_or_accreditation": false
+  },
+  "blockers": [
+    {
+      "class": "EXTERNAL_FOUNDATION_CONTRACT_ADMISSION",
+      "effect": "Public/shared route activation remains fail-closed until exact current Foundation semantic authorization/context contracts are admitted and integration-qualified."
+    },
+    {
+      "class": "CANONICAL_SOURCE_APPLICATION",
+      "effect": "The exact build is frozen as a reproducible patch against the admitted source ZIP; it is not yet claimed as applied to a canonical repo-native Learning source tree."
+    }
+  ],
+  "next_operation": "LRN-OWNERSHIP-FREEZE-001B-R3B-S01C — CANONICAL SOURCE APPLICATION/RECONCILIATION OF QUALIFIED S01B PATCH OR, IF REPO-NATIVE TARGET REMAINS UNADMITTED, ADVANCE INDEPENDENT S02 HANDLER FORENSICS WITHOUT CLAIMING ACTIVATION"
+}
