@@ -2,22 +2,23 @@
   "protocol_version": "control-gateway.active-work.v1",
   "mission_version": "SECOND-SHIFT-CONTROL-GATEWAY-CG-001/v1.0",
   "workstream_id": "SECOND-SHIFT-CONTROL-GATEWAY",
-  "authority_epoch": 1,
-  "authority_rebind_receipt_id": null,
+  "authority_epoch": 3,
+  "authority_rebind_receipt_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-004-LIVE-GITHUB-QUALIFICATION-34667378000",
   "authoritative_subject": {
     "algorithm": "sha1",
-    "oid": "d38825493805d0a9d4ac0f4ab17825badb59b6bb"
+    "oid": "59ed4c2857f0af35e339c2378956b110bf078119"
   },
   "repository": "BFochtman746/system-master",
-  "branch_or_ref": "second-shift-control-gateway/cg-003-active-work-state",
+  "branch_or_ref": "second-shift-control-gateway/cg-004-github-publication",
   "allowed_paths_or_effects": {
     "paths": [
-      ".github/workflows/second-shift-control-gateway-cg-003.yml",
+      ".github/workflows/second-shift-control-gateway-cg-004.yml",
       "control-gateway/**",
       "governance/control-gateway/**"
     ],
     "effects": [
-      "CONTROL_GATEWAY_DEVELOPMENT_WRITE"
+      "CONTROL_GATEWAY_DEVELOPMENT_WRITE",
+      "CONTROL_GATEWAY_STATE_PUBLICATION"
     ]
   },
   "dependency_graph": {
@@ -28,18 +29,18 @@
   "github_admission_state": "NOT_REQUIRED",
   "a01_state": "NOT_REQUIRED",
   "current_operation": {
-    "operation_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-003",
+    "operation_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-004",
     "state": "TERMINAL",
-    "predecessor_receipt_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-002-FREEZE-887f1e49"
+    "predecessor_receipt_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-003-HOST-QUALIFICATION-34666596357"
   },
   "last_terminal_receipt": {
-    "receipt_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-003-HOST-QUALIFICATION-34666596357",
-    "operation_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-003",
+    "receipt_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-004-LIVE-GITHUB-QUALIFICATION-34667378000",
+    "operation_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-004",
     "outcome": "SUCCEEDED",
     "satisfies_dependency": true,
     "subject": {
       "algorithm": "sha1",
-      "oid": "d38825493805d0a9d4ac0f4ab17825badb59b6bb"
+      "oid": "59ed4c2857f0af35e339c2378956b110bf078119"
     }
   },
   "receipt_index": [
@@ -52,12 +53,32 @@
         "algorithm": "sha1",
         "oid": "d38825493805d0a9d4ac0f4ab17825badb59b6bb"
       }
+    },
+    {
+      "receipt_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-004-HOST-QUALIFICATION-34667280696",
+      "operation_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-004",
+      "outcome": "SUCCEEDED",
+      "satisfies_dependency": true,
+      "subject": {
+        "algorithm": "sha1",
+        "oid": "a8be47a30abf5ffea1c81a50a5f47eb28e2175c8"
+      }
+    },
+    {
+      "receipt_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-004-LIVE-GITHUB-QUALIFICATION-34667378000",
+      "operation_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-004",
+      "outcome": "SUCCEEDED",
+      "satisfies_dependency": true,
+      "subject": {
+        "algorithm": "sha1",
+        "oid": "59ed4c2857f0af35e339c2378956b110bf078119"
+      }
     }
   ],
   "successor_candidates": [
     {
-      "operation_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-004",
-      "predecessor_receipt_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-003-HOST-QUALIFICATION-34666596357",
+      "operation_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-005",
+      "predecessor_receipt_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-004-LIVE-GITHUB-QUALIFICATION-34667378000",
       "required_receipt_ids": [],
       "qualification_state": "PENDING",
       "github_admission_state": "PENDING",
@@ -66,8 +87,8 @@
   ],
   "next_legal_operation": {
     "kind": "START_SUCCESSOR",
-    "operation_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-004",
-    "predecessor_receipt_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-003-HOST-QUALIFICATION-34666596357",
+    "operation_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-005",
+    "predecessor_receipt_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-004-LIVE-GITHUB-QUALIFICATION-34667378000",
     "reason": "EXACTLY_ONE_DEPENDENCY_VALID_SUCCESSOR"
   }
 }

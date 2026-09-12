@@ -1,0 +1,38 @@
+{
+  "schema": "second-shift-control-gateway.cg004-freeze.v1",
+  "operation_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-004",
+  "status": "HOST_QUALIFIED_LIVE_DEV_GITHUB_RECONSTRUCTION_QUALIFIED_DEVELOPMENT_FROZEN",
+  "mission_version": "SECOND-SHIFT-CONTROL-GATEWAY-CG-001/v1.0",
+  "predecessor_freeze_sha": "912b62fc49db0ac549cc3a06768659acd41d2a0d",
+  "qualified_implementation_sha": "59ed4c2857f0af35e339c2378956b110bf078119",
+  "qualification_run_id": 34667378000,
+  "host_qualification": {
+    "node_22": {"tests":63,"pass":63,"fail":0},
+    "node_24": {"tests":63,"pass":63,"fail":0},
+    "live_remote_reconstruction": "PASS"
+  },
+  "development_state": {
+    "ref": "control-gateway-state/active-work/second-shift-control-gateway-dev",
+    "head_commit_sha": "e71d19360562c2f6e5d40c9d1b87fc9bca80e47b",
+    "publication_revision": 2,
+    "packet_digest": "3c05d7fc1b5b16553b782f7aba33e8be87bb5d295c94d681cd1df3f6f6ef7d52",
+    "publication_digest": "fe975b0192ce561f3405d8ddac89e2b129738d00101fbeaf6e60b09c993e0b4e",
+    "head_and_revision_blob_sha": "39c4ff174a5d0e0866164cdf089268ea7f3a40af",
+    "production": false
+  },
+  "frozen_invariants": [
+    "CHAT_MEMORY_IS_NOT_STATE_AUTHORITY",
+    "GITHUB_REF_IS_LOCATOR_NOT_AUTHORITY",
+    "PACKET_MISSION_WORKSTREAM_AND_NEXT_OPERATION_MUST_VALIDATE",
+    "PUBLICATION_IS_PREDECESSOR_BOUND_AND_CONTENT_DIGESTED",
+    "EVERY_REVISION_HAS_IMMUTABLE_MIRROR",
+    "STALE_OR_RACED_PUBLICATION_FAILS_CLOSED",
+    "NETWORK_AMBIGUITY_REQUIRES_EXACT_REREAD",
+    "RECONSTRUCTION_REQUIRES_STABLE_VERIFIED_SNAPSHOT",
+    "PUBLICATION_ALONE_GRANTS_NO_GITHUB_MUTATION_OR_A01_AUTHORITY",
+    "PRODUCTION_REQUIRES_LATER_ADMISSION_PROTECTION_AND_A01_GATES"
+  ],
+  "known_a01_blocker": ".github/workflows/second-shift-supervisor-v2-a01-windows-stress.yml is rejected as DIRECT_SELF_HOSTED_WORKFLOW_NOT_REGISTERED and must later route through .github/workflows/a01-control-plane-gateway.yml",
+  "next_legal_operation": "SECOND-SHIFT-CONTROL-GATEWAY-CG-005 — GITHUB MUTATION ADMISSION / REPOSITORY-BRANCH-PATH-PREDECESSOR GATE + HOST QUALIFICATION",
+  "production_activation": false
+}
