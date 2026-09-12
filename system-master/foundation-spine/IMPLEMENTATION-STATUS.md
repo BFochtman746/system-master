@@ -10,9 +10,9 @@ It is a status bridge, not architecture authority. The architecture remains stab
 
 Repository: `BFochtman746/system-master`
 
-Current implementation/evidence baseline used for this initial mapping: `system-master/control-v2` at `6a44171bf4a8570d5e2fb8a489d194a9e704915b`, plus archival Foundation & Spine implementation/audit material and the current F-WP implementation lineage.
+The initial mapping used `system-master/control-v2` at `6a44171bf4a8570d5e2fb8a489d194a9e704915b` plus archival Foundation & Spine implementation/audit material and the current F-WP implementation lineage. Current component rows must use their newer exact-subject evidence when one is named below rather than treating that initial SHA as a fixed head.
 
-Documentation-only commits made after that baseline do not change runtime standing. Component rows may subsequently advance when new implementation and exact-subject qualification evidence is merged.
+Documentation-only commits do not change runtime standing. Component rows advance only when implementation and exact-subject qualification evidence support the stronger standing.
 
 ## Status vocabulary
 
@@ -30,8 +30,8 @@ These labels do not imply A-01 failure. If an A-01 test did not run because A-01
 | Logical system | Current standing | What this means now |
 |---|---|---|
 | System Root & Authority Registry | CURRENT — HOSTED QUALIFIED | Fresh internal Foundation authority registry now owns the exact 26 shared-system identities, Creative Fabric federated-overlay identity and one non-duplicating product-root binding. It provides unique owner mapping, parent topology, aliases, current version pointers, explicit admission, terminal retirement, optimistic revision checks, idempotent commands and a locked append-only SHA-256 journal that fails closed on corrupt/truncated replay. Isolated/adversarial/concurrency tests, product-root boundary validation and performance qualification pass in PR #61. This is a conditional component freeze: later Identity/Security/Contracts and accumulated-spine integration must requalify its boundaries. A-01 target execution is not claimed. |
-| Identity, Principal & Delegation | CURRENT — PARTIAL | Current authorization/approval substrate plus historical identity/security layers exist. Full fresh actor/workload identity and descendant-delegation binding still needs one current mapping. |
-| Contracts & Versioning | CURRENT — SUBSTANTIAL | Current contract registry/migration/portability implementation exists plus historical contract infrastructure. Fresh spine seam contracts still need complete registration. |
+| Identity, Principal & Delegation | CURRENT — HOSTED QUALIFIED | Fresh identity/proofing plus descendant-delegation mechanics are now bound for the hosted-portable reference boundary. `CORE-IDENTITY-DELEGATION-BUILD-001` qualified on exact PR head `4974e8fcd56cbc1bcd01c7bef7a89834c65654c7`; its tree `e1ce51830500ad14c99f47a65bfcd55b73c29a0f` is identical to live merge `044f6f809060b94226a7f546a55f2736bdf9c73f`. The delegation traceability accounts 16/16 invariants with a frozen 36-case isolated denominator and successful current O-WP-001/O-WP-002/delegation hosted checks. Real credentials/providers, live Keel receipt authority, Effect Authority, A-01/native/production and distributed durability remain separate evidence boundaries. |
+| Contracts & Versioning | CURRENT — SUBSTANTIAL | F-WP-012 remains strong reusable implementation, and fresh recovery now accounts 30/30 bounded Contracts & Versioning invariants with zero unaccounted rows. `CONTRACTS-VERSIONING-DESIGN-LOCK-001.md` repairs mutation-before-validation, same-major compatibility inference, missing direction/transitivity, under-specified migration edges, volatile registry authority, stale historical owner labels and missing pre-mutation gate semantics. Runtime standing does not advance until the design-locked durable registry/compatibility/migration/lifecycle gate is built and passes its frozen 48-case isolated denominator plus cumulative Foundation regression. |
 | Intent / Keel | HISTORICAL SUBSTRATE — REBIND | Strong prior goal/requirements/constraints/delegation/resource-ceiling semantics exist. The current spine needs a clean governed-goal implementation binding and end-to-end descendant propagation proof. |
 | Work & Project Control | CURRENT — PARTIAL | Durable work substrate and project concepts exist, but long-lived work/project truth must be consolidated above the low-level job runtime without creating duplicate execution truth. |
 | Planning & Orchestration | HISTORICAL SUBSTRATE — REBIND | Rich prior Orchestrator exists. Known repairs include lifecycle vocabulary/persistence parity and elimination of duplicate work/execution/checkpoint authority versus the durable runtime. |
@@ -57,6 +57,15 @@ These labels do not imply A-01 failure. If an A-01 test did not run because A-01
 | Change, Migration, Release & Operator Governance | CURRENT — SUBSTANTIAL / PARTIAL ENDGAME | Current change, approval, verification, recovery, query, migration and portability packages provide substantial implementation. Release/operator/production endgame still needs full target mapping. |
 | Creative Fabric shared overlay | CURRENT/PORTABLE — PARTIAL | Creative architecture/ownership is mature and substantial portable implementation evidence exists. Federated integration, target/native and production admission remain separate closure gates; Creative Fabric does not become a spine control authority. |
 
+## Current lossless census artifacts
+
+The implementation census is being closed in dependency order without creating a parallel architecture hierarchy. Current exact mappings include:
+
+- Identity / Principal / Delegation: `identity/DELEGATION-BUILD-TRACEABILITY.json` plus `identity/DELEGATION-FREEZE-001.md`.
+- Contracts & Versioning: `contracts/CONTRACTS-VERSIONING-RECOVERY-INVENTORY-001.md` accounts 30/30 bounded invariants and `contracts/CONTRACTS-VERSIONING-DESIGN-LOCK-001.md` freezes the build/test boundary.
+
+Each mapping uses the required chain: **Requirement / invariant → current component → durable state → interface/contract → tests → evidence → environment → remaining blocker**. Later logical systems must receive the same treatment before Foundation & Spine completion can be claimed.
+
 ## Current implementation facts that must be preserved
 
 The current Core lineage contains the F-WP-001 through F-WP-012 implementation/test packages. These include current code for traceability/change governance, policy/authority assessment, maintenance/recovery planning, approvals/authorization, execution grants, coordination/leases, verification/evidence/quarantine, recovery coordination, cross-domain adapters, queries and contract/migration/portability services.
@@ -69,21 +78,22 @@ The historical/recovered spine also contains strong reusable durable runtime, ro
 
 The current gaps should be closed in dependency order rather than by historical document order:
 
-1. **Lock the canonical Work Chain in implementation.** One durable causal identity must connect intent, goal revision, work, plan, admission, route, grant, assignment, job, attempt, context, invocation, effect, artifact/state, evidence and completion/recovery.
-2. **Rebind Keel and Orchestrator.** Preserve goal semantics, repair Orchestrator persistence/lifecycle inconsistencies, and make plan execution reference the durable runtime rather than duplicate job truth.
-3. **Complete Resource Admission & Budgeting.** Durable hierarchical budgets, protected lanes, fairness/backpressure, route-bound grants, accounting and safe reclaim are a major remaining runtime gap.
-4. **Complete Execution Placement.** Build/prove full eligibility → filter → score → assignment → drain/fence/reassignment behavior against the real runtime.
-5. **Make the Durable Runtime the sole attempt truth.** Reuse the strong existing engine, then harden it for multi-hour/multi-day operation and high pressure.
-6. **Converge context/model/tool/effect boundaries.** Context assembly, model calls and tool calls must consume current policy/resource/safety/rights standing; effects remain separately authorized at commit time.
-7. **Close shared Data/Artifact/Evidence integration.** Exact lineage, concurrency, large-object behavior, recovery and evidence freshness must work through the same Work Chain.
-8. **Unify Recovery classes.** Reuse existing primitives but explicitly close work continuity, worker failure, delivery, unknown effects, resource reclaim, state reconciliation and disaster recovery as distinct cases.
-9. **Implement missing AI Safety and Rights authorities.** These cannot remain design-only if the system will operate autonomously or create/use/publish third-party/generated assets.
-10. **Run integrated qualification and endurance.** Portable/hosted first; target/native environments including A-01 when available. Unavailable environments remain evidence gaps, not failures.
+1. **Complete the fresh Contracts & Versioning build.** Implement the design-locked durable registry, exact compatibility decisions, migration/lifecycle authority and pre-mutation gate, then qualify it cumulatively against the already-frozen Root/Identity boundaries.
+2. **Lock the canonical Work Chain in implementation.** One durable causal identity must connect intent, goal revision, work, plan, admission, route, grant, assignment, job, attempt, context, invocation, effect, artifact/state, evidence and completion/recovery.
+3. **Rebind Keel and Orchestrator.** Preserve goal semantics, repair Orchestrator persistence/lifecycle inconsistencies, and make plan execution reference the durable runtime rather than duplicate job truth.
+4. **Complete Resource Admission & Budgeting.** Durable hierarchical budgets, protected lanes, fairness/backpressure, route-bound grants, accounting and safe reclaim are a major remaining runtime gap.
+5. **Complete Execution Placement.** Build/prove full eligibility → filter → score → assignment → drain/fence/reassignment behavior against the real runtime.
+6. **Make the Durable Runtime the sole attempt truth.** Reuse the strong existing engine, then harden it for multi-hour/multi-day operation and high pressure.
+7. **Converge context/model/tool/effect boundaries.** Context assembly, model calls and tool calls must consume current policy/resource/safety/rights standing; effects remain separately authorized at commit time.
+8. **Close shared Data/Artifact/Evidence integration.** Exact lineage, concurrency, large-object behavior, recovery and evidence freshness must work through the same Work Chain.
+9. **Unify Recovery classes.** Reuse existing primitives but explicitly close work continuity, worker failure, delivery, unknown effects, resource reclaim, state reconciliation and disaster recovery as distinct cases.
+10. **Implement missing AI Safety and Rights authorities.** These cannot remain design-only if the system will operate autonomously or create/use/publish third-party/generated assets.
+11. **Run integrated qualification and endurance.** Portable/hosted first; target/native environments including A-01 when available. Unavailable environments remain evidence gaps, not failures.
 
 ## What this file does not claim
 
-This initial status mapping is not the final implementation census. Before the Foundation & Spine can be declared complete, every logical system must receive an exact mapping of:
+This status mapping is not the final implementation census. Before the Foundation & Spine can be declared complete, every logical system must receive an exact mapping of:
 
 **Requirement / invariant → current component → durable state → interface/contract → tests → evidence → environment → remaining blocker**.
 
-That census should be generated from code and evidence after the target documentation is locked. It must update this file rather than create another parallel architecture hierarchy.
+That census must continue to update this file rather than create another parallel architecture hierarchy.
