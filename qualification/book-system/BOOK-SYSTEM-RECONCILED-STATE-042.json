@@ -1,0 +1,69 @@
+{
+  "state_id": "BOOK-SYSTEM-RECONCILED-STATE-042",
+  "effective_date": "2026-09-12",
+  "supersedes_for_current_parent_control": "BOOK-SYSTEM-RECONCILED-STATE-041",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "standing": "BOOK_INCOMPLETE__B00_B01_FROZEN__B02_A_RECOVER_INVENTORY_READY__PROSE_RETIRED",
+  "control_record": "qualification/book-system/BOOK-SYSTEM-CONTROL-RECORD-012.json",
+  "reconstruction_blueprint": "qualification/book-system/reconstruction/BOOK-SYSTEM-RECONSTRUCTION-BLUEPRINT-001.md",
+  "topology_authority": "governance/SYSTEM-TOPOLOGY-005.json on canonical main",
+  "architecture_decision": "governance/ADR-0005-PROSE-TERMINAL-RETIREMENT-BOOK-INTEGRATION.md",
+  "program_job_lock": "governance/SYSTEM-PROGRAM-JOB-LOCK-001.json",
+  "completion_authority": "governance/SYSTEM-COMPLETION-STATUS-001.json",
+  "completion_truth": {
+    "BOOK": "INCOMPLETE",
+    "PROSE": "COMPLETE_RETIRED_TERMINAL",
+    "B00": "FROZEN",
+    "B01": "FROZEN",
+    "B02": "OPEN",
+    "rule": "B00/B01 are frozen only for their exact bounded reconstruction semantics. B02-A is not implementation or qualification and cannot claim B02 closure."
+  },
+  "current_owner_objective": {
+    "objective_id": "BOOK-RECONSTRUCTION-B02-A",
+    "state": "READY",
+    "domain": "SOURCE INTAKE & EXISTING-BOOK RECOVERY",
+    "stage": "RECOVER + INVENTORY",
+    "scope": "Losslessly recover and inventory current and historical source/manuscript intake, source identity/custody/provenance, exact bytes/digests/locators, native PDF/DOCX/OCR/provider boundaries, existing-book structural recovery, parts/chapters/scenes/units, work/edition/version/revision lineage, comments/TODOs/tracked changes, variants, metadata/citations, normalized and semantic extraction inputs, recovery confidence/evidence, deduplication/overlap, source-to-canonical admission handoff, and supporting error/blocker/privacy/currentness/authority/persistence/recovery semantics."
+  },
+  "required_atomic_trace": [
+    "requirement",
+    "current_or_target_owner",
+    "implementation_truth_class",
+    "durable_state",
+    "interface_or_contract",
+    "reachable_runtime_path_if_any",
+    "test_or_evidence_class",
+    "environment_or_authority_blocker"
+  ],
+  "allowed_implementation_truth_classes": [
+    "MAIN-INSTALLED",
+    "BOOK-BRANCH-BUILT",
+    "HISTORICAL-BOOK-CODE",
+    "QUALIFIER-ONLY",
+    "DESIGNED-NOT-INSTALLED",
+    "EXTERNAL-REQUIRED"
+  ],
+  "freeze_invariants": {
+    "b00_freeze_record": "qualification/book-system/reconstruction/BOOK-RECONSTRUCTION-B00-G1-CONTROL-FREEZE-001.md",
+    "b01_freeze_record": "qualification/book-system/reconstruction/BOOK-RECONSTRUCTION-B01-F-CONTROL-FREEZE-001.md",
+    "reopen_rule": "Only a genuine contradiction discovered by B02 may reopen the exact affected frozen B00/B01 scope, with fresh cumulative evidence required."
+  },
+  "authority_fences": {
+    "historical_prose_is_provenance_only": true,
+    "prose_active_owner_path": null,
+    "prose_execution_lane": null,
+    "prose_repair_lane": null,
+    "prose_qualification_lane": null,
+    "prose_research_domain": null,
+    "prose_telemetry_lane": null,
+    "book_admission_is_only_canonical_effect_path": true,
+    "author_final_creative_semantic_authority": true,
+    "rights_private_native_external_publication_production_a01_standing_must_be_real": true
+  },
+  "closure_condition": {
+    "unaccounted_b02_a_archaeology_requirements": 0,
+    "all_recovered_behavior_classified": true,
+    "implementation_or_design_allowed_before_close": false
+  },
+  "next_dependency_valid_action": "Execute BOOK-RECONSTRUCTION-B02-A RECOVER + INVENTORY only. If and only if bounded archaeology reaches unaccounted requirements = 0 with every recovered behavior fully classified, report the exact dependency-valid B02 analysis successor without silently entering design or implementation."
+}
