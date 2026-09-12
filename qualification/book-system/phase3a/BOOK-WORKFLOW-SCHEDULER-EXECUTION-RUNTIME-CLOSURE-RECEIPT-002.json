@@ -1,0 +1,111 @@
+{
+  "receipt_id": "BOOK-WORKFLOW-SCHEDULER-EXECUTION-RUNTIME-CLOSURE-RECEIPT-002",
+  "effective_date": "2026-09-11",
+  "operation_id": "BOOK-WORKFLOW-SCHEDULER-EXECUTION-RUNTIME-001Q-R1",
+  "receipt_role": "TERMINAL_R1_CLOSURE_SEAL_AFTER_STALE_DELEGATION_RETIREMENT",
+  "owner_system_id": "BOOK",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "authority_id": "CURRENT-AUTHORITY-003",
+  "topology_id": "SYSTEM-TOPOLOGY-005",
+  "pre_seal_main_head": "eac485ae1c450246022b74399db40380815dbcd1",
+  "control_ref": "book-system/control-v1",
+  "exact_owner_subject_sha": "27fe9a3621c92e414874ce229341e58e71b76375",
+  "predecessor_owner_subject_sha": "e2a23e8b1f076e3cd576c11e036e40eaf8a5ce2f",
+  "objective_id": "BOOK-WORKFLOW-SCHEDULER-EXECUTION-RUNTIME-001",
+  "source_test_workflow_freeze": {
+    "source_path": "system-master/book-system/book-workflow-scheduler-runtime.js",
+    "source_git_blob_sha": "e9d7210463c3547cf0fc451b733f928967211eb1",
+    "test_path": "system-master/book-system/book-workflow-scheduler-runtime.test.js",
+    "test_git_blob_sha": "23812ee310a3bd9b8f6410510f0a745efceb6ee6",
+    "workflow_path": ".github/workflows/book-workflow-scheduler-runtime-qualification.yml",
+    "workflow_git_blob_sha": "dae6a2062feadd28ce7a06cbe352b687f06e2303"
+  },
+  "hosted_qualification": {
+    "record_path": "qualification/book-system/phase3a/BOOK-WORKFLOW-SCHEDULER-EXECUTION-RUNTIME-HOSTED-QUALIFICATION-001.json",
+    "record_git_blob_sha": "29efe8105a2d3bf6999203eea146d534ee33837e",
+    "workflow_run_id": 34654507158,
+    "run_attempt": 1,
+    "head_sha": "27fe9a3621c92e414874ce229341e58e71b76375",
+    "status": "COMPLETED",
+    "conclusion": "SUCCESS",
+    "cases_executed": 39,
+    "cases_passed": 39,
+    "cases_failed": 0,
+    "max_parallel_workers_observed": 2,
+    "canonical_book_effect_performed": false
+  },
+  "artifact_digest_freeze": {
+    "artifact_id": 10284893217,
+    "artifact_name": "BOOK-WORKFLOW-SCHEDULER-RUNTIME-27fe9a3621c92e414874ce229341e58e71b76375-evidence",
+    "artifact_size_bytes": 334,
+    "artifact_zip_digest": "sha256:27011ca48120808ae66d0c243893bcb39fc01546c472e7bbe84264a524a1a0b7",
+    "scheduler_result_json_sha256": "1cc7f73927645bfd6d3f740b034b591bf120b913d5c660753d7cc6cdd8b35fb3"
+  },
+  "control_plane_enforcement": {
+    "workflow_run_id": 34654507134,
+    "head_sha": "27fe9a3621c92e414874ce229341e58e71b76375",
+    "status": "COMPLETED",
+    "conclusion": "SUCCESS",
+    "note": "This is control-plane enforcement evidence only and is not an A-01 subject qualification claim."
+  },
+  "current_main_reconciliation": {
+    "intermediate_closure_receipt_path": "qualification/book-system/phase3a/BOOK-WORKFLOW-SCHEDULER-EXECUTION-RUNTIME-CLOSURE-RECEIPT-001.json",
+    "intermediate_closure_receipt_commit": "635f9f23566c4bccc9eef878d8292b4c98c632e8",
+    "intermediate_closure_receipt_blob_sha": "feb305de7b2e1048c5fbebc8268aea18a49da40a",
+    "intermediate_receipt_standing": "IMMUTABLE_PRE_RETIREMENT_RECONCILIATION_EVIDENCE",
+    "delegation_path": "governance/second-shift/BOOK-DELEGATIONS.json",
+    "pre_reconciliation_delegation_blob_sha": "8630db0e4360f312b8cd79c532a08b42d07eac69",
+    "pre_reconciliation_epoch": 32,
+    "post_reconciliation_delegation_blob_sha": "5b7e5a6f37e519f2a6860a1767266b5a4ab8feb4",
+    "post_reconciliation_epoch": 33,
+    "delegation_reconciliation_commit": "eac485ae1c450246022b74399db40380815dbcd1"
+  },
+  "stale_candidate_retirement": {
+    "retired_delegation_id": "SECOND-SHIFT-BOOK-WORKFLOW-SCHEDULER-EXECUTION-RUNTIME-001",
+    "prior_state": "READY",
+    "prior_valid_for_control_head": "e2a23e8b1f076e3cd576c11e036e40eaf8a5ce2f",
+    "final_state": "COMPLETED__EXACT_SUBJECT_HOSTED_PASS__SUPERSEDED_BY_POST_SCHEDULER_OPEN_SEAM_CENSUS",
+    "completion_subject_sha": "27fe9a3621c92e414874ce229341e58e71b76375",
+    "historical_prior_state_preserved": true,
+    "qualified_work_replayed": false
+  },
+  "bound_successor": {
+    "delegation_id": "SECOND-SHIFT-BOOK-POST-SCHEDULER-OPEN-SEAM-CENSUS-001",
+    "objective_id": "BOOK-POST-SCHEDULER-OPEN-SEAM-CENSUS-001",
+    "state": "READY",
+    "valid_for_control_ref": "book-system/control-v1",
+    "valid_for_control_head": "27fe9a3621c92e414874ce229341e58e71b76375",
+    "classification": "BOOK_OWNED_POST_SCHEDULER_OPEN_SEAM_CENSUS",
+    "mutation_scope": "NONE_UNTIL_CENSUS_BINDS_ONE_DEMONSTRATED_SUCCESSOR"
+  },
+  "qualified_semantics": [
+    "bounded same-layer parallelism",
+    "required dependency ordering",
+    "registered idempotent same-operation replay after unknown outcome",
+    "durable pause reload and resume",
+    "completed-task non-redispatch after resume",
+    "authority-wait blocked isolation-unsatisfied and Book-admission work withheld",
+    "retired Prose execution withheld",
+    "stale scheduler run bindings rejected",
+    "worker canonical-effect fields rejected",
+    "zero canonical Book effect"
+  ],
+  "non_claims": [
+    "No real external provider execution is established by synthetic worker fixtures.",
+    "No fresh blind literary evaluation is established.",
+    "No Prose execution lane is recreated.",
+    "No Book canonical admission, manuscript mutation, Story Bible mutation or author decision is performed.",
+    "No A-01 subject qualification, native, publication or production PASS is inferred.",
+    "BOOK remains incomplete."
+  ],
+  "history_policy": {
+    "exact_sha_receipts_append_only": true,
+    "intermediate_receipt_001_preserved": true,
+    "epoch_32_history_preserved": true,
+    "completed_phase2_context_compiler_durable_persistence_and_scheduler_qualification_not_replayed": true
+  },
+  "closure_disposition": "CLOSED_PASS__R1_EXACT_ORDER_COMPLETE__SOURCE_TEST_WORKFLOW_SHA_FROZEN__ARTIFACT_DIGEST_FROZEN__CURRENT_MAIN_RECONCILED__STALE_CANDIDATE_RETIRED__TERMINAL_RECEIPT_SEALED",
+  "book_completion_claimed": false,
+  "prose_execution_created": false,
+  "exact_next_operation": "BOOK-POST-SCHEDULER-OPEN-SEAM-CENSUS-001 — LIVE BOOK HEAD / CURRENT AUTHORITY RE-READ → REMAINING BOOK-OWNED SEAM CLASSIFICATION → EXTERNAL/PRIVATE/A01/AUTHOR/NATIVE FENCE → BIND AT MOST ONE DEPENDENCY-VALID SUCCESSOR"
+}
