@@ -1,0 +1,78 @@
+name: Learning S03 Exact Interface Materialization
+
+on:
+  push:
+    branches:
+      - learning/ownership-freeze-001b-20260912
+    paths:
+      - '.github/workflows/learning-s03-interface-materialization.yml'
+      - 'qualification/learning/ownership/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Decode admitted repaired-R2 interface ledger and identify S03 rows
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import base64, csv, gzip, hashlib, io, json, pathlib, re
+
+          root = pathlib.Path('.')
+          p = root / 'qualification/learning/ownership/LRN-OWNERSHIP-FREEZE-001B-R3B-S02-R2-INTERFACES.csv.gz.b64'
+          encoded = p.read_text(encoding='utf-8').strip()
+          raw = gzip.decompress(base64.b64decode(encoded))
+          digest = hashlib.sha256(raw).hexdigest()
+          expected = '4f4387956bd8189b7a65f5de94ab3c722cb34f249ebe8a94ad74b4c0d0c3cbc0'
+          if digest != expected:
+              raise SystemExit(f'FAIL decoded ledger sha256 {digest} != {expected}')
+
+          text = raw.decode('utf-8-sig')
+          reader = csv.DictReader(io.StringIO(text))
+          rows = list(reader)
+          if len(rows) != 112:
+              raise SystemExit(f'FAIL active interface row count {len(rows)} != 112')
+
+          fields = reader.fieldnames or []
+          print('LEDGER_SHA256=' + digest)
+          print('ACTIVE_ROWS=' + str(len(rows)))
+          print('FIELDS=' + json.dumps(fields, ensure_ascii=False))
+
+          def row_id(row):
+              for k in fields:
+                  v = str(row.get(k, '')).strip()
+                  if re.fullmatch(r'I\d{3}(?:-[LC])?', v):
+                      return v
+              return None
+
+          def searchable(row):
+              return ' | '.join(str(row.get(k, '')) for k in fields).lower()
+
+          exact_terms = ('lrn-e007', 'lrn-e008', 'lessonsessionprojection', 'practiceattempt')
+          broad_terms = ('lesson session', 'lesson-session', 'practice attempt', 'practice-attempt', 'practice observation', 'record practice', 'lesson progress')
+          exact = []
+          broad = []
+          for row in rows:
+              s = searchable(row)
+              if any(t in s for t in exact_terms):
+                  exact.append(row)
+              elif any(t in s for t in broad_terms):
+                  broad.append(row)
+
+          selected = exact + broad
+          selected_ids = [row_id(r) for r in selected]
+          if any(i in {'I007','I082'} for i in selected_ids):
+              raise SystemExit('FAIL S03 selection intersects later R3A repaired interface rows I007/I082')
+
+          print('S03_EXACT_MATCH_COUNT=' + str(len(exact)))
+          print('S03_BROAD_MATCH_COUNT=' + str(len(broad)))
+          print('S03_SELECTED_IDS=' + json.dumps(selected_ids))
+          print('S03_SELECTED_ROWS_JSON_BEGIN')
+          print(json.dumps(selected, indent=2, ensure_ascii=False, sort_keys=True))
+          print('S03_SELECTED_ROWS_JSON_END')
+          PY
