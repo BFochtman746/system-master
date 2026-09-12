@@ -16,11 +16,11 @@ const clone = v => JSON.parse(JSON.stringify(v));
 
 function stableStructure(items) {
   return (items || []).map((item, i) => ({
-    structure_id: item.structure_id || `S-${i + 1}`,
-    kind: item.kind || 'SECTION',
+    structure_id: String(item.structure_id || `S-${i + 1}`).trim(),
+    kind: String(item.kind || 'SECTION').trim(),
     title: typeof item.title === 'string' ? item.title : '',
     ordinal: Number.isInteger(item.ordinal) ? item.ordinal : i + 1,
-    anchor: item.anchor || `STRUCTURE-${i + 1}`,
+    anchor: String(item.anchor || `STRUCTURE-${i + 1}`).trim(),
     confidence: Number.isFinite(item.confidence) ? Number(item.confidence) : 1,
     ambiguous: item.ambiguous === true
   })).sort((a,b) => a.ordinal - b.ordinal || a.structure_id.localeCompare(b.structure_id));
@@ -40,16 +40,16 @@ function coreProjectionDigest(p) {
 }
 function fakeRecoveryKey(request) {
   const identities = request.sources.map(s => ({
-    source_id: s.source_id,
+    source_id: String(s.source_id).trim(),
     source_digest: s.source_digest,
     projection_digest: coreProjectionDigest(s.normalized_projection)
   })).sort((a,b) => a.source_id.localeCompare(b.source_id));
   return d({
-    anchor: request.book_project_id || request.recovery_session_id,
+    anchor: String(request.book_project_id || request.recovery_session_id).trim(),
     profile_version: runtime.PROFILE_VERSION,
     reentry_mode: request.reentry_mode,
     source_identities: identities,
-    prior_edition_ref: request.reentry_mode === 'NEW_EDITION' ? request.prior_edition_ref : null
+    prior_edition_ref: request.reentry_mode === 'NEW_EDITION' ? { edition_id: String(request.prior_edition_ref.edition_id).trim(), edition_digest: request.prior_edition_ref.edition_digest } : null
   });
 }
 
