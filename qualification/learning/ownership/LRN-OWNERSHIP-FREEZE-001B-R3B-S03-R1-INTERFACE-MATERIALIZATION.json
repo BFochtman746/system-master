@@ -1,0 +1,66 @@
+{
+  "artifact_id": "LRN-OWNERSHIP-FREEZE-001B-R3B-S03-R1-INTERFACE-MATERIALIZATION",
+  "date": "2026-09-12",
+  "owner_path": "SYSTEM_MASTER/LEARNING",
+  "source_path": "qualification/learning/ownership/LRN-OWNERSHIP-FREEZE-001B-R3B-S02-R2-INTERFACES.csv.gz.b64",
+  "decoded_ledger_sha256": "4f4387956bd8189b7a65f5de94ab3c722cb34f249ebe8a94ad74b4c0d0c3cbc0",
+  "expected_decoded_ledger_sha256": "4f4387956bd8189b7a65f5de94ab3c722cb34f249ebe8a94ad74b4c0d0c3cbc0",
+  "active_interface_rows": 112,
+  "selected_interface_ids": [
+    "I009",
+    "I036"
+  ],
+  "selected_rows": [
+    {
+      "interface_id": "I009",
+      "source_parent_id": "I009",
+      "type": "COMMAND",
+      "name": "RecordPracticeResponse",
+      "prior_name": "RecordPracticeResponse",
+      "prior_semantic_owner": "Learning",
+      "canonical_owner": "MOD-LEARNING-001",
+      "caller_or_consumer": "Practice UX",
+      "preconditions_or_trigger": "Eligible practice item/version",
+      "input_or_payload": "attempt_id, item_version, response, assistance, timestamp, operation_id",
+      "output_or_semantics": "Records domain practice observation and proposes evidence",
+      "idempotency": "Required",
+      "concurrency": "Replay-safe; expected attempt version",
+      "errors_or_failure_semantics": "DuplicateOperationConflict; VersionConflict; ValidationError",
+      "notes": "Offline journal eligible by policy",
+      "freeze_status": "REFROZEN_SEMANTIC_SIGNATURE_001C",
+      "external_binding_ids": "LRN-EXT-001;LRN-EXT-005",
+      "transport_status": "TRANSPORT_NEUTRAL",
+      "implementation_status": "NOT_IMPLEMENTED_BY_001C",
+      "disposition": "REBIND_NO_SEMANTIC_LOSS"
+    },
+    {
+      "interface_id": "I036",
+      "source_parent_id": "I036",
+      "type": "EVENT",
+      "name": "PracticeEvidenceProposed",
+      "prior_name": "PracticeEvidenceProposed",
+      "prior_semantic_owner": "Learning",
+      "canonical_owner": "MOD-LEARNING-001",
+      "caller_or_consumer": "Evidence authority adapter",
+      "preconditions_or_trigger": "Eligible practice observation recorded",
+      "input_or_payload": "practice_attempt_ref, skill_ref, conditions, provenance refs",
+      "output_or_semantics": "Candidate evidence payload",
+      "idempotency": "Event identity required",
+      "concurrency": "After attempt commit",
+      "errors_or_failure_semantics": "Evidence authority unavailable -> retry/outbox",
+      "notes": "Proposal is not canonical evidence until accepted externally",
+      "freeze_status": "REFROZEN_SEMANTIC_SIGNATURE_001C",
+      "external_binding_ids": "LRN-EXT-001;LRN-EXT-003",
+      "transport_status": "TRANSPORT_NEUTRAL",
+      "implementation_status": "NOT_IMPLEMENTED_BY_001C",
+      "disposition": "REBIND_NO_SEMANTIC_LOSS"
+    }
+  ],
+  "standing": "EXACT_REPOSITORY_NATIVE_INTERFACE_ROW_MATERIALIZATION_COMPLETE",
+  "non_claims": [
+    "no runtime implementation claim",
+    "no participant or consent evidence",
+    "no mastery retention transfer psychometric SME certification claim",
+    "no native A-01 production claim"
+  ]
+}
