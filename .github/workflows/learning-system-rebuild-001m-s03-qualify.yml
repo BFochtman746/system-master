@@ -1,0 +1,64 @@
+name: Learning 001M-S03 Qualification
+
+on:
+  push:
+    branches:
+      - learning/system-rebuild-001m-s03-evidence-mastery-conditions-20260912
+    paths:
+      - learning/lab/learning_lab/engine.py
+      - learning/lab/learning_lab/mastery_conditions.py
+      - learning/lab/learning_lab/mastery_evidence_reader.py
+      - learning/lab/tests/test_mastery_conditions_s03.py
+      - learning/lab/tests/test_mastery_conditions_s03_hardening.py
+      - qualification/learning/rebuild/LEARNING-SYSTEM-REBUILD-001M-S03-64CASE-QUALIFICATION-CONTRACT.json
+      - .github/scripts/learning-system-rebuild-001m-s03-qualify.py
+      - .github/scripts/learning-system-rebuild-001m-s02-qualify.py
+      - .github/workflows/learning-system-rebuild-001m-s03-qualify.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Verify exact subject
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Syntax check S03 runtime and qualification code
+        run: |
+          python -m py_compile \
+            learning/lab/learning_lab/engine.py \
+            learning/lab/learning_lab/mastery_conditions.py \
+            learning/lab/learning_lab/mastery_evidence_reader.py \
+            learning/lab/tests/test_mastery_conditions_s03.py \
+            learning/lab/tests/test_mastery_conditions_s03_hardening.py \
+            .github/scripts/learning-system-rebuild-001m-s03-qualify.py
+
+      - name: Run S03 isolated and cumulative qualification
+        shell: bash
+        run: |
+          set -euo pipefail
+          python .github/scripts/learning-system-rebuild-001m-s03-qualify.py | tee learning-system-rebuild-001m-s03-result.json
+
+      - name: Upload exact-subject qualification evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: learning-system-rebuild-001m-s03-${{ github.sha }}
+          path: learning-system-rebuild-001m-s03-result.json
+          if-no-files-found: error
