@@ -15,12 +15,7 @@ from second_shift_supervisor_v2 import SupervisorStore  # noqa: E402
 
 
 def quick_logical_audit(self: SupervisorStore) -> list[str]:
-    """Run controller invariants without a full SQLite page scan.
-
-    Physical integrity is still checked explicitly by crash tests and at the end
-    of the 20,000-transition randomized stress test. This keeps every logical
-    transition checked without turning each transition into an O(database) scan.
-    """
+    """Run controller invariants without a full SQLite page scan."""
     problems: list[str] = []
     dup = self.conn.execute(
         "SELECT lane,COUNT(*) n FROM claims WHERE released_at IS NULL GROUP BY lane HAVING n>1"
@@ -67,16 +62,7 @@ def load_test_module():
 
 
 def install_indexed_randomized_stress(module):
-    """Preserve the exact 20k randomized transition semantics without O(n^2) history reloads.
-
-    The source test calls SupervisorStore.snapshot() on every transition only to
-    obtain the single CORE lane, its at-most-one live claim, and the current
-    delegation objective. Those are current-state decisions, not historical
-    assertions. Reading those exact rows directly keeps the random seed, action
-    distribution, mutation methods, rejection handling, per-transition logical
-    invariant audit, and final physical integrity gate unchanged while avoiding
-    repeatedly materializing an ever-growing historical snapshot.
-    """
+    """Preserve the exact 20k randomized transition semantics without O(n^2) history reloads."""
     original = module.SupervisorV2Tests.test_randomized_20000_transition_invariant_stress
 
     def indexed_randomized_stress(self):
@@ -91,8 +77,10 @@ def install_indexed_randomized_stress(module):
             lane_row = s.conn.execute("SELECT * FROM lanes WHERE lane=?", (lane,)).fetchone()
             if lane_row is None:
                 self.fail(f"missing lane {lane} at step {i}")
+            # The supervisor invariant permits at most one live claim per lane,
+            # so no historical ordering column is needed to select it.
             active = s.conn.execute(
-                "SELECT * FROM claims WHERE lane=? AND released_at IS NULL ORDER BY started_at,lease_id LIMIT 1",
+                "SELECT * FROM claims WHERE lane=? AND released_at IS NULL LIMIT 1",
                 (lane,),
             ).fetchall()
             choice = rnd.randrange(10)
@@ -139,8 +127,6 @@ def install_indexed_randomized_stress(module):
             if problems:
                 self.fail(f"invariant failure at step {i}: {problems}")
         self.assertEqual(s.conn.execute("PRAGMA integrity_check").fetchone()[0], "ok")
-        # Materialize the complete historical snapshot once at the end so the
-        # optimized path still proves the accumulated state remains readable.
         final_snapshot = s.snapshot()
         self.assertTrue(final_snapshot["lanes"])
         self.assertIn("claims", final_snapshot)
@@ -152,8 +138,6 @@ def install_indexed_randomized_stress(module):
 
 
 def main() -> int:
-    # Preserve the production prototype's deep audit method for explicit checks,
-    # but use logical-only audit in tight randomized loops.
     original_audit = SupervisorStore.audit_invariants
     SupervisorStore.audit_invariants = quick_logical_audit
     module = load_test_module()
