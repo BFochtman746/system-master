@@ -8,6 +8,7 @@ import { ControllerKernel } from '../src/kernel.js';
 
 const OID='0123456789abcdef0123456789abcdef01234567';
 function paths(){const dir=mkdtempSync(join(tmpdir(),'controller-v2-migrate-'));return {dir,db:join(dir,'legacy.sqlite')};}
+function cleanup(dir){rmSync(dir,{recursive:true,force:true,maxRetries:20,retryDelay:50});}
 function columns(db,table){return db.prepare(`PRAGMA table_info(${table})`).all().map(r=>r.name);}
 function createLegacyCore(db,version=1,{includePromotions=true}={}){
   db.exec(`
@@ -42,7 +43,7 @@ test('MG-T001 real v1 rows migrate losslessly through v2, v3 and v4 with implici
     assert.ok(k.db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='external_effect_attempts'").get());
     assert.equal(k.db.prepare('PRAGMA integrity_check').get().integrity_check,'ok');
     k.close();
-  }finally{rmSync(dir,{recursive:true,force:true});}
+  }finally{cleanup(dir);}
 });
 
 test('MG-T002 failed v2 to v3 migration rolls back every ALTER and version write before v4',()=>{
@@ -61,5 +62,5 @@ test('MG-T002 failed v2 to v3 migration rolls back every ALTER and version write
     assert.equal(columns(inspect,'qualifications').includes('subject_oid'),false);
     assert.equal(inspect.prepare("SELECT COUNT(*) n FROM sqlite_master WHERE type='table' AND name='external_effects'").get().n,0);
     inspect.close();
-  }finally{rmSync(dir,{recursive:true,force:true});}
+  }finally{cleanup(dir);}
 });
