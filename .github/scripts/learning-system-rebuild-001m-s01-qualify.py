@@ -69,8 +69,8 @@ def main():
     iface_sha, iface_rows = decode_csv_carrier(IFACE_PATH)
     obj_manifest = load_json(OBJ_MANIFEST_PATH)
 
-    req_id_col = find_id_column(req_rows, ["requirement_id", "id", "requirement"])
-    iface_id_col = find_id_column(iface_rows, ["interface_id", "id", "interface"])
+    req_id_col = find_id_column(req_rows, ["active_requirement_id", "requirement_id", "id", "requirement"])
+    iface_id_col = find_id_column(iface_rows, ["active_interface_id", "interface_id", "id", "interface"])
     req_ids = [r[req_id_col] for r in req_rows]
     iface_ids = [r[iface_id_col] for r in iface_rows]
 
