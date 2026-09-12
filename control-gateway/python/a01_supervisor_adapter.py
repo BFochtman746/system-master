@@ -106,34 +106,33 @@ class SupervisorGatewayAdapter:
         validate_gateway_handoff(handoff)
         now = now or utcnow()
         self.store.register_lane(
-            handoff["lane"],
-            handoff["owner_path"],
-            handoff["control_ref"],
-            handoff["control_head"],
-            now=now,
+            handoff["lane"], handoff["owner_path"], handoff["control_ref"], handoff["control_head"], now=now,
         )
         self.store.bind_ready(
-            lane=handoff["lane"],
-            delegation_id=handoff["delegation_id"],
-            objective_id=handoff["objective_id"],
-            control_head=handoff["control_head"],
-            obligation_id=handoff["admission_receipt"]["task_id"],
+            lane=handoff["lane"], delegation_id=handoff["delegation_id"], objective_id=handoff["objective_id"],
+            control_head=handoff["control_head"], obligation_id=handoff["admission_receipt"]["task_id"],
             payload={
                 "gateway_handoff_digest": handoff["handoff_digest"],
                 "admission_digest": handoff["admission_receipt"]["admission_digest"],
-                "execution_class": handoff["execution_class"],
-                "execution_order": handoff["execution_order"],
-                "priority": handoff["priority"],
-                "not_before": handoff["not_before"],
-                "not_after": handoff["not_after"],
-                "payload_digest": handoff["payload_digest"],
-                "payload": handoff["payload"],
+                "execution_class": handoff["execution_class"], "execution_order": handoff["execution_order"],
+                "priority": handoff["priority"], "not_before": handoff["not_before"], "not_after": handoff["not_after"],
+                "payload_digest": handoff["payload_digest"], "payload": handoff["payload"],
             },
             now=now,
         )
 
     def claim(self, handoff: dict[str, Any], now: Optional[dt.datetime] = None, lease_seconds: int = 300):
         validate_gateway_handoff(handoff)
+        # CG-009 fail-closed boundary: once a delegation carries durable coordination
+        # metadata, the CG-008 claim path may not bypass dependency/resource/cancel gates.
+        has_table = self.store.conn.execute(
+            "SELECT 1 FROM sqlite_master WHERE type='table' AND name='coordination_tasks'"
+        ).fetchone()
+        if has_table and self.store.conn.execute(
+            "SELECT 1 FROM coordination_tasks WHERE delegation_id=?", (handoff["delegation_id"],)
+        ).fetchone():
+            raise Conflict("coordinated delegation requires SupervisorCoordinationAdapter")
+
         now = now or utcnow()
         not_before = parse_iso(handoff["not_before"]) if handoff["not_before"] else None
         not_after = parse_iso(handoff["not_after"]) if handoff["not_after"] else None
@@ -143,19 +142,13 @@ class SupervisorGatewayAdapter:
             raise Conflict("admitted work window expired")
         allow_outside_shift = handoff["execution_class"] != "OVERNIGHT"
         return self.store.claim_ready(
-            lane=handoff["lane"],
-            delegation_id=handoff["delegation_id"],
-            objective_id=handoff["objective_id"],
-            control_head=handoff["control_head"],
-            idempotency_key=handoff["idempotency_key"],
+            lane=handoff["lane"], delegation_id=handoff["delegation_id"], objective_id=handoff["objective_id"],
+            control_head=handoff["control_head"], idempotency_key=handoff["idempotency_key"],
             executor_kind=handoff["executor_kind"],
             dispatch_payload={
                 "gateway_handoff_digest": handoff["handoff_digest"],
                 "admission_digest": handoff["admission_receipt"]["admission_digest"],
-                "payload_digest": handoff["payload_digest"],
-                "payload": handoff["payload"],
+                "payload_digest": handoff["payload_digest"], "payload": handoff["payload"],
             },
-            lease_seconds=lease_seconds,
-            now=now,
-            allow_outside_shift=allow_outside_shift,
+            lease_seconds=lease_seconds, now=now, allow_outside_shift=allow_outside_shift,
         )
