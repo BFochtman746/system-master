@@ -1,0 +1,79 @@
+{
+  "schema": "second-shift-control-gateway.cg009-freeze.v1",
+  "operation_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-009",
+  "status": "HOST_QUALIFIED_DEPENDENCY_CONCURRENCY_CANCELLATION_DEVELOPMENT_FROZEN",
+  "mission_version": "SECOND-SHIFT-CONTROL-GATEWAY-CG-001/v1.0",
+  "predecessor_freeze_sha": "54d20108311f4f5930017720b11794b3d3196731",
+  "qualified_implementation_sha": "c0ff180607624c27a6b5158e7c0f3ee00e08fddf",
+  "qualification_run_id": 34672012219,
+  "qualification_receipt_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-009-HOST-QUALIFICATION-34672012219",
+  "host_qualification": {
+    "node_22": {
+      "controller_tests": 146,
+      "controller_pass": 142,
+      "controller_fail": 0,
+      "controller_skipped": 4,
+      "cg008_regression_tests": 11,
+      "cg008_regression_fail": 0,
+      "cg009_coordination_tests": 14,
+      "cg009_coordination_fail": 0,
+      "supervisor_stress_tests": 28,
+      "supervisor_stress_fail": 0,
+      "randomized_transitions": 20000,
+      "random_seed": "0x5EC0D5",
+      "rigor_reduced": false
+    },
+    "node_24": {
+      "controller_tests": 146,
+      "controller_pass": 142,
+      "controller_fail": 0,
+      "controller_skipped": 4,
+      "cg008_regression_tests": 11,
+      "cg008_regression_fail": 0,
+      "cg009_coordination_tests": 14,
+      "cg009_coordination_fail": 0,
+      "supervisor_stress_tests": 28,
+      "supervisor_stress_fail": 0,
+      "randomized_transitions": 20000,
+      "random_seed": "0x5EC0D5",
+      "rigor_reduced": false
+    }
+  },
+  "coordination_protocol": "control-gateway.a01-supervisor-coordination.v1",
+  "closed_scope": {
+    "dependency_dag": "DURABLE_EXACT_COMPLETED_ONLY_CYCLE_FENCED",
+    "concurrency": "RESOURCE_KEY_LIMIT_ATOMIC_WITH_LEASE_AND_DISPATCH_INTENT",
+    "cancellation": "DURABLE_LOCAL_FENCE_IMMEDIATE_EXTERNAL_ACK_IF_DISPATCHED",
+    "cg008_bypass": "PROHIBITED_FOR_REGISTERED_COORDINATION_TASK"
+  },
+  "development_state": {
+    "ref": "control-gateway-state/active-work/second-shift-control-gateway-dev",
+    "head_commit_sha": "ef3721bb69f6a1eff4c61210d8298b21ff50e99e",
+    "publication_revision": 11,
+    "authority_epoch": 11,
+    "packet_digest": "fae50438b1ae1fce459f86aa89a78bfe9e0be3a12d12425cbaaa19991bc31a48",
+    "publication_digest": "f28a4e98203bd8644c58be751509cbc46fb4baedda274cf1d55b014fb4ab4ad5",
+    "head_and_revision_blob_sha": "74ab5e6a8fc2dc2872ddc151329a38f99e78af63",
+    "qualification_state": "PASSED",
+    "github_admission_state": "ADMITTED",
+    "a01_state": "NOT_REQUIRED",
+    "production": false
+  },
+  "production_blockers": [
+    {
+      "id": "A01-ACTUAL-WINDOWS-QUALIFICATION",
+      "status": "OPEN",
+      "reason": "CG-009 is host-qualified only; actual A-01 Windows execution and adjudication remains mandatory before production activation."
+    },
+    {
+      "id": "LEGACY-GITHUB-NIGHT-SCHEDULER-AUTHORITY",
+      "status": "OPEN",
+      "owner_operation": "SECOND-SHIFT-CONTROL-GATEWAY-CG-010",
+      "reason": ".github/workflows/a01-overnight-night-shift.yml still has legacy GitHub cron/slot-chain scheduling authority and must be retired or demoted before single-scheduler production cutover."
+    }
+  ],
+  "next_legal_operation": "SECOND-SHIFT-CONTROL-GATEWAY-CG-010 — NIGHT SCHEDULER / LEGACY GITHUB SCHEDULER RETIREMENT + HOST QUALIFICATION",
+  "next_predecessor_receipt_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-009-HOST-QUALIFICATION-34672012219",
+  "a01_windows_qualified": false,
+  "production_activation": false
+}
