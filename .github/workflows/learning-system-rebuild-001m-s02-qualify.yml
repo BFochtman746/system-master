@@ -4,6 +4,12 @@ on:
   push:
     branches:
       - learning/system-rebuild-001m-s02-learner-model-srl-runtime-20260912
+    paths:
+      - '.github/scripts/learning-system-rebuild-001m-s02-qualify.py'
+      - '.github/workflows/learning-system-rebuild-001m-s02-qualify.yml'
+      - 'learning/lab/learning_lab/learner_model.py'
+      - 'learning/lab/tests/test_learner_model_srl.py'
+      - 'qualification/learning/rebuild/LEARNING-SYSTEM-REBUILD-001M-S02-48CASE-QUALIFICATION-CONTRACT.json'
   workflow_dispatch:
 
 permissions:
@@ -12,6 +18,7 @@ permissions:
 jobs:
   qualify:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout exact subject
         uses: actions/checkout@v4
