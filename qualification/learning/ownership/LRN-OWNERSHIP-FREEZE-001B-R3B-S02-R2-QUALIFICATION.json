@@ -1,0 +1,138 @@
+{
+  "checks": {
+    "active_req_count_116": true,
+    "active_req_ids_unique": true,
+    "active_req_parent_denominator_preserved_110": true,
+    "all_pass": true,
+    "i005_i066_stage_separated": true,
+    "i006_sole_activation_transition": true,
+    "i068_approval_only": true,
+    "i072_never_activates": true,
+    "interface_parent_denominator_preserved_110": true,
+    "interfaces_still_112": true,
+    "no_book_semantic_owner_imported": true,
+    "no_document_semantic_owner_imported": true,
+    "no_programming_semantic_owner_imported": true,
+    "objects_still_28": true,
+    "six_atomic_children_present": true,
+    "source_interface_count_112": true,
+    "source_interface_parent_denominator_110": true,
+    "source_object_count_28": true,
+    "source_object_parent_denominator_26": true,
+    "source_req_count_113": true,
+    "source_req_parent_denominator_110": true,
+    "split_parents_absent_as_active": true
+  },
+  "denominators": {
+    "historical_source": {
+      "interfaces": 110,
+      "requirements": 110,
+      "semantic_objects": 26
+    },
+    "post_repair_active": {
+      "interfaces": 112,
+      "requirements": 116,
+      "semantic_objects": 28
+    },
+    "pre_repair_active": {
+      "interfaces": 112,
+      "requirements": 113,
+      "semantic_objects": 28
+    }
+  },
+  "generated_sha256": {
+    "LRN-OWNERSHIP-FREEZE-001B-R3B-S02-R2-INTERFACES.csv": "4f4387956bd8189b7a65f5de94ab3c722cb34f249ebe8a94ad74b4c0d0c3cbc0",
+    "LRN-OWNERSHIP-FREEZE-001B-R3B-S02-R2-REQUIREMENTS.csv": "63554c37366c2718e1453c56c4765d9a5a49621495a522ca8be26417c1d977a2"
+  },
+  "interface_deltas": {
+    "I005": {
+      "input_or_payload": "goal_id, goal_version, constraints, source_policy, accessibility_needs, client_operation_id",
+      "notes": "Owns workflow intent only; compilation is downstream I066; does not create generic job authority",
+      "output_or_semantics": "Creates/deduplicates one high-level CurriculumGenerationRequest; generic job authority may return a durable external job reference",
+      "preconditions_or_trigger": "Versioned LearningGoal ref and research scope valid; owner-local readiness preflight"
+    },
+    "I006": {
+      "input_or_payload": "curriculum_id, version, expected_goal_version, approval_receipt_ref, validation_report_ref, client_operation_id",
+      "notes": "Cannot infer approval from transport/chat metadata; I035 only after commit",
+      "output_or_semantics": "Sole Curriculum state-transition authority: pins the exact immutable CurriculumVersion ACTIVE and supersedes the prior active pointer",
+      "preconditions_or_trigger": "Exact CurriculumVersion is READY_FOR_ACTIVATION; current I068 approval receipt and validation/readiness receipts admitted"
+    },
+    "I066": {
+      "input_or_payload": "generation_request_ref; goal_id; goal_version; source_plan_ref; compiler_policy_version; requested_modalities; job_request_id",
+      "notes": "Cannot mint a second high-level generation intent; generic job authority owns lifecycle",
+      "output_or_semantics": "Creates/deduplicates a downstream course-compilation request for the admitted generation workflow",
+      "preconditions_or_trigger": "Admitted I005 generation_request_ref exists; normalized source plan permitted"
+    },
+    "I068": {
+      "input_or_payload": "curriculum_version; validation_report_ref; expected_goal_version; approval_decision; client_operation_id",
+      "notes": "Explicit user approval default v1; this command has no activation mutation side effect",
+      "output_or_semantics": "Records an immutable CourseActivationApproval decision receipt only; Curriculum state transition is exclusively I006",
+      "preconditions_or_trigger": "Exact CurriculumVersion validation has no blocking findings and explicit user approval decision is available"
+    },
+    "I072": {
+      "input_or_payload": "diff_ref; decision; client_operation_id",
+      "notes": "Activation is never bundled in v1; I068 approval then I006 transition remain mandatory",
+      "output_or_semantics": "Records accept/postpone/reject for the refresh diff; accept may make the candidate eligible for I068 review but never activates",
+      "preconditions_or_trigger": "Immutable refresh diff available"
+    }
+  },
+  "new_atomic_requirement_children": [
+    "LRN-064-L",
+    "LRN-064-C",
+    "LRN-138-L",
+    "LRN-138-C",
+    "LRN-140-L",
+    "LRN-140-C"
+  ],
+  "owner_counts": {
+    "interfaces": {
+      "021J + 021K": 5,
+      "021O + 021N/FOUNDATION-002 + FOUNDATION-004 + 021M": 1,
+      "ASSURANCE-001 + PLATFORM-009 + 021AB": 1,
+      "FOUNDATION-002 + 021N + FOUNDATION-004": 1,
+      "FOUNDATION-003 + PLATFORM-002": 3,
+      "MOD-CURRICULUM-001": 39,
+      "MOD-LEARNING-001": 59,
+      "PLATFORM-006 / MASTER CORE DEPENDENCY RESOLUTION": 1,
+      "RIGHTS-001 + PLATFORM-008": 2
+    },
+    "requirements": {
+      "021J + 021K": 3,
+      "021M + 021J + 021K": 1,
+      "021O + 021N/FOUNDATION-002 + FOUNDATION-004 + 021M": 2,
+      "ASSURANCE-001": 2,
+      "FOUNDATION-002 + 021N + FOUNDATION-004": 1,
+      "FOUNDATION-003 + PLATFORM-002": 2,
+      "FOUNDATION-004": 1,
+      "FOUNDATION-006": 2,
+      "MOD-CURRICULUM-001": 38,
+      "MOD-KNOWLEDGE-001": 1,
+      "MOD-LEARNING-001": 51,
+      "PLATFORM-008 + FOUNDATION-007 + RIGHTS-001 + 021M": 2,
+      "PLATFORM-009 + 021AB + ASSURANCE-001 + FOUNDATION-006/007 + 021N": 2,
+      "USER-EXPERIENCE-001": 8
+    }
+  },
+  "source_sha256": {
+    "LRN_OWNERSHIP_FREEZE_001C_INTERFACES.csv": "067becc2eb597e1dedc8169bee7222eaf5daad7e1dd122a8bfc6f0b7646e6f86",
+    "LRN_OWNERSHIP_FREEZE_001C_OBJECTS.csv": "a3cf9f19e5100bf66e45cc5a8c8e7f652a8d54c0dcae0b3adbe52a0157706120",
+    "LRN_OWNERSHIP_FREEZE_001C_REQUIREMENTS.csv": "48d580cdcd2412910c1ce5cb480ea47766646c5a35e7c8564d4d66cc3bf51962",
+    "LRN_OWNERSHIP_FREEZE_001C_TEST_OBLIGATIONS.csv": "7688f208e56a86303ba76e54e918b9aaf0eb3198d7490f803bee018faf55b6f3"
+  },
+  "status": "PASS",
+  "superseded_active_requirement_parents": [
+    "LRN-064",
+    "LRN-138",
+    "LRN-140"
+  ],
+  "truth_boundary": {
+    "human_approval_observed": false,
+    "live_postgresql_executed": false,
+    "native_or_a01_executed": false,
+    "participant_outcomes_observed": false,
+    "production_executed": false,
+    "runtime_implementation_claimed": false,
+    "specification_delta_only": true
+  },
+  "unit": "LRN-OWNERSHIP-FREEZE-001B-R3B-S02-R2"
+}
