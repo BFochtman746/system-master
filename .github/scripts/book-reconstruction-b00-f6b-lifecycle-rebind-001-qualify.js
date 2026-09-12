@@ -249,9 +249,11 @@ t('F6B-PUBLICATION-GATE', 'export-frozen project cannot publish without explicit
 t('F6B-STALE-EVIDENCE', 'stale projection-bound service evidence fails closed before transition', () => {
   const stale = { link_id: 'EVID-STALE', evidence_type: 'GOVERNING_BRIEF_READY', parent_projection_identity: { parent_state_version: 999, parent_state_digest: '0'.repeat(64) } };
   const parent = parentAt('BRIEFING', { research_evidence_links: [stale] });
-  const lifecycle = rebind.createLifecycleSpecialistState(parent);
-  const request = projectRequest(parent, lifecycle, 'PLANNING', 'STALE-EVIDENCE', { evidence_refs: ['EVID-STALE'] });
-  expectCode('STALE_CANONICAL_EVIDENCE', () => rebind.prepareLifecycleTransition({ canonicalParent: parent, lifecycleState: lifecycle, request }));
+  expectCode('STALE_CANONICAL_EVIDENCE', () => {
+    const lifecycle = rebind.createLifecycleSpecialistState(parent);
+    const request = projectRequest(parent, lifecycle, 'PLANNING', 'STALE-EVIDENCE', { evidence_refs: ['EVID-STALE'] });
+    rebind.prepareLifecycleTransition({ canonicalParent: parent, lifecycleState: lifecycle, request });
+  });
 });
 
 t('F6B-TRANSITIVE-INVALIDATION', 'unit invalidation propagates transitively and remains specialist-only', () => {
