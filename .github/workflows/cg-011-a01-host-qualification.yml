@@ -1,0 +1,31 @@
+name: CG-011 A-01 Host Qualification
+
+on:
+  push:
+    branches:
+      - second-shift-control-gateway/cg-011-a01-qualification-001
+    paths:
+      - '.github/workflows/cg-011-a01-host-qualification.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  a01-host-qualification:
+    name: CG-011 exact frozen subject on A-01 Windows
+    uses: ./.github/workflows/a01-control-plane-gateway.yml
+    with:
+      qualification_id: SECOND-SHIFT-SUPERVISOR-V2-A01-STRESS
+      workstream_id: SECOND-SHIFT-CONTROL-GATEWAY
+      subject_sha: f4f3787f90788e964fcd2b12872a7a10392d78c1
+      origin_ref: refs/heads/second-shift-control-gateway/cg-011-failure-restart-idempotency-frozen
+      resume_on_pass: Record exact-SHA A-01 Windows PASS for CG-011, preserve all earlier frozen Control Gateway authority, and permit CG-011 host-qualified closure without starting CG-012 automatically.
+      resume_on_failure: Record CG-011 A-01 host qualification as failed, preserve the frozen subject for evidence, reopen only CG-011 reconciliation, repair the failing boundary, and rerun the full cumulative gate before any successor work.
+      notification_target: obligation:SECOND-SHIFT-CONTROL-GATEWAY-CG-011-A01-HOST-QUALIFICATION-001
+      execution_context: normal
+      qualifier_timeout_minutes: 28
+      job_timeout_minutes: 30
+      repair_attempt: 0
+      max_repair_attempts: 1
