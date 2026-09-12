@@ -1,0 +1,100 @@
+{
+  "operation": "LEARNING-SYSTEM-REBUILD-001L",
+  "title": "Constitutional Reconciliation / Minimum Delta",
+  "date": "2026-09-12",
+  "status": "CONSTITUTIONAL_DELTA_FROZEN__NO_RUNTIME_BUILD_OR_PASS_CLAIMS",
+  "repository": "BFochtman746/system-master",
+  "source": {
+    "branch": "learning/system-rebuild-001k-standards-interoperability-20260912",
+    "commit": "3ae0d12b55edcda8ca44c6fc0a5f4ab5b8ef7317"
+  },
+  "historical_lineage": {
+    "requirements": 110,
+    "interfaces": 110,
+    "semantic_objects": 26,
+    "rule": "Historical 110/110/26 remains immutable provenance and is not rewritten."
+  },
+  "active_baseline": {
+    "requirements": 116,
+    "interfaces": 112,
+    "semantic_objects": 28
+  },
+  "reconciled_active_constitution": {
+    "requirements": 124,
+    "interfaces": 116,
+    "semantic_objects": 31,
+    "delta": {
+      "requirements_added": 8,
+      "interfaces_added": 4,
+      "semantic_objects_added": 3
+    }
+  },
+  "new_requirements": [
+    {"id":"LRN-151","owner":"SYSTEM_MASTER/LEARNING::MOD-LEARNING-001","responsibility":"Maintain a versioned LearnerModelProjection that synthesizes owner-valid learner state without becoming a second writer of source truth.","foundation_source":"001D/A01"},
+    {"id":"LRN-152","owner":"SYSTEM_MASTER/LEARNING::MOD-LEARNING-001","responsibility":"Record append-oriented self-regulation observations for plan, monitor, evaluate and strategy-use state without converting them into competence.","foundation_source":"001E/A02"},
+    {"id":"LRN-153","owner":"SYSTEM_MASTER/LEARNING::MOD-LEARNING-001","responsibility":"Preserve bounded intentionally supplied motivation, effort, task-value and confusion context as non-diagnostic learner context; missing context is not negative and context is never direct mastery evidence.","foundation_source":"001E/A03"},
+    {"id":"LRN-154","owner":"SYSTEM_MASTER/LEARNING::MOD-LEARNING-001","responsibility":"Preserve materially relevant assistance condition on learning evidence, including independent, instructional-scaffold, AI-assisted, collaborative, authorized-accommodation, tool-permitted and unknown-assistance standing.","foundation_source":"001G/A04"},
+    {"id":"LRN-155","owner":"SYSTEM_MASTER/LEARNING::MOD-LEARNING-001","responsibility":"Require owner-valid independent-performance or support-withdrawal verification when the intended construct requires independence, without withdrawing required accommodations or rewriting prior assisted evidence.","foundation_source":"001G/A05"},
+    {"id":"LRN-156","owner":"SYSTEM_MASTER/LEARNING::MOD-LEARNING-001","responsibility":"Define and interpret versioned educational-effectiveness evaluations while shared Assurance/Analytics retains generic experiment and statistical machinery.","foundation_source":"001J/A06"},
+    {"id":"LRN-157","owner":"SYSTEM_MASTER/LEARNING + SYSTEM_MASTER/LEARNING::MOD-CURRICULUM-001 semantic mappings; shared Integration/Gateway transport","responsibility":"Support version-pinned CASE, QTI, Caliper and CLR adapter mappings without making an external standard canonical Learning truth.","foundation_source":"001K/A07"},
+    {"id":"LRN-158","owner":"Integration adapter + future admitted competency-alignment owner; no current canonical Learning equivalence writer","responsibility":"Accept non-authoritative external competency-alignment proposals/associations with provenance while keeping LRN-069 / LRN-EXT-002 authoritative equivalence fail-closed.","foundation_source":"001K/A08"}
+  ],
+  "new_interfaces": [
+    {"id":"I111","name":"GetLearnerModelProjection","kind":"QUERY","owner":"SYSTEM_MASTER/LEARNING::MOD-LEARNING-001","object":"LRN-E027","rule":"Read-only version/as-of projection; no hidden source mutation."},
+    {"id":"I112","name":"RecordSelfRegulationObservation","kind":"COMMAND","owner":"SYSTEM_MASTER/LEARNING::MOD-LEARNING-001","object":"LRN-E028","rule":"Append-oriented, semantically idempotent, bounded learner-declared/context observation; never direct mastery mutation."},
+    {"id":"I113","name":"RegisterLearningEffectivenessEvaluation","kind":"COMMAND","owner":"SYSTEM_MASTER/LEARNING::MOD-LEARNING-001","object":"LRN-E029","rule":"Registers the Learning-specific protocol/claim subject and exact version pins; generic assignment/statistics remain shared Assurance/Analytics authority."},
+    {"id":"I114","name":"GetLearningEffectivenessEvaluation","kind":"QUERY","owner":"SYSTEM_MASTER/LEARNING::MOD-LEARNING-001","object":"LRN-E029","rule":"Returns bounded evaluation standing, evidence references, uncertainty, limitations and intended-use claim; never rewrites mastery or creates product-wide effectiveness truth."}
+  ],
+  "new_semantic_objects": [
+    {"id":"LRN-E027","name":"LearnerModelProjection","owner":"SYSTEM_MASTER/LEARNING::MOD-LEARNING-001","class":"VERSIONED_DERIVED_PROJECTION","source_truth":"References existing owner-valid goal, observation, assessment, evidence, mastery, retention, transfer, remediation, maintenance, SRL and assistance-condition state.","non_authority":["goals","assessment scores","mastery","retention","transfer","curriculum","privacy","model calibration"]},
+    {"id":"LRN-E028","name":"SelfRegulationObservation","owner":"SYSTEM_MASTER/LEARNING::MOD-LEARNING-001","class":"APPEND_ORIENTED_OBSERVATION","scope":["PLAN","MONITOR","EVALUATE","STRATEGY_USE","HELP_REQUEST","BOUNDED_DECLARED_CONTEXT"],"relationship":"LRN-E017 SelfConfidenceObservation remains valid and may be projected as one bounded SRL signal rather than being superseded.","non_authority":["mastery","competence","diagnosis","psychological profile"]},
+    {"id":"LRN-E029","name":"LearningEffectivenessEvaluationDescriptor","owner":"SYSTEM_MASTER/LEARNING::MOD-LEARNING-001","class":"VERSIONED_EVALUATION_DESCRIPTOR_PROJECTION","scope":"Learning-specific intervention, comparator, outcome, time horizon, assistance condition, evidence package, standing, uncertainty, limitations and intended-use claim.","shared_dependencies":["Assurance","Analytics","Evidence/Provenance","Artifact"],"non_authority":["generic statistics","experiment infrastructure","mastery","assessment validity","product-wide effectiveness","certification","eligibility"]}
+  ],
+  "existing_objects_extended": [
+    {"ids":["LRN-E012","LRN-E013","LRN-E014","LRN-E015","LRN-E016"],"change":"Make evidence coverage and uncertainty mandatory where applicable; represent retention, transfer and independence as explicit profile/gate/condition semantics; preserve contradictions and assistance standing."},
+    {"id":"LRN-E017","change":"Keep SelfConfidenceObservation; expose it as bounded learner self-report within the broader SRL projection without turning confidence into competence."},
+    {"id":"LRN-E020-C","change":"Extend InstructionalPolicyVersion for AI tutoring support ladder, direct-answer rules, scaffolding/fading, self-explanation, feedback timing and accommodation-safe behavior."},
+    {"id":"LRN-E020-L","change":"Extend AdaptiveLearningPolicyVersion to consume Learner Model, SRL, evidence uncertainty, retention, transfer and independence; eligibility precedes ranking and durable learning/independence outrank short-term performance."},
+    {"id":"LRN-E021","change":"Extend AdaptiveDecisionTrace with eligible-action set, exclusion reasons, reason codes, learner choice/override context, ranking inputs, deterministic fallback and exact policy/source versions."},
+    {"name":"AssessmentAttempt existing Learning object","change":"Extend score/result semantics with assistance conditions, scorer/model/rubric versions, score standing, assurance references and human-review lineage; external/asynchronous score-commit ingress remains unresolved."},
+    {"id":"LRN-E026","change":"Allow CLR/QTI/other export-format references and exact adapter/profile/version provenance as subordinate packaging metadata without converting the descriptor into certification/eligibility authority."}
+  ],
+  "existing_interfaces_extended": [
+    {"ids":["I024","I025","I088","I039","I078","I079","I080","I056","I057","I058","I059","I060","I061"],"change":"Carry the 001G uncertainty/coverage/retention/transfer/independence and assistance-condition semantics through existing evidence/mastery surfaces."},
+    {"ids":["I017","I026","I054","I055","I105"],"change":"Carry 001H eligibility-before-ranking, learner choice/override, reason codes, deterministic fallback and shared model-assurance fencing through existing adaptation surfaces."},
+    {"id":"I011","change":"Retain SubmitSelfConfidence unchanged in authority; its output may feed LRN-E027 alongside LRN-E028 observations."},
+    {"ids":["I077","I032","I086","I109"],"change":"Carry exact interoperability/export provenance and external-record references without converting packaging or authorization into qualification/certification/eligibility truth."}
+  ],
+  "subordinate_noncanonical_types": [
+    {"name":"EvidenceAssistanceCondition","reason":"Required by 001G but does not need a standalone canonical entity/object ID."},
+    {"name":"AdaptiveEligibilityReasonCode / AdaptiveSelectionReasonCode","reason":"Required for 001H explainability but belongs inside LRN-E021/I026 semantics rather than a new truth owner."},
+    {"name":"AssessmentScoreStanding / ScorerLineage","reason":"Required by 001I but subordinate to AssessmentAttempt/result semantics and shared Assurance references."},
+    {"name":"InteroperabilityEnvelope / MappingStanding","reason":"Required by 001K but remains adapter/provenance metadata rather than canonical Learning truth."}
+  ],
+  "unchanged_authority_fences": [
+    "LRN-069 / LRN-EXT-002 authoritative cross-domain competency equivalence remains unresolved and deny-by-default.",
+    "S04 external/asynchronous score-commit ingress remains unresolved and fail-closed; no callback authority is invented.",
+    "Learning does not own identity, generic artifact bytes, generic jobs/runtime, scheduler/delivery, transport, generic evidence/provenance substrate, rights/licensing, privacy/security authorization, generic model assurance/statistics, credential signing/serialization, certification, hiring, licensing or eligibility decisions.",
+    "Curriculum remains an internal Learning-system truth boundary, not a Topology peer.",
+    "Observation, completion, score, confidence, engagement, accepted AI output and generic productivity do not directly establish mastery.",
+    "Authorized accommodation does not automatically invalidate evidence and is not withdrawn merely to manufacture independence.",
+    "External standards remain adapters, never canonical semantic owners."
+  ],
+  "removed_or_not_admitted": [
+    "Task completion/output quality/accepted AI answer/generic productivity as direct mastery evidence.",
+    "Automated inferred emotion or mental-state truth from raw chat/device/camera/voice/physiological telemetry as a default Learning capability.",
+    "A separate AI Tutor semantic owner.",
+    "A second mastery writer, learner-model source writer, assessment writer, statistics platform, integration platform or credential authority inside Learning."
+  ],
+  "implementation_slices": [
+    {"order":1,"id":"001M-S01","name":"Constitution materialization","scope":"Materialize LRN-151..158, I111..I114 and LRN-E027..E029 plus schema/value-type extensions; preserve supersession and historical lineage."},
+    {"order":2,"id":"001M-S02","name":"Learner Model + SRL runtime","scope":"Implement LRN-E027/I111 and LRN-E028/I112 with versioned provenance, idempotency and fail-closed source reads."},
+    {"order":3,"id":"001M-S03","name":"Evidence/mastery condition expansion","scope":"Implement mandatory uncertainty/coverage and retention/transfer/independence/assistance conditions on existing mastery/evidence surfaces."},
+    {"order":4,"id":"001M-S04","name":"Tutoring + adaptive runtime expansion","scope":"Implement 001F/001H policy semantics on LRN-E020-C, LRN-E020-L, LRN-E021 and existing action interfaces."},
+    {"order":5,"id":"001M-S05","name":"Assessment/model-governance hardening","scope":"Implement score standing/scorer lineage/shared-Assurance fences without inventing external score ingress."},
+    {"order":6,"id":"001M-S06","name":"Learning-effectiveness evaluation runtime","scope":"Implement LRN-E029/I113/I114 over shared Assurance/Analytics/Evidence infrastructure."},
+    {"order":7,"id":"001M-S07","name":"Standards/interoperability adapters","scope":"Materialize CASE/QTI/Caliper/CLR adapters as non-authoritative translation surfaces with provenance and fail-closed semantic admission."},
+    {"order":8,"id":"001M-S08","name":"Cumulative qualification","scope":"Run the applicable frozen 001D-001K contracts and regression suites on the exact changed implementation subject; preserve software qualification separately from psychometric/educational-effectiveness claims."}
+  ],
+  "exact_next_operation": "LEARNING-SYSTEM-REBUILD-001M — CONSTITUTION MATERIALIZATION + RUNTIME IMPLEMENTATION RESUME -> MATERIALIZE 124/116/31 ACTIVE LEARNING CONSTITUTION -> IMPLEMENT 001M-S01..S08 IN ORDER -> RUN EXACT-SUBJECT EXECUTABLE QUALIFICATION PER SLICE -> NO PASS TRANSFER"
+}
