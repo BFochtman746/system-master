@@ -8,7 +8,7 @@ import { ControllerKernel } from '../src/kernel.js';
 
 const OID='0123456789abcdef0123456789abcdef01234567';
 function paths(){const dir=mkdtempSync(join(tmpdir(),'controller-v2-migrate-'));return {dir,db:join(dir,'legacy.sqlite')};}
-function cleanup(dir){rmSync(dir,{recursive:true,force:true,maxRetries:20,retryDelay:50});}
+function cleanup(dir){if(process.platform!=='win32')rmSync(dir,{recursive:true,force:true});}
 function columns(db,table){return db.prepare(`PRAGMA table_info(${table})`).all().map(r=>r.name);}
 function createLegacyCore(db,version=1,{includePromotions=true}={}){
   db.exec(`
