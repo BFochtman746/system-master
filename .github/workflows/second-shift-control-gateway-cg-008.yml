@@ -56,7 +56,7 @@ jobs:
         run: |
           node .github/scripts/a01-control-plane.js validate
           node --check .github/scripts/a01-second-shift-supervisor-v2-qualify.js
-      - name: Verify standalone infrastructure topology classification and legacy stress route
+      - name: Verify standalone infrastructure topology and explicit A-01 stress routing
         shell: bash
         run: |
           node .github/scripts/validate-system-topology.js
@@ -64,8 +64,11 @@ jobs:
           const fs = require('fs');
           const workflow = fs.readFileSync('.github/workflows/second-shift-supervisor-v2-a01-windows-stress.yml', 'utf8');
           if (/runs-on\s*:\s*\[[^\]]*self-hosted/i.test(workflow)) throw new Error('legacy stress route still declares direct self-hosted runner');
+          if (/^\s*push\s*:/m.test(workflow)) throw new Error('A-01 supervisor stress route must not be automatically triggered by repository push');
           if (!workflow.includes('uses: ./.github/workflows/a01-control-plane-gateway.yml')) throw new Error('legacy stress route does not use canonical A-01 gateway');
           if (!workflow.includes('qualification_id: SECOND-SHIFT-SUPERVISOR-V2-A01-STRESS')) throw new Error('legacy route qualification identity mismatch');
+          if (!workflow.includes('subject_sha: ${{ inputs.subject_sha }}')) throw new Error('stress route does not require exact explicit subject input');
+          if (!workflow.includes('origin_ref: ${{ inputs.origin_ref }}')) throw new Error('stress route does not require explicit owning ref input');
           const registry = JSON.parse(fs.readFileSync('qualification/a01/registry.json', 'utf8'));
           const entry = registry.qualifications['SECOND-SHIFT-SUPERVISOR-V2-A01-STRESS'];
           if (!entry) throw new Error('Second Shift A-01 qualification missing from registry');

@@ -2,18 +2,16 @@ name: Second Shift Supervisor V2 A-01 Windows Stress
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - reliability/second-shift-controller-v2-20260911
-    paths:
-      - 'tools/second_shift_supervisor_v2.py'
-      - 'tests/test_second_shift_supervisor_v2.py'
-      - 'tests/run_second_shift_supervisor_v2_optimized.py'
-      - 'control-gateway/python/a01_supervisor_adapter.py'
-      - 'tests/test_control_gateway_a01_supervisor_adapter.py'
-      - '.github/scripts/a01-second-shift-supervisor-v2-qualify.js'
-      - 'qualification/a01/registry.json'
-      - '.github/workflows/second-shift-supervisor-v2-a01-windows-stress.yml'
+    inputs:
+      subject_sha:
+        description: Exact Control Gateway subject SHA admitted for A-01 qualification
+        required: true
+        type: string
+      origin_ref:
+        description: Owning Control Gateway branch/ref
+        required: true
+        default: second-shift-control-gateway/cg-008-supervisor-integration
+        type: string
 
 permissions:
   contents: read
@@ -26,8 +24,8 @@ jobs:
     with:
       qualification_id: SECOND-SHIFT-SUPERVISOR-V2-A01-STRESS
       workstream_id: SECOND-SHIFT-CONTROL-GATEWAY
-      subject_sha: ${{ github.sha }}
-      origin_ref: ${{ github.ref }}
+      subject_sha: ${{ inputs.subject_sha }}
+      origin_ref: ${{ inputs.origin_ref }}
       resume_on_pass: 'Bind the exact A-01-qualified supervisor subject back into the Control Gateway qualification ledger; do not production-activate automatically.'
       resume_on_failure: 'Preserve exact A-01 evidence, fail closed, repair the admitted supervisor boundary, and rerun the minimum sufficient qualification.'
       notification_target: originating-workstream
