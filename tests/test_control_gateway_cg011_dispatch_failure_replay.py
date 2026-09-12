@@ -158,6 +158,69 @@ class CG011DispatchFailureReplayTests(unittest.TestCase):
         ).fetchone()["n"]
         self.assertEqual((retry_events, circuit_events), (2, 1))
 
+    def test_new_failure_after_external_dispatch_ack_fails_closed_without_reopening(self):
+        self.store.mark_dispatched(
+            self.claim["dispatch_id"],
+            "RUN-1",
+            now=IN_SHIFT + dt.timedelta(seconds=1),
+        )
+        with self.assertRaisesRegex(Conflict, "non-retryable"):
+            self.store.dispatch_failed(
+                self.claim["dispatch_id"],
+                "late transport timeout",
+                retry_budget=3,
+                now=IN_SHIFT + dt.timedelta(seconds=2),
+                failure_id="LATE-FAILURE-AFTER-DISPATCH",
+            )
+        row = self.store.conn.execute(
+            "SELECT state,attempt,external_run_id FROM dispatch_outbox WHERE dispatch_id=?",
+            (self.claim["dispatch_id"],),
+        ).fetchone()
+        self.assertEqual((row["state"], row["attempt"], row["external_run_id"]), ("DISPATCHED", 1, "RUN-1"))
+        self.assertEqual(self.store.pending_dispatches(IN_SHIFT + dt.timedelta(hours=1)), [])
+
+    def test_new_failure_after_cancelled_dispatch_fails_closed_without_resurrection(self):
+        self.scheduler.request_cancel("D-A", "operator cancel", now=IN_SHIFT + dt.timedelta(seconds=1))
+        row = self.store.conn.execute(
+            "SELECT state FROM dispatch_outbox WHERE dispatch_id=?", (self.claim["dispatch_id"],)
+        ).fetchone()
+        self.assertEqual(row["state"], "CANCELLED")
+        with self.assertRaisesRegex(Conflict, "non-retryable"):
+            self.store.dispatch_failed(
+                self.claim["dispatch_id"],
+                "late transport timeout",
+                retry_budget=3,
+                now=IN_SHIFT + dt.timedelta(seconds=2),
+                failure_id="LATE-FAILURE-AFTER-CANCEL",
+            )
+        row = self.store.conn.execute(
+            "SELECT state,attempt FROM dispatch_outbox WHERE dispatch_id=?", (self.claim["dispatch_id"],)
+        ).fetchone()
+        self.assertEqual((row["state"], row["attempt"]), ("CANCELLED", 0))
+        self.assertEqual(self.store.pending_dispatches(IN_SHIFT + dt.timedelta(hours=1)), [])
+
+    def test_new_failure_after_circuit_open_cannot_spend_beyond_budget(self):
+        for index, seconds in enumerate((1, 20, 40), start=1):
+            self.store.dispatch_failed(
+                self.claim["dispatch_id"],
+                "transport timeout",
+                retry_budget=3,
+                now=IN_SHIFT + dt.timedelta(seconds=seconds),
+                failure_id=f"CIRCUIT-FAILURE-{index}",
+            )
+        with self.assertRaisesRegex(Conflict, "non-retryable"):
+            self.store.dispatch_failed(
+                self.claim["dispatch_id"],
+                "another late failure",
+                retry_budget=3,
+                now=IN_SHIFT + dt.timedelta(minutes=10),
+                failure_id="CIRCUIT-FAILURE-4",
+            )
+        row = self.store.conn.execute(
+            "SELECT state,attempt FROM dispatch_outbox WHERE dispatch_id=?", (self.claim["dispatch_id"],)
+        ).fetchone()
+        self.assertEqual((row["state"], row["attempt"]), ("CIRCUIT_OPEN", 3))
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
