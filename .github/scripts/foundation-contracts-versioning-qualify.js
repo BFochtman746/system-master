@@ -1,0 +1,25 @@
+'use strict';
+
+const fs=require('fs'), os=require('os'), path=require('path'), crypto=require('crypto');
+const {spawnSync}=require('child_process');
+const root=process.env.GITHUB_WORKSPACE||process.cwd();
+const evidence=fs.mkdtempSync(path.join(process.env.RUNNER_TEMP||os.tmpdir(),'foundation-contracts-versioning-'));
+const pkg=path.join(root,'system-master','foundation-spine','contracts');
+const classes=path.join(evidence,'classes'); fs.mkdirSync(classes,{recursive:true});
+function run(cmd,args,file){const r=spawnSync(cmd,args,{cwd:root,encoding:'utf8',shell:false,windowsHide:true,env:process.env});const out=(r.stdout||'')+(r.stderr||'');if(file)fs.writeFileSync(path.join(evidence,file),out,'utf8');if(r.error||r.status!==0)throw new Error(`${cmd} ${args.join(' ')} failed: ${r.error?r.error.message:`exit ${r.status}`}\n${out}`);return out.trim();}
+function java(dir){let out=[];for(const e of fs.readdirSync(dir,{withFileTypes:true})){const p=path.join(dir,e.name);if(e.isDirectory())out=out.concat(java(p));else if(e.isFile()&&e.name.endsWith('.java'))out.push(p);}return out.sort();}
+function shaFile(p){return crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');}
+function trace(){const t=JSON.parse(fs.readFileSync(path.join(pkg,'CONTRACTS-BUILD-TRACEABILITY.json'),'utf8'));if(t.package_id!=='CORE-CONTRACTS-VERSIONING-BUILD-001')throw new Error('package id mismatch');if(t.base_owner_subject!=='173a0c222f245c50e19759775f7dee4a59773afb')throw new Error('base owner mismatch');if(t.isolated_case_denominator!==48||t.unaccounted_requirement_count!==0)throw new Error('denominator/accounting mismatch');if(!Array.isArray(t.invariants)||t.invariants.length!==30)throw new Error('invariant count mismatch');const ids=new Set(t.invariants.map(x=>x.id));if(ids.size!==30)throw new Error('duplicate invariant ids');for(const row of t.invariants)for(const f of ['requirement','implementation','durable_state','interface_contract','tests','evidence','environment','blocker'])if(row[f]===undefined||row[f]===null)throw new Error(`${row.id} missing ${f}`);fs.writeFileSync(path.join(evidence,'traceability.json'),JSON.stringify({package_id:t.package_id,base_owner_subject:t.base_owner_subject,invariant_count:t.invariants.length,unaccounted_requirement_count:t.unaccounted_requirement_count,isolated_case_denominator:t.isolated_case_denominator,external_evidence_fences:t.external_evidence_fences,result:'PASS'},null,2)+'\n');}
+try{
+ const subject=run('git',['rev-parse','HEAD']); run('git',['merge-base','--is-ancestor','173a0c222f245c50e19759775f7dee4a59773afb','HEAD']);
+ fs.writeFileSync(path.join(evidence,'subject.txt'),[`component=Foundation Contracts Versioning`,`commit=${subject}`,`base_owner_subject=173a0c222f245c50e19759775f7dee4a59773afb`,`qualification_class=HOSTED_PORTABLE_REFERENCE_CONTRACT_AUTHORITY_MECHANICS`,`a01_native_production=NOT_CLAIMED`,`real_schema_validator_semantics=ADAPTER_SPECIFIC_NOT_CLAIMED`,`distributed_network_filesystem_writer_safety=NOT_CLAIMED`,''].join('\n'));
+ run('java',['-version'],'java-version.txt'); run('javac',['-version'],'javac-version.txt'); trace();
+ const sources=java(path.join(pkg,'src','main','java')), tests=java(path.join(pkg,'src','test','java')), all=[...sources,...tests];
+ fs.writeFileSync(path.join(evidence,'source-digests.json'),JSON.stringify(Object.fromEntries(all.map(f=>[path.relative(root,f),shaFile(f)])),null,2)+'\n');
+ run('javac',['--release','21','-Xlint:all,-try','-Werror','-d',classes,...all],'compile.txt');
+ const isolated=run('java',['-cp',classes,'org.systemmaster.foundation.contracts.ContractAuthorityQualificationTest'],'contracts-isolated.txt');if(!isolated.includes('PASS FOUNDATION_CONTRACTS_VERSIONING cases=48'))throw new Error('48-case predicate missing');
+ const identity=run('node',['.github/scripts/foundation-identity-delegation-qualify.js'],'foundation-root-identity-cumulative.txt');if(!identity.includes('PASS FOUNDATION_IDENTITY_DELEGATION_HOSTED_PORTABLE')||!identity.includes('PASS FOUNDATION_SYSTEM_ROOT_PLUS_IDENTITY_OWP001_OWP002_DELEGATION_CUMULATIVE'))throw new Error('Root/Identity cumulative predicate missing');
+ const donor=run('node',['.github/scripts/fwp012-qualify.js'],'fwp012-donor-regression.txt');if(!donor.includes('PASS F-WP-012 tests=47 requirements=4'))throw new Error('F-WP-012 donor regression missing');
+ fs.writeFileSync(path.join(evidence,'result.txt'),'result=PASS\nisolated_cases=48\ncontracts_invariants=30\nunaccounted=0\nroot_identity_cumulative=PASS\nfwp012_donor_regression=PASS\na01_native_production=NOT_CLAIMED\n');
+ console.log(isolated); console.log('PASS FOUNDATION_CONTRACTS_VERSIONING_HOSTED_PORTABLE'); console.log('PASS FOUNDATION_ROOT_IDENTITY_CONTRACTS_CUMULATIVE'); console.log(`evidence_dir=${evidence}`);
+}catch(e){fs.writeFileSync(path.join(evidence,'result.txt'),'result=FAIL_OR_INCOMPLETE\n');fs.writeFileSync(path.join(evidence,'failure.txt'),`${e&&e.stack?e.stack:String(e)}\n`);console.error(e&&e.stack?e.stack:e);console.error(`evidence_dir=${evidence}`);process.exit(1);}

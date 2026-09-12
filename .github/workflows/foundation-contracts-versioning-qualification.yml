@@ -1,15 +1,12 @@
-name: Foundation Identity Through Contracts Qualification
+name: Foundation Contracts Versioning Qualification
 
 on:
   pull_request:
     branches:
       - system-master/control-v2
     paths:
-      - 'system-master/foundation-spine/identity/**'
       - 'system-master/foundation-spine/contracts/**'
-      - '.github/scripts/foundation-identity-delegation-qualify.js'
       - '.github/scripts/foundation-contracts-versioning-qualify.js'
-      - '.github/workflows/foundation-identity-delegation-qualification.yml'
       - '.github/workflows/foundation-contracts-versioning-qualification.yml'
   workflow_dispatch:
 
@@ -17,9 +14,9 @@ permissions:
   contents: read
 
 jobs:
-  qualify-foundation-through-contracts:
+  qualify-contracts-versioning:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 25
     steps:
       - name: Checkout exact candidate with full history
         uses: actions/checkout@v4
@@ -32,14 +29,14 @@ jobs:
           distribution: temurin
           java-version: '21'
 
-      - name: Qualify Contracts Versioning plus cumulative Root and Identity baseline
+      - name: Qualify Contracts Versioning and cumulative Foundation baseline
         run: node .github/scripts/foundation-contracts-versioning-qualify.js
 
-      - name: Preserve Contracts Versioning evidence
+      - name: Preserve qualification evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: foundation-through-contracts-evidence-${{ github.run_id }}
+          name: foundation-contracts-versioning-evidence-${{ github.run_id }}
           path: ${{ runner.temp }}/foundation-contracts-versioning-*/
           if-no-files-found: error
           retention-days: 30
