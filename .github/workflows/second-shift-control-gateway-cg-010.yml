@@ -1,0 +1,75 @@
+name: Second Shift Control Gateway CG-009 Closure Repair Qualification
+
+on:
+  push:
+    branches:
+      - second-shift-control-gateway/cg-010-night-scheduler-retirement
+    paths:
+      - 'control-gateway/**'
+      - '.github/workflows/second-shift-control-gateway-cg-010.yml'
+      - 'tools/second_shift_supervisor_v2.py'
+      - 'tests/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  qualify:
+    name: CG-009 Closure Repair / Node ${{ matrix.node }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [22, 24]
+    env:
+      CG009_REPAIR_LIVE_REF: control-gateway-state/active-work/second-shift-control-gateway-dev
+      CG009_REPAIR_EXPECTED_PUBLICATION_COMMIT: ccb284052d8eeb193ae2208f2e9deb2a414b7fb7
+      CG009_REPAIR_EXPECTED_PACKET_DIGEST: eebcfe535fc0b4f472b92fc41ef1c53b9c4480a468acc3ed0935429651b5b9aa
+      CG009_REPAIR_EXPECTED_AUTHORITY_SUBJECT: c0ff180607624c27a6b5158e7c0f3ee00e08fddf
+      CG009_REPAIR_EXPECTED_WORK_REF: second-shift-control-gateway/cg-010-night-scheduler-retirement
+      CG009_REPAIR_EXPECTED_OPERATION: SECOND-SHIFT-CONTROL-GATEWAY-CG-010
+      CG009_REPAIR_EXPECTED_PREDECESSOR_RECEIPT: SECOND-SHIFT-CONTROL-GATEWAY-CG-009-HOST-QUALIFICATION-34672012219
+      CG009_REPAIR_GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout exact repair subject
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: ${{ matrix.node }}
+          package-manager-cache: false
+      - name: Show runtimes
+        run: |
+          node --version
+          python --version
+      - name: Validate frozen A-01 routing and standalone topology
+        run: |
+          node .github/scripts/a01-control-plane.js validate
+          node .github/scripts/validate-system-topology.js
+      - name: Run Control Gateway tests including live predecessor-repair authority
+        working-directory: control-gateway
+        run: node --test
+      - name: Compile CG-009 closure repair
+        run: |
+          python -m py_compile \
+            tools/second_shift_supervisor_v2.py \
+            control-gateway/python/a01_supervisor_adapter.py \
+            control-gateway/python/a01_supervisor_coordination.py \
+            control-gateway/python/a01_supervisor_coordination_strict.py \
+            tests/test_control_gateway_a01_supervisor_adapter.py \
+            tests/test_control_gateway_a01_supervisor_coordination.py \
+            tests/test_control_gateway_a01_supervisor_coordination_authority.py \
+            tests/run_second_shift_supervisor_v2_optimized.py
+      - name: Run CG-008 gateway-to-supervisor regression
+        run: python tests/test_control_gateway_a01_supervisor_adapter.py
+      - name: Run CG-009 dependency DAG concurrency cancellation suite
+        run: python tests/test_control_gateway_a01_supervisor_coordination.py
+      - name: Run CG-009 authority-closure regression suite
+        run: python tests/test_control_gateway_a01_supervisor_coordination_authority.py
+      - name: Run preserved supervisor crash and concurrency stress
+        run: python tests/run_second_shift_supervisor_v2_optimized.py
