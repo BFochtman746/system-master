@@ -17,12 +17,22 @@ def _latest_correct(attempts, attempt_ids):
     return max(values, key=lambda a: int(a.get("submitted_at", 0)), default=None)
 
 
-def _s03_bound_compute_projection(self, learner_id: str, course_id: str, skill_id: str, now: int) -> Dict[str, Any]:
+def _s03_bound_compute_projection(
+    self,
+    learner_id: str,
+    course_id: str,
+    skill_id: str,
+    *,
+    now: int,
+    persist: bool = False,
+) -> Dict[str, Any]:
     """Adaptive projection view bound to the qualified S03 mastery evaluator.
 
     Adaptation may add freshness/revalidation standing after S03 evaluates evidence,
     but it may not redefine evidence, independence, retention, transfer, assistance,
-    uncertainty, coverage, or historical as-of semantics.
+    uncertainty, coverage, or historical as-of semantics. The existing adaptive
+    runtime persist contract is preserved: persistence stores only this S03-derived
+    projection and does not restore the copied adaptive mastery calculation.
     """
     all_attempts = validated_attempts_for_skill(self.repo, learner_id, course_id, skill_id)
     as_of = int(now)
@@ -99,6 +109,9 @@ def _s03_bound_compute_projection(self, learner_id: str, course_id: str, skill_i
         "projection_as_of": as_of,
         "future_attempt_ids_excluded": future_attempt_ids,
     })
+    if persist:
+        self.repo.append_projection(learner_id, course_id, skill_id, body)
+        self.repo.emit("MasteryChanged", f"{learner_id}:{course_id}:{skill_id}", body)
     return body
 
 
