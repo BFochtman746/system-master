@@ -2,46 +2,69 @@
   "owner_system_id": "BOOK",
   "owner_path": "SYSTEM_MASTER/BOOK",
   "control_ref": "book-system/control-v1",
-  "last_known_control_head": "e2a23e8b1f076e3cd576c11e036e40eaf8a5ce2f",
+  "last_known_control_head": "27fe9a3621c92e414874ce229341e58e71b76375",
   "program_job_lock": "governance/SYSTEM-PROGRAM-JOB-LOCK-001.json",
   "system_completion_status": "governance/SYSTEM-COMPLETION-STATUS-001.json",
-  "delegation_epoch": 32,
+  "delegation_epoch": 33,
   "active_delegations": [
     {
-      "delegation_id": "SECOND-SHIFT-BOOK-WORKFLOW-SCHEDULER-EXECUTION-RUNTIME-001",
+      "delegation_id": "SECOND-SHIFT-BOOK-POST-SCHEDULER-OPEN-SEAM-CENSUS-001",
       "owner_path": "SYSTEM_MASTER/BOOK",
-      "objective_id": "BOOK-WORKFLOW-SCHEDULER-EXECUTION-RUNTIME-001",
+      "objective_id": "BOOK-POST-SCHEDULER-OPEN-SEAM-CENSUS-001",
       "obligation_id": "BOOK-PROSE-PHASE-2-ORCHESTRATOR-CLOSURE-CENSUS-001",
       "active_prose_execution_owner": null,
       "state": "READY",
-      "priority": "BOOK_OWNER_DEPENDENCY_VALID_AFTER_DURABLE_PERSISTENCE",
+      "priority": "BOOK_OWNER_POST_SCHEDULER_DEPENDENCY_RECONCILIATION",
       "valid_for_control_ref": "book-system/control-v1",
-      "valid_for_control_head": "e2a23e8b1f076e3cd576c11e036e40eaf8a5ce2f",
-      "created_at": "2026-09-11T16:59:00-04:00",
-      "last_revalidated_at": "2026-09-11T16:59:00-04:00",
-      "parent_checkpoint": "qualification/book-system/phase3a/BOOK-POST-DURABLE-PERSISTENCE-OPEN-SEAM-CENSUS-001.json",
-      "classification": "BOOK_OWNED_COORDINATION_SCHEDULER_EXECUTION_RUNTIME",
-      "completion_delta": "Implement the missing Book-owned scheduler/dispatch coordination seam over already-qualified plan, routing, concurrency, retry/idempotency, cancellation/resume, evidence and durable-store contracts without acquiring specialist semantic authority or canonical Book mutation authority.",
-      "stop_condition": "Scheduler execution runtime has fresh exact-subject qualification proving prerequisite enforcement, bounded parallelism, serial/non-idempotent withholding, stale-binding rejection, cancel/resume, worker-failure evidence and zero canonical Book effect; otherwise preserve the exact blocker.",
+      "valid_for_control_head": "27fe9a3621c92e414874ce229341e58e71b76375",
+      "created_at": "2026-09-11T20:20:00-04:00",
+      "last_revalidated_at": "2026-09-11T20:20:00-04:00",
+      "parent_checkpoint": "qualification/book-system/phase3a/BOOK-WORKFLOW-SCHEDULER-EXECUTION-RUNTIME-CLOSURE-RECEIPT-001.json",
+      "classification": "BOOK_OWNED_POST_SCHEDULER_OPEN_SEAM_CENSUS",
+      "completion_delta": "Re-read exact live Book owner state after scheduler closure, classify only genuinely open Book-owned seams, and bind at most one dependency-valid successor without replaying Phase 2, Context Compiler, durable persistence, scheduler qualification, or retired Prose work.",
+      "stop_condition": "One genuinely open dependency-valid Book-owned successor is proven from current authority and exact live owner evidence, or the exact external/private/A-01/human/native blocker is preserved without manufacturing executable work.",
       "allowed_work": [
-        "consume existing Book execution-plan and concurrency eligibility decisions",
-        "dispatch only registered callable specialist service tasks after exact prerequisite and authority checks",
-        "use existing retry/idempotency/reconciliation and durable checkpoint contracts",
-        "emit Book-owned coordination evidence and preserve zero canonical effect"
+        "inspect exact current Book owner head and current authority",
+        "classify remaining Book-owned execution/integration seams against existing exact evidence",
+        "distinguish machine-resolvable Book work from external provider, private evaluator, A-01, author, native, publication and production authority",
+        "bind at most one demonstrated Book successor"
       ],
       "forbidden_authority": [
         "do not create or reactivate PROSE work",
-        "do not route Book work to Documents or take Documents semantics",
-        "do not execute Book canonical admission or author decisions",
-        "do not dispatch authority-wait, blocked, isolation-unsatisfied or Book-admission tasks",
-        "do not infer provider success, A-01, native, publication or production authority",
+        "do not route completed-Prose integration to Documents",
+        "do not replay Phase 2, Context Compiler, durable persistence or scheduler qualification",
+        "do not execute Book canonical admission or synthesize author decisions",
+        "do not infer provider, A-01, native, publication or production success",
         "do not declare BOOK complete"
       ],
-      "on_pass": "Retire this scheduler delegation with exact evidence, re-read live Book head, and bind at most one demonstrated successor.",
-      "on_failure": "Preserve the exact scheduler/runtime blocker and do not manufacture provider or canonical-effect success."
+      "on_pass": "Retire this census with exact evidence and bind exactly one dependency-valid Book successor if one exists under current authority.",
+      "on_blocked": "Preserve the exact blocker and bind no unauthorized mutation successor."
     }
   ],
   "retired_delegations": [
+    {
+      "delegation_id": "SECOND-SHIFT-BOOK-WORKFLOW-SCHEDULER-EXECUTION-RUNTIME-001",
+      "state": "COMPLETED__EXACT_SUBJECT_HOSTED_PASS__SUPERSEDED_BY_POST_SCHEDULER_OPEN_SEAM_CENSUS",
+      "completion_subject_sha": "27fe9a3621c92e414874ce229341e58e71b76375",
+      "source_blob_sha": "e9d7210463c3547cf0fc451b733f928967211eb1",
+      "test_blob_sha": "23812ee310a3bd9b8f6410510f0a745efceb6ee6",
+      "workflow_blob_sha": "dae6a2062feadd28ce7a06cbe352b687f06e2303",
+      "hosted_run_id": 34654507158,
+      "hosted_artifact_id": 10284893217,
+      "hosted_artifact_sha256": "27011ca48120808ae66d0c243893bcb39fc01546c472e7bbe84264a524a1a0b7",
+      "cases_passed": 39,
+      "cases_planned": 39,
+      "max_parallel_workers_observed": 2,
+      "canonical_effect": false,
+      "control_plane_run_id": 34654507134,
+      "completion_evidence": "qualification/book-system/phase3a/BOOK-WORKFLOW-SCHEDULER-EXECUTION-RUNTIME-HOSTED-QUALIFICATION-001.json",
+      "closure_receipt": "qualification/book-system/phase3a/BOOK-WORKFLOW-SCHEDULER-EXECUTION-RUNTIME-CLOSURE-RECEIPT-001.json",
+      "closure_receipt_commit": "635f9f23566c4bccc9eef878d8292b4c98c632e8",
+      "selected_successor": "SECOND-SHIFT-BOOK-POST-SCHEDULER-OPEN-SEAM-CENSUS-001",
+      "history_preserved": true,
+      "prose_execution_created": false,
+      "book_completion_claimed": false
+    },
     {
       "delegation_id": "SECOND-SHIFT-BOOK-POST-DURABLE-PERSISTENCE-OPEN-SEAM-CENSUS-001",
       "state": "COMPLETED__SUPERSEDED_BY_BOOK_WORKFLOW_SCHEDULER_EXECUTION_RUNTIME_001",
@@ -97,7 +120,12 @@
     "blob_sha": "f6eb5ec737a2231161c0ff732742e38bacf18aef",
     "standing": "IMMUTABLE_GIT_HISTORY_PRESERVED"
   },
+  "prior_epoch_snapshot": {
+    "delegation_epoch": 32,
+    "blob_sha": "8630db0e4360f312b8cd79c532a08b42d07eac69",
+    "standing": "IMMUTABLE_GIT_HISTORY_PRESERVED"
+  },
   "owner_revalidation_required": false,
-  "reason": "Post-durable census on exact Book owner head e2a23e8b proved Phase 2, Context Compiler and durable persistence already closed and Book admission A-01 blocked. The current concurrency module explicitly classifies eligibility while forbidding scheduler/dispatch authority, proving BOOK-WORKFLOW-SCHEDULER-EXECUTION-RUNTIME-001 is the first dependency-valid machine-resolvable Book-owned seam. No Prose work is reopened and no completed PASS is transferred.",
+  "reason": "Scheduler exact subject 27fe9a3621c92e414874ce229341e58e71b76375 has fresh hosted 39/39 PASS, exact source/test/workflow blob identities, artifact digest, successful control-plane enforcement and zero canonical Book effect. The stale epoch-32 scheduler delegation bound to predecessor head e2a23e8b is retired without replay. The only bound successor is a non-mutating post-scheduler open-seam census that must re-read live Book authority before selecting further work. No Prose lane is reopened and BOOK remains incomplete.",
   "empty_is_valid": false
 }
