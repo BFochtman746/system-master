@@ -1,0 +1,68 @@
+{
+  "state_id": "BOOK-SYSTEM-RECONCILED-STATE-043",
+  "effective_date": "2026-09-12",
+  "supersedes_for_current_parent_control": "BOOK-SYSTEM-RECONCILED-STATE-042",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "standing": "BOOK_INCOMPLETE__B00_B01_FROZEN__B02_A_COMPLETE__B02_B_ANALYSIS_READY__PROSE_RETIRED",
+  "control_record": "qualification/book-system/BOOK-SYSTEM-CONTROL-RECORD-013.json",
+  "reconstruction_blueprint": "qualification/book-system/reconstruction/BOOK-SYSTEM-RECONSTRUCTION-BLUEPRINT-001.md",
+  "topology_authority": "governance/SYSTEM-TOPOLOGY-005.json on canonical main",
+  "architecture_decision": "governance/ADR-0005-PROSE-TERMINAL-RETIREMENT-BOOK-INTEGRATION.md",
+  "program_job_lock": "governance/SYSTEM-PROGRAM-JOB-LOCK-001.json",
+  "completion_authority": "governance/SYSTEM-COMPLETION-STATUS-001.json",
+  "completion_truth": {
+    "BOOK": "INCOMPLETE",
+    "PROSE": "COMPLETE_RETIRED_TERMINAL",
+    "B00": "FROZEN",
+    "B01": "FROZEN",
+    "B02": "OPEN",
+    "B02_A": "COMPLETE_RECOVER_INVENTORY_ONLY",
+    "rule": "B02-A reached unaccounted requirements = 0 and classified all recovered behavior. This admits B02-B analysis only; it does not claim B02 installation, reachability, end-to-end testing, qualification, calibration or completion."
+  },
+  "b02_a_closure": {
+    "record": "qualification/book-system/reconstruction/BOOK-RECONSTRUCTION-B02-A-SOURCE-INTAKE-EXISTING-BOOK-RECOVERY-INVENTORY-001.md",
+    "atomic_requirements": 50,
+    "unaccounted_requirements": 0,
+    "all_recovered_behavior_classified": true,
+    "key_truth": {
+      "semantic_recovery_engine": "BOOK-BRANCH-BUILT__NOT_MAIN_INSTALLED__NOT_CURRENTLY_ROUTED",
+      "native_pdf_docx_ocr_front_door": "EXTERNAL-REQUIRED",
+      "recovery_specific_governed_admission": "DESIGNED-NOT-INSTALLED",
+      "historical_prose_literary_material": "PROVENANCE_ONLY__NO_ACTIVE_PROSE_DOMAIN"
+    }
+  },
+  "current_owner_objective": {
+    "objective_id": "BOOK-RECONSTRUCTION-B02-B",
+    "state": "READY",
+    "domain": "SOURCE INTAKE & EXISTING-BOOK RECOVERY",
+    "stage": "ANALYZE",
+    "scope": "Analyze the complete B02-A trace for gaps, duplicates, weak implementation, incorrect placement, stale assumptions and unresolved ownership/interface boundaries. Establish the minimum dependency-valid continuation required before research/adjudication/design, without implementing B02."
+  },
+  "analysis_questions": [
+    "What is the minimum lossless provider-to-Book normalized source contract for native PDF/DOCX/OCR intake?",
+    "Which existing semantic-recovery behaviors should be kept as-is versus refactored, and why?",
+    "What Book-owned capability route should invoke recovery without duplicating or bypassing frozen B01 execution authority?",
+    "What recovery-specific adapter is required to bind recovered manuscript/chapter/scene candidates to frozen B00 admission while preserving explicit author ratification?",
+    "Which exact per-unit digest/locator evidence must exist before structural units may be admitted?",
+    "Which historical Literary/Prose concepts are useful provenance or migration inputs and which must remain retired residue?",
+    "Which evidence gaps require targeted external research before adjudication or design?"
+  ],
+  "freeze_invariants": {
+    "b00_freeze_record": "qualification/book-system/reconstruction/BOOK-RECONSTRUCTION-B00-G1-CONTROL-FREEZE-001.md",
+    "b01_freeze_record": "qualification/book-system/reconstruction/BOOK-RECONSTRUCTION-B01-F-CONTROL-FREEZE-001.md",
+    "reopen_rule": "Only a genuine contradiction discovered by B02 may reopen the exact affected frozen B00/B01 scope, with fresh cumulative evidence required."
+  },
+  "authority_fences": {
+    "historical_prose_is_provenance_only": true,
+    "prose_active_owner_path": null,
+    "prose_execution_lane": null,
+    "prose_repair_lane": null,
+    "prose_qualification_lane": null,
+    "prose_research_domain": null,
+    "prose_telemetry_lane": null,
+    "book_admission_is_only_canonical_effect_path": true,
+    "author_final_creative_semantic_authority": true,
+    "rights_private_native_external_publication_production_a01_standing_must_be_real": true
+  },
+  "next_dependency_valid_action": "Execute BOOK-RECONSTRUCTION-B02-B ANALYZE only. Do not design or implement. On clean analysis close, bind exactly one dependency-valid continuation required by the evidence, including targeted research first if material external evidence can change the design."
+}
