@@ -1,0 +1,27 @@
+name: Learning 001M-S02 Qualification
+
+on:
+  push:
+    branches:
+      - learning/system-rebuild-001m-s02-learner-model-srl-runtime-20260912
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run S02 isolated and cumulative qualification
+        run: python .github/scripts/learning-system-rebuild-001m-s02-qualify.py

@@ -1,0 +1,74 @@
+{
+  "operation": "LEARNING-SYSTEM-REBUILD-001M-S02",
+  "title": "Learner Model + Self-Regulated Learning Runtime",
+  "status": "EXECUTABLE_QUALIFICATION_OBLIGATIONS_FROZEN__NO_PASS_CLAIM_YET",
+  "parent": {
+    "branch": "learning/system-rebuild-001m-s01-constitution-materialization-20260912",
+    "commit": "4e594a281d437ffa5632c90b9b660379e0147241",
+    "required_parent_standing": "001M-S01 QUALIFIED_AND_FROZEN / 36/36 EXECUTED PASS"
+  },
+  "runtime_target": {
+    "requirements": ["LRN-151", "LRN-152", "LRN-153"],
+    "interfaces": ["I111", "I112"],
+    "semantic_objects": ["LRN-E027", "LRN-E028"],
+    "implementation_root": "learning/lab/learning_lab",
+    "test_root": "learning/lab/tests"
+  },
+  "case_count": 48,
+  "cases": [
+    {"id":"T01","group":"lineage","obligation":"S02 descends from exact frozen S01 closure 4e594a281d437ffa5632c90b9b660379e0147241."},
+    {"id":"T02","group":"lineage","obligation":"The active 124/116/31 constitution remains unchanged by S02 runtime code."},
+    {"id":"T03","group":"lineage","obligation":"LRN-151, LRN-152 and LRN-153 remain Learning-owned and no earlier owner is replaced."},
+    {"id":"T04","group":"lineage","obligation":"I111 remains a read-only query and I112 remains the sole new public SRL mutation command."},
+    {"id":"T05","group":"lineage","obligation":"LRN-E027 remains a derived projection and LRN-E028 remains an append-oriented observation."},
+    {"id":"T06","group":"lineage","obligation":"Frozen 001D through 001L artifacts remain byte-identical."},
+
+    {"id":"T07","group":"srl_write","obligation":"I112 accepts only bounded SRL observation kinds PLAN, MONITOR, EVALUATE, STRATEGY_USE, HELP_REQUEST and BOUNDED_DECLARED_CONTEXT."},
+    {"id":"T08","group":"srl_write","obligation":"I112 requires a stable operation identity."},
+    {"id":"T09","group":"srl_write","obligation":"Same operation identity plus same semantic payload replays the same committed result without a duplicate observation."},
+    {"id":"T10","group":"srl_write","obligation":"Same operation identity plus different semantic payload fails deterministically."},
+    {"id":"T11","group":"srl_write","obligation":"Each new SRL observation is immutable historical state after commit."},
+    {"id":"T12","group":"srl_write","obligation":"A correction creates a successor observation and preserves the corrected observation unchanged."},
+    {"id":"T13","group":"srl_write","obligation":"A correction must reference an existing observation for the same learner."},
+    {"id":"T14","group":"srl_write","obligation":"Observation history is returned in deterministic append order."},
+    {"id":"T15","group":"srl_write","obligation":"SRL persistence survives repository restart."},
+    {"id":"T16","group":"srl_write","obligation":"I112 does not mutate mastery, retention, transfer, assessment or Curriculum truth."},
+
+    {"id":"T17","group":"privacy","obligation":"Automated inferred emotion is rejected as canonical SRL context."},
+    {"id":"T18","group":"privacy","obligation":"Mental-health diagnosis or risk classification is rejected as canonical SRL context."},
+    {"id":"T19","group":"privacy","obligation":"Personality typing is rejected as canonical SRL context."},
+    {"id":"T20","group":"privacy","obligation":"Protected or sensitive attribute profiling is rejected as default SRL context."},
+    {"id":"T21","group":"privacy","obligation":"Unrelated device, browsing, camera, voice or physiological telemetry is rejected as canonical learner truth."},
+    {"id":"T22","group":"privacy","obligation":"Missing bounded declared context is represented as unknown or absent and never as a negative trait."},
+
+    {"id":"T23","group":"learner_model","obligation":"I111 produces a versioned/as-of LearnerModelProjection without writing source truth."},
+    {"id":"T24","group":"learner_model","obligation":"Every projected claim carries an explicit standing from OBSERVED, DERIVED, INFERRED, UNKNOWN, STALE, CONTRADICTED or NOT_APPLICABLE."},
+    {"id":"T25","group":"learner_model","obligation":"No evidence produces UNKNOWN rather than zero competence."},
+    {"id":"T26","group":"learner_model","obligation":"Self-confidence or SRL self-report is never converted into competence or mastery."},
+    {"id":"T27","group":"learner_model","obligation":"AI-assisted success is not represented as independent capability unless owner-valid evidence says so."},
+    {"id":"T28","group":"learner_model","obligation":"Materially contradictory owner-valid source claims remain visible as CONTRADICTED rather than being silently averaged."},
+    {"id":"T29","group":"learner_model","obligation":"Stale owner-valid source state remains distinguishable from current state."},
+    {"id":"T30","group":"learner_model","obligation":"Projected claims preserve exact source references sufficient for provenance."},
+    {"id":"T31","group":"learner_model","obligation":"Identical exact source inputs, SRL history and policy version produce semantically identical projection output."},
+    {"id":"T32","group":"learner_model","obligation":"Source input ordering cannot change semantic projection output."},
+    {"id":"T33","group":"learner_model","obligation":"LearnerModelProjection may summarize SRL observations without rewriting their history."},
+    {"id":"T34","group":"learner_model","obligation":"LearnerModelProjection remains bounded to learning-purpose claims and does not become a general psychological dossier."},
+
+    {"id":"T35","group":"read_only","obligation":"Calling I111 does not add an SRL observation."},
+    {"id":"T36","group":"read_only","obligation":"Calling I111 does not add a mastery projection or attempt."},
+    {"id":"T37","group":"read_only","obligation":"Repeated I111 queries over unchanged inputs return the same semantic projection."},
+    {"id":"T38","group":"read_only","obligation":"I111 can operate when no SRL history exists and returns explicit unknown state rather than failing or fabricating."},
+
+    {"id":"T39","group":"failure_recovery","obligation":"Malformed observation kind fails without partial persistence."},
+    {"id":"T40","group":"failure_recovery","obligation":"Forbidden context fails without recording an idempotency success receipt."},
+    {"id":"T41","group":"failure_recovery","obligation":"Correction of another learner's observation fails without mutation."},
+    {"id":"T42","group":"failure_recovery","obligation":"Repository restart reconstructs committed SRL history from durable state rather than process memory."},
+
+    {"id":"T43","group":"cumulative","obligation":"The exact S01 36-case qualification continues to pass on S02 head."},
+    {"id":"T44","group":"cumulative","obligation":"The full existing learning/lab regression suite passes on the S02 head."},
+    {"id":"T45","group":"cumulative","obligation":"Existing mastery rule observation/completion/confidence does not directly establish mastery remains intact."},
+    {"id":"T46","group":"cumulative","obligation":"Existing Learning runtime persistence/idempotency behavior remains intact."},
+    {"id":"T47","group":"cumulative","obligation":"S02 introduces no authority for competency equivalence or external asynchronous score commit ingress."},
+    {"id":"T48","group":"cumulative","obligation":"S02 may be frozen only after isolated S02 tests and all required cumulative checks pass on the exact changed head."}
+  ]
+}
