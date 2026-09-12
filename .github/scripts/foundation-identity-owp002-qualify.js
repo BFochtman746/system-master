@@ -82,7 +82,7 @@ try {
     'component=Foundation Identity O-WP-002',
     `commit=${subject}`,
     'base_core_subject=4da156f9707c2f9aa31984d3fb958fd01e5b375b',
-    'qualification_class=HOSTED_PORTABLE_MECHANICS',
+    'qualification_class=HOSTED_PORTABLE_MECHANICS_PLUS_EVIDENCE_AUTHORITY_SEAM',
     'real_human_identity=NOT_CLAIMED',
     'external_provider_validity=NOT_CLAIMED',
     'production_persistence=NOT_CLAIMED_REFERENCE_ADAPTER_ONLY',
@@ -110,12 +110,16 @@ try {
   const qualification = run('java', ['-cp', classes, 'org.systemmaster.foundation.identity.ProofingEnrollmentQualificationTest'], { evidence: 'owp002-qualification.txt' });
   if (!qualification.includes('PASS FOUNDATION_IDENTITY_OWP002 cases=17')) throw new Error('O-WP-002 qualification completion predicate missing');
 
+  const evidenceAuthority = run('java', ['-cp', classes, 'org.systemmaster.foundation.identity.ProofingEvidenceAuthorityQualificationTest'], { evidence: 'owp002-evidence-authority.txt' });
+  if (!evidenceAuthority.includes('PASS FOUNDATION_IDENTITY_OWP002_EVIDENCE_AUTHORITY cases=6')) throw new Error('O-WP-002 evidence-authority predicate missing');
+
   const rootRegression = run('node', ['.github/scripts/foundation-system-root-qualify.js'], { evidence: 'system-root-cumulative-regression.txt' });
   if (!rootRegression.includes('PASS FOUNDATION_SYSTEM_ROOT_HOSTED')) throw new Error('System Root cumulative regression predicate missing');
 
   fs.writeFileSync(path.join(evidence, 'result.txt'), 'result=PASS\n');
   console.log(qualification);
-  console.log('PASS FOUNDATION_IDENTITY_OWP002_HOSTED_PORTABLE_MECHANICS');
+  console.log(evidenceAuthority);
+  console.log('PASS FOUNDATION_IDENTITY_OWP002_HOSTED_PORTABLE_MECHANICS_PLUS_EVIDENCE_AUTHORITY');
   console.log('PASS FOUNDATION_SYSTEM_ROOT_PLUS_IDENTITY_OWP001_OWP002_CUMULATIVE');
   console.log(`evidence_dir=${evidence}`);
 } catch (error) {
