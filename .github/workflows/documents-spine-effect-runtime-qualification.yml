@@ -38,7 +38,8 @@ jobs:
           set -euo pipefail
           ROOT='recovered/document/cr001-r4/source/01_CURRENT_DOCUMENT_PROCESSING_MODULE'
           cd "$ROOT"
-          java -cp build/classes org.systemmaster.tools.document.DocumentSpineEffectRuntimePortableTests | tee build/effect-runtime-isolated.txt
+          CLASSES="$(pwd)/build/classes"
+          java -cp "$CLASSES" org.systemmaster.tools.document.DocumentSpineEffectRuntimePortableTests | tee build/effect-runtime-isolated.txt
           grep -Fx 'DOCUMENT_SPINE_EFFECT_RUNTIME_PORTABLE_PASS REBUILD=48 MASTER=44' build/effect-runtime-isolated.txt
       - name: Cumulative portable regression
         shell: bash
@@ -46,13 +47,14 @@ jobs:
           set -euo pipefail
           ROOT='recovered/document/cr001-r4/source/01_CURRENT_DOCUMENT_PROCESSING_MODULE'
           cd "$ROOT"
+          CLASSES="$(pwd)/build/classes"
           : > build/cumulative-portable.txt
           while IFS= read -r file; do
             class="${file#src/test/java/}"
             class="${class%.java}"
             class="${class//\//.}"
             printf 'RUN %s\n' "$class" | tee -a build/cumulative-portable.txt
-            java -cp build/classes "$class" | tee -a build/cumulative-portable.txt
+            java -cp "$CLASSES" "$class" | tee -a build/cumulative-portable.txt
           done < <(find src/test/java -name '*PortableTests.java' -print | LC_ALL=C sort)
       - name: Preserve exact-subject receipt
         shell: bash
