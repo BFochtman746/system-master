@@ -1,0 +1,53 @@
+name: Book B03 E A01 Registry Refresh
+
+on:
+  push:
+    branches: [book-system/control-v1]
+    paths: ['.github/workflows/book-b03-e-a01-registry-refresh.yml']
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Register current Book A01 qualifiers only
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs');
+          const p='qualification/a01/registry.json';
+          const doc=JSON.parse(fs.readFileSync(p,'utf8'));
+          const additions={
+            'BOOK-SYSTEM-E2E-AUTHORITY-GUARDS-001': {
+              workstream_id:'BOOK-SYSTEM', gate_class:'focused', source:'subject', executable:'node',
+              args:['.github/scripts/a01-book-system-e2e-authority-guards-001.js'],
+              evidence_artifact:'book-system-e2e-authority-guards-001', overnight_eligible:false,
+              description:'Qualify the exact current Book System bounded E2E authority guards: strict active-governed-subject currentness around Author Decision Queue and mandatory non-empty exact parent admission around Export Freeze; reject stale historical author subjects and technical-only freeze; preserve conditional author-decision semantics; grant no author, provider, lifecycle, document, export-freeze, publication, promotion, or production authority. PASS is exact-SHA focused evidence only.'
+            },
+            'BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001': {
+              workstream_id:'BOOK-SYSTEM', gate_class:'consolidated', source:'subject', executable:'node',
+              args:['.github/scripts/a01-book-system-end-to-end-authoring-001.js'],
+              evidence_artifact:'book-system-end-to-end-authoring-001', overnight_eligible:false,
+              description:'Qualify the exact Book System end-to-end authoring composition subject through the unchanged 48-case synthetic matrix: exact predecessor binding; parent-owned provider admission; persistent Lifecycle ledger rebinding; Version/Rollback custody; strict current-subject author decisions; strict Export Freeze parent admission; stale artifact/provenance/rights/privacy rejection; export-freeze/publication separation; synthetic-only author/publication fixtures; no Book document engine; no provider self-admission; and zero qualification transfer. PASS is exact-SHA consolidated evidence only and grants no real author, publication, promotion, or production authority.'
+            }
+          };
+          let changed=0;
+          for (const [id,entry] of Object.entries(additions)) {
+            if (!doc.qualifications[id]) { doc.qualifications[id]=entry; changed++; }
+          }
+          if (!changed) throw new Error('BOOK_A01_QUALIFIERS_ALREADY_REGISTERED');
+          doc.registry_version=Number(doc.registry_version)+changed;
+          fs.writeFileSync(p,JSON.stringify(doc,null,2)+'\n');
+          NODE
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add qualification/a01/registry.json
+          test "$(git diff --cached --name-only)" = 'qualification/a01/registry.json'
+          git commit -m 'a01: register current Book B03 E qualification dependencies'
+          git push origin HEAD:book-system/control-v1
