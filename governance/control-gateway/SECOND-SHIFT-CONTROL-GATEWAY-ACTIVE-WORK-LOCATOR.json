@@ -1,0 +1,33 @@
+{
+  "protocol_version": "control-gateway.active-work-locator-recovery.v1",
+  "workstream_id": "SECOND-SHIFT-CONTROL-GATEWAY",
+  "mission_version": "SECOND-SHIFT-CONTROL-GATEWAY-CG-001/v1.0",
+  "status": "CURRENT_RECOVERY_LOCATOR",
+  "current_ref": "control-gateway-state/active-work/second-shift-control-gateway-dev-recovery-001",
+  "current_publication_commit_sha": "583caa2041c7ddbf6b262371427d80abb5a87bcc",
+  "current_publication_revision": 25,
+  "current_packet_digest": "085b5ad886fd2594bc3415c229fbbb5ed6cef150a8a93c6e04da5859ccad17a8",
+  "current_publication_digest": "5758df39c1655bec2f90e777f9e894abd8ff045d39108d46dd06967d1fab57c9",
+  "recovery_base": {
+    "revision": 24,
+    "commit_sha": "ccfab34389347f5d5d9d41f1ea0f950703ab2f3f",
+    "packet_digest": "d5e93ade758762d7e29ba9e2bbce2b0d5e62071676e0ca6686844c29385b0ed1",
+    "publication_digest": "0cb611ad8b3202cdd7e72620383bff705fc7d5b848d62d534b4f54e35b2c708e"
+  },
+  "quarantined_locator": {
+    "ref": "control-gateway-state/active-work/second-shift-control-gateway-dev",
+    "observed_head_sha": "0356887ac98b1a0fa992a2b42513f8b855bb1bd7",
+    "standing": "QUARANTINED_NONAUTHORITATIVE_AFTER_PUBLICATION_CHAIN_DEFECT",
+    "defect": "Revision 25 was finalized by a second Git commit after its revision mirror was first written. Its envelope predecessor remained r24 while the final Git parent became the intermediate revision-file commit, and its stored publication digest does not recompute from the stored envelope. Revision 26 therefore cannot provide a fully verified history through revision 25.",
+    "preserve_for_evidence": true
+  },
+  "recovery_rules": {
+    "force_ref_update_used": false,
+    "quarantined_ref_rewritten": false,
+    "history_deleted": false,
+    "recovery_ref_created_from_last_verified_revision": true,
+    "recovery_r25_single_parent_matches_envelope_predecessor": true,
+    "recovery_r25_digest_recomputed_with_repository_canonical_algorithm": true
+  },
+  "rule": "Fresh reconstruction must resolve this locator first, then verify the referenced publication envelope, immutable revision mirror, packet digest, publication digest, Git parent chain, current operation and live work branch. The quarantined ref is historical evidence only and must not be selected as current authority."
+}
