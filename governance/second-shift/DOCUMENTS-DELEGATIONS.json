@@ -2,10 +2,10 @@
   "owner_system_id": "DOCUMENTS",
   "owner_path": "SYSTEM_MASTER/DOCUMENTS",
   "control_ref": "documents/control-v1",
-  "last_known_control_head": "3e7c21045bf52ba3eee6b89a88e38f25542c0906",
+  "last_known_control_head": "3938e225ecf53478c09ac858ea38ad1027f372eb",
   "program_job_lock": "governance/SYSTEM-PROGRAM-JOB-LOCK-001.json",
   "system_completion_status": "governance/SYSTEM-COMPLETION-STATUS-001.json",
-  "delegation_epoch": 10,
+  "delegation_epoch": 11,
   "active_delegations": [
     {
       "delegation_id": "SECOND-SHIFT-DOCUMENTS-R4-CANONICAL-PAYLOAD-DEPOSIT-004",
@@ -16,9 +16,9 @@
       "priority": "DOCUMENTS_R4_BLOCKED_EXACT_PAYLOAD_CANDIDATE",
       "classification": "DOCUMENTS_R4_CANONICAL_TRANSPORT_RECONCILED__PAYLOAD_BYTES_NOT_YET_IN_GITHUB",
       "valid_for_control_ref": "documents/control-v1",
-      "valid_for_control_head": "3e7c21045bf52ba3eee6b89a88e38f25542c0906",
+      "valid_for_control_head": "3938e225ecf53478c09ac858ea38ad1027f372eb",
       "created_at": "2026-09-12T01:21:33-04:00",
-      "last_revalidated_at": "2026-09-12T01:24:13-04:00",
+      "last_revalidated_at": "2026-09-12T01:39:06-04:00",
       "completion_delta": "DOCUMENTS-R4-TRANSPORT-CONTRACT-RECONCILIATION-003 closed the prior 81/4fce versus 100/b6d0 transport ambiguity. Exact Library handoff and 225-row manifest were reverified; a deterministic carrier was built twice byte-identically as SHA-256 166f31ae9a6b2580ab14dc43af22fcd7fc6063817427289c8686d77f2cccd07d, 300832 bytes, five 65536-byte raw chunks (final chunk 38688 bytes). Contract, builder, fail-closed verifier, reconciled STAGING and admission workflow are on the live Documents control branch. GitHub-native source custody is still not claimed because the five exact payload chunks are not yet present in GitHub.",
       "blocker_evidence": "qualification/document-system/r4/DOCUMENTS-R4-TRANSPORT-CONTRACT-RECONCILIATION-003.json",
       "stop_condition": "All five contract-listed exact payload chunks are present in GitHub, re-read from GitHub, reconstructed to the exact canonical carrier and verified 225/225 before READY is armed; otherwise preserve the transport blocker and continue independent Documents-owned design/evidence work.",
@@ -39,39 +39,56 @@
       "on_failure": "Preserve exact chunk/carrier/source verification failure evidence, keep READY absent, repair only the demonstrated Documents transport/custody defect and continue independent safe Documents work."
     },
     {
-      "delegation_id": "SECOND-SHIFT-DOCUMENTS-SPINE-SECURE-FORENSIC-PREP-001",
+      "delegation_id": "SECOND-SHIFT-DOCUMENTS-SPINE-FORENSICS-FORENSIC-PREP-001",
       "owner_path": "SYSTEM_MASTER/DOCUMENTS",
-      "objective_id": "DOCUMENTS-SPINE-SECURE-FORENSIC-PREP-001",
+      "objective_id": "DOCUMENTS-SPINE-FORENSICS-FORENSIC-PREP-001",
       "obligation_id": "DOCUMENTS-CURRENT-ADMISSION-001",
       "state": "READY",
       "priority": "DOCUMENTS_OWNER_VALID_INDEPENDENT_WORK_AHEAD_WHILE_R4_PAYLOAD_BLOCKED",
-      "classification": "DOCUMENTS_SPINE_SECURE_FORENSIC_RECOVERY_AND_ANALYSIS_ONLY",
+      "classification": "DOCUMENTS_SPINE_FORENSICS_RECOVERY_AND_ANALYSIS_ONLY",
       "valid_for_control_ref": "documents/control-v1",
-      "valid_for_control_head": "3e7c21045bf52ba3eee6b89a88e38f25542c0906",
-      "created_at": "2026-09-12T01:24:13-04:00",
-      "last_revalidated_at": "2026-09-12T01:24:13-04:00",
-      "parent_checkpoint": "documents/control-v1/DOCUMENTS-SPINE-IDENTIFY-PROFILE-DESIGN-LOCK-001.md",
-      "completion_delta": "Recover, inventory and analyze the current Documents SECURE stage and its evidence without mutating runtime. Preserve the locked IDENTIFY rule that Documents owns document-specific active-content facts while shared security/effect authority decides permission. Census per-format gaps for macros/ActiveX/embedded executable content, external relationships/links, hidden data, redaction/sanitization, malformed/ambiguous packages, unknown/bounds behavior and recognized-but-engine-pending formats, then prepare a bounded SECURE design-lock successor.",
-      "stop_condition": "A lossless SECURE evidence/capability matrix identifies current implementation, shared-versus-Documents ownership boundaries, missing/weak/duplicate behavior, exact blockers and one dependency-valid design-lock successor; no runtime code is mutated while exact R4 source custody remains unresolved.",
+      "valid_for_control_head": "3938e225ecf53478c09ac858ea38ad1027f372eb",
+      "created_at": "2026-09-12T01:39:06-04:00",
+      "last_revalidated_at": "2026-09-12T01:39:06-04:00",
+      "parent_checkpoint": "documents/control-v1/DOCUMENTS-SPINE-SECURE-DESIGN-LOCK-001.md",
+      "completion_delta": "Recover, inventory and analyze UDM-SPINE-0004 without mutating recovered runtime: native structure, corruption, unknown/custom parts, assets, relationships, recoverability, malformed/ambiguous package behavior, loss accounting and the handoff from IDENTIFY/SECURE into FORENSICS. Preserve exact Documents semantic ownership while keeping shared artifact/security/effect authority external.",
+      "stop_condition": "A lossless FORENSICS evidence/capability matrix identifies current implementation, durable state, interfaces/contracts, tests, evidence, environment, blockers, duplicate/weak behavior and one dependency-valid design-lock successor; no runtime mutation while exact R4 source custody/current-subject qualification remains unresolved.",
       "allowed_work": [
-        "recover and inventory current Documents SECURE implementation, tests, historical evidence and defect lessons",
-        "classify document-specific active-content/security facts separately from shared security/effect policy authority",
-        "analyze external links, hidden data, redaction/sanitization and per-format security posture gaps",
-        "design fail-closed UNKNOWN/AMBIGUOUS/bounds behavior and regression requirements",
-        "prepare one SECURE design-lock packet without runtime mutation"
+        "recover and inventory current Documents FORENSICS implementation, tests, historical evidence and defect lessons",
+        "classify package/native structure, unknown parts, assets, relationships, corruption and recoverability behavior per supported format",
+        "map requirement/invariant to implementation, durable state, interface, tests, evidence, environment and blocker",
+        "analyze fail-closed malformed/ambiguous/bounds behavior and preservation/loss-accounting requirements",
+        "prepare at most one FORENSICS design-lock packet without runtime mutation"
       ],
       "forbidden_authority": [
         "do not mutate recovered Documents runtime before exact R4 source custody/current-subject qualification",
-        "do not convert document-specific evidence into shared policy/effect authority",
+        "do not convert Documents forensic facts into shared security/effect or global artifact authority",
         "do not absorb Book, Learning, Programming, spreadsheet or retired Prose semantics",
-        "do not weaken fail-closed handling of unknown, ambiguous or bounded inspection states",
-        "do not claim A-01, native, publication or production PASS"
+        "do not infer recoverability, absence, preservation or corruption repair from missing evidence",
+        "do not claim A-01, native, external, publication or production PASS"
       ],
-      "on_pass": "Preserve the SECURE forensic evidence matrix and bind at most one specification/design-lock successor after exact owner-head revalidation; runtime implementation remains separately custody-gated.",
-      "on_failure": "Preserve the exact security/ownership ambiguity or missing-evidence blocker and continue another independent Documents work-ahead rung without fabricating policy authority."
+      "on_pass": "Preserve the FORENSICS lossless evidence matrix and bind at most one specification/design-lock successor after exact owner-head revalidation; runtime implementation remains separately custody-gated.",
+      "on_failure": "Preserve the exact source/evidence/ownership ambiguity or blocker and continue another independent Documents work-ahead rung without inventing recovery evidence."
     }
   ],
   "retired_delegations": [
+    {
+      "delegation_id": "SECOND-SHIFT-DOCUMENTS-SPINE-SECURE-DESIGN-LOCK-001",
+      "state": "COMPLETED__DESIGN_LOCK_FROZEN__RUNTIME_IMPLEMENTATION_CUSTODY_GATED",
+      "prior_bound_control_head": "99b8c9f275f87eb1714287fb3957a5ebbb49c15f",
+      "implementation_subject_sha": "3938e225ecf53478c09ac858ea38ad1027f372eb",
+      "completion_evidence": "documents/control-v1/DOCUMENTS-SPINE-SECURE-DESIGN-LOCK-001.md",
+      "runtime_build_authorized": false,
+      "history_preserved": true
+    },
+    {
+      "delegation_id": "SECOND-SHIFT-DOCUMENTS-SPINE-SECURE-FORENSIC-PREP-001",
+      "state": "COMPLETED__FORENSIC_MATRIX_CLOSED__DESIGN_LOCK_COMPLETED",
+      "prior_bound_control_head": "3e7c21045bf52ba3eee6b89a88e38f25542c0906",
+      "implementation_subject_sha": "99b8c9f275f87eb1714287fb3957a5ebbb49c15f",
+      "completion_evidence": "documents/control-v1/DOCUMENTS-SPINE-SECURE-FORENSIC-PREP-001.md",
+      "history_preserved": true
+    },
     {
       "delegation_id": "SECOND-SHIFT-DOCUMENTS-SPINE-IDENTIFY-DESIGN-LOCK-001",
       "state": "COMPLETED__DESIGN_LOCK_FROZEN__RUNTIME_IMPLEMENTATION_CUSTODY_GATED",
@@ -134,6 +151,6 @@
     }
   ],
   "owner_revalidation_required": false,
-  "reason": "Documents owner advanced through deterministic R4 transport-contract reconciliation, IDENTIFY forensic preparation and a frozen IDENTIFY semantic design lock. Exact R4 payload chunks remain outside GitHub, so runtime implementation/qualification stays blocked truthfully while SECURE forensic recovery is the next independent specification-only successor.",
+  "reason": "Documents owner advanced through SECURE forensic recovery and a frozen SECURE semantic design lock while exact R4 payload chunks remain outside GitHub. IDENTIFY and SECURE runtime implementation/qualification therefore stay custody-gated truthfully; UDM-SPINE-0004 FORENSICS recovery/analysis is the next independent specification-only successor.",
   "empty_is_valid": false
 }
