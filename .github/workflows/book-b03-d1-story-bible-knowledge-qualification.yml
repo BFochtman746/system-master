@@ -1,56 +1,48 @@
-name: Book B03 D1 Story Bible Knowledge Bootstrap Qualification
+name: Book B03 D1 Story Bible Knowledge Qualification
 
 on:
   push:
     branches:
       - book-system/control-v1
     paths:
+      - 'system-master/book-system/book-story-bible-knowledge-v1.js'
+      - 'system-master/book-system/book-story-bible-knowledge-v1.test.js'
       - '.github/workflows/book-b03-d1-story-bible-knowledge-qualification.yml'
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  materialize-and-qualify:
+  isolated-story-bible-knowledge:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [22, 24]
     steps:
       - name: Checkout exact subject
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Set up Node 22
+      - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
-      - name: Materialize exact D1 source and tests
+          node-version: ${{ matrix.node-version }}
+      - name: Record exact subject
         run: |
           set -euo pipefail
-          mkdir -p system-master/book-system
-          cat qualification/book-system/reconstruction/.b03-d1-src-00.b64 qualification/book-system/reconstruction/.b03-d1-src-01.b64 qualification/book-system/reconstruction/.b03-d1-src-02.b64 | base64 -d | gzip -d > system-master/book-system/book-story-bible-knowledge-v1.js
-          cat qualification/book-system/reconstruction/.b03-d1-test-00.b64 qualification/book-system/reconstruction/.b03-d1-test-01.b64 | base64 -d | gzip -d > system-master/book-system/book-story-bible-knowledge-v1.test.js
-          test "$(git hash-object system-master/book-system/book-story-bible-knowledge-v1.js)" = '496c225314e2b9ea4625022a7d4f35a7e47f3cdd'
-          test "$(git hash-object system-master/book-system/book-story-bible-knowledge-v1.test.js)" = '594c3931c7316dba23557601721d40602f105f54'
-      - name: Run locked K01-K32 denominator
+          git rev-parse HEAD
+          git rev-parse 'HEAD^{tree}'
+      - name: Run B03 D1 K01-K32
         run: |
           set -euo pipefail
-          node system-master/book-system/book-story-bible-knowledge-v1.test.js | tee b03-d1-k01-k32.log
-          grep -F '"result":"PASS"' b03-d1-k01-k32.log
-          grep -F '"denominator":"K01-K32"' b03-d1-k01-k32.log
-          grep -F '"cases":32' b03-d1-k01-k32.log
-          grep -F '"materializer_implemented":false' b03-d1-k01-k32.log
-          grep -F '"invalidation_engine_implemented":false' b03-d1-k01-k32.log
-          grep -F '"canonical_admission_implemented":false' b03-d1-k01-k32.log
-          grep -F '"b01_registry_modified":false' b03-d1-k01-k32.log
-          grep -F '"model_accuracy_claimed":false' b03-d1-k01-k32.log
-          grep -F '"historical_pass_transferred":0' b03-d1-k01-k32.log
-          grep -F '"canonical_effect":false' b03-d1-k01-k32.log
-      - name: Commit D1 source and tests
-        run: |
-          set -euo pipefail
-          git rm qualification/book-system/reconstruction/.b03-d1-src-payload.b64 qualification/book-system/reconstruction/.b03-d1-test-payload.b64 qualification/book-system/reconstruction/.b03-d1-src-00.b64 qualification/book-system/reconstruction/.b03-d1-src-01.b64 qualification/book-system/reconstruction/.b03-d1-src-02.b64 qualification/book-system/reconstruction/.b03-d1-test-00.b64 qualification/book-system/reconstruction/.b03-d1-test-01.b64
-          git add system-master/book-system/book-story-bible-knowledge-v1.js system-master/book-system/book-story-bible-knowledge-v1.test.js
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git commit -m 'book: build B03 D1 story bible knowledge validator'
-          git push origin HEAD:book-system/control-v1
+          node system-master/book-system/book-story-bible-knowledge-v1.test.js | tee b03-d1-k01-k32-${{ matrix.node-version }}.log
+          grep -F '"result":"PASS"' b03-d1-k01-k32-${{ matrix.node-version }}.log
+          grep -F '"denominator":"K01-K32"' b03-d1-k01-k32-${{ matrix.node-version }}.log
+          grep -F '"cases":32' b03-d1-k01-k32-${{ matrix.node-version }}.log
+          grep -F '"materializer_implemented":false' b03-d1-k01-k32-${{ matrix.node-version }}.log
+          grep -F '"invalidation_engine_implemented":false' b03-d1-k01-k32-${{ matrix.node-version }}.log
+          grep -F '"canonical_admission_implemented":false' b03-d1-k01-k32-${{ matrix.node-version }}.log
+          grep -F '"b01_registry_modified":false' b03-d1-k01-k32-${{ matrix.node-version }}.log
+          grep -F '"model_accuracy_claimed":false' b03-d1-k01-k32-${{ matrix.node-version }}.log
+          grep -F '"historical_pass_transferred":0' b03-d1-k01-k32-${{ matrix.node-version }}.log
+          grep -F '"canonical_effect":false' b03-d1-k01-k32-${{ matrix.node-version }}.log
