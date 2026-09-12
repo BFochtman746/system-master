@@ -78,7 +78,7 @@ function assertNoForbidden(value, path = '$') {
   if (Array.isArray(value)) return value.forEach((x, i) => assertNoForbidden(x, `${path}[${i}]`));
   if (!obj(value)) return;
   for (const [key, child] of Object.entries(value)) {
-    if (HARD_FORBIDDEN.some(r => r.test(key))) fail('BLOCKED_KNOWLEDGE_SCHEMA_INVALID', `${path}.${key}`);
+    if (HARD_FORBIDDEN.some(r => r.test(key)) && !(key === 'raw_manuscript_text_persisted' && child === false)) fail('BLOCKED_KNOWLEDGE_SCHEMA_INVALID', `${path}.${key}`);
     if (FORBIDDEN_AUTHORITY_CLAIMS.some(r => r.test(key)) && ![false, 0, null, undefined].includes(child)) {
       fail('BLOCKED_AUTHORITY_WIDENING', `${path}.${key}`);
     }
