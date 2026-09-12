@@ -1,0 +1,86 @@
+{
+  "record_id": "DOCUMENTS-SPINE-EFFECT-RUNTIME-INTEGRATION-001",
+  "owner_system_id": "DOCUMENTS",
+  "owner_path": "SYSTEM_MASTER/DOCUMENTS",
+  "control_ref_observed_after_qualification": "documents/control-v1",
+  "control_head_observed_after_qualification": "92cdf489d5b3d4294f6b90104ec1753cc2da289f",
+  "current_authority": "CURRENT-AUTHORITY-003",
+  "topology": "TOPOLOGY-005",
+  "candidate_branch": "documents/spine-effect-runtime-001-20260912",
+  "exact_qualified_subject_sha": "9442b3d3aa4c1bc791a7de905058157758e5ce64",
+  "qualification_workflow_run_id": 34689179067,
+  "qualification_job_id": 103541328797,
+  "environment": {
+    "runner": "github-hosted",
+    "os": "ubuntu-latest",
+    "java": "Temurin 21",
+    "standing": "HOSTED_PORTABLE_ONLY"
+  },
+  "status": "QUALIFIED_PORTABLE__OWNER_CONTROL_FREEZE_PENDING",
+  "route_integration": {
+    "effectful_routes": ["REBUILD", "MASTER"],
+    "runtime": "DocumentExistingArtifactEffectExecutor",
+    "explicit_admission_interface": "DocumentEffectAdmissionProvider",
+    "missing_admission_behavior": "FAIL_CLOSED_WITH_DURABLE_BOUNDED_REASON",
+    "read_extract_five_argument_compatibility": true,
+    "legacy_inline_mutation_route_removed": true,
+    "legacy_action_evidence_without_effect_admission": "FAIL_CLOSED_ON_RECONSTRUCTION",
+    "prepared_candidate_restart_behavior": "RECONCILE_EXACT_PERSISTED_CANDIDATE__NO_BLIND_MUTATION_REPLAY",
+    "master_same_format_required": true
+  },
+  "qualification": {
+    "strict_java21_compile": "PASS",
+    "rebuild": {"passed": 48, "planned": 48},
+    "master": {"passed": 44, "planned": 44},
+    "owner_route_integration": {"status": "PASS", "assertions": 43},
+    "cumulative_portable_test_classes": {"passed": 32, "planned": 32},
+    "prior_failed_attempts_preserved": [
+      {
+        "class": "COMPILE_CONTRACT_DEFECT",
+        "evidence": "qualification/document-system/spine/DOCUMENTS-SPINE-EFFECT-RUNTIME-INTEGRATION-COMPILE-DIAGNOSTIC-001.txt",
+        "repair": "rebind UniversalDocumentSpine ENGINE_ID to DocumentExistingArtifactEffectExecutor.ENGINE_ID"
+      },
+      {
+        "class": "CUMULATIVE_QUALIFIER_BINDING_DEFECT",
+        "evidence": "qualification/document-system/spine/DOCUMENTS-SPINE-EFFECT-RUNTIME-INTEGRATION-QUALIFICATION-ATTEMPT-002.txt",
+        "repair": "inject explicit qualifier-only DocumentEffectAdmissionProvider into effectful portable callers"
+      }
+    ]
+  },
+  "test_provider_boundary": {
+    "provider": "PortableTestDocumentEffectAdmission",
+    "classification": "QUALIFIER_ONLY",
+    "production_policy_authority": false,
+    "real_external_provider_executed": false
+  },
+  "delegation_reconciliation": {
+    "main_documents_delegation_epoch_observed": 14,
+    "main_delegation_last_known_control_head": "6be5ca1073bf8d119d9841e8cce1a6eb9e2ac7d3",
+    "live_control_head": "92cdf489d5b3d4294f6b90104ec1753cc2da289f",
+    "classification": "STALE_DELEGATION__NOT_EXECUTED_AS_AUTHORITY",
+    "documents_repair_active_transactions": 0
+  },
+  "nonclaims": [
+    "NO_NATIVE_MICROSOFT_OFFICE_PASS",
+    "NO_TARGET_DEVICE_PASS",
+    "NO_REAL_EXTERNAL_POLICY_PROVIDER_CORRECTNESS_CLAIM",
+    "NO_HUMAN_OR_AUTHOR_AUTHORITY_CLAIM",
+    "NO_PRIVATE_SOURCE_PERMISSION_CLAIM",
+    "NO_PUBLICATION_AUTHORIZATION_CLAIM",
+    "NO_PRODUCTION_STANDING",
+    "NO_A01_PASS",
+    "NO_PROSE_WORK"
+  ],
+  "successor": {
+    "objective_id": "DOCUMENTS-SPINE-EFFECT-RUNTIME-FREEZE-001",
+    "state": "BOUND__READY_IF_LIVE_OWNER_HEAD_REMAINS_92CDF489_AND_NO_OVERLAP",
+    "required_work": [
+      "re-read CURRENT-AUTHORITY and exact documents/control-v1 live head",
+      "re-read Documents delegation and repair state and fail closed on any new overlap",
+      "reconcile exact qualified subject 9442b3d3aa4c1bc791a7de905058157758e5ce64 onto the live Documents owner lineage without importing non-Documents semantics",
+      "preserve exact qualification receipt and update Documents control evidence",
+      "rerun changed-subject qualification if reconciliation changes executable bytes",
+      "do not claim native, external-provider, publication, production or A-01 standing"
+    ]
+  }
+}
