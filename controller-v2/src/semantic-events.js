@@ -1,6 +1,7 @@
 import { canonicalize, sha256 } from './canonical.js';
 import { ControllerError } from './errors.js';
 import { normalizeSubjectRef } from './subject.js';
+import { validateOperationPlan } from './operation-plan.js';
 
 export const EVENT_SCHEMA = 'controller.event.v1';
 
@@ -43,7 +44,11 @@ export function reduceSemanticEvents(events) {
         if(event.event_type==='transaction.admitted'){if(!d.completion_contract)throw new ControllerError('RECOVERY_PAYLOAD_INVALID','transaction.admitted missing completion contract');tx.completion_contract=structuredClone(d.completion_contract);}
         tx.updated_at=event.occurred_at;break;
       }
-      case 'operation.planned':state.operations[d.operation_id]={operation_id:d.operation_id,transaction_id:d.transaction_id,state:'PLANNED',resource_id:d.resource_id??null,created_at:event.occurred_at,updated_at:event.occurred_at};break;
+      case 'operation.planned':{
+        let plan=null;
+        if(d.plan!==undefined){validateOperationPlan(d.plan);if(d.plan.operation_id!==d.operation_id||d.plan.transaction_id!==d.transaction_id||d.plan.resource_id!==(d.resource_id??null))throw new ControllerError('RECOVERY_PAYLOAD_INVALID','operation.planned plan binding mismatch');plan=structuredClone(d.plan);}
+        state.operations[d.operation_id]={operation_id:d.operation_id,transaction_id:d.transaction_id,state:'PLANNED',resource_id:d.resource_id??null,plan,created_at:event.occurred_at,updated_at:event.occurred_at};break;
+      }
       case 'operation.ready':case 'operation.running':case 'operation.verifying':case 'operation.failed':case 'operation.blocked':case 'operation.cancelled':case 'operation.stale':case 'operation.succeeded':{
         const op=state.operations[d.operation_id];if(!op)throw new ControllerError('RECOVERY_REFERENCE_MISSING',`operation event precedes operation.planned for ${d.operation_id}`);op.state=d.to||d.result||event.event_type.slice('operation.'.length).toUpperCase();op.updated_at=event.occurred_at;break;
       }
