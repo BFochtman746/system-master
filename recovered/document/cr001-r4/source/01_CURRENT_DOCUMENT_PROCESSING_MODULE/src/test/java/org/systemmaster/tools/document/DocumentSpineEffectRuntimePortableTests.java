@@ -420,7 +420,11 @@ public final class DocumentSpineEffectRuntimePortableTests {
     }
 
     private static String text(DocumentFormat format, byte[] bytes) {
-        return new DocumentProcessingService().extractPlainText(format, bytes);
+        try {
+            return new DocumentProcessingService().extractPlainText(format, bytes);
+        } catch (java.io.IOException exception) {
+            throw new IllegalStateException("portable text extraction failed", exception);
+        }
     }
 
     private static String policyDigest() {
