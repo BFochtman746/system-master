@@ -1,0 +1,98 @@
+{
+  "protocol_version": "github-a01-controller.production-enforcement-policy.v1",
+  "operation_id": "GITHUB-A01-CONTROLLER-FORENSIC-RECONCILIATION-001C",
+  "repository": "BFochtman746/system-master",
+  "status": "IMPLEMENTED_NOT_ACTIVE_REQUIRES_DEDICATED_WRITER_APP_AND_LIVE_RULESET",
+  "qualified_executable_predecessor": "65a661dde54149a6892574bc892fbb107022db00",
+  "writer_identity": {
+    "actor_type": "Integration",
+    "actor_id": null,
+    "client_id_variable": "CONTROL_GATEWAY_WRITER_CLIENT_ID",
+    "private_key_secret": "CONTROL_GATEWAY_WRITER_PRIVATE_KEY",
+    "environment": "control-gateway-production"
+  },
+  "writer_identity_requirements": {
+    "dedicated_github_app": true,
+    "repository_installation_scope": "BFochtman746/system-master_ONLY",
+    "repository_permissions": {
+      "contents": "write",
+      "metadata": "read"
+    },
+    "administration_permission": "NONE",
+    "issues_permission": "NONE",
+    "pull_requests_permission": "NONE",
+    "actions_permission": "NONE",
+    "rule": "The dedicated writer App is the only durable ref-mutation identity. It must not have repository-administration authority and must not share credentials with ChatGPT, a human PAT, or generic GitHub Actions GITHUB_TOKEN."
+  },
+  "ruleset": {
+    "name": "System Master Control Gateway Production Mutation Boundary",
+    "target": "branch",
+    "enforcement": "active",
+    "include_refs": ["~ALL"],
+    "exclude_refs": [],
+    "required_rule_types": ["creation", "update", "deletion", "non_fast_forward"],
+    "update_allows_fetch_and_merge": false,
+    "bypass": {
+      "actor_type": "Integration",
+      "actor_id_source": "writer_identity.actor_id",
+      "bypass_mode": "always",
+      "additional_bypass_actors_forbidden": true
+    }
+  },
+  "credential_separation": {
+    "chatgpt_direct_writer_forbidden": true,
+    "dedicated_writer_token_required": true,
+    "ordinary_github_connector_must_not_be_ruleset_bypass_actor": true,
+    "generic_github_actions_app_must_not_be_ruleset_bypass_actor": true,
+    "human_pat_must_not_be_writer_credential": true,
+    "production_workflow_default_token_permissions": "READ_ONLY",
+    "production_writer_token_lifetime": "GITHUB_APP_INSTALLATION_TOKEN_EPHEMERAL"
+  },
+  "production_writer": {
+    "workflow": ".github/workflows/control-gateway-production-writer.yml",
+    "entrypoint": ".github/scripts/control-gateway-production-writer.js",
+    "core_module": "control-gateway/src/github-production-mutation.js",
+    "required_ref": "refs/heads/main",
+    "required_environment": "control-gateway-production",
+    "admission_sequence": [
+      "RECONSTRUCT_DURABLE_AUTHORITY",
+      "CG005_ADMIT_EXACT_OPERATION_SCOPE_AND_PREDECESSOR",
+      "VERIFY_ADMISSION_FRESH",
+      "BIND_EXACT_MUTATION_PLAN_DIGEST",
+      "CREATE_EXACT_TREE_AND_SINGLE_PARENT_COMMIT",
+      "RECHECK_EXACT_PREDECESSOR",
+      "UPDATE_REF_FORCE_FALSE",
+      "POSTWRITE_VERIFY",
+      "EMIT_EXECUTION_RECEIPT"
+    ],
+    "idempotency": "AN_EXACT_ALREADY_APPLIED_COMMIT_IS_ACCEPTED_ONLY_WHEN_PARENT_TREE_AND_DIGEST_BOUND_COMMIT_MESSAGE_MATCH_THE_PRODUCTION_GRANT"
+  },
+  "activation_sequence": [
+    "QUALIFY_001C_EXECUTABLE_CANDIDATE_HOSTED_NODE22_NODE24",
+    "QUALIFY_SAME_EXACT_SHA_ON_A01_WINDOWS_X64",
+    "CREATE_DEDICATED_GITHUB_APP_AND_INSTALL_ONLY_ON_SYSTEM_MASTER",
+    "BIND_WRITER_APP_INTEGRATION_ID_IN_THIS_POLICY",
+    "CONFIGURE_CONTROL_GATEWAY_PRODUCTION_ENVIRONMENT_MAIN_ONLY_WITH_CLIENT_ID_AND_PRIVATE_KEY",
+    "FAST_FORWARD_MAIN_TO_THE_QUALIFIED_MAIN_DERIVED_CONTROLLER_CANDIDATE_AS_THE_FINAL_BOOTSTRAP_WRITE",
+    "CREATE_AND_ACTIVATE_EXACT_RULESET_WITH_ONLY_THE_DEDICATED_APP_AS_BYPASS",
+    "READ_BACK_LIVE_RULESET_AND_VERIFY_EXACT_POLICY",
+    "NEGATIVE_PROVE_ORDINARY_CHATGPT_GITHUB_MUTATION_CANNOT_CREATE_OR_UPDATE_A_BRANCH",
+    "POSITIVE_PROVE_RECEIPT_CONSUMING_WRITER_CAN_APPLY_ONE_ADMITTED_DISPOSABLE_MUTATION_AND_REPLAY_IDEMPOTENTLY",
+    "FREEZE_001C_ONLY_AFTER_ALL_PREVIOUS_STEPS_PASS"
+  ],
+  "forbidden_activation_shortcuts": [
+    "NO_RULESET_WITH_REPOSITORY_ROLE_OR_USER_BYPASS_FOR_CHATGPT",
+    "NO_GITHUB_ACTIONS_INTEGRATION_AS_GLOBAL_BYPASS",
+    "NO_DIRECT_CHATGPT_CREATE_FILE_UPDATE_FILE_CREATE_BRANCH_OR_UPDATE_REF_AFTER_ACTIVATION",
+    "NO_FORCE_PUSH",
+    "NO_MAIN_RESET",
+    "NO_CG012_START",
+    "NO_SECOND_SHIFT_MASTERY_ACTIVATION",
+    "NO_PASS_TRANSFER_ACROSS_CHANGED_EXECUTABLE_SHA"
+  ],
+  "current_live_observation_at_001c_start": {
+    "repository_rulesets": 0,
+    "main_protected": false,
+    "standing": "OPEN_CRITICAL"
+  }
+}
