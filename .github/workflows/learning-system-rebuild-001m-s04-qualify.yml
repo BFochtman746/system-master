@@ -56,9 +56,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python .github/scripts/learning-system-rebuild-001m-s04-qualify.py | tee learning-system-rebuild-001m-s04-result.json
+          python .github/scripts/learning-system-rebuild-001m-s04-qualify.py 2>&1 | tee learning-system-rebuild-001m-s04-result.json
 
       - name: Upload exact-subject qualification evidence
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: learning-system-rebuild-001m-s04-${{ github.sha }}
