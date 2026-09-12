@@ -1,0 +1,39 @@
+name: Book B01 D3 Execution Foundation Qualification
+
+on:
+  push:
+    branches:
+      - book-system/control-v1
+    paths:
+      - 'system-master/book-system/book-execution-foundation-b01.js'
+      - 'system-master/book-system/book-execution-foundation-b01.test.js'
+      - 'system-master/book-system/book-capability-binding-v1.js'
+      - 'system-master/book-system/book-capability-binding-v1.registry.json'
+      - '.github/workflows/book-b01-d3-execution-foundation-qualification.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  execution-foundation-qualification:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [22, 24]
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Record exact subject
+        run: |
+          echo "QUALIFIED_SUBJECT=${GITHUB_SHA}"
+          node --version
+      - name: Re-run D1 binding substrate
+        run: node system-master/book-system/book-capability-binding-v1.test.js
+      - name: Run D3 current routing plan concurrency retry qualification
+        run: node system-master/book-system/book-execution-foundation-b01.test.js
