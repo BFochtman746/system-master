@@ -63,6 +63,39 @@ class CG011AdversarialClosureAudit(unittest.TestCase):
             )
         self.assertEqual(self.store.conn.execute("SELECT COUNT(*) n FROM claims").fetchone()["n"], 0)
 
+    def test_binding_crash_after_coordination_commit_still_requires_scheduler_claim_authority(self):
+        h = helpers.overnight("A", "LANE-A")
+        c = helpers.helpers.make_coord(h, resource="R-LANE-A", limit=1, graph="CG011-AUDIT-BINDING")
+        stamp = IN_SHIFT.isoformat().replace("+00:00", "Z")
+        with self.store.tx() as tx:
+            tx.execute(
+                "INSERT INTO night_scheduler_queue("
+                "delegation_id,handoff_json,contract_json,scheduler_digest,state,enqueued_at,updated_at"
+                ") VALUES(?,?,?,?,?,?,?)",
+                (
+                    h["delegation_id"], helpers.helpers.canonical(h), helpers.helpers.canonical(c),
+                    self.scheduler._scheduler_digest(h, c), "BINDING", stamp, stamp,
+                ),
+            )
+        self.scheduler.coordination.bind(h, c, now=IN_SHIFT)
+        self.assertEqual(
+            self.store.conn.execute(
+                "SELECT state FROM night_scheduler_queue WHERE delegation_id=?", (h["delegation_id"],)
+            ).fetchone()["state"],
+            "BINDING",
+        )
+        self.restart()
+        with self.assertRaisesRegex(sqlite3.IntegrityError, "CG010_NIGHT_SCHEDULER_AUTH_REQUIRED"):
+            self.scheduler.coordination.claim(h, c, now=IN_SHIFT)
+        with self.assertRaisesRegex(sqlite3.IntegrityError, "CG010_NIGHT_SCHEDULER_AUTH_REQUIRED"):
+            self.store.claim_ready(
+                lane=h["lane"], delegation_id=h["delegation_id"], objective_id=h["objective_id"],
+                control_head=h["control_head"], idempotency_key=h["idempotency_key"],
+                executor_kind=h["executor_kind"], now=IN_SHIFT,
+            )
+        self.assertEqual(self.store.conn.execute("SELECT COUNT(*) n FROM claims").fetchone()["n"], 0)
+        self.assertEqual(self.scheduler.enqueue(h, c, now=IN_SHIFT)["state"], "QUEUED")
+
     def test_cancel_pending_does_not_release_resource_capacity_before_external_ack(self):
         self.enqueue("A", "LANE-A", resource="GPU", limit=1, priority=200)
         self.enqueue("B", "LANE-B", resource="GPU", limit=1, priority=100)
