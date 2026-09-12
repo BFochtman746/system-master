@@ -1,0 +1,101 @@
+nd(enc(event.operationId())).append('\t')
+                .append(event.systemId() == null ? "-" : event.systemId()).append('\t')
+                .append(enc(event.eventType())).append('\t')
+                .append(enc(event.actorRef())).append('\t')
+                .append(enc(event.decisionRef())).append('\t')
+                .append(event.occurredAt()).append('\t')
+                .append(event.payloadDigest()).append('\n');
+    }
+
+    private static Map<String, List<VersionPointer>> immutableVersionHistory(Map<String, List<VersionPointer>> raw) {
+        Map<String, List<VersionPointer>> out = new LinkedHashMap<>();
+        raw.forEach((k, v) -> out.put(k, List.copyOf(v)));
+        return Map.copyOf(out);
+    }
+
+    private static byte[] gzip(byte[] plain) throws IOException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try (GZIPOutputStream gz = new GZIPOutputStream(out)) { gz.write(plain); }
+        return out.toByteArray();
+    }
+
+    private static byte[] gunzip(byte[] compressed) throws IOException {
+        try (GZIPInputStream in = new GZIPInputStream(new ByteArrayInputStream(compressed));
+             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            byte[] buffer = new byte[8192];
+            int total = 0;
+            for (int n; (n = in.read(buffer)) >= 0;) {
+                if (n == 0) continue;
+                total += n;
+                if (total > MAX_FRAME_TEXT_BYTES) throw new CorruptRootStoreException("ROOT_JOURNAL_DECOMPRESSED_FRAME_TOO_LARGE");
+                out.write(buffer, 0, n);
+            }
+            return out.toByteArray();
+        } catch (CorruptRootStoreException ex) {
+            throw ex;
+        } catch (IOException ex) {
+            throw new CorruptRootStoreException("ROOT_JOURNAL_GZIP_INVALID", ex);
+        }
+    }
+
+    private static int indexOf(byte[] bytes, byte needle, int from) {
+        for (int i = from; i < bytes.length; i++) if (bytes[i] == needle) return i;
+        return -1;
+    }
+
+    private static boolean isPrefix(byte[] candidate, byte[] full) {
+        if (candidate.length > full.length) return false;
+        for (int i = 0; i < candidate.length; i++) if (candidate[i] != full[i]) return false;
+        return true;
+    }
+
+    private static void writeFully(FileChannel channel, ByteBuffer buffer) throws IOException {
+        while (buffer.hasRemaining()) channel.write(buffer);
+    }
+
+    private void cacheSnapshot(RootSnapshot snapshot, long size) throws IOException {
+        BasicFileAttributes attrs = Files.readAttributes(dataPath, BasicFileAttributes.class);
+        cache = new CacheEntry(size, attrs.lastModifiedTime(), attrs.fileKey(), size, snapshot);
+    }
+
+    private void syncParentDirectory() {
+        Path parent = dataPath.getParent();
+        if (parent == null) return;
+        try (FileChannel dir = FileChannel.open(parent, StandardOpenOption.READ)) {
+            dir.force(true);
+        } catch (IOException | UnsupportedOperationException ignored) {
+            // The journal itself has already been fsynced. Directory fsync is best effort for platforms
+            // that do not expose directory handles; startup replay still fails closed on missing/corrupt data.
+        }
+    }
+
+    private static String enc(String value) {
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(value.getBytes(StandardCharsets.UTF_8));
+    }
+
+    private static String dec(String value) {
+        return new String(Base64.getUrlDecoder().decode(value), StandardCharsets.UTF_8);
+    }
+
+    private static String encList(Set<String> values) {
+        return values.stream().sorted().map(FileSystemRootStore::enc).reduce((a, b) -> a + "," + b).orElse("");
+    }
+
+    private static Set<String> decList(String value) {
+        if (value.isEmpty()) return Set.of();
+        TreeSet<String> out = new TreeSet<>();
+        for (String part : value.split(",", -1)) {
+            String decoded = dec(part);
+            if (!out.add(decoded)) throw new IllegalArgumentException("duplicate negative ownership");
+        }
+        return Set.copyOf(out);
+    }
+
+    static String sha256Bytes(byte[] bytes) {
+        try {
+            return java.util.HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(bytes));
+        } catch (Exception ex) {
+            throw new IllegalStateException(ex);
+        }
+    }
+}
