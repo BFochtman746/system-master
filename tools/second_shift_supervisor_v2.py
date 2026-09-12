@@ -408,6 +408,13 @@ class SupervisorStore:
                     "next_attempt_at": next_at,
                 }
 
+            # A new failure callback is valid only while this dispatch is still
+            # locally retryable and no external run has been acknowledged. A late
+            # unique failure after DISPATCHED/CANCELLED/CANCEL_REQUESTED/CIRCUIT_OPEN
+            # must never resurrect the outbox or spend another retry.
+            if row["external_run_id"] is not None or row["state"] not in ("PENDING", "RETRY_WAIT"):
+                raise Conflict("dispatch failure callback is stale for non-retryable dispatch state")
+
             attempt = int(row["attempt"]) + 1
             if attempt >= retry_budget:
                 state = "CIRCUIT_OPEN"
