@@ -1,0 +1,92 @@
+name: Learning S03 Interface Materialization Report
+
+on:
+  push:
+    branches:
+      - learning/ownership-freeze-001b-20260912
+    paths:
+      - '.github/workflows/learning-s03-materialize-report.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  materialize-report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: learning/ownership-freeze-001b-20260912
+          fetch-depth: 0
+      - name: Decode exact interface ledger and persist S03 rows
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import base64, csv, gzip, hashlib, io, json, pathlib, re
+
+          source = pathlib.Path('qualification/learning/ownership/LRN-OWNERSHIP-FREEZE-001B-R3B-S02-R2-INTERFACES.csv.gz.b64')
+          encoded = source.read_text(encoding='utf-8').strip()
+          raw = gzip.decompress(base64.b64decode(encoded))
+          digest = hashlib.sha256(raw).hexdigest()
+          expected = '4f4387956bd8189b7a65f5de94ab3c722cb34f249ebe8a94ad74b4c0d0c3cbc0'
+          if digest != expected:
+              raise SystemExit(f'FAIL decoded ledger sha256 {digest} != {expected}')
+
+          text = raw.decode('utf-8-sig')
+          reader = csv.DictReader(io.StringIO(text))
+          rows = list(reader)
+          fields = reader.fieldnames or []
+          if len(rows) != 112:
+              raise SystemExit(f'FAIL active interface row count {len(rows)} != 112')
+
+          def row_id(row):
+              for key in fields:
+                  value = str(row.get(key, '')).strip()
+                  if re.fullmatch(r'I\d{3}(?:-[LC])?', value):
+                      return value
+              return None
+
+          wanted = {'I009', 'I036'}
+          selected = [row for row in rows if row_id(row) in wanted]
+          ids = [row_id(row) for row in selected]
+          if set(ids) != wanted or len(selected) != 2:
+              raise SystemExit(f'FAIL exact S03 interface rows not uniquely recovered: {ids}')
+          if any(i in {'I007', 'I082'} for i in ids):
+              raise SystemExit('FAIL S03 rows intersect S02 repaired interface identities')
+
+          report = {
+              'artifact_id': 'LRN-OWNERSHIP-FREEZE-001B-R3B-S03-R1-INTERFACE-MATERIALIZATION',
+              'date': '2026-09-12',
+              'owner_path': 'SYSTEM_MASTER/LEARNING',
+              'source_path': str(source),
+              'decoded_ledger_sha256': digest,
+              'expected_decoded_ledger_sha256': expected,
+              'active_interface_rows': len(rows),
+              'selected_interface_ids': ids,
+              'selected_rows': selected,
+              'standing': 'EXACT_REPOSITORY_NATIVE_INTERFACE_ROW_MATERIALIZATION_COMPLETE',
+              'non_claims': [
+                  'no runtime implementation claim',
+                  'no participant or consent evidence',
+                  'no mastery retention transfer psychometric SME certification claim',
+                  'no native A-01 production claim'
+              ]
+          }
+          out = pathlib.Path('qualification/learning/ownership/LRN-OWNERSHIP-FREEZE-001B-R3B-S03-R1-INTERFACE-MATERIALIZATION.json')
+          out.write_text(json.dumps(report, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
+          print('MATERIALIZED=' + ','.join(ids))
+          print('LEDGER_SHA256=' + digest)
+          PY
+      - name: Commit exact materialization report
+        shell: bash
+        run: |
+          if git diff --quiet -- qualification/learning/ownership/LRN-OWNERSHIP-FREEZE-001B-R3B-S03-R1-INTERFACE-MATERIALIZATION.json; then
+            echo 'No report delta.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add qualification/learning/ownership/LRN-OWNERSHIP-FREEZE-001B-R3B-S03-R1-INTERFACE-MATERIALIZATION.json
+          git commit -m 'learning: persist exact S03 interface materialization'
+          git push origin HEAD:learning/ownership-freeze-001b-20260912
