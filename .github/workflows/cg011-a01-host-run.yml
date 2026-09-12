@@ -1,0 +1,31 @@
+name: CG-011 A-01 Cumulative Host Qualification
+
+on:
+  push:
+    branches:
+      - system-master/a01-control-plane-cg011-host-qualification-001
+    paths:
+      - '.github/workflows/cg011-a01-host-run.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  qualify:
+    uses: ./.github/workflows/a01-control-plane-gateway.yml
+    with:
+      qualification_id: CG011-A01-FOUNDATION-CUMULATIVE-HOST-001
+      workstream_id: SECOND-SHIFT-CONTROL-GATEWAY
+      subject_sha: f4f3787f90788e964fcd2b12872a7a10392d78c1
+      origin_ref: refs/heads/second-shift-control-gateway/cg-011-failure-restart-idempotency-frozen
+      resume_on_pass: Adjudicate CG-011 A-01 host PASS and continue closure only against exact subject f4f3787f90788e964fcd2b12872a7a10392d78c1.
+      resume_on_failure: Stop CG-011 closure, inspect cumulative Foundation and supervisor host evidence, repair the failing boundary, and rerun this exact host qualification.
+      notification_target: originating-workstream
+      execution_context: normal
+      qualifier_timeout_minutes: 120
+      job_timeout_minutes: 140
+      repair_attempt: 0
+      max_repair_attempts: 1
+    secrets: inherit
