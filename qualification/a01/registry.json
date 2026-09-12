@@ -1,14 +1,12 @@
 {
-  "registry_version": 16,
+  "registry_version": 14,
   "qualifications": {
     "A01-CONTROL-PLANE-SELFTEST": {
       "workstream_id": "SYSTEM-MASTER",
       "gate_class": "promotion",
       "source": "control_plane",
       "executable": "node",
-      "args": [
-        ".github/scripts/a01-control-plane-selftest.js"
-      ],
+      "args": [".github/scripts/a01-control-plane-selftest.js"],
       "evidence_artifact": "a01-control-plane-selftest",
       "overnight_eligible": false,
       "description": "Qualify policy, registry, schemas, bootstrap, gateway safety, cross-ref subject execution, receipt production, exact-SHA binding, shared queue behavior, and overnight admission policy for A01-CONTROL-PLANE-001."
@@ -18,13 +16,9 @@
       "gate_class": "focused",
       "source": "subject",
       "executable": "node",
-      "args": [
-        ".github/scripts/a01-continuity-target-windows-reboot.js"
-      ],
+      "args": [".github/scripts/a01-continuity-target-windows-reboot.js"],
       "evidence_artifact": "system-master-continuity-target-windows-reboot",
-      "allowed_post_actions": [
-        "windows_reboot"
-      ],
+      "allowed_post_actions": ["windows_reboot"],
       "overnight_eligible": false,
       "description": "Run the repository-owned TARGET_WINDOWS_REBOOT ARM or VERIFY phase while preserving durable reboot handoff evidence. ARM may request the registered windows_reboot post-action only after its receipt and evidence are produced. Disruptive reboot qualifications are intentionally excluded from A01-OVERNIGHT-001 v1."
     },
@@ -33,9 +27,7 @@
       "gate_class": "focused",
       "source": "subject",
       "executable": "node",
-      "args": [
-        ".github/scripts/a01-literary-research-deep-harvest.js"
-      ],
+      "args": [".github/scripts/a01-literary-research-deep-harvest.js"],
       "evidence_artifact": "literary-research-overnight-deep",
       "overnight_eligible": true,
       "overnight_max_runtime_minutes": 30,
@@ -47,9 +39,7 @@
       "gate_class": "consolidated",
       "source": "subject",
       "executable": "node",
-      "args": [
-        ".github/scripts/a01-literary-prose-overnight-research-regression-sweep.js"
-      ],
+      "args": [".github/scripts/a01-literary-prose-overnight-research-regression-sweep.js"],
       "evidence_artifact": "literary-prose-overnight-research-regression-sweep",
       "overnight_eligible": true,
       "overnight_max_runtime_minutes": 180,
@@ -61,9 +51,7 @@
       "gate_class": "focused",
       "source": "subject",
       "executable": "node",
-      "args": [
-        ".github/scripts/book-eval-repair005-private-gold-recovery-qualify.js"
-      ],
+      "args": [".github/scripts/book-eval-repair005-private-gold-recovery-qualify.js"],
       "evidence_artifact": "book-eval-repair005-gate-d-private-gold-recovery",
       "overnight_eligible": true,
       "overnight_max_runtime_minutes": 90,
@@ -75,9 +63,7 @@
       "gate_class": "focused",
       "source": "subject",
       "executable": "node",
-      "args": [
-        ".github/scripts/book-eval-repair005-gate-d-teacher-freeze-qualify.js"
-      ],
+      "args": [".github/scripts/book-eval-repair005-gate-d-teacher-freeze-qualify.js"],
       "evidence_artifact": "book-eval-repair005-gate-d-teacher-freeze",
       "overnight_eligible": true,
       "overnight_max_runtime_minutes": 30,
@@ -89,9 +75,7 @@
       "gate_class": "consolidated",
       "source": "subject",
       "executable": "node",
-      "args": [
-        ".github/scripts/book-eval-repair005-gate-d-student-selective-qualify.js"
-      ],
+      "args": [".github/scripts/book-eval-repair005-gate-d-student-selective-qualify.js"],
       "evidence_artifact": "book-eval-repair005-gate-d-student-selective",
       "overnight_eligible": true,
       "overnight_max_runtime_minutes": 240,
@@ -103,9 +87,7 @@
       "gate_class": "promotion",
       "source": "subject",
       "executable": "node",
-      "args": [
-        ".github/scripts/learning-pilot-001-run-001-human-session-qualify.js"
-      ],
+      "args": [".github/scripts/learning-pilot-001-run-001-human-session-qualify.js"],
       "evidence_artifact": "learning-pilot-001-run-001-human-session",
       "overnight_eligible": true,
       "overnight_max_runtime_minutes": 120,
@@ -117,9 +99,7 @@
       "gate_class": "promotion",
       "source": "subject",
       "executable": "node",
-      "args": [
-        ".github/scripts/learning-pilot-001-run-001-execution-prep-qualify.js"
-      ],
+      "args": [".github/scripts/learning-pilot-001-run-001-execution-prep-qualify.js"],
       "evidence_artifact": "learning-pilot-001-run-001-execution-prep",
       "overnight_eligible": true,
       "overnight_max_runtime_minutes": 60,
@@ -131,23 +111,19 @@
       "gate_class": "promotion",
       "source": "subject",
       "executable": "node",
-      "args": [
-        ".github/scripts/learning-pilot-001-run-001-closed-loop-overnight-qualify.js"
-      ],
+      "args": [".github/scripts/learning-pilot-001-run-001-closed-loop-overnight-qualify.js"],
       "evidence_artifact": "learning-pilot-001-run-001-closed-loop",
       "overnight_eligible": true,
       "overnight_max_runtime_minutes": 60,
       "checkpoint_capable": false,
-      "description": "Qualify the exact Learning PILOT-001 RUN-001 closed-loop participant shell through delayed retention, novel transfer, terminal adjudication, digest-only completion packaging, the full Learning Lab regression suite, and repeated deterministic integrity runs. Frozen PILOT-001-v1 authority remains unchanged; qualification fixtures are not human evidence and cannot create or infer consent."
+      "description": "Qualify the exact Learning PILOT-001 RUN-001 closed-loop participant shell through delayed retention, novel transfer, terminal adjudication, digest-only completion packaging, the full Learning Lab regression suite, and repeated deterministic integrity seeds. Frozen PILOT-001-v1 authority remains unchanged; qualification fixtures are not human evidence and cannot create or infer consent."
     },
     "LEARNING-PILOT-001-RUN-001-FINAL-HUMAN-EXECUTION": {
       "workstream_id": "LEARNING",
       "gate_class": "promotion",
       "source": "subject",
       "executable": "node",
-      "args": [
-        ".github/scripts/learning-pilot-001-run-001-final-human-execution-qualify.js"
-      ],
+      "args": [".github/scripts/learning-pilot-001-run-001-final-human-execution-qualify.js"],
       "evidence_artifact": "learning-pilot-001-run-001-final-human-execution",
       "overnight_eligible": true,
       "overnight_max_runtime_minutes": 60,
@@ -159,38 +135,12 @@
       "gate_class": "focused",
       "source": "subject",
       "executable": "node",
-      "args": [
-        ".github/scripts/a01-assurance-recon-001b-deep-census.js"
-      ],
+      "args": [".github/scripts/a01-assurance-recon-001b-deep-census.js"],
       "evidence_artifact": "system-master-assurance-recon-001b-overnight-deep-census",
       "overnight_eligible": true,
       "overnight_max_runtime_minutes": 150,
       "checkpoint_capable": false,
       "description": "Run the exact-subject RECON-001B deep Assurance evidence/source census: validate reconciliation artifacts, current F-WP-001..012 regression chain, git object integrity, referenced-SHA reachability, and branch-level Assurance source/test/evidence discovery. PASS proves the bounded census executed, not ASSURANCE-001 completeness or production standing."
-    },
-    "BOOK-SYSTEM-E2E-AUTHORITY-GUARDS-001": {
-      "workstream_id": "BOOK-SYSTEM",
-      "gate_class": "focused",
-      "source": "subject",
-      "executable": "node",
-      "args": [
-        ".github/scripts/a01-book-system-e2e-authority-guards-001.js"
-      ],
-      "evidence_artifact": "book-system-e2e-authority-guards-001",
-      "overnight_eligible": false,
-      "description": "Qualify the exact current Book System bounded E2E authority guards: strict active-governed-subject currentness around Author Decision Queue and mandatory non-empty exact parent admission around Export Freeze; reject stale historical author subjects and technical-only freeze; preserve conditional author-decision semantics; grant no author, provider, lifecycle, document, export-freeze, publication, promotion, or production authority. PASS is exact-SHA focused evidence only."
-    },
-    "BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001": {
-      "workstream_id": "BOOK-SYSTEM",
-      "gate_class": "consolidated",
-      "source": "subject",
-      "executable": "node",
-      "args": [
-        ".github/scripts/a01-book-system-end-to-end-authoring-001.js"
-      ],
-      "evidence_artifact": "book-system-end-to-end-authoring-001",
-      "overnight_eligible": false,
-      "description": "Qualify the exact Book System end-to-end authoring composition subject through the unchanged 48-case synthetic matrix: exact predecessor binding; parent-owned provider admission; persistent Lifecycle ledger rebinding; Version/Rollback custody; strict current-subject author decisions; strict Export Freeze parent admission; stale artifact/provenance/rights/privacy rejection; export-freeze/publication separation; synthetic-only author/publication fixtures; no Book document engine; no provider self-admission; and zero qualification transfer. PASS is exact-SHA consolidated evidence only and grants no real author, publication, promotion, or production authority."
     }
   }
 }
