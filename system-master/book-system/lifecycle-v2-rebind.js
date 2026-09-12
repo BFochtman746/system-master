@@ -63,11 +63,6 @@ function projectCanonicalParent(canonicalParentInput) {
   };
 }
 
-function canonicalBinding(canonicalParent) {
-  core.validateParent(canonicalParent);
-  return { state_version: canonicalParent.state_version, state_digest: canonicalParent.state_digest };
-}
-
 function emptyUnitState(unitRef, unitType = 'CHAPTER', status = 'PLANNED', authorRequired = false) {
   return {
     unit_ref: unitRef,
@@ -85,15 +80,13 @@ function emptyUnitState(unitRef, unitType = 'CHAPTER', status = 'PLANNED', autho
 function createLifecycleSpecialistState(canonicalParentInput, options = {}) {
   const canonicalParent = clone(canonicalParentInput);
   const projection = projectCanonicalParent(canonicalParent);
-  const unitStates = clone(options.unit_states || {});
-  const dependencyEdges = clone(options.dependency_edges || []);
   const ledger = {
     ledger_schema_version: contract.engine_version,
     ledger_version: 1,
     bound_parent_state_version: projection.state_version,
     bound_parent_state_digest: engine.digestParentState(projection),
-    unit_states: unitStates,
-    dependency_edges: dependencyEdges,
+    unit_states: clone(options.unit_states || {}),
+    dependency_edges: clone(options.dependency_edges || []),
     processed_requests: {},
     transition_receipts: {},
   };
@@ -165,14 +158,28 @@ function delegatedRequest(canonicalParent, lifecycleState, request) {
   };
 }
 
-function buildSpecialistReceipt({ request, preIdentity, postIdentity, delegatedResult, canonicalPre, canonicalPost, disposition }) {
+function specialistReceiptIdFromFingerprint(transitionRequestId, idempotencyKey, requestFingerprint, preIdentity) {
+  return `BLC-${core.sha256({
+    transition_request_id: transitionRequestId,
+    idempotency_key: idempotencyKey,
+    request_fingerprint: requestFingerprint,
+    pre_identity: preIdentity,
+  }).slice(0, 32).toUpperCase()}`;
+}
+
+function specialistReceiptId(request, preIdentity) {
+  return specialistReceiptIdFromFingerprint(request.transition_request_id, request.idempotency_key, core.sha256(request), preIdentity);
+}
+
+function buildSpecialistReceipt({ receiptId, request, requestFingerprint, preIdentity, postIdentity, delegatedResult, canonicalPre, canonicalPost, disposition }) {
   const receipt = {
     receipt_schema_version: SPECIALIST_RECEIPT_SCHEMA_VERSION,
-    receipt_id: `BLC-${core.sha256({ transition_request_id: request.transition_request_id, idempotency_key: request.idempotency_key, request_fingerprint: core.sha256(request), pre_identity: preIdentity, post_identity: postIdentity }).slice(0, 32).toUpperCase()}`,
+    receipt_id: receiptId,
     specialist_kind: SPECIALIST_KIND,
     book_project_id: canonicalPre.book_project.book_project_id,
     transition_request_id: request.transition_request_id,
     idempotency_key: request.idempotency_key,
+    request_fingerprint: requestFingerprint,
     scope: request.scope,
     target_ref: request.target_ref,
     from_status: delegatedResult.receipt.from_status,
@@ -209,7 +216,12 @@ function validatePreparedLifecycleDelta(deltaInput, canonicalPreInput, canonical
   validateLifecycleSpecialistState(delta.post_state, canonicalPost);
   if (core.sha256(delta.post_state) !== delta.post_lifecycle_identity) fail('LIFECYCLE_POST_IDENTITY_MISMATCH');
   if (!obj(delta.specialist_receipt) || delta.specialist_receipt.receipt_schema_version !== SPECIALIST_RECEIPT_SCHEMA_VERSION) fail('INVALID_SPECIALIST_RECEIPT');
-  const receiptCopy = clone(delta.specialist_receipt);
+  const sr = delta.specialist_receipt;
+  if (sr.pre_lifecycle_identity !== delta.expected_lifecycle_identity || sr.post_lifecycle_identity !== delta.post_lifecycle_identity) fail('SPECIALIST_RECEIPT_IDENTITY_MISMATCH');
+  if (!isSha(sr.request_fingerprint)) fail('INVALID_REQUEST_FINGERPRINT');
+  const expectedReceiptId = specialistReceiptIdFromFingerprint(sr.transition_request_id, sr.idempotency_key, sr.request_fingerprint, delta.expected_lifecycle_identity);
+  if (sr.receipt_id !== expectedReceiptId) fail('SPECIALIST_RECEIPT_ID_MISMATCH');
+  const receiptCopy = clone(sr);
   const claimedReceiptDigest = receiptCopy.receipt_digest;
   delete receiptCopy.receipt_digest;
   if (core.sha256(receiptCopy) !== claimedReceiptDigest) fail('SPECIALIST_RECEIPT_DIGEST_MISMATCH');
@@ -234,12 +246,13 @@ function prepareLifecycleTransition({ canonicalParent: canonicalParentInput, lif
   const projection = projectCanonicalParent(canonicalParent);
   const engineRequest = delegatedRequest(canonicalParent, lifecycleState, request);
   const delegatedResult = engine.applyTransition(contract, projection, lifecycleState.lifecycle_ledger, engineRequest);
+  const requestFingerprint = core.sha256(request);
+  const receiptId = specialistReceiptIdFromFingerprint(request.transition_request_id, request.idempotency_key, requestFingerprint, preIdentity);
 
   let canonicalPost = canonicalParent;
   let parentEffect = null;
   if (request.scope === 'PROJECT') {
     if (request.target_ref !== canonicalParent.book_project.book_project_id) fail('PROJECT_TARGET_REF_MISMATCH');
-    const provisionalRef = `BLC-PREPARED:${request.transition_request_id}`;
     const payload = { to_status: delegatedResult.receipt.to_status };
     parentEffect = {
       effect_schema_version: core.EFFECT_SCHEMA_VERSION,
@@ -254,12 +267,11 @@ function prepareLifecycleTransition({ canonicalParent: canonicalParentInput, lif
       effect_payload_digest: core.effectPayloadDigest(payload),
       subject_identity_refs: [canonicalParent.book_project.book_project_id],
       evidence_refs: clone(request.evidence_refs),
-      specialist_receipt_refs: [provisionalRef],
+      specialist_receipt_refs: [receiptId],
       created_at: request.created_at,
       expected_specialist_ledger_identity: preIdentity,
     };
-    const provisional = core.applyEffect(canonicalParent, parentEffect);
-    canonicalPost = provisional.parent_state;
+    canonicalPost = core.applyEffect(canonicalParent, parentEffect).parent_state;
   }
 
   const postProjection = request.scope === 'PROJECT' ? projectCanonicalParent(canonicalPost) : projection;
@@ -271,21 +283,13 @@ function prepareLifecycleTransition({ canonicalParent: canonicalParentInput, lif
     delegated_parent_projection_digest: engine.digestParentState(postProjection),
     lifecycle_ledger: clone(delegatedResult.lifecycle_ledger),
   };
-
   if (postState.lifecycle_ledger.bound_parent_state_version !== postProjection.state_version || postState.lifecycle_ledger.bound_parent_state_digest !== engine.digestParentState(postProjection)) {
     fail('DELEGATED_LEDGER_POST_BINDING_MISMATCH');
   }
   validateLifecycleSpecialistState(postState, canonicalPost);
   const postIdentity = core.sha256(postState);
   const disposition = request.scope === 'PROJECT' ? 'PREPARED_FOR_PARENT' : 'PREPARED_SPECIALIST_ONLY';
-  const specialistReceipt = buildSpecialistReceipt({ request, preIdentity, postIdentity, delegatedResult, canonicalPre: canonicalParent, canonicalPost, disposition });
-
-  if (parentEffect) {
-    parentEffect.specialist_receipt_refs = [specialistReceipt.receipt_id];
-    const rerun = core.applyEffect(canonicalParent, parentEffect);
-    if (rerun.parent_state.state_digest !== canonicalPost.state_digest) fail('PARENT_SUCCESSOR_CHANGED_AFTER_RECEIPT_BINDING');
-    canonicalPost = rerun.parent_state;
-  }
+  const specialistReceipt = buildSpecialistReceipt({ receiptId, request, requestFingerprint, preIdentity, postIdentity, delegatedResult, canonicalPre: canonicalParent, canonicalPost, disposition });
 
   const delta = {
     specialist_kind: SPECIALIST_KIND,
@@ -326,6 +330,7 @@ module.exports = {
   createLifecycleSpecialistState,
   validateLifecycleSpecialistState,
   lifecycleIdentity,
+  specialistReceiptId,
   prepareLifecycleTransition,
   validatePreparedLifecycleDelta,
 };
