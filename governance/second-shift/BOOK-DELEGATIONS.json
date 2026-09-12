@@ -2,46 +2,58 @@
   "owner_system_id": "BOOK",
   "owner_path": "SYSTEM_MASTER/BOOK",
   "control_ref": "book-system/control-v1",
-  "last_known_control_head": "27fe9a3621c92e414874ce229341e58e71b76375",
+  "last_known_control_head": "f7a42615644457a94c4b2218d59c549054e09108",
   "program_job_lock": "governance/SYSTEM-PROGRAM-JOB-LOCK-001.json",
   "system_completion_status": "governance/SYSTEM-COMPLETION-STATUS-001.json",
-  "delegation_epoch": 33,
+  "delegation_epoch": 34,
   "active_delegations": [
     {
-      "delegation_id": "SECOND-SHIFT-BOOK-POST-SCHEDULER-OPEN-SEAM-CENSUS-001",
+      "delegation_id": "SECOND-SHIFT-BOOK-RECONSTRUCTION-B02-A",
       "owner_path": "SYSTEM_MASTER/BOOK",
-      "objective_id": "BOOK-POST-SCHEDULER-OPEN-SEAM-CENSUS-001",
-      "obligation_id": "BOOK-PROSE-PHASE-2-ORCHESTRATOR-CLOSURE-CENSUS-001",
-      "active_prose_execution_owner": null,
+      "objective_id": "BOOK-RECONSTRUCTION-B02-A",
+      "obligation_id": "BOOK-RECONSTRUCTION-B02-A",
       "state": "READY",
-      "priority": "BOOK_OWNER_POST_SCHEDULER_DEPENDENCY_RECONCILIATION",
+      "priority": "BOOK_OWNER_RECONSTRUCTION_RECOVER_INVENTORY",
       "valid_for_control_ref": "book-system/control-v1",
-      "valid_for_control_head": "27fe9a3621c92e414874ce229341e58e71b76375",
-      "created_at": "2026-09-11T20:20:00-04:00",
-      "last_revalidated_at": "2026-09-11T20:20:00-04:00",
-      "parent_checkpoint": "qualification/book-system/phase3a/BOOK-WORKFLOW-SCHEDULER-EXECUTION-RUNTIME-CLOSURE-RECEIPT-001.json",
-      "classification": "BOOK_OWNED_POST_SCHEDULER_OPEN_SEAM_CENSUS",
-      "completion_delta": "Re-read exact live Book owner state after scheduler closure, classify only genuinely open Book-owned seams, and bind at most one dependency-valid successor without replaying Phase 2, Context Compiler, durable persistence, scheduler qualification, or retired Prose work.",
-      "stop_condition": "One genuinely open dependency-valid Book-owned successor is proven from current authority and exact live owner evidence, or the exact external/private/A-01/human/native blocker is preserved without manufacturing executable work.",
+      "valid_for_control_head": "f7a42615644457a94c4b2218d59c549054e09108",
+      "created_at": "2026-09-12T10:01:34-04:00",
+      "last_revalidated_at": "2026-09-12T10:01:34-04:00",
+      "parent_checkpoint": "qualification/book-system/reconstruction/BOOK-RECONSTRUCTION-B01-F-CONTROL-FREEZE-001.md",
+      "classification": "BOOK_RECONSTRUCTION_B02_A_RECOVER_INVENTORY_ONLY",
+      "completion_delta": "Losslessly recover and inventory every atomic B02 source-intake and existing-book-recovery requirement across current Book runtime, historical Book/literary/Prose archaeology, qualification code, tests, fixtures, workflows, research, schemas, contracts and evidence receipts; classify every item with the reconstruction truth classes and required owner/state/interface/runtime/evidence/blocker trace; reach unaccounted B02-A archaeology requirements = 0 without entering design or implementation.",
+      "stop_condition": "Stop when every bounded B02-A requirement and recovered behavior is accounted and classified, or preserve the exact evidence gap/authority boundary that prevents lossless closure. Do not synthesize author, rights, private, native, provider, literary-quality, publication, production or A-01 standing.",
       "allowed_work": [
-        "inspect exact current Book owner head and current authority",
-        "classify remaining Book-owned execution/integration seams against existing exact evidence",
-        "distinguish machine-resolvable Book work from external provider, private evaluator, A-01, author, native, publication and production authority",
-        "bind at most one demonstrated Book successor"
+        "read exact live Book owner head and current authority before mutation",
+        "perform current and historical repository archaeology for B02 source intake and existing-book recovery",
+        "classify recovered behavior using only MAIN-INSTALLED, BOOK-BRANCH-BUILT, HISTORICAL-BOOK-CODE, QUALIFIER-ONLY, DESIGNED-NOT-INSTALLED and EXTERNAL-REQUIRED",
+        "preserve B00 and B01 frozen invariants and reopen only exact contradicted scope with fresh evidence",
+        "record a lossless B02-A recovery and inventory artifact",
+        "bind at most one dependency-valid B02 analysis successor after B02-A reaches unaccounted requirements = 0"
       ],
       "forbidden_authority": [
-        "do not create or reactivate PROSE work",
-        "do not route completed-Prose integration to Documents",
-        "do not replay Phase 2, Context Compiler, durable persistence or scheduler qualification",
-        "do not execute Book canonical admission or synthesize author decisions",
-        "do not infer provider, A-01, native, publication or production success",
-        "do not declare BOOK complete"
+        "do not create or reactivate PROSE work or identity",
+        "do not replay the old scheduler or open-seam work",
+        "do not perform B02 design or implementation from this delegation",
+        "do not mutate Book canonical state or self-admit recovered source material",
+        "do not infer author decisions, legal rights, private-source permission, native fidelity, external-provider availability, literary quality, publication authority, production standing or A-01 standing",
+        "do not declare BOOK or B02 complete"
       ],
-      "on_pass": "Retire this census with exact evidence and bind exactly one dependency-valid Book successor if one exists under current authority.",
-      "on_blocked": "Preserve the exact blocker and bind no unauthorized mutation successor."
+      "on_pass": "Retire this recovery/inventory delegation only after unaccounted B02-A archaeology requirements = 0 and every recovered behavior has complete truth/ownership/state/interface/runtime/evidence/blocker classification; then bind exactly one dependency-valid B02 analysis successor without executing it.",
+      "on_failure": "Preserve the exact archaeology gap, blocker or authority mismatch; release any claim; do not manufacture completion or unauthorized successor work."
     }
   ],
   "retired_delegations": [
+    {
+      "delegation_id": "SECOND-SHIFT-BOOK-POST-SCHEDULER-OPEN-SEAM-CENSUS-001",
+      "state": "SUPERSEDED__RECONSTRUCTION_AUTHORITY__DO_NOT_REPLAY",
+      "valid_for_control_head": "27fe9a3621c92e414874ce229341e58e71b76375",
+      "objective_id": "BOOK-POST-SCHEDULER-OPEN-SEAM-CENSUS-001",
+      "obligation_id": "BOOK-PROSE-PHASE-2-ORCHESTRATOR-CLOSURE-CENSUS-001",
+      "retirement_reason": "The Book reconstruction advanced through frozen B00 and B01 and explicitly admitted BOOK-RECONSTRUCTION-B02-A. The post-scheduler open-seam census is stale pre-reconstruction work and must not be replayed.",
+      "history_preserved": true,
+      "prose_execution_created": false,
+      "book_completion_claimed": false
+    },
     {
       "delegation_id": "SECOND-SHIFT-BOOK-WORKFLOW-SCHEDULER-EXECUTION-RUNTIME-001",
       "state": "COMPLETED__EXACT_SUBJECT_HOSTED_PASS__SUPERSEDED_BY_POST_SCHEDULER_OPEN_SEAM_CENSUS",
@@ -117,15 +129,15 @@
     }
   ],
   "prior_full_history": {
-    "blob_sha": "f6eb5ec737a2231161c0ff732742e38bacf18aef",
+    "blob_sha": "5b7e5a6f37e519f2a6860a1767266b5a4ab8feb4",
     "standing": "IMMUTABLE_GIT_HISTORY_PRESERVED"
   },
   "prior_epoch_snapshot": {
-    "delegation_epoch": 32,
-    "blob_sha": "8630db0e4360f312b8cd79c532a08b42d07eac69",
+    "delegation_epoch": 33,
+    "blob_sha": "5b7e5a6f37e519f2a6860a1767266b5a4ab8feb4",
     "standing": "IMMUTABLE_GIT_HISTORY_PRESERVED"
   },
   "owner_revalidation_required": false,
-  "reason": "Scheduler exact subject 27fe9a3621c92e414874ce229341e58e71b76375 has fresh hosted 39/39 PASS, exact source/test/workflow blob identities, artifact digest, successful control-plane enforcement and zero canonical Book effect. The stale epoch-32 scheduler delegation bound to predecessor head e2a23e8b is retired without replay. The only bound successor is a non-mutating post-scheduler open-seam census that must re-read live Book authority before selecting further work. No Prose lane is reopened and BOOK remains incomplete.",
+  "reason": "Book reconstruction B00 and B01 are frozen and BOOK-RECONSTRUCTION-B02-A is the exact admitted successor. The active delegation is rebound to exact Book owner head f7a42615644457a94c4b2218d59c549054e09108 for recovery/inventory only. The old post-scheduler open-seam census is retired without replay. Historical Prose remains provenance only and BOOK remains incomplete.",
   "empty_is_valid": false
 }
