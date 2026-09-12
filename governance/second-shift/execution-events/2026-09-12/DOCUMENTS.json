@@ -144,6 +144,58 @@
       "delegation_id": "SECOND-SHIFT-DOCUMENTS-SPINE-IDENTIFY-DESIGN-LOCK-001",
       "objective_id": "DOCUMENTS-SPINE-IDENTIFY-PROFILE-DESIGN-LOCK-001",
       "evidence": "governance/second-shift/DOCUMENTS-DELEGATIONS.json epoch 9 at main commit b33f1f55279f8496d1b2dfc25d64073529d5caa8"
+    },
+    {
+      "event_id": "DOC-20260912-012230-CLAIMED",
+      "occurred_at": "2026-09-12T01:22:30-04:00",
+      "event_type": "CLAIMED",
+      "lane": "DOCUMENTS",
+      "control_ref": "documents/control-v1",
+      "control_head": "3e1336f8f4a1285b19fb8dd76ea903412be07cd9",
+      "delegation_id": "SECOND-SHIFT-DOCUMENTS-SPINE-IDENTIFY-DESIGN-LOCK-001",
+      "objective_id": "DOCUMENTS-SPINE-IDENTIFY-PROFILE-DESIGN-LOCK-001",
+      "lease_id": "documents-20260912-identify-design-lock-001",
+      "idempotency_key": "DOCUMENTS-SPINE-IDENTIFY-PROFILE-DESIGN-LOCK-001@3e1336f8",
+      "lease_expires_at": "2026-09-12T01:52:30-04:00",
+      "attempt": 1,
+      "evidence": "Exact live Documents owner head re-read before executing the bound specification-only design-lock successor."
+    },
+    {
+      "event_id": "DOC-20260912-012231-RUNNING",
+      "occurred_at": "2026-09-12T01:22:31-04:00",
+      "event_type": "RUNNING",
+      "lane": "DOCUMENTS",
+      "control_ref": "documents/control-v1",
+      "control_head": "3e1336f8f4a1285b19fb8dd76ea903412be07cd9",
+      "delegation_id": "SECOND-SHIFT-DOCUMENTS-SPINE-IDENTIFY-DESIGN-LOCK-001",
+      "objective_id": "DOCUMENTS-SPINE-IDENTIFY-PROFILE-DESIGN-LOCK-001",
+      "lease_id": "documents-20260912-identify-design-lock-001",
+      "idempotency_key": "DOCUMENTS-SPINE-IDENTIFY-PROFILE-DESIGN-LOCK-001@3e1336f8",
+      "evidence": "Freezing Documents-owned identity/subtype/profile/active-content contract, evidence precedence, persistence/idempotency and isolated+cumulative qualification boundaries without runtime mutation."
+    },
+    {
+      "event_id": "DOC-20260912-012413-COMPLETED",
+      "occurred_at": "2026-09-12T01:24:13-04:00",
+      "event_type": "COMPLETED",
+      "lane": "DOCUMENTS",
+      "control_ref": "documents/control-v1",
+      "control_head": "3e7c21045bf52ba3eee6b89a88e38f25542c0906",
+      "delegation_id": "SECOND-SHIFT-DOCUMENTS-SPINE-IDENTIFY-DESIGN-LOCK-001",
+      "objective_id": "DOCUMENTS-SPINE-IDENTIFY-PROFILE-DESIGN-LOCK-001",
+      "lease_id": "documents-20260912-identify-design-lock-001",
+      "idempotency_key": "DOCUMENTS-SPINE-IDENTIFY-PROFILE-DESIGN-LOCK-001@3e1336f8",
+      "evidence": "documents/control-v1/DOCUMENTS-SPINE-IDENTIFY-PROFILE-DESIGN-LOCK-001.md at exact subject 3e7c21045bf52ba3eee6b89a88e38f25542c0906"
+    },
+    {
+      "event_id": "DOC-20260912-012536-SUCCESSOR",
+      "occurred_at": "2026-09-12T01:25:36-04:00",
+      "event_type": "SUCCESSOR_BOUND",
+      "lane": "DOCUMENTS",
+      "control_ref": "documents/control-v1",
+      "control_head": "3e7c21045bf52ba3eee6b89a88e38f25542c0906",
+      "delegation_id": "SECOND-SHIFT-DOCUMENTS-SPINE-SECURE-FORENSIC-PREP-001",
+      "objective_id": "DOCUMENTS-SPINE-SECURE-FORENSIC-PREP-001",
+      "evidence": "governance/second-shift/DOCUMENTS-DELEGATIONS.json epoch 10 at main commit e0c92628beba284da493c809a29777e69826837d"
     }
   ]
 }
