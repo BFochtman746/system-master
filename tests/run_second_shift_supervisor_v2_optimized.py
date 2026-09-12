@@ -137,15 +137,54 @@ def install_indexed_randomized_stress(module):
     return original
 
 
+def install_idempotent_dispatch_retry_test(module):
+    """Keep retry/circuit coverage while requiring stable failure-delivery identities."""
+    original = module.SupervisorV2Tests.test_dispatch_retry_then_circuit
+
+    def idempotent_dispatch_retry_then_circuit(self):
+        claim = self.claim()
+        first = self.fx.store.dispatch_failed(
+            claim.dispatch_id,
+            "network",
+            retry_budget=3,
+            now=module.T0 + module.dt.timedelta(seconds=1),
+            failure_id="FAILURE-1",
+        )
+        second = self.fx.store.dispatch_failed(
+            claim.dispatch_id,
+            "network",
+            retry_budget=3,
+            now=module.T0 + module.dt.timedelta(seconds=20),
+            failure_id="FAILURE-2",
+        )
+        third = self.fx.store.dispatch_failed(
+            claim.dispatch_id,
+            "network",
+            retry_budget=3,
+            now=module.T0 + module.dt.timedelta(seconds=40),
+            failure_id="FAILURE-3",
+        )
+        self.assertEqual(first["state"], "RETRY_WAIT")
+        self.assertEqual(second["state"], "RETRY_WAIT")
+        self.assertEqual(third["state"], "CIRCUIT_OPEN")
+        self.assertEqual(self.fx.store.pending_dispatches(module.T0 + module.dt.timedelta(minutes=20)), [])
+        self.assertEqual(self.fx.store.snapshot()["circuits"][0]["state"], "OPEN")
+
+    module.SupervisorV2Tests.test_dispatch_retry_then_circuit = idempotent_dispatch_retry_then_circuit
+    return original
+
+
 def main() -> int:
     original_audit = SupervisorStore.audit_invariants
     SupervisorStore.audit_invariants = quick_logical_audit
     module = load_test_module()
     original_randomized = install_indexed_randomized_stress(module)
+    original_dispatch_retry = install_idempotent_dispatch_retry_test(module)
     try:
         suite = unittest.defaultTestLoader.loadTestsFromTestCase(module.SupervisorV2Tests)
         result = unittest.TextTestRunner(verbosity=2).run(suite)
     finally:
+        module.SupervisorV2Tests.test_dispatch_retry_then_circuit = original_dispatch_retry
         module.SupervisorV2Tests.test_randomized_20000_transition_invariant_stress = original_randomized
         SupervisorStore.audit_invariants = original_audit
 
