@@ -46,6 +46,7 @@ class BookCanonicalParentF6Error extends Error {
 function fail(code, detail = '') { throw new BookCanonicalParentF6Error(code, detail); }
 function clone(v) { return v === undefined ? undefined : JSON.parse(JSON.stringify(v)); }
 function nonEmpty(v) { return typeof v === 'string' && v.trim().length > 0; }
+function isSha(v) { return typeof v === 'string' && /^[a-f0-9]{64}$/.test(v); }
 
 function validateProjectStatus(status) {
   if (!STATUS_SET.has(status)) fail('INVALID_PROJECT_STATUS', String(status));
@@ -77,6 +78,14 @@ function normalizedEffect(parent, effect) {
   return { normalizedParent, normalizedEffect: normalized };
 }
 
+function requireLifecycleSpecialistBinding(effect) {
+  if (!Array.isArray(effect.specialist_receipt_refs) || effect.specialist_receipt_refs.length < 1) {
+    fail('LIFECYCLE_SPECIALIST_RECEIPT_REQUIRED');
+  }
+  for (const ref of effect.specialist_receipt_refs) if (!nonEmpty(ref)) fail('MALFORMED_REFERENCE', 'specialist_receipt_refs');
+  if (!isSha(effect.expected_specialist_ledger_identity)) fail('LIFECYCLE_SPECIALIST_LEDGER_IDENTITY_REQUIRED');
+}
+
 function validateEffectEnvelope(parentInput, effectInput) {
   const parent = clone(parentInput);
   const effect = clone(effectInput);
@@ -87,6 +96,7 @@ function validateEffectEnvelope(parentInput, effectInput) {
   const { normalizedParent, normalizedEffect: normalized } = normalizedEffect(parent, effect);
   if (effect.effect_type === prior.F5_EFFECT_TYPE) prior.validateAdmissionEffect(normalizedParent, normalized);
   else prior.validateEffectEnvelope(normalizedParent, normalized);
+  if (effect.effect_type === 'ADVANCE_PROJECT_STATUS') requireLifecycleSpecialistBinding(effect);
   return true;
 }
 
@@ -198,6 +208,7 @@ module.exports = {
   PROJECT_TRANSITIONS,
   validateProjectStatus,
   legalProjectTransition,
+  requireLifecycleSpecialistBinding,
   validateParent,
   validateEffectEnvelope,
   applyEffect,
