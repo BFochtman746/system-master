@@ -17,7 +17,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Patch exact D4 guard and rebind qualifier
+      - name: Patch exact D4 raw-content guard
         run: |
           set -euo pipefail
           test "$(git hash-object system-master/book-system/book-story-bible-admission-v1.js)" = '9f01646fa9ad275bc0c43761658472bbe84eb042'
@@ -30,18 +30,7 @@ jobs:
           assert old in s
           p.write_text(s.replace(old,new,1))
           PY
-          new_sha="$(git hash-object system-master/book-system/book-story-bible-admission-v1.js)"
-          python3 - "$new_sha" <<'PY'
-          from pathlib import Path
-          import sys
-          p=Path('.github/workflows/book-b03-d4-story-bible-admission-qualification.yml')
-          s=p.read_text()
-          old='9f01646fa9ad275bc0c43761658472bbe84eb042'
-          assert old in s
-          p.write_text(s.replace(old,sys.argv[1],1))
-          PY
-          git rm .github/workflows/book-b03-d4-guard-repair.yml
-          git add system-master/book-system/book-story-bible-admission-v1.js .github/workflows/book-b03-d4-story-bible-admission-qualification.yml
+          git add system-master/book-system/book-story-bible-admission-v1.js
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git commit -m 'book: repair B03 D4 raw-content evidence guard'
