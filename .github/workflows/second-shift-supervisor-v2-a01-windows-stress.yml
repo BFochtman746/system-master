@@ -8,46 +8,33 @@ on:
     paths:
       - 'tools/second_shift_supervisor_v2.py'
       - 'tests/test_second_shift_supervisor_v2.py'
+      - 'tests/run_second_shift_supervisor_v2_optimized.py'
+      - 'control-gateway/python/a01_supervisor_adapter.py'
+      - 'tests/test_control_gateway_a01_supervisor_adapter.py'
+      - '.github/scripts/a01-second-shift-supervisor-v2-qualify.js'
+      - 'qualification/a01/registry.json'
       - '.github/workflows/second-shift-supervisor-v2-a01-windows-stress.yml'
 
 permissions:
   contents: read
-
-concurrency:
-  group: second-shift-supervisor-v2-a01-windows-stress
-  queue: max
-  cancel-in-progress: false
+  actions: read
 
 jobs:
-  a01-windows:
-    name: Exact A-01 Windows crash, concurrency, fencing and SQLite stress
-    runs-on: [self-hosted, Windows, X64]
-    timeout-minutes: 30
-    steps:
-      - name: Checkout exact supervisor subject
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-        with:
-          fetch-depth: 1
-          persist-credentials: false
-      - name: Runtime diagnostics
-        shell: powershell
-        run: |
-          python --version
-          python -c "import sqlite3,sys,platform; print('python',sys.version); print('sqlite',sqlite3.sqlite_version); print('platform',platform.platform())"
-      - name: Syntax check
-        shell: powershell
-        run: |
-          python -m py_compile tools/second_shift_supervisor_v2.py
-          python -m py_compile tests/test_second_shift_supervisor_v2.py
-      - name: Run exact supervisor reliability stress
-        shell: powershell
-        run: python tests/test_second_shift_supervisor_v2.py
-      - name: Upload exact A-01 stress evidence
-        if: always() && hashFiles('.second-shift-supervisor-v2-stress.json') != ''
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: second-shift-supervisor-v2-a01-${{ github.run_id }}
-          path: .second-shift-supervisor-v2-stress.json
-          include-hidden-files: true
-          if-no-files-found: error
-          retention-days: 30
+  route-through-a01-control-plane:
+    name: Route exact Second Shift supervisor subject through registered A-01 admission
+    uses: ./.github/workflows/a01-control-plane-gateway.yml
+    with:
+      qualification_id: SECOND-SHIFT-SUPERVISOR-V2-A01-STRESS
+      workstream_id: SECOND-SHIFT-CONTROL-GATEWAY
+      subject_sha: ${{ github.sha }}
+      origin_ref: ${{ github.ref }}
+      resume_on_pass: 'Bind the exact A-01-qualified supervisor subject back into the Control Gateway qualification ledger; do not production-activate automatically.'
+      resume_on_failure: 'Preserve exact A-01 evidence, fail closed, repair the admitted supervisor boundary, and rerun the minimum sufficient qualification.'
+      notification_target: originating-workstream
+      execution_context: normal
+      qualifier_timeout_minutes: 28
+      job_timeout_minutes: 30
+      repair_attempt: 0
+      max_repair_attempts: 1
+      repair_transaction_id: ''
+    secrets: inherit
