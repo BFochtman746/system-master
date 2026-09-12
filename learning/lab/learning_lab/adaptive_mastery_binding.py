@@ -8,7 +8,7 @@ from .mastery_evidence_reader import validated_attempts_for_skill
 from .models import GateState, MasteryProjection, MasteryStage
 
 
-S04_ADAPTIVE_MASTERY_BINDING_VERSION = "001M-S04-ADAPTIVE-CONSUMES-S03-V4"
+S04_ADAPTIVE_MASTERY_BINDING_VERSION = "001M-S04-ADAPTIVE-CONSUMES-S03-V5"
 
 
 def _latest_correct(attempts, attempt_ids):
@@ -25,10 +25,11 @@ def _material_transfer_task(task: Mapping[str, Any] | None) -> bool:
         return novelty.upper() in {"MATERIALLY_NOVEL", "NOVEL_CONTEXT"}
     if not isinstance(novelty, Mapping):
         return False
-    # Admitted domain task catalogs use different bounded novelty vocabularies.
-    # An explicit positive novelty fact on the versioned task is enough to carry
-    # that task's already-admitted materially-new-context standing into S03.
-    return any(value is True for value in novelty.values())
+    # Versioned transfer-task catalogs use bounded domain-specific novelty fields:
+    # booleans in some domains and explicit context/item-family declarations in
+    # open domains. A non-empty admitted novelty contract is the Curriculum fact;
+    # S04 only translates it to the S03 evaluator's normalized novelty standing.
+    return bool(novelty)
 
 
 def _copy_with_authoritative_transfer_context(self, attempts: Iterable[Mapping[str, Any]]) -> List[Dict[str, Any]]:
