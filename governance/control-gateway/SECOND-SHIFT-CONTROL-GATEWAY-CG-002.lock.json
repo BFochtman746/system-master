@@ -1,0 +1,126 @@
+{
+  "schema": "second-shift-control-gateway.lineage-rebind.v1",
+  "operation_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-002",
+  "status": "FROZEN",
+  "mission_version": "1.0",
+  "predecessor_sha": "14d87b02ac33198c9780ef80ffc8689d2da5dbe8",
+  "lineages": {
+    "second_shift_a01": {
+      "subject_sha": "6d0602660c8544bfd15f07f19752f9b51d04c55e",
+      "standing": "PRESERVE_AS_A01_SUPERVISOR_EXECUTION_LINEAGE"
+    },
+    "github_control_plane_candidate": {
+      "subject_sha": "8ba81e2fba9da87f95675dd868dd34d1d264d7a3",
+      "standing": "SELECTIVE_COMPONENT_REUSE_ONLY"
+    },
+    "premature_002d_freeze": {
+      "subject_sha": "38b9b815ceba96fc6acce98b3f286625292b0744",
+      "standing": "NOT_INTEGRATED_ARCHITECTURE_AUTHORITY"
+    },
+    "foundation_003_derivative": {
+      "subject_sha": "77fe9cf79f15aa3299030c2cc7da6daa65487b58",
+      "standing": "QUARANTINED_EVIDENCE"
+    }
+  },
+  "authority_owners": {
+    "chatgpt": ["PROPOSE_INTENT", "SUBMIT_COMMAND", "QUERY_STATUS", "PRESENT_USER_APPROVAL"],
+    "github_gateway": ["COMMAND_IDENTITY", "STATE_AUTHORITY", "GITHUB_ADMISSION", "VALIDATION", "DURABLE_JOURNAL", "ACTIVE_WORK_PACKET", "RECEIPTS", "NEXT_LEGAL_OPERATION"],
+    "a01_supervisor": ["A01_ADMISSION_ENFORCEMENT", "LIVE_SCHEDULING", "DEPENDENCY_READY_DISPATCH", "NOT_BEFORE", "OVERNIGHT_TIMING", "LEASES", "FENCING", "RETRIES", "CONCURRENCY", "RESTART_RECOVERY", "EXECUTOR_INVOCATION"],
+    "registered_executor": ["BOUNDED_EXECUTION", "HEARTBEAT_PROGRESS", "TYPED_RESULT", "EVIDENCE"]
+  },
+  "scheduler_authority": {
+    "owner": "A01_SECOND_SHIFT_SUPERVISOR_V2",
+    "exactly_one_per_task": true,
+    "github_actions_schedule_authoritative": false,
+    "notifications_authoritative": false,
+    "wake_hints_authoritative": false
+  },
+  "interfaces": [
+    "CommandEnvelope",
+    "ActiveWorkPacket",
+    "AdmissionReceipt",
+    "DispatchContract",
+    "WorkerPort",
+    "TerminalReceipt"
+  ],
+  "subjects": [
+    {"id":"CG2-01","name":"CHATGPT_COMMAND_SUBMISSION_IDENTITY","owner":"GITHUB_GATEWAY","disposition":"REUSE"},
+    {"id":"CG2-02","name":"GITHUB_DURABLE_INBOX_FORMAT","owner":"GITHUB_GATEWAY","disposition":"REUSE"},
+    {"id":"CG2-03","name":"COMMAND_FINGERPRINT_IDEMPOTENCY","owner":"GITHUB_GATEWAY_TO_A01_BRIDGE","disposition":"REPAIR"},
+    {"id":"CG2-04","name":"GITHUB_AUTHORITY_JOURNAL_CHECKPOINT","owner":"GITHUB_GATEWAY","disposition":"REUSE"},
+    {"id":"CG2-05","name":"GITHUB_MACHINE_IDENTITY","owner":"GITHUB_GATEWAY","disposition":"REUSE"},
+    {"id":"CG2-06","name":"A01_DISCOVERY_CLAIM","owner":"A01_SUPERVISOR","disposition":"REPAIR"},
+    {"id":"CG2-07","name":"WAKE_HINTS_VS_AUTHORITY","owner":"GITHUB_GATEWAY","disposition":"REUSE"},
+    {"id":"CG2-08","name":"NOT_BEFORE_OVERNIGHT_TIMING","owner":"A01_SUPERVISOR","disposition":"REPAIR"},
+    {"id":"CG2-09","name":"SINGLE_SCHEDULER_AUTHORITY","owner":"A01_SUPERVISOR","disposition":"REPAIR"},
+    {"id":"CG2-10","name":"LOCAL_LEASE_PROCESS_OWNERSHIP","owner":"A01_SUPERVISOR","disposition":"REUSE"},
+    {"id":"CG2-11","name":"DUPLICATE_DELIVERY","owner":"GATEWAY_AND_SUPERVISOR","disposition":"REPAIR"},
+    {"id":"CG2-12","name":"CRASH_BEFORE_DISPATCH","owner":"GATEWAY_AND_SUPERVISOR","disposition":"REPAIR"},
+    {"id":"CG2-13","name":"CRASH_DURING_EXECUTION","owner":"A01_SUPERVISOR","disposition":"REPAIR"},
+    {"id":"CG2-14","name":"GITHUB_UNAVAILABLE_WHILE_A01_RUNNING","owner":"GATEWAY_POLICY_AND_SUPERVISOR","disposition":"BUILD"},
+    {"id":"CG2-15","name":"A01_OFFLINE_COMMAND_ACCUMULATION","owner":"GATEWAY_AND_SUPERVISOR","disposition":"BUILD"},
+    {"id":"CG2-16","name":"RETRY_OWNERSHIP_BUDGETS","owner":"A01_SUPERVISOR_WITHIN_GATEWAY_POLICY","disposition":"REPAIR"},
+    {"id":"CG2-17","name":"REPOSITORY_BRANCH_PATH_WORKLOAD_ALLOWLISTS","owner":"GITHUB_GATEWAY","disposition":"BUILD"},
+    {"id":"CG2-18","name":"EXECUTOR_CAPABILITY_REGISTRY","owner":"A01_SUPERVISOR_AND_GATEWAY","disposition":"REPAIR"},
+    {"id":"CG2-19","name":"SECRETS_CREDENTIAL_BOUNDARIES","owner":"GITHUB_GATEWAY_AND_A01_HOST","disposition":"REPAIR"},
+    {"id":"CG2-20","name":"CANCELLATION","owner":"GATEWAY_DECISION_SUPERVISOR_ENFORCEMENT","disposition":"BUILD"},
+    {"id":"CG2-21","name":"PAUSE_RESUME","owner":"GATEWAY_DECISION_SUPERVISOR_ENFORCEMENT","disposition":"BUILD"},
+    {"id":"CG2-22","name":"DEPENDENCY_ORDERING","owner":"GATEWAY_PLAN_SUPERVISOR_EXECUTION","disposition":"BUILD"},
+    {"id":"CG2-23","name":"CONCURRENCY_RESOURCE_CONTROLS","owner":"A01_SUPERVISOR","disposition":"REPAIR"},
+    {"id":"CG2-24","name":"TASK_TIMEOUT","owner":"GATEWAY_POLICY_AND_SUPERVISOR","disposition":"REPAIR"},
+    {"id":"CG2-25","name":"RESULT_EVIDENCE_PUBLICATION","owner":"GITHUB_GATEWAY","disposition":"REPAIR"},
+    {"id":"CG2-26","name":"TERMINAL_RECEIPT","owner":"GITHUB_GATEWAY","disposition":"BUILD"},
+    {"id":"CG2-27","name":"READINESS_HEALTH","owner":"SUPERVISOR_AND_GATEWAY","disposition":"REPAIR"},
+    {"id":"CG2-28","name":"RESTART_RECOVERY","owner":"GATEWAY_AND_SUPERVISOR","disposition":"REPAIR"},
+    {"id":"CG2-29","name":"LATER_CHAT_STATUS_RECONSTRUCTION","owner":"GITHUB_GATEWAY","disposition":"BUILD"},
+    {"id":"CG2-30","name":"NIGHTLY_BATCH_START_END","owner":"A01_SUPERVISOR","disposition":"REPAIR"},
+    {"id":"CG2-31","name":"MANUAL_EMERGENCY_OVERRIDE","owner":"GITHUB_GATEWAY","disposition":"BUILD"},
+    {"id":"CG2-32","name":"QUALIFICATION_CUTOVER_PROOF","owner":"GATEWAY_AND_A01","disposition":"REPAIR"}
+  ],
+  "disposition_counts": {"REUSE":6,"REPAIR":17,"BUILD":9,"DROP":0,"DEFER":0,"TOTAL":32},
+  "component_dispositions": {
+    "controller_v2_wholesale_merge": "PROHIBITED",
+    "second_shift_wholesale_canonicalization": "PROHIBITED",
+    "controller_v2_kernel_identity_journal_ingress": "SELECTIVE_REUSE",
+    "second_shift_supervisor_sqlite_lease_fence_dispatch_recovery": "SELECTIVE_REUSE",
+    "system_master_lane_topology_policy": "WORKLOAD_SPECIFIC_NOT_GATEWAY_CORE",
+    "a01_control_plane_gateway": "REUSE_REPAIR_AS_REGISTERED_EXECUTION_ADAPTER",
+    "a01_control_plane_admission_broker": "REUSE_REPAIR_AS_REGISTERED_EXECUTION_ADAPTER",
+    "a01_control_plane_executor": "REUSE_REPAIR_AS_REGISTERED_EXECUTION_ADAPTER",
+    "a01_registry": "REUSE_REPAIR_REGISTER_CONTROLLER_QUALIFICATION",
+    "second_shift_supervisor_direct_self_hosted_stress_route": "DROP_AS_AUTHORITATIVE_ROUTE_PRESERVE_TEST_INTENT",
+    "a01_overnight_night_shift_scheduler": "LEGACY_UNTIL_CUTOVER_THEN_RETIRE_OR_DEMOTE_SCHEDULER_AUTHORITY",
+    "foundation_003_progression": "PROHIBITED"
+  },
+  "observed_collision": {
+    "run_id": 34664013476,
+    "workflow": "A-01 Control Plane Enforcement",
+    "result": "FAILURE",
+    "reason": ".github/workflows/second-shift-supervisor-v2-a01-windows-stress.yml: DIRECT_SELF_HOSTED_WORKFLOW_NOT_REGISTERED; use .github/workflows/a01-control-plane-gateway.yml",
+    "resolution": "REGISTER_SUPERVISOR_STRESS_QUALIFICATION_THROUGH_CANONICAL_A01_GATEWAY_DO_NOT_WEAKEN_ENFORCEMENT"
+  },
+  "qualification_cutover_order": [
+    "INTEGRATED_IMPLEMENTATION",
+    "HOST_QUALIFICATION",
+    "LIVE_GITHUB_CONTROL_STATE_PROVISION_AND_PREFLIGHT",
+    "REGISTER_A01_SUPERVISOR_QUALIFICATION",
+    "ACTUAL_A01_WINDOWS_STRESS",
+    "A01_SHADOW_MODE",
+    "A01_CANARY",
+    "OVERNIGHT_REHEARSAL_AND_MORNING_RECONSTRUCTION",
+    "RETIRE_COMPETING_SCHEDULER_AUTHORITY",
+    "PRODUCTION_ACTIVATION_RECEIPT"
+  ],
+  "mission_traceability": {
+    "CG1_requirements_bound": 17,
+    "CG2_subjects_adjudicated": 32,
+    "lossless": true
+  },
+  "production_activation": {
+    "allowed_now": false,
+    "actual_a01_qualification_required": true,
+    "hosted_tests_substitute_for_a01": false,
+    "external_github_control_state_setup_required": true
+  },
+  "exact_successor": "SECOND-SHIFT-CONTROL-GATEWAY-CG-003 — DURABLE ACTIVE-WORK STATE / NEXT-LEGAL-OPERATION IMPLEMENTATION + HOST QUALIFICATION"
+}
