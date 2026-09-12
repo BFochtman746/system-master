@@ -23,7 +23,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.sha }}
-          fetch-depth: 2
+          fetch-depth: 0
       - name: Record exact subject
         shell: bash
         run: |
@@ -34,7 +34,10 @@ jobs:
       - name: Syntax check qualifier
         run: python -m py_compile .github/scripts/learning-system-rebuild-001m-s01-qualify.py
       - name: Run isolated and cumulative qualification
-        run: python .github/scripts/learning-system-rebuild-001m-s01-qualify.py | tee learning-system-rebuild-001m-s01-result.json
+        shell: bash
+        run: |
+          set -euo pipefail
+          python .github/scripts/learning-system-rebuild-001m-s01-qualify.py | tee learning-system-rebuild-001m-s01-result.json
       - name: Upload exact-subject qualification evidence
         if: always()
         uses: actions/upload-artifact@v4
