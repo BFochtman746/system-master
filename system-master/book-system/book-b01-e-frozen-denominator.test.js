@@ -112,7 +112,7 @@ b01Case('A16', 'old /PROSE owner label cannot become active topology', 'D2 retir
 b01Case('A17', 'BOOK capability without admitted binding cannot dispatch by name alone', 'D3 missing-binding case', has(d3Source, 'CURRENT_CAPABILITY_BINDING_REQUIRED') && d3.current_dispatch_authorized_by_d3 === false);
 b01Case('A18', 'Documents technical output cannot become Book publication authority', 'D4 publication fence', d4.publication_authority_granted === false && d4.admission_handoff_canonical_effect === false);
 b01Case('A19', 'stale context cannot survive binding/source/Book/Story-Bible/service change', 'D2 stale suite', d2.changed_binding_stales_context === true && has(d2Source, 'staleSource') && has(d2Source, 'staleBook') && has(d2Source, 'staleStory'));
-b01Case('A20', 'candidate provenance requires exact current binding/source/evidence identity', 'D4 handoff binding checks', has(d4Source, 'ADMISSION_RECEIPT_BINDING_MISMATCH') && has(d4Source, 'capability_binding_digest') && d4.admission_handoff_canonical_effect === false);
+b01Case('A20', 'candidate provenance requires exact current binding/source/evidence identity', 'D4 handoff binding checks', has(d4Source, 'EXECUTION_RECEIPT_DIGEST_MISMATCH') && has(d4Source, 'capability_binding_digest') && d4.admission_handoff_canonical_effect === false);
 
 // X01-X09 — cross-component integration invariants.
 b01Case('X01', 'exact binding digest is included in bound-context identity', 'D2', d2.binding_digest_in_bound_context_identity === true);
