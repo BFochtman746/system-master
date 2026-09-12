@@ -1,0 +1,105 @@
+{
+  "schema": "second-shift-control-gateway.cg008-freeze.v1",
+  "operation_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-008",
+  "status": "HOST_QUALIFIED_SUPERVISOR_INTEGRATION_AND_A01_HANDOFF_DEVELOPMENT_FROZEN",
+  "mission_version": "SECOND-SHIFT-CONTROL-GATEWAY-CG-001/v1.0",
+  "predecessor_freeze_sha": "8d6a9bd0fd22cc0ee8db2fe688b4c2e0209f91c4",
+  "qualified_implementation_sha": "8a74194a37e81ae979f92ecbb0c55fbc371b4fc2",
+  "qualification_run_id": 34671167418,
+  "qualification_receipt_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-008-HOST-QUALIFICATION-34671167418",
+  "host_qualification": {
+    "node_22": {
+      "controller_tests": 145,
+      "controller_pass": 142,
+      "controller_fail": 0,
+      "controller_skipped": 3,
+      "adapter_tests": 11,
+      "adapter_fail": 0,
+      "supervisor_stress_tests": 28,
+      "supervisor_stress_fail": 0,
+      "randomized_transitions": 20000,
+      "random_seed": "0x5EC0D5",
+      "rigor_reduced": false
+    },
+    "node_24": {
+      "controller_tests": 145,
+      "controller_pass": 142,
+      "controller_fail": 0,
+      "controller_skipped": 3,
+      "adapter_tests": 11,
+      "adapter_fail": 0,
+      "supervisor_stress_tests": 28,
+      "supervisor_stress_fail": 0,
+      "randomized_transitions": 20000,
+      "random_seed": "0x5EC0D5",
+      "rigor_reduced": false
+    }
+  },
+  "a01_registry": {
+    "registry_version": 31,
+    "qualification_id": "SECOND-SHIFT-SUPERVISOR-V2-A01-STRESS",
+    "workstream_id": "SECOND-SHIFT-CONTROL-GATEWAY",
+    "source": "subject",
+    "wrapper": ".github/scripts/a01-second-shift-supervisor-v2-qualify.js",
+    "canonical_gateway": ".github/workflows/a01-control-plane-gateway.yml"
+  },
+  "ownership": {
+    "github_control_gateway": "ADMISSION_DEPENDENCY_VALID_INTENT_DURABLE_AUTHORITY",
+    "a01_second_shift_supervisor_v2": "LIVE_EXECUTION_ORDER_TIMING_CLAIM_LEASE_FENCE_RETRY_DISPATCH_OUTBOX_RESTART_RECOVERY",
+    "github_actions": "TRANSPORT_ADMISSION_EVIDENCE_RESOURCE_LOCK_ONLY"
+  },
+  "closed_findings": [
+    "A01_LEGACY_DIRECT_SELF_HOSTED_STRESS_ROUTE",
+    "A01_SUPERVISOR_STRESS_AUTOMATIC_PUSH_TRIGGER",
+    "CG008_GOVERNANCE_FREEZE_QUALIFICATION_RECURSION",
+    "CG008_STRESS_HARNESS_QUADRATIC_HISTORY_REREAD"
+  ],
+  "ordering_scope": {
+    "closed": "ADMITTED_ORDER_PRIORITY_TIMING_IDEMPOTENCY_HANDOFF_TO_A01_SUPERVISOR",
+    "not_claimed": "GENERAL_MULTI_ITEM_DEPENDENCY_DAG_CONCURRENCY_CANCELLATION",
+    "successor_owner": "SECOND-SHIFT-CONTROL-GATEWAY-CG-009"
+  },
+  "development_state": {
+    "ref": "control-gateway-state/active-work/second-shift-control-gateway-dev",
+    "head_commit_sha": "72d24ba45584797d172a3222adaf17f0ec9e231b",
+    "publication_revision": 9,
+    "authority_epoch": 10,
+    "packet_digest": "8cef60ae4e047337a974002e6460e91c38724b514438cc82bf6f859466c7c7a6",
+    "publication_digest": "bcb8c0d29b14f4c57b91fdb260f9d304fc54d562bf787f03b76400ca1dbb22a4",
+    "head_and_revision_blob_sha": "b81f28f2f452e810dc2cfdeb8f1c250058c3ada1",
+    "qualification_state": "PASSED",
+    "github_admission_state": "ADMITTED",
+    "a01_state": "NOT_REQUIRED",
+    "production": false
+  },
+  "frozen_invariants": [
+    "CONTROL_GATEWAY_ADMISSION_DOES_NOT_BYPASS_A01_POLICY_ADMISSION",
+    "A01_SUPERVISOR_IS_SINGLE_LIVE_EXECUTION_AND_ORDERING_OWNER_AFTER_HANDOFF",
+    "GITHUB_ACTIONS_IS_NOT_AN_INDEPENDENT_A01_SCHEDULER",
+    "A01_HANDOFF_BINDS_EXACT_DURABLE_AUTHORITY_OPERATION_PREDECESSOR_SUBJECT_AND_DEPENDENCIES",
+    "A01_HANDOFF_BINDS_EXECUTION_ORDER_PRIORITY_TIMING_AND_IDEMPOTENCY",
+    "DIRECT_SELF_HOSTED_SUPERVISOR_STRESS_BYPASS_IS_PROHIBITED",
+    "A01_SUPERVISOR_STRESS_REQUIRES_EXPLICIT_SUBJECT_AND_ORIGIN_REF",
+    "AUTOMATIC_REPOSITORY_PUSH_MUST_NOT_ENQUEUE_SUPERVISOR_STRESS",
+    "CONTROLLER_REMAINS_STANDALONE_EXTERNAL_INFRASTRUCTURE_NOT_PRODUCT_TOPOLOGY",
+    "HOST_QUALIFICATION_DOES_NOT_EQUAL_A01_WINDOWS_QUALIFICATION",
+    "HOST_QUALIFICATION_DOES_NOT_EQUAL_PRODUCTION_ACTIVATION"
+  ],
+  "production_blockers": [
+    {
+      "id": "A01-ACTUAL-WINDOWS-QUALIFICATION",
+      "status": "OPEN",
+      "reason": "Registered qualification has not yet been executed and adjudicated on the actual A-01 Windows host; this remains mandatory before production activation."
+    },
+    {
+      "id": "LEGACY-GITHUB-NIGHT-SCHEDULER-AUTHORITY",
+      "status": "OPEN",
+      "owner_operation": "SECOND-SHIFT-CONTROL-GATEWAY-CG-010",
+      "reason": ".github/workflows/a01-overnight-night-shift.yml still contains legacy GitHub cron and slot-chain scheduling semantics and must be retired or demoted before single-scheduler production cutover."
+    }
+  ],
+  "next_legal_operation": "SECOND-SHIFT-CONTROL-GATEWAY-CG-009 — DEPENDENCY DAG / CONCURRENCY / CANCELLATION + HOST QUALIFICATION",
+  "next_predecessor_receipt_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-008-HOST-QUALIFICATION-34671167418",
+  "a01_windows_qualified": false,
+  "production_activation": false
+}
