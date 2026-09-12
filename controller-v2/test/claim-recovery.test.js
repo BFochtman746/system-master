@@ -124,15 +124,18 @@ test('FREC-006 grant resource mismatch fails closed', () => {
 });
 
 test('FREC-007 duplicate lease id fails closed', () => {
-  const k = new ControllerKernel(':memory:'); const tx = activeTx(k); const a = granted(k, { tx, resourceId: 'resource:a', workerId: 'worker:a' }); granted(k, { tx, resourceId: 'resource:b', workerId: 'worker:b' });
-  const events = structuredClone(k.exportEvents()); k.close(); mutateEvent(events, 'lease.granted', (event) => { event.data.lease_id = a.lease.lease_id; }, 1); assertCode(() => reduceSemanticEvents(events));
+  const k = new ControllerKernel(':memory:'); const tx = activeTx(k); const a = granted(k, { tx, resourceId: 'resource:a', workerId: 'worker:a' }); const b = granted(k, { tx, resourceId: 'resource:b', workerId: 'worker:b' });
+  const events = structuredClone(k.exportEvents()); k.close();
+  const target = events.find((event) => event.event_type === 'lease.granted' && event.data.lease_id === b.lease.lease_id);
+  assert.ok(target); target.data.lease_id = a.lease.lease_id; resealStream(events, target.stream_id); assertCode(() => reduceSemanticEvents(events));
 });
 
 test('FREC-008 duplicate resource generation fails closed', () => {
-  const k = new ControllerKernel(':memory:'); const tx = activeTx(k); granted(k, { tx, resourceId: 'resource:a' }); granted(k, { tx, resourceId: 'resource:b' }); const events = structuredClone(k.exportEvents()); k.close();
-  const secondGrant = events.filter((event) => event.event_type === 'lease.granted')[1];
-  mutateEvent(events, 'operation.planned', (event) => { event.data.resource_id = 'resource:a'; }, 1);
-  secondGrant.data.resource_id = 'resource:a'; resealStream(events, secondGrant.stream_id); assertCode(() => reduceSemanticEvents(events));
+  const k = new ControllerKernel(':memory:'); const tx = activeTx(k); const a = granted(k, { tx, resourceId: 'resource:a' }); const b = granted(k, { tx, resourceId: 'resource:b' }); const events = structuredClone(k.exportEvents()); k.close();
+  const streamId = `operation:${b.operationId}`;
+  const planned = events.find((event) => event.stream_id === streamId && event.event_type === 'operation.planned');
+  const grant = events.find((event) => event.stream_id === streamId && event.event_type === 'lease.granted' && event.data.lease_id === b.lease.lease_id);
+  assert.ok(planned); assert.ok(grant); planned.data.resource_id = a.resourceId; grant.data.resource_id = a.resourceId; resealStream(events, streamId); assertCode(() => reduceSemanticEvents(events));
 });
 
 test('FREC-009 nonfuture grant expiry fails closed', () => {
@@ -156,8 +159,9 @@ test('FREC-012 lower generation is marked superseded by highest generation', () 
 });
 
 test('FREC-013 generation gap fails closed', () => {
-  const k = new ControllerKernel(':memory:'); const tx = activeTx(k); granted(k, { tx, resourceId: 'resource:g', ttlMs: 10 }); const op2 = readyOperation(k, tx, 'resource:g'); k.acquireLease(op2, 'resource:g', 'worker:two', 60_000, BASE + 11); const events = structuredClone(k.exportEvents()); k.close();
-  mutateEvent(events, 'lease.granted', (event) => { event.data.generation = 3; }, 1); assertCode(() => reduceSemanticEvents(events));
+  const k = new ControllerKernel(':memory:'); const tx = activeTx(k); granted(k, { tx, resourceId: 'resource:g', ttlMs: 10 }); const op2 = readyOperation(k, tx, 'resource:g'); const secondLease = k.acquireLease(op2, 'resource:g', 'worker:two', 60_000, BASE + 11); const events = structuredClone(k.exportEvents()); k.close();
+  const target = events.find((event) => event.event_type === 'lease.granted' && event.data.lease_id === secondLease.lease_id);
+  assert.ok(target); target.data.generation = 3; resealStream(events, target.stream_id); assertCode(() => reduceSemanticEvents(events));
 });
 
 test('FREC-014 zero or noninteger generation fails closed', () => {
