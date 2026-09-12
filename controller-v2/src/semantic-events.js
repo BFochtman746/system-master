@@ -24,9 +24,16 @@ export function verifyAndGroupEvents(events) {
   return grouped;
 }
 
+function requireEffect(state, effectId, expectedState = null) {
+  const effect=state.external_effects[effectId];
+  if(!effect) throw new ControllerError('RECOVERY_REFERENCE_MISSING',`external effect event precedes prepared for ${effectId}`);
+  if(expectedState&&effect.state!==expectedState) throw new ControllerError('RECOVERY_PAYLOAD_INVALID',`external effect ${effectId} expected ${expectedState}, got ${effect.state}`);
+  return effect;
+}
+
 export function reduceSemanticEvents(events) {
   const grouped=verifyAndGroupEvents(events);
-  const state={commands:{},transactions:{},operations:{},qualifications:{},promotions:{},resource_generations:{},last_event:null};
+  const state={commands:{},transactions:{},operations:{},qualifications:{},promotions:{},resource_generations:{},external_effects:{},external_effect_attempts:{},last_event:null};
   for(const list of grouped.values()) for(const event of list){
     state.last_event=event.event_id;const d=event.data||{};
     switch(event.event_type){
@@ -55,6 +62,30 @@ export function reduceSemanticEvents(events) {
       case 'promotion.requested':case 'promotion.authorized':case 'promotion.reconciled-not-applied':case 'promotion.executing':case 'promotion.succeeded':case 'promotion.failed':case 'promotion.reconciliation-required':{
         const prior=state.promotions[d.promotion_id],subject=d.subject?normalizeSubjectRef(d.subject):prior?.subject;if(!subject)throw new ControllerError('RECOVERY_PAYLOAD_INVALID','promotion event missing SubjectRef');
         state.promotions[d.promotion_id]={promotion_id:d.promotion_id,transaction_id:d.transaction_id??prior?.transaction_id,subject,qualification_id:d.qualification_id??prior?.qualification_id,state:d.state||event.event_type.slice('promotion.'.length).replaceAll('-','_').toUpperCase(),authorization_event_id:event.event_type==='promotion.authorized'?event.event_id:prior?.authorization_event_id??null,created_at:prior?.created_at??event.occurred_at,updated_at:event.occurred_at};break;
+      }
+      case 'external-effect.prepared':{
+        if(!d.effect_id||!d.transaction_id||!d.operation_id||!d.provider||!d.effect_type||!d.target_key||!d.idempotency_key||!d.request_digest)throw new ControllerError('RECOVERY_PAYLOAD_INVALID','external-effect.prepared missing immutable fields');
+        if(state.external_effects[d.effect_id])throw new ControllerError('RECOVERY_PAYLOAD_INVALID',`duplicate external-effect.prepared for ${d.effect_id}`);
+        state.external_effects[d.effect_id]={effect_id:d.effect_id,transaction_id:d.transaction_id,operation_id:d.operation_id,provider:d.provider,effect_type:d.effect_type,target_key:d.target_key,idempotency_key:d.idempotency_key,request_digest:d.request_digest,expected_remote_version:d.expected_remote_version??null,state:'PREPARED',terminal_evidence:null,last_error_code:null,created_at:event.occurred_at,updated_at:event.occurred_at};break;
+      }
+      case 'external-effect.dispatch-authorized':{
+        const effect=requireEffect(state,d.effect_id,'PREPARED');
+        if(!d.attempt_id||Number(d.attempt_number)!==1||!d.lease_id||!d.resource_id||!Number.isInteger(Number(d.generation)))throw new ControllerError('RECOVERY_PAYLOAD_INVALID','dispatch authorization missing attempt/fence fields');
+        if(state.external_effect_attempts[d.attempt_id]||Object.values(state.external_effect_attempts).some(a=>a.effect_id===d.effect_id))throw new ControllerError('RECOVERY_PAYLOAD_INVALID',`multiple dispatch attempts for ${d.effect_id}`);
+        state.external_effect_attempts[d.attempt_id]={attempt_id:d.attempt_id,effect_id:d.effect_id,attempt_number:1,lease_id:d.lease_id,resource_id:d.resource_id,generation:Number(d.generation),authorized_at:event.occurred_at};
+        effect.state='UNKNOWN';effect.updated_at=event.occurred_at;break;
+      }
+      case 'external-effect.reconciliation-started':{
+        const effect=requireEffect(state,d.effect_id,'UNKNOWN');effect.state='RECONCILING';effect.updated_at=event.occurred_at;break;
+      }
+      case 'external-effect.unknown':{
+        const effect=requireEffect(state,d.effect_id,'RECONCILING');if(!d.evidence)throw new ControllerError('RECOVERY_PAYLOAD_INVALID','unknown effect outcome requires evidence');effect.state='UNKNOWN';effect.last_error_code=d.error_code??null;effect.updated_at=event.occurred_at;break;
+      }
+      case 'external-effect.succeeded':case 'external-effect.failed':{
+        const effect=requireEffect(state,d.effect_id,'RECONCILING');if(!d.evidence)throw new ControllerError('RECOVERY_PAYLOAD_INVALID','terminal external effect requires evidence');const terminal=event.event_type==='external-effect.succeeded'?'SUCCEEDED':'FAILED';if(terminal==='FAILED'&&!d.error_code)throw new ControllerError('RECOVERY_PAYLOAD_INVALID','failed external effect requires error code');effect.state=terminal;effect.terminal_evidence=structuredClone(d.evidence);effect.last_error_code=d.error_code??null;effect.updated_at=event.occurred_at;break;
+      }
+      case 'external-effect.cancelled':{
+        const effect=requireEffect(state,d.effect_id,'PREPARED');if(!d.evidence)throw new ControllerError('RECOVERY_PAYLOAD_INVALID','cancelled external effect requires evidence');effect.state='CANCELLED';effect.terminal_evidence=structuredClone(d.evidence);effect.last_error_code=d.error_code??'CANCELLED_BEFORE_DISPATCH';effect.updated_at=event.occurred_at;break;
       }
       default:break;
     }

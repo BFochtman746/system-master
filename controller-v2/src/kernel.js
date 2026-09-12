@@ -6,7 +6,7 @@ import { assertCanonicalSubjectRef, normalizeSubjectRef, sameSubject } from './s
 
 export { ControllerError } from './errors.js';
 
-const SCHEMA_VERSION = 3;
+const SCHEMA_VERSION = 4;
 const TX_STATES = new Set(['OPEN','ADMITTED','ACTIVE','WAITING','SUCCEEDED','REJECTED','FAILED','CANCELLED','SUPERSEDED']);
 const TX_TERMINAL = new Set(['SUCCEEDED','REJECTED','FAILED','CANCELLED','SUPERSEDED']);
 const TX_TRANSITIONS = new Map([
@@ -110,6 +110,39 @@ export class ControllerKernel {
           ALTER TABLE promotions ADD COLUMN subject_algorithm TEXT NOT NULL DEFAULT 'sha1';
         `);
         this.db.prepare("INSERT INTO schema_migrations(version,applied_at) VALUES (3,strftime('%Y-%m-%dT%H:%M:%fZ','now'))").run();
+      }
+      const afterV3 = Number(this.db.prepare('SELECT COALESCE(MAX(version),0) version FROM schema_migrations').get().version);
+      if (afterV3 < 4) {
+        this.db.exec(`
+          CREATE TABLE external_effects(
+            effect_id TEXT PRIMARY KEY,
+            transaction_id TEXT NOT NULL REFERENCES transactions(transaction_id),
+            operation_id TEXT NOT NULL REFERENCES operations(operation_id),
+            provider TEXT NOT NULL,
+            effect_type TEXT NOT NULL,
+            target_key TEXT NOT NULL,
+            idempotency_key TEXT NOT NULL,
+            request_digest TEXT NOT NULL,
+            expected_remote_version TEXT,
+            state TEXT NOT NULL CHECK(state IN ('PREPARED','UNKNOWN','RECONCILING','SUCCEEDED','FAILED','CANCELLED')),
+            terminal_evidence_json TEXT,
+            last_error_code TEXT,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            UNIQUE(provider,idempotency_key)
+          );
+          CREATE TABLE external_effect_attempts(
+            attempt_id TEXT PRIMARY KEY,
+            effect_id TEXT NOT NULL REFERENCES external_effects(effect_id),
+            attempt_number INTEGER NOT NULL CHECK(attempt_number > 0),
+            lease_id TEXT NOT NULL,
+            resource_id TEXT NOT NULL,
+            generation INTEGER NOT NULL CHECK(generation > 0),
+            authorized_at TEXT NOT NULL,
+            UNIQUE(effect_id,attempt_number)
+          );
+        `);
+        this.db.prepare("INSERT INTO schema_migrations(version,applied_at) VALUES (4,strftime('%Y-%m-%dT%H:%M:%fZ','now'))").run();
       }
       this.db.exec('COMMIT');
     } catch (error) {
@@ -215,9 +248,9 @@ export class ControllerKernel {
   verifyStream(streamId){const rows=this.db.prepare('SELECT * FROM events WHERE stream_id=? ORDER BY stream_version').all(streamId);const events=rows.map(r=>({event_id:r.event_id,event_schema:r.event_schema,stream_id:r.stream_id,stream_version:Number(r.stream_version),event_type:r.event_type,occurred_at:r.occurred_at,data:JSON.parse(r.data_json),prev_event_digest:r.prev_event_digest,event_digest:r.event_digest}));reduceSemanticEvents(events);return {events:events.length,last_digest:events.at(-1)?.event_digest??null};}
   exportEvents(){return this.db.prepare('SELECT * FROM events ORDER BY stream_id,stream_version').all().map(r=>({event_id:r.event_id,event_schema:r.event_schema,stream_id:r.stream_id,stream_version:Number(r.stream_version),event_type:r.event_type,occurred_at:r.occurred_at,data:JSON.parse(r.data_json),prev_event_digest:r.prev_event_digest,event_digest:r.event_digest}));}
   static replay(events){return reduceSemanticEvents(events);}
-  projection(maxAgeMs=300000,nowMs=Date.now()){const events=this.exportEvents(),state=reduceSemanticEvents(events),last=events.reduce((m,e)=>Math.max(m,Date.parse(e.occurred_at)||0),0);return {generated_at:new Date(nowMs).toISOString(),freshness:last&&nowMs-last<=maxAgeMs?'FRESH':'STALE',state};}
+  projection(maxAgeMs=300000,nowMs=Date.now()){const events=this.exportEvents(),state=reduceSemanticEvents(events),last=events.reduce((m,e)=>Math.max(m,Date.parse(e.occurred_at)||0),0),pending=Number(this.db.prepare("SELECT COUNT(*) n FROM outbox WHERE status='PENDING'").get().n);return {source_authority:'LOCAL_PROVISIONAL',semantic_authority:false,generated_at:new Date(nowMs).toISOString(),freshness:last&&nowMs-last<=maxAgeMs?'FRESH':'STALE',freshness_basis:'LOCAL_EVENT_RECENCY_ONLY',source_event_count:events.length,pending_outbox_count:pending,state};}
 
-  createQualification(transactionId,subjectRef,policyVersion){const subject=normalizeSubjectRef(subjectRef);return this.atomic(()=>{const tx=this.db.prepare('SELECT * FROM transactions WHERE transaction_id=?').get(transactionId);if(!tx)throw new ControllerError('NOT_FOUND','transaction not found');if(!sameSubject(rowSubject(tx),subject))throw new ControllerError('SUBJECT_MISMATCH','qualification subject differs from transaction subject');const id=uuidv7(),now=new Date().toISOString();this.db.prepare("INSERT INTO qualifications(qualification_id,transaction_id,subject_oid,subject_algorithm,policy_version,state,created_at,updated_at) VALUES (?,?,?,?,?,'REQUESTED',?,?)").run(id,transactionId,subject.oid,subject.algorithm,policyVersion,now,now);this.appendEvent(`qualification:${id}`,0,'qualification.requested',{qualification_id:id,transaction_id:transactionId,subject,policy_version:policyVersion,state:'REQUESTED'},now);return id;});}
+  createQualification(transactionId,subjectRef,policyVersion){const subject=normalizeSubjectRef(subjectRef);return this.atomic(()=>{const tx=this.db.prepare('SELECT * FROM transactions WHERE transaction_id=?').get(transactionId);if(!tx)throw new ControllerError('NOT_FOUND','transaction not found');if(!sameSubject(rowSubject(tx),subject))throw new ControllerError('SUBJECT_MISMATCH','qualification subject differs from transaction subject');const id=uuidv7(),now=new Date().toISOString();this.db.prepare("INSERT INTO qualifications(qualification_id,transaction_id,subject_oid,subject_algorithm,policy_version,state,created_at,updated_at) VALUES (?,?,?,?,?,'REQUESTED',?,?)").run(id,transactionId,subject.oid,subject.algorithm,policyVersion,now,now);this.appendEvent(`qualification:${id}`,0,'qualification.requested',{qualification_id:id,transaction_id:transactionId,subject:rowSubject(tx),policy_version:policyVersion,state:'REQUESTED'},now);return id;});}
   startQualification(id){return this.atomic(()=>{const q=this.db.prepare('SELECT * FROM qualifications WHERE qualification_id=?').get(id);if(!q||q.state!=='REQUESTED')throw new ControllerError('ILLEGAL_TRANSITION','qualification must be REQUESTED');const now=new Date().toISOString();this.db.prepare("UPDATE qualifications SET state='RUNNING',updated_at=? WHERE qualification_id=?").run(now,id);this.appendEvent(`qualification:${id}`,this.currentStreamVersion(`qualification:${id}`),'qualification.running',{qualification_id:id,transaction_id:q.transaction_id,subject:rowSubject(q),policy_version:q.policy_version,state:'RUNNING'},now);return 'RUNNING';});}
   finishQualification(id,result){if(!['PASSED','FAILED','INDETERMINATE','CANCELLED'].includes(result))throw new ControllerError('INVALID_STATE','bad qualification result');return this.atomic(()=>{const q=this.db.prepare('SELECT * FROM qualifications WHERE qualification_id=?').get(id);if(!q||!['REQUESTED','RUNNING'].includes(q.state))throw new ControllerError('ILLEGAL_TRANSITION','qualification terminal or missing');const now=new Date().toISOString();this.db.prepare('UPDATE qualifications SET state=?,updated_at=? WHERE qualification_id=?').run(result,now,id);this.appendEvent(`qualification:${id}`,this.currentStreamVersion(`qualification:${id}`),`qualification.${result.toLowerCase()}`,{qualification_id:id,transaction_id:q.transaction_id,subject:rowSubject(q),policy_version:q.policy_version,state:result},now);return result;});}
 
