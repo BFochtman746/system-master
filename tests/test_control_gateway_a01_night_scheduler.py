@@ -3,6 +3,7 @@ from __future__ import annotations
 import concurrent.futures
 import datetime as dt
 import importlib.util
+import sqlite3
 import sys
 import tempfile
 import threading
@@ -74,6 +75,12 @@ class NightSchedulerTests(unittest.TestCase):
         self.scheduler.enqueue(h, c, now=IN_SHIFT)
         return h, c
 
+    def terminal_claim(self, claim, seconds=1):
+        self.store.terminal(
+            claim["lease_id"], claim["fencing_token"], "COMPLETED",
+            now=IN_SHIFT + dt.timedelta(seconds=seconds),
+        )
+
     def test_protocol_is_frozen(self):
         self.assertEqual(NIGHT_SCHEDULER_PROTOCOL, "control-gateway.a01-night-scheduler.v1")
 
@@ -88,7 +95,6 @@ class NightSchedulerTests(unittest.TestCase):
         first = self.scheduler.enqueue(h, c, now=IN_SHIFT)
         second = self.scheduler.enqueue(h, c, now=IN_SHIFT)
         self.assertEqual(first["scheduler_digest"], second["scheduler_digest"])
-
         changed = overnight("A", "LANE-A", order=2)
         changed_c = helpers.make_coord(changed, graph="NIGHT-GRAPH")
         with self.assertRaisesRegex(NightSchedulerError, "identity collision"):
@@ -99,61 +105,78 @@ class NightSchedulerTests(unittest.TestCase):
         result = self.scheduler.tick(now=OUT_SHIFT)
         self.assertFalse(result["shift_open"])
         self.assertEqual(result["claims"], [])
-        self.assertIsNone(
-            self.store.conn.execute("SELECT 1 FROM claims WHERE released_at IS NULL").fetchone()
-        )
+        self.assertIsNone(self.store.conn.execute("SELECT 1 FROM claims WHERE released_at IS NULL").fetchone())
 
-    def test_execution_order_then_priority_is_deterministic(self):
+    def test_execution_order_is_hard_stage_barrier_and_priority_orders_stage(self):
         self.enqueue("C", "LANE-C", order=2, priority=999)
         self.enqueue("A", "LANE-A", order=1, priority=100)
         self.enqueue("B", "LANE-B", order=1, priority=500)
-        result = self.scheduler.tick(now=IN_SHIFT, max_claims=3)
-        self.assertEqual(
-            [x["delegation_id"] for x in result["claims"]],
-            ["D-B", "D-A", "D-C"],
-        )
+        first = self.scheduler.tick(now=IN_SHIFT, max_claims=3)
+        self.assertEqual(first["active_execution_order"], 1)
+        self.assertEqual([x["delegation_id"] for x in first["claims"]], ["D-B", "D-A"])
+        self.assertNotIn("D-C", [x["delegation_id"] for x in first["claims"]])
+        self.terminal_claim(first["claims"][0], 1)
+        self.terminal_claim(first["claims"][1], 2)
+        second = self.scheduler.tick(now=IN_SHIFT + dt.timedelta(seconds=3), max_claims=3)
+        self.assertEqual(second["active_execution_order"], 2)
+        self.assertEqual([x["delegation_id"] for x in second["claims"]], ["D-C"])
 
-    def test_future_not_before_is_skipped_without_blocking_other_work(self):
+    def test_future_lower_stage_blocks_later_stage_until_completed(self):
         future = (IN_SHIFT + dt.timedelta(hours=1)).isoformat().replace("+00:00", "Z")
         self.enqueue("A", "LANE-A", order=0, not_before=future)
         self.enqueue("B", "LANE-B", order=1)
-        result = self.scheduler.tick(now=IN_SHIFT, max_claims=2)
-        self.assertEqual([x["delegation_id"] for x in result["claims"]], ["D-B"])
-        state = self.store.conn.execute(
-            "SELECT state FROM night_scheduler_queue WHERE delegation_id='D-A'"
-        ).fetchone()["state"]
-        self.assertEqual(state, "QUEUED")
+        first = self.scheduler.tick(now=IN_SHIFT, max_claims=2)
+        self.assertEqual(first["active_execution_order"], 0)
+        self.assertEqual(first["claims"], [])
+        at_future = IN_SHIFT + dt.timedelta(hours=1)
+        second = self.scheduler.tick(now=at_future, max_claims=2)
+        self.assertEqual([x["delegation_id"] for x in second["claims"]], ["D-A"])
+        self.store.terminal(
+            second["claims"][0]["lease_id"], second["claims"][0]["fencing_token"], "COMPLETED",
+            now=at_future + dt.timedelta(seconds=1),
+        )
+        third = self.scheduler.tick(now=at_future + dt.timedelta(seconds=2), max_claims=2)
+        self.assertEqual([x["delegation_id"] for x in third["claims"]], ["D-B"])
 
-    def test_dependency_gate_skips_child_until_parent_completes(self):
-        self.enqueue("A", "LANE-A", order=1)
-        self.enqueue("B", "LANE-B", order=0, deps=["D-A"])
+    def test_dependency_gate_unlocks_only_after_parent_completed_in_prior_stage(self):
+        self.enqueue("A", "LANE-A", order=0)
+        self.enqueue("B", "LANE-B", order=1, deps=["D-A"])
         first = self.scheduler.tick(now=IN_SHIFT, max_claims=2)
         self.assertEqual([x["delegation_id"] for x in first["claims"]], ["D-A"])
-        parent_claim = first["claims"][0]
-        self.store.terminal(
-            parent_claim["lease_id"], parent_claim["fencing_token"], "COMPLETED",
-            now=IN_SHIFT + dt.timedelta(seconds=1),
-        )
+        self.terminal_claim(first["claims"][0], 1)
         second = self.scheduler.tick(now=IN_SHIFT + dt.timedelta(seconds=2), max_claims=2)
         self.assertEqual([x["delegation_id"] for x in second["claims"]], ["D-B"])
 
     def test_resource_limit_remains_authoritative_across_lanes(self):
-        self.enqueue("A", "LANE-A", order=1, resource="GPU", limit=1)
-        self.enqueue("B", "LANE-B", order=2, resource="GPU", limit=1)
+        self.enqueue("A", "LANE-A", order=1, resource="GPU", limit=1, priority=200)
+        self.enqueue("B", "LANE-B", order=1, resource="GPU", limit=1, priority=100)
         result = self.scheduler.tick(now=IN_SHIFT, max_claims=2)
         self.assertEqual(len(result["claims"]), 1)
         self.assertEqual(result["claims"][0]["delegation_id"], "D-A")
         self.assertTrue(any(x["delegation_id"] == "D-B" for x in result["blocked"]))
 
-    def test_cancelled_task_cannot_be_claimed(self):
-        self.enqueue("A", "LANE-A")
+    def test_cancelled_lower_stage_unlocks_next_stage(self):
+        self.enqueue("A", "LANE-A", order=0)
+        self.enqueue("B", "LANE-B", order=1)
         self.scheduler.request_cancel("D-A", "operator cancelled", now=IN_SHIFT)
         result = self.scheduler.tick(now=IN_SHIFT)
-        self.assertEqual(result["claims"], [])
-        state = self.store.conn.execute(
-            "SELECT state FROM night_scheduler_queue WHERE delegation_id='D-A'"
-        ).fetchone()["state"]
-        self.assertEqual(state, "CANCELLED")
+        self.assertEqual([x["delegation_id"] for x in result["claims"]], ["D-B"])
+
+    def test_queued_night_task_cannot_bypass_scheduler_through_coordination_claim(self):
+        h, c = self.enqueue("A", "LANE-A")
+        with self.assertRaisesRegex(sqlite3.IntegrityError, "CG010_NIGHT_SCHEDULER_AUTH_REQUIRED"):
+            self.scheduler.coordination.claim(h, c, now=IN_SHIFT)
+        self.assertIsNone(self.store.conn.execute("SELECT 1 FROM claims").fetchone())
+
+    def test_queued_night_task_cannot_bypass_scheduler_through_store_claim(self):
+        h, _c = self.enqueue("A", "LANE-A")
+        with self.assertRaisesRegex(sqlite3.IntegrityError, "CG010_NIGHT_SCHEDULER_AUTH_REQUIRED"):
+            self.store.claim_ready(
+                lane=h["lane"], delegation_id=h["delegation_id"], objective_id=h["objective_id"],
+                control_head=h["control_head"], idempotency_key=h["idempotency_key"],
+                executor_kind=h["executor_kind"], now=IN_SHIFT,
+            )
+        self.assertIsNone(self.store.conn.execute("SELECT 1 FROM claims").fetchone())
 
     def test_queue_and_exact_scheduling_inputs_survive_restart(self):
         self.enqueue("A", "LANE-A", order=7, priority=321)
@@ -168,45 +191,48 @@ class NightSchedulerTests(unittest.TestCase):
         result = self.scheduler.tick(now=IN_SHIFT)
         self.assertEqual(result["claims"][0]["delegation_id"], "D-A")
 
+    def test_binding_state_survives_and_exact_retry_completes_binding(self):
+        h = overnight("A", "LANE-A")
+        c = helpers.make_coord(h, resource="RESOURCE-LANE-A", graph="NIGHT-GRAPH")
+        now_text = IN_SHIFT.isoformat().replace("+00:00", "Z")
+        self.store.conn.execute(
+            "INSERT INTO night_scheduler_queue(delegation_id,handoff_json,contract_json,scheduler_digest,state,enqueued_at,updated_at) VALUES(?,?,?,?,?,?,?)",
+            (h["delegation_id"], helpers.canonical(h), helpers.canonical(c), self.scheduler._scheduler_digest(h, c), "BINDING", now_text, now_text),
+        )
+        self.store.close(); self.store = SupervisorStore(self.db); self.scheduler = A01NightScheduler(self.store)
+        row = self.scheduler.enqueue(h, c, now=IN_SHIFT)
+        self.assertEqual(row["state"], "QUEUED")
+        self.assertEqual(self.scheduler.tick(now=IN_SHIFT)["claims"][0]["delegation_id"], "D-A")
+
     def test_parallel_scheduler_ticks_cannot_double_claim(self):
         self.enqueue("A", "LANE-A")
         self.store.close()
         barrier = threading.Barrier(2)
-
         def worker(_):
             with SupervisorStore(self.db) as store:
                 scheduler = A01NightScheduler(store)
                 barrier.wait()
                 return scheduler.tick(now=IN_SHIFT, max_claims=1)
-
         with concurrent.futures.ThreadPoolExecutor(max_workers=2) as ex:
             results = list(ex.map(worker, range(2)))
         claimed = [c for result in results for c in result["claims"]]
         self.assertEqual(len(claimed), 1, results)
-        self.store = SupervisorStore(self.db)
-        self.scheduler = A01NightScheduler(self.store)
-        live = self.store.conn.execute(
-            "SELECT COUNT(*) n FROM claims WHERE released_at IS NULL"
-        ).fetchone()["n"]
+        self.store = SupervisorStore(self.db); self.scheduler = A01NightScheduler(self.store)
+        live = self.store.conn.execute("SELECT COUNT(*) n FROM claims WHERE released_at IS NULL").fetchone()["n"]
         self.assertEqual(live, 1)
 
     def test_terminal_work_reconciles_out_of_scheduler_queue(self):
         self.enqueue("A", "LANE-A")
         result = self.scheduler.tick(now=IN_SHIFT)
-        claim = result["claims"][0]
-        self.store.terminal(
-            claim["lease_id"], claim["fencing_token"], "COMPLETED",
-            now=IN_SHIFT + dt.timedelta(seconds=1),
-        )
+        self.terminal_claim(result["claims"][0], 1)
         self.scheduler.reconcile(now=IN_SHIFT + dt.timedelta(seconds=2))
-        state = self.store.conn.execute(
-            "SELECT state FROM night_scheduler_queue WHERE delegation_id='D-A'"
-        ).fetchone()["state"]
+        state = self.store.conn.execute("SELECT state FROM night_scheduler_queue WHERE delegation_id='D-A'").fetchone()["state"]
         self.assertEqual(state, "TERMINAL")
 
-    def test_scheduler_snapshot_reports_zero_invariant_problems(self):
+    def test_scheduler_snapshot_reports_zero_invariant_problems_and_no_auth_leak(self):
         self.enqueue("A", "LANE-A")
         snap = self.scheduler.snapshot()
+        self.assertEqual(snap["authorization_leaks"], 0)
         self.assertEqual(snap["coordination_problems"], [])
         self.assertEqual(snap["supervisor_problems"], [])
 

@@ -5,6 +5,7 @@ import datetime as dt
 import json
 import sys
 import time
+import uuid
 from pathlib import Path
 from typing import Any, Optional
 
@@ -17,7 +18,8 @@ from a01_supervisor_coordination import CoordinationError, SupervisorCoordinatio
 from tools.second_shift_supervisor_v2 import SupervisorStore, in_shift, iso, parse_iso, utcnow
 
 NIGHT_SCHEDULER_PROTOCOL = "control-gateway.a01-night-scheduler.v1"
-QUEUE_STATES = {"QUEUED", "CLAIMED", "TERMINAL", "CANCELLED", "RECONCILE"}
+QUEUE_STATES = {"BINDING", "QUEUED", "CLAIMED", "TERMINAL", "CANCELLED", "RECONCILE"}
+ACTIVE_STAGE_STATES = {"BINDING", "QUEUED", "CLAIMED", "RECONCILE"}
 
 
 class NightSchedulerError(CoordinationError):
@@ -25,13 +27,15 @@ class NightSchedulerError(CoordinationError):
 
 
 class A01NightScheduler:
-    """A-01-local night scheduler.
+    """A-01-local night scheduler and exclusive claim authority for queued night work.
 
     GitHub may admit/persist work, but it does not select or order nightly tasks.
     Exact admitted handoffs plus CG-009 coordination contracts are persisted in
-    the A-01 supervisor SQLite database. This scheduler owns the local clock and
-    deterministic claim order; SupervisorCoordinationAdapter still owns the
-    dependency, resource-capacity, cancellation, lease, fence, and outbox gates.
+    the A-01 supervisor SQLite database. This scheduler owns the local clock,
+    execution-stage barrier, priority selection, and the only authorized path that
+    may create a claim for a queued night delegation. CG-009 coordination remains
+    authoritative for dependency, resource-capacity, cancellation, lease, fence,
+    and dispatch-outbox invariants.
     """
 
     def __init__(self, store: SupervisorStore):
@@ -55,6 +59,27 @@ class A01NightScheduler:
             );
             CREATE INDEX IF NOT EXISTS ix_night_scheduler_queue_state
               ON night_scheduler_queue(state);
+            CREATE TABLE IF NOT EXISTS night_scheduler_claim_authorizations (
+              delegation_id TEXT NOT NULL,
+              idempotency_key TEXT NOT NULL,
+              authorization_id TEXT NOT NULL,
+              PRIMARY KEY(delegation_id, idempotency_key)
+            );
+            DROP TRIGGER IF EXISTS cg010_night_scheduler_claim_guard;
+            CREATE TRIGGER cg010_night_scheduler_claim_guard
+            BEFORE INSERT ON claims
+            WHEN EXISTS (
+              SELECT 1 FROM night_scheduler_queue q
+              WHERE q.delegation_id=NEW.delegation_id
+            )
+            AND NOT EXISTS (
+              SELECT 1 FROM night_scheduler_claim_authorizations a
+              WHERE a.delegation_id=NEW.delegation_id
+                AND a.idempotency_key=NEW.idempotency_key
+            )
+            BEGIN
+              SELECT RAISE(ABORT, 'CG010_NIGHT_SCHEDULER_AUTH_REQUIRED');
+            END;
             """
         )
 
@@ -97,37 +122,38 @@ class A01NightScheduler:
                 or existing["scheduler_digest"] != expected_digest
             ):
                 raise NightSchedulerError("night scheduler delegation identity collision")
-            return dict(existing)
+            if existing["state"] == "BINDING":
+                self.coordination.bind(handoff, contract, now=now)
+                with self.store.tx() as c:
+                    c.execute(
+                        "UPDATE night_scheduler_queue SET state='QUEUED',updated_at=? WHERE delegation_id=? AND state='BINDING'",
+                        (iso(now), handoff["delegation_id"]),
+                    )
+            return dict(
+                self.store.conn.execute(
+                    "SELECT * FROM night_scheduler_queue WHERE delegation_id=?",
+                    (handoff["delegation_id"],),
+                ).fetchone()
+            )
 
+        # Persist the scheduler fence first. If the process dies before coordination
+        # binding completes, BINDING survives restart and blocks every claim path.
+        with self.store.tx() as c:
+            c.execute(
+                "INSERT INTO night_scheduler_queue("
+                "delegation_id,handoff_json,contract_json,scheduler_digest,state,enqueued_at,updated_at"
+                ") VALUES(?,?,?,?,?,?,?)",
+                (
+                    handoff["delegation_id"], expected_handoff, expected_contract,
+                    expected_digest, "BINDING", iso(now), iso(now),
+                ),
+            )
         self.coordination.bind(handoff, contract, now=now)
-        try:
-            with self.store.tx() as c:
-                c.execute(
-                    "INSERT INTO night_scheduler_queue("
-                    "delegation_id,handoff_json,contract_json,scheduler_digest,state,enqueued_at,updated_at"
-                    ") VALUES(?,?,?,?,?,?,?)",
-                    (
-                        handoff["delegation_id"],
-                        expected_handoff,
-                        expected_contract,
-                        expected_digest,
-                        "QUEUED",
-                        iso(now),
-                        iso(now),
-                    ),
-                )
-        except Exception:
-            existing = self.store.conn.execute(
-                "SELECT * FROM night_scheduler_queue WHERE delegation_id=?",
-                (handoff["delegation_id"],),
-            ).fetchone()
-            if (
-                existing is None
-                or existing["handoff_json"] != expected_handoff
-                or existing["contract_json"] != expected_contract
-                or existing["scheduler_digest"] != expected_digest
-            ):
-                raise
+        with self.store.tx() as c:
+            c.execute(
+                "UPDATE night_scheduler_queue SET state='QUEUED',updated_at=? WHERE delegation_id=? AND state='BINDING'",
+                (iso(now), handoff["delegation_id"]),
+            )
         return dict(
             self.store.conn.execute(
                 "SELECT * FROM night_scheduler_queue WHERE delegation_id=?",
@@ -147,6 +173,9 @@ class A01NightScheduler:
             for row in c.execute(
                 "SELECT * FROM night_scheduler_queue ORDER BY delegation_id"
             ).fetchall():
+                if row["state"] == "BINDING":
+                    results.append({"delegation_id": row["delegation_id"], "state": "BINDING"})
+                    continue
                 delegation = c.execute(
                     "SELECT state FROM delegations WHERE delegation_id=?",
                     (row["delegation_id"],),
@@ -201,12 +230,26 @@ class A01NightScheduler:
         self.reconcile(now=now)
         return result
 
+    def _minimum_active_order(self) -> Optional[int]:
+        orders: list[int] = []
+        for row in self.store.conn.execute(
+            "SELECT state,handoff_json FROM night_scheduler_queue"
+        ).fetchall():
+            if row["state"] in ACTIVE_STAGE_STATES:
+                orders.append(int(json.loads(row["handoff_json"])["execution_order"]))
+        return min(orders) if orders else None
+
     def _ordered_candidates(self, now: dt.datetime) -> list[tuple[dict[str, Any], dict[str, Any], Any]]:
+        minimum_order = self._minimum_active_order()
+        if minimum_order is None:
+            return []
         candidates: list[tuple[dict[str, Any], dict[str, Any], Any]] = []
         for row in self.store.conn.execute(
             "SELECT * FROM night_scheduler_queue WHERE state='QUEUED'"
         ).fetchall():
             handoff = json.loads(row["handoff_json"])
+            if int(handoff["execution_order"]) != minimum_order:
+                continue
             contract = json.loads(row["contract_json"])
             not_before = parse_iso(handoff["not_before"]) if handoff["not_before"] else None
             not_after = parse_iso(handoff["not_after"]) if handoff["not_after"] else None
@@ -217,12 +260,178 @@ class A01NightScheduler:
             candidates.append((handoff, contract, row))
         candidates.sort(
             key=lambda item: (
-                int(item[0]["execution_order"]),
                 -int(item[0]["priority"]),
                 item[0]["delegation_id"],
             )
         )
         return candidates
+
+    def _claim_authorized(
+        self,
+        handoff: dict[str, Any],
+        contract: dict[str, Any],
+        now: dt.datetime,
+        lease_seconds: int,
+    ):
+        validate_coordination_contract(handoff, contract)
+        not_before = parse_iso(handoff["not_before"]) if handoff["not_before"] else None
+        not_after = parse_iso(handoff["not_after"]) if handoff["not_after"] else None
+        if not_before and now < not_before:
+            raise NightSchedulerError("admitted work is not_before gated")
+        if not_after and now >= not_after:
+            raise NightSchedulerError("admitted work window expired")
+        if not in_shift(now):
+            raise NightSchedulerError("new coordinated claim outside Second Shift window")
+        if lease_seconds < 30 or lease_seconds > 3600:
+            raise ValueError("lease_seconds must be between 30 and 3600")
+
+        with self.store.tx() as c:
+            prior = c.execute(
+                "SELECT * FROM claims WHERE idempotency_key=?",
+                (handoff["idempotency_key"],),
+            ).fetchone()
+            if prior:
+                same = (
+                    prior["lane"] == handoff["lane"]
+                    and prior["delegation_id"] == handoff["delegation_id"]
+                    and prior["objective_id"] == handoff["objective_id"]
+                    and prior["control_head"] == handoff["control_head"]
+                )
+                if not same:
+                    raise NightSchedulerError("idempotency key collision across claim identities")
+                if prior["released_at"] is not None or prior["status"] in ("CANCELLED", "CANCEL_REQUESTED"):
+                    raise NightSchedulerError("idempotent claim identity is no longer live")
+                return self.store._to_claim(prior)
+
+            task = c.execute(
+                "SELECT * FROM coordination_tasks WHERE delegation_id=?",
+                (handoff["delegation_id"],),
+            ).fetchone()
+            if task is None or task["handoff_digest"] != handoff["handoff_digest"]:
+                raise NightSchedulerError("missing exact durable coordination task")
+            if task["cancel_state"] != "NONE":
+                raise NightSchedulerError("coordinated delegation is cancelled")
+
+            for dep in c.execute(
+                "SELECT dependency_id FROM coordination_dependencies WHERE delegation_id=? ORDER BY dependency_id",
+                (handoff["delegation_id"],),
+            ).fetchall():
+                dep_task = c.execute(
+                    "SELECT graph_id,graph_version FROM coordination_tasks WHERE delegation_id=?",
+                    (dep["dependency_id"],),
+                ).fetchone()
+                if dep_task is None:
+                    raise NightSchedulerError(f"missing dependency {dep['dependency_id']}")
+                if dep_task["graph_id"] != task["graph_id"] or int(dep_task["graph_version"]) != int(task["graph_version"]):
+                    raise NightSchedulerError(f"dependency {dep['dependency_id']} graph identity/version mismatch")
+                dep_row = c.execute(
+                    "SELECT state FROM delegations WHERE delegation_id=?",
+                    (dep["dependency_id"],),
+                ).fetchone()
+                if dep_row is None:
+                    raise NightSchedulerError(f"missing dependency {dep['dependency_id']}")
+                if dep_row["state"] != "COMPLETED":
+                    raise NightSchedulerError(f"dependency {dep['dependency_id']} is not COMPLETED")
+
+            resource = c.execute(
+                "SELECT max_concurrency FROM coordination_resource_limits WHERE resource_key=?",
+                (task["resource_key"],),
+            ).fetchone()
+            if resource is None or int(resource["max_concurrency"]) != int(task["max_concurrency"]):
+                raise NightSchedulerError("durable resource policy mismatch")
+            occupied = self.coordination._resource_occupancy_locked(c, task["resource_key"])
+            if occupied >= int(resource["max_concurrency"]):
+                raise NightSchedulerError("resource concurrency limit reached")
+
+            lane = self.store._lane(c, handoff["lane"])
+            if lane["control_head"] != handoff["control_head"]:
+                raise NightSchedulerError("claim head differs from current lane head")
+            if self.store._active_claim(c, handoff["lane"]):
+                raise NightSchedulerError("lane already has a live mutation claim")
+            delegation = c.execute(
+                "SELECT * FROM delegations WHERE delegation_id=?",
+                (handoff["delegation_id"],),
+            ).fetchone()
+            if (
+                not delegation
+                or delegation["lane"] != handoff["lane"]
+                or delegation["objective_id"] != handoff["objective_id"]
+                or delegation["control_head"] != handoff["control_head"]
+                or delegation["state"] != "READY"
+            ):
+                raise NightSchedulerError("delegation is not exact current READY work")
+
+            token = int(lane["fencing_counter"]) + 1
+            lease_id = f"{handoff['lane']}-{uuid.uuid4()}"
+            dispatch_id = f"dispatch-{uuid.uuid4()}"
+            expires = now + dt.timedelta(seconds=lease_seconds)
+            authorization_id = f"sched-auth-{uuid.uuid4()}"
+            c.execute(
+                "INSERT INTO night_scheduler_claim_authorizations(delegation_id,idempotency_key,authorization_id) VALUES(?,?,?)",
+                (handoff["delegation_id"], handoff["idempotency_key"], authorization_id),
+            )
+            c.execute(
+                "UPDATE lanes SET fencing_counter=?,state='CLAIMED',current_delegation_id=?,updated_at=? WHERE lane=?",
+                (token, handoff["delegation_id"], iso(now), handoff["lane"]),
+            )
+            c.execute(
+                "UPDATE delegations SET state='CLAIMED',updated_at=? WHERE delegation_id=?",
+                (iso(now), handoff["delegation_id"]),
+            )
+            c.execute(
+                "INSERT INTO claims(lease_id,lane,delegation_id,objective_id,control_head,idempotency_key,fencing_token,claimed_at,expires_at,heartbeat_at,status,dispatch_id) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",
+                (
+                    lease_id, handoff["lane"], handoff["delegation_id"],
+                    handoff["objective_id"], handoff["control_head"], handoff["idempotency_key"],
+                    token, iso(now), iso(expires), iso(now), "CLAIMED", dispatch_id,
+                ),
+            )
+            c.execute(
+                "INSERT INTO dispatch_outbox(dispatch_id,lane,lease_id,idempotency_key,fencing_token,executor_kind,payload_json,state,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?)",
+                (
+                    dispatch_id, handoff["lane"], lease_id, handoff["idempotency_key"], token,
+                    handoff["executor_kind"],
+                    json.dumps({
+                        "gateway_handoff_digest": handoff["handoff_digest"],
+                        "coordination_digest": contract["coordination_digest"],
+                        "admission_digest": handoff["admission_receipt"]["admission_digest"],
+                        "payload_digest": handoff["payload_digest"],
+                        "payload": handoff["payload"],
+                    }, sort_keys=True),
+                    "PENDING", iso(now), iso(now),
+                ),
+            )
+            c.execute(
+                "DELETE FROM night_scheduler_claim_authorizations WHERE delegation_id=? AND idempotency_key=?",
+                (handoff["delegation_id"], handoff["idempotency_key"]),
+            )
+            self.store._event(
+                c, handoff["lane"], "CLAIMED", now,
+                delegation_id=handoff["delegation_id"], objective_id=handoff["objective_id"],
+                lease_id=lease_id, dispatch_id=dispatch_id,
+                idempotency_key=handoff["idempotency_key"], fencing_token=token,
+                control_head=handoff["control_head"],
+                payload={
+                    "expires_at": iso(expires), "resource_key": task["resource_key"],
+                    "execution_order": handoff["execution_order"], "priority": handoff["priority"],
+                    "scheduling_owner": "A01_SUPERVISOR",
+                },
+            )
+            self.store._event(
+                c, handoff["lane"], "DISPATCH_INTENT", now,
+                delegation_id=handoff["delegation_id"], objective_id=handoff["objective_id"],
+                lease_id=lease_id, dispatch_id=dispatch_id,
+                idempotency_key=handoff["idempotency_key"], fencing_token=token,
+                control_head=handoff["control_head"],
+                payload={
+                    "executor_kind": handoff["executor_kind"],
+                    "coordination_digest": contract["coordination_digest"],
+                    "scheduling_owner": "A01_SUPERVISOR",
+                },
+            )
+            return self.store._to_claim(
+                c.execute("SELECT * FROM claims WHERE lease_id=?", (lease_id,)).fetchone()
+            )
 
     def tick(
         self,
@@ -238,49 +447,35 @@ class A01NightScheduler:
             self.reconcile(now=now)
             return {
                 "protocol_version": NIGHT_SCHEDULER_PROTOCOL,
-                "at": iso(now),
-                "shift_open": False,
-                "claims": [],
-                "blocked": [],
+                "at": iso(now), "shift_open": False, "claims": [], "blocked": [],
             }
 
         self.reconcile(now=now)
         claims: list[dict[str, Any]] = []
         blocked: list[dict[str, Any]] = []
+        active_order = self._minimum_active_order()
         for handoff, contract, _row in self._ordered_candidates(now):
             if len(claims) >= max_claims:
                 break
             try:
-                claim = self.coordination.claim(
-                    handoff, contract, now=now, lease_seconds=lease_seconds
-                )
-            except CoordinationError as exc:
-                blocked.append(
-                    {"delegation_id": handoff["delegation_id"], "reason": str(exc)}
-                )
+                claim = self._claim_authorized(handoff, contract, now, lease_seconds)
+            except (CoordinationError, NightSchedulerError) as exc:
+                blocked.append({"delegation_id": handoff["delegation_id"], "reason": str(exc)})
                 continue
             with self.store.tx() as c:
                 c.execute(
-                    "UPDATE night_scheduler_queue SET state='CLAIMED',updated_at=? "
-                    "WHERE delegation_id=?",
+                    "UPDATE night_scheduler_queue SET state='CLAIMED',updated_at=? WHERE delegation_id=?",
                     (iso(now), handoff["delegation_id"]),
                 )
-            claims.append(
-                {
-                    "delegation_id": claim.delegation_id,
-                    "lease_id": claim.lease_id,
-                    "dispatch_id": claim.dispatch_id,
-                    "fencing_token": claim.fencing_token,
-                    "execution_order": handoff["execution_order"],
-                    "priority": handoff["priority"],
-                }
-            )
+            claims.append({
+                "delegation_id": claim.delegation_id, "lease_id": claim.lease_id,
+                "dispatch_id": claim.dispatch_id, "fencing_token": claim.fencing_token,
+                "execution_order": handoff["execution_order"], "priority": handoff["priority"],
+            })
         return {
             "protocol_version": NIGHT_SCHEDULER_PROTOCOL,
-            "at": iso(now),
-            "shift_open": True,
-            "claims": claims,
-            "blocked": blocked,
+            "at": iso(now), "shift_open": True, "active_execution_order": active_order,
+            "claims": claims, "blocked": blocked,
         }
 
     def snapshot(self) -> dict[str, Any]:
@@ -288,9 +483,13 @@ class A01NightScheduler:
         for row in rows:
             row["handoff"] = json.loads(row.pop("handoff_json"))
             row["coordination_contract"] = json.loads(row.pop("contract_json"))
+        leaked = self.store.conn.execute(
+            "SELECT COUNT(*) n FROM night_scheduler_claim_authorizations"
+        ).fetchone()["n"]
         return {
             "protocol_version": NIGHT_SCHEDULER_PROTOCOL,
             "queue": rows,
+            "authorization_leaks": int(leaked),
             "coordination_problems": self.coordination.audit_coordination_invariants(),
             "supervisor_problems": self.store.audit_invariants(),
         }
