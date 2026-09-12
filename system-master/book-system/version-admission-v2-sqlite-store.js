@@ -1,7 +1,8 @@
 'use strict';
 
-const { CanonicalParentSqliteStore, BookCanonicalParentStoreError, classifySqliteError } = require('./canonical-parent-v2-sqlite-store.js');
-const core = require('./canonical-parent-v2-f5-core.js');
+const { classifySqliteError } = require('./canonical-parent-v2-sqlite-store.js');
+const { CanonicalParentF6SqliteStore, BookCanonicalParentF6StoreError } = require('./canonical-parent-v2-f6-sqlite-store.js');
+const core = require('./canonical-parent-v2-f6-core.js');
 const rebind = require('./version-admission-v2-rebind.js');
 
 class BookVersionAdmissionStoreError extends Error {
@@ -19,7 +20,7 @@ function json(v) { return JSON.stringify(v); }
 function parse(v, label) { try { return JSON.parse(v); } catch (e) { fail('STORE_JSON_CORRUPT', label, e); } }
 function nonEmpty(v) { return typeof v === 'string' && v.trim().length > 0; }
 
-class VersionAdmissionV2SqliteStore extends CanonicalParentSqliteStore {
+class VersionAdmissionV2SqliteStore extends CanonicalParentF6SqliteStore {
   constructor(dbPath, options = {}) {
     super(dbPath, options);
     try {
@@ -67,7 +68,7 @@ class VersionAdmissionV2SqliteStore extends CanonicalParentSqliteStore {
       return { ledger_identity: identity, state };
     } catch (err) {
       if (!committed) { try { this.db.exec('ROLLBACK'); } catch (_) {} }
-      if (err instanceof BookVersionAdmissionStoreError || err instanceof BookCanonicalParentStoreError || err instanceof rebind.BookVersionAdmissionRebindError) throw err;
+      if (err instanceof BookVersionAdmissionStoreError || err instanceof BookCanonicalParentF6StoreError || err instanceof rebind.BookVersionAdmissionRebindError) throw err;
       fail(classifySqliteError(err), String(err && err.message || err), err);
     }
   }
@@ -132,7 +133,7 @@ class VersionAdmissionV2SqliteStore extends CanonicalParentSqliteStore {
       if (specialistRow.ledger_identity !== delta.expected_ledger_identity) fail('SPECIALIST_LEDGER_IDENTITY_CONFLICT');
       if (specialistRow.ledger_identity !== effect.expected_specialist_ledger_identity) fail('SPECIALIST_EFFECT_IDENTITY_MISMATCH');
 
-      const result = core.applyAdmissionEffect(current, effect);
+      const result = core.applyEffect(current, effect);
       const next = result.parent_state;
       const receipt = result.commit_receipt;
       receipt.specialist_pre_ledger_identity = delta.expected_ledger_identity;
@@ -173,7 +174,7 @@ class VersionAdmissionV2SqliteStore extends CanonicalParentSqliteStore {
       return { replay: false, parent_state: next, commit_receipt: receipt, specialist_receipt: delta.specialist_receipt };
     } catch (err) {
       if (!committed) { try { this.db.exec('ROLLBACK'); } catch (_) {} }
-      if (err instanceof BookVersionAdmissionStoreError || err instanceof BookCanonicalParentStoreError || err instanceof core.BookCanonicalParentV2Error || err instanceof core.BookCanonicalParentF5Error || err instanceof rebind.BookVersionAdmissionRebindError) throw err;
+      if (err instanceof BookVersionAdmissionStoreError || err instanceof BookCanonicalParentF6StoreError || err instanceof core.BookCanonicalParentV2Error || err instanceof core.BookCanonicalParentF5Error || err instanceof core.BookCanonicalParentF6Error || err instanceof rebind.BookVersionAdmissionRebindError) throw err;
       fail(classifySqliteError(err), String(err && err.message || err), err);
     }
   }
