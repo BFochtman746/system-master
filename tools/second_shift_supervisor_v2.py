@@ -372,12 +372,22 @@ class SupervisorStore:
         payload = payload or {}
         with self.tx() as c:
             claim = self._claim(c, lease_id)
+            if claim["released_at"] is not None:
+                recorded_payload = json.loads(claim["terminal_reason"] or "{}")
+                exact_replay = (
+                    claim["status"] == state
+                    and int(fencing_token) == int(claim["fencing_token"])
+                    and recorded_payload == payload
+                )
+                if exact_replay:
+                    return
+                if int(fencing_token) != int(claim["fencing_token"]) or claim["status"] == "STALE":
+                    raise StaleWorker("terminal result replay is stale")
+                raise Conflict("terminal result replay conflicts with recorded terminalization")
             if state != "STALE":
                 self._assert_live_worker(c, claim, fencing_token, now)
             else:
                 lane_row = self._lane(c, claim["lane"])
-                if claim["released_at"] is not None:
-                    return
                 if fencing_token != claim["fencing_token"] and fencing_token != lane_row["fencing_counter"]:
                     raise StaleWorker("stale terminalization has invalid fence")
             c.execute("UPDATE claims SET status=?,released_at=?,terminal_reason=? WHERE lease_id=?", (state, iso(now), json.dumps(payload, sort_keys=True), lease_id))

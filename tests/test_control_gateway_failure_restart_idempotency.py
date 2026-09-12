@@ -106,12 +106,13 @@ class FailureRestartIdempotencyTests(unittest.TestCase):
              self.scheduler._scheduler_digest(h, c), "BINDING", stamp, stamp),
         )
         self.restart()
-        with self.assertRaisesRegex(sqlite3.IntegrityError, "CG010_NIGHT_SCHEDULER_AUTH_REQUIRED"):
+        with self.assertRaisesRegex(Conflict, "unknown lane"):
             self.store.claim_ready(
                 lane=h["lane"], delegation_id=h["delegation_id"], objective_id=h["objective_id"],
                 control_head=h["control_head"], idempotency_key=h["idempotency_key"],
                 executor_kind=h["executor_kind"], now=IN_SHIFT,
             )
+        self.assertEqual(self.store.conn.execute("SELECT COUNT(*) n FROM claims").fetchone()["n"], 0)
         self.assertEqual(self.scheduler.enqueue(h, c, now=IN_SHIFT)["state"], "QUEUED")
 
     def test_restart_from_queued_claimed_and_reconcile_states_is_reconstructable(self):
@@ -294,7 +295,8 @@ class FailureRestartIdempotencyTests(unittest.TestCase):
 
         self.store.close()
         other = Path(self.tmp.name) / "expired.db"
-        self.store = SupervisorStore(other)
+        self.db = other
+        self.store = SupervisorStore(self.db)
         self.scheduler = A01NightScheduler(self.store)
         self.enqueue("X", "LANE-X", not_before=future, not_after=expiry)
         self.restart()
@@ -332,6 +334,11 @@ class FailureRestartIdempotencyTests(unittest.TestCase):
             self.store.terminal(
                 claim["lease_id"], claim["fencing_token"], "BLOCKED", payload={"receipt": "R-2"},
                 now=IN_SHIFT + dt.timedelta(seconds=3),
+            )
+        with self.assertRaises(StaleWorker):
+            self.store.terminal(
+                claim["lease_id"], claim["fencing_token"] + 1, "COMPLETED", payload=payload,
+                now=IN_SHIFT + dt.timedelta(seconds=4),
             )
 
     def test_local_running_work_needs_no_github_roundtrip_and_claim_guard_survives_restart(self):
