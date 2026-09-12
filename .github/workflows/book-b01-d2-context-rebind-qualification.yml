@@ -1,0 +1,42 @@
+name: Book B01 D2 Context Rebind Qualification
+
+on:
+  push:
+    branches:
+      - book-system/control-v1
+    paths:
+      - 'system-master/book-system/context-compiler/**'
+      - 'system-master/book-system/book-capability-binding-v1.js'
+      - 'system-master/book-system/book-capability-binding-v1.registry.json'
+      - '.github/scripts/book-context-compiler-context-package-001-qualify.js'
+      - '.github/workflows/book-b01-d2-context-rebind-qualification.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  context-rebind-qualification:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [22, 24]
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Record exact subject and donor blobs
+        run: |
+          echo "QUALIFIED_SUBJECT=${GITHUB_SHA}"
+          node --version
+          test "$(git hash-object system-master/book-system/context-compiler/book-context-compiler.js)" = "8b71624cd555e834fb6572cb659ad3d50a1ade2c"
+          test "$(git hash-object system-master/book-system/context-compiler/book-context-package.schema.json)" = "725f3a16990f096c6fd99fe9e27d026445839efa"
+          test "$(git hash-object .github/scripts/book-context-compiler-context-package-001-qualify.js)" = "0a903198ea4baff3ceaa3b8b82da1546ef15fb14"
+      - name: Re-run exact recovered 44-case donor semantics
+        run: node .github/scripts/book-context-compiler-context-package-001-qualify.js
+      - name: Run B01 D2 binding-digest rebind qualification
+        run: node system-master/book-system/context-compiler/book-context-compiler-b01-rebind.test.js
