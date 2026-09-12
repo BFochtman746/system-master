@@ -87,7 +87,7 @@ public final class DocumentExistingArtifactEffectExecutor {
 
         Optional<DocumentSpineStageReceipt> prior = checkpoints.latest(job.jobId(), actionStage);
         if (prior.isPresent() && prior.get().resumable(idempotencyKey)) {
-            return resumePersisted(job, plan, sourceFormat, sourceBytes, sourceGraph, prior.get(), false);
+            return resumePersisted(job, plan, sourceFormat, sourceBytes, sourceGraph, prior.get());
         }
         if (prior.isPresent() && prior.get().prepared(idempotencyKey)) {
             return resumePrepared(job, plan, sourceFormat, sourceBytes, sourceGraph, actionStage, idempotencyKey, prior.get());
@@ -267,8 +267,7 @@ public final class DocumentExistingArtifactEffectExecutor {
             DocumentFormat sourceFormat,
             byte[] sourceBytes,
             CanonicalDocumentGraphV2 sourceGraph,
-            DocumentSpineStageReceipt persisted,
-            boolean preparedRecovery) throws Exception {
+            DocumentSpineStageReceipt persisted) throws Exception {
         String candidateSha = requireOutputDigest(persisted);
         byte[] candidateBytes = gateway.readVerified(candidateSha, gateway.maxBytes());
         return rebuildOutcomeFromEvidence(
@@ -290,7 +289,7 @@ public final class DocumentExistingArtifactEffectExecutor {
             CanonicalDocumentGraphV2 sourceGraph,
             DocumentSpineStageReceipt stageReceipt,
             byte[] candidateBytes,
-            boolean resumed) {
+            boolean resumed) throws IOException {
         Map<String, String> evidence = evidenceMap(stageReceipt.evidence());
         String candidateSha = DocumentSpineDigests.sha256(candidateBytes);
         if (!candidateSha.equals(requireOutputDigest(stageReceipt))) {
