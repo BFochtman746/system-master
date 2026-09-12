@@ -12,10 +12,11 @@ Repository: `BFochtman746/system-master`
 
 Current implementation/evidence baseline used for this initial mapping: `system-master/control-v2` at `6a44171bf4a8570d5e2fb8a489d194a9e704915b`, plus archival Foundation & Spine implementation/audit material and the current F-WP implementation lineage.
 
-Documentation-only commits made after that baseline do not change runtime standing.
+Documentation-only commits made after that baseline do not change runtime standing. Component rows may subsequently advance when new implementation and exact-subject qualification evidence is merged.
 
 ## Status vocabulary
 
+- **CURRENT — HOSTED QUALIFIED**: the target component is implemented for its present boundary and has passed portable/hosted isolated and applicable boundary qualification. Later components can still require requalification; target/native or production standing is separate.
 - **CURRENT — SUBSTANTIAL**: direct current implementation exists for a major portion of the target authority.
 - **CURRENT — PARTIAL**: current implementation exists but does not yet cover/prove the full target authority.
 - **HISTORICAL SUBSTRATE — REBIND**: substantial reusable implementation exists in prior/recovered spine material, but it must be mapped and qualified against the fresh contracts.
@@ -28,7 +29,7 @@ These labels do not imply A-01 failure. If an A-01 test did not run because A-01
 
 | Logical system | Current standing | What this means now |
 |---|---|---|
-| System Root & Authority Registry | CURRENT — SUBSTANTIAL | Current governance/authority/traceability/change-control implementation exists. It must be kept aligned with the simplified Foundation & Spine documentation root. |
+| System Root & Authority Registry | CURRENT — HOSTED QUALIFIED | Fresh internal Foundation authority registry now owns the exact 26 shared-system identities, Creative Fabric federated-overlay identity and one non-duplicating product-root binding. It provides unique owner mapping, parent topology, aliases, current version pointers, explicit admission, terminal retirement, optimistic revision checks, idempotent commands and a locked append-only SHA-256 journal that fails closed on corrupt/truncated replay. Isolated/adversarial/concurrency tests, product-root boundary validation and performance qualification pass in PR #61. This is a conditional component freeze: later Identity/Security/Contracts and accumulated-spine integration must requalify its boundaries. A-01 target execution is not claimed. |
 | Identity, Principal & Delegation | CURRENT — PARTIAL | Current authorization/approval substrate plus historical identity/security layers exist. Full fresh actor/workload identity and descendant-delegation binding still needs one current mapping. |
 | Contracts & Versioning | CURRENT — SUBSTANTIAL | Current contract registry/migration/portability implementation exists plus historical contract infrastructure. Fresh spine seam contracts still need complete registration. |
 | Intent / Keel | HISTORICAL SUBSTRATE — REBIND | Strong prior goal/requirements/constraints/delegation/resource-ceiling semantics exist. The current spine needs a clean governed-goal implementation binding and end-to-end descendant propagation proof. |
