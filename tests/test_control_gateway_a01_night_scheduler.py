@@ -207,14 +207,18 @@ class NightSchedulerTests(unittest.TestCase):
     def test_parallel_scheduler_ticks_cannot_double_claim(self):
         self.enqueue("A", "LANE-A")
         self.store.close()
-        barrier = threading.Barrier(2)
+        barrier = threading.Barrier(2, timeout=10)
+
         def worker(_):
             with SupervisorStore(self.db) as store:
                 scheduler = A01NightScheduler(store)
                 barrier.wait()
                 return scheduler.tick(now=IN_SHIFT, max_claims=1)
+
         with concurrent.futures.ThreadPoolExecutor(max_workers=2) as ex:
-            results = list(ex.map(worker, range(2)))
+            futures = [ex.submit(worker, i) for i in range(2)]
+            results = [future.result(timeout=30) for future in futures]
+
         claimed = [c for result in results for c in result["claims"]]
         self.assertEqual(len(claimed), 1, results)
         self.store = SupervisorStore(self.db); self.scheduler = A01NightScheduler(self.store)
