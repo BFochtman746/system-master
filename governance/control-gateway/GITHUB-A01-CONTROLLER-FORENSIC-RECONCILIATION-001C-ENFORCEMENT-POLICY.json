@@ -22,7 +22,7 @@
     "issues_permission": "NONE",
     "pull_requests_permission": "NONE",
     "actions_permission": "NONE",
-    "rule": "The dedicated writer App is the only durable ref-mutation identity. It must not have repository-administration authority and must not share credentials with ChatGPT, a human PAT, or generic GitHub Actions GITHUB_TOKEN."
+    "rule": "The dedicated writer App is the only durable ref-mutation identity. It must not have repository-administration authority and must not share credentials with ChatGPT, a human PAT, or generic GitHub Actions GITHUB_TOKEN. The repository policy remains an unbound template; the installed App Integration actor ID is supplied only at cutover/runtime and must not be committed merely to bind deployment identity."
   },
   "ruleset": {
     "name": "System Master Control Gateway Production Mutation Boundary",
@@ -34,7 +34,7 @@
     "update_allows_fetch_and_merge": false,
     "bypass": {
       "actor_type": "Integration",
-      "actor_id_source": "writer_identity.actor_id",
+      "actor_id_source": "runtime:CONTROL_GATEWAY_WRITER_INTEGRATION_ID",
       "bypass_mode": "always",
       "additional_bypass_actors_forbidden": true
     }
@@ -71,11 +71,11 @@
     "QUALIFY_001C_EXECUTABLE_CANDIDATE_HOSTED_NODE22_NODE24",
     "QUALIFY_SAME_EXACT_SHA_ON_A01_WINDOWS_X64",
     "CREATE_DEDICATED_GITHUB_APP_AND_INSTALL_ONLY_ON_SYSTEM_MASTER",
-    "BIND_WRITER_APP_INTEGRATION_ID_IN_THIS_POLICY",
     "CONFIGURE_CONTROL_GATEWAY_PRODUCTION_ENVIRONMENT_MAIN_ONLY_WITH_CLIENT_ID_AND_PRIVATE_KEY",
+    "CAPTURE_INSTALLED_WRITER_APP_INTEGRATION_ID_AS_CONTROL_GATEWAY_WRITER_INTEGRATION_ID_WITHOUT_EDITING_THE_QUALIFIED_POLICY_TEMPLATE",
     "FAST_FORWARD_MAIN_TO_THE_QUALIFIED_MAIN_DERIVED_CONTROLLER_CANDIDATE_AS_THE_FINAL_BOOTSTRAP_WRITE",
     "CREATE_AND_ACTIVATE_EXACT_RULESET_WITH_ONLY_THE_DEDICATED_APP_AS_BYPASS",
-    "READ_BACK_LIVE_RULESET_AND_VERIFY_EXACT_POLICY",
+    "READ_BACK_LIVE_RULESET_AND_VERIFY_EXACT_POLICY_USING_RUNTIME_INTEGRATION_ID_BINDING",
     "NEGATIVE_PROVE_ORDINARY_CHATGPT_GITHUB_MUTATION_CANNOT_CREATE_OR_UPDATE_A_BRANCH",
     "POSITIVE_PROVE_RECEIPT_CONSUMING_WRITER_CAN_APPLY_ONE_ADMITTED_DISPOSABLE_MUTATION_AND_REPLAY_IDEMPOTENTLY",
     "FREEZE_001C_ONLY_AFTER_ALL_PREVIOUS_STEPS_PASS"
@@ -84,6 +84,7 @@
     "NO_RULESET_WITH_REPOSITORY_ROLE_OR_USER_BYPASS_FOR_CHATGPT",
     "NO_GITHUB_ACTIONS_INTEGRATION_AS_GLOBAL_BYPASS",
     "NO_DIRECT_CHATGPT_CREATE_FILE_UPDATE_FILE_CREATE_BRANCH_OR_UPDATE_REF_AFTER_ACTIVATION",
+    "NO_COMMIT_OF_DEPLOYMENT_SPECIFIC_ACTOR_ID_MERELY_TO_BIND_WRITER_IDENTITY",
     "NO_FORCE_PUSH",
     "NO_MAIN_RESET",
     "NO_CG012_START",
