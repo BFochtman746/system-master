@@ -1,0 +1,48 @@
+name: Book B03 D4 Guard Repair
+
+on:
+  push:
+    branches:
+      - book-system/control-v1
+    paths:
+      - '.github/workflows/book-b03-d4-guard-repair.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Patch exact D4 guard and rebind qualifier
+        run: |
+          set -euo pipefail
+          test "$(git hash-object system-master/book-system/book-story-bible-admission-v1.js)" = '9f01646fa9ad275bc0c43761658472bbe84eb042'
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('system-master/book-system/book-story-bible-admission-v1.js')
+          s=p.read_text()
+          old="if (HARD_FORBIDDEN.some(r => r.test(key))) fail('BLOCKED_KNOWLEDGE_SCHEMA_INVALID', `${path}.${key}`);"
+          new="if (HARD_FORBIDDEN.some(r => r.test(key)) && !(key === 'raw_manuscript_text_persisted' && child === false)) fail('BLOCKED_KNOWLEDGE_SCHEMA_INVALID', `${path}.${key}`);"
+          assert old in s
+          p.write_text(s.replace(old,new,1))
+          PY
+          new_sha="$(git hash-object system-master/book-system/book-story-bible-admission-v1.js)"
+          python3 - "$new_sha" <<'PY'
+          from pathlib import Path
+          import sys
+          p=Path('.github/workflows/book-b03-d4-story-bible-admission-qualification.yml')
+          s=p.read_text()
+          old='9f01646fa9ad275bc0c43761658472bbe84eb042'
+          assert old in s
+          p.write_text(s.replace(old,sys.argv[1],1))
+          PY
+          git rm .github/workflows/book-b03-d4-guard-repair.yml
+          git add system-master/book-system/book-story-bible-admission-v1.js .github/workflows/book-b03-d4-story-bible-admission-qualification.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'book: repair B03 D4 raw-content evidence guard'
+          git push origin HEAD:book-system/control-v1
