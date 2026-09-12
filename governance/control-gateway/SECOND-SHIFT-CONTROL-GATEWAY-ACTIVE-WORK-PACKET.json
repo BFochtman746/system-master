@@ -1,0 +1,73 @@
+{
+  "protocol_version": "control-gateway.active-work.v1",
+  "mission_version": "SECOND-SHIFT-CONTROL-GATEWAY-CG-001/v1.0",
+  "workstream_id": "SECOND-SHIFT-CONTROL-GATEWAY",
+  "authority_epoch": 1,
+  "authority_rebind_receipt_id": null,
+  "authoritative_subject": {
+    "algorithm": "sha1",
+    "oid": "d38825493805d0a9d4ac0f4ab17825badb59b6bb"
+  },
+  "repository": "BFochtman746/system-master",
+  "branch_or_ref": "second-shift-control-gateway/cg-003-active-work-state",
+  "allowed_paths_or_effects": {
+    "paths": [
+      ".github/workflows/second-shift-control-gateway-cg-003.yml",
+      "control-gateway/**",
+      "governance/control-gateway/**"
+    ],
+    "effects": [
+      "CONTROL_GATEWAY_DEVELOPMENT_WRITE"
+    ]
+  },
+  "dependency_graph": {
+    "version": 1,
+    "edges": []
+  },
+  "qualification_state": "PASSED",
+  "github_admission_state": "NOT_REQUIRED",
+  "a01_state": "NOT_REQUIRED",
+  "current_operation": {
+    "operation_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-003",
+    "state": "TERMINAL",
+    "predecessor_receipt_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-002-FREEZE-887f1e49"
+  },
+  "last_terminal_receipt": {
+    "receipt_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-003-HOST-QUALIFICATION-34666596357",
+    "operation_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-003",
+    "outcome": "SUCCEEDED",
+    "satisfies_dependency": true,
+    "subject": {
+      "algorithm": "sha1",
+      "oid": "d38825493805d0a9d4ac0f4ab17825badb59b6bb"
+    }
+  },
+  "receipt_index": [
+    {
+      "receipt_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-003-HOST-QUALIFICATION-34666596357",
+      "operation_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-003",
+      "outcome": "SUCCEEDED",
+      "satisfies_dependency": true,
+      "subject": {
+        "algorithm": "sha1",
+        "oid": "d38825493805d0a9d4ac0f4ab17825badb59b6bb"
+      }
+    }
+  ],
+  "successor_candidates": [
+    {
+      "operation_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-004",
+      "predecessor_receipt_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-003-HOST-QUALIFICATION-34666596357",
+      "required_receipt_ids": [],
+      "qualification_state": "PENDING",
+      "github_admission_state": "PENDING",
+      "a01_state": "NOT_REQUIRED"
+    }
+  ],
+  "next_legal_operation": {
+    "kind": "START_SUCCESSOR",
+    "operation_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-004",
+    "predecessor_receipt_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-003-HOST-QUALIFICATION-34666596357",
+    "reason": "EXACTLY_ONE_DEPENDENCY_VALID_SUCCESSOR"
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "schema": "second-shift-control-gateway.cg003-freeze.v1",
+  "operation_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-003",
+  "status": "HOST_QUALIFIED_DEVELOPMENT_FROZEN",
+  "mission_version": "SECOND-SHIFT-CONTROL-GATEWAY-CG-001/v1.0",
+  "predecessor_operation": "SECOND-SHIFT-CONTROL-GATEWAY-CG-002",
+  "predecessor_sha": "887f1e49b0f7a6973de1be38b446e225b8abac39",
+  "branch": "second-shift-control-gateway/cg-003-active-work-state",
+  "qualified_implementation_subject": "d38825493805d0a9d4ac0f4ab17825badb59b6bb",
+  "qualification": {
+    "workflow": ".github/workflows/second-shift-control-gateway-cg-003.yml",
+    "run_id": 34666596357,
+    "conclusion": "SUCCESS",
+    "node_22": {
+      "version": "22.23.2",
+      "tests": 42,
+      "passed": 42,
+      "failed": 0
+    },
+    "node_24": {
+      "version": "24.20.0",
+      "tests": 42,
+      "passed": 42,
+      "failed": 0
+    }
+  },
+  "repair_lineage": {
+    "initial_subject": "1494902611b995d9f59d58ce60055207e285de27",
+    "initial_run_id": 34666516407,
+    "initial_standing": "FAILED_HOST_QUALIFICATION",
+    "observed_node_24": {
+      "tests": 41,
+      "passed": 38,
+      "failed": 3,
+      "defect": "IDENTIFIER_REGEX_REJECTED_VALID_ONE_CHARACTER_TEST_IDENTITIES_BEFORE_INTENDED_ADVERSARIAL_CHECKS"
+    },
+    "repair_subject": "6be04b27239c3e02a4b9a53b95e5996e7c2b454a",
+    "final_qualification_subject": "d38825493805d0a9d4ac0f4ab17825badb59b6bb",
+    "test_weakening": false
+  },
+  "implemented_contracts": [
+    "ACTIVE_WORK_PACKET_STRICT_SCHEMA",
+    "DETERMINISTIC_NEXT_LEGAL_OPERATION",
+    "EXACT_PREDECESSOR_SUCCESSOR_BINDING",
+    "AMBIGUITY_FAIL_CLOSED",
+    "DEPENDENCY_RECEIPT_VALIDATION",
+    "TERMINAL_RECEIPT_BINDING",
+    "SQLITE_WAL_FULL_DURABILITY",
+    "REVISION_AND_DIGEST_COMPARE_AND_SWAP",
+    "HASH_LINKED_ACTIVE_WORK_HISTORY",
+    "RESTART_RECONSTRUCTION_WITHOUT_CHAT_HISTORY",
+    "HISTORY_GAP_AND_FORK_DETECTION",
+    "PACKET_TAMPER_DETECTION",
+    "EXPLICIT_RECEIPT_BACKED_AUTHORITY_REBIND",
+    "SILENT_AUTHORITY_DRIFT_REJECTION",
+    "MISSION_PROTOCOL_WORKSTREAM_IMMUTABILITY"
+  ],
+  "development_active_work_packet": {
+    "path": "governance/control-gateway/SECOND-SHIFT-CONTROL-GATEWAY-ACTIVE-WORK-PACKET.json",
+    "git_blob_sha": "d52a12977b896f30e58710d909a3285df2fadca7",
+    "standing": "DEVELOPMENT_CONTINUATION_AUTHORITY_ONLY_NOT_PRODUCTION_RUNTIME_STATE"
+  },
+  "production_activation": false,
+  "remaining_blockers": [
+    "PROTECTED_DEDICATED_GITHUB_CONTROL_STATE_PUBLICATION_NOT_IMPLEMENTED",
+    "CHAT_RECONSTRUCTION_ADAPTER_NOT_IMPLEMENTED",
+    "CURRENT_A01_DIRECT_SELF_HOSTED_SUPERVISOR_STRESS_ROUTE_REMAINS_UNREGISTERED_AND_MUST_NOT_BE_BYPASSED",
+    "A01_SUPERVISOR_SCHEDULER_CUTOVER_NOT_PERFORMED"
+  ],
+  "explicit_non_scope": [
+    "SYSTEM_MASTER_PRODUCT_ARCHITECTURE",
+    "A01_ROUTING_REPAIR",
+    "A01_SCHEDULER_AUTHORITY_CUTOVER",
+    "PRODUCTION_CONTROL_STATE_ACTIVATION"
+  ],
+  "next_operation": {
+    "operation_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-004",
+    "title": "GITHUB DURABLE ACTIVE-WORK PUBLICATION / CHAT RECONSTRUCTION ADAPTER + HOST QUALIFICATION",
+    "predecessor_receipt_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-003-HOST-QUALIFICATION-34666596357"
+  }
+}
