@@ -1,0 +1,93 @@
+name: BOOK Reconstruction B00 F9 Qualification
+
+on:
+  push:
+    branches:
+      - book-system/reconstruction-b00-f9-export-freeze-rebind
+    paths:
+      - 'system-master/book-system/**'
+      - '.github/scripts/book-system-canonical-parent-v2-core-001-qualify.js'
+      - '.github/scripts/book-system-canonical-parent-v2-store-001-qualify.js'
+      - '.github/scripts/book-reconstruction-b00-f5-version-admission-001-qualify.js'
+      - '.github/scripts/book-reconstruction-b00-f6a-lifecycle-graph-001-qualify.js'
+      - '.github/scripts/book-reconstruction-b00-f6b-lifecycle-rebind-001-qualify.js'
+      - '.github/scripts/book-system-lifecycle-transition-001-qualify.js'
+      - '.github/scripts/book-system-rights-custody-evidence-001-qualify.js'
+      - '.github/scripts/book-system-governing-style-profile-001-qualify.js'
+      - '.github/scripts/book-system-author-decision-queue-001-qualify-v2.js'
+      - '.github/scripts/book-system-author-decision-current-subject-guard-001-qualify.js'
+      - '.github/scripts/book-system-content-admission-author-decision-applicability-guard-004-qualify.js'
+      - '.github/scripts/book-reconstruction-b00-f7-author-decision-rebind-001-qualify.js'
+      - '.github/scripts/book-system-integration-proposal-runtime-002-qualify.js'
+      - '.github/scripts/book-reconstruction-b00-f8-integration-proposal-rebind-001-qualify.js'
+      - '.github/scripts/book-system-export-freeze-001-reconciled-qualify.js'
+      - '.github/scripts/book-reconstruction-b00-f9-export-freeze-rebind-001-qualify.js'
+      - '.github/workflows/book-reconstruction-b00-f9-qualify.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    name: Node ${{ matrix.node }} — F1-F9 cumulative Book foundation
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['22','24']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Record exact subject
+        run: |
+          echo "subject_sha=${GITHUB_SHA}" | tee b00-f9-subject-node-${{ matrix.node }}.txt
+          git rev-parse HEAD | tee -a b00-f9-subject-node-${{ matrix.node }}.txt
+          node --version | tee -a b00-f9-subject-node-${{ matrix.node }}.txt
+      - name: Q001-Q036 parent core
+        run: node .github/scripts/book-system-canonical-parent-v2-core-001-qualify.js | tee b00-f9-core-${{ matrix.node }}.log
+      - name: Q037-Q050 durable parent
+        run: node .github/scripts/book-system-canonical-parent-v2-store-001-qualify.js | tee b00-f9-store-${{ matrix.node }}.log
+      - name: Q051-Q058 version admission
+        run: node .github/scripts/book-reconstruction-b00-f5-version-admission-001-qualify.js | tee b00-f9-f5-${{ matrix.node }}.log
+      - name: Q067-Q076 rights custody
+        run: node .github/scripts/book-system-rights-custody-evidence-001-qualify.js | tee b00-f9-rights-${{ matrix.node }}.log
+      - name: Q077-Q084 governing style
+        run: node .github/scripts/book-system-governing-style-profile-001-qualify.js | tee b00-f9-style-${{ matrix.node }}.log
+      - name: F6A lifecycle losslessness
+        run: node .github/scripts/book-reconstruction-b00-f6a-lifecycle-graph-001-qualify.js | tee b00-f9-f6a-${{ matrix.node }}.log
+      - name: recovered lifecycle predecessor
+        run: node .github/scripts/book-system-lifecycle-transition-001-qualify.js | tee b00-f9-lifecycle-${{ matrix.node }}.log
+      - name: Q059-Q060 F6B lifecycle rebind
+        run: node .github/scripts/book-reconstruction-b00-f6b-lifecycle-rebind-001-qualify.js | tee b00-f9-f6b-${{ matrix.node }}.log
+      - name: recovered author queue
+        run: node .github/scripts/book-system-author-decision-queue-001-qualify-v2.js | tee b00-f9-author-queue-${{ matrix.node }}.log
+      - name: recovered author current subject
+        run: node .github/scripts/book-system-author-decision-current-subject-guard-001-qualify.js | tee b00-f9-author-current-${{ matrix.node }}.log
+      - name: recovered author applicability
+        run: node .github/scripts/book-system-content-admission-author-decision-applicability-guard-004-qualify.js | tee b00-f9-author-applicability-${{ matrix.node }}.log
+      - name: Q061-Q062 F7
+        run: node .github/scripts/book-reconstruction-b00-f7-author-decision-rebind-001-qualify.js | tee b00-f9-f7-${{ matrix.node }}.log
+      - name: recovered integration proposal
+        run: node .github/scripts/book-system-integration-proposal-runtime-002-qualify.js | tee b00-f9-integration-${{ matrix.node }}.log
+      - name: Q063 F8
+        run: node .github/scripts/book-reconstruction-b00-f8-integration-proposal-rebind-001-qualify.js | tee b00-f9-f8-${{ matrix.node }}.log
+      - name: recovered export freeze predecessor
+        run: node .github/scripts/book-system-export-freeze-001-reconciled-qualify.js | tee b00-f9-export-predecessor-${{ matrix.node }}.log
+      - name: Q065 F9 export freeze rebind
+        run: node .github/scripts/book-reconstruction-b00-f9-export-freeze-rebind-001-qualify.js | tee b00-f9-rebind-${{ matrix.node }}.log
+      - name: Hash evidence
+        if: always()
+        run: sha256sum b00-f9-subject-node-${{ matrix.node }}.txt b00-f9-*.log > b00-f9-node-${{ matrix.node }}.sha256
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: book-reconstruction-b00-f9-node-${{ matrix.node }}-${{ github.sha }}
+          path: |
+            b00-f9-subject-node-${{ matrix.node }}.txt
+            b00-f9-*.log
+            b00-f9-node-${{ matrix.node }}.sha256
+          if-no-files-found: error
