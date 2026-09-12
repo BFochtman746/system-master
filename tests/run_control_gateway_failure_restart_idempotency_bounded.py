@@ -18,6 +18,29 @@ sys.modules[spec.name] = module
 spec.loader.exec_module(module)
 
 
+def concurrent_store_reopen_is_nonblocking(self):
+    """Two restarted scheduler processes can reopen one initialized durable store."""
+    self.enqueue("OPEN", "LANE-OPEN")
+    self.store.close()
+    barrier = threading.Barrier(2)
+
+    def worker(_):
+        barrier.wait(timeout=10)
+        with module.SupervisorStore(self.db) as store:
+            return store.pragma_state(), store.audit_invariants()
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:
+        futures = [pool.submit(worker, i) for i in range(2)]
+        results = [future.result(timeout=20) for future in futures]
+
+    self.store = module.SupervisorStore(self.db)
+    self.scheduler = module.A01NightScheduler(self.store)
+    self.assertEqual(len(results), 2)
+    for pragma, problems in results:
+        self.assertEqual(str(pragma["journal_mode"]).lower(), "wal")
+        self.assertEqual(problems, [])
+
+
 def bounded_parallel_scheduler_ticks(self):
     """Run the original parallel-tick invariant with bounded synchronization.
 
@@ -53,6 +76,7 @@ def bounded_parallel_scheduler_ticks(self):
     )
 
 
+module.FailureRestartIdempotencyTests.test_concurrent_store_reopen_is_nonblocking = concurrent_store_reopen_is_nonblocking
 module.FailureRestartIdempotencyTests.test_parallel_scheduler_ticks_cannot_double_schedule_or_double_dispatch = bounded_parallel_scheduler_ticks
 
 suite = unittest.defaultTestLoader.loadTestsFromTestCase(module.FailureRestartIdempotencyTests)

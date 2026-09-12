@@ -21,6 +21,18 @@ from zoneinfo import ZoneInfo
 NY = ZoneInfo("America/New_York")
 UTC = dt.timezone.utc
 TERMINAL = {"COMPLETED", "BLOCKED", "STALE"}
+_SCHEMA_OBJECTS = frozenset(
+    {
+        "lanes",
+        "delegations",
+        "claims",
+        "uq_active_claim_per_lane",
+        "dispatch_outbox",
+        "circuits",
+        "events",
+        "supervisor_meta",
+    }
+)
 
 
 class SupervisorError(RuntimeError):
@@ -77,11 +89,18 @@ class SupervisorStore:
         self.db_path = str(db_path)
         self.conn = sqlite3.connect(self.db_path, timeout=30, isolation_level=None)
         self.conn.row_factory = sqlite3.Row
-        self.conn.execute("PRAGMA foreign_keys=ON")
-        self.conn.execute("PRAGMA journal_mode=WAL")
-        self.conn.execute("PRAGMA synchronous=FULL")
+        # Install the wait policy before any pragma that can need a database lock.
         self.conn.execute("PRAGMA busy_timeout=30000")
-        self._init_schema()
+        self.conn.execute("PRAGMA foreign_keys=ON")
+        journal_mode = str(self.conn.execute("PRAGMA journal_mode").fetchone()[0]).lower()
+        if journal_mode != "wal":
+            self.conn.execute("PRAGMA journal_mode=WAL")
+        self.conn.execute("PRAGMA synchronous=FULL")
+        # Reopened scheduler processes must not all become schema writers. A fully
+        # initialized database takes this read-only fast path; only incomplete/new
+        # stores enter the transactional schema bootstrap below.
+        if not self._schema_ready():
+            self._init_schema()
 
     def close(self) -> None:
         self.conn.close()
@@ -103,96 +122,111 @@ class SupervisorStore:
         else:
             self.conn.execute("COMMIT")
 
+    def _schema_ready(self) -> bool:
+        rows = self.conn.execute(
+            "SELECT name FROM sqlite_master WHERE "
+            "(type='table' AND name IN ('lanes','delegations','claims','dispatch_outbox','circuits','events','supervisor_meta')) "
+            "OR (type='index' AND name='uq_active_claim_per_lane')"
+        ).fetchall()
+        return {str(row[0]) for row in rows} == _SCHEMA_OBJECTS
+
     def _init_schema(self) -> None:
-        self.conn.executescript(
-            """
-            CREATE TABLE IF NOT EXISTS lanes (
-              lane TEXT PRIMARY KEY,
-              owner_path TEXT NOT NULL,
-              control_ref TEXT NOT NULL,
-              control_head TEXT NOT NULL,
-              fencing_counter INTEGER NOT NULL DEFAULT 0,
-              state TEXT NOT NULL,
-              current_delegation_id TEXT,
-              shift_date TEXT,
-              updated_at TEXT NOT NULL
-            );
-            CREATE TABLE IF NOT EXISTS delegations (
-              delegation_id TEXT PRIMARY KEY,
-              lane TEXT NOT NULL REFERENCES lanes(lane),
-              objective_id TEXT NOT NULL,
-              obligation_id TEXT,
-              control_head TEXT NOT NULL,
-              state TEXT NOT NULL,
-              payload_json TEXT NOT NULL,
-              updated_at TEXT NOT NULL
-            );
-            CREATE TABLE IF NOT EXISTS claims (
-              lease_id TEXT PRIMARY KEY,
-              lane TEXT NOT NULL REFERENCES lanes(lane),
-              delegation_id TEXT NOT NULL REFERENCES delegations(delegation_id),
-              objective_id TEXT NOT NULL,
-              control_head TEXT NOT NULL,
-              idempotency_key TEXT NOT NULL UNIQUE,
-              fencing_token INTEGER NOT NULL,
-              claimed_at TEXT NOT NULL,
-              expires_at TEXT NOT NULL,
-              heartbeat_at TEXT NOT NULL,
-              checkpoint_pointer TEXT,
-              status TEXT NOT NULL,
-              released_at TEXT,
-              terminal_reason TEXT,
-              dispatch_id TEXT NOT NULL UNIQUE
-            );
-            CREATE UNIQUE INDEX IF NOT EXISTS uq_active_claim_per_lane
-              ON claims(lane) WHERE released_at IS NULL;
-            CREATE TABLE IF NOT EXISTS dispatch_outbox (
-              dispatch_id TEXT PRIMARY KEY,
-              lane TEXT NOT NULL REFERENCES lanes(lane),
-              lease_id TEXT NOT NULL UNIQUE REFERENCES claims(lease_id),
-              idempotency_key TEXT NOT NULL UNIQUE,
-              fencing_token INTEGER NOT NULL,
-              executor_kind TEXT NOT NULL,
-              payload_json TEXT NOT NULL,
-              state TEXT NOT NULL,
-              attempt INTEGER NOT NULL DEFAULT 0,
-              next_attempt_at TEXT,
-              external_run_id TEXT,
-              last_error TEXT,
-              created_at TEXT NOT NULL,
-              updated_at TEXT NOT NULL
-            );
-            CREATE TABLE IF NOT EXISTS circuits (
-              dependency_key TEXT PRIMARY KEY,
-              lane TEXT NOT NULL REFERENCES lanes(lane),
-              state TEXT NOT NULL,
-              failure_count INTEGER NOT NULL DEFAULT 0,
-              retry_budget INTEGER NOT NULL,
-              opened_at TEXT,
-              next_probe_at TEXT,
-              updated_at TEXT NOT NULL
-            );
-            CREATE TABLE IF NOT EXISTS events (
-              seq INTEGER PRIMARY KEY AUTOINCREMENT,
-              event_id TEXT NOT NULL UNIQUE,
-              occurred_at TEXT NOT NULL,
-              lane TEXT NOT NULL,
-              event_type TEXT NOT NULL,
-              delegation_id TEXT,
-              objective_id TEXT,
-              lease_id TEXT,
-              dispatch_id TEXT,
-              idempotency_key TEXT,
-              fencing_token INTEGER,
-              control_head TEXT,
-              payload_json TEXT NOT NULL
-            );
-            CREATE TABLE IF NOT EXISTS supervisor_meta (
-              key TEXT PRIMARY KEY,
-              value TEXT NOT NULL
-            );
-            """
-        )
+        try:
+            self.conn.executescript(
+                """
+                BEGIN IMMEDIATE;
+                CREATE TABLE IF NOT EXISTS lanes (
+                  lane TEXT PRIMARY KEY,
+                  owner_path TEXT NOT NULL,
+                  control_ref TEXT NOT NULL,
+                  control_head TEXT NOT NULL,
+                  fencing_counter INTEGER NOT NULL DEFAULT 0,
+                  state TEXT NOT NULL,
+                  current_delegation_id TEXT,
+                  shift_date TEXT,
+                  updated_at TEXT NOT NULL
+                );
+                CREATE TABLE IF NOT EXISTS delegations (
+                  delegation_id TEXT PRIMARY KEY,
+                  lane TEXT NOT NULL REFERENCES lanes(lane),
+                  objective_id TEXT NOT NULL,
+                  obligation_id TEXT,
+                  control_head TEXT NOT NULL,
+                  state TEXT NOT NULL,
+                  payload_json TEXT NOT NULL,
+                  updated_at TEXT NOT NULL
+                );
+                CREATE TABLE IF NOT EXISTS claims (
+                  lease_id TEXT PRIMARY KEY,
+                  lane TEXT NOT NULL REFERENCES lanes(lane),
+                  delegation_id TEXT NOT NULL REFERENCES delegations(delegation_id),
+                  objective_id TEXT NOT NULL,
+                  control_head TEXT NOT NULL,
+                  idempotency_key TEXT NOT NULL UNIQUE,
+                  fencing_token INTEGER NOT NULL,
+                  claimed_at TEXT NOT NULL,
+                  expires_at TEXT NOT NULL,
+                  heartbeat_at TEXT NOT NULL,
+                  checkpoint_pointer TEXT,
+                  status TEXT NOT NULL,
+                  released_at TEXT,
+                  terminal_reason TEXT,
+                  dispatch_id TEXT NOT NULL UNIQUE
+                );
+                CREATE UNIQUE INDEX IF NOT EXISTS uq_active_claim_per_lane
+                  ON claims(lane) WHERE released_at IS NULL;
+                CREATE TABLE IF NOT EXISTS dispatch_outbox (
+                  dispatch_id TEXT PRIMARY KEY,
+                  lane TEXT NOT NULL REFERENCES lanes(lane),
+                  lease_id TEXT NOT NULL UNIQUE REFERENCES claims(lease_id),
+                  idempotency_key TEXT NOT NULL UNIQUE,
+                  fencing_token INTEGER NOT NULL,
+                  executor_kind TEXT NOT NULL,
+                  payload_json TEXT NOT NULL,
+                  state TEXT NOT NULL,
+                  attempt INTEGER NOT NULL DEFAULT 0,
+                  next_attempt_at TEXT,
+                  external_run_id TEXT,
+                  last_error TEXT,
+                  created_at TEXT NOT NULL,
+                  updated_at TEXT NOT NULL
+                );
+                CREATE TABLE IF NOT EXISTS circuits (
+                  dependency_key TEXT PRIMARY KEY,
+                  lane TEXT NOT NULL REFERENCES lanes(lane),
+                  state TEXT NOT NULL,
+                  failure_count INTEGER NOT NULL DEFAULT 0,
+                  retry_budget INTEGER NOT NULL,
+                  opened_at TEXT,
+                  next_probe_at TEXT,
+                  updated_at TEXT NOT NULL
+                );
+                CREATE TABLE IF NOT EXISTS events (
+                  seq INTEGER PRIMARY KEY AUTOINCREMENT,
+                  event_id TEXT NOT NULL UNIQUE,
+                  occurred_at TEXT NOT NULL,
+                  lane TEXT NOT NULL,
+                  event_type TEXT NOT NULL,
+                  delegation_id TEXT,
+                  objective_id TEXT,
+                  lease_id TEXT,
+                  dispatch_id TEXT,
+                  idempotency_key TEXT,
+                  fencing_token INTEGER,
+                  control_head TEXT,
+                  payload_json TEXT NOT NULL
+                );
+                CREATE TABLE IF NOT EXISTS supervisor_meta (
+                  key TEXT PRIMARY KEY,
+                  value TEXT NOT NULL
+                );
+                COMMIT;
+                """
+            )
+        except Exception:
+            if self.conn.in_transaction:
+                self.conn.execute("ROLLBACK")
+            raise
 
     def pragma_state(self) -> dict[str, Any]:
         return {
