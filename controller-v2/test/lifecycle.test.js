@@ -162,7 +162,7 @@ test('LC-T010 reconcile runs after real kernel migration and before READY', () =
     let migrated = false;
     const runtime = new ControllerRuntime(w.db, {
       reconcile: kernel => {
-        migrated = Number(kernel.db.prepare('SELECT MAX(version) v FROM schema_migrations').get().v) === 4;
+        migrated = Number(kernel.db.prepare('SELECT MAX(version) v FROM schema_migrations').get().v) === 5;
         assert.equal(runtime.state, 'RECOVERING');
         return { reconciled: true };
       }
