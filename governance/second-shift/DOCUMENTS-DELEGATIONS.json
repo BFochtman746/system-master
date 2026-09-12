@@ -2,81 +2,91 @@
   "owner_system_id": "DOCUMENTS",
   "owner_path": "SYSTEM_MASTER/DOCUMENTS",
   "control_ref": "documents/control-v1",
-  "last_known_control_head": "cff6c9a1c6674fc84484fdb8207c3559499e4c2e",
+  "last_known_control_head": "3e1336f8f4a1285b19fb8dd76ea903412be07cd9",
   "program_job_lock": "governance/SYSTEM-PROGRAM-JOB-LOCK-001.json",
   "system_completion_status": "governance/SYSTEM-COMPLETION-STATUS-001.json",
-  "delegation_epoch": 8,
+  "delegation_epoch": 9,
   "active_delegations": [
     {
-      "delegation_id": "SECOND-SHIFT-DOCUMENTS-R4-ADMISSION-002",
+      "delegation_id": "SECOND-SHIFT-DOCUMENTS-R4-CANONICAL-PAYLOAD-DEPOSIT-004",
       "owner_path": "SYSTEM_MASTER/DOCUMENTS",
-      "objective_id": "DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-IMPORT-AND-EXACT-SUBJECT-QUALIFICATION-002",
+      "objective_id": "DOCUMENTS-R4-CANONICAL-PAYLOAD-DEPOSIT-004",
       "obligation_id": "DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-IMPORT-AND-EXACT-SUBJECT-QUALIFICATION-002",
       "state": "CANDIDATE",
-      "priority": "DOCUMENTS_R4_BLOCKED_PREREQUISITE_CANDIDATE",
-      "classification": "DOCUMENTS_R4_EXACT_CUSTODY_BLOCKED_PENDING_FILE_CAPABLE_TRANSPORT",
+      "priority": "DOCUMENTS_R4_BLOCKED_EXACT_PAYLOAD_CANDIDATE",
+      "classification": "DOCUMENTS_R4_CANONICAL_TRANSPORT_RECONCILED__PAYLOAD_BYTES_NOT_YET_IN_GITHUB",
       "valid_for_control_ref": "documents/control-v1",
-      "valid_for_control_head": "cff6c9a1c6674fc84484fdb8207c3559499e4c2e",
-      "created_at": "2026-09-10T22:35:00-04:00",
-      "last_revalidated_at": "2026-09-11T08:49:10-04:00",
-      "completion_delta": "Exact CR001-R4 source handoff was freshly materialized and verified 225/225 against the canonical manifest. GitHub-native source custody remains unresolved because the connected GitHub write contracts expose no mounted-file/file-ref bridge for the exact bytes. No changed-subject PASS was transferred.",
-      "blocker_evidence": "qualification/document-system/r4/DOCUMENTS-R4-EXACT-SOURCE-HANDOFF-RECONCILIATION-001.json",
-      "resume_condition": "A file-capable GitHub transport or separately integrity-gated exact-byte bridge becomes available; then import the already-verified exact handoff without reconstructing or reinterpreting source bytes and run fresh current-subject qualification.",
-      "stop_condition": "Exact verified CR001-R4 bytes are placed in GitHub-native custody and fresh exact-subject qualification evidence is durable, or the material transport prerequisite remains explicitly blocked while another dependency-valid Documents-owned successor carries the lane.",
+      "valid_for_control_head": "3e1336f8f4a1285b19fb8dd76ea903412be07cd9",
+      "created_at": "2026-09-12T01:21:33-04:00",
+      "last_revalidated_at": "2026-09-12T01:21:33-04:00",
+      "completion_delta": "DOCUMENTS-R4-TRANSPORT-CONTRACT-RECONCILIATION-003 closed the prior 81/4fce versus 100/b6d0 transport ambiguity. Exact Library handoff and 225-row manifest were reverified; a deterministic carrier was built twice byte-identically as SHA-256 166f31ae9a6b2580ab14dc43af22fcd7fc6063817427289c8686d77f2cccd07d, 300832 bytes, five 65536-byte raw chunks (final chunk 38688 bytes). Contract, builder, fail-closed verifier, reconciled STAGING and admission workflow are now on the live Documents control branch. GitHub-native source custody is still not claimed because the five exact payload chunks are not yet present in GitHub.",
+      "blocker_evidence": "qualification/document-system/r4/DOCUMENTS-R4-TRANSPORT-CONTRACT-RECONCILIATION-003.json",
+      "stop_condition": "All five contract-listed exact payload chunks are present in GitHub, re-read from GitHub, reconstructed to the exact canonical carrier and verified 225/225 before READY is armed; otherwise preserve the transport blocker and continue independent Documents-owned design/evidence work.",
       "allowed_work": [
-        "resume exact CR001-R4 GitHub-native source import only from the verified handoff bytes",
-        "run dependency-valid portable/hosted qualification only after exact GitHub subject custody exists",
-        "preserve exact custody evidence without PASS transfer"
+        "deposit only the five exact canonical payload chunks bound by TRANSPORT-CONTRACT.json when a byte-safe transport is available",
+        "re-read GitHub-hosted chunks and verify per-chunk, carrier and 225-row source identity",
+        "arm READY only after exact GitHub-native custody is established",
+        "run fresh exact-subject qualification only after immutable GitHub source custody exists"
       ],
       "forbidden_authority": [
-        "do not absorb, schedule, repair, qualify, research, telemeter or claim Prose work",
-        "do not receive Book-owned integration of preserved completed Prose capability",
-        "do not mutate Book canonical manuscript/Story Bible/author/lifecycle/admission state",
-        "do not take Learning product work",
-        "do not take Core shared runtime authority",
-        "do not take Programming engineering work",
-        "do not claim GitHub-native custody before exact bytes are present in Git",
-        "do not transfer historical Document or Prose PASS to changed Documents bytes"
+        "do not claim GitHub-native source custody before every contract-listed payload chunk is present and reverified from GitHub",
+        "do not transfer historical R4, Document or Prose PASS",
+        "do not create or absorb Prose work",
+        "do not mutate Book canonical state or take Learning, Core or Programming semantics",
+        "do not claim A-01, native Microsoft Office, publication or production PASS"
       ],
-      "on_pass": "After exact GitHub-native custody exists and fresh current-subject qualification passes, preserve the exact receipt and bind only the next Documents-owned successor after owner-head revalidation; transfer no historical PASS.",
-      "on_failure": "Preserve the exact Documents-owned custody or qualification failure evidence and repair only the demonstrated Documents defect; keep PROSE retired, Book integration Book-owned, and unrelated peer authority unchanged."
+      "on_pass": "After exact GitHub-native custody and fresh current-subject qualification pass, preserve the exact receipt and bind only the next Documents-owned successor after fresh owner-head revalidation.",
+      "on_failure": "Preserve exact chunk/carrier/source verification failure evidence, keep READY absent, repair only the demonstrated Documents transport/custody defect and continue independent safe Documents work."
     },
     {
-      "delegation_id": "SECOND-SHIFT-DOCUMENTS-POST-ADAPTER-OPEN-SEAM-CENSUS-001",
+      "delegation_id": "SECOND-SHIFT-DOCUMENTS-SPINE-IDENTIFY-DESIGN-LOCK-001",
       "owner_path": "SYSTEM_MASTER/DOCUMENTS",
-      "objective_id": "DOCUMENTS-POST-SYSTEM-MASTER-ADAPTER-OPEN-SEAM-CENSUS-001",
+      "objective_id": "DOCUMENTS-SPINE-IDENTIFY-PROFILE-DESIGN-LOCK-001",
       "obligation_id": "DOCUMENTS-CURRENT-ADMISSION-001",
       "state": "READY",
-      "priority": "DOCUMENTS_OWNER_VALID_POST_ADAPTER_SUCCESSOR_WHILE_R4_CUSTODY_BLOCKED",
+      "priority": "DOCUMENTS_OWNER_VALID_INDEPENDENT_WORK_AHEAD_WHILE_R4_PAYLOAD_BLOCKED",
+      "classification": "DOCUMENTS_SPINE_IDENTIFY_PROFILE_ACTIVE_CONTENT_SPECIFICATION_ONLY",
       "valid_for_control_ref": "documents/control-v1",
-      "valid_for_control_head": "cff6c9a1c6674fc84484fdb8207c3559499e4c2e",
-      "created_at": "2026-09-11T08:49:10-04:00",
-      "last_revalidated_at": "2026-09-11T08:49:10-04:00",
-      "parent_checkpoint": "qualification/document-system/interfaces/DOCUMENTS-SYSTEM-MASTER-SERVICE-ADAPTER-QUALIFICATION-001.json",
-      "classification": "DOCUMENTS_POST_ADAPTER_OPEN_SEAM_CENSUS",
-      "scope": "Re-read current Documents control, obligations, expectations and exact owner implementation after the qualified System Master adapter PASS. Identify the first genuinely open Documents-owned implementation or qualification seam that can advance independently of the blocked R4 exact-byte custody prerequisite. Bind at most one demonstrated successor and do not invent peer semantics.",
-      "completion_delta": "Produce an evidence-backed post-adapter open-seam matrix and bind only one dependency-valid Documents-owned successor, or prove all remaining machine-resolvable work is blocked by explicit external/native/source/human authority.",
-      "evidence_target": "Current Documents owner-head census with existing-versus-missing implementation/evidence boundaries and at most one exact successor.",
-      "stop_condition": "One genuinely open Documents-owned successor is bound, or durable evidence proves no independent machine-resolvable Documents work remains while R4 stays separately blocked.",
+      "valid_for_control_head": "3e1336f8f4a1285b19fb8dd76ea903412be07cd9",
+      "created_at": "2026-09-12T01:21:33-04:00",
+      "last_revalidated_at": "2026-09-12T01:21:33-04:00",
+      "parent_checkpoint": "documents/control-v1/DOCUMENTS-SPINE-IDENTIFY-PROFILE-FORENSIC-PREP-001.md",
+      "completion_delta": "Freeze the Documents-owned exact format/subtype/profile/active-content identity contract and its command/query/event/error/test boundaries without mutating runtime code. Recovered evidence shows UDM-SPINE-0002 is the first partial spine stage after verified INTAKE and demonstrates gaps in OOXML subtype discrimination, ZIP-family package identity, PDF profile/version identity, active-content posture placement, and declaration/name conflict evidence.",
+      "stop_condition": "A versioned deterministic Document identity contract, ownership/non-ownership boundaries, persistence/evidence fields, fail-closed ambiguity rules and qualification denominator are frozen; runtime BUILD remains gated on exact R4 source custody/current-subject qualification.",
       "allowed_work": [
-        "read current Documents control/obligations/expectations and owner implementation",
-        "census remaining Documents-owned document mechanics and integration evidence",
-        "bind at most one demonstrated dependency-valid Documents successor",
-        "preserve R4 exact-byte custody as a separate blocker"
+        "recover and classify current IDENTIFY implementation/evidence",
+        "adjudicate Documents versus Core generic media-detection boundary",
+        "specify exact format/subtype/profile/active-content identity semantics",
+        "design deterministic conflict, ambiguity and evidence rules",
+        "design isolated and cumulative regression tests without runtime mutation"
       ],
       "forbidden_authority": [
-        "do not create or resurrect PROSE work",
-        "do not mutate Book canonical manuscript/Story Bible/author/lifecycle/admission state",
-        "do not take Learning, Core or Programming product semantics",
-        "do not claim R4 custody before exact bytes exist in Git",
-        "do not claim A-01/native/publication/production PASS",
-        "do not declare DOCUMENTS complete"
+        "do not mutate recovered Documents runtime before exact source custody/current-subject qualification",
+        "do not treat filename or declared media type alone as native subtype proof",
+        "do not absorb spreadsheet semantics from generic OOXML recognition",
+        "do not create Prose work or cross Book/Learning/Core/Programming ownership",
+        "do not claim A-01/native/publication/production PASS"
       ],
-      "on_pass": "Preserve the census evidence and bind only the demonstrated Documents-owned successor after fresh owner-head revalidation.",
-      "on_failure": "Preserve the exact Documents-owned blocker/defect without crossing owner boundaries."
+      "on_pass": "Preserve the design lock and keep runtime implementation gated until exact R4 source custody exists; then bind a bounded implementation/requalification successor only after current owner revalidation.",
+      "on_failure": "Preserve the exact unresolved identity/ownership contradiction and continue another independent Documents work-ahead rung without weakening fail-closed semantics."
     }
   ],
   "retired_delegations": [
+    {
+      "delegation_id": "SECOND-SHIFT-DOCUMENTS-POST-ADAPTER-OPEN-SEAM-CENSUS-001",
+      "state": "COMPLETED__SUCCESSOR_SELECTED_AND_R4_TRANSPORT_REPAIRED",
+      "prior_bound_control_head": "cff6c9a1c6674fc84484fdb8207c3559499e4c2e",
+      "completion_evidence": "qualification/document-system/r4/DOCUMENTS-R4-TRANSPORT-CONTRACT-RECONCILIATION-003.json",
+      "selected_feature_prep": "documents/control-v1/DOCUMENTS-SPINE-IDENTIFY-PROFILE-FORENSIC-PREP-001.md",
+      "history_preserved": true
+    },
+    {
+      "delegation_id": "SECOND-SHIFT-DOCUMENTS-R4-ADMISSION-002",
+      "state": "SUPERSEDED__TRANSPORT_CONTRACT_AMBIGUITY_REPAIRED__PAYLOAD_DEPOSIT_REMAINS",
+      "prior_bound_control_head": "cff6c9a1c6674fc84484fdb8207c3559499e4c2e",
+      "completion_evidence": "qualification/document-system/r4/DOCUMENTS-R4-TRANSPORT-CONTRACT-RECONCILIATION-003.json",
+      "history_preserved": true
+    },
     {
       "delegation_id": "SECOND-SHIFT-DOCUMENTS-SYSTEM-MASTER-SERVICE-ADAPTER-INTEGRATION-001",
       "state": "COMPLETED__SYSTEM_MASTER_SERVICE_ADAPTER_INTEGRATED",
@@ -87,7 +97,6 @@
       "cases_planned": 43,
       "completion_evidence": "qualification/document-system/interfaces/DOCUMENTS-SYSTEM-MASTER-SERVICE-ADAPTER-QUALIFICATION-001.json",
       "binding_path": "system-master/021f-integration/DOCUMENTS-SERVICE-BINDING-001.json",
-      "adapter_path": "system-master/021f-integration/src/main/java/org/systemmaster/integration/documents/DocumentsServiceAdapter.java",
       "fwp010_package_mutated": false,
       "r4_dependency": false,
       "production_authorized": false,
@@ -116,6 +125,6 @@
     }
   ],
   "owner_revalidation_required": false,
-  "reason": "Morning recovery reconciled Documents owner head 045113bda0610ef174b677fdea36884b2c0c53be -> cff6c9a1c6674fc84484fdb8207c3559499e4c2e. Hosted run 34600881422 compiled and passed 43/43 on the exact System Master adapter subject while preserving the qualified Documents contract and F-WP-010 bytes. The adapter successor is retired as completed; R4 remains SOURCE_CUSTODY blocked; one bounded post-adapter census successor is READY.",
+  "reason": "Documents owner advanced through deterministic R4 transport-contract reconciliation and independent IDENTIFY forensic preparation. Exact payload chunks remain outside GitHub, so custody/qualification stays blocked truthfully while one specification-only Documents successor remains READY.",
   "empty_is_valid": false
 }
