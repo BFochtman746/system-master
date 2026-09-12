@@ -1,0 +1,29 @@
+{
+  "unit": "LRN-OWNERSHIP-FREEZE-001B-R3B-S02-R3A",
+  "basis_interface_sha256": "4f4387956bd8189b7a65f5de94ab3c722cb34f249ebe8a94ad74b4c0d0c3cbc0",
+  "repaired_interface_sha256": "217d3eecafadbb2e1e415423ab8e744948a7e474cd130c8fe90baade52bac563",
+  "denominator": {"active_interfaces":112,"historical_parent_interfaces":110},
+  "deltas": {
+    "I007": {
+      "output_or_semantics": "Creates/deduplicates a Curriculum-owned refresh workflow intent; may reference generic external job execution; never mutates the active CurriculumVersion in place",
+      "notes": "Candidate successor workflow only; generic job lifecycle stays external; activation requires I068 then I006"
+    },
+    "I082": {
+      "caller_or_consumer": "Curriculum activation orchestration/Learning UX",
+      "preconditions_or_trigger": "I068 approval decision committed for the exact CurriculumVersion; activation has not yet been implied",
+      "input_or_payload": "approval_receipt_ref; curriculum_version; validation_ref; expected_goal_version",
+      "output_or_semantics": "Announces the immutable course-activation approval decision only; does not mean the CurriculumVersion is ACTIVE",
+      "idempotency": "Event identity required",
+      "concurrency": "After I068 approval commit; independent from later I006 activation commit",
+      "errors_or_failure_semantics": "Delivery may retry; consumers deduplicate by event identity",
+      "notes": "I006 remains sole ACTIVE transition; I035 is the only activation-completed event; historical attempts remain pinned"
+    }
+  },
+  "truth_boundary": {
+    "specification_delta_only": true,
+    "runtime_implementation_claimed": false,
+    "human_approval_observed": false,
+    "production_executed": false,
+    "native_or_a01_executed": false
+  }
+}
