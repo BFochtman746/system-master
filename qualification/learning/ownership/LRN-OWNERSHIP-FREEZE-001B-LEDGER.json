@@ -4,7 +4,7 @@
   "owner_path": "SYSTEM_MASTER/LEARNING",
   "base_owner_ref": "learning/control-v1",
   "base_owner_head": "e3196089f77dde376944a08eac78a697e57d1535",
-  "standing": "IN_PROGRESS_SOURCE_RECOVERY__DOMAIN_OWNER_BOUNDARIES_LOCKED__ROW_LEVEL_FREEZE_NOT_COMPLETE",
+  "standing": "SOURCE_CORPUS_RECOVERED__LATER_001C_OWNER_REFREEZE_RECOVERED__REPOSITORY_AUTHORITY_ADMISSION_RECONCILIATION_REQUIRED",
   "method": [
     "RECOVER",
     "INVENTORY",
@@ -17,89 +17,100 @@
     "CUMULATIVE_REGRESSION_CALIBRATION",
     "FREEZE"
   ],
-  "required_denominator": {
+  "historical_source_denominator": {
     "p0_requirements": 110,
     "interfaces": 110,
-    "semantic_objects": 26
+    "semantic_objects": 26,
+    "source": "LEARNING-SEMANTIC-CONTRACT-FREEZE-V1",
+    "source_date": "2026-09-06",
+    "source_standing": "FROZEN_AT_SPECIFICATION_LEVEL__PRODUCTION_IMPLEMENTATION_NOT_AUTHORIZED_OR_PERFORMED",
+    "source_recovered_from_saved_learning_archive": true
   },
-  "recovery_standing": {
-    "p0_requirements": {
-      "exact_rows_recovered_under_new_ownership_corpus": 0,
-      "prior_lineage_rows_evidenced": 66,
-      "prior_lineage_class": "HISTORICAL_CURRENT_REUSE_INPUT__NOT_ASSUMED_EQUIVALENT_TO_NEW_110",
-      "missing_new_corpus_identity_count": 110,
-      "note": "The new 110-row source ledger itself is not materialized in current repository authority. Prior 66 rows must be crosswalked only after exact 110 identities are recovered."
+  "later_recovered_owner_refreeze": {
+    "artifact": "LRN-OWNERSHIP-FREEZE-001C",
+    "standing": "PASS_SEMANTIC_OWNER_TRACEABILITY_REFREEZE__IMPLEMENTATION_AND_TARGET_QUALIFICATION_NOT_CLAIMED",
+    "active_requirements": 113,
+    "active_interfaces": 112,
+    "active_semantic_objects": 28,
+    "historical_source_coverage": {
+      "requirements": "110/110",
+      "interfaces": "110/110",
+      "semantic_objects": "26/26"
     },
-    "interfaces": {
-      "exact_rows_recovered_under_new_ownership_corpus": 0,
-      "known_interface_contracts_recovered": [
-        "governance/architecture/LEARNING-TO-SYSTEM-MASTER-INTERFACE-CONTRACT-001.json"
+    "lossless_splits": {
+      "requirements": [
+        "LRN-026 -> LRN-026-L + LRN-026-C",
+        "LRN-065 -> LRN-065-L + LRN-065-C",
+        "LRN-114 -> LRN-114-L + LRN-114-C"
       ],
-      "missing_new_corpus_identity_count": 110
+      "interfaces": [
+        "I016 -> I016-L + I016-C",
+        "I092 -> I092-L + I092-C"
+      ],
+      "semantic_objects": [
+        "LRN-E018 -> LRN-E018-L + LRN-E018-C",
+        "LRN-E020 -> LRN-E020-L + LRN-E020-C"
+      ]
     },
-    "semantic_objects": {
-      "exact_rows_recovered_under_new_ownership_corpus": 0,
-      "missing_new_corpus_identity_count": 26
-    }
+    "owner_constitution": {
+      "MOD_LEARNING_001": "learner goal/session/attempt state, evidence admission, mastery, retention, transfer, remediation need, maintenance need, adaptive decision and next learning action",
+      "MOD_CURRICULUM_001": "skill/criterion definitions, prerequisites, curriculum versions, lesson definitions, instructional policies, practice/assessment definitions, course validation/freshness and remedial instructional plans",
+      "USER_EXPERIENCE_001": "human presentation and interaction semantics",
+      "SHARED_AUTHORITIES": "evidence, artifacts/rights, jobs, sync/reconciliation, authorization/privacy, security, AI/model and assurance remain external and are consumed by contract/reference"
+    },
+    "cross_domain_competency_alignment": {
+      "owner": "MOD-KNOWLEDGE-001",
+      "contract_required": "KNOWLEDGE-COMPETENCY-ALIGNMENT-001",
+      "implementation_claimed": false,
+      "feature_gate_required": true
+    },
+    "test_obligation_standing": {
+      "active_requirements_with_owner_source_obligation_trace": "113/113",
+      "recovered_direct_historical_qualification_links": 70,
+      "new_explicit_owner_bound_test_obligations": 43,
+      "new_obligations_execution_status": "SPECIFIED_UNEXECUTED"
+    },
+    "repository_admission_status": "RECOVERED_FROM_SAVED_LIBRARY__NOT_YET_MATERIALIZED_IN_CURRENT_REPOSITORY_CONTROL_LINEAGE"
   },
-  "domain_owner_lock": {
-    "LEARNING": [
-      "learner educational state and progress semantics",
-      "curriculum/course/module/lesson/objective/competency/skill semantics",
-      "curriculum graph and instructional sequencing semantics",
-      "assessment item/target/rubric/scoring and correctness semantics",
-      "attempt interpretation and Learning evidence admission",
-      "mastery semantics and transitions",
-      "retention-check semantics",
-      "transfer-check semantics",
-      "adaptation/remediation/practice/challenge/advancement semantics",
-      "Learning-specific evidence meaning and qualification criteria",
-      "Learning-specific persistence schema/invariants",
-      "Learning semantic commands/queries/events/results"
-    ],
-    "CORE_SHARED": [
-      "authentication principal/session/device/service/workload identity",
-      "generic transport/queue/delivery/idempotency/trace mechanics",
-      "generic runtime/resource/placement/retry mechanics",
-      "database/storage/backup custody mechanics",
-      "generic artifact custody/digest/reference mechanics",
-      "generic telemetry and observability",
-      "generic evidence/provenance transport infrastructure",
-      "shared model/tool/connector gateways",
-      "A-01 and shared qualification transport"
-    ],
-    "BOOK": [
-      "canonical manuscript and Story Bible/canon",
-      "author decisions",
-      "Book lifecycle/admission/publication",
-      "Book literary/craft canonical semantics"
-    ],
-    "DOCUMENTS": [
-      "generic DOCX/PDF/PPTX/OCR/document artifact mechanics",
-      "generic conversion/rendering/preservation/export"
-    ],
-    "PROGRAMMING": [
-      "software engineering build/test/toolchain semantics",
-      "software engineering analysis/security/performance/reliability semantics",
-      "release/deploy/operations/maintenance engineering semantics"
-    ],
-    "SYSTEM_MASTER_PRODUCT": [
-      "product-level orchestration",
-      "cross-system user-intent routing",
-      "product integration/admission",
-      "whole-product completion"
-    ]
+  "later_recovered_implementation_refreeze": {
+    "artifact": "LRN-OWNERSHIP-FREEZE-001D",
+    "standing": "SPECIFICATION_REFREEZE_COMPLETE__CODE_EXTRACTION_NOT_EXECUTED_AT_001D__POST_EXTRACTION_REQUALIFICATION_REQUIRED",
+    "requirements_mapped": "113/113",
+    "interfaces_mapped": "112/112",
+    "semantic_objects_mapped": "28/28",
+    "target_components": 51,
+    "ports": 20,
+    "build_packets": 12,
+    "explicit_residuals": 14,
+    "repository_admission_status": "RECOVERED_FROM_SAVED_LIBRARY__ADMISSION_RECONCILIATION_REQUIRED"
   },
-  "collision_rules": [
-    "Learner educational identity is Learning-owned; authentication principal/delegation identity is Core-owned.",
-    "Curriculum semantic identity/currentness/coverage is Learning-owned; file/OCR/render/export mechanics are Documents-owned and custody may be Core-owned.",
-    "Assessment semantics/scoring/evidence meaning are Learning-owned; document representation is Documents-owned.",
-    "Learning evidence meaning is Learning-owned; generic evidence/provenance infrastructure is Core-owned.",
-    "Pedagogical workflow state is Learning-owned; generic execution job/attempt/lease/retry mechanics are Core-owned.",
-    "Learning persistence schema/invariants are Learning-owned; physical database infrastructure may be Core-owned.",
-    "Shared test tooling does not transfer Learning correctness criteria to Programming/Core.",
-    "Teaching a specialist domain never grants Learning mutation authority over that specialist system."
-  ],
+  "later_forensic_standing_recovered": {
+    "portable_learning_curriculum_implementation": "SUBSTANTIAL_AND_REGRESSION_CLEAN",
+    "production_binding_architecture": "DEFINED_AND_PORTABLY_TESTED",
+    "production_end_to_end_execution": "NOT_COMPLETE",
+    "native_human_psychometric_real_learner_qualification": "NOT_COMPLETE",
+    "production_binding_portable_test_denominator": "575/575 PASS",
+    "production_binding_interface_owner_routes": 112,
+    "production_binding_exact_inbound_handlers_remaining": 63,
+    "live_postgresql_target_execution": "PENDING/NOT_PROVEN_BY_RECOVERED_PORTABLE_CLOSURE"
+  },
+  "current_adjudication": {
+    "redo_historical_110_110_26_owner_freeze_from_scratch": false,
+    "reason": "Exact historical freeze plus a later lossless owner refreeze and implementation-surface refreeze were recovered. Re-performing them would discard preserved work and violate the recover/reuse-first method.",
+    "may_treat_001c_001d_as_current_repository_authority_without_admission": false,
+    "reason_2": "Recovered Library artifacts are strong prior-work evidence but are not presently materialized in the current learning/control-v1 repository authority lineage. They must be reconciled/admitted without silently rewriting current authority.",
+    "old_batch_only_successor_may_resume": false
+  },
+  "current_owner_boundaries": {
+    "LEARNING": "learner learning-state, evidence admission/interpretation, mastery, retention, transfer, learner-specific remediation/maintenance need, adaptive decision and next-learning-action semantics",
+    "CURRICULUM": "program/instruction truth including skills/criteria, prerequisites, curriculum/course/lesson/practice/assessment definitions, instructional policy, generation/validation/freshness and remedial instructional plans",
+    "CORE_SHARED": "generic identity/auth/transport/jobs/resources/storage/evidence transport/model-tool gateways/A-01/shared infrastructure",
+    "BOOK": "canonical manuscript/Story Bible/author/Book lifecycle/publication/literary semantics",
+    "DOCUMENTS": "generic DOCX/PDF/PPTX/OCR/document mechanics",
+    "PROGRAMMING": "software-engineering semantics",
+    "EXPERIENCE": "human presentation and interaction semantics",
+    "SYSTEM_MASTER_PRODUCT": "product orchestration, cross-system intent routing, integration admission and whole-product completion"
+  },
   "evidence_fences": {
     "machine_may_not_fabricate": [
       "participant consent",
@@ -115,33 +126,22 @@
       "A-01/private/external/production evidence not observed"
     ]
   },
-  "prior_evidence": {
-    "dependency_full_closure_branch": "learning/dependency-adjudication-full-closure-20260910",
-    "dependency_full_closure_subject": "36ffc99c05e15fdcf9233303e035e5ce4159fc23",
-    "prior_frozen_requirements": 66,
-    "prior_provisional_subskills": 66,
-    "prior_assessment_targets": 66,
-    "prior_unresolved_dependency_candidates": 46,
-    "prior_rejected_as_hard_prerequisite": 38,
-    "prior_retained_noncanonical": 8,
-    "pass_transfer_forbidden": true
-  },
-  "completion_gate": {
-    "unaccounted_requirements_must_equal": 0,
-    "unaccounted_interfaces_must_equal": 0,
-    "unaccounted_semantic_objects_must_equal": 0,
-    "row_level_owner_required": true,
-    "row_level_canonical_writer_required_for_learning_owned_rows": true,
-    "row_level_persistence_interface_tests_evidence_invalidation_required": true,
-    "persistence_routes_interfaces_bound_before_build": true
-  },
-  "exact_next_operation": "LRN-OWNERSHIP-FREEZE-001B-R1 — 110/110/26 SOURCE-IDENTITY RECOVERY + PRIOR-66 CROSSWALK",
+  "exact_next_operation": "LRN-OWNERSHIP-FREEZE-001B-R2 — RECOVER 001C/001D EXACT ARTIFACT SET + CURRENT REPOSITORY AUTHORITY ADMISSION RECONCILIATION",
+  "r2_contract": [
+    "Recover the exact 001C requirements, interfaces, objects, supersession, reverse-trace and test-obligation artifacts plus 001D implementation-surface control artifacts from the saved Learning corpus.",
+    "Verify their provenance/hashes against the saved archive inventory where available.",
+    "Cross-check 001C/001D against current System Master topology and newest Foundation/Spine ownership constitution; classify only material deltas.",
+    "Preserve the 113/112/28 lossless split lineage rather than collapsing back to overloaded 110/110/26 parents.",
+    "Materialize/admit recovered semantic authority into a current Learning reconstruction lineage only after the exact evidence set is complete and collision-free.",
+    "After semantic authority admission, resume implementation-target/database/route reconciliation from the latest proven implementation standing rather than restarting old batch work."
+  ],
   "forbidden": [
-    "invent missing 110/110/26 row identities",
-    "resume older batch-only implementation before ownership freeze",
+    "invent missing row identities",
+    "redo recovered owner adjudication without a material-delta reason",
+    "silently treat Library evidence as canonical repository authority",
+    "collapse Curriculum program/instruction truth back into Learning learner-state truth",
+    "resume older batch-only implementation before current ownership authority is reconciled",
     "transfer historical PASS to changed ownership or changed subjects",
-    "move Learning semantic truth into Core because Core supplies infrastructure",
-    "take Book/Documents/Programming canonical semantics",
-    "claim Learning ownership freeze complete while row identities remain unrecovered"
+    "claim human/native/psychometric/production evidence not observed"
   ]
 }
