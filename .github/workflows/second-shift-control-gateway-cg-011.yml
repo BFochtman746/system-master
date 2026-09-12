@@ -1,0 +1,141 @@
+name: Second Shift Control Gateway CG-011 Failure Restart Idempotency Qualification
+
+on:
+  push:
+    branches:
+      - second-shift-control-gateway/cg-011-failure-restart-idempotency
+    paths:
+      - 'control-gateway/**'
+      - '.github/workflows/a01-overnight-night-shift.yml'
+      - '.github/workflows/second-shift-control-gateway-cg-011.yml'
+      - 'governance/control-gateway/**'
+      - 'tests/**'
+      - 'tools/second_shift_supervisor_v2.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+env:
+  CG011_LIVE_REF: control-gateway-state/active-work/second-shift-control-gateway-dev
+  CG011_EXPECTED_PUBLICATION_COMMIT: 5cdf4ce6d23838d78bd735ab479c680e05e0eb10
+  CG011_EXPECTED_PACKET_DIGEST: 085b5ad886fd2594bc3415c229fbbb5ed6cef150a8a93c6e04da5859ccad17a8
+  CG011_EXPECTED_AUTHORITY_SUBJECT: 18d7fc000ce7d3b931f308d0a40527fadba46d6d
+  CG011_EXPECTED_FREEZE_HEAD: cb6da74731fc5d1564a16fdd0a0ea3ca67f747e1
+  CG011_EXPECTED_WORK_REF: second-shift-control-gateway/cg-011-failure-restart-idempotency
+  CG011_EXPECTED_OPERATION: SECOND-SHIFT-CONTROL-GATEWAY-CG-011
+  CG011_EXPECTED_PREDECESSOR_RECEIPT: SECOND-SHIFT-CONTROL-GATEWAY-CG-010-CLOSURE-REPAIR-34673025004
+  CG011_EXPECTED_PUBLICATION_REVISION: '17'
+  CG011_GITHUB_TOKEN: ${{ github.token }}
+
+jobs:
+  qualify:
+    name: CG-011 Qualification / Node ${{ matrix.node }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [22, 24]
+    steps:
+      - name: Checkout exact CG-011 subject
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: ${{ matrix.node }}
+          package-manager-cache: false
+      - name: Show runtimes
+        run: |
+          node --version
+          python --version
+      - name: Validate A-01 control plane and standalone topology
+        run: |
+          node .github/scripts/a01-control-plane.js validate
+          node .github/scripts/validate-system-topology.js
+      - name: Prove GitHub night scheduler remains retired
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const text = fs.readFileSync('.github/workflows/a01-overnight-night-shift.yml', 'utf8');
+          const failures = [];
+          if (/^\s*schedule\s*:/m.test(text)) failures.push('schedule trigger remains');
+          if (/cron\s*:/m.test(text)) failures.push('cron remains');
+          if (/slot_0[1-8]/.test(text)) failures.push('slot-chain scheduling remains');
+          if (text.includes('a01-overnight-plan.js')) failures.push('GitHub night planner remains wired');
+          if (text.includes('uses: ./.github/workflows/a01-control-plane-gateway.yml')) failures.push('workflow still dispatches A-01 work');
+          if (!text.includes('GITHUB_SCHEDULER_RETIRED=1')) failures.push('retirement marker missing');
+          if (!text.includes('A01_SCHEDULING_OWNER=SecondShiftSupervisorV2')) failures.push('A-01 ownership marker missing');
+          if (failures.length) throw new Error(failures.join('; '));
+          console.log('CG011_GITHUB_SCHEDULER_RETIREMENT=PASS');
+          NODE
+      - name: Run complete Control Gateway test suite
+        working-directory: control-gateway
+        run: node --test
+      - name: Compile CG-011 and inherited supervisor layers
+        run: |
+          python -m py_compile \
+            tools/second_shift_supervisor_v2.py \
+            control-gateway/python/a01_supervisor_adapter.py \
+            control-gateway/python/a01_supervisor_coordination.py \
+            control-gateway/python/a01_supervisor_coordination_strict.py \
+            control-gateway/python/a01_night_scheduler.py \
+            tests/test_control_gateway_a01_supervisor_adapter.py \
+            tests/test_control_gateway_a01_supervisor_coordination.py \
+            tests/test_control_gateway_a01_supervisor_coordination_authority.py \
+            tests/test_control_gateway_a01_night_scheduler.py \
+            tests/test_control_gateway_failure_restart_idempotency.py \
+            tests/test_control_gateway_cg011_adversarial_closure.py \
+            tests/test_second_shift_supervisor_v2.py \
+            tests/run_second_shift_supervisor_v2_optimized.py
+      - name: Run CG-008 handoff regression
+        run: python tests/test_control_gateway_a01_supervisor_adapter.py
+      - name: Run CG-009 base coordination regression
+        run: python tests/test_control_gateway_a01_supervisor_coordination.py
+      - name: Run CG-009 authority-closure regression
+        run: python tests/test_control_gateway_a01_supervisor_coordination_authority.py
+      - name: Run CG-010 night-scheduler regression
+        run: python tests/test_control_gateway_a01_night_scheduler.py
+      - name: Run dedicated CG-011 failure restart idempotency suite
+        run: python tests/test_control_gateway_failure_restart_idempotency.py
+      - name: Run preserved supervisor crash concurrency and 20k transition stress
+        run: python tests/run_second_shift_supervisor_v2_optimized.py
+
+  adversarial-closure-audit:
+    name: CG-011 Separate Adversarial Closure Audit
+    needs: qualify
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact already-qualified CG-011 subject
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Set up Node 24
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Reconstruct live authority again before closure audit
+        working-directory: control-gateway
+        run: node --test test/cg011-live-authority.test.js
+      - name: Attack authority bypass crash windows ambiguous effects and duplicate terminalization
+        run: python tests/test_control_gateway_cg011_adversarial_closure.py
+      - name: Re-audit retired GitHub scheduler and A-01 sole scheduler ownership
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const text = fs.readFileSync('.github/workflows/a01-overnight-night-shift.yml', 'utf8');
+          if (/^\s*schedule\s*:/m.test(text) || /cron\s*:/m.test(text) || /slot_0[1-8]/.test(text) || text.includes('a01-overnight-plan.js')) {
+            throw new Error('retired GitHub scheduler regained scheduling authority');
+          }
+          if (!text.includes('A01_SCHEDULING_OWNER=SecondShiftSupervisorV2')) {
+            throw new Error('A-01 supervisor ownership marker missing');
+          }
+          console.log('CG011_ADVERSARIAL_AUTHORITY_AUDIT=PASS');
+          NODE
