@@ -1,16 +1,13 @@
-# SYSTEM-MASTER-CORE-CONTROL-RECORD-003
+# System Master Foundation & Spine — Compatibility Pointer
 
-Status: CURRENT COMPATIBILITY POINTER ONLY
-Date: 2026-09-11
+This path remains only because existing product-root governance resolves it as the Core/Foundation entry point.
 
-The historical architecture prose formerly stored at this path is retired.
+It contains no independent architecture authority.
 
-This path is retained only because product-root governance already resolves it as the Core control-record entry point. It contains no Foundation & Spine architecture specification.
+The sole current human-facing Foundation & Spine documentation root is:
 
-Current Foundation & Spine architecture authority is:
+`system-master/foundation-spine/README.md`
 
-`system-master/foundation-spine/FOUNDATION-SPINE-DOCUMENTATION-MANIFEST-001.json`
+That README identifies the complete current documentation set.
 
-Read that manifest and only the canonical documents it lists for Foundation & Spine architecture.
-
-Source code, tests, routes, runtime/control state, workflows, schemas, qualification evidence, reconciliation records, logs and recovery evidence remain separate implementation/operational evidence and are not superseded by this pointer.
+Earlier Core/Foundation/Spine design prose is historical source material only. Source code, tests, routes, runtime/control state, workflows, schemas used by implementation, qualification evidence, reconciliation records, logs and recovery evidence remain separate implementation/operational evidence and are not superseded by this pointer.
