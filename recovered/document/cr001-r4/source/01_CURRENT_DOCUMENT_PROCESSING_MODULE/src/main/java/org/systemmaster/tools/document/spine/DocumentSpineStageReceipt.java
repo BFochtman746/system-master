@@ -21,6 +21,7 @@ public record DocumentSpineStageReceipt(
 
     public enum Status {
         PASS,
+        PREPARED,
         NOT_REQUIRED,
         FAIL
     }
@@ -40,13 +41,20 @@ public record DocumentSpineStageReceipt(
         Objects.requireNonNull(completedAt, "completedAt");
         evidence = List.copyOf(Objects.requireNonNullElse(evidence, List.of()));
         diagnostics = List.copyOf(Objects.requireNonNullElse(diagnostics, List.of()));
-        if (status == Status.PASS && evidence.isEmpty()) {
-            throw new IllegalArgumentException("PASS stage receipt requires evidence");
+        if ((status == Status.PASS || status == Status.PREPARED) && evidence.isEmpty()) {
+            throw new IllegalArgumentException(status + " stage receipt requires evidence");
+        }
+        if (status == Status.PREPARED && outputSha256 == null) {
+            throw new IllegalArgumentException("PREPARED effect receipt requires expected output digest");
         }
     }
 
     public boolean resumable(String expectedKey) {
         return status == Status.PASS && idempotencyKey.equals(expectedKey);
+    }
+
+    public boolean prepared(String expectedKey) {
+        return status == Status.PREPARED && idempotencyKey.equals(expectedKey);
     }
 
     private static void requireOptionalSha(String value, String name) {
