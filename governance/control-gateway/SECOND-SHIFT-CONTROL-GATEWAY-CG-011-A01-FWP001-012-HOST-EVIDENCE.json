@@ -1,0 +1,68 @@
+{
+  "schema": "second-shift-control-gateway.cg011-supplemental-a01-foundation-evidence.v1",
+  "workstream_id": "SECOND-SHIFT-CONTROL-GATEWAY",
+  "operation_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-011",
+  "standing": "SUPPLEMENTAL_HISTORICAL_EXACT_SHA_EVIDENCE",
+  "authority_effect": "NONE",
+  "terminal_state_preserved": true,
+  "successor_started": false,
+  "production_activation": false,
+  "promotion_authorized": false,
+  "qualified_subject": {
+    "sha": "f4f3787f90788e964fcd2b12872a7a10392d78c1",
+    "description": "CG-011 governance recovery-locator active-r27 subject explicitly requested for A-01 host qualification",
+    "exact_checkout_verified": true
+  },
+  "qualification": {
+    "qualification_id": "CG011-A01-FOUNDATION-CUMULATIVE-HOST-001",
+    "workflow_run_id": 34705743348,
+    "result_class": "PASS",
+    "child_exit_code": 0,
+    "control_plane_sha": "4bf3b26ae0358bd97e327591987cf6c27092686e",
+    "runner": {
+      "name": "A-01",
+      "os": "Windows",
+      "arch": "X64",
+      "runner_version_observed": "2.337.0"
+    },
+    "foundation_chain": {
+      "scope": "F-WP-001..F-WP-012",
+      "execution_model": "CUMULATIVE_RECURSIVE",
+      "terminal_sentinel": "PASS F-WP-012 tests=47 requirements=4",
+      "all_predecessor_evidence_collected": true,
+      "result": "PASS"
+    },
+    "cg011_host_boundary": {
+      "supervisor_gateway_adapter_tests": 11,
+      "supervisor_gateway_adapter_failures": 0,
+      "crash_concurrency_stress_tests": 28,
+      "crash_concurrency_stress_failures": 0,
+      "randomized_transitions": 20000,
+      "rigor_reduced": false,
+      "sentinel": "CG011_A01_HOST_QUALIFICATION=PASS foundation=F-WP-001..012 supervisor_stress=PASS"
+    },
+    "evidence_artifact": {
+      "name": "CG011-A01-FOUNDATION-CUMULATIVE-HOST-001-34705743348-evidence",
+      "artifact_id": 10301439570,
+      "file_count": 303,
+      "sha256": "22abf9f9264f773258f5a005c3aeb9a7acb8ec840678cfee03bfda29617197c8",
+      "retention_days": 30
+    }
+  },
+  "terminal_authority_reconciliation": {
+    "current_terminal_frozen_subject_sha": "bad4708ba91b533c333ba2659ab99bf071710ba6",
+    "f4f_is_ancestor_of_terminal_frozen_subject": true,
+    "terminal_subject_ahead_by_commits": 7,
+    "runtime_implementation_changed_between_subjects": false,
+    "changed_paths_between_f4f_and_bad4708": [
+      ".github/scripts/a01-second-shift-supervisor-v2-qualify.js",
+      ".github/workflows/second-shift-control-gateway-cg-011-a01-closure-repair.yml",
+      ".github/workflows/second-shift-control-gateway-cg-011.yml",
+      "governance/control-gateway/SECOND-SHIFT-CONTROL-GATEWAY-ACTIVE-WORK-LOCATOR.json",
+      "governance/control-gateway/SECOND-SHIFT-CONTROL-GATEWAY-ACTIVE-WORK-PACKET.json",
+      "governance/control-gateway/SECOND-SHIFT-CONTROL-GATEWAY-CG-011.lock.json"
+    ],
+    "disposition": "PRESERVE_AS_EXACT_SHA_A01_FOUNDATION_EVIDENCE_WITHOUT_REBINDING_TERMINAL_AUTHORITY",
+    "reason": "The later terminal subject descends directly from the qualified subject through closure, qualification-harness, workflow, and governance-only changes. This supplemental record closes the requested exact-SHA cumulative Foundation host-evidence gap while leaving the current terminal authority and NO_LEGAL_SUCCESSOR standing unchanged."
+  }
+}
