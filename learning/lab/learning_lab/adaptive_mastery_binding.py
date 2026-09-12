@@ -8,7 +8,7 @@ from .mastery_evidence_reader import validated_attempts_for_skill
 from .models import GateState, MasteryProjection, MasteryStage
 
 
-S04_ADAPTIVE_MASTERY_BINDING_VERSION = "001M-S04-ADAPTIVE-CONSUMES-S03-V3"
+S04_ADAPTIVE_MASTERY_BINDING_VERSION = "001M-S04-ADAPTIVE-CONSUMES-S03-V4"
 
 
 def _latest_correct(attempts, attempt_ids):
@@ -25,9 +25,10 @@ def _material_transfer_task(task: Mapping[str, Any] | None) -> bool:
         return novelty.upper() in {"MATERIALLY_NOVEL", "NOVEL_CONTEXT"}
     if not isinstance(novelty, Mapping):
         return False
-    changed = any(value is True for key, value in novelty.items() if key != "preserved_construct")
-    preserved_construct = bool(novelty.get("preserved_construct"))
-    return changed and preserved_construct
+    # Admitted domain task catalogs use different bounded novelty vocabularies.
+    # An explicit positive novelty fact on the versioned task is enough to carry
+    # that task's already-admitted materially-new-context standing into S03.
+    return any(value is True for value in novelty.values())
 
 
 def _copy_with_authoritative_transfer_context(self, attempts: Iterable[Mapping[str, Any]]) -> List[Dict[str, Any]]:
@@ -64,11 +65,9 @@ def _mark_adaptive_freshness_exclusions(
     the latest qualifying retention and use an uncompromised transfer family.
     """
     values = [dict(a) for a in attempts]
-    by_id = {str(a.get("attempt_id", "")): a for a in values}
-    exclusions: Dict[str, str] = {}
-
     seen_successful_retention_families = set()
     qualified = set(str(x) for x in retention_qualified_ids)
+    exclusions: Dict[str, str] = {}
     for attempt in values:
         aid = str(attempt.get("attempt_id", ""))
         if aid not in qualified or not bool(attempt.get("correct")):
@@ -79,7 +78,6 @@ def _mark_adaptive_freshness_exclusions(
             exclusions[aid] = "REPEATED_RETENTION_FAMILY_NOT_FRESH"
         else:
             seen_successful_retention_families.add(family)
-
     return values, exclusions
 
 
