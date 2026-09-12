@@ -154,8 +154,9 @@ public final class DocumentSpineEffectRuntimePortableTests {
                     finalCandidate.job(), finalCandidate.plan(), finalCandidate.sourceFormat(), finalCandidate.source(), finalCandidate.sourceGraph(), DocumentSpineStage.MASTER, finalCandidate.effectKey());
             m(DocumentMasterReceipt.STATUS_PERSISTED.equals(finalOutcome.receipt().status()), "finalCandidate cannot promote MASTER candidate");
             m(finalOutcome.receipt().evidence().contains("effect-finalCandidate-nonpromotion=true"), "MASTER receipt records finalCandidate nonpromotion");
-            m(finalOutcome.receipt().evidence().contains("effect-publication-metadata-nonpromotion=true"), "MASTER receipt records publication metadata nonpromotion");
-            m(finalOutcome.receipt().evidence().contains("effect-author-metadata-nonpromotion=true"), "MASTER receipt records author metadata nonpromotion");
+            m(finalOutcome.receipt().evidence().contains("effect-publication-metadata-nonpromotion=true")
+                    && finalOutcome.receipt().evidence().contains("effect-author-metadata-nonpromotion=true"),
+                    "MASTER receipt records publication/author metadata nonpromotion");
         } finally {
             deleteTree(denyRoot);
             deleteTree(mismatchRoot);
