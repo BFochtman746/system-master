@@ -1,0 +1,94 @@
+{
+  "schema_id": "SECOND-SHIFT-NIGHT-SELECTION-GATE-SCHEMA-001",
+  "status": "DESIGN_LOCK_NOT_ACTIVE",
+  "purpose": "Strict machine-readable contract for selecting one primary system and at most one reserve system for a Second Shift night from fresh current authority.",
+  "validator": ".github/scripts/second-shift-mastery-contract-validate.js",
+  "required_fields": [
+    "schema_id",
+    "shift_id",
+    "shift_date",
+    "timezone",
+    "status",
+    "authority_snapshot",
+    "selection_policy",
+    "candidates",
+    "ranking",
+    "selected_primary_system",
+    "selected_reserve_system",
+    "primary_selection_reason",
+    "selected_at"
+  ],
+  "allowed_status": ["FROZEN", "NO_ELIGIBLE_SYSTEM"],
+  "timezone": "America/New_York",
+  "eligibility_checks": [
+    "CURRENT_AUTHORITY_RESOLVES",
+    "TOPOLOGY_OWNER_ACTIVE",
+    "UNATTENDED_SAFE",
+    "OPEN_OBJECTIVE",
+    "EXECUTABLE_PACKET_EXISTS",
+    "NO_IMMEDIATE_HUMAN_OR_HIGHER_AUTHORITY_BLOCK",
+    "SAME_SYSTEM_QUEUE_PREPARED",
+    "INDEPENDENT_EVALUATION_AVAILABLE",
+    "MUTATION_OWNERSHIP_UNAMBIGUOUS",
+    "MANDATORY_REPAIR_CONTROL_HEALTH_REPRESENTED"
+  ],
+  "eligibility_rule": "eligible=true if and only if every eligibility check is true. Ineligible candidates require one or more factual rejection reasons and cannot be selected regardless of score.",
+  "score_policy": {
+    "policy_id": "SECOND-SHIFT-NIGHT-SELECTION-SCORE-001",
+    "maximum_total": 100,
+    "components": {
+      "critical_path_unlock_value": 30,
+      "executable_queue_depth": 20,
+      "milestone_completion_value": 15,
+      "reliability_blocker_reduction": 15,
+      "dependency_leverage": 10,
+      "age_starvation": 10
+    },
+    "component_rule": "Each component is an integer from 0 through its maximum. total_score must equal the exact sum of components. Scores require evidence/rationale; importance alone cannot bypass eligibility.",
+    "tie_breakers": [
+      "mandatory_repair_control_health=true first",
+      "higher critical_path_unlock_value",
+      "higher executable_queue_depth",
+      "older last_primary_night_at; null means never selected and is oldest",
+      "lexicographically smaller system_id"
+    ]
+  },
+  "primary_rule": "When one or more candidates are eligible, selected_primary_system must equal the first candidate in the deterministic ranking and status must be FROZEN. Top-level system WIP is one.",
+  "reserve_rule": "selected_reserve_system is null when fewer than two candidates are eligible; otherwise it must be the second candidate in deterministic ranking. It is non-executable until Assignment Contract v3 reserve activation law is satisfied.",
+  "no_eligible_rule": "When no candidate is eligible, status=NO_ELIGIBLE_SYSTEM, ranking is empty, selected_primary_system and selected_reserve_system are null, and no overnight product mutation is admitted.",
+  "candidate_required_fields": [
+    "system_id",
+    "owner_path",
+    "control_ref",
+    "control_head",
+    "objective_id",
+    "module_or_capability",
+    "eligible",
+    "eligibility_checks",
+    "rejection_reasons",
+    "mandatory_repair_control_health",
+    "score_components",
+    "total_score",
+    "score_evidence",
+    "executable_queue_packet_ids",
+    "last_primary_night_at"
+  ],
+  "authority_snapshot_required_fields": [
+    "current_authority_ref",
+    "topology_ref",
+    "obligation_registry_ref",
+    "repair_registry_refs",
+    "captured_at"
+  ],
+  "invariants": [
+    "Candidate system_id values are unique.",
+    "Candidate control_head values are exact hexadecimal Git object ids.",
+    "Eligible candidates have a non-empty executable queue and score evidence.",
+    "Ineligible candidates cannot appear in ranking.",
+    "Ranking contains every eligible candidate exactly once and in deterministic policy order.",
+    "Primary and reserve can never be the same system.",
+    "Round-robin position alone is never a selection rule.",
+    "Fresh authority and eligibility are gates, not score components that can be traded away.",
+    "This schema selects work but grants no product, A-01, human, author, private, native, publication or production authority."
+  ]
+}
