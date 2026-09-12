@@ -1,0 +1,25 @@
+name: Foundation Work Project Recovery Qualification
+
+on:
+  pull_request:
+    branches:
+      - system-master/control-v2
+    paths:
+      - 'system-master/foundation-spine/work-chain/WORK-PROJECT-RECOVERY-INVENTORY-001.md'
+      - '.github/scripts/foundation-work-project-recovery-qualify.js'
+      - '.github/workflows/foundation-work-project-recovery-qualification.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify-work-project-recovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Qualify exact recovery/adjudication subject
+        run: node .github/scripts/foundation-work-project-recovery-qualify.js
