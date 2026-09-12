@@ -3,9 +3,10 @@
 const contentAdmission = require('./content-object-admission-core.js');
 const authorQueue = require('./author-decision-queue.js');
 const currentSubjectGuard = require('./author-decision-current-subject-guard.js');
+const vr = require('./version-and-rollback-core.js');
 
 const GUARD_ID = 'BOOK-SYSTEM-CONTENT-ADMISSION-AUTHOR-DECISION-APPLICABILITY-GUARD-004';
-const AFFIRMATIVE = new Set(['APPROVE', 'APPROVED', 'ACCEPT', 'ACCEPTED', 'PROMOTE', 'PROMOTED', 'YES', true]);
+const AFFIRMATIVE = new Set(['APPROVE','APPROVED','ACCEPT','ACCEPTED','PROMOTE','PROMOTED','YES',true]);
 
 class ContentAdmissionAuthorDecisionApplicabilityError extends Error {
   constructor(code, detail = '') {
@@ -23,21 +24,17 @@ function stable(v) { return authorQueue.stable(v); }
 function digest(v) { return authorQueue.digest(v); }
 function exactRefs(refs) {
   if (!Array.isArray(refs) || refs.length === 0) fail('REQUIRED_SUBJECT_IDENTITY_REFS_MISSING');
-  return refs.slice().sort((a, b) => stable(a).localeCompare(stable(b)));
+  return refs.slice().sort((a,b) => stable(a).localeCompare(stable(b)));
 }
-function sameRefs(a, b) { return stable(exactRefs(a)) === stable(exactRefs(b)); }
+function sameRefs(a,b) { return stable(exactRefs(a)) === stable(exactRefs(b)); }
 function requiredOperationIndexes(request) {
   if (!obj(request) || !Array.isArray(request.operations) || request.operations.length === 0) fail('CONTENT_ADMISSION_REQUEST_REQUIRED');
-  const indexes = [];
-  request.operations.forEach((op, index) => {
-    if (obj(op) && op.requires_author_decision === true) indexes.push(index);
-  });
-  return indexes;
+  const out = [];
+  request.operations.forEach((op,index) => { if (obj(op) && op.requires_author_decision === true) out.push(index); });
+  return out;
 }
 function canonicalDecision(parentState, decisionId) {
-  const item = Array.isArray(parentState && parentState.author_decisions)
-    ? parentState.author_decisions.find(d => d && d.decision_id === decisionId)
-    : null;
+  const item = Array.isArray(parentState && parentState.author_decisions) ? parentState.author_decisions.find(d => d && d.decision_id === decisionId) : null;
   if (!item) fail('CANONICAL_AUTHOR_DECISION_NOT_FOUND', String(decisionId));
   if (item.status !== 'APPROVED' || !AFFIRMATIVE.has(item.author_choice)) fail('CANONICAL_AUTHOR_DECISION_NOT_APPROVED', decisionId);
   return item;
@@ -49,9 +46,7 @@ function receiptFor(queueLedger, receiptId) {
   return receipt;
 }
 function validateReceiptIntegrity(queueLedger, receipt) {
-  if (receipt.receipt_id !== undefined && receipt.receipt_id !== receipt.decision_receipt_id && receipt.decision_receipt_id !== undefined) {
-    fail('RESOLUTION_RECEIPT_ID_INCONSISTENT', String(receipt.receipt_id));
-  }
+  if (receipt.receipt_id !== undefined && receipt.receipt_id !== receipt.decision_receipt_id && receipt.decision_receipt_id !== undefined) fail('RESOLUTION_RECEIPT_ID_INCONSISTENT', String(receipt.receipt_id));
   const snapshot = queueLedger.decision_request_snapshots && queueLedger.decision_request_snapshots[receipt.decision_request_id];
   if (!snapshot) fail('RESOLUTION_DECISION_REQUEST_SNAPSHOT_MISSING', String(receipt.decision_request_id));
   if (authorQueue.digestDecisionRequest(snapshot) !== receipt.decision_request_digest) fail('RESOLUTION_DECISION_REQUEST_DIGEST_MISMATCH', receipt.decision_request_id);
@@ -59,6 +54,34 @@ function validateReceiptIntegrity(queueLedger, receipt) {
   if (snapshot.decision_type !== receipt.decision_type) fail('RESOLUTION_RECEIPT_DECISION_TYPE_MISMATCH', receipt.decision_request_id);
   return snapshot;
 }
+
+function strictCurrentWithAuthorSuccessor(parentState, receipt, requiredRefs) {
+  const projectId = String(parentState.book_project.book_project_id);
+  const projectDigest = vr.digest(parentState.book_project);
+  const projectRefs = requiredRefs.filter(ref => ref && String(ref.object_id) === projectId && ref.object_digest === projectDigest && /^STATE-\d+$/.test(String(ref.object_version)));
+  let transitionProjectRef = null;
+  if (projectRefs.length) {
+    if (!Number.isInteger(receipt.pre_parent_state_version) || !Number.isInteger(receipt.post_parent_state_version) || !nonEmpty(receipt.pre_parent_state_digest) || !nonEmpty(receipt.post_parent_state_digest)) {
+      // Legacy/current-parent qualification fixtures use the normal strict-current guard.
+    } else {
+      if (receipt.post_parent_state_version !== parentState.state_version || receipt.post_parent_state_digest !== parentState.state_digest) fail('AUTHOR_DECISION_SUBJECT_NOT_CURRENT', 'RESOLUTION_POST_PARENT_NOT_CURRENT');
+      if (receipt.post_parent_state_version !== receipt.pre_parent_state_version + 1) fail('AUTHOR_DECISION_SUBJECT_NOT_CURRENT', 'RESOLUTION_PARENT_VERSION_DELTA_INVALID');
+      const expectedVersion = `STATE-${receipt.pre_parent_state_version}`;
+      transitionProjectRef = projectRefs.find(ref => String(ref.object_version) === expectedVersion) || null;
+      if (!transitionProjectRef) fail('AUTHOR_DECISION_SUBJECT_NOT_CURRENT', 'BOOK_PROJECT_RATIFICATION_SUBJECT_MISMATCH');
+    }
+  }
+  const strictRefs = transitionProjectRef ? requiredRefs.filter(ref => stable(ref) !== stable(transitionProjectRef)) : requiredRefs;
+  if (strictRefs.length) {
+    try { currentSubjectGuard.assertStrictSubjectCurrent(parentState, strictRefs); }
+    catch (e) {
+      if (e && ['AUTHOR_DECISION_SUBJECT_NOT_CURRENT','SUBJECT_IDENTITY_NOT_CURRENT'].includes(e.code)) fail('AUTHOR_DECISION_SUBJECT_NOT_CURRENT');
+      throw e;
+    }
+  }
+  return true;
+}
+
 function validateBinding({ parentState, queueLedger, request, operationIndex, binding }) {
   if (!obj(binding)) fail('APPLICABILITY_BINDING_REQUIRED', String(operationIndex));
   if (binding.operation_index !== operationIndex) fail('APPLICABILITY_BINDING_OPERATION_INDEX_MISMATCH', String(operationIndex));
@@ -74,20 +97,8 @@ function validateBinding({ parentState, queueLedger, request, operationIndex, bi
   if (receipt.canonical_decision_status !== canonical.status) fail('RESOLUTION_RECEIPT_CANONICAL_STATUS_MISMATCH', binding.author_decision_ref);
   const requiredRefs = exactRefs(binding.required_subject_identity_refs);
   if (!sameRefs(receipt.subject_identity_refs, requiredRefs)) fail('RESOLUTION_RECEIPT_SUBJECT_IDENTITY_MISMATCH', binding.author_decision_ref);
-  try {
-    currentSubjectGuard.assertStrictSubjectCurrent(parentState, requiredRefs);
-  } catch (e) {
-    if (e && ['AUTHOR_DECISION_SUBJECT_NOT_CURRENT', 'SUBJECT_IDENTITY_NOT_CURRENT'].includes(e.code)) {
-      fail('AUTHOR_DECISION_SUBJECT_NOT_CURRENT', binding.author_decision_ref);
-    }
-    throw e;
-  }
-  return {
-    operation_index: operationIndex,
-    author_decision_ref: binding.author_decision_ref,
-    resolution_receipt_id: binding.resolution_receipt_id,
-    required_subject_identity_refs: requiredRefs
-  };
+  strictCurrentWithAuthorSuccessor(parentState, receipt, requiredRefs);
+  return { operation_index:operationIndex, author_decision_ref:binding.author_decision_ref, resolution_receipt_id:binding.resolution_receipt_id, required_subject_identity_refs:requiredRefs };
 }
 
 function commitContentAdmissionWithAuthorDecisionApplicability({ parentState, versionLedger, queueLedger, request, applicabilityBindings }) {
@@ -106,7 +117,6 @@ function commitContentAdmissionWithAuthorDecisionApplicability({ parentState, ve
   const boundDecisionIds = [...new Set(verified.map(v => v.author_decision_ref))].sort();
   const requestDecisionIds = [...new Set((request.author_decision_refs || []).map(String))].sort();
   if (stable(boundDecisionIds) !== stable(requestDecisionIds)) fail('AUTHOR_DECISION_REF_BINDING_SET_MISMATCH');
-
   const result = contentAdmission.commitContentAdmission({ parentState, versionLedger, request });
   return {
     ...result,
@@ -120,8 +130,4 @@ function commitContentAdmissionWithAuthorDecisionApplicability({ parentState, ve
   };
 }
 
-module.exports = {
-  GUARD_ID,
-  ContentAdmissionAuthorDecisionApplicabilityError,
-  commitContentAdmissionWithAuthorDecisionApplicability
-};
+module.exports = { GUARD_ID, ContentAdmissionAuthorDecisionApplicabilityError, commitContentAdmissionWithAuthorDecisionApplicability };
