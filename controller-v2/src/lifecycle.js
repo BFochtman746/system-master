@@ -13,7 +13,7 @@ const ACTIVE_STATES = new Set(['STARTING', 'RECOVERING', 'READY', 'STOPPING']);
 function sqliteBusy(error) {
   const code = String(error?.code ?? error?.errcode ?? '');
   const message = String(error?.message ?? '');
-  return code === 'SQLITE_BUSY' || code === '5' || /database is (locked|busy)|SQLITE_BUSY/i.test(message);
+  return code === 'SQLITE_BUSY' || code === 'SQLITE_LOCKED' || code === '5' || code === '6' || /database(?: table)? is (locked|busy)|SQLITE_(?:BUSY|LOCKED)/i.test(message);
 }
 
 function canonicalFilePath(path) {
@@ -92,7 +92,8 @@ export class ControllerProcessOwnership {
         );
         INSERT OR IGNORE INTO ownership_guard(id) VALUES (1);
       `);
-      db.exec('BEGIN EXCLUSIVE');
+      db.exec('BEGIN IMMEDIATE');
+      db.prepare('UPDATE ownership_guard SET note = ? WHERE id = 1').run(`instance:${this.instance_id}`);
       this._db = db;
       return Object.freeze({ instance_id: this.instance_id, database_path: this.paths.database_path });
     } catch (error) {
