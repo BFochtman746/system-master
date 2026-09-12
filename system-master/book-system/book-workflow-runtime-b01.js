@@ -46,9 +46,10 @@ function assertCoordinationOnly(value, where = '$') {
   }
 }
 
-function digestRecord(record, digestField) {
+function digestRecord(record, digestField, idField) {
   const copy = clone(record);
   delete copy[digestField];
+  if (idField) delete copy[idField];
   return sha256(stableStringify(copy));
 }
 
@@ -115,7 +116,7 @@ function validateSchedulerState(state, plan, bindingPlan, options = {}) {
     if (taskState.dispatch_authorized !== false || taskState.canonical_effect !== false) fail('TASK_AUTHORITY_WIDENING', taskState.task_id);
     if (!['BLOCKED','COMPLETED_VERIFIED','UNKNOWN_OUTCOME_RECONCILE_REQUIRED','CANCELLED'].includes(taskState.state)) fail('INVALID_TASK_RUNTIME_STATE', taskState.task_id);
   }
-  const expectedDigest = digestRecord(state, 'scheduler_state_digest');
+  const expectedDigest = digestRecord(state, 'scheduler_state_digest', 'scheduler_state_id');
   if (state.scheduler_state_digest !== expectedDigest) fail('SCHEDULER_STATE_DIGEST_MISMATCH');
   if (state.scheduler_state_id !== contentId('book-b01-scheduler-state-v1', expectedDigest)) fail('SCHEDULER_STATE_ID_MISMATCH');
   foundation.validateExecutionBindingPlan(bindingPlan, plan, options);
@@ -173,7 +174,7 @@ function validateFailureRecord(record) {
   if (!isObject(record) || record.failure_record_schema_version !== SCHEMA_VERSION) fail('FAILURE_RECORD_REQUIRED');
   assertCoordinationOnly(record, 'failure_record');
   if (record.retry_authorized !== false || record.canonical_effect !== false) fail('FAILURE_RECORD_AUTHORITY_WIDENING');
-  const digest = digestRecord(record, 'failure_record_digest');
+  const digest = digestRecord(record, 'failure_record_digest', 'failure_record_id');
   if (record.failure_record_digest !== digest || record.failure_record_id !== contentId('book-b01-failure-v1', digest)) fail('FAILURE_RECORD_DIGEST_MISMATCH');
   return true;
 }
@@ -207,7 +208,7 @@ function validateCancellationCheckpoint(checkpoint) {
   if (!isObject(checkpoint) || checkpoint.cancellation_checkpoint_schema_version !== SCHEMA_VERSION) fail('CANCELLATION_CHECKPOINT_REQUIRED');
   assertCoordinationOnly(checkpoint, 'checkpoint');
   if (checkpoint.resume_requires_reread !== true || checkpoint.redispatch_unknown_outcome_forbidden !== true || checkpoint.canonical_effect !== false) fail('CANCELLATION_RESUME_AUTHORITY_WIDENING');
-  const digest = digestRecord(checkpoint, 'checkpoint_digest');
+  const digest = digestRecord(checkpoint, 'checkpoint_digest', 'checkpoint_id');
   if (checkpoint.checkpoint_digest !== digest || checkpoint.checkpoint_id !== contentId('book-b01-cancel-checkpoint-v1', digest)) fail('CHECKPOINT_DIGEST_MISMATCH');
   return true;
 }
@@ -244,7 +245,7 @@ function validateExecutionReceipt(receipt) {
   if (!isObject(receipt) || receipt.execution_receipt_schema_version !== SCHEMA_VERSION) fail('EXECUTION_RECEIPT_REQUIRED');
   assertCoordinationOnly(receipt, 'execution_receipt');
   if (receipt.canonical_effect !== false || receipt.publication_authority !== false || receipt.author_decision_authority !== false) fail('EXECUTION_RECEIPT_AUTHORITY_WIDENING');
-  const digest = digestRecord(receipt, 'receipt_digest');
+  const digest = digestRecord(receipt, 'receipt_digest', 'receipt_id');
   if (receipt.receipt_digest !== digest || receipt.receipt_id !== contentId('book-b01-execution-receipt-v1', digest)) fail('EXECUTION_RECEIPT_DIGEST_MISMATCH');
   return true;
 }
@@ -292,7 +293,7 @@ function validateAdmissionHandoff(handoff) {
   assertCoordinationOnly(handoff, 'admission_handoff');
   if (handoff.current_capability_id !== 'BOOK.LITERARY.GENERATE_REVISION_CANDIDATE') fail('ADMISSION_CANDIDATE_CAPABILITY_REQUIRED');
   if (handoff.target_authority !== 'SYSTEM_MASTER/BOOK_CANONICAL_CONTENT_ADMISSION' || handoff.canonical_effect !== false || handoff.publication_authority !== false || handoff.author_decision_authority !== false || handoff.handoff_only !== true) fail('ADMISSION_HANDOFF_AUTHORITY_WIDENING');
-  const digest = digestRecord(handoff, 'handoff_digest');
+  const digest = digestRecord(handoff, 'handoff_digest', 'handoff_id');
   if (handoff.handoff_digest !== digest || handoff.handoff_id !== contentId('book-b01-admission-handoff-v1', digest)) fail('ADMISSION_HANDOFF_DIGEST_MISMATCH');
   return true;
 }
