@@ -50,9 +50,14 @@ jobs:
           grep -F '"cases":36' b02-a01-x20-${{ matrix.node }}.log
 
       - name: B02 cumulative D1 to D3 integration
-        run: node .github/scripts/book-reconstruction-b02-e-cumulative-001-qualify.js | tee b02-cumulative-${{ matrix.node }}.log
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          node .github/scripts/book-reconstruction-b02-e-cumulative-001-qualify.js | tee b02-cumulative-${{ matrix.node }}.log
 
       - name: B01 frozen denominator and execution regressions
+        if: always()
         shell: bash
         run: |
           set -euo pipefail
@@ -66,6 +71,7 @@ jobs:
           node system-master/book-system/book-workflow-scheduler-runtime.test.js | tee scheduler-direct-${{ matrix.node }}.log
 
       - name: B00 Q001-Q096
+        if: always()
         shell: bash
         run: |
           set -euo pipefail
@@ -82,6 +88,7 @@ jobs:
           node .github/scripts/book-reconstruction-b00-f11-v1-v2-migration-001-qualify.js | tee q091-q096-${{ matrix.node }}.log
 
       - name: PRE01-PRE21 current-subject regressions
+        if: always()
         shell: bash
         run: |
           set -euo pipefail
@@ -108,6 +115,7 @@ jobs:
           node .github/scripts/book-workflow-orchestrator-evidence-provenance-emission-001-qualify.js | tee pre21-${{ matrix.node }}.log
 
       - name: Record calibration blockers
+        if: always()
         run: |
           cat > b02-e-calibration-blockers-${{ matrix.node }}.json <<'JSON'
           {
@@ -122,7 +130,10 @@ jobs:
 
       - name: Hash exact-subject evidence set
         if: always()
-        run: sha256sum b02-e-subject-${{ matrix.node }}.txt *.log b02-e-calibration-blockers-${{ matrix.node }}.json > b02-e-node-${{ matrix.node }}.sha256
+        shell: bash
+        run: |
+          set -euo pipefail
+          sha256sum b02-e-subject-${{ matrix.node }}.txt *.log b02-e-calibration-blockers-${{ matrix.node }}.json > b02-e-node-${{ matrix.node }}.sha256
       - name: Upload exact-subject evidence set
         if: always()
         uses: actions/upload-artifact@v4
