@@ -1,0 +1,43 @@
+{
+  "package_id": "CORE-WORK-PROJECT-BUILD-001",
+  "owner": "SYSTEM_MASTER/FOUNDATION_SPINE",
+  "design_lock_commit": "6a3a044c317adc354f6a91e1b3576d34481e2ccb",
+  "upstream_keel_freeze_commit": "40cf431fd2ad4857e126a95715a449b7325515de",
+  "isolated_case_denominator": 64,
+  "unaccounted_requirement_count": 0,
+  "qualification_class": "HOSTED_PORTABLE_REFERENCE_WORK_PROJECT_AUTHORITY_MECHANICS",
+  "invariants": [
+    {"id":"WP-01","requirement":"one durable workId owner","implementation":"WorkRecordV1 + createWork","tests":"01,04,58-60"},
+    {"id":"WP-02","requirement":"one durable projectId owner","implementation":"ProjectRecordV1 + createProject","tests":"02,05"},
+    {"id":"WP-03","requirement":"exact Keel governed-goal binding","implementation":"GovernedGoalRefV1 + KeelRefValidator","tests":"09-18,63"},
+    {"id":"WP-04","requirement":"no cross-goal Work repurposing","implementation":"rebindWorkGoal same-goal strict successor rule","tests":"11-14"},
+    {"id":"WP-05","requirement":"acyclic Work hierarchy","implementation":"ensureWorkAcyclic","tests":"21-23"},
+    {"id":"WP-06","requirement":"acyclic Project hierarchy","implementation":"ensureProjectAcyclic","tests":"24-26"},
+    {"id":"WP-07","requirement":"high-level Work lifecycle only","implementation":"WorkLifecycle transition table","tests":"27-28,31-35"},
+    {"id":"WP-08","requirement":"high-level Project lifecycle only","implementation":"ProjectLifecycle transition table + child guard","tests":"29-30,36"},
+    {"id":"WP-09","requirement":"closure requires external governing basis","implementation":"ClosureBasisV1 + ClosureBasisValidator","tests":"31-35"},
+    {"id":"WP-10","requirement":"milestones do not fabricate specialist completion","implementation":"basis-gated SATISFIED standing","tests":"37-42"},
+    {"id":"WP-11","requirement":"progress is a projection","implementation":"ProgressProjection weighted rollup","tests":"37-42,61-62"},
+    {"id":"WP-12","requirement":"management change cannot edit Keel intent","implementation":"ManagementRecordV1 reference-only boundary","tests":"43"},
+    {"id":"WP-13","requirement":"project memory stays reference-only","implementation":"ProjectMemoryRefV1","tests":"44"},
+    {"id":"WP-14","requirement":"typed cross-chain references do not transfer authority","implementation":"WorkAssociationV1","tests":"57-60"},
+    {"id":"WP-15","requirement":"exact idempotent replay","implementation":"IdempotencyReceipt","tests":"45-47"},
+    {"id":"WP-16","requirement":"stale writers fail closed","implementation":"expectedEntityRevision","tests":"48-50"},
+    {"id":"WP-17","requirement":"durable-before-ack mutation","implementation":"forced prepared file + atomic replacement","tests":"51-52"},
+    {"id":"WP-18","requirement":"tamper/truncation/reorder detection","implementation":"frame hash chain + registry sequence validation","tests":"53-56"},
+    {"id":"WP-19","requirement":"rebuildable projections","implementation":"snapshot replay + explicit freshness","tests":"47,61-62"},
+    {"id":"WP-20","requirement":"exact Planning handoff","implementation":"WorkPlanningRefV1","tests":"63"},
+    {"id":"WP-21","requirement":"no route/resource/execution/effect/recovery authority","implementation":"public API boundary","tests":"64"},
+    {"id":"WP-22","requirement":"contract-gated commands","implementation":"ContractValidator + CommandMetaV1","tests":"all mutation cases"},
+    {"id":"WP-23","requirement":"per-entity causal timeline","implementation":"TimelineEvent digest chain","tests":"restart/corruption campaign"},
+    {"id":"WP-24","requirement":"upstream frozen Foundation must not regress","implementation":"cumulative hosted qualifier invokes frozen Keel qualifier","tests":"hosted cumulative gate"}
+  ],
+  "external_evidence_fences": [
+    "A-01 not claimed",
+    "native/device not claimed",
+    "human/usability/accessibility not claimed",
+    "external/private authority not claimed",
+    "production admission not claimed",
+    "endurance qualification not claimed"
+  ]
+}
