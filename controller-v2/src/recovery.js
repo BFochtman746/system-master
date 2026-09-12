@@ -6,7 +6,18 @@ import { projectClaimHistory } from './claim-recovery.js';
 import { verifyDurableJournal } from './journal-integrity.js';
 
 export function reduceSemanticEvents(events) {
-  const state = reduceBaseSemanticEvents(events);
+  let state;
+  try {
+    state = reduceBaseSemanticEvents(events);
+  } catch (error) {
+    // The predecessor reducer already rejects malformed lease.granted syntax.
+    // Normalize that claim-specific failure into the recovered-claim contract so
+    // callers do not need to infer which reducer layer noticed it first.
+    if (error instanceof ControllerError && error.code === 'RECOVERY_PAYLOAD_INVALID' && String(error.message).startsWith('lease.granted')) {
+      throw new ControllerError('RECOVERY_CLAIM_INVALID', error.message);
+    }
+    throw error;
+  }
   const claims = projectClaimHistory(events, state);
   state.claim_history = claims.claim_history;
   state.resource_generations = claims.resource_generations;
