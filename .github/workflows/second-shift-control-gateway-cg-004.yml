@@ -1,0 +1,46 @@
+name: Second Shift Control Gateway CG-004 Host Qualification
+
+on:
+  push:
+    branches:
+      - 'second-shift-control-gateway/cg-004-*'
+    paths:
+      - 'control-gateway/**'
+      - '.github/workflows/second-shift-control-gateway-cg-004.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: second-shift-control-gateway-cg-004-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  github-publication:
+    name: GitHub Publication / Node ${{ matrix.node }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['22', '24']
+    steps:
+      - name: Checkout exact CG-004 subject
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: ${{ matrix.node }}
+          package-manager-cache: false
+
+      - name: Show runtime
+        run: node --version
+
+      - name: Run CG-003 + CG-004 qualification suite
+        working-directory: control-gateway
+        run: node --test
