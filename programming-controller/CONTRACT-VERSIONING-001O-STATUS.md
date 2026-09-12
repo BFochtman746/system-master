@@ -4,9 +4,9 @@ This is a stacked external Programming-controller implementation branch on the e
 
 It is not System Master iPhone runtime code and it does not replace the shared A-01 control plane.
 
-## Current candidate slice
+## Current candidate slices
 
-`IMPL-001O-01` is implemented as a portable/controller-contract candidate:
+### `IMPL-001O-01`
 
 - canonical contract-family and contract-version identities are delegated to the 001N identity port rather than derived from names or version labels;
 - contract surfaces are typed explicitly (`COMMAND`, `QUERY`, `EVENT`, `HTTP`, `FILE`, `SCHEMA`);
@@ -17,16 +17,28 @@ It is not System Master iPhone runtime code and it does not replace the shared A
 - family + scheme + label is unique and cannot overwrite a published version;
 - a family advance after draft creation makes the draft stale rather than silently rebasing it.
 
+### `IMPL-001O-02`
+
+- every admitted artifact receives an exact SHA-256 raw digest before canonicalization is attempted;
+- deterministic canonicalization is profile/version bound and never destroys the raw digest when canonicalization fails;
+- the current portable canonicalization adapter is explicitly `JSON / GENERIC_JSON / canon:json-sorted-v1`; it is not represented as a universal JSON standard;
+- format/dialect/profile mismatch fails the canonical claim while retaining raw-integrity evidence;
+- raw and canonical corruption checks fail closed with `DIGEST_MISMATCH`;
+- normalized diff is bound to exact source/target version IDs plus exact canonicalization profile/version and never emits a compatibility verdict;
+- incomplete canonicalization or profile drift produces `DIFF_INCOMPLETE`, never a false no-change result;
+- an injected secret-scanner policy can reject sensitive artifacts without echoing secret values into the error path;
+- when an artifact resolver is bound, published `ContractVersion` records carry raw/canonical digest plus exact canonicalization profile provenance.
+
 ## Authority boundary
 
-This slice deliberately uses an in-memory candidate registry with standing `PORTABLE_IN_MEMORY_CANDIDATE__001P_NOT_BOUND`. Physical persistence and transactional data governance remain 001P responsibilities. Durable identity remains 001N. Authorization/trust remains 001Q. Generic consistency/idempotency primitives remain 001R. Evidence infrastructure remains 001S.
+These slices deliberately use in-memory candidate registries with standing `PORTABLE_IN_MEMORY_CANDIDATE__001P_NOT_BOUND`. Physical persistence and transactional data governance remain 001P responsibilities. Durable identity remains 001N. Authorization/trust remains 001Q. Generic consistency/idempotency primitives remain 001R. Evidence infrastructure remains 001S. Canonicalization/diff produces structure and integrity facts only; compatibility verdicts belong to later 001O compatibility-policy/evaluator work.
 
 ## Qualification
 
-Targeted local qualification before branch publication: 12/12 tests PASS.
+Targeted realistic-layout local qualification through `IMPL-001O-02`: **20/20 tests PASS**.
 
 Do not claim hosted qualification until the exact stacked PR head passes the repository Programming Controller Portable Qualification workflow. Do not claim target/provider qualification from portable evidence.
 
 ## Next slice
 
-`IMPL-001O-02` — artifact canonicalization, exact raw/canonical digesting, normalized contract diff, and corruption detection without making compatibility verdicts.
+`IMPL-001O-03` — compatibility policy/evaluation engine plus qualified format-adapter framework, preserving native format semantics and explicit UNKNOWN/conflict/cache-invalidation behavior.
