@@ -1,0 +1,103 @@
+{
+  "schema": "second-shift-control-gateway.authority-lock.v1",
+  "operation_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-001",
+  "mission_version": "1.0",
+  "status": "FROZEN",
+  "authority_date": "2026-09-11",
+  "timezone": "America/New_York",
+  "base_second_shift_subject_sha": "6d0602660c8544bfd15f07f19752f9b51d04c55e",
+  "external_qualified_ingress_candidate_sha": "8ba81e2fba9da87f95675dd868dd34d1d264d7a3",
+  "controls": {
+    "chatgpt_to_github": true,
+    "chatgpt_to_a01": true,
+    "all_chat_originated_outbound_work_data_for_github_state_change": true,
+    "all_chat_originated_a01_execution_requests": true,
+    "validation_before_release": [
+      "state",
+      "predecessor",
+      "authority",
+      "repository",
+      "branch_or_ref",
+      "allowed_paths_or_effects",
+      "code",
+      "schemas",
+      "routing",
+      "interfaces",
+      "ownership",
+      "dependencies",
+      "qualification",
+      "execution_order"
+    ]
+  },
+  "authority_domains": [
+    "STATE_AUTHORITY",
+    "GITHUB_ADMISSION_AUTHORITY",
+    "VALIDATION_AUTHORITY",
+    "A01_ADMISSION_AUTHORITY",
+    "EXECUTION_ORDER_AUTHORITY",
+    "RECOVERY_AUTHORITY"
+  ],
+  "mission_requirements": [
+    "CG1-001",
+    "CG1-002",
+    "CG1-003",
+    "CG1-004",
+    "CG1-005",
+    "CG1-006",
+    "CG1-007",
+    "CG1-008",
+    "CG1-009",
+    "CG1-010",
+    "CG1-011",
+    "CG1-012",
+    "CG1-013",
+    "CG1-014",
+    "CG1-015",
+    "CG1-016",
+    "CG1-017"
+  ],
+  "requirement_denominator": 17,
+  "invariants": {
+    "chat_is_not_authoritative_state": true,
+    "durable_predecessor_bound_admission_required_for_github_mutation": true,
+    "durable_predecessor_bound_admission_required_for_a01_execution": true,
+    "single_scheduler_execution_authority_per_task": true,
+    "continue_resolves_only_next_legal_operation_after_predecessor_verification": true,
+    "ambiguity_fails_closed": true,
+    "duplicate_delivery_is_idempotent": true,
+    "actual_a01_windows_qualification_required": true,
+    "hosted_tests_cannot_substitute_for_a01_qualification": true
+  },
+  "qualification_lifecycle": [
+    "IMPLEMENTED",
+    "HOST-QUALIFIED",
+    "A01-QUALIFIED",
+    "PRODUCTION-ACTIVATED"
+  ],
+  "non_scope": [
+    "System Master product/runtime architecture",
+    "direct chat bypass for GitHub mutation",
+    "direct chat bypass for A-01 execution",
+    "GitHub Actions as a competing scheduler authority",
+    "automatic promotion from hosted tests to production activation",
+    "wholesale canonicalization of either pre-existing lineage during CG-001",
+    "Foundation-003 progression",
+    "main branch mutation"
+  ],
+  "read_only_reconciliation": {
+    "allowed_without_mutation_authority": true,
+    "may_manufacture_authority": false
+  },
+  "change_control": {
+    "mission_is_frozen": true,
+    "future_chat_may_reinterpret": false,
+    "mission_change_requires_explicit_user_operation": "CONTROL-GATEWAY-MISSION-V2-CHANGE"
+  },
+  "lineage_disposition": {
+    "reliability/second-shift-controller-v2-20260911": "PRESERVE_AS_SECOND_SHIFT_A01_DOMAIN_LINEAGE",
+    "8ba81e2fba9da87f95675dd868dd34d1d264d7a3": "PRESERVE_AS_QUALIFIED_GITHUB_CONTROL_PLANE_COMPONENT_CANDIDATE",
+    "38b9b815ceba96fc6acce98b3f286625292b0744": "PREMATURE_INTEGRATED_ARCHITECTURE_FREEZE_NOT_AUTHORITATIVE",
+    "77fe9cf79f15aa3299030c2cc7da6daa65487b58": "QUARANTINE_PENDING_CG_002"
+  },
+  "exact_successor": "SECOND-SHIFT-CONTROL-GATEWAY-CG-002 — LINEAGE REBIND / OWNERSHIP / INTERFACE / DISPOSITION FREEZE"
+}
