@@ -48,7 +48,7 @@ test('CG-011 reconstructs exact durable ACTIVE authority with zero prior-chat st
     reason: 'CURRENT_OPERATION_NONTERMINAL'
   });
 
-  const localPacket = JSON.parse(fs.readFileSync('governance/control-gateway/SECOND-SHIFT-CONTROL-GATEWAY-ACTIVE-WORK-PACKET.json', 'utf8'));
+  const localPacket = JSON.parse(fs.readFileSync('../governance/control-gateway/SECOND-SHIFT-CONTROL-GATEWAY-ACTIVE-WORK-PACKET.json', 'utf8'));
   assert.deepEqual(localPacket, envelope.packet, 'CG-011 governance mirror must equal durable packet exactly');
 });
 
