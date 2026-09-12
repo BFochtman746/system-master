@@ -1,5 +1,5 @@
 {
-  "registry_version": 30,
+  "registry_version": 31,
   "qualifications": {
     "A01-CONTROL-PLANE-SELFTEST": {
       "workstream_id": "SYSTEM-MASTER",
@@ -20,6 +20,16 @@
       "evidence_artifact": "a01-closed-loop-repair-selftest",
       "overnight_eligible": false,
       "description": "Qualify the exact A01-CLOSED-LOOP-REPAIR-001 sidecar candidate: authoritative receipt classification, bounded repair-attempt budget, repair-worker zero-authority contract, changed-SHA and deterministic-prequalification binding, exact workstream/qualification lineage, non-automatable owner routes, dead-letter behavior, arbitrary-command denial, replacement-request A01_ELIGIBLE-only standing, and preservation of the frozen gateway/policy execution model. PASS is exact-SHA focused evidence only and grants no promotion or automatic product-repair authority."
+    },
+    "SECOND-SHIFT-SUPERVISOR-V2-A01-STRESS": {
+      "workstream_id": "SECOND-SHIFT-CONTROL-GATEWAY",
+      "gate_class": "consolidated",
+      "source": "subject",
+      "executable": "node",
+      "args": [".github/scripts/a01-second-shift-supervisor-v2-qualify.js"],
+      "evidence_artifact": "second-shift-supervisor-v2-a01-stress",
+      "overnight_eligible": false,
+      "description": "Qualify the exact admitted SecondShiftSupervisorV2 and Control Gateway handoff boundary on A-01: exact subject identity, gateway-to-supervisor admission binding, sole A-01 supervisor scheduling ownership, SQLite lease/fencing/idempotency/outbox semantics, crash/concurrency stress, and deterministic evidence production. PASS is exact-SHA A-01 evidence only and does not production-activate the Control Gateway."
     },
     "BOOK-SYSTEM-CANONICAL-BOOK-STATE-MODEL-001": {
       "workstream_id": "BOOK-SYSTEM",
