@@ -30,6 +30,8 @@ const legacyRoot = path.resolve(process.argv[2]);
 const output = path.resolve(process.argv[3]);
 const componentVersion = process.argv[4];
 const componentControlRef = process.argv[5];
+if (!componentVersion.trim()) fail('component version is blank');
+if (!componentControlRef.trim()) fail('component control ref is blank');
 const authority = readJson(legacyRoot, 'governance/CURRENT-AUTHORITY.json');
 const topology = readJson(legacyRoot, authority.topology);
 const catalog = readJson(legacyRoot, authority.system_catalog);
@@ -38,10 +40,15 @@ if (authority.product_root !== 'SYSTEM_MASTER') fail('current authority product 
 if (topology.product_root?.product_id !== authority.product_root) fail('topology product root mismatch');
 if (!Array.isArray(authority.active_peer_execution_lanes)) fail('missing active_peer_execution_lanes');
 if (!Array.isArray(authority.retired_systems)) fail('missing retired_systems');
+if (!authority.authority_id) fail('current authority is missing authority_id');
+if (!topology.topology_id) fail('selected topology is missing topology_id');
 
 const active = new Map((topology.canonical_internal_systems || []).map(s => [s.system_id, s]));
 const activeIds = [...active.keys()].sort();
 const expectedActive = [...authority.active_peer_execution_lanes].sort();
+const topologyPeers = [...(topology.peer_system_ids || [])].sort();
+if (JSON.stringify(topologyPeers) !== JSON.stringify(expectedActive)) fail(`topology peer set mismatch:${topologyPeers.join(',')}:${expectedActive.join(',')}`);
+if ((topology.child_system_ids || []).length !== 0) fail('legacy topology has active child systems requiring explicit migration support');
 if (JSON.stringify(activeIds) !== JSON.stringify(expectedActive)) fail(`active peer mismatch:${activeIds.join(',')}:${expectedActive.join(',')}`);
 
 const retired = new Map((topology.retired_systems || []).map(s => [s.system_id, s]));
@@ -50,6 +57,7 @@ const expectedRetired = [...authority.retired_systems].sort();
 if (JSON.stringify(retiredIds) !== JSON.stringify(expectedRetired)) fail(`retired system mismatch:${retiredIds.join(',')}:${expectedRetired.join(',')}`);
 
 const catalogActive = new Map((catalog.active_peer_systems || []).map(s => [s.system_id, s]));
+const catalogRetired = new Map((catalog.retired_systems || []).map(s => [s.system_id, s]));
 for (const id of expectedActive) {
   const t = active.get(id);
   const c = catalogActive.get(id);
@@ -69,6 +77,9 @@ for (const id of expectedActive) {
 
 for (const id of expectedRetired) {
   const s = retired.get(id);
+  const c = catalogRetired.get(id);
+  if (!c) fail(`catalog missing retired system ${id}`);
+  if (c.historical_owner_path !== s.historical_owner_path) fail(`catalog retired owner path mismatch ${id}`);
   const ownerParts = String(s.historical_owner_path || '').split('/').filter(Boolean);
   if (ownerParts.length < 3 || ownerParts.at(-1) !== id || ownerParts[0] !== authority.product_root) {
     fail(`invalid historical owner path for ${id}`);
@@ -85,9 +96,9 @@ if (!active.has('CORE')) fail('CORE is required to own Root Authority Registry c
 lines.push(row('SYSTEM', rootSystemId, 'SYSTEM ROOT & AUTHORITY REGISTRY', 'FOUNDATION_SPINE_SHARED_SYSTEM',
   'CORE', componentVersion, componentControlRef, 'ACTIVE'));
 lines.push(row('AUTHORITY', 'PRODUCT-AUTHORITY-SELECTOR', 'Product authority selector', rootSystemId,
-  'governance/CURRENT-AUTHORITY.json', 'ACTIVE'));
+  `${authority.authority_id}@governance/CURRENT-AUTHORITY.json`, 'ACTIVE'));
 lines.push(row('AUTHORITY', 'SYSTEM-TOPOLOGY', 'System topology authority', rootSystemId,
-  authority.topology, 'ACTIVE'));
+  `${topology.topology_id}@${authority.topology}`, 'ACTIVE'));
 
 for (const candidate of catalog.future_system_candidates || []) {
   if (active.has(candidate.candidate_id) || retired.has(candidate.candidate_id)) {
