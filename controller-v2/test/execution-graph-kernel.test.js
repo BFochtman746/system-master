@@ -90,12 +90,12 @@ test('GEL-002 v5 store upgrades to v6 without changing predecessor rows', () => 
 });
 
 test('GEL-003 failed v6 migration rolls back version marker', () => {
-  const t = tempDb();
+  const base = new ControllerKernel(':memory:');
   try {
-    const base = new ControllerKernel(t.db); base.db.exec('CREATE TABLE operation_dependencies(bad TEXT)'); base.close();
-    assert.throws(() => new ExecutionGraphKernel(t.db));
-    const reread = new ControllerKernel(t.db); assert.equal(Number(reread.db.prepare('SELECT MAX(version) v FROM schema_migrations').get().v), 5); reread.close();
-  } finally { cleanupTemp(t); }
+    base.db.exec('CREATE TABLE operation_dependencies(bad TEXT)');
+    assert.throws(() => ExecutionGraphKernel.prototype.migrate.call(base));
+    assert.equal(Number(base.db.prepare('SELECT MAX(version) v FROM schema_migrations').get().v), 5);
+  } finally { base.close(); }
 });
 
 test('GEL-004 reopening v6 is idempotent', () => {
