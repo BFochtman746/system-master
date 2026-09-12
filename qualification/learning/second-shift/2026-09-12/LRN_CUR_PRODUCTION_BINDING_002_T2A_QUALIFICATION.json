@@ -1,0 +1,41 @@
+{
+  "objective": "LRN-CUR-PRODUCTION-BINDING-002-T2A",
+  "standing": "DESIGN_LOCK_PASS__I016L_CANDIDATE_REPAIRED__I016C_NOT_IMPLEMENTED",
+  "semantic_authority": {
+    "source": "LRN-OWNERSHIP-FREEZE-001C",
+    "active_denominator": {"requirements": 113, "interfaces": 112, "semantic_objects": 28},
+    "rule": "001C semantic signatures control where 001D implementation mapping abbreviates fields without explicit semantic supersession"
+  },
+  "i016_l": {
+    "owner": "MOD-LEARNING-001",
+    "required_fields": ["goal_id", "learner_ref", "skill_or_criterion_refs", "evidence_refs", "diagnosis_reason_codes", "client_operation_id"],
+    "candidate_status": "EXACT_001C_SIGNATURE_ALIGNED",
+    "foreign_semantics": "NONE"
+  },
+  "i016_c": {
+    "owner": "MOD-CURRICULUM-001",
+    "required_fields": ["remediation_need_ref", "curriculum_version_ref", "criterion_refs", "instructional_constraints", "client_operation_id"],
+    "candidate_status": "DESIGN_LOCKED_IMPLEMENTATION_PENDING",
+    "reference_resolution": "OWNER_RESOLVED_IMMUTABLE_SNAPSHOT_ADAPTER_NO_FOREIGN_STORE"
+  },
+  "qualification": {
+    "pb002_tranche": {"passed": 11, "total": 11},
+    "production_binding_baseline": {"passed": 15, "total": 15},
+    "rebind_001": {"passed": 20, "total": 20},
+    "rebind_002": {"passed": 34, "total": 34},
+    "impl016": {"passed": 25, "total": 25},
+    "changed_surface_cumulative": {"passed": 105, "total": 105},
+    "compileall": "PASS",
+    "fresh_historical_481": "NOT_CLAIMED"
+  },
+  "truth_boundaries": [
+    "Candidate branch only; canonical learning/control-v1 is unchanged.",
+    "No live PostgreSQL or deployed Master Core execution.",
+    "No native, human, learner, psychometric, SME, certification, external-provider or A-01 claims."
+  ],
+  "delta_bundle": {
+    "path": "LRN_CUR_PRODUCTION_BINDING_002_T2A_DELTA.zip",
+    "sha256": "773a0b9042977a696067203609c8ac982bbcf2b222887ac443e07527c5ef4d64"
+  },
+  "exact_next_operation": "LRN-CUR-PRODUCTION-BINDING-002-T2B — IMPLEMENT OWNER-RESOLVED I016-C HANDLER + CURRICULUM PLAN ATOMIC UOW / NEGATIVE FOREIGN-STORE + DIGEST/STALE/IDEMPOTENCY QUALIFICATION"
+}
