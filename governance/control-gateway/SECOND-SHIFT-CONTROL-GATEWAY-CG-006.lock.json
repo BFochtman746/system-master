@@ -1,0 +1,53 @@
+{
+  "schema": "second-shift-control-gateway.cg006-freeze.v1",
+  "operation_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-006",
+  "status": "HOST_QUALIFIED_LIVE_GITHUB_CHAT_RECOVERY_QUALIFIED_DEVELOPMENT_FROZEN",
+  "mission_version": "SECOND-SHIFT-CONTROL-GATEWAY-CG-001/v1.0",
+  "predecessor_freeze_sha": "c30404321e5e4cd296539443b224930ce83afed6",
+  "qualified_implementation_sha": "ee7f1d52e5b4421bcbb78947835f38c97cb6fd1e",
+  "qualification_run_id": 34669313253,
+  "host_qualification": {
+    "node_22": {"tests": 104, "pass": 102, "fail": 0, "skipped": 2},
+    "node_24": {"tests": 104, "pass": 102, "fail": 0, "skipped": 2},
+    "live_github_chat_recovery": "PASS"
+  },
+  "development_state": {
+    "ref": "control-gateway-state/active-work/second-shift-control-gateway-dev",
+    "head_commit_sha": "49c8e5cc7d01166966cc89aa48cac9ca77644466",
+    "publication_revision": 4,
+    "packet_digest": "b2d61b83b251dc695000f006e46455db114c3ea28b257b60791b1776bfd8fc4f",
+    "publication_digest": "397a82721f36c0151c9879e857b3bcc8917a647b53cf7e8ff87d7fc71d5dc67c",
+    "head_and_revision_blob_sha": "8c480d2526471196f444b42ff48ce8e124cea38c",
+    "production": false
+  },
+  "frozen_invariants": [
+    "CONTINUE_IS_RESOLVED_FROM_VERIFIED_DURABLE_STATE_NOT_CHAT_MEMORY",
+    "RECOVERY_REDERIVES_NEXT_LEGAL_OPERATION",
+    "AMBIGUOUS_OR_MISSING_SUCCESSOR_FAILS_CLOSED",
+    "BLOCKED_OR_FAILED_STANDING_REQUIRES_RECONCILIATION",
+    "PUBLISHED_PACKET_AND_WORK_REF_GOVERNANCE_PACKET_MUST_MATCH_EXACTLY",
+    "LIVE_GOVERNANCE_HEAD_MUST_HAVE_SINGLE_PARENT_ANCESTRY_TO_QUALIFIED_SUBJECT",
+    "WORK_REF_AND_DURABLE_AUTHORITY_MOVEMENT_DURING_RECOVERY_FAIL_CLOSED",
+    "RECOVERY_CONTRACT_IS_CONTENT_DIGESTED_AND_MUST_BE_FRESH_BEFORE_USE",
+    "RECOVERY_RETURNS_EXACT_LIVE_GOVERNANCE_HEAD_AS_CONTINUATION_BASE",
+    "RECOVERY_DOES_NOT_BYPASS_CG005_MUTATION_ADMISSION_OR_EXACT_PREDECESSOR_CAS",
+    "HOST_QUALIFICATION_DOES_NOT_EQUAL_PRODUCTION_ACTIVATION",
+    "A01_QUALIFICATION_REMAINS_MANDATORY_BEFORE_PRODUCTION_ACTIVATION"
+  ],
+  "production_blockers": [
+    {
+      "id": "CG006-B001",
+      "subject": "SUCCESSOR_BRANCH_CREATION_ADMISSION",
+      "status": "OPEN",
+      "reason": "CG-005 currently admits existing WORK_REF and AUTHORITY_STATE_REF targets; it does not yet authorize creation of a new successor work ref from the recovered governance freeze SHA.",
+      "required_closure": "CG-007 must adjudicate and close the controlled successor-ref creation contract or explicitly replace per-operation branch creation with a single durable admitted work-ref model before production GitHub mutation activation."
+    },
+    {
+      "id": "A01-LEGACY-DIRECT-STRESS-ROUTE",
+      "status": "OPEN",
+      "reason": ".github/workflows/second-shift-supervisor-v2-a01-windows-stress.yml remains an unregistered direct self-hosted path and must route through .github/workflows/a01-control-plane-gateway.yml."
+    }
+  ],
+  "next_legal_operation": "SECOND-SHIFT-CONTROL-GATEWAY-CG-007 — VALIDATOR CLOSURE / CODE-ROUTING-SCHEMA-CONTRACT-DEPENDENCY GATE + HOST QUALIFICATION",
+  "production_activation": false
+}

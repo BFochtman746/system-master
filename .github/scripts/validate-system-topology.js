@@ -6,6 +6,7 @@ const path = require('path');
 const root = path.resolve(__dirname, '..', '..');
 const authorityPath = path.join(root, 'governance', 'CURRENT-AUTHORITY.json');
 const registryPath = path.join(root, 'qualification', 'a01', 'registry.json');
+const externalInfrastructurePath = path.join(root, 'governance', 'control-gateway', 'A01-EXTERNAL-INFRASTRUCTURE-WORKSTREAMS.json');
 const expectedPeers = new Set(['CORE', 'LEARNING', 'BOOK', 'DOCUMENTS']);
 
 function fail(message) { console.error(`SYSTEM_TOPOLOGY_ERROR: ${message}`); process.exit(1); }
@@ -81,10 +82,28 @@ if (laneMap['LITERARY-PROSE']) fail('LITERARY-PROSE must not remain an active ex
 if (laneMap['BOOK-EVAL-LEMONADE-001'] !== 'BOOK') fail('BOOK-EVAL historical/current Book work must map to BOOK');
 if (!String(topology.legacy_route_dispositions?.['LITERARY-PROSE'] || '').startsWith('RETIRED_NO_DISPATCH')) fail('LITERARY-PROSE must be explicitly retired/no-dispatch');
 
+const externalInfrastructure = readJson(externalInfrastructurePath);
+if (externalInfrastructure.schema !== 'control-gateway.a01-external-infrastructure-workstreams.v1') fail('external A-01 infrastructure registry schema mismatch');
+if (externalInfrastructure.mission_version !== 'SECOND-SHIFT-CONTROL-GATEWAY-CG-001/v1.0') fail('external A-01 infrastructure registry mission mismatch');
+const externalInfrastructureEntries = externalInfrastructure.entries || {};
+for (const [workstreamId, entry] of Object.entries(externalInfrastructureEntries)) {
+  if (!workstreamId || !entry || typeof entry !== 'object' || Array.isArray(entry)) fail(`external A-01 infrastructure entry ${workstreamId || '<empty>'} is invalid`);
+  if (laneMap[workstreamId]) fail(`external A-01 infrastructure ${workstreamId} must not also be a product execution lane`);
+  if (expectedPeers.has(workstreamId)) fail(`external A-01 infrastructure ${workstreamId} collides with a canonical product system`);
+  if (entry.classification !== 'STANDALONE_EXTERNAL_CONTROL_PLANE_INFRASTRUCTURE') fail(`external A-01 infrastructure ${workstreamId} classification is invalid`);
+  if (entry.product_system_owner !== null) fail(`external A-01 infrastructure ${workstreamId} must not claim a System Master product owner`);
+  if (entry.a01_qualification_allowed !== true) fail(`external A-01 infrastructure ${workstreamId} must explicitly permit A-01 qualification`);
+  if (entry.may_create_product_system !== false || entry.may_inherit_product_execution_lane !== false) fail(`external A-01 infrastructure ${workstreamId} must not create or inherit product-system authority`);
+  if (!entry.authority_record || !String(entry.authority_record).startsWith('governance/control-gateway/')) fail(`external A-01 infrastructure ${workstreamId} authority record must stay under governance/control-gateway`);
+  requireFile(entry.authority_record);
+}
+
 const a01 = readJson(registryPath);
 const workstreams = new Set(Object.values(a01.qualifications || {}).map((entry) => entry.workstream_id).filter(Boolean));
-const unmapped = [...workstreams].filter((id) => !laneMap[id] && !(id === 'LITERARY-PROSE' && String(topology.legacy_route_dispositions?.['LITERARY-PROSE'] || '').startsWith('RETIRED_NO_DISPATCH'))).sort();
-if (unmapped.length) fail(`A-01 workstream IDs lack current owner mapping or retired disposition: ${unmapped.join(', ')}`);
+const unmapped = [...workstreams].filter((id) => !laneMap[id]
+  && !(id === 'LITERARY-PROSE' && String(topology.legacy_route_dispositions?.['LITERARY-PROSE'] || '').startsWith('RETIRED_NO_DISPATCH'))
+  && externalInfrastructureEntries[id]?.a01_qualification_allowed !== true).sort();
+if (unmapped.length) fail(`A-01 workstream IDs lack current owner mapping, retired disposition, or explicit external-infrastructure authority: ${unmapped.join(', ')}`);
 
 const activeOwnerPaths = new Set(['SYSTEM_MASTER', 'SYSTEM_MASTER/SHARED_INFRASTRUCTURE', 'SYSTEM_MASTER/SHARED_INFRASTRUCTURE/A01']);
 for (const id of expectedPeers) activeOwnerPaths.add(ownerPath(byId[id]));
@@ -136,3 +155,4 @@ console.log('prose_execution=NONE');
 console.log('prose_integration_owner_if_open=BOOK');
 console.log(`open_obligations_registered=${(obligations.obligations || []).filter((item) => item.state !== 'CLOSED' && item.state !== 'SUPERSEDED').length}`);
 console.log(`a01_workstream_ids_adjudicated=${workstreams.size}`);
+console.log(`a01_external_infrastructure_workstreams=${Object.keys(externalInfrastructureEntries).length}`);

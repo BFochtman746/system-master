@@ -1,0 +1,99 @@
+name: Second Shift Control Gateway CG-010 Closure Repair Qualification
+
+on:
+  push:
+    branches:
+      - second-shift-control-gateway/cg-010-night-scheduler-retirement
+    paths:
+      - 'control-gateway/**'
+      - '.github/workflows/a01-overnight-night-shift.yml'
+      - '.github/workflows/second-shift-control-gateway-cg-010-closure-repair.yml'
+      - 'tests/**'
+      - 'tools/second_shift_supervisor_v2.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  qualify:
+    name: CG-010 Closure Repair / Node ${{ matrix.node }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [22, 24]
+    env:
+      CG010_REPAIR_LIVE_REF: control-gateway-state/active-work/second-shift-control-gateway-dev
+      CG010_REPAIR_EXPECTED_PUBLICATION_COMMIT: c66747391e1c59baf4ccf28f8e99131ceb1e292b
+      CG010_REPAIR_EXPECTED_PACKET_DIGEST: 6a1f99abd0b84a8835973128afdeaaca612209d15fa34e977953556b6a715e23
+      CG010_REPAIR_EXPECTED_AUTHORITY_SUBJECT: 0c9fa4ab5915eda098ec24e81d4004dcee13b8a6
+      CG010_REPAIR_EXPECTED_WORK_REF: second-shift-control-gateway/cg-010-night-scheduler-retirement
+      CG010_REPAIR_EXPECTED_OPERATION: SECOND-SHIFT-CONTROL-GATEWAY-CG-010
+      CG010_REPAIR_EXPECTED_TERMINAL_RECEIPT: SECOND-SHIFT-CONTROL-GATEWAY-CG-010-HOST-QUALIFICATION-34672767322
+      CG010_REPAIR_EXPECTED_SUCCESSOR: SECOND-SHIFT-CONTROL-GATEWAY-CG-011
+      CG010_REPAIR_GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout exact CG-010 repair subject
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: ${{ matrix.node }}
+          package-manager-cache: false
+      - name: Show runtimes
+        run: |
+          node --version
+          python --version
+      - name: Validate A-01 control plane and standalone topology
+        run: |
+          node .github/scripts/a01-control-plane.js validate
+          node .github/scripts/validate-system-topology.js
+      - name: Prove GitHub night scheduler remains retired
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const text = fs.readFileSync('.github/workflows/a01-overnight-night-shift.yml', 'utf8');
+          const failures = [];
+          if (/^\s*schedule\s*:/m.test(text)) failures.push('schedule trigger remains');
+          if (/cron\s*:/m.test(text)) failures.push('cron remains');
+          if (/slot_0[1-8]/.test(text)) failures.push('slot-chain scheduling remains');
+          if (text.includes('a01-overnight-plan.js')) failures.push('GitHub night planner remains wired');
+          if (text.includes('uses: ./.github/workflows/a01-control-plane-gateway.yml')) failures.push('workflow still dispatches A-01 work');
+          if (!text.includes('GITHUB_SCHEDULER_RETIRED=1')) failures.push('retirement marker missing');
+          if (!text.includes('A01_SCHEDULING_OWNER=SecondShiftSupervisorV2')) failures.push('A-01 ownership marker missing');
+          if (failures.length) throw new Error(failures.join('; '));
+          console.log('CG010_GITHUB_SCHEDULER_RETIREMENT=PASS');
+          NODE
+      - name: Run Control Gateway tests including terminal-state closure-repair authority
+        working-directory: control-gateway
+        run: node --test
+      - name: Compile repaired A-01 local scheduler and inherited supervisor layers
+        run: |
+          python -m py_compile \
+            tools/second_shift_supervisor_v2.py \
+            control-gateway/python/a01_supervisor_adapter.py \
+            control-gateway/python/a01_supervisor_coordination.py \
+            control-gateway/python/a01_supervisor_coordination_strict.py \
+            control-gateway/python/a01_night_scheduler.py \
+            tests/test_control_gateway_a01_supervisor_adapter.py \
+            tests/test_control_gateway_a01_supervisor_coordination.py \
+            tests/test_control_gateway_a01_supervisor_coordination_authority.py \
+            tests/test_control_gateway_a01_night_scheduler.py \
+            tests/test_second_shift_supervisor_v2.py \
+            tests/run_second_shift_supervisor_v2_optimized.py
+      - name: Run CG-008 handoff regression tests
+        run: python tests/test_control_gateway_a01_supervisor_adapter.py
+      - name: Run CG-009 dependency concurrency cancellation regression tests
+        run: python tests/test_control_gateway_a01_supervisor_coordination.py
+      - name: Run CG-009 authority closure regression tests
+        run: python tests/test_control_gateway_a01_supervisor_coordination_authority.py
+      - name: Run CG-010 repaired scheduler authority tests
+        run: python tests/test_control_gateway_a01_night_scheduler.py
+      - name: Run preserved supervisor crash and concurrency stress
+        run: python tests/run_second_shift_supervisor_v2_optimized.py

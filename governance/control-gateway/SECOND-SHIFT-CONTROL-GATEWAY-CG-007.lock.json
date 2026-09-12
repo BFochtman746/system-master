@@ -1,0 +1,86 @@
+{
+  "schema": "second-shift-control-gateway.cg007-freeze.v1",
+  "operation_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-007",
+  "status": "HOST_QUALIFIED_VALIDATOR_AND_SUCCESSOR_REF_GATE_DEVELOPMENT_FROZEN",
+  "mission_version": "SECOND-SHIFT-CONTROL-GATEWAY-CG-001/v1.0",
+  "predecessor_freeze_sha": "a4b2e078ae2231242978e23b724ee27bf11f1d90",
+  "start_commit_sha": "ecb7a994de910d311194e120fe69beb35c986de2",
+  "qualified_implementation_sha": "51a0976f2f3265702e6005a36d70f9e9f240ad63",
+  "qualification_run_id": 34669882162,
+  "qualification_receipt_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-007-HOST-QUALIFICATION-34669882162",
+  "host_qualification": {
+    "node_22": {"tests": 131, "pass": 128, "fail": 0, "skipped": 3, "syntax": "PASS", "contract_registry": "PASS"},
+    "node_24": {"tests": 131, "pass": 128, "fail": 0, "skipped": 3, "syntax": "PASS", "contract_registry": "PASS"}
+  },
+  "validator_families": {
+    "CODE": "HOST_QUALIFIED",
+    "ROUTING": "HOST_QUALIFIED",
+    "SCHEMA": "HOST_QUALIFIED",
+    "CONTRACT": "HOST_QUALIFIED",
+    "DEPENDENCY": "HOST_QUALIFIED"
+  },
+  "cg006_b001": {
+    "id": "CG006-B001",
+    "subject": "SUCCESSOR_BRANCH_CREATION_ADMISSION",
+    "status": "CLOSED_HOST_QUALIFIED",
+    "request_protocol": "control-gateway.successor-ref-request.v1",
+    "admission_protocol": "control-gateway.successor-ref-admission.v1",
+    "execution_protocol": "control-gateway.successor-ref-execution.v1",
+    "executor_requirement": "CREATE_REF_IF_ABSENT_AT_EXACT_BASE_SHA",
+    "base_authority": "EXACT_RECOVERED_GOVERNANCE_FREEZE_HEAD",
+    "existing_ref_mutation": "PROHIBITED"
+  },
+  "development_state": {
+    "ref": "control-gateway-state/active-work/second-shift-control-gateway-dev",
+    "head_commit_sha": "a1893b5b4df5394fe34abba0e39c8cb921e948cf",
+    "publication_revision": 6,
+    "authority_epoch": 7,
+    "packet_digest": "29b09bc68c50ea5ab8b9d35bb47e0122f8824c2686a823d3615f7cd3153d0c9e",
+    "publication_digest": "636c0f8844991bcb644ff31098d2a61270fd7646f702af09f7ce7581c3f47116",
+    "head_and_revision_blob_sha": "93c05e21517403724ff5e4c98d761e2408a72024",
+    "qualification_state": "PASSED",
+    "github_admission_state": "ADMITTED",
+    "a01_state": "NOT_REQUIRED",
+    "production": false
+  },
+  "a01_enforcement_crosscheck": {
+    "run_id": 34669882127,
+    "conclusion": "FAILURE_EXPECTED_KNOWN_BLOCKER",
+    "topology_validation": "PASS",
+    "enforcement_selftest": "PASS",
+    "blocking_finding": ".github/workflows/second-shift-supervisor-v2-a01-windows-stress.yml: DIRECT_SELF_HOSTED_WORKFLOW_NOT_REGISTERED; use .github/workflows/a01-control-plane-gateway.yml"
+  },
+  "frozen_invariants": [
+    "VALIDATION_IS_BOUND_TO_DURABLE_RECOVERED_AUTHORITY",
+    "CHANGED_ARTIFACTS_REQUIRE_ALL_KIND_MANDATED_VALIDATOR_FAMILIES",
+    "CODE_EVIDENCE_BINDS_EXACT_ARTIFACT_DIGEST_AND_PASSING_CHECKS",
+    "ROUTES_ARE_GATEWAY_ENFORCED_AND_DIRECT_BYPASS_IS_REJECTED",
+    "A01_EXECUTION_OWNER_AND_SCHEDULER_OWNER_ARE_A01_SUPERVISOR",
+    "SCHEMAS_ARE_STRICT_AND_REJECT_UNKNOWN_FIELDS",
+    "CONTRACT_REFERENCES_MUST_RESOLVE_TO_VALIDATED_SCHEMA_AND_ROUTE_IDS",
+    "DEPENDENCIES_REQUIRE_SUCCESSFUL_DURABLE_RECEIPTS",
+    "AUTHORITY_MOVEMENT_DURING_VALIDATION_FAILS_CLOSED",
+    "SUCCESSOR_REF_CREATE_IS_CREATE_ONLY_AND_OPERATION_DERIVED",
+    "SUCCESSOR_REF_BASE_IS_EXACT_RECOVERED_GOVERNANCE_FREEZE_SHA",
+    "SUCCESSOR_REF_EXISTENCE_OR_STALE_AUTHORITY_FAILS_CLOSED",
+    "AMBIGUOUS_REF_CREATE_IS_ACCEPTED_ONLY_AFTER_EXACT_REREAD_PROOF",
+    "HOST_QUALIFICATION_DOES_NOT_EQUAL_A01_QUALIFICATION",
+    "A01_QUALIFICATION_REMAINS_MANDATORY_BEFORE_PRODUCTION_ACTIVATION"
+  ],
+  "production_blockers": [
+    {
+      "id": "A01-LEGACY-DIRECT-STRESS-ROUTE",
+      "status": "OPEN",
+      "owner_operation": "SECOND-SHIFT-CONTROL-GATEWAY-CG-008",
+      "reason": "The legacy A-01 Windows stress workflow is still a direct self-hosted route outside the registered control-plane gateway."
+    },
+    {
+      "id": "A01-ACTUAL-WINDOWS-QUALIFICATION",
+      "status": "OPEN",
+      "reason": "Actual A-01 Windows shadow/canary/fault qualification is mandatory before production activation."
+    }
+  ],
+  "next_legal_operation": "SECOND-SHIFT-CONTROL-GATEWAY-CG-008 — SUPERVISOR INTEGRATION / A-01 ADMISSION + ORDERING HANDOFF + HOST QUALIFICATION",
+  "next_predecessor_receipt_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-007-HOST-QUALIFICATION-34669882162",
+  "production_activation": false
+}

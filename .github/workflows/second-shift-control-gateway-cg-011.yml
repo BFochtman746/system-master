@@ -1,0 +1,22 @@
+name: Second Shift Control Gateway CG-011 Qualification — Frozen
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  frozen-record:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Preserve terminal qualification record
+        shell: bash
+        run: |
+          echo 'CG-011 is terminal and development-frozen.'
+          echo 'Authoritative qualified subject: bee130cff1b8845c7f793ca14fd9c0b9028faf96'
+          echo 'Qualification run: 34703609882'
+          echo 'Separate adversarial closure audit job: 103579659768'
+          echo 'Terminal publication: 11ce292c3efac87ecf7758e6d2eb747a25d62127 (r28)'
+          echo 'Frozen ref: second-shift-control-gateway/cg-011-failure-restart-idempotency-frozen'
+          echo 'This manual record workflow grants no A-01 Windows or production authority.'

@@ -1,0 +1,44 @@
+{
+  "schema": "second-shift-control-gateway.cg009-closure-repair.v1",
+  "operation_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-009",
+  "repair_subject_sha": "2a3d6b04be8037f9edb859eb87663cd5b4a5504c",
+  "qualification_run_id": 34672512923,
+  "qualification_receipt_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-009-CLOSURE-REPAIR-34672512923",
+  "outcome": "SUCCEEDED",
+  "satisfies_dependency": true,
+  "reconciled_operation": "SECOND-SHIFT-CONTROL-GATEWAY-CG-010",
+  "closed_findings": [
+    "CANCELLATION_POLICY_CALLER_OVERRIDE",
+    "CROSS_GRAPH_DEPENDENCY_IDENTITY_DRIFT",
+    "CANCEL_PENDING_RESOURCE_CAPACITY_RELEASE"
+  ],
+  "host_qualification": {
+    "node_22": {
+      "controller_tests": 147,
+      "controller_pass": 142,
+      "controller_fail": 0,
+      "controller_skipped": 5,
+      "cg008_adapter_tests": 11,
+      "cg009_coordination_tests": 14,
+      "cg009_authority_closure_tests": 7,
+      "supervisor_stress_tests": 28,
+      "randomized_transitions": 20000,
+      "rigor_reduced": false
+    },
+    "node_24": {
+      "status": "PASSED_SAME_MATRIX"
+    }
+  },
+  "a01_control_plane_enforcement_run": 34672512968,
+  "a01_control_plane_enforcement": "SUCCESS",
+  "system_state_reconciler_run": 34672512899,
+  "system_state_reconciler": "SUCCESS",
+  "authority_rebind": {
+    "from_subject": "c0ff180607624c27a6b5158e7c0f3ee00e08fddf",
+    "to_subject": "2a3d6b04be8037f9edb859eb87663cd5b4a5504c",
+    "from_epoch": 12,
+    "to_epoch": 13
+  },
+  "cg010_state_after_reconciliation": "ACTIVE",
+  "production_activation": false
+}

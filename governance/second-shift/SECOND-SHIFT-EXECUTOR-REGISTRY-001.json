@@ -1,0 +1,58 @@
+{
+  "registry_id": "SECOND-SHIFT-EXECUTOR-REGISTRY-001",
+  "status": "PROPOSED_RELIABILITY_BRANCH_ONLY",
+  "purpose": "Allow the supervisor to dispatch only pre-registered execution adapters. Delegations select executor_id; they never carry arbitrary commands or workflow paths.",
+  "executors": {
+    "LOCAL-REGISTERED-SCRIPT-001": {
+      "executor_kind": "LOCAL_REGISTERED_SCRIPT",
+      "runtime": "A01_WINDOWS_SERVICE_HOST",
+      "entrypoint_policy": "ENTRYPOINT_MUST_BE_REGISTERED_IN_LOCAL_EXECUTOR_MAP",
+      "arbitrary_command_input": false,
+      "max_timeout_seconds": 3600,
+      "requires_fencing_token": true,
+      "requires_idempotency_key": true,
+      "heartbeat_required": true,
+      "side_effect_policy": "Only the registered script's declared owner-lane effects are permitted."
+    },
+    "GITHUB-REGISTERED-WORKFLOW-001": {
+      "executor_kind": "GITHUB_REGISTERED_WORKFLOW",
+      "runtime": "GITHUB_ACTIONS",
+      "entrypoint_policy": "WORKFLOW_ID_AND_INPUT_SCHEMA_MUST_BE_PRE_REGISTERED",
+      "arbitrary_workflow_path_input": false,
+      "max_timeout_seconds": 21600,
+      "requires_fencing_token": true,
+      "requires_idempotency_key": true,
+      "dispatch_reconciliation": "Persist dispatch_id before API call; after ambiguous response search run metadata for the same immutable dispatch identity before redispatch.",
+      "github_schedule_is_authority": false
+    },
+    "A01-REGISTERED-QUALIFICATION-001": {
+      "executor_kind": "A01_REGISTERED_QUALIFICATION",
+      "runtime": "A01_CANONICAL_GATEWAY",
+      "entrypoint_policy": "qualification_id MUST EXIST IN CURRENT A01 REGISTRY",
+      "arbitrary_command_input": false,
+      "max_timeout_seconds": 18000,
+      "requires_exact_subject_sha": true,
+      "requires_current_policy_admission": true,
+      "promotion_inferred_from_execution": false
+    },
+    "AGENT-REGISTERED-TASK-001": {
+      "executor_kind": "AGENT_REGISTERED_TASK",
+      "runtime": "OPTIONAL_AGENT_WORKER",
+      "entrypoint_policy": "VERSIONED_TASK_CONTRACT_AND_TOOL_POLICY_ONLY",
+      "arbitrary_prompt_as_authority": false,
+      "max_timeout_seconds": 21600,
+      "requires_fencing_token": true,
+      "requires_idempotency_key": true,
+      "checkpoint_required": true,
+      "tool_policy_required": true,
+      "availability": "OPTIONAL_NOT_REQUIRED_FOR_V2_CONTROL_PLANE_CUTOVER"
+    }
+  },
+  "global_rules": [
+    "A blocked or absent executor keeps a delegation CANDIDATE, never falsely READY.",
+    "Executor registration grants mechanics only, not product ownership or higher-gate authority.",
+    "Every mutation-capable executor validates the current fencing token before effect and before terminal acknowledgement.",
+    "External dispatch APIs are treated as at-least-once/ambiguous unless the provider explicitly supplies an idempotency guarantee for the exact operation.",
+    "GitHub cron is a backup observation/alert trigger, not the primary supervisor clock."
+  ]
+}

@@ -1,0 +1,38 @@
+name: Second Shift Supervisor V2 A-01 Windows Stress
+
+on:
+  workflow_dispatch:
+    inputs:
+      subject_sha:
+        description: Exact Control Gateway subject SHA admitted for A-01 qualification
+        required: true
+        type: string
+      origin_ref:
+        description: Owning Control Gateway branch/ref
+        required: true
+        default: second-shift-control-gateway/cg-008-supervisor-integration
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  route-through-a01-control-plane:
+    name: Route exact Second Shift supervisor subject through registered A-01 admission
+    uses: ./.github/workflows/a01-control-plane-gateway.yml
+    with:
+      qualification_id: SECOND-SHIFT-SUPERVISOR-V2-A01-STRESS
+      workstream_id: SECOND-SHIFT-CONTROL-GATEWAY
+      subject_sha: ${{ inputs.subject_sha }}
+      origin_ref: ${{ inputs.origin_ref }}
+      resume_on_pass: 'Bind the exact A-01-qualified supervisor subject back into the Control Gateway qualification ledger; do not production-activate automatically.'
+      resume_on_failure: 'Preserve exact A-01 evidence, fail closed, repair the admitted supervisor boundary, and rerun the minimum sufficient qualification.'
+      notification_target: originating-workstream
+      execution_context: normal
+      qualifier_timeout_minutes: 28
+      job_timeout_minutes: 30
+      repair_attempt: 0
+      max_repair_attempts: 1
+      repair_transaction_id: ''
+    secrets: inherit

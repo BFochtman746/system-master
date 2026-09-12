@@ -1,0 +1,48 @@
+name: Second Shift Control Gateway CG-006 Host Qualification
+
+on:
+  push:
+    branches:
+      - second-shift-control-gateway/cg-006-chat-recovery
+    paths:
+      - 'control-gateway/**'
+      - '.github/workflows/second-shift-control-gateway-cg-006.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    name: Chat Crash Recovery / Node ${{ matrix.node }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [22, 24]
+    env:
+      CG006_LIVE_REF: control-gateway-state/active-work/second-shift-control-gateway-dev
+      CG006_EXPECTED_PUBLICATION_COMMIT: c3c29bb6b6d4ae325b0c52743b3fb611967ae808
+      CG006_EXPECTED_PACKET_DIGEST: 6728947361523faa60d06435efaf9a1ff301f81a0b85a6df4086880793aaa43b
+      CG006_EXPECTED_AUTHORITY_SUBJECT: 632848deb3045c80338246ccf9ea4163c61218a0
+      CG006_EXPECTED_WORK_REF: second-shift-control-gateway/cg-005-github-admission
+      CG006_EXPECTED_WORK_REF_HEAD: c30404321e5e4cd296539443b224930ce83afed6
+      CG006_EXPECTED_OPERATION: SECOND-SHIFT-CONTROL-GATEWAY-CG-006
+      CG006_EXPECTED_PREDECESSOR_RECEIPT: SECOND-SHIFT-CONTROL-GATEWAY-CG-005-HOST-QUALIFICATION-34668105764
+      CG006_GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout exact CG-006 subject
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: ${{ matrix.node }}
+          package-manager-cache: false
+      - name: Show runtime
+        run: node --version
+      - name: Run CG-003 through CG-006 qualification suite including live crash recovery
+        working-directory: control-gateway
+        run: node --test

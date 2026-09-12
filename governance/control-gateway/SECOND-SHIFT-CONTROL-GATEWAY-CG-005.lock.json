@@ -1,0 +1,42 @@
+{
+  "schema": "second-shift-control-gateway.cg005-freeze.v1",
+  "operation_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-005",
+  "status": "HOST_QUALIFIED_LIVE_DEV_GITHUB_ADMISSION_QUALIFIED_DEVELOPMENT_FROZEN",
+  "mission_version": "SECOND-SHIFT-CONTROL-GATEWAY-CG-001/v1.0",
+  "predecessor_freeze_sha": "76c63ca0d48e3691142cb02ffa37f9a4e6a1f005",
+  "qualified_implementation_sha": "632848deb3045c80338246ccf9ea4163c61218a0",
+  "qualification_run_id": 34668105764,
+  "host_qualification": {
+    "node_22": {"tests": 90, "pass": 89, "fail": 0, "skipped": 1},
+    "node_24": {"tests": 90, "pass": 89, "fail": 0, "skipped": 1},
+    "live_github_admission": "PASS"
+  },
+  "development_state": {
+    "ref": "control-gateway-state/active-work/second-shift-control-gateway-dev",
+    "head_commit_sha": "c3c29bb6b6d4ae325b0c52743b3fb611967ae808",
+    "publication_revision": 3,
+    "packet_digest": "6728947361523faa60d06435efaf9a1ff301f81a0b85a6df4086880793aaa43b",
+    "publication_digest": "59c20f05d27ca84e7bc0298040c31f6eb50596e2ba248473d3f99883ce6083d6",
+    "head_and_revision_blob_sha": "dbf203de3b9b8fd00f487a1a0f8b7bbaa5347d47",
+    "production": false
+  },
+  "frozen_invariants": [
+    "CHAT_MEMORY_IS_NOT_GITHUB_MUTATION_AUTHORITY",
+    "MUTATION_ADMISSION_CONSUMES_VERIFIED_DURABLE_PUBLICATION_STATE",
+    "REQUEST_AND_TRANSPORT_REPOSITORY_MUST_EQUAL_DURABLE_AUTHORITY",
+    "TARGET_KIND_AND_REF_MUST_MATCH_DURABLE_AUTHORITY",
+    "REQUESTED_PATHS_AND_EFFECTS_MUST_BE_WITHIN_DURABLE_SCOPE",
+    "EVERY_GRANT_BINDS_EXACT_LIVE_PREDECESSOR_SHA",
+    "REQUEST_MUST_BIND_EXACT_LEGAL_OPERATION_AND_PREDECESSOR_RECEIPT",
+    "QUALIFICATION_AND_GITHUB_STANDING_MUST_PERMIT_MUTATION",
+    "AUTHORITY_AND_TARGET_REF_MUST_REMAIN_STABLE_DURING_ADMISSION",
+    "ADMISSION_RECEIPT_IS_CONTENT_DIGESTED_AND_REQUEST_BOUND",
+    "GRANT_BECOMES_STALE_WHEN_AUTHORITY_OR_TARGET_PREDECESSOR_MOVES",
+    "EXECUTOR_MUST_ENFORCE_EXACT_PREDECESSOR_CAS_AT_EFFECT_BOUNDARY",
+    "AUTHORITY_STATE_PUBLICATION_USES_DEDICATED_TARGET_KIND_EFFECT_AND_RESERVED_PATHS",
+    "ADMISSION_IS_NOT_PRODUCTION_ACTIVATION"
+  ],
+  "known_a01_blocker": ".github/workflows/second-shift-supervisor-v2-a01-windows-stress.yml is rejected as DIRECT_SELF_HOSTED_WORKFLOW_NOT_REGISTERED and must later route through .github/workflows/a01-control-plane-gateway.yml",
+  "next_legal_operation": "SECOND-SHIFT-CONTROL-GATEWAY-CG-006 — CHAT CRASH / RESTART / CONTINUE RECOVERY GATE + HOST QUALIFICATION",
+  "production_activation": false
+}

@@ -1,0 +1,35 @@
+name: Second Shift Controller Reliability Stress
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - reliability/second-shift-controller-v2-20260911
+    paths:
+      - 'tests/second-shift-execution-control-contract.test.js'
+      - '.github/scripts/second-shift-enforce.js'
+      - 'governance/second-shift/**'
+      - '.github/workflows/second-shift-controller-reliability-stress.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: second-shift-controller-reliability-stress-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  contract-stress:
+    name: Fault-inject execution-control invariants
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact stress subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Record runtime
+        run: node --version
+      - name: Run production-validator contract stress
+        run: node tests/second-shift-execution-control-contract.test.js

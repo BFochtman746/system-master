@@ -1,0 +1,86 @@
+name: GITHUB-A01 Controller Reconciliation 001B — Hosted then A-01 Exact-SHA Proving
+
+on:
+  push:
+    branches:
+      - github-a01-controller-forensic-reconciliation-001b-20260912
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  portable-cumulative:
+    name: 001B portable cumulative controller gate / Node ${{ matrix.node }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [22, 24]
+    steps:
+      - name: Checkout exact 001B candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: ${{ matrix.node }}
+          package-manager-cache: false
+      - name: Verify exact candidate and bootstrap contracts
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          node -e "JSON.parse(require('fs').readFileSync('governance/control-gateway/GITHUB-A01-CONTROLLER-FORENSIC-RECONCILIATION-001A-BOOTSTRAP-ADMISSION.json','utf8')); JSON.parse(require('fs').readFileSync('governance/control-gateway/GITHUB-A01-CONTROLLER-FORENSIC-RECONCILIATION-001A-CANONICAL-PORT-MANIFEST.json','utf8')); console.log('001A_BOOTSTRAP_JSON=PASS')"
+          node .github/scripts/validate-system-topology.js
+      - name: Run cumulative CG-008 through CG-011 qualification
+        shell: bash
+        env:
+          A01_SUBJECT_SHA: ${{ github.sha }}
+          A01_SUBJECT_ROOT: ${{ github.workspace }}
+          A01_EVIDENCE_DIR: ${{ runner.temp }}/controller-001b-portable-${{ matrix.node }}
+          A01_QUALIFICATION_ID: SECOND-SHIFT-SUPERVISOR-V2-A01-STRESS
+          A01_WORKSTREAM_ID: SECOND-SHIFT-CONTROL-GATEWAY
+        run: node .github/scripts/a01-second-shift-supervisor-v2-qualify.js
+
+  independent-adversarial:
+    name: 001B independent controller adversarial closure
+    needs: portable-cumulative
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact 001B candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Set up Node 24
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Attack restart, dispatch and authority invariants
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          python tests/test_control_gateway_cg011_adversarial_closure.py
+          python tests/test_control_gateway_cg011_dispatch_failure_replay.py
+
+  a01-windows-cumulative:
+    name: 001B exact-subject A-01 Windows cumulative qualification
+    needs: [portable-cumulative, independent-adversarial]
+    uses: ./.github/workflows/a01-control-plane-gateway.yml
+    with:
+      qualification_id: SECOND-SHIFT-SUPERVISOR-V2-A01-STRESS
+      workstream_id: SECOND-SHIFT-CONTROL-GATEWAY
+      subject_sha: ${{ github.sha }}
+      origin_ref: refs/heads/github-a01-controller-forensic-reconciliation-001b-20260912
+      resume_on_pass: Freeze 001B only after exact hosted and A-01 PASS evidence is bound to this main-derived controller candidate; do not production-activate or start CG-012.
+      resume_on_failure: Keep 001A frozen, mark 001B candidate blocked, repair only the exact failing reconciliation boundary, and rerun hosted then A-01 on the replacement exact SHA.
+      notification_target: workstream:SECOND-SHIFT-CONTROL-GATEWAY
+      execution_context: normal
+      qualifier_timeout_minutes: 28
+      job_timeout_minutes: 30
+      repair_attempt: 0
+      max_repair_attempts: 1

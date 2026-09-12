@@ -1,0 +1,37 @@
+{
+  "schema": "control-gateway.cg007-contract-registry.v1",
+  "mission_version": "SECOND-SHIFT-CONTROL-GATEWAY-CG-001/v1.0",
+  "successor_ref": {
+    "request_protocol": "control-gateway.successor-ref-request.v1",
+    "admission_protocol": "control-gateway.successor-ref-admission.v1",
+    "execution_protocol": "control-gateway.successor-ref-execution.v1",
+    "effect": "CONTROL_GATEWAY_SUCCESSOR_REF_CREATE",
+    "executor_requirement": "CREATE_REF_IF_ABSENT_AT_EXACT_BASE_SHA",
+    "target_prefix": "second-shift-control-gateway/<cg-nnn>-",
+    "base_authority": "RECOVERED_GOVERNANCE_FREEZE_HEAD",
+    "existing_target_policy": "FAIL_CLOSED",
+    "ambiguous_create_policy": "REREAD_AND_ACCEPT_ONLY_EXACT_ADMITTED_BASE"
+  },
+  "validator": {
+    "request_protocol": "control-gateway.validator-request.v1",
+    "receipt_protocol": "control-gateway.validator-receipt.v1",
+    "families": ["CODE", "ROUTING", "SCHEMA", "CONTRACT", "DEPENDENCY"],
+    "artifact_kind_minimums": {
+      "CODE": ["CODE"],
+      "WORKFLOW": ["CODE", "ROUTING"],
+      "SCHEMA": ["SCHEMA", "CONTRACT"],
+      "CONTRACT": ["CONTRACT"],
+      "DEPENDENCY": ["DEPENDENCY"],
+      "GOVERNANCE": ["DEPENDENCY"]
+    },
+    "route_ownership": {
+      "GITHUB_MUTATION": {"control_authority": "CONTROL_GATEWAY", "execution_owner": "GITHUB", "scheduler_owner": "NONE"},
+      "A01_EXECUTION": {"control_authority": "CONTROL_GATEWAY", "execution_owner": "A01_SUPERVISOR", "scheduler_owner": "A01_SUPERVISOR"},
+      "HOST_QUALIFICATION": {"control_authority": "CONTROL_GATEWAY", "execution_owner": "GITHUB_ACTIONS", "scheduler_owner": "GITHUB_ACTIONS"}
+    },
+    "schema_policy": {"strict": true, "unknown_fields": "REJECT", "validation": "PASS"},
+    "contract_policy": {"compatibility": "PASS", "schema_references_must_exist": true, "route_references_must_exist": true},
+    "dependency_policy": {"durable_receipt_required": true, "receipt_outcome": "SUCCEEDED", "satisfies_dependency": true},
+    "authority_movement_policy": "FAIL_CLOSED"
+  }
+}

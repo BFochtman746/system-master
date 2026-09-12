@@ -1,0 +1,63 @@
+name: Second Shift Control Gateway CG-009 Host Qualification
+
+on:
+  push:
+    branches:
+      - second-shift-control-gateway/cg-009-dependency-concurrency-cancellation
+    paths:
+      - 'control-gateway/**'
+      - '.github/workflows/second-shift-control-gateway-cg-009.yml'
+      - 'tools/second_shift_supervisor_v2.py'
+      - 'tests/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  qualify:
+    name: Dependency DAG / Concurrency / Cancellation / Node ${{ matrix.node }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [22, 24]
+    env:
+      CG009_LIVE_REF: control-gateway-state/active-work/second-shift-control-gateway-dev
+      CG009_EXPECTED_PUBLICATION_COMMIT: e10d8b93eb601c6f91807de7332eb15ef0ab4788
+      CG009_EXPECTED_PACKET_DIGEST: f535063c9c7287adc842fd12388d954f86470cb4670965e4f20dcdf79eb7b567
+      CG009_EXPECTED_AUTHORITY_SUBJECT: 8a74194a37e81ae979f92ecbb0c55fbc371b4fc2
+      CG009_EXPECTED_WORK_REF: second-shift-control-gateway/cg-009-dependency-concurrency-cancellation
+      CG009_EXPECTED_OPERATION: SECOND-SHIFT-CONTROL-GATEWAY-CG-009
+      CG009_EXPECTED_PREDECESSOR_RECEIPT: SECOND-SHIFT-CONTROL-GATEWAY-CG-008-HOST-QUALIFICATION-34671167418
+      CG009_GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout exact CG-009 subject
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: ${{ matrix.node }}
+          package-manager-cache: false
+      - name: Show runtimes
+        run: |
+          node --version
+          python --version
+      - name: Validate A-01 control plane remains intact
+        run: node .github/scripts/a01-control-plane.js validate
+      - name: Run Control Gateway tests including live CG-009 authority
+        working-directory: control-gateway
+        run: node --test
+      - name: Compile coordination Python
+        run: |
+          python -m py_compile tools/second_shift_supervisor_v2.py control-gateway/python/a01_supervisor_adapter.py control-gateway/python/a01_supervisor_coordination.py tests/test_control_gateway_a01_supervisor_adapter.py tests/test_control_gateway_a01_supervisor_coordination.py tests/test_second_shift_supervisor_v2.py tests/run_second_shift_supervisor_v2_optimized.py
+      - name: Run CG-008 handoff regression tests
+        run: python tests/test_control_gateway_a01_supervisor_adapter.py
+      - name: Run CG-009 dependency concurrency cancellation tests
+        run: python tests/test_control_gateway_a01_supervisor_coordination.py
+      - name: Run preserved supervisor crash and concurrency stress
+        run: python tests/run_second_shift_supervisor_v2_optimized.py
