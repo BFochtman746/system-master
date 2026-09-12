@@ -361,26 +361,65 @@ class SupervisorStore:
             c.execute("UPDATE dispatch_outbox SET state='DISPATCHED',external_run_id=?,attempt=attempt+1,updated_at=? WHERE dispatch_id=?", (external_run_id, iso(now), dispatch_id))
             self._event(c, row["lane"], "DISPATCHED", now, delegation_id=claim["delegation_id"], objective_id=claim["objective_id"], lease_id=claim["lease_id"], dispatch_id=dispatch_id, idempotency_key=claim["idempotency_key"], fencing_token=claim["fencing_token"], control_head=claim["control_head"], payload={"external_run_id": external_run_id})
 
-    def dispatch_failed(self, dispatch_id: str, error_text: str, retry_budget: int = 3, now: Optional[dt.datetime] = None) -> dict[str, Any]:
+    def dispatch_failed(
+        self,
+        dispatch_id: str,
+        error_text: str,
+        retry_budget: int = 3,
+        now: Optional[dt.datetime] = None,
+        failure_id: Optional[str] = None,
+    ) -> dict[str, Any]:
         now = now or utcnow()
         if retry_budget < 1 or retry_budget > 3:
             raise ValueError("retry_budget must be 1..3")
+        if failure_id is None or not str(failure_id).strip():
+            raise ValueError("failure_id is required for idempotent dispatch failure handling")
+        failure_id = str(failure_id)
         with self.tx() as c:
             row = c.execute("SELECT * FROM dispatch_outbox WHERE dispatch_id=?", (dispatch_id,)).fetchone()
             if not row:
                 raise Conflict("unknown dispatch id")
+
+            # Failure callbacks are delivered at least once. The append-only event
+            # ledger is the durable deduplication record so an exact replay after a
+            # process restart returns the already-recorded outcome without spending
+            # another retry or opening the circuit early.
+            prior_events = c.execute(
+                "SELECT dispatch_id,event_type,payload_json FROM events "
+                "WHERE event_type IN ('RETRY','CIRCUIT_OPEN') ORDER BY seq"
+            ).fetchall()
+            for event in prior_events:
+                payload = json.loads(event["payload_json"] or "{}")
+                if payload.get("failure_id") != failure_id:
+                    continue
+                if event["dispatch_id"] != dispatch_id:
+                    raise Conflict("failure id collision across dispatch identities")
+                same_failure = (
+                    payload.get("error") == error_text
+                    and int(payload.get("retry_budget", -1)) == retry_budget
+                )
+                if not same_failure:
+                    raise Conflict("failure id collision across dispatch failure identities")
+                state = "CIRCUIT_OPEN" if event["event_type"] == "CIRCUIT_OPEN" else "RETRY_WAIT"
+                next_at = payload.get("next_probe_at") or payload.get("next_attempt_at")
+                return {
+                    "state": state,
+                    "attempt": int(payload["attempt"]),
+                    "next_attempt_at": next_at,
+                }
+
             attempt = int(row["attempt"]) + 1
             if attempt >= retry_budget:
                 state = "CIRCUIT_OPEN"
                 next_at = now + dt.timedelta(minutes=5)
                 c.execute("UPDATE dispatch_outbox SET state=?,attempt=?,last_error=?,next_attempt_at=?,updated_at=? WHERE dispatch_id=?", (state, attempt, error_text, iso(next_at), iso(now), dispatch_id))
                 c.execute("INSERT INTO circuits(dependency_key,lane,state,failure_count,retry_budget,opened_at,next_probe_at,updated_at) VALUES(?,?,?,?,?,?,?,?) ON CONFLICT(dependency_key) DO UPDATE SET state=excluded.state,failure_count=excluded.failure_count,retry_budget=excluded.retry_budget,opened_at=excluded.opened_at,next_probe_at=excluded.next_probe_at,updated_at=excluded.updated_at", (f"dispatch:{dispatch_id}", row["lane"], "OPEN", attempt, retry_budget, iso(now), iso(next_at), iso(now)))
-                self._event(c, row["lane"], "CIRCUIT_OPEN", now, dispatch_id=dispatch_id, idempotency_key=row["idempotency_key"], fencing_token=row["fencing_token"], payload={"failure_class": "DISPATCH_FAILURE", "attempt": attempt, "retry_budget": retry_budget, "next_probe_at": iso(next_at), "error": error_text})
+                self._event(c, row["lane"], "CIRCUIT_OPEN", now, dispatch_id=dispatch_id, idempotency_key=row["idempotency_key"], fencing_token=row["fencing_token"], payload={"failure_class": "DISPATCH_FAILURE", "failure_id": failure_id, "attempt": attempt, "retry_budget": retry_budget, "next_probe_at": iso(next_at), "error": error_text})
             else:
                 state = "RETRY_WAIT"
                 next_at = now + dt.timedelta(seconds=min(60, 2 ** attempt * 5))
                 c.execute("UPDATE dispatch_outbox SET state=?,attempt=?,last_error=?,next_attempt_at=?,updated_at=? WHERE dispatch_id=?", (state, attempt, error_text, iso(next_at), iso(now), dispatch_id))
-                self._event(c, row["lane"], "RETRY", now, dispatch_id=dispatch_id, idempotency_key=row["idempotency_key"], fencing_token=row["fencing_token"], payload={"failure_class": "DISPATCH_FAILURE", "attempt": attempt, "retry_budget": retry_budget, "next_attempt_at": iso(next_at), "error": error_text})
+                self._event(c, row["lane"], "RETRY", now, dispatch_id=dispatch_id, idempotency_key=row["idempotency_key"], fencing_token=row["fencing_token"], payload={"failure_class": "DISPATCH_FAILURE", "failure_id": failure_id, "attempt": attempt, "retry_budget": retry_budget, "next_attempt_at": iso(next_at), "error": error_text})
             return {"state": state, "attempt": attempt, "next_attempt_at": iso(next_at)}
 
     def heartbeat(self, lease_id: str, fencing_token: int, checkpoint_pointer: str, now: Optional[dt.datetime] = None) -> None:
