@@ -1,0 +1,138 @@
+name: CG011 One Shot Stale Failure Guard
+
+on:
+  push:
+    branches:
+      - second-shift-control-gateway/cg-011-failure-restart-idempotency
+    paths:
+      - '.github/workflows/cg011-one-shot-stale-failure-guard.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+      - name: Apply fail-closed stale failure callback repair and regressions
+        shell: bash
+        run: |
+          python <<'PY'
+          from pathlib import Path
+
+          tool = Path('tools/second_shift_supervisor_v2.py')
+          text = tool.read_text(encoding='utf-8')
+          needle = '''                return {
+                    "state": state,
+                    "attempt": int(payload["attempt"]),
+                    "next_attempt_at": next_at,
+                }
+
+            attempt = int(row["attempt"]) + 1
+'''
+          replacement = '''                return {
+                    "state": state,
+                    "attempt": int(payload["attempt"]),
+                    "next_attempt_at": next_at,
+                }
+
+            # A new failure callback is valid only while this dispatch is still
+            # locally retryable and no external run has been acknowledged. A late
+            # unique failure after DISPATCHED/CANCELLED/CANCEL_REQUESTED/CIRCUIT_OPEN
+            # must never resurrect the outbox or spend another retry.
+            if row["external_run_id"] is not None or row["state"] not in ("PENDING", "RETRY_WAIT"):
+                raise Conflict("dispatch failure callback is stale for non-retryable dispatch state")
+
+            attempt = int(row["attempt"]) + 1
+'''
+          if text.count(needle) != 1:
+              raise SystemExit('dispatch_failed insertion point not uniquely found; refusing repair')
+          tool.write_text(text.replace(needle, replacement), encoding='utf-8')
+
+          test = Path('tests/test_control_gateway_cg011_dispatch_failure_replay.py')
+          t = test.read_text(encoding='utf-8')
+          marker = '\n\nif __name__ == "__main__":\n'
+          if t.count(marker) != 1:
+              raise SystemExit('test insertion point not uniquely found; refusing repair')
+          addition = r'''
+
+    def test_new_failure_after_external_dispatch_ack_fails_closed_without_reopening(self):
+        self.store.mark_dispatched(
+            self.claim["dispatch_id"],
+            "RUN-1",
+            now=IN_SHIFT + dt.timedelta(seconds=1),
+        )
+        with self.assertRaisesRegex(Conflict, "non-retryable"):
+            self.store.dispatch_failed(
+                self.claim["dispatch_id"],
+                "late transport timeout",
+                retry_budget=3,
+                now=IN_SHIFT + dt.timedelta(seconds=2),
+                failure_id="LATE-FAILURE-AFTER-DISPATCH",
+            )
+        row = self.store.conn.execute(
+            "SELECT state,attempt,external_run_id FROM dispatch_outbox WHERE dispatch_id=?",
+            (self.claim["dispatch_id"],),
+        ).fetchone()
+        self.assertEqual((row["state"], row["attempt"], row["external_run_id"]), ("DISPATCHED", 1, "RUN-1"))
+        self.assertEqual(self.store.pending_dispatches(IN_SHIFT + dt.timedelta(hours=1)), [])
+
+    def test_new_failure_after_cancelled_dispatch_fails_closed_without_resurrection(self):
+        self.scheduler.request_cancel("D-A", "operator cancel", now=IN_SHIFT + dt.timedelta(seconds=1))
+        row = self.store.conn.execute(
+            "SELECT state FROM dispatch_outbox WHERE dispatch_id=?", (self.claim["dispatch_id"],)
+        ).fetchone()
+        self.assertEqual(row["state"], "CANCELLED")
+        with self.assertRaisesRegex(Conflict, "non-retryable"):
+            self.store.dispatch_failed(
+                self.claim["dispatch_id"],
+                "late transport timeout",
+                retry_budget=3,
+                now=IN_SHIFT + dt.timedelta(seconds=2),
+                failure_id="LATE-FAILURE-AFTER-CANCEL",
+            )
+        row = self.store.conn.execute(
+            "SELECT state,attempt FROM dispatch_outbox WHERE dispatch_id=?", (self.claim["dispatch_id"],)
+        ).fetchone()
+        self.assertEqual((row["state"], row["attempt"]), ("CANCELLED", 0))
+        self.assertEqual(self.store.pending_dispatches(IN_SHIFT + dt.timedelta(hours=1)), [])
+
+    def test_new_failure_after_circuit_open_cannot_spend_beyond_budget(self):
+        for index, seconds in enumerate((1, 20, 40), start=1):
+            self.store.dispatch_failed(
+                self.claim["dispatch_id"],
+                "transport timeout",
+                retry_budget=3,
+                now=IN_SHIFT + dt.timedelta(seconds=seconds),
+                failure_id=f"CIRCUIT-FAILURE-{index}",
+            )
+        with self.assertRaisesRegex(Conflict, "non-retryable"):
+            self.store.dispatch_failed(
+                self.claim["dispatch_id"],
+                "another late failure",
+                retry_budget=3,
+                now=IN_SHIFT + dt.timedelta(minutes=10),
+                failure_id="CIRCUIT-FAILURE-4",
+            )
+        row = self.store.conn.execute(
+            "SELECT state,attempt FROM dispatch_outbox WHERE dispatch_id=?", (self.claim["dispatch_id"],)
+        ).fetchone()
+        self.assertEqual((row["state"], row["attempt"]), ("CIRCUIT_OPEN", 3))
+'''
+          test.write_text(t.replace(marker, addition + marker), encoding='utf-8')
+          PY
+          rm .github/workflows/cg011-one-shot-stale-failure-guard.yml
+          git diff --check
+          git status --short
+      - name: Commit repaired exact subject
+        shell: bash
+        run: |
+          git config user.name 'BFochtman746'
+          git config user.email '85698619+BFochtman746@users.noreply.github.com'
+          git add -A
+          git commit -m 'CG-011 repair: reject stale failure callbacks after final dispatch state'
+          git push origin HEAD:second-shift-control-gateway/cg-011-failure-restart-idempotency
