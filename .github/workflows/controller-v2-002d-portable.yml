@@ -1,0 +1,28 @@
+name: Controller V2 002D Portable Qualification
+
+on:
+  pull_request:
+    branches:
+      - controller-v2/foundation-002c-c1
+    paths:
+      - 'controller-v2/**'
+      - '.github/workflows/controller-v2-002d-portable.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify-002d:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@v4
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+      - name: Run Controller V2 cumulative test suite
+        working-directory: controller-v2
+        run: npm test
