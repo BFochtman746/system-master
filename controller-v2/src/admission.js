@@ -132,12 +132,14 @@ export function buildAuthorizationRequest(kernel, transactionId, ownerFacts = {}
 }
 
 function validateDecisionId(value, profile) {
-  if (typeof profile.validateDecisionId === 'function') {
-    if (profile.validateDecisionId(value) !== true) throw admissionError('POLICY_DECISION_INVALID', 'decision id rejected by profile');
-    return value;
-  }
   if (isUuidV7(value)) return value;
-  return boundedToken(value);
+  if (typeof profile.validateDecisionId === 'function') {
+    let accepted = false;
+    try { accepted = profile.validateDecisionId(value) === true; }
+    catch { accepted = false; }
+    if (accepted) return boundedToken(value);
+  }
+  throw admissionError('POLICY_DECISION_INVALID', 'decision id must be UUIDv7 or explicitly accepted by adapter profile');
 }
 
 export function validatePolicyDecisionCandidate(candidate, request, inputDigest, profile = {}, nowMs = Date.now()) {
