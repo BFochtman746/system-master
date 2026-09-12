@@ -62,7 +62,7 @@ jobs:
           set -euo pipefail
           B='transport/document-r4-bridge-005'
           rm -rf /tmp/r4-current recovered/document/cr001-r4
-          mkdir -p /tmp/r4-current/chunks
+          mkdir -p /tmp/r4-current/chunks recovered/document
           cp "$B"/chunk-*.b64 /tmp/r4-current/chunks/
           python3 "$B/verify_and_extract_transport.py" \
             --contract "$B/TRANSPORT-CONTRACT.json" \
