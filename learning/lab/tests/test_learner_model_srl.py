@@ -1,5 +1,4 @@
 import os
-import sqlite3
 import tempfile
 import unittest
 
@@ -11,6 +10,10 @@ from learning_lab.learner_model import (
     self_regulation_history,
 )
 from learning_lab.repository import Repository
+
+
+LEARNING_OWNER = "SYSTEM_MASTER/LEARNING::MOD-LEARNING-001"
+CURRICULUM_OWNER = "SYSTEM_MASTER/LEARNING::MOD-CURRICULUM-001"
 
 
 class LearnerModelSRLRuntimeTests(unittest.TestCase):
@@ -35,10 +38,38 @@ class LearnerModelSRLRuntimeTests(unittest.TestCase):
             **kwargs,
         )
 
+    def claim(
+        self,
+        claim_type="mastery",
+        standing="DERIVED",
+        value="BUILDING",
+        source_ref="learning:1",
+        source_owner=LEARNING_OWNER,
+        as_of=90,
+        **kwargs,
+    ):
+        result = {
+            "claim_type": claim_type,
+            "standing": standing,
+            "value": value,
+            "source_owner": source_owner,
+            "source_refs": [source_ref],
+            "source_versions": {source_ref: "v1"},
+            "as_of": as_of,
+            "policy_version": "policy-v1",
+            "uncertainty": {"standing": "BOUNDED"},
+            "evidence_coverage": {"standing": "PARTIAL"},
+            "freshness": "CURRENT",
+            "limitations": ["bounded test claim"],
+        }
+        result.update(kwargs)
+        return result
+
     def counts(self):
         with self.repo.connect() as con:
             return {
                 "srl": int(con.execute("SELECT COUNT(*) FROM objects WHERE kind='LRN-E028'").fetchone()[0]),
+                "learner_model_objects": int(con.execute("SELECT COUNT(*) FROM objects WHERE kind='LRN-E027'").fetchone()[0]),
                 "operations": int(con.execute("SELECT COUNT(*) FROM operations").fetchone()[0]),
                 "attempts": int(con.execute("SELECT COUNT(*) FROM attempts").fetchone()[0]),
                 "projections": int(con.execute("SELECT COUNT(*) FROM projections").fetchone()[0]),
@@ -64,6 +95,50 @@ class LearnerModelSRLRuntimeTests(unittest.TestCase):
             source_type="LEARNER_DECLARED",
         )
         self.assertEqual("BOUNDED_DECLARED_CONTEXT", result["observation_kind"])
+
+    def test_bounded_context_full_family_allowed(self):
+        keys = [
+            "MOTIVATION", "EFFORT", "TASK_VALUE", "CONFUSION",
+            "HELP_PREFERENCE", "READINESS_TO_TRY_INDEPENDENTLY", "STRATEGY_PREFERENCE",
+        ]
+        for index, key in enumerate(keys):
+            self.record(
+                operation_id=f"ctx-{index}",
+                kind="BOUNDED_DECLARED_CONTEXT",
+                value={"declared": index},
+                context={"context_key": key},
+            )
+        self.assertEqual(len(keys), self.counts()["srl"])
+
+    def test_learner_confirmed_declared_context_is_explicit(self):
+        self.record(
+            kind="BOUNDED_DECLARED_CONTEXT",
+            value="prefer examples",
+            context={"context_key": "STRATEGY_PREFERENCE"},
+            source_type="LEARNER_CONFIRMED",
+        )
+        body = self.service.get_self_regulation_history("learner-1")[0]
+        self.assertEqual("LEARNER_CONFIRMED", body["declaration_standing"])
+
+    def test_human_declared_context_cannot_impersonate_learner_declaration(self):
+        with self.assertRaises(LearnerModelPolicyError):
+            self.record(
+                kind="BOUNDED_DECLARED_CONTEXT",
+                value="x",
+                context={"context_key": "CONFUSION"},
+                source_type="AUTHORIZED_HUMAN_DECLARED",
+            )
+        self.assertEqual(0, self.counts()["srl"])
+
+    def test_model_extracted_unconfirmed_context_rejected(self):
+        with self.assertRaises(LearnerModelPolicyError):
+            self.record(
+                kind="BOUNDED_DECLARED_CONTEXT",
+                value="x",
+                context={"context_key": "CONFUSION"},
+                source_type="MODEL_EXTRACTED_UNCONFIRMED",
+            )
+        self.assertEqual(0, self.counts()["srl"])
 
     def test_invalid_kind_fails_without_persistence(self):
         with self.assertRaisesRegex(LearnerModelPolicyError, "SRL_OBSERVATION_KIND_NOT_ALLOWED"):
@@ -91,17 +166,17 @@ class LearnerModelSRLRuntimeTests(unittest.TestCase):
     def test_observation_is_immutable_after_commit(self):
         result = self.record()
         with self.repo.connect() as con:
-            body_before = con.execute(
+            before = con.execute(
                 "SELECT body FROM objects WHERE kind='LRN-E028' AND object_id=?",
                 (result["observation_id"],),
             ).fetchone()[0]
         self.record(operation_id="op-2", kind="MONITOR", value="new")
         with self.repo.connect() as con:
-            body_after = con.execute(
+            after = con.execute(
                 "SELECT body FROM objects WHERE kind='LRN-E028' AND object_id=?",
                 (result["observation_id"],),
             ).fetchone()[0]
-        self.assertEqual(body_before, body_after)
+        self.assertEqual(before, after)
 
     def test_correction_appends_successor_and_preserves_prior(self):
         first = self.record(operation_id="first", value="strategy A")
@@ -155,6 +230,7 @@ class LearnerModelSRLRuntimeTests(unittest.TestCase):
         after = self.counts()
         self.assertEqual(before["attempts"], after["attempts"])
         self.assertEqual(before["projections"], after["projections"])
+        self.assertEqual(before["learner_model_objects"], after["learner_model_objects"])
 
     def test_forbidden_model_inference_source_rejected(self):
         with self.assertRaisesRegex(LearnerModelPolicyError, "UNAUTHORIZED_OR_INFERRED_CONTEXT_SOURCE"):
@@ -193,79 +269,87 @@ class LearnerModelSRLRuntimeTests(unittest.TestCase):
 
     def test_valid_claim_standing_and_source_preserved(self):
         projection = self.service.get_learner_model_projection(
-            learner_id="learner-1",
-            source_claims=[{"claim_type":"mastery","standing":"DERIVED","value":"BUILDING","source_refs":["m:1"]}],
-            as_of=10,
+            learner_id="learner-1", source_claims=[self.claim()], as_of=100
         )
         mastery = next(c for c in projection["claims"] if c["claim_type"] == "mastery")
         self.assertEqual("DERIVED", mastery["standing"])
-        self.assertEqual(["m:1"], mastery["source_refs"])
+        self.assertEqual(["learning:1"], mastery["source_refs"])
+        self.assertEqual({"learning:1": "v1"}, mastery["source_versions"])
+        self.assertEqual(LEARNING_OWNER, mastery["source_owner"])
+
+    def test_meaningful_claim_requires_source_refs(self):
+        claim = self.claim()
+        claim["source_refs"] = []
+        claim["source_versions"] = {}
+        with self.assertRaisesRegex(LearnerModelPolicyError, "SOURCE_REFS_REQUIRED"):
+            self.service.get_learner_model_projection(learner_id="learner-1", source_claims=[claim], as_of=100)
+
+    def test_meaningful_claim_requires_owner_valid_source(self):
+        claim = self.claim(source_owner="EXTERNAL_STANDARD/CASE")
+        with self.assertRaisesRegex(LearnerModelPolicyError, "SOURCE_OWNER_NOT_OWNER_VALID"):
+            self.service.get_learner_model_projection(learner_id="learner-1", source_claims=[claim], as_of=100)
+
+    def test_meaningful_claim_requires_source_version(self):
+        claim = self.claim()
+        claim["source_versions"] = {}
+        with self.assertRaisesRegex(LearnerModelPolicyError, "SOURCE_VERSION_MISSING"):
+            self.service.get_learner_model_projection(learner_id="learner-1", source_claims=[claim], as_of=100)
 
     def test_invalid_claim_standing_rejected(self):
+        claim = self.claim(standing="CERTAIN")
         with self.assertRaisesRegex(LearnerModelPolicyError, "CLAIM_STANDING_NOT_ALLOWED"):
-            self.service.get_learner_model_projection(
-                learner_id="learner-1",
-                source_claims=[{"claim_type":"mastery","standing":"CERTAIN","value":1,"source_refs":["x"]}],
-            )
+            self.service.get_learner_model_projection(learner_id="learner-1", source_claims=[claim], as_of=100)
 
     def test_confidence_self_report_does_not_become_mastery(self):
         self.record(kind="MONITOR", value={"confidence": 100})
-        projection = self.service.get_learner_model_projection(learner_id="learner-1", as_of=1)
+        projection = self.service.get_learner_model_projection(learner_id="learner-1", as_of=100)
         mastery = next(c for c in projection["claims"] if c["claim_type"] == "mastery")
         self.assertEqual("UNKNOWN", mastery["standing"])
         self.assertEqual("NONE", projection["self_regulation"]["mastery_effect"])
 
     def test_ai_assisted_independence_is_contradicted(self):
-        projection = self.service.get_learner_model_projection(
-            learner_id="learner-1",
-            source_claims=[{
-                "claim_type":"independence","standing":"OBSERVED","value":True,
-                "source_refs":["attempt:1"],"assistance_condition":"AI_ASSISTED"
-            }],
-            as_of=1,
+        claim = self.claim(
+            claim_type="independence", standing="OBSERVED", value=True,
+            source_ref="attempt:1", assistance_condition="AI_ASSISTED",
         )
-        claim = next(c for c in projection["claims"] if c["claim_type"] == "independence")
-        self.assertEqual("CONTRADICTED", claim["standing"])
-        self.assertIn("ASSISTANCE_INCOMPATIBLE_WITH_INDEPENDENCE", claim["reason_codes"])
+        projection = self.service.get_learner_model_projection(learner_id="learner-1", source_claims=[claim], as_of=100)
+        item = next(c for c in projection["claims"] if c["claim_type"] == "independence")
+        self.assertEqual("CONTRADICTED", item["standing"])
+        self.assertIn("ASSISTANCE_INCOMPATIBLE_WITH_INDEPENDENCE", item["reason_codes"])
 
     def test_conflicting_sources_remain_contradicted(self):
-        claims = [
-            {"claim_type":"mastery","standing":"DERIVED","value":"DEMONSTRATED","source_refs":["a"]},
-            {"claim_type":"mastery","standing":"OBSERVED","value":"INSUFFICIENT_EVIDENCE","source_refs":["b"]},
-        ]
-        projection = self.service.get_learner_model_projection(learner_id="learner-1", source_claims=claims, as_of=1)
+        a = self.claim(value="DEMONSTRATED", source_ref="mastery:a")
+        b = self.claim(value="INSUFFICIENT_EVIDENCE", source_ref="mastery:b")
+        projection = self.service.get_learner_model_projection(learner_id="learner-1", source_claims=[a, b], as_of=100)
         mastery = next(c for c in projection["claims"] if c["claim_type"] == "mastery")
         self.assertEqual("CONTRADICTED", mastery["standing"])
-        self.assertEqual(["a", "b"], mastery["source_refs"])
+        self.assertEqual(["mastery:a", "mastery:b"], mastery["source_refs"])
         self.assertEqual(2, len(mastery["variants"]))
 
     def test_stale_standing_preserved(self):
-        projection = self.service.get_learner_model_projection(
-            learner_id="learner-1",
-            source_claims=[{"claim_type":"retention","standing":"STALE","value":"RETAINED","source_refs":["r:1"]}],
-            as_of=1,
-        )
-        claim = next(c for c in projection["claims"] if c["claim_type"] == "retention")
-        self.assertEqual("STALE", claim["standing"])
+        claim = self.claim(claim_type="retention", standing="STALE", value="RETAINED", source_ref="retention:1")
+        projection = self.service.get_learner_model_projection(learner_id="learner-1", source_claims=[claim], as_of=100)
+        item = next(c for c in projection["claims"] if c["claim_type"] == "retention")
+        self.assertEqual("STALE", item["standing"])
 
     def test_same_inputs_are_deterministic(self):
-        claims = [{"claim_type":"mastery","standing":"DERIVED","value":"BUILDING","source_refs":["b","a"]}]
-        first = self.service.get_learner_model_projection(learner_id="learner-1", source_claims=claims, as_of=5)
-        second = self.service.get_learner_model_projection(learner_id="learner-1", source_claims=claims, as_of=5)
+        claims = [self.claim(source_ref="b"), self.claim(source_ref="a")]
+        first = self.service.get_learner_model_projection(learner_id="learner-1", source_claims=claims, as_of=100)
+        second = self.service.get_learner_model_projection(learner_id="learner-1", source_claims=claims, as_of=100)
         self.assertEqual(first, second)
 
     def test_source_order_does_not_change_projection(self):
-        a = {"claim_type":"mastery","standing":"DERIVED","value":"A","source_refs":["a"]}
-        b = {"claim_type":"mastery","standing":"DERIVED","value":"B","source_refs":["b"]}
-        first = self.service.get_learner_model_projection(learner_id="learner-1", source_claims=[a,b], as_of=5)
-        second = self.service.get_learner_model_projection(learner_id="learner-1", source_claims=[b,a], as_of=5)
+        a = self.claim(value="A", source_ref="a")
+        b = self.claim(value="B", source_ref="b")
+        first = self.service.get_learner_model_projection(learner_id="learner-1", source_claims=[a, b], as_of=100)
+        second = self.service.get_learner_model_projection(learner_id="learner-1", source_claims=[b, a], as_of=100)
         self.assertEqual(first, second)
 
     def test_projection_summarizes_srl_without_rewriting_history(self):
         first = self.record(operation_id="first", kind="PLAN", value="A")
         self.record(operation_id="second", kind="PLAN", value="B", supersedes_observation_id=first["observation_id"], observed_at=101)
         before = self.service.get_self_regulation_history("learner-1")
-        projection = self.service.get_learner_model_projection(learner_id="learner-1", as_of=5)
+        projection = self.service.get_learner_model_projection(learner_id="learner-1", as_of=101)
         after = self.service.get_self_regulation_history("learner-1")
         self.assertEqual(before, after)
         self.assertEqual(2, projection["self_regulation"]["history_count"])
@@ -275,12 +359,12 @@ class LearnerModelSRLRuntimeTests(unittest.TestCase):
         projection = self.service.get_learner_model_projection(learner_id="learner-1")
         self.assertFalse(projection["source_of_truth"])
         self.assertEqual("NONE", projection["write_authority"])
+        self.assertEqual("CONTENT_ADDRESSED_READ_ONLY", projection["projection_lifecycle"])
 
     def test_query_is_read_only_for_srl_attempts_and_mastery_projections(self):
         before = self.counts()
         self.service.get_learner_model_projection(learner_id="learner-1", as_of=1)
-        after = self.counts()
-        self.assertEqual(before, after)
+        self.assertEqual(before, self.counts())
 
     def test_repeated_query_does_not_persist_learner_model_object(self):
         self.service.get_learner_model_projection(learner_id="learner-1")
@@ -294,8 +378,9 @@ class LearnerModelSRLRuntimeTests(unittest.TestCase):
 
     def test_bounded_context_missing_is_not_negative_trait(self):
         projection = self.service.get_learner_model_projection(learner_id="learner-1")
-        self.assertNotIn("motivation", str(projection).lower())
-        self.assertNotIn("lazy", str(projection).lower())
+        rendered = str(projection).lower()
+        self.assertNotIn("lazy", rendered)
+        self.assertNotIn("personality", rendered)
 
     def test_failed_forbidden_context_does_not_consume_operation_identity(self):
         with self.assertRaises(LearnerModelPolicyError):
@@ -319,6 +404,83 @@ class LearnerModelSRLRuntimeTests(unittest.TestCase):
             )
         with self.assertRaisesRegex(ValueError, "OBJECT_DIGEST_MISMATCH"):
             self.service.get_self_regulation_history("learner-1")
+
+    def test_as_of_projection_excludes_future_srl_observation(self):
+        self.record(operation_id="early", kind="PLAN", value="early", observed_at=100)
+        self.record(operation_id="future", kind="MONITOR", value="future", observed_at=200)
+        projection = self.service.get_learner_model_projection(learner_id="learner-1", as_of=150)
+        self.assertEqual(1, projection["self_regulation"]["history_count"])
+        self.assertEqual(["PLAN"], projection["self_regulation"]["observed_kinds"])
+
+    def test_as_of_before_correction_keeps_prior_observation_active(self):
+        first = self.record(operation_id="early", kind="PLAN", value="A", observed_at=100)
+        self.record(
+            operation_id="correction", kind="PLAN", value="B", observed_at=200,
+            supersedes_observation_id=first["observation_id"],
+        )
+        projection = self.service.get_learner_model_projection(learner_id="learner-1", as_of=150)
+        latest = projection["self_regulation"]["latest_by_kind"]["PLAN"]
+        self.assertEqual(first["observation_id"], latest["observation_id"])
+        self.assertEqual("A", latest["value"])
+
+    def test_future_source_claim_excluded_by_projection_as_of(self):
+        future = self.claim(as_of=200, value="DEMONSTRATED")
+        projection = self.service.get_learner_model_projection(learner_id="learner-1", source_claims=[future], as_of=100)
+        mastery = next(c for c in projection["claims"] if c["claim_type"] == "mastery")
+        self.assertEqual("UNKNOWN", mastery["standing"])
+
+    def test_inferred_claim_requires_model_version(self):
+        claim = self.claim(standing="INFERRED")
+        claim.pop("model_version", None)
+        with self.assertRaisesRegex(LearnerModelPolicyError, "MODEL_VERSION_REQUIRED"):
+            self.service.get_learner_model_projection(learner_id="learner-1", source_claims=[claim], as_of=100)
+
+    def test_inferred_claim_requires_uncertainty(self):
+        claim = self.claim(standing="INFERRED", model_version="model-v1", uncertainty=None)
+        with self.assertRaisesRegex(LearnerModelPolicyError, "INFERRED_CLAIM_UNCERTAINTY_REQUIRED"):
+            self.service.get_learner_model_projection(learner_id="learner-1", source_claims=[claim], as_of=100)
+
+    def test_projected_claim_preserves_interpretation_metadata(self):
+        claim = self.claim(
+            source_ref="mastery:metadata",
+            evidence_cutoff={"through": 88},
+            evidence_coverage={"required": 4, "admitted": 3},
+            freshness={"standing": "CURRENT", "checked_at": 89},
+            limitations=["not transfer evidence", "assisted condition"],
+            assistance_condition="AI_ASSISTED",
+        )
+        projection = self.service.get_learner_model_projection(learner_id="learner-1", source_claims=[claim], as_of=100)
+        item = next(c for c in projection["claims"] if c["claim_type"] == "mastery")
+        self.assertEqual({"through": 88}, item["evidence_cutoff"])
+        self.assertEqual({"required": 4, "admitted": 3}, item["evidence_coverage"])
+        self.assertEqual({"standing": "CURRENT", "checked_at": 89}, item["freshness"])
+        self.assertEqual("AI_ASSISTED", item["assistance_condition"])
+        self.assertIn("not transfer evidence", item["limitations"])
+        self.assertEqual("policy-v1", item["policy_version"])
+
+    def test_psychological_claim_type_rejected(self):
+        claim = self.claim(claim_type="personality_profile")
+        with self.assertRaisesRegex(LearnerModelPolicyError, "CLAIM_TYPE_OUT_OF_LEARNING_SCOPE"):
+            self.service.get_learner_model_projection(learner_id="learner-1", source_claims=[claim], as_of=100)
+
+    def test_learner_reference_never_becomes_identity_authority(self):
+        observed = self.record()
+        projection = self.service.get_learner_model_projection(learner_id="learner-1", as_of=100)
+        self.assertEqual("EXTERNAL_REFERENCE_ONLY", observed["identity_authority"])
+        self.assertEqual("EXTERNAL_REFERENCE_ONLY", projection["identity_authority"])
+
+    def test_invalid_as_of_fails_closed(self):
+        with self.assertRaisesRegex(LearnerModelPolicyError, "AS_OF_MUST_BE_NONNEGATIVE_INTEGER"):
+            self.service.get_learner_model_projection(learner_id="learner-1", as_of=-1)
+
+    def test_curriculum_owner_may_supply_bounded_definition_claim(self):
+        claim = self.claim(
+            claim_type="goal_state", standing="OBSERVED", value="ACTIVE",
+            source_ref="curriculum:skill:1", source_owner=CURRICULUM_OWNER,
+        )
+        projection = self.service.get_learner_model_projection(learner_id="learner-1", source_claims=[claim], as_of=100)
+        item = next(c for c in projection["claims"] if c["claim_type"] == "goal_state")
+        self.assertEqual(CURRICULUM_OWNER, item["source_owner"])
 
 
 if __name__ == "__main__":
