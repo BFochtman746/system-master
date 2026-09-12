@@ -1,0 +1,100 @@
+{
+  "manifest_id": "LRN-OWNERSHIP-FREEZE-001B-R1-SOURCE-MANIFEST",
+  "effective_date": "2026-09-12",
+  "owner_path": "SYSTEM_MASTER/LEARNING",
+  "operation": "LRN-OWNERSHIP-FREEZE-001B-R1 — 110/110/26 SOURCE-IDENTITY RECOVERY + PRIOR-66 CROSSWALK",
+  "base_owner_ref": "learning/control-v1",
+  "base_owner_head": "e3196089f77dde376944a08eac78a697e57d1535",
+  "standing": "PARTIAL_SOURCE_RECOVERY__PRIOR_66_EXACT_IDENTITIES_RECOVERED__NEW_110_110_26_LEDGER_SOURCE_NOT_YET_LOCATED",
+  "recovered_sources": [
+    {
+      "role": "PRIOR_REQUIREMENT_IDENTITY_LEDGER",
+      "ref": "learning/full-graph-closure-20260910",
+      "path": "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-66-SOURCE-NODE-INDEX-001.json",
+      "blob_sha": "b0a21364ddd01f1e88e4574c2afafb29e3e4c0f2",
+      "artifact_digest_sha256": "af03a8ad3d49efb6f199e43b743648edf3d2e115dc004d582b9d8a26a5ccbf19",
+      "requirement_set_digest_sha256": "86a1baba495d2637ef4d889948befd2c87a9b87a377f04b892b06c5ec980a298",
+      "row_count": 66,
+      "schema": ["requirement_id", "source_code", "source_locator", "highest_cognitive_level", "title"],
+      "standing_for_001b": "EXACT_PRIOR_IDENTITIES_RECOVERED__CROSSWALK_INPUT_ONLY",
+      "notes": "All 66 prior frozen requirement IDs and source locators are durably available. They are not assumed to be identical to or a subset mapping of the new 110-row ownership corpus until the 110 source is recovered."
+    },
+    {
+      "role": "PRIOR_66_STRUCTURAL_CLOSURE",
+      "ref": "learning/full-graph-closure-20260910",
+      "path": "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001A-FULL-GRAPH-CLOSURE-CANDIDATE-024A.json",
+      "blob_sha": "f26e20e8e0147c42b4ad2d3b25f85719caae39b4",
+      "frozen_requirement_count": 66,
+      "requirement_set_digest_sha256": "86a1baba495d2637ef4d889948befd2c87a9b87a377f04b892b06c5ec980a298",
+      "standing_for_001b": "PRIOR_GRAPH_EVIDENCE__NO_PASS_TRANSFER"
+    },
+    {
+      "role": "PRIOR_DEPENDENCY_ADJUDICATION_CLOSURE",
+      "ref": "learning/dependency-adjudication-full-closure-20260910",
+      "path": "qualification/learning/LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001C-DEPENDENCY-EVIDENCE-ADJUDICATION-FULL-CLOSURE-CANDIDATE-055A.json",
+      "blob_sha": "b35b0fb63aa22c953196cca3c23a0c7a8039f636",
+      "prior_requirement_count": 66,
+      "prior_subskill_count": 66,
+      "prior_assessment_target_count": 66,
+      "unresolved_dependency_candidates": 46,
+      "rejected_as_hard_prerequisite": 38,
+      "retained_explicitly_noncanonical": 8,
+      "standing_for_001b": "ADJUDICATION_ARCHAEOLOGY__NO_PASS_TRANSFER"
+    },
+    {
+      "role": "OWNER_PRESERVING_SYSTEM_MASTER_INTERFACE_CONTRACT",
+      "ref": "b81ea732df0778e84e089379abac54a03747f82e",
+      "path": "governance/architecture/LEARNING-TO-SYSTEM-MASTER-INTERFACE-CONTRACT-001.json",
+      "blob_sha": "bad94e59a4829e0af56c267b79c839f00a2344db",
+      "known_command_count": 6,
+      "known_event_count": 3,
+      "standing_for_001b": "CONCRETE_INTERFACE_ARCHAEOLOGY__PROPOSED_NOT_PRODUCT_PASS",
+      "owner_boundary": {
+        "learning": "learner/curriculum/lesson-assessment/scoring/mastery-retention-transfer/Learning-evidence semantics",
+        "core": "transport/auth/idempotency/trace/artifact-reference/routing-presentation mechanics",
+        "system_master": "product orchestration/cross-system user-intent routing/integration admission/product completion"
+      }
+    }
+  ],
+  "source_recovery_findings": {
+    "prior_66_exact_requirement_identities_recovered": true,
+    "prior_66_source_locators_recovered": true,
+    "prior_requirement_set_digest_recovered": true,
+    "prior_dependency_dispositions_recovered": true,
+    "concrete_owner_preserving_interface_contract_recovered": true,
+    "new_110_requirement_ledger_located": false,
+    "new_110_interface_ledger_located": false,
+    "new_26_semantic_object_ledger_located": false,
+    "new_corpus_exact_row_count_recovered": {
+      "requirements": 0,
+      "interfaces": 0,
+      "semantic_objects": 0
+    }
+  },
+  "crosswalk_rules": [
+    "Do not renumber or synthesize the new 110-row corpus from the prior 66.",
+    "Do not assume the numerical difference of 44 identifies 44 specific missing requirements.",
+    "Match prior rows to the new corpus only by exact recovered identity, explicit supersession link, or evidence-backed semantic equivalence recorded row by row.",
+    "One prior row may split into multiple new rows; multiple prior rows may merge only with explicit current adjudication.",
+    "Historical graph/dependency/assessment PASS remains evidence for its exact historical subject and does not transfer to the ownership-freeze subject.",
+    "Interface archaeology may seed row recovery but cannot be inflated into 110 interfaces by counting fields, commands or events arbitrarily.",
+    "Semantic-object rows must come from an authoritative current/user-directed source or be individually proposed and later adjudicated; they may not be reverse-counted from runtime classes to force a denominator of 26."
+  ],
+  "targeted_research_disposition": {
+    "external_web_research_now": "DEFERRED_NOT_MATERIAL_TO_CURRENT_BLOCKER",
+    "reason": "The current blocker is internal source identity for the user-defined 110/110/26 corpus. External pedagogy research cannot recover those row identities and would risk design drift before ownership is locked.",
+    "research_reopen_rule": "Use external research only after exact row recovery when an ownership/design decision remains evidence-sensitive."
+  },
+  "next_recovery_targets": [
+    "Search prior chats/library/authorized repository lineage for the exact artifact that introduced 110 P0 requirements.",
+    "Search prior chats/library/authorized repository lineage for the exact 110-interface inventory.",
+    "Search prior chats/library/authorized repository lineage for the exact 26-semantic-object inventory.",
+    "Once found, freeze source/version/digest and generate an exact row-level crosswalk against the recovered 66-row index and known interface contract."
+  ],
+  "completion_gate": {
+    "source_identity_recovery_complete": false,
+    "ownership_freeze_complete": false,
+    "build_allowed": false,
+    "reason": "Row-level 110/110/26 source identities remain unrecovered."
+  }
+}
