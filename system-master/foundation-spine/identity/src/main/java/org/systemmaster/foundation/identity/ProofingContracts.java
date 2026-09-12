@@ -126,6 +126,10 @@ public final class ProofingContracts {
         }
     }
 
+    /**
+     * Completion request from transport/caller. The result fields are untrusted hints until
+     * an EnrollmentEvidenceValidator returns a bound ValidationResult.
+     */
     public record CompleteIdentityEnrollmentRequest(
             MutationContext context,
             String enrollmentId,
@@ -146,6 +150,32 @@ public final class ProofingContracts {
         }
     }
 
+    /** Result produced by the authority-bearing proofing evidence validator, not by transport input. */
+    public record ValidationResult(
+            String validatorRef,
+            String principalId,
+            ProfileRef profileRef,
+            List<String> evidenceReceiptRefs,
+            int validatedAssurance,
+            EnrollmentDecision decision,
+            EnrollmentStanding standing) {
+        public ValidationResult {
+            validatorRef = safeReference("validatorRef", validatorRef);
+            principalId = requireId("principalId", principalId);
+            profileRef = Objects.requireNonNull(profileRef, "profileRef");
+            evidenceReceiptRefs = immutableEvidenceRefs(evidenceReceiptRefs);
+            if (validatedAssurance < 0 || validatedAssurance > 3) throw new IllegalArgumentException("validatedAssurance must be 0..3");
+            decision = Objects.requireNonNull(decision, "decision");
+            standing = Objects.requireNonNull(standing, "standing");
+            if (standing == EnrollmentStanding.STARTED) throw new IllegalArgumentException("validation result cannot remain STARTED");
+        }
+    }
+
+    @FunctionalInterface
+    public interface EnrollmentEvidenceValidator {
+        ValidationResult validate(Principal principal, IdentityProofingProfile profile, CompleteIdentityEnrollmentRequest request);
+    }
+
     public record ProfileMutationResult(long journalRevision, boolean changed, IdentityProofingProfile profile) {}
     public record EnrollmentMutationResult(long journalRevision, boolean changed, IdentityEnrollmentRecord enrollment) {}
 
@@ -157,10 +187,13 @@ public final class ProofingContracts {
 
     static List<String> immutableEvidenceRefs(List<String> refs) {
         List<String> safe = List.copyOf(refs == null ? List.of() : refs);
-        for (String ref : safe) {
-            Objects.requireNonNull(ref, "evidence ref");
-            if (!SAFE_REF.matcher(ref).matches()) throw new IllegalArgumentException("proofing evidence must be digest/reference only");
-        }
+        for (String ref : safe) safeReference("evidence ref", ref);
         return safe;
+    }
+
+    private static String safeReference(String name, String ref) {
+        Objects.requireNonNull(ref, name);
+        if (!SAFE_REF.matcher(ref).matches()) throw new IllegalArgumentException(name + " must be digest/reference only");
+        return ref;
     }
 }
