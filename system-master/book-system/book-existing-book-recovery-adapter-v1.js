@@ -242,13 +242,13 @@ function normalizeCoreStructure(items) {
   if (!Array.isArray(items)) return [];
   return items.map((item, i) => {
     if (!isObject(item)) fail('INVALID_STRUCTURE_ITEM', String(i));
-    const kind = nonEmpty(item.kind) ? item.kind : 'SECTION';
+    const kind = nonEmpty(item.kind) ? item.kind.trim() : 'SECTION';
     const title = typeof item.title === 'string' ? item.title : '';
-    const anchor = nonEmpty(item.anchor) ? item.anchor : `STRUCTURE-${i + 1}`;
+    const anchor = nonEmpty(item.anchor) ? item.anchor.trim() : `STRUCTURE-${i + 1}`;
     const confidence = Number.isFinite(item.confidence) ? Number(item.confidence) : 1;
     if (confidence < 0 || confidence > 1) fail('INVALID_STRUCTURE_CONFIDENCE', anchor);
     return {
-      structure_id: nonEmpty(item.structure_id) ? item.structure_id : `S-${i + 1}`,
+      structure_id: nonEmpty(item.structure_id) ? item.structure_id.trim() : `S-${i + 1}`,
       kind,
       title,
       ordinal: Number.isInteger(item.ordinal) ? item.ordinal : i + 1,
@@ -324,7 +324,7 @@ function prepareRecoveryInvocationV1(command, options = {}) {
     });
   }
   for (const source of sources) if (!projectionBySource.has(source.source_acceptance_id)) fail('PROJECTION_REQUIRED_FOR_ACCEPTED_SOURCE', source.source_acceptance_id);
-  engineSources.sort((a, b) => a.source_id.localeCompare(b.source_id));
+  engineSources.sort((a, b) => String(a.source_id).trim().localeCompare(String(b.source_id).trim()));
   const engineRequest = {
     reentry_mode: command.reentry_mode,
     sources: engineSources
@@ -332,10 +332,10 @@ function prepareRecoveryInvocationV1(command, options = {}) {
   if (nonEmpty(command.book_project_id)) engineRequest.book_project_id = command.book_project_id;
   if (nonEmpty(command.recovery_session_id)) engineRequest.recovery_session_id = command.recovery_session_id;
   if (command.reentry_mode === 'NEW_EDITION') engineRequest.prior_edition_ref = clone(command.prior_edition_ref);
-  const anchor = engineRequest.book_project_id || engineRequest.recovery_session_id;
-  const priorEditionRef = command.reentry_mode === 'NEW_EDITION' ? clone(command.prior_edition_ref) : null;
+  const anchor = String(engineRequest.book_project_id || engineRequest.recovery_session_id).trim();
+  const priorEditionRef = command.reentry_mode === 'NEW_EDITION' ? { edition_id: String(command.prior_edition_ref.edition_id).trim(), edition_digest: command.prior_edition_ref.edition_digest } : null;
   const sourceIdentities = engineSources.map(s => ({
-    source_id: s.source_id,
+    source_id: String(s.source_id).trim(),
     source_digest: s.source_digest,
     projection_digest: deriveCoreProjectionDigest(s.normalized_projection)
   }));
