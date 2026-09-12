@@ -1,0 +1,123 @@
+{
+  "operation": "LEARNING-SYSTEM-REBUILD-001M-S01",
+  "title": "Constitution Materialization",
+  "date": "2026-09-12",
+  "status": "MATERIALIZED_CONSTITUTION_SUBJECT__RUNTIME_BEHAVIOR_NOT_YET_IMPLEMENTED",
+  "repository": "BFochtman746/system-master",
+  "branch": "learning/system-rebuild-001m-s01-constitution-materialization-20260912",
+  "parent": {
+    "operation": "LEARNING-SYSTEM-REBUILD-001L",
+    "branch": "learning/system-rebuild-001l-constitutional-reconciliation-20260912",
+    "commit": "39786d38f2b51777a9adee26ce7e5a4bae771857"
+  },
+  "composition_rule": "The active Learning constitution is the exact admitted 116/112/28 baseline plus the frozen 001L additive rows and listed semantic extensions. Baseline rows are not renumbered, deleted, re-owned, or silently replaced by this materialization.",
+  "historical_lineage": {
+    "requirements": 110,
+    "interfaces": 110,
+    "semantic_objects": 26,
+    "rule": "Historical lineage remains immutable provenance."
+  },
+  "baseline": {
+    "requirements": {
+      "count": 116,
+      "carrier": "qualification/learning/ownership/LRN-OWNERSHIP-FREEZE-001B-R3B-S02-R2-REQUIREMENTS.csv.gz.b64",
+      "decoded_sha256": "63554c37366c2718e1453c56c4765d9a5a49621495a522ca8be26417c1d977a2"
+    },
+    "interfaces": {
+      "count": 112,
+      "carrier": "qualification/learning/ownership/LRN-OWNERSHIP-FREEZE-001B-R3B-S02-R2-INTERFACES.csv.gz.b64",
+      "decoded_sha256": "4f4387956bd8189b7a65f5de94ab3c722cb34f249ebe8a94ad74b4c0d0c3cbc0",
+      "semantic_amendment": {
+        "path": "qualification/learning/ownership/LRN-OWNERSHIP-FREEZE-001B-R3B-S02-R3A-INTERFACE-DELTA.json",
+        "git_blob_sha": "f788ccdad193f75a9c1849fc8abd695020f7eda3",
+        "rule": "I007 and I082 repaired semantics remain controlling without changing the 112-interface denominator."
+      }
+    },
+    "semantic_objects": {
+      "count": 28,
+      "recovered_authority_manifest": "qualification/learning/ownership/LRN-OWNERSHIP-FREEZE-001B-R2-RECOVERED-AUTHORITY-MANIFEST.json",
+      "recovered_source_ledger": "LRN_OWNERSHIP_FREEZE_001C_OBJECTS.csv",
+      "recovered_source_sha256": "a3cf9f19e5100bf66e45cc5a8c8e7f652a8d54c0dcae0b3adbe52a0157706120"
+    }
+  },
+  "active_constitution": {
+    "requirements": 124,
+    "interfaces": 116,
+    "semantic_objects": 31,
+    "delta": {
+      "requirements_added": 8,
+      "interfaces_added": 4,
+      "semantic_objects_added": 3,
+      "baseline_rows_deleted": 0,
+      "baseline_rows_reowned": 0
+    }
+  },
+  "new_requirements": [
+    {"id":"LRN-151","owner":"SYSTEM_MASTER/LEARNING::MOD-LEARNING-001","responsibility":"Maintain a versioned LearnerModelProjection that synthesizes owner-valid learner state without becoming a second writer of source truth.","foundation_source":"001D/A01"},
+    {"id":"LRN-152","owner":"SYSTEM_MASTER/LEARNING::MOD-LEARNING-001","responsibility":"Record append-oriented self-regulation observations for plan, monitor, evaluate and strategy-use state without converting them into competence.","foundation_source":"001E/A02"},
+    {"id":"LRN-153","owner":"SYSTEM_MASTER/LEARNING::MOD-LEARNING-001","responsibility":"Preserve bounded intentionally supplied motivation, effort, task-value and confusion context as non-diagnostic learner context; missing context is not negative and context is never direct mastery evidence.","foundation_source":"001E/A03"},
+    {"id":"LRN-154","owner":"SYSTEM_MASTER/LEARNING::MOD-LEARNING-001","responsibility":"Preserve materially relevant assistance condition on learning evidence, including independent, instructional-scaffold, AI-assisted, collaborative, authorized-accommodation, tool-permitted and unknown-assistance standing.","foundation_source":"001G/A04"},
+    {"id":"LRN-155","owner":"SYSTEM_MASTER/LEARNING::MOD-LEARNING-001","responsibility":"Require owner-valid independent-performance or support-withdrawal verification when the intended construct requires independence, without withdrawing required accommodations or rewriting prior assisted evidence.","foundation_source":"001G/A05"},
+    {"id":"LRN-156","owner":"SYSTEM_MASTER/LEARNING::MOD-LEARNING-001","responsibility":"Define and interpret versioned educational-effectiveness evaluations while shared Assurance/Analytics retains generic experiment and statistical machinery.","foundation_source":"001J/A06"},
+    {"id":"LRN-157","owner":"SYSTEM_MASTER/LEARNING","responsibility":"Own the Learning-system obligation to provide version-pinned CASE, QTI, Caliper and CLR adapter mappings while preserving Learning/Curriculum semantic owners and shared Integration/Gateway transport; no external standard becomes canonical Learning truth.","foundation_source":"001K/A07"},
+    {"id":"LRN-158","owner":"SYSTEM_MASTER/LEARNING","responsibility":"Own fail-closed handling of imported non-authoritative competency-alignment proposals/associations with provenance while leaving authoritative equivalence with the unresolved future alignment owner under LRN-069 / LRN-EXT-002.","foundation_source":"001K/A08"}
+  ],
+  "new_interfaces": [
+    {"id":"I111","name":"GetLearnerModelProjection","kind":"QUERY","owner":"SYSTEM_MASTER/LEARNING::MOD-LEARNING-001","object":"LRN-E027","rule":"Read-only version/as-of projection; no hidden source mutation."},
+    {"id":"I112","name":"RecordSelfRegulationObservation","kind":"COMMAND","owner":"SYSTEM_MASTER/LEARNING::MOD-LEARNING-001","object":"LRN-E028","rule":"Append-oriented, semantically idempotent, bounded learner-declared/context observation; never direct mastery mutation."},
+    {"id":"I113","name":"RegisterLearningEffectivenessEvaluation","kind":"COMMAND","owner":"SYSTEM_MASTER/LEARNING::MOD-LEARNING-001","object":"LRN-E029","rule":"Registers the Learning-specific protocol/claim subject and exact version pins; generic assignment/statistics remain shared Assurance/Analytics authority."},
+    {"id":"I114","name":"GetLearningEffectivenessEvaluation","kind":"QUERY","owner":"SYSTEM_MASTER/LEARNING::MOD-LEARNING-001","object":"LRN-E029","rule":"Returns bounded evaluation standing, evidence references, uncertainty, limitations and intended-use claim; never rewrites mastery or creates product-wide effectiveness truth."}
+  ],
+  "new_semantic_objects": [
+    {"id":"LRN-E027","name":"LearnerModelProjection","owner":"SYSTEM_MASTER/LEARNING::MOD-LEARNING-001","class":"VERSIONED_DERIVED_PROJECTION","non_authority":["goals","assessment scores","mastery","retention","transfer","curriculum","privacy","model calibration"]},
+    {"id":"LRN-E028","name":"SelfRegulationObservation","owner":"SYSTEM_MASTER/LEARNING::MOD-LEARNING-001","class":"APPEND_ORIENTED_OBSERVATION","scope":["PLAN","MONITOR","EVALUATE","STRATEGY_USE","HELP_REQUEST","BOUNDED_DECLARED_CONTEXT"],"relationship":"LRN-E017 SelfConfidenceObservation remains valid and may be projected as one bounded SRL signal rather than being superseded.","non_authority":["mastery","competence","diagnosis","psychological profile"]},
+    {"id":"LRN-E029","name":"LearningEffectivenessEvaluationDescriptor","owner":"SYSTEM_MASTER/LEARNING::MOD-LEARNING-001","class":"VERSIONED_EVALUATION_DESCRIPTOR_PROJECTION","shared_dependencies":["Assurance","Analytics","Evidence/Provenance","Artifact"],"non_authority":["generic statistics","experiment infrastructure","mastery","assessment validity","product-wide effectiveness","certification","eligibility"]}
+  ],
+  "existing_extensions": [
+    {"ids":["LRN-E012","LRN-E013","LRN-E014","LRN-E015","LRN-E016"],"rule":"Extend existing evidence/mastery families for mandatory coverage/uncertainty and explicit retention/transfer/independence/assistance semantics; no second mastery writer."},
+    {"id":"LRN-E017","rule":"Retain SelfConfidenceObservation as bounded self-report; confidence is not competence."},
+    {"id":"LRN-E020-C","rule":"Retain Curriculum InstructionalPolicyVersion as instructional-method authority and extend it for the frozen AI tutoring policy semantics."},
+    {"ids":["LRN-E020-L","LRN-E021"],"rule":"Retain Learning adaptive policy/decision authority; eligibility precedes ranking and durable-learning priorities remain controlling."},
+    {"name":"AssessmentAttempt existing Learning object","rule":"Extend result semantics with assistance condition, scorer/model/rubric versions, score standing, Assurance references and human-review lineage; do not invent external score ingress."},
+    {"id":"LRN-E026","rule":"Carry interoperability/export provenance only as subordinate metadata; no certification or eligibility authority."}
+  ],
+  "subordinate_noncanonical_types": [
+    "EvidenceAssistanceCondition",
+    "AdaptiveEligibilityReasonCode",
+    "AdaptiveSelectionReasonCode",
+    "AssessmentScoreStanding",
+    "ScorerLineage",
+    "InteroperabilityEnvelope",
+    "MappingStanding"
+  ],
+  "deferred_authority_gaps": [
+    {"id":"LRN-069 / LRN-EXT-002","standing":"UNRESOLVED_DENY_BY_DEFAULT","rule":"No imported association, similarity, model output or adapter mapping may publish authoritative cross-domain competency equivalence."},
+    {"id":"S04_EXTERNAL_ASYNC_SCORE_INGRESS","standing":"UNRESOLVED_FAIL_CLOSED","rule":"No callback/interface is invented; external provider payload cannot become canonical finalized Learning score truth without an owner-valid ingress contract."}
+  ],
+  "authority_invariants": [
+    "Curriculum remains an internal Learning-system truth boundary, not a Topology peer.",
+    "External standards are adapters, never canonical semantic owners.",
+    "Observation, completion, score, confidence, engagement, accepted AI output and generic productivity do not directly establish mastery.",
+    "Authorized accommodation does not automatically invalidate evidence and is not withdrawn merely to manufacture independence.",
+    "Learning does not own person identity, generic artifact bytes, generic jobs/runtime, scheduler/delivery, transport, generic evidence/provenance substrate, rights/licensing, privacy/security authorization, generic model assurance/statistics, credential signing/serialization, certification, hiring, licensing or eligibility decisions.",
+    "No AI Tutor peer authority, second mastery writer, second assessment writer, second learner-state source writer, generic statistics platform, generic integration platform or credential authority is introduced."
+  ],
+  "foundation_artifact_integrity": [
+    {"capability":"001D","path":"qualification/learning/rebuild/LEARNING-SYSTEM-REBUILD-001D-LEARNER-MODEL-FOUNDATION.md","git_blob_sha":"678d9c0eae1bd7781b70c334707f274ed1b04ce1"},
+    {"capability":"001E","path":"qualification/learning/rebuild/LEARNING-SYSTEM-REBUILD-001E-SELF-REGULATED-LEARNING-METACOGNITION-FOUNDATION.md","git_blob_sha":"c84f1bc2fbdbba38a81422ed5a6730d95cffadf9"},
+    {"capability":"001F","path":"qualification/learning/rebuild/LEARNING-SYSTEM-REBUILD-001F-AI-TUTORING-INSTRUCTIONAL-POLICY-FOUNDATION.md","git_blob_sha":"776bf7e4e19e87567c3ceeee54f2cc96b8e57ce0"},
+    {"capability":"001G","path":"qualification/learning/rebuild/LEARNING-SYSTEM-REBUILD-001G-EVIDENCE-MASTERY-UNCERTAINTY-RETENTION-TRANSFER-INDEPENDENCE-FOUNDATION.md","git_blob_sha":"a531aeb1a6cc53565e68a10bd700e344e679781e"},
+    {"capability":"001H","path":"qualification/learning/rebuild/LEARNING-SYSTEM-REBUILD-001H-ADAPTIVE-NEXT-ACTION-POLICY-FOUNDATION.md","git_blob_sha":"24725193babc04b6b1dc5e3f6f376f2dff56b3b8"},
+    {"capability":"001I","path":"qualification/learning/rebuild/LEARNING-SYSTEM-REBUILD-001I-ASSESSMENT-MODEL-GOVERNANCE-HARDENING-FOUNDATION.md","git_blob_sha":"54d684901d47e04f182b9125e6973bbb1b5936b0"},
+    {"capability":"001J","path":"qualification/learning/rebuild/LEARNING-SYSTEM-REBUILD-001J-LEARNING-EFFECTIVENESS-EVALUATION-FOUNDATION.md","git_blob_sha":"5bf914aa354dbceb3f6de03b59f50ca0f4b764a4"},
+    {"capability":"001K","path":"qualification/learning/rebuild/LEARNING-SYSTEM-REBUILD-001K-STANDARDS-INTEROPERABILITY-ADAPTERS-FOUNDATION.md","git_blob_sha":"508a9a60be534d0b6bb4082ff36532df12e1b7a5"},
+    {"capability":"001L-DELTA","path":"qualification/learning/rebuild/LEARNING-SYSTEM-REBUILD-001L-CONSTITUTIONAL-DELTA.json","git_blob_sha":"53e22baf63eee8d91d59a0c74da3aaf37e9a71bc"},
+    {"capability":"001L-FREEZE","path":"qualification/learning/rebuild/LEARNING-SYSTEM-REBUILD-001L-CONSTITUTIONAL-RECONCILIATION-MINIMUM-DELTA.md","git_blob_sha":"7772ed6f1b144c7ff25882628e7cf6f6d2121bef"},
+    {"capability":"001L-CONTRACT","path":"qualification/learning/rebuild/LEARNING-SYSTEM-REBUILD-001L-64CASE-PREBUILD-RECONCILIATION-CONTRACT.json","git_blob_sha":"6c8c154e299b91f5b263a1cecf4752bdb721ed9b"}
+  ],
+  "runtime_gate": {
+    "runtime_behavior_implemented_by_s01": false,
+    "next_slice_allowed_only_after_s01_isolated_and_cumulative_pass": "001M-S02 — Learner Model + SRL runtime",
+    "no_pass_transfer": true
+  }
+}

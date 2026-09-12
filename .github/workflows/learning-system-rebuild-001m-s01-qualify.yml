@@ -1,0 +1,44 @@
+name: Learning System Rebuild 001M S01 Qualify
+
+on:
+  push:
+    branches:
+      - learning/system-rebuild-001m-s01-constitution-materialization-20260912
+    paths:
+      - 'qualification/learning/rebuild/LEARNING-SYSTEM-REBUILD-001M-S01-ACTIVE-CONSTITUTION.json'
+      - 'qualification/learning/rebuild/LEARNING-SYSTEM-REBUILD-001M-S01-36CASE-QUALIFICATION-CONTRACT.json'
+      - '.github/scripts/learning-system-rebuild-001m-s01-qualify.py'
+      - '.github/workflows/learning-system-rebuild-001m-s01-qualify.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify-constitution-materialization:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+      - name: Record exact subject
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          printf 'SUBJECT_SHA=%s\n' "${GITHUB_SHA}"
+          printf 'PARENT_SHA=%s\n' "$(git rev-parse HEAD^)"
+      - name: Syntax check qualifier
+        run: python -m py_compile .github/scripts/learning-system-rebuild-001m-s01-qualify.py
+      - name: Run isolated and cumulative qualification
+        run: python .github/scripts/learning-system-rebuild-001m-s01-qualify.py | tee learning-system-rebuild-001m-s01-result.json
+      - name: Upload exact-subject qualification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: learning-system-rebuild-001m-s01-${{ github.sha }}
+          path: learning-system-rebuild-001m-s01-result.json
+          if-no-files-found: error
