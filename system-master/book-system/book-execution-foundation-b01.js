@@ -262,7 +262,7 @@ function buildCurrentOperationIdentity(bindingPlan, plan, taskId, options = {}) 
   const digest = sha256(stableStringify(projection));
   return stable({
     operation_identity_schema_version: SCHEMA_VERSION,
-    task_id,
+    task_id: taskId,
     operation_digest: digest,
     idempotency_key: `book-b01-op-${digest}`,
     registered_idempotent: taskBinding.registered_idempotent,
