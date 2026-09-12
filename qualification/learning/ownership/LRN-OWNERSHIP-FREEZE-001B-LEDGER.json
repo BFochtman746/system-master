@@ -1,0 +1,147 @@
+{
+  "ledger_id": "LRN-OWNERSHIP-FREEZE-001B-LEDGER",
+  "effective_date": "2026-09-12",
+  "owner_path": "SYSTEM_MASTER/LEARNING",
+  "base_owner_ref": "learning/control-v1",
+  "base_owner_head": "e3196089f77dde376944a08eac78a697e57d1535",
+  "standing": "IN_PROGRESS_SOURCE_RECOVERY__DOMAIN_OWNER_BOUNDARIES_LOCKED__ROW_LEVEL_FREEZE_NOT_COMPLETE",
+  "method": [
+    "RECOVER",
+    "INVENTORY",
+    "ANALYZE",
+    "TARGETED_RESEARCH",
+    "ADJUDICATE",
+    "DESIGN_LOCK",
+    "BUILD",
+    "ISOLATED_QUALIFICATION",
+    "CUMULATIVE_REGRESSION_CALIBRATION",
+    "FREEZE"
+  ],
+  "required_denominator": {
+    "p0_requirements": 110,
+    "interfaces": 110,
+    "semantic_objects": 26
+  },
+  "recovery_standing": {
+    "p0_requirements": {
+      "exact_rows_recovered_under_new_ownership_corpus": 0,
+      "prior_lineage_rows_evidenced": 66,
+      "prior_lineage_class": "HISTORICAL_CURRENT_REUSE_INPUT__NOT_ASSUMED_EQUIVALENT_TO_NEW_110",
+      "missing_new_corpus_identity_count": 110,
+      "note": "The new 110-row source ledger itself is not materialized in current repository authority. Prior 66 rows must be crosswalked only after exact 110 identities are recovered."
+    },
+    "interfaces": {
+      "exact_rows_recovered_under_new_ownership_corpus": 0,
+      "known_interface_contracts_recovered": [
+        "governance/architecture/LEARNING-TO-SYSTEM-MASTER-INTERFACE-CONTRACT-001.json"
+      ],
+      "missing_new_corpus_identity_count": 110
+    },
+    "semantic_objects": {
+      "exact_rows_recovered_under_new_ownership_corpus": 0,
+      "missing_new_corpus_identity_count": 26
+    }
+  },
+  "domain_owner_lock": {
+    "LEARNING": [
+      "learner educational state and progress semantics",
+      "curriculum/course/module/lesson/objective/competency/skill semantics",
+      "curriculum graph and instructional sequencing semantics",
+      "assessment item/target/rubric/scoring and correctness semantics",
+      "attempt interpretation and Learning evidence admission",
+      "mastery semantics and transitions",
+      "retention-check semantics",
+      "transfer-check semantics",
+      "adaptation/remediation/practice/challenge/advancement semantics",
+      "Learning-specific evidence meaning and qualification criteria",
+      "Learning-specific persistence schema/invariants",
+      "Learning semantic commands/queries/events/results"
+    ],
+    "CORE_SHARED": [
+      "authentication principal/session/device/service/workload identity",
+      "generic transport/queue/delivery/idempotency/trace mechanics",
+      "generic runtime/resource/placement/retry mechanics",
+      "database/storage/backup custody mechanics",
+      "generic artifact custody/digest/reference mechanics",
+      "generic telemetry and observability",
+      "generic evidence/provenance transport infrastructure",
+      "shared model/tool/connector gateways",
+      "A-01 and shared qualification transport"
+    ],
+    "BOOK": [
+      "canonical manuscript and Story Bible/canon",
+      "author decisions",
+      "Book lifecycle/admission/publication",
+      "Book literary/craft canonical semantics"
+    ],
+    "DOCUMENTS": [
+      "generic DOCX/PDF/PPTX/OCR/document artifact mechanics",
+      "generic conversion/rendering/preservation/export"
+    ],
+    "PROGRAMMING": [
+      "software engineering build/test/toolchain semantics",
+      "software engineering analysis/security/performance/reliability semantics",
+      "release/deploy/operations/maintenance engineering semantics"
+    ],
+    "SYSTEM_MASTER_PRODUCT": [
+      "product-level orchestration",
+      "cross-system user-intent routing",
+      "product integration/admission",
+      "whole-product completion"
+    ]
+  },
+  "collision_rules": [
+    "Learner educational identity is Learning-owned; authentication principal/delegation identity is Core-owned.",
+    "Curriculum semantic identity/currentness/coverage is Learning-owned; file/OCR/render/export mechanics are Documents-owned and custody may be Core-owned.",
+    "Assessment semantics/scoring/evidence meaning are Learning-owned; document representation is Documents-owned.",
+    "Learning evidence meaning is Learning-owned; generic evidence/provenance infrastructure is Core-owned.",
+    "Pedagogical workflow state is Learning-owned; generic execution job/attempt/lease/retry mechanics are Core-owned.",
+    "Learning persistence schema/invariants are Learning-owned; physical database infrastructure may be Core-owned.",
+    "Shared test tooling does not transfer Learning correctness criteria to Programming/Core.",
+    "Teaching a specialist domain never grants Learning mutation authority over that specialist system."
+  ],
+  "evidence_fences": {
+    "machine_may_not_fabricate": [
+      "participant consent",
+      "actual learner responses",
+      "real mastery",
+      "real delayed retention",
+      "real novel transfer",
+      "instructional effectiveness",
+      "psychometric validity",
+      "SME approval",
+      "certification/accreditation",
+      "native/accessibility conformance not executed",
+      "A-01/private/external/production evidence not observed"
+    ]
+  },
+  "prior_evidence": {
+    "dependency_full_closure_branch": "learning/dependency-adjudication-full-closure-20260910",
+    "dependency_full_closure_subject": "36ffc99c05e15fdcf9233303e035e5ce4159fc23",
+    "prior_frozen_requirements": 66,
+    "prior_provisional_subskills": 66,
+    "prior_assessment_targets": 66,
+    "prior_unresolved_dependency_candidates": 46,
+    "prior_rejected_as_hard_prerequisite": 38,
+    "prior_retained_noncanonical": 8,
+    "pass_transfer_forbidden": true
+  },
+  "completion_gate": {
+    "unaccounted_requirements_must_equal": 0,
+    "unaccounted_interfaces_must_equal": 0,
+    "unaccounted_semantic_objects_must_equal": 0,
+    "row_level_owner_required": true,
+    "row_level_canonical_writer_required_for_learning_owned_rows": true,
+    "row_level_persistence_interface_tests_evidence_invalidation_required": true,
+    "persistence_routes_interfaces_bound_before_build": true
+  },
+  "exact_next_operation": "LRN-OWNERSHIP-FREEZE-001B-R1 — 110/110/26 SOURCE-IDENTITY RECOVERY + PRIOR-66 CROSSWALK",
+  "forbidden": [
+    "invent missing 110/110/26 row identities",
+    "resume older batch-only implementation before ownership freeze",
+    "transfer historical PASS to changed ownership or changed subjects",
+    "move Learning semantic truth into Core because Core supplies infrastructure",
+    "take Book/Documents/Programming canonical semantics",
+    "claim Learning ownership freeze complete while row identities remain unrecovered"
+  ]
+}
