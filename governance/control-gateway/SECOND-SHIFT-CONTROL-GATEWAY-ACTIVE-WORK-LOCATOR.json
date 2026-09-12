@@ -4,10 +4,10 @@
   "mission_version": "SECOND-SHIFT-CONTROL-GATEWAY-CG-001/v1.0",
   "status": "CURRENT_RECOVERY_LOCATOR",
   "current_ref": "control-gateway-state/active-work/second-shift-control-gateway-dev-recovery-001",
-  "current_publication_commit_sha": "6c8773f81f7701e2638dfbc128f6f9fdd19bd3b1",
-  "current_publication_revision": 27,
-  "current_packet_digest": "085b5ad886fd2594bc3415c229fbbb5ed6cef150a8a93c6e04da5859ccad17a8",
-  "current_publication_digest": "45859758bccf96bf2c86a477dbdfb3a0cec624e2d7cb8cdd9af3245d982bee2d",
+  "current_publication_commit_sha": "11ce292c3efac87ecf7758e6d2eb747a25d62127",
+  "current_publication_revision": 28,
+  "current_packet_digest": "18e5dbefce2428383c2d431d2c4f096fee2d2c0d42caf2811827660eba673b64",
+  "current_publication_digest": "70852d6af3772f264addfa80d9a88768cbf4d51bf4205b958e08dcae7774240a",
   "recovery_base": {
     "revision": 24,
     "commit_sha": "ccfab34389347f5d5d9d41f1ea0f950703ab2f3f",
@@ -21,6 +21,18 @@
     "defect": "Revision 25 was finalized by a second Git commit after its revision mirror was first written. Its envelope predecessor remained r24 while the final Git parent became the intermediate revision-file commit, and its stored publication digest does not recompute from the stored envelope. Revision 26 therefore cannot provide a fully verified history through revision 25.",
     "preserve_for_evidence": true
   },
+  "terminal_freeze": {
+    "qualified_subject_sha": "bee130cff1b8845c7f793ca14fd9c0b9028faf96",
+    "qualification_run_id": 34703609882,
+    "separate_adversarial_closure_audit_job_id": 103579659768,
+    "receipt_id": "SECOND-SHIFT-CONTROL-GATEWAY-CG-011-CLOSURE-REPAIR-34703609882",
+    "frozen_ref": "second-shift-control-gateway/cg-011-failure-restart-idempotency-frozen",
+    "freeze_head_sha": "f4f3787f90788e964fcd2b12872a7a10392d78c1",
+    "freeze_parent_sha": "bee130cff1b8845c7f793ca14fd9c0b9028faf96",
+    "single_parent_directly_above_qualified_subject": true,
+    "production_activation": false,
+    "a01_windows_qualified": false
+  },
   "recovery_rules": {
     "force_ref_update_used": false,
     "quarantined_ref_rewritten": false,
@@ -28,8 +40,8 @@
     "recovery_ref_created_from_last_verified_revision": true,
     "recovery_r25_single_parent_matches_envelope_predecessor": true,
     "recovery_r25_digest_recomputed_with_repository_canonical_algorithm": true,
-    "recovery_history_contiguous_through_revision": 27,
-    "current_state": "ACTIVE"
+    "recovery_history_contiguous_through_revision": 28,
+    "current_state": "TERMINAL"
   },
-  "rule": "Fresh reconstruction must resolve this locator first, then verify the referenced publication envelope, immutable revision mirror, packet digest, publication digest, Git parent chain, current operation and live work branch. The quarantined ref is historical evidence only and must not be selected as current authority."
+  "rule": "Fresh reconstruction must resolve this locator first, verify the referenced terminal publication envelope and complete recovery history, then verify the named frozen ref is the single-parent governance freeze directly above the exact qualified subject. The quarantined ref is historical evidence only and must not be selected as current authority. No successor is started by this terminal locator."
 }
