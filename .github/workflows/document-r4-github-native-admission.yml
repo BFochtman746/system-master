@@ -43,80 +43,14 @@ jobs:
           command -v pdftoppm
           command -v pdfimages
 
-      - name: Reconstruct carrier and verify exact 225-file identity
+      - name: Reconstruct canonical carrier and verify exact 225-file identity
         shell: bash
         run: |
           set -euo pipefail
           STAGE='transport/document-r4'
-          ARCHIVE='/tmp/CR001_R4_225_SOURCE_WITH_EVIDENCE_20260910.tar.xz'
-          EXPECTED='b6d0f8a98cea0615513eda07873b38532123585336de87c40350afeafa474edf'
           test -f "$STAGE/READY"
-          test "$(find "$STAGE" -maxdepth 1 -name 'chunk-*.b64' -type f | wc -l)" -eq 100
-          cat "$STAGE"/chunk-*.b64 | tr -d '\r\n' | base64 --decode > "$ARCHIVE"
-          echo "$EXPECTED  $ARCHIVE" | sha256sum -c -
-          python3 - <<'PY'
-          import csv, hashlib, io, json, pathlib, tarfile
-          archive = pathlib.Path('/tmp/CR001_R4_225_SOURCE_WITH_EVIDENCE_20260910.tar.xz')
-          expected = 'b6d0f8a98cea0615513eda07873b38532123585336de87c40350afeafa474edf'
-          raw = archive.read_bytes()
-          if hashlib.sha256(raw).hexdigest() != expected:
-              raise SystemExit('carrier digest mismatch')
-          dest = pathlib.Path('recovered/document/cr001-r4')
-          if dest.exists():
-              raise SystemExit('destination already exists; refusing overwrite')
-          source_dest = dest / 'source'
-          evidence_dest = dest / 'evidence'
-          with tarfile.open(fileobj=io.BytesIO(raw), mode='r:xz') as tf:
-              regular = [m for m in tf.getmembers() if m.isfile()]
-              if len(regular) != 227:
-                  raise SystemExit(f'expected 227 regular entries, got {len(regular)}')
-              by_name = {}
-              for member in regular:
-                  rel = pathlib.PurePosixPath(member.name)
-                  if rel.is_absolute() or '..' in rel.parts or member.name in by_name:
-                      raise SystemExit(f'unsafe/duplicate tar path: {member.name}')
-                  fh = tf.extractfile(member)
-                  if fh is None:
-                      raise SystemExit(f'unreadable tar member: {member.name}')
-                  by_name[member.name] = fh.read()
-              manifest_name = 'CANONICAL-SOURCE-TREE-MANIFEST.csv'
-              receipt_name = 'RECONSTRUCTION-RECEIPT.json'
-              if manifest_name not in by_name or receipt_name not in by_name:
-                  raise SystemExit('required evidence missing')
-              manifest_bytes = by_name[manifest_name]
-              rows = list(csv.DictReader(io.StringIO(manifest_bytes.decode('utf-8-sig'))))
-              if len(rows) != 225:
-                  raise SystemExit(f'expected 225 manifest rows, got {len(rows)}')
-              seen = set()
-              for row in rows:
-                  rel = pathlib.PurePosixPath(row['path'])
-                  if rel.is_absolute() or '..' in rel.parts or str(rel) in seen:
-                      raise SystemExit(f'unsafe/duplicate manifest path: {rel}')
-                  seen.add(str(rel))
-                  key = 'source/' + str(rel)
-                  if key not in by_name:
-                      raise SystemExit(f'missing source: {rel}')
-                  data = by_name[key]
-                  if len(data) != int(row['bytes']):
-                      raise SystemExit(f'byte-size mismatch: {rel}')
-                  if hashlib.sha256(data).hexdigest() != row['sha256']:
-                      raise SystemExit(f'sha256 mismatch: {rel}')
-                  data.decode('utf-8')
-                  target = source_dest.joinpath(*rel.parts)
-                  target.parent.mkdir(parents=True, exist_ok=True)
-                  target.write_bytes(data)
-              evidence_dest.mkdir(parents=True, exist_ok=True)
-              (evidence_dest / manifest_name).write_bytes(manifest_bytes)
-              (evidence_dest / receipt_name).write_bytes(by_name[receipt_name])
-              verification = {
-                  'transport_tar_xz_sha256': expected,
-                  'transport_regular_entries': len(regular),
-                  'manifest_rows': len(rows),
-                  'verified_source_files': len(seen),
-                  'identity_result': 'PASS__225_OF_225_EXACT_MATCH'
-              }
-              (evidence_dest / 'GITHUB-NATIVE-IMPORT-VERIFICATION.json').write_text(json.dumps(verification, indent=2) + '\n')
-          PY
+          test -f "$STAGE/TRANSPORT-CONTRACT.json"
+          python3 "$STAGE/verify-canonical-transport.py" "$STAGE" --extract-to recovered/document/cr001-r4
           git diff --check
 
       - name: Commit immutable source-custody subject
@@ -201,13 +135,15 @@ jobs:
           cp "$QUAL/portable.log" "$DEST/PORTABLE-SUITES.log"
           cp "$QUAL/external.log" "$DEST/T13-T14-EXTERNAL.log"
           PORTABLE_COUNT="$(cat "$QUAL/portable-count.txt")"
-          python3 - "$SUBJECT_SHA" "$PORTABLE_COUNT" <<'PY'
+          TRANSPORT_SHA="$(python3 -c "import json; print(json.load(open('transport/document-r4/TRANSPORT-CONTRACT.json'))['carrier_sha256'])")"
+          python3 - "$SUBJECT_SHA" "$PORTABLE_COUNT" "$TRANSPORT_SHA" <<'PY'
           import json, pathlib, sys
-          subject_sha, portable_count = sys.argv[1], int(sys.argv[2])
+          subject_sha, portable_count, transport_sha = sys.argv[1], int(sys.argv[2]), sys.argv[3]
           receipt = {
               'qualification_id': 'CR001-R4-GITHUB-NATIVE-QUALIFICATION-002',
               'qualified_git_subject_sha': subject_sha,
-              'transport_tar_xz_sha256': 'b6d0f8a98cea0615513eda07873b38532123585336de87c40350afeafa474edf',
+              'transport_contract_id': 'DOCUMENTS-R4-TRANSPORT-CONTRACT-001',
+              'transport_tar_xz_sha256': transport_sha,
               'source_identity': 'PASS__225_OF_225_EXACT_MATCH',
               'strict_java21_compile': 'PASS',
               'portable_test_classes_passed': portable_count,
@@ -239,6 +175,7 @@ jobs:
         shell: bash
         run: |
           echo 'DOCUMENT_R4_GITHUB_NATIVE_ADMISSION=PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'transport_contract=DOCUMENTS-R4-TRANSPORT-CONTRACT-001' >> "$GITHUB_STEP_SUMMARY"
           echo 'source_identity=225/225 exact manifest match' >> "$GITHUB_STEP_SUMMARY"
           echo 'strict_java21_compile=PASS' >> "$GITHUB_STEP_SUMMARY"
           echo 'portable_suites=PASS' >> "$GITHUB_STEP_SUMMARY"
