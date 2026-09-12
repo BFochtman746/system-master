@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   GITHUB_PRODUCTION_ENFORCEMENT_POLICY_PROTOCOL,
+  bindProductionWriterIdentity,
   desiredRepositoryRuleset,
   evaluateProductionEnforcement,
   GitHubProductionEnforcementError
@@ -34,6 +35,20 @@ function policy(actorId = 12345) {
   };
 }
 
+test('runtime binding converts the unbound template into one exact Integration identity', () => {
+  const template = policy(null);
+  const bound = bindProductionWriterIdentity(template, '12345');
+  assert.equal(template.writer_identity.actor_id, null);
+  assert.equal(bound.writer_identity.actor_id, 12345);
+  assert.deepEqual(desiredRepositoryRuleset(bound).bypass_actors, [{ actor_id: 12345, actor_type: 'Integration', bypass_mode: 'always' }]);
+});
+
+test('invalid or conflicting runtime writer identity fails closed', () => {
+  assert.throws(() => bindProductionWriterIdentity(policy(null), ''), (error) => error instanceof GitHubProductionEnforcementError && error.code === 'WRITER_IDENTITY_BINDING_INVALID');
+  assert.throws(() => bindProductionWriterIdentity(policy(null), '0'), (error) => error instanceof GitHubProductionEnforcementError && error.code === 'WRITER_IDENTITY_BINDING_INVALID');
+  assert.throws(() => bindProductionWriterIdentity(policy(12345), 67890), (error) => error instanceof GitHubProductionEnforcementError && error.code === 'WRITER_IDENTITY_BINDING_MISMATCH');
+});
+
 test('desired ruleset blocks branch create/update/delete/force except dedicated Integration', () => {
   const desired = desiredRepositoryRuleset(policy());
   assert.deepEqual(desired.conditions.ref_name.include, ['~ALL']);
@@ -46,9 +61,11 @@ test('unbound writer identity fails closed before ruleset generation', () => {
   assert.throws(() => desiredRepositoryRuleset(policy(null)), (error) => error instanceof GitHubProductionEnforcementError && error.code === 'WRITER_IDENTITY_UNBOUND');
 });
 
-test('exact live ruleset passes enforcement audit', () => {
-  const p = policy();
-  assert.equal(evaluateProductionEnforcement({ policy: p, liveRulesets: [desiredRepositoryRuleset(p)] }).status, 'PASS');
+test('exact live ruleset passes enforcement audit only after runtime binding', () => {
+  const template = policy(null);
+  const bound = bindProductionWriterIdentity(template, 12345);
+  assert.equal(evaluateProductionEnforcement({ policy: template, liveRulesets: [desiredRepositoryRuleset(bound)] }).status, 'BLOCKED');
+  assert.equal(evaluateProductionEnforcement({ policy: bound, liveRulesets: [desiredRepositoryRuleset(bound)] }).status, 'PASS');
 });
 
 test('missing ruleset and direct-bypass expansion remain blocked', () => {
