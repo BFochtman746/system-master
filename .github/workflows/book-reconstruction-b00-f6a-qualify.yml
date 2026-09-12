@@ -1,0 +1,84 @@
+name: BOOK Reconstruction B00 F6A Qualification
+
+on:
+  push:
+    branches:
+      - book-system/reconstruction-b00-f6-lifecycle
+    paths:
+      - 'system-master/book-system/canonical-parent-v2-core.js'
+      - 'system-master/book-system/canonical-parent-v2-f5-core.js'
+      - 'system-master/book-system/canonical-parent-v2-f6-core.js'
+      - 'system-master/book-system/canonical-parent-v2-sqlite-store.js'
+      - 'system-master/book-system/version-admission-v2-rebind.js'
+      - 'system-master/book-system/version-admission-v2-sqlite-store.js'
+      - 'system-master/book-system/version-and-rollback-core.js'
+      - 'system-master/book-system/content-object-admission-core.js'
+      - 'system-master/book-system/lifecycle-transition-engine.js'
+      - 'system-master/book-system/lifecycle-transition-engine-runtime.js'
+      - 'qualification/book-system/lifecycle-transition-001/**'
+      - '.github/scripts/book-system-canonical-parent-v2-core-001-qualify.js'
+      - '.github/scripts/book-system-canonical-parent-v2-store-001-qualify.js'
+      - '.github/scripts/book-reconstruction-b00-f5-version-admission-001-qualify.js'
+      - '.github/scripts/book-reconstruction-b00-f6a-lifecycle-graph-001-qualify.js'
+      - '.github/scripts/book-system-lifecycle-transition-001-qualify.js'
+      - '.github/scripts/book-system-rights-custody-evidence-001-qualify.js'
+      - '.github/scripts/book-system-governing-style-profile-001-qualify.js'
+      - '.github/workflows/book-reconstruction-b00-f6a-qualify.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    name: Node ${{ matrix.node }} — F1-F5 + F6A + lifecycle predecessor
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['22', '24']
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Record exact subject
+        run: |
+          echo "subject_sha=${GITHUB_SHA}" | tee b00-f6a-subject-node-${{ matrix.node }}.txt
+          git rev-parse HEAD | tee -a b00-f6a-subject-node-${{ matrix.node }}.txt
+          node --version | tee -a b00-f6a-subject-node-${{ matrix.node }}.txt
+      - name: Run Q001-Q036 pure-core predecessor baseline
+        run: node .github/scripts/book-system-canonical-parent-v2-core-001-qualify.js | tee b00-f6a-core-node-${{ matrix.node }}.log
+      - name: Run Q037-Q050 durable-store predecessor baseline
+        run: node .github/scripts/book-system-canonical-parent-v2-store-001-qualify.js | tee b00-f6a-store-node-${{ matrix.node }}.log
+      - name: Run Q051-Q058 version-admission predecessor baseline
+        run: node .github/scripts/book-reconstruction-b00-f5-version-admission-001-qualify.js | tee b00-f6a-f5-node-${{ matrix.node }}.log
+      - name: Run Q067-Q076 rights-custody predecessor denominator
+        run: node .github/scripts/book-system-rights-custody-evidence-001-qualify.js | tee b00-f6a-rights-node-${{ matrix.node }}.log
+      - name: Run Q077-Q084 governing-style predecessor denominator
+        run: node .github/scripts/book-system-governing-style-profile-001-qualify.js | tee b00-f6a-style-node-${{ matrix.node }}.log
+      - name: Run F6A lifecycle graph losslessness matrix
+        run: node .github/scripts/book-reconstruction-b00-f6a-lifecycle-graph-001-qualify.js | tee b00-f6a-lifecycle-node-${{ matrix.node }}.log
+      - name: Run recovered lifecycle predecessor harness
+        run: node .github/scripts/book-system-lifecycle-transition-001-qualify.js | tee b00-f6a-lifecycle-predecessor-node-${{ matrix.node }}.log
+      - name: Hash evidence
+        if: always()
+        run: sha256sum b00-f6a-subject-node-${{ matrix.node }}.txt b00-f6a-core-node-${{ matrix.node }}.log b00-f6a-store-node-${{ matrix.node }}.log b00-f6a-f5-node-${{ matrix.node }}.log b00-f6a-rights-node-${{ matrix.node }}.log b00-f6a-style-node-${{ matrix.node }}.log b00-f6a-lifecycle-node-${{ matrix.node }}.log b00-f6a-lifecycle-predecessor-node-${{ matrix.node }}.log > b00-f6a-node-${{ matrix.node }}.sha256
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: book-reconstruction-b00-f6a-node-${{ matrix.node }}-${{ github.sha }}
+          path: |
+            b00-f6a-subject-node-${{ matrix.node }}.txt
+            b00-f6a-core-node-${{ matrix.node }}.log
+            b00-f6a-store-node-${{ matrix.node }}.log
+            b00-f6a-f5-node-${{ matrix.node }}.log
+            b00-f6a-rights-node-${{ matrix.node }}.log
+            b00-f6a-style-node-${{ matrix.node }}.log
+            b00-f6a-lifecycle-node-${{ matrix.node }}.log
+            b00-f6a-lifecycle-predecessor-node-${{ matrix.node }}.log
+            b00-f6a-node-${{ matrix.node }}.sha256
+          if-no-files-found: error
