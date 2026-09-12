@@ -7,16 +7,16 @@
   "current_authority": "CURRENT-AUTHORITY-003",
   "topology": "TOPOLOGY-005",
   "candidate_branch": "documents/spine-effect-runtime-001-20260912",
-  "exact_qualified_subject_sha": "9442b3d3aa4c1bc791a7de905058157758e5ce64",
-  "qualification_workflow_run_id": 34689179067,
-  "qualification_job_id": 103541328797,
+  "exact_qualified_subject_sha": "e6358b90ea92fff8f2e70e59d90c705f0dc3e88c",
+  "qualification_workflow_run_id": 34689307899,
+  "qualification_job_id": 103541658239,
   "environment": {
     "runner": "github-hosted",
-    "os": "ubuntu-latest",
+    "os": "ubuntu-24.04",
     "java": "Temurin 21",
     "standing": "HOSTED_PORTABLE_ONLY"
   },
-  "status": "QUALIFIED_PORTABLE__OWNER_CONTROL_FREEZE_PENDING",
+  "status": "QUALIFIED_PORTABLE__EXTERNAL_FENCE_RESTORED__OWNER_CONTROL_FREEZE_PENDING",
   "route_integration": {
     "effectful_routes": ["REBUILD", "MASTER"],
     "runtime": "DocumentExistingArtifactEffectExecutor",
@@ -44,12 +44,18 @@
         "class": "CUMULATIVE_QUALIFIER_BINDING_DEFECT",
         "evidence": "qualification/document-system/spine/DOCUMENTS-SPINE-EFFECT-RUNTIME-INTEGRATION-QUALIFICATION-ATTEMPT-002.txt",
         "repair": "inject explicit qualifier-only DocumentEffectAdmissionProvider into effectful portable callers"
+      },
+      {
+        "class": "QUALIFIER_EXTERNAL_FENCE_OVERSCOPE",
+        "evidence": "qualification/document-system/spine/DOCUMENTS-SPINE-EFFECT-RUNTIME-EXTERNAL-FENCE-RECONCILIATION-001.json",
+        "repair": "restore ExternalQualification callers to the no-test-provider path so real external admission is still required and effectful execution otherwise fails closed"
       }
     ]
   },
   "test_provider_boundary": {
     "provider": "PortableTestDocumentEffectAdmission",
-    "classification": "QUALIFIER_ONLY",
+    "classification": "QUALIFIER_ONLY__PORTABLE_TESTS_ONLY",
+    "external_qualification_binding": "UNBOUND__REAL_EXTERNAL_ADMISSION_REQUIRED_OR_FAIL_CLOSED",
     "production_policy_authority": false,
     "real_external_provider_executed": false
   },
@@ -77,7 +83,7 @@
     "required_work": [
       "re-read CURRENT-AUTHORITY and exact documents/control-v1 live head",
       "re-read Documents delegation and repair state and fail closed on any new overlap",
-      "reconcile exact qualified subject 9442b3d3aa4c1bc791a7de905058157758e5ce64 onto the live Documents owner lineage without importing non-Documents semantics",
+      "reconcile exact qualified subject e6358b90ea92fff8f2e70e59d90c705f0dc3e88c onto the live Documents owner lineage without importing non-Documents semantics",
       "preserve exact qualification receipt and update Documents control evidence",
       "rerun changed-subject qualification if reconciliation changes executable bytes",
       "do not claim native, external-provider, publication, production or A-01 standing"
