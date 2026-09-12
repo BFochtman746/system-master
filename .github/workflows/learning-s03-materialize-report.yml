@@ -1,4 +1,4 @@
-# repository-native durable materialization v1
+# repository-native durable materialization v2
 name: Learning S03 Interface Materialization Report
 
 on:
@@ -82,12 +82,13 @@ jobs:
       - name: Commit exact materialization report
         shell: bash
         run: |
-          if git diff --quiet -- qualification/learning/ownership/LRN-OWNERSHIP-FREEZE-001B-R3B-S03-R1-INTERFACE-MATERIALIZATION.json; then
+          path='qualification/learning/ownership/LRN-OWNERSHIP-FREEZE-001B-R3B-S03-R1-INTERFACE-MATERIALIZATION.json'
+          if [ -z "$(git status --porcelain -- "$path")" ]; then
             echo 'No report delta.'
             exit 0
           fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add qualification/learning/ownership/LRN-OWNERSHIP-FREEZE-001B-R3B-S03-R1-INTERFACE-MATERIALIZATION.json
+          git add "$path"
           git commit -m 'learning: persist exact S03 interface materialization'
           git push origin HEAD:learning/ownership-freeze-001b-20260912
