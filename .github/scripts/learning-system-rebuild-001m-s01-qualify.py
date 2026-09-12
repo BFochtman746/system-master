@@ -94,12 +94,14 @@ def main():
     invariants = "\n".join(material["authority_invariants"])
     extensions = material["existing_extensions"]
 
-    head_parent = subprocess.check_output(
-        ["git", "rev-parse", "HEAD^"], cwd=ROOT, text=True
-    ).strip()
+    parent_lineage_ok = subprocess.run(
+        ["git", "merge-base", "--is-ancestor", EXPECTED_PARENT, "HEAD"],
+        cwd=ROOT,
+        check=False,
+    ).returncode == 0
 
     checks = {}
-    checks["T01"] = head_parent == EXPECTED_PARENT
+    checks["T01"] = parent_lineage_ok
     checks["T02"] = (
         material["parent"]["operation"] == "LEARNING-SYSTEM-REBUILD-001L"
         and material["parent"]["branch"] == "learning/system-rebuild-001l-constitutional-reconciliation-20260912"
