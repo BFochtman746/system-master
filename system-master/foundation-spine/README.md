@@ -16,6 +16,25 @@ There are only three substantive Foundation & Spine documents:
 
 If another prose file conflicts with these documents, these documents define the intended Foundation & Spine design. Historical evidence can prove that something exists or passed a test; it cannot silently change architecture or ownership.
 
+## Operational build blueprint
+
+Foundation & Spine development proceeds one logical system at a time in dependency order.
+
+For each logical system:
+
+1. **Forensic census** — inspect current code, historical/recovered substrate, schemas, tests, qualification evidence and known failures. Classify each relevant piece as keep, modify, consolidate, replace or missing.
+2. **Design closure** — lock canonical ownership, negative ownership, state, persistence, contracts, dependencies, invariants, concurrency/idempotency behavior, security/resource/evidence boundaries, failure behavior and recovery behavior before expanding implementation.
+3. **Complete implementation** — build every mandatory success and failure behavior required by the current specification; do not stop at a skeleton, stub or happy path.
+4. **Isolated qualification** — test the component by itself with all applicable contract, state, persistence, concurrency, security, failure, recovery and adversarial cases.
+5. **Performance evaluation** — measure the component under representative and pressure conditions, including latency, throughput, memory, CPU, storage/database growth, contention and recovery cost where applicable. Tune or redesign when the measured result is inadequate.
+6. **Boundary qualification** — test the component with each completed direct dependency and consumer across real contracts, including negative and failure behavior.
+7. **Accumulated-spine qualification** — rerun the integrated Foundation & Spine containing every completed component so far. A new component may invalidate prior standing when it changes contracts, load, ownership, authority, state or environment assumptions.
+8. **Representative implementation campaigns** — run realistic System Master work through the growing spine, not only synthetic component tests, to expose coupling, bottlenecks, hidden shared state, duplicate authority, recovery weakness and incorrect ownership.
+9. **Repair before advancing** — if isolated, boundary, performance or accumulated testing exposes a defect or wrong architectural assumption, repair/redesign the affected component(s) and rerun impacted qualification before moving to the next logical system.
+10. **Conditional freeze** — a component is frozen only against the exact current architecture, implementation and evidence subject. Later material changes require requalification; earlier evidence is reused only where its claim remains valid.
+
+The four standing levels are therefore cumulative but distinct: **component qualification**, **pair/boundary qualification**, **accumulated-spine qualification**, and **representative implementation qualification**. No component is considered permanently complete merely because it once passed an isolated test.
+
 ## A-01
 
 A-01 is a qualification environment, not an architectural authority. If A-01 was disconnected or unavailable, the correct result is **NOT EXECUTED — ENVIRONMENT UNAVAILABLE**. That is an evidence gap, not an implementation failure and not an architecture failure. A-01 PASS may be claimed only after the exact subject actually executes there and passes.
