@@ -151,8 +151,8 @@ function revalidateAgainstParent(args) {
         observed_parent_state_digest: args.currentParentState.state_digest,
         guard_id: GUARD_ID,
       };
+      staleIds.push(requestId);
     }
-    if (next.decision_request_snapshots && next.decision_request_snapshots[item.originalRequestId]) staleIds.push(item.originalRequestId);
   }
   base.validateQueueLedger(next, args.currentParentState);
   return {
