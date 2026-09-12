@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-subject_root="${1:-.}"
-legacy_root="${2:-$subject_root}"
+subject_root="$(cd "${1:-.}" && pwd)"
+legacy_root="$(cd "${2:-$subject_root}" && pwd)"
 component_rel="system-master/foundation-spine/root-authority-registry"
 component_root="$subject_root/$component_rel"
 if [[ ! -d "$component_root" ]]; then
@@ -15,12 +15,22 @@ if [[ ! -f "$legacy_root/governance/CURRENT-AUTHORITY.json" ]]; then
 fi
 
 work_dir="$(mktemp -d)"
-trap 'rm -rf "$work_dir"' EXIT
 classes="$work_dir/classes"
 manifest="$work_dir/bootstrap.tsv"
 snapshot="$work_dir/root-registry.bin"
 evidence_dir="${ROOT_REGISTRY_EVIDENCE_DIR:-$work_dir/evidence}"
 mkdir -p "$classes" "$evidence_dir"
+
+cleanup() {
+  status=$?
+  if [[ -n "${ROOT_REGISTRY_PERSIST_EVIDENCE_TO:-}" ]]; then
+    mkdir -p "$ROOT_REGISTRY_PERSIST_EVIDENCE_TO"
+    cp -R "$evidence_dir"/. "$ROOT_REGISTRY_PERSIST_EVIDENCE_TO"/ 2>/dev/null || true
+  fi
+  rm -rf "$work_dir"
+  exit "$status"
+}
+trap cleanup EXIT
 
 subject_sha="$(git -C "$subject_root" rev-parse HEAD 2>/dev/null || printf 'UNVERSIONED')"
 legacy_sha="$(git -C "$legacy_root" rev-parse HEAD 2>/dev/null || printf 'UNVERSIONED')"
@@ -70,8 +80,3 @@ fi
   echo "legacy_sha=$legacy_sha"
   echo "evidence_class=${ROOT_REGISTRY_EVIDENCE_CLASS:-PORTABLE}"
 } | tee "$evidence_dir/result.txt"
-
-if [[ -n "${ROOT_REGISTRY_PERSIST_EVIDENCE_TO:-}" ]]; then
-  mkdir -p "$ROOT_REGISTRY_PERSIST_EVIDENCE_TO"
-  cp -R "$evidence_dir"/. "$ROOT_REGISTRY_PERSIST_EVIDENCE_TO"/
-fi
