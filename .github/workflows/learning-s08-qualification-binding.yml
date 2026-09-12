@@ -1,0 +1,94 @@
+name: Learning S08 Qualification Evidence Interface Binding
+
+on:
+  push:
+    branches:
+      - learning/ownership-freeze-001b-20260912
+    paths:
+      - '.github/workflows/learning-s08-qualification-binding.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  bind:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: learning/ownership-freeze-001b-20260912
+          fetch-depth: 0
+      - name: Bind exact S08 qualification interfaces
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import base64, csv, gzip, hashlib, io, json, pathlib
+
+          source = pathlib.Path('qualification/learning/ownership/LRN-OWNERSHIP-FREEZE-001B-R3B-S02-R2-INTERFACES.csv.gz.b64')
+          raw = gzip.decompress(base64.b64decode(source.read_text(encoding='utf-8').strip()))
+          digest = hashlib.sha256(raw).hexdigest()
+          expected = '4f4387956bd8189b7a65f5de94ab3c722cb34f249ebe8a94ad74b4c0d0c3cbc0'
+          if digest != expected:
+              raise SystemExit(f'FAIL decoded ledger sha256 {digest} != {expected}')
+          reader = csv.DictReader(io.StringIO(raw.decode('utf-8-sig')))
+          rows = list(reader)
+          if len(rows) != 112:
+              raise SystemExit(f'FAIL active interface row count {len(rows)} != 112')
+
+          ids = ['I077','I032','I086','I109']
+          by_id = {str(r.get('interface_id','')).strip(): r for r in rows}
+          selected = [by_id[i] for i in ids if i in by_id]
+          missing = [i for i in ids if i not in by_id]
+          if missing:
+              raise SystemExit('FAIL missing S08 interfaces: ' + ','.join(missing))
+          names = {r['interface_id']: r['name'] for r in selected}
+          expected_names = {
+              'I077':'RequestQualificationEvidencePackaging',
+              'I032':'GetEvidencePackageForQualification',
+              'I086':'QualificationEvidencePackaged',
+              'I109':'QualificationExportNotAuthorized'
+          }
+          if names != expected_names:
+              raise SystemExit(f'FAIL S08 identity/name mismatch {names}')
+          for iid in ('I077','I032','I086'):
+              if by_id[iid].get('canonical_owner') != 'MOD-LEARNING-001':
+                  raise SystemExit(f'FAIL {iid} Learning owner mismatch')
+          if by_id['I109'].get('canonical_owner') == 'MOD-LEARNING-001':
+              raise SystemExit('FAIL I109 must remain shared authorization/privacy authority')
+
+          report = {
+              'artifact_id':'LRN-OWNERSHIP-FREEZE-001B-R3B-S08-R1-QUALIFICATION-INTERFACE-BINDING',
+              'date':'2026-09-12',
+              'owner_path':'SYSTEM_MASTER/LEARNING',
+              'source_path':str(source),
+              'decoded_ledger_sha256':digest,
+              'active_interface_rows':len(rows),
+              'selected_interface_ids':ids,
+              'selected_rows':selected,
+              'standing':'EXACT_REPOSITORY_NATIVE_S08_INTERFACE_BINDING_COMPLETE__OWNER_ADJUDICATION_REQUIRED',
+              'non_claims':[
+                  'Learning packages evidence but does not own job eligibility or certification decisions',
+                  'I109 remains shared authorization/privacy authority',
+                  'no runtime implementation or real qualification claim',
+                  'no participant consent mastery retention transfer psychometric SME certification claim',
+                  'no native A-01 production claim'
+              ]
+          }
+          out = pathlib.Path('qualification/learning/ownership/LRN-OWNERSHIP-FREEZE-001B-R3B-S08-R1-QUALIFICATION-INTERFACE-BINDING.json')
+          out.write_text(json.dumps(report, indent=2, ensure_ascii=False)+'\n', encoding='utf-8')
+          print('BOUND=' + ','.join(ids))
+          PY
+      - name: Commit exact S08 binding report
+        shell: bash
+        run: |
+          path='qualification/learning/ownership/LRN-OWNERSHIP-FREEZE-001B-R3B-S08-R1-QUALIFICATION-INTERFACE-BINDING.json'
+          if [ -z "$(git status --porcelain -- "$path")" ]; then
+            echo 'No binding delta.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add "$path"
+          git commit -m 'learning: persist exact S08 qualification interface binding'
+          git push origin HEAD:learning/ownership-freeze-001b-20260912
