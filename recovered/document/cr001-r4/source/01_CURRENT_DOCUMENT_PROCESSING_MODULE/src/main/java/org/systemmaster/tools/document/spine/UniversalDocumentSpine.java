@@ -36,6 +36,8 @@ import java.util.Set;
  * persisted before later proof stages so restart can continue without replaying the native mutation.
  */
 public final class UniversalDocumentSpine {
+    private static final String ENGINE_ID = DocumentExistingArtifactEffectExecutor.ENGINE_ID;
+
     private final GovernedArtifactGateway gateway;
     private final DocumentSpineCheckpointStore checkpoints;
     private final DocumentSpineVersionStore versions;
