@@ -39,7 +39,10 @@ jobs:
           ROOT='system-master/foundation-spine/system-root'
           T="$ROOT/.transport"
           mkdir -p "$ROOT/src/main/java/org/systemmaster/foundation/root" "$ROOT/src/test/java/org/systemmaster/foundation/root"
-          cat "$T"/FileSystemRootStore.java.part-* > "$ROOT/src/main/java/org/systemmaster/foundation/root/FileSystemRootStore.java"
+          # The contents API preserved one transport-padding byte in part 000. Remove only that
+          # non-source padding byte, then prove the exact intended source by SHA-256 below.
+          head -c -1 "$T/FileSystemRootStore.java.part-000" > "$ROOT/src/main/java/org/systemmaster/foundation/root/FileSystemRootStore.java"
+          cat "$T/FileSystemRootStore.java.part-001" "$T/FileSystemRootStore.java.part-002" "$T/FileSystemRootStore.java.part-003" "$T/FileSystemRootStore.java.part-004" "$T/FileSystemRootStore.java.part-005" >> "$ROOT/src/main/java/org/systemmaster/foundation/root/FileSystemRootStore.java"
           cat "$T"/SystemRootQualificationTest.java.part-* > "$ROOT/src/test/java/org/systemmaster/foundation/root/SystemRootQualificationTest.java"
           cat "$T"/SystemRootPerformanceTest.java.part-* > "$ROOT/src/test/java/org/systemmaster/foundation/root/SystemRootPerformanceTest.java"
           test "$(sha256sum "$ROOT/src/main/java/org/systemmaster/foundation/root/FileSystemRootStore.java" | cut -d' ' -f1)" = 'e4f5a5e91a11ee31c53597ef07b361aad82b6f57e4cc3617e40f959ce7f07d60'
