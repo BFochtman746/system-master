@@ -103,8 +103,6 @@ class AdaptiveTutorJourneyDirector(AdaptiveEntryJourneyDirector):
         journey = self._journey(journey_id)
         skill_id = turn_result.get("next_action", {}).get("skill_id")
         if not skill_id:
-            # The tutor result's next action may not carry the skill in every domain;
-            # recover it from the completed turn identity instead.
             turn_id = turn_result["turn_id"]
             rows = self.repo.completed_tutor_turns(
                 turn_result["session_id"], journey["course_id"],
@@ -327,10 +325,25 @@ def submit_current_tutor_interaction(
     }
     prior_turn = repo.get_tutor_turn(operation_id, tutor_payload)
     if prior_turn and prior_turn["state"] == "COMPLETE":
-        tutor_result = prior_turn["body"]["result"]
+        # Re-enter the same tutor wrapper over the already-completed turn. The
+        # underlying tutor detects the exact operation/payload replay and performs
+        # no new write; the S04 governance mixin then deterministically reapplies
+        # the same policy annotations as on first execution. This preserves exact
+        # API replay without duplicating a tutor turn or minting mastery.
+        tutor_result = tutor.process_turn(
+            operation_id=operation_id,
+            turn_id=turn_id,
+            session_id=session_id,
+            learner_id=learner_id,
+            course_id=course_id,
+            skill_id=skill_id,
+            probe_id=probe_id,
+            response=response,
+            requested_help_level=requested_help_level,
+            now=submitted_at,
+            active_assessment_item_id=None,
+        )
     else:
-        # A new or crash-resumed tutor write still requires this bound interaction's
-        # skill to be the current tutor route. Exact completed replay is handled above.
         current = journey.plan_next(
             operation_id=f"{operation_id}:current",
             decision_id=f"DEC-TUTOR-SUBMIT-{turn_id}",
