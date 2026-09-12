@@ -18,17 +18,17 @@ try{
   'ba5713958cd2930c7c54e3d5fdadc41dd7a7a9ca',
   '347b0e4931f6fbc53a9c7bfe906e634fd90ac9af',
   'production_authorized=false',
-  'Requirements authorized for direct semantic owner transfer',
   'CORE-DURABLE-RUNTIME-CONTINUITY-RECOVERY-INVENTORY-001',
   'No A-01 target execution',
   'no historical qualification is transferred'
  ];
- // The transfer rule is expressed as prose rather than as a count in this recovery unit.
- for(const phrase of required.filter(x=>x!=='Requirements authorized for direct semantic owner transfer')) if(!text.includes(phrase)) throw new Error(`missing ${phrase}`);
+ for(const phrase of required) if(!text.includes(phrase)) throw new Error(`missing ${phrase}`);
  const rows=[...text.matchAll(/^\| (Governed Goal \/ Intent|Long-lived Work identity \/ Work lifecycle|Project identity \/ grouping \/ project lifecycle|Orchestrator Plan \/ Step truth|Durable Job \/ Attempt \/ fence \/ checkpoint|Durable signal\/timer\/pause\/cancel recovery|Handoff\/replacement recovery|Retry\/backlog\/resource pacing|Query\/progress projection|Qualification\/evidence closure) \|/gm)];
  if(rows.length!==10) throw new Error(`owner adjudication rows ${rows.length} != 10`);
- const unresolved=[...text.matchAll(/^\d+\. /gm)].length;
- if(unresolved<20) throw new Error(`expected >=20 explicit collision/blocker items, got ${unresolved}`);
- console.log(JSON.stringify({subject,base,current_gwp_paths:0,owner_adjudication_rows:10,standing:'RECOVERY_QUALIFIED__WORK_PROJECT_ORCHESTRATOR_DESIGN_LOCK_BLOCKED',result:'PASS'}));
- console.log('PASS FOUNDATION_WORK_PROJECT_RECOVERY owner_rows=10 current_gwp_paths=0');
+ const workProjectBlockers=[...text.matchAll(/^\d+\. /gm)].length;
+ if(workProjectBlockers!==12) throw new Error(`expected 12 explicit Work/Project blocker items, got ${workProjectBlockers}`);
+ const orchestratorCollisions=[...text.matchAll(/^- /gm)].length;
+ if(orchestratorCollisions<8) throw new Error(`expected >=8 explicit Orchestrator collision bullets, got ${orchestratorCollisions}`);
+ console.log(JSON.stringify({subject,base,current_gwp_paths:0,owner_adjudication_rows:10,work_project_blockers:12,orchestrator_collision_items:orchestratorCollisions,standing:'RECOVERY_QUALIFIED__WORK_PROJECT_ORCHESTRATOR_DESIGN_LOCK_BLOCKED',result:'PASS'}));
+ console.log('PASS FOUNDATION_WORK_PROJECT_RECOVERY owner_rows=10 blockers=12 current_gwp_paths=0');
 }catch(e){console.error(e&&e.stack?e.stack:String(e));process.exit(1);}
