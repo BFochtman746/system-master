@@ -1,0 +1,216 @@
+{
+  "registry_id": "WORK-OBLIGATION-REGISTRY-012",
+  "effective_date": "2026-09-12",
+  "product_root": "SYSTEM_MASTER",
+  "topology": "governance/SYSTEM-TOPOLOGY-005.json",
+  "supersedes_current_selection": "governance/WORK-OBLIGATION-REGISTRY-011.json",
+  "program_job_lock": "governance/SYSTEM-PROGRAM-JOB-LOCK-001.json",
+  "programming_work_program_lock": "governance/programs/PROGRAMMING-WORK-PROGRAM-LOCK-001.json",
+  "system_completion_status": "governance/SYSTEM-COMPLETION-STATUS-001.json",
+  "purpose": "Lock current work to active peer jobs while preserving terminal Prose retirement, Book reconstruction B00/B01 freezes, completed B02-A recovery/inventory, Book-only B02-B analysis, Programming work-program continuity, and Knowledge Recovery 001 as the highest discretionary System Master priority while selected.",
+  "states": ["READY", "ACTIVE", "BLOCKED", "HOLD", "DEFERRED", "OWNER_SELECTION_REQUIRED", "SUPERSEDED", "CLOSED"],
+  "rules": [
+    "Every non-closed peer-system obligation has one executable owner_path valid under SYSTEM-TOPOLOGY-005.",
+    "PROSE is complete and retired. No active obligation may be owned by PROSE or SYSTEM_MASTER/BOOK/PROSE.",
+    "A historical obligation name containing PROSE may remain only for lineage when its current owner is SYSTEM_MASTER/BOOK and its objective is Book-owned integration of preserved completed capability.",
+    "DOCUMENTS may not absorb, schedule, repair, qualify, research, telemeter or claim Prose work.",
+    "LEARNING may not cross into Book, Documents or Programming product work.",
+    "CORE supplies shared Foundation/Spine and integration primitives but may not take peer-system or Programming-specific engineering semantics.",
+    "PROGRAMMING is a named active work program with preserved foundation/build/assurance evidence continuity and is not yet a Topology-005 peer system.",
+    "SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001 is the highest discretionary System Master priority while selected: Programming proving-corpus recovery first, then remaining authorized catalog/archive recovery.",
+    "Knowledge Recovery priority does not override non-discretionary safety/control integrity, take peer product semantics, or create a Programming peer lane.",
+    "Changed subjects require fresh qualification; no PASS transfers across SHA, ownership, topology or system boundaries."
+  ],
+  "owner_head_snapshot": {
+    "CORE": "d88a5952e93b5bae4ce96e4017f334aeb8abaa00",
+    "LEARNING": "e3196089f77dde376944a08eac78a697e57d1535",
+    "BOOK": "cc5093bb46bb54a4b7245ba479ed97ffa770c996",
+    "DOCUMENTS": "6be5ca1073bf8d119d9841e8cce1a6eb9e2ac7d3"
+  },
+  "obligations": [
+    {
+      "obligation_id": "SYSTEM-MASTER-INTEGRATION-COORDINATION-001",
+      "owner_path": "SYSTEM_MASTER/CORE",
+      "semantic_owner_path": "SYSTEM_MASTER",
+      "state": "ACTIVE",
+      "priority": "MANDATORY_PRODUCT_COORDINATION",
+      "objective": "Coordinate integration of incomplete CORE, LEARNING, BOOK and DOCUMENTS into System Master while preserving owner authority. PROSE is complete and retired and is not an active lane or successor."
+    },
+    {
+      "obligation_id": "PROGRAMMING-WORK-PROGRAM-CONTINUATION-001",
+      "owner_path": "SYSTEM_MASTER",
+      "program_id": "PROGRAMMING",
+      "program_lock": "governance/programs/PROGRAMMING-WORK-PROGRAM-LOCK-001.json",
+      "state": "READY",
+      "priority": "INDEPENDENT_WORK_PROGRAM",
+      "second_shift_state": "NO_PEER_LANE_BEFORE_TOPOLOGY_ADMISSION",
+      "objective": "Continue the preserved Programming engineering work program, recover only missing exact source/custody evidence, select the first genuinely unclosed Programming package, and prepare explicit System Master integration/admission without crossing Core/Learning/Book/Documents jobs or silently creating a peer system."
+    },
+    {
+      "obligation_id": "SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001",
+      "owner_path": "SYSTEM_MASTER/CORE",
+      "semantic_owner_path": "SYSTEM_MASTER",
+      "parent_program_id": "PROGRAMMING",
+      "state": "ACTIVE",
+      "priority": "HIGHEST_DISCRETIONARY_SYSTEM_MASTER_PRIORITY",
+      "second_shift_state": "CORE_PRIORITY_WHEN_OWNER_VALID_AND_UNATTENDED_SAFE",
+      "objective": "Recover the Programming proving corpus first through deterministic source/custody/provenance work and full-corpus preparation, then recover remaining authorized catalog/archive evidence. Preserve source identities, exact hashes, blockers and A-01 boundaries; do not create a Programming peer lane or take peer-system semantics."
+    },
+    {
+      "obligation_id": "CORE-SMR021-USER-EXPERIENCE-001",
+      "owner_path": "SYSTEM_MASTER/CORE",
+      "state": "ACTIVE",
+      "priority": "CORE_DEPENDENCY_VALID_AFTER_NONDISCRETIONARY_AND_KNOWLEDGE_RECOVERY_SELECTION",
+      "objective": "Finish dependency-valid shared Foundation/Spine SMR021 work without taking Learning, Book, Documents or Programming-specific product semantics."
+    },
+    {
+      "obligation_id": "CORE-CORRECTED-SOURCE-CUSTODY-001",
+      "owner_path": "SYSTEM_MASTER/CORE",
+      "state": "BLOCKED",
+      "blocker_class": "SOURCE_CUSTODY",
+      "objective": "Preserve and recover corrected Core runnable-source custody without taking peer-system or Programming product work."
+    },
+    {
+      "obligation_id": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001",
+      "owner_path": "SYSTEM_MASTER/LEARNING",
+      "state": "ACTIVE",
+      "objective": "Finish Learning through the frozen-source curriculum/compiler, assessment, mastery/adaptation and evidence train, then bind Learning-to-System-Master interfaces without crossing Book, Documents, Programming or Core product ownership."
+    },
+    {
+      "obligation_id": "LEARNING-REAL-PARTICIPANT-PILOT-001",
+      "owner_path": "SYSTEM_MASTER/LEARNING",
+      "state": "BLOCKED",
+      "blocker_class": "HUMAN_ONLY",
+      "objective": "Execute the real participant Learning pilot only with genuine explicit consent and real learner evidence."
+    },
+    {
+      "obligation_id": "BOOK-SYSTEM-CANONICAL-CONTENT-OBJECT-ADMISSION-001-A01-REGISTRATION-AND-QUALIFICATION-PREP",
+      "owner_path": "SYSTEM_MASTER/BOOK",
+      "state": "BLOCKED",
+      "blocker_class": "SHARED_A01_AUTHORITY",
+      "objective": "Route the unchanged original Book canonical-content-admission subject through central registered A-01 authority without mutating or relabeling hosted evidence."
+    },
+    {
+      "obligation_id": "BOOK-RECONSTRUCTION-B02-B",
+      "owner_path": "SYSTEM_MASTER/BOOK",
+      "state": "READY",
+      "priority": "BOOK_OWNER_LANE_PRIORITY",
+      "objective": "Analyze the completed B02-A Source Intake & Existing-Book Recovery inventory only: identify gaps, duplicates, weak implementations, incorrect placement, stale assumptions and unresolved owner/interface boundaries; determine the smallest dependency-valid research/adjudication continuation. Do not begin B02 design or implementation."
+    },
+    {
+      "obligation_id": "DOCUMENTS-CURRENT-ADMISSION-001",
+      "owner_path": "SYSTEM_MASTER/DOCUMENTS",
+      "state": "ACTIVE",
+      "objective": "Finish Documents using preserved DOCX/PDF/PPTX/document implementation, exact custody and fresh current-subject qualification, then integrate Documents upward into System Master. Documents receives no Prose work."
+    },
+    {
+      "obligation_id": "DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-IMPORT-AND-EXACT-SUBJECT-QUALIFICATION-002",
+      "owner_path": "SYSTEM_MASTER/DOCUMENTS",
+      "state": "BLOCKED",
+      "priority": "DOCUMENTS_OWNER_LANE_PRIORITY",
+      "parent_obligation_id": "DOCUMENTS-CURRENT-ADMISSION-001",
+      "objective": "Resume exact CR001-R4 GitHub-native source import only when the already-verified exact bytes can cross an approved file-capable transport; then bind exact identity and run fresh qualification. Historical PASS does not transfer.",
+      "blocker_class": "SOURCE_CUSTODY",
+      "blocker_evidence": "qualification/document-system/r4/DOCUMENTS-R4-EXACT-SOURCE-HANDOFF-RECONCILIATION-001.json"
+    },
+    {
+      "obligation_id": "A01-CONTROL-PLANE-SELFTEST-A1-REPLACEMENT-RERUN-001",
+      "owner_path": "SYSTEM_MASTER/SHARED_INFRASTRUCTURE/A01",
+      "administrative_owner": "SYSTEM_MASTER/CORE",
+      "state": "CLOSED",
+      "final_standing": "DEAD_LETTER__REPAIR_BUDGET_EXHAUSTED",
+      "final_result_class": "SUBJECT_FAILURE",
+      "classification_note": "The authoritative receipt labeled the failed replacement SUBJECT_FAILURE, but A01-CONTROL-PLANE-SELFTEST is registered source=control_plane and the demonstrated assertion failure was in current control-plane bootstrap authority linkage. Preserve the receipt unchanged; route the current control-plane defect as a fresh current-SHA qualification obligation rather than reopening this exhausted repair transaction.",
+      "repair_transaction": "A01-REPAIR-a01-run-34431764843-A01-CONTROL-PLANE-SELFTEST-A1",
+      "terminal_event": "governance/repair/events/A01-REPAIR-a01-run-34431764843-A01-CONTROL-PLANE-SELFTEST-A1/0006-transaction_dead_lettered.json",
+      "a01_receipt_pointer": "github-actions-run:34595673549:artifact:A01-CONTROL-PLANE-SELFTEST-34595673549-evidence",
+      "objective": "Historical terminal record for the exhausted replacement-rerun transaction; no additional same-lineage repair or rerun is authorized."
+    },
+    {
+      "obligation_id": "A01-CONTROL-PLANE-SELFTEST-CURRENT-SHA-QUALIFICATION-001",
+      "owner_path": "SYSTEM_MASTER/SHARED_INFRASTRUCTURE/A01",
+      "administrative_owner": "SYSTEM_MASTER/CORE",
+      "state": "CLOSED",
+      "priority": "NONDISCRETIONARY_CONTROL_PLANE_REQUALIFICATION",
+      "predecessor": "A01-CONTROL-PLANE-SELFTEST-A1-REPLACEMENT-RERUN-001",
+      "demonstrated_defect": "SYSTEM-MASTER-WORKSTREAM-BOOTSTRAP.md omitted the A01-OVERNIGHT-001.md authority link required by the registered control-plane self-test.",
+      "objective": "Closed by authoritative A-01 PASS on exact subject/control-plane SHA 7df303eafdc425d51d9be964c7e0ffd4ae21cf13 after repairing the bootstrap overnight-authority link and aligning the stale legacy-workflow freeze selftest invariant to the authoritative v2 retirement contract. This PASS is exact-subject evidence only and does not transfer to later changed bytes.",
+      "final_standing": "A01_EXACT_SUBJECT_PASS",
+      "final_result_class": "PASS",
+      "exact_subject_sha": "7df303eafdc425d51d9be964c7e0ffd4ae21cf13",
+      "exact_control_plane_sha": "7df303eafdc425d51d9be964c7e0ffd4ae21cf13",
+      "a01_run_id": 34596555005,
+      "a01_artifact_id": 10262098747,
+      "a01_artifact_name": "A01-CONTROL-PLANE-SELFTEST-34596555005-evidence",
+      "a01_artifact_sha256": "b8362c117a4975d7b02e3bb6d44050aa377511b5365752487bd8e20c93bae6ff",
+      "promotion_authorized": true,
+      "closed_at": "2026-09-11T11:58:40Z"
+    },
+    {
+      "obligation_id": "SECOND-SHIFT-LIVE-AUTHORITY-SUCCESSOR-ENFORCEMENT-002",
+      "owner_path": "SYSTEM_MASTER/SHARED_INFRASTRUCTURE",
+      "administrative_owner": "SYSTEM_MASTER/CORE",
+      "state": "ACTIVE",
+      "objective": "Enforce live owner/objective semantics, topology-peer coverage, lane-wide mutation arbitration, truthful utilization and retired-system non-resurrection without crossing owner lanes."
+    },
+    {
+      "obligation_id": "HEADLESS-COMPUTE-DATA-SPREADSHEET-CONTRACT-001",
+      "owner_path": "SYSTEM_MASTER",
+      "state": "HOLD",
+      "objective": "Bind spreadsheet/math/user-data-analysis semantics over Core shared execution/artifact/data primitives after current system-integration priorities permit."
+    },
+    {
+      "obligation_id": "HEADLESS-SOFTWARE-ENGINEERING-CONTRACT-001",
+      "owner_path": "SYSTEM_MASTER",
+      "state": "HOLD",
+      "objective": "Define the eventual System Master headless software-engineering service boundary after the Programming work-program architecture/admission decision; this HOLD is not the Programming work program itself."
+    },
+    {
+      "obligation_id": "HEADLESS-RESEARCH-KNOWLEDGE-CONTRACT-001",
+      "owner_path": "SYSTEM_MASTER",
+      "state": "HOLD",
+      "objective": "Bind research/knowledge/external-information semantics after current system-integration priorities permit."
+    },
+    {
+      "obligation_id": "HEADLESS-CONNECTED-ACTION-AUTHORITY-CONTRACT-001",
+      "owner_path": "SYSTEM_MASTER",
+      "state": "HOLD",
+      "objective": "Bind email/calendar/automation/plugin user-action semantics after current system-integration priorities permit."
+    },
+    {
+      "obligation_id": "HEADLESS-MEDIA-CAPABILITY-CONTRACT-001",
+      "owner_path": "SYSTEM_MASTER",
+      "state": "HOLD",
+      "objective": "Bind image/audio/video/media semantics after current system-integration priorities permit."
+    }
+  ],
+  "superseded_at_transition": [
+    {
+      "obligation_id": "BOOK-RECONSTRUCTION-B02-A",
+      "final_state": "CLOSED",
+      "reason": "B02-A lossless recovery/inventory closed on book-system/control-v1 with 50 atomic requirements accounted, unaccounted requirements = 0 and no B00/B01 invariant contradiction. The exact dependency-valid Book successor is BOOK-RECONSTRUCTION-B02-B analysis only."
+    },
+    {
+      "obligation_id": "BOOK-PROSE-PHASE-2-ORCHESTRATOR-CLOSURE-CENSUS-001",
+      "final_state": "SUPERSEDED",
+      "reason": "Reconstruction authority superseded the stale pre-reconstruction Phase-2/Phase-3A objective. B00 and B01 are frozen and old scheduler/open-seam work is not replayed. Historical Prose remains provenance only."
+    },
+    {
+      "obligation_id": "DOCUMENTS-PROSE-ABSORPTION-INTEGRATION-001",
+      "final_state": "SUPERSEDED",
+      "reason": "PROSE is complete and retired. Documents receives no Prose work."
+    },
+    {
+      "obligation_id": "BOOK-DOCUMENTS-PROSE-SERVICE-INTEGRATION-PHASE-1-001",
+      "final_state": "SUPERSEDED",
+      "reason": "Any remaining completed-Prose integration is ordinary BOOK-owned integration; Documents remains a peer document/artifact service system."
+    },
+    {
+      "obligation_id": "PROSE-STANDALONE-OR-CHILD-EXECUTION",
+      "final_state": "CLOSED",
+      "reason": "Terminal retirement: no active Prose owner, child, inherited execution, repair, qualification, research, telemetry or successor task."
+    }
+  ],
+  "central_next_objective": "SYSTEM-MASTER-INTEGRATION-COORDINATION-001",
+  "highest_discretionary_objective": "SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001"
+}
