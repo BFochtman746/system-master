@@ -1,13 +1,16 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { c1ConfigFromEnv, runC1Preflight, serializeC1Failure } from '../src/live-c1-runner.js';
+import { c1ConfigFromEnv, digestC1Receipt, runC1Preflight, serializeC1Failure } from '../src/live-c1-runner.js';
 
 function headers(values={}){const map=new Map(Object.entries(values).map(([k,v])=>[k.toLowerCase(),String(v)]));return {get:name=>map.get(String(name).toLowerCase())??null};}
 function response(status,body,extraHeaders={}){return {ok:status>=200&&status<300,status,headers:headers(extraHeaders),async text(){return body===null?'':JSON.stringify(body);}};}
 
+const controllerCommit='a'.repeat(40),policyDigest='b'.repeat(64);
 const env={
   CONTROLLER_C1_GITHUB_TOKEN:'token',
   CONTROLLER_C1_QUALIFICATION_ID:'C1-LIVE-TEST-001',
+  CONTROLLER_C1_CONTROLLER_COMMIT:controllerCommit,
+  CONTROLLER_C1_POLICY_DIGEST:policyDigest,
   CONTROLLER_C1_DESTRUCTIVE_OPT_IN:'I-UNDERSTAND-C1-WILL-QUALIFY-FOR-LATER-MUTATION'
 };
 const seedHead='1'.repeat(40), seedTree='2'.repeat(40), readmeBlob='3'.repeat(40);
@@ -27,71 +30,29 @@ function freshFetch({metadata=seededMetadata(),parents=[],paths=['README.md'],jo
   return {fetchImpl,calls};
 }
 
-test('C1R-T001 runner freezes canonical journal and subject identities',()=>{
+test('C1R-T001 runner freezes canonical identities and execution bindings',()=>{
   const parsed=c1ConfigFromEnv(env);
   assert.equal(parsed.config.journalRepository,'BFochtman746/system-master-controller-journal');
   assert.equal(parsed.config.subjectRepository,'BFochtman746/system-master');
+  assert.equal(parsed.controllerCommit,controllerCommit);
+  assert.equal(parsed.policyDigest,policyDigest);
 });
 
-test('C1R-T002 missing explicit opt-in fails before remote request',async()=>{
-  let calls=0;
-  await assert.rejects(()=>runC1Preflight({env:{...env,CONTROLLER_C1_DESTRUCTIVE_OPT_IN:''},fetchImpl:async()=>{calls++;throw new Error('unexpected');}}),e=>e.code==='LIVE_DESTRUCTIVE_OPT_IN_REQUIRED');
-  assert.equal(calls,0);
+test('C1R-T002 missing explicit opt-in fails before remote request',async()=>{let calls=0;await assert.rejects(()=>runC1Preflight({env:{...env,CONTROLLER_C1_DESTRUCTIVE_OPT_IN:''},fetchImpl:async()=>{calls++;throw new Error('unexpected');}}),e=>e.code==='LIVE_DESTRUCTIVE_OPT_IN_REQUIRED');assert.equal(calls,0);});
+test('C1R-T003 missing token fails before remote request',async()=>{let calls=0;await assert.rejects(()=>runC1Preflight({env:{...env,CONTROLLER_C1_GITHUB_TOKEN:'',GITHUB_TOKEN:''},fetchImpl:async()=>{calls++;throw new Error('unexpected');}}),e=>e.code==='LIVE_GITHUB_TOKEN_REQUIRED');assert.equal(calls,0);});
+test('C1R-T004 missing controller commit fails before remote request',async()=>{let calls=0;await assert.rejects(()=>runC1Preflight({env:{...env,CONTROLLER_C1_CONTROLLER_COMMIT:'',GITHUB_SHA:''},fetchImpl:async()=>{calls++;}}),e=>e.code==='LIVE_CONTROLLER_COMMIT_REQUIRED');assert.equal(calls,0);});
+test('C1R-T005 missing policy digest fails before remote request',async()=>{let calls=0;await assert.rejects(()=>runC1Preflight({env:{...env,CONTROLLER_C1_POLICY_DIGEST:''},fetchImpl:async()=>{calls++;}}),e=>e.code==='LIVE_POLICY_DIGEST_REQUIRED');assert.equal(calls,0);});
+
+test('C1R-T006 canonical private one-commit seed emits bound digest-verified PASS using GET-only calls',async()=>{
+  const {fetchImpl,calls}=freshFetch();const result=await runC1Preflight({env,fetchImpl});
+  assert.equal(result.schema,'controller://qualification/c1-preflight/v2');assert.equal(result.result,'PASS');assert.equal(result.journal_repository_id,24680);assert.equal(result.seed_head,seedHead);assert.equal(result.controller_commit,controllerCommit);assert.equal(result.policy_digest,policyDigest);assert.equal(result.receipt_digest,digestC1Receipt(result));assert.ok(calls.length>=5);assert.ok(calls.every(c=>c.method==='GET'));
 });
 
-test('C1R-T003 missing token fails before remote request',async()=>{
-  let calls=0;
-  await assert.rejects(()=>runC1Preflight({env:{...env,CONTROLLER_C1_GITHUB_TOKEN:'',GITHUB_TOKEN:''},fetchImpl:async()=>{calls++;throw new Error('unexpected');}}),e=>e.code==='LIVE_GITHUB_TOKEN_REQUIRED');
-  assert.equal(calls,0);
-});
-
-test('C1R-T004 canonical private one-commit seed passes using GET-only remote calls',async()=>{
-  const {fetchImpl,calls}=freshFetch();
-  const result=await runC1Preflight({env,fetchImpl});
-  assert.equal(result.result,'PASS');
-  assert.equal(result.journal_repository_id,24680);
-  assert.equal(result.seed_head,seedHead);
-  assert.ok(calls.length>=5);
-  assert.ok(calls.every(c=>c.method==='GET'));
-});
-
-test('C1R-T005 existing journal ref fails closed without mutation',async()=>{
-  const {fetchImpl,calls}=freshFetch({journalRef404:false});
-  await assert.rejects(()=>runC1Preflight({env,fetchImpl}),e=>e.code==='LIVE_JOURNAL_REF_ALREADY_EXISTS');
-  assert.ok(calls.every(c=>c.method==='GET'));
-});
-
-test('C1R-T006 branchless repository fails before seed lookup',async()=>{
-  const {fetchImpl,calls}=freshFetch({metadata:seededMetadata({default_branch:null})});
-  await assert.rejects(()=>runC1Preflight({env,fetchImpl}),e=>e.code==='LIVE_REPOSITORY_UNSEEDED');
-  assert.equal(calls.length,1);
-});
-
-test('C1R-T007 public repository is rejected before seed lookup',async()=>{
-  const {fetchImpl,calls}=freshFetch({metadata:seededMetadata({private:false})});
-  await assert.rejects(()=>runC1Preflight({env,fetchImpl}),e=>e.code==='LIVE_REPOSITORY_MUST_BE_PRIVATE');
-  assert.equal(calls.length,1);
-});
-
-test('C1R-T008 non-main default branch is rejected before seed lookup',async()=>{
-  const {fetchImpl,calls}=freshFetch({metadata:seededMetadata({default_branch:'master'})});
-  await assert.rejects(()=>runC1Preflight({env,fetchImpl}),e=>e.code==='LIVE_DEFAULT_BRANCH_MISMATCH');
-  assert.equal(calls.length,1);
-});
-
-test('C1R-T009 seed commit with a parent is rejected',async()=>{
-  const {fetchImpl,calls}=freshFetch({parents:['f'.repeat(40)]});
-  await assert.rejects(()=>runC1Preflight({env,fetchImpl}),e=>e.code==='LIVE_SEED_HISTORY_NOT_MINIMAL');
-  assert.equal(calls.length,3);
-});
-
-test('C1R-T010 seed tree must contain exactly README.md',async()=>{
-  const {fetchImpl,calls}=freshFetch({paths:['README.md','extra.txt']});
-  await assert.rejects(()=>runC1Preflight({env,fetchImpl}),e=>e.code==='LIVE_SEED_TREE_NOT_MINIMAL');
-  assert.equal(calls.length,4);
-});
-
-test('C1R-T011 failure serializer is deterministic and machine readable',()=>{
-  const error=Object.assign(new Error('blocked'),{code:'LIVE_REPOSITORY_UNSEEDED',details:{repo:'x'}});
-  assert.deepEqual(serializeC1Failure(error),{schema:'controller://qualification/c1-preflight/v1',result:'FAIL',error_code:'LIVE_REPOSITORY_UNSEEDED',message:'blocked',details:{repo:'x'}});
-});
+test('C1R-T007 existing journal ref fails closed without mutation',async()=>{const {fetchImpl,calls}=freshFetch({journalRef404:false});await assert.rejects(()=>runC1Preflight({env,fetchImpl}),e=>e.code==='LIVE_JOURNAL_REF_ALREADY_EXISTS');assert.ok(calls.every(c=>c.method==='GET'));});
+test('C1R-T008 branchless repository fails before seed lookup',async()=>{const {fetchImpl,calls}=freshFetch({metadata:seededMetadata({default_branch:null})});await assert.rejects(()=>runC1Preflight({env,fetchImpl}),e=>e.code==='LIVE_REPOSITORY_UNSEEDED');assert.equal(calls.length,1);});
+test('C1R-T009 public repository is rejected before seed lookup',async()=>{const {fetchImpl,calls}=freshFetch({metadata:seededMetadata({private:false})});await assert.rejects(()=>runC1Preflight({env,fetchImpl}),e=>e.code==='LIVE_REPOSITORY_MUST_BE_PRIVATE');assert.equal(calls.length,1);});
+test('C1R-T010 non-main default branch is rejected before seed lookup',async()=>{const {fetchImpl,calls}=freshFetch({metadata:seededMetadata({default_branch:'master'})});await assert.rejects(()=>runC1Preflight({env,fetchImpl}),e=>e.code==='LIVE_DEFAULT_BRANCH_MISMATCH');assert.equal(calls.length,1);});
+test('C1R-T011 seed commit with a parent is rejected',async()=>{const {fetchImpl,calls}=freshFetch({parents:['f'.repeat(40)]});await assert.rejects(()=>runC1Preflight({env,fetchImpl}),e=>e.code==='LIVE_SEED_HISTORY_NOT_MINIMAL');assert.equal(calls.length,3);});
+test('C1R-T012 seed tree must contain exactly README.md',async()=>{const {fetchImpl,calls}=freshFetch({paths:['README.md','extra.txt']});await assert.rejects(()=>runC1Preflight({env,fetchImpl}),e=>e.code==='LIVE_SEED_TREE_NOT_MINIMAL');assert.equal(calls.length,4);});
+test('C1R-T013 changing a PASS field invalidates its receipt digest',async()=>{const {fetchImpl}=freshFetch();const result=await runC1Preflight({env,fetchImpl});result.seed_head='f'.repeat(40);assert.notEqual(result.receipt_digest,digestC1Receipt(result));});
+test('C1R-T014 failure serializer is deterministic and machine readable',()=>{const error=Object.assign(new Error('blocked'),{code:'LIVE_REPOSITORY_UNSEEDED',details:{repo:'x'}});assert.deepEqual(serializeC1Failure(error),{schema:'controller://qualification/c1-preflight/v2',result:'FAIL',error_code:'LIVE_REPOSITORY_UNSEEDED',message:'blocked',details:{repo:'x'}});});
