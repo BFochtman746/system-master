@@ -1,0 +1,103 @@
+name: Learning S05 Evidence Mastery Interface Binding
+
+on:
+  push:
+    branches:
+      - learning/ownership-freeze-001b-20260912
+    paths:
+      - '.github/workflows/learning-s05-evidence-mastery-binding.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  bind:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: learning/ownership-freeze-001b-20260912
+          fetch-depth: 0
+      - name: Bind exact S05 evidence and mastery interfaces
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import base64, csv, gzip, hashlib, io, json, pathlib
+
+          source = pathlib.Path('qualification/learning/ownership/LRN-OWNERSHIP-FREEZE-001B-R3B-S02-R2-INTERFACES.csv.gz.b64')
+          raw = gzip.decompress(base64.b64decode(source.read_text(encoding='utf-8').strip()))
+          digest = hashlib.sha256(raw).hexdigest()
+          expected = '4f4387956bd8189b7a65f5de94ab3c722cb34f249ebe8a94ad74b4c0d0c3cbc0'
+          if digest != expected:
+              raise SystemExit(f'FAIL decoded ledger sha256 {digest} != {expected}')
+          reader = csv.DictReader(io.StringIO(raw.decode('utf-8-sig')))
+          rows = list(reader)
+          if len(rows) != 112:
+              raise SystemExit(f'FAIL active interface row count {len(rows)} != 112')
+
+          names = [
+              'SelectMasteryEvidenceProfile',
+              'RecordExternalEvidenceCandidate',
+              'AdmitExternalEvidenceCandidate',
+              'RejectExternalEvidenceCandidate',
+              'RequestMasteryReprojection',
+              'ChallengeMasteryProjection',
+              'GetSkillMastery',
+              'ExplainMastery',
+              'GetMasteryEvidenceMatrix',
+              'MasteryProjectionUpdated',
+              'MasteryGateSatisfied',
+              'MasteryGateLost',
+              'EvidenceBecameStale',
+              'InsufficientEvidence',
+              'ProjectionStale',
+              'EvidenceInadmissible',
+              'MasteryPolicyMismatch',
+              'ExternalEvidenceNeedsReview'
+          ]
+          by_name = {str(r.get('name', '')).strip(): r for r in rows}
+          selected = [by_name[n] for n in names if n in by_name]
+          missing = [n for n in names if n not in by_name]
+          if missing:
+              raise SystemExit('FAIL missing exact S05 names: ' + ','.join(missing))
+          if len(selected) != len(names):
+              raise SystemExit('FAIL duplicate/incomplete exact name binding')
+
+          report = {
+              'artifact_id': 'LRN-OWNERSHIP-FREEZE-001B-R3B-S05-R1-EVIDENCE-MASTERY-INTERFACE-BINDING',
+              'date': '2026-09-12',
+              'owner_path': 'SYSTEM_MASTER/LEARNING',
+              'source_path': str(source),
+              'decoded_ledger_sha256': digest,
+              'active_interface_rows': len(rows),
+              'requested_names': names,
+              'matched_count': len(selected),
+              'missing_names': missing,
+              'matched_rows': selected,
+              'standing': 'EXACT_REPOSITORY_NATIVE_S05_INTERFACE_BINDING_COMPLETE__DESIGN_ADJUDICATION_REQUIRED',
+              'non_claims': [
+                  'no runtime implementation claim',
+                  'no mastery retention transfer psychometric SME certification claim',
+                  'no participant consent or real learner outcome claim',
+                  'no native A-01 production claim'
+              ]
+          }
+          out = pathlib.Path('qualification/learning/ownership/LRN-OWNERSHIP-FREEZE-001B-R3B-S05-R1-EVIDENCE-MASTERY-INTERFACE-BINDING.json')
+          out.write_text(json.dumps(report, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
+          print('MATCHED=' + str(len(selected)))
+          print('NAMES=' + ','.join(names))
+          PY
+      - name: Commit exact S05 binding report
+        shell: bash
+        run: |
+          path='qualification/learning/ownership/LRN-OWNERSHIP-FREEZE-001B-R3B-S05-R1-EVIDENCE-MASTERY-INTERFACE-BINDING.json'
+          if [ -z "$(git status --porcelain -- "$path")" ]; then
+            echo 'No binding delta.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add "$path"
+          git commit -m 'learning: persist exact S05 evidence mastery interface binding'
+          git push origin HEAD:learning/ownership-freeze-001b-20260912
