@@ -365,6 +365,15 @@ class SupervisorStore:
             c.execute("UPDATE claims SET heartbeat_at=?,status='RUNNING' WHERE lease_id=?", (iso(now), lease_id))
             self._event(c, claim["lane"], "PROGRESS", now, delegation_id=claim["delegation_id"], objective_id=claim["objective_id"], lease_id=lease_id, dispatch_id=claim["dispatch_id"], idempotency_key=claim["idempotency_key"], fencing_token=fencing_token, control_head=claim["control_head"], payload=payload)
 
+    def _release_dispatch_for_stale_authority(self, c: sqlite3.Connection, lease_id: str, now: dt.datetime) -> None:
+        c.execute(
+            "UPDATE dispatch_outbox SET state=CASE "
+            "WHEN state='DISPATCHED' AND external_run_id IS NOT NULL THEN 'CANCEL_REQUESTED' "
+            "WHEN state IN ('PENDING','RETRY_WAIT') THEN 'CANCELLED' "
+            "ELSE state END,updated_at=? WHERE lease_id=?",
+            (iso(now), lease_id),
+        )
+
     def terminal(self, lease_id: str, fencing_token: int, state: str, payload: Optional[dict[str, Any]] = None, now: Optional[dt.datetime] = None) -> None:
         if state not in TERMINAL:
             raise ValueError("terminal state must be COMPLETED, BLOCKED, or STALE")
@@ -393,7 +402,10 @@ class SupervisorStore:
             c.execute("UPDATE claims SET status=?,released_at=?,terminal_reason=? WHERE lease_id=?", (state, iso(now), json.dumps(payload, sort_keys=True), lease_id))
             c.execute("UPDATE delegations SET state=?,updated_at=? WHERE delegation_id=?", (state, iso(now), claim["delegation_id"]))
             c.execute("UPDATE lanes SET state='RECONCILE',current_delegation_id=NULL,updated_at=? WHERE lane=?", (iso(now), claim["lane"]))
-            c.execute("UPDATE dispatch_outbox SET state=CASE WHEN state IN ('PENDING','RETRY_WAIT') THEN 'CANCELLED' ELSE state END,updated_at=? WHERE lease_id=?", (iso(now), lease_id))
+            if state == "STALE":
+                self._release_dispatch_for_stale_authority(c, lease_id, now)
+            else:
+                c.execute("UPDATE dispatch_outbox SET state=CASE WHEN state IN ('PENDING','RETRY_WAIT') THEN 'CANCELLED' ELSE state END,updated_at=? WHERE lease_id=?", (iso(now), lease_id))
             self._event(c, claim["lane"], state, now, delegation_id=claim["delegation_id"], objective_id=claim["objective_id"], lease_id=lease_id, dispatch_id=claim["dispatch_id"], idempotency_key=claim["idempotency_key"], fencing_token=claim["fencing_token"], control_head=claim["control_head"], payload=payload)
 
     def invalidate_head(self, lane: str, new_control_head: str, now: Optional[dt.datetime] = None) -> None:
@@ -410,7 +422,7 @@ class SupervisorStore:
         if claim:
             c.execute("UPDATE claims SET status='STALE',released_at=?,terminal_reason=? WHERE lease_id=?", (iso(now), json.dumps({"reason": "CONTROL_HEAD_CHANGED", "new_control_head": new_control_head}), claim["lease_id"]))
             c.execute("UPDATE delegations SET state='STALE',updated_at=? WHERE delegation_id=?", (iso(now), claim["delegation_id"]))
-            c.execute("UPDATE dispatch_outbox SET state=CASE WHEN state IN ('PENDING','RETRY_WAIT') THEN 'CANCELLED' ELSE state END,updated_at=? WHERE lease_id=?", (iso(now), claim["lease_id"]))
+            self._release_dispatch_for_stale_authority(c, claim["lease_id"], now)
             self._event(c, lane, "STALE", now, delegation_id=claim["delegation_id"], objective_id=claim["objective_id"], lease_id=claim["lease_id"], dispatch_id=claim["dispatch_id"], idempotency_key=claim["idempotency_key"], fencing_token=claim["fencing_token"], control_head=claim["control_head"], payload={"reason": "CONTROL_HEAD_CHANGED", "new_control_head": new_control_head})
         c.execute("UPDATE delegations SET state='STALE',updated_at=? WHERE lane=? AND state='READY'", (iso(now), lane))
         c.execute("UPDATE lanes SET control_head=?,fencing_counter=?,state='RECONCILE',current_delegation_id=NULL,updated_at=? WHERE lane=?", (new_control_head, new_fence, iso(now), lane))
@@ -429,7 +441,7 @@ class SupervisorStore:
                     c.execute("UPDATE claims SET status='STALE',released_at=?,terminal_reason=? WHERE lease_id=?", (iso(now), json.dumps({"reason": "LEASE_EXPIRED" if expired else "HEARTBEAT_STALE"}), claim["lease_id"]))
                     c.execute("UPDATE delegations SET state='STALE',updated_at=? WHERE delegation_id=?", (iso(now), claim["delegation_id"]))
                     c.execute("UPDATE lanes SET fencing_counter=fencing_counter+1,state='RECONCILE',current_delegation_id=NULL,updated_at=? WHERE lane=?", (iso(now), claim["lane"]))
-                    c.execute("UPDATE dispatch_outbox SET state=CASE WHEN state IN ('PENDING','RETRY_WAIT') THEN 'CANCELLED' ELSE state END,updated_at=? WHERE lease_id=?", (iso(now), claim["lease_id"]))
+                    self._release_dispatch_for_stale_authority(c, claim["lease_id"], now)
                     self._event(c, claim["lane"], "STALE", now, delegation_id=claim["delegation_id"], objective_id=claim["objective_id"], lease_id=claim["lease_id"], dispatch_id=claim["dispatch_id"], idempotency_key=claim["idempotency_key"], fencing_token=claim["fencing_token"], control_head=claim["control_head"], payload={"reason": "LEASE_EXPIRED" if expired else "HEARTBEAT_STALE"})
             pending = [dict(r) for r in c.execute("SELECT * FROM dispatch_outbox WHERE state IN ('PENDING','RETRY_WAIT','CIRCUIT_OPEN') ORDER BY created_at").fetchall()]
         return {"stale_leases": stale_leases, "pending_dispatches": pending}

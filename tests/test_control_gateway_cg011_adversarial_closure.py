@@ -13,7 +13,7 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "control-gateway" / "python"))
 
 from a01_night_scheduler import A01NightScheduler  # noqa: E402
-from tools.second_shift_supervisor_v2 import Conflict, SupervisorStore  # noqa: E402
+from tools.second_shift_supervisor_v2 import Conflict, StaleWorker, SupervisorStore  # noqa: E402
 
 FAILURE_PATH = ROOT / "tests" / "test_control_gateway_failure_restart_idempotency.py"
 spec = importlib.util.spec_from_file_location("cg011_failure", FAILURE_PATH)
@@ -103,6 +103,77 @@ class CG011AdversarialClosureAudit(unittest.TestCase):
         self.store.mark_dispatched(first["dispatch_id"], "RUN-A", now=IN_SHIFT + dt.timedelta(seconds=1))
         self.scheduler.request_cancel("D-A", "audit cancel", now=IN_SHIFT + dt.timedelta(seconds=2))
         self.restart()
+        blocked = self.scheduler.tick(now=IN_SHIFT + dt.timedelta(seconds=3), max_claims=1)
+        self.assertEqual(blocked["claims"], [])
+        self.assertTrue(any("concurrency limit" in item["reason"] for item in blocked["blocked"]))
+        self.scheduler.coordination.acknowledge_cancel(
+            first["dispatch_id"], "RUN-A", now=IN_SHIFT + dt.timedelta(seconds=4)
+        )
+        self.scheduler.reconcile(now=IN_SHIFT + dt.timedelta(seconds=5))
+        after = self.scheduler.tick(now=IN_SHIFT + dt.timedelta(seconds=6), max_claims=1)
+        self.assertEqual([x["delegation_id"] for x in after["claims"]], ["D-B"])
+
+    def test_expired_dispatched_run_keeps_capacity_until_external_effect_is_resolved(self):
+        self.enqueue("A", "LANE-A", resource="GPU", limit=1, priority=200)
+        self.enqueue("B", "LANE-B", resource="GPU", limit=1, priority=100)
+        first = self.scheduler.tick(now=IN_SHIFT, max_claims=1, lease_seconds=30)["claims"][0]
+        self.store.mark_dispatched(first["dispatch_id"], "RUN-A", now=IN_SHIFT + dt.timedelta(seconds=1))
+        self.restart()
+        recovered = self.store.recover(now=IN_SHIFT + dt.timedelta(seconds=31), heartbeat_sla_seconds=300)
+        self.assertEqual(recovered["stale_leases"], [first["lease_id"]])
+        outbox = self.store.conn.execute(
+            "SELECT state,external_run_id FROM dispatch_outbox WHERE dispatch_id=?", (first["dispatch_id"],)
+        ).fetchone()
+        self.assertEqual((outbox["state"], outbox["external_run_id"]), ("CANCEL_REQUESTED", "RUN-A"))
+        self.scheduler.reconcile(now=IN_SHIFT + dt.timedelta(seconds=31))
+        blocked = self.scheduler.tick(now=IN_SHIFT + dt.timedelta(seconds=32), max_claims=1)
+        self.assertEqual(blocked["claims"], [])
+        self.assertTrue(any("concurrency limit" in item["reason"] for item in blocked["blocked"]))
+        with self.assertRaises(StaleWorker):
+            self.store.terminal(
+                first["lease_id"], first["fencing_token"], "COMPLETED",
+                now=IN_SHIFT + dt.timedelta(seconds=33),
+            )
+        self.scheduler.coordination.acknowledge_cancel(
+            first["dispatch_id"], "RUN-A", now=IN_SHIFT + dt.timedelta(seconds=34)
+        )
+        self.scheduler.reconcile(now=IN_SHIFT + dt.timedelta(seconds=35))
+        after = self.scheduler.tick(now=IN_SHIFT + dt.timedelta(seconds=36), max_claims=1)
+        self.assertEqual([x["delegation_id"] for x in after["claims"]], ["D-B"])
+
+    def test_control_head_invalidation_keeps_dispatched_capacity_until_external_ack(self):
+        self.enqueue("A", "LANE-A", resource="GPU", limit=1, priority=200)
+        self.enqueue("B", "LANE-B", resource="GPU", limit=1, priority=100)
+        first = self.scheduler.tick(now=IN_SHIFT, max_claims=1)["claims"][0]
+        self.store.mark_dispatched(first["dispatch_id"], "RUN-A", now=IN_SHIFT + dt.timedelta(seconds=1))
+        self.store.invalidate_head("LANE-A", "HEAD-REPLACED", now=IN_SHIFT + dt.timedelta(seconds=2))
+        outbox = self.store.conn.execute(
+            "SELECT state FROM dispatch_outbox WHERE dispatch_id=?", (first["dispatch_id"],)
+        ).fetchone()
+        self.assertEqual(outbox["state"], "CANCEL_REQUESTED")
+        blocked = self.scheduler.tick(now=IN_SHIFT + dt.timedelta(seconds=3), max_claims=1)
+        self.assertEqual(blocked["claims"], [])
+        self.assertTrue(any("concurrency limit" in item["reason"] for item in blocked["blocked"]))
+        self.scheduler.coordination.acknowledge_cancel(
+            first["dispatch_id"], "RUN-A", now=IN_SHIFT + dt.timedelta(seconds=4)
+        )
+        self.scheduler.reconcile(now=IN_SHIFT + dt.timedelta(seconds=5))
+        after = self.scheduler.tick(now=IN_SHIFT + dt.timedelta(seconds=6), max_claims=1)
+        self.assertEqual([x["delegation_id"] for x in after["claims"]], ["D-B"])
+
+    def test_stale_terminalization_keeps_dispatched_capacity_until_external_ack(self):
+        self.enqueue("A", "LANE-A", resource="GPU", limit=1, priority=200)
+        self.enqueue("B", "LANE-B", resource="GPU", limit=1, priority=100)
+        first = self.scheduler.tick(now=IN_SHIFT, max_claims=1)["claims"][0]
+        self.store.mark_dispatched(first["dispatch_id"], "RUN-A", now=IN_SHIFT + dt.timedelta(seconds=1))
+        self.store.terminal(
+            first["lease_id"], first["fencing_token"], "STALE",
+            payload={"reason": "audit stale"}, now=IN_SHIFT + dt.timedelta(seconds=2),
+        )
+        outbox = self.store.conn.execute(
+            "SELECT state FROM dispatch_outbox WHERE dispatch_id=?", (first["dispatch_id"],)
+        ).fetchone()
+        self.assertEqual(outbox["state"], "CANCEL_REQUESTED")
         blocked = self.scheduler.tick(now=IN_SHIFT + dt.timedelta(seconds=3), max_claims=1)
         self.assertEqual(blocked["claims"], [])
         self.assertTrue(any("concurrency limit" in item["reason"] for item in blocked["blocked"]))
