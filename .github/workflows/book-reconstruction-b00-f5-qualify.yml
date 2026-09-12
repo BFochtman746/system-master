@@ -1,0 +1,75 @@
+name: BOOK Reconstruction B00 F5 Qualification
+
+on:
+  push:
+    branches:
+      - book-system/reconstruction-b00-f5-version-admission
+    paths:
+      - 'system-master/book-system/canonical-parent-v2-core.js'
+      - 'system-master/book-system/canonical-parent-v2-sqlite-store.js'
+      - 'system-master/book-system/canonical-parent-v2-f5-core.js'
+      - 'system-master/book-system/version-admission-v2-rebind.js'
+      - 'system-master/book-system/version-admission-v2-sqlite-store.js'
+      - 'system-master/book-system/version-and-rollback-core.js'
+      - 'system-master/book-system/content-object-admission-core.js'
+      - 'system-master/book-system/rights-custody-evidence-core.js'
+      - 'system-master/book-system/governing-style-profile-core.js'
+      - '.github/scripts/book-system-canonical-parent-v2-core-001-qualify.js'
+      - '.github/scripts/book-system-canonical-parent-v2-store-001-qualify.js'
+      - '.github/scripts/book-reconstruction-b00-f5-version-admission-001-qualify.js'
+      - '.github/scripts/book-system-rights-custody-evidence-001-qualify.js'
+      - '.github/scripts/book-system-governing-style-profile-001-qualify.js'
+      - 'qualification/book-system/reconstruction/BOOK-RECONSTRUCTION-B00-F5-DESIGN-REPAIR-001.md'
+      - '.github/workflows/book-reconstruction-b00-f5-qualify.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    name: Node ${{ matrix.node }} — Q001-Q058 + Q067-Q084
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['22', '24']
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Record exact subject
+        run: |
+          echo "subject_sha=${GITHUB_SHA}" | tee b00-f5-subject-node-${{ matrix.node }}.txt
+          git rev-parse HEAD | tee -a b00-f5-subject-node-${{ matrix.node }}.txt
+          node --version | tee -a b00-f5-subject-node-${{ matrix.node }}.txt
+      - name: Run Q001-Q036 pure-core baseline
+        run: node .github/scripts/book-system-canonical-parent-v2-core-001-qualify.js | tee b00-f5-core-node-${{ matrix.node }}.log
+      - name: Run Q037-Q050 durable-store baseline
+        run: node .github/scripts/book-system-canonical-parent-v2-store-001-qualify.js | tee b00-f5-store-node-${{ matrix.node }}.log
+      - name: Run Q051-Q058 version-admission rebind
+        run: node .github/scripts/book-reconstruction-b00-f5-version-admission-001-qualify.js | tee b00-f5-rebind-node-${{ matrix.node }}.log
+      - name: Run Q067-Q076 rights-custody denominator
+        run: node .github/scripts/book-system-rights-custody-evidence-001-qualify.js | tee b00-f5-rights-node-${{ matrix.node }}.log
+      - name: Run Q077-Q084 governing-style denominator
+        run: node .github/scripts/book-system-governing-style-profile-001-qualify.js | tee b00-f5-style-node-${{ matrix.node }}.log
+      - name: Hash evidence
+        if: always()
+        run: sha256sum b00-f5-subject-node-${{ matrix.node }}.txt b00-f5-core-node-${{ matrix.node }}.log b00-f5-store-node-${{ matrix.node }}.log b00-f5-rebind-node-${{ matrix.node }}.log b00-f5-rights-node-${{ matrix.node }}.log b00-f5-style-node-${{ matrix.node }}.log > b00-f5-node-${{ matrix.node }}.sha256
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: book-reconstruction-b00-f5-node-${{ matrix.node }}-${{ github.sha }}
+          path: |
+            b00-f5-subject-node-${{ matrix.node }}.txt
+            b00-f5-core-node-${{ matrix.node }}.log
+            b00-f5-store-node-${{ matrix.node }}.log
+            b00-f5-rebind-node-${{ matrix.node }}.log
+            b00-f5-rights-node-${{ matrix.node }}.log
+            b00-f5-style-node-${{ matrix.node }}.log
+            b00-f5-node-${{ matrix.node }}.sha256
+          if-no-files-found: error

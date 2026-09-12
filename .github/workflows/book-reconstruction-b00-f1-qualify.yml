@@ -1,0 +1,51 @@
+name: BOOK Reconstruction B00 F1 Qualification
+
+on:
+  push:
+    branches:
+      - book-system/reconstruction-b00-parent-v2
+    paths:
+      - 'system-master/book-system/canonical-parent-v2-core.js'
+      - '.github/scripts/book-system-canonical-parent-v2-core-001-qualify.js'
+      - '.github/workflows/book-reconstruction-b00-f1-qualify.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    name: Node ${{ matrix.node }} — 36/36 F1 core
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['22', '24']
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Record exact subject
+        run: |
+          echo "subject_sha=${GITHUB_SHA}" | tee b00-f1-subject-node-${{ matrix.node }}.txt
+          git rev-parse HEAD | tee -a b00-f1-subject-node-${{ matrix.node }}.txt
+      - name: Run frozen 36-case isolated denominator
+        run: |
+          node .github/scripts/book-system-canonical-parent-v2-core-001-qualify.js | tee b00-f1-node-${{ matrix.node }}.log
+      - name: Hash evidence
+        if: always()
+        run: |
+          sha256sum b00-f1-subject-node-${{ matrix.node }}.txt b00-f1-node-${{ matrix.node }}.log > b00-f1-node-${{ matrix.node }}.sha256
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: book-reconstruction-b00-f1-node-${{ matrix.node }}-${{ github.sha }}
+          path: |
+            b00-f1-subject-node-${{ matrix.node }}.txt
+            b00-f1-node-${{ matrix.node }}.log
+            b00-f1-node-${{ matrix.node }}.sha256
+          if-no-files-found: error

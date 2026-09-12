@@ -1,0 +1,87 @@
+name: BOOK Reconstruction B00 F10 Qualification
+
+on:
+  push:
+    branches:
+      - book-system/reconstruction-b00-f10-evidence-recovery-seam
+    paths:
+      - 'system-master/book-system/**'
+      - '.github/scripts/book-system-canonical-parent-v2-core-001-qualify.js'
+      - '.github/scripts/book-system-canonical-parent-v2-store-001-qualify.js'
+      - '.github/scripts/book-reconstruction-b00-f5-version-admission-001-qualify.js'
+      - '.github/scripts/book-reconstruction-b00-f6a-lifecycle-graph-001-qualify.js'
+      - '.github/scripts/book-reconstruction-b00-f6b-lifecycle-rebind-001-qualify.js'
+      - '.github/scripts/book-reconstruction-b00-f7-author-decision-rebind-001-qualify.js'
+      - '.github/scripts/book-reconstruction-b00-f8-integration-proposal-rebind-001-qualify.js'
+      - '.github/scripts/book-reconstruction-b00-f9-export-freeze-rebind-001-qualify.js'
+      - '.github/scripts/book-workflow-orchestrator-*-qualify.js'
+      - '.github/scripts/book-reconstruction-b00-f10-evidence-recovery-seam-001-qualify.js'
+      - '.github/workflows/book-reconstruction-b00-f10-qualify.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    name: Node ${{ matrix.node }} — F1-F10 cumulative Book foundation
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['22','24']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Record exact subject
+        run: |
+          echo "subject_sha=${GITHUB_SHA}" | tee b00-f10-subject-${{ matrix.node }}.txt
+          git rev-parse HEAD | tee -a b00-f10-subject-${{ matrix.node }}.txt
+          node --version | tee -a b00-f10-subject-${{ matrix.node }}.txt
+      - name: Parent core Q001-Q036
+        run: node .github/scripts/book-system-canonical-parent-v2-core-001-qualify.js | tee f10-core-${{ matrix.node }}.log
+      - name: Parent store Q037-Q050
+        run: node .github/scripts/book-system-canonical-parent-v2-store-001-qualify.js | tee f10-store-${{ matrix.node }}.log
+      - name: F5 version/admission Q051-Q058
+        run: node .github/scripts/book-reconstruction-b00-f5-version-admission-001-qualify.js | tee f10-f5-${{ matrix.node }}.log
+      - name: Rights Q067-Q076
+        run: node .github/scripts/book-system-rights-custody-evidence-001-qualify.js | tee f10-rights-${{ matrix.node }}.log
+      - name: Style Q077-Q084
+        run: node .github/scripts/book-system-governing-style-profile-001-qualify.js | tee f10-style-${{ matrix.node }}.log
+      - name: F6A lifecycle graph
+        run: node .github/scripts/book-reconstruction-b00-f6a-lifecycle-graph-001-qualify.js | tee f10-f6a-${{ matrix.node }}.log
+      - name: F6B lifecycle rebind
+        run: node .github/scripts/book-reconstruction-b00-f6b-lifecycle-rebind-001-qualify.js | tee f10-f6b-${{ matrix.node }}.log
+      - name: F7 author decision rebind
+        run: node .github/scripts/book-reconstruction-b00-f7-author-decision-rebind-001-qualify.js | tee f10-f7-${{ matrix.node }}.log
+      - name: F8 integration proposal rebind
+        run: node .github/scripts/book-reconstruction-b00-f8-integration-proposal-rebind-001-qualify.js | tee f10-f8-${{ matrix.node }}.log
+      - name: F9 export freeze rebind
+        run: node .github/scripts/book-reconstruction-b00-f9-export-freeze-rebind-001-qualify.js | tee f10-f9-${{ matrix.node }}.log
+      - name: Recovered workflow authority contract
+        run: node .github/scripts/book-workflow-orchestrator-authority-contract-001-qualify.js | tee f10-workflow-authority-${{ matrix.node }}.log
+      - name: Recovered workflow admission handoff
+        run: node .github/scripts/book-workflow-orchestrator-book-admission-handoff-001-qualify.js | tee f10-workflow-admission-${{ matrix.node }}.log
+      - name: Recovered workflow concurrency
+        run: node .github/scripts/book-workflow-orchestrator-concurrency-rules-001-qualify.js | tee f10-workflow-concurrency-${{ matrix.node }}.log
+      - name: Recovered workflow failure semantics
+        run: node .github/scripts/book-workflow-orchestrator-failure-semantics-001-qualify.js | tee f10-workflow-failure-${{ matrix.node }}.log
+      - name: Recovered workflow evidence provenance
+        run: node .github/scripts/book-workflow-orchestrator-evidence-provenance-emission-001-qualify.js | tee f10-workflow-evidence-${{ matrix.node }}.log
+      - name: Q064 Q066 Q085-Q090 evidence recovery seam
+        run: node .github/scripts/book-reconstruction-b00-f10-evidence-recovery-seam-001-qualify.js | tee f10-gate-${{ matrix.node }}.log
+      - name: Hash evidence
+        if: always()
+        run: sha256sum b00-f10-subject-${{ matrix.node }}.txt f10-*.log > b00-f10-${{ matrix.node }}.sha256
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: book-reconstruction-b00-f10-node-${{ matrix.node }}-${{ github.sha }}
+          path: |
+            b00-f10-subject-${{ matrix.node }}.txt
+            f10-*.log
+            b00-f10-${{ matrix.node }}.sha256
+          if-no-files-found: error
