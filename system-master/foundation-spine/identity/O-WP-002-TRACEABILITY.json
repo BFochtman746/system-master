@@ -1,0 +1,31 @@
+{
+  "package_id": "O-WP-002",
+  "fresh_owner": "SYSTEM_MASTER/CORE/Foundation & Spine/Identity, Principal & Delegation",
+  "historical_package_sha256": "cc8d7567ee2a1f307eba7add206d5c12c25db5a6dfa4fe7d09fc8499db21cc37",
+  "base_core_subject_at_build_start": "4da156f9707c2f9aa31984d3fb958fd01e5b375b",
+  "prerequisite_package": "O-WP-001",
+  "components": ["IdentityProofingProfileRegistry", "IdentityEnrollmentService", "ProofingJournalStore"],
+  "data_entities": ["IdentityProofingProfile", "IdentityEnrollmentRecord"],
+  "apis": ["PublishIdentityProofingProfile", "BeginIdentityEnrollment", "CompleteIdentityEnrollment", "GetEnrollmentStanding"],
+  "requirements": [
+    {"id":"O-RQ-003","sources":["ProofingContracts.java","IdentityEnrollmentService.java"],"tests":["humanAndNonHumanEnrollmentStayDistinct","exactPrincipalAndProfileBinding"],"standing":"IMPLEMENTED_PORTABLE_CANDIDATE"},
+    {"id":"O-RQ-004","sources":["ProofingContracts.java","IdentityProofingProfileRegistry.java"],"tests":["profileVersionsAreImmutableAndStaleSafe","proofingNotRequiredPath"],"standing":"IMPLEMENTED_PORTABLE_CANDIDATE"},
+    {"id":"O-RQ-053","sources":["ProofingContracts.java","IdentityProofingProfileRegistry.java","ProofingJournalStore.java"],"tests":["profileVersionsAreImmutableAndStaleSafe","blockedProfileDeniesNewEnrollment"],"standing":"IMPLEMENTED_PORTABLE_CANDIDATE"},
+    {"id":"O-RQ-054","sources":["IdentityEnrollmentService.java","ProofingJournalStore.java"],"tests":["requiredEvidenceCannotBeOmitted","belowRequiredAssuranceCannotPass","rejectionQuarantineAndUnknownRemainExplicit"],"standing":"MECHANICS_ONLY_REAL_PROOFING_EVIDENCE_REQUIRED"},
+    {"id":"O-RQ-105","sources":["ProofingContracts.java"],"tests":["profileVersionsAreImmutableAndStaleSafe","humanAndNonHumanEnrollmentStayDistinct"],"standing":"IMPLEMENTED_PORTABLE_CANDIDATE"},
+    {"id":"O-RQ-106","sources":["ProofingContracts.java","ProofingJournalStore.java"],"tests":["restartReplayPreservesProofingState","rawProofingPayloadIsRejected"],"standing":"IMPLEMENTED_PORTABLE_CANDIDATE"},
+    {"id":"O-RQ-164","sources":["IdentityProofingProfileRegistry.java","ProofingJournalStore.java"],"tests":["profileVersionsAreImmutableAndStaleSafe","concurrentProfilePublishHasSingleWinner"],"standing":"IMPLEMENTED_PORTABLE_CANDIDATE"},
+    {"id":"O-RQ-165","sources":["IdentityEnrollmentService.java","ProofingJournalStore.java"],"tests":["exactPrincipalAndProfileBinding","blockedProfileDeniesNewEnrollment"],"standing":"IMPLEMENTED_PORTABLE_CANDIDATE"},
+    {"id":"O-RQ-166","sources":["IdentityEnrollmentService.java","ProofingJournalStore.java"],"tests":["beginReplayIsIdempotentAndChangedBytesConflict","concurrentBeginHasSingleWinner"],"standing":"IMPLEMENTED_PORTABLE_CANDIDATE"},
+    {"id":"O-RQ-167","sources":["ProofingJournalStore.java"],"tests":["requiredEvidenceCannotBeOmitted","belowRequiredAssuranceCannotPass","suppliedAssuranceIsPreservedWithoutElevation"],"standing":"MECHANICS_ONLY_PROVIDER_ASSERTION_TRUTH_NOT_CLAIMED"},
+    {"id":"O-RQ-272","sources":["ProofingJournalStore.java"],"tests":["restartReplayPreservesProofingState","corruptJournalFailsClosed","concurrentBeginHasSingleWinner"],"standing":"IMPLEMENTED_PORTABLE_REFERENCE_PERSISTENCE"},
+    {"id":"O-RQ-310","sources":["IdentityMutationGate.java","IdentityEnrollmentService.java","IdentityProofingProfileRegistry.java"],"tests":["authenticationEvidenceDoesNotAuthorizeMutation","principalLifecycleRemainsSeparateFromEnrollment"],"standing":"AUTHENTICATION_OR_PROOFING_DOES_NOT_GRANT_AUTHORIZATION"},
+    {"id":"O-RQ-317","sources":["O-WP-002-TRACEABILITY.json","ProofingContracts.java","IdentityProofingProfileRegistry.java","IdentityEnrollmentService.java","ProofingJournalStore.java"],"tests":["traceability_exact_requirement_set","cumulative_owp001_owp002_system_root_regression"],"standing":"BOUND_TO_EXACT_PACKAGE_SCOPE"}
+  ],
+  "required_test_families": ["unit","schema_contract","property_invariant","state_failure","security_privacy","concurrency_idempotency","integration","restart_corruption","cumulative_regression"],
+  "unaccounted_requirement_count": 0,
+  "real_human_identity_standing": "NOT_CLAIMED",
+  "external_provider_validity_standing": "NOT_CLAIMED",
+  "production_persistence_standing": "NOT_CLAIMED_PORTABLE_REFERENCE_ADAPTER_ONLY",
+  "a01_native_production_standing": "NOT_CLAIMED"
+}
