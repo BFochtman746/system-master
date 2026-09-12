@@ -27,7 +27,7 @@ function removeIfPresent(path) {
 }
 
 function durableFileEvidence(path) {
-  const handle = openSync(path, 'r');
+  const handle = openSync(path, 'r+');
   try {
     fsyncSync(handle);
   } finally {
