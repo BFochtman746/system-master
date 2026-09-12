@@ -1,0 +1,174 @@
+name: Documents Spine Effect Runtime Integration One Shot
+
+on:
+  push:
+    branches:
+      - documents/spine-effect-runtime-001-20260912
+    paths:
+      - .github/workflows/documents-spine-effect-runtime-integration.yml
+
+permissions:
+  contents: write
+
+jobs:
+  integrate-and-qualify:
+    name: Integrate owner route / strict Java 21 / 48+44 / cumulative
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact candidate branch
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: documents/spine-effect-runtime-001-20260912
+          fetch-depth: 0
+      - name: Set up Java 21
+        uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Apply owner-route integration patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 .github/scripts/documents-spine-effect-runtime-integration.py
+          git diff --check
+      - name: Commit exact executable subject
+        id: subject
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'system-master-documents-worker'
+          git config user.email 'actions@users.noreply.github.com'
+          git add recovered/document/cr001-r4/source/01_CURRENT_DOCUMENT_PROCESSING_MODULE/src/main/java/org/systemmaster/tools/document/spine/UniversalDocumentSpine.java
+          git add recovered/document/cr001-r4/source/01_CURRENT_DOCUMENT_PROCESSING_MODULE/src/test/java/org/systemmaster/tools/document/DocumentSpine002APortableTests.java
+          if git diff --cached --quiet; then
+            SUBJECT="$(git rev-parse HEAD)"
+          else
+            git commit -m 'documents: integrate admitted REBUILD MASTER effect runtime'
+            SUBJECT="$(git rev-parse HEAD)"
+            git push origin HEAD:documents/spine-effect-runtime-001-20260912
+          fi
+          printf 'subject=%s\n' "$SUBJECT" >> "$GITHUB_OUTPUT"
+          printf 'QUALIFIED_SUBJECT=%s\n' "$SUBJECT" >> "$GITHUB_ENV"
+      - name: Strict compile exact subject
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$QUALIFIED_SUBJECT"
+          ROOT='recovered/document/cr001-r4/source/01_CURRENT_DOCUMENT_PROCESSING_MODULE'
+          cd "$ROOT"
+          rm -rf build/classes
+          mkdir -p build/classes
+          find src/main/java src/test/java -name '*.java' -print | LC_ALL=C sort > build/java-sources.txt
+          javac --release 21 -Xlint:all -Werror -d build/classes @build/java-sources.txt
+      - name: Isolated REBUILD-48 plus MASTER-44
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT='recovered/document/cr001-r4/source/01_CURRENT_DOCUMENT_PROCESSING_MODULE'
+          cd "$ROOT"
+          CLASSES="$(pwd)/build/classes"
+          java -cp "$CLASSES" org.systemmaster.tools.document.DocumentSpineEffectRuntimePortableTests | tee build/effect-runtime-isolated.txt
+          grep -Fx 'DOCUMENT_SPINE_EFFECT_RUNTIME_PORTABLE_PASS REBUILD=48 MASTER=44' build/effect-runtime-isolated.txt
+      - name: Owner-route integration regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT='recovered/document/cr001-r4/source/01_CURRENT_DOCUMENT_PROCESSING_MODULE'
+          cd "$ROOT"
+          CLASSES="$(pwd)/build/classes"
+          java -cp "$CLASSES" org.systemmaster.tools.document.DocumentSpine002APortableTests | tee build/spine-integration.txt
+          grep -F 'DOCUMENT_SPINE_002A_PORTABLE_PASS' build/spine-integration.txt
+      - name: Cumulative portable regression
+        id: cumulative
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT='recovered/document/cr001-r4/source/01_CURRENT_DOCUMENT_PROCESSING_MODULE'
+          cd "$ROOT"
+          CLASSES="$(pwd)/build/classes"
+          : > build/cumulative-portable.txt
+          COUNT=0
+          while IFS= read -r file; do
+            class="${file#src/test/java/}"
+            class="${class%.java}"
+            class="${class//\//.}"
+            printf 'RUN %s\n' "$class" | tee -a build/cumulative-portable.txt
+            java -cp "$CLASSES" "$class" | tee -a build/cumulative-portable.txt
+            COUNT=$((COUNT + 1))
+          done < <(find src/test/java -name '*PortableTests.java' -print | LC_ALL=C sort)
+          printf 'count=%s\n' "$COUNT" >> "$GITHUB_OUTPUT"
+          printf 'CUMULATIVE_COUNT=%s\n' "$COUNT" >> "$GITHUB_ENV"
+      - name: Preserve exact qualification evidence
+        shell: bash
+        env:
+          RUN_ID: ${{ github.run_id }}
+          JOB_NAME: integrate-and-qualify
+        run: |
+          set -euo pipefail
+          mkdir -p qualification/document-system/spine
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          payload = {
+            "record_id": "DOCUMENTS-SPINE-EFFECT-RUNTIME-INTEGRATION-001",
+            "owner_system_id": "DOCUMENTS",
+            "owner_path": "SYSTEM_MASTER/DOCUMENTS",
+            "control_ref_observed_before_build": "documents/control-v1",
+            "control_head_observed_before_build": "92cdf489d5b3d4294f6b90104ec1753cc2da289f",
+            "candidate_branch": "documents/spine-effect-runtime-001-20260912",
+            "qualified_subject_sha": os.environ["QUALIFIED_SUBJECT"],
+            "workflow_run_id": int(os.environ["RUN_ID"]),
+            "environment": {
+              "runner": "github-hosted",
+              "os": "ubuntu-latest",
+              "java": "Temurin 21",
+              "standing": "HOSTED_PORTABLE_ONLY"
+            },
+            "status": "QUALIFIED_PORTABLE__OWNER_CONTROL_FREEZE_PENDING",
+            "integration_contract": [
+              "UniversalDocumentSpine effectful MASTER/REBUILD routes delegate to DocumentExistingArtifactEffectExecutor",
+              "effectful execution fails closed when no explicit DocumentEffectAdmissionProvider is supplied",
+              "READ/EXTRACT retain the five-argument construction path and do not require effect admission",
+              "external admission exact-binds job/mode/source semantic identity/operation intent/plan/capability set/policy revision and digest",
+              "legacy inline mutation coordinator route is removed from UniversalDocumentSpine",
+              "legacy action PASS/PREPARED receipts lacking effect-admission evidence fail closed during executor reconstruction",
+              "candidate-before-proof PREPARED/PASS recovery semantics remain executor-owned and mutation replay is forbidden after ambiguous PREPARED",
+              "MASTER remains same-format; proof/version/publication remain downstream and non-promoted by transport/author/finalCandidate metadata"
+            ],
+            "qualification": {
+              "strict_compile": "PASS",
+              "isolated": {"REBUILD": {"passed": 48, "planned": 48}, "MASTER": {"passed": 44, "planned": 44}},
+              "owner_route_integration": "PASS",
+              "cumulative_portable_test_classes_passed": int(os.environ["CUMULATIVE_COUNT"]),
+              "cumulative_portable_test_classes_planned": int(os.environ["CUMULATIVE_COUNT"])
+            },
+            "nonclaims": [
+              "NO_NATIVE_MICROSOFT_OFFICE_PASS",
+              "NO_TARGET_DEVICE_PASS",
+              "NO_REAL_EXTERNAL_POLICY_PROVIDER_CORRECTNESS_CLAIM",
+              "NO_HUMAN_OR_AUTHOR_AUTHORITY_CLAIM",
+              "NO_PRIVATE_SOURCE_PERMISSION_CLAIM",
+              "NO_PUBLICATION_AUTHORIZATION_CLAIM",
+              "NO_PRODUCTION_STANDING",
+              "NO_A01_PASS",
+              "NO_PROSE_WORK"
+            ],
+            "successor": {
+              "objective_id": "DOCUMENTS-SPINE-EFFECT-RUNTIME-FREEZE-001",
+              "state": "READY_IF_OWNER_HEAD_UNCHANGED_AND_NO_OVERLAP",
+              "required_work": [
+                "re-read CURRENT-AUTHORITY and exact documents/control-v1 live head",
+                "re-read Documents delegation/repair state and reject stale overlapping claims",
+                "reconcile exact qualified integration subject onto the live owner lineage without importing non-Documents semantics",
+                "preserve the exact qualification receipt and update Documents control evidence",
+                "do not claim native/external/publication/A-01 standing"
+              ]
+            }
+          }
+          Path("qualification/document-system/spine/DOCUMENTS-SPINE-EFFECT-RUNTIME-INTEGRATION-001.json").write_text(
+              json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+          PY
+          git add qualification/document-system/spine/DOCUMENTS-SPINE-EFFECT-RUNTIME-INTEGRATION-001.json
+          git commit -m 'documents: preserve effect runtime integration qualification' || true
+          git push origin HEAD:documents/spine-effect-runtime-001-20260912
