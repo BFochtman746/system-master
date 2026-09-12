@@ -5,6 +5,7 @@ const core = require('./canonical-parent-v2-f6-core.js');
 // Private compatibility helper for the F9 rebind only. It does not change
 // canonical-parent source bytes or authority; it supplies deterministic
 // structural comparison to the rebind module in this process.
+// This file is also the canonical reusable F9 entrypoint used by qualification.
 if (typeof core.stable !== 'function') {
   core.stable = function stable(value) {
     function normalize(v) {
