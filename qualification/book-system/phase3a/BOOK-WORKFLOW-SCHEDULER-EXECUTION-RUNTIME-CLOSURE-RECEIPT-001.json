@@ -1,0 +1,91 @@
+{
+  "receipt_id": "BOOK-WORKFLOW-SCHEDULER-EXECUTION-RUNTIME-CLOSURE-RECEIPT-001",
+  "effective_date": "2026-09-11",
+  "operation_id": "BOOK-WORKFLOW-SCHEDULER-EXECUTION-RUNTIME-001Q-R1",
+  "owner_system_id": "BOOK",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "authority_id": "CURRENT-AUTHORITY-003",
+  "topology_id": "SYSTEM-TOPOLOGY-005",
+  "pre_write_main_head": "a71c1b36a0d94b29137f126f6a84741f722f4bda",
+  "control_ref": "book-system/control-v1",
+  "exact_owner_subject_sha": "27fe9a3621c92e414874ce229341e58e71b76375",
+  "predecessor_owner_subject_sha": "e2a23e8b1f076e3cd576c11e036e40eaf8a5ce2f",
+  "objective_id": "BOOK-WORKFLOW-SCHEDULER-EXECUTION-RUNTIME-001",
+  "exact_subject_identity": {
+    "source": {
+      "path": "system-master/book-system/book-workflow-scheduler-runtime.js",
+      "git_blob_sha": "e9d7210463c3547cf0fc451b733f928967211eb1"
+    },
+    "test": {
+      "path": "system-master/book-system/book-workflow-scheduler-runtime.test.js",
+      "git_blob_sha": "23812ee310a3bd9b8f6410510f0a745efceb6ee6"
+    },
+    "workflow": {
+      "path": ".github/workflows/book-workflow-scheduler-runtime-qualification.yml",
+      "git_blob_sha": "dae6a2062feadd28ce7a06cbe352b687f06e2303"
+    }
+  },
+  "hosted_qualification": {
+    "record_path": "qualification/book-system/phase3a/BOOK-WORKFLOW-SCHEDULER-EXECUTION-RUNTIME-HOSTED-QUALIFICATION-001.json",
+    "record_git_blob_sha": "29efe8105a2d3bf6999203eea146d534ee33837e",
+    "workflow_run_id": 34654507158,
+    "run_attempt": 1,
+    "head_sha": "27fe9a3621c92e414874ce229341e58e71b76375",
+    "status": "COMPLETED",
+    "conclusion": "SUCCESS",
+    "cases_executed": 39,
+    "cases_passed": 39,
+    "cases_failed": 0,
+    "max_parallel_workers_observed": 2,
+    "canonical_book_effect_performed": false
+  },
+  "evidence_artifact": {
+    "artifact_id": 10284893217,
+    "name": "BOOK-WORKFLOW-SCHEDULER-RUNTIME-27fe9a3621c92e414874ce229341e58e71b76375-evidence",
+    "size_bytes": 334,
+    "artifact_zip_digest": "sha256:27011ca48120808ae66d0c243893bcb39fc01546c472e7bbe84264a524a1a0b7",
+    "scheduler_result_json_sha256": "1cc7f73927645bfd6d3f740b034b591bf120b913d5c660753d7cc6cdd8b35fb3",
+    "expired_at_seal": false
+  },
+  "control_plane_enforcement": {
+    "workflow_run_id": 34654507134,
+    "head_sha": "27fe9a3621c92e414874ce229341e58e71b76375",
+    "status": "COMPLETED",
+    "conclusion": "SUCCESS"
+  },
+  "stale_candidate_retirement_basis": {
+    "delegation_file": "governance/second-shift/BOOK-DELEGATIONS.json",
+    "pre_reconciliation_blob_sha": "8630db0e4360f312b8cd79c532a08b42d07eac69",
+    "pre_reconciliation_epoch": 32,
+    "stale_delegation_id": "SECOND-SHIFT-BOOK-WORKFLOW-SCHEDULER-EXECUTION-RUNTIME-001",
+    "stale_binding_head": "e2a23e8b1f076e3cd576c11e036e40eaf8a5ce2f",
+    "reason": "The active delegation still selected scheduler implementation against the predecessor Book head even though the exact changed scheduler subject already had fresh hosted PASS evidence. The stale delegation is control-plane drift and must be retired without replaying qualified work."
+  },
+  "qualified_semantics": [
+    "bounded same-layer parallelism",
+    "required dependency ordering",
+    "registered idempotent same-operation replay after unknown outcome",
+    "durable pause reload and resume",
+    "completed-task non-redispatch after resume",
+    "authority-wait blocked isolation-unsatisfied and Book-admission work withheld",
+    "retired Prose execution withheld",
+    "stale scheduler run bindings rejected",
+    "worker canonical-effect fields rejected",
+    "zero canonical Book effect"
+  ],
+  "non_claims": [
+    "No real external provider execution is established by synthetic worker fixtures.",
+    "No fresh blind literary evaluation is established.",
+    "No Prose execution lane is recreated.",
+    "No Book canonical admission, manuscript mutation, Story Bible mutation or author decision is performed.",
+    "No A-01 subject qualification, native, publication or production PASS is inferred.",
+    "BOOK remains incomplete."
+  ],
+  "history_policy": {
+    "prior_candidate_and_delegation_state_preserved": true,
+    "historical_evidence_append_only": true,
+    "completed_phase2_context_compiler_and_durable_persistence_not_replayed": true
+  },
+  "closure_disposition": "CLOSED_PASS__EXACT_SUBJECT_HOSTED_EVIDENCE_AND_ARTIFACT_DIGEST_FROZEN__STALE_DELEGATION_REQUIRES_CONTROL_LEDGER_RETIREMENT",
+  "downstream_gate": "Do not advance by replaying scheduler work. Reconcile the Second Shift Book delegation ledger, then bind at most one dependency-valid Book successor under current authority."
+}
