@@ -38,6 +38,7 @@ try {
     `commit=${subject}`,
     'base_subject=170860ea430da7b1a26a402512b1d54fb89b5a69',
     'changed_subject_cases=26',
+    'receipt_binding_hardening_cases=4',
     'qualification_class=HOSTED_PORTABLE_REFERENCE_CONTRACT_AUTHORITY_MECHANICS',
     'whole_runtime_authority=NOT_CLAIMED',
     'a01_native_production=NOT_CLAIMED',
@@ -63,6 +64,8 @@ try {
   run('javac', ['--release', '21', '-Xlint:all,-try', '-Werror', '-d', classes, ...sources], 'compile.txt');
   const changed = run('java', ['-cp', classes, 'org.systemmaster.foundation.runtimecontinuity.IdentityContractsPreflightQualificationTest'], 'changed-subject-26.txt');
   if (!changed.includes('PASS CORE_DURABLE_RUNTIME_IDENTITY_CONTRACTS_PREFLIGHT cases=26')) throw new Error('26-case predicate missing');
+  const hardening = run('java', ['-cp', classes, 'org.systemmaster.foundation.runtimecontinuity.IdentityContractsPreflightReceiptBindingHardeningTest'], 'receipt-binding-hardening-4.txt');
+  if (!hardening.includes('PASS CORE_DURABLE_RUNTIME_PREFLIGHT_RECEIPT_BINDING_HARDENING cases=4')) throw new Error('4-case receipt-binding hardening predicate missing');
 
   const cumulative = run('node', ['.github/scripts/foundation-contracts-versioning-qualify.js'], 'root-identity-contracts-cumulative.txt');
   if (!cumulative.includes('PASS FOUNDATION_CONTRACTS_VERSIONING_HOSTED_PORTABLE')) throw new Error('Contracts regression missing');
@@ -71,6 +74,7 @@ try {
   fs.writeFileSync(path.join(evidence, 'result.txt'), [
     'result=PASS',
     'changed_subject_cases=26',
+    'receipt_binding_hardening_cases=4',
     'identity_cases=36_via_cumulative',
     'contracts_cases=48_via_cumulative',
     'system_root_affected_regression=PASS_via_cumulative',
@@ -79,6 +83,7 @@ try {
     ''
   ].join('\n'));
   console.log(changed);
+  console.log(hardening);
   console.log('PASS CORE_DURABLE_RUNTIME_IDENTITY_CONTRACTS_PREFLIGHT_HOSTED_PORTABLE');
   console.log('PASS CORE_DURABLE_RUNTIME_IDENTITY_CONTRACTS_PREFLIGHT_CUMULATIVE_FOUNDATION');
   console.log(`evidence_dir=${evidence}`);
