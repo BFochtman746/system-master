@@ -1,0 +1,98 @@
+name: Learning S04 Assessment Interface Census
+
+on:
+  push:
+    branches:
+      - learning/ownership-freeze-001b-20260912
+    paths:
+      - '.github/workflows/learning-s04-assessment-census.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  assessment-census:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: learning/ownership-freeze-001b-20260912
+          fetch-depth: 0
+      - name: Recover exact assessment-related interface rows
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import base64, csv, gzip, hashlib, io, json, pathlib, re
+
+          source = pathlib.Path('qualification/learning/ownership/LRN-OWNERSHIP-FREEZE-001B-R3B-S02-R2-INTERFACES.csv.gz.b64')
+          raw = gzip.decompress(base64.b64decode(source.read_text(encoding='utf-8').strip()))
+          digest = hashlib.sha256(raw).hexdigest()
+          expected = '4f4387956bd8189b7a65f5de94ab3c722cb34f249ebe8a94ad74b4c0d0c3cbc0'
+          if digest != expected:
+              raise SystemExit(f'FAIL decoded ledger sha256 {digest} != {expected}')
+
+          reader = csv.DictReader(io.StringIO(raw.decode('utf-8-sig')))
+          rows = list(reader)
+          fields = reader.fieldnames or []
+          if len(rows) != 112:
+              raise SystemExit(f'FAIL active interface row count {len(rows)} != 112')
+
+          def row_id(row):
+              for key in fields:
+                  value = str(row.get(key, '')).strip()
+                  if re.fullmatch(r'I\d{3}(?:-[LC])?', value):
+                      return value
+              return None
+
+          terms = (
+              'assessment', 'score', 'scoring', 'item family', 'item_family',
+              'attempt', 'response', 'criterion', 'evidence'
+          )
+          selected = []
+          for row in rows:
+              searchable = ' | '.join(str(row.get(k, '')) for k in fields).lower()
+              if any(term in searchable for term in terms):
+                  selected.append(row)
+
+          ids = [row_id(r) for r in selected]
+          if not selected or any(i is None for i in ids):
+              raise SystemExit('FAIL assessment candidate census did not recover identifiable rows')
+
+          report = {
+              'artifact_id': 'LRN-OWNERSHIP-FREEZE-001B-R3B-S04-R1-ASSESSMENT-INTERFACE-CENSUS',
+              'date': '2026-09-12',
+              'owner_path': 'SYSTEM_MASTER/LEARNING',
+              'source_path': str(source),
+              'decoded_ledger_sha256': digest,
+              'active_interface_rows': len(rows),
+              'selection_terms': list(terms),
+              'candidate_count': len(selected),
+              'candidate_interface_ids': ids,
+              'candidate_rows': selected,
+              'standing': 'EXACT_REPOSITORY_NATIVE_CANDIDATE_CENSUS__ADJUDICATION_REQUIRED',
+              'non_claims': [
+                  'candidate match does not establish S04 membership',
+                  'no runtime implementation claim',
+                  'no mastery retention transfer psychometric SME certification claim',
+                  'no participant consent native A-01 production claim'
+              ]
+          }
+          out = pathlib.Path('qualification/learning/ownership/LRN-OWNERSHIP-FREEZE-001B-R3B-S04-R1-ASSESSMENT-INTERFACE-CENSUS.json')
+          out.write_text(json.dumps(report, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
+          print('CANDIDATE_COUNT=' + str(len(selected)))
+          print('CANDIDATE_IDS=' + ','.join(ids))
+          PY
+      - name: Commit exact census
+        shell: bash
+        run: |
+          path='qualification/learning/ownership/LRN-OWNERSHIP-FREEZE-001B-R3B-S04-R1-ASSESSMENT-INTERFACE-CENSUS.json'
+          if [ -z "$(git status --porcelain -- "$path")" ]; then
+            echo 'No census delta.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add "$path"
+          git commit -m 'learning: persist exact S04 assessment interface census'
+          git push origin HEAD:learning/ownership-freeze-001b-20260912
