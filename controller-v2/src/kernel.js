@@ -135,7 +135,7 @@ export class ControllerKernel {
             attempt_id TEXT PRIMARY KEY,
             effect_id TEXT NOT NULL REFERENCES external_effects(effect_id),
             attempt_number INTEGER NOT NULL CHECK(attempt_number > 0),
-            lease_id TEXT NOT NULL REFERENCES leases(lease_id),
+            lease_id TEXT NOT NULL,
             resource_id TEXT NOT NULL,
             generation INTEGER NOT NULL CHECK(generation > 0),
             authorized_at TEXT NOT NULL,
