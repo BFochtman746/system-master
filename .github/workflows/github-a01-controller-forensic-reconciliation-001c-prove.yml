@@ -8,7 +8,9 @@ on:
       - 'control-gateway/**'
       - '.github/scripts/control-gateway-production-writer.js'
       - '.github/scripts/control-gateway-production-enforcement-audit.js'
+      - '.github/scripts/control-gateway-production-r01-live-proof.js'
       - '.github/workflows/control-gateway-production-writer.yml'
+      - '.github/workflows/control-gateway-production-r01-live-proof.yml'
       - '.github/workflows/github-a01-controller-forensic-reconciliation-001c-prove.yml'
       - 'governance/control-gateway/GITHUB-A01-CONTROLLER-FORENSIC-RECONCILIATION-001C-*'
   workflow_dispatch:
@@ -44,6 +46,7 @@ jobs:
           node --check control-gateway/src/github-production-enforcement.js
           node --check .github/scripts/control-gateway-production-writer.js
           node --check .github/scripts/control-gateway-production-enforcement-audit.js
+          node --check .github/scripts/control-gateway-production-r01-live-proof.js
           node -e "JSON.parse(require('fs').readFileSync('governance/control-gateway/GITHUB-A01-CONTROLLER-FORENSIC-RECONCILIATION-001C-ENFORCEMENT-POLICY.json','utf8'))"
       - name: Run full Control Gateway Node regression including 001C writer tests
         shell: bash

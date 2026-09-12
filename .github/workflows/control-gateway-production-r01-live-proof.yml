@@ -1,0 +1,64 @@
+name: Control Gateway R01 Production Live Proof
+
+on:
+  workflow_dispatch:
+    inputs:
+      state_ref:
+        description: Durable R01 positive-proof active-work state branch name
+        required: true
+        type: string
+      mutation_request_json:
+        description: Exact R01 positive-proof CG-005 mutation request JSON
+        required: true
+        type: string
+      mutation_plan_json:
+        description: Exact byte-bound R01 positive-proof mutation plan JSON
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  live-proof:
+    name: Dedicated writer live CAS + exact replay proof
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: control-gateway-production
+    steps:
+      - name: Checkout exact production controller
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Verify workflow is executing exact main head
+        shell: bash
+        run: |
+          test "${GITHUB_REF}" = "refs/heads/main"
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+      - name: Mint repository-scoped dedicated writer App token
+        id: writer-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1
+        with:
+          client-id: ${{ vars.CONTROL_GATEWAY_WRITER_CLIENT_ID }}
+          private-key: ${{ secrets.CONTROL_GATEWAY_WRITER_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
+      - name: Execute fresh admitted CAS and exact replay
+        shell: bash
+        env:
+          CONTROL_GATEWAY_STATE_REF: ${{ inputs.state_ref }}
+          CONTROL_GATEWAY_MUTATION_REQUEST_JSON: ${{ inputs.mutation_request_json }}
+          CONTROL_GATEWAY_MUTATION_PLAN_JSON: ${{ inputs.mutation_plan_json }}
+          CONTROL_GATEWAY_WRITER_TOKEN: ${{ steps.writer-token.outputs.token }}
+          CONTROL_GATEWAY_WRITER_EVIDENCE_DIR: ${{ runner.temp }}/control-gateway-r01-live-proof-${{ github.run_id }}
+        run: node .github/scripts/control-gateway-production-r01-live-proof.js
+      - name: Upload immutable R01 live-proof evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: control-gateway-r01-live-proof-${{ github.run_id }}-evidence
+          path: ${{ runner.temp }}/control-gateway-r01-live-proof-${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 90
