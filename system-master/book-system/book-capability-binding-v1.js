@@ -72,7 +72,7 @@ function isRetiredExecutionIdentity(capabilityId, ownerPath, serviceId) {
   const cap = String(capabilityId || '').toUpperCase();
   const owner = String(ownerPath || '').toUpperCase();
   const service = String(serviceId || '').toUpperCase();
-  return cap.startsWith('PROSE.') || owner === RETIRED_OWNER_PREFIX || owner.startsWith(`${RETIRED_OWNER_PREFIX}/`) || service === 'PROSE_ANALYSIS_AND_REVISION' && cap.startsWith('PROSE.');
+  return cap.startsWith('PROSE.') || owner === RETIRED_OWNER_PREFIX || owner.startsWith(`${RETIRED_OWNER_PREFIX}/`) || (service === 'PROSE_ANALYSIS_AND_REVISION' && cap.startsWith('PROSE.'));
 }
 
 function assertProviderProvenance(p) {
@@ -104,9 +104,10 @@ function validateBinding(binding) {
   if (binding.current_capability_id.startsWith('PROSE.')) fail('RETIRED_PROSE_EXECUTION_ID');
   if (binding.current_owner_path !== OWNER_PATH) fail('INVALID_CURRENT_OWNER_PATH');
   if (isRetiredExecutionIdentity(binding.current_capability_id, binding.current_owner_path, null)) fail('RETIRED_PROSE_EXECUTION_ID');
-  for (const key of ['adapter_id', 'adapter_version', 'authority_domain', 'private_data_authority']) {
+  for (const key of ['adapter_id', 'adapter_version', 'authority_domain']) {
     if (typeof binding[key] !== 'string' || binding[key].length === 0) fail('INVALID_CAPABILITY_BINDING', `invalid ${key}`);
   }
+  if (binding.private_data_authority !== 'NOT_GRANTED_BY_BINDING') fail('PRIVATE_AUTHORITY_WIDENING_FORBIDDEN');
   if (!ALLOWED_CONTEXT_CLASSES.has(binding.context_package_class)) fail('INVALID_CONTEXT_PACKAGE_CLASS');
   if (typeof binding.registered_idempotent !== 'boolean') fail('INVALID_IDEMPOTENCY_CLASS');
   if (!ALLOWED_CONCURRENCY_CLASSES.has(binding.concurrency_policy_class)) fail('INVALID_CONCURRENCY_POLICY_CLASS');
@@ -160,7 +161,7 @@ function loadRegistrySource() {
 }
 
 function buildRegistry(source = loadRegistrySource()) {
-  if (!source || source.registry_schema_version !== '1' || !Array.isArray(source.binding_inputs)) fail('INVALID_BINDING_REGISTRY');
+  if (!source || source.registry_schema_version !== '1' || source.owner_path !== OWNER_PATH || !Array.isArray(source.binding_inputs)) fail('INVALID_BINDING_REGISTRY');
   const bindings = source.binding_inputs.map(createBinding);
   const byCapability = new Map();
   const byId = new Map();
