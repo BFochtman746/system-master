@@ -9,6 +9,7 @@ on:
       - 'governance/control-gateway/**'
       - 'qualification/a01/registry.json'
       - '.github/scripts/a01-second-shift-supervisor-v2-qualify.js'
+      - '.github/scripts/validate-system-topology.js'
       - '.github/workflows/second-shift-supervisor-v2-a01-windows-stress.yml'
       - '.github/workflows/second-shift-control-gateway-cg-008.yml'
       - 'tools/second_shift_supervisor_v2.py'
@@ -29,8 +30,8 @@ jobs:
         node: [22, 24]
     env:
       CG008_LIVE_REF: control-gateway-state/active-work/second-shift-control-gateway-dev
-      CG008_EXPECTED_PUBLICATION_COMMIT: 278c010c561d87fc55bea9c6b5cc736e50390fb7
-      CG008_EXPECTED_PACKET_DIGEST: e44b17e197c86800ffd94e935674d5c5f2fcadd1c6f480ed26e913a4e1f910f1
+      CG008_EXPECTED_PUBLICATION_COMMIT: dfc69e291f6d7b2cd370e08fb3950cc2355ec70b
+      CG008_EXPECTED_PACKET_DIGEST: 62f863eef8ebbd4c6a91e741b83f8fff0b47dd02fd7e3261e190f0368c31d975
       CG008_EXPECTED_AUTHORITY_SUBJECT: 51a0976f2f3265702e6005a36d70f9e9f240ad63
       CG008_EXPECTED_WORK_REF: second-shift-control-gateway/cg-008-supervisor-integration
       CG008_EXPECTED_OPERATION: SECOND-SHIFT-CONTROL-GATEWAY-CG-008
@@ -55,9 +56,10 @@ jobs:
         run: |
           node .github/scripts/a01-control-plane.js validate
           node --check .github/scripts/a01-second-shift-supervisor-v2-qualify.js
-      - name: Verify legacy stress route is gateway-only and registered
+      - name: Verify standalone infrastructure topology classification and legacy stress route
         shell: bash
         run: |
+          node .github/scripts/validate-system-topology.js
           node <<'NODE'
           const fs = require('fs');
           const workflow = fs.readFileSync('.github/workflows/second-shift-supervisor-v2-a01-windows-stress.yml', 'utf8');
@@ -69,6 +71,9 @@ jobs:
           if (!entry) throw new Error('Second Shift A-01 qualification missing from registry');
           if (entry.workstream_id !== 'SECOND-SHIFT-CONTROL-GATEWAY' || entry.source !== 'subject' || entry.executable !== 'node') throw new Error('Second Shift registry ownership/source mismatch');
           if (entry.args.length !== 1 || entry.args[0] !== '.github/scripts/a01-second-shift-supervisor-v2-qualify.js') throw new Error('Second Shift registry wrapper mismatch');
+          const external = JSON.parse(fs.readFileSync('governance/control-gateway/A01-EXTERNAL-INFRASTRUCTURE-WORKSTREAMS.json', 'utf8'));
+          const classification = external.entries?.['SECOND-SHIFT-CONTROL-GATEWAY'];
+          if (!classification || classification.product_system_owner !== null || classification.may_create_product_system !== false || classification.may_inherit_product_execution_lane !== false) throw new Error('standalone control gateway was accidentally mapped into product topology');
           console.log('CG008_A01_ROUTE_CONTRACT=PASS');
           NODE
       - name: Run Control Gateway CG-003 through CG-008 tests including live authority
