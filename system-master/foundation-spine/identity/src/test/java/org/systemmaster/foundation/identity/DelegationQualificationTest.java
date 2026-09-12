@@ -365,7 +365,7 @@ public final class DelegationQualificationTest {
         ActorChain chain = f.chainFor(p);
         GrantBody staleChild = f.childBody(p, "grant-child-c33", chain, 2);
         f.service.advanceAuthorityGeneration(f.advance("command-advance-c33", 1));
-        expect(ErrorCode.STALE_BASE, () -> f.issue("command-child-c33", staleChild, chain));
+        expect(ErrorCode.REVOKED, () -> f.issue("command-child-c33", staleChild, chain));
         pass();
     }
 
