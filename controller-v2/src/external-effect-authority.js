@@ -99,10 +99,46 @@ export function authorizeExternalEffectDispatch(kernel, effectId, leaseId, nowMs
     const now = new Date(nowMs).toISOString();
     kernel.db.prepare('INSERT INTO external_effect_attempts(attempt_id,effect_id,attempt_number,lease_id,resource_id,generation,authorized_at) VALUES (?,?,1,?,?,?,?)').run(attemptId,effectId,leaseId,lease.resource_id,Number(lease.generation),now);
     kernel.db.prepare("UPDATE external_effects SET state='UNKNOWN',last_error_code=NULL,updated_at=? WHERE effect_id=?").run(now,effectId);
-    kernel.appendEvent(effectStream(effectId),kernel.currentStreamVersion(effectStream(effectId)),'external-effect.dispatch-authorized',{
+    const event = kernel.appendEvent(effectStream(effectId),kernel.currentStreamVersion(effectStream(effectId)),'external-effect.dispatch-authorized',{
       attempt_id:attemptId,effect_id:effectId,attempt_number:1,lease_id:leaseId,resource_id:lease.resource_id,generation:Number(lease.generation),state:'UNKNOWN'
     },now);
-    return {attempt_id:attemptId,effect_id:effectId,attempt_number:1,lease_id:leaseId,resource_id:lease.resource_id,generation:Number(lease.generation),authorized_at:now};
+    return {attempt_id:attemptId,effect_id:effectId,attempt_number:1,lease_id:leaseId,resource_id:lease.resource_id,generation:Number(lease.generation),authorized_at:now,dispatch_event_id:event.event_id,durability_status:'PENDING'};
+  });
+}
+
+export function getExternalEffectDispatchPermit(kernel, effectId, leaseId, nowMs = Date.now()) {
+  requireText(effectId, 'effect_id');
+  requireText(leaseId, 'lease_id');
+  const effect = kernel.db.prepare('SELECT * FROM external_effects WHERE effect_id=?').get(effectId);
+  if (!effect) throw new ControllerError('NOT_FOUND', 'external effect not found');
+  if (effect.state !== 'UNKNOWN') throw new ControllerError('EXTERNAL_EFFECT_DISPATCH_PERMIT_STATE_INVALID', 'dispatch permit requires UNKNOWN effect after local authorization');
+  const attempt = kernel.db.prepare('SELECT * FROM external_effect_attempts WHERE effect_id=? ORDER BY attempt_number').get(effectId);
+  if (!attempt || Number(attempt.attempt_number) !== 1) throw new ControllerError('EXTERNAL_EFFECT_DISPATCH_PERMIT_MISSING', 'exactly one dispatch attempt required');
+  if (attempt.lease_id !== leaseId) throw new ControllerError('STALE_LEASE', 'dispatch permit requires the authorizing lease');
+  kernel.assertWorkerLease({leaseId,generation:Number(attempt.generation),operationId:effect.operation_id},nowMs);
+  const currentGeneration = kernel.db.prepare('SELECT generation FROM resource_generations WHERE resource_id=?').get(attempt.resource_id);
+  if (!currentGeneration || Number(currentGeneration.generation) !== Number(attempt.generation)) throw new ControllerError('STALE_LEASE', 'dispatch permit lease generation is stale');
+  const row = kernel.db.prepare(`
+    SELECT e.event_id,e.data_json,o.status
+      FROM events e
+      JOIN outbox o ON o.event_id=e.event_id
+     WHERE e.stream_id=? AND e.event_type='external-effect.dispatch-authorized'
+     ORDER BY e.stream_version DESC LIMIT 1
+  `).get(effectStream(effectId));
+  if (!row) throw new ControllerError('EXTERNAL_EFFECT_DISPATCH_PERMIT_MISSING', 'dispatch authorization event missing');
+  const data = JSON.parse(row.data_json);
+  if (data.effect_id !== effectId || data.attempt_id !== attempt.attempt_id || data.lease_id !== attempt.lease_id || data.resource_id !== attempt.resource_id || Number(data.generation) !== Number(attempt.generation)) {
+    throw new ControllerError('EXTERNAL_EFFECT_DISPATCH_PERMIT_MISMATCH', 'dispatch event and immutable attempt evidence disagree');
+  }
+  if (row.status !== 'SEALED') throw new ControllerError('DURABILITY_BARRIER_NOT_MET', 'dispatch authorization is not durably sealed');
+  return Object.freeze({
+    effect_id:effectId,
+    attempt_id:attempt.attempt_id,
+    lease_id:attempt.lease_id,
+    resource_id:attempt.resource_id,
+    generation:Number(attempt.generation),
+    dispatch_event_id:row.event_id,
+    durability_status:'SEALED'
   });
 }
 
