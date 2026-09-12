@@ -1,0 +1,74 @@
+{
+  "control_record_id": "BOOK-SYSTEM-CONTROL-RECORD-012",
+  "effective_date": "2026-09-12",
+  "standing": "ACTIVE_INCOMPLETE_BOOK__RECONSTRUCTION_B00_B01_FROZEN__B02_A_SELECTED",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "parent_product": "SYSTEM_MASTER",
+  "control_ref": "book-system/control-v1",
+  "topology_authority": "governance/SYSTEM-TOPOLOGY-005.json on canonical main",
+  "current_authority": "governance/CURRENT-AUTHORITY.json on canonical main",
+  "architecture_decision": "governance/ADR-0005-PROSE-TERMINAL-RETIREMENT-BOOK-INTEGRATION.md",
+  "program_job_lock": "governance/SYSTEM-PROGRAM-JOB-LOCK-001.json",
+  "completion_authority": "governance/SYSTEM-COMPLETION-STATUS-001.json",
+  "reconstruction_blueprint": "qualification/book-system/reconstruction/BOOK-SYSTEM-RECONSTRUCTION-BLUEPRINT-001.md",
+  "completion_truth": {
+    "book_complete": false,
+    "prose_historical_completion": "COMPLETE_RETIRED_TERMINAL",
+    "rule": "BOOK remains incomplete. Frozen reconstruction domains are bounded exact-subject evidence only; they do not imply whole-Book completion. PROSE has no current owner, execution, repair, qualification, research, telemetry or successor domain."
+  },
+  "frozen_reconstruction_domains": [
+    {
+      "domain_id": "BOOK-RECONSTRUCTION-B00",
+      "domain": "FOUNDATION & AUTHORITY",
+      "standing": "FROZEN",
+      "freeze_record": "qualification/book-system/reconstruction/BOOK-RECONSTRUCTION-B00-G1-CONTROL-FREEZE-001.md"
+    },
+    {
+      "domain_id": "BOOK-RECONSTRUCTION-B01",
+      "domain": "EXECUTION FOUNDATION",
+      "standing": "FROZEN",
+      "freeze_record": "qualification/book-system/reconstruction/BOOK-RECONSTRUCTION-B01-F-CONTROL-FREEZE-001.md"
+    }
+  ],
+  "current_objective": {
+    "objective_id": "BOOK-RECONSTRUCTION-B02-A",
+    "state": "READY",
+    "domain": "SOURCE INTAKE & EXISTING-BOOK RECOVERY",
+    "stage": "RECOVER + INVENTORY",
+    "completion_target": "Perform lossless current and historical repository archaeology for B02 source-intake and existing-book-recovery requirements and reach unaccounted B02-A archaeology requirements = 0 with every recovered behavior classified by owner, reconstruction truth class, durable state, interface/contract, reachable runtime path if any, test/evidence class and environment/authority blocker.",
+    "next_on_clean_close": "Bind exactly one dependency-valid B02 analysis successor only after B02-A unaccounted archaeology requirements = 0. Do not begin design or implementation from B02-A."
+  },
+  "reconstruction_truth_classes": [
+    "MAIN-INSTALLED",
+    "BOOK-BRANCH-BUILT",
+    "HISTORICAL-BOOK-CODE",
+    "QUALIFIER-ONLY",
+    "DESIGNED-NOT-INSTALLED",
+    "EXTERNAL-REQUIRED"
+  ],
+  "authority_fences": {
+    "preserve_b00_b01_frozen_invariants": true,
+    "reopen_only_exact_invalidated_frozen_scope": true,
+    "book_canonical_admission_remains_terminal_effect_boundary": true,
+    "author_decisions_must_not_be_synthesized": true,
+    "rights_or_private_source_permission_must_not_be_synthesized": true,
+    "native_fidelity_or_external_provider_availability_must_not_be_synthesized": true,
+    "publication_or_production_standing_must_not_be_synthesized": true,
+    "a01_standing_must_not_be_synthesized": true,
+    "prose_active_execution_forbidden": true
+  },
+  "lane_rules": [
+    "BOOK is the sole current owner of Book/manuscript/Story-Bible/author/lifecycle/admission/versioning/publication semantics.",
+    "Historical Prose/literary implementation is provenance and archaeological evidence only; it cannot create a Prose owner, lane, router identity, successor, repair domain, qualification domain, research domain or telemetry domain.",
+    "BOOK must not take Learning, Documents, Core, Programming or Second Shift Controller product ownership.",
+    "A design document, registry declaration, historical PASS, qualifier-only implementation, fixture or callable declaration is not installed capability evidence.",
+    "If the live Book head changes during execution, re-read and reconcile before mutation; never overwrite valid concurrent progress."
+  ],
+  "evidence_rule": "B02-A is archaeology only. No historical PASS transfers. Any later B02 qualification requires fresh B02 isolated qualification and fresh B00-B02 cumulative regression on the exact candidate subject.",
+  "supersession": {
+    "supersedes_for_current_control": "BOOK-SYSTEM-CONTROL-RECORD-011",
+    "historical_binding_preserved": true,
+    "latest_reconciled_state_before_this_record": "BOOK-SYSTEM-RECONCILED-STATE-041",
+    "retired_objective_not_replayed": "BOOK-PROSE-PHASE-2-ORCHESTRATOR-CLOSURE-CENSUS-001"
+  }
+}
