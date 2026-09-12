@@ -481,7 +481,8 @@ test('F005-T043 valid authenticated request creates exactly one command and one 
     assert.equal(countRows(f.runtime.kernel, 'transactions'), 1);
     assert.equal(f.runtime.kernel.db.prepare('SELECT state FROM transactions').get().state, 'OPEN');
     const tx = f.runtime.kernel.db.prepare('SELECT controller_version,policy_version FROM transactions').get();
-    assert.deepEqual(tx, { controller_version: 'controller-test', policy_version: 'policy-runtime-v1' });
+    assert.equal(tx.controller_version, 'controller-test');
+    assert.equal(tx.policy_version, 'policy-runtime-v1');
   } finally { await f.close(); }
 });
 
