@@ -2,33 +2,33 @@
   "owner_system_id": "BOOK",
   "owner_path": "SYSTEM_MASTER/BOOK",
   "control_ref": "book-system/control-v1",
-  "last_known_control_head": "f7a42615644457a94c4b2218d59c549054e09108",
+  "last_known_control_head": "cc5093bb46bb54a4b7245ba479ed97ffa770c996",
   "program_job_lock": "governance/SYSTEM-PROGRAM-JOB-LOCK-001.json",
   "system_completion_status": "governance/SYSTEM-COMPLETION-STATUS-001.json",
-  "delegation_epoch": 34,
+  "delegation_epoch": 35,
   "active_delegations": [
     {
-      "delegation_id": "SECOND-SHIFT-BOOK-RECONSTRUCTION-B02-A",
+      "delegation_id": "SECOND-SHIFT-BOOK-RECONSTRUCTION-B02-B",
       "owner_path": "SYSTEM_MASTER/BOOK",
-      "objective_id": "BOOK-RECONSTRUCTION-B02-A",
-      "obligation_id": "BOOK-RECONSTRUCTION-B02-A",
+      "objective_id": "BOOK-RECONSTRUCTION-B02-B",
+      "obligation_id": "BOOK-RECONSTRUCTION-B02-B",
       "state": "READY",
-      "priority": "BOOK_OWNER_RECONSTRUCTION_RECOVER_INVENTORY",
+      "priority": "BOOK_OWNER_RECONSTRUCTION_ANALYSIS_ONLY",
       "valid_for_control_ref": "book-system/control-v1",
-      "valid_for_control_head": "f7a42615644457a94c4b2218d59c549054e09108",
-      "created_at": "2026-09-12T10:01:34-04:00",
-      "last_revalidated_at": "2026-09-12T10:01:34-04:00",
-      "parent_checkpoint": "qualification/book-system/reconstruction/BOOK-RECONSTRUCTION-B01-F-CONTROL-FREEZE-001.md",
-      "classification": "BOOK_RECONSTRUCTION_B02_A_RECOVER_INVENTORY_ONLY",
-      "completion_delta": "Losslessly recover and inventory every atomic B02 source-intake and existing-book-recovery requirement across current Book runtime, historical Book/literary/Prose archaeology, qualification code, tests, fixtures, workflows, research, schemas, contracts and evidence receipts; classify every item with the reconstruction truth classes and required owner/state/interface/runtime/evidence/blocker trace; reach unaccounted B02-A archaeology requirements = 0 without entering design or implementation.",
-      "stop_condition": "Stop when every bounded B02-A requirement and recovered behavior is accounted and classified, or preserve the exact evidence gap/authority boundary that prevents lossless closure. Do not synthesize author, rights, private, native, provider, literary-quality, publication, production or A-01 standing.",
+      "valid_for_control_head": "cc5093bb46bb54a4b7245ba479ed97ffa770c996",
+      "created_at": "2026-09-12T10:26:32-04:00",
+      "last_revalidated_at": "2026-09-12T10:26:32-04:00",
+      "parent_checkpoint": "qualification/book-system/reconstruction/BOOK-RECONSTRUCTION-B02-A-SOURCE-INTAKE-EXISTING-BOOK-RECOVERY-INVENTORY-001.md",
+      "classification": "BOOK_RECONSTRUCTION_B02_B_ANALYSIS_ONLY",
+      "completion_delta": "Analyze the closed B02-A inventory for gaps, duplicates, weak implementations, incorrect placement, stale assumptions and unresolved ownership/interface boundaries. Determine the minimum dependency-valid continuation before any B02 research/adjudication/design/build transition.",
+      "stop_condition": "Stop after the bounded B02-B analysis identifies and classifies every material gap/duplicate/placement/boundary issue and binds exactly one dependency-valid continuation. Do not design or implement B02 from this delegation.",
       "allowed_work": [
         "read exact live Book owner head and current authority before mutation",
-        "perform current and historical repository archaeology for B02 source intake and existing-book recovery",
-        "classify recovered behavior using only MAIN-INSTALLED, BOOK-BRANCH-BUILT, HISTORICAL-BOOK-CODE, QUALIFIER-ONLY, DESIGNED-NOT-INSTALLED and EXTERNAL-REQUIRED",
-        "preserve B00 and B01 frozen invariants and reopen only exact contradicted scope with fresh evidence",
-        "record a lossless B02-A recovery and inventory artifact",
-        "bind at most one dependency-valid B02 analysis successor after B02-A reaches unaccounted requirements = 0"
+        "analyze the closed B02-A 50-requirement ledger",
+        "identify gaps, duplicates, weak implementations, incorrect placement, stale assumptions and unresolved ownership/interface boundaries",
+        "challenge native provider, normalized projection, recovery routing and governed admission boundaries against frozen B00/B01 invariants",
+        "identify whether targeted external research is materially required before adjudication",
+        "bind exactly one dependency-valid B02 continuation on clean analysis close"
       ],
       "forbidden_authority": [
         "do not create or reactivate PROSE work or identity",
@@ -38,18 +38,33 @@
         "do not infer author decisions, legal rights, private-source permission, native fidelity, external-provider availability, literary quality, publication authority, production standing or A-01 standing",
         "do not declare BOOK or B02 complete"
       ],
-      "on_pass": "Retire this recovery/inventory delegation only after unaccounted B02-A archaeology requirements = 0 and every recovered behavior has complete truth/ownership/state/interface/runtime/evidence/blocker classification; then bind exactly one dependency-valid B02 analysis successor without executing it.",
-      "on_failure": "Preserve the exact archaeology gap, blocker or authority mismatch; release any claim; do not manufacture completion or unauthorized successor work."
+      "on_pass": "Retire this analysis delegation only after the bounded B02-B analysis is complete and bind exactly one dependency-valid continuation required by the evidence. If external evidence can materially change the architecture, targeted research precedes adjudication/design.",
+      "on_failure": "Preserve the exact analysis gap, blocker or authority mismatch; release any claim; do not manufacture completion or unauthorized successor work."
     }
   ],
   "retired_delegations": [
+    {
+      "delegation_id": "SECOND-SHIFT-BOOK-RECONSTRUCTION-B02-A",
+      "state": "COMPLETED__B02_A_RECOVER_INVENTORY_ZERO_UNACCOUNTED__SUPERSEDED_BY_B02_B_ANALYSIS",
+      "valid_for_control_head": "f7a42615644457a94c4b2218d59c549054e09108",
+      "objective_id": "BOOK-RECONSTRUCTION-B02-A",
+      "obligation_id": "BOOK-RECONSTRUCTION-B02-A",
+      "completion_evidence": "qualification/book-system/reconstruction/BOOK-RECONSTRUCTION-B02-A-SOURCE-INTAKE-EXISTING-BOOK-RECOVERY-INVENTORY-001.md",
+      "completion_subject_head": "cc5093bb46bb54a4b7245ba479ed97ffa770c996",
+      "atomic_requirements": 50,
+      "unaccounted_requirements": 0,
+      "selected_successor": "SECOND-SHIFT-BOOK-RECONSTRUCTION-B02-B",
+      "history_preserved": true,
+      "prose_execution_created": false,
+      "book_completion_claimed": false
+    },
     {
       "delegation_id": "SECOND-SHIFT-BOOK-POST-SCHEDULER-OPEN-SEAM-CENSUS-001",
       "state": "SUPERSEDED__RECONSTRUCTION_AUTHORITY__DO_NOT_REPLAY",
       "valid_for_control_head": "27fe9a3621c92e414874ce229341e58e71b76375",
       "objective_id": "BOOK-POST-SCHEDULER-OPEN-SEAM-CENSUS-001",
       "obligation_id": "BOOK-PROSE-PHASE-2-ORCHESTRATOR-CLOSURE-CENSUS-001",
-      "retirement_reason": "The Book reconstruction advanced through frozen B00 and B01 and explicitly admitted BOOK-RECONSTRUCTION-B02-A. The post-scheduler open-seam census is stale pre-reconstruction work and must not be replayed.",
+      "retirement_reason": "The Book reconstruction advanced through frozen B00 and B01 and superseded the post-scheduler open-seam census. It must not be replayed.",
       "history_preserved": true,
       "prose_execution_created": false,
       "book_completion_claimed": false
@@ -129,15 +144,15 @@
     }
   ],
   "prior_full_history": {
-    "blob_sha": "5b7e5a6f37e519f2a6860a1767266b5a4ab8feb4",
+    "blob_sha": "ab619088668726eb1fecab731c383c72c54a272b",
     "standing": "IMMUTABLE_GIT_HISTORY_PRESERVED"
   },
   "prior_epoch_snapshot": {
-    "delegation_epoch": 33,
-    "blob_sha": "5b7e5a6f37e519f2a6860a1767266b5a4ab8feb4",
+    "delegation_epoch": 34,
+    "blob_sha": "ab619088668726eb1fecab731c383c72c54a272b",
     "standing": "IMMUTABLE_GIT_HISTORY_PRESERVED"
   },
   "owner_revalidation_required": false,
-  "reason": "Book reconstruction B00 and B01 are frozen and BOOK-RECONSTRUCTION-B02-A is the exact admitted successor. The active delegation is rebound to exact Book owner head f7a42615644457a94c4b2218d59c549054e09108 for recovery/inventory only. The old post-scheduler open-seam census is retired without replay. Historical Prose remains provenance only and BOOK remains incomplete.",
+  "reason": "B02-A recovery/inventory closed losslessly with unaccounted requirements = 0. The one active Book delegation is now BOOK-RECONSTRUCTION-B02-B analysis only at exact owner head cc5093bb46bb54a4b7245ba479ed97ffa770c996. No Prose work is recreated and no design or implementation is authorized by this delegation.",
   "empty_is_valid": false
 }
