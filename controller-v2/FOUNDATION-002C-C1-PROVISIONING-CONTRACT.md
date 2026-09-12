@@ -9,10 +9,13 @@ Scope: live remote identity + permission + seed + empty-journal preflight
 - Subject repository: `BFochtman746/system-master`
 - Visibility: private
 - Archived: false
-- Seed requirement: exactly one harmless initial commit on the default branch (for example a README)
 - Required default branch: `main`
+- Seed history: exactly one root commit, with zero parents
+- Seed tree: exactly one file named `README.md`
 - `refs/heads/journal`: MUST NOT EXIST before C1 qualification
 - System Master repository MUST NOT be used as journal storage
+
+The README contents are non-authoritative infrastructure seed material. The repository name, numeric repository identity, root seed commit, default branch, visibility, and empty journal-ref state are qualification inputs.
 
 ## Authority boundary
 
@@ -20,9 +23,11 @@ Repository creation/provisioning is infrastructure setup only. Creating the repo
 
 The Controller live qualification owns creation of `refs/heads/journal` and all subsequent journal objects.
 
+C1 itself is read-only. Its real GitHub surface is limited to repository/ref/commit/tree GET operations and cannot create blobs, trees, commits, or refs.
+
 ## Required principal capability
 
-The Controller qualification principal must be able to read repository metadata and Git objects and write repository Git objects/refs. It must not receive broader subject-repository mutation authority through this provisioning step.
+The Controller qualification principal must be able to read repository metadata and Git objects and must expose repository write capability for later C2 qualification. C1 verifies known absence of write capability and fails closed. It must not receive broader subject-repository mutation authority through this provisioning step.
 
 ## C1 fail-closed preconditions
 
@@ -33,13 +38,28 @@ C1 MUST fail without mutation if any of the following is true:
 3. the target is `BFochtman746/system-master`;
 4. explicit destructive qualification opt-in is absent;
 5. resolved repository identity differs from configured identity;
-6. repository is archived;
-7. repository has no default branch / seed commit;
-8. repository write capability is known to be absent;
-9. `refs/heads/journal` already exists;
-10. the qualification identity is absent.
+6. stable positive numeric repository identity is unavailable;
+7. repository is archived;
+8. repository is not private;
+9. repository has no default branch / seed commit;
+10. default branch is not exactly `main`;
+11. seed commit is not the single root commit;
+12. root tree does not contain exactly one file named `README.md`;
+13. repository write capability is known to be absent;
+14. `refs/heads/journal` already exists;
+15. the qualification identity is absent.
 
 ## Successful C1 result
+
+C1 success emits a machine-readable PASS receipt containing at minimum:
+
+- qualification identity;
+- canonical journal repository name;
+- stable numeric journal repository ID;
+- canonical subject repository name;
+- default branch;
+- exact root seed commit OID;
+- `qualified_for_live_journal_mutation: true`.
 
 C1 success means only:
 
