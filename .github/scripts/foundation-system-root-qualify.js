@@ -91,7 +91,7 @@ try {
   ];
   for (const source of sources) if (!fs.existsSync(source)) throw new Error(`missing source ${path.relative(root, source)}`);
 
-  run('javac', ['--release', '21', '-Xlint:all', '-d', classes, ...sources], { evidence: 'compile.txt' });
+  run('javac', ['--release', '21', '-Xlint:all,-try', '-Werror', '-d', classes, ...sources], { evidence: 'compile.txt' });
   const qualification = run('java', ['-cp', classes, 'org.systemmaster.foundation.root.AuthorityRegistryQualificationTest'], { evidence: 'qualification.txt' });
   if (!qualification.includes('PASS FOUNDATION_SYSTEM_ROOT')) throw new Error('qualification completion predicate missing');
 
