@@ -3,7 +3,7 @@ import { ControllerError } from './errors.js';
 const DEFAULT_API_VERSION='2026-03-10';
 const JSON_ACCEPT='application/vnd.github+json';
 
-function fail(code,message,details={}){throw new ControllerError(code,message,details);}
+function fail(code,message,details={}){const e=new ControllerError(code,message,details);if(Object.hasOwn(details,'status'))e.status=details.status;if(Object.hasOwn(details,'ambiguous'))e.ambiguous=details.ambiguous;throw e;}
 function encodeRef(ref){return ref.split('/').map(encodeURIComponent).join('/');}
 function header(response,name){return response.headers?.get?.(name)??response.headers?.get?.(name.toLowerCase())??null;}
 
@@ -60,7 +60,7 @@ export class GitHubGitDataClient {
       fail('GITHUB_RATE_LIMITED',message,{status:response.status,retry_after_seconds:retryAfter===null?null:Number(retryAfter),rate_limit_reset_epoch:reset===null?null:Number(reset),method,path});
     }
     if(response.status===403)fail('GITHUB_PERMISSION_DENIED',message,{status:403,accepted_permissions:header(response,'x-accepted-github-permissions'),method,path});
-    if(response.status===404){const e=new ControllerError('GITHUB_NOT_FOUND',message,{status:404,method,path});e.status=404;throw e;}
+    if(response.status===404)fail('GITHUB_NOT_FOUND',message,{status:404,method,path});
     if(response.status===409)fail('NON_FAST_FORWARD',message,{status:409,method,path});
     if(response.status===422)fail('GITHUB_VALIDATION_FAILED',message,{status:422,method,path,errors:payload?.errors??null});
     fail('GITHUB_API_ERROR',message,{status:response.status,method,path});
@@ -88,7 +88,16 @@ export class GitHubGitDataClient {
   async getCommit(sha){const r=await this._request('GET',`/git/commits/${encodeURIComponent(sha)}`);if(!r?.tree?.sha||!Array.isArray(r?.parents))fail('GITHUB_RESPONSE_INVALID','commit response incomplete');return {message:r.message??'',tree:r.tree.sha,parents:r.parents.map(p=>p.sha)};}
 
   async createRef(ref,commitOid){const r=await this._request('POST','/git/refs',{body:{ref:`refs/${ref}`,sha:commitOid}});return r?.object?.sha??commitOid;}
-  async getRef(ref){const r=await this._request('GET',`/git/ref/${encodeRef(ref)}`);if(!r?.object?.sha)fail('GITHUB_RESPONSE_INVALID','ref response missing object sha');return r.object.sha;}
+  async getRef(ref){
+    try{return await this._request('GET',`/git/ref/${encodeRef(ref)}` ).then(r=>{if(!r?.object?.sha)fail('GITHUB_RESPONSE_INVALID','ref response missing object sha');return r.object.sha;});}
+    catch(error){
+      if(ref==='heads/journal'&&error?.code==='GITHUB_NOT_FOUND'){
+        const metadata=await this.getRepositoryMetadata();
+        if(!metadata?.default_branch)fail('JOURNAL_REPOSITORY_UNSEEDED','journal repository must have an initial branch before heads/journal can be created');
+      }
+      throw error;
+    }
+  }
 
   async updateRef(ref,commitOid,{force=false,expectedOldOid=null}={}){
     if(force!==false)fail('GITHUB_FORCE_UPDATE_FORBIDDEN','journal client never permits force ref updates');
