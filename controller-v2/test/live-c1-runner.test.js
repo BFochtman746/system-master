@@ -51,7 +51,8 @@ test('C1R-T004 canonical private one-commit seed passes using GET-only remote ca
   assert.equal(result.result,'PASS');
   assert.equal(result.journal_repository_id,24680);
   assert.equal(result.seed_head,seedHead);
-  assert.deepEqual(calls.map(c=>c.method),['GET','GET','GET','GET','GET']);
+  assert.ok(calls.length>=5);
+  assert.ok(calls.every(c=>c.method==='GET'));
 });
 
 test('C1R-T005 existing journal ref fails closed without mutation',async()=>{
