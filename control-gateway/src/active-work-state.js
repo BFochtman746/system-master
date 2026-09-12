@@ -12,7 +12,7 @@ const A01_STATES = new Set(['NOT_REQUIRED', 'PENDING', 'QUEUED', 'CLAIMED', 'RUN
 const RECEIPT_OUTCOMES = new Set(['SUCCEEDED', 'FAILED', 'CANCELLED', 'SUPERSEDED', 'BLOCKED']);
 const NEXT_KINDS = new Set(['CONTINUE_CURRENT', 'RECONCILE_CURRENT', 'START_SUCCESSOR', 'NO_LEGAL_SUCCESSOR', 'AMBIGUOUS_SUCCESSORS']);
 const WORKSTREAM_RE = /^[A-Za-z0-9][A-Za-z0-9._:/-]{1,127}$/;
-const ID_RE = /^[A-Za-z0-9][A-Za-z0-9._:/-]{1,191}$/;
+const ID_RE = /^[A-Za-z0-9][A-Za-z0-9._:/-]{0,191}$/;
 const REPO_RE = /^[^/\s]+\/[^/\s]+$/;
 const SHA1_RE = /^[0-9a-f]{40}$/;
 const SHA256_RE = /^[0-9a-f]{64}$/;
@@ -368,6 +368,9 @@ function authorityCore(packet) {
 }
 
 function assertAuthorityTransition(previous, next) {
+  if (next.protocol_version !== previous.protocol_version || next.mission_version !== previous.mission_version || next.workstream_id !== previous.workstream_id) {
+    fail('MISSION_DRIFT', 'protocol, mission version, and workstream identity are immutable within an active-work history');
+  }
   const changed = canonicalize(authorityCore(previous)) !== canonicalize(authorityCore(next));
   if (!changed) {
     if (next.authority_epoch !== previous.authority_epoch || next.authority_rebind_receipt_id !== previous.authority_rebind_receipt_id) fail('AUTHORITY_DRIFT', 'authority epoch/rebind receipt changed without authority change');
