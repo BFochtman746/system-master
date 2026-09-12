@@ -1,0 +1,57 @@
+{
+  "objective": "LRN-CUR-PRODUCTION-BINDING-002",
+  "tranche": "PB002-T1",
+  "standing": "CANDIDATE_BUILD_PASS_CHANGED_SURFACE__NOT_PRODUCTION_INSTALLED",
+  "recovered_source": {
+    "artifact": "LRN_CUR_PRODUCTION_BINDING_001_REBOUND_SOURCE.zip",
+    "sha256": "28e3317e5494c9df7df2f8aefb7f83f7c69fbc9d0ababfb696700542c831edc3",
+    "expected_sha256": "28e3317e5494c9df7df2f8aefb7f83f7c69fbc9d0ababfb696700542c831edc3"
+  },
+  "ownership_freeze": {
+    "historical_denominator": {"requirements": 110, "interfaces": 110, "semantic_objects": 26},
+    "active_lossless_denominator": {"requirements": 113, "interfaces": 112, "semantic_objects": 28},
+    "learning_owner": "MOD-LEARNING-001",
+    "curriculum_owner": "MOD-CURRICULUM-001"
+  },
+  "handler_coverage": {
+    "inbound_total": 63,
+    "domain_inbound_total": 59,
+    "shared_inbound_total": 4,
+    "exact_candidate_handlers_bound": 3,
+    "bound_ids": ["I001", "I016-L", "I027"],
+    "domain_handlers_remaining": 56,
+    "shared_gateway_routes_remaining": 4,
+    "all_inbound_execution_remaining": 60
+  },
+  "implementation": {
+    "atomic_owner_scoped_bridge": true,
+    "i001_create_learning_goal": true,
+    "i016_l_create_remediation_need": true,
+    "i027_get_curriculum": true,
+    "strict_unknown_field_rejection": true,
+    "unbound_domain_routes_fail_closed": true,
+    "i016_c_ref_resolution_exact": false
+  },
+  "qualification": {
+    "pb002_t1_new_tests": {"passed": 9, "total": 9},
+    "rebind_001": {"passed": 20, "total": 20},
+    "rebind_002": {"passed": 34, "total": 34},
+    "impl016": {"passed": 25, "total": 25},
+    "production_binding_total_after_t1": {"passed": 24, "total": 24},
+    "changed_surface_cumulative_unique_tests": {"passed": 103, "total": 103},
+    "historical_481_rerun_this_turn": "NOT_COMPLETED_TIMEOUT",
+    "prior_exact_source_historical_legacy": {"passed": 481, "total": 481, "status": "PRIOR_AUDIT_EVIDENCE_ONLY"}
+  },
+  "truth_boundaries": [
+    "Candidate delta is not installed on learning/control-v1 or main.",
+    "No live PostgreSQL execution was performed.",
+    "No Master Core deployment was performed.",
+    "No native iPhone, human, psychometric, real-learner, SME, certification, external-provider or A-01 evidence is claimed.",
+    "Only 3 of 59 domain inbound routes have candidate exact handlers in this tranche; all others remain fail-closed."
+  ],
+  "delta_bundle": {
+    "path": "LRN_CUR_PRODUCTION_BINDING_002_T1_DELTA.zip",
+    "sha256": "ec35b25ba35254ff2897c68daa532bf34110fa4b17443c99acb5c0214032f2e3"
+  },
+  "exact_next_operation": "LRN-CUR-PRODUCTION-BINDING-002-T2 — EXACT I016-C CROSS-DOMAIN REMEDIATION-NEED REF RESOLUTION + ADDITIONAL OWNER-VALID HANDLER MATERIALIZATION / ATOMIC UOW EXPANSION"
+}
