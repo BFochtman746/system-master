@@ -1,0 +1,80 @@
+{
+  "evidence_version": 1,
+  "operation_id": "GITHUB-A01-CONTROLLER-FORENSIC-RECONCILIATION-001C-R01",
+  "status": "EXECUTABLE_QUALIFIED_PRODUCTION_ADMIN_BOOTSTRAP_PENDING",
+  "qualified_executable_sha": "2222778c44dba46a56d37e3cced1e41986f9beef",
+  "qualified_exact_ref": "github-a01-controller-forensic-reconciliation-001c-r01-runtime-binding-qualified-frozen",
+  "work_branch": "github-a01-controller-forensic-reconciliation-001c-20260912",
+  "qualification_run_id": 34713246052,
+  "hosted": {
+    "node22": "PASS",
+    "node24": "PASS",
+    "independent_adversarial": "PASS"
+  },
+  "a01": {
+    "metadata_admission": "PASS",
+    "windows_execution": "PASS",
+    "runner": "A-01",
+    "os": "Windows",
+    "arch": "X64",
+    "policy_version": 8,
+    "registry_version": 31,
+    "subject_sha": "2222778c44dba46a56d37e3cced1e41986f9beef",
+    "checkout_sha": "2222778c44dba46a56d37e3cced1e41986f9beef",
+    "control_plane_sha": "2222778c44dba46a56d37e3cced1e41986f9beef",
+    "node_suite": {
+      "tests": 166,
+      "pass": 155,
+      "fail": 0,
+      "skipped": 11
+    },
+    "supervisor_v2": {
+      "tests": 28,
+      "failures": 0,
+      "errors": 0,
+      "randomized_transitions": 20000,
+      "random_seed": "0x5EC0D5",
+      "rigor_reduced": false
+    },
+    "cumulative_qualifier": "PASS",
+    "result_class": "PASS",
+    "promotion_authorized": false,
+    "artifact_id": 10304490707,
+    "artifact_name": "SECOND-SHIFT-SUPERVISOR-V2-A01-STRESS-34713246052-evidence",
+    "artifact_sha256": "4f169fa5815588bd3eddf4fbe94f3817915910f40c3f73ecc628c11aa24c977e"
+  },
+  "repair": {
+    "reason": "Qualified ece3 candidate could not bind a deployment-specific Integration actor ID without changing the qualified SHA; leaving actor_id null made the live enforcement audit permanently fail closed.",
+    "resolution": "Keep the repository policy as an unbound template and bind CONTROL_GATEWAY_WRITER_INTEGRATION_ID only at cutover/runtime; invalid or conflicting identity fails closed.",
+    "changed_file_count": 5
+  },
+  "main_ancestry": {
+    "observed_main_sha": "c41884bf9cc66c24fb7f245d68eefc6dbbd1139f",
+    "qualified_candidate_ahead_by": 21,
+    "qualified_candidate_behind_by": 0,
+    "cutover_form": "FAST_FORWARD_ONLY"
+  },
+  "live_repository_enforcement": {
+    "ruleset_count": 0,
+    "main_protected": false,
+    "production_enforcement_gap": "OPEN_CRITICAL"
+  },
+  "production_activation": false,
+  "required_external_admin_boundary": [
+    "CREATE_DEDICATED_CONTROL_GATEWAY_WRITER_GITHUB_APP",
+    "INSTALL_APP_ONLY_ON_BFOCHTMAN746_SYSTEM_MASTER",
+    "CONFIGURE_CONTROL_GATEWAY_PRODUCTION_ENVIRONMENT_MAIN_ONLY",
+    "CAPTURE_WRITER_INTEGRATION_ID_AS_RUNTIME_BINDING",
+    "FAST_FORWARD_MAIN_TO_QUALIFIED_SHA",
+    "CREATE_ACTIVE_ALL_BRANCH_RULESET_WITH_ONLY_DEDICATED_APP_BYPASS",
+    "LIVE_READBACK_AND_NEGATIVE_BYPASS_PROOF",
+    "POSITIVE_RECEIPT_CAS_WRITER_PROOF"
+  ],
+  "authority_nonclaims": [
+    "NO_CG012_START",
+    "NO_SECOND_SHIFT_MASTERY_ACTIVATION",
+    "NO_FORCE_PUSH",
+    "NO_MAIN_RESET",
+    "NO_PASS_TRANSFER_TO_EVIDENCE_DESCENDANTS"
+  ]
+}
