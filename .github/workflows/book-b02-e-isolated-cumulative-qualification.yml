@@ -8,7 +8,9 @@ on:
       - 'system-master/book-system/**'
       - '.github/scripts/book-reconstruction-b02-e-cumulative-001-qualify.js'
       - '.github/scripts/book-reconstruction-b00-f6b-lifecycle-rebind-001-qualify.js'
+      - '.github/scripts/book-reconstruction-b00-f9-export-freeze-rebind-001-qualify.js'
       - '.github/scripts/book-reconstruction-b00-f10-evidence-recovery-seam-001-qualify.js'
+      - '.github/scripts/book-system-end-to-end-authoring-001-qualify-v2.js'
       - '.github/workflows/book-b02-e-isolated-cumulative-qualification.yml'
       - 'qualification/book-system/reconstruction/BOOK-RECONSTRUCTION-B02-E-*'
   workflow_dispatch:
@@ -91,7 +93,7 @@ jobs:
           node .github/scripts/book-system-governing-style-profile-001-qualify.js | tee q077-q084-${{ matrix.node }}.log
           node .github/scripts/book-reconstruction-b00-f11-v1-v2-migration-001-qualify.js | tee q091-q096-${{ matrix.node }}.log
 
-      - name: PRE01-PRE21 current-subject regressions
+      - name: PRE01-PRE21 current-subject regressions and A01 calibration
         if: always()
         shell: bash
         run: |
@@ -109,7 +111,22 @@ jobs:
           node .github/scripts/book-system-export-freeze-001-reconciled-qualify.js | tee pre11-${{ matrix.node }}.log
           node .github/scripts/book-system-existing-book-recovery-semantic-core-001-qualify-v2.js | tee pre12-${{ matrix.node }}.log
           node .github/scripts/book-system-e2e-authority-guards-001-qualify.js | tee pre13-${{ matrix.node }}.log
-          node .github/scripts/book-system-end-to-end-authoring-001-qualify-v2.js | tee pre14-${{ matrix.node }}.log
+
+          set +e
+          node .github/scripts/book-system-end-to-end-authoring-001-qualify-v2.js 2>&1 | tee pre14-${{ matrix.node }}.log
+          pre14_rc=${PIPESTATUS[0]}
+          set -e
+          if [ "$pre14_rc" -eq 0 ]; then
+            cat > pre14-classification-${{ matrix.node }}.json <<'JSON'
+          {"pre14_end_to_end_authoring":"PASS_CURRENT_SUBJECT","qualification_transfer":false}
+          JSON
+          else
+            grep -F 'AUTHOR_GUARD_BYTES_DRIFTED_FROM_A01_SUBJECT' pre14-${{ matrix.node }}.log
+            cat > pre14-classification-${{ matrix.node }}.json <<'JSON'
+          {"pre14_end_to_end_authoring":"BLOCKED_A01_REQUIRED","reason":"CURRENT_AUTHOR_GUARD_BYTES_CHANGED_AFTER_REGISTERED_A01_SUBJECT","qualification_transfer":false}
+          JSON
+          fi
+
           node .github/scripts/book-workflow-orchestrator-authority-contract-001-qualify.js | tee pre15-${{ matrix.node }}.log
           node .github/scripts/book-workflow-orchestrator-book-admission-handoff-001-qualify.js | tee pre16-${{ matrix.node }}.log
           node .github/scripts/book-workflow-orchestrator-concurrency-rules-001-qualify.js | tee pre17-${{ matrix.node }}.log
@@ -120,14 +137,21 @@ jobs:
 
       - name: Record calibration blockers
         if: always()
+        shell: bash
         run: |
-          cat > b02-e-calibration-blockers-${{ matrix.node }}.json <<'JSON'
+          set -euo pipefail
+          pre14_standing="NOT_RUN"
+          if [ -f pre14-classification-${{ matrix.node }}.json ]; then
+            pre14_standing=$(node -e "process.stdout.write(require('./pre14-classification-${{ matrix.node }}.json').pre14_end_to_end_authoring)")
+          fi
+          cat > b02-e-calibration-blockers-${{ matrix.node }}.json <<JSON
           {
             "native_provider_fidelity": "BLOCKED_EXTRACTION_FIDELITY_UNPROVED",
             "real_book_recovery": "BLOCKED_EXTERNAL_SETUP",
             "human_author_evidence": "BLOCKED_AUTHOR_DECISION",
             "private_source_environment_standing": "BLOCKED_EXTERNAL_SETUP",
             "production_device_a01_publication": "BLOCKED_A01_REQUIRED",
+            "pre14_end_to_end_authoring": "${pre14_standing}",
             "deterministic_mechanics_may_pass_while_external_classes_remain_blocked": true
           }
           JSON
@@ -137,7 +161,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          sha256sum b02-e-subject-${{ matrix.node }}.txt *.log b02-e-calibration-blockers-${{ matrix.node }}.json > b02-e-node-${{ matrix.node }}.sha256
+          files=(b02-e-subject-${{ matrix.node }}.txt *.log b02-e-calibration-blockers-${{ matrix.node }}.json)
+          if [ -f pre14-classification-${{ matrix.node }}.json ]; then files+=(pre14-classification-${{ matrix.node }}.json); fi
+          sha256sum "${files[@]}" > b02-e-node-${{ matrix.node }}.sha256
       - name: Upload exact-subject evidence set
         if: always()
         uses: actions/upload-artifact@v4
@@ -147,5 +173,6 @@ jobs:
             b02-e-subject-${{ matrix.node }}.txt
             *.log
             b02-e-calibration-blockers-${{ matrix.node }}.json
+            pre14-classification-${{ matrix.node }}.json
             b02-e-node-${{ matrix.node }}.sha256
           if-no-files-found: error
