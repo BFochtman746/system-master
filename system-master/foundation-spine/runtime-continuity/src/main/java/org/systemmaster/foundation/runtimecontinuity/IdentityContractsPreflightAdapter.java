@@ -168,12 +168,17 @@ public final class IdentityContractsPreflightAdapter {
                     List.of("PROVIDER_BINDING_STALE_OR_UNKNOWN"));
         }
 
+        CapabilityUseRequest capabilityUse = request.capabilityUseRequest();
         CapabilityValidationReceipt identityReceipt;
         try {
-            identityReceipt = identityValidator.validate(request.capabilityUseRequest());
+            identityReceipt = identityValidator.validate(capabilityUse);
             if (identityReceipt == null) {
                 return receipt(request, semanticDigest, Standing.BLOCKED_UNKNOWN, currentBinding, null, null,
                         List.of("IDENTITY_RECEIPT_MISSING"));
+            }
+            if (!identityReceiptBoundTo(capabilityUse, identityReceipt)) {
+                return receipt(request, semanticDigest, Standing.BLOCKED_UNKNOWN, currentBinding, identityReceipt, null,
+                        List.of("IDENTITY_RECEIPT_BINDING_MISMATCH"));
             }
         } catch (IdentityException identityFailure) {
             return receipt(request, semanticDigest, mapIdentity(identityFailure.code()), currentBinding, null, null,
@@ -195,6 +200,10 @@ public final class IdentityContractsPreflightAdapter {
             return receipt(request, semanticDigest, Standing.BLOCKED_UNKNOWN, currentBinding, identityReceipt, null,
                     List.of("CONTRACT_GATE_MISSING"));
         }
+        if (!contractGateBoundTo(request, gate)) {
+            return receipt(request, semanticDigest, Standing.BLOCKED_UNKNOWN, currentBinding, identityReceipt, gate,
+                    List.of("CONTRACT_GATE_BINDING_MISMATCH"));
+        }
 
         if (gate.standing() == GateStanding.ADMITTED) {
             return receipt(request, semanticDigest, Standing.ALLOW_CURRENT_PREREQUISITES, currentBinding,
@@ -208,6 +217,21 @@ public final class IdentityContractsPreflightAdapter {
         boolean unknown = gate.reasonCodes().stream().anyMatch(IdentityContractsPreflightAdapter::unknownContractReason);
         return receipt(request, semanticDigest, unknown ? Standing.BLOCKED_UNKNOWN : Standing.DENY,
                 currentBinding, identityReceipt, gate, gate.reasonCodes());
+    }
+
+    private static boolean identityReceiptBoundTo(
+            CapabilityUseRequest request,
+            CapabilityValidationReceipt receipt) {
+        return receipt.grantId().equals(request.grantId())
+                && receipt.grantDigest().equals(request.grantDigest())
+                && receipt.actorChainDigest().equals(request.actorChain().chainDigest())
+                && receipt.evaluatedAt().equals(request.now());
+    }
+
+    private static boolean contractGateBoundTo(Request request, GateReceipt gate) {
+        return gate.subjectId().equals(request.contractSubjectId())
+                && gate.requestedVersion().equals(request.requestedVersion())
+                && gate.requestedDigest().equals(request.requestedDigest());
     }
 
     private static Standing mapIdentity(ErrorCode code) {
