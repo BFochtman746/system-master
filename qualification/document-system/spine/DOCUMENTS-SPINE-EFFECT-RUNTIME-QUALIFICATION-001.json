@@ -1,0 +1,92 @@
+{
+  "record_id": "DOCUMENTS-SPINE-EFFECT-RUNTIME-QUALIFICATION-001",
+  "owner_system_id": "DOCUMENTS",
+  "owner_path": "SYSTEM_MASTER/DOCUMENTS",
+  "control_ref_observed_before_build": "documents/control-v1",
+  "control_head_observed_before_build": "92cdf489d5b3d4294f6b90104ec1753cc2da289f",
+  "candidate_branch": "documents/spine-effect-runtime-001-20260912",
+  "qualified_subject_sha": "969519ce33c111e8816df6f4705fa5e503d351e4",
+  "qualified_runtime_scope": "shared governed existing-artifact effect executor for UDM-SPINE-0009 REBUILD and UDM-SPINE-0010 MASTER",
+  "build_method": [
+    "RECOVER",
+    "INVENTORY",
+    "ANALYZE",
+    "TARGETED_RESEARCH",
+    "ADJUDICATE",
+    "DESIGN_LOCK",
+    "BUILD",
+    "ISOLATED_QUALIFICATION",
+    "CUMULATIVE_REGRESSION_CALIBRATION"
+  ],
+  "status": "QUALIFIED_PORTABLE__OWNER_ROUTE_INTEGRATION_PENDING",
+  "qualification": {
+    "workflow": ".github/workflows/documents-spine-effect-runtime-qualification.yml",
+    "run_id": 34686836485,
+    "job_id": 103535178394,
+    "environment": {
+      "runner": "github-hosted",
+      "os": "Ubuntu 24.04.5 LTS",
+      "runner_image": "ubuntu-24.04",
+      "java": "Temurin 21.0.12+1"
+    },
+    "strict_compile": "PASS",
+    "isolated": {
+      "REBUILD": {
+        "passed": 48,
+        "planned": 48
+      },
+      "MASTER": {
+        "passed": 44,
+        "planned": 44
+      }
+    },
+    "cumulative_portable": {
+      "test_classes_passed": 32,
+      "test_classes_planned": 32,
+      "status": "PASS"
+    },
+    "cumulative_harness_repair": "The first cumulative attempt exposed a pre-existing relative-classpath defect in DesignIntelligence001APortableTests when its fake local visual critic subprocess changed working directory. The qualification harness was repaired to use the absolute compiled-class path. No runtime or design authority was weakened; the full 32-class portable cumulative set then passed."
+  },
+  "implemented_contracts": [
+    "DocumentEffectAdmissionDecision v1 exact-binds job, mode, source artifact digest, source semantic digest, operation intent, plan digest, capability-set digest and immutable policy revision/digest",
+    "DocumentEffectAdmissionProvider keeps effect authorization outside Documents and is consumed fail-closed",
+    "DocumentExistingArtifactEffectExecutor is shared by REBUILD and MASTER",
+    "DocumentRebuildReceipt v1 permits only CANDIDATE_PERSISTED_UNPROVEN[_RESUMED] standing",
+    "DocumentMasterReceipt v1 enforces same-format MASTER and permits only MASTER_CANDIDATE_PERSISTED_UNPROVEN[_RESUMED] standing",
+    "PREPARED checkpoint records expected candidate digest before content-addressed persistence",
+    "restart/lost-response reconciliation reads the expected digest from governed artifact custody and never blindly replays mutation",
+    "missing candidate after PREPARED is ambiguous and fails closed for explicit reconciliation",
+    "finalCandidate, author metadata, publication metadata and transport metadata are non-promoting"
+  ],
+  "known_owner_route_gap": {
+    "classification": "BLOCKED_OWNER_ROUTE_INTEGRATION_NOT_YET_APPLIED",
+    "evidence": "UniversalDocumentSpine on documents/control-v1 still routes effectful MASTER/REBUILD through its legacy inline GovernedCdg2MutationCoordinator path and therefore does not yet consume the separately admitted shared executor.",
+    "legacy_route_file": "recovered/document/cr001-r4/source/01_CURRENT_DOCUMENT_PROCESSING_MODULE/src/main/java/org/systemmaster/tools/document/spine/UniversalDocumentSpine.java",
+    "freeze_authorized": false
+  },
+  "nonclaims": [
+    "NO_NATIVE_MICROSOFT_OFFICE_PASS",
+    "NO_TARGET_DEVICE_PASS",
+    "NO_EXTERNAL_POLICY_PROVIDER_CORRECTNESS_CLAIM",
+    "NO_HUMAN_OR_AUTHOR_AUTHORITY_CLAIM",
+    "NO_PRIVATE_SOURCE_PERMISSION_CLAIM",
+    "NO_PUBLICATION_AUTHORIZATION_CLAIM",
+    "NO_PRODUCTION_STANDING",
+    "NO_A01_PASS",
+    "NO_PROSE_WORK"
+  ],
+  "successor": {
+    "objective_id": "DOCUMENTS-SPINE-EFFECT-RUNTIME-INTEGRATION-001",
+    "state": "READY",
+    "dependency_basis": "Shared REBUILD/MASTER effect executor has fresh exact-subject portable qualification and cumulative regression evidence; the remaining demonstrated gap is owner-route integration.",
+    "required_work": [
+      "bind UniversalDocumentSpine MASTER/REBUILD effect route to DocumentExistingArtifactEffectExecutor",
+      "require an explicit external DocumentEffectAdmissionProvider for effectful execution while preserving read-only routes",
+      "preserve candidate-before-proof PREPARED/PASS recovery semantics and fail closed on legacy incompatible action receipts",
+      "preserve same-format MASTER and cross-format REBUILD qualification fences",
+      "rerun frozen REBUILD-48 plus MASTER-44 isolated qualification on the changed exact subject",
+      "rerun the full cumulative portable regression on the changed exact subject",
+      "only then consider owner-control integration/freeze after a fresh documents/control-v1 reread"
+    ]
+  }
+}
