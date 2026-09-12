@@ -1,0 +1,126 @@
+egistry.authorityForTruth("legacy.truth").orElseThrow().equals("replacement-service"), "truth transferred atomically");
+        pass();
+    }
+
+    private static void testRootIdentityCannotRetire() throws Exception {
+        Harness h = bootstrappedHarness();
+        expect(IllegalLifecycleTransitionException.class,
+                () -> h.registry.retire("system-root", 1, "principal:p", "decision:bad", "op:bad"));
+        expect(IllegalLifecycleTransitionException.class,
+                () -> h.registry.beginDrain("system-root", 1, "principal:p", "decision:bad", "op:bad-drain"));
+        pass();
+    }
+
+    private static void testCrashBeforeDurableAppendPreservesPriorTruth() throws Exception {
+        Harness h = bootstrappedHarness();
+        FileSystemRootStore failingStore = new FileSystemRootStore(h.path, (path, frame) -> {
+            throw new IOException("SIMULATED_CRASH_BEFORE_DURABLE_APPEND");
+        });
+        SystemRootRegistry failing = registry(failingStore);
+        expect(IOException.class,
+                () -> failing.declare(descriptor("crash-service", "crash.truth"),
+                        "principal:p", "decision:crash", "op:crash"));
+        SystemRootRegistry recovered = registry(new FileSystemRootStore(h.path));
+        check(recovered.snapshot().storeRevision() == 1, "failed pre-append write cannot advance authority");
+        check(recovered.findSystem("crash-service").isEmpty(), "failed pre-append write cannot leak partial authority");
+        pass();
+    }
+
+
+    private static void testTornTailRecovery() throws Exception {
+        Harness h = bootstrappedHarness();
+        long committedSize = Files.size(h.path);
+        Files.write(h.path, "FRAME\t2\tTORN".getBytes(StandardCharsets.UTF_8), java.nio.file.StandardOpenOption.APPEND);
+        SystemRootRegistry recovered = registry(new FileSystemRootStore(h.path));
+        check(recovered.snapshot().storeRevision() == 1, "torn tail is uncommitted");
+        recovered.declare(descriptor("after-torn", "after.torn"), "principal:p", "decision:r", "op:after-torn");
+        check(recovered.snapshot().storeRevision() == 2, "writer truncates torn tail before append");
+        check(Files.size(h.path) > committedSize, "new committed frame persisted after torn-tail repair");
+        pass();
+    }
+
+
+    private static void testLosslessJournalCompaction() throws Exception {
+        Harness h = bootstrappedHarness();
+        for (int i = 0; i < 12; i++) {
+            String id = "compact-" + i;
+            h.registry.declare(descriptor(id, "compact.truth." + i), "principal:p", "decision:c", "op:compact-" + i);
+        }
+        String beforeDigest = h.registry.snapshotDigest();
+        long beforeSize = Files.size(h.path);
+        FileSystemRootStore store = new FileSystemRootStore(h.path);
+        store.compact();
+        long afterSize = Files.size(h.path);
+        SystemRootRegistry reloaded = registry(new FileSystemRootStore(h.path));
+        check(reloaded.snapshotDigest().equals(beforeDigest), "compaction preserves exact logical snapshot");
+        check(reloaded.snapshot().storeRevision() == 13, "compaction preserves revision");
+        check(reloaded.snapshot().operationReceipts().size() == 13, "compaction preserves idempotency receipts");
+        MutationResult replay = reloaded.declare(descriptor("compact-0", "compact.truth.0"),
+                "principal:p", "decision:c", "op:compact-0");
+        check(replay.replayed(), "compacted receipt still prevents duplicate mutation");
+        check(afterSize < beforeSize, "checkpoint compaction reduces journal size");
+        pass();
+    }
+
+    private static void testCorruptStoreFailsClosed() throws Exception {
+        Harness h = bootstrappedHarness();
+        byte[] raw = Files.readAllBytes(h.path);
+        for (int i = 0; i < raw.length; i++) {
+            if (raw[i] == 'R') { raw[i] = 'Q'; break; }
+        }
+        Files.write(h.path, raw);
+        expect(SystemRootStore.CorruptRootStoreException.class, () -> h.registry.snapshot());
+        pass();
+    }
+
+    private static void testConcurrentWritersConvergeWithoutLostUpdate() throws Exception {
+        Harness h = bootstrappedHarness();
+        SystemRootRegistry a = registry(new FileSystemRootStore(h.path));
+        SystemRootRegistry b = registry(new FileSystemRootStore(h.path));
+        ExecutorService pool = Executors.newFixedThreadPool(2);
+        CountDownLatch start = new CountDownLatch(1);
+        try {
+            Future<?> fa = pool.submit(() -> {
+                await(start);
+                try {
+                    a.declare(descriptor("concurrent-a", "concurrent.a"), "principal:a", "decision:a", "op:concurrent-a");
+                } catch (IOException e) { throw new RuntimeException(e); }
+            });
+            Future<?> fb = pool.submit(() -> {
+                await(start);
+                try {
+                    b.declare(descriptor("concurrent-b", "concurrent.b"), "principal:b", "decision:b", "op:concurrent-b");
+                } catch (IOException e) { throw new RuntimeException(e); }
+            });
+            start.countDown();
+            fa.get();
+            fb.get();
+        } finally {
+            pool.shutdownNow();
+        }
+        RootSnapshot finalState = h.registry.snapshot();
+        check(finalState.storeRevision() == 3, "bootstrap plus two concurrent commits");
+        check(finalState.systems().containsKey("concurrent-a") && finalState.systems().containsKey("concurrent-b"),
+                "no lost concurrent update");
+        pass();
+    }
+
+
+    private static void testCrossProcessWritersConvergeWithoutLostUpdate() throws Exception {
+        Harness h = bootstrappedHarness();
+        String java = Path.of(System.getProperty("java.home"), "bin", "java").toString();
+        String cp = System.getProperty("java.class.path");
+        Process a = new ProcessBuilder(java, "-cp", cp, SystemRootExternalWriter.class.getName(),
+                h.path.toString(), "process-a", "process.a", "op:process-a", CLOCK.instant().toString()).redirectErrorStream(true).start();
+        Process b = new ProcessBuilder(java, "-cp", cp, SystemRootExternalWriter.class.getName(),
+                h.path.toString(), "process-b", "process.b", "op:process-b", CLOCK.instant().toString()).redirectErrorStream(true).start();
+        int ea = a.waitFor();
+        int eb = b.waitFor();
+        String oa = new String(a.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+        String ob = new String(b.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+        check(ea == 0, "external writer A failed: " + oa);
+        check(eb == 0, "external writer B failed: " + ob);
+        RootSnapshot finalState = h.registry.snapshot();
+        check(finalState.storeRevision() == 3, "bootstrap plus two cross-process commits");
+        check(finalState.systems().containsKey("process-a") && finalState.systems().containsKey("process-b"),
+                "OS-level lock/CAS prevents lost cross-p
