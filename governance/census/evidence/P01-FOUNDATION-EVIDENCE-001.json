@@ -1,0 +1,43 @@
+{
+  "receipt_id": "P01-FOUNDATION-EVIDENCE-001",
+  "evidence_schema": "1.0",
+  "contract_id": "P01-FOUNDATION-1.0",
+  "requirement_or_capability_id": "P01",
+  "owner_path": "SYSTEM_MASTER/CORE",
+  "authority_id": "CURRENT-AUTHORITY-005",
+  "topology_id": "SYSTEM-TOPOLOGY-007",
+  "allocation_id": "SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006",
+  "status": "PASS",
+  "source_identity": "bda684e1e0c2a797130138c6f1a1775aca376d90",
+  "qualification": {
+    "workflow_run_id": 34789295096,
+    "workflow_name": "P01 Topology Ownership Foundation Qualification",
+    "artifact_id": 10327538145,
+    "artifact_name": "p01-foundation-1.0-evidence",
+    "artifact_digest": "sha256:50f9d2e91d7b3d3efbe7ba7897c06486b507595744646ecd5d85bb53f8dc6d94",
+    "head_sha": "bda684e1e0c2a797130138c6f1a1775aca376d90",
+    "conclusion": "success"
+  },
+  "acceptance_commands": [
+    "node .github/scripts/validate-governance.js",
+    "node .github/scripts/validate-system-topology.js",
+    "node .github/scripts/lane-brief.js --list"
+  ],
+  "peer_system_ids": ["BOOK","CONNECTED_ACTIONS","CORE","DOCUMENTS","LEARNING","MEDIA","PROGRAMMING","RESEARCH_KNOWLEDGE","SPREADSHEET_DATA"],
+  "owned_module_count": 36,
+  "subjects": [
+    {"path":"governance/CURRENT-AUTHORITY.json","git_blob_sha":"dabee965ae81d6bb3a1bc7477e1a793e6f17e3e1"},
+    {"path":"governance/contracts/P01-FOUNDATION-CONTRACT-001.md","git_blob_sha":"051e9873228293d57c6f9d50b2cd940b29d1dc5a"},
+    {"path":"governance/SYSTEM-TOPOLOGY-007.json","git_blob_sha":"7ab634e41cdce2e288cef9f74930f93a7ef54e82"},
+    {"path":"governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006.json","git_blob_sha":"401a9748c18bdfe30361f40553788dcf497fa1c4"},
+    {"path":".github/scripts/validate-governance.js","git_blob_sha":"8443a71b93338bd8291f0a51a5f36576ee566b31"},
+    {"path":".github/scripts/validate-system-topology.js","git_blob_sha":"f6ed050d02b1f5f557a6088920ed92efe693cf7c"},
+    {"path":".github/scripts/lane-brief.js","git_blob_sha":"8b969364d210835a148e787cc131168995dbb326"},
+    {"path":".github/workflows/p01-topology-ownership-foundation-qualification.yml","git_blob_sha":"2101121945abcc7fc6372a6defb19aa4b4b7f1d4"}
+  ],
+  "logs": {
+    "validate_governance_sha256": "562f907f9990c89a61709f718b5415ed7238e701094678a60425bf49865fa953",
+    "validate_system_topology_sha256": "426eb3e7b541086146b297f5a376fc05aec3aa5b24fd74018c3f9a3666245f7e",
+    "lane_list_sha256": "46b33e02c619684de62da09ac08e32fde40da4230d66301c62ec9a3758f38163"
+  }
+}
