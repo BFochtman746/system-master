@@ -12,12 +12,11 @@ const selftest = argSet.has('--selftest');
 const outArg = args.find((v) => v.startsWith('--out='));
 const outDir = path.resolve(root, outArg ? outArg.slice('--out='.length) : '.state-reconciler');
 const coverageScript = path.join(root, '.github/scripts/second-shift-owner-coverage.js');
-const expectedPeers = new Set(['CORE', 'LEARNING', 'BOOK', 'DOCUMENTS']);
 
 function readJson(rel) {
   const p = path.join(root, rel);
   if (!fs.existsSync(p)) throw new Error(`required file missing: ${rel}`);
-  return JSON.parse(fs.readFileSync(p, 'utf8'));
+  return JSON.parse(fs.readFileSync(p, 'utf8').replace(/^\uFEFF/, ''));
 }
 function exists(rel) { return Boolean(rel) && fs.existsSync(path.join(root, rel)); }
 function isSha(v) { return /^[0-9a-f]{40}$/i.test(String(v || '')); }
@@ -28,6 +27,20 @@ function liveHead(ref) {
     const out = execFileSync('git', ['ls-remote', 'origin', `refs/heads/${ref}`], { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
     return out ? out.split(/\s+/)[0] : null;
   } catch (_) { return null; }
+}
+function localFileBlob(rel) {
+  try {
+    return execFileSync('git', ['rev-parse', `HEAD:${rel}`], { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
+  } catch (_) { return null; }
+}
+function resolveOwnerControl(owner) {
+  const binding = owner?.control_binding || { type: 'BRANCH_HEAD', ref: owner?.control_ref };
+  if (binding.type === 'FILE_BLOB') {
+    const rel = binding.path || owner?.control_ref;
+    return { type: 'FILE_BLOB', ref: rel, head: localFileBlob(rel) };
+  }
+  const ref = binding.ref || owner?.control_ref;
+  return { type: 'BRANCH_HEAD', ref, head: noLive ? owner?.last_known_control_head : liveHead(ref) };
 }
 function runNode(script, childArgs) { return spawnSync(process.execPath, [script, ...childArgs], { cwd: root, encoding: 'utf8' }); }
 function systemOwnerPath(system) { return system?.owner_path || (system?.system_id ? `SYSTEM_MASTER/${system.system_id}` : null); }
@@ -41,23 +54,33 @@ function completionRows(doc) {
   if (Array.isArray(doc.entries)) return doc.entries;
   return [];
 }
+function topologySets(topology) {
+  const peers = new Set(topology.peer_system_ids || []);
+  const executionReady = new Set(topology.execution_readiness?.execution_ready_peer_system_ids || topology.peer_system_ids || []);
+  const admittedNotReady = new Set(topology.execution_readiness?.admitted_not_execution_ready_peer_system_ids || []);
+  return { peers, executionReady, admittedNotReady };
+}
 
 if (selftest) {
   const authority = readJson('governance/CURRENT-AUTHORITY.json');
   const topology = readJson(authority.topology);
   const systems = topology.canonical_internal_systems || [];
-  const peerIds = new Set(topology.peer_system_ids || []);
+  const canonicalIds = new Set(systems.map((s) => s.system_id));
+  const { peers, executionReady, admittedNotReady } = topologySets(topology);
   const registry = readJson(authority.second_shift_registry);
   const retiredProse = (topology.retired_systems || []).find((s) => s.system_id === 'PROSE');
+  const readinessPartitionValid = [...executionReady].every((id) => peers.has(id)) && [...admittedNotReady].every((id) => peers.has(id)) && [...executionReady].every((id) => !admittedNotReady.has(id)) && executionReady.size + admittedNotReady.size === peers.size;
   const checks = [
     ['product_root', authority.product_root === 'SYSTEM_MASTER'],
-    ['topology_005_selected', topology.topology_id === 'SYSTEM-TOPOLOGY-005'],
-    ['active_peers_exact', setEq(peerIds, expectedPeers)],
+    ['selected_topology_exists', Boolean(authority.topology) && exists(authority.topology)],
+    ['canonical_systems_match_peers', setEq(canonicalIds, peers)],
+    ['execution_readiness_partitions_peers', readinessPartitionValid],
+    ['authority_execution_lanes_match_readiness', setEq(new Set(authority.active_peer_execution_lanes || []), executionReady)],
     ['active_systems_exclude_prose', !systems.some((s) => s.system_id === 'PROSE')],
     ['prose_terminally_retired', Boolean(retiredProse) && retiredProse.lifecycle === 'RETIRED_TERMINAL' && retiredProse.final_completion === 'COMPLETE'],
     ['prose_has_no_execution_lane', Boolean(retiredProse) && retiredProse.current_execution_lane === null],
     ['prose_integration_owner_is_book', Boolean(retiredProse) && retiredProse.integration_owner === 'SYSTEM_MASTER/BOOK'],
-    ['second_shift_matches_peers', setEq(new Set(Object.keys(registry.owner_files || {})), expectedPeers)],
+    ['second_shift_matches_execution_ready_peers', setEq(new Set(Object.keys(registry.owner_files || {})), executionReady)],
     ['prose_has_no_second_shift_lane', !registry.owner_files?.PROSE && registry.retired_routes?.PROSE?.dispatchable === false],
     ['knowledge_recovery_selected', authority.highest_discretionary_objective === 'SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001'],
     ['current_obligation_registry_selected', exists(authority.obligation_registry)],
@@ -98,13 +121,17 @@ const repairRegistry = exists(selected.repair_inbox_registry) ? readJson(selecte
 const obligations = obligationsDoc.obligations || [];
 const completionEntries = completionRows(completion);
 const terminal = new Set(['CLOSED', 'SUPERSEDED']);
-
-if (topology.product_root?.product_id !== 'SYSTEM_MASTER') finding('ERROR', 'TOPOLOGY_ROOT_MISMATCH', 'topology product root must be SYSTEM_MASTER');
-if (topology.topology_id !== 'SYSTEM-TOPOLOGY-005') finding('ERROR', 'TOPOLOGY_VERSION_MISMATCH', 'current authority must select SYSTEM-TOPOLOGY-005', { topology_id: topology.topology_id || null });
 const systems = topology.canonical_internal_systems || [];
 const activeIds = new Set(systems.map((s) => s.system_id));
-if (!setEq(activeIds, expectedPeers)) finding('ERROR', 'ACTIVE_SYSTEM_SET_MISMATCH', 'active canonical systems must be exactly CORE, LEARNING, BOOK, DOCUMENTS', { active: [...activeIds] });
-if (!setEq(new Set(topology.peer_system_ids || []), expectedPeers)) finding('ERROR', 'PEER_SET_MISMATCH', 'peer_system_ids must be exactly CORE, LEARNING, BOOK, DOCUMENTS');
+const { peers: expectedPeers, executionReady: executionReadyPeers, admittedNotReady: admittedNotReadyPeers } = topologySets(topology);
+
+if (topology.product_root?.product_id !== 'SYSTEM_MASTER') finding('ERROR', 'TOPOLOGY_ROOT_MISMATCH', 'topology product root must be SYSTEM_MASTER');
+if (!selected.topology || !exists(selected.topology)) finding('ERROR', 'TOPOLOGY_SELECTION_INVALID', 'current authority must select an accessible topology');
+if (!setEq(activeIds, expectedPeers)) finding('ERROR', 'ACTIVE_SYSTEM_SET_MISMATCH', 'active canonical systems must match topology peer_system_ids', { active: [...activeIds], peers: [...expectedPeers] });
+const readinessOverlap = [...executionReadyPeers].filter((id) => admittedNotReadyPeers.has(id));
+const readinessUnknown = [...executionReadyPeers, ...admittedNotReadyPeers].filter((id) => !expectedPeers.has(id));
+if (readinessOverlap.length || readinessUnknown.length || executionReadyPeers.size + admittedNotReadyPeers.size !== expectedPeers.size) finding('ERROR', 'EXECUTION_READINESS_PARTITION_INVALID', 'execution readiness sets must form a disjoint complete partition of topology peers', { execution_ready: [...executionReadyPeers], admitted_not_ready: [...admittedNotReadyPeers], overlap: readinessOverlap, unknown: readinessUnknown });
+if (!setEq(new Set(authority.active_peer_execution_lanes || []), executionReadyPeers)) finding('ERROR', 'AUTHORITY_EXECUTION_LANE_MISMATCH', 'CURRENT-AUTHORITY active_peer_execution_lanes must match topology execution-ready peers', { authority_lanes: authority.active_peer_execution_lanes || [], execution_ready: [...executionReadyPeers] });
 if ((topology.child_system_ids || []).length !== 0) finding('ERROR', 'ACTIVE_CHILD_SYSTEMS_PRESENT', 'terminal Prose retirement requires no active child execution systems', { child_system_ids: topology.child_system_ids || [] });
 
 const retiredSystems = topology.retired_systems || [];
@@ -118,7 +145,7 @@ if (retiredProse) {
 }
 
 const activeCompletion = new Map((completionStatus.systems || []).map((s) => [s.system_id, s]));
-for (const id of ['SYSTEM_MASTER', 'CORE', 'LEARNING', 'BOOK', 'DOCUMENTS']) {
+for (const id of ['SYSTEM_MASTER', ...expectedPeers]) {
   if (!activeCompletion.has(id) || activeCompletion.get(id).complete !== false) finding('ERROR', 'FALSE_SYSTEM_COMPLETION', `${id} must remain an active incomplete system`);
 }
 if (activeCompletion.has('PROSE')) finding('ERROR', 'RETIRED_SYSTEM_RESURRECTION', 'PROSE must not appear in active completion systems');
@@ -148,7 +175,7 @@ const knowledge = obligations.find((o) => o.obligation_id === 'SYSTEM-MASTER-KNO
 if (!knowledge || knowledge.owner_path !== 'SYSTEM_MASTER/CORE' || knowledge.priority !== 'HIGHEST_DISCRETIONARY_SYSTEM_MASTER_PRIORITY' || authority.highest_discretionary_objective !== knowledge.obligation_id) finding('ERROR', 'KNOWLEDGE_RECOVERY_PRIORITY_DRIFT', 'Knowledge Recovery 001 must remain CORE-administered highest discretionary System Master priority while selected');
 
 const ownerFiles = secondShift.owner_files || {};
-if (!setEq(new Set(Object.keys(ownerFiles)), expectedPeers)) finding('ERROR', 'SECOND_SHIFT_PEER_COVERAGE_MISMATCH', 'Second Shift active owner files must exactly match topology peers', { owner_lanes: Object.keys(ownerFiles) });
+if (!setEq(new Set(Object.keys(ownerFiles)), executionReadyPeers)) finding('ERROR', 'SECOND_SHIFT_PEER_COVERAGE_MISMATCH', 'Second Shift active owner files must exactly match topology execution-ready peers', { owner_lanes: Object.keys(ownerFiles), execution_ready: [...executionReadyPeers] });
 if (ownerFiles.PROSE) finding('ERROR', 'RETIRED_SYSTEM_RESURRECTION', 'PROSE must not have a Second Shift owner lane');
 if (ownerFiles.SYSTEM_MASTER) finding('ERROR', 'ROOT_WORKER_LANE_ACTIVE', 'SYSTEM_MASTER product-root controller must not be an active peer worker lane');
 if (Object.keys(secondShift.coverage_routes || {}).some((prefix) => ownerIsRetired(prefix))) finding('ERROR', 'RETIRED_SYSTEM_RESURRECTION', 'Second Shift active coverage route points into retired Prose');
@@ -160,23 +187,28 @@ for (const [lane, rel] of Object.entries(ownerFiles)) {
   const data = readJson(rel);
   const system = systems.find((s) => s.system_id === lane);
   if (!system) finding('ERROR', 'SECOND_SHIFT_UNKNOWN_ACTIVE_SYSTEM', `Second Shift lane ${lane} is not an active topology peer`);
+  if (!executionReadyPeers.has(lane)) finding('ERROR', 'FALSE_EXECUTION_READINESS', `Second Shift lane ${lane} is not execution-ready in the selected topology`);
   const expectedPath = systemOwnerPath(system);
   if (system && data.owner_path !== expectedPath) finding('ERROR', 'SECOND_SHIFT_OWNER_PATH_MISMATCH', `${lane} owner_path mismatch`, { owner_path: data.owner_path, expected: expectedPath });
   if (system && data.control_ref !== system.control_ref) finding('ERROR', 'SECOND_SHIFT_CONTROL_REF_MISMATCH', `${lane} delegation control_ref differs from topology`, { delegation_control_ref: data.control_ref, topology_control_ref: system.control_ref });
-  const live = noLive ? data.last_known_control_head : liveHead(data.control_ref);
+  const resolved = resolveOwnerControl(data);
+  const live = resolved.head;
   if (!isSha(data.last_known_control_head)) finding('ERROR', 'OWNER_CONTROL_HEAD_INVALID', `${lane} last_known_control_head is invalid`);
-  if (live && live !== data.last_known_control_head) finding('ERROR', 'STALE_DELEGATION', `${lane} owner selector is stale`, { recorded_head: data.last_known_control_head, live_head: live });
+  if (!live || !isSha(live)) finding(noLive ? 'WARN' : 'ERROR', 'OWNER_CONTROL_BINDING_UNRESOLVED', `${lane} owner control binding could not be resolved`, { control_type: resolved.type, control_ref: resolved.ref });
+  else if (live !== data.last_known_control_head) finding('ERROR', 'STALE_DELEGATION', `${lane} owner selector is stale`, { recorded_head: data.last_known_control_head, live_head: live, control_type: resolved.type, control_ref: resolved.ref });
   const active = Array.isArray(data.active_delegations) ? data.active_delegations : [];
   const claimed = active.filter((d) => d && d.state === 'CLAIMED');
   if (claimed.length > 1) finding('ERROR', 'OVERLAPPING_MUTATION_CLAIM', `${lane} has more than one active mutation-capable claim`, { claim_count: claimed.length });
   for (const d of active) {
     if (d.owner_path !== data.owner_path) finding('ERROR', 'JOB_LANE_VIOLATION', `${lane} delegation owner_path differs from lane owner`, { delegation_id: d.delegation_id });
+    if (d.valid_for_control_ref !== data.control_ref) finding('ERROR', 'STALE_DELEGATION', `${lane} delegation is not bound to owner selector ref`, { delegation_id: d.delegation_id, delegated_ref: d.valid_for_control_ref, owner_ref: data.control_ref });
     if (d.valid_for_control_head !== data.last_known_control_head) finding('ERROR', 'STALE_DELEGATION', `${lane} delegation is not bound to owner selector head`, { delegation_id: d.delegation_id, delegated_head: d.valid_for_control_head, owner_head: data.last_known_control_head });
     if (lane === 'DOCUMENTS' && /PROSE/i.test(`${d.delegation_id || ''} ${d.objective_id || ''} ${d.obligation_id || ''} ${d.parent_objective_id || ''}`)) finding('ERROR', 'JOB_LANE_VIOLATION', 'Documents active delegation contains Prose work', { delegation_id: d.delegation_id });
   }
   owners[lane] = {
     owner_path: data.owner_path,
     control_ref: data.control_ref,
+    control_binding_type: resolved.type,
     live_control_head: live,
     recorded_control_head: data.last_known_control_head,
     completion_count: completionEntries.filter((e) => e.owner_path === data.owner_path).length,
@@ -215,6 +247,9 @@ const derived = {
   topology_id: topology.topology_id || null,
   central_next_objective: central || null,
   highest_discretionary_objective: authority.highest_discretionary_objective || null,
+  architectural_peer_systems: [...expectedPeers],
+  execution_ready_peer_systems: [...executionReadyPeers],
+  admitted_not_execution_ready_peer_systems: [...admittedNotReadyPeers],
   active_systems: systems.map((s) => ({ system_id: s.system_id, parent_id: s.parent_id || null, owner_path: systemOwnerPath(s) })),
   retired_systems: retiredSystems.map((s) => ({ system_id: s.system_id, standing: s.lifecycle || null, historical_owner_path: s.historical_owner_path || null, integration_owner: s.integration_owner || null })),
   owners,
@@ -238,6 +273,7 @@ fs.writeFileSync(path.join(outDir, 'DERIVED-CURRENT-STATE.json'), JSON.stringify
 fs.writeFileSync(path.join(outDir, 'SYSTEM-STATE-DRIFT-REPORT.json'), JSON.stringify(report, null, 2) + '\n');
 console.log(`SYSTEM_STATE_RECONCILER_${report.standing}`);
 console.log(`active_systems=${derived.active_systems.map((s) => s.system_id).join(',')}`);
+console.log(`execution_ready_systems=${derived.execution_ready_peer_systems.join(',')}`);
 console.log(`retired_systems=${derived.retired_systems.map((s) => s.system_id).join(',')}`);
 console.log(`second_shift_lanes=${derived.second_shift_active_lanes.join(',')}`);
 for (const f of findings) console.log(`${f.severity}:${f.type}:${f.message}`);
