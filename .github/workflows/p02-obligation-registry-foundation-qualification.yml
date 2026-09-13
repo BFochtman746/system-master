@@ -1,0 +1,137 @@
+name: P02 Obligation Registry Foundation Qualification
+
+on:
+  push:
+    paths:
+      - 'governance/CURRENT-AUTHORITY.json'
+      - 'governance/WORK-OBLIGATION-REGISTRY-*.json'
+      - 'governance/SYSTEM-TOPOLOGY-*.json'
+      - 'governance/SYSTEM-PROGRAM-JOB-LOCK-*.json'
+      - 'governance/SYSTEM-COMPLETION-STATUS-*.json'
+      - 'governance/contracts/P02-FOUNDATION-CONTRACT-001.md'
+      - 'governance/schemas/**'
+      - '.github/scripts/validate-governance.js'
+      - '.github/scripts/current-obligation-registry-enforce.js'
+      - '.github/scripts/system-brief.js'
+      - '.github/workflows/p02-obligation-registry-foundation-qualification.yml'
+  pull_request:
+    paths:
+      - 'governance/CURRENT-AUTHORITY.json'
+      - 'governance/WORK-OBLIGATION-REGISTRY-*.json'
+      - 'governance/SYSTEM-TOPOLOGY-*.json'
+      - 'governance/SYSTEM-PROGRAM-JOB-LOCK-*.json'
+      - 'governance/SYSTEM-COMPLETION-STATUS-*.json'
+      - 'governance/contracts/P02-FOUNDATION-CONTRACT-001.md'
+      - 'governance/schemas/**'
+      - '.github/scripts/validate-governance.js'
+      - '.github/scripts/current-obligation-registry-enforce.js'
+      - '.github/scripts/system-brief.js'
+      - '.github/workflows/p02-obligation-registry-foundation-qualification.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout exact P02 subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Pin Node runtime
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Run exact P02 acceptance target
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p qualification-output
+          node .github/scripts/validate-governance.js | tee /tmp/p02-validate-governance.log
+          node .github/scripts/current-obligation-registry-enforce.js | tee /tmp/p02-obligation-enforce.log
+          node .github/scripts/system-brief.js | tee /tmp/p02-system-brief.log
+      - name: Assert current obligation graph and emit exact-subject evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs = require('fs');
+          const cp = require('child_process');
+          const crypto = require('crypto');
+          const authority = JSON.parse(fs.readFileSync('governance/CURRENT-AUTHORITY.json', 'utf8'));
+          const registry = JSON.parse(fs.readFileSync(authority.obligation_registry, 'utf8'));
+          const expectedStates = ['READY','ACTIVE','BLOCKED','HOLD','DEFERRED','OWNER_SELECTION_REQUIRED','SUPERSEDED','CLOSED'];
+          const sorted = (xs) => [...xs].sort();
+          const same = (a,b) => JSON.stringify(sorted(a)) === JSON.stringify(sorted(b));
+          if (authority.authority_id !== 'CURRENT-AUTHORITY-005') throw new Error(`AUTHORITY_MISMATCH ${authority.authority_id}`);
+          if (authority.obligation_registry !== 'governance/WORK-OBLIGATION-REGISTRY-013.json') throw new Error(`REGISTRY_POINTER_MISMATCH ${authority.obligation_registry}`);
+          if (registry.registry_id !== 'WORK-OBLIGATION-REGISTRY-013') throw new Error(`REGISTRY_ID_MISMATCH ${registry.registry_id}`);
+          if (!same(registry.states || [], expectedStates) || new Set(registry.states || []).size !== expectedStates.length) throw new Error('STATE_VOCABULARY_MISMATCH');
+          const obligations = registry.obligations || [];
+          if (obligations.length !== 20) throw new Error(`OBLIGATION_COUNT ${obligations.length}`);
+          const ids = obligations.map((row) => row.obligation_id);
+          if (new Set(ids).size !== 20 || ids.some((id) => !id)) throw new Error('OBLIGATION_ID_INTEGRITY');
+          const stateSet = new Set(expectedStates);
+          if (!obligations.every((row) => stateSet.has(row.state))) throw new Error('OBLIGATION_STATE_OUTSIDE_VOCABULARY');
+          if (registry.topology !== authority.topology) throw new Error('TOPOLOGY_BINDING_MISMATCH');
+          if (registry.program_job_lock !== authority.program_job_lock) throw new Error('JOB_LOCK_BINDING_MISMATCH');
+          if (registry.system_completion_status !== authority.system_completion_status) throw new Error('COMPLETION_BINDING_MISMATCH');
+          if (registry.central_next_objective !== authority.central_next_objective || registry.central_next_objective !== 'FOUNDATION-1-0-CLOSURE-001') throw new Error('CENTRAL_OBJECTIVE_MISMATCH');
+          if (registry.highest_discretionary_objective !== authority.highest_discretionary_objective || registry.highest_discretionary_objective !== 'SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001') throw new Error('DISCRETIONARY_OBJECTIVE_MISMATCH');
+          const central = obligations.find((row) => row.obligation_id === registry.central_next_objective);
+          if (!central || central.state !== 'ACTIVE' || central.owner_path !== 'SYSTEM_MASTER/CORE') throw new Error('CENTRAL_OBJECTIVE_ENTRY_INVALID');
+          if (!obligations.some((row) => row.obligation_id === registry.highest_discretionary_objective)) throw new Error('DISCRETIONARY_OBJECTIVE_ABSENT');
+          if (obligations.some((row) => String(row.owner_path || '').includes('/PROSE'))) throw new Error('PROSE_CURRENT_OWNER');
+          const subjects = [
+            'governance/CURRENT-AUTHORITY.json',
+            'governance/contracts/P02-FOUNDATION-CONTRACT-001.md',
+            authority.obligation_registry,
+            authority.topology,
+            authority.program_job_lock,
+            authority.system_completion_status,
+            '.github/scripts/validate-governance.js',
+            '.github/scripts/current-obligation-registry-enforce.js',
+            '.github/scripts/system-brief.js',
+            '.github/workflows/p02-obligation-registry-foundation-qualification.yml'
+          ];
+          const blob = (path) => cp.execFileSync('git', ['rev-parse', `HEAD:${path}`], {encoding:'utf8'}).trim();
+          const sha256 = (path) => crypto.createHash('sha256').update(fs.readFileSync(path)).digest('hex');
+          const evidence = {
+            evidence_schema: '1.0',
+            contract_id: 'P02-FOUNDATION-1.0',
+            requirement_or_capability_id: 'P02',
+            owner_path: 'SYSTEM_MASTER/CORE',
+            authority_id: authority.authority_id,
+            registry_id: registry.registry_id,
+            status: 'PASS',
+            source_identity: process.env.GITHUB_SHA,
+            acceptance_commands: [
+              'node .github/scripts/validate-governance.js',
+              'node .github/scripts/current-obligation-registry-enforce.js',
+              'node .github/scripts/system-brief.js'
+            ],
+            obligation_count: obligations.length,
+            declared_states: expectedStates,
+            central_next_objective: registry.central_next_objective,
+            highest_discretionary_objective: registry.highest_discretionary_objective,
+            subjects: subjects.map((path) => ({path, git_blob_sha: blob(path)})),
+            logs: {
+              validate_governance_sha256: sha256('/tmp/p02-validate-governance.log'),
+              obligation_enforce_sha256: sha256('/tmp/p02-obligation-enforce.log'),
+              system_brief_sha256: sha256('/tmp/p02-system-brief.log')
+            }
+          };
+          fs.writeFileSync('qualification-output/p02-foundation-1.0.json', `${JSON.stringify(evidence, null, 2)}\n`);
+          process.stdout.write(`${JSON.stringify(evidence)}\n`);
+          NODE
+      - name: Preserve machine-readable P02 qualification evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p02-foundation-1.0-evidence
+          path: qualification-output/p02-foundation-1.0.json
+          if-no-files-found: error
+          retention-days: 30

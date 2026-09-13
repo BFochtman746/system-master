@@ -1,109 +1,107 @@
 # P02 — Foundation Contract 001
 
 **Owner** `SYSTEM_MASTER/CORE` · **Capability** P02 Work obligation registry · **Effective** 2026-09-13
-**Authority** `governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-001.json`
+**Authority** `governance/CURRENT-AUTHORITY.json` (`CURRENT-AUTHORITY-005`)
+**Current registry** `governance/WORK-OBLIGATION-REGISTRY-013.json`
 
 ## 1. Contract / interface
 
-`governance/WORK-OBLIGATION-REGISTRY-013.json` is the build plan. It carries
-`registry_id`, `effective_date`, `central_next_objective`,
-`highest_discretionary_objective`, and an `obligations` array.
+P02 is the authority-selected durable work-obligation registry for System Master. Under `CURRENT-AUTHORITY-005`, `governance/WORK-OBLIGATION-REGISTRY-013.json` is the current registry.
 
-Each obligation carries `obligation_id`, a `state` from
-`ACTIVE | READY | BLOCKED | HOLD | CLOSED | RETIRED`, and optionally `owner_path`,
-`title`, `objective`, `evidence_target`, `acceptance_target`.
+The registry exposes:
 
-Offers: the answer to "what is being worked on, by whom, and what is next." It is the only
-artifact that names a single next objective for the whole estate.
+- `registry_id`, `effective_date`, `product_root`, topology/job/completion bindings and supersession lineage;
+- a closed declared state vocabulary: `READY`, `ACTIVE`, `BLOCKED`, `HOLD`, `DEFERRED`, `OWNER_SELECTION_REQUIRED`, `SUPERSEDED`, `CLOSED`;
+- an `obligations` array whose entries carry a unique `obligation_id`, `owner_path`, state and execution/acceptance metadata as applicable;
+- one `central_next_objective` and one `highest_discretionary_objective` selected consistently with P00.
 
-Does not offer: scheduling, ordering within a night, or progress. A registry entry is a
-commitment, not a status.
+The current Registry 013 contains 20 obligations. P02 answers what obligations currently exist, who owns them, which state each is in, and which estate-level objectives are selected. It does not itself execute, schedule or complete work.
 
 ## 2. Ingress routes
 
-1. **Human, via pull request**, gated by `a01-control-plane-enforcement`. The only write
-   route.
-2. **Read by the ingress** (P12) over the GitHub contents API, which enqueues obligations
-   in state `READY` and no other state.
+Changes enter through owner-authorized governance mutations admitted by the repository control plane. P00 must select the registry before it is current authority.
 
-State is what makes an obligation eligible for the night. `READY` is therefore a
-deliberate act, not a default — an obligation left in `ACTIVE` is never picked up.
+No product executor, ingress consumer, Second Shift worker or lane runtime may rewrite the registry as an incidental side effect of executing an obligation. Changes to obligation identity, ownership, state, central selection or acceptance semantics are governance mutations and require the corresponding owner authority.
 
 ## 3. Egress routes
 
-- `system-brief.js` — renders the central objective and work in flight.
-- `lane-brief.js` — selects a lane's obligation for a chat session.
-- `a01_github_ingress` — builds one delegation per `READY` obligation.
-- `validate-governance.js` — schema and cross-file owner checks.
+Current consumers include:
 
-Marking an obligation `READY` causes work to be enqueued on the next ingress pass. That is
-the intended coupling and the reason the state vocabulary is closed by schema enum.
+- `.github/scripts/current-obligation-registry-enforce.js` — fail-closed validation against current topology, program-job locks, completion state, retirement and objective selectors;
+- `.github/scripts/validate-governance.js` — schema and cross-file validation;
+- `.github/scripts/system-brief.js` and `.github/scripts/lane-brief.js` — current-state/owner-lane rendering;
+- A-01 ingress and scheduling components — consumers of admitted eligible work, without becoming canonical writers for P02.
+
+`READY` is an explicit eligibility state consumed by downstream execution machinery; changing an obligation to or from an executable state is therefore an authority-bearing registry mutation, not a runtime default.
 
 ## 4. Persistence and canonical writer
 
-In git, superseded by number: `-013` supersedes `-012`, with `supersedes_current_selection`
-naming the prior file. Prior registries are retained unedited.
+The registry is a versioned JSON governance artifact in git. `WORK-OBLIGATION-REGISTRY-013.json` supersedes `WORK-OBLIGATION-REGISTRY-012.json`; prior versions remain historical evidence.
 
-Canonical writer: a human through a reviewed pull request. **No process writes this file** —
-notably the ingress reads it and never marks anything done. Letting the executor write the
-plan would let a night rewrite its own obligations.
-
-Completion is recorded in evidence (P15 receipt, A-01 qualification artifacts) and reflected
-here by a human in the next successor.
+Canonical writer: an owner-authorized governance mutation. Runtime consumers are readers. When the current work graph changes materially, a successor numbered registry is admitted and P00 is repointed; historical numbered registries are not rewritten to simulate current state.
 
 ## 5. Dependencies
 
-- **P00** — must point at it.
-- **P01** — supplies the owner paths obligations are checked against.
-- **P05** — validates it on every push and pull request.
-- **P12** consumes it; **P11** schedules what P12 enqueues.
+- **P00** selects the current obligation registry and the estate-level objective pointers.
+- **P01** supplies the current nine-peer topology and owner boundaries used to validate obligation owners.
+- `SYSTEM-PROGRAM-JOB-LOCK-001` and `SYSTEM-COMPLETION-STATUS-002` constrain active/retired jobs and completion truth.
+- `current-obligation-registry-enforce.js` and `validate-governance.js` are qualification mechanisms, not semantic owners.
+
+P02 does not require private, native, external-provider, publication or credential authority.
 
 ## 6. Failure semantics
 
-**Fail-closed.**
+**Fail closed on obligation-graph disagreement.**
 
-- Absent or unpointed → the brief reports the registry unreadable and degrades rather than
-  inventing; ingress records the error and enqueues nothing.
-- Invalid `state` value → schema failure, build red. The enum is closed precisely because
-  an unrecognised state would be silently skipped by the ingress filter.
-- `owner_path` absent on an obligation → ingress skips it as `BUILD_FAILED` and continues.
-  An unowned obligation cannot be assigned to a lane, so enqueuing it would create work
-  nobody owns.
-- Empty `obligations` array → schema requires at least one. An empty build plan is far
-  more likely to be an accident than a statement.
+Qualification fails when any of the following is true:
 
-Idempotency is downstream: re-reading an unchanged registry produces identical delegation
-ids for the same night.
+- P00 does not select Registry 013 or the registry bindings disagree with P00;
+- registry JSON is missing/malformed, obligation IDs are missing/duplicated, or a current obligation uses a state outside the declared vocabulary;
+- current obligation ownership is invalid, retired, or conflicts with Topology 007/job-lock authority;
+- an open obligation lacks its required objective;
+- the selected central or highest-discretionary objective is absent or disagrees with P00;
+- the central objective is not owned by an active execution-ready peer;
+- PROSE is resurrected as a current execution owner;
+- a changed registry, contract, enforcement script, authority pointer, topology/job/completion input or qualification workflow is used with an older P02 PASS.
+
+A validation warning is not silently converted into a PASS claim outside the exact acceptance rules below.
 
 ## 7. Evidence target
 
-Git history plus the supersession chain. `WORK-OBLIGATION-REGISTRY-013.json` carries
-`ratification_record` and `prior_central_next_objective`, so the sequence of objectives is
-reconstructable from the artifacts alone.
+`.github/workflows/p02-obligation-registry-foundation-qualification.yml` must execute the P02 acceptance target and preserve machine-readable `p02-foundation-1.0-evidence`.
+
+The receipt binds `CURRENT-AUTHORITY-005`, `WORK-OBLIGATION-REGISTRY-013`, `SYSTEM_MASTER/CORE`, source commit identity, the exact 20-obligation current graph assertions, acceptance-log hashes, and exact Git blob identities for every repository subject used to qualify P02.
+
+Foundation census completion additionally requires admission of that exact successful receipt into `governance/census/FOUNDATION-CLOSURE-EVIDENCE-REGISTRY-001.json`. Contract prose or a green unrelated workflow is not completion evidence.
 
 ## 8. Acceptance target
 
-```
-node .github/scripts/validate-governance.js && node .github/scripts/system-brief.js
+```bash
+node .github/scripts/validate-governance.js
+node .github/scripts/current-obligation-registry-enforce.js
+node .github/scripts/system-brief.js
 ```
 
-**PASS** when validation reports `obligations` PASS and the brief renders a
-`central_next_objective` with a non-zero obligation count. Verified 2026-09-13 at
-`WORK-OBLIGATION-REGISTRY-013`, central objective `FOUNDATION-1-0-CLOSURE-001`.
+**PASS** only when all three commands return zero on the same source identity and the qualifier additionally proves:
+
+1. current authority is `CURRENT-AUTHORITY-005` and selects `WORK-OBLIGATION-REGISTRY-013`;
+2. the registry declares exactly the eight current states listed in section 1;
+3. exactly 20 current obligations exist and all obligation IDs are unique;
+4. every current obligation state belongs to the declared state vocabulary;
+5. registry topology, program-job-lock and completion-status bindings match P00;
+6. `central_next_objective` is `FOUNDATION-1-0-CLOSURE-001`, exists in the registry, is `ACTIVE`, and is owned by `SYSTEM_MASTER/CORE`;
+7. `highest_discretionary_objective` is `SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001` and exists in the registry;
+8. no current obligation is owned by terminally retired PROSE;
+9. exact-subject machine-readable evidence is emitted.
 
 ## 9. Authority boundary
 
-**Lane may decide alone (`agent`):** wording of `title` and `objective` for an obligation
-the lane already owns.
+**Lane may decide alone (`agent`):** read, render and validate the current obligation graph; execute an already-admitted obligation only within its separate owner/action authority.
 
-**Requires the owner (`owner`):** adding or removing an obligation; any state change,
-including to `READY`, because that dispatches work; changing `owner_path`; changing the
-central or highest-discretionary objective; changing an `acceptance_target`.
+**Requires owner/governance authority (`owner`):** add/remove an obligation; change `owner_path`, state, priority, central/highest-discretionary selection, evidence/acceptance semantics or supersession lineage; or admit a successor registry.
 
-Moving an obligation to `READY` is the single highest-consequence edit in this estate: it
-is the act that puts work into the night.
+P02 qualification proves the current work graph. It does not grant authority to execute external side effects, change another peer's semantic job, or mark work complete without its required evidence.
 
 ## 10. Open gaps
 
-None in the artifact. Five obligations carry owner paths that own no modules in P01 — a
-live validator warning and an open P01 decision, not a defect here.
+P02 remains `ACTIVE_GAP` until a fresh exact-subject `CURRENT-AUTHORITY-005` / Registry 013 qualification receipt is produced and admitted to the Foundation evidence registry.
