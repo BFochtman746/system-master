@@ -10,6 +10,9 @@ on:
       - '.github/scripts/a01-runner-guard.ps1'
       - '.github/scripts/validate-system-topology.js'
       - '.github/scripts/validate-system-control-branch.js'
+      - '.github/scripts/control-gateway-*.js'
+      - '.github/scripts/github-adapter-*.js'
+      - 'control-gateway/**'
       - 'qualification/a01/**'
       - 'governance/**'
       - 'SYSTEM-MASTER-WORKSTREAM-BOOTSTRAP.md'
@@ -23,6 +26,9 @@ on:
       - '.github/scripts/a01-runner-guard.ps1'
       - '.github/scripts/validate-system-topology.js'
       - '.github/scripts/validate-system-control-branch.js'
+      - '.github/scripts/control-gateway-*.js'
+      - '.github/scripts/github-adapter-*.js'
+      - 'control-gateway/**'
       - 'qualification/a01/**'
       - 'governance/**'
       - 'SYSTEM-MASTER-WORKSTREAM-BOOTSTRAP.md'
@@ -50,3 +56,61 @@ jobs:
         run: node .github/scripts/a01-control-plane-enforce.js scan
       - name: Self-test hosted registration admission logic
         run: node .github/scripts/a01-admission-barrier.js selftest
+      # The four load-bearing governance files were previously unvalidated: a typo
+      # in a pointer broke consumers silently at the moment they were needed.
+      - name: Validate governance pointer chain and registries
+        run: node .github/scripts/validate-governance.js
+
+  control-gateway-suite:
+    name: Control Gateway deterministic test suite
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout control gateway subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Pin Node runtime
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Report runtime
+        run: node --version
+      # Live-authority suites self-skip when their env vars are absent, so this job
+      # is fully deterministic and needs no credentials. Do NOT grant it a token:
+      # a PR gate that can reach production authority is not a gate.
+      - name: Run Control Gateway test suite
+        working-directory: control-gateway
+        run: node --test
+      - name: Assert no suite was silently emptied
+        working-directory: control-gateway
+        shell: bash
+        run: |
+          set -euo pipefail
+          COUNT="$(find test -name '*.test.js' | wc -l)"
+          echo "control-gateway test files: $COUNT"
+          # guards against a path/rename change quietly reducing the gate to zero tests
+          test "$COUNT" -ge 30
+
+  ingress-suite:
+    name: A-01 ingress, receipt and evidence suites
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout ingress subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Pin Python runtime
+        uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38
+        with:
+          python-version: '3.12'
+      # Offline by construction: GitHub is replaced by a fake source and the
+      # scheduler by a recording double. No token, no network, no SQLite.
+      - name: Run ingress suite
+        working-directory: control-gateway/python
+        env:
+          PYTHONPATH: ${{ github.workspace }}/control-gateway/python:${{ github.workspace }}
+        run: python -m unittest test_a01_github_ingress test_a01_morning_receipt test_a01_evidence_retention -v

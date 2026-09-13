@@ -1,0 +1,263 @@
+{
+  "allocation_id": "SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-005",
+  "effective_date": "2026-09-13",
+  "standing": "FOUR_NEW_PEERS_ADMITTED__ALL_CENSUSED_MODULES_OWNED_OR_EXPLICITLY_DEFERRED",
+  "supersedes": "governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-004.json",
+  "topology": "governance/SYSTEM-TOPOLOGY-006.json",
+  "architecture_decision": "governance/ADR-0005-PROSE-TERMINAL-RETIREMENT-BOOK-INTEGRATION.md",
+  "first_class_tool_systems": [
+    {
+      "system_id": "LEARNING",
+      "owner_path": "SYSTEM_MASTER/LEARNING"
+    },
+    {
+      "system_id": "BOOK",
+      "owner_path": "SYSTEM_MASTER/BOOK"
+    },
+    {
+      "system_id": "DOCUMENTS",
+      "owner_path": "SYSTEM_MASTER/DOCUMENTS",
+      "control_ref": "documents/control-v1"
+    },
+    {
+      "system_id": "SPREADSHEET_DATA",
+      "owner_path": "SYSTEM_MASTER/SPREADSHEET_DATA",
+      "control_ref": "spreadsheet-data/control-v1",
+      "admitted": "2026-09-13"
+    },
+    {
+      "system_id": "MEDIA",
+      "owner_path": "SYSTEM_MASTER/MEDIA",
+      "control_ref": "media/control-v1",
+      "admitted": "2026-09-13"
+    },
+    {
+      "system_id": "CONNECTED_ACTIONS",
+      "owner_path": "SYSTEM_MASTER/CONNECTED_ACTIONS",
+      "control_ref": "connected-actions/control-v1",
+      "admitted": "2026-09-13"
+    },
+    {
+      "system_id": "RESEARCH_KNOWLEDGE",
+      "owner_path": "SYSTEM_MASTER/RESEARCH_KNOWLEDGE",
+      "control_ref": "research-knowledge/control-v1",
+      "admitted": "2026-09-13"
+    }
+  ],
+  "retired_systems": [
+    {
+      "system_id": "PROSE",
+      "historical_owner_path": "SYSTEM_MASTER/BOOK/PROSE",
+      "historical_control_ref": "literary-prose-engine-001",
+      "standing": "COMPLETE_RETIRED_TERMINAL",
+      "active_owner_path": null,
+      "active_second_shift_lane": false,
+      "active_repair_lane": false,
+      "active_qualification_lane": false,
+      "active_research_task": false,
+      "active_telemetry_lane": false,
+      "successor_task": false,
+      "integration_owner_if_genuinely_open": "SYSTEM_MASTER/BOOK"
+    }
+  ],
+  "documents_decision": {
+    "classification": "FIRST_CLASS_TOOL_SYSTEM",
+    "owner_path": "SYSTEM_MASTER/DOCUMENTS",
+    "modules": [
+      "DOCX",
+      "PPTX",
+      "PDF",
+      "OCR",
+      "FILE",
+      "IMG-INGEST",
+      "GENERIC_WRITING_ARTIFACTS"
+    ],
+    "rule": "Documents owns document/artifact semantics and services. It receives no Prose work and does not own Book literary intelligence or canonical Book state."
+  },
+  "book_completed_prose_integration_decision": {
+    "book_owner_path": "SYSTEM_MASTER/BOOK",
+    "retired_prose_historical_path": "SYSTEM_MASTER/BOOK/PROSE",
+    "book_is_canonical_manuscript_owner": true,
+    "retired_prose_is_active_system": false,
+    "book_owns_any_genuinely_open_integration": true,
+    "prose_direct_canonical_write": false,
+    "book_admission_only_canonical_effect": true,
+    "retirement_record": "governance/retirements/PROSE-SYSTEM-RETIREMENT-001.json"
+  },
+  "book_documents_boundary": "BOOK and DOCUMENTS remain peers. BOOK owns canonical Book state and any remaining integration of preserved completed Prose capability. DOCUMENTS owns document/artifact mechanics and may be consumed through explicit service contracts; DOCUMENTS cannot mutate Book canonical state or receive Prose work.",
+  "qualification_rule": "Historical Book, Prose and Document PASS remains exact-subject evidence only. Changed integration bytes require fresh qualification under the current owner.",
+  "ratification_record": "governance/FOUNDATION-CLOSURE-OWNER-DECISION-PACK-001.md",
+  "module_ownership": [
+    {
+      "module_key": "AUDIOBOOK",
+      "owner_path": "SYSTEM_MASTER/MEDIA"
+    },
+    {
+      "module_key": "AUTOMATION",
+      "owner_path": "SYSTEM_MASTER/PROGRAMMING"
+    },
+    {
+      "module_key": "BROWSER",
+      "owner_path": "SYSTEM_MASTER/CONNECTED_ACTIONS"
+    },
+    {
+      "module_key": "CALENDAR",
+      "owner_path": "SYSTEM_MASTER/CONNECTED_ACTIONS"
+    },
+    {
+      "module_key": "CHAT",
+      "owner_path": "SYSTEM_MASTER/CORE"
+    },
+    {
+      "module_key": "CODE",
+      "owner_path": "SYSTEM_MASTER/PROGRAMMING"
+    },
+    {
+      "module_key": "COMMS",
+      "owner_path": "SYSTEM_MASTER/CONNECTED_ACTIONS"
+    },
+    {
+      "module_key": "CURRICULUM",
+      "owner_path": "SYSTEM_MASTER/LEARNING"
+    },
+    {
+      "module_key": "DATA",
+      "owner_path": "SYSTEM_MASTER/SPREADSHEET_DATA"
+    },
+    {
+      "module_key": "DOCX",
+      "owner_path": "SYSTEM_MASTER/DOCUMENTS"
+    },
+    {
+      "module_key": "EXCEL",
+      "owner_path": "SYSTEM_MASTER/SPREADSHEET_DATA"
+    },
+    {
+      "module_key": "EXPECTATION",
+      "owner_path": "SYSTEM_MASTER/CORE"
+    },
+    {
+      "module_key": "EXPERIENCE",
+      "owner_path": "SYSTEM_MASTER/CORE"
+    },
+    {
+      "module_key": "FILE",
+      "owner_path": "SYSTEM_MASTER/DOCUMENTS"
+    },
+    {
+      "module_key": "GEO",
+      "owner_path": "SYSTEM_MASTER/RESEARCH_KNOWLEDGE"
+    },
+    {
+      "module_key": "IMAGE",
+      "owner_path": "SYSTEM_MASTER/MEDIA"
+    },
+    {
+      "module_key": "IMG-INGEST",
+      "owner_path": "SYSTEM_MASTER/DOCUMENTS"
+    },
+    {
+      "module_key": "KNOWLEDGE",
+      "owner_path": "SYSTEM_MASTER/RESEARCH_KNOWLEDGE"
+    },
+    {
+      "module_key": "LEARNING",
+      "owner_path": "SYSTEM_MASTER/LEARNING"
+    },
+    {
+      "module_key": "LEDGER",
+      "owner_path": "SYSTEM_MASTER/SPREADSHEET_DATA"
+    },
+    {
+      "module_key": "LOCALAI",
+      "owner_path": "SYSTEM_MASTER/CORE"
+    },
+    {
+      "module_key": "MANUSCRIPT",
+      "owner_path": "SYSTEM_MASTER/BOOK"
+    },
+    {
+      "module_key": "MATH",
+      "owner_path": "SYSTEM_MASTER/SPREADSHEET_DATA"
+    },
+    {
+      "module_key": "MEDIA",
+      "owner_path": "SYSTEM_MASTER/MEDIA"
+    },
+    {
+      "module_key": "OCR",
+      "owner_path": "SYSTEM_MASTER/DOCUMENTS"
+    },
+    {
+      "module_key": "PDF",
+      "owner_path": "SYSTEM_MASTER/DOCUMENTS"
+    },
+    {
+      "module_key": "PHOTO",
+      "owner_path": "SYSTEM_MASTER/MEDIA"
+    },
+    {
+      "module_key": "PLUGINS",
+      "owner_path": "SYSTEM_MASTER/CONNECTED_ACTIONS"
+    },
+    {
+      "module_key": "PPTX",
+      "owner_path": "SYSTEM_MASTER/DOCUMENTS"
+    },
+    {
+      "module_key": "PROJECTS",
+      "owner_path": "SYSTEM_MASTER/CORE"
+    },
+    {
+      "module_key": "RESEARCH",
+      "owner_path": "SYSTEM_MASTER/RESEARCH_KNOWLEDGE"
+    },
+    {
+      "module_key": "STORYBIBLE",
+      "owner_path": "SYSTEM_MASTER/BOOK"
+    },
+    {
+      "module_key": "VIDEO",
+      "owner_path": "SYSTEM_MASTER/MEDIA"
+    },
+    {
+      "module_key": "VOICE",
+      "owner_path": "SYSTEM_MASTER/MEDIA"
+    },
+    {
+      "module_key": "WRITING",
+      "owner_path": "SYSTEM_MASTER/BOOK"
+    }
+  ],
+  "explicitly_deferred_modules": [
+    {
+      "module_key": "AIINCOME",
+      "disposition": "EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY__DEFERRED_UNTIL_FOUNDATION_1_0_CLOSURE"
+    },
+    {
+      "module_key": "CAD",
+      "disposition": "EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY__HEADLESS_INTEROP_ONLY"
+    },
+    {
+      "module_key": "PHONEOPS",
+      "disposition": "EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY__ABSORBED_EXPERIENCE_AUTOMATION_FOUNDATION"
+    },
+    {
+      "module_key": "PHYSICALAI",
+      "disposition": "EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY__DEFERRED_OPTIONAL"
+    },
+    {
+      "module_key": "PORTFOLIO",
+      "disposition": "EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY__DEFERRED_UNTIL_FOUNDATION_1_0_CLOSURE"
+    }
+  ],
+  "boundary_rules": [
+    "CORE owns the shared data foundation; SPREADSHEET_DATA owns product BI and analysis semantics.",
+    "CORE owns the connector action runtime; CONNECTED_ACTIONS owns module policy.",
+    "BOOK owns authoring and prose semantics; DOCUMENTS owns the artifact mechanics they render into.",
+    "RESEARCH_KNOWLEDGE consumes BROWSER from CONNECTED_ACTIONS and does not own it.",
+    "PROGRAMMING owns CODE and AUTOMATION as an active non-peer work program; no separate owner is created.",
+    "No CONNECTED_ACTIONS module reaches production authority before Foundation 1.0 closure.",
+    "Registering an owner is a precondition, not an implementation claim. Every owned module still owes a full foundation contract."
+  ]
+}

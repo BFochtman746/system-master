@@ -7,6 +7,9 @@ export const A01_DEFAULT_RESUME_ON_FAILURE = 'Adjudicate evidence, repair the fa
 const SHA40 = /^[0-9a-f]{40}$/;
 const WORKFLOW_RE = /^[A-Za-z0-9_.-]+\.ya?ml$/;
 const REF_RE = /^[A-Za-z0-9][A-Za-z0-9._/-]{0,254}$/;
+const ISO8601_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?(\.\d+)?(Z|[+-]\d{2}:\d{2})$/;
+const TRANSACTION_ID_RE = /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/;
+export const A01_EXECUTION_CONTEXTS = Object.freeze(['normal', 'recovery', 'repair', 'overnight']);
 
 export class GitHubWorkflowDispatchError extends Error {
   constructor(code, message, details = undefined) {
@@ -27,6 +30,18 @@ function integer(value, name, { min = 0, max = Number.MAX_SAFE_INTEGER } = {}) {
   if (!Number.isSafeInteger(value) || value < min || value > max) fail('DISPATCH_INPUT_INVALID', `${name} must be an integer in range ${min}..${max}`);
   return value;
 }
+function optionalString(value, name, pattern = null) {
+  if (value === undefined || value === null || value === '') return '';
+  if (typeof value !== 'string') fail('DISPATCH_INPUT_INVALID', `${name} must be a string when supplied`);
+  if (pattern && !pattern.test(value)) fail('DISPATCH_INPUT_INVALID', `${name} has invalid format`);
+  return value;
+}
+function isoInstant(value, name) {
+  if (!ISO8601_RE.test(value)) fail('DISPATCH_WINDOW_INVALID', `${name} must be an ISO-8601 instant with an explicit offset`);
+  const parsed = Date.parse(value);
+  if (Number.isNaN(parsed)) fail('DISPATCH_WINDOW_INVALID', `${name} is not a parseable instant`);
+  return parsed;
+}
 
 export function normalizeA01Dispatch({ workflow = A01_DISPATCH_WORKFLOW, ref, inputs }) {
   string(workflow, 'workflow', WORKFLOW_RE);
@@ -37,12 +52,36 @@ export function normalizeA01Dispatch({ workflow = A01_DISPATCH_WORKFLOW, ref, in
   string(inputs.subject_sha, 'subject_sha', SHA40);
   string(inputs.origin_ref, 'origin_ref');
   const executionContext = inputs.execution_context ?? 'normal';
-  if (!['normal', 'recovery', 'repair', 'overnight'].includes(executionContext)) fail('DISPATCH_INPUT_INVALID', 'execution_context is not registered');
+  if (!A01_EXECUTION_CONTEXTS.includes(executionContext)) fail('DISPATCH_INPUT_INVALID', 'execution_context is not registered');
   const qualifierTimeout = integer(inputs.qualifier_timeout_minutes ?? 28, 'qualifier_timeout_minutes', { min: 1, max: 360 });
   const jobTimeout = integer(inputs.job_timeout_minutes ?? 30, 'job_timeout_minutes', { min: 1, max: 360 });
+  if (jobTimeout <= qualifierTimeout) fail('DISPATCH_INPUT_INVALID', 'job_timeout_minutes must exceed qualifier_timeout_minutes to leave an evidence-capture margin');
   const repairAttempt = integer(inputs.repair_attempt ?? 0, 'repair_attempt', { min: 0, max: 100 });
   const maxRepairAttempts = integer(inputs.max_repair_attempts ?? 1, 'max_repair_attempts', { min: 0, max: 100 });
   if (repairAttempt > maxRepairAttempts) fail('DISPATCH_INPUT_INVALID', 'repair_attempt cannot exceed max_repair_attempts');
+
+  const notificationTarget = optionalString(inputs.notification_target, 'notification_target') || 'originating-workstream';
+
+  // Overnight admission window. Carried end to end: a window accepted here and dropped
+  // before the gateway would execute outside its authorized hours with no failure signal.
+  const notBefore = optionalString(inputs.not_before, 'not_before');
+  const notAfter = optionalString(inputs.not_after, 'not_after');
+  if (executionContext === 'overnight') {
+    if (!notBefore) fail('DISPATCH_WINDOW_INVALID', 'overnight execution_context requires not_before');
+    if (!notAfter) fail('DISPATCH_WINDOW_INVALID', 'overnight execution_context requires not_after');
+    if (isoInstant(notBefore, 'not_before') >= isoInstant(notAfter, 'not_after')) {
+      fail('DISPATCH_WINDOW_INVALID', 'not_before must be strictly earlier than not_after');
+    }
+  } else if (notBefore || notAfter) {
+    fail('DISPATCH_WINDOW_INVALID', 'not_before/not_after are only registered for overnight execution_context');
+  }
+
+  // Durable repair lineage. Carried end to end: dropping it makes the broker mint a
+  // second transaction for one failure lineage and forks the repair ledger.
+  const repairTransactionId = optionalString(inputs.repair_transaction_id, 'repair_transaction_id', TRANSACTION_ID_RE);
+  if (!repairTransactionId && repairAttempt > 0) {
+    fail('DISPATCH_INPUT_INVALID', 'repair_attempt above zero requires the originating repair_transaction_id');
+  }
 
   const normalizedInputs = Object.freeze({
     qualification_id: inputs.qualification_id,
@@ -51,11 +90,15 @@ export function normalizeA01Dispatch({ workflow = A01_DISPATCH_WORKFLOW, ref, in
     origin_ref: inputs.origin_ref,
     resume_on_pass: inputs.resume_on_pass ?? A01_DEFAULT_RESUME_ON_PASS,
     resume_on_failure: inputs.resume_on_failure ?? A01_DEFAULT_RESUME_ON_FAILURE,
+    notification_target: notificationTarget,
     execution_context: executionContext,
     qualifier_timeout_minutes: String(qualifierTimeout),
     job_timeout_minutes: String(jobTimeout),
+    not_before: notBefore,
+    not_after: notAfter,
     repair_attempt: String(repairAttempt),
-    max_repair_attempts: String(maxRepairAttempts)
+    max_repair_attempts: String(maxRepairAttempts),
+    repair_transaction_id: repairTransactionId
   });
   return Object.freeze({ workflow, ref, inputs: normalizedInputs });
 }

@@ -26,36 +26,36 @@ on:
         required: false
         default: originating-workstream
       execution_context:
-        description: Normal or centrally scheduled overnight execution
+        description: Registered execution context
         required: true
         default: normal
         type: choice
-        options: [normal, overnight]
+        options: [normal, recovery, repair, overnight]
       qualifier_timeout_minutes:
-        description: Registered qualifier runtime budget
+        description: Registered qualifier runtime budget (1-360)
         required: true
         default: 28
         type: number
       job_timeout_minutes:
-        description: Outer GitHub job budget including evidence cleanup
+        description: Outer GitHub job budget including evidence cleanup (1-360, must exceed qualifier budget)
         required: true
         default: 30
         type: number
       not_before:
-        description: Overnight admission start ISO timestamp
+        description: Overnight admission start ISO-8601 timestamp; required when execution_context is overnight, must be empty otherwise
         required: false
         default: ''
       not_after:
-        description: Overnight admission end ISO timestamp
+        description: Overnight admission end ISO-8601 timestamp; required when execution_context is overnight, must be empty otherwise
         required: false
         default: ''
       repair_attempt:
-        description: Product repair attempts already consumed for this failure lineage
+        description: Product repair attempts already consumed for this failure lineage (0-100)
         required: false
         default: 0
         type: number
       max_repair_attempts:
-        description: Maximum bounded product repair attempts for this lineage, 0-2
+        description: Maximum bounded product repair attempts for this lineage (0-100)
         required: false
         default: 1
         type: number
@@ -73,8 +73,15 @@ jobs:
   preflight:
     name: Validate external A-01 dispatch packet before reusable routing
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      qualifier_timeout_minutes: ${{ steps.normalize.outputs.qualifier_timeout_minutes }}
+      job_timeout_minutes: ${{ steps.normalize.outputs.job_timeout_minutes }}
+      repair_attempt: ${{ steps.normalize.outputs.repair_attempt }}
+      max_repair_attempts: ${{ steps.normalize.outputs.max_repair_attempts }}
     steps:
-      - name: Validate dispatch packet shape
+      - name: Validate and normalize dispatch packet
+        id: normalize
         shell: bash
         env:
           QUALIFICATION_ID: ${{ inputs.qualification_id }}
@@ -83,26 +90,95 @@ jobs:
           ORIGIN_REF: ${{ inputs.origin_ref }}
           RESUME_ON_PASS: ${{ inputs.resume_on_pass }}
           RESUME_ON_FAILURE: ${{ inputs.resume_on_failure }}
+          NOTIFICATION_TARGET: ${{ inputs.notification_target }}
           EXECUTION_CONTEXT: ${{ inputs.execution_context }}
           QUALIFIER_TIMEOUT_MINUTES: ${{ inputs.qualifier_timeout_minutes }}
           JOB_TIMEOUT_MINUTES: ${{ inputs.job_timeout_minutes }}
+          NOT_BEFORE: ${{ inputs.not_before }}
+          NOT_AFTER: ${{ inputs.not_after }}
           REPAIR_ATTEMPT: ${{ inputs.repair_attempt }}
           MAX_REPAIR_ATTEMPTS: ${{ inputs.max_repair_attempts }}
+          REPAIR_TRANSACTION_ID: ${{ inputs.repair_transaction_id }}
         run: |
           set -euo pipefail
-          test -n "$QUALIFICATION_ID"
-          test -n "$WORKSTREAM_ID"
-          [[ "$SUBJECT_SHA" =~ ^[0-9a-f]{40}$ ]]
-          test -n "$ORIGIN_REF"
-          test -n "$RESUME_ON_PASS"
-          test -n "$RESUME_ON_FAILURE"
-          case "$EXECUTION_CONTEXT" in normal|overnight) ;; *) exit 1 ;; esac
-          [[ "$QUALIFIER_TIMEOUT_MINUTES" =~ ^[0-9]+$ ]]
-          [[ "$JOB_TIMEOUT_MINUTES" =~ ^[0-9]+$ ]]
-          [[ "$REPAIR_ATTEMPT" =~ ^[0-9]+$ ]]
-          [[ "$MAX_REPAIR_ATTEMPTS" =~ ^[0-9]+$ ]]
-          test "$REPAIR_ATTEMPT" -le "$MAX_REPAIR_ATTEMPTS"
-          echo A01_DISPATCH_BRIDGE_PREFLIGHT=PASS
+
+          reject() { echo "A01_DISPATCH_BRIDGE_PREFLIGHT=FAIL code=$1 detail=$2" >&2; exit 1; }
+
+          # --- identity and subject -------------------------------------------------
+          [[ -n "$QUALIFICATION_ID" ]] || reject DISPATCH_INPUT_INVALID qualification_id_empty
+          [[ -n "$WORKSTREAM_ID" ]]    || reject DISPATCH_INPUT_INVALID workstream_id_empty
+          [[ "$SUBJECT_SHA" =~ ^[0-9a-f]{40}$ ]] || reject DISPATCH_INPUT_INVALID subject_sha_not_exact_lowercase_sha40
+
+          # origin_ref shape mirrors REF_RE in control-gateway/src/github-workflow-dispatch.js
+          [[ "$ORIGIN_REF" =~ ^[A-Za-z0-9][A-Za-z0-9._/-]{0,254}$ ]] || reject DISPATCH_INPUT_INVALID origin_ref_shape
+          case "$ORIGIN_REF" in *..*|*//*) reject DISPATCH_INPUT_INVALID origin_ref_traversal ;; esac
+
+          # --- continuation authority ----------------------------------------------
+          [[ -n "$RESUME_ON_PASS" ]]     || reject DISPATCH_INPUT_INVALID resume_on_pass_empty
+          [[ -n "$RESUME_ON_FAILURE" ]]  || reject DISPATCH_INPUT_INVALID resume_on_failure_empty
+          [[ -n "$NOTIFICATION_TARGET" ]] || reject DISPATCH_INPUT_INVALID notification_target_empty
+
+          # --- execution context ----------------------------------------------------
+          case "$EXECUTION_CONTEXT" in
+            normal|recovery|repair|overnight) ;;
+            *) reject DISPATCH_INPUT_INVALID execution_context_not_registered ;;
+          esac
+
+          # --- integer budgets (bounds mirror the JS normalizer) --------------------
+          bounded_int() {
+            local name="$1" value="$2" min="$3" max="$4"
+            [[ "$value" =~ ^(0|[1-9][0-9]*)$ ]] || reject DISPATCH_INPUT_INVALID "${name}_not_integer"
+            (( value >= min )) || reject DISPATCH_INPUT_INVALID "${name}_below_${min}"
+            (( value <= max )) || reject DISPATCH_INPUT_INVALID "${name}_above_${max}"
+          }
+          bounded_int qualifier_timeout_minutes "$QUALIFIER_TIMEOUT_MINUTES" 1 360
+          bounded_int job_timeout_minutes       "$JOB_TIMEOUT_MINUTES"       1 360
+          bounded_int repair_attempt            "$REPAIR_ATTEMPT"            0 100
+          bounded_int max_repair_attempts       "$MAX_REPAIR_ATTEMPTS"       0 100
+
+          (( REPAIR_ATTEMPT <= MAX_REPAIR_ATTEMPTS )) \
+            || reject DISPATCH_BUDGET_INVALID repair_attempt_exceeds_max
+          # the outer job budget must leave room for evidence capture after the qualifier
+          (( JOB_TIMEOUT_MINUTES > QUALIFIER_TIMEOUT_MINUTES )) \
+            || reject DISPATCH_BUDGET_INVALID job_budget_not_greater_than_qualifier_budget
+
+          # --- overnight admission window ------------------------------------------
+          iso_epoch() {
+            local value="$1"
+            [[ "$value" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}(:[0-9]{2})?(\.[0-9]+)?(Z|[+-][0-9]{2}:[0-9]{2})$ ]] \
+              || reject DISPATCH_WINDOW_INVALID "not_iso8601:${value}"
+            date -u -d "$value" +%s 2>/dev/null || reject DISPATCH_WINDOW_INVALID "unparseable:${value}"
+          }
+          if [[ "$EXECUTION_CONTEXT" == "overnight" ]]; then
+            [[ -n "$NOT_BEFORE" ]] || reject DISPATCH_WINDOW_INVALID overnight_requires_not_before
+            [[ -n "$NOT_AFTER" ]]  || reject DISPATCH_WINDOW_INVALID overnight_requires_not_after
+            NB_EPOCH="$(iso_epoch "$NOT_BEFORE")"
+            NA_EPOCH="$(iso_epoch "$NOT_AFTER")"
+            (( NB_EPOCH < NA_EPOCH )) || reject DISPATCH_WINDOW_INVALID not_before_not_earlier_than_not_after
+          else
+            # fail closed: a window supplied outside overnight would be silently ignored downstream
+            [[ -z "$NOT_BEFORE" ]] || reject DISPATCH_WINDOW_INVALID not_before_forbidden_outside_overnight
+            [[ -z "$NOT_AFTER" ]]  || reject DISPATCH_WINDOW_INVALID not_after_forbidden_outside_overnight
+          fi
+
+          # --- durable repair lineage ----------------------------------------------
+          if [[ -n "$REPAIR_TRANSACTION_ID" ]]; then
+            [[ "$REPAIR_TRANSACTION_ID" =~ ^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$ ]] \
+              || reject DISPATCH_INPUT_INVALID repair_transaction_id_shape
+          else
+            # a continued lineage must carry its transaction; a first-pass request must not claim consumed attempts
+            (( REPAIR_ATTEMPT == 0 )) \
+              || reject DISPATCH_LINEAGE_INVALID repair_attempt_without_transaction_id
+          fi
+
+          {
+            echo "qualifier_timeout_minutes=$QUALIFIER_TIMEOUT_MINUTES"
+            echo "job_timeout_minutes=$JOB_TIMEOUT_MINUTES"
+            echo "repair_attempt=$REPAIR_ATTEMPT"
+            echo "max_repair_attempts=$MAX_REPAIR_ATTEMPTS"
+          } >> "$GITHUB_OUTPUT"
+
+          echo "A01_DISPATCH_BRIDGE_PREFLIGHT=PASS"
 
   route:
     name: Dispatch through reusable A-01 Control Plane Gateway
@@ -117,7 +193,10 @@ jobs:
       resume_on_failure: ${{ inputs.resume_on_failure }}
       notification_target: ${{ inputs.notification_target }}
       execution_context: ${{ inputs.execution_context }}
-      qualifier_timeout_minutes: ${{ fromJSON(inputs.qualifier_timeout_minutes) }}
-      job_timeout_minutes: ${{ fromJSON(inputs.job_timeout_minutes) }}
-      repair_attempt: ${{ fromJSON(inputs.repair_attempt) }}
-      max_repair_attempts: ${{ fromJSON(inputs.max_repair_attempts) }}
+      qualifier_timeout_minutes: ${{ fromJSON(needs.preflight.outputs.qualifier_timeout_minutes) }}
+      job_timeout_minutes: ${{ fromJSON(needs.preflight.outputs.job_timeout_minutes) }}
+      not_before: ${{ inputs.not_before }}
+      not_after: ${{ inputs.not_after }}
+      repair_attempt: ${{ fromJSON(needs.preflight.outputs.repair_attempt) }}
+      max_repair_attempts: ${{ fromJSON(needs.preflight.outputs.max_repair_attempts) }}
+      repair_transaction_id: ${{ inputs.repair_transaction_id }}
