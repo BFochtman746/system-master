@@ -14,20 +14,20 @@ Entries: 50 capability · 16 platform · 66 total
 
 | State | Rows |
 | --- | ---: |
-| `COMPLETE_WITH_EVIDENCE` | 16 |
-| `ACTIVE_GAP` | 32 |
+| `COMPLETE_WITH_EVIDENCE` | 17 |
+| `ACTIVE_GAP` | 31 |
 | `DURABLY_BLOCKED_EXTERNAL_HUMAN_PRIVATE_NATIVE` | 2 |
 | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | 16 |
 | **Total** | **66** |
 
-**Foundation 1.0 completion with evidence: 24%.**
+**Foundation 1.0 completion with evidence: 26%.**
 
 ## Matrix
 
 | ID | Capability / requirement | Owner | State | Blocker / evidence | Unpopulated required |
 | --- | --- | --- | --- | --- | ---: |
 | `C00` | AUDIOBOOK | SYSTEM_MASTER/MEDIA | COMPLETE WITH EVIDENCE | Foundation contract complete: governance/contracts/AUDIOBOOK-FOUNDATION-CONTRACT-001.md | 0/8 |
-| `C01` | AUTOMATION | SYSTEM_MASTER/PROGRAMMING | ACTIVE GAP | Contract exists but 8/8 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target | 8/8 |
+| `C01` | AUTOMATION | SYSTEM_MASTER/PROGRAMMING | COMPLETE WITH EVIDENCE | Foundation contract complete: governance/contracts/AUTOMATION-FOUNDATION-CONTRACT-001.md | 0/8 |
 | `C02` | BROWSER | SYSTEM_MASTER/CONNECTED_ACTIONS | ACTIVE GAP | Contract exists but 8/8 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target | 8/8 |
 | `C03` | CALENDAR | SYSTEM_MASTER/CONNECTED_ACTIONS | ACTIVE GAP | Contract exists but 8/8 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target | 8/8 |
 | `C04` | CHAT | SYSTEM_MASTER/CORE | ACTIVE GAP | Contract exists but 8/8 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target | 8/8 |
@@ -95,11 +95,10 @@ Entries: 50 capability · 16 platform · 66 total
 
 ## Unresolved gap successor register
 
-32 ACTIVE_GAP entries remain.
+31 ACTIVE_GAP entries remain.
 
 | Gap | Capability | Owner | Unpopulated required |
 | --- | --- | --- | ---: |
-| `FCC-001-GAP-C01` | AUTOMATION | SYSTEM_MASTER/PROGRAMMING | 8/8 |
 | `FCC-001-GAP-C02` | BROWSER | SYSTEM_MASTER/CONNECTED_ACTIONS | 8/8 |
 | `FCC-001-GAP-C03` | CALENDAR | SYSTEM_MASTER/CONNECTED_ACTIONS | 8/8 |
 | `FCC-001-GAP-C04` | CHAT | SYSTEM_MASTER/CORE | 8/8 |
@@ -134,4 +133,4 @@ Entries: 50 capability · 16 platform · 66 total
 
 ## Exact next ACTIVE_GAP
 
-`C01` AUTOMATION — Contract exists but 8/8 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target
+`C02` BROWSER — Contract exists but 8/8 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target
