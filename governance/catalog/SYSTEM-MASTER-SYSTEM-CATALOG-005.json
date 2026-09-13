@@ -1,0 +1,40 @@
+{
+  "catalog_id": "SYSTEM-MASTER-SYSTEM-CATALOG-005",
+  "effective_date": "2026-09-13",
+  "supersedes_current_selection": "governance/catalog/SYSTEM-MASTER-SYSTEM-CATALOG-004.json",
+  "catalog_class": "DISCOVERY_AND_REUSE_INDEX__NOT_ARCHITECTURE_AUTHORITY",
+  "authority_rule": "This catalog cannot create, promote, retire or reparent architecture. CURRENT-AUTHORITY plus its selected topology/ADR controls architecture.",
+  "active_peer_systems": [
+    {"system_id":"CORE","owner_path":"SYSTEM_MASTER/CORE","lifecycle":"ACTIVE_INCOMPLETE","control_ref":"system-master/control-v2","source":"governance/SYSTEM-TOPOLOGY-007.json"},
+    {"system_id":"LEARNING","owner_path":"SYSTEM_MASTER/LEARNING","lifecycle":"ACTIVE_INCOMPLETE","control_ref":"learning/control-v1","source":"governance/SYSTEM-TOPOLOGY-007.json"},
+    {"system_id":"BOOK","owner_path":"SYSTEM_MASTER/BOOK","lifecycle":"ACTIVE_INCOMPLETE","control_ref":"book-system/control-v1","source":"governance/SYSTEM-TOPOLOGY-007.json","historical_integration_inputs":["PROSE"]},
+    {"system_id":"DOCUMENTS","owner_path":"SYSTEM_MASTER/DOCUMENTS","lifecycle":"ACTIVE_INCOMPLETE","control_ref":"documents/control-v1","source":"governance/SYSTEM-TOPOLOGY-007.json"},
+    {"system_id":"SPREADSHEET_DATA","owner_path":"SYSTEM_MASTER/SPREADSHEET_DATA","lifecycle":"ACTIVE_INCOMPLETE","control_ref":"spreadsheet-data/control-v1","source":"governance/SYSTEM-TOPOLOGY-007.json"},
+    {"system_id":"MEDIA","owner_path":"SYSTEM_MASTER/MEDIA","lifecycle":"ACTIVE_INCOMPLETE","control_ref":"media/control-v1","source":"governance/SYSTEM-TOPOLOGY-007.json"},
+    {"system_id":"CONNECTED_ACTIONS","owner_path":"SYSTEM_MASTER/CONNECTED_ACTIONS","lifecycle":"ACTIVE_INCOMPLETE","control_ref":"connected-actions/control-v1","source":"governance/SYSTEM-TOPOLOGY-007.json"},
+    {"system_id":"RESEARCH_KNOWLEDGE","owner_path":"SYSTEM_MASTER/RESEARCH_KNOWLEDGE","lifecycle":"ACTIVE_INCOMPLETE","control_ref":"research-knowledge/control-v1","source":"governance/SYSTEM-TOPOLOGY-007.json"},
+    {"system_id":"PROGRAMMING","owner_path":"SYSTEM_MASTER/PROGRAMMING","lifecycle":"ACTIVE_INCOMPLETE__ADMITTED_FROM_PRESERVED_WORK_PROGRAM_2026_09_13","control_ref":"programming/control-v1","source":"governance/SYSTEM-TOPOLOGY-007.json","control_record":"governance/control-records/PROGRAMMING-CONTROL-RECORD-001.json","continuity_lock":"governance/programs/PROGRAMMING-WORK-PROGRAM-LOCK-001.json","owns_modules":["AUTOMATION","CODE","WEBSITE_BUILDING"]}
+  ],
+  "retired_systems": [
+    {"system_id":"PROSE","historical_owner_path":"SYSTEM_MASTER/BOOK/PROSE","lifecycle":"COMPLETE_RETIRED_TERMINAL","retirement_record":"governance/retirements/PROSE-SYSTEM-RETIREMENT-001.json","active_execution_lane":null,"active_repair_lane":null,"active_qualification_lane":null,"active_research_task":null,"active_telemetry_lane":null,"successor_task":null,"integration_owner_if_needed":"SYSTEM_MASTER/BOOK"}
+  ],
+  "historical_non_peer_programs": [
+    {"program_id":"PROGRAMMING","historical_lifecycle":"ACTIVE_INCOMPLETE_WORK_PROGRAM__CANDIDATE_SYSTEM_BOUNDARY","current_effect":"SUPERSEDED_BY_ADR_0006__CONTINUITY_PRESERVED_IN_PROGRAMMING_PEER","historical_lock":"governance/programs/PROGRAMMING-WORK-PROGRAM-LOCK-001.json"}
+  ],
+  "support_programs": [
+    {"program_id":"PROGRAMMING_KNOWLEDGE_RECOVERY","control":"governance/knowledge-recovery/SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001.md","owner_path":"SYSTEM_MASTER/CORE","lifecycle":"ACTIVE_SUPPORT__HIGHEST_DISCRETIONARY_WHILE_SELECTED","supports_peer":"PROGRAMMING"}
+  ],
+  "future_system_candidates": [
+    {"candidate_id":"AI_INCOME","display_name":"AI Income System","lifecycle":"OWNER_AND_ARCHITECTURE_DECISION_REQUIRED","architecture_authority":false},
+    {"candidate_id":"LIVING_PORTFOLIO","display_name":"Living Portfolio System","lifecycle":"OWNER_AND_ARCHITECTURE_DECISION_REQUIRED","architecture_authority":false}
+  ],
+  "special_dispositions": [
+    {"module_key":"PROSE","current_disposition":"COMPLETE_RETIRED_TERMINAL__NO_ACTIVE_OWNER"},
+    {"module_key":"CODE","current_disposition":"PROGRAMMING_PEER_CAPABILITY_C05"},
+    {"module_key":"AUTOMATION","current_disposition":"PROGRAMMING_PEER_CAPABILITY_C01"},
+    {"module_key":"WEBSITE_BUILDING","current_disposition":"PROGRAMMING_CAPABILITY_C40__NOT_SEPARATE_PEER_SYSTEM"},
+    {"module_key":"BROWSER","current_disposition":"CONNECTED_ACTIONS_CAPABILITY__CONSUMABLE_BY_PROGRAMMING_WITHOUT_AUTHORITY_TRANSFER"}
+  ],
+  "chat_rule": "Resolve CURRENT-AUTHORITY, selected topology, applicable owner control and exact source packet before broad rediscovery. Programming resumes preserved engineering continuity under its admitted peer owner rather than restarting.",
+  "ratification_record": "governance/ADR-0006-PROGRAMMING-PEER-ADMISSION-WEBSITE-BUILDING.md"
+}

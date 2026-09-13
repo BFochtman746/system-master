@@ -2,7 +2,7 @@
   "registry_id": "SECOND-SHIFT-REGISTRY-001",
   "effective_date": "2026-09-13",
   "product_root": "SYSTEM_MASTER",
-  "topology": "governance/SYSTEM-TOPOLOGY-006.json",
+  "topology": "governance/SYSTEM-TOPOLOGY-007.json",
   "schema": "governance/second-shift/SECOND-SHIFT-DELEGATION-SCHEMA-002.json",
   "execution_control": "governance/second-shift/SECOND-SHIFT-EXECUTION-CONTROL-001.md",
   "program_job_lock": "governance/SYSTEM-PROGRAM-JOB-LOCK-001.json",
@@ -20,7 +20,8 @@
     "SPREADSHEET_DATA": "governance/second-shift/SPREADSHEET_DATA-DELEGATIONS.json",
     "MEDIA": "governance/second-shift/MEDIA-DELEGATIONS.json",
     "CONNECTED_ACTIONS": "governance/second-shift/CONNECTED_ACTIONS-DELEGATIONS.json",
-    "RESEARCH_KNOWLEDGE": "governance/second-shift/RESEARCH_KNOWLEDGE-DELEGATIONS.json"
+    "RESEARCH_KNOWLEDGE": "governance/second-shift/RESEARCH_KNOWLEDGE-DELEGATIONS.json",
+    "PROGRAMMING": "governance/second-shift/PROGRAMMING-DELEGATIONS.json"
   },
   "coverage_routes": {
     "SYSTEM_MASTER/SHARED_INFRASTRUCTURE": "CORE",
@@ -42,35 +43,34 @@
       "rule": "Old Prose routes are stale and non-dispatchable. Any genuinely open integration result is an ordinary BOOK obligation."
     }
   },
-  "non_peer_work_programs": {
+  "historical_non_peer_transitions": {
     "PROGRAMMING": {
-      "program_lock": "governance/programs/PROGRAMMING-WORK-PROGRAM-LOCK-001.json",
-      "peer_second_shift_lane": false,
-      "product_work_dispatch": "NOT_AUTHORIZED_UNTIL_EXPLICIT_TOPOLOGY_ADMISSION",
-      "support_subprogram_route": "PROGRAMMING_KNOWLEDGE_RECOVERY -> CORE",
-      "rule": "Programming engineering/product work is not dispatchable as peer work before explicit admission."
+      "prior_standing": "ACTIVE_NON_PEER_WORK_PROGRAM",
+      "current_standing": "ACTIVE_EXECUTION_READY_PEER_SYSTEM",
+      "admission_authority": "governance/ADR-0006-PROGRAMMING-PEER-ADMISSION-WEBSITE-BUILDING.md",
+      "continuity_rule": "Preserve prior Programming evidence; do not restart the program because lane authority changed."
     }
   },
-  "owner_discovery_rule": "Controllers enumerate owner_files as active lanes and compare its keys against CURRENT-AUTHORITY topology peer_system_ids on every run. Sets must match exactly. Missing coverage never creates a new system and retired systems are never provisioned.",
+  "owner_discovery_rule": "Controllers enumerate owner_files as active lanes and compare its keys against CURRENT-AUTHORITY selected topology execution_readiness.execution_ready_peer_system_ids on every run. Sets must match exactly. Missing coverage never creates a new system and retired systems are never provisioned.",
   "auto_provisioning_invariant": {
-    "topology_peer_source": "governance/SYSTEM-TOPOLOGY-006.json::peer_system_ids",
+    "topology_peer_source": "governance/SYSTEM-TOPOLOGY-007.json::execution_readiness.execution_ready_peer_system_ids",
     "registry_lane_source": "owner_files",
-    "expected_active_peers": ["CORE", "LEARNING", "BOOK", "DOCUMENTS", "SPREADSHEET_DATA", "MEDIA", "CONNECTED_ACTIONS", "RESEARCH_KNOWLEDGE"],
+    "expected_active_peers": ["CORE", "LEARNING", "BOOK", "DOCUMENTS", "SPREADSHEET_DATA", "MEDIA", "CONNECTED_ACTIONS", "RESEARCH_KNOWLEDGE", "PROGRAMMING"],
     "current_coverage_complete": true,
     "machine_resolvable_missing_peer_must_be_provisioned": true,
     "implicit_system_creation_forbidden": true,
     "retired_system_provisioning_forbidden": true
   },
   "job_lock_rule": "Before dispatch every delegation must conform to current topology, program job lock and completion status. Cross-lane work, retired-system resurrection, unauthorized user side effects or false completion must not dispatch.",
-  "system_lane_rule": "The active peer worker lanes are CORE, LEARNING, BOOK, DOCUMENTS, SPREADSHEET_DATA, MEDIA, CONNECTED_ACTIONS and RESEARCH_KNOWLEDGE. PROSE is terminally retired. Programming remains a named non-peer work program until explicit admission.",
+  "system_lane_rule": "The active peer worker lanes are CORE, LEARNING, BOOK, DOCUMENTS, SPREADSHEET_DATA, MEDIA, CONNECTED_ACTIONS, RESEARCH_KNOWLEDGE and PROGRAMMING. PROSE is terminally retired. WEBSITE_BUILDING is a Programming capability, not a separate lane.",
   "portfolio_rule": "The controller reads CURRENT-AUTHORITY, selected topology, job lock, completion status, current obligation registry, repair state, every owner file and live owner control before dispatch.",
   "night_start_rule": "Freshly re-read CURRENT-AUTHORITY, selected topology, job lock, completion status, obligation registry, repair state and owner control bindings before execution; never trust stale snapshots.",
   "dispatch_rule": "Dispatch only job-conforming READY/CANDIDATE work in active peer lanes. User-authorized external actions remain subject to explicit action authority.",
-  "claim_rule": "Only one mutation-capable claim/lease may be live per active owner lane. PROSE has no claim domain. Programming has no peer claim domain before topology admission.",
+  "claim_rule": "Only one mutation-capable claim/lease may be live per active owner lane. PROSE has no claim domain.",
   "retry_rule": "Transient dependencies receive finite classified retries; after exhaustion select independent safe work within the same owner job.",
   "stale_rule": "No job survives a live-head, current-obligation, job-lock, topology, completion-status or retired-system mismatch.",
   "no_work_rule": "An active peer lane may be idle only after durable all-eight-rungs exhaustion for its own locked job. Retired systems require no lane or exhaustion proof.",
   "successor_rule": "After completion/material block, re-read live authority and select the next dependency-valid successor inside the same active lane job. Never bind a Prose successor.",
-  "utilization_rule": "Active peer ledgers are exactly the eight owner_files lanes. Book-owned preserved-Prose integration is BOOK telemetry only. Programming product work has no peer utilization ledger before admission.",
+  "utilization_rule": "Active peer ledgers are exactly the nine owner_files lanes. Book-owned preserved-Prose integration is BOOK telemetry only. Programming product work is PROGRAMMING telemetry; Programming Knowledge Recovery remains CORE telemetry.",
   "work_ahead_ladder": ["current repair/control health", "completion and evidence census", "authoritative research and provenance", "architecture/contracts/state/interface/evidence specification", "tests/benchmarks/property/concurrency/failure injection", "bounded implementation with objective verification", "exact-SHA qualification and A-01 preparation", "next successor build packet"]
 }

@@ -2,7 +2,7 @@
   "registry_id": "REPAIR-INBOX-REGISTRY-001",
   "effective_date": "2026-09-13",
   "product_root": "SYSTEM_MASTER",
-  "topology": "governance/SYSTEM-TOPOLOGY-006.json",
+  "topology": "governance/SYSTEM-TOPOLOGY-007.json",
   "program_job_lock": "governance/SYSTEM-PROGRAM-JOB-LOCK-001.json",
   "system_completion_status": "governance/SYSTEM-COMPLETION-STATUS-002.json",
   "schema": "governance/repair/REPAIR-INBOX-SCHEMA-001.json",
@@ -15,9 +15,10 @@
     "SPREADSHEET_DATA": "governance/repair/SPREADSHEET_DATA-REPAIR-INBOX.json",
     "MEDIA": "governance/repair/MEDIA-REPAIR-INBOX.json",
     "CONNECTED_ACTIONS": "governance/repair/CONNECTED_ACTIONS-REPAIR-INBOX.json",
-    "RESEARCH_KNOWLEDGE": "governance/repair/RESEARCH_KNOWLEDGE-REPAIR-INBOX.json"
+    "RESEARCH_KNOWLEDGE": "governance/repair/RESEARCH_KNOWLEDGE-REPAIR-INBOX.json",
+    "PROGRAMMING": "governance/repair/PROGRAMMING-REPAIR-INBOX.json"
   },
-  "owner_set_source": "governance/SYSTEM-TOPOLOGY-006.json::execution_readiness.execution_ready_peer_system_ids",
+  "owner_set_source": "governance/SYSTEM-TOPOLOGY-007.json::execution_readiness.execution_ready_peer_system_ids",
   "child_routes": {},
   "retired_system_routes": {
     "PROSE": {
@@ -28,17 +29,17 @@
       "inherited_repair_route_allowed": false,
       "historical_inbox": "governance/repair/PROSE-REPAIR-INBOX.json",
       "historical_inbox_effect": "IMMUTABLE_EVIDENCE_ONLY",
-      "rule": "No new Prose repair transaction may be opened. If a current BOOK-owned integration subject that consumes preserved completed Prose capability fails, the defect belongs to BOOK and routes to BOOK as a Book integration failure. Historical Prose subject evidence does not create current Prose repair work."
+      "rule": "No new Prose repair transaction may be opened. Current Book-owned integration failures route to BOOK."
     }
   },
   "rules": [
     "Every active repair transaction has exactly one canonical active execution owner resolved through the topology selected by CURRENT-AUTHORITY.",
-    "Active repair owner systems must exactly match the topology execution-ready peer set: CORE, LEARNING, BOOK, DOCUMENTS, SPREADSHEET_DATA, MEDIA, CONNECTED_ACTIONS and RESEARCH_KNOWLEDGE.",
+    "Active repair owner systems must exactly match the topology execution-ready peer set: CORE, LEARNING, BOOK, DOCUMENTS, SPREADSHEET_DATA, MEDIA, CONNECTED_ACTIONS, RESEARCH_KNOWLEDGE and PROGRAMMING.",
+    "PROGRAMMING receives Programming-owned software-engineering, Automation, Code and Website Building C40 subject failures; Website Building never creates a separate repair owner.",
+    "CONNECTED_ACTIONS retains browser/action side-effect failures and CORE retains shared runtime/A-01/control-plane failures; Programming admission does not transfer those authorities.",
     "PROSE is complete and terminally retired with no standalone or inherited repair lane.",
-    "BOOK receives Book lifecycle/state/orchestration/integration failures, including failures in current Book-owned integration bytes that consume preserved completed Prose capability.",
     "DOCUMENTS owns only Documents product/document-artifact repairs and receives no Prose repair work.",
-    "SPREADSHEET_DATA, MEDIA, CONNECTED_ACTIONS and RESEARCH_KNOWLEDGE route product-subject failures to their own owner inboxes once execution-ready; repository repair routing never grants external side-effect, private, native, publication or production authority.",
-    "Historical standalone Prose repair evidence remains immutable and transfers no PASS, repair budget or qualification authority to any changed subject.",
+    "Historical exact-subject repair evidence transfers no PASS, repair budget or qualification authority to changed subjects.",
     "No repair transaction may create or transfer A-01 PASS, peer promotion, canonical-writer, human, author, private, native, external, publication or production authority.",
     "SUBJECT_FAILURE may create owner-valid product repair work; admission/window/dependency/human/author/private/native/external/control-plane outcomes route to their truthful boundary.",
     "An active owner chat or Second Shift worker checks its repair inbox after current-authority reconciliation and before unrelated build-ahead.",

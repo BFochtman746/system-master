@@ -15,8 +15,15 @@
 | **SYSTEM_MASTER/MEDIA** | Image, photo, video, voice, audiobook and general media product semantics over Core shared storage/runtime. | `media/control-v1` |
 | **SYSTEM_MASTER/CONNECTED_ACTIONS** | Browser, communications, calendar and plugin/action policy over Core shared connector runtime. | `connected-actions/control-v1` |
 | **SYSTEM_MASTER/RESEARCH_KNOWLEDGE** | Research, knowledge and geospatial retrieval/provenance semantics; consumes admitted browser capability from Connected Actions. | `research-knowledge/control-v1` |
+| **SYSTEM_MASTER/PROGRAMMING** | Software engineering: Automation, Code, project/build/test/repair/release/deploy/ops semantics and Website Building C40. | `programming/control-v1` |
 
-All eight peer systems are active and incomplete. Each remains semantically isolated and integrates upward into System Master through explicit interfaces. Shared implementation primitives remain Core-owned unless a current authority record says otherwise.
+All nine peer systems are active and incomplete. Each remains semantically isolated and integrates upward into System Master through explicit interfaces. Shared runtime/model/storage/A-01 primitives remain Core-owned unless a current authority record says otherwise.
+
+## Programming and Website Building
+
+PROGRAMMING is an admitted first-class peer system under Topology 007. Its prior work-program foundation, build/test/assurance, source-code and Genesis evidence is preserved as continuity input; peer admission does not restart completed Programming work.
+
+**WEBSITE_BUILDING** is capability **C40** owned by `SYSTEM_MASTER/PROGRAMMING`. It is not a tenth peer system. Programming owns website/web-application construction, code/build/test/deployment-preparation and maintenance engineering. Browser action policy and user/external side effects remain `CONNECTED_ACTIONS`; credentials, domains/DNS, hosting, publication and production deployment require explicit authority.
 
 ## Retired system
 
@@ -24,24 +31,19 @@ All eight peer systems are active and incomplete. Each remains semantically isol
 
 Any genuinely unfinished integration of preserved completed Prose capability is ordinary **BOOK-owned** work. **DOCUMENTS never receives Prose work.** Historical Prose branches, qualification IDs, exact-SHA receipts, private/blind/author evidence and implementation lineage remain immutable provenance; their PASS never transfers to changed current subjects.
 
-BOOK and DOCUMENTS remain peers. BOOK retains canonical manuscript/Story Bible/lifecycle/author state. DOCUMENTS supplies admitted generic document/artifact services and may not silently mutate Book canonical state.
+## Infrastructure and special identities — not additional systems
 
-## Active non-peer work program
+A-01, Assurance, Reconciliation, Continuity, Foundation, Platform, qualification lanes, runners, Night/Second Shift workers, branches, chats and evidence artifacts are infrastructure or working surfaces, not additional product systems. Website Building is a Programming capability, not an additional system. Programming Knowledge Recovery is Core-administered support, not a second Programming owner.
 
-**PROGRAMMING** remains an incomplete active work program with preserved engineering semantics and evidence continuity. It is not an admitted peer system and has no peer Second Shift lane until an explicit future authority transaction admits it. Knowledge Recovery may support custody/provenance but does not replace Programming engineering work.
-
-## Infrastructure, capabilities and historical identities — not additional systems
-
-A-01, Assurance, Reconciliation, Continuity, Foundation, Platform, qualification lanes, runners, Night/Second Shift workers, branches, chats and evidence artifacts are infrastructure or working surfaces, not additional product systems. `Book Evaluator`, `Literary Prose Engine`, `LITERARY-PROSE`, and `BOOK-EVAL-LEMONADE-001` are historical capability/workstream identities and do not create a current Prose owner.
-
-The historical module/vault inventory is discovery and reuse evidence, not topology. A future first-class system or parent relationship cannot be created implicitly by a branch, archive, module name, catalog entry, A-01 qualification, chat or scheduled task. It requires explicit user intent plus a superseding topology/authority transaction.
+A future first-class system or parent relationship cannot be created implicitly by a branch, archive, module name, catalog entry, A-01 qualification, chat or scheduled task. It requires explicit user intent plus a superseding topology/authority transaction.
 
 ## Current authority
 
 Single startup pointer: `governance/CURRENT-AUTHORITY.json`  
-Machine-readable topology: `governance/SYSTEM-TOPOLOGY-006.json`  
-Architecture decision: `governance/ADR-0005-PROSE-TERMINAL-RETIREMENT-BOOK-INTEGRATION.md`  
-Prose retirement: `governance/retirements/PROSE-SYSTEM-RETIREMENT-001.json`  
+Machine-readable topology: `governance/SYSTEM-TOPOLOGY-007.json`  
+Architecture decision: `governance/ADR-0006-PROGRAMMING-PEER-ADMISSION-WEBSITE-BUILDING.md`  
+Prose retirement authority: `governance/ADR-0005-PROSE-TERMINAL-RETIREMENT-BOOK-INTEGRATION.md`  
+Prose retirement record: `governance/retirements/PROSE-SYSTEM-RETIREMENT-001.json`  
 Cross-chat bootstrap: `SYSTEM-MASTER-WORKSTREAM-BOOTSTRAP.md`
 
 When records disagree, resolve authority through the startup pointer, selected topology/job/completion records and live owner control before execution.

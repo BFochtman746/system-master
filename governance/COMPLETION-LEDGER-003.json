@@ -1,20 +1,20 @@
 {
   "ledger_id": "COMPLETION-LEDGER-003",
   "effective_date": "2026-09-13",
-  "topology": "governance/SYSTEM-TOPOLOGY-006.json",
+  "topology": "governance/SYSTEM-TOPOLOGY-007.json",
   "program_job_lock": "governance/SYSTEM-PROGRAM-JOB-LOCK-001.json",
   "system_completion_status": "governance/SYSTEM-COMPLETION-STATUS-002.json",
   "supersedes_current_selection": "governance/COMPLETION-LEDGER-002.json",
   "historical_boundary_ledgers": ["governance/COMPLETION-LEDGER-001.json", "governance/COMPLETION-LEDGER-002.json"],
-  "standing": "CURRENT_SYSTEM_COMPLETION_INTERPRETATION__PROSE_COMPLETE_RETIRED__EIGHT_ACTIVE_PEERS_INCOMPLETE",
-  "purpose": "Provide current product-level completion interpretation while preserving prior packet, phase, exact-subject and subsystem evidence as immutable historical boundaries.",
+  "standing": "CURRENT_SYSTEM_COMPLETION_INTERPRETATION__PROSE_COMPLETE_RETIRED__NINE_ACTIVE_PEERS_INCOMPLETE",
+  "purpose": "Provide current product-level completion interpretation while preserving prior packet, phase, exact-subject, work-program and subsystem evidence as immutable historical boundaries.",
   "rules": [
     "Prior completion ledgers remain immutable historical/boundary evidence and may not dispatch current work when they conflict with CURRENT-AUTHORITY.",
     "A completed packet, phase, branch, hosted qualification, A-01 receipt, subsystem or integration slice does not by itself make its owning active system complete.",
     "SYSTEM-COMPLETION-STATUS-002 controls current whole-system completion standing.",
-    "SYSTEM_MASTER and all eight active peers remain incomplete until explicit product-level completion authority changes their standing.",
-    "PROSE is historically complete and terminally retired. There is no remaining Prose product work and no active Prose execution domain.",
-    "Any genuinely unfinished integration of preserved completed Prose capability is BOOK-owned integration and does not reopen Prose.",
+    "SYSTEM_MASTER and all nine active peers remain incomplete until explicit product-level completion authority changes their standing.",
+    "Programming peer admission preserves earlier Programming work-program evidence but does not convert historical PASS into current-subject PASS.",
+    "PROSE is historically complete and terminally retired with no active Prose execution domain.",
     "Historical completion evidence never transfers PASS across a changed SHA, topology, integration subject, ownership boundary or qualification class."
   ],
   "system_completion_entries": [
@@ -26,13 +26,14 @@
     {"system_id":"SPREADSHEET_DATA","owner_path":"SYSTEM_MASTER/SPREADSHEET_DATA","complete":false,"standing":"INCOMPLETE_ACTIVE_SYSTEM"},
     {"system_id":"MEDIA","owner_path":"SYSTEM_MASTER/MEDIA","complete":false,"standing":"INCOMPLETE_ACTIVE_SYSTEM"},
     {"system_id":"CONNECTED_ACTIONS","owner_path":"SYSTEM_MASTER/CONNECTED_ACTIONS","complete":false,"standing":"INCOMPLETE_ACTIVE_SYSTEM"},
-    {"system_id":"RESEARCH_KNOWLEDGE","owner_path":"SYSTEM_MASTER/RESEARCH_KNOWLEDGE","complete":false,"standing":"INCOMPLETE_ACTIVE_SYSTEM"}
+    {"system_id":"RESEARCH_KNOWLEDGE","owner_path":"SYSTEM_MASTER/RESEARCH_KNOWLEDGE","complete":false,"standing":"INCOMPLETE_ACTIVE_SYSTEM"},
+    {"system_id":"PROGRAMMING","owner_path":"SYSTEM_MASTER/PROGRAMMING","complete":false,"standing":"INCOMPLETE_ACTIVE_SYSTEM__ADMITTED_FROM_PRESERVED_WORK_PROGRAM"}
   ],
   "retired_system_entries": [
     {"system_id":"PROSE","historical_owner_path":"SYSTEM_MASTER/BOOK/PROSE","complete":true,"active":false,"standing":"COMPLETE_RETIRED_TERMINAL","remaining_product_work":false,"integration_owner_if_genuinely_open":"SYSTEM_MASTER/BOOK","active_execution_lane":null,"active_repair_lane":null,"active_qualification_lane":null,"active_research_task":null,"active_telemetry_lane":null,"successor_task":null}
   ],
   "support_programs": [
-    {"program_id":"PROGRAMMING_KNOWLEDGE_RECOVERY","owner_path":"SYSTEM_MASTER/CORE","classification":"SUPPORT_PROGRAM_NOT_SYSTEM_COMPLETION__HIGHEST_DISCRETIONARY_WHILE_SELECTED","complete":false,"job":"Recover and prove Programming source/custody/provenance without redefining topology or replacing Programming engineering work."}
+    {"program_id":"PROGRAMMING_KNOWLEDGE_RECOVERY","owner_path":"SYSTEM_MASTER/CORE","classification":"SUPPORT_PROGRAM_NOT_SYSTEM_COMPLETION__HIGHEST_DISCRETIONARY_WHILE_SELECTED","complete":false,"job":"Recover and prove Programming source/custody/provenance without replacing Programming engineering work."}
   ],
   "interpretation_rule": "For detailed prior completion evidence read historical_boundary_ledgers; for current whole-system and retirement claims use this ledger with system_completion_status and CURRENT-AUTHORITY."
 }

@@ -1,109 +1,92 @@
 'use strict';
-
 const fs = require('fs');
 const path = require('path');
 const root = path.resolve(__dirname, '..', '..');
+function fail(message){ console.error(`PROGRAMMING_WORK_PROGRAM_ENFORCEMENT_FAIL: ${message}`); process.exit(1); }
+function assert(ok,message){ if(!ok) fail(message); }
+function readJson(rel){ const p=path.join(root,rel); assert(fs.existsSync(p),`missing ${rel}`); try{return JSON.parse(fs.readFileSync(p,'utf8').replace(/^\uFEFF/,''));}catch(e){fail(`invalid JSON ${rel}: ${e.message}`);} }
+function readText(rel){ const p=path.join(root,rel); assert(fs.existsSync(p),`missing ${rel}`); return fs.readFileSync(p,'utf8'); }
 
-function fail(message) {
-  console.error(`PROGRAMMING_WORK_PROGRAM_ENFORCEMENT_FAIL: ${message}`);
-  process.exit(1);
-}
-function readJson(rel) {
-  if (!rel || typeof rel !== 'string') fail('required authority selector is missing');
-  const p = path.join(root, rel);
-  if (!fs.existsSync(p)) fail(`missing ${rel}`);
-  try { return JSON.parse(fs.readFileSync(p, 'utf8').replace(/^\uFEFF/, '')); }
-  catch (error) { fail(`invalid JSON ${rel}: ${error.message}`); }
-}
-function readText(rel) {
-  if (!rel || typeof rel !== 'string') fail('required authority selector is missing');
-  const p = path.join(root, rel);
-  if (!fs.existsSync(p)) fail(`missing ${rel}`);
-  return fs.readFileSync(p, 'utf8');
-}
-function assert(condition, message) { if (!condition) fail(message); }
-function topologyToken(topologyId) {
-  return String(topologyId || '').replace(/^SYSTEM-/, '').replace(/-/g, '_');
-}
+const authority=readJson('governance/CURRENT-AUTHORITY.json');
+for(const f of ['topology','program_job_lock','programming_work_program_lock','programming_system_packet','programming_control_record','system_completion_status','obligation_registry','second_shift_registry','capability_crosswalk','morning_bootstrap_schema','chat_start_command_contract']) assert(authority[f],`CURRENT-AUTHORITY must select ${f}`);
+const topology=readJson(authority.topology);
+const programLock=readJson(authority.programming_work_program_lock);
+const packet=readJson(authority.programming_system_packet);
+const control=readJson(authority.programming_control_record);
+const jobLock=readJson(authority.program_job_lock);
+const completion=readJson(authority.system_completion_status);
+const obligations=readJson(authority.obligation_registry);
+const secondShift=readJson(authority.second_shift_registry);
+const crosswalk=readJson(authority.capability_crosswalk);
+const bootstrap=readJson(authority.morning_bootstrap_schema);
+const start=readText(authority.chat_start_command_contract);
 
-const authority = readJson('governance/CURRENT-AUTHORITY.json');
-for (const field of [
-  'topology',
-  'program_job_lock',
-  'programming_work_program_lock',
-  'programming_system_packet',
-  'system_completion_status',
-  'obligation_registry',
-  'second_shift_registry',
-  'morning_bootstrap_schema',
-  'chat_start_command_contract'
-]) assert(authority[field], `CURRENT-AUTHORITY must select ${field}`);
+assert(topology.topology_id==='SYSTEM-TOPOLOGY-007','Programming admission must be bound to Topology 007');
+assert(programLock.program_id==='PROGRAMMING','Programming continuity-lock ID mismatch');
+assert(programLock.current_topology===authority.topology,'Programming continuity lock has stale topology binding');
+assert(programLock.system_packet===authority.programming_system_packet,'Programming system packet pointer mismatch');
+assert(programLock.control_record===authority.programming_control_record,'Programming control record pointer mismatch');
+assert(programLock.classification==='ACTIVE_PEER_SYSTEM__ADMITTED_FROM_PRESERVED_WORK_PROGRAM','Programming continuity lock must describe admitted peer');
+assert(programLock.execution_lane?.separate_peer_second_shift_lane===true,'Programming must have peer Second Shift lane after admission');
+assert(Array.isArray(programLock.preserve_and_reuse)&&programLock.preserve_and_reuse.length>0,'Programming preserved evidence lineage missing');
+assert(String(programLock.topology_effect||'').includes('TOPOLOGY_007'),'Programming topology effect must bind Topology 007');
 
-const topology = readJson(authority.topology);
-const programLock = readJson(authority.programming_work_program_lock);
-const packet = readJson(authority.programming_system_packet);
-const jobLock = readJson(authority.program_job_lock);
-const completion = readJson(authority.system_completion_status);
-const obligations = readJson(authority.obligation_registry);
-const secondShift = readJson(authority.second_shift_registry);
-const bootstrap = readJson(authority.morning_bootstrap_schema);
-const start = readText(authority.chat_start_command_contract);
+const system=(topology.canonical_internal_systems||[]).find(x=>x.system_id==='PROGRAMMING');
+assert(system,'Programming missing from canonical internal systems');
+assert((topology.peer_system_ids||[]).includes('PROGRAMMING'),'Programming missing from peer_system_ids');
+assert((topology.execution_readiness?.execution_ready_peer_system_ids||[]).includes('PROGRAMMING'),'Programming must be execution-ready after admission');
+assert(system.parent_id==='SYSTEM_MASTER'&&system.control_ref==='programming/control-v1','Programming topology owner/control mismatch');
+assert(system.control_record===authority.programming_control_record,'Programming topology control-record pointer mismatch');
+assert(control.system_id==='PROGRAMMING'&&control.owner_path==='SYSTEM_MASTER/PROGRAMMING','Programming control record identity mismatch');
+assert(control.control_ref===system.control_ref,'Programming control ref mismatch');
 
-assert(programLock.program_id === 'PROGRAMMING', 'Programming work-program ID mismatch');
-assert(programLock.current_topology === authority.topology, `Programming work-program topology binding is stale: lock=${programLock.current_topology} authority=${authority.topology}`);
-assert(programLock.system_packet === authority.programming_system_packet, 'Programming work-program system packet pointer mismatch');
-assert(programLock.classification === 'ACTIVE_WORK_PROGRAM__CANDIDATE_SYSTEM_BOUNDARY__NOT_YET_PEER_TOPOLOGY', 'Programming work-program classification mismatch');
-assert(String(programLock.topology_effect || '').startsWith('NONE__'), 'Programming lock must declare zero topology effect');
-assert(String(programLock.topology_effect || '').includes(topologyToken(topology.topology_id)), `Programming topology effect must bind ${topology.topology_id}`);
-assert(programLock.execution_lane?.separate_peer_second_shift_lane === false, 'Programming must not have a peer Second Shift lane before admission');
-assert(Array.isArray(programLock.preserve_and_reuse) && programLock.preserve_and_reuse.length > 0, 'Programming preservation lineage is missing');
+const job=jobLock.programs?.PROGRAMMING;
+assert(job?.owner_path==='SYSTEM_MASTER/PROGRAMMING','Programming job owner mismatch');
+assert(String(job.classification||'').includes('ACTIVE_PEER_SYSTEM'),'Programming job classification must be peer');
+assert(job.integrates_upward_to==='SYSTEM_MASTER','Programming must integrate upward into System Master');
+assert(job.program_lock===authority.programming_work_program_lock,'Programming job continuity-lock mismatch');
+assert(job.system_packet===authority.programming_system_packet,'Programming job packet mismatch');
 
-const activeTopologyIds = new Set((topology.canonical_internal_systems || []).map((entry) => entry.system_id));
-assert(!activeTopologyIds.has('PROGRAMMING'), 'Programming must not be silently promoted to canonical peer topology');
-assert(!(topology.peer_system_ids || []).includes('PROGRAMMING'), 'Programming must not be silently promoted to peer topology');
-assert(!(topology.child_system_ids || []).includes('PROGRAMMING'), 'Programming must not be silently created as a child system');
+assert(packet.system_id==='PROGRAMMING'&&packet.candidate_system_id==='PROGRAMMING','Programming packet identity mismatch');
+assert(packet.architecture_authority===true,'Programming packet must reflect explicit admission authority');
+assert(String(packet.lifecycle||'').includes('ACTIVE_INCOMPLETE_PEER_SYSTEM'),'Programming packet must reflect peer lifecycle');
+assert(packet.work_program_lock===authority.programming_work_program_lock,'Programming packet continuity-lock mismatch');
+const owned=new Map((packet.owned_capabilities||[]).map(x=>[x.capability_id,x.module_key]));
+assert(owned.get('C01')==='AUTOMATION'&&owned.get('C05')==='CODE'&&owned.get('C40')==='WEBSITE_BUILDING','Programming packet capability ownership incomplete');
 
-const programming = jobLock.programs?.PROGRAMMING;
-assert(programming, 'program job lock missing PROGRAMMING');
-assert(String(programming.classification || '').includes('ACTIVE_WORK_PROGRAM'), 'Programming job-lock classification must remain active work program');
-assert(String(programming.classification || '').includes('NOT_YET_PEER'), 'Programming job-lock classification must preserve non-peer boundary');
-assert(programming.program_lock === authority.programming_work_program_lock, 'Programming job-lock program pointer mismatch');
-assert(programming.system_packet === authority.programming_system_packet, 'Programming job-lock packet pointer mismatch');
-assert(/preserved/i.test(programming.job || ''), 'Programming job must preserve prior engineering evidence');
+const status=(completion.systems||[]).find(x=>x.system_id==='PROGRAMMING');
+assert(status&&status.complete===false&&status.owner_path==='SYSTEM_MASTER/PROGRAMMING','Programming must be active/incomplete in system completion truth');
+assert(!(completion.non_system_programs||[]).some(x=>x.program_id==='PROGRAMMING'),'Programming must not remain a non-system program after admission');
 
-assert(packet.candidate_system_id === 'PROGRAMMING', 'Programming packet candidate_system_id mismatch');
-assert(packet.architecture_authority === false, 'Programming packet may not self-grant architecture authority');
-assert(packet.work_program_lock === authority.programming_work_program_lock, 'Programming packet work-program pointer mismatch');
-assert(String(packet.lifecycle || '').includes('ACTIVE_WORK_PROGRAM'), 'Programming packet must preserve active work-program standing');
-assert(String(packet.lifecycle || '').includes('NOT_ACTIVE_PEER'), 'Programming packet must preserve non-peer standing');
+const current=(obligations.obligations||[]).find(x=>x.obligation_id==='PROGRAMMING-WORK-PROGRAM-CONTINUATION-001');
+assert(current&&['READY','ACTIVE'].includes(current.state),'Programming continuation obligation must remain executable');
+assert(current.owner_path==='SYSTEM_MASTER/PROGRAMMING','Programming continuation must be Programming-owned');
+assert(current.program_lock===authority.programming_work_program_lock,'Programming continuation continuity-lock mismatch');
+assert(/ACTIVE_PEER_LANE/.test(String(current.second_shift_state||'')),'Programming continuation must declare peer lane execution state');
 
-const programStatus = (completion.non_system_programs || []).find((entry) => entry.program_id === 'PROGRAMMING');
-assert(programStatus && programStatus.complete === false, 'Programming must be recorded as an incomplete non-system work program');
-assert(!(completion.systems || []).some((entry) => entry.system_id === 'PROGRAMMING'), 'Programming must not appear in active system completion records before admission');
-const retiredProse = (completion.retired_systems || []).find((entry) => entry.system_id === 'PROSE');
-assert(retiredProse && retiredProse.complete === true && retiredProse.active === false && retiredProse.remaining_product_work === false, 'retired Prose completion boundary must remain intact');
+const support=(obligations.obligations||[]).find(x=>x.obligation_id===authority.highest_discretionary_objective);
+assert(support?.parent_program_id==='PROGRAMMING','selected Programming support objective must remain subordinate to Programming');
+assert(support?.owner_path==='SYSTEM_MASTER/CORE','Programming Knowledge Recovery must remain Core-administered');
 
-const current = (obligations.obligations || []).find((entry) => entry.obligation_id === 'PROGRAMMING-WORK-PROGRAM-CONTINUATION-001');
-assert(current && current.state === 'READY', 'Programming continuation obligation must be READY');
-assert(current.program_id === 'PROGRAMMING', 'Programming continuation program_id mismatch');
-assert(current.program_lock === authority.programming_work_program_lock, 'Programming continuation lock mismatch');
-assert(current.second_shift_state === 'NO_PEER_LANE_BEFORE_TOPOLOGY_ADMISSION', 'Programming continuation must deny peer Second Shift execution before admission');
+const ownerFile=secondShift.owner_files?.PROGRAMMING;
+assert(ownerFile,'Programming Second Shift owner file missing');
+const owner=readJson(ownerFile);
+assert(owner.owner_system_id==='PROGRAMMING'&&owner.owner_path==='SYSTEM_MASTER/PROGRAMMING','Programming Second Shift identity mismatch');
+assert(owner.control_binding?.path===authority.programming_control_record,'Programming Second Shift control binding mismatch');
+assert(owner.last_known_control_head===obligations.owner_head_snapshot?.PROGRAMMING,'Programming Second Shift head must match obligation snapshot');
 
-assert(obligations.highest_discretionary_objective === authority.highest_discretionary_objective, 'obligation registry highest-discretionary selector mismatch');
-const support = (obligations.obligations || []).find((entry) => entry.obligation_id === authority.highest_discretionary_objective);
-assert(support, `selected highest discretionary objective is missing: ${authority.highest_discretionary_objective}`);
-assert(support.parent_program_id === 'PROGRAMMING', 'selected Programming support objective must remain subordinate to Programming');
-assert(support.owner_path === 'SYSTEM_MASTER/CORE', 'Programming knowledge/source recovery support must remain Core-administered');
+const c40=(crosswalk.capability_entries||[]).find(x=>x.capability_id==='C40');
+assert(c40?.module_key==='WEBSITE_BUILDING'&&c40.owner_path==='SYSTEM_MASTER/PROGRAMMING','C40 must be Website Building owned by Programming');
+assert(String(c40.disposition||'').includes('NOT_PEER_SYSTEM'),'Website Building must not become a tenth peer system');
+assert(topology.explicit_non_systems?.WEBSITE_BUILDING==='PROGRAMMING_CAPABILITY_NOT_PEER_SYSTEM','Topology must preserve Website Building non-system classification');
 
-assert(!(secondShift.owner_files || {}).PROGRAMMING, 'Programming must not have a peer Second Shift owner file before admission');
-assert((bootstrap.allowed_chat_roles || []).includes('PROGRAMMING_WORK_PROGRAM'), 'Morning bootstrap missing Programming work-program role');
-assert(bootstrap.non_peer_work_program_roles?.PROGRAMMING_WORK_PROGRAM === authority.programming_work_program_lock, 'Programming bootstrap role must bind authority-selected work-program lock');
-assert(start.includes("Start today's Programming chat."), 'Programming start command missing');
-assert(start.includes('PROGRAMMING_WORK_PROGRAM'), 'Programming start role missing');
+assert((bootstrap.allowed_chat_roles||[]).includes('PROGRAMMING'),'Morning bootstrap missing PROGRAMMING peer role');
+assert(bootstrap.historical_role_aliases?.PROGRAMMING_WORK_PROGRAM==='PROGRAMMING','historical Programming chat role alias missing');
+assert(start.includes("Start today's Programming chat."),'Programming start command missing');
+assert(start.includes('-> `PROGRAMMING`'),'Programming start command must resolve to PROGRAMMING peer role');
 
 console.log('PROGRAMMING_WORK_PROGRAM_ENFORCEMENT_PASS');
 console.log(`topology=${topology.topology_id}`);
-console.log('programming=ACTIVE_WORK_PROGRAM_NOT_PEER');
-console.log('programming_continuation=READY');
+console.log('programming=ACTIVE_EXECUTION_READY_PEER_CONTINUITY_PRESERVED');
+console.log('website_building=C40_PROGRAMMING_CAPABILITY_NOT_PEER');
 console.log(`support_objective=${authority.highest_discretionary_objective}`);
-console.log('peer_topology_effect=NONE');

@@ -2,112 +2,39 @@
   "job_lock_id": "SYSTEM-PROGRAM-JOB-LOCK-001",
   "effective_date": "2026-09-13",
   "authority": "USER_DIRECTED_CURRENT_PROGRAM_JOB_LOCK",
-  "topology": "governance/SYSTEM-TOPOLOGY-006.json",
-  "architecture_decision": "governance/ADR-0005-PROSE-TERMINAL-RETIREMENT-BOOK-INTEGRATION.md",
-  "program_work_locks": {
-    "PROGRAMMING": "governance/programs/PROGRAMMING-WORK-PROGRAM-LOCK-001.json"
-  },
-  "purpose": "Prevent lane drift, duplicate ownership, completion confusion, retired-system resurrection and loss of program continuity while eight active peer systems and named work programs are finished and integrated into System Master.",
+  "topology": "governance/SYSTEM-TOPOLOGY-007.json",
+  "architecture_decision": "governance/ADR-0006-PROGRAMMING-PEER-ADMISSION-WEBSITE-BUILDING.md",
+  "program_work_locks": {"PROGRAMMING":"governance/programs/PROGRAMMING-WORK-PROGRAM-LOCK-001.json"},
+  "purpose": "Prevent lane drift, duplicate ownership, completion confusion and retired-system resurrection while nine active peers are finished and integrated into System Master.",
   "global_rules": [
-    "Each active peer system owns and executes only its assigned product job plus explicit admitted interfaces to System Master.",
-    "Active peer systems are exactly CORE, LEARNING, BOOK, DOCUMENTS, SPREADSHEET_DATA, MEDIA, CONNECTED_ACTIONS and RESEARCH_KNOWLEDGE unless explicit future user architecture authority changes topology.",
+    "Active peer systems are exactly CORE, LEARNING, BOOK, DOCUMENTS, SPREADSHEET_DATA, MEDIA, CONNECTED_ACTIONS, RESEARCH_KNOWLEDGE and PROGRAMMING unless explicit future architecture authority changes topology.",
+    "Each active peer owns only its assigned product job plus admitted System Master interfaces.",
+    "PROGRAMMING is an admitted peer; its preserved work-program lock is continuity authority, not a separate non-peer execution domain.",
+    "WEBSITE_BUILDING is Programming-owned C40 and is not a separate peer system.",
     "PROSE is complete and terminally retired with no active execution, repair, qualification, research, telemetry, successor or mutation-claim domain.",
-    "Any genuinely open integration of preserved completed Prose capability is BOOK-owned work. DOCUMENTS receives no Prose work.",
-    "Named non-peer work programs keep their semantic scope and evidence continuity but do not acquire peer topology or Second Shift authority from this job lock.",
-    "Peer systems integrate upward into SYSTEM_MASTER through explicit interfaces and may not take another peer's product job, semantic authority, completion state, repair lane or canonical writes.",
-    "A packet, phase, test, branch or subsystem closure never means the owning system or work program is complete unless product-level completion authority says so."
+    "Cross-system product integration uses explicit interfaces and never transfers semantic ownership.",
+    "A packet, phase, test, branch or subsystem closure never means the owning system is complete unless product-level completion authority says so."
   ],
   "programs": {
-    "SYSTEM_MASTER": {
-      "owner_path": "SYSTEM_MASTER",
-      "job": "Integrate all eight active peers into one coherent product while maintaining product architecture, sequencing and cross-system acceptance without taking peer semantic ownership.",
-      "must_integrate": ["SYSTEM_MASTER/CORE", "SYSTEM_MASTER/LEARNING", "SYSTEM_MASTER/BOOK", "SYSTEM_MASTER/DOCUMENTS", "SYSTEM_MASTER/SPREADSHEET_DATA", "SYSTEM_MASTER/MEDIA", "SYSTEM_MASTER/CONNECTED_ACTIONS", "SYSTEM_MASTER/RESEARCH_KNOWLEDGE"],
-      "forbidden": ["declare active peers complete without product-level authority", "take peer semantic ownership", "create duplicate peer systems", "resurrect PROSE"]
-    },
-    "CORE": {
-      "owner_path": "SYSTEM_MASTER/CORE",
-      "job": "Finish shared Foundation and Spine plus shared runtime/data/platform/continuity/assurance/A-01 infrastructure and Master-facing integration primitives.",
-      "integrates_upward_to": "SYSTEM_MASTER",
-      "forbidden": ["take peer product semantics", "restart retired Prose work", "absorb Programming-specific engineering semantics"]
-    },
-    "LEARNING": {
-      "owner_path": "SYSTEM_MASTER/LEARNING",
-      "job": "Finish Learning product behavior, curriculum/compiler, mastery/assessment/adaptation/evidence and integrate upward through explicit interfaces.",
-      "integrates_upward_to": "SYSTEM_MASTER",
-      "forbidden": ["cross into Book, Documents, Spreadsheet/Data, Media, Connected Actions, Research/Knowledge or Programming semantic ownership", "create active Prose work"]
-    },
-    "BOOK": {
-      "owner_path": "SYSTEM_MASTER/BOOK",
-      "job": "Finish Book, including genuinely unfinished integration of preserved completed Prose capability through Book-owned interfaces while preserving canonical manuscript, Story Bible, author, lifecycle, admission and publication authority.",
-      "integrates_upward_to": "SYSTEM_MASTER",
-      "authorized_historical_input": "retired PROSE evidence/capability artifacts",
-      "forbidden": ["create a Prose execution owner or successor", "grant Documents canonical Book semantics", "cross into other peer or Programming product ownership"]
-    },
-    "DOCUMENTS": {
-      "owner_path": "SYSTEM_MASTER/DOCUMENTS",
-      "job": "Finish DOCX/PDF/PPTX/OCR/file/document artifact structure, conversion, preservation, rendering/export and generic document services.",
-      "integrates_upward_to": "SYSTEM_MASTER",
-      "forbidden": ["absorb, schedule, repair, qualify, research or telemeter Prose", "own Book canonical semantics", "take other peer or Programming semantic ownership"]
-    },
-    "SPREADSHEET_DATA": {
-      "owner_path": "SYSTEM_MASTER/SPREADSHEET_DATA",
-      "job": "Finish spreadsheet, math, data-analysis, BI and ledger product semantics over Core shared execution/artifact/data primitives.",
-      "integrates_upward_to": "SYSTEM_MASTER",
-      "forbidden": ["take Core shared-runtime ownership", "take Documents artifact semantics", "take Research/Knowledge retrieval semantics", "take Programming engineering semantics"]
-    },
-    "MEDIA": {
-      "owner_path": "SYSTEM_MASTER/MEDIA",
-      "job": "Finish image, photo, video, voice, audiobook and general media product semantics over Core shared storage/runtime primitives.",
-      "integrates_upward_to": "SYSTEM_MASTER",
-      "forbidden": ["take Core shared-runtime ownership", "take Documents generic document semantics", "take Book canonical manuscript semantics", "take Programming engineering semantics"]
-    },
-    "CONNECTED_ACTIONS": {
-      "owner_path": "SYSTEM_MASTER/CONNECTED_ACTIONS",
-      "job": "Finish browser, communications, calendar and plugin/action policy over Core shared connector-action runtime.",
-      "integrates_upward_to": "SYSTEM_MASTER",
-      "forbidden": ["perform unauthorized user side effects", "take Core connector-runtime ownership", "take Research/Knowledge retrieval semantics", "take Programming engineering semantics"]
-    },
-    "RESEARCH_KNOWLEDGE": {
-      "owner_path": "SYSTEM_MASTER/RESEARCH_KNOWLEDGE",
-      "job": "Finish research, knowledge and geospatial retrieval/provenance semantics while consuming admitted browser capability from Connected Actions and shared evidence/data runtime from Core.",
-      "integrates_upward_to": "SYSTEM_MASTER",
-      "forbidden": ["own Connected Actions side-effect policy", "take Core shared-runtime ownership", "take Programming engineering semantics", "fabricate source/provenance authority"]
-    },
-    "PROGRAMMING": {
-      "classification": "ACTIVE_WORK_PROGRAM__NOT_YET_PEER_TOPOLOGY",
-      "program_lock": "governance/programs/PROGRAMMING-WORK-PROGRAM-LOCK-001.json",
-      "system_packet": "governance/catalog/system-packets/PROGRAMMING.json",
-      "job": "Continue the existing Programming software-engineering program from preserved evidence; complete only material current deltas and prepare explicit System Master admission without silently promoting Programming to a peer.",
-      "integrates_toward": "SYSTEM_MASTER_EXPLICIT_ADMISSION_BOUNDARY",
-      "forbidden": ["restart completed Programming work from scratch", "silently promote Programming to peer topology", "create a Programming peer Second Shift lane before admission", "take active-peer semantics"]
-    },
-    "PROGRAMMING_KNOWLEDGE_RECOVERY": {
-      "owner_path": "SYSTEM_MASTER/CORE",
-      "classification": "SUPPORT_SUBPROGRAM_FOR_PROGRAMMING_AND_SYSTEM_MASTER__NOT_PROGRAMMING_PRODUCT_OWNER",
-      "parent_work_program": "PROGRAMMING",
-      "job": "Recover exact Programming assets/custody/provenance and remaining authorized catalog/archive evidence while selected.",
-      "priority": "HIGHEST_DISCRETIONARY_SYSTEM_MASTER_PRIORITY",
-      "forbidden": ["promote Programming to peer system", "become Programming product definition", "redefine peer jobs"]
-    }
+    "SYSTEM_MASTER": {"owner_path":"SYSTEM_MASTER","job":"Integrate all nine active peers into one coherent product while maintaining product architecture, sequencing and cross-system acceptance without taking peer semantic ownership.","must_integrate":["SYSTEM_MASTER/CORE","SYSTEM_MASTER/LEARNING","SYSTEM_MASTER/BOOK","SYSTEM_MASTER/DOCUMENTS","SYSTEM_MASTER/SPREADSHEET_DATA","SYSTEM_MASTER/MEDIA","SYSTEM_MASTER/CONNECTED_ACTIONS","SYSTEM_MASTER/RESEARCH_KNOWLEDGE","SYSTEM_MASTER/PROGRAMMING"],"forbidden":["declare active peers complete without product-level authority","take peer semantic ownership","create duplicate peer systems","resurrect PROSE"]},
+    "CORE": {"owner_path":"SYSTEM_MASTER/CORE","job":"Finish shared Foundation and Spine plus shared runtime/data/platform/continuity/assurance/A-01 infrastructure and Master-facing integration primitives.","integrates_upward_to":"SYSTEM_MASTER","forbidden":["take peer product semantics","restart retired Prose work","absorb Programming engineering semantics"]},
+    "LEARNING": {"owner_path":"SYSTEM_MASTER/LEARNING","job":"Finish Learning product behavior, curriculum/compiler, mastery/assessment/adaptation/evidence and integrate upward through explicit interfaces.","integrates_upward_to":"SYSTEM_MASTER","forbidden":["cross into another peer semantic owner","create active Prose work"]},
+    "BOOK": {"owner_path":"SYSTEM_MASTER/BOOK","job":"Finish Book, including genuinely unfinished integration of preserved completed Prose capability through Book-owned interfaces while preserving canonical manuscript, Story Bible, author, lifecycle, admission and publication authority.","integrates_upward_to":"SYSTEM_MASTER","forbidden":["create a Prose execution owner or successor","grant Documents canonical Book semantics","cross into another peer product owner"]},
+    "DOCUMENTS": {"owner_path":"SYSTEM_MASTER/DOCUMENTS","job":"Finish DOCX/PDF/PPTX/OCR/file/document artifact structure, conversion, preservation, rendering/export and generic document services.","integrates_upward_to":"SYSTEM_MASTER","forbidden":["receive Prose work","own Book canonical semantics","take Programming engineering semantics"]},
+    "SPREADSHEET_DATA": {"owner_path":"SYSTEM_MASTER/SPREADSHEET_DATA","job":"Finish spreadsheet, math, data-analysis, BI and ledger product semantics over Core shared execution/artifact/data primitives.","integrates_upward_to":"SYSTEM_MASTER","forbidden":["take Core shared-runtime ownership","take Programming engineering semantics"]},
+    "MEDIA": {"owner_path":"SYSTEM_MASTER/MEDIA","job":"Finish image, photo, video, voice, audiobook and general media product semantics over Core shared storage/runtime primitives.","integrates_upward_to":"SYSTEM_MASTER","forbidden":["take Programming engineering semantics","take Book canonical manuscript semantics"]},
+    "CONNECTED_ACTIONS": {"owner_path":"SYSTEM_MASTER/CONNECTED_ACTIONS","job":"Finish browser, communications, calendar and plugin/action policy over Core shared connector-action runtime.","integrates_upward_to":"SYSTEM_MASTER","forbidden":["perform unauthorized user side effects","take Programming website/software engineering semantics"]},
+    "RESEARCH_KNOWLEDGE": {"owner_path":"SYSTEM_MASTER/RESEARCH_KNOWLEDGE","job":"Finish research, knowledge and geospatial retrieval/provenance semantics while consuming admitted browser capability from Connected Actions and shared evidence/data runtime from Core.","integrates_upward_to":"SYSTEM_MASTER","forbidden":["own Connected Actions side-effect policy","take Programming engineering semantics","fabricate source/provenance authority"]},
+    "PROGRAMMING": {"owner_path":"SYSTEM_MASTER/PROGRAMMING","classification":"ACTIVE_PEER_SYSTEM__ADMITTED_FROM_PRESERVED_WORK_PROGRAM","program_lock":"governance/programs/PROGRAMMING-WORK-PROGRAM-LOCK-001.json","system_packet":"governance/catalog/system-packets/PROGRAMMING.json","job":"Continue and finish Programming software-engineering semantics from preserved evidence, including AUTOMATION, CODE and WEBSITE_BUILDING C40; integrate upward through explicit interfaces without taking another peer's semantics.","integrates_upward_to":"SYSTEM_MASTER","forbidden":["restart completed Programming work from scratch","create Website Building as a separate peer without authority","take Core shared infrastructure ownership","take Connected Actions side-effect authority","take another peer's canonical semantics"]},
+    "PROGRAMMING_KNOWLEDGE_RECOVERY": {"owner_path":"SYSTEM_MASTER/CORE","classification":"SUPPORT_SUBPROGRAM_FOR_PROGRAMMING__NOT_PROGRAMMING_PRODUCT_OWNER","parent_work_program":"PROGRAMMING","job":"Recover exact Programming assets/custody/provenance and remaining authorized catalog/archive evidence while selected.","priority":"HIGHEST_DISCRETIONARY_SYSTEM_MASTER_PRIORITY","forbidden":["become Programming product definition","redefine peer jobs"]}
   },
   "retired_systems": {
-    "PROSE": {
-      "completion": "COMPLETE",
-      "standing": "RETIRED_TERMINAL",
-      "retirement_record": "governance/retirements/PROSE-SYSTEM-RETIREMENT-001.json",
-      "integration_owner_if_needed": "SYSTEM_MASTER/BOOK",
-      "active_execution": false,
-      "active_repair": false,
-      "active_qualification": false,
-      "active_research": false,
-      "active_telemetry": false,
-      "successor_allowed": false
-    }
+    "PROSE": {"completion":"COMPLETE","standing":"RETIRED_TERMINAL","retirement_record":"governance/retirements/PROSE-SYSTEM-RETIREMENT-001.json","integration_owner_if_needed":"SYSTEM_MASTER/BOOK","active_execution":false,"active_repair":false,"active_qualification":false,"active_research":false,"active_telemetry":false,"successor_allowed":false}
   },
   "lane_crossing_policy": {
-    "peer_integration_rule": "All eight active peers remain in their own lanes. Cross-system product integration uses explicit System Master/shared-service interfaces and never transfers ownership.",
+    "peer_integration_rule": "All nine active peers remain in their own lanes. Cross-system product integration uses explicit System Master/shared-service interfaces and never transfers ownership.",
+    "programming_rule": "PROGRAMMING is a peer. WEBSITE_BUILDING is its C40 capability; browser actions remain CONNECTED_ACTIONS.",
     "retired_prose_rule": "No active cross-lane route exists for PROSE. Any genuinely open integration result is BOOK work.",
-    "programming_rule": "PROGRAMMING remains a named active non-peer work program with isolated engineering semantics until explicit topology admission.",
     "documents_prose_rule": "DOCUMENTS must not absorb, schedule, repair, qualify, research, telemeter or claim Prose work."
   }
 }

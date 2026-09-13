@@ -1,86 +1,63 @@
 # AUTOMATION — Foundation Contract 001
 
-**Owner** `SYSTEM_MASTER/PROGRAMMING` · **Lane** PROGRAMMING · **Effective** <UNSET>
-**Authority** `governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-005.json`
-**Scaffolded** 2026-09-13 from `.github/scripts/scaffold-foundation-contracts.js`
+**Owner** `SYSTEM_MASTER/PROGRAMMING` · **Lane** PROGRAMMING · **Effective** 2026-09-13
+**Authority** `governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006.json`
+**Architecture decision** `governance/ADR-0006-PROGRAMMING-PEER-ADMISSION-WEBSITE-BUILDING.md`
 
-> **This contract is a stub.** Sections 1–8 are the census gap-forcing columns and
-> are empty on purpose. A section containing "TBD", a placeholder, or a plausible
-> guess counts as unpopulated — the census forbids inferring completion from
-> planning volume. Delete this block when all eight are genuinely filled.
+> **This contract remains an implementation gap.** Programming peer admission resolves owner/lane authority but does not fabricate implementation, evidence or acceptance completion.
 
 ## Known from the census
 
 - **Module name:** Automation / Background Jobs
 - **Interaction direction:** HEADLESS_BACKGROUND_EXECUTION_CAPABILITY
 - **Census standing:** `SHARED_EXECUTION_FOUNDATIONS_PRESENT__PRODUCT_AUTOMATION_MODULE_NOT_FULLY_PROVEN`
-- **Census evidence summary:** Core has durable work/repair/A-01/Second Shift infrastructure, but P5 explicitly found Second Shift live-authority/telemetry hardening gaps. Historical Automation module research closure is not current product completion.
-
-This is what P6 recorded. It is background, not a populated section.
+- Historical Automation research remains reusable only in its exact historical scope.
 
 ## Boundary rules touching this module
 
-- PROGRAMMING owns CODE and AUTOMATION as an active non-peer work program; no separate owner is created.
+- PROGRAMMING is the admitted first-class owner of AUTOMATION C01.
+- CORE retains shared scheduling/runtime/A-01/Second Shift infrastructure.
+- CONNECTED_ACTIONS retains external action-policy and user-side-effect authority.
+- Automation semantics inside Programming do not create another system or execution lane.
 
-Crossing any of these is an `owner` decision, never lane discretion.
+Crossing any of these is an owner/authority decision, never lane discretion.
 
 ## 1. Contract / interface
-
-<!-- What this module promises callers: named operations, inputs, outputs, and what is explicitly not offered. -->
 
 **UNPOPULATED**
 
 ## 2. Ingress routes
 
-<!-- Every way work enters. Name the caller, the transport, and the authority that admits it. A route with no named admitting authority is a gap, not a route. -->
-
 **UNPOPULATED**
 
 ## 3. Egress routes
-
-<!-- Every way results leave: return values, emitted artifacts, notifications, side effects on other modules. -->
 
 **UNPOPULATED**
 
 ## 4. Persistence and canonical writer
 
-<!-- Exactly one component may write each piece of durable state. Name it, name the store, and name what happens to a write arriving from anywhere else. -->
-
 **UNPOPULATED**
 
 ## 5. Dependencies
-
-<!-- Modules and shared infrastructure required, and the direction of each. Flag any that cross a boundary rule below. -->
 
 **UNPOPULATED**
 
 ## 6. Failure semantics
 
-<!-- What happens when each ingress route fails, a dependency is unavailable, or a write is refused. State fail-closed or fail-open, and justify any fail-open. Include the idempotency rule. -->
-
 **UNPOPULATED**
 
 ## 7. Evidence target
-
-<!-- The artifact that proves this module did what it claimed: path, format, required contents. A log line is not evidence. -->
 
 **UNPOPULATED**
 
 ## 8. Acceptance target
 
-<!-- The exact command returning PASS or FAIL, and the PASS condition. Must be runnable by someone who did not write the module. -->
-
 **UNPOPULATED**
 
 ## 9. Authority boundary
 
-<!-- What this module may decide alone vs. what needs the owner. Mirrors
-     governance/DECISION-RIGHTS-001.md, scoped to this module. -->
-
-**UNPOPULATED**
+PROGRAMMING owns Automation product semantics. CORE supplies shared control/scheduling primitives and CONNECTED_ACTIONS supplies separately authorized external action interfaces. Consumption never transfers semantic ownership.
 
 ## 10. Open gaps
 
-- Sections 1–9 are unpopulated. This module remains `ACTIVE_GAP` in
-  Foundation Closure Census 001 until they are filled.
-
+- Sections 1–8 remain unpopulated. AUTOMATION remains `ACTIVE_GAP` in Foundation Closure Census 001 until they are evidence-backed.
