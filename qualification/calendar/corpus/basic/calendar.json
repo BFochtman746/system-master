@@ -1,0 +1,32 @@
+{
+  "schema_version": "CALENDAR-ACTION-SPEC-1.0",
+  "intent_id": "calendar-foundation-basic",
+  "name": "Calendar Foundation Basic Corpus",
+  "calendar_ref": "primary",
+  "actions": [
+    {
+      "id": "create-review",
+      "type": "CREATE_EVENT",
+      "event": {
+        "title": "Foundation design review",
+        "start": "2026-09-14T13:00:00-04:00",
+        "end": "2026-09-14T14:00:00-04:00",
+        "location": "Conference room"
+      }
+    },
+    {
+      "id": "update-review",
+      "type": "UPDATE_EVENT",
+      "event_id": "evt-001",
+      "changes": {
+        "title": "Foundation design review - revised"
+      }
+    },
+    {
+      "id": "delete-duplicate",
+      "type": "DELETE_EVENT",
+      "event_id": "evt-002",
+      "reason": "Duplicate event"
+    }
+  ]
+}
