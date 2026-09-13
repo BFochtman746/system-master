@@ -35,6 +35,12 @@ function nonEmpty(v) {
 function isSameOrDescendant(candidate, ownerPath) {
   return candidate === ownerPath || String(candidate || '').startsWith(`${ownerPath}/`);
 }
+function sameSet(a, b) {
+  const aa = [...a].sort(), bb = [...b].sort();
+  return aa.length === bb.length && aa.every((value, index) => value === bb[index]);
+}
+function setDifference(a, b) { return new Set([...a].filter((value) => !b.has(value))); }
+function setUnion(...sets) { return new Set(sets.flatMap((set) => [...set])); }
 function branchHead(ref) {
   if (noLive) return null;
   try {
@@ -86,10 +92,15 @@ function runSelftest() {
     })),
     independent_work_remaining: false
   };
+  const architectural = new Set(['CORE', 'MEDIA']);
+  const ready = new Set(['CORE']);
+  const admittedNotReady = new Set(['MEDIA']);
   if (!validExhaustion(good) || validExhaustion({ ...good, rungs: good.rungs.slice(0, 7) }) ||
       !isSameOrDescendant('SYSTEM_MASTER/BOOK/X', 'SYSTEM_MASTER/BOOK') ||
       isSameOrDescendant('SYSTEM_MASTER/LEARNING', 'SYSTEM_MASTER/BOOK') ||
-      !isExplicitNonPeerObligation({ program_id: 'PROGRAMMING', owner_path: 'SYSTEM_MASTER', second_shift_state: 'NO_PEER_LANE_BEFORE_TOPOLOGY_ADMISSION' })) {
+      !isExplicitNonPeerObligation({ program_id: 'PROGRAMMING', owner_path: 'SYSTEM_MASTER', second_shift_state: 'NO_PEER_LANE_BEFORE_TOPOLOGY_ADMISSION' }) ||
+      !sameSet(setUnion(ready, admittedNotReady), architectural) ||
+      setDifference(ready, architectural).size !== 0) {
     console.error('SECOND_SHIFT_OWNER_COVERAGE_SELFTEST_FAIL');
     process.exit(1);
   }
@@ -106,12 +117,47 @@ const topologyRel = authority.topology;
 if (!topologyRel || !exists(topologyRel)) {
   add('ERROR', 'CURRENT_TOPOLOGY_MISSING', `CURRENT-AUTHORITY does not select an accessible topology: ${topologyRel || '<unset>'}`);
 }
-const topology = topologyRel && exists(topologyRel) ? readJson(topologyRel) : { peer_system_ids: [], retired_systems: [] };
-const topologyPeers = new Set(topology.peer_system_ids || []);
+const topology = topologyRel && exists(topologyRel) ? readJson(topologyRel) : { peer_system_ids: [], retired_systems: [], execution_readiness: {} };
+const architecturalPeers = new Set(topology.peer_system_ids || []);
+const executionReadyPeers = new Set(topology.execution_readiness?.execution_ready_peer_system_ids || []);
+const admittedNotExecutionReadyPeers = new Set(topology.execution_readiness?.admitted_not_execution_ready_peer_system_ids || []);
+const authorityExecutionPeers = new Set(authority.active_peer_execution_lanes || []);
 const retiredSystems = new Map((topology.retired_systems || []).filter(Boolean).map((r) => [r.system_id, r]));
+const canonicalSystems = topology.canonical_internal_systems || [];
+
+if (!architecturalPeers.size) add('ERROR', 'ARCHITECTURAL_PEER_SET_EMPTY', 'selected topology declares no architectural peers');
+if (!executionReadyPeers.size) add('ERROR', 'EXECUTION_READY_PEER_SET_EMPTY', 'selected topology declares no execution-ready peers');
+if (!sameSet(authorityExecutionPeers, executionReadyPeers)) {
+  add('ERROR', 'AUTHORITY_EXECUTION_PEER_MISMATCH', 'CURRENT-AUTHORITY execution lanes do not match topology execution-ready peers', {
+    authority_execution_lanes: [...authorityExecutionPeers],
+    topology_execution_ready_peers: [...executionReadyPeers]
+  });
+}
+if (setDifference(executionReadyPeers, architecturalPeers).size) {
+  add('ERROR', 'EXECUTION_READY_NONPEER', 'execution-ready set contains a non-architectural peer', { lanes: [...setDifference(executionReadyPeers, architecturalPeers)] });
+}
+if (setDifference(admittedNotExecutionReadyPeers, architecturalPeers).size) {
+  add('ERROR', 'ADMITTED_NOT_READY_NONPEER', 'admitted-not-ready set contains a non-architectural peer', { lanes: [...setDifference(admittedNotExecutionReadyPeers, architecturalPeers)] });
+}
+if (!sameSet(setUnion(executionReadyPeers, admittedNotExecutionReadyPeers), architecturalPeers)) {
+  add('ERROR', 'EXECUTION_READINESS_PARTITION_INVALID', 'execution readiness must account for every architectural peer exactly once');
+}
+for (const lane of executionReadyPeers) {
+  if (admittedNotExecutionReadyPeers.has(lane)) add('ERROR', 'EXECUTION_READINESS_OVERLAP', 'peer appears in both execution-ready and admitted-not-ready sets', { lane });
+}
+
+function systemForOwnerPath(ownerPath) {
+  return canonicalSystems
+    .map((system) => ({ system, ownerPath: system.owner_path || `SYSTEM_MASTER/${system.system_id}` }))
+    .filter(({ ownerPath: candidate }) => isSameOrDescendant(ownerPath, candidate))
+    .sort((a, b) => b.ownerPath.length - a.ownerPath.length)[0]?.system || null;
+}
 
 const registryRel = authority.second_shift_registry || 'governance/second-shift/SECOND-SHIFT-REGISTRY-001.json';
 const registry = readJson(registryRel);
+if (registry.topology && registry.topology !== topologyRel) {
+  add('ERROR', 'SECOND_SHIFT_REGISTRY_TOPOLOGY_MISMATCH', 'Second Shift registry is not bound to the authority-selected topology', { registry_topology: registry.topology, authority_topology: topologyRel });
+}
 const obligationRel = authority.obligation_registry;
 if (!obligationRel || !exists(obligationRel)) {
   add('ERROR', 'CURRENT_OBLIGATION_REGISTRY_MISSING', `CURRENT-AUTHORITY does not select an accessible obligation registry: ${obligationRel || '<unset>'}`);
@@ -121,12 +167,12 @@ const ownerFiles = registry.owner_files || {};
 const laneEntries = Object.entries(ownerFiles);
 if (!laneEntries.length) add('ERROR', 'SECOND_SHIFT_REGISTRY_EMPTY', 'Second Shift registry declares no owner lanes');
 
-for (const peer of topologyPeers) {
+for (const peer of executionReadyPeers) {
   if (!ownerFiles[peer]) {
-    const system = (topology.canonical_internal_systems || []).find((s) => s && s.system_id === peer);
+    const system = canonicalSystems.find((s) => s && s.system_id === peer);
     const candidates = obligations.filter((o) => o && ACTIVE_OBLIGATION_STATES.has(o.state) && isSameOrDescendant(o.owner_path, system?.owner_path || `SYSTEM_MASTER/${peer}`));
-    const machineResolvable = Boolean(system?.control_ref && system?.parent_id === 'SYSTEM_MASTER' && candidates.length > 0);
-    add('ERROR', 'SECOND_SHIFT_PEER_COVERAGE_MISSING', 'topology-declared active peer has no Second Shift owner file', {
+    const machineResolvable = Boolean(system?.control_ref && system?.control_record && system?.parent_id === 'SYSTEM_MASTER' && candidates.length > 0);
+    add('ERROR', 'SECOND_SHIFT_EXECUTION_READY_COVERAGE_MISSING', 'execution-ready peer has no Second Shift owner file', {
       lane: peer,
       control_ref: system?.control_ref || null,
       owner_path: system?.owner_path || `SYSTEM_MASTER/${peer}`,
@@ -135,11 +181,15 @@ for (const peer of topologyPeers) {
   }
 }
 for (const [lane] of laneEntries) {
-  if (!topologyPeers.has(lane)) {
+  if (admittedNotExecutionReadyPeers.has(lane)) {
+    add('ERROR', 'SECOND_SHIFT_NONREADY_PEER_PROVISIONED', 'admitted-but-not-execution-ready peer must not have an active Second Shift owner file', { lane });
+    continue;
+  }
+  if (!executionReadyPeers.has(lane)) {
     const retired = retiredSystems.get(lane);
     add('ERROR', retired ? 'RETIRED_SYSTEM_PROVISIONED' : 'SECOND_SHIFT_ORPHAN_ACTIVE_LANE', retired ?
       'retired system appears in active Second Shift owner_files and must be removed without replacement' :
-      'registry declares an active lane that is not a topology peer', { lane, retired: Boolean(retired) });
+      'registry declares an active lane that is not execution-ready', { lane, retired: Boolean(retired), architectural_peer: architecturalPeers.has(lane) });
   }
 }
 for (const [retiredId] of retiredSystems) {
@@ -152,12 +202,18 @@ if (!eventSchemaRel || !exists(eventSchemaRel)) {
 } else {
   const eventSchema = readJson(eventSchemaRel);
   const allowed = new Set(eventSchema.allowed_lanes || []);
+  if (!sameSet(allowed, executionReadyPeers)) {
+    add('ERROR', 'SECOND_SHIFT_TELEMETRY_READINESS_MISMATCH', 'utilization allowed_lanes must match execution-ready peers exactly', {
+      allowed_lanes: [...allowed],
+      execution_ready_peers: [...executionReadyPeers]
+    });
+  }
   for (const [lane] of laneEntries) {
     if (!allowed.has(lane)) add('ERROR', 'SECOND_SHIFT_TELEMETRY_LANE_MISSING', 'registry-declared owner lane is absent from utilization allowed_lanes', { lane, event_schema: eventSchemaRel });
   }
   for (const lane of allowed) {
     if (!ownerFiles[lane]) add('ERROR', 'SECOND_SHIFT_TELEMETRY_LANE_ORPHANED', 'utilization allowed_lanes contains a lane not declared by owner_files', { lane, event_schema: eventSchemaRel });
-    if (!topologyPeers.has(lane)) add('ERROR', 'SECOND_SHIFT_TELEMETRY_NONPEER_LANE', 'utilization allowed_lanes contains a non-peer or retired system', { lane, event_schema: eventSchemaRel });
+    if (!executionReadyPeers.has(lane)) add('ERROR', 'SECOND_SHIFT_TELEMETRY_NONREADY_LANE', 'utilization allowed_lanes contains a peer that is not execution-ready', { lane, event_schema: eventSchemaRel });
   }
   for (const [retiredId] of retiredSystems) {
     if (allowed.has(retiredId)) add('ERROR', 'RETIRED_SYSTEM_TELEMETRY_ACTIVE', 'retired system is present in active utilization allowed_lanes', { lane: retiredId });
@@ -215,6 +271,7 @@ function routeLane(ownerPath) {
 
 for (const [prefix, lane] of Object.entries(coverageRoutes)) {
   if (!ownerDataByLane.has(lane)) add('ERROR', 'SECOND_SHIFT_COVERAGE_ROUTE_INVALID', 'coverage route points to a missing Second Shift lane', { owner_prefix: prefix, routed_lane: lane });
+  if (!executionReadyPeers.has(lane)) add('ERROR', 'SECOND_SHIFT_COVERAGE_ROUTE_NONREADY', 'coverage route points to a lane that is not execution-ready', { owner_prefix: prefix, routed_lane: lane });
   for (const [, retired] of retiredSystems) {
     if (retired?.historical_owner_path && isSameOrDescendant(prefix, retired.historical_owner_path)) {
       add('ERROR', 'RETIRED_SYSTEM_COVERAGE_ROUTE_ACTIVE', 'active coverage route points into a retired system path', { owner_prefix: prefix, routed_lane: lane, retired_system_id: retired.system_id });
@@ -229,8 +286,16 @@ for (const o of obligations.filter((x) => x && ACTIVE_OBLIGATION_STATES.has(x.st
     add('ERROR', 'RETIRED_SYSTEM_ACTIVE_OBLIGATION', 'active obligation is owned by or beneath a retired system path', { obligation_id: o.obligation_id, owner_path: o.owner_path, retired_system_id: retired.system_id });
     continue;
   }
+
+  const system = systemForOwnerPath(o.owner_path);
+  if (system && admittedNotExecutionReadyPeers.has(system.system_id)) {
+    const lane = routeLane(o.owner_path);
+    if (lane) add('ERROR', 'NONREADY_OBLIGATION_ROUTED_TO_SECOND_SHIFT', 'obligation owned by an admitted-but-not-execution-ready peer must not have an active Second Shift route', { obligation_id: o.obligation_id, owner_path: o.owner_path, lane, system_id: system.system_id });
+    continue;
+  }
+
   const lane = routeLane(o.owner_path);
-  if (!lane) add('ERROR', 'SECOND_SHIFT_OWNER_COVERAGE_MISSING', 'READY/ACTIVE obligation owner_path has no registry-declared Second Shift owner route', { obligation_id: o.obligation_id, owner_path: o.owner_path });
+  if (!lane) add('ERROR', 'SECOND_SHIFT_OWNER_COVERAGE_MISSING', 'READY/ACTIVE obligation owned by an execution-ready lane has no registry-declared Second Shift owner route', { obligation_id: o.obligation_id, owner_path: o.owner_path });
 }
 
 const central = authority.central_next_objective;
@@ -238,11 +303,16 @@ if (central) {
   const o = obligations.find((x) => x && x.obligation_id === central);
   if (!o) add('ERROR', 'CENTRAL_NEXT_OBJECTIVE_MISSING', 'central_next_objective is absent from the authority-selected current obligation registry', { objective_id: central });
   else if (ACTIVE_OBLIGATION_STATES.has(o.state)) {
-    const lane = routeLane(o.owner_path);
-    const owner = lane ? ownerDataByLane.get(lane) : null;
-    const active = owner && Array.isArray(owner.active_delegations) ? owner.active_delegations : [];
-    const bound = active.some((d) => d && ACTIVE_DELEGATION_STATES.has(d.state) && (d.obligation_id === central || d.objective_id === central));
-    if (!bound) add('ERROR', 'CENTRAL_OBJECTIVE_SECOND_SHIFT_UNBOUND', 'current central objective has no active delegation in its registry-routed owner lane', { objective_id: central, owner_path: o.owner_path, lane: lane || null });
+    const system = systemForOwnerPath(o.owner_path);
+    if (system && !executionReadyPeers.has(system.system_id)) {
+      add('ERROR', 'CENTRAL_OBJECTIVE_NOT_EXECUTION_READY', 'central_next_objective is owned by a peer that is not execution-ready', { objective_id: central, owner_path: o.owner_path, system_id: system.system_id });
+    } else {
+      const lane = routeLane(o.owner_path);
+      const owner = lane ? ownerDataByLane.get(lane) : null;
+      const active = owner && Array.isArray(owner.active_delegations) ? owner.active_delegations : [];
+      const bound = active.some((d) => d && ACTIVE_DELEGATION_STATES.has(d.state) && (d.obligation_id === central || d.objective_id === central));
+      if (!bound) add('ERROR', 'CENTRAL_OBJECTIVE_SECOND_SHIFT_UNBOUND', 'current central objective has no active delegation in its registry-routed owner lane', { objective_id: central, owner_path: o.owner_path, lane: lane || null });
+    }
   }
 }
 
@@ -252,7 +322,9 @@ const report = {
   authority_obligation_registry: obligationRel || null,
   registry: registryRel,
   utilization_event_schema: eventSchemaRel || null,
-  topology_peer_lanes: [...topologyPeers],
+  architectural_peer_system_ids: [...architecturalPeers],
+  execution_ready_peer_lanes: [...executionReadyPeers],
+  admitted_not_execution_ready_peer_system_ids: [...admittedNotExecutionReadyPeers],
   registry_declared_lanes: laneEntries.map(([lane]) => lane),
   retired_system_ids: [...retiredSystems.keys()],
   central_next_objective: central || null,
