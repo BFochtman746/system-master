@@ -1,0 +1,131 @@
+{
+  "schema_id": "SECOND-SHIFT-UTILIZATION-EVENT-SCHEMA-003",
+  "effective_date": "2026-09-13",
+  "purpose": "Append-only evidence schema for reconstructing Second Shift lane state and useful execution without treating architectural peer admission as execution authority.",
+  "supersedes_for_current_authority": "governance/second-shift/SECOND-SHIFT-UTILIZATION-EVENT-SCHEMA-001.json",
+  "preserves_proposed_reliability_schema": "governance/second-shift/SECOND-SHIFT-UTILIZATION-EVENT-SCHEMA-002.json",
+  "shift_timezone": "America/New_York",
+  "shift_window": "00:00-07:00",
+  "storage_rule": "Use one lane-owned ledger per execution-ready shift lane per date under governance/second-shift/execution-events/YYYY-MM-DD/. The active permitted lane set must remain synchronized with the authority-selected Second Shift registry owner_files and Topology 006 execution readiness. Historical SYSTEM_MASTER and PROSE ledgers remain immutable evidence but are not current lanes.",
+  "architectural_peer_source": "governance/SYSTEM-TOPOLOGY-006.json::peer_system_ids",
+  "execution_ready_peer_source": "governance/SYSTEM-TOPOLOGY-006.json::execution_readiness.execution_ready_peer_system_ids",
+  "allowed_lane_source": "governance/second-shift/SECOND-SHIFT-REGISTRY-002.json::owner_files",
+  "allowed_lanes": [
+    "CORE",
+    "LEARNING",
+    "BOOK",
+    "DOCUMENTS"
+  ],
+  "admitted_not_execution_ready_peers": [
+    "SPREADSHEET_DATA",
+    "MEDIA",
+    "CONNECTED_ACTIONS",
+    "RESEARCH_KNOWLEDGE"
+  ],
+  "historical_lanes": [
+    "PROSE",
+    "SYSTEM_MASTER"
+  ],
+  "allowed_event_types": [
+    "SHIFT_OPEN",
+    "READY",
+    "CLAIMED",
+    "RUNNING",
+    "HEARTBEAT",
+    "PROGRESS",
+    "COMPLETED",
+    "BLOCKED",
+    "STALE",
+    "RETRY",
+    "CIRCUIT_OPEN",
+    "CIRCUIT_HALF_OPEN",
+    "CIRCUIT_CLOSED",
+    "SUCCESSOR_BOUND",
+    "ALL_RUNGS_EXHAUSTED",
+    "IDLE_VALID",
+    "SHIFT_CLOSE"
+  ],
+  "required_ledger_fields": [
+    "schema_id",
+    "shift_id",
+    "shift_date",
+    "lane",
+    "events"
+  ],
+  "required_event_fields": [
+    "event_id",
+    "occurred_at",
+    "event_type",
+    "lane",
+    "control_ref",
+    "control_head",
+    "delegation_id",
+    "objective_id",
+    "evidence"
+  ],
+  "claim_event_required_fields": [
+    "lease_id",
+    "idempotency_key",
+    "lease_expires_at",
+    "attempt"
+  ],
+  "heartbeat_event_required_fields": [
+    "lease_id",
+    "idempotency_key",
+    "checkpoint_pointer"
+  ],
+  "retry_event_required_fields": [
+    "dependency_or_operation",
+    "failure_class",
+    "attempt",
+    "retry_budget",
+    "next_action"
+  ],
+  "circuit_event_required_fields": [
+    "dependency_or_operation",
+    "failure_class",
+    "next_probe_at_or_condition",
+    "fallback_successor_or_rung"
+  ],
+  "all_rungs_exhausted_required_fields": [
+    "rungs",
+    "independent_work_remaining",
+    "next_external_condition"
+  ],
+  "all_rungs_required_count": 8,
+  "operational_limits": {
+    "heartbeat_sla_minutes": 50,
+    "ready_dispatch_sla_minutes": 70,
+    "telemetry_freshness_sla_minutes": 75,
+    "max_retry_budget": 3
+  },
+  "claim_lifecycle_rules": [
+    "CLAIMED opens exactly one mutation-capable lease for an execution-ready active lane; a second live claim is invalid.",
+    "RUNNING and PROGRESS require a live preceding CLAIMED lease for the same delegation, control head and idempotency key.",
+    "HEARTBEAT must refer to the live lease and preserve the same idempotency key while advancing a durable checkpoint pointer.",
+    "COMPLETED, BLOCKED or STALE releases the live lease for that delegation; successor work requires a new claim after current-owner revalidation.",
+    "SHIFT_CLOSE is invalid while a mutation-capable lease remains unresolved."
+  ],
+  "event_order_rules": [
+    "event_id values are unique within a lane ledger.",
+    "occurred_at values are monotonic nondecreasing within the append-only ledger.",
+    "Every current-state event uses the exact current owner control_ref and control_head observed for that event.",
+    "IDLE_VALID requires a preceding same-head ALL_RUNGS_EXHAUSTED event containing exactly eight rung dispositions and independent_work_remaining=false."
+  ],
+  "retry_rules": [
+    "retry_budget must be an integer from 1 through max_retry_budget.",
+    "attempt must not exceed retry_budget.",
+    "After retry budget exhaustion the dependency becomes CIRCUIT_OPEN for that invocation and the lane switches to a dependency-valid fallback rung when one exists.",
+    "Repeated transient failure never proves whole-lane exhaustion."
+  ],
+  "utilization_rules": [
+    "Telemetry is factual and missing telemetry remains UNKNOWN rather than inferred.",
+    "Current Second Shift telemetry is permitted only for execution-ready peer lanes CORE, LEARNING, BOOK and DOCUMENTS.",
+    "SPREADSHEET_DATA, MEDIA, CONNECTED_ACTIONS and RESEARCH_KNOWLEDGE are architectural peers but emit no Second Shift telemetry until canonical control records and execution readiness are established.",
+    "PROSE is complete and terminally retired and never generates new telemetry.",
+    "Any genuinely open preserved-Prose integration is BOOK telemetry only.",
+    "PROGRAMMING product work has no peer utilization ledger before explicit topology admission; Knowledge Recovery support is recorded under CORE."
+  ],
+  "retired_system_rule": "A historical PROSE ledger may be read only as immutable evidence. No controller, auto-provisioner, repair broker, qualifier or successor binder may create a new PROSE ledger.",
+  "authority_boundary": "This ledger records execution state only. Architectural admission does not grant dispatch authority. It never grants PASS, promotion, canonical-writer, A-01, human, author, private, native, publication or production authority."
+}
