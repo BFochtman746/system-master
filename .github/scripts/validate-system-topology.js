@@ -7,7 +7,6 @@ const root = path.resolve(__dirname, '..', '..');
 const authorityPath = path.join(root, 'governance', 'CURRENT-AUTHORITY.json');
 const registryPath = path.join(root, 'qualification', 'a01', 'registry.json');
 const externalInfrastructurePath = path.join(root, 'governance', 'control-gateway', 'A01-EXTERNAL-INFRASTRUCTURE-WORKSTREAMS.json');
-const expectedPeers = new Set(['CORE', 'LEARNING', 'BOOK', 'DOCUMENTS']);
 
 function fail(message) { console.error(`SYSTEM_TOPOLOGY_ERROR: ${message}`); process.exit(1); }
 function readJson(file) {
@@ -25,10 +24,13 @@ function setEq(a, b) {
   const aa = [...a].sort(), bb = [...b].sort();
   return aa.length === bb.length && aa.every((v, i) => v === bb[i]);
 }
+function setDifference(a, b) { return new Set([...a].filter((value) => !b.has(value))); }
+function setUnion(...sets) { return new Set(sets.flatMap((set) => [...set])); }
 
 const authority = readJson(authorityPath);
 if (authority.product_root !== 'SYSTEM_MASTER') fail('CURRENT-AUTHORITY product_root must be SYSTEM_MASTER');
-if (authority.topology !== 'governance/SYSTEM-TOPOLOGY-005.json') fail('CURRENT-AUTHORITY must select SYSTEM-TOPOLOGY-005.json');
+if (!authority.topology) fail('CURRENT-AUTHORITY missing topology');
+requireFile(authority.topology);
 for (const field of ['program_job_lock', 'system_completion_status', 'completion_ledger', 'obligation_registry', 'expectation_registry', 'reallocation_ledger', 'second_shift_registry']) {
   if (!authority[field]) fail(`CURRENT-AUTHORITY missing ${field}`);
   requireFile(authority[field]);
@@ -37,19 +39,39 @@ for (const field of ['program_job_lock', 'system_completion_status', 'completion
 const topology = readJson(requireFile(authority.topology));
 if ((topology.product_root || {}).product_id !== 'SYSTEM_MASTER') fail('topology product root must be SYSTEM_MASTER');
 if ((topology.product_root || {}).classification !== 'PRODUCT_ROOT__SYSTEM_OF_SYSTEMS') fail('SYSTEM_MASTER must remain PRODUCT_ROOT__SYSTEM_OF_SYSTEMS');
-const systems = topology.canonical_internal_systems || [];
-const ids = systems.map((entry) => entry.system_id);
-if (new Set(ids).size !== systems.length) fail('canonical internal systems contain duplicate system IDs');
-if (!setEq(new Set(ids), expectedPeers)) fail('canonical internal systems must be exactly CORE, LEARNING, BOOK, DOCUMENTS');
 
-const byId = Object.fromEntries(systems.map((entry) => [entry.system_id, entry]));
-for (const id of expectedPeers) {
-  if (byId[id].parent_id !== 'SYSTEM_MASTER') fail(`${id} parent is invalid; expected SYSTEM_MASTER`);
-  if (!byId[id].control_ref || !byId[id].control_record) fail(`${id} must declare control_ref and control_record`);
-}
+const systems = topology.canonical_internal_systems || [];
+if (!Array.isArray(systems) || systems.length === 0) fail('topology must declare canonical_internal_systems');
+const ids = systems.map((entry) => entry.system_id);
+if (ids.some((id) => !id)) fail('canonical internal systems must declare system_id');
+if (new Set(ids).size !== systems.length) fail('canonical internal systems contain duplicate system IDs');
 
 const peerIds = new Set(topology.peer_system_ids || []);
-if (!setEq(peerIds, expectedPeers)) fail('peer_system_ids must be exactly CORE,LEARNING,BOOK,DOCUMENTS');
+if (peerIds.size === 0) fail('topology must declare peer_system_ids');
+const canonicalPeerIds = new Set(ids);
+if (!setEq(canonicalPeerIds, peerIds)) fail('canonical internal systems must match peer_system_ids exactly');
+
+const readiness = topology.execution_readiness || {};
+const executionReadyPeers = new Set(readiness.execution_ready_peer_system_ids || []);
+const admittedNotExecutionReadyPeers = new Set(readiness.admitted_not_execution_ready_peer_system_ids || []);
+if (executionReadyPeers.size === 0) fail('topology execution_readiness must declare at least one execution-ready peer');
+if (setDifference(executionReadyPeers, peerIds).size) fail(`execution-ready peers must be architectural peers: ${[...setDifference(executionReadyPeers, peerIds)].join(', ')}`);
+if (setDifference(admittedNotExecutionReadyPeers, peerIds).size) fail(`admitted non-ready peers must be architectural peers: ${[...setDifference(admittedNotExecutionReadyPeers, peerIds)].join(', ')}`);
+const readinessOverlap = [...executionReadyPeers].filter((id) => admittedNotExecutionReadyPeers.has(id));
+if (readinessOverlap.length) fail(`peer cannot be both execution-ready and admitted-not-ready: ${readinessOverlap.join(', ')}`);
+if (!setEq(setUnion(executionReadyPeers, admittedNotExecutionReadyPeers), peerIds)) fail('execution readiness partition must account for every architectural peer exactly once');
+
+const byId = Object.fromEntries(systems.map((entry) => [entry.system_id, entry]));
+for (const id of peerIds) {
+  const system = byId[id];
+  if (system.parent_id !== 'SYSTEM_MASTER') fail(`${id} parent is invalid; expected SYSTEM_MASTER`);
+  if (!system.control_ref) fail(`${id} must declare control_ref`);
+  if (executionReadyPeers.has(id) && !system.control_record) fail(`${id} is execution-ready but has no canonical control_record`);
+  if (admittedNotExecutionReadyPeers.has(id) && system.control_record && readiness.readiness_blockers?.[id] === 'MISSING_CANONICAL_CONTROL_RECORD') {
+    fail(`${id} declares a control_record but readiness still says MISSING_CANONICAL_CONTROL_RECORD`);
+  }
+}
+
 if (!Array.isArray(topology.child_system_ids) || topology.child_system_ids.length !== 0) fail('child_system_ids must be empty under terminal Prose retirement');
 
 const retired = topology.retired_systems || [];
@@ -69,18 +91,40 @@ requireFile(history.prose_retirement);
 if (history.prose_child_restoration_current_effect !== 'SUPERSEDED_BY_ADR_0005') fail('ADR-0004 restoration must be superseded by ADR-0005');
 if (history.documents_absorption_current_effect !== 'SUPERSEDED_BY_ADR_0005') fail('Documents absorption must be superseded by ADR-0005');
 
-const edges = new Set((topology.hierarchy_edges || []).map((edge) => `${edge[0]}>${edge[1]}`));
-for (const edge of ['SYSTEM_MASTER>CORE', 'SYSTEM_MASTER>LEARNING', 'SYSTEM_MASTER>BOOK', 'SYSTEM_MASTER>DOCUMENTS']) if (!edges.has(edge)) fail(`required hierarchy edge missing: ${edge}`);
+const hierarchyEdges = topology.hierarchy_edges || [];
+const edges = new Set(hierarchyEdges.map((edge) => `${edge[0]}>${edge[1]}`));
+for (const id of peerIds) {
+  const edge = `SYSTEM_MASTER>${id}`;
+  if (!edges.has(edge)) fail(`required hierarchy edge missing: ${edge}`);
+}
+const rootPeerEdges = new Set(hierarchyEdges
+  .filter((edge) => Array.isArray(edge) && edge[0] === 'SYSTEM_MASTER')
+  .map((edge) => edge[1]));
+if (!setEq(rootPeerEdges, peerIds)) fail('SYSTEM_MASTER hierarchy children must match peer_system_ids exactly');
 if ([...edges].some((edge) => edge.endsWith('>PROSE') || edge.startsWith('PROSE>'))) fail('active hierarchy must not contain PROSE');
 
 const creation = topology.creation_rule || {};
-for (const flag of ['implicit_system_creation_forbidden', 'branch_name_cannot_create_system', 'workstream_id_cannot_create_system', 'chat_or_task_title_cannot_create_system', 'qualification_id_cannot_create_system', 'new_first_class_system_requires_explicit_user_instruction', 'retired_system_cannot_be_auto_provisioned']) if (creation[flag] !== true) fail(`system creation/retirement guard ${flag} must remain true`);
+for (const flag of ['implicit_system_creation_forbidden', 'branch_name_cannot_create_system', 'workstream_id_cannot_create_system', 'chat_or_task_title_cannot_create_system', 'qualification_id_cannot_create_system', 'new_first_class_system_requires_explicit_user_instruction', 'retired_system_cannot_be_auto_provisioned']) {
+  if (creation[flag] !== true) fail(`system creation/retirement guard ${flag} must remain true`);
+}
 
 const laneMap = topology.execution_lane_owner_map || {};
-for (const [lane, owner] of Object.entries(laneMap)) if (!expectedPeers.has(owner)) fail(`execution lane ${lane} maps to non-peer owner ${owner}`);
+for (const [lane, owner] of Object.entries(laneMap)) {
+  if (!executionReadyPeers.has(owner)) fail(`execution lane ${lane} maps to non-execution-ready peer owner ${owner}`);
+}
 if (laneMap['LITERARY-PROSE']) fail('LITERARY-PROSE must not remain an active execution lane mapping');
 if (laneMap['BOOK-EVAL-LEMONADE-001'] !== 'BOOK') fail('BOOK-EVAL historical/current Book work must map to BOOK');
 if (!String(topology.legacy_route_dispositions?.['LITERARY-PROSE'] || '').startsWith('RETIRED_NO_DISPATCH')) fail('LITERARY-PROSE must be explicitly retired/no-dispatch');
+
+const secondShiftRule = topology.second_shift_autoprovision_rule || {};
+const secondShiftArchitecturalPeers = new Set(secondShiftRule.architectural_peer_set || []);
+const secondShiftActivePeers = new Set(secondShiftRule.active_peer_set || []);
+const secondShiftNonReadyPeers = new Set(secondShiftRule.admitted_not_execution_ready_peer_set || []);
+if (!setEq(secondShiftArchitecturalPeers, peerIds)) fail('Second Shift architectural_peer_set must match topology peers');
+if (!setEq(secondShiftActivePeers, executionReadyPeers)) fail('Second Shift active_peer_set must match execution-ready peers');
+if (!setEq(secondShiftNonReadyPeers, admittedNotExecutionReadyPeers)) fail('Second Shift admitted-not-ready set must match topology execution readiness');
+if (secondShiftRule.compare_execution_ready_peer_set_to_registry_owner_files !== true) fail('Second Shift must validate owner files against execution-ready peers');
+if (secondShiftRule.compare_peer_system_ids_to_registry_owner_files === true) fail('Second Shift must not require owner files for admitted non-execution-ready peers');
 
 const externalInfrastructure = readJson(externalInfrastructurePath);
 if (externalInfrastructure.schema !== 'control-gateway.a01-external-infrastructure-workstreams.v1') fail('external A-01 infrastructure registry schema mismatch');
@@ -89,7 +133,7 @@ const externalInfrastructureEntries = externalInfrastructure.entries || {};
 for (const [workstreamId, entry] of Object.entries(externalInfrastructureEntries)) {
   if (!workstreamId || !entry || typeof entry !== 'object' || Array.isArray(entry)) fail(`external A-01 infrastructure entry ${workstreamId || '<empty>'} is invalid`);
   if (laneMap[workstreamId]) fail(`external A-01 infrastructure ${workstreamId} must not also be a product execution lane`);
-  if (expectedPeers.has(workstreamId)) fail(`external A-01 infrastructure ${workstreamId} collides with a canonical product system`);
+  if (peerIds.has(workstreamId)) fail(`external A-01 infrastructure ${workstreamId} collides with a canonical product system`);
   if (entry.classification !== 'STANDALONE_EXTERNAL_CONTROL_PLANE_INFRASTRUCTURE') fail(`external A-01 infrastructure ${workstreamId} classification is invalid`);
   if (entry.product_system_owner !== null) fail(`external A-01 infrastructure ${workstreamId} must not claim a System Master product owner`);
   if (entry.a01_qualification_allowed !== true) fail(`external A-01 infrastructure ${workstreamId} must explicitly permit A-01 qualification`);
@@ -106,7 +150,7 @@ const unmapped = [...workstreams].filter((id) => !laneMap[id]
 if (unmapped.length) fail(`A-01 workstream IDs lack current owner mapping, retired disposition, or explicit external-infrastructure authority: ${unmapped.join(', ')}`);
 
 const activeOwnerPaths = new Set(['SYSTEM_MASTER', 'SYSTEM_MASTER/SHARED_INFRASTRUCTURE', 'SYSTEM_MASTER/SHARED_INFRASTRUCTURE/A01']);
-for (const id of expectedPeers) activeOwnerPaths.add(ownerPath(byId[id]));
+for (const id of peerIds) activeOwnerPaths.add(ownerPath(byId[id]));
 const obligations = readJson(requireFile(authority.obligation_registry));
 for (const item of obligations.obligations || []) {
   if (!item.obligation_id || !item.owner_path || !item.state) fail('every obligation must declare obligation_id, owner_path and state');
@@ -118,7 +162,7 @@ for (const item of obligations.obligations || []) {
 
 const secondShift = readJson(requireFile(authority.second_shift_registry));
 const ownerLanes = new Set(Object.keys(secondShift.owner_files || {}));
-if (!setEq(ownerLanes, expectedPeers)) fail('Second Shift owner_files must match topology peers exactly');
+if (!setEq(ownerLanes, executionReadyPeers)) fail('Second Shift owner_files must match execution-ready topology peers exactly');
 if ((secondShift.owner_files || {}).PROSE) fail('Second Shift must not schedule a retired PROSE lane');
 if ((secondShift.owner_files || {}).SYSTEM_MASTER) fail('Second Shift must not schedule SYSTEM_MASTER root as a peer worker lane');
 if (Object.keys(secondShift.coverage_routes || {}).some((prefix) => sameOrDescendant(prefix, 'SYSTEM_MASTER/BOOK/PROSE'))) fail('Second Shift must not route retired Prose through an active lane');
@@ -132,7 +176,7 @@ if (retiredProseActiveSurfaceArtifacts.length) {
 }
 
 const schema = readJson(requireFile(secondShift.utilization_event_schema));
-if (!setEq(new Set(schema.allowed_lanes || []), expectedPeers)) fail('telemetry allowed_lanes must match active peers exactly');
+if (!setEq(new Set(schema.allowed_lanes || []), executionReadyPeers)) fail('telemetry allowed_lanes must match execution-ready peers exactly');
 if ((schema.allowed_lanes || []).includes('PROSE')) fail('PROSE must not be an active telemetry lane');
 
 const eventRoot = path.join(secondShiftRoot, 'execution-events');
@@ -149,7 +193,10 @@ if (fs.existsSync(eventRoot)) {
 
 console.log('SYSTEM_TOPOLOGY_PASS');
 console.log('product_root=SYSTEM_MASTER');
-console.log('peer_systems=CORE,LEARNING,BOOK,DOCUMENTS');
+console.log(`selected_topology=${authority.topology}`);
+console.log(`peer_systems=${[...peerIds].join(',')}`);
+console.log(`execution_ready_peer_systems=${[...executionReadyPeers].join(',')}`);
+console.log(`admitted_not_execution_ready_peer_systems=${[...admittedNotExecutionReadyPeers].join(',')}`);
 console.log('prose_status=COMPLETE_RETIRED_TERMINAL');
 console.log('prose_execution=NONE');
 console.log('prose_integration_owner_if_open=BOOK');
