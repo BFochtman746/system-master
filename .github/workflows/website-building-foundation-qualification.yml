@@ -1,0 +1,59 @@
+name: Website Building Foundation Qualification
+
+on:
+  push:
+    paths:
+      - 'governance/contracts/WEBSITE-BUILDING-FOUNDATION-CONTRACT-*.md'
+      - 'governance/control-records/PROGRAMMING-CONTROL-RECORD-*.json'
+      - 'governance/programs/PROGRAMMING-WORK-PROGRAM-LOCK-*.json'
+      - 'governance/catalog/system-packets/PROGRAMMING.json'
+      - 'tools/website_builder.py'
+      - '.github/scripts/website-building-foundation-qualify.py'
+      - 'tests/test_website_builder.py'
+      - 'qualification/website-building/**'
+      - '.github/workflows/website-building-foundation-qualification.yml'
+      - '.github/scripts/programming-work-program-enforce.js'
+      - '.github/workflows/programming-work-program-enforcement.yml'
+  pull_request:
+    paths:
+      - 'governance/contracts/WEBSITE-BUILDING-FOUNDATION-CONTRACT-*.md'
+      - 'governance/control-records/PROGRAMMING-CONTROL-RECORD-*.json'
+      - 'governance/programs/PROGRAMMING-WORK-PROGRAM-LOCK-*.json'
+      - 'governance/catalog/system-packets/PROGRAMMING.json'
+      - 'tools/website_builder.py'
+      - '.github/scripts/website-building-foundation-qualify.py'
+      - 'tests/test_website_builder.py'
+      - 'qualification/website-building/**'
+      - '.github/workflows/website-building-foundation-qualification.yml'
+      - '.github/scripts/programming-work-program-enforce.js'
+      - '.github/workflows/programming-work-program-enforcement.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: website-building-foundation-qualification-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Test deterministic Website Building foundation
+        run: python3 -m unittest tests.test_website_builder
+      - name: Qualify representative Website Building corpus
+        env:
+          WEBSITE_BUILDING_SOURCE_ID: ${{ github.sha }}
+        run: python3 .github/scripts/website-building-foundation-qualify.py
+      - name: Preserve machine-readable Website Building qualification evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: website-building-foundation-1.0-evidence
+          path: qualification-output/website-building-foundation-1.0.json
+          if-no-files-found: error
+          retention-days: 30

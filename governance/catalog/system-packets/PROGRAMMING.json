@@ -21,7 +21,18 @@
   "owned_capabilities": [
     {"capability_id":"C01","module_key":"AUTOMATION"},
     {"capability_id":"C05","module_key":"CODE"},
-    {"capability_id":"C40","module_key":"WEBSITE_BUILDING","classification":"FIRST_CLASS_PROGRAMMING_CAPABILITY__NOT_PEER_SYSTEM"}
+    {
+      "capability_id":"C40",
+      "module_key":"WEBSITE_BUILDING",
+      "classification":"FIRST_CLASS_PROGRAMMING_CAPABILITY__NOT_PEER_SYSTEM",
+      "foundation_1_0": {
+        "contract_id": "WEBSITE-BUILDING-FOUNDATION-1.0",
+        "status": "QUALIFIED_DETERMINISTIC_STATIC_FOUNDATION",
+        "implementation": "tools/website_builder.py",
+        "qualification_command": "python3 .github/scripts/website-building-foundation-qualify.py",
+        "qualification_corpus": "qualification/website-building/corpus/static-basic"
+      }
+    }
   ],
   "capability_domains_observed": [
     "project model and build semantics",
@@ -56,7 +67,7 @@
     "CORE owns shared runtime/storage/model/A-01 infrastructure; PROGRAMMING owns engineering semantics.",
     "CONNECTED_ACTIONS owns browser/action policy; WEBSITE_BUILDING consumes it without side-effect authority transfer.",
     "WEBSITE_BUILDING is C40 within PROGRAMMING and is not a separate peer system.",
-    "Production credentials/publication/provider authority remain separate explicit gates."
+    "Website Building Foundation 1.0 proves deterministic local static build/verify/qualification only; production credentials/publication/provider authority remain separate explicit gates."
   ],
   "current_continuation_sequence": [
     "Resolve CURRENT-AUTHORITY, Programming control/continuity lock and this packet.",
@@ -64,13 +75,13 @@
     "Do not replay completed Programming foundation work merely because peer admission occurred.",
     "Use Knowledge Recovery only for missing source/custody/provenance gaps.",
     "Maintain explicit CORE and peer-system boundaries.",
-    "Treat Website Building as Programming-owned C40 and bind concrete qualification/deployment providers only when explicit authority exists."
+    "Use Website Building Foundation 1.0 as the admitted deterministic static substrate; admit framework/browser/deployment providers separately when authority and evidence exist."
   ],
   "current_known_gaps": [
     "Full exact-byte census of all Programming Library/archive artifacts remains incomplete.",
     "Some external objects remain unstaged pending approved immutable transport.",
     "Current material standards/tooling deltas may remain for areas not covered by historical research closure.",
-    "Website Building implementation qualification corpus and concrete production provider authority remain to be admitted."
+    "Website Building framework-specific adapters, browser rendering proof and concrete production provider/credential/publication authority remain unadmitted after Foundation 1.0."
   ],
-  "ready_response_to_user_request": "Resume Programming from preserved evidence as an admitted peer, including Website Building C40 when requested, without restarting completed work or crossing another system's authority."
+  "ready_response_to_user_request": "Resume Programming from preserved evidence as an admitted peer, using the qualified Website Building Foundation 1.0 static substrate when applicable, without restarting completed work or crossing another system's authority."
 }

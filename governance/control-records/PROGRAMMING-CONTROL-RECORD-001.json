@@ -41,12 +41,26 @@
     "module_key": "WEBSITE_BUILDING",
     "capability_id": "C40",
     "classification": "FIRST_CLASS_PROGRAMMING_CAPABILITY__NOT_SEPARATE_PEER_SYSTEM",
-    "rule": "Website Building owns construction and engineering of websites/web applications inside PROGRAMMING. Browser automation and external side-effect authority remain CONNECTED_ACTIONS; production hosting/publication authority must be explicitly granted."
+    "rule": "Website Building owns construction and engineering of websites/web applications inside PROGRAMMING. Browser automation and external side-effect authority remain CONNECTED_ACTIONS; production hosting/publication authority must be explicitly granted.",
+    "foundation_1_0": {
+      "contract_id": "WEBSITE-BUILDING-FOUNDATION-1.0",
+      "status": "QUALIFIED_DETERMINISTIC_STATIC_FOUNDATION",
+      "foundation_contract": "governance/contracts/WEBSITE-BUILDING-FOUNDATION-CONTRACT-001.md",
+      "implementation": "tools/website_builder.py",
+      "qualification_command": "python3 .github/scripts/website-building-foundation-qualify.py",
+      "qualification_corpus": "qualification/website-building/corpus/static-basic",
+      "qualification_workflow": ".github/workflows/website-building-foundation-qualification.yml",
+      "build_mode": "DETERMINISTIC_STATIC_PACKAGE",
+      "external_side_effects": false,
+      "network_access": false,
+      "publication_authority": "NOT_GRANTED",
+      "production_deployment_authority": "NOT_GRANTED"
+    }
   },
   "second_shift": {
     "peer_lane": true,
     "owner_file": "governance/second-shift/PROGRAMMING-DELEGATIONS.json",
     "one_mutation_claim_max": true
   },
-  "qualification_boundary": "Admission grants repository owner/lane authority only. It does not grant production, external-provider, credential, publication, native-device or user-side-effect authority."
+  "qualification_boundary": "Admission grants repository owner/lane authority only. Website Building Foundation 1.0 proves deterministic local static build/verify/qualification only; it does not grant production, external-provider, credential, publication, native-device or user-side-effect authority."
 }
