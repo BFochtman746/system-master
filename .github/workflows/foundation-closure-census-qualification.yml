@@ -28,14 +28,12 @@ on:
       - 'tools/**'
       - 'tests/**'
 
-# Bounded write window: synchronize the generated matrix after P02 evidence admission.
-# Follow-up sealing commit must restore contents: read and drift rejection.
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   qualify:
-    name: Verify evidence and synchronize Foundation closure truth
+    name: Verify evidence and recompute Foundation closure truth
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
@@ -43,7 +41,7 @@ jobs:
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           fetch-depth: 0
-          persist-credentials: true
+          persist-credentials: false
       - name: Pin Node runtime
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
@@ -58,10 +56,14 @@ jobs:
         run: |
           mkdir -p .foundation-census
           node .github/scripts/foundation-closure-matrix.js --summary | tee .foundation-census/summary.json
-          node .github/scripts/foundation-closure-matrix.js --out governance/census/FOUNDATION-CLOSURE-CENSUS-001-DISPOSITION-MATRIX.md
-          cp governance/census/FOUNDATION-CLOSURE-CENSUS-001-DISPOSITION-MATRIX.md .foundation-census/FOUNDATION-CLOSURE-CENSUS-001-DISPOSITION-MATRIX.md
+          node .github/scripts/foundation-closure-matrix.js --out .foundation-census/FOUNDATION-CLOSURE-CENSUS-001-DISPOSITION-MATRIX.md
           node .github/scripts/foundation-closure-matrix.js --json > .foundation-census/matrix.json
-      - name: Assert P00-P02 admission invariants
+      - name: Reject committed matrix drift
+        shell: bash
+        run: |
+          set -euo pipefail
+          diff -u governance/census/FOUNDATION-CLOSURE-CENSUS-001-DISPOSITION-MATRIX.md .foundation-census/FOUNDATION-CLOSURE-CENSUS-001-DISPOSITION-MATRIX.md
+      - name: Assert integrity invariants
         shell: bash
         run: |
           set -euo pipefail
@@ -71,23 +73,11 @@ jobs:
           if (m.module_count !== 66 || m.capability_entries !== 50 || m.platform_entries !== 16) process.exit(2);
           const complete = new Set(m.rows.filter(r => r.current_state === 'COMPLETE_WITH_EVIDENCE').map(r => r.requirement_or_capability_id));
           for (const id of ['P00','P01','P02']) if (!complete.has(id)) process.exit(3);
-          if (complete.size !== 3) process.exit(4);
-          if (!m.next_active_gap || m.next_active_gap.requirement_or_capability_id !== 'P03') process.exit(5);
+          for (const row of m.rows) {
+            if (row.current_state === 'DURABLY_BLOCKED_EXTERNAL_HUMAN_PRIVATE_NATIVE' && row._unpopulated_required.length) process.exit(4);
+            if (row.current_state === 'COMPLETE_WITH_EVIDENCE' && (!row.evidence_pointer || row.evidence_pointer === 'UNPOPULATED')) process.exit(5);
+          }
           NODE
-      - name: Synchronize canonical matrix for P02 admission
-        if: github.event_name == 'push' && github.ref == 'refs/heads/apply-updates-008'
-        shell: bash
-        run: |
-          set -euo pipefail
-          if git diff --quiet -- governance/census/FOUNDATION-CLOSURE-CENSUS-001-DISPOSITION-MATRIX.md; then
-            echo 'Matrix already synchronized.'
-            exit 0
-          fi
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add governance/census/FOUNDATION-CLOSURE-CENSUS-001-DISPOSITION-MATRIX.md
-          git commit -m 'foundation: synchronize P02 evidence matrix'
-          git push origin HEAD:apply-updates-008
       - name: Upload generated census evidence
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
