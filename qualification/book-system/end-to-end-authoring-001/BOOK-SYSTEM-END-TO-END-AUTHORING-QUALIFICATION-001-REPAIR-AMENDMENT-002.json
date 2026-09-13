@@ -1,0 +1,75 @@
+{
+  "amendment_id": "BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001-REPAIR-AMENDMENT-002",
+  "effective_date": "2026-09-13",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "standing": "CANONICAL_ADDITIVE_QUALIFICATION_AMENDMENT__CURRENT_GUARD_EVIDENCE_REBOUND__ORIGINAL_48_CASE_MATRIX_UNCHANGED",
+  "parent_qualification": "BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001",
+  "original_forensic_map": "qualification/book-system/end-to-end-authoring-001/BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001-FORENSIC-MAP.json",
+  "original_failed_subject": {
+    "subject_sha": "cd96d6d300b73d1a28660d58707624372fee6142",
+    "hosted_run_id": 34431785904,
+    "result": "46_PASS_2_FAIL",
+    "historical_evidence_only": true
+  },
+  "qualified_guard_dependency": {
+    "qualification_id": "BOOK-SYSTEM-E2E-AUTHORITY-GUARDS-001",
+    "subject_sha": "9b2d7e3f5fb8244c7768c4732cddb491bfd11703",
+    "hosted_run_id": 34738140039,
+    "hosted_job_id": 103673112669,
+    "hosted_result": "PASS__24_OF_24",
+    "hosted_evidence_artifact_id": 10311224703,
+    "hosted_evidence_artifact_sha256": "3fc035fe2604e770d68eef142a028680324078ae97558d429fbf8f5c7b3b9b67",
+    "a01_run_id": 34737703272,
+    "a01_job_id": 103671965481,
+    "a01_registry_version": 31,
+    "a01_control_plane_sha": "49c28f7d5f9ebd9878f9bd88a243363d87570bed",
+    "a01_result": "PASS",
+    "a01_result_detail": "PASS__24_OF_24",
+    "a01_evidence_artifact_id": 10311745675,
+    "a01_evidence_zip_sha256": "d51ba3c649f8290610dd48a6454123f7acd1ccc9bc59ff06708bc2fe6685aefa"
+  },
+  "routing_changes_only": [
+    {
+      "affected_case": "E2E019_CHANGED_AUTHOR_SUBJECT_INVALIDATES_PRIOR_DECISION_FOR_NEW_SUBJECT",
+      "runtime_route": "system-master/book-system/author-decision-current-subject-guard.js",
+      "interpretation": "Effective currentness must use the qualified guard. A preserved base snapshot may remain historically non-STALE while the guard's effectiveDecisionState is STALE; the effective guarded state governs new presentation/resolution."
+    },
+    {
+      "affected_case": "E2E021_DOCUMENT_PROVIDER_SUCCESS_ALONE_CANNOT_FREEZE",
+      "runtime_route": "system-master/book-system/export-freeze-parent-admission-guard.js",
+      "interpretation": "The exact qualified guard must reject an empty parent_admission_refs set with PARENT_ADMISSION_REF_REQUIRED before delegating all other freeze semantics to Export Freeze v1."
+    },
+    {
+      "affected_scope": "ALL_E2E_AUTHOR_QUEUE_CALLS",
+      "runtime_route": "system-master/book-system/author-decision-current-subject-guard.js",
+      "interpretation": "Use the strict guard as the E2E-facing Author Decision Queue surface so direct and revalidated stale-subject handling are tested compositionally."
+    },
+    {
+      "affected_scope": "ALL_E2E_EXPORT_FREEZE_CALLS",
+      "runtime_route": "system-master/book-system/export-freeze-parent-admission-guard.js",
+      "interpretation": "Use the strict parent-admission guard as the E2E-facing Export Freeze surface while retaining v1 as the delegated implementation."
+    }
+  ],
+  "unchanged_requirements": [
+    "all 48 original E2E case IDs remain required",
+    "one persistent Lifecycle ledger remains required through every non-lifecycle parent successor",
+    "Lifecycle current-parent rebind remains the only allowed ledger rebinding path",
+    "qualified Author Decision Queue v1 and Export Freeze v1 bytes remain unchanged and independently authoritative for their qualified v1 semantics",
+    "synthetic author and publication fixtures remain explicitly synthetic qualification evidence only",
+    "technical, proof, provenance, C2PA, document, or export success cannot synthesize publication authority",
+    "Document mechanics remain outside Book",
+    "provider SUCCESS remains insufficient for canonical admission, export freeze, or publication authority",
+    "no predecessor exact-SHA PASS transfers to the changed E2E subject"
+  ],
+  "qualification_policy": {
+    "hosted_exact_sha_pass_required": true,
+    "registered_a01_required": true,
+    "a01_gate_class": "consolidated",
+    "required_case_count": 48,
+    "required_pass_count": 48,
+    "promotion_authority_from_this_gate": false
+  },
+  "qualification_effect": "GUARD_DEPENDENCY_REBOUND_ONLY__PRE14_48_CASE_REQUALIFICATION_REQUIRED__NO_PASS_TRANSFER__NO_PROMOTION_AUTHORITY",
+  "supersedes_for_current_guard_evidence": "BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001-REPAIR-AMENDMENT-001",
+  "supersession_scope": "CURRENT_EXACT_SHA_GUARD_QUALIFICATION_EVIDENCE_ONLY"
+}

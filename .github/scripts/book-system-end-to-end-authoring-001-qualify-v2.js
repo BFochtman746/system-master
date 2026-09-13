@@ -10,11 +10,11 @@ const evidenceDir = process.env.A01_EVIDENCE_DIR || path.join(process.env.RUNNER
 fs.mkdirSync(evidenceDir, { recursive: true });
 
 const SOURCE = '.github/scripts/book-system-end-to-end-authoring-001-qualify.js';
-const AMENDMENT = 'qualification/book-system/end-to-end-authoring-001/BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001-REPAIR-AMENDMENT-001.json';
-const STATE = 'qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-022.json';
+const AMENDMENT = 'qualification/book-system/end-to-end-authoring-001/BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001-REPAIR-AMENDMENT-002.json';
+const STATE = 'qualification/book-system/reconstruction/BOOK-RECONSTRUCTION-B03-E-PRE14-AUTHORITY-REBIND-001.json';
 const AUTHOR_GUARD = 'system-master/book-system/author-decision-current-subject-guard.js';
 const FREEZE_GUARD = 'system-master/book-system/export-freeze-parent-admission-guard.js';
-const QUALIFIED_GUARD_SUBJECT = 'a119ccdf77b61011b1093006b55367fc3e5a65c2';
+const QUALIFIED_GUARD_SUBJECT = '9b2d7e3f5fb8244c7768c4732cddb491bfd11703';
 const QUALIFICATION_ID = 'BOOK-SYSTEM-END-TO-END-AUTHORING-QUALIFICATION-001';
 
 function readJson(rel) { return JSON.parse(fs.readFileSync(path.join(workspace, rel), 'utf8')); }
