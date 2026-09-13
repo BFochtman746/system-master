@@ -1,32 +1,11 @@
 name: Foundation Closure Census Qualification
 
+# Evidence receipts can bind any repository path. Run on every repository change so
+# exact-subject drift cannot evade immediate Foundation evidence invalidation.
 on:
   push:
-    paths:
-      - '.github/scripts/foundation-closure-matrix.js'
-      - '.github/scripts/foundation-closure-evidence-verify.js'
-      - '.github/workflows/foundation-closure-census-qualification.yml'
-      - 'governance/CURRENT-AUTHORITY.json'
-      - 'governance/census/**'
-      - 'governance/contracts/**'
-      - 'governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-*.json'
-      - 'governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-*.json'
-      - 'qualification/**'
-      - 'tools/**'
-      - 'tests/**'
   pull_request:
-    paths:
-      - '.github/scripts/foundation-closure-matrix.js'
-      - '.github/scripts/foundation-closure-evidence-verify.js'
-      - '.github/workflows/foundation-closure-census-qualification.yml'
-      - 'governance/CURRENT-AUTHORITY.json'
-      - 'governance/census/**'
-      - 'governance/contracts/**'
-      - 'governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-*.json'
-      - 'governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-*.json'
-      - 'qualification/**'
-      - 'tools/**'
-      - 'tests/**'
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -79,10 +58,11 @@ jobs:
           }
           NODE
       - name: Upload generated census evidence
+        if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: foundation-closure-census-${{ github.run_id }}
           path: .foundation-census/
           include-hidden-files: true
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 30
