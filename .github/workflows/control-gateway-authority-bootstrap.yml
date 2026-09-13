@@ -20,7 +20,7 @@ jobs:
     environment: control-gateway-production
     steps:
       - name: Checkout exact production controller
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           persist-credentials: false
           fetch-depth: 1
@@ -37,11 +37,15 @@ jobs:
           private-key: ${{ secrets.CONTROL_GATEWAY_WRITER_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
           repositories: ${{ github.event.repository.name }}
+          permission-contents: write
       - name: Execute create-only authority bootstrap
         shell: bash
         env:
           CONTROL_GATEWAY_BOOTSTRAP_REQUEST_JSON: ${{ inputs.bootstrap_request_json }}
           CONTROL_GATEWAY_WRITER_TOKEN: ${{ steps.writer-token.outputs.token }}
+          CONTROL_GATEWAY_WRITER_ACTUAL_APP_SLUG: ${{ steps.writer-token.outputs.app-slug }}
+          CONTROL_GATEWAY_WRITER_EXPECTED_APP_SLUG: ${{ vars.CONTROL_GATEWAY_WRITER_APP_SLUG }}
+          CONTROL_GATEWAY_WRITER_INSTALLATION_ID: ${{ steps.writer-token.outputs.installation-id }}
           CONTROL_GATEWAY_WRITER_EVIDENCE_DIR: ${{ runner.temp }}/control-gateway-authority-bootstrap-${{ github.run_id }}
         run: node .github/scripts/control-gateway-authority-bootstrap.js
       - name: Upload immutable bootstrap evidence
