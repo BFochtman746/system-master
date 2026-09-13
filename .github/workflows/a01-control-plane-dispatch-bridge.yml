@@ -70,8 +70,43 @@ permissions:
   actions: read
 
 jobs:
+  preflight:
+    name: Validate external A-01 dispatch packet before reusable routing
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate dispatch packet shape
+        shell: bash
+        env:
+          QUALIFICATION_ID: ${{ inputs.qualification_id }}
+          WORKSTREAM_ID: ${{ inputs.workstream_id }}
+          SUBJECT_SHA: ${{ inputs.subject_sha }}
+          ORIGIN_REF: ${{ inputs.origin_ref }}
+          RESUME_ON_PASS: ${{ inputs.resume_on_pass }}
+          RESUME_ON_FAILURE: ${{ inputs.resume_on_failure }}
+          EXECUTION_CONTEXT: ${{ inputs.execution_context }}
+          QUALIFIER_TIMEOUT_MINUTES: ${{ inputs.qualifier_timeout_minutes }}
+          JOB_TIMEOUT_MINUTES: ${{ inputs.job_timeout_minutes }}
+          REPAIR_ATTEMPT: ${{ inputs.repair_attempt }}
+          MAX_REPAIR_ATTEMPTS: ${{ inputs.max_repair_attempts }}
+        run: |
+          set -euo pipefail
+          test -n "$QUALIFICATION_ID"
+          test -n "$WORKSTREAM_ID"
+          [[ "$SUBJECT_SHA" =~ ^[0-9a-f]{40}$ ]]
+          test -n "$ORIGIN_REF"
+          test -n "$RESUME_ON_PASS"
+          test -n "$RESUME_ON_FAILURE"
+          case "$EXECUTION_CONTEXT" in normal|overnight) ;; *) exit 1 ;; esac
+          [[ "$QUALIFIER_TIMEOUT_MINUTES" =~ ^[0-9]+$ ]]
+          [[ "$JOB_TIMEOUT_MINUTES" =~ ^[0-9]+$ ]]
+          [[ "$REPAIR_ATTEMPT" =~ ^[0-9]+$ ]]
+          [[ "$MAX_REPAIR_ATTEMPTS" =~ ^[0-9]+$ ]]
+          test "$REPAIR_ATTEMPT" -le "$MAX_REPAIR_ATTEMPTS"
+          echo A01_DISPATCH_BRIDGE_PREFLIGHT=PASS
+
   route:
     name: Dispatch through reusable A-01 Control Plane Gateway
+    needs: preflight
     uses: ./.github/workflows/a01-control-plane-gateway.yml
     with:
       qualification_id: ${{ inputs.qualification_id }}
