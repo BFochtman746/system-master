@@ -50,7 +50,19 @@ jobs:
       - name: Verify canonical Foundation census disposition
         run: |
           node .github/scripts/foundation-closure-matrix.js --out /tmp/foundation-matrix.md
-          diff -u governance/census/FOUNDATION-CLOSURE-CENSUS-001-DISPOSITION-MATRIX.md /tmp/foundation-matrix.md
+          python3 - <<'PY'
+          from pathlib import Path
+          paths = [
+              Path('governance/census/FOUNDATION-CLOSURE-CENSUS-001-DISPOSITION-MATRIX.md'),
+              Path('/tmp/foundation-matrix.md'),
+          ]
+          for path in paths:
+              normalized = path.with_name(path.name + '.normalized')
+              normalized.write_text(path.read_text(encoding='utf-8').rstrip('\n') + '\n', encoding='utf-8')
+          PY
+          diff -u \
+            governance/census/FOUNDATION-CLOSURE-CENSUS-001-DISPOSITION-MATRIX.md.normalized \
+            /tmp/foundation-matrix.md.normalized
       - name: Preserve machine-readable Audiobook qualification evidence
         uses: actions/upload-artifact@v4
         with:
