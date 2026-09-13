@@ -2,6 +2,7 @@
   "census_id": "SYSTEM-MASTER-FOUNDATION-CLOSURE-CENSUS-001",
   "status": "ACTIVE",
   "created_at": "2026-09-10T05:41:00-04:00",
+  "updated_at": "2026-09-13T18:45:00-04:00",
   "purpose": "Prove, rather than assume, whether System Master foundational mapping, tracing, ownership and execution semantics are complete.",
   "scope": [
     "all canonical foundational requirements and capability crosswalk entries including C00-C49 and P00-P15",
@@ -27,6 +28,7 @@
     "failure_semantics",
     "evidence_target",
     "test_or_acceptance_target",
+    "authority_boundary",
     "current_state",
     "gap_or_blocker",
     "successor",
@@ -40,14 +42,21 @@
   ],
   "closure_rule": "Foundation 1.0 may be called complete only when every in-scope row is COMPLETE_WITH_EVIDENCE or EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY, and every durable blocker is separately recorded as preventing only the dependent capability rather than silently closing unrelated work.",
   "no_silent_gap_rule": "Missing owner, route, contract, canonical writer, authority boundary, failure semantics, evidence target or acceptance target is an ACTIVE_GAP, not completion.",
-  "execution_rule": "Each ACTIVE_GAP must be assigned to its canonical owner and converted into the highest-value safe successor packet. Owners continue after each completion until their dependency-valid ladder is exhausted.",
-  "initial_owner_order": ["CORE", "LEARNING", "BOOK", "PROSE"],
+  "evidence_rule": "COMPLETE_WITH_EVIDENCE requires an explicit Foundation evidence receipt bound to CURRENT-AUTHORITY, canonical owner, and exact Git blob identities of the qualified subject files. Populated contract prose alone is never acceptance evidence. Evidence subject drift invalidates PASS.",
+  "ownership_rule": "Crosswalk ownership and the current owner-allocation registry must agree for every owned capability; disagreement is a census failure, not a tie-breaker.",
+  "blocker_rule": "External, human, private or native blockers may be recorded only after all repository-solvable contract, ownership, authority-boundary and evidence obligations for that row are complete; a blocker may not conceal local unfinished work.",
+  "execution_rule": "Each ACTIVE_GAP must be assigned to its canonical owner and converted into the highest-value dependency-valid safe successor packet. Platform/foundation prerequisites are considered before product capabilities; explicit dependency evidence overrides identifier order.",
+  "active_owner_order": ["CORE", "PROGRAMMING", "DOCUMENTS", "SPREADSHEET_DATA", "RESEARCH_KNOWLEDGE", "CONNECTED_ACTIONS", "MEDIA", "LEARNING", "BOOK"],
+  "retired_owner_exclusions": ["PROSE"],
   "prose_recovery_ref": "governance/second-shift/PROSE-RECOVERY-2026-09-10-0541.json",
   "forbidden_claims": [
     "do not infer completion from prior planning volume",
     "do not fabricate ownership, authority or evidence",
     "do not treat a stale/absent delegation as an empty valid lane",
-    "do not transfer hosted evidence into A-01/native/private/publication/production authority"
+    "do not transfer hosted evidence into A-01/native/private/publication/production authority",
+    "do not treat populated contract prose as acceptance evidence",
+    "do not transfer PASS when an exact qualified subject blob has changed",
+    "do not use an external/native/private blocker to hide unfinished repository-solvable work"
   ],
-  "final_artifact": "A 100-percent disposition matrix plus unresolved-gap successor register and Foundation 1.0 closure decision."
+  "final_artifact": "A 100-percent disposition matrix containing every required column, plus unresolved-gap successor register, evidence pointers, and Foundation 1.0 closure decision."
 }

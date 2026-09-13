@@ -1,0 +1,71 @@
+name: Foundation Closure Census Qualification
+
+on:
+  push:
+    paths:
+      - '.github/scripts/foundation-closure-matrix.js'
+      - '.github/workflows/foundation-closure-census-qualification.yml'
+      - 'governance/CURRENT-AUTHORITY.json'
+      - 'governance/census/**'
+      - 'governance/contracts/**'
+      - 'governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-*.json'
+      - 'governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-*.json'
+      - 'qualification/**'
+  pull_request:
+    paths:
+      - '.github/scripts/foundation-closure-matrix.js'
+      - '.github/workflows/foundation-closure-census-qualification.yml'
+      - 'governance/CURRENT-AUTHORITY.json'
+      - 'governance/census/**'
+      - 'governance/contracts/**'
+      - 'governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-*.json'
+      - 'governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-*.json'
+      - 'qualification/**'
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    name: Recompute Foundation closure truth
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout census subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Pin Node runtime
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Syntax check census generator
+        run: node --check .github/scripts/foundation-closure-matrix.js
+      - name: Recompute canonical matrix and summary
+        run: |
+          mkdir -p .foundation-census
+          node .github/scripts/foundation-closure-matrix.js --summary | tee .foundation-census/summary.json
+          node .github/scripts/foundation-closure-matrix.js --out .foundation-census/FOUNDATION-CLOSURE-CENSUS-001-DISPOSITION-MATRIX.md
+          node .github/scripts/foundation-closure-matrix.js --json > .foundation-census/matrix.json
+      - name: Assert integrity invariants
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs = require('fs');
+          const m = JSON.parse(fs.readFileSync('.foundation-census/matrix.json', 'utf8'));
+          if (m.module_count !== 66 || m.capability_entries !== 50 || m.platform_entries !== 16) process.exit(2);
+          for (const row of m.rows) {
+            if (row.current_state === 'DURABLY_BLOCKED_EXTERNAL_HUMAN_PRIVATE_NATIVE' && row._unpopulated_required.length) process.exit(3);
+            if (row.current_state === 'COMPLETE_WITH_EVIDENCE' && (!row.evidence_pointer || row.evidence_pointer === 'UNPOPULATED')) process.exit(4);
+          }
+          NODE
+      - name: Upload generated census evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: foundation-closure-census-${{ github.run_id }}
+          path: .foundation-census/
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 30
