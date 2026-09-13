@@ -26,8 +26,10 @@ on:
       - '.github/scripts/second-shift-owner-coverage.js'
       - '.github/scripts/second-shift-execution-control-enforce.js'
       - '.github/scripts/second-shift-eight-lane-qualification.py'
+      - '.github/scripts/programming-work-program-enforce.js'
       - 'tools/second_shift_supervisor_v2.py'
       - '.github/workflows/second-shift-enforcement.yml'
+      - '.github/workflows/programming-work-program-enforcement.yml'
   pull_request:
     paths:
       - 'governance/CURRENT-AUTHORITY.json'
@@ -49,8 +51,10 @@ on:
       - '.github/scripts/second-shift-owner-coverage.js'
       - '.github/scripts/second-shift-execution-control-enforce.js'
       - '.github/scripts/second-shift-eight-lane-qualification.py'
+      - '.github/scripts/programming-work-program-enforce.js'
       - 'tools/second_shift_supervisor_v2.py'
       - '.github/workflows/second-shift-enforcement.yml'
+      - '.github/workflows/programming-work-program-enforcement.yml'
 
 permissions:
   contents: read
@@ -78,6 +82,7 @@ jobs:
           node --check .github/scripts/second-shift-enforce.js
           node --check .github/scripts/second-shift-owner-coverage.js
           node --check .github/scripts/second-shift-execution-control-enforce.js
+          node --check .github/scripts/programming-work-program-enforce.js
           node --check .github/scripts/validate-system-topology.js
           python3 -m py_compile .github/scripts/second-shift-eight-lane-qualification.py
 
@@ -86,6 +91,9 @@ jobs:
 
       - name: Enforce locked program jobs and completion truth
         run: node .github/scripts/program-job-lock-enforce.js
+
+      - name: Enforce Programming peer continuity and Website Building boundary
+        run: node .github/scripts/programming-work-program-enforce.js
 
       - name: Enforce current obligation ownership
         run: node .github/scripts/current-obligation-registry-enforce.js
