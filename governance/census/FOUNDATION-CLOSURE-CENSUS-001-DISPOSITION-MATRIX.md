@@ -14,13 +14,13 @@ Entries: 50 capability · 16 platform · 66 total
 
 | State | Rows |
 | --- | ---: |
-| `COMPLETE_WITH_EVIDENCE` | 19 |
-| `ACTIVE_GAP` | 29 |
+| `COMPLETE_WITH_EVIDENCE` | 20 |
+| `ACTIVE_GAP` | 28 |
 | `DURABLY_BLOCKED_EXTERNAL_HUMAN_PRIVATE_NATIVE` | 2 |
 | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | 16 |
 | **Total** | **66** |
 
-**Foundation 1.0 completion with evidence: 29%.**
+**Foundation 1.0 completion with evidence: 30%.**
 
 ## Matrix
 
@@ -30,7 +30,7 @@ Entries: 50 capability · 16 platform · 66 total
 | `C01` | AUTOMATION | SYSTEM_MASTER/PROGRAMMING | COMPLETE WITH EVIDENCE | Foundation contract complete: governance/contracts/AUTOMATION-FOUNDATION-CONTRACT-001.md | 0/8 |
 | `C02` | BROWSER | SYSTEM_MASTER/CONNECTED_ACTIONS | COMPLETE WITH EVIDENCE | Foundation contract complete: governance/contracts/BROWSER-FOUNDATION-CONTRACT-001.md | 0/8 |
 | `C03` | CALENDAR | SYSTEM_MASTER/CONNECTED_ACTIONS | COMPLETE WITH EVIDENCE | Foundation contract complete: governance/contracts/CALENDAR-FOUNDATION-CONTRACT-001.md | 0/8 |
-| `C04` | CHAT | SYSTEM_MASTER/CORE | ACTIVE GAP | Contract exists but 8/8 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target | 8/8 |
+| `C04` | CHAT | SYSTEM_MASTER/CORE | COMPLETE WITH EVIDENCE | Foundation contract complete: governance/contracts/CHAT-FOUNDATION-CONTRACT-001.md | 0/8 |
 | `C05` | CODE | SYSTEM_MASTER/PROGRAMMING | ACTIVE GAP | Contract exists but 8/8 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target | 8/8 |
 | `C06` | COMMS | SYSTEM_MASTER/CONNECTED_ACTIONS | ACTIVE GAP | Contract exists but 8/8 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target | 8/8 |
 | `C07` | CURRICULUM | SYSTEM_MASTER/LEARNING | ACTIVE GAP | Contract exists but 8/8 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target | 8/8 |
@@ -95,11 +95,10 @@ Entries: 50 capability · 16 platform · 66 total
 
 ## Unresolved gap successor register
 
-29 ACTIVE_GAP entries remain.
+28 ACTIVE_GAP entries remain.
 
 | Gap | Capability | Owner | Unpopulated required |
 | --- | --- | --- | ---: |
-| `FCC-001-GAP-C04` | CHAT | SYSTEM_MASTER/CORE | 8/8 |
 | `FCC-001-GAP-C05` | CODE | SYSTEM_MASTER/PROGRAMMING | 8/8 |
 | `FCC-001-GAP-C06` | COMMS | SYSTEM_MASTER/CONNECTED_ACTIONS | 8/8 |
 | `FCC-001-GAP-C07` | CURRICULUM | SYSTEM_MASTER/LEARNING | 8/8 |
@@ -131,4 +130,4 @@ Entries: 50 capability · 16 platform · 66 total
 
 ## Exact next ACTIVE_GAP
 
-`C04` CHAT — Contract exists but 8/8 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target
+`C05` CODE — Contract exists but 8/8 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target

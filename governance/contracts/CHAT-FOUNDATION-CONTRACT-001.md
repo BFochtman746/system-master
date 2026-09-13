@@ -1,87 +1,107 @@
-# CHAT — Foundation Contract 001
+# CHAT - Foundation Contract 001
 
-**Owner** `SYSTEM_MASTER/CORE` · **Lane** CORE · **Effective** <UNSET>
-**Authority** `governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-005.json`
-**Scaffolded** 2026-09-13 from `.github/scripts/scaffold-foundation-contracts.js`
+**Capability** `C04` - **Owner** `SYSTEM_MASTER/CORE` - **Lane** CORE - **Effective** 2026-09-13
+**Authority** `governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006.json`
+**Foundation implementation** `CHAT-FOUNDATION-1.0`
 
-> **This contract is a stub.** Sections 1–8 are the census gap-forcing columns and
-> are empty on purpose. A section containing "TBD", a placeholder, or a plausible
-> guess counts as unpopulated — the census forbids inferring completion from
-> planning volume. Delete this block when all eight are genuinely filled.
+> **Foundation 1.0 implementation accepted for deterministic local Chat turn-envelope artifacts only.** This foundation proves ordered local message normalization, authority binding, content addressing, and verification. It does not grant model execution, provider/network access, credentials, tool or connector execution, memory writes, durable conversation persistence, autonomous sending, publication, or any external side effect.
 
-## Known from the census
+## Known from current authority
 
-- **Module name:** Chat / Conversational Workspace
-- **Interaction direction:** PRIMARY_SYSTEM_MASTER_WORKING_SURFACE
-- **Census standing:** `CURRENT_CANONICAL_OWNER_CAPABILITY__PARTIAL`
-- **Census evidence summary:** CHAT-001A/SMR019 has a superseding cumulative local exact-subject portable/fresh-extraction PASS with durable custody; hosted, A-01, native/device and production remain separate.
-
-This is what P6 recorded. It is background, not a populated section.
-
-## Boundary rules touching this module
-
-- CORE owns the shared data foundation; SPREADSHEET_DATA owns product BI and analysis semantics.
-- CORE owns the connector action runtime; CONNECTED_ACTIONS owns module policy.
-
-Crossing any of these is an `owner` decision, never lane discretion.
+- C04 CHAT is owned by `SYSTEM_MASTER/CORE` in capability crosswalk 003 and is the primary System Master working surface.
+- Chat may coordinate requests across peer systems, but coordination does not transfer semantic ownership or side-effect authority from those systems to CORE/Chat.
+- P13 model routing/local inference is absorbed into C20 LOCALAI; C04 does not acquire model-runtime authority from that absorption.
+- P14 connector action runtime is absorbed into C27 PLUGINS under CONNECTED_ACTIONS; C04 does not acquire connector/action authority.
+- Historical CHAT-001A/SMR019 portable evidence remains background evidence only; Foundation 1.0 acceptance is bound to the implementation and qualification named below.
 
 ## 1. Contract / interface
 
-<!-- What this module promises callers: named operations, inputs, outputs, and what is explicitly not offered. -->
+Provide a headless deterministic compiler/verifier for a local Chat turn envelope:
 
-**UNPOPULATED**
+- implementation: `tools/chat_turn_plan.py`
+- build: `python3 tools/chat_turn_plan.py build <chat.json> <output>`
+- verify: `python3 tools/chat_turn_plan.py verify <output>`
+- input schema: `CHAT-TURN-SPEC-1.0`
+- output: `chat-turn-plan.json`, schema `CHAT-TURN-PLAN-1.0`
+- qualification: `python3 .github/scripts/chat-foundation-qualify.py`
+- representative corpus: `qualification/chat/corpus/basic/chat.json`
+- CI: `.github/workflows/chat-foundation-qualification.yml`
+
+Foundation 1.0 accepts an ordered bounded message sequence using only `system`, `assistant`, and `user` roles. Every message has a unique identifier; at least one user message is required; the terminal message must be the current user request. The compiler preserves message order and content, binds the plan to current C04 ownership, emits a source digest plus plan digest, and performs no inference or side effect.
 
 ## 2. Ingress routes
 
-<!-- Every way work enters. Name the caller, the transport, and the authority that admits it. A route with no named admitting authority is a gap, not a route. -->
-
-**UNPOPULATED**
+- A caller supplies one local `CHAT-TURN-SPEC-1.0` JSON document to the `build` command.
+- The compiler reads `governance/CURRENT-AUTHORITY.json` and its selected capability crosswalk only to bind current C04 ownership into the plan.
+- `verify` accepts a previously emitted local Foundation plan directory.
+- No live model/provider stream, account session, tool result, connector callback, memory mutation, remote conversation store, voice session, or external message transport is admitted by Foundation 1.0.
 
 ## 3. Egress routes
 
-<!-- Every way results leave: return values, emitted artifacts, notifications, side effects on other modules. -->
-
-**UNPOPULATED**
+- `build` emits exactly one local `chat-turn-plan.json` artifact in a caller-selected new output directory.
+- `verify` returns a local PASS/FAIL result without mutating the plan.
+- qualification emits `qualification-output/chat-foundation-1.0.json`.
+- No model response is generated; no tool is called; no connector is executed; no memory or durable conversation state is written; no message is autonomously sent; no network request or other external side effect occurs.
 
 ## 4. Persistence and canonical writer
 
-<!-- Exactly one component may write each piece of durable state. Name it, name the store, and name what happens to a write arriving from anywhere else. -->
+`tools/chat_turn_plan.py` is the canonical writer for the Foundation 1.0 local Chat turn-plan artifact only. It refuses an existing output path, rejects symlink traversal for input/output paths, stages the completed plan in a sibling temporary directory, and promotes the new directory by filesystem rename. It never overwrites or deletes an existing caller artifact.
 
-**UNPOPULATED**
+Production conversation state, memory, artifact indexes, and any remote Chat/session state are outside this writer boundary. Their canonical writers must be separately admitted under their owning systems/contracts before C04 may consume them as durable state.
 
 ## 5. Dependencies
 
-<!-- Modules and shared infrastructure required, and the direction of each. Flag any that cross a boundary rule below. -->
+- Python standard library only for the local compiler/verifier.
+- `governance/CURRENT-AUTHORITY.json` for the authority pointer.
+- the current authority-selected capability crosswalk for C04 ownership.
+- CORE for C04 Chat/working-surface semantics.
+- C20 LOCALAI or another separately admitted model runtime for future inference; not used by Foundation 1.0.
+- C27 PLUGINS / CONNECTED_ACTIONS for future connector/action execution; not used by Foundation 1.0.
+- Other peer systems may later supply owned artifacts or operations through admitted interfaces; Foundation 1.0 does not execute them.
 
-**UNPOPULATED**
+The Foundation substrate has no package-manager, network, provider SDK, model, credential, account, connector, tool-runtime, remote-store, or native-device dependency.
 
 ## 6. Failure semantics
 
-<!-- What happens when each ingress route fails, a dependency is unavailable, or a write is refused. State fail-closed or fail-open, and justify any fail-open. Include the idempotency rule. -->
+Fail closed on malformed JSON, unknown top-level or message fields, unsupported roles, invalid or duplicate identifiers, empty/oversized/control-character content, excessive message count or aggregate content, absence of a user message, a terminal message that is not the current user request, stale/incorrect C04 authority binding, symlink traversal, an existing output path, malformed hashes, schema drift, plan tampering, or any attempt to escalate a denied authority even if the plan is rehashed.
 
-**UNPOPULATED**
+For the same normalized source and authority state, compilation is deterministic and produces byte-identical plan artifacts and the same SHA-256. This is local artifact idempotency only; Foundation 1.0 performs no inference, send, tool call, memory mutation, or provider operation for which external idempotency would be required.
 
 ## 7. Evidence target
 
-<!-- The artifact that proves this module did what it claimed: path, format, required contents. A log line is not evidence. -->
+The machine-readable evidence artifact is `qualification-output/chat-foundation-1.0.json`. CI preserves it as `chat-foundation-1.0-evidence`.
 
-**UNPOPULATED**
+Required evidence includes source identity, representative corpus path, qualification command, plan SHA-256, plan-file SHA-256, deterministic repeat-compile result, tamper detection, current-authority binding, ordered-message preservation, terminal-current-user validation, and explicit denials for model execution, provider/network access, credentials, tool execution, connector execution, memory writes, conversation persistence, autonomous send, and external side effects.
+
+A log line by itself is not acceptance evidence.
 
 ## 8. Acceptance target
 
-<!-- The exact command returning PASS or FAIL, and the PASS condition. Must be runnable by someone who did not write the module. -->
+Foundation 1.0 is accepted only when all of the following pass:
 
-**UNPOPULATED**
+1. `python3 -m unittest tests.test_chat_turn_plan`
+2. `python3 .github/scripts/chat-foundation-qualify.py`
+3. Independent builds of the representative corpus produce byte-identical plans and the same plan SHA-256.
+4. Verification detects ordinary tampering and rehashed authority escalation.
+5. Unknown fields, invalid roles/identifiers, duplicate messages, invalid terminal-role semantics, oversized content, symlinked input/output ancestors, and existing output paths fail closed.
+6. The CLI exposes no model run/execute, send, connect/login, tool, memory, persist, or publish command.
+7. The emitted plan denies model execution, provider/network, credential, tool/connector, memory-write, conversation-persistence, autonomous-send, and external-side-effect authority.
+8. `.github/workflows/chat-foundation-qualification.yml` runs tests and qualification, verifies the committed Foundation census against the generator, and preserves machine-readable evidence.
+
+Passing Foundation 1.0 closes the deterministic local Chat turn-envelope substrate gap for C04. It does not prove the full Chat product, model inference, production UI, streaming, multimodal handling, memory, tool execution, external actions, or production persistence.
 
 ## 9. Authority boundary
 
-<!-- What this module may decide alone vs. what needs the owner. Mirrors
-     governance/DECISION-RIGHTS-001.md, scoped to this module. -->
+C04/CORE may define and validate Chat working-surface and local turn-envelope semantics inside the admitted owner boundary. The Foundation compiler may create and verify local plan artifacts only.
 
-**UNPOPULATED**
+Model/runtime authority remains separately owned/admitted; P13 is absorbed into C20 LOCALAI. Connector/action execution remains separately owned/admitted; P14 is absorbed into C27 PLUGINS under CONNECTED_ACTIONS. Domain outputs remain owned by their peer systems. User authorization, credentials, external sends, durable memory/conversation writes, publication, and production side effects require explicit additional authority.
 
-## 10. Open gaps
+Chat orchestration is not ownership transfer: C04 may route intent to an owner, but it may not silently execute or persist on that owner's behalf.
 
-- Sections 1–9 are unpopulated. This module remains `ACTIVE_GAP` in
-  Foundation Closure Census 001 until they are filled.
+## 10. Remaining gaps after Foundation 1.0
 
+- Live model inference, model selection/routing, streaming response assembly, cancellation, retry, token/accounting semantics, and production latency evidence remain separate work.
+- Durable conversation persistence, history retrieval, context-window construction, summarization/compaction, memory read/write semantics, and artifact linkage require separately admitted contracts and canonical writers.
+- Tool calling, connector execution, user-confirmation gates, external messaging, and all side effects remain outside this substrate.
+- Multimodal image/audio/video/file ingress, generated UI surfaces, native iOS interaction, accessibility behavior, and production Chat UX require separate qualification.
+- Production privacy, security, abuse controls, retention, observability, recovery, and hosted/native acceptance evidence remain separate work.
