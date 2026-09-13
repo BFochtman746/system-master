@@ -1,24 +1,46 @@
 # SECOND-SHIFT-EXECUTION-CONTROL-001
 
-Status: ACTIVE / TOPOLOGY-005 / PROGRAM-JOB-LOCKED
-Effective date: 2026-09-11
+Status: ACTIVE / TOPOLOGY-006 / EIGHT-PEER / PROGRAM-JOB-LOCKED
+Effective date: 2026-09-13
 Scope: execution control and observability only. This contract does not transfer product, work-program, canonical-writer, A-01, human, author, private, blind, native, external, publication or production authority.
+
+<!-- SECOND_SHIFT_MACHINE_CONTRACT_START -->
+```json
+{
+  "execution_control_id": "SECOND-SHIFT-EXECUTION-CONTROL-001",
+  "revision": 2,
+  "topology_id": "SYSTEM-TOPOLOGY-006",
+  "registry_id": "SECOND-SHIFT-REGISTRY-001",
+  "peer_system_ids": [
+    "CORE",
+    "LEARNING",
+    "BOOK",
+    "DOCUMENTS",
+    "SPREADSHEET_DATA",
+    "MEDIA",
+    "CONNECTED_ACTIONS",
+    "RESEARCH_KNOWLEDGE"
+  ]
+}
+```
+<!-- SECOND_SHIFT_MACHINE_CONTRACT_END -->
 
 ## Required authority before dispatch
 
-Every controller/worker reads current `CURRENT-AUTHORITY`, its selected topology, `program_job_lock`, `system_completion_status`, current obligation registry, Second Shift registry, repair registries, and every declared active peer owner file. It re-fetches each live owner head before mutation.
+Every controller/worker reads current `governance/CURRENT-AUTHORITY.json`, its selected topology, `program_job_lock`, `system_completion_status`, current obligation registry, Second Shift registry, repair registries, and every declared execution-ready peer owner file. It re-fetches each live owner head before mutation.
 
-Active peer systems are CORE, LEARNING, BOOK and DOCUMENTS. PROSE is complete and terminally retired. PROGRAMMING is an incomplete active work program outside current peer topology.
+The current execution-ready peer systems are CORE, LEARNING, BOOK, DOCUMENTS, SPREADSHEET_DATA, MEDIA, CONNECTED_ACTIONS and RESEARCH_KNOWLEDGE. PROSE is complete and terminally retired. PROGRAMMING is an incomplete active work program outside the peer topology and therefore is not silently given a peer Second Shift mutation lane.
 
 ## Owner discovery and auto-provisioning
 
-1. `SYSTEM-TOPOLOGY-005.json::peer_system_ids` is the architecture source for active peers.
-2. `SECOND-SHIFT-REGISTRY-001.json::owner_files` is the execution source for active lanes.
-3. On every controller run, compare the two sets. They must match exactly.
-4. If a topology-declared peer lacks coverage and its control ref, live owner head, owner path and current obligation are machine-unambiguous, provision the missing owner coverage automatically and bind it to that exact head.
-5. Never create a new system to fill a lane. Never provision or resurrect a retired system.
-6. If missing peer coverage is ambiguous, fail closed and preserve a durable blocker rather than inventing ownership.
-7. The current active lane set is exactly CORE, LEARNING, BOOK and DOCUMENTS.
+1. `CURRENT-AUTHORITY.json::topology` selects the architecture source. The current selected topology is `governance/SYSTEM-TOPOLOGY-006.json`.
+2. The selected topology's `execution_readiness.execution_ready_peer_system_ids` is the authoritative unattended peer-lane set.
+3. `CURRENT-AUTHORITY.json::second_shift_registry` selects the Second Shift registry. The registry's `owner_files` keys and `auto_provisioning_invariant.expected_active_peers` must match the execution-ready peer set exactly.
+4. On every controller and enforcement run, compare those sets and the machine-readable contract above. Any omission, extra lane, stale topology id, stale registry id, or stale execution-control reference fails closed.
+5. If a topology-declared execution-ready peer lacks coverage and its control ref, live owner head, owner path and current obligation are machine-unambiguous, provision the missing owner coverage automatically and bind it to that exact head.
+6. Never create a new system to fill a lane. Never provision or resurrect a retired system.
+7. If missing peer coverage is ambiguous, fail closed and preserve a durable blocker rather than inventing ownership.
+8. The current active peer lane set is exactly CORE, LEARNING, BOOK, DOCUMENTS, SPREADSHEET_DATA, MEDIA, CONNECTED_ACTIONS and RESEARCH_KNOWLEDGE.
 
 ## Retired Prose boundary
 
@@ -38,7 +60,17 @@ BOOK: Book product, including only genuinely open BOOK-owned adapter/context/com
 
 DOCUMENTS: document/artifact mechanics and upward System-Master integration only. Documents receives no Prose integration, repair, qualification, research or telemetry work.
 
-PROGRAMMING: active software-engineering work program with its own preserved engineering evidence. Before explicit topology admission, Programming product work is outside peer Second Shift mutation lanes.
+SPREADSHEET_DATA: spreadsheet, math, data and ledger semantics and their admitted upward System-Master interfaces.
+
+MEDIA: audiobook, image, media, photo, video and voice semantics and their admitted upward System-Master interfaces.
+
+CONNECTED_ACTIONS: browser, calendar, communications and plugin integration inside repository-granted execution authority. Repository readiness never grants external side-effect authority; user/external authority gates still apply.
+
+RESEARCH_KNOWLEDGE: research, knowledge and geo semantics and their admitted upward System-Master interfaces.
+
+PROGRAMMING: active software-engineering work program with its own preserved engineering evidence. Programming remains non-peer unless explicit authority admits it; peer Second Shift coverage must not be synthesized for it.
+
+WEBSITE BUILDING: no independent peer lane is admitted by the selected topology. Browser operation belongs to CONNECTED_ACTIONS; website/software construction must remain within explicitly authorized Programming/product work until a separate architecture decision assigns or admits a dedicated capability/lane.
 
 PROGRAMMING KNOWLEDGE RECOVERY: CORE-administered source/custody/provenance support. It may use owner-valid unattended-safe CORE capacity under the current priority lock but does not become the Programming product or a peer lane.
 
@@ -53,9 +85,9 @@ Retired systems do not enter this state machine.
 
 ## Claim and live-head law
 
-One mutation-capable claim per active peer owner lane. Required claim fields remain: lease_id, lane, delegation_id, objective_id, control_ref, control_head_at_claim, idempotency_key, claimed_at, lease_expires_at, last_heartbeat_at, attempt and checkpoint_pointer.
+One mutation-capable claim per execution-ready peer owner lane. Required claim fields remain: lease_id, lane, delegation_id, objective_id, control_ref, control_head_at_claim, idempotency_key, claimed_at, lease_expires_at, last_heartbeat_at, attempt and checkpoint_pointer.
 
-Changed live owner head invalidates mutation until revalidation. PROSE has no claim or inherited claim. Programming has no peer claim domain before topology admission. A CORE claim for Knowledge Recovery authorizes only bounded custody/provenance work.
+Changed live owner head invalidates mutation until revalidation. PROSE has no claim or inherited claim. Programming has no peer claim domain before explicit topology admission. A CORE claim for Knowledge Recovery authorizes only bounded custody/provenance work.
 
 Until foreground/Second-Shift arbitration is fully machine-admitted, any detected concurrent mutation attempt fails closed, re-reads the live head and adopts/reconciles valid existing progress rather than overwriting it.
 
@@ -86,9 +118,15 @@ Assume at-least-once invocation. State-changing effects require durable idempote
 
 ## Utilization and handoff
 
-Active peer ledgers are CORE, LEARNING, BOOK and DOCUMENTS only. No new Prose telemetry is created or expected. Book-owned integration involving preserved completed Prose capability is BOOK telemetry. Programming product work has no peer utilization ledger before admission; Knowledge Recovery support is CORE telemetry.
+Active peer ledgers are CORE, LEARNING, BOOK, DOCUMENTS, SPREADSHEET_DATA, MEDIA, CONNECTED_ACTIONS and RESEARCH_KNOWLEDGE only. No new Prose telemetry is created or expected. Book-owned integration involving preserved completed Prose capability is BOOK telemetry. Programming product work has no peer utilization ledger before explicit admission; Knowledge Recovery support is CORE telemetry.
 
 Telemetry is factual. If ledger evidence is missing, stale or contradictory, report UNKNOWN rather than infer activity from commits, runner uptime or workflow duration.
+
+## Eight-lane qualification requirement
+
+The Second Shift enforcement workflow must execute a deterministic, side-effect-free qualification against the repository's actual supervisor claim/dispatch state machine for every current execution-ready peer lane. Qualification must demonstrate lane registration, READY binding, fenced claim, dispatch acknowledgement, heartbeat authority and terminal completion for each lane, and must preserve a machine-readable report. Any omitted lane, extra lane, invariant violation or execution failure blocks Second Shift certification.
+
+This qualification proves repository execution-control mechanics only. It does not synthesize external provider authority, native-device evidence, production publication authority or permission for CONNECTED_ACTIONS side effects.
 
 ## Safe stopping
 

@@ -24,6 +24,9 @@ on:
       - '.github/scripts/validate-system-topology.js'
       - '.github/scripts/second-shift-enforce.js'
       - '.github/scripts/second-shift-owner-coverage.js'
+      - '.github/scripts/second-shift-execution-control-enforce.js'
+      - '.github/scripts/second-shift-eight-lane-qualification.py'
+      - 'tools/second_shift_supervisor_v2.py'
       - '.github/workflows/second-shift-enforcement.yml'
   pull_request:
     paths:
@@ -44,6 +47,9 @@ on:
       - '.github/scripts/validate-system-topology.js'
       - '.github/scripts/second-shift-enforce.js'
       - '.github/scripts/second-shift-owner-coverage.js'
+      - '.github/scripts/second-shift-execution-control-enforce.js'
+      - '.github/scripts/second-shift-eight-lane-qualification.py'
+      - 'tools/second_shift_supervisor_v2.py'
       - '.github/workflows/second-shift-enforcement.yml'
 
 permissions:
@@ -55,7 +61,7 @@ concurrency:
 
 jobs:
   enforce:
-    name: Reject job drift, false completion, stale claims and owner coverage gaps
+    name: Reject drift and qualify all eight Second Shift lanes
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -71,7 +77,9 @@ jobs:
           node --check .github/scripts/current-obligation-registry-enforce.js
           node --check .github/scripts/second-shift-enforce.js
           node --check .github/scripts/second-shift-owner-coverage.js
+          node --check .github/scripts/second-shift-execution-control-enforce.js
           node --check .github/scripts/validate-system-topology.js
+          python3 -m py_compile .github/scripts/second-shift-eight-lane-qualification.py
 
       - name: Validate current topology and retired-system boundary
         run: node .github/scripts/validate-system-topology.js
@@ -81,6 +89,15 @@ jobs:
 
       - name: Enforce current obligation ownership
         run: node .github/scripts/current-obligation-registry-enforce.js
+
+      - name: Enforce execution-control contract against live topology
+        run: |
+          mkdir -p .second-shift-enforcement
+          node .github/scripts/second-shift-execution-control-enforce.js > .second-shift-enforcement/execution-control-contract.json
+
+      - name: Qualify all eight Second Shift execution lanes
+        run: |
+          python3 .github/scripts/second-shift-eight-lane-qualification.py --out=.second-shift-enforcement/eight-lane-qualification.json
 
       - name: Self-test Second Shift invariants
         run: |
@@ -104,6 +121,18 @@ jobs:
         shell: bash
         run: |
           echo '## Second Shift Enforcement' >> "$GITHUB_STEP_SUMMARY"
+          if [ -f .second-shift-enforcement/execution-control-contract.json ]; then
+            echo '### Topology / execution-control contract' >> "$GITHUB_STEP_SUMMARY"
+            echo '```json' >> "$GITHUB_STEP_SUMMARY"
+            cat .second-shift-enforcement/execution-control-contract.json >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          fi
+          if [ -f .second-shift-enforcement/eight-lane-qualification.json ]; then
+            echo '### Eight-lane execution-control qualification' >> "$GITHUB_STEP_SUMMARY"
+            echo '```json' >> "$GITHUB_STEP_SUMMARY"
+            cat .second-shift-enforcement/eight-lane-qualification.json >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          fi
           if [ -f .second-shift-enforcement/report.json ]; then
             echo '### Execution-control report' >> "$GITHUB_STEP_SUMMARY"
             echo '```json' >> "$GITHUB_STEP_SUMMARY"
@@ -116,7 +145,7 @@ jobs:
             cat .second-shift-enforcement/owner-coverage.json >> "$GITHUB_STEP_SUMMARY"
             echo '```' >> "$GITHUB_STEP_SUMMARY"
           fi
-          if [ ! -f .second-shift-enforcement/report.json ] && [ ! -f .second-shift-enforcement/owner-coverage.json ]; then
+          if [ ! -d .second-shift-enforcement ]; then
             echo 'No enforcement report was produced.' >> "$GITHUB_STEP_SUMMARY"
           fi
 
