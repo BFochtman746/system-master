@@ -20,6 +20,10 @@ function sameSet(a, b) {
   const aa = sorted(a || []), bb = sorted(b || []);
   return aa.length === bb.length && aa.every((v, i) => v === bb[i]);
 }
+function difference(a, b) {
+  const right = new Set(b || []);
+  return [...(a || [])].filter((value) => !right.has(value));
+}
 
 const authority = readJson('governance/CURRENT-AUTHORITY.json');
 for (const field of [
@@ -42,23 +46,38 @@ const packet = readJson(authority.programming_system_packet);
 
 if (topology.product_root?.product_id !== 'SYSTEM_MASTER') fail('selected topology is not rooted at SYSTEM_MASTER');
 if (expectations.topology !== authority.topology) fail('selected expectation registry is not bound to current topology');
+if (expectations.system_completion_status !== authority.system_completion_status) fail('selected expectation registry is not bound to current completion status');
 if (realloc.topology !== authority.topology) fail('selected reallocation ledger is not bound to current topology');
 if (catalog.authority_rule == null || !String(catalog.authority_rule).includes('cannot create')) fail('system catalog must explicitly deny architecture creation authority');
 
-const expectedActive = authority.active_peer_execution_lanes || [];
-if (!sameSet(expectedActive, ['CORE','LEARNING','BOOK','DOCUMENTS'])) fail(`current authority peer lanes are invalid: ${expectedActive.join(',')}`);
-if (!sameSet(topology.peer_system_ids || [], expectedActive)) fail('topology peer_system_ids do not match CURRENT-AUTHORITY active peer lanes');
+const architecturalPeers = topology.peer_system_ids || [];
+const executionReadyPeers = topology.execution_readiness?.execution_ready_peer_system_ids || [];
+const admittedNotReadyPeers = topology.execution_readiness?.admitted_not_execution_ready_peer_system_ids || [];
+const authorityExecutionLanes = authority.active_peer_execution_lanes || [];
+
+if (!architecturalPeers.length) fail('topology has no architectural peer systems');
+if (!executionReadyPeers.length) fail('topology has no execution-ready peer systems');
+if (!sameSet(authorityExecutionLanes, executionReadyPeers)) {
+  fail(`CURRENT-AUTHORITY active peer execution lanes do not match topology execution readiness: authority=${authorityExecutionLanes.join(',')} topology=${executionReadyPeers.join(',')}`);
+}
+if (!sameSet(expectations.architectural_peer_system_ids || [], architecturalPeers)) fail('expectation registry architectural peers do not match topology peers');
+if (!sameSet(expectations.execution_ready_peer_system_ids || [], executionReadyPeers)) fail('expectation registry execution-ready peers do not match topology readiness');
+if (!sameSet(expectations.admitted_not_execution_ready_peer_system_ids || [], admittedNotReadyPeers)) fail('expectation registry admitted-not-ready peers do not match topology readiness');
+if (difference(executionReadyPeers, architecturalPeers).length) fail('execution-ready peers must be architectural peers');
+if (difference(admittedNotReadyPeers, architecturalPeers).length) fail('admitted-not-ready peers must be architectural peers');
+if (!sameSet([...executionReadyPeers, ...admittedNotReadyPeers], architecturalPeers)) fail('topology execution-readiness partition must account for every architectural peer exactly once');
 
 const activeTopology = new Map((topology.canonical_internal_systems || []).map(x => [x.system_id, x]));
 const activeCatalog = new Map((catalog.active_peer_systems || []).map(x => [x.system_id, x]));
-if (activeTopology.size !== expectedActive.length || activeCatalog.size !== expectedActive.length) fail('active peer system count mismatch');
-for (const id of expectedActive) {
+if (activeTopology.size !== architecturalPeers.length || activeCatalog.size !== architecturalPeers.length) fail('architectural peer system count mismatch between topology and catalog');
+for (const id of architecturalPeers) {
   const t = activeTopology.get(id), c = activeCatalog.get(id);
-  if (!t || !c) fail(`active peer missing from topology/catalog: ${id}`);
+  if (!t || !c) fail(`architectural peer missing from topology/catalog: ${id}`);
   if (c.owner_path !== `SYSTEM_MASTER/${id}`) fail(`catalog owner path mismatch for ${id}`);
   if (c.control_ref !== t.control_ref) fail(`catalog control ref mismatch for ${id}`);
   if (!String(c.lifecycle || '').startsWith('ACTIVE')) fail(`catalog lifecycle must be active for ${id}`);
   if (t.completion !== 'INCOMPLETE') fail(`topology must keep ${id} incomplete until explicit completion authority`);
+  if (executionReadyPeers.includes(id) && !t.control_record) fail(`execution-ready peer ${id} must have a canonical control record`);
 }
 if (activeTopology.has('PROSE') || activeCatalog.has('PROSE')) fail('PROSE must not be active');
 
@@ -104,6 +123,9 @@ for (const s of sources.sources) {
 const expText = JSON.stringify(expectations);
 if (!expText.includes('DOCUMENTS') || !expText.includes('PROSE is historically complete and terminally retired')) fail('current expectation registry lacks Documents/terminal-Prose expectations');
 if (!expText.includes('PROGRAMMING is an incomplete active work program')) fail('current expectation registry lacks Programming active-work-program boundary');
+for (const id of admittedNotReadyPeers) {
+  if (!expText.includes(id)) fail(`current expectation registry lacks admitted peer expectation for ${id}`);
+}
 const reallocText = JSON.stringify(realloc);
 if (!reallocText.includes('LITERARY-PROSE') || !reallocText.includes('BOOK-EVAL-LEMONADE-001') || !reallocText.includes('RETIRED_NO_DISPATCH')) fail('current reallocation ledger lacks current retired-Prose/Book integration dispositions');
 
@@ -113,7 +135,9 @@ if (systemsMd.includes('Machine-readable topology: `governance/SYSTEM-TOPOLOGY-0
 
 console.log('SYSTEM_CATALOG_ENFORCEMENT_PASS');
 console.log(`topology=${topology.topology_id}`);
-console.log(`active_peer_systems=${expectedActive.join(',')}`);
+console.log(`architectural_peer_systems=${architecturalPeers.join(',')}`);
+console.log(`execution_ready_peer_systems=${executionReadyPeers.join(',')}`);
+console.log(`admitted_not_execution_ready_peer_systems=${admittedNotReadyPeers.join(',')}`);
 console.log('retired_system=PROSE_NO_DISPATCH_BOOK_INTEGRATION_ONLY');
 console.log('programming=ACTIVE_NON_PEER_WORK_PROGRAM');
 console.log(`future_candidates=${(catalog.future_system_candidates || []).map(x => x.candidate_id).join(',')}`);
