@@ -16,13 +16,13 @@ Entries: 50 capability · 16 platform · 66 total
 
 | State | Rows |
 | --- | ---: |
-| `COMPLETE_WITH_EVIDENCE` | 2 |
-| `ACTIVE_GAP` | 48 |
+| `COMPLETE_WITH_EVIDENCE` | 3 |
+| `ACTIVE_GAP` | 47 |
 | `DURABLY_BLOCKED_EXTERNAL_HUMAN_PRIVATE_NATIVE` | 0 |
 | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | 16 |
 | **Total** | **66** |
 
-**Foundation 1.0 completion with evidence: 3%.**
+**Foundation 1.0 completion with evidence: 5%.**
 
 ## Full required-column matrix
 
@@ -80,7 +80,7 @@ Entries: 50 capability · 16 platform · 66 total
 | C49 | UNPOPULATED | governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json; governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006.json; governance/CURRENT-AUTHORITY.json | UNPOPULATED | UNPOPULATED | UNPOPULATED | UNPOPULATED | UNPOPULATED | UNPOPULATED | UNPOPULATED | UNPOPULATED | UNPOPULATED | EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY | Reserved unallocated capability identifier by canonical crosswalk authority. | UNPOPULATED | governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json |
 | P00 | SYSTEM_MASTER/CORE | governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json; governance/CURRENT-AUTHORITY.json | governance/contracts/P00-FOUNDATION-CONTRACT-001.md | governance/contracts/P00-FOUNDATION-CONTRACT-001.md | governance/contracts/P00-FOUNDATION-CONTRACT-001.md | governance/contracts/P00-FOUNDATION-CONTRACT-001.md | governance/contracts/P00-FOUNDATION-CONTRACT-001.md | governance/contracts/P00-FOUNDATION-CONTRACT-001.md | governance/contracts/P00-FOUNDATION-CONTRACT-001.md | governance/contracts/P00-FOUNDATION-CONTRACT-001.md | governance/contracts/P00-FOUNDATION-CONTRACT-001.md | COMPLETE_WITH_EVIDENCE | Current-authority Foundation evidence receipt PASS with exact subject bindings. | UNPOPULATED | governance/contracts/P00-FOUNDATION-CONTRACT-001.md; governance/census/FOUNDATION-CLOSURE-EVIDENCE-REGISTRY-001.json; governance/census/evidence/P00-FOUNDATION-EVIDENCE-001.json; https://github.com/BFochtman746/system-master/actions/runs/34788911066; https://api.github.com/repos/BFochtman746/system-master/actions/artifacts/10327645501 |
 | P01 | SYSTEM_MASTER/CORE | governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json; governance/CURRENT-AUTHORITY.json | governance/contracts/P01-FOUNDATION-CONTRACT-001.md | governance/contracts/P01-FOUNDATION-CONTRACT-001.md | governance/contracts/P01-FOUNDATION-CONTRACT-001.md | governance/contracts/P01-FOUNDATION-CONTRACT-001.md | governance/contracts/P01-FOUNDATION-CONTRACT-001.md | governance/contracts/P01-FOUNDATION-CONTRACT-001.md | governance/contracts/P01-FOUNDATION-CONTRACT-001.md | governance/contracts/P01-FOUNDATION-CONTRACT-001.md | governance/contracts/P01-FOUNDATION-CONTRACT-001.md | COMPLETE_WITH_EVIDENCE | Current-authority Foundation evidence receipt PASS with exact subject bindings. | UNPOPULATED | governance/contracts/P01-FOUNDATION-CONTRACT-001.md; governance/census/FOUNDATION-CLOSURE-EVIDENCE-REGISTRY-001.json; governance/census/evidence/P01-FOUNDATION-EVIDENCE-001.json; https://github.com/BFochtman746/system-master/actions/runs/34789295096; https://api.github.com/repos/BFochtman746/system-master/actions/artifacts/10327538145 |
-| P02 | SYSTEM_MASTER/CORE | governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json; governance/CURRENT-AUTHORITY.json | governance/contracts/P02-FOUNDATION-CONTRACT-001.md | governance/contracts/P02-FOUNDATION-CONTRACT-001.md | governance/contracts/P02-FOUNDATION-CONTRACT-001.md | governance/contracts/P02-FOUNDATION-CONTRACT-001.md | governance/contracts/P02-FOUNDATION-CONTRACT-001.md | governance/contracts/P02-FOUNDATION-CONTRACT-001.md | governance/contracts/P02-FOUNDATION-CONTRACT-001.md | governance/contracts/P02-FOUNDATION-CONTRACT-001.md | governance/contracts/P02-FOUNDATION-CONTRACT-001.md | ACTIVE_GAP | Contract may be populated, but no Foundation evidence receipt is registered. | UNPOPULATED | governance/contracts/P02-FOUNDATION-CONTRACT-001.md |
+| P02 | SYSTEM_MASTER/CORE | governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json; governance/CURRENT-AUTHORITY.json | governance/contracts/P02-FOUNDATION-CONTRACT-001.md | governance/contracts/P02-FOUNDATION-CONTRACT-001.md | governance/contracts/P02-FOUNDATION-CONTRACT-001.md | governance/contracts/P02-FOUNDATION-CONTRACT-001.md | governance/contracts/P02-FOUNDATION-CONTRACT-001.md | governance/contracts/P02-FOUNDATION-CONTRACT-001.md | governance/contracts/P02-FOUNDATION-CONTRACT-001.md | governance/contracts/P02-FOUNDATION-CONTRACT-001.md | governance/contracts/P02-FOUNDATION-CONTRACT-001.md | COMPLETE_WITH_EVIDENCE | Current-authority Foundation evidence receipt PASS with exact subject bindings. | UNPOPULATED | governance/contracts/P02-FOUNDATION-CONTRACT-001.md; governance/census/FOUNDATION-CLOSURE-EVIDENCE-REGISTRY-001.json; governance/census/evidence/P02-FOUNDATION-EVIDENCE-001.json; https://github.com/BFochtman746/system-master/actions/runs/34789480177; https://api.github.com/repos/BFochtman746/system-master/actions/artifacts/10327641078 |
 | P03 | SYSTEM_MASTER/CORE | governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json; governance/CURRENT-AUTHORITY.json | governance/contracts/P03-FOUNDATION-CONTRACT-001.md | governance/contracts/P03-FOUNDATION-CONTRACT-001.md | governance/contracts/P03-FOUNDATION-CONTRACT-001.md | governance/contracts/P03-FOUNDATION-CONTRACT-001.md | governance/contracts/P03-FOUNDATION-CONTRACT-001.md | governance/contracts/P03-FOUNDATION-CONTRACT-001.md | governance/contracts/P03-FOUNDATION-CONTRACT-001.md | governance/contracts/P03-FOUNDATION-CONTRACT-001.md | governance/contracts/P03-FOUNDATION-CONTRACT-001.md | ACTIVE_GAP | Contract may be populated, but no Foundation evidence receipt is registered. | UNPOPULATED | governance/contracts/P03-FOUNDATION-CONTRACT-001.md |
 | P04 | SYSTEM_MASTER/CORE | governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json; governance/CURRENT-AUTHORITY.json | governance/contracts/P04-FOUNDATION-CONTRACT-001.md | governance/contracts/P04-FOUNDATION-CONTRACT-001.md | governance/contracts/P04-FOUNDATION-CONTRACT-001.md | governance/contracts/P04-FOUNDATION-CONTRACT-001.md | governance/contracts/P04-FOUNDATION-CONTRACT-001.md | governance/contracts/P04-FOUNDATION-CONTRACT-001.md | governance/contracts/P04-FOUNDATION-CONTRACT-001.md | governance/contracts/P04-FOUNDATION-CONTRACT-001.md | governance/contracts/P04-FOUNDATION-CONTRACT-001.md | ACTIVE_GAP | Contract may be populated, but no Foundation evidence receipt is registered. | UNPOPULATED | governance/contracts/P04-FOUNDATION-CONTRACT-001.md |
 | P05 | SYSTEM_MASTER/CORE | governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json; governance/CURRENT-AUTHORITY.json | governance/contracts/P05-FOUNDATION-CONTRACT-001.md | governance/contracts/P05-FOUNDATION-CONTRACT-001.md | governance/contracts/P05-FOUNDATION-CONTRACT-001.md | governance/contracts/P05-FOUNDATION-CONTRACT-001.md | governance/contracts/P05-FOUNDATION-CONTRACT-001.md | governance/contracts/P05-FOUNDATION-CONTRACT-001.md | governance/contracts/P05-FOUNDATION-CONTRACT-001.md | governance/contracts/P05-FOUNDATION-CONTRACT-001.md | governance/contracts/P05-FOUNDATION-CONTRACT-001.md | ACTIVE_GAP | Contract may be populated, but no Foundation evidence receipt is registered. | UNPOPULATED | governance/contracts/P05-FOUNDATION-CONTRACT-001.md |
@@ -97,11 +97,10 @@ Entries: 50 capability · 16 platform · 66 total
 
 ## Unresolved gap successor register
 
-48 ACTIVE_GAP entries remain.
+47 ACTIVE_GAP entries remain.
 
 | Gap | Capability / requirement | Owner | Rank | Missing required | Reason |
 | --- | --- | --- | --- | --- | --- |
-| `FCC-002-GAP-P02` | P02 P02 | SYSTEM_MASTER/CORE | 0/0/2 | 0/9 | Contract may be populated, but no Foundation evidence receipt is registered. |
 | `FCC-002-GAP-P03` | P03 P03 | SYSTEM_MASTER/CORE | 0/0/3 | 0/9 | Contract may be populated, but no Foundation evidence receipt is registered. |
 | `FCC-002-GAP-P04` | P04 P04 | SYSTEM_MASTER/CORE | 0/0/4 | 0/9 | Contract may be populated, but no Foundation evidence receipt is registered. |
 | `FCC-002-GAP-P05` | P05 P05 | SYSTEM_MASTER/CORE | 0/0/5 | 0/9 | Contract may be populated, but no Foundation evidence receipt is registered. |
@@ -152,5 +151,5 @@ Entries: 50 capability · 16 platform · 66 total
 
 ## Exact next ACTIVE_GAP
 
-`P02` P02 — Contract may be populated, but no Foundation evidence receipt is registered.
+`P03` P03 — Contract may be populated, but no Foundation evidence receipt is registered.
 
