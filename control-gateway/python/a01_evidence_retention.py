@@ -7,7 +7,9 @@ nobody can date.
 
 This governs retention without either. It indexes evidence under a root, records
 each artifact in a hash-chained append-only manifest, and prunes by a tiered
-policy that never deletes an artifact whose record it has not first written.
+policy. Every destructive attempt is recorded before deletion. Successful
+deletion is then confirmed by a second append-only record, so the manifest never
+needs to pretend an attempted deletion succeeded when the filesystem refused it.
 
 Design follows current audit-log practice: immutability is a property of the
 write path, not of a policy sentence. Each manifest entry carries the digest of
@@ -25,7 +27,7 @@ that it existed is an audit decision, and those are not the same decision.
     python -m a01_evidence_retention --prune          # prune, recording each
     python -m a01_evidence_retention --report
 
-Exit codes: 0 ok, 1 policy violation or prune refused, 2 chain broken or
+Exit codes: 0 ok, 1 policy/refusal/completion-record problem, 2 chain broken or
 unreadable. A broken chain is exit 2 because it is not a retention problem, it is
 an integrity problem.
 """
@@ -37,6 +39,7 @@ import datetime as dt
 import hashlib
 import json
 import os
+import shutil
 import sys
 from dataclasses import dataclass
 from typing import Any, Iterator, Optional
@@ -83,11 +86,10 @@ def digest_file(path: str) -> str:
 
 @dataclass(frozen=True)
 class RetentionPolicy:
-    """Tiered windows. Defaults are conservative: keeping too much costs disk,
-    keeping too little costs the ability to reconstruct a night."""
+    """Tiered windows plus a non-destructive low-space alert threshold."""
 
-    keep_all_days: int = 30          # recent evidence kept whole
-    keep_summary_days: int = 365     # older: one artifact per day retained, rest prunable
+    keep_all_days: int = 30
+    keep_summary_days: int = 365
     min_free_bytes: int = 5 * 1024 ** 3
     never_prune_prefixes: tuple[str, ...] = ("authority/", "qualification/", "closure/")
 
@@ -131,7 +133,6 @@ class EvidenceManifest:
         record["recorded_at"] = iso(utcnow())
         record["entry_digest"] = self.compute_entry_digest(record)
         os.makedirs(self.root, exist_ok=True)
-        # Append-only: opened "a", never "w" or "r+". One line, one fsync.
         with open(self.path, "a", encoding="utf-8") as handle:
             handle.write(f"{canonical(record)}\n")
             handle.flush()
@@ -139,8 +140,6 @@ class EvidenceManifest:
         return record
 
     def verify(self) -> dict[str, Any]:
-        """Replay the chain. Reports the first break rather than raising, so a
-        damaged manifest can still be diagnosed rather than only rejected."""
         previous = GENESIS
         count = 0
         for index, entry in enumerate(self.entries()):
@@ -156,7 +155,7 @@ class EvidenceManifest:
         return {"ok": True, "entries": count, "head": previous}
 
     def recorded_paths(self) -> dict[str, dict[str, Any]]:
-        """Latest record per artifact path."""
+        """Latest completed artifact state per path. Intent/failure records are audit events."""
         seen: dict[str, dict[str, Any]] = {}
         for entry in self.entries():
             if entry.get("event") in {"INDEXED", "PRUNED"}:
@@ -179,8 +178,6 @@ class EvidenceStore:
                 yield os.path.relpath(abs_path, self.root).replace(os.sep, "/")
 
     def index(self) -> dict[str, Any]:
-        """Record artifacts not yet in the manifest. Idempotent: an unchanged
-        artifact is not re-recorded, so repeated runs do not inflate the chain."""
         known = self.manifest.recorded_paths()
         added = []
         for relpath in sorted(self._artifacts()):
@@ -226,55 +223,99 @@ class EvidenceStore:
             day = dt.datetime.fromtimestamp(os.stat(abs_path).st_mtime, dt.timezone.utc).date().isoformat()
             by_day.setdefault(day, []).append(relpath)
 
-        # In the summary tier keep one artifact per day — the smallest, which is
-        # almost always the structured record rather than a large payload.
-        for day, paths in by_day.items():
+        for _day, paths in by_day.items():
             paths.sort(key=lambda p: os.stat(os.path.join(self.root, p)).st_size)
             keep.append(paths[0])
             prune.extend(paths[1:])
 
+        usage = shutil.disk_usage(self.root)
         return {
             "now": iso(now),
             "keep": sorted(keep),
             "prune": sorted(prune),
             "protected": sorted(protected),
             "prune_bytes": sum(os.stat(os.path.join(self.root, p)).st_size for p in prune),
+            "free_bytes": usage.free,
+            "min_free_bytes": self.policy.min_free_bytes,
+            "below_min_free_bytes": usage.free < self.policy.min_free_bytes,
         }
 
     def prune(self, now: Optional[dt.datetime] = None, dry_run: bool = False) -> dict[str, Any]:
-        """Record first, delete second. If the record cannot be written the
-        artifact is not deleted — an untraceable deletion is the one outcome this
-        module exists to make impossible."""
+        """Record destructive intent first, then delete, then record completion.
+
+        The pre-delete PRUNE_INTENT carries the content digest and size, so even a
+        post-delete manifest-write failure cannot make the deletion untraceable.
+        """
         chain = self.manifest.verify()
         if not chain["ok"]:
             raise ChainError(f"refusing to prune with a broken manifest: {chain['reason']} at entry {chain['broken_at']}")
 
         planned = self.plan(now)
-        pruned, refused = [], []
+        pruned, would_prune, refused, completion_record_failures = [], [], [], []
+        bytes_reclaimed = 0
         for relpath in planned["prune"]:
             abs_path = os.path.join(self.root, relpath)
             if not os.path.exists(abs_path):
                 continue
             if dry_run:
-                pruned.append(relpath)
+                would_prune.append(relpath)
                 continue
+
+            content = digest_file(abs_path)
+            size_bytes = os.stat(abs_path).st_size
             try:
-                content = digest_file(abs_path)
+                self.manifest.append({
+                    "event": "PRUNE_INTENT",
+                    "relpath": relpath,
+                    "content_digest": content,
+                    "size_bytes": size_bytes,
+                    "reason": "retention policy",
+                })
+            except OSError as error:
+                refused.append({"relpath": relpath, "reason": f"intent record failed: {error}"})
+                continue
+
+            try:
+                os.remove(abs_path)
+            except OSError as error:
+                failure_reason = f"delete failed: {error}"
+                try:
+                    self.manifest.append({
+                        "event": "PRUNE_FAILED",
+                        "relpath": relpath,
+                        "content_digest": content,
+                        "size_bytes": size_bytes,
+                        "reason": failure_reason,
+                    })
+                except OSError as record_error:
+                    failure_reason += f"; failure record failed: {record_error}"
+                refused.append({"relpath": relpath, "reason": failure_reason})
+                continue
+
+            pruned.append(relpath)
+            bytes_reclaimed += size_bytes
+            try:
                 self.manifest.append({
                     "event": "PRUNED",
                     "relpath": relpath,
                     "content_digest": content,
-                    "size_bytes": os.stat(abs_path).st_size,
+                    "size_bytes": size_bytes,
                     "reason": "retention policy",
                 })
             except OSError as error:
-                refused.append({"relpath": relpath, "reason": f"record failed: {error}"})
-                continue
-            os.remove(abs_path)
-            pruned.append(relpath)
+                completion_record_failures.append({
+                    "relpath": relpath,
+                    "reason": f"completion record failed after traceable deletion: {error}",
+                })
 
-        return {"pruned": len(pruned), "refused": refused, "dry_run": dry_run,
-                "bytes_reclaimed": planned["prune_bytes"] if not dry_run else 0}
+        return {
+            "pruned": len(pruned),
+            "would_prune": len(would_prune),
+            "refused": refused,
+            "completion_record_failures": completion_record_failures,
+            "dry_run": dry_run,
+            "bytes_reclaimed": bytes_reclaimed,
+        }
 
     def report(self, now: Optional[dt.datetime] = None) -> dict[str, Any]:
         chain = self.manifest.verify()
@@ -288,6 +329,9 @@ class EvidenceStore:
             "chain": chain,
             "artifacts": len(artifacts),
             "total_bytes": total,
+            "free_bytes": planned["free_bytes"],
+            "min_free_bytes": planned["min_free_bytes"],
+            "below_min_free_bytes": planned["below_min_free_bytes"],
             "unrecorded": unrecorded,
             "keep": len(planned["keep"]),
             "prune_candidates": len(planned["prune"]),
@@ -295,6 +339,7 @@ class EvidenceStore:
             "policy": {
                 "keep_all_days": self.policy.keep_all_days,
                 "keep_summary_days": self.policy.keep_summary_days,
+                "min_free_bytes": self.policy.min_free_bytes,
                 "never_prune_prefixes": list(self.policy.never_prune_prefixes),
             },
         }
@@ -319,6 +364,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     parser.add_argument("--report", action="store_true")
     parser.add_argument("--keep-all-days", type=int, default=30)
     parser.add_argument("--keep-summary-days", type=int, default=365)
+    parser.add_argument("--min-free-bytes", type=int, default=5 * 1024 ** 3)
     args = parser.parse_args(argv)
 
     root = args.root or default_root()
@@ -327,7 +373,9 @@ def main(argv: Optional[list[str]] = None) -> int:
         return 2
 
     store = EvidenceStore(root, RetentionPolicy(
-        keep_all_days=args.keep_all_days, keep_summary_days=args.keep_summary_days))
+        keep_all_days=args.keep_all_days,
+        keep_summary_days=args.keep_summary_days,
+        min_free_bytes=args.min_free_bytes))
 
     try:
         if args.verify:
@@ -341,8 +389,9 @@ def main(argv: Optional[list[str]] = None) -> int:
             sys.stdout.write(f"{json.dumps(store.plan(), indent=2)}\n")
             return 0
         if args.prune:
-            sys.stdout.write(f"{json.dumps(store.prune(dry_run=args.dry_run), indent=2)}\n")
-            return 0
+            result = store.prune(dry_run=args.dry_run)
+            sys.stdout.write(f"{json.dumps(result, indent=2)}\n")
+            return 1 if result["refused"] or result["completion_record_failures"] else 0
         sys.stdout.write(f"{json.dumps(store.report(), indent=2)}\n")
         return 0
     except ChainError as error:

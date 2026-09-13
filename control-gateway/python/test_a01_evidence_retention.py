@@ -1,26 +1,25 @@
-"""Tests for A-01 evidence retention.
-
-The properties under test are the ones that make the manifest evidence rather
-than a log: the chain detects tampering, nothing is deleted before it is
-recorded, and protected classes are never prunable.
-
-    cd control-gateway/python && python -m unittest test_a01_evidence_retention -v
-"""
+"""Tests for A-01 evidence retention — P03 Foundation 1.0."""
 
 from __future__ import annotations
 
+import contextlib
 import datetime as dt
+import io
 import json
 import os
 import tempfile
 import unittest
+from types import SimpleNamespace
+from unittest import mock
 
 from a01_evidence_retention import (
     GENESIS,
     MANIFEST_NAME,
     ChainError,
+    EvidenceManifest,
     EvidenceStore,
     RetentionPolicy,
+    main,
 )
 
 NOW = dt.datetime(2026, 9, 13, 12, 0, tzinfo=dt.timezone.utc)
@@ -116,16 +115,26 @@ class TestPolicy(unittest.TestCase):
         self.assertEqual(plan["prune"], [])
         self.assertEqual(len(plan["protected"]), 3)
 
+    @mock.patch("a01_evidence_retention.shutil.disk_usage")
+    def test_low_free_space_threshold_is_surfaced_without_overriding_retention(self, disk_usage):
+        disk_usage.return_value = SimpleNamespace(total=100, used=95, free=5)
+        store = self.policy_store({"recent.json": ("x", 1)}, min_free_bytes=10)
+        plan = store.plan(NOW)
+        self.assertTrue(plan["below_min_free_bytes"])
+        self.assertEqual(plan["free_bytes"], 5)
+        self.assertEqual(plan["min_free_bytes"], 10)
+        self.assertIn("recent.json", plan["keep"])
+
 
 class TestPrune(unittest.TestCase):
-    def test_pruned_artifact_is_recorded_before_deletion(self):
+    def test_pruned_artifact_is_recorded_before_and_after_deletion(self):
         root = make_root({"old.json": ("x", 400)})
         store = EvidenceStore(root)
         store.index()
         store.prune(NOW)
         self.assertFalse(os.path.exists(os.path.join(root, "old.json")))
         events = [e["event"] for e in store.manifest.entries() if e["relpath"] == "old.json"]
-        self.assertEqual(events, ["INDEXED", "PRUNED"])
+        self.assertEqual(events, ["INDEXED", "PRUNE_INTENT", "PRUNED"])
 
     def test_prune_is_refused_on_a_broken_chain(self):
         root = make_root({"old.json": ("x", 400), "b.json": ("y", 1)})
@@ -137,15 +146,16 @@ class TestPrune(unittest.TestCase):
         open(path, "w", encoding="utf-8").write("\n".join(lines) + "\n")
         with self.assertRaises(ChainError):
             store.prune(NOW)
-        self.assertTrue(os.path.exists(os.path.join(root, "old.json")),
-                        "a broken chain must not permit deletion")
+        self.assertTrue(os.path.exists(os.path.join(root, "old.json")))
 
-    def test_dry_run_deletes_nothing(self):
+    def test_dry_run_deletes_nothing_and_reports_would_prune(self):
         root = make_root({"old.json": ("x", 400)})
         store = EvidenceStore(root)
         store.index()
         result = store.prune(NOW, dry_run=True)
         self.assertTrue(os.path.exists(os.path.join(root, "old.json")))
+        self.assertEqual(result["pruned"], 0)
+        self.assertEqual(result["would_prune"], 1)
         self.assertEqual(result["bytes_reclaimed"], 0)
 
     def test_chain_still_verifies_after_pruning(self):
@@ -156,7 +166,6 @@ class TestPrune(unittest.TestCase):
         self.assertTrue(store.manifest.verify()["ok"])
 
     def test_pruned_artifact_remains_provable_after_deletion(self):
-        """The record outlives the artifact. That is the whole point."""
         root = make_root({"old.json": ("payload", 400)})
         store = EvidenceStore(root)
         store.index()
@@ -164,6 +173,36 @@ class TestPrune(unittest.TestCase):
         store.prune(NOW)
         pruned = next(e for e in store.manifest.entries() if e["event"] == "PRUNED")
         self.assertEqual(pruned["content_digest"], original)
+
+    def test_delete_failure_is_recorded_and_not_counted_as_reclaimed(self):
+        root = make_root({"old.json": ("payload", 400)})
+        store = EvidenceStore(root)
+        store.index()
+        with mock.patch("a01_evidence_retention.os.remove", side_effect=OSError("denied")):
+            result = store.prune(NOW)
+        self.assertTrue(os.path.exists(os.path.join(root, "old.json")))
+        self.assertEqual(result["pruned"], 0)
+        self.assertEqual(result["bytes_reclaimed"], 0)
+        self.assertEqual(len(result["refused"]), 1)
+        events = [e["event"] for e in store.manifest.entries() if e["relpath"] == "old.json"]
+        self.assertEqual(events, ["INDEXED", "PRUNE_INTENT", "PRUNE_FAILED"])
+
+    def test_cli_returns_one_when_prune_is_refused(self):
+        root = make_root({"old.json": ("payload", 400)})
+        store = EvidenceStore(root)
+        store.index()
+        original_append = EvidenceManifest.append
+
+        def refuse_intent(manifest, body):
+            if body.get("event") == "PRUNE_INTENT":
+                raise OSError("manifest denied")
+            return original_append(manifest, body)
+
+        with mock.patch.object(EvidenceManifest, "append", new=refuse_intent):
+            with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+                code = main(["--root", root, "--prune"])
+        self.assertEqual(code, 1)
+        self.assertTrue(os.path.exists(os.path.join(root, "old.json")))
 
 
 class TestReport(unittest.TestCase):
