@@ -1,0 +1,105 @@
+name: P05 Governance Schema Foundation Qualification
+
+on:
+  push:
+    paths:
+      - 'governance/CURRENT-AUTHORITY.json'
+      - 'governance/WORK-OBLIGATION-REGISTRY-*.json'
+      - 'governance/SYSTEM-TOPOLOGY-*.json'
+      - 'governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-*.json'
+      - 'governance/schemas/**'
+      - 'governance/contracts/P05-FOUNDATION-CONTRACT-001.md'
+      - '.github/scripts/validate-governance.js'
+      - '.github/scripts/foundation-closure-evidence-verify.js'
+      - '.github/workflows/p05-governance-schema-foundation-qualification.yml'
+  pull_request:
+    paths:
+      - 'governance/CURRENT-AUTHORITY.json'
+      - 'governance/WORK-OBLIGATION-REGISTRY-*.json'
+      - 'governance/SYSTEM-TOPOLOGY-*.json'
+      - 'governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-*.json'
+      - 'governance/schemas/**'
+      - 'governance/contracts/P05-FOUNDATION-CONTRACT-001.md'
+      - '.github/scripts/validate-governance.js'
+      - '.github/scripts/foundation-closure-evidence-verify.js'
+      - '.github/workflows/p05-governance-schema-foundation-qualification.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Checkout exact P05 subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Pin Node runtime
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Run positive governance acceptance
+        shell: bash
+        run: |
+          set -euo pipefail
+          node .github/scripts/validate-governance.js | tee /tmp/p05-positive.log
+          node .github/scripts/validate-governance.js --json > /tmp/p05-positive.json
+          node - <<'NODE'
+          const r = JSON.parse(require('fs').readFileSync('/tmp/p05-positive.json','utf8'));
+          if ((r.checked || []).length !== 4 || (r.errors || []).length !== 0) process.exit(2);
+          const required = ['obligation_registry','topology','system_completion_status','headless_tool_owner_allocation','capability_crosswalk','foundation_closure_census','foundation_closure_matrix_generator','governance_validator'];
+          const observed = new Set((r.critical_pointers || []).filter(x=>x.present).map(x=>x.pointer));
+          for (const p of required) if (!observed.has(p)) process.exit(3);
+          NODE
+      - name: Prove three fail-closed negative cases
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp governance/CURRENT-AUTHORITY.json /tmp/p05-authority.json
+          cp governance/SYSTEM-TOPOLOGY-007.json /tmp/p05-topology.json
+          restore() { cp /tmp/p05-authority.json governance/CURRENT-AUTHORITY.json; cp /tmp/p05-topology.json governance/SYSTEM-TOPOLOGY-007.json; }
+          trap restore EXIT
+
+          node -e "const fs=require('fs');const p='governance/CURRENT-AUTHORITY.json';const j=JSON.parse(fs.readFileSync(p));delete j.capability_crosswalk;fs.writeFileSync(p,JSON.stringify(j,null,2)+'\\n')"
+          set +e; node .github/scripts/validate-governance.js > /tmp/p05-negative-missing-crosswalk.log 2>&1; c=$?; set -e
+          test "$c" -eq 1; grep -q 'capability_crosswalk' /tmp/p05-negative-missing-crosswalk.log; restore
+
+          node -e "const fs=require('fs');const p='governance/SYSTEM-TOPOLOGY-007.json';const j=JSON.parse(fs.readFileSync(p));j.canonical_internal_systems[0].completion='MAYBE';fs.writeFileSync(p,JSON.stringify(j,null,2)+'\\n')"
+          set +e; node .github/scripts/validate-governance.js > /tmp/p05-negative-enum.log 2>&1; c=$?; set -e
+          test "$c" -eq 1; grep -q 'not one of COMPLETE, INCOMPLETE, RETIRED' /tmp/p05-negative-enum.log; restore
+
+          node -e "const fs=require('fs');const p='governance/CURRENT-AUTHORITY.json';const j=JSON.parse(fs.readFileSync(p));j.governance_validator='governance/missing-validator.js';fs.writeFileSync(p,JSON.stringify(j,null,2)+'\\n')"
+          set +e; node .github/scripts/validate-governance.js > /tmp/p05-negative-missing-pointer.log 2>&1; c=$?; set -e
+          test "$c" -eq 1; grep -q 'governance_validator.*points to missing file' /tmp/p05-negative-missing-pointer.log; restore
+          trap - EXIT
+          git diff --exit-code
+      - name: Emit exact-subject P05 evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p qualification-output
+          node - <<'NODE'
+          const fs=require('fs'), cp=require('child_process'), crypto=require('crypto');
+          const authority=JSON.parse(fs.readFileSync('governance/CURRENT-AUTHORITY.json','utf8'));
+          const subjects=[
+            'governance/CURRENT-AUTHORITY.json', authority.obligation_registry, authority.topology, authority.headless_tool_owner_allocation,
+            'governance/schemas/CURRENT-AUTHORITY-001.schema.json','governance/schemas/WORK-OBLIGATION-REGISTRY-001.schema.json','governance/schemas/SYSTEM-TOPOLOGY-001.schema.json','governance/schemas/TOOL-OWNER-ALLOCATION-001.schema.json',
+            '.github/scripts/validate-governance.js','.github/scripts/foundation-closure-evidence-verify.js','governance/contracts/P05-FOUNDATION-CONTRACT-001.md','.github/workflows/p05-governance-schema-foundation-qualification.yml'
+          ];
+          const blob=p=>cp.execFileSync('git',['rev-parse',`HEAD:${p}`],{encoding:'utf8'}).trim();
+          const sha=p=>crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
+          const evidence={evidence_schema:'1.0',contract_id:'P05-FOUNDATION-1.0',requirement_or_capability_id:'P05',owner_path:'SYSTEM_MASTER/CORE',authority_id:authority.authority_id,status:'PASS',source_identity:process.env.GITHUB_SHA,checked_target_count:4,critical_pointer_count:8,negative_case_count:3,subjects:subjects.map(p=>({path:p,git_blob_sha:blob(p)})),logs:{positive_sha256:sha('/tmp/p05-positive.log'),missing_crosswalk_sha256:sha('/tmp/p05-negative-missing-crosswalk.log'),invalid_enum_sha256:sha('/tmp/p05-negative-enum.log'),missing_pointer_sha256:sha('/tmp/p05-negative-missing-pointer.log')}};
+          fs.writeFileSync('qualification-output/p05-foundation-1.0.json',JSON.stringify(evidence,null,2)+'\n');
+          console.log(JSON.stringify(evidence));
+          NODE
+      - name: Preserve machine-readable P05 qualification evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p05-foundation-1.0-evidence
+          path: qualification-output/p05-foundation-1.0.json
+          if-no-files-found: error
+          retention-days: 30

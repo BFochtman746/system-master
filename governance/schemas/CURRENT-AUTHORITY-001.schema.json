@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "SYSTEM-MASTER/CURRENT-AUTHORITY-001",
-  "title": "Current Authority \u2014 pointer of record",
-  "description": "The single entry point. Every consumer resolves state from here, so a defect in this file breaks the estate silently. Pointer fields must name artifacts that exist on some ref.",
+  "title": "Current Authority — pointer of record",
+  "description": "The single entry point. Foundation-critical pointers are mandatory and must name repository artifacts; semantic validation of pointed subjects remains with their owning validators.",
   "type": "object",
   "required": [
     "authority_id",
@@ -10,71 +10,31 @@
     "standing",
     "obligation_registry",
     "topology",
-    "system_completion_status"
+    "system_completion_status",
+    "headless_tool_owner_allocation",
+    "capability_crosswalk",
+    "foundation_closure_census",
+    "foundation_closure_matrix_generator",
+    "governance_validator"
   ],
   "properties": {
-    "authority_id": {
-      "type": "string",
-      "pattern": "^CURRENT-AUTHORITY-\\d{3}$"
-    },
-    "effective_date": {
-      "type": "string",
-      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
-    },
-    "standing": {
-      "type": "string",
-      "minLength": 1
-    },
-    "supersedes": {
-      "type": "string"
-    },
-    "obligation_registry": {
-      "type": "string",
-      "pattern": "^[A-Za-z0-9.][A-Za-z0-9._/-]*\\.(json|md|js|ya?ml)$"
-    },
-    "topology": {
-      "type": "string",
-      "pattern": "^[A-Za-z0-9.][A-Za-z0-9._/-]*\\.(json|md|js|ya?ml)$"
-    },
-    "system_completion_status": {
-      "type": "string",
-      "pattern": "^[A-Za-z0-9.][A-Za-z0-9._/-]*\\.(json|md|js|ya?ml)$"
-    },
-    "system_catalog": {
-      "type": "string",
-      "pattern": "^[A-Za-z0-9.][A-Za-z0-9._/-]*\\.(json|md|js|ya?ml)$"
-    },
-    "headless_tool_owner_allocation": {
-      "type": "string",
-      "pattern": "^[A-Za-z0-9.][A-Za-z0-9._/-]*\\.(json|md|js|ya?ml)$"
-    },
-    "foundation_closure_census": {
-      "type": "string",
-      "pattern": "^[A-Za-z0-9.][A-Za-z0-9._/-]*\\.(json|md|js|ya?ml)$"
-    },
-    "chat_operating_contract": {
-      "type": "string",
-      "pattern": "^[A-Za-z0-9.][A-Za-z0-9._/-]*\\.(json|md|js|ya?ml)$"
-    },
-    "decision_rights": {
-      "type": "string",
-      "pattern": "^[A-Za-z0-9.][A-Za-z0-9._/-]*\\.(json|md|js|ya?ml)$"
-    },
-    "fast_lane": {
-      "type": "string",
-      "pattern": "^[A-Za-z0-9.][A-Za-z0-9._/-]*\\.(json|md|js|ya?ml)$"
-    },
-    "state_brief_generator": {
-      "type": "string",
-      "pattern": "^[A-Za-z0-9.][A-Za-z0-9._/-]*\\.(json|md|js|ya?ml)$"
-    },
-    "lane_brief_generator": {
-      "type": "string",
-      "pattern": "^[A-Za-z0-9.][A-Za-z0-9._/-]*\\.(json|md|js|ya?ml)$"
-    },
-    "foundation_closure_matrix_generator": {
-      "type": "string",
-      "pattern": "^[A-Za-z0-9.][A-Za-z0-9._/-]*\\.(json|md|js|ya?ml)$"
-    }
+    "authority_id": {"type":"string","pattern":"^CURRENT-AUTHORITY-\\d{3}$"},
+    "effective_date": {"type":"string","pattern":"^\\d{4}-\\d{2}-\\d{2}$"},
+    "standing": {"type":"string","minLength":1},
+    "supersedes": {"type":"string"},
+    "obligation_registry": {"type":"string","pattern":"^[A-Za-z0-9.][A-Za-z0-9._/-]*\\.(json|md|js|ya?ml)$"},
+    "topology": {"type":"string","pattern":"^[A-Za-z0-9.][A-Za-z0-9._/-]*\\.(json|md|js|ya?ml)$"},
+    "system_completion_status": {"type":"string","pattern":"^[A-Za-z0-9.][A-Za-z0-9._/-]*\\.(json|md|js|ya?ml)$"},
+    "system_catalog": {"type":"string","pattern":"^[A-Za-z0-9.][A-Za-z0-9._/-]*\\.(json|md|js|ya?ml)$"},
+    "headless_tool_owner_allocation": {"type":"string","pattern":"^[A-Za-z0-9.][A-Za-z0-9._/-]*\\.(json|md|js|ya?ml)$"},
+    "capability_crosswalk": {"type":"string","pattern":"^[A-Za-z0-9.][A-Za-z0-9._/-]*\\.(json|md|js|ya?ml)$"},
+    "foundation_closure_census": {"type":"string","pattern":"^[A-Za-z0-9.][A-Za-z0-9._/-]*\\.(json|md|js|ya?ml)$"},
+    "chat_operating_contract": {"type":"string","pattern":"^[A-Za-z0-9.][A-Za-z0-9._/-]*\\.(json|md|js|ya?ml)$"},
+    "decision_rights": {"type":"string","pattern":"^[A-Za-z0-9.][A-Za-z0-9._/-]*\\.(json|md|js|ya?ml)$"},
+    "fast_lane": {"type":"string","pattern":"^[A-Za-z0-9.][A-Za-z0-9._/-]*\\.(json|md|js|ya?ml)$"},
+    "state_brief_generator": {"type":"string","pattern":"^[A-Za-z0-9.][A-Za-z0-9._/-]*\\.(json|md|js|ya?ml)$"},
+    "lane_brief_generator": {"type":"string","pattern":"^[A-Za-z0-9.][A-Za-z0-9._/-]*\\.(json|md|js|ya?ml)$"},
+    "foundation_closure_matrix_generator": {"type":"string","pattern":"^[A-Za-z0-9.][A-Za-z0-9._/-]*\\.(json|md|js|ya?ml)$"},
+    "governance_validator": {"type":"string","pattern":"^[A-Za-z0-9.][A-Za-z0-9._/-]*\\.(json|md|js|ya?ml)$"}
   }
 }
