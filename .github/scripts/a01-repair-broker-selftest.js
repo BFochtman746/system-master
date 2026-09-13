@@ -50,8 +50,10 @@ const routeCases = [
   ['SPREADSHEET_DATA', 'SPREADSHEET_DATA', 'SYSTEM_MASTER/SPREADSHEET_DATA', 'governance/repair/SPREADSHEET_DATA-REPAIR-INBOX.json'],
   ['MEDIA', 'MEDIA', 'SYSTEM_MASTER/MEDIA', 'governance/repair/MEDIA-REPAIR-INBOX.json'],
   ['CONNECTED_ACTIONS', 'CONNECTED_ACTIONS', 'SYSTEM_MASTER/CONNECTED_ACTIONS', 'governance/repair/CONNECTED_ACTIONS-REPAIR-INBOX.json'],
-  ['RESEARCH_KNOWLEDGE', 'RESEARCH_KNOWLEDGE', 'SYSTEM_MASTER/RESEARCH_KNOWLEDGE', 'governance/repair/RESEARCH_KNOWLEDGE-REPAIR-INBOX.json']
+  ['RESEARCH_KNOWLEDGE', 'RESEARCH_KNOWLEDGE', 'SYSTEM_MASTER/RESEARCH_KNOWLEDGE', 'governance/repair/RESEARCH_KNOWLEDGE-REPAIR-INBOX.json'],
+  ['PROGRAMMING', 'PROGRAMMING', 'SYSTEM_MASTER/PROGRAMMING', 'governance/repair/PROGRAMMING-REPAIR-INBOX.json']
 ];
+assert(routeCases.length === executionReady.size, 'repair routing selftest must exercise every execution-ready peer');
 for (const [systemId, workstreamId, ownerPath, inboxPath] of routeCases) {
   const tx = openTransaction(base({ receipt_id:`receipt-${systemId.toLowerCase()}`, qualification_id:`${systemId}-REPAIR-SELFTEST`, workstream_id:workstreamId }));
   assert(tx.transaction.state === 'REPAIR_REQUEST_READY', `${systemId} subject failure must create repair request`);
@@ -92,6 +94,7 @@ expectThrow(() => finalizeTransaction({ transaction:subject.transaction, candida
 
 console.log('A01_REPAIR_BROKER_SELFTEST_PASS');
 console.log(`active_product_repair_routes=${[...executionReady].join(',')}`);
+console.log('programming_repair_route=PROGRAMMING');
 console.log('book_evaluator_repair_route=BOOK');
 console.log('retired_literary_prose_repair_route=REJECTED_NO_DISPATCH');
 console.log('replacement_standing=A01_ELIGIBLE_ONLY');
