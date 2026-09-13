@@ -1,0 +1,111 @@
+name: P03 Evidence Retention Foundation Qualification
+
+on:
+  push:
+    paths:
+      - 'governance/CURRENT-AUTHORITY.json'
+      - 'governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-*.json'
+      - 'governance/PLATFORM-DISPOSITION-DECISIONS-001.md'
+      - 'governance/contracts/P03-FOUNDATION-CONTRACT-001.md'
+      - 'control-gateway/python/a01_evidence_retention.py'
+      - 'control-gateway/python/test_a01_evidence_retention.py'
+      - '.github/workflows/p03-evidence-retention-foundation-qualification.yml'
+  pull_request:
+    paths:
+      - 'governance/CURRENT-AUTHORITY.json'
+      - 'governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-*.json'
+      - 'governance/PLATFORM-DISPOSITION-DECISIONS-001.md'
+      - 'governance/contracts/P03-FOUNDATION-CONTRACT-001.md'
+      - 'control-gateway/python/a01_evidence_retention.py'
+      - 'control-gateway/python/test_a01_evidence_retention.py'
+      - '.github/workflows/p03-evidence-retention-foundation-qualification.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout exact P03 subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Pin Python runtime
+        uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38
+        with:
+          python-version: '3.12'
+      - name: Run exact P03 acceptance target
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p qualification-output
+          cd control-gateway/python
+          PYTHONPATH="$PWD:$(cd ../.. && pwd)" python -m unittest test_a01_evidence_retention -v 2>&1 | tee /tmp/p03-tests.log
+          grep -E '^Ran 17 tests in ' /tmp/p03-tests.log
+          grep -Fx 'OK' /tmp/p03-tests.log
+      - name: Assert current P03 contract and emit exact-subject evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH="${GITHUB_WORKSPACE}/control-gateway/python:${GITHUB_WORKSPACE}" python - <<'PY'
+          import hashlib, inspect, json, os, subprocess
+          from a01_evidence_retention import EvidenceManifest, EvidenceStore, RetentionPolicy
+
+          with open('governance/CURRENT-AUTHORITY.json', encoding='utf-8') as f:
+              authority = json.load(f)
+          with open(authority['capability_crosswalk'], encoding='utf-8') as f:
+              crosswalk = json.load(f)
+          assert authority['authority_id'] == 'CURRENT-AUTHORITY-005'
+          assert crosswalk['crosswalk_id'] == 'SYSTEM-MASTER-CAPABILITY-CROSSWALK-003'
+          p03 = next(row for row in crosswalk['platform_requirements'] if row['platform_id'] == 'P03')
+          assert p03['owner_path'] == 'SYSTEM_MASTER/CORE'
+          assert p03['disposition'] == 'BUILT'
+          assert p03['implementation'] == 'control-gateway/python/a01_evidence_retention.py'
+          assert not hasattr(EvidenceManifest, 'update') and not hasattr(EvidenceManifest, 'delete')
+          assert {'index','plan','prune','report'} <= set(dir(EvidenceStore))
+          assert RetentionPolicy().never_prune_prefixes == ('authority/','qualification/','closure/')
+
+          subjects = [
+              'governance/CURRENT-AUTHORITY.json',
+              authority['capability_crosswalk'],
+              'governance/PLATFORM-DISPOSITION-DECISIONS-001.md',
+              'governance/contracts/P03-FOUNDATION-CONTRACT-001.md',
+              'control-gateway/python/a01_evidence_retention.py',
+              'control-gateway/python/test_a01_evidence_retention.py',
+              '.github/workflows/p03-evidence-retention-foundation-qualification.yml',
+          ]
+          def blob(path):
+              return subprocess.check_output(['git','rev-parse',f'HEAD:{path}'], text=True).strip()
+          def sha256(path):
+              with open(path, 'rb') as f:
+                  return hashlib.sha256(f.read()).hexdigest()
+          evidence = {
+              'evidence_schema':'1.0',
+              'contract_id':'P03-FOUNDATION-1.0',
+              'requirement_or_capability_id':'P03',
+              'owner_path':'SYSTEM_MASTER/CORE',
+              'authority_id':authority['authority_id'],
+              'crosswalk_id':crosswalk['crosswalk_id'],
+              'status':'PASS',
+              'source_identity':os.environ['GITHUB_SHA'],
+              'test_count':17,
+              'qualified_guarantees':['hash_chain_tamper_evidence','append_only_manifest','record_before_delete','broken_chain_prune_refusal','protected_prefixes','idempotent_indexing'],
+              'explicit_non_guarantees':['tamper_proof_worm_storage','min_free_bytes_enforcement','external_anchor'],
+              'subjects':[{'path':p,'git_blob_sha':blob(p)} for p in subjects],
+              'logs':{'unittest_sha256':sha256('/tmp/p03-tests.log')},
+          }
+          with open('qualification-output/p03-foundation-1.0.json','w',encoding='utf-8') as f:
+              json.dump(evidence,f,indent=2); f.write('\n')
+          print(json.dumps(evidence))
+          PY
+      - name: Preserve machine-readable P03 qualification evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p03-foundation-1.0-evidence
+          path: qualification-output/p03-foundation-1.0.json
+          if-no-files-found: error
+          retention-days: 30

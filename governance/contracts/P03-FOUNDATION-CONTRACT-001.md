@@ -1,122 +1,101 @@
 # P03 — Foundation Contract 001
 
 **Owner** `SYSTEM_MASTER/CORE` · **Capability** P03 Evidence store and retention · **Effective** 2026-09-13
-**Authority** `governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-002.json`
-**Disposition** BUILT by `governance/PLATFORM-DISPOSITION-DECISIONS-001.md`
+**Authority** `governance/CURRENT-AUTHORITY.json` (`CURRENT-AUTHORITY-005`)
+**Crosswalk** `governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json` · P03 `BUILT`
+**Implementation** `control-gateway/python/a01_evidence_retention.py`
 
 ## 1. Contract / interface
 
-`a01_evidence_retention` governs local evidence under a root directory.
+P03 provides local, tamper-evident evidence indexing and tiered retention under an evidence root.
 
-- `EvidenceManifest` — `entries()`, `head()`, `append(body)`, `verify()`, `recorded_paths()`.
-- `EvidenceStore` — `index()`, `plan(now)`, `prune(now, dry_run)`, `report(now)`.
-- `RetentionPolicy` — `keep_all_days` 30, `keep_summary_days` 365,
-  `never_prune_prefixes` (`authority/`, `qualification/`, `closure/`).
+- `EvidenceManifest`: append-only `entries()`, `head()`, `append(body)`, `verify()`, `recorded_paths()`.
+- `EvidenceStore`: `index()`, `plan(now)`, `prune(now, dry_run)`, `report(now)`.
+- `RetentionPolicy`: 30-day whole-retention window, 365-day summary window, and never-prune prefixes `authority/`, `qualification/`, `closure/`.
 - CLI: `--index`, `--verify`, `--plan`, `--prune [--dry-run]`, `--report`.
 
-Offers: a tamper-evident record of every artifact that has existed, and bounded disk use.
-Does not offer: an update or delete path for manifest entries. Neither class has one.
+Foundation 1.0 guarantees append-only manifest lineage, detectable chain tampering, record-before-delete pruning, protected prefixes and fail-closed prune refusal on integrity doubt. It does **not** claim WORM/tamper-proof storage or an absolute free-space guarantee. `min_free_bytes` exists in the policy object but is not currently enforced and is outside this Foundation acceptance claim.
 
 ## 2. Ingress routes
 
-1. **`--index` after a night**, recording new artifacts. Idempotent.
-2. **`--prune`**, scheduled or manual, applying the policy.
-3. **`--verify`**, any time, and mandatorily before any prune.
+- `--index` records new or changed local artifacts idempotently.
+- `--verify` replays manifest integrity.
+- `--plan` computes retention disposition without mutation.
+- `--prune` applies the tiered policy only after successful manifest verification; `--dry-run` performs no deletion.
+- `--report` renders current local evidence/retention state.
 
-Writes into the evidence root come from producers — the gateway, the supervisor, the
-morning receipt. This module never creates evidence, only records and prunes it.
+Evidence producers write artifacts into the root; P03 records and governs retention of those artifacts but does not manufacture their semantic evidence claims.
 
 ## 3. Egress routes
 
-- The manifest at `<root>/EVIDENCE-MANIFEST-001.jsonl`, append-only.
-- Deletion of prunable artifacts, each preceded by its own recorded entry.
-- JSON on stdout for every subcommand.
-- Exit 0 ok, 1 policy violation or prune refused, 2 chain broken or root absent.
+- append-only `<root>/EVIDENCE-MANIFEST-001.jsonl`;
+- JSON CLI results;
+- artifact deletion only after a durable `PRUNED` manifest record is appended and fsynced;
+- exit 0 on success, exit 1 for retention/policy refusal, exit 2 for missing root or chain-integrity failure.
 
-Exit 2 for a broken chain is deliberate: that is an integrity failure, not a retention one,
-and must not be retried like a transient.
+A `PRUNED` record retains the deleted artifact content digest, preserving post-deletion identity.
 
 ## 4. Persistence and canonical writer
 
-The manifest is the durable state. Canonical writer: `EvidenceManifest.append`, and nothing
-else. It opens the file `"a"`, writes one canonical JSON line, flushes and fsyncs.
+The manifest is P03 durable state. `EvidenceManifest.append` is the canonical writer and opens the manifest only in append mode, writes canonical JSON, flushes and fsyncs.
 
-Each entry carries `previous_entry_digest` and an `entry_digest` over the entry body, so
-the chain is verifiable by replay from `GENESIS`. Modification, deletion or insertion at
-any position is detectable — `verify()` reports the index of the first break rather than
-only rejecting, so a damaged manifest can be diagnosed.
+Every record carries `previous_entry_digest` plus `entry_digest`, allowing replay to detect edit, removal or insertion. P03 never updates or deletes manifest entries. Evidence artifacts remain producer-owned; P03 may delete only artifacts admitted by its retention policy and only after recording the deletion.
 
-Artifacts are owned by their producers. This module deletes them under policy and never
-modifies them.
-
-**Honest limit:** hash-chaining is tamper-*evidence*, not tamper-*proofing*. Anyone with
-local write access to A-01 could rewrite the chain end to end. Closing that needs an
-external anchor, which conflicts with the standing sovereignty rule and is an owner
-decision. Recorded, not glossed.
+Hash chaining is tamper-evidence, not tamper-proofing: a principal with unrestricted local filesystem write authority could rewrite the chain end-to-end. External anchoring/WORM storage is not granted by this contract.
 
 ## 5. Dependencies
 
-- A local filesystem root (`A01_EVIDENCE_ROOT`, default `control-gateway/state/evidence`).
-- Python 3.12 stdlib only.
+- local filesystem evidence root (`A01_EVIDENCE_ROOT`, default `control-gateway/state/evidence`);
+- Python 3.12 standard library only;
+- P00 current authority and Crosswalk 003 establish current P03 ownership/disposition for census qualification.
 
-Consumers: **P04** authority writes, **P06** gateway, **P08** qualification and **P15**
-receipt all produce evidence into this root. None depends on this module to function —
-retention is governance over their output, not a path in it.
+P03 has no network, private-data, publication, credential or external-provider dependency for Foundation 1.0 qualification.
 
 ## 6. Failure semantics
 
-**Fail-closed, and asymmetrically: never delete on doubt.**
+**Fail closed; never delete on doubt.**
 
-- Root absent → exit 2, nothing attempted.
-- Manifest line unparseable → `ChainError`, exit 2.
-- Chain broken → `prune()` raises before deleting anything. A test asserts the artifact
-  survives a broken-chain prune attempt.
-- Record write fails during prune → that artifact is **not** deleted and is reported under
-  `refused`. Record first, delete second, always.
-- Artifact vanished between plan and prune → skipped silently. Something else removed it;
-  that is not this module's failure to report.
-- Protected prefix → never prunable at any age, regardless of policy values.
+- absent evidence root → exit 2;
+- malformed or broken manifest chain → verification fails and prune is refused before deletion;
+- failure to append a prune record → corresponding artifact is not deleted and is reported refused;
+- protected prefixes → never prunable regardless of age;
+- dry-run → no deletion;
+- repeated index/prune operations are idempotent with respect to unchanged/already-pruned artifacts.
 
-Idempotent throughout. `index()` re-records only changed content. `verify()` and `plan()`
-are pure. Repeated `prune()` is a no-op once the plan is empty.
+Artifact disappearance caused outside P03 is not relabeled as a successful P03 prune.
 
 ## 7. Evidence target
 
-The manifest itself, and it is self-proving: `--verify` replays the chain and reports
-entry count and head digest. A `PRUNED` entry retains the artifact's content digest, so a
-deleted artifact remains provably identifiable after deletion. The record outlives the
-artifact, which is the entire purpose.
+`.github/workflows/p03-evidence-retention-foundation-qualification.yml` executes the exact current implementation/test subject and preserves `p03-foundation-1.0-evidence`.
+
+The receipt binds `CURRENT-AUTHORITY-005`, Crosswalk 003 P03 `BUILT`, `SYSTEM_MASTER/CORE`, source commit identity, the implementation/test/contract/workflow Git blobs, the 17-test result, acceptance-log digest and immutable workflow artifact identity. Foundation census completion requires admission of that successful exact-subject receipt into `FOUNDATION-CLOSURE-EVIDENCE-REGISTRY-001.json`.
 
 ## 8. Acceptance target
 
-```
-cd control-gateway/python && PYTHONPATH="$PWD:$(cd ../.. && pwd)" \
-  python -m unittest test_a01_evidence_retention
+```bash
+cd control-gateway/python
+PYTHONPATH="$PWD:$(cd ../.. && pwd)" python -m unittest test_a01_evidence_retention -v
 ```
 
-**PASS** when all 17 tests pass with zero skips. The suite proves the properties that make
-this evidence rather than a log: an edited entry is detected, a removed entry is detected,
-a broken chain refuses to prune, a pruned artifact stays provable, and protected prefixes
-are never prunable.
+**PASS** only when all 17 tests pass with zero skips on the same exact source identity and the qualifier additionally proves:
+
+1. current authority is `CURRENT-AUTHORITY-005` and selects Crosswalk 003;
+2. Crosswalk 003 contains P03 owned by `SYSTEM_MASTER/CORE`, disposition `BUILT`, implementation `control-gateway/python/a01_evidence_retention.py`;
+3. the implementation exposes append/index/verify/plan/prune/report behavior but no manifest update/delete method;
+4. default protected prefixes are exactly `authority/`, `qualification/`, `closure/`;
+5. `min_free_bytes` is not represented as a qualified Foundation guarantee;
+6. exact-subject machine-readable evidence is emitted and preserved.
 
 ## 9. Authority boundary
 
-**Lane may decide alone (`agent`):** default window values within the tiered shape, report
-formatting, additional tests, walk performance.
+**Lane may decide alone (`agent`):** implementation details preserving the accepted invariants, report formatting, performance and additional tests.
 
-**Requires the owner (`owner`):** adding any update or delete path to the manifest;
-changing or removing a protected prefix; permitting a prune on an unverified chain;
-reversing the record-then-delete order; adding an external anchor, which is a sovereignty
-decision.
+**Requires owner authority (`owner`):** manifest mutation/deletion semantics; protected-prefix removal; permitting prune on an unverified chain; reversing record-before-delete; external anchoring/WORM integration; or promoting `min_free_bytes` into an enforcement/availability guarantee.
 
-Reversing record-then-delete would make untraceable deletion possible again. That is the
-one invariant this capability is.
+Repository qualification grants none of those broader authorities.
 
 ## 10. Open gaps
 
-None in the module. Two adoption items:
+No open gap blocks the P03 Foundation 1.0 claim above once exact-subject acceptance evidence is admitted.
 
-- Not yet scheduled. Run `--index` after the night and `--prune` weekly, after the ingress
-  and receipt tasks are registered.
-- `min_free_bytes` is defined in the policy but not yet enforced against actual free space.
-  Low priority while the tiered windows hold, and it is the natural next addition.
+Follow-on adoption work remains separately owed: schedule indexing/pruning in the admitted execution environment, and decide/implement actual free-space pressure enforcement if `min_free_bytes` is to become a runtime guarantee. Those items must not be silently inferred from this Foundation acceptance.
