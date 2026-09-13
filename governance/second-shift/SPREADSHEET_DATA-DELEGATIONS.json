@@ -1,0 +1,33 @@
+{
+  "owner_system_id": "SPREADSHEET_DATA",
+  "owner_path": "SYSTEM_MASTER/SPREADSHEET_DATA",
+  "control_ref": "spreadsheet-data/control-v1",
+  "control_binding": {"type":"FILE_BLOB","path":"governance/control-records/SPREADSHEET-DATA-CONTROL-RECORD-001.json"},
+  "last_known_control_head": "38db243fb9a3d6cceea9b1d643fae085ffffe70d",
+  "program_job_lock": "governance/SYSTEM-PROGRAM-JOB-LOCK-001.json",
+  "system_completion_status": "governance/SYSTEM-COMPLETION-STATUS-002.json",
+  "delegation_epoch": 1,
+  "active_delegations": [
+    {
+      "delegation_id": "SECOND-SHIFT-SPREADSHEET-DATA-CONTRACT-001",
+      "owner_path": "SYSTEM_MASTER/SPREADSHEET_DATA",
+      "objective_id": "HEADLESS-COMPUTE-DATA-SPREADSHEET-CONTRACT-001",
+      "obligation_id": "HEADLESS-COMPUTE-DATA-SPREADSHEET-CONTRACT-001",
+      "state": "READY",
+      "valid_for_control_ref": "spreadsheet-data/control-v1",
+      "valid_for_control_head": "38db243fb9a3d6cceea9b1d643fae085ffffe70d",
+      "created_at": "2026-09-13T15:12:00-04:00",
+      "last_revalidated_at": "2026-09-13T15:12:00-04:00",
+      "completion_delta": "Define and verify the owner-isolated spreadsheet/math/data/ledger contract over Core shared primitives without taking Core runtime or peer semantics.",
+      "stop_condition": "Contract boundary is evidence-backed and ready for exact-subject qualification, or a durable authority/native/private-data blocker is recorded.",
+      "allowed_work": ["specify spreadsheet/math/data/ledger semantics", "define admitted Core interfaces", "prepare tests and qualification evidence"],
+      "forbidden_authority": ["do not take Core runtime ownership", "do not take another peer's semantic state", "do not infer production or private-data authority"],
+      "on_pass": "Bind the next dependency-valid SPREADSHEET_DATA successor under current authority.",
+      "on_failure": "Preserve exact blocker/evidence and select only independent owner-valid SPREADSHEET_DATA work."
+    }
+  ],
+  "retired_delegations": [],
+  "owner_revalidation_required": false,
+  "reason": "Initial admitted peer control binding and owner-valid current contract obligation.",
+  "empty_is_valid": false
+}

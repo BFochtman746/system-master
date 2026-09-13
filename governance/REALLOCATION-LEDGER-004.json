@@ -1,28 +1,32 @@
 {
   "ledger_id": "REALLOCATION-LEDGER-004",
-  "effective_date": "2026-09-11",
-  "topology": "governance/SYSTEM-TOPOLOGY-005.json",
+  "effective_date": "2026-09-13",
+  "topology": "governance/SYSTEM-TOPOLOGY-006.json",
   "supersedes_current_selection": "governance/REALLOCATION-LEDGER-003.json",
   "historical_ledgers": ["governance/REALLOCATION-LEDGER-001.json", "governance/REALLOCATION-LEDGER-002.json", "governance/REALLOCATION-LEDGER-003.json"],
   "rule": "Reallocation changes current ownership/control taxonomy only. Historical names, branches, commits, qualification IDs, receipts and exact-SHA evidence remain valid only in their original scope and are never rewritten.",
   "entries": [
-    {"source_label": "MASTER", "source_classification": "HISTORICAL_FOUNDATION_IDENTITY", "current_owner": "CORE", "current_path": "SYSTEM_MASTER/CORE", "action": "PRESERVE_HISTORICAL_ALIAS_ROUTE_CURRENT_TO_CORE"},
-    {"source_label": "MASTER SYSTEM", "source_classification": "HISTORICAL_FOUNDATION_NAME", "current_owner": "CORE", "current_path": "SYSTEM_MASTER/CORE", "action": "PRESERVE_HISTORICAL_ALIAS_ROUTE_CURRENT_TO_CORE"},
-    {"source_label": "LEARNING SYSTEM", "source_classification": "FIRST_CLASS_TOOL_SYSTEM", "current_owner": "LEARNING", "current_path": "SYSTEM_MASTER/LEARNING", "action": "PRESERVE_ACTIVE_PEER"},
-    {"source_label": "BOOK SYSTEM", "source_classification": "FIRST_CLASS_TOOL_SYSTEM", "current_owner": "BOOK", "current_path": "SYSTEM_MASTER/BOOK", "action": "PRESERVE_ACTIVE_PEER_AND_CANONICAL_MANUSCRIPT_OWNER"},
-    {"source_label": "DOCUMENT / DOCUMENTS / CONTENT & DOCUMENT ARTIFACTS", "source_classification": "FIRST_CLASS_TOOL_SYSTEM", "current_owner": "DOCUMENTS", "current_path": "SYSTEM_MASTER/DOCUMENTS", "action": "PRESERVE_ACTIVE_PEER_DOCUMENT_ARTIFACT_OWNER"},
-    {"source_label": "PROSE SYSTEM", "source_classification": "COMPLETE_RETIRED_TERMINAL", "historical_path": "SYSTEM_MASTER/BOOK/PROSE", "current_owner": null, "current_path": null, "execution_lane": null, "action": "RETIRED_NO_DISPATCH__PRESERVE_HISTORY", "authority": "governance/ADR-0005-PROSE-TERMINAL-RETIREMENT-BOOK-INTEGRATION.md", "retirement_record": "governance/retirements/PROSE-SYSTEM-RETIREMENT-001.json", "integration_owner_if_genuinely_open": "BOOK"},
-    {"source_label": "LITERARY-PROSE", "source_classification": "HISTORICAL_A01_WORKSTREAM_ID", "historical_owner": "PROSE", "current_owner": null, "current_path": null, "execution_lane": null, "action": "PRESERVE_QUALIFICATION_IDENTITY_AS_HISTORY__NO_ACTIVE_ROUTE", "rule": "Existing receipts retain original workstream identity. Any changed current integration subject is BOOK-owned and freshly qualified as Book work; no historical PASS transfers."},
-    {"source_label": "BOOK-EVAL-LEMONADE-001", "source_classification": "HISTORICAL_QUALIFICATION_AND_IMPLEMENTATION_IDENTITY", "historical_owner": "PROSE", "current_owner": "BOOK", "current_path": "SYSTEM_MASTER/BOOK", "execution_lane": "BOOK", "action": "PRESERVE_HISTORICAL_EVIDENCE_IDENTITY__CURRENT_INTEGRATION_IF_OPEN_IS_BOOK_ONLY"},
-    {"source_label": "LITERARY PROSE ENGINE", "source_classification": "RETIRED_IMPLEMENTATION_FAMILY_WITH_HISTORICAL_LINEAGE", "historical_owner": "PROSE", "current_owner": null, "current_path": null, "action": "PRESERVE_IMPLEMENTATION_PROVENANCE__NO_ACTIVE_CONTROL"},
-    {"source_label": "SYSTEM-MASTER-CONTINUITY", "source_classification": "A01_WORKSTREAM_OR_SUBWORKSTREAM", "current_owner": "CORE", "current_path": "SYSTEM_MASTER/CORE/CONTINUITY", "action": "PRESERVE_CORE_SUBSYSTEM_ROUTE"},
-    {"source_label": "SYSTEM-MASTER-ASSURANCE-RECON", "source_classification": "A01_WORKSTREAM_OR_EVIDENCE_FUNCTION", "current_owner": "CORE", "current_path": "SYSTEM_MASTER/CORE/ASSURANCE_RECONCILIATION", "action": "PRESERVE_CORE_CONTROL_ROUTE"},
-    {"source_label": "A-01", "source_classification": "SHARED_INFRASTRUCTURE", "current_owner": "SYSTEM_MASTER", "administrative_owner": "CORE", "current_path": "SYSTEM_MASTER/SHARED_INFRASTRUCTURE/A01", "action": "PRESERVE_SHARED_INFRASTRUCTURE"},
-    {"source_label": "SECOND SHIFT / NIGHT SHIFT", "source_classification": "SCHEDULED_EXECUTION_SURFACE", "current_owner": "SYSTEM_MASTER", "current_path": "SYSTEM_MASTER/SHARED_INFRASTRUCTURE/SECOND_SHIFT", "action": "PRESERVE_SHARED_EXECUTION_INFRASTRUCTURE"}
+    {"source_label":"MASTER","source_classification":"HISTORICAL_FOUNDATION_IDENTITY","current_owner":"CORE","current_path":"SYSTEM_MASTER/CORE","action":"PRESERVE_HISTORICAL_ALIAS_ROUTE_CURRENT_TO_CORE"},
+    {"source_label":"MASTER SYSTEM","source_classification":"HISTORICAL_FOUNDATION_NAME","current_owner":"CORE","current_path":"SYSTEM_MASTER/CORE","action":"PRESERVE_HISTORICAL_ALIAS_ROUTE_CURRENT_TO_CORE"},
+    {"source_label":"LEARNING SYSTEM","source_classification":"FIRST_CLASS_TOOL_SYSTEM","current_owner":"LEARNING","current_path":"SYSTEM_MASTER/LEARNING","action":"PRESERVE_ACTIVE_PEER"},
+    {"source_label":"BOOK SYSTEM","source_classification":"FIRST_CLASS_TOOL_SYSTEM","current_owner":"BOOK","current_path":"SYSTEM_MASTER/BOOK","action":"PRESERVE_ACTIVE_PEER_AND_CANONICAL_MANUSCRIPT_OWNER"},
+    {"source_label":"DOCUMENT / DOCUMENTS / CONTENT & DOCUMENT ARTIFACTS","source_classification":"FIRST_CLASS_TOOL_SYSTEM","current_owner":"DOCUMENTS","current_path":"SYSTEM_MASTER/DOCUMENTS","action":"PRESERVE_ACTIVE_PEER_DOCUMENT_ARTIFACT_OWNER"},
+    {"source_label":"EXCEL / MATH / DATA / LEDGER","source_classification":"ADMITTED_FIRST_CLASS_TOOL_SYSTEM_FAMILY","current_owner":"SPREADSHEET_DATA","current_path":"SYSTEM_MASTER/SPREADSHEET_DATA","action":"ADMITTED_ACTIVE_PEER__PRESERVE_CORE_SHARED_DATA_BOUNDARY"},
+    {"source_label":"IMAGE / PHOTO / VIDEO / VOICE / AUDIOBOOK / MEDIA","source_classification":"ADMITTED_FIRST_CLASS_TOOL_SYSTEM_FAMILY","current_owner":"MEDIA","current_path":"SYSTEM_MASTER/MEDIA","action":"ADMITTED_ACTIVE_PEER__PRESERVE_CORE_SHARED_RUNTIME_BOUNDARY"},
+    {"source_label":"BROWSER / CALENDAR / COMMS / PLUGINS","source_classification":"ADMITTED_FIRST_CLASS_TOOL_SYSTEM_FAMILY","current_owner":"CONNECTED_ACTIONS","current_path":"SYSTEM_MASTER/CONNECTED_ACTIONS","action":"ADMITTED_ACTIVE_PEER__EXPLICIT_USER_ACTION_AUTHORITY_REQUIRED"},
+    {"source_label":"RESEARCH / KNOWLEDGE / GEO","source_classification":"ADMITTED_FIRST_CLASS_TOOL_SYSTEM_FAMILY","current_owner":"RESEARCH_KNOWLEDGE","current_path":"SYSTEM_MASTER/RESEARCH_KNOWLEDGE","action":"ADMITTED_ACTIVE_PEER__CONSUME_CONNECTED_ACTIONS_BROWSER_INTERFACE"},
+    {"source_label":"PROSE SYSTEM","source_classification":"COMPLETE_RETIRED_TERMINAL","historical_path":"SYSTEM_MASTER/BOOK/PROSE","current_owner":null,"current_path":null,"execution_lane":null,"action":"RETIRED_NO_DISPATCH__PRESERVE_HISTORY","authority":"governance/ADR-0005-PROSE-TERMINAL-RETIREMENT-BOOK-INTEGRATION.md","retirement_record":"governance/retirements/PROSE-SYSTEM-RETIREMENT-001.json","integration_owner_if_genuinely_open":"BOOK"},
+    {"source_label":"LITERARY-PROSE","source_classification":"HISTORICAL_A01_WORKSTREAM_ID","historical_owner":"PROSE","current_owner":null,"current_path":null,"execution_lane":null,"action":"RETIRED_NO_DISPATCH__PRESERVE_QUALIFICATION_IDENTITY_AS_HISTORY"},
+    {"source_label":"BOOK-EVAL-LEMONADE-001","source_classification":"HISTORICAL_QUALIFICATION_AND_IMPLEMENTATION_IDENTITY","historical_owner":"PROSE","current_owner":"BOOK","current_path":"SYSTEM_MASTER/BOOK","execution_lane":"BOOK","action":"PRESERVE_HISTORICAL_EVIDENCE_IDENTITY__CURRENT_INTEGRATION_IF_OPEN_IS_BOOK_ONLY"},
+    {"source_label":"LITERARY PROSE ENGINE","source_classification":"RETIRED_IMPLEMENTATION_FAMILY_WITH_HISTORICAL_LINEAGE","historical_owner":"PROSE","current_owner":null,"current_path":null,"action":"PRESERVE_IMPLEMENTATION_PROVENANCE__NO_ACTIVE_CONTROL"},
+    {"source_label":"SYSTEM-MASTER-CONTINUITY","source_classification":"A01_WORKSTREAM_OR_SUBWORKSTREAM","current_owner":"CORE","current_path":"SYSTEM_MASTER/CORE/CONTINUITY","action":"PRESERVE_CORE_SUBSYSTEM_ROUTE"},
+    {"source_label":"SYSTEM-MASTER-ASSURANCE-RECON","source_classification":"A01_WORKSTREAM_OR_EVIDENCE_FUNCTION","current_owner":"CORE","current_path":"SYSTEM_MASTER/CORE/ASSURANCE_RECONCILIATION","action":"PRESERVE_CORE_CONTROL_ROUTE"},
+    {"source_label":"A-01","source_classification":"SHARED_INFRASTRUCTURE","current_owner":"SYSTEM_MASTER","administrative_owner":"CORE","current_path":"SYSTEM_MASTER/SHARED_INFRASTRUCTURE/A01","action":"PRESERVE_SHARED_INFRASTRUCTURE"},
+    {"source_label":"SECOND SHIFT / NIGHT SHIFT","source_classification":"SCHEDULED_EXECUTION_SURFACE","current_owner":"SYSTEM_MASTER","current_path":"SYSTEM_MASTER/SHARED_INFRASTRUCTURE/SECOND_SHIFT","action":"PRESERVE_SHARED_EXECUTION_INFRASTRUCTURE"}
   ],
   "superseded_reallocations": [
-    {"prior_ledger": "governance/REALLOCATION-LEDGER-002.json", "prior_action": "PROSE_TO_DOCUMENTS", "current_effect": "SUPERSEDED_BY_ADR_0005", "history_preserved": true},
-    {"prior_ledger": "governance/REALLOCATION-LEDGER-003.json", "prior_action": "RESTORE_ACTIVE_BOOK_CHILD_SPECIALIST", "current_effect": "SUPERSEDED_BY_ADR_0005", "history_preserved": true}
+    {"prior_ledger":"governance/REALLOCATION-LEDGER-002.json","prior_action":"PROSE_TO_DOCUMENTS","current_effect":"SUPERSEDED_BY_ADR_0005","history_preserved":true},
+    {"prior_ledger":"governance/REALLOCATION-LEDGER-003.json","prior_action":"RESTORE_ACTIVE_BOOK_CHILD_SPECIALIST","current_effect":"SUPERSEDED_BY_ADR_0005","history_preserved":true}
   ],
-  "future_rule": "Candidate future systems and archived module families may be cataloged without becoming owners. Current ownership changes require explicit user instruction plus the applicable topology/ADR/registry transaction. Retired systems cannot be auto-provisioned or resurrected."
+  "future_rule": "Candidate future systems and archived module families may be cataloged without becoming owners. Current ownership changes require explicit user instruction plus the applicable topology/authority transaction. Retired systems cannot be auto-provisioned or resurrected."
 }

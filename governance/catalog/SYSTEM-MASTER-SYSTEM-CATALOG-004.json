@@ -5,276 +5,57 @@
   "catalog_class": "DISCOVERY_AND_REUSE_INDEX__NOT_ARCHITECTURE_AUTHORITY",
   "authority_rule": "This catalog makes active peer systems, retired systems, active non-peer work programs, future candidates and archived module families discoverable. It cannot create, promote, retire or reparent a system. CURRENT-AUTHORITY plus selected topology/ADR remains architecture authority.",
   "active_peer_systems": [
-    {
-      "system_id": "CORE",
-      "owner_path": "SYSTEM_MASTER/CORE",
-      "lifecycle": "ACTIVE_INCOMPLETE",
-      "control_ref": "system-master/control-v2",
-      "source": "governance/SYSTEM-TOPOLOGY-005.json"
-    },
-    {
-      "system_id": "LEARNING",
-      "owner_path": "SYSTEM_MASTER/LEARNING",
-      "lifecycle": "ACTIVE_INCOMPLETE",
-      "control_ref": "learning/control-v1",
-      "source": "governance/SYSTEM-TOPOLOGY-005.json"
-    },
-    {
-      "system_id": "BOOK",
-      "owner_path": "SYSTEM_MASTER/BOOK",
-      "lifecycle": "ACTIVE_INCOMPLETE",
-      "control_ref": "book-system/control-v1",
-      "source": "governance/SYSTEM-TOPOLOGY-005.json",
-      "historical_integration_inputs": [
-        "PROSE"
-      ]
-    },
-    {
-      "system_id": "DOCUMENTS",
-      "owner_path": "SYSTEM_MASTER/DOCUMENTS",
-      "lifecycle": "ACTIVE_INCOMPLETE",
-      "control_ref": "documents/control-v1",
-      "source": "governance/SYSTEM-TOPOLOGY-005.json"
-    },
-    {
-      "system_id": "SPREADSHEET_DATA",
-      "owner_path": "SYSTEM_MASTER/SPREADSHEET_DATA",
-      "lifecycle": "ACTIVE_PEER__NEWLY_ADMITTED",
-      "control_ref": "spreadsheet-data/control-v1",
-      "source": "catalog future_system_candidates, ratified 2026-09-13"
-    },
-    {
-      "system_id": "MEDIA",
-      "owner_path": "SYSTEM_MASTER/MEDIA",
-      "lifecycle": "ACTIVE_PEER__NEWLY_ADMITTED",
-      "control_ref": "media/control-v1",
-      "source": "catalog future_system_candidates, ratified 2026-09-13"
-    },
-    {
-      "system_id": "CONNECTED_ACTIONS",
-      "owner_path": "SYSTEM_MASTER/CONNECTED_ACTIONS",
-      "lifecycle": "ACTIVE_PEER__NEWLY_ADMITTED",
-      "control_ref": "connected-actions/control-v1",
-      "source": "catalog future_system_candidates, ratified 2026-09-13"
-    },
-    {
-      "system_id": "RESEARCH_KNOWLEDGE",
-      "owner_path": "SYSTEM_MASTER/RESEARCH_KNOWLEDGE",
-      "lifecycle": "ACTIVE_PEER__NEWLY_ADMITTED",
-      "control_ref": "research-knowledge/control-v1",
-      "source": "catalog future_system_candidates, ratified 2026-09-13"
-    }
+    {"system_id":"CORE","owner_path":"SYSTEM_MASTER/CORE","lifecycle":"ACTIVE_INCOMPLETE","control_ref":"system-master/control-v2","source":"governance/SYSTEM-TOPOLOGY-006.json"},
+    {"system_id":"LEARNING","owner_path":"SYSTEM_MASTER/LEARNING","lifecycle":"ACTIVE_INCOMPLETE","control_ref":"learning/control-v1","source":"governance/SYSTEM-TOPOLOGY-006.json"},
+    {"system_id":"BOOK","owner_path":"SYSTEM_MASTER/BOOK","lifecycle":"ACTIVE_INCOMPLETE","control_ref":"book-system/control-v1","source":"governance/SYSTEM-TOPOLOGY-006.json","historical_integration_inputs":["PROSE"]},
+    {"system_id":"DOCUMENTS","owner_path":"SYSTEM_MASTER/DOCUMENTS","lifecycle":"ACTIVE_INCOMPLETE","control_ref":"documents/control-v1","source":"governance/SYSTEM-TOPOLOGY-006.json"},
+    {"system_id":"SPREADSHEET_DATA","owner_path":"SYSTEM_MASTER/SPREADSHEET_DATA","lifecycle":"ACTIVE_INCOMPLETE__ADMITTED_2026_09_13","control_ref":"spreadsheet-data/control-v1","source":"governance/SYSTEM-TOPOLOGY-006.json"},
+    {"system_id":"MEDIA","owner_path":"SYSTEM_MASTER/MEDIA","lifecycle":"ACTIVE_INCOMPLETE__ADMITTED_2026_09_13","control_ref":"media/control-v1","source":"governance/SYSTEM-TOPOLOGY-006.json"},
+    {"system_id":"CONNECTED_ACTIONS","owner_path":"SYSTEM_MASTER/CONNECTED_ACTIONS","lifecycle":"ACTIVE_INCOMPLETE__ADMITTED_2026_09_13","control_ref":"connected-actions/control-v1","source":"governance/SYSTEM-TOPOLOGY-006.json"},
+    {"system_id":"RESEARCH_KNOWLEDGE","owner_path":"SYSTEM_MASTER/RESEARCH_KNOWLEDGE","lifecycle":"ACTIVE_INCOMPLETE__ADMITTED_2026_09_13","control_ref":"research-knowledge/control-v1","source":"governance/SYSTEM-TOPOLOGY-006.json"}
   ],
   "retired_systems": [
-    {
-      "system_id": "PROSE",
-      "historical_owner_path": "SYSTEM_MASTER/BOOK/PROSE",
-      "lifecycle": "COMPLETE_RETIRED_TERMINAL",
-      "retirement_record": "governance/retirements/PROSE-SYSTEM-RETIREMENT-001.json",
-      "architecture_decision": "governance/ADR-0005-PROSE-TERMINAL-RETIREMENT-BOOK-INTEGRATION.md",
-      "active_execution_lane": null,
-      "active_repair_lane": null,
-      "active_qualification_lane": null,
-      "active_research_task": null,
-      "active_telemetry_lane": null,
-      "successor_task": null,
-      "integration_owner_if_needed": "SYSTEM_MASTER/BOOK",
-      "reuse_rule": "Preserve historical exact-SHA evidence and capability artifacts as Book integration inputs only. Do not dispatch Prose or transfer PASS to changed Book integration bytes."
-    }
+    {"system_id":"PROSE","historical_owner_path":"SYSTEM_MASTER/BOOK/PROSE","lifecycle":"COMPLETE_RETIRED_TERMINAL","retirement_record":"governance/retirements/PROSE-SYSTEM-RETIREMENT-001.json","architecture_decision":"governance/ADR-0005-PROSE-TERMINAL-RETIREMENT-BOOK-INTEGRATION.md","active_execution_lane":null,"active_repair_lane":null,"active_qualification_lane":null,"active_research_task":null,"active_telemetry_lane":null,"successor_task":null,"integration_owner_if_needed":"SYSTEM_MASTER/BOOK","reuse_rule":"Preserve historical exact-SHA evidence and capability artifacts as Book integration inputs only. Do not dispatch Prose or transfer PASS to changed current subjects."}
   ],
   "active_non_peer_work_programs": [
-    {
-      "program_id": "PROGRAMMING",
-      "display_name": "Programming / Software Engineering Work Program",
-      "lifecycle": "ACTIVE_INCOMPLETE_WORK_PROGRAM__CANDIDATE_SYSTEM_BOUNDARY",
-      "architecture_authority": false,
-      "work_program_lock": "governance/programs/PROGRAMMING-WORK-PROGRAM-LOCK-001.json",
-      "system_packet": "governance/catalog/system-packets/PROGRAMMING.json",
-      "current_obligation": "PROGRAMMING-WORK-PROGRAM-CONTINUATION-001",
-      "peer_topology_status": "NOT_ADMITTED",
-      "second_shift_peer_lane": false,
-      "reuse_rule": "Preserve and continue existing Programming foundation/capability/build/test/assurance/Genesis evidence. SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001 performs prioritized custody/provenance recovery but does not replace Programming engineering work."
-    }
+    {"program_id":"PROGRAMMING","display_name":"Programming / Software Engineering Work Program","lifecycle":"ACTIVE_INCOMPLETE_WORK_PROGRAM__CANDIDATE_SYSTEM_BOUNDARY","architecture_authority":false,"work_program_lock":"governance/programs/PROGRAMMING-WORK-PROGRAM-LOCK-001.json","system_packet":"governance/catalog/system-packets/PROGRAMMING.json","current_obligation":"PROGRAMMING-WORK-PROGRAM-CONTINUATION-001","peer_topology_status":"NOT_ADMITTED","second_shift_peer_lane":false,"reuse_rule":"Preserve and continue existing Programming engineering evidence. Knowledge Recovery supports custody/provenance but does not replace Programming engineering work."}
   ],
   "support_programs": [
-    {
-      "program_id": "PROGRAMMING_KNOWLEDGE_RECOVERY",
-      "control": "governance/knowledge-recovery/SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001.md",
-      "owner_path": "SYSTEM_MASTER/CORE",
-      "lifecycle": "ACTIVE_SUPPORT__HIGHEST_DISCRETIONARY_WHILE_SELECTED",
-      "priority_order": [
-        "PROGRAMMING_PROVING_CORPUS",
-        "AUTHORIZED_REMAINING_CATALOG_ARCHIVE_RECOVERY"
-      ]
-    }
-  ],
-  "historical_architecture_records": [
-    {
-      "system_id": "PROSE",
-      "record": "governance/ADR-0003-DOCUMENTS-PEER-SYSTEM-AND-PROSE-RETIREMENT.md",
-      "current_effect": "SUPERSEDED_WHERE_IT_ASSIGNED_PROSE_TO_DOCUMENTS"
-    },
-    {
-      "system_id": "PROSE",
-      "record": "governance/ADR-0004-BOOK-PROSE-CHILD-RESTORATION.md",
-      "current_effect": "SUPERSEDED_FOR_CURRENT_EXECUTION"
-    }
+    {"program_id":"PROGRAMMING_KNOWLEDGE_RECOVERY","control":"governance/knowledge-recovery/SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001.md","owner_path":"SYSTEM_MASTER/CORE","lifecycle":"ACTIVE_SUPPORT__HIGHEST_DISCRETIONARY_WHILE_SELECTED"}
   ],
   "future_system_candidates": [
-    {
-      "candidate_id": "PROGRAMMING",
-      "display_name": "Programming / Software Engineering System",
-      "lifecycle": "ACTIVE_WORK_PROGRAM__PEER_ADMISSION_PENDING",
-      "architecture_authority": false,
-      "work_program_lock": "governance/programs/PROGRAMMING-WORK-PROGRAM-LOCK-001.json",
-      "historical_module_keys": [
-        "CODE"
-      ],
-      "adjacent_module_keys": [
-        "LOCALAI",
-        "AUTOMATION",
-        "PLUGINS",
-        "DATA"
-      ],
-      "build_start_rule": "Do not restart. Continue the active Programming work program and prepare explicit first-class-system admission only when authorized."
-    },
-    {
-      "candidate_id": "AI_INCOME",
-      "display_name": "AI Income System",
-      "lifecycle": "OWNER_AND_ARCHITECTURE_DECISION_REQUIRED",
-      "architecture_authority": false,
-      "historical_module_keys": [
-        "AIINCOME"
-      ]
-    },
-    {
-      "candidate_id": "LIVING_PORTFOLIO",
-      "display_name": "Living Portfolio System",
-      "lifecycle": "OWNER_AND_ARCHITECTURE_DECISION_REQUIRED",
-      "architecture_authority": false,
-      "historical_module_keys": [
-        "PORTFOLIO"
-      ]
-    }
+    {"candidate_id":"PROGRAMMING","display_name":"Programming / Software Engineering System","lifecycle":"ACTIVE_WORK_PROGRAM__PEER_ADMISSION_PENDING","architecture_authority":false,"work_program_lock":"governance/programs/PROGRAMMING-WORK-PROGRAM-LOCK-001.json","historical_module_keys":["CODE"],"build_start_rule":"Do not restart. Continue the active Programming work program and prepare explicit first-class-system admission only when authorized."},
+    {"candidate_id":"AI_INCOME","display_name":"AI Income System","lifecycle":"OWNER_AND_ARCHITECTURE_DECISION_REQUIRED","architecture_authority":false,"historical_module_keys":["AIINCOME"]},
+    {"candidate_id":"LIVING_PORTFOLIO","display_name":"Living Portfolio System","lifecycle":"OWNER_AND_ARCHITECTURE_DECISION_REQUIRED","architecture_authority":false,"historical_module_keys":["PORTFOLIO"]}
   ],
   "non_peer_or_special_dispositions": [
-    {
-      "module_key": "MANUSCRIPT",
-      "current_disposition": "BOOK_CAPABILITY"
-    },
-    {
-      "module_key": "STORYBIBLE",
-      "current_disposition": "BOOK_CAPABILITY"
-    },
-    {
-      "module_key": "WRITING",
-      "current_disposition": "CONTEXTUAL_CAPABILITY",
-      "rule": "Book/manuscript expressive writing belongs to BOOK and may consume preserved completed Prose capability evidence; generic reusable non-Book document writing belongs to DOCUMENTS."
-    },
-    {
-      "module_key": "PROSE",
-      "current_disposition": "COMPLETE_RETIRED_TERMINAL__NO_ACTIVE_OWNER"
-    },
-    {
-      "module_key": "CODE",
-      "current_disposition": "PROGRAMMING_ACTIVE_WORK_PROGRAM",
-      "program_lock": "governance/programs/PROGRAMMING-WORK-PROGRAM-LOCK-001.json"
-    },
-    {
-      "module_key": "CURRICULUM",
-      "current_disposition": "LEARNING_CAPABILITY"
-    },
-    {
-      "module_key": "CHAT",
-      "current_disposition": "CORE_SHARED_RUNTIME"
-    },
-    {
-      "module_key": "PROJECTS",
-      "current_disposition": "CORE_SHARED_WORK_CAPABILITY"
-    },
-    {
-      "module_key": "EXPERIENCE",
-      "current_disposition": "CORE_SHARED_PRODUCT_EXPERIENCE__HISTORICAL_STANDALONE_RESEARCH_EXISTS"
-    },
-    {
-      "module_key": "PHONEOPS",
-      "current_disposition": "ABSORBED_NO_STANDALONE"
-    },
-    {
-      "module_key": "PHYSICALAI",
-      "current_disposition": "DEFERRED_OPTIONAL"
-    },
-    {
-      "module_key": "CAD",
-      "current_disposition": "HEADLESS_INTEROP_ONLY"
-    },
-    {
-      "module_key": "DOCX",
-      "current_disposition": "DOCUMENTS_CAPABILITY"
-    },
-    {
-      "module_key": "PPTX",
-      "current_disposition": "DOCUMENTS_CAPABILITY"
-    },
-    {
-      "module_key": "PDF",
-      "current_disposition": "DOCUMENTS_CAPABILITY"
-    },
-    {
-      "module_key": "OCR",
-      "current_disposition": "DOCUMENTS_CAPABILITY"
-    },
-    {
-      "module_key": "FILE",
-      "current_disposition": "DOCUMENTS_SEMANTICS_PLUS_CORE_CUSTODY"
-    }
+    {"module_key":"MANUSCRIPT","current_disposition":"BOOK_CAPABILITY"},
+    {"module_key":"STORYBIBLE","current_disposition":"BOOK_CAPABILITY"},
+    {"module_key":"WRITING","current_disposition":"CONTEXTUAL_CAPABILITY"},
+    {"module_key":"PROSE","current_disposition":"COMPLETE_RETIRED_TERMINAL__NO_ACTIVE_OWNER"},
+    {"module_key":"CODE","current_disposition":"PROGRAMMING_ACTIVE_WORK_PROGRAM"},
+    {"module_key":"CURRICULUM","current_disposition":"LEARNING_CAPABILITY"},
+    {"module_key":"CHAT","current_disposition":"CORE_SHARED_RUNTIME"},
+    {"module_key":"PROJECTS","current_disposition":"CORE_SHARED_WORK_CAPABILITY"},
+    {"module_key":"DOCX","current_disposition":"DOCUMENTS_CAPABILITY"},
+    {"module_key":"PPTX","current_disposition":"DOCUMENTS_CAPABILITY"},
+    {"module_key":"PDF","current_disposition":"DOCUMENTS_CAPABILITY"},
+    {"module_key":"OCR","current_disposition":"DOCUMENTS_CAPABILITY"},
+    {"module_key":"EXCEL","current_disposition":"SPREADSHEET_DATA_CAPABILITY"},
+    {"module_key":"MATH","current_disposition":"SPREADSHEET_DATA_CAPABILITY"},
+    {"module_key":"DATA","current_disposition":"SPREADSHEET_DATA_CAPABILITY"},
+    {"module_key":"LEDGER","current_disposition":"SPREADSHEET_DATA_CAPABILITY"},
+    {"module_key":"IMAGE","current_disposition":"MEDIA_CAPABILITY"},
+    {"module_key":"VIDEO","current_disposition":"MEDIA_CAPABILITY"},
+    {"module_key":"VOICE","current_disposition":"MEDIA_CAPABILITY"},
+    {"module_key":"BROWSER","current_disposition":"CONNECTED_ACTIONS_CAPABILITY"},
+    {"module_key":"CALENDAR","current_disposition":"CONNECTED_ACTIONS_CAPABILITY"},
+    {"module_key":"COMMS","current_disposition":"CONNECTED_ACTIONS_CAPABILITY"},
+    {"module_key":"PLUGINS","current_disposition":"CONNECTED_ACTIONS_CAPABILITY"},
+    {"module_key":"RESEARCH","current_disposition":"RESEARCH_KNOWLEDGE_CAPABILITY"},
+    {"module_key":"KNOWLEDGE","current_disposition":"RESEARCH_KNOWLEDGE_CAPABILITY"},
+    {"module_key":"GEO","current_disposition":"RESEARCH_KNOWLEDGE_CAPABILITY"}
   ],
-  "historical_inventory": {
-    "count": 40,
-    "module_keys": [
-      "DOCX",
-      "EXCEL",
-      "PPTX",
-      "PDF",
-      "OCR",
-      "RESEARCH",
-      "KNOWLEDGE",
-      "WRITING",
-      "MANUSCRIPT",
-      "STORYBIBLE",
-      "LEARNING",
-      "CURRICULUM",
-      "PROJECTS",
-      "CHAT",
-      "EXPECTATION",
-      "FILE",
-      "IMAGE",
-      "PHOTO",
-      "VIDEO",
-      "VOICE",
-      "AUDIOBOOK",
-      "MEDIA",
-      "CODE",
-      "MATH",
-      "DATA",
-      "CAD",
-      "BROWSER",
-      "COMMS",
-      "CALENDAR",
-      "AUTOMATION",
-      "PLUGINS",
-      "LEDGER",
-      "GEO",
-      "AIINCOME",
-      "PORTFOLIO",
-      "EXPERIENCE",
-      "PHONEOPS",
-      "PHYSICALAI",
-      "LOCALAI",
-      "IMG-INGEST"
-    ],
-    "rule": "Archived module names are discovery keys, not active owners."
-  },
-  "chat_rule": "Resolve this catalog, CURRENT-AUTHORITY, the applicable system/work-program job lock and exact source packets before broad rediscovery. Retired systems cannot dispatch or be auto-provisioned.",
+  "chat_rule": "Resolve this catalog, CURRENT-AUTHORITY, the applicable job lock and exact source packets before broad rediscovery. Retired systems cannot dispatch or be auto-provisioned.",
   "ratification_record": "governance/FOUNDATION-CLOSURE-OWNER-DECISION-PACK-001.md"
 }

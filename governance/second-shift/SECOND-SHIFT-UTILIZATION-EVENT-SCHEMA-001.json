@@ -3,9 +3,9 @@
   "purpose": "Append-only evidence schema for reconstructing Second Shift lane state and useful execution without inferring utilization from commits, runner uptime or workflow duration.",
   "shift_timezone": "America/New_York",
   "shift_window": "00:00-07:00",
-  "storage_rule": "Use one lane-owned ledger per active shift lane per date: governance/second-shift/execution-events/YYYY-MM-DD/{CORE|LEARNING|BOOK|DOCUMENTS}.json. The active permitted lane set must remain synchronized with SECOND-SHIFT-REGISTRY-001.json::owner_files. Historical SYSTEM_MASTER and PROSE ledgers remain immutable evidence but are not expected after those lanes leave owner_files.",
+  "storage_rule": "Use one lane-owned ledger per active shift lane per date under governance/second-shift/execution-events/YYYY-MM-DD/. The active permitted lane set must remain synchronized with SECOND-SHIFT-REGISTRY-001.json::owner_files. Historical SYSTEM_MASTER and PROSE ledgers remain immutable evidence but are not current lanes.",
   "allowed_lane_source": "governance/second-shift/SECOND-SHIFT-REGISTRY-001.json::owner_files",
-  "allowed_lanes": ["CORE", "LEARNING", "BOOK", "DOCUMENTS"],
+  "allowed_lanes": ["CORE", "LEARNING", "BOOK", "DOCUMENTS", "SPREADSHEET_DATA", "MEDIA", "CONNECTED_ACTIONS", "RESEARCH_KNOWLEDGE"],
   "historical_lanes": ["PROSE", "SYSTEM_MASTER"],
   "allowed_event_types": ["SHIFT_OPEN", "READY", "CLAIMED", "RUNNING", "HEARTBEAT", "PROGRESS", "COMPLETED", "BLOCKED", "STALE", "RETRY", "CIRCUIT_OPEN", "CIRCUIT_HALF_OPEN", "CIRCUIT_CLOSED", "SUCCESSOR_BOUND", "ALL_RUNGS_EXHAUSTED", "IDLE_VALID", "SHIFT_CLOSE"],
   "required_ledger_fields": ["schema_id", "shift_id", "shift_date", "lane", "events"],
@@ -16,12 +16,7 @@
   "circuit_event_required_fields": ["dependency_or_operation", "failure_class", "next_probe_at_or_condition", "fallback_successor_or_rung"],
   "all_rungs_exhausted_required_fields": ["rungs", "independent_work_remaining", "next_external_condition"],
   "all_rungs_required_count": 8,
-  "operational_limits": {
-    "heartbeat_sla_minutes": 50,
-    "ready_dispatch_sla_minutes": 70,
-    "telemetry_freshness_sla_minutes": 75,
-    "max_retry_budget": 3
-  },
+  "operational_limits": {"heartbeat_sla_minutes":50,"ready_dispatch_sla_minutes":70,"telemetry_freshness_sla_minutes":75,"max_retry_budget":3},
   "claim_lifecycle_rules": [
     "CLAIMED opens exactly one mutation-capable lease for the active lane; a second live claim is invalid.",
     "RUNNING and PROGRESS require a live preceding CLAIMED lease for the same delegation, control head and idempotency key.",
@@ -38,21 +33,16 @@
   "retry_rules": [
     "retry_budget must be an integer from 1 through max_retry_budget.",
     "attempt must not exceed retry_budget.",
-    "After the retry budget is consumed, the dependency becomes CIRCUIT_OPEN for that invocation and the lane switches to a dependency-valid fallback rung when one exists.",
+    "After retry budget exhaustion the dependency becomes CIRCUIT_OPEN for that invocation and the lane switches to a dependency-valid fallback rung when one exists.",
     "Repeated transient failure never proves whole-lane exhaustion."
   ],
   "utilization_rules": [
-    "State-duration calculations use occurred_at event boundaries only.",
-    "RUNNING means an owner-valid worker has a live claim and is performing or awaiting a bounded operation that is part of the current objective; runner uptime alone is not RUNNING.",
-    "READY means executable dependency-valid work exists but is not presently claimed.",
-    "BLOCKED applies only to the objective/rung actually blocked; it cannot be promoted to whole-lane idle while another rung is executable.",
-    "IDLE_VALID requires a preceding ALL_RUNGS_EXHAUSTED event for the same current owner control head and shift.",
-    "If telemetry is missing, stale or contradictory, the audit reports UNKNOWN rather than inferring productive time.",
-    "PROSE is complete and terminally retired and is never expected to generate new telemetry.",
-    "Any genuinely open integration of preserved completed Prose capability is BOOK-owned work and is recorded only in BOOK telemetry.",
-    "DOCUMENTS never records Prose integration activity because Documents receives no Prose work.",
+    "Telemetry is factual and missing telemetry remains UNKNOWN rather than inferred.",
+    "PROSE is complete and terminally retired and never generates new telemetry.",
+    "Any genuinely open preserved-Prose integration is BOOK telemetry only.",
+    "All eight active peer lanes may emit current telemetry when owner-valid.",
     "PROGRAMMING product work has no peer utilization ledger before explicit topology admission; Knowledge Recovery support is recorded under CORE."
   ],
   "retired_system_rule": "A historical PROSE ledger may be read only as immutable evidence. No controller, auto-provisioner, repair broker, qualifier or successor binder may create a new PROSE ledger.",
-  "authority_boundary": "This ledger records execution state only. It never grants PASS, promotion, canonical-writer, A-01, human, author, private, blind, native, publication or production authority."
+  "authority_boundary": "This ledger records execution state only. It never grants PASS, promotion, canonical-writer, A-01, human, author, private, native, publication or production authority."
 }

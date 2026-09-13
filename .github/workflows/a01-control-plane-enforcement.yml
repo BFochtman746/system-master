@@ -56,8 +56,6 @@ jobs:
         run: node .github/scripts/a01-control-plane-enforce.js scan
       - name: Self-test hosted registration admission logic
         run: node .github/scripts/a01-admission-barrier.js selftest
-      # The four load-bearing governance files were previously unvalidated: a typo
-      # in a pointer broke consumers silently at the moment they were needed.
       - name: Validate governance pointer chain and registries
         run: node .github/scripts/validate-governance.js
 
@@ -77,21 +75,27 @@ jobs:
           node-version: '22'
       - name: Report runtime
         run: node --version
-      # Live-authority suites self-skip when their env vars are absent, so this job
-      # is fully deterministic and needs no credentials. Do NOT grant it a token:
-      # a PR gate that can reach production authority is not a gate.
-      - name: Run Control Gateway test suite
-        working-directory: control-gateway
-        run: node --test
-      - name: Assert no suite was silently emptied
+      - name: Run Control Gateway test suite and retain summary
         working-directory: control-gateway
         shell: bash
         run: |
           set -euo pipefail
-          COUNT="$(find test -name '*.test.js' | wc -l)"
-          echo "control-gateway test files: $COUNT"
-          # guards against a path/rename change quietly reducing the gate to zero tests
-          test "$COUNT" -ge 30
+          node --test | tee /tmp/control-gateway-test.out
+      - name: Assert executable test coverage was not silently emptied
+        working-directory: control-gateway
+        shell: bash
+        run: |
+          set -euo pipefail
+          FILE_COUNT="$(find test -name '*.test.js' | wc -l | tr -d ' ')"
+          TEST_COUNT="$(awk '/^# tests / {print $3}' /tmp/control-gateway-test.out | tail -1)"
+          PASS_COUNT="$(awk '/^# pass / {print $3}' /tmp/control-gateway-test.out | tail -1)"
+          echo "control-gateway test files: $FILE_COUNT"
+          echo "control-gateway tests: ${TEST_COUNT:-0}; pass: ${PASS_COUNT:-0}"
+          test "$FILE_COUNT" -ge 1
+          test -n "$TEST_COUNT"
+          test "$TEST_COUNT" -ge 150
+          test -n "$PASS_COUNT"
+          test "$PASS_COUNT" -ge 150
 
   ingress-suite:
     name: A-01 ingress, receipt and evidence suites
@@ -107,8 +111,6 @@ jobs:
         uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38
         with:
           python-version: '3.12'
-      # Offline by construction: GitHub is replaced by a fake source and the
-      # scheduler by a recording double. No token, no network, no SQLite.
       - name: Run ingress suite
         working-directory: control-gateway/python
         env:

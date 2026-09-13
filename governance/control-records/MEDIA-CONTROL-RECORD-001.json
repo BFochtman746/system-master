@@ -1,0 +1,16 @@
+{
+  "record_id": "MEDIA-CONTROL-RECORD-001",
+  "system_id": "MEDIA",
+  "canonical_name": "MEDIA SYSTEM",
+  "owner_path": "SYSTEM_MASTER/MEDIA",
+  "control_ref": "media/control-v1",
+  "standing": "ACTIVE_INCOMPLETE_PEER",
+  "topology": "governance/SYSTEM-TOPOLOGY-006.json",
+  "authority": "governance/CURRENT-AUTHORITY.json",
+  "job": "Own image, photo, video, voice, audiobook and general media capability over CORE shared file, artifact and media runtime.",
+  "owned_modules": ["AUDIOBOOK", "IMAGE", "MEDIA", "PHOTO", "VIDEO", "VOICE"],
+  "shared_dependency_boundary": "CORE owns shared runtime/storage primitives; MEDIA owns media product semantics and orchestration.",
+  "canonical_writer_boundary": "Writes to MEDIA canonical product state require this owner lane or an explicitly admitted interface.",
+  "current_obligation": "HEADLESS-MEDIA-CAPABILITY-CONTRACT-001",
+  "mutation_rule": "Fail closed on stale control identity, cross-lane semantic ownership, or unqualified changed subjects."
+}

@@ -1,13 +1,13 @@
 {
   "registry_id": "SECOND-SHIFT-REGISTRY-001",
-  "effective_date": "2026-09-11",
+  "effective_date": "2026-09-13",
   "product_root": "SYSTEM_MASTER",
-  "topology": "governance/SYSTEM-TOPOLOGY-005.json",
+  "topology": "governance/SYSTEM-TOPOLOGY-006.json",
   "schema": "governance/second-shift/SECOND-SHIFT-DELEGATION-SCHEMA-002.json",
   "execution_control": "governance/second-shift/SECOND-SHIFT-EXECUTION-CONTROL-001.md",
   "program_job_lock": "governance/SYSTEM-PROGRAM-JOB-LOCK-001.json",
   "programming_work_program_lock": "governance/programs/PROGRAMMING-WORK-PROGRAM-LOCK-001.json",
-  "system_completion_status": "governance/SYSTEM-COMPLETION-STATUS-001.json",
+  "system_completion_status": "governance/SYSTEM-COMPLETION-STATUS-002.json",
   "utilization_event_schema": "governance/second-shift/SECOND-SHIFT-UTILIZATION-EVENT-SCHEMA-001.json",
   "enforcement_script": ".github/scripts/second-shift-enforce.js",
   "owner_coverage_enforcement_script": ".github/scripts/second-shift-owner-coverage.js",
@@ -16,7 +16,11 @@
     "CORE": "governance/second-shift/CORE-DELEGATIONS.json",
     "LEARNING": "governance/second-shift/LEARNING-DELEGATIONS.json",
     "BOOK": "governance/second-shift/BOOK-DELEGATIONS.json",
-    "DOCUMENTS": "governance/second-shift/DOCUMENTS-DELEGATIONS.json"
+    "DOCUMENTS": "governance/second-shift/DOCUMENTS-DELEGATIONS.json",
+    "SPREADSHEET_DATA": "governance/second-shift/SPREADSHEET_DATA-DELEGATIONS.json",
+    "MEDIA": "governance/second-shift/MEDIA-DELEGATIONS.json",
+    "CONNECTED_ACTIONS": "governance/second-shift/CONNECTED_ACTIONS-DELEGATIONS.json",
+    "RESEARCH_KNOWLEDGE": "governance/second-shift/RESEARCH_KNOWLEDGE-DELEGATIONS.json"
   },
   "coverage_routes": {
     "SYSTEM_MASTER/SHARED_INFRASTRUCTURE": "CORE",
@@ -35,7 +39,7 @@
       "telemetry_lane": false,
       "successor_task": false,
       "integration_owner_if_genuinely_open": "BOOK",
-      "rule": "Old Prose routes are STALE_ARCHITECTURE_PENDING_RECONCILIATION. Any genuinely open integration result is an ordinary BOOK obligation, not a Prose route."
+      "rule": "Old Prose routes are stale and non-dispatchable. Any genuinely open integration result is an ordinary BOOK obligation."
     }
   },
   "non_peer_work_programs": {
@@ -44,39 +48,29 @@
       "peer_second_shift_lane": false,
       "product_work_dispatch": "NOT_AUTHORIZED_UNTIL_EXPLICIT_TOPOLOGY_ADMISSION",
       "support_subprogram_route": "PROGRAMMING_KNOWLEDGE_RECOVERY -> CORE",
-      "rule": "Programming engineering/product work is not dispatchable as CORE work. Only bounded Knowledge Recovery custody/provenance support uses CORE Second Shift capacity before Programming peer admission."
+      "rule": "Programming engineering/product work is not dispatchable as peer work before explicit admission."
     }
   },
-  "owner_discovery_rule": "Controllers enumerate owner_files as active lanes and compare its keys against CURRENT-AUTHORITY topology peer_system_ids on every run. The sets must match exactly after machine-resolvable auto-provisioning. A missing owner file for an already-declared peer is provisioned only when control_ref, current owner head and current obligation are unambiguous; otherwise fail closed. Missing coverage never creates a new system and retired systems are never provisioned.",
+  "owner_discovery_rule": "Controllers enumerate owner_files as active lanes and compare its keys against CURRENT-AUTHORITY topology peer_system_ids on every run. Sets must match exactly. Missing coverage never creates a new system and retired systems are never provisioned.",
   "auto_provisioning_invariant": {
-    "topology_peer_source": "governance/SYSTEM-TOPOLOGY-005.json::peer_system_ids",
+    "topology_peer_source": "governance/SYSTEM-TOPOLOGY-006.json::peer_system_ids",
     "registry_lane_source": "owner_files",
-    "expected_active_peers": ["CORE", "LEARNING", "BOOK", "DOCUMENTS"],
+    "expected_active_peers": ["CORE", "LEARNING", "BOOK", "DOCUMENTS", "SPREADSHEET_DATA", "MEDIA", "CONNECTED_ACTIONS", "RESEARCH_KNOWLEDGE"],
     "current_coverage_complete": true,
     "machine_resolvable_missing_peer_must_be_provisioned": true,
     "implicit_system_creation_forbidden": true,
     "retired_system_provisioning_forbidden": true
   },
-  "job_lock_rule": "Before dispatch every delegation must conform to current topology, SYSTEM-PROGRAM-JOB-LOCK-001 and SYSTEM-COMPLETION-STATUS-001. A delegation that crosses another peer job, routes any Prose work to Documents, creates active Prose execution, dispatches Programming product work as CORE, silently creates a Programming peer lane, or claims completion of an incomplete active system is stale/invalid and must not dispatch.",
-  "system_lane_rule": "CORE, LEARNING, BOOK and DOCUMENTS are the active peer worker lanes. PROSE is terminally retired with no active or inherited lane. Programming remains a named non-peer work program with no peer worker lane until explicit topology admission.",
-  "portfolio_rule": "The portfolio controller reads CURRENT-AUTHORITY, selected topology, job lock, Programming work-program lock, completion status, current obligation registry, repair registries, every owner file and live owner head. It rejects stale/non-open/cross-lane/retired-system work before dispatch and preserves independent lane/program progress.",
-  "day_shift_rule": "When an active owner materially changes objective or completion standing, reconcile its delegation in the same working session. BOOK owns any remaining completed-Prose integration; DOCUMENTS receives none. Programming changes update its work-program lock/obligation but do not create a peer delegation before admission.",
-  "night_start_rule": "Freshly re-read CURRENT-AUTHORITY, selected topology, job lock, completion status, obligation registry, Programming work-program lock, repair state and live owner heads before execution; never trust stale snapshots.",
-  "dispatch_rule": "Dispatch only job-conforming READY/CANDIDATE work in active peer lanes. While Knowledge Recovery 001 is selected, CORE uses owner-valid unattended-safe discretionary capacity for Programming proving-corpus recovery first, then remaining authorized catalog/archive recovery. PROGRAMMING product work itself has no peer Second Shift dispatch before explicit admission.",
+  "job_lock_rule": "Before dispatch every delegation must conform to current topology, program job lock and completion status. Cross-lane work, retired-system resurrection, unauthorized user side effects or false completion must not dispatch.",
+  "system_lane_rule": "The active peer worker lanes are CORE, LEARNING, BOOK, DOCUMENTS, SPREADSHEET_DATA, MEDIA, CONNECTED_ACTIONS and RESEARCH_KNOWLEDGE. PROSE is terminally retired. Programming remains a named non-peer work program until explicit admission.",
+  "portfolio_rule": "The controller reads CURRENT-AUTHORITY, selected topology, job lock, completion status, current obligation registry, repair state, every owner file and live owner control before dispatch.",
+  "night_start_rule": "Freshly re-read CURRENT-AUTHORITY, selected topology, job lock, completion status, obligation registry, repair state and owner control bindings before execution; never trust stale snapshots.",
+  "dispatch_rule": "Dispatch only job-conforming READY/CANDIDATE work in active peer lanes. User-authorized external actions remain subject to explicit action authority.",
   "claim_rule": "Only one mutation-capable claim/lease may be live per active owner lane. PROSE has no claim domain. Programming has no peer claim domain before topology admission.",
   "retry_rule": "Transient dependencies receive finite classified retries; after exhaustion select independent safe work within the same owner job.",
-  "stale_rule": "No job survives a live-head, current-obligation, job-lock, work-program-lock, topology, completion-status or retired-system mismatch. Preserve evidence/checkpoint, re-evaluate, then bind a current owner-valid delegation or work-program continuation.",
-  "no_work_rule": "An active peer lane may be idle only after durable all-eight-rungs exhaustion for its own locked job. A blocker in another lane does not justify idling independent work. Retired systems require no lane or exhaustion proof.",
-  "successor_rule": "After completion/material block, re-read live authority and select the next dependency-valid successor inside the same active lane job. Never bind a Prose successor. Programming successors remain inside its work-program lock until explicit admission.",
-  "utilization_rule": "Active peer ledgers are CORE, LEARNING, BOOK and DOCUMENTS only. Book-owned completed-Prose integration is recorded as BOOK work, not Prose activity. No new Prose telemetry is created or expected. Programming product work has no peer utilization ledger before admission; Knowledge Recovery support is recorded under CORE.",
-  "work_ahead_ladder": [
-    "current repair/control health",
-    "completion and evidence census",
-    "authoritative research and provenance",
-    "architecture/contracts/state/interface/evidence specification",
-    "tests/benchmarks/property/concurrency/failure injection",
-    "bounded implementation with objective verification",
-    "exact-SHA qualification and A-01 preparation",
-    "next successor build packet"
-  ]
+  "stale_rule": "No job survives a live-head, current-obligation, job-lock, topology, completion-status or retired-system mismatch.",
+  "no_work_rule": "An active peer lane may be idle only after durable all-eight-rungs exhaustion for its own locked job. Retired systems require no lane or exhaustion proof.",
+  "successor_rule": "After completion/material block, re-read live authority and select the next dependency-valid successor inside the same active lane job. Never bind a Prose successor.",
+  "utilization_rule": "Active peer ledgers are exactly the eight owner_files lanes. Book-owned preserved-Prose integration is BOOK telemetry only. Programming product work has no peer utilization ledger before admission.",
+  "work_ahead_ladder": ["current repair/control health", "completion and evidence census", "authoritative research and provenance", "architecture/contracts/state/interface/evidence specification", "tests/benchmarks/property/concurrency/failure injection", "bounded implementation with objective verification", "exact-SHA qualification and A-01 preparation", "next successor build packet"]
 }

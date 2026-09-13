@@ -1,74 +1,93 @@
 {
   "job_lock_id": "SYSTEM-PROGRAM-JOB-LOCK-001",
-  "effective_date": "2026-09-11",
+  "effective_date": "2026-09-13",
   "authority": "USER_DIRECTED_CURRENT_PROGRAM_JOB_LOCK",
-  "topology": "governance/SYSTEM-TOPOLOGY-005.json",
+  "topology": "governance/SYSTEM-TOPOLOGY-006.json",
   "architecture_decision": "governance/ADR-0005-PROSE-TERMINAL-RETIREMENT-BOOK-INTEGRATION.md",
   "program_work_locks": {
     "PROGRAMMING": "governance/programs/PROGRAMMING-WORK-PROGRAM-LOCK-001.json"
   },
-  "purpose": "Prevent lane drift, duplicate ownership, completion confusion, retired-system resurrection, and loss of program continuity while current systems and work programs are finished and integrated into System Master.",
+  "purpose": "Prevent lane drift, duplicate ownership, completion confusion, retired-system resurrection and loss of program continuity while eight active peer systems and named work programs are finished and integrated into System Master.",
   "global_rules": [
     "Each active peer system owns and executes only its assigned product job plus explicit admitted interfaces to System Master.",
-    "Active peer systems are exactly CORE, LEARNING, BOOK and DOCUMENTS unless explicit future user architecture authority changes topology.",
-    "PROSE is complete and terminally retired. It has no active owner path, child or inherited execution, repair lane, qualification lane, research task, telemetry lane, successor task, or mutation claim domain.",
-    "Any genuinely open integration of preserved completed Prose capability is BOOK-owned integration work. A historical objective name containing PROSE does not create a Prose owner.",
-    "DOCUMENTS receives no Prose work and may provide only generic document/artifact services through admitted interfaces.",
-    "Named non-peer work programs keep their own semantic work scope and evidence continuity but do not acquire peer topology, canonical owner-lane or Second Shift authority merely from this job lock.",
-    "Peer systems integrate upward into SYSTEM_MASTER through explicit interfaces but may not take another peer's product job, semantic authority, current objective, completion state, repair lane, or canonical writes.",
-    "SYSTEM_MASTER/CORE may provide shared infrastructure and integration surfaces but may not silently implement or own Learning, Book, Documents, retired-Prose, or Programming-specific engineering semantics.",
-    "A packet, phase, test, branch, or subsystem closure never means the owning system or work program is complete unless applicable product-level completion authority says so.",
-    "Second Shift, repair, morning startup, obligation selection, owner chats, and work-program chats must reject work that violates these job boundaries or resurrects a retired system."
+    "Active peer systems are exactly CORE, LEARNING, BOOK, DOCUMENTS, SPREADSHEET_DATA, MEDIA, CONNECTED_ACTIONS and RESEARCH_KNOWLEDGE unless explicit future user architecture authority changes topology.",
+    "PROSE is complete and terminally retired with no active execution, repair, qualification, research, telemetry, successor or mutation-claim domain.",
+    "Any genuinely open integration of preserved completed Prose capability is BOOK-owned work. DOCUMENTS receives no Prose work.",
+    "Named non-peer work programs keep their semantic scope and evidence continuity but do not acquire peer topology or Second Shift authority from this job lock.",
+    "Peer systems integrate upward into SYSTEM_MASTER through explicit interfaces and may not take another peer's product job, semantic authority, completion state, repair lane or canonical writes.",
+    "A packet, phase, test, branch or subsystem closure never means the owning system or work program is complete unless product-level completion authority says so."
   ],
   "programs": {
     "SYSTEM_MASTER": {
       "owner_path": "SYSTEM_MASTER",
-      "job": "Integrate CORE, LEARNING, BOOK, and DOCUMENTS into one coherent product; maintain product architecture, sequencing, interface boundaries, and cross-system acceptance without taking their product ownership.",
-      "must_integrate": ["SYSTEM_MASTER/CORE", "SYSTEM_MASTER/LEARNING", "SYSTEM_MASTER/BOOK", "SYSTEM_MASTER/DOCUMENTS"],
-      "forbidden": ["declare active child systems complete without product-level authority", "take peer-system semantic ownership", "create duplicate peer systems from chats/branches/workstreams", "resurrect PROSE"]
+      "job": "Integrate all eight active peers into one coherent product while maintaining product architecture, sequencing and cross-system acceptance without taking peer semantic ownership.",
+      "must_integrate": ["SYSTEM_MASTER/CORE", "SYSTEM_MASTER/LEARNING", "SYSTEM_MASTER/BOOK", "SYSTEM_MASTER/DOCUMENTS", "SYSTEM_MASTER/SPREADSHEET_DATA", "SYSTEM_MASTER/MEDIA", "SYSTEM_MASTER/CONNECTED_ACTIONS", "SYSTEM_MASTER/RESEARCH_KNOWLEDGE"],
+      "forbidden": ["declare active peers complete without product-level authority", "take peer semantic ownership", "create duplicate peer systems", "resurrect PROSE"]
     },
     "CORE": {
       "owner_path": "SYSTEM_MASTER/CORE",
       "job": "Finish shared Foundation and Spine plus shared runtime/data/platform/continuity/assurance/A-01 infrastructure and Master-facing integration primitives.",
       "integrates_upward_to": "SYSTEM_MASTER",
-      "discretionary_priority": "SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001 while selected by CURRENT-AUTHORITY: Programming proving-corpus recovery first, then authorized catalog/archive recovery.",
-      "forbidden": ["own Learning curriculum/learner logic", "own Book manuscript/canon/author state", "own Documents artifact semantics", "restart retired Prose work", "reclassify Programming-specific engineering semantics as generic Core product work"]
+      "forbidden": ["take peer product semantics", "restart retired Prose work", "absorb Programming-specific engineering semantics"]
     },
     "LEARNING": {
       "owner_path": "SYSTEM_MASTER/LEARNING",
-      "job": "Finish Learning product behavior, curriculum/compiler, mastery/assessment/adaptation/evidence, then integrate Learning upward into System Master through explicit interfaces.",
+      "job": "Finish Learning product behavior, curriculum/compiler, mastery/assessment/adaptation/evidence and integrate upward through explicit interfaces.",
       "integrates_upward_to": "SYSTEM_MASTER",
-      "forbidden": ["cross into Book work", "cross into Documents implementation", "cross into Programming engineering work", "create or consume active Prose work", "redefine Core shared contracts instead of consuming them"]
+      "forbidden": ["cross into Book, Documents, Spreadsheet/Data, Media, Connected Actions, Research/Knowledge or Programming semantic ownership", "create active Prose work"]
     },
     "BOOK": {
       "owner_path": "SYSTEM_MASTER/BOOK",
-      "job": "Finish the Book system. Complete any genuinely unfinished integration of preserved completed Prose capability through Book-owned adapters/context/compiler/routing/orchestration; preserve Book canonical manuscript/Story Bible/author/lifecycle/admission/publication ownership; then integrate Book upward into System Master.",
+      "job": "Finish Book, including genuinely unfinished integration of preserved completed Prose capability through Book-owned interfaces while preserving canonical manuscript, Story Bible, author, lifecycle, admission and publication authority.",
       "integrates_upward_to": "SYSTEM_MASTER",
       "authorized_historical_input": "retired PROSE evidence/capability artifacts",
-      "authorized_shared_consumption": ["SYSTEM_MASTER/CORE shared services", "SYSTEM_MASTER/DOCUMENTS document/artifact services"],
-      "forbidden": ["create a Prose execution owner or successor", "grant retired Prose canonical manuscript writes", "grant Documents Book semantic ownership", "treat orchestrator evidence as admission", "declare Book complete before the full Book product completion boundary", "cross into Learning or Programming product work"]
+      "forbidden": ["create a Prose execution owner or successor", "grant Documents canonical Book semantics", "cross into other peer or Programming product ownership"]
     },
     "DOCUMENTS": {
       "owner_path": "SYSTEM_MASTER/DOCUMENTS",
-      "job": "Finish Documents product behavior for DOCX/PDF/PPTX/general document artifact structure, conversion, preservation, rendering/export and generic document services, then integrate Documents upward into System Master.",
+      "job": "Finish DOCX/PDF/PPTX/OCR/file/document artifact structure, conversion, preservation, rendering/export and generic document services.",
       "integrates_upward_to": "SYSTEM_MASTER",
-      "forbidden": ["absorb, schedule, repair, qualify, research or telemeter Prose", "own Book-specific literary intelligence", "mutate Book canonical state", "own Learning product behavior", "take Core shared runtime authority", "cross into Programming engineering work"]
+      "forbidden": ["absorb, schedule, repair, qualify, research or telemeter Prose", "own Book canonical semantics", "take other peer or Programming semantic ownership"]
+    },
+    "SPREADSHEET_DATA": {
+      "owner_path": "SYSTEM_MASTER/SPREADSHEET_DATA",
+      "job": "Finish spreadsheet, math, data-analysis, BI and ledger product semantics over Core shared execution/artifact/data primitives.",
+      "integrates_upward_to": "SYSTEM_MASTER",
+      "forbidden": ["take Core shared-runtime ownership", "take Documents artifact semantics", "take Research/Knowledge retrieval semantics", "take Programming engineering semantics"]
+    },
+    "MEDIA": {
+      "owner_path": "SYSTEM_MASTER/MEDIA",
+      "job": "Finish image, photo, video, voice, audiobook and general media product semantics over Core shared storage/runtime primitives.",
+      "integrates_upward_to": "SYSTEM_MASTER",
+      "forbidden": ["take Core shared-runtime ownership", "take Documents generic document semantics", "take Book canonical manuscript semantics", "take Programming engineering semantics"]
+    },
+    "CONNECTED_ACTIONS": {
+      "owner_path": "SYSTEM_MASTER/CONNECTED_ACTIONS",
+      "job": "Finish browser, communications, calendar and plugin/action policy over Core shared connector-action runtime.",
+      "integrates_upward_to": "SYSTEM_MASTER",
+      "forbidden": ["perform unauthorized user side effects", "take Core connector-runtime ownership", "take Research/Knowledge retrieval semantics", "take Programming engineering semantics"]
+    },
+    "RESEARCH_KNOWLEDGE": {
+      "owner_path": "SYSTEM_MASTER/RESEARCH_KNOWLEDGE",
+      "job": "Finish research, knowledge and geospatial retrieval/provenance semantics while consuming admitted browser capability from Connected Actions and shared evidence/data runtime from Core.",
+      "integrates_upward_to": "SYSTEM_MASTER",
+      "forbidden": ["own Connected Actions side-effect policy", "take Core shared-runtime ownership", "take Programming engineering semantics", "fabricate source/provenance authority"]
     },
     "PROGRAMMING": {
       "classification": "ACTIVE_WORK_PROGRAM__NOT_YET_PEER_TOPOLOGY",
       "program_lock": "governance/programs/PROGRAMMING-WORK-PROGRAM-LOCK-001.json",
       "system_packet": "governance/catalog/system-packets/PROGRAMMING.json",
-      "job": "Continue the existing Programming software-engineering program from preserved foundation/capability/build/test/assurance evidence; recover only missing exact source/custody evidence; complete only material current deltas; keep Programming semantics isolated from Core, Learning, Book and Documents; and prepare explicit System Master integration/admission without silently promoting Programming to a peer system.",
+      "job": "Continue the existing Programming software-engineering program from preserved evidence; complete only material current deltas and prepare explicit System Master admission without silently promoting Programming to a peer.",
       "integrates_toward": "SYSTEM_MASTER_EXPLICIT_ADMISSION_BOUNDARY",
-      "forbidden": ["restart completed Programming foundation work from scratch", "silently promote Programming to peer topology", "create a Programming peer Second Shift lane before admission", "take Core/Learning/Book/Documents semantics", "allow another lane to absorb Programming-specific engineering semantics"]
+      "forbidden": ["restart completed Programming work from scratch", "silently promote Programming to peer topology", "create a Programming peer Second Shift lane before admission", "take active-peer semantics"]
     },
     "PROGRAMMING_KNOWLEDGE_RECOVERY": {
       "owner_path": "SYSTEM_MASTER/CORE",
       "classification": "SUPPORT_SUBPROGRAM_FOR_PROGRAMMING_AND_SYSTEM_MASTER__NOT_PROGRAMMING_PRODUCT_OWNER",
       "parent_work_program": "PROGRAMMING",
-      "job": "Recover exact Programming assets/custody/provenance, prove the Programming corpus first, then recover remaining authorized catalog/archive evidence while SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001 remains selected.",
+      "job": "Recover exact Programming assets/custody/provenance and remaining authorized catalog/archive evidence while selected.",
       "priority": "HIGHEST_DISCRETIONARY_SYSTEM_MASTER_PRIORITY",
-      "forbidden": ["promote Programming to peer system", "become the Programming product definition", "redefine system jobs", "block non-discretionary safety/control integrity", "take Book/Learning/Documents product work"]
+      "forbidden": ["promote Programming to peer system", "become Programming product definition", "redefine peer jobs"]
     }
   },
   "retired_systems": {
@@ -86,11 +105,9 @@
     }
   },
   "lane_crossing_policy": {
-    "peer_integration_rule": "CORE, LEARNING, BOOK, and DOCUMENTS remain in their own lanes. Cross-system product integration uses explicit System Master/shared-service interfaces and never transfers ownership.",
-    "retired_prose_rule": "No active cross-lane route exists for PROSE. Any genuinely open integration result is BOOK work, not Prose work.",
-    "programming_rule": "PROGRAMMING is a named active work program with isolated engineering semantics and preserved evidence continuity. Until explicit topology admission it does not own a peer lane, and no peer lane may absorb its product semantics.",
-    "documents_prose_rule": "DOCUMENTS must not absorb, schedule, repair, qualify, research, telemeter or claim Prose work.",
-    "learning_rule": "LEARNING remains isolated from BOOK/DOCUMENTS/PROGRAMMING product work except shared System Master interfaces.",
-    "core_rule": "CORE supplies shared primitives and product-root integration support; it does not become implementation owner of peer systems or the Programming work program."
+    "peer_integration_rule": "All eight active peers remain in their own lanes. Cross-system product integration uses explicit System Master/shared-service interfaces and never transfers ownership.",
+    "retired_prose_rule": "No active cross-lane route exists for PROSE. Any genuinely open integration result is BOOK work.",
+    "programming_rule": "PROGRAMMING remains a named active non-peer work program with isolated engineering semantics until explicit topology admission.",
+    "documents_prose_rule": "DOCUMENTS must not absorb, schedule, repair, qualify, research, telemeter or claim Prose work."
   }
 }
