@@ -1,0 +1,60 @@
+name: Audiobook Foundation Qualification
+
+on:
+  push:
+    paths:
+      - 'governance/contracts/AUDIOBOOK-FOUNDATION-CONTRACT-*.md'
+      - 'governance/census/FOUNDATION-CLOSURE-CENSUS-001-DISPOSITION-MATRIX.md'
+      - 'tools/audiobook_builder.py'
+      - '.github/scripts/audiobook-foundation-qualify.py'
+      - '.github/scripts/foundation-closure-matrix.js'
+      - 'tests/test_audiobook_builder.py'
+      - 'qualification/audiobook/**'
+      - '.github/workflows/audiobook-foundation-qualification.yml'
+  pull_request:
+    paths:
+      - 'governance/contracts/AUDIOBOOK-FOUNDATION-CONTRACT-*.md'
+      - 'governance/census/FOUNDATION-CLOSURE-CENSUS-001-DISPOSITION-MATRIX.md'
+      - 'tools/audiobook_builder.py'
+      - '.github/scripts/audiobook-foundation-qualify.py'
+      - '.github/scripts/foundation-closure-matrix.js'
+      - 'tests/test_audiobook_builder.py'
+      - 'qualification/audiobook/**'
+      - '.github/workflows/audiobook-foundation-qualification.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: audiobook-foundation-qualification-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test deterministic Audiobook foundation
+        run: python3 -m unittest tests.test_audiobook_builder
+      - name: Qualify representative Audiobook corpus
+        env:
+          AUDIOBOOK_SOURCE_ID: ${{ github.sha }}
+        run: python3 .github/scripts/audiobook-foundation-qualify.py
+      - name: Verify canonical Foundation census disposition
+        run: |
+          node .github/scripts/foundation-closure-matrix.js --out /tmp/foundation-matrix.md
+          diff -u governance/census/FOUNDATION-CLOSURE-CENSUS-001-DISPOSITION-MATRIX.md /tmp/foundation-matrix.md
+      - name: Preserve machine-readable Audiobook qualification evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: audiobook-foundation-1.0-evidence
+          path: qualification-output/audiobook-foundation-1.0.json
+          if-no-files-found: error
+          retention-days: 30
