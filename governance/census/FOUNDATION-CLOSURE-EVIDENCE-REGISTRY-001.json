@@ -2,21 +2,18 @@
   "registry_id": "FOUNDATION-CLOSURE-EVIDENCE-REGISTRY-001",
   "authority_id": "CURRENT-AUTHORITY-005",
   "effective_date": "2026-09-13",
+  "crosswalk": "governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json",
+  "allocation": "governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006.json",
+  "topology": "governance/SYSTEM-TOPOLOGY-007.json",
   "purpose": "Admission registry for Foundation census completion evidence. Absence of a receipt means implementation may exist but COMPLETE_WITH_EVIDENCE is not proven.",
-  "entry_schema": {
-    "requirement_or_capability_id": "C00-C49 or P00-P15",
-    "owner_path": "canonical owner path",
-    "authority_id": "must equal current authority",
-    "status": "PASS or BLOCKED_EXTERNAL_HUMAN_PRIVATE_NATIVE",
-    "subjects": [{"path":"repository-relative qualified subject","git_blob_sha":"exact Git blob SHA"}],
-    "evidence_refs": ["durable evidence reference such as a committed receipt path or exact workflow run/artifact URI"]
-  },
+  "verification": "Every PASS entry is bound to current authority/topology, an exact qualification head SHA, exact repository subject Git blob SHAs, and immutable GitHub Actions run/artifact identity. The evidence verifier proves both historical subject blobs at subject_sha and current blobs before classification.",
   "entries": [
     {
       "requirement_or_capability_id": "P00",
       "owner_path": "SYSTEM_MASTER/CORE",
       "authority_id": "CURRENT-AUTHORITY-005",
       "status": "PASS",
+      "subject_sha": "56f646cd36334e6a92411ee9dc0c6df7455a8f3d",
       "subjects": [
         {"path":"governance/CURRENT-AUTHORITY.json","git_blob_sha":"dabee965ae81d6bb3a1bc7477e1a793e6f17e3e1"},
         {"path":"governance/contracts/P00-FOUNDATION-CONTRACT-001.md","git_blob_sha":"0e178fcc3ce0f87ddf1c42c244c7e333e0577b65"},
@@ -24,11 +21,98 @@
         {"path":".github/scripts/system-brief.js","git_blob_sha":"de35c4a6337349b25eea2bf0adb4f304d92500ff"},
         {"path":".github/workflows/p00-authority-pointer-foundation-qualification.yml","git_blob_sha":"eac0db4c8ee1da89a0c8bae003346358ad8145e4"}
       ],
-      "evidence_refs": [
-        "governance/census/evidence/P00-FOUNDATION-EVIDENCE-001.json",
-        "https://github.com/BFochtman746/system-master/actions/runs/34788911066",
-        "https://api.github.com/repos/BFochtman746/system-master/actions/artifacts/10327645501"
-      ]
+      "qualification": {"workflow_run_id":34788911066,"workflow_name":"P00 Authority Pointer Foundation Qualification","artifact_id":10327645501,"artifact_name":"p00-foundation-1.0-evidence","artifact_digest":"sha256:3f26bc6dcbb039acf2e1327f3c9048f17d411fc89eb197ed35c34ce4c20ba69c","head_sha":"56f646cd36334e6a92411ee9dc0c6df7455a8f3d","conclusion":"success"},
+      "evidence_refs": ["governance/census/evidence/P00-FOUNDATION-EVIDENCE-001.json","https://github.com/BFochtman746/system-master/actions/runs/34788911066","https://api.github.com/repos/BFochtman746/system-master/actions/artifacts/10327645501","sha256:3f26bc6dcbb039acf2e1327f3c9048f17d411fc89eb197ed35c34ce4c20ba69c"]
+    },
+    {
+      "requirement_or_capability_id": "C00",
+      "owner_path": "SYSTEM_MASTER/MEDIA",
+      "authority_id": "CURRENT-AUTHORITY-005",
+      "status": "PASS",
+      "subject_sha": "5bf8a5944208c9e6aef615c3b84d445ea03d8da5",
+      "subjects": [
+        {"path":"tools/audiobook_builder.py","git_blob_sha":"701601df182717e73209b953f274c6c8094cd71d"},
+        {"path":"tests/test_audiobook_builder.py","git_blob_sha":"75921a4112144163eb73e0758469ba86c752df1b"},
+        {"path":".github/scripts/audiobook-foundation-qualify.py","git_blob_sha":"c49b62ff5dbc5ddb40eb1a98b1f7f55f0fe3fed1"},
+        {"path":"governance/contracts/AUDIOBOOK-FOUNDATION-CONTRACT-001.md","git_blob_sha":"650d1ae97657eb5aff92d8f5c481a2da7db3d68b"}
+      ],
+      "qualification": {"workflow_run_id":34788453012,"workflow_name":"Audiobook Foundation Qualification","artifact_id":10326758732,"artifact_name":"audiobook-foundation-1.0-evidence","artifact_digest":"sha256:ea2aadb4273c8c0c5af1928c97ec7f3132e722648e936eace1c88707b25ec4e4","head_sha":"5bf8a5944208c9e6aef615c3b84d445ea03d8da5","conclusion":"success"},
+      "evidence_refs": ["https://github.com/BFochtman746/system-master/actions/runs/34788453012","https://api.github.com/repos/BFochtman746/system-master/actions/artifacts/10326758732","sha256:ea2aadb4273c8c0c5af1928c97ec7f3132e722648e936eace1c88707b25ec4e4"]
+    },
+    {
+      "requirement_or_capability_id": "C01",
+      "owner_path": "SYSTEM_MASTER/PROGRAMMING",
+      "authority_id": "CURRENT-AUTHORITY-005",
+      "status": "PASS",
+      "subject_sha": "5bf8a5944208c9e6aef615c3b84d445ea03d8da5",
+      "subjects": [
+        {"path":"tools/automation_plan.py","git_blob_sha":"fd02bc37750cbbb932784618309856ee63d8c3d0"},
+        {"path":"tests/test_automation_plan.py","git_blob_sha":"66c88d5219707867b8961f1a000ccc90fab43d1f"},
+        {"path":".github/scripts/automation-foundation-qualify.py","git_blob_sha":"a9ca7993fe5e844c05c4d347336c6af297a0a4f7"},
+        {"path":"governance/contracts/AUTOMATION-FOUNDATION-CONTRACT-001.md","git_blob_sha":"c6c3468f0d32c3557633d85fcecb7a3fd6aebcc2"}
+      ],
+      "qualification": {"workflow_run_id":34788453011,"workflow_name":"Automation Foundation Qualification","artifact_id":10327522215,"artifact_name":"automation-foundation-1.0-evidence","artifact_digest":"sha256:c23f2c354db75d22f2df425627f9eb657e1b80e6a38adc83f9adc2f67d0c7086","head_sha":"5bf8a5944208c9e6aef615c3b84d445ea03d8da5","conclusion":"success"},
+      "evidence_refs": ["https://github.com/BFochtman746/system-master/actions/runs/34788453011","https://api.github.com/repos/BFochtman746/system-master/actions/artifacts/10327522215","sha256:c23f2c354db75d22f2df425627f9eb657e1b80e6a38adc83f9adc2f67d0c7086"]
+    },
+    {
+      "requirement_or_capability_id": "C02",
+      "owner_path": "SYSTEM_MASTER/CONNECTED_ACTIONS",
+      "authority_id": "CURRENT-AUTHORITY-005",
+      "status": "PASS",
+      "subject_sha": "5bf8a5944208c9e6aef615c3b84d445ea03d8da5",
+      "subjects": [
+        {"path":"tools/browser_action_plan.py","git_blob_sha":"aecd14327eb1947a8b3b1860579b116245103f20"},
+        {"path":"tests/test_browser_action_plan.py","git_blob_sha":"a7ac158af3a3bf9cdaec21a60a0a37db167ca3ad"},
+        {"path":".github/scripts/browser-foundation-qualify.py","git_blob_sha":"2fb4e1deeb0cd5f4088bac6dcd5bf327c6fdb815"},
+        {"path":"governance/contracts/BROWSER-FOUNDATION-CONTRACT-001.md","git_blob_sha":"3042bb4195f23eb058b99bf56ee9e1ed10f44501"}
+      ],
+      "qualification": {"workflow_run_id":34788453030,"workflow_name":"Browser Foundation Qualification","artifact_id":10326599124,"artifact_name":"browser-foundation-1.0-evidence","artifact_digest":"sha256:de0c6dfb43c830a8bacba42956da2c22efd2673f4f70ec1d8f10c80d2f590801","head_sha":"5bf8a5944208c9e6aef615c3b84d445ea03d8da5","conclusion":"success"},
+      "evidence_refs": ["https://github.com/BFochtman746/system-master/actions/runs/34788453030","https://api.github.com/repos/BFochtman746/system-master/actions/artifacts/10326599124","sha256:de0c6dfb43c830a8bacba42956da2c22efd2673f4f70ec1d8f10c80d2f590801"]
+    },
+    {
+      "requirement_or_capability_id": "C03",
+      "owner_path": "SYSTEM_MASTER/CONNECTED_ACTIONS",
+      "authority_id": "CURRENT-AUTHORITY-005",
+      "status": "PASS",
+      "subject_sha": "5bf8a5944208c9e6aef615c3b84d445ea03d8da5",
+      "subjects": [
+        {"path":"tools/calendar_action_plan.py","git_blob_sha":"7d0895b35b5b18f16543569132f74bd03dfdc5dc"},
+        {"path":"tests/test_calendar_action_plan.py","git_blob_sha":"03a738e6c173756bb310b915ce883e560795b5c0"},
+        {"path":".github/scripts/calendar-foundation-qualify.py","git_blob_sha":"badbf74159d893e42452448788b82e2072be78f4"},
+        {"path":"governance/contracts/CALENDAR-FOUNDATION-CONTRACT-001.md","git_blob_sha":"f9bfb621c2b410599b7caf6a323becc4d07a8f63"}
+      ],
+      "qualification": {"workflow_run_id":34788453068,"workflow_name":"Calendar Foundation Qualification","artifact_id":10326933983,"artifact_name":"calendar-foundation-1.0-evidence","artifact_digest":"sha256:298b0a39201406341ab8c7794f657be6b9d44822e2db015d4ff3117db5d07821","head_sha":"5bf8a5944208c9e6aef615c3b84d445ea03d8da5","conclusion":"success"},
+      "evidence_refs": ["https://github.com/BFochtman746/system-master/actions/runs/34788453068","https://api.github.com/repos/BFochtman746/system-master/actions/artifacts/10326933983","sha256:298b0a39201406341ab8c7794f657be6b9d44822e2db015d4ff3117db5d07821"]
+    },
+    {
+      "requirement_or_capability_id": "C04",
+      "owner_path": "SYSTEM_MASTER/CORE",
+      "authority_id": "CURRENT-AUTHORITY-005",
+      "status": "PASS",
+      "subject_sha": "e85a49a0c0ceb6f169954de8da73b847b571b257",
+      "subjects": [
+        {"path":"tools/chat_turn_plan.py","git_blob_sha":"b1ae2c08b1bfc19764361ffd26b82e5c732b5eaf"},
+        {"path":"tests/test_chat_turn_plan.py","git_blob_sha":"fe363cd4be998a9e38e40827efc3d73d57b2e13c"},
+        {"path":".github/scripts/chat-foundation-qualify.py","git_blob_sha":"a90fc44bd54ce5856c7f245ec8cb854f23963818"},
+        {"path":"governance/contracts/CHAT-FOUNDATION-CONTRACT-001.md","git_blob_sha":"b975ea066b97f6818f32e9938143f366316532f2"}
+      ],
+      "qualification": {"workflow_run_id":34788507541,"workflow_name":"Chat Foundation Qualification","artifact_id":10326429717,"artifact_name":"chat-foundation-1.0-evidence","artifact_digest":"sha256:d8574999246da03f2934409aba2d753147fa79e7be496402cf6c75b69b1f8545","head_sha":"e85a49a0c0ceb6f169954de8da73b847b571b257","conclusion":"success"},
+      "evidence_refs": ["https://github.com/BFochtman746/system-master/actions/runs/34788507541","https://api.github.com/repos/BFochtman746/system-master/actions/artifacts/10326429717","sha256:d8574999246da03f2934409aba2d753147fa79e7be496402cf6c75b69b1f8545"]
+    },
+    {
+      "requirement_or_capability_id": "C40",
+      "owner_path": "SYSTEM_MASTER/PROGRAMMING",
+      "authority_id": "CURRENT-AUTHORITY-005",
+      "status": "PASS",
+      "subject_sha": "4866c4dcd270877cf9f4c3ec3ed03362460d7dc3",
+      "subjects": [
+        {"path":"tools/website_builder.py","git_blob_sha":"993153e0c1a0ee2f2a7083eee05db2cb6155f50c"},
+        {"path":"tests/test_website_builder.py","git_blob_sha":"2a9961e357b2c8c138b3001628728cd773561a7e"},
+        {"path":".github/scripts/website-building-foundation-qualify.py","git_blob_sha":"c13a2801b94bfc7e85461f5f505d0fae12b050ce"},
+        {"path":"governance/contracts/WEBSITE-BUILDING-FOUNDATION-CONTRACT-001.md","git_blob_sha":"efec7f674612f26c63a88dcccf29130256ebd68b"}
+      ],
+      "qualification": {"workflow_run_id":34782954534,"workflow_name":"Website Building Foundation Qualification","artifact_id":10326050260,"artifact_name":"website-building-foundation-1.0-evidence","artifact_digest":"sha256:d4978feef267a415e8ee2beb9de5927f0e7abfdaf52b90af9ab49b432fbbd61c","head_sha":"4866c4dcd270877cf9f4c3ec3ed03362460d7dc3","conclusion":"success"},
+      "evidence_refs": ["https://github.com/BFochtman746/system-master/actions/runs/34782954534","https://api.github.com/repos/BFochtman746/system-master/actions/artifacts/10326050260","sha256:d4978feef267a415e8ee2beb9de5927f0e7abfdaf52b90af9ab49b432fbbd61c"]
     }
   ]
 }
