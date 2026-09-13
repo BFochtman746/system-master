@@ -51,7 +51,8 @@ class ChatTurnPlanTests(unittest.TestCase):
     def test_final_message_must_be_user_request(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td); spec = self._spec(root); obj = json.loads(spec.read_text())
-            obj["messages"][-1]["role"] = "assistant"; spec.write_text(json.dumps(obj))
+            obj["messages"].append({"id": "m4", "role": "assistant", "content": "Invalid terminal response context."})
+            spec.write_text(json.dumps(obj))
             with self.assertRaisesRegex(ChatTurnPlanError, "final message"):
                 build(spec, root / "out", repo_root=ROOT)
 
