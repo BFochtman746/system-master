@@ -84,7 +84,16 @@ def _safe_relative(value: object, field: str) -> str:
     return posix.as_posix()
 
 
+def _assert_no_symlink_components(project: Path, rel: str) -> None:
+    current = project
+    for part in PurePosixPath(rel).parts:
+        current = current / part
+        if current.is_symlink():
+            raise AudiobookBuildError(f"symlinks are not allowed: {rel}")
+
+
 def _regular_source(project: Path, rel: str, field: str) -> Path:
+    _assert_no_symlink_components(project, rel)
     path = project / Path(rel)
     if not path.exists():
         raise AudiobookBuildError(f"{field} does not exist: {rel}")

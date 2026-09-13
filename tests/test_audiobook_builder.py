@@ -118,6 +118,20 @@ class AudiobookBuilderTests(unittest.TestCase):
             with self.assertRaisesRegex(AudiobookBuildError, "symlinks"):
                 build(project, root / "out")
 
+    def test_source_symlinked_parent_directory_fails_closed(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            project = self._project(root)
+            audio = project / "audio"
+            real_audio = project / "real-audio"
+            audio.rename(real_audio)
+            try:
+                os.symlink(real_audio, audio, target_is_directory=True)
+            except (OSError, NotImplementedError):
+                self.skipTest("directory symlinks unavailable on this platform")
+            with self.assertRaisesRegex(AudiobookBuildError, "symlinks"):
+                build(project, root / "out")
+
     def test_output_inside_source_fails_closed(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
