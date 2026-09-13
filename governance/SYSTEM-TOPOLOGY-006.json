@@ -95,7 +95,7 @@
         "DATA",
         "LEDGER"
       ],
-      "admission_note": "Admitted from catalog future_system_candidates by owner ratification. Control record not yet authored \u2014 ACTIVE_GAP."
+      "admission_note": "Admitted from catalog future_system_candidates by owner ratification. Control record not yet authored — ACTIVE_GAP."
     },
     {
       "system_id": "MEDIA",
@@ -114,7 +114,7 @@
         "VIDEO",
         "VOICE"
       ],
-      "admission_note": "Admitted from catalog future_system_candidates by owner ratification. Control record not yet authored \u2014 ACTIVE_GAP."
+      "admission_note": "Admitted from catalog future_system_candidates by owner ratification. Control record not yet authored — ACTIVE_GAP."
     },
     {
       "system_id": "CONNECTED_ACTIONS",
@@ -131,7 +131,7 @@
         "COMMS",
         "PLUGINS"
       ],
-      "admission_note": "Admitted from catalog future_system_candidates by owner ratification. Control record not yet authored \u2014 ACTIVE_GAP."
+      "admission_note": "Admitted from catalog future_system_candidates by owner ratification. Control record not yet authored — ACTIVE_GAP."
     },
     {
       "system_id": "RESEARCH_KNOWLEDGE",
@@ -147,15 +147,40 @@
         "KNOWLEDGE",
         "GEO"
       ],
-      "admission_note": "Admitted from catalog future_system_candidates by owner ratification. Control record not yet authored \u2014 ACTIVE_GAP."
+      "admission_note": "Admitted from catalog future_system_candidates by owner ratification. Control record not yet authored — ACTIVE_GAP."
     }
   ],
   "peer_system_ids": [
     "CORE",
     "LEARNING",
     "BOOK",
-    "DOCUMENTS"
+    "DOCUMENTS",
+    "SPREADSHEET_DATA",
+    "MEDIA",
+    "CONNECTED_ACTIONS",
+    "RESEARCH_KNOWLEDGE"
   ],
+  "execution_readiness": {
+    "rule": "Architectural peer admission is distinct from unattended execution readiness. A peer may be canonical and incomplete while remaining non-dispatchable until its canonical control record and required execution authority exist.",
+    "execution_ready_peer_system_ids": [
+      "CORE",
+      "LEARNING",
+      "BOOK",
+      "DOCUMENTS"
+    ],
+    "admitted_not_execution_ready_peer_system_ids": [
+      "SPREADSHEET_DATA",
+      "MEDIA",
+      "CONNECTED_ACTIONS",
+      "RESEARCH_KNOWLEDGE"
+    ],
+    "readiness_blockers": {
+      "SPREADSHEET_DATA": "MISSING_CANONICAL_CONTROL_RECORD",
+      "MEDIA": "MISSING_CANONICAL_CONTROL_RECORD",
+      "CONNECTED_ACTIONS": "MISSING_CANONICAL_CONTROL_RECORD",
+      "RESEARCH_KNOWLEDGE": "MISSING_CANONICAL_CONTROL_RECORD"
+    }
+  },
   "child_system_ids": [],
   "hierarchy_edges": [
     [
@@ -173,6 +198,22 @@
     [
       "SYSTEM_MASTER",
       "DOCUMENTS"
+    ],
+    [
+      "SYSTEM_MASTER",
+      "SPREADSHEET_DATA"
+    ],
+    [
+      "SYSTEM_MASTER",
+      "MEDIA"
+    ],
+    [
+      "SYSTEM_MASTER",
+      "CONNECTED_ACTIONS"
+    ],
+    [
+      "SYSTEM_MASTER",
+      "RESEARCH_KNOWLEDGE"
     ]
   ],
   "retired_systems": [
@@ -239,31 +280,49 @@
     "retired_system_cannot_be_auto_provisioned": true
   },
   "second_shift_autoprovision_rule": {
-    "compare_peer_system_ids_to_registry_owner_files": true,
+    "compare_peer_system_ids_to_registry_owner_files": false,
+    "compare_execution_ready_peer_set_to_registry_owner_files": true,
     "machine_resolvable_missing_peer_coverage_must_be_provisioned": true,
     "may_create_new_system": false,
     "may_resurrect_retired_system": false,
+    "architectural_peer_set": [
+      "CORE",
+      "LEARNING",
+      "BOOK",
+      "DOCUMENTS",
+      "SPREADSHEET_DATA",
+      "MEDIA",
+      "CONNECTED_ACTIONS",
+      "RESEARCH_KNOWLEDGE"
+    ],
+    "active_peer_set_scope": "SECOND_SHIFT_EXECUTION_READY_ONLY",
     "active_peer_set": [
       "CORE",
       "LEARNING",
       "BOOK",
       "DOCUMENTS"
+    ],
+    "admitted_not_execution_ready_peer_set": [
+      "SPREADSHEET_DATA",
+      "MEDIA",
+      "CONNECTED_ACTIONS",
+      "RESEARCH_KNOWLEDGE"
     ]
   },
   "authority_order": [
     "governance/CURRENT-AUTHORITY.json",
     "governance/SYSTEM-PROGRAM-JOB-LOCK-001.json",
-    "governance/SYSTEM-COMPLETION-STATUS-001.json",
-    "governance/SYSTEM-TOPOLOGY-005.json",
+    "governance/SYSTEM-COMPLETION-STATUS-002.json",
+    "governance/SYSTEM-TOPOLOGY-006.json",
     "canonical system control record",
     "system-owned state/obligation/delegation registry",
     "qualification/evidence record",
     "branch/workflow label",
     "chat/task title"
   ],
-  "cross_lane_rule": "CORE, LEARNING, BOOK and DOCUMENTS stay in their own product lanes and integrate upward through explicit System Master/shared interfaces without ownership transfer. There is no active Prose cross-lane exception.",
+  "cross_lane_rule": "CORE, LEARNING, BOOK, DOCUMENTS, SPREADSHEET_DATA, MEDIA, CONNECTED_ACTIONS and RESEARCH_KNOWLEDGE remain distinct architectural peers and integrate upward through explicit System Master/shared interfaces without ownership transfer. Only execution-ready peers may receive unattended execution lanes. There is no active Prose cross-lane exception.",
   "canonical_write_rule": "SYSTEM_MASTER/BOOK is the sole canonical Book/manuscript owner. Retired Prose evidence, Documents, Research, evaluators and orchestration evidence cannot directly mutate canonical manuscript state.",
-  "completion_rule": "SYSTEM_MASTER, CORE, LEARNING, BOOK and DOCUMENTS remain incomplete until explicit product-level completion authority changes that standing. PROSE is historically complete and terminally retired, not active work.",
+  "completion_rule": "SYSTEM_MASTER, CORE, LEARNING, BOOK, DOCUMENTS, SPREADSHEET_DATA, MEDIA, CONNECTED_ACTIONS and RESEARCH_KNOWLEDGE remain incomplete until explicit product-level completion authority changes that standing. PROSE is historically complete and terminally retired, not active work.",
   "qualification_rule": "Topology/control changes never transfer or broaden exact-SHA qualification, human, author, private-data, publication, production or native-platform authority.",
   "tool_owner_allocation": "governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-005.json",
   "ratification_record": "governance/FOUNDATION-CLOSURE-OWNER-DECISION-PACK-001.md"
