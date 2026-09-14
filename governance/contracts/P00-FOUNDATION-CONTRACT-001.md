@@ -1,99 +1,93 @@
 # P00 — Foundation Contract 001
 
-**Owner** `SYSTEM_MASTER/CORE` · **Capability** P00 Authority pointer of record · **Effective** 2026-09-13
-**Authority** `governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-001.json`
+**Owner** `SYSTEM_MASTER/CORE` · **Capability** P00 Authority pointer of record · **Effective** 2026-09-14  
+**Current architecture authority** `governance/CURRENT-AUTHORITY.json` → `CURRENT-AUTHORITY-005` / `SYSTEM-TOPOLOGY-007`  
+**Capability authority** `governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json`
 
 ## 1. Contract / interface
 
-`governance/CURRENT-AUTHORITY.json` is the single entry point to the estate. Every
-consumer resolves state by reading this file and following its pointers. It carries
-`authority_id`, `effective_date`, `standing`, `supersedes`, and one named pointer per
-canonical artifact.
+`governance/CURRENT-AUTHORITY.json` is the single canonical entry point to the current System Master governance estate. Consumers resolve current state by reading this file first and following its named role pointers rather than selecting numbered artifacts directly.
 
-Offers: a stable resolution path that survives artifact renumbering, because consumers
-name the *role* (`obligation_registry`) not the file (`WORK-OBLIGATION-REGISTRY-013.json`).
+The pointer contract is role-based. For example, a consumer reads `obligation_registry` from `CURRENT-AUTHORITY.json`; it does not assume a specific `WORK-OBLIGATION-REGISTRY-NNN.json` filename. The same rule applies to topology, owner allocation, capability crosswalk, completion status, control records, and every other selected governance artifact.
 
-Does not offer: content. It holds no facts about the estate, only where the facts live.
-Any fact stated here rather than pointed at is a defect.
+P00 supplies selection authority, not the selected artifacts' semantic content. Facts owned by another artifact remain authoritative there. Historical receipts and superseded numbered records retain their original bytes and subjects; repointing the current selector never relabels historical evidence.
 
 ## 2. Ingress routes
 
-Writes are human, via pull request, gated by `a01-control-plane-enforcement`. There is no
-programmatic writer and there must not be one — a pointer of record that a process can
-repoint can silently redirect the whole estate.
+Canonical pointer-file mutation enters through a reviewed repository change to `governance/CURRENT-AUTHORITY.json`. Any mutation must preserve schema validity, pointer integrity, explicit supersession/ratification semantics, and the authority rules selected by the current file.
 
-Reads: `system-brief.js`, `lane-brief.js`, `foundation-closure-matrix.js`,
-`validate-governance.js`, `scaffold-foundation-contracts.js`, and `a01_github_ingress`.
+Read ingress includes `system-brief.js`, `lane-brief.js`, `foundation-closure-matrix.js`, `validate-governance.js`, the control/ingress surfaces that resolve current authority, and any owner lane that must determine current topology, ownership, completion, or work-selection truth.
+
+P04 content-addressed authority bootstrap is a separate interface: it may create immutable authority/state refs in its own guarded namespace, but it does not silently rewrite or repoint `governance/CURRENT-AUTHORITY.json`. P00 therefore forbids unreviewed repointing of the canonical selector without forbidding P04's separately governed write-once authority-ref mechanism.
 
 ## 3. Egress routes
 
-Consumed by read only. No process emits from it. A change propagates the next time any
-consumer runs — there is no cache and no invalidation step.
+P00 is consumed read-only by downstream resolution. Its egress is the set of named pointers and selector facts exposed by `CURRENT-AUTHORITY.json`.
+
+A selector change becomes visible on the next read; P00 defines no independent cache. Any consumer-side cache must invalidate when the selected authority blob/ref changes and must never fall back to a superseded selector after a current selector is readable.
 
 ## 4. Persistence and canonical writer
 
-The file itself, at `governance/CURRENT-AUTHORITY.json`, in git. Git history is the
-supersession record; the `supersedes` field names the prior `authority_id`.
+Persistence is the version-controlled file `governance/CURRENT-AUTHORITY.json`. Git history preserves every prior file state, while `authority_id`, `supersedes`, ratification pointers, and selected numbered artifacts preserve the governance chain.
 
-Canonical writer: a human, through a reviewed pull request. This is the only artifact in
-the estate whose writer is deliberately a person rather than a process.
+Canonical writer for the selector file is a reviewed repository mutation with exact predecessor awareness. Automation may prepare or transport such a change only through an explicitly authorized repository-control path; no runtime process may silently repoint the selector as a side effect of ordinary execution.
 
-Unlike every other governance artifact, this file is **overwritten in place** rather than
-superseded by a new numbered file. That is intentional: a pointer whose path changed would
-need a pointer to find it.
+P04's write-once refs under its guarded authority namespace are not P00 writes. They are durable authority records selected/consumed under their own contract and cannot substitute for changing this pointer file.
 
 ## 5. Dependencies
 
-None. P00 is the root — everything depends on it and it depends on nothing. It must remain
-readable with no tooling, no network, and no other artifact present.
+P00 is the resolution root and must remain parseable without first consulting another governance artifact. Its selected pointers are validation dependencies, not bootstrap prerequisites: a malformed or missing selected target must be reportable as a pointer-integrity failure rather than making the selector itself undiscoverable.
 
-Its pointers reach P01, P02, P05, and the generators. Those are references, not
-dependencies: P00 is valid whether or not its targets currently resolve, which is what lets
-the validator report a broken pointer instead of failing to start.
+Current Foundation qualification additionally verifies that the selector resolves the current topology, owner allocation, capability crosswalk, obligation registry, and Foundation census inputs named by `CURRENT-AUTHORITY-005`.
 
 ## 6. Failure semantics
 
-**Fail-closed, and loudly.**
+**Fail closed and preserve evidence lineage.**
 
-- Absent → `system-brief.js` exits 2, `validate-governance.js` exits 2, ingress reports
-  `AUTHORITY_ABSENT` and enqueues nothing. Nothing degrades to a default.
-- Malformed JSON → same, exit 2. No partial parse, no repair attempt.
-- A pointer naming a missing file → the estate still resolves for every other pointer;
-  the validator reports it as an error and the brief lists it under pointer integrity.
-  One broken pointer must not black out the rest.
-- A pointer naming a file on another ref (the five control records) → reported as
-  `ABSENT_ON_THIS_REF`, not as corruption. This is a known federation condition.
+- Missing or malformed `CURRENT-AUTHORITY.json` → no current-authority claim may be made; validation/brief/ingress surfaces fail rather than selecting a default.
+- Missing selected pointer target → report the exact unresolved role/path; do not substitute a prior numbered artifact.
+- Selector/schema disagreement → reject the changed selector.
+- Current topology/allocation/crosswalk disagreement with the Foundation census → Foundation projection fails rather than mixing authority generations.
+- A current receipt whose bound selector or other subject blob changes → receipt becomes non-current; historical receipt remains intact and a fresh receipt is required.
+- Concurrent selector mutation based on a stale predecessor → reject or reconcile before write; never overwrite unseen current authority.
 
-No idempotency concern: reads are pure.
+Reads are pure and idempotent. Retrying a failed read or validation cannot mutate governance state.
 
 ## 7. Evidence target
 
-Git history of the file. Each change carries a commit, and `authority_id` plus
-`supersedes` reconstructs the chain without reading commits. The `validate-governance`
-CI log records the validated state at each commit.
+Current completion evidence is a Foundation evidence receipt registered under `FOUNDATION-CLOSURE-EVIDENCE-REGISTRY-001` and bound to:
+
+- an exact qualification head SHA;
+- the exact current `CURRENT-AUTHORITY.json` blob;
+- this exact P00 contract blob;
+- the current P00 qualification script/workflow blobs;
+- the current selector inputs the P00 qualifier proves; and
+- a successful GitHub Actions run plus immutable artifact identity/digest.
+
+Superseded P00 evidence remains historical provenance and is never rewritten to the new subject.
 
 ## 8. Acceptance target
 
-```
-node .github/scripts/validate-governance.js && node .github/scripts/system-brief.js
+The current P00 qualification must run, on the exact candidate head:
+
+```text
+node .github/scripts/validate-governance.js
+node .github/scripts/system-brief.js
+node .github/scripts/p00-authority-pointer-foundation-qualify.js
 ```
 
-**PASS** when validation reports `authority` PASS and the brief renders with the expected
-`authority_id`. Verified 2026-09-13 at `CURRENT-AUTHORITY-004`.
+**PASS** requires the qualifier to prove `CURRENT-AUTHORITY-005`, `SYSTEM-TOPOLOGY-007`, `SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006`, `SYSTEM-MASTER-CAPABILITY-CROSSWALK-003`, the current authority-selected obligation registry, and the rebased Foundation census; produce a machine-readable evidence artifact; and then admit a fresh exact-subject PASS receipt to the Foundation evidence registry.
+
+A historical P00 PASS does not transfer across changed authority, contract, workflow, script, topology, allocation, crosswalk, or other bound subject blobs.
 
 ## 9. Authority boundary
 
-**Lane may decide alone (`agent`):** nothing. Every change to this file is an `owner`
-decision, because every change redirects the estate.
+**Lane may decide alone (`agent`):** validation implementation, evidence formatting, negative tests, and internal refactoring that preserve the selector's roles, schema, write authority, and fail-closed semantics.
 
-**Requires the owner (`owner`):** adding, removing, or repointing any pointer; changing
-`standing`; superseding the authority id.
+**Requires the owner (`owner`):** adding/removing/repointing a canonical role; changing `authority_id`, `standing`, `supersedes`, topology, ownership allocation, capability crosswalk, completion truth, or any rule that broadens mutation authority over the selector.
 
-This is the only contract in the estate with an empty `agent` column, and that is the
-correct shape for a root pointer.
+P00 never creates a new peer system, transfers semantic ownership, resurrects a retired system, or broadens a historical receipt.
 
 ## 10. Open gaps
 
-None in the artifact. One known condition, recorded not resolved: five declared pointers
-name control records resident on other branches, so no single checkout resolves the full
-estate. That is the branch-federation decision, tracked outside P00.
+No contract-level interface gap is intentionally left open. Foundation completion is nevertheless evidence-gated: this rebased contract requires a fresh current-authority qualification receipt before P00 may be classified `COMPLETE_WITH_EVIDENCE`.
