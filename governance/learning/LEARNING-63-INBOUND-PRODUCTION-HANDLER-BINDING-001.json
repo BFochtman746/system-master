@@ -1,0 +1,66 @@
+{
+  "binding_id": "LEARNING-63-INBOUND-PRODUCTION-HANDLER-BINDING-001",
+  "effective_date": "2026-09-14",
+  "status": "DENOMINATOR_MATERIALIZED_63_OF_63__EXACT_HANDLER_BINDING_EXECUTION_OPEN",
+  "authority": {
+    "current_authority": "CURRENT-AUTHORITY-005",
+    "topology": "SYSTEM-TOPOLOGY-007",
+    "allocation": "SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006",
+    "crosswalk": "SYSTEM-MASTER-CAPABILITY-CROSSWALK-003",
+    "learning_control": "LEARNING-CONTROL-RECORD-v7.md"
+  },
+  "parent_traceability": {
+    "artifact": "governance/learning/LEARNING-113-REQUIREMENT-CURRENT-TRACEABILITY-001.json",
+    "standing": "CLOSED_TRACEABILITY_ONLY"
+  },
+  "denominator": {
+    "required_inbound_handlers": 63,
+    "commands": 45,
+    "queries": 18,
+    "learning_owned": 33,
+    "curriculum_owned": 26,
+    "peer_shared": 4,
+    "exact_current_handlers_bound": 0,
+    "route_parity_pass_current_subject": 0
+  },
+  "source_bindings": [
+    {"artifact": "MASTER_CORE_ROUTE_MANIFEST_001.json", "sha256": "6498e15bd83aa3f0d491b02f1da6e8f1f3649fe391a8455ae4c4fe4115307c0f"},
+    {"artifact": "LRN_OWNERSHIP_FREEZE_001D_CONTROL.xlsx", "sha256": "3afc515544cfa6c8593e3408b883ae41d8867bd1feb518d0ea2a33c9df0a8452"},
+    {"artifact": "LRN_OWNERSHIP_FREEZE_001C_TEST_OBLIGATIONS.csv", "sha256": "7688f208e56a86303ba76e54e918b9aaf0eb3198d7490f803bee018faf55b6f3"},
+    {"artifact": "FINAL_QUALIFICATION_001.json", "sha256": "95fa7402ce492b73a22eacd111b4db6c676c1eb2e3a7e89501b9d8ac86a0d627"},
+    {"artifact": "FINAL_QUALIFICATION_002.json", "sha256": "b9f70fada889a41a04627df2ac06959ba622f5a996019188df1c1c16429c77b1"}
+  ],
+  "truth_boundary": [
+    "The 63-route denominator is exact: 45 COMMAND plus 18 QUERY interfaces from the frozen 112-interface constitution.",
+    "No current exact production handler identity is claimed bound by this denominator materialization.",
+    "Historical/portable aggregate PASS does not establish current route-handler parity.",
+    "Four shared-authority routes remain CORE-owned interfaces and may not be absorbed by Learning.",
+    "Production persistence, live target database, native iPhone, human, psychometric, SME and external gates remain independently open."
+  ],
+  "closure_rule": "Binding objective may close only when all 63 routes have exact current handler disposition and every executable route claimed PASS has handler identity+digest, contract evidence, negative/no-bypass evidence, applicable idempotency/concurrency evidence, and route parity. Explicit blockers may close denominator disposition but never executable PASS.",
+  "next_dependency_valid_successor_after_binding": "LEARNING_ATOMIC_PRODUCTION_PERSISTENCE_UOW_OUTBOX_BINDING__ID_TO_BE_RATIFIED_AFTER_63_HANDLER_CLOSURE",
+  "row_storage": {
+    "format": "SHARDED_ROW_LEDGER__CANONICAL_INDEX_PLUS_FOUR_HASH_ADDRESSED_SHARDS",
+    "shards": [
+      {"path": "governance/learning/handler-binding/ROWS-001-016.json", "sha256": "e2a64895c1b1fcad510ecb3bbd9a4784a7d1e1823c21dbc87d165ea305836ef4", "rows": 16, "first_interface_id": "I001", "last_interface_id": "I016-L"},
+      {"path": "governance/learning/handler-binding/ROWS-017-032.json", "sha256": "431c88ca58cee8028a1ba4385a342ed3e9b644014e6068e8fa3ad65a9f991bec", "rows": 16, "first_interface_id": "I016-C", "last_interface_id": "I031"},
+      {"path": "governance/learning/handler-binding/ROWS-033-048.json", "sha256": "ac4bb90838e266f2924adfe78aad501c51936f78397e07958131369682d9f964", "rows": 16, "first_interface_id": "I032", "last_interface_id": "I070"},
+      {"path": "governance/learning/handler-binding/ROWS-049-063.json", "sha256": "5d188d34a40a018c94fa44cbff55d2080f3a5fe1bb90973c6039bd2147036ad5", "rows": 15, "first_interface_id": "I071", "last_interface_id": "I094"}
+    ],
+    "rows_total": 63
+  },
+  "minimum_field_contract": [
+    "interface_id", "interface_type", "route", "port", "current_owner_path", "bound_handler_identity", "bound_handler_source_digest", "request_response_error_contract_identity", "owner_boundary_evidence", "negative_path_evidence", "idempotency_or_concurrency_evidence", "route_parity_result", "current_disposition", "blockers"
+  ],
+  "validation": {
+    "unique_interface_ids": 63,
+    "commands": 45,
+    "queries": 18,
+    "learning_curriculum_owned": 59,
+    "peer_shared": 4,
+    "all_required_fields_present": true,
+    "bound_handlers_claimed": 0,
+    "route_parity_pass_claimed": 0,
+    "truth_boundary": "DENOMINATOR_AND_CURRENT_DISPOSITION_ONLY__NO_EXECUTABLE_HANDLER_PASS_CLAIMED"
+  }
+}
