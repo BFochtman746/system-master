@@ -1,0 +1,83 @@
+{
+  "matrix_id": "LEARNING-FORENSIC-DISPOSITION-MATRIX-002",
+  "effective_date": "2026-09-14",
+  "status": "FORENSIC_ROW_LEVEL_ADJUDICATION_COMPLETE__IMPLEMENTATION_GAPS_REMAIN_OPEN",
+  "supersedes": "LEARNING-FORENSIC-DISPOSITION-MATRIX-001 for row-level adjudication",
+  "authority": {
+    "current_authority": "CURRENT-AUTHORITY-005",
+    "topology": "SYSTEM-TOPOLOGY-007",
+    "allocation": "SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006",
+    "crosswalk": "SYSTEM-MASTER-CAPABILITY-CROSSWALK-003",
+    "learning_control": "LEARNING-CONTROL-RECORD-v5.md"
+  },
+  "frozen_source_bindings": [
+    {"class":"forensic_audit","filename":"LEARNING_SUITE_FORENSIC_AUDIT_2026-09-11.md","sha256":"89b6f5b45adc92d61ae70377ae519cc41b63df778b8511a54ad84d67ca284337","bytes":24395},
+    {"class":"requirement_ledger","filename":"LEARNING_SUITE_REQUIREMENT_GAP_LEDGER.csv","sha256":"e46ceff3583cef71fa32c5e88cb4c3aec5c3c9660cdd3371e98f3685e20fa06b","bytes":101791,"rows":113},
+    {"class":"interface_ledger","filename":"LEARNING_SUITE_INTERFACE_GAP_LEDGER.csv","sha256":"b9c3852c4d3a70077ec4af98f34ca9195bd3c43b0ce77e06a414b679da29ca6a","bytes":73064,"rows":112},
+    {"class":"gap_register","filename":"LEARNING_SUITE_GLOBAL_FINDINGS.csv","sha256":"1c5ad30eb5a41b28169a0a5cd75d8b4ed1d48ed32479694da759fa583294109c","bytes":7601,"rows":16},
+    {"class":"archive_inventory","filename":"LEARNING_SUITE_ARCHIVE_INVENTORY.csv","sha256":"d7a47fed7ce8fb9886b2c9ad6c3206ba515674f653aae1fe6d0e1803aeceb57d","bytes":43723,"rows":161}
+  ],
+  "row_level_owner_rebase_coverage": [
+    {"frozen_owner":"021J + 021K","requirement_rows":3,"interface_rows":5,"current_owner_path":"SYSTEM_MASTER/CORE","current_binding":"CORE_SHARED_SYNC_RECONCILIATION","disposition":"PEER_INTERFACE_REQUIRED"},
+    {"frozen_owner":"021M + 021J + 021K","requirement_rows":1,"interface_rows":0,"current_owner_path":"SYSTEM_MASTER/CORE","current_binding":"CORE_SHARED_LIFECYCLE_SYNC_RECONCILIATION","disposition":"PEER_INTERFACE_REQUIRED"},
+    {"frozen_owner":"021O + 021N + FOUNDATION-002 + FOUNDATION-004 + 021M","requirement_rows":3,"interface_rows":2,"current_owner_path":"SYSTEM_MASTER/CORE","current_binding":"CORE_SHARED_AUTHORIZATION_LIFECYCLE","disposition":"PEER_INTERFACE_REQUIRED"},
+    {"frozen_owner":"ASSURANCE-001","requirement_rows":2,"interface_rows":0,"current_owner_path":"SYSTEM_MASTER/CORE","current_binding":"P08 QUALIFICATION_EXECUTION_PASS","disposition":"PEER_INTERFACE_REQUIRED"},
+    {"frozen_owner":"ASSURANCE-001 + PLATFORM-009","requirement_rows":0,"interface_rows":1,"current_owner_path":"SYSTEM_MASTER/CORE + SYSTEM_MASTER/RESEARCH_KNOWLEDGE","current_binding":"P08/C20 + C30/C17","disposition":"PEER_INTERFACE_SPLIT_REQUIRED"},
+    {"frozen_owner":"FOUNDATION-003 + PLATFORM-002","requirement_rows":2,"interface_rows":3,"current_owner_path":"SYSTEM_MASTER/CORE","current_binding":"CORE_SHARED_DURABLE_JOB_RUNTIME","disposition":"PEER_INTERFACE_REQUIRED"},
+    {"frozen_owner":"FOUNDATION-006","requirement_rows":2,"interface_rows":0,"current_owner_path":"SYSTEM_MASTER/CORE","current_binding":"P03/P08 SHARED_EVIDENCE_QUALIFICATION","disposition":"PEER_INTERFACE_REQUIRED"},
+    {"frozen_owner":"MASTER-CORE / PLATFORM-006","requirement_rows":0,"interface_rows":1,"current_owner_path":"SYSTEM_MASTER/CORE","current_binding":"CORE_SHARED_DEPENDENCY_RUNTIME","disposition":"PEER_INTERFACE_REQUIRED"},
+    {"frozen_owner":"MOD-CURRICULUM-001","requirement_rows":35,"interface_rows":39,"current_owner_path":"SYSTEM_MASTER/LEARNING","current_binding":"C07 CURRICULUM","disposition":"CARRY_FORWARD_CURRENT_OWNER"},
+    {"frozen_owner":"MOD-KNOWLEDGE-001 / KNOWLEDGE-COMPETENCY-ALIGNMENT-001","requirement_rows":1,"interface_rows":0,"current_owner_path":"SYSTEM_MASTER/RESEARCH_KNOWLEDGE","current_binding":"C17 KNOWLEDGE","disposition":"PEER_INTERFACE_REQUIRED"},
+    {"frozen_owner":"MOD-LEARNING-001","requirement_rows":50,"interface_rows":59,"current_owner_path":"SYSTEM_MASTER/LEARNING","current_binding":"C18 LEARNING","disposition":"CARRY_FORWARD_CURRENT_OWNER"},
+    {"frozen_owner":"PLATFORM-008 + FOUNDATION-007 + RIGHTS-001 + 021M","requirement_rows":2,"interface_rows":0,"current_owner_path":"SYSTEM_MASTER/DOCUMENTS + SYSTEM_MASTER/CORE","current_binding":"C13 FILE + CORE_AUTHORIZATION_LIFECYCLE","disposition":"PEER_INTERFACE_SPLIT_REQUIRED"},
+    {"frozen_owner":"PLATFORM-008 + RIGHTS-001 + FOUNDATION-007 + 021M","requirement_rows":0,"interface_rows":2,"current_owner_path":"SYSTEM_MASTER/DOCUMENTS + SYSTEM_MASTER/CORE","current_binding":"C13 FILE + CORE_AUTHORIZATION_LIFECYCLE","disposition":"PEER_INTERFACE_SPLIT_REQUIRED"},
+    {"frozen_owner":"PLATFORM-009 + 021AB + ASSURANCE-001 + FOUNDATION-006/007 + 021N","requirement_rows":2,"interface_rows":0,"current_owner_path":"SYSTEM_MASTER/RESEARCH_KNOWLEDGE + SYSTEM_MASTER/CORE","current_binding":"C30/C17 + P03/P08/C20","disposition":"PEER_INTERFACE_SPLIT_REQUIRED"},
+    {"frozen_owner":"SECURITY-TRUST-001","requirement_rows":1,"interface_rows":0,"current_owner_path":"SYSTEM_MASTER/CORE","current_binding":"CORE_SHARED_SECURITY_TRUST","disposition":"PEER_INTERFACE_REQUIRED"},
+    {"frozen_owner":"SYSTEM-MASTER-BUILD-GOVERNANCE","requirement_rows":1,"interface_rows":0,"current_owner_path":"SYSTEM_MASTER/CORE","current_binding":"P00/P01/P02 PRODUCT_GOVERNANCE","disposition":"PEER_INTERFACE_REQUIRED"},
+    {"frozen_owner":"USER-EXPERIENCE-001","requirement_rows":8,"interface_rows":0,"current_owner_path":"SYSTEM_MASTER/CORE","current_binding":"C12 EXPERIENCE","disposition":"PEER_INTERFACE_REQUIRED"}
+  ],
+  "global_finding_dispositions": {
+    "F-001":"OPEN_P0__LEARNING_HANDLERS_PLUS_CORE_ROUTER",
+    "F-002":"OPEN_P0__LEARNING_STATE_PLUS_CORE_ATOMIC_PERSISTENCE",
+    "F-003":"OPEN_P0__CORE_TARGET_DATABASE_EVIDENCE",
+    "F-004":"OPEN_P0__CURRENT_PEER_INTERFACE_BINDING",
+    "F-005":"OPEN_P0__LEARNING_EVALUATOR_PLUS_CORE_MODEL_RUNTIME_PLUS_EXTERNAL_SME",
+    "F-006":"OPEN_P0__LEARNING_PLUS_CORE_C12_NATIVE_AUTHORITY_REQUIRED",
+    "F-007":"OPEN_P0__LEARNING_PLUS_HUMAN_EXTERNAL_VALIDITY",
+    "F-008":"ACTIVE_NEXT__113_REQUIREMENT_TRACEABILITY_CLOSURE",
+    "F-009":"OPEN_P1__CURRENT_PRODUCTION_PATH_REGRESSION",
+    "F-010":"OPEN_P1__LEARNING_EVENTS_PLUS_CORE_EVENT_RUNTIME",
+    "F-011":"OPEN_P1__EXTERNAL_CONFORMANCE",
+    "F-012":"OPEN_P1__P08_PLUS_OUTPUT_PEER_ORACLES",
+    "F-013":"OPEN_P1__CORE_PRODUCT_POLICY_PLUS_HUMAN_DECISION",
+    "F-014":"OPEN_P1__LEARNING_DUE_STATE_PLUS_CONNECTED_ACTIONS_DELIVERY",
+    "F-015":"OPEN_P1__GOVERNANCE_EVIDENCE_HYGIENE",
+    "F-016":"DEFERRED_P2__EMPIRICAL_MODEL_ADMISSION"
+  },
+  "archive_rule": {
+    "rows": 161,
+    "source_sha256": "d7a47fed7ce8fb9886b2c9ad6c3206ba515674f653aae1fe6d0e1803aeceb57d",
+    "disposition_for_every_row": "HISTORICAL_EVIDENCE_ONLY__NO_AUTHORITY_TRANSFER",
+    "preserve": "evidence_family, artifact, category, artifact sha256, historical status"
+  },
+  "frozen_truth": {
+    "requirements_total": 113,
+    "learning_curriculum_requirements": 85,
+    "other_shared_dependency_requirements": 28,
+    "new_001C_test_obligations_unexecuted_at_freeze": 43,
+    "learning_curriculum_new_001C_test_obligations": 34,
+    "direct_portable_evidence_gaps": 21,
+    "learning_curriculum_direct_portable_evidence_gaps": 21,
+    "exact_production_handler_pending_requirement_rows": 95,
+    "interfaces_total": 112,
+    "interface_types": {"COMMAND":45,"QUERY":18,"EVENT":21,"ERROR":28},
+    "exact_inbound_handlers_required": 63,
+    "exact_inbound_handlers_bound_at_freeze": 0
+  },
+  "exact_successor": {
+    "objective_id": "LEARNING-113-REQUIREMENT-CURRENT-TRACEABILITY-CLOSURE-001",
+    "scope": "Trace all 113 frozen requirements to current component, handler/port, persistence, test and evidence; execute/re-prove the 34 Learning/Curriculum-owned previously unexecuted 001C obligations and close the 21 Learning/Curriculum-owned direct portable evidence gaps where current evidence permits; route 28 other/shared dependency rows through current peer interfaces rather than absorbing them.",
+    "subordinate_to": "FOUNDATION-1-0-CLOSURE-001"
+  },
+  "closure_boundary": "Forensic row-level adjudication is complete. Learning implementation, production binding, qualification, native, human, psychometric and external-conformance gaps remain open until separately evidenced."
+}
