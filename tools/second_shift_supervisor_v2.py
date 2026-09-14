@@ -367,7 +367,7 @@ class SupervisorStore:
         error_text: str,
         retry_budget: int = 3,
         now: Optional[dt.datetime] = None,
-        failure_id: Optional[str] = None,
+        failure_id: Optional[str] = None,  # required in practice; see the guard below
     ) -> dict[str, Any]:
         now = now or utcnow()
         if retry_budget < 1 or retry_budget > 3:
@@ -536,7 +536,14 @@ class SupervisorStore:
                 result.append(dict(row))
         return result
 
-    def audit_invariants(self) -> list[str]:
+    def audit_invariants(self, deep: bool = True) -> list[str]:
+        """Check controller invariants.
+
+        deep=True  also runs PRAGMA integrity_check, a full database page scan.
+                   Use it at the start and end of a run, and in any release gate.
+        deep=False runs the logical invariants only. Use it inside hot loops; a
+                   full page scan per transition makes a 20,000-step run quadratic.
+        """
         problems: list[str] = []
         dup = self.conn.execute("SELECT lane,COUNT(*) n FROM claims WHERE released_at IS NULL GROUP BY lane HAVING n>1").fetchall()
         if dup:
@@ -552,15 +559,29 @@ class SupervisorStore:
         orphan = self.conn.execute("SELECT d.dispatch_id FROM dispatch_outbox d LEFT JOIN claims c ON c.lease_id=d.lease_id WHERE c.lease_id IS NULL").fetchall()
         if orphan:
             problems.append("ORPHAN_DISPATCH_OUTBOX")
-        integrity = self.conn.execute("PRAGMA integrity_check").fetchone()[0]
-        if integrity != "ok":
-            problems.append(f"SQLITE_INTEGRITY:{integrity}")
+        if deep:
+            integrity = self.conn.execute("PRAGMA integrity_check").fetchone()[0]
+            if integrity != "ok":
+                problems.append(f"SQLITE_INTEGRITY:{integrity}")
         return problems
 
-    def snapshot(self) -> dict[str, Any]:
+    SNAPSHOT_TABLES = ("lanes", "delegations", "claims", "dispatch_outbox", "circuits", "events")
+
+    def snapshot(self, tables: Optional[tuple[str, ...]] = None) -> dict[str, Any]:
+        """Materialise whole tables as dictionaries.
+
+        The default is every table, which is what an audit export wants. Pass an
+        explicit subset inside a loop: the events table grows without bound, so
+        fetching all of it once per iteration is quadratic in the step count.
+        """
+        wanted = tuple(tables) if tables else self.SNAPSHOT_TABLES
+        unknown = [t for t in wanted if t not in self.SNAPSHOT_TABLES]
+        if unknown:
+            raise ValueError(f"unknown snapshot table(s): {unknown}")
+
         def rows(table: str) -> list[dict[str, Any]]:
             return [dict(r) for r in self.conn.execute(f"SELECT * FROM {table} ORDER BY rowid").fetchall()]
-        return {k: rows(k) for k in ["lanes", "delegations", "claims", "dispatch_outbox", "circuits", "events"]}
+        return {k: rows(k) for k in wanted}
 
     def export_audit_json(self, out_path: os.PathLike[str] | str) -> None:
         Path(out_path).write_text(json.dumps(self.snapshot(), indent=2, sort_keys=True) + "\n", encoding="utf-8")
