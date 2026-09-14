@@ -191,3 +191,17 @@ Format: **L-nnn — one-line summary** / Symptom / Root cause / Fix / Rule it pr
   run rather than trusting it to be current. Treat a failure that moves between runs as
   evidence of a stale-state bug, not a flaky test. And when a fix introduces a new cache,
   own its invalidation in the same change — this defect was created by the previous fix.
+
+## L-013 — Register a new runtime directory before asking CI to qualify it
+
+- **Symptom.** The first Learning I001–I004 handler tranche compiled and its repository tests
+  passed, but `Required Verification` remained red at `ASSURANCE-STANDARDS-1.0`.
+- **Root cause.** The tranche introduced `system-master/learning-handler-binding-001/` as a
+  new runtime directory without registering that implementation subsystem in `SYSTEM-MAP.md`,
+  violating S-05. The failure was governance discovery, not a handler compile/test defect.
+- **Fix.** Registered the directory in the implementation-subsystem map with its purpose,
+  path, test count, LEARNING owner and evidence/log location, while explicitly preserving the
+  nine-peer topology and Master Core/DATA authority boundaries.
+- **Rule.** Before the first commit that creates `system-master/<area>/`, preflight S-05 and
+  land the corresponding `SYSTEM-MAP.md` registration in the same change. A runtime package
+  registration is not a new peer and must say so when its name could be misread as topology.
