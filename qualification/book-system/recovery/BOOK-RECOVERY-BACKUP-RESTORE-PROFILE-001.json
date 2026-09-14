@@ -1,0 +1,214 @@
+{
+  "profile_id": "BOOK-RECOVERY-BACKUP-RESTORE-PROFILE-001",
+  "effective_date": "2026-09-14",
+  "standing": "FROZEN_BOOK_SEMANTIC_RECOVERY_PROFILE__CORE_PHYSICAL_DURABILITY_PORT_REQUIRED__WHOLE_OBJECTIVE_NOT_CLOSED",
+  "authority_id": "CURRENT-AUTHORITY-005",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "component_id": "BOOK-COMP-12",
+  "objective_id": "BOOK-ENG-009-SEMANTIC-RECOVERY-PROFILE-001",
+  "purpose": "Define and execute the Book-owned semantic backup set, restore invariants, offline continuity rules, retention semantics, restored-state validation, and preservation-lineage closure while keeping physical backup, storage, restore, and durability execution owned by CORE.",
+  "bound_lifecycle_operations": [
+    "P19-01",
+    "P19-02",
+    "P19-03",
+    "P19-04",
+    "P19-05",
+    "P19-06",
+    "P19-07",
+    "P19-08"
+  ],
+  "interfaces": [
+    "IBookRecoveryProfile.validateBackupSet",
+    "IBookRecoveryProfile.defineRestoreInvariants",
+    "IBookRecoveryProfile.verifyOfflineContinuity",
+    "IBookRecoveryProfile.verifyRestoredState"
+  ],
+  "ownership_split": {
+    "BOOK": [
+      "release-manifest semantic composition",
+      "semantic backup-set completeness and digest",
+      "restore invariant definition",
+      "semantic restored-state comparison",
+      "offline continuity and deterministic reconnect disposition",
+      "retention and retrievability requirements",
+      "preservation receipt admission",
+      "release/archive lineage and reentry anchors"
+    ],
+    "CORE": [
+      "physical backup creation",
+      "physical storage and retention execution",
+      "physical checksum and backup integrity verification",
+      "physical restore and rollback execution",
+      "generic local persistence and sync primitives",
+      "physical retrievability execution"
+    ],
+    "rule": "Book MUST NOT implement or self-certify CORE physical durability mechanics. A Book semantic PASS that depends on physical durability requires an admitted CORE receipt."
+  },
+  "semantic_backup_set": {
+    "schema_version": 1,
+    "required_identity": [
+      "book_project_id",
+      "source_identity.book_state_version",
+      "source_identity.book_state_digest",
+      "source_identity.canonical_manuscript_ref",
+      "source_identity.manuscript_version_id",
+      "source_identity.manuscript_digest_sha256"
+    ],
+    "required_components": [
+      "active_book_state",
+      "canon_knowledge",
+      "research_evidence",
+      "plan_architecture",
+      "accepted_text",
+      "release_state",
+      "evidence_receipts"
+    ],
+    "component_shape": ["ref", "digest_sha256"],
+    "required_lineage": [
+      "release_manifest_ref",
+      "lifecycle_version",
+      "release_candidate_id"
+    ],
+    "digest_rule": "semantic_set_digest_sha256 is SHA-256 over the deterministic canonical JSON projection excluding the digest field itself."
+  },
+  "release_manifest": {
+    "required_fields": [
+      "book_project_id",
+      "release_candidate_id",
+      "accepted_text_digest_sha256",
+      "metadata_digest_sha256",
+      "build_config_digest_sha256",
+      "identifier_state_digest_sha256",
+      "rights_state_digest_sha256",
+      "approvals_digest_sha256",
+      "receipt_chain_digest_sha256",
+      "created_at"
+    ],
+    "rule": "The manifest freezes semantic release identity. Durable persistence of the manifest remains a CORE responsibility."
+  },
+  "restore_invariants": {
+    "exact_match": [
+      "book_project_id",
+      "source_identity.book_state_version",
+      "source_identity.book_state_digest",
+      "source_identity.canonical_manuscript_ref",
+      "source_identity.manuscript_version_id",
+      "source_identity.manuscript_digest_sha256",
+      "all semantic component refs and digests",
+      "release_manifest_ref",
+      "lifecycle_version",
+      "release_candidate_id"
+    ],
+    "destructive_restore_rule": "Destructive-restore acceptance requires a successful CORE RESTORE receipt marked destructive_drill=true plus exact Book semantic invariant equality.",
+    "failure_rule": "Any mismatch fails closed. Book never repairs, normalizes, or silently advances the restored state during verification."
+  },
+  "core_durability_port": {
+    "port_id": "CORE.DURABILITY.BOOK_RECOVERY.v1",
+    "current_binding_status": "UNBOUND_REQUIRED_DEPENDENCY",
+    "operations": [
+      "CREATE_BACKUP",
+      "VERIFY_BACKUP",
+      "RESTORE",
+      "VERIFY_RETRIEVABILITY"
+    ],
+    "required_receipt_fields": [
+      "owner",
+      "operation",
+      "status",
+      "semantic_set_digest_sha256",
+      "physical_receipt_ref",
+      "physical_manifest_digest_sha256",
+      "completed_at"
+    ],
+    "receipt_rules": [
+      "owner must equal CORE",
+      "status must equal SUCCEEDED",
+      "semantic_set_digest_sha256 must exactly match the Book semantic backup set",
+      "RESTORE used for destructive proof must set destructive_drill=true"
+    ],
+    "non_claim": "This profile defines the Book-facing port contract only. No current CORE physical backup/restore provider is claimed by this artifact."
+  },
+  "offline_continuity": {
+    "base_rule": "An offline session is anchored to an exact semantic backup-set digest and exact Book source identity.",
+    "safe_reconnect": "If reconnect current semantic_set_digest_sha256 equals the offline base digest, the offline delta is eligible for normal admission; canonical mutation rules still apply.",
+    "divergent_reconnect": "If reconnect current semantic_set_digest_sha256 differs from the offline base digest, automatic application is forbidden and disposition is RECONCILIATION_REQUIRED.",
+    "no_silent_merge": true,
+    "physical_local_storage_owner": "CORE"
+  },
+  "retention_policy": {
+    "Book_must_define": [
+      "policy_id",
+      "core_physical_policy_ref",
+      "retained_semantic_classes",
+      "retrievability_verification_required",
+      "destructive_restore_drill_required",
+      "retain_release_lineage"
+    ],
+    "required_retained_semantic_classes": [
+      "semantic_backup_set",
+      "release_manifest",
+      "preservation_receipts",
+      "release_archive_lineage"
+    ],
+    "rule": "Book defines what remains semantically retrievable; CORE executes and proves physical retention/retrieval."
+  },
+  "preservation_receipt_admission": {
+    "required_core_operation": "VERIFY_BACKUP",
+    "required_Book_checks": [
+      "semantic backup set validates",
+      "CORE receipt validates",
+      "CORE semantic_set_digest_sha256 equals Book semantic_set_digest_sha256",
+      "retention policy validates"
+    ],
+    "rule": "A preservation receipt is Book evidence that semantic completeness and admitted CORE physical verification agreed on the same frozen semantic set."
+  },
+  "lineage_closure": {
+    "required_fields": [
+      "semantic_set_digest_sha256",
+      "preservation_receipt_ref",
+      "release_manifest_ref",
+      "continuation_anchor",
+      "reentry_anchor",
+      "closed_at"
+    ],
+    "rule": "Lineage closure records pointers and anchors only. It does not authorize release, publication, distribution, or a future edition."
+  },
+  "failure_codes": [
+    "INVALID_RECOVERY_INPUT",
+    "INVALID_SHA256",
+    "BACKUP_SET_COMPONENT_MISSING",
+    "BACKUP_SET_DIGEST_MISMATCH",
+    "CORE_DURABILITY_RECEIPT_REQUIRED",
+    "CORE_DURABILITY_RECEIPT_INVALID",
+    "CORE_DURABILITY_SEMANTIC_SET_MISMATCH",
+    "RESTORE_INVARIANT_MISMATCH",
+    "DESTRUCTIVE_RESTORE_PROOF_REQUIRED",
+    "OFFLINE_BASE_MISMATCH",
+    "RETENTION_POLICY_INVALID",
+    "PRESERVATION_RECEIPT_MISMATCH"
+  ],
+  "qualification_requirements": [
+    "semantic backup set exact completeness and tamper rejection",
+    "CORE receipt owner/status/set-digest admission",
+    "destructive restore fail-closed behavior for missing/invalid CORE proof",
+    "restored manuscript/canon/release/evidence mismatch rejection",
+    "offline exact-base safe disposition and divergent-base reconciliation disposition",
+    "retention policy validation",
+    "preservation receipt and lineage-anchor validation",
+    "no physical backup/storage/restore implementation in the Book module"
+  ],
+  "completion_boundary": {
+    "Book_semantic_layer_can_be_qualified_by_this_profile": true,
+    "BOOK_ENG_009_whole_objective_complete": false,
+    "blocking_dependency": "Qualified CORE.DURABILITY.BOOK_RECOVERY.v1 physical provider and destructive restore evidence",
+    "whole_app_continuity_complete": false
+  },
+  "non_claims": [
+    "This artifact does not claim a CORE physical backup/restore provider exists.",
+    "This artifact does not implement physical storage, backup, restore, rollback, sync transport, or retrievability execution.",
+    "This artifact does not make BOOK-ENG-009 complete by itself.",
+    "This artifact does not make the Book system complete or production certified.",
+    "This artifact does not authorize release, publication, distribution, submission, or reentry.",
+    "This artifact does not change CURRENT-AUTHORITY-005, SYSTEM-TOPOLOGY-007, peer ownership, the frozen 20-phase lifecycle, or PROSE retirement."
+  ]
+}
