@@ -1,0 +1,78 @@
+name: P00 Authority Pointer Foundation Qualification
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'governance/CURRENT-AUTHORITY.json'
+      - 'governance/SYSTEM-TOPOLOGY-007.json'
+      - 'governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006.json'
+      - 'governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json'
+      - 'governance/WORK-OBLIGATION-REGISTRY-*.json'
+      - 'governance/census/SYSTEM-MASTER-FOUNDATION-CLOSURE-CENSUS-001.json'
+      - 'governance/contracts/P00-FOUNDATION-CONTRACT-001.md'
+      - '.github/scripts/p00-authority-pointer-foundation-qualify.js'
+      - '.github/workflows/p00-authority-pointer-foundation-qualification.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'governance/CURRENT-AUTHORITY.json'
+      - 'governance/SYSTEM-TOPOLOGY-007.json'
+      - 'governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006.json'
+      - 'governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json'
+      - 'governance/WORK-OBLIGATION-REGISTRY-*.json'
+      - 'governance/census/SYSTEM-MASTER-FOUNDATION-CLOSURE-CENSUS-001.json'
+      - 'governance/contracts/P00-FOUNDATION-CONTRACT-001.md'
+      - '.github/scripts/p00-authority-pointer-foundation-qualify.js'
+      - '.github/workflows/p00-authority-pointer-foundation-qualification.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: p00-authority-pointer-foundation-${{ github.event.pull_request.number || github.ref || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  qualify:
+    name: p00-current-authority-qualification
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout exact qualification subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Validate current governance graph
+        shell: bash
+        run: node .github/scripts/validate-governance.js
+
+      - name: Render current authority brief
+        shell: bash
+        run: node .github/scripts/system-brief.js
+
+      - name: Qualify P00 exact current authority pointer
+        shell: bash
+        env:
+          P00_SUBJECT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: node .github/scripts/p00-authority-pointer-foundation-qualify.js
+
+      - name: Inspect machine-readable P00 evidence
+        shell: bash
+        run: cat qualification-output/p00-foundation-1.0.json
+
+      - name: Preserve P00 qualification evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p00-foundation-1.0-evidence-current
+          path: qualification-output/p00-foundation-1.0.json
+          if-no-files-found: error
+          retention-days: 30
