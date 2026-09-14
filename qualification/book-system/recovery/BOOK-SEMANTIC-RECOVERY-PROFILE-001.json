@@ -1,0 +1,124 @@
+{
+  "profile_id": "BOOK-SEMANTIC-RECOVERY-PROFILE-001",
+  "objective_id": "BOOK-ENG-009-SEMANTIC-RECOVERY-PROFILE-001",
+  "effective_date": "2026-09-14",
+  "standing": "BOOK_SEMANTIC_RECOVERY_ACCEPTANCE_PROFILE_IMPLEMENTED__CORE_P03_PROVIDER_REGISTRATION_OPEN",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "component_id": "BOOK-COMP-12",
+  "authority_id": "CURRENT-AUTHORITY-005",
+  "lifecycle_contract": "qualification/book-system/lifecycle/BOOK-LIFECYCLE-STATE-MACHINE-001.json",
+  "lifecycle_phase": "PRESERVATION",
+  "completion_gate": "PRESERVATION_COMPLETE",
+  "system_interface_blueprint": "governance/architecture/SYSTEM-MASTER-SYSTEM-INTERFACE-BLUEPRINT-001.json",
+  "capability_crosswalk": "governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json",
+  "purpose": "Define and execute Book-owned semantic backup-set, restore-acceptance, offline-continuity and crash-recovery semantics while delegating generic physical persistence, backup and restore mechanics to CORE.",
+  "ownership_boundary": {
+    "book_owns": [
+      "semantic backup-set membership and exact identities",
+      "dependency-closure and currentness rules",
+      "Book-side durability request construction and provider receipt admission",
+      "restore semantic acceptance and stale/current classification",
+      "PRESERVATION/G19 completion-gate truth",
+      "completion reporting and re-entry instructions"
+    ],
+    "core_owns": [
+      "physical persistence mechanics",
+      "physical backup/archive mechanics",
+      "physical checksum/integrity mechanics",
+      "destructive restore execution mechanics",
+      "physical restored-byte reproduction mechanics"
+    ],
+    "forbidden": [
+      "BOOK implementing a second physical backup/store/restore platform",
+      "BOOK directly reading or writing CORE-private storage/database state",
+      "CORE rewriting Book semantic state",
+      "restored historical bytes silently replacing a newer canonical Book subject",
+      "unregistered cross-peer CORE operation dispatch",
+      "active PROSE provider, consumer, dependency or execution lane"
+    ]
+  },
+  "semantic_backup_set": {
+    "subject_fields": ["canonical_state_ref","canonical_version","canonical_digest","manuscript_ref","manuscript_digest"],
+    "required_dependency_classes": ["GOVERNING_BRIEF","BOOK_PLAN","LIFECYCLE_STATE","EVIDENCE_MANIFEST"],
+    "conditional_dependency_classes": {
+      "requires_knowledge_canon": ["STORY_BIBLE_OR_CANON"],
+      "requires_research": ["RESEARCH_PROVENANCE"],
+      "has_publication_artifacts": ["PUBLICATION_ARTIFACT_MANIFEST"],
+      "has_release": ["RELEASE_MANIFEST"],
+      "has_external_receipts": ["EXTERNAL_RECEIPT"],
+      "has_active_workflow": ["WORKFLOW_CHECKPOINT"]
+    },
+    "allowed_dependency_classes": [
+      "GOVERNING_BRIEF","BOOK_PLAN","LIFECYCLE_STATE","EVIDENCE_MANIFEST","STORY_BIBLE_OR_CANON",
+      "KNOWLEDGE_MODEL","RESEARCH_PROVENANCE","WORKFLOW_CHECKPOINT","WORKFLOW_EVIDENCE",
+      "PUBLICATION_ARTIFACT_MANIFEST","RELEASE_MANIFEST","EXTERNAL_RECEIPT","OTHER_BOOK_SEMANTIC_DEPENDENCY"
+    ],
+    "dependency_identity_rule": "Every dependency has one stable dependency_id, exact ref, SHA-256 digest, owner_path and currentness classification. Duplicate ids or refs fail closed.",
+    "rebuild_rule": "Rebuild recipes and index-version identities are semantic recovery metadata. Each category must be PRESENT with exact version/digest entries or explicitly NOT_APPLICABLE; silent omission is forbidden.",
+    "physical_payload_rule": "The Book semantic manifest contains references/digests only and never stores physical payload bytes."
+  },
+  "scope_flags": ["requires_knowledge_canon","requires_research","has_publication_artifacts","has_release","has_external_receipts","has_active_workflow"],
+  "retention_classes": ["STANDARD","LONG_TERM","RELEASE_PERMANENT"],
+  "offline_continuity_requirements": ["NONE","READ_ONLY_CONTINUITY","FULL_LOCAL_SEMANTIC_CONTINUITY"],
+  "core_p03_dependency": {
+    "provider_system": "CORE",
+    "provider_owner_path": "SYSTEM_MASTER/CORE",
+    "provider_domain": "P03",
+    "provider_requirement": "Evidence store and retention",
+    "required_interface_kind": "COMMAND",
+    "required_semantic_roles": ["PRESERVE_PHYSICAL_SET","RESTORE_PHYSICAL_SET"],
+    "registration_state": "REQUIRED_PROVIDER_REGISTRATION_OPEN",
+    "dispatch_rule": "A runtime registration supplied by CORE must be REGISTERED_ACTIVE, owned by SYSTEM_MASTER/CORE, use an operation_id shaped CORE.P03.COMMAND.<OPERATION_NAME>, deny Book canonical-write authority, and match the requested semantic role. Absent registration fails CORE_DURABILITY_INTERFACE_UNAVAILABLE.",
+    "no_operation_id_invented_by_book": true
+  },
+  "restore_acceptance_invariants": [
+    "The restored semantic-manifest digest must equal the requested exact manifest digest.",
+    "The restored canonical and manuscript digests must equal the preserved subject digests.",
+    "Every preserved dependency digest must be reproduced exactly.",
+    "The physical manifest digest must bind to the admitted CORE durability receipt.",
+    "The restore must be evidenced as destructive/test-environment restore execution rather than an untested copy claim.",
+    "The reproduced final-expression digest must equal the preserved manuscript digest.",
+    "If current canonical Book state advanced after preservation, restore may be accepted as a verified historical snapshot but may not satisfy the current PRESERVATION gate or overwrite current state.",
+    "Only exact-current restore proof may satisfy G19/PRESERVATION_COMPLETE."
+  ],
+  "offline_continuity": {
+    "allowed_local_operations": ["ASSEMBLE_SEMANTIC_BACKUP_SET","VERIFY_DEPENDENCY_CLOSURE","VERIFY_RESTORE","GENERATE_COMPLETION_REPORT","CALCULATE_REENTRY"],
+    "peer_required_operations": ["REQUEST_CORE_DURABILITY","REQUEST_CORE_RESTORE"],
+    "rule": "Offline peer-required operations block rather than fabricate a provider result. Local semantic verification may continue only from already-present exact evidence."
+  },
+  "crash_recovery": {
+    "exact_subject_required": true,
+    "checkpoint_required": true,
+    "existing_receipt_reconciliation_before_retry": true,
+    "duplicate_physical_side_effects_forbidden": true,
+    "idempotency_key_bound_to": ["provider operation_id","semantic_manifest_digest","canonical_digest","retention_class"],
+    "rule": "If an exact matching CORE receipt already exists, reconcile it instead of issuing a duplicate provider command. If canonical state advanced, stop retry and re-plan preservation for the new subject."
+  },
+  "p19_binding": {
+    "P19-01": "PEER_DEPENDENCY__CORE_PHYSICAL_BACKUP_SET",
+    "P19-02": "BOOK_SEMANTIC_REBUILD_RECIPE_AND_INDEX_IDENTITY_CAPTURE",
+    "P19-03": "PEER_DEPENDENCY__CORE_PHYSICAL_ARCHIVE_MANIFEST_CHECKSUMS",
+    "P19-04": "PEER_DEPENDENCY__CORE_DESTRUCTIVE_RESTORE_EXECUTION",
+    "P19-05": "PEER_DEPENDENCY__CORE_PHYSICAL_DIGEST_AND_FINAL_EXPRESSION_REPRODUCTION",
+    "P19-06": "BOOK_SEMANTIC_EDITION_RELEASE_LINEAGE_SNAPSHOT__CANONICAL_FREEZE_REMAINS_COMP_02",
+    "P19-07": "BOOK_COMPLETION_REPORT_AND_REENTRY_INSTRUCTIONS",
+    "P19-08": "BOOK_G19_RESTORATION_PROOF_ACCEPTANCE_GATE"
+  },
+  "acceptance_outputs": [
+    "semantic_backup_manifest",
+    "dependency_closure_result",
+    "core_durability_request_or_exact_blocker",
+    "core_durability_admission",
+    "core_restore_request_or_exact_blocker",
+    "restore_proof",
+    "preservation_gate_result",
+    "preservation_receipt",
+    "completion_report_and_reentry_instructions"
+  ],
+  "non_claims": [
+    "This profile does not claim CORE currently exposes a registered durability or restore operation.",
+    "This profile does not implement physical storage, backup, checksum, archive or restore mechanics inside BOOK.",
+    "This profile does not grant canonical mutation authority outside BOOK-COMP-02.",
+    "This profile does not make Book complete, whole-app qualified, publication-authorized or production-certified."
+  ]
+}
