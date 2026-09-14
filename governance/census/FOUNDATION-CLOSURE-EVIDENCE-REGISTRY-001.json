@@ -1,13 +1,48 @@
 {
   "registry_id": "FOUNDATION-CLOSURE-EVIDENCE-REGISTRY-001",
   "authority_id": "CURRENT-AUTHORITY-005",
-  "effective_date": "2026-09-13",
+  "effective_date": "2026-09-14",
   "crosswalk": "governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json",
   "allocation": "governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006.json",
   "topology": "governance/SYSTEM-TOPOLOGY-007.json",
-  "purpose": "Admission registry for Foundation census completion evidence. Absence of a receipt means implementation may exist but COMPLETE_WITH_EVIDENCE is not proven.",
-  "verification": "Every PASS entry is bound to current authority/topology, an exact qualification head SHA, exact repository subject Git blob SHAs, and immutable GitHub Actions run/artifact identity. The evidence verifier proves both historical subject blobs at subject_sha and current blobs before classification. Any current subject drift invalidates the receipt until the current subject is requalified.",
+  "purpose": "Admission registry for current Foundation census completion evidence. Absence of a current receipt means implementation may exist but COMPLETE_WITH_EVIDENCE is not proven.",
+  "verification": "Every current PASS entry is bound to current authority/topology, an exact qualification head SHA, exact repository subject Git blob SHAs, and immutable GitHub Actions run/artifact identity. The evidence verifier proves both historical subject blobs at subject_sha and current blobs before classification. Any current subject drift removes the receipt from current admission until the changed subject is freshly qualified.",
+  "historical_entries_note": "Historical receipt objects below are preserved byte-for-byte at the object-field level from the prior current registry. They are provenance only and are not current PASS admissions. Moving a stale receipt to historical_entries does not relabel, broaden, or transfer its evidence.",
   "entries": [
+    {
+      "requirement_or_capability_id": "P00",
+      "owner_path": "SYSTEM_MASTER/CORE",
+      "authority_id": "CURRENT-AUTHORITY-005",
+      "status": "PASS",
+      "subject_sha": "df2653e270029fc5534c1945af29164b9b3c1f39",
+      "subjects": [
+        {"path":"governance/CURRENT-AUTHORITY.json","git_blob_sha":"8263748af54d2b295db73cb24fa1dd2ba7797c88"},
+        {"path":"governance/contracts/P00-FOUNDATION-CONTRACT-001.md","git_blob_sha":"df95b6cd76bd996f7e31ca4f0c0f67250cf39e3f"},
+        {"path":"governance/SYSTEM-TOPOLOGY-007.json","git_blob_sha":"7ab634e41cdce2e288cef9f74930f93a7ef54e82"},
+        {"path":"governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006.json","git_blob_sha":"401a9748c18bdfe30361f40553788dcf497fa1c4"},
+        {"path":"governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json","git_blob_sha":"8448d6b8c95264f129a2dbeda1945fbb62bbc6eb"},
+        {"path":"governance/WORK-OBLIGATION-REGISTRY-014.json","git_blob_sha":"1a2f588df6d8a2defa8bcdd77fadb0bad5321895"},
+        {"path":"governance/census/SYSTEM-MASTER-FOUNDATION-CLOSURE-CENSUS-001.json","git_blob_sha":"4f0f21955300ab1c210958561fcba673cd956ae3"},
+        {"path":".github/scripts/p00-authority-pointer-foundation-qualify.js","git_blob_sha":"1e91d5bf2fc1227ccc0550b4e8f853afaa6a633d"},
+        {"path":".github/workflows/p00-authority-pointer-foundation-qualification.yml","git_blob_sha":"dca98514140ab86ef4c6fd5bc6115421f688b94f"}
+      ],
+      "qualification": {
+        "workflow_run_id": 34850400795,
+        "workflow_name": "P00 Authority Pointer Foundation Qualification",
+        "artifact_id": 10351205260,
+        "artifact_name": "p00-foundation-1.0-evidence-current",
+        "artifact_digest": "sha256:8cd7384b6d113bead21b7c869fe0373f8e5b61a38ee0bfee093cbe9ffae45f74",
+        "head_sha": "df2653e270029fc5534c1945af29164b9b3c1f39",
+        "conclusion": "success"
+      },
+      "evidence_refs": [
+        "governance/census/evidence/P00-FOUNDATION-EVIDENCE-002.json",
+        "https://github.com/BFochtman746/system-master/actions/runs/34850400795",
+        "https://api.github.com/repos/BFochtman746/system-master/actions/artifacts/10351205260"
+      ]
+    }
+  ],
+  "historical_entries": [
     {
       "requirement_or_capability_id": "P00", "owner_path": "SYSTEM_MASTER/CORE", "authority_id": "CURRENT-AUTHORITY-005", "status": "PASS", "subject_sha": "56f646cd36334e6a92411ee9dc0c6df7455a8f3d",
       "subjects": [{"path":"governance/CURRENT-AUTHORITY.json","git_blob_sha":"dabee965ae81d6bb3a1bc7477e1a793e6f17e3e1"},{"path":"governance/contracts/P00-FOUNDATION-CONTRACT-001.md","git_blob_sha":"0e178fcc3ce0f87ddf1c42c244c7e333e0577b65"},{"path":".github/scripts/validate-governance.js","git_blob_sha":"8443a71b93338bd8291f0a51a5f36576ee566b31"},{"path":".github/scripts/system-brief.js","git_blob_sha":"de35c4a6337349b25eea2bf0adb4f304d92500ff"},{"path":".github/workflows/p00-authority-pointer-foundation-qualification.yml","git_blob_sha":"eac0db4c8ee1da89a0c8bae003346358ad8145e4"}],
