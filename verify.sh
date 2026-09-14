@@ -93,7 +93,19 @@ for s in $(ls .github/scripts | grep qualify | grep -E '\.(js|py)$' | sort); do
   fi
 done
 
-hr; echo "4. FOUNDATION CLOSURE CURRENT-INVENTORY AUTHORITY"; hr
+hr; echo "4. SYSTEM-TO-SYSTEM INTERFACE BLUEPRINT"; hr
+# Every cross-peer operation and database boundary must resolve to one current semantic
+# owner under the authority-selected topology/crosswalk. Shared CORE mechanics never
+# authorize direct cross-peer state writes, dual-writer tables, hidden distributed
+# transactions, query side effects, event-as-command behavior or ownership transfer.
+if out=$(node .github/scripts/system-interface-blueprint-check.js 2>&1); then
+  ok "nine-peer COMMAND/QUERY/API/EVENT/ERROR ownership and database boundaries"
+else
+  bad "system-interface-blueprint current-authority enforcement"
+  sed -n '1,18p' <<< "$out" | sed 's/^/        /'
+fi
+
+hr; echo "5. FOUNDATION CLOSURE CURRENT-INVENTORY AUTHORITY"; hr
 # The current matrix must enumerate exclusively from CURRENT-AUTHORITY's selected
 # capability crosswalk. Historical census/P6 allocation artifacts remain evidence,
 # never inventory authority. The generator also fail-closes if current allocation
@@ -130,7 +142,7 @@ else
   sed -n '1,8p' <<< "$out" | sed 's/^/        /'
 fi
 
-hr; echo "5. ASSURANCE STANDARDS"; hr
+hr; echo "6. ASSURANCE STANDARDS"; hr
 # Resolve the base through the checker's portable default (`origin/main`) instead of
 # requiring a local branch literally named `main`; GitHub PR merge checkouts are detached.
 # The checker emits compact JSON for "no changes" and pretty JSON when files changed.
