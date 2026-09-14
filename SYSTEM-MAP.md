@@ -250,3 +250,43 @@ authority=CURRENT-AUTHORITY-003`. **Left failing deliberately** — the registry
 carry exact subject blob bindings authored under `-005`; relabelling them to `-003` would
 clear the gate by making every receipt a false statement. This is an authority-reconciliation
 decision for the owner (see LESSONS.md L-009), not a code defect.
+
+## Full repository sweep — branch inventory
+
+The complete branch evaluation lives in **`BRANCH-INVENTORY.md`** (human entry
+point) and **`governance/branch-catalog/`** (25 files: per-area TSV shards plus
+INDEX.md). Read those before concluding that anything is missing.
+
+| Fact | Value |
+|---|---:|
+| Remote branches swept | 503 |
+| Fully merged into main (deleted this pass) | 79 |
+| Remaining branches | 424 |
+| Unmerged carrying unique content | 329 |
+| Unmerged partially rescued | 84 |
+| Author-marked garbage (tmp-/noop-/do-not-use) | 8 |
+| Unique file paths existing off main | 3,651 |
+| Paths existing on exactly ONE branch | 837 |
+| Sole-custodian branches (must not delete) | 147 |
+
+**Consolidating a lane's tip does not work and was not used.** Ancestry was
+tested per lane: the learning tip contains 75 of 162 siblings (46%),
+book-system 11 of 29, system-master 2 of 28. The lanes diverge and rejoin, so
+the tip is not a superset and taking it would silently drop content.
+
+Because of that, the unit of organization is the **file**, not the branch. The
+catalog maps every off-main path to the branch holding its newest version, so
+any stranded file is recoverable with a targeted checkout:
+
+```sh
+git checkout origin/<newest_branch> -- <path>
+```
+
+This is the same targeted-path recovery used for the six other-system runtimes,
+the capability crosswalk chain, and the six qualification corpora — never a
+wholesale branch merge.
+
+**Naming caution.** There is no standalone `control-v1` branch. The name always
+carries a lane prefix: `book-system/control-v1`, `documents/control-v1`,
+`learning/control-v1`. A bare `control-v1` reference resolves to nothing and
+will read as data loss when none occurred.
