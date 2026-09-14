@@ -1,0 +1,262 @@
+{
+  "blueprint_id": "SYSTEM-MASTER-SYSTEM-INTERFACE-BLUEPRINT-001",
+  "effective_date": "2026-09-14",
+  "standing": "CANONICAL_CURRENT_AUTHORITY_COMMAND_QUERY_API_EVENT_ERROR_BOUNDARY_CONTRACT",
+  "purpose": "Define one owner-preserving system-to-system contract for every directed relationship among the nine current peer systems so operation semantics, database writes, events and errors cannot acquire duplicate owners.",
+  "authority_binding": {
+    "current_authority": "governance/CURRENT-AUTHORITY.json",
+    "authority_id": "CURRENT-AUTHORITY-005",
+    "topology": "governance/SYSTEM-TOPOLOGY-007.json",
+    "topology_id": "SYSTEM-TOPOLOGY-007",
+    "allocation": "governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006.json",
+    "allocation_id": "SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006",
+    "capability_crosswalk": "governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json",
+    "crosswalk_id": "SYSTEM-MASTER-CAPABILITY-CROSSWALK-003"
+  },
+  "source_of_truth": {
+    "peer_inventory": "CURRENT-AUTHORITY.json -> topology -> peer_system_ids",
+    "capability_ownership": "CURRENT-AUTHORITY.json -> capability_crosswalk -> capability_entries",
+    "ownership_consistency": "CURRENT-AUTHORITY.json -> headless_tool_owner_allocation",
+    "historical_or_peer_specific_interface_contracts": "SUBORDINATE_EVIDENCE_ONLY__MUST_NOT_OVERRIDE_THIS_BLUEPRINT_OR_CURRENT_AUTHORITY"
+  },
+  "peer_systems": [
+    "CORE",
+    "LEARNING",
+    "BOOK",
+    "DOCUMENTS",
+    "SPREADSHEET_DATA",
+    "MEDIA",
+    "CONNECTED_ACTIONS",
+    "RESEARCH_KNOWLEDGE",
+    "PROGRAMMING"
+  ],
+  "interface_kinds": {
+    "COMMAND": {
+      "mutation": true,
+      "owner_rule": "Exactly one provider owns the command meaning and the resulting semantic state transition.",
+      "caller_rule": "A caller may request the transition but never becomes co-owner and never writes the provider's semantic store.",
+      "concurrency_rule": "Mutating commands require provider-defined idempotency and optimistic-version or equivalent conflict protection whenever replay or concurrency is possible.",
+      "database_rule": "Only the provider may commit semantic writes to provider-owned state."
+    },
+    "QUERY": {
+      "mutation": false,
+      "owner_rule": "Exactly one provider owns the queried semantic data and query meaning.",
+      "caller_rule": "Consumers obtain provider data through the query/API contract or an admitted projection, never by reading provider-private tables or schemas.",
+      "side_effect_rule": "A query may emit operational telemetry but may not change domain truth, admit evidence, authorize actions or perform external side effects."
+    },
+    "API": {
+      "mutation": "DERIVED",
+      "owner_rule": "The provider owns the synchronous contract surface.",
+      "semantic_rule": "Every API operation resolves to COMMAND or QUERY semantics; API is transport/interface shape, not a third ownership model.",
+      "database_rule": "An API cannot create shared database ownership or expose a peer-private write surface."
+    },
+    "EVENT": {
+      "mutation": false,
+      "owner_rule": "Exactly one semantic owner publishes each event type after the owner has committed the fact it describes.",
+      "consumer_rule": "Subscribers may update only their own state in reaction. An event is a fact, not authority to mutate publisher state.",
+      "delivery_rule": "Consumers must tolerate at-least-once delivery and deduplicate by stable event identity where delivery can repeat."
+    },
+    "ERROR": {
+      "mutation": false,
+      "owner_rule": "The provider owns typed errors for its operation namespace.",
+      "consumer_rule": "Consumers may map an error for presentation or their own facade, but must retain origin/provider identity and must not reinterpret the error as ownership transfer.",
+      "database_rule": "Errors never authorize compensating writes to another peer's semantic store."
+    }
+  },
+  "operation_identity": {
+    "format": "<PROVIDER>.<DOMAIN>.<KIND>.<OPERATION_NAME>",
+    "domain_rule": "DOMAIN must be a current capability module_key owned by PROVIDER in the selected crosswalk, or a current platform requirement id owned by PROVIDER.",
+    "registration_rule": "Every public cross-peer operation must have one globally unique operation_id before implementation. Two providers may not register aliases for the same semantic operation.",
+    "transfer_rule": "Moving an operation between providers is an architecture change requiring explicit migration; aliases may forward temporarily but may not create dual writers or dual semantic owners.",
+    "unregistered_cross_peer_operation": "FORBIDDEN"
+  },
+  "database_and_state_ownership": {
+    "semantic_store_owner_count": 1,
+    "direct_cross_peer_database_access": false,
+    "cross_peer_foreign_writes": false,
+    "cross_peer_private_schema_reads": false,
+    "physical_persistence_mechanics_owner": "CORE",
+    "physical_persistence_does_not_transfer_semantic_ownership": true,
+    "cross_peer_transaction_rule": "No transaction may directly write semantic state for more than one peer. Each owner commits its own state; multi-peer workflows coordinate through commands, owner-local commits, events, idempotency and compensating/saga behavior.",
+    "projection_rule": "A consumer may keep an owner-local read projection only from admitted QUERY/API/EVENT data with source owner, source version and provenance. The projection never becomes source-of-truth for the provider.",
+    "cache_rule": "A cache is owned by the consuming system, is disposable, and may not become a second canonical writer. Invalidation follows provider version/event contracts.",
+    "backup_restore_rule": "CORE may provide generic physical backup/restore mechanics; the semantic owner defines acceptance/currentness invariants for its records."
+  },
+  "pair_boundary_coverage": {
+    "mode": "COMPLETE_DIRECTED_GRAPH",
+    "peer_count": 9,
+    "expected_directed_boundaries": 72,
+    "formula": "peer_count * (peer_count - 1)",
+    "self_calls": "INTERNAL_TO_OWNER__NOT_SYSTEM_TO_SYSTEM",
+    "default_boundary": {
+      "allowed_interface_kinds": ["COMMAND", "QUERY", "API", "EVENT", "ERROR"],
+      "surface_rule": "Only provider-owned registered operations and event/error namespaces are callable/consumable.",
+      "direct_database_access": false,
+      "semantic_write_rule": "PROVIDER_OWNED_STATE_ONLY",
+      "authority_transfer": false
+    }
+  },
+  "system_profiles": [
+    {
+      "system_id": "CORE",
+      "owner_path": "SYSTEM_MASTER/CORE",
+      "operation_namespace": "CORE.",
+      "error_namespace": "CORE.ERROR.",
+      "semantic_database_namespace": "core.*",
+      "capability_authority": "CURRENT_CROSSWALK",
+      "owns": ["shared runtime mechanics", "generic jobs", "generic artifacts", "evidence storage mechanics", "authorization plumbing", "scheduling mechanics", "shared research infrastructure", "CHAT/EXPECTATION/EXPERIENCE/LOCALAI product semantics assigned by the crosswalk"],
+      "does_not_own": ["peer product semantics merely because CORE hosts transport, storage, transactions, scheduling or orchestration"]
+    },
+    {
+      "system_id": "LEARNING",
+      "owner_path": "SYSTEM_MASTER/LEARNING",
+      "operation_namespace": "LEARNING.",
+      "error_namespace": "LEARNING.ERROR.",
+      "semantic_database_namespace": "learning.*",
+      "capability_authority": "CURRENT_CROSSWALK",
+      "owns": ["learner state", "mastery", "adaptation", "retention", "transfer", "Learning projections", "Learning qualification evidence", "CURRICULUM capability under the frozen internal Curriculum boundary"],
+      "does_not_own": ["Experience presentation", "generic shared jobs/artifacts/evidence storage/authorization/scheduling/research infrastructure", "employment eligibility decisions"]
+    },
+    {
+      "system_id": "BOOK",
+      "owner_path": "SYSTEM_MASTER/BOOK",
+      "operation_namespace": "BOOK.",
+      "error_namespace": "BOOK.ERROR.",
+      "semantic_database_namespace": "book.*",
+      "capability_authority": "CURRENT_CROSSWALK",
+      "owns": ["canonical Book/manuscript state", "Story Bible/canon truth", "Book writing semantics", "Book lifecycle and publication semantics", "remaining integration of preserved completed Prose capability"],
+      "does_not_own": ["generic DOCX/PDF/PPTX/OCR/file mechanics"]
+    },
+    {
+      "system_id": "DOCUMENTS",
+      "owner_path": "SYSTEM_MASTER/DOCUMENTS",
+      "operation_namespace": "DOCUMENTS.",
+      "error_namespace": "DOCUMENTS.ERROR.",
+      "semantic_database_namespace": "documents.*",
+      "capability_authority": "CURRENT_CROSSWALK",
+      "owns": ["generic document generation/transformation", "DOCX/PDF/PPTX mechanics", "OCR", "file mechanics", "image ingest mechanics"],
+      "does_not_own": ["Book manuscript/canon/writing/publication semantics", "retired Prose work"]
+    },
+    {
+      "system_id": "SPREADSHEET_DATA",
+      "owner_path": "SYSTEM_MASTER/SPREADSHEET_DATA",
+      "operation_namespace": "SPREADSHEET_DATA.",
+      "error_namespace": "SPREADSHEET_DATA.ERROR.",
+      "semantic_database_namespace": "spreadsheet_data.*",
+      "capability_authority": "CURRENT_CROSSWALK",
+      "owns": ["spreadsheet semantics", "data-analysis semantics", "math semantics", "ledger semantics"],
+      "does_not_own": ["source peer semantic records merely because it calculates over them"]
+    },
+    {
+      "system_id": "MEDIA",
+      "owner_path": "SYSTEM_MASTER/MEDIA",
+      "operation_namespace": "MEDIA.",
+      "error_namespace": "MEDIA.ERROR.",
+      "semantic_database_namespace": "media.*",
+      "capability_authority": "CURRENT_CROSSWALK",
+      "owns": ["image/photo/audio/video/voice/audiobook/media production semantics"],
+      "does_not_own": ["the caller's Book, Learning, Documents or other peer semantic state merely because media is produced for it"]
+    },
+    {
+      "system_id": "CONNECTED_ACTIONS",
+      "owner_path": "SYSTEM_MASTER/CONNECTED_ACTIONS",
+      "operation_namespace": "CONNECTED_ACTIONS.",
+      "error_namespace": "CONNECTED_ACTIONS.ERROR.",
+      "semantic_database_namespace": "connected_actions.*",
+      "capability_authority": "CURRENT_CROSSWALK",
+      "owns": ["browser action policy", "calendar actions", "communications actions", "plugin/connector action semantics", "external side-effect execution policy"],
+      "does_not_own": ["peer semantic state used to formulate an external action"],
+      "explicit_user_authority_required_for_external_side_effects": true
+    },
+    {
+      "system_id": "RESEARCH_KNOWLEDGE",
+      "owner_path": "SYSTEM_MASTER/RESEARCH_KNOWLEDGE",
+      "operation_namespace": "RESEARCH_KNOWLEDGE.",
+      "error_namespace": "RESEARCH_KNOWLEDGE.ERROR.",
+      "semantic_database_namespace": "research_knowledge.*",
+      "capability_authority": "CURRENT_CROSSWALK",
+      "owns": ["research semantics", "knowledge/provenance semantics", "geospatial retrieval semantics"],
+      "does_not_own": ["generic research execution infrastructure hosted by CORE", "caller state changed after consuming research"]
+    },
+    {
+      "system_id": "PROGRAMMING",
+      "owner_path": "SYSTEM_MASTER/PROGRAMMING",
+      "operation_namespace": "PROGRAMMING.",
+      "error_namespace": "PROGRAMMING.ERROR.",
+      "semantic_database_namespace": "programming.*",
+      "capability_authority": "CURRENT_CROSSWALK",
+      "owns": ["software-engineering semantics", "code", "automation", "Website Building C40"],
+      "does_not_own": ["browser/external side-effect authority", "another peer's canonical state merely because code is generated for it"]
+    }
+  ],
+  "frozen_high_risk_boundaries": {
+    "learning_curriculum_experience_shared": {
+      "peer_owner": "LEARNING",
+      "curriculum_internal_owner": "CURRICULUM",
+      "curriculum_owns": ["program semantics", "instruction semantics", "course semantics"],
+      "learning_internal_owner": "LEARNING",
+      "learning_owns": ["learner state", "mastery", "adaptation", "retention", "transfer", "Learning projections"],
+      "presentation_owner": "CORE/EXPERIENCE",
+      "shared_mechanics_owner": "CORE",
+      "learning_may_create_qualification_evidence": true,
+      "learning_may_decide_employment_eligibility": false,
+      "rule": "This split is frozen and must not be redesigned by interface implementation."
+    },
+    "book_documents": {
+      "semantic_content_owner": "BOOK",
+      "generic_document_mechanics_owner": "DOCUMENTS",
+      "rule": "BOOK may command DOCUMENTS to render/export generic artifacts; DOCUMENTS never becomes owner of manuscript, canon, writing or publication semantics."
+    },
+    "programming_connected_actions": {
+      "software_owner": "PROGRAMMING",
+      "external_action_owner": "CONNECTED_ACTIONS",
+      "rule": "PROGRAMMING Website Building/Automation may request browser or connector actions only through CONNECTED_ACTIONS and cannot inherit or bypass user side-effect authority."
+    },
+    "research_core": {
+      "research_semantics_owner": "RESEARCH_KNOWLEDGE",
+      "generic_research_infrastructure_owner": "CORE",
+      "rule": "CORE may host generic research jobs/storage/transport; RESEARCH_KNOWLEDGE owns research/knowledge/geo result and provenance semantics."
+    },
+    "core_peer_persistence": {
+      "physical_mechanics_owner": "CORE",
+      "semantic_owner": "EACH_PEER_FOR_ITS_OWN_STATE",
+      "rule": "CORE storage/transaction/backup mechanics never grant CORE authority to rewrite peer semantic records."
+    },
+    "prose_retirement": {
+      "active_peer": false,
+      "active_interface_provider": false,
+      "active_interface_consumer": false,
+      "integration_owner_if_genuinely_open": "BOOK",
+      "rule": "PROSE is historical evidence only and may not appear as an active interface endpoint."
+    },
+    "website_building": {
+      "capability_id": "C40",
+      "semantic_owner": "PROGRAMMING",
+      "peer_system": false
+    }
+  },
+  "cross_peer_workflow_rules": {
+    "orchestration": "A coordinator may sequence operations but does not become semantic owner of the participating operations or stores.",
+    "idempotency": "Idempotency keys are interpreted in the provider namespace; replay never creates a second semantic transition.",
+    "concurrency": "Each provider owns version/conflict semantics for its state. Cross-peer optimistic versions are references, not a shared write lock.",
+    "sync": "Synchronous API composition cannot directly commit more than one peer's semantic store.",
+    "events": "Use owner-published facts for asynchronous propagation; consumers deduplicate and commit only consumer-owned state.",
+    "errors": "A downstream provider error remains typed to the provider even when wrapped by an upstream facade.",
+    "cancellation": "Cancellation is a provider command; a caller cannot cancel by editing provider job/state records directly."
+  },
+  "change_control": {
+    "architecture_change_required_for": [
+      "adding or removing a peer system",
+      "transferring a capability or public operation between peer owners",
+      "allowing a second semantic writer",
+      "allowing direct cross-peer database access",
+      "changing COMMAND/QUERY mutation classification",
+      "changing an EVENT publisher",
+      "changing provider ERROR ownership",
+      "turning Website Building into a peer",
+      "reactivating PROSE"
+    ],
+    "compatible_extension": "A new provider-owned operation may be added inside an existing current owner/capability namespace only when it obeys this blueprint and is registered before implementation.",
+    "validation": ".github/scripts/system-interface-blueprint-check.js"
+  }
+}
