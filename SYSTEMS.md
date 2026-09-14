@@ -1,39 +1,46 @@
-# System Master — Canonical Product/System Map
+# System Master — Canonical Systems
 
-`SYSTEM MASTER` is the product root and system-of-systems.
+This document is authority-derived from `governance/CURRENT-AUTHORITY.json` (`CURRENT-AUTHORITY-005`) and `governance/SYSTEM-TOPOLOGY-007.json`. It describes current product ownership; historical branch names, workstreams, capabilities, receipts, and qualification IDs do not create systems.
 
-## Current active hierarchy
+## Product root and nine peers
 
-| Owner path | Role | Canonical control |
+`SYSTEM_MASTER` is the product root / system-of-systems. Its direct active peers are:
+
+| Owner path | Role | Current standing |
 |---|---|---|
-| **SYSTEM_MASTER** | Product-root governance/orchestration. It is not a peer worker system. | `governance/CURRENT-AUTHORITY.json` |
-| **SYSTEM_MASTER/CORE** | Shared Foundation & Spine: authority/data/platform/runtime foundations, continuity/recovery, assurance/reconciliation and shared A-01/control integration. | `system-master/control-v2` |
-| **SYSTEM_MASTER/LEARNING** | Learning System: learning architecture/runtime, mastery/assessment/adaptive sequencing, retention/transfer, curriculum and Learning qualification. | `learning/control-v1` |
-| **SYSTEM_MASTER/BOOK** | Book System: canonical book/manuscript/story-bible state and end-to-end lifecycle, author decisions, version/rollback, editorial lifecycle and publication/export. | `book-system/control-v1` |
-| **SYSTEM_MASTER/DOCUMENTS** | Documents System: document/content artifact semantics and implementation, DOCX/PDF/PPTX/OCR/file/writing capabilities, plus the completed Prose evaluator/craft/diagnostic/revision/preservation capability family as it is absorbed and freshly integrated. | `documents/control-v1` |
+| `SYSTEM_MASTER/CORE` | Shared Foundation & Spine, common runtime/data/platform/assurance/continuity/A-01 infrastructure and admitted shared interfaces | INCOMPLETE |
+| `SYSTEM_MASTER/LEARNING` | Learning architecture/runtime, curriculum, mastery, assessment and adaptive sequencing | INCOMPLETE |
+| `SYSTEM_MASTER/BOOK` | Canonical book/manuscript/Story Bible state, lifecycle, author decisions, versioning, publication and remaining completed-Prose integration | INCOMPLETE |
+| `SYSTEM_MASTER/DOCUMENTS` | DOCX, PDF, PPTX, OCR, file/document artifact mechanics, conversion, preservation, rendering and export | INCOMPLETE |
+| `SYSTEM_MASTER/SPREADSHEET_DATA` | Spreadsheet, math, data-analysis and ledger semantics | INCOMPLETE |
+| `SYSTEM_MASTER/MEDIA` | Audiobook, image, media, photo, video and voice semantics | INCOMPLETE |
+| `SYSTEM_MASTER/CONNECTED_ACTIONS` | Browser, calendar, communications and plugin/action policy; external side effects still require explicit user authority | INCOMPLETE |
+| `SYSTEM_MASTER/RESEARCH_KNOWLEDGE` | Research, knowledge and geospatial retrieval/provenance semantics | INCOMPLETE |
+| `SYSTEM_MASTER/PROGRAMMING` | Software-engineering semantics; Automation, Code and Website Building C40 | INCOMPLETE |
+
+There are exactly **nine** active peer systems. `SYSTEM_MASTER` itself is the product root, not a tenth peer.
+
+## Programming and Website Building
+
+`PROGRAMMING` is an admitted peer under `SYSTEM_MASTER`. Admission preserves the earlier Programming work-program evidence as continuity input; it does not restart or discard completed Programming work.
+
+`WEBSITE_BUILDING` is capability `C40` under `SYSTEM_MASTER/PROGRAMMING`. It is not a peer system. It owns website/web-application construction semantics while consuming admitted interfaces from other owners. Browser/action policy and external side-effect authority remain with `CONNECTED_ACTIONS`.
 
 ## Retired system
 
-**PROSE** is completed and retired. Its historical path was `SYSTEM_MASTER/BOOK/PROSE`; its successor for still-useful capability implementation is **DOCUMENTS**. Historical Prose branches, qualification IDs, exact-SHA receipts, private/blind/author evidence and implementation lineage remain immutable provenance. They do not create a current Prose owner and their PASS does not transfer to changed Documents subjects.
+`PROSE` is historically complete and terminally retired. Its historical path `SYSTEM_MASTER/BOOK/PROSE`, branches, qualification IDs, exact-SHA receipts and evidence remain immutable provenance, but they do not create a current Prose owner or execution lane. Any genuinely unfinished integration of preserved completed Prose capability is ordinary BOOK-owned work; DOCUMENTS receives no Prose work.
 
-BOOK and DOCUMENTS are peers. BOOK retains canonical book/manuscript/lifecycle/author state. DOCUMENTS supplies admitted document/prose capabilities and may not silently mutate BOOK canonical state.
+## Not systems
 
-Historical `MASTER` / `MASTER SYSTEM` foundation-and-spine references map to **CORE**. They do not name a peer product alongside System Master.
+A-01, Assurance, Reconciliation, Continuity, Foundation, Platform, Second Shift, qualification lanes, runners, branches, chats, evidence artifacts, capability IDs and workstream IDs are not additional product systems. `WEBSITE_BUILDING` is specifically a Programming capability, not a system.
 
-## Infrastructure, capabilities and historical identities — not active peer systems
+## Authority pointers
 
-A-01, Assurance, Reconciliation, Continuity, Foundation, Platform, qualification lanes, runners, Night/Second Shift workers, branches, chats and evidence artifacts are not additional product systems. `Book Evaluator`, `Literary Prose Engine`, `LITERARY-PROSE`, and `BOOK-EVAL-LEMONADE-001` are historical capability/workstream/implementation identities whose current owner resolution is DOCUMENTS when new work is actually authorized.
+- Current authority: `governance/CURRENT-AUTHORITY.json` (`CURRENT-AUTHORITY-005`)
+- Topology: `governance/SYSTEM-TOPOLOGY-007.json`
+- Architecture decision: `governance/ADR-0006-PROGRAMMING-PEER-ADMISSION-WEBSITE-BUILDING.md`
+- Completion truth: `governance/SYSTEM-COMPLETION-STATUS-002.json`
+- Current obligations: `governance/WORK-OBLIGATION-REGISTRY-013.json`
+- Capability ownership: `governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json`
 
-The historical 40-module/vault inventory is discovery and reuse evidence, not present topology. Future system candidates may be cataloged without becoming active systems.
-
-## Current authority
-
-Single startup pointer: `governance/CURRENT-AUTHORITY.json`  
-Machine-readable topology: `governance/SYSTEM-TOPOLOGY-003.json`  
-Architecture decision: `governance/ADR-0003-DOCUMENTS-PEER-SYSTEM-AND-PROSE-RETIREMENT.md`  
-Prose retirement: `governance/retirements/PROSE-SYSTEM-RETIREMENT-001.json`  
-Cross-chat bootstrap: `SYSTEM-MASTER-WORKSTREAM-BOOTSTRAP.md`
-
-When records disagree, resolve authority through the startup pointer and live owner control before execution.
-
-A future first-class system or parent relationship cannot be created implicitly by a branch, archive, module name, catalog entry, A-01 qualification, chat or scheduled task. It requires explicit user intent plus a superseding topology/ADR/registry transaction. Cataloging a future system is discovery metadata only.
+A new first-class system or ownership transfer requires explicit authority and a superseding topology transaction; it cannot be created implicitly by naming, cataloging, qualification, branch structure, or chat/task titles.
