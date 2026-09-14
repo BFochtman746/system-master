@@ -42,6 +42,8 @@ jobs:
         with:
           fetch-depth: 1
           persist-credentials: false
+      - name: Validate governance pointer chain and registries
+        run: node .github/scripts/validate-governance.js
       - name: Enforce System Master parent topology and authority registries
         run: node .github/scripts/validate-system-topology.js
       - name: Self-test enforcement logic

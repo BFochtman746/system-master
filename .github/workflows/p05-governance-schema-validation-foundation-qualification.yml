@@ -1,0 +1,165 @@
+name: P05 Governance Schema Validation Foundation Qualification
+
+on:
+  push:
+    paths:
+      - 'governance/CURRENT-AUTHORITY.json'
+      - 'governance/WORK-OBLIGATION-REGISTRY-*.json'
+      - 'governance/SYSTEM-TOPOLOGY-*.json'
+      - 'governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-*.json'
+      - 'governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-*.json'
+      - 'governance/contracts/P05-FOUNDATION-CONTRACT-001.md'
+      - 'governance/schemas/**'
+      - '.github/scripts/validate-governance.js'
+      - '.github/workflows/a01-control-plane-enforcement.yml'
+      - '.github/workflows/p05-governance-schema-validation-foundation-qualification.yml'
+  pull_request:
+    paths:
+      - 'governance/CURRENT-AUTHORITY.json'
+      - 'governance/WORK-OBLIGATION-REGISTRY-*.json'
+      - 'governance/SYSTEM-TOPOLOGY-*.json'
+      - 'governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-*.json'
+      - 'governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-*.json'
+      - 'governance/contracts/P05-FOUNDATION-CONTRACT-001.md'
+      - 'governance/schemas/**'
+      - '.github/scripts/validate-governance.js'
+      - '.github/workflows/a01-control-plane-enforcement.yml'
+      - '.github/workflows/p05-governance-schema-validation-foundation-qualification.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout exact P05 subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Pin Node runtime
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Run positive governance validation
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p qualification-output
+          node .github/scripts/validate-governance.js | tee /tmp/p05-positive.log
+          grep -q 'GOVERNANCE_VALIDATION=PASS' /tmp/p05-positive.log
+      - name: Prove invalid topology fails closed
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp governance/SYSTEM-TOPOLOGY-007.json /tmp/p05-topology.json
+          node - <<'NODE'
+          const fs = require('fs');
+          const p = 'governance/SYSTEM-TOPOLOGY-007.json';
+          const d = JSON.parse(fs.readFileSync(p, 'utf8'));
+          d.canonical_internal_systems[0].completion = 'NOT_A_VALID_COMPLETION';
+          fs.writeFileSync(p, JSON.stringify(d, null, 2) + '\n');
+          NODE
+          if node .github/scripts/validate-governance.js > /tmp/p05-negative-topology.log 2>&1; then
+            cat /tmp/p05-negative-topology.log
+            echo 'P05_NEGATIVE_TOPOLOGY=FAIL expected_nonzero'
+            exit 1
+          fi
+          cat /tmp/p05-negative-topology.log
+          grep -q 'GOVERNANCE_VALIDATION=FAIL' /tmp/p05-negative-topology.log
+          mv /tmp/p05-topology.json governance/SYSTEM-TOPOLOGY-007.json
+          echo 'P05_NEGATIVE_TOPOLOGY=PASS'
+      - name: Prove invalid authority pointer fails closed
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp governance/CURRENT-AUTHORITY.json /tmp/p05-authority.json
+          node - <<'NODE'
+          const fs = require('fs');
+          const p = 'governance/CURRENT-AUTHORITY.json';
+          const d = JSON.parse(fs.readFileSync(p, 'utf8'));
+          d.obligation_registry = 'NOT_A_PATH';
+          fs.writeFileSync(p, JSON.stringify(d, null, 2) + '\n');
+          NODE
+          if node .github/scripts/validate-governance.js > /tmp/p05-negative-pointer.log 2>&1; then
+            cat /tmp/p05-negative-pointer.log
+            echo 'P05_NEGATIVE_POINTER=FAIL expected_nonzero'
+            exit 1
+          fi
+          cat /tmp/p05-negative-pointer.log
+          grep -q 'GOVERNANCE_VALIDATION=FAIL' /tmp/p05-negative-pointer.log
+          mv /tmp/p05-authority.json governance/CURRENT-AUTHORITY.json
+          echo 'P05_NEGATIVE_POINTER=PASS'
+      - name: Prove authoritative CI wiring
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE' | tee /tmp/p05-wiring.log
+          const fs = require('fs');
+          const text = fs.readFileSync('.github/workflows/a01-control-plane-enforcement.yml', 'utf8');
+          if (!text.includes('node .github/scripts/validate-governance.js')) throw new Error('P05_CI_WIRING_ABSENT');
+          console.log('P05_CI_WIRING=PASS');
+          NODE
+      - name: Emit exact-subject P05 evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs = require('fs');
+          const cp = require('child_process');
+          const crypto = require('crypto');
+          const authority = JSON.parse(fs.readFileSync('governance/CURRENT-AUTHORITY.json', 'utf8'));
+          const crosswalk = JSON.parse(fs.readFileSync(authority.capability_crosswalk, 'utf8'));
+          const p05 = crosswalk.platform_requirements.find((row) => row.platform_id === 'P05');
+          if (authority.authority_id !== 'CURRENT-AUTHORITY-005') throw new Error(`AUTHORITY_MISMATCH ${authority.authority_id}`);
+          if (!p05 || p05.owner_path !== 'SYSTEM_MASTER/CORE') throw new Error(`P05_OWNER_MISMATCH ${p05?.owner_path}`);
+          if (p05.implementation !== '.github/scripts/validate-governance.js') throw new Error(`P05_IMPLEMENTATION_MISMATCH ${p05?.implementation}`);
+          const subjects = [
+            'governance/CURRENT-AUTHORITY.json',
+            authority.capability_crosswalk,
+            'governance/contracts/P05-FOUNDATION-CONTRACT-001.md',
+            '.github/scripts/validate-governance.js',
+            'governance/schemas/CURRENT-AUTHORITY-001.schema.json',
+            'governance/schemas/WORK-OBLIGATION-REGISTRY-001.schema.json',
+            'governance/schemas/SYSTEM-TOPOLOGY-001.schema.json',
+            'governance/schemas/TOOL-OWNER-ALLOCATION-001.schema.json',
+            authority.obligation_registry,
+            authority.topology,
+            authority.headless_tool_owner_allocation,
+            '.github/workflows/a01-control-plane-enforcement.yml',
+            '.github/workflows/p05-governance-schema-validation-foundation-qualification.yml'
+          ];
+          const blob = (p) => cp.execFileSync('git', ['rev-parse', `HEAD:${p}`], {encoding:'utf8'}).trim();
+          const sha256 = (p) => crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
+          const evidence = {
+            evidence_schema: '1.0',
+            contract_id: 'P05-FOUNDATION-1.0',
+            requirement_or_capability_id: 'P05',
+            owner_path: 'SYSTEM_MASTER/CORE',
+            authority_id: authority.authority_id,
+            status: 'PASS',
+            source_identity: process.env.GITHUB_SHA,
+            validated_targets: ['authority','obligations','topology','allocation'],
+            negative_cases: ['invalid_topology_completion','invalid_obligation_registry_pointer'],
+            ci_wiring: '.github/workflows/a01-control-plane-enforcement.yml',
+            subjects: subjects.map((p) => ({path:p, git_blob_sha:blob(p)})),
+            logs: {
+              positive_sha256: sha256('/tmp/p05-positive.log'),
+              negative_topology_sha256: sha256('/tmp/p05-negative-topology.log'),
+              negative_pointer_sha256: sha256('/tmp/p05-negative-pointer.log'),
+              ci_wiring_sha256: sha256('/tmp/p05-wiring.log')
+            }
+          };
+          fs.writeFileSync('qualification-output/p05-foundation-1.0.json', JSON.stringify(evidence, null, 2) + '\n');
+          console.log(JSON.stringify(evidence));
+          NODE
+      - name: Preserve machine-readable P05 qualification evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p05-foundation-1.0-evidence
+          path: qualification-output/p05-foundation-1.0.json
+          if-no-files-found: error
+          retention-days: 30
