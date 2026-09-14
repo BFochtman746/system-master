@@ -1,53 +1,69 @@
 # MORNING-CHAT-READINESS-GATE-001
 
-Status: ACTIVE / TOPOLOGY-005 / PROGRAM-JOB-LOCKED
+Status: ACTIVE / CURRENT-AUTHORITY-005 / TOPOLOGY-007 / PROGRAM-JOB-LOCKED
 Purpose: independently verify that new-day chat bootstrap is current, coherent and executable before work begins.
 
 ## Required checks
 
 1. Re-fetch current `main` and `governance/CURRENT-AUTHORITY.json`.
 2. Read selected topology, program job lock, system completion status, current obligation registry and expectation registry.
-3. Require completion truth: SYSTEM_MASTER, CORE, LEARNING, BOOK and DOCUMENTS are active/incomplete; PROSE is complete and terminally retired; PROGRAMMING is an incomplete active non-peer work program.
-4. Read the current morning pointer/manifest when available and treat it as a cache, not live authority.
-5. Require owner packets for MASTER_ROOT, LEARNING, BOOK and DOCUMENTS plus PROGRAMMING_WORK_PROGRAM when Programming work is requested or remains open. Do not require or create a PROSE packet.
-6. Resolve current controls for CORE, LEARNING, BOOK and DOCUMENTS. Do not resolve retired `literary-prose-engine-001` as a live owner control; read it only as historical evidence when needed.
-7. Compare live controls/state to each packet and reconcile machine-resolvable AUTHORITY_DELTA.
-8. Verify every selected objective belongs to that active system or named work program's locked job.
-9. Verify BOOK owns any genuinely unfinished integration of preserved completed Prose capability and retains canonical manuscript/Story Bible/author/lifecycle/admission/publication authority.
-10. Verify DOCUMENTS work is document/artifact implementation and System-Master integration only; any Prose work selector is stale and must be repaired before CHAT_READY.
-11. Verify LEARNING stays inside Learning product/runtime/curriculum/mastery/assessment/evidence and System-Master integration.
-12. Verify CORE stays within shared Foundation/Spine/integration infrastructure and does not take peer product or Programming engineering semantics.
-13. While `SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001` is selected, verify CORE marks Programming proving-corpus recovery as the highest discretionary priority, followed by remaining authorized catalog/archive recovery.
-14. Verify `PROGRAMMING-WORK-PROGRAM-CONTINUATION-001` remains nonterminal while Programming remains open; preserve prior Programming Foundation/capability/build/test/assurance/Genesis evidence and do not restart completed work.
-15. Verify Programming remains a named non-peer work program until explicit topology admission. There must be no Programming peer owner control, repair inbox, peer Second Shift lane or claim domain created merely by startup/reconciliation.
-16. Compare topology `peer_system_ids` with Second Shift registry `owner_files`. Require exact active coverage for CORE, LEARNING, BOOK and DOCUMENTS. Auto-provision a missing already-declared peer only when owner path/control ref/live head/current obligation are machine-unambiguous; never create a new system and never provision a retired system.
-17. Verify PROSE has no standalone lane, inherited child execution, repair lane, qualification lane, research task, telemetry ledger, successor task or mutation claim domain. Any active-Prose metadata is `STALE_ARCHITECTURE_PENDING_RECONCILIATION`.
-18. Verify no overlapping mutation-capable claims exist inside any active peer lane.
-19. Require applicable enforcement workflows to have an executed green result on the relevant current subject, or explicitly classify zero-step GitHub-hosted attempts as infrastructure-only. Zero-step execution is neither semantic PASS nor semantic FAIL.
-20. Verify no packet hides EVIDENCE_MISMATCH, false system completion, cross-lane job drift, Programming scope drift, stale delegation, owner-route mismatch, repair-owner mismatch, retired-system resurrection or authority transfer.
+3. Require completion truth: SYSTEM_MASTER and all nine active peers are incomplete; PROSE is historically complete and terminally retired.
+4. Require the active peer set to be exactly CORE, LEARNING, BOOK, DOCUMENTS, SPREADSHEET_DATA, MEDIA, CONNECTED_ACTIONS, RESEARCH_KNOWLEDGE and PROGRAMMING.
+5. Verify WEBSITE_BUILDING is C40 under PROGRAMMING and is not a peer system, owner lane or independent claim domain.
+6. Read the current morning pointer/manifest when available and treat it as a cache, not live authority. If it was generated under a prior topology, classify it stale for current routing without rewriting the historical manifest.
+7. Require owner packets/roles for MASTER_ROOT and the nine active peers. Do not require or create a PROSE packet.
+8. Resolve current controls for every affected active peer. Do not resolve retired `literary-prose-engine-001` as a live owner control.
+9. Compare live controls/state to each packet and reconcile machine-resolvable AUTHORITY_DELTA.
+10. Verify every selected objective belongs to that peer's locked job.
+11. Verify BOOK owns any genuinely unfinished integration of preserved completed Prose capability and retains canonical manuscript/Story Bible/author/lifecycle/admission/publication authority.
+12. Verify DOCUMENTS owns document/artifact mechanics only and receives no Prose work.
+13. Verify LEARNING stays inside Learning product/runtime/curriculum/mastery/assessment/evidence and upward integration.
+14. Verify SPREADSHEET_DATA stays inside spreadsheet/math/data/ledger semantics.
+15. Verify MEDIA stays inside audiobook/image/media/photo/video/voice semantics.
+16. Verify CONNECTED_ACTIONS owns browser/calendar/comms/plugin action policy and that repository readiness does not grant external side-effect authority.
+17. Verify RESEARCH_KNOWLEDGE stays inside research/knowledge/geo retrieval/provenance semantics.
+18. Verify CORE stays within shared Foundation/Spine/integration infrastructure and does not take another peer's product semantics.
+19. While `SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001` is selected, verify CORE marks Programming source/custody/provenance recovery as the highest discretionary System Master support priority without replacing Programming engineering.
+20. Verify PROGRAMMING is an admitted peer, `PROGRAMMING-WORK-PROGRAM-CONTINUATION-001` remains nonterminal while Programming remains open, preserved Programming evidence is reused, and completed foundation/build/assurance work is not restarted.
+21. Verify PROGRAMMING owns AUTOMATION, CODE and WEBSITE_BUILDING C40 while CONNECTED_ACTIONS retains browser/action side-effect policy and CORE/shared authority retains shared runtime/A-01 infrastructure.
+22. Compare topology `execution_readiness.execution_ready_peer_system_ids` with Second Shift registry `owner_files` and telemetry allowed lanes. Require exact nine-peer coverage. Auto-provision only a missing already-declared peer when machine-resolvable; never create a system and never provision a retired system.
+23. Verify PROSE has no standalone/inherited execution, repair, qualification, research, telemetry, successor or mutation claim domain.
+24. Verify no overlapping mutation-capable claims exist inside any active peer lane.
+25. Require applicable enforcement workflows to have an executed green result on the relevant current subject, or explicitly classify zero-step hosted attempts as infrastructure-only. Zero-step execution is neither semantic PASS nor semantic FAIL.
+26. Verify no packet hides EVIDENCE_MISMATCH, false completion, cross-lane job drift, Programming scope drift, stale delegation, owner-route mismatch, repair-owner mismatch, retired-system resurrection, C40 peer promotion or authority transfer.
 
 ## Active roles and jobs
 
-MASTER_ROOT: integrate CORE, LEARNING, BOOK and DOCUMENTS into System Master without taking their product semantics; govern explicit named work-program admission/integration boundaries without absorbing semantics.
+MASTER_ROOT: integrate all nine active peers into System Master without taking their product semantics.
 
-LEARNING: finish Learning and integrate upward into System Master.
+CORE: shared Foundation/Spine/runtime/platform/continuity/assurance/A-01 and integration infrastructure.
 
-BOOK: finish Book, including only genuinely unfinished Book-owned integration of preserved completed Prose capability, then integrate upward into System Master.
+LEARNING: Learning product/runtime/curriculum/mastery/assessment/evidence and upward integration.
 
-DOCUMENTS: finish Documents and integrate upward into System Master; no Prose work and no Programming engineering ownership.
+BOOK: canonical Book/manuscript/Story Bible/author/lifecycle/admission/publication semantics and only genuinely unfinished BOOK-owned integration of preserved completed Prose capability.
 
-PROGRAMMING_WORK_PROGRAM: continue the existing Programming engineering program from preserved evidence; recover missing exact source/custody evidence; continue the first genuinely unclosed package; prepare explicit System Master integration/admission; do not silently promote to a peer system.
+DOCUMENTS: document/artifact mechanics and upward integration; no Prose work.
 
-PROGRAMMING_KNOWLEDGE_RECOVERY: Core-administered source/custody/provenance support. It is highest discretionary System Master work while control 001 is selected, but it does not replace Programming engineering or non-discretionary safety/control work.
+SPREADSHEET_DATA: spreadsheet/math/data/ledger semantics.
 
-PROSE: complete and terminally retired. It is historical evidence/capability provenance only, not an active role.
+MEDIA: audiobook/image/media/photo/video/voice semantics.
+
+CONNECTED_ACTIONS: browser/calendar/comms/plugin action policy; external side effects remain separately authorized.
+
+RESEARCH_KNOWLEDGE: research/knowledge/geo retrieval and provenance semantics.
+
+PROGRAMMING: preserved software-engineering continuity including AUTOMATION, CODE and WEBSITE_BUILDING C40; do not restart completed work or absorb another peer's authority.
+
+PROGRAMMING_KNOWLEDGE_RECOVERY: CORE-administered source/custody/provenance support only; it does not replace Programming engineering or become a second Programming claim domain.
+
+PROSE: complete and terminally retired; historical evidence/capability provenance only.
 
 ## Repair behavior
 
-If machine-resolvable drift is found, reconcile it and refresh current control metadata before declaring readiness. A false completion claim for an active incomplete system is a readiness defect. A cross-lane selector is a readiness defect. Any active Prose route is stale. Programming product work routed as generic Core work is stale. A Programming peer lane created before explicit admission is stale.
+If machine-resolvable drift is found, reconcile it and refresh current control metadata before declaring readiness. False completion, cross-lane selectors, active Prose routes, denied Programming peer authority, Website Building peer promotion and stale Second Shift coverage are readiness defects.
 
-If BOOK's objective changes, reconcile `BOOK-DELEGATIONS.json`. If Documents changes, reconcile `DOCUMENTS-DELEGATIONS.json`. Learning and Core follow their owner files. Programming work-program changes update its work-program lock/current obligation and startup packet; they do not create a peer delegation before admission.
+Owner/delegation changes remain inside the affected peer lane and must preserve exact live-head binding. Historical exact-SHA evidence is never relabeled to satisfy a new topology.
 
 ## Notification behavior
 
-When all owner roles, work-program roles, completion truth, locked jobs and active execution lanes are coherent, no user intervention is required. If a role is not ready, surface only the affected role, exact blocker, what was repaired automatically, the smallest required action/decision and independent work still safe to execute.
+When all roles, completion truth, locked jobs and execution lanes are coherent, no user intervention is required. If a role is not ready, surface only the affected role, exact blocker, what was repaired automatically, the smallest required action/decision and independent work still safe to execute.
