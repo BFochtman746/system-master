@@ -25,6 +25,13 @@ function sameArray(a, b) {
   return Array.isArray(a) && Array.isArray(b) && a.length === b.length && a.every((v, i) => v === b[i]);
 }
 
+function peerFromOwnerPath(ownerPath) {
+  if (!ownerPath || ownerPath === UNPOPULATED) return null;
+  const parts = String(ownerPath).split('/').filter(Boolean);
+  if (parts[0] !== 'SYSTEM_MASTER' || parts.length !== 2) return null;
+  return parts[1];
+}
+
 function build() {
   const authority = readJson(AUTHORITY_PATH);
   const census = readJson(CENSUS_PATH);
@@ -83,13 +90,15 @@ function build() {
   const open = raw.rows
     .filter((row) => row.current_state === GAP)
     .map((row) => {
-      const ownerValid = ownerRank.has(row.canonical_owner);
+      const ownerPeer = peerFromOwnerPath(row.canonical_owner);
+      const ownerValid = ownerPeer !== null && ownerRank.has(ownerPeer);
       const dependenciesKnown = row.dependencies && row.dependencies !== UNPOPULATED;
       return {
         gap_id: `FOUNDATION-1-0-${row.requirement_or_capability_id}`,
         requirement_or_capability_id: row.requirement_or_capability_id,
         module_key: row.module_key,
-        canonical_owner: row.canonical_owner,
+        canonical_owner_path: row.canonical_owner,
+        canonical_owner_peer: ownerPeer || UNPOPULATED,
         owner_valid_under_topology_007: ownerValid,
         evidence_state: row.current_state,
         evidence_pointer: row.evidence_pointer,
@@ -102,8 +111,8 @@ function build() {
       };
     })
     .sort((a, b) => {
-      const ar = ownerRank.has(a.canonical_owner) ? ownerRank.get(a.canonical_owner) : Number.MAX_SAFE_INTEGER;
-      const br = ownerRank.has(b.canonical_owner) ? ownerRank.get(b.canonical_owner) : Number.MAX_SAFE_INTEGER;
+      const ar = ownerRank.has(a.canonical_owner_peer) ? ownerRank.get(a.canonical_owner_peer) : Number.MAX_SAFE_INTEGER;
+      const br = ownerRank.has(b.canonical_owner_peer) ? ownerRank.get(b.canonical_owner_peer) : Number.MAX_SAFE_INTEGER;
       return ar - br || a.requirement_or_capability_id.localeCompare(b.requirement_or_capability_id);
     });
 
@@ -111,7 +120,7 @@ function build() {
   for (const owner of activeOwners) openByOwner[owner] = [];
   openByOwner.UNASSIGNED_OR_INVALID = [];
   for (const gap of open) {
-    const key = gap.owner_valid_under_topology_007 ? gap.canonical_owner : 'UNASSIGNED_OR_INVALID';
+    const key = gap.owner_valid_under_topology_007 ? gap.canonical_owner_peer : 'UNASSIGNED_OR_INVALID';
     openByOwner[key].push(gap);
   }
 
