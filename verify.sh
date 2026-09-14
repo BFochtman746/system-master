@@ -26,7 +26,24 @@ ok()   { printf '  PASS  %s\n' "$1"; pass=$((pass+1)); }
 bad()  { printf '  FAIL  %s\n' "$1"; fail=$((fail+1)); FAILED+=("$1"); }
 skipd(){ printf '  SKIP  %s\n' "$1"; skip=$((skip+1)); }
 
-hr; echo "0. PURGE STALE LOCAL CACHES"; hr
+hr; echo "0. TOOLCHAIN + PURGE STALE LOCAL CACHES"; hr
+# F-WP-001's authoritative manifest declares the Java release used by the qualifier.
+# Fail once, clearly, instead of cascading the same javac incompatibility through
+# F-WP-001..012 and obscuring the real prerequisite.
+required_java=$(node -p "require('./system-master/f-wp-001/control/SOURCE-SLICE-MANIFEST.json').java_release || 21" 2>/dev/null || printf '21')
+if ! javac_line=$(javac -version 2>&1); then
+  echo "  FAIL  toolchain — javac unavailable; F-WP qualifiers require Java ${required_java}+"
+  echo "RESULT: FAIL"
+  exit 1
+fi
+javac_major=$(sed -E 's/^javac ([0-9]+).*/\1/' <<< "$javac_line")
+if ! [[ "$javac_major" =~ ^[0-9]+$ ]] || (( javac_major < required_java )); then
+  echo "  FAIL  toolchain — F-WP qualifiers require javac ${required_java}+; found: ${javac_line}"
+  echo "RESULT: FAIL"
+  exit 1
+fi
+echo "  toolchain: ${javac_line} (required >= ${required_java})"
+
 # Off CI, RUNNER_TEMP is unset and the qualify scripts fall back to workspace/.tmp,
 # where they cache COMPILED CLASSES. A stale entry there silently poisoned a
 # verification run once already (L-012): the qualifier ran an old class and reported a
@@ -77,7 +94,10 @@ for s in $(ls .github/scripts | grep qualify | grep -E '\.(js|py)$' | sort); do
 done
 
 hr; echo "4. ASSURANCE STANDARDS"; hr
-if out=$(node .github/scripts/assurance-standards-check.js main 2>&1) && [[ "$out" == *'"status":"PASS"'* ]]; then
+# The checker emits compact JSON for "no changes" and pretty JSON when files changed.
+# Accept either serialization; status is semantic, whitespace is not.
+if out=$(node .github/scripts/assurance-standards-check.js main 2>&1) \
+   && grep -qE '"status"[[:space:]]*:[[:space:]]*"PASS"' <<< "$out"; then
   ok "assurance-standards-check"
 else
   bad "assurance-standards-check"; sed -n '1,3p' <<< "$out" | sed 's/^/        /'
