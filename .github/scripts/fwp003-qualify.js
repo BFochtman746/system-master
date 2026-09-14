@@ -4,6 +4,7 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
+const javaSources = require('./lib/java-sources');
 
 const workspace = process.env.GITHUB_WORKSPACE || process.cwd();
 const packageRoot = 'system-master/f-wp-003';
@@ -103,14 +104,12 @@ try {
 
   const classes = path.join(evidenceDir, 'classes');
   fs.mkdirSync(classes, { recursive: true });
-  const sources = [
-    'system-master/f-wp-002/src/main/java/org/systemmaster/core/ChangeRegistry.java',
-    'system-master/f-wp-003/src/main/java/org/systemmaster/core/GovernanceContracts.java',
-    'system-master/f-wp-003/src/main/java/org/systemmaster/core/AuthorityResolver.java',
-    'system-master/f-wp-003/src/main/java/org/systemmaster/core/ImpactAssessmentService.java',
-    'system-master/f-wp-003/src/main/java/org/systemmaster/core/ChangePolicyEngine.java',
-    'system-master/f-wp-003/src/test/java/org/systemmaster/core/Fwp003QualificationTest.java'
-  ].map(p => path.join(workspace, p));
+  // Derived from the seal-verified SOURCE-SLICE-MANIFEST of this package and its
+  // upstream dependency, so the compiled set cannot drift from the sealed set.
+  // Canonical build definition for these sources is the repository-root pom.xml.
+  const sources = javaSources.compileList(workspace, packageRoot, [
+    'system-master/f-wp-002'
+  ]);
   const compileOut = run('javac', ['-encoding', 'UTF-8', '-d', classes, ...sources]);
   write('compile.txt', compileOut || 'javac=PASS');
 
