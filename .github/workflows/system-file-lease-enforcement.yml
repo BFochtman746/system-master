@@ -1,0 +1,75 @@
+name: System File Lease Enforcement
+
+# (e) The gate that keeps the single-writer layer honest.
+#
+# Runs on pull_request because that is where the chokepoint is: once main requires
+# PRs, every mutation passes through here. A push trigger is kept for main so that
+# anything landing by another route is still audited after the fact rather than
+# silently accepted.
+#
+# This workflow exists specifically so the lock cannot fail the way its predecessors
+# did — SYSTEM-PROGRAM-JOB-LOCK-001.json validates JSON against JSON, and
+# chat-recovery-gate.js was imported by nothing but its own test. Both stayed "green"
+# by never being in a position to object.
+
+on:
+  pull_request:
+    paths:
+      - 'governance/CURRENT-AUTHORITY.json'
+      - 'governance/SYSTEM-TOPOLOGY-*.json'
+      - 'governance/SYSTEM-PROGRAM-JOB-LOCK-*.json'
+      - 'governance/SYSTEM-COMPLETION-STATUS-*.json'
+      - 'governance/COMPLETION-LEDGER-*.json'
+      - 'governance/WORK-OBLIGATION-REGISTRY-*.json'
+      - 'governance/second-shift/**'
+      - 'governance/control-gateway/**'
+      - '.github/scripts/system-file-lease-enforce.js'
+      - '.github/workflows/system-file-lease-enforcement.yml'
+      - 'system-master/control-gateway-lock/**'
+  push:
+    branches: [main]
+    paths:
+      - 'governance/CURRENT-AUTHORITY.json'
+      - 'governance/SYSTEM-TOPOLOGY-*.json'
+      - 'governance/SYSTEM-PROGRAM-JOB-LOCK-*.json'
+      - 'governance/SYSTEM-COMPLETION-STATUS-*.json'
+      - 'governance/COMPLETION-LEDGER-*.json'
+      - 'governance/WORK-OBLIGATION-REGISTRY-*.json'
+      - 'governance/second-shift/**'
+      - 'governance/control-gateway/**'
+      - 'system-master/control-gateway-lock/**'
+
+jobs:
+  lease-receipts:
+    name: Governed mutations carry lease receipts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Full history: the audit walks merge-base..HEAD, which a shallow clone cannot resolve.
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Audit lease receipts on governed system files
+        run: node .github/scripts/system-file-lease-enforce.js
+
+  lock-runtime:
+    name: Single-writer runtime qualification
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Compile and qualify the lease registry
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/lockbuild
+          javac -d /tmp/lockbuild \
+            system-master/control-gateway-lock/src/main/java/org/systemmaster/core/SystemFileLeaseRegistry.java \
+            system-master/control-gateway-lock/src/main/java/org/systemmaster/core/SystemFileLeaseRegistryTest.java \
+            system-master/f-wp-007/src/main/java/org/systemmaster/core/ExecutionLeaseManager.java \
+            system-master/f-wp-007/src/main/java/org/systemmaster/core/CoordinationContracts.java
+          java -cp /tmp/lockbuild org.systemmaster.core.SystemFileLeaseRegistryTest

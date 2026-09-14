@@ -44,6 +44,14 @@ Capabilities C35 AIINCOME, C36 CAD, C37 PHONEOPS, C38 PHYSICALAI and C39 PORTFOL
 
 Platform requirements are dependencies, not peer systems. They remain CORE-owned shared infrastructure unless the canonical crosswalk marks an absorbed dependency. P00 is the authority pointer, P01 topology/ownership, P02 obligation registry, P03 evidence retention, P04 content-addressed authority writes, P05 governance validation, P06 control-gateway admission, P07 A-01 barrier, P08 qualification semantics, P09 repair lineage, P10 Second Shift supervisor, P11 night scheduler, P12 GitHub ingress, P13 model routing/local inference (absorbed into C20), P14 connector action runtime (absorbed into C27), and P15 observability/morning receipt/rollback.
 
+## Enforcement subsystem directories
+
+| Directory | Platform requirement | Responsibility |
+|---|---|---|
+| `system-master/control-gateway-lock` | P06 control-gateway admission | Single-writer admission for governed system files. Provides the mutual exclusion that the pre-existing machinery did not: `ExecutionLeaseManager` (F-WP-007) fences a *stale* writer but `acquire()` unconditionally grants a new epoch, so a *second concurrent* writer was never refused. This subsystem adds per-path exclusion on top of it, an expected-revision precondition reusing `ChangeRegistry` (F-WP-002) optimistic-concurrency semantics, and refusal of any session without an admitted recovery contract. The `*-LOCK-*.json` governance records remain ownership decisions, not mutexes. |
+
+Enforced on pull requests by `.github/workflows/system-file-lease-enforcement.yml`, which audits `System-File-Lease` commit-trailer receipts so a lease-less mutation to a governed path stays detectable from git history alone.
+
 ## Completion and execution truth
 
 `SYSTEM_MASTER` and all nine active peers are product-level incomplete. PROSE is historically complete and terminally retired. Repository execution readiness does not grant human, private-data, native-device, credential, production, publication, external-provider, or user-action authority.
