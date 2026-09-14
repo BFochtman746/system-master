@@ -119,6 +119,17 @@ else
   sed -n '1,12p' <<< "$matrix_summary" | sed 's/^/        /'
 fi
 
+# The checked-in human-readable projection is also authoritative operational input.
+# It must not lag the generator after an authority, crosswalk, allocation, contract,
+# or evidence change. Compare semantic row identity/ownership/state rather than a
+# timestamp or prose rendering so formatting changes do not create false failures.
+if out=$(node .github/scripts/foundation-closure-matrix-committed-check.js 2>&1); then
+  ok "foundation-closure-matrix committed projection freshness"
+else
+  bad "foundation-closure-matrix committed projection freshness"
+  sed -n '1,8p' <<< "$out" | sed 's/^/        /'
+fi
+
 hr; echo "5. ASSURANCE STANDARDS"; hr
 # Resolve the base through the checker's portable default (`origin/main`) instead of
 # requiring a local branch literally named `main`; GitHub PR merge checkouts are detached.
