@@ -1,0 +1,157 @@
+{
+  "architecture_id": "BOOK-COMPONENT-ARCHITECTURE-001",
+  "effective_date": "2026-09-14",
+  "standing": "CANONICAL_CURRENT_BOOK_COMPONENT_ARCHITECTURE__ARCHITECTURE_DECISION_ONLY__BOOK_REMAINS_INCOMPLETE",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "current_authority_id": "CURRENT-AUTHORITY-005",
+  "topology_authority": "governance/SYSTEM-TOPOLOGY-007.json",
+  "owner_allocation": "governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006.json",
+  "capability_crosswalk": "governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json",
+  "reconciliation_basis": "qualification/book-system/BOOK-SYSTEM-ARCHITECTURE-RECOVERY-RECONCILIATION-001.json",
+  "design_lock_basis": "qualification/book-system/reconstruction/BOOK-RECONSTRUCTION-B00-E1-FORMAL-DESIGN-LOCK-001.md",
+  "product_scope_basis": "PRODUCT-SCOPE-RESET-001",
+  "decision": "BOOK remains one first-class peer system with one logical canonical Book parent writer. The Book product is composed of bounded Book-owned domain components around that parent aggregate and integrates with shared peer capabilities only through explicit ports. No component may create a second canonical writer, a second shared orchestrator, a Book-owned generic document engine, a Book-owned general research engine, or an active PROSE execution route.",
+  "constitutional_invariants": [
+    "Exactly one logical canonical Book parent writer owns current canonical Book/manuscript state.",
+    "All canonical mutation is typed, exact-current, replay-safe, versioned and receipt-backed; generic PATCH or silent in-place overwrite is forbidden.",
+    "Specialist analysis, model output, research, document conversion, media rendering and external actions return evidence, artifacts or proposals and never self-canonize.",
+    "Author final semantic and creative authority is preserved wherever an author decision is required.",
+    "Story Bible/canon/world-state semantics remain Book-owned even when retrieval, persistence or rendering is delegated.",
+    "The 227-step Book lifecycle remains internal planning/gate intelligence and is projected to a small user-facing stage model rather than exposed as 227 user steps.",
+    "Technical export does not imply publication authorization.",
+    "Historical exact-SHA qualification never transfers to changed current subjects.",
+    "PROSE remains terminally retired as a peer/execution lane; preserved prose capability is integrated inside Book-owned authoring intelligence rather than resurrected as a system."
+  ],
+  "canonical_components": [
+    {
+      "component_id": "BOOK-COMP-01",
+      "name": "PROJECT_AND_GOVERNING_BRIEF",
+      "owns": ["book/project identity", "book type and purpose", "author intent", "audience", "voice goals", "hard constraints", "governing brief versions"],
+      "canonical_write_authority": false,
+      "mutation_path": "BOOK-COMP-02 typed effects only"
+    },
+    {
+      "component_id": "BOOK-COMP-02",
+      "name": "CANONICAL_PARENT_STATE_AND_VERSIONING",
+      "owns": ["canonical parent aggregate", "state version and digest", "active canonical pointers", "typed effect validation", "immutable commit receipts", "version lineage", "rollback/recovery identity"],
+      "canonical_write_authority": true,
+      "rule": "This is the sole logical canonical writer."
+    },
+    {
+      "component_id": "BOOK-COMP-03",
+      "name": "STORY_BIBLE_AND_CANON_KNOWLEDGE",
+      "owns": ["canon manifest", "entities", "relationships", "timeline", "arcs", "motifs/themes", "world rules", "continuity", "open questions", "canon provenance"],
+      "canonical_write_authority": false,
+      "mutation_path": "admitted immutable successor through BOOK-COMP-02"
+    },
+    {
+      "component_id": "BOOK-COMP-04",
+      "name": "BOOK_PLAN_AND_MANUSCRIPT_MODEL",
+      "owns": ["book plan", "part/chapter/scene structure", "purpose/payoff dependencies", "accepted manuscript identity", "manuscript version manifest", "Book/Edition/Version/Artifact semantic relationships"],
+      "canonical_write_authority": false,
+      "mutation_path": "admitted immutable successor through BOOK-COMP-02"
+    },
+    {
+      "component_id": "BOOK-COMP-05",
+      "name": "AUTHORING_LIFECYCLE_GATES_AND_NEXT_STEP",
+      "owns": ["project lifecycle", "unit lifecycle", "readiness", "dependency invalidation", "gate truth", "internal 227-step planning intelligence", "dependency-valid next-step selection"],
+      "canonical_write_authority": false,
+      "rule": "Lifecycle transitions commit only through BOOK-COMP-02; user-facing stages are a projection, not a second lifecycle truth."
+    },
+    {
+      "component_id": "BOOK-COMP-06",
+      "name": "AUTHOR_DECISION_CONTENT_ADMISSION_AND_RIGHTS_GUARDS",
+      "owns": ["author decision queue", "candidate accept/reject/defer", "integration proposal admission", "Book-specific content admission", "rights/custody acceptance state", "protected-language conflicts", "publication-authority prerequisites"],
+      "canonical_write_authority": false,
+      "rule": "Decisions and evidence are admitted through typed parent effects; missing human, rights or external authority fails closed."
+    },
+    {
+      "component_id": "BOOK-COMP-07",
+      "name": "BOOK_INTELLIGENCE_REVISION_AND_EVALUATION",
+      "owns": ["macro narrative orchestration", "meso chapter/scene function", "micro prose craft", "developmental editing", "line/style editing", "copy/proof diagnostics", "voice/style preservation", "bounded revision candidates", "whole-book evaluation", "homogenization defense"],
+      "canonical_write_authority": false,
+      "rule": "Recovered completed prose capability is expressed here as Book-owned capability; findings/candidates require admission and never write canonical state directly."
+    },
+    {
+      "component_id": "BOOK-COMP-08",
+      "name": "BOOK_CONTEXT_AND_RESEARCH_ADMISSION",
+      "owns": ["Book-specific context compilation", "research-evidence links to Book objects", "freshness/conflict state", "claim-to-book-object mapping", "citation applicability", "context budgets and protected constraints"],
+      "canonical_write_authority": false,
+      "rule": "General search/retrieval/provenance stays RESEARCH_KNOWLEDGE; Book owns only Book-specific selection, interpretation and admission."
+    },
+    {
+      "component_id": "BOOK-COMP-09",
+      "name": "EXISTING_BOOK_RECOVERY_AND_SEMANTIC_INGESTION",
+      "owns": ["new/existing Book admission", "source-to-Book semantic reconstruction", "structure/version/knowledge recovery", "loss/conflict ledger", "maturity/gap profile", "author ratification handoff"],
+      "canonical_write_authority": false,
+      "rule": "Generic OCR/PDF/DOCX parsing and conversion are delegated to DOCUMENTS; recovered semantics become canonical only through BOOK-COMP-06 and BOOK-COMP-02."
+    },
+    {
+      "component_id": "BOOK-COMP-10",
+      "name": "BOOK_LONG_JOB_PROFILE_AND_WORKFLOW_COORDINATION",
+      "owns": ["Book job definitions", "Book checkpoints", "Book progress semantics", "Book cancellation/resume intent", "Book dependency graph", "Book workflow evidence requirements"],
+      "canonical_write_authority": false,
+      "rule": "CORE owns the shared scheduler/orchestrator, durable execution machinery, resource admission and A-01; Book supplies Book semantics and bounded jobs only."
+    },
+    {
+      "component_id": "BOOK-COMP-11",
+      "name": "EXPORT_FREEZE_AND_PUBLICATION_PACKAGE",
+      "owns": ["exact manuscript freeze identity", "Book release manifest", "publication-readiness semantics", "format request profile", "release approval state", "publication-authority handoff"],
+      "canonical_write_authority": false,
+      "rule": "DOCUMENTS owns generic DOCX/PDF/EPUB/accessibility/conversion mechanics; MEDIA owns audiobook/media rendering; CONNECTED_ACTIONS owns external publication/transmission side effects."
+    },
+    {
+      "component_id": "BOOK-COMP-12",
+      "name": "BOOK_RECOVERY_BACKUP_RESTORE_OFFLINE_PROFILE",
+      "owns": ["Book semantic backup set definition", "canonical recovery invariants", "restore acceptance", "offline continuity expectations", "crash-recovery Book verification", "Book-level recovery evidence"],
+      "canonical_write_authority": false,
+      "rule": "CORE owns physical persistence, storage, backup/restore mechanics and shared durability. Book defines what constitutes a semantically complete and valid Book recovery."
+    },
+    {
+      "component_id": "BOOK-COMP-13",
+      "name": "BOOK_QUALIFICATION_REGRESSION_AND_HUMAN_EVIDENCE_PROFILE",
+      "owns": ["compact Book invariant regression", "representative end-to-end authoring journeys", "periodic route/model requalification requirements", "targeted human/masterwork evidence gates", "Book-specific acceptance evidence profile"],
+      "canonical_write_authority": false,
+      "rule": "This replaces a permanent standalone world-class comparison program; qualification evidence cannot self-promote canonical state or production standing."
+    }
+  ],
+  "canonical_flow": [
+    "BOOK-COMP-01 establishes immutable identity and versioned governing intent.",
+    "BOOK-COMP-03 and BOOK-COMP-04 maintain Book-owned canon/knowledge/plan/manuscript candidates as immutable versioned objects.",
+    "BOOK-COMP-05 determines legal lifecycle state, readiness, invalidation and next dependency-valid work.",
+    "BOOK-COMP-07, BOOK-COMP-08 and BOOK-COMP-09 produce bounded findings, context, recovery candidates or revision candidates.",
+    "BOOK-COMP-06 preserves author decisions, rights/custody state and admission decisions and prepares typed canonical effects.",
+    "BOOK-COMP-02 alone validates exact-current preconditions and commits a new immutable canonical parent version.",
+    "BOOK-COMP-10 coordinates durable Book work through CORE without creating another orchestrator.",
+    "BOOK-COMP-11 freezes one exact canonical version and requests artifact/media/external services without transferring publication authority.",
+    "BOOK-COMP-12 proves Book semantic recoverability over CORE durability mechanics.",
+    "BOOK-COMP-13 continuously checks representative invariants and journeys without becoming a second product runtime."
+  ],
+  "peer_ports": {
+    "CORE": ["shared execution", "transaction/persistence", "storage and physical backup/restore", "scheduler/orchestrator", "resource management", "assurance/A-01", "shared app/runtime services"],
+    "DOCUMENTS": ["DOCX", "PDF", "EPUB when triggered", "generic accessibility transformation/validation", "OCR", "file/document parsing and conversion", "generic document artifact mechanics"],
+    "RESEARCH_KNOWLEDGE": ["general search", "retrieval", "knowledge operations", "source provenance", "geospatial research when relevant"],
+    "CONNECTED_ACTIONS": ["browser side effects", "external publication/transmission", "email/calendar/plugin actions", "credentialed external actions with explicit user authority"],
+    "MEDIA": ["audiobook rendering", "audio", "voice", "image/video/media generation and assembly"],
+    "LEARNING": ["Book-derived learning handoff where explicitly requested"],
+    "SPREADSHEET_DATA": ["structured analysis, tables and quantitative work requested by Book workflows"],
+    "PROGRAMMING": ["software/build/programming services requested by Book workflows; no Book semantic authority"]
+  },
+  "forbidden_components_or_routes": [
+    "active PROSE peer/component/execution lane",
+    "second canonical Book writer",
+    "Book-owned generic document engine",
+    "Book-owned general web/research engine",
+    "Book-owned generic media engine",
+    "Book-owned shared scheduler/orchestrator",
+    "Book-owned external side-effect authority",
+    "automatic canonical promotion from model/evaluator/provider output",
+    "permanent BOOK-ENG-010 mega-comparison program on the release critical path"
+  ],
+  "user_surface_projection": {
+    "surface": "Books durable experience / Books deck",
+    "shows": ["active project", "current stage", "plan/manuscript progress", "Story Bible/canon health", "research/conflict state", "author decisions", "long jobs", "version history", "release/readiness state"],
+    "rule": "The surface is a projection of canonical Book state and workflow evidence. It does not own canonical state or expose the full internal 227-step lifecycle by default."
+  },
+  "qualification_effect": "NONE_BY_ARCHITECTURE_DECISION. This record freezes component/ownership boundaries only. It does not establish current implementation, native/provider fidelity, human quality, publication authority, production readiness or whole-app qualification."
+}
