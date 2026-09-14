@@ -1,7 +1,7 @@
 # P05 — Foundation Contract 001
 
-**Owner** `SYSTEM_MASTER/CORE` · **Capability** P05 Governance schema validation · **Effective** 2026-09-13
-**Authority** `governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-001.json`
+**Owner** `SYSTEM_MASTER/CORE` · **Capability** P05 Governance schema validation · **Effective** 2026-09-14
+**Authority** `CURRENT-AUTHORITY-005` → `governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json`
 
 ## 1. Contract / interface
 
@@ -13,100 +13,121 @@ Offers: a pass/fail verdict, a per-file error list with JSON pointers, and cross
 warnings. Does not offer: repair, formatting, or any mutation. It is a read-only judge.
 
 Implements the JSON Schema subset the schemas use — `type`, `required`, `properties`,
-`items`, `enum`, `pattern`, `minLength`, `minItems`. Zero dependencies is a contract term,
-not an implementation detail: a governance gate that needs an install step is a gate that
-gets skipped.
+`items`, `enum`, `pattern`, `minLength`, `minItems`. Zero package dependencies is a
+contract term, not an implementation detail: a governance gate that needs an install step
+is a gate that gets skipped.
 
 ## 2. Ingress routes
 
 Two, both pull.
 
-1. **CI** — the `enforce` job of `a01-control-plane-enforcement.yml`, on every push and
-   pull request touching `governance/**`. Admitting authority is the workflow's path
-   filter. This is the authoritative route.
+1. **CI** — the `enforce` job of `.github/workflows/a01-control-plane-enforcement.yml`,
+   on every push and pull request touching the governed path set. Its
+   `Validate governance pointer chain and registries` step invokes the validator before
+   the rest of A-01 enforcement. The workflow path filter is the admitting authority.
 2. **Operator shell** — manual invocation. No admitting authority; advisory only. A local
    pass does not substitute for the CI gate.
 
-No push route. Nothing calls this; it is called.
+No push route. Nothing calls this by external side effect; it is invoked as a read-only
+validation gate.
 
 ## 3. Egress routes
 
 - stdout: human table, or JSON with `--json`.
-- Exit code: 0 valid, 1 validation failure, 2 a required file unreadable.
+- Exit code: 0 valid, 1 validation failure, 2 a required authority file unreadable.
 - No side effects. No files written, no network, no state mutated.
 
-The exit code is the load-bearing output — CI consumes it, humans read the table.
+The exit code is the load-bearing output — CI consumes it, humans read the report.
 
 ## 4. Persistence and canonical writer
 
-None. P05 holds no durable state and has no writer.
+None. P05 holds no durable product state and has no canonical writer.
 
 It reads `governance/CURRENT-AUTHORITY.json`, the three artifacts that file points at, and
-`governance/schemas/*.schema.json`. All read-only. A validator that could write the thing
-it validates could make itself pass, so this section stays empty by design, not by
-omission.
+`governance/schemas/*.schema.json`. All are read-only inputs. A validator that could write
+the thing it validates could make itself pass, so no persistence is a required property,
+not an omission.
+
+Foundation qualification evidence is written only by GitHub Actions as an immutable run
+artifact; that evidence is not governance state and does not grant the validator write
+authority.
 
 ## 5. Dependencies
 
-- **P00** authority pointer — resolves every target. If P00 is malformed, P05 exits 2.
-- **P01** topology and allocation, **P02** obligation registry — the validated subjects.
-- Node 22 runtime. No packages.
+- **P00** authority pointer — resolves every target. If P00 is malformed or unreadable,
+  P05 fails closed.
+- **P01** topology and owner allocation, **P02** obligation registry — validated subjects.
+- The four governance schemas named by `.github/scripts/validate-governance.js`.
+- Node 22 runtime. No packages and no network dependency.
 
-Crosses no boundary rule. CORE-internal.
+Crosses no product-owner boundary; P05 is CORE-internal validation infrastructure.
 
 ## 6. Failure semantics
 
 **Fail-closed throughout.**
 
-- Authority unreadable or absent → exit 2, nothing else attempted. A validator that
-  proceeds without its pointer of record is guessing.
-- A declared pointer names a missing file → recorded as an error, remaining targets still
-  checked, exit 1. One broken pointer must not hide three others.
-- Schema unreadable → error for that target, others continue.
-- Type mismatch → that subtree is not descended into, preventing a cascade of derived
-  errors from one wrong type.
-- Cross-file warnings never fail the build. They report conditions that may be intentional
-  (an obligation owned by a path that owns no modules), and turning a maybe into a hard
-  failure trains people to disable the gate.
+- Authority unreadable or absent → exit 2, nothing else is trusted.
+- A declared pointer names a missing or invalid file → recorded as an error; remaining
+  targets are still checked; final exit is nonzero.
+- Schema unreadable → error for that target; remaining targets continue.
+- Type mismatch → that subtree is not descended into, preventing derivative error noise.
+- Cross-file warnings do not fail the build. They identify potentially intentional owner
+  relationships that schema validation alone cannot adjudicate.
 
-Idempotent and side-effect free: running it N times is identical to running it once.
-Retries are always safe.
+The validator is idempotent and side-effect free: retries are safe. Qualification must
+prove the positive path and at least two negative paths by corrupting only the disposable
+CI checkout, observing rejection, restoring the exact subject, and proving PASS again.
 
 ## 7. Evidence target
 
-CI job log for `Validate governance pointer chain and registries`, retained by the Actions
-artifact policy. The terminal line `GOVERNANCE_VALIDATION=PASS` or `=FAIL errors=N` is the
-evidence record. With `--json`, the full report is machine-readable for archival.
+The authoritative closure evidence is the artifact emitted by
+`.github/workflows/p05-governance-schema-foundation-qualification.yml` on the exact PR
+head. It contains a machine-readable P05 receipt with:
+
+- exact qualification head SHA;
+- exact Git blob SHA for every bound subject;
+- positive validation output;
+- negative topology-enum rejection output;
+- negative authority-pointer rejection output;
+- final restored positive PASS.
+
+The live enforcement step in `a01-control-plane-enforcement.yml` is operational evidence;
+Foundation completion additionally requires the subject-bound P05 qualification artifact
+and its admission into `FOUNDATION-CLOSURE-EVIDENCE-REGISTRY-001.json`.
 
 ## 8. Acceptance target
 
-```
+Operational gate:
+
+```sh
 node .github/scripts/validate-governance.js
 ```
 
-**PASS** when all four targets report PASS and the final line is
+**PASS** requires all four targets to validate and the final line
 `GOVERNANCE_VALIDATION=PASS`. Warnings do not affect PASS.
 
-Negative acceptance, both verified 2026-09-13: an invalid `completion` enum value in the
-topology and a non-path `obligation_registry` pointer each produce exit 1 with a located
-error.
+Foundation closure additionally requires
+`.github/workflows/p05-governance-schema-foundation-qualification.yml` to succeed on the
+exact subject after proving both rejection directions and restoration, followed by a
+current-authority registry entry whose exact subject blobs still match. The disposition
+matrix must then classify `P05` as `COMPLETE_WITH_EVIDENCE`.
 
 ## 9. Authority boundary
 
-**Lane may decide alone (`agent`):** error message wording, table formatting, the order
-targets are checked, adding a test.
+**Lane may decide alone (`agent`):** error message wording, report formatting, validation
+order, and adding tests that do not weaken acceptance.
 
-**Requires the owner (`owner`):** adding or removing a validated target; loosening any
-schema pattern or enum; changing a warning into an error or the reverse; making any
-condition non-fatal.
+**Requires the owner (`owner`):** adding or removing a validated target; loosening a
+schema pattern or enum; changing warning/error severity; making a currently fatal
+condition non-fatal; or changing the evidence-admission rule.
 
-Loosening a schema to make a file pass is always an `owner` decision. That path is how a
-gate becomes decoration.
+Loosening a schema merely to make a subject pass is always an owner decision. Repository
+qualification does not grant native-device, private-data, provider, publication,
+production, credential, or external-side-effect authority.
 
 ## 10. Open gaps
 
-None. All four targets PASS, negative cases verified, wired as a CI job.
-
-Adjacent work, not a gap in P05: the five live cross-file warnings name obligations owned
-by `SYSTEM_MASTER`, `SYSTEM_MASTER/SHARED_INFRASTRUCTURE`, and `.../A01` — paths that own
-no modules. Those are P01/P02 decisions.
+The implementation and contract are complete once the active enforcement workflow
+contains the governance-validation step. Foundation closure remains open until a fresh
+exact-subject P05 qualification PASS is admitted to the Foundation evidence registry and
+the current disposition matrix reports `P05` as `COMPLETE_WITH_EVIDENCE`.
