@@ -8,6 +8,7 @@ on:
       - '.github/scripts/a01-admission-*.js'
       - '.github/scripts/a01-overnight-*.js'
       - '.github/scripts/a01-runner-guard.ps1'
+      - '.github/scripts/validate-governance.js'
       - '.github/scripts/validate-system-topology.js'
       - '.github/scripts/validate-system-control-branch.js'
       - 'qualification/a01/**'
@@ -21,6 +22,7 @@ on:
       - '.github/scripts/a01-admission-*.js'
       - '.github/scripts/a01-overnight-*.js'
       - '.github/scripts/a01-runner-guard.ps1'
+      - '.github/scripts/validate-governance.js'
       - '.github/scripts/validate-system-topology.js'
       - '.github/scripts/validate-system-control-branch.js'
       - 'qualification/a01/**'
@@ -42,6 +44,8 @@ jobs:
         with:
           fetch-depth: 1
           persist-credentials: false
+      - name: Validate governance pointer chain and registries
+        run: node .github/scripts/validate-governance.js
       - name: Enforce System Master parent topology and authority registries
         run: node .github/scripts/validate-system-topology.js
       - name: Self-test enforcement logic
