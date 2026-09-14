@@ -41,7 +41,7 @@ import org.junit.jupiter.api.TestFactory;
 class QualificationBridgeTest {
 
     /** Discovery floor. 24 classes exist today; fewer than this means discovery broke. */
-    private static final int MIN_EXPECTED_CLASSES = 24;
+    private static final int MIN_EXPECTED_CLASSES = 25;
 
     /** Needs two CLI arguments by design, so it gets its own test below. */
     private static final String ARGS_REQUIRED = "org.systemmaster.core.Fwp001QualificationTest";

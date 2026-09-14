@@ -1,0 +1,96 @@
+name: Claim Driver
+
+# The unattended executor. This is the launcher this repository has described in its
+# governance records since the beginning and never actually had: it runs
+# ClaimDriverMain, which drives ClaimLedger.Consumer.tick() inside two ceilings and
+# prints a run summary an operator can read the next morning.
+#
+# NOT A REQUIRED CHECK, AND DELIBERATELY UNREACHABLE FROM A PULL REQUEST.
+# There is no pull_request trigger here, and this workflow must never be bound as a
+# required status check. A required check that cannot report on some pull requests holds
+# them pending forever — that is precisely how the lease-enforcement workflow deadlocked
+# PR #143, with no failing check to point at. A scheduled runner has no business being a
+# merge gate, so the shape is avoided at the source.
+#
+# SCHEDULE. Hourly through the overnight window, skipping 05:00 UTC — that is 01:00
+# America/New_York, which the read-only nightly main verifier owns. Two runners competing
+# for the same repository state in the same minute is a collision worth designing out
+# rather than debugging later. Cron here is UTC and does not follow daylight saving, so
+# the window shifts by an hour in winter; that is acceptable for overnight work.
+
+on:
+  schedule:
+    - cron: '0 3,4,6,7,8,9 * * *'
+  workflow_dispatch:
+    inputs:
+      claim_id:
+        description: 'Optional claim id to queue for this run'
+        required: false
+        type: string
+      payload_digest:
+        description: 'Payload digest for the inline claim'
+        required: false
+        type: string
+      max_iterations:
+        description: 'Iteration ceiling for this run'
+        required: false
+        default: '25'
+        type: string
+      budget_seconds:
+        description: 'Wall-clock ceiling in seconds'
+        required: false
+        default: '300'
+        type: string
+
+# One driver at a time. A second concurrent driver would be refused CLAIM_HELD by the
+# ledger rather than corrupting anything, but queuing is cheaper than relying on that
+# every night — and it keeps a manual dispatch from racing the schedule.
+concurrency:
+  group: claim-driver
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  actions: write # required: the dispatch posts workflow_dispatch to claim-work.yml
+
+jobs:
+  drive:
+    name: claim-driver
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Build
+        run: mvn -q -B compile
+
+      - name: Drive claims
+        env:
+          # GITHUB_TOKEN exists only inside Actions. Outside it, ActionsDispatch refuses
+          # with DISPATCH_NO_CREDENTIAL rather than pretending to dispatch — the claim
+          # fails loudly with that code in its evidence trail.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CLAIM_WORK_WORKFLOW: claim-work.yml
+          CLAIM_WORK_REF: main
+          # Inputs travel through the environment, never interpolated into the shell:
+          # a dispatch input is untrusted text and ${{ }} inside run: is a command
+          # injection seam.
+          IN_CLAIM_ID: ${{ inputs.claim_id }}
+          IN_PAYLOAD_DIGEST: ${{ inputs.payload_digest }}
+          IN_MAX_ITERATIONS: ${{ inputs.max_iterations }}
+          IN_BUDGET_SECONDS: ${{ inputs.budget_seconds }}
+        run: |
+          set -euo pipefail
+          args=(--queue execution/claims/queue
+                --max-iterations "${IN_MAX_ITERATIONS:-25}"
+                --budget-seconds "${IN_BUDGET_SECONDS:-300}")
+          if [ -n "${IN_CLAIM_ID:-}" ]; then
+            args+=(--claim "${IN_CLAIM_ID}=${IN_PAYLOAD_DIGEST:-manual-dispatch}")
+          fi
+          java -cp target/classes org.systemmaster.core.ClaimDriverMain "${args[@]}"
