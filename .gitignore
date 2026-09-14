@@ -4,3 +4,13 @@ __pycache__/
 *.pyc
 .state-reconciler/
 .second-shift-supervisor-v2-stress.json
+
+# Maven build output
+target/
+
+# Local qualifier scratch. These appear only off CI: RUNNER_TEMP is a GitHub Actions
+# variable, so the qualify scripts fall back to workspace/.tmp on a developer machine.
+# They cache COMPILED CLASSES, which means a stale entry can poison a later run with a
+# false result (see L-012). verify.sh purges them before every run; never commit them.
+.tmp/
+qualification-output/
