@@ -155,6 +155,7 @@ class EvidenceManifest:
         return {"ok": True, "entries": count, "head": previous}
 
     def recorded_paths(self) -> dict[str, dict[str, Any]]:
+        """Latest completed artifact state per path. Intent/failure records are audit events."""
         seen: dict[str, dict[str, Any]] = {}
         for entry in self.entries():
             if entry.get("event") in {"INDEXED", "PRUNED"}:
@@ -240,6 +241,11 @@ class EvidenceStore:
         }
 
     def prune(self, now: Optional[dt.datetime] = None, dry_run: bool = False) -> dict[str, Any]:
+        """Record destructive intent first, then delete, then record completion.
+
+        The pre-delete PRUNE_INTENT carries the content digest and size, so even a
+        post-delete manifest-write failure cannot make the deletion untraceable.
+        """
         chain = self.manifest.verify()
         if not chain["ok"]:
             raise ChainError(f"refusing to prune with a broken manifest: {chain['reason']} at entry {chain['broken_at']}")
