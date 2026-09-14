@@ -76,7 +76,7 @@ jobs:
           grep -E "ClassFormatError|Truncated class file|invalid class|bad class" /tmp/p0-corruption-red.log
           echo "PROOF_CORRUPT_CLASS=RED rc=$rc"
 
-      - name: Restore exact PR head and prove green
+      - name: Restore exact PR head and prove green off CI
         shell: bash
         run: |
           set -euo pipefail
@@ -86,7 +86,7 @@ jobs:
           test "$(git rev-parse HEAD)" = "$TARGET_SHA"
           git clean -fdx
           test -z "$(git status --porcelain)"
-          bash ./verify.sh | tee /tmp/p0-pr86-green.log
+          env -u GITHUB_WORKSPACE -u GITHUB_ACTIONS -u GITHUB_SHA -u RUNNER_TEMP -u A01_SUBJECT_SHA bash ./verify.sh | tee /tmp/p0-pr86-green.log
           grep -F "RESULT: PASS" /tmp/p0-pr86-green.log
           grep -E "SUMMARY  pass=[0-9]+  fail=0  skip=[0-9]+" /tmp/p0-pr86-green.log
           echo "PROOF_RESTORED=GREEN"
