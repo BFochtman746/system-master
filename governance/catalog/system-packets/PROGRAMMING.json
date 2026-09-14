@@ -1,29 +1,57 @@
 {
-  "packet_id": "SYSTEM-PACKET-PROGRAMMING-001",
-  "generated_date": "2026-09-11",
+  "packet_id": "SYSTEM-PACKET-PROGRAMMING-002",
+  "generated_date": "2026-09-13",
   "candidate_system_id": "PROGRAMMING",
+  "system_id": "PROGRAMMING",
   "display_name": "Programming / Software Engineering System",
-  "lifecycle": "ACTIVE_WORK_PROGRAM__PLANNED_SYSTEM_CANDIDATE__NOT_ACTIVE_PEER_ARCHITECTURE",
-  "architecture_authority": false,
+  "lifecycle": "ACTIVE_INCOMPLETE_PEER_SYSTEM__ADMITTED_FROM_PRESERVED_WORK_PROGRAM",
+  "architecture_authority": true,
+  "architecture_decision": "governance/ADR-0006-PROGRAMMING-PEER-ADMISSION-WEBSITE-BUILDING.md",
   "work_program_lock": "governance/programs/PROGRAMMING-WORK-PROGRAM-LOCK-001.json",
+  "control_record": "governance/control-records/PROGRAMMING-CONTROL-RECORD-001.json",
   "current_work_program_objective": "PROGRAMMING-WORK-PROGRAM-CONTINUATION-001",
-  "activation_rule": "The Programming engineering work program is active and preserves prior work now. Promotion into SYSTEM-TOPOLOGY as a first-class peer still requires an explicit superseding topology/ADR/control/obligation/repair/Second-Shift admission transaction; work-program activity alone never creates peer authority.",
+  "activation_rule": "PROGRAMMING is now an admitted peer under Topology 007. Preserve and continue prior Programming engineering work; do not restart it. Admission grants owner/lane authority only and does not transfer historical PASS to changed bytes.",
   "historical_anchor": {
     "module_id": "MOD-CODE-001",
     "historical_research_standing": "COMPLETE_RESEARCH",
-    "r64_candidate_files": 14,
-    "orivellum_candidate_files": 350,
     "source_authority_note": "programming-core + source-code-001 0.1.0 PORTABLE",
     "reopen_rule": "Do not restart historical research. Apply current comparative/material-delta research only when a material reopen trigger is evidenced."
   },
-  "work_program_rule": "Resume from the first genuinely unclosed Programming package using preserved foundation/capability/build/test/assurance/Genesis evidence. Do not reduce Programming to Knowledge Recovery, restart completed foundation planning, or let another system absorb Programming-specific engineering semantics.",
+  "continuity_rule": "Resume from the first genuinely unclosed Programming package using preserved foundation/capability/build/test/assurance/Genesis evidence. Knowledge Recovery remains support, not the Programming product definition.",
+  "owned_capabilities": [
+    {"capability_id":"C01","module_key":"AUTOMATION"},
+    {"capability_id":"C05","module_key":"CODE"},
+    {
+      "capability_id":"C40",
+      "module_key":"WEBSITE_BUILDING",
+      "classification":"FIRST_CLASS_PROGRAMMING_CAPABILITY__NOT_PEER_SYSTEM",
+      "foundation_1_0": {
+        "contract_id": "WEBSITE-BUILDING-FOUNDATION-1.0",
+        "status": "QUALIFIED_DETERMINISTIC_STATIC_FOUNDATION",
+        "implementation": "tools/website_builder.py",
+        "qualification_command": "python3 .github/scripts/website-building-foundation-qualify.py",
+        "qualification_corpus": "qualification/website-building/corpus/static-basic"
+      }
+    }
+  ],
+  "capability_domains_observed": [
+    "project model and build semantics",
+    "dependency resolution and toolchain",
+    "build and test execution",
+    "coverage, mutation, static, dynamic and fuzz/property testing",
+    "application security, performance, compatibility and reliability",
+    "diagnosis, root cause and repair",
+    "validation, release, signing, deployment and rollback",
+    "operations, observability, maintenance and EOL",
+    "software architecture/design and engineering planning",
+    "code construction/transformation and semantic intelligence",
+    "website/web-application construction, build, test, deployment preparation and maintenance engineering"
+  ],
   "knowledge_recovery": {
     "control": "governance/knowledge-recovery/SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001.md",
     "ingest_manifest": "governance/catalog/ingest/programming/PROGRAMMING-INGEST-MANIFEST-003.json",
-    "qualification_id": "SYSTEM-MASTER-KNOWLEDGE-RECOVERY-PROGRAMMING-001",
-    "accepted_proving_boundary": "governance/knowledge-recovery/SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001-SUPERVISED-ACCEPTANCE.json",
-    "standing": "MANIFEST_003_DURABLE__FIVE_EXTERNAL_OBJECTS_OBSERVED_NOT_STAGED__FULL_CORPUS_RECOVERY_REMAINS",
-    "second_shift_eligibility": "CORE_SUPPORT_CAPACITY_ONLY__HIGHEST_DISCRETIONARY_WHILE_SELECTED__NO_PROGRAMMING_PEER_LANE"
+    "standing": "CORE_ADMINISTERED_SUPPORT_FOR_PROGRAMMING_PEER",
+    "second_shift_eligibility": "CORE_SUPPORT_CAPACITY_ONLY__PROGRAMMING_PRODUCT_WORK_USES_PROGRAMMING_PEER_LANE"
   },
   "known_reusable_evidence_families": [
     "PROGRAMMING_APP_ATOMIC_CAPABILITY_LEDGER_002Y_*",
@@ -35,90 +63,25 @@
     "CODE-QUAL and related qualification/evidence lineage",
     "Programming vault / Genesis integration backups and hash sidecars where exact identity can be verified"
   ],
-  "capability_domains_observed": [
-    "project model and build semantics",
-    "dependency resolution and toolchain",
-    "build execution",
-    "test execution and result integrity",
-    "test coverage adequacy",
-    "mutation testing / test effectiveness",
-    "static analysis / code quality",
-    "dynamic analysis",
-    "fuzzing / property-based testing",
-    "application security",
-    "performance / scalability",
-    "compatibility / portability",
-    "reliability / resilience",
-    "diagnosis / root cause / repair",
-    "validation / acceptance",
-    "release / signing / promotion",
-    "deployment / transition / rollback",
-    "operations / observability",
-    "maintenance / evolution / EOL",
-    "documentation / knowledge / technical communication",
-    "crosscut requirements closure",
-    "UI/UX/accessibility/human interaction",
-    "autonomous engineering loop coordination",
-    "code semantic intelligence",
-    "software architecture/design",
-    "engineering planning",
-    "code construction/transformation",
-    "secure design/threat modeling",
-    "assurance-profile/qualification-gate selection"
-  ],
-  "known_library_source_ids": [
-    "LIB-PROGRAMMING-BUILD-EXECUTION-LEDGER-001",
-    "LIB-PROGRAMMING-UIUX-DESIGN-001",
-    "LIB-PROGRAMMING-CROSSCUT-R5U-001",
-    "LIB-PROGRAMMING-CROSSCUT-R5N-001",
-    "LIB-PROGRAMMING-STATIC-WAVE-EVIDENCE-001",
-    "LIB-PROGRAMMING-R5AJ-BASELINE-001",
-    "LIB-PROGRAMMING-AUD038-001",
-    "LIB-PROGRAMMING-R4-LEDGER-001",
-    "LIB-PROGRAMMING-R5W-002K-001",
-    "LIB-PROGRAMMING-R5Y-002M-001",
-    "LIB-PROGRAMMING-R5AJ-002X-001",
-    "LIB-PROGRAMMING-R5AN-001T-001",
-    "LIB-PROGRAMMING-R5AM-001S-001",
-    "LIB-PROGRAMMING-R5AF-002T-001",
-    "LIB-PROGRAMMING-R5AE-002S-001",
-    "LIB-PROGRAMMING-REPAIR002-001",
-    "LIB-PROGRAMMING-002R-001",
-    "LIB-PROGRAMMING-002V-001",
-    "LIB-PROGRAMMING-002W-001",
-    "LIB-PROGRAMMING-MASTER-DEPENDENCY-GRAPH-001",
-    "LIB-PROGRAMMING-AUTHORITY-MANIFEST-V18-001",
-    "LIB-PROGRAMMING-FOUNDATION-COVERAGE-001",
-    "LIB-PROGRAMMING-MASTER-DECOMPOSITION-001",
-    "LIB-PROGRAMMING-GENESIS-BACKUP-SHA-001",
-    "LIB-PROGRAMMING-DETERMINISM-001"
-  ],
-  "adjacent_historical_modules": ["LOCALAI", "AUTOMATION", "PLUGINS", "DATA", "CHAT", "EXPERIENCE"],
-  "boundary_questions_before_peer_activation": [
-    "Which Programming capabilities are semantic owner responsibilities versus shared CORE execution/model/artifact/runtime infrastructure?",
-    "Should Local AI / model runtime remain CORE/shared runtime, become a Programming capability after admission, or remain a separately admitted future system?",
-    "Which Automation/Plugins/Data capabilities are consumed interfaces rather than Programming-owned semantics?",
-    "What exact artifacts/ledgers represent the latest Programming authority versus historical derived views?"
+  "boundary_rules": [
+    "CORE owns shared runtime/storage/model/A-01 infrastructure; PROGRAMMING owns engineering semantics.",
+    "CONNECTED_ACTIONS owns browser/action policy; WEBSITE_BUILDING consumes it without side-effect authority transfer.",
+    "WEBSITE_BUILDING is C40 within PROGRAMMING and is not a separate peer system.",
+    "Website Building Foundation 1.0 proves deterministic local static build/verify/qualification only; production credentials/publication/provider authority remain separate explicit gates."
   ],
   "current_continuation_sequence": [
-    "Resolve CURRENT-AUTHORITY, the Programming work-program lock and this packet.",
-    "Recover the latest Programming dependency/coverage/authority ledgers and exact evidence; do not replay completed PROGRAMMING-FOUNDATION work.",
-    "Use current Manifest 003 and accepted Knowledge Recovery outputs to close only missing exact-byte/source-custody gaps; do not substitute custody work for engineering work.",
-    "Classify reusable assets as REUSE_AS_IS, REUSE_WITH_REQUALIFICATION, REFERENCE_ONLY, MIGRATION_INPUT, DELTA_RESEARCH_REQUIRED, SUPERSEDED_HISTORY, DUPLICATE, QUARANTINE_CONFLICT, IDENTITY_UNPROVEN or OWNER_DECISION_REQUIRED.",
-    "Apply current comparative/material delta only where historical closure has a real reopen trigger.",
-    "Select and execute the first genuinely unclosed Programming foundation/build/test/assurance package that does not require unavailable higher authority.",
-    "Maintain an explicit CORE/shared-infrastructure boundary; service consumption never transfers Programming semantics to Core.",
-    "Prepare the Programming-to-System-Master interface and peer-admission proposal when the engineering/evidence boundary is sufficiently defined.",
-    "Only after explicit topology admission create a Programming peer control/delegation/repair/Second-Shift owner lane."
+    "Resolve CURRENT-AUTHORITY, Programming control/continuity lock and this packet.",
+    "Recover exact current Programming authority/evidence and continue the first genuinely unclosed package.",
+    "Do not replay completed Programming foundation work merely because peer admission occurred.",
+    "Use Knowledge Recovery only for missing source/custody/provenance gaps.",
+    "Maintain explicit CORE and peer-system boundaries.",
+    "Use Website Building Foundation 1.0 as the admitted deterministic static substrate; admit framework/browser/deployment providers separately when authority and evidence exist."
   ],
   "current_known_gaps": [
-    "Full exact-byte census of all Programming Library/archive artifacts is not complete: Manifest 003 records 21 external objects not yet observed and 2 historical identity-unproven records.",
-    "Five exact external objects are observed and hashed but remain unstaged because the approved immutable A-01-readable binary transport boundary is unresolved.",
-    "Some historical R64/Orivellum candidate families still require exact locator/byte recovery.",
-    "Some historical archive/backups may have conflicting or absent digest authority and remain quarantined/identity-unproven until bytes are verified.",
-    "Current external standards/tooling delta may still be required for material areas not covered by historical research closure.",
-    "The Programming work program does not yet have peer-system control, repair or Second Shift authority under Topology 005."
+    "Full exact-byte census of all Programming Library/archive artifacts remains incomplete.",
+    "Some external objects remain unstaged pending approved immutable transport.",
+    "Current material standards/tooling deltas may remain for areas not covered by historical research closure.",
+    "Website Building framework-specific adapters, browser rendering proof and concrete production provider/credential/publication authority remain unadmitted after Foundation 1.0."
   ],
-  "a01_ingest_status": "MANIFEST_003_DURABLE__FULL_CORPUS_EXACT_BYTE_CUSTODY_AND_CURRENT_SUBJECT_A01_QUALIFICATION_REMAIN",
-  "ready_response_to_user_request": "When the user starts or resumes Programming, load the Programming work-program lock and this packet, preserve all valid prior Programming foundation/build evidence, use Manifest 003 as current custody input, distinguish Knowledge Recovery support from engineering work, reconcile the latest genuine gap, and continue the first unclosed Programming package without crossing another system's job or silently promoting peer topology."
+  "ready_response_to_user_request": "Resume Programming from preserved evidence as an admitted peer, using the qualified Website Building Foundation 1.0 static substrate when applicable, without restarting completed work or crossing another system's authority."
 }

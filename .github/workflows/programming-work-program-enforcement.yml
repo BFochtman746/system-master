@@ -2,7 +2,6 @@ name: Programming Work Program Enforcement
 
 on:
   push:
-    branches: [main]
     paths:
       - 'governance/CURRENT-AUTHORITY.json'
       - 'governance/SYSTEM-TOPOLOGY-*.json'
@@ -11,11 +10,22 @@ on:
       - 'governance/WORK-OBLIGATION-REGISTRY-*.json'
       - 'governance/programs/PROGRAMMING-WORK-PROGRAM-LOCK-*.json'
       - 'governance/catalog/system-packets/PROGRAMMING.json'
+      - 'governance/control-records/PROGRAMMING-CONTROL-RECORD-*.json'
+      - 'governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-*.json'
+      - 'governance/contracts/WEBSITE-BUILDING-FOUNDATION-CONTRACT-*.md'
+      - 'governance/contracts/WEBSITE-BUILDING-FOUNDATION-CONTRACT-001.md'
       - 'governance/morning/CHAT-START-COMMAND-CONTRACT-*.md'
       - 'governance/morning/DAILY-CHAT-BOOTSTRAP-SCHEMA-*.json'
       - 'governance/second-shift/SECOND-SHIFT-REGISTRY-*.json'
+      - 'governance/second-shift/PROGRAMMING-DELEGATIONS.json'
+      - 'tools/website_builder.py'
+      - '.github/scripts/website-building-foundation-qualify.py'
+      - 'tests/test_website_builder.py'
+      - 'qualification/website-building/**'
       - '.github/scripts/programming-work-program-enforce.js'
       - '.github/workflows/programming-work-program-enforcement.yml'
+      - '.github/workflows/website-building-foundation-qualification.yml'
+      - '.github/workflows/second-shift-enforcement.yml'
   pull_request:
     paths:
       - 'governance/CURRENT-AUTHORITY.json'
@@ -25,11 +35,22 @@ on:
       - 'governance/WORK-OBLIGATION-REGISTRY-*.json'
       - 'governance/programs/PROGRAMMING-WORK-PROGRAM-LOCK-*.json'
       - 'governance/catalog/system-packets/PROGRAMMING.json'
+      - 'governance/control-records/PROGRAMMING-CONTROL-RECORD-*.json'
+      - 'governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-*.json'
+      - 'governance/contracts/WEBSITE-BUILDING-FOUNDATION-CONTRACT-*.md'
+      - 'governance/contracts/WEBSITE-BUILDING-FOUNDATION-CONTRACT-001.md'
       - 'governance/morning/CHAT-START-COMMAND-CONTRACT-*.md'
       - 'governance/morning/DAILY-CHAT-BOOTSTRAP-SCHEMA-*.json'
       - 'governance/second-shift/SECOND-SHIFT-REGISTRY-*.json'
+      - 'governance/second-shift/PROGRAMMING-DELEGATIONS.json'
+      - 'tools/website_builder.py'
+      - '.github/scripts/website-building-foundation-qualify.py'
+      - 'tests/test_website_builder.py'
+      - 'qualification/website-building/**'
       - '.github/scripts/programming-work-program-enforce.js'
       - '.github/workflows/programming-work-program-enforcement.yml'
+      - '.github/workflows/website-building-foundation-qualification.yml'
+      - '.github/workflows/second-shift-enforcement.yml'
   workflow_dispatch:
 
 concurrency:
@@ -42,11 +63,10 @@ permissions:
 jobs:
   enforce:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # was actions/checkout@v4
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # was actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Enforce Programming work-program scope
+      - name: Enforce Programming peer continuity and Website Building boundary
         run: node .github/scripts/programming-work-program-enforce.js

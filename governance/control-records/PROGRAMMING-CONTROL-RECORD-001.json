@@ -1,0 +1,66 @@
+{
+  "control_record_id": "PROGRAMMING-CONTROL-RECORD-001",
+  "effective_date": "2026-09-13",
+  "system_id": "PROGRAMMING",
+  "canonical_name": "PROGRAMMING / SOFTWARE ENGINEERING SYSTEM",
+  "owner_path": "SYSTEM_MASTER/PROGRAMMING",
+  "control_ref": "programming/control-v1",
+  "classification": "FIRST_CLASS_TOOL_SYSTEM__ADMITTED_FROM_PRESERVED_WORK_PROGRAM",
+  "completion": "INCOMPLETE",
+  "admission_authority": "governance/ADR-0006-PROGRAMMING-PEER-ADMISSION-WEBSITE-BUILDING.md",
+  "continuity_lock": "governance/programs/PROGRAMMING-WORK-PROGRAM-LOCK-001.json",
+  "system_packet": "governance/catalog/system-packets/PROGRAMMING.json",
+  "owns_modules": ["AUTOMATION", "CODE", "WEBSITE_BUILDING"],
+  "owns": [
+    "software-engineering semantics and lifecycle",
+    "project/build/dependency/toolchain semantics",
+    "code construction, transformation, diagnosis and repair",
+    "software test, quality, security, performance, compatibility and reliability semantics",
+    "release/deployment/operations/maintenance engineering semantics",
+    "website construction, application composition, web build/test/deployment engineering semantics",
+    "Programming-specific qualification and evidence interpretation"
+  ],
+  "consumes": [
+    "CORE shared runtime, storage, model, A-01, evidence and execution infrastructure",
+    "CONNECTED_ACTIONS browser/action interfaces for authorized browser interaction",
+    "MEDIA assets through admitted interfaces",
+    "DOCUMENTS artifact services through admitted interfaces",
+    "RESEARCH_KNOWLEDGE research/provenance services through admitted interfaces"
+  ],
+  "does_not_own": [
+    "CORE shared runtime/platform/A-01 authority",
+    "CONNECTED_ACTIONS user-side-effect policy or browser action authority",
+    "RESEARCH_KNOWLEDGE canonical research/provenance semantics",
+    "MEDIA canonical media semantics",
+    "DOCUMENTS canonical document/artifact semantics",
+    "BOOK canonical manuscript/Story Bible/lifecycle semantics",
+    "LEARNING learner/curriculum/mastery semantics",
+    "SPREADSHEET_DATA spreadsheet/math/data/ledger semantics"
+  ],
+  "website_building_boundary": {
+    "module_key": "WEBSITE_BUILDING",
+    "capability_id": "C40",
+    "classification": "FIRST_CLASS_PROGRAMMING_CAPABILITY__NOT_SEPARATE_PEER_SYSTEM",
+    "rule": "Website Building owns construction and engineering of websites/web applications inside PROGRAMMING. Browser automation and external side-effect authority remain CONNECTED_ACTIONS; production hosting/publication authority must be explicitly granted.",
+    "foundation_1_0": {
+      "contract_id": "WEBSITE-BUILDING-FOUNDATION-1.0",
+      "status": "QUALIFIED_DETERMINISTIC_STATIC_FOUNDATION",
+      "foundation_contract": "governance/contracts/WEBSITE-BUILDING-FOUNDATION-CONTRACT-001.md",
+      "implementation": "tools/website_builder.py",
+      "qualification_command": "python3 .github/scripts/website-building-foundation-qualify.py",
+      "qualification_corpus": "qualification/website-building/corpus/static-basic",
+      "qualification_workflow": ".github/workflows/website-building-foundation-qualification.yml",
+      "build_mode": "DETERMINISTIC_STATIC_PACKAGE",
+      "external_side_effects": false,
+      "network_access": false,
+      "publication_authority": "NOT_GRANTED",
+      "production_deployment_authority": "NOT_GRANTED"
+    }
+  },
+  "second_shift": {
+    "peer_lane": true,
+    "owner_file": "governance/second-shift/PROGRAMMING-DELEGATIONS.json",
+    "one_mutation_claim_max": true
+  },
+  "qualification_boundary": "Admission grants repository owner/lane authority only. Website Building Foundation 1.0 proves deterministic local static build/verify/qualification only; it does not grant production, external-provider, credential, publication, native-device or user-side-effect authority."
+}

@@ -1,0 +1,16 @@
+{
+  "record_id": "CONNECTED-ACTIONS-CONTROL-RECORD-001",
+  "system_id": "CONNECTED_ACTIONS",
+  "canonical_name": "CONNECTED ACTIONS SYSTEM",
+  "owner_path": "SYSTEM_MASTER/CONNECTED_ACTIONS",
+  "control_ref": "connected-actions/control-v1",
+  "standing": "ACTIVE_INCOMPLETE_PEER",
+  "topology": "governance/SYSTEM-TOPOLOGY-006.json",
+  "authority": "governance/CURRENT-AUTHORITY.json",
+  "job": "Own communications, calendar, browsing and plugin module policy over CORE shared connector-action runtime.",
+  "owned_modules": ["BROWSER", "CALENDAR", "COMMS", "PLUGINS"],
+  "shared_dependency_boundary": "CORE owns connector runtime and shared transport; CONNECTED_ACTIONS owns user-action policy and product semantics.",
+  "canonical_writer_boundary": "External side effects require explicit user authority and this owner lane's admitted policy path.",
+  "current_obligation": "HEADLESS-CONNECTED-ACTION-AUTHORITY-CONTRACT-001",
+  "mutation_rule": "Fail closed on stale control identity, missing user authority, cross-lane semantic ownership, or unqualified changed subjects."
+}

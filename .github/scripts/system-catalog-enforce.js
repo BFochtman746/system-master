@@ -1,120 +1,32 @@
 'use strict';
-
-const fs = require('fs');
-const path = require('path');
-
-const root = path.resolve(__dirname, '..', '..');
-function fail(msg) { console.error(`SYSTEM_CATALOG_ENFORCEMENT_FAIL: ${msg}`); process.exit(1); }
-function readJson(rel) {
-  if (!rel) fail('missing required path');
-  const p = path.join(root, rel);
-  if (!fs.existsSync(p)) fail(`missing required file: ${rel}`);
-  try { return JSON.parse(fs.readFileSync(p, 'utf8').replace(/^\uFEFF/, '')); }
-  catch (e) { fail(`invalid JSON ${rel}: ${e.message}`); }
-}
-function requireFile(rel) {
-  if (!rel || !fs.existsSync(path.join(root, rel))) fail(`missing required file: ${rel || '<unset>'}`);
-}
-function sorted(values) { return [...values].sort(); }
-function sameSet(a, b) {
-  const aa = sorted(a || []), bb = sorted(b || []);
-  return aa.length === bb.length && aa.every((v, i) => v === bb[i]);
-}
-
-const authority = readJson('governance/CURRENT-AUTHORITY.json');
-for (const field of [
-  'topology',
-  'expectation_registry',
-  'reallocation_ledger',
-  'system_catalog',
-  'archive_source_registry',
-  'programming_system_packet',
-  'programming_work_program_lock',
-  'prose_retirement_record'
-]) requireFile(authority[field]);
-
-const topology = readJson(authority.topology);
-const catalog = readJson(authority.system_catalog);
-const expectations = readJson(authority.expectation_registry);
-const realloc = readJson(authority.reallocation_ledger);
-const sources = readJson(authority.archive_source_registry);
-const packet = readJson(authority.programming_system_packet);
-
-if (topology.product_root?.product_id !== 'SYSTEM_MASTER') fail('selected topology is not rooted at SYSTEM_MASTER');
-if (expectations.topology !== authority.topology) fail('selected expectation registry is not bound to current topology');
-if (realloc.topology !== authority.topology) fail('selected reallocation ledger is not bound to current topology');
-if (catalog.authority_rule == null || !String(catalog.authority_rule).includes('cannot create')) fail('system catalog must explicitly deny architecture creation authority');
-
-const expectedActive = authority.active_peer_execution_lanes || [];
-if (!sameSet(expectedActive, ['CORE','LEARNING','BOOK','DOCUMENTS'])) fail(`current authority peer lanes are invalid: ${expectedActive.join(',')}`);
-if (!sameSet(topology.peer_system_ids || [], expectedActive)) fail('topology peer_system_ids do not match CURRENT-AUTHORITY active peer lanes');
-
-const activeTopology = new Map((topology.canonical_internal_systems || []).map(x => [x.system_id, x]));
-const activeCatalog = new Map((catalog.active_peer_systems || []).map(x => [x.system_id, x]));
-if (activeTopology.size !== expectedActive.length || activeCatalog.size !== expectedActive.length) fail('active peer system count mismatch');
-for (const id of expectedActive) {
-  const t = activeTopology.get(id), c = activeCatalog.get(id);
-  if (!t || !c) fail(`active peer missing from topology/catalog: ${id}`);
-  if (c.owner_path !== `SYSTEM_MASTER/${id}`) fail(`catalog owner path mismatch for ${id}`);
-  if (c.control_ref !== t.control_ref) fail(`catalog control ref mismatch for ${id}`);
-  if (!String(c.lifecycle || '').startsWith('ACTIVE')) fail(`catalog lifecycle must be active for ${id}`);
-  if (t.completion !== 'INCOMPLETE') fail(`topology must keep ${id} incomplete until explicit completion authority`);
-}
-if (activeTopology.has('PROSE') || activeCatalog.has('PROSE')) fail('PROSE must not be active');
-
-const retiredTopology = new Map((topology.retired_systems || []).map(x => [x.system_id, x]));
-const retiredCatalog = new Map((catalog.retired_systems || []).map(x => [x.system_id, x]));
-const proseTopology = retiredTopology.get('PROSE');
-const proseCatalog = retiredCatalog.get('PROSE');
-if (!proseTopology || !proseCatalog) fail('PROSE retirement must exist in topology and catalog');
-if (proseTopology.current_execution_lane !== null || proseTopology.current_repair_lane !== null || proseTopology.current_qualification_lane !== null) fail('retired PROSE must have no active execution, repair, or qualification lane');
-if (proseTopology.successor_system !== null) fail('retired PROSE must not have a successor system');
-if (proseTopology.integration_owner !== 'SYSTEM_MASTER/BOOK') fail('any genuinely open preserved-Prose integration must remain Book-owned');
-if (proseCatalog.active_execution_lane !== null || proseCatalog.active_repair_lane !== null || proseCatalog.active_qualification_lane !== null) fail('catalog must keep retired PROSE non-dispatchable');
-if (proseCatalog.integration_owner_if_needed !== 'SYSTEM_MASTER/BOOK') fail('catalog must route any genuinely open preserved-Prose integration to Book only');
-
-for (const candidate of catalog.future_system_candidates || []) {
-  if (!candidate.candidate_id) fail('future system candidate missing candidate_id');
-  if (candidate.architecture_authority !== false) fail(`candidate may not have architecture authority: ${candidate.candidate_id}`);
-  if (activeTopology.has(candidate.candidate_id)) fail(`candidate duplicates an admitted active peer: ${candidate.candidate_id}`);
-}
-
-const programmingProgram = (catalog.active_non_peer_work_programs || []).find(x => x.program_id === 'PROGRAMMING');
-if (!programmingProgram) fail('PROGRAMMING active non-peer work program is missing');
-if (programmingProgram.architecture_authority !== false) fail('Programming work program may not grant architecture authority');
-if (programmingProgram.peer_topology_status !== 'NOT_ADMITTED' || programmingProgram.second_shift_peer_lane !== false) fail('Programming work program must remain non-peer until explicit admission');
-if (programmingProgram.work_program_lock !== authority.programming_work_program_lock) fail('Programming work-program lock mismatch');
-
-const programmingCandidate = (catalog.future_system_candidates || []).find(x => x.candidate_id === 'PROGRAMMING');
-if (!programmingCandidate) fail('PROGRAMMING peer-admission candidate is missing');
-if (!String(programmingCandidate.lifecycle || '').includes('ACTIVE_WORK_PROGRAM')) fail('Programming candidate must preserve active work-program standing');
-if (programmingCandidate.architecture_authority !== false) fail('Programming candidate cannot self-admit architecture authority');
-
-if (packet.candidate_system_id !== 'PROGRAMMING' || packet.architecture_authority !== false) fail('Programming packet authority boundary invalid');
-if (!String(packet.lifecycle || '').includes('ACTIVE_WORK_PROGRAM')) fail('Programming packet must preserve active work-program standing');
-if (!String(packet.lifecycle || '').includes('NOT_ACTIVE_PEER')) fail('Programming packet must deny current peer-system standing');
-if (packet.work_program_lock !== authority.programming_work_program_lock) fail('Programming packet work-program lock mismatch');
-
-if (!Array.isArray(sources.sources) || sources.sources.length < 1) fail('archive source registry has no sources');
-if (!String(sources.standing || '').includes('FULL_ASSET_CENSUS_PENDING')) fail('source registry must not falsely claim full archive census');
-for (const s of sources.sources) {
-  if (!s.source_id || !s.surface || !s.evidence_class || !s.reuse_disposition) fail(`invalid source registry row: ${s.source_id || '<missing>'}`);
-}
-
-const expText = JSON.stringify(expectations);
-if (!expText.includes('DOCUMENTS') || !expText.includes('PROSE is historically complete and terminally retired')) fail('current expectation registry lacks Documents/terminal-Prose expectations');
-if (!expText.includes('PROGRAMMING is an incomplete active work program')) fail('current expectation registry lacks Programming active-work-program boundary');
-const reallocText = JSON.stringify(realloc);
-if (!reallocText.includes('LITERARY-PROSE') || !reallocText.includes('BOOK-EVAL-LEMONADE-001') || !reallocText.includes('RETIRED_NO_DISPATCH')) fail('current reallocation ledger lacks current retired-Prose/Book integration dispositions');
-
-const systemsMd = fs.readFileSync(path.join(root, 'SYSTEMS.md'), 'utf8');
-if (!systemsMd.includes('SYSTEM_MASTER/DOCUMENTS') || !systemsMd.includes('PROSE') || !systemsMd.includes('retired')) fail('SYSTEMS.md is not aligned to Documents peer / Prose retirement');
-if (systemsMd.includes('Machine-readable topology: `governance/SYSTEM-TOPOLOGY-002.json`')) fail('SYSTEMS.md still points to topology 002');
-
-console.log('SYSTEM_CATALOG_ENFORCEMENT_PASS');
-console.log(`topology=${topology.topology_id}`);
-console.log(`active_peer_systems=${expectedActive.join(',')}`);
-console.log('retired_system=PROSE_NO_DISPATCH_BOOK_INTEGRATION_ONLY');
-console.log('programming=ACTIVE_NON_PEER_WORK_PROGRAM');
-console.log(`future_candidates=${(catalog.future_system_candidates || []).map(x => x.candidate_id).join(',')}`);
-console.log(`source_registry_seed_count=${sources.sources.length}`);
+const fs=require('fs'); const path=require('path'); const root=path.resolve(__dirname,'..','..');
+function fail(m){console.error(`SYSTEM_CATALOG_ENFORCEMENT_FAIL: ${m}`);process.exit(1);} function assert(x,m){if(!x)fail(m);} function readJson(rel){const p=path.join(root,rel);assert(fs.existsSync(p),`missing ${rel}`);try{return JSON.parse(fs.readFileSync(p,'utf8').replace(/^\uFEFF/,''));}catch(e){fail(`invalid JSON ${rel}: ${e.message}`);}}
+function sameSet(a,b){const aa=[...(a||[])].sort(),bb=[...(b||[])].sort();return aa.length===bb.length&&aa.every((v,i)=>v===bb[i]);}
+const authority=readJson('governance/CURRENT-AUTHORITY.json');
+for(const f of ['topology','expectation_registry','reallocation_ledger','system_catalog','archive_source_registry','programming_system_packet','programming_work_program_lock','programming_control_record','capability_crosswalk','prose_retirement_record']) assert(authority[f],`CURRENT-AUTHORITY missing ${f}`);
+const topology=readJson(authority.topology), catalog=readJson(authority.system_catalog), expectations=readJson(authority.expectation_registry), realloc=readJson(authority.reallocation_ledger), sources=readJson(authority.archive_source_registry), packet=readJson(authority.programming_system_packet), crosswalk=readJson(authority.capability_crosswalk);
+assert(topology.product_root?.product_id==='SYSTEM_MASTER','selected topology is not rooted at SYSTEM_MASTER');
+assert(expectations.topology===authority.topology,'expectation registry is not bound to current topology');
+assert(expectations.system_completion_status===authority.system_completion_status,'expectation registry completion binding mismatch');
+assert(realloc.topology===authority.topology,'reallocation ledger is not bound to current topology');
+assert(String(catalog.authority_rule||'').includes('cannot create'),'system catalog must deny architecture creation authority');
+const peers=topology.peer_system_ids||[], ready=topology.execution_readiness?.execution_ready_peer_system_ids||[], nonReady=topology.execution_readiness?.admitted_not_execution_ready_peer_system_ids||[];
+assert(peers.length>0&&sameSet(peers,ready)&&nonReady.length===0,'current architecture expects all admitted peers execution-ready');
+assert(sameSet(authority.active_peer_execution_lanes,ready),'authority execution lanes mismatch');
+assert(sameSet(expectations.architectural_peer_system_ids,peers),'expectation peer set mismatch');
+assert(sameSet(expectations.execution_ready_peer_system_ids,ready),'expectation readiness set mismatch');
+const topoMap=new Map((topology.canonical_internal_systems||[]).map(x=>[x.system_id,x])); const catMap=new Map((catalog.active_peer_systems||[]).map(x=>[x.system_id,x]));
+assert(topoMap.size===peers.length&&catMap.size===peers.length,'topology/catalog peer count mismatch');
+for(const id of peers){const t=topoMap.get(id),c=catMap.get(id);assert(t&&c,`peer missing from topology/catalog: ${id}`);assert(c.owner_path===`SYSTEM_MASTER/${id}`,`catalog owner mismatch ${id}`);assert(c.control_ref===t.control_ref,`catalog control mismatch ${id}`);assert(String(c.lifecycle||'').startsWith('ACTIVE'),`catalog lifecycle inactive ${id}`);assert(t.completion==='INCOMPLETE',`${id} completion must remain INCOMPLETE`);assert(t.control_record,`${id} execution-ready peer missing control record`);}
+assert(topoMap.has('PROGRAMMING')&&catMap.has('PROGRAMMING'),'PROGRAMMING must be an active peer');
+assert(!topoMap.has('PROSE')&&!catMap.has('PROSE'),'PROSE must not be active');
+const pt=(topology.retired_systems||[]).find(x=>x.system_id==='PROSE'), pc=(catalog.retired_systems||[]).find(x=>x.system_id==='PROSE');assert(pt&&pc,'PROSE retirement missing');assert(pt.current_execution_lane===null&&pt.current_repair_lane===null&&pt.current_qualification_lane===null&&pt.successor_system===null,'PROSE active route present');assert(pt.integration_owner==='SYSTEM_MASTER/BOOK'&&pc.integration_owner_if_needed==='SYSTEM_MASTER/BOOK','Prose integration owner must be BOOK');
+for(const candidate of catalog.future_system_candidates||[]){assert(candidate.candidate_id,'candidate missing ID');assert(candidate.architecture_authority===false,`candidate architecture authority invalid: ${candidate.candidate_id}`);assert(!topoMap.has(candidate.candidate_id),`candidate duplicates active peer: ${candidate.candidate_id}`);}
+assert(packet.system_id==='PROGRAMMING'&&packet.architecture_authority===true,'Programming packet must reflect explicit peer admission');assert(String(packet.lifecycle||'').includes('ACTIVE_INCOMPLETE_PEER_SYSTEM'),'Programming packet lifecycle mismatch');assert(packet.work_program_lock===authority.programming_work_program_lock,'Programming continuity lock pointer mismatch');
+const hist=(catalog.historical_non_peer_programs||[]).find(x=>x.program_id==='PROGRAMMING');assert(hist&&String(hist.current_effect||'').includes('SUPERSEDED_BY_ADR_0006'),'catalog must preserve pre-admission Programming history');
+const c40=(crosswalk.capability_entries||[]).find(x=>x.capability_id==='C40');assert(c40?.module_key==='WEBSITE_BUILDING'&&c40.owner_path==='SYSTEM_MASTER/PROGRAMMING','C40 Website Building allocation invalid');assert(String(c40.disposition||'').includes('NOT_PEER_SYSTEM'),'Website Building must remain non-peer capability');
+assert(Array.isArray(sources.sources)&&sources.sources.length>0,'archive source registry has no sources');
+const expText=JSON.stringify(expectations);assert(expText.includes('PROGRAMMING')&&expText.includes('WEBSITE_BUILDING'),'expectation registry lacks Programming/Website Building expectations');assert(expText.includes('PROSE is historically complete and terminally retired'),'expectation registry lacks terminal Prose expectation');
+const reallocText=JSON.stringify(realloc);assert(reallocText.includes('PROGRAMMING / CODE / AUTOMATION')&&reallocText.includes('WEBSITE BUILDING'),'reallocation ledger lacks Programming/Website transition');
+const systemsMd=fs.readFileSync(path.join(root,'SYSTEMS.md'),'utf8');assert(systemsMd.includes('SYSTEM_MASTER/PROGRAMMING')&&systemsMd.includes('SYSTEM-TOPOLOGY-007.json'),'SYSTEMS.md is not aligned to Topology 007 Programming admission');
+console.log('SYSTEM_CATALOG_ENFORCEMENT_PASS'); console.log(`topology=${topology.topology_id}`); console.log(`architectural_peer_systems=${peers.join(',')}`); console.log('programming=ACTIVE_PEER_CONTINUITY_PRESERVED'); console.log('website_building=C40_PROGRAMMING_CAPABILITY_NOT_PEER');

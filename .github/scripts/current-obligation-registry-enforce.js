@@ -19,6 +19,8 @@ function setEq(a, b) {
   const aa = [...a].sort(), bb = [...b].sort();
   return aa.length === bb.length && aa.every((value, index) => value === bb[index]);
 }
+function setDifference(a, b) { return new Set([...a].filter((value) => !b.has(value))); }
+function setUnion(...sets) { return new Set(sets.flatMap((set) => [...set])); }
 
 const authority = readJson('governance/CURRENT-AUTHORITY.json');
 for (const field of ['topology', 'program_job_lock', 'system_completion_status', 'obligation_registry']) {
@@ -33,8 +35,10 @@ const obligations = Array.isArray(registry.obligations) ? registry.obligations :
 
 const systems = topology.canonical_internal_systems || [];
 const byOwnerPath = new Map(systems.map((system) => [systemOwnerPath(system), system]).filter(([owner]) => Boolean(owner)));
-const peerSystems = new Set(topology.peer_system_ids || []);
-const authorityPeers = new Set(authority.active_peer_execution_lanes || []);
+const architecturalPeers = new Set(topology.peer_system_ids || []);
+const executionReadyPeers = new Set(topology.execution_readiness?.execution_ready_peer_system_ids || []);
+const admittedNotExecutionReadyPeers = new Set(topology.execution_readiness?.admitted_not_execution_ready_peer_system_ids || []);
+const authorityExecutionPeers = new Set(authority.active_peer_execution_lanes || []);
 const retiredSystems = topology.retired_systems || [];
 const retiredIds = new Set(authority.retired_systems || retiredSystems.map((entry) => entry.system_id));
 const retiredPaths = retiredSystems.map((entry) => entry.historical_owner_path).filter(Boolean);
@@ -42,8 +46,14 @@ const activeOwnerPaths = new Set(['SYSTEM_MASTER', ...byOwnerPath.keys()]);
 
 assert(authority.product_root === 'SYSTEM_MASTER', 'CURRENT-AUTHORITY product_root must remain SYSTEM_MASTER');
 assert(topology.product_root?.product_id === 'SYSTEM_MASTER', 'selected topology must remain rooted at SYSTEM_MASTER');
-assert(setEq(peerSystems, authorityPeers), 'authority active peer lanes must match topology peer_system_ids');
-assert(setEq(peerSystems, new Set(systems.map((entry) => entry.system_id))), 'topology peer_system_ids must match canonical internal systems');
+assert(architecturalPeers.size > 0, 'selected topology must declare architectural peer_system_ids');
+assert(executionReadyPeers.size > 0, 'selected topology must declare execution-ready peers');
+assert(setEq(architecturalPeers, new Set(systems.map((entry) => entry.system_id))), 'topology peer_system_ids must match canonical internal systems');
+assert(setEq(authorityExecutionPeers, executionReadyPeers), 'CURRENT-AUTHORITY active peer execution lanes must match topology execution-ready peers');
+assert(setDifference(executionReadyPeers, architecturalPeers).size === 0, 'execution-ready peers must be architectural peers');
+assert(setDifference(admittedNotExecutionReadyPeers, architecturalPeers).size === 0, 'admitted-not-ready peers must be architectural peers');
+assert([...executionReadyPeers].every((id) => !admittedNotExecutionReadyPeers.has(id)), 'peer cannot be both execution-ready and admitted-not-ready');
+assert(setEq(setUnion(executionReadyPeers, admittedNotExecutionReadyPeers), architecturalPeers), 'topology execution-readiness partition must account for every architectural peer exactly once');
 assert(jobLock.topology === authority.topology, 'program job lock must bind authority-selected topology');
 
 function validOwner(ownerPath) {
@@ -60,13 +70,20 @@ function resolveSystemForOwner(ownerPath) {
 
 const activeStatuses = new Map((completion.systems || []).map((entry) => [entry.system_id, entry]));
 assert(activeStatuses.get('SYSTEM_MASTER')?.complete === false, 'SYSTEM_MASTER must remain incomplete until explicit product completion authority');
-for (const id of authorityPeers) {
+for (const id of architecturalPeers) {
   const status = activeStatuses.get(id);
-  assert(status, `active completion status missing ${id}`);
+  assert(status, `active completion status missing architectural peer ${id}`);
   assert(status.complete === false, `${id} must remain incomplete until explicit product completion authority`);
-  assert(jobLock.programs?.[id], `program job lock missing active peer ${id}`);
+  assert(jobLock.programs?.[id], `program job lock missing architectural peer ${id}`);
   assert(jobLock.programs[id].owner_path === `SYSTEM_MASTER/${id}`, `program job owner mismatch for ${id}`);
   assert(jobLock.programs[id].integrates_upward_to === 'SYSTEM_MASTER', `${id} must integrate upward into System Master`);
+}
+for (const id of executionReadyPeers) {
+  const system = systems.find((entry) => entry.system_id === id);
+  assert(system?.control_record, `execution-ready peer ${id} must have a canonical control record`);
+}
+for (const id of admittedNotExecutionReadyPeers) {
+  assert(!authorityExecutionPeers.has(id), `admitted-not-ready peer ${id} must not appear in CURRENT-AUTHORITY execution lanes`);
 }
 for (const retiredId of retiredIds) {
   assert(!activeStatuses.has(retiredId), `${retiredId} must not remain in active completion systems`);
@@ -96,6 +113,12 @@ for (const entry of obligations) {
   if (!['CLOSED', 'SUPERSEDED'].includes(entry.state)) assert(entry.objective, `open obligation missing objective: ${entry.obligation_id}`);
   assert(!retiredPaths.some((retired) => sameOrDescendant(entry.owner_path, retired)), `active registry contains retired owner path: ${entry.obligation_id}`);
   if (entry.specialist_owner_path) assert(!retiredPaths.some((retired) => sameOrDescendant(entry.specialist_owner_path, retired)), `active registry contains retired specialist owner: ${entry.obligation_id}`);
+
+  const ownerSystem = resolveSystemForOwner(entry.owner_path);
+  if (ownerSystem && admittedNotExecutionReadyPeers.has(ownerSystem.system_id)) {
+    const executionState = String(entry.second_shift_state || '');
+    assert(!/ACTIVE|EXECUTABLE|DISPATCH/i.test(executionState), `admitted-not-ready peer obligation ${entry.obligation_id} must not claim execution readiness through second_shift_state`);
+  }
 }
 
 if (retiredIds.has('PROSE')) {
@@ -126,7 +149,8 @@ assert(validOwner(next.owner_path) && next.owner_path !== 'SYSTEM_MASTER', `cent
 const nextSystem = resolveSystemForOwner(next.owner_path);
 if (!next.owner_path.startsWith('SYSTEM_MASTER/SHARED_INFRASTRUCTURE')) {
   assert(nextSystem, `central_next_objective owner is not an active topology system: ${next.owner_path}`);
-  assert(peerSystems.has(nextSystem.system_id), `central_next_objective must resolve to an active peer system: ${next.owner_path}`);
+  assert(architecturalPeers.has(nextSystem.system_id), `central_next_objective must resolve to an architectural peer system: ${next.owner_path}`);
+  assert(executionReadyPeers.has(nextSystem.system_id), `central_next_objective must resolve to an execution-ready peer system: ${next.owner_path}`);
 }
 
 const transitionRows = [
@@ -141,4 +165,4 @@ for (const row of transitionRows) {
   assert(!seen.has(row.obligation_id), `obligation appears both current and transition history: ${row.obligation_id}`);
 }
 
-console.log(`CURRENT_OBLIGATION_REGISTRY_ENFORCEMENT_PASS registry=${registry.registry_id} topology=${topology.topology_id} obligations=${obligations.length} next=${authority.central_next_objective} owner=${next.owner_path} highest_discretionary=${authority.highest_discretionary_objective} retired=${[...retiredIds].sort().join(',') || 'NONE'}`);
+console.log(`CURRENT_OBLIGATION_REGISTRY_ENFORCEMENT_PASS registry=${registry.registry_id} topology=${topology.topology_id} architectural_peers=${[...architecturalPeers].sort().join(',')} execution_ready_peers=${[...executionReadyPeers].sort().join(',')} admitted_not_ready_peers=${[...admittedNotExecutionReadyPeers].sort().join(',')} obligations=${obligations.length} next=${authority.central_next_objective} owner=${next.owner_path} highest_discretionary=${authority.highest_discretionary_objective} retired=${[...retiredIds].sort().join(',') || 'NONE'}`);
