@@ -1,0 +1,36 @@
+{
+  "contract_id": "BOOK-SEMANTIC-OFFLINE-CONTINUITY-001",
+  "effective_date": "2026-09-14",
+  "standing": "CURRENT_BOOK_COMP_12_OFFLINE_CONTINUITY_EXTENSION__EXACT_BASE_RECONNECT_FAIL_CLOSED",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "component_id": "BOOK-COMP-12",
+  "objective_id": "BOOK-ENG-009-SEMANTIC-RECOVERY-PROFILE-001",
+  "extends_profile": "qualification/book-system/recovery/BOOK-SEMANTIC-RECOVERY-PROFILE-001.json",
+  "reconciliation_ref": "qualification/book-system/recovery/BOOK-ENG-009-CONCURRENT-IMPLEMENTATION-RECONCILIATION-001.json",
+  "runtime": "system-master/book-system/book-semantic-offline-continuity.js",
+  "test": "system-master/book-system/book-semantic-offline-continuity.test.js",
+  "offline_session_invariants": [
+    "Every offline session is anchored to one exact semantic manifest digest and exact Book canonical/manuscript subject.",
+    "Offline work never carries canonical effect and is never auto-applied on reconnect.",
+    "If both semantic manifest and Book subject remain exact, the offline delta is eligible only for the normal Book admission path.",
+    "If either semantic manifest or Book subject changed, reconnect returns RECONCILIATION_REQUIRED and forbids normal automatic admission.",
+    "Project identity mismatch fails closed."
+  ],
+  "retention_invariants": [
+    "Book defines the semantic classes that must remain retrievable; CORE owns physical retention execution.",
+    "SEMANTIC_BACKUP_SET, PRESERVATION_RECEIPTS and BOOK_LINEAGE are mandatory retained semantic classes.",
+    "Retrievability verification and destructive-restore drill are required by the preservation retention policy.",
+    "Book physical retention execution is forbidden."
+  ],
+  "lineage_reentry_invariants": [
+    "Preservation may emit continuation and reentry anchors bound to the exact semantic manifest and subject.",
+    "Lineage/reentry anchors do not grant release, distribution or canonical mutation authority."
+  ],
+  "provider_namespace_rule": "This extension does not define or register a CORE public operation. Physical provider dispatch remains governed by the canonical profile's CORE/P03 REGISTERED_ACTIVE COMMAND requirement.",
+  "non_claims": [
+    "This extension does not merge or canonize the divergent book-eng-009-semantic-recovery-profile-001 branch.",
+    "This extension does not register CORE.DURABILITY.BOOK_RECOVERY.v1 or any other conceptual port as a public operation.",
+    "This extension does not close the four CORE-owned P19 physical dependencies.",
+    "This extension does not make ENG-009 whole-objective complete."
+  ]
+}
