@@ -143,9 +143,10 @@ Format: **L-nnn — one-line summary** / Symptom / Root cause / Fix / Rule it pr
   dynamic test. `Fwp001QualificationTest` gets a dedicated case that rebuilds its base64
   fixture and digest-checks it before invoking. `mvn test` now runs **22 tests**.
 - **Verification.** Proven in both directions, because a green never observed failing is not
-  evidence: removing four test classes tripped the discovery floor (`discovered only 19`),
-  and corrupting one class produced `Tests run: 2, Errors: 1` with a nonzero exit. Restored
-  state returns 22/22.
+  evidence: removing three compiled test classes reduced discovery from 22 to 19 and tripped
+  the discovery floor (`discovered only 19 qualification classes`); corrupting
+  `Fwp002QualificationTest.class` produced `ClassFormatError: Truncated class file` with a
+  nonzero exit. Restored state returns 22/22.
 - **Rule.** A test phase that can pass while executing nothing is a false instrument. Every
   suite must assert a floor on how many tests it discovered, and that floor is never lowered
   to make a build pass. Before trusting any green signal, break something on purpose and
