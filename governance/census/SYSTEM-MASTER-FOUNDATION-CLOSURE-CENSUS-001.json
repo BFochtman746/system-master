@@ -2,7 +2,11 @@
   "census_id": "SYSTEM-MASTER-FOUNDATION-CLOSURE-CENSUS-001",
   "status": "ACTIVE",
   "created_at": "2026-09-10T05:41:00-04:00",
-  "purpose": "Prove, rather than assume, whether System Master foundational mapping, tracing, ownership and execution semantics are complete.",
+  "reconciled_at": "2026-09-14",
+  "architecture_authority": "governance/CURRENT-AUTHORITY.json",
+  "topology_ref": "governance/SYSTEM-TOPOLOGY-007.json",
+  "reconciliation_script": ".github/scripts/foundation-closure-reconcile.js",
+  "purpose": "Prove, rather than assume, whether System Master foundational mapping, tracing, ownership and execution semantics are complete under the current architecture authority.",
   "scope": [
     "all canonical foundational requirements and capability crosswalk entries including C00-C49 and P00-P15",
     "all first-class and headless capability ownership decisions",
@@ -40,14 +44,28 @@
   ],
   "closure_rule": "Foundation 1.0 may be called complete only when every in-scope row is COMPLETE_WITH_EVIDENCE or EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY, and every durable blocker is separately recorded as preventing only the dependent capability rather than silently closing unrelated work.",
   "no_silent_gap_rule": "Missing owner, route, contract, canonical writer, authority boundary, failure semantics, evidence target or acceptance target is an ACTIVE_GAP, not completion.",
-  "execution_rule": "Each ACTIVE_GAP must be assigned to its canonical owner and converted into the highest-value safe successor packet. Owners continue after each completion until their dependency-valid ladder is exhausted.",
-  "initial_owner_order": ["CORE", "LEARNING", "BOOK", "PROSE"],
-  "prose_recovery_ref": "governance/second-shift/PROSE-RECOVERY-2026-09-10-0541.json",
+  "execution_rule": "Each ACTIVE_GAP must be assigned to a canonical owner admitted by the current topology and converted into the highest-value safe dependency-valid successor packet. Owners continue after each completion until their dependency-valid ladder is exhausted.",
+  "active_owner_order": [
+    "CORE",
+    "LEARNING",
+    "BOOK",
+    "DOCUMENTS",
+    "SPREADSHEET_DATA",
+    "MEDIA",
+    "CONNECTED_ACTIONS",
+    "RESEARCH_KNOWLEDGE",
+    "PROGRAMMING"
+  ],
+  "retired_owner_exclusions": ["PROSE"],
+  "historical_prose_recovery_ref": "governance/second-shift/PROSE-RECOVERY-2026-09-10-0541.json",
+  "historical_prose_recovery_current_effect": "HISTORICAL_EVIDENCE_ONLY__NO_ACTIVE_OWNER_OR_EXECUTION_LANE",
   "forbidden_claims": [
     "do not infer completion from prior planning volume",
     "do not fabricate ownership, authority or evidence",
     "do not treat a stale/absent delegation as an empty valid lane",
-    "do not transfer hosted evidence into A-01/native/private/publication/production authority"
+    "do not transfer hosted evidence into A-01/native/private/publication/production authority",
+    "do not assign new Foundation 1.0 obligations to terminally retired PROSE",
+    "do not split Website Building C40 from PROGRAMMING into a peer system"
   ],
-  "final_artifact": "A 100-percent disposition matrix plus unresolved-gap successor register and Foundation 1.0 closure decision."
+  "final_artifact": "A 100-percent disposition matrix plus unresolved-gap successor register grouped by current owner with evidence state, dependency state, executable closure gate and Foundation 1.0 closure decision."
 }
