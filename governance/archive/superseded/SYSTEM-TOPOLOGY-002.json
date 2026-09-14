@@ -1,0 +1,153 @@
+{
+  "topology_id": "SYSTEM-TOPOLOGY-002",
+  "effective_date": "2026-09-10",
+  "standing": "CANONICAL__SYSTEM_MASTER_PARENT_HIERARCHY",
+  "supersedes": "governance/SYSTEM-TOPOLOGY-001.json",
+  "product_root": {
+    "product_id": "SYSTEM_MASTER",
+    "canonical_name": "SYSTEM MASTER",
+    "classification": "PRODUCT_ROOT__SYSTEM_OF_SYSTEMS",
+    "description": "The complete System Master product. All first-class tools, child systems, shared foundation/spine services, execution infrastructure and qualification/evidence lanes exist inside this root.",
+    "owns_product_architecture": true
+  },
+  "canonical_internal_systems": [
+    {
+      "system_id": "CORE",
+      "canonical_name": "SYSTEM MASTER CORE / FOUNDATION & SPINE",
+      "classification": "SHARED_CORE_SYSTEM",
+      "parent_id": "SYSTEM_MASTER",
+      "control_ref": "system-master/control-v2",
+      "control_record": "system-master/control-v2/SYSTEM-MASTER-CORE-CONTROL-RECORD-001.md",
+      "owns": [
+        "foundation and authority spine",
+        "shared data/platform/runtime architecture",
+        "chat/work/UX shared runtime foundations",
+        "continuity and recovery",
+        "assurance and reconciliation",
+        "shared model/tool/artifact/connector infrastructure",
+        "A-01 and central qualification/control-plane integration"
+      ],
+      "does_not_own": [
+        "Learning product logic",
+        "Book lifecycle product logic",
+        "Prose evaluation/training product logic"
+      ]
+    },
+    {
+      "system_id": "LEARNING",
+      "canonical_name": "LEARNING SYSTEM",
+      "classification": "FIRST_CLASS_TOOL_SYSTEM",
+      "parent_id": "SYSTEM_MASTER",
+      "control_ref": "learning/control-v1",
+      "control_record": "learning/control-v1/LEARNING-CONTROL-RECORD-v2.md",
+      "owns": [
+        "learning architecture and runtime",
+        "learner/mastery model",
+        "assessment and adaptive sequencing",
+        "retention and transfer",
+        "curriculum and learning evidence",
+        "Learning qualification and pilots"
+      ]
+    },
+    {
+      "system_id": "BOOK",
+      "canonical_name": "BOOK SYSTEM",
+      "classification": "FIRST_CLASS_TOOL_SYSTEM",
+      "parent_id": "SYSTEM_MASTER",
+      "control_ref": "book-system/control-v1",
+      "control_record": "qualification/book-system/BOOK-SYSTEM-PRODUCT-PARENT-BINDING-006.json",
+      "owns": [
+        "canonical book state",
+        "end-to-end book lifecycle",
+        "planning/research/orchestration",
+        "author decision routing",
+        "versioning and rollback",
+        "editorial lifecycle",
+        "publication/export"
+      ]
+    },
+    {
+      "system_id": "PROSE",
+      "canonical_name": "PROSE SYSTEM",
+      "classification": "CHILD_TOOL_SYSTEM",
+      "parent_id": "BOOK",
+      "root_product_id": "SYSTEM_MASTER",
+      "control_ref": "literary-prose-engine-001",
+      "control_record": "qualification/literary-prose-engine-001/PROSE-SYSTEM-PRODUCT-PARENT-BINDING-003.json",
+      "owns": [
+        "Book Evaluator",
+        "literary/prose evaluation",
+        "evaluator and judge training",
+        "prose/craft training",
+        "diagnostics and calibration",
+        "revision intelligence",
+        "voice/canon/intent/protected-language preservation"
+      ]
+    }
+  ],
+  "hierarchy_edges": [
+    ["SYSTEM_MASTER", "CORE"],
+    ["SYSTEM_MASTER", "LEARNING"],
+    ["SYSTEM_MASTER", "BOOK"],
+    ["BOOK", "PROSE"]
+  ],
+  "execution_lane_owner_map": {
+    "SYSTEM-MASTER": "CORE",
+    "SYSTEM-MASTER-CONTINUITY": "CORE",
+    "SYSTEM-MASTER-ASSURANCE-RECON": "CORE",
+    "A01-CONTROL-PLANE": "CORE",
+    "LEARNING": "LEARNING",
+    "BOOK-SYSTEM": "BOOK",
+    "LITERARY-PROSE": "PROSE",
+    "BOOK-EVAL-LEMONADE-001": "PROSE"
+  },
+  "historical_aliases": {
+    "MASTER": "CORE",
+    "MASTER SYSTEM": "CORE",
+    "SYSTEM MASTER FOUNDATION/SPINE": "CORE",
+    "PROSE PROJECT": "PROSE",
+    "LITERARY PROSE SYSTEM": "PROSE",
+    "LITERARY PROSE ENGINE": "PROSE_IMPLEMENTATION_FAMILY",
+    "BOOK EVALUATOR": "PROSE_CAPABILITY"
+  },
+  "explicit_non_systems": {
+    "A-01": "SHARED_QUALIFICATION_AND_CONTROL_INFRASTRUCTURE",
+    "ASSURANCE": "CORE_SUBSYSTEM_OR_EVIDENCE_FUNCTION",
+    "RECONCILIATION": "CORE_CONTROL_AND_EVIDENCE_FUNCTION",
+    "CONTINUITY": "CORE_SUBSYSTEM",
+    "FOUNDATION": "CORE_SCOPE",
+    "PLATFORM": "CORE_SCOPE",
+    "BOOK EVALUATOR": "PROSE_CAPABILITY_AND_QUALIFICATION_LANE",
+    "LITERARY PROSE ENGINE": "PROSE_IMPLEMENTATION_FAMILY",
+    "NIGHT SHIFT": "EXECUTION_WORKER",
+    "SECOND SHIFT": "EXECUTION_WORKER",
+    "QUALIFICATION": "EVIDENCE_PROCESS",
+    "RUNNER": "INFRASTRUCTURE",
+    "CHAT": "WORKING_SURFACE"
+  },
+  "authority_order": [
+    "governance/CURRENT-AUTHORITY.json",
+    "governance/SYSTEM-TOPOLOGY-002.json",
+    "canonical system control record",
+    "system-owned state/obligation/delegation registry",
+    "qualification/evidence record",
+    "branch/workflow label",
+    "chat/task title"
+  ],
+  "creation_rule": {
+    "implicit_system_creation_forbidden": true,
+    "branch_name_cannot_create_system": true,
+    "workstream_id_cannot_create_system": true,
+    "chat_or_task_title_cannot_create_system": true,
+    "qualification_id_cannot_create_system": true,
+    "new_first_class_system_requires": [
+      "explicit user instruction",
+      "superseding topology ADR",
+      "new topology registry version",
+      "updated validator",
+      "explicit parent and ownership decision"
+    ]
+  },
+  "cross_lane_rule": "A system may consume another system's published/qualified interface or evidence, but may not silently take ownership of that system's objective, state, requirements, qualification lane or canonical writes.",
+  "qualification_rule": "Topology/reallocation metadata never transfers or broadens exact-SHA qualification, human, author, private-data, publication, production or native-platform authority."
+}

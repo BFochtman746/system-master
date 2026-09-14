@@ -1,0 +1,130 @@
+{
+  "topology_id": "SYSTEM-TOPOLOGY-001",
+  "effective_date": "2026-09-09",
+  "standing": "CANONICAL__FOUR_SYSTEM_CARDINALITY_LOCKED",
+  "system_cardinality": 4,
+  "reserved_word": "SYSTEM",
+  "authority_order": [
+    "governance/SYSTEM-TOPOLOGY-001.json",
+    "canonical system control record",
+    "system-owned workstream/capability state",
+    "qualification/evidence record",
+    "branch or workflow label",
+    "chat/task title"
+  ],
+  "systems": [
+    {
+      "system_id": "MASTER",
+      "canonical_name": "MASTER SYSTEM",
+      "description": "System Master foundation and spine: shared platform, data, execution, continuity, recovery, assurance and integration architecture that the other systems depend on.",
+      "parent_system_id": null,
+      "control_ref": "system-master/control-v2",
+      "control_record": "system-master/control-v2/SYSTEM-MASTER-V2-CONTROL-RECORD.md",
+      "owns": [
+        "foundation/spine",
+        "shared platform and data architecture",
+        "continuity/recovery",
+        "assurance/reconciliation",
+        "shared A-01/control-plane integration"
+      ]
+    },
+    {
+      "system_id": "LEARNING",
+      "canonical_name": "LEARNING SYSTEM",
+      "description": "The system that develops and runs System Master learning, mastery, assessment, adaptive sequencing, retention and transfer capabilities.",
+      "parent_system_id": null,
+      "control_ref": "learning/control-v1",
+      "control_record": "learning/control-v1/LEARNING-CONTROL-RECORD.md",
+      "owns": [
+        "learning architecture",
+        "learning runtime",
+        "learner/pilot software boundaries",
+        "learning research and qualification"
+      ]
+    },
+    {
+      "system_id": "BOOK",
+      "canonical_name": "BOOK SYSTEM",
+      "description": "The parent end-to-end book system that manages a book from intake and planning through drafting, editorial lifecycle, decisions, versioning, publication/export and rollback.",
+      "parent_system_id": null,
+      "control_ref": "book-system/control-v1",
+      "control_record": "qualification/book-system/BOOK-SYSTEM-PROJECT-HIERARCHY-002.json",
+      "owns": [
+        "end-to-end book lifecycle",
+        "canonical book state",
+        "parent orchestration and admission",
+        "author decision routing",
+        "publication/export lifecycle"
+      ]
+    },
+    {
+      "system_id": "PROSE",
+      "canonical_name": "PROSE SYSTEM",
+      "description": "A child system of Book System responsible for prose evaluation, literary diagnostics, evaluator training, prose/craft training, revision intelligence and preservation-aware prose optimization.",
+      "parent_system_id": "BOOK",
+      "control_ref": "literary-prose-engine-001",
+      "control_record": "qualification/literary-prose-engine-001/PROSE-SYSTEM-PARENT-BINDING-002.json",
+      "owns": [
+        "book/prose evaluation",
+        "Book Evaluator capability and qualification lane",
+        "literary diagnostics",
+        "evaluator/judge training",
+        "prose and craft training",
+        "revision intelligence",
+        "voice/canon/intent/protected-language preservation checks"
+      ]
+    }
+  ],
+  "execution_lane_owner_map": {
+    "SYSTEM-MASTER": "MASTER",
+    "SYSTEM-MASTER-CONTINUITY": "MASTER",
+    "SYSTEM-MASTER-ASSURANCE-RECON": "MASTER",
+    "A01-CONTROL-PLANE": "MASTER",
+    "LEARNING": "LEARNING",
+    "BOOK-SYSTEM": "BOOK",
+    "LITERARY-PROSE": "PROSE",
+    "BOOK-EVAL-LEMONADE-001": "PROSE"
+  },
+  "explicit_non_systems": {
+    "A-01": "SHARED_QUALIFICATION_AND_CONTROL_INFRASTRUCTURE__ADMINISTRATIVELY_OWNED_BY_MASTER",
+    "ASSURANCE": "MASTER_SUBSYSTEM_OR_EVIDENCE_LANE",
+    "RECONCILIATION": "MASTER_CONTROL_AND_EVIDENCE_FUNCTION",
+    "CONTINUITY": "MASTER_SUBSYSTEM",
+    "FOUNDATION": "MASTER_SCOPE",
+    "PLATFORM": "MASTER_SCOPE",
+    "BOOK EVALUATOR": "PROSE_SYSTEM_CAPABILITY_AND_QUALIFICATION_LANE",
+    "LITERARY PROSE ENGINE": "PROSE_SYSTEM_IMPLEMENTATION_FAMILY",
+    "PROSE PROJECT": "HISTORICAL_ALIAS_FOR_PROSE_SYSTEM",
+    "NIGHT SHIFT": "EXECUTION_WORKER",
+    "SECOND SHIFT": "EXECUTION_WORKER",
+    "QUALIFICATION": "EVIDENCE_PROCESS",
+    "RUNNER": "INFRASTRUCTURE"
+  },
+  "classification_vocabulary": [
+    "SYSTEM",
+    "SUBSYSTEM",
+    "CAPABILITY",
+    "COMPONENT",
+    "WORKSTREAM",
+    "QUALIFICATION_LANE",
+    "INFRASTRUCTURE",
+    "EVIDENCE",
+    "CONTROL_SURFACE",
+    "HISTORICAL"
+  ],
+  "system_creation_rule": {
+    "implicit_creation_forbidden": true,
+    "branch_name_cannot_create_system": true,
+    "workstream_id_cannot_create_system": true,
+    "chat_or_task_title_cannot_create_system": true,
+    "qualification_id_cannot_create_system": true,
+    "required_for_fifth_system": [
+      "explicit user instruction that a new top-level system is intended",
+      "new superseding topology ADR",
+      "new topology registry version",
+      "updated machine validation",
+      "explicit parent/dependency decision"
+    ]
+  },
+  "qualification_rule": "Topology metadata never transfers or broadens exact-SHA qualification, human, author, private-data, publication, production or native-platform authority."
+}

@@ -1,0 +1,85 @@
+{
+  "baseline_id": "SYSTEM-STATE-BASELINE-001",
+  "captured_at": "2026-09-09T19:55:47-04:00",
+  "topology": "governance/SYSTEM-TOPOLOGY-002.json",
+  "purpose": "Compact current-state index. Detailed technical truth remains in each control/evidence record; this file selects the current control head, standing, completed boundary and next dependency so new chats do not reconstruct state from branch chronology.",
+  "nodes": {
+    "SYSTEM_MASTER": {
+      "classification": "PRODUCT_ROOT__SYSTEM_OF_SYSTEMS",
+      "standing": "ACTIVE",
+      "children": ["CORE", "LEARNING", "BOOK"],
+      "rule": "Product-root state is the union of governed child-system standings plus shared infrastructure. It does not replace child control records."
+    },
+    "CORE": {
+      "parent": "SYSTEM_MASTER",
+      "control_ref": "system-master/control-v2",
+      "control_head_at_baseline": "7dba9c378ab93a1c8a9a4e084e333e73ef0cdd55",
+      "control_record": "system-master/control-v2/SYSTEM-MASTER-V2-CONTROL-RECORD.md",
+      "standing": "ACTIVE__DEPENDENCY_TRAIN_STABLE_THROUGH_SMR017__SMR018_RESIDUAL_REPAIR_PENDING__SMR019_REBASE_PENDING__SMR020_BLOCKED",
+      "completed_or_preserved": [
+        "MASTER/Core dependency train is reconciled/stable through SMR017 under the selected control record.",
+        "SMR018 composite 0ae86ee36d00d3d5749e20889dafbcf85c1dd84baecbcc4bc34c8d39ba31553c retains its exact prior qualification evidence.",
+        "SMR019 CHAT repair evidence remains valid for its own tested bytes but is not dependency-current."
+      ],
+      "current_objective": "Recover the exact runnable SMR018 composite, reproduce it, apply only PLATFORM005_PARSED_PATH_API_ROUTE_REPAIR_002.patch, derive a new exact subject and rerun the complete SMR018 portable gate; then cumulatively rebase SMR019. Do not resume SMR020 before rebased SMR019 PASS.",
+      "blockers": [
+        "Exact runnable SMR018 composite source recovery/import is required before changed-byte qualification.",
+        "SMR020 is blocked by predecessor reconciliation."
+      ]
+    },
+    "LEARNING": {
+      "parent": "SYSTEM_MASTER",
+      "control_ref": "learning/control-v1",
+      "control_head_at_baseline": "42cbeb3db6ba97c1baacb9f0b6cac1b673257f7e",
+      "control_record": "learning/control-v1/LEARNING-CONTROL-RECORD.md",
+      "standing": "ACTIVE__MACHINE_FINAL_HUMAN_EXECUTION_BOUNDARY_COMPLETE__REAL_PARTICIPANT_EVIDENCE_HUMAN_BLOCKED",
+      "completed_or_preserved": [
+        "Exact software subject f49ac9eaf6e0f11894bf47f5d773090b4ef60ebf passed the authoritative machine-side final-human-execution qualification before the control branch was created.",
+        "Control-branch documentation does not transfer that exact-SHA qualification to changed bytes."
+      ],
+      "current_objective": "Continue the highest-value dependency-valid non-human Learning development/research/qualification objective selected by the Learning control authority; do not fabricate participant evidence.",
+      "blockers": [
+        "Actual participant execution, consent, retention and transfer evidence remain HUMAN_ONLY."
+      ],
+      "control_gap": "Learning must record a specific technical successor in its control state before an unattended worker may invent one from historical branches."
+    },
+    "BOOK": {
+      "parent": "SYSTEM_MASTER",
+      "control_ref": "book-system/control-v1",
+      "control_head_at_baseline": "8d242bdc36abef60d662d2af09b6d65e9a256898",
+      "current_state_record": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-008.json",
+      "standing": "ACTIVE__EDITORIAL_CROSSWALK_AND_AUTHORING_LIFECYCLE_AMENDMENT_CLOSED__PUBLICATION_EXPORT_STANDARDS_PROFILE_NEXT",
+      "completed_or_preserved": [
+        "BOOK-SYSTEM-EDITORIAL-CAPABILITY-CROSSWALK-001 closed.",
+        "BOOK-SYSTEM-RESEARCH-VERIFIED-AUTHORING-LIFECYCLE-AMENDMENT-001 closed.",
+        "Canonical Book State Model A-01 PASS on b6938fcfc5c2c24ac23b558de6dfc7f75c382312.",
+        "Service Interface Registry A-01 PASS on 9245cf9ce56f15020369eb490d9e562480825158.",
+        "Lifecycle Transition Engine A-01 PASS on 4a6e3459d6ba94b7ce191e426ca64bef00d23582."
+      ],
+      "current_objective": "BOOK-SYSTEM-PUBLICATION-EXPORT-STANDARDS-PROFILE-001",
+      "implementation_pause": "BOOK-SYSTEM-INTEGRATION-PROPOSAL-RUNTIME-001 executable implementation remains paused until publication/export standards, provenance interoperability and contract re-review remediation close.",
+      "children": ["PROSE"]
+    },
+    "PROSE": {
+      "parent": "BOOK",
+      "root_product": "SYSTEM_MASTER",
+      "control_ref": "literary-prose-engine-001",
+      "control_head_at_baseline": "32bdcfd809045d599346cb5f8bb080ca06313fec",
+      "current_state_record": "qualification/literary-prose-engine-001/LITERARY-PROSE-CONSOLIDATED-WORKSTREAM-STATE-014.json",
+      "standing": "ACTIVE__REAL_LIMITATION_AUTHOR_PACKET_QUALIFIED__EXPLICIT_AUTHOR_LABELS_REQUIRED__REVISION_AUTHORITY_ZERO",
+      "completed_or_preserved": [
+        "Real semantic routing PASS: 9/9 diagnosis allowed, 0/9 revision allowed on tested SHA 1de91bcaedcdd18615f685adeab8a451c7926e97.",
+        "Strength-vs-observation calibration PASS on tested SHA f0cd916930964c294243c26d0a207af69283f74e.",
+        "Six-case real-limitation ground-truth packet infrastructure PASS on tested SHA 42c1412e5c36e0d44875806785d5f009dfb508ca with zero labels and zero revision authority."
+      ],
+      "current_objective": "PROSE-REAL-LIMITATION-AUTHOR-ADJUDICATION-001",
+      "blockers": [
+        "Six explicit author labels are required before blind limitation-ground-truth comparison.",
+        "Generic Continue is not author authority.",
+        "No automatic revision, manuscript mutation or publication authority is granted."
+      ]
+    }
+  },
+  "anti_surprise_rule": "A chat must compare the live control head with control_head_at_baseline/current selected state before continuing. If the head moved, read the new control/state record and reconcile the delta; never announce surprise or continue from this baseline as if it were immutable current state.",
+  "update_rule": "This baseline is a checkpoint. Future current state is selected through CURRENT-AUTHORITY.json and successor state baselines; never rewrite historical baseline facts."
+}
