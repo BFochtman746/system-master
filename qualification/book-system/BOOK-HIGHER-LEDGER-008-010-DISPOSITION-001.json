@@ -1,0 +1,92 @@
+{
+  "disposition_id": "BOOK-HIGHER-LEDGER-008-010-DISPOSITION-001",
+  "effective_date": "2026-09-14",
+  "standing": "CURRENT_DISPOSITION_CLOSED__IMPLEMENTATION_QUALIFICATION_AND_PRODUCTION_REMAIN_OPEN",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "current_authority_id": "CURRENT-AUTHORITY-005",
+  "topology_authority": "governance/SYSTEM-TOPOLOGY-007.json",
+  "component_architecture": "qualification/book-system/BOOK-COMPONENT-ARCHITECTURE-001.json",
+  "reconciliation_basis": "qualification/book-system/BOOK-SYSTEM-ARCHITECTURE-RECOVERY-RECONCILIATION-001.json",
+  "scope_reset_basis": "PRODUCT-SCOPE-RESET-001",
+  "decision_summary": "The remaining higher Book ledger is adjudicated against current nine-peer ownership and current product scope. BOOK-ENG-008 is split, BOOK-ENG-009 is promoted, and BOOK-ENG-010 is removed from the critical path and replaced by a bounded qualification profile. No historical architecture evidence is rewritten or relabeled as current implementation proof.",
+  "dispositions": [
+    {
+      "id": "BOOK-ENG-008",
+      "name": "Professional publication and proof pipeline",
+      "current_disposition": "SPLIT",
+      "critical_path_effect": "CORE_DOCX_PDF_DELIVERY_RETAINED__SPECIALIST_PUBLICATION_TRIGGERED",
+      "book_owned": [
+        "exact canonical manuscript freeze identity",
+        "Book release/package manifest",
+        "publication-readiness semantics",
+        "format request profile",
+        "release approval state",
+        "publication-authority handoff"
+      ],
+      "delegated": {
+        "DOCUMENTS": ["DOCX generation/validation", "PDF generation/validation", "EPUB mechanics when triggered", "generic accessibility transformation/validation", "generic document conversion and artifact mechanics"],
+        "MEDIA": ["audiobook/audio/media rendering when requested"],
+        "CONNECTED_ACTIONS": ["external publication, upload, transmission or other side effects under explicit user authority"]
+      },
+      "triggered_only": ["EPUB-specific production when publication requires it", "channel-specific proof/certification", "publication-specific accessibility certification or conformance work beyond the normal document baseline"],
+      "canonical_component": "BOOK-COMP-11",
+      "non_claims": ["Book does not own a generic document engine.", "Technical export does not grant publication authority.", "This disposition does not prove current DOCX/PDF/EPUB/native/provider fidelity."]
+    },
+    {
+      "id": "BOOK-ENG-009",
+      "name": "Book backup, restore and offline endurance",
+      "current_disposition": "PROMOTE",
+      "critical_path_effect": "SHARED_CRITICAL__ADVANCE_BEFORE_SPECIALIST_PUBLICATION_WORK",
+      "book_owned": [
+        "semantic backup-set definition for a Book",
+        "canonical-state and governed-object recovery invariants",
+        "restore acceptance and verification",
+        "offline continuity expectations for Book work",
+        "crash-recovery semantic validation",
+        "Book-level recovery evidence and regression"
+      ],
+      "delegated": {
+        "CORE": ["physical persistence", "storage", "backup/restore mechanism", "transaction durability", "shared crash recovery", "scheduler/resource/runtime mechanics", "A-01/assurance"]
+      },
+      "canonical_component": "BOOK-COMP-12",
+      "priority": "FIRST_NEW_DEPENDENCY_VALID_BOOK_PACKET_AFTER_THIS_DISPOSITION",
+      "next_packet": "BOOK-ENG-009-SEMANTIC-RECOVERY-PROFILE-001",
+      "non_claims": ["Book does not create a second storage or backup platform.", "Promotion in roadmap priority is not implementation completion.", "Core durability evidence does not by itself prove Book semantic recoverability."]
+    },
+    {
+      "id": "BOOK-ENG-010",
+      "name": "Book-length comparative qualification",
+      "current_disposition": "REMOVE_FROM_CRITICAL_PATH_AND_REPLACE",
+      "critical_path_effect": "DORMANT_HISTORICAL_PROGRAM__REPLACED_BY_BOUNDED_CURRENT_QUALIFICATION_PROFILE",
+      "replacement": [
+        "compact deterministic Book invariant regression",
+        "representative end-to-end author journeys",
+        "periodic exact route/model requalification when material model/runtime/provider changes occur",
+        "targeted independent and human/masterwork evidence where quality claims require it",
+        "whole-app Book integration qualification before production promotion"
+      ],
+      "canonical_component": "BOOK-COMP-13",
+      "historical_preservation_rule": "Historical BOOK-ENG-010 research, tests and comparison evidence remain immutable provenance and may be reused as inputs when exact/current applicability is established; they are not deleted or relabeled.",
+      "non_claims": ["No permanent commercial/world-class comparison laboratory is required for normal release progression.", "Representative regression does not synthesize human quality evidence.", "Historical comparison PASS cannot transfer to changed subjects."
+    }
+  ],
+  "higher_ledger_result": {
+    "book_eng_001": "CLOSED_PRESERVE_NO_REOPEN",
+    "book_eng_002": "CLOSED_ARCHITECTURE_BUILD_SPEC__IMPLEMENTATION_QUALIFICATION_OPEN",
+    "book_eng_003": "SUBSUMED_BY_BOOK_INTELLIGENCE__NO_REOPEN",
+    "book_eng_004": "SUBSUMED_BY_STORY_BIBLE__NO_REOPEN",
+    "book_eng_005": "CLOSED_ARCHITECTURE_BUILD_SPEC__EXACT_TARGET_RUNTIME_MODEL_QUALIFICATION_OPEN",
+    "book_eng_006": "SUBSUMED_NO_REOPEN",
+    "book_eng_007": "CLOSED_ARCHITECTURE_BUILD_SPEC__IMPLEMENTATION_NATIVE_PROVIDER_QUALIFICATION_OPEN",
+    "book_eng_008": "SPLIT_CURRENT_DISPOSITION_CLOSED__IMPLEMENTATION_QUALIFICATION_OPEN",
+    "book_eng_009": "PROMOTED_CURRENT_DISPOSITION_CLOSED__IMPLEMENTATION_QUALIFICATION_OPEN",
+    "book_eng_010": "REPLACED_CURRENT_DISPOSITION_CLOSED__BOUNDED_QUALIFICATION_PROFILE_OPEN"
+  },
+  "objective_closure": {
+    "objective_id": "BOOK-HIGHER-LEDGER-008-010-CURRENT-DISPOSITION-001",
+    "state": "CLOSED",
+    "closure_basis": "Current Authority-005/Topology-007 ownership plus recovered scope-reset evidence and live Book residuals were reconciled into BOOK-COMPONENT-ARCHITECTURE-001.",
+    "next_dependency_valid_objective": "BOOK-ENG-009-SEMANTIC-RECOVERY-PROFILE-001"
+  },
+  "qualification_effect": "NONE_BY_DISPOSITION. This closes the architecture/roadmap decision only. BOOK remains incomplete and all implementation, exact-target, native/provider, human, publication and production gates remain evidence-bound."
+}
