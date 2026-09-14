@@ -77,6 +77,24 @@ variables set. Therefore:
   override documented and exits 0. Cryptic failures train developers to ignore red.
 - Skips are reported as skips. They never count toward a pass.
 
+## S-10 — Verification is a mandatory merge gate
+
+`Required Verification / required-verification` is the canonical merge-protection status
+for `main`. It is not advisory.
+
+- `.github/workflows/required-verification.yml` runs on every pull request targeting `main`
+  and on `merge_group`; it has no path filter that can silently exempt a change.
+- The gate runs `./verify.sh` and separately requires a non-zero Surefire test count.
+- The gate also runs `verification/probe-vacuous-green.sh`, which deliberately drops
+  qualification discovery below the fixed floor and requires Maven to fail for that floor.
+  A gate that cannot demonstrate red in this probe is itself red.
+- The GitHub ruleset/branch protection for `main` must require the exact status context
+  `Required Verification / required-verification` before merge. Removing, renaming, skipping,
+  path-filtering, or making that check optional is a governance change, not a CI cleanup.
+- Administrators and automation must not use bypass authority to merge around a failing or
+  missing required-verification status except for an explicitly recorded emergency recovery
+  whose first successor restores and reruns the gate.
+
 ---
 
 ## Naming and layout
@@ -95,9 +113,10 @@ variables set. Therefore:
 ```
 ./verify.sh                                     # THE command: build + all tests + all qualifiers
 ./verify.sh --ci-only                           # also force the two CI-only gates
+bash verification/probe-vacuous-green.sh        # intentional under-discovery must go red
 
 mvn -B compile                                  # compile all Java (foundation-spine + f-wp-001..012)
-mvn -B test                                     # run all 22 qualification tests via the JUnit bridge
+mvn -B test                                     # run all qualification tests via the JUnit bridge
 java -cp target/classes <TestClass>             # run one qualification test directly
 node .github/scripts/assurance-standards-check.js   # enforce these standards
 ```
