@@ -1,0 +1,163 @@
+name: P05 Governance Schema Foundation Qualification
+
+on:
+  pull_request:
+    paths:
+      - 'governance/CURRENT-AUTHORITY.json'
+      - 'governance/SYSTEM-TOPOLOGY-*.json'
+      - 'governance/WORK-OBLIGATION-REGISTRY-*.json'
+      - 'governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-*.json'
+      - 'governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-*.json'
+      - 'governance/contracts/P05-FOUNDATION-CONTRACT-001.md'
+      - 'governance/schemas/**'
+      - '.github/scripts/validate-governance.js'
+      - '.github/workflows/a01-control-plane-enforcement.yml'
+      - '.github/workflows/p05-governance-schema-foundation-qualification.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify-p05:
+    name: Qualify P05 governance schema validation
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      P05_SUBJECT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Prove exact subject identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${P05_SUBJECT_SHA}"
+          echo "P05_SUBJECT_SHA=${P05_SUBJECT_SHA}"
+
+      - name: Positive governance validation
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "${RUNNER_TEMP}/p05-foundation-evidence"
+          node .github/scripts/validate-governance.js | tee "${RUNNER_TEMP}/p05-foundation-evidence/positive.txt"
+          grep -q 'GOVERNANCE_VALIDATION=PASS' "${RUNNER_TEMP}/p05-foundation-evidence/positive.txt"
+
+      - name: Negative proof - invalid topology enum is rejected
+        shell: bash
+        run: |
+          set -euo pipefail
+          topology_path="$(node -p "require('./governance/CURRENT-AUTHORITY.json').topology")"
+          cp "${topology_path}" "${RUNNER_TEMP}/p05-topology-original.json"
+          P05_TOPOLOGY_PATH="${topology_path}" node - <<'NODE'
+          const fs = require('fs');
+          const p = process.env.P05_TOPOLOGY_PATH;
+          const j = JSON.parse(fs.readFileSync(p, 'utf8'));
+          j.canonical_internal_systems[0].completion = 'INVALID_P05_NEGATIVE_TEST';
+          fs.writeFileSync(p, `${JSON.stringify(j, null, 2)}\n`);
+          NODE
+          set +e
+          node .github/scripts/validate-governance.js > "${RUNNER_TEMP}/p05-foundation-evidence/negative-topology.txt" 2>&1
+          rc=$?
+          set -e
+          test "${rc}" -eq 1
+          grep -q 'completion' "${RUNNER_TEMP}/p05-foundation-evidence/negative-topology.txt"
+          grep -q 'GOVERNANCE_VALIDATION=FAIL' "${RUNNER_TEMP}/p05-foundation-evidence/negative-topology.txt"
+          cp "${RUNNER_TEMP}/p05-topology-original.json" "${topology_path}"
+          echo 'P05_NEGATIVE_TOPOLOGY=PASS'
+
+      - name: Negative proof - invalid authority pointer is rejected
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp governance/CURRENT-AUTHORITY.json "${RUNNER_TEMP}/p05-authority-original.json"
+          node - <<'NODE'
+          const fs = require('fs');
+          const p = 'governance/CURRENT-AUTHORITY.json';
+          const j = JSON.parse(fs.readFileSync(p, 'utf8'));
+          j.obligation_registry = 'NOT_A_REPOSITORY_PATH';
+          fs.writeFileSync(p, `${JSON.stringify(j, null, 2)}\n`);
+          NODE
+          set +e
+          node .github/scripts/validate-governance.js > "${RUNNER_TEMP}/p05-foundation-evidence/negative-authority-pointer.txt" 2>&1
+          rc=$?
+          set -e
+          test "${rc}" -eq 1
+          grep -Eq 'obligation_registry|NOT_A_REPOSITORY_PATH' "${RUNNER_TEMP}/p05-foundation-evidence/negative-authority-pointer.txt"
+          grep -q 'GOVERNANCE_VALIDATION=FAIL' "${RUNNER_TEMP}/p05-foundation-evidence/negative-authority-pointer.txt"
+          cp "${RUNNER_TEMP}/p05-authority-original.json" governance/CURRENT-AUTHORITY.json
+          echo 'P05_NEGATIVE_AUTHORITY_POINTER=PASS'
+
+      - name: Prove restoration and final PASS
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --exit-code -- governance/CURRENT-AUTHORITY.json "$(node -p "require('./governance/CURRENT-AUTHORITY.json').topology")"
+          node .github/scripts/validate-governance.js | tee "${RUNNER_TEMP}/p05-foundation-evidence/final-positive.txt"
+          grep -q 'GOVERNANCE_VALIDATION=PASS' "${RUNNER_TEMP}/p05-foundation-evidence/final-positive.txt"
+          echo 'P05_RESTORATION=PASS'
+
+      - name: Build exact subject-bound receipt
+        shell: bash
+        env:
+          P05_RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs = require('fs');
+          const cp = require('child_process');
+          const authority = JSON.parse(fs.readFileSync('governance/CURRENT-AUTHORITY.json', 'utf8'));
+          const paths = [
+            'governance/CURRENT-AUTHORITY.json',
+            authority.topology,
+            authority.obligation_registry,
+            authority.headless_tool_owner_allocation,
+            authority.capability_crosswalk,
+            'governance/contracts/P05-FOUNDATION-CONTRACT-001.md',
+            'governance/schemas/CURRENT-AUTHORITY-001.schema.json',
+            'governance/schemas/WORK-OBLIGATION-REGISTRY-001.schema.json',
+            'governance/schemas/SYSTEM-TOPOLOGY-001.schema.json',
+            'governance/schemas/TOOL-OWNER-ALLOCATION-001.schema.json',
+            '.github/scripts/validate-governance.js',
+            '.github/workflows/a01-control-plane-enforcement.yml',
+            '.github/workflows/p05-governance-schema-foundation-qualification.yml'
+          ];
+          const subjects = [...new Set(paths)].map((p) => ({
+            path: p,
+            git_blob_sha: cp.execFileSync('git', ['rev-parse', `HEAD:${p}`], {encoding:'utf8'}).trim()
+          }));
+          const receipt = {
+            requirement_or_capability_id: 'P05',
+            owner_path: 'SYSTEM_MASTER/CORE',
+            authority_id: authority.authority_id,
+            status: 'PASS',
+            subject_sha: process.env.P05_SUBJECT_SHA,
+            subjects,
+            qualification: {
+              workflow_name: 'P05 Governance Schema Foundation Qualification',
+              workflow_run_id: Number(process.env.P05_RUN_ID),
+              head_sha: process.env.P05_SUBJECT_SHA,
+              conclusion: 'success'
+            },
+            checks: {
+              positive_validation: 'PASS',
+              negative_topology_enum_rejected: 'PASS',
+              negative_authority_pointer_rejected: 'PASS',
+              exact_subject_restored_and_revalidated: 'PASS'
+            }
+          };
+          fs.writeFileSync(`${process.env.RUNNER_TEMP}/p05-foundation-evidence/p05-foundation-receipt.json`, `${JSON.stringify(receipt, null, 2)}\n`);
+          NODE
+
+      - name: Upload P05 Foundation evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p05-foundation-1.0-evidence
+          path: ${{ runner.temp }}/p05-foundation-evidence
+          if-no-files-found: error
+          retention-days: 90
