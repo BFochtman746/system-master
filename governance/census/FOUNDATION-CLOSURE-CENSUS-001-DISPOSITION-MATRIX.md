@@ -2,23 +2,25 @@
 
 Rebuilt 2026-09-14 under `CURRENT-AUTHORITY-005` / `SYSTEM-TOPOLOGY-007`.
 
-Ownership authority: `SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006`  
-Capability identity: `SYSTEM-MASTER-CAPABILITY-CROSSWALK-003`  
+Inventory authority: `SYSTEM-MASTER-CAPABILITY-CROSSWALK-003` selected through `CURRENT-AUTHORITY-005`  
+Ownership consistency: `SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006`  
 Evidence authority: `governance/census/FOUNDATION-CLOSURE-EVIDENCE-REGISTRY-001.json`
 
-> Historical census artifacts remain provenance only. Contract prose is specification, not acceptance evidence. `COMPLETE_WITH_EVIDENCE` requires a current-authority PASS receipt with exact subject bindings.
+> Historical census/P6 module-allocation artifacts remain provenance and evidence only. They do not enumerate or define the current capability inventory. Current rows enumerate from the capability crosswalk selected by `CURRENT-AUTHORITY-005`; the current allocation is a fail-closed ownership/deferred consistency check.
+
+> Contract prose is specification, not acceptance evidence. `COMPLETE_WITH_EVIDENCE` requires a current-authority PASS receipt whose exact subject Git blobs still match. Historical PASS receipts remain preserved when their subjects drift, but they do not transfer PASS to changed current subjects.
 
 ## Disposition summary
 
 | State | Rows |
 | --- | ---: |
-| `COMPLETE_WITH_EVIDENCE` | 5 |
-| `ACTIVE_GAP` | 45 |
+| `COMPLETE_WITH_EVIDENCE` | 0 |
+| `ACTIVE_GAP` | 50 |
 | `DURABLY_BLOCKED_EXTERNAL_HUMAN_PRIVATE_NATIVE` | 0 |
 | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | 16 |
 | **Total** | **66** |
 
-**Foundation 1.0 completion with evidence: 10% (5 of 50 in-scope rows).**
+**Foundation 1.0 completion with evidence: 0% (0 of 50 in-scope rows).**
 
 ## Current disposition matrix
 
@@ -74,31 +76,31 @@ Evidence authority: `governance/census/FOUNDATION-CLOSURE-EVIDENCE-REGISTRY-001.
 | `C47` | RESERVED | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Reserved unallocated capability identifier. |
 | `C48` | RESERVED | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Reserved unallocated capability identifier. |
 | `C49` | RESERVED | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Reserved unallocated capability identifier. |
-| `P00` | Authority pointer of record | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | Current-authority PASS receipt registered and exact-subject bound. |
-| `P01` | System topology and ownership allocation | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | Current-authority PASS receipt registered and exact-subject bound. |
-| `P02` | Work obligation registry | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | Current-authority PASS receipt registered and exact-subject bound. |
-| `P03` | Evidence store and retention | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | Current-authority PASS receipt registered and exact-subject bound. |
-| `P04` | Content-addressed authority writes | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | Current-authority PASS receipt registered and exact-subject bound. |
-| `P05` | Governance schema validation | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-| `P06` | Control gateway dispatch and admission | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-| `P07` | A-01 admission barrier | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-| `P08` | Qualification execution and PASS semantics | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-| `P09` | Repair broker and durable repair lineage | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-| `P10` | Second-shift supervisor: lanes, leases, fencing | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-| `P11` | Night scheduler and claim authority | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-| `P12` | GitHub to A-01 ingress transport | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-| `P13` | Model routing and local inference | SYSTEM_MASTER/CORE | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Absorbed into C20 LOCALAI. |
-| `P14` | Connector action runtime | SYSTEM_MASTER/CORE | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Absorbed into C27 PLUGINS. |
-| `P15` | Observability, morning receipt and rollback | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
+| `P00` | P00 | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Historical PASS receipt preserved, but current-invalid: `SUBJECT_DRIFT:governance/CURRENT-AUTHORITY.json`; fresh current-subject qualification required. |
+| `P01` | P01 | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Historical PASS receipt preserved, but current-invalid: `SUBJECT_DRIFT:governance/CURRENT-AUTHORITY.json`; fresh current-subject qualification required. |
+| `P02` | P02 | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Historical PASS receipt preserved, but current-invalid: `SUBJECT_DRIFT:governance/CURRENT-AUTHORITY.json`; fresh current-subject qualification required. |
+| `P03` | P03 | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Historical PASS receipt preserved, but current-invalid: `SUBJECT_DRIFT:governance/CURRENT-AUTHORITY.json`; fresh current-subject qualification required. |
+| `P04` | P04 | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Historical PASS receipt preserved, but current-invalid: `SUBJECT_DRIFT:governance/CURRENT-AUTHORITY.json`; fresh current-subject qualification required. |
+| `P05` | P05 | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
+| `P06` | P06 | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
+| `P07` | P07 | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
+| `P08` | P08 | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
+| `P09` | P09 | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
+| `P10` | P10 | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
+| `P11` | P11 | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
+| `P12` | P12 | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
+| `P13` | P13 | SYSTEM_MASTER/CORE | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Absorbed into C20 LOCALAI. |
+| `P14` | P14 | SYSTEM_MASTER/CORE | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Absorbed into C27 PLUGINS. |
+| `P15` | P15 | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
 
 ## Evidence-complete rows
 
-`P00`, `P01`, `P02`, `P03`, and `P04` are the only current `COMPLETE_WITH_EVIDENCE` rows. Their immutable workflow/artifact identities and exact subject blob bindings are recorded in `FOUNDATION-CLOSURE-EVIDENCE-REGISTRY-001.json`.
+`NONE` under the current exact subjects. The historical P00-P04 PASS receipts remain preserved in `FOUNDATION-CLOSURE-EVIDENCE-REGISTRY-001.json`, but all five bind an earlier `CURRENT-AUTHORITY.json` Git blob and therefore do not transfer completion to the current authority subject.
 
 ## Unresolved gap successor register
 
-45 `ACTIVE_GAP` rows remain. Ordering is shared platform dependency first, then the current nine-peer order from Topology 007: CORE, LEARNING, BOOK, DOCUMENTS, SPREADSHEET_DATA, MEDIA, CONNECTED_ACTIONS, RESEARCH_KNOWLEDGE, PROGRAMMING.
+50 `ACTIVE_GAP` rows remain. Ordering is shared platform dependency first, then the current nine-peer order from Topology 007: CORE, LEARNING, BOOK, DOCUMENTS, SPREADSHEET_DATA, MEDIA, CONNECTED_ACTIONS, RESEARCH_KNOWLEDGE, PROGRAMMING.
 
-**Exact next ACTIVE_GAP: `P05` - Governance schema validation.**
+**Exact next ACTIVE_GAP: `P00` - Authority pointer of record.**
 
-After P05, continue `P06-P12`, `P15`, then owner-valid capability gaps. `PROSE` receives no current successor because it is terminally retired.
+Continue `P00-P12`, `P15`, then owner-valid capability gaps in dependency-valid order. `PROSE` receives no current successor because it is terminally retired.
