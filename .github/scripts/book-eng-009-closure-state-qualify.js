@@ -1,5 +1,6 @@
 'use strict';
 
+const crypto = require('crypto');
 const fs = require('fs');
 
 const authorityPath = 'governance/CURRENT-AUTHORITY.json';
@@ -10,10 +11,15 @@ const bindingPath = 'qualification/book-system/lifecycle/BOOK-LIFECYCLE-IMPLEMEN
 const providerPath = 'governance/contracts/CORE-P03-PUBLIC-DURABILITY-OPERATIONS-002.json';
 const higherLedgerPath = 'qualification/book-system/BOOK-HIGHER-LEDGER-008-010-DISPOSITION-001.json';
 const endToEndQualifierPath = '.github/scripts/book-core-p03-end-to-end-qualify.js';
+const historicalHigherLedgerBlobSha = '54569bc4f22408ea65281ef90871f7218c805c74';
 
 function fail(message) { process.stderr.write(`BOOK_ENG_009_CLOSURE_STATE_QUALIFY_FAIL: ${message}\n`); process.exit(1); }
 function assert(condition, message) { if (!condition) fail(message); }
 function readJson(file) { try { return JSON.parse(fs.readFileSync(file, 'utf8')); } catch (error) { fail(`cannot read ${file}: ${error.message}`); } }
+function gitBlobSha(text) {
+  const bytes = Buffer.from(text, 'utf8');
+  return crypto.createHash('sha1').update(Buffer.from(`blob ${bytes.length}\0`, 'utf8')).update(bytes).digest('hex');
+}
 
 for (const file of [authorityPath, controlPath, statePath, priorControlPath, bindingPath, providerPath, higherLedgerPath, endToEndQualifierPath]) {
   assert(fs.existsSync(file), `missing ${file}`);
@@ -25,7 +31,9 @@ const state = readJson(statePath);
 const priorControl = readJson(priorControlPath);
 const binding = readJson(bindingPath);
 const provider = readJson(providerPath);
-const higherLedger = readJson(higherLedgerPath);
+const higherLedgerText = fs.readFileSync(higherLedgerPath, 'utf8');
+
+assert(gitBlobSha(higherLedgerText) === historicalHigherLedgerBlobSha, 'historical higher-ledger bytes changed');
 
 assert(authority.authority_id === 'CURRENT-AUTHORITY-005', 'authority drift');
 assert(authority.book_control_record === 'qualification/book-system/BOOK-SYSTEM-CONTROL-RECORD-015.json', 'global Book control selector unexpectedly changed');
@@ -67,11 +75,10 @@ for (const id of ['P19-01','P19-03','P19-04','P19-05']) {
   assert(binding.preservation_peer_dependencies?.[id]?.provider_satisfaction === 'QUALIFIED_CURRENT', `${id} provider satisfaction missing`);
 }
 
-const bookEng010 = (higherLedger.dispositions || []).find(x => x.id === 'BOOK-ENG-010');
-assert(bookEng010, 'BOOK-ENG-010 historical disposition missing');
-assert(bookEng010.current_disposition === 'REMOVE_FROM_CRITICAL_PATH_AND_REPLACE', 'BOOK-ENG-010 disposition drift');
-assert(bookEng010.canonical_component === 'BOOK-COMP-13', 'BOOK-ENG-010 bounded replacement component drift');
-assert(higherLedger.higher_ledger_result?.book_eng_010 === 'REPLACED_CURRENT_DISPOSITION_CLOSED__BOUNDED_QUALIFICATION_PROFILE_OPEN', 'bounded qualification profile standing missing');
+assert(higherLedgerText.includes('"id": "BOOK-ENG-010"'), 'BOOK-ENG-010 historical disposition missing');
+assert(higherLedgerText.includes('"current_disposition": "REMOVE_FROM_CRITICAL_PATH_AND_REPLACE"'), 'BOOK-ENG-010 disposition drift');
+assert(higherLedgerText.includes('"canonical_component": "BOOK-COMP-13"'), 'BOOK-ENG-010 bounded replacement component drift');
+assert(higherLedgerText.includes('"book_eng_010": "REPLACED_CURRENT_DISPOSITION_CLOSED__BOUNDED_QUALIFICATION_PROFILE_OPEN"'), 'bounded qualification profile standing missing');
 
 const nextControl = control.next_dependency_valid_action || {};
 const nextState = state.next_dependency_valid_action || {};
@@ -88,12 +95,13 @@ assert((control.non_claims || []).some(x => /BOOK-COMP-13 is not advanced ahead/
 
 console.log(JSON.stringify({
   status: 'PASS',
-  qualifier: 'BOOK-ENG-009-CLOSURE-STATE-002',
+  qualifier: 'BOOK-ENG-009-CLOSURE-STATE-003',
   control: control.control_record_id,
   state: state.state_id,
   binding: binding.binding_id,
   book_complete: false,
   eng009: 'COMPLETE_WITH_EXACT_CURRENT_END_TO_END_PROVIDER_EVIDENCE',
+  historical_higher_ledger_blob: historicalHigherLedgerBlobSha,
   next_residual: expectedResidual,
   later_bounded_profile: 'BOOK-COMP-13',
   global_selector: 'UNCHANGED_015_045',
