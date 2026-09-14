@@ -5,6 +5,7 @@ const fs = require('fs');
 const authorityPath = 'governance/CURRENT-AUTHORITY.json';
 const controlPath = 'qualification/book-system/BOOK-SYSTEM-CONTROL-RECORD-017.json';
 const statePath = 'qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-047.json';
+const priorControlPath = 'qualification/book-system/BOOK-SYSTEM-CONTROL-RECORD-015.json';
 const bindingPath = 'qualification/book-system/lifecycle/BOOK-LIFECYCLE-IMPLEMENTATION-BINDING-003.json';
 const providerPath = 'governance/contracts/CORE-P03-PUBLIC-DURABILITY-OPERATIONS-002.json';
 const higherLedgerPath = 'qualification/book-system/BOOK-HIGHER-LEDGER-008-010-DISPOSITION-001.json';
@@ -14,19 +15,17 @@ function fail(message) { process.stderr.write(`BOOK_ENG_009_CLOSURE_STATE_QUALIF
 function assert(condition, message) { if (!condition) fail(message); }
 function readJson(file) { try { return JSON.parse(fs.readFileSync(file, 'utf8')); } catch (error) { fail(`cannot read ${file}: ${error.message}`); } }
 
-for (const file of [authorityPath, controlPath, statePath, bindingPath, providerPath, higherLedgerPath, endToEndQualifierPath]) {
+for (const file of [authorityPath, controlPath, statePath, priorControlPath, bindingPath, providerPath, higherLedgerPath, endToEndQualifierPath]) {
   assert(fs.existsSync(file), `missing ${file}`);
 }
 
 const authority = readJson(authorityPath);
 const control = readJson(controlPath);
 const state = readJson(statePath);
+const priorControl = readJson(priorControlPath);
 const binding = readJson(bindingPath);
 const provider = readJson(providerPath);
-// This recovered ledger is immutable historical provenance and is known to contain
-// legacy JSON syntax damage. Verify the exact disposition markers as text rather than
-// rewriting historical bytes merely to satisfy a new qualifier.
-const higherText = fs.readFileSync(higherLedgerPath, 'utf8');
+const higherLedger = readJson(higherLedgerPath);
 
 assert(authority.authority_id === 'CURRENT-AUTHORITY-005', 'authority drift');
 assert(authority.book_control_record === 'qualification/book-system/BOOK-SYSTEM-CONTROL-RECORD-015.json', 'global Book control selector unexpectedly changed');
@@ -41,12 +40,14 @@ assert(control.completion_truth?.book_eng_009_whole_objective_complete === true,
 assert(state.completion_truth?.BOOK === 'INCOMPLETE', 'Book state falsely complete');
 assert(state.completion_truth?.BOOK_ENG_009 === 'COMPLETE_WITH_EXACT_CURRENT_END_TO_END_PROVIDER_EVIDENCE', 'ENG-009 state closure drift');
 assert(state.completion_truth?.PRODUCTION_CERTIFICATION === 'NO', 'false production certification');
-assert(binding.exact_qualification_evidence?.qualified_head_sha === 'c760dc0c22ba329499ccd0ccb0b60c35b6ab2ed3', 'qualified subject drift');
-assert(binding.exact_qualification_evidence?.required_verification_run_id === 34882444676, 'Required Verification run drift');
-assert(binding.exact_qualification_evidence?.required_verification_job_id === 104104774721, 'Required Verification job drift');
-assert(binding.exact_qualification_evidence?.conclusion === 'success', 'qualification conclusion drift');
-assert(binding.exact_qualification_evidence?.verify_summary?.pass === 35 && binding.exact_qualification_evidence?.verify_summary?.fail === 0 && binding.exact_qualification_evidence?.verify_summary?.skip === 1, 'verification summary drift');
-assert(binding.exact_qualification_evidence?.non_vacuous === 'PASS', 'non-vacuous evidence missing');
+
+const evidence = binding.exact_qualification_evidence || {};
+assert(evidence.qualified_head_sha === 'c760dc0c22ba329499ccd0ccb0b60c35b6ab2ed3', 'qualified subject drift');
+assert(evidence.required_verification_run_id === 34882444676, 'Required Verification run drift');
+assert(evidence.required_verification_job_id === 104104774721, 'Required Verification job drift');
+assert(evidence.conclusion === 'success', 'qualification conclusion drift');
+assert(evidence.verify_summary?.pass === 35 && evidence.verify_summary?.fail === 0 && evidence.verify_summary?.skip === 1, 'verification summary drift');
+assert(evidence.non_vacuous === 'PASS', 'non-vacuous evidence missing');
 
 assert(provider.registry_id === 'CORE-P03-PUBLIC-DURABILITY-OPERATIONS-002', 'provider registry drift');
 assert(provider.provider_system === 'CORE' && provider.owner_path === 'SYSTEM_MASTER/CORE' && provider.domain === 'P03', 'provider ownership drift');
@@ -66,24 +67,35 @@ for (const id of ['P19-01','P19-03','P19-04','P19-05']) {
   assert(binding.preservation_peer_dependencies?.[id]?.provider_satisfaction === 'QUALIFIED_CURRENT', `${id} provider satisfaction missing`);
 }
 
-assert(control.next_dependency_valid_action?.owner === 'SYSTEM_MASTER/BOOK', 'next owner drift');
-assert(control.next_dependency_valid_action?.component_id === 'BOOK-COMP-13', 'next component drift');
-assert(state.next_dependency_valid_action?.component_id === 'BOOK-COMP-13', 'state next component drift');
-assert(higherText.includes('"id": "BOOK-ENG-010"'), 'BOOK-ENG-010 historical disposition missing');
-assert(higherText.includes('"current_disposition": "REMOVE_FROM_CRITICAL_PATH_AND_REPLACE"'), 'BOOK-ENG-010 disposition drift');
-assert(higherText.includes('"canonical_component": "BOOK-COMP-13"'), 'BOOK-ENG-010 replacement component drift');
-assert(higherText.includes('"book_eng_010": "REPLACED_CURRENT_DISPOSITION_CLOSED__BOUNDED_QUALIFICATION_PROFILE_OPEN"'), 'bounded qualification profile standing missing');
-assert(control.next_dependency_valid_action?.forbidden_revival === 'PERMANENT_BOOK_ENG_010_MEGA_COMPARISON_PROGRAM', 'mega-comparison revival fence missing');
+const bookEng010 = (higherLedger.dispositions || []).find(x => x.id === 'BOOK-ENG-010');
+assert(bookEng010, 'BOOK-ENG-010 historical disposition missing');
+assert(bookEng010.current_disposition === 'REMOVE_FROM_CRITICAL_PATH_AND_REPLACE', 'BOOK-ENG-010 disposition drift');
+assert(bookEng010.canonical_component === 'BOOK-COMP-13', 'BOOK-ENG-010 bounded replacement component drift');
+assert(higherLedger.higher_ledger_result?.book_eng_010 === 'REPLACED_CURRENT_DISPOSITION_CLOSED__BOUNDED_QUALIFICATION_PROFILE_OPEN', 'bounded qualification profile standing missing');
+
+const nextControl = control.next_dependency_valid_action || {};
+const nextState = state.next_dependency_valid_action || {};
+const expectedResidual = 'whole-source build graph/shared Core integration dependencies';
+assert(Array.isArray(priorControl.preserved_open_residuals), 'preserved residual ledger missing');
+assert(priorControl.preserved_open_residuals[1] === expectedResidual, 'post-ENG-009 residual order drift');
+assert(nextControl.owner === 'SYSTEM_MASTER/BOOK' && nextState.owner === 'SYSTEM_MASTER/BOOK', 'next owner drift');
+assert(nextControl.residual === expectedResidual && nextState.residual === expectedResidual, 'next preserved residual drift');
+assert(nextControl.objective_id === null && nextState.objective_id === null, 'ungrounded successor objective id was invented');
+assert(nextControl.state === 'READY_FOR_EXACT_OBJECTIVE_ID_SELECTION' && nextState.state === 'READY_FOR_EXACT_OBJECTIVE_ID_SELECTION', 'next residual selection state drift');
+assert(nextControl.later_bounded_qualification_profile === 'BOOK-COMP-13' && nextState.later_bounded_qualification_profile === 'BOOK-COMP-13', 'later bounded qualification profile lost');
+assert(nextControl.forbidden_revival === 'PERMANENT_BOOK_ENG_010_MEGA_COMPARISON_PROGRAM' && nextState.forbidden_revival === 'PERMANENT_BOOK_ENG_010_MEGA_COMPARISON_PROGRAM', 'mega-comparison revival fence missing');
+assert((control.non_claims || []).some(x => /BOOK-COMP-13 is not advanced ahead/i.test(x)), 'dependency-order fence missing');
 
 console.log(JSON.stringify({
   status: 'PASS',
-  qualifier: 'BOOK-ENG-009-CLOSURE-STATE-001',
+  qualifier: 'BOOK-ENG-009-CLOSURE-STATE-002',
   control: control.control_record_id,
   state: state.state_id,
   binding: binding.binding_id,
   book_complete: false,
   eng009: 'COMPLETE_WITH_EXACT_CURRENT_END_TO_END_PROVIDER_EVIDENCE',
-  next_component: 'BOOK-COMP-13',
+  next_residual: expectedResidual,
+  later_bounded_profile: 'BOOK-COMP-13',
   global_selector: 'UNCHANGED_015_045',
   sentinel: 'BOOK_ENG_009_CLOSURE_STATE_QUALIFY_PASS'
 }));
