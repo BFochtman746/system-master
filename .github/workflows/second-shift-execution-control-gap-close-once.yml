@@ -1,4 +1,4 @@
-name: One-shot Second Shift execution-control baseline
+name: One-shot Second Shift execution-control closure
 
 on:
   push:
@@ -6,23 +6,43 @@ on:
       - repair/second-shift-execution-control-29of29-20260914
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  baseline:
+  close-gap:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-      - name: Run exact committed contract suite
+        with:
+          persist-credentials: true
+
+      - name: Apply bounded validator repair
+        run: python3 tools/close_second_shift_execution_control_gap_once.py
+
+      - name: Prove exact committed contract suite
         shell: bash
         run: |
-          set +e
-          node tests/second-shift-execution-control-contract.test.js 2>&1 | tee /tmp/execution-control-before.txt
-          status=${PIPESTATUS[0]}
-          set -e
-          cat /tmp/execution-control-before.txt >> "$GITHUB_STEP_SUMMARY"
-          grep -F '"suite": "SECOND_SHIFT_EXECUTION_CONTROL_CONTRACT_STRESS"' /tmp/execution-control-before.txt
-          grep -F '"cases": 29' /tmp/execution-control-before.txt
-          exit "$status"
+          node --check .github/scripts/second-shift-enforce.js
+          test "$(git rev-parse HEAD:tests/second-shift-execution-control-contract.test.js)" = "51510180c8545407746f2bdd0cd9937379ce5926"
+          git diff --exit-code -- tests/second-shift-execution-control-contract.test.js
+          node tests/second-shift-execution-control-contract.test.js 2>&1 | tee /tmp/execution-control-after.txt
+          grep -F '"suite": "SECOND_SHIFT_EXECUTION_CONTROL_CONTRACT_STRESS"' /tmp/execution-control-after.txt
+          grep -F '"cases": 29' /tmp/execution-control-after.txt
+          grep -F '"passed": 29' /tmp/execution-control-after.txt
+          grep -F '"failed": 0' /tmp/execution-control-after.txt
+          echo '## Exact committed execution-control suite' >> "$GITHUB_STEP_SUMMARY"
+          echo '```text' >> "$GITHUB_STEP_SUMMARY"
+          cat /tmp/execution-control-after.txt >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Persist validator repair
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .github/scripts/second-shift-enforce.js
+          git diff --cached --check
+          git commit -m 'second-shift: close 16-of-29 execution-control gap'
+          git push origin "HEAD:${GITHUB_REF_NAME}"
