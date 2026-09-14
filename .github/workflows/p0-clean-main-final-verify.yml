@@ -1,0 +1,68 @@
+name: P0 Clean Main Final Verify
+
+on:
+  push:
+    branches:
+      - ops/p0-clean-main-final-20260914
+
+permissions:
+  contents: read
+
+jobs:
+  verify-clean-main:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      TARGET_MAIN_SHA: 0fefa72732d8b80f774a56072a7af45146ff010a
+    steps:
+      - name: Checkout exact current main with full history
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TARGET_MAIN_SHA }}
+          fetch-depth: 0
+
+      - name: Materialize clean local main
+        shell: bash
+        run: |
+          set -euo pipefail
+          git checkout -B main "$TARGET_MAIN_SHA"
+          git clean -xfd
+          test -z "$(git status --porcelain)"
+          test "$(git rev-parse HEAD)" = "$TARGET_MAIN_SHA"
+          test "$(git branch --show-current)" = "main"
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Run verify.sh from clean main
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/p0-final"
+          printf 'target_main_sha=%s\n' "$TARGET_MAIN_SHA" | tee "$RUNNER_TEMP/p0-final/final-verify.txt"
+          env -i \
+            HOME="$HOME" \
+            USER="$USER" \
+            PATH="$PATH" \
+            JAVA_HOME="$JAVA_HOME" \
+            LANG="C.UTF-8" \
+            LC_ALL="C.UTF-8" \
+            bash verify.sh 2>&1 | tee "$RUNNER_TEMP/p0-final/final-verify.log"
+          grep -F "SUMMARY  pass=22  fail=0  skip=2" "$RUNNER_TEMP/p0-final/final-verify.log"
+          grep -F "RESULT: PASS" "$RUNNER_TEMP/p0-final/final-verify.log"
+          git rev-parse HEAD | tee -a "$RUNNER_TEMP/p0-final/final-verify.txt"
+          git branch --show-current | tee -a "$RUNNER_TEMP/p0-final/final-verify.txt"
+          test "$(git rev-parse HEAD)" = "$TARGET_MAIN_SHA"
+          test "$(git branch --show-current)" = "main"
+
+      - name: Preserve final proof logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p0-clean-main-final-${{ env.TARGET_MAIN_SHA }}
+          path: ${{ runner.temp }}/p0-final
+          if-no-files-found: warn
