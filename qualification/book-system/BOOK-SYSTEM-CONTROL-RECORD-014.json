@@ -1,7 +1,7 @@
 {
   "control_record_id": "BOOK-SYSTEM-CONTROL-RECORD-014",
   "effective_date": "2026-09-14",
-  "standing": "PREPARED_NOT_SELECTED__BOOK_INCOMPLETE__RECOVERED_ARCHITECTURE_RECONCILED_TO_CURRENT_AUTHORITY__IMPLEMENTATION_AND_QUALIFICATION_OPEN",
+  "standing": "ACTIVE_INCOMPLETE_BOOK__RECOVERED_ARCHITECTURE_RECONCILED_TO_CURRENT_AUTHORITY__IMPLEMENTATION_AND_QUALIFICATION_OPEN",
   "owner_path": "SYSTEM_MASTER/BOOK",
   "parent_product": "SYSTEM_MASTER",
   "control_ref": "book-system/control-v1",
@@ -12,12 +12,12 @@
   "owner_allocation": "governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006.json",
   "capability_crosswalk": "governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json",
   "reconciliation_record": "qualification/book-system/BOOK-SYSTEM-ARCHITECTURE-RECOVERY-RECONCILIATION-001.json",
-  "selection_status": "PREPARED_ON_MAIN__NOT_SELECTED_BY_FROZEN_CURRENT_AUTHORITY",
+  "selection_status": "SELECTED_BY_CURRENT_AUTHORITY_005",
   "historical_predecessor": {
     "control_record_id": "BOOK-SYSTEM-CONTROL-RECORD-013",
     "control_ref": "book-system/control-v1",
     "preserve_exact_history": true,
-    "current_effect": "SUPERSEDED_FOR_PREPARED_CURRENT_MAIN_PROJECTION_ONLY__NOT_REWRITTEN"
+    "current_effect": "SUPERSEDED_FOR_CURRENT_CONTROL__NOT_REWRITTEN"
   },
   "completion_truth": {
     "book_complete": false,
@@ -60,7 +60,7 @@
   },
   "current_objective": {
     "objective_id": "BOOK-HIGHER-LEDGER-008-010-CURRENT-DISPOSITION-001",
-    "state": "READY_AFTER_SELECTOR_PROMOTION_OR_EXPLICIT_BOOK_OWNER_EXECUTION",
+    "state": "READY",
     "stage": "RECONCILE",
     "completion_target": "Adjudicate BOOK-ENG-008, BOOK-ENG-009 and BOOK-ENG-010 against current Authority-005/Topology-007 ownership, recovered scope-reset recommendations and live implementation/qualification gaps. Produce an explicit current disposition without reopening BOOK-ENG-001 through BOOK-ENG-007 absent contradictory evidence.",
     "next_on_clean_close": "Select the first dependency-valid current Book implementation/qualification packet from the adjudicated higher ledger. Do not infer production readiness from architecture closure."
@@ -79,9 +79,9 @@
   ],
   "evidence_rule": "No historical PASS transfers to current changed subjects. Recovered architecture artifacts are preserved as lineage and build-spec evidence only. Current implementation, qualification, native/provider, human and production claims require fresh exact-subject evidence.",
   "supersession": {
-    "supersedes_for_prepared_current_main_projection": "BOOK-SYSTEM-CONTROL-RECORD-013",
+    "supersedes_for_current_control": "BOOK-SYSTEM-CONTROL-RECORD-013",
     "historical_binding_preserved": true,
-    "selector_not_moved_by_this_record": true,
-    "reason": "Selector promotion is a separately gated governance transaction because CURRENT-AUTHORITY and related Foundation evidence are exact-subject bound."
+    "selector_promotion_performed": true,
+    "selector_promotion_commit": "bd9734dadd30cc2ee3250225e6b09119fc3bd650"
   }
 }
