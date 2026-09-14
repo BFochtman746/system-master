@@ -93,7 +93,16 @@ for s in $(ls .github/scripts | grep qualify | grep -E '\.(js|py)$' | sort); do
   fi
 done
 
-hr; echo "4. ASSURANCE STANDARDS"; hr
+hr; echo "4. FOUNDATION CLOSURE MATRIX FRESHNESS"; hr
+if out=$(node .github/scripts/foundation-closure-matrix-freshness-check.js 2>&1); then
+  ok "foundation-closure-matrix-freshness"
+  printf '        %s\n' "$out"
+else
+  bad "foundation-closure-matrix-freshness"
+  sed -n '1,5p' <<< "$out" | sed 's/^/        /'
+fi
+
+hr; echo "5. ASSURANCE STANDARDS"; hr
 # Resolve the base through the checker's portable default (`origin/main`) instead of
 # requiring a local branch literally named `main`; GitHub PR merge checkouts are detached.
 # The checker emits compact JSON for "no changes" and pretty JSON when files changed.
