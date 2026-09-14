@@ -1,0 +1,80 @@
+name: Foundation 1.0 Closure Census Enforcement
+
+on:
+  pull_request:
+    paths:
+      - 'governance/CURRENT-AUTHORITY.json'
+      - 'governance/SYSTEM-TOPOLOGY-007.json'
+      - 'governance/census/**'
+      - 'governance/catalog/SYSTEM-MASTER-SYSTEM-CATALOG-*.json'
+      - 'governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-*.json'
+      - 'governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-*.json'
+      - 'governance/contracts/**'
+      - '.github/scripts/foundation-closure-matrix.js'
+      - '.github/scripts/foundation-closure-reconcile.js'
+      - '.github/workflows/foundation-closure-census-enforcement.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  reconcile-foundation-census:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      FOUNDATION_SUBJECT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Prove checked-out subject identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${FOUNDATION_SUBJECT_SHA}"
+          echo "FOUNDATION_SUBJECT_SHA=${FOUNDATION_SUBJECT_SHA}"
+
+      - name: Parse current census inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check .github/scripts/foundation-closure-matrix.js
+          node --check .github/scripts/foundation-closure-reconcile.js
+          node -e "for (const p of ['governance/CURRENT-AUTHORITY.json','governance/census/SYSTEM-MASTER-FOUNDATION-CLOSURE-CENSUS-001.json','governance/census/FOUNDATION-CLOSURE-EVIDENCE-REGISTRY-001.json']) JSON.parse(require('fs').readFileSync(p,'utf8'));"
+
+      - name: Reconcile current authority pass one
+        shell: bash
+        run: |
+          set -euo pipefail
+          node .github/scripts/foundation-closure-reconcile.js --out "${RUNNER_TEMP}/foundation-1.json"
+
+      - name: Reconcile current authority pass two
+        shell: bash
+        run: |
+          set -euo pipefail
+          node .github/scripts/foundation-closure-reconcile.js --out "${RUNNER_TEMP}/foundation-2.json"
+
+      - name: Require deterministic reconciliation
+        shell: bash
+        run: |
+          set -euo pipefail
+          cmp "${RUNNER_TEMP}/foundation-1.json" "${RUNNER_TEMP}/foundation-2.json"
+          echo 'FOUNDATION_RECONCILIATION_DETERMINISM=PASS'
+
+      - name: Print open-obligation summary
+        shell: bash
+        run: node .github/scripts/foundation-closure-reconcile.js --summary
+
+      - name: Upload exact Foundation 1.0 reconciliation
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: foundation-1-0-reconciliation-${{ github.run_id }}
+          path: ${{ runner.temp }}/foundation-1.json
+          if-no-files-found: error
+          retention-days: 30
