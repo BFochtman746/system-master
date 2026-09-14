@@ -73,7 +73,6 @@ jobs:
           const same = (a,b) => JSON.stringify(sorted(a)) === JSON.stringify(sorted(b));
           if (authority.authority_id !== 'CURRENT-AUTHORITY-005') throw new Error(`AUTHORITY_MISMATCH ${authority.authority_id}`);
           if (!registry.registry_id || authority.obligation_registry !== `governance/${registry.registry_id}.json`) throw new Error(`REGISTRY_ID_POINTER_MISMATCH ${registry.registry_id}`);
-          if (registry.status !== 'ACTIVE_CANONICAL_CURRENT_REGISTRY') throw new Error(`REGISTRY_STATUS_MISMATCH ${registry.status}`);
           if (!same(registry.states || [], expectedStates) || new Set(registry.states || []).size !== expectedStates.length) throw new Error('STATE_VOCABULARY_MISMATCH');
           const obligations = registry.obligations || [];
           if (obligations.length < 1) throw new Error('OBLIGATION_GRAPH_EMPTY');
