@@ -18,13 +18,30 @@
     All work-package sources share a single package and compile as one unit, which
     is why sourceDirectory is the shared root rather than a per-package module. The
     qualification test classes are plain main()-based entry points, not JUnit
-    suites, so they are compiled alongside the production sources and executed
-    directly by the qualify scripts. There is no surefire phase to bind them to.
+    suites, so they are compiled alongside the production sources.
+
+    They are ALSO bound to the standard `mvn test` phase: QualificationBridgeTest
+    (see testSourceDirectory) discovers every compiled *Test class that exposes a
+    main(String[]) and invokes it as a real JUnit dynamic test. Before this binding
+    `mvn test` printed BUILD SUCCESS while running zero tests, so "the build passes"
+    carried no information. The bridge fails when discovery finds fewer classes than
+    expected, so that false green cannot quietly come back.
   </description>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>${junit.jupiter.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
 
   <properties>
     <maven.compiler.release>17</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <junit.jupiter.version>5.10.2</junit.jupiter.version>
+    <surefire.version>3.2.5</surefire.version>
   </properties>
 
   <build>
@@ -33,6 +50,10 @@
          picked up automatically instead of requiring a script edit. -->
     <sourceDirectory>system-master</sourceDirectory>
     <outputDirectory>target/classes</outputDirectory>
+    <!-- Only the JUnit bridge lives here. The qualification classes themselves are
+         compiled from sourceDirectory above into target/classes, and the bridge
+         reaches them reflectively rather than by compile-time dependency. -->
+    <testSourceDirectory>verification/src/test/java</testSourceDirectory>
 
     <plugins>
       <plugin>
@@ -41,6 +62,18 @@
         <version>3.13.0</version>
         <configuration>
           <encoding>UTF-8</encoding>
+        </configuration>
+      </plugin>
+
+      <!-- Binds real test execution to `mvn test`. failIfNoTests guards the specific
+           regression this replaced: a green build that ran nothing at all. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>${surefire.version}</version>
+        <configuration>
+          <failIfNoTests>true</failIfNoTests>
+          <trimStackTrace>false</trimStackTrace>
         </configuration>
       </plugin>
     </plugins>

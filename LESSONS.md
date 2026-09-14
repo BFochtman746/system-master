@@ -126,3 +126,68 @@ Format: **L-nnn — one-line summary** / Symptom / Root cause / Fix / Rule it pr
 - **Rule.** Never edit an identifier for the purpose of satisfying a check. A gate that goes
   green because its evidence was relabelled is worse than a gate that fails honestly. When
   clearing one requires asserting something unverified, stop and surface the decision.
+
+## L-010 — `mvn test` reported BUILD SUCCESS while running zero tests
+
+- **Symptom.** `mvn test` exited 0 with BUILD SUCCESS on every commit. Twenty-two
+  qualification test classes existed and **none of them ran**. "The build passes" was a
+  statement with no content, and it had been relied on as evidence.
+- **Root cause.** The qualification classes are plain `main(String[])` entry points, not JUnit
+  suites, and nothing bound them to the test phase. There was no surefire plugin and no
+  `testSourceDirectory`, so surefire found zero test sources and reported success — the
+  correct behaviour for "no tests," indistinguishable from "all tests passed." The pom's own
+  description had recorded this as a design decision ("There is no surefire phase to bind them
+  to") rather than as the defect it was.
+- **Fix.** Added surefire 3.2.5 + junit-jupiter 5.10.2 and `QualificationBridgeTest`, which
+  discovers every compiled `*Test` class exposing a `main(String[])` and runs it as a JUnit
+  dynamic test. `Fwp001QualificationTest` gets a dedicated case that rebuilds its base64
+  fixture and digest-checks it before invoking. `mvn test` now runs **22 tests**.
+- **Verification.** Proven in both directions, because a green never observed failing is not
+  evidence: removing three compiled test classes reduced discovery from 22 to 19 and tripped
+  the discovery floor (`discovered only 19 qualification classes`); corrupting
+  `Fwp002QualificationTest.class` produced `ClassFormatError: Truncated class file` with a
+  nonzero exit. Restored state returns 22/22.
+- **Rule.** A test phase that can pass while executing nothing is a false instrument. Every
+  suite must assert a floor on how many tests it discovered, and that floor is never lowered
+  to make a build pass. Before trusting any green signal, break something on purpose and
+  confirm it goes red.
+
+## L-011 — A CI-only environment variable made 12 of 21 qualifiers unrunnable locally
+
+- **Symptom.** On a clean checkout, 14 of 21 qualify scripts failed. Twelve died on
+  `RUNNER_TEMP_NOT_SET`, two on cryptic identity errors. Verification was effectively
+  CI-exclusive, so local work could not be checked before pushing.
+- **Root cause.** One file. `fwp001-qualify.js` hard-threw when `RUNNER_TEMP` (injected only
+  by GitHub Actions) was absent, while every *other* `fwp*-qualify.js` already defaulted it.
+  Because `fwp002-qualify.js` shells out to `fwp001-qualify.js` and the chain continues
+  through `012`, that single throw cascaded into twelve failures. Separately, two gates are
+  legitimately CI-shaped (one requires HEAD to *be* a recorded two-parent merge, one requires
+  a CI-supplied subject SHA equal to HEAD) and failed loudly instead of declining politely.
+- **Fix.** Defaulted `RUNNER_TEMP` to an OS temp dir, matching the sibling scripts. Made the
+  two CI-only gates print an explicit `SKIP ... reason=CI_ONLY_GATE` with the override
+  documented, exit 0, and keep their CI behaviour byte-identical. Off-CI result went from
+  7/21 passing to **19 pass + 2 explicit skips, 0 failures**.
+- **Rule.** A missing CI variable is an absence, not an error: default it or skip explicitly.
+  Never let one script's strict environment check cascade through a chain of callers. A gate
+  that cannot apply in the current context says so by name and skips — a cryptic failure
+  teaches developers to ignore red, which is the expensive outcome.
+
+## L-012 — A stale local cache reported a failure that did not exist in the source
+
+- **Symptom.** Immediately after `L-010`/`L-011` were fixed, a verification run reported
+  `fwp003-qualify.js` failing with `ClassFormatError: Truncated class file`. The source was
+  fine and `mvn test` was green on all 22 tests. A later run moved the failure to
+  `fwp005-qualify.js`. A defect that changes identity between runs is not a defect.
+- **Root cause.** Second-order consequence of the `L-011` fix. With `RUNNER_TEMP` now
+  defaulting locally, the qualify scripts write to `workspace/.tmp/` — and they cache
+  *compiled classes* there. A deliberately corrupted class, created to prove the new test
+  binding could actually go red, was picked up from that cache by a later run long after the
+  source had been restored. The cache outlived the condition that produced it.
+- **Fix.** `verify.sh` purges `.tmp/` and `qualification-output/` before every run, so
+  verification always starts from nothing. Both directories, plus `target/`, are now
+  gitignored — there was no `.gitignore` entry for build output, leaving the repository one
+  careless `git add .` away from committing 375 class files.
+- **Rule.** Verification state is derived, never authoritative: purge it at the start of a
+  run rather than trusting it to be current. Treat a failure that moves between runs as
+  evidence of a stale-state bug, not a flaky test. And when a fix introduces a new cache,
+  own its invalidation in the same change — this defect was created by the previous fix.

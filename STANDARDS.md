@@ -55,6 +55,28 @@ Every non-trivial defect fixed adds an entry to `LESSONS.md`. The list is meant 
 the same mistake stops recurring. This is the learning loop; skipping the write-up is
 skipping the point.
 
+## S-08 — A verification signal must be able to fail
+
+A check that cannot go red proves nothing. Concretely:
+
+- A test phase may never pass while executing zero tests. Suites assert a floor on how many
+  tests they discovered, and **that floor is never lowered to make a build pass** (`mvn test`
+  once printed BUILD SUCCESS while running none of 22 test classes — see `L-010`).
+- A new or repaired check is demonstrated in both directions: break something on purpose,
+  confirm red, restore, confirm green. Record both results.
+- Never relabel an identifier, lower a threshold, or widen an exclusion to clear a gate.
+
+## S-09 — Verification runs on a developer machine, not only in CI
+
+`./verify.sh` is the single entry point and must work on a clean checkout with no CI
+variables set. Therefore:
+
+- A CI-injected variable (`RUNNER_TEMP`, `GITHUB_*`) is defaulted, never hard-required. One
+  script's strict check must not cascade through its callers (`L-011`).
+- A gate that genuinely cannot apply locally prints `SKIP <name> reason=CI_ONLY_GATE` with its
+  override documented and exits 0. Cryptic failures train developers to ignore red.
+- Skips are reported as skips. They never count toward a pass.
+
 ---
 
 ## Naming and layout
@@ -71,7 +93,14 @@ skipping the point.
 ## Build and test commands
 
 ```
-mvn -o compile                                  # compile all Java (foundation-spine + f-wp-001..012)
-java -cp target/classes <TestClass>             # run one qualification test
+./verify.sh                                     # THE command: build + all tests + all qualifiers
+./verify.sh --ci-only                           # also force the two CI-only gates
+
+mvn -B compile                                  # compile all Java (foundation-spine + f-wp-001..012)
+mvn -B test                                     # run all 22 qualification tests via the JUnit bridge
+java -cp target/classes <TestClass>             # run one qualification test directly
 node .github/scripts/assurance-standards-check.js   # enforce these standards
 ```
+
+`./verify.sh` exits 0 only when everything that ran passed. Skips are reported as skips and
+never inflate a pass.

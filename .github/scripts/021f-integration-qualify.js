@@ -6,6 +6,15 @@ const write=(n,v)=>fs.writeFileSync(path.join(evidenceDir,n),String(v).endsWith(
 function git(args,encoding='utf8'){const r=spawnSync('git',['-c',`safe.directory=${ws}`,...args],{cwd:ws,encoding,shell:false,windowsHide:true});if(r.error||r.status!==0)throw new Error(`GIT_FAILED:${args.join(' ')}:${r.error?r.error.message:String(r.stderr||r.stdout)}`);return r.stdout;}
 function run(cmd,args){const r=spawnSync(cmd,args,{cwd:ws,encoding:'utf8',shell:false,windowsHide:true});const out=`${r.stdout||''}${r.stderr||''}`;if(r.error||r.status!==0)throw new Error(`${cmd.toUpperCase()}_FAILED:${r.error?r.error.message:out}`);return out;}
 function walk(dir,out=[]){for(const e of fs.readdirSync(dir,{withFileTypes:true})){const p=path.join(dir,e.name);e.isDirectory()?walk(p,out):out.push(p);}return out;}
+// CI-ONLY GATE. This qualifier asserts HEAD *is* the exact two-parent integration
+// merge commit recorded in INTEGRATION-BINDING.json. On any ordinary checkout HEAD is
+// not that merge, so it failed with a cryptic MERGE_PARENT_MISMATCH that looked like a
+// broken build rather than "this gate does not apply here". Skip explicitly instead.
+// Force it anywhere with SYSTEM_MASTER_RUN_CI_ONLY=1.
+if(process.env.GITHUB_ACTIONS!=='true'&&process.env.SYSTEM_MASTER_RUN_CI_ONLY!=='1'){
+ console.log('SKIP 021F-INTEGRATION reason=CI_ONLY_GATE detail=requires_HEAD_to_be_the_recorded_two_parent_integration_merge override=SYSTEM_MASTER_RUN_CI_ONLY=1');
+ process.exit(0);
+}
 try{
  const binding=JSON.parse(fs.readFileSync(path.join(ws,'system-master','021f-integration','INTEGRATION-BINDING.json'),'utf8'));
  const head=git(['rev-parse','HEAD']).trim();const parents=git(['rev-list','--parents','-n','1','HEAD']).trim().split(/\s+/).slice(1);

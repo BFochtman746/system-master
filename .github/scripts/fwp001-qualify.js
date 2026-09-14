@@ -2,15 +2,20 @@
 
 const crypto = require('crypto');
 const fs = require('fs');
+const os = require('os');
 const path = require('path');
 const { spawnSync } = require('child_process');
 
 const workspace = process.env.GITHUB_WORKSPACE || process.cwd();
-const runnerTemp = process.env.RUNNER_TEMP;
 const runId = process.env.GITHUB_RUN_ID || 'local';
-if (!runnerTemp) {
-  throw new Error('RUNNER_TEMP_NOT_SET');
-}
+// RUNNER_TEMP is injected by GitHub Actions and is simply absent on a developer
+// machine — an absence, not an error. This script used to throw RUNNER_TEMP_NOT_SET
+// here, which made it unrunnable off CI; because fwp002-qualify.js shells out to
+// THIS script (and 003..012 chain likewise), that single throw failed all twelve
+// work-package qualifiers locally. Every other fwp*-qualify.js already defaults the
+// same way, so this restores consistency rather than inventing a new convention.
+const runnerTemp = process.env.RUNNER_TEMP
+  || fs.mkdtempSync(path.join(os.tmpdir(), `system-master-fwp001-${runId}-`));
 
 const packageRoot = path.join(workspace, 'system-master', 'f-wp-001');
 const evidenceDir = path.join(runnerTemp, `system-master-fwp001-${runId}`);
