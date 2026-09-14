@@ -1,90 +1,86 @@
 name: P00 Authority Pointer Foundation Qualification
 
 on:
-  push:
-    paths:
-      - 'governance/CURRENT-AUTHORITY.json'
-      - 'governance/contracts/P00-FOUNDATION-CONTRACT-001.md'
-      - '.github/scripts/validate-governance.js'
-      - '.github/scripts/system-brief.js'
-      - '.github/workflows/p00-authority-pointer-foundation-qualification.yml'
   pull_request:
+    branches:
+      - main
     paths:
       - 'governance/CURRENT-AUTHORITY.json'
+      - 'governance/SYSTEM-TOPOLOGY-007.json'
+      - 'governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006.json'
+      - 'governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json'
+      - 'governance/WORK-OBLIGATION-REGISTRY-*.json'
+      - 'governance/census/SYSTEM-MASTER-FOUNDATION-CLOSURE-CENSUS-001.json'
       - 'governance/contracts/P00-FOUNDATION-CONTRACT-001.md'
       - '.github/scripts/validate-governance.js'
       - '.github/scripts/system-brief.js'
+      - '.github/scripts/p00-authority-pointer-foundation-qualify.js'
+      - '.github/workflows/p00-authority-pointer-foundation-qualification.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'governance/CURRENT-AUTHORITY.json'
+      - 'governance/SYSTEM-TOPOLOGY-007.json'
+      - 'governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006.json'
+      - 'governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json'
+      - 'governance/WORK-OBLIGATION-REGISTRY-*.json'
+      - 'governance/census/SYSTEM-MASTER-FOUNDATION-CLOSURE-CENSUS-001.json'
+      - 'governance/contracts/P00-FOUNDATION-CONTRACT-001.md'
+      - '.github/scripts/validate-governance.js'
+      - '.github/scripts/system-brief.js'
+      - '.github/scripts/p00-authority-pointer-foundation-qualify.js'
       - '.github/workflows/p00-authority-pointer-foundation-qualification.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: p00-authority-pointer-foundation-${{ github.event.pull_request.number || github.ref || github.sha }}
+  cancel-in-progress: true
+
 jobs:
   qualify:
-    runs-on: ubuntu-latest
+    name: p00-current-authority-qualification
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
     steps:
-      - name: Checkout exact P00 subject
+      - name: Checkout exact qualification subject
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 1
           persist-credentials: false
+
       - name: Pin Node runtime
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: '22'
+
       - name: Run exact P00 acceptance target
         shell: bash
         run: |
           set -euo pipefail
           node .github/scripts/validate-governance.js | tee /tmp/p00-validate-governance.log
           node .github/scripts/system-brief.js | tee /tmp/p00-system-brief.log
-      - name: Emit exact-subject P00 evidence
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p qualification-output
-          python3 - <<'PY'
-          import hashlib
-          import json
-          import os
-          import subprocess
-          from pathlib import Path
 
-          subjects = [
-              'governance/CURRENT-AUTHORITY.json',
-              'governance/contracts/P00-FOUNDATION-CONTRACT-001.md',
-              '.github/scripts/validate-governance.js',
-              '.github/scripts/system-brief.js',
-              '.github/workflows/p00-authority-pointer-foundation-qualification.yml',
-          ]
-          authority = json.loads(Path('governance/CURRENT-AUTHORITY.json').read_text(encoding='utf-8'))
-          bindings = []
-          for path in subjects:
-              blob = subprocess.check_output(['git', 'rev-parse', f'HEAD:{path}'], text=True).strip()
-              bindings.append({'path': path, 'git_blob_sha': blob})
-          evidence = {
-              'evidence_schema': '1.0',
-              'contract_id': 'P00-FOUNDATION-1.0',
-              'requirement_or_capability_id': 'P00',
-              'owner_path': 'SYSTEM_MASTER/CORE',
-              'authority_id': authority['authority_id'],
-              'status': 'PASS',
-              'source_identity': os.environ['GITHUB_SHA'],
-              'acceptance_command': 'node .github/scripts/validate-governance.js && node .github/scripts/system-brief.js',
-              'subjects': bindings,
-              'logs': {
-                  'validate_governance_sha256': hashlib.sha256(Path('/tmp/p00-validate-governance.log').read_bytes()).hexdigest(),
-                  'system_brief_sha256': hashlib.sha256(Path('/tmp/p00-system-brief.log').read_bytes()).hexdigest(),
-              },
-          }
-          Path('qualification-output/p00-foundation-1.0.json').write_text(json.dumps(evidence, sort_keys=True, indent=2) + '\n', encoding='utf-8')
-          print(json.dumps(evidence, sort_keys=True))
-          PY
-      - name: Preserve machine-readable P00 qualification evidence
-        uses: actions/upload-artifact@v4
+      - name: Qualify P00 exact current authority pointer
+        shell: bash
+        env:
+          P00_SUBJECT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: node .github/scripts/p00-authority-pointer-foundation-qualify.js
+
+      - name: Inspect machine-readable P00 evidence
+        shell: bash
+        run: cat qualification-output/p00-foundation-1.0.json
+
+      - name: Preserve P00 qualification evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: p00-foundation-1.0-evidence
+          name: p00-foundation-1.0-evidence-current
           path: qualification-output/p00-foundation-1.0.json
           if-no-files-found: error
           retention-days: 30
