@@ -1,0 +1,92 @@
+name: P0 PR86 verification truth proof
+
+on:
+  push:
+    branches:
+      - proof/p0-pr86-verification-20260914
+
+permissions:
+  contents: read
+
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      REPO: BFochtman746/system-master
+      TARGET_SHA: 1dceaa7bfe8eff3b224565a43d36556aeb5eaa6c
+    steps:
+      - name: Prove discovery floor goes red
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --no-tags "https://github.com/${REPO}.git" discovery
+          cd discovery
+          git checkout --detach "$TARGET_SHA"
+          test "$(git rev-parse HEAD)" = "$TARGET_SHA"
+          test -z "$(git status --porcelain)"
+          mvn -B -q test-compile
+          mapfile -t classes < <(find target/classes -type f -name '*Test.class' ! -name '*$*' | sort)
+          echo "discovered_before_break=${#classes[@]}"
+          if (( ${#classes[@]} < 20 )); then
+            echo "baseline discovery already below floor" >&2
+            exit 1
+          fi
+          remove_count=$(( ${#classes[@]} - 19 ))
+          echo "removing_test_classes=$remove_count"
+          for ((i=0; i<remove_count; i++)); do
+            echo "remove ${classes[$i]}"
+            rm -f "${classes[$i]}"
+          done
+          set +e
+          mvn -B surefire:test > /tmp/p0-discovery-red.log 2>&1
+          rc=$?
+          set -e
+          cat /tmp/p0-discovery-red.log
+          if [[ $rc -eq 0 ]]; then
+            echo "ERROR: discovery-floor mutation stayed green" >&2
+            exit 1
+          fi
+          grep -F "discovered only 19 qualification classes" /tmp/p0-discovery-red.log
+          echo "PROOF_DISCOVERY_FLOOR=RED rc=$rc"
+
+      - name: Prove corrupt compiled qualification goes red
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --no-tags "https://github.com/${REPO}.git" corruption
+          cd corruption
+          git checkout --detach "$TARGET_SHA"
+          test "$(git rev-parse HEAD)" = "$TARGET_SHA"
+          test -z "$(git status --porcelain)"
+          mvn -B -q test-compile
+          victim="$(find target/classes -type f -name '*Test.class' ! -name '*$*' | sort | grep -v 'Fwp001QualificationTest.class' | head -1)"
+          test -n "$victim"
+          echo "corrupting=$victim"
+          printf '\xCA\xFE\xBA\xBE' > "$victim"
+          set +e
+          mvn -B surefire:test > /tmp/p0-corruption-red.log 2>&1
+          rc=$?
+          set -e
+          cat /tmp/p0-corruption-red.log
+          if [[ $rc -eq 0 ]]; then
+            echo "ERROR: corrupted qualification class stayed green" >&2
+            exit 1
+          fi
+          grep -E "ClassFormatError|Truncated class file|invalid class|bad class" /tmp/p0-corruption-red.log
+          echo "PROOF_CORRUPT_CLASS=RED rc=$rc"
+
+      - name: Restore exact PR head and prove green
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --no-tags "https://github.com/${REPO}.git" green
+          cd green
+          git checkout --detach "$TARGET_SHA"
+          test "$(git rev-parse HEAD)" = "$TARGET_SHA"
+          git clean -fdx
+          test -z "$(git status --porcelain)"
+          bash ./verify.sh | tee /tmp/p0-pr86-green.log
+          grep -F "RESULT: PASS" /tmp/p0-pr86-green.log
+          grep -E "SUMMARY  pass=[0-9]+  fail=0  skip=[0-9]+" /tmp/p0-pr86-green.log
+          echo "PROOF_RESTORED=GREEN"
