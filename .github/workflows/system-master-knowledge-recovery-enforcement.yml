@@ -3,11 +3,16 @@ name: System Master Knowledge Recovery Enforcement
 on:
   pull_request:
     paths:
+      - 'governance/CURRENT-AUTHORITY.json'
+      - 'governance/SYSTEM-TOPOLOGY-007.json'
+      - 'governance/SYSTEM-COMPLETION-STATUS-002.json'
+      - 'governance/WORK-OBLIGATION-REGISTRY-013.json'
       - 'governance/knowledge-recovery/**'
       - 'governance/catalog/ingest/**'
+      - 'governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json'
       - 'governance/catalog/schemas/SYSTEM-MASTER-*'
       - 'governance/catalog/system-packets/PROGRAMMING.json'
-      - '.github/scripts/a01-system-master-knowledge-recovery-001.js'
+      - '.github/scripts/system-master-knowledge-recovery-current-enforce.js'
       - 'qualification/a01/registry.json'
       - '.github/workflows/system-master-knowledge-recovery-enforcement.yml'
   workflow_dispatch:
@@ -16,7 +21,7 @@ permissions:
   contents: read
 
 jobs:
-  deterministic-pilot:
+  current-authority-enforcement:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -24,12 +29,14 @@ jobs:
         with:
           fetch-depth: 1
           persist-credentials: false
-      - name: Parse contracts and manifest
+
+      - name: Parse current authority and preserved lineage inputs
         shell: bash
         run: |
-          node -e "for (const p of ['governance/catalog/schemas/SYSTEM-MASTER-INGEST-MANIFEST-001.schema.json','governance/catalog/schemas/SYSTEM-MASTER-ASSET-CATALOG-001.schema.json','governance/catalog/schemas/SYSTEM-MASTER-TRACE-GRAPH-001.schema.json','governance/catalog/ingest/programming/PROGRAMMING-INGEST-MANIFEST-001.json','qualification/a01/registry.json']) JSON.parse(require('fs').readFileSync(p,'utf8'));"
-          node --check .github/scripts/a01-system-master-knowledge-recovery-001.js
-      - name: Enforce supervised registration
+          node -e "for (const p of ['governance/CURRENT-AUTHORITY.json','governance/SYSTEM-TOPOLOGY-007.json','governance/SYSTEM-COMPLETION-STATUS-002.json','governance/WORK-OBLIGATION-REGISTRY-013.json','governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json','governance/catalog/ingest/programming/PROGRAMMING-INGEST-MANIFEST-003.json','governance/knowledge-recovery/SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001-SUPERVISED-ACCEPTANCE.json','qualification/a01/registry.json']) JSON.parse(require('fs').readFileSync(p,'utf8'));"
+          node --check .github/scripts/system-master-knowledge-recovery-current-enforce.js
+
+      - name: Preserve supervised registration lineage
         shell: bash
         run: |
           node - <<'NODE'
@@ -38,30 +45,31 @@ jobs:
           if (r.registry_version < 30) throw new Error('REGISTRY_V30_REQUIRED');
           if (!q) throw new Error('KNOWLEDGE_RECOVERY_REGISTRATION_MISSING');
           if (q.workstream_id !== 'SYSTEM-MASTER' || q.gate_class !== 'focused' || q.source !== 'subject') throw new Error('KNOWLEDGE_RECOVERY_REGISTRATION_BOUNDARY');
-          if (q.overnight_eligible !== false) throw new Error('FIRST_RUN_MUST_NOT_BE_OVERNIGHT_ELIGIBLE');
-          console.log('KNOWLEDGE_RECOVERY_SUPERVISED_REGISTRATION=PASS');
+          if (q.overnight_eligible !== false) throw new Error('HISTORICAL_REGISTRATION_MUST_REMAIN_NON_OVERNIGHT');
+          console.log('KNOWLEDGE_RECOVERY_HISTORICAL_REGISTRATION=PASS');
           NODE
-      - name: Run deterministic pass one
+
+      - name: Enforce current authority pass one
         env:
-          A01_EVIDENCE_DIR: ${{ runner.temp }}/kr-pass-1
-        run: node .github/scripts/a01-system-master-knowledge-recovery-001.js
-      - name: Run deterministic pass two
+          A01_EVIDENCE_DIR: ${{ runner.temp }}/kr-current-1
+        run: node .github/scripts/system-master-knowledge-recovery-current-enforce.js
+
+      - name: Enforce current authority pass two
         env:
-          A01_EVIDENCE_DIR: ${{ runner.temp }}/kr-pass-2
-        run: node .github/scripts/a01-system-master-knowledge-recovery-001.js
-      - name: Compare deterministic products
+          A01_EVIDENCE_DIR: ${{ runner.temp }}/kr-current-2
+        run: node .github/scripts/system-master-knowledge-recovery-current-enforce.js
+
+      - name: Compare deterministic current-authority reports
         shell: bash
         run: |
-          cmp '${{ runner.temp }}/kr-pass-1/programming-asset-catalog.json' '${{ runner.temp }}/kr-pass-2/programming-asset-catalog.json'
-          cmp '${{ runner.temp }}/kr-pass-1/programming-trace-graph.json' '${{ runner.temp }}/kr-pass-2/programming-trace-graph.json'
-          cmp '${{ runner.temp }}/kr-pass-1/programming-source-observations.json' '${{ runner.temp }}/kr-pass-2/programming-source-observations.json'
-          cmp '${{ runner.temp }}/kr-pass-1/knowledge-recovery-report.json' '${{ runner.temp }}/kr-pass-2/knowledge-recovery-report.json'
-          echo 'KNOWLEDGE_RECOVERY_DETERMINISM=PASS'
-      - name: Upload hosted pilot evidence
+          cmp '${{ runner.temp }}/kr-current-1/knowledge-recovery-current-authority.json' '${{ runner.temp }}/kr-current-2/knowledge-recovery-current-authority.json'
+          echo 'KNOWLEDGE_RECOVERY_CURRENT_AUTHORITY_DETERMINISM=PASS'
+
+      - name: Upload current-authority enforcement evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: knowledge-recovery-hosted-${{ github.run_id }}
-          path: ${{ runner.temp }}/kr-pass-1
+          name: knowledge-recovery-current-authority-${{ github.run_id }}
+          path: ${{ runner.temp }}/kr-current-1
           if-no-files-found: error
           retention-days: 30
