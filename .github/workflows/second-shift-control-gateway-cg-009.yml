@@ -19,6 +19,7 @@ jobs:
   qualify:
     name: Dependency DAG / Concurrency / Cancellation / Node ${{ matrix.node }}
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
