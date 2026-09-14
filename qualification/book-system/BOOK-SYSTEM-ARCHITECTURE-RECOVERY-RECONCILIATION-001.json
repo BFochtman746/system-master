@@ -1,0 +1,134 @@
+{
+  "reconciliation_id": "BOOK-SYSTEM-ARCHITECTURE-RECOVERY-RECONCILIATION-001",
+  "effective_date": "2026-09-14",
+  "standing": "CURRENT_MAIN_RECONCILIATION_COMPLETE__SELECTOR_PROMOTION_SEPARATELY_GATED",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "current_authority_id": "CURRENT-AUTHORITY-005",
+  "current_authority_ref": "governance/CURRENT-AUTHORITY.json",
+  "current_topology_id": "SYSTEM-TOPOLOGY-007",
+  "current_topology_ref": "governance/SYSTEM-TOPOLOGY-007.json",
+  "current_completion_ref": "governance/SYSTEM-COMPLETION-STATUS-002.json",
+  "current_owner_allocation_ref": "governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006.json",
+  "current_capability_crosswalk_ref": "governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json",
+  "purpose": "Reconcile the recovered Book architecture/build-spec lineage with current main without rewriting historical Book evidence, transferring qualification PASS, changing the frozen architectural authority set, or silently promoting a stale Book control record.",
+  "historical_control_inputs": {
+    "control_ref": "book-system/control-v1",
+    "control_record": "qualification/book-system/BOOK-SYSTEM-CONTROL-RECORD-013.json",
+    "reconciled_state": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-043.json",
+    "historical_disposition": "PRESERVED_ON_BOOK_CONTROL_REF__STALE_FOR_CURRENT_MAIN_PROJECTION",
+    "stale_reasons": [
+      "BOOK-SYSTEM-CONTROL-RECORD-013 binds SYSTEM-TOPOLOGY-005 instead of current SYSTEM-TOPOLOGY-007.",
+      "BOOK-SYSTEM-CONTROL-RECORD-013 and BOOK-SYSTEM-RECONCILED-STATE-043 bind SYSTEM-COMPLETION-STATUS-001 instead of current SYSTEM-COMPLETION-STATUS-002.",
+      "Their exact-next BOOK-RECONSTRUCTION-B02-B state predates later recovered Book architecture/build-spec closure work and cannot be replayed as current truth."
+    ],
+    "rewrite_forbidden": true
+  },
+  "recovered_evidence_sources": [
+    {
+      "artifact": "UAF-BOOK-ARCHITECTURE-CLOSURE-REPAIR-001-R6-REPORT.md",
+      "disposition": "RECOVERED_GOVERNING_BOOK_PREREQUISITE_BUILD_SPEC_CLOSURE",
+      "key_truth": "Zero live prerequisite build-spec residuals across Book Intelligence, foundation/project admission, collaboration, durable jobs/resources, lifecycle runtime and existing-book recovery; implementation and production gaps remain open."
+    },
+    {
+      "artifact": "UAF-BOOK-INTELLIGENCE-CLOSURE-AUDIT-002-REPORT.md",
+      "disposition": "RECOVERED_BOOK_INTELLIGENCE_ARCHITECTURE_CLOSURE",
+      "key_truth": "Book Intelligence 001-021, P00-P20 lifecycle phases and 227 lifecycle atomic steps are architecturally accounted for with zero material semantic residuals; runtime qualification was not performed."
+    },
+    {
+      "artifact": "UAF-BOOK-STORYBIBLE-CLOSURE-AUDIT-001-REPORT.md",
+      "disposition": "RECOVERED_STORY_BIBLE_ARCHITECTURE_CLOSURE",
+      "key_truth": "Story Bible SB-01 through SB-36 are architecturally accounted for with zero material semantic residuals; computer implementation and executable qualification remain deferred."
+    },
+    {
+      "artifact": "UAF-BOOK-SECURE-RESEARCH-FOUNDATION-001-REPORT.md",
+      "disposition": "RECOVERED_BOOK_ENG_002_BUILD_SPEC_CLOSURE",
+      "key_truth": "BOOK-ENG-002 is architecture/build-spec closed; portable WARC assertions do not establish whole-app or production closure."
+    },
+    {
+      "artifact": "UAF-BOOK-LOCAL-MODEL-RUNTIME-QUALIFICATION-001-REPORT.md",
+      "disposition": "RECOVERED_BOOK_ENG_003_005_RECONCILIATION",
+      "key_truth": "BOOK-ENG-003 and BOOK-ENG-004 are subsumed by already-closed Book Intelligence/Story Bible architecture; BOOK-ENG-005 is architecture/build-spec closed while exact target runtime/model qualification remains open."
+    },
+    {
+      "artifact": "UAF-BOOK-MANUSCRIPT-LIBRARY-SEMANTIC-INGESTION-001-REPORT.md",
+      "disposition": "RECOVERED_BOOK_ENG_006_007_RECONCILIATION",
+      "key_truth": "BOOK-ENG-006 is no-reopen/subsumed; BOOK-ENG-007 is architecture/build-spec closed while whole-source, native provider/parser and production qualification remain open."
+    },
+    {
+      "artifact": "PRODUCT-SCOPE-RESET-001.md",
+      "disposition": "RECOVERED_PLANNING_INPUT_ONLY__NOT_CURRENT_AUTHORITY",
+      "key_truth": "Proposes splitting BOOK-ENG-008, promoting BOOK-ENG-009 and removing BOOK-ENG-010 from the critical path; these recommendations require current-main adjudication before canonization."
+    }
+  ],
+  "current_book_truth": {
+    "system_completion": "INCOMPLETE_ACTIVE_SYSTEM",
+    "architecture_owner": "SYSTEM_MASTER/BOOK",
+    "canonical_book_state_owner": "SYSTEM_MASTER/BOOK",
+    "author_final_semantic_and_creative_authority": true,
+    "prose": "COMPLETE_RETIRED_TERMINAL__PROVENANCE_ONLY__NO_ACTIVE_DOMAIN",
+    "prerequisite_build_spec_standing": "CLOSED__ZERO_LIVE_PREREQUISITE_BUILD_SPEC_RESIDUALS",
+    "book_intelligence_standing": "ARCHITECTURE_CLOSED__IMPLEMENTATION_AND_RUNTIME_QUALIFICATION_OPEN",
+    "story_bible_standing": "ARCHITECTURE_CLOSED__IMPLEMENTATION_AND_EXECUTABLE_QUALIFICATION_OPEN",
+    "higher_ledger": {
+      "BOOK-ENG-001": "CLOSED_PRESERVE_NO_REOPEN",
+      "BOOK-ENG-002": "CLOSED_ARCHITECTURE_BUILD_SPEC__IMPLEMENTATION_QUALIFICATION_OPEN",
+      "BOOK-ENG-003": "SUBSUMED_BY_BOOK_INTELLIGENCE__NO_REOPEN",
+      "BOOK-ENG-004": "SUBSUMED_BY_STORY_BIBLE__NO_REOPEN",
+      "BOOK-ENG-005": "CLOSED_ARCHITECTURE_BUILD_SPEC__EXACT_TARGET_RUNTIME_MODEL_QUALIFICATION_OPEN",
+      "BOOK-ENG-006": "SUBSUMED_NO_REOPEN",
+      "BOOK-ENG-007": "CLOSED_ARCHITECTURE_BUILD_SPEC__IMPLEMENTATION_NATIVE_PROVIDER_QUALIFICATION_OPEN",
+      "BOOK-ENG-008": "CURRENT_DISPOSITION_REQUIRED",
+      "BOOK-ENG-009": "CURRENT_DISPOSITION_REQUIRED",
+      "BOOK-ENG-010": "CURRENT_DISPOSITION_REQUIRED"
+    },
+    "computer_implementation_complete": false,
+    "whole_app_executable_qualification_complete": false,
+    "production_certified": false
+  },
+  "current_authority_boundary_reconciliation": [
+    "BOOK owns Book lifecycle truth, canonical manuscript/book state, Story Bible/canon meaning, author-decision routing, versioning/rollback and Book-specific workflow semantics.",
+    "CORE retains shared runtime, data/platform, assurance, continuity and A-01 infrastructure authority; Book domain profiles do not create a second shared orchestrator or shared platform authority.",
+    "DOCUMENTS owns generic DOCX/PDF/PPTX/OCR/file/document artifact mechanics. Book may require manuscript outputs but does not absorb generic Documents mechanics.",
+    "RESEARCH_KNOWLEDGE owns general research/knowledge/geospatial retrieval and provenance semantics; Book owns only Book-specific use, admission and interpretation of research evidence through admitted interfaces.",
+    "CONNECTED_ACTIONS retains browser/communication/calendar/plugin external-side-effect policy. Book workflows do not inherit external side-effect authority merely by requesting an action.",
+    "Historical PLATFORM/SYSTEM-ORCHESTRATOR identifiers in recovered Book packets remain lineage inputs and must be rebound to current peer/shared interfaces before implementation; they do not create additional current peer systems.",
+    "Author, private-data, native-provider, rights/legal, publication, production and external-provider standing must remain real and cannot be synthesized by Book architecture closure."
+  ],
+  "preserved_open_residual_classes": [
+    "Whole-source build graph and missing shared Core integration dependencies.",
+    "Collaboration product runtime implementation gaps.",
+    "Durable jobs/resource runtime hardening and target calibration.",
+    "Lifecycle/deep-capability executable qualification.",
+    "Existing-book native PDF/OCR/provider fidelity qualification.",
+    "Local model/runtime exact-target qualification and human/independent evaluation.",
+    "Book-ENG-007 secure parser/provider implementation and whole-source integration.",
+    "Creative/masterwork empirical and human evidence.",
+    "Future implementation work-package instances inherited from recovered build-spec packets.",
+    "Whole-app qualification and production certification."
+  ],
+  "current_next_architecture_action": {
+    "objective_id": "BOOK-HIGHER-LEDGER-008-010-CURRENT-DISPOSITION-001",
+    "state": "READY_AFTER_SELECTOR_PROMOTION_OR_EXPLICIT_BOOK_OWNER_EXECUTION",
+    "scope": "Adjudicate BOOK-ENG-008 through BOOK-ENG-010 against CURRENT-AUTHORITY-005, Topology 007, current peer ownership and live implementation gaps. Preserve recovered scope-reset recommendations as planning input only; do not automatically canonize them.",
+    "forbidden_reopens": ["BOOK-ENG-001", "BOOK-ENG-002", "BOOK-ENG-003", "BOOK-ENG-004", "BOOK-ENG-005", "BOOK-ENG-006", "BOOK-ENG-007", "UAF-BOOK-INTELLIGENCE-001..021", "UAF-BOOK-STORYBIBLE-001"],
+    "reopen_rule": "Reopen only the exact affected closed scope if current evidence proves a genuine contradiction; implementation defects alone do not create a new semantic architecture packet."
+  },
+  "prepared_successors": {
+    "control_record": "qualification/book-system/BOOK-SYSTEM-CONTROL-RECORD-014.json",
+    "reconciled_state": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-044.json",
+    "selection_status": "PREPARED_ON_MAIN__NOT_SELECTED_BY_FROZEN_CURRENT_AUTHORITY"
+  },
+  "selector_promotion_gate": {
+    "required": true,
+    "reason": "CURRENT-AUTHORITY-005 currently names historical Book control/state paths. Changing current selector or evidence-bound governance subjects would invalidate exact-subject Foundation evidence and therefore requires a deliberate successor/requalification transaction rather than an incidental edit.",
+    "must_preserve": [
+      "CURRENT-AUTHORITY-005 nine-peer architecture semantics",
+      "SYSTEM-TOPOLOGY-007",
+      "SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006",
+      "SYSTEM-MASTER-CAPABILITY-CROSSWALK-003",
+      "terminal PROSE retirement",
+      "all historical Book receipts and exact subject identities"
+    ]
+  },
+  "historical_evidence_rule": "Recovered and historical Book artifacts retain their original bytes, labels, subjects, dates and evidence standing. This reconciliation is an additive current-main interpretation record only; it does not relabel historical PASS, manufacture runtime evidence or rewrite branch history."
+}
