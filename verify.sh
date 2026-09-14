@@ -27,9 +27,6 @@ bad()  { printf '  FAIL  %s\n' "$1"; fail=$((fail+1)); FAILED+=("$1"); }
 skipd(){ printf '  SKIP  %s\n' "$1"; skip=$((skip+1)); }
 
 hr; echo "0. TOOLCHAIN + PURGE STALE LOCAL CACHES"; hr
-# F-WP-001's authoritative manifest declares the Java release used by the qualifier.
-# Fail once, clearly, instead of cascading the same javac incompatibility through
-# F-WP-001..012 and obscuring the real prerequisite.
 required_java=$(node -p "require('./system-master/f-wp-001/control/SOURCE-SLICE-MANIFEST.json').java_release || 21" 2>/dev/null || printf '21')
 if ! javac_line=$(javac -version 2>&1); then
   echo "  FAIL  toolchain — javac unavailable; F-WP qualifiers require Java ${required_java}+"
@@ -43,11 +40,6 @@ if ! [[ "$javac_major" =~ ^[0-9]+$ ]] || (( javac_major < required_java )); then
   exit 1
 fi
 echo "  toolchain: ${javac_line} (required >= ${required_java})"
-
-# Off CI, RUNNER_TEMP is unset and the qualify scripts fall back to workspace/.tmp,
-# where they cache COMPILED CLASSES. A stale entry there silently poisoned a
-# verification run once already (L-012): the qualifier ran an old class and reported a
-# failure that did not exist in the source. Verification must start from nothing.
 rm -rf .tmp qualification-output
 echo "  purged .tmp/ qualification-output/"
 
@@ -62,7 +54,6 @@ fi
 hr; echo "2. TESTS (mvn test — real execution via the JUnit bridge)"; hr
 if mvn -B test > /tmp/verify-test.log 2>&1; then
   line=$(grep -E "^\[INFO\] Tests run:" /tmp/verify-test.log | tail -1 | sed 's/^\[INFO\] //')
-  # A "success" that ran nothing is the exact failure this repo already had once.
   if grep -qE "Tests run: [1-9]" /tmp/verify-test.log; then
     ok "mvn test — ${line:-tests ran}"
   else
@@ -94,10 +85,6 @@ for s in $(ls .github/scripts | grep qualify | grep -E '\.(js|py)$' | sort); do
 done
 
 hr; echo "4. FOUNDATION CLOSURE CURRENT-INVENTORY AUTHORITY"; hr
-# The current matrix must enumerate exclusively from CURRENT-AUTHORITY's selected
-# capability crosswalk. Historical census/P6 allocation artifacts remain evidence,
-# never inventory authority. The generator also fail-closes if current allocation
-# contains an owned/deferred module that the selected crosswalk omits or disagrees on.
 if matrix_summary=$(node .github/scripts/foundation-closure-matrix.js --summary 2>&1); then
   if MATRIX_SUMMARY="$matrix_summary" node - <<'NODE'
 const summary = JSON.parse(process.env.MATRIX_SUMMARY);
@@ -119,11 +106,14 @@ else
   sed -n '1,12p' <<< "$matrix_summary" | sed 's/^/        /'
 fi
 
+if out=$(node .github/scripts/foundation-closure-matrix-committed-check.js 2>&1); then
+  ok "foundation-closure-matrix committed projection freshness"
+else
+  bad "foundation-closure-matrix committed projection freshness"
+  sed -n '1,8p' <<< "$out" | sed 's/^/        /'
+fi
+
 hr; echo "5. ASSURANCE STANDARDS"; hr
-# Resolve the base through the checker's portable default (`origin/main`) instead of
-# requiring a local branch literally named `main`; GitHub PR merge checkouts are detached.
-# The checker emits compact JSON for "no changes" and pretty JSON when files changed.
-# Accept either serialization; status is semantic, whitespace is not.
 if out=$(node .github/scripts/assurance-standards-check.js 2>&1) \
    && grep -qE '"status"[[:space:]]*:[[:space:]]*"PASS"' <<< "$out"; then
   ok "assurance-standards-check"
