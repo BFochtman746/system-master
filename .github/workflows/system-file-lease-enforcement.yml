@@ -12,20 +12,24 @@ name: System File Lease Enforcement
 # chat-recovery-gate.js was imported by nothing but its own test. Both stayed "green"
 # by never being in a position to object.
 
+# A REQUIRED CHECK MUST ALWAYS REPORT.
+#
+# This trigger deliberately carries no `paths:` filter, and removing it was a bug fix.
+# Both jobs below are bound as REQUIRED status checks on main. A path-filtered workflow
+# does not report a neutral or skipped result when its paths do not match — it never
+# starts, so GitHub holds the required check permanently "pending" and the pull request
+# can never merge. PR #143 (execution-claims) touched no governed path and was blocked
+# by exactly this, with no failing check to point at.
+#
+# So the filtering moved inside: system-file-lease-enforce.js computes the governed
+# paths in the commit range itself and exits 0 when there are none. The gate is no
+# weaker for it — it still fails a governed mutation that carries no lease receipt,
+# which is the only thing it was ever meant to object to. The cost is a few seconds
+# of runner time on unrelated pull requests, which is the correct trade for a
+# chokepoint that cannot deadlock.
 on:
   pull_request:
-    paths:
-      - 'governance/CURRENT-AUTHORITY.json'
-      - 'governance/SYSTEM-TOPOLOGY-*.json'
-      - 'governance/SYSTEM-PROGRAM-JOB-LOCK-*.json'
-      - 'governance/SYSTEM-COMPLETION-STATUS-*.json'
-      - 'governance/COMPLETION-LEDGER-*.json'
-      - 'governance/WORK-OBLIGATION-REGISTRY-*.json'
-      - 'governance/second-shift/**'
-      - 'governance/control-gateway/**'
-      - '.github/scripts/system-file-lease-enforce.js'
-      - '.github/workflows/system-file-lease-enforcement.yml'
-      - 'system-master/control-gateway-lock/**'
+    branches: [main]
   push:
     branches: [main]
     paths:
