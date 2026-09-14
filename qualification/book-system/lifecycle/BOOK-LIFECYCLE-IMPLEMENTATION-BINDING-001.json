@@ -1,0 +1,103 @@
+{
+  "binding_id": "BOOK-LIFECYCLE-IMPLEMENTATION-BINDING-001",
+  "effective_date": "2026-09-14",
+  "standing": "CURRENT_BOOK_LIFECYCLE_IMPLEMENTATION_BINDING__227_ATOMIC_OPERATIONS_ACCOUNTED__IMPLEMENTATION_AND_PEER_HUMAN_GAPS_EXPLICIT",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "authority_id": "CURRENT-AUTHORITY-005",
+  "bound_repository_base_sha": "30c98afe510b2a41e0fbb23e78036023cde5b78e",
+  "lifecycle_contract_ref": "qualification/book-system/lifecycle/BOOK-LIFECYCLE-STATE-MACHINE-001.json",
+  "lifecycle_contract_id": "BOOK-LIFECYCLE-STATE-MACHINE-001",
+  "component_architecture_ref": "qualification/book-system/BOOK-COMPONENT-ARCHITECTURE-001.json",
+  "source_ledger_identity": {
+    "name": "BOOKS_OWNERSHIP_TRACE_002.xlsx",
+    "sheet": "Lifecycle 227",
+    "sha256": "b14c722551698eacf902836730345415090466809d2aff00cc45d960fa5181e6",
+    "atomic_operation_count": 227,
+    "policy": "Requirement text/provenance is historical source evidence. This binding keys by immutable P00-01..P20-07 operation IDs and does not relabel the source ledger."
+  },
+  "purpose": "Bind all 227 recovered Book atomic operations exactly once to the frozen 20-phase completion-gate model and current implementation truth, without transferring historical PASS or treating lifecycle control coverage as substantive operation completion.",
+  "classification_policy": {
+    "IMPLEMENTED": "Direct current executable Book source plus focused current tests perform the material atomic operation, not merely its route/gate.",
+    "PARTIAL": "Current executable Book source materially implements a subset, control, routing, context, evidence, or orchestration portion, but the atomic operation is not end-to-end complete.",
+    "UNIMPLEMENTED": "Book-owned substantive behavior has no direct current executable realization sufficient for the atomic operation.",
+    "PEER_DEPENDENCY": "The material execution is intentionally owned by a System Master peer or specialist adapter; Book must bind request/result/admission semantics and must not duplicate the generic engine.",
+    "HUMAN/EXTERNAL": "The decisive semantic decision, authorization, physical review, or external-world event must come from a human/external authority and cannot be synthesized as completion.",
+    "precedence": "Classify the decisive current execution locus. HUMAN/EXTERNAL wins for irreducible authority; PEER_DEPENDENCY wins for intentionally delegated execution; otherwise IMPLEMENTED requires direct current Book execution, PARTIAL records real but incomplete Book execution, and remaining Book-owned work is UNIMPLEMENTED."
+  },
+  "status_bindings": {
+    "IMPLEMENTED": ["P01-28"],
+    "PARTIAL": ["P00-03","P00-08","P00-09","P00-10","P01-20","P01-24","P01-25","P01-27","P01-30","P01-31","P02-08","P02-09","P03-09","P04-11","P05-11","P06-11","P07-10","P08-01","P08-02","P08-04","P08-05","P08-07","P08-08","P08-11","P08-12","P09-01","P09-09","P10-01","P10-06","P10-09","P11-01","P11-02","P11-04","P11-05","P11-09","P12-11","P13-09","P14-08","P14-09","P15-09","P15-11","P16-11","P17-10","P17-11","P18-01","P18-04","P18-07","P18-09","P19-08","P20-04"],
+    "UNIMPLEMENTED": ["P00-01","P00-04","P00-06","P01-04","P01-05","P01-07","P01-08","P01-09","P01-10","P01-12","P01-13","P01-14","P01-17","P01-18","P01-19","P01-21","P01-22","P01-29","P03-01","P03-02","P03-03","P03-04","P03-05","P03-06","P03-07","P03-08","P04-01","P04-02","P04-04","P04-09","P04-10","P05-01","P05-02","P05-03","P05-04","P05-05","P05-06","P05-07","P05-08","P05-09","P06-01","P06-02","P06-03","P06-04","P06-05","P06-06","P06-07","P06-08","P06-09","P07-01","P07-02","P07-03","P07-04","P07-05","P07-06","P07-07","P07-08","P07-09","P08-03","P08-06","P08-09","P08-10","P09-02","P09-03","P09-04","P09-06","P09-07","P09-08","P10-02","P10-03","P10-04","P10-05","P10-07","P10-08","P11-03","P11-07","P11-08","P12-01","P12-02","P12-03","P12-09","P13-01","P13-02","P13-03","P13-04","P13-05","P13-06","P13-07","P13-08","P14-01","P14-02","P14-03","P14-04","P14-05","P14-06","P14-07","P15-01","P15-02","P15-03","P15-10","P16-01","P16-02","P16-03","P16-04","P16-05","P16-06","P16-07","P16-08","P16-09","P16-10","P18-02","P18-08","P19-02","P19-06","P19-07","P20-01","P20-02","P20-03","P20-05","P20-07"],
+    "PEER_DEPENDENCY": ["P00-05","P01-01","P01-02","P01-03","P01-06","P01-11","P01-15","P01-16","P01-23","P04-03","P04-05","P04-06","P04-07","P04-08","P12-04","P12-05","P12-06","P12-07","P12-08","P15-04","P15-05","P15-06","P15-07","P15-08","P17-01","P17-02","P17-03","P17-04","P17-05","P17-06","P17-07","P17-09","P18-06","P19-01","P19-03","P19-04","P19-05"],
+    "HUMAN/EXTERNAL": ["P00-02","P00-07","P01-26","P02-01","P02-02","P02-03","P02-04","P02-05","P02-06","P02-07","P05-10","P06-10","P09-05","P11-06","P12-10","P17-08","P18-03","P18-05","P20-06"]
+  },
+  "phase_and_gate_binding_rule": "For every source operation ID, frozen phase is the exact legacy_227_projection target in BOOK-LIFECYCLE-STATE-MACHINE-001; completion gate is that phase definition completion_gate.gate_id. No independent phase vocabulary is introduced here.",
+  "component_assignment": {
+    "legacy_phase_defaults": {"P00":"BOOK-COMP-01","P01":"BOOK-COMP-09"},
+    "operation_overrides": {"P00-08":"BOOK-COMP-12","P00-09":"BOOK-COMP-05","P00-10":"BOOK-COMP-05"},
+    "frozen_phase_defaults": {"INTENT":"BOOK-COMP-01","RESEARCH":"BOOK-COMP-08","KNOWLEDGE_CANON":"BOOK-COMP-03","ARCHITECTURE":"BOOK-COMP-04","UNIT_DESIGN":"BOOK-COMP-04","DRAFT":"BOOK-COMP-07","MACRO_REVISION":"BOOK-COMP-07","DEVELOPMENTAL":"BOOK-COMP-07","LINE_STYLE":"BOOK-COMP-07","COPY":"BOOK-COMP-07","FACT_CITATION":"BOOK-COMP-08","RIGHTS":"BOOK-COMP-06","PROOF":"BOOK-COMP-11","PUBLICATION_BUILD":"BOOK-COMP-11","RELEASE":"BOOK-COMP-11","DISTRIBUTION":"BOOK-COMP-11","PRESERVATION":"BOOK-COMP-12","REENTRY_EDITION":"BOOK-COMP-05","SUBMISSION_HANDOFF":"BOOK-COMP-11"}
+  },
+  "current_implementation_surfaces": {
+    "FROZEN_LIFECYCLE_CONTROL": {"paths":["system-master/book-system/book-lifecycle-state-machine.js","system-master/book-system/book-lifecycle-state-machine.test.js"],"coverage":"phase applicability/status/gates/next-step/stale/reopen/cancel/recovery/invalidation control semantics"},
+    "BOOK_WRITING_ROUTING": {"paths":["system-master/book-system/book-capability-routing-interface.js","system-master/book-system/book-capability-routing-interface.test.js"],"coverage":"active BOOK.WRITING.* routing and retired PROSE fail-closed boundary; provider binding remains open"},
+    "BOOK_CONTEXT_COMPILER": {"paths":["system-master/book-system/context-compiler/book-context-compiler.js","system-master/book-system/context-compiler/book-context-package.schema.json"],"coverage":"bounded context package validation/digest/exact-current bindings/privacy/authority constraints; no canonical effect"},
+    "BOOK_WORKFLOW_STATE": {"paths":["system-master/book-system/book-workflow-state-model.js"],"coverage":"long-job state/control model"},
+    "BOOK_WORKFLOW_PLAN": {"paths":["system-master/book-system/book-workflow-execution-plan.js"],"coverage":"Book workflow task/dependency/authority planning"},
+    "BOOK_WORKFLOW_RETRY_IDEMPOTENCY": {"paths":["system-master/book-system/book-workflow-retry-idempotency-rules.js"],"coverage":"retry/idempotency/provider operation identity controls"},
+    "BOOK_WORKFLOW_CANCELLATION_RESUME": {"paths":["system-master/book-system/book-workflow-cancellation-resume.js"],"coverage":"checkpoint/cancel/resume controls"},
+    "BOOK_WORKFLOW_DURABLE_STORE": {"paths":["system-master/book-system/book-workflow-durable-store.js","system-master/book-system/book-workflow-durable-store.test.js"],"coverage":"durable workflow coordination records; not canonical manuscript storage"},
+    "BOOK_WORKFLOW_EVIDENCE_PROVENANCE": {"paths":["system-master/book-system/book-workflow-evidence-provenance.js"],"coverage":"workflow/task/checkpoint/author/admission evidence receipts with canonical-effect prohibition"}
+  },
+  "evidence_bindings": {
+    "FROZEN_LIFECYCLE_CONTROL": ["P00-03","P00-09","P00-10","P01-20","P01-24","P01-25","P01-27","P01-28","P01-31","P02-08","P02-09","P03-09","P04-11","P05-11","P06-11","P07-10","P08-08","P08-12","P09-01","P09-09","P10-01","P10-09","P11-01","P11-09","P12-11","P13-09","P14-08","P14-09","P15-09","P15-11","P16-11","P17-10","P17-11","P18-04","P18-07","P18-09","P19-08","P20-04"],
+    "BOOK_WORKFLOW_CANCELLATION_RESUME": ["P00-08","P01-30","P08-11"],
+    "BOOK_WORKFLOW_DURABLE_STORE": ["P00-08","P01-30","P08-11"],
+    "BOOK_WORKFLOW_EVIDENCE_PROVENANCE": ["P00-08","P01-30","P02-08","P08-04","P08-05","P08-07","P08-11","P09-01","P10-01","P10-06","P11-01","P14-08","P15-09","P18-01"],
+    "BOOK_CONTEXT_COMPILER": ["P08-01","P08-02"],
+    "BOOK_WORKFLOW_PLAN": ["P08-04","P08-05","P08-07","P10-06","P18-01"],
+    "BOOK_WORKFLOW_STATE": ["P08-08"],
+    "BOOK_WRITING_ROUTING": ["P11-02","P11-04","P11-05"]
+  },
+  "peer_dependency_bindings": {
+    "CORE": ["P00-05","P01-01","P01-02","P01-03","P01-06","P01-11","P01-15","P01-16","P01-23","P04-03","P04-05","P04-06","P04-07","P04-08","P12-04","P12-05","P12-06","P12-07","P12-08","P15-05","P15-06","P15-07","P17-01","P17-02","P17-03","P17-04","P17-06","P17-09","P19-01","P19-03","P19-04","P19-05"],
+    "CONNECTED_ACTIONS": ["P00-05","P01-23","P17-09","P18-06"],
+    "RESEARCH_KNOWLEDGE": ["P01-15","P01-16","P01-23","P04-03","P04-05","P04-06","P04-07","P04-08","P12-04","P12-05","P12-06","P12-07","P12-08","P17-04","P19-01","P19-03","P19-05"],
+    "DOCUMENTS": ["P15-04","P15-05","P15-06","P15-08","P17-01","P17-02","P17-03","P17-05","P17-06","P17-07"],
+    "MEDIA": ["P15-07"]
+  },
+  "remediation_by_status": {
+    "IMPLEMENTED": "Maintain exact-current proof; no atomic implementation gap is claimed for the bound operation.",
+    "PARTIAL": "Complete the missing Book-domain producer/consumer/admission behavior against the cited current surface and add focused executable qualification.",
+    "UNIMPLEMENTED": "Implement the Book-owned operation under the assigned component; use typed peer ports for specialist work and add receipt-backed tests.",
+    "PEER_DEPENDENCY": "Bind a typed Book request/result/admission contract to the named peer and qualify the route; do not duplicate the peer engine.",
+    "HUMAN/EXTERNAL": "Implement decision/request/receipt capture and a fail-closed gate; never synthesize human/external authority as completion."
+  },
+  "historical_evidence_policy": {"recovered_inputs":["BOOKS_OWNERSHIP_TRACE_002.xlsx / Lifecycle 227","BOOKS_BUILD_READINESS_003.xlsx","BOOKS_IMPLEMENTATION_EXECUTION_005A_EVIDENCE.xlsx"],"rule":"Recovered historical evidence may identify requirements, provenance and prior attempts. It may not upgrade a current atomic row to IMPLEMENTED or PARTIAL without a current repository evidence path."},
+  "non_claims": ["This binding does not claim all 227 operations are implemented.","Lifecycle state-machine control coverage is not substantive Book-operation implementation by itself.","Historical 005A Java execution evidence and older readiness spreadsheets do not transfer PASS to current main.","No provider/native binding, whole-app Book qualification, human masterwork evidence, publication authority, or production certification is implied.","This record does not change CURRENT-AUTHORITY-005, topology, peer ownership, PROSE retirement, or the selected BOOK-ENG-009 program objective."],
+  "summary": {
+    "overall": {"IMPLEMENTED":1,"PARTIAL":50,"UNIMPLEMENTED":120,"PEER_DEPENDENCY":37,"HUMAN/EXTERNAL":19},
+    "by_phase": {
+      "INTAKE":{"total":41,"IMPLEMENTED":1,"PARTIAL":10,"UNIMPLEMENTED":18,"PEER_DEPENDENCY":9,"HUMAN/EXTERNAL":3},
+      "INTENT":{"total":18,"IMPLEMENTED":0,"PARTIAL":3,"UNIMPLEMENTED":8,"PEER_DEPENDENCY":0,"HUMAN/EXTERNAL":7},
+      "RESEARCH":{"total":11,"IMPLEMENTED":0,"PARTIAL":1,"UNIMPLEMENTED":5,"PEER_DEPENDENCY":5,"HUMAN/EXTERNAL":0},
+      "KNOWLEDGE_CANON":{"total":11,"IMPLEMENTED":0,"PARTIAL":1,"UNIMPLEMENTED":9,"PEER_DEPENDENCY":0,"HUMAN/EXTERNAL":1},
+      "ARCHITECTURE":{"total":11,"IMPLEMENTED":0,"PARTIAL":1,"UNIMPLEMENTED":9,"PEER_DEPENDENCY":0,"HUMAN/EXTERNAL":1},
+      "UNIT_DESIGN":{"total":10,"IMPLEMENTED":0,"PARTIAL":1,"UNIMPLEMENTED":9,"PEER_DEPENDENCY":0,"HUMAN/EXTERNAL":0},
+      "DRAFT":{"total":12,"IMPLEMENTED":0,"PARTIAL":8,"UNIMPLEMENTED":4,"PEER_DEPENDENCY":0,"HUMAN/EXTERNAL":0},
+      "MACRO_REVISION":{"total":9,"IMPLEMENTED":0,"PARTIAL":2,"UNIMPLEMENTED":6,"PEER_DEPENDENCY":0,"HUMAN/EXTERNAL":1},
+      "DEVELOPMENTAL":{"total":9,"IMPLEMENTED":0,"PARTIAL":3,"UNIMPLEMENTED":6,"PEER_DEPENDENCY":0,"HUMAN/EXTERNAL":0},
+      "LINE_STYLE":{"total":9,"IMPLEMENTED":0,"PARTIAL":5,"UNIMPLEMENTED":3,"PEER_DEPENDENCY":0,"HUMAN/EXTERNAL":1},
+      "COPY":{"total":9,"IMPLEMENTED":0,"PARTIAL":1,"UNIMPLEMENTED":8,"PEER_DEPENDENCY":0,"HUMAN/EXTERNAL":0},
+      "FACT_CITATION":{"total":7,"IMPLEMENTED":0,"PARTIAL":0,"UNIMPLEMENTED":3,"PEER_DEPENDENCY":4,"HUMAN/EXTERNAL":0},
+      "RIGHTS":{"total":5,"IMPLEMENTED":0,"PARTIAL":1,"UNIMPLEMENTED":2,"PEER_DEPENDENCY":1,"HUMAN/EXTERNAL":1},
+      "PROOF":{"total":9,"IMPLEMENTED":0,"PARTIAL":2,"UNIMPLEMENTED":7,"PEER_DEPENDENCY":0,"HUMAN/EXTERNAL":0},
+      "PUBLICATION_BUILD":{"total":28,"IMPLEMENTED":0,"PARTIAL":4,"UNIMPLEMENTED":10,"PEER_DEPENDENCY":13,"HUMAN/EXTERNAL":1},
+      "RELEASE":{"total":8,"IMPLEMENTED":0,"PARTIAL":4,"UNIMPLEMENTED":3,"PEER_DEPENDENCY":0,"HUMAN/EXTERNAL":1},
+      "DISTRIBUTION":{"total":3,"IMPLEMENTED":0,"PARTIAL":0,"UNIMPLEMENTED":2,"PEER_DEPENDENCY":0,"HUMAN/EXTERNAL":1},
+      "PRESERVATION":{"total":8,"IMPLEMENTED":0,"PARTIAL":1,"UNIMPLEMENTED":3,"PEER_DEPENDENCY":4,"HUMAN/EXTERNAL":0},
+      "REENTRY_EDITION":{"total":7,"IMPLEMENTED":0,"PARTIAL":1,"UNIMPLEMENTED":5,"PEER_DEPENDENCY":0,"HUMAN/EXTERNAL":1},
+      "SUBMISSION_HANDOFF":{"total":2,"IMPLEMENTED":0,"PARTIAL":1,"UNIMPLEMENTED":0,"PEER_DEPENDENCY":1,"HUMAN/EXTERNAL":0}
+    }
+  },
+  "integrity": {"expected_atomic_operations":227,"expected_macro_phases":20,"all_status_sets_explicit":true,"status_sets_disjoint":true,"status_union_must_equal_frozen_projection":true,"implemented_or_partial_requires_current_repo_evidence":true,"peer_dependency_requires_named_peer":true,"active_prose_evidence_forbidden":true,"historical_005a_or_workbook_as_current_implementation_evidence_forbidden":true}
+}
