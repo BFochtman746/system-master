@@ -1,0 +1,163 @@
+{
+  "blueprint_id": "SYSTEM-MASTER-SYSTEM-INTERFACE-BLUEPRINT-001",
+  "schema_version": "1.0",
+  "effective_date": "2026-09-14",
+  "standing": "CANONICAL_NINE_PEER_INTERFACE_BOUNDARY__COMMAND_QUERY_API_EVENT_ERROR__SINGLE_SEMANTIC_OWNER__NO_CROSS_PEER_DATABASE_WRITES",
+  "purpose": "Lock system-to-system operation and data authority so every semantic operation, canonical mutation, query, event and domain error has exactly one owning peer while shared infrastructure remains mechanics only.",
+  "authority_binding": {
+    "current_authority": "governance/CURRENT-AUTHORITY.json",
+    "authority_id": "CURRENT-AUTHORITY-005",
+    "topology": "governance/SYSTEM-TOPOLOGY-007.json",
+    "topology_id": "SYSTEM-TOPOLOGY-007",
+    "allocation": "governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006.json",
+    "allocation_id": "SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006",
+    "capability_crosswalk": "governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json",
+    "crosswalk_id": "SYSTEM-MASTER-CAPABILITY-CROSSWALK-003",
+    "inventory_authority": "CURRENT_AUTHORITY_SELECTED_CAPABILITY_CROSSWALK",
+    "historical_inventory_fallback": false
+  },
+  "interface_classes": {
+    "COMMAND": {
+      "semantic": "REQUEST_OWNER_CONTROLLED_STATE_CHANGE",
+      "owner_rule": "The semantic owner of the target aggregate/capability is the only peer allowed to accept and commit the mutation.",
+      "caller_rule": "A caller may request intent but cannot mutate another peer's canonical store, schema, aggregate or transaction directly.",
+      "transaction_rule": "The receiving owner commits only its local semantic transaction. Cross-peer atomic database transactions are forbidden.",
+      "idempotency_rule": "Every retriable command crossing a peer boundary must carry an owner-scoped idempotency key or equivalent deterministic deduplication identity.",
+      "result_rule": "The owner returns a typed accepted/rejected/result envelope; durable state-change facts are emitted as owner events."
+    },
+    "QUERY": {
+      "semantic": "READ_OWNER_CONTROLLED_STATE_WITHOUT_SIDE_EFFECT",
+      "owner_rule": "Authoritative reads are served by the semantic owner or an explicitly owner-authorized projection.",
+      "side_effect_rule": "Queries must not mutate state, acquire leases, publish events that imply mutation, or perform external side effects.",
+      "store_rule": "Callers cannot read another peer's canonical database directly; they query the owner contract or a declared non-authoritative projection.",
+      "freshness_rule": "Projection responses must expose owner version/freshness metadata when stale reads can affect correctness."
+    },
+    "API": {
+      "semantic": "TRANSPORT_NEUTRAL_CONTRACT_SURFACE",
+      "owner_rule": "API transport never transfers semantic ownership. The operation's semantic_owner_system remains authoritative regardless of HTTP, function call, queue, plugin or local transport.",
+      "routing_rule": "Cross-peer APIs must identify operation class, semantic owner, caller, correlation identity and contract version.",
+      "side_effect_rule": "External side-effect execution routes through CONNECTED_ACTIONS when user/provider action authority is required; the originating peer retains its business/domain semantics.",
+      "bypass_rule": "No API may provide a lower-level route that bypasses the semantic owner's command/query authority."
+    },
+    "EVENT": {
+      "semantic": "OWNER_EMITTED_FACT_ABOUT_COMMITTED_OR_AUTHORITATIVE_DOMAIN_STATE",
+      "owner_rule": "Only the semantic owner may emit an authoritative state-change event for its domain. Subscribers cannot gain mutation authority from subscription.",
+      "fact_rule": "Events describe facts already established by the owner; an event cannot be used as a disguised command requiring a subscriber to mutate another owner's domain.",
+      "identity_rule": "Events require stable event identity, originating system, aggregate/entity identity where applicable, owner version/sequence and correlation/causation identity.",
+      "projection_rule": "Caches/read models may update from events but remain non-authoritative and cannot write back into the owner's store."
+    },
+    "ERROR": {
+      "semantic": "TYPED_FAILURE_WITH_ORIGINATING_AUTHORITY",
+      "owner_rule": "The peer that owns the failed domain operation owns its semantic/domain error code namespace. Shared runtime/transport errors may originate from CORE infrastructure.",
+      "identity_rule": "Cross-peer propagation preserves origin_system, error_code, retryability/category and correlation identity.",
+      "mapping_rule": "Callers may map errors for UX or local orchestration but cannot erase or rebrand the originating semantic error identity.",
+      "partial_failure_rule": "Cross-peer workflows report partial completion explicitly; they must not roll back another peer's already committed transaction by direct database action."
+    }
+  },
+  "global_operation_rules": [
+    "Every operation has exactly one semantic_owner_system.",
+    "COMMAND and QUERY handlers for owned domain state execute under that semantic owner even when transport/runtime mechanics are provided by CORE.",
+    "API is a contract/transport class, not an ownership class.",
+    "Authoritative EVENT facts are emitted only by the semantic owner of the fact.",
+    "Domain ERROR namespaces belong to the semantic owner; CORE may originate shared runtime/transport/infrastructure errors.",
+    "A peer may compose another peer but may not wrap composition as a claim of the provider peer's semantic ownership.",
+    "No operation may be registered as mutation-capable under two peer systems.",
+    "Historical routing, P6/module-allocation evidence or retired-system records cannot define current operation ownership."
+  ],
+  "database_contract": {
+    "canonical_data_rule": "Each semantic dataset/aggregate has exactly one peer semantic owner and one mutation authority.",
+    "physical_storage_rule": "CORE may provide generic persistence, transaction, backup/restore, migration-engine and durability mechanics without acquiring semantic ownership of peer data.",
+    "schema_rule": "The semantic peer owns domain schema meaning, invariants and domain migration intent; shared migration execution mechanics may be CORE-provided.",
+    "write_rule": "Direct cross-peer writes are forbidden. No peer may update another peer's canonical tables/documents/aggregates through database credentials or shared repository access.",
+    "read_rule": "Direct cross-peer canonical-store reads are forbidden unless the owner explicitly publishes a read-only projection contract; the projection remains non-authoritative.",
+    "table_rule": "Jointly mutated semantic tables are forbidden. Shared infrastructure tables must not contain ambiguous peer-owned domain fields.",
+    "transaction_rule": "Transaction authority stops at the semantic owner boundary. Cross-peer workflows use commands plus typed results/events; distributed database commit/rollback coupling is forbidden.",
+    "cache_rule": "Caches and projections are derived, non-authoritative, versioned against owner state, invalidated/refreshed from owner contracts/events, and cannot become fallback canonical truth.",
+    "backup_restore_rule": "CORE may own physical backup/restore mechanics; the semantic peer owns restore acceptance invariants and the determination that restored domain state is semantically valid/current.",
+    "concurrency_rule": "Each owner defines domain concurrency/version rules for its aggregates. Callers cannot bypass them with direct writes or out-of-band compare-and-swap.",
+    "idempotency_rule": "Idempotency identity is interpreted and persisted by the command-owning peer; infrastructure may assist storage/dedup but cannot redefine semantic success."
+  },
+  "peer_systems": [
+    {"system_id":"CORE","owner_path":"SYSTEM_MASTER/CORE","operation_namespace":"CORE","error_namespace":"CORE.ERROR","canonical_semantic_write_authority":true,"owned_capabilities":[{"capability_id":"C04","module_key":"CHAT"},{"capability_id":"C11","module_key":"EXPECTATION"},{"capability_id":"C12","module_key":"EXPERIENCE"},{"capability_id":"C20","module_key":"LOCALAI"},{"capability_id":"C29","module_key":"PROJECTS"}]},
+    {"system_id":"LEARNING","owner_path":"SYSTEM_MASTER/LEARNING","operation_namespace":"LEARNING","error_namespace":"LEARNING.ERROR","canonical_semantic_write_authority":true,"owned_capabilities":[{"capability_id":"C07","module_key":"CURRICULUM"},{"capability_id":"C18","module_key":"LEARNING"}]},
+    {"system_id":"BOOK","owner_path":"SYSTEM_MASTER/BOOK","operation_namespace":"BOOK","error_namespace":"BOOK.ERROR","canonical_semantic_write_authority":true,"owned_capabilities":[{"capability_id":"C21","module_key":"MANUSCRIPT"},{"capability_id":"C31","module_key":"STORYBIBLE"},{"capability_id":"C34","module_key":"WRITING"}]},
+    {"system_id":"DOCUMENTS","owner_path":"SYSTEM_MASTER/DOCUMENTS","operation_namespace":"DOCUMENTS","error_namespace":"DOCUMENTS.ERROR","canonical_semantic_write_authority":true,"owned_capabilities":[{"capability_id":"C09","module_key":"DOCX"},{"capability_id":"C13","module_key":"FILE"},{"capability_id":"C16","module_key":"IMG-INGEST"},{"capability_id":"C24","module_key":"OCR"},{"capability_id":"C25","module_key":"PDF"},{"capability_id":"C28","module_key":"PPTX"}]},
+    {"system_id":"SPREADSHEET_DATA","owner_path":"SYSTEM_MASTER/SPREADSHEET_DATA","operation_namespace":"SPREADSHEET_DATA","error_namespace":"SPREADSHEET_DATA.ERROR","canonical_semantic_write_authority":true,"owned_capabilities":[{"capability_id":"C08","module_key":"DATA"},{"capability_id":"C10","module_key":"EXCEL"},{"capability_id":"C19","module_key":"LEDGER"},{"capability_id":"C22","module_key":"MATH"}]},
+    {"system_id":"MEDIA","owner_path":"SYSTEM_MASTER/MEDIA","operation_namespace":"MEDIA","error_namespace":"MEDIA.ERROR","canonical_semantic_write_authority":true,"owned_capabilities":[{"capability_id":"C00","module_key":"AUDIOBOOK"},{"capability_id":"C15","module_key":"IMAGE"},{"capability_id":"C23","module_key":"MEDIA"},{"capability_id":"C26","module_key":"PHOTO"},{"capability_id":"C32","module_key":"VIDEO"},{"capability_id":"C33","module_key":"VOICE"}]},
+    {"system_id":"CONNECTED_ACTIONS","owner_path":"SYSTEM_MASTER/CONNECTED_ACTIONS","operation_namespace":"CONNECTED_ACTIONS","error_namespace":"CONNECTED_ACTIONS.ERROR","canonical_semantic_write_authority":true,"owned_capabilities":[{"capability_id":"C02","module_key":"BROWSER"},{"capability_id":"C03","module_key":"CALENDAR"},{"capability_id":"C06","module_key":"COMMS"},{"capability_id":"C27","module_key":"PLUGINS"}]},
+    {"system_id":"RESEARCH_KNOWLEDGE","owner_path":"SYSTEM_MASTER/RESEARCH_KNOWLEDGE","operation_namespace":"RESEARCH_KNOWLEDGE","error_namespace":"RESEARCH_KNOWLEDGE.ERROR","canonical_semantic_write_authority":true,"owned_capabilities":[{"capability_id":"C14","module_key":"GEO"},{"capability_id":"C17","module_key":"KNOWLEDGE"},{"capability_id":"C30","module_key":"RESEARCH"}]},
+    {"system_id":"PROGRAMMING","owner_path":"SYSTEM_MASTER/PROGRAMMING","operation_namespace":"PROGRAMMING","error_namespace":"PROGRAMMING.ERROR","canonical_semantic_write_authority":true,"owned_capabilities":[{"capability_id":"C01","module_key":"AUTOMATION"},{"capability_id":"C05","module_key":"CODE"},{"capability_id":"C40","module_key":"WEBSITE_BUILDING"}]}
+  ],
+  "system_database_authority": [
+    {"system_id":"CORE","semantic_domains":["CHAT","EXPECTATION","EXPERIENCE","LOCALAI","PROJECTS","shared runtime/control metadata"],"shared_mechanics":["persistence infrastructure","transaction engine","A-01/control plane","generic durability","physical backup/restore","generic migration execution"],"may_write_other_peer_semantic_state":false},
+    {"system_id":"LEARNING","semantic_domains":["CURRICULUM","LEARNING learner/course/mastery/assessment semantics"],"shared_mechanics_consumed":["CORE durability/runtime","RESEARCH_KNOWLEDGE retrieval where requested","CONNECTED_ACTIONS external actions where authorized"],"may_write_other_peer_semantic_state":false},
+    {"system_id":"BOOK","semantic_domains":["MANUSCRIPT","STORYBIBLE","WRITING","Book lifecycle/publication semantics","Book semantic recovery/restore acceptance"],"shared_mechanics_consumed":["CORE physical persistence/backup/restore","DOCUMENTS generic document/artifact mechanics","RESEARCH_KNOWLEDGE research services"],"may_write_other_peer_semantic_state":false},
+    {"system_id":"DOCUMENTS","semantic_domains":["DOCX","FILE","IMG-INGEST","OCR","PDF","PPTX","generic document/artifact mechanics"],"shared_mechanics_consumed":["CORE durability/runtime"],"may_write_other_peer_semantic_state":false},
+    {"system_id":"SPREADSHEET_DATA","semantic_domains":["DATA","EXCEL","LEDGER","MATH"],"shared_mechanics_consumed":["CORE durability/runtime"],"may_write_other_peer_semantic_state":false},
+    {"system_id":"MEDIA","semantic_domains":["AUDIOBOOK","IMAGE","MEDIA","PHOTO","VIDEO","VOICE"],"shared_mechanics_consumed":["CORE durability/runtime"],"may_write_other_peer_semantic_state":false},
+    {"system_id":"CONNECTED_ACTIONS","semantic_domains":["BROWSER","CALENDAR","COMMS","PLUGINS","external side-effect policy/execution"],"shared_mechanics_consumed":["CORE runtime/control"],"may_write_other_peer_semantic_state":false},
+    {"system_id":"RESEARCH_KNOWLEDGE","semantic_domains":["GEO","KNOWLEDGE","RESEARCH","research/provenance semantics"],"shared_mechanics_consumed":["CORE durability/runtime","CONNECTED_ACTIONS external retrieval actions where authorized"],"may_write_other_peer_semantic_state":false},
+    {"system_id":"PROGRAMMING","semantic_domains":["AUTOMATION","CODE","WEBSITE_BUILDING","software-engineering/build semantics"],"shared_mechanics_consumed":["CORE runtime/data/model infrastructure","CONNECTED_ACTIONS browser/deployment/external actions","RESEARCH_KNOWLEDGE research services"],"may_write_other_peer_semantic_state":false}
+  ],
+  "peer_pair_default_policy": {
+    "scope": "ALL_ORDERED_PAIRS_OF_DISTINCT_ACTIVE_PEERS",
+    "allowed_interface_classes": ["COMMAND","QUERY","API","EVENT","ERROR"],
+    "direct_store_read": false,
+    "direct_store_write": false,
+    "shared_semantic_table_dual_writer": false,
+    "cross_peer_transaction": false,
+    "query_side_effects": false,
+    "event_as_hidden_command": false,
+    "semantic_authority_transfer": false,
+    "origin_error_identity_preserved": true
+  },
+  "peer_pair_coverage": {
+    "mode": "COMPLETE_CARTESIAN_DEFAULT_PLUS_NAMED_SEAMS",
+    "ordered_pair_count": 72,
+    "self_pairs_excluded": true,
+    "rule": "The peer_pair_default_policy applies to every ordered pair of distinct systems in peer_systems unless a named seam tightens the contract. A seam may never weaken database/ownership prohibitions."
+  },
+  "known_seams": [
+    {"seam_id":"CORE_PROGRAMMING_RUNTIME_VS_ENGINEERING","systems":["CORE","PROGRAMMING"],"CORE_owns":["shared runtime/data/model/A-01 infrastructure mechanics"],"PROGRAMMING_owns":["AUTOMATION","CODE","WEBSITE_BUILDING","software-engineering semantics"],"rule":"PROGRAMMING commands/queries its semantic operations; CORE may execute shared mechanics but cannot become semantic owner or directly mutate Programming domain state."},
+    {"seam_id":"BOOK_DOCUMENTS_SEMANTICS_VS_ARTIFACT_MECHANICS","systems":["BOOK","DOCUMENTS"],"BOOK_owns":["MANUSCRIPT","STORYBIBLE","WRITING","canonical Book/lifecycle/publication semantics"],"DOCUMENTS_owns":["DOCX","PDF","PPTX","FILE","OCR","IMG-INGEST","generic document/artifact mechanics"],"rule":"BOOK requests artifact mechanics through DOCUMENTS interfaces. DOCUMENTS returns artifacts/results/errors but cannot canonize manuscript or Book state."},
+    {"seam_id":"PROGRAMMING_CONNECTED_ACTIONS_BUILD_VS_SIDE_EFFECT","systems":["PROGRAMMING","CONNECTED_ACTIONS"],"PROGRAMMING_owns":["AUTOMATION","CODE","WEBSITE_BUILDING","build/deploy intent semantics"],"CONNECTED_ACTIONS_owns":["BROWSER","CALENDAR","COMMS","PLUGINS","external side-effect policy and execution"],"rule":"PROGRAMMING may request browser/deployment/provider actions but never inherits external side-effect or user-action authority."},
+    {"seam_id":"LEARNING_CORE_DOMAIN_VS_DURABILITY","systems":["LEARNING","CORE"],"LEARNING_owns":["CURRICULUM","LEARNING semantic state and invariants"],"CORE_owns":["generic runtime/persistence/transaction/durability mechanics"],"rule":"CORE may persist Learning bytes/records through shared mechanics but cannot issue Learning semantic mutations or define Learning domain invariants."},
+    {"seam_id":"BOOK_CORE_SEMANTIC_RECOVERY_VS_PHYSICAL_RECOVERY","systems":["BOOK","CORE"],"BOOK_owns":["Book semantic backup set definition","restore/currentness invariants","semantic restore acceptance"],"CORE_owns":["physical persistence","storage","backup/restore mechanics","transaction/runtime mechanics"],"rule":"CORE performs physical mechanics; BOOK alone decides whether restored Book domain state satisfies Book semantic invariants."},
+    {"seam_id":"RESEARCH_KNOWLEDGE_PROGRAMMING_RESEARCH_VS_ENGINEERING","systems":["RESEARCH_KNOWLEDGE","PROGRAMMING"],"RESEARCH_KNOWLEDGE_owns":["RESEARCH","KNOWLEDGE","GEO","retrieval/provenance semantics"],"PROGRAMMING_owns":["AUTOMATION","CODE","WEBSITE_BUILDING","engineering decisions/artifacts"],"rule":"Research evidence may inform Programming but cannot self-canonize Programming state or acquire software-engineering write authority."}
+  ],
+  "operation_contract_required_fields": {
+    "all": ["operation_id","interface_class","semantic_owner_system","contract_version"],
+    "cross_peer": ["caller_system","semantic_owner_system","correlation_id"],
+    "command": ["idempotency_identity","target_aggregate_or_scope"],
+    "query": ["consistency_or_freshness_semantics"],
+    "event": ["event_id","origin_system","owner_version_or_sequence","correlation_id","causation_id"],
+    "error": ["origin_system","error_code","category","retryability","correlation_id"]
+  },
+  "forbidden_behaviors": [
+    "DIRECT_PEER_STORE_WRITE",
+    "DIRECT_PEER_CANONICAL_STORE_READ_WITHOUT_OWNER_PROJECTION_CONTRACT",
+    "SHARED_SEMANTIC_TABLE_DUAL_WRITER",
+    "CALLER_OWNED_REMOTE_TRANSACTION",
+    "CROSS_PEER_DISTRIBUTED_DATABASE_ROLLBACK",
+    "EVENT_AS_HIDDEN_COMMAND",
+    "QUERY_WITH_DOMAIN_MUTATION_OR_EXTERNAL_SIDE_EFFECT",
+    "API_TRANSPORT_IMPLIES_SEMANTIC_OWNERSHIP",
+    "ERROR_CODE_REBRANDING_WITHOUT_ORIGIN",
+    "CACHE_OR_PROJECTION_AS_CANONICAL_SOURCE",
+    "CROSS_PEER_SCHEMA_MUTATION",
+    "SEMANTIC_OWNER_BYPASS_THROUGH_LOW_LEVEL_API",
+    "TWO_PEERS_REGISTER_SAME_MUTATION_OPERATION",
+    "SILENT_FALLBACK_TO_HISTORICAL_P6_OR_MODULE_ALLOCATION",
+    "RETIRED_PROSE_OPERATION_NAMESPACE_RESURRECTION"
+  ],
+  "existing_contract_compatibility": [
+    {"contract_ref":"qualification/book-system/routing/BOOK-CAPABILITY-ROUTING-INTERFACE-002.json","compatibility_rule":"Book routing remains subordinate to this nine-peer blueprint: Book is semantic owner of Book capabilities; RESEARCH_KNOWLEDGE remains owner of bounded research acquisition; only BOOK-COMP-02 has logical canonical Book write authority."}
+  ],
+  "change_control": {
+    "architecture_change_rule": "Any change to active peer set, current capability owner, cross-peer database-write policy or known seam ownership requires an explicit reviewed blueprint update and passing validator.",
+    "capability_change_rule": "A capability added/removed/reowned in the current authority-selected crosswalk must fail verification until the blueprint's peer capability projection is reconciled.",
+    "operation_change_rule": "A new cross-peer operation must declare interface class and one semantic owner before implementation.",
+    "database_change_rule": "A new shared datastore/table may be introduced only as shared mechanics or a read projection with explicit single semantic owner; dual semantic writers are forbidden.",
+    "historical_evidence_rule": "Historical interface/routing evidence remains provenance only and cannot silently redefine current ownership."
+  }
+}
