@@ -9,7 +9,7 @@
     "crosswalk": "SYSTEM-MASTER-CAPABILITY-CROSSWALK-003",
     "current_learning_authority_manifest": "governance/learning/CURRENT-LEARNING-AUTHORITY.json",
     "learning_control": "LEARNING-CONTROL-RECORD-v6.md",
-    "work_obligation_registry": "WORK-OBLIGATION-REGISTRY-015",
+    "work_obligation_registry": "WORK-OBLIGATION-REGISTRY-016",
     "forensic_matrix": "LEARNING-FORENSIC-DISPOSITION-MATRIX-002",
     "parent_central_objective": "FOUNDATION-1-0-CLOSURE-001"
   },
@@ -36,17 +36,8 @@
   },
   "denominator_note": "The 113 SPECIFIED_NOT_EXECUTED QO-REQ obligations and the narrower 43/34 denominator are different facts. 113 is the full 001C requirement-obligation set. 43 is the subset whose 001D requirement row test_refs are newly introduced LRN-001C-Qxxx surfaces; 34 of those 43 belong to C07/C18 Learning ownership and 9 belong to peer/shared dependencies.",
   "global_evidence": {
-    "FINAL_QUALIFICATION_002": {
-      "status": "PASS_FULL_OWNER_EXTRACTION_PORTABLE",
-      "tests": 535,
-      "rebind002": 34,
-      "rule": "owner-extraction evidence only; not row closure"
-    },
-    "FINAL_QUALIFICATION_001": {
-      "fresh_total": "575/575 PASS",
-      "production_handlers": "0/63",
-      "rule": "aggregate portable readiness does not close exact rows"
-    }
+    "FINAL_QUALIFICATION_002": {"status":"PASS_FULL_OWNER_EXTRACTION_PORTABLE","tests":535,"rebind002":34,"rule":"owner-extraction evidence only; not row closure"},
+    "FINAL_QUALIFICATION_001": {"fresh_total":"575/575 PASS","production_handlers":"0/63","rule":"aggregate portable readiness does not close exact rows"}
   },
   "source_sha256": {
     "LRN_OWNERSHIP_FREEZE_001D_CONTROL.xlsx": "3afc515544cfa6c8593e3408b883ae41d8867bd1feb518d0ea2a33c9df0a8452",
@@ -92,21 +83,11 @@
       "EXPERIENCE_PRESENTATION_STATE_ONLY": "NO_DOMAIN_TRUTH_PERSISTENCE; Experience owns presentation/interaction state only",
       "EXTERNAL_CANONICAL_OWNER__REFERENCE_ONLY": "EXTERNAL_CANONICAL_OWNER_ONLY; Learning/Curriculum persist reference/snapshot identity only where contract permits"
     },
-    "flags": {
-      "H": "references >=1 exact inbound handler still requiring production binding",
-      "N": "new LRN-001C-Qxxx requirement-test surface in 001D",
-      "D": "direct portable implementation-evidence gap",
-      "B": "001D blocking gate present"
-    },
+    "flags": {"H":"references >=1 exact inbound handler still requiring production binding","N":"new LRN-001C-Qxxx requirement-test surface in 001D","D":"direct portable implementation-evidence gap","B":"001D blocking gate present"},
     "test_obligation_rule": "For every row, exact 001C test obligation is QO-REQ-{requirement_id}; all 113 were SPECIFIED_NOT_EXECUTED at the 001C freeze.",
     "post_extraction_rule": "All 113 001D test rows state HISTORICAL_EVIDENCE_PRESERVED_BUT_POST_EXTRACTION_NOT_EXECUTED; fresh exact row receipt remains required for implementation closure.",
     "trace_status_rule": "Every row is CLOSED_CURRENT_AUTHORITY_TRACE. This closes traceability/authority disposition only.",
-    "dispositions": {
-      "D1": "TRACE_CLOSED__HISTORICAL_EVIDENCE_PRESENT__FRESH_ROW_QUALIFICATION_OPEN",
-      "D2": "TRACE_CLOSED__LEARNING_NEW_001C_ROW_REQUALIFICATION_OPEN",
-      "D3": "TRACE_CLOSED__LEARNING_DIRECT_PORTABLE_EVIDENCE_GAP_RETAINED",
-      "D4": "TRACE_CLOSED__PEER_INTERFACE_DEPENDENCY_OPEN"
-    },
+    "dispositions": {"D1":"TRACE_CLOSED__HISTORICAL_EVIDENCE_PRESENT__FRESH_ROW_QUALIFICATION_OPEN","D2":"TRACE_CLOSED__LEARNING_NEW_001C_ROW_REQUALIFICATION_OPEN","D3":"TRACE_CLOSED__LEARNING_DIRECT_PORTABLE_EVIDENCE_GAP_RETAINED","D4":"TRACE_CLOSED__PEER_INTERFACE_DEPENDENCY_OPEN"},
     "source_resolution_rule": "Use requirement_id to resolve exact 001C trace/test rows and 001D Requirements/Tests rows in the SHA-bound sources; historical source rows are not rewritten."
   },
   "row_disposition_counts": {
@@ -132,12 +113,5 @@
     {"path":"governance/learning/traceability/LEARNING-113-REQUIREMENT-CURRENT-TRACEABILITY-001-ROWS-101-113.json","ordinal_start":101,"ordinal_end":113,"rows":13,"sha256":"e9b30162c829b00b8461f54bc32c22ac36bafba3c651654725b1c0d4f9f688ce"}
   ],
   "row_total_from_shards": 113,
-  "closure_assertions": {
-    "all_113_rows_present": true,
-    "all_113_traceability_status": "CLOSED_CURRENT_AUTHORITY_TRACE",
-    "unresolved_interface_refs": 0,
-    "implementation_completion_claimed": false,
-    "fresh_post_extraction_row_receipts_located": 0,
-    "next_phase": "LEARNING-63-INBOUND-PRODUCTION-HANDLER-BINDING-001"
-  }
+  "closure_assertions": {"all_113_rows_present":true,"all_113_traceability_status":"CLOSED_CURRENT_AUTHORITY_TRACE","unresolved_interface_refs":0,"implementation_completion_claimed":false,"fresh_post_extraction_row_receipts_located":0,"next_phase":"LEARNING-63-INBOUND-PRODUCTION-HANDLER-BINDING-001"}
 }
