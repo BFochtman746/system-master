@@ -10,6 +10,8 @@ Evidence authority: `governance/census/FOUNDATION-CLOSURE-EVIDENCE-REGISTRY-001.
 
 > Contract prose is specification, not acceptance evidence. `COMPLETE_WITH_EVIDENCE` requires a current-authority PASS receipt whose exact subject Git blobs still match. Historical PASS receipts remain preserved when their subjects drift, but they do not transfer PASS to changed current subjects.
 
+> All 36 currently owned/programmed capabilities (C00-C34 and C40) now have populated nine-section Foundation contract specifications. They remain `ACTIVE_GAP` until current-authority implementation evidence is qualified and admitted.
+
 ## Disposition summary
 
 | State | Rows |
@@ -31,36 +33,36 @@ Evidence authority: `governance/census/FOUNDATION-CLOSURE-EVIDENCE-REGISTRY-001.
 | `C02` | BROWSER | SYSTEM_MASTER/CONNECTED_ACTIONS | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
 | `C03` | CALENDAR | SYSTEM_MASTER/CONNECTED_ACTIONS | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
 | `C04` | CHAT | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-| `C05` | CODE | SYSTEM_MASTER/PROGRAMMING | `ACTIVE_GAP` | Contract incomplete: 8/9 required sections unpopulated. |
-| `C06` | COMMS | SYSTEM_MASTER/CONNECTED_ACTIONS | `ACTIVE_GAP` | Contract incomplete: 9/9 required sections unpopulated. |
-| `C07` | CURRICULUM | SYSTEM_MASTER/LEARNING | `ACTIVE_GAP` | Contract incomplete: 9/9 required sections unpopulated. |
-| `C08` | DATA | SYSTEM_MASTER/SPREADSHEET_DATA | `ACTIVE_GAP` | Contract incomplete: 9/9 required sections unpopulated. |
-| `C09` | DOCX | SYSTEM_MASTER/DOCUMENTS | `ACTIVE_GAP` | Contract incomplete: 9/9 required sections unpopulated. |
-| `C10` | EXCEL | SYSTEM_MASTER/SPREADSHEET_DATA | `ACTIVE_GAP` | Contract incomplete: 9/9 required sections unpopulated. |
-| `C11` | EXPECTATION | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Contract incomplete: 9/9 required sections unpopulated. |
-| `C12` | EXPERIENCE | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Contract incomplete: 9/9 required sections unpopulated. |
-| `C13` | FILE | SYSTEM_MASTER/DOCUMENTS | `ACTIVE_GAP` | Contract incomplete: 9/9 required sections unpopulated. |
-| `C14` | GEO | SYSTEM_MASTER/RESEARCH_KNOWLEDGE | `ACTIVE_GAP` | Contract incomplete: 9/9 required sections unpopulated. |
-| `C15` | IMAGE | SYSTEM_MASTER/MEDIA | `ACTIVE_GAP` | Contract incomplete: 9/9 required sections unpopulated. |
-| `C16` | IMG-INGEST | SYSTEM_MASTER/DOCUMENTS | `ACTIVE_GAP` | Contract incomplete: 9/9 required sections unpopulated. |
-| `C17` | KNOWLEDGE | SYSTEM_MASTER/RESEARCH_KNOWLEDGE | `ACTIVE_GAP` | Contract incomplete: 9/9 required sections unpopulated. |
-| `C18` | LEARNING | SYSTEM_MASTER/LEARNING | `ACTIVE_GAP` | Contract incomplete: 9/9 required sections unpopulated. |
-| `C19` | LEDGER | SYSTEM_MASTER/SPREADSHEET_DATA | `ACTIVE_GAP` | Contract incomplete: 9/9 required sections unpopulated. |
-| `C20` | LOCALAI | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Contract incomplete: 9/9 required sections unpopulated. |
-| `C21` | MANUSCRIPT | SYSTEM_MASTER/BOOK | `ACTIVE_GAP` | Contract incomplete: 9/9 required sections unpopulated. |
-| `C22` | MATH | SYSTEM_MASTER/SPREADSHEET_DATA | `ACTIVE_GAP` | Contract incomplete: 9/9 required sections unpopulated. |
-| `C23` | MEDIA | SYSTEM_MASTER/MEDIA | `ACTIVE_GAP` | Contract incomplete: 9/9 required sections unpopulated. |
-| `C24` | OCR | SYSTEM_MASTER/DOCUMENTS | `ACTIVE_GAP` | Contract incomplete: 9/9 required sections unpopulated. |
-| `C25` | PDF | SYSTEM_MASTER/DOCUMENTS | `ACTIVE_GAP` | Contract incomplete: 9/9 required sections unpopulated. |
-| `C26` | PHOTO | SYSTEM_MASTER/MEDIA | `ACTIVE_GAP` | Contract incomplete: 9/9 required sections unpopulated. |
-| `C27` | PLUGINS | SYSTEM_MASTER/CONNECTED_ACTIONS | `ACTIVE_GAP` | Contract incomplete: 9/9 required sections unpopulated. |
-| `C28` | PPTX | SYSTEM_MASTER/DOCUMENTS | `ACTIVE_GAP` | Contract incomplete: 9/9 required sections unpopulated. |
-| `C29` | PROJECTS | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Contract incomplete: 9/9 required sections unpopulated. |
-| `C30` | RESEARCH | SYSTEM_MASTER/RESEARCH_KNOWLEDGE | `ACTIVE_GAP` | Contract incomplete: 9/9 required sections unpopulated. |
-| `C31` | STORYBIBLE | SYSTEM_MASTER/BOOK | `ACTIVE_GAP` | Contract incomplete: 9/9 required sections unpopulated. |
-| `C32` | VIDEO | SYSTEM_MASTER/MEDIA | `ACTIVE_GAP` | Contract incomplete: 9/9 required sections unpopulated. |
-| `C33` | VOICE | SYSTEM_MASTER/MEDIA | `ACTIVE_GAP` | Contract incomplete: 9/9 required sections unpopulated. |
-| `C34` | WRITING | SYSTEM_MASTER/BOOK | `ACTIVE_GAP` | Contract incomplete: 9/9 required sections unpopulated. |
+| `C05` | CODE | SYSTEM_MASTER/PROGRAMMING | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
+| `C06` | COMMS | SYSTEM_MASTER/CONNECTED_ACTIONS | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
+| `C07` | CURRICULUM | SYSTEM_MASTER/LEARNING | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
+| `C08` | DATA | SYSTEM_MASTER/SPREADSHEET_DATA | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
+| `C09` | DOCX | SYSTEM_MASTER/DOCUMENTS | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
+| `C10` | EXCEL | SYSTEM_MASTER/SPREADSHEET_DATA | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
+| `C11` | EXPECTATION | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
+| `C12` | EXPERIENCE | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
+| `C13` | FILE | SYSTEM_MASTER/DOCUMENTS | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
+| `C14` | GEO | SYSTEM_MASTER/RESEARCH_KNOWLEDGE | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
+| `C15` | IMAGE | SYSTEM_MASTER/MEDIA | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
+| `C16` | IMG-INGEST | SYSTEM_MASTER/DOCUMENTS | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
+| `C17` | KNOWLEDGE | SYSTEM_MASTER/RESEARCH_KNOWLEDGE | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
+| `C18` | LEARNING | SYSTEM_MASTER/LEARNING | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
+| `C19` | LEDGER | SYSTEM_MASTER/SPREADSHEET_DATA | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
+| `C20` | LOCALAI | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
+| `C21` | MANUSCRIPT | SYSTEM_MASTER/BOOK | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
+| `C22` | MATH | SYSTEM_MASTER/SPREADSHEET_DATA | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
+| `C23` | MEDIA | SYSTEM_MASTER/MEDIA | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
+| `C24` | OCR | SYSTEM_MASTER/DOCUMENTS | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
+| `C25` | PDF | SYSTEM_MASTER/DOCUMENTS | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
+| `C26` | PHOTO | SYSTEM_MASTER/MEDIA | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
+| `C27` | PLUGINS | SYSTEM_MASTER/CONNECTED_ACTIONS | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
+| `C28` | PPTX | SYSTEM_MASTER/DOCUMENTS | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
+| `C29` | PROJECTS | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
+| `C30` | RESEARCH | SYSTEM_MASTER/RESEARCH_KNOWLEDGE | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
+| `C31` | STORYBIBLE | SYSTEM_MASTER/BOOK | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
+| `C32` | VIDEO | SYSTEM_MASTER/MEDIA | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
+| `C33` | VOICE | SYSTEM_MASTER/MEDIA | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
+| `C34` | WRITING | SYSTEM_MASTER/BOOK | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
 | `C35` | AIINCOME | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Deferred until Foundation 1.0 closure. |
 | `C36` | CAD | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Headless interop only. |
 | `C37` | PHONEOPS | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Absorbed into Experience/Automation foundation. |
