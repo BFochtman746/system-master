@@ -1,0 +1,202 @@
+{
+  "package_id": "CORE-IDENTITY-DELEGATION-BUILD-001",
+  "design_lock": "DELEGATION-DESIGN-LOCK-001.md",
+  "base_owner_subject": "38c80514298fd1b1509f9fb55bd817b95a5f9f0b",
+  "qualification_class": "HOSTED_PORTABLE_REFERENCE_AUTHORITY_MECHANICS",
+  "unaccounted_requirement_count": 0,
+  "isolated_case_denominator": 36,
+  "calibration": {
+    "synthetic_grants": 128,
+    "synthetic_validations": 512,
+    "replay_threshold_ms": 15000,
+    "validation_threshold_ms": 15000,
+    "thresholds_frozen_before_execution": true
+  },
+  "external_evidence_fences": {
+    "real_credentials": "NOT_CLAIMED",
+    "external_provider_validity": "NOT_CLAIMED",
+    "keel_runtime_receipt_authority": "INTERFACE_ONLY_NOT_CLAIMED",
+    "effect_authority_commit_permission": "OUTSIDE_OWNER_NOT_CLAIMED",
+    "a01": "NOT_EXECUTED",
+    "native": "NOT_EXECUTED",
+    "production": "NOT_EXECUTED"
+  },
+  "invariants": [
+    {
+      "id": "DEL-INV-01",
+      "requirement": "Stable principal identities remain canonical inputs to delegation and are re-read before authority use.",
+      "implementation": ["DelegationRuntime.DelegationService.requireCurrentPrincipal"],
+      "durable_state": ["IdentityJournalStore remains principal authority", "DelegationJournalStore stores only principal identifiers"],
+      "interface_contract": ["PrincipalAuthority", "RegistryPrincipalAuthority"],
+      "tests": ["cases 1, 17, 22"],
+      "evidence": ["delegation-isolated.txt", "source-digests.json"],
+      "environment": "GitHub hosted Ubuntu + Temurin Java 21",
+      "blocker": "Real credential/provider standing remains external"
+    },
+    {
+      "id": "DEL-INV-02",
+      "requirement": "Actor-chain attribution is immutable, contiguous, acyclic, digest-bound and hard-bounded to 16 hops.",
+      "implementation": ["DelegationRuntime.ActorChain", "DelegationRuntime.DelegationHop"],
+      "durable_state": ["grant.actorChainDigest", "immutable grant records"],
+      "interface_contract": ["ActorChain.create", "ValidateCapabilityUse"],
+      "tests": ["cases 23-29"],
+      "evidence": ["delegation-isolated.txt"],
+      "environment": "Hosted portable",
+      "blocker": "None for reference mechanics"
+    },
+    {
+      "id": "DEL-INV-03",
+      "requirement": "Capability grants are immutable, content-digested, create-once authority records.",
+      "implementation": ["DelegationRuntime.CapabilityGrant", "DelegationRuntime.digestGrant"],
+      "durable_state": ["GRANT_ISSUED append-only event"],
+      "interface_contract": ["IssueGrantRequest", "DelegationService.issue"],
+      "tests": ["cases 1-3, 30"],
+      "evidence": ["delegation-isolated.txt", "journal-format.txt"],
+      "environment": "Hosted portable",
+      "blocker": "Production persistence adapter not claimed"
+    },
+    {
+      "id": "DEL-INV-04",
+      "requirement": "Semantic command ingestion is idempotent and same command id with changed payload fails conflict.",
+      "implementation": ["CommandMemo", "requireCommandReplay", "issueRequestHash"],
+      "durable_state": ["commandId + requestHash persisted in each journal record"],
+      "interface_contract": ["MutationContext.commandId"],
+      "tests": ["cases 2-3"],
+      "evidence": ["delegation-isolated.txt"],
+      "environment": "Hosted portable",
+      "blocker": "None for reference mechanics"
+    },
+    {
+      "id": "DEL-INV-05",
+      "requirement": "Parent to child delegation is monotonic across actions/resources/purposes/audiences/targets/time/depth.",
+      "implementation": ["DelegationService.validateChild"],
+      "durable_state": ["parentGrantId", "parentGrantDigest", "immutable scope sets"],
+      "interface_contract": ["GrantBody parent bindings"],
+      "tests": ["cases 4-12"],
+      "evidence": ["delegation-isolated.txt"],
+      "environment": "Hosted portable",
+      "blocker": "None for reference mechanics"
+    },
+    {
+      "id": "DEL-INV-06",
+      "requirement": "Parent identity, subject, Keel ceiling and generation bindings cannot silently change within a lineage.",
+      "implementation": ["DelegationService.validateChild"],
+      "durable_state": ["parent digest", "subjectPrincipalId", "keelCeilingRef/digest", "authorityGeneration"],
+      "interface_contract": ["GrantBody", "DelegationCeilingReceipt"],
+      "tests": ["cases 13-17"],
+      "evidence": ["delegation-isolated.txt"],
+      "environment": "Hosted portable",
+      "blocker": "Live Keel runtime receipt authority remains external"
+    },
+    {
+      "id": "DEL-INV-07",
+      "requirement": "Standing is mutable canonical state separate from immutable grant bytes; revocation is terminal.",
+      "implementation": ["GrantStandingState", "DelegationService.suspend", "DelegationService.revoke"],
+      "durable_state": ["GRANT_SUSPENDED", "GRANT_REVOKED"],
+      "interface_contract": ["StandingChangeRequest"],
+      "tests": ["cases 18-19, 30"],
+      "evidence": ["delegation-isolated.txt"],
+      "environment": "Hosted portable",
+      "blocker": "None for reference mechanics"
+    },
+    {
+      "id": "DEL-INV-08",
+      "requirement": "Authority generation advancement invalidates stale grants without destructive history rewrite.",
+      "implementation": ["DelegationService.advanceAuthorityGeneration", "DelegationService.requireUsable"],
+      "durable_state": ["AUTHORITY_GENERATION_ADVANCED"],
+      "interface_contract": ["AdvanceGenerationRequest"],
+      "tests": ["cases 17, 33"],
+      "evidence": ["delegation-isolated.txt"],
+      "environment": "Hosted portable",
+      "blocker": "Cross-process production invalidation propagation not claimed"
+    },
+    {
+      "id": "DEL-INV-09",
+      "requirement": "Capability use re-reads canonical grant/standing/lineage/principal state and fails closed on time or unknown state.",
+      "implementation": ["DelegationService.validateUse", "DelegationService.requireUsable"],
+      "durable_state": ["DelegationJournalStore replay", "Identity principal authority"],
+      "interface_contract": ["CapabilityUseRequest", "CapabilityValidationReceipt"],
+      "tests": ["cases 19-22, 27-29"],
+      "evidence": ["delegation-isolated.txt"],
+      "environment": "Hosted portable",
+      "blocker": "Native/production runtime integration not claimed"
+    },
+    {
+      "id": "DEL-INV-10",
+      "requirement": "Keel and external authorization are receipt interfaces; caller assertions are not canonical authority.",
+      "implementation": ["ReceiptAuthority", "DelegationService.validateReceipts"],
+      "durable_state": ["receipt references only inside command/grant evidence"],
+      "interface_contract": ["ExternalAuthorizationReceipt", "DelegationCeilingReceipt"],
+      "tests": ["cases 1, 16"],
+      "evidence": ["delegation-isolated.txt"],
+      "environment": "Stub receipt authority in isolated qualification",
+      "blocker": "Real external policy/Keel validators not executed"
+    },
+    {
+      "id": "DEL-INV-11",
+      "requirement": "Portable journal is append-only, hash-chained, durably flushed and fail-closed on corruption/truncation.",
+      "implementation": ["DelegationJournalStore.append", "DelegationJournalStore.replay"],
+      "durable_state": ["delegation.journal", "delegation.lock"],
+      "interface_contract": ["DelegationJournalStore"],
+      "tests": ["cases 30-32"],
+      "evidence": ["delegation-isolated.txt", "source-digests.json"],
+      "environment": "GitHub hosted filesystem reference adapter",
+      "blocker": "A-01/native crash semantics and production database durability not executed"
+    },
+    {
+      "id": "DEL-INV-12",
+      "requirement": "Mutation acknowledgment occurs only after append and force-to-storage in the reference adapter.",
+      "implementation": ["DelegationJournalStore.append FileChannel.force(true)"],
+      "durable_state": ["append-only journal"],
+      "interface_contract": ["issue/suspend/revoke/advance return after append"],
+      "tests": ["cases 1, 18, 30"],
+      "evidence": ["delegation-isolated.txt"],
+      "environment": "Hosted filesystem only",
+      "blocker": "Native power-loss durability not claimed"
+    },
+    {
+      "id": "DEL-INV-13",
+      "requirement": "Portable single-writer append uses an OS file lock and replayed state, never mutable cache truth.",
+      "implementation": ["DelegationJournalStore.append FileLock", "DelegationJournalStore.load"],
+      "durable_state": ["delegation.lock", "journal sequence/hash"],
+      "interface_contract": ["DelegationJournalStore"],
+      "tests": ["cases 30, 33"],
+      "evidence": ["delegation-isolated.txt"],
+      "environment": "Hosted portable single-host adapter",
+      "blocker": "Distributed/network filesystem writer exclusion not claimed"
+    },
+    {
+      "id": "DEL-INV-14",
+      "requirement": "Delegation persistence contains no bearer credential, raw token, private key or secret payload fields.",
+      "implementation": ["grant/reference-only schema", "RegistryPrincipalAuthority adapter seam"],
+      "durable_state": ["bounded identifiers/digests/references only"],
+      "interface_contract": ["PrincipalAuthority", "ReceiptAuthority"],
+      "tests": ["case 34"],
+      "evidence": ["delegation-isolated.txt"],
+      "environment": "Hosted portable",
+      "blocker": "Real workload credential adapter not executed"
+    },
+    {
+      "id": "DEL-INV-15",
+      "requirement": "Delegation validation cannot become Effect Authority commit permission.",
+      "implementation": ["CapabilityValidationReceipt carries no effect/commit authority"],
+      "durable_state": ["none; owner boundary by contract"],
+      "interface_contract": ["CapabilityValidationReceipt"],
+      "tests": ["case 35"],
+      "evidence": ["delegation-isolated.txt"],
+      "environment": "Hosted portable",
+      "blocker": "Effect Authority integration remains future owner-valid work"
+    },
+    {
+      "id": "DEL-INV-16",
+      "requirement": "Delegation cannot replace Placement or Durable Runtime assignment/lease/fence truth.",
+      "implementation": ["CapabilityGrant schema excludes lease/fence authority"],
+      "durable_state": ["none; external owner references only if added later"],
+      "interface_contract": ["CapabilityGrant", "CapabilityValidationReceipt"],
+      "tests": ["case 36"],
+      "evidence": ["delegation-isolated.txt"],
+      "environment": "Hosted portable",
+      "blocker": "Placement/Durable Runtime integration remains external"
+    }
+  ]
+}
