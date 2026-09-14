@@ -1,0 +1,199 @@
+{
+  "matrix_id": "LEARNING-FORENSIC-DISPOSITION-MATRIX-001",
+  "effective_date": "2026-09-14",
+  "status": "ACTIVE__CURRENT_AUTHORITY_ANCHORS_ADJUDICATED__FROZEN_SOURCE_IDENTITIES_PENDING",
+  "owner_path": "SYSTEM_MASTER/LEARNING",
+  "governing_obligation": "LEARNING-FORENSIC-BASELINE-CURRENT-AUTHORITY-ADJUDICATION-001",
+  "governing_authority": {
+    "current_authority": "CURRENT-AUTHORITY-005",
+    "topology": "governance/SYSTEM-TOPOLOGY-007.json",
+    "allocation": "governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006.json",
+    "crosswalk": "governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json",
+    "learning_control": "learning/control-v1/LEARNING-CONTROL-RECORD-v5.md",
+    "frozen_forensic_baseline": "docs/governance/LEARNING_FORENSIC_BASELINE_FREEZE_2026-09-11.md"
+  },
+  "scope_rule": "This matrix adjudicates only facts established by current authority and the frozen forensic-baseline governance record. It does not reconstruct missing row-level forensic evidence from historical branches. Exact historical branches remain provenance only.",
+  "disposition_classes": [
+    "CARRY_FORWARD",
+    "CARRY_FORWARD_WITH_INTERFACE_ADAPTATION",
+    "INTERFACE_REQUIRED",
+    "HISTORICAL_ONLY",
+    "HOLD_PENDING_FORENSIC_ROW_ADJUDICATION",
+    "BLOCKED_HUMAN",
+    "GAP_SOURCE_IDENTITY_UNRESOLVED"
+  ],
+  "source_identity_register": [
+    {
+      "source_class_id": "LFS-01",
+      "source_class": "Learning forensic audit",
+      "frozen_baseline_date": "2026-09-11",
+      "exact_artifact_identity": null,
+      "identity_status": "GAP_SOURCE_IDENTITY_UNRESOLVED",
+      "current_effect": "Governing recovered evidence class, but no filename/SHA/artifact ID is asserted until independently verified.",
+      "next_action": "Locate and bind the exact artifact identity without changing its historical provenance."
+    },
+    {
+      "source_class_id": "LFS-02",
+      "source_class": "Learning requirement ledger",
+      "frozen_baseline_date": "2026-09-11",
+      "exact_artifact_identity": null,
+      "identity_status": "GAP_SOURCE_IDENTITY_UNRESOLVED",
+      "current_effect": "No individual requirement row is treated as recovered current truth until its exact frozen ledger source is located.",
+      "next_action": "Locate the exact frozen requirement-ledger artifact, then append requirement rows to this matrix without renumbering or rewriting historical IDs."
+    },
+    {
+      "source_class_id": "LFS-03",
+      "source_class": "Learning interface ledger",
+      "frozen_baseline_date": "2026-09-11",
+      "exact_artifact_identity": null,
+      "identity_status": "GAP_SOURCE_IDENTITY_UNRESOLVED",
+      "current_effect": "Current-authority peer boundaries are binding, but recovered interface-ledger rows are not invented.",
+      "next_action": "Locate the exact frozen interface-ledger artifact and map each recovered interface to the current peer owner."
+    },
+    {
+      "source_class_id": "LFS-04",
+      "source_class": "Learning archive inventory",
+      "frozen_baseline_date": "2026-09-11",
+      "exact_artifact_identity": null,
+      "identity_status": "GAP_SOURCE_IDENTITY_UNRESOLVED",
+      "current_effect": "Historical branches and artifacts remain provenance candidates only; none is promoted by branch age or naming.",
+      "next_action": "Locate the exact frozen archive-inventory artifact and bind inventory entries to exact provenance where verifiable."
+    },
+    {
+      "source_class_id": "LFS-05",
+      "source_class": "Learning gap register",
+      "frozen_baseline_date": "2026-09-11",
+      "exact_artifact_identity": null,
+      "identity_status": "GAP_SOURCE_IDENTITY_UNRESOLVED",
+      "current_effect": "All unresolved September 11 gap-register items remain unresolved by rule even though row identities are not yet located.",
+      "next_action": "Locate the exact frozen gap-register artifact and append each gap with its current-authority disposition; do not close a gap by inference."
+    }
+  ],
+  "learning_semantic_authority_rows": [
+    {
+      "row_id": "LA-001",
+      "subject": "Learner and mastery state",
+      "capability_id": "C18",
+      "module_key": "LEARNING",
+      "owner_path": "SYSTEM_MASTER/LEARNING",
+      "disposition": "CARRY_FORWARD",
+      "basis": "LEARNING-CONTROL-RECORD-v5 current semantic ownership",
+      "evidence_boundary": "Authority anchor only; does not assert recovery of a particular requirement-ledger row."
+    },
+    {
+      "row_id": "LA-002",
+      "subject": "Curriculum and curriculum/compiler behavior",
+      "capability_id": "C07",
+      "module_key": "CURRICULUM",
+      "owner_path": "SYSTEM_MASTER/LEARNING",
+      "disposition": "CARRY_FORWARD",
+      "basis": "Allocation 006, Crosswalk 003 and LEARNING-CONTROL-RECORD-v5",
+      "evidence_boundary": "Semantic ownership carries forward; the prior curriculum/compiler implementation obligation remains HOLD until recovered forensic rows establish its exact current disposition."
+    },
+    {
+      "row_id": "LA-003",
+      "subject": "Assessment and adaptive sequencing",
+      "capability_id": "C18",
+      "module_key": "LEARNING",
+      "owner_path": "SYSTEM_MASTER/LEARNING",
+      "disposition": "CARRY_FORWARD",
+      "basis": "LEARNING-CONTROL-RECORD-v5 current semantic ownership",
+      "evidence_boundary": "No historical PASS transfers to a changed implementation or interface subject."
+    },
+    {
+      "row_id": "LA-004",
+      "subject": "Misconception handling",
+      "capability_id": "C18",
+      "module_key": "LEARNING",
+      "owner_path": "SYSTEM_MASTER/LEARNING",
+      "disposition": "CARRY_FORWARD",
+      "basis": "LEARNING-CONTROL-RECORD-v5 current semantic ownership",
+      "evidence_boundary": "Authority anchor only until matched to exact frozen forensic evidence."
+    },
+    {
+      "row_id": "LA-005",
+      "subject": "Retention and transfer design",
+      "capability_id": "C18",
+      "module_key": "LEARNING",
+      "owner_path": "SYSTEM_MASTER/LEARNING",
+      "disposition": "CARRY_FORWARD",
+      "basis": "LEARNING-CONTROL-RECORD-v5 current semantic ownership",
+      "evidence_boundary": "Real learner retention/transfer outcomes require genuine evidence and are not inferred."
+    },
+    {
+      "row_id": "LA-006",
+      "subject": "Learning-specific product qualification semantics",
+      "capability_id": "C18",
+      "module_key": "LEARNING",
+      "owner_path": "SYSTEM_MASTER/LEARNING",
+      "disposition": "CARRY_FORWARD_WITH_INTERFACE_ADAPTATION",
+      "interface_dependency": "P08 qualification execution and PASS semantics owned by SYSTEM_MASTER/CORE",
+      "basis": "Learning owns Learning-specific qualification meaning; CORE owns shared qualification execution/PASS infrastructure.",
+      "evidence_boundary": "Exact-subject qualification remains exact-subject scoped."
+    }
+  ],
+  "platform_interface_rows": [
+    {"platform_id":"P00","requirement":"Authority pointer of record","owner_path":"SYSTEM_MASTER/CORE","learning_disposition":"INTERFACE_REQUIRED","rule":"Learning consumes current authority; it does not own or fork it."},
+    {"platform_id":"P01","requirement":"System topology and ownership allocation","owner_path":"SYSTEM_MASTER/CORE","learning_disposition":"INTERFACE_REQUIRED","rule":"Learning remains a peer under Topology 007 and must not redefine peer ownership."},
+    {"platform_id":"P02","requirement":"Work obligation registry","owner_path":"SYSTEM_MASTER/CORE","learning_disposition":"INTERFACE_REQUIRED","rule":"Learning obligations are selected through the central registry."},
+    {"platform_id":"P03","requirement":"Evidence store and retention","owner_path":"SYSTEM_MASTER/CORE","learning_disposition":"INTERFACE_REQUIRED","rule":"Learning evidence uses shared retention while preserving Learning semantic meaning and exact provenance."},
+    {"platform_id":"P04","requirement":"Content-addressed authority writes","owner_path":"SYSTEM_MASTER/CORE","learning_disposition":"INTERFACE_REQUIRED","rule":"Learning current-control writes use shared authority mechanics."},
+    {"platform_id":"P05","requirement":"Governance schema validation","owner_path":"SYSTEM_MASTER/CORE","learning_disposition":"INTERFACE_REQUIRED","rule":"Learning governance artifacts must conform to shared validation requirements."},
+    {"platform_id":"P06","requirement":"Control gateway dispatch and admission","owner_path":"SYSTEM_MASTER/CORE","learning_disposition":"INTERFACE_REQUIRED","rule":"Learning uses shared dispatch/admission and retains its own semantic lane."},
+    {"platform_id":"P07","requirement":"A-01 admission barrier","owner_path":"SYSTEM_MASTER/CORE","learning_disposition":"INTERFACE_REQUIRED","rule":"Learning cannot self-grant A-01 authority."},
+    {"platform_id":"P08","requirement":"Qualification execution and PASS semantics","owner_path":"SYSTEM_MASTER/CORE","learning_disposition":"INTERFACE_REQUIRED","rule":"Learning defines Learning-specific qualification meaning; shared PASS execution semantics remain CORE-owned."},
+    {"platform_id":"P09","requirement":"Repair broker and durable repair lineage","owner_path":"SYSTEM_MASTER/CORE","learning_disposition":"INTERFACE_REQUIRED","rule":"Repairs preserve exact Learning evidence lineage through shared repair infrastructure."},
+    {"platform_id":"P10","requirement":"Second-shift supervisor: lanes, leases, fencing","owner_path":"SYSTEM_MASTER/CORE","learning_disposition":"INTERFACE_REQUIRED","rule":"The Learning lane remains fenced from other peer mutation authority."},
+    {"platform_id":"P11","requirement":"Night scheduler and claim authority","owner_path":"SYSTEM_MASTER/CORE","learning_disposition":"INTERFACE_REQUIRED","rule":"Scheduling cannot create or broaden Learning semantic authority."},
+    {"platform_id":"P12","requirement":"GitHub to A-01 ingress transport","owner_path":"SYSTEM_MASTER/CORE","learning_disposition":"INTERFACE_REQUIRED","rule":"Learning uses shared ingress when authorized; transport does not transfer PASS."},
+    {"platform_id":"P13","requirement":"Model routing and local inference","owner_path":"SYSTEM_MASTER/CORE","learning_disposition":"INTERFACE_REQUIRED","absorbed_into":"C20 LOCALAI","rule":"Learning may consume model-routing/local-inference services but does not own the shared model/runtime layer."},
+    {"platform_id":"P14","requirement":"Connector action runtime","owner_path":"SYSTEM_MASTER/CORE","learning_disposition":"INTERFACE_REQUIRED","absorbed_into":"C27 PLUGINS","rule":"Learning may request connector actions through admitted interfaces; external side effects still require explicit authority."},
+    {"platform_id":"P15","requirement":"Observability, morning receipt and rollback","owner_path":"SYSTEM_MASTER/CORE","learning_disposition":"INTERFACE_REQUIRED","rule":"Learning emits/consumes shared operational evidence without taking CORE ownership."}
+  ],
+  "peer_interface_rows": [
+    {"peer":"BOOK","owner_path":"SYSTEM_MASTER/BOOK","subject":"Canonical Book/manuscript/Story-Bible semantics","learning_disposition":"INTERFACE_REQUIRED_IF_NEEDED","rule":"Learning does not own Book authoring or canon state."},
+    {"peer":"DOCUMENTS","owner_path":"SYSTEM_MASTER/DOCUMENTS","subject":"Generic document/artifact mechanics","learning_disposition":"INTERFACE_REQUIRED","rule":"Learning content may use document outputs; generic DOCX/PDF/PPTX/file mechanics stay DOCUMENTS-owned."},
+    {"peer":"SPREADSHEET_DATA","owner_path":"SYSTEM_MASTER/SPREADSHEET_DATA","subject":"Spreadsheet/math/data/ledger mechanics","learning_disposition":"INTERFACE_REQUIRED_IF_NEEDED","rule":"Learning may consume data/math services without absorbing the peer."},
+    {"peer":"MEDIA","owner_path":"SYSTEM_MASTER/MEDIA","subject":"Image/audio/video/voice/audiobook/media generation and processing","learning_disposition":"INTERFACE_REQUIRED","rule":"Instructional media requirements remain Learning intent but generic media mechanics stay MEDIA-owned."},
+    {"peer":"CONNECTED_ACTIONS","owner_path":"SYSTEM_MASTER/CONNECTED_ACTIONS","subject":"Browser/calendar/comms/plugins and user-side-effect policy","learning_disposition":"INTERFACE_REQUIRED_IF_NEEDED","rule":"Learning does not inherit external side-effect authority."},
+    {"peer":"RESEARCH_KNOWLEDGE","owner_path":"SYSTEM_MASTER/RESEARCH_KNOWLEDGE","subject":"Research, knowledge and provenance semantics","learning_disposition":"INTERFACE_REQUIRED","rule":"Learning can request research/provenance services while retaining Learning-domain interpretation."},
+    {"peer":"PROGRAMMING","owner_path":"SYSTEM_MASTER/PROGRAMMING","subject":"Software-engineering implementation and Website Building C40","learning_disposition":"INTERFACE_REQUIRED","rule":"Learning owns product semantics; PROGRAMMING owns generic software-engineering semantics."}
+  ],
+  "special_dispositions": [
+    {
+      "row_id": "LS-001",
+      "subject": "Historical PROSE assumptions or Learning-to-Prose routes",
+      "owner_path": null,
+      "disposition": "HISTORICAL_ONLY",
+      "rule": "PROSE is terminally retired. No recovered Learning item may resurrect a Prose lane; any genuinely open preserved-Prose integration is BOOK-owned."
+    },
+    {
+      "row_id": "LS-002",
+      "subject": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001",
+      "owner_path": "SYSTEM_MASTER/LEARNING",
+      "disposition": "HOLD_PENDING_FORENSIC_ROW_ADJUDICATION",
+      "rule": "Do not replay the prior implementation program. Resume, adapt, split or supersede only after exact frozen requirement/gap/interface rows are located and adjudicated."
+    },
+    {
+      "row_id": "LS-003",
+      "subject": "LEARNING-REAL-PARTICIPANT-PILOT-001",
+      "owner_path": "SYSTEM_MASTER/LEARNING",
+      "disposition": "BLOCKED_HUMAN",
+      "rule": "Requires genuine explicit consent and real learner evidence. No simulated participant evidence closes this blocker."
+    }
+  ],
+  "summary": {
+    "frozen_evidence_classes": 5,
+    "exact_frozen_source_identities_verified": 0,
+    "source_identity_gaps": 5,
+    "current_learning_semantic_authority_anchors": 6,
+    "platform_interface_requirements_mapped": 16,
+    "peer_interface_boundaries_mapped": 7,
+    "historical_only_rows": 1,
+    "held_prior_learning_obligations": 1,
+    "human_blocked_learning_obligations": 1,
+    "forensic_row_level_adjudication_complete": false
+  },
+  "next_required_action": "Recover and bind the exact September 11 frozen source identities, beginning with the requirement ledger and gap register; then append their original row identities and dispositions to this matrix without rewriting historical evidence. Until then, current-authority anchor rows govern ownership and interfaces, but do not substitute for missing forensic row evidence.",
+  "closure_rule": "This matrix may be marked FORENSIC_ROW_LEVEL_ADJUDICATION_COMPLETE only after all five frozen evidence classes have verified source identities and every recovered requirement/interface/archive/gap row has an explicit current-authority disposition with evidence provenance."
+}
