@@ -94,9 +94,11 @@ for s in $(ls .github/scripts | grep qualify | grep -E '\.(js|py)$' | sort); do
 done
 
 hr; echo "4. ASSURANCE STANDARDS"; hr
+# Resolve the base through the checker's portable default (`origin/main`) instead of
+# requiring a local branch literally named `main`; GitHub PR merge checkouts are detached.
 # The checker emits compact JSON for "no changes" and pretty JSON when files changed.
 # Accept either serialization; status is semantic, whitespace is not.
-if out=$(node .github/scripts/assurance-standards-check.js main 2>&1) \
+if out=$(node .github/scripts/assurance-standards-check.js 2>&1) \
    && grep -qE '"status"[[:space:]]*:[[:space:]]*"PASS"' <<< "$out"; then
   ok "assurance-standards-check"
 else
@@ -106,7 +108,7 @@ fi
 hr
 printf 'SUMMARY  pass=%d  fail=%d  skip=%d\n' "$pass" "$fail" "$skip"
 if [[ $FORCE_CI_ONLY -eq 0 && $skip -gt 0 ]]; then
-  echo "note: skips are CI-only gates. Run ./verify.sh --ci-only to force them."
+  echo "note: skips are exact-subject/CI-only gates. Run ./verify.sh --ci-only to force CI-only applicability checks."
 fi
 if [[ $fail -gt 0 ]]; then
   echo "FAILED:"; printf '  - %s\n' "${FAILED[@]}"
