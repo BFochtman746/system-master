@@ -97,3 +97,5 @@ Qualification proves the current ownership model; it does not grant authority to
 ## 10. Open gaps
 
 P01 remains `ACTIVE_GAP` until a fresh exact-subject `CURRENT-AUTHORITY-005` qualification receipt is produced and admitted to the Foundation evidence registry.
+
+<!-- 2026-09-14: non-semantic trigger for fresh current-subject P01 qualification. -->
