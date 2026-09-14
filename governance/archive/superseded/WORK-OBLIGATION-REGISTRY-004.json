@@ -1,0 +1,126 @@
+{
+  "registry_id": "WORK-OBLIGATION-REGISTRY-004",
+  "effective_date": "2026-09-10",
+  "product_root": "SYSTEM_MASTER",
+  "topology": "governance/SYSTEM-TOPOLOGY-003.json",
+  "supersedes_current_selection": "governance/WORK-OBLIGATION-REGISTRY-003.json",
+  "historical_registries": ["governance/WORK-OBLIGATION-REGISTRY-001.json","governance/WORK-OBLIGATION-REGISTRY-002.json","governance/WORK-OBLIGATION-REGISTRY-003.json"],
+  "transition_basis": ["governance/ADR-0003-DOCUMENTS-PEER-SYSTEM-AND-PROSE-RETIREMENT.md","governance/retirements/PROSE-SYSTEM-RETIREMENT-001.json","governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-002.json","documents/control-v1/DOCUMENTS-CONTROL-RECORD-001.md"],
+  "purpose": "Current work index after Documents is admitted as a first-class peer system and completed Prose is retired into Documents. No current PROSE owner work remains.",
+  "states": ["READY","ACTIVE","BLOCKED","HOLD","DEFERRED","OWNER_SELECTION_REQUIRED","SUPERSEDED","CLOSED"],
+  "rules": [
+    "Every non-closed obligation has exactly one canonical owner_path under SYSTEM-TOPOLOGY-003.",
+    "PROSE is retired and cannot own a current obligation.",
+    "Historical Prose obligations/receipts remain in Registry 003 and earlier evidence but cannot drive current scheduling.",
+    "Still-required Prose capability work is translated into SYSTEM_MASTER/DOCUMENTS integration work without PASS transfer.",
+    "BOOK and DOCUMENTS are peer owners; Book canonical state remains BOOK-owned while document/prose capability implementation remains DOCUMENTS-owned.",
+    "Historical qualification may seed integration but changed Documents subjects require fresh qualification."
+  ],
+  "owner_head_snapshot": {
+    "CORE": "2031f070bd3702185c028733819ec410db36613c",
+    "LEARNING": "262f3f0b5ffa4dea68964b91eacd57a4c39bdda6",
+    "BOOK": "a2820411337b74a00878a1ce9cb82a363a4fb18c",
+    "DOCUMENTS": "4fc463a4744671927d92d04f87dc131d3bae310c"
+  },
+  "obligations": [
+    {
+      "obligation_id": "CORE-SMR021-USER-EXPERIENCE-001",
+      "owner_path": "SYSTEM_MASTER/CORE",
+      "state": "ACTIVE",
+      "current_control_head_snapshot": "2031f070bd3702185c028733819ec410db36613c",
+      "objective": "Establish ordinary GitHub-native immutable custody of the exact verified SMR021 capsule/source tree, recompute required source/test identity, obtain fresh exact-Git-SHA hosted qualification where permitted, and keep DATA persistence mutation fail-closed until DATA-owner-valid authority exists."
+    },
+    {
+      "obligation_id": "CORE-CORRECTED-SOURCE-CUSTODY-001",
+      "owner_path": "SYSTEM_MASTER/CORE",
+      "state": "BLOCKED",
+      "blocker_class": "SOURCE_CUSTODY",
+      "objective": "Import/admit corrected SMR018, cumulative SMR019 and changed SMR020 runnable source trees into ordinary GitHub-native immutable custody without mutation and independently reproduce exact identities before higher qualification."
+    },
+    {
+      "obligation_id": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001",
+      "owner_path": "SYSTEM_MASTER/LEARNING",
+      "state": "ACTIVE",
+      "current_control_head_snapshot": "262f3f0b5ffa4dea68964b91eacd57a4c39bdda6",
+      "objective": "Continue the frozen-source full-standard curriculum compiler through Domain III assessment-target binding without inferring psychometric, learner, SME, certification, A-01, native or production authority."
+    },
+    {
+      "obligation_id": "LEARNING-REAL-PARTICIPANT-PILOT-001",
+      "owner_path": "SYSTEM_MASTER/LEARNING",
+      "state": "BLOCKED",
+      "blocker_class": "HUMAN_ONLY",
+      "objective": "Execute the real participant Learning pilot only with genuine explicit consent and real learner evidence."
+    },
+    {
+      "obligation_id": "BOOK-SYSTEM-CANONICAL-CONTENT-OBJECT-ADMISSION-001-A01-REGISTRATION-AND-QUALIFICATION-PREP",
+      "owner_path": "SYSTEM_MASTER/BOOK",
+      "state": "BLOCKED",
+      "blocker_class": "SHARED_A01_AUTHORITY",
+      "objective": "Route the unchanged original Book canonical-content-admission subject through central registered A-01 authority without mutating or relabeling hosted evidence."
+    },
+    {
+      "obligation_id": "BOOK-DOCUMENTS-PROSE-SERVICE-INTEGRATION-PHASE-1-001",
+      "owner_path": "SYSTEM_MASTER/BOOK",
+      "state": "READY",
+      "current_control_head_snapshot": "a2820411337b74a00878a1ce9cb82a363a4fb18c",
+      "supersedes": "BOOK-PROSE-INTEGRATION-PHASE-1-INPUT-CENSUS-001",
+      "objective": "Integrate Book with the new DOCUMENTS peer-system service boundary for document/prose capabilities. Consume completed Prose capabilities only through DOCUMENTS interfaces; preserve Book canonical-state and author authority."
+    },
+    {
+      "obligation_id": "DOCUMENTS-CURRENT-ADMISSION-001",
+      "owner_path": "SYSTEM_MASTER/DOCUMENTS",
+      "state": "ACTIVE",
+      "current_control_head_snapshot": "4fc463a4744671927d92d04f87dc131d3bae310c",
+      "supersedes_owner_binding_of": "SYSTEM-MASTER-DOCUMENT-TOOL-CURRENT-ADMISSION-001",
+      "classification": "DOCUMENTS_FIRST_CLASS_SYSTEM_CURRENT_ADMISSION",
+      "objective": "Admit preserved Document/DOCX/PPTX/PDF implementation under the DOCUMENTS peer-system owner using exact source custody and fresh current-subject qualification rather than rebuilding completed work."
+    },
+    {
+      "obligation_id": "DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-IMPORT-AND-EXACT-SUBJECT-QUALIFICATION-002",
+      "owner_path": "SYSTEM_MASTER/DOCUMENTS",
+      "state": "READY",
+      "current_control_head_snapshot": "4fc463a4744671927d92d04f87dc131d3bae310c",
+      "priority": "CENTRAL_NEXT_OBJECTIVE",
+      "parent_obligation_id": "DOCUMENTS-CURRENT-ADMISSION-001",
+      "supersedes_owner_binding_of": "SYSTEM-MASTER-DOCUMENT-R4-GITHUB-NATIVE-SOURCE-IMPORT-AND-EXACT-SUBJECT-QUALIFICATION-002",
+      "objective": "Import the exactly reconstructed 225-file CR001-R4 source tree into ordinary GitHub-native immutable custody, bind the exact Git subject SHA, independently verify source identity, and run fresh portable/hosted qualification on that exact subject without PASS transfer.",
+      "requires_physical_a01_access": false
+    },
+    {
+      "obligation_id": "DOCUMENTS-PROSE-ABSORPTION-INTEGRATION-001",
+      "owner_path": "SYSTEM_MASTER/DOCUMENTS",
+      "state": "READY",
+      "current_control_head_snapshot": "4fc463a4744671927d92d04f87dc131d3bae310c",
+      "classification": "RETIRED_SYSTEM_CAPABILITY_ABSORPTION",
+      "retirement_record": "governance/retirements/PROSE-SYSTEM-RETIREMENT-001.json",
+      "objective": "Crosswalk and integrate the completed Prose evaluator/craft/diagnostic/revision/preservation capability family into DOCUMENTS, deduplicating existing Documents capabilities and freshly qualifying changed integration subjects while preserving all historical Prose evidence and blind/private/author boundaries.",
+      "dependency_note": "May proceed in parallel where it does not mutate or depend on unresolved exact R4 source identity; executable integration bytes require fresh exact-subject evidence."
+    },
+    {
+      "obligation_id": "A01-CONTROL-PLANE-SELFTEST-A1-REPLACEMENT-RERUN-001",
+      "owner_path": "SYSTEM_MASTER/SHARED_INFRASTRUCTURE/A01",
+      "administrative_owner": "SYSTEM_MASTER/CORE",
+      "state": "READY",
+      "objective": "Use the existing repair-rerun transaction to obtain and adjudicate a real authoritative replacement A-01 receipt; do not open a duplicate repair lineage."
+    },
+    {
+      "obligation_id": "SECOND-SHIFT-LIVE-AUTHORITY-SUCCESSOR-ENFORCEMENT-002",
+      "owner_path": "SYSTEM_MASTER/SHARED_INFRASTRUCTURE",
+      "administrative_owner": "SYSTEM_MASTER/CORE",
+      "state": "ACTIVE",
+      "objective": "Finish remote live-owner/current-objective semantic enforcement and real per-lane utilization reconstruction beyond schema/lease/watchdog and owner-selector repairs, without treating Second Shift as a product system."
+    },
+    {"obligation_id":"HEADLESS-COMPUTE-DATA-SPREADSHEET-CONTRACT-001","owner_path":"SYSTEM_MASTER","state":"HOLD","objective":"Bind spreadsheet/math/user-data-analysis semantics over Core shared execution/artifact/data primitives."},
+    {"obligation_id":"HEADLESS-SOFTWARE-ENGINEERING-CONTRACT-001","owner_path":"SYSTEM_MASTER","state":"HOLD","objective":"Bind software-engineering and local-model tool semantics over Core execution/model infrastructure."},
+    {"obligation_id":"HEADLESS-RESEARCH-KNOWLEDGE-CONTRACT-001","owner_path":"SYSTEM_MASTER","state":"HOLD","objective":"Bind research/knowledge/external-information semantics over Core retrieval/evidence/connector primitives."},
+    {"obligation_id":"HEADLESS-CONNECTED-ACTION-AUTHORITY-CONTRACT-001","owner_path":"SYSTEM_MASTER","state":"HOLD","objective":"Bind email/calendar/automation/plugin user-action semantics over Core connector/action infrastructure."},
+    {"obligation_id":"HEADLESS-MEDIA-CAPABILITY-CONTRACT-001","owner_path":"SYSTEM_MASTER","state":"HOLD","objective":"Bind image/audio/video/media semantics over Core model/artifact/provider primitives."}
+  ],
+  "closed_at_transition": [
+    {"obligation_id":"PROSE-EVALUATOR-TOMORROW-READINESS-001","final_state":"CLOSED","closure_evidence":"governance/retirements/PROSE-SYSTEM-RETIREMENT-001.json","reason":"Prose is completed and retired; no tomorrow-readiness work remains under a Prose owner. Still-useful integration work is DOCUMENTS-PROSE-ABSORPTION-INTEGRATION-001."},
+    {"obligation_id":"PROSE-REAL-LIMITATION-BLIND-MODEL-SCORING-001","final_state":"SUPERSEDED","closure_evidence":"governance/retirements/PROSE-SYSTEM-RETIREMENT-001.json","reason":"No active Prose owner remains. Any materially required evaluator validation is now a DOCUMENTS-owned qualification concern with preserved historical blind-boundary evidence."},
+    {"obligation_id":"BOOK-EVAL-REPAIR-005-GATE-D-PRIVATE-RECOVERY-2026-09-10","final_state":"SUPERSEDED","closure_evidence":"governance/retirements/PROSE-SYSTEM-RETIREMENT-001.json","reason":"Retired Prose private-data obligation cannot remain active. Any still-required private validation must be explicitly re-authorized under DOCUMENTS without synthesizing or transferring private authority."},
+    {"obligation_id":"BOOK-PROSE-INTEGRATION-PHASE-1-INPUT-CENSUS-001","final_state":"SUPERSEDED","closure_evidence":"governance/ADR-0003-DOCUMENTS-PEER-SYSTEM-AND-PROSE-RETIREMENT.md","reason":"The integration boundary is now BOOK <-> DOCUMENTS, not BOOK <-> PROSE."}
+  ],
+  "central_next_objective": "DOCUMENTS-R4-GITHUB-NATIVE-SOURCE-IMPORT-AND-EXACT-SUBJECT-QUALIFICATION-002"
+}
