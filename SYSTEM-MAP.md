@@ -46,7 +46,7 @@ Implementation-subsystem registration satisfies `STANDARDS.md` S-05 and does **n
 
 | Subsystem | What it is | Repository path | Tests | Owner | Logs / evidence |
 |---|---|---|---:|---|---|
-| `learning-handler-binding-001` | Thin, transport-neutral inbound registration/adaptation seam for the frozen Learning/Curriculum command/query contracts. Master Core remains the router/dispatcher owner and DATA remains physical-persistence owner. | `system-master/learning-handler-binding-001/` | 1 runnable qualification entry point for the I001–I004 tranche | `LEARNING` (`CURRICULUM` + `LEARNING` semantics) | `Required Verification / required-verification`; Maven `target/surefire-reports/`; Learning handler-binding governance receipts |
+| `learning-handler-binding-001` | Thin, transport-neutral inbound registration/adaptation seam for the frozen Learning/Curriculum command/query contracts. CORE remains router/dispatcher and generic physical-persistence-mechanics owner; LEARNING remains sole owner of Learning/Curriculum semantic state and operation meaning. | `system-master/learning-handler-binding-001/` | 2 runnable qualification entry points covering I001–I008 | `LEARNING` (`CURRICULUM` + `LEARNING` semantics) | `Required Verification / required-verification`; Maven `target/surefire-reports/`; Learning handler-binding governance receipts |
 
 ## Platform requirements P00-P15
 
