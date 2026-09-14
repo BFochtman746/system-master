@@ -104,3 +104,5 @@ P02 qualification proves the current work graph. It does not grant authority to 
 ## 10. Open gaps
 
 P02 remains `ACTIVE_GAP` until a fresh exact-subject qualification receipt for the authority-selected current registry is produced and admitted to the Foundation evidence registry. Historical P02 PASS receipts remain exact-subject evidence and never transfer across registry or authority changes.
+
+<!-- 2026-09-14: non-semantic trigger for fresh current-subject P02 qualification. -->
