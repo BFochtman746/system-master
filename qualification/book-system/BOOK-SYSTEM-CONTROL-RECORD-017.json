@@ -1,7 +1,7 @@
 {
   "control_record_id": "BOOK-SYSTEM-CONTROL-RECORD-017",
   "effective_date": "2026-09-14",
-  "standing": "BOOK_LOCAL_SUCCESSOR__BOOK_INCOMPLETE__ENG_009_COMPLETE_WITH_EXACT_CURRENT_CORE_P03_END_TO_END_EVIDENCE__COMP_13_NEXT",
+  "standing": "BOOK_LOCAL_SUCCESSOR__BOOK_INCOMPLETE__ENG_009_COMPLETE_WITH_EXACT_CURRENT_CORE_P03_END_TO_END_EVIDENCE__NEXT_PRESERVED_RESIDUAL_READY",
   "owner_path": "SYSTEM_MASTER/BOOK",
   "current_authority_id": "CURRENT-AUTHORITY-005",
   "global_selector_status": "NOT_SELECTED_BY_CURRENT_AUTHORITY__COORDINATED_PROMOTION_DEFERRED",
@@ -58,16 +58,12 @@
   },
   "next_dependency_valid_action": {
     "owner": "SYSTEM_MASTER/BOOK",
-    "component_id": "BOOK-COMP-13",
-    "objective": "BOUNDED_BOOK_QUALIFICATION_REGRESSION_AND_HUMAN_EVIDENCE_PROFILE",
-    "basis": "qualification/book-system/BOOK-HIGHER-LEDGER-008-010-DISPOSITION-001.json",
-    "scope": [
-      "compact deterministic Book invariant regression",
-      "representative end-to-end author journeys",
-      "periodic exact route/model requalification when material runtime/model/provider subjects change",
-      "targeted independent and human/masterwork evidence where quality claims require it",
-      "whole-app Book integration qualification before production promotion"
-    ],
+    "selection_basis": "qualification/book-system/BOOK-SYSTEM-CONTROL-RECORD-015.json#preserved_open_residuals",
+    "residual": "whole-source build graph/shared Core integration dependencies",
+    "objective_id": null,
+    "state": "READY_FOR_EXACT_OBJECTIVE_ID_SELECTION",
+    "rule": "Continue the preserved current Book residuals in dependency order. Select the exact existing work packet for this residual before execution; do not fabricate a BOOK-ENG identifier.",
+    "later_bounded_qualification_profile": "BOOK-COMP-13",
     "forbidden_revival": "PERMANENT_BOOK_ENG_010_MEGA_COMPARISON_PROGRAM"
   },
   "selector_policy": {
@@ -77,7 +73,8 @@
   "non_claims": [
     "BOOK remains incomplete after BOOK-ENG-009 closure.",
     "BOOK-ENG-009 closure does not establish whole-app executable qualification, production certification or publication authority.",
-    "BOOK-ENG-010 is not revived as a permanent mega-comparison program.",
+    "BOOK-ENG-010 is not revived as a permanent mega-comparison program; BOOK-COMP-13 remains a later bounded qualification residual.",
+    "The next preserved residual is whole-source build graph/shared Core integration dependencies; BOOK-COMP-13 is not advanced ahead of that dependency order.",
     "This Book-local successor is not selected by CURRENT-AUTHORITY-005 until a separate coordinated selector promotion occurs."
   ]
 }

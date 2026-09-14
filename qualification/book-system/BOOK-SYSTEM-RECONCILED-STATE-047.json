@@ -1,7 +1,7 @@
 {
   "state_id": "BOOK-SYSTEM-RECONCILED-STATE-047",
   "effective_date": "2026-09-14",
-  "standing": "BOOK_INCOMPLETE__ENG_009_COMPLETE_WITH_EXACT_CURRENT_CORE_P03_END_TO_END_EVIDENCE__BOOK_COMP_13_NEXT",
+  "standing": "BOOK_INCOMPLETE__ENG_009_COMPLETE_WITH_EXACT_CURRENT_CORE_P03_END_TO_END_EVIDENCE__NEXT_PRESERVED_RESIDUAL_READY",
   "owner_path": "SYSTEM_MASTER/BOOK",
   "control_record": "qualification/book-system/BOOK-SYSTEM-CONTROL-RECORD-017.json",
   "global_selector_status": "BOOK_LOCAL_SUCCESSOR_NOT_YET_SELECTED_BY_CURRENT_AUTHORITY",
@@ -44,7 +44,8 @@
     "peer_dependencies": ["P19-01","P19-03","P19-04","P19-05"],
     "peer_provider": "SYSTEM_MASTER/CORE",
     "provider_domain": "P03",
-    "peer_provider_satisfaction": "QUALIFIED_CURRENT"
+    "peer_provider_satisfaction": "QUALIFIED_CURRENT",
+    "rule": "PEER_DEPENDENCY remains an ownership classification after exact-current provider satisfaction and is not an unresolved blocker for BOOK-ENG-009."
   },
   "overall_227_binding": {
     "IMPLEMENTED": 3,
@@ -67,12 +68,14 @@
     "book_core_p03_end_to_end_qualifier": "PASS"
   },
   "next_dependency_valid_action": {
-    "state": "READY",
+    "state": "READY_FOR_EXACT_OBJECTIVE_ID_SELECTION",
     "owner": "SYSTEM_MASTER/BOOK",
-    "component_id": "BOOK-COMP-13",
-    "objective": "BOUNDED_BOOK_QUALIFICATION_REGRESSION_AND_HUMAN_EVIDENCE_PROFILE",
-    "basis": "qualification/book-system/BOOK-HIGHER-LEDGER-008-010-DISPOSITION-001.json",
-    "rule": "Build the bounded current qualification profile. Do not revive BOOK-ENG-010 as a permanent mega-comparison program or place such a program on the release critical path."
+    "selection_basis": "qualification/book-system/BOOK-SYSTEM-CONTROL-RECORD-015.json#preserved_open_residuals",
+    "residual": "whole-source build graph/shared Core integration dependencies",
+    "objective_id": null,
+    "rule": "Select the exact existing work packet for this preserved residual before execution. Do not invent a BOOK-ENG identifier and do not jump directly to BOOK-COMP-13 ahead of dependency order.",
+    "later_bounded_qualification_profile": "BOOK-COMP-13",
+    "forbidden_revival": "PERMANENT_BOOK_ENG_010_MEGA_COMPARISON_PROGRAM"
   },
   "selector_promotion": {
     "performed": false,
@@ -84,6 +87,7 @@
     "CORE P03 provider satisfaction does not transfer physical durability ownership to BOOK.",
     "BOOK remains incomplete and production certification remains NO.",
     "No historical PASS is transferred to changed subjects.",
-    "No permanent BOOK-ENG-010 comparison program is reactivated."
+    "No permanent BOOK-ENG-010 comparison program is reactivated.",
+    "BOOK-COMP-13 remains open as a later bounded qualification residual and is not selected ahead of the preserved whole-source/shared-CORE integration residual."
   ]
 }
