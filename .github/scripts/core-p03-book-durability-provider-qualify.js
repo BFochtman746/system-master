@@ -77,9 +77,9 @@ assert(active.implementation === implementationPath, 'implementation pointer dri
 assert(active.focused_tests === testPath, 'focused test pointer drift');
 assert(active.runtime_contract?.canonical_effect_allowed === false, 'runtime canonical effect fence missing');
 assert(active.runtime_contract?.direct_cross_peer_database_access === false, 'runtime direct DB fence missing');
-assert(/reconciled before source retouch/i.test(active.runtime_contract?.preserve_idempotency || ''), 'preserve retry reconciliation contract missing');
-assert(/reconciled before duplicate destructive side effect/i.test(active.runtime_contract?.restore_idempotency || ''), 'restore retry reconciliation contract missing');
-assert(/caller cannot select delete path/i.test(active.runtime_contract?.destructive_restore_scope || ''), 'restore delete-path authority fence missing');
+assert(active.runtime_contract?.preserve_idempotency === 'EXACT_EXISTING_PHYSICAL_MANIFEST_RECONCILED_BEFORE_SOURCE_RETOUCH', 'preserve retry reconciliation contract missing');
+assert(active.runtime_contract?.restore_idempotency === 'EXACT_EXISTING_RESTORE_RECEIPT_RECONCILED_BEFORE_DUPLICATE_DESTRUCTIVE_SIDE_EFFECT', 'restore retry reconciliation contract missing');
+assert(active.runtime_contract?.destructive_restore_scope === 'CORE_DERIVED_TEST_TARGET_ONLY__CALLER_CANNOT_SELECT_DELETE_PATH', 'restore delete-path authority fence missing');
 
 assert(bookProfile.owner_path === 'SYSTEM_MASTER/BOOK' && bookProfile.component_id === 'BOOK-COMP-12', 'Book semantic owner drift');
 assert((bookProfile.ownership_boundary?.core_owns || []).some(x => /physical persistence mechanics/i.test(x)), 'Book profile no longer delegates physical persistence to CORE');
