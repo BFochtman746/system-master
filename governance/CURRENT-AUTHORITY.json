@@ -3,6 +3,7 @@
   "effective_date": "2026-09-12",
   "standing": "CANONICAL_ENTRY_POINT__TOPOLOGY_005__PROSE_COMPLETE_RETIRED__FOUR_PEER_LANES__KNOWLEDGE_RECOVERY_PRIORITY",
   "product_root": "SYSTEM_MASTER",
+  "session_entry_point": "CURRENT-STATE.md",
   "topology": "governance/SYSTEM-TOPOLOGY-005.json",
   "architecture_decision": "governance/ADR-0005-PROSE-TERMINAL-RETIREMENT-BOOK-INTEGRATION.md",
   "prose_retirement_record": "governance/retirements/PROSE-SYSTEM-RETIREMENT-001.json",
@@ -76,6 +77,8 @@
   "active_peer_execution_lanes": ["CORE", "LEARNING", "BOOK", "DOCUMENTS"],
   "retired_systems": ["PROSE"],
   "startup_sequence": [
+    "MANDATORY ENTRY READ: read session_entry_point (CURRENT-STATE.md) from current main. That file is sufficient to begin work and supersedes reading the governance corpus on entry.",
+    "Read the remaining steps below only when CURRENT-STATE.md is insufficient for the specific decision at hand. They are adjudication detail, not a required entry load.",
     "Read this file from current main.",
     "Read last_sealed_state_checkpoint as the latest coherent checkpoint, but always re-fetch live active-owner heads before execution.",
     "Read selected topology, program_job_lock and system_completion_status before completion, ownership or work-selection claims.",

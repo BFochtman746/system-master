@@ -25,6 +25,7 @@ jobs:
     name: Dedicated writer live CAS + exact replay proof
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     environment: control-gateway-production
     steps:
       - name: Checkout exact production controller

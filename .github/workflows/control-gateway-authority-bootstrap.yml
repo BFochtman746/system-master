@@ -17,6 +17,7 @@ jobs:
     name: Dedicated-writer genesis active-work publication
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     environment: control-gateway-production
     steps:
       - name: Checkout exact production controller

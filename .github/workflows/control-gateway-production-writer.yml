@@ -25,6 +25,7 @@ jobs:
     name: Receipt-consuming exact-CAS production write
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     environment: control-gateway-production
     steps:
       - name: Checkout exact production controller

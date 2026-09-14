@@ -161,6 +161,33 @@ module.exports = { classifyReceipt, planRepair, rejectWorkerAuthority };
 
 if (require.main === module) {
   let raw = '';
+// --- stdin safety guard -------------------------------------------------------
+// This script reads its payload from stdin. Without a guard, an invocation with
+// no pipe attached blocks forever: on a GitHub runner that is a job pinned for
+// the full six-hour ceiling, and on a self-hosted runner it blocks every other
+// queued job behind it. Fail fast and say why.
+const STDIN_TIMEOUT_MS = Number(process.env.A01_STDIN_TIMEOUT_MS || 120000);
+function guardStdin() {
+  if (process.stdin.isTTY) {
+    process.stderr.write(
+      'STDIN_REQUIRED: this script reads a JSON payload from standard input.\n' +
+      'Pipe one in, for example:  node ' + __filename + ' < payload.json\n'
+    );
+    process.exit(2);
+  }
+  const timer = setTimeout(() => {
+    process.stderr.write(
+      'STDIN_TIMEOUT: no end-of-input after ' + STDIN_TIMEOUT_MS + ' ms.\n' +
+      'Set A01_STDIN_TIMEOUT_MS to change the deadline.\n'
+    );
+    process.exit(2);
+  }, STDIN_TIMEOUT_MS);
+  if (typeof timer.unref === 'function') timer.unref();
+  process.stdin.once('end', () => clearTimeout(timer));
+  process.stdin.once('error', () => clearTimeout(timer));
+}
+guardStdin();
+// --- end stdin safety guard ---------------------------------------------------
   process.stdin.setEncoding('utf8');
   process.stdin.on('data', (chunk) => { raw += chunk; });
   process.stdin.on('end', () => {

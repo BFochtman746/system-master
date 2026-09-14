@@ -43,7 +43,6 @@ permissions:
 
 concurrency:
   group: a01-global-r2
-  queue: max
   cancel-in-progress: false
 
 jobs:
@@ -242,16 +241,93 @@ jobs:
     name: Route ordinary non-PASS receipt to durable repair broker
     needs: qualify
     if: ${{ always() && inputs.repair_transaction_id == '' && needs.qualify.outputs.result_class != '' && needs.qualify.outputs.result_class != 'PASS' }}
-    uses: ./.github/workflows/a01-repair-broker.yml
-    with:
-      receipt_id: ${{ format('a01-run-{0}-{1}', github.run_id, inputs.qualification_id) }}
-      qualification_id: ${{ inputs.qualification_id }}
-      workstream_id: ${{ inputs.workstream_id }}
-      failed_subject_sha: ${{ inputs.subject_sha }}
-      result_class: ${{ needs.qualify.outputs.result_class }}
-      evidence_pointer: ${{ format('artifact:{0}-{1}-evidence', inputs.qualification_id, github.run_id) }}
-      repair_attempt: ${{ inputs.repair_attempt }}
-      max_repair_attempts: ${{ inputs.max_repair_attempts }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      transaction_id: ${{ steps.meta.outputs.transaction_id }}
+      transaction_state: ${{ steps.meta.outputs.transaction_state }}
+      target_inbox: ${{ steps.meta.outputs.target_inbox }}
+      transaction_b64: ${{ steps.meta.outputs.transaction_b64 }}
+    steps:
+      # Inlined from .github/workflows/a01-repair-broker.yml so the reusable-workflow
+      # chain stays within GitHub's four-level nesting limit. a01-repair-broker.yml
+      # remains available as a standalone dispatch/call entry point.
+      - name: Checkout canonical control plane
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Syntax and contract selftests
+        run: |
+          node --check .github/scripts/a01-closed-loop-repair.js
+          node --check .github/scripts/a01-repair-broker.js
+          node .github/scripts/a01-closed-loop-repair-selftest.js
+          node .github/scripts/a01-repair-broker-selftest.js
+
+      - name: Build immutable broker input
+        env:
+          RECEIPT_ID: ${{ format('a01-run-{0}-{1}', github.run_id, inputs.qualification_id) }}
+          QUALIFICATION_ID: ${{ inputs.qualification_id }}
+          WORKSTREAM_ID: ${{ inputs.workstream_id }}
+          FAILED_SUBJECT_SHA: ${{ inputs.subject_sha }}
+          RESULT_CLASS: ${{ needs.qualify.outputs.result_class }}
+          EVIDENCE_POINTER: ${{ format('artifact:{0}-{1}-evidence', inputs.qualification_id, github.run_id) }}
+          REPAIR_ATTEMPT: ${{ inputs.repair_attempt }}
+          MAX_REPAIR_ATTEMPTS: ${{ inputs.max_repair_attempts }}
+        run: |
+          mkdir -p .repair-broker
+          node - <<'NODE'
+          const fs = require('fs');
+          const input = {
+            receipt_id: process.env.RECEIPT_ID,
+            qualification_id: process.env.QUALIFICATION_ID,
+            workstream_id: process.env.WORKSTREAM_ID,
+            failed_subject_sha: process.env.FAILED_SUBJECT_SHA,
+            receipt: { result_class: process.env.RESULT_CLASS },
+            evidence_pointer: process.env.EVIDENCE_POINTER || null,
+            repair_attempt: Number(process.env.REPAIR_ATTEMPT || 0),
+            max_repair_attempts: Number(process.env.MAX_REPAIR_ATTEMPTS || 1),
+            created_at: new Date().toISOString()
+          };
+          fs.writeFileSync('.repair-broker/input.json', JSON.stringify(input, null, 2) + '\n');
+          NODE
+
+      - name: Classify and route receipt
+        run: node .github/scripts/a01-repair-broker.js open < .repair-broker/input.json > .repair-broker/transaction.json
+
+      - name: Expose non-authoritative route metadata
+        id: meta
+        run: |
+          node - <<'NODE' >> "$GITHUB_OUTPUT"
+          const fs = require('fs');
+          const text = fs.readFileSync('.repair-broker/transaction.json', 'utf8');
+          const value = JSON.parse(text);
+          const tx = value.transaction || {};
+          console.log(`transaction_id=${tx.transaction_id || ''}`);
+          console.log(`transaction_state=${tx.state || ''}`);
+          console.log(`target_inbox=${tx.target_inbox || ''}`);
+          console.log(`transaction_b64=${Buffer.from(text, 'utf8').toString('base64')}`);
+          NODE
+
+      - name: Publish broker transaction summary
+        run: |
+          echo '## A-01 Repair Broker Transaction' >> "$GITHUB_STEP_SUMMARY"
+          echo '' >> "$GITHUB_STEP_SUMMARY"
+          echo 'This output is routing evidence only. It is not A-01 PASS or promotion authority.' >> "$GITHUB_STEP_SUMMARY"
+          echo '```json' >> "$GITHUB_STEP_SUMMARY"
+          cat .repair-broker/transaction.json >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload immutable broker transaction
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: a01-repair-broker-${{ format('a01-run-{0}-{1}', github.run_id, inputs.qualification_id) }}
+          path: |
+            .repair-broker/input.json
+            .repair-broker/transaction.json
+          if-no-files-found: error
+          retention-days: 30
 
   disruptive-settle:
     name: Hold A-01 admission through registered reboot window

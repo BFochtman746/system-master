@@ -16,11 +16,24 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
+      - name: Preflight - qualification subject must exist
+        shell: bash
+        run: |
+          set -euo pipefail
+          SUBJECT='system-master/book-system/book-workflow-durable-store.test.js'
+          if [ ! -f "$SUBJECT" ]; then
+            echo "BOOK_DURABLE_PERSISTENCE=FAIL code=MISSING_QUALIFICATION_SUBJECT" >&2
+            echo "The qualification subject $SUBJECT is not present in this commit." >&2
+            echo "This workflow cannot produce evidence until the subject is committed." >&2
+            exit 1
+          fi
+          echo "BOOK_DURABLE_PERSISTENCE_PREFLIGHT=PASS subject=$SUBJECT"
+
       - name: Checkout exact Book owner subject
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # was actions/checkout@v4
         with:
           ref: e2a23e8b1f076e3cd576c11e036e40eaf8a5ce2f
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # was actions/setup-node@v4
         with:
           node-version: '20'
       - name: Verify exact subject and run durable persistence qualification
@@ -30,7 +43,7 @@ jobs:
           mkdir -p hosted-evidence
           node system-master/book-system/book-workflow-durable-store.test.js | tee hosted-evidence/result.json
       - name: Upload exact-subject evidence
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # was actions/upload-artifact@v4
         with:
           name: BOOK-DURABLE-PERSISTENCE-e2a23e8b-hosted-evidence
           path: hosted-evidence/result.json

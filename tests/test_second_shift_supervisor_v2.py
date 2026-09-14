@@ -180,9 +180,11 @@ class SupervisorV2Tests(unittest.TestCase):
 
     def test_dispatch_retry_then_circuit(self):
         c = self.claim()
-        a = self.fx.store.dispatch_failed(c.dispatch_id, "network", retry_budget=3, now=T0 + dt.timedelta(seconds=1))
-        b = self.fx.store.dispatch_failed(c.dispatch_id, "network", retry_budget=3, now=T0 + dt.timedelta(seconds=20))
-        c3 = self.fx.store.dispatch_failed(c.dispatch_id, "network", retry_budget=3, now=T0 + dt.timedelta(seconds=40))
+        # dispatch_failed() requires a distinct failure_id per delivery so that an
+        # at-least-once callback replay cannot spend the retry budget twice.
+        a = self.fx.store.dispatch_failed(c.dispatch_id, "network", retry_budget=3, now=T0 + dt.timedelta(seconds=1), failure_id="FAILURE-1")
+        b = self.fx.store.dispatch_failed(c.dispatch_id, "network", retry_budget=3, now=T0 + dt.timedelta(seconds=20), failure_id="FAILURE-2")
+        c3 = self.fx.store.dispatch_failed(c.dispatch_id, "network", retry_budget=3, now=T0 + dt.timedelta(seconds=40), failure_id="FAILURE-3")
         self.assertEqual(a["state"], "RETRY_WAIT")
         self.assertEqual(b["state"], "RETRY_WAIT")
         self.assertEqual(c3["state"], "CIRCUIT_OPEN")
@@ -324,10 +326,15 @@ os._exit(19)
         now = T0
         for i in range(20000):
             now += dt.timedelta(milliseconds=100)
-            snap = s.snapshot()
-            lane_row = snap["lanes"][0]
             lane = "CORE"
-            active = [x for x in snap["claims"] if x["lane"] == lane and x["released_at"] is None]
+            # Indexed lookups instead of a full six-table snapshot. The supervisor
+            # invariant permits at most one live claim per lane, so LIMIT 1 is exact.
+            lane_row = s.conn.execute("SELECT * FROM lanes WHERE lane=?", (lane,)).fetchone()
+            if lane_row is None:
+                self.fail(f"missing lane {lane} at step {i}")
+            active = s.conn.execute(
+                "SELECT * FROM claims WHERE lane=? AND released_at IS NULL LIMIT 1", (lane,)
+            ).fetchall()
             choice = rnd.randrange(10)
             try:
                 if active:
@@ -359,14 +366,20 @@ os._exit(19)
                             pass
                     elif lane_row["state"] == "READY":
                         did = lane_row["current_delegation_id"]
-                        row = next(x for x in s.snapshot()["delegations"] if x["delegation_id"] == did)
+                        row = s.conn.execute(
+                            "SELECT objective_id FROM delegations WHERE delegation_id=?", (did,)
+                        ).fetchone()
+                        if row is None:
+                            self.fail(f"missing current delegation {did} at step {i}")
                         s.claim_ready(lane, did, row["objective_id"], heads[lane], f"FUZZ-{i}-{did}", "LOCAL_AGENT", now=now)
             except (Conflict, StaleWorker):
                 # Rejected operations are acceptable; DB invariants must still hold.
                 pass
-            problems = s.audit_invariants()
+            # Logical invariants on every transition; the full page scan once at the end.
+            problems = s.audit_invariants(deep=False)
             if problems:
                 self.fail(f"invariant failure at step {i}: {problems}")
+        self.assertEqual(s.audit_invariants(deep=True), [])
         self.assertEqual(s.conn.execute("PRAGMA integrity_check").fetchone()[0], "ok")
 
 

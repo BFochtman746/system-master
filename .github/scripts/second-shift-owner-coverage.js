@@ -35,30 +35,49 @@ function nonEmpty(v) {
 function isSameOrDescendant(candidate, ownerPath) {
   return candidate === ownerPath || String(candidate || '').startsWith(`${ownerPath}/`);
 }
+// Binding resolution returns a classified status so that an infrastructure
+// outage is never reported as a governance violation, and so that an offline
+// run can never be mistaken for a verified one.
+//   RESOLVED   - git answered and the ref exists
+//   ABSENT     - git answered and the ref genuinely does not exist
+//   INFRA_DOWN - git could not answer (no remote, no network, no credentials)
+//   OFFLINE    - --no-live was requested, so nothing was verified at all
 function branchHead(ref) {
-  if (noLive) return null;
+  if (noLive) return { status: 'OFFLINE', head: null, detail: 'no-live requested' };
   try {
     const out = execFileSync('git', ['ls-remote', 'origin', `refs/heads/${ref}`], {
       cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe']
     }).trim();
-    return out ? out.split(/\s+/)[0] : null;
-  } catch (_) { return null; }
+    if (!out) return { status: 'ABSENT', head: null, detail: 'remote has no such branch' };
+    return { status: 'RESOLVED', head: out.split(/\s+/)[0], detail: null };
+  } catch (err) {
+    return { status: 'INFRA_DOWN', head: null, detail: String((err && err.message) || err).slice(0, 200) };
+  }
 }
 function localFileBlob(rel) {
+  if (noLive) return { status: 'OFFLINE', head: null, detail: 'no-live requested' };
   try {
-    return execFileSync('git', ['rev-parse', `HEAD:${rel}`], {
+    const out = execFileSync('git', ['rev-parse', `HEAD:${rel}`], {
       cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe']
     }).trim();
-  } catch (_) { return null; }
+    if (!out) return { status: 'ABSENT', head: null, detail: 'path not present in HEAD' };
+    return { status: 'RESOLVED', head: out, detail: null };
+  } catch (err) {
+    const msg = String((err && err.message) || err);
+    const infra = /not a git repository|could not read|unable to access|Could not resolve host/i.test(msg);
+    return { status: infra ? 'INFRA_DOWN' : 'ABSENT', head: null, detail: msg.slice(0, 200) };
+  }
 }
 function resolveBinding(owner) {
   const binding = owner.control_binding || { type: 'BRANCH_HEAD', ref: owner.control_ref };
   if (binding.type === 'FILE_BLOB') {
     const rel = binding.path || owner.control_ref;
-    return { type: 'FILE_BLOB', ref: rel, head: localFileBlob(rel) };
+    const r = localFileBlob(rel);
+    return { type: 'FILE_BLOB', ref: rel, head: r.head, status: r.status, detail: r.detail };
   }
   const ref = binding.ref || owner.control_ref;
-  return { type: 'BRANCH_HEAD', ref, head: noLive ? owner.last_known_control_head : branchHead(ref) };
+  const r = branchHead(ref);
+  return { type: 'BRANCH_HEAD', ref, head: r.head, status: r.status, detail: r.detail };
 }
 function validExhaustion(record) {
   const allowed = new Set(['COMPLETE', 'DUPLICATE', 'DEPENDENCY_BLOCKED', 'HUMAN_AUTHOR_PRIVATE_NATIVE_EXTERNAL_BLOCKED', 'UNSAFE_WITHOUT_DECISION']);
@@ -175,8 +194,16 @@ for (const [lane, rel] of laneEntries) {
   if (!owner.owner_path) add('ERROR', 'OWNER_PATH_MISSING', 'owner file has no owner_path', { lane, owner_file: rel });
   if (!isSha(owner.last_known_control_head)) add('ERROR', 'OWNER_CONTROL_HEAD_INVALID', 'owner file lacks a valid 40-character control binding', { lane });
   const resolved = resolveBinding(owner);
+  // One severity policy, owned here, identical no matter which gate invoked this
+  // script. --watchdog no longer changes the verdict; it only changes reporting.
   if (!resolved.head || !isSha(resolved.head)) {
-    add(watchdog && !noLive ? 'ERROR' : 'WARN', 'OWNER_CONTROL_BINDING_UNRESOLVED', 'could not resolve owner control binding', { lane, control_ref: resolved.ref, control_type: resolved.type });
+    if (resolved.status === 'ABSENT') {
+      add('ERROR', 'OWNER_CONTROL_BINDING_MISSING', 'owner control binding does not exist', { lane, control_ref: resolved.ref, control_type: resolved.type, detail: resolved.detail || null });
+    } else if (resolved.status === 'INFRA_DOWN') {
+      add('WARN', 'OWNER_CONTROL_BINDING_UNVERIFIABLE_INFRASTRUCTURE', 'git could not answer, so the binding was not verified; this is an environment fault, not a governance fault', { lane, control_ref: resolved.ref, control_type: resolved.type, detail: resolved.detail || null });
+    } else {
+      add('WARN', 'OWNER_CONTROL_BINDING_NOT_VERIFIED_OFFLINE', 'offline mode was requested, so no binding was verified; this run is not evidence of a correct binding', { lane, control_ref: resolved.ref, control_type: resolved.type });
+    }
   } else if (resolved.head !== owner.last_known_control_head) {
     add('ERROR', 'OWNER_CONTROL_BINDING_STALE', 'owner selector does not match its current control binding', { lane, recorded_head: owner.last_known_control_head, resolved_head: resolved.head, control_type: resolved.type });
   }
