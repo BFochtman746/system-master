@@ -1,0 +1,78 @@
+name: Foundation Closure Evidence Enforcement
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'governance/CURRENT-AUTHORITY.json'
+      - 'governance/SYSTEM-TOPOLOGY-007.json'
+      - 'governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006.json'
+      - 'governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json'
+      - 'governance/census/SYSTEM-MASTER-FOUNDATION-CLOSURE-CENSUS-001.json'
+      - 'governance/census/FOUNDATION-CLOSURE-EVIDENCE-REGISTRY-001.json'
+      - 'governance/census/evidence/**'
+      - 'governance/contracts/*-FOUNDATION-CONTRACT-*.md'
+      - '.github/scripts/foundation-closure-evidence-verify.js'
+      - '.github/scripts/foundation-closure-matrix.js'
+      - '.github/workflows/foundation-closure-evidence-enforcement.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'governance/CURRENT-AUTHORITY.json'
+      - 'governance/SYSTEM-TOPOLOGY-007.json'
+      - 'governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006.json'
+      - 'governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json'
+      - 'governance/census/SYSTEM-MASTER-FOUNDATION-CLOSURE-CENSUS-001.json'
+      - 'governance/census/FOUNDATION-CLOSURE-EVIDENCE-REGISTRY-001.json'
+      - 'governance/census/evidence/**'
+      - 'governance/contracts/*-FOUNDATION-CONTRACT-*.md'
+      - '.github/scripts/foundation-closure-evidence-verify.js'
+      - '.github/scripts/foundation-closure-matrix.js'
+      - '.github/workflows/foundation-closure-evidence-enforcement.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: foundation-closure-evidence-${{ github.event.pull_request.number || github.ref || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: foundation-closure-current-evidence
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout exact verification subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify current Foundation evidence registry
+        shell: bash
+        run: node .github/scripts/foundation-closure-evidence-verify.js
+
+      - name: Render current Foundation summary
+        shell: bash
+        run: node .github/scripts/foundation-closure-matrix.js --summary | tee foundation-closure-summary.json
+
+      - name: Render complete machine-readable matrix
+        shell: bash
+        run: node .github/scripts/foundation-closure-matrix.js --json --out foundation-closure-matrix.json
+
+      - name: Preserve current Foundation closure proof
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: foundation-closure-current-evidence-${{ github.run_id }}
+          path: |
+            foundation-closure-summary.json
+            foundation-closure-matrix.json
+          if-no-files-found: error
+          retention-days: 30
