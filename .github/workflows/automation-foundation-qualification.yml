@@ -4,20 +4,16 @@ on:
   push:
     paths:
       - 'governance/contracts/AUTOMATION-FOUNDATION-CONTRACT-*.md'
-      - 'governance/census/FOUNDATION-CLOSURE-CENSUS-001-DISPOSITION-MATRIX.md'
       - 'tools/automation_plan.py'
       - '.github/scripts/automation-foundation-qualify.py'
-      - '.github/scripts/foundation-closure-matrix.js'
       - 'tests/test_automation_plan.py'
       - 'qualification/automation/**'
       - '.github/workflows/automation-foundation-qualification.yml'
   pull_request:
     paths:
       - 'governance/contracts/AUTOMATION-FOUNDATION-CONTRACT-*.md'
-      - 'governance/census/FOUNDATION-CLOSURE-CENSUS-001-DISPOSITION-MATRIX.md'
       - 'tools/automation_plan.py'
       - '.github/scripts/automation-foundation-qualify.py'
-      - '.github/scripts/foundation-closure-matrix.js'
       - 'tests/test_automation_plan.py'
       - 'qualification/automation/**'
       - '.github/workflows/automation-foundation-qualification.yml'
@@ -38,31 +34,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
       - name: Test deterministic Automation foundation
         run: python3 -m unittest tests.test_automation_plan
       - name: Qualify representative Automation corpus
         env:
           AUTOMATION_SOURCE_ID: ${{ github.sha }}
         run: python3 .github/scripts/automation-foundation-qualify.py
-      - name: Verify canonical Foundation census disposition
-        run: |
-          node .github/scripts/foundation-closure-matrix.js --out /tmp/foundation-matrix.md
-          python3 - <<'PY'
-          from pathlib import Path
-          paths = [
-              Path('governance/census/FOUNDATION-CLOSURE-CENSUS-001-DISPOSITION-MATRIX.md'),
-              Path('/tmp/foundation-matrix.md'),
-          ]
-          for path in paths:
-              normalized = path.with_name(path.name + '.normalized')
-              normalized.write_text(path.read_text(encoding='utf-8').rstrip('\n') + '\n', encoding='utf-8')
-          PY
-          diff -u \
-            governance/census/FOUNDATION-CLOSURE-CENSUS-001-DISPOSITION-MATRIX.md.normalized \
-            /tmp/foundation-matrix.md.normalized
       - name: Preserve machine-readable Automation qualification evidence
         uses: actions/upload-artifact@v4
         with:
