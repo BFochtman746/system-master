@@ -1,9 +1,9 @@
 {
   "manifest_id": "CURRENT-LEARNING-AUTHORITY-001",
   "effective_date": "2026-09-14",
-  "status": "ACTIVE_CANONICAL_LEARNING_ENTRYPOINT__INCOMPLETE__TRACEABILITY_CLOSURE_ACTIVE",
+  "status": "ACTIVE_CANONICAL_LEARNING_ENTRYPOINT__INCOMPLETE__113_TRACEABILITY_CLOSED__63_HANDLER_BINDING_ACTIVE",
   "owner_path": "SYSTEM_MASTER/LEARNING",
-  "purpose": "Provide one explicit current Learning authority manifest that resolves the live Learning selector, control, work obligation, forensic baseline, ownership, evidence boundaries and dependency-valid successor sequence without creating a competing System Master authority or rewriting historical evidence.",
+  "purpose": "Provide one explicit current Learning authority manifest that resolves the live Learning selector, control, work obligation, frozen forensic baseline, definitive 113-requirement traceability matrix, ownership, evidence boundaries and dependency-valid successor sequence without creating a competing System Master authority or rewriting historical evidence.",
   "authority_semantics": {
     "creates_new_system_master_architecture": false,
     "changes_peer_ownership": false,
@@ -16,8 +16,8 @@
   "parent_system_master_authority": {
     "authority_id": "CURRENT-AUTHORITY-005",
     "selector": "governance/CURRENT-AUTHORITY.json",
-    "selector_blob_sha": "fb0bb354c7ee9fcfeb8ff71e2b8c01a4ddf8cfdd",
-    "main_snapshot_sha": "7d19d180cbf0173404f2d874c6b8459131959e3a",
+    "selector_blob_sha": "752183147f0af27750704f855b3487c91babfc08",
+    "transition_base_main_sha": "a62b499c0cbfe7aedb2ae157ede93a46791b69c6",
     "topology": "governance/SYSTEM-TOPOLOGY-007.json",
     "system_completion_status": "governance/SYSTEM-COMPLETION-STATUS-002.json",
     "allocation": "governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006.json",
@@ -26,19 +26,21 @@
   },
   "learning_control": {
     "control_ref": "learning/control-v1",
-    "live_head_sha": "24b7465e466dfe92e51c777750843978a745cd0c",
-    "record": "learning/control-v1/LEARNING-CONTROL-RECORD-v6.md",
-    "record_blob_sha": "ae2f1d437a3b4b38cf89d04fcfc5898079f72101",
-    "standing": "ACTIVE / INCOMPLETE / FORENSIC-ADJUDICATED / TRACEABILITY-CLOSURE ACTIVE"
+    "live_head_sha": "e645c4446113ac3966a7ab580db381b0e1729f90",
+    "record": "learning/control-v1/LEARNING-CONTROL-RECORD-v7.md",
+    "record_blob_sha": "c1096ed1392180e41cebe381b7a18b84abfc4842",
+    "standing": "ACTIVE / INCOMPLETE / 113-ROW TRACEABILITY CLOSED / 63-HANDLER PRODUCTION BINDING ACTIVE"
   },
   "current_work_selection": {
-    "registry": "governance/WORK-OBLIGATION-REGISTRY-015.json",
-    "registry_blob_sha": "83534c35ba6972e5401d37024c82306f268245e6",
-    "active_obligation": "LEARNING-113-REQUIREMENT-CURRENT-TRACEABILITY-CLOSURE-001",
-    "evidence_target": "governance/learning/LEARNING-113-REQUIREMENT-CURRENT-TRACEABILITY-001.json",
+    "registry": "governance/WORK-OBLIGATION-REGISTRY-016.json",
+    "registry_blob_sha": "22c304ef536a0e519d6692f5ea95918bed7c12cd",
+    "active_obligation": "LEARNING-63-INBOUND-PRODUCTION-HANDLER-BINDING-001",
+    "active_evidence_target": "governance/learning/LEARNING-63-INBOUND-PRODUCTION-HANDLER-BINDING-001.json",
+    "traceability_obligation": "LEARNING-113-REQUIREMENT-CURRENT-TRACEABILITY-CLOSURE-001",
+    "traceability_obligation_state": "CLOSED",
+    "traceability_final_standing": "PASS_TRACEABILITY_CLOSURE__LEARNING_SYSTEM_INCOMPLETE",
     "forensic_obligation": "LEARNING-FORENSIC-BASELINE-CURRENT-AUTHORITY-ADJUDICATION-001",
     "forensic_obligation_state": "CLOSED",
-    "forensic_final_standing": "FORENSIC_ROW_LEVEL_ADJUDICATION_COMPLETE__IMPLEMENTATION_GAPS_REMAIN_OPEN",
     "historical_curriculum_compiler_obligation": "LEARNING-FULL-STANDARD-CURRICULUM-COMPILER-001",
     "historical_curriculum_compiler_state": "HOLD",
     "real_participant_pilot": "LEARNING-REAL-PARTICIPANT-PILOT-001",
@@ -58,14 +60,30 @@
     "matrix": "governance/learning/LEARNING-FORENSIC-DISPOSITION-MATRIX-002.json",
     "matrix_blob_sha": "0c98e91ea68aed4a33a98373c0d7e8eea0ee88ab",
     "matrix_status": "FORENSIC_ROW_LEVEL_ADJUDICATION_COMPLETE__IMPLEMENTATION_GAPS_REMAIN_OPEN",
-    "matrix_control_snapshot_note": "Matrix 002 records LEARNING-CONTROL-RECORD-v5.md because that was the control at forensic adjudication. Current lane control is v6; the matrix control field is historical provenance and does not override this manifest or CURRENT-AUTHORITY-005.",
+    "matrix_control_snapshot_note": "Matrix 002 records LEARNING-CONTROL-RECORD-v5.md because that was the control at forensic adjudication. Current lane control is v7; the matrix control field is historical provenance and does not override this manifest or CURRENT-AUTHORITY-005.",
     "frozen_sources": [
       {"class": "forensic_audit", "filename": "LEARNING_SUITE_FORENSIC_AUDIT_2026-09-11.md", "sha256": "89b6f5b45adc92d61ae70377ae519cc41b63df778b8511a54ad84d67ca284337"},
-      {"class": "requirement_ledger", "filename": "LEARNING_SUITE_REQUIREMENT_GAP_LEDGER.csv", "sha256": "e46ceff3583cef71fa32c5e88cb4c3aec5c3c9660cdd3371e98f3685e20fa06", "rows": 113},
+      {"class": "requirement_ledger", "filename": "LEARNING_SUITE_REQUIREMENT_GAP_LEDGER.csv", "sha256": "e46ceff3583cef71fa32c5e88cb4c3aec5c3c9660cdd3371e98f3685e20fa06b", "rows": 113},
       {"class": "interface_ledger", "filename": "LEARNING_SUITE_INTERFACE_GAP_LEDGER.csv", "sha256": "b9c3852c4d3a70077ec4af98f34ca9195bd3c43b0ce77e06a414b679da29ca6a", "rows": 112},
       {"class": "gap_register", "filename": "LEARNING_SUITE_GLOBAL_FINDINGS.csv", "sha256": "1c5ad30eb5a41b28169a0a5cd75d8b4ed1d48ed32479694da759fa583294109c", "rows": 16},
       {"class": "archive_inventory", "filename": "LEARNING_SUITE_ARCHIVE_INVENTORY.csv", "sha256": "d7a47fed7ce8fb9886b2c9ad6c3206ba515674f653aae1fe6d0e1803aeceb57d", "rows": 161}
     ]
+  },
+  "definitive_traceability_authority": {
+    "matrix": "governance/learning/LEARNING-113-REQUIREMENT-CURRENT-TRACEABILITY-001.json",
+    "matrix_blob_sha": "fb661998c67a802753ad6ea0f14d9ca44c4e2c1e",
+    "matrix_sha256": "4d020e44c8f8139bfcabf47ca0c1c66626b880adc1be037843f50b10d37144f9",
+    "verification": "governance/learning/LEARNING-113-REQUIREMENT-CURRENT-TRACEABILITY-001-VERIFICATION.json",
+    "verification_blob_sha": "d92399f2c4d86b20684cb3f6b382dcfd3cef1231",
+    "verification_status": "PASS",
+    "standing": "113_OF_113_CURRENT_TRACEABILITY_CLOSED__IMPLEMENTATION_AND_PRODUCTION_GAPS_REMAIN_OPEN",
+    "dispositions": {
+      "CURRENT_EVIDENCE_SUPPORTED_NOT_PRODUCTION_CLOSED": 64,
+      "OPEN": 21,
+      "PEER_INTERFACE_DEPENDENT": 28,
+      "CLOSED_EXACT_CURRENT_EVIDENCE": 0
+    },
+    "rule": "Traceability closure means every frozen requirement has one explicit current-owner/component/port/persistence/test/evidence/gap/disposition trace. It does not mean every requirement is implemented or production-qualified."
   },
   "current_truth_denominators": {
     "requirements_total": 113,
@@ -89,7 +107,7 @@
   "current_completion_truth": {
     "learning_system_complete": false,
     "forensic_row_level_adjudication_complete": true,
-    "113_requirement_current_traceability_complete": false,
+    "113_requirement_current_traceability_complete": true,
     "production_handler_binding_complete": false,
     "production_persistence_binding_complete": false,
     "live_target_database_qualification_complete": false,
@@ -102,39 +120,35 @@
   "evidence_rules": [
     "A green aggregate suite does not close a requirement row unless exact row-level current evidence supports that row.",
     "REBIND-002 34/34 is owner-extraction/architecture evidence and must not be treated as one-for-one closure of the 34 Learning/Curriculum frozen requirement obligations.",
+    "The definitive 113-row matrix closes the traceability obligation, not implementation or production completion.",
     "Historical PASS remains exact-subject scoped and does not transfer across changed SHA, handler, persistence path, interface, ownership, topology, native target or production path.",
     "Historical branches and archives are provenance only unless explicitly selected by current authority.",
     "Frozen source rows are append-only evidence inputs; current-authority fields are added through current trace/disposition artifacts rather than rewriting frozen evidence."
   ],
   "current_required_output": {
-    "objective_id": "LEARNING-113-REQUIREMENT-CURRENT-TRACEABILITY-CLOSURE-001",
-    "artifact": "governance/learning/LEARNING-113-REQUIREMENT-CURRENT-TRACEABILITY-001.json",
-    "required_rows": 113,
+    "objective_id": "LEARNING-63-INBOUND-PRODUCTION-HANDLER-BINDING-001",
+    "artifact": "governance/learning/LEARNING-63-INBOUND-PRODUCTION-HANDLER-BINDING-001.json",
+    "required_handler_dispositions": 63,
     "minimum_fields": [
-      "requirement_id",
+      "interface_id",
+      "interface_type",
+      "route",
+      "port",
       "current_owner_path",
-      "capability_or_platform_binding",
-      "current_component_or_service",
-      "current_handler_or_port",
-      "persistence_authority_or_boundary",
-      "test_obligation",
-      "test_execution_standing",
-      "evidence_refs",
-      "gap_flags",
-      "blocker_class",
-      "current_disposition"
+      "bound_handler_identity",
+      "bound_handler_source_digest",
+      "request_response_error_contract_identity",
+      "owner_boundary_evidence",
+      "negative_path_evidence",
+      "idempotency_or_concurrency_evidence",
+      "route_parity_result",
+      "current_disposition",
+      "blockers"
     ],
-    "allowed_dispositions": [
-      "CLOSED_EXACT_CURRENT_EVIDENCE",
-      "CURRENT_EVIDENCE_SUPPORTED_NOT_PRODUCTION_CLOSED",
-      "PEER_INTERFACE_DEPENDENT",
-      "BLOCKED",
-      "OPEN"
-    ]
+    "rule": "A 63/63 disposition denominator may include blocked handlers. Denominator closure must never be interpreted as 63/63 executable PASS unless exact current evidence supports that claim."
   },
   "dependency_valid_successor_sequence": [
-    "LEARNING-113-REQUIREMENT-CURRENT-TRACEABILITY-CLOSURE-001",
-    "Bind and qualify all 63 exact inbound command/query production handlers with route parity and negative-path evidence.",
+    "LEARNING-63-INBOUND-PRODUCTION-HANDLER-BINDING-001",
     "Bind Learning/Curriculum mutations to the atomic production persistence/unit-of-work/outbox path and rerun relevant regression/recovery evidence.",
     "Bind required current peer authorities and fixtures without duplicate semantic ownership.",
     "Execute live target PostgreSQL concurrency/restart/migration/rollback/backup/restore qualification.",
@@ -143,16 +157,16 @@
   ],
   "known_metadata_reconciliation": {
     "topology_007_learning_control_record_literal": "LEARNING-CONTROL-RECORD-v4.md",
-    "standing": "RATIFICATION_TIME_METADATA_ONLY__CURRENT_SELECTOR_AND_THIS_MANIFEST_SELECT_V6",
+    "standing": "RATIFICATION_TIME_METADATA_ONLY__CURRENT_SELECTOR_AND_THIS_MANIFEST_SELECT_V7",
     "rule": "Do not mutate or version-bump Topology 007 solely to rewrite this historical pointer. If enforcement later requires literal equality, perform a narrowly scoped explicit metadata reconciliation under separate authority."
   },
   "startup_sequence": [
     "Read governance/CURRENT-AUTHORITY.json and confirm CURRENT-AUTHORITY-005 remains selected.",
     "Read this manifest as the canonical Learning startup entrypoint.",
     "Re-fetch learning/control-v1 live head and compare it with learning_control.live_head_sha; classify any mismatch as AUTHORITY_DELTA rather than silently accepting it.",
-    "Read LEARNING-CONTROL-RECORD-v6.md from the selected Learning control ref.",
-    "Read WORK-OBLIGATION-REGISTRY-015 and select only the current Learning ACTIVE obligation.",
-    "Use Matrix 002 and the frozen September 11 evidence set for forensic provenance; do not reopen historical branches as current truth.",
+    "Read LEARNING-CONTROL-RECORD-v7.md from the selected Learning control ref.",
+    "Read WORK-OBLIGATION-REGISTRY-016 and select only the current Learning ACTIVE obligation.",
+    "Use the definitive 113-row matrix for current requirement traceability and Matrix 002/frozen September 11 evidence for forensic provenance; do not reopen historical branches as current truth.",
     "Preserve Foundation 1.0 Closure as the product-wide central objective and remain inside the Learning mutation lane."
   ]
 }
