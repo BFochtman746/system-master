@@ -1,44 +1,36 @@
 'use strict';
 
 /**
- * foundation-closure-matrix.js
+ * Foundation Closure Census 001 projection generator.
  *
- * Executes SYSTEM-MASTER-FOUNDATION-CLOSURE-CENSUS-001 against evidence that
- * actually exists on this ref, and emits the two artifacts the census declares:
+ * Current projection authority is resolved only through CURRENT-AUTHORITY-005:
+ *   - SYSTEM-TOPOLOGY-007
+ *   - SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006
+ *   - SYSTEM-MASTER-CAPABILITY-CROSSWALK-003
  *
- *   1. a 100-percent disposition matrix over every censused module, using the
- *      census's own 15 required columns and 4 allowed states
- *   2. an unresolved-gap successor register
- *
- * Design rule, taken from the census itself: "Missing owner, route, contract,
- * canonical writer, authority boundary, failure semantics, evidence target or
- * acceptance target is an ACTIVE_GAP, not completion." This script therefore
- * marks a column UNPOPULATED unless a real artifact backs it. It will not infer
- * completion from planning volume, and it will not fabricate ownership,
- * authority or evidence. A mostly-gap matrix is the correct output of an honest
- * first pass, not a defect in the script.
- *
- *   node .github/scripts/foundation-closure-matrix.js
- *   node .github/scripts/foundation-closure-matrix.js --json
- *   node .github/scripts/foundation-closure-matrix.js --out governance/census/MATRIX.md
- *   node .github/scripts/foundation-closure-matrix.js --summary
+ * Historical census phases remain provenance. A populated contract is
+ * specification, not completion evidence. COMPLETE_WITH_EVIDENCE requires a
+ * current-authority PASS receipt whose exact subject Git blobs still match.
  */
 
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 const ROOT = path.resolve(__dirname, '..', '..');
-const CENSUS = 'governance/census/SYSTEM-MASTER-FOUNDATION-CLOSURE-CENSUS-001.json';
-const P6 = 'governance/census/SYSTEM-MASTER-COMPLETION-CENSUS-002-P6-PRODUCT-MODULE-ALLOCATION.json';
-const CATALOG = 'governance/catalog/SYSTEM-MASTER-SYSTEM-CATALOG-003.json';
 const AUTHORITY = 'governance/CURRENT-AUTHORITY.json';
+const CENSUS = 'governance/census/SYSTEM-MASTER-FOUNDATION-CLOSURE-CENSUS-001.json';
+const EVIDENCE_REGISTRY = 'governance/census/FOUNDATION-CLOSURE-EVIDENCE-REGISTRY-001.json';
 const CONTRACT_DIR = 'governance/contracts';
+const UNPOPULATED = 'UNPOPULATED';
 
-// The eight census gap-forcing sections, as they appear as markdown headings in
-// FOUNDATION-CONTRACT-TEMPLATE-001. A section counts as populated only when it
-// has real prose: the template's own UNPOPULATED marker, a TBD, or a bare
-// placeholder all leave it unpopulated, because the census forbids inferring
-// completion from planning volume.
+const STATE = Object.freeze({
+  COMPLETE: 'COMPLETE_WITH_EVIDENCE',
+  GAP: 'ACTIVE_GAP',
+  BLOCKED: 'DURABLY_BLOCKED_EXTERNAL_HUMAN_PRIVATE_NATIVE',
+  OUT: 'EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY'
+});
+
 const CONTRACT_SECTIONS = [
   ['contract_or_interface', /^##\s*1\./m],
   ['ingress_routes', /^##\s*2\./m],
@@ -47,53 +39,10 @@ const CONTRACT_SECTIONS = [
   ['dependencies', /^##\s*5\./m],
   ['failure_semantics', /^##\s*6\./m],
   ['evidence_target', /^##\s*7\./m],
-  ['test_or_acceptance_target', /^##\s*8\./m]
+  ['test_or_acceptance_target', /^##\s*8\./m],
+  ['authority_boundary', /^##\s*9\./m]
 ];
-const PLACEHOLDER = /^(UNPOPULATED|TBD|N\/A|NONE|-|\*\*UNPOPULATED\*\*)$/i;
 
-// Piping to head/less closes stdout early; that is normal shell use, not an error.
-process.stdout.on('error', (error) => { if (error.code === 'EPIPE') process.exit(0); throw error; });
-
-function contractPath(key) {
-  return `${CONTRACT_DIR}/${key}-FOUNDATION-CONTRACT-001.md`;
-}
-
-/** Read a contract and report which required sections carry real content. */
-function readContract(key) {
-  const rel = contractPath(key);
-  if (!exists(rel)) return { present: false, populated: new Set(), missing: CONTRACT_SECTIONS.map((s) => s[0]) };
-  const text = fs.readFileSync(path.join(ROOT, rel), 'utf8');
-  const headings = [...text.matchAll(/^##\s+.*$/gm)];
-  const populated = new Set();
-  for (const [name, re] of CONTRACT_SECTIONS) {
-    const start = text.search(re);
-    if (start < 0) continue;
-    const next = headings.find((h) => h.index > start);
-    const body = text
-      .slice(start, next ? next.index : text.length)
-      .split('\n').slice(1)                      // drop the heading itself
-      .filter((line) => !line.trim().startsWith('<!--') && line.trim() !== '')
-      .join('\n').trim();
-    if (body && !PLACEHOLDER.test(body)) populated.add(name);
-  }
-  return {
-    present: true,
-    path: rel,
-    populated,
-    missing: CONTRACT_SECTIONS.map((s) => s[0]).filter((n) => !populated.has(n))
-  };
-}
-
-const UNPOPULATED = 'UNPOPULATED';
-
-const STATE = {
-  COMPLETE: 'COMPLETE_WITH_EVIDENCE',
-  GAP: 'ACTIVE_GAP',
-  BLOCKED: 'DURABLY_BLOCKED_EXTERNAL_HUMAN_PRIVATE_NATIVE',
-  OUT: 'EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY'
-};
-
-// Columns the census requires. Order is authoritative.
 const COLUMNS = [
   'requirement_or_capability_id',
   'canonical_owner',
@@ -106,378 +55,342 @@ const COLUMNS = [
   'failure_semantics',
   'evidence_target',
   'test_or_acceptance_target',
+  'authority_boundary',
   'current_state',
   'gap_or_blocker',
   'successor',
   'evidence_pointer'
 ];
 
-// Columns whose absence forces ACTIVE_GAP under the census's no-silent-gap rule.
-const GAP_FORCING = [
-  'canonical_owner',
-  'contract_or_interface',
-  'ingress_routes',
-  'egress_routes',
-  'persistence_or_canonical_writer',
-  'failure_semantics',
-  'evidence_target',
-  'test_or_acceptance_target'
-];
+const PLACEHOLDER = /^(UNPOPULATED|TBD|N\/A|NONE|-|\*\*UNPOPULATED\*\*)$/i;
 
-// Modules whose completion depends on a device, human, private corpus or
-// external provider. These are DURABLY_BLOCKED, which is a real disposition,
-// not a gap to be closed by more engineering.
-const NATIVE_OR_EXTERNAL = new Set(['PHONEOPS', 'PHYSICALAI', 'LOCALAI', 'CAD', 'GEO']);
+process.stdout.on('error', (error) => {
+  if (error.code === 'EPIPE') process.exit(0);
+  throw error;
+});
 
-function readJson(rel) {
-  return JSON.parse(fs.readFileSync(path.join(ROOT, rel), 'utf8'));
-}
-function exists(rel) {
-  return fs.existsSync(path.join(ROOT, rel));
+function abs(rel) { return path.join(ROOT, rel); }
+function exists(rel) { return fs.existsSync(abs(rel)); }
+function readJson(rel) { return JSON.parse(fs.readFileSync(abs(rel), 'utf8')); }
+function contractPath(key) { return `${CONTRACT_DIR}/${key}-FOUNDATION-CONTRACT-001.md`; }
+function numericId(id) { return Number(String(id).slice(1)); }
+
+function gitBlobSha(rel) {
+  const bytes = fs.readFileSync(abs(rel));
+  const header = Buffer.from(`blob ${bytes.length}\0`, 'utf8');
+  return crypto.createHash('sha1').update(header).update(bytes).digest('hex');
 }
 
-function ownerFromDisposition(disposition) {
-  if (!disposition) return UNPOPULATED;
-  if (disposition.startsWith('SYSTEM_MASTER/')) return disposition.split('__')[0];
-  return UNPOPULATED; // OWNER_REGISTRATION_REQUIRED / OWNER_SELECTION_REQUIRED == no owner yet
+function readContract(key) {
+  const rel = contractPath(key);
+  if (!exists(rel)) {
+    return { present: false, path: rel, populated: new Set(), missing: CONTRACT_SECTIONS.map(([name]) => name) };
+  }
+  const text = fs.readFileSync(abs(rel), 'utf8');
+  const headings = [...text.matchAll(/^##\s+.*$/gm)];
+  const populated = new Set();
+  for (const [name, heading] of CONTRACT_SECTIONS) {
+    const start = text.search(heading);
+    if (start < 0) continue;
+    const next = headings.find((hit) => hit.index > start);
+    const body = text.slice(start, next ? next.index : text.length)
+      .split('\n').slice(1)
+      .filter((line) => !line.trim().startsWith('<!--') && line.trim() !== '')
+      .join('\n').trim();
+    if (body && !PLACEHOLDER.test(body)) populated.add(name);
+  }
+  return {
+    present: true,
+    path: rel,
+    populated,
+    missing: CONTRACT_SECTIONS.map(([name]) => name).filter((name) => !populated.has(name))
+  };
 }
 
-// The allocation registry named by CURRENT-AUTHORITY is the authoritative owner
-// source once ownership has been ratified. P6 remains the fallback, because an
-// unratified estate must still census honestly.
-function loadOwnership() {
-  const owners = new Map();
-  const deferred = new Map();
-  try {
-    const authority = readJson(AUTHORITY);
-    const rel = authority.headless_tool_owner_allocation;
-    if (!rel || !exists(rel)) return { owners, deferred, source: null };
-    const alloc = readJson(rel);
-    for (const row of alloc.module_ownership || []) owners.set(row.module_key, row.owner_path);
-    for (const row of alloc.explicitly_deferred_modules || []) deferred.set(row.module_key, row.disposition);
-    return { owners, deferred, source: rel };
-  } catch {
-    return { owners, deferred, source: null };
+function authorityInputs() {
+  const authority = readJson(AUTHORITY);
+  const census = readJson(CENSUS);
+  const topologyRel = authority.topology;
+  const allocationRel = authority.headless_tool_owner_allocation;
+  const crosswalkRel = authority.capability_crosswalk;
+  for (const rel of [topologyRel, allocationRel, crosswalkRel, EVIDENCE_REGISTRY]) {
+    if (!rel || !exists(rel)) throw new Error(`current-authority input absent: ${rel || 'UNSET'}`);
   }
-}
+  const topology = readJson(topologyRel);
+  const allocation = readJson(allocationRel);
+  const crosswalk = readJson(crosswalkRel);
+  const evidence = readJson(EVIDENCE_REGISTRY);
 
-function classify(module, owner, deferredDisposition) {
-  const standing = module.current_standing || '';
-  const disposition = module.owner_disposition || '';
-
-  if (deferredDisposition) {
-    return { state: STATE.OUT, reason: `Explicitly deferred by ratified allocation authority (${deferredDisposition}).` };
-  }
-
-  if (disposition.startsWith('ABSORBED_NO_STANDALONE') || standing.startsWith('ABSORBED_NO_STANDALONE')) {
-    return { state: STATE.OUT, reason: 'Absorbed into another foundation; no standalone module owed.' };
-  }
-  if (disposition === 'DEFERRED_OPTIONAL' || standing === 'DEFERRED_OPTIONAL') {
-    return { state: STATE.OUT, reason: 'Deferred by explicit allocation authority.' };
-  }
-  if (standing.includes('NOT_REQUIRED_UNLESS_CONCRETE_NEED_EMERGES')) {
-    return { state: STATE.OUT, reason: 'Dedicated implementation not owed absent a concrete need.' };
-  }
-  if (NATIVE_OR_EXTERNAL.has(module.module_key)) {
-    return { state: STATE.BLOCKED, reason: 'Completion requires native device, external provider or private evidence not obtainable from repository evidence.' };
-  }
-  if (!owner || owner === UNPOPULATED) {
-    return { state: STATE.GAP, reason: `No canonical owner registered (${disposition || 'no disposition'}).` };
-  }
-  return { state: STATE.GAP, reason: `Owner registered but foundation columns unpopulated (${standing || 'no standing'}).` };
-}
-
-function buildRow(module, ownership) {
-  const owner = ownership.owners.get(module.module_key) || ownerFromDisposition(module.owner_disposition);
-  const deferredDisposition = ownership.deferred.get(module.module_key) || null;
-  const contract = readContract(module.module_key);
-  let { state, reason } = classify(module, owner, deferredDisposition);
-
-  // A module with an owner AND a fully populated contract is the only path to
-  // COMPLETE_WITH_EVIDENCE. This is what lets the count move.
-  if (state === STATE.GAP && contract.present) {
-    if (contract.missing.length === 0) {
-      state = STATE.COMPLETE;
-      reason = `Foundation contract complete: ${contract.path}`;
-    } else {
-      reason = `Contract exists but ${contract.missing.length}/8 required sections unpopulated: ${contract.missing.join(', ')}`;
+  const expected = {
+    authority: census.current_authority_id,
+    topology: census.current_topology_id,
+    allocation: census.current_owner_allocation_id,
+    crosswalk: census.current_capability_crosswalk_id
+  };
+  const observed = {
+    authority: authority.authority_id,
+    topology: topology.topology_id,
+    allocation: allocation.allocation_id,
+    crosswalk: crosswalk.crosswalk_id
+  };
+  for (const key of Object.keys(expected)) {
+    if (expected[key] && expected[key] !== observed[key]) {
+      throw new Error(`census/current-authority mismatch for ${key}: expected=${expected[key]} observed=${observed[key]}`);
     }
   }
+  if (evidence.authority_id !== authority.authority_id) {
+    throw new Error(`evidence registry authority mismatch: ${evidence.authority_id}`);
+  }
+  return { authority, census, topology, allocation, crosswalk, evidence, topologyRel, allocationRel, crosswalkRel };
+}
 
-  const row = {
-    requirement_or_capability_id: module.module_id,
-    module_key: module.module_key,
-    module_name: module.module_name,
-    canonical_owner: owner,
-    authority_source: ownership.source
-      ? `${ownership.source} (ratified ownership); ${AUTHORITY} (pointer of record)`
-      : `${P6} (census allocation); ${AUTHORITY} (pointer of record)`,
-    contract_or_interface: contract.populated.has('contract_or_interface') ? contract.path : UNPOPULATED,
-    ingress_routes: contract.populated.has('ingress_routes') ? contract.path : UNPOPULATED,
-    egress_routes: contract.populated.has('egress_routes') ? contract.path : UNPOPULATED,
-    persistence_or_canonical_writer: contract.populated.has('persistence_or_canonical_writer') ? contract.path : UNPOPULATED,
-    dependencies: contract.populated.has('dependencies') ? contract.path : (module.interaction_direction || UNPOPULATED),
-    failure_semantics: contract.populated.has('failure_semantics') ? contract.path : UNPOPULATED,
-    evidence_target: contract.populated.has('evidence_target') ? contract.path : UNPOPULATED,
-    test_or_acceptance_target: contract.populated.has('test_or_acceptance_target') ? contract.path : UNPOPULATED,
+function evidenceMap(inputs) {
+  return new Map((inputs.evidence.entries || []).map((entry) => [entry.requirement_or_capability_id, entry]));
+}
+
+function verifyReceipt(receipt, id, owner, authorityId) {
+  if (!receipt) return { valid: false, reason: 'NO_RECEIPT' };
+  if (receipt.requirement_or_capability_id !== id) return { valid: false, reason: 'ID_MISMATCH' };
+  if (receipt.status !== 'PASS') return { valid: false, reason: `STATUS_${receipt.status || 'UNSET'}` };
+  if (receipt.authority_id !== authorityId) return { valid: false, reason: 'AUTHORITY_MISMATCH' };
+  if (receipt.owner_path !== owner) return { valid: false, reason: 'OWNER_MISMATCH' };
+  if (receipt.qualification?.conclusion !== 'success') return { valid: false, reason: 'QUALIFICATION_NOT_SUCCESS' };
+  for (const subject of receipt.subjects || []) {
+    if (!subject.path || !subject.git_blob_sha || !exists(subject.path)) {
+      return { valid: false, reason: `SUBJECT_ABSENT:${subject.path || 'UNSET'}` };
+    }
+    if (gitBlobSha(subject.path) !== subject.git_blob_sha) {
+      return { valid: false, reason: `SUBJECT_DRIFT:${subject.path}` };
+    }
+  }
+  return { valid: true, reason: 'PASS' };
+}
+
+function evidencePointer(receipt) {
+  if (!receipt) return UNPOPULATED;
+  const refs = [...(receipt.evidence_refs || [])];
+  const q = receipt.qualification || {};
+  if (q.workflow_run_id) refs.push(`github-actions-run:${q.workflow_run_id}`);
+  if (q.artifact_id) refs.push(`github-actions-artifact:${q.artifact_id}:${q.artifact_digest || 'digest-unset'}`);
+  return refs.length ? refs.join('; ') : EVIDENCE_REGISTRY;
+}
+
+function baseFields(contract) {
+  const out = {};
+  for (const [name] of CONTRACT_SECTIONS) out[name] = contract.populated.has(name) ? contract.path : UNPOPULATED;
+  return out;
+}
+
+function completeOrGap({ id, key, owner, authoritySource, contract, receipt, receiptCheck }) {
+  const fields = baseFields(contract);
+  let state = STATE.GAP;
+  let reason;
+  if (!contract.present) {
+    reason = `No Foundation contract at ${contract.path}.`;
+  } else if (contract.missing.length) {
+    reason = `Contract exists but ${contract.missing.length}/9 required sections unpopulated: ${contract.missing.join(', ')}`;
+  } else if (!receipt) {
+    reason = 'Contract may be populated, but no current-authority Foundation evidence receipt is registered.';
+  } else if (!receiptCheck.valid) {
+    reason = `Foundation evidence receipt is not current-valid (${receiptCheck.reason}).`;
+  } else {
+    state = STATE.COMPLETE;
+    reason = 'Current-authority Foundation evidence receipt PASS with exact subject bindings.';
+  }
+  return {
+    requirement_or_capability_id: id,
+    module_key: key,
+    canonical_owner: owner || UNPOPULATED,
+    authority_source: authoritySource,
+    ...fields,
     current_state: state,
     gap_or_blocker: reason,
     successor: UNPOPULATED,
-    evidence_pointer: contract.present ? contract.path : (module.evidence_summary ? `${P6}#modules[${module.sequence - 1}]` : UNPOPULATED),
-    _historical_standing: module.current_standing || UNPOPULATED,
-    _next_disposition: module.next_disposition || UNPOPULATED
+    evidence_pointer: state === STATE.COMPLETE ? evidencePointer(receipt) : (contract.present ? contract.path : UNPOPULATED),
+    _missing_required: contract.missing
   };
-
-  row._unpopulated_required = GAP_FORCING.filter((c) => row[c] === UNPOPULATED);
-  return row;
 }
 
-/** Platform requirements are censused alongside modules once the crosswalk is ratified. */
-function platformRows() {
-  let crosswalkRel = null;
-  try {
-    crosswalkRel = readJson(AUTHORITY).capability_crosswalk;
-  } catch { /* handled by caller */ }
-  if (!crosswalkRel || !exists(crosswalkRel)) return { rows: [], source: null };
-
-  const crosswalk = readJson(crosswalkRel);
-  const rows = (crosswalk.platform_requirements || []).map((entry) => {
-    const contract = readContract(entry.platform_id);
-    const owner = entry.owner_path || UNPOPULATED;
-    // A requirement absorbed into a capability entry is not a gap: the work is
-    // owed, but by the absorbing owner, and counting it twice would overstate
-    // the surface.
-    if (entry.disposition === 'ABSORBED') {
-      const absorbedRow = {
-        requirement_or_capability_id: entry.platform_id,
-        module_key: entry.platform_id,
-        module_name: entry.requirement,
-        canonical_owner: owner,
-        authority_source: `${crosswalkRel} (ratified crosswalk)`,
-        contract_or_interface: UNPOPULATED, ingress_routes: UNPOPULATED, egress_routes: UNPOPULATED,
-        persistence_or_canonical_writer: UNPOPULATED, dependencies: UNPOPULATED,
-        failure_semantics: UNPOPULATED, evidence_target: UNPOPULATED, test_or_acceptance_target: UNPOPULATED,
+function capabilityRows(inputs, receipts) {
+  const source = `${inputs.crosswalkRel}; ${inputs.allocationRel}; ${AUTHORITY}`;
+  return (inputs.crosswalk.capability_entries || []).map((entry) => {
+    const id = entry.capability_id;
+    const key = entry.module_key || id;
+    const disposition = entry.disposition || '';
+    if (disposition.startsWith('EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY') || disposition === 'RESERVED_UNALLOCATED') {
+      const reason = disposition === 'RESERVED_UNALLOCATED'
+        ? 'Reserved unallocated capability identifier by canonical crosswalk authority.'
+        : `Explicitly out of scope by canonical crosswalk/owner-allocation authority (${disposition}).`;
+      return {
+        requirement_or_capability_id: id,
+        module_key: key,
+        canonical_owner: entry.owner_path || UNPOPULATED,
+        authority_source: source,
+        ...Object.fromEntries(CONTRACT_SECTIONS.map(([name]) => [name, UNPOPULATED])),
         current_state: STATE.OUT,
-        gap_or_blocker: `Absorbed into ${entry.absorbed_into} by ratified decision: ${entry.absorption_rationale}`,
-        successor: entry.absorbed_into,
-        evidence_pointer: crosswalkRel,
-        _historical_standing: 'PLATFORM_REQUIREMENT_ABSORBED',
-        _next_disposition: UNPOPULATED,
-        _entry_kind: 'PLATFORM',
-        _unpopulated_required: []
+        gap_or_blocker: reason,
+        successor: UNPOPULATED,
+        evidence_pointer: `${inputs.crosswalkRel}; ${inputs.allocationRel}`,
+        _missing_required: []
       };
-      return absorbedRow;
     }
-    let state = STATE.GAP;
-    let reason = contract.present
-      ? `Contract exists but ${contract.missing.length}/8 required sections unpopulated: ${contract.missing.join(', ')}`
-      : `No foundation contract at ${contractPath(entry.platform_id)}.`;
-    if (contract.present && contract.missing.length === 0) {
-      state = STATE.COMPLETE;
-      reason = `Foundation contract complete: ${contract.path}`;
-    }
-    const row = {
-      requirement_or_capability_id: entry.platform_id,
-      module_key: entry.platform_id,
-      module_name: entry.requirement,
-      canonical_owner: owner,
-      authority_source: `${crosswalkRel} (ratified crosswalk)`,
-      contract_or_interface: contract.populated.has('contract_or_interface') ? contract.path : UNPOPULATED,
-      ingress_routes: contract.populated.has('ingress_routes') ? contract.path : UNPOPULATED,
-      egress_routes: contract.populated.has('egress_routes') ? contract.path : UNPOPULATED,
-      persistence_or_canonical_writer: contract.populated.has('persistence_or_canonical_writer') ? contract.path : UNPOPULATED,
-      dependencies: contract.populated.has('dependencies') ? contract.path : (entry.implementation || UNPOPULATED),
-      failure_semantics: contract.populated.has('failure_semantics') ? contract.path : UNPOPULATED,
-      evidence_target: contract.populated.has('evidence_target') ? contract.path : UNPOPULATED,
-      test_or_acceptance_target: contract.populated.has('test_or_acceptance_target') ? contract.path : UNPOPULATED,
-      current_state: state,
-      gap_or_blocker: reason,
-      successor: UNPOPULATED,
-      evidence_pointer: contract.present ? contract.path : (entry.implementation || UNPOPULATED),
-      _historical_standing: 'PLATFORM_REQUIREMENT',
-      _next_disposition: UNPOPULATED,
-      _entry_kind: 'PLATFORM'
-    };
-    row._unpopulated_required = GAP_FORCING.filter((c) => row[c] === UNPOPULATED);
-    return row;
+    const contract = readContract(key);
+    const receipt = receipts.get(id);
+    return completeOrGap({
+      id, key, owner: entry.owner_path, authoritySource: source, contract, receipt,
+      receiptCheck: verifyReceipt(receipt, id, entry.owner_path, inputs.authority.authority_id)
+    });
   });
-  return { rows, source: crosswalkRel };
 }
 
-function scopeCoverage(census) {
-  // The census declares 10 scope areas. Report honestly which have a source
-  // artifact on this ref and which have none.
-  const crosswalkPresent = (() => {
-    const hits = [];
-    const roots = ['governance', 'system-master', 'qualification'];
-    const idRe = /\b(C[0-4][0-9]|P0[0-9]|P1[0-5])\b/;
-    const walk = (dir) => {
-      let entries = [];
-      try { entries = fs.readdirSync(path.join(ROOT, dir), { withFileTypes: true }); } catch { return; }
-      for (const e of entries) {
-        const rel = path.join(dir, e.name);
-        if (e.isDirectory()) walk(rel);
-        else if (/\.(json|md)$/.test(e.name)) {
-          try {
-            const text = fs.readFileSync(path.join(ROOT, rel), 'utf8');
-            if (rel === CENSUS) continue;
-            // A crosswalk DEFINES many distinct identifiers. A document that merely
-            // mentions the range in prose is not a crosswalk — this guard exists
-            // because the first version of this detector was fooled by an obligation
-            // statement describing the missing crosswalk.
-            const distinct = new Set((text.match(/\b(C[0-4][0-9]|P0[0-9]|P1[0-5])\b/g) || []));
-            if (distinct.size >= 10) hits.push(rel);
-          } catch { /* unreadable file is not evidence */ }
-        }
-      }
-    };
-    roots.forEach(walk);
-    return hits;
-  })();
-
-  return census.scope.map((area, i) => {
-    let source = null;
-    if (i === 0) source = crosswalkPresent.length ? crosswalkPresent.slice(0, 3).join(', ') : null;
-    if (i === 1) source = exists(P6) ? P6 : null;
-    // Scope areas 3-10 describe route, transaction, writer, boundary, evidence,
-    // failure, test and release semantics. No per-module artifact carries them.
-    return {
-      scope_index: i + 1,
-      area,
-      source: source || 'NO SOURCE ARTIFACT ON THIS REF',
-      covered: Boolean(source)
-    };
+function platformRows(inputs, receipts) {
+  const source = `${inputs.crosswalkRel}; ${AUTHORITY}`;
+  return (inputs.crosswalk.platform_requirements || []).map((entry) => {
+    const id = entry.platform_id;
+    if (entry.disposition === 'ABSORBED') {
+      return {
+        requirement_or_capability_id: id,
+        module_key: id,
+        canonical_owner: entry.owner_path || UNPOPULATED,
+        authority_source: source,
+        ...Object.fromEntries(CONTRACT_SECTIONS.map(([name]) => [name, UNPOPULATED])),
+        current_state: STATE.OUT,
+        gap_or_blocker: `Absorbed into ${entry.absorbed_into} by canonical crosswalk authority.`,
+        successor: entry.absorbed_into || UNPOPULATED,
+        evidence_pointer: inputs.crosswalkRel,
+        _missing_required: []
+      };
+    }
+    const contract = readContract(id);
+    const receipt = receipts.get(id);
+    return completeOrGap({
+      id, key: id, owner: entry.owner_path, authoritySource: source, contract, receipt,
+      receiptCheck: verifyReceipt(receipt, id, entry.owner_path, inputs.authority.authority_id)
+    });
   });
+}
+
+function ownerRank(census, owner) {
+  if (!owner || !owner.startsWith('SYSTEM_MASTER/')) return 999;
+  const lane = owner.slice('SYSTEM_MASTER/'.length);
+  const i = (census.initial_owner_order || []).indexOf(lane);
+  return i < 0 ? 999 : i;
+}
+
+function successorSort(census, a, b) {
+  const aPlatform = a.requirement_or_capability_id.startsWith('P');
+  const bPlatform = b.requirement_or_capability_id.startsWith('P');
+  if (aPlatform !== bPlatform) return aPlatform ? -1 : 1;
+  if (aPlatform) return numericId(a.requirement_or_capability_id) - numericId(b.requirement_or_capability_id);
+  const ownerDelta = ownerRank(census, a.canonical_owner) - ownerRank(census, b.canonical_owner);
+  return ownerDelta || numericId(a.requirement_or_capability_id) - numericId(b.requirement_or_capability_id);
 }
 
 function build() {
-  for (const rel of [CENSUS, P6, CATALOG, AUTHORITY]) {
-    if (!exists(rel)) {
-      process.stderr.write(`FOUNDATION_MATRIX=FAIL code=INPUT_ABSENT path=${rel}\n`);
-      process.exit(2);
-    }
-  }
-  const census = readJson(CENSUS);
-  const p6 = readJson(P6);
-  const catalog = readJson(CATALOG);
+  const inputs = authorityInputs();
+  const receipts = evidenceMap(inputs);
+  const rows = [...capabilityRows(inputs, receipts), ...platformRows(inputs, receipts)]
+    .sort((a, b) => a.requirement_or_capability_id.localeCompare(b.requirement_or_capability_id));
 
-  const ownership = loadOwnership();
-  const platform = platformRows();
-  const moduleRows = p6.modules.map((m) => buildRow(m, ownership));
-  for (const r of moduleRows) r._entry_kind = r._entry_kind || 'MODULE';
-  const rows = [...moduleRows, ...platform.rows].sort((a, b) => a.requirement_or_capability_id.localeCompare(b.requirement_or_capability_id));
-
-  const counts = Object.values(STATE).reduce((acc, s) => {
-    acc[s] = rows.filter((r) => r.current_state === s).length;
-    return acc;
-  }, {});
-
-  const register = rows
-    .filter((r) => r.current_state === STATE.GAP)
-    .map((r) => ({
-      gap_id: `FCC-001-GAP-${r.requirement_or_capability_id}`,
-      module_key: r.module_key,
-      canonical_owner: r.canonical_owner,
-      blocker: r.gap_or_blocker,
-      unpopulated_required_columns: r._unpopulated_required,
-      declared_next_disposition: r._next_disposition
-    }));
+  const counts = Object.fromEntries(Object.values(STATE).map((state) => [state, rows.filter((r) => r.current_state === state).length]));
+  const inScope = rows.length - counts[STATE.OUT];
+  const completionPercent = inScope ? Math.round((counts[STATE.COMPLETE] / inScope) * 100) : 0;
+  const gaps = rows.filter((r) => r.current_state === STATE.GAP).sort((a, b) => successorSort(inputs.census, a, b));
 
   return {
     generated_at: new Date().toISOString(),
-    census_id: census.census_id,
-    census_status: census.status,
-    census_purpose: census.purpose,
-    allowed_states: census.allowed_states,
-    forbidden_claims: census.forbidden_claims,
+    authority_id: inputs.authority.authority_id,
+    topology_id: inputs.topology.topology_id,
+    allocation_id: inputs.allocation.allocation_id,
+    crosswalk_id: inputs.crosswalk.crosswalk_id,
+    census_id: inputs.census.census_id,
+    census_status: inputs.census.status,
     required_columns: COLUMNS,
-    ownership_source: ownership.source || 'UNRATIFIED — falling back to P6 census allocation',
-    crosswalk_source: platform.source || 'UNRATIFIED — platform requirements not censused',
-    module_count: rows.length,
-    module_entries: moduleRows.length,
-    platform_entries: platform.rows.length,
-    catalog_module_keys: catalog.historical_inventory?.count ?? null,
+    total_rows: rows.length,
+    capability_entries: inputs.crosswalk.capability_entries.length,
+    platform_entries: inputs.crosswalk.platform_requirements.length,
+    in_scope_rows: inScope,
     counts,
-    completion_percent: rows.length ? Math.round((counts[STATE.COMPLETE] / rows.length) * 100) : 0,
-    scope_coverage: scopeCoverage(census),
+    completion_percent: completionPercent,
     rows,
-    unresolved_gap_successor_register: register
+    unresolved_gap_successor_register: gaps.map((r) => ({
+      gap_id: `FCC-002-GAP-${r.requirement_or_capability_id}`,
+      requirement_or_capability_id: r.requirement_or_capability_id,
+      module_key: r.module_key,
+      canonical_owner: r.canonical_owner,
+      blocker: r.gap_or_blocker,
+      missing_required: r._missing_required
+    })),
+    exact_next_active_gap: gaps[0]?.requirement_or_capability_id || null
   };
 }
 
+function esc(value) { return String(value ?? '').replace(/\|/g, '\\|').replace(/\n/g, ' '); }
+
 function renderMarkdown(m) {
-  const L = [];
-  L.push('# Foundation Closure Census 001 — Disposition Matrix');
-  L.push('');
-  L.push(`Generated ${m.generated_at} · census status \`${m.census_status}\``);
-  L.push('');
-  L.push(`Ownership source: \`${m.ownership_source}\``);
-  L.push('');
-  L.push(`Crosswalk source: \`${m.crosswalk_source}\``);
-  L.push('');
-  L.push(`Entries: ${m.module_entries} capability · ${m.platform_entries} platform`);
-  L.push('');
-  L.push('> Produced under the census no-silent-gap rule. A column is UNPOPULATED unless a');
-  L.push('> real artifact on this ref backs it. Completion is never inferred from planning volume.');
-  L.push('');
-  L.push('## Disposition summary');
-  L.push('');
-  L.push('| State | Modules |');
-  L.push('| --- | ---: |');
-  for (const [k, v] of Object.entries(m.counts)) L.push(`| \`${k}\` | ${v} |`);
-  L.push(`| **Total** | **${m.module_count}** |`);
-  L.push('');
-  L.push(`**Foundation 1.0 closure: ${m.completion_percent}% complete with evidence.**`);
-  L.push('');
-  L.push('## Scope coverage');
-  L.push('');
-  L.push('The census declares 10 scope areas. Source artifacts on this ref:');
-  L.push('');
-  L.push('| # | Scope area | Source |');
-  L.push('| ---: | --- | --- |');
-  for (const s of m.scope_coverage) {
-    L.push(`| ${s.scope_index} | ${s.area} | ${s.covered ? `\`${s.source}\`` : '**none**'} |`);
-  }
-  L.push('');
-  L.push('## Matrix');
-  L.push('');
-  L.push('| Module | Owner | State | Blocker | Unpopulated required columns |');
-  L.push('| --- | --- | --- | --- | ---: |');
+  const lines = [];
+  lines.push('# Foundation Closure Census 001 - Disposition Matrix', '');
+  lines.push(`Generated ${m.generated_at} under \`${m.authority_id}\` / \`${m.topology_id}\`.`,'');
+  lines.push(`Ownership: \`${m.allocation_id}\`  `);
+  lines.push(`Crosswalk: \`${m.crosswalk_id}\`  `);
+  lines.push(`Evidence registry: \`${EVIDENCE_REGISTRY}\``, '');
+  lines.push(`Entries: ${m.capability_entries} capability + ${m.platform_entries} platform = ${m.total_rows} total.`, '');
+  lines.push('> Populated contract prose is specification, not acceptance evidence. COMPLETE_WITH_EVIDENCE requires a current-authority PASS receipt whose exact subject blobs still match.', '');
+  lines.push('## Disposition summary', '');
+  lines.push('| State | Rows |', '| --- | ---: |');
+  for (const state of Object.values(STATE)) lines.push(`| \`${state}\` | ${m.counts[state]} |`);
+  lines.push(`| **Total** | **${m.total_rows}** |`, '');
+  lines.push(`**Foundation 1.0 completion with evidence: ${m.completion_percent}% (${m.counts[STATE.COMPLETE]} of ${m.in_scope_rows} in-scope rows).**`, '');
+  lines.push('## Disposition matrix', '');
+  lines.push('| ID | Capability / requirement | Owner | State | Missing required | Gap / blocker | Evidence / successor |');
+  lines.push('| --- | --- | --- | --- | ---: | --- | --- |');
   for (const r of m.rows) {
-    L.push(`| \`${r.requirement_or_capability_id}\` ${r.module_key} | ${r.canonical_owner} | ${r.current_state.replace(/_/g, ' ')} | ${r.gap_or_blocker} | ${r._unpopulated_required.length}/8 |`);
+    const evidence = r.successor !== UNPOPULATED ? `successor=${r.successor}; ${r.evidence_pointer}` : r.evidence_pointer;
+    lines.push(`| \`${r.requirement_or_capability_id}\` | ${esc(r.module_key)} | ${esc(r.canonical_owner)} | ${esc(r.current_state)} | ${r._missing_required.length}/9 | ${esc(r.gap_or_blocker)} | ${esc(evidence)} |`);
   }
-  L.push('');
-  L.push('## Unresolved gap successor register');
-  L.push('');
-  L.push(`${m.unresolved_gap_successor_register.length} entries.`);
-  L.push('');
+  lines.push('', '## Unresolved gap successor register', '');
+  lines.push(`${m.unresolved_gap_successor_register.length} ACTIVE_GAP rows remain, ordered by shared platform dependency first and then current nine-peer owner order.`, '');
+  lines.push('| Gap | ID | Owner | Missing | Reason |', '| --- | --- | --- | ---: | --- |');
   for (const g of m.unresolved_gap_successor_register) {
-    L.push(`### \`${g.gap_id}\``);
-    L.push(`- **Owner:** ${g.canonical_owner}`);
-    L.push(`- **Blocker:** ${g.blocker}`);
-    L.push(`- **Unpopulated:** ${g.unpopulated_required_columns.join(', ')}`);
-    if (g.declared_next_disposition !== UNPOPULATED) L.push(`- **Declared next:** ${g.declared_next_disposition}`);
-    L.push('');
+    lines.push(`| \`${g.gap_id}\` | ${g.requirement_or_capability_id} ${esc(g.module_key)} | ${esc(g.canonical_owner)} | ${g.missing_required.length}/9 | ${esc(g.blocker)} |`);
   }
-  return L.join('\n');
+  lines.push('', '## Exact next ACTIVE_GAP', '');
+  lines.push(m.exact_next_active_gap ? `\`${m.exact_next_active_gap}\`` : '`NONE`', '');
+  lines.push('## Machine-readable required columns', '');
+  lines.push('The `--json` form contains all required row fields, including authority boundary, exact evidence pointer, and successor.', '');
+  return lines.join('\n');
 }
 
 function main() {
   const args = process.argv.slice(2);
-  const m = build();
-  if (args.includes('--summary')) {
-    process.stdout.write(`${JSON.stringify({ counts: m.counts, completion_percent: m.completion_percent, gaps: m.unresolved_gap_successor_register.length, scope_uncovered: m.scope_coverage.filter((s) => !s.covered).length }, null, 2)}\n`);
-    return;
-  }
-  const text = args.includes('--json') ? `${JSON.stringify(m, null, 2)}\n` : `${renderMarkdown(m)}\n`;
-  const outIndex = args.indexOf('--out');
-  if (outIndex >= 0 && args[outIndex + 1]) {
-    const p = path.resolve(ROOT, args[outIndex + 1]);
-    fs.mkdirSync(path.dirname(p), { recursive: true });
-    fs.writeFileSync(p, text, 'utf8');
-    process.stderr.write(`FOUNDATION_MATRIX=WROTE path=${args[outIndex + 1]}\n`);
-  } else {
+  try {
+    const matrix = build();
+    if (args.includes('--summary')) {
+      process.stdout.write(`${JSON.stringify({
+        counts: matrix.counts,
+        completion_percent: matrix.completion_percent,
+        total_rows: matrix.total_rows,
+        in_scope_rows: matrix.in_scope_rows,
+        gaps: matrix.unresolved_gap_successor_register.length,
+        next: matrix.exact_next_active_gap
+      }, null, 2)}\n`);
+      return;
+    }
+    const text = args.includes('--json') ? `${JSON.stringify(matrix, null, 2)}\n` : `${renderMarkdown(matrix)}\n`;
+    const outIndex = args.indexOf('--out');
+    if (outIndex >= 0) {
+      const out = args[outIndex + 1];
+      if (!out) throw new Error('--out requires a repository-relative path');
+      const outPath = path.resolve(ROOT, out);
+      fs.mkdirSync(path.dirname(outPath), { recursive: true });
+      fs.writeFileSync(outPath, text, 'utf8');
+      process.stderr.write(`FOUNDATION_MATRIX=WROTE path=${out}\n`);
+      return;
+    }
     process.stdout.write(text);
+  } catch (error) {
+    process.stderr.write(`FOUNDATION_MATRIX=FAIL ${error.message}\n`);
+    process.exit(2);
   }
 }
 
