@@ -1,0 +1,49 @@
+{
+  "registry_id": "EXPECTATION-REGISTRY-003",
+  "effective_date": "2026-09-10",
+  "product_root": "SYSTEM_MASTER",
+  "topology": "governance/SYSTEM-TOPOLOGY-004.json",
+  "supersedes": "governance/EXPECTATION-REGISTRY-002.json",
+  "purpose": "Record current System Master expectations under topology 004 while preserving Registry 002 as historical evidence of the superseded Prose-to-Documents allocation.",
+  "architecture_expectations": [
+    {"id":"EXP-ARCH-001","requirement":"SYSTEM MASTER is the product root/system-of-systems.","owner":"SYSTEM_MASTER","standing":"ADOPTED"},
+    {"id":"EXP-ARCH-002","requirement":"CORE provides shared Foundation & Spine services and does not silently acquire peer-system semantic authority.","owner":"CORE","standing":"ADOPTED"},
+    {"id":"EXP-ARCH-003","requirement":"LEARNING is a first-class peer tool system inside SYSTEM MASTER.","owner":"LEARNING","standing":"ADOPTED"},
+    {"id":"EXP-ARCH-004","requirement":"BOOK is a first-class peer tool system owning canonical book/manuscript/lifecycle/Story-Bible/admission/author state.","owner":"BOOK","standing":"ADOPTED"},
+    {"id":"EXP-ARCH-005","requirement":"DOCUMENTS is a first-class peer tool system owning document/artifact mechanics, formats, conversion, rendering, preservation/export and generic document services without Book canonical authority.","owner":"DOCUMENTS","standing":"ADOPTED"},
+    {"id":"EXP-ARCH-006","requirement":"PROSE is an active specialist child at SYSTEM_MASTER/BOOK/PROSE. It owns Book-scoped literary intelligence but has zero canonical manuscript-write, admission, author or peer-lane authority.","owner":"BOOK","specialist_owner":"SYSTEM_MASTER/BOOK/PROSE","standing":"ADOPTED","authority":"governance/ADR-0004-BOOK-PROSE-CHILD-RESTORATION.md"},
+    {"id":"EXP-ARCH-007","requirement":"Historical Prose retirement and exact-subject evidence remain preserved but cannot redirect active Book-Prose work to Documents or transfer PASS.","owner":"SYSTEM_MASTER","standing":"ADOPTED"}
+  ],
+  "operating_expectations": [
+    {"id":"EXP-OPS-001","requirement":"Every executable work item has an explicit active owner path, exact current control binding, completion delta, evidence expectation, stop condition and next-state rule.","standing":"MANDATORY"},
+    {"id":"EXP-OPS-002","requirement":"No newer branch/chat/workflow/ticket/archive becomes authority merely because it is newer.","standing":"MANDATORY"},
+    {"id":"EXP-OPS-003","requirement":"Completed work and exact-subject evidence are append-only; current state selects from them without rewriting history.","standing":"MANDATORY"},
+    {"id":"EXP-OPS-004","requirement":"Unallocated/candidate future-system work may be inspected and cataloged but may not execute, schedule, promote or redefine architecture until explicitly admitted.","standing":"MANDATORY"},
+    {"id":"EXP-OPS-005","requirement":"Second Shift executes only registry-declared peer owner lanes and routes child specialist work through the parent owner lane; active Prose work inherits BOOK and never creates a separate Prose mutation lane.","standing":"MANDATORY"},
+    {"id":"EXP-OPS-006","requirement":"Historical and archived assets must be traceable by exact source locator, identity/digest where available, lifecycle/evidence class, system/capability affinity, reuse disposition and provenance lineage before reuse.","standing":"MANDATORY"},
+    {"id":"EXP-OPS-007","requirement":"A-01 may verify identity, process deterministic inventories, execute registered qualification and emit receipts/attestations, but it may not create systems, assign semantic ownership or transfer evidence authority across changed subjects.","standing":"MANDATORY"},
+    {"id":"EXP-OPS-008","requirement":"A future system build begins from the reusable system/asset catalog and current-source delta review; completed research is not repeated without a material reopen trigger.","standing":"MANDATORY"},
+    {"id":"EXP-OPS-009","requirement":"Foreground owner chats and Second Shift must ultimately arbitrate through one lane-wide mutation claim; until machine admission, concurrent mutation detection fails closed and reconciles the live head before writing.","standing":"MANDATORY"}
+  ],
+  "historical_product_module_inventory": {
+    "inventory_id": "SYSTEM-MASTER-HISTORICAL-PRODUCT-MODULE-INVENTORY-001",
+    "claimed_historical_count": 40,
+    "source": "MODULE-AUDIT-001-FULL-QUEUE.csv and VAULT-INTEGRITY-REBASE-001 canonical control",
+    "reconciled_by": "governance/census/SYSTEM-MASTER-COMPLETION-CENSUS-002-P6-PRODUCT-MODULE-ALLOCATION.json",
+    "rule": "The historical 40-module inventory is discovery/reuse evidence, not current topology. Lifecycle/ownership must be resolved through CURRENT-AUTHORITY and topology 004 before execution.",
+    "modules": ["DOCX","EXCEL","PPTX","PDF","OCR","RESEARCH","KNOWLEDGE","WRITING","MANUSCRIPT","STORYBIBLE","LEARNING","CURRICULUM","PROJECTS","CHAT","EXPECTATION","FILE","IMAGE","PHOTO","VIDEO","VOICE","AUDIOBOOK","MEDIA","CODE","MATH","DATA","CAD","BROWSER","COMMS","CALENDAR","AUTOMATION","PLUGINS","LEDGER","GEO","AIINCOME","PORTFOLIO","EXPERIENCE","PHONEOPS","PHYSICALAI","LOCALAI","IMG-INGEST"]
+  },
+  "current_scope_clarifications": [
+    {"module_key":"PHONEOPS","standing":"ABSORBED_NO_STANDALONE","rule":"Do not create duplicate Phone Operations authority."},
+    {"module_key":"PHYSICALAI","standing":"DEFERRED_OPTIONAL","rule":"Requires explicit future program authorization plus hardware/safety scope."},
+    {"module_key":"CAD","standing":"HEADLESS_INTEROP_ONLY","rule":"No full CAD system absent a concrete future owner decision."},
+    {"module_key":"PROSE","standing":"ACTIVE_BOOK_CHILD_SPECIALIST","owner_path":"SYSTEM_MASTER/BOOK/PROSE","execution_lane":"BOOK","rule":"No direct canonical manuscript write and no separate peer or Second Shift mutation lane."}
+  ],
+  "historical_supersession": {
+    "prior_registry":"governance/EXPECTATION-REGISTRY-002.json",
+    "superseded_expectation":"PROSE_RETIRED_ABSORBED_BY_DOCUMENTS",
+    "authority":"governance/ADR-0004-BOOK-PROSE-CHILD-RESTORATION.md",
+    "history_preserved":true
+  },
+  "change_rule": "New product expectations require an explicit successor registry entry. Never erase or rewrite prior registries to conceal historical topology."
+}

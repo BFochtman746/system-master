@@ -1,0 +1,117 @@
+{
+  "registry_id": "EXPECTATION-REGISTRY-001",
+  "effective_date": "2026-09-10",
+  "product_root": "SYSTEM_MASTER",
+  "topology": "governance/SYSTEM-TOPOLOGY-002.json",
+  "purpose": "Record what System Master is expected to contain and what boundaries must remain true, without converting historical planning claims into current implementation standing.",
+  "architecture_expectations": [
+    {
+      "id": "EXP-ARCH-001",
+      "requirement": "SYSTEM MASTER is the product root/system-of-systems.",
+      "owner": "SYSTEM_MASTER",
+      "standing": "ADOPTED"
+    },
+    {
+      "id": "EXP-ARCH-002",
+      "requirement": "CORE provides the shared Foundation & Spine consumed by product tools; tool systems do not duplicate Core authority silently.",
+      "owner": "CORE",
+      "standing": "ADOPTED"
+    },
+    {
+      "id": "EXP-ARCH-003",
+      "requirement": "LEARNING is a first-class tool system inside SYSTEM MASTER.",
+      "owner": "LEARNING",
+      "standing": "ADOPTED"
+    },
+    {
+      "id": "EXP-ARCH-004",
+      "requirement": "BOOK is a first-class end-to-end tool system inside SYSTEM MASTER.",
+      "owner": "BOOK",
+      "standing": "ADOPTED"
+    },
+    {
+      "id": "EXP-ARCH-005",
+      "requirement": "PROSE is a child system of BOOK and owns Book Evaluator/evaluation and prose-training intelligence without self-authorizing BOOK canonical writes.",
+      "owner": "PROSE",
+      "standing": "ADOPTED"
+    }
+  ],
+  "operating_expectations": [
+    {
+      "id": "EXP-OPS-001",
+      "requirement": "Every executable work item has an explicit owner path, current control head/watermark, completion delta, evidence expectation, stop condition and next-state rule.",
+      "standing": "MANDATORY"
+    },
+    {
+      "id": "EXP-OPS-002",
+      "requirement": "No newer branch/chat/workflow/ticket becomes authority merely because it is newer.",
+      "standing": "MANDATORY"
+    },
+    {
+      "id": "EXP-OPS-003",
+      "requirement": "Completed work is append-only evidence; current state selects from it but does not rewrite it.",
+      "standing": "MANDATORY"
+    },
+    {
+      "id": "EXP-OPS-004",
+      "requirement": "Unallocated work may be inspected but may not execute, schedule, promote or redefine architecture until an owner is assigned.",
+      "standing": "MANDATORY"
+    },
+    {
+      "id": "EXP-OPS-005",
+      "requirement": "Second Shift executes only live delegations revalidated against the current system control head; stale delegated work is superseded before execution.",
+      "standing": "MANDATORY"
+    }
+  ],
+  "historical_product_module_inventory": {
+    "inventory_id": "SYSTEM-MASTER-HISTORICAL-PRODUCT-MODULE-INVENTORY-001",
+    "source": "System Master Foundation & Spine Forensic Audit and Workload Hardening Study, 2026-08-31, section 3.3 plus recovered 40-row master index",
+    "historical_statement": "The audit tracked 40 product capability modules. Its old implementation-status counts are historical and must not be reused as current status without present evidence.",
+    "claimed_historical_count": 40,
+    "explicit_count": 40,
+    "reconciled_by": "governance/census/SYSTEM-MASTER-COMPLETION-CENSUS-002-P6-PRODUCT-MODULE-ALLOCATION.json",
+    "modules": [
+      "DOCX", "EXCEL", "PPTX", "PDF", "OCR", "RESEARCH", "KNOWLEDGE", "WRITING", "MANUSCRIPT", "STORYBIBLE",
+      "LEARNING", "CURRICULUM", "PROJECTS", "CHAT", "EXPECTATION", "FILE", "IMAGE", "PHOTO", "VIDEO", "VOICE",
+      "AUDIOBOOK", "MEDIA", "CODE", "MATH", "DATA", "CAD", "BROWSER", "COMMS", "CALENDAR", "AUTOMATION",
+      "PLUGINS", "LEDGER", "GEO", "AIINCOME", "PORTFOLIO", "EXPERIENCE", "PHONEOPS", "PHYSICALAI", "LOCALAI", "IMG-INGEST"
+    ],
+    "known_current_owner_hints": {
+      "LEARNING": "LEARNING",
+      "CURRICULUM": "LEARNING",
+      "MANUSCRIPT": "BOOK",
+      "STORYBIBLE": "BOOK",
+      "CHAT": "CORE_SHARED_RUNTIME",
+      "EXPERIENCE": "CORE_SHARED_RUNTIME",
+      "PHONEOPS": "ABSORBED_NO_STANDALONE__EXPERIENCE_AUTOMATION_FOUNDATION",
+      "PHYSICALAI": "DEFERRED_OPTIONAL",
+      "CAD": "HEADLESS_INTEROP_ONLY__NO_DEDICATED_SYSTEM"
+    },
+    "default_current_standing": "SEE_P6_PER_MODULE_DISPOSITION__DO_NOT_INFER_COMPLETION",
+    "allocation_rule": "Owner hints are not implementation proof. P6 is the current per-module allocation census. Unresolved headless/domain modules require an explicit current owner/capability registration before executable implementation; branch names may not fill that gap.",
+    "name_collision_rule": "The product Response Expectation Engine is distinct from this governance EXPECTATION registry, and Household Ledger is distinct from governance ledgers. Their current semantic owner/implementation standing remains explicit P7/P8 adjudication work."
+  },
+  "current_scope_clarifications": [
+    {
+      "module_key": "PHONEOPS",
+      "standing": "ABSORBED_NO_STANDALONE__EXPERIENCE_AUTOMATION_FOUNDATION",
+      "rule": "Do not create duplicate Phone Operations authority."
+    },
+    {
+      "module_key": "PHYSICALAI",
+      "standing": "DEFERRED_OPTIONAL",
+      "rule": "Requires explicit future program authorization plus hardware/safety scope before activation."
+    },
+    {
+      "module_key": "CAD",
+      "standing": "HEADLESS_INTEROP_ONLY__NO_DEDICATED_SYSTEM",
+      "rule": "Preserve optional CAD-derived import/view/interoperability support; do not maintain a full CAD mini-app absent a concrete need."
+    }
+  ],
+  "p8_reconciliation": {
+    "date": "2026-09-10",
+    "source_delta": "governance/census/SYSTEM-MASTER-COMPLETION-CENSUS-002-P6-PRODUCT-MODULE-ALLOCATION-LEDGER-DELTA.json",
+    "result": "40_OF_40_MODULE_KEYS_EXPLICIT__CURRENT_DISPOSITIONS_POINTER_BOUND__NO_IMPLEMENTATION_AUTHORITY_TRANSFER"
+  },
+  "change_rule": "New product expectations require an explicit registry entry with owner and standing. If an expectation changes, supersede it; do not erase the prior expectation from history."
+}

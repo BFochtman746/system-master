@@ -1,0 +1,96 @@
+{
+  "ledger_id": "REALLOCATION-LEDGER-001",
+  "effective_date": "2026-09-10",
+  "topology": "governance/SYSTEM-TOPOLOGY-002.json",
+  "rule": "Reallocation changes ownership/control taxonomy only. Historical names, commits, receipts and exact-SHA evidence remain valid in their original scope and are not rewritten.",
+  "entries": [
+    {
+      "source_label": "MASTER",
+      "source_classification": "HISTORICAL_PEER_SYSTEM_ID",
+      "new_owner": "CORE",
+      "new_path": "SYSTEM_MASTER/CORE",
+      "action": "REALLOCATE_CONTROL_IDENTITY",
+      "reason": "System Master is now the product root; historical MASTER foundation/spine work belongs to Core."
+    },
+    {
+      "source_label": "MASTER SYSTEM",
+      "source_classification": "HISTORICAL_PEER_SYSTEM_NAME",
+      "new_owner": "CORE",
+      "new_path": "SYSTEM_MASTER/CORE",
+      "action": "REALLOCATE_CONTROL_IDENTITY"
+    },
+    {
+      "source_label": "LEARNING SYSTEM",
+      "source_classification": "FIRST_CLASS_TOOL_SYSTEM",
+      "new_owner": "LEARNING",
+      "new_path": "SYSTEM_MASTER/LEARNING",
+      "action": "REPARENT_ONLY"
+    },
+    {
+      "source_label": "BOOK SYSTEM",
+      "source_classification": "FIRST_CLASS_TOOL_SYSTEM",
+      "new_owner": "BOOK",
+      "new_path": "SYSTEM_MASTER/BOOK",
+      "action": "REPARENT_ONLY"
+    },
+    {
+      "source_label": "PROSE SYSTEM",
+      "source_classification": "CHILD_TOOL_SYSTEM",
+      "new_owner": "PROSE",
+      "new_path": "SYSTEM_MASTER/BOOK/PROSE",
+      "action": "PRESERVE_PARENT_AND_ADD_ROOT_PATH"
+    },
+    {
+      "source_label": "SYSTEM-MASTER-CONTINUITY",
+      "source_classification": "A01_WORKSTREAM_OR_SUBWORKSTREAM",
+      "new_owner": "CORE",
+      "new_path": "SYSTEM_MASTER/CORE/CONTINUITY",
+      "action": "NEST_AS_SUBSYSTEM"
+    },
+    {
+      "source_label": "SYSTEM-MASTER-ASSURANCE-RECON",
+      "source_classification": "A01_WORKSTREAM_OR_EVIDENCE_FUNCTION",
+      "new_owner": "CORE",
+      "new_path": "SYSTEM_MASTER/CORE/ASSURANCE_RECONCILIATION",
+      "action": "NEST_AS_CONTROL_EVIDENCE_FUNCTION"
+    },
+    {
+      "source_label": "A-01",
+      "source_classification": "INFRASTRUCTURE",
+      "new_owner": "SYSTEM_MASTER",
+      "administrative_owner": "CORE",
+      "new_path": "SYSTEM_MASTER/SHARED_INFRASTRUCTURE/A01",
+      "action": "CLASSIFY_AS_SHARED_INFRASTRUCTURE"
+    },
+    {
+      "source_label": "BOOK-EVAL-LEMONADE-001",
+      "source_classification": "QUALIFICATION_AND_IMPLEMENTATION_LANE",
+      "new_owner": "PROSE",
+      "new_path": "SYSTEM_MASTER/BOOK/PROSE/BOOK_EVALUATOR",
+      "action": "NEST_AS_PROSE_CAPABILITY_LANE"
+    },
+    {
+      "source_label": "LITERARY PROSE ENGINE",
+      "source_classification": "IMPLEMENTATION_FAMILY",
+      "new_owner": "PROSE",
+      "new_path": "SYSTEM_MASTER/BOOK/PROSE/IMPLEMENTATION",
+      "action": "PRESERVE_AS_IMPLEMENTATION_ALIAS"
+    },
+    {
+      "source_label": "SECOND SHIFT / NIGHT SHIFT",
+      "source_classification": "SCHEDULED_EXECUTION_SURFACE",
+      "new_owner": "SYSTEM_MASTER",
+      "new_path": "SYSTEM_MASTER/SHARED_INFRASTRUCTURE/SECOND_SHIFT",
+      "action": "CLASSIFY_AS_SHARED_EXECUTION_INFRASTRUCTURE"
+    }
+  ],
+  "p8_reconciliation": {
+    "date": "2026-09-10",
+    "source_phases": ["P1", "P2", "P3", "P4", "P5", "P6", "P7"],
+    "new_reallocation_entries_required": 0,
+    "result": "NO_NEW_OWNER_REALLOCATION_SUPPORTED_BY_CENSUS_EVIDENCE",
+    "boundary": "P6/P7 unresolved headless modules, AI Income, Living Portfolio, Response Expectation Engine and Household Ledger remain owner-selection/evidence-review obligations. They are not reallocated by inference."
+  },
+  "unallocated_rule": "A new or historical workstream not listed in the topology owner maps must be classified UNALLOCATED and may be inspected but not executed, promoted, scheduled or used to redefine architecture until an owning lane is explicitly assigned.",
+  "future_rule": "Add new reallocations as successor ledger entries or a new ledger version; do not silently reinterpret an old label."
+}
