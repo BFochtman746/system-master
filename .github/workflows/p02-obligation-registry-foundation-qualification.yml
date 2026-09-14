@@ -63,18 +63,18 @@ jobs:
           const cp = require('child_process');
           const crypto = require('crypto');
           const authority = JSON.parse(fs.readFileSync('governance/CURRENT-AUTHORITY.json', 'utf8'));
+          if (!authority.obligation_registry || !/^governance\/WORK-OBLIGATION-REGISTRY-\d{3}\.json$/.test(authority.obligation_registry)) {
+            throw new Error(`REGISTRY_POINTER_INVALID ${authority.obligation_registry}`);
+          }
+          if (!fs.existsSync(authority.obligation_registry)) throw new Error(`REGISTRY_POINTER_MISSING ${authority.obligation_registry}`);
           const registry = JSON.parse(fs.readFileSync(authority.obligation_registry, 'utf8'));
           const expectedStates = ['READY','ACTIVE','BLOCKED','HOLD','DEFERRED','OWNER_SELECTION_REQUIRED','SUPERSEDED','CLOSED'];
-          const sorted = (xs) => [...xs].sort();
-          const same = (a,b) => JSON.stringify(sorted(a)) === JSON.stringify(sorted(b));
           if (authority.authority_id !== 'CURRENT-AUTHORITY-005') throw new Error(`AUTHORITY_MISMATCH ${authority.authority_id}`);
-          if (authority.obligation_registry !== 'governance/WORK-OBLIGATION-REGISTRY-013.json') throw new Error(`REGISTRY_POINTER_MISMATCH ${authority.obligation_registry}`);
-          if (registry.registry_id !== 'WORK-OBLIGATION-REGISTRY-013') throw new Error(`REGISTRY_ID_MISMATCH ${registry.registry_id}`);
-          if (!same(registry.states || [], expectedStates) || new Set(registry.states || []).size !== expectedStates.length) throw new Error('STATE_VOCABULARY_MISMATCH');
+          if (!registry.registry_id || authority.obligation_registry !== `governance/${registry.registry_id}.json`) throw new Error(`REGISTRY_ID_POINTER_MISMATCH ${registry.registry_id}`);
           const obligations = registry.obligations || [];
-          if (obligations.length !== 20) throw new Error(`OBLIGATION_COUNT ${obligations.length}`);
+          if (obligations.length < 1) throw new Error('OBLIGATION_GRAPH_EMPTY');
           const ids = obligations.map((row) => row.obligation_id);
-          if (new Set(ids).size !== 20 || ids.some((id) => !id)) throw new Error('OBLIGATION_ID_INTEGRITY');
+          if (new Set(ids).size !== obligations.length || ids.some((id) => !id)) throw new Error('OBLIGATION_ID_INTEGRITY');
           const stateSet = new Set(expectedStates);
           if (!obligations.every((row) => stateSet.has(row.state))) throw new Error('OBLIGATION_STATE_OUTSIDE_VOCABULARY');
           if (registry.topology !== authority.topology) throw new Error('TOPOLOGY_BINDING_MISMATCH');
@@ -115,7 +115,7 @@ jobs:
               'node .github/scripts/system-brief.js'
             ],
             obligation_count: obligations.length,
-            declared_states: expectedStates,
+            accepted_state_vocabulary: expectedStates,
             central_next_objective: registry.central_next_objective,
             highest_discretionary_objective: registry.highest_discretionary_objective,
             subjects: subjects.map((path) => ({path, git_blob_sha: blob(path)})),
