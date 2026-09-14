@@ -1,0 +1,40 @@
+name: P0 clean merged main verify
+
+on:
+  push:
+    branches:
+      - proof/p0-clean-main-verify-20260914
+
+permissions:
+  contents: read
+
+jobs:
+  verify-clean-main:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      REPO: BFochtman746/system-master
+      TARGET_SHA: 3dd5b0125bab3a519682aa8fad9e9bfd4959e849
+    steps:
+      - name: Set up required JDK 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Verify exact clean main
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --no-tags "https://github.com/${REPO}.git" clean-main
+          cd clean-main
+          git checkout --detach "$TARGET_SHA"
+          test "$(git rev-parse HEAD)" = "$TARGET_SHA"
+          git clean -fdx
+          test -z "$(git status --porcelain)"
+          test "$(git branch -r --contains "$TARGET_SHA" | grep -c 'origin/main')" -ge 1
+          env -u GITHUB_WORKSPACE -u GITHUB_ACTIONS -u GITHUB_SHA -u RUNNER_TEMP -u A01_SUBJECT_SHA bash ./verify.sh | tee /tmp/clean-main-verify.log
+          grep -F "SUMMARY  pass=22  fail=0  skip=2" /tmp/clean-main-verify.log
+          grep -F "RESULT: PASS" /tmp/clean-main-verify.log
+          echo "CLEAN_MAIN_SHA=$TARGET_SHA"
+          echo "PROOF_CLEAN_MAIN=GREEN"
