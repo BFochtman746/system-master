@@ -1,0 +1,56 @@
+{
+  "migration_id": "BOOK-WRITING-PROSE-MIGRATION-001",
+  "effective_date": "2026-09-14",
+  "standing": "AUTHORITY_AND_NAMESPACE_MIGRATION_CLOSED__EXECUTABLE_PROVIDER_BINDING_REMAINS_OPEN",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "current_authority_id": "CURRENT-AUTHORITY-005",
+  "topology_id": "SYSTEM-TOPOLOGY-007",
+  "book_control_record": "qualification/book-system/BOOK-SYSTEM-CONTROL-RECORD-015.json",
+  "component_architecture": "qualification/book-system/BOOK-COMPONENT-ARCHITECTURE-001.json",
+  "target_component": "BOOK-COMP-07",
+  "prose_system_standing": "COMPLETE_RETIRED_TERMINAL",
+  "purpose": "Resolve the remaining Writing/Prose runtime identity seam without reopening PROSE, rewriting historical evidence, transferring historical PASS to changed bytes, or inventing an executable provider binding that has not been proven on current main.",
+  "migration_rules": [
+    "PROSE is not an active system, component, owner path, execution lane, repair lane, qualification lane, research task, telemetry lane or successor domain.",
+    "Completed historical prose capability is consumed only as provenance/evidence for Book-owned Writing and evaluation capability under BOOK-COMP-07.",
+    "Legacy PROSE capability names are migration metadata only and are never dispatchable aliases.",
+    "Runtime requests using PROSE.* fail closed and identify a canonical BOOK.WRITING.* replacement only when an explicit one-to-one mapping exists.",
+    "Changed Book routing/integration bytes require fresh Book-owned qualification; historical Prose PASS does not transfer.",
+    "BOOK-COMP-02 remains the sole logical canonical Book writer; BOOK-COMP-07 may produce findings and candidates only."
+  ],
+  "capability_mappings": [
+    {"legacy_id":"PROSE.ANALYZE_PASSAGE","canonical_id":"BOOK.WRITING.ANALYZE_PASSAGE","canonical_owner":"SYSTEM_MASTER/BOOK","book_component_id":"BOOK-COMP-07","legacy_dispatchable":false},
+    {"legacy_id":"PROSE.GENERATE_REVISION_CANDIDATE","canonical_id":"BOOK.WRITING.GENERATE_REVISION_CANDIDATE","canonical_owner":"SYSTEM_MASTER/BOOK","book_component_id":"BOOK-COMP-07","legacy_dispatchable":false},
+    {"legacy_id":"PROSE.ASSESS_VOICE","canonical_id":"BOOK.WRITING.ASSESS_VOICE","canonical_owner":"SYSTEM_MASTER/BOOK","book_component_id":"BOOK-COMP-07","legacy_dispatchable":false},
+    {"legacy_id":"PROSE.ASSESS_HOMOGENIZATION","canonical_id":"BOOK.WRITING.ASSESS_HOMOGENIZATION","canonical_owner":"SYSTEM_MASTER/BOOK","book_component_id":"BOOK-COMP-07","legacy_dispatchable":false}
+  ],
+  "active_routing_contract": "qualification/book-system/routing/BOOK-CAPABILITY-ROUTING-INTERFACE-002.json",
+  "provider_binding_truth": {
+    "writing_provider_binding_proven_current": false,
+    "evaluation_provider_binding_proven_current": false,
+    "research_knowledge_provider_binding_proven_current": false,
+    "rule": "The routing registry declares current semantic ownership and capability identity only. A capability stays non-callable until exact current service/operation bytes and qualification evidence are bound."
+  },
+  "historical_lineage": {
+    "preserve_exact_history": true,
+    "historical_names_may_remain_in_immutable_evidence": true,
+    "historical_pass_transfer": false,
+    "historical_prose_artifacts_are_dispatch_authority": false
+  },
+  "global_authority_effect": {
+    "current_authority_changed": false,
+    "topology_changed": false,
+    "peer_ownership_changed": false,
+    "prose_resurrected": false,
+    "reason": "This is a Book-local migration repair beneath the already-authorized BOOK peer and BOOK-COMP-07 component boundary."
+  },
+  "acceptance": {
+    "active_registry_contains_prose_ids": false,
+    "active_registry_contains_prose_owner": false,
+    "legacy_prose_requests_dispatch": false,
+    "canonical_book_writing_ids_present": true,
+    "sole_canonical_writer_capability": "BOOK.CANONICAL_MANUSCRIPT_ADMISSION",
+    "sole_canonical_writer_component": "BOOK-COMP-02",
+    "fresh_direct_test_required": true
+  }
+}
