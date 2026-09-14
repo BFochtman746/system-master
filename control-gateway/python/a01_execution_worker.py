@@ -3,8 +3,9 @@
 
 The scheduler remains the sole claim authority. This worker consumes only claims already
 materialized in the supervisor dispatch outbox, keeps their leases alive under the exact
-fence, persists idempotent execution results, terminalizes the claim, runs recovery, and
-returns control to the scheduler for the next dependency-valid continuation.
+fence, persists idempotent execution results, terminalizes the claim, performs fenced
+crash recovery for locally executable dispatches, and returns control to the scheduler
+for the next dependency-valid continuation.
 """
 
 from __future__ import annotations
@@ -84,6 +85,16 @@ def _digest(value: Any) -> str:
 
 
 class A01ExecutionWorker:
+    """Consume authorized dispatches and execute them under durable lease/fence state.
+
+    Executor functions are required to be idempotent for the supplied idempotency_key.
+    The built-in A-01 qualification executor satisfies this by executing only the
+    registered, no-post-action overnight qualification path. Recovery never invents a
+    new claim or admission identity: it rotates fencing authority on the existing
+    lease/dispatch identity so an old worker is rejected while the same durable work
+    can resume.
+    """
+
     def __init__(
         self,
         store: SupervisorStore,
@@ -164,13 +175,15 @@ class A01ExecutionWorker:
             raise ExecutionWorkerError("unknown dispatch id")
         bundle = dict(row)
         bundle["payload_envelope"] = json.loads(bundle["payload_json"])
+        # Fencing generation is deliberately not part of work identity. Recovery
+        # rotates the fence while preserving the same admitted dispatch/idempotency
+        # identity, so the durable result must remain addressable across that rotation.
         bundle["input_digest"] = _digest(
             {
                 "dispatch_id": bundle["dispatch_id"],
                 "lease_id": bundle["lease_id"],
                 "lane": bundle["lane"],
                 "idempotency_key": bundle["idempotency_key"],
-                "fencing_token": int(bundle["fencing_token"]),
                 "executor_kind": bundle["executor_kind"],
                 "payload": bundle["payload_envelope"],
             }
@@ -192,12 +205,6 @@ class A01ExecutionWorker:
         lease_seconds: Optional[int] = None,
         now: Optional[dt.datetime] = None,
     ) -> str:
-        """Extend a live lease under the exact current fencing token.
-
-        Renewal is intentionally stronger than heartbeat: it advances expires_at as well
-        as heartbeat_at. _assert_live_worker prevents an expired or superseded worker
-        from resurrecting its authority.
-        """
         now = now or self.clock()
         ttl = self.lease_seconds if lease_seconds is None else lease_seconds
         if ttl < 30 or ttl > 3600:
@@ -226,8 +233,111 @@ class A01ExecutionWorker:
             )
         return iso(expires)
 
+    def _recoverable(self, claim: Any, outbox: Any, result: Optional[Any], now: dt.datetime) -> tuple[bool, str]:
+        expired = parse_iso(claim["expires_at"]) <= now
+        heartbeat_stale = (now - parse_iso(claim["heartbeat_at"])).total_seconds() > self.heartbeat_sla_seconds
+        if not expired and not heartbeat_stale:
+            return False, ""
+        if outbox["executor_kind"] not in self.executors:
+            return False, ""
+        if outbox["state"] not in ("PENDING", "DISPATCHED"):
+            return False, ""
+        expected_local_run = f"local:{outbox['dispatch_id']}"
+        if outbox["external_run_id"] not in (None, expected_local_run):
+            return False, ""
+        if result is not None and result["state"] in FINAL_RESULT_STATES:
+            return False, ""
+        return True, "LEASE_EXPIRED" if expired else "HEARTBEAT_STALE"
+
+    def _recover_local_claims(self, now: dt.datetime) -> list[dict[str, Any]]:
+        resumed: list[dict[str, Any]] = []
+        with self.store.tx() as c:
+            rows = c.execute(
+                """
+                SELECT c.*, o.state AS outbox_state, o.executor_kind, o.external_run_id,
+                       o.fencing_token AS outbox_fencing_token,
+                       r.state AS result_state, r.input_digest AS result_input_digest
+                FROM claims c
+                JOIN dispatch_outbox o ON o.lease_id=c.lease_id
+                LEFT JOIN night_execution_results r ON r.dispatch_id=o.dispatch_id
+                WHERE c.released_at IS NULL
+                ORDER BY c.claimed_at,c.lease_id
+                """
+            ).fetchall()
+            for row in rows:
+                outbox = {
+                    "dispatch_id": row["dispatch_id"],
+                    "state": row["outbox_state"],
+                    "executor_kind": row["executor_kind"],
+                    "external_run_id": row["external_run_id"],
+                }
+                result = None if row["result_state"] is None else {"state": row["result_state"]}
+                recoverable, reason = self._recoverable(row, outbox, result, now)
+                if not recoverable:
+                    continue
+                lane = self.store._lane(c, row["lane"])
+                active = self.store._active_claim(c, row["lane"])
+                if active is None or active["lease_id"] != row["lease_id"]:
+                    continue
+                new_fence = int(lane["fencing_counter"]) + 1
+                expires = now + dt.timedelta(seconds=self.lease_seconds)
+                c.execute(
+                    "UPDATE lanes SET fencing_counter=?,state='CLAIMED',current_delegation_id=?,updated_at=? WHERE lane=?",
+                    (new_fence, row["delegation_id"], iso(now), row["lane"]),
+                )
+                c.execute(
+                    """
+                    UPDATE claims
+                    SET fencing_token=?,expires_at=?,heartbeat_at=?,status='RECOVERED',
+                        checkpoint_pointer=COALESCE(checkpoint_pointer,?),terminal_reason=NULL
+                    WHERE lease_id=? AND released_at IS NULL
+                    """,
+                    (new_fence, iso(expires), iso(now), f"execution:{row['dispatch_id']}:recovered", row["lease_id"]),
+                )
+                c.execute(
+                    "UPDATE dispatch_outbox SET fencing_token=?,updated_at=? WHERE dispatch_id=?",
+                    (new_fence, iso(now), row["dispatch_id"]),
+                )
+                c.execute(
+                    "UPDATE night_execution_results SET fencing_token=?,updated_at=? WHERE dispatch_id=? AND state IN ('RUNNING','RESULT_READY')",
+                    (new_fence, iso(now), row["dispatch_id"]),
+                )
+                self.store._event(
+                    c,
+                    row["lane"],
+                    "LEASE_RECOVERED",
+                    now,
+                    delegation_id=row["delegation_id"],
+                    objective_id=row["objective_id"],
+                    lease_id=row["lease_id"],
+                    dispatch_id=row["dispatch_id"],
+                    idempotency_key=row["idempotency_key"],
+                    fencing_token=new_fence,
+                    control_head=row["control_head"],
+                    payload={
+                        "reason": reason,
+                        "previous_fencing_token": int(row["fencing_token"]),
+                        "expires_at": iso(expires),
+                        "identity_preserved": True,
+                    },
+                )
+                resumed.append(
+                    {
+                        "lease_id": row["lease_id"],
+                        "dispatch_id": row["dispatch_id"],
+                        "idempotency_key": row["idempotency_key"],
+                        "previous_fencing_token": int(row["fencing_token"]),
+                        "fencing_token": new_fence,
+                        "reason": reason,
+                    }
+                )
+        return resumed
+
     def recover(self, now: Optional[dt.datetime] = None) -> dict[str, Any]:
         now = now or self.clock()
+        resumed = self._recover_local_claims(now)
+        # Anything not safely resumable by this local worker keeps the supervisor's
+        # fail-closed recovery semantics and is terminally fenced stale.
         recovered = self.store.recover(now=now, heartbeat_sla_seconds=self.heartbeat_sla_seconds)
         stale = set(recovered["stale_leases"])
         if stale:
@@ -243,14 +353,21 @@ class A01ExecutionWorker:
                     (iso(now), iso(now), *sorted(stale)),
                 )
         self.scheduler.reconcile(now=now)
-        return recovered
+        return {**recovered, "resumed_leases": resumed}
 
     def _ensure_execution_record(self, bundle: dict[str, Any], now: dt.datetime) -> dict[str, Any]:
         existing = self._result_row(bundle["dispatch_id"])
         if existing is not None:
             if existing["input_digest"] != bundle["input_digest"]:
                 raise Conflict("dispatch result identity collision")
-            return existing
+            if int(existing["fencing_token"]) != int(bundle["fencing_token"]):
+                with self.store.tx() as c:
+                    c.execute(
+                        "UPDATE night_execution_results SET fencing_token=?,updated_at=? WHERE dispatch_id=? AND state IN ('RUNNING','RESULT_READY')",
+                        (int(bundle["fencing_token"]), iso(now), bundle["dispatch_id"]),
+                    )
+                existing = self._result_row(bundle["dispatch_id"])
+            return existing or {}
         with self.store.tx() as c:
             c.execute(
                 """
@@ -292,6 +409,7 @@ class A01ExecutionWorker:
             "dispatch_id": bundle["dispatch_id"],
             "executor_kind": bundle["executor_kind"],
             "input_digest": bundle["input_digest"],
+            "idempotency_key": bundle["idempotency_key"],
             "result": result,
         }
         if error is not None:
@@ -545,6 +663,8 @@ class A01ExecutionWorker:
                 "A01_SUBJECT_ROOT": str(self.root),
                 "A01_EVIDENCE_DIR": str(evidence_dir),
                 "A01_ARTIFACT_NAME": f"{qualification_id}-{context.dispatch_id}-evidence",
+                "A01_IDEMPOTENCY_KEY": context.idempotency_key,
+                "A01_DISPATCH_ID": context.dispatch_id,
             }
         )
         script = self.root / ".github" / "scripts" / "a01-control-plane.js"
