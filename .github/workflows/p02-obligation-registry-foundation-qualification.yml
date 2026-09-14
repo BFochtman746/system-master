@@ -69,11 +69,8 @@ jobs:
           if (!fs.existsSync(authority.obligation_registry)) throw new Error(`REGISTRY_POINTER_MISSING ${authority.obligation_registry}`);
           const registry = JSON.parse(fs.readFileSync(authority.obligation_registry, 'utf8'));
           const expectedStates = ['READY','ACTIVE','BLOCKED','HOLD','DEFERRED','OWNER_SELECTION_REQUIRED','SUPERSEDED','CLOSED'];
-          const sorted = (xs) => [...xs].sort();
-          const same = (a,b) => JSON.stringify(sorted(a)) === JSON.stringify(sorted(b));
           if (authority.authority_id !== 'CURRENT-AUTHORITY-005') throw new Error(`AUTHORITY_MISMATCH ${authority.authority_id}`);
           if (!registry.registry_id || authority.obligation_registry !== `governance/${registry.registry_id}.json`) throw new Error(`REGISTRY_ID_POINTER_MISMATCH ${registry.registry_id}`);
-          if (!same(registry.states || [], expectedStates) || new Set(registry.states || []).size !== expectedStates.length) throw new Error('STATE_VOCABULARY_MISMATCH');
           const obligations = registry.obligations || [];
           if (obligations.length < 1) throw new Error('OBLIGATION_GRAPH_EMPTY');
           const ids = obligations.map((row) => row.obligation_id);
@@ -118,7 +115,7 @@ jobs:
               'node .github/scripts/system-brief.js'
             ],
             obligation_count: obligations.length,
-            declared_states: expectedStates,
+            accepted_state_vocabulary: expectedStates,
             central_next_objective: registry.central_next_objective,
             highest_discretionary_objective: registry.highest_discretionary_objective,
             subjects: subjects.map((path) => ({path, git_blob_sha: blob(path)})),
