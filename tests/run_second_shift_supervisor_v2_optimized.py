@@ -175,18 +175,14 @@ def install_idempotent_dispatch_retry_test(module):
 
 
 def main() -> int:
-    original_audit = SupervisorStore.audit_invariants
-    SupervisorStore.audit_invariants = quick_logical_audit
+    # The production class is no longer monkey-patched and the committed tests are
+    # no longer rewritten at runtime. The corrections that used to live in this
+    # shim now live in tools/second_shift_supervisor_v2.py and
+    # tests/test_second_shift_supervisor_v2.py, so the evidence this run produces
+    # describes the code that actually ships.
     module = load_test_module()
-    original_randomized = install_indexed_randomized_stress(module)
-    original_dispatch_retry = install_idempotent_dispatch_retry_test(module)
-    try:
-        suite = unittest.defaultTestLoader.loadTestsFromTestCase(module.SupervisorV2Tests)
-        result = unittest.TextTestRunner(verbosity=2).run(suite)
-    finally:
-        module.SupervisorV2Tests.test_dispatch_retry_then_circuit = original_dispatch_retry
-        module.SupervisorV2Tests.test_randomized_20000_transition_invariant_stress = original_randomized
-        SupervisorStore.audit_invariants = original_audit
+    suite = unittest.defaultTestLoader.loadTestsFromTestCase(module.SupervisorV2Tests)
+    result = unittest.TextTestRunner(verbosity=2).run(suite)
 
     report = {
         "suite": "SECOND_SHIFT_SUPERVISOR_V2_CRASH_CONCURRENCY_STRESS_OPTIMIZED",
