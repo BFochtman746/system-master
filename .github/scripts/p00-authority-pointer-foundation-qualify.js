@@ -41,6 +41,21 @@ function blob(rel) { return git('rev-parse', `HEAD:${rel}`); }
 function sorted(values) { return [...values].sort(); }
 function sameSet(a, b) { return JSON.stringify(sorted(a)) === JSON.stringify(sorted(b)); }
 function sha256File(file) { return crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex'); }
+function runAcceptanceTarget(rel, logFile) {
+  let output;
+  try {
+    output = execFileSync(process.execPath, [abs(rel)], {
+      cwd: ROOT,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'pipe']
+    });
+  } catch (error) {
+    const stderr = String(error.stderr || '').trim().replace(/\s+/g, ' ').slice(0, 500);
+    fail('P00_ACCEPTANCE_TARGET_FAILED', `${rel}${stderr ? `:${stderr}` : ''}`);
+  }
+  assert(output.trim().length > 0, 'P00_ACCEPTANCE_LOG_EMPTY', rel);
+  fs.writeFileSync(logFile, output.endsWith('\n') ? output : `${output}\n`, 'utf8');
+}
 
 function main() {
   const authority = readJson(PATHS.authority);
@@ -124,7 +139,8 @@ function main() {
     validate_governance_sha256: '/tmp/p00-validate-governance.log',
     system_brief_sha256: '/tmp/p00-system-brief.log'
   };
-  for (const file of Object.values(logFiles)) assert(fs.existsSync(file), 'P00_ACCEPTANCE_LOG_ABSENT', file);
+  runAcceptanceTarget(PATHS.validateGovernance, logFiles.validate_governance_sha256);
+  runAcceptanceTarget(PATHS.systemBrief, logFiles.system_brief_sha256);
 
   const result = {
     evidence_schema: '2.0',
@@ -148,6 +164,7 @@ function main() {
       programming_owns_website_building_c40: 'PASS',
       prose_terminal_retirement: 'PASS',
       p00_contract_current_bindings: 'PASS',
+      acceptance_targets_self_contained: 'PASS',
       historical_receipt_relabeling: false
     }
   };
