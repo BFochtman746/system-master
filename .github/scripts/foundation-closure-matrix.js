@@ -3,14 +3,16 @@
 /**
  * Foundation Closure Census 001 projection generator.
  *
- * Current projection authority is resolved only through CURRENT-AUTHORITY-005:
- *   - SYSTEM-TOPOLOGY-007
- *   - SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006
- *   - SYSTEM-MASTER-CAPABILITY-CROSSWALK-003
+ * Current inventory authority is resolved only through the live selector chain:
+ *   CURRENT-AUTHORITY.json -> capability_crosswalk
  *
- * Historical census phases remain provenance. A populated contract is
- * specification, not completion evidence. COMPLETE_WITH_EVIDENCE requires a
- * current-authority PASS receipt whose exact subject Git blobs still match.
+ * The authority-selected topology and owner allocation are consistency inputs,
+ * not capability-inventory sources. Historical census phases (including P6
+ * product/module allocation evidence) remain provenance only and can never add,
+ * remove, or define rows in the current matrix.
+ *
+ * COMPLETE_WITH_EVIDENCE requires a current-authority PASS receipt whose exact
+ * subject Git blobs still match.
  */
 
 const fs = require('fs');
@@ -74,6 +76,9 @@ function exists(rel) { return fs.existsSync(abs(rel)); }
 function readJson(rel) { return JSON.parse(fs.readFileSync(abs(rel), 'utf8')); }
 function contractPath(key) { return `${CONTRACT_DIR}/${key}-FOUNDATION-CONTRACT-001.md`; }
 function numericId(id) { return Number(String(id).slice(1)); }
+function isOutDisposition(disposition) {
+  return String(disposition || '').startsWith('EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY');
+}
 
 function gitBlobSha(rel) {
   const bytes = fs.readFileSync(abs(rel));
@@ -104,6 +109,113 @@ function readContract(key) {
     path: rel,
     populated,
     missing: CONTRACT_SECTIONS.map(([name]) => name).filter((name) => !populated.has(name))
+  };
+}
+
+function requireUnique(entries, idField, label) {
+  const seen = new Set();
+  for (const entry of entries) {
+    const id = entry?.[idField];
+    if (!id) throw new Error(`current crosswalk ${label} entry missing ${idField}`);
+    if (seen.has(id)) throw new Error(`duplicate current crosswalk ${label} id: ${id}`);
+    seen.add(id);
+  }
+}
+
+function validateInventory(inputs) {
+  const capabilities = inputs.crosswalk.capability_entries;
+  const platforms = inputs.crosswalk.platform_requirements;
+  if (!Array.isArray(capabilities)) throw new Error('current crosswalk capability_entries must be an array');
+  if (!Array.isArray(platforms)) throw new Error('current crosswalk platform_requirements must be an array');
+
+  requireUnique(capabilities, 'capability_id', 'capability');
+  requireUnique(platforms, 'platform_id', 'platform');
+
+  const capabilityIds = new Set(capabilities.map((entry) => entry.capability_id));
+  for (const entry of platforms) {
+    if (capabilityIds.has(entry.platform_id)) {
+      throw new Error(`current crosswalk id collision: ${entry.platform_id}`);
+    }
+  }
+
+  if (inputs.crosswalk.allocation && inputs.crosswalk.allocation !== inputs.allocationRel) {
+    throw new Error(`crosswalk/allocation pointer mismatch: crosswalk=${inputs.crosswalk.allocation} authority=${inputs.allocationRel}`);
+  }
+  if (inputs.allocation.topology && inputs.allocation.topology !== inputs.topologyRel) {
+    throw new Error(`allocation/topology pointer mismatch: allocation=${inputs.allocation.topology} authority=${inputs.topologyRel}`);
+  }
+
+  const byModule = new Map();
+  for (const entry of capabilities) {
+    const disposition = entry.disposition || '';
+    if (disposition === 'RESERVED_UNALLOCATED') {
+      if (entry.module_key || entry.owner_path) {
+        throw new Error(`reserved capability must not carry module/owner authority: ${entry.capability_id}`);
+      }
+      continue;
+    }
+    if (!entry.module_key) throw new Error(`current capability missing module_key: ${entry.capability_id}`);
+    if (byModule.has(entry.module_key)) throw new Error(`duplicate current crosswalk module_key: ${entry.module_key}`);
+    byModule.set(entry.module_key, entry);
+    if (!isOutDisposition(disposition) && !entry.owner_path) {
+      throw new Error(`owned current capability missing owner_path: ${entry.capability_id}`);
+    }
+  }
+
+  const allocationOwners = new Map();
+  for (const row of inputs.allocation.module_ownership || []) {
+    if (!row.module_key || !row.owner_path) throw new Error('current allocation module_ownership row missing module_key/owner_path');
+    if (allocationOwners.has(row.module_key)) throw new Error(`duplicate current allocation module ownership: ${row.module_key}`);
+    allocationOwners.set(row.module_key, row.owner_path);
+  }
+
+  const allocationDeferred = new Map();
+  for (const row of inputs.allocation.explicitly_deferred_modules || []) {
+    if (!row.module_key || !row.disposition) throw new Error('current allocation deferred row missing module_key/disposition');
+    if (allocationDeferred.has(row.module_key)) throw new Error(`duplicate current allocation deferred module: ${row.module_key}`);
+    allocationDeferred.set(row.module_key, row.disposition);
+  }
+
+  // Crosswalk is the inventory authority. Allocation is only a consistency guard.
+  // A newly allocated/deferred architecture module that is absent from the current
+  // crosswalk must fail generation rather than silently disappear from closure math.
+  for (const [moduleKey, ownerPath] of allocationOwners) {
+    const entry = byModule.get(moduleKey);
+    if (!entry) throw new Error(`current allocation module absent from authority-selected crosswalk: ${moduleKey}`);
+    if (isOutDisposition(entry.disposition) || entry.disposition === 'RESERVED_UNALLOCATED') {
+      throw new Error(`current allocation owns module crosswalk marks non-owned: ${moduleKey}`);
+    }
+    if (entry.owner_path !== ownerPath) {
+      throw new Error(`current owner mismatch for ${moduleKey}: crosswalk=${entry.owner_path || 'UNSET'} allocation=${ownerPath}`);
+    }
+  }
+  for (const [moduleKey, disposition] of allocationDeferred) {
+    const entry = byModule.get(moduleKey);
+    if (!entry) throw new Error(`current deferred module absent from authority-selected crosswalk: ${moduleKey}`);
+    if (entry.disposition !== disposition) {
+      throw new Error(`current deferred disposition mismatch for ${moduleKey}: crosswalk=${entry.disposition || 'UNSET'} allocation=${disposition}`);
+    }
+  }
+  for (const entry of capabilities) {
+    if (!entry.module_key || entry.disposition === 'RESERVED_UNALLOCATED') continue;
+    if (isOutDisposition(entry.disposition)) {
+      if (!allocationDeferred.has(entry.module_key)) {
+        throw new Error(`crosswalk deferred capability missing from current allocation deferred set: ${entry.capability_id}/${entry.module_key}`);
+      }
+    } else if (!allocationOwners.has(entry.module_key)) {
+      throw new Error(`crosswalk owned capability missing from current allocation ownership set: ${entry.capability_id}/${entry.module_key}`);
+    }
+  }
+
+  return {
+    source: inputs.crosswalkRel,
+    capability_ids: capabilities.map((entry) => entry.capability_id),
+    platform_ids: platforms.map((entry) => entry.platform_id),
+    capability_count: capabilities.length,
+    platform_count: platforms.length,
+    allocation_owned_modules_validated: allocationOwners.size,
+    allocation_deferred_modules_validated: allocationDeferred.size,
+    historical_inventory_fallback: false
   };
 }
 
@@ -141,7 +253,9 @@ function authorityInputs() {
   if (evidence.authority_id !== authority.authority_id) {
     throw new Error(`evidence registry authority mismatch: ${evidence.authority_id}`);
   }
-  return { authority, census, topology, allocation, crosswalk, evidence, topologyRel, allocationRel, crosswalkRel };
+  const inputs = { authority, census, topology, allocation, crosswalk, evidence, topologyRel, allocationRel, crosswalkRel };
+  inputs.inventory = validateInventory(inputs);
+  return inputs;
 }
 
 function evidenceMap(inputs) {
@@ -212,15 +326,15 @@ function completeOrGap({ id, key, owner, authoritySource, contract, receipt, rec
 }
 
 function capabilityRows(inputs, receipts) {
-  const source = `${inputs.crosswalkRel}; ${inputs.allocationRel}; ${AUTHORITY}`;
-  return (inputs.crosswalk.capability_entries || []).map((entry) => {
+  const source = `${AUTHORITY} -> ${inputs.crosswalkRel}; owner consistency validated by ${inputs.allocationRel}`;
+  return inputs.crosswalk.capability_entries.map((entry) => {
     const id = entry.capability_id;
     const key = entry.module_key || id;
     const disposition = entry.disposition || '';
-    if (disposition.startsWith('EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY') || disposition === 'RESERVED_UNALLOCATED') {
+    if (isOutDisposition(disposition) || disposition === 'RESERVED_UNALLOCATED') {
       const reason = disposition === 'RESERVED_UNALLOCATED'
-        ? 'Reserved unallocated capability identifier by canonical crosswalk authority.'
-        : `Explicitly out of scope by canonical crosswalk/owner-allocation authority (${disposition}).`;
+        ? 'Reserved unallocated capability identifier by current authority-selected crosswalk.'
+        : `Explicitly out of scope by current authority-selected crosswalk (${disposition}).`;
       return {
         requirement_or_capability_id: id,
         module_key: key,
@@ -230,7 +344,7 @@ function capabilityRows(inputs, receipts) {
         current_state: STATE.OUT,
         gap_or_blocker: reason,
         successor: UNPOPULATED,
-        evidence_pointer: `${inputs.crosswalkRel}; ${inputs.allocationRel}`,
+        evidence_pointer: inputs.crosswalkRel,
         _missing_required: []
       };
     }
@@ -244,8 +358,8 @@ function capabilityRows(inputs, receipts) {
 }
 
 function platformRows(inputs, receipts) {
-  const source = `${inputs.crosswalkRel}; ${AUTHORITY}`;
-  return (inputs.crosswalk.platform_requirements || []).map((entry) => {
+  const source = `${AUTHORITY} -> ${inputs.crosswalkRel}`;
+  return inputs.crosswalk.platform_requirements.map((entry) => {
     const id = entry.platform_id;
     if (entry.disposition === 'ABSORBED') {
       return {
@@ -255,7 +369,7 @@ function platformRows(inputs, receipts) {
         authority_source: source,
         ...Object.fromEntries(CONTRACT_SECTIONS.map(([name]) => [name, UNPOPULATED])),
         current_state: STATE.OUT,
-        gap_or_blocker: `Absorbed into ${entry.absorbed_into} by canonical crosswalk authority.`,
+        gap_or_blocker: `Absorbed into ${entry.absorbed_into} by current authority-selected crosswalk.`,
         successor: entry.absorbed_into || UNPOPULATED,
         evidence_pointer: inputs.crosswalkRel,
         _missing_required: []
@@ -303,12 +417,14 @@ function build() {
     topology_id: inputs.topology.topology_id,
     allocation_id: inputs.allocation.allocation_id,
     crosswalk_id: inputs.crosswalk.crosswalk_id,
+    inventory_source: inputs.crosswalkRel,
+    inventory_guard: inputs.inventory,
     census_id: inputs.census.census_id,
     census_status: inputs.census.status,
     required_columns: COLUMNS,
     total_rows: rows.length,
-    capability_entries: inputs.crosswalk.capability_entries.length,
-    platform_entries: inputs.crosswalk.platform_requirements.length,
+    capability_entries: inputs.inventory.capability_count,
+    platform_entries: inputs.inventory.platform_count,
     in_scope_rows: inScope,
     counts,
     completion_percent: completionPercent,
@@ -331,10 +447,12 @@ function renderMarkdown(m) {
   const lines = [];
   lines.push('# Foundation Closure Census 001 - Disposition Matrix', '');
   lines.push(`Generated ${m.generated_at} under \`${m.authority_id}\` / \`${m.topology_id}\`.`,'');
-  lines.push(`Ownership: \`${m.allocation_id}\`  `);
+  lines.push(`Inventory authority: \`${m.inventory_source}\` selected by \`${AUTHORITY}\`  `);
+  lines.push(`Ownership consistency: \`${m.allocation_id}\`  `);
   lines.push(`Crosswalk: \`${m.crosswalk_id}\`  `);
   lines.push(`Evidence registry: \`${EVIDENCE_REGISTRY}\``, '');
   lines.push(`Entries: ${m.capability_entries} capability + ${m.platform_entries} platform = ${m.total_rows} total.`, '');
+  lines.push('> Historical census/P6 module-allocation evidence is provenance only. Current rows are enumerated exclusively from the authority-selected capability crosswalk; allocation is a fail-closed ownership/deferred consistency check.', '');
   lines.push('> Populated contract prose is specification, not acceptance evidence. COMPLETE_WITH_EVIDENCE requires a current-authority PASS receipt whose exact subject blobs still match.', '');
   lines.push('## Disposition summary', '');
   lines.push('| State | Rows |', '| --- | ---: |');
@@ -357,7 +475,7 @@ function renderMarkdown(m) {
   lines.push('', '## Exact next ACTIVE_GAP', '');
   lines.push(m.exact_next_active_gap ? `\`${m.exact_next_active_gap}\`` : '`NONE`', '');
   lines.push('## Machine-readable required columns', '');
-  lines.push('The `--json` form contains all required row fields, including authority boundary, exact evidence pointer, and successor.', '');
+  lines.push('The `--json` form contains all required row fields, including authority boundary, exact evidence pointer, successor, and the current-inventory guard.', '');
   return lines.join('\n');
 }
 
@@ -367,6 +485,9 @@ function main() {
     const matrix = build();
     if (args.includes('--summary')) {
       process.stdout.write(`${JSON.stringify({
+        authority_id: matrix.authority_id,
+        inventory_source: matrix.inventory_source,
+        inventory_guard: matrix.inventory_guard,
         counts: matrix.counts,
         completion_percent: matrix.completion_percent,
         total_rows: matrix.total_rows,
