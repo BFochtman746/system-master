@@ -4,158 +4,146 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import org.systemmaster.learning.binding.LearningGoalInboundHandlers.CommandEnvelope;
-import org.systemmaster.learning.binding.LearningGoalInboundHandlers.HandlerContractException;
-import org.systemmaster.learning.binding.LearningGoalInboundHandlers.HandlerFailureCode;
-import org.systemmaster.learning.binding.LearningGoalInboundHandlers.InboundCommandHandler;
+import org.systemmaster.learning.binding.InboundBindingContracts.HandlerContractException;
+import org.systemmaster.learning.binding.InboundBindingContracts.HandlerFailureCode;
+import org.systemmaster.learning.binding.InboundBindingContracts.InboundEnvelope;
+import org.systemmaster.learning.binding.InboundBindingContracts.InboundHandler;
+import org.systemmaster.learning.binding.InboundBindingContracts.RegistrationSink;
+import org.systemmaster.learning.binding.InboundBindingContracts.RouteDescriptor;
 import org.systemmaster.learning.binding.LearningGoalInboundHandlers.LearningGoalControllerPort;
-import org.systemmaster.learning.binding.LearningGoalInboundHandlers.RouteDescriptor;
 
-/**
- * Portable first-tranche qualification for I001-I004.
- *
- * <p>This proves route parity, exact owner/port enforcement, authorization denial,
- * exact payload forwarding, and non-translation of domain failures. It does not
- * claim production UoW/PostgreSQL/Master Core installation; those gates remain open.
- */
+/** Portable exact-subject qualification for the I001-I004 local binding seam. */
 public final class LearningGoalInboundHandlerQualificationTest {
     private LearningGoalInboundHandlerQualificationTest() {}
 
     public static void main(String[] args) throws Exception {
-        routeParityIsExactAndComplete();
+        routeParityAndFrozenMetadataAreExact();
         unauthorizedAndMismatchedRoutesFailClosedBeforeDelegation();
-        exactPayloadsAreForwardedWithoutFieldReinterpretation();
-        invalidPayloadFailsClosedBeforeDelegation();
+        typedSemanticPayloadIsForwardedWithoutReinterpretation();
+        wrongSemanticPayloadTypeFailsClosed();
+        requiredSemanticFieldsFailClosedAtConstruction();
         domainFailureIdentityIsPreserved();
         System.out.println("PASS LearningGoalInboundHandlerQualificationTest I001-I004");
     }
 
-    private static void routeParityIsExactAndComplete() {
+    private static void routeParityAndFrozenMetadataAreExact() {
         RecordingController controller = new RecordingController();
         RecordingSink sink = registered(controller);
         equal(4, sink.handlers.size(), "exact registration count");
-        assertRoute(sink, "I001", "CreateLearningGoal");
-        assertRoute(sink, "I002", "UpdateLearningGoal");
-        assertRoute(sink, "I003", "PauseLearningGoal");
-        assertRoute(sink, "I004", "ResumeLearningGoal");
+        assertRoute(sink, LearningGoalInboundHandlers.I001, "CreateLearningGoal");
+        assertRoute(sink, LearningGoalInboundHandlers.I002, "UpdateLearningGoal");
+        assertRoute(sink, LearningGoalInboundHandlers.I003, "PauseLearningGoal");
+        assertRoute(sink, LearningGoalInboundHandlers.I004, "ResumeLearningGoal");
+        equal(
+                java.util.List.of("client_operation_id", "title", "objective", "horizon", "priority"),
+                LearningGoalInboundHandlers.I001.semanticPayloadFields(),
+                "I001 frozen payload fields");
+        equal(
+                java.util.List.of("VersionConflict", "ValidationError"),
+                LearningGoalInboundHandlers.I002.typedFailures(),
+                "I002 typed failures");
     }
 
     private static void unauthorizedAndMismatchedRoutesFailClosedBeforeDelegation() throws Exception {
         RecordingController controller = new RecordingController();
         RecordingSink sink = registered(controller);
-        InboundCommandHandler create = sink.handlers.get("I001");
+        InboundHandler create = sink.handlers.get("I001");
+        var command = createCommand();
 
         expectHandlerFailure(
                 HandlerFailureCode.AUTHORIZATION_DENIED,
-                () -> create.handle(envelope(
-                        "I001",
-                        LearningGoalInboundHandlers.OWNER_PATH,
-                        LearningGoalInboundHandlers.PORT,
-                        false,
-                        createPayload())),
+                () -> create.handle(envelope(LearningGoalInboundHandlers.I001, false, command)),
                 "unauthorized command");
         equal(0, controller.calls, "unauthorized route must not delegate");
 
         expectHandlerFailure(
                 HandlerFailureCode.ROUTE_SCOPE_MISMATCH,
-                () -> create.handle(envelope(
+                () -> create.handle(new InboundEnvelope(
                         "I001",
+                        "CreateLearningGoal",
                         "SYSTEM_MASTER/CORE",
                         LearningGoalInboundHandlers.PORT,
+                        "principal-1",
                         true,
-                        createPayload())),
+                        command)),
                 "wrong owner");
         equal(0, controller.calls, "wrong-owner route must not delegate");
 
         expectHandlerFailure(
                 HandlerFailureCode.ROUTE_SCOPE_MISMATCH,
-                () -> create.handle(envelope(
+                () -> create.handle(new InboundEnvelope(
                         "I001",
+                        "WrongRoute",
                         LearningGoalInboundHandlers.OWNER_PATH,
-                        "CUR-CMD-PORT-001",
+                        LearningGoalInboundHandlers.PORT,
+                        "principal-1",
                         true,
-                        createPayload())),
-                "wrong port");
-        equal(0, controller.calls, "wrong-port route must not delegate");
+                        command)),
+                "wrong route");
+        equal(0, controller.calls, "wrong-route request must not delegate");
 
         expectHandlerFailure(
                 HandlerFailureCode.ROUTE_SCOPE_MISMATCH,
-                () -> create.handle(envelope(
-                        "I002",
+                () -> create.handle(new InboundEnvelope(
+                        "I001",
+                        "CreateLearningGoal",
                         LearningGoalInboundHandlers.OWNER_PATH,
-                        LearningGoalInboundHandlers.PORT,
+                        "CUR-CMD-PORT-001",
+                        "principal-1",
                         true,
-                        createPayload())),
-                "wrong interface");
-        equal(0, controller.calls, "wrong-interface route must not delegate");
+                        command)),
+                "wrong port");
+        equal(0, controller.calls, "wrong-port route must not delegate");
     }
 
-    private static void exactPayloadsAreForwardedWithoutFieldReinterpretation() throws Exception {
+    private static void typedSemanticPayloadIsForwardedWithoutReinterpretation() throws Exception {
         RecordingController controller = new RecordingController();
         RecordingSink sink = registered(controller);
 
-        Map<String, Object> createPayload = createPayload();
-        sink.handlers.get("I001").handle(envelope("I001", true, createPayload));
+        var create = createCommand();
+        sink.handlers.get("I001").handle(envelope(LearningGoalInboundHandlers.I001, true, create));
+        same(create, controller.lastCommand, "I001 semantic command identity");
         equal("create", controller.lastMethod, "I001 method");
-        var create = (LearningGoalInboundHandlers.CreateLearningGoalCommand) controller.lastCommand;
-        same(createPayload.get("client_operation_id"), create.clientOperationId(), "I001 operation id");
-        same(createPayload.get("title"), create.title(), "I001 title");
-        same(createPayload.get("objective"), create.objective(), "I001 objective");
-        same(createPayload.get("horizon"), create.horizon(), "I001 horizon");
-        same(createPayload.get("priority"), create.priority(), "I001 priority");
 
-        Map<String, Object> updatePayload = map(
-                "goal_id", "goal-1",
-                "expected_version", 7L,
-                "patch", Map.of("title", "revised"),
-                "client_operation_id", "op-2");
-        sink.handlers.get("I002").handle(envelope("I002", true, updatePayload));
+        var update = new LearningGoalInboundHandlers.UpdateLearningGoalCommand(
+                "goal-1", 7L, Map.of("title", "revised"), "op-2");
+        sink.handlers.get("I002").handle(envelope(LearningGoalInboundHandlers.I002, true, update));
+        same(update, controller.lastCommand, "I002 semantic command identity");
         equal("update", controller.lastMethod, "I002 method");
-        var update = (LearningGoalInboundHandlers.UpdateLearningGoalCommand) controller.lastCommand;
-        same(updatePayload.get("goal_id"), update.goalId(), "I002 goal_id");
-        same(updatePayload.get("expected_version"), update.expectedVersion(), "I002 expected_version");
-        same(updatePayload.get("patch"), update.patch(), "I002 patch");
-        same(updatePayload.get("client_operation_id"), update.clientOperationId(), "I002 operation id");
 
-        Map<String, Object> pausePayload = map(
-                "goal_id", "goal-1",
-                "expected_version", 8L,
-                "client_operation_id", "op-3");
-        sink.handlers.get("I003").handle(envelope("I003", true, pausePayload));
+        var pause = new LearningGoalInboundHandlers.PauseLearningGoalCommand("goal-1", 8L, "op-3");
+        sink.handlers.get("I003").handle(envelope(LearningGoalInboundHandlers.I003, true, pause));
+        same(pause, controller.lastCommand, "I003 semantic command identity");
         equal("pause", controller.lastMethod, "I003 method");
-        var pause = (LearningGoalInboundHandlers.PauseLearningGoalCommand) controller.lastCommand;
-        same(pausePayload.get("expected_version"), pause.expectedVersion(), "I003 expected_version");
-        same(pausePayload.get("client_operation_id"), pause.clientOperationId(), "I003 operation id");
 
-        Map<String, Object> resumePayload = map(
-                "goal_id", "goal-1",
-                "expected_version", 9L,
-                "client_operation_id", "op-4");
-        sink.handlers.get("I004").handle(envelope("I004", true, resumePayload));
+        var resume = new LearningGoalInboundHandlers.ResumeLearningGoalCommand("goal-1", 9L, "op-4");
+        sink.handlers.get("I004").handle(envelope(LearningGoalInboundHandlers.I004, true, resume));
+        same(resume, controller.lastCommand, "I004 semantic command identity");
         equal("resume", controller.lastMethod, "I004 method");
-        var resume = (LearningGoalInboundHandlers.ResumeLearningGoalCommand) controller.lastCommand;
-        same(resumePayload.get("expected_version"), resume.expectedVersion(), "I004 expected_version");
-        same(resumePayload.get("client_operation_id"), resume.clientOperationId(), "I004 operation id");
     }
 
-    private static void invalidPayloadFailsClosedBeforeDelegation() throws Exception {
+    private static void wrongSemanticPayloadTypeFailsClosed() throws Exception {
         RecordingController controller = new RecordingController();
         RecordingSink sink = registered(controller);
-        Map<String, Object> missingPriority = new LinkedHashMap<>(createPayload());
-        missingPriority.remove("priority");
+        var wrong = new LearningGoalInboundHandlers.PauseLearningGoalCommand("goal-1", 1L, "op-x");
         expectHandlerFailure(
                 HandlerFailureCode.INVALID_PAYLOAD,
-                () -> sink.handlers.get("I001").handle(envelope("I001", true, missingPriority)),
-                "missing exact field");
-        equal(0, controller.calls, "invalid payload must not delegate");
+                () -> sink.handlers.get("I001").handle(
+                        envelope(LearningGoalInboundHandlers.I001, true, wrong)),
+                "wrong semantic payload type");
+        equal(0, controller.calls, "wrong payload type must not delegate");
+    }
 
-        Map<String, Object> extraField = new LinkedHashMap<>(createPayload());
-        extraField.put("silent_extra", "not allowed");
-        expectHandlerFailure(
-                HandlerFailureCode.INVALID_PAYLOAD,
-                () -> sink.handlers.get("I001").handle(envelope("I001", true, extraField)),
-                "extra field");
-        equal(0, controller.calls, "extra payload field must not delegate");
+    private static void requiredSemanticFieldsFailClosedAtConstruction() {
+        try {
+            new LearningGoalInboundHandlers.CreateLearningGoalCommand(
+                    "op", "title", null, "30d", "HIGH");
+            fail("expected required semantic field failure");
+        } catch (IllegalArgumentException expected) {
+            if (!expected.getMessage().contains("objective")) {
+                fail("required-field failure did not identify objective");
+            }
+        }
     }
 
     private static void domainFailureIdentityIsPreserved() throws Exception {
@@ -163,16 +151,19 @@ public final class LearningGoalInboundHandlerQualificationTest {
         RecordingSink sink = registered(controller);
         SentinelDomainFailure sentinel = new SentinelDomainFailure("VersionConflict");
         controller.failure = sentinel;
+        var update = new LearningGoalInboundHandlers.UpdateLearningGoalCommand(
+                "goal-1", 4L, Map.of("objective", "x"), "op-failure");
         try {
-            sink.handlers.get("I002").handle(envelope("I002", true, map(
-                    "goal_id", "goal-1",
-                    "expected_version", 4L,
-                    "patch", Map.of("objective", "x"),
-                    "client_operation_id", "op-failure")));
+            sink.handlers.get("I002").handle(envelope(LearningGoalInboundHandlers.I002, true, update));
             fail("expected domain failure");
         } catch (SentinelDomainFailure actual) {
             same(sentinel, actual, "domain failure object must be preserved");
         }
+    }
+
+    private static LearningGoalInboundHandlers.CreateLearningGoalCommand createCommand() {
+        return new LearningGoalInboundHandlers.CreateLearningGoalCommand(
+                "op-1", "Learn X", "Master X", "30d", "HIGH");
     }
 
     private static RecordingSink registered(RecordingController controller) {
@@ -181,53 +172,32 @@ public final class LearningGoalInboundHandlerQualificationTest {
         return sink;
     }
 
-    private static void assertRoute(RecordingSink sink, String interfaceId, String route) {
-        RouteDescriptor descriptor = sink.descriptors.get(interfaceId);
-        if (descriptor == null) {
-            fail("missing registration " + interfaceId);
-        }
-        equal(route, descriptor.route(), interfaceId + " route");
-        equal(LearningGoalInboundHandlers.OWNER_PATH, descriptor.ownerPath(), interfaceId + " owner");
-        equal(LearningGoalInboundHandlers.PORT, descriptor.port(), interfaceId + " port");
-        equal(LearningGoalInboundHandlers.TARGET_COMPONENT, descriptor.targetComponent(), interfaceId + " component");
-    }
-
-    private static CommandEnvelope envelope(String interfaceId, boolean authorized, Map<String, Object> payload) {
-        return envelope(
-                interfaceId,
-                LearningGoalInboundHandlers.OWNER_PATH,
-                LearningGoalInboundHandlers.PORT,
+    private static InboundEnvelope envelope(
+            RouteDescriptor descriptor, boolean authorized, Object payload) {
+        return new InboundEnvelope(
+                descriptor.interfaceId(),
+                descriptor.route(),
+                descriptor.ownerPath(),
+                descriptor.port(),
+                "principal-1",
                 authorized,
                 payload);
     }
 
-    private static CommandEnvelope envelope(
-            String interfaceId,
-            String owner,
-            String port,
-            boolean authorized,
-            Map<String, Object> payload) {
-        return new CommandEnvelope(interfaceId, owner, port, "principal-1", authorized, payload);
-    }
-
-    private static Map<String, Object> createPayload() {
-        return map(
-                "client_operation_id", "op-1",
-                "title", "Learn X",
-                "objective", "Master X",
-                "horizon", "30d",
-                "priority", "HIGH");
-    }
-
-    private static Map<String, Object> map(Object... entries) {
-        if ((entries.length & 1) != 0) {
-            throw new IllegalArgumentException("entries must be key/value pairs");
+    private static void assertRoute(RecordingSink sink, RouteDescriptor expected, String route) {
+        RouteDescriptor actual = sink.descriptors.get(expected.interfaceId());
+        if (actual == null) {
+            fail("missing registration " + expected.interfaceId());
         }
-        Map<String, Object> result = new LinkedHashMap<>();
-        for (int i = 0; i < entries.length; i += 2) {
-            result.put((String) entries[i], entries[i + 1]);
-        }
-        return result;
+        equal(route, actual.route(), expected.interfaceId() + " route");
+        equal(LearningGoalInboundHandlers.OWNER_PATH, actual.ownerPath(), expected.interfaceId() + " owner");
+        equal(LearningGoalInboundHandlers.PORT, actual.port(), expected.interfaceId() + " port");
+        equal(LearningGoalInboundHandlers.TARGET_COMPONENT, actual.targetComponent(), expected.interfaceId() + " component");
+        equal(
+                "MASTER_CORE_ROUTE_MANIFEST_001::" + expected.interfaceId(),
+                actual.contractIdentity(),
+                expected.interfaceId() + " contract identity");
+        equal("QO-IF-" + expected.interfaceId(), actual.testObligationId(), expected.interfaceId() + " test obligation");
     }
 
     private static void expectHandlerFailure(
@@ -261,12 +231,12 @@ public final class LearningGoalInboundHandlerQualificationTest {
         void run() throws Exception;
     }
 
-    private static final class RecordingSink implements LearningGoalInboundHandlers.RegistrationSink {
+    private static final class RecordingSink implements RegistrationSink {
         private final Map<String, RouteDescriptor> descriptors = new LinkedHashMap<>();
-        private final Map<String, InboundCommandHandler> handlers = new LinkedHashMap<>();
+        private final Map<String, InboundHandler> handlers = new LinkedHashMap<>();
 
         @Override
-        public void register(RouteDescriptor descriptor, InboundCommandHandler handler) {
+        public void register(RouteDescriptor descriptor, InboundHandler handler) {
             if (descriptors.putIfAbsent(descriptor.interfaceId(), descriptor) != null) {
                 fail("duplicate interface registration " + descriptor.interfaceId());
             }
