@@ -118,3 +118,5 @@ P00 remains `ACTIVE_GAP` until a successful current-subject qualification receip
 admitted by the Foundation evidence registry. Federated control-record pointers, when
 reported by the current governance tooling, remain explicit topology/federation conditions
 and are not silently treated as P00 completion evidence.
+
+<!-- 2026-09-14: non-semantic trigger for fresh current-subject P00 qualification. -->
