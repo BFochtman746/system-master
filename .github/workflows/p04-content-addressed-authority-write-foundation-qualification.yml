@@ -1,0 +1,123 @@
+name: P04 Content-Addressed Authority Write Foundation Qualification
+
+on:
+  push:
+    paths:
+      - 'governance/CURRENT-AUTHORITY.json'
+      - 'governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-*.json'
+      - 'governance/contracts/P04-FOUNDATION-CONTRACT-001.md'
+      - 'control-gateway/src/github-authority-bootstrap.js'
+      - 'control-gateway/test/github-control-adapter-repair.test.js'
+      - '.github/scripts/control-gateway-authority-bootstrap.js'
+      - '.github/workflows/control-gateway-authority-bootstrap.yml'
+      - '.github/workflows/p04-content-addressed-authority-write-foundation-qualification.yml'
+  pull_request:
+    paths:
+      - 'governance/CURRENT-AUTHORITY.json'
+      - 'governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-*.json'
+      - 'governance/contracts/P04-FOUNDATION-CONTRACT-001.md'
+      - 'control-gateway/src/github-authority-bootstrap.js'
+      - 'control-gateway/test/github-control-adapter-repair.test.js'
+      - '.github/scripts/control-gateway-authority-bootstrap.js'
+      - '.github/workflows/control-gateway-authority-bootstrap.yml'
+      - '.github/workflows/p04-content-addressed-authority-write-foundation-qualification.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout exact P04 subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Pin Node runtime
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Run exact P04 acceptance target
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd control-gateway
+          node --test test/github-control-adapter-repair.test.js 2>&1 | tee /tmp/p04-test.log
+          grep -Eq '^# tests 21$' /tmp/p04-test.log
+          grep -Eq '^# pass 21$' /tmp/p04-test.log
+          test "$(grep -c '^# Subtest: bootstrap ' /tmp/p04-test.log)" -eq 17
+      - name: Prove credential-derived production identity wiring
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE' | tee /tmp/p04-wiring.log
+          const fs = require('fs');
+          const workflow = fs.readFileSync('.github/workflows/control-gateway-authority-bootstrap.yml', 'utf8');
+          const needles = [
+            "environment: control-gateway-production",
+            "contents: read",
+            "id: writer-token",
+            "permission-contents: write",
+            "CONTROL_GATEWAY_WRITER_ACTUAL_APP_SLUG: $" + "{{ steps.writer-token.outputs.app-slug }}",
+            "CONTROL_GATEWAY_WRITER_EXPECTED_APP_SLUG: $" + "{{ vars.CONTROL_GATEWAY_WRITER_APP_SLUG }}",
+            "CONTROL_GATEWAY_WRITER_INSTALLATION_ID: $" + "{{ steps.writer-token.outputs.installation-id }}"
+          ];
+          for (const needle of needles) {
+            if (!workflow.includes(needle)) throw new Error(`P04_IDENTITY_WIRING_MISSING ${needle}`);
+          }
+          const wrapper = fs.readFileSync('.github/scripts/control-gateway-authority-bootstrap.js', 'utf8');
+          for (const name of ['CONTROL_GATEWAY_WRITER_ACTUAL_APP_SLUG','CONTROL_GATEWAY_WRITER_EXPECTED_APP_SLUG','CONTROL_GATEWAY_WRITER_INSTALLATION_ID']) {
+            if (!wrapper.includes(`process.env.${name}`)) throw new Error(`P04_WRAPPER_BINDING_MISSING ${name}`);
+          }
+          console.log('P04_IDENTITY_WIRING=PASS');
+          NODE
+      - name: Emit exact-subject P04 evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p qualification-output
+          node - <<'NODE'
+          const crypto = require('crypto');
+          const fs = require('fs');
+          const cp = require('child_process');
+          const authority = JSON.parse(fs.readFileSync('governance/CURRENT-AUTHORITY.json','utf8'));
+          const crosswalkPath = authority.capability_crosswalk;
+          const crosswalk = JSON.parse(fs.readFileSync(crosswalkPath,'utf8'));
+          const p04 = crosswalk.platform_requirements.find((row) => row.platform_id === 'P04');
+          if (authority.authority_id !== 'CURRENT-AUTHORITY-005') throw new Error(`AUTHORITY_MISMATCH ${authority.authority_id}`);
+          if (!p04 || p04.owner_path !== 'SYSTEM_MASTER/CORE') throw new Error(`P04_OWNER_MISMATCH ${p04?.owner_path}`);
+          if (p04.implementation !== '.github/workflows/control-gateway-authority-bootstrap.yml') throw new Error(`P04_IMPLEMENTATION_MISMATCH ${p04.implementation}`);
+          const subjects = [
+            'governance/CURRENT-AUTHORITY.json',
+            crosswalkPath,
+            'governance/contracts/P04-FOUNDATION-CONTRACT-001.md',
+            'control-gateway/src/github-authority-bootstrap.js',
+            'control-gateway/test/github-control-adapter-repair.test.js',
+            '.github/scripts/control-gateway-authority-bootstrap.js',
+            '.github/workflows/control-gateway-authority-bootstrap.yml',
+            '.github/workflows/p04-content-addressed-authority-write-foundation-qualification.yml'
+          ];
+          const blob = (p) => cp.execFileSync('git',['rev-parse',`HEAD:${p}`],{encoding:'utf8'}).trim();
+          const sha256 = (p) => crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
+          const evidence = {
+            evidence_schema:'1.0', contract_id:'P04-FOUNDATION-1.0', requirement_or_capability_id:'P04',
+            owner_path:'SYSTEM_MASTER/CORE', authority_id:authority.authority_id, status:'PASS', source_identity:process.env.GITHUB_SHA,
+            implementation:p04.implementation, node_version:process.version, total_test_count:21, bootstrap_test_count:17,
+            writer_identity_binding:'TOKEN_ACTION_APP_SLUG_PLUS_INSTALLATION_ID_MATCHED_TO_OWNER_CONFIGURED_EXPECTED_APP_SLUG',
+            production_authority_granted:false,
+            subjects:subjects.map((p)=>({path:p,git_blob_sha:blob(p)})),
+            logs:{test_sha256:sha256('/tmp/p04-test.log'),identity_wiring_sha256:sha256('/tmp/p04-wiring.log')}
+          };
+          fs.writeFileSync('qualification-output/p04-foundation-1.0.json',JSON.stringify(evidence,null,2)+'\n');
+          console.log(JSON.stringify(evidence));
+          NODE
+      - name: Preserve machine-readable P04 qualification evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p04-foundation-1.0-evidence
+          path: qualification-output/p04-foundation-1.0.json
+          if-no-files-found: error
+          retention-days: 30
