@@ -100,14 +100,16 @@ Total sole-custodian branches: **147**
 
 ## How to find anything
 
-`governance/branch-catalog.json` maps every off-main path to the branches
-holding it, newest first:
+`governance/branch-catalog/` holds the index, sharded by top-level area
+(24 TSV shards + `INDEX.md`). Each row maps an off-main path to the branch
+holding its newest version:
 
 ```
-  "system-master/foundation-spine/keel/.../KeelAuthorityRuntime.java": {
-    "newest_branch": "foundation/keel-build-001-20260912",
-    "holder_count": 3, "holders": [...] }
+# path                            newest_branch              holder_count
+system-master/.../KeelAuthority... foundation/keel-build-...  3
 ```
+
+A `holder_count` of 1 means that shard names the ONLY copy in the repository.
 
 To recover a file without merging its branch:
 
