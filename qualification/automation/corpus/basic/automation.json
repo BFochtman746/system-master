@@ -1,0 +1,22 @@
+{
+  "schema_version": "AUTOMATION-SPEC-1.0",
+  "automation_id": "foundation-overnight-flow",
+  "name": "Foundation Overnight Flow",
+  "execution_class": "OVERNIGHT",
+  "steps": [
+    {
+      "id": "prepare",
+      "capability_id": "C01",
+      "operation": "automation.prepare",
+      "effect_class": "LOCAL_ARTIFACT",
+      "depends_on": []
+    },
+    {
+      "id": "browser-intent",
+      "capability_id": "C02",
+      "operation": "browser.inspect",
+      "effect_class": "EXTERNAL_SIDE_EFFECT_INTENT",
+      "depends_on": ["prepare"]
+    }
+  ]
+}

@@ -204,8 +204,17 @@ qualification tests            21/21 PASS
 | identity | 13 | 6 | PASS |
 | contracts | 1 | 1 | PASS |
 | planning-orchestration | 1 | 1 | PASS |
-| **keel** | 1 | **0** | **no coverage — gap** |
+| **keel** | 1 | **1** | **PASS — 23 cases / 41 checks** |
 | f-wp-001..012 | 51 | 12 | 12/12 PASS |
+
+Updated after the keel gap was closed: `mvn -o compile` SUCCESS at 374 classes,
+full suite **22/22 PASS**. `KeelAuthorityQualificationTest` covers the non-expanding
+refinement algebra (every reason code the evaluator emits: HARD_CONSTRAINT_WEAKENED /
+_REMOVED, DELEGATION_ and RESOURCE_CEILING_EXPANDED, ALLOWED_ACTION_EXPANDED,
+FORBIDDEN_ACTION_REMOVED, HITL_REQUIREMENT_WEAKENED, SOFT_CONSTRAINT_UNDISPOSITIONED,
+UNKNOWN_COMPARATOR), the contract-gate and principal authority gates, command idempotency
+and replay conflict, optimistic revision concurrency, hash-chained journal tamper and
+truncation detection, and retirement terminality.
 
 `Fwp001QualificationTest` requires two arguments (reconstructed traceability CSV + baseline
 binding). Run bare it throws usage; supplied correctly it reports
@@ -221,16 +230,23 @@ that branch and are now on this one.
 
 | System | Runtime | Qualify result |
 |---|---|---|
-| automation | 163 lines | FAIL — `current authority does not name capability_crosswalk` |
-| browser | 317 lines | FAIL — same crosswalk cause |
-| calendar | 384 lines | FAIL — same crosswalk cause |
-| chat | 294 lines | FAIL — same crosswalk cause |
-| audiobook | 372 lines | FAIL — `qualification/audiobook/` input dir absent everywhere |
-| website-building | 257 lines | FAIL — project directory does not exist |
+| automation | 163 lines | **PASS** — AUTOMATION-FOUNDATION-1.0 |
+| browser | 317 lines | **PASS** — BROWSER-FOUNDATION-1.0 |
+| calendar | 384 lines | **PASS** — CALENDAR-FOUNDATION-1.0 |
+| chat | 294 lines | **PASS** — CHAT-FOUNDATION-1.0 |
+| audiobook | 372 lines | **PASS** — AUDIOBOOK-FOUNDATION-1.0 |
+| website-building | 257 lines | **PASS** — WEBSITE-BUILDING-FOUNDATION-1.0 |
 
-`foundation-closure-matrix.js` (the ACTIVE census machinery) reports
-`FOUNDATION_MATRIX=FAIL CROSSWALK_ABSENT path=UNPOPULATED`.
+**All six PASS (was 0/6).** Two recoveries were required, both from `apply-updates-008`:
+the governance chain (`CAPABILITY-CROSSWALK-003.json` + `TOOL-OWNER-ALLOCATION-006.json`,
+36 ownership rows, 0 mismatches against the crosswalk) and the six qualification corpora
+under `qualification/`. `CURRENT-AUTHORITY-003` did not carry a `capability_crosswalk` key
+at all; it now names crosswalk-003, and `headless_tool_owner_allocation` moved from
+`ALLOCATION-004` (zero ownership rows, different schema) to `ALLOCATION-006`.
 
-**One unpopulated capability crosswalk accounts for five of these failures.** The runtimes and
-harnesses are intact; the governance input was never populated. Highest-leverage single unblock
-in the repo.
+`foundation-closure-matrix.js` advanced past `CROSSWALK_ABSENT` and now stops at
+`EVIDENCE_REGISTRY_AUTHORITY_MISMATCH registry=CURRENT-AUTHORITY-005
+authority=CURRENT-AUTHORITY-003`. **Left failing deliberately** — the registry's receipts
+carry exact subject blob bindings authored under `-005`; relabelling them to `-003` would
+clear the gate by making every receipt a false statement. This is an authority-reconciliation
+decision for the owner (see LESSONS.md L-009), not a code defect.

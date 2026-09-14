@@ -53,11 +53,21 @@ Format: **L-nnn — one-line summary** / Symptom / Root cause / Fix / Rule it pr
 - **Symptom.** `foundation-closure-matrix.js` reported `FAIL CROSSWALK_ABSENT
   path=UNPOPULATED`, and four of six other-system qualify scripts failed with
   `current authority does not name capability_crosswalk`. Five failures, one cause.
-- **Root cause.** The capability crosswalk the current authority record must name was never
-  populated. The harnesses and runtimes were correct; the governance input did not exist.
-- **Fix.** Not yet fixed — recorded as the highest-leverage single unblock available.
+- **Root cause.** Two layers. `CURRENT-AUTHORITY-003` on main did not carry a
+  `capability_crosswalk` key at all — the harness message was literal, not a broken path. And
+  the crosswalk itself was never absent: `SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json` plus
+  its `TOOL-OWNER-ALLOCATION-006.json` were stranded on `apply-updates-008`. Main carried
+  `ALLOCATION-004`, a different schema with **zero** ownership rows.
+- **Fix.** Recovered the crosswalk and allocation-006 by path, named the crosswalk in the
+  authority record, and recovered the six qualification corpora that the next gate needed.
+  All six other-system qualifications went from 0/6 to **6/6 PASS**.
+- **Correction to the original entry.** This lesson first stated the crosswalk "was never
+  populated." That was wrong — it existed and was authored correctly, on another branch. The
+  earlier claim was inference from its absence on main.
 - **Rule.** Before treating a qualification failure as a code defect, confirm its inputs
-  exist. Report harness failures with the missing input named, not as "system broken."
+  exist **across all branches**, not just the current one. Report harness failures with the
+  missing input named, not as "system broken." When an error says a record "does not name" a
+  key, check whether the key is literally absent before hunting for a bad path.
 
 ## L-006 — Naming collisions between architecture and paperwork cost a whole investigation
 
@@ -84,3 +94,35 @@ Format: **L-nnn — one-line summary** / Symptom / Root cause / Fix / Rule it pr
   tests=12 requirements=60`.
 - **Rule.** Before diagnosing a failing test, run it against the unchanged baseline to
   separate pre-existing conditions from regressions, and check whether it needs arguments.
+
+## L-008 — A directory-only listing produced a false "exists nowhere" claim
+
+- **Symptom.** The audiobook and website-building qualification inputs were reported as
+  "absent on every branch." They were present on `apply-updates-008` the whole time, and once
+  recovered both subsystems qualified PASS immediately.
+- **Root cause.** The search used `git ls-tree -d` (directories only) with an exact anchored
+  match on one path depth. It could not match the real nested files. A search shape that
+  cannot see the thing was read as proof the thing does not exist.
+- **Fix.** Re-searched with a recursive file listing across all branches, which found every
+  corpus at once.
+- **Rule.** A negative search result is only evidence when the search could have found a
+  positive. State the search shape alongside any "does not exist" claim, and never escalate
+  absence-on-one-branch to absence-everywhere. Given this repository's established stranding
+  pattern, assume a missing artifact is on another branch until a recursive all-branch search
+  says otherwise.
+
+## L-009 — Authority version divergence: do not forge a receipt to clear a gate
+
+- **Symptom.** With the crosswalk recovered, `foundation-closure-matrix.js` advanced to
+  `EVIDENCE_REGISTRY_AUTHORITY_MISMATCH registry=CURRENT-AUTHORITY-005
+  authority=CURRENT-AUTHORITY-003`.
+- **Root cause.** The evidence registry was authored under authority `-005`; main's authority
+  record is `-003`. The registry's receipts carry exact subject blob bindings tied to the
+  state at `-005`, so the two chains are genuinely different vintages.
+- **Fix.** None applied, deliberately. Editing `authority_id` to `-003` would clear the gate
+  while making every receipt a false statement about what was verified under which authority.
+  Recorded as an authority-reconciliation decision for the owner: either promote main to `-005`
+  with its supporting records, or re-issue receipts under `-003`.
+- **Rule.** Never edit an identifier for the purpose of satisfying a check. A gate that goes
+  green because its evidence was relabelled is worse than a gate that fails honestly. When
+  clearing one requires asserting something unverified, stop and surface the decision.
