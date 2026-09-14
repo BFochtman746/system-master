@@ -1,100 +1,99 @@
 # P01 — Foundation Contract 001
 
 **Owner** `SYSTEM_MASTER/CORE` · **Capability** P01 System topology and ownership allocation · **Effective** 2026-09-13
-**Authority** `governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-001.json`
+**Authority** `governance/CURRENT-AUTHORITY.json` (`CURRENT-AUTHORITY-005`)
+**Topology** `governance/SYSTEM-TOPOLOGY-007.json`
+**Owner allocation** `governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006.json`
 
 ## 1. Contract / interface
 
-Two artifacts answering "what systems exist" and "who owns what."
+P01 defines the canonical System Master ownership shape through two current artifacts selected by P00:
 
-- `governance/SYSTEM-TOPOLOGY-006.json` — product root, eight canonical internal systems,
-  each with classification, parent, control ref and `completion`.
-- `governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-005.json` —
-  `module_ownership` (35 module→owner rows), `explicitly_deferred_modules` (5), and
-  `boundary_rules` (7).
+- `SYSTEM-TOPOLOGY-007` declares the product root and exactly nine active peer systems: CORE, LEARNING, BOOK, DOCUMENTS, SPREADSHEET_DATA, MEDIA, CONNECTED_ACTIONS, RESEARCH_KNOWLEDGE and PROGRAMMING.
+- `SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006` maps 36 owned module keys to their canonical owner paths, records five explicitly deferred modules, and preserves the cross-lane boundary rules.
 
-Offers: the single resolution from a module key to a canonical owner, and the boundary
-rules that govern cross-lane work. `lane-brief.js` and `foundation-closure-matrix.js` both
-resolve ownership here and nowhere else.
+Website Building is C40 under PROGRAMMING and is not a peer system. PROSE is historically complete and terminally retired and has no active execution lane.
 
-Does not offer: implementation state. A registered owner is a precondition, never an
-implementation claim.
+P01 offers canonical answers to “what active systems exist?” and “who owns this module?” It does not claim implementation completion for an owner or capability.
 
 ## 2. Ingress routes
 
-Human, via pull request, gated by `a01-control-plane-enforcement`. Admission requires an
-owner ratification record — `FOUNDATION-CLOSURE-OWNER-DECISION-PACK-001.md` for the
-current version.
+Changes enter through owner-authorized repository governance mutations admitted by the current control plane. P00 must select the topology and owner-allocation artifacts before they are current authority.
 
-No programmatic writer.
+No product/runtime component may create a peer system, reassign module ownership, resurrect PROSE, or alter an authority boundary as an incidental side effect.
 
 ## 3. Egress routes
 
-Read by `lane-brief.js` (lane scope and boundary rules), `foundation-closure-matrix.js`
-(ownership resolution), `scaffold-foundation-contracts.js` (which stubs to create), and
-`validate-governance.js` (cross-file owner checks).
+P01 is consumed by topology validation, lane briefs, Foundation closure, Second Shift owner coverage, obligation routing, governance validation and system-state reconciliation.
 
-Changing an owner here silently re-scopes a lane brief the next time it is generated.
-That coupling is intentional — it is what stops a brief drifting from the record — and it
-is why every change needs ratification.
+A current ownership change therefore changes routing and lane scope only after the corresponding authority/topology/allocation artifacts are admitted together. Consumers must resolve the current files through P00 rather than hard-code an older numbered artifact.
 
 ## 4. Persistence and canonical writer
 
-Both files in git, superseded by number: `-005` supersedes `-004`, `-006` supersedes
-`-005`. Prior versions are never edited or deleted; the `supersedes` field carries the
-chain.
+Topology and owner allocation are durable versioned JSON governance artifacts in git. New versions supersede prior numbered records; historical records remain immutable evidence.
 
-Canonical writer: a human through a reviewed pull request, with `CURRENT-AUTHORITY`
-repointed in the same change. An allocation that is not pointed at by P00 is not in force,
-regardless of its contents.
+Canonical writer: an owner-authorized governance change. `governance/CURRENT-AUTHORITY.json` is repointed to the new version in the same admitted architecture transition. Automated validators and qualification workflows are readers only.
 
 ## 5. Dependencies
 
-- **P00** — must point at both files for them to be authoritative.
-- **P05** — schema-validates both on every push and pull request.
+- **P00** — selects the current topology and owner-allocation records.
+- **P05** — validates current governance schemas and pointer coherence.
+- `validate-system-topology.js` — enforces topology, retirement, readiness and ownership invariants across current governance state.
+- `lane-brief.js` — proves the current allocation can be resolved into executable owner lanes without a hand-maintained ownership copy.
 
-Crosses no boundary rule; it is where the boundary rules live.
+P01 has no private, native, publication, credential or external-provider dependency.
 
 ## 6. Failure semantics
 
-**Fail-closed.**
+**Fail closed on topology or ownership disagreement.**
 
-- Allocation absent or unpointed → `lane-brief.js` exits 2 (`ALLOCATION_ABSENT`); the
-  closure matrix falls back to the P6 census allocation and labels its output
-  `UNRATIFIED`. Degraded, clearly marked, never silently wrong.
-- A malformed `owner_path` → schema validation fails the build. Enforced by pattern, not
-  convention.
-- An obligation owned by a path owning no modules → a validator **warning**, not a
-  failure. Five are live today. These may be intentional, and turning a maybe into a hard
-  failure trains people to disable the gate.
-- A module in the allocation with no P6 census record → scaffolded and censused anyway.
-  The allocation is authoritative for ownership; P6 is historical background.
+- Missing/malformed current topology or owner allocation → qualification fails.
+- Topology peer set differs from the execution-readiness partition → topology validation fails.
+- Duplicate system IDs, duplicate module keys, missing owners or invalid owner paths → qualification fails.
+- An owned module resolving to a lane outside the nine active peers → qualification fails.
+- PROSE appearing as an active peer/lane → qualification fails.
+- Current lane briefs not resolving exactly nine owner lanes covering exactly 36 owned modules → qualification fails.
+- A changed topology, allocation, contract, validator, lane renderer or qualification workflow invalidates prior P01 PASS until fresh exact-subject evidence is produced.
+
+There is no fallback to historical P6 ownership for current authority.
 
 ## 7. Evidence target
 
-Git history plus the supersession chain. `SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-005.json`
-carries `ratification_record`, so the decision that produced each version is traceable
-from the artifact without reading commits.
+`.github/workflows/p01-topology-ownership-foundation-qualification.yml` must execute the P01 acceptance target and preserve machine-readable `p01-foundation-1.0-evidence`.
+
+The receipt binds `CURRENT-AUTHORITY-005`, `SYSTEM_MASTER/CORE`, source commit identity, PASS, acceptance-log hashes, and exact Git blob identities for the current authority pointer, P01 contract, Topology 007, Allocation 006, the validating/rendering scripts and the qualification workflow.
+
+Foundation census completion additionally requires admission of that exact successful receipt into `governance/census/FOUNDATION-CLOSURE-EVIDENCE-REGISTRY-001.json`. Contract prose alone is not completion evidence.
 
 ## 8. Acceptance target
 
-```
-node .github/scripts/validate-governance.js && node .github/scripts/lane-brief.js --list
+```bash
+node .github/scripts/validate-governance.js
+node .github/scripts/validate-system-topology.js
+node .github/scripts/lane-brief.js --list
 ```
 
-**PASS** when validation reports `topology` and `allocation` PASS, and `--list` renders 9
-lanes covering 35 modules with no module appearing twice. Verified 2026-09-13.
+**PASS** only when all commands return zero on the same source identity and the qualifier additionally proves:
+
+1. current authority is `CURRENT-AUTHORITY-005`;
+2. current topology is `SYSTEM-TOPOLOGY-007`;
+3. current allocation is `SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006`;
+4. topology declares exactly the nine active peers and excludes PROSE from active peers;
+5. allocation contains exactly 36 unique owned module keys;
+6. all 36 owned modules resolve to those nine peer owner lanes;
+7. lane-brief `--list` renders those same nine lanes with a total of 36 modules;
+8. exact-subject machine-readable evidence is emitted.
+
+Historical verification against Topology 006 or Allocation 005 does not satisfy this acceptance target.
 
 ## 9. Authority boundary
 
-**Lane may decide alone (`agent`):** ordering of entries, descriptive field wording.
+**Lane may decide alone (`agent`):** read, validate, render and qualify the current topology/allocation without changing ownership semantics.
 
-**Requires the owner (`owner`):** any module→owner change; admitting or retiring a system;
-adding, removing or amending a boundary rule; moving a module between owned and deferred;
-changing a `completion` value.
+**Requires owner/human-authorized governance change (`owner`):** admitting/retiring a peer, changing module ownership, changing deferred disposition, changing execution-readiness classification, amending cross-lane boundary rules, or modifying product-root/peer hierarchy.
+
+Qualification proves the current ownership model; it does not grant authority to change that model.
 
 ## 10. Open gaps
 
-None in the artifacts. One open decision recorded elsewhere: five obligations are owned by
-paths that own no modules (`SYSTEM_MASTER`, `SYSTEM_MASTER/SHARED_INFRASTRUCTURE`,
-`.../A01`). Either those are lanes and belong here, or those obligations need reassigning.
+P01 remains `ACTIVE_GAP` until a fresh exact-subject `CURRENT-AUTHORITY-005` qualification receipt is produced and admitted to the Foundation evidence registry.
