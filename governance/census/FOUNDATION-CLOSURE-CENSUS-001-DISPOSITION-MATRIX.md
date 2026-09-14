@@ -14,13 +14,13 @@ Evidence authority: `governance/census/FOUNDATION-CLOSURE-EVIDENCE-REGISTRY-001.
 
 | State | Rows |
 | --- | ---: |
-| `COMPLETE_WITH_EVIDENCE` | 0 |
-| `ACTIVE_GAP` | 50 |
+| `COMPLETE_WITH_EVIDENCE` | 1 |
+| `ACTIVE_GAP` | 49 |
 | `DURABLY_BLOCKED_EXTERNAL_HUMAN_PRIVATE_NATIVE` | 0 |
 | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | 16 |
 | **Total** | **66** |
 
-**Foundation 1.0 completion with evidence: 0% (0 of 50 in-scope rows).**
+**Foundation 1.0 completion with evidence: 2% (1 of 50 in-scope rows).**
 
 ## Current disposition matrix
 
@@ -76,7 +76,7 @@ Evidence authority: `governance/census/FOUNDATION-CLOSURE-EVIDENCE-REGISTRY-001.
 | `C47` | RESERVED | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Reserved unallocated capability identifier. |
 | `C48` | RESERVED | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Reserved unallocated capability identifier. |
 | `C49` | RESERVED | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Reserved unallocated capability identifier. |
-| `P00` | P00 | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Historical PASS receipt preserved, but current-invalid: `SUBJECT_DRIFT:governance/CURRENT-AUTHORITY.json`; fresh current-subject qualification required. |
+| `P00` | P00 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | Fresh current-authority PASS receipt admitted for exact subject `196ab9b1c5c2be79bd05225a831b33304f00c857`; prior receipt preserved as historical evidence. |
 | `P01` | P01 | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Historical PASS receipt preserved, but current-invalid: `SUBJECT_DRIFT:governance/CURRENT-AUTHORITY.json`; fresh current-subject qualification required. |
 | `P02` | P02 | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Historical PASS receipt preserved, but current-invalid: `SUBJECT_DRIFT:governance/CURRENT-AUTHORITY.json`; fresh current-subject qualification required. |
 | `P03` | P03 | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Historical PASS receipt preserved, but current-invalid: `SUBJECT_DRIFT:governance/CURRENT-AUTHORITY.json`; fresh current-subject qualification required. |
@@ -95,12 +95,12 @@ Evidence authority: `governance/census/FOUNDATION-CLOSURE-EVIDENCE-REGISTRY-001.
 
 ## Evidence-complete rows
 
-`NONE` under the current exact subjects. The historical P00-P04 PASS receipts remain preserved in `FOUNDATION-CLOSURE-EVIDENCE-REGISTRY-001.json`, but all five bind an earlier `CURRENT-AUTHORITY.json` Git blob and therefore do not transfer completion to the current authority subject.
+`P00` is current-complete with exact-subject evidence from GitHub Actions run `34868657748`, artifact `10357803440`, bound to subject `196ab9b1c5c2be79bd05225a831b33304f00c857`.
 
 ## Unresolved gap successor register
 
-50 `ACTIVE_GAP` rows remain. Ordering is shared platform dependency first, then the current nine-peer order from Topology 007: CORE, LEARNING, BOOK, DOCUMENTS, SPREADSHEET_DATA, MEDIA, CONNECTED_ACTIONS, RESEARCH_KNOWLEDGE, PROGRAMMING.
+49 `ACTIVE_GAP` rows remain. Ordering is shared platform dependency first, then the current nine-peer order from Topology 007: CORE, LEARNING, BOOK, DOCUMENTS, SPREADSHEET_DATA, MEDIA, CONNECTED_ACTIONS, RESEARCH_KNOWLEDGE, PROGRAMMING.
 
-**Exact next ACTIVE_GAP: `P00` - Authority pointer of record.**
+**Exact next ACTIVE_GAP: `P01` - System topology and ownership allocation.**
 
-Continue `P00-P12`, `P15`, then owner-valid capability gaps in dependency-valid order. `PROSE` receives no current successor because it is terminally retired.
+Continue `P01-P12`, `P15`, then owner-valid capability gaps in dependency-valid order. `PROSE` receives no current successor because it is terminally retired.
