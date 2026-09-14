@@ -1,0 +1,45 @@
+{
+  "reconciliation_id": "BOOK-ENG-009-CONCURRENT-IMPLEMENTATION-RECONCILIATION-001",
+  "effective_date": "2026-09-14",
+  "objective_id": "BOOK-ENG-009-SEMANTIC-RECOVERY-PROFILE-001",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "component_id": "BOOK-COMP-12",
+  "standing": "CURRENT_MAIN_IMPLEMENTATION_CANONICAL__DIVERGENT_BRANCH_REVIEWED_FOR_NONCONFLICTING_SEMANTICS__STALE_PROVIDER_NAMESPACE_NOT_ADMITTED",
+  "current_main_profile": "qualification/book-system/recovery/BOOK-SEMANTIC-RECOVERY-PROFILE-001.json",
+  "current_main_runtime": "system-master/book-system/book-semantic-recovery-profile.js",
+  "divergent_branch": {
+    "branch": "book-eng-009-semantic-recovery-profile-001",
+    "head_sha": "6e7b7f8b7679812060a51baded7cf8de076f1fee",
+    "profile": "qualification/book-system/recovery/BOOK-RECOVERY-BACKUP-RESTORE-PROFILE-001.json",
+    "runtime": "system-master/book-system/book-recovery-profile.js",
+    "status": "NON_CURRENT_ALTERNATIVE__DO_NOT_MERGE_AS_CANONICAL"
+  },
+  "admitted_findings": [
+    "Offline work must be anchored to an exact semantic backup-set digest and exact Book subject identity.",
+    "Reconnect against an unchanged exact base may enter normal Book admission, but never auto-apply to canonical state.",
+    "Reconnect against a changed semantic base must return RECONCILIATION_REQUIRED and forbid automatic application.",
+    "Book retention semantics should identify retained semantic classes and require retrievability and destructive-restore verification where the preservation profile requires them.",
+    "Preservation evidence must retain lineage/reentry anchors without granting publication, distribution or canonical-write authority."
+  ],
+  "rejected_or_not_admitted": [
+    {
+      "item": "CORE.DURABILITY.BOOK_RECOVERY.v1",
+      "reason": "It is a Book-facing conceptual port identifier but is not a registered public operation under the frozen cross-system operation namespace. Current runtime correctly requires a CORE/P03 REGISTERED_ACTIVE COMMAND operation and does not invent one."
+    },
+    {
+      "item": "Release-manifest semantic composition as a new COMP-12 authority",
+      "reason": "Release/export package semantics remain governed by BOOK-COMP-11; COMP-12 may preserve exact release-manifest references/digests but does not become a second release-manifest owner."
+    },
+    {
+      "item": "Any claim that branch-local CORE receipt fixtures prove a production CORE provider",
+      "reason": "Fixtures are qualification inputs only; no current CORE/P03 durability/restore operation registration is established by the divergent branch."
+    }
+  ],
+  "authority_rule": "Only merged current-main artifacts and exact current-main qualification evidence can advance current Book implementation truth. Divergent branch evidence remains historical/alternative evidence until explicitly reconciled and admitted.",
+  "non_claims": [
+    "This reconciliation does not delete or rewrite the divergent branch.",
+    "This reconciliation does not register a CORE operation.",
+    "This reconciliation does not make ENG-009 whole-objective complete.",
+    "This reconciliation does not alter CURRENT-AUTHORITY-005, topology, peer ownership or PROSE retirement."
+  ]
+}
