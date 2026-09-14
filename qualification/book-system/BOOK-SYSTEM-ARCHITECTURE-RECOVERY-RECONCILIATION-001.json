@@ -1,7 +1,7 @@
 {
   "reconciliation_id": "BOOK-SYSTEM-ARCHITECTURE-RECOVERY-RECONCILIATION-001",
   "effective_date": "2026-09-14",
-  "standing": "CURRENT_MAIN_RECONCILIATION_COMPLETE__SELECTOR_PROMOTION_SEPARATELY_GATED",
+  "standing": "CURRENT_MAIN_RECONCILIATION_COMPLETE__SELECTOR_PROMOTED__CHANGED_SUBJECTS_REQUIRE_FRESH_EVIDENCE",
   "owner_path": "SYSTEM_MASTER/BOOK",
   "current_authority_id": "CURRENT-AUTHORITY-005",
   "current_authority_ref": "governance/CURRENT-AUTHORITY.json",
@@ -10,12 +10,12 @@
   "current_completion_ref": "governance/SYSTEM-COMPLETION-STATUS-002.json",
   "current_owner_allocation_ref": "governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006.json",
   "current_capability_crosswalk_ref": "governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json",
-  "purpose": "Reconcile the recovered Book architecture/build-spec lineage with current main without rewriting historical Book evidence, transferring qualification PASS, changing the frozen architectural authority set, or silently promoting a stale Book control record.",
+  "purpose": "Reconcile the recovered Book architecture/build-spec lineage with current main without rewriting historical Book evidence, transferring qualification PASS, changing the frozen architectural authority set, or replaying a stale Book control objective.",
   "historical_control_inputs": {
     "control_ref": "book-system/control-v1",
     "control_record": "qualification/book-system/BOOK-SYSTEM-CONTROL-RECORD-013.json",
     "reconciled_state": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-043.json",
-    "historical_disposition": "PRESERVED_ON_BOOK_CONTROL_REF__STALE_FOR_CURRENT_MAIN_PROJECTION",
+    "historical_disposition": "PRESERVED_ON_BOOK_CONTROL_REF__SUPERSEDED_FOR_CURRENT_CONTROL",
     "stale_reasons": [
       "BOOK-SYSTEM-CONTROL-RECORD-013 binds SYSTEM-TOPOLOGY-005 instead of current SYSTEM-TOPOLOGY-007.",
       "BOOK-SYSTEM-CONTROL-RECORD-013 and BOOK-SYSTEM-RECONCILED-STATE-043 bind SYSTEM-COMPLETION-STATUS-001 instead of current SYSTEM-COMPLETION-STATUS-002.",
@@ -108,27 +108,29 @@
   ],
   "current_next_architecture_action": {
     "objective_id": "BOOK-HIGHER-LEDGER-008-010-CURRENT-DISPOSITION-001",
-    "state": "READY_AFTER_SELECTOR_PROMOTION_OR_EXPLICIT_BOOK_OWNER_EXECUTION",
+    "state": "READY",
     "scope": "Adjudicate BOOK-ENG-008 through BOOK-ENG-010 against CURRENT-AUTHORITY-005, Topology 007, current peer ownership and live implementation gaps. Preserve recovered scope-reset recommendations as planning input only; do not automatically canonize them.",
     "forbidden_reopens": ["BOOK-ENG-001", "BOOK-ENG-002", "BOOK-ENG-003", "BOOK-ENG-004", "BOOK-ENG-005", "BOOK-ENG-006", "BOOK-ENG-007", "UAF-BOOK-INTELLIGENCE-001..021", "UAF-BOOK-STORYBIBLE-001"],
     "reopen_rule": "Reopen only the exact affected closed scope if current evidence proves a genuine contradiction; implementation defects alone do not create a new semantic architecture packet."
   },
-  "prepared_successors": {
+  "selected_successors": {
     "control_record": "qualification/book-system/BOOK-SYSTEM-CONTROL-RECORD-014.json",
     "reconciled_state": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-044.json",
-    "selection_status": "PREPARED_ON_MAIN__NOT_SELECTED_BY_FROZEN_CURRENT_AUTHORITY"
+    "selection_status": "SELECTED_BY_CURRENT_AUTHORITY_005",
+    "authority_selector_commit": "bd9734dadd30cc2ee3250225e6b09119fc3bd650",
+    "obligation_registry": "governance/WORK-OBLIGATION-REGISTRY-014.json",
+    "obligation_registry_book_rebase_commit": "4a8effae8cb81ed59378aa6ede4df59293036b10"
   },
-  "selector_promotion_gate": {
+  "fresh_evidence_gate": {
     "required": true,
-    "reason": "CURRENT-AUTHORITY-005 currently names historical Book control/state paths. Changing current selector or evidence-bound governance subjects would invalidate exact-subject Foundation evidence and therefore requires a deliberate successor/requalification transaction rather than an incidental edit.",
-    "must_preserve": [
-      "CURRENT-AUTHORITY-005 nine-peer architecture semantics",
+    "reason": "Current authority/control/obligation subjects changed during the Learning and Book reconciliation transactions. Any prior exact-subject Foundation or governance PASS bound to old blobs must be re-evaluated and freshly qualified where its subject set changed.",
+    "architecture_semantics_preserved": [
+      "CURRENT-AUTHORITY-005 nine-peer architecture",
       "SYSTEM-TOPOLOGY-007",
       "SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006",
       "SYSTEM-MASTER-CAPABILITY-CROSSWALK-003",
-      "terminal PROSE retirement",
-      "all historical Book receipts and exact subject identities"
+      "terminal PROSE retirement"
     ]
   },
-  "historical_evidence_rule": "Recovered and historical Book artifacts retain their original bytes, labels, subjects, dates and evidence standing. This reconciliation is an additive current-main interpretation record only; it does not relabel historical PASS, manufacture runtime evidence or rewrite branch history."
+  "historical_evidence_rule": "Recovered and historical Book artifacts retain their original bytes, labels, subjects, dates and evidence standing. This reconciliation is additive current-main authority interpretation; it does not relabel historical PASS, manufacture runtime evidence or rewrite branch history."
 }
