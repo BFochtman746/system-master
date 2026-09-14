@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.systemmaster</groupId>
+  <artifactId>system-master-foundation</artifactId>
+  <version>1.0.0</version>
+  <packaging>jar</packaging>
+
+  <name>System Master Foundation Work Packages</name>
+  <description>
+    Canonical build definition for the foundation work packages F-WP-001..012
+    (org.systemmaster.core). Replaces the hand-typed javac source lists that were
+    previously embedded in .github/scripts/fwp*-qualify.js.
+
+    All work-package sources share a single package and compile as one unit, which
+    is why sourceDirectory is the shared root rather than a per-package module. The
+    qualification test classes are plain main()-based entry points, not JUnit
+    suites, so they are compiled alongside the production sources and executed
+    directly by the qualify scripts. There is no surefire phase to bind them to.
+  </description>
+
+  <properties>
+    <maven.compiler.release>17</maven.compiler.release>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+  <build>
+    <!-- Every f-wp-*/src/{main,test}/java tree lives under this root. Maven compiles
+         all *.java found recursively, so adding a source file to any work package is
+         picked up automatically instead of requiring a script edit. -->
+    <sourceDirectory>system-master</sourceDirectory>
+    <outputDirectory>target/classes</outputDirectory>
+
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.13.0</version>
+        <configuration>
+          <encoding>UTF-8</encoding>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>
