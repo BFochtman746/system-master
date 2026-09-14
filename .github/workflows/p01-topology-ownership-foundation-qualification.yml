@@ -1,0 +1,127 @@
+name: P01 Topology Ownership Foundation Qualification
+
+on:
+  push:
+    paths:
+      - 'governance/CURRENT-AUTHORITY.json'
+      - 'governance/SYSTEM-TOPOLOGY-*.json'
+      - 'governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-*.json'
+      - 'governance/contracts/P01-FOUNDATION-CONTRACT-001.md'
+      - 'governance/schemas/**'
+      - '.github/scripts/validate-governance.js'
+      - '.github/scripts/validate-system-topology.js'
+      - '.github/scripts/lane-brief.js'
+      - '.github/workflows/p01-topology-ownership-foundation-qualification.yml'
+  pull_request:
+    paths:
+      - 'governance/CURRENT-AUTHORITY.json'
+      - 'governance/SYSTEM-TOPOLOGY-*.json'
+      - 'governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-*.json'
+      - 'governance/contracts/P01-FOUNDATION-CONTRACT-001.md'
+      - 'governance/schemas/**'
+      - '.github/scripts/validate-governance.js'
+      - '.github/scripts/validate-system-topology.js'
+      - '.github/scripts/lane-brief.js'
+      - '.github/workflows/p01-topology-ownership-foundation-qualification.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout exact P01 subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Pin Node runtime
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Run exact P01 acceptance target
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p qualification-output
+          node .github/scripts/validate-governance.js | tee /tmp/p01-validate-governance.log
+          node .github/scripts/validate-system-topology.js | tee /tmp/p01-validate-system-topology.log
+          node .github/scripts/lane-brief.js --list | tee /tmp/p01-lane-list.log
+      - name: Assert current nine-peer ownership invariants and emit exact-subject evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs = require('fs');
+          const cp = require('child_process');
+          const crypto = require('crypto');
+          const authority = JSON.parse(fs.readFileSync('governance/CURRENT-AUTHORITY.json', 'utf8'));
+          const topology = JSON.parse(fs.readFileSync(authority.topology, 'utf8'));
+          const allocation = JSON.parse(fs.readFileSync(authority.headless_tool_owner_allocation, 'utf8'));
+          const expectedPeers = ['BOOK','CONNECTED_ACTIONS','CORE','DOCUMENTS','LEARNING','MEDIA','PROGRAMMING','RESEARCH_KNOWLEDGE','SPREADSHEET_DATA'];
+          const sorted = (xs) => [...xs].sort();
+          const same = (a,b) => JSON.stringify(sorted(a)) === JSON.stringify(sorted(b));
+          if (authority.authority_id !== 'CURRENT-AUTHORITY-005') throw new Error(`AUTHORITY_MISMATCH ${authority.authority_id}`);
+          if (topology.topology_id !== 'SYSTEM-TOPOLOGY-007') throw new Error(`TOPOLOGY_MISMATCH ${topology.topology_id}`);
+          if (allocation.allocation_id !== 'SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006') throw new Error(`ALLOCATION_MISMATCH ${allocation.allocation_id}`);
+          if (!same(topology.peer_system_ids || [], expectedPeers)) throw new Error('PEER_SET_MISMATCH');
+          if ((topology.peer_system_ids || []).includes('PROSE')) throw new Error('PROSE_ACTIVE_PEER');
+          const owned = allocation.module_ownership || [];
+          if (owned.length !== 36) throw new Error(`OWNED_MODULE_COUNT ${owned.length}`);
+          const moduleKeys = owned.map((row) => row.module_key);
+          if (new Set(moduleKeys).size !== 36) throw new Error('DUPLICATE_MODULE_KEY');
+          const ownerLanes = owned.map((row) => String(row.owner_path || '').split('/').pop());
+          if (!ownerLanes.every((lane) => expectedPeers.includes(lane))) throw new Error('OWNER_OUTSIDE_PEER_SET');
+          const laneText = fs.readFileSync('/tmp/p01-lane-list.log', 'utf8');
+          const laneRows = [...laneText.matchAll(/^\s{2}(\S+)\s+(\d+) modules:/gm)].map((m) => ({lane:m[1], count:Number(m[2])}));
+          if (laneRows.length !== 9 || !same(laneRows.map((row) => row.lane), expectedPeers)) throw new Error('LANE_LIST_PEER_SET_MISMATCH');
+          if (laneRows.reduce((sum,row) => sum + row.count, 0) !== 36) throw new Error('LANE_LIST_MODULE_COUNT_MISMATCH');
+          const subjects = [
+            'governance/CURRENT-AUTHORITY.json',
+            'governance/contracts/P01-FOUNDATION-CONTRACT-001.md',
+            authority.topology,
+            authority.headless_tool_owner_allocation,
+            '.github/scripts/validate-governance.js',
+            '.github/scripts/validate-system-topology.js',
+            '.github/scripts/lane-brief.js',
+            '.github/workflows/p01-topology-ownership-foundation-qualification.yml'
+          ];
+          const blob = (path) => cp.execFileSync('git', ['rev-parse', `HEAD:${path}`], {encoding:'utf8'}).trim();
+          const sha256 = (path) => crypto.createHash('sha256').update(fs.readFileSync(path)).digest('hex');
+          const evidence = {
+            evidence_schema: '1.0',
+            contract_id: 'P01-FOUNDATION-1.0',
+            requirement_or_capability_id: 'P01',
+            owner_path: 'SYSTEM_MASTER/CORE',
+            authority_id: authority.authority_id,
+            topology_id: topology.topology_id,
+            allocation_id: allocation.allocation_id,
+            status: 'PASS',
+            source_identity: process.env.GITHUB_SHA,
+            acceptance_commands: [
+              'node .github/scripts/validate-governance.js',
+              'node .github/scripts/validate-system-topology.js',
+              'node .github/scripts/lane-brief.js --list'
+            ],
+            peer_system_ids: sorted(topology.peer_system_ids || []),
+            owned_module_count: owned.length,
+            subjects: subjects.map((path) => ({path, git_blob_sha: blob(path)})),
+            logs: {
+              validate_governance_sha256: sha256('/tmp/p01-validate-governance.log'),
+              validate_system_topology_sha256: sha256('/tmp/p01-validate-system-topology.log'),
+              lane_list_sha256: sha256('/tmp/p01-lane-list.log')
+            }
+          };
+          fs.writeFileSync('qualification-output/p01-foundation-1.0.json', `${JSON.stringify(evidence, null, 2)}\n`);
+          process.stdout.write(`${JSON.stringify(evidence)}\n`);
+          NODE
+      - name: Preserve machine-readable P01 qualification evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p01-foundation-1.0-evidence
+          path: qualification-output/p01-foundation-1.0.json
+          if-no-files-found: error
+          retention-days: 30
