@@ -1,0 +1,77 @@
+name: P0 PR86 final exact-head truth proof
+
+on:
+  push:
+    branches:
+      - proof/p0-pr86-final-20260914
+
+permissions:
+  contents: read
+
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      REPO: BFochtman746/system-master
+      TARGET_SHA: 0c2055053dffdbcf1272b576de9cb49098b88bc6
+    steps:
+      - name: Discovery floor must go red
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --no-tags "https://github.com/${REPO}.git" discovery
+          cd discovery
+          git checkout --detach "$TARGET_SHA"
+          test "$(git rev-parse HEAD)" = "$TARGET_SHA"
+          test -z "$(git status --porcelain)"
+          mvn -B -q test-compile
+          mapfile -t classes < <(find target/classes -type f -name '*Test.class' ! -name '*$*' | sort)
+          test "${#classes[@]}" -eq 22
+          echo "baseline_discovery=${#classes[@]}"
+          for i in 0 1 2; do rm -f "${classes[$i]}"; done
+          set +e
+          mvn -B surefire:test > /tmp/discovery-red.log 2>&1
+          rc=$?
+          set -e
+          cat /tmp/discovery-red.log
+          test "$rc" -ne 0
+          grep -F "discovered only 19 qualification classes" /tmp/discovery-red.log
+          echo "PROOF_DISCOVERY_FLOOR=RED rc=$rc"
+
+      - name: Corrupt compiled class must go red
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --no-tags "https://github.com/${REPO}.git" corruption
+          cd corruption
+          git checkout --detach "$TARGET_SHA"
+          test "$(git rev-parse HEAD)" = "$TARGET_SHA"
+          test -z "$(git status --porcelain)"
+          mvn -B -q test-compile
+          victim="target/classes/org/systemmaster/core/Fwp002QualificationTest.class"
+          test -f "$victim"
+          printf '\xCA\xFE\xBA\xBE' > "$victim"
+          set +e
+          mvn -B surefire:test > /tmp/corruption-red.log 2>&1
+          rc=$?
+          set -e
+          cat /tmp/corruption-red.log
+          test "$rc" -ne 0
+          grep -F "ClassFormatError: Truncated class file" /tmp/corruption-red.log
+          echo "PROOF_CORRUPT_CLASS=RED rc=$rc"
+
+      - name: Restored exact PR head must go green off CI
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --no-tags "https://github.com/${REPO}.git" restored
+          cd restored
+          git checkout --detach "$TARGET_SHA"
+          test "$(git rev-parse HEAD)" = "$TARGET_SHA"
+          git clean -fdx
+          test -z "$(git status --porcelain)"
+          env -u GITHUB_WORKSPACE -u GITHUB_ACTIONS -u GITHUB_SHA -u RUNNER_TEMP -u A01_SUBJECT_SHA bash ./verify.sh | tee /tmp/restored-green.log
+          grep -F "RESULT: PASS" /tmp/restored-green.log
+          grep -E "SUMMARY  pass=[0-9]+  fail=0  skip=[0-9]+" /tmp/restored-green.log
+          echo "PROOF_RESTORED=GREEN"
