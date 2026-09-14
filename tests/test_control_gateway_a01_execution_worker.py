@@ -62,7 +62,7 @@ class ExecutionWorkerTests(unittest.TestCase):
         def execute(payload, context):
             self.calls.append(payload["task"])
             context.renew(checkpoint_pointer=f"test:{payload['task']}", now=self.clock[0])
-            return {"task": payload["task"], "done": True}
+            return {"task": payload["task"], "done": True, "idempotency_key": context.idempotency_key}
 
         self.worker = A01ExecutionWorker(
             self.store,
@@ -78,9 +78,14 @@ class ExecutionWorkerTests(unittest.TestCase):
         self.store.close()
         self.tmp.cleanup()
 
-    def enqueue(self, name: str, lane: str, *, order: int = 1, priority: int = 100, executor_kind: str = "TEST_EXECUTOR"):
+    def enqueue(self, name: str, lane: str, *, order: int = 1, priority: int = 100, executor_kind: str = "TEST_EXECUTOR", deps=None):
         h = overnight(name, lane, order=order, priority=priority, executor_kind=executor_kind)
-        c = helpers.make_coord(h, resource=f"RESOURCE-{lane}", graph="EXECUTION-WORKER-GRAPH")
+        c = helpers.make_coord(
+            h,
+            deps=deps or [],
+            resource=f"RESOURCE-{lane}",
+            graph="EXECUTION-WORKER-GRAPH",
+        )
         self.scheduler.enqueue(h, c, now=self.clock[0])
         return h, c
 
@@ -138,9 +143,7 @@ class ExecutionWorkerTests(unittest.TestCase):
 
         self.worker.executors["TEST_EXECUTOR"] = fail
         self.enqueue("A", "LANE-A", order=0)
-        h2 = overnight("B", "LANE-B", order=1)
-        c2 = helpers.make_coord(h2, deps=["D-A"], resource="RESOURCE-LANE-B", graph="EXECUTION-WORKER-GRAPH")
-        self.scheduler.enqueue(h2, c2, now=self.clock[0])
+        self.enqueue("B", "LANE-B", order=1, deps=["D-A"])
         result = self.worker.run_once(now=self.clock[0])["execution"]
         self.assertEqual(result["state"], "FAILED")
         self.assertEqual(result["terminal_state"], "BLOCKED")
@@ -150,17 +153,84 @@ class ExecutionWorkerTests(unittest.TestCase):
         self.assertIsNone(next_result["execution"])
         self.assertEqual(self.calls, ["A"])
 
-    def test_recovery_stales_expired_claim_before_any_work_runs(self):
+    def test_pending_claim_recovery_preserves_identity_rotates_fence_and_executes(self):
         self.enqueue("A", "LANE-A")
         claim = self.scheduler.tick(now=self.clock[0], max_claims=1, lease_seconds=30)["claims"][0]
         self.clock[0] += dt.timedelta(seconds=31)
         result = self.worker.run_once(now=self.clock[0])
+        self.assertEqual(result["recovery"]["stale_leases"], [])
+        self.assertEqual(len(result["recovery"]["resumed_leases"]), 1)
+        resumed = result["recovery"]["resumed_leases"][0]
+        self.assertEqual(resumed["lease_id"], claim["lease_id"])
+        self.assertEqual(resumed["dispatch_id"], claim["dispatch_id"])
+        self.assertGreater(resumed["fencing_token"], claim["fencing_token"])
+        self.assertEqual(result["execution"]["state"], "SUCCEEDED")
+        self.assertEqual(self.calls, ["A"])
+        claims = self.store.conn.execute("SELECT COUNT(*) n FROM claims").fetchone()["n"]
+        self.assertEqual(claims, 1)
+
+    def test_recovered_old_fence_is_rejected(self):
+        self.enqueue("A", "LANE-A")
+        claim = self.scheduler.tick(now=self.clock[0], max_claims=1, lease_seconds=30)["claims"][0]
+        self.clock[0] += dt.timedelta(seconds=31)
+        recovery = self.worker.recover(now=self.clock[0])
+        new_fence = recovery["resumed_leases"][0]["fencing_token"]
+        self.assertGreater(new_fence, claim["fencing_token"])
+        with self.assertRaises(StaleWorker):
+            self.store.heartbeat(claim["lease_id"], claim["fencing_token"], "old-worker", now=self.clock[0])
+        self.worker.renew_lease(claim["lease_id"], new_fence, now=self.clock[0])
+
+    def test_crash_recovery_replays_same_dispatch_then_resumes_next_stage(self):
+        self.enqueue("A", "LANE-A", order=1)
+        self.enqueue("B", "LANE-B", order=2)
+        claim = self.scheduler.tick(now=self.clock[0], max_claims=1, lease_seconds=30)["claims"][0]
+        bundle = self.worker._dispatch_bundle(claim["dispatch_id"])
+        self.worker._ensure_execution_record(bundle, self.clock[0])
+        self.worker._mark_attempt(claim["dispatch_id"], self.clock[0])
+        self.store.mark_dispatched(claim["dispatch_id"], f"local:{claim['dispatch_id']}", now=self.clock[0])
+        self.clock[0] += dt.timedelta(seconds=31)
+
+        first = self.worker.run_once(now=self.clock[0])
+        self.assertEqual(first["execution"]["dispatch_id"], claim["dispatch_id"])
+        self.assertEqual(first["execution"]["state"], "SUCCEEDED")
+        self.assertEqual(first["execution"]["attempt_count"], 2)
+        self.assertEqual(self.calls, ["A"])
+        only_claim = self.store.conn.execute("SELECT COUNT(*) n FROM claims").fetchone()["n"]
+        self.assertEqual(only_claim, 1)
+
+        self.clock[0] += dt.timedelta(seconds=1)
+        second = self.worker.run_once(now=self.clock[0])
+        self.assertEqual(second["execution"]["state"], "SUCCEEDED")
+        self.assertEqual(self.calls, ["A", "B"])
+
+    def test_result_ready_recovery_commits_without_rerunning_executor(self):
+        self.enqueue("A", "LANE-A")
+        claim = self.scheduler.tick(now=self.clock[0], max_claims=1, lease_seconds=30)["claims"][0]
+        bundle = self.worker._dispatch_bundle(claim["dispatch_id"])
+        self.worker._ensure_execution_record(bundle, self.clock[0])
+        self.worker._stage_result(
+            bundle,
+            terminal_state="COMPLETED",
+            result={"task": "A", "done": True},
+            error=None,
+            now=self.clock[0],
+        )
+        self.clock[0] += dt.timedelta(seconds=31)
+        result = self.worker.run_once(now=self.clock[0])
+        self.assertEqual(result["execution"]["state"], "SUCCEEDED")
+        self.assertEqual(self.calls, [])
+        self.assertEqual(result["recovery"]["stale_leases"], [])
+        self.assertEqual(len(result["recovery"]["resumed_leases"]), 1)
+
+    def test_unsupported_executor_recovery_remains_fail_closed(self):
+        self.enqueue("A", "LANE-A", executor_kind="UNKNOWN_EXECUTOR")
+        claim = self.scheduler.tick(now=self.clock[0], max_claims=1, lease_seconds=30)["claims"][0]
+        self.clock[0] += dt.timedelta(seconds=31)
+        result = self.worker.run_once(now=self.clock[0])
         self.assertIn(claim["lease_id"], result["recovery"]["stale_leases"])
+        self.assertEqual(result["recovery"]["resumed_leases"], [])
         self.assertIsNone(result["execution"])
         self.assertEqual(self.calls, [])
-        row = self.store.conn.execute("SELECT status,released_at FROM claims WHERE lease_id=?", (claim["lease_id"],)).fetchone()
-        self.assertEqual(row["status"], "STALE")
-        self.assertIsNotNone(row["released_at"])
 
     def test_normal_loop_resumes_scheduler_selected_next_stage(self):
         self.enqueue("A", "LANE-A", order=1)
