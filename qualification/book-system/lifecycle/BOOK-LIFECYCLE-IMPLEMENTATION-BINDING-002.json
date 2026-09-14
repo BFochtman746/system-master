@@ -1,0 +1,87 @@
+{
+  "binding_id": "BOOK-LIFECYCLE-IMPLEMENTATION-BINDING-002",
+  "effective_date": "2026-09-14",
+  "standing": "CURRENT_SUCCESSOR_BOOK_LIFECYCLE_IMPLEMENTATION_BINDING__BOOK_COMP_12_SEMANTIC_RECOVERY_QUALIFIED__CORE_PHYSICAL_DEPENDENCIES_OPEN",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "authority_id": "CURRENT-AUTHORITY-005",
+  "supersedes": "qualification/book-system/lifecycle/BOOK-LIFECYCLE-IMPLEMENTATION-BINDING-001.json",
+  "superseded_binding_blob_sha": "97d4aa14281d1f426fd23890f10f23bacd9493f2",
+  "qualified_implementation_subject_sha": "fe42e8526a7a73ddc19fa7d9671dcb5c7165ad9c",
+  "recovery_profile": "qualification/book-system/recovery/BOOK-SEMANTIC-RECOVERY-PROFILE-001.json",
+  "runtime": "system-master/book-system/book-semantic-recovery-profile.js",
+  "focused_test": "system-master/book-system/book-semantic-recovery-profile.test.js",
+  "qualifier": ".github/scripts/book-semantic-recovery-profile-qualify.js",
+  "lifecycle_contract_ref": "qualification/book-system/lifecycle/BOOK-LIFECYCLE-STATE-MACHINE-001.json",
+  "source_ledger_identity": {
+    "name": "BOOKS_OWNERSHIP_TRACE_002.xlsx",
+    "sheet": "Lifecycle 227",
+    "sha256": "b14c722551698eacf902836730345415090466809d2aff00cc45d960fa5181e6",
+    "atomic_operation_count": 227
+  },
+  "transition_policy": "Preserve Binding-001 exactly as historical current-at-the-time evidence. Apply only the four listed P19 disposition changes supported by the exact qualified COMP-12 subject; all other 223 operation dispositions remain identical to Binding-001.",
+  "status_overrides": [
+    {
+      "source_id": "P19-02",
+      "phase": "PRESERVATION",
+      "from": "UNIMPLEMENTED",
+      "to": "PARTIAL",
+      "component": "BOOK-COMP-12",
+      "evidence": ["qualification/book-system/recovery/BOOK-SEMANTIC-RECOVERY-PROFILE-001.json","system-master/book-system/book-semantic-recovery-profile.js","system-master/book-system/book-semantic-recovery-profile.test.js"],
+      "reason": "Book now captures exact rebuild recipe and index-version identities in the semantic manifest with deterministic closure checks; physical preservation remains CORE-owned."
+    },
+    {
+      "source_id": "P19-06",
+      "phase": "PRESERVATION",
+      "from": "UNIMPLEMENTED",
+      "to": "PARTIAL",
+      "component": "BOOK-COMP-12",
+      "evidence": ["qualification/book-system/recovery/BOOK-SEMANTIC-RECOVERY-PROFILE-001.json","system-master/book-system/book-semantic-recovery-profile.js","system-master/book-system/book-semantic-recovery-profile.test.js"],
+      "reason": "Book now snapshots edition/release lineage and parent-version identities for recovery; canonical lineage mutation/freeze remains exclusively BOOK-COMP-02."
+    },
+    {
+      "source_id": "P19-07",
+      "phase": "PRESERVATION",
+      "from": "UNIMPLEMENTED",
+      "to": "IMPLEMENTED",
+      "component": "BOOK-COMP-12",
+      "evidence": ["system-master/book-system/book-semantic-recovery-profile.js","system-master/book-system/book-semantic-recovery-profile.test.js"],
+      "reason": "Completion reporting and deterministic re-entry instructions are fully executable Book-owned behavior and distinguish current preservation from historical preserved snapshots without canonical mutation."
+    },
+    {
+      "source_id": "P19-08",
+      "phase": "PRESERVATION",
+      "from": "PARTIAL",
+      "to": "IMPLEMENTED",
+      "component": "BOOK-COMP-12",
+      "evidence": ["qualification/book-system/recovery/BOOK-SEMANTIC-RECOVERY-PROFILE-001.json","system-master/book-system/book-semantic-recovery-profile.js","system-master/book-system/book-semantic-recovery-profile.test.js"],
+      "reason": "G19/PRESERVATION_COMPLETE acceptance is executable and fail-closed: PASS requires semantic closure, admitted CORE durability evidence, destructive restore proof, exact dependency/final-expression reproduction, and exact-current Book subject identity."
+    }
+  ],
+  "effective_summary": {
+    "overall": {"IMPLEMENTED":3,"PARTIAL":51,"UNIMPLEMENTED":117,"PEER_DEPENDENCY":37,"HUMAN/EXTERNAL":19,"total":227},
+    "preservation_phase": {"total":8,"IMPLEMENTED":2,"PARTIAL":2,"UNIMPLEMENTED":0,"PEER_DEPENDENCY":4,"HUMAN/EXTERNAL":0},
+    "unchanged_operation_count": 223
+  },
+  "remaining_preservation_dependencies": {
+    "P19-01": {"status":"PEER_DEPENDENCY","provider":"CORE","meaning":"physical complete backup set"},
+    "P19-03": {"status":"PEER_DEPENDENCY","provider":"CORE","meaning":"physical archive manifest/checksum mechanics"},
+    "P19-04": {"status":"PEER_DEPENDENCY","provider":"CORE","meaning":"destructive restore execution"},
+    "P19-05": {"status":"PEER_DEPENDENCY","provider":"CORE","meaning":"physical restored digest/final-expression reproduction"},
+    "provider_interface_blocker": "No current registered public CORE/P03 durability/restore COMMAND operation was found. BOOK runtime therefore requires a CORE-supplied REGISTERED_ACTIVE operation registration and fails closed otherwise."
+  },
+  "book_comp_12_standing": {
+    "book_owned_semantic_profile": "IMPLEMENTED_AND_EXACT_SUBJECT_QUALIFIED",
+    "book_owned_restore_acceptance": "IMPLEMENTED_AND_EXACT_SUBJECT_QUALIFIED",
+    "book_owned_offline_crash_semantics": "IMPLEMENTED_AND_EXACT_SUBJECT_QUALIFIED",
+    "physical_backup_restore_mechanics": "CORE_OWNED_NOT_ABSORBED",
+    "core_public_operation_registration": "OPEN_BLOCKER",
+    "whole_component_end_to_end_provider_qualification": "BLOCKED_ON_CORE_PUBLIC_OPERATION_REGISTRATION"
+  },
+  "non_claims": [
+    "P19 peer dependencies are not reclassified as Book implementation.",
+    "No current CORE/P03 provider operation is claimed to exist or be registered.",
+    "The qualified fixture registrations in the focused test are test-only and are not production provider registrations.",
+    "BOOK-COMP-12 does not own physical storage, backup, archive, checksum or destructive-restore mechanics.",
+    "Book remains incomplete and is not whole-app qualified or production-certified."
+  ]
+}
