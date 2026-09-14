@@ -1,7 +1,7 @@
 {
   "state_id": "BOOK-SYSTEM-RECONCILED-STATE-044",
   "effective_date": "2026-09-14",
-  "standing": "PREPARED_NOT_SELECTED__BOOK_INCOMPLETE__RECOVERED_ARCHITECTURE_RECONCILED__HIGHER_LEDGER_008_010_REMAINS__IMPLEMENTATION_QUALIFICATION_PRODUCTION_OPEN",
+  "standing": "BOOK_INCOMPLETE__RECOVERED_ARCHITECTURE_RECONCILED__HIGHER_LEDGER_008_010_REMAINS__IMPLEMENTATION_QUALIFICATION_PRODUCTION_OPEN",
   "owner_path": "SYSTEM_MASTER/BOOK",
   "control_record": "qualification/book-system/BOOK-SYSTEM-CONTROL-RECORD-014.json",
   "reconciliation_record": "qualification/book-system/BOOK-SYSTEM-ARCHITECTURE-RECOVERY-RECONCILIATION-001.json",
@@ -9,12 +9,12 @@
   "current_authority_ref": "governance/CURRENT-AUTHORITY.json",
   "topology_authority": "governance/SYSTEM-TOPOLOGY-007.json",
   "completion_authority": "governance/SYSTEM-COMPLETION-STATUS-002.json",
-  "selection_status": "PREPARED_ON_MAIN__NOT_SELECTED_BY_FROZEN_CURRENT_AUTHORITY",
+  "selection_status": "SELECTED_BY_CURRENT_AUTHORITY_005",
   "historical_state": {
     "prior_state_id": "BOOK-SYSTEM-RECONCILED-STATE-043",
     "prior_control_ref": "book-system/control-v1",
     "preserve_exact_history": true,
-    "prior_b02_b_next_action_current_effect": "STALE_FOR_CURRENT_PROJECTION__DO_NOT_REPLAY",
+    "prior_b02_b_next_action_current_effect": "SUPERSEDED_FOR_CURRENT_EXECUTION__DO_NOT_REPLAY",
     "reason": "Recovered Book architecture/build-spec work continued beyond the 2026-09-12 B02-B analysis-ready snapshot."
   },
   "completion_truth": {
@@ -78,13 +78,14 @@
   },
   "next_dependency_valid_action": {
     "objective_id": "BOOK-HIGHER-LEDGER-008-010-CURRENT-DISPOSITION-001",
-    "state": "READY_AFTER_SELECTOR_PROMOTION_OR_EXPLICIT_BOOK_OWNER_EXECUTION",
+    "state": "READY",
     "action": "Reconcile BOOK-ENG-008 through BOOK-ENG-010 against current Authority-005/Topology-007 ownership and current implementation gaps; then select the first dependency-valid implementation/qualification packet.",
     "scope_reset_input": "PRODUCT-SCOPE-RESET-001 is advisory recovered planning input only until each remaining tranche is explicitly adjudicated under current authority.",
     "no_reopen_rule": "Do not reopen BOOK-ENG-001 through BOOK-ENG-007, Book Intelligence 001-021 or Story Bible SB-01 through SB-36 unless current evidence proves an exact contradiction."
   },
   "selector_promotion": {
-    "performed": false,
-    "reason": "The frozen current authority and Foundation evidence are exact-subject bound. Selecting this state requires a deliberate governance/evidence requalification transaction rather than an incidental pointer edit."
+    "performed": true,
+    "authority_id": "CURRENT-AUTHORITY-005",
+    "authority_commit": "bd9734dadd30cc2ee3250225e6b09119fc3bd650"
   }
 }
