@@ -1,80 +1,98 @@
 # MORNING-CANONICAL-RECONCILIATION-001
 
-Status: ACTIVE / TOPOLOGY-005 / PROGRAM-JOB-LOCKED
+Status: ACTIVE / CURRENT-AUTHORITY-005 / TOPOLOGY-007 / PROGRAM-JOB-LOCKED
 Owner: SYSTEM_MASTER product-root governance
 Purpose: reconcile overnight execution into live canonical owner state and publish one deterministic chat-start manifest for the new day.
 
 ## Core rule
 
-Second Shift does not become a second source of truth. `CURRENT-AUTHORITY`, its selected topology, `SYSTEM-PROGRAM-JOB-LOCK-001`, `SYSTEM-COMPLETION-STATUS-001`, live owner controls, exact completion evidence and the current obligation registry remain authoritative.
+Second Shift does not become a second source of truth. `CURRENT-AUTHORITY-005`, its selected `SYSTEM-TOPOLOGY-007`, `SYSTEM-PROGRAM-JOB-LOCK-001`, `SYSTEM-COMPLETION-STATUS-002`, live owner controls, exact completion evidence and the current obligation registry remain authoritative.
 
-SYSTEM_MASTER, CORE, LEARNING, BOOK and DOCUMENTS remain active and incomplete. PROSE is historically complete and terminally retired. It has no active owner, child/inherited execution, repair lane, qualification lane, research task, telemetry lane, successor task or claim domain.
+`SYSTEM_MASTER` and all nine active peers are incomplete. The active peers are CORE, LEARNING, BOOK, DOCUMENTS, SPREADSHEET_DATA, MEDIA, CONNECTED_ACTIONS, RESEARCH_KNOWLEDGE and PROGRAMMING.
 
-Any genuinely unfinished integration of preserved completed Prose capability is ordinary BOOK-owned work. DOCUMENTS receives no Prose work.
+PROSE is historically complete and terminally retired. It has no active owner, child/inherited execution, repair lane, qualification lane, research task, telemetry lane, successor task or claim domain. Any genuinely unfinished integration of preserved completed Prose capability is ordinary BOOK-owned work. DOCUMENTS receives no Prose work.
+
+WEBSITE_BUILDING is C40 under PROGRAMMING and is not a peer or independent execution lane.
 
 ## Required read set
 
 1. current `main` and `governance/CURRENT-AUTHORITY.json`;
 2. selected topology, program job lock, completion status, obligation registry and expectation registry;
 3. completion, reallocation and repair ledgers/registries;
-4. Second Shift registry, every active owner file and any factual active-lane event ledgers;
-5. live controls for CORE, LEARNING, BOOK and DOCUMENTS;
-6. Programming work-program lock/system packet when Programming or Knowledge Recovery is relevant;
-7. overnight branches/runs/receipts/evidence referenced by active lanes.
+4. Second Shift registry, every current execution-ready peer owner file and factual active-lane event ledgers;
+5. live controls for all affected active peers;
+6. Programming continuity lock/system packet when Programming or Knowledge Recovery is relevant;
+7. overnight branches/runs/receipts/evidence referenced by active lanes;
+8. current morning pointer/manifest as cache only.
 
-Historical Prose records may be read as provenance only. Any metadata that still labels PROSE active is `STALE_ARCHITECTURE_PENDING_RECONCILIATION` and cannot dispatch.
+Historical Prose records and superseded topology/manifests may be read as provenance only. Metadata conflicting with CURRENT-AUTHORITY-005 / Topology 007 is stale for dispatch.
 
 ## Reconciliation transaction
 
-For each active peer lane:
+For each active execution-ready peer lane:
 
 1. resolve the exact live owner control head;
-2. verify the delegation/objective conforms to topology, program job lock and completion status;
+2. verify delegation/objective conforms to topology, program job lock and completion status;
 3. reject overlapping mutation claims;
 4. classify overnight result as ALREADY_CANONICAL, ADMISSIBLE_DELTA, CANDIDATE_ONLY, BLOCKED_HIGHER_AUTHORITY, SUPERSEDED, STALE, REWORK_REQUIRED or INVALID;
 5. preserve exact historical evidence; never rewrite receipts or transfer PASS;
-6. reject cross-lane product work, retired-system resurrection and false system-completion claims;
+6. reject cross-lane product work, retired-system resurrection, Website Building peer promotion and false system-completion claims;
 7. admit only owner-valid deltas allowed by canonical-writer rules;
 8. update completion/obligation/repair/delegation state only when evidence supports it;
 9. bind the next dependency-valid successor inside the same active lane after completion/material block;
-10. re-resolve live owner state after mutation.
+10. re-resolve live owner and authority state after mutation.
 
 ## Auto-provisioning invariant
 
-Compare `SYSTEM-TOPOLOGY-005.json::peer_system_ids` with `SECOND-SHIFT-REGISTRY-001.json::owner_files` on every reconciliation. Missing coverage for an already-declared peer is provisioned only when owner path, control ref, live head and current obligation are machine-unambiguous. Missing coverage never creates a new system. Retired systems are never provisioned or resurrected.
+Compare the selected topology's `execution_readiness.execution_ready_peer_system_ids` with `SECOND-SHIFT-REGISTRY-001.json::owner_files` and telemetry allowed lanes on every reconciliation. Current expected set is exactly the nine active peers.
+
+Missing coverage may be provisioned only for an already-declared execution-ready peer when owner path, control ref, live head and current obligation are machine-unambiguous. Missing coverage never creates a new system. Retired systems are never provisioned or resurrected. Website Building uses PROGRAMMING coverage.
 
 ## Locked lane jobs
 
-CORE: finish shared Foundation/Spine and System Master integration primitives. While `SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001` is selected, Programming proving-corpus recovery is the highest discretionary priority, followed by remaining authorized catalog/archive recovery. Core does not take peer product or Programming engineering semantics.
+CORE: shared Foundation/Spine and System Master integration infrastructure. `FOUNDATION-1-0-CLOSURE-001` remains central. While Knowledge Recovery 001 is selected, Programming source/custody/provenance recovery is the highest discretionary System Master support priority without taking Programming product semantics.
 
-LEARNING: finish Learning and integrate it upward into System Master without crossing into Book, Documents or Programming work.
+LEARNING: Learning product/runtime/curriculum/mastery/assessment/evidence and upward integration.
 
-BOOK: finish Book. Own any genuinely unfinished integration of preserved completed Prose capability through Book adapters/context/compiler/routing/orchestration while retaining canonical manuscript, Story Bible, author, lifecycle, admission and publication authority.
+BOOK: canonical Book/manuscript/Story Bible/author/lifecycle/admission/publication semantics plus only genuinely unfinished BOOK-owned integration of preserved completed Prose capability.
 
-DOCUMENTS: finish Documents and integrate it upward into System Master. Documents receives no Prose work.
+DOCUMENTS: document/artifact mechanics and upward integration; no Prose work.
 
-PROGRAMMING remains an active non-peer engineering work program. Knowledge Recovery is a Core-administered support program and does not create a Programming peer lane.
+SPREADSHEET_DATA: spreadsheet/math/data/ledger semantics.
+
+MEDIA: audiobook/image/media/photo/video/voice semantics.
+
+CONNECTED_ACTIONS: browser/calendar/comms/plugin action policy; explicit user/external authority remains required for side effects.
+
+RESEARCH_KNOWLEDGE: research/knowledge/geo retrieval and provenance semantics.
+
+PROGRAMMING: preserved software-engineering continuity including AUTOMATION, CODE and WEBSITE_BUILDING C40. Knowledge Recovery remains CORE support; browser side-effect policy remains CONNECTED_ACTIONS.
 
 ## Morning seal
 
-Publish one append-only daily manifest at `governance/morning/daily/YYYY-MM-DD/DAILY-CHAT-BOOTSTRAP.json` and update `governance/morning/LATEST-BOOTSTRAP-POINTER.json` when the morning process executes.
+When the morning process actually executes, publish one append-only daily manifest at `governance/morning/daily/YYYY-MM-DD/DAILY-CHAT-BOOTSTRAP.json` and update `governance/morning/LATEST-BOOTSTRAP-POINTER.json`.
 
-The manifest is a fast-start cache and reconciliation receipt, not authority over later repository movement.
+The manifest is a fast-start cache and reconciliation receipt, not authority over later repository movement. Never fabricate a fresh manifest or rewrite a historical receipt merely to match a later topology.
 
 ## Required chat packets
 
 - MASTER_ROOT — SYSTEM_MASTER product-root integration controller;
-- LEARNING — SYSTEM_MASTER/LEARNING;
-- BOOK — SYSTEM_MASTER/BOOK, including any Book-owned completed-Prose integration lineage;
-- DOCUMENTS — SYSTEM_MASTER/DOCUMENTS;
-- PROGRAMMING_WORK_PROGRAM when Programming work remains open or is requested.
+- CORE;
+- LEARNING;
+- BOOK;
+- DOCUMENTS;
+- SPREADSHEET_DATA;
+- MEDIA;
+- CONNECTED_ACTIONS;
+- RESEARCH_KNOWLEDGE;
+- PROGRAMMING.
 
-PROSE never receives a packet or focus role that creates active execution. A user request about Prose history/integration resolves to BOOK for any genuinely open integration and to historical evidence for completed Prose itself.
+PROSE never receives an active packet. A user request about unfinished integration of preserved completed Prose capability resolves to BOOK. Website Building resolves to PROGRAMMING.
 
 ## Chat-ready gate
 
-A packet is CHAT_READY only when current authority/topology resolve; job lock and completion status were read; live owner head was checked; current objective belongs to that owner/job; overnight delta is reconciled; repair/delegation state is current; peer coverage matches topology; no retired-system route, false completion, overlapping claim or cross-lane ownership remains; and the next step is dependency-valid or its exact blocker is identified.
+A packet is CHAT_READY only when current authority/topology resolve; job lock and completion status were read; live owner head was checked; current objective belongs to that owner/job; overnight delta is reconciled; repair/delegation state is current; execution-ready peer coverage matches topology; no retired-system route, false completion, overlapping claim, C40 peer promotion or cross-lane ownership remains; and the next step is dependency-valid or its exact blocker is identified.
 
 ## Final safeguard
 
-Prefer truthful NOT_READY over fabricated certainty. Never transfer historical PASS into changed integration bytes, never move product ownership across peer lanes, never resurrect retired Prose and never synthesize human/author/private/native/external/publication/production authority.
+Prefer truthful NOT_READY over fabricated certainty. Never transfer historical PASS into changed bytes, never move product ownership across peer lanes, never resurrect retired Prose, never create Website Building as a tenth peer and never synthesize human/author/private/native/external/publication/production authority.
