@@ -22,12 +22,22 @@ jobs:
   reconcile-foundation-census:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
+    env:
+      FOUNDATION_SUBJECT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
     steps:
       - name: Checkout exact subject
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 1
           persist-credentials: false
+
+      - name: Prove checked-out subject identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${FOUNDATION_SUBJECT_SHA}"
+          echo "FOUNDATION_SUBJECT_SHA=${FOUNDATION_SUBJECT_SHA}"
 
       - name: Parse current census inputs
         shell: bash
@@ -35,7 +45,7 @@ jobs:
           set -euo pipefail
           node --check .github/scripts/foundation-closure-matrix.js
           node --check .github/scripts/foundation-closure-reconcile.js
-          node -e "for (const p of ['governance/CURRENT-AUTHORITY.json','governance/census/SYSTEM-MASTER-FOUNDATION-CLOSURE-CENSUS-001.json']) JSON.parse(require('fs').readFileSync(p,'utf8'));"
+          node -e "for (const p of ['governance/CURRENT-AUTHORITY.json','governance/census/SYSTEM-MASTER-FOUNDATION-CLOSURE-CENSUS-001.json','governance/census/FOUNDATION-CLOSURE-EVIDENCE-REGISTRY-001.json']) JSON.parse(require('fs').readFileSync(p,'utf8'));"
 
       - name: Reconcile current authority pass one
         shell: bash
