@@ -93,7 +93,33 @@ for s in $(ls .github/scripts | grep qualify | grep -E '\.(js|py)$' | sort); do
   fi
 done
 
-hr; echo "4. ASSURANCE STANDARDS"; hr
+hr; echo "4. FOUNDATION CLOSURE CURRENT-INVENTORY AUTHORITY"; hr
+# The current matrix must enumerate exclusively from CURRENT-AUTHORITY's selected
+# capability crosswalk. Historical census/P6 allocation artifacts remain evidence,
+# never inventory authority. The generator also fail-closes if current allocation
+# contains an owned/deferred module that the selected crosswalk omits or disagrees on.
+if matrix_summary=$(node .github/scripts/foundation-closure-matrix.js --summary 2>&1); then
+  if MATRIX_SUMMARY="$matrix_summary" node - <<'NODE'
+const summary = JSON.parse(process.env.MATRIX_SUMMARY);
+const authority = require('./governance/CURRENT-AUTHORITY.json');
+const guard = summary.inventory_guard || {};
+if (summary.inventory_source !== authority.capability_crosswalk) process.exit(1);
+if (guard.source !== authority.capability_crosswalk) process.exit(1);
+if (guard.historical_inventory_fallback !== false) process.exit(1);
+if (summary.total_rows !== guard.capability_count + guard.platform_count) process.exit(1);
+NODE
+  then
+    ok "foundation-closure-matrix current crosswalk inventory authority"
+  else
+    bad "foundation-closure-matrix inventory authority assertion"
+    sed -n '1,12p' <<< "$matrix_summary" | sed 's/^/        /'
+  fi
+else
+  bad "foundation-closure-matrix current inventory generation"
+  sed -n '1,12p' <<< "$matrix_summary" | sed 's/^/        /'
+fi
+
+hr; echo "5. ASSURANCE STANDARDS"; hr
 # Resolve the base through the checker's portable default (`origin/main`) instead of
 # requiring a local branch literally named `main`; GitHub PR merge checkouts are detached.
 # The checker emits compact JSON for "no changes" and pretty JSON when files changed.
