@@ -1,0 +1,321 @@
+{
+  "architecture_id": "BOOK-CANONICAL-COMPONENT-ARCHITECTURE-001",
+  "effective_date": "2026-09-14",
+  "standing": "CANONICAL_BOOK_INTERNAL_COMPONENT_ARCHITECTURE_DECIDED__IMPLEMENTATION_AND_QUALIFICATION_OPEN",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "parent_authority": {
+    "authority_id": "CURRENT-AUTHORITY-005",
+    "topology_id": "SYSTEM-TOPOLOGY-007",
+    "owner_allocation_id": "SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006",
+    "capability_crosswalk_id": "SYSTEM-MASTER-CAPABILITY-CROSSWALK-003",
+    "rule": "This record refines the internal architecture of the existing BOOK peer only. It creates no peer, transfers no cross-peer semantic authority, changes no System Master topology and does not resurrect PROSE. Parent authority wins on conflict."
+  },
+  "decision": {
+    "book_peer_count": 1,
+    "canonical_internal_component_count": 10,
+    "active_trace_subject_denominator": 755,
+    "active_trace_subjects_accounted": 755,
+    "orphan_trace_subjects": 0,
+    "duplicate_top_level_component_owners": 0,
+    "prose_active_component": false,
+    "book_intelligence_packet_ids_are_top_level_components": false,
+    "book_eng_packet_ids_are_top_level_components": false,
+    "architecture_rule": "Historical packet, module and specialist authority IDs remain immutable lineage and may survive as aliases or bounded subauthorities. Canonical product components are stable semantic boundaries, not packet numbers."
+  },
+  "components": [
+    {
+      "component_id": "BOOK-WRITING-001",
+      "name": "Writing and Authoring",
+      "trace_subjects": 270,
+      "historical_primary_owner": "MOD-WRITING-001",
+      "owns": [
+        "author intent and audience semantics",
+        "book architecture and unit design semantics",
+        "drafting and continuation semantics",
+        "developmental, macro, line, copy and text-proof editing semantics",
+        "voice, style and accepted-expression decision semantics",
+        "candidate-to-accepted-text semantic admission requirements"
+      ],
+      "absorbed_or_historical_facets": [
+        "PROSE-CRAFT capability evidence is historical/completed input consumed by Book-owned integration; PROSE is not an active component or authority lane"
+      ],
+      "must_not_own": [
+        "canonical manuscript persistence mechanics",
+        "Story Bible canon truth",
+        "general research truth",
+        "model/provider execution authority",
+        "generic document rendering mechanics"
+      ]
+    },
+    {
+      "component_id": "BOOK-MANUSCRIPT-001",
+      "name": "Manuscript, Work and Edition Identity",
+      "trace_subjects": 72,
+      "historical_primary_owner": "MOD-MANUSCRIPT-001",
+      "owns": [
+        "Work, Expression, Manifestation and Item identity",
+        "durable manuscript structure and revision identity",
+        "edition and package identity",
+        "Book-specific version lineage and reversible-history semantics",
+        "semantic import acceptance and loss/conflict accounting"
+      ],
+      "must_not_own": [
+        "raw artifact/blob custody",
+        "generic DOCX/PDF/OCR mechanics",
+        "accepted-expression authorship semantics",
+        "Story Bible canon truth"
+      ]
+    },
+    {
+      "component_id": "BOOK-STORY-BIBLE-001",
+      "name": "Story Bible, Canon and Continuity",
+      "trace_subjects": 46,
+      "historical_primary_owner": "MOD-STORYBIBLE-001",
+      "owns": [
+        "author-ratified canon and world-state semantics",
+        "entity, alias, state, relation, event, temporal, spatial, object and knowledge models",
+        "promises, reveals, world rules and continuity findings",
+        "branch, retcon and merge canon lineage",
+        "Book semantic context selection and canon delta emission"
+      ],
+      "absorbed_or_overlay_facets": [
+        "BOOK-KNOWLEDGE-CANON-001 lifecycle sufficiency/promotion policy is an overlay across Story Bible and Book Lifecycle, not an eleventh component"
+      ],
+      "must_not_own": [
+        "silent manuscript mutation",
+        "external factual truth",
+        "collaboration principal/ACL truth",
+        "downstream generic storage/index execution"
+      ]
+    },
+    {
+      "component_id": "BOOK-RESEARCH-EVIDENCE-001",
+      "name": "Book Research and Evidence",
+      "trace_subjects": 48,
+      "historical_primary_owner": "BOOK-RESEARCH-EVIDENCE-001",
+      "owns": [
+        "Book-specific research questions and evidence needs",
+        "claim-to-evidence workflow semantics",
+        "Book-side source admission, applicability and verification state",
+        "citation/evidence use decisions inside Book workflows"
+      ],
+      "must_not_own": [
+        "general research retrieval/provenance authority",
+        "external source factual truth",
+        "Story Bible canon ratification"
+      ]
+    },
+    {
+      "component_id": "BOOK-LIFECYCLE-001",
+      "name": "Book Workflow and Lifecycle",
+      "trace_subjects": 34,
+      "historical_primary_owner": "BOOK-LIFECYCLE-RUNTIME-001",
+      "owns": [
+        "Book phases, gates, exact-next and reopen semantics",
+        "Book-specific admission and invalidation rules",
+        "workflow state projections and progress truth",
+        "coordination of candidate generation, review, ratification and canonical admission",
+        "Book-side retry/idempotency/cancel/resume policy atop shared runtime"
+      ],
+      "canonical_mutation_rule": "Canonical manuscript mutation is admitted only through the SYSTEM_MASTER/BOOK canonical admission gate. Delegated services may propose, analyze, render, store or transport but may not acquire canonical Book write authority.",
+      "must_not_own": [
+        "shared durable-job engine semantics",
+        "shared data transaction mechanics",
+        "external side-effect authority",
+        "other components' semantic truth"
+      ]
+    },
+    {
+      "component_id": "BOOK-RECOVERY-001",
+      "name": "Existing-Book Recovery and Reconstruction",
+      "trace_subjects": 26,
+      "historical_primary_owner": "BOOK-EXISTING-BOOK-RECOVERY-001",
+      "owns": [
+        "existing-book semantic reconstruction",
+        "recovery completeness and uncertainty state",
+        "conflict preservation and author reconciliation workflow",
+        "candidate reconstruction of manuscript and Story Bible state with source lineage"
+      ],
+      "must_not_own": [
+        "generic OCR/PDF/parser mechanics",
+        "raw source custody",
+        "automatic canonization of recovered or inferred material"
+      ]
+    },
+    {
+      "component_id": "BOOK-COLLABORATION-001",
+      "name": "Book Collaboration, Roles and Visibility",
+      "trace_subjects": 3,
+      "historical_primary_owner": "BOOK-COLLAB-001",
+      "owns": [
+        "Book collaborator roles and participation semantics",
+        "Book ACL/visibility policy semantics",
+        "authorization outcome consumption for author/canon actions"
+      ],
+      "must_not_own": [
+        "shared identity/authentication infrastructure",
+        "Story Bible canon meaning",
+        "external communication side effects"
+      ]
+    },
+    {
+      "component_id": "BOOK-RIGHTS-001",
+      "name": "Rights and Permissions",
+      "trace_subjects": 25,
+      "historical_primary_owner": "RIGHTS-001",
+      "owns": [
+        "Book rights/permission/license record semantics",
+        "rights readiness and unresolved-rights findings",
+        "binding Book publication/reuse decisions to real rights evidence"
+      ],
+      "authority_fence": "This component records and applies rights evidence but may not synthesize legal clearance, permission, contract, copyright ownership or external legal standing that has not actually been established.",
+      "must_not_own": [
+        "external legal authority",
+        "publication side-effect authority",
+        "artifact storage mechanics"
+      ]
+    },
+    {
+      "component_id": "BOOK-PUBLICATION-001",
+      "name": "Publication, Release and External Handoff",
+      "trace_subjects": 146,
+      "historical_subauthorities": [
+        "UAF-BOOK-INTELLIGENCE-014",
+        "UAF-BOOK-INTELLIGENCE-015",
+        "UAF-BOOK-INTELLIGENCE-016",
+        "UAF-BOOK-INTELLIGENCE-017",
+        "UAF-BOOK-INTELLIGENCE-021"
+      ],
+      "owns": [
+        "Book-specific proof/production-integrity semantics",
+        "publication product and metadata readiness semantics",
+        "release plan and release-state semantics",
+        "post-release verification and distribution-integrity semantics",
+        "publisher/agent submission, package, handoff and external-response state"
+      ],
+      "baseline_scope": [
+        "DOCX/PDF manuscript output readiness is core Book product scope"
+      ],
+      "triggered_scope": [
+        "EPUB-specific production",
+        "accessibility/channel certification",
+        "provider-specific publication proof",
+        "actual external release or submission"
+      ],
+      "delegation_rules": [
+        "DOCUMENTS owns generic DOCX/PDF/EPUB/file/rendering mechanics",
+        "CONNECTED_ACTIONS owns consequential external browser/communication/plugin side effects",
+        "Book owns the semantic decision, readiness, state and reconciliation of those operations"
+      ]
+    },
+    {
+      "component_id": "BOOK-PRESERVATION-001",
+      "name": "Preservation, Restore and Edition Continuity",
+      "trace_subjects": 85,
+      "historical_subauthorities": [
+        "UAF-BOOK-INTELLIGENCE-018",
+        "UAF-BOOK-INTELLIGENCE-019",
+        "UAF-BOOK-INTELLIGENCE-020"
+      ],
+      "owns": [
+        "Book preservation/archival-continuity requirements",
+        "Book backup/restore semantic completeness and recovery-point expectations",
+        "later-edition re-entry and revision-lineage semantics",
+        "semantic delta impact classification and selective Book requalification decisions",
+        "Book-level offline/endurance continuity requirements"
+      ],
+      "delegation_rules": [
+        "CORE/DATA/artifact services own generic durable storage, transaction, backup and recovery mechanics",
+        "Book owns what constitutes a semantically complete and usable Book restore and which Book subjects become stale after accepted changes"
+      ]
+    }
+  ],
+  "trace_partition": {
+    "BOOK-WRITING-001": 270,
+    "BOOK-MANUSCRIPT-001": 72,
+    "BOOK-STORY-BIBLE-001": 46,
+    "BOOK-RESEARCH-EVIDENCE-001": 48,
+    "BOOK-LIFECYCLE-001": 34,
+    "BOOK-RECOVERY-001": 26,
+    "BOOK-COLLABORATION-001": 3,
+    "BOOK-RIGHTS-001": 25,
+    "BOOK-PUBLICATION-001": 146,
+    "BOOK-PRESERVATION-001": 85,
+    "total": 755
+  },
+  "higher_ledger_008_010_disposition": {
+    "BOOK-ENG-008": {
+      "disposition": "SPLIT_AND_SUBSUMED_INTO_CANONICAL_ARCHITECTURE",
+      "core": "Book publication readiness plus DOCX/PDF outcome remains core through BOOK-PUBLICATION-001 with DOCUMENTS mechanics delegated",
+      "triggered": "EPUB/accessibility/channel/provider certification and external release remain trigger-gated",
+      "new_top_level_component_required": false
+    },
+    "BOOK-ENG-009": {
+      "disposition": "PROMOTED_SHARED_CRITICAL_BOOK_OUTCOME",
+      "component": "BOOK-PRESERVATION-001",
+      "rule": "Preservation/restore is ahead of specialist publication features in implementation dependency order; generic storage/recovery remains delegated to CORE/DATA/artifact infrastructure."
+    },
+    "BOOK-ENG-010": {
+      "disposition": "REMOVED_FROM_PRODUCT_COMPONENT_CRITICAL_PATH__PRESERVED_AS_QUALIFICATION_HISTORY",
+      "replacement": "BOOK-QUALIFICATION-PROFILE-001",
+      "replacement_semantics": "compact deterministic regression, representative end-to-end Book journeys, role/model requalification on material change, and independent/human quality gates where applicable",
+      "new_top_level_component_required": false
+    }
+  },
+  "shared_peer_interfaces": {
+    "CORE": "shared durable jobs, transaction/data mechanics, artifact/evidence custody, assurance, continuity, resource governance and A-01 infrastructure",
+    "DOCUMENTS": "generic DOCX/PDF/EPUB/OCR/file/document artifact mechanics",
+    "RESEARCH_KNOWLEDGE": "general research retrieval, knowledge and provenance semantics",
+    "CONNECTED_ACTIONS": "external browser/communication/plugin/publication side-effect execution under explicit authority",
+    "MEDIA": "headless image/audio/video/audiobook/media production when Book workflows request it",
+    "SPREADSHEET_DATA": "spreadsheet/data processing only when a Book workflow explicitly needs it",
+    "PROGRAMMING": "code/automation/website capabilities only through explicit cross-peer interfaces",
+    "LEARNING": "no Book semantic ownership transfer; optional learning interfaces only when explicitly invoked"
+  },
+  "user_experience_projection": {
+    "book_is_first_class_durable_experience": true,
+    "internal_component_count_exposed_to_user": false,
+    "user_facing_stage_model_rule": "The 227-step lifecycle remains internal planning/qualification intelligence. UI should project a small stage model, automatically resolving steps that are inapplicable, already satisfied or automatic.",
+    "headless_default": [
+      "document rendering/export mechanics",
+      "research retrieval mechanics",
+      "model execution",
+      "external side-effect execution",
+      "media production",
+      "qualification harnesses"
+    ]
+  },
+  "non_components": [
+    "PROSE",
+    "PROSE-CRAFT as an active owner lane",
+    "BOOK-KNOWLEDGE-CANON-001 as a separate product component",
+    "UAF-BOOK-INTELLIGENCE-014 through 021 as eight separate product components",
+    "BOOK-ENG-001 through BOOK-ENG-010 as product components",
+    "BOOK-QUALIFICATION-PROFILE-001 as a product component",
+    "generic Documents/Research/Connected Actions/Core engines"
+  ],
+  "evidence_and_lineage": {
+    "ownership_trace": "BOOKS_OWNERSHIP_TRACE_002.xlsx",
+    "implementation_dag": "BOOKS_IMPLEMENTATION_DAG_004.xlsx",
+    "book_build_readiness": "BOOKS_BUILD_READINESS_003.xlsx",
+    "story_bible_closure": "UAF-BOOK-STORYBIBLE-CLOSURE-AUDIT-001-REPORT.md",
+    "book_architecture_recovery": "qualification/book-system/BOOK-SYSTEM-ARCHITECTURE-RECOVERY-RECONCILIATION-001.json",
+    "current_book_control": "qualification/book-system/BOOK-SYSTEM-CONTROL-RECORD-014.json",
+    "scope_reset_input": "PRODUCT-SCOPE-RESET-001.md",
+    "lineage_rule": "Historical artifacts, packet IDs, evidence labels and PASS scope remain unchanged. This record is a current component projection, not a retroactive rewrite."
+  },
+  "completion_truth": {
+    "architecture_component_decision_complete": true,
+    "book_system_complete": false,
+    "computer_implementation_complete": false,
+    "whole_app_executable_qualification_complete": false,
+    "native_provider_fidelity_complete": false,
+    "human_quality_evidence_complete": false,
+    "production_certified": false
+  },
+  "promotion_policy": {
+    "global_current_authority_pointer_changed_by_this_record": false,
+    "reason": "Do not create avoidable CURRENT-AUTHORITY exact-subject churn merely to record an internal Book component decision. Promote the next Book control/state pointer in a deliberate batched Book authority transaction after downstream control artifacts are prepared.",
+    "next_book_control_effect": "BOOK-HIGHER-LEDGER-008-010-CURRENT-DISPOSITION-001 is architecturally resolved by this record; the next Book control revision should select the first dependency-valid implementation/qualification slice without reopening BOOK-ENG-001..007, Book Intelligence 001..021 or Story Bible SB-01..36 absent exact contradictory evidence."
+  }
+}
