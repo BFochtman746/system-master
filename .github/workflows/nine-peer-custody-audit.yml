@@ -1,0 +1,86 @@
+name: Nine-peer capability custody audit
+
+on:
+  push:
+    branches:
+      - recovery/nine-peer-sole-custodian-001
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout diagnostic branch
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Enumerate branch-head custody for topology-required capability slices
+        shell: bash
+        env:
+          SOURCE_BRANCH: apply-updates-008
+          SOURCE_SHA: 1379fdbab3b4a452dcf3db228ce7b43fd7e86369
+        run: |
+          set -euo pipefail
+          git fetch --prune origin '+refs/heads/*:refs/remotes/origin/*'
+          actual="$(git rev-parse "origin/${SOURCE_BRANCH}")"
+          test "$actual" = "$SOURCE_SHA"
+
+          cat > /tmp/candidates.tsv <<'EOF'
+          CORE/CHAT	.github/scripts/chat-foundation-qualify.py
+          CORE/CHAT	.github/workflows/chat-foundation-qualification.yml
+          CORE/CHAT	qualification/chat/corpus/basic/chat.json
+          CORE/CHAT	tests/test_chat_turn_plan.py
+          CORE/CHAT	tools/chat_turn_plan.py
+          MEDIA/AUDIOBOOK	.github/scripts/audiobook-foundation-qualify.py
+          MEDIA/AUDIOBOOK	.github/workflows/audiobook-foundation-qualification.yml
+          MEDIA/AUDIOBOOK	qualification/audiobook/corpus/local-basic/README.md
+          MEDIA/AUDIOBOOK	qualification/audiobook/corpus/local-basic/audiobook.json
+          MEDIA/AUDIOBOOK	qualification/audiobook/corpus/local-basic/chapters/chapter-01.txt
+          MEDIA/AUDIOBOOK	tests/test_audiobook_builder.py
+          MEDIA/AUDIOBOOK	tools/audiobook_builder.py
+          PROGRAMMING/AUTOMATION	.github/scripts/automation-foundation-qualify.py
+          PROGRAMMING/AUTOMATION	.github/workflows/automation-foundation-qualification.yml
+          PROGRAMMING/AUTOMATION	qualification/automation/corpus/basic/automation.json
+          PROGRAMMING/AUTOMATION	tests/test_automation_plan.py
+          PROGRAMMING/AUTOMATION	tools/automation_plan.py
+          CONNECTED_ACTIONS/BROWSER	.github/scripts/browser-foundation-qualify.py
+          CONNECTED_ACTIONS/BROWSER	.github/workflows/browser-foundation-qualification.yml
+          CONNECTED_ACTIONS/BROWSER	qualification/browser/corpus/basic/browser.json
+          CONNECTED_ACTIONS/BROWSER	tests/test_browser_action_plan.py
+          CONNECTED_ACTIONS/BROWSER	tools/browser_action_plan.py
+          CONNECTED_ACTIONS/CALENDAR	.github/scripts/calendar-foundation-qualify.py
+          CONNECTED_ACTIONS/CALENDAR	.github/workflows/calendar-foundation-qualification.yml
+          CONNECTED_ACTIONS/CALENDAR	qualification/calendar/corpus/basic/calendar.json
+          CONNECTED_ACTIONS/CALENDAR	tests/test_calendar_action_plan.py
+          CONNECTED_ACTIONS/CALENDAR	tools/calendar_action_plan.py
+          EOF
+
+          echo 'CAPABILITY_CUSTODY_AUDIT_V1'
+          echo "source_branch=${SOURCE_BRANCH}"
+          echo "source_sha=${SOURCE_SHA}"
+          printf 'capability\tpath\tbranch_head_count\tsole_custodian\tsource_blob\tbranch_heads\n'
+
+          while IFS=$'\t' read -r capability path; do
+            source_blob="$(git rev-parse "${SOURCE_SHA}:${path}")"
+            mapfile -t refs < <(
+              git for-each-ref --format='%(refname:short)' refs/remotes/origin \
+                | grep -v '^origin/HEAD$' \
+                | while read -r ref; do
+                    if git cat-file -e "${ref}:${path}" 2>/dev/null; then
+                      printf '%s\n' "$ref"
+                    fi
+                  done \
+                | sort
+            )
+            count="${#refs[@]}"
+            sole='NO'
+            if [[ "$count" -eq 1 && "${refs[0]}" == "origin/${SOURCE_BRANCH}" ]]; then
+              sole='YES'
+            fi
+            joined="$(IFS=,; echo "${refs[*]}")"
+            printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$capability" "$path" "$count" "$sole" "$source_blob" "$joined"
+          done < /tmp/candidates.tsv
