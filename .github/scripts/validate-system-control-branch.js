@@ -13,7 +13,26 @@ const subjectRoot = process.env.SYSTEM_CONTROL_SUBJECT_ROOT;
 const branch = process.env.SYSTEM_CONTROL_BRANCH;
 if (!policyRoot || !subjectRoot || !branch) fail('SYSTEM_POLICY_ROOT, SYSTEM_CONTROL_SUBJECT_ROOT and SYSTEM_CONTROL_BRANCH are required');
 
-const topology = JSON.parse(fs.readFileSync(path.join(policyRoot, 'governance', 'SYSTEM-TOPOLOGY-002.json'), 'utf8'));
+// The selected topology is whatever governance/CURRENT-AUTHORITY.json points at.
+// Hardcoding a version here is what let this validator enforce retired topology 002
+// while authority had already moved to 005.
+const authorityPath = path.join(policyRoot, 'governance', 'CURRENT-AUTHORITY.json');
+if (!fs.existsSync(authorityPath)) fail('governance/CURRENT-AUTHORITY.json missing from policy root');
+let authority;
+try {
+  authority = JSON.parse(fs.readFileSync(authorityPath, 'utf8'));
+} catch (error) {
+  fail(`CURRENT-AUTHORITY.json is invalid JSON: ${error.message}`);
+}
+if (!authority.topology) fail('CURRENT-AUTHORITY.json does not select a topology');
+const topologyPath = path.join(policyRoot, ...authority.topology.split('/'));
+if (!fs.existsSync(topologyPath)) fail(`selected topology missing at ${authority.topology}`);
+let topology;
+try {
+  topology = JSON.parse(fs.readFileSync(topologyPath, 'utf8'));
+} catch (error) {
+  fail(`${authority.topology} is invalid JSON: ${error.message}`);
+}
 if ((topology.product_root || {}).product_id !== 'SYSTEM_MASTER') fail('policy topology must declare SYSTEM_MASTER product root');
 const expectedByBranch = Object.fromEntries((topology.canonical_internal_systems || []).map((entry) => [entry.control_ref, entry]));
 const system = expectedByBranch[branch];

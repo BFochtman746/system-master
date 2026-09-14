@@ -194,7 +194,10 @@ else {
   else if (terminal.has(current.state)) finding('ERROR', 'CENTRAL_NEXT_OBJECTIVE_TERMINAL', 'central_next_objective is terminal', { objective_id: central, state: current.state });
 }
 
-const coverage = runNode(coverageScript, noLive ? ['--no-live'] : ['--watchdog']);
+// The coverage gate owns its own severity policy. Passing --watchdog used to
+// flip WARN findings into ERRORs here only, so the same repository state
+// passed when the gate ran alone and failed when it ran under the reconciler.
+const coverage = runNode(coverageScript, noLive ? ['--no-live'] : []);
 if (coverage.stdout) process.stdout.write(coverage.stdout);
 if (coverage.stderr) process.stderr.write(coverage.stderr);
 if (coverage.status !== 0) finding('ERROR', 'SECOND_SHIFT_OWNER_COVERAGE_FAILED', 'registry-driven Second Shift owner coverage failed', { exit_status: coverage.status });
