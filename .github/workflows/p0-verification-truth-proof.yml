@@ -1,0 +1,115 @@
+name: P0 Verification Truth Proof
+
+on:
+  push:
+    branches:
+      - ops/p0-verification-proof-20260914
+
+permissions:
+  contents: read
+
+jobs:
+  prove-p0-verification-truth:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      TARGET_MAIN_SHA: 8f96b83dec8ca7592f31d32417f3b1a2a84ef58d
+    steps:
+      - name: Checkout exact clean main snapshot
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TARGET_MAIN_SHA }}
+          fetch-depth: 1
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Prove discovery-floor failure
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/p0-proof"
+          git reset --hard "$TARGET_MAIN_SHA"
+          git clean -xfd
+          test -z "$(git status --porcelain)"
+
+          mvn -B -Dstyle.color=never clean test-compile -DskipTests
+          mapfile -t classes < <(find target/classes -type f -name '*Test.class' ! -name '*$*' | sort)
+          baseline=${#classes[@]}
+          printf 'baseline_discovered_classes=%s\n' "$baseline" | tee "$RUNNER_TEMP/p0-proof/discovery-floor.txt"
+          if (( baseline < 20 )); then
+            echo "baseline already below discovery floor: $baseline" | tee -a "$RUNNER_TEMP/p0-proof/discovery-floor.txt"
+            exit 1
+          fi
+          remove_count=$((baseline - 19))
+          if (( remove_count < 1 )); then
+            echo "could not force below-floor state from baseline=$baseline" | tee -a "$RUNNER_TEMP/p0-proof/discovery-floor.txt"
+            exit 1
+          fi
+          for ((i=0; i<remove_count; i++)); do
+            echo "removing ${classes[$i]}" | tee -a "$RUNNER_TEMP/p0-proof/discovery-floor.txt"
+            rm -f "${classes[$i]}"
+          done
+
+          set +e
+          mvn -B -Dstyle.color=never surefire:test > "$RUNNER_TEMP/p0-proof/discovery-floor.log" 2>&1
+          rc=$?
+          set -e
+          cat "$RUNNER_TEMP/p0-proof/discovery-floor.log"
+          echo "exit_code=$rc" | tee -a "$RUNNER_TEMP/p0-proof/discovery-floor.txt"
+          if (( rc == 0 )); then
+            echo "ERROR: discovery-floor breakage incorrectly passed" >&2
+            exit 1
+          fi
+          grep -F "discovered only 19 qualification classes" "$RUNNER_TEMP/p0-proof/discovery-floor.log"
+
+      - name: Prove corrupt-class loadability failure
+        shell: bash
+        run: |
+          set -euo pipefail
+          git reset --hard "$TARGET_MAIN_SHA"
+          git clean -xfd
+          test -z "$(git status --porcelain)"
+
+          mvn -B -Dstyle.color=never clean test-compile -DskipTests
+          victim="target/classes/org/systemmaster/core/Fwp002QualificationTest.class"
+          test -f "$victim"
+          printf 'victim=%s\n' "$victim" | tee "$RUNNER_TEMP/p0-proof/loadability.txt"
+          truncate -s 8 "$victim"
+
+          set +e
+          mvn -B -Dstyle.color=never surefire:test > "$RUNNER_TEMP/p0-proof/loadability.log" 2>&1
+          rc=$?
+          set -e
+          cat "$RUNNER_TEMP/p0-proof/loadability.log"
+          echo "exit_code=$rc" | tee -a "$RUNNER_TEMP/p0-proof/loadability.txt"
+          if (( rc == 0 )); then
+            echo "ERROR: corrupt compiled class incorrectly passed" >&2
+            exit 1
+          fi
+          grep -E "ClassFormatError|Truncated class file" "$RUNNER_TEMP/p0-proof/loadability.log"
+
+      - name: Restore clean main and run verify.sh
+        shell: bash
+        run: |
+          set -euo pipefail
+          git reset --hard "$TARGET_MAIN_SHA"
+          git clean -xfd
+          test -z "$(git status --porcelain)"
+          printf 'target_main_sha=%s\n' "$TARGET_MAIN_SHA" | tee "$RUNNER_TEMP/p0-proof/final-verify.txt"
+          bash verify.sh 2>&1 | tee "$RUNNER_TEMP/p0-proof/final-verify.log"
+          grep -F "RESULT: PASS" "$RUNNER_TEMP/p0-proof/final-verify.log"
+          git rev-parse HEAD | tee -a "$RUNNER_TEMP/p0-proof/final-verify.txt"
+          test "$(git rev-parse HEAD)" = "$TARGET_MAIN_SHA"
+
+      - name: Preserve proof logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p0-verification-truth-proof-${{ env.TARGET_MAIN_SHA }}
+          path: ${{ runner.temp }}/p0-proof
+          if-no-files-found: warn
