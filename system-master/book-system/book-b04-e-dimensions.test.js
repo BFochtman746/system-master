@@ -33,6 +33,7 @@ const cases = [
   ['unknown perspective lens fails closed', () => assert.throws(()=>registry.assertLensV1('LEGACY_FAKE_AXIS'),/BLOCKED_LENS_UNKNOWN/)],
   ['dimension registry exposes no scalar score field', () => registry.DIMENSIONS.forEach(d=>assert.equal(Object.keys(d).some(k=>/score/i.test(k)),false))],
   ['dimension registry exposes no rating or rank field', () => registry.DIMENSIONS.forEach(d=>assert.equal(Object.keys(d).some(k=>/rating|rank/i.test(k)),false))],
+  ['dimension registry exposes no percentile or aggregate field', () => registry.DIMENSIONS.forEach(d=>assert.equal(Object.keys(d).some(k=>/percentile|aggregate/i.test(k)),false))],
   ['empty understanding leaves every dimension UNOBSERVED', () => { const { exp }=fx.buildExposure(); const p=understanding.assembleReaderUnderstandingProjectionV1({exposure_projection:exp,observations:[]}); assert.equal(p.dimension_dispositions.length,64); assert.ok(p.dimension_dispositions.every(d=>d.disposition==='UNOBSERVED')); }],
   ['NOT_APPLICABLE remains an explicit sparse disposition', () => assert.equal(oneDisposition('NOT_APPLICABLE').disposition,'NOT_APPLICABLE')],
   ['ABSTAINED remains an explicit sparse disposition', () => assert.equal(oneDisposition('ABSTAINED').disposition,'ABSTAINED')],
