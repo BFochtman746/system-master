@@ -53,8 +53,8 @@ test('1 full fifteen-field overnight packet survives the ten-input GitHub envelo
   assert.equal(packet.inputs.repair_attempt, '1');
   assert.equal(packet.inputs.max_repair_attempts, '2');
 
-  const bridge = fs.readFileSync('../.github/workflows/a01-control-plane-dispatch-bridge.yml', 'utf8');
-  const gateway = fs.readFileSync('../.github/workflows/a01-control-plane-gateway.yml', 'utf8');
+  const bridge = fs.readFileSync(new URL('../../.github/workflows/a01-control-plane-dispatch-bridge.yml', import.meta.url), 'utf8');
+  const gateway = fs.readFileSync(new URL('../../.github/workflows/a01-control-plane-gateway.yml', import.meta.url), 'utf8');
   for (const field of ['notification_target', 'qualifier_timeout_minutes', 'job_timeout_minutes', 'not_before', 'not_after', 'repair_transaction_id']) {
     assert.ok(bridge.includes(`${field}:`), `bridge must forward ${field}`);
     assert.ok(gateway.includes(`${field}:`), `gateway must accept/forward ${field}`);
