@@ -49,7 +49,7 @@ function uniqueTextArray(value, label, { allowEmpty = false } = {}) {
   if (new Set(result).size !== result.length) {
     fail('EXPECTATION_SCHEMA_INVALID', `${label} must not contain duplicates`);
   }
-  return result;
+  return Object.freeze(result);
 }
 
 function normalizePolicy(policy) {
@@ -58,7 +58,7 @@ function normalizePolicy(policy) {
   const classNames = Object.keys(classes);
   if (classNames.length === 0) fail('EXPECTATION_SCHEMA_INVALID', 'policy.classes must not be empty');
 
-  const normalizedClasses = {};
+  const normalizedClasses = Object.create(null);
   for (const className of classNames) {
     requiredText(className, 'response class');
     const definition = requiredObject(classes[className], `policy.classes.${className}`);
@@ -66,23 +66,23 @@ function normalizePolicy(policy) {
     const forbiddenHeadings = uniqueTextArray(definition.forbidden_headings ?? [], `policy.classes.${className}.forbidden_headings`, { allowEmpty: true });
     const requiredLabelsByHeading = definition.required_labels_by_heading ?? {};
     requiredObject(requiredLabelsByHeading, `policy.classes.${className}.required_labels_by_heading`);
-    const normalizedLabels = {};
+    const normalizedLabels = Object.create(null);
     for (const [heading, labels] of Object.entries(requiredLabelsByHeading)) {
       if (!requiredHeadings.includes(heading)) {
         fail('EXPECTATION_SCHEMA_INVALID', `${className} label section ${heading} must be a required heading`);
       }
       normalizedLabels[heading] = uniqueTextArray(labels, `policy.classes.${className}.required_labels_by_heading.${heading}`);
     }
-    normalizedClasses[className] = {
+    normalizedClasses[className] = Object.freeze({
       required_headings: requiredHeadings,
       forbidden_headings: forbiddenHeadings,
-      required_labels_by_heading: normalizedLabels
-    };
+      required_labels_by_heading: Object.freeze(normalizedLabels)
+    });
   }
 
   const firstLineAllowlistByHeading = policy.first_line_allowlist_by_heading ?? {};
   requiredObject(firstLineAllowlistByHeading, 'policy.first_line_allowlist_by_heading');
-  const normalizedAllowlists = {};
+  const normalizedAllowlists = Object.create(null);
   for (const [heading, values] of Object.entries(firstLineAllowlistByHeading)) {
     const presentInAllClasses = classNames.every((className) => normalizedClasses[className].required_headings.includes(heading));
     if (!presentInAllClasses) {
@@ -97,34 +97,40 @@ function normalizePolicy(policy) {
   });
 }
 
-function headingLines(responseText) {
-  return responseText.split(/\r?\n/).filter((line) => /^## [^#].*$/.test(line));
+function parseResponse(responseText) {
+  const lines = responseText.split(/\r?\n/);
+  const headings = [];
+  for (let lineIndex = 0; lineIndex < lines.length; lineIndex += 1) {
+    const text = lines[lineIndex];
+    if (/^## [^#].*$/.test(text)) headings.push(Object.freeze({ text, line_index: lineIndex }));
+  }
+  return Object.freeze({ lines: Object.freeze(lines), headings: Object.freeze(headings) });
 }
 
-function sectionContent(responseText, heading, nextHeading) {
-  const start = responseText.indexOf(heading);
-  if (start < 0) return null;
-  const from = start + heading.length;
-  const end = nextHeading ? responseText.indexOf(nextHeading, from) : responseText.length;
-  return responseText.slice(from, end < 0 ? responseText.length : end).trim();
+function sectionContent(parsed, heading, nextHeading) {
+  const start = parsed.headings.find((entry) => entry.text === heading);
+  if (!start) return null;
+  const next = nextHeading ? parsed.headings.find((entry) => entry.text === nextHeading) : null;
+  const endLine = next ? next.line_index : parsed.lines.length;
+  return parsed.lines.slice(start.line_index + 1, endLine).join('\n').trim();
 }
 
-function validateHeadings(responseText, responseClass, definition) {
-  const lines = headingLines(responseText);
+function validateHeadings(parsed, responseClass, definition) {
+  const headingTexts = parsed.headings.map((entry) => entry.text);
   let cursor = -1;
   for (const heading of definition.required_headings) {
-    const occurrences = lines.filter((line) => line === heading).length;
+    const occurrences = headingTexts.filter((line) => line === heading).length;
     if (occurrences !== 1) {
       fail('EXPECTATION_REQUIRED_HEADING_INVALID', `${heading} must occur exactly once`, { response_class: responseClass, occurrences });
     }
-    const index = lines.indexOf(heading);
+    const index = headingTexts.indexOf(heading);
     if (index <= cursor) {
       fail('EXPECTATION_HEADING_ORDER_INVALID', `${heading} is out of order`, { response_class: responseClass });
     }
     cursor = index;
   }
 
-  for (const heading of lines) {
+  for (const heading of headingTexts) {
     if (definition.forbidden_headings.includes(heading)) {
       fail('EXPECTATION_FORBIDDEN_HEADING', `${responseClass} cannot contain forbidden heading ${heading}`, { response_class: responseClass, heading });
     }
@@ -133,30 +139,30 @@ function validateHeadings(responseText, responseClass, definition) {
   for (let index = 0; index < definition.required_headings.length; index += 1) {
     const heading = definition.required_headings[index];
     const nextHeading = definition.required_headings[index + 1] ?? null;
-    if (!sectionContent(responseText, heading, nextHeading)) {
+    if (!sectionContent(parsed, heading, nextHeading)) {
       fail('EXPECTATION_SECTION_EMPTY', `${heading} must contain content`, { response_class: responseClass, heading });
     }
   }
-  return lines;
+  return headingTexts;
 }
 
-function validateFirstLines(responseText, definition, allowlists) {
+function validateFirstLines(parsed, definition, allowlists) {
   for (const [heading, allowedValues] of Object.entries(allowlists)) {
     const index = definition.required_headings.indexOf(heading);
     const nextHeading = definition.required_headings[index + 1] ?? null;
-    const body = sectionContent(responseText, heading, nextHeading) ?? '';
-    const firstLine = body.split(/\r?\n/).map((line) => line.trim()).find(Boolean) ?? '';
+    const body = sectionContent(parsed, heading, nextHeading) ?? '';
+    const firstLine = body.split('\n').map((line) => line.trim()).find(Boolean) ?? '';
     if (!allowedValues.includes(firstLine)) {
       fail('EXPECTATION_FIRST_LINE_INVALID', `${heading} must begin with an allowed value`, { heading, observed: firstLine });
     }
   }
 }
 
-function validateRequiredLabels(responseText, definition) {
+function validateRequiredLabels(parsed, definition) {
   for (const [heading, labels] of Object.entries(definition.required_labels_by_heading)) {
     const index = definition.required_headings.indexOf(heading);
     const nextHeading = definition.required_headings[index + 1] ?? null;
-    const body = sectionContent(responseText, heading, nextHeading) ?? '';
+    const body = sectionContent(parsed, heading, nextHeading) ?? '';
     for (const label of labels) {
       const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       if (!new RegExp(`(^|\\n)${escaped}:\\s*\\S`, 'm').test(body)) {
@@ -173,14 +179,15 @@ export function responseExpectationPolicyDigest(policy) {
 export function evaluateResponseExpectations({ responseText, responseClass, policy }) {
   requiredText(responseText, 'responseText');
   const normalizedPolicy = normalizePolicy(policy);
-  const definition = normalizedPolicy.classes[responseClass];
-  if (!definition) {
+  if (typeof responseClass !== 'string' || !Object.prototype.hasOwnProperty.call(normalizedPolicy.classes, responseClass)) {
     fail('EXPECTATION_CLASS_INVALID', `responseClass must be one of: ${Object.keys(normalizedPolicy.classes).join(', ')}`);
   }
+  const definition = normalizedPolicy.classes[responseClass];
+  const parsed = parseResponse(responseText);
 
-  const observedHeadings = validateHeadings(responseText, responseClass, definition);
-  validateFirstLines(responseText, definition, normalizedPolicy.first_line_allowlist_by_heading);
-  validateRequiredLabels(responseText, definition);
+  const observedHeadings = validateHeadings(parsed, responseClass, definition);
+  validateFirstLines(parsed, definition, normalizedPolicy.first_line_allowlist_by_heading);
+  validateRequiredLabels(parsed, definition);
 
   return Object.freeze({
     status: 'PASS',
