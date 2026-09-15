@@ -89,7 +89,7 @@ jobs:
           CONTROL_GATEWAY_BOOTSTRAP_REQUEST_JSON: ${{ needs.validate-command.outputs.bootstrap_request_json }}
           CONTROL_GATEWAY_WRITER_TOKEN: ${{ steps.writer-token.outputs.token }}
           CONTROL_GATEWAY_WRITER_ACTUAL_APP_SLUG: ${{ steps.writer-token.outputs.app-slug }}
-          CONTROL_GATEWAY_WRITER_EXPECTED_APP_SLUG: ${{ vars.CONTROL_GATEWAY_WRITER_APP_SLUG }}
+          CONTROL_GATEWAY_WRITER_EXPECTED_APP_SLUG: control-gateway-writer
           CONTROL_GATEWAY_WRITER_INSTALLATION_ID: ${{ steps.writer-token.outputs.installation-id }}
           CONTROL_GATEWAY_WRITER_EVIDENCE_DIR: ${{ runner.temp }}/control-gateway-authority-bootstrap-${{ github.run_id }}
         run: node .github/scripts/control-gateway-authority-bootstrap.js
