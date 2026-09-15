@@ -127,17 +127,48 @@ function makeContext({ lenses = ['B05-LENS-001'], b03 = false, b04 = false, voic
 function sourceDeps(context) {
   return context.dependency_snapshot_refs.filter(x => ['B02_SOURCE_ACCEPTANCE','B05_SOURCE_ANCHOR'].includes(x.dependency_kind));
 }
+function depByKind(context, kind) {
+  const dep = context.dependency_snapshot_refs.find(x => x.dependency_kind === kind);
+  if (!dep) throw new Error(`fixture dependency missing: ${kind}`);
+  return clone(dep);
+}
+function lensDependencies(context, lensId) {
+  const deps = sourceDeps(context).map(clone);
+  const add = kind => {
+    const dep = depByKind(context, kind);
+    if (!deps.some(x => x.dependency_kind === dep.dependency_kind && x.dependency_ref === dep.dependency_ref)) deps.push(dep);
+  };
+  if (lensId === 'B05-LENS-004') {
+    add('B03_STORY_BIBLE');
+    add('B03_KNOWLEDGE');
+  }
+  if (['B05-LENS-005','B05-LENS-006','B05-LENS-007'].includes(lensId)) {
+    add('B03_STORY_BIBLE');
+    add('B03_KNOWLEDGE');
+    add('B03_SEMANTIC');
+  }
+  if (lensId === 'B05-LENS-009') {
+    add('B04_EXPOSURE');
+  }
+  if (lensId === 'B05-LENS-016') {
+    add('B03_STORY_BIBLE');
+    add('B03_KNOWLEDGE');
+    add('B10_AUTHOR_CONSTRAINT');
+  }
+  return deps.sort((a,b) => `${a.dependency_kind}:${a.dependency_ref}`.localeCompare(`${b.dependency_kind}:${b.dependency_ref}`));
+}
 function allContextDeps(context) { return clone(context.dependency_snapshot_refs); }
 function makeProviderAdmission() {
   return { provider_capability_id: 'BOOK.LITERARY.DIAGNOSE', provider_operation_id: 'DIAGNOSE_PASSAGE', provider_subject_ref: 'provider-subject:b05:1', provider_admission_ref: 'provider-admission:b05:1', provider_admission_digest: H('6'), current: true };
 }
 function makeObservationPayload(context, lensId, overrides = {}) {
+  const baseDependencies = lensDependencies(context, lensId);
   return {
     lens_id: lensId,
     finding_class: 'STRENGTH',
     target_anchor_refs: [context.source_anchor_refs[0].anchor_ref],
     evidence_refs: [{ evidence_ref: `evidence:${lensId}:1`, evidence_digest: H('5') }],
-    upstream_dependency_refs: sourceDeps(context),
+    upstream_dependency_refs: baseDependencies,
     source_class: 'DETERMINISTIC',
     evidence_strength_class: 'SUPPORTED',
     purpose_relevance_class: 'HIGH',
@@ -153,4 +184,4 @@ function makeObservationPayload(context, lensId, overrides = {}) {
   };
 }
 
-module.exports = { BOOK, H, clone, makeSourceAcceptance, makeProjection, makeKnowledge, makeB03Binding, makeReaderBinding, makeContext, sourceDeps, allContextDeps, makeProviderAdmission, makeObservationPayload };
+module.exports = { BOOK, H, clone, makeSourceAcceptance, makeProjection, makeKnowledge, makeB03Binding, makeReaderBinding, makeContext, sourceDeps, lensDependencies, allContextDeps, makeProviderAdmission, makeObservationPayload };
