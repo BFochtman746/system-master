@@ -66,6 +66,15 @@ jobs:
               test "$(jq -c '.parameters | keys' "${request_file}")" = '["authoritative_subject","receipt_id"]'
               jq -e '.parameters.authoritative_subject | type == "object"' "${request_file}" >/dev/null
               ;;
+            AUTHORIZE_AND_START_SUCCESSOR)
+              test "$(jq -c '.parameters | keys' "${request_file}")" = '["allowed_paths_or_effects","authoritative_subject","receipt_id","successor_candidate"]'
+              test "$(jq -c '.parameters.allowed_paths_or_effects | keys' "${request_file}")" = '["effects","paths"]'
+              jq -e '.parameters.allowed_paths_or_effects.paths | type == "array"' "${request_file}" >/dev/null
+              jq -e '.parameters.allowed_paths_or_effects.effects | type == "array"' "${request_file}" >/dev/null
+              test "$(jq -c '.parameters.successor_candidate | keys' "${request_file}")" = '["a01_state","github_admission_state","operation_id","predecessor_receipt_id","qualification_state","required_receipt_ids"]'
+              jq -e '.parameters.successor_candidate.required_receipt_ids | type == "array"' "${request_file}" >/dev/null
+              jq -e '.parameters.authoritative_subject | type == "object"' "${request_file}" >/dev/null
+              ;;
             *) exit 1 ;;
           esac
 
