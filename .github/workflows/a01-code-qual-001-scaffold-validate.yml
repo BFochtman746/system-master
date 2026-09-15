@@ -1,0 +1,55 @@
+name: A01 CODE QUAL 001 Scaffold Validation
+
+on:
+  pull_request:
+    paths:
+      - 'qualification/a01/**'
+      - '.github/workflows/a01-code-qual-001-scaffold-validate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-scaffold:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile runner scripts
+        run: |
+          python -m py_compile qualification/a01/fixture/a01-code-qual-001/runner/*.py
+      - name: Generate one sealed instance
+        run: |
+          rm -rf .a01-code-qual-validation
+          A01_QUAL_OUT="$PWD/.a01-code-qual-validation" python qualification/a01/fixture/a01-code-qual-001/runner/seal_instance.py
+          test -f .a01-code-qual-validation/seal-metadata.json
+          test -f .a01-code-qual-validation/candidate-package/assignment.md
+          test -f .a01-code-qual-validation/hidden-evaluator/cases.json
+      - name: Prove initial fixture is non-vacuously failing
+        shell: bash
+        run: |
+          set +e
+          python qualification/a01/fixture/a01-code-qual-001/runner/init_candidate.py --workspace .a01-code-qual-validation/candidate-package --out .a01-code-qual-validation/run
+          python qualification/a01/fixture/a01-code-qual-001/runner/evaluate_frozen.py --candidate .a01-code-qual-validation/candidate-package --hidden .a01-code-qual-validation/hidden-evaluator --out .a01-code-qual-validation/evidence
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('.a01-code-qual-validation/evidence/functional-evidence.json')
+          e = json.loads(p.read_text())
+          failed = int(e['visible_tests']['failed']) + int(e['hidden_tests']['failed'])
+          if failed < 2:
+              raise SystemExit(f'benchmark fixture is too vacuous: failures={failed}')
+          print(f'non-vacuous baseline failures={failed}')
+          PY
+      - name: Validate contract JSON
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          for p in Path('qualification/a01').glob('*.json'):
+              json.loads(p.read_text())
+              print(f'valid-json {p}')
+          PY
