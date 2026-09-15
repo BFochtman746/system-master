@@ -9,56 +9,48 @@ import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 
 /**
  * The production {@link ClaimLedger.Consumer.Dispatch}: posts a claim's delegated work to
  * GitHub Actions via {@code workflow_dispatch}.
  *
- * <p>WHY ACTIONS. The architecture decision for this repository was to use GitHub Actions
- * as the executor rather than write an in-process Java worker: the tree already runs 48
- * workflows and thousands of lines of CI scripting that do real execution with auth,
- * scheduling, retries and durable evidence artifacts. This class is the seam between the
- * claim lifecycle and that executor, and it is deliberately the only place that knows
- * execution happens over HTTP.
+ * <p>WHAT THE RECEIPT ATTESTS. {@code workflow_dispatch} answers {@code 204 No Content}:
+ * it returns no run id. A successful return proves only that Actions accepted the dispatch.
+ * The caller must publish DISPATCHED and then use {@link ActionsRunPoller} to resolve the
+ * run to a terminal conclusion before DONE is permitted.
  *
- * <p>WHAT THE RECEIPT ACTUALLY ATTESTS — READ THIS BEFORE TRUSTING A DONE CLAIM.
- * {@code workflow_dispatch} answers {@code 204 No Content}: it returns no body and no run
- * id. So a successful dispatch proves the work was <em>accepted by Actions</em>, not that
- * it finished. The receipt digest says {@code ACTIONS_DISPATCHED} for exactly that reason,
- * and the claim id is passed as a workflow input so the resulting run is correlatable.
- * Closing that gap — polling the dispatched run to completion before terminalizing DONE —
- * is not implemented here and is recorded as outstanding in SYSTEM-MAP.md rather than
- * quietly implied by a green claim.
- *
- * <p>FAILS LOUDLY, NEVER SILENTLY. Every refusal carries a specific code:
- * {@code DISPATCH_NO_CREDENTIAL} when no token is present (the ordinary case outside CI),
- * {@code DISPATCH_MISCONFIGURED_*} for missing coordinates, {@code DISPATCH_REJECTED_<http>}
- * when Actions refuses, {@code DISPATCH_TRANSPORT_FAILURE} when the call cannot be made.
- * A dispatch that cannot run must never look like a claim with nothing to do — the
- * consumer records the refusal as evidence and terminalizes the claim FAILED.
+ * <p>CORRELATION. A unique {@code dispatch_id} is generated before the POST, sent as a
+ * workflow input, and returned in the dispatch receipt. claim-work.yml places the same id
+ * in its run-name. The completion poller therefore correlates by an exact identity chosen
+ * before dispatch instead of by timestamps or substring matching.
  */
 public final class ActionsDispatch implements ClaimLedger.Consumer.Dispatch {
 
     /** Minimal HTTP response shape; keeps the transport seam free of the JDK client type. */
     public record Response(int status, String body) { }
 
-    /**
-     * The HTTP seam. Injected so the qualification can prove every refusal code and the
-     * exact request shape without network access, which the build sandbox does not have.
-     */
+    /** HTTP seam used by production and deterministic qualification. */
     public interface Transport {
         Response post(String url, Map<String, String> headers, String body) throws Exception;
     }
 
-    /** Token source, separate from the transport so a missing credential is its own proof. */
+    /** Token source, separate from transport so a missing credential has its own code. */
     public interface Credentials {
         String token();
     }
 
+    /** Generates the dispatch identity before workflow_dispatch is sent. */
+    public interface DispatchIdSource {
+        String next();
+    }
+
     private static final String API = "https://api.github.com";
+    private static final String DISPATCH_ID_PREFIX = "dispatch_id=";
 
     private final Transport transport;
     private final Credentials credentials;
+    private final DispatchIdSource dispatchIds;
     private final String owner;
     private final String repo;
     private final String workflowFile;
@@ -66,39 +58,31 @@ public final class ActionsDispatch implements ClaimLedger.Consumer.Dispatch {
 
     public ActionsDispatch(Transport transport, Credentials credentials,
             String owner, String repo, String workflowFile, String ref) {
+        this(transport, credentials, () -> UUID.randomUUID().toString(),
+                owner, repo, workflowFile, ref);
+    }
+
+    public ActionsDispatch(Transport transport, Credentials credentials,
+            DispatchIdSource dispatchIds, String owner, String repo, String workflowFile, String ref) {
         this.transport = Objects.requireNonNull(transport, "transport");
         this.credentials = Objects.requireNonNull(credentials, "credentials");
+        this.dispatchIds = Objects.requireNonNull(dispatchIds, "dispatchIds");
         this.owner = norm(owner);
         this.repo = norm(repo);
         this.workflowFile = norm(workflowFile);
         this.ref = norm(ref);
     }
 
-    /**
-     * Builds a dispatch from the ambient environment, which is how the scheduled driver
-     * constructs it. Coordinates are not validated here: a missing one becomes a specific
-     * refusal at execute time, where it lands in a claim's evidence trail instead of
-     * crashing the runner before anything is recorded.
-     */
+    /** Builds the production dispatch from the GitHub Actions environment. */
     public static ActionsDispatch fromEnvironment(Transport transport) {
-        String slug = env("GITHUB_REPOSITORY", "");
-        String owner = "";
-        String repo = "";
-        int slash = slug.indexOf('/');
-        if (slash > 0 && slash < slug.length() - 1) {
-            owner = slug.substring(0, slash);
-            repo = slug.substring(slash + 1);
-        }
-        Credentials creds = () -> {
-            String t = env("GITHUB_TOKEN", "");
-            return t.isEmpty() ? env("GH_TOKEN", "") : t;
-        };
-        return new ActionsDispatch(transport, creds, owner, repo,
+        RepoCoordinates coordinates = repoCoordinates();
+        Credentials creds = ActionsDispatch::ambientToken;
+        return new ActionsDispatch(transport, creds, coordinates.owner(), coordinates.repo(),
                 env("CLAIM_WORK_WORKFLOW", "claim-work.yml"),
                 env("CLAIM_WORK_REF", "main"));
     }
 
-    /** The real transport. Not exercised by the qualification: the sandbox has no network. */
+    /** The real POST transport. */
     public static Transport httpTransport() {
         HttpClient client = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(15))
@@ -130,18 +114,20 @@ public final class ActionsDispatch implements ClaimLedger.Consumer.Dispatch {
         String token = credentials.token();
         if (token == null || token.isBlank()) throw new IllegalStateException("DISPATCH_NO_CREDENTIAL");
 
+        // Load-bearing ordering: identity exists before the POST. The durability packet will
+        // persist this prepared identity before transport so a crash around HTTP 204 can be
+        // reconciled without guessing whether a second dispatch is safe.
+        String dispatchId = norm(dispatchIds.next());
+        if (!validDispatchId(dispatchId)) throw new IllegalStateException("DISPATCH_INVALID_ID");
+
         String url = API + "/repos/" + owner + "/" + repo
                 + "/actions/workflows/" + workflowFile + "/dispatches";
         String body = "{\"ref\":\"" + esc(ref) + "\",\"inputs\":{"
                 + "\"claim_id\":\"" + esc(claimId) + "\","
-                + "\"payload_digest\":\"" + esc(payloadDigest) + "\"}}";
+                + "\"payload_digest\":\"" + esc(payloadDigest) + "\","
+                + "\"dispatch_id\":\"" + esc(dispatchId) + "\"}}";
 
-        Map<String, String> headers = new LinkedHashMap<>();
-        headers.put("Accept", "application/vnd.github+json");
-        headers.put("Authorization", "Bearer " + token);
-        headers.put("X-GitHub-Api-Version", "2022-11-28");
-        headers.put("Content-Type", "application/json");
-
+        Map<String, String> headers = headers(token);
         Response response;
         try {
             response = transport.post(url, headers, body);
@@ -154,7 +140,61 @@ public final class ActionsDispatch implements ClaimLedger.Consumer.Dispatch {
             throw new IllegalStateException("DISPATCH_REJECTED_" + response.status());
         }
         return "ACTIONS_DISPATCHED workflow=" + workflowFile + " ref=" + ref
-                + " correlation=" + claimId;
+                + " correlation=" + claimId + " " + DISPATCH_ID_PREFIX + dispatchId;
+    }
+
+    /** Extracts the pre-dispatch identity from a successful dispatch receipt. */
+    static String dispatchIdFromReceipt(String receipt) {
+        if (receipt == null || !receipt.startsWith("ACTIONS_DISPATCHED ")) {
+            throw new IllegalArgumentException("INVALID_DISPATCH_RECEIPT");
+        }
+        int start = receipt.indexOf(DISPATCH_ID_PREFIX);
+        if (start < 0) throw new IllegalArgumentException("DISPATCH_RECEIPT_MISSING_ID");
+        start += DISPATCH_ID_PREFIX.length();
+        int end = receipt.indexOf(' ', start);
+        String id = end < 0 ? receipt.substring(start) : receipt.substring(start, end);
+        if (!validDispatchId(id)) throw new IllegalArgumentException("DISPATCH_RECEIPT_INVALID_ID");
+        return id;
+    }
+
+    static Map<String, String> headers(String token) {
+        Map<String, String> headers = new LinkedHashMap<>();
+        headers.put("Accept", "application/vnd.github+json");
+        headers.put("Authorization", "Bearer " + token);
+        headers.put("X-GitHub-Api-Version", "2022-11-28");
+        headers.put("Content-Type", "application/json");
+        return headers;
+    }
+
+    static String ambientToken() {
+        String t = env("GITHUB_TOKEN", "");
+        return t.isEmpty() ? env("GH_TOKEN", "") : t;
+    }
+
+    static RepoCoordinates repoCoordinates() {
+        String slug = env("GITHUB_REPOSITORY", "");
+        String owner = "";
+        String repo = "";
+        int slash = slug.indexOf('/');
+        if (slash > 0 && slash < slug.length() - 1) {
+            owner = slug.substring(0, slash);
+            repo = slug.substring(slash + 1);
+        }
+        return new RepoCoordinates(owner, repo);
+    }
+
+    record RepoCoordinates(String owner, String repo) { }
+
+    private static boolean validDispatchId(String id) {
+        if (id == null || id.isBlank() || id.length() > 128) return false;
+        for (int i = 0; i < id.length(); i++) {
+            char c = id.charAt(i);
+            if (!(c >= 'A' && c <= 'Z') && !(c >= 'a' && c <= 'z')
+                    && !(c >= '0' && c <= '9') && c != '.' && c != '_' && c != '-') {
+                return false;
+            }
+        }
+        return true;
     }
 
     private static String norm(String s) {
