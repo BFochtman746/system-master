@@ -1,0 +1,47 @@
+{
+  "registry_id": "CORE-P03-PUBLIC-DURABILITY-OPERATIONS-001",
+  "effective_date": "2026-09-14",
+  "standing": "OPERATION_IDENTITIES_RESERVED__IMPLEMENTATION_NOT_YET_ACTIVE",
+  "authority_id": "CURRENT-AUTHORITY-005",
+  "system_interface_blueprint": "governance/architecture/SYSTEM-MASTER-SYSTEM-INTERFACE-BLUEPRINT-001.json",
+  "capability_crosswalk": "governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json",
+  "provider_system": "CORE",
+  "owner_path": "SYSTEM_MASTER/CORE",
+  "domain": "P03",
+  "platform_requirement": "Evidence store and retention",
+  "purpose": "Reserve globally unique CORE/P03 public command identities for generic physical preservation and destructive test-restore mechanics needed by Book semantic recovery without transferring Book semantic ownership.",
+  "operations": [
+    {
+      "registration_state": "REGISTERED_RESERVED",
+      "provider_system": "CORE",
+      "owner_path": "SYSTEM_MASTER/CORE",
+      "domain": "P03",
+      "kind": "COMMAND",
+      "semantic_role": "PRESERVE_PHYSICAL_SET",
+      "operation_id": "CORE.P03.COMMAND.PRESERVE_PHYSICAL_SET",
+      "canonical_write_authority": false,
+      "direct_book_state_write": false,
+      "implementation": null
+    },
+    {
+      "registration_state": "REGISTERED_RESERVED",
+      "provider_system": "CORE",
+      "owner_path": "SYSTEM_MASTER/CORE",
+      "domain": "P03",
+      "kind": "COMMAND",
+      "semantic_role": "RESTORE_PHYSICAL_SET",
+      "operation_id": "CORE.P03.COMMAND.RESTORE_PHYSICAL_SET",
+      "canonical_write_authority": false,
+      "direct_book_state_write": false,
+      "implementation": null
+    }
+  ],
+  "consumer_scope": ["BOOK"],
+  "ownership_boundary": {
+    "core_owns": ["physical persistence", "physical archive/checksum mechanics", "destructive test restore", "physical byte reproduction"],
+    "book_retains": ["semantic backup-set membership", "currentness", "canonical state", "restore acceptance", "PRESERVATION/G19 gate truth"],
+    "direct_cross_peer_database_access": false,
+    "book_physical_backup_implementation": false
+  },
+  "activation_rule": "Reserved operation identities may become REGISTERED_ACTIVE only after CORE-owned implementation and focused tests exist on the same repository lineage. Required Verification on the active successor is mandatory before the active registration is accepted as qualified current evidence."
+}

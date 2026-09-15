@@ -8,7 +8,7 @@
 - **Selected topology:** `governance/SYSTEM-TOPOLOGY-007.json`
 - **Architecture decision:** `governance/ADR-0006-PROGRAMMING-PEER-ADMISSION-WEBSITE-BUILDING.md`
 - **Completion status:** `governance/SYSTEM-COMPLETION-STATUS-002.json`
-- **Obligation registry:** `governance/WORK-OBLIGATION-REGISTRY-013.json`
+- **Obligation registry:** `governance/WORK-OBLIGATION-REGISTRY-017.json`
 - **Capability crosswalk:** `governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json`
 - **Central objective:** `FOUNDATION-1-0-CLOSURE-001`
 - **Highest discretionary objective:** `SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001`

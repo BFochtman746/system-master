@@ -1,0 +1,158 @@
+name: P06 Control Gateway Dispatch Foundation Qualification
+
+on:
+  push:
+    paths:
+      - 'governance/CURRENT-AUTHORITY.json'
+      - 'governance/WORK-OBLIGATION-REGISTRY-*.json'
+      - 'governance/SYSTEM-TOPOLOGY-*.json'
+      - 'governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-*.json'
+      - 'governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-*.json'
+      - 'governance/contracts/P06-FOUNDATION-CONTRACT-001.md'
+      - 'control-gateway/src/github-workflow-dispatch.js'
+      - 'control-gateway/test/github-workflow-dispatch-passthrough.test.js'
+      - 'control-gateway/test/github-workflow-dispatch-bridge.test.js'
+      - '.github/workflows/a01-control-plane-dispatch-bridge.yml'
+      - '.github/workflows/a01-control-plane-gateway.yml'
+      - '.github/workflows/p06-control-gateway-dispatch-foundation-qualification.yml'
+  pull_request:
+    paths:
+      - 'governance/CURRENT-AUTHORITY.json'
+      - 'governance/WORK-OBLIGATION-REGISTRY-*.json'
+      - 'governance/SYSTEM-TOPOLOGY-*.json'
+      - 'governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-*.json'
+      - 'governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-*.json'
+      - 'governance/contracts/P06-FOUNDATION-CONTRACT-001.md'
+      - 'control-gateway/src/github-workflow-dispatch.js'
+      - 'control-gateway/test/github-workflow-dispatch-passthrough.test.js'
+      - 'control-gateway/test/github-workflow-dispatch-bridge.test.js'
+      - '.github/workflows/a01-control-plane-dispatch-bridge.yml'
+      - '.github/workflows/a01-control-plane-gateway.yml'
+      - '.github/workflows/p06-control-gateway-dispatch-foundation-qualification.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout exact P06 subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Pin Node runtime
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Run P06 twelve-case acceptance target
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p qualification-output
+          node --test control-gateway/test/github-workflow-dispatch-passthrough.test.js | tee /tmp/p06-acceptance.log
+          grep -Eq '# tests 12|tests 12' /tmp/p06-acceptance.log
+      - name: Run dispatch bridge compatibility test
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test control-gateway/test/github-workflow-dispatch-bridge.test.js | tee /tmp/p06-bridge-test.log
+      - name: Prove bridge and gateway carry all fifteen logical fields
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE' | tee /tmp/p06-wiring.log
+          const fs = require('fs');
+          const bridge = fs.readFileSync('.github/workflows/a01-control-plane-dispatch-bridge.yml', 'utf8');
+          const gateway = fs.readFileSync('.github/workflows/a01-control-plane-gateway.yml', 'utf8');
+          const normalizer = fs.readFileSync('control-gateway/src/github-workflow-dispatch.js', 'utf8');
+          const logical = [
+            'qualification_id','workstream_id','subject_sha','origin_ref','resume_on_pass','resume_on_failure',
+            'notification_target','execution_context','qualifier_timeout_minutes','job_timeout_minutes','not_before',
+            'not_after','repair_attempt','max_repair_attempts','repair_transaction_id'
+          ];
+          const advanced = ['notification_target','qualifier_timeout_minutes','job_timeout_minutes','not_before','not_after','repair_transaction_id'];
+          for (const field of logical) {
+            if (!bridge.includes(field)) throw new Error(`P06_BRIDGE_FIELD_MISSING ${field}`);
+            if (!gateway.includes(field)) throw new Error(`P06_GATEWAY_FIELD_MISSING ${field}`);
+            if (!normalizer.includes(field)) throw new Error(`P06_NORMALIZER_FIELD_MISSING ${field}`);
+          }
+          for (const field of advanced) {
+            if (!bridge.includes(`\n      ${field}:`)) throw new Error(`P06_BRIDGE_ROUTE_BINDING_MISSING ${field}`);
+            if (!gateway.includes(field)) throw new Error(`P06_GATEWAY_BINDING_MISSING ${field}`);
+          }
+          for (const code of ['DISPATCH_INPUT_INVALID','DISPATCH_BUDGET_INVALID','DISPATCH_WINDOW_INVALID','DISPATCH_LINEAGE_INVALID']) {
+            if (!bridge.includes(code) || !normalizer.includes(code)) throw new Error(`P06_FAIL_CODE_MISSING ${code}`);
+          }
+          console.log('P06_LOGICAL_FIELD_COUNT=15');
+          console.log('P06_ADVANCED_ENVELOPE_FIELD_COUNT=6');
+          console.log('P06_WIRING=PASS');
+          NODE
+      - name: Emit exact-subject P06 evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs = require('fs');
+          const cp = require('child_process');
+          const crypto = require('crypto');
+          const authority = JSON.parse(fs.readFileSync('governance/CURRENT-AUTHORITY.json', 'utf8'));
+          const crosswalk = JSON.parse(fs.readFileSync(authority.capability_crosswalk, 'utf8'));
+          const p06 = crosswalk.platform_requirements.find((row) => row.platform_id === 'P06');
+          if (authority.authority_id !== 'CURRENT-AUTHORITY-005') throw new Error(`AUTHORITY_MISMATCH ${authority.authority_id}`);
+          if (crosswalk.crosswalk_id !== 'SYSTEM-MASTER-CAPABILITY-CROSSWALK-003') throw new Error(`CROSSWALK_MISMATCH ${crosswalk.crosswalk_id}`);
+          if (!p06 || p06.owner_path !== 'SYSTEM_MASTER/CORE') throw new Error(`P06_OWNER_MISMATCH ${p06?.owner_path}`);
+          if (p06.implementation !== '.github/workflows/a01-control-plane-gateway.yml') throw new Error(`P06_IMPLEMENTATION_MISMATCH ${p06?.implementation}`);
+          const subjects = [
+            'governance/CURRENT-AUTHORITY.json',
+            authority.capability_crosswalk,
+            authority.obligation_registry,
+            authority.topology,
+            authority.headless_tool_owner_allocation,
+            'governance/contracts/P06-FOUNDATION-CONTRACT-001.md',
+            'control-gateway/src/github-workflow-dispatch.js',
+            'control-gateway/test/github-workflow-dispatch-passthrough.test.js',
+            'control-gateway/test/github-workflow-dispatch-bridge.test.js',
+            '.github/workflows/a01-control-plane-dispatch-bridge.yml',
+            '.github/workflows/a01-control-plane-gateway.yml',
+            '.github/workflows/p06-control-gateway-dispatch-foundation-qualification.yml'
+          ];
+          const blob = (p) => cp.execFileSync('git', ['rev-parse', `HEAD:${p}`], {encoding:'utf8'}).trim();
+          const sha256 = (p) => crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
+          const evidence = {
+            evidence_schema: '1.0',
+            contract_id: 'P06-FOUNDATION-1.0',
+            requirement_or_capability_id: 'P06',
+            owner_path: 'SYSTEM_MASTER/CORE',
+            authority_id: authority.authority_id,
+            crosswalk_id: crosswalk.crosswalk_id,
+            status: 'PASS',
+            source_identity: cp.execFileSync('git', ['rev-parse', 'HEAD'], {encoding:'utf8'}).trim(),
+            implementation: p06.implementation,
+            logical_packet_field_count: 15,
+            physical_workflow_dispatch_input_count: 10,
+            advanced_envelope_field_count: 6,
+            acceptance_test_count: 12,
+            compatibility_test_count: 1,
+            fail_closed_codes: ['DISPATCH_INPUT_INVALID','DISPATCH_BUDGET_INVALID','DISPATCH_WINDOW_INVALID','DISPATCH_LINEAGE_INVALID'],
+            subjects: subjects.map((p) => ({path:p, git_blob_sha:blob(p)})),
+            logs: {
+              acceptance_sha256: sha256('/tmp/p06-acceptance.log'),
+              bridge_test_sha256: sha256('/tmp/p06-bridge-test.log'),
+              wiring_sha256: sha256('/tmp/p06-wiring.log')
+            }
+          };
+          fs.writeFileSync('qualification-output/p06-foundation-1.0.json', JSON.stringify(evidence, null, 2) + '\n');
+          console.log(JSON.stringify(evidence));
+          NODE
+      - name: Preserve machine-readable P06 qualification evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p06-foundation-1.0-evidence
+          path: qualification-output/p06-foundation-1.0.json
+          if-no-files-found: error
+          retention-days: 30

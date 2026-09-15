@@ -1,0 +1,93 @@
+{
+  "state_id": "BOOK-SYSTEM-RECONCILED-STATE-047",
+  "effective_date": "2026-09-14",
+  "standing": "BOOK_INCOMPLETE__ENG_009_COMPLETE_WITH_EXACT_CURRENT_CORE_P03_END_TO_END_EVIDENCE__NEXT_PRESERVED_RESIDUAL_READY",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "control_record": "qualification/book-system/BOOK-SYSTEM-CONTROL-RECORD-017.json",
+  "global_selector_status": "BOOK_LOCAL_SUCCESSOR_NOT_YET_SELECTED_BY_CURRENT_AUTHORITY",
+  "current_authority_id": "CURRENT-AUTHORITY-005",
+  "historical_state": {
+    "prior_state_id": "BOOK-SYSTEM-RECONCILED-STATE-046",
+    "path": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-046.json",
+    "preserve_exact_history": true,
+    "current_effect": "SUPERSEDED_FOR_BOOK_LOCAL_SUCCESSOR_TRUTH_ONLY__GLOBAL_SELECTOR_UNCHANGED"
+  },
+  "completion_truth": {
+    "BOOK": "INCOMPLETE",
+    "PROSE": "COMPLETE_RETIRED_TERMINAL",
+    "BOOK_COMP_12_BOOK_OWNED_SEMANTICS": "IMPLEMENTED_AND_QUALIFIED",
+    "BOOK_COMP_12_CORE_PHYSICAL_PROVIDER_BINDING": "QUALIFIED_CURRENT",
+    "BOOK_ENG_009": "COMPLETE_WITH_EXACT_CURRENT_END_TO_END_PROVIDER_EVIDENCE",
+    "WHOLE_APP_EXECUTABLE_QUALIFICATION": "INCOMPLETE",
+    "PRODUCTION_CERTIFICATION": "NO"
+  },
+  "book_eng_009": {
+    "objective_id": "BOOK-ENG-009-SEMANTIC-RECOVERY-PROFILE-001",
+    "book_owned_semantic_profile": "QUALIFIED",
+    "semantic_backup_set_and_dependency_closure": "QUALIFIED",
+    "restore_currentness_acceptance": "QUALIFIED",
+    "offline_reconnect_reconciliation": "QUALIFIED",
+    "crash_recovery_dedupe_and_stale_replan": "QUALIFIED",
+    "completion_reporting_and_reentry": "QUALIFIED",
+    "core_physical_preserve_restore_provider": "QUALIFIED_CURRENT",
+    "preserve_operation": "CORE.P03.COMMAND.PRESERVE_PHYSICAL_SET",
+    "restore_operation": "CORE.P03.COMMAND.RESTORE_PHYSICAL_SET",
+    "whole_objective_state": "COMPLETE_WITH_EVIDENCE"
+  },
+  "preservation_phase": {
+    "total_atomic_operations": 8,
+    "IMPLEMENTED": 2,
+    "PARTIAL": 2,
+    "UNIMPLEMENTED": 0,
+    "PEER_DEPENDENCY": 4,
+    "HUMAN/EXTERNAL": 0,
+    "peer_dependencies": ["P19-01","P19-03","P19-04","P19-05"],
+    "peer_provider": "SYSTEM_MASTER/CORE",
+    "provider_domain": "P03",
+    "peer_provider_satisfaction": "QUALIFIED_CURRENT",
+    "rule": "PEER_DEPENDENCY remains an ownership classification after exact-current provider satisfaction and is not an unresolved blocker for BOOK-ENG-009."
+  },
+  "overall_227_binding": {
+    "IMPLEMENTED": 3,
+    "PARTIAL": 51,
+    "UNIMPLEMENTED": 117,
+    "PEER_DEPENDENCY": 37,
+    "HUMAN/EXTERNAL": 19,
+    "total": 227,
+    "binding": "qualification/book-system/lifecycle/BOOK-LIFECYCLE-IMPLEMENTATION-BINDING-003.json"
+  },
+  "qualification": {
+    "exact_head_sha": "c760dc0c22ba329499ccd0ccb0b60c35b6ab2ed3",
+    "required_verification_run_id": 34882444676,
+    "required_verification_job_id": 104104774721,
+    "conclusion": "success",
+    "repository_result": "PASS",
+    "non_vacuous": "PASS",
+    "summary": "35_PASS_0_FAIL_1_HISTORICAL_SKIP",
+    "core_provider_qualifier": "PASS",
+    "book_core_p03_end_to_end_qualifier": "PASS"
+  },
+  "next_dependency_valid_action": {
+    "state": "READY_FOR_EXACT_OBJECTIVE_ID_SELECTION",
+    "owner": "SYSTEM_MASTER/BOOK",
+    "selection_basis": "qualification/book-system/BOOK-SYSTEM-CONTROL-RECORD-015.json#preserved_open_residuals",
+    "residual": "whole-source build graph/shared Core integration dependencies",
+    "objective_id": null,
+    "rule": "Select the exact existing work packet for this preserved residual before execution. Do not invent a BOOK-ENG identifier and do not jump directly to BOOK-COMP-13 ahead of dependency order.",
+    "later_bounded_qualification_profile": "BOOK-COMP-13",
+    "forbidden_revival": "PERMANENT_BOOK_ENG_010_MEGA_COMPARISON_PROGRAM"
+  },
+  "selector_promotion": {
+    "performed": false,
+    "current_global_control_remains": "qualification/book-system/BOOK-SYSTEM-CONTROL-RECORD-015.json",
+    "current_global_state_remains": "qualification/book-system/BOOK-SYSTEM-RECONCILED-STATE-045.json",
+    "reason": "Avoid unrelated CURRENT-AUTHORITY byte churn and Foundation exact-subject receipt invalidation during Book-local advancement."
+  },
+  "non_claims": [
+    "CORE P03 provider satisfaction does not transfer physical durability ownership to BOOK.",
+    "BOOK remains incomplete and production certification remains NO.",
+    "No historical PASS is transferred to changed subjects.",
+    "No permanent BOOK-ENG-010 comparison program is reactivated.",
+    "BOOK-COMP-13 remains open as a later bounded qualification residual and is not selected ahead of the preserved whole-source/shared-CORE integration residual."
+  ]
+}

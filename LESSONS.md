@@ -201,8 +201,7 @@ Format: **L-nnn — one-line summary** / Symptom / Root cause / Fix / Rule it pr
   violating S-05. The failure was governance discovery, not a handler compile/test defect.
 - **Fix.** Registered the directory in the implementation-subsystem map with its purpose,
   path, test count, LEARNING owner and evidence/log location, while explicitly preserving the
-  nine-peer topology, CORE-owned shared physical persistence/transaction mechanics, and
-  LEARNING-owned Learning/Curriculum semantic state and operation meaning.
+  nine-peer topology and Master Core/DATA authority boundaries.
 - **Rule.** Before the first commit that creates `system-master/<area>/`, preflight S-05 and
   land the corresponding `SYSTEM-MAP.md` registration in the same change. A runtime package
   registration is not a new peer and must say so when its name could be misread as topology.

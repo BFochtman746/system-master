@@ -1,0 +1,80 @@
+{
+  "control_record_id": "BOOK-SYSTEM-CONTROL-RECORD-017",
+  "effective_date": "2026-09-14",
+  "standing": "BOOK_LOCAL_SUCCESSOR__BOOK_INCOMPLETE__ENG_009_COMPLETE_WITH_EXACT_CURRENT_CORE_P03_END_TO_END_EVIDENCE__NEXT_PRESERVED_RESIDUAL_READY",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "current_authority_id": "CURRENT-AUTHORITY-005",
+  "global_selector_status": "NOT_SELECTED_BY_CURRENT_AUTHORITY__COORDINATED_PROMOTION_DEFERRED",
+  "global_selector_current_book_control": "qualification/book-system/BOOK-SYSTEM-CONTROL-RECORD-015.json",
+  "historical_predecessor": {
+    "control_record_id": "BOOK-SYSTEM-CONTROL-RECORD-016",
+    "path": "qualification/book-system/BOOK-SYSTEM-CONTROL-RECORD-016.json",
+    "preserve_exact_history": true,
+    "current_effect": "SUPERSEDED_FOR_BOOK_LOCAL_SUCCESSOR_TRUTH_ONLY__GLOBAL_SELECTOR_UNCHANGED"
+  },
+  "component_architecture": "qualification/book-system/BOOK-COMPONENT-ARCHITECTURE-001.json",
+  "implementation_binding": "qualification/book-system/lifecycle/BOOK-LIFECYCLE-IMPLEMENTATION-BINDING-003.json",
+  "provider_registry": "governance/contracts/CORE-P03-PUBLIC-DURABILITY-OPERATIONS-002.json",
+  "end_to_end_qualifier": ".github/scripts/book-core-p03-end-to-end-qualify.js",
+  "completion_truth": {
+    "book_complete": false,
+    "computer_implementation_complete": false,
+    "whole_app_executable_qualification_complete": false,
+    "production_certified": false,
+    "book_comp_12_book_owned_semantics": "IMPLEMENTED_AND_QUALIFIED",
+    "book_comp_12_core_physical_provider_binding": "QUALIFIED_CURRENT",
+    "book_eng_009_whole_objective_complete": true
+  },
+  "book_eng_009_state": {
+    "objective_id": "BOOK-ENG-009-SEMANTIC-RECOVERY-PROFILE-001",
+    "state": "COMPLETE_WITH_EXACT_CURRENT_END_TO_END_PROVIDER_EVIDENCE",
+    "stage": "BOOK_AND_CORE_P03_BOUNDARY_QUALIFIED",
+    "book_owned_work_status": "QUALIFIED",
+    "external_dependency_status": "SATISFIED_BY_CURRENT_CORE_P03_PROVIDER",
+    "preserve_operation_id": "CORE.P03.COMMAND.PRESERVE_PHYSICAL_SET",
+    "restore_operation_id": "CORE.P03.COMMAND.RESTORE_PHYSICAL_SET",
+    "ownership_rule": "CORE retains physical durability mechanics; BOOK retains semantic backup-set, currentness and restore-acceptance authority. No canonical mutation authority transfers across the interface."
+  },
+  "p19_preservation_disposition": {
+    "P19-01": "PEER_DEPENDENCY__CORE_PHYSICAL_BACKUP_SET__QUALIFIED_CURRENT_PROVIDER",
+    "P19-02": "PARTIAL__BOOK_SEMANTIC_REBUILD_RECIPE_AND_INDEX_IDENTITY_CAPTURE",
+    "P19-03": "PEER_DEPENDENCY__CORE_PHYSICAL_ARCHIVE_MANIFEST_CHECKSUMS__QUALIFIED_CURRENT_PROVIDER",
+    "P19-04": "PEER_DEPENDENCY__CORE_DESTRUCTIVE_RESTORE_EXECUTION__QUALIFIED_CURRENT_PROVIDER",
+    "P19-05": "PEER_DEPENDENCY__CORE_PHYSICAL_REPRODUCTION_MECHANICS__QUALIFIED_CURRENT_PROVIDER",
+    "P19-06": "PARTIAL__BOOK_LINEAGE_RECOVERY_SNAPSHOT__CANONICAL_MUTATION_REMAINS_COMP_02",
+    "P19-07": "IMPLEMENTED__BOOK_COMPLETION_REPORT_AND_REENTRY_INSTRUCTIONS",
+    "P19-08": "IMPLEMENTED__BOOK_G19_EXACT_CURRENT_RESTORE_ACCEPTANCE_GATE"
+  },
+  "exact_qualification_evidence": {
+    "qualified_head_sha": "c760dc0c22ba329499ccd0ccb0b60c35b6ab2ed3",
+    "required_verification_run_id": 34882444676,
+    "required_verification_job_id": 104104774721,
+    "conclusion": "success",
+    "verify_summary": {"pass":35,"fail":0,"skip":1},
+    "non_vacuous": "PASS",
+    "provider_qualifier": "core-p03-book-durability-provider-qualify.js",
+    "book_end_to_end_qualifier": "book-core-p03-end-to-end-qualify.js",
+    "end_to_end_acceptance_sentinel": "BOOK_CORE_P03_END_TO_END_ACCEPTANCE_PASS"
+  },
+  "next_dependency_valid_action": {
+    "owner": "SYSTEM_MASTER/BOOK",
+    "selection_basis": "qualification/book-system/BOOK-SYSTEM-CONTROL-RECORD-015.json#preserved_open_residuals",
+    "residual": "whole-source build graph/shared Core integration dependencies",
+    "objective_id": null,
+    "state": "READY_FOR_EXACT_OBJECTIVE_ID_SELECTION",
+    "rule": "Continue the preserved current Book residuals in dependency order. Select the exact existing work packet for this residual before execution; do not fabricate a BOOK-ENG identifier.",
+    "later_bounded_qualification_profile": "BOOK-COMP-13",
+    "forbidden_revival": "PERMANENT_BOOK_ENG_010_MEGA_COMPARISON_PROGRAM"
+  },
+  "selector_policy": {
+    "current_authority_file_must_remain_unchanged_in_this_book_local_successor": true,
+    "future_promotion": "Only coordinated authority update with required exact-subject requalification may change the global Book selector."
+  },
+  "non_claims": [
+    "BOOK remains incomplete after BOOK-ENG-009 closure.",
+    "BOOK-ENG-009 closure does not establish whole-app executable qualification, production certification or publication authority.",
+    "BOOK-ENG-010 is not revived as a permanent mega-comparison program; BOOK-COMP-13 remains a later bounded qualification residual.",
+    "The next preserved residual is whole-source build graph/shared Core integration dependencies; BOOK-COMP-13 is not advanced ahead of that dependency order.",
+    "This Book-local successor is not selected by CURRENT-AUTHORITY-005 until a separate coordinated selector promotion occurs."
+  ]
+}

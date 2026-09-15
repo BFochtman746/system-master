@@ -1,0 +1,63 @@
+{
+  "binding_id": "BOOK-LIFECYCLE-IMPLEMENTATION-BINDING-003",
+  "effective_date": "2026-09-14",
+  "standing": "CURRENT_SUCCESSOR_BOOK_LIFECYCLE_IMPLEMENTATION_BINDING__BOOK_COMP_12_END_TO_END_PROVIDER_QUALIFIED__BOOK_REMAINS_INCOMPLETE",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "authority_id": "CURRENT-AUTHORITY-005",
+  "supersedes": "qualification/book-system/lifecycle/BOOK-LIFECYCLE-IMPLEMENTATION-BINDING-002.json",
+  "superseded_binding_blob_sha": "7f5d1cf52d9a91842e7e33e971ba1b82028e976b",
+  "qualified_implementation_subject_sha": "c760dc0c22ba329499ccd0ccb0b60c35b6ab2ed3",
+  "recovery_profile": "qualification/book-system/recovery/BOOK-SEMANTIC-RECOVERY-PROFILE-001.json",
+  "provider_registry": "governance/contracts/CORE-P03-PUBLIC-DURABILITY-OPERATIONS-002.json",
+  "provider_registry_blob_sha": "d7aa8136e9c33014196803690953cd7a338f3b3e",
+  "end_to_end_qualifier": ".github/scripts/book-core-p03-end-to-end-qualify.js",
+  "end_to_end_runtime": ".github/scripts/book-core-p03-end-to-end-runtime.js",
+  "lifecycle_contract_ref": "qualification/book-system/lifecycle/BOOK-LIFECYCLE-STATE-MACHINE-001.json",
+  "transition_policy": "Preserve Binding-002 exactly as historical evidence. Do not reclassify CORE-owned P19 physical durability responsibilities as Book implementation. Resolve only the provider-availability and exact end-to-end acceptance blocker using the exact current CORE/P03 registrations and Book acceptance evidence.",
+  "effective_summary": {
+    "overall": {"IMPLEMENTED":3,"PARTIAL":51,"UNIMPLEMENTED":117,"PEER_DEPENDENCY":37,"HUMAN/EXTERNAL":19,"total":227},
+    "preservation_phase": {"total":8,"IMPLEMENTED":2,"PARTIAL":2,"UNIMPLEMENTED":0,"PEER_DEPENDENCY":4,"HUMAN/EXTERNAL":0},
+    "unchanged_operation_count": 227
+  },
+  "preservation_peer_dependencies": {
+    "P19-01": {"status":"PEER_DEPENDENCY","provider":"CORE","meaning":"physical complete backup set","provider_satisfaction":"QUALIFIED_CURRENT"},
+    "P19-03": {"status":"PEER_DEPENDENCY","provider":"CORE","meaning":"physical archive manifest/checksum mechanics","provider_satisfaction":"QUALIFIED_CURRENT"},
+    "P19-04": {"status":"PEER_DEPENDENCY","provider":"CORE","meaning":"destructive restore execution","provider_satisfaction":"QUALIFIED_CURRENT"},
+    "P19-05": {"status":"PEER_DEPENDENCY","provider":"CORE","meaning":"physical restored digest/final-expression reproduction","provider_satisfaction":"QUALIFIED_CURRENT"}
+  },
+  "provider_binding": {
+    "provider_system": "CORE",
+    "owner_path": "SYSTEM_MASTER/CORE",
+    "domain": "P03",
+    "preserve_operation": {"operation_id":"CORE.P03.COMMAND.PRESERVE_PHYSICAL_SET","kind":"COMMAND","semantic_role":"PRESERVE_PHYSICAL_SET","registration_state":"REGISTERED_ACTIVE"},
+    "restore_operation": {"operation_id":"CORE.P03.COMMAND.RESTORE_PHYSICAL_SET","kind":"COMMAND","semantic_role":"RESTORE_PHYSICAL_SET","registration_state":"REGISTERED_ACTIVE"},
+    "book_canonical_write_authority_transferred": false,
+    "core_book_canonical_write_authority": false
+  },
+  "exact_qualification_evidence": {
+    "qualified_head_sha": "c760dc0c22ba329499ccd0ccb0b60c35b6ab2ed3",
+    "required_verification_run_id": 34882444676,
+    "required_verification_job_id": 104104774721,
+    "conclusion": "success",
+    "verify_summary": {"pass":35,"fail":0,"skip":1},
+    "non_vacuous": "PASS",
+    "required_qualifiers": {
+      "core-p03-book-durability-provider-qualify.js": "PASS",
+      "book-core-p03-end-to-end-qualify.js": "PASS"
+    },
+    "end_to_end_acceptance_sentinel": "BOOK_CORE_P03_END_TO_END_ACCEPTANCE_PASS"
+  },
+  "book_comp_12_standing": {
+    "book_owned_semantic_profile": "IMPLEMENTED_AND_EXACT_SUBJECT_QUALIFIED",
+    "book_owned_restore_acceptance": "IMPLEMENTED_AND_EXACT_SUBJECT_QUALIFIED",
+    "book_owned_offline_crash_semantics": "IMPLEMENTED_AND_EXACT_SUBJECT_QUALIFIED",
+    "physical_backup_restore_mechanics": "CORE_OWNED_NOT_ABSORBED",
+    "core_public_operation_registration": "REGISTERED_ACTIVE_AND_EXACT_SUBJECT_QUALIFIED",
+    "whole_component_end_to_end_provider_qualification": "PASS"
+  },
+  "non_claims": [
+    "The four P19 physical durability responsibilities remain CORE-owned PEER_DEPENDENCY items and are not counted as Book implementation.",
+    "Closing BOOK-ENG-009 does not complete BOOK as a system.",
+    "No production, publication, native-device, human-quality or whole-app completion claim is created by this binding."
+  ]
+}

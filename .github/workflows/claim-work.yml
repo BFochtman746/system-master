@@ -1,0 +1,80 @@
+name: Claim Work
+
+# The delegated work executor — what ActionsDispatch actually starts for a claim.
+#
+# Split from claim-driver.yml on purpose: the driver decides WHICH claim runs and records
+# evidence, this workflow performs the work. Keeping them apart is what makes GitHub
+# Actions the executor rather than a wrapper around one, and it means the work step can
+# grow per claim type without touching the lifecycle.
+#
+# workflow_dispatch only. Like the driver, this is never a required check and never runs
+# on a pull request, so it cannot become a merge gate that fails to report.
+#
+# HONEST SCOPE: the work step below records what it was asked to do and produces a
+# durable artifact. It is a real, verifiable execution path, not a simulation — but the
+# repository-specific work each claim type should perform is not defined yet, and this
+# file is where it goes when it is.
+
+on:
+  workflow_dispatch:
+    inputs:
+      claim_id:
+        description: 'Claim being executed'
+        required: true
+        type: string
+      payload_digest:
+        description: 'Payload digest carried by the claim'
+        required: false
+        type: string
+
+# Per-claim serialization: the ledger already refuses a second consumer for the same
+# claim, and this keeps two dispatches of the same id from overlapping on the runner too.
+concurrency:
+  group: claim-work-${{ inputs.claim_id }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  perform:
+    name: claim-work
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Perform delegated work
+        env:
+          # Untrusted dispatch inputs stay in the environment, never interpolated into
+          # the shell body.
+          IN_CLAIM_ID: ${{ inputs.claim_id }}
+          IN_PAYLOAD_DIGEST: ${{ inputs.payload_digest }}
+        run: |
+          set -euo pipefail
+          mkdir -p claim-evidence
+          receipt="claim-evidence/${IN_CLAIM_ID//[^A-Za-z0-9._-]/_}.txt"
+          {
+            printf 'claim_id=%s\n' "$IN_CLAIM_ID"
+            printf 'payload_digest=%s\n' "${IN_PAYLOAD_DIGEST:-none}"
+            printf 'run_id=%s\n' "$GITHUB_RUN_ID"
+            printf 'run_attempt=%s\n' "$GITHUB_RUN_ATTEMPT"
+            printf 'commit=%s\n' "$GITHUB_SHA"
+            printf 'executed_at=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          } | tee "$receipt"
+          {
+            echo "### Claim work"
+            echo
+            echo '```'
+            cat "$receipt"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Publish evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: claim-evidence-${{ github.run_id }}
+          path: claim-evidence/
+          if-no-files-found: error
+          retention-days: 30

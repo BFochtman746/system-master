@@ -1,0 +1,186 @@
+{
+  "checkpoint_id": "BOOK-BIDAG-004-DEP-02-CORE-API-SURFACE-RECOVERY-CHECKPOINT-001",
+  "effective_date": "2026-09-14",
+  "standing": "SOURCE_EVIDENCE_RECOVERED__SEVEN_TYPE_API_CENSUS_COMPLETE__CURRENT_OWNER_DISPOSITIONS_BOUND__NO_CURRENT_COMPILE_GRAPH_MUTATION_YET",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "authority_id": "CURRENT-AUTHORITY-005",
+  "topology_ref": "governance/SYSTEM-TOPOLOGY-007.json",
+  "completion_ref": "governance/SYSTEM-COMPLETION-STATUS-002.json",
+  "interface_blueprint_ref": "governance/architecture/SYSTEM-MASTER-SYSTEM-INTERFACE-BLUEPRINT-001.json",
+  "capability_crosswalk_ref": "governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json",
+  "owner_allocation_ref": "governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006.json",
+  "selection_ref": "qualification/book-system/BOOK-BIDAG-004-DEP-02-SELECTION-001.json",
+  "work_package_id": "BIDAG-004-DEP-02",
+  "work_package_title": "Restore whole-Book core dependency/build graph",
+  "semantic_owner_boundary": "Master Core / shared build graph authority with current peer ownership preserved",
+  "predecessor_truth": {
+    "book_eng_009": "COMPLETE_WITH_EXACT_CURRENT_CORE_P03_END_TO_END_EVIDENCE",
+    "book_system": "INCOMPLETE",
+    "current_residual": "whole-source build graph/shared Core integration dependencies"
+  },
+  "recovery_correction": {
+    "prior_checkpoint_assumption": "Exact R5-WP-020 / MLSI-WP-020 Book Java source was not materialized in inspected GitHub surfaces.",
+    "current_truth": "GitHub alone did not expose the recovered source carrier, but the user Library contains the exact Book source carrier, the 005A compile evidence, the CR001 225-source Core handoff, and the exact UAF recovery worktree. The source-evidence blocker is therefore closed and replaced by the current-owner migration problem.",
+    "prior_source_missing_claim_current_effect": "SUPERSEDED_WITHIN_THIS_UNMERGED_CHECKPOINT"
+  },
+  "exact_source_custody": {
+    "recovered_book_source": {
+      "artifact": "BOOK_WRITING_OS_COMPLETE_HANDOFF_R2_CLOSED_R3_NEXT_20260901.zip",
+      "sha256": "d2b82624186f57ae0da3aaa47e3e445c0c633bf9dbb08b06f1cee04639e64c50",
+      "role": "Recovered cumulative Book source baseline used by the 005A evidence chain"
+    },
+    "cr001_core_handoff": {
+      "artifact": "CR001_R4_EXACT_225_SOURCE_HANDOFF_20260910.zip",
+      "sha256": "ada701cfa15e6162b6cdf67bc6c0803540a611b08a23aeeeddd1045d8ce2d8ab",
+      "role": "Exact later shared-Core source handoff"
+    },
+    "uaf_recovery_worktree": {
+      "artifact": "SYSTEM_MASTER_UAF001_RECOVERY_WORKING_APP_FOUNDATION006-F-PROMOTION-GATE-PROVEN_SIGNED-CHECKPOINT-WITNESS-G-NEXT_VERSION-LOCKED_EXACT-LATER-BYTES-PENDING_20260830(1).zip",
+      "sha256": "945f3882537d5badfac0f98d53902d4117af3df9d24d3c7040321a4c29a070c2",
+      "manifest_subject_count": 5260,
+      "standing": "EXACT_RECOVERABLE_ENGINEERING_BASELINE__NOT_LATEST_IDENTIFIED_ORIGINAL_SOURCE__NOT_PRODUCTION",
+      "role": "Exact recovered Core source substrate containing the historical Book-facing API family"
+    }
+  },
+  "historical_failure_truth": {
+    "original_book_only_compile": "FAIL",
+    "javac_error_count": 82,
+    "dominant_cause": "Recovered Book sources referenced missing org.systemmaster.core types in the transferred Book-only baseline.",
+    "source_basis_labels": ["R5-WP-020", "MLSI-WP-020"],
+    "original_selection_representative_type_count": 6,
+    "recovered_complete_type_count": 7,
+    "previously_unlisted_type": "org.systemmaster.core.DataClassification"
+  },
+  "complete_book_facing_historical_core_api_surface": [
+    "org.systemmaster.core.ArtifactGateway",
+    "org.systemmaster.core.CapabilityDescriptor",
+    "org.systemmaster.core.DataClassification",
+    "org.systemmaster.core.EffectClass",
+    "org.systemmaster.core.SearchDigests",
+    "org.systemmaster.core.SearchRequest",
+    "org.systemmaster.core.SourceArchiveDocument"
+  ],
+  "uaf_exact_type_sha256": {
+    "ArtifactGateway": "ea25489c45fd3519c7a4eacaf700ac5eb67dd0c24b2bcc25f3ea7d724934d53e",
+    "CapabilityDescriptor": "24b8c161d5f584415fb0f737c28d611e05198d758d16e096422704a4a33a353c",
+    "DataClassification": "051b477f598d66a91454f24b282ab80da1cf8b42f62f9c18198b1dd15bfdbd3c",
+    "EffectClass": "5a0c6e5da3702c707de7545825b20eed7df485c9c16e1ed7912f097861a32a5e",
+    "SearchDigests": "7a744abb49c3e7c91b693ca4178507199927421e7345657f83ea15aaf367d51b",
+    "SearchRequest": "1eeaee4437309cfe9d62b9bb7457f5f86fb099779b19b3c8f61681556688e5a2",
+    "SourceArchiveDocument": "5ef97000d9a937630b120cf83f0f178005b871083b09ff47c7d3f66b03c9b89a"
+  },
+  "historical_compatibility_replay": {
+    "java_runtime": "OpenJDK 21.0.11",
+    "book_java_source_count": 45,
+    "uaf_core_source_count_total": 381,
+    "bounded_uaf_core_source_count_compiled": 379,
+    "excluded_unrelated_core_sources": [
+      "org.systemmaster.core.AgentAiGateway",
+      "org.systemmaster.core.JobAiGateway"
+    ],
+    "excluded_reason": "These two unrelated Core classes require separate model-gateway/integration packages and are outside the Book-facing dependency family.",
+    "javac_result": "PASS_EXIT_0",
+    "portable_test_main_count": 21,
+    "portable_test_pass": 21,
+    "portable_test_fail": 0,
+    "evidence_class": "HISTORICAL_RECOVERED_SUBJECT_COMPATIBILITY_ONLY__NOT_CURRENT_MAIN_QUALIFICATION"
+  },
+  "current_authority_dispositions": [
+    {
+      "historical_type": "org.systemmaster.core.CapabilityDescriptor",
+      "disposition": "REUSE",
+      "current_owner": "SYSTEM_MASTER/CORE",
+      "evidence": "Byte-identical SHA-256 in exact UAF recovery and CR001 225-source Core handoff.",
+      "current_action": "Use the current shared Core type; no compatibility adapter required."
+    },
+    {
+      "historical_type": "org.systemmaster.core.EffectClass",
+      "disposition": "REUSE",
+      "current_owner": "SYSTEM_MASTER/CORE",
+      "evidence": "Byte-identical SHA-256 in exact UAF recovery and CR001 225-source Core handoff.",
+      "current_action": "Use the current shared Core type; no compatibility adapter required."
+    },
+    {
+      "historical_type": "org.systemmaster.core.ArtifactGateway",
+      "disposition": "ADAPTER",
+      "current_owner": "SYSTEM_MASTER/CORE",
+      "evidence": "Historical API is a Book-facing facade over governed artifact mechanics. Current interface blueprint assigns generic artifacts to CORE; CR001 exposes GovernedArtifactGateway rather than the historical facade.",
+      "current_action": "Bind Book through a registered current CORE generic-artifact operation/adapter. Do not restore ArtifactGateway as a Book-owned implementation and do not treat DOCUMENTS as owner of generic physical artifact storage."
+    },
+    {
+      "historical_type": "org.systemmaster.core.DataClassification",
+      "disposition": "ADAPTER",
+      "current_owner": "SYSTEM_MASTER/CORE",
+      "evidence": "Book uses the type for sensitivity/external-egress gating, which is shared authorization/data-policy plumbing rather than Book semantic state. The exact historical enum exists in UAF but is not present in the CR001 current handoff.",
+      "current_action": "Map the Book call sites to the current CORE shared classification/authorization contract. Do not copy the legacy enum into Book merely to satisfy javac."
+    },
+    {
+      "historical_type": "org.systemmaster.core.SearchRequest",
+      "disposition": "REPLACEMENT",
+      "current_owner": "SYSTEM_MASTER/RESEARCH_KNOWLEDGE",
+      "evidence": "Current C30 RESEARCH ownership and the research/core frozen boundary assign research request/result semantics to RESEARCH_KNOWLEDGE while CORE may host generic search transport/jobs/storage.",
+      "current_action": "Replace the historical Core semantic request DTO at the Book boundary with a registered RESEARCH_KNOWLEDGE research query/API contract."
+    },
+    {
+      "historical_type": "org.systemmaster.core.SearchDigests",
+      "disposition": "REPLACEMENT",
+      "current_owner": "SYSTEM_MASTER/RESEARCH_KNOWLEDGE",
+      "evidence": "The utility is used by Book only to bind research query/request identity. Current research request/provenance semantics belong to RESEARCH_KNOWLEDGE; Book must not create a second provider identity scheme.",
+      "current_action": "Use the current provider-owned research request identity/digest contract or an explicitly non-semantic shared digest primitive. Do not preserve SearchDigests as a public cross-peer Core semantic contract by name alone."
+    },
+    {
+      "historical_type": "org.systemmaster.core.SourceArchiveDocument",
+      "disposition": "REPLACEMENT",
+      "current_owner": "SYSTEM_MASTER/RESEARCH_KNOWLEDGE",
+      "evidence": "The type carries source/archive/provenance semantics. Current C17 KNOWLEDGE and C30 RESEARCH ownership assign source/provenance semantics to RESEARCH_KNOWLEDGE, while physical artifact identities/storage remain shared mechanics.",
+      "current_action": "Replace with a RESEARCH_KNOWLEDGE-owned source/provenance projection that may reference CORE-owned artifact identities without transferring research semantics to CORE."
+    }
+  ],
+  "disposition_summary": {
+    "REUSE": 2,
+    "ADAPTER": 2,
+    "REPLACEMENT": 3,
+    "RETIRED_INVALID": 0,
+    "all_historical_book_facing_core_types_dispositioned": true
+  },
+  "architecture_laws": [
+    "BOOK remains sole owner of Book/manuscript semantic state.",
+    "CORE may own shared runtime, generic artifact and generic research infrastructure without owning research result/provenance semantics.",
+    "RESEARCH_KNOWLEDGE owns RESEARCH and KNOWLEDGE semantic contracts and provenance meaning.",
+    "DOCUMENTS owns generic FILE/document transformation mechanics; this does not make DOCUMENTS the owner of generic CORE physical artifact storage or research provenance.",
+    "Every public cross-peer operation must be globally registered before implementation; no unregistered compatibility call is admitted.",
+    "No direct cross-peer database access or foreign semantic write is admitted.",
+    "Historical recovered PASS/compile evidence does not transfer to a changed current implementation subject."
+  ],
+  "disposition_status": {
+    "source_evidence_recovered": true,
+    "complete_surface_enumerated": true,
+    "all_imports_dispositioned": true,
+    "historical_api_compatibility_proven": true,
+    "current_owner_migration_implemented": false,
+    "current_direct_manuscript_compile_pass": false,
+    "current_whole_recovered_book_tree_compile_pass": false,
+    "compile_graph_mutation_allowed": false,
+    "reason_compile_graph_mutation_not_yet_allowed": "The census prerequisite is closed, but current cross-peer operation/adapter contracts must be design-locked and registered before source mutation so the repair cannot resurrect retired Core semantics or create unregistered peer calls.",
+    "stub_only_repair_allowed": false,
+    "work_package_complete": false
+  },
+  "exact_next_action": {
+    "state": "READY_FOR_CURRENT_INTERFACE_REPAIR_DESIGN_LOCK",
+    "action": "Create the BIDAG-004-DEP-02 current interface repair design lock: bind CapabilityDescriptor and EffectClass directly to current CORE; define/register the CORE artifact and classification adapter operations required by Book; define/register the RESEARCH_KNOWLEDGE research-request and source/provenance replacement operations required by Book; specify exact Book call-site migrations and dependency/module changes; then build the smallest candidate and rerun direct Manuscript compile plus whole recovered Book-tree compile and affected portable tests.",
+    "implementation_guard": "Do not mutate Book/Core/Research source until the operation identities, provider ownership, request/response shapes, digest/currentness laws and error semantics are frozen."
+  },
+  "forbidden_actions": [
+    "Treat the original six representative names as the complete dependency surface; DataClassification is part of the recovered exact surface.",
+    "Create placeholder or stub org.systemmaster.core classes to make javac green.",
+    "Copy the historical UAF Core API family wholesale into current main.",
+    "Create Book-owned duplicates of CORE or RESEARCH_KNOWLEDGE semantic authority.",
+    "Expose an unregistered cross-peer compatibility operation.",
+    "Claim the historical 21/21 replay is current-main qualification.",
+    "Close BIDAG-004-DEP-02 until current direct Manuscript and whole recovered Book-tree compile/qualification evidence pass.",
+    "Advance to BOOK-COMP-13 while this earlier dependency residual remains open."
+  ],
+  "canonical_effect": "NONE",
+  "book_completion_effect": "NONE",
+  "selector_effect": "NONE"
+}

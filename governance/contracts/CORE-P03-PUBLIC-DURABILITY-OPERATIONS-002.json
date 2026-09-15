@@ -1,0 +1,65 @@
+{
+  "registry_id": "CORE-P03-PUBLIC-DURABILITY-OPERATIONS-002",
+  "effective_date": "2026-09-14",
+  "standing": "REGISTERED_ACTIVE_CANDIDATE__EFFECTIVE_ON_EXACT_REQUIRED_VERIFICATION_PASS__BOOK_CONSUMER_BINDING_OPEN",
+  "supersedes": "governance/contracts/CORE-P03-PUBLIC-DURABILITY-OPERATIONS-001.json",
+  "authority_id": "CURRENT-AUTHORITY-005",
+  "system_interface_blueprint": "governance/architecture/SYSTEM-MASTER-SYSTEM-INTERFACE-BLUEPRINT-001.json",
+  "capability_crosswalk": "governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json",
+  "provider_system": "CORE",
+  "owner_path": "SYSTEM_MASTER/CORE",
+  "domain": "P03",
+  "platform_requirement": "Evidence store and retention",
+  "implementation": "control-gateway/python/a01_book_durability_provider.py",
+  "focused_tests": "control-gateway/python/test_a01_book_durability_provider.py",
+  "qualifier": ".github/scripts/core-p03-book-durability-provider-qualify.js",
+  "operations": [
+    {
+      "registration_state": "REGISTERED_ACTIVE",
+      "provider_system": "CORE",
+      "owner_path": "SYSTEM_MASTER/CORE",
+      "domain": "P03",
+      "kind": "COMMAND",
+      "semantic_role": "PRESERVE_PHYSICAL_SET",
+      "operation_id": "CORE.P03.COMMAND.PRESERVE_PHYSICAL_SET",
+      "handler_identity": "control-gateway/python/a01_book_durability_provider.py:preserve_physical_set",
+      "request_contract": "BOOK buildCoreDurabilityRequest output plus caller-supplied exact semantic_manifest metadata object",
+      "response_status": "DURABLE",
+      "canonical_write_authority": false,
+      "direct_book_state_write": false
+    },
+    {
+      "registration_state": "REGISTERED_ACTIVE",
+      "provider_system": "CORE",
+      "owner_path": "SYSTEM_MASTER/CORE",
+      "domain": "P03",
+      "kind": "COMMAND",
+      "semantic_role": "RESTORE_PHYSICAL_SET",
+      "operation_id": "CORE.P03.COMMAND.RESTORE_PHYSICAL_SET",
+      "handler_identity": "control-gateway/python/a01_book_durability_provider.py:restore_physical_set",
+      "request_contract": "BOOK buildCoreRestoreRequest output plus CORE-owned archive and destructive-test restore roots",
+      "response_status": "RESTORED",
+      "canonical_write_authority": false,
+      "direct_book_state_write": false
+    }
+  ],
+  "consumer_scope": ["BOOK"],
+  "runtime_contract": {
+    "semantic_manifest_transport": "CALLER_SUPPLIED_METADATA__NO_PHYSICAL_PAYLOAD__EXACT_DIGEST_REQUIRED",
+    "physical_source_resolution": "CORE_OWNED_RESOLVER__BOOK_DOES_NOT_RECEIVE_CORE_STORAGE_ROOT",
+    "archive_model": "CONTENT_ADDRESSED_OBJECTS_PLUS_EXACT_PHYSICAL_MANIFEST",
+    "preserve_idempotency": "EXACT_EXISTING_PHYSICAL_MANIFEST_RECONCILED_BEFORE_SOURCE_RETOUCH",
+    "restore_idempotency": "EXACT_EXISTING_RESTORE_RECEIPT_RECONCILED_BEFORE_DUPLICATE_DESTRUCTIVE_SIDE_EFFECT",
+    "destructive_restore_scope": "CORE_DERIVED_TEST_TARGET_ONLY__CALLER_CANNOT_SELECT_DELETE_PATH",
+    "physical_integrity": "SHA256_EVERY_SOURCE_ARCHIVE_AND_RESTORED_OBJECT",
+    "canonical_effect_allowed": false,
+    "direct_cross_peer_database_access": false
+  },
+  "ownership_boundary": {
+    "core_owns": ["physical persistence", "physical archive/checksum mechanics", "destructive test restore", "physical byte reproduction"],
+    "book_retains": ["semantic backup-set membership", "currentness", "canonical state", "restore acceptance", "PRESERVATION/G19 gate truth"],
+    "book_physical_backup_implementation": false,
+    "core_book_canonical_write_authority": false
+  },
+  "qualification_rule": "REGISTERED_ACTIVE is accepted as qualified current evidence only when Required Verification passes on the exact commit containing this registry, implementation, tests and qualifier. This registration alone does not close BOOK-ENG-009; Book must bind these operations and pass real exact-subject preserve plus destructive-restore acceptance."
+}
