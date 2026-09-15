@@ -16,17 +16,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Resolves an accepted workflow_dispatch to exactly one GitHub Actions run and waits for
- * that run to reach a real terminal conclusion.
- *
- * <p>Correlation is exact. ActionsDispatch chooses a dispatch_id before POST and
- * claim-work.yml publishes {@code claim:<claimId> dispatch:<dispatchId>} as display_title.
- * This poller compares the entire title, so claim {@code job-1} cannot be satisfied by a
- * run for {@code job-11}. More than one exact match fails closed as ambiguous.
- *
- * <p>Discovery and completion are independently bounded by both attempt ceilings and
- * wall-clock budgets. "dispatch accepted but no run became visible" and "run found but
- * still running" are intentionally different failure codes.
+ * Resolves one accepted workflow_dispatch to exactly one Actions run and waits for its
+ * terminal conclusion. Correlation is the exact display_title produced from the claim id
+ * and the dispatch_id chosen by ActionsDispatch before POST.
  */
 public final class ActionsRunPoller implements ClaimLedger.Consumer.Completion {
 
@@ -58,8 +50,8 @@ public final class ActionsRunPoller implements ClaimLedger.Consumer.Completion {
         }
 
         public static Bounds production() {
-            // Worst case is below claim-driver.yml's 20-minute job timeout: two minutes
-            // to discover the run plus sixteen minutes to observe its terminal result.
+            // 2 minutes to resolve the run + 16 minutes to observe completion remains
+            // inside claim-driver.yml's 20-minute workflow timeout.
             return new Bounds(24, Duration.ofMinutes(2),
                     192, Duration.ofMinutes(16), Duration.ofSeconds(5));
         }
@@ -103,8 +95,8 @@ public final class ActionsRunPoller implements ClaimLedger.Consumer.Completion {
         return new ActionsRunPoller(transport, ActionsDispatch::ambientToken,
                 coordinates.owner(), coordinates.repo(),
                 env("CLAIM_WORK_WORKFLOW", "claim-work.yml"),
-                env("CLAIM_WORK_REF", "main"), Bounds.production(),
-                Instant::now, Thread::sleep);
+                env("CLAIM_WORK_REF", "main"), Bounds.production(), Instant::now,
+                duration -> Thread.sleep(Math.max(1L, duration.toMillis())));
     }
 
     public static Transport httpTransport() {
@@ -155,8 +147,7 @@ public final class ActionsRunPoller implements ClaimLedger.Consumer.Completion {
     }
 
     private long discoverRun(String expectedTitle, Map<String, String> headers) throws Exception {
-        Instant started = clock.now();
-        Instant deadline = started.plus(bounds.discoveryBudget());
+        Instant deadline = clock.now().plus(bounds.discoveryBudget());
         String url = API + "/repos/" + owner + "/" + repo
                 + "/actions/workflows/" + path(workflowFile)
                 + "/runs?event=workflow_dispatch&branch=" + query(ref) + "&per_page=100";
@@ -170,17 +161,14 @@ public final class ActionsRunPoller implements ClaimLedger.Consumer.Completion {
             if (exact.size() > 1) throw new IllegalStateException("DISPATCH_RUN_AMBIGUOUS");
             if (exact.size() == 1) return exact.get(0).id();
 
-            if (attempt == bounds.discoveryAttempts() || !clock.now().isBefore(deadline)) {
-                break;
-            }
+            if (attempt == bounds.discoveryAttempts() || !clock.now().isBefore(deadline)) break;
             sleepWithin(deadline);
         }
         throw new IllegalStateException("DISPATCH_RUN_NOT_FOUND_WITHIN_WINDOW");
     }
 
     private RunSnapshot awaitTerminal(long runId, Map<String, String> headers) throws Exception {
-        Instant started = clock.now();
-        Instant deadline = started.plus(bounds.completionBudget());
+        Instant deadline = clock.now().plus(bounds.completionBudget());
         String url = API + "/repos/" + owner + "/" + repo + "/actions/runs/" + runId;
 
         for (int attempt = 1; attempt <= bounds.completionAttempts(); attempt++) {
@@ -189,11 +177,8 @@ public final class ActionsRunPoller implements ClaimLedger.Consumer.Completion {
             if (run.id() != runId) throw new IllegalStateException("DISPATCH_RUN_ID_MISMATCH");
             if ("completed".equals(run.status())) return run;
 
-            // A conclusion field alone is not completion. GitHub status is the terminal
-            // gate; this prevents a stale/partial response from becoming false success.
-            if (attempt == bounds.completionAttempts() || !clock.now().isBefore(deadline)) {
-                break;
-            }
+            // conclusion=success without status=completed is not terminal truth.
+            if (attempt == bounds.completionAttempts() || !clock.now().isBefore(deadline)) break;
             sleepWithin(deadline);
         }
         throw new IllegalStateException("DISPATCH_POLL_BUDGET_EXHAUSTED");
@@ -276,10 +261,10 @@ public final class ActionsRunPoller implements ClaimLedger.Consumer.Completion {
     }
 
     private static String field(String json, String name, boolean numberOnly) {
-        String pattern = "\\\"" + Pattern.quote(name) + "\\\"\\s*:\\s*";
+        String prefix = "\\\"" + Pattern.quote(name) + "\\\"\\s*:\\s*";
         Pattern p = numberOnly
-                ? Pattern.compile(pattern + "(-?[0-9]+)")
-                : Pattern.compile(pattern + "(?:\\\"((?:\\\\.|[^\\\"\\\\])*)\\\"|(null))");
+                ? Pattern.compile(prefix + "(-?[0-9]+)")
+                : Pattern.compile(prefix + "(?:\\\"((?:\\\\.|[^\\\"\\\\])*)\\\"|(null))");
         Matcher m = p.matcher(json);
         if (!m.find()) return null;
         if (numberOnly) return m.group(1);
