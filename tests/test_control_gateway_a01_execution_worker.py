@@ -3,6 +3,7 @@ from __future__ import annotations
 import datetime as dt
 import importlib.util
 import os
+import subprocess
 import sys
 import tempfile
 import threading
@@ -593,6 +594,8 @@ class ExecutionWorkerTests(unittest.TestCase):
         proc = self.worker._spawn_managed_process(
             [sys.executable, str(parent), str(marker), str(ready)],
             cwd=Path(self.tmp.name),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
         )
         deadline = time.time() + 5
         while time.time() < deadline and not ready.exists():
