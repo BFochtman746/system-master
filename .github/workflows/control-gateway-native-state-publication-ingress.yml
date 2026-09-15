@@ -1,0 +1,90 @@
+name: Control Gateway Native State Publication Ingress
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: read
+  actions: read
+  issues: read
+
+jobs:
+  validate-state-command:
+    name: Validate owner-authenticated state command
+    if: >-
+      github.actor == github.repository_owner &&
+      github.event.issue.author_association == 'OWNER' &&
+      startsWith(github.event.issue.title, '[CONTROL-GATEWAY-STATE] ')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      transition_request_json: ${{ steps.validate.outputs.transition_request_json }}
+    steps:
+      - name: Validate exact state transition envelope
+        id: validate
+        shell: bash
+        env:
+          CONTROL_GATEWAY_STATE_BODY: ${{ github.event.issue.body }}
+          CONTROL_GATEWAY_ISSUE_TITLE: ${{ github.event.issue.title }}
+          CONTROL_GATEWAY_REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          request_file="${RUNNER_TEMP}/control-gateway-state-transition.json"
+          printf '%s' "${CONTROL_GATEWAY_STATE_BODY}" > "${request_file}"
+
+          jq -e 'type == "object"' "${request_file}" >/dev/null
+          test "$(jq -c 'keys' "${request_file}")" = '["action","expected_head_commit_sha","expected_packet_digest","expected_publication_revision","mission_version","parameters","protocol_version","repository","state_ref","transition_id","workstream_id"]'
+          test "$(jq -r '.protocol_version // empty' "${request_file}")" = 'control-gateway.active-work-transition-request.v1'
+
+          transition_id="$(jq -r '.transition_id // empty' "${request_file}")"
+          state_ref="$(jq -r '.state_ref // empty' "${request_file}")"
+          repository="$(jq -r '.repository // empty' "${request_file}")"
+          action="$(jq -r '.action // empty' "${request_file}")"
+          expected_head="$(jq -r '.expected_head_commit_sha // empty' "${request_file}")"
+          expected_packet="$(jq -r '.expected_packet_digest // empty' "${request_file}")"
+          expected_revision="$(jq -r '.expected_publication_revision' "${request_file}")"
+
+          [[ "${transition_id}" =~ ^[A-Za-z0-9][A-Za-z0-9._:/-]{0,191}$ ]]
+          [[ "${state_ref}" =~ ^[A-Za-z0-9][A-Za-z0-9._/-]{0,254}$ ]]
+          [[ "${state_ref}" != *'..'* ]]
+          [[ "${state_ref}" != *'//'* ]]
+          [[ "${state_ref}" != */ ]]
+          [[ "${expected_head}" =~ ^[0-9a-f]{40}$ ]]
+          [[ "${expected_packet}" =~ ^[0-9a-f]{64}$ ]]
+          [[ "${expected_revision}" =~ ^[1-9][0-9]*$ ]]
+          test "${repository}" = "${CONTROL_GATEWAY_REPOSITORY}"
+          test "${CONTROL_GATEWAY_ISSUE_TITLE}" = "[CONTROL-GATEWAY-STATE] ${transition_id}"
+
+          case "${action}" in
+            TERMINATE_CURRENT)
+              test "$(jq -c '.parameters | keys' "${request_file}")" = '["successor_candidates","terminal_receipt"]'
+              jq -e '.parameters.successor_candidates | type == "array"' "${request_file}" >/dev/null
+              jq -e '.parameters.terminal_receipt | type == "object"' "${request_file}" >/dev/null
+              ;;
+            REBIND_AUTHORITY)
+              test "$(jq -c '.parameters | keys' "${request_file}")" = '["authoritative_subject","receipt_id"]'
+              jq -e '.parameters.authoritative_subject | type == "object"' "${request_file}" >/dev/null
+              ;;
+            AUTHORIZE_AND_START_SUCCESSOR)
+              test "$(jq -c '.parameters | keys' "${request_file}")" = '["allowed_paths_or_effects","authoritative_subject","receipt_id","successor_candidate"]'
+              test "$(jq -c '.parameters.allowed_paths_or_effects | keys' "${request_file}")" = '["effects","paths"]'
+              jq -e '.parameters.allowed_paths_or_effects.paths | type == "array"' "${request_file}" >/dev/null
+              jq -e '.parameters.allowed_paths_or_effects.effects | type == "array"' "${request_file}" >/dev/null
+              test "$(jq -c '.parameters.successor_candidate | keys' "${request_file}")" = '["a01_state","github_admission_state","operation_id","predecessor_receipt_id","qualification_state","required_receipt_ids"]'
+              jq -e '.parameters.successor_candidate.required_receipt_ids | type == "array"' "${request_file}" >/dev/null
+              jq -e '.parameters.authoritative_subject | type == "object"' "${request_file}" >/dev/null
+              ;;
+            *) exit 1 ;;
+          esac
+
+          compact="$(jq -c '.' "${request_file}")"
+          printf 'transition_request_json=%s\n' "${compact}" >> "${GITHUB_OUTPUT}"
+
+  publish-state:
+    name: Publish through exact-CAS active-work writer
+    needs: validate-state-command
+    uses: ./.github/workflows/control-gateway-active-work-publisher.yml
+    with:
+      transition_request_json: ${{ needs.validate-state-command.outputs.transition_request_json }}
+    secrets: inherit
