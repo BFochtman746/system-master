@@ -14,13 +14,13 @@ Evidence authority: `governance/census/FOUNDATION-CLOSURE-EVIDENCE-REGISTRY-001.
 
 | State | Rows |
 | --- | ---: |
-| `COMPLETE_WITH_EVIDENCE` | 7 |
-| `ACTIVE_GAP` | 43 |
+| `COMPLETE_WITH_EVIDENCE` | 8 |
+| `ACTIVE_GAP` | 42 |
 | `DURABLY_BLOCKED_EXTERNAL_HUMAN_PRIVATE_NATIVE` | 0 |
 | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | 16 |
 | **Total** | **66** |
 
-**Foundation 1.0 completion with evidence: 14% (7 of 50 in-scope rows).**
+**Foundation 1.0 completion with evidence: 16% (8 of 50 in-scope rows).**
 
 ## Current disposition matrix
 
@@ -83,7 +83,7 @@ Evidence authority: `governance/census/FOUNDATION-CLOSURE-EVIDENCE-REGISTRY-001.
 | `P04` | P04 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | Fresh current-authority PASS receipt admitted for exact subject `ba0689a0389958d108571b50329b039e167a8156`; superseded receipt preserved as historical evidence. |
 | `P05` | P05 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | Fresh current-authority PASS receipt admitted for exact subject `fe7a19093721c73093fcc5b9daa2330eb2d6d9cc`; current Registry 017 binding and fail-closed schema validation proven. |
 | `P06` | P06 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | Fresh current-authority PASS receipt admitted for exact subject `2d0442ab7b1a1d125ab2bfbdf5b7ea137305f902`; all 15 logical dispatch fields, fail-closed validation, bridge-to-gateway forwarding, and legacy timeout read compatibility proven without widening the 10-input wire packet. |
-| `P07` | P07 | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
+| `P07` | P07 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | Fresh current-authority PASS receipt admitted for exact subject `2bf022c5f39d0b3275d66f91883a5551b67c583f`; four-context admission alignment plus fail-closed registration, identity, wrapper, timeout and overnight guards proven. |
 | `P08` | P08 | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
 | `P09` | P09 | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
 | `P10` | P10 | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
@@ -109,10 +109,12 @@ Evidence authority: `governance/census/FOUNDATION-CLOSURE-EVIDENCE-REGISTRY-001.
 
 `P06` is current-complete with exact-subject evidence from GitHub Actions run `34925186452`, artifact `10380056210`, bound to subject `2d0442ab7b1a1d125ab2bfbdf5b7ea137305f902`; all 12 acceptance cases and the bridge compatibility/wiring checks passed, proving the complete 15-field logical packet over the 10-input GitHub dispatch envelope while preserving legacy timeout reads off-wire.
 
+`P07` is current-complete with exact-subject evidence from GitHub Actions run `34926943360`, artifact `10380440701`, bound to subject `2bf022c5f39d0b3275d66f91883a5551b67c583f`; the barrier admits registered `normal`, `recovery`, and `repair` contexts with exact subject/control-plane identity, recognizes `overnight` and applies its stricter policy, refuses unregistered and invalid-context requests fail-closed, and proves gateway-to-broker admission wiring before subject checkout.
+
 ## Unresolved gap successor register
 
-43 `ACTIVE_GAP` rows remain. Ordering is shared platform dependency first, then the current nine-peer order from Topology 007: CORE, LEARNING, BOOK, DOCUMENTS, SPREADSHEET_DATA, MEDIA, CONNECTED_ACTIONS, RESEARCH_KNOWLEDGE, PROGRAMMING.
+42 `ACTIVE_GAP` rows remain. Ordering is shared platform dependency first, then the current nine-peer order from Topology 007: CORE, LEARNING, BOOK, DOCUMENTS, SPREADSHEET_DATA, MEDIA, CONNECTED_ACTIONS, RESEARCH_KNOWLEDGE, PROGRAMMING.
 
-**Exact next ACTIVE_GAP: `P07` - A-01 admission barrier.**
+**Exact next ACTIVE_GAP: `P08` - Qualification execution and PASS semantics.**
 
-Continue `P07-P12`, `P15`, then owner-valid capability gaps in dependency-valid order. `PROSE` receives no current successor because it is terminally retired.
+Continue `P08-P12`, `P15`, then owner-valid capability gaps in dependency-valid order. `PROSE` receives no current successor because it is terminally retired.

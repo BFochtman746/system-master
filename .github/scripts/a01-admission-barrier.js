@@ -6,6 +6,8 @@ const cp = require('child_process');
 const https = require('https');
 const os = require('os');
 
+const EXECUTION_CONTEXTS = Object.freeze(['normal', 'recovery', 'repair', 'overnight']);
+
 function readJson(p) { return JSON.parse(fs.readFileSync(p, 'utf8')); }
 function isObj(v) { return v !== null && typeof v === 'object' && !Array.isArray(v); }
 function safeWrapper(rel) { return typeof rel === 'string' && rel.startsWith('.github/scripts/') && !rel.includes('..') && !path.isAbsolute(rel); }
@@ -92,7 +94,7 @@ function loadControlState(controlRoot, expectedControl, id, workstream, subjectS
   if (!['subject', 'control_plane'].includes(entry.source)) {
     return { blocked: classify('INVALID_REGISTERED_WRAPPER_SOURCE', String(entry.source), base) };
   }
-  if (!['normal', 'overnight'].includes(executionContext)) {
+  if (!EXECUTION_CONTEXTS.includes(executionContext)) {
     return { blocked: classify('INVALID_EXECUTION_CONTEXT', executionContext, base) };
   }
   if (!Number.isInteger(timeout) || timeout <= 0 || timeout > policy.runtime.max_qualifier_timeout_minutes) {
@@ -228,15 +230,16 @@ function selftest() {
   if (!isSha('a'.repeat(40)) || isSha('abc')) throw new Error('SHA_VALIDATION_SELFTEST_FAILED');
   if (!safeWrapper('.github/scripts/test.js')) throw new Error('SAFE_WRAPPER_SELFTEST_FAILED');
   if (safeWrapper('../x.js') || safeWrapper('/tmp/x.js')) throw new Error('UNSAFE_WRAPPER_SELFTEST_FAILED');
-  console.log('A01_ADMISSION_BARRIER_SELFTEST=PASS');
+  if (JSON.stringify(EXECUTION_CONTEXTS) !== JSON.stringify(['normal', 'recovery', 'repair', 'overnight'])) throw new Error('EXECUTION_CONTEXT_ALLOWLIST_SELFTEST_FAILED');
+  console.log('A01_ADMISSION_BARRIER_SELFTEST=PASS contexts=4');
 }
 
 function integrationSelftest() {
   const root = path.resolve(__dirname, '..', '..');
   const head = gitHead(root);
   const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'a01-admission-selftest-'));
-  const run = (id, workstream) => {
-    const evidence = path.join(temp, `${id}.json`);
+  const run = (id, workstream, executionContext = 'normal', timeout = '1', repairTransaction = '') => {
+    const evidence = path.join(temp, `${id}-${executionContext}.json`);
     const child = cp.spawnSync(process.execPath, [__filename, 'evaluate'], {
       cwd: root,
       encoding: 'utf8',
@@ -249,24 +252,46 @@ function integrationSelftest() {
         A01_WORKSTREAM_ID: workstream,
         A01_SUBJECT_SHA: head,
         A01_CONTROL_PLANE_SHA: head,
-        A01_EXECUTION_CONTEXT: 'normal',
-        A01_QUALIFIER_TIMEOUT_MINUTES: '1',
-        A01_REPAIR_TRANSACTION_ID: '',
+        A01_EXECUTION_CONTEXT: executionContext,
+        A01_QUALIFIER_TIMEOUT_MINUTES: timeout,
+        A01_REPAIR_TRANSACTION_ID: repairTransaction,
         A01_ADMISSION_EVIDENCE: evidence,
         GITHUB_OUTPUT: ''
       }
     });
-    if (child.status !== 0) throw new Error(`ADMISSION_CHILD_FAILED:${id}:${child.stderr || child.stdout}`);
+    if (child.status !== 0) throw new Error(`ADMISSION_CHILD_FAILED:${id}:${executionContext}:${child.stderr || child.stdout}`);
     return { evidence: readJson(evidence), stdout: child.stdout };
   };
+
   const blocked = run('A01-SYNTHETIC-UNREGISTERED-SELFTEST-DO-NOT-REGISTER', 'SYSTEM-MASTER');
   if (blocked.evidence.admitted !== false || blocked.evidence.admission_state !== 'WAITING_FOR_REGISTRATION') throw new Error('UNREGISTERED_MUST_BLOCK');
   if (!blocked.evidence.fresh_dispatch_required) throw new Error('UNREGISTERED_MUST_REQUIRE_FRESH_DISPATCH');
-  const admitted = run('A01-CONTROL-PLANE-SELFTEST', 'SYSTEM-MASTER');
-  if (admitted.evidence.admitted !== true || admitted.evidence.admission_state !== 'ADMITTED') throw new Error('REGISTERED_SELFTEST_MUST_ADMIT');
-  if (admitted.evidence.control_plane_sha.toLowerCase() !== head.toLowerCase()) throw new Error('CONTROL_SHA_NOT_BOUND');
-  if (admitted.evidence.subject_sha.toLowerCase() !== head.toLowerCase()) throw new Error('SUBJECT_SHA_NOT_BOUND');
-  console.log('A01_ADMISSION_BARRIER_INTEGRATION_SELFTEST=PASS blocked_unregistered=1 admitted_registered=1');
+
+  let admittedRegistered = 0;
+  for (const executionContext of ['normal', 'recovery', 'repair']) {
+    const admitted = run(
+      'A01-CONTROL-PLANE-SELFTEST',
+      'SYSTEM-MASTER',
+      executionContext,
+      '1',
+      executionContext === 'repair' ? 'P07-INTEGRATION-SELFTEST' : ''
+    );
+    if (admitted.evidence.admitted !== true || admitted.evidence.admission_state !== 'ADMITTED') throw new Error(`REGISTERED_SELFTEST_MUST_ADMIT:${executionContext}`);
+    if (admitted.evidence.execution_context !== executionContext) throw new Error(`EXECUTION_CONTEXT_NOT_BOUND:${executionContext}`);
+    if (admitted.evidence.control_plane_sha.toLowerCase() !== head.toLowerCase()) throw new Error(`CONTROL_SHA_NOT_BOUND:${executionContext}`);
+    if (admitted.evidence.subject_sha.toLowerCase() !== head.toLowerCase()) throw new Error(`SUBJECT_SHA_NOT_BOUND:${executionContext}`);
+    admittedRegistered += 1;
+  }
+
+  const invalidContext = run('A01-CONTROL-PLANE-SELFTEST', 'SYSTEM-MASTER', 'invalid-context');
+  if (invalidContext.evidence.admitted !== false || invalidContext.evidence.admission_state !== 'INVALID_EXECUTION_CONTEXT') throw new Error('INVALID_CONTEXT_MUST_BLOCK');
+  if (!invalidContext.evidence.fresh_dispatch_required) throw new Error('INVALID_CONTEXT_MUST_REQUIRE_FRESH_DISPATCH');
+
+  const overnightPolicy = run('A01-CONTROL-PLANE-SELFTEST', 'SYSTEM-MASTER', 'overnight');
+  if (overnightPolicy.evidence.admitted !== false || overnightPolicy.evidence.admission_state !== 'QUALIFICATION_NOT_OVERNIGHT_ELIGIBLE') throw new Error('OVERNIGHT_CONTEXT_MUST_REACH_OVERNIGHT_POLICY');
+  if (!overnightPolicy.evidence.fresh_dispatch_required) throw new Error('OVERNIGHT_POLICY_BLOCK_MUST_REQUIRE_FRESH_DISPATCH');
+
+  console.log(`A01_ADMISSION_BARRIER_INTEGRATION_SELFTEST=PASS blocked_unregistered=1 admitted_registered=${admittedRegistered} invalid_context_blocked=1 overnight_policy_blocked=1`);
 }
 
 async function main() {

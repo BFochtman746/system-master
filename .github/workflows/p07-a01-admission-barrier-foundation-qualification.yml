@@ -1,0 +1,170 @@
+name: P07 A-01 Admission Barrier Foundation Qualification
+
+on:
+  push:
+    paths:
+      - 'governance/CURRENT-AUTHORITY.json'
+      - 'governance/WORK-OBLIGATION-REGISTRY-*.json'
+      - 'governance/SYSTEM-TOPOLOGY-*.json'
+      - 'governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-*.json'
+      - 'governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-*.json'
+      - 'governance/contracts/P07-FOUNDATION-CONTRACT-001.md'
+      - 'qualification/a01/a01-policy.json'
+      - 'qualification/a01/registry.json'
+      - '.github/scripts/a01-admission-barrier.js'
+      - '.github/workflows/a01-control-plane-gateway.yml'
+      - '.github/workflows/a01-control-plane-admission-broker.yml'
+      - '.github/workflows/a01-control-plane-enforcement.yml'
+      - '.github/workflows/p07-a01-admission-barrier-foundation-qualification.yml'
+  pull_request:
+    paths:
+      - 'governance/CURRENT-AUTHORITY.json'
+      - 'governance/WORK-OBLIGATION-REGISTRY-*.json'
+      - 'governance/SYSTEM-TOPOLOGY-*.json'
+      - 'governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-*.json'
+      - 'governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-*.json'
+      - 'governance/contracts/P07-FOUNDATION-CONTRACT-001.md'
+      - 'qualification/a01/a01-policy.json'
+      - 'qualification/a01/registry.json'
+      - '.github/scripts/a01-admission-barrier.js'
+      - '.github/workflows/a01-control-plane-gateway.yml'
+      - '.github/workflows/a01-control-plane-admission-broker.yml'
+      - '.github/workflows/a01-control-plane-enforcement.yml'
+      - '.github/workflows/p07-a01-admission-barrier-foundation-qualification.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout exact P07 subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Pin Node runtime
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Run P07 admission barrier acceptance target
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p qualification-output
+          node .github/scripts/a01-admission-barrier.js selftest | tee /tmp/p07-selftest.log
+          grep -Fq 'A01_ADMISSION_BARRIER_SELFTEST=PASS contexts=4' /tmp/p07-selftest.log
+          node .github/scripts/a01-admission-barrier.js integration-selftest | tee /tmp/p07-integration.log
+          grep -Fq 'A01_ADMISSION_BARRIER_INTEGRATION_SELFTEST=PASS blocked_unregistered=1 admitted_registered=3 invalid_context_blocked=1 overnight_policy_blocked=1' /tmp/p07-integration.log
+      - name: Prove current authority and fail-closed wiring
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE' | tee /tmp/p07-wiring.log
+          const fs = require('fs');
+          const authority = JSON.parse(fs.readFileSync('governance/CURRENT-AUTHORITY.json', 'utf8'));
+          const crosswalk = JSON.parse(fs.readFileSync(authority.capability_crosswalk, 'utf8'));
+          const policy = JSON.parse(fs.readFileSync('qualification/a01/a01-policy.json', 'utf8'));
+          const p07 = crosswalk.platform_requirements.find((row) => row.platform_id === 'P07');
+          const barrier = fs.readFileSync('.github/scripts/a01-admission-barrier.js', 'utf8');
+          const gateway = fs.readFileSync('.github/workflows/a01-control-plane-gateway.yml', 'utf8');
+          const broker = fs.readFileSync('.github/workflows/a01-control-plane-admission-broker.yml', 'utf8');
+          const enforcement = fs.readFileSync('.github/workflows/a01-control-plane-enforcement.yml', 'utf8');
+
+          if (authority.authority_id !== 'CURRENT-AUTHORITY-005') throw new Error(`AUTHORITY_MISMATCH ${authority.authority_id}`);
+          if (crosswalk.crosswalk_id !== 'SYSTEM-MASTER-CAPABILITY-CROSSWALK-003') throw new Error(`CROSSWALK_MISMATCH ${crosswalk.crosswalk_id}`);
+          if (!p07 || p07.owner_path !== 'SYSTEM_MASTER/CORE') throw new Error(`P07_OWNER_MISMATCH ${p07?.owner_path}`);
+          if (p07.implementation !== '.github/scripts/a01-admission-barrier.js') throw new Error(`P07_IMPLEMENTATION_MISMATCH ${p07?.implementation}`);
+
+          if (policy.policy_version !== 8 || policy.control_plane_id !== 'A01-CONTROL-PLANE-001' || policy.canonical_ref !== 'main') throw new Error('P07_POLICY_IDENTITY_INVALID');
+          if (policy.admission.require_registered_qualification !== true) throw new Error('P07_REGISTRATION_REQUIREMENT_RELAXED');
+          if (policy.admission.allow_arbitrary_command_input !== false) throw new Error('P07_ARBITRARY_COMMAND_GUARD_RELAXED');
+          if (policy.admission.pre_admission_subject_checkout_forbidden !== true) throw new Error('P07_PRECHECKOUT_GUARD_RELAXED');
+          if (policy.admission.pre_admission_subject_execution_forbidden !== true) throw new Error('P07_PREEXECUTION_GUARD_RELAXED');
+          if (policy.admission.trusted_metadata_barrier_required_before_subject_checkout !== true) throw new Error('P07_METADATA_BARRIER_NOT_REQUIRED');
+
+          if (!barrier.includes("Object.freeze(['normal', 'recovery', 'repair', 'overnight'])")) throw new Error('P07_EXECUTION_CONTEXT_ALLOWLIST_MISMATCH');
+          if (!barrier.includes("classify('INVALID_EXECUTION_CONTEXT'")) throw new Error('P07_INVALID_CONTEXT_FAIL_CODE_MISSING');
+          if (!barrier.includes("executionContext === 'overnight'")) throw new Error('P07_OVERNIGHT_SPECIAL_POLICY_MISSING');
+          if (!gateway.includes('uses: ./.github/workflows/a01-control-plane-admission-broker.yml')) throw new Error('P07_GATEWAY_BROKER_ROUTE_MISSING');
+          if (!gateway.includes('execution_context:') || !gateway.includes('inputs.execution_context')) throw new Error('P07_GATEWAY_CONTEXT_FORWARDING_MISSING');
+          if (!broker.includes('A01_EXECUTION_CONTEXT:') || !broker.includes('inputs.execution_context')) throw new Error('P07_BROKER_CONTEXT_FORWARDING_MISSING');
+          if (!broker.includes('a01-admission-barrier.js\" evaluate-remote')) throw new Error('P07_BROKER_BARRIER_INVOCATION_MISSING');
+          if (!broker.includes('Fail closed before subject checkout when admission is not valid')) throw new Error('P07_BROKER_FAIL_CLOSED_STEP_MISSING');
+          if (!enforcement.includes('a01-admission-barrier.js selftest')) throw new Error('P07_ENFORCEMENT_SELFTEST_WIRING_MISSING');
+
+          console.log('P07_EXECUTION_CONTEXT_ALLOWLIST=normal,recovery,repair,overnight');
+          console.log('P07_FAIL_CLOSED_POLICY=PASS');
+          console.log('P07_GATEWAY_BROKER_WIRING=PASS');
+          NODE
+      - name: Emit exact-subject P07 evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs = require('fs');
+          const cp = require('child_process');
+          const crypto = require('crypto');
+          const authority = JSON.parse(fs.readFileSync('governance/CURRENT-AUTHORITY.json', 'utf8'));
+          const crosswalk = JSON.parse(fs.readFileSync(authority.capability_crosswalk, 'utf8'));
+          const p07 = crosswalk.platform_requirements.find((row) => row.platform_id === 'P07');
+          if (authority.authority_id !== 'CURRENT-AUTHORITY-005') throw new Error(`AUTHORITY_MISMATCH ${authority.authority_id}`);
+          if (crosswalk.crosswalk_id !== 'SYSTEM-MASTER-CAPABILITY-CROSSWALK-003') throw new Error(`CROSSWALK_MISMATCH ${crosswalk.crosswalk_id}`);
+          if (!p07 || p07.owner_path !== 'SYSTEM_MASTER/CORE') throw new Error(`P07_OWNER_MISMATCH ${p07?.owner_path}`);
+          if (p07.implementation !== '.github/scripts/a01-admission-barrier.js') throw new Error(`P07_IMPLEMENTATION_MISMATCH ${p07?.implementation}`);
+          const subjects = [
+            'governance/CURRENT-AUTHORITY.json',
+            authority.capability_crosswalk,
+            authority.obligation_registry,
+            authority.topology,
+            authority.headless_tool_owner_allocation,
+            'governance/contracts/P07-FOUNDATION-CONTRACT-001.md',
+            '.github/scripts/a01-admission-barrier.js',
+            'qualification/a01/a01-policy.json',
+            'qualification/a01/registry.json',
+            '.github/workflows/a01-control-plane-gateway.yml',
+            '.github/workflows/a01-control-plane-admission-broker.yml',
+            '.github/workflows/a01-control-plane-enforcement.yml',
+            '.github/workflows/p07-a01-admission-barrier-foundation-qualification.yml'
+          ];
+          const blob = (p) => cp.execFileSync('git', ['rev-parse', `HEAD:${p}`], {encoding:'utf8'}).trim();
+          const sha256 = (p) => crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
+          const evidence = {
+            evidence_schema: '1.0',
+            contract_id: 'P07-FOUNDATION-1.0',
+            requirement_or_capability_id: 'P07',
+            owner_path: 'SYSTEM_MASTER/CORE',
+            authority_id: authority.authority_id,
+            crosswalk_id: crosswalk.crosswalk_id,
+            status: 'PASS',
+            source_identity: cp.execFileSync('git', ['rev-parse', 'HEAD'], {encoding:'utf8'}).trim(),
+            implementation: p07.implementation,
+            admission_version: 2,
+            execution_context_allowlist: ['normal','recovery','repair','overnight'],
+            admitted_registered_contexts: ['normal','recovery','repair'],
+            overnight_context_policy_checked: true,
+            invalid_context_fail_closed_checked: true,
+            registration_fail_closed_checked: true,
+            exact_subject_identity_checked: true,
+            exact_control_plane_identity_checked: true,
+            subjects: subjects.map((p) => ({path:p, git_blob_sha:blob(p)})),
+            logs: {
+              selftest_sha256: sha256('/tmp/p07-selftest.log'),
+              integration_sha256: sha256('/tmp/p07-integration.log'),
+              wiring_sha256: sha256('/tmp/p07-wiring.log')
+            }
+          };
+          fs.writeFileSync('qualification-output/p07-foundation-1.0.json', JSON.stringify(evidence, null, 2) + '\n');
+          console.log(JSON.stringify(evidence));
+          NODE
+      - name: Preserve machine-readable P07 qualification evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p07-foundation-1.0-evidence
+          path: qualification-output/p07-foundation-1.0.json
+          if-no-files-found: error
+          retention-days: 30
