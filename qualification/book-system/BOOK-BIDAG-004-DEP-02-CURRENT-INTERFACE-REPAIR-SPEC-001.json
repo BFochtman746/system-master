@@ -1,0 +1,364 @@
+{
+  "interface_spec_id": "BOOK-BIDAG-004-DEP-02-CURRENT-INTERFACE-REPAIR-SPEC-001",
+  "effective_date": "2026-09-14",
+  "standing": "BOOK_SIDE_INTERFACE_SPEC_COMPLETE__CORE_AND_RESEARCH_KNOWLEDGE_PROVIDER_CONTRACTS_REQUIRED__SOURCE_MUTATION_BLOCKED",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "authority_id": "CURRENT-AUTHORITY-005",
+  "topology_ref": "governance/SYSTEM-TOPOLOGY-007.json",
+  "completion_ref": "governance/SYSTEM-COMPLETION-STATUS-002.json",
+  "interface_blueprint_ref": "governance/architecture/SYSTEM-MASTER-SYSTEM-INTERFACE-BLUEPRINT-001.json",
+  "capability_crosswalk_ref": "governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json",
+  "owner_allocation_ref": "governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006.json",
+  "selection_ref": "qualification/book-system/BOOK-BIDAG-004-DEP-02-SELECTION-001.json",
+  "census_ref": "qualification/book-system/BOOK-BIDAG-004-DEP-02-CORE-API-SURFACE-RECOVERY-CHECKPOINT-001.json",
+  "work_package_id": "BIDAG-004-DEP-02",
+  "work_package_title": "Restore whole-Book core dependency/build graph",
+  "canonical_effect": "NONE",
+  "selector_effect": "NONE",
+  "book_completion_effect": "NONE",
+  "implementation_effect": "NONE__DESIGN_SPECIFICATION_ONLY",
+  "purpose": "Specify the smallest owner-correct replacement for the seven historical org.systemmaster.core dependencies consumed by the recovered Book Java tree. This specification defines Book-required ports, exact Book-side request/response invariants, call-site migrations, failure behavior and qualification denominator without registering provider operations, implementing provider code, or mutating the recovered Book source graph.",
+  "preconditions": {
+    "book_eng_009": "COMPLETE_WITH_EXACT_CURRENT_CORE_P03_END_TO_END_EVIDENCE",
+    "historical_core_surface_count": 7,
+    "historical_compatibility_replay": "PASS__JAVAC_EXIT_0__21_OF_21_BOOK_PORTABLE_TEST_MAINS_PASS",
+    "historical_compatibility_current_effect": "EVIDENCE_ONLY__NO_PASS_TRANSFER_TO_CHANGED_CURRENT_SUBJECT",
+    "current_disposition_counts": {
+      "REUSE": 2,
+      "ADAPTER": 2,
+      "REPLACEMENT": 3,
+      "RETIRED_INVALID": 0
+    }
+  },
+  "design_decision": {
+    "summary": "Replace seven historical public org.systemmaster.core dependencies with two direct current CORE shared types, one Book-owned artifact-read port backed by a registered CORE operation, one Book-owned research-provider port backed by a registered RESEARCH_KNOWLEDGE operation, and one CORE-owned shared data-classification contract/schema. No historical compatibility type is copied into Book solely to satisfy javac.",
+    "book_owned_public_provider_implementations": false,
+    "provider_operation_registration_performed_here": false,
+    "historical_core_namespace_restored": false,
+    "compile_graph_mutation_admitted": false
+  },
+  "direct_reuse_bindings": [
+    {
+      "historical_type": "org.systemmaster.core.CapabilityDescriptor",
+      "current_disposition": "REUSE",
+      "provider_owner": "SYSTEM_MASTER/CORE",
+      "binding_rule": "Bind recovered Book descriptor registries directly to the current shared CORE CapabilityDescriptor type only when the exact current source/package remains compatible with the census-bound SHA evidence or fresh changed-subject qualification proves the replacement.",
+      "book_call_sites": [
+        "org.systemmaster.tools.manuscript.ManuscriptCapabilityDescriptors",
+        "org.systemmaster.tools.storybible.StoryBibleCapabilityDescriptors",
+        "org.systemmaster.tools.writing.WritingCapabilityDescriptors"
+      ],
+      "adapter_required": false
+    },
+    {
+      "historical_type": "org.systemmaster.core.EffectClass",
+      "current_disposition": "REUSE",
+      "provider_owner": "SYSTEM_MASTER/CORE",
+      "binding_rule": "Bind recovered Book descriptor registries directly to current shared CORE EffectClass. Book may consume effect classification but may not redefine CORE effect semantics.",
+      "book_call_sites": [
+        "org.systemmaster.tools.manuscript.ManuscriptCapabilityDescriptors",
+        "org.systemmaster.tools.storybible.StoryBibleCapabilityDescriptors",
+        "org.systemmaster.tools.writing.WritingCapabilityDescriptors"
+      ],
+      "adapter_required": false
+    }
+  ],
+  "book_owned_ports": [
+    {
+      "port_id": "BOOK-PORT-CORE-VERIFIED-ARTIFACT-READ-V1",
+      "owner": "SYSTEM_MASTER/BOOK",
+      "provider_required": "SYSTEM_MASTER/CORE",
+      "provider_semantic_role": "READ_VERIFIED_ARTIFACT_BY_DIGEST",
+      "provider_operation_id": null,
+      "provider_operation_state": "PROVIDER_REGISTRATION_REQUIRED",
+      "required_interface_kind": "QUERY",
+      "provider_domain_rule": "CORE owner must bind this role to a current capability/platform domain allowed by SYSTEM-MASTER-SYSTEM-INTERFACE-BLUEPRINT-001; Book does not assign the provider domain or operation_id.",
+      "historical_dependency_replaced": "org.systemmaster.core.ArtifactGateway",
+      "book_need": "Replay exact already-admitted raw/text artifact bytes by content digest so Book can independently verify source evidence before Book admission.",
+      "request_shape": {
+        "artifact_ref": "content-addressed artifact identity/ref",
+        "expected_sha256": "64 lowercase hexadecimal characters",
+        "max_bytes": "positive bounded integer",
+        "purpose": "BOOK_RESEARCH_EVIDENCE_VERIFICATION",
+        "caller_owner": "SYSTEM_MASTER/BOOK"
+      },
+      "response_shape": {
+        "artifact_ref": "exact requested/admitted ref",
+        "sha256": "exact verified digest",
+        "size_bytes": "nonnegative integer",
+        "media_type": "provider-admitted media type when available",
+        "bytes": "bounded byte payload or equivalent provider-approved byte stream",
+        "provider_receipt_ref": "exact provider evidence/receipt identity",
+        "provider_subject_ref": "exact provider implementation/standing identity when qualification depends on it"
+      },
+      "book_acceptance_laws": [
+        "Book recomputes SHA-256 over returned bytes and requires equality to expected_sha256.",
+        "Book rejects size mismatch, digest mismatch, unverified artifact standing, missing receipt identity, over-budget response or provider error.",
+        "A successful CORE read is evidence only and cannot mutate Book canonical state.",
+        "Book never receives or reads CORE private storage roots/tables directly."
+      ],
+      "required_provider_errors": [
+        "NOT_FOUND",
+        "NOT_VERIFIED",
+        "DIGEST_MISMATCH",
+        "SIZE_LIMIT_EXCEEDED",
+        "STALE_OR_UNAVAILABLE_PROVIDER_SUBJECT",
+        "INVALID_REQUEST"
+      ]
+    },
+    {
+      "port_id": "BOOK-PORT-RESEARCH-SOURCE-QUERY-V1",
+      "owner": "SYSTEM_MASTER/BOOK",
+      "provider_required": "SYSTEM_MASTER/RESEARCH_KNOWLEDGE",
+      "provider_capability_domain": "RESEARCH",
+      "provider_semantic_role": "SEARCH_SOURCES_WITH_PROVENANCE",
+      "provider_operation_id": null,
+      "provider_operation_state": "PROVIDER_REGISTRATION_REQUIRED",
+      "required_interface_kind": "QUERY",
+      "historical_dependencies_replaced": [
+        "org.systemmaster.core.SearchRequest",
+        "org.systemmaster.core.SearchDigests",
+        "org.systemmaster.core.SourceArchiveDocument"
+      ],
+      "book_need": "Submit one exactly bound Book research request and receive provider-owned source/provenance projections while keeping Book-specific authorization, source verification, locator construction, evidence admission and canon decisions inside BOOK.",
+      "request_shape": {
+        "request_id": "stable caller request identity",
+        "work_id": "exact Book/work identity",
+        "principal_ref": "caller/user principal reference when required by provider policy",
+        "query_text": "exact Book-authorized query text",
+        "query_sha256": "SHA-256 over exact UTF-8 query_text under the provider contract",
+        "semantic_tags": "bounded provider-admitted set",
+        "provider_filters": "optional provider/source filter set",
+        "max_results": "positive bounded integer",
+        "freshness_requirement": "provider-defined current enum/profile",
+        "domain_profile": "optional research domain profile",
+        "include_local": "boolean",
+        "include_external": "boolean",
+        "data_classification": "CORE-contract canonical classification value/reference",
+        "purpose": "exact Book research purpose string/enum",
+        "book_authorization_ref": "exact BOOK ExternalSearchAuthorization or local-search admission evidence",
+        "semantic_binding_snapshot_ref": "exact current Book context/binding identity when applicable",
+        "requested_at": "timestamp metadata not used as semantic request identity",
+        "deadline": "optional execution deadline",
+        "breadth_profile": "provider-admitted breadth policy",
+        "source_classes": "bounded provider-admitted source classes",
+        "query_variants": "bounded explicit query variants",
+        "preferred_domains": "bounded normalized domain set",
+        "excluded_domains": "bounded normalized domain set",
+        "minimum_distinct_domains": "positive integer",
+        "require_primary_sources": "boolean",
+        "recency_days": "optional nonnegative integer",
+        "max_provider_queries": "positive bounded integer"
+      },
+      "request_identity_laws": [
+        "query_sha256 binds exact query_text; provider independently verifies the digest.",
+        "Book does not depend on a public SearchDigests compatibility class; SHA-256 algorithm and canonical UTF-8 bytes are contract data.",
+        "Mutable timestamps, retry counters, chat labels and provider attempt ids do not define semantic Book request identity.",
+        "External search is admitted only after Book proves every contributing fragment is eligible for external egress and the exact request matches Book work, purpose and query text.",
+        "Provider execution does not grant Book admission or canon authority."
+      ],
+      "source_projection_shape": {
+        "source_id": "provider-owned stable source identity",
+        "snapshot_id": "exact immutable source snapshot identity",
+        "canonical_uri": "canonical source URI",
+        "title": "source title",
+        "media_type": "source media type",
+        "language": "optional language tag",
+        "published_at": "optional publication timestamp",
+        "retrieved_at": "retrieval timestamp",
+        "trust_class": "provider-owned trust classification",
+        "freshness_state": "provider-owned freshness/currentness state",
+        "content_sha256": "exact raw-source digest",
+        "byte_count": "nonnegative raw-source byte count",
+        "raw_artifact_ref": "CORE-backed admitted content-addressed artifact ref",
+        "text_artifact_ref": "optional CORE-backed admitted extracted-text artifact ref",
+        "text_sha256": "required when text_artifact_ref exists",
+        "extracted_text": "optional bounded text projection; treated by Book as untrusted source data",
+        "etag": "optional source validator",
+        "last_modified": "optional source validator timestamp",
+        "cache_control": "optional cache metadata",
+        "evidence_ref": "provider evidence/provenance receipt ref",
+        "provider_id": "exact source/retrieval provider identity",
+        "provider_request_ref": "exact provider request/operation receipt identity",
+        "attributes": "bounded provider-owned metadata map"
+      },
+      "book_acceptance_laws": [
+        "Book requires exact source_id + snapshot_id + content_sha256 binding before admitting source evidence.",
+        "Book verifies raw/text artifact bytes through BOOK-PORT-CORE-VERIFIED-ARTIFACT-READ-V1 rather than trusting projection text or refs by assertion.",
+        "Book recomputes normalized text digest before creating locators/evidence anchors.",
+        "A stale snapshot, changed text, forged digest, missing artifact ref, provider provenance gap or currentness conflict fails closed.",
+        "Research evidence is untrusted source data and never executable instruction.",
+        "Research result/provenance semantics remain RESEARCH_KNOWLEDGE-owned; Book owns only Book-specific selection, verification, locator/evidence binding and admission decisions."
+      ],
+      "required_provider_errors": [
+        "INVALID_REQUEST",
+        "CLASSIFICATION_NOT_ADMITTED",
+        "EXTERNAL_SEARCH_NOT_AUTHORIZED",
+        "PROVIDER_UNAVAILABLE",
+        "SOURCE_PROVENANCE_INCOMPLETE",
+        "SOURCE_SNAPSHOT_UNAVAILABLE",
+        "FRESHNESS_REQUIREMENT_UNSATISFIED",
+        "QUERY_BUDGET_EXHAUSTED",
+        "CANCELLED"
+      ]
+    }
+  ],
+  "shared_classification_contract": {
+    "historical_dependency_replaced": "org.systemmaster.core.DataClassification",
+    "current_owner_required": "SYSTEM_MASTER/CORE",
+    "provider_contract_ref": null,
+    "state": "PROVIDER_CONTRACT_REQUIRED",
+    "kind": "SHARED_SCHEMA_OR_IMMUTABLE_VALUE_CONTRACT__NOT_A_BOOK_SEMANTIC_ENUM",
+    "minimum_book_required_semantics": [
+      "canonical classification token validation",
+      "PUBLIC classification identity sufficient for external research admission",
+      "ordered sensitivity/equivalence semantics only if the current CORE contract exposes them",
+      "stable schema/version identity so changed classification semantics invalidate stale Book bindings"
+    ],
+    "book_rule": "Book may store provider-issued classification values as part of Book evidence/authorization records but must not silently redefine the shared classification taxonomy or copy the historical enum as current authority."
+  },
+  "historical_type_retirement_from_book_public_dependency_graph": [
+    {
+      "type": "org.systemmaster.core.ArtifactGateway",
+      "current_effect": "REMOVE_FROM_BOOK_PUBLIC_COMPILE_DEPENDENCIES_AFTER_CORE_PORT_IMPLEMENTATION"
+    },
+    {
+      "type": "org.systemmaster.core.DataClassification",
+      "current_effect": "REMOVE_FROM_BOOK_PUBLIC_COMPILE_DEPENDENCIES_AFTER_CORE_CLASSIFICATION_CONTRACT_BINDING"
+    },
+    {
+      "type": "org.systemmaster.core.SearchRequest",
+      "current_effect": "REMOVE_FROM_BOOK_PUBLIC_COMPILE_DEPENDENCIES_AFTER_RESEARCH_PORT_IMPLEMENTATION"
+    },
+    {
+      "type": "org.systemmaster.core.SearchDigests",
+      "current_effect": "REMOVE_FROM_BOOK_PUBLIC_COMPILE_DEPENDENCIES__USE_CONTRACT_SHA256_RULE"
+    },
+    {
+      "type": "org.systemmaster.core.SourceArchiveDocument",
+      "current_effect": "REMOVE_FROM_BOOK_PUBLIC_COMPILE_DEPENDENCIES_AFTER_RESEARCH_SOURCE_PROJECTION_BINDING"
+    }
+  ],
+  "book_call_site_migration": [
+    {
+      "source": "org.systemmaster.tools.writing.BookResearchEvidenceEngine.QueryFragment",
+      "historical_dependency": "DataClassification.parseCanonical",
+      "target": "Validate/store CORE-contract classification token/reference; external egress gate requires canonical PUBLIC identity."
+    },
+    {
+      "source": "org.systemmaster.tools.writing.BookResearchEvidenceEngine.authorizeExternalSearch",
+      "historical_dependency": "SearchRequest + DataClassification",
+      "target": "Build/validate BOOK-PORT-RESEARCH-SOURCE-QUERY-V1 request from exact ResearchQuery and classification contract; issue Book-local ExternalSearchAuthorization before external execution."
+    },
+    {
+      "source": "org.systemmaster.tools.writing.BookResearchEvidenceEngine.verifyArchivedSource",
+      "historical_dependency": "SourceArchiveDocument + ArtifactGateway",
+      "target": "Accept RESEARCH_KNOWLEDGE source projection and replay raw/text artifacts through BOOK-PORT-CORE-VERIFIED-ARTIFACT-READ-V1 before creating VerifiedArchivedSource."
+    },
+    {
+      "source": "org.systemmaster.tools.writing.BookResearchEvidenceEngine.locate/verifyLocator/source-binding helpers",
+      "historical_dependency": "SourceArchiveDocument",
+      "target": "Operate on the admitted provider source projection or a Book-owned immutable verified-source snapshot derived from it; preserve exact snapshot/text/digest fail-closed checks."
+    },
+    {
+      "source": "org.systemmaster.tools.writing.BookResearchEvidencePortableTests and BookLexicalResearchPortableTests",
+      "historical_dependency": "ArtifactGateway/SearchRequest/SearchDigests/SourceArchiveDocument",
+      "target": "Replace fixtures with Book port fakes and provider-contract projections; retain stale snapshot, altered text, forged digest, private-fragment egress and request-binding negative cases."
+    }
+  ],
+  "module_and_dependency_change": {
+    "recovered_book_source": "Do not add historical UAF Core classes to the Book source tree.",
+    "core_compile_dependencies": [
+      "current CORE CapabilityDescriptor",
+      "current CORE EffectClass",
+      "provider-registered artifact-read client/contract after CORE owner supplies it",
+      "provider-published classification schema/value contract after CORE owner supplies it"
+    ],
+    "research_knowledge_compile_dependencies": [
+      "provider-registered RESEARCH source-query request/response contract after RESEARCH_KNOWLEDGE owner supplies it"
+    ],
+    "book_owned_adapter_policy": "Book may define narrow internal ports and adapters that consume registered provider contracts. Book may not implement the provider's semantic operation or private store."
+  },
+  "cross_peer_dependency_blockers": [
+    {
+      "blocker_id": "CORE_PUBLIC_VERIFIED_ARTIFACT_READ_CONTRACT_REQUIRED",
+      "owner": "SYSTEM_MASTER/CORE",
+      "status": "OPEN",
+      "required_result": "A current, registered, qualified CORE public operation or shared client contract satisfying READ_VERIFIED_ARTIFACT_BY_DIGEST with exact receipt/digest/size semantics."
+    },
+    {
+      "blocker_id": "CORE_SHARED_DATA_CLASSIFICATION_CONTRACT_REQUIRED",
+      "owner": "SYSTEM_MASTER/CORE",
+      "status": "OPEN",
+      "required_result": "A current CORE-owned classification schema/value contract with stable version identity and canonical PUBLIC semantics usable by Book authorization."
+    },
+    {
+      "blocker_id": "RESEARCH_KNOWLEDGE_PUBLIC_SOURCE_QUERY_CONTRACT_REQUIRED",
+      "owner": "SYSTEM_MASTER/RESEARCH_KNOWLEDGE",
+      "status": "OPEN",
+      "required_result": "A current, registered, qualified RESEARCH_KNOWLEDGE public RESEARCH query/API operation returning source/provenance projections with exact request/receipt identity."
+    }
+  ],
+  "provider_contract_evidence_currently_observed": {
+    "core_p03_book_durability_operations": "PRESENT_BUT_NOT_A_SUBSTITUTE_FOR_THE_ARTIFACT_READ_OR_CLASSIFICATION_CONTRACTS_DEFINED_HERE",
+    "research_foundation_contract": "STUB__CONTRACT_INTERFACE_UNPOPULATED",
+    "knowledge_foundation_contract": "STUB__CONTRACT_INTERFACE_UNPOPULATED",
+    "research_knowledge_registered_source_query_operation_found": false,
+    "core_registered_verified_artifact_read_operation_found": false,
+    "core_current_classification_contract_found": false
+  },
+  "implementation_admission_gate": {
+    "source_mutation_allowed_now": false,
+    "required_before_source_mutation": [
+      "CORE owner supplies current artifact-read provider contract/operation satisfying the specified Book role.",
+      "CORE owner supplies current classification contract satisfying the specified Book role.",
+      "RESEARCH_KNOWLEDGE owner supplies current registered source-query contract/operation satisfying the specified Book role.",
+      "Book rebind record pins exact provider operation/schema identities and changed-subject qualification requirements.",
+      "No live Book lane conflict/lease violation exists."
+    ],
+    "rule": "Provider registration is an owner-lane action. This Book interface specification cannot make an unregistered operation callable by naming it."
+  },
+  "future_candidate_qualification_denominator": {
+    "direct_compile": [
+      "direct Manuscript source compile on the migrated exact candidate",
+      "whole recovered Book main/test source compile on the migrated exact candidate"
+    ],
+    "focused_behavior": [
+      "all 21 recovered Book portable test mains or their explicitly mapped non-vacuous successors",
+      "external research rejects any non-PUBLIC contributing Book fragment",
+      "exact query/work/purpose/digest binding failures reject",
+      "stale source snapshot rejects",
+      "altered text artifact rejects",
+      "raw/text digest mismatch rejects",
+      "missing provider provenance/receipt rejects",
+      "provider error identity is retained when mapped by Book",
+      "research/provider success cannot mutate Book canonical state",
+      "no direct cross-peer database/store access",
+      "no historical five compatibility types remain as Book public compile dependencies"
+    ],
+    "cumulative": [
+      "current canonical repository Required Verification",
+      "System File Lease Enforcement",
+      "affected Book regression/qualification suites",
+      "fresh exact-subject evidence for changed provider bindings"
+    ],
+    "non_vacuity": "Zero discovered tests, skipped-only execution, compile-only green, historical PASS reuse, or provider registration without a real Book binding is failure."
+  },
+  "successor_rule": {
+    "current_state": "BLOCKED_ON_CROSS_PEER_PROVIDER_CONTRACTS",
+    "next_book_action_after_provider_contracts": "Create BIDAG-004-DEP-02 exact provider rebind record, implement the smallest Book call-site/dependency migration, then run direct Manuscript + whole recovered Book compile and the specified qualification denominator.",
+    "book_may_self_clear_provider_blockers": false,
+    "advance_to_book_comp_13": false
+  },
+  "forbidden_actions": [
+    "Copy ArtifactGateway, DataClassification, SearchRequest, SearchDigests or SourceArchiveDocument from UAF into Book/current main merely to restore compilation.",
+    "Create Book-owned public operations that impersonate CORE or RESEARCH_KNOWLEDGE providers.",
+    "Invent a provider operation_id and treat it as registered.",
+    "Read CORE or RESEARCH_KNOWLEDGE private databases/storage directly.",
+    "Let research/source/provider success self-admit or canonize Book state.",
+    "Treat CORE P03 Book durability operations as implicit authorization for unrelated artifact-read or classification APIs.",
+    "Claim the 21/21 historical compatibility replay qualifies a changed current migration.",
+    "Close BIDAG-004-DEP-02 before current direct and whole-tree compile plus non-vacuous behavioral evidence pass.",
+    "Advance to BOOK-COMP-13 while BIDAG-004-DEP-02 remains open."
+  ]
+}
