@@ -23,6 +23,7 @@ public final class ActionsRunPollerTest {
         discoveryAttemptCeilingFailsWithSpecificCode();
         discoveryClockBudgetFailsAtBoundary();
         completionAttemptCeilingFailsWithSpecificCode();
+        completionClockBudgetFailsAtBoundary();
         successConclusionBeforeCompletedIsNotSuccess();
 
         System.out.println();
@@ -151,6 +152,23 @@ public final class ActionsRunPollerTest {
         refuses("completion attempt ceiling", "DISPATCH_POLL_BUDGET_EXHAUSTED",
                 () -> poller.await("job-6", "payload", receipt("job-6", "d-6")));
         eq("completion stops on exact attempt ceiling", 3, transport.urls.size());
+    }
+
+    /** MUTATION TARGET: completion wall-clock budget must independently stop polling. */
+    private static void completionClockBudgetFailsAtBoundary() {
+        String title = ActionsRunPoller.runTitle("job-9", "d-9");
+        StubTransport transport = new StubTransport();
+        transport.add(200, runs(run(9, title, "queued", null)));
+        transport.add(200, run(9, title, "queued", null));
+        transport.add(200, run(9, title, "in_progress", null));
+        FakeTime time = new FakeTime(T0);
+        ActionsRunPoller.Bounds b = new ActionsRunPoller.Bounds(
+                1, Duration.ofMinutes(1), 9, Duration.ofSeconds(5), Duration.ofSeconds(5));
+        ActionsRunPoller poller = poller(transport, b, time);
+        refuses("completion wall clock boundary", "DISPATCH_POLL_BUDGET_EXHAUSTED",
+                () -> poller.await("job-9", "payload", receipt("job-9", "d-9")));
+        eq("completion performs no request after exact deadline", 3, transport.urls.size());
+        eq("completion fake clock lands exactly on deadline", T0.plusSeconds(5), time.now());
     }
 
     /** MUTATION TARGET: conclusion=success must never override status!=completed. */
