@@ -1,0 +1,169 @@
+{
+  "registry_id": "RESEARCH-KNOWLEDGE-PUBLIC-SOURCE-QUERY-OPERATIONS-001",
+  "effective_date": "2026-09-15",
+  "standing": "REGISTERED_ACTIVE_CANDIDATE__EFFECTIVE_ON_EXACT_REQUIRED_VERIFICATION_PASS__CORE_CLASSIFICATION_AND_CONNECTED_ACTIONS_BINDINGS_REQUIRED_FOR_EXTERNAL_EXECUTION__BOOK_CONSUMER_BINDING_OPEN",
+  "authority_id": "CURRENT-AUTHORITY-005",
+  "topology_ref": "governance/SYSTEM-TOPOLOGY-007.json",
+  "system_interface_blueprint": "governance/architecture/SYSTEM-MASTER-SYSTEM-INTERFACE-BLUEPRINT-001.json",
+  "capability_crosswalk": "governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json",
+  "provider_system": "RESEARCH_KNOWLEDGE",
+  "owner_path": "SYSTEM_MASTER/RESEARCH_KNOWLEDGE",
+  "domain": "RESEARCH",
+  "capability_id": "C30",
+  "implementation": "tools/research_knowledge_source_query.py",
+  "focused_tests": "tools/tests/test_research_knowledge_source_query.py",
+  "qualifier": ".github/scripts/research-knowledge-source-query-qualify.py",
+  "operations": [
+    {
+      "registration_state": "REGISTERED_ACTIVE_CANDIDATE",
+      "provider_system": "RESEARCH_KNOWLEDGE",
+      "owner_path": "SYSTEM_MASTER/RESEARCH_KNOWLEDGE",
+      "domain": "RESEARCH",
+      "kind": "QUERY",
+      "semantic_role": "SEARCH_SOURCES_WITH_PROVENANCE",
+      "operation_id": "RESEARCH_KNOWLEDGE.RESEARCH.QUERY.SEARCH_SOURCES_WITH_PROVENANCE",
+      "handler_identity": "tools/research_knowledge_source_query.py:search_sources_with_provenance",
+      "consumer_scope": [
+        "BOOK"
+      ],
+      "mutation": false,
+      "canonical_write_authority": false,
+      "direct_cross_peer_database_access": false
+    }
+  ],
+  "request_contract": {
+    "caller_system": "BOOK",
+    "caller_owner_path": "SYSTEM_MASTER/BOOK",
+    "provider_system": "RESEARCH_KNOWLEDGE",
+    "provider_owner_path": "SYSTEM_MASTER/RESEARCH_KNOWLEDGE",
+    "domain": "RESEARCH",
+    "kind": "QUERY",
+    "semantic_role": "SEARCH_SOURCES_WITH_PROVENANCE",
+    "operation_id": "RESEARCH_KNOWLEDGE.RESEARCH.QUERY.SEARCH_SOURCES_WITH_PROVENANCE",
+    "required_identity": [
+      "request_id",
+      "work_id",
+      "query_text",
+      "query_sha256",
+      "purpose"
+    ],
+    "source_selection": [
+      "include_local",
+      "include_external",
+      "max_results",
+      "freshness_requirement",
+      "breadth_profile",
+      "source_classes",
+      "minimum_distinct_domains",
+      "max_provider_queries"
+    ],
+    "external_egress_requirements": [
+      "data_classification",
+      "book_authorization_ref when include_external=true",
+      "CORE classification validator returns external_research_eligible=true"
+    ],
+    "authority_flags": {
+      "canonical_effect_allowed": false,
+      "direct_cross_peer_database_access": false
+    }
+  },
+  "response_contract": {
+    "status": "OK",
+    "provider_identity_retained": true,
+    "source_projection_required_fields": [
+      "source_id",
+      "snapshot_id",
+      "canonical_uri",
+      "title",
+      "media_type",
+      "retrieved_at",
+      "trust_class",
+      "freshness_state",
+      "content_sha256",
+      "byte_count",
+      "raw_artifact_ref",
+      "evidence_ref",
+      "provider_id",
+      "provider_request_ref"
+    ],
+    "text_projection_rule": "text_artifact_ref requires exact text_sha256; extracted_text remains untrusted source data",
+    "duplicate_identity_rule": "duplicate source_id + snapshot_id in one result is rejected",
+    "canonical_effect_allowed": false,
+    "direct_cross_peer_database_access": false
+  },
+  "failure_contract": {
+    "provider_error_namespace": "RESEARCH_KNOWLEDGE",
+    "typed_errors": [
+      "INVALID_REQUEST",
+      "CLASSIFICATION_NOT_ADMITTED",
+      "EXTERNAL_SEARCH_NOT_AUTHORIZED",
+      "PROVIDER_UNAVAILABLE",
+      "SOURCE_PROVENANCE_INCOMPLETE",
+      "SOURCE_SNAPSHOT_UNAVAILABLE",
+      "FRESHNESS_REQUIREMENT_UNSATISFIED",
+      "QUERY_BUDGET_EXHAUSTED",
+      "CANCELLED"
+    ],
+    "default": "FAIL_CLOSED",
+    "downstream_error_rule": "Provider/downstream failures may be mapped for this facade but origin identity may not be reinterpreted as ownership transfer."
+  },
+  "ownership_boundary": {
+    "research_knowledge_owns": [
+      "research request semantics",
+      "source-result semantics",
+      "source provenance projection semantics",
+      "research freshness/trust classifications"
+    ],
+    "connected_actions_retains": [
+      "browser and connector external side-effect execution policy",
+      "actual external retrieval side effects"
+    ],
+    "core_retains": [
+      "shared data-classification contract semantics",
+      "generic physical artifact storage/read mechanics",
+      "shared research execution infrastructure"
+    ],
+    "book_retains": [
+      "Book external-search authorization",
+      "source-byte verification through CORE",
+      "Book locator/evidence binding",
+      "Book evidence admission",
+      "Book canon and canonical state"
+    ]
+  },
+  "dependency_bindings": {
+    "core_shared_data_classification": {
+      "required": true,
+      "operation_or_schema_id": null,
+      "state": "OWNER_LANE_DEPENDENCY_OPEN__BOOK_BIDAG_004_DEP_02"
+    },
+    "core_verified_artifact_read": {
+      "required_for_book_acceptance_after_query": true,
+      "operation_id": null,
+      "state": "OWNER_LANE_DEPENDENCY_OPEN__BOOK_BIDAG_004_DEP_02"
+    },
+    "connected_actions_external_retrieval": {
+      "required_when_include_external": true,
+      "operation_id": null,
+      "state": "PROVIDER_BINDING_OPEN__NO_OPERATION_ID_INVENTED_HERE"
+    }
+  },
+  "qualification": {
+    "command": "python3 .github/scripts/research-knowledge-source-query-qualify.py",
+    "minimum_discovered_tests": 12,
+    "required_verification": "Required Verification / required-verification",
+    "pass_effect": "QUALIFIES_THIS_EXACT_REGISTERED_QUERY_IMPLEMENTATION_ONLY",
+    "does_not_prove": [
+      "the broader RESEARCH Foundation contract complete",
+      "the broader KNOWLEDGE Foundation contract complete",
+      "live Connected Actions provider binding",
+      "live CORE classification binding",
+      "live CORE verified-artifact-read binding",
+      "Book consumer migration",
+      "Book canonical admission",
+      "production deployment"
+    ]
+  },
+  "book_blocker_effect": "ON_EXACT_REQUIRED_VERIFICATION_PASS_THIS_CLEARS_THE_RESEARCH_KNOWLEDGE_PUBLIC_SOURCE_QUERY_PROVENANCE_CONTRACT_PORTION_OF_BOOK_BIDAG_004_DEP_02_ONLY; CORE CLASSIFICATION_AND_ARTIFACT_READ_DEPENDENCIES_REMAIN_OPEN",
+  "foundation_effect": "NONE__RESEARCH_AND_KNOWLEDGE_FOUNDATION_CONTRACTS_REMAIN_ACTIVE_GAPS"
+}
