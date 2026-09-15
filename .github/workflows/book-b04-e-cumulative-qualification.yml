@@ -86,7 +86,7 @@ jobs:
         run: |
           set -euo pipefail
           node -e "require('./system-master/book-system/book-b04-e-denominator-manifest-v1').validateDenominatorManifestV1()"
-          node --test \
+          node --test --test-reporter=tap \
             system-master/book-system/book-b04-e-exposure.test.js \
             system-master/book-system/book-b04-e-dimensions.test.js \
             system-master/book-system/book-b04-e-perspective.test.js \
@@ -101,7 +101,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          node --test system-master/book-system/book-b04-e-cumulative-integration.test.js | tee b04-e-integration-${{ matrix.node }}.log
+          node --test --test-reporter=tap system-master/book-system/book-b04-e-cumulative-integration.test.js | tee b04-e-integration-${{ matrix.node }}.log
           grep -E '^# tests 8$' b04-e-integration-${{ matrix.node }}.log
           grep -E '^# pass 8$' b04-e-integration-${{ matrix.node }}.log
           grep -E '^# fail 0$' b04-e-integration-${{ matrix.node }}.log
