@@ -17,6 +17,22 @@ on:
       - 'tests/**/*.py'
       - 'tests/**/*.js'
       - 'tools/**/*.py'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/pqf-001f-quality-baseline.yml'
+      - '.github/scripts/pqf-001f-quality-baseline-report.py'
+      - 'qualification/pqf/PQF-001F-MULTI-LANGUAGE-QUALITY-BASELINE-CONTRACT-001.json'
+      - 'pom.xml'
+      - 'system-master/**/*.java'
+      - 'system-master/book-system/**/*.js'
+      - 'verification/**/*.java'
+      - 'control-gateway/src/**/*.js'
+      - 'control-gateway/test/**/*.js'
+      - 'control-gateway/python/**/*.py'
+      - 'tests/**/*.py'
+      - 'tests/**/*.js'
+      - 'tools/**/*.py'
   workflow_dispatch:
 
 permissions:
@@ -57,6 +73,9 @@ jobs:
           assert c['authority']['mode'] == 'REPORT_ONLY'
           assert c['authority']['production_source_mutation_authorized'] is False
           assert c['authority']['quality_threshold_authority'] == 'NONE_IN_PQF_001F'
+          assert c['execution_failure_policy']['suppress_or_greenwash'] is False
+          assert c['execution_failure_policy']['admission_requires_zero_failures'] is True
+          assert c['post_merge_exact_subject_rerun'] is True
           print('PQF_001F_CONTRACT=PASS')
           PY
 
@@ -87,23 +106,29 @@ jobs:
           python -m pip install --disable-pip-version-check --no-input 'coverage==7.16.1' 'lizard==1.24.0'
           npm install --global 'c8@12.0.0' 'jscpd@5.2.0'
           mkdir -p "$PQF_OUT"/{java,python,javascript,complexity,duplication}
+          : > "$PQF_OUT/execution-health.ndjson"
 
-      - name: Measure Java coverage through current qualification bridge
+      - name: Measure Java coverage and preserve test health
         shell: bash
         run: |
           set -euo pipefail
-          mvn -B \
-            org.jacoco:jacoco-maven-plugin:0.8.15:prepare-agent \
-            test \
-            org.jacoco:jacoco-maven-plugin:0.8.15:report
+          set +e
+          mvn -B org.jacoco:jacoco-maven-plugin:0.8.15:prepare-agent test
+          java_test_rc=$?
+          set -e
+          PQF_KIND='java' PQF_LABEL='maven-qualification-bridge' PQF_RC="$java_test_rc" python - <<'PY' >> "$PQF_OUT/execution-health.ndjson"
+          import json, os
+          print(json.dumps({'kind': os.environ['PQF_KIND'], 'label': os.environ['PQF_LABEL'], 'rc': int(os.environ['PQF_RC'])}, sort_keys=True))
+          PY
+          mvn -B org.jacoco:jacoco-maven-plugin:0.8.15:report
           test -s target/site/jacoco/jacoco.xml
           cp target/site/jacoco/jacoco.xml "$PQF_OUT/java/jacoco.xml"
 
-      - name: Measure Python line and branch coverage
+      - name: Measure Python line and branch coverage and preserve test health
         shell: bash
         run: |
           set -euo pipefail
-          cat > /tmp/pqf-001f.coveragerc <<'EOF'
+          cat > /tmp/pqf-001f.coveragerc <<'EOF_COVERAGE'
           [run]
           branch = True
           parallel = True
@@ -118,44 +143,74 @@ jobs:
           [report]
           show_missing = True
           skip_covered = False
-          EOF
+          EOF_COVERAGE
           mapfile -t python_tests < <(find tests control-gateway/python tools/tests -type f -name 'test_*.py' -print 2>/dev/null | sort)
           test "${#python_tests[@]}" -gt 0
           for test_file in "${python_tests[@]}"; do
             echo "PQF Python coverage test: $test_file"
+            set +e
             python -m coverage run --rcfile=/tmp/pqf-001f.coveragerc "$test_file"
+            rc=$?
+            set -e
+            PQF_KIND='python' PQF_LABEL="$test_file" PQF_RC="$rc" python - <<'PY' >> "$PQF_OUT/execution-health.ndjson"
+          import json, os
+          print(json.dumps({'kind': os.environ['PQF_KIND'], 'label': os.environ['PQF_LABEL'], 'rc': int(os.environ['PQF_RC'])}, sort_keys=True))
+          PY
           done
           mapfile -t python_stress < <(find tests -maxdepth 1 -type f -name 'run_*.py' -print 2>/dev/null | sort)
           for stress_file in "${python_stress[@]}"; do
             echo "PQF Python coverage stress: $stress_file"
+            set +e
             python -m coverage run --rcfile=/tmp/pqf-001f.coveragerc "$stress_file"
+            rc=$?
+            set -e
+            PQF_KIND='python' PQF_LABEL="$stress_file" PQF_RC="$rc" python - <<'PY' >> "$PQF_OUT/execution-health.ndjson"
+          import json, os
+          print(json.dumps({'kind': os.environ['PQF_KIND'], 'label': os.environ['PQF_LABEL'], 'rc': int(os.environ['PQF_RC'])}, sort_keys=True))
+          PY
           done
           python -m coverage combine
           python -m coverage report --rcfile=/tmp/pqf-001f.coveragerc
           python -m coverage json --rcfile=/tmp/pqf-001f.coveragerc -o "$PQF_OUT/python/coverage.json"
           test -s "$PQF_OUT/python/coverage.json"
 
-      - name: Measure JavaScript coverage across canonical JS qualification reachability
+      - name: Measure JavaScript coverage and preserve qualification health
         shell: bash
         run: |
           set -euo pipefail
-          cat > /tmp/pqf-001f-js.sh <<'EOF'
+          cat > /tmp/pqf-001f-js.sh <<'EOF_JS'
           #!/usr/bin/env bash
-          set -euo pipefail
+          set -uo pipefail
+
+          record_health() {
+            local label="$1"
+            local rc="$2"
+            PQF_KIND='javascript' PQF_LABEL="$label" PQF_RC="$rc" python - <<'PY' >> "$PQF_OUT/execution-health.ndjson"
+          import json, os
+          print(json.dumps({'kind': os.environ['PQF_KIND'], 'label': os.environ['PQF_LABEL'], 'rc': int(os.environ['PQF_RC'])}, sort_keys=True))
+          PY
+          }
+
           (
             cd control-gateway
             node --test
           )
+          rc=$?
+          record_health 'control-gateway/node--test' "$rc"
+
           shopt -s nullglob
           for qualifier in .github/scripts/*qualify*; do
             case "$qualifier" in
               *.js)
                 echo "PQF JavaScript coverage qualifier: $qualifier"
                 node "$qualifier"
+                rc=$?
+                record_health "$qualifier" "$rc"
                 ;;
             esac
           done
-          EOF
+          exit 0
+          EOF_JS
           chmod +x /tmp/pqf-001f-js.sh
           c8 \
             --all \
@@ -167,6 +222,29 @@ jobs:
             --report-dir="$PQF_OUT/javascript" \
             bash /tmp/pqf-001f-js.sh
           test -s "$PQF_OUT/javascript/coverage-summary.json"
+
+      - name: Finalize execution health evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          out = Path('qualification-output/pqf-001f')
+          ndjson = out / 'execution-health.ndjson'
+          rows = [json.loads(line) for line in ndjson.read_text(encoding='utf-8').splitlines() if line.strip()]
+          failures = [row for row in rows if int(row.get('rc', 0)) != 0]
+          payload = {
+              'command_count': len(rows),
+              'failure_count': len(failures),
+              'failures': failures,
+              'commands': rows,
+              'policy': 'measurement continues where possible; failures remain blocking evidence',
+          }
+          (out / 'execution-health.json').write_text(json.dumps(payload, indent=2, sort_keys=True) + '\n', encoding='utf-8')
+          print(json.dumps({'command_count': len(rows), 'failure_count': len(failures)}, sort_keys=True))
+          PY
+          test -s "$PQF_OUT/execution-health.json"
 
       - name: Measure cross-language structural complexity
         shell: bash
@@ -242,7 +320,7 @@ jobs:
           set -euo pipefail
           python .github/scripts/pqf-001f-quality-baseline-report.py | tee "$PQF_OUT/baseline-summary.log"
           test -s "$PQF_OUT/PQF-001F-QUALITY-BASELINE.json"
-          grep -q 'PQF_001F_REPORT_ONLY=PASS' "$PQF_OUT/baseline-summary.log"
+          grep -q 'PQF_001F_REPORT_ONLY=MEASURED' "$PQF_OUT/baseline-summary.log"
 
       - name: Upload PQF-001F report-only evidence
         if: always() && hashFiles('qualification-output/pqf-001f/**') != ''
@@ -252,3 +330,22 @@ jobs:
           path: qualification-output/pqf-001f
           if-no-files-found: error
           retention-days: 30
+
+      - name: Enforce zero unresolved execution failures for PQF-001F admission
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('qualification-output/pqf-001f/PQF-001F-QUALITY-BASELINE.json')
+          if not p.is_file():
+              raise SystemExit('PQF_001F_BASELINE_RECEIPT_MISSING')
+          receipt = json.loads(p.read_text(encoding='utf-8'))
+          count = int(receipt['execution_health']['failure_count'])
+          if count != 0:
+              print(json.dumps(receipt['execution_health']['failures'], indent=2, sort_keys=True))
+              raise SystemExit(f'PQF_001F_EXECUTION_FAILURES_BLOCK_ADMISSION={count}')
+          print('PQF_001F_EXECUTION_HEALTH=PASS')
+          PY

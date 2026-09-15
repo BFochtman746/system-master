@@ -49,11 +49,8 @@ def parse_jacoco(path: Path) -> dict[str, Any]:
     included_files = 0
     excluded_test_files = 0
     for package in root.findall("package"):
-        package_name = package.attrib.get("name", "")
         for source in package.findall("sourcefile"):
             name = source.attrib.get("name", "")
-            # System Master intentionally compiles many *Test.java files as main classes so
-            # QualificationBridgeTest can invoke them. They must not inflate production coverage.
             if name.endswith("Test.java") or name.endswith("Tests.java"):
                 excluded_test_files += 1
                 continue
@@ -113,15 +110,20 @@ def parse_js_coverage(path: Path) -> dict[str, Any]:
         fail(f"missing c8 JSON summary: {path}")
     data = json.loads(path.read_text(encoding="utf-8"))
     total = data.get("total") or {}
-    required = ("lines", "branches", "functions", "statements")
-    if any(key not in total for key in required):
+    mapping = {
+        "lines": "line",
+        "branches": "branch",
+        "functions": "function",
+        "statements": "statement",
+    }
+    if any(key not in total for key in mapping):
         fail("c8 summary missing required total counters")
-    result = {
+    result: dict[str, Any] = {
         "scope": "control-gateway/src + system-master/book-system JavaScript; tests excluded; --all enabled",
         "files": max(0, len(data) - 1),
     }
-    for key in required:
-        result[key[:-1] if key.endswith("s") else key] = normalize_istanbul_metric(total[key])
+    for source_key, receipt_key in mapping.items():
+        result[receipt_key] = normalize_istanbul_metric(total[source_key])
     return result
 
 
@@ -250,10 +252,19 @@ def main() -> int:
         "lizard_csv": OUT / "complexity" / "lizard.csv",
         "jscpd_json": OUT / "duplication" / "jscpd-report.json",
         "tool_versions": OUT / "tool-versions.json",
+        "execution_health": OUT / "execution-health.json",
     }
     for path in raw_paths.values():
         if not path.is_file():
             fail(f"required raw report is absent: {path}")
+
+    execution_health = load_json(raw_paths["execution_health"])
+    failure_count = int(execution_health.get("failure_count", 0))
+    standing = (
+        "PQF_001F_REPORT_ONLY_BASELINE_MEASURED_WITH_EXECUTION_FAILURES__NO_THRESHOLDS_ENFORCED"
+        if failure_count
+        else "PQF_001F_REPORT_ONLY_BASELINE_MEASURED__NO_THRESHOLDS_ENFORCED"
+    )
     receipt = {
         "receipt_id": "PQF-001F-MULTI-LANGUAGE-QUALITY-BASELINE-RECEIPT-001",
         "subject_sha": subject,
@@ -261,6 +272,7 @@ def main() -> int:
         "mode": "REPORT_ONLY_NO_QUALITY_THRESHOLDS",
         "thresholds_enforced": False,
         "production_source_mutation_authorized": False,
+        "execution_health": execution_health,
         "coverage": {
             "java": parse_jacoco(raw_paths["java_jacoco_xml"]),
             "python": parse_python_coverage(raw_paths["python_coverage_json"]),
@@ -273,16 +285,18 @@ def main() -> int:
         "interpretation_law": [
             "Coverage is evidence of executed test reachability, not proof of correctness.",
             "Complexity and duplication values are baseline measurements, not automatic defects.",
+            "A failing test discovered during measurement remains a quality finding and is never suppressed to make the baseline green.",
             "No percentage, CCN, NLOC, parameter-count, or duplication threshold is authoritative in PQF-001F.",
             "Thresholds may be proposed only after baseline interpretation and risk classification.",
         ],
-        "standing": "PQF_001F_REPORT_ONLY_BASELINE_MEASURED__NO_THRESHOLDS_ENFORCED",
+        "standing": standing,
     }
     destination = OUT / "PQF-001F-QUALITY-BASELINE.json"
     destination.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(json.dumps(receipt, indent=2, sort_keys=True))
     print(f"PQF_001F_BASELINE_RECEIPT={destination}")
-    print("PQF_001F_REPORT_ONLY=PASS")
+    print(f"PQF_001F_EXECUTION_FAILURES={failure_count}")
+    print("PQF_001F_REPORT_ONLY=MEASURED")
     return 0
 
 
