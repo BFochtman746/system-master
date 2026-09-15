@@ -48,10 +48,13 @@ function main() {
     'control-gateway/python/a01_supervisor_coordination.py',
     'control-gateway/python/a01_supervisor_coordination_strict.py',
     'control-gateway/python/a01_night_scheduler.py',
+    'control-gateway/python/a01_execution_worker.py',
     'tests/test_control_gateway_a01_supervisor_adapter.py',
     'tests/test_control_gateway_a01_supervisor_coordination.py',
     'tests/test_control_gateway_a01_supervisor_coordination_authority.py',
     'tests/test_control_gateway_a01_night_scheduler.py',
+    'tests/test_control_gateway_a01_execution_worker.py',
+    'tests/test_control_gateway_a01_execution_worker_single_owner.py',
     'tests/test_control_gateway_failure_restart_idempotency.py',
     'tests/run_control_gateway_failure_restart_idempotency_bounded.py',
     'tests/test_control_gateway_cg011_dispatch_failure_replay.py',
@@ -65,7 +68,7 @@ function main() {
     run(exe, args, options);
     stages.push(name);
     writeJson(path.join(EVIDENCE_DIR, 'cg011-cumulative-stage-progress.json'), {
-      evidence_version: 1,
+      evidence_version: 2,
       subject_sha: actual,
       completed_stages: stages,
     });
@@ -79,6 +82,8 @@ function main() {
   stage('CG009_COORDINATION_BASE', 'python', ['tests/test_control_gateway_a01_supervisor_coordination.py'], { timeout: 120000 });
   stage('CG009_COORDINATION_AUTHORITY', 'python', ['tests/test_control_gateway_a01_supervisor_coordination_authority.py'], { timeout: 120000 });
   stage('CG010_NIGHT_SCHEDULER', 'python', ['tests/test_control_gateway_a01_night_scheduler.py'], { timeout: 180000 });
+  stage('CG012_EXECUTION_WORKER', 'python', ['tests/test_control_gateway_a01_execution_worker.py'], { timeout: 180000 });
+  stage('PQF_EXECUTION_SINGLE_OWNER', 'python', ['tests/test_control_gateway_a01_execution_worker_single_owner.py'], { timeout: 180000 });
   stage('CG011_FAILURE_RESTART_IDEMPOTENCY', 'python', ['tests/run_control_gateway_failure_restart_idempotency_bounded.py'], { timeout: 300000 });
   stage('CG011_DISPATCH_FAILURE_REPLAY', 'python', ['tests/test_control_gateway_cg011_dispatch_failure_replay.py'], { timeout: 120000 });
   stage('CG011_20K_STRESS', 'python', ['tests/run_second_shift_supervisor_v2_optimized.py'], { timeout: 600000 });
@@ -92,7 +97,7 @@ function main() {
   stage('CG011_ADVERSARIAL_CLOSURE', 'python', ['tests/test_control_gateway_cg011_adversarial_closure.py'], { timeout: 180000 });
 
   const evidence = {
-    evidence_version: 3,
+    evidence_version: 4,
     qualification_id: process.env.A01_QUALIFICATION_ID || 'SECOND-SHIFT-SUPERVISOR-V2-A01-STRESS',
     workstream_id: process.env.A01_WORKSTREAM_ID || 'SECOND-SHIFT-CONTROL-GATEWAY',
     subject_sha: actual,
@@ -105,7 +110,15 @@ function main() {
       'CIRCUIT_NEXT_PROBE_ON_RETRY_BUDGET_EXHAUSTION',
       'AUDIT_INVARIANT_CORRUPTION_DETECTION',
     ],
-    cumulative_modules: ['P10', 'CG-008', 'CG-009', 'CG-010', 'CG-011'],
+    pqf_execution_invariants: [
+      'EXACTLY_ONE_EXECUTION_OWNER_PER_DISPATCH_GENERATION',
+      'STALE_EXECUTION_GENERATION_CANNOT_DOWNGRADE_TERMINAL_RESULT',
+      'RECOVERY_ROTATES_EXECUTION_GENERATION',
+      'REPLAY_POLICY_IS_MACHINE_READABLE',
+      'ATTEMPT_EVIDENCE_IDENTITY_IS_IMMUTABLE',
+      'WINDOWS_FENCE_LOSS_TERMINATES_DESCENDANT_PROCESS_TREE_ON_A01',
+    ],
+    cumulative_modules: ['P10', 'CG-008', 'CG-009', 'CG-010', 'CG-011', 'CG-012', 'PQF-REPAIR-A01-001'],
     completed_stages: stages,
     adapter_contract: 'control-gateway.a01-supervisor-handoff.v1',
     scheduling_owner: 'A01_SUPERVISOR',
@@ -116,6 +129,7 @@ function main() {
   writeJson(path.join(EVIDENCE_DIR, 'cg011-a01-cumulative-qualification.json'), evidence);
   console.log('CG011_A01_CUMULATIVE_QUALIFIER=PASS');
   console.log('P10_FOUNDATION_INVARIANTS=PASS');
+  console.log('PQF_REPAIR_A01_001=PASS');
 }
 
 try { main(); }
