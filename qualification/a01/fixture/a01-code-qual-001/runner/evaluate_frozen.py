@@ -43,17 +43,28 @@ def hidden_python(candidate: Path, cases: dict) -> dict:
         request_id = cases["request_ids"][0]
         workers = int(cases["concurrency_workers"])
 
-        def claim(i: int):
+        def claim(i: int) -> dict:
             s = Store(db)
             try:
-                return s.claim(request_id, f"worker-{i}", "alpha")
+                try:
+                    return {"ok": True, "value": s.claim(request_id, f"worker-{i}", "alpha")}
+                except Exception as exc:  # Candidate failures are evidence, not evaluator failures.
+                    return {"ok": False, "error_class": type(exc).__name__, "error_message": str(exc)}
             finally:
                 s.close()
 
         with ThreadPoolExecutor(max_workers=workers) as ex:
-            claims = list(ex.map(claim, range(workers)))
-        acquired = [bool(item[1]) for item in claims]
-        results["single_owner_reported"] = sum(acquired) == 1
+            claim_results = list(ex.map(claim, range(workers)))
+        successful_claims = [item["value"] for item in claim_results if item["ok"]]
+        claim_errors = [
+            {"error_class": item["error_class"], "error_message": item["error_message"]}
+            for item in claim_results
+            if not item["ok"]
+        ]
+        acquired = [bool(item[1]) for item in successful_claims]
+        results["concurrency_calls_returned"] = len(claim_errors) == 0
+        results["single_owner_reported"] = len(claim_errors) == 0 and sum(acquired) == 1
+        results["concurrency_errors"] = claim_errors
 
         con = sqlite3.connect(db)
         try:
@@ -65,16 +76,22 @@ def hidden_python(candidate: Path, cases: dict) -> dict:
 
         s = Store(db)
         try:
-            claim_obj, _ = s.claim(cases["request_ids"][1], "owner-new", "payload")
-            stale_ok = s.complete(claim_obj.request_id, "stale-owner", max(0, claim_obj.generation - int(cases["stale_generation_delta"])))
-            results["stale_writer_rejected"] = stale_ok is False
-            correct_ok = s.complete(claim_obj.request_id, claim_obj.owner, claim_obj.generation)
-            results["current_writer_can_complete"] = correct_ok is True
+            try:
+                claim_obj, _ = s.claim(cases["request_ids"][1], "owner-new", "payload")
+                stale_ok = s.complete(claim_obj.request_id, "stale-owner", max(0, claim_obj.generation - int(cases["stale_generation_delta"])))
+                results["stale_writer_rejected"] = stale_ok is False
+                correct_ok = s.complete(claim_obj.request_id, claim_obj.owner, claim_obj.generation)
+                results["current_writer_can_complete"] = correct_ok is True
+            except Exception as exc:
+                results["stale_writer_rejected"] = False
+                results["current_writer_can_complete"] = False
+                results["recovery_error"] = {"error_class": type(exc).__name__, "error_message": str(exc)}
         finally:
             s.close()
 
-    results["passed"] = sum(1 for v in results.values() if v is True)
-    results["failed"] = sum(1 for v in results.values() if v is False)
+    boolean_results = [value for value in results.values() if isinstance(value, bool)]
+    results["passed"] = sum(1 for value in boolean_results if value)
+    results["failed"] = sum(1 for value in boolean_results if not value)
     return results
 
 
