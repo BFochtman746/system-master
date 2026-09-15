@@ -371,7 +371,10 @@ public final class DurableDispatchCoordinator {
                     if (c.runId() != r.runId()) throw new IllegalStateException("COMPLETION_RUN_ID_MISMATCH");
                     if (!"completed".equals(c.status())) throw new IllegalStateException("COMPLETION_NOT_TERMINAL");
                     State terminal = "success".equals(c.conclusion()) ? State.DONE : State.FAILED;
-                    String reason = terminal == State.DONE ? "COMPLETED" : "RUN_NON_SUCCESS:" + c.conclusion();
+                    String reason = (terminal == State.DONE
+                            ? "COMPLETED"
+                            : "RUN_NON_SUCCESS:" + c.conclusion())
+                            + " EVIDENCE=" + c.evidenceDigest();
                     ClaimRecord done = r.terminal(terminal, c.runId(), c.conclusion(), reason, clock.now());
                     current = casOrReload(current, done);
                 }
@@ -508,7 +511,7 @@ public final class DurableDispatchCoordinator {
                 case 't' -> out.append('\t');
                 case 'u' -> {
                     if (i + 4 >= value.length()) throw new IllegalStateException("STATE_CORRUPT_ESCAPE");
-                    try { out.append((char) Integer.parseInt(value.substring(i + 1, i + 5), 16)); }
+                    try { out.append((char) Integer.parseInt(value.substring(i + 1, i + 5), 16));
                     catch (NumberFormatException e2) { throw new IllegalStateException("STATE_CORRUPT_ESCAPE", e2); }
                     i += 4;
                 }
