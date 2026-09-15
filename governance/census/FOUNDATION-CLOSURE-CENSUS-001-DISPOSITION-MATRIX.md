@@ -14,13 +14,13 @@ Evidence authority: `governance/census/FOUNDATION-CLOSURE-EVIDENCE-REGISTRY-001.
 
 | State | Rows |
 | --- | ---: |
-| `COMPLETE_WITH_EVIDENCE` | 5 |
-| `ACTIVE_GAP` | 45 |
+| `COMPLETE_WITH_EVIDENCE` | 6 |
+| `ACTIVE_GAP` | 44 |
 | `DURABLY_BLOCKED_EXTERNAL_HUMAN_PRIVATE_NATIVE` | 0 |
 | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | 16 |
 | **Total** | **66** |
 
-**Foundation 1.0 completion with evidence: 10% (5 of 50 in-scope rows).**
+**Foundation 1.0 completion with evidence: 12% (6 of 50 in-scope rows).**
 
 ## Current disposition matrix
 
@@ -81,7 +81,7 @@ Evidence authority: `governance/census/FOUNDATION-CLOSURE-EVIDENCE-REGISTRY-001.
 | `P02` | P02 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | Fresh current-authority PASS receipt admitted for exact subject `efc325ab682fa92985569ceaa2619220dd4a6d3f`; prior receipt preserved as historical evidence. |
 | `P03` | P03 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | Fresh current-authority PASS receipt admitted for exact subject `ba0689a0389958d108571b50329b039e167a8156`; superseded receipt preserved as historical evidence. |
 | `P04` | P04 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | Fresh current-authority PASS receipt admitted for exact subject `ba0689a0389958d108571b50329b039e167a8156`; superseded receipt preserved as historical evidence. |
-| `P05` | P05 | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
+| `P05` | P05 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | Fresh current-authority PASS receipt admitted for exact subject `fe7a19093721c73093fcc5b9daa2330eb2d6d9cc`; current Registry 017 binding and fail-closed schema validation proven. |
 | `P06` | P06 | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
 | `P07` | P07 | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
 | `P08` | P08 | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
@@ -105,10 +105,12 @@ Evidence authority: `governance/census/FOUNDATION-CLOSURE-EVIDENCE-REGISTRY-001.
 
 `P04` is current-complete with exact-subject evidence from GitHub Actions run `34915442434`, artifact `10375324127`, bound to subject `ba0689a0389958d108571b50329b039e167a8156`; the qualification executed 21 content-addressed authority-write tests and the superseded receipt remains preserved in history.
 
+`P05` is current-complete with exact-subject evidence from GitHub Actions run `34920515659`, artifact `10377389020`, bound to subject `fe7a19093721c73093fcc5b9daa2330eb2d6d9cc`; positive validation, invalid-topology rejection, invalid-authority-pointer rejection, and authoritative CI wiring all passed against Registry 017.
+
 ## Unresolved gap successor register
 
-45 `ACTIVE_GAP` rows remain. Ordering is shared platform dependency first, then the current nine-peer order from Topology 007: CORE, LEARNING, BOOK, DOCUMENTS, SPREADSHEET_DATA, MEDIA, CONNECTED_ACTIONS, RESEARCH_KNOWLEDGE, PROGRAMMING.
+44 `ACTIVE_GAP` rows remain. Ordering is shared platform dependency first, then the current nine-peer order from Topology 007: CORE, LEARNING, BOOK, DOCUMENTS, SPREADSHEET_DATA, MEDIA, CONNECTED_ACTIONS, RESEARCH_KNOWLEDGE, PROGRAMMING.
 
-**Exact next ACTIVE_GAP: `P05` - Governance schema validation.**
+**Exact next ACTIVE_GAP: `P06` - Evidence admission and closure projection.**
 
-Continue `P05-P12`, `P15`, then owner-valid capability gaps in dependency-valid order. `PROSE` receives no current successor because it is terminally retired.
+Continue `P06-P12`, `P15`, then owner-valid capability gaps in dependency-valid order. `PROSE` receives no current successor because it is terminally retired.

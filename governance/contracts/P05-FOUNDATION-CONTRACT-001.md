@@ -43,7 +43,7 @@ Schemas and validated governance artifacts retain their own canonical writers. P
 
 - **P00** — selects current authority and pointer targets.
 - **P01** — provides the current Topology 007 and Allocation 006 subjects P05 validates.
-- **P02** — provides the current Registry 013 subject P05 validates.
+- **P02** — provides the current Registry 017 subject P05 validates.
 - Node 22 runtime, standard library only.
 - The four schema files named in section 1.
 
