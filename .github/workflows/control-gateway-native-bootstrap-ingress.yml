@@ -1,0 +1,66 @@
+name: Control Gateway Native Bootstrap Ingress
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: read
+  actions: read
+  issues: read
+
+jobs:
+  validate-command:
+    name: Validate owner-authenticated bootstrap command
+    if: >-
+      github.actor == github.repository_owner &&
+      github.event.issue.author_association == 'OWNER' &&
+      startsWith(github.event.issue.title, '[CONTROL-GATEWAY-BOOTSTRAP] ')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      bootstrap_request_json: ${{ steps.validate.outputs.bootstrap_request_json }}
+    steps:
+      - name: Validate exact native bootstrap envelope
+        id: validate
+        shell: bash
+        env:
+          CONTROL_GATEWAY_COMMAND_BODY: ${{ github.event.issue.body }}
+          CONTROL_GATEWAY_ISSUE_TITLE: ${{ github.event.issue.title }}
+          CONTROL_GATEWAY_REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          command_file="${RUNNER_TEMP}/control-gateway-native-bootstrap.json"
+          printf '%s' "${CONTROL_GATEWAY_COMMAND_BODY}" > "${command_file}"
+
+          jq -e 'type == "object"' "${command_file}" >/dev/null
+          test "$(jq -c 'keys' "${command_file}")" = '["bootstrap_request","command_id","kind","protocol_version"]'
+          test "$(jq -r '.protocol_version // empty' "${command_file}")" = 'control-gateway.github-native-command.v1'
+          test "$(jq -r '.kind // empty' "${command_file}")" = 'AUTHORITY_BOOTSTRAP'
+          jq -e '.bootstrap_request | type == "object"' "${command_file}" >/dev/null
+
+          command_id="$(jq -r '.command_id // empty' "${command_file}")"
+          operation="$(jq -r '.bootstrap_request.operation // empty' "${command_file}")"
+          repository="$(jq -r '.bootstrap_request.repository // empty' "${command_file}")"
+          state_ref="$(jq -r '.bootstrap_request.state_ref // empty' "${command_file}")"
+
+          [[ "${command_id}" =~ ^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$ ]]
+          test "${CONTROL_GATEWAY_ISSUE_TITLE}" = "[CONTROL-GATEWAY-BOOTSTRAP] ${command_id}"
+          test "${operation}" = 'CONTROL-GATEWAY-AUTHORITY-BOOTSTRAP-001'
+          test "${repository}" = "${CONTROL_GATEWAY_REPOSITORY}"
+          [[ "${state_ref}" =~ ^control-gateway-state/active-work/[A-Za-z0-9][A-Za-z0-9._/-]{0,218}$ ]]
+          [[ "${state_ref}" != *'..'* ]]
+          [[ "${state_ref}" != *'//'* ]]
+          [[ "${state_ref}" != */ ]]
+
+          bootstrap_request_json="$(jq -c '.bootstrap_request' "${command_file}")"
+          printf 'bootstrap_request_json=%s\n' "${bootstrap_request_json}" >> "${GITHUB_OUTPUT}"
+
+  execute-authority-bootstrap:
+    name: Execute through dedicated-writer authority bootstrap
+    needs: validate-command
+    uses: ./.github/workflows/control-gateway-authority-bootstrap.yml
+    with:
+      bootstrap_request_json: ${{ needs.validate-command.outputs.bootstrap_request_json }}
+    secrets: inherit
