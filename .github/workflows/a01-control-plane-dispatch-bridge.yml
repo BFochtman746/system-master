@@ -22,28 +22,27 @@ on:
         description: Authorized continuation after failure
         required: true
       execution_context:
-        description: Normal or centrally scheduled overnight execution
+        description: Registered execution context
         required: true
         default: normal
         type: choice
-        options: [normal, overnight]
+        options: [normal, recovery, repair, overnight]
       repair_attempt:
         description: Product repair attempts already consumed for this failure lineage
         required: false
         default: 0
         type: number
       max_repair_attempts:
-        description: Maximum bounded product repair attempts for this lineage, 0-2
+        description: Maximum bounded product repair attempts for this lineage
         required: false
         default: 1
         type: number
       advanced_json:
         description: >-
-          Optional JSON object carrying the advanced fields that no longer fit inside
-          GitHub's ten-input limit for manual dispatch. Recognised keys:
+          Validated JSON envelope for the six advanced logical packet fields:
           notification_target, qualifier_timeout_minutes, job_timeout_minutes,
           not_before, not_after, repair_transaction_id. Example:
-          {"qualifier_timeout_minutes": 28, "job_timeout_minutes": 30}
+          {"qualifier_timeout_minutes":28,"job_timeout_minutes":30}
         required: false
         default: '{}'
         type: string
@@ -55,9 +54,9 @@ jobs:
   preflight:
     name: Validate external A-01 dispatch packet before reusable routing
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 5
     steps:
-      - name: Validate dispatch packet shape
+      - name: Validate all fifteen logical dispatch fields
         shell: bash
         env:
           QUALIFICATION_ID: ${{ inputs.qualification_id }}
@@ -67,25 +66,72 @@ jobs:
           RESUME_ON_PASS: ${{ inputs.resume_on_pass }}
           RESUME_ON_FAILURE: ${{ inputs.resume_on_failure }}
           EXECUTION_CONTEXT: ${{ inputs.execution_context }}
-          QUALIFIER_TIMEOUT_MINUTES: ${{ fromJSON(inputs.advanced_json || '{}').qualifier_timeout_minutes || 28 }}
-          JOB_TIMEOUT_MINUTES: ${{ fromJSON(inputs.advanced_json || '{}').job_timeout_minutes || 30 }}
           REPAIR_ATTEMPT: ${{ inputs.repair_attempt }}
           MAX_REPAIR_ATTEMPTS: ${{ inputs.max_repair_attempts }}
+          ADVANCED_JSON: ${{ inputs.advanced_json }}
         run: |
           set -euo pipefail
-          test -n "$QUALIFICATION_ID"
-          test -n "$WORKSTREAM_ID"
-          [[ "$SUBJECT_SHA" =~ ^[0-9a-f]{40}$ ]]
-          test -n "$ORIGIN_REF"
-          test -n "$RESUME_ON_PASS"
-          test -n "$RESUME_ON_FAILURE"
-          case "$EXECUTION_CONTEXT" in normal|overnight) ;; *) exit 1 ;; esac
-          [[ "$QUALIFIER_TIMEOUT_MINUTES" =~ ^[0-9]+$ ]]
-          [[ "$JOB_TIMEOUT_MINUTES" =~ ^[0-9]+$ ]]
-          [[ "$REPAIR_ATTEMPT" =~ ^[0-9]+$ ]]
-          [[ "$MAX_REPAIR_ATTEMPTS" =~ ^[0-9]+$ ]]
-          test "$REPAIR_ATTEMPT" -le "$MAX_REPAIR_ATTEMPTS"
-          echo A01_DISPATCH_BRIDGE_PREFLIGHT=PASS
+          node <<'NODE'
+          const env = process.env;
+          const die = (code, detail) => {
+            console.error(`A01_DISPATCH_BRIDGE_PREFLIGHT=FAIL code=${code} detail=${detail}`);
+            process.exit(1);
+          };
+          const nonempty = (v, name) => {
+            if (typeof v !== 'string' || v.length === 0) die('DISPATCH_INPUT_INVALID', `${name}_required`);
+          };
+          const refOk = (v) => /^[A-Za-z0-9][A-Za-z0-9._/-]{0,254}$/.test(v) && !v.includes('..') && !v.includes('//') && !v.endsWith('/');
+          const isoOffset = (v) => /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/.test(v) && !Number.isNaN(Date.parse(v));
+          const integer = (v, name, min, max, code) => {
+            if (!/^\d+$/.test(String(v))) die(code, `${name}_not_integer`);
+            const n = Number(v);
+            if (!Number.isSafeInteger(n) || n < min || n > max) die(code, `${name}_out_of_range`);
+            return n;
+          };
+
+          nonempty(env.QUALIFICATION_ID, 'qualification_id');
+          nonempty(env.WORKSTREAM_ID, 'workstream_id');
+          if (!/^[0-9a-f]{40}$/.test(env.SUBJECT_SHA || '')) die('DISPATCH_INPUT_INVALID', 'subject_sha_invalid');
+          if (!refOk(env.ORIGIN_REF || '')) die('DISPATCH_INPUT_INVALID', 'origin_ref_invalid');
+          nonempty(env.RESUME_ON_PASS, 'resume_on_pass');
+          nonempty(env.RESUME_ON_FAILURE, 'resume_on_failure');
+          if (!['normal', 'recovery', 'repair', 'overnight'].includes(env.EXECUTION_CONTEXT)) die('DISPATCH_INPUT_INVALID', 'execution_context_unregistered');
+
+          let advanced;
+          try { advanced = JSON.parse(env.ADVANCED_JSON || '{}'); }
+          catch { die('DISPATCH_INPUT_INVALID', 'advanced_json_invalid'); }
+          if (!advanced || typeof advanced !== 'object' || Array.isArray(advanced)) die('DISPATCH_INPUT_INVALID', 'advanced_json_object_required');
+          const allowed = new Set(['notification_target','qualifier_timeout_minutes','job_timeout_minutes','not_before','not_after','repair_transaction_id']);
+          const unknown = Object.keys(advanced).filter((key) => !allowed.has(key));
+          if (unknown.length) die('DISPATCH_INPUT_INVALID', `advanced_json_unknown_key_${unknown[0]}`);
+
+          const notificationTarget = advanced.notification_target ?? 'originating-workstream';
+          nonempty(notificationTarget, 'notification_target');
+          const qualifierTimeout = integer(advanced.qualifier_timeout_minutes ?? 28, 'qualifier_timeout_minutes', 1, 360, 'DISPATCH_BUDGET_INVALID');
+          const jobTimeout = integer(advanced.job_timeout_minutes ?? 30, 'job_timeout_minutes', 1, 360, 'DISPATCH_BUDGET_INVALID');
+          if (jobTimeout <= qualifierTimeout) die('DISPATCH_BUDGET_INVALID', 'job_timeout_must_exceed_qualifier_timeout');
+
+          const repairAttempt = integer(env.REPAIR_ATTEMPT ?? '0', 'repair_attempt', 0, 100, 'DISPATCH_INPUT_INVALID');
+          const maxRepairAttempts = integer(env.MAX_REPAIR_ATTEMPTS ?? '1', 'max_repair_attempts', 0, 100, 'DISPATCH_INPUT_INVALID');
+          if (repairAttempt > maxRepairAttempts) die('DISPATCH_INPUT_INVALID', 'repair_attempt_exceeds_max');
+
+          const notBefore = advanced.not_before ?? '';
+          const notAfter = advanced.not_after ?? '';
+          if (typeof notBefore !== 'string' || typeof notAfter !== 'string') die('DISPATCH_WINDOW_INVALID', 'window_must_be_string');
+          if (env.EXECUTION_CONTEXT === 'overnight') {
+            if (!notBefore || !notAfter) die('DISPATCH_WINDOW_INVALID', 'overnight_window_required');
+            if (!isoOffset(notBefore) || !isoOffset(notAfter)) die('DISPATCH_WINDOW_INVALID', 'window_requires_explicit_offset');
+            if (Date.parse(notBefore) >= Date.parse(notAfter)) die('DISPATCH_WINDOW_INVALID', 'not_before_must_precede_not_after');
+          } else if (notBefore || notAfter) {
+            die('DISPATCH_WINDOW_INVALID', 'window_only_valid_for_overnight');
+          }
+
+          const transactionId = advanced.repair_transaction_id ?? '';
+          if (typeof transactionId !== 'string') die('DISPATCH_LINEAGE_INVALID', 'repair_transaction_id_must_be_string');
+          if (repairAttempt > 0 && !transactionId) die('DISPATCH_LINEAGE_INVALID', 'repair_transaction_id_required');
+
+          console.log('A01_DISPATCH_BRIDGE_PREFLIGHT=PASS code=OK logical_field_count=15');
+          NODE
 
   route:
     name: Dispatch through reusable A-01 Control Plane Gateway
@@ -102,5 +148,8 @@ jobs:
       execution_context: ${{ inputs.execution_context }}
       qualifier_timeout_minutes: ${{ fromJSON(inputs.advanced_json || '{}').qualifier_timeout_minutes || 28 }}
       job_timeout_minutes: ${{ fromJSON(inputs.advanced_json || '{}').job_timeout_minutes || 30 }}
+      not_before: ${{ fromJSON(inputs.advanced_json || '{}').not_before || '' }}
+      not_after: ${{ fromJSON(inputs.advanced_json || '{}').not_after || '' }}
       repair_attempt: ${{ fromJSON(inputs.repair_attempt) }}
       max_repair_attempts: ${{ fromJSON(inputs.max_repair_attempts) }}
+      repair_transaction_id: ${{ fromJSON(inputs.advanced_json || '{}').repair_transaction_id || '' }}
