@@ -1,0 +1,153 @@
+name: Book B05-D3 Craft Intelligence Opportunity Qualification
+
+on:
+  push:
+    branches:
+      - book-system/b05-d3-craft-intelligence-opportunity-v1
+    paths:
+      - 'system-master/book-system/book-craft-intelligence-v1.js'
+      - 'system-master/book-system/book-literary-opportunity-ledger-v1.js'
+      - 'system-master/book-system/book-literary-d3.test.js'
+      - '.github/workflows/book-b05-d3-craft-intelligence-opportunity-qualification.yml'
+  pull_request:
+    branches:
+      - book-system/b05-d2-diagnostic-observation-v1
+    types: [opened, synchronize, reopened, edited, ready_for_review]
+    paths:
+      - 'system-master/book-system/book-craft-intelligence-v1.js'
+      - 'system-master/book-system/book-literary-opportunity-ledger-v1.js'
+      - 'system-master/book-system/book-literary-d3.test.js'
+      - '.github/workflows/book-b05-d3-craft-intelligence-opportunity-qualification.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [22, 24]
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    steps:
+      - name: Validate D3 subject
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          HEAD_REF: ${{ github.head_ref }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          if [[ "${EVENT_NAME}" == "pull_request" ]]; then
+            test "${HEAD_REF}" = "book-system/b05-d3-craft-intelligence-opportunity-v1"
+            [[ "${PR_HEAD_SHA}" =~ ^[0-9a-f]{40}$ ]]
+          else
+            test "${GITHUB_REF}" = "refs/heads/book-system/b05-d3-craft-intelligence-opportunity-v1"
+          fi
+
+      - name: Checkout exact D3 subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Verify exact checkout
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          if [[ "${EVENT_NAME}" == "pull_request" ]]; then
+            test "$(git rev-parse HEAD)" = "${PR_HEAD_SHA}"
+          else
+            test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          fi
+          echo "subject_sha=$(git rev-parse HEAD)"
+
+      - name: Setup Node ${{ matrix.node }}
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Verify frozen B05-C lock
+        shell: bash
+        run: node qualification/book-system/reconstruction/BOOK-RECONSTRUCTION-B05-C-LOCK-VERIFY-001.js | tee b05-c-lock.log
+
+      - name: B02 source acceptance baseline
+        shell: bash
+        run: node system-master/book-system/book-source-recovery-acceptance-v1.test.js | tee b02-source.log
+
+      - name: B03 knowledge baseline
+        shell: bash
+        run: node system-master/book-system/book-story-bible-knowledge-v1.test.js | tee b03-knowledge.log
+
+      - name: B04 reader baselines
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test system-master/book-system/book-reader-d1.test.js | tee b04-d1.log
+          node --test system-master/book-system/book-reader-d2.test.js | tee b04-d2.log
+          node --test system-master/book-system/book-reader-d3.test.js system-master/book-system/book-reader-d3-query-hardening.test.js | tee b04-d3.log
+
+      - name: B05 D1 baseline
+        shell: bash
+        run: node --test system-master/book-system/book-literary-d1.test.js system-master/book-system/book-literary-d1-registry-lock.test.js | tee b05-d1.log
+
+      - name: B05 D2 baseline
+        shell: bash
+        run: node --test system-master/book-system/book-literary-d2.test.js system-master/book-system/book-literary-d2-hardening.test.js | tee b05-d2.log
+
+      - name: B05 D3 K01-K20 O01-O24 focused qualification
+        shell: bash
+        run: node --test system-master/book-system/book-literary-d3.test.js | tee b05-d3.log
+
+      - name: Runtime import smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          node -e "require('./system-master/book-system/book-craft-intelligence-v1')"
+          node -e "require('./system-master/book-system/book-literary-opportunity-ledger-v1')"
+
+      - name: Seal D3 evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            echo "subject_sha=$(git rev-parse HEAD)"
+            echo "node=$(node --version)"
+            echo "workflow=book-b05-d3-craft-intelligence-opportunity-qualification"
+            echo "focused_cases=44"
+            echo "focused_groups=K20,O24"
+            echo "b05_e_denominator_reserved=152"
+            echo "denominator_shrinkage=false"
+            echo "historical_pass_transfer=0"
+            echo "canonical_effect=false"
+            sha256sum system-master/book-system/book-craft-intelligence-v1.js
+            sha256sum system-master/book-system/book-literary-opportunity-ledger-v1.js
+            sha256sum system-master/book-system/book-literary-d3.test.js
+            sha256sum qualification/book-system/reconstruction/BOOK-RECONSTRUCTION-B05-C-DESIGN-LOCK-001.md
+            sha256sum qualification/book-system/reconstruction/BOOK-RECONSTRUCTION-B05-C-QUALIFICATION-DENOMINATOR-001.csv
+            sha256sum qualification/book-system/reconstruction/BOOK-RECONSTRUCTION-B05-D2-CLOSURE-RECEIPT-001.md
+          } > b05-d3-evidence.txt
+          cat b05-d3-evidence.txt
+
+      - name: Upload D3 evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: book-b05-d3-node-${{ matrix.node }}-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            b05-c-lock.log
+            b02-source.log
+            b03-knowledge.log
+            b04-d1.log
+            b04-d2.log
+            b04-d3.log
+            b05-d1.log
+            b05-d2.log
+            b05-d3.log
+            b05-d3-evidence.txt
+          if-no-files-found: error
+          retention-days: 30
