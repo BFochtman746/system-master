@@ -52,9 +52,9 @@ manifest.registerFamilyTests(test, 'E', [
     const k = f.knowledgeFixture(); k.knowledge_digest = f.h('tampered'); const a = k.anchors[1];
     assert.throws(() => exposure.buildReaderExposureProjectionV1({ knowledge: k, story_bible_binding: f.storyBibleBinding(k), scope: { scope_kind: 'CHAPTER', scope_ref: 'CHAPTER:X', scope_digest: f.h('scope') }, reveal_frontier: { frontier_anchor_id: a.anchor_id, frontier_ordinal: a.ordinal, frontier_anchor_digest: exposure.anchorDigestV1(a) } }), code('BLOCKED_KNOWLEDGE_INVALID'));
   }),
-  c('source_current false anchor is hidden even before frontier', () => {
-    const x = f.exposureFixture({ a2_current: false, frontier_ordinal: 3 });
-    assert.equal(x.exp.visible_anchor_refs.includes('ANCHOR:B04E-A2'), false);
+  c('noncurrent source anchor is rejected by B03 knowledge validity before B04 exposure', () => {
+    const k = f.knowledgeFixture({ a2_current: false }); const a = k.anchors[2];
+    assert.throws(() => exposure.buildReaderExposureProjectionV1({ knowledge: k, story_bible_binding: f.storyBibleBinding(k), scope: { scope_kind: 'CHAPTER', scope_ref: 'CHAPTER:X', scope_digest: f.h('scope') }, reveal_frontier: { frontier_anchor_id: a.anchor_id, frontier_ordinal: a.ordinal, frontier_anchor_digest: exposure.anchorDigestV1(a) } }), err => err && err.code === 'BLOCKED_KNOWLEDGE_INVALID' && err.detail === 'ANCHOR_SOURCE_NOT_CURRENT');
   }),
   c('frontier hides future anchor', () => {
     const x = f.exposureFixture(); assert.equal(x.exp.visible_anchor_refs.includes('ANCHOR:B04E-A3'), false);
@@ -80,9 +80,10 @@ manifest.registerFamilyTests(test, 'E', [
   c('hidden semantic counts are not emitted', () => {
     const x = f.exposureFixture(); const s = JSON.stringify(x.exp); assert.equal(/hidden.*count|future.*count/i.test(s), false);
   }),
-  c('visible anchors are exactly current anchors at or before frontier', () => {
-    const x = f.exposureFixture({ a2_current: false, frontier_ordinal: 3 });
-    assert.deepEqual(x.exp.visible_anchor_refs, ['ANCHOR:B04E-A1','ANCHOR:B04E-A3']);
+  c('visible anchors are exactly valid current anchors at or before frontier', () => {
+    const x = f.exposureFixture();
+    assert.deepEqual(x.exp.visible_anchor_refs, ['ANCHOR:B04E-A1','ANCHOR:B04E-A2']);
+    assert.equal(x.knowledge.anchors.filter(a => a.ordinal <= 2).every(a => a.source_current === true), true);
   }),
   c('dependency refs bind exact knowledge identity and digest', () => {
     const x = f.exposureFixture(); assert.ok(x.exp.dependency_refs.includes(`knowledge:${x.knowledge.knowledge_candidate_id}@${x.knowledge.knowledge_digest}`));
