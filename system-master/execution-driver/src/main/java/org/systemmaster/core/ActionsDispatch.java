@@ -9,56 +9,32 @@ import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 
 /**
- * The production {@link ClaimLedger.Consumer.Dispatch}: posts a claim's delegated work to
- * GitHub Actions via {@code workflow_dispatch}.
+ * Posts delegated work to GitHub Actions via workflow_dispatch.
  *
- * <p>WHY ACTIONS. The architecture decision for this repository was to use GitHub Actions
- * as the executor rather than write an in-process Java worker: the tree already runs 48
- * workflows and thousands of lines of CI scripting that do real execution with auth,
- * scheduling, retries and durable evidence artifacts. This class is the seam between the
- * claim lifecycle and that executor, and it is deliberately the only place that knows
- * execution happens over HTTP.
- *
- * <p>WHAT THE RECEIPT ACTUALLY ATTESTS — READ THIS BEFORE TRUSTING A DONE CLAIM.
- * {@code workflow_dispatch} answers {@code 204 No Content}: it returns no body and no run
- * id. So a successful dispatch proves the work was <em>accepted by Actions</em>, not that
- * it finished. The receipt digest says {@code ACTIONS_DISPATCHED} for exactly that reason,
- * and the claim id is passed as a workflow input so the resulting run is correlatable.
- * Closing that gap — polling the dispatched run to completion before terminalizing DONE —
- * is not implemented here and is recorded as outstanding in SYSTEM-MAP.md rather than
- * quietly implied by a green claim.
- *
- * <p>FAILS LOUDLY, NEVER SILENTLY. Every refusal carries a specific code:
- * {@code DISPATCH_NO_CREDENTIAL} when no token is present (the ordinary case outside CI),
- * {@code DISPATCH_MISCONFIGURED_*} for missing coordinates, {@code DISPATCH_REJECTED_<http>}
- * when Actions refuses, {@code DISPATCH_TRANSPORT_FAILURE} when the call cannot be made.
- * A dispatch that cannot run must never look like a claim with nothing to do — the
- * consumer records the refusal as evidence and terminalizes the claim FAILED.
+ * <p>A 204 is acceptance only. Production durability is owned by
+ * {@link DurableDispatchCoordinator}: it persists DISPATCH_PREPARED with the exact
+ * dispatch id before calling {@link #executePrepared(String, String, String)}.
  */
 public final class ActionsDispatch implements ClaimLedger.Consumer.Dispatch {
 
-    /** Minimal HTTP response shape; keeps the transport seam free of the JDK client type. */
     public record Response(int status, String body) { }
 
-    /**
-     * The HTTP seam. Injected so the qualification can prove every refusal code and the
-     * exact request shape without network access, which the build sandbox does not have.
-     */
     public interface Transport {
         Response post(String url, Map<String, String> headers, String body) throws Exception;
     }
 
-    /** Token source, separate from the transport so a missing credential is its own proof. */
-    public interface Credentials {
-        String token();
-    }
+    public interface Credentials { String token(); }
+    public interface DispatchIdSource { String next(); }
 
     private static final String API = "https://api.github.com";
+    private static final String DISPATCH_ID_PREFIX = "dispatch_id=";
 
     private final Transport transport;
     private final Credentials credentials;
+    private final DispatchIdSource dispatchIds;
     private final String owner;
     private final String repo;
     private final String workflowFile;
@@ -66,21 +42,121 @@ public final class ActionsDispatch implements ClaimLedger.Consumer.Dispatch {
 
     public ActionsDispatch(Transport transport, Credentials credentials,
             String owner, String repo, String workflowFile, String ref) {
+        this(transport, credentials, () -> UUID.randomUUID().toString(), owner, repo, workflowFile, ref);
+    }
+
+    public ActionsDispatch(Transport transport, Credentials credentials,
+            DispatchIdSource dispatchIds, String owner, String repo, String workflowFile, String ref) {
         this.transport = Objects.requireNonNull(transport, "transport");
         this.credentials = Objects.requireNonNull(credentials, "credentials");
+        this.dispatchIds = Objects.requireNonNull(dispatchIds, "dispatchIds");
         this.owner = norm(owner);
         this.repo = norm(repo);
         this.workflowFile = norm(workflowFile);
         this.ref = norm(ref);
     }
 
-    /**
-     * Builds a dispatch from the ambient environment, which is how the scheduled driver
-     * constructs it. Coordinates are not validated here: a missing one becomes a specific
-     * refusal at execute time, where it lands in a claim's evidence trail instead of
-     * crashing the runner before anything is recorded.
-     */
     public static ActionsDispatch fromEnvironment(Transport transport) {
+        RepoCoordinates coordinates = repoCoordinates();
+        return new ActionsDispatch(transport, ActionsDispatch::ambientToken,
+                coordinates.owner(), coordinates.repo(), env("CLAIM_WORK_WORKFLOW", "claim-work.yml"),
+                env("CLAIM_WORK_REF", "main"));
+    }
+
+    public static Transport httpTransport() {
+        HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(15)).build();
+        return (url, headers, body) -> {
+            HttpRequest.Builder b = HttpRequest.newBuilder(URI.create(url))
+                    .timeout(Duration.ofSeconds(30))
+                    .POST(HttpRequest.BodyPublishers.ofString(body, StandardCharsets.UTF_8));
+            for (Map.Entry<String, String> h : headers.entrySet()) b.header(h.getKey(), h.getValue());
+            HttpResponse<String> r = client.send(b.build(), HttpResponse.BodyHandlers.ofString());
+            return new Response(r.statusCode(), r.body());
+        };
+    }
+
+    /** Validates every local prerequisite before PREPARED is durably committed. */
+    public void preflight() {
+        if (owner.isEmpty() || repo.isEmpty()) throw new IllegalStateException("DISPATCH_MISCONFIGURED_REPOSITORY");
+        if (workflowFile.isEmpty()) throw new IllegalStateException("DISPATCH_MISCONFIGURED_WORKFLOW");
+        if (ref.isEmpty()) throw new IllegalStateException("DISPATCH_MISCONFIGURED_REF");
+        String token = credentials.token();
+        if (token == null || token.isBlank()) throw new IllegalStateException("DISPATCH_NO_CREDENTIAL");
+    }
+
+    /** Creates the correlation identity without performing network I/O. */
+    public String newDispatchId() {
+        String dispatchId = norm(dispatchIds.next());
+        if (!validDispatchId(dispatchId)) throw new IllegalStateException("DISPATCH_INVALID_ID");
+        return dispatchId;
+    }
+
+    /**
+     * POSTs exactly the dispatch id already persisted by the caller. This method never
+     * generates a replacement id, which is the load-bearing crash/restart invariant.
+     */
+    public String executePrepared(String claimId, String payloadDigest, String dispatchId) throws Exception {
+        requireClaim(claimId, payloadDigest);
+        preflight();
+        dispatchId = norm(dispatchId);
+        if (!validDispatchId(dispatchId)) throw new IllegalStateException("DISPATCH_INVALID_ID");
+        String token = credentials.token().trim();
+
+        String url = API + "/repos/" + owner + "/" + repo
+                + "/actions/workflows/" + workflowFile + "/dispatches";
+        String body = "{\"ref\":\"" + esc(ref) + "\",\"inputs\":{"
+                + "\"claim_id\":\"" + esc(claimId) + "\","
+                + "\"payload_digest\":\"" + esc(payloadDigest) + "\","
+                + "\"dispatch_id\":\"" + esc(dispatchId) + "\"}}";
+
+        Response response;
+        try {
+            response = transport.post(url, headers(token), body);
+        } catch (Exception transportFailure) {
+            throw new IllegalStateException("DISPATCH_TRANSPORT_FAILURE:"
+                    + transportFailure.getClass().getSimpleName(), transportFailure);
+        }
+        if (response == null) throw new IllegalStateException("DISPATCH_TRANSPORT_FAILURE:NO_RESPONSE");
+        if (response.status() != 204) throw new IllegalStateException("DISPATCH_REJECTED_" + response.status());
+        return "ACTIONS_DISPATCHED workflow=" + workflowFile + " ref=" + ref
+                + " correlation=" + claimId + " " + DISPATCH_ID_PREFIX + dispatchId;
+    }
+
+    /** Legacy non-durable seam retained for existing deterministic qualification only. */
+    @Override
+    public String execute(String claimId, String payloadDigest) throws Exception {
+        requireClaim(claimId, payloadDigest);
+        return executePrepared(claimId, payloadDigest, newDispatchId());
+    }
+
+    static String dispatchIdFromReceipt(String receipt) {
+        if (receipt == null || !receipt.startsWith("ACTIONS_DISPATCHED ")) {
+            throw new IllegalArgumentException("INVALID_DISPATCH_RECEIPT");
+        }
+        int start = receipt.indexOf(DISPATCH_ID_PREFIX);
+        if (start < 0) throw new IllegalArgumentException("DISPATCH_RECEIPT_MISSING_ID");
+        start += DISPATCH_ID_PREFIX.length();
+        int end = receipt.indexOf(' ', start);
+        String id = end < 0 ? receipt.substring(start) : receipt.substring(start, end);
+        if (!validDispatchId(id)) throw new IllegalArgumentException("DISPATCH_RECEIPT_INVALID_ID");
+        return id;
+    }
+
+    static Map<String, String> headers(String token) {
+        Map<String, String> headers = new LinkedHashMap<>();
+        headers.put("Accept", "application/vnd.github+json");
+        headers.put("Authorization", "Bearer " + token);
+        headers.put("X-GitHub-Api-Version", "2022-11-28");
+        headers.put("Content-Type", "application/json");
+        return headers;
+    }
+
+    static String ambientToken() {
+        String t = env("GITHUB_TOKEN", "");
+        return t.isEmpty() ? env("GH_TOKEN", "") : t;
+    }
+
+    static RepoCoordinates repoCoordinates() {
         String slug = env("GITHUB_REPOSITORY", "");
         String owner = "";
         String repo = "";
@@ -89,83 +165,30 @@ public final class ActionsDispatch implements ClaimLedger.Consumer.Dispatch {
             owner = slug.substring(0, slash);
             repo = slug.substring(slash + 1);
         }
-        Credentials creds = () -> {
-            String t = env("GITHUB_TOKEN", "");
-            return t.isEmpty() ? env("GH_TOKEN", "") : t;
-        };
-        return new ActionsDispatch(transport, creds, owner, repo,
-                env("CLAIM_WORK_WORKFLOW", "claim-work.yml"),
-                env("CLAIM_WORK_REF", "main"));
+        return new RepoCoordinates(owner, repo);
     }
 
-    /** The real transport. Not exercised by the qualification: the sandbox has no network. */
-    public static Transport httpTransport() {
-        HttpClient client = HttpClient.newBuilder()
-                .connectTimeout(Duration.ofSeconds(15))
-                .build();
-        return (url, headers, body) -> {
-            HttpRequest.Builder b = HttpRequest.newBuilder(URI.create(url))
-                    .timeout(Duration.ofSeconds(30))
-                    .POST(HttpRequest.BodyPublishers.ofString(body, StandardCharsets.UTF_8));
-            for (Map.Entry<String, String> h : headers.entrySet()) {
-                b = b.header(h.getKey(), h.getValue());
-            }
-            HttpResponse<String> r = client.send(b.build(), HttpResponse.BodyHandlers.ofString());
-            return new Response(r.statusCode(), r.body());
-        };
+    record RepoCoordinates(String owner, String repo) { }
+
+    static boolean validDispatchId(String id) {
+        if (id == null || id.isBlank() || id.length() > 128) return false;
+        for (int i = 0; i < id.length(); i++) {
+            char c = id.charAt(i);
+            if (!(c >= 'A' && c <= 'Z') && !(c >= 'a' && c <= 'z')
+                    && !(c >= '0' && c <= '9') && c != '.' && c != '_' && c != '-') return false;
+        }
+        return true;
     }
 
-    @Override
-    public String execute(String claimId, String payloadDigest) throws Exception {
+    private static void requireClaim(String claimId, String payloadDigest) {
         if (claimId == null || claimId.isBlank()) throw new IllegalArgumentException("MISSING_CLAIM_ID");
-        if (payloadDigest == null || payloadDigest.isBlank()) {
-            throw new IllegalArgumentException("MISSING_PAYLOAD_DIGEST");
-        }
-        if (owner.isEmpty() || repo.isEmpty()) {
-            throw new IllegalStateException("DISPATCH_MISCONFIGURED_REPOSITORY");
-        }
-        if (workflowFile.isEmpty()) throw new IllegalStateException("DISPATCH_MISCONFIGURED_WORKFLOW");
-        if (ref.isEmpty()) throw new IllegalStateException("DISPATCH_MISCONFIGURED_REF");
-
-        String token = credentials.token();
-        if (token == null || token.isBlank()) throw new IllegalStateException("DISPATCH_NO_CREDENTIAL");
-
-        String url = API + "/repos/" + owner + "/" + repo
-                + "/actions/workflows/" + workflowFile + "/dispatches";
-        String body = "{\"ref\":\"" + esc(ref) + "\",\"inputs\":{"
-                + "\"claim_id\":\"" + esc(claimId) + "\","
-                + "\"payload_digest\":\"" + esc(payloadDigest) + "\"}}";
-
-        Map<String, String> headers = new LinkedHashMap<>();
-        headers.put("Accept", "application/vnd.github+json");
-        headers.put("Authorization", "Bearer " + token);
-        headers.put("X-GitHub-Api-Version", "2022-11-28");
-        headers.put("Content-Type", "application/json");
-
-        Response response;
-        try {
-            response = transport.post(url, headers, body);
-        } catch (Exception transportFailure) {
-            throw new IllegalStateException("DISPATCH_TRANSPORT_FAILURE:"
-                    + transportFailure.getClass().getSimpleName(), transportFailure);
-        }
-        if (response == null) throw new IllegalStateException("DISPATCH_TRANSPORT_FAILURE:NO_RESPONSE");
-        if (response.status() != 204) {
-            throw new IllegalStateException("DISPATCH_REJECTED_" + response.status());
-        }
-        return "ACTIONS_DISPATCHED workflow=" + workflowFile + " ref=" + ref
-                + " correlation=" + claimId;
+        if (payloadDigest == null || payloadDigest.isBlank()) throw new IllegalArgumentException("MISSING_PAYLOAD_DIGEST");
     }
-
-    private static String norm(String s) {
-        return s == null ? "" : s.trim();
-    }
-
+    private static String norm(String s) { return s == null ? "" : s.trim(); }
     private static String env(String key, String fallback) {
         String v = System.getenv(key);
         return v == null || v.isBlank() ? fallback : v.trim();
     }
-
     private static String esc(String s) {
         StringBuilder out = new StringBuilder(s.length() + 8);
         for (int i = 0; i < s.length(); i++) {
@@ -176,10 +199,7 @@ public final class ActionsDispatch implements ClaimLedger.Consumer.Dispatch {
                 case '\n' -> out.append("\\n");
                 case '\r' -> out.append("\\r");
                 case '\t' -> out.append("\\t");
-                default -> {
-                    if (c < 0x20) out.append(String.format("\\u%04x", (int) c));
-                    else out.append(c);
-                }
+                default -> { if (c < 0x20) out.append(String.format("\\u%04x", (int)c)); else out.append(c); }
             }
         }
         return out.toString();
