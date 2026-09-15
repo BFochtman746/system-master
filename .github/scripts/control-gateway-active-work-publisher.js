@@ -2,7 +2,7 @@
 
 async function main() {
   const { GitHubActiveWorkPublisher, GitHubActiveWorkRestTransport } = await import('../../control-gateway/src/github-active-work-publication.js');
-  const { transitionCurrentOperation, rebindAuthority } = await import('../../control-gateway/src/active-work-state.js');
+  const { transitionCurrentOperation, rebindAuthority, finalizeActiveWorkPacket, startNextLegalOperation } = await import('../../control-gateway/src/active-work-state.js');
   const fs = await import('node:fs');
   const path = await import('node:path');
 
@@ -34,7 +34,7 @@ async function main() {
   if (!/^[0-9a-f]{40}$/.test(request.expected_head_commit_sha || '')) throw new Error('ACTIVE_WORK_PUBLICATION_EXPECTED_HEAD_INVALID');
   if (!Number.isSafeInteger(request.expected_publication_revision) || request.expected_publication_revision < 1) throw new Error('ACTIVE_WORK_PUBLICATION_EXPECTED_REVISION_INVALID');
   if (!/^[0-9a-f]{64}$/.test(request.expected_packet_digest || '')) throw new Error('ACTIVE_WORK_PUBLICATION_EXPECTED_PACKET_DIGEST_INVALID');
-  if (!['TERMINATE_CURRENT', 'REBIND_AUTHORITY'].includes(request.action)) throw new Error('ACTIVE_WORK_PUBLICATION_ACTION_INVALID');
+  if (!['TERMINATE_CURRENT', 'REBIND_AUTHORITY', 'AUTHORIZE_AND_START_SUCCESSOR'].includes(request.action)) throw new Error('ACTIVE_WORK_PUBLICATION_ACTION_INVALID');
 
   const parts = String(request.repository || '').split('/');
   if (parts.length !== 2 || parts.some((part) => !part)) throw new Error('ACTIVE_WORK_PUBLICATION_REPOSITORY_INVALID');
@@ -56,12 +56,25 @@ async function main() {
       terminal_receipt: request.parameters.terminal_receipt,
       successor_candidates: request.parameters.successor_candidates
     });
-  } else {
+  } else if (request.action === 'REBIND_AUTHORITY') {
     exactKeys(request.parameters, ['receipt_id', 'authoritative_subject'], 'ACTIVE_WORK_PUBLICATION_REBIND_PARAMETERS');
     nextPacket = rebindAuthority(reconstructed.envelope.packet, {
       receipt_id: request.parameters.receipt_id,
       authoritative_subject: request.parameters.authoritative_subject
     });
+  } else {
+    exactKeys(request.parameters, ['receipt_id', 'authoritative_subject', 'allowed_paths_or_effects', 'successor_candidate'], 'ACTIVE_WORK_PUBLICATION_SUCCESSOR_PARAMETERS');
+    const rebound = rebindAuthority(reconstructed.envelope.packet, {
+      receipt_id: request.parameters.receipt_id,
+      authoritative_subject: request.parameters.authoritative_subject,
+      allowed_paths_or_effects: request.parameters.allowed_paths_or_effects
+    });
+    const staged = structuredClone(rebound);
+    staged.successor_candidates = [structuredClone(request.parameters.successor_candidate)];
+    const startable = finalizeActiveWorkPacket(staged);
+    if (startable.next_legal_operation.kind !== 'START_SUCCESSOR') throw new Error(`ACTIVE_WORK_PUBLICATION_SUCCESSOR_NOT_STARTABLE:${startable.next_legal_operation.kind}`);
+    if (startable.next_legal_operation.operation_id !== request.parameters.successor_candidate.operation_id) throw new Error('ACTIVE_WORK_PUBLICATION_SUCCESSOR_ID_MISMATCH');
+    nextPacket = startNextLegalOperation(startable);
   }
 
   const result = await publisher.publish(nextPacket, {
