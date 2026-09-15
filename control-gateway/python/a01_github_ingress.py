@@ -28,6 +28,7 @@ A01_POLICY_PATH = "qualification/a01/a01-policy.json"
 A01_REGISTRY_PATH = "qualification/a01/registry.json"
 READY_STATES = {"READY"}
 NON_EXECUTABLE_OBLIGATION_STATES = {"CLOSED", "HOLD", "BLOCKED", "SUPERSEDED", "CANCELLED"}
+SHARED_OWNER_PATHS = {"SYSTEM_MASTER/SHARED_INFRASTRUCTURE", "SYSTEM_MASTER/SHARED_INFRASTRUCTURE/A01"}
 SUPPORTED_EXECUTOR = "A01_CONTROL_PLANE_QUALIFICATION"
 
 
@@ -381,6 +382,9 @@ def validate_a01_execution_envelope(
         raise IngressError("already-granted A-01 admission receipt is required")
     _required_string(receipt.get("admission_id"), "admission_id")
     _required_string(receipt.get("request_digest"), "request_digest")
+    task_id = _required_string(receipt.get("task_id"), "admission task_id")
+    if task_id != obligation_id:
+        raise IngressError("A-01 admission task_id differs from current obligation")
     if receipt.get("decision") != "GRANTED":
         raise IngressError("A-01 admission was not granted")
     if receipt.get("repository") != repository_full_name:
@@ -422,12 +426,6 @@ def validate_a01_execution_envelope(
         raise IngressError("coordination resource_key must bind the exact owner lane")
     if contract.get("max_concurrency") != 1:
         raise IngressError("coordination max_concurrency must preserve one mutation claim per owner lane")
-
-    task_id = receipt.get("task_id")
-    if task_id is not None and not isinstance(task_id, str):
-        raise IngressError("admission task_id must be a string when present")
-    if not obligation_id:
-        raise IngressError("current obligation identity is required")
 
     return handoff, contract
 
@@ -524,8 +522,11 @@ class Ingress:
             obligation_index = self._obligation_index(obligations)
             owner_heads = obligations.get("owner_head_snapshot")
             owner_files = second_shift.get("owner_files")
+            coverage_routes = second_shift.get("coverage_routes")
             if not isinstance(owner_heads, dict) or not isinstance(owner_files, dict):
                 raise IngressError("owner head snapshot or Second Shift owner_files is invalid")
+            if not isinstance(coverage_routes, dict):
+                raise IngressError("Second Shift coverage_routes is invalid")
             if set(owner_files) != set(owner_heads):
                 raise IngressError("Second Shift owner coverage differs from obligation owner-head snapshot")
 
@@ -585,7 +586,14 @@ class Ingress:
                     if obligation is None:
                         result.skipped.append({"source_delegation_id": delegation.get("delegation_id"), "reason": "MISSING_CURRENT_OBLIGATION"})
                         continue
-                    if obligation.get("owner_path") not in (owner_path, "SYSTEM_MASTER/SHARED_INFRASTRUCTURE", "SYSTEM_MASTER/SHARED_INFRASTRUCTURE/A01"):
+                    obligation_owner = obligation.get("owner_path")
+                    owner_matches = obligation_owner == owner_path
+                    if obligation_owner in SHARED_OWNER_PATHS:
+                        owner_matches = (
+                            obligation.get("administrative_owner") == owner_path
+                            and coverage_routes.get(obligation_owner) == lane
+                        )
+                    if not owner_matches:
                         result.skipped.append({"source_delegation_id": delegation.get("delegation_id"), "reason": "OBLIGATION_OWNER_MISMATCH"})
                         continue
                     if obligation.get("state") in NON_EXECUTABLE_OBLIGATION_STATES:
