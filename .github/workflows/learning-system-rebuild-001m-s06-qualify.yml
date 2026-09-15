@@ -1,0 +1,63 @@
+name: Learning 001M-S06 Qualification
+
+on:
+  push:
+    branches:
+      - learning/system-rebuild-001m-s06-learning-effectiveness-20260912
+    paths:
+      - learning/lab/learning_lab/learning_effectiveness.py
+      - learning/lab/learning_lab/__init__.py
+      - learning/lab/tests/test_learning_effectiveness_s06.py
+      - learning/lab/tests/test_learning_effectiveness_s06_hardening.py
+      - qualification/learning/rebuild/LEARNING-SYSTEM-REBUILD-001M-S06-96CASE-QUALIFICATION-CONTRACT.json
+      - .github/scripts/learning-system-rebuild-001m-s06-qualify.py
+      - .github/workflows/learning-system-rebuild-001m-s06-qualify.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Verify exact subject
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Syntax check S06 runtime and qualification code
+        run: |
+          python -m py_compile \
+            learning/lab/learning_lab/learning_effectiveness.py \
+            learning/lab/tests/test_learning_effectiveness_s06.py \
+            learning/lab/tests/test_learning_effectiveness_s06_hardening.py \
+            .github/scripts/learning-system-rebuild-001m-s06-qualify.py
+
+      - name: Run S06 isolated, predecessor, and cumulative qualification
+        shell: bash
+        run: |
+          set -euo pipefail
+          python .github/scripts/learning-system-rebuild-001m-s06-qualify.py 2>&1 | tee learning-system-rebuild-001m-s06-result.json
+
+      - name: Upload exact-subject qualification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: learning-system-rebuild-001m-s06-${{ github.sha }}
+          path: learning-system-rebuild-001m-s06-result.json
+          if-no-files-found: error
+          retention-days: 90
