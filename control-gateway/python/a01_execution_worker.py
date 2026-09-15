@@ -6,6 +6,10 @@ materialized in the supervisor dispatch outbox, keeps their leases alive under t
 fence, persists idempotent execution results, terminalizes the claim, performs fenced
 crash recovery for locally executable dispatches, and returns control to the scheduler
 for the next dependency-valid continuation.
+
+Execution ownership is deliberately separate from claim fencing. A claim fence protects
+lane authority; an execution generation plus owner token protects one concrete executor
+attempt. Stale generations may never mutate a terminal result.
 """
 
 from __future__ import annotations
@@ -16,9 +20,11 @@ import datetime as dt
 import hashlib
 import json
 import os
+import signal
 import subprocess
 import sys
 import time
+import uuid
 from pathlib import Path
 from typing import Any, Callable, Optional
 
@@ -36,12 +42,19 @@ from tools.second_shift_supervisor_v2 import (
     utcnow,
 )
 
-EXECUTION_WORKER_PROTOCOL = "control-gateway.a01-execution-worker.v1"
+EXECUTION_WORKER_PROTOCOL = "control-gateway.a01-execution-worker.v2"
 FINAL_RESULT_STATES = {"SUCCEEDED", "FAILED", "AUTHORITY_LOST"}
 RESUMABLE_RESULT_STATES = {"RUNNING", "RESULT_READY"}
+REPLAY_SAFE = "REPLAY_SAFE"
+RECONCILE_REQUIRED = "RECONCILE_REQUIRED"
+RECOVERY_POLICIES = {REPLAY_SAFE, RECONCILE_REQUIRED}
 
 
 class ExecutionWorkerError(RuntimeError):
+    pass
+
+
+class ExecutionBusy(ExecutionWorkerError):
     pass
 
 
@@ -63,11 +76,13 @@ class ExecutionContext:
     fencing_token: int
     idempotency_key: str
     delegation_id: str
+    execution_generation: int
+    execution_owner: str
+    attempt_count: int
 
     def renew(self, checkpoint_pointer: Optional[str] = None, now: Optional[dt.datetime] = None) -> str:
-        return self.worker.renew_lease(
-            self.lease_id,
-            self.fencing_token,
+        return self.worker._renew_execution_lease(
+            self,
             checkpoint_pointer=checkpoint_pointer,
             now=now,
         )
@@ -85,14 +100,11 @@ def _digest(value: Any) -> str:
 
 
 class A01ExecutionWorker:
-    """Consume authorized dispatches and execute them under durable lease/fence state.
+    """Consume admitted dispatches under durable claim and execution ownership.
 
-    Executor functions are required to be idempotent for the supplied idempotency_key.
-    The built-in A-01 qualification executor satisfies this by executing only the
-    registered, no-post-action overnight qualification path. Recovery never invents a
-    new claim or admission identity: it rotates fencing authority on the existing
-    lease/dispatch identity so an old worker is rejected while the same durable work
-    can resume.
+    Claim fencing prevents stale lane authority. Execution generation prevents two
+    processes sharing the same valid claim fence from executing or publishing the same
+    dispatch concurrently. Recovery rotates both authorities before work can resume.
     """
 
     def __init__(
@@ -102,6 +114,8 @@ class A01ExecutionWorker:
         root: Optional[Path] = None,
         scheduler: Optional[A01NightScheduler] = None,
         executors: Optional[dict[str, Executor]] = None,
+        executor_recovery_policy: Optional[dict[str, str]] = None,
+        worker_instance_id: Optional[str] = None,
         lease_seconds: int = 300,
         renew_seconds: int = 30,
         heartbeat_sla_seconds: int = 300,
@@ -124,11 +138,25 @@ class A01ExecutionWorker:
         self.heartbeat_sla_seconds = heartbeat_sla_seconds
         self.evidence_root = (evidence_root or (Path(store.db_path).resolve().parent / "execution-evidence")).resolve()
         self.clock = clock
+        self.worker_instance_id = worker_instance_id or f"worker-{uuid.uuid4().hex}"
         self.executors: dict[str, Executor] = {
             "A01_CONTROL_PLANE_QUALIFICATION": self._execute_a01_qualification,
         }
+        self.executor_recovery_policy: dict[str, str] = {
+            "A01_CONTROL_PLANE_QUALIFICATION": REPLAY_SAFE,
+        }
         if executors:
             self.executors.update(executors)
+            # Injected executors are an explicit code-level trust boundary. Existing
+            # test executors depend on replay semantics; production executors should
+            # supply an explicit policy when registered.
+            for kind in executors:
+                self.executor_recovery_policy.setdefault(kind, REPLAY_SAFE)
+        if executor_recovery_policy:
+            for kind, policy in executor_recovery_policy.items():
+                if policy not in RECOVERY_POLICIES:
+                    raise ValueError(f"unsupported recovery policy for {kind}: {policy}")
+                self.executor_recovery_policy[kind] = policy
         self._init_schema()
 
     def _init_schema(self) -> None:
@@ -146,6 +174,10 @@ class A01ExecutionWorker:
                   state TEXT NOT NULL,
                   terminal_state TEXT,
                   attempt_count INTEGER NOT NULL DEFAULT 0,
+                  execution_generation INTEGER NOT NULL DEFAULT 0,
+                  execution_owner TEXT,
+                  recovery_policy TEXT NOT NULL DEFAULT 'RECONCILE_REQUIRED',
+                  owner_acquired_at TEXT,
                   started_at TEXT,
                   finished_at TEXT,
                   updated_at TEXT NOT NULL,
@@ -155,9 +187,32 @@ class A01ExecutionWorker:
                 )
                 """
             )
+            columns = {str(row["name"]) for row in c.execute("PRAGMA table_info(night_execution_results)").fetchall()}
+            migrations = {
+                "execution_generation": "INTEGER NOT NULL DEFAULT 0",
+                "execution_owner": "TEXT",
+                "recovery_policy": "TEXT NOT NULL DEFAULT 'RECONCILE_REQUIRED'",
+                "owner_acquired_at": "TEXT",
+            }
+            for name, declaration in migrations.items():
+                if name not in columns:
+                    c.execute(f"ALTER TABLE night_execution_results ADD COLUMN {name} {declaration}")
+            c.execute("CREATE INDEX IF NOT EXISTS ix_night_execution_results_state ON night_execution_results(state)")
             c.execute(
-                "CREATE INDEX IF NOT EXISTS ix_night_execution_results_state ON night_execution_results(state)"
+                "CREATE INDEX IF NOT EXISTS ix_night_execution_results_owner ON night_execution_results(dispatch_id,execution_generation,execution_owner)"
             )
+
+    def _work_identity_digest(self, bundle: dict[str, Any]) -> str:
+        return _digest(
+            {
+                "dispatch_id": bundle["dispatch_id"],
+                "lease_id": bundle["lease_id"],
+                "lane": bundle["lane"],
+                "idempotency_key": bundle["idempotency_key"],
+                "executor_kind": bundle["executor_kind"],
+                "payload": bundle["payload_envelope"],
+            }
+        )
 
     def _dispatch_bundle(self, dispatch_id: str) -> dict[str, Any]:
         row = self.store.conn.execute(
@@ -175,19 +230,7 @@ class A01ExecutionWorker:
             raise ExecutionWorkerError("unknown dispatch id")
         bundle = dict(row)
         bundle["payload_envelope"] = json.loads(bundle["payload_json"])
-        # Fencing generation is deliberately not part of work identity. Recovery
-        # rotates the fence while preserving the same admitted dispatch/idempotency
-        # identity, so the durable result must remain addressable across that rotation.
-        bundle["input_digest"] = _digest(
-            {
-                "dispatch_id": bundle["dispatch_id"],
-                "lease_id": bundle["lease_id"],
-                "lane": bundle["lane"],
-                "idempotency_key": bundle["idempotency_key"],
-                "executor_kind": bundle["executor_kind"],
-                "payload": bundle["payload_envelope"],
-            }
-        )
+        bundle["input_digest"] = self._work_identity_digest(bundle)
         return bundle
 
     def _result_row(self, dispatch_id: str) -> Optional[dict[str, Any]]:
@@ -205,6 +248,7 @@ class A01ExecutionWorker:
         lease_seconds: Optional[int] = None,
         now: Optional[dt.datetime] = None,
     ) -> str:
+        """Renew only claim authority. Execution paths use _renew_execution_lease."""
         now = now or self.clock()
         ttl = self.lease_seconds if lease_seconds is None else lease_seconds
         if ttl < 30 or ttl > 3600:
@@ -233,30 +277,106 @@ class A01ExecutionWorker:
             )
         return iso(expires)
 
+    def _assert_execution_owner(self, c: Any, context: ExecutionContext) -> dict[str, Any]:
+        row = c.execute(
+            "SELECT * FROM night_execution_results WHERE dispatch_id=?",
+            (context.dispatch_id,),
+        ).fetchone()
+        if row is None:
+            raise StaleWorker("execution result identity is missing")
+        result = dict(row)
+        if result["state"] in FINAL_RESULT_STATES:
+            raise StaleWorker("execution is already terminal")
+        if int(result["execution_generation"]) != int(context.execution_generation):
+            raise StaleWorker("execution generation is stale")
+        if result["execution_owner"] != context.execution_owner:
+            raise StaleWorker("execution owner is stale")
+        if int(result["fencing_token"]) != int(context.fencing_token):
+            raise StaleWorker("execution fence is stale")
+        return result
+
+    def _renew_execution_lease(
+        self,
+        context: ExecutionContext,
+        *,
+        checkpoint_pointer: Optional[str] = None,
+        lease_seconds: Optional[int] = None,
+        now: Optional[dt.datetime] = None,
+    ) -> str:
+        now = now or self.clock()
+        ttl = self.lease_seconds if lease_seconds is None else lease_seconds
+        if ttl < 30 or ttl > 3600:
+            raise ValueError("lease_seconds must be between 30 and 3600")
+        expires = now + dt.timedelta(seconds=ttl)
+        with self.store.tx() as c:
+            claim = self.store._claim(c, context.lease_id)
+            self.store._assert_live_worker(c, claim, context.fencing_token, now)
+            self._assert_execution_owner(c, context)
+            c.execute(
+                "UPDATE claims SET expires_at=?,heartbeat_at=?,checkpoint_pointer=COALESCE(?,checkpoint_pointer),status='RUNNING' WHERE lease_id=?",
+                (iso(expires), iso(now), checkpoint_pointer, context.lease_id),
+            )
+            self.store._event(
+                c,
+                claim["lane"],
+                "LEASE_RENEWED",
+                now,
+                delegation_id=claim["delegation_id"],
+                objective_id=claim["objective_id"],
+                lease_id=context.lease_id,
+                dispatch_id=context.dispatch_id,
+                idempotency_key=claim["idempotency_key"],
+                fencing_token=context.fencing_token,
+                control_head=claim["control_head"],
+                payload={
+                    "expires_at": iso(expires),
+                    "checkpoint_pointer": checkpoint_pointer,
+                    "execution_generation": context.execution_generation,
+                    "execution_owner": context.execution_owner,
+                },
+            )
+        return iso(expires)
+
+    def _recovery_policy(self, executor_kind: str) -> str:
+        return self.executor_recovery_policy.get(executor_kind, RECONCILE_REQUIRED)
+
     def _recoverable(self, claim: Any, outbox: Any, result: Optional[Any], now: dt.datetime) -> tuple[bool, str]:
         expired = parse_iso(claim["expires_at"]) <= now
         heartbeat_stale = (now - parse_iso(claim["heartbeat_at"])).total_seconds() > self.heartbeat_sla_seconds
         if not expired and not heartbeat_stale:
             return False, ""
         if outbox["executor_kind"] not in self.executors:
-            return False, ""
+            return False, "UNSUPPORTED_EXECUTOR"
         if outbox["state"] not in ("PENDING", "DISPATCHED"):
-            return False, ""
+            return False, "OUTBOX_NOT_EXECUTABLE"
         expected_local_run = f"local:{outbox['dispatch_id']}"
         if outbox["external_run_id"] not in (None, expected_local_run):
-            return False, ""
-        if result is not None and result["state"] in FINAL_RESULT_STATES:
-            return False, ""
+            return False, "EXTERNAL_RUN_ID_MISMATCH"
+        if int(outbox["fencing_token"]) != int(claim["fencing_token"]):
+            return False, "OUTBOX_FENCE_MISMATCH"
+        if result is not None:
+            if result["state"] in FINAL_RESULT_STATES:
+                return False, "RESULT_ALREADY_TERMINAL"
+            if result["input_digest"] != outbox["expected_input_digest"]:
+                return False, "RESULT_INPUT_DIGEST_MISMATCH"
+            if int(result["fencing_token"]) != int(claim["fencing_token"]):
+                return False, "RESULT_FENCE_MISMATCH"
+            if result["state"] == "RUNNING" and result["recovery_policy"] != REPLAY_SAFE:
+                return False, "RECONCILIATION_REQUIRED"
         return True, "LEASE_EXPIRED" if expired else "HEARTBEAT_STALE"
 
-    def _recover_local_claims(self, now: dt.datetime) -> list[dict[str, Any]]:
+    def _recover_local_claims(self, now: dt.datetime) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
         resumed: list[dict[str, Any]] = []
+        blocked: list[dict[str, Any]] = []
         with self.store.tx() as c:
             rows = c.execute(
                 """
                 SELECT c.*, o.state AS outbox_state, o.executor_kind, o.external_run_id,
-                       o.fencing_token AS outbox_fencing_token,
-                       r.state AS result_state, r.input_digest AS result_input_digest
+                       o.fencing_token AS outbox_fencing_token, o.payload_json,
+                       r.state AS result_state, r.input_digest AS result_input_digest,
+                       r.fencing_token AS result_fencing_token,
+                       r.execution_generation AS result_execution_generation,
+                       r.recovery_policy AS result_recovery_policy
                 FROM claims c
                 JOIN dispatch_outbox o ON o.lease_id=c.lease_id
                 LEFT JOIN night_execution_results r ON r.dispatch_id=o.dispatch_id
@@ -265,15 +385,42 @@ class A01ExecutionWorker:
                 """
             ).fetchall()
             for row in rows:
+                payload_envelope = json.loads(row["payload_json"])
+                expected_input_digest = _digest(
+                    {
+                        "dispatch_id": row["dispatch_id"],
+                        "lease_id": row["lease_id"],
+                        "lane": row["lane"],
+                        "idempotency_key": row["idempotency_key"],
+                        "executor_kind": row["executor_kind"],
+                        "payload": payload_envelope,
+                    }
+                )
                 outbox = {
                     "dispatch_id": row["dispatch_id"],
                     "state": row["outbox_state"],
                     "executor_kind": row["executor_kind"],
                     "external_run_id": row["external_run_id"],
+                    "fencing_token": row["outbox_fencing_token"],
+                    "expected_input_digest": expected_input_digest,
                 }
-                result = None if row["result_state"] is None else {"state": row["result_state"]}
+                result = None
+                if row["result_state"] is not None:
+                    result = {
+                        "state": row["result_state"],
+                        "input_digest": row["result_input_digest"],
+                        "fencing_token": row["result_fencing_token"],
+                        "execution_generation": row["result_execution_generation"],
+                        "recovery_policy": row["result_recovery_policy"],
+                    }
                 recoverable, reason = self._recoverable(row, outbox, result, now)
                 if not recoverable:
+                    expired_or_stale = (
+                        parse_iso(row["expires_at"]) <= now
+                        or (now - parse_iso(row["heartbeat_at"])).total_seconds() > self.heartbeat_sla_seconds
+                    )
+                    if expired_or_stale and reason:
+                        blocked.append({"lease_id": row["lease_id"], "dispatch_id": row["dispatch_id"], "reason": reason})
                     continue
                 lane = self.store._lane(c, row["lane"])
                 active = self.store._active_claim(c, row["lane"])
@@ -298,10 +445,16 @@ class A01ExecutionWorker:
                     "UPDATE dispatch_outbox SET fencing_token=?,updated_at=? WHERE dispatch_id=?",
                     (new_fence, iso(now), row["dispatch_id"]),
                 )
-                c.execute(
-                    "UPDATE night_execution_results SET fencing_token=?,updated_at=? WHERE dispatch_id=? AND state IN ('RUNNING','RESULT_READY')",
-                    (new_fence, iso(now), row["dispatch_id"]),
-                )
+                if result is not None:
+                    c.execute(
+                        """
+                        UPDATE night_execution_results
+                        SET fencing_token=?,execution_generation=execution_generation+1,
+                            execution_owner=NULL,owner_acquired_at=NULL,updated_at=?
+                        WHERE dispatch_id=? AND state IN ('RUNNING','RESULT_READY')
+                        """,
+                        (new_fence, iso(now), row["dispatch_id"]),
+                    )
                 self.store._event(
                     c,
                     row["lane"],
@@ -319,6 +472,7 @@ class A01ExecutionWorker:
                         "previous_fencing_token": int(row["fencing_token"]),
                         "expires_at": iso(expires),
                         "identity_preserved": True,
+                        "execution_generation_rotated": result is not None,
                     },
                 )
                 resumed.append(
@@ -331,13 +485,11 @@ class A01ExecutionWorker:
                         "reason": reason,
                     }
                 )
-        return resumed
+        return resumed, blocked
 
     def recover(self, now: Optional[dt.datetime] = None) -> dict[str, Any]:
         now = now or self.clock()
-        resumed = self._recover_local_claims(now)
-        # Anything not safely resumable by this local worker keeps the supervisor's
-        # fail-closed recovery semantics and is terminally fenced stale.
+        resumed, blockers = self._recover_local_claims(now)
         recovered = self.store.recover(now=now, heartbeat_sla_seconds=self.heartbeat_sla_seconds)
         stale = set(recovered["stale_leases"])
         if stale:
@@ -347,49 +499,127 @@ class A01ExecutionWorker:
                     f"""
                     UPDATE night_execution_results
                     SET state='AUTHORITY_LOST',terminal_state='STALE',finished_at=?,updated_at=?,
-                        error_class='StaleWorker',error_message='lease recovered as stale before terminal result commit'
+                        execution_owner=NULL,error_class='StaleWorker',
+                        error_message='lease recovered as stale before terminal result commit'
                     WHERE lease_id IN ({placeholders}) AND state IN ('RUNNING','RESULT_READY')
                     """,
                     (iso(now), iso(now), *sorted(stale)),
                 )
         self.scheduler.reconcile(now=now)
-        return {**recovered, "resumed_leases": resumed}
+        return {**recovered, "resumed_leases": resumed, "recovery_blockers": blockers}
 
     def _ensure_execution_record(self, bundle: dict[str, Any], now: dt.datetime) -> dict[str, Any]:
+        """Compatibility helper for deterministic crash fixtures; does not claim an owner."""
         existing = self._result_row(bundle["dispatch_id"])
         if existing is not None:
             if existing["input_digest"] != bundle["input_digest"]:
                 raise Conflict("dispatch result identity collision")
-            if int(existing["fencing_token"]) != int(bundle["fencing_token"]):
-                with self.store.tx() as c:
-                    c.execute(
-                        "UPDATE night_execution_results SET fencing_token=?,updated_at=? WHERE dispatch_id=? AND state IN ('RUNNING','RESULT_READY')",
-                        (int(bundle["fencing_token"]), iso(now), bundle["dispatch_id"]),
-                    )
-                existing = self._result_row(bundle["dispatch_id"])
-            return existing or {}
+            return existing
+        policy = self._recovery_policy(bundle["executor_kind"])
         with self.store.tx() as c:
             c.execute(
                 """
                 INSERT INTO night_execution_results(
                   dispatch_id,lease_id,lane,idempotency_key,fencing_token,executor_kind,input_digest,
-                  state,attempt_count,started_at,updated_at
-                ) VALUES(?,?,?,?,?,?,?,?,?,?,?)
+                  state,attempt_count,execution_generation,execution_owner,recovery_policy,
+                  started_at,updated_at
+                ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)
                 """,
                 (
                     bundle["dispatch_id"], bundle["lease_id"], bundle["lane"], bundle["idempotency_key"],
                     int(bundle["fencing_token"]), bundle["executor_kind"], bundle["input_digest"],
-                    "RUNNING", 0, iso(now), iso(now),
+                    "RUNNING", 0, 0, None, policy, iso(now), iso(now),
                 ),
             )
         return self._result_row(bundle["dispatch_id"]) or {}
 
     def _mark_attempt(self, dispatch_id: str, now: dt.datetime) -> None:
+        """Compatibility helper used by crash fixtures."""
         with self.store.tx() as c:
             c.execute(
-                "UPDATE night_execution_results SET attempt_count=attempt_count+1,state='RUNNING',updated_at=? WHERE dispatch_id=?",
+                "UPDATE night_execution_results SET attempt_count=attempt_count+1,state='RUNNING',updated_at=? WHERE dispatch_id=? AND state='RUNNING'",
                 (iso(now), dispatch_id),
             )
+
+    def _claim_execution(self, bundle: dict[str, Any], now: dt.datetime) -> dict[str, Any]:
+        with self.store.tx() as c:
+            claim = self.store._claim(c, bundle["lease_id"])
+            self.store._assert_live_worker(c, claim, int(bundle["fencing_token"]), now)
+            row = c.execute(
+                "SELECT * FROM night_execution_results WHERE dispatch_id=?",
+                (bundle["dispatch_id"],),
+            ).fetchone()
+            if row is None:
+                policy = self._recovery_policy(bundle["executor_kind"])
+                c.execute(
+                    """
+                    INSERT INTO night_execution_results(
+                      dispatch_id,lease_id,lane,idempotency_key,fencing_token,executor_kind,input_digest,
+                      state,attempt_count,execution_generation,execution_owner,recovery_policy,
+                      owner_acquired_at,started_at,updated_at
+                    ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                    """,
+                    (
+                        bundle["dispatch_id"], bundle["lease_id"], bundle["lane"], bundle["idempotency_key"],
+                        int(bundle["fencing_token"]), bundle["executor_kind"], bundle["input_digest"],
+                        "RUNNING", 1, 1, self.worker_instance_id, policy,
+                        iso(now), iso(now), iso(now),
+                    ),
+                )
+            else:
+                current = dict(row)
+                if current["input_digest"] != bundle["input_digest"]:
+                    raise Conflict("dispatch result identity collision")
+                if current["state"] in FINAL_RESULT_STATES:
+                    return current
+                if int(current["fencing_token"]) != int(bundle["fencing_token"]):
+                    raise StaleWorker("execution result fence does not match live claim")
+                owner = current["execution_owner"]
+                if owner not in (None, self.worker_instance_id):
+                    raise ExecutionBusy(
+                        f"dispatch {bundle['dispatch_id']} is owned by another execution worker"
+                    )
+                if owner is None:
+                    generation = max(1, int(current["execution_generation"]))
+                    attempt_increment = 1 if current["state"] == "RUNNING" else 0
+                    c.execute(
+                        """
+                        UPDATE night_execution_results
+                        SET execution_generation=?,execution_owner=?,owner_acquired_at=?,
+                            attempt_count=attempt_count+?,updated_at=?
+                        WHERE dispatch_id=? AND execution_owner IS NULL
+                          AND execution_generation=? AND state IN ('RUNNING','RESULT_READY')
+                        """,
+                        (
+                            generation, self.worker_instance_id, iso(now), attempt_increment,
+                            iso(now), bundle["dispatch_id"], int(current["execution_generation"]),
+                        ),
+                    )
+                    if c.execute("SELECT changes()").fetchone()[0] != 1:
+                        raise ExecutionBusy("execution ownership changed during claim")
+            claimed = c.execute(
+                "SELECT * FROM night_execution_results WHERE dispatch_id=?",
+                (bundle["dispatch_id"],),
+            ).fetchone()
+            if claimed is None:
+                raise ExecutionWorkerError("execution ownership claim disappeared")
+            claimed_dict = dict(claimed)
+            if claimed_dict["state"] not in FINAL_RESULT_STATES and claimed_dict["execution_owner"] != self.worker_instance_id:
+                raise ExecutionBusy("execution ownership was not acquired")
+            return claimed_dict
+
+    def _context(self, bundle: dict[str, Any], row: dict[str, Any]) -> ExecutionContext:
+        return ExecutionContext(
+            worker=self,
+            dispatch_id=bundle["dispatch_id"],
+            lease_id=bundle["lease_id"],
+            fencing_token=int(bundle["fencing_token"]),
+            idempotency_key=bundle["idempotency_key"],
+            delegation_id=bundle["delegation_id"],
+            execution_generation=int(row["execution_generation"]),
+            execution_owner=str(row["execution_owner"]),
+            attempt_count=int(row["attempt_count"]),
+        )
 
     def _stage_result(
         self,
@@ -399,6 +629,7 @@ class A01ExecutionWorker:
         result: dict[str, Any],
         error: Optional[BaseException],
         now: dt.datetime,
+        context: Optional[ExecutionContext] = None,
     ) -> dict[str, Any]:
         if terminal_state not in ("COMPLETED", "BLOCKED"):
             raise ValueError("worker terminal state must be COMPLETED or BLOCKED")
@@ -412,31 +643,77 @@ class A01ExecutionWorker:
             "idempotency_key": bundle["idempotency_key"],
             "result": result,
         }
+        if context is not None:
+            terminal_payload["execution_generation"] = context.execution_generation
+            terminal_payload["attempt_count"] = context.attempt_count
         if error is not None:
             terminal_payload["error"] = {"class": error_class, "message": error_message}
+        with self.store.tx() as c:
+            if context is None:
+                # Controlled crash-fixture path: only an unowned RUNNING row may be staged.
+                c.execute(
+                    """
+                    UPDATE night_execution_results
+                    SET state='RESULT_READY',terminal_state=?,result_json=?,error_class=?,error_message=?,updated_at=?
+                    WHERE dispatch_id=? AND state='RUNNING' AND execution_owner IS NULL
+                    """,
+                    (
+                        terminal_state, json.dumps(terminal_payload, sort_keys=True), error_class,
+                        error_message, iso(now), bundle["dispatch_id"],
+                    ),
+                )
+            else:
+                self._assert_execution_owner(c, context)
+                c.execute(
+                    """
+                    UPDATE night_execution_results
+                    SET state='RESULT_READY',terminal_state=?,result_json=?,error_class=?,error_message=?,updated_at=?
+                    WHERE dispatch_id=? AND state='RUNNING'
+                      AND execution_generation=? AND execution_owner=?
+                    """,
+                    (
+                        terminal_state, json.dumps(terminal_payload, sort_keys=True), error_class,
+                        error_message, iso(now), bundle["dispatch_id"], context.execution_generation,
+                        context.execution_owner,
+                    ),
+                )
+            if c.execute("SELECT changes()").fetchone()[0] != 1:
+                raise StaleWorker("execution ownership changed before result staging")
+        return terminal_payload
+
+    def _record_authority_loss_if_owned(
+        self,
+        context: ExecutionContext,
+        now: dt.datetime,
+        message: str,
+    ) -> bool:
         with self.store.tx() as c:
             c.execute(
                 """
                 UPDATE night_execution_results
-                SET state='RESULT_READY',terminal_state=?,result_json=?,error_class=?,error_message=?,updated_at=?
-                WHERE dispatch_id=?
+                SET state='AUTHORITY_LOST',terminal_state='STALE',finished_at=?,updated_at=?,
+                    execution_owner=NULL,error_class='StaleWorker',error_message=?
+                WHERE dispatch_id=? AND state IN ('RUNNING','RESULT_READY')
+                  AND execution_generation=? AND execution_owner=?
                 """,
                 (
-                    terminal_state,
-                    json.dumps(terminal_payload, sort_keys=True),
-                    error_class,
-                    error_message,
-                    iso(now),
-                    bundle["dispatch_id"],
+                    iso(now), iso(now), message, context.dispatch_id,
+                    context.execution_generation, context.execution_owner,
                 ),
             )
-        return terminal_payload
+            return c.execute("SELECT changes()").fetchone()[0] == 1
 
-    def _commit_staged_result(self, bundle: dict[str, Any], now: dt.datetime) -> dict[str, Any]:
-        row = self._result_row(bundle["dispatch_id"])
-        if row is None or row["state"] != "RESULT_READY" or not row["terminal_state"]:
-            raise ExecutionWorkerError("result is not staged for terminal commit")
-        payload = json.loads(row["result_json"] or "{}")
+    def _commit_staged_result(
+        self,
+        bundle: dict[str, Any],
+        now: dt.datetime,
+        context: ExecutionContext,
+    ) -> dict[str, Any]:
+        with self.store.tx() as c:
+            row = self._assert_execution_owner(c, context)
+            if row["state"] != "RESULT_READY" or not row["terminal_state"]:
+                raise ExecutionWorkerError("result is not staged for terminal commit")
+            payload = json.loads(row["result_json"] or "{}")
         try:
             self.store.terminal(
                 bundle["lease_id"],
@@ -446,23 +723,31 @@ class A01ExecutionWorker:
                 now=now,
             )
         except StaleWorker:
-            with self.store.tx() as c:
-                c.execute(
-                    """
-                    UPDATE night_execution_results
-                    SET state='AUTHORITY_LOST',terminal_state='STALE',finished_at=?,updated_at=?,
-                        error_class='StaleWorker',error_message='fencing authority lost before terminal result commit'
-                    WHERE dispatch_id=?
-                    """,
-                    (iso(now), iso(now), bundle["dispatch_id"]),
-                )
+            self._record_authority_loss_if_owned(
+                context, now, "fencing authority lost before terminal result commit"
+            )
             raise
         final = "SUCCEEDED" if row["terminal_state"] == "COMPLETED" else "FAILED"
         with self.store.tx() as c:
             c.execute(
-                "UPDATE night_execution_results SET state=?,finished_at=?,updated_at=? WHERE dispatch_id=?",
-                (final, iso(now), iso(now), bundle["dispatch_id"]),
+                """
+                UPDATE night_execution_results
+                SET state=?,finished_at=?,updated_at=?,execution_owner=NULL
+                WHERE dispatch_id=? AND state='RESULT_READY'
+                  AND execution_generation=? AND execution_owner=?
+                """,
+                (
+                    final, iso(now), iso(now), bundle["dispatch_id"],
+                    context.execution_generation, context.execution_owner,
+                ),
             )
+            if c.execute("SELECT changes()").fetchone()[0] != 1:
+                current = c.execute(
+                    "SELECT state FROM night_execution_results WHERE dispatch_id=?",
+                    (bundle["dispatch_id"],),
+                ).fetchone()
+                if current is None or current["state"] != final:
+                    raise StaleWorker("execution ownership changed before final result commit")
         self.scheduler.reconcile(now=now)
         return self._result_row(bundle["dispatch_id"]) or {}
 
@@ -482,27 +767,18 @@ class A01ExecutionWorker:
             raise Conflict("dispatch result identity collision")
         if existing is not None and existing["state"] in FINAL_RESULT_STATES:
             return existing
-        if existing is not None and existing["state"] == "RESULT_READY":
-            return self._commit_staged_result(bundle, now)
         if bundle["released_at"] is not None:
             raise StaleWorker("dispatch claim is already released without a committed worker result")
         if bundle["state"] not in ("PENDING", "DISPATCHED"):
             raise ExecutionWorkerError(f"dispatch is not executable from state {bundle['state']}")
-        self._ensure_execution_record(bundle, now)
-        self.renew_lease(
-            bundle["lease_id"], int(bundle["fencing_token"]),
-            checkpoint_pointer=f"execution:{dispatch_id}:starting", now=now,
-        )
+        claimed = self._claim_execution(bundle, now)
+        if claimed["state"] in FINAL_RESULT_STATES:
+            return claimed
+        context = self._context(bundle, claimed)
+        if claimed["state"] == "RESULT_READY":
+            return self._commit_staged_result(bundle, now, context)
+        context.renew(checkpoint_pointer=f"execution:{dispatch_id}:starting", now=now)
         self.store.mark_dispatched(dispatch_id, f"local:{dispatch_id}", now=now)
-        self._mark_attempt(dispatch_id, now)
-        context = ExecutionContext(
-            worker=self,
-            dispatch_id=dispatch_id,
-            lease_id=bundle["lease_id"],
-            fencing_token=int(bundle["fencing_token"]),
-            idempotency_key=bundle["idempotency_key"],
-            delegation_id=bundle["delegation_id"],
-        )
         try:
             payload = self._validate_payload_envelope(bundle)
             executor = self.executors.get(bundle["executor_kind"])
@@ -512,47 +788,30 @@ class A01ExecutionWorker:
             if not isinstance(result, dict):
                 raise ExecutionWorkerError("executor result must be an object")
             end = self.clock()
-            self.renew_lease(
-                bundle["lease_id"], int(bundle["fencing_token"]),
-                checkpoint_pointer=f"execution:{dispatch_id}:result-ready", now=end,
+            context.renew(checkpoint_pointer=f"execution:{dispatch_id}:result-ready", now=end)
+            self._stage_result(
+                bundle, terminal_state="COMPLETED", result=result, error=None, now=end, context=context
             )
-            self._stage_result(bundle, terminal_state="COMPLETED", result=result, error=None, now=end)
-            return self._commit_staged_result(bundle, end)
+            return self._commit_staged_result(bundle, end, context)
         except StaleWorker:
             lost_at = self.clock()
-            with self.store.tx() as c:
-                c.execute(
-                    """
-                    UPDATE night_execution_results
-                    SET state='AUTHORITY_LOST',terminal_state='STALE',finished_at=?,updated_at=?,
-                        error_class='StaleWorker',error_message='fencing authority lost during execution'
-                    WHERE dispatch_id=?
-                    """,
-                    (iso(lost_at), iso(lost_at), dispatch_id),
-                )
+            self._record_authority_loss_if_owned(context, lost_at, "fencing or execution authority lost during execution")
             raise
         except Exception as exc:
             failure_result = exc.result if isinstance(exc, WorkExecutionFailed) else {}
             failure_result = {**failure_result, "status": "BLOCKED"}
             failure_now = self.clock()
             try:
-                self.renew_lease(
-                    bundle["lease_id"], int(bundle["fencing_token"]),
-                    checkpoint_pointer=f"execution:{dispatch_id}:blocked", now=failure_now,
+                context.renew(checkpoint_pointer=f"execution:{dispatch_id}:blocked", now=failure_now)
+                self._stage_result(
+                    bundle, terminal_state="BLOCKED", result=failure_result, error=exc,
+                    now=failure_now, context=context,
                 )
-                self._stage_result(bundle, terminal_state="BLOCKED", result=failure_result, error=exc, now=failure_now)
-                return self._commit_staged_result(bundle, failure_now)
+                return self._commit_staged_result(bundle, failure_now, context)
             except StaleWorker:
-                with self.store.tx() as c:
-                    c.execute(
-                        """
-                        UPDATE night_execution_results
-                        SET state='AUTHORITY_LOST',terminal_state='STALE',finished_at=?,updated_at=?,
-                            error_class='StaleWorker',error_message='fencing authority lost while recording failure'
-                        WHERE dispatch_id=?
-                        """,
-                        (iso(failure_now), iso(failure_now), dispatch_id),
-                    )
+                self._record_authority_loss_if_owned(
+                    context, failure_now, "fencing or execution authority lost while recording failure"
+                )
                 raise
 
     def _live_dispatch_ids(self) -> list[str]:
@@ -583,7 +842,10 @@ class A01ExecutionWorker:
                 "scheduler": scheduler_tick,
                 "execution": None,
             }
-        result = self.consume_dispatch(live[0], now=now)
+        try:
+            result = self.consume_dispatch(live[0], now=now)
+        except ExecutionBusy:
+            result = {"dispatch_id": live[0], "state": "BUSY", "worker_instance_id": self.worker_instance_id}
         self.scheduler.reconcile(now=now)
         return {
             "protocol_version": EXECUTION_WORKER_PROTOCOL,
@@ -607,6 +869,44 @@ class A01ExecutionWorker:
         if not isinstance(value, str) or not value:
             raise WorkExecutionFailed(f"missing required qualification payload field: {name}")
         return value
+
+    def _attempt_evidence_dir(self, context: ExecutionContext) -> Path:
+        return self.evidence_root / context.dispatch_id / (
+            f"attempt-{context.attempt_count:04d}-generation-{context.execution_generation:04d}"
+        )
+
+    def _terminate_process_tree(self, proc: subprocess.Popen[Any]) -> None:
+        if proc.poll() is not None:
+            return
+        if os.name == "nt":
+            terminated = subprocess.run(
+                ["taskkill", "/PID", str(proc.pid), "/T", "/F"],
+                capture_output=True,
+                text=True,
+                shell=False,
+                timeout=15,
+            )
+            try:
+                proc.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                proc.kill()
+                proc.wait(timeout=5)
+            if terminated.returncode not in (0, 128) and proc.poll() is None:
+                raise WorkExecutionFailed(
+                    "failed to terminate A-01 qualification process tree",
+                    {"stdout": terminated.stdout, "stderr": terminated.stderr},
+                )
+            return
+        try:
+            os.killpg(proc.pid, signal.SIGTERM)
+            proc.wait(timeout=5)
+        except (ProcessLookupError, subprocess.TimeoutExpired):
+            if proc.poll() is None:
+                try:
+                    os.killpg(proc.pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+                proc.wait(timeout=5)
 
     def _execute_a01_qualification(self, payload: dict[str, Any], context: ExecutionContext) -> dict[str, Any]:
         if not isinstance(payload, dict):
@@ -642,8 +942,8 @@ class A01ExecutionWorker:
         not_after = handoff.get("not_after")
         if not not_before or not not_after:
             raise WorkExecutionFailed("overnight qualification requires an admitted not_before/not_after window")
-        evidence_dir = self.evidence_root / context.dispatch_id
-        evidence_dir.mkdir(parents=True, exist_ok=True)
+        evidence_dir = self._attempt_evidence_dir(context)
+        evidence_dir.mkdir(parents=True, exist_ok=False)
         env = os.environ.copy()
         env.update(
             {
@@ -662,9 +962,13 @@ class A01ExecutionWorker:
                 "A01_CONTROL_ROOT": str(self.root),
                 "A01_SUBJECT_ROOT": str(self.root),
                 "A01_EVIDENCE_DIR": str(evidence_dir),
-                "A01_ARTIFACT_NAME": f"{qualification_id}-{context.dispatch_id}-evidence",
+                "A01_ARTIFACT_NAME": (
+                    f"{qualification_id}-{context.dispatch_id}-a{context.attempt_count}-g{context.execution_generation}-evidence"
+                ),
                 "A01_IDEMPOTENCY_KEY": context.idempotency_key,
                 "A01_DISPATCH_ID": context.dispatch_id,
+                "A01_EXECUTION_GENERATION": str(context.execution_generation),
+                "A01_EXECUTION_ATTEMPT": str(context.attempt_count),
             }
         )
         script = self.root / ".github" / "scripts" / "a01-control-plane.js"
@@ -678,6 +982,7 @@ class A01ExecutionWorker:
             stderr=subprocess.PIPE,
             text=True,
             shell=False,
+            start_new_session=(os.name != "nt"),
         )
         stdout = ""
         stderr = ""
@@ -689,11 +994,7 @@ class A01ExecutionWorker:
                 except subprocess.TimeoutExpired:
                     context.renew(checkpoint_pointer=f"execution:{context.dispatch_id}:qualification-running")
         except StaleWorker:
-            proc.terminate()
-            try:
-                proc.wait(timeout=5)
-            except subprocess.TimeoutExpired:
-                proc.kill()
+            self._terminate_process_tree(proc)
             raise
         receipt_path = evidence_dir / "receipt.json"
         receipt = None
@@ -704,6 +1005,8 @@ class A01ExecutionWorker:
             "stdout_tail": stdout[-4000:],
             "stderr_tail": stderr[-4000:],
             "evidence_dir": str(evidence_dir),
+            "execution_generation": context.execution_generation,
+            "attempt_count": context.attempt_count,
             "receipt": receipt,
         }
         if proc.returncode != 0 or not isinstance(receipt, dict) or receipt.get("result_class") != "PASS":
@@ -740,7 +1043,7 @@ def _cli() -> int:
         while True:
             result = worker.run_once()
             print(json.dumps(result, sort_keys=True), flush=True)
-            if result["execution"] is None:
+            if result["execution"] is None or result["execution"].get("state") == "BUSY":
                 time.sleep(args.poll_seconds)
 
 
