@@ -21,6 +21,12 @@ public final class ControlGatewayClaimStateStoreTest {
         ambiguousDispatchNeverRedispatches();
         competingMutationIsCasConflict();
         missingAuthorityFailsClosedBeforeDispatch();
+        wrongAuthorityProtocolFailsClosedBeforeDispatch();
+        wrongAuthorityWorkstreamFailsClosedBeforeDispatch();
+        wrongAuthorityRepositoryFailsClosedBeforeDispatch();
+        oldShortPredecessorReceiptFailsClosedBeforeDispatch();
+        broadenedPathScopeFailsClosedBeforeDispatch();
+        broadenedEffectScopeFailsClosedBeforeDispatch();
         System.out.println();
         System.out.println("CONTROL-GATEWAY-CLAIM-STATE-STORE checks=" + checks + " failures=" + failures);
         if (failures > 0) { System.out.println("RESULT: FAIL"); System.exit(1); }
@@ -72,6 +78,54 @@ public final class ControlGatewayClaimStateStoreTest {
         eq("authority preflight performs no mutation", 0, http.postCalls);
     }
 
+    private static void wrongAuthorityProtocolFailsClosedBeforeDispatch() {
+        FakeTransport http = new FakeTransport();
+        http.authorityProtocol = "control-gateway.active-work.v0";
+        refusesAuthority(http, "wrong authority protocol fails closed",
+                "STATE_AUTHORITY_PROTOCOL_MISMATCH");
+    }
+
+    private static void wrongAuthorityWorkstreamFailsClosedBeforeDispatch() {
+        FakeTransport http = new FakeTransport();
+        http.authorityWorkstream = "SECOND-SHIFT-OTHER-WORKSTREAM";
+        refusesAuthority(http, "wrong authority workstream fails closed",
+                "STATE_AUTHORITY_WORKSTREAM_MISMATCH");
+    }
+
+    private static void wrongAuthorityRepositoryFailsClosedBeforeDispatch() {
+        FakeTransport http = new FakeTransport();
+        http.authorityRepository = "other/repo";
+        refusesAuthority(http, "wrong authority repository fails closed",
+                "STATE_AUTHORITY_REPOSITORY_MISMATCH");
+    }
+
+    private static void oldShortPredecessorReceiptFailsClosedBeforeDispatch() {
+        FakeTransport http = new FakeTransport();
+        http.authorityPredecessorReceipt = "SECOND-SHIFT-DISPATCH-DURABILITY-003-AUTH";
+        refusesAuthority(http, "old short predecessor receipt fails closed",
+                "STATE_AUTHORITY_PREDECESSOR_RECEIPT_MISMATCH");
+    }
+
+    private static void broadenedPathScopeFailsClosedBeforeDispatch() {
+        FakeTransport http = new FakeTransport();
+        http.allowedPathsJson = "[\"execution/claims/state/**\",\"execution/**\"]";
+        refusesAuthority(http, "broadened authority path scope fails closed",
+                "STATE_AUTHORITY_PATH_SCOPE_MISMATCH");
+    }
+
+    private static void broadenedEffectScopeFailsClosedBeforeDispatch() {
+        FakeTransport http = new FakeTransport();
+        http.allowedEffectsJson = "[\"SECOND_SHIFT_CLAIM_STATE_WRITE\",\"OTHER_WRITE\"]";
+        refusesAuthority(http, "broadened authority effect scope fails closed",
+                "STATE_AUTHORITY_EFFECT_SCOPE_MISMATCH");
+    }
+
+    private static void refusesAuthority(FakeTransport http, String label, String code) {
+        ControlGatewayClaimStateStore store = store(http, 1);
+        refuses(label, IllegalStateException.class, code, store::verifyStateRef);
+        eq(label + " before mutation", 0, http.postCalls);
+    }
+
     private static ControlGatewayClaimStateStore store(FakeTransport http, int polls) {
         return new ControlGatewayClaimStateStore(http, () -> "token", "owner", "repo",
                 "second-shift/execution-state", "execution/claims/state",
@@ -91,6 +145,13 @@ public final class ControlGatewayClaimStateStoreTest {
         int postCalls;
         String lastPostUrl;
         String lastPostBody;
+        String authorityProtocol = "control-gateway.active-work.v1";
+        String authorityWorkstream = "SECOND-SHIFT-DISPATCH-DURABILITY";
+        String authorityRepository = "owner/repo";
+        String authorityOperation = "SECOND-SHIFT-DISPATCH-DURABILITY-003";
+        String authorityPredecessorReceipt = "SECOND-SHIFT-DISPATCH-DURABILITY-003-AUTHORITY-BOOTSTRAP";
+        String allowedPathsJson = "[\"execution/claims/state/**\"]";
+        String allowedEffectsJson = "[\"SECOND_SHIFT_CLAIM_STATE_WRITE\"]";
 
         public ControlGatewayClaimStateStore.Response get(String url, Map<String, String> headers) {
             if (url.contains("/git/ref/heads/control-gateway-state/active-work/second-shift-dispatch-durability-003")) {
@@ -139,13 +200,14 @@ public final class ControlGatewayClaimStateStoreTest {
         }
         private String authorityJson() {
             return "{\"packet\":{"
-                    + "\"allowed_paths_or_effects\":{\"effects\":[\"SECOND_SHIFT_CLAIM_STATE_WRITE\"],\"paths\":[\"execution/claims/state/**\"]},"
+                    + "\"allowed_paths_or_effects\":{\"effects\":" + allowedEffectsJson + ",\"paths\":" + allowedPathsJson + "},"
                     + "\"authoritative_subject\":{\"algorithm\":\"sha1\",\"oid\":\"" + SUBJECT + "\"},"
                     + "\"authority_epoch\":1,\"branch_or_ref\":\"second-shift/execution-state\","
-                    + "\"current_operation\":{\"operation_id\":\"SECOND-SHIFT-DISPATCH-DURABILITY-003\","
-                    + "\"predecessor_receipt_id\":\"SECOND-SHIFT-DISPATCH-DURABILITY-003-AUTH\",\"state\":\"ACTIVE\"},"
+                    + "\"current_operation\":{\"operation_id\":\"" + authorityOperation + "\","
+                    + "\"predecessor_receipt_id\":\"" + authorityPredecessorReceipt + "\",\"state\":\"ACTIVE\"},"
                     + "\"github_admission_state\":\"ADMITTED\",\"mission_version\":\"SECOND-SHIFT-CONTROL-GATEWAY-CG-001/v1.0\","
-                    + "\"qualification_state\":\"PASSED\",\"workstream_id\":\"SECOND-SHIFT-DISPATCH-DURABILITY\"},"
+                    + "\"protocol_version\":\"" + authorityProtocol + "\",\"qualification_state\":\"PASSED\","
+                    + "\"repository\":\"" + authorityRepository + "\",\"workstream_id\":\"" + authorityWorkstream + "\"},"
                     + "\"packet_digest\":\"" + PACKET + "\"}";
         }
         private static String escape(String value) {

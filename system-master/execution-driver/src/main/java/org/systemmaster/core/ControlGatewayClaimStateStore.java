@@ -35,6 +35,14 @@ public final class ControlGatewayClaimStateStore implements DurableDispatchCoord
     private static final String API = "https://api.github.com";
     private static final String REQUEST_PROTOCOL = "control-gateway.github-mutation-request.v1";
     private static final String PLAN_PROTOCOL = "control-gateway.github-production-mutation-plan.v1";
+    private static final String ACTIVE_WORK_PROTOCOL = "control-gateway.active-work.v1";
+    private static final String CLAIM_STATE_MISSION_VERSION = "SECOND-SHIFT-CONTROL-GATEWAY-CG-001/v1.0";
+    private static final String CLAIM_STATE_WORKSTREAM = "SECOND-SHIFT-DISPATCH-DURABILITY";
+    private static final String CLAIM_STATE_OPERATION = "SECOND-SHIFT-DISPATCH-DURABILITY-003";
+    private static final String CLAIM_STATE_PREDECESSOR_RECEIPT =
+            "SECOND-SHIFT-DISPATCH-DURABILITY-003-AUTHORITY-BOOTSTRAP";
+    private static final Pattern SHA1 = Pattern.compile("[0-9a-f]{40}");
+    private static final Pattern SHA256 = Pattern.compile("[0-9a-f]{64}");
     private static final Pattern STRING_FIELD = Pattern.compile("\\\"([^\\\"]+)\\\"\\s*:\\s*(?:\\\"((?:\\\\.|[^\\\"\\\\])*)\\\"|(null))");
     private static final Pattern NUMBER_FIELD = Pattern.compile("\\\"([^\\\"]+)\\\"\\s*:\\s*(-?[0-9]+)");
 
@@ -232,33 +240,66 @@ public final class ControlGatewayClaimStateStore implements DurableDispatchCoord
         if (r.status() != 200) throw new IllegalStateException("STATE_AUTHORITY_READ_REJECTED_" + r.status());
         String envelope = decodeContentBody(r, "STATE_AUTHORITY_READ");
         String packet = objectField(envelope, "packet", "STATE_AUTHORITY_PACKET_MISSING");
+
+        if (!ACTIVE_WORK_PROTOCOL.equals(requiredString(packet, "protocol_version", "STATE_AUTHORITY_PROTOCOL_MISSING"))) {
+            throw new IllegalStateException("STATE_AUTHORITY_PROTOCOL_MISMATCH");
+        }
+        String mission = requiredString(packet, "mission_version", "STATE_AUTHORITY_MISSION_MISSING");
+        if (!CLAIM_STATE_MISSION_VERSION.equals(mission)) {
+            throw new IllegalStateException("STATE_AUTHORITY_MISSION_MISMATCH");
+        }
+        String workstream = requiredString(packet, "workstream_id", "STATE_AUTHORITY_WORKSTREAM_MISSING");
+        if (!CLAIM_STATE_WORKSTREAM.equals(workstream)) {
+            throw new IllegalStateException("STATE_AUTHORITY_WORKSTREAM_MISMATCH");
+        }
+        String repository = requiredString(packet, "repository", "STATE_AUTHORITY_REPOSITORY_MISSING");
+        if (!(owner + "/" + repo).equals(repository)) {
+            throw new IllegalStateException("STATE_AUTHORITY_REPOSITORY_MISMATCH");
+        }
         String target = requiredString(packet, "branch_or_ref", "STATE_AUTHORITY_TARGET_MISSING");
         if (!stateRef.equals(target)) throw new IllegalStateException("STATE_AUTHORITY_TARGET_MISMATCH");
+        long epoch = requiredLong(packet, "authority_epoch", "STATE_AUTHORITY_EPOCH_MISSING");
+        if (epoch < 1) throw new IllegalStateException("STATE_AUTHORITY_EPOCH_INVALID");
         if (!"PASSED".equals(requiredString(packet, "qualification_state", "STATE_AUTHORITY_QUALIFICATION_MISSING"))) {
             throw new IllegalStateException("STATE_AUTHORITY_NOT_QUALIFIED");
         }
         if (!"ADMITTED".equals(requiredString(packet, "github_admission_state", "STATE_AUTHORITY_ADMISSION_MISSING"))) {
             throw new IllegalStateException("STATE_AUTHORITY_NOT_ADMITTED");
         }
+
         String allowed = objectField(packet, "allowed_paths_or_effects", "STATE_AUTHORITY_SCOPE_MISSING");
-        if (!containsJsonString(allowed, root + "/**")) throw new IllegalStateException("STATE_AUTHORITY_PATH_SCOPE_MISSING");
-        if (!containsJsonString(allowed, writerEffect)) throw new IllegalStateException("STATE_AUTHORITY_EFFECT_SCOPE_MISSING");
+        requireExactSingleStringArray(allowed, "paths", root + "/**", "STATE_AUTHORITY_PATH_SCOPE_MISMATCH");
+        requireExactSingleStringArray(allowed, "effects", writerEffect, "STATE_AUTHORITY_EFFECT_SCOPE_MISMATCH");
+
         String current = objectField(packet, "current_operation", "STATE_AUTHORITY_OPERATION_MISSING");
         if (!"ACTIVE".equals(requiredString(current, "state", "STATE_AUTHORITY_OPERATION_STATE_MISSING"))) {
             throw new IllegalStateException("STATE_AUTHORITY_OPERATION_NOT_ACTIVE");
         }
+        String operation = requiredString(current, "operation_id", "STATE_AUTHORITY_OPERATION_ID_MISSING");
+        if (!CLAIM_STATE_OPERATION.equals(operation)) {
+            throw new IllegalStateException("STATE_AUTHORITY_OPERATION_MISMATCH");
+        }
+        String predecessorReceipt = requiredString(current, "predecessor_receipt_id",
+                "STATE_AUTHORITY_PREDECESSOR_RECEIPT_MISSING");
+        if (!CLAIM_STATE_PREDECESSOR_RECEIPT.equals(predecessorReceipt)) {
+            throw new IllegalStateException("STATE_AUTHORITY_PREDECESSOR_RECEIPT_MISMATCH");
+        }
+
         String subject = objectField(packet, "authoritative_subject", "STATE_AUTHORITY_SUBJECT_MISSING");
         if (!"sha1".equals(requiredString(subject, "algorithm", "STATE_AUTHORITY_SUBJECT_ALGORITHM_MISSING"))) {
             throw new IllegalStateException("STATE_AUTHORITY_SUBJECT_ALGORITHM_INVALID");
         }
-        return new Authority(head,
-                requiredString(packet, "mission_version", "STATE_AUTHORITY_MISSION_MISSING"),
-                requiredString(packet, "workstream_id", "STATE_AUTHORITY_WORKSTREAM_MISSING"),
-                requiredLong(packet, "authority_epoch", "STATE_AUTHORITY_EPOCH_MISSING"),
-                requiredString(envelope, "packet_digest", "STATE_AUTHORITY_PACKET_DIGEST_MISSING"),
-                requiredString(subject, "oid", "STATE_AUTHORITY_SUBJECT_OID_MISSING"),
-                requiredString(current, "operation_id", "STATE_AUTHORITY_OPERATION_ID_MISSING"),
-                requiredString(current, "predecessor_receipt_id", "STATE_AUTHORITY_PREDECESSOR_RECEIPT_MISSING"));
+        String subjectSha = requiredString(subject, "oid", "STATE_AUTHORITY_SUBJECT_OID_MISSING");
+        if (!SHA1.matcher(subjectSha).matches()) {
+            throw new IllegalStateException("STATE_AUTHORITY_SUBJECT_OID_INVALID");
+        }
+        String packetDigest = requiredString(envelope, "packet_digest", "STATE_AUTHORITY_PACKET_DIGEST_MISSING");
+        if (!SHA256.matcher(packetDigest).matches()) {
+            throw new IllegalStateException("STATE_AUTHORITY_PACKET_DIGEST_INVALID");
+        }
+
+        return new Authority(head, mission, workstream, epoch, packetDigest, subjectSha,
+                operation, predecessorReceipt);
     }
 
     private String mutationRequest(Authority a, String predecessor, String path, String mutationId) {
@@ -432,8 +473,12 @@ public final class ControlGatewayClaimStateStore implements DurableDispatchCoord
         throw new IllegalStateException(error);
     }
 
-    private static boolean containsJsonString(String json, String value) {
-        return json.contains("\"" + esc(value) + "\"");
+    private static void requireExactSingleStringArray(String json, String key, String expected, String error) {
+        String array = arrayField(json, key, error);
+        String encoded = "\"" + esc(expected) + "\"";
+        if (!array.matches("\\[\\s*" + Pattern.quote(encoded) + "\\s*\\]")) {
+            throw new IllegalStateException(error);
+        }
     }
 
     private static Map<String, String> headers(String token) {
