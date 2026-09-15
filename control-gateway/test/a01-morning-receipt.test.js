@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
+import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -39,4 +40,17 @@ test('P15 missing supervisor database never reports a clean morning', () => {
   const result = runPython(['-m', 'a01_morning_receipt', '--db', missing, '--json']);
   assert.equal(result.status, 2);
   assert.match(result.stdout, /DATABASE_UNREADABLE/);
+});
+
+test('P15 operational delivery uses local Windows Task Scheduler, not an independent GitHub A-01 schedule', () => {
+  const runner = fs.readFileSync(path.join(ROOT, 'control-gateway', 'windows', 'run-a01-morning-receipt.ps1'), 'utf8');
+  const installer = fs.readFileSync(path.join(ROOT, 'control-gateway', 'windows', 'install-a01-morning-receipt-task.ps1'), 'utf8');
+  assert.match(runner, /python -m a01_morning_receipt/);
+  assert.match(runner, /--out \$receiptPath/);
+  assert.match(runner, /exit \$receiptExit/);
+  assert.match(installer, /LocalTime = '07:15'/);
+  assert.match(installer, /New-ScheduledTaskTrigger -Daily/);
+  assert.match(installer, /-UserId 'SYSTEM'/);
+  assert.match(installer, /Register-ScheduledTask/);
+  assert.equal(fs.existsSync(path.join(ROOT, '.github', 'workflows', 'p15-a01-morning-receipt.yml')), false);
 });
