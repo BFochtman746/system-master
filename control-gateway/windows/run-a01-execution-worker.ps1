@@ -14,9 +14,9 @@ if ([string]::IsNullOrWhiteSpace($Database)) {
 if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
   $RepositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
 }
-$worker = Join-Path $RepositoryRoot 'control-gateway\python\a01_execution_worker.py'
+$worker = Join-Path $RepositoryRoot 'control-gateway\python\a01_execution_worker_hardened.py'
 if (-not (Test-Path -LiteralPath $worker)) {
-  throw "A-01 execution worker not found: $worker"
+  throw "A-01 hardened execution worker not found: $worker"
 }
 
 $args = @(
