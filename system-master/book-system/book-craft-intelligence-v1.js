@@ -64,6 +64,15 @@ function exactKeys(v, fields, code, label) {
 }
 function assertNoForbiddenPayload(v, path = '$', provenanceMetadata = false) {
   if (typeof v === 'string') {
+    if (!provenanceMetadata && /(?:replacement[-_ ]?prose|candidate[-_ ]?text|rewritten[-_ ]?text|applied[-_ ]?(?:revision|transform))\s*:/i.test(v)) {
+      fail('BLOCKED_REWRITE_PAYLOAD_FORBIDDEN', `${path}:${v}`);
+    }
+    if (!provenanceMetadata && /(?:(?:quality|prose|literary)[-_ ]?score|percentile|(?:overall|aggregate)[-_ ]?rank|prestige[-_ ]?rank|citation[-_ ]?count[-_ ]?rank)\s*:/i.test(v)) {
+      fail('BLOCKED_UNIVERSAL_PROSE_SCORE_FORBIDDEN', `${path}:${v}`);
+    }
+    if (!provenanceMetadata && /(?:winner|evaluation[-_ ]?disposition|candidate[-_ ]?superior)\s*:/i.test(v)) {
+      fail('BLOCKED_EVALUATION_AUTHORITY_FORBIDDEN', `${path}:${v}`);
+    }
     if (!provenanceMetadata && /(?:named[-_ ]?author[-_ ]?target|nearest[-_ ]?author|similarity[-_ ]?author|imitat(?:e|ion)[-_ ]?author|mimic[-_ ]?author|write\s+like|in\s+the\s+style\s+of)/i.test(v)) {
       fail('BLOCKED_NAMED_AUTHOR_TARGET_FORBIDDEN', `${path}:${v}`);
     }
@@ -159,8 +168,8 @@ function normalizeEffectClaim(v) {
 }
 function normalizeRecordPayloadV1(p) {
   const fields = ['mechanism','effect_claim','applicability_conditions','counterconditions','failure_modes','technique_interactions','diagnostic_signals','abstract_revision_transforms','applicability','evidence_refs','provenance_refs','uncertainty_standing','task_fit_standing','canonical_effect'];
-  exactKeys(p, fields, 'BLOCKED_CRAFT_TASK_FIT_UNRESOLVED', 'record');
   assertNoForbiddenPayload(p, 'record');
+  exactKeys(p, fields, 'BLOCKED_CRAFT_TASK_FIT_UNRESOLVED', 'record');
   if (!text(p.mechanism)) fail('BLOCKED_CRAFT_TASK_FIT_UNRESOLVED', 'mechanism');
   if (!UNCERTAINTY_STANDINGS.includes(p.uncertainty_standing)) fail('BLOCKED_CRAFT_TASK_FIT_UNRESOLVED', 'uncertainty_standing');
   if (!TASK_FIT_STANDINGS.includes(p.task_fit_standing)) fail('BLOCKED_CRAFT_TASK_FIT_UNRESOLVED', 'task_fit_standing');
@@ -273,6 +282,7 @@ function validateCraftIntelligenceRecordV1(record) {
 }
 
 function normalizeQueryV1(q) {
+  assertNoForbiddenPayload(q, 'query');
   exactKeys(q, ['policy_ref','policy_digest','task_class','requested_lens_ids','genre','form','audience','pov_mode','narrative_distance','include_conditional'], 'BLOCKED_CRAFT_TASK_FIT_UNRESOLVED', 'query');
   if (!text(q.policy_ref) || !digest(q.policy_digest) || !text(q.task_class) || typeof q.include_conditional !== 'boolean') fail('BLOCKED_CRAFT_TASK_FIT_UNRESOLVED', 'query');
   const lensIds = normalizeStrings(q.requested_lens_ids, 'query.requested_lens_ids');
