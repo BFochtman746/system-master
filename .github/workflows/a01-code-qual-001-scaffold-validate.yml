@@ -1,0 +1,79 @@
+name: A01 CODE QUAL 001 Scaffold Validation
+
+on:
+  pull_request:
+    paths:
+      - 'qualification/a01/**'
+      - '.github/workflows/a01-code-qual-001-scaffold-validate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-scaffold:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile runner scripts
+        run: |
+          python -m py_compile qualification/a01/fixture/a01-code-qual-001/runner/*.py
+      - name: Generate one sealed instance
+        run: |
+          rm -rf .a01-code-qual-validation
+          A01_QUAL_OUT="$PWD/.a01-code-qual-validation" python qualification/a01/fixture/a01-code-qual-001/runner/seal_instance.py
+          test -f .a01-code-qual-validation/seal-metadata.json
+          test -f .a01-code-qual-validation/candidate-package/assignment.md
+          test -f .a01-code-qual-validation/candidate-package/python/store.py
+          test -f .a01-code-qual-validation/candidate-package/python/canonical.py
+          test -f .a01-code-qual-validation/candidate-package/javascript/validate.js
+          test -f .a01-code-qual-validation/candidate-package/javascript/canonical.js
+          test -f .a01-code-qual-validation/candidate-package/java/src/main/java/benchmark/RequestKey.java
+          test -f .a01-code-qual-validation/candidate-package/tests-visible/run_all.py
+          test -f .a01-code-qual-validation/hidden-evaluator/cases.json
+      - name: Prove initial fixture is a material stress problem
+        shell: bash
+        run: |
+          set -euo pipefail
+          python qualification/a01/fixture/a01-code-qual-001/runner/init_candidate.py --workspace .a01-code-qual-validation/candidate-package --out .a01-code-qual-validation/run
+          python qualification/a01/fixture/a01-code-qual-001/runner/evaluate_frozen.py --candidate .a01-code-qual-validation/candidate-package --hidden .a01-code-qual-validation/hidden-evaluator --out .a01-code-qual-validation/evidence
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('.a01-code-qual-validation/evidence/functional-evidence.json')
+          e = json.loads(p.read_text())
+          hidden = e['hidden_tests']
+          categories = {
+              'python': (int(hidden['python']['passed']), int(hidden['python']['failed'])),
+              'javascript': (int(hidden['javascript']['passed']), int(hidden['javascript']['failed'])),
+              'cross_language': (int(hidden['cross_language']['passed']), int(hidden['cross_language']['failed'])),
+          }
+          totals = {name: passed + failed for name, (passed, failed) in categories.items()}
+          if totals != {'python': 25, 'javascript': 16, 'cross_language': 24}:
+              raise SystemExit(f'hidden denominator drift: {totals}')
+          hidden_failed = int(hidden['failed'])
+          visible_failed = int(e['visible_tests']['failed'])
+          if hidden_failed < 40 or visible_failed < 1:
+              raise SystemExit(
+                  f'benchmark fixture is too vacuous: visible_failed={visible_failed} hidden_failed={hidden_failed}'
+              )
+          for name, (_, failed) in categories.items():
+              if failed < 8:
+                  raise SystemExit(f'benchmark category is not materially failing: {name} failed={failed}')
+          print(
+              'stress-denominator PASS '
+              f'visible_failed={visible_failed} hidden_failed={hidden_failed} categories={categories}'
+          )
+          PY
+      - name: Validate contract JSON
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          for p in Path('qualification/a01').glob('*.json'):
+              json.loads(p.read_text())
+              print(f'valid-json {p}')
+          PY

@@ -1,0 +1,46 @@
+{
+  "scoring_model_id": "A01-CODE-QUAL-001-SCORING-MODEL-001",
+  "operation_id": "A01-CODE-QUAL-001",
+  "policy": "DESCRIPTIVE_BASELINE_ONLY",
+  "aggregate_pass_fail_score_authorized": false,
+  "weighted_total_authorized": false,
+  "dimensions": [
+    {
+      "id": "functional_correctness",
+      "report": ["visible_tests_passed", "visible_tests_failed", "hidden_tests_passed", "hidden_tests_failed", "cross_language_contract_failures"]
+    },
+    {
+      "id": "first_pass_quality",
+      "report": ["first_visible_run_pass_fraction", "failures_seen_before_first_green", "candidate_mutations_after_first_test_run", "repair_iterations"]
+    },
+    {
+      "id": "test_quality",
+      "report": ["candidate_tests_added", "negative_cases", "boundary_cases", "concurrency_cases", "recovery_cases", "mutation_or_fault_detection_rate_if_available"]
+    },
+    {
+      "id": "maintainability",
+      "report": ["java_coverage", "python_coverage", "javascript_coverage", "max_function_complexity", "complexity_distribution", "duplication_percentage", "new_duplicate_blocks", "changed_nloc"]
+    },
+    {
+      "id": "concurrency_recovery",
+      "report": ["single_owner_cases", "duplicate_effect_cases", "stale_writer_cases", "restart_recovery_cases", "idempotent_replay_cases"]
+    },
+    {
+      "id": "security_failure_safety",
+      "report": ["malformed_input_cases", "fail_closed_cases", "unsafe_execution_findings", "resource_cleanup_findings"]
+    },
+    {
+      "id": "scope_discipline",
+      "report": ["authorized_files_changed", "unauthorized_files_changed", "unrelated_behavior_changes", "change_surface"]
+    },
+    {
+      "id": "execution_efficiency",
+      "report": ["elapsed_seconds", "commands_observed", "failed_commands", "test_runs", "compiler_or_runtime_failures"]
+    }
+  ],
+  "comparison_policy": {
+    "allowed_only_after": "two or more valid runs using the same contract version and equivalent fixture difficulty",
+    "required_reporting": "show raw dimension deltas before deriving any composite threshold",
+    "forbidden": "declaring A-01 good/bad from the first run's single composite number"
+  }
+}

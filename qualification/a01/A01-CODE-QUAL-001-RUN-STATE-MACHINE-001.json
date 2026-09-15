@@ -1,0 +1,52 @@
+{
+  "state_machine_id": "A01-CODE-QUAL-001-RUN-STATE-MACHINE-001",
+  "operation_id": "A01-CODE-QUAL-001",
+  "initial_state": "UNSEALED",
+  "terminal_states": ["EVALUATED", "INVALID_RUN"],
+  "states": {
+    "UNSEALED": {
+      "allowed_next": ["SEALED"],
+      "requirements": ["fixture fixed", "assignment fixed", "hidden evaluator fixed", "all three SHA-256 identities captured"]
+    },
+    "SEALED": {
+      "allowed_next": ["RUNNING", "INVALID_RUN"],
+      "requirements": ["candidate cannot access hidden evaluator", "starting Git identity captured"]
+    },
+    "RUNNING": {
+      "allowed_next": ["SUBMITTED", "DEADLINE_REACHED", "INVALID_RUN"],
+      "requirements": ["start timestamp captured", "deadline armed for 1800 seconds", "human assistance disabled"]
+    },
+    "SUBMITTED": {
+      "allowed_next": ["FROZEN", "INVALID_RUN"],
+      "requirements": ["submission occurred before deadline"]
+    },
+    "DEADLINE_REACHED": {
+      "allowed_next": ["FROZEN", "INVALID_RUN"],
+      "requirements": ["candidate mutation terminated", "no later mutation admitted"]
+    },
+    "FROZEN": {
+      "allowed_next": ["EVALUATING", "INVALID_RUN"],
+      "requirements": ["final Git identity captured", "final diff captured", "elapsed time <= 1800.999 seconds"]
+    },
+    "EVALUATING": {
+      "allowed_next": ["EVALUATED", "INVALID_RUN"],
+      "requirements": ["hidden evaluator available only now", "quality tools operate on frozen artifact"]
+    },
+    "EVALUATED": {
+      "allowed_next": [],
+      "requirements": ["receipt emitted", "raw evidence digested", "artifact preserved"]
+    },
+    "INVALID_RUN": {
+      "allowed_next": [],
+      "requirements": ["invalidating reason captured", "no capability conclusion emitted"]
+    }
+  },
+  "invalidating_conditions": [
+    "candidate accessed hidden evaluator before FROZEN",
+    "human assistance occurred during RUNNING",
+    "deadline was not enforced",
+    "measured artifact contains post-deadline mutation",
+    "required exact-subject identity is missing",
+    "required evidence was overwritten or not preserved"
+  ]
+}
