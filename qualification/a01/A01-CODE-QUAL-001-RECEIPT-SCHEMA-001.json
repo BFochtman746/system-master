@@ -1,13 +1,14 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "A01-CODE-QUAL-001-RECEIPT-SCHEMA-001",
-  "title": "A-01 Coding Qualification Receipt v1",
+  "title": "A-01 Hosted Coding Qualification Receipt v1",
   "type": "object",
   "additionalProperties": false,
   "required": [
     "protocol_version",
     "contract_id",
     "operation_id",
+    "authoring_subject_identity",
     "benchmark_subject_sha256",
     "hidden_evaluator_sha256",
     "assignment_sha256",
@@ -17,7 +18,9 @@
     "stop_timestamp_utc",
     "elapsed_seconds",
     "deadline_enforced",
+    "candidate_isolation_enforced",
     "human_assistance",
+    "a01_host_evidence",
     "visible_tests",
     "hidden_tests",
     "coverage",
@@ -34,6 +37,25 @@
     "protocol_version": {"const": "a01.code-qualification-receipt.v1"},
     "contract_id": {"const": "A01-CODE-QUAL-001-30-MINUTE-SEALED-CODING-STRESS-BASELINE-CONTRACT-001"},
     "operation_id": {"const": "A01-CODE-QUAL-001"},
+    "authoring_subject_identity": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "provider_or_runtime",
+        "authoring_entrypoint_identity",
+        "system_or_project_instruction_digest",
+        "tool_permission_profile_digest"
+      ],
+      "properties": {
+        "provider_or_runtime": {"type": "string", "minLength": 1},
+        "authoring_entrypoint_identity": {"type": "string", "minLength": 1},
+        "system_or_project_instruction_digest": {"$ref": "#/$defs/sha256"},
+        "tool_permission_profile_digest": {"$ref": "#/$defs/sha256"},
+        "agent_or_model_name": {"type": ["string", "null"]},
+        "agent_or_model_version": {"type": ["string", "null"]},
+        "reasoning_or_effort_configuration": {"type": ["string", "null"]}
+      }
+    },
     "benchmark_subject_sha256": {"$ref": "#/$defs/sha256"},
     "hidden_evaluator_sha256": {"$ref": "#/$defs/sha256"},
     "assignment_sha256": {"$ref": "#/$defs/sha256"},
@@ -43,7 +65,19 @@
     "stop_timestamp_utc": {"type": "string", "format": "date-time"},
     "elapsed_seconds": {"type": "number", "minimum": 0, "maximum": 1800.999},
     "deadline_enforced": {"const": true},
+    "candidate_isolation_enforced": {"const": true},
     "human_assistance": {"const": false},
+    "a01_host_evidence": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["runner_name", "operating_system", "architecture", "freeze_artifact_sha256"],
+      "properties": {
+        "runner_name": {"type": "string", "minLength": 1},
+        "operating_system": {"type": "string", "minLength": 1},
+        "architecture": {"type": "string", "minLength": 1},
+        "freeze_artifact_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
     "visible_tests": {"$ref": "#/$defs/testResult"},
     "hidden_tests": {"$ref": "#/$defs/testResult"},
     "coverage": {"type": "object"},
