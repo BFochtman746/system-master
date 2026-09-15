@@ -236,6 +236,8 @@ public final class ControlGatewayClaimStateStore implements DurableDispatchCoord
         Response r = get(url, headers(token()), "STATE_AUTHORITY_READ");
         if (r.status() != 200) throw new IllegalStateException("STATE_AUTHORITY_READ_REJECTED_" + r.status());
         String envelope = decodeContentBody(r, "STATE_AUTHORITY_READ");
+        StrictJsonObjectKeys.rejectDuplicates(envelope,
+                "STATE_AUTHORITY_DUPLICATE_JSON_KEY", "STATE_AUTHORITY_INVALID_JSON");
         String packet = objectField(envelope, "packet", "STATE_AUTHORITY_PACKET_MISSING");
 
         if (!ACTIVE_WORK_PROTOCOL.equals(requiredString(packet, "protocol_version", "STATE_AUTHORITY_PROTOCOL_MISSING"))) {
