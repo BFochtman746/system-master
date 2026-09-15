@@ -15,12 +15,24 @@ test('native state ingress is owner-authenticated and narrowly issue-triggered',
   assert.equal(ingress.includes('pull_request_target'), false);
 });
 
-test('native state ingress permits only terminalization and authority rebind', () => {
+test('native state ingress permits only governed terminalization, rebind, or atomic successor authorization', () => {
   assert.ok(ingress.includes('TERMINATE_CURRENT)'));
   assert.ok(ingress.includes('REBIND_AUTHORITY)'));
-  assert.ok(script.includes("['TERMINATE_CURRENT', 'REBIND_AUTHORITY']"));
-  assert.ok(script.includes("transitionCurrentOperation"));
-  assert.ok(script.includes("rebindAuthority"));
+  assert.ok(ingress.includes('AUTHORIZE_AND_START_SUCCESSOR)'));
+  assert.ok(script.includes("['TERMINATE_CURRENT', 'REBIND_AUTHORITY', 'AUTHORIZE_AND_START_SUCCESSOR']"));
+  assert.ok(script.includes('transitionCurrentOperation'));
+  assert.ok(script.includes('rebindAuthority'));
+  assert.ok(script.includes('finalizeActiveWorkPacket'));
+  assert.ok(script.includes('startNextLegalOperation'));
+});
+
+test('atomic successor authorization widens scope only through rebind and stages exactly one successor', () => {
+  assert.ok(script.includes('allowed_paths_or_effects: request.parameters.allowed_paths_or_effects'));
+  assert.ok(script.includes('staged.successor_candidates = [structuredClone(request.parameters.successor_candidate)]'));
+  assert.ok(script.includes("startable.next_legal_operation.kind !== 'START_SUCCESSOR'"));
+  assert.ok(script.includes('startNextLegalOperation(startable)'));
+  assert.ok(ingress.includes("test \"$(jq -c '.parameters.allowed_paths_or_effects | keys' \"${request_file}\")\" = '[\"effects\",\"paths\"]'"));
+  assert.ok(ingress.includes("test \"$(jq -c '.parameters.successor_candidate | keys' \"${request_file}\")\" = '[\"a01_state\",\"github_admission_state\",\"operation_id\",\"predecessor_receipt_id\",\"qualification_state\",\"required_receipt_ids\"]'"));
 });
 
 test('active-work publisher is reusable, protected, and uses dedicated writer identity', () => {
