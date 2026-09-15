@@ -5,8 +5,9 @@ import datetime as dt
 import json
 import sqlite3
 import sys
+from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Iterator, Optional
 from urllib.parse import quote
 from zoneinfo import ZoneInfo
 
@@ -47,16 +48,26 @@ def session_start(now: Optional[dt.datetime] = None) -> dt.datetime:
     return dt.datetime.combine(day, dt.time.min, tzinfo=NY).astimezone(UTC)
 
 
-def connect_read_only(db_path: str | Path) -> sqlite3.Connection:
+@contextmanager
+def connect_read_only(db_path: str | Path) -> Iterator[sqlite3.Connection]:
+    """Open a supervisor database read-only and always release the OS handle.
+
+    sqlite3.Connection's own context-manager protocol commits/rolls back but does not
+    close the connection. P15 must explicitly close it so Windows A-01 never retains a
+    handle after a morning report or test completes.
+    """
     path = Path(db_path).expanduser().resolve()
     if not path.is_file():
         raise FileNotFoundError(str(path))
     uri_path = quote(path.as_posix(), safe="/:")
     conn = sqlite3.connect(f"file:{uri_path}?mode=ro", uri=True, timeout=5)
-    conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA busy_timeout=5000")
-    conn.execute("PRAGMA query_only=ON")
-    return conn
+    try:
+        conn.row_factory = sqlite3.Row
+        conn.execute("PRAGMA busy_timeout=5000")
+        conn.execute("PRAGMA query_only=ON")
+        yield conn
+    finally:
+        conn.close()
 
 
 def _table_exists(conn: sqlite3.Connection, table: str) -> bool:
