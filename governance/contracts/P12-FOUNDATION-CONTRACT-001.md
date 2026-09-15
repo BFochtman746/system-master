@@ -65,8 +65,12 @@ policy, and A-01 qualification registry. A pass fails closed when:
 - the live canonical owner branch head differs from the owner-file/snapshot head;
 - a delegation is not bound to that exact current control ref/head;
 - the referenced current obligation is missing, non-executable, or owned elsewhere;
+- shared-infrastructure work does not name the active lane as both current
+  `administrative_owner` and the exact Second Shift `coverage_routes` target;
 - the delegation has no explicit `a01_execution` envelope;
 - the envelope names an unregistered, non-subject, or non-overnight A-01 qualifier;
+- the admission receipt `task_id` differs from the exact current obligation selected for
+  the source delegation;
 - the exact subject SHA, repository, workstream, owner/lane/delegation/objective/control
   identity, execution class, executor kind, payload digest, night window, or coordination
   identity differs from the already-granted admission;
@@ -92,14 +96,18 @@ P12 revalidates, but does not rewrite, the following authority chain before P11 
 6. The handoff lane/owner/delegation/objective/control ref/control head equal the exact
    current source delegation and live owner control identity.
 7. The already-GRANTED receipt repository equals `BFochtman746/system-master`, its
-   workstream equals the registered qualifier workstream, and its
+   workstream equals the registered qualifier workstream, its `task_id` equals the exact
+   current obligation ID, and its
    `authoritative_subject = {algorithm: sha1, oid: subject_sha}`.
-8. The payload `qualification_id`, `workstream_id`, and `subject_sha` match the envelope
+8. If the current obligation is shared-infrastructure work, its `administrative_owner`
+   equals the active `SYSTEM_MASTER/<lane>` owner and the selected Second Shift
+   `coverage_routes` entry resolves that shared owner path to the same lane.
+9. The payload `qualification_id`, `workstream_id`, and `subject_sha` match the envelope
    and registered qualifier; optional `control_plane_sha`, when present, equals the exact
    subject. The admitted `payload_digest` recomputes exactly.
-9. `not_before` / `not_after` equal the currently selected A-01 night window for the
-   active session.
-10. Frozen CG-009 `validate_coordination_contract` passes; the contract binds the exact
+10. `not_before` / `not_after` equal the currently selected A-01 night window for the
+    active session.
+11. Frozen CG-009 `validate_coordination_contract` passes; the contract binds the exact
     handoff digest and source delegation, uses `OWNER-LANE:<lane>`, and has
     `max_concurrency = 1`.
 
@@ -136,7 +144,9 @@ actual claims. Scheduler refusal does not refund a P12 transport slot.
 P12 derives **no execution identity**. `delegation_id`, `idempotency_key`, admission ID,
 qualification ID, exact subject SHA, scheduling values, payload digest, graph ID, graph
 version and dependency identity all arrive in the explicit `a01_execution` envelope and
-must already be digest-bound under CG-008/CG-009.
+must already be digest-bound under CG-008/CG-009. The admitted `task_id` is additionally
+rebound to the exact current obligation before transport because P10 materializes its
+durable obligation identity from that field.
 
 The ingress computes only the active session's expected 00:00–07:00
 `America/New_York` window from current A-01 policy and compares the admitted timestamps to
@@ -153,8 +163,9 @@ admission authority.**
 - Source state other than `READY` → `NOT_READY` skip.
 - Stale owner/control binding → `STALE_CONTROL_BINDING` skip.
 - Missing/non-executable current obligation → explicit skip.
+- Wrong shared-infrastructure administrator/coverage route → `OBLIGATION_OWNER_MISMATCH`.
 - No `a01_execution` envelope → `NO_PRE_ADMITTED_A01_EXECUTION` skip.
-- Any qualifier/subject/admission/payload/owner/control/window/coordination mismatch →
+- Any qualifier/subject/admission task/payload/owner/control/window/coordination mismatch →
   `A01_EXECUTION_REVALIDATION_FAILED` skip.
 - Missing production scheduler → error; no fallback writer.
 - P12 budget exhausted → `NIGHT_BUDGET_EXHAUSTED` skip.
@@ -193,7 +204,9 @@ The adversarial Python suite proves, at minimum:
 - an exact pre-admitted handoff/coordination pair is forwarded unchanged;
 - unregistered/non-overnight qualifier rejection;
 - exact subject and authoritative-subject drift rejection;
+- admission `task_id` drift rejection even after all affected digests are recomputed;
 - owner/control drift rejection;
+- shared-infrastructure administrative-owner/coverage-route rejection and exact-route acceptance;
 - payload-digest tamper rejection;
 - unsupported executor rejection;
 - coordination resource/concurrency drift rejection;
@@ -221,8 +234,8 @@ boundary.
 subject/qualifier; raising the policy slot limit; adding GitHub write capability;
 transporting `CANDIDATE` as READY; changing scheduling priority or execution identity;
 changing execution class away from `OVERNIGHT`; weakening current-head/current-obligation
-checks; accepting another executor kind; weakening payload/coordination digest checks;
-removing the per-item kill switch; or bypassing P11.
+or shared-owner-route checks; accepting another executor kind; weakening
+payload/coordination digest checks; removing the per-item kill switch; or bypassing P11.
 
 Repository closure does not claim the Windows Scheduled Task is installed or that a token
 exists for future private-repository access. The service docstring preserves deployment
