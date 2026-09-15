@@ -64,16 +64,16 @@ function exactKeys(v, fields, code, label) {
 }
 function assertNoForbiddenPayload(v, path = '$', provenanceMetadata = false) {
   if (typeof v === 'string') {
-    if (!provenanceMetadata && /(?:replacement[-_ ]?prose|candidate[-_ ]?text|rewritten[-_ ]?text|applied[-_ ]?(?:revision|transform))\s*:/i.test(v)) {
+    if (/(?:replacement[-_ ]?prose|candidate[-_ ]?text|rewritten[-_ ]?text|applied[-_ ]?(?:revision|transform))\s*:/i.test(v)) {
       fail('BLOCKED_REWRITE_PAYLOAD_FORBIDDEN', `${path}:${v}`);
     }
-    if (!provenanceMetadata && /(?:(?:quality|prose|literary)[-_ ]?score|percentile|(?:overall|aggregate)[-_ ]?rank|prestige[-_ ]?rank|citation[-_ ]?count[-_ ]?rank)\s*:/i.test(v)) {
+    if (/(?:(?:quality|prose|literary)[-_ ]?score|percentile|(?:overall|aggregate)[-_ ]?rank|prestige[-_ ]?rank|citation[-_ ]?count[-_ ]?rank)\s*:/i.test(v)) {
       fail('BLOCKED_UNIVERSAL_PROSE_SCORE_FORBIDDEN', `${path}:${v}`);
     }
-    if (!provenanceMetadata && /(?:winner|evaluation[-_ ]?disposition|candidate[-_ ]?superior)\s*:/i.test(v)) {
+    if (/(?:winner|evaluation[-_ ]?disposition|candidate[-_ ]?superior)\s*:/i.test(v)) {
       fail('BLOCKED_EVALUATION_AUTHORITY_FORBIDDEN', `${path}:${v}`);
     }
-    if (!provenanceMetadata && /(?:named[-_ ]?author[-_ ]?target|nearest[-_ ]?author|similarity[-_ ]?author|imitat(?:e|ion)[-_ ]?author|mimic[-_ ]?author|write\s+like|in\s+the\s+style\s+of)/i.test(v)) {
+    if (/(?:named[-_ ]?author[-_ ]?target|nearest[-_ ]?author|similarity[-_ ]?author|imitat(?:e|ion)[-_ ]?author|mimic[-_ ]?author|write\s+like|in\s+the\s+style\s+of)/i.test(v)) {
       fail('BLOCKED_NAMED_AUTHOR_TARGET_FORBIDDEN', `${path}:${v}`);
     }
     return;
