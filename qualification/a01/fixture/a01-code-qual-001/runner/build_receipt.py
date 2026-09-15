@@ -22,25 +22,57 @@ def sha256_tree(root: Path) -> str:
     return sha256_bytes(canonical(rows))
 
 
+def load_object(path: str, label: str) -> dict:
+    value = json.loads(Path(path).read_text(encoding='utf-8'))
+    if not isinstance(value, dict) or not value:
+        raise SystemExit(f'{label} must be a non-empty JSON object')
+    return value
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument('--seal', required=True)
     ap.add_argument('--start', required=True)
     ap.add_argument('--freeze', required=True)
     ap.add_argument('--functional', required=True)
+    ap.add_argument('--authoring', required=True)
+    ap.add_argument('--isolation', required=True)
+    ap.add_argument('--a01-host', required=True)
     ap.add_argument('--evidence-root', required=True)
     ap.add_argument('--out', required=True)
     args = ap.parse_args()
 
-    seal = json.loads(Path(args.seal).read_text(encoding='utf-8'))
-    start = json.loads(Path(args.start).read_text(encoding='utf-8'))
-    freeze = json.loads(Path(args.freeze).read_text(encoding='utf-8'))
-    functional = json.loads(Path(args.functional).read_text(encoding='utf-8'))
+    seal = load_object(args.seal, 'seal')
+    start = load_object(args.start, 'start')
+    freeze = load_object(args.freeze, 'freeze')
+    functional = load_object(args.functional, 'functional')
+    authoring = load_object(args.authoring, 'authoring')
+    isolation = load_object(args.isolation, 'isolation')
+    a01_host = load_object(args.a01_host, 'a01-host')
+
+    required_authoring = {
+        'provider_or_runtime',
+        'authoring_entrypoint_identity',
+        'system_or_project_instruction_digest',
+        'tool_permission_profile_digest',
+    }
+    missing_authoring = sorted(required_authoring - set(authoring))
+    if missing_authoring:
+        raise SystemExit(f'authoring identity missing required fields: {missing_authoring}')
+    if isolation.get('candidate_isolation_enforced') is not True:
+        raise SystemExit('candidate isolation must be externally enforced')
+    if freeze.get('deadline_enforced') is not True:
+        raise SystemExit('hard deadline must be externally enforced')
+    required_host = {'runner_name', 'operating_system', 'architecture', 'freeze_artifact_sha256'}
+    missing_host = sorted(required_host - set(a01_host))
+    if missing_host:
+        raise SystemExit(f'A-01 host evidence missing required fields: {missing_host}')
 
     receipt = {
         'protocol_version': 'a01.code-qualification-receipt.v1',
         'contract_id': 'A01-CODE-QUAL-001-30-MINUTE-SEALED-CODING-STRESS-BASELINE-CONTRACT-001',
         'operation_id': 'A01-CODE-QUAL-001',
+        'authoring_subject_identity': authoring,
         'benchmark_subject_sha256': seal['candidate_package_sha256'],
         'hidden_evaluator_sha256': seal['hidden_evaluator_sha256'],
         'assignment_sha256': seal['assignment_sha256'],
@@ -49,8 +81,10 @@ def main() -> int:
         'start_timestamp_utc': start['start_timestamp_utc'],
         'stop_timestamp_utc': freeze['stop_timestamp_utc'],
         'elapsed_seconds': freeze['elapsed_seconds'],
-        'deadline_enforced': bool(freeze['deadline_enforced']),
+        'deadline_enforced': True,
+        'candidate_isolation_enforced': True,
         'human_assistance': False,
+        'a01_host_evidence': a01_host,
         'visible_tests': functional['visible_tests'],
         'hidden_tests': functional['hidden_tests'],
         'coverage': {},
