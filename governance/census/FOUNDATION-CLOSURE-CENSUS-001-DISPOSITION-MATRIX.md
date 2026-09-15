@@ -76,7 +76,7 @@ Evidence authority: `governance/census/FOUNDATION-CLOSURE-EVIDENCE-REGISTRY-001.
 | `C47` | RESERVED | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Reserved unallocated capability identifier. |
 | `C48` | RESERVED | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Reserved unallocated capability identifier. |
 | `C49` | RESERVED | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Reserved unallocated capability identifier. |
-| `P00` | P00 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | Fresh current-authority PASS receipt admitted for exact subject `196ab9b1c5c2be79bd05225a831b33304f00c857`; prior receipt preserved as historical evidence. |
+| `P00` | P00 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | Fresh current-authority PASS receipt admitted for exact subject `0540318f5d85631ebe61e0bb7320b3408acfe9c5`; prior receipts preserved as historical evidence. |
 | `P01` | P01 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | Fresh current-authority PASS receipt admitted for exact subject `02209b88106926f62718b7d3c6956e5e81506639`; prior receipt preserved as historical evidence. |
 | `P02` | P02 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | Fresh current-authority PASS receipt admitted for exact subject `efc325ab682fa92985569ceaa2619220dd4a6d3f`; prior receipt preserved as historical evidence. |
 | `P03` | P03 | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Historical PASS receipt preserved, but current-invalid: `SUBJECT_DRIFT:governance/CURRENT-AUTHORITY.json`; fresh current-subject qualification required. |
@@ -95,7 +95,7 @@ Evidence authority: `governance/census/FOUNDATION-CLOSURE-EVIDENCE-REGISTRY-001.
 
 ## Evidence-complete rows
 
-`P00` is current-complete with exact-subject evidence from GitHub Actions run `34868657748`, artifact `10357803440`, bound to subject `196ab9b1c5c2be79bd05225a831b33304f00c857`.
+`P00` is current-complete with exact-subject evidence from GitHub Actions run `34915015935`, artifact `10375986180`, bound to subject `0540318f5d85631ebe61e0bb7320b3408acfe9c5` after reconciliation of the authority-derived Crosswalk 003 P02 pointer to `WORK-OBLIGATION-REGISTRY-017`.
 
 `P01` is current-complete with exact-subject evidence from GitHub Actions run `34869129891`, artifact `10358422012`, bound to subject `02209b88106926f62718b7d3c6956e5e81506639`.
 
