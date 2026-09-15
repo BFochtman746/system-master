@@ -1,13 +1,7 @@
 name: Claim Driver
 
-# The unattended executor. This is the launcher this repository has described in its
-# governance records since the beginning and never actually had: it runs
-# ClaimDriverMain, which drives ClaimLedger.Consumer.tick() inside two ceilings and
-# prints a run summary an operator can read the next morning.
-#
-# NOT A REQUIRED CHECK, AND DELIBERATELY UNREACHABLE FROM A PULL REQUEST.
-# There is no pull_request trigger here, and this workflow must never be bound as a
-# required status check. A scheduled runner has no business being a merge gate.
+# Unattended crash-safe dispatcher. Durable state lives on a dedicated non-code branch;
+# this workflow is deliberately not a required PR check.
 
 on:
   schedule:
@@ -28,7 +22,7 @@ on:
         default: '25'
         type: string
       budget_seconds:
-        description: 'Wall-clock ceiling in seconds'
+        description: 'Wall-clock admission ceiling in seconds'
         required: false
         default: '300'
         type: string
@@ -38,8 +32,8 @@ concurrency:
   cancel-in-progress: false
 
 permissions:
-  contents: read
-  actions: write # dispatch claim-work and read its run status/conclusion
+  contents: write # CAS persistence on the dedicated claim-state branch
+  actions: write  # dispatch claim-work and read its run status/conclusion
 
 jobs:
   drive:
@@ -62,10 +56,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CLAIM_WORK_WORKFLOW: claim-work.yml
-          # Dispatch the work definition from the same ref as this driver. Scheduled
-          # production runs resolve to main; a manual feature-branch qualification can
-          # exercise the branch's matching dispatch_id/run-name protocol before merge.
           CLAIM_WORK_REF: ${{ github.ref_name }}
+          CLAIM_STATE_REF: second-shift/execution-state
+          CLAIM_STATE_ROOT: execution/claims/state
           IN_CLAIM_ID: ${{ inputs.claim_id }}
           IN_PAYLOAD_DIGEST: ${{ inputs.payload_digest }}
           IN_MAX_ITERATIONS: ${{ inputs.max_iterations }}
