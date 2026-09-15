@@ -111,7 +111,7 @@ jobs:
           if (!bridge.includes('tests') || !bridge.includes('test_a01_github_ingress.py') || !bridge.includes('a01_ingress_service')) throw new Error('P12_A01_DISCOVERY_BRIDGE_MISSING');
           if (!tests.includes('test_module_has_no_local_admission_or_coordination_builder')) throw new Error('P12_NO_LOCAL_AUTHORITY_TEST_MISSING');
           if (!tests.includes('test_exact_pre_admitted_objects_are_forwarded_to_p11')) throw new Error('P12_EXACT_FORWARDING_TEST_MISSING');
-          if (!contract.includes('does not mint admission authority') || !contract.includes('NO_PRE_ADMITTED_A01_EXECUTION')) throw new Error('P12_CONTRACT_PRE_ADMISSION_BOUNDARY_MISSING');
+          if (!contract.includes('does **not** mint admission authority') || !contract.includes('NO_PRE_ADMITTED_A01_EXECUTION')) throw new Error('P12_CONTRACT_PRE_ADMISSION_BOUNDARY_MISSING');
           console.log('P12_HOSTED_PREQUALIFICATION=PASS');
           NODE
 
