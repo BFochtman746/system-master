@@ -55,6 +55,7 @@ public final class ClaimDriverMain {
                 return actions.executePrepared(claimId, payloadDigest, dispatchId);
             }
         };
+        dispatch = DurabilityCrashProofDispatch.fromEnvironment(dispatch);
         DurableDispatchCoordinator.Reconciler reconciler = new DurableDispatchCoordinator.Reconciler() {
             public DurableDispatchCoordinator.Discovery discover(String claimId, String dispatchId) throws Exception {
                 ActionsRunPoller.Discovery d = poller.discover(claimId, dispatchId);
