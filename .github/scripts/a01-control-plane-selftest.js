@@ -122,7 +122,8 @@ assert(!broker.includes('qualifier_command'), 'broker arbitrary commands prohibi
 assert(executor.includes('runs-on: [self-hosted, Windows, X64]'), 'executor runner labels');
 assert(executor.includes('control_plane_sha'), 'executor exact control-plane binding');
 assert(executor.includes('ref: ${{ inputs.control_plane_sha }}'), 'executor checks out admitted control SHA');
-assert(executor.includes('group: a01-global-r2') && executor.includes('queue: max'), 'global queue remains serialized');
+assert(executor.includes('group: a01-global-r2') && executor.includes('cancel-in-progress: false'), 'global execution remains serialized without cancelling the active qualification');
+assert(!/^\s*queue\s*:/m.test(executor), 'unsupported workflow concurrency queue key must remain absent');
 assert(executor.includes('Guard A-01 runner health before subject acquisition'), 'runner preflight missing');
 assert(executor.indexOf('Guard A-01 runner health before subject acquisition') < executor.indexOf('Checkout exact qualification subject'), 'subject checkout must follow runner guard');
 assert(executor.includes('A01QualificationSleepGuard'), 'qualification sleep prevention missing');
@@ -142,12 +143,12 @@ assert(runnerGuard.includes('LOW_DISK'), 'runner disk failure classification mis
 assert(runnerGuard.includes('LOW_MEMORY'), 'runner memory failure classification missing');
 assert(runnerGuard.includes('SetThreadExecutionState'), 'runner sleep capability probe missing');
 assert(runnerGuard.includes('STALE_TEMP_CLEANUP_FAILED'), 'runner stale temp hygiene missing');
-assert(nightWorkflow.includes("timezone: 'America/New_York'") || nightWorkflow.includes('timezone: America/New_York'), 'night shift timezone missing');
-assert(nightWorkflow.includes("cron: '57 23 * * *'") || nightWorkflow.includes('cron: 57 23 * * *'), 'off-hour kickoff missing');
-assert(nightWorkflow.includes('a01-overnight-plan.js'), 'night planner missing');
-assert(nightWorkflow.includes('execution_context: overnight'), 'night slots must use overnight context');
-assert(nightWorkflow.includes('requires_previous_pass'), 'night successor PASS dependency missing');
-assert(nightWorkflow.includes("outputs.result_class == 'PASS'"), 'night successor must require predecessor PASS');
+assert(nightWorkflow.includes('GitHub Scheduler Retired'), 'retired GitHub night scheduler standing missing');
+assert(nightWorkflow.includes('SecondShiftSupervisorV2'), 'A-01 supervisor night scheduling owner missing');
+assert(nightWorkflow.includes('MANUAL_AUDIT_ONLY'), 'retired GitHub scheduler must remain manual audit only');
+assert(!nightWorkflow.includes('cron:'), 'retired GitHub scheduler must not retain cron authority');
+assert(!nightWorkflow.includes('a01-overnight-plan.js'), 'retired GitHub scheduler must not construct night plans');
+assert(!nightWorkflow.includes('a01-control-plane-gateway.yml'), 'retired GitHub scheduler must not dispatch A-01 execution');
 assert(legacy.version === 2, 'legacy direct-workflow freeze generation');
 const frozenLegacyWorkflows = Object.keys(legacy.workflows || {}).sort();
 const retainedRunnerSupport = [...(workflowRetirement.retained_runner_support || [])].sort();
