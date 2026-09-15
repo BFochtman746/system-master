@@ -24,9 +24,13 @@ function runPython(args) {
   return result;
 }
 
-test('P12 offline GitHub-to-A01 ingress acceptance suite passes', () => {
-  const result = runPython([path.join('control-gateway', 'python', 'test_a01_github_ingress.py')]);
-  assert.equal(result.status, 0, `P12 Python suite failed with exit ${result.status}`);
+// This bridge intentionally uses the pre-existing Control Gateway Node suite. The
+// registered cumulative A-01 qualifier already executes `node --test` here, so P12
+// gains exact-subject A-01 coverage without modifying predecessor qualifier/registry
+// blobs whose prior Foundation receipts are content-addressed.
+test('P12 GitHub ingress accepts only already-admitted A-01 execution authority', () => {
+  const result = runPython([path.join('tests', 'test_a01_github_ingress.py')]);
+  assert.equal(result.status, 0, `P12 Python ingress suite failed with exit ${result.status}`);
 });
 
 test('P12 production service binds the real A01NightScheduler without GitHub write authority', () => {
