@@ -8,6 +8,7 @@ import time
 import uuid
 from pathlib import Path
 from typing import Any, Optional
+from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
@@ -20,11 +21,14 @@ from tools.second_shift_supervisor_v2 import SupervisorStore, in_shift, iso, par
 NIGHT_SCHEDULER_PROTOCOL = "control-gateway.a01-night-scheduler.v1"
 QUEUE_STATES = {"BINDING", "QUEUED", "CLAIMED", "TERMINAL", "CANCELLED", "RECONCILE"}
 ACTIVE_STAGE_STATES = {"BINDING", "QUEUED", "CLAIMED", "RECONCILE"}
+A01_POLICY_PATH = ROOT / "qualification" / "a01" / "a01-policy.json"
 _SCHEDULER_SCHEMA_OBJECTS = frozenset(
     {
         "night_scheduler_queue",
         "ix_night_scheduler_queue_state",
         "night_scheduler_claim_authorizations",
+        "night_scheduler_night_budget",
+        "night_scheduler_budget_usage",
         "cg010_night_scheduler_claim_guard",
     }
 )
@@ -40,10 +44,10 @@ class A01NightScheduler:
     GitHub may admit/persist work, but it does not select or order nightly tasks.
     Exact admitted handoffs plus CG-009 coordination contracts are persisted in
     the A-01 supervisor SQLite database. This scheduler owns the local clock,
-    execution-stage barrier, priority selection, and the only authorized path that
-    may create a claim for a queued night delegation. CG-009 coordination remains
-    authoritative for dependency, resource-capacity, cancellation, lease, fence,
-    and dispatch-outbox invariants.
+    execution-stage barrier, priority selection, the durable night-wide claim
+    budget, and the only authorized path that may create a claim for a queued
+    night delegation. CG-009 coordination remains authoritative for dependency,
+    resource-capacity, cancellation, lease, fence, and dispatch-outbox invariants.
     """
 
     def __init__(self, store: SupervisorStore):
@@ -51,21 +55,39 @@ class A01NightScheduler:
             raise TypeError("store must be SupervisorStore")
         self.store = store
         self.coordination = SupervisorCoordinationAdapter(store)
+        self.night_timezone_name, self.max_night_slots = self._load_overnight_policy()
+        self.night_timezone = ZoneInfo(self.night_timezone_name)
         self._init_schema()
+
+    @staticmethod
+    def _load_overnight_policy() -> tuple[str, int]:
+        try:
+            policy = json.loads(A01_POLICY_PATH.read_text(encoding="utf-8"))
+            overnight = policy["overnight"]
+            timezone_name = str(overnight["timezone"])
+            max_slots = overnight["max_slots"]
+        except (OSError, KeyError, TypeError, ValueError, json.JSONDecodeError) as exc:
+            raise NightSchedulerError(f"invalid A-01 overnight policy: {exc}") from exc
+        if overnight.get("enabled") is not True:
+            raise NightSchedulerError("A-01 overnight scheduling is disabled")
+        if timezone_name != "America/New_York":
+            raise NightSchedulerError("night scheduler timezone differs from Second Shift authority")
+        if type(max_slots) is not int or not 1 <= max_slots <= 64:
+            raise NightSchedulerError("A-01 overnight max_slots must be an integer 1..64")
+        return timezone_name, max_slots
 
     def _schema_ready(self) -> bool:
         rows = self.store.conn.execute(
             "SELECT name FROM sqlite_master WHERE "
-            "(type='table' AND name IN ('night_scheduler_queue','night_scheduler_claim_authorizations')) "
+            "(type='table' AND name IN ("
+            "'night_scheduler_queue','night_scheduler_claim_authorizations',"
+            "'night_scheduler_night_budget','night_scheduler_budget_usage')) "
             "OR (type='index' AND name='ix_night_scheduler_queue_state') "
             "OR (type='trigger' AND name='cg010_night_scheduler_claim_guard')"
         ).fetchall()
         return {str(row[0]) for row in rows} == _SCHEDULER_SCHEMA_OBJECTS
 
     def _init_schema(self) -> None:
-        # Reopened scheduler processes are readers of already-frozen schema. This
-        # prevents two simultaneous restarts from both rewriting the CG-010 trigger
-        # before they can compete for the transactional scheduler claim.
         if self._schema_ready():
             return
         try:
@@ -88,6 +110,23 @@ class A01NightScheduler:
                   idempotency_key TEXT NOT NULL,
                   authorization_id TEXT NOT NULL,
                   PRIMARY KEY(delegation_id, idempotency_key)
+                );
+                CREATE TABLE IF NOT EXISTS night_scheduler_night_budget (
+                  night_key TEXT PRIMARY KEY,
+                  max_slots INTEGER NOT NULL CHECK(max_slots BETWEEN 1 AND 64),
+                  used_slots INTEGER NOT NULL DEFAULT 0 CHECK(used_slots >= 0 AND used_slots <= max_slots),
+                  created_at TEXT NOT NULL,
+                  updated_at TEXT NOT NULL
+                );
+                CREATE TABLE IF NOT EXISTS night_scheduler_budget_usage (
+                  night_key TEXT NOT NULL,
+                  slot_number INTEGER NOT NULL,
+                  delegation_id TEXT NOT NULL,
+                  lease_id TEXT NOT NULL UNIQUE,
+                  claimed_at TEXT NOT NULL,
+                  PRIMARY KEY(night_key, slot_number),
+                  UNIQUE(night_key, delegation_id),
+                  FOREIGN KEY(night_key) REFERENCES night_scheduler_night_budget(night_key)
                 );
                 DROP TRIGGER IF EXISTS cg010_night_scheduler_claim_guard;
                 CREATE TRIGGER cg010_night_scheduler_claim_guard
@@ -123,6 +162,79 @@ class A01NightScheduler:
             "delegation_id": handoff["delegation_id"],
         }
         return hashlib.sha256(canonical(body).encode("utf-8")).hexdigest()
+
+    def _night_key(self, now: dt.datetime) -> str:
+        if now.tzinfo is None or now.utcoffset() is None:
+            raise NightSchedulerError("night scheduler requires timezone-aware timestamps")
+        return now.astimezone(self.night_timezone).date().isoformat()
+
+    def _budget_status(self, now: dt.datetime) -> dict[str, Any]:
+        night_key = self._night_key(now)
+        row = self.store.conn.execute(
+            "SELECT max_slots,used_slots FROM night_scheduler_night_budget WHERE night_key=?",
+            (night_key,),
+        ).fetchone()
+        max_slots = int(row["max_slots"]) if row is not None else self.max_night_slots
+        used_slots = int(row["used_slots"]) if row is not None else 0
+        return {
+            "night_key": night_key,
+            "max_slots": max_slots,
+            "used_slots": used_slots,
+            "remaining_slots": max(0, max_slots - used_slots),
+        }
+
+    def _reserve_night_slot(
+        self,
+        c,
+        now: dt.datetime,
+        delegation_id: str,
+        lease_id: str,
+    ) -> dict[str, Any]:
+        night_key = self._night_key(now)
+        row = c.execute(
+            "SELECT * FROM night_scheduler_night_budget WHERE night_key=?",
+            (night_key,),
+        ).fetchone()
+        if row is None:
+            c.execute(
+                "INSERT INTO night_scheduler_night_budget(night_key,max_slots,used_slots,created_at,updated_at) "
+                "VALUES(?,?,?,?,?)",
+                (night_key, self.max_night_slots, 0, iso(now), iso(now)),
+            )
+            max_slots = self.max_night_slots
+            used_slots = 0
+        else:
+            max_slots = int(row["max_slots"])
+            used_slots = int(row["used_slots"])
+            if max_slots != self.max_night_slots:
+                raise NightSchedulerError("night scheduler budget policy changed during active night")
+
+        counted = int(
+            c.execute(
+                "SELECT COUNT(*) n FROM night_scheduler_budget_usage WHERE night_key=?",
+                (night_key,),
+            ).fetchone()["n"]
+        )
+        if counted != used_slots:
+            raise NightSchedulerError("night scheduler budget accounting mismatch")
+        if used_slots >= max_slots:
+            raise NightSchedulerError("night-wide scheduler slot budget exhausted")
+
+        slot_number = used_slots + 1
+        c.execute(
+            "INSERT INTO night_scheduler_budget_usage(night_key,slot_number,delegation_id,lease_id,claimed_at) "
+            "VALUES(?,?,?,?,?)",
+            (night_key, slot_number, delegation_id, lease_id, iso(now)),
+        )
+        c.execute(
+            "UPDATE night_scheduler_night_budget SET used_slots=?,updated_at=? WHERE night_key=?",
+            (slot_number, iso(now), night_key),
+        )
+        return {
+            "night_key": night_key,
+            "slot_number": slot_number,
+            "max_slots": max_slots,
+        }
 
     def enqueue(
         self,
@@ -165,8 +277,6 @@ class A01NightScheduler:
                 ).fetchone()
             )
 
-        # Persist the scheduler fence first. If the process dies before coordination
-        # binding completes, BINDING survives restart and blocks every claim path.
         with self.store.tx() as c:
             c.execute(
                 "INSERT INTO night_scheduler_queue("
@@ -394,6 +504,7 @@ class A01NightScheduler:
             lease_id = f"{handoff['lane']}-{uuid.uuid4()}"
             dispatch_id = f"dispatch-{uuid.uuid4()}"
             expires = now + dt.timedelta(seconds=lease_seconds)
+            budget = self._reserve_night_slot(c, now, handoff["delegation_id"], lease_id)
             authorization_id = f"sched-auth-{uuid.uuid4()}"
             c.execute(
                 "INSERT INTO night_scheduler_claim_authorizations(delegation_id,idempotency_key,authorization_id) VALUES(?,?,?)",
@@ -434,17 +545,22 @@ class A01NightScheduler:
                 "DELETE FROM night_scheduler_claim_authorizations WHERE delegation_id=? AND idempotency_key=?",
                 (handoff["delegation_id"], handoff["idempotency_key"]),
             )
+            common_payload = {
+                "resource_key": task["resource_key"],
+                "execution_order": handoff["execution_order"],
+                "priority": handoff["priority"],
+                "scheduling_owner": "A01_SUPERVISOR",
+                "night_key": budget["night_key"],
+                "night_slot": budget["slot_number"],
+                "night_slot_limit": budget["max_slots"],
+            }
             self.store._event(
                 c, handoff["lane"], "CLAIMED", now,
                 delegation_id=handoff["delegation_id"], objective_id=handoff["objective_id"],
                 lease_id=lease_id, dispatch_id=dispatch_id,
                 idempotency_key=handoff["idempotency_key"], fencing_token=token,
                 control_head=handoff["control_head"],
-                payload={
-                    "expires_at": iso(expires), "resource_key": task["resource_key"],
-                    "execution_order": handoff["execution_order"], "priority": handoff["priority"],
-                    "scheduling_owner": "A01_SUPERVISOR",
-                },
+                payload={"expires_at": iso(expires), **common_payload},
             )
             self.store._event(
                 c, handoff["lane"], "DISPATCH_INTENT", now,
@@ -455,7 +571,7 @@ class A01NightScheduler:
                 payload={
                     "executor_kind": handoff["executor_kind"],
                     "coordination_digest": contract["coordination_digest"],
-                    "scheduling_owner": "A01_SUPERVISOR",
+                    **common_payload,
                 },
             )
             return self.store._to_claim(
@@ -477,6 +593,7 @@ class A01NightScheduler:
             return {
                 "protocol_version": NIGHT_SCHEDULER_PROTOCOL,
                 "at": iso(now), "shift_open": False, "claims": [], "blocked": [],
+                "night_budget": self._budget_status(now),
             }
 
         self.reconcile(now=now)
@@ -505,6 +622,7 @@ class A01NightScheduler:
             "protocol_version": NIGHT_SCHEDULER_PROTOCOL,
             "at": iso(now), "shift_open": True, "active_execution_order": active_order,
             "claims": claims, "blocked": blocked,
+            "night_budget": self._budget_status(now),
         }
 
     def snapshot(self) -> dict[str, Any]:
@@ -515,9 +633,21 @@ class A01NightScheduler:
         leaked = self.store.conn.execute(
             "SELECT COUNT(*) n FROM night_scheduler_claim_authorizations"
         ).fetchone()["n"]
+        budgets = [
+            dict(row) for row in self.store.conn.execute(
+                "SELECT * FROM night_scheduler_night_budget ORDER BY night_key"
+            ).fetchall()
+        ]
+        usage = [
+            dict(row) for row in self.store.conn.execute(
+                "SELECT * FROM night_scheduler_budget_usage ORDER BY night_key,slot_number"
+            ).fetchall()
+        ]
         return {
             "protocol_version": NIGHT_SCHEDULER_PROTOCOL,
             "queue": rows,
+            "night_budgets": budgets,
+            "night_budget_usage": usage,
             "authorization_leaks": int(leaked),
             "coordination_problems": self.coordination.audit_coordination_invariants(),
             "supervisor_problems": self.store.audit_invariants(),
