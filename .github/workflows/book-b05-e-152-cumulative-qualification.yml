@@ -1,0 +1,307 @@
+name: Book B05-E 152 Isolated Cumulative Qualification
+
+on:
+  push:
+    branches:
+      - book-system/b05-e-152-qualification-v1
+    paths:
+      - 'system-master/book-system/book-b05-e-*.js'
+      - 'system-master/book-system/book-b05-e-*.test.js'
+      - 'qualification/book-system/reconstruction/BOOK-B05-E-*'
+      - '.github/workflows/book-b05-e-152-cumulative-qualification.yml'
+      - 'system-master/book-system/book-literary-*.js'
+  pull_request:
+    branches:
+      - book-system/b05-d4-invalidation-currentness-runtime-v1
+    types: [opened, synchronize, reopened, edited, ready_for_review]
+    paths:
+      - 'system-master/book-system/book-b05-e-*.js'
+      - 'system-master/book-system/book-b05-e-*.test.js'
+      - 'qualification/book-system/reconstruction/BOOK-B05-E-*'
+      - '.github/workflows/book-b05-e-152-cumulative-qualification.yml'
+      - 'system-master/book-system/book-literary-*.js'
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    name: Node ${{ matrix.node }} — B05 152 + B00-B05 cumulative
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['22','24']
+    steps:
+      - name: Validate B05 E subject
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          HEAD_REF: ${{ github.head_ref }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          if [[ "${EVENT_NAME}" == "pull_request" ]]; then
+            test "${HEAD_REF}" = "book-system/b05-e-152-qualification-v1"
+            [[ "${PR_HEAD_SHA}" =~ ^[0-9a-f]{40}$ ]]
+          else
+            test "${GITHUB_REF}" = "refs/heads/book-system/b05-e-152-qualification-v1"
+          fi
+
+      - name: Checkout exact B05 E subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Verify exact checkout and frozen B05-C denominator
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          if [[ "${EVENT_NAME}" == "pull_request" ]]; then
+            test "$(git rev-parse HEAD)" = "${PR_HEAD_SHA}"
+          else
+            test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          fi
+          echo "subject_sha=$(git rev-parse HEAD)" | tee b05-e-subject-${{ matrix.node }}.txt
+          test "$(git hash-object qualification/book-system/reconstruction/BOOK-RECONSTRUCTION-B05-C-QUALIFICATION-DENOMINATOR-001.csv)" = '83bd8781ea434e20d23e9a6d37177fa934fd5f80'
+          node qualification/book-system/reconstruction/BOOK-RECONSTRUCTION-B05-C-LOCK-VERIFY-001.js | tee b05-c-lock-${{ matrix.node }}.log
+
+      - name: Setup Node ${{ matrix.node }}
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Bind Node version
+        shell: bash
+        run: node --version | tee -a b05-e-subject-${{ matrix.node }}.txt
+
+      - name: B05 E fresh isolated frozen 152-case denominator
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test --test-reporter=tap system-master/book-system/book-b05-e-152-isolated.test.js | tee b05-e-152-${{ matrix.node }}.log
+          grep -E '^# tests 152$' b05-e-152-${{ matrix.node }}.log
+          grep -E '^# pass 152$' b05-e-152-${{ matrix.node }}.log
+          grep -E '^# fail 0$' b05-e-152-${{ matrix.node }}.log
+          grep -E '^# cancelled 0$' b05-e-152-${{ matrix.node }}.log
+          grep -E '^# skipped 0$' b05-e-152-${{ matrix.node }}.log
+
+      - name: B05 D1-D4 cumulative regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test system-master/book-system/book-literary-d1.test.js system-master/book-system/book-literary-d1-registry-lock.test.js | tee b05-d1-${{ matrix.node }}.log
+          node --test system-master/book-system/book-literary-d2.test.js system-master/book-system/book-literary-d2-hardening.test.js | tee b05-d2-${{ matrix.node }}.log
+          node --test system-master/book-system/book-literary-d3.test.js system-master/book-system/book-literary-d3-hardening.test.js | tee b05-d3-${{ matrix.node }}.log
+          node --test system-master/book-system/book-literary-d4.test.js system-master/book-system/book-literary-d4-hardening.test.js | tee b05-d4-${{ matrix.node }}.log
+
+      - name: B04 frozen 128 and cumulative integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          node -e "require('./system-master/book-system/book-b04-e-denominator-manifest-v1').validateDenominatorManifestV1()"
+          node --test --test-reporter=tap \
+            system-master/book-system/book-b04-e-exposure.test.js \
+            system-master/book-system/book-b04-e-dimensions.test.js \
+            system-master/book-system/book-b04-e-perspective.test.js \
+            system-master/book-system/book-b04-e-understanding.test.js \
+            system-master/book-system/book-b04-e-invalidation.test.js \
+            | tee b04-e-128-${{ matrix.node }}.log
+          grep -E '^# tests 128$' b04-e-128-${{ matrix.node }}.log
+          grep -E '^# pass 128$' b04-e-128-${{ matrix.node }}.log
+          grep -E '^# fail 0$' b04-e-128-${{ matrix.node }}.log
+          node --test --test-reporter=tap system-master/book-system/book-b04-e-cumulative-integration.test.js | tee b04-e-integration-${{ matrix.node }}.log
+          grep -E '^# tests 8$' b04-e-integration-${{ matrix.node }}.log
+          grep -E '^# pass 8$' b04-e-integration-${{ matrix.node }}.log
+          grep -E '^# fail 0$' b04-e-integration-${{ matrix.node }}.log
+
+      - name: B03 frozen 108 and integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          node system-master/book-system/book-story-bible-knowledge-v1.test.js | tee b03-k-${{ matrix.node }}.log
+          node system-master/book-system/book-knowledge-materializer-v1.test.js | tee b03-m-${{ matrix.node }}.log
+          node system-master/book-system/book-knowledge-invalidation-v1.test.js | tee b03-i-${{ matrix.node }}.log
+          node system-master/book-system/book-story-bible-admission-v1.test.js | tee b03-a-${{ matrix.node }}.log
+          grep -F '"denominator":"K01-K32"' b03-k-${{ matrix.node }}.log
+          grep -F '"denominator":"M01-M20"' b03-m-${{ matrix.node }}.log
+          grep -F '"denominator":"I01-I16"' b03-i-${{ matrix.node }}.log
+          grep -F '"denominator":"A01-A16+X01-X24"' b03-a-${{ matrix.node }}.log
+          grep -F '"cumulative_b03_cases":108' b03-a-${{ matrix.node }}.log
+          node system-master/book-system/book-b03-e-cumulative-integration.test.js | tee b03-e-integration-${{ matrix.node }}.log
+          grep -F '"denominator":"B03-E-INTEGRATION-E01-E08"' b03-e-integration-${{ matrix.node }}.log
+          grep -F '"cases":8' b03-e-integration-${{ matrix.node }}.log
+
+      - name: B02 frozen 72 and cumulative recovery integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          node system-master/book-system/book-source-recovery-acceptance-v1.test.js | tee b02-s-${{ matrix.node }}.log
+          node system-master/book-system/book-existing-book-recovery-adapter-v1.test.js | tee b02-r-${{ matrix.node }}.log
+          node system-master/book-system/book-recovered-baseline-admission-v1.test.js | tee b02-a-${{ matrix.node }}.log
+          grep -F '"denominator":"S01-S20"' b02-s-${{ matrix.node }}.log
+          grep -F '"denominator":"R01-R16"' b02-r-${{ matrix.node }}.log
+          grep -F '"denominator":"A01-A16 + X01-X20"' b02-a-${{ matrix.node }}.log
+          node .github/scripts/book-reconstruction-b02-e-cumulative-001-qualify.js | tee b02-cumulative-${{ matrix.node }}.log
+
+      - name: B01 frozen 64 and execution regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          node system-master/book-system/book-b01-e-frozen-denominator.test.js | tee b01-64-${{ matrix.node }}.log
+          node system-master/book-system/book-capability-binding-v1.test.js | tee b01-binding-${{ matrix.node }}.log
+          node .github/scripts/book-context-compiler-context-package-001-qualify.js | tee context-44-${{ matrix.node }}.log
+          node system-master/book-system/context-compiler/book-context-compiler-b01-rebind.test.js | tee b01-context-${{ matrix.node }}.log
+          node system-master/book-system/book-execution-foundation-b01.test.js | tee b01-foundation-${{ matrix.node }}.log
+          node system-master/book-system/book-workflow-runtime-b01.test.js | tee b01-runtime-${{ matrix.node }}.log
+          node system-master/book-system/book-workflow-durable-store.test.js | tee durable-${{ matrix.node }}.log
+          node system-master/book-system/book-workflow-scheduler-runtime.test.js | tee scheduler-${{ matrix.node }}.log
+
+      - name: B00 Q001-Q096
+        shell: bash
+        run: |
+          set -euo pipefail
+          node .github/scripts/book-system-canonical-parent-v2-core-001-qualify.js | tee q001-q036-${{ matrix.node }}.log
+          node .github/scripts/book-system-canonical-parent-v2-store-001-qualify.js | tee q037-q050-${{ matrix.node }}.log
+          node .github/scripts/book-reconstruction-b00-f5-version-admission-001-qualify.js | tee q051-q058-${{ matrix.node }}.log
+          node .github/scripts/book-reconstruction-b00-f6b-lifecycle-rebind-001-qualify.js | tee q059-q060-${{ matrix.node }}.log
+          node .github/scripts/book-reconstruction-b00-f7-author-decision-rebind-001-qualify.js | tee q061-q062-${{ matrix.node }}.log
+          node .github/scripts/book-reconstruction-b00-f8-integration-proposal-rebind-001-qualify.js | tee q063-${{ matrix.node }}.log
+          node .github/scripts/book-reconstruction-b00-f10-evidence-recovery-seam-001-qualify.js | tee q064-q066-q085-q090-${{ matrix.node }}.log
+          node .github/scripts/book-reconstruction-b00-f9-export-freeze-rebind-001-qualify.js | tee q065-${{ matrix.node }}.log
+          node .github/scripts/book-system-rights-custody-evidence-001-qualify.js | tee q067-q076-${{ matrix.node }}.log
+          node .github/scripts/book-system-governing-style-profile-001-qualify.js | tee q077-q084-${{ matrix.node }}.log
+          node .github/scripts/book-reconstruction-b00-f11-v1-v2-migration-001-qualify.js | tee q091-q096-${{ matrix.node }}.log
+
+      - name: PRE01-PRE21 current-subject regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          node .github/scripts/book-system-canonical-state-001-qualify.js | tee pre01-${{ matrix.node }}.log
+          node .github/scripts/book-system-version-and-rollback-001-qualify-v2.js | tee pre02-${{ matrix.node }}.log
+          node .github/scripts/book-system-content-object-admission-001-qualify.js | tee pre03-${{ matrix.node }}.log
+          node .github/scripts/book-system-content-admission-author-decision-applicability-guard-004-qualify.js | tee pre04-${{ matrix.node }}.log
+          node .github/scripts/book-system-lifecycle-transition-001-qualify.js | tee pre05-${{ matrix.node }}.log
+          node .github/scripts/book-system-lifecycle-current-parent-compatibility-001-qualify-v2.js | tee pre06-${{ matrix.node }}.log
+          node .github/scripts/book-system-lifecycle-current-parent-rebind-001-qualify.js | tee pre07-${{ matrix.node }}.log
+          node .github/scripts/book-system-author-decision-queue-001-qualify-v2.js | tee pre08-${{ matrix.node }}.log
+          node .github/scripts/book-system-author-decision-current-subject-guard-001-qualify.js | tee pre09-${{ matrix.node }}.log
+          node .github/scripts/book-system-integration-proposal-runtime-002-qualify.js | tee pre10-${{ matrix.node }}.log
+          node .github/scripts/book-system-export-freeze-001-reconciled-qualify.js | tee pre11-${{ matrix.node }}.log
+          node .github/scripts/book-system-existing-book-recovery-semantic-core-001-qualify-v2.js | tee pre12-${{ matrix.node }}.log
+          node .github/scripts/book-system-e2e-authority-guards-001-qualify.js | tee pre13-${{ matrix.node }}.log
+          set +e
+          node .github/scripts/book-system-end-to-end-authoring-001-qualify-v2.js 2>&1 | tee pre14-${{ matrix.node }}.log
+          pre14_rc=${PIPESTATUS[0]}
+          set -e
+          if [ "$pre14_rc" -eq 0 ]; then
+            echo '{"pre14_end_to_end_authoring":"PASS_CURRENT_SUBJECT","qualification_transfer":false}' > pre14-classification-${{ matrix.node }}.json
+          else
+            grep -F 'AUTHOR_GUARD_BYTES_DRIFTED_FROM_A01_SUBJECT' pre14-${{ matrix.node }}.log
+            echo '{"pre14_end_to_end_authoring":"BLOCKED_A01_REQUIRED","reason":"CURRENT_AUTHOR_GUARD_BYTES_CHANGED_AFTER_REGISTERED_A01_SUBJECT","qualification_transfer":false}' > pre14-classification-${{ matrix.node }}.json
+          fi
+          node .github/scripts/book-workflow-orchestrator-authority-contract-001-qualify.js | tee pre15-${{ matrix.node }}.log
+          node .github/scripts/book-workflow-orchestrator-book-admission-handoff-001-qualify.js | tee pre16-${{ matrix.node }}.log
+          node .github/scripts/book-workflow-orchestrator-concurrency-rules-001-qualify.js | tee pre17-${{ matrix.node }}.log
+          node .github/scripts/book-workflow-orchestrator-failure-semantics-001-qualify.js | tee pre18-${{ matrix.node }}.log
+          node .github/scripts/book-workflow-orchestrator-retry-idempotency-rules-001-qualify.js | tee pre19-${{ matrix.node }}.log
+          node .github/scripts/book-workflow-orchestrator-cancellation-resume-001-qualify.js | tee pre20-${{ matrix.node }}.log
+          node .github/scripts/book-workflow-orchestrator-evidence-provenance-emission-001-qualify.js | tee pre21-${{ matrix.node }}.log
+
+      - name: Runtime import smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          node -e "require('./system-master/book-system/book-literary-diagnostic-context-v1')"
+          node -e "require('./system-master/book-system/book-literary-diagnostic-observation-v1')"
+          node -e "require('./system-master/book-system/book-literary-diagnosis-v1')"
+          node -e "require('./system-master/book-system/book-craft-intelligence-v1')"
+          node -e "require('./system-master/book-system/book-literary-opportunity-ledger-v1')"
+          node -e "require('./system-master/book-system/book-literary-currentness-runtime-v1')"
+          node -e "const m=require('./qualification/book-system/reconstruction/BOOK-B05-E-152-DENOMINATOR-v1.json'); if(m.total!==152||m.historical_pass_transfer!==0) process.exit(1)"
+
+      - name: Record B05 E calibration and authority fences
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          pre14_standing="NOT_RUN"
+          if [ -f pre14-classification-${{ matrix.node }}.json ]; then
+            pre14_standing=$(node -e "process.stdout.write(require('./pre14-classification-${{ matrix.node }}.json').pre14_end_to_end_authoring)")
+          fi
+          cat > b05-e-calibration-blockers-${{ matrix.node }}.json <<JSON
+          {
+            "MODEL_LITERARY_SPECIALIST_CALIBRATION_REQUIRED": "OPEN",
+            "HUMAN_EDITOR_ALIGNMENT_REQUIRED": "OPEN",
+            "REAL_BOOK_DIAGNOSTIC_CALIBRATION_REQUIRED": "OPEN",
+            "CROSS_GENRE_GENERALIZATION_REQUIRED": "OPEN",
+            "PROVIDER_SUBJECT_ADMISSION_REQUIRED": "OPEN",
+            "PRIVATE_MANUSCRIPT_ENVIRONMENT_REQUIRED": "OPEN",
+            "pre14_end_to_end_authoring": "${pre14_standing}",
+            "b05_isolated_denominator": 152,
+            "groups": "C24,S36,K20,O24,I24,X24",
+            "denominator_shrinkage": 0,
+            "historical_pass_transferred": 0,
+            "retired_prose_pass_transferred": 0,
+            "b01_provider_registry_widened": false,
+            "canonical_effect": false,
+            "b05_f_freeze_started": false
+          }
+          JSON
+          cat b05-e-calibration-blockers-${{ matrix.node }}.json
+
+      - name: Seal B05 E evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            echo "subject_sha=$(git rev-parse HEAD)"
+            echo "node=$(node --version)"
+            echo "workflow=book-b05-e-152-cumulative-qualification"
+            echo "isolated_cases=152"
+            echo "groups=C24,S36,K20,O24,I24,X24"
+            echo "historical_pass_transfer=0"
+            echo "denominator_shrinkage=false"
+            echo "canonical_effect=false"
+            sha256sum qualification/book-system/reconstruction/BOOK-B05-E-152-DENOMINATOR-v1.json
+            sha256sum system-master/book-system/book-b05-e-152-isolated.test.js
+            sha256sum system-master/book-system/book-b05-e-adversarial.test.js
+            sha256sum qualification/book-system/reconstruction/BOOK-RECONSTRUCTION-B05-C-DESIGN-LOCK-001.md
+            sha256sum qualification/book-system/reconstruction/BOOK-RECONSTRUCTION-B05-C-QUALIFICATION-DENOMINATOR-001.csv
+            sha256sum qualification/book-system/reconstruction/BOOK-RECONSTRUCTION-B05-D4-CLOSURE-RECEIPT-001.md
+          } > b05-e-evidence-${{ matrix.node }}.txt
+          cat b05-e-evidence-${{ matrix.node }}.txt
+
+      - name: Upload B05 E evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: book-b05-e-node-${{ matrix.node }}-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            b05-e-subject-${{ matrix.node }}.txt
+            b05-c-lock-${{ matrix.node }}.log
+            b05-e-152-${{ matrix.node }}.log
+            b05-d1-${{ matrix.node }}.log
+            b05-d2-${{ matrix.node }}.log
+            b05-d3-${{ matrix.node }}.log
+            b05-d4-${{ matrix.node }}.log
+            b04-e-128-${{ matrix.node }}.log
+            b04-e-integration-${{ matrix.node }}.log
+            b03-*.log
+            b02-*.log
+            b01-*.log
+            context-*.log
+            durable-*.log
+            scheduler-*.log
+            q*.log
+            pre*.log
+            pre14-classification-${{ matrix.node }}.json
+            b05-e-calibration-blockers-${{ matrix.node }}.json
+            b05-e-evidence-${{ matrix.node }}.txt
+          if-no-files-found: error
+          retention-days: 30
