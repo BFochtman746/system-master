@@ -1,0 +1,42 @@
+{
+  "binding_id": "A01-CODE-QUAL-001-AUTHORING-SUBJECT-BINDING-001",
+  "operation_id": "A01-CODE-QUAL-001",
+  "purpose": "Prevent the qualification from attributing code-authoring capability to the A-01 execution host when the measured work was actually produced by a separate coding agent/model.",
+  "measured_subject_definition": "The measured subject is the exact code-authoring agent configuration operating inside the A-01 controlled workspace and toolchain during the sealed 30-minute window.",
+  "required_identities": {
+    "authoring_agent": [
+      "provider_or_runtime",
+      "agent_or_model_name",
+      "agent_or_model_version_when_available",
+      "reasoning_or_effort_configuration_when_available",
+      "system_or_project_instruction_digest",
+      "tool_permission_profile_digest",
+      "authoring_entrypoint_identity"
+    ],
+    "a01_execution_environment": [
+      "runner_name",
+      "operating_system",
+      "architecture",
+      "toolchain_manifest_digest",
+      "workspace_isolation_contract_digest"
+    ],
+    "benchmark": [
+      "contract_digest",
+      "assignment_digest",
+      "candidate_fixture_digest",
+      "hidden_evaluator_digest",
+      "runner_digest"
+    ]
+  },
+  "validity_law": [
+    "A run with an unidentified authoring agent is INVALID_RUN.",
+    "A run that exercises only A-01 qualification/execution commands is not evidence of code-authoring capability.",
+    "A run may be compared with another run only when subject-identity differences are explicitly reported.",
+    "Changing the authoring model, project instructions, tool permissions, or execution environment creates a new measured subject configuration even if the benchmark contract is unchanged."
+  ],
+  "current_repository_finding": {
+    "status": "AUTHORING_ENTRYPOINT_NOT_YET_BOUND",
+    "finding": "Checked-in A-01 infrastructure currently exposes qualification, scheduling, fenced execution, and repair-request paths; no authoritative code-authoring agent entrypoint has yet been identified for the CODE phase.",
+    "consequence": "Do not execute or label the first 30-minute run as A-01 code-authoring evidence until the exact authoring entrypoint is bound."
+  }
+}
