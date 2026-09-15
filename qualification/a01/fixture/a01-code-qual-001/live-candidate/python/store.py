@@ -83,7 +83,6 @@ class Store:
         return self._claim(row) if row else None
 
     def claim(self, request_id: str, owner: str, payload: str) -> tuple[Claim, bool]:
-        now = float(self.clock())
         with self._write_transaction():
             row = self.conn.execute(
                 "SELECT request_id, owner, generation, payload, status, expires_at "
@@ -96,7 +95,7 @@ class Store:
                     raise Conflict(request_id)
                 return current, False
 
-            expires = now + self.lease_seconds
+            expires = float(self.clock()) + self.lease_seconds
             self.conn.execute(
                 "INSERT INTO claims(request_id, owner, generation, payload, status, expires_at) "
                 "VALUES(?,?,?,?,?,?)",
@@ -105,9 +104,9 @@ class Store:
             return Claim(request_id, owner, 1, payload, "CLAIMED", expires), True
 
     def renew(self, request_id: str, owner: str, generation: int) -> bool:
-        now = float(self.clock())
-        expires = now + self.lease_seconds
         with self._write_transaction():
+            now = float(self.clock())
+            expires = now + self.lease_seconds
             cur = self.conn.execute(
                 "UPDATE claims SET expires_at=? "
                 "WHERE request_id=? AND status='CLAIMED' AND owner=? AND generation=? "
@@ -117,8 +116,8 @@ class Store:
             return cur.rowcount == 1
 
     def complete(self, request_id: str, owner: str, generation: int) -> bool:
-        now = float(self.clock())
         with self._write_transaction():
+            now = float(self.clock())
             cur = self.conn.execute(
                 "UPDATE claims SET status='DONE' "
                 "WHERE request_id=? AND status='CLAIMED' AND owner=? AND generation=? "
@@ -128,8 +127,8 @@ class Store:
             return cur.rowcount == 1
 
     def recover(self, request_id: str, new_owner: str) -> tuple[Claim, bool]:
-        now = float(self.clock())
         with self._write_transaction():
+            now = float(self.clock())
             row = self.conn.execute(
                 "SELECT request_id, owner, generation, payload, status, expires_at "
                 "FROM claims WHERE request_id=?",
