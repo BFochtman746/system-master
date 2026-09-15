@@ -107,6 +107,7 @@ class A01ExecutionWorker:
         heartbeat_sla_seconds: int = 300,
         evidence_root: Optional[Path] = None,
         clock: Callable[[], dt.datetime] = utcnow,
+        worker_id: Optional[str] = None,
     ):
         if not isinstance(store, SupervisorStore):
             raise TypeError("store must be SupervisorStore")
@@ -116,6 +117,8 @@ class A01ExecutionWorker:
             raise ValueError("renew_seconds must be positive and less than lease_seconds")
         if heartbeat_sla_seconds < renew_seconds:
             raise ValueError("heartbeat_sla_seconds must be >= renew_seconds")
+        if worker_id is not None and (not isinstance(worker_id, str) or not worker_id.strip()):
+            raise ValueError("worker_id must be a non-empty string")
         self.store = store
         self.root = (root or ROOT).resolve()
         self.scheduler = scheduler or A01NightScheduler(store)
@@ -124,6 +127,7 @@ class A01ExecutionWorker:
         self.heartbeat_sla_seconds = heartbeat_sla_seconds
         self.evidence_root = (evidence_root or (Path(store.db_path).resolve().parent / "execution-evidence")).resolve()
         self.clock = clock
+        self.worker_id = worker_id or f"a01-worker:{os.getpid()}:{time.time_ns()}:{id(self):x}"
         self.executors: dict[str, Executor] = {
             "A01_CONTROL_PLANE_QUALIFICATION": self._execute_a01_qualification,
         }
@@ -152,6 +156,17 @@ class A01ExecutionWorker:
                   result_json TEXT,
                   error_class TEXT,
                   error_message TEXT
+                )
+                """
+            )
+            c.execute(
+                """
+                CREATE TABLE IF NOT EXISTS night_execution_owners (
+                  dispatch_id TEXT PRIMARY KEY REFERENCES dispatch_outbox(dispatch_id),
+                  owner_worker_id TEXT NOT NULL,
+                  fencing_token INTEGER NOT NULL,
+                  acquired_at TEXT NOT NULL,
+                  updated_at TEXT NOT NULL
                 )
                 """
             )
@@ -195,6 +210,60 @@ class A01ExecutionWorker:
             "SELECT * FROM night_execution_results WHERE dispatch_id=?", (dispatch_id,)
         ).fetchone()
         return dict(row) if row is not None else None
+
+    def _assert_owned_result(
+        self,
+        c: Any,
+        bundle: dict[str, Any],
+        *,
+        states: set[str],
+        now: Optional[dt.datetime] = None,
+        require_live_fence: bool = True,
+    ) -> Any:
+        fence = int(bundle["fencing_token"])
+        if require_live_fence:
+            if now is None:
+                raise ValueError("now is required for live-fence validation")
+            claim = self.store._claim(c, bundle["lease_id"])
+            self.store._assert_live_worker(c, claim, fence, now)
+        owner = c.execute(
+            "SELECT owner_worker_id,fencing_token FROM night_execution_owners WHERE dispatch_id=?",
+            (bundle["dispatch_id"],),
+        ).fetchone()
+        if owner is None or owner["owner_worker_id"] != self.worker_id or int(owner["fencing_token"]) != fence:
+            raise StaleWorker("execution ownership or fencing authority changed")
+        row = c.execute(
+            "SELECT * FROM night_execution_results WHERE dispatch_id=?",
+            (bundle["dispatch_id"],),
+        ).fetchone()
+        if row is None:
+            raise ExecutionWorkerError("execution result record is missing")
+        if row["input_digest"] != bundle["input_digest"]:
+            raise Conflict("dispatch result identity collision")
+        if int(row["fencing_token"]) != fence:
+            raise StaleWorker("execution result fencing authority changed")
+        if row["state"] not in states:
+            raise ExecutionWorkerError(f"execution result is not mutable from state {row['state']}")
+        return row
+
+    def _mark_authority_lost_if_owned(self, bundle: dict[str, Any], message: str, now: dt.datetime) -> bool:
+        fence = int(bundle["fencing_token"])
+        with self.store.tx() as c:
+            changed = c.execute(
+                """
+                UPDATE night_execution_results
+                SET state='AUTHORITY_LOST',terminal_state='STALE',finished_at=?,updated_at=?,
+                    error_class='StaleWorker',error_message=?
+                WHERE dispatch_id=? AND fencing_token=? AND state IN ('RUNNING','RESULT_READY')
+                  AND EXISTS (
+                    SELECT 1 FROM night_execution_owners o
+                    WHERE o.dispatch_id=night_execution_results.dispatch_id
+                      AND o.owner_worker_id=? AND o.fencing_token=?
+                  )
+                """,
+                (iso(now), iso(now), message, bundle["dispatch_id"], fence, self.worker_id, fence),
+            ).rowcount
+        return changed == 1
 
     def renew_lease(
         self,
@@ -302,6 +371,18 @@ class A01ExecutionWorker:
                     "UPDATE night_execution_results SET fencing_token=?,updated_at=? WHERE dispatch_id=? AND state IN ('RUNNING','RESULT_READY')",
                     (new_fence, iso(now), row["dispatch_id"]),
                 )
+                c.execute(
+                    """
+                    INSERT INTO night_execution_owners(dispatch_id,owner_worker_id,fencing_token,acquired_at,updated_at)
+                    VALUES(?,?,?,?,?)
+                    ON CONFLICT(dispatch_id) DO UPDATE SET
+                      owner_worker_id=excluded.owner_worker_id,
+                      fencing_token=excluded.fencing_token,
+                      acquired_at=excluded.acquired_at,
+                      updated_at=excluded.updated_at
+                    """,
+                    (row["dispatch_id"], self.worker_id, new_fence, iso(now), iso(now)),
+                )
                 self.store._event(
                     c,
                     row["lane"],
@@ -356,19 +437,34 @@ class A01ExecutionWorker:
         return {**recovered, "resumed_leases": resumed}
 
     def _ensure_execution_record(self, bundle: dict[str, Any], now: dt.datetime) -> dict[str, Any]:
-        existing = self._result_row(bundle["dispatch_id"])
-        if existing is not None:
-            if existing["input_digest"] != bundle["input_digest"]:
-                raise Conflict("dispatch result identity collision")
-            if int(existing["fencing_token"]) != int(bundle["fencing_token"]):
-                with self.store.tx() as c:
-                    c.execute(
-                        "UPDATE night_execution_results SET fencing_token=?,updated_at=? WHERE dispatch_id=? AND state IN ('RUNNING','RESULT_READY')",
-                        (int(bundle["fencing_token"]), iso(now), bundle["dispatch_id"]),
-                    )
-                existing = self._result_row(bundle["dispatch_id"])
-            return existing or {}
+        fence = int(bundle["fencing_token"])
         with self.store.tx() as c:
+            claim = self.store._claim(c, bundle["lease_id"])
+            self.store._assert_live_worker(c, claim, fence, now)
+            existing = c.execute(
+                "SELECT * FROM night_execution_results WHERE dispatch_id=?",
+                (bundle["dispatch_id"],),
+            ).fetchone()
+            if existing is not None and existing["input_digest"] != bundle["input_digest"]:
+                raise Conflict("dispatch result identity collision")
+            owner = c.execute(
+                "SELECT owner_worker_id,fencing_token FROM night_execution_owners WHERE dispatch_id=?",
+                (bundle["dispatch_id"],),
+            ).fetchone()
+            if owner is None:
+                c.execute(
+                    """
+                    INSERT INTO night_execution_owners(dispatch_id,owner_worker_id,fencing_token,acquired_at,updated_at)
+                    VALUES(?,?,?,?,?)
+                    """,
+                    (bundle["dispatch_id"], self.worker_id, fence, iso(now), iso(now)),
+                )
+            elif owner["owner_worker_id"] != self.worker_id or int(owner["fencing_token"]) != fence:
+                raise StaleWorker("dispatch execution is owned by another worker or fencing generation")
+            if existing is not None:
+                if int(existing["fencing_token"]) != fence:
+                    raise StaleWorker("execution result fencing generation does not match live authority")
+                return dict(existing)
             c.execute(
                 """
                 INSERT INTO night_execution_results(
@@ -378,18 +474,35 @@ class A01ExecutionWorker:
                 """,
                 (
                     bundle["dispatch_id"], bundle["lease_id"], bundle["lane"], bundle["idempotency_key"],
-                    int(bundle["fencing_token"]), bundle["executor_kind"], bundle["input_digest"],
+                    fence, bundle["executor_kind"], bundle["input_digest"],
                     "RUNNING", 0, iso(now), iso(now),
                 ),
             )
-        return self._result_row(bundle["dispatch_id"]) or {}
+            created = c.execute(
+                "SELECT * FROM night_execution_results WHERE dispatch_id=?",
+                (bundle["dispatch_id"],),
+            ).fetchone()
+            return dict(created) if created is not None else {}
 
-    def _mark_attempt(self, dispatch_id: str, now: dt.datetime) -> None:
+    def _mark_attempt(self, bundle: dict[str, Any], now: dt.datetime) -> None:
+        fence = int(bundle["fencing_token"])
         with self.store.tx() as c:
-            c.execute(
-                "UPDATE night_execution_results SET attempt_count=attempt_count+1,state='RUNNING',updated_at=? WHERE dispatch_id=?",
-                (iso(now), dispatch_id),
-            )
+            self._assert_owned_result(c, bundle, states={"RUNNING"}, now=now)
+            changed = c.execute(
+                """
+                UPDATE night_execution_results
+                SET attempt_count=attempt_count+1,state='RUNNING',updated_at=?
+                WHERE dispatch_id=? AND fencing_token=? AND state='RUNNING'
+                  AND EXISTS (
+                    SELECT 1 FROM night_execution_owners o
+                    WHERE o.dispatch_id=night_execution_results.dispatch_id
+                      AND o.owner_worker_id=? AND o.fencing_token=?
+                  )
+                """,
+                (iso(now), bundle["dispatch_id"], fence, self.worker_id, fence),
+            ).rowcount
+            if changed != 1:
+                raise StaleWorker("execution attempt lost owner/fence authority")
 
     def _stage_result(
         self,
@@ -414,12 +527,19 @@ class A01ExecutionWorker:
         }
         if error is not None:
             terminal_payload["error"] = {"class": error_class, "message": error_message}
+        fence = int(bundle["fencing_token"])
         with self.store.tx() as c:
-            c.execute(
+            self._assert_owned_result(c, bundle, states={"RUNNING"}, now=now)
+            changed = c.execute(
                 """
                 UPDATE night_execution_results
                 SET state='RESULT_READY',terminal_state=?,result_json=?,error_class=?,error_message=?,updated_at=?
-                WHERE dispatch_id=?
+                WHERE dispatch_id=? AND fencing_token=? AND state='RUNNING'
+                  AND EXISTS (
+                    SELECT 1 FROM night_execution_owners o
+                    WHERE o.dispatch_id=night_execution_results.dispatch_id
+                      AND o.owner_worker_id=? AND o.fencing_token=?
+                  )
                 """,
                 (
                     terminal_state,
@@ -428,41 +548,55 @@ class A01ExecutionWorker:
                     error_message,
                     iso(now),
                     bundle["dispatch_id"],
+                    fence,
+                    self.worker_id,
+                    fence,
                 ),
-            )
+            ).rowcount
+            if changed != 1:
+                raise StaleWorker("execution result lost owner/fence authority before staging")
         return terminal_payload
 
     def _commit_staged_result(self, bundle: dict[str, Any], now: dt.datetime) -> dict[str, Any]:
-        row = self._result_row(bundle["dispatch_id"])
-        if row is None or row["state"] != "RESULT_READY" or not row["terminal_state"]:
+        fence = int(bundle["fencing_token"])
+        with self.store.tx() as c:
+            row = self._assert_owned_result(c, bundle, states={"RESULT_READY"}, now=now)
+            terminal_state = row["terminal_state"]
+            payload = json.loads(row["result_json"] or "{}")
+        if not terminal_state:
             raise ExecutionWorkerError("result is not staged for terminal commit")
-        payload = json.loads(row["result_json"] or "{}")
         try:
             self.store.terminal(
                 bundle["lease_id"],
-                int(bundle["fencing_token"]),
-                row["terminal_state"],
+                fence,
+                terminal_state,
                 payload=payload,
                 now=now,
             )
         except StaleWorker:
-            with self.store.tx() as c:
-                c.execute(
-                    """
-                    UPDATE night_execution_results
-                    SET state='AUTHORITY_LOST',terminal_state='STALE',finished_at=?,updated_at=?,
-                        error_class='StaleWorker',error_message='fencing authority lost before terminal result commit'
-                    WHERE dispatch_id=?
-                    """,
-                    (iso(now), iso(now), bundle["dispatch_id"]),
-                )
-            raise
-        final = "SUCCEEDED" if row["terminal_state"] == "COMPLETED" else "FAILED"
-        with self.store.tx() as c:
-            c.execute(
-                "UPDATE night_execution_results SET state=?,finished_at=?,updated_at=? WHERE dispatch_id=?",
-                (final, iso(now), iso(now), bundle["dispatch_id"]),
+            self._mark_authority_lost_if_owned(
+                bundle,
+                "fencing authority lost before terminal result commit",
+                now,
             )
+            raise
+        final = "SUCCEEDED" if terminal_state == "COMPLETED" else "FAILED"
+        with self.store.tx() as c:
+            changed = c.execute(
+                """
+                UPDATE night_execution_results
+                SET state=?,finished_at=?,updated_at=?
+                WHERE dispatch_id=? AND fencing_token=? AND state='RESULT_READY'
+                  AND EXISTS (
+                    SELECT 1 FROM night_execution_owners o
+                    WHERE o.dispatch_id=night_execution_results.dispatch_id
+                      AND o.owner_worker_id=? AND o.fencing_token=?
+                  )
+                """,
+                (final, iso(now), iso(now), bundle["dispatch_id"], fence, self.worker_id, fence),
+            ).rowcount
+            if changed != 1:
+                raise StaleWorker("execution result lost owner/fence authority after terminal commit")
         self.scheduler.reconcile(now=now)
         return self._result_row(bundle["dispatch_id"]) or {}
 
@@ -494,7 +628,7 @@ class A01ExecutionWorker:
             checkpoint_pointer=f"execution:{dispatch_id}:starting", now=now,
         )
         self.store.mark_dispatched(dispatch_id, f"local:{dispatch_id}", now=now)
-        self._mark_attempt(dispatch_id, now)
+        self._mark_attempt(bundle, now)
         context = ExecutionContext(
             worker=self,
             dispatch_id=dispatch_id,
@@ -520,16 +654,11 @@ class A01ExecutionWorker:
             return self._commit_staged_result(bundle, end)
         except StaleWorker:
             lost_at = self.clock()
-            with self.store.tx() as c:
-                c.execute(
-                    """
-                    UPDATE night_execution_results
-                    SET state='AUTHORITY_LOST',terminal_state='STALE',finished_at=?,updated_at=?,
-                        error_class='StaleWorker',error_message='fencing authority lost during execution'
-                    WHERE dispatch_id=?
-                    """,
-                    (iso(lost_at), iso(lost_at), dispatch_id),
-                )
+            self._mark_authority_lost_if_owned(
+                bundle,
+                "fencing authority lost during execution",
+                lost_at,
+            )
             raise
         except Exception as exc:
             failure_result = exc.result if isinstance(exc, WorkExecutionFailed) else {}
@@ -543,16 +672,11 @@ class A01ExecutionWorker:
                 self._stage_result(bundle, terminal_state="BLOCKED", result=failure_result, error=exc, now=failure_now)
                 return self._commit_staged_result(bundle, failure_now)
             except StaleWorker:
-                with self.store.tx() as c:
-                    c.execute(
-                        """
-                        UPDATE night_execution_results
-                        SET state='AUTHORITY_LOST',terminal_state='STALE',finished_at=?,updated_at=?,
-                            error_class='StaleWorker',error_message='fencing authority lost while recording failure'
-                        WHERE dispatch_id=?
-                        """,
-                        (iso(failure_now), iso(failure_now), dispatch_id),
-                    )
+                self._mark_authority_lost_if_owned(
+                    bundle,
+                    "fencing authority lost while recording failure",
+                    failure_now,
+                )
                 raise
 
     def _live_dispatch_ids(self) -> list[str]:
