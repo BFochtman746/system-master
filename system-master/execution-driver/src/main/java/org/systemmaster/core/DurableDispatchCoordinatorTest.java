@@ -141,6 +141,10 @@ public final class DurableDispatchCoordinatorTest {
         eq("versioned state JSON round-trips", ready, DurableDispatchCoordinator.ClaimRecord.fromJson(json));
         refuses("unsupported schema fails closed", IllegalStateException.class, "STATE_SCHEMA_UNSUPPORTED", () -> DurableDispatchCoordinator.ClaimRecord.fromJson(json.replace("\"schema_version\":1", "\"schema_version\":99")));
         refuses("missing required field fails closed", IllegalStateException.class, "STATE_CORRUPT_MISSING_CLAIM_ID", () -> DurableDispatchCoordinator.ClaimRecord.fromJson(json.replace("\"claim_id\":\"job-8\",\n", "")));
+        refuses("trailing bytes fail closed", IllegalStateException.class, "STATE_CORRUPT_NON_CANONICAL", () -> DurableDispatchCoordinator.ClaimRecord.fromJson(json + "{}"));
+        refuses("duplicate field fails closed", IllegalStateException.class, "STATE_CORRUPT_NON_CANONICAL", () -> DurableDispatchCoordinator.ClaimRecord.fromJson(json.replace("\"payload_digest\":\"sha256:p8\",\n", "\"payload_digest\":\"sha256:p8\",\n  \"claim_id\":\"job-8\",\n")));
+        refuses("unknown field fails closed", IllegalStateException.class, "STATE_CORRUPT_NON_CANONICAL", () -> DurableDispatchCoordinator.ClaimRecord.fromJson(json.replace("\n}\n", ",\n  \"unexpected\":\"x\"\n}\n")));
+        refuses("noncanonical whitespace fails closed", IllegalStateException.class, "STATE_CORRUPT_NON_CANONICAL", () -> DurableDispatchCoordinator.ClaimRecord.fromJson(json.replace("\"schema_version\":1", "\"schema_version\" : 1")));
     }
 
     private static void freshCompletionTimeSurvivesFifteenMinuteWait() throws Exception {

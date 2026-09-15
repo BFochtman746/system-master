@@ -178,9 +178,13 @@ public final class DurableDispatchCoordinator {
                 String terminal = optionalString(json, "terminal_reason");
                 String error = optionalString(json, "last_error");
                 Instant updated = Instant.parse(requiredString(json, "updated_at"));
-                return new ClaimRecord(schema, id, payload, state, attempts, epoch, fence,
+                ClaimRecord parsed = new ClaimRecord(schema, id, payload, state, attempts, epoch, fence,
                         consumer, dispatch, claimed, prepared, dispatched, run, status,
                         conclusion, terminal, error, updated);
+                if (!json.equals(parsed.toJson())) {
+                    throw new IllegalStateException("STATE_CORRUPT_NON_CANONICAL");
+                }
+                return parsed;
             } catch (IllegalStateException e) {
                 throw e;
             } catch (Exception e) {
