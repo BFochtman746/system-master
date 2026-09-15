@@ -5,7 +5,7 @@ on:
     paths:
       - 'control-gateway/python/a01_github_ingress.py'
       - 'control-gateway/python/a01_ingress_service.py'
-      - 'control-gateway/python/test_a01_github_ingress.py'
+      - 'tests/test_a01_github_ingress.py'
       - 'control-gateway/test/a01-github-ingress.test.js'
       - '.github/workflows/p12-github-a01-ingress-foundation-qualification.yml'
       - 'governance/contracts/P12-FOUNDATION-CONTRACT-001.md'
@@ -13,12 +13,13 @@ on:
       - 'governance/CURRENT-AUTHORITY.json'
       - 'governance/second-shift/SECOND-SHIFT-REGISTRY-001.json'
       - 'qualification/a01/a01-policy.json'
+      - 'qualification/a01/registry.json'
   push:
     branches: [main]
     paths:
       - 'control-gateway/python/a01_github_ingress.py'
       - 'control-gateway/python/a01_ingress_service.py'
-      - 'control-gateway/python/test_a01_github_ingress.py'
+      - 'tests/test_a01_github_ingress.py'
       - 'control-gateway/test/a01-github-ingress.test.js'
       - '.github/workflows/p12-github-a01-ingress-foundation-qualification.yml'
       - 'governance/contracts/P12-FOUNDATION-CONTRACT-001.md'
@@ -26,6 +27,7 @@ on:
       - 'governance/CURRENT-AUTHORITY.json'
       - 'governance/second-shift/SECOND-SHIFT-REGISTRY-001.json'
       - 'qualification/a01/a01-policy.json'
+      - 'qualification/a01/registry.json'
   workflow_dispatch:
 
 permissions:
@@ -34,7 +36,7 @@ permissions:
 
 jobs:
   prequalify:
-    name: Prequalify P12 read-only ingress and real scheduler wiring
+    name: Prequalify P12 pre-admitted-only ingress and real scheduler wiring
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -57,13 +59,13 @@ jobs:
           PY
           python -m py_compile control-gateway/python/a01_github_ingress.py
           python -m py_compile control-gateway/python/a01_ingress_service.py
-          python -m py_compile control-gateway/python/test_a01_github_ingress.py
+          python -m py_compile tests/test_a01_github_ingress.py
 
-      - name: Run P12 offline ingress acceptance
+      - name: Run P12 fail-closed ingress acceptance
         shell: bash
         env:
           PYTHONPATH: ${{ github.workspace }}/control-gateway/python:${{ github.workspace }}
-        run: python control-gateway/python/test_a01_github_ingress.py
+        run: python tests/test_a01_github_ingress.py
 
       - name: Prove Control Gateway bridge discovers P12 acceptance
         shell: bash
@@ -74,7 +76,7 @@ jobs:
       - name: Reprove P11 scheduler dependency boundary
         run: python tests/test_control_gateway_a01_night_scheduler.py
 
-      - name: Assert current P12 authority and unchanged A-01 registration
+      - name: Assert current P12 authority and unchanged predecessor registration
         shell: bash
         run: |
           set -euo pipefail
@@ -89,19 +91,27 @@ jobs:
           const ingress = fs.readFileSync('control-gateway/python/a01_github_ingress.py', 'utf8');
           const service = fs.readFileSync('control-gateway/python/a01_ingress_service.py', 'utf8');
           const bridge = fs.readFileSync('control-gateway/test/a01-github-ingress.test.js', 'utf8');
+          const tests = fs.readFileSync('tests/test_a01_github_ingress.py', 'utf8');
           const p12 = crosswalk.platform_requirements.find(x => x.platform_id === 'P12');
           if (!p12 || p12.implementation !== 'control-gateway/python/a01_github_ingress.py') throw new Error('P12_CANONICAL_IMPLEMENTATION_POINTER_INVALID');
           if (authority.github_ingress !== p12.implementation) throw new Error('P12_CURRENT_AUTHORITY_POINTER_INVALID');
           if (policy.overnight?.enabled !== true || policy.overnight?.timezone !== 'America/New_York' || policy.overnight?.max_slots !== 8) throw new Error('P12_OVERNIGHT_POLICY_INVALID');
           const live = registry.qualifications['SECOND-SHIFT-SUPERVISOR-V2-A01-STRESS'];
-          if (!live || live.workstream_id !== 'SECOND-SHIFT-CONTROL-GATEWAY' || live.gate_class !== 'consolidated' || live.source !== 'subject') throw new Error('P12_LIVE_QUALIFIER_REGISTRATION_INVALID');
+          if (!live || live.workstream_id !== 'SECOND-SHIFT-CONTROL-GATEWAY' || live.gate_class !== 'consolidated' || live.source !== 'subject') throw new Error('P12_PREDECESSOR_QUALIFIER_REGISTRATION_INVALID');
           const expectedPeers = secondShift.auto_provisioning_invariant?.expected_active_peers;
           if (!Array.isArray(expectedPeers) || expectedPeers.length !== 9 || !expectedPeers.includes('PROGRAMMING')) throw new Error('P12_SECOND_SHIFT_OWNER_AUTHORITY_INVALID');
-          if (!ingress.includes('ADMISSION_TRANSPORT_EVIDENCE_ONLY') || !ingress.includes('READY_STATES = {"READY"}')) throw new Error('P12_AUTHORITY_BOUNDARY_MISSING');
+          if (!ingress.includes('EXECUTION_ENVELOPE_PROTOCOL = "control-gateway.a01-github-ingress-execution.v1"')) throw new Error('P12_EXECUTION_ENVELOPE_PROTOCOL_MISSING');
+          if (!ingress.includes('validate_a01_execution_envelope')) throw new Error('P12_EXECUTION_REVALIDATION_MISSING');
+          if (!ingress.includes('NO_PRE_ADMITTED_A01_EXECUTION')) throw new Error('P12_PRE_ADMISSION_BARRIER_MISSING');
+          if (ingress.includes('def build_handoff(') || ingress.includes('def build_contract(')) throw new Error('P12_LOCAL_AUTHORITY_CONSTRUCTOR_PRESENT');
+          if (!ingress.includes('A01_CONTROL_PLANE_QUALIFICATION')) throw new Error('P12_PRODUCTION_EXECUTOR_BINDING_MISSING');
+          if (!ingress.includes('resolve_ref_head')) throw new Error('P12_LIVE_OWNER_HEAD_REVALIDATION_MISSING');
           if (!ingress.includes('class GitHubSource') || !ingress.includes('class NightBudget') || !ingress.includes('class KillSwitch')) throw new Error('P12_REQUIRED_RUNTIME_MISSING');
           if (!service.includes('A01NightScheduler') || !service.includes('SupervisorStore')) throw new Error('P12_REAL_WIRING_MISSING');
-          if (!bridge.includes('test_a01_github_ingress.py') || !bridge.includes('a01_ingress_service')) throw new Error('P12_A01_DISCOVERY_BRIDGE_MISSING');
-          if (!contract.includes('no file had ever existed') || !contract.includes('neutral values')) throw new Error('P12_CONTRACT_RECONCILIATION_MISSING');
+          if (!bridge.includes('tests') || !bridge.includes('test_a01_github_ingress.py') || !bridge.includes('a01_ingress_service')) throw new Error('P12_A01_DISCOVERY_BRIDGE_MISSING');
+          if (!tests.includes('test_module_has_no_local_admission_or_coordination_builder')) throw new Error('P12_NO_LOCAL_AUTHORITY_TEST_MISSING');
+          if (!tests.includes('test_exact_pre_admitted_objects_are_forwarded_to_p11')) throw new Error('P12_EXACT_FORWARDING_TEST_MISSING');
+          if (!contract.includes('does not mint admission authority') || !contract.includes('NO_PRE_ADMITTED_A01_EXECUTION')) throw new Error('P12_CONTRACT_PRE_ADMISSION_BOUNDARY_MISSING');
           console.log('P12_HOSTED_PREQUALIFICATION=PASS');
           NODE
 
@@ -118,11 +128,18 @@ jobs:
               'subject_sha': os.environ['SUBJECT_SHA'],
               'successful': True,
               'github_read_only': True,
-              'candidate_not_promoted': True,
-              'stable_session_identity': True,
+              'pre_admitted_execution_required': True,
+              'local_admission_construction': False,
+              'local_coordination_construction': False,
+              'registered_overnight_qualifier_revalidated': True,
+              'exact_subject_revalidated': True,
+              'live_owner_head_revalidated': True,
+              'owner_control_identity_revalidated': True,
+              'payload_digest_revalidated': True,
+              'coordination_contract_revalidated': True,
+              'exact_objects_forwarded_to_p11': True,
               'durable_transport_budget': True,
               'kill_switch_per_item': True,
-              'current_head_and_obligation_guards': True,
               'real_p11_wiring': True,
               'a01_discovery_bridge': 'control-gateway/test/a01-github-ingress.test.js',
           }
@@ -147,8 +164,8 @@ jobs:
       workstream_id: SECOND-SHIFT-CONTROL-GATEWAY
       subject_sha: ${{ github.event.pull_request.head.sha || github.sha }}
       origin_ref: ${{ github.head_ref || github.ref }}
-      resume_on_pass: 'Adjudicate P12 exact-SHA GitHub-to-A01 ingress evidence and continue Foundation closure.'
-      resume_on_failure: 'Preserve P12 evidence, classify the exact transport or wiring failure, and repair only the failing ingress boundary.'
+      resume_on_pass: 'Adjudicate P12 exact-SHA pre-admitted-only GitHub-to-A01 ingress evidence and continue Foundation closure.'
+      resume_on_failure: 'Preserve P12 evidence, classify the exact admission/revalidation/transport/wiring failure, and repair only the failing ingress boundary.'
       notification_target: foundation-p12
       execution_context: normal
       qualifier_timeout_minutes: 28
