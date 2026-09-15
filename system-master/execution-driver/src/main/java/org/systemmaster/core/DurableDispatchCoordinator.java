@@ -511,7 +511,7 @@ public final class DurableDispatchCoordinator {
                 case 't' -> out.append('\t');
                 case 'u' -> {
                     if (i + 4 >= value.length()) throw new IllegalStateException("STATE_CORRUPT_ESCAPE");
-                    try { out.append((char) Integer.parseInt(value.substring(i + 1, i + 5), 16));
+                    try { out.append((char) Integer.parseInt(value.substring(i + 1, i + 5), 16)); }
                     catch (NumberFormatException e2) { throw new IllegalStateException("STATE_CORRUPT_ESCAPE", e2); }
                     i += 4;
                 }
