@@ -1,0 +1,88 @@
+{
+  "contract_id": "SYSTEM-MASTER-DEVELOPMENT-RESPONSE-GOVERNOR-001",
+  "version": 1,
+  "owner_path": "SYSTEM_MASTER/CORE",
+  "scope": "SUBSTANTIVE_SYSTEM_MASTER_DEVELOPMENT_RESPONSES",
+  "response_classes": {
+    "FULL": {
+      "required_headings": [
+        "## STATUS",
+        "## WHERE WE ARE",
+        "## SYSTEM COMPLETION STANDING",
+        "## LOCKED JOB",
+        "## WHAT CHANGED",
+        "## EVIDENCE / RESULT",
+        "## WHERE WE ARE GOING",
+        "## EXACT NEXT STEP"
+      ],
+      "exact_next_step_required_labels": [
+        "Objective",
+        "First action",
+        "PASS boundary",
+        "Successor",
+        "Failure route",
+        "Forbidden authority"
+      ],
+      "use_when": [
+        "NEW_CHAT_STARTUP",
+        "CONTEXT_RECOVERY",
+        "AUTHORITY_TOPOLOGY_OR_OWNER_CHANGE",
+        "MAJOR_EXECUTION_COMPLETION",
+        "QUALIFICATION",
+        "MERGE",
+        "MATERIAL_FAILURE_OR_BLOCKER"
+      ]
+    },
+    "CONTINUATION": {
+      "required_headings": [
+        "## STATUS",
+        "## WORK COMPLETED",
+        "## EVIDENCE / RESULT",
+        "## CURRENT BLOCKER",
+        "## EXACT NEXT STEP"
+      ],
+      "exact_next_step_required_labels": [
+        "Objective",
+        "First action",
+        "PASS boundary"
+      ],
+      "use_when": [
+        "ORDINARY_TURN_IN_ESTABLISHED_CURRENT_DEVELOPMENT_SESSION"
+      ]
+    }
+  },
+  "allowed_status_values": [
+    "CHAT READY",
+    "CHAT READY WITH DECISION",
+    "NOT READY",
+    "WORKING",
+    "BLOCKED",
+    "QUALIFICATION PENDING",
+    "COMPLETE WITH EVIDENCE"
+  ],
+  "receipt": {
+    "protocol_version": "control-gateway.development-response-receipt.v1",
+    "required_fields": [
+      "protocol_version",
+      "contract_id",
+      "contract_digest",
+      "response_class",
+      "response_digest",
+      "authority_context_digest",
+      "compliance",
+      "receipt_digest"
+    ],
+    "compliance_value": "PASS",
+    "exact_response_bytes_bound": true,
+    "authority_context_bound": true
+  },
+  "controller_binding": {
+    "github": "control-gateway.governed-github-admission.v1",
+    "a01_admission": "control-gateway.governed-a01-admission.v1",
+    "a01_handoff": "control-gateway.governed-a01-supervisor-handoff.v1",
+    "missing_or_invalid_receipt": "FAIL_CLOSED_BEFORE_RAW_AUTHORIZATION"
+  },
+  "native_chatgpt_boundary": "PROJECT_INSTRUCTION_AND_SKILL_GOVERN_GENERATION; REPOSITORY_CONTROLLER_HARD_GATES_GITHUB_AND_A01_EFFECTS; REPOSITORY_CODE_DOES_NOT_INTERCEPT_ALREADY_RENDERED_NATIVE_CHATGPT_UI_MESSAGES",
+  "project_instruction": "governance/chat/SYSTEM-MASTER-PROJECT-INSTRUCTION-001.md",
+  "skill_name": "system-master-build-governor"
+}
