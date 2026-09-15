@@ -182,7 +182,7 @@ function requireLensDependenciesV1(context, lensId, dependencies) {
   if (lensId === 'B05-LENS-004' && !kinds.has('B03_STORY_BIBLE') && !kinds.has('B03_KNOWLEDGE')) {
     fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', `${lensId}:B03_NARRATIVE_DEPENDENCY_REQUIRED`);
   }
-  if (lensId === 'B05-LENS-009' && (!hasB04 || (!kinds.has('B04_EXPOSURE') && !kinds.has('B04_UNDERSTANDING'))) {
+  if (lensId === 'B05-LENS-009' && (!hasB04 || (!kinds.has('B04_EXPOSURE') && !kinds.has('B04_UNDERSTANDING')))) {
     fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', `${lensId}:B04_REQUIRED`);
   }
   if (lensId === 'B05-LENS-016' && (!hasB03 || context.author_constraint_refs.length === 0 || !kinds.has('B10_AUTHOR_CONSTRAINT'))) {
