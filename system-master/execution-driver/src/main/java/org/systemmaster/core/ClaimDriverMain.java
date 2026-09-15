@@ -15,22 +15,14 @@ import java.util.stream.Stream;
  * The unattended entry point invoked by {@code .github/workflows/claim-driver.yml}.
  *
  * <p>Loads queued claims, runs {@link ClaimDriver} inside its ceilings, prints a summary an
- * operator can read the next morning, and exits non-zero when the run needs attention. It
- * is deliberately thin: all policy lives in the driver and the ledger, so this file cannot
- * quietly acquire behaviour that has no test.
+ * operator can read the next morning, and exits non-zero when the run needs attention.
  *
- * <p>THE QUEUE IS FILE-BASED AND NOT YET DURABLE ACROSS RUNS. Each file in the queue
- * directory is one claim: the file name is the claim id, the first non-blank line is the
- * payload digest. The ledger itself is in-memory, so a claim's lifecycle completes within a
- * single run; receipts are printed and published to the run summary, not committed back to
- * the repository. A claim abandoned by a crashed runner is therefore recovered by the
- * ledger inside a run, but not across runs. That limit is stated in SYSTEM-MAP.md rather
- * than implied away — persisting the ledger is the next piece of work, not a claim this
- * file makes.
- *
- * <p>An invalid queue entry does not abort the run: it is reported loudly and forces a
- * non-zero exit, so one malformed file cannot silently starve every other claim, and cannot
- * pass unnoticed either.
+ * <p>REMOTE COMPLETION IS REAL, PERSISTENCE IS NOT YET. Production uses
+ * {@link ActionsDispatch} only for workflow_dispatch acceptance and an explicit
+ * {@link ActionsRunPoller} for run completion. A 204 dispatch can therefore no longer
+ * become DONE by returning from the POST. The ledger is still in-memory across process
+ * runs; durable restoration of the prepared dispatch identity and DISPATCHED state is the
+ * next packet and remains required for crash-safe reconciliation.
  */
 public final class ClaimDriverMain {
 
@@ -81,9 +73,6 @@ public final class ClaimDriverMain {
             }
             for (Path entry : entries) {
                 String claimId = entry.getFileName().toString();
-                // The queue directory carries its own documentation, and a claim id IS a
-                // file name — so without this the driver would dispatch work for
-                // "README.md". Excluded explicitly rather than by convention.
                 if (claimId.startsWith(".") || claimId.endsWith(".md")) continue;
                 String digest = firstNonBlankLine(entry);
                 if (digest == null) {
@@ -99,9 +88,10 @@ public final class ClaimDriverMain {
 
         String consumerRef = "claim-driver/" + env("GITHUB_RUN_ID",
                 "local-" + ProcessHandle.current().pid());
+        ActionsDispatch dispatch = ActionsDispatch.fromEnvironment(ActionsDispatch.httpTransport());
+        ActionsRunPoller completion = ActionsRunPoller.fromEnvironment(ActionsRunPoller.httpTransport());
         ClaimLedger.Consumer consumer = new ClaimLedger.Consumer(ledger,
-                ActionsDispatch.fromEnvironment(ActionsDispatch.httpTransport()),
-                consumerRef, Duration.ofMinutes(10));
+                dispatch, completion, consumerRef, Duration.ofMinutes(10));
 
         ClaimDriver driver = new ClaimDriver(ledger, consumer,
                 new ClaimDriver.Bounds(maxIterations, Duration.ofSeconds(budgetSeconds)),
