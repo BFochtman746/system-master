@@ -2,8 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
-const ingress = fs.readFileSync(new URL('../../.github/workflows/control-gateway-native-command-ingress.yml', import.meta.url), 'utf8');
-const writer = fs.readFileSync(new URL('../../.github/workflows/control-gateway-production-writer.yml', import.meta.url), 'utf8');
+const normalizeNewlines = (value) => value.replace(/\r\n?/g, '\n');
+const ingress = normalizeNewlines(fs.readFileSync(new URL('../../.github/workflows/control-gateway-native-command-ingress.yml', import.meta.url), 'utf8'));
+const writer = normalizeNewlines(fs.readFileSync(new URL('../../.github/workflows/control-gateway-production-writer.yml', import.meta.url), 'utf8'));
 
 test('native command ingress is owner-authenticated and issue-triggered', () => {
   assert.ok(ingress.includes('issues:\n    types: [opened]'));
