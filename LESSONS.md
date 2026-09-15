@@ -220,3 +220,17 @@ Format: **L-nnn — one-line summary** / Symptom / Root cause / Fix / Rule it pr
 - **Rule.** Security- or durability-sensitive state must validate the complete persisted
   representation. If the authoritative writer emits canonical bytes, readers fail closed on
   every byte sequence that is not exactly canonical; never ignore unrecognized residue.
+
+## L-015 — A fail-closed control must preserve failure evidence before it exits
+
+- **Symptom.** The protected authority bootstrap correctly refused a missing expected writer
+  identity, but the following immutable-evidence upload also failed because the bootstrap
+  exited before creating its evidence directory.
+- **Root cause.** Evidence creation happened only after successful execution, so the exact
+  failures most in need of diagnosis left no immutable artifact.
+- **Fix.** Persist the sanitized bootstrap request before validation, write a machine-readable
+  `bootstrap-failure.json` from the top-level failure handler, classify local preflight
+  failures with stable codes, and qualify that the writer token is never persisted.
+- **Rule.** Failure evidence is part of the control contract. Create the evidence path before
+  any expected validation boundary can fail, sanitize secrets, and prove the failure path in
+  qualification instead of relying on success-path artifacts.
