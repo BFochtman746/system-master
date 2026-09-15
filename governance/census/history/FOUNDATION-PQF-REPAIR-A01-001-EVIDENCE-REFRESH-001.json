@@ -1,0 +1,37 @@
+{
+  "history_id": "FOUNDATION-PQF-REPAIR-A01-001-EVIDENCE-REFRESH-001",
+  "effective_date": "2026-09-15",
+  "standing": "IMMUTABLE_SUPERSEDED_SHARED_A01_QUALIFIER_RECEIPT_HISTORY",
+  "reason": "PQF-REPAIR-A01-001 changed the shared registered A-01 cumulative qualifier blob while preserving the capability-specific P10, P11, P12 and P15 implementation/test subject blobs. The changed qualifier and execution-worker repair were requalified on exact subject SHA 21faff4d8c0f3bebbe2f32734a1c75fa0dc7a1b4 on the native Windows A-01 runner. The live registry was then refreshed to the new exact-blob A-01 receipt and its current hosted/admission corroboration. This record preserves the superseded Foundation receipt identities and prior auxiliary artifact identities as historical evidence. It does not expand capability scope, transfer authority, production-activate the Control Gateway, or relabel historical PASS evidence onto changed bytes.",
+  "repair": {
+    "id": "PQF-REPAIR-A01-001",
+    "qualified_subject_sha": "21faff4d8c0f3bebbe2f32734a1c75fa0dc7a1b4",
+    "changed_shared_subject": {
+      "path": ".github/scripts/a01-second-shift-supervisor-v2-qualify.js",
+      "prior_git_blob_sha": "c84eb4b1541dc1ddf7ac64412e3dc4f307daf31a",
+      "qualified_git_blob_sha": "bf4e49f0aaeb0aa51eeb32e2b54bc3f0f97284d3"
+    },
+    "a01_qualification": {
+      "workflow_run_id": 35027315783,
+      "artifact_id": 10420056817,
+      "artifact_digest": "sha256:3236d99e3f6681c17c4ba49c66dd787013ebe4dced548b393bd0a37ca7853795",
+      "head_sha": "21faff4d8c0f3bebbe2f32734a1c75fa0dc7a1b4",
+      "qualification_id": "SECOND-SHIFT-SUPERVISOR-V2-A01-STRESS",
+      "result_class": "PASS",
+      "conclusion": "success",
+      "promotion_authorized": false,
+      "runner": {"name":"A-01","os":"Windows","arch":"X64"}
+    },
+    "live_auxiliary_evidence": {
+      "hosted_evidence": {"artifact_id":10419634289,"artifact_digest":"sha256:f3dd832618c55aa6accc9cd18728ed5db630ec8ccf490867c3022a3d8aaaf19e"},
+      "admission_evidence": {"artifact_id":10420230921,"artifact_digest":"sha256:a1415a9866b169cdf13060be7395b7f0c26716cdf01dea183d42857023bb6747"}
+    }
+  },
+  "preservation_rule": "Historical artifacts remain immutable under their original identities and are never relabeled onto changed bytes. The live P10/P11/P12/P15 entries intentionally rebind the changed shared qualifier to the exact native A-01 receipt and current auxiliary evidence from the qualified repair chain; unchanged capability-specific implementation/test blob identities remain unchanged.",
+  "superseded_receipts": {
+    "P10": {"subject_sha":"d85f1f8303b68b128673e913fd9161441dc3ee30","workflow_run_id":34981467990,"artifact_id":10401566984,"artifact_digest":"sha256:63b432164e64a8ea7d63dcdd1dda1670d08bb1cad3ba46132cb56d4038842bff","hosted_evidence":{"artifact_id":10401886738,"artifact_digest":"sha256:1953391798d9160013de55728e0c3bb9dc8faa00a89af251ff1ae867e6d3a077"}},
+    "P11": {"subject_sha":"c453bd3ead90d6d2ef7760e7ed2f132d686eda79","workflow_run_id":34984774840,"artifact_id":10403181650,"artifact_digest":"sha256:46461c89be081429db963f5f9ae2871b1d1a3298ce69831d46c73eba36d2e15a","hosted_evidence":{"artifact_id":10402997577,"artifact_digest":"sha256:1a5fe381db269b11d157c4fed4b164cde78dbd15d6b0f37db98f4d445442898c"}},
+    "P12": {"subject_sha":"415fe9fa84167f3a8f9e2a71ae9d46b20da21577","workflow_run_id":34989398661,"artifact_id":10405605305,"artifact_digest":"sha256:ac69899d98b763f5f5cbe00804efcd0de2c0cb7e683ac52bfc39f4d56db8b154","hosted_evidence":{"artifact_id":10405535097,"artifact_digest":"sha256:18356a598dc5dc5531c0374e5272c26edf68c5ef5fca521a3cc4470faa70e5f6"},"prior_history_ref":"governance/census/history/FOUNDATION-P12-EVIDENCE-REFRESH-001.json"},
+    "P15": {"subject_sha":"d48512f06a50baa012ce1b8340ea90b5024ca42d","workflow_run_id":34996416393,"artifact_id":10408550313,"artifact_digest":"sha256:4c18b3971c88e94c1dae8307ffe52d9fb87b8a9e6493c5e0c915761011fa05df","hosted_evidence":{"artifact_id":10408211158,"artifact_digest":"sha256:9966b712652060932785273672ef156472eac7b4dac3786ac418426b66d797c6"},"admission_evidence":{"artifact_id":10407417407,"artifact_digest":"sha256:9d33f469a66fba13d76dbccc8f880ec9558afcf18a78aa52f7e8a93d72d4416a"}}
+  }
+}
