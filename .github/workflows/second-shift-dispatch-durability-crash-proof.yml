@@ -1,0 +1,296 @@
+name: Second Shift Dispatch Durability Crash Proof
+
+# Armed only by a separate, explicit arm-file commit after this workflow and its crash
+# gate have passed the ordinary exact-head qualification suite. The proof runs two
+# unique claims through the real persistent state branch and protected Control Gateway
+# writer. It proves both load-bearing crash windows without permitting blind redispatch.
+
+on:
+  push:
+    branches:
+      - second-shift/execution-ordering-001
+    paths:
+      - 'execution/qualification/second-shift-dispatch-durability-crash-proof.arm'
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: second-shift-dispatch-durability-crash-proof
+  cancel-in-progress: false
+
+jobs:
+  crash-proof:
+    name: Real restart-safe dispatch crash windows
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      CLAIM_WORK_WORKFLOW: claim-work.yml
+      CLAIM_WORK_REF: ${{ github.ref_name }}
+      CLAIM_STATE_REF: second-shift/execution-state
+      CLAIM_STATE_ROOT: execution/claims/state
+      BEFORE_CLAIM_ID: durability-003-crash-before-${{ github.run_id }}-${{ github.run_attempt }}
+      BEFORE_PAYLOAD_DIGEST: crash-before-${{ github.sha }}
+      AFTER_CLAIM_ID: durability-003-crash-after-${{ github.run_id }}-${{ github.run_attempt }}
+      AFTER_PAYLOAD_DIGEST: crash-after-${{ github.sha }}
+      PROOF_ACK: SECOND-SHIFT-DISPATCH-DURABILITY-003
+
+    steps:
+      - name: Checkout exact armed subject
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Require explicit real-crash arm receipt
+        shell: bash
+        run: |
+          set -euo pipefail
+          arm='execution/qualification/second-shift-dispatch-durability-crash-proof.arm'
+          test -f "${arm}"
+          grep -Fxq 'SECOND-SHIFT-DISPATCH-DURABILITY-003' "${arm}"
+          grep -Fxq 'REAL_CRASH_PROOF=ARMED' "${arm}"
+          printf 'armed_sha=%s\n' "${GITHUB_SHA}" | tee -a "${GITHUB_STEP_SUMMARY}"
+
+      - name: Ensure dedicated claim-state authority through protected main writer
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p crash-proof/before crash-proof/after
+          node .github/scripts/second-shift-claim-state-authority-ensure.js \
+            | tee crash-proof/authority-ensure.log
+
+      - name: Select Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Build exact production driver
+        run: mvn -q -B compile
+
+      - name: Crash after durable PREPARED and before POST
+        shell: bash
+        env:
+          SECOND_SHIFT_DURABILITY_PROOF_FAULT: AFTER_PREPARED_BEFORE_POST
+          SECOND_SHIFT_DURABILITY_PROOF_ACK: ${{ env.PROOF_ACK }}
+          SECOND_SHIFT_DURABILITY_PROOF_CLAIM_ID: ${{ env.BEFORE_CLAIM_ID }}
+        run: |
+          set -euo pipefail
+          set +e
+          java -cp target/classes org.systemmaster.core.ClaimDriverMain \
+            --claim "${BEFORE_CLAIM_ID}=${BEFORE_PAYLOAD_DIGEST}" \
+            --max-iterations 1 \
+            --budget-seconds 1200 2>&1 | tee crash-proof/before/crash.log
+          status="${PIPESTATUS[0]}"
+          set -e
+          printf 'crash_exit=%s\n' "${status}" | tee crash-proof/before/crash-exit.txt
+          test "${status}" -eq 86
+          grep -Fq 'DURABILITY-CRASH-PROOF point=AFTER_PREPARED_BEFORE_POST' crash-proof/before/crash.log
+
+      - name: Prove PREPARED identity durable and zero POSTs
+        shell: bash
+        run: |
+          set -euo pipefail
+          state_hash="$(printf '%s' "${BEFORE_CLAIM_ID}" | sha256sum | awk '{print $1}')"
+          state_file="${state_hash}.json"
+          gh api -X GET \
+            "repos/${GITHUB_REPOSITORY}/contents/${CLAIM_STATE_ROOT}/${state_file}" \
+            -f ref="${CLAIM_STATE_REF}" > crash-proof/before/state-after-crash-envelope.json
+          jq -r '.content' crash-proof/before/state-after-crash-envelope.json | tr -d '\n' | base64 -d \
+            > crash-proof/before/state-after-crash.json
+          jq -e --arg claim "${BEFORE_CLAIM_ID}" --arg payload "${BEFORE_PAYLOAD_DIGEST}" \
+            '.claim_id == $claim
+             and .payload_digest == $payload
+             and .state == "DISPATCH_PREPARED"
+             and .attempts == 1
+             and .epoch == 1
+             and (.dispatch_id | type == "string" and length > 0)
+             and .run_id == null' crash-proof/before/state-after-crash.json >/dev/null
+          dispatch_id="$(jq -r '.dispatch_id' crash-proof/before/state-after-crash.json)"
+          expected_title="claim:${BEFORE_CLAIM_ID} dispatch:${dispatch_id}"
+          gh api -X GET \
+            "repos/${GITHUB_REPOSITORY}/actions/workflows/${CLAIM_WORK_WORKFLOW}/runs" \
+            -f event=workflow_dispatch -f branch="${CLAIM_WORK_REF}" -f per_page=100 \
+            > crash-proof/before/runs-after-crash.json
+          exact_count="$(jq --arg title "${expected_title}" '[.workflow_runs[] | select(.display_title == $title)] | length' crash-proof/before/runs-after-crash.json)"
+          test "${exact_count}" -eq 0
+          printf 'dispatch_id=%s\nexact_runs_after_crash=%s\n' "${dispatch_id}" "${exact_count}" \
+            | tee crash-proof/before/pre-restart-summary.txt
+
+      - name: Restart PREPARED claim and prove no blind redispatch
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          java -cp target/classes org.systemmaster.core.ClaimDriverMain \
+            --claim "${BEFORE_CLAIM_ID}=${BEFORE_PAYLOAD_DIGEST}" \
+            --max-iterations 1 \
+            --budget-seconds 300 2>&1 | tee crash-proof/before/restart.log
+          status="${PIPESTATUS[0]}"
+          set -e
+          printf 'restart_exit=%s\n' "${status}" | tee crash-proof/before/restart-exit.txt
+          test "${status}" -eq 1
+          grep -Fq 'PREPARED_UNCERTAIN_NO_REDISPATCH' crash-proof/before/restart.log
+
+          state_hash="$(printf '%s' "${BEFORE_CLAIM_ID}" | sha256sum | awk '{print $1}')"
+          state_file="${state_hash}.json"
+          gh api -X GET \
+            "repos/${GITHUB_REPOSITORY}/contents/${CLAIM_STATE_ROOT}/${state_file}" \
+            -f ref="${CLAIM_STATE_REF}" > crash-proof/before/state-after-restart-envelope.json
+          jq -r '.content' crash-proof/before/state-after-restart-envelope.json | tr -d '\n' | base64 -d \
+            > crash-proof/before/state-after-restart.json
+          before_dispatch="$(jq -r '.dispatch_id' crash-proof/before/state-after-crash.json)"
+          jq -e --arg dispatch "${before_dispatch}" \
+            '.state == "DISPATCH_PREPARED"
+             and .attempts == 1
+             and .epoch == 1
+             and .dispatch_id == $dispatch
+             and .run_id == null' crash-proof/before/state-after-restart.json >/dev/null
+          expected_title="claim:${BEFORE_CLAIM_ID} dispatch:${before_dispatch}"
+          gh api -X GET \
+            "repos/${GITHUB_REPOSITORY}/actions/workflows/${CLAIM_WORK_WORKFLOW}/runs" \
+            -f event=workflow_dispatch -f branch="${CLAIM_WORK_REF}" -f per_page=100 \
+            > crash-proof/before/runs-after-restart.json
+          exact_count="$(jq --arg title "${expected_title}" '[.workflow_runs[] | select(.display_title == $title)] | length' crash-proof/before/runs-after-restart.json)"
+          test "${exact_count}" -eq 0
+          printf 'same_dispatch_id=%s\nexact_runs_after_restart=%s\n' "${before_dispatch}" "${exact_count}" \
+            | tee crash-proof/before/final-summary.txt
+
+      - name: Crash after accepted POST and before DISPATCHED persistence
+        shell: bash
+        env:
+          SECOND_SHIFT_DURABILITY_PROOF_FAULT: AFTER_ACCEPTED_POST_BEFORE_DISPATCHED
+          SECOND_SHIFT_DURABILITY_PROOF_ACK: ${{ env.PROOF_ACK }}
+          SECOND_SHIFT_DURABILITY_PROOF_CLAIM_ID: ${{ env.AFTER_CLAIM_ID }}
+        run: |
+          set -euo pipefail
+          set +e
+          java -cp target/classes org.systemmaster.core.ClaimDriverMain \
+            --claim "${AFTER_CLAIM_ID}=${AFTER_PAYLOAD_DIGEST}" \
+            --max-iterations 1 \
+            --budget-seconds 1200 2>&1 | tee crash-proof/after/crash.log
+          status="${PIPESTATUS[0]}"
+          set -e
+          printf 'crash_exit=%s\n' "${status}" | tee crash-proof/after/crash-exit.txt
+          test "${status}" -eq 87
+          grep -Fq 'DURABILITY-CRASH-PROOF point=AFTER_ACCEPTED_POST_BEFORE_DISPATCHED' crash-proof/after/crash.log
+
+      - name: Prove accepted dispatch exists while durable state remains PREPARED
+        shell: bash
+        run: |
+          set -euo pipefail
+          state_hash="$(printf '%s' "${AFTER_CLAIM_ID}" | sha256sum | awk '{print $1}')"
+          state_file="${state_hash}.json"
+          gh api -X GET \
+            "repos/${GITHUB_REPOSITORY}/contents/${CLAIM_STATE_ROOT}/${state_file}" \
+            -f ref="${CLAIM_STATE_REF}" > crash-proof/after/state-after-crash-envelope.json
+          jq -r '.content' crash-proof/after/state-after-crash-envelope.json | tr -d '\n' | base64 -d \
+            > crash-proof/after/state-after-crash.json
+          jq -e --arg claim "${AFTER_CLAIM_ID}" --arg payload "${AFTER_PAYLOAD_DIGEST}" \
+            '.claim_id == $claim
+             and .payload_digest == $payload
+             and .state == "DISPATCH_PREPARED"
+             and .attempts == 1
+             and .epoch == 1
+             and (.dispatch_id | type == "string" and length > 0)
+             and .run_id == null' crash-proof/after/state-after-crash.json >/dev/null
+          dispatch_id="$(jq -r '.dispatch_id' crash-proof/after/state-after-crash.json)"
+          expected_title="claim:${AFTER_CLAIM_ID} dispatch:${dispatch_id}"
+
+          exact_count=0
+          for attempt in $(seq 1 24); do
+            gh api -X GET \
+              "repos/${GITHUB_REPOSITORY}/actions/workflows/${CLAIM_WORK_WORKFLOW}/runs" \
+              -f event=workflow_dispatch -f branch="${CLAIM_WORK_REF}" -f per_page=100 \
+              > crash-proof/after/runs-after-crash.json
+            exact_count="$(jq --arg title "${expected_title}" '[.workflow_runs[] | select(.display_title == $title)] | length' crash-proof/after/runs-after-crash.json)"
+            test "${exact_count}" -le 1
+            if [ "${exact_count}" -eq 1 ]; then break; fi
+            sleep 5
+          done
+          test "${exact_count}" -eq 1
+          run_id="$(jq -r --arg title "${expected_title}" '.workflow_runs[] | select(.display_title == $title) | .id' crash-proof/after/runs-after-crash.json)"
+          printf 'dispatch_id=%s\nexact_run_id=%s\nexact_runs_after_crash=%s\n' \
+            "${dispatch_id}" "${run_id}" "${exact_count}" | tee crash-proof/after/pre-restart-summary.txt
+
+      - name: Restart PREPARED claim and reconcile exact accepted run to DONE
+        shell: bash
+        run: |
+          set -euo pipefail
+          java -cp target/classes org.systemmaster.core.ClaimDriverMain \
+            --claim "${AFTER_CLAIM_ID}=${AFTER_PAYLOAD_DIGEST}" \
+            --max-iterations 1 \
+            --budget-seconds 1200 2>&1 | tee crash-proof/after/restart.log
+
+          state_hash="$(printf '%s' "${AFTER_CLAIM_ID}" | sha256sum | awk '{print $1}')"
+          state_file="${state_hash}.json"
+          gh api -X GET \
+            "repos/${GITHUB_REPOSITORY}/contents/${CLAIM_STATE_ROOT}/${state_file}" \
+            -f ref="${CLAIM_STATE_REF}" > crash-proof/after/final-state-envelope.json
+          jq -r '.content' crash-proof/after/final-state-envelope.json | tr -d '\n' | base64 -d \
+            > crash-proof/after/final-state.json
+
+          original_dispatch="$(jq -r '.dispatch_id' crash-proof/after/state-after-crash.json)"
+          exact_run_id="$(awk -F= '$1=="exact_run_id" {print $2}' crash-proof/after/pre-restart-summary.txt)"
+          jq -e --arg dispatch "${original_dispatch}" --argjson run_id "${exact_run_id}" \
+            '.state == "DONE"
+             and .attempts == 1
+             and .epoch == 1
+             and .dispatch_id == $dispatch
+             and .run_id == $run_id
+             and .run_status == "completed"
+             and .run_conclusion == "success"' crash-proof/after/final-state.json >/dev/null
+          expected_evidence="EVIDENCE=ACTIONS_COMPLETED run_id=${exact_run_id} conclusion=success dispatch_id=${original_dispatch}"
+          jq -e --arg evidence "${expected_evidence}" '.terminal_reason | contains($evidence)' \
+            crash-proof/after/final-state.json >/dev/null
+
+          expected_title="claim:${AFTER_CLAIM_ID} dispatch:${original_dispatch}"
+          gh api -X GET \
+            "repos/${GITHUB_REPOSITORY}/actions/workflows/${CLAIM_WORK_WORKFLOW}/runs" \
+            -f event=workflow_dispatch -f branch="${CLAIM_WORK_REF}" -f per_page=100 \
+            > crash-proof/after/runs-final.json
+          exact_count="$(jq --arg title "${expected_title}" '[.workflow_runs[] | select(.display_title == $title)] | length' crash-proof/after/runs-final.json)"
+          test "${exact_count}" -eq 1
+          printf 'same_dispatch_id=%s\nexact_run_id=%s\nfinal_state=DONE\nfinal_attempts=1\nfinal_epoch=1\nexact_run_count=%s\n' \
+            "${original_dispatch}" "${exact_run_id}" "${exact_count}" | tee crash-proof/after/final-summary.txt
+
+      - name: Publish crash-proof summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo '## SECOND-SHIFT-DISPATCH-DURABILITY-003 real crash proof'
+            echo
+            echo '### Crash after PREPARED before POST'
+            if [ -f crash-proof/before/final-summary.txt ]; then
+              echo '```text'
+              cat crash-proof/before/final-summary.txt
+              echo '```'
+            else
+              echo 'This window did not reach its validated final summary.'
+            fi
+            echo
+            echo '### Crash after accepted POST before DISPATCHED persistence'
+            if [ -f crash-proof/after/final-summary.txt ]; then
+              echo '```text'
+              cat crash-proof/after/final-summary.txt
+              echo '```'
+            else
+              echo 'This window did not reach its validated final summary.'
+            fi
+            echo
+            printf 'source_sha=%s\n' "${GITHUB_SHA}"
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+      - name: Upload immutable crash-proof evidence
+        if: always() && hashFiles('crash-proof/**') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: second-shift-dispatch-durability-crash-proof-${{ github.run_id }}
+          path: crash-proof/
+          if-no-files-found: error
+          retention-days: 30

@@ -3,10 +3,49 @@ package org.systemmaster.core;
 /** Deterministic qualification for the proof-only hard-crash dispatch wrapper. */
 public final class DurabilityCrashProofDispatchTest {
     public static void main(String[] args) throws Exception {
+        defaultOffReturnsOriginalDispatch();
+        authorizationFailsClosedOutsideDedicatedWorkflow();
         beforePostCrashDoesNotCallDelegatePost();
         afterAcceptedPostCrashCallsDelegateExactlyOnce();
         mismatchedClaimFailsBeforeDelegatePost();
         System.out.println("DURABILITY-CRASH-PROOF-DISPATCH RESULT: PASS");
+    }
+
+    private static void defaultOffReturnsOriginalDispatch() {
+        FakeDispatch delegate = new FakeDispatch();
+        DurableDispatchCoordinator.Dispatch configured = DurabilityCrashProofDispatch.fromConfiguration(
+                delegate, "", "", "", "", "", "", status -> { throw new AssertionError("must not halt"); });
+        if (configured != delegate) throw new AssertionError("unarmed proof wrapper must be exact no-op");
+    }
+
+    private static void authorizationFailsClosedOutsideDedicatedWorkflow() {
+        FakeDispatch delegate = new FakeDispatch();
+        expectFailure("DURABILITY_CRASH_PROOF_NOT_GITHUB_ACTIONS", () ->
+                DurabilityCrashProofDispatch.fromConfiguration(delegate,
+                        "AFTER_PREPARED_BEFORE_POST", "false", DurabilityCrashProofDispatch.ACK,
+                        "durability-003-crash-auth-test", DurabilityCrashProofDispatch.WORKFLOW,
+                        DurabilityCrashProofDispatch.BRANCH, status -> { }));
+        expectFailure("DURABILITY_CRASH_PROOF_WORKFLOW_MISMATCH", () ->
+                DurabilityCrashProofDispatch.fromConfiguration(delegate,
+                        "AFTER_PREPARED_BEFORE_POST", "true", DurabilityCrashProofDispatch.ACK,
+                        "durability-003-crash-auth-test", "Different Workflow",
+                        DurabilityCrashProofDispatch.BRANCH, status -> { }));
+        expectFailure("DURABILITY_CRASH_PROOF_BRANCH_MISMATCH", () ->
+                DurabilityCrashProofDispatch.fromConfiguration(delegate,
+                        "AFTER_PREPARED_BEFORE_POST", "true", DurabilityCrashProofDispatch.ACK,
+                        "durability-003-crash-auth-test", DurabilityCrashProofDispatch.WORKFLOW,
+                        "main", status -> { }));
+        expectFailure("DURABILITY_CRASH_PROOF_ACK_MISMATCH", () ->
+                DurabilityCrashProofDispatch.fromConfiguration(delegate,
+                        "AFTER_PREPARED_BEFORE_POST", "true", "wrong-ack",
+                        "durability-003-crash-auth-test", DurabilityCrashProofDispatch.WORKFLOW,
+                        DurabilityCrashProofDispatch.BRANCH, status -> { }));
+        expectFailure("DURABILITY_CRASH_PROOF_POINT_INVALID:NOT_A_POINT", () ->
+                DurabilityCrashProofDispatch.fromConfiguration(delegate,
+                        "NOT_A_POINT", "true", DurabilityCrashProofDispatch.ACK,
+                        "durability-003-crash-auth-test", DurabilityCrashProofDispatch.WORKFLOW,
+                        DurabilityCrashProofDispatch.BRANCH, status -> { }));
+        if (delegate.posts != 0) throw new AssertionError("authorization failures must never POST");
     }
 
     private static void beforePostCrashDoesNotCallDelegatePost() throws Exception {
@@ -55,6 +94,22 @@ public final class DurabilityCrashProofDispatchTest {
         }
         if (delegate.posts != 0 || stops.calls != 0) throw new AssertionError("mismatched claim must fail closed before POST/halt");
     }
+
+    private static void expectFailure(String message, Action action) {
+        try {
+            action.run();
+            throw new AssertionError("expected failure " + message);
+        } catch (IllegalStateException expected) {
+            if (!message.equals(expected.getMessage())) {
+                throw new AssertionError("expected=" + message + " actual=" + expected.getMessage(), expected);
+            }
+        } catch (Exception unexpected) {
+            throw new AssertionError("unexpected checked failure", unexpected);
+        }
+    }
+
+    @FunctionalInterface
+    private interface Action { void run() throws Exception; }
 
     private static final class FakeDispatch implements DurableDispatchCoordinator.Dispatch {
         int posts;
