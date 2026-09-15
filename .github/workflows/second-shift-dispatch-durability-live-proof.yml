@@ -1,10 +1,11 @@
 name: Second Shift Dispatch Durability Live Proof
 
 # Feature-branch-only production-path qualification for SECOND-SHIFT-DISPATCH-DURABILITY-003.
-# This workflow is intentionally hosted-runner only and never runs on main. It drives the
+# This workflow is intentionally hosted-runner only and never runs on main. It first ensures
+# the narrow claim-state authority through main's protected bootstrap writer, then drives the
 # real ClaimDriverMain against the dedicated persistent state branch, lets that production
-# path POST claim-work.yml with its already-persisted dispatch_id, then independently reads
-# GitHub state/run truth back and proves the exact one-run terminal chain.
+# path POST claim-work.yml with its already-persisted dispatch_id, and independently proves
+# the exact one-run terminal chain.
 
 on:
   push:
@@ -14,9 +15,13 @@ on:
       - '.github/workflows/second-shift-dispatch-durability-live-proof.yml'
       - '.github/workflows/claim-driver.yml'
       - '.github/workflows/claim-work.yml'
+      - '.github/scripts/second-shift-claim-state-authority-ensure.js'
+      - 'control-gateway/src/second-shift-claim-state-authority.js'
+      - 'control-gateway/src/second-shift-claim-state-authority-ensure.js'
       - 'system-master/execution-driver/src/main/java/org/systemmaster/core/ActionsDispatch.java'
       - 'system-master/execution-driver/src/main/java/org/systemmaster/core/ActionsRunPoller.java'
       - 'system-master/execution-driver/src/main/java/org/systemmaster/core/ClaimDriverMain.java'
+      - 'system-master/execution-driver/src/main/java/org/systemmaster/core/ControlGatewayClaimStateStore.java'
       - 'system-master/execution-driver/src/main/java/org/systemmaster/core/DurableDispatchCoordinator.java'
       - 'system-master/execution-driver/src/main/java/org/systemmaster/core/GitHubClaimStateStore.java'
 
@@ -50,6 +55,14 @@ jobs:
           fetch-depth: 1
           persist-credentials: false
 
+      - name: Ensure dedicated claim-state authority through protected main writer
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p live-proof
+          node .github/scripts/second-shift-claim-state-authority-ensure.js \
+            | tee live-proof/authority-ensure.log
+
       - name: Select Java 21
         uses: actions/setup-java@v4
         with:
@@ -63,7 +76,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p live-proof
           java -cp target/classes org.systemmaster.core.ClaimDriverMain \
             --claim "${PROOF_CLAIM_ID}=${PROOF_PAYLOAD_DIGEST}" \
             --max-iterations 1 \
