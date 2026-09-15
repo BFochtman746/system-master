@@ -1,169 +1,180 @@
 # Rollback Procedure — 001
 
-**Effective** 2026-09-13 · Covers P15 in the capability crosswalk proposal
+**Effective** 2026-09-15 · **Owner** `SYSTEM_MASTER/CORE` · **Foundation requirement** P15
 
-Every repair path in this estate is forward-only. That is correct for *evidence* — you
-never rewrite what happened. It is wrong for *code*, because it means a bad control-plane
-commit can only be fixed by shipping another commit while the broken one is live.
-
-This is the procedure for going backwards safely. The hard part is not `git revert`. It
-is that a running night holds leases, fencing tokens, and a queue built against the
-commit you are about to undo.
-
----
+Evidence is append-only; code is not. This procedure safely backs out a bad control-plane
+change without rewriting evidence, moving a content-addressed authority ref, or pretending
+that in-flight P10/P11 lease state disappeared with Git history.
 
 ## Decide first: roll back, or halt and fix forward?
 
 | Situation | Action |
 |---|---|
-| Control plane is dispatching wrong or unbounded work | **Halt immediately**, then roll back |
-| A gate is failing but nothing is dispatching | Fix forward. Rolling back a red gate hides the finding |
-| Governance pointer is broken, estate unreadable | **Roll back the pointer only** (Scenario C) |
-| A single module's work is wrong | Cancel that delegation. Do not roll back the plane |
-| You are not sure | **Halt.** Halting is always reversible and costs one night |
+| Control plane is dispatching wrong or unbounded work | **Kill new ingress immediately**, then roll back |
+| A gate is failing but nothing is dispatching | Fix forward; do not hide a red gate with rollback |
+| Governance pointer is broken / estate unreadable | Restore only the pointer (Scenario C) |
+| A single delegation is wrong | Cancel through its owning control path; do not roll back the plane |
+| You are not sure | **Kill new ingress.** The kill switch is reversible |
 
-Halting is never the wrong first move. The kill switch exists so that the decision of
-what to do next is made in the morning, awake, rather than at 2am.
+The P12 kill switch stops new ingress. It does **not** force-release work already holding a
+lease; that separation protects writes already executing under a valid fence.
 
----
+## Step 0 — Kill new ingress, always
 
-## Step 0 — Halt, always, before anything else
+On A-01, using the same state directory as the ingress service:
 
-```bash
-python -m a01_github_ingress --halt "rollback in progress: <reason>"
-python -m a01_github_ingress --status        # confirm halted: true
+```powershell
+$env:PYTHONPATH = "$PWD\control-gateway\python;$PWD"
+python -m a01_github_ingress --state-dir C:\SystemMaster\a01-ingress --kill "rollback in progress: <reason>"
+python -c "from pathlib import Path; p=Path(r'C:\SystemMaster\a01-ingress\NIGHT-HALT'); assert p.is_file(); print('P12_KILL_SWITCH=ENGAGED', p.read_text().strip())"
+python -m a01_morning_receipt --db C:\SystemMaster\a01-supervisor.db --state-dir C:\SystemMaster\a01-ingress --json
 ```
 
-Nothing new is admitted. Work already claimed keeps running — that is deliberate, because
-killing a worker mid-write is how you get the corrupt state you are trying to avoid.
+Do not add a P12 `--status` compatibility path solely for rollback. The durable
+`NIGHT-HALT` file is the status authority for this procedure.
 
-## Step 1 — Capture the state you are about to change
+## Step 1 — Capture the state before changing anything
 
-Do this before touching anything. A rollback with no before-picture is not reversible.
-
-```bash
-git rev-parse HEAD > /tmp/rollback-from.txt
+```powershell
+git rev-parse HEAD | Set-Content $env:TEMP\rollback-from.txt
 git log --oneline -15
-cp control-gateway/state/supervisor.sqlite /tmp/supervisor-$(date +%Y%m%d-%H%M).sqlite
-python -m a01_morning_receipt --json --out /tmp/pre-rollback-receipt.json
-node .github/scripts/system-brief.js --out /tmp/pre-rollback-brief.md
+python -m a01_morning_receipt --db C:\SystemMaster\a01-supervisor.db --state-dir C:\SystemMaster\a01-ingress --json --out $env:TEMP\pre-rollback-receipt.json
+node .github/scripts/system-brief.js --out $env:TEMP\pre-rollback-brief.md
 ```
 
-The database copy is the important one. The supervisor holds lease state that git does
-not, and it is the thing you cannot reconstruct.
+Back up the live SQLite database with **SQLite's backup API**, not `copy`/`cp` of only the
+main `.db` file while WAL pages may still be live:
 
-## Step 2 — Let in-flight leases finish or expire
-
-```bash
-python -m a01_morning_receipt | sed -n '/Still holding a lease/,/^$/p'
+```powershell
+@'
+import datetime, sqlite3
+from pathlib import Path
+src_path = Path(r"C:\SystemMaster\a01-supervisor.db").resolve()
+stamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+dst_path = Path.home() / f"a01-supervisor-pre-rollback-{stamp}.db"
+src = sqlite3.connect(src_path.as_uri() + "?mode=ro", uri=True)
+dst = sqlite3.connect(dst_path)
+try:
+    src.backup(dst)
+finally:
+    dst.close(); src.close()
+print(dst_path)
+'@ | python -
 ```
 
-If leases are open, prefer waiting for expiry over forcing release. The heartbeat SLA and
-`recover()` in the supervisor exist precisely for this, and they are better at it than you
-are at 2am. Force-release only when a lease blocks a rollback that cannot wait, and record
-that you did.
+The database snapshot matters because leases, fences, queue state and budget usage are not
+reconstructed by reverting Git.
 
-## Step 3 — Choose the scenario
+## Step 2 — Observe in-flight leases before rollback
 
-### Scenario A — Bad control-plane code (workflows, scripts, gateway)
+```powershell
+python -m a01_morning_receipt --db C:\SystemMaster\a01-supervisor.db --state-dir C:\SystemMaster\a01-ingress
+```
 
-```bash
+Read **Still holding a lease**. Prefer natural completion/expiry and P10 recovery over any
+manual intervention. P15 is diagnosis-only and exposes no force-release command. If an
+emergency lease mutation is truly required, that is an owner-authorized P10/P11 operation
+and must be recorded separately; do not invent it inside this procedure.
+
+## Step 3 — Choose the rollback scenario
+
+### Scenario A — Bad control-plane code
+
+```powershell
 git revert --no-commit <bad-sha>
-node .github/scripts/validate-governance.js          # must PASS
-cd control-gateway && node --test                    # must be 0 fail
-cd python && python -m unittest test_a01_github_ingress test_a01_morning_receipt
-cd ../.. && git commit -m "revert: <bad-sha> — <reason>"
+node .github/scripts/validate-governance.js
+node --test control-gateway
+$env:PYTHONPATH = "$PWD\control-gateway\python;$PWD"
+python tests/test_a01_github_ingress.py
+python tests/test_a01_morning_receipt.py
+git commit -m "revert: <bad-sha> — <reason>"
 ```
 
-Revert, never force-push. A forced history rewrite breaks every CAS ref, evidence pointer
-and commit digest recorded against the old history — and those are your audit trail.
+Use `git revert`, never force-push. Rewriting history breaks recorded exact-SHA and CAS
+identity that must remain auditable.
 
-### Scenario B — Bad governance content (topology, allocation, obligations)
+### Scenario B — Bad governance content
 
-Do not revert the file. Governance artifacts supersede by successor, so roll *forward to a
-copy of the previous content*:
+Governance artifacts supersede; do not erase the defective historical version. Materialize
+the prior good content as a new successor under the current schema/ID rules, repoint
+`CURRENT-AUTHORITY.json`, then run governance validation. Preserve the bad version in Git
+history as evidence that it existed and was detected.
 
-```bash
-git show <good-sha>:governance/SYSTEM-TOPOLOGY-006.json > governance/SYSTEM-TOPOLOGY-007.json
-# edit: topology_id -> 007, effective_date -> today,
-#       supersedes -> governance/SYSTEM-TOPOLOGY-006.json,
-#       standing   -> note that this restores 005 content after a defect in 006
-```
+### Scenario C — Broken authority pointer
 
-Then repoint `CURRENT-AUTHORITY.json` and validate. This keeps the defective version in
-the record, which is the point of a supersession chain — a rollback that erases the
-mistake also erases the evidence that you caught it.
+Restore only the pointer from an exact known-good commit, then verify it immediately:
 
-### Scenario C — Broken authority pointer (fastest, most common)
-
-The estate is unreadable but nothing is corrupt. Restore only the pointer:
-
-```bash
+```powershell
 git checkout <good-sha> -- governance/CURRENT-AUTHORITY.json
 node .github/scripts/validate-governance.js
-node .github/scripts/system-brief.js | head -8
+node .github/scripts/system-brief.js | Select-Object -First 8
 ```
 
-### Scenario D — Bad authority ref written by the CAS bootstrap
+### Scenario D — Bad content-addressed authority ref
 
-**Never delete or move a CAS ref.** The bootstrap's whole guarantee is that a ref is
-written once and never changes; deleting one to "clean up" destroys that guarantee
-permanently and silently.
+**Never delete or move a CAS ref.** Write a successor authority object/ref that explicitly
+supersedes the defective one and repoint its consumer. Deleting a supposedly write-once
+ref destroys the property P04 exists to prove.
 
-Write a successor ref recording the supersession, leave the bad ref in place, and repoint
-the consumer. If you believe a ref must be deleted, that is an `owner` decision and it
-needs writing down before it is executed.
+## Step 4 — Verify all five gates before resume
 
-## Step 4 — Verify before resuming
+Do not resume until **all five verification gates** are green:
 
-All five must pass. If any fails, you are not rolled back — you are somewhere new.
+```powershell
+# 1. Governance
+node .github/scripts/validate-governance.js
 
-```bash
-node .github/scripts/validate-governance.js                    # 4 PASS
-cd control-gateway && node --test                              # 0 fail
-cd python && python -m unittest test_a01_github_ingress test_a01_morning_receipt
-cd ../.. && node .github/scripts/system-brief.js | head -8     # expected authority id
-node .github/scripts/foundation-closure-matrix.js --summary    # gap count as expected
+# 2. Control Gateway / P12-P15 portable tests
+node --test control-gateway
+$env:PYTHONPATH = "$PWD\control-gateway\python;$PWD"
+python tests/test_a01_github_ingress.py
+python tests/test_a01_morning_receipt.py
+
+# 3. Repository-wide canonical verification
+bash ./verify.sh
+
+# 4. Current authority projection
+node .github/scripts/system-brief.js | Select-Object -First 8
+
+# 5. Foundation projection
+node .github/scripts/foundation-closure-matrix.js --summary
 ```
 
-An unexpected gap count means governance changed in a way you did not intend. Stop and
-find out why before resuming.
+The expected authority ID and Foundation gap count must match the intended rollback target.
+An unexpected count is an authority delta, not a cosmetic discrepancy.
 
-## Step 5 — Resume, and watch the first night
+## Step 5 — Resume P12 and inspect the first cycle
 
-```bash
-python -m a01_ingress_service --check
-python -m a01_github_ingress --resume
-python -m a01_ingress_service --once --dry-run     # confirm sane delegations
+```powershell
+$env:PYTHONPATH = "$PWD\control-gateway\python;$PWD"
+python -m a01_ingress_service --check --db C:\SystemMaster\a01-supervisor.db --state-dir C:\SystemMaster\a01-ingress
+python -m a01_github_ingress --state-dir C:\SystemMaster\a01-ingress --resume
+python -m a01_ingress_service --once --db C:\SystemMaster\a01-supervisor.db --state-dir C:\SystemMaster\a01-ingress
 ```
 
-Next morning, read the receipt before anything else. A rollback that looks clean at the
-console and produces a broken night is the common case, not the rare one.
+Next morning, read the P15 receipt artifact before treating the rollback as operationally
+healthy.
 
----
+## Record the rollback
 
-## Record it
+Append one entry to `governance/ROLLBACK-LOG-001.md`. Create the file only when the first
+real rollback occurs; an empty synthetic log would fabricate history.
 
-Append to `governance/ROLLBACK-LOG-001.md`, one entry per rollback:
-
-```
+```markdown
 ## <date> — <scenario A/B/C/D>
 From:      <sha>          To: <sha>
 Reason:    <what went wrong, one line>
-Halted at: <time>         Resumed at: <time>
-Leases:    <expired naturally | force-released: which and why>
-Verified:  <which of the five checks passed>
-Follow-up: <the gate that should have caught this, and whether it now does>
+Killed at: <time>         Resumed at: <time>
+Leases:    <completed/expired naturally | owner-authorized intervention and why>
+Verified:  <all five gates and exact results>
+Follow-up: <the gate that should have caught the problem, and whether it now does>
 ```
 
-The follow-up line is the one that earns its keep. A rollback that does not end in a new
-or tightened gate will happen again in the same place.
+## Forbidden shortcuts
 
-## Things this procedure will not let you do
-
-- **Force-push the control plane.** Breaks every recorded digest.
-- **Delete a CAS authority ref.** Destroys the write-once guarantee permanently.
-- **Roll back evidence.** Evidence is append-only. A wrong result is superseded, never
-  removed.
-- **Resume while any of the five checks is red.** Resuming into a red gate is how a
-  rollback becomes an outage.
+- Force-push the control plane.
+- Delete or move a CAS authority ref.
+- Rewrite or remove evidence.
+- Force-release a lease through P15; P15 has no mutation authority.
+- Resume P12 while any verification gate is red.
+- Treat an empty/no-activity morning as proof the night succeeded.

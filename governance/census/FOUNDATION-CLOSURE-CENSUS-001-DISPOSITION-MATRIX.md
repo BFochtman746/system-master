@@ -6,8 +6,8 @@ Evidence authority: `governance/census/FOUNDATION-CLOSURE-EVIDENCE-REGISTRY-001.
 
 ## Disposition summary
 
-13 `COMPLETE_WITH_EVIDENCE`; 37 `ACTIVE_GAP`; 0 `DURABLY_BLOCKED_EXTERNAL_HUMAN_PRIVATE_NATIVE`; 16 `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY`; 66 total.
-Foundation 1.0 completion with evidence: 26% (13 of 50 in-scope rows).
+14 `COMPLETE_WITH_EVIDENCE`; 36 `ACTIVE_GAP`; 0 `DURABLY_BLOCKED_EXTERNAL_HUMAN_PRIVATE_NATIVE`; 16 `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY`; 66 total.
+Foundation 1.0 completion with evidence: 28% (14 of 50 in-scope rows).
 
 | ID | Capability / requirement | Canonical owner | State | Current disposition |
 | --- | --- | --- | --- | --- |
@@ -76,12 +76,12 @@ Foundation 1.0 completion with evidence: 26% (13 of 50 in-scope rows).
 | `P12` | P12 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | Current-authority PASS receipt registered. |
 | `P13` | P13 | SYSTEM_MASTER/CORE | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Absorbed by current authority-selected crosswalk. |
 | `P14` | P14 | SYSTEM_MASTER/CORE | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Absorbed by current authority-selected crosswalk. |
-| `P15` | P15 | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Current-authority Foundation evidence receipt not registered. |
+| `P15` | P15 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | Current-authority PASS receipt registered. |
 
 ## Unresolved gap successor register
 
-37 `ACTIVE_GAP` rows remain. Shared platform dependencies remain first in successor order.
+36 `ACTIVE_GAP` rows remain. Shared platform dependencies are exhausted; capability gaps now follow current nine-peer owner order.
 
-**Exact next ACTIVE_GAP: `P15` - Observability, morning receipt and rollback.**
+**Exact next ACTIVE_GAP: `C04` - CHAT.**
 
-Continue `P15`, then owner-valid capability gaps in dependency-valid order.
+Continue `C04`, then owner-valid capability gaps in dependency-valid order.
