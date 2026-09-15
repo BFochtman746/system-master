@@ -159,7 +159,7 @@ async function execute() {
   const subject = (process.env.A01_SUBJECT_SHA || process.env.GITHUB_SHA || '').trim();
   assert(/^[0-9a-fA-F]{40}$/.test(subject), `INVALID_SUBJECT_SHA:${subject}`);
   const context = process.env.A01_EXECUTION_CONTEXT || 'normal';
-  assert(['normal', 'overnight'].includes(context), `INVALID_EXECUTION_CONTEXT:${context}`);
+  assert(['normal', 'recovery', 'repair', 'overnight'].includes(context), `INVALID_EXECUTION_CONTEXT:${context}`);
   const defaultTimeout = context === 'overnight' ? policy.overnight.max_ticket_runtime_minutes : policy.runtime.normal_qualifier_timeout_minutes;
   const qualifierTimeout = intEnv('A01_QUALIFIER_TIMEOUT_MINUTES', defaultTimeout);
   assert(qualifierTimeout <= policy.runtime.max_qualifier_timeout_minutes, `QUALIFIER_TIMEOUT_EXCEEDS_POLICY:${qualifierTimeout}`);
