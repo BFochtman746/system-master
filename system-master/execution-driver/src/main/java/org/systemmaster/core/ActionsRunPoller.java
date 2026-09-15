@@ -55,6 +55,8 @@ public final class ActionsRunPoller implements ClaimLedger.Consumer.Completion {
     private record RunSnapshot(long id, String displayTitle, String status, String conclusion) { }
 
     private static final String API = "https://api.github.com";
+    private static final int DISCOVERY_PAGE_SIZE = 100;
+    private static final int DISCOVERY_MAX_PAGES = 100;
     private final Transport transport;
     private final ActionsDispatch.Credentials credentials;
     private final String owner;
@@ -145,15 +147,32 @@ public final class ActionsRunPoller implements ClaimLedger.Consumer.Completion {
 
     private long discoverRun(String expectedTitle, Map<String, String> headers) throws Exception {
         Instant deadline = clock.now().plus(bounds.discoveryBudget());
-        String url = API + "/repos/" + owner + "/" + repo + "/actions/workflows/" + path(workflowFile)
-                + "/runs?event=workflow_dispatch&branch=" + query(ref) + "&per_page=100";
+        String baseUrl = API + "/repos/" + owner + "/" + repo + "/actions/workflows/" + path(workflowFile)
+                + "/runs?event=workflow_dispatch&branch=" + query(ref) + "&per_page=" + DISCOVERY_PAGE_SIZE;
         for (int attempt = 1; attempt <= bounds.discoveryAttempts(); attempt++) {
-            Response response = get(url, headers, "DISPATCH_RUN_DISCOVERY");
             List<RunSnapshot> exact = new ArrayList<>();
-            for (RunSnapshot run : parseWorkflowRuns(response.body())) {
-                if (expectedTitle.equals(run.displayTitle())) exact.add(run);
+            boolean completePageScan = false;
+            for (int page = 1; page <= DISCOVERY_MAX_PAGES; page++) {
+                if (page > 1 && !clock.now().isBefore(deadline)) {
+                    throw new IllegalStateException("DISPATCH_RUN_DISCOVERY_PAGINATION_BUDGET_EXHAUSTED");
+                }
+                Response response = get(baseUrl + "&page=" + page, headers, "DISPATCH_RUN_DISCOVERY");
+                List<RunSnapshot> runs = parseWorkflowRuns(response.body());
+                for (RunSnapshot run : runs) {
+                    if (expectedTitle.equals(run.displayTitle())) exact.add(run);
+                }
+                if (exact.size() > 1) throw new IllegalStateException("DISPATCH_RUN_AMBIGUOUS");
+                if (runs.size() < DISCOVERY_PAGE_SIZE) {
+                    completePageScan = true;
+                    break;
+                }
+                if (page == DISCOVERY_MAX_PAGES) {
+                    throw new IllegalStateException("DISPATCH_RUN_DISCOVERY_PAGE_LIMIT_EXHAUSTED");
+                }
             }
-            if (exact.size() > 1) throw new IllegalStateException("DISPATCH_RUN_AMBIGUOUS");
+            if (!completePageScan) {
+                throw new IllegalStateException("DISPATCH_RUN_DISCOVERY_PAGE_LIMIT_EXHAUSTED");
+            }
             if (exact.size() == 1) return exact.get(0).id();
             if (attempt == bounds.discoveryAttempts() || !clock.now().isBefore(deadline)) break;
             sleepWithin(deadline);
