@@ -1,0 +1,110 @@
+'use strict';
+
+const LENS_REGISTRY_SCHEMA_VERSION = 'BOOK_LITERARY_DIAGNOSTIC_LENS_REGISTRY_V1';
+const FROZEN_SOURCE_BLOB_SHA = 'af6770b3ec0f54cba604d041b6abb9e30082209e';
+
+const EXTERNAL_B08_SEAMS = Object.freeze([
+  'VOICE_PRESERVATION_EVOLUTION',
+  'HOMOGENIZATION_OVEROPTIMIZATION'
+]);
+
+// Exact runtime projection of LITERARY-DIAGNOSTIC-LENS-REGISTRY_v1.0.csv.
+// These six fields are frozen by B05-C and must not be paraphrased in runtime code.
+const RAW_LENSES = Object.freeze([
+  ['B05-LENS-001','SENTENCE_RHYTHM_SYNTAX','B05_DIRECT','B02_SOURCE_IDENTITY','LOCAL_CRAFT_DIAGNOSTIC_EVIDENCE','NO_REPLACEMENT_PROSE'],
+  ['B05-LENS-002','PARAGRAPH_MOVEMENT','B05_DIRECT','B02_SOURCE_IDENTITY','LOCAL_CRAFT_DIAGNOSTIC_EVIDENCE','NO_REPLACEMENT_PROSE'],
+  ['B05-LENS-003','DICTION_REGISTER_LOCAL','B05_DIRECT_WITH_B08_FENCE','B02_SOURCE_IDENTITY;B08_IF_GOVERNING_VOICE_USED','LOCAL_CRAFT_DIAGNOSTIC_EVIDENCE','NO_GOVERNING_VOICE_STANDING'],
+  ['B05-LENS-004','POV_FOCALIZATION_DISTANCE_EFFECT','B05_COMPOSED','B03_NARRATIVE_TRUTH;B04_READER_EVIDENCE_IF_USED','CRAFT_EFFECT_DIAGNOSTIC_EVIDENCE','NO_POV_OR_FOCALIZATION_TRUTH_MUTATION'],
+  ['B05-LENS-005','CHARACTER_AGENCY_CONTINUITY_REALIZATION','B05_COMPOSED','B03_CHARACTER_EVENT_KNOWLEDGE_TRUTH','CRAFT_REALIZATION_DIAGNOSTIC_EVIDENCE','NO_CHARACTER_STATE_SYNTHESIS'],
+  ['B05-LENS-006','DIALOGUE_SUBTEXT_DISTINCTIVENESS','B05_DIRECT_WITH_B08_FENCE','B03_SPEAKER_CONTEXT;B08_IF_GOVERNING_VOICE_USED','LOCAL_CRAFT_DIAGNOSTIC_EVIDENCE','NO_GOVERNING_VOICE_STANDING'],
+  ['B05-LENS-007','SCENE_TENSION_CAUSALITY_EFFECT','B05_COMPOSED','B03_CAUSAL_EVENT_TRUTH;B04_TENSION_EVIDENCE_IF_USED','CRAFT_EFFECT_DIAGNOSTIC_EVIDENCE','NO_CAUSAL_OR_READER_TRUTH_MUTATION'],
+  ['B05-LENS-008','PACING_COMPRESSION_EXPANSION_EFFECT','B05_COMPOSED','B04_PACING_MOMENTUM_EVIDENCE_IF_USED','CRAFT_EFFECT_DIAGNOSTIC_EVIDENCE','NO_READER_PACING_STANDING'],
+  ['B05-LENS-009','INFORMATION_RELEASE_ORIENTATION_EFFECT','B05_COMPOSED','B04_EXPOSURE_UNDERSTANDING','CRAFT_EFFECT_DIAGNOSTIC_EVIDENCE','NO_SECOND_REVEAL_FRONTIER_OR_READER_TRUTH'],
+  ['B05-LENS-010','DESCRIPTION_IMAGERY_METAPHOR_MOTIF_EFFECT','B05_DIRECT_WITH_B03_FENCE','B02_SOURCE_IDENTITY;B03_MOTIF_THEME_TRUTH_IF_USED','LOCAL_CRAFT_DIAGNOSTIC_EVIDENCE','NO_CANONICAL_MOTIF_OR_THEME_SYNTHESIS'],
+  ['B05-LENS-011','EMOTIONAL_PROGRESSION_EFFECT','B05_COMPOSED','B03_CHARACTER_STATE_IF_USED;B04_AFFECT_EVIDENCE_IF_USED','CRAFT_EFFECT_DIAGNOSTIC_EVIDENCE','NO_CHARACTER_OR_READER_STATE_SYNTHESIS'],
+  ['B05-LENS-012','EXPOSITION_ARGUMENT','B05_DIRECT','B02_SOURCE_IDENTITY','LOCAL_CRAFT_DIAGNOSTIC_EVIDENCE','NO_FACTUAL_TRUTH_AUTHORITY'],
+  ['B05-LENS-013','THEOLOGICAL_PHILOSOPHICAL_PRESENTATION','B05_DIRECT_CRAFT_ONLY','B03_CANONICAL_OR_EXTERNAL_FACTUAL_EVIDENCE_WHERE_APPLICABLE','PRESENTATION_AND_REASONING_CRAFT_EVIDENCE','NO_THEOLOGICAL_OR_FACTUAL_TRUTH_CERTIFICATION'],
+  ['B05-LENS-014','HISTORICAL_REGISTER_PRESENTATION','B05_DIRECT_CRAFT_ONLY','B03_CANONICAL_OR_EXTERNAL_HISTORICAL_EVIDENCE_WHERE_APPLICABLE','REGISTER_AND_PRESENTATION_CRAFT_EVIDENCE','NO_HISTORICAL_FACT_CERTIFICATION'],
+  ['B05-LENS-015','OPENING_ENDING_TURNS','B05_DIRECT','B02_SOURCE_IDENTITY;B03_OR_B04_PURPOSE_EVIDENCE_IF_USED','LOCAL_CRAFT_DIAGNOSTIC_EVIDENCE','NO_AUTHOR_INTENT_SYNTHESIS'],
+  ['B05-LENS-016','CANON_PROTECTED_LANGUAGE_CONSTRAINT_CHECK','B05_COMPOSED_CHECK_ONLY','B03_CANON_TRUTH;B10_OR_BOOK_AUTHOR_CONSTRAINTS_IF_APPLICABLE','CONSTRAINT_CONFLICT_OR_RISK_EVIDENCE','NO_CANON_PROTECTED_LANGUAGE_OR_AUTHOR_DECISION_AUTHORITY']
+]);
+
+const LENSES = Object.freeze(RAW_LENSES.map((row, index) => Object.freeze({
+  index,
+  lens_id: row[0],
+  label: row[1],
+  owner_class: row[2],
+  required_owner_dependencies: row[3],
+  output_authority: row[4],
+  anti_abuse_rule: row[5]
+})));
+
+class BookLiteraryDiagnosticLensRegistryError extends Error {
+  constructor(code, detail = '') {
+    super(detail ? `${code}:${detail}` : code);
+    this.name = 'BookLiteraryDiagnosticLensRegistryError';
+    this.code = code;
+    this.detail = detail;
+  }
+}
+
+function fail(code, detail = '') { throw new BookLiteraryDiagnosticLensRegistryError(code, detail); }
+
+function validateLiteraryDiagnosticLensRegistryV1() {
+  if (LENSES.length !== 16) fail('BLOCKED_DIAGNOSTIC_LENS_REGISTRY_CARDINALITY', String(LENSES.length));
+  if (EXTERNAL_B08_SEAMS.length !== 2) fail('BLOCKED_EXTERNAL_B08_SEAM_CARDINALITY', String(EXTERNAL_B08_SEAMS.length));
+  const ids = new Set();
+  const labels = new Set();
+  for (let i = 0; i < LENSES.length; i += 1) {
+    const lens = LENSES[i];
+    const expected = `B05-LENS-${String(i + 1).padStart(3, '0')}`;
+    if (lens.lens_id !== expected) fail('BLOCKED_DIAGNOSTIC_LENS_ID_SEQUENCE', lens.lens_id);
+    if (ids.has(lens.lens_id)) fail('BLOCKED_DIAGNOSTIC_LENS_DUPLICATE', lens.lens_id);
+    if (labels.has(lens.label)) fail('BLOCKED_DIAGNOSTIC_LENS_LABEL_DUPLICATE', lens.label);
+    for (const field of ['label','owner_class','required_owner_dependencies','output_authority','anti_abuse_rule']) {
+      if (typeof lens[field] !== 'string' || lens[field].trim().length === 0) fail('BLOCKED_DIAGNOSTIC_LENS_INVALID', `${lens.lens_id}.${field}`);
+    }
+    ids.add(lens.lens_id);
+    labels.add(lens.label);
+  }
+  if (new Set(EXTERNAL_B08_SEAMS).size !== 2) fail('BLOCKED_EXTERNAL_B08_SEAM_DUPLICATE');
+  if (EXTERNAL_B08_SEAMS[0] !== 'VOICE_PRESERVATION_EVOLUTION' || EXTERNAL_B08_SEAMS[1] !== 'HOMOGENIZATION_OVEROPTIMIZATION') {
+    fail('BLOCKED_EXTERNAL_B08_SEAM_DRIFT');
+  }
+  return true;
+}
+
+function getLiteraryDiagnosticLensV1(lensId) {
+  const lens = LENSES.find(x => x.lens_id === lensId);
+  if (!lens) fail('BLOCKED_DIAGNOSTIC_LENS_UNKNOWN', String(lensId));
+  return lens;
+}
+
+function assertLiteraryDiagnosticLensV1(lensId) {
+  return getLiteraryDiagnosticLensV1(lensId).lens_id;
+}
+
+function normalizeRequestedLiteraryLensesV1(lensIds) {
+  if (!Array.isArray(lensIds) || lensIds.length === 0) fail('BLOCKED_DIAGNOSTIC_LENS_UNKNOWN', 'requested_lens_ids');
+  const unique = new Set();
+  for (const lensId of lensIds) {
+    assertLiteraryDiagnosticLensV1(lensId);
+    if (unique.has(lensId)) fail('BLOCKED_DIAGNOSTIC_LENS_DUPLICATE', lensId);
+    unique.add(lensId);
+  }
+  return [...unique].sort();
+}
+
+validateLiteraryDiagnosticLensRegistryV1();
+
+module.exports = {
+  LENS_REGISTRY_SCHEMA_VERSION,
+  FROZEN_SOURCE_BLOB_SHA,
+  LENSES,
+  EXTERNAL_B08_SEAMS,
+  BookLiteraryDiagnosticLensRegistryError,
+  validateLiteraryDiagnosticLensRegistryV1,
+  getLiteraryDiagnosticLensV1,
+  assertLiteraryDiagnosticLensV1,
+  normalizeRequestedLiteraryLensesV1
+};
