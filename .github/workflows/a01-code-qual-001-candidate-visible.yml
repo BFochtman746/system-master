@@ -1,0 +1,36 @@
+name: A01 CODE QUAL 001 Candidate Visible
+
+on:
+  push:
+    branches:
+      - 'qualification/a01-code-qual-001-run-*'
+    paths:
+      - 'qualification/a01/fixture/a01-code-qual-001/live-candidate/**'
+
+permissions:
+  contents: read
+
+jobs:
+  visible-candidate-checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout exact candidate branch commit
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Record candidate subject
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "candidate_sha=$(git rev-parse HEAD)"
+          python3 --version
+          node --version
+          javac -version
+      - name: Run candidate-visible suite
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd qualification/a01/fixture/a01-code-qual-001/live-candidate
+          python3 tests-visible/run_all.py
