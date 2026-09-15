@@ -37,6 +37,12 @@ function selectorFor(caseId, group) {
   return `^${group.selector_prefix}${caseId.slice(1)}\\b`;
 }
 
+function isolatedChildEnv() {
+  const env = { ...process.env };
+  delete env.NODE_TEST_CONTEXT;
+  return env;
+}
+
 function childDiagnostic(caseId, group, selector, result) {
   return [
     `case_id=${caseId}`,
@@ -70,7 +76,7 @@ for (const caseId of EXPECTED) {
     const result = spawnSync(process.execPath, ['--test', `--test-name-pattern=${selector}`, group.source], {
       cwd: ROOT,
       encoding: 'utf8',
-      env: process.env,
+      env: isolatedChildEnv(),
       maxBuffer: 16 * 1024 * 1024
     });
     const output = `${result.stdout || ''}\n${result.stderr || ''}`;
