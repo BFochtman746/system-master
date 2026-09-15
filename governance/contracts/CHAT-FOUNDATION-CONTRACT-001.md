@@ -96,12 +96,13 @@ Required repository evidence:
 - `control-gateway/test/development-response-governor.test.js`
 - `control-gateway/test/governed-execution-admission.test.js`
 - `control-gateway/test/development-response-production-enforcement.test.js`
+- `.github/scripts/development-response-governor-qualify.js`
 - `governance/contracts/SYSTEM-MASTER-DEVELOPMENT-RESPONSE-GOVERNOR-001.json`
 - `governance/chat/SYSTEM-MASTER-PROJECT-INSTRUCTION-001.md`
 
 Required external/runtime evidence before final C04 closure:
 
-1. repository CI PASS on the exact C04 branch/head;
+1. repository CI PASS on the exact C04 branch/head, including `development-response-governor-qualify.js` under canonical `verify.sh`;
 2. exact-subject A-01 qualification when required by current Foundation evidence policy;
 3. installation/activation evidence for the System Master ChatGPT Project instruction and Build Governor Skill if claiming native ChatGPT response governance is active.
 
@@ -116,7 +117,13 @@ node --test \
   control-gateway/test/development-response-production-enforcement.test.js
 ```
 
-PASS requires zero failed tests and explicit negative coverage proving:
+Repository Required Verification must also execute:
+
+```bash
+node .github/scripts/development-response-governor-qualify.js
+```
+
+PASS requires zero failed tests, a non-vacuous positive test count, and explicit negative coverage proving:
 
 - ordinary unstructured chat prose cannot issue a PASS response receipt;
 - missing required sections cannot issue a PASS response receipt;
