@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import copy
 import datetime as dt
-import json
 import sys
 import tempfile
 import unittest
@@ -226,6 +225,10 @@ class FakeSource:
             },
             "governance/second-shift/SECOND-SHIFT-REGISTRY-001.json": {
                 "owner_files": {LANE: "governance/second-shift/CORE-DELEGATIONS.json"},
+                "coverage_routes": {
+                    "SYSTEM_MASTER/SHARED_INFRASTRUCTURE": LANE,
+                    "SYSTEM_MASTER/SHARED_INFRASTRUCTURE/A01": LANE,
+                },
             },
             "governance/WORK-OBLIGATION-REGISTRY-017.json": {
                 "owner_head_snapshot": {LANE: CONTROL_HEAD},
@@ -334,6 +337,13 @@ class P12IngressAuthorityTests(unittest.TestCase):
         with self.assertRaisesRegex(IngressError, "admission subject"):
             validate(delegation)
 
+    def test_admission_task_id_drift_fails_even_with_valid_digests(self):
+        delegation = make_delegation()
+        delegation["a01_execution"]["handoff"]["admission_receipt"]["task_id"] = "OTHER-OBLIGATION"
+        rehash(delegation)
+        with self.assertRaisesRegex(IngressError, "task_id differs from current obligation"):
+            validate(delegation)
+
     def test_owner_identity_drift_fails_even_with_rehashed_receipt(self):
         delegation = make_delegation()
         handoff = delegation["a01_execution"]["handoff"]
@@ -404,6 +414,47 @@ class P12IngressAuthorityTests(unittest.TestCase):
         self.assertEqual(result.status, "ERROR")
         self.assertEqual(len(scheduler.calls), 0)
         self.assertIn("live owner control head drift", result.errors[0]["detail"])
+
+    def test_shared_obligation_requires_matching_administrative_owner(self):
+        delegation = make_delegation()
+        source = FakeSource(delegation)
+        source.files["governance/WORK-OBLIGATION-REGISTRY-017.json"]["obligations"] = [
+            {
+                "obligation_id": OBLIGATION_ID,
+                "owner_path": "SYSTEM_MASTER/SHARED_INFRASTRUCTURE/A01",
+                "administrative_owner": "SYSTEM_MASTER/BOOK",
+                "state": "ACTIVE",
+            }
+        ]
+        scheduler = RecordingScheduler()
+        with tempfile.TemporaryDirectory() as state_dir:
+            result = Ingress(source, scheduler=scheduler, state_dir=state_dir).run_once(
+                now=dt.datetime(2026, 9, 16, 3, 57, tzinfo=UTC)
+            )
+        self.assertEqual(result.status, "PASS")
+        self.assertEqual(result.enqueued, 0)
+        self.assertEqual(len(scheduler.calls), 0)
+        self.assertEqual(result.skipped[0]["reason"], "OBLIGATION_OWNER_MISMATCH")
+
+    def test_shared_obligation_accepts_exact_coverage_route_and_administrator(self):
+        delegation = make_delegation()
+        source = FakeSource(delegation)
+        source.files["governance/WORK-OBLIGATION-REGISTRY-017.json"]["obligations"] = [
+            {
+                "obligation_id": OBLIGATION_ID,
+                "owner_path": "SYSTEM_MASTER/SHARED_INFRASTRUCTURE/A01",
+                "administrative_owner": OWNER_PATH,
+                "state": "ACTIVE",
+            }
+        ]
+        scheduler = RecordingScheduler()
+        with tempfile.TemporaryDirectory() as state_dir:
+            result = Ingress(source, scheduler=scheduler, state_dir=state_dir).run_once(
+                now=dt.datetime(2026, 9, 16, 3, 57, tzinfo=UTC)
+            )
+        self.assertEqual(result.status, "PASS")
+        self.assertEqual(result.enqueued, 1)
+        self.assertEqual(len(scheduler.calls), 1)
 
     def test_dry_run_validates_but_does_not_reserve_or_enqueue(self):
         delegation = make_delegation()
