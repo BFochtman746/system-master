@@ -6,8 +6,8 @@ Evidence authority: `governance/census/FOUNDATION-CLOSURE-EVIDENCE-REGISTRY-001.
 
 ## Disposition summary
 
-11 `COMPLETE_WITH_EVIDENCE`; 39 `ACTIVE_GAP`; 0 `DURABLY_BLOCKED_EXTERNAL_HUMAN_PRIVATE_NATIVE`; 16 `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY`; 66 total.
-Foundation 1.0 completion with evidence: 22% (11 of 50 in-scope rows).
+12 `COMPLETE_WITH_EVIDENCE`; 38 `ACTIVE_GAP`; 0 `DURABLY_BLOCKED_EXTERNAL_HUMAN_PRIVATE_NATIVE`; 16 `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY`; 66 total.
+Foundation 1.0 completion with evidence: 24% (12 of 50 in-scope rows).
 
 | ID | Capability / requirement | Canonical owner | State | Current disposition |
 | --- | --- | --- | --- | --- |
@@ -72,7 +72,7 @@ Foundation 1.0 completion with evidence: 22% (11 of 50 in-scope rows).
 | `P08` | P08 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | Current-authority PASS receipt registered. |
 | `P09` | P09 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | Current-authority PASS receipt registered. |
 | `P10` | P10 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | Current-authority PASS receipt registered. |
-| `P11` | P11 | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Current-authority Foundation evidence receipt not registered. |
+| `P11` | P11 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | Current-authority PASS receipt registered. |
 | `P12` | P12 | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Current-authority Foundation evidence receipt not registered. |
 | `P13` | P13 | SYSTEM_MASTER/CORE | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Absorbed by current authority-selected crosswalk. |
 | `P14` | P14 | SYSTEM_MASTER/CORE | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Absorbed by current authority-selected crosswalk. |
@@ -80,8 +80,8 @@ Foundation 1.0 completion with evidence: 22% (11 of 50 in-scope rows).
 
 ## Unresolved gap successor register
 
-39 `ACTIVE_GAP` rows remain. Shared platform dependencies remain first in successor order.
+38 `ACTIVE_GAP` rows remain. Shared platform dependencies remain first in successor order.
 
-**Exact next ACTIVE_GAP: `P11` - Night scheduler and claim authority.**
+**Exact next ACTIVE_GAP: `P12` - GitHub to A-01 ingress transport.**
 
-Continue `P11-P12`, `P15`, then owner-valid capability gaps in dependency-valid order.
+Continue `P12`, `P15`, then owner-valid capability gaps in dependency-valid order.

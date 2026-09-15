@@ -1,0 +1,155 @@
+name: P11 Night Scheduler Foundation Qualification
+
+on:
+  pull_request:
+    paths:
+      - 'control-gateway/python/a01_night_scheduler.py'
+      - 'tests/test_control_gateway_a01_night_scheduler.py'
+      - '.github/workflows/p11-night-scheduler-foundation-qualification.yml'
+      - 'governance/contracts/P11-FOUNDATION-CONTRACT-001.md'
+      - 'governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-*.json'
+      - 'qualification/a01/a01-policy.json'
+      - 'qualification/a01/registry.json'
+  push:
+    branches: [main]
+    paths:
+      - 'control-gateway/python/a01_night_scheduler.py'
+      - 'tests/test_control_gateway_a01_night_scheduler.py'
+      - '.github/workflows/p11-night-scheduler-foundation-qualification.yml'
+      - 'governance/contracts/P11-FOUNDATION-CONTRACT-001.md'
+      - 'governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-*.json'
+      - 'qualification/a01/a01-policy.json'
+      - 'qualification/a01/registry.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  prequalify:
+    name: Prequalify P11 scheduling authority and durable night budget
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact P11 subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Assert Python runtime and syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          python --version
+          python - <<'PY'
+          import sys
+          if sys.version_info < (3, 12):
+              raise SystemExit(f'P11 requires Python 3.12+, found {sys.version}')
+          PY
+          python -m py_compile control-gateway/python/a01_night_scheduler.py
+          python -m py_compile tests/test_control_gateway_a01_night_scheduler.py
+      - name: Run P11 scheduler authority and budget suite
+        run: python tests/test_control_gateway_a01_night_scheduler.py
+      - name: Reprove P10 transactional dependency boundary
+        run: python tests/test_second_shift_supervisor_p10_foundation.py
+      - name: Assert current P11 authority and unchanged registered A-01 qualifier
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs = require('fs');
+          const crosswalk = JSON.parse(fs.readFileSync('governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json', 'utf8'));
+          const policy = JSON.parse(fs.readFileSync('qualification/a01/a01-policy.json', 'utf8'));
+          const registry = JSON.parse(fs.readFileSync('qualification/a01/registry.json', 'utf8'));
+          const contract = fs.readFileSync('governance/contracts/P11-FOUNDATION-CONTRACT-001.md', 'utf8');
+          const scheduler = fs.readFileSync('control-gateway/python/a01_night_scheduler.py', 'utf8');
+          const tests = fs.readFileSync('tests/test_control_gateway_a01_night_scheduler.py', 'utf8');
+          const p11 = crosswalk.platform_requirements.find(x => x.platform_id === 'P11');
+          if (!p11 || p11.implementation !== 'control-gateway/python/a01_night_scheduler.py') throw new Error('P11_CANONICAL_IMPLEMENTATION_POINTER_INVALID');
+          if (policy.overnight?.enabled !== true || policy.overnight?.timezone !== 'America/New_York' || policy.overnight?.max_slots !== 8) throw new Error('P11_OVERNIGHT_POLICY_INVALID');
+          const live = registry.qualifications['SECOND-SHIFT-SUPERVISOR-V2-A01-STRESS'];
+          if (!live || live.workstream_id !== 'SECOND-SHIFT-CONTROL-GATEWAY' || live.gate_class !== 'consolidated' || live.source !== 'subject') throw new Error('P11_LIVE_QUALIFIER_REGISTRATION_INVALID');
+          if (!scheduler.includes('night_scheduler_night_budget') || !scheduler.includes('night_scheduler_budget_usage')) throw new Error('P11_DURABLE_BUDGET_SCHEMA_MISSING');
+          if (!scheduler.includes('night-wide scheduler slot budget exhausted')) throw new Error('P11_BUDGET_FAIL_CLOSED_GUARD_MISSING');
+          if (!tests.includes('test_parallel_ticks_at_last_night_slot_cannot_overspend')) throw new Error('P11_FINAL_SLOT_CONTENTION_TEST_MISSING');
+          if (!tests.includes('test_night_budget_caps_successive_ticks_persists_restart_and_resets_next_night')) throw new Error('P11_DURABLE_BUDGET_TEST_MISSING');
+          if (!contract.includes('same `BEGIN IMMEDIATE` transaction') || !contract.includes('Completion, blockage, stale recovery, or restart does not refund')) throw new Error('P11_CONTRACT_BUDGET_SEMANTICS_MISSING');
+          console.log('P11_HOSTED_PREQUALIFICATION=PASS');
+          NODE
+      - name: Emit hosted P11 evidence manifest
+        shell: bash
+        env:
+          SUBJECT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, os, pathlib
+          out = {
+              'suite': 'P11_NIGHT_SCHEDULER_FOUNDATION',
+              'subject_sha': os.environ['SUBJECT_SHA'],
+              'successful': True,
+              'policy_timezone': 'America/New_York',
+              'policy_max_slots': 8,
+              'durable_budget': True,
+              'restart_proven': True,
+              'final_slot_contention_proven': True,
+              'next_night_reset_proven': True,
+              'p10_dependency_reproved': True,
+          }
+          pathlib.Path('.p11-night-scheduler-foundation.json').write_text(json.dumps(out, indent=2) + '\n', encoding='utf-8')
+          PY
+      - name: Upload hosted P11 evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p11-night-scheduler-foundation-${{ github.run_id }}
+          path: .p11-night-scheduler-foundation.json
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 30
+
+  live_a01:
+    name: Live exact-SHA A-01 night scheduler qualification
+    needs: prequalify
+    uses: ./.github/workflows/a01-control-plane-gateway.yml
+    with:
+      qualification_id: SECOND-SHIFT-SUPERVISOR-V2-A01-STRESS
+      workstream_id: SECOND-SHIFT-CONTROL-GATEWAY
+      subject_sha: ${{ github.event.pull_request.head.sha || github.sha }}
+      origin_ref: ${{ github.head_ref || github.ref }}
+      resume_on_pass: 'Adjudicate P11 exact-SHA scheduling authority and durable night-budget evidence and continue Foundation closure.'
+      resume_on_failure: 'Preserve P11 evidence, classify the exact failure, and repair only the failing scheduler or budget boundary.'
+      notification_target: foundation-p11
+      execution_context: normal
+      qualifier_timeout_minutes: 28
+      job_timeout_minutes: 30
+    secrets: inherit
+
+  assert_live_result:
+    name: Assert authoritative P11 live result
+    needs: [prequalify, live_a01]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Fail closed unless A-01 proves exact P11 subject
+        shell: bash
+        env:
+          LIVE_JOB_RESULT: ${{ needs.live_a01.result }}
+          RESULT_CLASS: ${{ needs.live_a01.outputs.result_class }}
+          PROMOTION_AUTHORIZED: ${{ needs.live_a01.outputs.promotion_authorized }}
+          ADMISSION_STATE: ${{ needs.live_a01.outputs.admission_state }}
+          CONTROL_PLANE_SHA: ${{ needs.live_a01.outputs.control_plane_sha }}
+          EXPECTED_SUBJECT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          EXPECTED_CONTROL_PLANE_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          test "$LIVE_JOB_RESULT" = "success"
+          test "$ADMISSION_STATE" = "ADMITTED"
+          test "$RESULT_CLASS" = "PASS"
+          test "$PROMOTION_AUTHORIZED" = "false"
+          [[ "$EXPECTED_SUBJECT_SHA" =~ ^[0-9a-fA-F]{40}$ ]]
+          [[ "$CONTROL_PLANE_SHA" =~ ^[0-9a-fA-F]{40}$ ]]
+          test "${CONTROL_PLANE_SHA,,}" = "${EXPECTED_CONTROL_PLANE_SHA,,}"
+          printf 'P11_LIVE_A01=PASS\nP11_RESULT_CLASS=%s\nP11_PROMOTION_AUTHORIZED=%s\nP11_SUBJECT_SHA=%s\nP11_CONTROL_PLANE_SHA=%s\n' "$RESULT_CLASS" "$PROMOTION_AUTHORIZED" "$EXPECTED_SUBJECT_SHA" "$CONTROL_PLANE_SHA"

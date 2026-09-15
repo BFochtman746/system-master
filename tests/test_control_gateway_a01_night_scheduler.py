@@ -27,6 +27,7 @@ spec.loader.exec_module(helpers)
 
 UTC = dt.timezone.utc
 IN_SHIFT = dt.datetime(2026, 9, 12, 5, 0, tzinfo=UTC)
+NEXT_SHIFT = IN_SHIFT + dt.timedelta(days=1)
 OUT_SHIFT = dt.datetime(2026, 9, 12, 12, 0, tzinfo=UTC)
 
 
@@ -75,14 +76,22 @@ class NightSchedulerTests(unittest.TestCase):
         self.scheduler.enqueue(h, c, now=IN_SHIFT)
         return h, c
 
-    def terminal_claim(self, claim, seconds=1):
+    def terminal_claim(self, claim, seconds=1, base=IN_SHIFT):
         self.store.terminal(
             claim["lease_id"], claim["fencing_token"], "COMPLETED",
-            now=IN_SHIFT + dt.timedelta(seconds=seconds),
+            now=base + dt.timedelta(seconds=seconds),
         )
 
     def test_protocol_is_frozen(self):
         self.assertEqual(NIGHT_SCHEDULER_PROTOCOL, "control-gateway.a01-night-scheduler.v1")
+
+    def test_policy_binds_scheduler_to_eight_night_slots(self):
+        self.assertEqual(self.scheduler.night_timezone_name, "America/New_York")
+        self.assertEqual(self.scheduler.max_night_slots, 8)
+        self.assertEqual(
+            self.scheduler._budget_status(IN_SHIFT),
+            {"night_key": "2026-09-12", "max_slots": 8, "used_slots": 0, "remaining_slots": 8},
+        )
 
     def test_enqueue_accepts_only_overnight_work(self):
         h = helpers.make_handoff("A", "LANE-A", execution_class="IMMEDIATE")
@@ -106,6 +115,7 @@ class NightSchedulerTests(unittest.TestCase):
         self.assertFalse(result["shift_open"])
         self.assertEqual(result["claims"], [])
         self.assertIsNone(self.store.conn.execute("SELECT 1 FROM claims WHERE released_at IS NULL").fetchone())
+        self.assertEqual(result["night_budget"]["used_slots"], 0)
 
     def test_execution_order_is_hard_stage_barrier_and_priority_orders_stage(self):
         self.enqueue("C", "LANE-C", order=2, priority=999)
@@ -224,6 +234,91 @@ class NightSchedulerTests(unittest.TestCase):
         self.store = SupervisorStore(self.db); self.scheduler = A01NightScheduler(self.store)
         live = self.store.conn.execute("SELECT COUNT(*) n FROM claims WHERE released_at IS NULL").fetchone()["n"]
         self.assertEqual(live, 1)
+        self.assertEqual(self.scheduler._budget_status(IN_SHIFT)["used_slots"], 1)
+
+    def test_night_budget_caps_successive_ticks_persists_restart_and_resets_next_night(self):
+        for name in "ABCDEFGHI":
+            self.enqueue(name, f"LANE-{name}")
+
+        first = self.scheduler.tick(now=IN_SHIFT, max_claims=3)
+        self.assertEqual(len(first["claims"]), 3)
+        for i, claim in enumerate(first["claims"], start=1):
+            self.terminal_claim(claim, i)
+
+        second_at = IN_SHIFT + dt.timedelta(seconds=10)
+        second = self.scheduler.tick(now=second_at, max_claims=3)
+        self.assertEqual(len(second["claims"]), 3)
+        for i, claim in enumerate(second["claims"], start=11):
+            self.terminal_claim(claim, i)
+
+        self.store.close()
+        self.store = SupervisorStore(self.db)
+        self.scheduler = A01NightScheduler(self.store)
+        third_at = IN_SHIFT + dt.timedelta(seconds=20)
+        third = self.scheduler.tick(now=third_at, max_claims=3)
+        self.assertEqual(len(third["claims"]), 2)
+        self.assertEqual(third["night_budget"]["used_slots"], 8)
+        self.assertEqual(third["night_budget"]["remaining_slots"], 0)
+        self.assertTrue(any("night-wide scheduler slot budget exhausted" in x["reason"] for x in third["blocked"]))
+        usage = self.store.conn.execute(
+            "SELECT COUNT(*) n FROM night_scheduler_budget_usage WHERE night_key='2026-09-12'"
+        ).fetchone()["n"]
+        self.assertEqual(usage, 8)
+
+        for i, claim in enumerate(third["claims"], start=21):
+            self.terminal_claim(claim, i)
+        next_night = self.scheduler.tick(now=NEXT_SHIFT, max_claims=3)
+        self.assertEqual([x["delegation_id"] for x in next_night["claims"]], ["D-I"])
+        self.assertEqual(next_night["night_budget"]["night_key"], "2026-09-13")
+        self.assertEqual(next_night["night_budget"]["used_slots"], 1)
+        self.assertEqual(next_night["night_budget"]["remaining_slots"], 7)
+
+    def test_parallel_ticks_at_last_night_slot_cannot_overspend(self):
+        for name in "ABCDEFG":
+            self.enqueue(name, f"LANE-{name}")
+        first = self.scheduler.tick(now=IN_SHIFT, max_claims=7)
+        self.assertEqual(len(first["claims"]), 7)
+        for i, claim in enumerate(first["claims"], start=1):
+            self.terminal_claim(claim, i)
+
+        self.enqueue("H", "LANE-H")
+        self.enqueue("I", "LANE-I")
+        self.store.close()
+        barrier = threading.Barrier(2, timeout=10)
+
+        def worker(_):
+            with SupervisorStore(self.db) as store:
+                scheduler = A01NightScheduler(store)
+                barrier.wait()
+                return scheduler.tick(now=IN_SHIFT + dt.timedelta(seconds=20), max_claims=1)
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as ex:
+            futures = [ex.submit(worker, i) for i in range(2)]
+            results = [future.result(timeout=30) for future in futures]
+
+        self.store = SupervisorStore(self.db)
+        self.scheduler = A01NightScheduler(self.store)
+        budget = self.scheduler._budget_status(IN_SHIFT)
+        usage = self.store.conn.execute(
+            "SELECT COUNT(*) n FROM night_scheduler_budget_usage WHERE night_key='2026-09-12'"
+        ).fetchone()["n"]
+        claims = self.store.conn.execute("SELECT COUNT(*) n FROM claims").fetchone()["n"]
+        self.assertEqual(budget["used_slots"], 8, results)
+        self.assertEqual(usage, 8, results)
+        self.assertEqual(claims, 8, results)
+        self.assertEqual(budget["remaining_slots"], 0)
+
+    def test_budget_policy_change_during_active_night_fails_closed(self):
+        self.enqueue("A", "LANE-A")
+        first = self.scheduler.tick(now=IN_SHIFT, max_claims=1)
+        self.assertEqual(len(first["claims"]), 1)
+        self.terminal_claim(first["claims"][0], 1)
+        self.enqueue("B", "LANE-B")
+        self.scheduler.max_night_slots = 7
+        result = self.scheduler.tick(now=IN_SHIFT + dt.timedelta(seconds=2), max_claims=1)
+        self.assertEqual(result["claims"], [])
+        self.assertTrue(any("budget policy changed during active night" in x["reason"] for x in result["blocked"]))
+        self.assertEqual(self.store.conn.execute("SELECT COUNT(*) n FROM claims").fetchone()["n"], 1)
 
     def test_terminal_work_reconciles_out_of_scheduler_queue(self):
         self.enqueue("A", "LANE-A")
@@ -233,12 +328,17 @@ class NightSchedulerTests(unittest.TestCase):
         state = self.store.conn.execute("SELECT state FROM night_scheduler_queue WHERE delegation_id='D-A'").fetchone()["state"]
         self.assertEqual(state, "TERMINAL")
 
-    def test_scheduler_snapshot_reports_zero_invariant_problems_and_no_auth_leak(self):
+    def test_scheduler_snapshot_reports_budget_and_zero_invariant_problems_and_no_auth_leak(self):
         self.enqueue("A", "LANE-A")
+        claim = self.scheduler.tick(now=IN_SHIFT, max_claims=1)["claims"][0]
         snap = self.scheduler.snapshot()
         self.assertEqual(snap["authorization_leaks"], 0)
         self.assertEqual(snap["coordination_problems"], [])
         self.assertEqual(snap["supervisor_problems"], [])
+        self.assertEqual(snap["night_budgets"][0]["max_slots"], 8)
+        self.assertEqual(snap["night_budgets"][0]["used_slots"], 1)
+        self.assertEqual(snap["night_budget_usage"][0]["lease_id"], claim["lease_id"])
+        self.assertEqual(snap["night_budget_usage"][0]["slot_number"], 1)
 
 
 if __name__ == "__main__":
