@@ -15,6 +15,20 @@ on:
         description: Exact byte-bound production mutation plan JSON
         required: true
         type: string
+  workflow_call:
+    inputs:
+      state_ref:
+        description: Durable Control Gateway active-work state branch name
+        required: true
+        type: string
+      mutation_request_json:
+        description: Exact CG-005 mutation request JSON
+        required: true
+        type: string
+      mutation_plan_json:
+        description: Exact byte-bound production mutation plan JSON
+        required: true
+        type: string
 
 permissions:
   contents: read
