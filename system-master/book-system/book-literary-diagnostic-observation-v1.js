@@ -42,6 +42,8 @@ const FORBIDDEN_KEY_PATTERNS = Object.freeze([
   /trait.*disposition/i,
   /homogenization.*standing/i,
   /winner/i,
+  /evaluation.*disposition/i,
+  /candidate.*superior/i,
   /credential/i,
   /access.*token/i,
   /secret/i
@@ -70,6 +72,12 @@ function exactKeys(v, fields, code, label) {
   for (const field of fields) if (!own(v, field)) fail(code, `${label}.missing:${field}`);
 }
 function assertNoForbiddenPayload(v, path = '$') {
+  if (typeof v === 'string') {
+    if (/(?:named[-_ ]?author[-_ ]?target|nearest[-_ ]?author|similarity[-_ ]?author|imitat(?:e|ion)[-_ ]?author|style[-_ ]?target:)/i.test(v)) {
+      fail('BLOCKED_NAMED_AUTHOR_TARGET_FORBIDDEN', `${path}:${v}`);
+    }
+    return;
+  }
   if (Array.isArray(v)) return v.forEach((x, i) => assertNoForbiddenPayload(x, `${path}[${i}]`));
   if (!obj(v)) return;
   for (const [key, child] of Object.entries(v)) {
@@ -78,6 +86,7 @@ function assertNoForbiddenPayload(v, path = '$') {
       if (/(?:quality|prose|literary).*score|percentile|(?:overall|aggregate).*rank/i.test(key)) fail('BLOCKED_UNIVERSAL_PROSE_SCORE_FORBIDDEN', `${path}.${key}`);
       if (/named.*author.*target|nearest.*author|similarity.*author/i.test(key)) fail('BLOCKED_NAMED_AUTHOR_TARGET_FORBIDDEN', `${path}.${key}`);
       if (/replacement.*prose|candidate.*text|rewritten.*text|applied.*revision/i.test(key)) fail('BLOCKED_REWRITE_PAYLOAD_FORBIDDEN', `${path}.${key}`);
+      if (/winner|evaluation.*disposition|candidate.*superior/i.test(key)) fail('BLOCKED_EVALUATION_AUTHORITY_FORBIDDEN', `${path}.${key}`);
       fail('BLOCKED_RAW_TEXT_FORBIDDEN', `${path}.${key}`);
     }
     assertNoForbiddenPayload(child, `${path}.${key}`);
@@ -90,6 +99,7 @@ function normalizeStrings(values, label, allowEmpty = true) {
   const out = [];
   for (const value of values) {
     if (!text(value)) fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', label);
+    assertNoForbiddenPayload(value, label);
     if (seen.has(value)) fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', `${label}.duplicate:${value}`);
     seen.add(value); out.push(value);
   }
@@ -101,6 +111,7 @@ function normalizeEvidenceRefs(values) {
   return values.map((x, i) => {
     exactKeys(x, ['evidence_ref','evidence_digest'], 'BLOCKED_OBSERVATION_BINDING_MISMATCH', `evidence_refs.${i}`);
     if (!text(x.evidence_ref) || !digest(x.evidence_digest)) fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', `evidence_refs.${i}`);
+    assertNoForbiddenPayload(x.evidence_ref, `evidence_refs.${i}.evidence_ref`);
     if (seen.has(x.evidence_ref)) fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', `evidence_refs.duplicate:${x.evidence_ref}`);
     seen.add(x.evidence_ref);
     return clone(x);
@@ -158,13 +169,25 @@ function validateProviderV1(payload, providerAdmission) {
     provider_admission_digest: null
   };
 }
-function requireLensDependenciesV1(context, lensId) {
+function requireLensDependenciesV1(context, lensId, dependencies) {
   const hasB03 = context.story_bible_ref !== null && context.knowledge_candidate_id !== null;
   const hasB04 = context.reader_exposure_ref !== null;
-  if (['B05-LENS-005','B05-LENS-006'].includes(lensId) && !hasB03) fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', `${lensId}:B03_REQUIRED`);
-  if (lensId === 'B05-LENS-009' && !hasB04) fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', `${lensId}:B04_REQUIRED`);
-  if (['B05-LENS-004','B05-LENS-007'].includes(lensId) && !hasB03 && !hasB04) fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', `${lensId}:B03_OR_B04_REQUIRED`);
-  if (lensId === 'B05-LENS-016' && (!hasB03 || context.author_constraint_refs.length === 0)) fail('BLOCKED_OWNER_CONSTRAINT', `${lensId}:B03_B10_REQUIRED`);
+  const kinds = new Set(dependencies.map(x => x.dependency_kind));
+  if (['B05-LENS-004','B05-LENS-005','B05-LENS-006','B05-LENS-007'].includes(lensId) && !hasB03) {
+    fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', `${lensId}:B03_REQUIRED`);
+  }
+  if (['B05-LENS-005','B05-LENS-006','B05-LENS-007'].includes(lensId) && !kinds.has('B03_SEMANTIC')) {
+    fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', `${lensId}:B03_SEMANTIC_REQUIRED`);
+  }
+  if (lensId === 'B05-LENS-004' && !kinds.has('B03_STORY_BIBLE') && !kinds.has('B03_KNOWLEDGE')) {
+    fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', `${lensId}:B03_NARRATIVE_DEPENDENCY_REQUIRED`);
+  }
+  if (lensId === 'B05-LENS-009' && (!hasB04 || (!kinds.has('B04_EXPOSURE') && !kinds.has('B04_UNDERSTANDING'))) {
+    fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', `${lensId}:B04_REQUIRED`);
+  }
+  if (lensId === 'B05-LENS-016' && (!hasB03 || context.author_constraint_refs.length === 0 || !kinds.has('B10_AUTHOR_CONSTRAINT'))) {
+    fail('BLOCKED_OWNER_CONSTRAINT', `${lensId}:B03_B10_REQUIRED`);
+  }
 }
 function observationSemanticV1(observation) {
   const out = clone(observation);
@@ -173,6 +196,25 @@ function observationSemanticV1(observation) {
   return out;
 }
 function diagnosticObservationDigestV1(observation) { return hash(observationSemanticV1(observation)); }
+
+function enforceFindingLawV1(payload, anchors, evidence, dependencies, related, signals) {
+  if (anchors.length === 0) fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', 'target_anchor_refs:NONEMPTY_REQUIRED');
+  if (SUBSTANTIVE.has(payload.finding_class)) {
+    if (payload.standing !== 'ACCEPTED_UNCALIBRATED') fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', 'substantive_standing');
+    if (evidence.length === 0 || dependencies.length === 0) fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', 'substantive_evidence_required');
+    if (payload.evidence_strength_class === 'UNSPECIFIED') fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', 'substantive_strength_required');
+    if (payload.abstention_or_blocker_reason !== null) fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', 'substantive_reason_must_be_null');
+    if (payload.finding_class === 'CONTRADICTION' && related.length === 0) fail('BLOCKED_CONFLICT_UNRESOLVED', 'contradiction_requires_related_observation');
+  } else if (payload.finding_class === 'NO_FINDING') {
+    if (payload.standing !== 'ACCEPTED_UNCALIBRATED' || payload.abstention_or_blocker_reason !== null) fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', 'no_finding_standing');
+    if (payload.evidence_strength_class !== 'UNSPECIFIED' && evidence.length === 0) fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', 'no_finding_strength_requires_evidence');
+  } else if (payload.finding_class === 'ABSTAINED') {
+    if (payload.standing !== 'ABSTAINED' || payload.evidence_strength_class !== 'UNSPECIFIED' || !text(payload.abstention_or_blocker_reason)) fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', 'abstained_law');
+  } else if (payload.finding_class === 'BLOCKED') {
+    if (payload.standing !== 'BLOCKED' || payload.evidence_strength_class !== 'UNSPECIFIED' || !text(payload.abstention_or_blocker_reason)) fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', 'blocked_law');
+  }
+  if (signals.length > 0 && (!SUBSTANTIVE.has(payload.finding_class) || evidence.length === 0)) fail('BLOCKED_VOICE_STANDING_FORBIDDEN', 'external_signal_requires_evidence_backed_substantive_finding');
+}
 
 function acceptLiteraryDiagnosticObservationV1(input) {
   if (!obj(input)) fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', 'input');
@@ -191,7 +233,6 @@ function acceptLiteraryDiagnosticObservationV1(input) {
   if (!context.requested_lens_ids.includes(p.lens_id)) fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', `lens_not_requested:${p.lens_id}`);
   try { registry.assertLiteraryDiagnosticLensV1(p.lens_id); }
   catch (err) { fail('BLOCKED_DIAGNOSTIC_LENS_UNKNOWN', p.lens_id); }
-  requireLensDependenciesV1(context, p.lens_id);
   if (!FINDING_CLASSES.includes(p.finding_class)) fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', 'finding_class');
   if (!SOURCE_CLASSES.includes(p.source_class)) fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', 'source_class');
   if (!OBSERVATION_STANDINGS.includes(p.standing)) fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', 'standing');
@@ -207,18 +248,8 @@ function acceptLiteraryDiagnosticObservationV1(input) {
   const related = normalizeStrings(p.related_observation_refs, 'related_observation_refs');
   const signals = normalizeSignals(p.external_owner_signal_refs, p.lens_id);
   if (stable(p.scope_limits) !== stable(context.scope)) fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', 'scope_limits');
-  if (SUBSTANTIVE.has(p.finding_class)) {
-    if (p.standing !== 'ACCEPTED_UNCALIBRATED') fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', 'substantive_standing');
-    if (anchors.length === 0 || evidence.length === 0 || deps.length === 0) fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', 'substantive_evidence_required');
-    if (p.evidence_strength_class === 'UNSPECIFIED') fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', 'substantive_strength_required');
-    if (p.abstention_or_blocker_reason !== null) fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', 'substantive_reason_must_be_null');
-  } else if (p.finding_class === 'NO_FINDING') {
-    if (p.standing !== 'ACCEPTED_UNCALIBRATED' || p.abstention_or_blocker_reason !== null) fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', 'no_finding_standing');
-  } else if (p.finding_class === 'ABSTAINED') {
-    if (p.standing !== 'ABSTAINED' || p.evidence_strength_class !== 'UNSPECIFIED' || !text(p.abstention_or_blocker_reason)) fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', 'abstained_law');
-  } else if (p.finding_class === 'BLOCKED') {
-    if (p.standing !== 'BLOCKED' || p.evidence_strength_class !== 'UNSPECIFIED' || !text(p.abstention_or_blocker_reason)) fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', 'blocked_law');
-  }
+  requireLensDependenciesV1(context, p.lens_id, deps);
+  enforceFindingLawV1(p, anchors, evidence, deps, related, signals);
   const provider = validateProviderV1(p, input.provider_admission);
   const out = {
     observation_schema_version: OBSERVATION_SCHEMA_VERSION,
@@ -264,27 +295,24 @@ function validateLiteraryDiagnosticObservationV1(observation, context) {
   if (observation.diagnostic_context_id !== context.diagnostic_context_id || observation.diagnostic_context_digest !== context.diagnostic_context_digest) fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', 'context_binding');
   try { registry.assertLiteraryDiagnosticLensV1(observation.lens_id); } catch (err) { fail('BLOCKED_DIAGNOSTIC_LENS_UNKNOWN', observation.lens_id); }
   if (!context.requested_lens_ids.includes(observation.lens_id)) fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', 'lens_not_requested');
-  requireLensDependenciesV1(context, observation.lens_id);
   if (!FINDING_CLASSES.includes(observation.finding_class) || !SOURCE_CLASSES.includes(observation.source_class) || !OBSERVATION_STANDINGS.includes(observation.standing) || !EVIDENCE_STRENGTH_CLASSES.includes(observation.evidence_strength_class) || !PURPOSE_RELEVANCE_CLASSES.includes(observation.purpose_relevance_class) || !RISK_CLASSES.includes(observation.preservation_risk_class) || !RISK_CLASSES.includes(observation.collateral_risk_class)) fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', 'enum');
   if (observation.canonical_effect !== false) fail('BLOCKED_CANONICAL_EFFECT_FORBIDDEN');
   if (stable(observation.scope_limits) !== stable(context.scope)) fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', 'scope_limits');
   const contextAnchors = new Set(context.source_anchor_refs.map(x => x.anchor_ref));
-  for (const anchor of observation.target_anchor_refs) if (!contextAnchors.has(anchor)) fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', `anchor:${anchor}`);
-  normalizeEvidenceRefs(observation.evidence_refs);
-  normalizeDependencyRefs(observation.upstream_dependency_refs, context);
-  normalizeSignals(observation.external_owner_signal_refs, observation.lens_id);
+  const anchors = normalizeStrings(observation.target_anchor_refs, 'target_anchor_refs');
+  for (const anchor of anchors) if (!contextAnchors.has(anchor)) fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', `anchor:${anchor}`);
+  const evidence = normalizeEvidenceRefs(observation.evidence_refs);
+  const deps = normalizeDependencyRefs(observation.upstream_dependency_refs, context);
+  const related = normalizeStrings(observation.related_observation_refs, 'related_observation_refs');
+  const signals = normalizeSignals(observation.external_owner_signal_refs, observation.lens_id);
+  if (stable(anchors) !== stable(observation.target_anchor_refs) || stable(evidence) !== stable(observation.evidence_refs) || stable(deps) !== stable(observation.upstream_dependency_refs) || stable(related) !== stable(observation.related_observation_refs) || stable(signals) !== stable(observation.external_owner_signal_refs)) {
+    fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', 'sealed_normalization');
+  }
+  requireLensDependenciesV1(context, observation.lens_id, deps);
+  enforceFindingLawV1(observation, anchors, evidence, deps, related, signals);
   if (observation.source_class === 'MODEL') {
     if (!MODEL_CAPABILITIES.includes(observation.provider_capability_id) || !text(observation.provider_operation_id) || !text(observation.provider_subject_ref) || !text(observation.provider_admission_ref) || !digest(observation.provider_admission_digest)) fail('BLOCKED_PROVIDER_SUBJECT_UNADMITTED');
   } else if (!providerFieldsNull(observation)) fail('BLOCKED_PROVIDER_SUBJECT_UNADMITTED', 'non_model_provider_fields');
-  if (SUBSTANTIVE.has(observation.finding_class)) {
-    if (observation.standing !== 'ACCEPTED_UNCALIBRATED' || observation.target_anchor_refs.length === 0 || observation.evidence_refs.length === 0 || observation.upstream_dependency_refs.length === 0 || observation.evidence_strength_class === 'UNSPECIFIED' || observation.abstention_or_blocker_reason !== null) fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', 'substantive_law');
-  } else if (observation.finding_class === 'NO_FINDING') {
-    if (observation.standing !== 'ACCEPTED_UNCALIBRATED' || observation.abstention_or_blocker_reason !== null) fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', 'no_finding_law');
-  } else if (observation.finding_class === 'ABSTAINED') {
-    if (observation.standing !== 'ABSTAINED' || observation.evidence_strength_class !== 'UNSPECIFIED' || !text(observation.abstention_or_blocker_reason)) fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', 'abstained_law');
-  } else if (observation.finding_class === 'BLOCKED') {
-    if (observation.standing !== 'BLOCKED' || observation.evidence_strength_class !== 'UNSPECIFIED' || !text(observation.abstention_or_blocker_reason)) fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', 'blocked_law');
-  }
   if (!digest(observation.diagnostic_observation_digest)) fail('BLOCKED_DIGEST_MISMATCH', 'observation_digest');
   const d = diagnosticObservationDigestV1(observation);
   if (observation.diagnostic_observation_digest !== d || observation.diagnostic_observation_id !== `${OBSERVATION_PREFIX}${d}`) fail('BLOCKED_DIGEST_MISMATCH', 'observation_identity');
