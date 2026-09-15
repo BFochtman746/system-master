@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://system-master.local/contracts/system-master-development-response-001.schema.json",
+  "title": "System Master Development Response 001",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["protocol_version", "contract_id", "response_class", "authority_id", "owner_lane", "objective_id", "readiness", "response_text"],
+  "properties": {
+    "protocol_version": {"const": "system-master.development-response.v1"},
+    "contract_id": {"const": "SYSTEM-MASTER-DEVELOPMENT-RESPONSE-GOVERNOR-001"},
+    "response_class": {"enum": ["FULL", "CONTINUATION"]},
+    "authority_id": {"type": "string", "minLength": 1},
+    "owner_lane": {"type": "string", "minLength": 1},
+    "objective_id": {"type": "string", "minLength": 1},
+    "readiness": {"enum": ["CHAT READY", "CHAT READY WITH DECISION", "NOT READY"]},
+    "response_text": {"type": "string", "minLength": 1}
+  }
+}

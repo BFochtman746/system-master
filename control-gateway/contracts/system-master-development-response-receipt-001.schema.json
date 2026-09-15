@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://system-master.local/contracts/system-master-development-response-receipt-001.schema.json",
+  "title": "System Master Development Response Compliance Receipt 001",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["protocol_version", "decision", "contract_id", "contract_digest", "response_class", "response_digest", "authority_id", "owner_lane", "objective_id", "readiness", "issued_at", "receipt_digest"],
+  "properties": {
+    "protocol_version": {"const": "control-gateway.chat-response-compliance-receipt.v1"},
+    "decision": {"const": "PASS"},
+    "contract_id": {"const": "SYSTEM-MASTER-DEVELOPMENT-RESPONSE-GOVERNOR-001"},
+    "contract_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "response_class": {"enum": ["FULL", "CONTINUATION"]},
+    "response_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "authority_id": {"type": "string", "minLength": 1},
+    "owner_lane": {"type": "string", "minLength": 1},
+    "objective_id": {"type": "string", "minLength": 1},
+    "readiness": {"enum": ["CHAT READY", "CHAT READY WITH DECISION", "NOT READY"]},
+    "issued_at": {"type": "string", "format": "date-time"},
+    "receipt_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}
