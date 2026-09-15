@@ -62,6 +62,9 @@ public final class DurableDispatchRecoveryQualificationTest {
         eq("pre-PREPARED crash preserves epoch high-water", 1L, done.epoch());
         ok("restart persisted a dispatch identity before POST",
                 done.dispatchId() != null && !done.dispatchId().isBlank());
+        ok("DONE durably retains completion evidence",
+                done.terminalReason().contains(
+                        "EVIDENCE=ACTIONS_COMPLETED run_id=1101 conclusion=success dispatch_id=dispatch-1"));
         eq("restart terminal disposition", "TERMINAL_NO_READMISSION",
                 restarted.drive("job-claimed", "sha256:claimed").disposition());
         eq("terminal replay does not POST", 1, dispatch.posts);
@@ -86,7 +89,9 @@ public final class DurableDispatchRecoveryQualificationTest {
                 DurableDispatchCoordinator.State.FAILED, failed.state());
         eq("FAILED run status is durably terminal", "completed", failed.runStatus());
         eq("FAILED conclusion is durable", "failure", failed.runConclusion());
-        eq("FAILED terminal reason is explicit", "RUN_NON_SUCCESS:failure", failed.terminalReason());
+        eq("FAILED terminal reason retains exact completion evidence",
+                "RUN_NON_SUCCESS:failure EVIDENCE=ACTIONS_COMPLETED run_id=1202 conclusion=failure dispatch_id=dispatch-1",
+                failed.terminalReason());
         eq("FAILED retains exact run id", Long.valueOf(1202L), failed.runId());
         eq("first FAILED result requires attention", true, firstResult.needsAttention());
         eq("fresh execution POSTed once", 1, dispatch.posts);
