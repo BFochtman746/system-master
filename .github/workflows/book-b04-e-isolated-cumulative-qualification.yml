@@ -45,7 +45,7 @@ jobs:
         with:
           ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
-          fetch-depth: 1
+          fetch-depth: 0
 
       - name: Verify exact checkout
         shell: bash
@@ -88,45 +88,45 @@ jobs:
         run: |
           set -euo pipefail
           node --test system-master/book-system/book-b04-e-exposure.test.js | tee b04-e-exposure-${{ matrix.node }}.log
-          grep -F '# tests 32' b04-e-exposure-${{ matrix.node }}.log
-          grep -F '# pass 32' b04-e-exposure-${{ matrix.node }}.log
-          grep -F '# fail 0' b04-e-exposure-${{ matrix.node }}.log
+          grep -E 'tests 32$' b04-e-exposure-${{ matrix.node }}.log
+          grep -E 'pass 32$' b04-e-exposure-${{ matrix.node }}.log
+          grep -E 'fail 0$' b04-e-exposure-${{ matrix.node }}.log
 
       - name: B04 D01-D32 immutable dimensions sparse applicability non-scalar law
         shell: bash
         run: |
           set -euo pipefail
           node --test system-master/book-system/book-b04-e-dimensions.test.js | tee b04-e-dimensions-${{ matrix.node }}.log
-          grep -F '# tests 32' b04-e-dimensions-${{ matrix.node }}.log
-          grep -F '# pass 32' b04-e-dimensions-${{ matrix.node }}.log
-          grep -F '# fail 0' b04-e-dimensions-${{ matrix.node }}.log
+          grep -E 'tests 32$' b04-e-dimensions-${{ matrix.node }}.log
+          grep -E 'pass 32$' b04-e-dimensions-${{ matrix.node }}.log
+          grep -E 'fail 0$' b04-e-dimensions-${{ matrix.node }}.log
 
       - name: B04 P01-P24 perspective observation standing calibration evidence
         shell: bash
         run: |
           set -euo pipefail
           node --test system-master/book-system/book-b04-e-perspective.test.js | tee b04-e-perspective-${{ matrix.node }}.log
-          grep -F '# tests 24' b04-e-perspective-${{ matrix.node }}.log
-          grep -F '# pass 24' b04-e-perspective-${{ matrix.node }}.log
-          grep -F '# fail 0' b04-e-perspective-${{ matrix.node }}.log
+          grep -E 'tests 24$' b04-e-perspective-${{ matrix.node }}.log
+          grep -E 'pass 24$' b04-e-perspective-${{ matrix.node }}.log
+          grep -E 'fail 0$' b04-e-perspective-${{ matrix.node }}.log
 
       - name: B04 U01-U24 understanding sparse projection cross-boundary law
         shell: bash
         run: |
           set -euo pipefail
           node --test system-master/book-system/book-b04-e-understanding.test.js | tee b04-e-understanding-${{ matrix.node }}.log
-          grep -F '# tests 24' b04-e-understanding-${{ matrix.node }}.log
-          grep -F '# pass 24' b04-e-understanding-${{ matrix.node }}.log
-          grep -F '# fail 0' b04-e-understanding-${{ matrix.node }}.log
+          grep -E 'tests 24$' b04-e-understanding-${{ matrix.node }}.log
+          grep -E 'pass 24$' b04-e-understanding-${{ matrix.node }}.log
+          grep -E 'fail 0$' b04-e-understanding-${{ matrix.node }}.log
 
       - name: B04 I01-I16 invalidation currentness idempotency query content-addressing
         shell: bash
         run: |
           set -euo pipefail
           node --test system-master/book-system/book-b04-e-invalidation.test.js | tee b04-e-invalidation-${{ matrix.node }}.log
-          grep -F '# tests 16' b04-e-invalidation-${{ matrix.node }}.log
-          grep -F '# pass 16' b04-e-invalidation-${{ matrix.node }}.log
-          grep -F '# fail 0' b04-e-invalidation-${{ matrix.node }}.log
+          grep -E 'tests 16$' b04-e-invalidation-${{ matrix.node }}.log
+          grep -E 'pass 16$' b04-e-invalidation-${{ matrix.node }}.log
+          grep -E 'fail 0$' b04-e-invalidation-${{ matrix.node }}.log
 
       - name: B03 frozen 108 and cumulative integration
         shell: bash
