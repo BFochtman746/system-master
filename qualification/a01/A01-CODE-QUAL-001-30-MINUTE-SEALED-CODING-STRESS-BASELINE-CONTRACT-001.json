@@ -2,37 +2,42 @@
   "contract_id": "A01-CODE-QUAL-001-30-MINUTE-SEALED-CODING-STRESS-BASELINE-CONTRACT-001",
   "operation_id": "A01-CODE-QUAL-001",
   "title": "30-MINUTE SEALED CODING STRESS BASELINE",
-  "purpose": "Measure A-01's own software-engineering performance under a controlled, timed, previously unseen coding assignment. This qualification is distinct from repository-wide PQF quality measurement.",
+  "purpose": "Measure the exact System Master Second Shift ChatGPT scheduled development worker's software-engineering performance under a controlled, timed, previously unseen coding assignment, with A-01 serving as the controlled Windows/X64 execution, timing-corroboration, freeze, and evidence host. This qualification is distinct from repository-wide PQF quality measurement.",
   "truth_boundary": {
     "establishes": [
-      "A-01 performance on this exact sealed benchmark subject and time window",
+      "performance of the bound Second Shift ChatGPT authoring subject on this exact sealed benchmark instance and time window",
       "functional correctness and engineering-quality evidence produced by the evaluator",
-      "behavioral evidence about planning, implementation, testing, debugging, scope discipline, and recovery during the run"
+      "behavioral evidence about planning, implementation, testing, debugging, scope discipline, and recovery during the run",
+      "A-01-hosted corroboration of candidate identity, freeze, timing evidence, and final artifact identity when the registered host boundary executes"
     ],
     "does_not_establish": [
+      "that A-01 itself authored the measured code",
       "that all System Master code is high quality",
-      "that future A-01 runs will achieve the same result",
+      "that future authoring runs will achieve the same result",
       "that a repository-wide quality threshold has been satisfied",
       "that the first baseline score is a pass/fail quality threshold"
     ]
   },
   "separation_of_concerns": {
     "pqf_001f": "Repository-wide multi-language coverage, complexity, and duplication baseline.",
-    "a01_code_qual_001": "Controlled measurement of code authored by A-01 during a sealed timed assignment."
+    "a01_code_qual_001": "A-01-hosted controlled measurement of code authored by the exact bound Second Shift ChatGPT scheduled development worker during a sealed timed assignment.",
+    "a01_host": "Windows/X64 execution, timing corroboration, evidence, freeze, and qualification host; not the code-authoring subject."
   },
   "timing": {
     "hard_wall_clock_minutes": 30,
     "human_assistance_during_window": false,
-    "timer_starts_when": "A-01 receives the sealed assignment payload and writable benchmark workspace.",
-    "timer_stops_when": "30 wall-clock minutes elapse or A-01 explicitly submits final work, whichever occurs first.",
+    "timer_starts_when": "The fresh eligible Second Shift ChatGPT authoring session receives the sealed candidate assignment and writable benchmark workspace.",
+    "timer_stops_when": "An external control boundary terminates candidate mutation at 1,800 wall-clock seconds or on explicit earlier submission, whichever occurs first.",
+    "prompt_only_deadline_is_sufficient": false,
     "post_deadline_mutation_allowed": false
   },
   "sealed_fixture_rules": {
-    "unseen_by_a01_before_start": true,
+    "unseen_by_authoring_subject_before_start": true,
     "isolated_from_live_system_master_production_paths": true,
     "fresh_exact_subject_required": true,
-    "hidden_evaluator_not_exposed_to_a01": true,
-    "hidden_test_names_and_expected_outputs_not_exposed_to_a01": true,
+    "exact_hidden_evaluator_instance_not_exposed_to_authoring_subject": true,
+    "hidden_test_names_and_expected_outputs_not_exposed_to_authoring_subject": true,
+    "candidate_only_mutation_boundary_must_be_technically_enforced": true,
     "fixture_languages": ["java", "python", "javascript"],
     "required_challenge_classes": [
       "unfamiliar_code_comprehension",
@@ -47,19 +52,42 @@
       "scope_discipline"
     ]
   },
+  "authoring_subject": {
+    "binding": "qualification/a01/A01-CODE-QUAL-001-AUTHORING-SUBJECT-BINDING-001.json",
+    "required": [
+      "provider_or_runtime",
+      "authoring_entrypoint_identity",
+      "system_or_project_instruction_digest",
+      "tool_permission_profile_digest"
+    ],
+    "record_when_available": [
+      "agent_or_model_name",
+      "agent_or_model_version",
+      "reasoning_or_effort_configuration"
+    ],
+    "unavailable_platform_metadata_policy": "Record as unavailable; never infer or fabricate it.",
+    "fresh_session_required": true,
+    "session_with_prior_hidden_evaluator_exposure_is_ineligible": true
+  },
   "run_capture": {
     "required": [
       "benchmark_subject_sha256",
       "hidden_evaluator_sha256",
       "assignment_sha256",
+      "authoring_subject_identity",
+      "authoring_instruction_digest",
+      "authoring_tool_permission_profile_digest",
       "starting_git_sha",
       "final_git_sha",
       "start_timestamp_utc",
       "stop_timestamp_utc",
       "elapsed_seconds",
+      "deadline_control_evidence",
+      "candidate_isolation_evidence",
+      "a01_host_identity_and_freeze_evidence",
       "all_commits_and_final_diff",
       "commands_or_test_invocations_available_from_runner_logs",
-      "compiler_test_and_runtime_failures_available_from_runner logs",
+      "compiler_test_and_runtime_failures_available_from_runner_logs",
       "final_visible_test_result",
       "final_hidden_test_result",
       "post_run_quality_metrics",
@@ -103,10 +131,14 @@
   },
   "valid_run_boundary": {
     "all_must_hold": [
-      "sealed assignment and evaluator were fixed before A-01 access",
-      "A-01 had no human assistance during the timed window",
-      "the hard 30-minute boundary was enforced",
+      "sealed candidate assignment and exact hidden evaluator instance were fixed before authoring access",
+      "a fresh eligible Second Shift ChatGPT session authored the candidate",
+      "the authoring subject had no human assistance during the timed window",
+      "the authoring subject was technically restricted to the candidate mutation boundary",
+      "the hard 30-minute boundary was externally enforced rather than requested only by prompt",
       "no post-deadline mutation was included in the measured artifact",
+      "available authoring subject identities and digests were captured without guessing unavailable platform metadata",
+      "A-01 host/freeze evidence was captured when required by the execution architecture",
       "exact subject identities and digests were captured",
       "hidden evaluator executed only after the measured coding window",
       "raw evidence and machine-readable receipt were preserved immutably"
@@ -117,6 +149,7 @@
     "protocol_version",
     "contract_id",
     "operation_id",
+    "authoring_subject_identity",
     "benchmark_subject_sha256",
     "hidden_evaluator_sha256",
     "assignment_sha256",
@@ -126,7 +159,9 @@
     "stop_timestamp_utc",
     "elapsed_seconds",
     "deadline_enforced",
+    "candidate_isolation_enforced",
     "human_assistance",
+    "a01_host_evidence",
     "visible_tests",
     "hidden_tests",
     "coverage",
@@ -139,5 +174,5 @@
     "raw_artifact_digest",
     "receipt_digest"
   ],
-  "status": "CONTRACT_CREATED_FIXTURE_AND_RUNNER_PENDING"
+  "status": "HARNESS_READY_AUTHORING_DEADLINE_AND_ISOLATION_BRIDGE_PENDING"
 }
