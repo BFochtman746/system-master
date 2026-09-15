@@ -53,44 +53,21 @@ The optional output file is caller-owned reporting output, not canonical executi
 
 Optional scheduler tables degrade to an empty section so an older/readable database can still produce partial evidence. A missing database does not degrade; it exits 2.
 
-## 6. Report semantics
+## 6. Failure semantics
 
-The report is deliberately glanceable and decision-first:
+The report is deliberately decision-first. It raises attention for an engaged ingress kill switch, unreleased claims, blocked/stale claims, open circuits, stalled retry/circuit/cancel-requested dispatches, or scheduler items stuck in `BINDING`/`RECONCILE`.
 
-1. Decisions requiring attention.
-2. Blocked/stale claims.
-3. Claims still holding leases.
-4. Open circuits.
-5. Stalled dispatches.
-6. Completed/run summary.
-7. Durable night-budget usage.
-8. Lane state.
+A truly empty night renders `Nothing ran` plus an ingress/admission check instruction; it never masquerades as successful execution. An unreadable or missing supervisor database exits `2` rather than producing a clean-looking report. A readable state that requires operator action exits `1`; a readable state with no attention decision exits `0`.
 
-Attention is raised for an engaged ingress kill switch, unreleased claims, blocked/stale claims, open circuits, stalled retry/circuit/cancel-requested dispatches, or scheduler items stuck in `BINDING`/`RECONCILE`.
+Rollback failures remain fail-closed. `governance/ROLLBACK-PROCEDURE-001.md` uses the admitted P12 CLI (`--kill` / `--resume`), captures Git + supervisor DB + P15 report before mutation, lets P10/P11 leases finish or expire where possible, preserves CAS refs and historical evidence, and forbids resume while any verification gate is red.
 
-A truly empty night renders `Nothing ran` plus an ingress/admission check instruction. It does not masquerade as successful execution.
-
-## 7. Rollback semantics
-
-`governance/ROLLBACK-PROCEDURE-001.md` is current to the admitted P12 CLI:
-
-- engage with `a01_github_ingress --kill`, not obsolete `--halt`/`--status` commands;
-- capture Git + supervisor DB + P15 report before change;
-- let P10/P11 leases finish or expire where possible;
-- use Git revert for code and successor governance for append-only governance history;
-- never force-push or delete/move CAS authority refs;
-- run all five verification gates before `--resume`;
-- preserve the first post-rollback morning receipt before declaring operational health.
-
-Rollback never grants authority to mutate P12 admission, P10/P11 fencing, or historical evidence.
-
-## 8. Evidence target
+## 7. Evidence target
 
 Hosted evidence must prove:
 
 - Python 3.12 syntax and all 13 acceptance tests;
 - real `SupervisorStore` schema use;
-- read-only connection enforcement;
+- read-only connection enforcement and explicit handle closure on Windows;
 - missing-database exit-2 semantics;
 - attention vs clean exit semantics;
 - P12-compatible session rollover;
@@ -100,7 +77,7 @@ Hosted evidence must prove:
 
 Authoritative A-01 evidence must execute the unchanged registered `SECOND-SHIFT-SUPERVISOR-V2-A01-STRESS` qualifier on the exact P15 subject. The Control Gateway Node bridge `control-gateway/test/a01-morning-receipt.test.js` ensures that cumulative qualifier discovers the P15 Python suite without changing predecessor qualifier/registry blobs.
 
-## 9. Acceptance target
+## 8. Test / acceptance target
 
 Hosted direct acceptance:
 
@@ -115,12 +92,10 @@ Dedicated workflow:
 
 `.github/workflows/p15-observability-morning-rollback-foundation-qualification.yml`
 
-## 10. Authority boundary
-
-**Agent-owned:** diagnostic query optimization, section wording that preserves decision-first meaning, additional read-only fields, tests, and evidence manifests.
-
-**Owner decision required:** changing exit-code meanings; making unreadable state look clean; opening any write path; changing the P12/P15 session rollover; force-releasing leases; deleting/moving CAS refs; resuming with a red verification gate.
-
-## 11. Closure rule
-
 P15 is `COMPLETE_WITH_EVIDENCE` only after the exact current subject has a current immutable Foundation PASS receipt and the committed census projection advances past P15. Implementation presence or hosted-only PASS is insufficient.
+
+## 9. Authority boundary
+
+**Agent-owned:** diagnostic query optimization, section wording that preserves decision-first meaning, additional read-only fields, tests, evidence manifests, and rollback documentation that does not create new authority.
+
+**Owner decision required:** changing exit-code meanings; making unreadable state look clean; opening any write path; changing the P12/P15 session rollover; force-releasing leases; deleting/moving CAS refs; resuming with a red verification gate; or granting any new product, admission, scheduler, repair, native, private, external, publication, or production authority.
