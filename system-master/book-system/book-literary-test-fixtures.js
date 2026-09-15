@@ -129,14 +129,13 @@ function sourceDeps(context) {
 }
 function depByKind(context, kind) {
   const dep = context.dependency_snapshot_refs.find(x => x.dependency_kind === kind);
-  if (!dep) throw new Error(`fixture dependency missing: ${kind}`);
-  return clone(dep);
+  return dep ? clone(dep) : null;
 }
 function lensDependencies(context, lensId) {
   const deps = sourceDeps(context).map(clone);
   const add = kind => {
     const dep = depByKind(context, kind);
-    if (!deps.some(x => x.dependency_kind === dep.dependency_kind && x.dependency_ref === dep.dependency_ref)) deps.push(dep);
+    if (dep && !deps.some(x => x.dependency_kind === dep.dependency_kind && x.dependency_ref === dep.dependency_ref)) deps.push(dep);
   };
   if (lensId === 'B05-LENS-004') {
     add('B03_STORY_BIBLE');
