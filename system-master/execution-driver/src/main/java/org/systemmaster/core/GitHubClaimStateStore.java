@@ -102,11 +102,21 @@ public final class GitHubClaimStateStore implements DurableDispatchCoordinator.S
         if (expectedRevision != null) { requireText(expectedRevision, "EXPECTED_REVISION"); body.append(",\"sha\":\"").append(esc(expectedRevision)).append('"'); }
         body.append('}');
         Response r = put(contentUrl(next.claimId()), headers(token()), body.toString(), "STATE_STORE_WRITE");
-        if (r.status() == 409) throw new DurableDispatchCoordinator.CasConflictException("STATE_CAS_CONFLICT");
+        if (r.status() == 409) classifyConflict(expectedRevision, next.claimId());
         int expectedStatus = expectedRevision == null ? 201 : 200;
         if (r.status() != expectedStatus) throw new IllegalStateException("STATE_STORE_WRITE_REJECTED_" + r.status());
         if (r.body() == null || r.body().isBlank()) throw new IllegalStateException("STATE_STORE_WRITE_INVALID_RESPONSE");
         return new DurableDispatchCoordinator.Versioned(next, contentSha(r.body()));
+    }
+
+    private void classifyConflict(String expectedRevision, String claimId) throws Exception {
+        DurableDispatchCoordinator.Versioned observed = load(claimId);
+        boolean lostCreate = expectedRevision == null && observed != null;
+        boolean lostUpdate = expectedRevision != null && observed != null && !expectedRevision.equals(observed.revision());
+        if (lostCreate || lostUpdate) {
+            throw new DurableDispatchCoordinator.CasConflictException("STATE_CAS_CONFLICT");
+        }
+        throw new IllegalStateException("STATE_STORE_WRITE_REJECTED_409");
     }
 
     private String contentUrl(String claimId) {
