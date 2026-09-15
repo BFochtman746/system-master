@@ -7,16 +7,7 @@ name: Claim Driver
 #
 # NOT A REQUIRED CHECK, AND DELIBERATELY UNREACHABLE FROM A PULL REQUEST.
 # There is no pull_request trigger here, and this workflow must never be bound as a
-# required status check. A required check that cannot report on some pull requests holds
-# them pending forever — that is precisely how the lease-enforcement workflow deadlocked
-# PR #143, with no failing check to point at. A scheduled runner has no business being a
-# merge gate, so the shape is avoided at the source.
-#
-# SCHEDULE. Hourly through the overnight window, skipping 05:00 UTC — that is 01:00
-# America/New_York, which the read-only nightly main verifier owns. Two runners competing
-# for the same repository state in the same minute is a collision worth designing out
-# rather than debugging later. Cron here is UTC and does not follow daylight saving, so
-# the window shifts by an hour in winter; that is acceptable for overnight work.
+# required status check. A scheduled runner has no business being a merge gate.
 
 on:
   schedule:
@@ -42,16 +33,13 @@ on:
         default: '300'
         type: string
 
-# One driver at a time. A second concurrent driver would be refused CLAIM_HELD by the
-# ledger rather than corrupting anything, but queuing is cheaper than relying on that
-# every night — and it keeps a manual dispatch from racing the schedule.
 concurrency:
   group: claim-driver
   cancel-in-progress: false
 
 permissions:
   contents: read
-  actions: write # required: the dispatch posts workflow_dispatch to claim-work.yml
+  actions: write # dispatch claim-work and read its run status/conclusion
 
 jobs:
   drive:
@@ -72,15 +60,12 @@ jobs:
 
       - name: Drive claims
         env:
-          # GITHUB_TOKEN exists only inside Actions. Outside it, ActionsDispatch refuses
-          # with DISPATCH_NO_CREDENTIAL rather than pretending to dispatch — the claim
-          # fails loudly with that code in its evidence trail.
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CLAIM_WORK_WORKFLOW: claim-work.yml
-          CLAIM_WORK_REF: main
-          # Inputs travel through the environment, never interpolated into the shell:
-          # a dispatch input is untrusted text and ${{ }} inside run: is a command
-          # injection seam.
+          # Dispatch the work definition from the same ref as this driver. Scheduled
+          # production runs resolve to main; a manual feature-branch qualification can
+          # exercise the branch's matching dispatch_id/run-name protocol before merge.
+          CLAIM_WORK_REF: ${{ github.ref_name }}
           IN_CLAIM_ID: ${{ inputs.claim_id }}
           IN_PAYLOAD_DIGEST: ${{ inputs.payload_digest }}
           IN_MAX_ITERATIONS: ${{ inputs.max_iterations }}
