@@ -122,7 +122,8 @@ assert(!broker.includes('qualifier_command'), 'broker arbitrary commands prohibi
 assert(executor.includes('runs-on: [self-hosted, Windows, X64]'), 'executor runner labels');
 assert(executor.includes('control_plane_sha'), 'executor exact control-plane binding');
 assert(executor.includes('ref: ${{ inputs.control_plane_sha }}'), 'executor checks out admitted control SHA');
-assert(executor.includes('group: a01-global-r2') && executor.includes('queue: max'), 'global queue remains serialized');
+assert(executor.includes('group: a01-global-r2') && executor.includes('cancel-in-progress: false'), 'global execution remains serialized without cancelling the active qualification');
+assert(!/^\s*queue\s*:/m.test(executor), 'unsupported workflow concurrency queue key must remain absent');
 assert(executor.includes('Guard A-01 runner health before subject acquisition'), 'runner preflight missing');
 assert(executor.indexOf('Guard A-01 runner health before subject acquisition') < executor.indexOf('Checkout exact qualification subject'), 'subject checkout must follow runner guard');
 assert(executor.includes('A01QualificationSleepGuard'), 'qualification sleep prevention missing');
