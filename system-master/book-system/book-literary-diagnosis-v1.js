@@ -45,6 +45,17 @@ function assertUniqueSortedStrings(values, label) {
   const expected = [...new Set(values)].sort();
   if (expected.length !== values.length || stable(expected) !== stable(values) || values.some(v => !text(v))) fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', label);
 }
+function putDependencyV1(map, dep, label) {
+  if (!obj(dep) || !text(dep.dependency_kind) || !text(dep.dependency_ref) || !digest(dep.dependency_digest)) {
+    fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', `${label}:INVALID_DEPENDENCY`);
+  }
+  const key = `${dep.dependency_kind}:${dep.dependency_ref}`;
+  const existing = map.get(key);
+  if (existing && existing.dependency_digest !== dep.dependency_digest) {
+    fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', `${label}:CONFLICTING_DEPENDENCY_DIGEST:${key}`);
+  }
+  map.set(key, clone(dep));
+}
 
 function observationDispositionV1(observations) {
   if (observations.length === 0) return 'UNOBSERVED';
@@ -96,15 +107,15 @@ function deriveDiagnosisComponentsV1(context, observations) {
   }
   const signals = [...signalMap.values()].sort((a,b) => `${a.owner_domain}:${a.signal_class}:${a.signal_ref}`.localeCompare(`${b.owner_domain}:${b.signal_class}:${b.signal_ref}`));
   const dependencyMap = new Map();
-  for (const dep of context.dependency_snapshot_refs) dependencyMap.set(`${dep.dependency_kind}:${dep.dependency_ref}`, clone(dep));
+  for (const dep of context.dependency_snapshot_refs) putDependencyV1(dependencyMap, dep, 'context_dependency');
   for (const observation of observations) {
-    for (const dep of observation.upstream_dependency_refs) dependencyMap.set(`${dep.dependency_kind}:${dep.dependency_ref}`, clone(dep));
+    for (const dep of observation.upstream_dependency_refs) putDependencyV1(dependencyMap, dep, 'observation_dependency');
     if (observation.source_class === 'MODEL') {
-      dependencyMap.set(`B01_PROVIDER_ADMISSION:${observation.provider_admission_ref}`, {
+      putDependencyV1(dependencyMap, {
         dependency_kind: 'B01_PROVIDER_ADMISSION',
         dependency_ref: observation.provider_admission_ref,
         dependency_digest: observation.provider_admission_digest
-      });
+      }, 'provider_admission');
     }
   }
   const dependencyRefs = [...dependencyMap.values()].sort((a,b) => `${a.dependency_kind}:${a.dependency_ref}`.localeCompare(`${b.dependency_kind}:${b.dependency_ref}`));
