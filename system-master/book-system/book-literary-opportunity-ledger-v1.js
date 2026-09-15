@@ -61,6 +61,9 @@ function exactKeys(v, fields, code, label) {
 }
 function assertNoForbiddenPayload(v, path = '$') {
   if (typeof v === 'string') {
+    if (/(?:replacement[-_ ]?prose|candidate[-_ ]?text|rewritten[-_ ]?text|applied[-_ ]?(?:revision|transform))\s*:/i.test(v)) fail('BLOCKED_REWRITE_PAYLOAD_FORBIDDEN', `${path}:${v}`);
+    if (/(?:(?:quality|prose|literary)[-_ ]?score|percentile|(?:overall|aggregate)[-_ ]?rank|prestige[-_ ]?rank|citation[-_ ]?count[-_ ]?rank)\s*:/i.test(v)) fail('BLOCKED_UNIVERSAL_PROSE_SCORE_FORBIDDEN', `${path}:${v}`);
+    if (/(?:winner|evaluation[-_ ]?disposition|candidate[-_ ]?superior)\s*:/i.test(v)) fail('BLOCKED_EVALUATION_AUTHORITY_FORBIDDEN', `${path}:${v}`);
     if (/(?:named[-_ ]?author[-_ ]?target|nearest[-_ ]?author|similarity[-_ ]?author|imitat(?:e|ion)[-_ ]?author|mimic[-_ ]?author|write\s+like|in\s+the\s+style\s+of)/i.test(v)) fail('BLOCKED_NAMED_AUTHOR_TARGET_FORBIDDEN', `${path}:${v}`);
     return;
   }
@@ -107,8 +110,8 @@ function opportunitySemanticKeyV1(candidate) {
 }
 function normalizeCandidateV1(candidate, context, observationMap, craftMap) {
   const fields = ['opportunity_key','target_lens_ids','supporting_observation_refs','contradicting_observation_refs','craft_intelligence_refs','purpose_relevance_class','evidence_strength_class','preservation_risk_class','collateral_risk_class','scope_recommendation','owner_constraint_refs'];
-  exactKeys(candidate, fields, 'BLOCKED_OBSERVATION_BINDING_MISMATCH', 'opportunity_candidate');
   assertNoForbiddenPayload(candidate, 'opportunity_candidate');
+  exactKeys(candidate, fields, 'BLOCKED_OBSERVATION_BINDING_MISMATCH', 'opportunity_candidate');
   if (!text(candidate.opportunity_key)) fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', 'opportunity_key');
   const lensIds = normalizeStrings(candidate.target_lens_ids, 'target_lens_ids', false);
   for (const lensId of lensIds) {
@@ -248,7 +251,7 @@ function assembleLiteraryOpportunityLedgerV1(input) {
   const dg = opportunityLedgerDigestV1(out);
   out.opportunity_ledger_digest = dg;
   out.opportunity_ledger_id = `${LEDGER_PREFIX}${dg}`;
-  validateLiteraryOpportunityLedgerV1(out, input.diagnosis);
+  validateLiteraryOpportunityLedgerV1(out, input.diagnosis, input.observations, input.craft_record_bindings);
   return out;
 }
 
@@ -264,8 +267,8 @@ function validateRefArrayV1(values, idField, digestField, label) {
   }
 }
 function validateOpportunityV1(o) {
-  exactKeys(o, ['opportunity_key','target_lens_ids','supporting_observation_refs','contradicting_observation_refs','craft_intelligence_refs','purpose_relevance_class','evidence_strength_class','preservation_risk_class','collateral_risk_class','scope_recommendation','owner_constraint_refs'], 'BLOCKED_OBSERVATION_BINDING_MISMATCH', 'opportunity');
   assertNoForbiddenPayload(o, 'opportunity');
+  exactKeys(o, ['opportunity_key','target_lens_ids','supporting_observation_refs','contradicting_observation_refs','craft_intelligence_refs','purpose_relevance_class','evidence_strength_class','preservation_risk_class','collateral_risk_class','scope_recommendation','owner_constraint_refs'], 'BLOCKED_OBSERVATION_BINDING_MISMATCH', 'opportunity');
   if (!text(o.opportunity_key) || !PURPOSE_RELEVANCE_CLASSES.includes(o.purpose_relevance_class) || !EVIDENCE_STRENGTH_CLASSES.includes(o.evidence_strength_class) || !RISK_CLASSES.includes(o.preservation_risk_class) || !RISK_CLASSES.includes(o.collateral_risk_class)) fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', 'opportunity');
   const lenses = normalizeStrings(o.target_lens_ids, 'target_lens_ids', false);
   if (stable(lenses) !== stable(o.target_lens_ids)) fail('BLOCKED_DIGEST_MISMATCH', 'opportunity_lenses');
@@ -277,10 +280,21 @@ function validateOpportunityV1(o) {
   const owners = normalizeStrings(o.owner_constraint_refs, 'owner_constraint_refs');
   if (stable(owners) !== stable(o.owner_constraint_refs)) fail('BLOCKED_DIGEST_MISMATCH', 'owner_constraint_refs');
 }
-function validateLiteraryOpportunityLedgerV1(ledger, diagnosis) {
+function validateExactRefsV1(refs, map, idField, digestField, sourceDigestField, label, requireCurrent = false) {
+  for (const ref of refs) {
+    const source = map.get(ref[idField]);
+    if (!source) fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', `${label}.missing:${ref[idField]}`);
+    const value = source.record || source;
+    if (value[sourceDigestField] !== ref[digestField]) fail('BLOCKED_DIGEST_MISMATCH', `${label}.digest:${ref[idField]}`);
+    if (requireCurrent && source.current !== true) fail('BLOCKED_CURRENTNESS_REQUIRED', `${label}.stale:${ref[idField]}`);
+  }
+}
+function sortedRefIds(values, idField) { return values.map(x => x[idField]).sort(); }
+function validateLiteraryOpportunityLedgerV1(ledger, diagnosis, observations, craftRecordBindings) {
   const fields = ['ledger_schema_version','opportunity_ledger_id','opportunity_ledger_digest','book_project_id','diagnosis_id','diagnosis_digest','contributing_observation_refs','contradicting_observation_refs','craft_intelligence_refs','strengths_to_preserve','opportunities','currentness_standing','ledger_standing','canonical_effect'];
-  exactKeys(ledger, fields, 'BLOCKED_OBSERVATION_BINDING_MISMATCH', 'ledger');
   assertNoForbiddenPayload(ledger, 'ledger');
+  exactKeys(ledger, fields, 'BLOCKED_OBSERVATION_BINDING_MISMATCH', 'ledger');
+  if (!Array.isArray(observations) || !Array.isArray(craftRecordBindings)) fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', 'exact_evidence_inputs_required');
   if (ledger.ledger_schema_version !== LEDGER_SCHEMA_VERSION || ledger.book_project_id !== diagnosis.book_project_id || ledger.diagnosis_id !== diagnosis.diagnosis_id || ledger.diagnosis_digest !== diagnosis.diagnosis_digest) fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', 'diagnosis_binding');
   validateRefArrayV1(ledger.contributing_observation_refs, 'observation_id', 'diagnostic_observation_digest', 'contributing_observation_refs');
   validateRefArrayV1(ledger.contradicting_observation_refs, 'observation_id', 'diagnostic_observation_digest', 'contradicting_observation_refs');
@@ -293,6 +307,29 @@ function validateLiteraryOpportunityLedgerV1(ledger, diagnosis) {
     if (keys.has(opportunity.opportunity_key)) fail('BLOCKED_CONFLICT_UNRESOLVED', `duplicate_opportunity:${opportunity.opportunity_key}`);
     keys.add(opportunity.opportunity_key);
   }
+  const observationMap = new Map();
+  for (const observation of observations) {
+    if (!obj(observation) || !text(observation.diagnostic_observation_id) || !digest(observation.diagnostic_observation_digest) || observationMap.has(observation.diagnostic_observation_id)) fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', 'observations');
+    observationMap.set(observation.diagnostic_observation_id, observation);
+  }
+  const craftMap = normalizeCraftBindingsV1(craftRecordBindings);
+  validateExactRefsV1(ledger.contributing_observation_refs, observationMap, 'observation_id', 'diagnostic_observation_digest', 'diagnostic_observation_digest', 'contributing_observation_refs');
+  validateExactRefsV1(ledger.contradicting_observation_refs, observationMap, 'observation_id', 'diagnostic_observation_digest', 'diagnostic_observation_digest', 'contradicting_observation_refs');
+  validateExactRefsV1(ledger.strengths_to_preserve, observationMap, 'observation_id', 'diagnostic_observation_digest', 'diagnostic_observation_digest', 'strengths_to_preserve');
+  validateExactRefsV1(ledger.craft_intelligence_refs, craftMap, 'craft_record_id', 'craft_record_digest', 'craft_record_digest', 'craft_intelligence_refs', true);
+  for (const opportunity of ledger.opportunities) {
+    validateExactRefsV1(opportunity.supporting_observation_refs, observationMap, 'observation_id', 'diagnostic_observation_digest', 'diagnostic_observation_digest', 'opportunity.supporting_observation_refs');
+    validateExactRefsV1(opportunity.contradicting_observation_refs, observationMap, 'observation_id', 'diagnostic_observation_digest', 'diagnostic_observation_digest', 'opportunity.contradicting_observation_refs');
+    validateExactRefsV1(opportunity.craft_intelligence_refs, craftMap, 'craft_record_id', 'craft_record_digest', 'craft_record_digest', 'opportunity.craft_intelligence_refs', true);
+  }
+  const expectedContributing = [...new Set(ledger.opportunities.flatMap(x => sortedRefIds(x.supporting_observation_refs, 'observation_id')))].sort();
+  const expectedContradicting = [...new Set(ledger.opportunities.flatMap(x => sortedRefIds(x.contradicting_observation_refs, 'observation_id')))].sort();
+  const expectedCraft = [...new Set(ledger.opportunities.flatMap(x => sortedRefIds(x.craft_intelligence_refs, 'craft_record_id')))].sort();
+  const expectedStrengths = [...diagnosis.strength_observation_refs].sort();
+  if (stable(sortedRefIds(ledger.contributing_observation_refs, 'observation_id')) !== stable(expectedContributing)) fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', 'contributing_observation_refs:projection_mismatch');
+  if (stable(sortedRefIds(ledger.contradicting_observation_refs, 'observation_id')) !== stable(expectedContradicting)) fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', 'contradicting_observation_refs:projection_mismatch');
+  if (stable(sortedRefIds(ledger.craft_intelligence_refs, 'craft_record_id')) !== stable(expectedCraft)) fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', 'craft_intelligence_refs:projection_mismatch');
+  if (stable(sortedRefIds(ledger.strengths_to_preserve, 'observation_id')) !== stable(expectedStrengths)) fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', 'strengths_to_preserve:projection_mismatch');
   if (!CURRENTNESS_STANDINGS.includes(ledger.currentness_standing) || ledger.currentness_standing !== 'CURRENT') fail('BLOCKED_CURRENTNESS_REQUIRED', 'ledger_currentness');
   if (!LEDGER_STANDINGS.includes(ledger.ledger_standing)) fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', 'ledger_standing');
   const expectedStanding = ledger.opportunities.length === 0 ? 'NO_ACTION' : 'READY_FOR_REVISION_REVIEW';
