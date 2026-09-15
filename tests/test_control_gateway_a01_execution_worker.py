@@ -72,6 +72,7 @@ class ExecutionWorkerTests(unittest.TestCase):
             renew_seconds=10,
             heartbeat_sla_seconds=120,
             clock=lambda: self.clock[0],
+            worker_id="worker-primary",
         )
 
     def tearDown(self):
@@ -106,6 +107,9 @@ class ExecutionWorkerTests(unittest.TestCase):
         self.assertEqual(delegation["state"], "COMPLETED")
         queue = self.store.conn.execute("SELECT state FROM night_scheduler_queue WHERE delegation_id='D-A'").fetchone()
         self.assertEqual(queue["state"], "TERMINAL")
+        owner = self.store.conn.execute("SELECT * FROM night_execution_owners").fetchone()
+        self.assertEqual(owner["owner_worker_id"], "worker-primary")
+        self.assertEqual(owner["fencing_token"], execution["fencing_token"])
 
     def test_dispatch_result_is_idempotent_and_does_not_repeat_work(self):
         self.enqueue("A", "LANE-A")
@@ -135,6 +139,98 @@ class ExecutionWorkerTests(unittest.TestCase):
                 claim["lease_id"], claim["fencing_token"],
                 now=self.clock[0] + dt.timedelta(seconds=2),
             )
+
+    def test_second_worker_same_fence_is_rejected_before_executor_side_effect(self):
+        self.enqueue("A", "LANE-A")
+        claim = self.scheduler.tick(now=self.clock[0], max_claims=1, lease_seconds=60)["claims"][0]
+        bundle = self.worker._dispatch_bundle(claim["dispatch_id"])
+        self.worker._ensure_execution_record(bundle, self.clock[0])
+        competing_calls: list[str] = []
+
+        def competing_execute(payload, context):
+            competing_calls.append(payload["task"])
+            return {"unexpected": True}
+
+        competitor = A01ExecutionWorker(
+            self.store,
+            scheduler=self.scheduler,
+            executors={"TEST_EXECUTOR": competing_execute},
+            lease_seconds=60,
+            renew_seconds=10,
+            heartbeat_sla_seconds=120,
+            clock=lambda: self.clock[0],
+            worker_id="worker-secondary",
+        )
+        with self.assertRaises(StaleWorker):
+            competitor.consume_dispatch(claim["dispatch_id"], now=self.clock[0])
+        self.assertEqual(competing_calls, [])
+        owner = self.store.conn.execute(
+            "SELECT owner_worker_id,fencing_token FROM night_execution_owners WHERE dispatch_id=?",
+            (claim["dispatch_id"],),
+        ).fetchone()
+        self.assertEqual(owner["owner_worker_id"], "worker-primary")
+        self.assertEqual(owner["fencing_token"], claim["fencing_token"])
+        outbox = self.store.conn.execute(
+            "SELECT state FROM dispatch_outbox WHERE dispatch_id=?", (claim["dispatch_id"],)
+        ).fetchone()
+        self.assertEqual(outbox["state"], "PENDING")
+
+    def test_recovery_transfers_owner_and_stale_worker_cannot_clobber_takeover(self):
+        self.enqueue("A", "LANE-A")
+        claim = self.scheduler.tick(now=self.clock[0], max_claims=1, lease_seconds=30)["claims"][0]
+        old_bundle = self.worker._dispatch_bundle(claim["dispatch_id"])
+        self.worker._ensure_execution_record(old_bundle, self.clock[0])
+        self.worker._mark_attempt(old_bundle, self.clock[0])
+        self.store.mark_dispatched(claim["dispatch_id"], f"local:{claim['dispatch_id']}", now=self.clock[0])
+        self.clock[0] += dt.timedelta(seconds=31)
+
+        takeover = A01ExecutionWorker(
+            self.store,
+            scheduler=self.scheduler,
+            executors={"TEST_EXECUTOR": self.worker.executors["TEST_EXECUTOR"]},
+            lease_seconds=60,
+            renew_seconds=10,
+            heartbeat_sla_seconds=120,
+            clock=lambda: self.clock[0],
+            worker_id="worker-secondary",
+        )
+        recovery = takeover.recover(now=self.clock[0])
+        self.assertEqual(len(recovery["resumed_leases"]), 1)
+        new_fence = recovery["resumed_leases"][0]["fencing_token"]
+        self.assertGreater(new_fence, claim["fencing_token"])
+        owner = self.store.conn.execute(
+            "SELECT owner_worker_id,fencing_token FROM night_execution_owners WHERE dispatch_id=?",
+            (claim["dispatch_id"],),
+        ).fetchone()
+        self.assertEqual(owner["owner_worker_id"], "worker-secondary")
+        self.assertEqual(owner["fencing_token"], new_fence)
+
+        with self.assertRaises(StaleWorker):
+            self.worker._stage_result(
+                old_bundle,
+                terminal_state="COMPLETED",
+                result={"task": "A", "stale": True},
+                error=None,
+                now=self.clock[0],
+            )
+        self.assertFalse(
+            self.worker._mark_authority_lost_if_owned(
+                old_bundle,
+                "stale worker must not overwrite takeover",
+                self.clock[0],
+            )
+        )
+        row = self.store.conn.execute(
+            "SELECT state,fencing_token,error_class FROM night_execution_results WHERE dispatch_id=?",
+            (claim["dispatch_id"],),
+        ).fetchone()
+        self.assertEqual(row["state"], "RUNNING")
+        self.assertEqual(row["fencing_token"], new_fence)
+        self.assertIsNone(row["error_class"])
+
+        result = takeover.consume_dispatch(claim["dispatch_id"], now=self.clock[0])
+        self.assertEqual(result["state"], "SUCCEEDED")
+        self.assertEqual(self.calls, ["A"])
 
     def test_executor_failure_is_durable_and_blocks_dependents(self):
         def fail(payload, context):
@@ -186,7 +282,7 @@ class ExecutionWorkerTests(unittest.TestCase):
         claim = self.scheduler.tick(now=self.clock[0], max_claims=1, lease_seconds=30)["claims"][0]
         bundle = self.worker._dispatch_bundle(claim["dispatch_id"])
         self.worker._ensure_execution_record(bundle, self.clock[0])
-        self.worker._mark_attempt(claim["dispatch_id"], self.clock[0])
+        self.worker._mark_attempt(bundle, self.clock[0])
         self.store.mark_dispatched(claim["dispatch_id"], f"local:{claim['dispatch_id']}", now=self.clock[0])
         self.clock[0] += dt.timedelta(seconds=31)
 
