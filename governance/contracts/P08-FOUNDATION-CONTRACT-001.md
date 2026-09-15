@@ -1,19 +1,24 @@
 # P08 — Foundation Contract 001
 
-**Owner** `SYSTEM_MASTER/CORE` · **Capability** P08 Qualification execution and PASS semantics · **Effective** 2026-09-13
-**Authority** `governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-002.json`
+**Owner** `SYSTEM_MASTER/CORE` · **Capability** P08 Qualification execution and PASS semantics · **Effective** 2026-09-15  
+**Authority** `governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json`
 
 ## 1. Contract / interface
 
-Qualification executes a **registered** wrapper against an **exact** subject SHA on the
-A-01 self-hosted runner, and emits one of four result classes: `PASS`, `SUBJECT_FAILURE`,
-`INFRA_FAILURE`, `CONTROL_PLANE_FAILURE`.
+P08 is the canonical execution and result-semantics layer behind admitted A-01 qualification. Its implementation is `.github/scripts/a01-control-plane.js`.
 
-Governed by `qualification/a01/a01-policy.json` (policy_version 8, control plane
-`A01-CONTROL-PLANE-001`, canonical ref `main`) and `registry.json`. Runner requires labels
-`self-hosted, Windows, X64`, concurrency group `a01-global-r2`, queue capacity 100.
+A qualification executes a **registered** wrapper against an **exact** subject SHA on the A-01 self-hosted runner and emits exactly one of four result classes:
 
-Three gate classes, and only one carries promotion authority:
+- `PASS`
+- `SUBJECT_FAILURE`
+- `INFRA_FAILURE`
+- `CONTROL_PLANE_FAILURE`
+
+The execution context is one of `normal`, `recovery`, `repair`, or `overnight`. P08 must accept the same four contexts admitted by P06/P07; overnight additionally applies the stricter registry and time-window rules.
+
+Governance comes from `qualification/a01/a01-policy.json` and `qualification/a01/registry.json`. The runner identity remains `A-01` with labels `self-hosted, Windows, X64`; the global execution concurrency namespace remains `a01-global-r2` with `cancel-in-progress: false`. Policy queue semantics are separate from GitHub workflow syntax and must not be represented by an unsupported `queue:` workflow key.
+
+Three gate classes exist, and only one carries promotion authority:
 
 | Class | Purpose | Promotion authority |
 |---|---|---|
@@ -21,122 +26,116 @@ Three gate classes, and only one carries promotion authority:
 | `consolidated` | accumulated slice plus broader regressions | **no** |
 | `promotion` | exact promotion subject and required regressions | **yes** |
 
-A `focused` PASS is evidence about one subject SHA. It is not a statement that anything is
-complete, and the registry makes each qualification say so in its own description.
+A `focused` or `consolidated` PASS is evidence about its exact subject only. A promotion result is authorized only when the registered gate class has `promotion_authority: true` and the exact subject checkout equals the requested subject SHA.
 
 ## 2. Ingress routes
 
-One admitted route: **P06** gateway → **P07** admission barrier → subject checkout →
-registered wrapper. Nothing else may execute a subject.
+The canonical route is:
 
-Policy makes the ordering structural: `pre_admission_subject_checkout_forbidden`,
-`pre_admission_subject_execution_forbidden`, and
-`trusted_metadata_barrier_required_before_subject_checkout` are all true. Blocked requests
-may acquire a trusted admission runner but `blocked_requests_must_not_checkout_or_execute_subject`.
+**P06 gateway → P07 trusted metadata admission → exact subject checkout → P08 registered wrapper execution.**
 
-`max_outstanding_per_workstream: 4`.
+No arbitrary command input is accepted. A subject may not be checked out or executed before successful admission. The trusted control-plane checkout and the qualification subject are independently identity-bound: on pull requests the trusted reusable workflow may execute from the PR merge SHA while the qualified subject remains the PR head SHA. Those two identities must be verified, not conflated.
 
 ## 3. Egress routes
 
-- A result class and a receipt, per the policy `receipt` and `return_ticket` sections.
-- Evidence artifacts named by the registry's `evidence_artifact`.
-- A return ticket to `origin_ref` for the workstream.
-- Downstream `workflow_run` consumers: repair receipt ingest and rerun adjudication (P09).
+P08 emits:
+
+- `result_class`;
+- `promotion_authorized`;
+- `receipt.json` and `result.txt`;
+- timing, runner preflight/postflight, stdout/stderr and supporting evidence;
+- the registered evidence artifact;
+- a return ticket carrying the exact subject SHA and continuation instructions.
+
+Ordinary non-PASS subject results may be consumed by P09 repair routing. Infrastructure/control-plane failures must not be misrouted as subject repair.
 
 ## 4. Persistence and canonical writer
 
-Qualification writes evidence, never governance. It holds no authority state.
+Qualification writes evidence, never governance authority.
 
-`registry.json` is the canonical record of what may be qualified and is written only by a
-human through a reviewed pull request. A qualification cannot register itself, which is
-what `require_registered_qualification: true` and `allow_arbitrary_command_input: false`
-mean in practice.
+`qualification/a01/registry.json` is the canonical allowlist for qualification wrappers. A qualification cannot register itself. `require_registered_qualification: true` and `allow_arbitrary_command_input: false` remain fail-closed invariants.
 
-Where the wrapper lives is declared by `source`: `control_plane` means it ships on `main`;
-`subject` means it ships on the subject ref. Both are validated for path safety by P07
-before checkout.
+Wrapper source is declared by registry entry:
+
+- `control_plane` — wrapper is supplied by the trusted control-plane checkout;
+- `subject` — wrapper is supplied by the exact subject checkout.
+
+Both wrapper paths are validated before execution.
 
 ## 5. Dependencies
 
-- **P07** admission — nothing runs unadmitted.
-- **P06** gateway — the transport.
-- **P04** authority writes — for qualifications that publish.
-- **P09** repair broker — consumes failures.
-- **P03** retention — governs the evidence produced.
-- The A-01 self-hosted runner.
+- **P06** control gateway transport.
+- **P07** admission barrier.
+- **P03** evidence retention.
+- **P04** content-addressed authority writes where a qualified workflow later publishes authority.
+- **P09** repair broker for subject failures.
+- A healthy A-01 self-hosted runner.
 
 ## 6. Failure semantics
 
-**Fail-closed, with failure *classified* rather than merely reported.**
+P08 is **fail-closed and classifies failures rather than collapsing them into generic failure**.
 
-The four result classes exist so a failure routes correctly: `SUBJECT_FAILURE` is the
-subject's problem and goes to repair; `INFRA_FAILURE` and `CONTROL_PLANE_FAILURE` are not
-the subject's fault and must never consume a repair attempt. Collapsing these into
-"failed" is how a healthy subject gets repaired for an infrastructure fault.
+- Registered child exit `0` → `PASS`.
+- Registered child non-zero exit → `SUBJECT_FAILURE`.
+- Child spawn/runtime infrastructure error → `INFRA_FAILURE`.
+- Control-plane/identity/contract failure before a valid subject result exists → `CONTROL_PLANE_FAILURE`.
+- Qualifier timeout → `SUBJECT_FAILURE` with explicit runtime-budget reason.
+- Runner unavailable → `WAITING_FOR_RUNNER`, not a subject failure.
+- Subject checkout SHA mismatch or trusted control-plane SHA mismatch fails closed.
+- Promotion authorization is true only for an exact-subject `PASS` from a gate class whose policy grants promotion authority.
 
-- Runner unavailable → `WAITING_FOR_RUNNER`, not a failure. Queue expiry 24 hours,
-  requeue 60 seconds.
-- Runner health guards — minimum 10 GB free disk, 4 GB available memory, node and git
-  present — with `fail_closed_on_identity_or_resource_guard: true`.
-- Sleep prevented during qualification; preflight and postflight recorded.
-- Disruptive qualifications fail closed without hosted admission;
-  `non_disruptive_only_without_hosted_runner: true`.
-- Stale requests handled by the policy's `stale_request_policy` rather than by silent
-  re-execution.
+Runner health guards require minimum free disk and memory, node/git availability, sleep prevention during qualification, and recorded preflight/postflight evidence.
 
 ## 7. Evidence target
 
-Per-qualification evidence artifacts named in the registry, plus the receipt and return
-ticket. Live proof: Bridge run #4, `BOOK-SYSTEM-E2E-AUTHORITY-GUARDS-001`, 6.48 KB
-evidence plus a 667-byte admission record.
+The current closure procedure is `.github/workflows/p08-qualification-pass-semantics-foundation-qualification.yml`.
+
+It must prove, on the same exact qualification subject:
+
+1. the policy exposes exactly the four P08 result classes;
+2. P06/P07/P08 agree on the four execution contexts;
+3. PASS, failure-classification and promotion-authority bindings are present;
+4. `A01-CONTROL-PLANE-SELFTEST` is a registered `promotion` qualification;
+5. trusted metadata admission returns `ADMITTED` before subject checkout;
+6. A-01 checks out the exact requested subject SHA;
+7. the registered qualification returns `PASS` with child exit `0`;
+8. the receipt reports `promotion_authorized: true` for that exact subject;
+9. the trusted control-plane SHA is independently bound to the workflow execution SHA;
+10. the authoritative A-01 evidence artifact uploads successfully.
+
+Hosted prequalification is necessary but not sufficient. Foundation completion requires the live A-01 portion and registration of its immutable run/artifact identity in `governance/census/FOUNDATION-CLOSURE-EVIDENCE-REGISTRY-001.json`.
 
 ## 8. Acceptance target
 
-```
-node .github/scripts/a01-control-plane-enforce.js selftest
-node .github/scripts/a01-control-plane-enforce.js scan
-node .github/scripts/a01-admission-barrier.js selftest
+Canonical P08 qualification:
+
+```text
+.github/workflows/p08-qualification-pass-semantics-foundation-qualification.yml
 ```
 
-**PASS** when all three pass in the `enforce` CI job: the scan rejects ungoverned executor
-and scheduling paths, and admission self-tests green.
+Acceptance is **PASS** only when the complete workflow succeeds and its live A-01 receipt proves:
 
-**Weak, and named as weak.** These prove the *governance* of qualification, not
-qualification execution itself. Proving execution needs a live registered run against a
-known subject SHA with an asserted result class, and that cannot run in hosted CI because
-it requires the A-01 runner. A recorded live-proof procedure is the honest closure here,
-and it does not exist yet.
+```text
+admission_state = ADMITTED
+result_class = PASS
+child_exit_code = 0
+promotion_authorized = true
+checkout_sha = subject_sha = requested exact subject SHA
+control_plane_checkout_sha = control_plane_sha = trusted workflow SHA
+```
+
+A hosted-only result cannot close P08.
 
 ## 9. Authority boundary
 
-**Lane may decide alone (`agent`):** evidence formatting, wrapper internals for a
-qualification the lane owns.
+**Lane may decide alone (`agent`):** evidence formatting and wrapper internals for a qualification the lane owns, provided result semantics and authority are unchanged.
 
-**Requires the owner (`owner`):** registering or deregistering a qualification; changing a
-`gate_class`, especially granting `promotion`; setting `overnight_eligible`; adding
-`allowed_post_actions`; changing runner labels, health thresholds or concurrency; relaxing
-any admission ordering flag; changing the result classes.
+**Requires the owner (`owner`):** registering/deregistering a qualification; changing a `gate_class`; granting or removing promotion authority; changing result classes; changing runner identity/labels, health thresholds or concurrency; changing overnight eligibility; adding disruptive post-actions; relaxing admission or exact-SHA identity checks.
 
-Granting `promotion_authority` is the single highest-consequence registry edit: it is what
-lets a PASS mean more than evidence about one SHA.
+Granting promotion authority remains the highest-consequence registry edit because it changes whether a PASS may authorize promotion rather than merely record evidence about one exact subject.
 
 ## 10. Open gaps
 
-- **No live-proof procedure.** Execution semantics are unproven by anything automated.
-  Needs a documented runbook plus a recorded run, since CI cannot reach the runner.
-- **`WAITING_FOR_RUNNER` is silent to the operator.** A request can sit for 24 hours and
-  expire; the P15 receipt does not yet surface queued-but-unstarted requests.
+P08 has a live exact-SHA proof procedure. Its Foundation closure condition is therefore evidence-registration, not missing implementation.
 
-**Correcting an earlier finding of mine.** In the P06 contract I flagged Bridge run #4's
-23-second qualification against a 28-minute budget as possibly meaning nothing ran. That
-was wrong, and the policy says why: admission mode is
-`TRUSTED_SELF_HOSTED_METADATA_ONLY_FOR_NONDISRUPTIVE`, and the registration for that
-qualification is `gate_class: focused`, `overnight_eligible: false`, `source: subject`,
-running a single in-process guard script. A focused guard check completing in 23 seconds is
-correct behaviour; `qualifier_timeout_minutes` is a ceiling, not an expectation. I had read
-a budget as a duration.
-
-The registration's own wording is the right reading of that run: *"PASS is exact-SHA
-focused evidence only"*, granting no lifecycle, publication, promotion or production
-authority. So the run was valid, and it was never a Books completion — exactly as
-registered.
+Queued-but-unstarted operator visibility remains a **P15 observability concern**. It does not change P08 result semantics and must not be used to classify an unstarted request as a subject failure.

@@ -137,6 +137,8 @@ Each peer continues dependency-valid work inside its own semantic lane. A blocke
 
 `governance/second-shift/SECOND-SHIFT-REGISTRY-001.json::owner_files` is the machine execution-lane set. It must match the topology's current execution-ready peer set.
 
+A-01 overnight execution authority is defined by `qualification/a01/overnight/A01-OVERNIGHT-001.md`; Second Shift integration with that control plane remains bounded by the current A-01 policy, registry, admission barrier and exact-subject evidence rules.
+
 Current execution-ready peer lanes are exactly:
 
 - CORE
