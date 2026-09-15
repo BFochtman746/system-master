@@ -12,7 +12,6 @@ import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -43,8 +42,6 @@ public final class ControlGatewayClaimStateStore implements DurableDispatchCoord
             "SECOND-SHIFT-DISPATCH-DURABILITY-003-AUTHORITY-BOOTSTRAP";
     private static final Pattern SHA1 = Pattern.compile("[0-9a-f]{40}");
     private static final Pattern SHA256 = Pattern.compile("[0-9a-f]{64}");
-    private static final Pattern STRING_FIELD = Pattern.compile("\\\"([^\\\"]+)\\\"\\s*:\\s*(?:\\\"((?:\\\\.|[^\\\"\\\\])*)\\\"|(null))");
-    private static final Pattern NUMBER_FIELD = Pattern.compile("\\\"([^\\\"]+)\\\"\\s*:\\s*(-?[0-9]+)");
 
     private final Transport transport;
     private final ActionsDispatch.Credentials credentials;
@@ -458,19 +455,55 @@ public final class ControlGatewayClaimStateStore implements DurableDispatchCoord
     }
 
     private static String requiredString(String json, String key, String error) {
-        Matcher m = STRING_FIELD.matcher(json);
-        while (m.find()) {
-            if (!key.equals(m.group(1))) continue;
-            if (m.group(3) != null) throw new IllegalStateException(error);
-            return unesc(m.group(2));
+        int keyAt = json.indexOf("\"" + key + "\"");
+        if (keyAt < 0) throw new IllegalStateException(error);
+        int start = skipWsAfterColon(json, keyAt, key);
+        if (start < 0 || start >= json.length() || json.charAt(start) != '"') {
+            throw new IllegalStateException(error);
         }
-        throw new IllegalStateException(error);
+        int end = stringEnd(json, start);
+        if (end < 0) throw new IllegalStateException(error);
+        return unesc(json.substring(start + 1, end));
+    }
+
+    private static int stringEnd(String json, int quoteStart) {
+        boolean escaped = false;
+        for (int i = quoteStart + 1; i < json.length(); i++) {
+            char c = json.charAt(i);
+            if (escaped) {
+                escaped = false;
+                continue;
+            }
+            if (c == '\\') {
+                escaped = true;
+                continue;
+            }
+            if (c == '"') return i;
+        }
+        return -1;
     }
 
     private static long requiredLong(String json, String key, String error) {
-        Matcher m = NUMBER_FIELD.matcher(json);
-        while (m.find()) if (key.equals(m.group(1))) return Long.parseLong(m.group(2));
-        throw new IllegalStateException(error);
+        int keyAt = json.indexOf("\"" + key + "\"");
+        if (keyAt < 0) throw new IllegalStateException(error);
+        int start = skipWsAfterColon(json, keyAt, key);
+        if (start < 0 || start >= json.length()) throw new IllegalStateException(error);
+        int at = start;
+        if (json.charAt(at) == '-') at++;
+        int digitStart = at;
+        while (at < json.length() && json.charAt(at) >= '0' && json.charAt(at) <= '9') at++;
+        if (at == digitStart || (at < json.length() && !jsonValueDelimiter(json.charAt(at)))) {
+            throw new IllegalStateException(error);
+        }
+        try {
+            return Long.parseLong(json.substring(start, at));
+        } catch (NumberFormatException bad) {
+            throw new IllegalStateException(error, bad);
+        }
+    }
+
+    private static boolean jsonValueDelimiter(char c) {
+        return c == ',' || c == '}' || c == ']' || Character.isWhitespace(c);
     }
 
     private static void requireExactSingleStringArray(String json, String key, String expected, String error) {
