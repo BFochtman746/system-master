@@ -14,6 +14,9 @@ public final class GitHubClaimStateStoreTest {
     public static void main(String[] args) throws Exception {
         createLoadAndCasUpdate();
         staleShaIsCasConflict();
+        rejectedCreate409FailsClosed();
+        rejectedUpdate409FailsClosed();
+        rejected422FailsClosed();
         corruptPayloadFailsClosed();
         missingStateRefFailsClosed();
         claimIdCannotEscapeStateRoot();
@@ -43,6 +46,26 @@ public final class GitHubClaimStateStoreTest {
         refuses("stale blob SHA loses CAS", DurableDispatchCoordinator.CasConflictException.class, "STATE_CAS_CONFLICT", () -> store.save(v1.revision(), ready));
     }
 
+    private static void rejectedCreate409FailsClosed() {
+        FakeTransport http = new FakeTransport(); http.forcedPutStatus = 409; GitHubClaimStateStore store = store(http);
+        DurableDispatchCoordinator.ClaimRecord ready = DurableDispatchCoordinator.ClaimRecord.ready("job-create-rejected", "sha256:p", T0);
+        refuses("409 without observed winning create is write rejection", IllegalStateException.class, "STATE_STORE_WRITE_REJECTED_409", () -> store.save(null, ready));
+    }
+
+    private static void rejectedUpdate409FailsClosed() throws Exception {
+        FakeTransport http = new FakeTransport(); GitHubClaimStateStore store = store(http);
+        DurableDispatchCoordinator.ClaimRecord ready = DurableDispatchCoordinator.ClaimRecord.ready("job-update-rejected", "sha256:p", T0);
+        DurableDispatchCoordinator.Versioned v1 = store.save(null, ready);
+        http.forcedPutStatus = 409;
+        refuses("409 with unchanged observed revision is write rejection", IllegalStateException.class, "STATE_STORE_WRITE_REJECTED_409", () -> store.save(v1.revision(), ready.claimed("c", "f", T0)));
+    }
+
+    private static void rejected422FailsClosed() {
+        FakeTransport http = new FakeTransport(); http.forcedPutStatus = 422; GitHubClaimStateStore store = store(http);
+        DurableDispatchCoordinator.ClaimRecord ready = DurableDispatchCoordinator.ClaimRecord.ready("job-422-rejected", "sha256:p", T0);
+        refuses("422 is never guessed to be CAS", IllegalStateException.class, "STATE_STORE_WRITE_REJECTED_422", () -> store.save(null, ready));
+    }
+
     private static void corruptPayloadFailsClosed() throws Exception {
         FakeTransport http = new FakeTransport(); GitHubClaimStateStore store = store(http);
         store.save(null, DurableDispatchCoordinator.ClaimRecord.ready("job-3", "sha256:p3", T0));
@@ -69,14 +92,16 @@ public final class GitHubClaimStateStoreTest {
     }
 
     private static final class FakeTransport implements GitHubClaimStateStore.Transport {
-        boolean refExists = true; String revision; String content; String lastPutUrl; int sequence;
+        boolean refExists = true; String revision; String content; String lastPutUrl; int sequence; Integer forcedPutStatus;
         public GitHubClaimStateStore.Response get(String url, Map<String, String> headers) {
             if (url.contains("/git/ref/heads/")) return new GitHubClaimStateStore.Response(refExists ? 200 : 404, refExists ? "{\"ref\":\"refs/heads/second-shift/execution-state\"}" : "{}");
             if (revision == null) return new GitHubClaimStateStore.Response(404, "{}");
             return new GitHubClaimStateStore.Response(200, "{\"sha\":\"" + revision + "\",\"encoding\":\"base64\",\"content\":\"" + content + "\"}");
         }
         public GitHubClaimStateStore.Response put(String url, Map<String, String> headers, String body) {
-            lastPutUrl = url; String expected = jsonString(body, "sha");
+            lastPutUrl = url;
+            if (forcedPutStatus != null) return new GitHubClaimStateStore.Response(forcedPutStatus, "{}");
+            String expected = jsonString(body, "sha");
             if (revision == null) { if (expected != null) return new GitHubClaimStateStore.Response(409, "{}"); }
             else if (expected == null || !revision.equals(expected)) return new GitHubClaimStateStore.Response(409, "{}");
             content = jsonString(body, "content"); revision = "blob-" + (++sequence); int status = sequence == 1 ? 201 : 200;
