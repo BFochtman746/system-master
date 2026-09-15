@@ -1,0 +1,75 @@
+{
+  "selection_id": "BOOK-BIDAG-004-DEP-02-SELECTION-001",
+  "effective_date": "2026-09-14",
+  "standing": "CURRENT_BOOK_LOCAL_SUCCESSOR_SELECTION__EXECUTION_OPEN",
+  "owner_path": "SYSTEM_MASTER/BOOK",
+  "authority_id": "CURRENT-AUTHORITY-005",
+  "predecessor_objective": "BOOK-ENG-009-SEMANTIC-RECOVERY-PROFILE-001",
+  "predecessor_closure_subject": "5a058aa68e0249ff895776e4ce3e9a082476b720",
+  "predecessor_required_verification": {
+    "run_id": 34883806080,
+    "job_id": 104109416003,
+    "conclusion": "success",
+    "verify_summary": {"pass":36,"fail":0,"skip":1},
+    "non_vacuous": "PASS"
+  },
+  "selected_work_package": {
+    "work_package_id": "BIDAG-004-DEP-02",
+    "title": "Restore whole-Book core dependency/build graph",
+    "disposition_class": "DEPENDENCY",
+    "semantic_owner_boundary": "Master Core / shared build graph authority",
+    "depends_on": ["BIDAG-004-C00"],
+    "topological_level": 1,
+    "wave": "W01",
+    "wave_title": "Source recovery + reusable/shared substrate",
+    "components_or_scope": "org.systemmaster.core dependency family",
+    "acceptance_gate": "Direct Manuscript compile and whole recovered Book tree no longer blocked by missing core types; no stub-only pass",
+    "source_basis": ["R5-WP-020","MLSI-WP-020"],
+    "notes": "Repairs inherited compile graph; not a Book semantic rewrite."
+  },
+  "selection_basis": {
+    "book_control_residual": "whole-source build graph/shared Core integration dependencies",
+    "r6_open_residual": "UAF-F002 / R5-WP-020: whole-source build graph / missing org.systemmaster.core integration dependencies",
+    "implementation_dag": "BOOKS_IMPLEMENTATION_DAG_004",
+    "dag_row_index": 3,
+    "no_new_book_eng_id_invented": true,
+    "historical_b01_b02_replay_rejected": true
+  },
+  "observed_failure_family": {
+    "historical_whole_tree_compile": "FAIL",
+    "historical_javac_error_count": 82,
+    "dominant_cause": "Recovered Book sources reference missing org.systemmaster.core types in the transferred baseline.",
+    "representative_missing_types": [
+      "org.systemmaster.core.ArtifactGateway",
+      "org.systemmaster.core.SearchDigests",
+      "org.systemmaster.core.SearchRequest",
+      "org.systemmaster.core.SourceArchiveDocument",
+      "org.systemmaster.core.CapabilityDescriptor",
+      "org.systemmaster.core.EffectClass"
+    ]
+  },
+  "current_core_reconciliation": {
+    "current_repository_build": "PASS",
+    "current_core_package_root": "system-master/f-wp-*/src/main/java/org/systemmaster/core",
+    "historical_api_family_present_as_exact_current_types": false,
+    "disposition": "REQUIRE_EXACT_API_SURFACE_RECOVERY_AND_OWNER_REBIND_BEFORE_BUILD_GRAPH_REPAIR",
+    "stub_only_repair_forbidden": true,
+    "book_semantic_ownership_change_forbidden": true
+  },
+  "exact_next_substep": {
+    "state": "ACTIVE",
+    "action": "Recover and enumerate the historical org.systemmaster.core API surface consumed by the recovered Book tree; map each type to current CORE ownership as REUSE, ADAPTER, REPLACEMENT, or RETIRED/INVALID before any compile-graph mutation.",
+    "acceptance": [
+      "Every unresolved historical Core import has an exact disposition.",
+      "No Book-owned duplicate of a CORE semantic authority is introduced.",
+      "No placeholder/stub class is accepted as closure evidence.",
+      "A concrete source/module/dependency plan exists for direct Manuscript and whole recovered Book-tree compilation."
+    ]
+  },
+  "non_claims": [
+    "BIDAG-004-DEP-02 is selected, not complete.",
+    "The current repository Maven PASS does not prove the recovered Book source tree compiles.",
+    "Current F-WP Core classes are not asserted to be drop-in replacements for unrecovered historical Core APIs.",
+    "BOOK remains incomplete and no CURRENT-AUTHORITY Book selector promotion is performed."
+  ]
+}
