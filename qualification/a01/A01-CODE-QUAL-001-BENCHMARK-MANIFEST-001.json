@@ -1,0 +1,56 @@
+{
+  "manifest_id": "A01-CODE-QUAL-001-BENCHMARK-MANIFEST-001",
+  "operation_id": "A01-CODE-QUAL-001",
+  "contract": "qualification/a01/A01-CODE-QUAL-001-30-MINUTE-SEALED-CODING-STRESS-BASELINE-CONTRACT-001.json",
+  "candidate_assignment": "qualification/a01/A01-CODE-QUAL-001-ASSIGNMENT-001.md",
+  "hard_wall_clock_minutes": 30,
+  "fixture_policy": {
+    "fixture_root": "qualification/a01/fixture/a01-code-qual-001",
+    "candidate_visible_root": "candidate",
+    "hidden_evaluator_root": "evaluator-hidden",
+    "candidate_must_not_read_hidden_root_before_deadline": true,
+    "candidate_must_not_modify_hidden_root": true
+  },
+  "writable_globs": [
+    "candidate/java/**",
+    "candidate/python/**",
+    "candidate/javascript/**",
+    "candidate/tests-visible/**"
+  ],
+  "read_only_globs": [
+    "benchmark-manifest.json",
+    "assignment.md",
+    "evaluator-hidden/**",
+    "runner/**"
+  ],
+  "required_languages": ["java", "python", "javascript"],
+  "required_domains": [
+    "cross-language request path",
+    "idempotent durable mutation",
+    "single-owner concurrency",
+    "stale-writer rejection",
+    "crash/restart recovery",
+    "malformed-input failure safety",
+    "visible test authoring"
+  ],
+  "post_run_tools": [
+    "language-native test runners",
+    "coverage.py",
+    "JaCoCo",
+    "c8",
+    "Lizard",
+    "jscpd"
+  ],
+  "artifact_policy": {
+    "preserve_starting_tree": true,
+    "preserve_final_tree": true,
+    "preserve_git_diff": true,
+    "preserve_runner_log": true,
+    "preserve_visible_test_log": true,
+    "preserve_hidden_test_log": true,
+    "preserve_quality_reports": true,
+    "preserve_machine_receipt": true,
+    "sha256_all_preserved_evidence": true
+  },
+  "status": "SCAFFOLD_DEFINED_FIXTURE_IMPLEMENTATION_PENDING"
+}
