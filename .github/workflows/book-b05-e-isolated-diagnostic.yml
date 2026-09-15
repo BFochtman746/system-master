@@ -1,0 +1,57 @@
+name: Book B05 E Isolated Diagnostic
+
+on:
+  push:
+    branches:
+      - book-system/b05-e-152-qualification-v1
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    name: Node 22 — preserve B05-E isolated failure
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Setup Node 22
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: '22'
+
+      - name: Run isolated 152 and preserve diagnostics
+        id: isolated
+        shell: bash
+        run: |
+          set +e
+          node --test --test-reporter=tap system-master/book-system/book-b05-e-152-isolated.test.js > b05-e-isolated-diagnostic.log 2>&1
+          rc=$?
+          set -e
+          {
+            echo "subject_sha=$(git rev-parse HEAD)"
+            echo "node=$(node --version)"
+            echo "exit_code=${rc}"
+            echo "case_diagnostics:"
+            grep -n -E 'case_id=|source=|selector=|status=|spawn_error=|AssertionError|not ok|# pass |# fail |# cancelled ' b05-e-isolated-diagnostic.log || true
+          } | tee b05-e-isolated-diagnostic-summary.txt
+          cat b05-e-isolated-diagnostic.log
+          exit "${rc}"
+
+      - name: Upload isolated diagnostic artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: book-b05-e-isolated-diagnostic-${{ github.sha }}
+          path: |
+            b05-e-isolated-diagnostic.log
+            b05-e-isolated-diagnostic-summary.txt
+          if-no-files-found: error
+          retention-days: 7
