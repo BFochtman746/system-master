@@ -1,0 +1,143 @@
+{
+  "contract_id": "A01-CODE-QUAL-001-30-MINUTE-SEALED-CODING-STRESS-BASELINE-CONTRACT-001",
+  "operation_id": "A01-CODE-QUAL-001",
+  "title": "30-MINUTE SEALED CODING STRESS BASELINE",
+  "purpose": "Measure A-01's own software-engineering performance under a controlled, timed, previously unseen coding assignment. This qualification is distinct from repository-wide PQF quality measurement.",
+  "truth_boundary": {
+    "establishes": [
+      "A-01 performance on this exact sealed benchmark subject and time window",
+      "functional correctness and engineering-quality evidence produced by the evaluator",
+      "behavioral evidence about planning, implementation, testing, debugging, scope discipline, and recovery during the run"
+    ],
+    "does_not_establish": [
+      "that all System Master code is high quality",
+      "that future A-01 runs will achieve the same result",
+      "that a repository-wide quality threshold has been satisfied",
+      "that the first baseline score is a pass/fail quality threshold"
+    ]
+  },
+  "separation_of_concerns": {
+    "pqf_001f": "Repository-wide multi-language coverage, complexity, and duplication baseline.",
+    "a01_code_qual_001": "Controlled measurement of code authored by A-01 during a sealed timed assignment."
+  },
+  "timing": {
+    "hard_wall_clock_minutes": 30,
+    "human_assistance_during_window": false,
+    "timer_starts_when": "A-01 receives the sealed assignment payload and writable benchmark workspace.",
+    "timer_stops_when": "30 wall-clock minutes elapse or A-01 explicitly submits final work, whichever occurs first.",
+    "post_deadline_mutation_allowed": false
+  },
+  "sealed_fixture_rules": {
+    "unseen_by_a01_before_start": true,
+    "isolated_from_live_system_master_production_paths": true,
+    "fresh_exact_subject_required": true,
+    "hidden_evaluator_not_exposed_to_a01": true,
+    "hidden_test_names_and_expected_outputs_not_exposed_to_a01": true,
+    "fixture_languages": ["java", "python", "javascript"],
+    "required_challenge_classes": [
+      "unfamiliar_code_comprehension",
+      "feature_implementation",
+      "undisclosed_bug_diagnosis",
+      "cross_language_integration",
+      "concurrency_and_idempotency",
+      "persistence_and_recovery",
+      "input_validation_and_failure_safety",
+      "test_authoring",
+      "debugging_after_observed_failure",
+      "scope_discipline"
+    ]
+  },
+  "run_capture": {
+    "required": [
+      "benchmark_subject_sha256",
+      "hidden_evaluator_sha256",
+      "assignment_sha256",
+      "starting_git_sha",
+      "final_git_sha",
+      "start_timestamp_utc",
+      "stop_timestamp_utc",
+      "elapsed_seconds",
+      "all_commits_and_final_diff",
+      "commands_or_test_invocations_available_from_runner_logs",
+      "compiler_test_and_runtime_failures_available_from_runner logs",
+      "final_visible_test_result",
+      "final_hidden_test_result",
+      "post_run_quality_metrics",
+      "immutable_artifact_identity_and_digest"
+    ]
+  },
+  "evaluation_dimensions": {
+    "functional_correctness": {
+      "evidence": ["visible_tests", "hidden_tests", "cross_language_contract_tests"]
+    },
+    "code_comprehension": {
+      "evidence": ["change_relevance", "unnecessary_change_count", "architecture_contract_preservation"]
+    },
+    "debugging_effectiveness": {
+      "evidence": ["failed_runs_before_final", "regression_introductions", "repair_convergence"]
+    },
+    "test_quality": {
+      "evidence": ["tests_added", "negative_and_boundary_cases", "mutation_or_fault_detection_if_enabled"]
+    },
+    "maintainability": {
+      "evidence": ["coverage", "complexity", "duplication", "dead_or_unused_code", "change_surface"]
+    },
+    "concurrency_recovery": {
+      "evidence": ["race_tests", "idempotency_tests", "restart_or_recovery_tests", "stale_writer_tests"]
+    },
+    "security_failure_safety": {
+      "evidence": ["validation_tests", "fail_closed_behavior", "unsafe_execution_checks", "resource_cleanup"]
+    },
+    "scope_discipline": {
+      "evidence": ["authorized_paths_changed", "unauthorized_paths_changed", "requirements_not_requested"]
+    },
+    "first_pass_quality": {
+      "evidence": ["correctness_before_first_observed_failure", "changes_after_first_test_run", "repair_iterations"]
+    }
+  },
+  "baseline_policy": {
+    "first_run_is_measurement_only": true,
+    "arbitrary_numeric_quality_threshold_forbidden": true,
+    "pass_fail_threshold_derivation_deferred": true,
+    "comparison_requires_same_contract_version_and_equivalent_fixture_difficulty": true
+  },
+  "valid_run_boundary": {
+    "all_must_hold": [
+      "sealed assignment and evaluator were fixed before A-01 access",
+      "A-01 had no human assistance during the timed window",
+      "the hard 30-minute boundary was enforced",
+      "no post-deadline mutation was included in the measured artifact",
+      "exact subject identities and digests were captured",
+      "hidden evaluator executed only after the measured coding window",
+      "raw evidence and machine-readable receipt were preserved immutably"
+    ]
+  },
+  "receipt_protocol": "a01.code-qualification-receipt.v1",
+  "required_receipt_fields": [
+    "protocol_version",
+    "contract_id",
+    "operation_id",
+    "benchmark_subject_sha256",
+    "hidden_evaluator_sha256",
+    "assignment_sha256",
+    "starting_git_sha",
+    "final_git_sha",
+    "start_timestamp_utc",
+    "stop_timestamp_utc",
+    "elapsed_seconds",
+    "deadline_enforced",
+    "human_assistance",
+    "visible_tests",
+    "hidden_tests",
+    "coverage",
+    "complexity",
+    "duplication",
+    "concurrency_recovery",
+    "security_failure_safety",
+    "scope_discipline",
+    "first_pass_quality",
+    "raw_artifact_digest",
+    "receipt_digest"
+  ],
+  "status": "CONTRACT_CREATED_FIXTURE_AND_RUNNER_PENDING"
+}
