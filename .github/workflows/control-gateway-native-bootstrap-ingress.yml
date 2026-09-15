@@ -58,9 +58,46 @@ jobs:
           printf 'bootstrap_request_json=%s\n' "${bootstrap_request_json}" >> "${GITHUB_OUTPUT}"
 
   execute-authority-bootstrap:
-    name: Execute through dedicated-writer authority bootstrap
+    name: Dedicated-writer genesis active-work publication
     needs: validate-command
-    uses: ./.github/workflows/control-gateway-authority-bootstrap.yml
-    with:
-      bootstrap_request_json: ${{ needs.validate-command.outputs.bootstrap_request_json }}
-    secrets: inherit
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: control-gateway-production
+    steps:
+      - name: Checkout exact production controller
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Verify workflow is executing exact main head
+        shell: bash
+        run: |
+          test "${GITHUB_REF}" = "refs/heads/main"
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+      - name: Mint repository-scoped dedicated writer App token
+        id: writer-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1
+        with:
+          client-id: ${{ vars.CONTROL_GATEWAY_WRITER_CLIENT_ID }}
+          private-key: ${{ secrets.CONTROL_GATEWAY_WRITER_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
+          permission-contents: write
+      - name: Execute create-only authority bootstrap
+        shell: bash
+        env:
+          CONTROL_GATEWAY_BOOTSTRAP_REQUEST_JSON: ${{ needs.validate-command.outputs.bootstrap_request_json }}
+          CONTROL_GATEWAY_WRITER_TOKEN: ${{ steps.writer-token.outputs.token }}
+          CONTROL_GATEWAY_WRITER_ACTUAL_APP_SLUG: ${{ steps.writer-token.outputs.app-slug }}
+          CONTROL_GATEWAY_WRITER_EXPECTED_APP_SLUG: ${{ vars.CONTROL_GATEWAY_WRITER_APP_SLUG }}
+          CONTROL_GATEWAY_WRITER_INSTALLATION_ID: ${{ steps.writer-token.outputs.installation-id }}
+          CONTROL_GATEWAY_WRITER_EVIDENCE_DIR: ${{ runner.temp }}/control-gateway-authority-bootstrap-${{ github.run_id }}
+        run: node .github/scripts/control-gateway-authority-bootstrap.js
+      - name: Upload immutable bootstrap evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: control-gateway-authority-bootstrap-${{ github.run_id }}-evidence
+          path: ${{ runner.temp }}/control-gateway-authority-bootstrap-${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 90
