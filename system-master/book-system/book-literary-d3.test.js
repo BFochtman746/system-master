@@ -198,6 +198,6 @@ test('O22 opportunity adjudication deduplicates observations for same underlying
 });
 test('O23 durable opportunity ledger admits at most three opportunities and rejects a fourth', () => {
   const d = makeDiagnostic(); const candidates = [1,2,3,4].map(i => candidate(d.context, d.observation, { opportunity_key: `opportunity:${i}` })); const ledger = assembleLedger({ ...d, candidates }); assert.equal(ledger.opportunities.length, 3);
-  const tampered = clone(ledger); tampered.opportunities.push(clone(ledger.opportunities[0])); assert.throws(() => ledgerRuntime.validateLiteraryOpportunityLedgerV1(tampered, d.diagnosis), expectCode('BLOCKED_OBSERVATION_BINDING_MISMATCH'));
+  const tampered = clone(ledger); tampered.opportunities.push(clone(ledger.opportunities[0])); assert.throws(() => ledgerRuntime.validateLiteraryOpportunityLedgerV1(tampered, d.diagnosis, d.observations, []), expectCode('BLOCKED_OBSERVATION_BINDING_MISMATCH'));
 });
 test('O24 zero-opportunity NO_ACTION is valid and never forces revision target', () => { const d = makeDiagnostic(); const ledger = assembleLedger({ ...d, candidates: [] }); assert.equal(ledger.opportunities.length, 0); assert.equal(ledger.ledger_standing, 'NO_ACTION'); assert.equal(ledger.canonical_effect, false); });
