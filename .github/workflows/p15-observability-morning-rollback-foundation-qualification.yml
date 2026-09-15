@@ -6,9 +6,10 @@ on:
       - 'control-gateway/python/a01_morning_receipt.py'
       - 'tests/test_a01_morning_receipt.py'
       - 'control-gateway/test/a01-morning-receipt.test.js'
+      - 'control-gateway/windows/run-a01-morning-receipt.ps1'
+      - 'control-gateway/windows/install-a01-morning-receipt-task.ps1'
       - 'governance/ROLLBACK-PROCEDURE-001.md'
       - 'governance/contracts/P15-FOUNDATION-CONTRACT-001.md'
-      - '.github/workflows/p15-a01-morning-receipt.yml'
       - '.github/workflows/p15-observability-morning-rollback-foundation-qualification.yml'
       - 'governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json'
       - 'governance/CURRENT-AUTHORITY.json'
@@ -18,9 +19,10 @@ on:
       - 'control-gateway/python/a01_morning_receipt.py'
       - 'tests/test_a01_morning_receipt.py'
       - 'control-gateway/test/a01-morning-receipt.test.js'
+      - 'control-gateway/windows/run-a01-morning-receipt.ps1'
+      - 'control-gateway/windows/install-a01-morning-receipt-task.ps1'
       - 'governance/ROLLBACK-PROCEDURE-001.md'
       - 'governance/contracts/P15-FOUNDATION-CONTRACT-001.md'
-      - '.github/workflows/p15-a01-morning-receipt.yml'
       - '.github/workflows/p15-observability-morning-rollback-foundation-qualification.yml'
       - 'governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json'
       - 'governance/CURRENT-AUTHORITY.json'
@@ -74,7 +76,7 @@ jobs:
           PYTHONPATH: ${{ github.workspace }}/control-gateway/python:${{ github.workspace }}
         run: python tests/test_a01_github_ingress.py
 
-      - name: Assert P15 authority, schedule, rollback and predecessor preservation
+      - name: Assert P15 authority, local schedule, rollback and predecessor preservation
         shell: bash
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha || '' }}
@@ -91,7 +93,8 @@ jobs:
           const bridge = fs.readFileSync('control-gateway/test/a01-morning-receipt.test.js', 'utf8');
           const rollback = fs.readFileSync('governance/ROLLBACK-PROCEDURE-001.md', 'utf8');
           const contract = fs.readFileSync('governance/contracts/P15-FOUNDATION-CONTRACT-001.md', 'utf8');
-          const schedule = fs.readFileSync('.github/workflows/p15-a01-morning-receipt.yml', 'utf8');
+          const runner = fs.readFileSync('control-gateway/windows/run-a01-morning-receipt.ps1', 'utf8');
+          const installer = fs.readFileSync('control-gateway/windows/install-a01-morning-receipt-task.ps1', 'utf8');
           const p15 = crosswalk.platform_requirements.find(x => x.platform_id === 'P15');
           if (!p15 || p15.implementation !== 'control-gateway/python/a01_morning_receipt.py') throw new Error('P15_CANONICAL_IMPLEMENTATION_POINTER_INVALID');
           if (authority.morning_receipt !== p15.implementation) throw new Error('P15_CURRENT_AUTHORITY_POINTER_INVALID');
@@ -106,8 +109,9 @@ jobs:
           if (!tests.includes('test_13_execution_worker_failure_is_observed_when_worker_table_exists')) throw new Error('P15_WORKER_FAILURE_TEST_MISSING');
           if (!tests.includes('test_14_decisions_lead_and_receipt_stays_one_scroll_with_20_completions')) throw new Error('P15_GLANCEABILITY_TEST_MISSING');
           if (!bridge.includes('Ran 16 tests')) throw new Error('P15_A01_DISCOVERY_BRIDGE_MISSING');
-          if (!schedule.includes("cron: '15 12 * * *'") || !schedule.includes('self-hosted, Windows, X64')) throw new Error('P15_MORNING_SCHEDULE_INVALID');
-          if (!schedule.includes('A01_SUPERVISOR_DB') || !schedule.includes('upload-artifact')) throw new Error('P15_MORNING_DELIVERY_INCOMPLETE');
+          if (!runner.includes('python -m a01_morning_receipt') || !runner.includes('--out $receiptPath') || !runner.includes('exit $receiptExit')) throw new Error('P15_LOCAL_RUNNER_INVALID');
+          if (!installer.includes("LocalTime = '07:15'") || !installer.includes('New-ScheduledTaskTrigger -Daily') || !installer.includes("-UserId 'SYSTEM'") || !installer.includes('Register-ScheduledTask')) throw new Error('P15_LOCAL_SCHEDULE_INVALID');
+          if (fs.existsSync('.github/workflows/p15-a01-morning-receipt.yml')) throw new Error('P15_UNGOVERNED_GITHUB_A01_SCHEDULE_PRESENT');
           const staleIngressCommand = /(?:^|\n)\s*python\s+-m\s+a01_github_ingress[^\n]*(?:--halt|--status)\b/m.test(rollback);
           const staleServiceDryRun = /(?:^|\n)\s*python\s+-m\s+a01_ingress_service[^\n]*--dry-run\b/m.test(rollback);
           if (staleIngressCommand || staleServiceDryRun) throw new Error('P15_ROLLBACK_STALE_RUNTIME_INTERFACE_PRESENT');
@@ -154,7 +158,9 @@ jobs:
               'p11_budget_observed': True,
               'decisions_first': True,
               'one_scroll_guard': True,
-              'morning_schedule_utc': '15 12 * * *',
+              'morning_schedule_owner': 'WINDOWS_TASK_SCHEDULER_LOCAL_A01',
+              'morning_schedule_local': '07:15',
+              'github_is_qualification_and_evidence_only': True,
               'rollback_uses_current_p12_kill_switch': True,
               'rollback_uses_sqlite_backup_api': True,
               'rollback_preserves_leases_fences_and_evidence': True,
@@ -183,7 +189,7 @@ jobs:
       subject_sha: ${{ github.event.pull_request.head.sha || github.sha }}
       origin_ref: ${{ github.head_ref || github.ref }}
       resume_on_pass: 'Adjudicate P15 exact-SHA morning observability and rollback evidence and continue Foundation closure.'
-      resume_on_failure: 'Preserve P15 evidence and repair only the failing read-only observability, schedule, or rollback boundary.'
+      resume_on_failure: 'Preserve P15 evidence and repair only the failing read-only observability, local schedule, or rollback boundary.'
       notification_target: foundation-p15
       execution_context: normal
       qualifier_timeout_minutes: 28
