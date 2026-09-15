@@ -90,7 +90,7 @@ class ExecutionWorkerTests(unittest.TestCase):
         return h, c
 
     def test_protocol_is_frozen(self):
-        self.assertEqual(EXECUTION_WORKER_PROTOCOL, "control-gateway.a01-execution-worker.v1")
+        self.assertEqual(EXECUTION_WORKER_PROTOCOL, "control-gateway.a01-execution-worker.v2")
 
     def test_worker_consumes_authorized_claim_records_result_and_releases_lane(self):
         self.enqueue("A", "LANE-A")
