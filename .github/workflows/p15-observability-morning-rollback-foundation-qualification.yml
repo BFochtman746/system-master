@@ -8,11 +8,10 @@ on:
       - 'control-gateway/test/a01-morning-receipt.test.js'
       - 'governance/ROLLBACK-PROCEDURE-001.md'
       - 'governance/contracts/P15-FOUNDATION-CONTRACT-001.md'
+      - '.github/workflows/p15-a01-morning-receipt.yml'
       - '.github/workflows/p15-observability-morning-rollback-foundation-qualification.yml'
       - 'governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json'
       - 'governance/CURRENT-AUTHORITY.json'
-      - 'qualification/a01/a01-policy.json'
-      - 'qualification/a01/registry.json'
   push:
     branches: [main]
     paths:
@@ -21,11 +20,10 @@ on:
       - 'control-gateway/test/a01-morning-receipt.test.js'
       - 'governance/ROLLBACK-PROCEDURE-001.md'
       - 'governance/contracts/P15-FOUNDATION-CONTRACT-001.md'
+      - '.github/workflows/p15-a01-morning-receipt.yml'
       - '.github/workflows/p15-observability-morning-rollback-foundation-qualification.yml'
       - 'governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json'
       - 'governance/CURRENT-AUTHORITY.json'
-      - 'qualification/a01/a01-policy.json'
-      - 'qualification/a01/registry.json'
   workflow_dispatch:
 
 permissions:
@@ -35,14 +33,14 @@ permissions:
 jobs:
   prequalify:
     name: Prequalify P15 read-only morning observability and rollback safety
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - name: Checkout exact P15 subject
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
-          fetch-depth: 1
+          fetch-depth: 0
           persist-credentials: false
 
       - name: Assert Python runtime and syntax
@@ -70,8 +68,17 @@ jobs:
           PYTHONPATH: ${{ github.workspace }}/control-gateway/python:${{ github.workspace }}
         run: node --test control-gateway/test/a01-morning-receipt.test.js
 
-      - name: Assert P15 authority, read-only boundary, and rollback contract
+      - name: Reprove P12 ingress authority boundary
         shell: bash
+        env:
+          PYTHONPATH: ${{ github.workspace }}/control-gateway/python:${{ github.workspace }}
+        run: python tests/test_a01_github_ingress.py
+
+      - name: Assert P15 authority, schedule, rollback and predecessor preservation
+        shell: bash
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || '' }}
+          SUBJECT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
           set -euo pipefail
           node - <<'NODE'
@@ -84,29 +91,49 @@ jobs:
           const bridge = fs.readFileSync('control-gateway/test/a01-morning-receipt.test.js', 'utf8');
           const rollback = fs.readFileSync('governance/ROLLBACK-PROCEDURE-001.md', 'utf8');
           const contract = fs.readFileSync('governance/contracts/P15-FOUNDATION-CONTRACT-001.md', 'utf8');
+          const schedule = fs.readFileSync('.github/workflows/p15-a01-morning-receipt.yml', 'utf8');
           const p15 = crosswalk.platform_requirements.find(x => x.platform_id === 'P15');
           if (!p15 || p15.implementation !== 'control-gateway/python/a01_morning_receipt.py') throw new Error('P15_CANONICAL_IMPLEMENTATION_POINTER_INVALID');
           if (authority.morning_receipt !== p15.implementation) throw new Error('P15_CURRENT_AUTHORITY_POINTER_INVALID');
           const live = registry.qualifications['SECOND-SHIFT-SUPERVISOR-V2-A01-STRESS'];
-          if (!live || live.workstream_id !== 'SECOND-SHIFT-CONTROL-GATEWAY' || live.source !== 'subject') throw new Error('P15_PREDECESSOR_QUALIFIER_REGISTRATION_INVALID');
+          if (!live || live.workstream_id !== 'SECOND-SHIFT-CONTROL-GATEWAY' || live.gate_class !== 'consolidated' || live.source !== 'subject') throw new Error('P15_PREDECESSOR_QUALIFIER_REGISTRATION_INVALID');
           if (!receipt.includes('mode=ro') || !receipt.includes('PRAGMA query_only=ON')) throw new Error('P15_READ_ONLY_CONNECTION_MISSING');
-          if (!receipt.includes('A01_MORNING_RECEIPT_UNREADABLE') || !receipt.includes('return 2')) throw new Error('P15_UNREADABLE_FAIL_CLOSED_MISSING');
+          if (!receipt.includes('REQUIRED_P10_TABLES') || !receipt.includes('missing required P10 supervisor table')) throw new Error('P15_REQUIRED_SCHEMA_FAIL_CLOSED_MISSING');
+          if (!receipt.includes('night_execution_results') || !receipt.includes('execution_failures')) throw new Error('P15_EXECUTION_WORKER_OBSERVABILITY_MISSING');
+          if (!receipt.includes('DATABASE_UNREADABLE') || !receipt.includes('return 2')) throw new Error('P15_UNREADABLE_FAIL_CLOSED_MISSING');
           if (!receipt.includes('Nothing ran') || !receipt.includes('attention_required')) throw new Error('P15_EMPTY_OR_ATTENTION_SEMANTICS_MISSING');
-          if (!tests.includes('test_04_connection_refuses_writes') || !tests.includes('test_03_missing_database_raises_instead_of_reporting_clean')) throw new Error('P15_READ_ONLY_FAIL_CLOSED_TESTS_MISSING');
-          if (!tests.includes('test_12_decisions_lead_and_receipt_stays_one_scroll_with_20_completions')) throw new Error('P15_GLANCEABILITY_TEST_MISSING');
-          if (!bridge.includes('Ran 13 tests')) throw new Error('P15_A01_DISCOVERY_BRIDGE_MISSING');
-          if (!rollback.includes('--kill') || !rollback.includes('--resume') || rollback.includes('--halt') || rollback.includes('--status')) throw new Error('P15_ROLLBACK_INGRESS_INTERFACE_STALE');
-          if (!rollback.includes('a01_morning_receipt') || !rollback.includes('foundation-closure-matrix.js --summary')) throw new Error('P15_ROLLBACK_VERIFICATION_INCOMPLETE');
-          if (!contract.includes('SYSTEM-MASTER-CAPABILITY-CROSSWALK-003') || !contract.includes('13 tests')) throw new Error('P15_CONTRACT_NOT_CURRENT');
+          if (!tests.includes('test_04_connection_refuses_writes') || !tests.includes('test_05_readable_database_missing_core_supervisor_schema_fails_closed')) throw new Error('P15_READ_ONLY_FAIL_CLOSED_TESTS_MISSING');
+          if (!tests.includes('test_13_execution_worker_failure_is_observed_when_worker_table_exists')) throw new Error('P15_WORKER_FAILURE_TEST_MISSING');
+          if (!tests.includes('test_14_decisions_lead_and_receipt_stays_one_scroll_with_20_completions')) throw new Error('P15_GLANCEABILITY_TEST_MISSING');
+          if (!bridge.includes('Ran 16 tests')) throw new Error('P15_A01_DISCOVERY_BRIDGE_MISSING');
+          if (!schedule.includes("cron: '15 12 * * *'") || !schedule.includes('self-hosted, Windows, X64')) throw new Error('P15_MORNING_SCHEDULE_INVALID');
+          if (!schedule.includes('A01_SUPERVISOR_DB') || !schedule.includes('upload-artifact')) throw new Error('P15_MORNING_DELIVERY_INCOMPLETE');
+          if (rollback.includes('--halt') || rollback.includes('--status') || rollback.includes('--dry-run')) throw new Error('P15_ROLLBACK_STALE_RUNTIME_INTERFACE_PRESENT');
+          if (!rollback.includes('--kill') || !rollback.includes('--resume')) throw new Error('P15_ROLLBACK_CURRENT_P12_INTERFACE_MISSING');
+          if (!rollback.includes("SQLite's backup API") || !rollback.includes('all five')) throw new Error('P15_ROLLBACK_DURABILITY_OR_VERIFICATION_MISSING');
+          if (!contract.includes('SYSTEM-MASTER-CAPABILITY-CROSSWALK-003') || !contract.includes('16 tests')) throw new Error('P15_CONTRACT_NOT_CURRENT');
           console.log('P15_HOSTED_PREQUALIFICATION=PASS');
           NODE
+          if [[ -n "$BASE_SHA" ]]; then
+            git diff --name-only "$BASE_SHA" "$SUBJECT_SHA" > /tmp/p15-changed.txt
+            for protected in \
+              control-gateway/python/a01_github_ingress.py \
+              control-gateway/python/a01_night_scheduler.py \
+              .github/scripts/a01-second-shift-supervisor-v2-qualify.js \
+              qualification/a01/registry.json \
+              qualification/a01/a01-policy.json; do
+              if grep -Fxq "$protected" /tmp/p15-changed.txt; then
+                echo "P15_PREDECESSOR_SUBJECT_MUTATED=$protected" >&2
+                exit 1
+              fi
+            done
+          fi
 
       - name: Emit hosted P15 evidence manifest
         shell: bash
         env:
           SUBJECT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
-          set -euo pipefail
           python - <<'PY'
           import json, os, pathlib
           out = {
@@ -115,15 +142,21 @@ jobs:
               'successful': True,
               'sqlite_read_only_uri': True,
               'query_only_guard': True,
+              'required_p10_schema_fail_closed': True,
+              'optional_extension_degradation_explicit': True,
+              'execution_worker_failures_observed': True,
               'missing_database_fail_closed_exit_2': True,
               'attention_exit_1': True,
               'clean_exit_0': True,
               'p12_session_rollover_shared': True,
-              'p10_p11_state_observed': True,
+              'p11_budget_observed': True,
               'decisions_first': True,
               'one_scroll_guard': True,
+              'morning_schedule_utc': '15 12 * * *',
               'rollback_uses_current_p12_kill_switch': True,
+              'rollback_uses_sqlite_backup_api': True,
               'rollback_preserves_leases_fences_and_evidence': True,
+              'predecessor_subjects_unchanged': True,
               'a01_discovery_bridge': 'control-gateway/test/a01-morning-receipt.test.js',
           }
           pathlib.Path('.p15-observability-foundation.json').write_text(json.dumps(out, indent=2) + '\n', encoding='utf-8')
@@ -148,7 +181,7 @@ jobs:
       subject_sha: ${{ github.event.pull_request.head.sha || github.sha }}
       origin_ref: ${{ github.head_ref || github.ref }}
       resume_on_pass: 'Adjudicate P15 exact-SHA morning observability and rollback evidence and continue Foundation closure.'
-      resume_on_failure: 'Preserve P15 evidence and repair only the failing read-only observability or rollback boundary.'
+      resume_on_failure: 'Preserve P15 evidence and repair only the failing read-only observability, schedule, or rollback boundary.'
       notification_target: foundation-p15
       execution_context: normal
       qualifier_timeout_minutes: 28

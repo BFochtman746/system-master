@@ -30,6 +30,13 @@ function runPython(args) {
 test('P15 morning receipt is read-only, fail-closed, and one-scroll observable', () => {
   const result = runPython([path.join('tests', 'test_a01_morning_receipt.py')]);
   assert.equal(result.status, 0, `P15 Python morning receipt suite failed with exit ${result.status}`);
-  assert.match(result.stderr, /Ran 13 tests/);
+  assert.match(result.stderr, /Ran 16 tests/);
   assert.match(result.stderr, /OK/);
+});
+
+test('P15 missing supervisor database never reports a clean morning', () => {
+  const missing = path.join(process.env.RUNNER_TEMP || process.env.TEMP || ROOT, `p15-missing-${process.pid}.db`);
+  const result = runPython(['-m', 'a01_morning_receipt', '--db', missing, '--json']);
+  assert.equal(result.status, 2);
+  assert.match(result.stdout, /DATABASE_UNREADABLE/);
 });

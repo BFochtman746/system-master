@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import contextlib
 import datetime as dt
+import io
+import json
 import sqlite3
 import sys
 import tempfile
@@ -11,9 +14,17 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "control-gateway" / "python"))
 
-from a01_morning_receipt import collect, connect_read_only, render, session_date, session_start  # noqa: E402
+from a01_morning_receipt import (  # noqa: E402
+    MorningReceiptError,
+    collect,
+    connect_read_only,
+    main,
+    render,
+    session_date,
+    session_start,
+)
 from a01_night_scheduler import A01NightScheduler  # noqa: E402
-from tools.second_shift_supervisor_v2 import SupervisorStore  # noqa: E402
+from tools.second_shift_supervisor_v2 import SupervisorStore, iso  # noqa: E402
 
 UTC = dt.timezone.utc
 NOW = dt.datetime(2026, 9, 15, 10, 0, tzinfo=UTC)  # 06:00 America/New_York
@@ -80,14 +91,20 @@ class MorningReceiptTests(unittest.TestCase):
                     ("BOOK", "SYSTEM_MASTER/BOOK", "book/control-v1", HEAD, "IDLE", "2026-09-15T10:00:00Z"),
                 )
 
-    def test_05_truly_empty_night_is_explicit_not_false_success(self):
+    def test_05_readable_database_missing_core_supervisor_schema_fails_closed(self):
+        incomplete = self.root / "incomplete.sqlite"
+        sqlite3.connect(incomplete).close()
+        with self.assertRaises(MorningReceiptError):
+            collect(incomplete, now=NOW, state_dir=self.state_dir)
+
+    def test_06_truly_empty_night_is_explicit_not_false_success(self):
         report = self.report()
         self.assertTrue(report["nothing_ran"])
         text = render(report)
         self.assertIn("Nothing ran", text)
         self.assertIn("Check ingress/admission state", text)
 
-    def test_06_completed_claim_is_counted_without_attention(self):
+    def test_07_completed_claim_is_counted_without_attention(self):
         claim = self.claim("complete")
         self.store.terminal(claim.lease_id, claim.fencing_token, "COMPLETED", {"result": "PASS"}, now=NOW - dt.timedelta(minutes=1))
         report = self.report()
@@ -95,7 +112,7 @@ class MorningReceiptTests(unittest.TestCase):
         self.assertFalse(report["attention_required"])
         self.assertEqual(report["exit_code"], 0)
 
-    def test_07_blocked_claim_requires_attention(self):
+    def test_08_blocked_claim_requires_attention(self):
         claim = self.claim("blocked")
         self.store.terminal(claim.lease_id, claim.fencing_token, "BLOCKED", {"reason": "TEST"}, now=NOW - dt.timedelta(minutes=1))
         report = self.report()
@@ -103,13 +120,13 @@ class MorningReceiptTests(unittest.TestCase):
         self.assertTrue(report["attention_required"])
         self.assertEqual(report["exit_code"], 1)
 
-    def test_08_open_claim_requires_attention(self):
+    def test_09_open_claim_requires_attention(self):
         self.claim("open")
         report = self.report()
         self.assertEqual(report["counts"]["open_claims"], 1)
         self.assertIn("still holding a lease", " ".join(report["decisions"]))
 
-    def test_09_open_circuit_requires_attention(self):
+    def test_10_open_circuit_requires_attention(self):
         self.register()
         self.store.conn.execute(
             "INSERT INTO circuits(dependency_key,lane,state,failure_count,retry_budget,opened_at,next_probe_at,updated_at) VALUES(?,?,?,?,?,?,?,?)",
@@ -119,7 +136,7 @@ class MorningReceiptTests(unittest.TestCase):
         self.assertEqual(report["counts"]["open_circuits"], 1)
         self.assertTrue(report["attention_required"])
 
-    def test_10_retry_wait_dispatch_is_reported_stalled(self):
+    def test_11_retry_wait_dispatch_is_reported_stalled(self):
         claim = self.claim("retry")
         self.store.conn.execute(
             "UPDATE dispatch_outbox SET state='RETRY_WAIT',last_error='network',next_attempt_at=? WHERE dispatch_id=?",
@@ -129,7 +146,7 @@ class MorningReceiptTests(unittest.TestCase):
         self.assertEqual(report["counts"]["stalled_dispatches"], 1)
         self.assertEqual(report["stalled_dispatches"][0]["last_error"], "network")
 
-    def test_11_scheduler_queue_and_durable_budget_are_observed(self):
+    def test_12_scheduler_queue_and_durable_budget_are_observed(self):
         A01NightScheduler(self.store)
         self.store.conn.execute(
             "INSERT INTO night_scheduler_night_budget(night_key,max_slots,used_slots,created_at,updated_at) VALUES(?,?,?,?,?)",
@@ -141,10 +158,30 @@ class MorningReceiptTests(unittest.TestCase):
         )
         report = self.report()
         self.assertEqual(report["budget"]["used_slots"], 3)
+        self.assertEqual(report["budget"]["remaining_slots"], 5)
         self.assertEqual(report["counts"]["scheduler_attention"], 1)
         self.assertTrue(report["attention_required"])
 
-    def test_12_decisions_lead_and_receipt_stays_one_scroll_with_20_completions(self):
+    def test_13_execution_worker_failure_is_observed_when_worker_table_exists(self):
+        claim = self.claim("worker")
+        self.store.conn.execute(
+            """CREATE TABLE night_execution_results(
+              dispatch_id TEXT PRIMARY KEY, lease_id TEXT, lane TEXT, executor_kind TEXT, state TEXT,
+              terminal_state TEXT, attempt_count INTEGER, started_at TEXT, finished_at TEXT, updated_at TEXT,
+              error_class TEXT, error_message TEXT)"""
+        )
+        self.store.conn.execute(
+            "INSERT INTO night_execution_results VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",
+            (claim.dispatch_id, claim.lease_id, "CORE", "A01_CONTROL_PLANE_QUALIFICATION", "FAILED", "BLOCKED", 1,
+             iso(NOW - dt.timedelta(minutes=3)), iso(NOW - dt.timedelta(minutes=1)), iso(NOW - dt.timedelta(minutes=1)),
+             "SyntheticFailure", "boom"),
+        )
+        report = self.report()
+        self.assertEqual(report["counts"]["execution_failures"], 1)
+        self.assertEqual(report["execution_failures"][0]["error_message"], "boom")
+        self.assertTrue(report["attention_required"])
+
+    def test_14_decisions_lead_and_receipt_stays_one_scroll_with_20_completions(self):
         self.register()
         base = NOW - dt.timedelta(minutes=40)
         for i in range(20):
@@ -164,12 +201,26 @@ class MorningReceiptTests(unittest.TestCase):
         self.assertLess(text.index("## Decisions"), text.index("## Completed"))
         self.assertLessEqual(len(text.splitlines()), 80)
 
-    def test_13_missing_optional_scheduler_tables_degrades_cleanly(self):
+    def test_15_missing_optional_scheduler_and_worker_tables_are_named_degradations(self):
         self.register()
         report = self.report()
         self.assertEqual(report["scheduler_queue"], [])
         self.assertIsNone(report["budget"])
-        self.assertIn("No durable scheduler budget row", render(report))
+        self.assertEqual(report["execution_failures"], [])
+        self.assertIn("MISSING_OPTIONAL_TABLE:night_scheduler_queue", report["degraded_sections"])
+        self.assertIn("MISSING_OPTIONAL_TABLE:night_execution_results", report["degraded_sections"])
+        self.assertIn("Degraded optional sections", render(report))
+
+    def test_16_cli_exit_codes_json_and_output_file(self):
+        output = self.root / "receipt.json"
+        with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+            self.assertEqual(main(["--db", str(self.db), "--state-dir", str(self.state_dir), "--json", "--out", str(output)]), 0)
+        saved = json.loads(output.read_text(encoding="utf-8"))
+        self.assertTrue(saved["read_only"])
+        self.claim("cli-attention")
+        with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+            self.assertEqual(main(["--db", str(self.db), "--state-dir", str(self.state_dir), "--json"]), 1)
+            self.assertEqual(main(["--db", str(self.root / "missing.sqlite"), "--state-dir", str(self.state_dir), "--json"]), 2)
 
 
 if __name__ == "__main__":
