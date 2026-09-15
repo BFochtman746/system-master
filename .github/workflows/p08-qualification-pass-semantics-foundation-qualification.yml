@@ -119,11 +119,14 @@ jobs:
           ADMISSION_STATE: ${{ needs.live_a01.outputs.admission_state }}
           CONTROL_PLANE_SHA: ${{ needs.live_a01.outputs.control_plane_sha }}
           EXPECTED_SUBJECT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          EXPECTED_CONTROL_PLANE_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
           test "$LIVE_JOB_RESULT" = "success"
           test "$ADMISSION_STATE" = "ADMITTED"
           test "$RESULT_CLASS" = "PASS"
           test "$PROMOTION_AUTHORIZED" = "true"
-          test "${CONTROL_PLANE_SHA,,}" = "${EXPECTED_SUBJECT_SHA,,}"
+          [[ "$EXPECTED_SUBJECT_SHA" =~ ^[0-9a-fA-F]{40}$ ]]
+          [[ "$CONTROL_PLANE_SHA" =~ ^[0-9a-fA-F]{40}$ ]]
+          test "${CONTROL_PLANE_SHA,,}" = "${EXPECTED_CONTROL_PLANE_SHA,,}"
           printf 'P08_LIVE_A01=PASS\nP08_RESULT_CLASS=%s\nP08_PROMOTION_AUTHORIZED=%s\nP08_SUBJECT_SHA=%s\nP08_CONTROL_PLANE_SHA=%s\n' "$RESULT_CLASS" "$PROMOTION_AUTHORIZED" "$EXPECTED_SUBJECT_SHA" "$CONTROL_PLANE_SHA"
