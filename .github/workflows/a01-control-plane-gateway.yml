@@ -46,18 +46,18 @@ on:
         description: Authorized continuation after failure
         required: true
       execution_context:
-        description: Normal or centrally scheduled overnight execution
+        description: Registered execution context
         required: true
         default: normal
         type: choice
-        options: [normal, overnight]
+        options: [normal, recovery, repair, overnight]
       repair_attempt:
         description: Product repair attempts already consumed for this failure lineage
         required: false
         default: 0
         type: number
       max_repair_attempts:
-        description: Maximum bounded product repair attempts for this lineage, 0-2
+        description: Maximum bounded product repair attempts for this lineage
         required: false
         default: 1
         type: number
