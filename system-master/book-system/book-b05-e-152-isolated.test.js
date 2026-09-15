@@ -37,6 +37,22 @@ function selectorFor(caseId, group) {
   return `^${group.selector_prefix}${caseId.slice(1)}\\b`;
 }
 
+function childDiagnostic(caseId, group, selector, result) {
+  return [
+    `case_id=${caseId}`,
+    `source=${group.source}`,
+    `selector=${selector}`,
+    `status=${String(result.status)}`,
+    `signal=${String(result.signal)}`,
+    `spawn_error=${result.error ? result.error.stack || result.error.message || String(result.error) : 'none'}`,
+    '--- child stdout ---',
+    result.stdout || '',
+    '--- child stderr ---',
+    result.stderr || '',
+    '--- end child diagnostic ---'
+  ].join('\n');
+}
+
 assert.equal(manifest.total, 152);
 assert.equal(manifest.fresh_execution_required, true);
 assert.equal(manifest.historical_pass_transfer, 0);
@@ -58,9 +74,10 @@ for (const caseId of EXPECTED) {
       maxBuffer: 16 * 1024 * 1024
     });
     const output = `${result.stdout || ''}\n${result.stderr || ''}`;
-    assert.equal(result.status, 0, `${caseId} child execution failed\n${output}`);
-    assert.match(output, /# pass 1\b/, `${caseId} did not execute exactly one passing selected case\n${output}`);
-    assert.match(output, /# fail 0\b/, `${caseId} child execution reported failure\n${output}`);
-    assert.match(output, /# cancelled 0\b/, `${caseId} child execution cancelled\n${output}`);
+    const diagnostic = childDiagnostic(caseId, group, selector, result);
+    assert.equal(result.status, 0, `${caseId} child execution failed\n${diagnostic}`);
+    assert.match(output, /# pass 1\b/, `${caseId} did not execute exactly one passing selected case\n${diagnostic}`);
+    assert.match(output, /# fail 0\b/, `${caseId} child execution reported failure\n${diagnostic}`);
+    assert.match(output, /# cancelled 0\b/, `${caseId} child execution cancelled\n${diagnostic}`);
   });
 }
