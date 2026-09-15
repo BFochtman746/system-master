@@ -8,6 +8,7 @@ on:
       - 'system-master/book-system/book-craft-intelligence-v1.js'
       - 'system-master/book-system/book-literary-opportunity-ledger-v1.js'
       - 'system-master/book-system/book-literary-d3.test.js'
+      - 'system-master/book-system/book-literary-d3-hardening.test.js'
       - '.github/workflows/book-b05-d3-craft-intelligence-opportunity-qualification.yml'
   pull_request:
     branches:
@@ -17,6 +18,7 @@ on:
       - 'system-master/book-system/book-craft-intelligence-v1.js'
       - 'system-master/book-system/book-literary-opportunity-ledger-v1.js'
       - 'system-master/book-system/book-literary-d3.test.js'
+      - 'system-master/book-system/book-literary-d3-hardening.test.js'
       - '.github/workflows/book-b05-d3-craft-intelligence-opportunity-qualification.yml'
 
 permissions:
@@ -100,9 +102,9 @@ jobs:
         shell: bash
         run: node --test system-master/book-system/book-literary-d2.test.js system-master/book-system/book-literary-d2-hardening.test.js | tee b05-d2.log
 
-      - name: B05 D3 K01-K20 O01-O24 focused qualification
+      - name: B05 D3 K01-K20 O01-O24 focused plus adversarial hardening
         shell: bash
-        run: node --test system-master/book-system/book-literary-d3.test.js | tee b05-d3.log
+        run: node --test system-master/book-system/book-literary-d3.test.js system-master/book-system/book-literary-d3-hardening.test.js | tee b05-d3.log
 
       - name: Runtime import smoke
         shell: bash
@@ -121,6 +123,7 @@ jobs:
             echo "workflow=book-b05-d3-craft-intelligence-opportunity-qualification"
             echo "focused_cases=44"
             echo "focused_groups=K20,O24"
+            echo "hardening_cases=10"
             echo "b05_e_denominator_reserved=152"
             echo "denominator_shrinkage=false"
             echo "historical_pass_transfer=0"
@@ -128,6 +131,7 @@ jobs:
             sha256sum system-master/book-system/book-craft-intelligence-v1.js
             sha256sum system-master/book-system/book-literary-opportunity-ledger-v1.js
             sha256sum system-master/book-system/book-literary-d3.test.js
+            sha256sum system-master/book-system/book-literary-d3-hardening.test.js
             sha256sum qualification/book-system/reconstruction/BOOK-RECONSTRUCTION-B05-C-DESIGN-LOCK-001.md
             sha256sum qualification/book-system/reconstruction/BOOK-RECONSTRUCTION-B05-C-QUALIFICATION-DENOMINATOR-001.csv
             sha256sum qualification/book-system/reconstruction/BOOK-RECONSTRUCTION-B05-D2-CLOSURE-RECEIPT-001.md
