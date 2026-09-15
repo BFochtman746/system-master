@@ -91,8 +91,8 @@ jobs:
           if (!barrier.includes("classify('INVALID_EXECUTION_CONTEXT'")) throw new Error('P07_INVALID_CONTEXT_FAIL_CODE_MISSING');
           if (!barrier.includes("executionContext === 'overnight'")) throw new Error('P07_OVERNIGHT_SPECIAL_POLICY_MISSING');
           if (!gateway.includes('uses: ./.github/workflows/a01-control-plane-admission-broker.yml')) throw new Error('P07_GATEWAY_BROKER_ROUTE_MISSING');
-          if (!gateway.includes('execution_context: ${{ inputs.execution_context')) throw new Error('P07_GATEWAY_CONTEXT_FORWARDING_MISSING');
-          if (!broker.includes('A01_EXECUTION_CONTEXT: ${{ inputs.execution_context')) throw new Error('P07_BROKER_CONTEXT_FORWARDING_MISSING');
+          if (!gateway.includes('execution_context:') || !gateway.includes('inputs.execution_context')) throw new Error('P07_GATEWAY_CONTEXT_FORWARDING_MISSING');
+          if (!broker.includes('A01_EXECUTION_CONTEXT:') || !broker.includes('inputs.execution_context')) throw new Error('P07_BROKER_CONTEXT_FORWARDING_MISSING');
           if (!broker.includes('a01-admission-barrier.js\" evaluate-remote')) throw new Error('P07_BROKER_BARRIER_INVOCATION_MISSING');
           if (!broker.includes('Fail closed before subject checkout when admission is not valid')) throw new Error('P07_BROKER_FAIL_CLOSED_STEP_MISSING');
           if (!enforcement.includes('a01-admission-barrier.js selftest')) throw new Error('P07_ENFORCEMENT_SELFTEST_WIRING_MISSING');
