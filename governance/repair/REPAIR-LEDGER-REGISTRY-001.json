@@ -1,6 +1,6 @@
 {
   "registry_id": "REPAIR-LEDGER-REGISTRY-001",
-  "effective_date": "2026-09-09",
+  "effective_date": "2026-09-15",
   "product_root": "SYSTEM_MASTER",
   "event_schema": "governance/repair/REPAIR-EVENT-SCHEMA-001.json",
   "event_root": "governance/repair/events",
@@ -11,7 +11,9 @@
     "Repair history is append-only. New events are added; earlier events are not rewritten to make current state cleaner.",
     "One transaction_id represents one failed-receipt lineage. A changed repaired subject remains in the same transaction lineage but always has a new exact SHA.",
     "TRANSACTION_OPENED is idempotent by transaction_id plus receipt_id; conflicting duplicate lineage fails closed.",
-    "Only REPAIRABLE_SUBJECT transactions may emit changed-SHA replacement tickets.",
+    "Only REPAIRABLE_SUBJECT transactions may emit changed-SHA replacement tickets or enter product repair finalization.",
+    "INFRA_FAILURE remains RETRYABLE_INFRA under shared A-01/Core ownership and may only emit the bounded same-SHA retry defined by the repair control; it never becomes changed-SHA product repair.",
+    "CONTROL_PLANE_FAILURE remains a Core control-plane owner route and never emits a product replacement ticket or changed-SHA product repair.",
     "A replacement ticket requires deterministic prequalification PASS on the exact replacement SHA and preserves qualification_id, workstream_id, root failed receipt and immediate failed-subject lineage.",
     "Every replacement A-01 invocation carries the existing repair transaction_id separately from the ordinary return ticket so rerun evidence cannot create a disconnected second repair transaction.",
     "An authoritative replacement A-01 PASS closes the existing transaction and preserves all prior failed-subject events; it never rewrites the original failure.",
@@ -21,6 +23,7 @@
     "Receipt-less rerun attempts may be recorded only for infrastructure/control-plane failures and must never be labeled as authoritative A-01 receipts.",
     "Repair events and owner inbox state are routing/control evidence only; only an authoritative A-01 receipt can supply A-01 PASS evidence.",
     "Human, author, private-data, native-platform and external-authority routes do not emit automated product replacement tickets.",
+    "P09 owns repair classification, per-lineage retry/repair budgets, exact ticket identity and durable lineage. P11 owns night-wide scheduling, claim authority and aggregate overnight dispatch budget; P09 repair tickets may not bypass P11 when execution_context is overnight.",
     "The System State Reconciler may derive current repair standing from event history, current ticket pointers and owner inbox projections."
   ]
 }
