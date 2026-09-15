@@ -1,0 +1,80 @@
+name: Control Gateway Native Command Ingress
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: read
+  actions: read
+  issues: read
+
+jobs:
+  validate-command:
+    name: Validate owner-authenticated control command
+    if: >-
+      github.actor == github.repository_owner &&
+      github.event.issue.author_association == 'OWNER' &&
+      startsWith(github.event.issue.title, '[CONTROL-GATEWAY-COMMAND] ')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      state_ref: ${{ steps.validate.outputs.state_ref }}
+      mutation_request_json: ${{ steps.validate.outputs.mutation_request_json }}
+      mutation_plan_json: ${{ steps.validate.outputs.mutation_plan_json }}
+    steps:
+      - name: Validate exact native command envelope
+        id: validate
+        shell: bash
+        env:
+          CONTROL_GATEWAY_COMMAND_BODY: ${{ github.event.issue.body }}
+          CONTROL_GATEWAY_ISSUE_TITLE: ${{ github.event.issue.title }}
+          CONTROL_GATEWAY_REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          command_file="${RUNNER_TEMP}/control-gateway-native-command.json"
+          printf '%s' "${CONTROL_GATEWAY_COMMAND_BODY}" > "${command_file}"
+
+          jq -e 'type == "object"' "${command_file}" >/dev/null
+          test "$(jq -c 'keys' "${command_file}")" = '["command_id","kind","mutation_plan","mutation_request","protocol_version","state_ref"]'
+          test "$(jq -r '.protocol_version // empty' "${command_file}")" = 'control-gateway.github-native-command.v1'
+          test "$(jq -r '.kind // empty' "${command_file}")" = 'PRODUCTION_MUTATION'
+          jq -e '.mutation_request | type == "object"' "${command_file}" >/dev/null
+          jq -e '.mutation_plan | type == "object"' "${command_file}" >/dev/null
+
+          command_id="$(jq -r '.command_id // empty' "${command_file}")"
+          state_ref="$(jq -r '.state_ref // empty' "${command_file}")"
+          request_id="$(jq -r '.mutation_request.mutation_id // empty' "${command_file}")"
+          plan_id="$(jq -r '.mutation_plan.mutation_id // empty' "${command_file}")"
+          request_repo="$(jq -r '.mutation_request.repository // empty' "${command_file}")"
+          plan_repo="$(jq -r '.mutation_plan.repository // empty' "${command_file}")"
+
+          [[ "${command_id}" =~ ^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$ ]]
+          [[ "${state_ref}" =~ ^[A-Za-z0-9][A-Za-z0-9._/-]{0,254}$ ]]
+          [[ "${state_ref}" != *'..'* ]]
+          [[ "${state_ref}" != *'//'* ]]
+          [[ "${state_ref}" != */ ]]
+
+          test "${CONTROL_GATEWAY_ISSUE_TITLE}" = "[CONTROL-GATEWAY-COMMAND] ${command_id}"
+          test "${request_id}" = "${command_id}"
+          test "${plan_id}" = "${command_id}"
+          test "${request_repo}" = "${CONTROL_GATEWAY_REPOSITORY}"
+          test "${plan_repo}" = "${CONTROL_GATEWAY_REPOSITORY}"
+
+          request_json="$(jq -c '.mutation_request' "${command_file}")"
+          plan_json="$(jq -c '.mutation_plan' "${command_file}")"
+
+          printf 'state_ref=%s\n' "${state_ref}" >> "${GITHUB_OUTPUT}"
+          printf 'mutation_request_json=%s\n' "${request_json}" >> "${GITHUB_OUTPUT}"
+          printf 'mutation_plan_json=%s\n' "${plan_json}" >> "${GITHUB_OUTPUT}"
+
+  execute-production-mutation:
+    name: Execute through receipt-consuming production writer
+    needs: validate-command
+    uses: ./.github/workflows/control-gateway-production-writer.yml
+    with:
+      state_ref: ${{ needs.validate-command.outputs.state_ref }}
+      mutation_request_json: ${{ needs.validate-command.outputs.mutation_request_json }}
+      mutation_plan_json: ${{ needs.validate-command.outputs.mutation_plan_json }}
+    secrets: inherit
