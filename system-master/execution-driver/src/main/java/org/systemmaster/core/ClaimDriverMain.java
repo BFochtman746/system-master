@@ -45,7 +45,7 @@ public final class ClaimDriverMain {
 
         ActionsDispatch actions = ActionsDispatch.fromEnvironment(ActionsDispatch.httpTransport());
         ActionsRunPoller poller = ActionsRunPoller.fromEnvironment(ActionsRunPoller.httpTransport());
-        GitHubClaimStateStore stateStore = GitHubClaimStateStore.fromEnvironment(GitHubClaimStateStore.httpTransport());
+        ControlGatewayClaimStateStore stateStore = ControlGatewayClaimStateStore.fromEnvironment(ControlGatewayClaimStateStore.httpTransport());
         stateStore.verifyStateRef();
 
         DurableDispatchCoordinator.Dispatch dispatch = new DurableDispatchCoordinator.Dispatch() {
