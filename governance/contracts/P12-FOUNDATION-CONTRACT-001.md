@@ -1,129 +1,169 @@
 # P12 — Foundation Contract 001
 
-**Owner** `SYSTEM_MASTER/CORE` · **Capability** P12 GitHub to A-01 ingress transport · **Effective** 2026-09-13
-**Authority** `governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-001.json`
+**Owner** `SYSTEM_MASTER/CORE` · **Capability** P12 GitHub to A-01 ingress transport · **Effective** 2026-09-15
+**Authority** `governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json`
 
 ## 1. Contract / interface
 
-`a01_github_ingress` reads the governance state of record from GitHub read-only, mints a
-local A-01 admission receipt, builds a frozen gateway handoff plus CG-009 coordination
-contract, and enqueues through the night scheduler.
+`control-gateway/python/a01_github_ingress.py` is the read-only GitHub-to-A-01 transport.
+Before this Foundation closure slice, Crosswalk 003 and `CURRENT-AUTHORITY-005` named this
+canonical implementation path but no file had ever existed at it. P12 is therefore a new
+bounded implementation of an already-declared platform requirement, not recovery of a
+prior implementation.
 
-- `Ingress.run_once(now, dry_run) -> IngressResult` — one pass.
-- `build_handoff(obligation, *, control_head, control_ref, not_before, not_after, execution_order, session_date, ...)`
-- `build_contract(handoff, *, graph_id, ...)`
-- `NightBudget`, `KillSwitch` — night-scoped ceilings and halt.
-- `a01_ingress_service` owns the `SupervisorStore` lifetime and binds the real scheduler.
+The module reads current governance state from GitHub, mints the frozen local A-01
+admission receipt expected by CG-008, builds the frozen gateway handoff plus CG-009
+coordination contract, and offers it to P11.
 
-Does not offer: any write to GitHub, scheduling decisions, claim selection, or execution.
-A-01 remains sole scheduling owner; GitHub remains `ADMISSION_TRANSPORT_EVIDENCE_ONLY`.
+- `Ingress.run_once(now, dry_run) -> IngressResult` — one bounded pass.
+- `build_handoff(...)` — exact CG-008 handoff plus admission receipt.
+- `build_contract(...)` — exact CG-009 coordination contract.
+- `GitHubSource` — read-only GitHub Contents transport. It exposes no write method.
+- `NightBudget` — durable, night-scoped P12 transport ceiling.
+- `KillSwitch` — durable local halt checked before the pass and before every item.
+- `a01_ingress_service.build_scheduler` — the only production wiring path; owns the
+  `SupervisorStore` lifetime and binds the real `A01NightScheduler`.
+
+P12 does **not** select or claim work. A-01 remains sole scheduling/claim owner and GitHub
+remains `ADMISSION_TRANSPORT_EVIDENCE_ONLY`.
 
 ## 2. Ingress routes
 
-1. **Scheduled task** (`schtasks /SC ONSTART`, `--daemon`) — the production route.
-   Admitting authority is the local A-01 receipt minted per delegation.
-2. **Operator CLI** (`--once`, `--dry-run`) — same admission path, manual trigger.
+1. **A-01 service** (`a01_ingress_service --once` or `--daemon`) — production route.
+   It reads GitHub and binds the real P11 scheduler against the local P10 store.
+2. **Wiring check** (`a01_ingress_service --check`) — constructs the real P10/P11 stack
+   without reading or writing GitHub.
+3. **Builder/dry-run CLI** (`a01_github_ingress`) — constructs with `scheduler=None` and
+   can only validate/build/report. It cannot queue or execute work.
 
-`a01_github_ingress.main()` constructs with `scheduler=None` and can only build and
-report. The single write path into the queue is `a01_ingress_service.build_scheduler`.
+The Windows Scheduled Task registration remains an operator deployment action; an example
+is preserved in the service module docstring rather than performed by repository code.
 
-## 3. Egress routes
+## 3. Source authority and selection boundary
 
-- **Into the night queue:** `A01NightScheduler.enqueue(handoff, contract)`. The only
-  state-changing egress.
-- **stdout:** one JSON object per line — `PASS`, `HALTED`, `BACKOFF`, `WINDOW_CLOSED`,
-  `WIRING_OK`, `WIRING_FAILED`. Scheduled tasks are read from log files, not terminals.
-- **Exit code:** 0 ok, 1 pass errors, 2 wiring failure.
+P12 reads the current authority pointer, its selected Second Shift registry, current work
+obligation registry, owner files and A-01 overnight policy. A pass fails closed when:
 
-No egress to GitHub in any mode.
+- the current authority id is not `CURRENT-AUTHORITY-005`;
+- Second Shift owner coverage and the obligation registry owner-head snapshot differ;
+- an owner file identity/control head differs from that current snapshot;
+- a delegation is not bound to its owner file's exact current control ref/head;
+- the referenced current obligation is missing, non-executable, or owned by another lane.
 
-## 4. Persistence and canonical writer
+Only source delegations already marked `READY` are transportable. `CANDIDATE` is **not**
+promoted by P12. That keeps readiness authority in the existing Second Shift governance
+layer.
 
-Two stores, each with exactly one writer.
+Source owner-file `priority` values are semantic strings, while the frozen CG-008 handoff
+requires numeric scheduler values. P12 therefore uses neutral values
+`execution_order = 0`, `priority = 100` and preserves the source semantic priority inside
+the immutable payload. It does not invent a cross-peer ranking. P11 remains responsible
+for ordering/claim authority after admission.
 
-- **Night queue** (`night_scheduler_queue` in the supervisor SQLite): the canonical writer
-  is `A01NightScheduler`, never this module. P12 supplies a validated handoff and the
-  scheduler decides. A refusal is recorded as `ENQUEUE_REFUSED` and never retried around.
-- **Kill switch file** (`<state>/NIGHT-HALT`): written only by `KillSwitch.engage`,
-  removed only by `KillSwitch.release`. No other component writes it.
+## 4. Egress routes
 
-`GitHubSource` has no write method. `test_github_source_exposes_no_write_method` asserts
-it never grows one — the read-only property is enforced by test, not by convention.
+- **Only state-changing egress:** `A01NightScheduler.enqueue(handoff, contract)`.
+- **stdout/service log:** structured JSON pass status and counts.
+- **exit code:** success only for clean/well-classified service results.
 
-## 5. Dependencies
+There is no GitHub write route, workflow-dispatch route, subprocess execution route, or
+external action route in `GitHubSource` or `Ingress`.
 
-- **P00–P02** governance state of record, read over the GitHub contents API.
-- **P10** supervisor store (lanes, leases, fencing).
-- **P11** night scheduler — the enqueue authority.
-- **P07** admission semantics, mirrored in the locally minted receipt.
-- Python 3.12 stdlib only. No packages.
+## 5. Persistence and canonical writers
 
-Crosses no boundary rule.
+Three durable stores have separate authority.
 
-## 6. Failure semantics
+1. **P11 queue / P10 supervisor SQLite** — canonical writers remain P11/P10. P12 never
+   inserts a claim, lease, dispatch row, coordination row, or scheduler queue row directly.
+2. **P12 night transport budget** — `<state>/a01-ingress-night-budget.json`, written only
+   by `NightBudget`. The write is temp-file + `fsync` + atomic replace. Distinct transport
+   identities consume slots permanently for that session; exact replay is idempotent.
+3. **Kill switch** — `<state>/NIGHT-HALT`, written/removed only by `KillSwitch`.
 
-**Fail-closed throughout. No partial enqueue exists** — a handoff either validates whole
-and is offered to the scheduler, or it is skipped and recorded.
+The P12 budget is intentionally conservative and separate from P11's authoritative claim
+budget. It bounds how many distinct identities P12 may offer; P11 independently bounds
+actual claims. Scheduler refusal does not refund a P12 slot.
 
-- GitHub unreachable or non-200 → `IngressError`, recorded in `result.errors`, nothing
-  enqueued, exit 1. Daemon backs off and retries; the budget still bounds the night.
-- Handoff or contract fails validation → that obligation is skipped as `BUILD_FAILED` and
-  the pass continues. One malformed obligation must not end the night.
-- Scheduler refuses → recorded as `ENQUEUE_REFUSED`, no retry. The scheduler is the
-  authority; arguing with it is how duplicates are born.
-- Budget exhausted → remaining obligations skipped as `NIGHT_BUDGET_EXHAUSTED`.
-- Kill switch engaged → pass halts. Re-checked before **every** item, so a mid-night halt
-  stops the next one.
+## 6. Identity and night semantics
 
-**Idempotency.** `delegation_id` is `digest(objective_id, control_head, session_date)`,
-truncated to 16 hex characters and prefixed `ING-`. Re-polling unchanged state within one
-night produces the identical id, which the scheduler treats as a no-op. The session date
-rolls at midday so a night spanning midnight is one night.
+`delegation_id` is derived from
+`digest({objective_id, control_head, session_date})`, truncated to 16 hex characters and
+prefixed `ING-`; the idempotency key uses the same full identity material.
 
-This is corrected behaviour: the first implementation derived identity from the poll
-instant, so every re-poll forked a new delegation. `test_identity_survives_a_moving_poll_instant`
-exists to keep that fixed.
+The session date rolls at **local noon in `America/New_York`**, so the evening kickoff and
+the following 00:00–07:00 execution window are one night. Re-polling unchanged authority
+within that session produces the same transport identity and consumes no additional P12
+budget slot. The next session gets a new identity and a new budget.
 
-## 7. Evidence target
+P12 derives `not_before`/`not_after` from the current A-01 overnight policy and refuses a
+policy with the wrong timezone, disabled overnight execution, or an invalid slot ceiling.
 
-- **Per pass:** the JSON lines on stdout, captured by the scheduled task log. Each `PASS`
-  line carries counts, skips with reasons, errors, and the budget snapshot.
-- **Per delegation:** the handoff and coordination contract persisted by P11 in
-  `night_scheduler_queue`, with `scheduler_digest`.
-- **Per night:** the P15 morning receipt, which reads the resulting claims and events.
+## 7. Failure semantics
 
-## 8. Acceptance target
+**Fail closed.** A malformed or stale item is never repaired by inventing authority.
 
+- GitHub read/JSON failure → `ERROR`; nothing is offered from an incomplete pass.
+- Owner coverage/head mismatch → pass `ERROR` before affected work can be enqueued.
+- Source state other than `READY` → `NOT_READY` skip.
+- Stale owner/control binding → `STALE_CONTROL_BINDING` skip.
+- Missing/non-executable current obligation → explicit skip.
+- Frozen handoff/coordination validation failure → `BUILD_FAILED` skip.
+- Missing production scheduler → error, never an implicit fallback writer.
+- P12 budget exhausted → `NIGHT_BUDGET_EXHAUSTED` skip.
+- P11 refusal → `ENQUEUE_REFUSED`; P12 does not retry around scheduler authority.
+- Kill switch → `HALTED`; rechecked before every item so a mid-pass halt stops the next
+  transport.
+- Active-session budget policy drift or malformed budget ledger → fail closed.
+
+## 8. Dependencies
+
+- **P00–P02** current governance and obligation state.
+- **P07** frozen admission-receipt semantics.
+- **P10** local supervisor store, via the service/P11 boundary only.
+- **P11** queue and exclusive scheduling/claim authority.
+- `qualification/a01/a01-policy.json` for timezone/window/slot ceiling.
+- Python 3.12 standard library only for P12 runtime.
+
+## 9. Evidence target and acceptance
+
+Hosted acceptance:
+
+```bash
+PYTHONPATH="$PWD/control-gateway/python:$PWD" \
+  python control-gateway/python/test_a01_github_ingress.py
+PYTHONPATH="$PWD/control-gateway/python:$PWD" \
+  python -m a01_ingress_service --check --db /tmp/p12.db --state-dir /tmp/p12-state
 ```
-cd control-gateway/python && PYTHONPATH="$PWD:$(cd ../.. && pwd)" \
-  python -m unittest test_a01_github_ingress
-```
 
-**PASS** when all 25 tests pass with zero skips. The suite is offline by construction —
-GitHub is a fake source, the scheduler a recording double — so it needs no token, no
-network, and no database. Runs as the `ingress-suite` CI job.
+The Python suite is offline: GitHub is a fake read-only source and queueing uses a
+recording scheduler except for the explicit real-wiring test. It proves frozen handoff and
+coordination validation, stable night identity, budget durability/reset/exhaustion,
+non-refund on refusal, kill-switch behavior, stale-control rejection, obligation/current
+head guards, no GitHub write surface, and real P11 wiring.
 
-Wiring acceptance: `python -m a01_ingress_service --check` reports
-`"scheduler": "A01NightScheduler"` against a real store.
+A-01 acceptance is reached without modifying the shared qualification registry: the new
+`control-gateway/test/a01-github-ingress.test.js` bridge is automatically discovered by
+the already-registered `SECOND-SHIFT-SUPERVISOR-V2-A01-STRESS` Control Gateway Node stage.
+Thus the exact P12 subject must execute the Python P12 suite and real service wiring on
+A-01 Windows while P07–P11 registry-bound receipts remain undisturbed.
 
-## 9. Authority boundary
+**PASS** requires hosted acceptance, exact-SHA A-01 PASS, immutable hosted/A-01 artifacts,
+a current P12 Foundation evidence receipt, Required Verification, and a census successor
+of P15.
 
-**Lane may decide alone (`agent`):** poll interval, backoff, log line wording, additional
-tests, internal refactoring that preserves the handoff shape.
+## 10. Authority boundary / remaining operational deployment
 
-**Requires the owner (`owner`):** changing the `delegation_id` identity rule; raising the
-default night budget; adding a GitHub write path of any kind; changing `execution_class`
-away from `OVERNIGHT`; altering the admission receipt shape; removing the kill switch
-check from the per-item loop.
+**Lane may decide alone (`agent`):** poll interval, backoff, log wording, additional
+negative tests, internal refactoring that preserves frozen contracts and current authority
+checks.
 
-The identity rule and the read-only property are the two things that must never change
-without a written decision. Both have already failed once in this module's short history.
+**Requires owner authority:** changing transport identity; raising the policy slot limit;
+adding any GitHub write path; transporting `CANDIDATE` as if READY; assigning semantic
+cross-peer scheduling priority; changing execution class away from `OVERNIGHT`; weakening
+current-head/obligation checks; removing the per-item kill-switch check; bypassing P11.
 
-## 10. Open gaps
-
-None in the module. Two operational items outside it:
-
-- The scheduled task is not yet registered. Until it is, nothing polls, and the failure
-  is silent. Registration and the post-reboot `Last Result` check are in the
-  `a01_ingress_service` docstring.
-- `A01_INGRESS_TOKEN` is unset. Fine for a public repo; required if it goes private.
+Repository closure does not claim the Windows Scheduled Task is installed or that a token
+exists for a future private repository. The service docstring preserves the deployment
+command and post-reboot check. `A01_INGRESS_TOKEN` is optional for the current public
+repository and becomes an external/private-authority prerequisite if repository access
+changes.
