@@ -1,0 +1,162 @@
+name: Second Shift Dispatch Durability Live Proof
+
+# Feature-branch-only production-path qualification for SECOND-SHIFT-DISPATCH-DURABILITY-003.
+# This workflow is intentionally hosted-runner only and never runs on main. It drives the
+# real ClaimDriverMain against the dedicated persistent state branch, lets that production
+# path POST claim-work.yml with its already-persisted dispatch_id, then independently reads
+# GitHub state/run truth back and proves the exact one-run terminal chain.
+
+on:
+  push:
+    branches:
+      - second-shift/execution-ordering-001
+    paths:
+      - '.github/workflows/second-shift-dispatch-durability-live-proof.yml'
+      - '.github/workflows/claim-driver.yml'
+      - '.github/workflows/claim-work.yml'
+      - 'system-master/execution-driver/src/main/java/org/systemmaster/core/ActionsDispatch.java'
+      - 'system-master/execution-driver/src/main/java/org/systemmaster/core/ActionsRunPoller.java'
+      - 'system-master/execution-driver/src/main/java/org/systemmaster/core/ClaimDriverMain.java'
+      - 'system-master/execution-driver/src/main/java/org/systemmaster/core/DurableDispatchCoordinator.java'
+      - 'system-master/execution-driver/src/main/java/org/systemmaster/core/GitHubClaimStateStore.java'
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: second-shift-dispatch-durability-live-proof
+  cancel-in-progress: false
+
+jobs:
+  live-proof:
+    name: Exact persistent dispatch chain
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      CLAIM_WORK_WORKFLOW: claim-work.yml
+      CLAIM_WORK_REF: ${{ github.ref_name }}
+      CLAIM_STATE_REF: second-shift/execution-state
+      CLAIM_STATE_ROOT: execution/claims/state
+      PROOF_CLAIM_ID: durability-003-live-${{ github.run_id }}-${{ github.run_attempt }}
+      PROOF_PAYLOAD_DIGEST: live-${{ github.sha }}
+
+    steps:
+      - name: Checkout exact feature subject
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Select Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Build production driver
+        run: mvn -q -B compile
+
+      - name: Drive one unique claim through the production chain
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p live-proof
+          java -cp target/classes org.systemmaster.core.ClaimDriverMain \
+            --claim "${PROOF_CLAIM_ID}=${PROOF_PAYLOAD_DIGEST}" \
+            --max-iterations 1 \
+            --budget-seconds 1200 | tee live-proof/claim-driver.log
+
+      - name: Read back durable state and exact GitHub run truth
+        shell: bash
+        run: |
+          set -euo pipefail
+          state_hash="$(printf '%s' "${PROOF_CLAIM_ID}" | sha256sum | awk '{print $1}')"
+          state_file="${state_hash}.json"
+
+          gh api -X GET \
+            "repos/${GITHUB_REPOSITORY}/contents/${CLAIM_STATE_ROOT}/${state_file}" \
+            -f ref="${CLAIM_STATE_REF}" > live-proof/state-envelope.json
+          jq -r '.content' live-proof/state-envelope.json | tr -d '\n' | base64 -d > live-proof/state.json
+
+          jq -e \
+            --arg claim "${PROOF_CLAIM_ID}" \
+            --arg payload "${PROOF_PAYLOAD_DIGEST}" \
+            '.claim_id == $claim
+             and .payload_digest == $payload
+             and .state == "DONE"
+             and .attempts == 1
+             and .epoch == 1
+             and (.dispatch_id | type == "string" and length > 0)
+             and (.run_id | type == "number" and . > 0)
+             and .run_status == "completed"
+             and .run_conclusion == "success"' \
+            live-proof/state.json >/dev/null
+
+          dispatch_id="$(jq -r '.dispatch_id' live-proof/state.json)"
+          run_id="$(jq -r '.run_id' live-proof/state.json)"
+          expected_title="claim:${PROOF_CLAIM_ID} dispatch:${dispatch_id}"
+          expected_evidence="EVIDENCE=ACTIONS_COMPLETED run_id=${run_id} conclusion=success dispatch_id=${dispatch_id}"
+
+          jq -e --arg evidence "${expected_evidence}" \
+            '.terminal_reason | contains($evidence)' live-proof/state.json >/dev/null
+
+          gh api -X GET "repos/${GITHUB_REPOSITORY}/actions/runs/${run_id}" > live-proof/exact-run.json
+          jq -e \
+            --arg title "${expected_title}" \
+            --arg branch "${CLAIM_WORK_REF}" \
+            --argjson run_id "${run_id}" \
+            '.id == $run_id
+             and .display_title == $title
+             and .event == "workflow_dispatch"
+             and .head_branch == $branch
+             and .status == "completed"
+             and .conclusion == "success"' \
+            live-proof/exact-run.json >/dev/null
+
+          gh api -X GET \
+            "repos/${GITHUB_REPOSITORY}/actions/workflows/${CLAIM_WORK_WORKFLOW}/runs" \
+            -f event=workflow_dispatch \
+            -f branch="${CLAIM_WORK_REF}" \
+            -f per_page=100 > live-proof/workflow-runs.json
+          exact_count="$(jq --arg title "${expected_title}" '[.workflow_runs[] | select(.display_title == $title)] | length' live-proof/workflow-runs.json)"
+          test "${exact_count}" -eq 1
+
+          {
+            printf 'proof_claim_id=%s\n' "${PROOF_CLAIM_ID}"
+            printf 'payload_digest=%s\n' "${PROOF_PAYLOAD_DIGEST}"
+            printf 'dispatch_id=%s\n' "${dispatch_id}"
+            printf 'run_id=%s\n' "${run_id}"
+            printf 'state=DONE\n'
+            printf 'run_status=completed\n'
+            printf 'run_conclusion=success\n'
+            printf 'exact_run_count=%s\n' "${exact_count}"
+            printf 'source_sha=%s\n' "${GITHUB_SHA}"
+          } | tee live-proof/proof-summary.txt
+
+      - name: Publish exact proof summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo '## SECOND-SHIFT-DISPATCH-DURABILITY-003 live proof'
+            echo
+            if [ -f live-proof/proof-summary.txt ]; then
+              echo '```text'
+              cat live-proof/proof-summary.txt
+              echo '```'
+            else
+              echo 'Live proof did not reach a validated terminal summary.'
+            fi
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+      - name: Upload live proof evidence
+        if: always() && hashFiles('live-proof/**') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: second-shift-dispatch-durability-live-proof-${{ github.run_id }}
+          path: live-proof/
+          if-no-files-found: error
+          retention-days: 30
