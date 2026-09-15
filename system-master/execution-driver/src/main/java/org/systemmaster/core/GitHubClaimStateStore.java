@@ -102,7 +102,7 @@ public final class GitHubClaimStateStore implements DurableDispatchCoordinator.S
         if (expectedRevision != null) { requireText(expectedRevision, "EXPECTED_REVISION"); body.append(",\"sha\":\"").append(esc(expectedRevision)).append('"'); }
         body.append('}');
         Response r = put(contentUrl(next.claimId()), headers(token()), body.toString(), "STATE_STORE_WRITE");
-        if (r.status() == 409 || r.status() == 422) throw new DurableDispatchCoordinator.CasConflictException("STATE_CAS_CONFLICT");
+        if (r.status() == 409) throw new DurableDispatchCoordinator.CasConflictException("STATE_CAS_CONFLICT");
         int expectedStatus = expectedRevision == null ? 201 : 200;
         if (r.status() != expectedStatus) throw new IllegalStateException("STATE_STORE_WRITE_REJECTED_" + r.status());
         if (r.body() == null || r.body().isBlank()) throw new IllegalStateException("STATE_STORE_WRITE_INVALID_RESPONSE");
