@@ -8,6 +8,7 @@ on:
       - 'system-master/book-system/book-literary-diagnostic-lens-registry-v1.js'
       - 'system-master/book-system/book-literary-diagnostic-context-v1.js'
       - 'system-master/book-system/book-literary-d1.test.js'
+      - 'system-master/book-system/book-literary-d1-registry-lock.test.js'
       - '.github/workflows/book-b05-d1-diagnostic-context-qualification.yml'
   pull_request:
     branches:
@@ -17,6 +18,7 @@ on:
       - 'system-master/book-system/book-literary-diagnostic-lens-registry-v1.js'
       - 'system-master/book-system/book-literary-diagnostic-context-v1.js'
       - 'system-master/book-system/book-literary-d1.test.js'
+      - 'system-master/book-system/book-literary-d1-registry-lock.test.js'
       - '.github/workflows/book-b05-d1-diagnostic-context-qualification.yml'
 
 permissions:
@@ -98,7 +100,7 @@ jobs:
 
       - name: B05 D1 focused qualification
         shell: bash
-        run: node --test system-master/book-system/book-literary-d1.test.js | tee b05-d1.log
+        run: node --test system-master/book-system/book-literary-d1.test.js system-master/book-system/book-literary-d1-registry-lock.test.js | tee b05-d1.log
 
       - name: Runtime import smoke
         shell: bash
@@ -123,6 +125,8 @@ jobs:
             sha256sum system-master/book-system/book-literary-diagnostic-lens-registry-v1.js
             sha256sum system-master/book-system/book-literary-diagnostic-context-v1.js
             sha256sum system-master/book-system/book-literary-d1.test.js
+            sha256sum system-master/book-system/book-literary-d1-registry-lock.test.js
+            sha256sum qualification/book-system/reconstruction/LITERARY-DIAGNOSTIC-LENS-REGISTRY_v1.0.csv
             sha256sum qualification/book-system/reconstruction/BOOK-RECONSTRUCTION-B05-C-DESIGN-LOCK-001.md
             sha256sum qualification/book-system/reconstruction/BOOK-RECONSTRUCTION-B05-C-QUALIFICATION-DENOMINATOR-001.csv
           } > b05-d1-evidence.txt
