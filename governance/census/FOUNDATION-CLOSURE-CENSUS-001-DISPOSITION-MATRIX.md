@@ -80,7 +80,7 @@ Evidence authority: `governance/census/FOUNDATION-CLOSURE-EVIDENCE-REGISTRY-001.
 | `P01` | P01 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | Fresh current-authority PASS receipt admitted for exact subject `02209b88106926f62718b7d3c6956e5e81506639`; prior receipt preserved as historical evidence. |
 | `P02` | P02 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | Fresh current-authority PASS receipt admitted for exact subject `efc325ab682fa92985569ceaa2619220dd4a6d3f`; prior receipt preserved as historical evidence. |
 | `P03` | P03 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | Fresh current-authority PASS receipt admitted for exact subject `ba0689a0389958d108571b50329b039e167a8156`; superseded receipt preserved as historical evidence. |
-| `P04` | P04 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | Fresh current-authority PASS receipt admitted for exact subject `ba0689a0389958d108571b50329b039e167a8156`; superseded receipt preserved as historical evidence. |
+| `P04` | P04 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | Fresh current-authority PASS receipt admitted for exact subject `29c61bafca47677487e1b1770e3a0ee034d73da7`; superseded receipts preserved as historical evidence. |
 | `P05` | P05 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | Fresh current-authority PASS receipt admitted for exact subject `fe7a19093721c73093fcc5b9daa2330eb2d6d9cc`; current Registry 017 binding and fail-closed schema validation proven. |
 | `P06` | P06 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | Fresh current-authority PASS receipt admitted for exact subject `2d0442ab7b1a1d125ab2bfbdf5b7ea137305f902`; all 15 logical dispatch fields, fail-closed validation, bridge-to-gateway forwarding, and legacy timeout read compatibility proven without widening the 10-input wire packet. |
 | `P07` | P07 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | Fresh current-authority PASS receipt admitted for exact subject `2bf022c5f39d0b3275d66f91883a5551b67c583f`; four-context admission alignment plus fail-closed registration, identity, wrapper, timeout and overnight guards proven. |
@@ -103,7 +103,7 @@ Evidence authority: `governance/census/FOUNDATION-CLOSURE-EVIDENCE-REGISTRY-001.
 
 `P03` is current-complete with exact-subject evidence from GitHub Actions run `34915442421`, artifact `10376096325`, bound to subject `ba0689a0389958d108571b50329b039e167a8156`; the qualification executed 20 evidence-retention tests and the superseded receipt remains preserved in history.
 
-`P04` is current-complete with exact-subject evidence from GitHub Actions run `34915442434`, artifact `10375324127`, bound to subject `ba0689a0389958d108571b50329b039e167a8156`; the qualification executed 21 content-addressed authority-write tests and the superseded receipt remains preserved in history.
+`P04` is current-complete with exact-subject evidence from GitHub Actions run `34975333806`, artifact `10398729319`, bound to subject `29c61bafca47677487e1b1770e3a0ee034d73da7`; the qualification executed 21 content-addressed authority-write tests and the superseded receipts remain preserved in history.
 
 `P05` is current-complete with exact-subject evidence from GitHub Actions run `34920515659`, artifact `10377389020`, bound to subject `fe7a19093721c73093fcc5b9daa2330eb2d6d9cc`; positive validation, invalid-topology rejection, invalid-authority-pointer rejection, and authoritative CI wiring all passed against Registry 017.
 
