@@ -1,0 +1,126 @@
+name: P08 Qualification Execution and PASS Semantics Foundation Qualification
+
+on:
+  pull_request:
+    paths:
+      - '.github/scripts/a01-control-plane.js'
+      - '.github/scripts/a01-control-plane-selftest.js'
+      - '.github/workflows/a01-control-plane-gateway.yml'
+      - '.github/workflows/a01-control-plane-admission-broker.yml'
+      - '.github/workflows/a01-control-plane-executor.yml'
+      - '.github/workflows/p08-qualification-pass-semantics-foundation-qualification.yml'
+      - 'qualification/a01/a01-policy.json'
+      - 'qualification/a01/registry.json'
+      - 'qualification/a01/schema/qualification-receipt.schema.json'
+      - 'governance/contracts/P08-FOUNDATION-CONTRACT-001.md'
+      - 'governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-*.json'
+  push:
+    paths:
+      - '.github/scripts/a01-control-plane.js'
+      - '.github/scripts/a01-control-plane-selftest.js'
+      - '.github/workflows/a01-control-plane-gateway.yml'
+      - '.github/workflows/a01-control-plane-admission-broker.yml'
+      - '.github/workflows/a01-control-plane-executor.yml'
+      - '.github/workflows/p08-qualification-pass-semantics-foundation-qualification.yml'
+      - 'qualification/a01/a01-policy.json'
+      - 'qualification/a01/registry.json'
+      - 'qualification/a01/schema/qualification-receipt.schema.json'
+      - 'governance/contracts/P08-FOUNDATION-CONTRACT-001.md'
+      - 'governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-*.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  prequalify:
+    name: Prequalify P08 semantics on exact subject
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout exact P08 subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Pin Node runtime
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Assert P08 execution and PASS semantics contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          node .github/scripts/a01-control-plane.js validate
+          node - <<'NODE'
+          const fs = require('fs');
+          const policy = JSON.parse(fs.readFileSync('qualification/a01/a01-policy.json', 'utf8'));
+          const registry = JSON.parse(fs.readFileSync('qualification/a01/registry.json', 'utf8'));
+          const receiptSchema = JSON.parse(fs.readFileSync('qualification/a01/schema/qualification-receipt.schema.json', 'utf8'));
+          const executor = fs.readFileSync('.github/scripts/a01-control-plane.js', 'utf8');
+          const gateway = fs.readFileSync('.github/workflows/a01-control-plane-gateway.yml', 'utf8');
+          const workflow = fs.readFileSync('.github/workflows/a01-control-plane-executor.yml', 'utf8');
+
+          const expectedContexts = ['normal', 'recovery', 'repair', 'overnight'];
+          const expectedResults = ['PASS', 'SUBJECT_FAILURE', 'INFRA_FAILURE', 'CONTROL_PLANE_FAILURE'];
+          if (JSON.stringify(policy.result_classes) !== JSON.stringify(expectedResults)) throw new Error(`P08_RESULT_CLASSES_MISMATCH:${JSON.stringify(policy.result_classes)}`);
+          if (!executor.includes("['normal', 'recovery', 'repair', 'overnight'].includes(context)")) throw new Error('P08_EXECUTOR_CONTEXT_ALLOWLIST_MISMATCH');
+          for (const context of expectedContexts) if (!gateway.includes(context)) throw new Error(`P08_GATEWAY_CONTEXT_MISSING:${context}`);
+          if (!executor.includes("childExitCode === 0 ? 'PASS' : 'SUBJECT_FAILURE'")) throw new Error('P08_PASS_EXIT_SEMANTICS_MISSING');
+          if (!executor.includes("resultClass = 'INFRA_FAILURE'")) throw new Error('P08_INFRA_FAILURE_CLASSIFICATION_MISSING');
+          if (!executor.includes("let resultClass = 'CONTROL_PLANE_FAILURE'")) throw new Error('P08_CONTROL_PLANE_FAILURE_DEFAULT_MISSING');
+          if (!executor.includes("policy.gate_classes[entry.gate_class].promotion_authority === true")) throw new Error('P08_PROMOTION_AUTHORITY_BINDING_MISSING');
+          if (!receiptSchema.required.includes('result_class') || !receiptSchema.required.includes('promotion_authorized')) throw new Error('P08_RECEIPT_AUTHORITY_FIELDS_MISSING');
+          if (!workflow.includes('steps.control.outputs.result_class') || !workflow.includes("steps.control.outputs.result_class != 'PASS'")) throw new Error('P08_WORKFLOW_RESULT_BINDING_MISSING');
+
+          const selftest = registry.qualifications['A01-CONTROL-PLANE-SELFTEST'];
+          if (!selftest || selftest.workstream_id !== 'SYSTEM-MASTER' || selftest.gate_class !== 'promotion' || selftest.source !== 'control_plane') throw new Error('P08_LIVE_QUALIFICATION_REGISTRATION_INVALID');
+
+          console.log('P08_PREQUALIFICATION=PASS');
+          console.log(`P08_EXECUTION_CONTEXTS=${expectedContexts.join(',')}`);
+          console.log(`P08_RESULT_CLASSES=${expectedResults.join(',')}`);
+          NODE
+
+  live_a01:
+    name: Live exact-SHA A-01 qualification
+    needs: prequalify
+    uses: ./.github/workflows/a01-control-plane-gateway.yml
+    with:
+      qualification_id: A01-CONTROL-PLANE-SELFTEST
+      workstream_id: SYSTEM-MASTER
+      subject_sha: ${{ github.event.pull_request.head.sha || github.sha }}
+      origin_ref: ${{ github.head_ref || github.ref }}
+      resume_on_pass: 'Adjudicate P08 exact-SHA PASS semantics and continue Foundation closure.'
+      resume_on_failure: 'Classify the P08 failure without conflating subject, infrastructure, or control-plane faults.'
+      notification_target: foundation-p08
+      execution_context: normal
+      qualifier_timeout_minutes: 28
+      job_timeout_minutes: 30
+    secrets: inherit
+
+  assert_live_result:
+    name: Assert authoritative P08 live result
+    needs: [prequalify, live_a01]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Fail closed unless live A-01 proves PASS semantics
+        shell: bash
+        env:
+          LIVE_JOB_RESULT: ${{ needs.live_a01.result }}
+          RESULT_CLASS: ${{ needs.live_a01.outputs.result_class }}
+          PROMOTION_AUTHORIZED: ${{ needs.live_a01.outputs.promotion_authorized }}
+          ADMISSION_STATE: ${{ needs.live_a01.outputs.admission_state }}
+          CONTROL_PLANE_SHA: ${{ needs.live_a01.outputs.control_plane_sha }}
+          EXPECTED_SUBJECT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          test "$LIVE_JOB_RESULT" = "success"
+          test "$ADMISSION_STATE" = "ADMITTED"
+          test "$RESULT_CLASS" = "PASS"
+          test "$PROMOTION_AUTHORIZED" = "true"
+          test "${CONTROL_PLANE_SHA,,}" = "${EXPECTED_SUBJECT_SHA,,}"
+          printf 'P08_LIVE_A01=PASS\nP08_RESULT_CLASS=%s\nP08_PROMOTION_AUTHORIZED=%s\nP08_SUBJECT_SHA=%s\nP08_CONTROL_PLANE_SHA=%s\n' "$RESULT_CLASS" "$PROMOTION_AUTHORIZED" "$EXPECTED_SUBJECT_SHA" "$CONTROL_PLANE_SHA"
