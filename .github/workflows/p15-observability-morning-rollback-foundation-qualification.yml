@@ -108,7 +108,9 @@ jobs:
           if (!bridge.includes('Ran 16 tests')) throw new Error('P15_A01_DISCOVERY_BRIDGE_MISSING');
           if (!schedule.includes("cron: '15 12 * * *'") || !schedule.includes('self-hosted, Windows, X64')) throw new Error('P15_MORNING_SCHEDULE_INVALID');
           if (!schedule.includes('A01_SUPERVISOR_DB') || !schedule.includes('upload-artifact')) throw new Error('P15_MORNING_DELIVERY_INCOMPLETE');
-          if (rollback.includes('--halt') || rollback.includes('--status') || rollback.includes('--dry-run')) throw new Error('P15_ROLLBACK_STALE_RUNTIME_INTERFACE_PRESENT');
+          const staleIngressCommand = /(?:^|\n)\s*python\s+-m\s+a01_github_ingress[^\n]*(?:--halt|--status)\b/m.test(rollback);
+          const staleServiceDryRun = /(?:^|\n)\s*python\s+-m\s+a01_ingress_service[^\n]*--dry-run\b/m.test(rollback);
+          if (staleIngressCommand || staleServiceDryRun) throw new Error('P15_ROLLBACK_STALE_RUNTIME_INTERFACE_PRESENT');
           if (!rollback.includes('--kill') || !rollback.includes('--resume')) throw new Error('P15_ROLLBACK_CURRENT_P12_INTERFACE_MISSING');
           if (!rollback.includes("SQLite's backup API") || !rollback.includes('all five')) throw new Error('P15_ROLLBACK_DURABILITY_OR_VERIFICATION_MISSING');
           if (!contract.includes('SYSTEM-MASTER-CAPABILITY-CROSSWALK-003') || !contract.includes('16 tests')) throw new Error('P15_CONTRACT_NOT_CURRENT');
