@@ -82,7 +82,8 @@ jobs:
             if (!normalizer.includes(field)) throw new Error(`P06_NORMALIZER_FIELD_MISSING ${field}`);
           }
           for (const field of advanced) {
-            if (!bridge.includes(`${field}: ${{ '${{' }} fromJSON(inputs.advanced_json || '{}').${field}`)) throw new Error(`P06_BRIDGE_FORWARDING_MISSING ${field}`);
+            if (!bridge.includes(`\n      ${field}:`)) throw new Error(`P06_BRIDGE_ROUTE_BINDING_MISSING ${field}`);
+            if (!gateway.includes(field)) throw new Error(`P06_GATEWAY_BINDING_MISSING ${field}`);
           }
           for (const code of ['DISPATCH_INPUT_INVALID','DISPATCH_BUDGET_INVALID','DISPATCH_WINDOW_INVALID','DISPATCH_LINEAGE_INVALID']) {
             if (!bridge.includes(code) || !normalizer.includes(code)) throw new Error(`P06_FAIL_CODE_MISSING ${code}`);
