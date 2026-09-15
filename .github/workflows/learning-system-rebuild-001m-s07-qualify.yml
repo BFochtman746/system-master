@@ -1,0 +1,61 @@
+name: Learning 001M-S07 Qualification
+
+on:
+  push:
+    branches:
+      - learning/system-rebuild-001m-s07-standards-interoperability-20260915
+    paths:
+      - learning/lab/learning_lab/standards_interoperability.py
+      - learning/lab/learning_lab/__init__.py
+      - learning/lab/tests/test_standards_interoperability_s07.py
+      - learning/lab/tests/test_standards_interoperability_s07_hardening.py
+      - qualification/learning/rebuild/LEARNING-SYSTEM-REBUILD-001M-S07-96CASE-QUALIFICATION-CONTRACT.json
+      - qualification/learning/rebuild/LEARNING-SYSTEM-REBUILD-001M-S07-CLOSURE.md
+      - .github/scripts/learning-system-rebuild-001m-s07-qualify.py
+      - .github/workflows/learning-system-rebuild-001m-s07-qualify.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    name: Exact-subject S07 qualification
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+      - name: Verify exact subject
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.12"
+      - name: Syntax check S07 runtime and qualification code
+        shell: bash
+        run: |
+          python -m py_compile \
+            learning/lab/learning_lab/standards_interoperability.py \
+            learning/lab/tests/test_standards_interoperability_s07.py \
+            learning/lab/tests/test_standards_interoperability_s07_hardening.py \
+            .github/scripts/learning-system-rebuild-001m-s07-qualify.py
+      - name: Run S07 isolated, predecessor, and cumulative qualification
+        shell: bash
+        run: |
+          mkdir -p qualification-evidence
+          python .github/scripts/learning-system-rebuild-001m-s07-qualify.py | tee qualification-evidence/s07-report.json
+      - name: Upload exact-subject qualification evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: learning-system-rebuild-001m-s07-${{ github.sha }}
+          path: |
+            qualification-evidence/s07-report.json
+            qualification/learning/rebuild/LEARNING-SYSTEM-REBUILD-001M-S07-96CASE-QUALIFICATION-CONTRACT.json
+          if-no-files-found: error
+          retention-days: 90
