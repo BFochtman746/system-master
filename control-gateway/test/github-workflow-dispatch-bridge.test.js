@@ -19,8 +19,13 @@ test('dispatch bridge is the default external workflow while gateway identity re
   assert.equal(A01_DISPATCH_WORKFLOW, 'a01-control-plane-dispatch-bridge.yml');
   const packet = normalizeA01Dispatch({ ref: 'main', inputs: bookInputs });
   assert.equal(packet.workflow, A01_DISPATCH_WORKFLOW);
-  assert.equal(packet.inputs.qualifier_timeout_minutes, '28');
-  assert.equal(packet.inputs.job_timeout_minutes, '30');
   assert.equal(packet.inputs.repair_attempt, '0');
   assert.equal(packet.inputs.max_repair_attempts, '1');
+  const advanced = JSON.parse(packet.inputs.advanced_json);
+  assert.equal(advanced.qualifier_timeout_minutes, 28);
+  assert.equal(advanced.job_timeout_minutes, 30);
+  assert.equal(advanced.notification_target, 'originating-workstream');
+  assert.equal(advanced.not_before, '');
+  assert.equal(advanced.not_after, '');
+  assert.equal(advanced.repair_transaction_id, '');
 });
