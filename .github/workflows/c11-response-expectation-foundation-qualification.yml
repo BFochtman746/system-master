@@ -1,0 +1,81 @@
+name: C11 Response Expectation Foundation Qualification
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'governance/CURRENT-AUTHORITY.json'
+      - 'governance/SYSTEM-TOPOLOGY-007.json'
+      - 'governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json'
+      - 'governance/contracts/EXPECTATION-FOUNDATION-CONTRACT-001.md'
+      - 'control-gateway/src/response-expectation-engine.js'
+      - 'control-gateway/test/response-expectation-engine.test.js'
+      - 'control-gateway/src/development-response-governor.js'
+      - 'control-gateway/test/development-response-governor.test.js'
+      - '.github/scripts/response-expectation-engine-qualify.js'
+      - '.github/scripts/development-response-governor-qualify.js'
+      - '.github/workflows/c11-response-expectation-foundation-qualification.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'governance/CURRENT-AUTHORITY.json'
+      - 'governance/SYSTEM-TOPOLOGY-007.json'
+      - 'governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json'
+      - 'governance/contracts/EXPECTATION-FOUNDATION-CONTRACT-001.md'
+      - 'control-gateway/src/response-expectation-engine.js'
+      - 'control-gateway/test/response-expectation-engine.test.js'
+      - 'control-gateway/src/development-response-governor.js'
+      - 'control-gateway/test/development-response-governor.test.js'
+      - '.github/scripts/response-expectation-engine-qualify.js'
+      - '.github/scripts/development-response-governor-qualify.js'
+      - '.github/workflows/c11-response-expectation-foundation-qualification.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: c11-response-expectation-foundation-${{ github.event.pull_request.number || github.ref || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  qualify:
+    name: c11-response-expectation-exact-subject-qualification
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout exact C11 qualification subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Pin Node runtime
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+
+      - name: Qualify C11 exact response expectation engine
+        shell: bash
+        env:
+          C11_SUBJECT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          node .github/scripts/response-expectation-engine-qualify.js
+
+      - name: Inspect machine-readable C11 evidence
+        shell: bash
+        run: cat qualification-output/c11-foundation-1.0.json
+
+      - name: Preserve C11 qualification evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: c11-foundation-1.0-evidence-current
+          path: qualification-output/c11-foundation-1.0.json
+          if-no-files-found: error
+          retention-days: 30
