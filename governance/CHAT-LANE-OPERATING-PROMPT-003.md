@@ -3,6 +3,7 @@
 Status: CANDIDATE successor to `CHAT-LANE-OPERATING-PROMPT-002` for C04 qualification.
 Owner: `SYSTEM_MASTER/CORE`
 Authority: `CURRENT-AUTHORITY-005` / Topology 007
+Operation: `C04-DEVELOPMENT-RESPONSE-GOVERNOR-001`
 
 Preserve all authority, ownership, completion, startup, lane-crossing, evidence, Second Shift, and end-of-work rules from `CHAT-LANE-OPERATING-PROMPT-002` except replace the startup-only response-format rule with this stronger rule.
 
