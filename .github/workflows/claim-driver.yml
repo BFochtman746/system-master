@@ -3,6 +3,8 @@ name: Claim Driver
 # Unattended crash-safe dispatcher. Durable state lives on a dedicated non-code branch;
 # state mutation crosses the protected Control Gateway writer, so this ordinary workflow
 # needs repository read access plus Actions dispatch/read access only.
+# Final audit: the legacy direct-write state store is removed; protected Control Gateway
+# mutation is the sole production durable-state write path.
 
 on:
   schedule:
