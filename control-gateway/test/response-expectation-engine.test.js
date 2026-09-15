@@ -48,6 +48,11 @@ test('valid CONTINUATION response evaluates to PASS', () => {
   assert.equal(assertResponseExpectations({ responseText: CONTINUATION, responseClass: 'CONTINUATION', policy: POLICY }), true);
 });
 
+test('CRLF responses preserve exact-line validation semantics', () => {
+  const crlf = FULL.replaceAll('\n', '\r\n');
+  assert.equal(assertResponseExpectations({ responseText: crlf, responseClass: 'FULL', policy: POLICY }), true);
+});
+
 test('policy digest is deterministic across object key order', () => {
   const reordered = {
     first_line_allowlist_by_heading: POLICY.first_line_allowlist_by_heading,
@@ -61,6 +66,17 @@ test('policy digest is deterministic across object key order', () => {
 
 test('unknown response class fails closed', async () => {
   await rejectsCode(async () => assertResponseExpectations({ responseText: FULL, responseClass: 'UNKNOWN', policy: POLICY }), 'EXPECTATION_CLASS_INVALID');
+});
+
+test('inherited object prototype name is not accepted as a response class', async () => {
+  await rejectsCode(async () => assertResponseExpectations({ responseText: FULL, responseClass: 'toString', policy: POLICY }), 'EXPECTATION_CLASS_INVALID');
+});
+
+test('explicit prototype-like class key remains an owned policy class', () => {
+  const prototypePolicy = JSON.parse('{"classes":{"__proto__":{"required_headings":["## ONLY"],"forbidden_headings":[],"required_labels_by_heading":{}}},"first_line_allowlist_by_heading":{}}');
+  const result = evaluateResponseExpectations({ responseText: '## ONLY\ncontent', responseClass: '__proto__', policy: prototypePolicy });
+  assert.equal(result.status, 'PASS');
+  assert.equal(result.response_class, '__proto__');
 });
 
 test('missing required heading fails closed', async () => {
@@ -81,6 +97,20 @@ test('out-of-order headings fail closed', async () => {
 test('empty required section fails closed', async () => {
   const malformed = FULL.replace('## BODY\nReusable response policy validation is active.', '## BODY');
   await rejectsCode(async () => assertResponseExpectations({ responseText: malformed, responseClass: 'FULL', policy: POLICY }), 'EXPECTATION_SECTION_EMPTY');
+});
+
+test('inline heading substring cannot spoof content for an empty exact heading section', async () => {
+  const actualEmptyBody = FULL.replace('## BODY\nReusable response policy validation is active.', '## BODY');
+  const malformed = `preamble ## BODY\nSpoofed body content.\n\n${actualEmptyBody}`;
+  await rejectsCode(async () => assertResponseExpectations({ responseText: malformed, responseClass: 'FULL', policy: POLICY }), 'EXPECTATION_SECTION_EMPTY');
+});
+
+test('inline heading substring cannot spoof required labels for the exact heading section', async () => {
+  const actualWithoutLabels = FULL
+    .replace('Objective: Prove the C11 engine.', 'No objective declared.')
+    .replace('PASS boundary: Every declared expectation is enforced.', 'No pass boundary declared.');
+  const malformed = `preamble ## NEXT\nObjective: spoofed\nPASS boundary: spoofed\n\n${actualWithoutLabels}`;
+  await rejectsCode(async () => assertResponseExpectations({ responseText: malformed, responseClass: 'FULL', policy: POLICY }), 'EXPECTATION_REQUIRED_LABEL_MISSING');
 });
 
 test('forbidden peer heading fails closed', async () => {
