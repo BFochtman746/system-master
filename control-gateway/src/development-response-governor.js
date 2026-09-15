@@ -1,4 +1,8 @@
 import { createHash } from 'node:crypto';
+import {
+  ResponseExpectationEngineError,
+  assertResponseExpectations
+} from './response-expectation-engine.js';
 
 export const DEVELOPMENT_RESPONSE_CONTRACT_ID = 'SYSTEM-MASTER-DEVELOPMENT-RESPONSE-GOVERNOR-001';
 export const DEVELOPMENT_RESPONSE_RECEIPT_PROTOCOL = 'control-gateway.development-response-receipt.v1';
@@ -21,13 +25,35 @@ const CONTINUATION_HEADINGS = Object.freeze([
   '## CURRENT BLOCKER',
   '## EXACT NEXT STEP'
 ]);
-const FULL_ONLY_HEADINGS = new Set([
+const FULL_ONLY_HEADINGS = Object.freeze([
   '## WHERE WE ARE', '## SYSTEM COMPLETION STANDING', '## LOCKED JOB', '## WHAT CHANGED', '## WHERE WE ARE GOING'
 ]);
-const STATUS_VALUES = new Set([
+const STATUS_VALUES = Object.freeze([
   'CHAT READY', 'CHAT READY WITH DECISION', 'NOT READY', 'WORKING', 'BLOCKED', 'QUALIFICATION PENDING', 'COMPLETE WITH EVIDENCE'
 ]);
 const SHA256_RE = /^[0-9a-f]{64}$/;
+
+const DEVELOPMENT_RESPONSE_POLICY = Object.freeze({
+  classes: Object.freeze({
+    FULL: Object.freeze({
+      required_headings: FULL_HEADINGS,
+      forbidden_headings: Object.freeze([]),
+      required_labels_by_heading: Object.freeze({
+        '## EXACT NEXT STEP': Object.freeze(['Objective', 'First action', 'PASS boundary', 'Successor', 'Failure route', 'Forbidden authority'])
+      })
+    }),
+    CONTINUATION: Object.freeze({
+      required_headings: CONTINUATION_HEADINGS,
+      forbidden_headings: FULL_ONLY_HEADINGS,
+      required_labels_by_heading: Object.freeze({
+        '## EXACT NEXT STEP': Object.freeze(['Objective', 'First action', 'PASS boundary'])
+      })
+    })
+  }),
+  first_line_allowlist_by_heading: Object.freeze({
+    '## STATUS': STATUS_VALUES
+  })
+});
 
 export class DevelopmentResponseGovernorError extends Error {
   constructor(code, message, details = undefined) {
@@ -65,66 +91,27 @@ function requiredObject(value, label) {
   return value;
 }
 
-function headingLines(responseText) {
-  return responseText.split(/\r?\n/).filter((line) => /^## [^#].*$/.test(line));
-}
-
-function sectionContent(responseText, heading, nextHeading) {
-  const start = responseText.indexOf(heading);
-  if (start < 0) return null;
-  const from = start + heading.length;
-  const end = nextHeading ? responseText.indexOf(nextHeading, from) : responseText.length;
-  return responseText.slice(from, end < 0 ? responseText.length : end).trim();
-}
-
-function validateHeadingContract(responseText, requiredHeadings, responseClass) {
-  const lines = headingLines(responseText);
-  let cursor = -1;
-  for (const heading of requiredHeadings) {
-    const occurrences = lines.filter((line) => line === heading).length;
-    if (occurrences !== 1) fail('RESPONSE_REQUIRED_HEADING_INVALID', `${heading} must occur exactly once`, { response_class: responseClass, occurrences });
-    const index = lines.indexOf(heading);
-    if (index <= cursor) fail('RESPONSE_HEADING_ORDER_INVALID', `${heading} is out of order`, { response_class: responseClass });
-    cursor = index;
-  }
-  if (responseClass === DEVELOPMENT_RESPONSE_CLASSES.CONTINUATION) {
-    for (const heading of lines) if (FULL_ONLY_HEADINGS.has(heading)) fail('RESPONSE_CLASS_AMBIGUOUS', `CONTINUATION cannot contain FULL peer heading ${heading}`);
-  }
-  for (let i = 0; i < requiredHeadings.length; i += 1) {
-    const heading = requiredHeadings[i];
-    const next = requiredHeadings[i + 1] ?? null;
-    const content = sectionContent(responseText, heading, next);
-    if (!content) fail('RESPONSE_SECTION_EMPTY', `${heading} must contain content`, { response_class: responseClass });
-  }
-}
-
-function validateStatus(responseText, requiredHeadings) {
-  const next = requiredHeadings[1];
-  const statusBody = sectionContent(responseText, '## STATUS', next);
-  const firstLine = statusBody.split(/\r?\n/).map((line) => line.trim()).find(Boolean) ?? '';
-  if (!STATUS_VALUES.has(firstLine)) fail('RESPONSE_STATUS_INVALID', 'STATUS must begin with an allowed status value', { observed: firstLine });
-}
-
-function validateExactNextStep(responseText, responseClass) {
-  const body = sectionContent(responseText, '## EXACT NEXT STEP', null) ?? '';
-  if (responseClass === DEVELOPMENT_RESPONSE_CLASSES.FULL) {
-    for (const label of ['Objective', 'First action', 'PASS boundary', 'Successor', 'Failure route', 'Forbidden authority']) {
-      if (!new RegExp(`(^|\\n)${label}:\\s*\\S`, 'm').test(body)) fail('RESPONSE_NEXT_STEP_INCOMPLETE', `FULL EXACT NEXT STEP requires ${label}:`);
-    }
-  } else {
-    for (const label of ['Objective', 'First action', 'PASS boundary']) {
-      if (!new RegExp(`(^|\\n)${label}:\\s*\\S`, 'm').test(body)) fail('RESPONSE_NEXT_STEP_INCOMPLETE', `CONTINUATION EXACT NEXT STEP requires ${label}:`);
-    }
-  }
+function mapExpectationViolation(error) {
+  const codes = {
+    EXPECTATION_SCHEMA_INVALID: 'RESPONSE_SCHEMA_INVALID',
+    EXPECTATION_CLASS_INVALID: 'RESPONSE_CLASS_INVALID',
+    EXPECTATION_REQUIRED_HEADING_INVALID: 'RESPONSE_REQUIRED_HEADING_INVALID',
+    EXPECTATION_HEADING_ORDER_INVALID: 'RESPONSE_HEADING_ORDER_INVALID',
+    EXPECTATION_FORBIDDEN_HEADING: 'RESPONSE_CLASS_AMBIGUOUS',
+    EXPECTATION_SECTION_EMPTY: 'RESPONSE_SECTION_EMPTY',
+    EXPECTATION_FIRST_LINE_INVALID: 'RESPONSE_STATUS_INVALID',
+    EXPECTATION_REQUIRED_LABEL_MISSING: 'RESPONSE_NEXT_STEP_INCOMPLETE'
+  };
+  fail(codes[error.code] ?? 'RESPONSE_SCHEMA_INVALID', error.message, error.details);
 }
 
 export function validateDevelopmentResponse({ responseText, responseClass }) {
-  requiredText(responseText, 'responseText');
-  if (!Object.values(DEVELOPMENT_RESPONSE_CLASSES).includes(responseClass)) fail('RESPONSE_CLASS_INVALID', 'responseClass must be FULL or CONTINUATION');
-  const headings = responseClass === DEVELOPMENT_RESPONSE_CLASSES.FULL ? FULL_HEADINGS : CONTINUATION_HEADINGS;
-  validateHeadingContract(responseText, headings, responseClass);
-  validateStatus(responseText, headings);
-  validateExactNextStep(responseText, responseClass);
+  try {
+    assertResponseExpectations({ responseText, responseClass, policy: DEVELOPMENT_RESPONSE_POLICY });
+  } catch (error) {
+    if (error instanceof ResponseExpectationEngineError) mapExpectationViolation(error);
+    throw error;
+  }
   return true;
 }
 
