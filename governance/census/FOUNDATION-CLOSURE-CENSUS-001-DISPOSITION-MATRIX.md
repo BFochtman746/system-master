@@ -1,26 +1,13 @@
 # Foundation Closure Census 001 - Disposition Matrix
 
 Reconciled 2026-09-15 under `CURRENT-AUTHORITY-005` / `SYSTEM-TOPOLOGY-007`.
-
-Inventory authority: `SYSTEM-MASTER-CAPABILITY-CROSSWALK-003` selected through `CURRENT-AUTHORITY-005`  
-Ownership consistency: `SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006`  
-Evidence authority: `governance/census/FOUNDATION-CLOSURE-EVIDENCE-REGISTRY-001.json`
-
-> Contract prose is specification, not acceptance evidence. `COMPLETE_WITH_EVIDENCE` requires a current-authority PASS receipt whose exact subject Git blobs still match.
+Inventory authority: `SYSTEM-MASTER-CAPABILITY-CROSSWALK-003`. Ownership consistency: `SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006`.
+Evidence authority: `governance/census/FOUNDATION-CLOSURE-EVIDENCE-REGISTRY-001.json`.
 
 ## Disposition summary
 
-| State | Rows |
-| --- | ---: |
-| `COMPLETE_WITH_EVIDENCE` | 9 |
-| `ACTIVE_GAP` | 41 |
-| `DURABLY_BLOCKED_EXTERNAL_HUMAN_PRIVATE_NATIVE` | 0 |
-| `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | 16 |
-| **Total** | **66** |
-
-**Foundation 1.0 completion with evidence: 18% (9 of 50 in-scope rows).**
-
-## Current disposition matrix
+10 `COMPLETE_WITH_EVIDENCE`; 40 `ACTIVE_GAP`; 0 `DURABLY_BLOCKED_EXTERNAL_HUMAN_PRIVATE_NATIVE`; 16 `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY`; 66 total.
+Foundation 1.0 completion with evidence: 20% (10 of 50 in-scope rows).
 
 | ID | Capability / requirement | Canonical owner | State | Current disposition |
 | --- | --- | --- | --- | --- |
@@ -59,31 +46,31 @@ Evidence authority: `governance/census/FOUNDATION-CLOSURE-EVIDENCE-REGISTRY-001.
 | `C32` | VIDEO | SYSTEM_MASTER/MEDIA | `ACTIVE_GAP` | Current-authority Foundation evidence receipt not registered. |
 | `C33` | VOICE | SYSTEM_MASTER/MEDIA | `ACTIVE_GAP` | Current-authority Foundation evidence receipt not registered. |
 | `C34` | WRITING | SYSTEM_MASTER/BOOK | `ACTIVE_GAP` | Current-authority Foundation evidence receipt not registered. |
-| `C35` | AIINCOME | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Current-authority out-of-scope/reserved disposition. |
-| `C36` | CAD | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Current-authority out-of-scope/reserved disposition. |
-| `C37` | PHONEOPS | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Current-authority out-of-scope/reserved disposition. |
-| `C38` | PHYSICALAI | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Current-authority out-of-scope/reserved disposition. |
-| `C39` | PORTFOLIO | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Current-authority out-of-scope/reserved disposition. |
+| `C35` | AIINCOME | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Current-authority out-of-scope disposition. |
+| `C36` | CAD | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Current-authority out-of-scope disposition. |
+| `C37` | PHONEOPS | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Current-authority out-of-scope disposition. |
+| `C38` | PHYSICALAI | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Current-authority out-of-scope disposition. |
+| `C39` | PORTFOLIO | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Current-authority out-of-scope disposition. |
 | `C40` | WEBSITE_BUILDING | SYSTEM_MASTER/PROGRAMMING | `ACTIVE_GAP` | Current-authority Foundation evidence receipt not registered. |
-| `C41` | RESERVED | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Current-authority out-of-scope/reserved disposition. |
-| `C42` | RESERVED | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Current-authority out-of-scope/reserved disposition. |
-| `C43` | RESERVED | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Current-authority out-of-scope/reserved disposition. |
-| `C44` | RESERVED | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Current-authority out-of-scope/reserved disposition. |
-| `C45` | RESERVED | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Current-authority out-of-scope/reserved disposition. |
-| `C46` | RESERVED | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Current-authority out-of-scope/reserved disposition. |
-| `C47` | RESERVED | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Current-authority out-of-scope/reserved disposition. |
-| `C48` | RESERVED | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Current-authority out-of-scope/reserved disposition. |
-| `C49` | RESERVED | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Current-authority out-of-scope/reserved disposition. |
-| `P00` | P00 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | Current-authority PASS receipt registered with exact subject bindings. |
-| `P01` | P01 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | Current-authority PASS receipt registered with exact subject bindings. |
-| `P02` | P02 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | Current-authority PASS receipt registered with exact subject bindings. |
-| `P03` | P03 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | Current-authority PASS receipt registered with exact subject bindings. |
-| `P04` | P04 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | Current-authority PASS receipt registered with exact subject bindings. |
-| `P05` | P05 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | Current-authority PASS receipt registered with exact subject bindings. |
-| `P06` | P06 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | Current-authority PASS receipt registered with exact subject bindings. |
-| `P07` | P07 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | Current-authority PASS receipt registered with exact subject bindings. |
-| `P08` | P08 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | Current-authority PASS receipt registered with exact subject bindings. |
-| `P09` | P09 | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Current-authority Foundation evidence receipt not registered. |
+| `C41` | RESERVED | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Reserved by current authority. |
+| `C42` | RESERVED | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Reserved by current authority. |
+| `C43` | RESERVED | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Reserved by current authority. |
+| `C44` | RESERVED | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Reserved by current authority. |
+| `C45` | RESERVED | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Reserved by current authority. |
+| `C46` | RESERVED | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Reserved by current authority. |
+| `C47` | RESERVED | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Reserved by current authority. |
+| `C48` | RESERVED | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Reserved by current authority. |
+| `C49` | RESERVED | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Reserved by current authority. |
+| `P00` | P00 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | Current-authority PASS receipt registered. |
+| `P01` | P01 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | Current-authority PASS receipt registered. |
+| `P02` | P02 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | Current-authority PASS receipt registered. |
+| `P03` | P03 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | Current-authority PASS receipt registered. |
+| `P04` | P04 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | Current-authority PASS receipt registered. |
+| `P05` | P05 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | Current-authority PASS receipt registered. |
+| `P06` | P06 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | Current-authority PASS receipt registered. |
+| `P07` | P07 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | Current-authority PASS receipt registered. |
+| `P08` | P08 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | Current-authority PASS receipt registered. |
+| `P09` | P09 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | Current-authority PASS receipt registered. |
 | `P10` | P10 | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Current-authority Foundation evidence receipt not registered. |
 | `P11` | P11 | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Current-authority Foundation evidence receipt not registered. |
 | `P12` | P12 | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Current-authority Foundation evidence receipt not registered. |
@@ -91,30 +78,10 @@ Evidence authority: `governance/census/FOUNDATION-CLOSURE-EVIDENCE-REGISTRY-001.
 | `P14` | P14 | SYSTEM_MASTER/CORE | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Absorbed by current authority-selected crosswalk. |
 | `P15` | P15 | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Current-authority Foundation evidence receipt not registered. |
 
-## Evidence-complete rows
-
-`P00` is `COMPLETE_WITH_EVIDENCE` under the current evidence registry.
-
-`P01` is `COMPLETE_WITH_EVIDENCE` under the current evidence registry.
-
-`P02` is `COMPLETE_WITH_EVIDENCE` under the current evidence registry.
-
-`P03` is `COMPLETE_WITH_EVIDENCE` under the current evidence registry.
-
-`P04` is `COMPLETE_WITH_EVIDENCE` under the current evidence registry.
-
-`P05` is `COMPLETE_WITH_EVIDENCE` under the current evidence registry.
-
-`P06` is `COMPLETE_WITH_EVIDENCE` under the current evidence registry.
-
-`P07` is `COMPLETE_WITH_EVIDENCE` under the current evidence registry.
-
-`P08` is `COMPLETE_WITH_EVIDENCE` under the current evidence registry.
-
 ## Unresolved gap successor register
 
-41 `ACTIVE_GAP` rows remain. Shared platform dependencies remain first in successor order.
+40 `ACTIVE_GAP` rows remain. Shared platform dependencies remain first in successor order.
 
-**Exact next ACTIVE_GAP: `P09` - Repair broker and durable repair lineage.**
+**Exact next ACTIVE_GAP: `P10` - Second-shift supervisor: lanes, leases, fencing.**
 
-Continue `P09-P12`, `P15`, then owner-valid capability gaps in dependency-valid order.
+Continue `P10-P12`, `P15`, then owner-valid capability gaps in dependency-valid order.
