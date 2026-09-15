@@ -1,0 +1,91 @@
+name: Book B04-D2 Reader Understanding Qualification
+
+on:
+  push:
+    branches:
+      - book-system/b04-d2-reader-understanding-v1
+    paths:
+      - 'system-master/book-system/book-reader-understanding-v1.js'
+      - 'system-master/book-system/book-reader-d2.test.js'
+      - '.github/workflows/book-b04-d2-reader-understanding-qualification.yml'
+  pull_request:
+    branches:
+      - book-system/b04-d1-reader-exposure-v1
+    types: [opened, synchronize, reopened, edited, ready_for_review]
+    paths:
+      - 'system-master/book-system/book-reader-understanding-v1.js'
+      - 'system-master/book-system/book-reader-d2.test.js'
+      - '.github/workflows/book-b04-d2-reader-understanding-qualification.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Validate D2 subject
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          HEAD_REF: ${{ github.head_ref }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          if [[ "${EVENT_NAME}" == "pull_request" ]]; then
+            test "${HEAD_REF}" = "book-system/b04-d2-reader-understanding-v1"
+            [[ "${PR_HEAD_SHA}" =~ ^[0-9a-f]{40}$ ]]
+          else
+            test "${GITHUB_REF}" = "refs/heads/book-system/b04-d2-reader-understanding-v1"
+          fi
+
+      - name: Checkout exact D2 subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Verify exact checkout
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          if [[ "${EVENT_NAME}" == "pull_request" ]]; then
+            test "$(git rev-parse HEAD)" = "${PR_HEAD_SHA}"
+          else
+            test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          fi
+
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: '22'
+
+      - name: B03 knowledge baseline
+        shell: bash
+        run: node system-master/book-system/book-story-bible-knowledge-v1.test.js
+
+      - name: B03 cumulative integration baseline
+        shell: bash
+        run: node system-master/book-system/book-b03-e-cumulative-integration.test.js
+
+      - name: B04 D1 inherited registry and exposure qualification
+        shell: bash
+        run: node --test system-master/book-system/book-reader-d1.test.js
+
+      - name: B04 D2 observation and understanding qualification
+        shell: bash
+        run: node --test system-master/book-system/book-reader-d2.test.js
+
+      - name: Runtime import smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          node -e "require('./system-master/book-system/book-reader-dimension-registry-v1').validateRegistryV1()"
+          node -e "require('./system-master/book-system/book-reader-exposure-projection-v1')"
+          node -e "require('./system-master/book-system/book-reader-understanding-v1')"
