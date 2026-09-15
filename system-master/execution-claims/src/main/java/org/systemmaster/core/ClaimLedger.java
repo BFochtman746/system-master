@@ -139,8 +139,10 @@ public final class ClaimLedger {
     }
 
     /**
-     * Writes evidence under the live execution epoch. This remains usable in CLAIMED for
-     * a dispatch refusal and in DISPATCHED for completion/failure evidence.
+     * Writes ordinary successful execution evidence under the live execution epoch.
+     * Legacy callers historically used this method immediately before DONE, so when
+     * called from CLAIMED it also publishes DISPATCHED. New remote execution should use
+     * markDispatched() explicitly, which makes the acceptance boundary unambiguous.
      */
     public Receipt recordEvidence(String claimId, long epoch, String fenceToken,
             String receiptDigest, Instant now) {
@@ -150,13 +152,14 @@ public final class ClaimLedger {
             throw new IllegalStateException("CLAIM_NOT_IN_EXECUTION");
         }
         if (epoch != e.epoch) throw new SecurityException("FENCED_STALE_EXECUTOR");
-        return appendReceipt(e, epoch, receiptDigest, now);
+        Receipt receipt = appendReceipt(e, epoch, receiptDigest, now);
+        if (e.state == ClaimState.CLAIMED) e.state = ClaimState.DISPATCHED;
+        return receipt;
     }
 
     /**
-     * Closes a claim. DONE is accepted from DISPATCHED on the ordered consumer path.
-     * CLAIMED is retained for the legacy low-level evidence API until its callers are
-     * migrated; production remote execution must use Consumer's ordered completion seam.
+     * Closes a claim. DONE structurally requires DISPATCHED. FAILED may close either a
+     * rejected CLAIMED dispatch or a DISPATCHED execution/completion failure.
      */
     public void terminalize(String claimId, long epoch, String fenceToken,
             ClaimState outcome, Instant now) {
@@ -165,15 +168,25 @@ public final class ClaimLedger {
         }
         Entry e = require(claimId);
         leases.requireMutationAuthority(claimId, epoch, fenceToken, now);
-        if (e.state != ClaimState.CLAIMED && e.state != ClaimState.DISPATCHED) {
-            throw new IllegalStateException("CLAIM_NOT_IN_EXECUTION");
-        }
         if (epoch != e.epoch) throw new SecurityException("FENCED_STALE_EXECUTOR");
+
         boolean evidenced = false;
         for (Receipt r : e.receipts) {
             if (r.epoch() == epoch) { evidenced = true; break; }
         }
+        // Preserve the specific no-evidence refusal before evaluating state. Existing
+        // callers and operators rely on this code to distinguish missing proof from an
+        // illegal transition.
         if (!evidenced) throw new IllegalStateException("CLAIM_NO_EVIDENCE");
+
+        if (outcome == ClaimState.DONE) {
+            if (e.state != ClaimState.DISPATCHED) {
+                throw new IllegalStateException("CLAIM_NOT_DISPATCHED");
+            }
+        } else if (e.state != ClaimState.CLAIMED && e.state != ClaimState.DISPATCHED) {
+            throw new IllegalStateException("CLAIM_NOT_IN_EXECUTION");
+        }
+
         e.state = outcome;
         e.terminalReason = outcome == ClaimState.DONE ? "COMPLETED" : "EXECUTION_FAILED";
     }
@@ -226,6 +239,18 @@ public final class ClaimLedger {
         Receipt r = new Receipt(e.claimId, epoch, e.consumerRef, receiptDigest, now);
         e.receipts.add(r);
         return r;
+    }
+
+    /** Failure evidence never promotes a rejected CLAIMED dispatch to DISPATCHED. */
+    private Receipt recordFailureEvidence(String claimId, long epoch, String fenceToken,
+            String receiptDigest, Instant now) {
+        Entry e = require(claimId);
+        leases.requireMutationAuthority(claimId, epoch, fenceToken, now);
+        if (e.state != ClaimState.CLAIMED && e.state != ClaimState.DISPATCHED) {
+            throw new IllegalStateException("CLAIM_NOT_IN_EXECUTION");
+        }
+        if (epoch != e.epoch) throw new SecurityException("FENCED_STALE_EXECUTOR");
+        return appendReceipt(e, epoch, receiptDigest, now);
     }
 
     private Entry require(String claimId) {
@@ -328,7 +353,7 @@ public final class ClaimLedger {
                 CoordinationContracts.ExecutionLease lease, Exception failure, Instant now) {
             String reason = failure.getClass().getSimpleName()
                     + ":" + String.valueOf(failure.getMessage());
-            ledger.recordEvidence(claimId, lease.epoch(), lease.fenceToken(), reason, now);
+            ledger.recordFailureEvidence(claimId, lease.epoch(), lease.fenceToken(), reason, now);
             ledger.terminalize(claimId, lease.epoch(), lease.fenceToken(), ClaimState.FAILED, now);
         }
     }
