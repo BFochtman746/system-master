@@ -198,8 +198,8 @@ function observationSemanticV1(observation) {
 function diagnosticObservationDigestV1(observation) { return hash(observationSemanticV1(observation)); }
 
 function enforceFindingLawV1(payload, anchors, evidence, dependencies, related, signals) {
-  if (anchors.length === 0) fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', 'target_anchor_refs:NONEMPTY_REQUIRED');
   if (SUBSTANTIVE.has(payload.finding_class)) {
+    if (anchors.length === 0) fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', 'target_anchor_refs:NONEMPTY_REQUIRED');
     if (payload.standing !== 'ACCEPTED_UNCALIBRATED') fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', 'substantive_standing');
     if (evidence.length === 0 || dependencies.length === 0) fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', 'substantive_evidence_required');
     if (payload.evidence_strength_class === 'UNSPECIFIED') fail('BLOCKED_OBSERVATION_BINDING_MISMATCH', 'substantive_strength_required');
