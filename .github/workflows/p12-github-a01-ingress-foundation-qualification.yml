@@ -100,18 +100,23 @@ jobs:
           if (!live || live.workstream_id !== 'SECOND-SHIFT-CONTROL-GATEWAY' || live.gate_class !== 'consolidated' || live.source !== 'subject') throw new Error('P12_PREDECESSOR_QUALIFIER_REGISTRATION_INVALID');
           const expectedPeers = secondShift.auto_provisioning_invariant?.expected_active_peers;
           if (!Array.isArray(expectedPeers) || expectedPeers.length !== 9 || !expectedPeers.includes('PROGRAMMING')) throw new Error('P12_SECOND_SHIFT_OWNER_AUTHORITY_INVALID');
+          if (secondShift.coverage_routes?.['SYSTEM_MASTER/SHARED_INFRASTRUCTURE/A01'] !== 'CORE') throw new Error('P12_SHARED_A01_COVERAGE_ROUTE_INVALID');
           if (!ingress.includes('EXECUTION_ENVELOPE_PROTOCOL = "control-gateway.a01-github-ingress-execution.v1"')) throw new Error('P12_EXECUTION_ENVELOPE_PROTOCOL_MISSING');
           if (!ingress.includes('validate_a01_execution_envelope')) throw new Error('P12_EXECUTION_REVALIDATION_MISSING');
           if (!ingress.includes('NO_PRE_ADMITTED_A01_EXECUTION')) throw new Error('P12_PRE_ADMISSION_BARRIER_MISSING');
           if (ingress.includes('def build_handoff(') || ingress.includes('def build_contract(')) throw new Error('P12_LOCAL_AUTHORITY_CONSTRUCTOR_PRESENT');
           if (!ingress.includes('A01_CONTROL_PLANE_QUALIFICATION')) throw new Error('P12_PRODUCTION_EXECUTOR_BINDING_MISSING');
+          if (!ingress.includes('task_id != obligation_id')) throw new Error('P12_CURRENT_OBLIGATION_TASK_BINDING_MISSING');
+          if (!ingress.includes('administrative_owner') || !ingress.includes('coverage_routes')) throw new Error('P12_SHARED_OWNER_ROUTE_REVALIDATION_MISSING');
           if (!ingress.includes('resolve_ref_head')) throw new Error('P12_LIVE_OWNER_HEAD_REVALIDATION_MISSING');
           if (!ingress.includes('class GitHubSource') || !ingress.includes('class NightBudget') || !ingress.includes('class KillSwitch')) throw new Error('P12_REQUIRED_RUNTIME_MISSING');
           if (!service.includes('A01NightScheduler') || !service.includes('SupervisorStore')) throw new Error('P12_REAL_WIRING_MISSING');
           if (!bridge.includes('tests') || !bridge.includes('test_a01_github_ingress.py') || !bridge.includes('a01_ingress_service')) throw new Error('P12_A01_DISCOVERY_BRIDGE_MISSING');
           if (!tests.includes('test_module_has_no_local_admission_or_coordination_builder')) throw new Error('P12_NO_LOCAL_AUTHORITY_TEST_MISSING');
           if (!tests.includes('test_exact_pre_admitted_objects_are_forwarded_to_p11')) throw new Error('P12_EXACT_FORWARDING_TEST_MISSING');
-          if (!contract.includes('does not mint admission authority') || !contract.includes('NO_PRE_ADMITTED_A01_EXECUTION')) throw new Error('P12_CONTRACT_PRE_ADMISSION_BOUNDARY_MISSING');
+          if (!tests.includes('test_admission_task_id_drift_fails_even_with_valid_digests')) throw new Error('P12_TASK_ID_REBIND_TEST_MISSING');
+          if (!tests.includes('test_shared_obligation_requires_matching_administrative_owner')) throw new Error('P12_SHARED_OWNER_ROUTE_TEST_MISSING');
+          if (!contract.includes('does not mint admission authority') || !contract.includes('NO_PRE_ADMITTED_A01_EXECUTION') || !contract.includes('task_id')) throw new Error('P12_CONTRACT_PRE_ADMISSION_BOUNDARY_MISSING');
           console.log('P12_HOSTED_PREQUALIFICATION=PASS');
           NODE
 
@@ -135,6 +140,8 @@ jobs:
               'exact_subject_revalidated': True,
               'live_owner_head_revalidated': True,
               'owner_control_identity_revalidated': True,
+              'current_obligation_task_id_revalidated': True,
+              'shared_administrative_owner_route_revalidated': True,
               'payload_digest_revalidated': True,
               'coordination_contract_revalidated': True,
               'exact_objects_forwarded_to_p11': True,
