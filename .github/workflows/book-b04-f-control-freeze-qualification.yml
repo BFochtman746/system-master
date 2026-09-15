@@ -1,0 +1,175 @@
+name: Book B04 F Deterministic Control Freeze Qualification
+
+on:
+  push:
+    branches:
+      - book-system/b04-f-control-freeze-v1
+    paths:
+      - 'qualification/book-system/reconstruction/BOOK-RECONSTRUCTION-B04-F-*'
+      - '.github/workflows/book-b04-f-control-freeze-qualification.yml'
+  pull_request:
+    branches:
+      - book-system/b04-e-128-cumulative-v1
+    types: [opened, synchronize, reopened, edited, ready_for_review]
+    paths:
+      - 'qualification/book-system/reconstruction/BOOK-RECONSTRUCTION-B04-F-*'
+      - '.github/workflows/book-b04-f-control-freeze-qualification.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  freeze-verify:
+    name: Node ${{ matrix.node }} — exact B04 freeze verification
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['22','24']
+    steps:
+      - name: Validate B04 F subject
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          HEAD_REF: ${{ github.head_ref }}
+          BASE_REF: ${{ github.base_ref }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          if [[ "${EVENT_NAME}" == "pull_request" ]]; then
+            test "${HEAD_REF}" = "book-system/b04-f-control-freeze-v1"
+            test "${BASE_REF}" = "book-system/b04-e-128-cumulative-v1"
+            [[ "${PR_HEAD_SHA}" =~ ^[0-9a-f]{40}$ ]]
+          else
+            test "${GITHUB_REF}" = "refs/heads/book-system/b04-f-control-freeze-v1"
+          fi
+
+      - name: Checkout exact B04 F subject with full lineage
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Verify exact checkout
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          if [[ "${EVENT_NAME}" == "pull_request" ]]; then
+            test "$(git rev-parse HEAD)" = "${PR_HEAD_SHA}"
+          else
+            test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          fi
+          printf 'freeze_subject_sha=%s\n' "$(git rev-parse HEAD)" | tee b04-f-subject-${{ matrix.node }}.txt
+          printf 'freeze_subject_tree=%s\n' "$(git show -s --format=%T HEAD)" | tee -a b04-f-subject-${{ matrix.node }}.txt
+
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Bind Node version
+        shell: bash
+        run: node --version | tee -a b04-f-subject-${{ matrix.node }}.txt
+
+      - name: Verify exact freeze manifest, lineage and unchanged runtime bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          node qualification/book-system/reconstruction/BOOK-RECONSTRUCTION-B04-F-FREEZE-VERIFY-001.js | tee b04-f-freeze-verify-${{ matrix.node }}.log
+          grep -F '"result":"PASS"' b04-f-freeze-verify-${{ matrix.node }}.log
+          grep -F '"runtime_blob_bindings_verified":5' b04-f-freeze-verify-${{ matrix.node }}.log
+          grep -F '"isolated_denominator":128' b04-f-freeze-verify-${{ matrix.node }}.log
+          grep -F '"external_fences_closed":0' b04-f-freeze-verify-${{ matrix.node }}.log
+          grep -F '"runtime_semantics_changed_by_freeze":false' b04-f-freeze-verify-${{ matrix.node }}.log
+
+      - name: Re-prove frozen B04 isolated denominator
+        shell: bash
+        run: |
+          set -euo pipefail
+          node -e "require('./system-master/book-system/book-b04-e-denominator-manifest-v1').validateDenominatorManifestV1()"
+          node --test --test-reporter=tap \
+            system-master/book-system/book-b04-e-exposure.test.js \
+            system-master/book-system/book-b04-e-dimensions.test.js \
+            system-master/book-system/book-b04-e-perspective.test.js \
+            system-master/book-system/book-b04-e-understanding.test.js \
+            system-master/book-system/book-b04-e-invalidation.test.js \
+            | tee b04-f-128-${{ matrix.node }}.log
+          grep -E '^# tests 128$' b04-f-128-${{ matrix.node }}.log
+          grep -E '^# pass 128$' b04-f-128-${{ matrix.node }}.log
+          grep -E '^# fail 0$' b04-f-128-${{ matrix.node }}.log
+          grep -E '^# skipped 0$' b04-f-128-${{ matrix.node }}.log
+          grep -E '^# todo 0$' b04-f-128-${{ matrix.node }}.log
+          grep -E '^# cancelled 0$' b04-f-128-${{ matrix.node }}.log
+
+      - name: Re-prove B04 cumulative integration supplement
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test --test-reporter=tap system-master/book-system/book-b04-e-cumulative-integration.test.js | tee b04-f-integration-${{ matrix.node }}.log
+          grep -E '^# tests 8$' b04-f-integration-${{ matrix.node }}.log
+          grep -E '^# pass 8$' b04-f-integration-${{ matrix.node }}.log
+          grep -E '^# fail 0$' b04-f-integration-${{ matrix.node }}.log
+
+      - name: Runtime import smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          node -e "require('./system-master/book-system/book-reader-dimension-registry-v1').validateRegistryV1()"
+          node -e "require('./system-master/book-system/book-reader-exposure-projection-v1')"
+          node -e "require('./system-master/book-system/book-reader-understanding-v1')"
+          node -e "require('./system-master/book-system/book-reader-currentness-runtime-v1')"
+          node -e "require('./system-master/book-system/book-reader-query-runtime-v1')"
+          node -e "require('./system-master/book-system/book-b04-e-denominator-manifest-v1').validateDenominatorManifestV1()"
+
+      - name: Record preserved external fences
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > b04-f-fences-${{ matrix.node }}.json <<'JSON'
+          {
+            "MODEL_READER_SIMULATION_CALIBRATION_REQUIRED": "OPEN",
+            "HUMAN_READER_ALIGNMENT_REQUIRED": "OPEN",
+            "REAL_BOOK_LONG_FORM_CALIBRATION_REQUIRED": "OPEN",
+            "PROVIDER_SUBJECT_ADMISSION_REQUIRED": "OPEN",
+            "external_fences_closed": 0,
+            "denominator_shrinkage": 0,
+            "historical_pass_transferred": 0,
+            "b01_provider_registry_widened": false,
+            "canonical_effect": false,
+            "runtime_semantics_changed_by_freeze": false
+          }
+          JSON
+
+      - name: Hash freeze evidence
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          sha256sum \
+            b04-f-subject-${{ matrix.node }}.txt \
+            b04-f-freeze-verify-${{ matrix.node }}.log \
+            b04-f-128-${{ matrix.node }}.log \
+            b04-f-integration-${{ matrix.node }}.log \
+            b04-f-fences-${{ matrix.node }}.json \
+            > b04-f-node-${{ matrix.node }}.sha256
+
+      - name: Upload exact-subject freeze evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: book-b04-f-node-${{ matrix.node }}-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            b04-f-subject-${{ matrix.node }}.txt
+            b04-f-freeze-verify-${{ matrix.node }}.log
+            b04-f-128-${{ matrix.node }}.log
+            b04-f-integration-${{ matrix.node }}.log
+            b04-f-fences-${{ matrix.node }}.json
+            b04-f-node-${{ matrix.node }}.sha256
+          if-no-files-found: error
