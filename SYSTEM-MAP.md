@@ -40,6 +40,14 @@ Exactly nine active peers exist. `WEBSITE_BUILDING` is C40 under Programming and
 
 Capabilities C35 AIINCOME, C36 CAD, C37 PHONEOPS, C38 PHYSICALAI and C39 PORTFOLIO retain the explicit non-owned/deferred dispositions in the canonical crosswalk. C41-C49 remain reserved/unallocated. Reserved IDs are not renumbered.
 
+## Registered implementation subsystems
+
+Implementation-subsystem registration satisfies `STANDARDS.md` S-05 and does **not** add a peer, move semantic ownership, or create a new authority domain.
+
+| Subsystem | What it is | Repository path | Tests | Owner | Logs / evidence |
+|---|---|---|---:|---|---|
+| `learning-handler-binding-001` | Thin, transport-neutral inbound registration/adaptation seam for the frozen Learning/Curriculum command/query contracts. CORE remains router/dispatcher and generic physical-persistence-mechanics owner; LEARNING remains sole owner of Learning/Curriculum semantic state and operation meaning. | `system-master/learning-handler-binding-001/` | 2 runnable qualification entry points covering I001–I008 | `LEARNING` (`CURRICULUM` + `LEARNING` semantics) | `Required Verification / required-verification`; Maven `target/surefire-reports/`; Learning handler-binding governance receipts |
+
 ## Platform requirements P00-P15
 
 Platform requirements are dependencies, not peer systems. They remain CORE-owned shared infrastructure unless the canonical crosswalk marks an absorbed dependency. P00 is the authority pointer, P01 topology/ownership, P02 obligation registry, P03 evidence retention, P04 content-addressed authority writes, P05 governance validation, P06 control-gateway admission, P07 A-01 barrier, P08 qualification semantics, P09 repair lineage, P10 Second Shift supervisor, P11 night scheduler, P12 GitHub ingress, P13 model routing/local inference (absorbed into C20), P14 connector action runtime (absorbed into C27), and P15 observability/morning receipt/rollback.
