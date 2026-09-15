@@ -92,7 +92,7 @@ export function normalizeA01Dispatch({ workflow = A01_DISPATCH_WORKFLOW, ref, in
   // GitHub workflow_dispatch currently permits at most ten declared inputs. The frozen
   // P06 packet therefore remains fifteen logical fields while six advanced fields travel
   // inside one validated JSON envelope. Both the bridge and direct gateway understand it.
-  const normalizedInputs = Object.freeze({
+  const normalizedInputs = {
     qualification_id: inputs.qualification_id,
     workstream_id: inputs.workstream_id,
     subject_sha: inputs.subject_sha,
@@ -103,7 +103,15 @@ export function normalizeA01Dispatch({ workflow = A01_DISPATCH_WORKFLOW, ref, in
     repair_attempt: String(repairAttempt),
     max_repair_attempts: String(maxRepairAttempts),
     advanced_json: JSON.stringify(advanced)
+  };
+  // Backward-compatible read aliases for callers that inspected the old normalized
+  // timeout fields. They are deliberately non-enumerable, so JSON serialization and the
+  // GitHub workflow_dispatch wire contract remain exactly ten physical inputs.
+  Object.defineProperties(normalizedInputs, {
+    qualifier_timeout_minutes: { value: String(qualifierTimeout), enumerable: false },
+    job_timeout_minutes: { value: String(jobTimeout), enumerable: false }
   });
+  Object.freeze(normalizedInputs);
   return Object.freeze({ workflow, ref, inputs: normalizedInputs });
 }
 
