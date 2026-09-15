@@ -272,7 +272,7 @@ function computeLiteraryDiagnosticInvalidationV1(input) {
     diagnosis_current: diagnosisCurrent,
     opportunity_ledger_current: ledgerCurrent,
     recompute_layers: recompute,
-    standing: allChanges.length === 0 ? 'CURRENT' : 'STALE',
+    standing: (contextCurrent && diagnosisCurrent && ledgerCurrent) ? 'CURRENT' : 'STALE',
     canonical_effect: false
   };
   const dg = literaryCurrentnessDigestV1(out);
@@ -318,18 +318,31 @@ function validateLiteraryDiagnosticCurrentnessV1(receipt, context, diagnosis, le
   validateSnapshotRefsV1(receipt.dependency_snapshot_refs, 'dependency_snapshot_refs');
   validateSnapshotRefsV1(receipt.observation_snapshot_refs, 'observation_snapshot_refs');
   validateSnapshotRefsV1(receipt.craft_record_snapshot_refs, 'craft_record_snapshot_refs');
+
+  const exactDependencies = expectedDependencyRefsV1(context, diagnosis);
+  const exactObservations = diagnosis.observation_refs.map(clone).sort((a,b) => a.observation_id.localeCompare(b.observation_id));
+  const exactCraftRecords = ledger.craft_intelligence_refs.map(clone).sort((a,b) => a.craft_record_id.localeCompare(b.craft_record_id));
+  if (stable(receipt.dependency_snapshot_refs) !== stable(exactDependencies)) fail('BLOCKED_CURRENTNESS_REQUIRED', 'dependency_snapshot_binding');
+  if (stable(receipt.observation_snapshot_refs) !== stable(exactObservations)) fail('BLOCKED_CURRENTNESS_REQUIRED', 'observation_snapshot_binding');
+  if (stable(receipt.craft_record_snapshot_refs) !== stable(exactCraftRecords)) fail('BLOCKED_CURRENTNESS_REQUIRED', 'craft_snapshot_binding');
+
   if (!Array.isArray(receipt.changed_dependency_refs) || !Array.isArray(receipt.stale_observation_refs) || !Array.isArray(receipt.stale_craft_record_refs)) fail('BLOCKED_CURRENTNESS_REQUIRED', 'change_arrays');
   for (const x of receipt.changed_dependency_refs) {
     exactKeys(x, ['dependency_kind','dependency_ref','expected_digest','current_digest','change_class'], 'BLOCKED_CURRENTNESS_REQUIRED', 'changed_dependency_ref');
     if (!text(x.dependency_kind) || !text(x.dependency_ref) || !digest(x.expected_digest) || (x.current_digest !== null && !digest(x.current_digest)) || !['MISSING_OR_IDENTITY_CHANGED','DIGEST_CHANGED','NOT_CURRENT'].includes(x.change_class)) fail('BLOCKED_CURRENTNESS_REQUIRED', 'changed_dependency_ref');
   }
+  const exactStaleObservations = receipt.changed_dependency_refs.filter(x => x.dependency_kind === 'B05_DIAGNOSTIC_OBSERVATION').map(x => x.dependency_ref).sort();
+  const exactStaleCraft = receipt.changed_dependency_refs.filter(x => x.dependency_kind === 'B05_CRAFT_INTELLIGENCE').map(x => x.dependency_ref).sort();
+  if (stable(receipt.stale_observation_refs) !== stable(exactStaleObservations)) fail('BLOCKED_CURRENTNESS_REQUIRED', 'stale_observation_binding');
+  if (stable(receipt.stale_craft_record_refs) !== stable(exactStaleCraft)) fail('BLOCKED_CURRENTNESS_REQUIRED', 'stale_craft_binding');
+
   if ([receipt.context_current, receipt.diagnosis_current, receipt.opportunity_ledger_current].some(x => typeof x !== 'boolean')) fail('BLOCKED_CURRENTNESS_REQUIRED', 'current_booleans');
   if (receipt.diagnosis_current && !receipt.context_current) fail('BLOCKED_CURRENTNESS_REQUIRED', 'layer_order');
   if (receipt.opportunity_ledger_current && !receipt.diagnosis_current) fail('BLOCKED_CURRENTNESS_REQUIRED', 'layer_order');
   const expectedRecompute = recomputeLayersV1(receipt.context_current, receipt.diagnosis_current, receipt.opportunity_ledger_current);
   if (stable(receipt.recompute_layers) !== stable(expectedRecompute) || receipt.recompute_layers.some(x => !RECOMPUTE_LAYERS.includes(x))) fail('BLOCKED_CURRENTNESS_REQUIRED', 'recompute_layers');
   if (!CURRENTNESS_STANDINGS.includes(receipt.standing)) fail('BLOCKED_CURRENTNESS_REQUIRED', 'standing');
-  const expectedStanding = receipt.changed_dependency_refs.length === 0 ? 'CURRENT' : 'STALE';
+  const expectedStanding = (receipt.context_current && receipt.diagnosis_current && receipt.opportunity_ledger_current) ? 'CURRENT' : 'STALE';
   if (receipt.standing !== expectedStanding) fail('BLOCKED_CURRENTNESS_REQUIRED', 'standing_mismatch');
   if (receipt.canonical_effect !== false) fail('BLOCKED_CANONICAL_EFFECT_FORBIDDEN');
   if (!digest(receipt.currentness_digest)) fail('BLOCKED_DIGEST_MISMATCH', 'currentness_digest');
