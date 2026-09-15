@@ -1,0 +1,77 @@
+name: Book B04 Exact Subject Qualification
+
+on:
+  workflow_dispatch:
+    inputs:
+      subject_ref:
+        description: Candidate Book branch name bound to the requested subject SHA
+        required: true
+        type: string
+      expected_subject_sha:
+        description: Exact candidate commit SHA to qualify
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  ALLOWED_SUBJECT_REF: book-system/b04-d1-reader-exposure-v1
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Validate qualification request
+        shell: bash
+        env:
+          SUBJECT_REF: ${{ inputs.subject_ref }}
+          EXPECTED_SUBJECT_SHA: ${{ inputs.expected_subject_sha }}
+        run: |
+          set -euo pipefail
+          test "${GITHUB_REF}" = "refs/heads/book-system/control-v1"
+          test "${SUBJECT_REF}" = "${ALLOWED_SUBJECT_REF}"
+          [[ "${EXPECTED_SUBJECT_SHA}" =~ ^[0-9a-f]{40}$ ]]
+
+      - name: Checkout exact candidate SHA
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ inputs.expected_subject_sha }}
+          fetch-depth: 1
+          persist-credentials: true
+
+      - name: Verify exact candidate binding
+        shell: bash
+        env:
+          SUBJECT_REF: ${{ inputs.subject_ref }}
+          EXPECTED_SUBJECT_SHA: ${{ inputs.expected_subject_sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${EXPECTED_SUBJECT_SHA}"
+          git fetch --quiet origin "refs/heads/${SUBJECT_REF}:refs/remotes/origin/b04-subject"
+          test "$(git rev-parse refs/remotes/origin/b04-subject)" = "${EXPECTED_SUBJECT_SHA}"
+
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: '22'
+
+      - name: B03 knowledge baseline
+        shell: bash
+        run: node system-master/book-system/book-story-bible-knowledge-v1.test.js
+
+      - name: B03 cumulative integration baseline
+        shell: bash
+        run: node system-master/book-system/book-b03-e-cumulative-integration.test.js
+
+      - name: B04 D1 registry and exposure qualification
+        shell: bash
+        run: node --test system-master/book-system/book-reader-d1.test.js
+
+      - name: Runtime import smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          node -e "require('./system-master/book-system/book-reader-dimension-registry-v1').validateRegistryV1()"
+          node -e "require('./system-master/book-system/book-reader-exposure-projection-v1')"
