@@ -1,0 +1,81 @@
+name: Book B05-C Design Lock Verification
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+    branches:
+      - book-system/b05-b-literary-craft-analysis-v1
+    paths:
+      - 'qualification/book-system/reconstruction/BOOK-RECONSTRUCTION-B05-C-DESIGN-LOCK-001.md'
+      - 'qualification/book-system/reconstruction/BOOK-RECONSTRUCTION-B05-C-LOCK-MANIFEST-001.json'
+      - 'qualification/book-system/reconstruction/BOOK-RECONSTRUCTION-B05-C-LOCK-VERIFY-001.js'
+      - 'qualification/book-system/reconstruction/BOOK-RECONSTRUCTION-B05-C-QUALIFICATION-DENOMINATOR-001.csv'
+      - 'qualification/book-system/reconstruction/LITERARY-DIAGNOSTIC-LENS-REGISTRY_v1.0.csv'
+      - '.github/workflows/book-b05-c-design-lock-verification.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify-design-lock:
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [22, 24]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 1
+
+      - name: Prove exact subject
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+          echo "subject_sha=$(git rev-parse HEAD)"
+
+      - name: Setup Node ${{ matrix.node }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Verify frozen B05-C lock
+        shell: bash
+        run: |
+          set -euo pipefail
+          node qualification/book-system/reconstruction/BOOK-RECONSTRUCTION-B05-C-LOCK-VERIFY-001.js | tee b05-c-lock-verify.log
+
+      - name: Seal evidence manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            echo "subject_sha=${{ github.event.pull_request.head.sha }}"
+            echo "node=$(node --version)"
+            echo "workflow=book-b05-c-design-lock-verification"
+            echo "lens_count=16"
+            echo "external_b08_seams=2"
+            echo "denominator_total=152"
+            echo "groups=C24,S36,K20,O24,I24,X24"
+            echo "historical_pass_transfer=0"
+            echo "canonical_effect=false"
+            sha256sum qualification/book-system/reconstruction/BOOK-RECONSTRUCTION-B05-C-DESIGN-LOCK-001.md
+            sha256sum qualification/book-system/reconstruction/BOOK-RECONSTRUCTION-B05-C-LOCK-MANIFEST-001.json
+            sha256sum qualification/book-system/reconstruction/LITERARY-DIAGNOSTIC-LENS-REGISTRY_v1.0.csv
+            sha256sum qualification/book-system/reconstruction/BOOK-RECONSTRUCTION-B05-C-QUALIFICATION-DENOMINATOR-001.csv
+            sha256sum qualification/book-system/reconstruction/BOOK-RECONSTRUCTION-B05-C-LOCK-VERIFY-001.js
+          } > b05-c-design-lock-evidence.txt
+          cat b05-c-design-lock-evidence.txt
+
+      - name: Upload B05-C lock evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: book-b05-c-design-lock-node-${{ matrix.node }}-${{ github.event.pull_request.head.sha }}
+          path: |
+            b05-c-lock-verify.log
+            b05-c-design-lock-evidence.txt
+          if-no-files-found: error
+          retention-days: 30
