@@ -1,0 +1,137 @@
+name: P10 Second Shift Supervisor Foundation Qualification
+
+on:
+  pull_request:
+    paths:
+      - 'tools/second_shift_supervisor_v2.py'
+      - 'tests/test_second_shift_supervisor_v2.py'
+      - 'tests/test_second_shift_supervisor_p10_foundation.py'
+      - 'tests/run_second_shift_supervisor_v2_optimized.py'
+      - '.github/scripts/a01-second-shift-supervisor-v2-qualify.js'
+      - '.github/workflows/p10-second-shift-supervisor-foundation-qualification.yml'
+      - 'governance/contracts/P10-FOUNDATION-CONTRACT-001.md'
+      - 'governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-*.json'
+      - 'qualification/a01/registry.json'
+      - 'qualification/a01/a01-policy.json'
+  push:
+    branches: [main]
+    paths:
+      - 'tools/second_shift_supervisor_v2.py'
+      - 'tests/test_second_shift_supervisor_v2.py'
+      - 'tests/test_second_shift_supervisor_p10_foundation.py'
+      - 'tests/run_second_shift_supervisor_v2_optimized.py'
+      - '.github/scripts/a01-second-shift-supervisor-v2-qualify.js'
+      - '.github/workflows/p10-second-shift-supervisor-foundation-qualification.yml'
+      - 'governance/contracts/P10-FOUNDATION-CONTRACT-001.md'
+      - 'governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-*.json'
+      - 'qualification/a01/registry.json'
+      - 'qualification/a01/a01-policy.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  prequalify:
+    name: Prequalify P10 lane lease and fencing invariants
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact P10 subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Assert Python runtime and syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          python --version
+          python - <<'PY'
+          import sys
+          if sys.version_info < (3, 12):
+              raise SystemExit(f'P10 requires Python 3.12+, found {sys.version}')
+          PY
+          python -m py_compile tools/second_shift_supervisor_v2.py
+          python -m py_compile tests/test_second_shift_supervisor_v2.py
+          python -m py_compile tests/test_second_shift_supervisor_p10_foundation.py
+          python -m py_compile tests/run_second_shift_supervisor_v2_optimized.py
+      - name: Run targeted P10 Foundation invariants
+        run: python tests/test_second_shift_supervisor_p10_foundation.py
+      - name: Run crash concurrency and 20000 transition stress
+        run: python tests/run_second_shift_supervisor_v2_optimized.py
+      - name: Assert current P10 authority and live qualifier registration
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs = require('fs');
+          const crosswalk = JSON.parse(fs.readFileSync('governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json', 'utf8'));
+          const registry = JSON.parse(fs.readFileSync('qualification/a01/registry.json', 'utf8'));
+          const contract = fs.readFileSync('governance/contracts/P10-FOUNDATION-CONTRACT-001.md', 'utf8');
+          const qualifier = fs.readFileSync('.github/scripts/a01-second-shift-supervisor-v2-qualify.js', 'utf8');
+          const p10 = crosswalk.platform_requirements.find(x => x.platform_id === 'P10');
+          if (!p10 || p10.implementation !== 'tools/second_shift_supervisor_v2.py') throw new Error('P10_CANONICAL_IMPLEMENTATION_POINTER_INVALID');
+          const live = registry.qualifications['SECOND-SHIFT-SUPERVISOR-V2-A01-STRESS'];
+          if (!live || live.workstream_id !== 'SECOND-SHIFT-CONTROL-GATEWAY' || live.gate_class !== 'consolidated' || live.source !== 'subject') throw new Error('P10_LIVE_QUALIFIER_REGISTRATION_INVALID');
+          if (!qualifier.includes("stage('P10_FOUNDATION_INVARIANTS'")) throw new Error('P10_TARGETED_SUITE_NOT_BOUND_TO_A01');
+          if (!qualifier.includes("report.randomized_transitions !== 20000")) throw new Error('P10_20K_RIGOR_ASSERTION_MISSING');
+          if (!contract.includes('P11 owns night-wide ordering') || !contract.includes('32-way contention')) throw new Error('P10_CONTRACT_BOUNDARY_OR_ACCEPTANCE_MISSING');
+          console.log('P10_HOSTED_PREQUALIFICATION=PASS');
+          NODE
+      - name: Upload hosted P10 stress evidence
+        if: always() && hashFiles('.second-shift-supervisor-v2-stress.json') != ''
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p10-hosted-supervisor-stress-${{ github.run_id }}
+          path: .second-shift-supervisor-v2-stress.json
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 30
+
+  live_a01:
+    name: Live exact-SHA A-01 supervisor qualification
+    needs: prequalify
+    uses: ./.github/workflows/a01-control-plane-gateway.yml
+    with:
+      qualification_id: SECOND-SHIFT-SUPERVISOR-V2-A01-STRESS
+      workstream_id: SECOND-SHIFT-CONTROL-GATEWAY
+      subject_sha: ${{ github.event.pull_request.head.sha || github.sha }}
+      origin_ref: ${{ github.head_ref || github.ref }}
+      resume_on_pass: 'Adjudicate P10 exact-SHA lane, lease, fencing and recovery evidence and continue Foundation closure.'
+      resume_on_failure: 'Preserve P10 evidence, classify the exact failure, and repair only the failing supervisor boundary.'
+      notification_target: foundation-p10
+      execution_context: normal
+      qualifier_timeout_minutes: 28
+      job_timeout_minutes: 30
+    secrets: inherit
+
+  assert_live_result:
+    name: Assert authoritative P10 live result
+    needs: [prequalify, live_a01]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Fail closed unless A-01 proves exact P10 subject
+        shell: bash
+        env:
+          LIVE_JOB_RESULT: ${{ needs.live_a01.result }}
+          RESULT_CLASS: ${{ needs.live_a01.outputs.result_class }}
+          PROMOTION_AUTHORIZED: ${{ needs.live_a01.outputs.promotion_authorized }}
+          ADMISSION_STATE: ${{ needs.live_a01.outputs.admission_state }}
+          CONTROL_PLANE_SHA: ${{ needs.live_a01.outputs.control_plane_sha }}
+          EXPECTED_SUBJECT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          EXPECTED_CONTROL_PLANE_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          test "$LIVE_JOB_RESULT" = "success"
+          test "$ADMISSION_STATE" = "ADMITTED"
+          test "$RESULT_CLASS" = "PASS"
+          test "$PROMOTION_AUTHORIZED" = "false"
+          [[ "$EXPECTED_SUBJECT_SHA" =~ ^[0-9a-fA-F]{40}$ ]]
+          [[ "$CONTROL_PLANE_SHA" =~ ^[0-9a-fA-F]{40}$ ]]
+          test "${CONTROL_PLANE_SHA,,}" = "${EXPECTED_CONTROL_PLANE_SHA,,}"
+          printf 'P10_LIVE_A01=PASS\nP10_RESULT_CLASS=%s\nP10_PROMOTION_AUTHORIZED=%s\nP10_SUBJECT_SHA=%s\nP10_CONTROL_PLANE_SHA=%s\n' "$RESULT_CLASS" "$PROMOTION_AUTHORIZED" "$EXPECTED_SUBJECT_SHA" "$CONTROL_PLANE_SHA"
