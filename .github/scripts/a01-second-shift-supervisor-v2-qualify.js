@@ -30,12 +30,6 @@ function readJson(file) { return JSON.parse(fs.readFileSync(file, 'utf8')); }
 function writeJson(file, value) { fs.mkdirSync(path.dirname(file), { recursive: true }); fs.writeFileSync(file, `${JSON.stringify(value, null, 2)}\n`, 'utf8'); }
 
 function main() {
-  // CI-ONLY GATE (locally opt-in). This qualifier demands a CI-supplied subject SHA
-  // equal to HEAD, then runs the full supervisor suite including a 20k-transition
-  // stress run. Off CI that SHA is simply absent, which produced a cryptic
-  // INVALID_A01_SUBJECT_SHA that read as a defect rather than "does not apply here".
-  // Behaviour under CI is unchanged; opt in anywhere with SYSTEM_MASTER_RUN_CI_ONLY=1,
-  // in which case the current HEAD becomes the subject.
   const inCi = process.env.GITHUB_ACTIONS === 'true';
   const optIn = process.env.SYSTEM_MASTER_RUN_CI_ONLY === '1';
   if (!SHA_RE.test(EXPECTED_SHA) && !inCi && !optIn) {
@@ -62,6 +56,7 @@ function main() {
     'tests/run_control_gateway_failure_restart_idempotency_bounded.py',
     'tests/test_control_gateway_cg011_dispatch_failure_replay.py',
     'tests/test_control_gateway_cg011_adversarial_closure.py',
+    'tests/test_second_shift_supervisor_p10_foundation.py',
     'tests/run_second_shift_supervisor_v2_optimized.py',
   ];
   const stages = [];
@@ -78,6 +73,7 @@ function main() {
   };
 
   stage('PYTHON_COMPILE', 'python', ['-m', 'py_compile', ...syntaxTargets], { timeout: 120000 });
+  stage('P10_FOUNDATION_INVARIANTS', 'python', ['tests/test_second_shift_supervisor_p10_foundation.py'], { timeout: 180000 });
   stage('CONTROL_GATEWAY_NODE_SUITE', 'node', ['--test'], { cwd: path.join(ROOT, 'control-gateway'), timeout: 180000 });
   stage('CG008_SUPERVISOR_ADAPTER', 'python', ['tests/test_control_gateway_a01_supervisor_adapter.py'], { timeout: 120000 });
   stage('CG009_COORDINATION_BASE', 'python', ['tests/test_control_gateway_a01_supervisor_coordination.py'], { timeout: 120000 });
@@ -96,12 +92,20 @@ function main() {
   stage('CG011_ADVERSARIAL_CLOSURE', 'python', ['tests/test_control_gateway_cg011_adversarial_closure.py'], { timeout: 180000 });
 
   const evidence = {
-    evidence_version: 2,
+    evidence_version: 3,
     qualification_id: process.env.A01_QUALIFICATION_ID || 'SECOND-SHIFT-SUPERVISOR-V2-A01-STRESS',
     workstream_id: process.env.A01_WORKSTREAM_ID || 'SECOND-SHIFT-CONTROL-GATEWAY',
     subject_sha: actual,
-    foundation_rule: 'BOTTOM_UP_INDIVIDUAL_THEN_CUMULATIVE_THEN_TARGET_HOST',
-    cumulative_modules: ['CG-008', 'CG-009', 'CG-010', 'CG-011'],
+    foundation_requirement: 'P10',
+    foundation_rule: 'TARGETED_P10_INVARIANTS_THEN_BOTTOM_UP_CUMULATIVE_THEN_TARGET_HOST',
+    p10_invariants: [
+      'EXACTLY_ONE_CLAIM_WINNER_UNDER_32_WAY_CONTENTION',
+      'RECOVERY_FENCES_STALE_WORKER_WRITES',
+      'LEASE_AND_HEARTBEAT_BOUNDARY_REASON_SEMANTICS',
+      'CIRCUIT_NEXT_PROBE_ON_RETRY_BUDGET_EXHAUSTION',
+      'AUDIT_INVARIANT_CORRUPTION_DETECTION',
+    ],
+    cumulative_modules: ['P10', 'CG-008', 'CG-009', 'CG-010', 'CG-011'],
     completed_stages: stages,
     adapter_contract: 'control-gateway.a01-supervisor-handoff.v1',
     scheduling_owner: 'A01_SUPERVISOR',
@@ -111,6 +115,7 @@ function main() {
   writeJson(path.join(EVIDENCE_DIR, 'second-shift-supervisor-v2-stress.json'), report);
   writeJson(path.join(EVIDENCE_DIR, 'cg011-a01-cumulative-qualification.json'), evidence);
   console.log('CG011_A01_CUMULATIVE_QUALIFIER=PASS');
+  console.log('P10_FOUNDATION_INVARIANTS=PASS');
 }
 
 try { main(); }
