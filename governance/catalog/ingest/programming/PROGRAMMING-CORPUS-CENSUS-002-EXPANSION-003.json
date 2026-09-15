@@ -1,0 +1,71 @@
+{
+  "record_id": "PROGRAMMING-CORPUS-CENSUS-002-EXPANSION-003",
+  "supersedes": "PROGRAMMING-CORPUS-CENSUS-002-EXPANSION-002",
+  "parent_census": "governance/catalog/ingest/programming/PROGRAMMING-CORPUS-CENSUS-002.json",
+  "hash_manifest": "governance/catalog/ingest/programming/PROGRAMMING-PRESTAGE-SHA256-004.txt",
+  "status": "CANDIDATE__FOCUSED_LIBRARY_SEARCH_FULLY_MATERIALIZED__SUPERVISED_PRESTAGE_ONLY",
+  "architecture_authority": false,
+  "second_shift_eligible": false,
+  "a01_verified": false,
+  "evidence_standing": "CHATGPT_PRESTAGE_OBSERVED__NOT_A01_VERIFIED",
+  "counts": {
+    "focused_library_search_locators_observed": 69,
+    "focused_library_search_locators_materialized": 69,
+    "additional_seed_or_adjacent_programming_locators_materialized": 7,
+    "total_materialized_source_files": 76,
+    "unique_content_identities": 51,
+    "duplicate_content_groups": 24,
+    "source_locators_participating_in_duplicate_groups": 49,
+    "focused_search_materialization_complete": true,
+    "global_programming_corpus_complete": false
+  },
+  "final_count_correction": {
+    "superseded_total_materialized_source_files": 75,
+    "superseded_unique_content_identities": 50,
+    "missing_locator_discovered": {
+      "file_id": "file_0000000042a4822f8d9213be7d3408db",
+      "version_id": "1",
+      "name": "PROGRAMMING_APP_ATOMIC_CAPABILITY_LEDGER_002Y_AUD037_R5AM_EVIDENCE_OBSERVABILITY_001S(1).xlsx",
+      "size_bytes": 6111692,
+      "sha256": "c80f78657f213b2dafb8d463ad36c46a09f000cc54681fedf2d45ac75b292107"
+    },
+    "base_locator": {
+      "file_id": "file_00000000ec88822f96339b8737a81e70",
+      "name": "PROGRAMMING_APP_ATOMIC_CAPABILITY_LEDGER_002Y_AUD037_R5AM_EVIDENCE_OBSERVABILITY_001S.xlsx",
+      "size_bytes": 6111693,
+      "sha256": "e35026fda68a748745cde2a22296e30d9ba456032a35ed0c980ce24c8f5366dd"
+    },
+    "finding": "The (1) Evidence/Observability copy is not byte-identical to the base artifact. Filename suffix and near-identical size are not sufficient duplicate evidence."
+  },
+  "duplicate_policy_confirmed": [
+    "Duplicate status requires exact content identity, not filename similarity, suffix, size, chronology or Library co-location.",
+    "Every source locator remains preserved even when byte-identical to another locator.",
+    "Byte-identical locators normalize to one content node while retaining separate locator-role/provenance nodes.",
+    "Near-duplicates remain separate content identities until semantic/diff adjudication establishes a stronger relation."
+  ],
+  "focused_corpus_standing": {
+    "materialization": "COMPLETE",
+    "content_hashing": "COMPLETE_IN_CHATGPT_PRESTAGE_CUSTODY",
+    "a01_raw_byte_observation": "NOT_PERFORMED",
+    "metadata_normalization": "NEXT",
+    "lineage_adjudication": "PARTIAL",
+    "system_affinity_adjudication": "PARTIAL",
+    "historical_global_archive_recovery": "INCOMPLETE"
+  },
+  "remaining_global_recovery": [
+    "Individually recover the historical 14 R64 candidate files recorded by the prior Programming packet.",
+    "Individually recover the historical 350 Orivellum candidate files or their authoritative inventory/manifest and establish exact identity where possible.",
+    "Reconcile seed-manifest Library sources that are outside the 69-result focused search, including earlier authority/coverage/dependency/repair artifacts.",
+    "Ingest system-wide PROGRAM-VAULT release provenance separately from Programming ownership.",
+    "Keep conflicting historical digest claims quarantined until exact bytes establish identity."
+  ],
+  "next_gate": "BUILD_PROGRAMMING_PRESTAGE_SOURCE_INDEX_AND_EXPANDED_INGEST_MANIFEST_FROM_69_EXACT_LIBRARY_LOCATORS_PLUS_SEED_AND_HISTORICAL_REFERENCES",
+  "execution_rule": "Do not launch the next supervised A-01 attempt until the expanded manifest is pinned to the candidate subject and the canonical admission path is healthy. Do not use Second Shift for this first proving sequence.",
+  "prohibited_claims": [
+    "No global Programming corpus completion claim.",
+    "No A-01 verification claim for Library bytes.",
+    "No Programming system activation.",
+    "No Second Shift Knowledge Recovery eligibility.",
+    "No deletion or silent collapse of duplicate/superseded source provenance."
+  ]
+}
