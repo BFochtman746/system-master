@@ -1,0 +1,65 @@
+name: Control Gateway Active Work Publisher
+
+on:
+  workflow_dispatch:
+    inputs:
+      transition_request_json:
+        description: Exact active-work transition request JSON
+        required: true
+        type: string
+  workflow_call:
+    inputs:
+      transition_request_json:
+        description: Exact active-work transition request JSON
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  publish-active-work:
+    name: Exact-CAS active-work publication
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: control-gateway-production
+    steps:
+      - name: Checkout exact production controller
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Verify workflow is executing exact main head
+        shell: bash
+        run: |
+          test "${GITHUB_REF}" = "refs/heads/main"
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+      - name: Mint repository-scoped dedicated writer App token
+        id: writer-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1
+        with:
+          client-id: ${{ vars.CONTROL_GATEWAY_WRITER_CLIENT_ID }}
+          private-key: ${{ secrets.CONTROL_GATEWAY_WRITER_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
+          permission-contents: write
+      - name: Execute governed active-work transition
+        shell: bash
+        env:
+          CONTROL_GATEWAY_STATE_TRANSITION_REQUEST_JSON: ${{ inputs.transition_request_json }}
+          CONTROL_GATEWAY_WRITER_TOKEN: ${{ steps.writer-token.outputs.token }}
+          CONTROL_GATEWAY_WRITER_ACTUAL_APP_SLUG: ${{ steps.writer-token.outputs.app-slug }}
+          CONTROL_GATEWAY_WRITER_EXPECTED_APP_SLUG: ${{ vars.CONTROL_GATEWAY_WRITER_APP_SLUG }}
+          CONTROL_GATEWAY_WRITER_INSTALLATION_ID: ${{ steps.writer-token.outputs.installation-id }}
+          CONTROL_GATEWAY_WRITER_EVIDENCE_DIR: ${{ runner.temp }}/control-gateway-active-work-${{ github.run_id }}
+        run: node .github/scripts/control-gateway-active-work-publisher.js
+      - name: Upload immutable active-work evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: control-gateway-active-work-${{ github.run_id }}-evidence
+          path: ${{ runner.temp }}/control-gateway-active-work-${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 90
