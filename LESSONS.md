@@ -205,3 +205,32 @@ Format: **L-nnn — one-line summary** / Symptom / Root cause / Fix / Rule it pr
 - **Rule.** Before the first commit that creates `system-master/<area>/`, preflight S-05 and
   land the corresponding `SYSTEM-MAP.md` registration in the same change. A runtime package
   registration is not a new peer and must say so when its name could be misread as topology.
+
+## L-014 — Durable state integrity validates the whole document, not selected fields
+
+- **Symptom.** The durable claim-state reader rejected missing required fields and unsupported
+  schema versions, but could still accept a record containing all expected fields plus
+  trailing bytes, duplicate fields, unknown fields, or alternate whitespace.
+- **Root cause.** The lightweight parser extracted known fields with regular expressions and
+  validated the reconstructed record, but never proved that those fields represented the
+  entire persisted document. Partial field validation is not corruption detection.
+- **Fix.** After parsing and constructing the record, require its canonical serialization to
+  equal the persisted bytes exactly. Added qualification for trailing bytes, duplicate and
+  unknown fields, and noncanonical formatting.
+- **Rule.** Security- or durability-sensitive state must validate the complete persisted
+  representation. If the authoritative writer emits canonical bytes, readers fail closed on
+  every byte sequence that is not exactly canonical; never ignore unrecognized residue.
+
+## L-015 — A fail-closed control must preserve failure evidence before it exits
+
+- **Symptom.** The protected authority bootstrap correctly refused a missing expected writer
+  identity, but the following immutable-evidence upload also failed because the bootstrap
+  exited before creating its evidence directory.
+- **Root cause.** Evidence creation happened only after successful execution, so the exact
+  failures most in need of diagnosis left no immutable artifact.
+- **Fix.** Persist the sanitized bootstrap request before validation, write a machine-readable
+  `bootstrap-failure.json` from the top-level failure handler, classify local preflight
+  failures with stable codes, and qualify that the writer token is never persisted.
+- **Rule.** Failure evidence is part of the control contract. Create the evidence path before
+  any expected validation boundary can fail, sanitize secrets, and prove the failure path in
+  qualification instead of relying on success-path artifacts.

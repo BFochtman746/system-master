@@ -12,43 +12,28 @@ import java.util.Objects;
 /**
  * Claim lifecycle and consumer for delegated execution.
  *
- * <p>WHY THIS EXISTS. The repository's governance records and CI scripts have long
- * described a scheduler that claims work, executes it, writes an evidence receipt and
- * terminalizes the claim — including a STALE readmission path. That runtime was never
- * written: before this class there was no {@code recover()}, no {@code tick()} loop and
- * no claim/consumer/executor type anywhere in the tree. The vocabulary existed only in
- * documents, which is why nothing ever failed: there was no code to fail.
+ * <p>The remote-execution lifecycle is deliberately two phase:
+ * {@code READY -> CLAIMED -> DISPATCHED -> (DONE | FAILED)}. A rejected dispatch may
+ * terminalize {@code CLAIMED -> FAILED}; a successfully accepted remote dispatch must
+ * become {@code DISPATCHED} before any completion waiter is invoked.
  *
- * <p>WHY IT DOES NOT REUSE {@link ExecutionLeaseManager} FOR EXCLUSION.
- * {@code ExecutionLeaseManager} is real and is reused here for what it genuinely
- * provides: monotonic epochs, fence tokens, trusted-time admission, and rejection of a
- * <em>stale</em> writer via {@code requireMutationAuthority}. What it deliberately does
- * NOT provide is mutual exclusion — {@code acquire()} unconditionally grants a new
- * epoch, which is correct behaviour for taking over from a dead holder, but means a
- * second <em>live</em> consumer is never refused. So the "only one consumer per claim"
- * decision is made here, by inspecting the current lease's expiry, and fencing is
- * delegated downward. This is the same split the control-gateway-lock subsystem uses for
- * system files.
+ * <p>{@code DISPATCHED} is an execution fact, not a completion fact. It means the
+ * executor accepted the work. The completion seam is separate so a GitHub
+ * {@code workflow_dispatch} 204 can never by itself mean DONE.
  *
- * <p>STATES. {@code READY -> CLAIMED -> (DONE | FAILED)}. A {@code CLAIMED} claim whose
- * lease has expired is presumed abandoned; {@link #recover} readmits it to {@code READY}
- * a bounded number of times and then terminalizes it {@code DEAD} rather than looping
- * forever. That bound is what stops a wedged claim from being retried indefinitely.
- *
- * <p>NO DOUBLE EXECUTION. Readmission issues a new epoch to the next consumer, which
- * makes the abandoned consumer's fence token stale. If that process wakes up and tries
- * to write, {@code requireMutationAuthority} refuses it. A terminal claim can never be
- * claimed again. Both paths are proven by the accompanying test.
+ * <p>The ledger is still in-memory. The ordering is therefore observable inside a
+ * driver process, but crash/restart durability is not claimed here. Persistence must
+ * make the same transition durable before this subsystem can claim restart safety.
  */
 public final class ClaimLedger {
 
-    /** Terminal states are DONE, FAILED and DEAD; DEAD means the attempt bound was spent. */
-    public enum ClaimState { READY, CLAIMED, DONE, FAILED, DEAD }
+    /** Terminal states are DONE, FAILED and DEAD. */
+    public enum ClaimState { READY, CLAIMED, DISPATCHED, DONE, FAILED, DEAD }
 
     /** Default bound on execution attempts before a claim is declared DEAD. */
     public static final int DEFAULT_MAX_ATTEMPTS = 3;
 
-    /** A durable execution receipt. Append-only: a claim's evidence is never rewritten. */
+    /** Append-only evidence written under a fenced execution epoch. */
     public record Receipt(String claimId, long epoch, String consumerRef,
             String receiptDigest, Instant writtenAt) {
         public Receipt {
@@ -97,7 +82,7 @@ public final class ClaimLedger {
 
     public int maxAttempts() { return maxAttempts; }
 
-    /** Queues new work. A claim id is single-use so a resubmit cannot silently reset state. */
+    /** Queues new work. A claim id is single-use. */
     public void submit(String claimId, String payloadDigest) {
         requireText(claimId, "CLAIM_ID");
         requireText(payloadDigest, "PAYLOAD_DIGEST");
@@ -105,33 +90,30 @@ public final class ClaimLedger {
         claims.put(claimId, new Entry(claimId, payloadDigest));
     }
 
-    /**
-     * Takes exclusive possession of a READY claim and returns the lease that authorizes
-     * writing to it. This is the mutual-exclusion point.
-     *
-     * @throws IllegalStateException CLAIM_HELD when another consumer's lease is still live,
-     *         CLAIM_STALE_AWAITING_READMISSION when the holder is presumed dead but the claim
-     *         has not been swept yet (a takeover here would bypass the attempt bound),
-     *         CLAIM_TERMINAL when the claim is already finished.
-     */
+    /** Takes exclusive possession of a READY claim. */
     public CoordinationContracts.ExecutionLease claim(String claimId, String consumerRef,
             Duration ttl, Instant now, CoordinationContracts.TimeEvidence time) {
         requireText(consumerRef, "CONSUMER_REF");
         ExecutionLeaseManager.requireTrustedTime(now, time);
         Entry e = require(claimId);
         if (isTerminal(e.state)) throw new IllegalStateException("CLAIM_TERMINAL");
+
+        if (e.state == ClaimState.DISPATCHED) {
+            // Remote work may still be running. Never redispatch merely because the local
+            // lease aged out; completion reconciliation must resolve this state.
+            throw new IllegalStateException("CLAIM_DISPATCHED_AWAITING_COMPLETION");
+        }
+
         if (e.state == ClaimState.CLAIMED) {
             CoordinationContracts.ExecutionLease held = leases.current(claimId);
             if (held != null && now.isBefore(held.expiresAt())) {
                 throw new IllegalStateException("CLAIM_HELD");
             }
-            // The holder is presumed dead, but silently taking over here would let a claim
-            // be retried without ever incrementing the attempt counter — an unbounded retry
-            // loop wearing the costume of a successful takeover. Readmission is recover()'s
-            // job alone, so refuse and stay visible.
             throw new IllegalStateException("CLAIM_STALE_AWAITING_READMISSION");
         }
-        CoordinationContracts.ExecutionLease lease = leases.acquire(claimId, consumerRef, ttl, now, time);
+
+        CoordinationContracts.ExecutionLease lease =
+                leases.acquire(claimId, consumerRef, ttl, now, time);
         e.state = ClaimState.CLAIMED;
         e.consumerRef = consumerRef;
         e.epoch = lease.epoch();
@@ -140,27 +122,44 @@ public final class ClaimLedger {
     }
 
     /**
-     * Writes a durable evidence receipt for work performed under a live lease.
-     *
-     * @throws SecurityException FENCED_STALE_EXECUTOR / LEASE_EXPIRED / LEASE_MISSING,
-     *         raised by the fencing layer — an abandoned consumer cannot write.
+     * Records successful dispatch acceptance and publishes DISPATCHED before any
+     * completion waiter is allowed to run.
+     */
+    public Receipt markDispatched(String claimId, long epoch, String fenceToken,
+            String dispatchReceiptDigest, Instant now) {
+        Entry e = require(claimId);
+        leases.requireMutationAuthority(claimId, epoch, fenceToken, now);
+        if (e.state != ClaimState.CLAIMED) {
+            throw new IllegalStateException("CLAIM_NOT_CLAIMED_FOR_DISPATCH");
+        }
+        if (epoch != e.epoch) throw new SecurityException("FENCED_STALE_EXECUTOR");
+        Receipt receipt = appendReceipt(e, epoch, dispatchReceiptDigest, now);
+        e.state = ClaimState.DISPATCHED;
+        return receipt;
+    }
+
+    /**
+     * Writes ordinary successful execution evidence under the live execution epoch.
+     * Legacy callers historically used this method immediately before DONE, so when
+     * called from CLAIMED it also publishes DISPATCHED. New remote execution should use
+     * markDispatched() explicitly, which makes the acceptance boundary unambiguous.
      */
     public Receipt recordEvidence(String claimId, long epoch, String fenceToken,
             String receiptDigest, Instant now) {
         Entry e = require(claimId);
         leases.requireMutationAuthority(claimId, epoch, fenceToken, now);
-        if (e.state != ClaimState.CLAIMED) throw new IllegalStateException("CLAIM_NOT_IN_EXECUTION");
+        if (e.state != ClaimState.CLAIMED && e.state != ClaimState.DISPATCHED) {
+            throw new IllegalStateException("CLAIM_NOT_IN_EXECUTION");
+        }
         if (epoch != e.epoch) throw new SecurityException("FENCED_STALE_EXECUTOR");
-        Receipt r = new Receipt(claimId, epoch, e.consumerRef, receiptDigest, now);
-        e.receipts.add(r);
-        return r;
+        Receipt receipt = appendReceipt(e, epoch, receiptDigest, now);
+        if (e.state == ClaimState.CLAIMED) e.state = ClaimState.DISPATCHED;
+        return receipt;
     }
 
     /**
-     * Closes a claim. Refuses to terminalize without an evidence receipt from this epoch,
-     * so "done" always has something behind it.
-     *
-     * @throws IllegalStateException CLAIM_NO_EVIDENCE when no receipt exists for this epoch.
+     * Closes a claim. DONE structurally requires DISPATCHED. FAILED may close either a
+     * rejected CLAIMED dispatch or a DISPATCHED execution/completion failure.
      */
     public void terminalize(String claimId, long epoch, String fenceToken,
             ClaimState outcome, Instant now) {
@@ -169,23 +168,33 @@ public final class ClaimLedger {
         }
         Entry e = require(claimId);
         leases.requireMutationAuthority(claimId, epoch, fenceToken, now);
-        if (e.state != ClaimState.CLAIMED) throw new IllegalStateException("CLAIM_NOT_IN_EXECUTION");
         if (epoch != e.epoch) throw new SecurityException("FENCED_STALE_EXECUTOR");
+
         boolean evidenced = false;
         for (Receipt r : e.receipts) {
             if (r.epoch() == epoch) { evidenced = true; break; }
         }
+        // Preserve the specific no-evidence refusal before evaluating state. Existing
+        // callers and operators rely on this code to distinguish missing proof from an
+        // illegal transition.
         if (!evidenced) throw new IllegalStateException("CLAIM_NO_EVIDENCE");
+
+        if (outcome == ClaimState.DONE) {
+            if (e.state != ClaimState.DISPATCHED) {
+                throw new IllegalStateException("CLAIM_NOT_DISPATCHED");
+            }
+        } else if (e.state != ClaimState.CLAIMED && e.state != ClaimState.DISPATCHED) {
+            throw new IllegalStateException("CLAIM_NOT_IN_EXECUTION");
+        }
+
         e.state = outcome;
         e.terminalReason = outcome == ClaimState.DONE ? "COMPLETED" : "EXECUTION_FAILED";
     }
 
     /**
-     * Readmits abandoned claims, bounded by the attempt counter. This is the method the
-     * governance records have described all along; it now exists and is called from
-     * {@link Consumer#tick}.
-     *
-     * @return one {@code claimId:NEWSTATE} entry per claim whose state changed.
+     * Readmits abandoned CLAIMED work. DISPATCHED work is deliberately excluded because
+     * the remote executor may still be running it; completion reconciliation owns that
+     * state and persistence must preserve it across process restart.
      */
     public List<String> recover(Instant now, CoordinationContracts.TimeEvidence time) {
         ExecutionLeaseManager.requireTrustedTime(now, time);
@@ -193,7 +202,7 @@ public final class ClaimLedger {
         for (Entry e : claims.values()) {
             if (e.state != ClaimState.CLAIMED) continue;
             CoordinationContracts.ExecutionLease held = leases.current(e.claimId);
-            if (held != null && now.isBefore(held.expiresAt())) continue; // consumer still alive
+            if (held != null && now.isBefore(held.expiresAt())) continue;
             if (e.attempts >= maxAttempts) {
                 e.state = ClaimState.DEAD;
                 e.terminalReason = "ATTEMPT_LIMIT_EXHAUSTED";
@@ -226,6 +235,24 @@ public final class ClaimLedger {
         return Collections.unmodifiableList(require(claimId).receipts);
     }
 
+    private Receipt appendReceipt(Entry e, long epoch, String receiptDigest, Instant now) {
+        Receipt r = new Receipt(e.claimId, epoch, e.consumerRef, receiptDigest, now);
+        e.receipts.add(r);
+        return r;
+    }
+
+    /** Failure evidence never promotes a rejected CLAIMED dispatch to DISPATCHED. */
+    private Receipt recordFailureEvidence(String claimId, long epoch, String fenceToken,
+            String receiptDigest, Instant now) {
+        Entry e = require(claimId);
+        leases.requireMutationAuthority(claimId, epoch, fenceToken, now);
+        if (e.state != ClaimState.CLAIMED && e.state != ClaimState.DISPATCHED) {
+            throw new IllegalStateException("CLAIM_NOT_IN_EXECUTION");
+        }
+        if (epoch != e.epoch) throw new SecurityException("FENCED_STALE_EXECUTOR");
+        return appendReceipt(e, epoch, receiptDigest, now);
+    }
+
     private Entry require(String claimId) {
         requireText(claimId, "CLAIM_ID");
         Entry e = claims.get(claimId);
@@ -241,46 +268,50 @@ public final class ClaimLedger {
         if (s == null || s.isBlank()) throw new IllegalArgumentException("MISSING_" + code);
     }
 
-    /**
-     * The claim consumer: recovers abandoned claims, then takes and executes one claim,
-     * writing a receipt and terminalizing it.
-     *
-     * <p>{@code tick()} calls {@link ClaimLedger#recover} first, every time. Recovery that
-     * only runs when someone remembers to call it is the failure this whole subsystem
-     * exists to prevent, so the ordering is structural rather than conventional.
-     *
-     * <p>Work is dispatched through {@link Dispatch}, which keeps this class independent of
-     * how execution actually happens. The chosen executor is GitHub Actions — the tree
-     * already runs 48 workflows with auth, scheduling, retries and durable artifacts — so
-     * the production dispatch posts a workflow and returns its receipt digest. A failing
-     * dispatch terminalizes FAILED with evidence rather than throwing away the attempt.
-     */
+    /** Recovers, claims, dispatches, publishes DISPATCHED, then waits for completion. */
     public static final class Consumer {
 
-        /** Performs the delegated work and returns a receipt digest for the evidence trail. */
+        /** Dispatch only: success means the remote executor accepted the work. */
         public interface Dispatch {
             String execute(String claimId, String payloadDigest) throws Exception;
         }
 
+        /**
+         * Completion wait/reconciliation. It is invoked only after the ledger already
+         * exposes DISPATCHED. A non-blank returned digest is appended as completion
+         * evidence. Throwing records failure evidence and terminalizes FAILED.
+         */
+        public interface Completion {
+            String await(String claimId, String payloadDigest, String dispatchReceiptDigest)
+                    throws Exception;
+        }
+
         private final ClaimLedger ledger;
         private final Dispatch dispatch;
+        private final Completion completion;
         private final String consumerRef;
         private final Duration ttl;
 
+        /**
+         * Legacy synchronous constructor used by in-process qualifications. Remote
+         * production wiring should supply an explicit Completion implementation.
+         */
         public Consumer(ClaimLedger ledger, Dispatch dispatch, String consumerRef, Duration ttl) {
+            this(ledger, dispatch, (claimId, payload, dispatchReceipt) -> null,
+                    consumerRef, ttl);
+        }
+
+        public Consumer(ClaimLedger ledger, Dispatch dispatch, Completion completion,
+                String consumerRef, Duration ttl) {
             this.ledger = Objects.requireNonNull(ledger, "ledger");
             this.dispatch = Objects.requireNonNull(dispatch, "dispatch");
+            this.completion = Objects.requireNonNull(completion, "completion");
             requireText(consumerRef, "CONSUMER_REF");
             this.consumerRef = consumerRef;
             this.ttl = Objects.requireNonNull(ttl, "ttl");
         }
 
-        /**
-         * One scheduler iteration: recover abandoned claims, then execute at most one
-         * READY claim to completion.
-         *
-         * @return the claim id handled, or null when there was nothing to do.
-         */
+        /** One scheduler iteration, handling at most one READY claim. */
         public String tick(Instant now, CoordinationContracts.TimeEvidence time) {
             ledger.recover(now, time);
 
@@ -292,20 +323,38 @@ public final class ClaimLedger {
                     ledger.claim(claimId, consumerRef, ttl, now, time);
             ClaimView v = ledger.view(claimId);
 
-            String digest;
+            String dispatchDigest;
             try {
-                digest = dispatch.execute(claimId, v.payloadDigest());
+                dispatchDigest = dispatch.execute(claimId, v.payloadDigest());
             } catch (Exception failure) {
-                String reason = failure.getClass().getSimpleName()
-                        + ":" + String.valueOf(failure.getMessage());
-                ledger.recordEvidence(claimId, lease.epoch(), lease.fenceToken(), reason, now);
-                ledger.terminalize(claimId, lease.epoch(), lease.fenceToken(), ClaimState.FAILED, now);
+                recordFailureAndTerminalize(claimId, lease, failure, now);
                 return claimId;
             }
 
-            ledger.recordEvidence(claimId, lease.epoch(), lease.fenceToken(), digest, now);
-            ledger.terminalize(claimId, lease.epoch(), lease.fenceToken(), ClaimState.DONE, now);
+            // This is the load-bearing ordering point. Once execute() returns, the
+            // executor has accepted the work. Publish DISPATCHED before entering await().
+            ledger.markDispatched(claimId, lease.epoch(), lease.fenceToken(),
+                    dispatchDigest, now);
+
+            try {
+                String completionDigest = completion.await(claimId, v.payloadDigest(), dispatchDigest);
+                if (completionDigest != null && !completionDigest.isBlank()) {
+                    ledger.recordEvidence(claimId, lease.epoch(), lease.fenceToken(),
+                            completionDigest, now);
+                }
+                ledger.terminalize(claimId, lease.epoch(), lease.fenceToken(), ClaimState.DONE, now);
+            } catch (Exception failure) {
+                recordFailureAndTerminalize(claimId, lease, failure, now);
+            }
             return claimId;
+        }
+
+        private void recordFailureAndTerminalize(String claimId,
+                CoordinationContracts.ExecutionLease lease, Exception failure, Instant now) {
+            String reason = failure.getClass().getSimpleName()
+                    + ":" + String.valueOf(failure.getMessage());
+            ledger.recordFailureEvidence(claimId, lease.epoch(), lease.fenceToken(), reason, now);
+            ledger.terminalize(claimId, lease.epoch(), lease.fenceToken(), ClaimState.FAILED, now);
         }
     }
 }

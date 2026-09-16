@@ -1,19 +1,11 @@
 name: Claim Work
+run-name: "claim:${{ inputs.claim_id }} dispatch:${{ inputs.dispatch_id }}"
 
 # The delegated work executor — what ActionsDispatch actually starts for a claim.
 #
-# Split from claim-driver.yml on purpose: the driver decides WHICH claim runs and records
-# evidence, this workflow performs the work. Keeping them apart is what makes GitHub
-# Actions the executor rather than a wrapper around one, and it means the work step can
-# grow per claim type without touching the lifecycle.
-#
-# workflow_dispatch only. Like the driver, this is never a required check and never runs
-# on a pull request, so it cannot become a merge gate that fails to report.
-#
-# HONEST SCOPE: the work step below records what it was asked to do and produces a
-# durable artifact. It is a real, verifiable execution path, not a simulation — but the
-# repository-specific work each claim type should perform is not defined yet, and this
-# file is where it goes when it is.
+# workflow_dispatch only. The dispatch_id is generated before the dispatch POST and is
+# included verbatim in this run-name. ActionsRunPoller compares the complete display_title,
+# so similarly named claims (for example job-1 and job-11) cannot cross-correlate.
 
 on:
   workflow_dispatch:
@@ -26,9 +18,12 @@ on:
         description: 'Payload digest carried by the claim'
         required: false
         type: string
+      dispatch_id:
+        description: 'Unique pre-dispatch correlation identity'
+        required: true
+        type: string
 
-# Per-claim serialization: the ledger already refuses a second consumer for the same
-# claim, and this keeps two dispatches of the same id from overlapping on the runner too.
+# Per-claim serialization: a second dispatch of the same claim cannot overlap the first.
 concurrency:
   group: claim-work-${{ inputs.claim_id }}
   cancel-in-progress: false
@@ -43,7 +38,9 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
 
       - name: Perform delegated work
         env:
@@ -51,6 +48,7 @@ jobs:
           # the shell body.
           IN_CLAIM_ID: ${{ inputs.claim_id }}
           IN_PAYLOAD_DIGEST: ${{ inputs.payload_digest }}
+          IN_DISPATCH_ID: ${{ inputs.dispatch_id }}
         run: |
           set -euo pipefail
           mkdir -p claim-evidence
@@ -58,6 +56,7 @@ jobs:
           {
             printf 'claim_id=%s\n' "$IN_CLAIM_ID"
             printf 'payload_digest=%s\n' "${IN_PAYLOAD_DIGEST:-none}"
+            printf 'dispatch_id=%s\n' "$IN_DISPATCH_ID"
             printf 'run_id=%s\n' "$GITHUB_RUN_ID"
             printf 'run_attempt=%s\n' "$GITHUB_RUN_ATTEMPT"
             printf 'commit=%s\n' "$GITHUB_SHA"
@@ -72,7 +71,7 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Publish evidence
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: claim-evidence-${{ github.run_id }}
           path: claim-evidence/
