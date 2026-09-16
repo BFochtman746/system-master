@@ -22,6 +22,8 @@ jobs:
       state_ref: ${{ steps.validate.outputs.state_ref }}
       mutation_request_json: ${{ steps.validate.outputs.mutation_request_json }}
       mutation_plan_json: ${{ steps.validate.outputs.mutation_plan_json }}
+      development_response_base64: ${{ steps.validate.outputs.development_response_base64 }}
+      development_response_receipt_json: ${{ steps.validate.outputs.development_response_receipt_json }}
     steps:
       - name: Validate exact native command envelope
         id: validate
@@ -37,11 +39,13 @@ jobs:
           printf '%s' "${CONTROL_GATEWAY_COMMAND_BODY}" > "${command_file}"
 
           jq -e 'type == "object"' "${command_file}" >/dev/null
-          test "$(jq -c 'keys' "${command_file}")" = '["command_id","kind","mutation_plan","mutation_request","protocol_version","state_ref"]'
+          test "$(jq -c 'keys' "${command_file}")" = '["command_id","development_response_base64","development_response_receipt","kind","mutation_plan","mutation_request","protocol_version","state_ref"]'
           test "$(jq -r '.protocol_version // empty' "${command_file}")" = 'control-gateway.github-native-command.v1'
           test "$(jq -r '.kind // empty' "${command_file}")" = 'PRODUCTION_MUTATION'
           jq -e '.mutation_request | type == "object"' "${command_file}" >/dev/null
           jq -e '.mutation_plan | type == "object"' "${command_file}" >/dev/null
+          jq -e '.development_response_base64 | type == "string" and length > 0' "${command_file}" >/dev/null
+          jq -e '.development_response_receipt | type == "object"' "${command_file}" >/dev/null
 
           command_id="$(jq -r '.command_id // empty' "${command_file}")"
           state_ref="$(jq -r '.state_ref // empty' "${command_file}")"
@@ -49,6 +53,8 @@ jobs:
           plan_id="$(jq -r '.mutation_plan.mutation_id // empty' "${command_file}")"
           request_repo="$(jq -r '.mutation_request.repository // empty' "${command_file}")"
           plan_repo="$(jq -r '.mutation_plan.repository // empty' "${command_file}")"
+          development_response_base64="$(jq -r '.development_response_base64 // empty' "${command_file}")"
+          development_response_receipt_json="$(jq -c '.development_response_receipt' "${command_file}")"
 
           [[ "${command_id}" =~ ^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$ ]]
           [[ "${state_ref}" =~ ^[A-Za-z0-9][A-Za-z0-9._/-]{0,254}$ ]]
@@ -68,6 +74,8 @@ jobs:
           printf 'state_ref=%s\n' "${state_ref}" >> "${GITHUB_OUTPUT}"
           printf 'mutation_request_json=%s\n' "${request_json}" >> "${GITHUB_OUTPUT}"
           printf 'mutation_plan_json=%s\n' "${plan_json}" >> "${GITHUB_OUTPUT}"
+          printf 'development_response_base64=%s\n' "${development_response_base64}" >> "${GITHUB_OUTPUT}"
+          printf 'development_response_receipt_json=%s\n' "${development_response_receipt_json}" >> "${GITHUB_OUTPUT}"
 
   execute-production-mutation:
     name: Execute through receipt-consuming production writer
@@ -77,4 +85,7 @@ jobs:
       state_ref: ${{ needs.validate-command.outputs.state_ref }}
       mutation_request_json: ${{ needs.validate-command.outputs.mutation_request_json }}
       mutation_plan_json: ${{ needs.validate-command.outputs.mutation_plan_json }}
+      development_response_base64: ${{ needs.validate-command.outputs.development_response_base64 }}
+      development_response_receipt_json: ${{ needs.validate-command.outputs.development_response_receipt_json }
+
     secrets: inherit
