@@ -1,0 +1,225 @@
+name: P15 Observability Morning Receipt and Rollback Foundation Qualification
+
+on:
+  pull_request:
+    paths:
+      - 'control-gateway/python/a01_morning_receipt.py'
+      - 'tests/test_a01_morning_receipt.py'
+      - 'control-gateway/test/a01-morning-receipt.test.js'
+      - 'control-gateway/windows/run-a01-morning-receipt.ps1'
+      - 'control-gateway/windows/install-a01-morning-receipt-task.ps1'
+      - 'governance/ROLLBACK-PROCEDURE-001.md'
+      - 'governance/contracts/P15-FOUNDATION-CONTRACT-001.md'
+      - '.github/workflows/p15-observability-morning-rollback-foundation-qualification.yml'
+      - 'governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json'
+      - 'governance/CURRENT-AUTHORITY.json'
+  push:
+    branches: [main]
+    paths:
+      - 'control-gateway/python/a01_morning_receipt.py'
+      - 'tests/test_a01_morning_receipt.py'
+      - 'control-gateway/test/a01-morning-receipt.test.js'
+      - 'control-gateway/windows/run-a01-morning-receipt.ps1'
+      - 'control-gateway/windows/install-a01-morning-receipt-task.ps1'
+      - 'governance/ROLLBACK-PROCEDURE-001.md'
+      - 'governance/contracts/P15-FOUNDATION-CONTRACT-001.md'
+      - '.github/workflows/p15-observability-morning-rollback-foundation-qualification.yml'
+      - 'governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json'
+      - 'governance/CURRENT-AUTHORITY.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  prequalify:
+    name: Prequalify P15 read-only morning observability and rollback safety
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact P15 subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Assert Python runtime and syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          python --version
+          python - <<'PY'
+          import sys
+          if sys.version_info < (3, 12):
+              raise SystemExit(f'P15 requires Python 3.12+, found {sys.version}')
+          PY
+          python -m py_compile control-gateway/python/a01_morning_receipt.py
+          python -m py_compile tests/test_a01_morning_receipt.py
+
+      - name: Run P15 real-schema morning receipt acceptance
+        shell: bash
+        env:
+          PYTHONPATH: ${{ github.workspace }}/control-gateway/python:${{ github.workspace }}
+        run: python tests/test_a01_morning_receipt.py
+
+      - name: Prove Control Gateway bridge discovers P15 acceptance
+        shell: bash
+        env:
+          PYTHONPATH: ${{ github.workspace }}/control-gateway/python:${{ github.workspace }}
+        run: node --test control-gateway/test/a01-morning-receipt.test.js
+
+      - name: Reprove P12 ingress authority boundary
+        shell: bash
+        env:
+          PYTHONPATH: ${{ github.workspace }}/control-gateway/python:${{ github.workspace }}
+        run: python tests/test_a01_github_ingress.py
+
+      - name: Assert P15 authority, local schedule, rollback and predecessor preservation
+        shell: bash
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || '' }}
+          SUBJECT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs = require('fs');
+          const crosswalk = JSON.parse(fs.readFileSync('governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json', 'utf8'));
+          const authority = JSON.parse(fs.readFileSync('governance/CURRENT-AUTHORITY.json', 'utf8'));
+          const registry = JSON.parse(fs.readFileSync('qualification/a01/registry.json', 'utf8'));
+          const receipt = fs.readFileSync('control-gateway/python/a01_morning_receipt.py', 'utf8');
+          const tests = fs.readFileSync('tests/test_a01_morning_receipt.py', 'utf8');
+          const bridge = fs.readFileSync('control-gateway/test/a01-morning-receipt.test.js', 'utf8');
+          const rollback = fs.readFileSync('governance/ROLLBACK-PROCEDURE-001.md', 'utf8');
+          const contract = fs.readFileSync('governance/contracts/P15-FOUNDATION-CONTRACT-001.md', 'utf8');
+          const runner = fs.readFileSync('control-gateway/windows/run-a01-morning-receipt.ps1', 'utf8');
+          const installer = fs.readFileSync('control-gateway/windows/install-a01-morning-receipt-task.ps1', 'utf8');
+          const p15 = crosswalk.platform_requirements.find(x => x.platform_id === 'P15');
+          if (!p15 || p15.implementation !== 'control-gateway/python/a01_morning_receipt.py') throw new Error('P15_CANONICAL_IMPLEMENTATION_POINTER_INVALID');
+          if (authority.morning_receipt !== p15.implementation) throw new Error('P15_CURRENT_AUTHORITY_POINTER_INVALID');
+          const live = registry.qualifications['SECOND-SHIFT-SUPERVISOR-V2-A01-STRESS'];
+          if (!live || live.workstream_id !== 'SECOND-SHIFT-CONTROL-GATEWAY' || live.gate_class !== 'consolidated' || live.source !== 'subject') throw new Error('P15_PREDECESSOR_QUALIFIER_REGISTRATION_INVALID');
+          if (!receipt.includes('mode=ro') || !receipt.includes('PRAGMA query_only=ON')) throw new Error('P15_READ_ONLY_CONNECTION_MISSING');
+          if (!receipt.includes('REQUIRED_P10_TABLES') || !receipt.includes('missing required P10 supervisor table')) throw new Error('P15_REQUIRED_SCHEMA_FAIL_CLOSED_MISSING');
+          if (!receipt.includes('night_execution_results') || !receipt.includes('execution_failures')) throw new Error('P15_EXECUTION_WORKER_OBSERVABILITY_MISSING');
+          if (!receipt.includes('DATABASE_UNREADABLE') || !receipt.includes('return 2')) throw new Error('P15_UNREADABLE_FAIL_CLOSED_MISSING');
+          if (!receipt.includes('Nothing ran') || !receipt.includes('attention_required')) throw new Error('P15_EMPTY_OR_ATTENTION_SEMANTICS_MISSING');
+          if (!tests.includes('test_04_connection_refuses_writes') || !tests.includes('test_05_readable_database_missing_core_supervisor_schema_fails_closed')) throw new Error('P15_READ_ONLY_FAIL_CLOSED_TESTS_MISSING');
+          if (!tests.includes('test_13_execution_worker_failure_is_observed_when_worker_table_exists')) throw new Error('P15_WORKER_FAILURE_TEST_MISSING');
+          if (!tests.includes('test_14_decisions_lead_and_receipt_stays_one_scroll_with_20_completions')) throw new Error('P15_GLANCEABILITY_TEST_MISSING');
+          if (!bridge.includes('Ran 16 tests')) throw new Error('P15_A01_DISCOVERY_BRIDGE_MISSING');
+          if (!runner.includes('python -m a01_morning_receipt') || !runner.includes('--out $receiptPath') || !runner.includes('exit $receiptExit')) throw new Error('P15_LOCAL_RUNNER_INVALID');
+          if (!installer.includes("LocalTime = '07:15'") || !installer.includes('New-ScheduledTaskTrigger -Daily') || !installer.includes("-UserId 'SYSTEM'") || !installer.includes('Register-ScheduledTask')) throw new Error('P15_LOCAL_SCHEDULE_INVALID');
+          if (fs.existsSync('.github/workflows/p15-a01-morning-receipt.yml')) throw new Error('P15_UNGOVERNED_GITHUB_A01_SCHEDULE_PRESENT');
+          const staleIngressCommand = /(?:^|\n)\s*python\s+-m\s+a01_github_ingress[^\n]*(?:--halt|--status)\b/m.test(rollback);
+          const staleServiceDryRun = /(?:^|\n)\s*python\s+-m\s+a01_ingress_service[^\n]*--dry-run\b/m.test(rollback);
+          if (staleIngressCommand || staleServiceDryRun) throw new Error('P15_ROLLBACK_STALE_RUNTIME_INTERFACE_PRESENT');
+          if (!rollback.includes('--kill') || !rollback.includes('--resume')) throw new Error('P15_ROLLBACK_CURRENT_P12_INTERFACE_MISSING');
+          if (!rollback.includes("SQLite's backup API") || !rollback.includes('all five')) throw new Error('P15_ROLLBACK_DURABILITY_OR_VERIFICATION_MISSING');
+          if (!contract.includes('SYSTEM-MASTER-CAPABILITY-CROSSWALK-003') || !contract.includes('16 tests')) throw new Error('P15_CONTRACT_NOT_CURRENT');
+          console.log('P15_HOSTED_PREQUALIFICATION=PASS');
+          NODE
+          if [[ -n "$BASE_SHA" ]]; then
+            git diff --name-only "$BASE_SHA" "$SUBJECT_SHA" > /tmp/p15-changed.txt
+            for protected in \
+              control-gateway/python/a01_github_ingress.py \
+              control-gateway/python/a01_night_scheduler.py \
+              .github/scripts/a01-second-shift-supervisor-v2-qualify.js \
+              qualification/a01/registry.json \
+              qualification/a01/a01-policy.json; do
+              if grep -Fxq "$protected" /tmp/p15-changed.txt; then
+                echo "P15_PREDECESSOR_SUBJECT_MUTATED=$protected" >&2
+                exit 1
+              fi
+            done
+          fi
+
+      - name: Emit hosted P15 evidence manifest
+        shell: bash
+        env:
+          SUBJECT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          python - <<'PY'
+          import json, os, pathlib
+          out = {
+              'suite': 'P15_OBSERVABILITY_MORNING_ROLLBACK_FOUNDATION',
+              'subject_sha': os.environ['SUBJECT_SHA'],
+              'successful': True,
+              'sqlite_read_only_uri': True,
+              'query_only_guard': True,
+              'required_p10_schema_fail_closed': True,
+              'optional_extension_degradation_explicit': True,
+              'execution_worker_failures_observed': True,
+              'missing_database_fail_closed_exit_2': True,
+              'attention_exit_1': True,
+              'clean_exit_0': True,
+              'p12_session_rollover_shared': True,
+              'p11_budget_observed': True,
+              'decisions_first': True,
+              'one_scroll_guard': True,
+              'morning_schedule_owner': 'WINDOWS_TASK_SCHEDULER_LOCAL_A01',
+              'morning_schedule_local': '07:15',
+              'github_is_qualification_and_evidence_only': True,
+              'rollback_uses_current_p12_kill_switch': True,
+              'rollback_uses_sqlite_backup_api': True,
+              'rollback_preserves_leases_fences_and_evidence': True,
+              'predecessor_subjects_unchanged': True,
+              'a01_discovery_bridge': 'control-gateway/test/a01-morning-receipt.test.js',
+          }
+          pathlib.Path('.p15-observability-foundation.json').write_text(json.dumps(out, indent=2) + '\n', encoding='utf-8')
+          PY
+
+      - name: Upload hosted P15 evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p15-observability-foundation-${{ github.run_id }}
+          path: .p15-observability-foundation.json
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 30
+
+  live_a01:
+    name: Live exact-SHA A-01 P15 observability qualification
+    needs: prequalify
+    uses: ./.github/workflows/a01-control-plane-gateway.yml
+    with:
+      qualification_id: SECOND-SHIFT-SUPERVISOR-V2-A01-STRESS
+      workstream_id: SECOND-SHIFT-CONTROL-GATEWAY
+      subject_sha: ${{ github.event.pull_request.head.sha || github.sha }}
+      origin_ref: ${{ github.head_ref || github.ref }}
+      resume_on_pass: 'Adjudicate P15 exact-SHA morning observability and rollback evidence and continue Foundation closure.'
+      resume_on_failure: 'Preserve P15 evidence and repair only the failing read-only observability, local schedule, or rollback boundary.'
+      notification_target: foundation-p15
+      execution_context: normal
+      qualifier_timeout_minutes: 28
+      job_timeout_minutes: 30
+    secrets: inherit
+
+  assert_live_result:
+    name: Assert authoritative P15 live result
+    needs: [prequalify, live_a01]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Fail closed unless A-01 proves exact P15 subject
+        shell: bash
+        env:
+          LIVE_JOB_RESULT: ${{ needs.live_a01.result }}
+          RESULT_CLASS: ${{ needs.live_a01.outputs.result_class }}
+          PROMOTION_AUTHORIZED: ${{ needs.live_a01.outputs.promotion_authorized }}
+          ADMISSION_STATE: ${{ needs.live_a01.outputs.admission_state }}
+          CONTROL_PLANE_SHA: ${{ needs.live_a01.outputs.control_plane_sha }}
+          EXPECTED_SUBJECT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          EXPECTED_CONTROL_PLANE_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          test "$LIVE_JOB_RESULT" = "success"
+          test "$ADMISSION_STATE" = "ADMITTED"
+          test "$RESULT_CLASS" = "PASS"
+          test "$PROMOTION_AUTHORIZED" = "false"
+          [[ "$EXPECTED_SUBJECT_SHA" =~ ^[0-9a-fA-F]{40}$ ]]
+          [[ "$CONTROL_PLANE_SHA" =~ ^[0-9a-fA-F]{40}$ ]]
+          test "${CONTROL_PLANE_SHA,,}" = "${EXPECTED_CONTROL_PLANE_SHA,,}"
+          printf 'P15_LIVE_A01=PASS\nP15_RESULT_CLASS=%s\nP15_PROMOTION_AUTHORIZED=%s\nP15_SUBJECT_SHA=%s\nP15_CONTROL_PLANE_SHA=%s\n' "$RESULT_CLASS" "$PROMOTION_AUTHORIZED" "$EXPECTED_SUBJECT_SHA" "$CONTROL_PLANE_SHA"
