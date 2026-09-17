@@ -20,7 +20,9 @@ jobs:
     timeout-minutes: 5
     outputs:
       bootstrap_request_json: ${{ steps.validate.outputs.bootstrap_request_json }}
-    steps:
+      development_response_base64: ${{ steps.validate.outputs.development_response_base64 }}
+      development_response_receipt_json: ${{ steps.validate.outputs.development_response_receipt_json }}
+  steps:
       - name: Validate exact native bootstrap envelope
         id: validate
         shell: bash
@@ -35,16 +37,19 @@ jobs:
           printf '%s' "${CONTROL_GATEWAY_COMMAND_BODY}" > "${command_file}"
 
           jq -e 'type == "object"' "${command_file}" >/dev/null
-          test "$(jq -c 'keys' "${command_file}")" = '["bootstrap_request","command_id","kind","protocol_version"]'
+          test "$(jq -c 'keys' "${command_file}")" = '["bootstrap_request","command_id","development_response_base64","development_response_receipt","kind","protocol_version"]'
           test "$(jq -r '.protocol_version // empty' "${command_file}")" = 'control-gateway.github-native-command.v1'
           test "$(jq -r '.kind // empty' "${command_file}")" = 'AUTHORITY_BOOTSTRAP'
           jq -e '.bootstrap_request | type == "object"' "${command_file}" >/dev/null
-
+          jq -e '.development_response_base64 | type == "string" and length > 0' "${command_file}" >/dev/null
+          jq -e '.development_response_receipt | type == "object"' "${command_file}" >/dev/null
           command_id="$(jq -r '.command_id // empty' "${command_file}")"
           operation="$(jq -r '.bootstrap_request.operation // empty' "${command_file}")"
           repository="$(jq -r '.bootstrap_request.repository // empty' "${command_file}")"
           state_ref="$(jq -r '.bootstrap_request.state_ref // empty' "${command_file}")"
-
+          development_response_base64="$(jq -r '.development_response_base64 // empty' "${command_file}")"
+          development_response_receipt_json="$(jq -c '.development_response_receipt' "${command_file}")"
+          
           [[ "${command_id}" =~ ^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$ ]]
           test "${CONTROL_GATEWAY_ISSUE_TITLE}" = "[CONTROL-GATEWAY-BOOTSTRAP] ${command_id}"
           test "${operation}" = 'CONTROL-GATEWAY-AUTHORITY-BOOTSTRAP-001'
@@ -56,7 +61,8 @@ jobs:
 
           bootstrap_request_json="$(jq -c '.bootstrap_request' "${command_file}")"
           printf 'bootstrap_request_json=%s\n' "${bootstrap_request_json}" >> "${GITHUB_OUTPUT}"
-
+          printf 'development_response_base64=%s\n' "${development_response_base64}" >> "${GITHUB_OUTPUT}"
+          printf 'development_response_receipt_json=%s\n' "${development_response_receipt_json}" >> "${GITHUB_OUTPUT}"
   execute-authority-bootstrap:
     name: Dedicated-writer genesis active-work publication
     needs: validate-command
@@ -86,7 +92,9 @@ jobs:
       - name: Execute create-only authority bootstrap
         shell: bash
         env:
-          CONTROL_GATEWAY_BOOTSTRAP_REQUEST_JSON: ${{ needs.validate-command.outputs.bootstrap_request_json }}
+          CONTROL_GATEWAY_BOOTSTRAP_REQUEST_JSON: ${{ needs.validate-command.outputs.bootstrap_request_          CONTROL_GATEWAY_DEVELOPMENT_RESPONSE_BASE64: ${{ needs.validate-command.outputs.development_response_base64 }}
+          CONTROL_GATEWAY_DEVELOPMENT_RESPONSE_RECEIPT_JSON: ${{ needs.validate-command.outputs.development_response_receipt_json }}  
+          CONTROL_GATEWAY_DEVELOPMENT_RESPONSE_BASE64: ${{ needs.validate-command.outputs.development_response_base64 }}
           CONTROL_GATEWAY_WRITER_TOKEN: ${{ steps.writer-token.outputs.token }}
           CONTROL_GATEWAY_WRITER_ACTUAL_APP_SLUG: ${{ steps.writer-token.outputs.app-slug }}
           CONTROL_GATEWAY_WRITER_EXPECTED_APP_SLUG: control-gateway-writer
