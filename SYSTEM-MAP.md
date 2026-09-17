@@ -73,23 +73,41 @@ Path scope, because these two lists are routinely confused: a `System-File-Lease
 
 ### Bootstrap / authority bootstrap — inventory before you write another one
 
-**Every session that has looked for this concluded it did not exist and started over. It exists. It exists several times.** Read this table before writing any bootstrap, boot, init, startup or authority-bootstrap controller.
+**Sessions keep concluding this does not exist and rebuilding it. It exists, on `main`, and it is tested.** Read this section before writing any bootstrap, boot, init, startup or authority-bootstrap controller.
 
-| Version | Where | What it is | Status |
+**Correction, 2026-09-17.** An earlier revision of this section claimed three duplicate on-`main` bootstrap versions, all ungated, with the off-`main` controller-v2 pair as the only tested version. **Every one of those claims was false**, and they were written here without checking the tree. Verified facts follow; the false rows are recorded as corrected rather than silently replaced, because this document being wrong is the same disease as this document being silent.
+
+On `main` the bootstrap is **one coherent two-layer implementation**, not duplicates:
+
+| Layer | Path | Size | Reality |
+|---|---|---:|---|
+| Library (the substance) | `control-gateway/src/github-authority-bootstrap.js` | 169 lines | Create-only genesis authority write. **Not** in `.github/scripts/` — an earlier revision of this table said so and was wrong. |
+| CI wrapper (entry point) | `.github/scripts/control-gateway-authority-bootstrap.js` | 67 lines | **Imports the library** (`../../control-gateway/src/github-authority-bootstrap.js`). A thin driver, not a second implementation. Earlier claim of "41 lines" was wrong. |
+| Test | `control-gateway/test/github-control-adapter-repair.test.js` | 21 cases | **21/21 pass.** 17 are bootstrap cases with real negative proofs: invalid namespace, mismatched head, packet/publication digest mismatch, concurrent race, post-write mismatch, unauthorized writer App slug, invalid installation id. |
+| Local gate | `.github/scripts/control-gateway-authority-bootstrap-qualify.js` | — | Added 2026-09-17. See "the gate that was actually missing" below. |
+
+Driven in production by `.github/workflows/control-gateway-authority-bootstrap.yml` and `control-gateway-native-bootstrap-ingress.yml`; qualified in CI by `p04-content-addressed-authority-write-foundation-qualification.yml`, which reads both files, validates the P04 implementation pointer, and binds them as exact-SHA subjects.
+
+**The gate that was actually missing.** The earlier claim "ungated — no qualifier covers it" was wrong: CI gated this path all along. The real gap was narrower and had gone unnoticed — `verify.sh` discovers qualifiers only from `.github/scripts/*qualify*`, while the bootstrap test lives under `control-gateway/test/` and was reachable **only** from CI workflows. The path was gated in CI and **ungated locally**, so no pre-push run could catch a bootstrap regression. `control-gateway-authority-bootstrap-qualify.js` closes that: it runs the existing test with a pinned TAP reporter, asserts a floor of 21 passes, and additionally asserts the wrapper still imports the library — because a wrapper that stopped importing it would leave every test green while the production path did nothing.
+
+### A distinct component, deliberately not merged
+
+`FoundationAuthorityBootstrap.java` (142 lines, `system-master/foundation-spine/system-root/`) is **not** another version of the above and must not be merged into it. It bootstraps the **in-process Java authority registry** — `createRegistry()`, `bootstrap(journal)`, `expectedAuthorityIds()`, `PRODUCT_BINDING_ID` with 27 root children — whereas the JS pair performs a **content-addressed authority write to GitHub**. Different substrate, different failure modes. It is covered by `AuthorityRegistryQualificationTest` and `AuthorityRegistryPerformanceTest`, and compiles as part of the 552-class build. Registered here as a separate component so the name similarity stops being rediscovered as duplication.
+
+### Off-`main` versions — dispositions decided
+
+| Version | Where | Verified content | Disposition |
 |---|---|---|---|
-| `github-authority-bootstrap.js` | `.github/scripts/` on `main` | 169 lines. The largest on-`main` version. | Present, **ungated** — no qualifier covers it. |
-| `control-gateway-authority-bootstrap.js` | `.github/scripts/` on `main` | 41 lines, driven by `.github/workflows/control-gateway-authority-bootstrap.yml`. | Present, **ungated**: `control-gateway-authority-bootstrap-qualify.js` is **absent from `main`**, so this path is unqualified. |
-| `FoundationAuthorityBootstrap.java` | Java sources on `main` | 142 lines. | Present; compiles as part of the 552-class build. |
-| controller-v2 pair: `github-control-state-bootstrap.js` + `live-c2-initialize.js` | **off `main`**, reachable from ~66 branches | Each has a dedicated test — the **best-tested** version of this concern. | **Not on `main`.** Deleted from main's lineage; recoverable from those branches. |
-| root-authority-registry trio: `BootstrapManifest.java`, `RootAuthorityRegistryBootstrapCli.java`, generator | **off `main`**, sole-custodian branch | Exists nowhere else. | **Not on `main`.** Loss risk if that branch is deleted. |
+| controller-v2 pair: `github-control-state-bootstrap.js` + `live-c2-initialize.js` | `controller-v2/execution-001b-forensic-restart`, `controller-v2/foundation-002b` | 29-line src + 20-line test (4 cases `BCS-T001`-`T004`); 37-line src + 32-line test. Creates two sibling git refs `controller-journal/v1` / `controller-anchor/v1` with empty journal checkpoints. | **Deliberately abandoned.** A *subset* on a different, abandoned architecture — not a superset of main's version. 4 test cases against main's 17; 29 lines against main's 169. The earlier claim that this was the "best-tested" version was wrong. Recovering it would regress capability. |
+| root-authority-registry module: `BootstrapManifest.java`, `RootAuthorityRegistryBootstrapCli.java`, `FileAuthorityRegistryStore.java`, `RegistrySnapshotCodec.java`, generator, `qualify.sh`, workflow, 2 tests | `foundation-root-authority-registry` (**sole custodian**) | A complete 9-class module carrying **registry persistence** — a capability `main` genuinely lacks, since `FoundationAuthorityBootstrap` builds an in-memory registry only. | **Recover — queued, not abandoned.** Real capability, but landing a new Maven module with 9 classes and 2 tests wired into the build is its own pass. **Do not delete this branch**; it is the only custodian. |
 
-`governance/P04-FOUNDATION-CONTRACT-001.md` describes the intended bootstrap contract. It is **intent, not proof**: no on-`main` runtime has been demonstrated to satisfy it, and this repository has repeatedly asserted behaviour in contract records that no code implemented. Consolidation into one implementation, with the missing qualifier restored, is open work — not done.
+`governance/contracts/P04-FOUNDATION-CONTRACT-001.md` names `control-gateway/src/github-authority-bootstrap.js` as the P04 implementation. Treat the contract as **intent**; the evidence that the runtime satisfies it is the 21-case test and the CI qualification above, not the contract text.
 
 ### Known absent — do not infer these exist
 
 Recorded so a session stops re-deriving the same absence:
 
-- **No qualifier for either on-`main` bootstrap script.** That path is ungated.
+- **No registry persistence on `main`.** `FoundationAuthorityBootstrap` builds an in-memory registry; the persistence-capable module is off-`main` on `foundation-root-authority-registry` (see dispositions above).
 - **No durable claim ledger.** The ledger is in-memory; a claim abandoned by a crashed *runner* is not resumed by the next run.
 - **No run polling.** `DONE` means Actions **accepted** the dispatch, not that the dispatched run finished. `ActionsRunPoller` exists on a working branch, compiles, and has **no tests or mutation proofs** — it is deliberately not on `main`.
 - **No scheduler beyond what `execution-claims` / `execution-driver` actually implement.** Governance records describing a scheduler are not evidence one runs.
