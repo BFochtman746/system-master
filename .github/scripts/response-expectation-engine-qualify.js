@@ -64,8 +64,11 @@ function runNode(args, failureCode) {
 }
 
 function parseTestSummary(combined) {
-  const pass = Number(combined.match(/# pass (\d+)/)?.[1] ?? 0);
-  const failCount = Number(combined.match(/# fail (\d+)/)?.[1] ?? -1);
+  // Accept either reporter's counter line (TAP `# pass N`, spec `ℹ pass N`).
+  // Unparseable counters yield pass=0 / fail=-1, which trips the non-vacuity
+  // gate rather than producing a silently vacuous PASS.
+  const pass = Number(combined.match(/^[#\u2139]\s*pass\s+(\d+)\s*$/m)?.[1] ?? 0);
+  const failCount = Number(combined.match(/^[#\u2139]\s*fail\s+(\d+)\s*$/m)?.[1] ?? -1);
   return { pass, fail: failCount };
 }
 
@@ -102,7 +105,9 @@ function main() {
     assert(fs.existsSync(path.join(root, rel)), 'C11_SUBJECT_PATH_MISSING', rel);
   }
 
-  const testOutput = runNode(['--test', ...tests], 'C11_TEST_EXECUTION_FAILED');
+  // Pin the reporter — see parseTestSummary: the counters are a load-bearing gate,
+  // so the output format must not be inherited from the node default.
+  const testOutput = runNode(['--test', '--test-reporter=tap', ...tests], 'C11_TEST_EXECUTION_FAILED');
   const summary = parseTestSummary(testOutput);
   assert(summary.pass >= 21 && summary.fail === 0, 'C11_NON_VACUOUS_TEST_GATE_FAILED', `pass=${summary.pass} fail=${summary.fail}`);
 

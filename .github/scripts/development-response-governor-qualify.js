@@ -11,7 +11,10 @@ const tests = [
   'control-gateway/test/development-response-production-enforcement.test.js'
 ];
 
-const result = spawnSync(process.execPath, ['--test', ...tests], {
+// Pin the reporter: node's default reporter is version- and TTY-dependent
+// (>=20 emits spec `ℹ pass N`, TAP emits `# pass N`). The counters below are a
+// load-bearing non-vacuity gate, so the output format must not be inherited.
+const result = spawnSync(process.execPath, ['--test', '--test-reporter=tap', ...tests], {
   cwd: root,
   encoding: 'utf8',
   env: process.env
@@ -24,8 +27,11 @@ if (result.status !== 0) {
 }
 
 const combined = `${result.stdout ?? ''}\n${result.stderr ?? ''}`;
-const passMatch = combined.match(/# pass (\d+)/);
-const failMatch = combined.match(/# fail (\d+)/);
+// Accept either reporter's counter line, so a future reporter change degrades to
+// an unparseable-counter refusal rather than a silently vacuous PASS.
+const passMatch = combined.match(/^[#\u2139]\s*pass\s+(\d+)\s*$/m);
+const failMatch = combined.match(/^[#\u2139]\s*fail\s+(\d+)\s*$/m);
+// Unparseable counters must fail closed: pass=0 / fail=-1 both trip the gate below.
 const pass = Number(passMatch?.[1] ?? 0);
 const fail = Number(failMatch?.[1] ?? -1);
 if (pass < 14 || fail !== 0) {
