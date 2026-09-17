@@ -13,6 +13,21 @@
 - **Central objective:** `FOUNDATION-1-0-CLOSURE-001`
 - **Highest discretionary objective:** `SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001`
 
+## Where the runtime actually lives — read before building anything
+
+Sessions cannot see each other's work, so the rational move on not finding a component is to build it. That has produced repeated duplicate implementations of the same thing. **Before writing any component, check `SYSTEM-MAP.md` — "Enforcement subsystem directories", "Session admission", and "Bootstrap / authority bootstrap — inventory before you write another one" — and search the branch landscape, not only `main`.** Content existing nowhere but a single branch is common here.
+
+| Concern | Where it is | Honest status |
+|---|---|---|
+| Bootstrap / authority bootstrap controller | 3 partial versions on `main`; a better-tested pair and a sole-custodian trio **off** `main` | **Exists — do not rewrite.** Not consolidated; the on-`main` path is ungated. Full inventory in `SYSTEM-MAP.md`. |
+| Single-writer admission for governed files | `system-master/control-gateway-lock` | Real and tested. Enforced on every PR by two required checks. |
+| Claim lifecycle `READY → CLAIMED → DONE/FAILED` | `system-master/execution-claims` | Real and tested **within one run**. Ledger is in-memory — no cross-run recovery. |
+| Unattended driver + Actions dispatch | `system-master/execution-driver` | Real and tested, both ceilings mutation-proofed. `DONE` attests Actions **accepted** the work, **not** that the run finished. |
+| Chat session admission | `control-gateway/src/` + `control-gateway/test/` | On `main`, 6 cases passing. Consolidated 2026-09-17; an orphan duplicate was deleted. |
+| Run polling, durable ledger, bootstrap qualifier | — | **Absent.** See "Known absent" in `SYSTEM-MAP.md` before assuming otherwise. |
+
+Two mechanical traps that have each cost a session: operation identity comes from the **PR event payload**, so re-running a workflow run can never pick up an edited title or body — make a new commit instead; and a `System-File-Lease` trailer is required only under `governance/`, while operation identity is required for all of `control-gateway/**`.
+
 ## Current product topology
 
 `SYSTEM_MASTER` is the product root. It has exactly **nine active peer systems**, all **incomplete**:
