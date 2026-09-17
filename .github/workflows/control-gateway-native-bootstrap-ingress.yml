@@ -22,7 +22,7 @@ jobs:
       bootstrap_request_json: ${{ steps.validate.outputs.bootstrap_request_json }}
       development_response_base64: ${{ steps.validate.outputs.development_response_base64 }}
       development_response_receipt_json: ${{ steps.validate.outputs.development_response_receipt_json }}
-  steps:
+    steps:
       - name: Validate exact native bootstrap envelope
         id: validate
         shell: bash
@@ -92,9 +92,9 @@ jobs:
       - name: Execute create-only authority bootstrap
         shell: bash
         env:
-          CONTROL_GATEWAY_BOOTSTRAP_REQUEST_JSON: ${{ needs.validate-command.outputs.bootstrap_request_          CONTROL_GATEWAY_DEVELOPMENT_RESPONSE_BASE64: ${{ needs.validate-command.outputs.development_response_base64 }}
-          CONTROL_GATEWAY_DEVELOPMENT_RESPONSE_RECEIPT_JSON: ${{ needs.validate-command.outputs.development_response_receipt_json }}  
+          CONTROL_GATEWAY_BOOTSTRAP_REQUEST_JSON: ${{ needs.validate-command.outputs.bootstrap_request_json }}
           CONTROL_GATEWAY_DEVELOPMENT_RESPONSE_BASE64: ${{ needs.validate-command.outputs.development_response_base64 }}
+          CONTROL_GATEWAY_DEVELOPMENT_RESPONSE_RECEIPT_JSON: ${{ needs.validate-command.outputs.development_response_receipt_json }}
           CONTROL_GATEWAY_WRITER_TOKEN: ${{ steps.writer-token.outputs.token }}
           CONTROL_GATEWAY_WRITER_ACTUAL_APP_SLUG: ${{ steps.writer-token.outputs.app-slug }}
           CONTROL_GATEWAY_WRITER_EXPECTED_APP_SLUG: control-gateway-writer
