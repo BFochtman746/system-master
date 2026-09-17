@@ -15,8 +15,25 @@ on:
         description: Exact byte-bound production mutation plan JSON
         required: true
         type: string
+      development_response_base64:
+        description: Exact governed development response encoded as Base64
+        required: true
+        type: string
+      development_response_receipt_json:
+        description: Exact development response PASS receipt JSON
+        required: true
+        type: string
   workflow_call:
     inputs:
+      development_response_base64:
+        description: Exact governed development response encoded as Base64
+        required: true
+        type: string
+      development_response_receipt_json:
+        description: Exact development response PASS receipt JSON
+        required: true
+        type: string
+
       state_ref:
         description: Durable Control Gateway active-work state branch name
         required: true
@@ -66,6 +83,8 @@ jobs:
           CONTROL_GATEWAY_STATE_REF: ${{ inputs.state_ref }}
           CONTROL_GATEWAY_MUTATION_REQUEST_JSON: ${{ inputs.mutation_request_json }}
           CONTROL_GATEWAY_MUTATION_PLAN_JSON: ${{ inputs.mutation_plan_json }}
+          CONTROL_GATEWAY_DEVELOPMENT_RESPONSE_BASE64: ${{ inputs.development_response_base64 }}
+          CONTROL_GATEWAY_DEVELOPMENT_RESPONSE_RECEIPT_JSON: ${{ inputs.development_response_receipt_json }}
           CONTROL_GATEWAY_WRITER_TOKEN: ${{ steps.writer-token.outputs.token }}
           CONTROL_GATEWAY_WRITER_EVIDENCE_DIR: ${{ runner.temp }}/control-gateway-production-write-${{ github.run_id }}
         run: node .github/scripts/control-gateway-production-writer.js
