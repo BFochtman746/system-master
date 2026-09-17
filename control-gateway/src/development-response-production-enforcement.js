@@ -15,7 +15,23 @@ const FORBIDDEN = [
   /\badmitA01Execution\s*\(/,
   /\bbuildA01SupervisorHandoff\s*\(/
 ];
+const ENTRYPOINT_REQUIRED = Object.freeze({
+  '.github/scripts/control-gateway-production-writer.js': Object.freeze([
+    'new GovernedGitHubMutationAdmissionGate(',
+    'governedAdmissionGate.admit(request, { responseText, responseReceipt })'
+  ]),
+  '.github/scripts/control-gateway-authority-bootstrap.js': Object.freeze([
+    'assertDevelopmentResponseAuthorization({',
+    'CONTROL_GATEWAY_DEVELOPMENT_RESPONSE_BASE64',
+    'CONTROL_GATEWAY_DEVELOPMENT_RESPONSE_RECEIPT_JSON'
+  ])
+});
 
+const ENTRYPOINT_FORBIDDEN = Object.freeze([
+  /\bnew\s+GitHubMutationAdmissionGate\s*\(/,
+  /\badmitA01Execution\s*\(/,
+  /\bbuildA01SupervisorHandoff\s*\(/
+]);
 function walk(root, relative = '') {
   const dir = path.join(root, relative);
   const out = [];
@@ -38,6 +54,22 @@ export function auditDevelopmentResponseProductionEnforcement(repositoryRoot) {
     const text = fs.readFileSync(path.join(sourceRoot, sourceRelative), 'utf8');
     for (const pattern of FORBIDDEN) {
       if (pattern.test(text)) violations.push({ path: rel, pattern: String(pattern) });
+    }
+  }
+    for (const [entrypoint, requiredMarkers] of Object.entries(ENTRYPOINT_REQUIRED)) {
+    const entrypointPath = path.join(repositoryRoot, ...entrypoint.split('/'));
+    const text = fs.readFileSync(entrypointPath, 'utf8');
+
+    for (const marker of requiredMarkers) {
+      if (!text.includes(marker)) {
+        violations.push({ path: entrypoint, missing: marker });
+      }
+    }
+
+    for (const pattern of ENTRYPOINT_FORBIDDEN) {
+      if (pattern.test(text)) {
+        violations.push({ path: entrypoint, pattern: String(pattern) });
+      }
     }
   }
   return violations;
