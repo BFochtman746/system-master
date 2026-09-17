@@ -18,7 +18,7 @@ async function main() {
     expectedAppSlug: String(process.env.CONTROL_GATEWAY_WRITER_EXPECTED_APP_SLUG || '').trim(),
     installationId: String(process.env.CONTROL_GATEWAY_WRITER_INSTALLATION_ID || '').trim()
   };
-  if (!request || !token || !writerCredential.actualAppSlug || !writerCredential.expectedAppSlug || !writerCredential.installationId) throw new Error('AUTHORITY_BOOTSTRAP_INPUTS_MISSING');
+  
   if (
     !request ||
     !responseBase64 ||
