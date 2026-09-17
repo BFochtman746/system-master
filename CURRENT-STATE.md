@@ -19,12 +19,13 @@ Sessions cannot see each other's work, so the rational move on not finding a com
 
 | Concern | Where it is | Honest status |
 |---|---|---|
-| Bootstrap / authority bootstrap controller | 3 partial versions on `main`; a better-tested pair and a sole-custodian trio **off** `main` | **Exists — do not rewrite.** Not consolidated; the on-`main` path is ungated. Full inventory in `SYSTEM-MAP.md`. |
+| Bootstrap / authority bootstrap controller | `control-gateway/src/github-authority-bootstrap.js` (library, 169 lines) + `.github/scripts/control-gateway-authority-bootstrap.js` (CI wrapper, 67 lines) | **Exists, tested, gated — do not rewrite.** ONE two-layer implementation, not duplicates: the wrapper imports the library. 21/21 tests pass. Now also in the local suite. Full inventory and off-`main` dispositions in `SYSTEM-MAP.md`. |
+| Java authority registry bootstrap | `FoundationAuthorityBootstrap.java` (`foundation-spine/system-root/`) | **A distinct component, deliberately not merged** with the above — in-process Java registry, not a GitHub authority write. Tested by 2 Java tests. Registry is in-memory only. |
 | Single-writer admission for governed files | `system-master/control-gateway-lock` | Real and tested. Enforced on every PR by two required checks. |
 | Claim lifecycle `READY → CLAIMED → DONE/FAILED` | `system-master/execution-claims` | Real and tested **within one run**. Ledger is in-memory — no cross-run recovery. |
 | Unattended driver + Actions dispatch | `system-master/execution-driver` | Real and tested, both ceilings mutation-proofed. `DONE` attests Actions **accepted** the work, **not** that the run finished. |
 | Chat session admission | `control-gateway/src/` + `control-gateway/test/` | On `main`, 6 cases passing. Consolidated 2026-09-17; an orphan duplicate was deleted. |
-| Run polling, durable ledger, bootstrap qualifier | — | **Absent.** See "Known absent" in `SYSTEM-MAP.md` before assuming otherwise. |
+| Run polling, durable claim ledger, registry persistence | — | **Absent from `main`.** Registry persistence exists off-`main` on `foundation-root-authority-registry` (sole custodian — do not delete). See "Known absent" in `SYSTEM-MAP.md` before assuming otherwise. |
 
 Two mechanical traps that have each cost a session: operation identity comes from the **PR event payload**, so re-running a workflow run can never pick up an edited title or body — make a new commit instead; and a `System-File-Lease` trailer is required only under `governance/`, while operation identity is required for all of `control-gateway/**`.
 
