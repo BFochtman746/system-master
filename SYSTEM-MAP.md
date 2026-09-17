@@ -61,7 +61,38 @@ Platform requirements are dependencies, not peer systems. They remain CORE-owned
 | `system-master/execution-claims` | P10 Second Shift supervisor, P11 night scheduler | Claim lifecycle and consumer: `READY -> CLAIMED -> (DONE \| FAILED)`, with bounded `recover()` readmission to `READY` and terminal `DEAD` on `ATTEMPT_LIMIT_EXHAUSTED`. `ClaimLedger.Consumer.tick()` calls `recover()` first, then executes at most one claim, writes an append-only evidence receipt, and terminalizes. Reuses `ExecutionLeaseManager` for epochs, fence tokens and trusted-time admission; the one-consumer-per-claim decision is made here because `acquire()` deliberately does not refuse a second live holder. Terminalizing without a receipt for the current epoch is refused, so a completed claim always has evidence behind it. |
 | `system-master/execution-driver` | P10 Second Shift supervisor, P11 night scheduler, P15 observability/morning receipt/rollback | The unattended launcher. `ClaimDriver` runs `ClaimLedger.Consumer.tick()` inside two independent ceilings — an iteration count and a wall-clock budget — and always reports an explicit stop reason (`QUEUE_DRAINED`, `ITERATION_LIMIT`, `BUDGET_EXHAUSTED`) plus counts of readmitted, dead-lettered, completed and failed claims. Both ceilings are mutation-proofed. `ActionsDispatch` is the production dispatch: it posts `workflow_dispatch` to `claim-work.yml`, and refuses loudly with `DISPATCH_NO_CREDENTIAL` / `DISPATCH_MISCONFIGURED_*` / `DISPATCH_REJECTED_<http>` / `DISPATCH_TRANSPORT_FAILURE` rather than degrading silently — every refusal lands in the claim's evidence trail. `ClaimDriverMain` is the entry point invoked by `.github/workflows/claim-driver.yml`; the queue is `execution/claims/queue`. NOTE: a dispatch receipt says `ACTIONS_DISPATCHED`, which attests acceptance by Actions, not completion — `workflow_dispatch` returns 204 with no run id. |
 
-Enforced on pull requests by `.github/workflows/system-file-lease-enforcement.yml`, which audits `System-File-Lease` commit-trailer receipts so a lease-less mutation to a governed path stays detectable from git history alone.
+Enforced on pull requests by `.github/workflows/system-file-lease-enforcement.yml`, which audits `System-File-Lease` commit-trailer receipts so a lease-less mutation to a governed path stays detectable from git history alone. Its two required status checks are `Governed mutations carry lease receipts` and `Single-writer runtime qualification`. Operation identity (`System-Operation: <ID>`) is read from the **pull-request event payload** (title or body) — never from a commit trailer, and never re-read live. A re-run of an existing run therefore replays the original payload: after editing a PR title or body, a **new commit** is required to produce a fresh event. `SYSTEM_OPERATION_ID_REQUIRED` with `operation=NONE` is that situation, not a Node version warning.
+
+Path scope, because these two lists are routinely confused: a `System-File-Lease` trailer is required only for the narrow governed paths under `governance/`. Operation identity is required for a wider set including all of `control-gateway/**`. A change under `control-gateway/test/` therefore needs an operation id and **no** lease trailer.
+
+### Session admission
+
+| Subsystem | Runtime | Test | Status |
+|---|---|---|---|
+| `chat-session-admission` | `control-gateway/src/chat-session-admission.js` | `control-gateway/test/chat-session-admission.test.js` (6 cases, 8 assertions) | On `main` and passing. Consolidated 2026-09-17: the test previously sat at `tests/chat-session-admission.test.js`, where its relative import resolved to a repo-root `src/` that does not exist, so it was an orphan that could never run; the runtime existed only on a branch. The test was relocated byte-identically (blob `2750a899`) and the orphan copy deleted. Do not create a third copy. |
+
+### Bootstrap / authority bootstrap — inventory before you write another one
+
+**Every session that has looked for this concluded it did not exist and started over. It exists. It exists several times.** Read this table before writing any bootstrap, boot, init, startup or authority-bootstrap controller.
+
+| Version | Where | What it is | Status |
+|---|---|---|---|
+| `github-authority-bootstrap.js` | `.github/scripts/` on `main` | 169 lines. The largest on-`main` version. | Present, **ungated** — no qualifier covers it. |
+| `control-gateway-authority-bootstrap.js` | `.github/scripts/` on `main` | 41 lines, driven by `.github/workflows/control-gateway-authority-bootstrap.yml`. | Present, **ungated**: `control-gateway-authority-bootstrap-qualify.js` is **absent from `main`**, so this path is unqualified. |
+| `FoundationAuthorityBootstrap.java` | Java sources on `main` | 142 lines. | Present; compiles as part of the 552-class build. |
+| controller-v2 pair: `github-control-state-bootstrap.js` + `live-c2-initialize.js` | **off `main`**, reachable from ~66 branches | Each has a dedicated test — the **best-tested** version of this concern. | **Not on `main`.** Deleted from main's lineage; recoverable from those branches. |
+| root-authority-registry trio: `BootstrapManifest.java`, `RootAuthorityRegistryBootstrapCli.java`, generator | **off `main`**, sole-custodian branch | Exists nowhere else. | **Not on `main`.** Loss risk if that branch is deleted. |
+
+`governance/P04-FOUNDATION-CONTRACT-001.md` describes the intended bootstrap contract. It is **intent, not proof**: no on-`main` runtime has been demonstrated to satisfy it, and this repository has repeatedly asserted behaviour in contract records that no code implemented. Consolidation into one implementation, with the missing qualifier restored, is open work — not done.
+
+### Known absent — do not infer these exist
+
+Recorded so a session stops re-deriving the same absence:
+
+- **No qualifier for either on-`main` bootstrap script.** That path is ungated.
+- **No durable claim ledger.** The ledger is in-memory; a claim abandoned by a crashed *runner* is not resumed by the next run.
+- **No run polling.** `DONE` means Actions **accepted** the dispatch, not that the dispatched run finished. `ActionsRunPoller` exists on a working branch, compiles, and has **no tests or mutation proofs** — it is deliberately not on `main`.
+- **No scheduler beyond what `execution-claims` / `execution-driver` actually implement.** Governance records describing a scheduler are not evidence one runs.
 
 ### Correction: execution runtime status
 
