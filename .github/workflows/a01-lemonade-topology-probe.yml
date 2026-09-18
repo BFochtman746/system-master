@@ -1,0 +1,72 @@
+name: A-01 Lemonade Topology Probe
+
+# WHY: `ModelDispatch` needs a VERIFIED local-inference endpoint. The repository records the
+# doctrine (governance/PLATFORM-DISPOSITION-DECISIONS-001.md lines 76-78 — Lemonade primary on
+# the Nimo box, never Ollama because of the gfx1151 silent-fallback bug) but records no
+# endpoint, no port and no model list; a repo-wide search for any `localhost:<port>` returns
+# zero matches. This probe reads those facts off the box so they can be committed once instead
+# of re-guessed every session.
+#
+# READ-ONLY AND BOUNDED. It issues HTTP GETs against loopback with a 5s per-request timeout and
+# enumerates local listeners. It writes nothing to the machine outside RUNNER_TEMP, and
+# `timeout-minutes` caps the job so an offline server fails fast and visibly rather than
+# hanging a runner that other workflows share.
+
+on:
+  push:
+    paths:
+      - ".github/workflows/a01-lemonade-topology-probe.yml"
+      - ".github/scripts/a01-lemonade-probe.ps1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    name: Read local inference topology off the A-01 box
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 6
+
+    steps:
+      - name: Check out the probe
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+
+      - name: Probe Lemonade and record topology
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Continue'
+          $evidence = Join-Path $env:RUNNER_TEMP "lemonade-topology-$env:GITHUB_RUN_ID"
+          New-Item -ItemType Directory -Force -Path $evidence | Out-Null
+          $report = Join-Path $evidence 'lemonade-topology.txt'
+
+          & .github/scripts/a01-lemonade-probe.ps1 2>&1 | Tee-Object -FilePath $report
+
+          # Fail the step only if the probe did not produce its verdict block. An absent
+          # inference server is a FINDING to record; a probe that did not run is a broken gate.
+          if (-not (Select-String -Path $report -SimpleMatch 'LEMONADE-PROBE-JSON-END' -Quiet)) {
+            Write-Host '::error::probe did not emit its verdict block — the probe itself failed'
+            exit 1
+          }
+          "EVIDENCE_DIR=$evidence" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Publish verdict to the run summary
+        if: always()
+        shell: pwsh
+        run: |
+          $report = Join-Path $env:EVIDENCE_DIR 'lemonade-topology.txt'
+          if (Test-Path $report) {
+            "## A-01 Lemonade topology probe`n" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+            '```' | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+            Get-Content $report | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+            '```' | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+          }
+
+      - name: Upload topology evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: a01-lemonade-topology-evidence
+          path: ${{ env.EVIDENCE_DIR }}
+          if-no-files-found: error
+          retention-days: 30
