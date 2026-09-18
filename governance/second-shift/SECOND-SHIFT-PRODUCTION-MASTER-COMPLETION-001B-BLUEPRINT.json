@@ -1,0 +1,118 @@
+{
+  "blueprint_id": "SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION-001B-BLUEPRINT-001",
+  "status": "FROZEN_FOR_001C_IMPLEMENTATION",
+  "operation_id": "SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION-001B",
+  "main_subject": "05fdb2acc5d331289bcc6d5b26387d4da615ec72",
+  "mastery_donor_subject": "5905da7deadbc9d227d9976dae91804365dbe99d",
+  "architecture_law": {
+    "control_gateway_owner": "durable intake/admission/state/reconstruction/production mutation enforcement",
+    "sole_scheduler_owner": "A01_SUPERVISOR",
+    "github_scheduled_role": "WATCHDOG_OBSERVER_ONLY",
+    "top_level_system_wip": 1,
+    "mutation_packet_wip": 1,
+    "registered_executors_only": true,
+    "planner_worker_evaluator_separation_required": true,
+    "worker_self_acceptance_forbidden": true,
+    "duplicate_scheduler_ownership_forbidden": true
+  },
+  "mastery_port": {
+    "assignment_contract": "governance/second-shift/SECOND-SHIFT-ASSIGNMENT-CONTRACT-SCHEMA-003.json",
+    "night_selection_gate": "governance/second-shift/SECOND-SHIFT-NIGHT-SELECTION-GATE-SCHEMA-001.json",
+    "operating_model": "governance/second-shift/SECOND-SHIFT-MASTERY-001-ALL-NIGHT-OPERATING-MODEL.md",
+    "validator": ".github/scripts/second-shift-mastery-contract-validate.js",
+    "tests": "tests/test_second_shift_mastery_contracts.js",
+    "workflow": ".github/workflows/second-shift-mastery-001-contracts.yml"
+  },
+  "interfaces": [
+    {
+      "id": "SELECTOR",
+      "producer": "Mastery Night Selection Gate",
+      "consumer": "A-01 Supervisor",
+      "contract": "Only FROZEN deterministic primary selection may create an overnight mission; reserve remains non-executable until exhaustion law passes."
+    },
+    {
+      "id": "ASSIGNMENT",
+      "producer": "Mastery Assignment Contract v3",
+      "consumer": "A-01 GitHub ingress",
+      "contract": "Only FROZEN contracts; exact owner/control head/objective; top-level WIP=1; mutation packet WIP=1; bounded surfaces; worker self-authorization forbidden."
+    },
+    {
+      "id": "INGRESS",
+      "producer": "control-gateway/python/a01_github_ingress.py",
+      "consumer": "control-gateway/python/a01_night_scheduler.py",
+      "contract": "Read-only GitHub authority pull; revalidate live owner head and obligation; preserve one-writer coordination; accept registered executor kinds only."
+    },
+    {
+      "id": "SCHEDULER",
+      "producer": "control-gateway/python/a01_night_scheduler.py",
+      "consumer": "A01ExecutionWorker",
+      "contract": "A01_SUPERVISOR is sole scheduler; exact dependency/priority/window/budget claim; max_concurrency=1 for owner lane."
+    },
+    {
+      "id": "EXECUTOR",
+      "producer": "A01ExecutionWorker",
+      "consumer": "registered executor adapter",
+      "contract": "Executor kind allowlist; no arbitrary shell executor; exact claim/fence/heartbeat/evidence/retry semantics."
+    },
+    {
+      "id": "AI_CODING",
+      "producer": "registered AI_CODING adapter",
+      "consumer": "OpenCode via Lemonade",
+      "contract": "OpenCode -> http://127.0.0.1:13305/api/v1 -> Qwen3.6-35B-A3B-GGUF; exact-subject detached worktree; bounded files/commands; no push/merge/cloud fallback; reconciliation required after mutation ambiguity."
+    },
+    {
+      "id": "EVALUATOR",
+      "producer": "independent evaluator",
+      "consumer": "packet acceptance gate",
+      "contract": "Worker output cannot self-accept; evaluator must verify objective tests/evidence before successor becomes executable."
+    },
+    {
+      "id": "DRIFT_GUARD",
+      "producer": "current authority + assignment freeze",
+      "consumer": "selector/worker/evaluator",
+      "contract": "Owner head, objective, capability boundary, research scope and authority-class drift require replan/re-admission; no silent continuation."
+    },
+    {
+      "id": "TELEMETRY_V2",
+      "producer": "supervisor/scheduler/worker",
+      "consumer": "morning report + watchdog",
+      "contract": "Heartbeat=liveness only; checkpoint=progress; intervals distinguish working/waiting/recovery/blocked/unknown and preserve exact evidence pointers."
+    },
+    {
+      "id": "MORNING_REPORT_V2",
+      "producer": "A-01 morning evidence path",
+      "consumer": "human operator",
+      "contract": "Report mission/start/finish/progress/night_use/adherence/quality/recovery/remaining/decision/verdict/next-night recommendation with technical evidence underneath."
+    },
+    {
+      "id": "WATCHDOG_EXPORT",
+      "producer": "GitHub scheduled enforcement/watchdog",
+      "consumer": "control plane",
+      "contract": "Observer only; may detect/reconcile/report scheduler drift but never dispatch competing overnight work."
+    }
+  ],
+  "required_001c_changes": [
+    {
+      "path": "control-gateway/python/a01_github_ingress.py",
+      "change": "replace single SUPPORTED_EXECUTOR constant with explicit allowlist including existing A01_CONTROL_PLANE_QUALIFICATION and AI_CODING; validate executor-specific payload without weakening current qualification path"
+    },
+    {
+      "path": "control-gateway/python/a01_execution_worker.py",
+      "change": "register AI_CODING executor beside existing qualification executor; preserve claim/fence/retry/evidence semantics"
+    },
+    {
+      "path": "control-gateway/python/a01_model_dispatch.py",
+      "change": "add governed OpenCode/Lemonade local-model dispatch with exact-subject worktree and bounded tool authority"
+    },
+    {
+      "path": "tests/**",
+      "change": "add selector/assignment/ingress/scheduler/executor/evaluator/drift/telemetry fault and integration tests"
+    }
+  ],
+  "qualification_binding": {
+    "hosted_required": true,
+    "a01_windows_x64_required_for_a01_dependent_bytes": true,
+    "no_pass_transfer_across_changed_sha": true,
+    "stage_001d_minimum": "fresh exact-SHA hosted + A-01 Windows/X64 proof including races, crash recovery, stale fencing, ambiguous dispatch, bounded retry/circuit behavior, historical replay/version adaptation, >=20000 randomized supervisor transitions, watchdog checks, and Mastery contract regression"
+  }
+}
