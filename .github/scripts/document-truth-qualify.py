@@ -42,6 +42,7 @@ demonstrated that it can still detect a planted lie, and that it can still see `
 import os
 import re
 import shutil
+import subprocess
 import sys
 import tempfile
 
@@ -85,15 +86,75 @@ def walk(root):
         yield dirpath, dirnames, filenames
 
 
+_GIT_INDEX_CACHE = {}
+
+
+def git_known_files(root):
+    """Every path git knows about: tracked, plus untracked files that are NOT ignored.
+
+    WHY GIT AND NOT THE FILESYSTEM. `os.path.exists` answered a document's claim from
+    whatever happened to be on disk, including generated output. The contract document
+    asserting `qualification-output/website-building-foundation-1.0.json` therefore resolved
+    in a tree where qualifiers had run and failed in a clean one -- the gate's verdict
+    depended on whether the tree had been built, which makes it useless as a baseline.
+
+    `target/` and `qualification-output/` are both gitignored, so asking git excludes build
+    output deterministically. Untracked-but-not-ignored files are included on purpose: a new
+    source file added in the same commit as the document describing it is a true claim, and
+    a gate that failed until after the commit would be unusable locally.
+
+    Returns None when root is not a git tree, so the filesystem fallback still serves the
+    self-proof fixtures.
+    """
+    key = os.path.abspath(root)
+    if key in _GIT_INDEX_CACHE:
+        return _GIT_INDEX_CACHE[key]
+    index = None
+    try:
+        out = subprocess.run(
+            ["git", "-C", root, "ls-files", "--cached", "--others", "--exclude-standard", "-z"],
+            capture_output=True, text=True, timeout=180,
+        )
+        if out.returncode == 0:
+            paths = [p for p in out.stdout.split("\0") if p]
+            if paths:
+                dirs = set()
+                for path in paths:
+                    parts = path.split("/")
+                    for cut in range(1, len(parts)):
+                        dirs.add("/".join(parts[:cut]))
+                index = {
+                    "paths": set(paths),
+                    "dirs": dirs,
+                    "basenames": {os.path.basename(p) for p in paths},
+                    "dirnames": {d.rsplit("/", 1)[-1] for d in dirs},
+                }
+    except (OSError, subprocess.SubprocessError):
+        index = None
+    _GIT_INDEX_CACHE[key] = index
+    return index
+
+
 def resolve(root, token):
     cleaned = token.rstrip("*").rstrip("/")
     if not cleaned:
         return True
+
+    index = git_known_files(root)
+    if index is not None:
+        if cleaned in index["paths"] or cleaned in index["dirs"]:
+            return True
+        base = os.path.basename(cleaned)
+        # A doc may quote a relative import exactly as the source writes it; that is a real
+        # claim about a real file, just not root-relative.
+        if base != cleaned and not cleaned.startswith(".."):
+            return False
+        return base in index["basenames"] or base in index["dirnames"]
+
+    # Filesystem fallback -- non-git trees only (the self-proof fixtures below).
     if os.path.exists(os.path.join(root, cleaned)):
         return True
     base = os.path.basename(cleaned)
-    # A doc may quote a relative import exactly as the source writes it; that is a real
-    # claim about a real file, just not root-relative.
     if base != cleaned and not cleaned.startswith(".."):
         return False
     for _dirpath, dirnames, filenames in walk(root):
@@ -190,7 +251,40 @@ def self_test():
         check("globs, filters and subsystem ids are not treated as file paths",
               checked == 0 and not violations)
 
-        # 6. A missing document is itself a violation, never a silent pass.
+        # 6. A claim met only by IGNORED build output must still be a violation. This is the
+        #    determinism defect: the same commit measured 94 violations in a built tree and
+        #    95 in a clean one, because a generated artifact answered a document's claim.
+        #    A baseline built on a non-deterministic measurement is worthless, so this proof
+        #    guards the property the ratchet depends on.
+        gitfix = tempfile.mkdtemp(prefix="doctruth-git-")
+        try:
+            with open(os.path.join(gitfix, "real-module.java"), "w") as fh:
+                fh.write("// present\n")
+            with open(os.path.join(gitfix, ".gitignore"), "w") as fh:
+                fh.write("generated-output/\n")
+            with open(os.path.join(gitfix, "SYSTEM-MAP.md"), "w", encoding="utf-8") as fh:
+                fh.write("Output lands at `generated-output/artifact-1.0.json`.\n")
+            with open(os.path.join(gitfix, "CURRENT-STATE.md"), "w", encoding="utf-8") as fh:
+                fh.write("Entry point is `real-module.java`.\n")
+            for args in (["init", "-q"], ["add", "-A"]):
+                subprocess.run(["git", "-C", gitfix] + args, capture_output=True, timeout=60)
+            subprocess.run(["git", "-C", gitfix, "-c", "user.email=t@t", "-c", "user.name=t",
+                            "commit", "-qm", "base"], capture_output=True, timeout=60)
+            # Create the artifact exactly as a qualifier run does: present on disk, ignored.
+            os.makedirs(os.path.join(gitfix, "generated-output"), exist_ok=True)
+            with open(os.path.join(gitfix, "generated-output", "artifact-1.0.json"), "w") as fh:
+                fh.write("{}\n")
+            _checked, violations, _ = audit(gitfix)
+            check("a claim met only by ignored build output is still a violation",
+                  any(v[2] == "generated-output/artifact-1.0.json" for v in violations))
+            # And the same tree must still accept a genuinely tracked file, so the fix
+            # tightened resolution without breaking it.
+            check("a tracked file still resolves under git-based resolution",
+                  not any(v[2] == "real-module.java" for v in violations))
+        finally:
+            shutil.rmtree(gitfix, ignore_errors=True)
+
+        # 7. A missing document is itself a violation, never a silent pass.
         empty = tempfile.mkdtemp(prefix="doctruth-empty-")
         try:
             _checked, violations, _ = audit(empty)
