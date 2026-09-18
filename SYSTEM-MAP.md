@@ -112,12 +112,17 @@ Collapsing those two into one code would make "nothing ever started" indistingui
 
 **Scope limit, stated because a green claim would otherwise imply more.** `DONE` means "the dispatched run completed" **only for a consumer wired with this poller**. Nothing in production is wired yet.
 
-### What is gated where — the two discovery rules
+### What is gated where — the three discovery rules
 
-Whether a new test actually protects anything depends on which of these it satisfies. Both are mechanical; neither involves registering the test anywhere.
+Whether a new test actually protects anything depends on which of these it satisfies. All three are mechanical; none involves registering the test anywhere.
 
-1. **Script qualifiers** are discovered by `verify.sh` from `.github/scripts/*qualify*` only. A test living anywhere else — `control-gateway/test/`, for instance — is reachable from CI workflows but **invisible to a local pre-push run**. That gap is what hid the bootstrap path locally; `control-gateway-authority-bootstrap-qualify.js` exists to close it.
+1. **Script qualifiers** are discovered by `verify.sh` from `.github/scripts/*qualify*` only. A qualifier living anywhere else is reachable from CI workflows but invisible to a local pre-push run. That gap is what hid the bootstrap path locally; `control-gateway-authority-bootstrap-qualify.js` exists to close it for that one path.
 2. **Java qualifications** are auto-discovered by `verification/.../QualificationBridgeTest`, which walks compiled `target/classes/**/*Test.class` and invokes each `main(String[])`. So any Java qualification that compiles is gated by plain `verify.sh` automatically — this is why `ActionsRunPollerTest` moved the count from 35 to 36 with no registration step. The bridge holds a discovery floor (`MIN_EXPECTED_CLASSES`) so that if compilation ever stops producing these classes, the suite fails loudly instead of returning a green run of nothing.
+3. **The control-gateway suite** is run wholesale by `verify.sh` section 6 — every test file directly under `control-gateway/test/`, node and python alike, plus the python tests beside the control-gateway python sources. Any new test dropped there is gated locally with no registration.
+
+**Correction, 2026-09-17 (same change that makes it true).** Rule 1 previously said a test under `control-gateway/test/` is "invisible to a local pre-push run". That was accurate when written and is now false: section 6 runs all 33 of them. What was measured before this change — 31 node tests and 2 python tests, referenced by 21 CI workflows and by **zero** local sections — is the honest scale of the gap that existed. It was never a single-path problem; `control-gateway-authority-bootstrap-qualify.js` closed one path out of 33 and the rest stayed CI-only. Everything in that suite already passed, so this closed an *observability* gap, not a defect backlog: nothing was broken, nothing local could have told you so.
+
+**Section 6 holds a discovery floor (`CG_MIN_TESTS`) and the floor is the load-bearing part.** A loop over a glob that matches nothing runs zero tests and reports success — the same failure as the reporter that printed `pass=0 fail=-1` while fail-closing on nothing, and as the audit that skipped `.github/` and reported clean after inspecting no files. Mutation-proved in all three directions: breaking one test turns the section red and names the file; hiding the suite trips the floor and refuses; deleting the floor and hiding the suite reports `PASS` on 2 tests instead of refusing — which is precisely why the floor exists. Losing tests is a hard failure; adding them is free.
 
 ### The document truth gate — this document is now gated against the tree
 
