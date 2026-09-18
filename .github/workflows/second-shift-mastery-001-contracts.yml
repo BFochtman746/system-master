@@ -1,0 +1,48 @@
+name: Second Shift Mastery 001 Contract Qualification
+
+on:
+  push:
+    branches:
+      - second-shift/mastery-001-all-night-operating-model
+      - second-shift-production-master-completion-001
+    paths:
+      - 'governance/second-shift/SECOND-SHIFT-MASTERY-001-ALL-NIGHT-OPERATING-MODEL.md'
+      - 'governance/second-shift/SECOND-SHIFT-NIGHT-SELECTION-GATE-SCHEMA-001.json'
+      - 'governance/second-shift/SECOND-SHIFT-ASSIGNMENT-CONTRACT-SCHEMA-003.json'
+      - '.github/scripts/second-shift-mastery-contract-validate.js'
+      - 'tests/test_second_shift_mastery_contracts.js'
+      - '.github/workflows/second-shift-mastery-001-contracts.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify-contracts:
+    name: Mastery Contracts / Node ${{ matrix.node }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [22, 24]
+    steps:
+      - name: Checkout exact contract subject
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: ${{ matrix.node }}
+          package-manager-cache: false
+      - name: Parse contract definitions
+        shell: bash
+        run: |
+          node -e "JSON.parse(require('fs').readFileSync('governance/second-shift/SECOND-SHIFT-NIGHT-SELECTION-GATE-SCHEMA-001.json','utf8')); JSON.parse(require('fs').readFileSync('governance/second-shift/SECOND-SHIFT-ASSIGNMENT-CONTRACT-SCHEMA-003.json','utf8')); console.log('SECOND_SHIFT_MASTERY_SCHEMA_JSON=PASS')"
+      - name: Syntax-check validator and tests
+        run: |
+          node --check .github/scripts/second-shift-mastery-contract-validate.js
+          node --check tests/test_second_shift_mastery_contracts.js
+      - name: Run strict contract regression suite
+        run: node --test tests/test_second_shift_mastery_contracts.js
