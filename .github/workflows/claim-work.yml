@@ -1,5 +1,24 @@
 name: Claim Work
 
+# CORRELATION CONTRACT — load-bearing, do not reformat casually.
+#
+# workflow_dispatch answers 204 with no run id, so ActionsRunPoller cannot address the run
+# it just started. It finds the run by matching the claim id in the run title
+# (display_title, which is this run-name evaluated). Without a run-name every run here is
+# titled "Claim Work", the claim id appears nowhere, and a poller-wrapped consumer refuses
+# EVERY claim with DISPATCH_RUN_NOT_FOUND_WITHIN_WINDOW — wedging the driver, which is
+# strictly worse than the honest ACTIONS_DISPATCHED it replaces.
+#
+# The square brackets are not decoration. ActionsRunPoller.titleCorrelates requires the
+# claim id to appear as a WHOLE TOKEN, and it treats '-' and '_' as identifier characters
+# so that claim `job-1` can never be satisfied by the run for `job-11`. A separator that is
+# itself an identifier character (e.g. "Claim-Work-job-1") fails that boundary check and
+# breaks correlation. '[' and ']' are non-identifier, so they delimit correctly.
+#
+# ClaimWorkCorrelationTest reads THIS FILE and proves the rendered title correlates, so the
+# YAML and the Java matcher cannot drift apart silently.
+run-name: Claim Work [${{ inputs.claim_id }}]
+
 # The delegated work executor — what ActionsDispatch actually starts for a claim.
 #
 # Split from claim-driver.yml on purpose: the driver decides WHICH claim runs and records
