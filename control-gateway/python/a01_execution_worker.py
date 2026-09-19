@@ -511,6 +511,14 @@ class A01ExecutionWorker:
 
     def recover(self, now: Optional[dt.datetime] = None) -> dict[str, Any]:
         now = now or self.clock()
+        evaluation_resumed = []
+        rows = self.store.conn.execute(
+            "SELECT r.dispatch_id FROM night_execution_results r JOIN claims c ON c.lease_id=r.lease_id JOIN dispatch_outbox o ON o.dispatch_id=r.dispatch_id WHERE r.state='RESULT_READY' AND c.status='VALIDATING' AND c.released_at IS NOT NULL AND o.state='VALIDATING' ORDER BY r.dispatch_id"
+        ).fetchall()
+        for item in rows:
+            dispatch_id = str(item["dispatch_id"])
+            self._commit_evaluation_candidate(self._dispatch_bundle(dispatch_id), now)
+            evaluation_resumed.append(dispatch_id)
         resumed = self._recover_local_claims(now)
         recovered = self.store.recover(now=now, heartbeat_sla_seconds=self.heartbeat_sla_seconds)
         stale = set(recovered["stale_leases"])
@@ -538,7 +546,7 @@ class A01ExecutionWorker:
                     (iso(now), iso(now), *sorted(stale)),
                 )
         self.scheduler.reconcile(now=now)
-        return {**recovered, "resumed_leases": resumed}
+        return {**recovered, "resumed_leases": resumed, "resumed_evaluation_dispatches": evaluation_resumed}
 
     def _new_attempt_id(self, dispatch_id: str, generation: int) -> str:
         return f"{dispatch_id}-g{generation}-{uuid.uuid4().hex}"
@@ -742,6 +750,38 @@ class A01ExecutionWorker:
             )
         return terminal_payload
 
+    def _commit_evaluation_candidate(self, bundle: dict[str, Any], now: dt.datetime) -> dict[str, Any]:
+        row = self._result_row(bundle["dispatch_id"])
+        if row is None:
+            raise ExecutionWorkerError("evaluation candidate result does not exist")
+        if row["state"] == "SUCCEEDED" and row["terminal_state"] == "VALIDATING":
+            return row
+        if row["state"] != "RESULT_READY" or int(row["fencing_token"]) != int(bundle["fencing_token"]):
+            raise StaleWorker("evaluation candidate staging identity is stale")
+        payload = json.loads(row["result_json"] or "{}")
+        result = payload.get("result")
+        if bundle["executor_kind"] != "AI_CODING" or not isinstance(result, dict):
+            raise ExecutionWorkerError("only AI_CODING may enter evaluator validation")
+        digest = result.get("patch_sha256")
+        if result.get("status") != "CANDIDATE_READY_FOR_INDEPENDENT_EVALUATION" or result.get("evaluator_required") is not True:
+            raise ExecutionWorkerError("AI_CODING result is not evaluator-bound")
+        if not isinstance(digest, str) or len(digest) != 64 or any(ch not in "0123456789abcdefABCDEF" for ch in digest):
+            raise ExecutionWorkerError("AI_CODING candidate requires an exact patch SHA-256")
+        self.store.await_evaluation(bundle["lease_id"], int(bundle["fencing_token"]), digest.lower(), payload=payload, now=now)
+        with self.store.tx() as c:
+            updated = c.execute(
+                "UPDATE night_execution_results SET state='SUCCEEDED',terminal_state='VALIDATING',finished_at=?,updated_at=?,execution_owner=NULL,execution_owner_acquired_at=NULL WHERE dispatch_id=? AND state='RESULT_READY' AND execution_generation=? AND current_attempt_id=?",
+                (iso(now), iso(now), bundle["dispatch_id"], int(row["execution_generation"]), row["current_attempt_id"]),
+            )
+            if updated.rowcount == 0:
+                current = c.execute("SELECT state,terminal_state FROM night_execution_results WHERE dispatch_id=?", (bundle["dispatch_id"],)).fetchone()
+                if current is None or current["state"] != "SUCCEEDED" or current["terminal_state"] != "VALIDATING":
+                    raise Conflict("evaluation candidate result changed while committing")
+            if row["current_attempt_id"]:
+                c.execute("UPDATE night_execution_attempts SET state='SUCCEEDED',finished_at=COALESCE(finished_at,?) WHERE attempt_id=? AND state='RESULT_READY'", (iso(now), row["current_attempt_id"]))
+        self.scheduler.reconcile(now=now)
+        return self._result_row(bundle["dispatch_id"]) or {}
+
     def _stage_result(
         self,
         bundle: dict[str, Any],
@@ -839,6 +879,10 @@ class A01ExecutionWorker:
         if existing is not None and existing["state"] in FINAL_RESULT_STATES:
             return existing
         if existing is not None and existing["state"] == "RESULT_READY":
+            staged = json.loads(existing["result_json"] or "{}")
+            result = staged.get("result")
+            if isinstance(result, dict) and result.get("evaluator_required") is True:
+                return self._commit_evaluation_candidate(bundle, now)
             return self._commit_staged_result(bundle, now)
         if bundle["released_at"] is not None:
             raise StaleWorker("dispatch claim is already released without a committed worker result")
@@ -860,6 +904,8 @@ class A01ExecutionWorker:
             self._stage_owned_result(
                 bundle, context, terminal_state="COMPLETED", result=result, error=None, now=end
             )
+            if result.get("evaluator_required") is True:
+                return self._commit_evaluation_candidate(bundle, end)
             return self._commit_staged_result(bundle, end)
         except StaleWorker:
             self._record_authority_lost(
