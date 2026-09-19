@@ -20,6 +20,7 @@ from a01_supervisor_adapter import (
     validate_gateway_handoff,
 )
 from a01_supervisor_coordination import COORDINATION_PROTOCOL, validate_coordination_contract
+from a01_model_dispatch import ModelDispatchError, validate_ai_coding_payload
 
 INGRESS_PROTOCOL = "control-gateway.a01-github-ingress.v1"
 EXECUTION_ENVELOPE_PROTOCOL = "control-gateway.a01-github-ingress-execution.v1"
@@ -401,15 +402,28 @@ def validate_a01_execution_envelope(
     payload = handoff.get("payload")
     if not isinstance(payload, dict):
         raise IngressError("A-01 execution payload must be an object")
-    if payload.get("qualification_id") != qualification_id:
-        raise IngressError("payload qualification_id differs from a01_execution qualifier")
-    if str(payload.get("subject_sha", "")).lower() != subject_sha:
-        raise IngressError("payload subject_sha differs from a01_execution subject")
-    if payload.get("workstream_id") != registered_workstream:
-        raise IngressError("payload workstream_id differs from registered qualifier")
-    control_plane_sha = payload.get("control_plane_sha")
-    if control_plane_sha is not None and str(control_plane_sha).lower() != subject_sha:
-        raise IngressError("payload control_plane_sha differs from exact subject")
+    executor_kind = handoff.get("executor_kind")
+    if executor_kind == "A01_CONTROL_PLANE_QUALIFICATION":
+        if payload.get("qualification_id") != qualification_id:
+            raise IngressError("payload qualification_id differs from a01_execution qualifier")
+        if str(payload.get("subject_sha", "")).lower() != subject_sha:
+            raise IngressError("payload subject_sha differs from a01_execution subject")
+        if payload.get("workstream_id") != registered_workstream:
+            raise IngressError("payload workstream_id differs from registered qualifier")
+        control_plane_sha = payload.get("control_plane_sha")
+        if control_plane_sha is not None and str(control_plane_sha).lower() != subject_sha:
+            raise IngressError("payload control_plane_sha differs from exact subject")
+    elif executor_kind == "AI_CODING":
+        try:
+            ai_payload = validate_ai_coding_payload(payload)
+        except ModelDispatchError as exc:
+            raise IngressError(f"AI_CODING payload invalid: {exc}") from exc
+        if ai_payload["subject_sha"] != subject_sha:
+            raise IngressError("AI_CODING payload subject_sha differs from a01_execution subject")
+        if ai_payload["workstream_id"] != registered_workstream:
+            raise IngressError("AI_CODING payload workstream_id differs from registered qualifier")
+    else:
+        raise IngressError("ingress executor is not supported by the production A-01 worker")
     if handoff.get("payload_digest") != digest(payload):
         raise IngressError("payload digest differs from admitted payload")
 

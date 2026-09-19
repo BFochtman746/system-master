@@ -185,6 +185,34 @@ def make_delegation(*, qualifier=QUALIFICATION_ID, subject_sha=SUBJECT_SHA):
     }
 
 
+def make_ai_coding_delegation(**payload_overrides):
+    delegation = make_delegation()
+    envelope = delegation["a01_execution"]
+    handoff = envelope["handoff"]
+    receipt = handoff["admission_receipt"]
+    payload = {
+        "protocol_version": "control-gateway.a01-model-dispatch.v1",
+        "workstream_id": WORKSTREAM_ID,
+        "packet_id": "PACKET-AI-CODING-001",
+        "subject_sha": SUBJECT_SHA,
+        "prompt": "Implement the admitted bounded change.",
+        "allowed_paths": ["control-gateway/python/example.py"],
+        "allowed_commands": ["python -m unittest tests.test_example"],
+        "model": "Qwen3.6-35B-A3B-GGUF",
+        "base_url": "http://127.0.0.1:13305/api/v1",
+        "max_steps": 16,
+        "timeout_seconds": 300,
+        "evaluator_required": True,
+    }
+    payload.update(payload_overrides)
+    handoff["executor_kind"] = "AI_CODING"
+    receipt["executor_kind"] = "AI_CODING"
+    handoff["payload"] = payload
+    handoff["payload_digest"] = digest(payload)
+    receipt["payload_digest"] = handoff["payload_digest"]
+    return rehash(delegation)
+
+
 def rehash(delegation):
     envelope = delegation["a01_execution"]
     handoff = envelope["handoff"]
@@ -375,6 +403,43 @@ class P12IngressAuthorityTests(unittest.TestCase):
         handoff["admission_receipt"]["executor_kind"] = "LOCAL_AGENT"
         rehash(delegation)
         with self.assertRaisesRegex(IngressError, "not supported"):
+            validate(delegation)
+
+    def test_valid_ai_coding_payload_uses_executor_specific_contract(self):
+        delegation = make_ai_coding_delegation()
+        handoff, _ = validate(delegation)
+        self.assertEqual(handoff["executor_kind"], "AI_CODING")
+        self.assertTrue(handoff["payload"]["evaluator_required"])
+
+    def test_ai_coding_wrong_model_fails_closed(self):
+        delegation = make_ai_coding_delegation(model="NOT-THE-FROZEN-MODEL")
+        with self.assertRaisesRegex(IngressError, "AI_CODING payload invalid"):
+            validate(delegation)
+
+    def test_ai_coding_wrong_endpoint_fails_closed(self):
+        delegation = make_ai_coding_delegation(base_url="https://api.example.com/v1")
+        with self.assertRaisesRegex(IngressError, "AI_CODING payload invalid"):
+            validate(delegation)
+
+    def test_ai_coding_subject_drift_fails_closed_with_valid_digests(self):
+        delegation = make_ai_coding_delegation(subject_sha="e" * 40)
+        with self.assertRaisesRegex(IngressError, "subject_sha differs"):
+            validate(delegation)
+
+    def test_ai_coding_workstream_drift_fails_closed_with_valid_digests(self):
+        delegation = make_ai_coding_delegation(workstream_id="OTHER-WORKSTREAM")
+        with self.assertRaisesRegex(IngressError, "workstream_id differs"):
+            validate(delegation)
+
+    def test_ai_coding_path_escape_and_forbidden_command_fail_closed(self):
+        with self.assertRaisesRegex(IngressError, "AI_CODING payload invalid"):
+            validate(make_ai_coding_delegation(allowed_paths=["../escape.py"]))
+        with self.assertRaisesRegex(IngressError, "AI_CODING payload invalid"):
+            validate(make_ai_coding_delegation(allowed_commands=["git push origin main"]))
+
+    def test_ai_coding_requires_independent_evaluator(self):
+        delegation = make_ai_coding_delegation(evaluator_required=False)
+        with self.assertRaisesRegex(IngressError, "AI_CODING payload invalid"):
             validate(delegation)
 
     def test_coordination_resource_drift_fails_even_with_valid_digest(self):
