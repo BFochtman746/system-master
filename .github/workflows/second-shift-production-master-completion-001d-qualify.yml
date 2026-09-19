@@ -120,23 +120,77 @@ jobs:
           node - <<'NODE'
           const fs = require('fs');
           const report = JSON.parse(fs.readFileSync('.second-shift-kernel-v2-stress.json', 'utf8'));
-          const historicalTopology = JSON.parse(fs.readFileSync('../governance/SYSTEM-TOPOLOGY-004.json', 'utf8'));
+          const historicalTopology = JSON.parse(fs.readFileSync('../governance/SYSTEM-TOPOLOGY-005.json', 'utf8'));
           const currentTopology = JSON.parse(fs.readFileSync('governance/SYSTEM-TOPOLOGY-007.json', 'utf8'));
+          const learningCheckpointPath = '../qualification/learning/LEARNING-001E-BATCH-06-HOSTED-INFRASTRUCTURE-CHECKPOINT-070B.json';
+          const learningCheckpointText = fs.readFileSync(learningCheckpointPath, 'utf8');
+          const learningCheckpoint = JSON.parse(learningCheckpointText);
+          const crypto = require('crypto');
+          const learningCheckpointSha256 = crypto.createHash('sha256').update(learningCheckpointText, 'utf8').digest('hex');
+          if (learningCheckpointSha256 !== 'c755403685b244a5d773aba444c0e28d685797712d3cce4a8140d2199b38a644') throw new Error('LEARNING_070B_CHECKPOINT_DIGEST_MISMATCH');
           const historicalPeers = new Set(historicalTopology.peer_system_ids || []);
           const currentPeers = new Set(currentTopology.execution_readiness?.execution_ready_peer_system_ids || currentTopology.peer_system_ids || []);
           const replay = Array.isArray(report.historical_replay) ? report.historical_replay : [];
           const byLane = new Map(replay.map((entry) => [entry.lane, entry]));
           const failures = [];
           const adapted = [];
+          function legacyLearningCircuitReplayCompatible(entry) {
+            const errors = Array.isArray(entry?.errors) ? entry.errors : [];
+            const attempts = Array.isArray(learningCheckpoint.attempts) ? learningCheckpoint.attempts : [];
+            const adjudication = learningCheckpoint.adjudication || {};
+            return entry?.lane === 'LEARNING'
+              && entry?.status === 'INCOMPATIBLE'
+              && errors.length === 1
+              && errors[0]?.type === 'CIRCUIT_OPEN_BEFORE_RETRY_EXHAUSTION'
+              && errors[0]?.event_id === '2026-09-11-LEARNING-0005-CIRCUIT-OPEN'
+              && errors[0]?.index === 4
+              && learningCheckpoint.checkpoint_id === 'LEARNING-001E-BATCH-06-HOSTED-INFRASTRUCTURE-CHECKPOINT-070B'
+              && learningCheckpoint.effective_date === '2026-09-11'
+              && learningCheckpoint.owner_path === 'SYSTEM_MASTER/LEARNING'
+              && learningCheckpoint.control_ref === 'learning/control-v1'
+              && learningCheckpoint.control_head === 'e3196089f77dde376944a08eac78a697e57d1535'
+              && learningCheckpoint.exact_subject?.sha === 'bd3f7de8490c7cfb6a7dcdd37cc1fa1d4656bced'
+              && learningCheckpoint.exact_subject?.mutated === false
+              && learningCheckpoint.workflow?.run_id === 34545605665
+              && learningCheckpoint.workflow?.final_attempt_reviewed === 3
+              && learningCheckpoint.workflow?.run_conclusion === 'failure'
+              && attempts.length === 3
+              && attempts.every((attempt, index) =>
+                attempt?.attempt === index + 1
+                && attempt?.runner_id === 0
+                && attempt?.runner_name === ''
+                && Array.isArray(attempt?.steps)
+                && attempt.steps.length === 0
+                && attempt?.classification === 'ZERO_STEP_RUNNER_ALLOCATION_FAILURE')
+              && adjudication.retry_budget === 3
+              && adjudication.retry_budget_consumed === 3
+              && adjudication.circuit_state === 'OPEN_FOR_CURRENT_INVOCATION'
+              && adjudication.product_subject_failure === false
+              && adjudication.semantic_qualification_executed === false
+              && adjudication.semantic_result === 'UNOBSERVED'
+              && adjudication.evidence_transfer === false;
+          }
           for (const lane of historicalPeers) {
             const entry = byLane.get(lane);
-            if (!entry || entry.status !== 'PASS') failures.push({ lane, reason: 'HISTORICAL_LANE_NOT_COMPATIBLE', observed: entry || null });
-            else adapted.push({ lane, status: 'PASS', adaptation: 'NONE_REQUIRED' });
+            if (entry?.status === 'PASS') {
+              adapted.push({ lane, status: 'PASS', adaptation: 'NONE_REQUIRED' });
+            } else if (legacyLearningCircuitReplayCompatible(entry)) {
+              adapted.push({
+                lane,
+                status: 'PASS_WITH_LEGACY_EVIDENCE_ADAPTATION',
+                adaptation: 'LEGACY_AGGREGATE_RETRY_EXHAUSTION_FROM_IMMUTABLE_CHECKPOINT',
+                checkpoint_id: learningCheckpoint.checkpoint_id,
+                checkpoint_sha256: learningCheckpointSha256,
+                source_workflow_run_id: learningCheckpoint.workflow.run_id
+              });
+            } else {
+              failures.push({ lane, reason: 'HISTORICAL_LANE_NOT_COMPATIBLE', observed: entry || null });
+            }
           }
           for (const lane of currentPeers) {
             if (historicalPeers.has(lane)) continue;
             const entry = byLane.get(lane);
-            if (!entry || entry.status === 'MISSING') adapted.push({ lane, status: 'VERSION_ADAPTED_NOT_APPLICABLE', adaptation: 'LANE_NOT_PRESENT_IN_SYSTEM_TOPOLOGY_004' });
+            if (!entry || entry.status === 'MISSING') adapted.push({ lane, status: 'VERSION_ADAPTED_NOT_APPLICABLE', adaptation: 'LANE_NOT_PRESENT_IN_SYSTEM_TOPOLOGY_005' });
             else if (entry.status === 'PASS') adapted.push({ lane, status: 'PASS', adaptation: 'OPTIONAL_HISTORICAL_LEDGER_PRESENT_AND_COMPATIBLE' });
             else failures.push({ lane, reason: 'POST_TOPOLOGY_LANE_HISTORICAL_LEDGER_INCOMPATIBLE', observed: entry });
           }
@@ -145,7 +199,7 @@ jobs:
             subject_operation: 'SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION-001D-R1',
             control_plane_sha: '05fdb2acc5d331289bcc6d5b26387d4da615ec72',
             historical_shift_date: '2026-09-11',
-            historical_topology: historicalTopology.topology_id || 'SYSTEM-TOPOLOGY-004',
+            historical_topology: historicalTopology.topology_id || 'SYSTEM-TOPOLOGY-005',
             current_topology: currentTopology.topology_id || 'SYSTEM-TOPOLOGY-007',
             standing: failures.length ? 'NOT_PASS' : 'PASS',
             replay,
