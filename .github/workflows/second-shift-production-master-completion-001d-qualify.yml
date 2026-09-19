@@ -7,6 +7,10 @@ on:
     paths:
       - '.github/scripts/a01-second-shift-supervisor-v2-qualify.js'
       - '.github/workflows/second-shift-production-master-completion-001d-qualify.yml'
+      - '.github/scripts/second-shift-enforce.js'
+      - '.github/scripts/second-shift-owner-coverage.js'
+      - '.github/scripts/second-shift-state-kernel-v2.js'
+      - 'tests/second-shift-state-kernel-v2.stress.js'
       - 'tools/second_shift_supervisor_v2.py'
       - 'control-gateway/python/a01_github_ingress.py'
       - 'control-gateway/python/a01_model_dispatch.py'
@@ -57,6 +61,30 @@ jobs:
           actual="$(git rev-parse HEAD)"
           test "$actual" = "$EXPECTED_SHA"
           echo "SECOND_SHIFT_001D_HOSTED_SUBJECT=$actual"
+      - name: Checkout pinned current control plane
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: ${{ github.repository }}
+          ref: 05fdb2acc5d331289bcc6d5b26387d4da615ec72
+          path: current-control
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Verify pinned control plane remains live main authority
+        env:
+          CONTROL_PLANE_SHA: 05fdb2acc5d331289bcc6d5b26387d4da615ec72
+        run: |
+          set -euo pipefail
+          test "$(git -C current-control rev-parse HEAD)" = "$CONTROL_PLANE_SHA"
+          live="$(git ls-remote origin refs/heads/main | awk '{print $1}')"
+          test "$live" = "$CONTROL_PLANE_SHA"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          authority = json.loads(Path('current-control/governance/CURRENT-AUTHORITY.json').read_text(encoding='utf-8'))
+          assert authority['authority_id'] == 'CURRENT-AUTHORITY-005', authority.get('authority_id')
+          assert authority['topology'] == 'governance/SYSTEM-TOPOLOGY-007.json', authority.get('topology')
+          print('SECOND_SHIFT_001D_CURRENT_AUTHORITY=PASS')
+          PY
       - name: Syntax check integrated Python surfaces
         run: |
           python -m py_compile             tools/second_shift_supervisor_v2.py             control-gateway/python/a01_supervisor_adapter.py             control-gateway/python/a01_supervisor_coordination.py             control-gateway/python/a01_supervisor_coordination_strict.py             control-gateway/python/a01_night_scheduler.py             control-gateway/python/a01_github_ingress.py             control-gateway/python/a01_model_dispatch.py             control-gateway/python/a01_execution_worker.py             tests/test_a01_github_ingress.py             tests/test_a01_model_dispatch.py             tests/test_a01_execution_worker_ai_coding.py             tests/test_control_gateway_a01_supervisor_adapter.py             tests/test_control_gateway_a01_supervisor_coordination.py             tests/test_control_gateway_a01_supervisor_coordination_authority.py             tests/test_control_gateway_a01_night_scheduler.py             tests/test_control_gateway_failure_restart_idempotency.py             tests/run_control_gateway_failure_restart_idempotency_bounded.py             tests/test_control_gateway_cg011_dispatch_failure_replay.py             tests/test_control_gateway_cg011_adversarial_closure.py             tests/run_second_shift_supervisor_v2_optimized.py
@@ -82,6 +110,97 @@ jobs:
         run: python tests/test_control_gateway_cg011_dispatch_failure_replay.py
       - name: Run adversarial closure regression
         run: python tests/test_control_gateway_cg011_adversarial_closure.py
+      - name: Run strict historical replay with explicit topology version adaptation
+        env:
+          CONTROL_PLANE_SHA: 05fdb2acc5d331289bcc6d5b26387d4da615ec72
+        run: |
+          set -euo pipefail
+          cd current-control
+          node tests/second-shift-state-kernel-v2.stress.js
+          node - <<'NODE'
+          const fs = require('fs');
+          const report = JSON.parse(fs.readFileSync('.second-shift-kernel-v2-stress.json', 'utf8'));
+          const historicalTopology = JSON.parse(fs.readFileSync('governance/SYSTEM-TOPOLOGY-004.json', 'utf8'));
+          const currentTopology = JSON.parse(fs.readFileSync('governance/SYSTEM-TOPOLOGY-007.json', 'utf8'));
+          const historicalPeers = new Set(historicalTopology.peer_system_ids || []);
+          const currentPeers = new Set(currentTopology.execution_readiness?.execution_ready_peer_system_ids || currentTopology.peer_system_ids || []);
+          const replay = Array.isArray(report.historical_replay) ? report.historical_replay : [];
+          const byLane = new Map(replay.map((entry) => [entry.lane, entry]));
+          const failures = [];
+          const adapted = [];
+          for (const lane of historicalPeers) {
+            const entry = byLane.get(lane);
+            if (!entry || entry.status !== 'PASS') failures.push({ lane, reason: 'HISTORICAL_LANE_NOT_COMPATIBLE', observed: entry || null });
+            else adapted.push({ lane, status: 'PASS', adaptation: 'NONE_REQUIRED' });
+          }
+          for (const lane of currentPeers) {
+            if (historicalPeers.has(lane)) continue;
+            const entry = byLane.get(lane);
+            if (!entry || entry.status === 'MISSING') adapted.push({ lane, status: 'VERSION_ADAPTED_NOT_APPLICABLE', adaptation: 'LANE_NOT_PRESENT_IN_SYSTEM_TOPOLOGY_004' });
+            else if (entry.status === 'PASS') adapted.push({ lane, status: 'PASS', adaptation: 'OPTIONAL_HISTORICAL_LEDGER_PRESENT_AND_COMPATIBLE' });
+            else failures.push({ lane, reason: 'POST_TOPOLOGY_LANE_HISTORICAL_LEDGER_INCOMPATIBLE', observed: entry });
+          }
+          const evidence = {
+            evidence_version: 1,
+            subject_operation: 'SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION-001D-R1',
+            control_plane_sha: '05fdb2acc5d331289bcc6d5b26387d4da615ec72',
+            historical_shift_date: '2026-09-11',
+            historical_topology: historicalTopology.topology_id || 'SYSTEM-TOPOLOGY-004',
+            current_topology: currentTopology.topology_id || 'SYSTEM-TOPOLOGY-007',
+            standing: failures.length ? 'NOT_PASS' : 'PASS',
+            replay,
+            version_adaptation: adapted,
+            failures
+          };
+          fs.writeFileSync('.001d-historical-replay-evidence.json', JSON.stringify(evidence, null, 2) + '\n');
+          if (failures.length) { console.error(JSON.stringify(evidence, null, 2)); process.exit(1); }
+          console.log('SECOND_SHIFT_001D_HISTORICAL_REPLAY=PASS');
+          NODE
+      - name: Run independent watchdog checks against pinned current authority
+        env:
+          CONTROL_PLANE_SHA: 05fdb2acc5d331289bcc6d5b26387d4da615ec72
+          SECOND_SHIFT_001D_WATCHDOG_NOW: '2026-09-19T12:00:00.000Z'
+        run: |
+          set -euo pipefail
+          cat > "$RUNNER_TEMP/second-shift-001d-fixed-clock.cjs" <<'NODE'
+          'use strict';
+          const RealDate = Date;
+          const fixedText = process.env.SECOND_SHIFT_001D_WATCHDOG_NOW;
+          const fixedMs = RealDate.parse(fixedText);
+          if (!Number.isFinite(fixedMs)) throw new Error('SECOND_SHIFT_001D_WATCHDOG_CLOCK_INVALID');
+          class FixedDate extends RealDate {
+            constructor(...args) { super(...(args.length ? args : [fixedMs])); }
+            static now() { return fixedMs; }
+            static parse(value) { return RealDate.parse(value); }
+            static UTC(...args) { return RealDate.UTC(...args); }
+          }
+          global.Date = FixedDate;
+          NODE
+          cd current-control
+          NODE_OPTIONS="--require=$RUNNER_TEMP/second-shift-001d-fixed-clock.cjs" node .github/scripts/second-shift-enforce.js --watchdog --out=.001d-watchdog-enforcement.json
+          node .github/scripts/second-shift-owner-coverage.js --watchdog | tee .001d-watchdog-owner-coverage.log
+          grep -q 'SECOND_SHIFT_OWNER_COVERAGE_PASS' .001d-watchdog-owner-coverage.log
+          node - <<'NODE'
+          const fs = require('fs');
+          const enforcement = JSON.parse(fs.readFileSync('.001d-watchdog-enforcement.json', 'utf8'));
+          if (enforcement.watchdog !== true || enforcement.standing !== 'PASS' || enforcement.in_shift_window !== false) {
+            console.error(JSON.stringify(enforcement, null, 2));
+            process.exit(1);
+          }
+          const evidence = {
+            evidence_version: 1,
+            subject_operation: 'SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION-001D-R1',
+            control_plane_sha: '05fdb2acc5d331289bcc6d5b26387d4da615ec72',
+            qualification_clock: '2026-09-19T12:00:00.000Z',
+            live_control_resolution: true,
+            watchdog_standing: enforcement.standing,
+            watchdog_mode: enforcement.watchdog,
+            in_shift_window: enforcement.in_shift_window,
+            owner_coverage_marker: 'SECOND_SHIFT_OWNER_COVERAGE_PASS'
+          };
+          fs.writeFileSync('.001d-watchdog-evidence.json', JSON.stringify(evidence, null, 2) + '\n');
+          console.log('SECOND_SHIFT_001D_INDEPENDENT_WATCHDOG=PASS');
+          NODE
       - name: Run full Supervisor v2 suite and 20000-transition stress
         run: python tests/run_second_shift_supervisor_v2_optimized.py
       - name: Run Mastery contract regression
@@ -91,19 +210,25 @@ jobs:
           SUBJECT_SHA: ${{ github.sha }}
           RUN_ID: ${{ github.run_id }}
           RUN_ATTEMPT: ${{ github.run_attempt }}
+          CONTROL_PLANE_SHA: 05fdb2acc5d331289bcc6d5b26387d4da615ec72
         run: |
           python - <<'PY'
           import json
           import os
           from pathlib import Path
           stress = json.loads(Path('.second-shift-supervisor-v2-stress.json').read_text(encoding='utf-8'))
+          historical = json.loads(Path('current-control/.001d-historical-replay-evidence.json').read_text(encoding='utf-8'))
+          watchdog = json.loads(Path('current-control/.001d-watchdog-evidence.json').read_text(encoding='utf-8'))
           evidence = {
               'evidence_version': 1,
-              'operation_id': 'SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION-001D',
+              'operation_id': 'SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION-001D-R1',
               'subject_sha': os.environ['SUBJECT_SHA'],
               'workflow_run_id': os.environ['RUN_ID'],
               'workflow_run_attempt': int(os.environ['RUN_ATTEMPT']),
               'hosted_result': 'PASS',
+              'control_plane_sha': os.environ['CONTROL_PLANE_SHA'],
+              'historical_replay_standing': historical.get('standing'),
+              'watchdog_standing': watchdog.get('watchdog_standing'),
               'randomized_transitions': stress.get('randomized_transitions'),
               'stress_successful': stress.get('successful'),
               'coverage': [
@@ -118,6 +243,8 @@ jobs:
                   'crash-restart-idempotency',
                   'dispatch-replay-retry-circuit',
                   'adversarial-closure',
+                  'historical-replay-version-adaptation',
+                  'independent-watchdog-current-authority',
                   'supervisor-20000-transition-stress',
                   'mastery-contract-regression',
               ],
@@ -132,6 +259,11 @@ jobs:
           path: |
             .001d-hosted-evidence.json
             .second-shift-supervisor-v2-stress.json
+            current-control/.second-shift-kernel-v2-stress.json
+            current-control/.001d-historical-replay-evidence.json
+            current-control/.001d-watchdog-enforcement.json
+            current-control/.001d-watchdog-owner-coverage.log
+            current-control/.001d-watchdog-evidence.json
           if-no-files-found: error
           include-hidden-files: true
           retention-days: 30
@@ -139,14 +271,14 @@ jobs:
   a01:
     name: Fresh A-01 Windows X64 exact-SHA qualification
     needs: hosted
-    uses: ./.github/workflows/a01-control-plane-gateway.yml
+    uses: BFochtman746/system-master/.github/workflows/a01-control-plane-gateway.yml@05fdb2acc5d331289bcc6d5b26387d4da615ec72
     with:
       qualification_id: SECOND-SHIFT-SUPERVISOR-V2-A01-STRESS
       workstream_id: SECOND-SHIFT-CONTROL-GATEWAY
       subject_sha: ${{ github.sha }}
       origin_ref: ${{ github.ref_name }}
-      resume_on_pass: 'Return exact-SHA PASS to SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION-001D; do not promote automatically.'
-      resume_on_failure: 'Preserve exact A-01 evidence, repair only the demonstrated 001D boundary, and rerun fresh qualification on the changed SHA.'
+      resume_on_pass: 'Return exact-SHA PASS to SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION-001D-R1; do not promote automatically.'
+      resume_on_failure: 'Preserve exact A-01 evidence, repair only the demonstrated 001D-R1 boundary, and rerun fresh qualification on the changed SHA.'
       notification_target: originating-workstream
       execution_context: normal
       qualifier_timeout_minutes: 28
@@ -170,6 +302,8 @@ jobs:
           A01_JOB_RESULT: ${{ needs.a01.result }}
           A01_RESULT_CLASS: ${{ needs.a01.outputs.result_class }}
           A01_PROMOTION_AUTHORIZED: ${{ needs.a01.outputs.promotion_authorized }}
+          A01_CONTROL_PLANE_SHA: ${{ needs.a01.outputs.control_plane_sha }}
+          PINNED_CONTROL_PLANE_SHA: 05fdb2acc5d331289bcc6d5b26387d4da615ec72
           RUN_ID: ${{ github.run_id }}
           RUN_ATTEMPT: ${{ github.run_attempt }}
         run: |
@@ -179,7 +313,7 @@ jobs:
           from pathlib import Path
           value = {
               'evidence_version': 1,
-              'operation_id': 'SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION-001D',
+              'operation_id': 'SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION-001D-R1',
               'subject_sha': os.environ['SUBJECT_SHA'],
               'workflow_run_id': os.environ['RUN_ID'],
               'workflow_run_attempt': int(os.environ['RUN_ATTEMPT']),
@@ -187,7 +321,9 @@ jobs:
               'a01_job_result': os.environ.get('A01_JOB_RESULT', ''),
               'a01_result_class': os.environ.get('A01_RESULT_CLASS', ''),
               'a01_promotion_authorized': os.environ.get('A01_PROMOTION_AUTHORIZED', ''),
-              'standing': 'PASS' if os.environ.get('HOSTED_JOB_RESULT') == 'success' and os.environ.get('A01_RESULT_CLASS') == 'PASS' else 'NOT_PASS',
+              'control_plane_sha': os.environ.get('A01_CONTROL_PLANE_SHA', ''),
+              'pinned_control_plane_sha': os.environ.get('PINNED_CONTROL_PLANE_SHA', ''),
+              'standing': 'PASS' if os.environ.get('HOSTED_JOB_RESULT') == 'success' and os.environ.get('A01_RESULT_CLASS') == 'PASS' and os.environ.get('A01_CONTROL_PLANE_SHA') == os.environ.get('PINNED_CONTROL_PLANE_SHA') else 'NOT_PASS',
           }
           Path('.001d-qualification-summary.json').write_text(json.dumps(value, indent=2) + '\n', encoding='utf-8')
           PY
@@ -200,6 +336,15 @@ jobs:
           if-no-files-found: error
           include-hidden-files: true
           retention-days: 30
+      - name: Enforce pinned current authority stayed current
+        env:
+          PINNED_CONTROL_PLANE_SHA: 05fdb2acc5d331289bcc6d5b26387d4da615ec72
+          A01_CONTROL_PLANE_SHA: ${{ needs.a01.outputs.control_plane_sha }}
+        run: |
+          set -euo pipefail
+          test "$A01_CONTROL_PLANE_SHA" = "$PINNED_CONTROL_PLANE_SHA"
+          live="$(git ls-remote "https://github.com/${GITHUB_REPOSITORY}.git" refs/heads/main | awk '{print $1}')"
+          test "$live" = "$PINNED_CONTROL_PLANE_SHA"
       - name: Enforce exact-SHA PASS
         env:
           HOSTED_JOB_RESULT: ${{ needs.hosted.result }}
