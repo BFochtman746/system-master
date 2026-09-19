@@ -27,6 +27,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from a01_night_scheduler import A01NightScheduler
+from a01_model_dispatch import DispatchAmbiguousError, ModelDispatchError, ModelDispatchFailed, dispatch_ai_coding
 from tools.second_shift_supervisor_v2 import (
     Conflict,
     StaleWorker,
@@ -135,11 +136,13 @@ class A01ExecutionWorker:
         self.worker_id = worker_id or f"worker-{os.getpid()}-{uuid.uuid4().hex}"
         self.executors: dict[str, Executor] = {
             "A01_CONTROL_PLANE_QUALIFICATION": self._execute_a01_qualification,
+            "AI_CODING": self._execute_ai_coding,
         }
         if executors:
             self.executors.update(executors)
         self.executor_retry_safety: dict[str, str] = {
             "A01_CONTROL_PLANE_QUALIFICATION": RETRY_SAFE,
+            "AI_CODING": RECONCILIATION_REQUIRED,
         }
         if executor_retry_safety:
             self.executor_retry_safety.update(executor_retry_safety)
@@ -1007,6 +1010,19 @@ class A01ExecutionWorker:
             except ProcessLookupError:
                 pass
             proc.wait(timeout=5)
+
+    def _execute_ai_coding(self, payload: dict[str, Any], context: ExecutionContext) -> dict[str, Any]:
+        try:
+            return dispatch_ai_coding(payload, context, root=self.root)
+        except DispatchAmbiguousError as exc:
+            raise WorkExecutionFailed(
+                "AI_CODING dispatch requires reconciliation before retry",
+                {"reconciliation_required": True, **exc.details},
+            ) from exc
+        except ModelDispatchFailed as exc:
+            raise WorkExecutionFailed("AI_CODING model dispatch failed", exc.details) from exc
+        except ModelDispatchError as exc:
+            raise WorkExecutionFailed("AI_CODING model dispatch rejected", {"error": str(exc)}) from exc
 
     def _execute_a01_qualification(self, payload: dict[str, Any], context: ExecutionContext) -> dict[str, Any]:
         if not isinstance(payload, dict):
