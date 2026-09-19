@@ -223,6 +223,18 @@ test('active current operation may mutate only when operation and predecessor re
   await rejectsCode(gate(new FakeAdapter(c)).admit(request({ predecessor_receipt_id: 'WRONG-RECEIPT' })), 'MUTATION_OPERATION_MISMATCH');
 });
 
+
+
+test('active operation with null predecessor admits null and rejects a non-null mismatch', async () => {
+  const c = continuation({
+    current_operation: { operation_id: 'SECOND-SHIFT-CONTROL-GATEWAY-CG-005', state: 'ACTIVE', predecessor_receipt_id: null },
+    next_legal_operation: { kind: 'CONTINUE_CURRENT', operation_id: 'SECOND-SHIFT-CONTROL-GATEWAY-CG-005', predecessor_receipt_id: null, reason: 'CURRENT_OPERATION_NONTERMINAL' }
+  });
+  const receipt = await gate(new FakeAdapter(c)).admit(request({ predecessor_receipt_id: null }));
+  assert.equal(receipt.predecessor_receipt_id, null);
+  await rejectsCode(gate(new FakeAdapter(c)).admit(request({ predecessor_receipt_id: PREDECESSOR_RECEIPT })), 'MUTATION_OPERATION_MISMATCH');
+});
+
 test('terminal authority refuses any operation other than the exact single legal successor', async () => {
   await rejectsCode(gate().admit(request({ operation_id: 'SECOND-SHIFT-CONTROL-GATEWAY-CG-006' })), 'MUTATION_OPERATION_MISMATCH');
   const ambiguous = continuation({ next_legal_operation: { kind: 'AMBIGUOUS_SUCCESSORS', operation_id: null, predecessor_receipt_id: PREDECESSOR_RECEIPT, reason: 'MULTIPLE' } });

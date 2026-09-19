@@ -184,6 +184,22 @@ test('production gate requires exact admitted path set and binds plan digest', a
   }) }), 'PRODUCTION_MUTATION_PATH_SET_MISMATCH');
 });
 
+
+
+test('production grant preserves a null predecessor for an active operation and remains executable', async () => {
+  const active = continuation({
+    current_operation: { operation_id: 'SECOND-SHIFT-CONTROL-GATEWAY-CG-005', state: 'ACTIVE', predecessor_receipt_id: null },
+    next_legal_operation: { kind: 'CONTINUE_CURRENT', operation_id: 'SECOND-SHIFT-CONTROL-GATEWAY-CG-005', predecessor_receipt_id: null, reason: 'CURRENT_OPERATION_NONTERMINAL' }
+  });
+  const req = request({ predecessor_receipt_id: null });
+  const { grant } = await productionGrant({ req, adapter: new FakeAdapter(active) });
+  assert.equal(grant.predecessor_receipt_id, null);
+  const transport = new FakeWriterTransport();
+  const receipt = await new GitHubReceiptConsumingCasWriter({ transport }).execute({ grant, plan: plan() });
+  assert.equal(receipt.result_commit_sha, RESULT_COMMIT_SHA);
+  assert.equal(validateProductionMutationExecutionReceipt(receipt), true);
+});
+
 test('receipt-consuming writer applies exact predecessor CAS and emits verifiable receipt', async () => {
   const { grant } = await productionGrant();
   const transport = new FakeWriterTransport();

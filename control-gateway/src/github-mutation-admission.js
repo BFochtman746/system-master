@@ -41,6 +41,11 @@ function requiredString(value, label, pattern = null) {
   return value;
 }
 
+function nullableId(value, label) {
+  if (value === null) return null;
+  return requiredString(value, label, ID_RE);
+}
+
 function validateSubject(subject, label = 'authoritative_subject') {
   strictKeys(subject, ['algorithm', 'oid'], label);
   if (subject.algorithm !== 'sha1' || !SHA1_RE.test(subject.oid ?? '')) fail('MUTATION_SCHEMA_INVALID', `${label} must be a lowercase SHA-1 Git subject`);
@@ -90,7 +95,7 @@ export function validateMutationRequest(request) {
   requiredString(request.target_ref, 'target_ref', REF_RE);
   requiredString(request.expected_predecessor_sha, 'expected_predecessor_sha', SHA1_RE);
   requiredString(request.operation_id, 'operation_id', ID_RE);
-  requiredString(request.predecessor_receipt_id, 'predecessor_receipt_id', ID_RE);
+  nullableId(request.predecessor_receipt_id, 'predecessor_receipt_id');
   validateStringSet(request.paths, 'paths', validateExactPath);
   validateStringSet(request.effects, 'effects', (value, label) => requiredString(value, label, ID_RE));
   if (request.paths.length + request.effects.length === 0) fail('MUTATION_SCOPE_EMPTY', 'mutation request must declare at least one path or effect');

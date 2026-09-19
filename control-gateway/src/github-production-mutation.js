@@ -41,6 +41,11 @@ function requiredString(value, label, pattern = null) {
   return value;
 }
 
+function nullableId(value, label) {
+  if (value === null) return null;
+  return requiredString(value, label, ID_RE);
+}
+
 function validateExactPath(path, label = 'path') {
   requiredString(path, label);
   if (path.startsWith('/') || path.includes('\\') || path.includes('\0')) fail('PRODUCTION_MUTATION_PATH_INVALID', `${label} is unsafe`);
@@ -160,7 +165,7 @@ export function validateProductionMutationGrant(grant) {
   requiredString(grant.target_ref, 'grant.target_ref', REF_RE);
   requiredString(grant.observed_predecessor_sha, 'grant.observed_predecessor_sha', SHA1_RE);
   requiredString(grant.operation_id, 'grant.operation_id', ID_RE);
-  requiredString(grant.predecessor_receipt_id, 'grant.predecessor_receipt_id', ID_RE);
+  nullableId(grant.predecessor_receipt_id, 'grant.predecessor_receipt_id');
   exactStringSet(grant.paths, 'grant.paths');
   exactStringSet(grant.effects, 'grant.effects');
   if (grant.executor_requirement !== 'RECEIPT_CONSUMING_EXACT_PREDECESSOR_CAS_REQUIRED') fail('PRODUCTION_MUTATION_GRANT_INVALID', 'grant executor requirement invalid');
@@ -356,7 +361,7 @@ export class GitHubReceiptCasRestTransport {
     if (!token) fail('GITHUB_AUTH_FAILED', 'production writer tokenProvider returned no token');
     const headers = {
       Accept: 'application/vnd.github+json',
-      Authorization: `Bearer ${token}`,
+      Authorization: ['Bearer', token].join(' '),
       'X-GitHub-Api-Version': '2026-03-10'
     };
     if (body !== undefined) headers['Content-Type'] = 'application/json';
