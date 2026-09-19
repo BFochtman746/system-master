@@ -464,7 +464,7 @@ function renderMarkdown(m) {
   lines.push('| --- | --- | --- | --- | ---: | --- | --- |');
   for (const r of m.rows) {
     const evidence = r.successor !== UNPOPULATED ? `successor=${r.successor}; ${r.evidence_pointer}` : r.evidence_pointer;
-    lines.push(`| \`${r.requirement_or_capability_id}\` | ${esc(r.module_key)} | ${esc(r.canonical_owner)} | ${esc(r.current_state)} | ${r._missing_required.length}/9 | ${esc(r.gap_or_blocker)} | ${esc(evidence)} |`);
+    lines.push(`| \`${r.requirement_or_capability_id}\` | ${esc(r.module_key)} | ${esc(r.canonical_owner)} | \`${esc(r.current_state)}\` | ${r._missing_required.length}/9 | ${esc(r.gap_or_blocker)} | ${esc(evidence)} |`);
   }
   lines.push('', '## Unresolved gap successor register', '');
   lines.push(`${m.unresolved_gap_successor_register.length} ACTIVE_GAP rows remain, ordered by shared platform dependency first and then current nine-peer owner order.`, '');
@@ -476,7 +476,7 @@ function renderMarkdown(m) {
   lines.push(m.exact_next_active_gap ? `\`${m.exact_next_active_gap}\`` : '`NONE`', '');
   lines.push('## Machine-readable required columns', '');
   lines.push('The `--json` form contains all required row fields, including authority boundary, exact evidence pointer, successor, and the current-inventory guard.', '');
-  return lines.join('\n');
+  return lines.join('\n').replace(/[ \t]+$/gm, '').trimEnd();
 }
 
 function main() {
