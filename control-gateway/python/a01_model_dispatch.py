@@ -24,11 +24,17 @@ MAX_ALLOWED_COMMANDS = 64
 
 _FORBIDDEN_PATH_PARTS = {".git", ".opencode"}
 _FORBIDDEN_COMMAND_PATTERNS = (
-    re.compile(r"(?:^|\s)git\s+push(?:\s|$)", re.I),
-    re.compile(r"(?:^|\s)git\s+(?:commit|merge|rebase|reset|clean|checkout|switch|worktree)(?:\s|$)", re.I),
-    re.compile(r"(?:^|\s)(?:curl|wget|scp|ssh)(?:\s|$)", re.I),
-    re.compile(r"(?:^|\s)(?:invoke-webrequest|start-bitstransfer)(?:\s|$)", re.I),
+    re.compile(r"(?:^|\s)git\s+(?:push|commit|merge|rebase|reset|clean|checkout|switch|worktree|fetch|pull|clone|tag)(?:\s|$)", re.I),
+    re.compile(r"(?:^|\s)gh(?:\s|$)", re.I),
+    re.compile(r"(?:^|\s)(?:curl|wget|scp|ssh|rsync)(?:\s|$)", re.I),
+    re.compile(r"(?:^|\s)(?:invoke-webrequest|invoke-restmethod|start-bitstransfer)(?:\s|$)", re.I),
 )
+_CLOUD_ENV_PREFIXES = (
+    "ANTHROPIC_", "OPENAI_", "AZURE_", "AWS_", "GOOGLE_", "GEMINI_",
+    "OPENROUTER_", "GROQ_", "MISTRAL_", "COHERE_", "DEEPSEEK_",
+    "TOGETHER_", "FIREWORKS_", "CEREBRAS_", "PERPLEXITY_",
+)
+_SECRET_ENV_MARKERS = ("TOKEN", "SECRET", "PASSWORD", "PRIVATE_KEY", "API_KEY", "CREDENTIAL")
 
 
 class ModelDispatchError(RuntimeError):
@@ -39,6 +45,10 @@ class ModelDispatchFailed(ModelDispatchError):
     def __init__(self, message: str, details: Optional[dict[str, Any]] = None):
         super().__init__(message)
         self.details = details or {}
+
+
+class DispatchAmbiguousError(ModelDispatchFailed):
+    pass
 
 
 def _is_sha(value: Any) -> bool:
@@ -165,7 +175,12 @@ def build_opencode_config(payload: dict[str, Any]) -> dict[str, Any]:
                 "models": {payload["model"]: {"name": payload["model"]}},
             }
         },
+        "share": "disabled",
         "permission": {
+            "*": "deny",
+            "read": {"*": "allow", "*.env": "deny", "*.env.*": "deny"},
+            "glob": "allow",
+            "grep": "allow",
             "edit": edit_permissions,
             "bash": bash_permissions,
             "webfetch": "deny",
@@ -173,7 +188,9 @@ def build_opencode_config(payload: dict[str, Any]) -> dict[str, Any]:
             "task": "deny",
             "external_directory": "deny",
             "question": "deny",
+            "skill": "deny",
         },
+        "plugin": [],
     }
 
 
@@ -240,6 +257,20 @@ def _write_evidence(path: Path, data: str | bytes) -> None:
         path.write_text(data, encoding="utf-8")
 
 
+def _sanitized_environment(config_json: str) -> dict[str, str]:
+    env = os.environ.copy()
+    for key in list(env):
+        upper = key.upper()
+        if any(upper.startswith(prefix) for prefix in _CLOUD_ENV_PREFIXES) or any(marker in upper for marker in _SECRET_ENV_MARKERS):
+            env.pop(key, None)
+    env["OPENCODE_CONFIG_CONTENT"] = config_json
+    env["OPENCODE_DISABLE_AUTOUPDATE"] = "true"
+    env["OPENCODE_DISABLE_PRUNE"] = "true"
+    env["NO_PROXY"] = "127.0.0.1,localhost"
+    env["no_proxy"] = "127.0.0.1,localhost"
+    return env
+
+
 def dispatch_ai_coding(
     payload: dict[str, Any],
     context: Any,
@@ -272,6 +303,7 @@ def dispatch_ai_coding(
     started = time.monotonic()
     stdout = ""
     stderr = ""
+    preserve_worktree = False
     try:
         _run_git(root, "worktree", "add", "--detach", str(worktree), payload["subject_sha"], timeout=120)
         added = True
@@ -279,12 +311,7 @@ def dispatch_ai_coding(
         if head != payload["subject_sha"]:
             raise ModelDispatchFailed("detached AI_CODING worktree resolved to the wrong subject")
 
-        env = os.environ.copy()
-        env["OPENCODE_CONFIG_CONTENT"] = config_json
-        env["OPENCODE_DISABLE_AUTOUPDATE"] = "true"
-        env["OPENCODE_DISABLE_PRUNE"] = "true"
-        env.pop("OPENAI_API_KEY", None)
-        env.pop("ANTHROPIC_API_KEY", None)
+        env = _sanitized_environment(config_json)
 
         command = [
             opencode,
@@ -317,7 +344,23 @@ def dispatch_ai_coding(
             remaining = deadline - time.monotonic()
             if remaining <= 0:
                 _terminate_process_tree(proc)
-                raise ModelDispatchFailed("OpenCode AI_CODING dispatch exceeded timeout")
+                changed = _changed_paths(worktree)
+                reconciliation = {
+                    "protocol_version": MODEL_DISPATCH_PROTOCOL,
+                    "status": "RECONCILIATION_REQUIRED",
+                    "workstream_id": payload["workstream_id"],
+                    "packet_id": payload["packet_id"],
+                    "subject_sha": payload["subject_sha"],
+                    "worktree": str(worktree),
+                    "changed_paths": changed,
+                    "reason": "OPENCODE_TIMEOUT_AFTER_POSSIBLE_MUTATION",
+                }
+                evidence_path = evidence_dir / "model-dispatch-reconciliation.json"
+                _write_evidence(evidence_path, _canonical(reconciliation) + "\n")
+                raise DispatchAmbiguousError(
+                    "OpenCode AI_CODING dispatch exceeded timeout after possible mutation; reconcile before retry",
+                    {"worktree": str(worktree), "evidence_path": str(evidence_path), "changed_paths": changed},
+                )
             try:
                 stdout, stderr = proc.communicate(timeout=min(renew_interval, remaining))
                 break
@@ -361,10 +404,13 @@ def dispatch_ai_coding(
         }
         _write_evidence(evidence_dir / "model-dispatch-result.json", _canonical(result) + "\n")
         return result
+    except DispatchAmbiguousError:
+        preserve_worktree = True
+        raise
     finally:
         if proc is not None and proc.poll() is None:
             _terminate_process_tree(proc)
-        if added:
+        if added and not preserve_worktree:
             subprocess.run(
                 ["git", "-C", str(root), "worktree", "remove", "--force", str(worktree)],
                 stdout=subprocess.DEVNULL,
@@ -372,4 +418,5 @@ def dispatch_ai_coding(
                 check=False,
                 timeout=120,
             )
-        shutil.rmtree(worktree_parent, ignore_errors=True)
+        if not preserve_worktree:
+            shutil.rmtree(worktree_parent, ignore_errors=True)
