@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import concurrent.futures
 import datetime as dt
+import json
 import importlib.util
 import sqlite3
 import sys
@@ -327,6 +328,40 @@ class NightSchedulerTests(unittest.TestCase):
         self.scheduler.reconcile(now=IN_SHIFT + dt.timedelta(seconds=2))
         state = self.store.conn.execute("SELECT state FROM night_scheduler_queue WHERE delegation_id='D-A'").fetchone()["state"]
         self.assertEqual(state, "TERMINAL")
+
+    def test_validating_work_remains_active_stage_barrier_and_is_not_claimable(self):
+        self.enqueue("A", "LANE-A", order=0)
+        self.enqueue("B", "LANE-B", order=1)
+        first = self.scheduler.tick(now=IN_SHIFT, max_claims=2)
+        self.assertEqual([x["delegation_id"] for x in first["claims"]], ["D-A"])
+        claim = first["claims"][0]
+        at = IN_SHIFT + dt.timedelta(seconds=1)
+        with self.store.tx() as c:
+            c.execute(
+                "UPDATE claims SET status='VALIDATING',released_at=?,terminal_reason=? WHERE lease_id=?",
+                (at.isoformat().replace("+00:00", "Z"), json.dumps({"reason": "AWAITING_INDEPENDENT_EVALUATOR"}), claim["lease_id"]),
+            )
+            c.execute(
+                "UPDATE delegations SET state='VALIDATING',updated_at=? WHERE delegation_id='D-A'",
+                (at.isoformat().replace("+00:00", "Z"),),
+            )
+            c.execute(
+                "UPDATE lanes SET state='RECONCILE',current_delegation_id=NULL,updated_at=? WHERE lane='LANE-A'",
+                (at.isoformat().replace("+00:00", "Z"),),
+            )
+        reconciled = self.scheduler.reconcile(now=at)
+        self.assertIn({"delegation_id": "D-A", "state": "VALIDATING"}, reconciled)
+        state = self.store.conn.execute(
+            "SELECT state FROM night_scheduler_queue WHERE delegation_id='D-A'"
+        ).fetchone()["state"]
+        self.assertEqual(state, "VALIDATING")
+        second = self.scheduler.tick(now=at + dt.timedelta(seconds=1), max_claims=2)
+        self.assertEqual(second["active_execution_order"], 0)
+        self.assertEqual(second["claims"], [])
+        self.assertEqual(
+            self.store.conn.execute("SELECT COUNT(*) n FROM claims WHERE released_at IS NULL").fetchone()["n"],
+            0,
+        )
 
     def test_scheduler_snapshot_reports_budget_and_zero_invariant_problems_and_no_auth_leak(self):
         self.enqueue("A", "LANE-A")

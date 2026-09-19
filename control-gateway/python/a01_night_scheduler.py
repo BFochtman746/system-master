@@ -19,8 +19,8 @@ from a01_supervisor_coordination import CoordinationError, SupervisorCoordinatio
 from tools.second_shift_supervisor_v2 import SupervisorStore, in_shift, iso, parse_iso, utcnow
 
 NIGHT_SCHEDULER_PROTOCOL = "control-gateway.a01-night-scheduler.v1"
-QUEUE_STATES = {"BINDING", "QUEUED", "CLAIMED", "TERMINAL", "CANCELLED", "RECONCILE"}
-ACTIVE_STAGE_STATES = {"BINDING", "QUEUED", "CLAIMED", "RECONCILE"}
+QUEUE_STATES = {"BINDING", "QUEUED", "CLAIMED", "VALIDATING", "TERMINAL", "CANCELLED", "RECONCILE"}
+ACTIVE_STAGE_STATES = {"BINDING", "QUEUED", "CLAIMED", "VALIDATING", "RECONCILE"}
 A01_POLICY_PATH = ROOT / "qualification" / "a01" / "a01-policy.json"
 _SCHEDULER_SCHEMA_OBJECTS = frozenset(
     {
@@ -331,6 +331,8 @@ class A01NightScheduler:
                     state = "CANCELLED"
                 elif delegation is None:
                     state = "RECONCILE"
+                elif delegation["state"] == "VALIDATING":
+                    state = "VALIDATING"
                 elif delegation["state"] in ("COMPLETED", "BLOCKED", "CANCELLED"):
                     state = "TERMINAL" if delegation["state"] != "CANCELLED" else "CANCELLED"
                 elif live is not None:
