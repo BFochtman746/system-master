@@ -2,12 +2,21 @@
 
 async function main() {
   const { GitHubActiveWorkPublisher, GitHubActiveWorkRestTransport } = await import('../../control-gateway/src/github-active-work-publication.js');
-  const { GitHubAuthorityBootstrapTransport, GitHubAuthorityBootstrapExecutor } = await import('../../control-gateway/src/github-authority-bootstrap.js');
+  const {
+    GitHubAuthorityBootstrapTransport,
+    GitHubAuthorityBootstrapExecutor,
+    validateBootstrapWriterCredential
+  } = await import('../../control-gateway/src/github-authority-bootstrap.js');
+  const {
+    GENESIS_PUBLICATION_BUILDER_PROTOCOL,
+    GitHubGenesisPublicationBuilder,
+    deriveAuthorityBootstrapRequest
+  } = await import('../../control-gateway/src/github-genesis-publication-builder.js');
   const { assertDevelopmentResponseAuthorization } = await import('../../control-gateway/src/development-response-governor.js');
   const fs = await import('node:fs');
   const path = await import('node:path');
 
-  const request = JSON.parse(process.env.CONTROL_GATEWAY_BOOTSTRAP_REQUEST_JSON || 'null');
+  const rawRequest = JSON.parse(process.env.CONTROL_GATEWAY_BOOTSTRAP_REQUEST_JSON || 'null');
   const responseBase64 = String(process.env.CONTROL_GATEWAY_DEVELOPMENT_RESPONSE_BASE64 || '').trim();
   const responseReceipt = JSON.parse(process.env.CONTROL_GATEWAY_DEVELOPMENT_RESPONSE_RECEIPT_JSON || 'null');
   const responseText = responseBase64 ? Buffer.from(responseBase64, 'base64').toString('utf8') : '';
@@ -18,9 +27,9 @@ async function main() {
     expectedAppSlug: String(process.env.CONTROL_GATEWAY_WRITER_EXPECTED_APP_SLUG || '').trim(),
     installationId: String(process.env.CONTROL_GATEWAY_WRITER_INSTALLATION_ID || '').trim()
   };
-  
+
   if (
-    !request ||
+    !rawRequest ||
     !responseBase64 ||
     !responseReceipt ||
     !responseText ||
@@ -28,24 +37,36 @@ async function main() {
     !writerCredential.actualAppSlug ||
     !writerCredential.expectedAppSlug ||
     !writerCredential.installationId
-) throw new Error('AUTHORITY_BOOTSTRAP_INPUTS_MISSING');
+  ) throw new Error('AUTHORITY_BOOTSTRAP_INPUTS_MISSING');
   if (process.env.GITHUB_ACTIONS === 'true' && process.env.GITHUB_REF !== 'refs/heads/main') throw new Error(`AUTHORITY_BOOTSTRAP_REF_FORBIDDEN:${process.env.GITHUB_REF || '<missing>'}`);
-  const parts = String(request.repository || '').split('/');
+  const parts = String(rawRequest.repository || '').split('/');
   if (parts.length !== 2 || parts.some((part) => !part)) throw new Error('AUTHORITY_BOOTSTRAP_REPOSITORY_INVALID');
   const [owner, repo] = parts;
   const authorityContext = {
     channel: 'GITHUB_AUTHORITY_BOOTSTRAP',
-    bootstrap_request: request
+    bootstrap_request: rawRequest
   };
 
+  // This authorization must remain before writer validation and before genesis object creation.
   assertDevelopmentResponseAuthorization({
     responseText,
     responseReceipt,
     authorityContext
   });
+  validateBootstrapWriterCredential(writerCredential);
+
   const tokenProvider = async () => token;
   const baseTransport = new GitHubActiveWorkRestTransport({ owner, repo, tokenProvider });
   const transport = new GitHubAuthorityBootstrapTransport({ baseTransport });
+
+  let request = rawRequest;
+  let genesisBuildReceipt = null;
+  if (rawRequest.protocol_version === GENESIS_PUBLICATION_BUILDER_PROTOCOL) {
+    const builder = new GitHubGenesisPublicationBuilder({ transport });
+    genesisBuildReceipt = await builder.build(rawRequest);
+    request = deriveAuthorityBootstrapRequest(genesisBuildReceipt);
+  }
+
   const publisher = new GitHubActiveWorkPublisher({ transport, ref: request.state_ref, workstreamId: request.workstream_id, missionVersion: request.mission_version });
   const executor = new GitHubAuthorityBootstrapExecutor({ transport, publisher, writerCredential });
   const receipt = await executor.execute(request);
@@ -55,7 +76,9 @@ async function main() {
     fs.writeFileSync(path.join(evidenceDir, 'development-response-authority-context.json'), `${JSON.stringify(authorityContext, null, 2)}\n`, 'utf8');
     fs.writeFileSync(path.join(evidenceDir, 'development-response-receipt.json'), `${JSON.stringify(responseReceipt, null, 2)}\n`, 'utf8');
     fs.writeFileSync(path.join(evidenceDir, 'development-response.txt'), responseText, 'utf8');
-    fs.writeFileSync(path.join(evidenceDir, 'bootstrap-request.json'), `${JSON.stringify(request, null, 2)}\n`, 'utf8');
+    fs.writeFileSync(path.join(evidenceDir, 'bootstrap-request.json'), `${JSON.stringify(rawRequest, null, 2)}\n`, 'utf8');
+    if (genesisBuildReceipt) fs.writeFileSync(path.join(evidenceDir, 'genesis-build-receipt.json'), `${JSON.stringify(genesisBuildReceipt, null, 2)}\n`, 'utf8');
+    fs.writeFileSync(path.join(evidenceDir, 'effective-bootstrap-request.json'), `${JSON.stringify(request, null, 2)}\n`, 'utf8');
     fs.writeFileSync(path.join(evidenceDir, 'bootstrap-receipt.json'), `${JSON.stringify(receipt, null, 2)}\n`, 'utf8');
   }
   console.log(`CONTROL_GATEWAY_AUTHORITY_BOOTSTRAP=PASS state_ref=${receipt.state_ref} publication_commit=${receipt.publication_commit_sha} writer_app=${receipt.writer_app_slug} writer_installation=${receipt.writer_installation_id}`);
