@@ -17,7 +17,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const crypto = require('crypto');
+const { execFileSync } = require('child_process');
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const AUTHORITY = 'governance/CURRENT-AUTHORITY.json';
@@ -81,11 +81,11 @@ function isOutDisposition(disposition) {
 }
 
 function gitBlobSha(rel) {
-  const bytes = fs.readFileSync(abs(rel));
-  const header = Buffer.from(`blob ${bytes.length}\0`, 'utf8');
-  return crypto.createHash('sha1').update(header).update(bytes).digest('hex');
+  return execFileSync('git', ['hash-object', `--path=${rel}`, '--', rel], {
+    cwd: ROOT,
+    encoding: 'utf8'
+  }).trim();
 }
-
 function readContract(key) {
   const rel = contractPath(key);
   if (!exists(rel)) {
