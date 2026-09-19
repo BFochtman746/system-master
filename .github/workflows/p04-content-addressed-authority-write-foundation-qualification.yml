@@ -11,6 +11,10 @@ on:
       - '.github/scripts/control-gateway-authority-bootstrap.js'
       - '.github/workflows/control-gateway-authority-bootstrap.yml'
       - '.github/workflows/p04-content-addressed-authority-write-foundation-qualification.yml'
+      - '.github/scripts/control-gateway-authority-bootstrap-qualify.js'
+      - 'control-gateway/src/github-genesis-publication-builder.js'
+      - 'control-gateway/test/github-genesis-publication-builder.test.js'
+
   pull_request:
     paths:
       - 'governance/CURRENT-AUTHORITY.json'
@@ -21,6 +25,10 @@ on:
       - '.github/scripts/control-gateway-authority-bootstrap.js'
       - '.github/workflows/control-gateway-authority-bootstrap.yml'
       - '.github/workflows/p04-content-addressed-authority-write-foundation-qualification.yml'
+      - '.github/scripts/control-gateway-authority-bootstrap-qualify.js'
+      - 'control-gateway/src/github-genesis-publication-builder.js'
+      - 'control-gateway/test/github-genesis-publication-builder.test.js'
+
   workflow_dispatch:
 
 permissions:
@@ -44,11 +52,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cd control-gateway
-          node --test test/github-control-adapter-repair.test.js 2>&1 | tee /tmp/p04-test.log
-          grep -Eq '^# tests 21$' /tmp/p04-test.log
-          grep -Eq '^# pass 21$' /tmp/p04-test.log
-          test "$(grep -c '^# Subtest: bootstrap ' /tmp/p04-test.log)" -eq 17
+          node .github/scripts/control-gateway-authority-bootstrap-qualify.js 2>&1 | tee /tmp/p04-test.log
+          grep -q '"status":"PASS"' /tmp/p04-test.log
+          grep -q '"tests_passed":42' /tmp/p04-test.log
+          grep -q '"tests_failed":0' /tmp/p04-test.log
+
       - name: Prove credential-derived production identity wiring
         shell: bash
         run: |
@@ -90,13 +98,16 @@ jobs:
           if (authority.authority_id !== 'CURRENT-AUTHORITY-005') throw new Error(`AUTHORITY_MISMATCH ${authority.authority_id}`);
           if (!p04 || p04.owner_path !== 'SYSTEM_MASTER/CORE') throw new Error(`P04_OWNER_MISMATCH ${p04?.owner_path}`);
           if (p04.implementation !== '.github/workflows/control-gateway-authority-bootstrap.yml') throw new Error(`P04_IMPLEMENTATION_MISMATCH ${p04.implementation}`);
-          const subjects = [
+  const subjects = [
             'governance/CURRENT-AUTHORITY.json',
             crosswalkPath,
             'governance/contracts/P04-FOUNDATION-CONTRACT-001.md',
             'control-gateway/src/github-authority-bootstrap.js',
             'control-gateway/test/github-control-adapter-repair.test.js',
             '.github/scripts/control-gateway-authority-bootstrap.js',
+            '.github/scripts/control-gateway-authority-bootstrap-qualify.js',
+            'control-gateway/src/github-genesis-publication-builder.js',
+            'control-gateway/test/github-genesis-publication-builder.test.js',
             '.github/workflows/control-gateway-authority-bootstrap.yml',
             '.github/workflows/p04-content-addressed-authority-write-foundation-qualification.yml'
           ];
@@ -105,7 +116,7 @@ jobs:
           const evidence = {
             evidence_schema:'1.0', contract_id:'P04-FOUNDATION-1.0', requirement_or_capability_id:'P04',
             owner_path:'SYSTEM_MASTER/CORE', authority_id:authority.authority_id, status:'PASS', source_identity:process.env.GITHUB_SHA,
-            implementation:p04.implementation, node_version:process.version, total_test_count:21, bootstrap_test_count:17,
+            implementation:p04.implementation, node_version:process.version, total_test_count:42, bootstrap_test_count:17,
             writer_identity_binding:'TOKEN_ACTION_APP_SLUG_PLUS_INSTALLATION_ID_MATCHED_TO_OWNER_CONFIGURED_EXPECTED_APP_SLUG',
             production_authority_granted:false,
             subjects:subjects.map((p)=>({path:p,git_blob_sha:blob(p)})),
