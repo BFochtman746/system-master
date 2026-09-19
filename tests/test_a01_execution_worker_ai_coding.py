@@ -71,6 +71,61 @@ class A01ExecutionWorkerAICodingTests(unittest.TestCase):
         self.assertEqual(caught.exception.result["returncode"], 7)
         self.assertNotIn("result_class", caught.exception.result)
 
+    def test_candidate_waits_for_independent_evaluator_and_blocks_successor(self):
+        now = worker_module.dt.datetime(2026, 9, 19, 5, 0, tzinfo=worker_module.dt.timezone.utc)
+        head = "1" * 40
+        self.store.register_lane("CORE", "SYSTEM_MASTER/CORE", "system-master/control-v2", head, now)
+        self.store.bind_ready("CORE", "D-AI", "O-AI", head, "O-AI", {"kind": "ai"}, now)
+        claim = self.store.claim_ready("CORE", "D-AI", "O-AI", head, "IDEM-AI", "AI_CODING", {"payload": "test"}, now=now)
+        self.store.mark_dispatched(claim.dispatch_id, f"local:{claim.dispatch_id}", now)
+        bundle = self.worker._dispatch_bundle(claim.dispatch_id)
+        context = self.worker._acquire_execution(bundle, now)
+        candidate = {"status": "CANDIDATE_READY_FOR_INDEPENDENT_EVALUATION", "evaluator_required": True, "patch_sha256": "a" * 64}
+        self.worker._stage_owned_result(bundle, context, terminal_state="COMPLETED", result=candidate, error=None, now=now)
+        result_row = self.worker._commit_evaluation_candidate(bundle, now)
+
+        claim_row = self.store.conn.execute("SELECT status,released_at FROM claims WHERE lease_id=?", (claim.lease_id,)).fetchone()
+        self.assertEqual(result_row["state"], "SUCCEEDED")
+        self.assertEqual(result_row["terminal_state"], "VALIDATING")
+        self.assertEqual(claim_row["status"], "VALIDATING")
+        self.assertIsNotNone(claim_row["released_at"])
+        self.assertEqual(self.store.conn.execute("SELECT state FROM delegations WHERE delegation_id='D-AI'").fetchone()["state"], "VALIDATING")
+        self.assertEqual(self.store.conn.execute("SELECT state FROM dispatch_outbox WHERE dispatch_id=?", (claim.dispatch_id,)).fetchone()["state"], "VALIDATING")
+        self.assertEqual(self.store.audit_invariants(), [])
+
+        with self.assertRaisesRegex(worker_module.Conflict, "awaits independent evaluation"):
+            self.store.bind_ready("CORE", "D-NEXT", "O-NEXT", head, "O-NEXT", {"kind": "next"}, now)
+        with self.assertRaisesRegex(worker_module.Conflict, "candidate digest differs"):
+            self.store.evaluator_verdict(claim.lease_id, claim.fencing_token, "VERDICT-AI-1", "PASS", "b" * 64, {"tests": "pass"}, now)
+
+        self.assertEqual(
+            self.store.evaluator_verdict(claim.lease_id, claim.fencing_token, "VERDICT-AI-1", "PASS", "a" * 64, {"tests": "pass"}, now),
+            "COMPLETED",
+        )
+        self.assertEqual(self.store.conn.execute("SELECT state FROM delegations WHERE delegation_id='D-AI'").fetchone()["state"], "COMPLETED")
+        self.assertEqual(self.store.audit_invariants(), [])
+
+    def test_recovery_closes_validation_handoff_crash_window(self):
+        now = worker_module.dt.datetime(2026, 9, 19, 5, 0, tzinfo=worker_module.dt.timezone.utc)
+        head = "2" * 40
+        self.store.register_lane("CORE", "SYSTEM_MASTER/CORE", "system-master/control-v2", head, now)
+        self.store.bind_ready("CORE", "D-REC", "O-REC", head, "O-REC", {"kind": "ai"}, now)
+        claim = self.store.claim_ready("CORE", "D-REC", "O-REC", head, "IDEM-REC", "AI_CODING", {"payload": "test"}, now=now)
+        self.store.mark_dispatched(claim.dispatch_id, f"local:{claim.dispatch_id}", now)
+        bundle = self.worker._dispatch_bundle(claim.dispatch_id)
+        context = self.worker._acquire_execution(bundle, now)
+        candidate = {"status": "CANDIDATE_READY_FOR_INDEPENDENT_EVALUATION", "evaluator_required": True, "patch_sha256": "c" * 64}
+        self.worker._stage_owned_result(bundle, context, terminal_state="COMPLETED", result=candidate, error=None, now=now)
+        staged = worker_module.json.loads(self.worker._result_row(claim.dispatch_id)["result_json"])
+        self.store.await_evaluation(claim.lease_id, claim.fencing_token, "c" * 64, payload=staged, now=now)
+
+        recovered = self.worker.recover(now=now)
+        self.assertEqual(recovered["resumed_evaluation_dispatches"], [claim.dispatch_id])
+        row = self.worker._result_row(claim.dispatch_id)
+        self.assertEqual(row["state"], "SUCCEEDED")
+        self.assertEqual(row["terminal_state"], "VALIDATING")
+        self.assertEqual(self.store.audit_invariants(), [])
+
 
 if __name__ == "__main__":
     unittest.main()
