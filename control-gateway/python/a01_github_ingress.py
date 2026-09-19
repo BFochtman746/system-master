@@ -29,7 +29,7 @@ A01_REGISTRY_PATH = "qualification/a01/registry.json"
 READY_STATES = {"READY"}
 NON_EXECUTABLE_OBLIGATION_STATES = {"CLOSED", "HOLD", "BLOCKED", "SUPERSEDED", "CANCELLED"}
 SHARED_OWNER_PATHS = {"SYSTEM_MASTER/SHARED_INFRASTRUCTURE", "SYSTEM_MASTER/SHARED_INFRASTRUCTURE/A01"}
-SUPPORTED_EXECUTOR = "A01_CONTROL_PLANE_QUALIFICATION"
+SUPPORTED_EXECUTORS = frozenset({"A01_CONTROL_PLANE_QUALIFICATION", "AI_CODING"})
 
 
 class IngressError(RuntimeError):
@@ -355,7 +355,7 @@ def validate_a01_execution_envelope(
         raise IngressError("handoff protocol mismatch")
     if contract.get("protocol_version") != COORDINATION_PROTOCOL:
         raise IngressError("coordination protocol mismatch")
-    if handoff.get("executor_kind") != SUPPORTED_EXECUTOR:
+    if handoff.get("executor_kind") not in SUPPORTED_EXECUTORS:
         raise IngressError("ingress executor is not supported by the production A-01 worker")
     if handoff.get("execution_class") != "OVERNIGHT":
         raise IngressError("P12 ingress accepts OVERNIGHT execution only")
