@@ -120,7 +120,7 @@ jobs:
           node - <<'NODE'
           const fs = require('fs');
           const report = JSON.parse(fs.readFileSync('.second-shift-kernel-v2-stress.json', 'utf8'));
-          const historicalTopology = JSON.parse(fs.readFileSync('governance/SYSTEM-TOPOLOGY-004.json', 'utf8'));
+          const historicalTopology = JSON.parse(fs.readFileSync('../governance/SYSTEM-TOPOLOGY-004.json', 'utf8'));
           const currentTopology = JSON.parse(fs.readFileSync('governance/SYSTEM-TOPOLOGY-007.json', 'utf8'));
           const historicalPeers = new Set(historicalTopology.peer_system_ids || []);
           const currentPeers = new Set(currentTopology.execution_readiness?.execution_ready_peer_system_ids || currentTopology.peer_system_ids || []);
