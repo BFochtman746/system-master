@@ -4,7 +4,7 @@
 // Why this file exists: the bootstrap runtime
 // (`control-gateway/src/github-authority-bootstrap.js`, plus the thin CI wrapper
 // `.github/scripts/control-gateway-authority-bootstrap.js`) is covered by a real test with
-// 17 bootstrap cases — but that test lives under `control-gateway/test/` and was reachable
+// 17 bootstrap cases â€” but that test lives under `control-gateway/test/` and was reachable
 // ONLY from CI workflows. `verify.sh` discovers qualifiers from `.github/scripts/*qualify*`,
 // so no local pre-push run could catch a bootstrap regression. The path was gated in CI and
 // ungated locally. This qualifier puts it in the suite.
@@ -14,12 +14,15 @@ import { fileURLToPath } from 'node:url';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '..', '..');
-const tests = ['control-gateway/test/github-control-adapter-repair.test.js'];
+const tests = [
+  'control-gateway/test/github-control-adapter-repair.test.js',
+  'control-gateway/test/github-genesis-publication-builder.test.js'
+];
 
 // Pin the reporter: node's default reporter is version- and TTY-dependent (>=20 emits spec
-// `ℹ pass N`, TAP emits `# pass N`). The counters below are a load-bearing non-vacuity
+// `â„¹ pass N`, TAP emits `# pass N`). The counters below are a load-bearing non-vacuity
 // gate, so the output format must not be inherited. This is the same defect that made
-// two qualifiers fail closed under Node 24 — do not remove the pin.
+// two qualifiers fail closed under Node 24 â€” do not remove the pin.
 const result = spawnSync(process.execPath, ['--test', '--test-reporter=tap', ...tests], {
   cwd: root,
   encoding: 'utf8',
@@ -43,7 +46,7 @@ const fail = Number(failMatch?.[1] ?? -1);
 
 // 21 cases exist today, 17 of them bootstrap cases. Asserting the floor makes a silently
 // shrinking suite a failure rather than a quiet PASS.
-if (pass < 21 || fail !== 0) {
+if (pass < 42 || fail !== 0) {
   process.stderr.write(combined);
   process.stderr.write(`\nControl-gateway authority bootstrap qualification is not non-vacuous: pass=${pass} fail=${fail}\n`);
   process.exit(2);
@@ -78,3 +81,4 @@ process.stdout.write(JSON.stringify({
     'bootstrap unauthorized writer App slug'
   ]
 }) + '\n');
+
