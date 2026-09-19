@@ -98,7 +98,7 @@ jobs:
           if (authority.authority_id !== 'CURRENT-AUTHORITY-005') throw new Error(`AUTHORITY_MISMATCH ${authority.authority_id}`);
           if (!p04 || p04.owner_path !== 'SYSTEM_MASTER/CORE') throw new Error(`P04_OWNER_MISMATCH ${p04?.owner_path}`);
           if (p04.implementation !== '.github/workflows/control-gateway-authority-bootstrap.yml') throw new Error(`P04_IMPLEMENTATION_MISMATCH ${p04.implementation}`);
-  const subjects = [
+          const subjects = [
             'governance/CURRENT-AUTHORITY.json',
             crosswalkPath,
             'governance/contracts/P04-FOUNDATION-CONTRACT-001.md',
