@@ -41,10 +41,16 @@ function main() {
     'control-gateway/python/a01_supervisor_coordination.py',
     'control-gateway/python/a01_supervisor_coordination_strict.py',
     'control-gateway/python/a01_night_scheduler.py',
+    'control-gateway/python/a01_github_ingress.py',
+    'control-gateway/python/a01_model_dispatch.py',
+    'control-gateway/python/a01_execution_worker.py',
     'tests/test_control_gateway_a01_supervisor_adapter.py',
     'tests/test_control_gateway_a01_supervisor_coordination.py',
     'tests/test_control_gateway_a01_supervisor_coordination_authority.py',
     'tests/test_control_gateway_a01_night_scheduler.py',
+    'tests/test_a01_github_ingress.py',
+    'tests/test_a01_model_dispatch.py',
+    'tests/test_a01_execution_worker_ai_coding.py',
     'tests/test_control_gateway_failure_restart_idempotency.py',
     'tests/run_control_gateway_failure_restart_idempotency_bounded.py',
     'tests/test_control_gateway_cg011_dispatch_failure_replay.py',
@@ -60,12 +66,16 @@ function main() {
       evidence_version: 1,
       subject_sha: actual,
       completed_stages: stages,
+    integrated_001c_coverage: ['AI_GITHUB_INGRESS', 'AI_MODEL_DISPATCH', 'AI_EXECUTION_WORKER_EVALUATOR', 'MASTERY_CONTRACTS'],
     });
     console.log(`CG011_A01_STAGE_PASS=${name}`);
   };
 
   stage('PYTHON_COMPILE', 'python', ['-m', 'py_compile', ...syntaxTargets], { timeout: 120000 });
   stage('CONTROL_GATEWAY_NODE_SUITE', 'node', ['--test'], { cwd: path.join(ROOT, 'control-gateway'), timeout: 180000 });
+  stage('A01_GITHUB_INGRESS', 'python', ['tests/test_a01_github_ingress.py'], { timeout: 180000 });
+  stage('A01_MODEL_DISPATCH', 'python', ['tests/test_a01_model_dispatch.py'], { timeout: 180000 });
+  stage('A01_EXECUTION_WORKER_AI_CODING', 'python', ['tests/test_a01_execution_worker_ai_coding.py'], { timeout: 180000 });
   stage('CG008_SUPERVISOR_ADAPTER', 'python', ['tests/test_control_gateway_a01_supervisor_adapter.py'], { timeout: 120000 });
   stage('CG009_COORDINATION_BASE', 'python', ['tests/test_control_gateway_a01_supervisor_coordination.py'], { timeout: 120000 });
   stage('CG009_COORDINATION_AUTHORITY', 'python', ['tests/test_control_gateway_a01_supervisor_coordination_authority.py'], { timeout: 120000 });
@@ -81,9 +91,10 @@ function main() {
   if (report.randomized_transitions !== 20000 || report.rigor_reduced !== false) fail('SUPERVISOR_STRESS_RIGOR_MISMATCH');
 
   stage('CG011_ADVERSARIAL_CLOSURE', 'python', ['tests/test_control_gateway_cg011_adversarial_closure.py'], { timeout: 180000 });
+  stage('MASTERY_CONTRACT_REGRESSION', 'node', ['--test', 'tests/test_second_shift_mastery_contracts.js'], { timeout: 120000 });
 
   const evidence = {
-    evidence_version: 2,
+    evidence_version: 3,
     qualification_id: process.env.A01_QUALIFICATION_ID || 'SECOND-SHIFT-SUPERVISOR-V2-A01-STRESS',
     workstream_id: process.env.A01_WORKSTREAM_ID || 'SECOND-SHIFT-CONTROL-GATEWAY',
     subject_sha: actual,

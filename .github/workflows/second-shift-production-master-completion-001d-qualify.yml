@@ -1,0 +1,207 @@
+name: Second Shift Production Master 001D Exact-SHA Qualification
+
+on:
+  push:
+    branches:
+      - second-shift-production-master-completion-001
+    paths:
+      - '.github/scripts/a01-second-shift-supervisor-v2-qualify.js'
+      - '.github/workflows/second-shift-production-master-completion-001d-qualify.yml'
+      - 'tools/second_shift_supervisor_v2.py'
+      - 'control-gateway/python/a01_github_ingress.py'
+      - 'control-gateway/python/a01_model_dispatch.py'
+      - 'control-gateway/python/a01_execution_worker.py'
+      - 'control-gateway/python/a01_night_scheduler.py'
+      - 'tests/test_a01_github_ingress.py'
+      - 'tests/test_a01_model_dispatch.py'
+      - 'tests/test_a01_execution_worker_ai_coding.py'
+      - 'tests/test_control_gateway_a01_supervisor_adapter.py'
+      - 'tests/test_control_gateway_a01_supervisor_coordination.py'
+      - 'tests/test_control_gateway_a01_supervisor_coordination_authority.py'
+      - 'tests/test_control_gateway_a01_night_scheduler.py'
+      - 'tests/test_control_gateway_failure_restart_idempotency.py'
+      - 'tests/run_control_gateway_failure_restart_idempotency_bounded.py'
+      - 'tests/test_control_gateway_cg011_dispatch_failure_replay.py'
+      - 'tests/test_control_gateway_cg011_adversarial_closure.py'
+      - 'tests/test_second_shift_supervisor_v2.py'
+      - 'tests/run_second_shift_supervisor_v2_optimized.py'
+      - 'tests/test_second_shift_mastery_contracts.js'
+      - 'governance/second-shift/SECOND-SHIFT-MASTERY-001-ALL-NIGHT-OPERATING-MODEL.md'
+      - 'governance/second-shift/SECOND-SHIFT-NIGHT-SELECTION-GATE-SCHEMA-001.json'
+      - 'governance/second-shift/SECOND-SHIFT-ASSIGNMENT-CONTRACT-SCHEMA-003.json'
+      - '.github/scripts/second-shift-mastery-contract-validate.js'
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: second-shift-production-master-001d-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  hosted:
+    name: Fresh hosted exact-SHA regression and fault qualification
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact 001D subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify exact hosted subject
+        env:
+          EXPECTED_SHA: ${{ github.sha }}
+        run: |
+          actual="$(git rev-parse HEAD)"
+          test "$actual" = "$EXPECTED_SHA"
+          echo "SECOND_SHIFT_001D_HOSTED_SUBJECT=$actual"
+      - name: Syntax check integrated Python surfaces
+        run: |
+          python -m py_compile             tools/second_shift_supervisor_v2.py             control-gateway/python/a01_supervisor_adapter.py             control-gateway/python/a01_supervisor_coordination.py             control-gateway/python/a01_supervisor_coordination_strict.py             control-gateway/python/a01_night_scheduler.py             control-gateway/python/a01_github_ingress.py             control-gateway/python/a01_model_dispatch.py             control-gateway/python/a01_execution_worker.py             tests/test_a01_github_ingress.py             tests/test_a01_model_dispatch.py             tests/test_a01_execution_worker_ai_coding.py             tests/test_control_gateway_a01_supervisor_adapter.py             tests/test_control_gateway_a01_supervisor_coordination.py             tests/test_control_gateway_a01_supervisor_coordination_authority.py             tests/test_control_gateway_a01_night_scheduler.py             tests/test_control_gateway_failure_restart_idempotency.py             tests/run_control_gateway_failure_restart_idempotency_bounded.py             tests/test_control_gateway_cg011_dispatch_failure_replay.py             tests/test_control_gateway_cg011_adversarial_closure.py             tests/run_second_shift_supervisor_v2_optimized.py
+      - name: Run Control Gateway Node regressions
+        run: cd control-gateway && node --test
+      - name: Run AI ingress regression
+        run: python tests/test_a01_github_ingress.py
+      - name: Run bounded local model-dispatch regression
+        run: python tests/test_a01_model_dispatch.py
+      - name: Run AI execution-worker evaluator regression
+        run: python tests/test_a01_execution_worker_ai_coding.py
+      - name: Run supervisor adapter regression
+        run: python tests/test_control_gateway_a01_supervisor_adapter.py
+      - name: Run coordination regression
+        run: python tests/test_control_gateway_a01_supervisor_coordination.py
+      - name: Run coordination authority regression
+        run: python tests/test_control_gateway_a01_supervisor_coordination_authority.py
+      - name: Run night scheduler regression
+        run: python tests/test_control_gateway_a01_night_scheduler.py
+      - name: Run bounded crash restart idempotency regression
+        run: python tests/run_control_gateway_failure_restart_idempotency_bounded.py
+      - name: Run dispatch replay and circuit regression
+        run: python tests/test_control_gateway_cg011_dispatch_failure_replay.py
+      - name: Run adversarial closure regression
+        run: python tests/test_control_gateway_cg011_adversarial_closure.py
+      - name: Run full Supervisor v2 suite and 20000-transition stress
+        run: python tests/run_second_shift_supervisor_v2_optimized.py
+      - name: Run Mastery contract regression
+        run: node --test tests/test_second_shift_mastery_contracts.js
+      - name: Emit hosted exact-SHA evidence
+        env:
+          SUBJECT_SHA: ${{ github.sha }}
+          RUN_ID: ${{ github.run_id }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          stress = json.loads(Path('.second-shift-supervisor-v2-stress.json').read_text(encoding='utf-8'))
+          evidence = {
+              'evidence_version': 1,
+              'operation_id': 'SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION-001D',
+              'subject_sha': os.environ['SUBJECT_SHA'],
+              'workflow_run_id': os.environ['RUN_ID'],
+              'workflow_run_attempt': int(os.environ['RUN_ATTEMPT']),
+              'hosted_result': 'PASS',
+              'randomized_transitions': stress.get('randomized_transitions'),
+              'stress_successful': stress.get('successful'),
+              'coverage': [
+                  'control-gateway-node-regression',
+                  'ai-ingress',
+                  'local-model-dispatch',
+                  'ai-execution-worker-evaluator',
+                  'supervisor-adapter',
+                  'coordination',
+                  'coordination-authority',
+                  'night-scheduler',
+                  'crash-restart-idempotency',
+                  'dispatch-replay-retry-circuit',
+                  'adversarial-closure',
+                  'supervisor-20000-transition-stress',
+                  'mastery-contract-regression',
+              ],
+          }
+          Path('.001d-hosted-evidence.json').write_text(json.dumps(evidence, indent=2) + '\n', encoding='utf-8')
+          PY
+      - name: Upload immutable hosted evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: second-shift-production-master-001d-hosted-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            .001d-hosted-evidence.json
+            .second-shift-supervisor-v2-stress.json
+          if-no-files-found: error
+          retention-days: 30
+
+  a01:
+    name: Fresh A-01 Windows X64 exact-SHA qualification
+    needs: hosted
+    uses: ./.github/workflows/a01-control-plane-gateway.yml
+    with:
+      qualification_id: SECOND-SHIFT-SUPERVISOR-V2-A01-STRESS
+      workstream_id: SECOND-SHIFT-CONTROL-GATEWAY
+      subject_sha: ${{ github.sha }}
+      origin_ref: ${{ github.ref_name }}
+      resume_on_pass: 'Return exact-SHA PASS to SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION-001D; do not promote automatically.'
+      resume_on_failure: 'Preserve exact A-01 evidence, repair only the demonstrated 001D boundary, and rerun fresh qualification on the changed SHA.'
+      notification_target: originating-workstream
+      execution_context: normal
+      qualifier_timeout_minutes: 28
+      job_timeout_minutes: 30
+      repair_attempt: 0
+      max_repair_attempts: 1
+      repair_transaction_id: ''
+    secrets: inherit
+
+  qualification-summary:
+    name: Bind hosted and A-01 evidence to one exact SHA
+    if: always()
+    needs: [hosted, a01]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Write exact-SHA qualification summary
+        env:
+          SUBJECT_SHA: ${{ github.sha }}
+          HOSTED_JOB_RESULT: ${{ needs.hosted.result }}
+          A01_JOB_RESULT: ${{ needs.a01.result }}
+          A01_RESULT_CLASS: ${{ needs.a01.outputs.result_class }}
+          A01_PROMOTION_AUTHORIZED: ${{ needs.a01.outputs.promotion_authorized }}
+          RUN_ID: ${{ github.run_id }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          value = {
+              'evidence_version': 1,
+              'operation_id': 'SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION-001D',
+              'subject_sha': os.environ['SUBJECT_SHA'],
+              'workflow_run_id': os.environ['RUN_ID'],
+              'workflow_run_attempt': int(os.environ['RUN_ATTEMPT']),
+              'hosted_job_result': os.environ.get('HOSTED_JOB_RESULT', ''),
+              'a01_job_result': os.environ.get('A01_JOB_RESULT', ''),
+              'a01_result_class': os.environ.get('A01_RESULT_CLASS', ''),
+              'a01_promotion_authorized': os.environ.get('A01_PROMOTION_AUTHORIZED', ''),
+              'standing': 'PASS' if os.environ.get('HOSTED_JOB_RESULT') == 'success' and os.environ.get('A01_RESULT_CLASS') == 'PASS' else 'NOT_PASS',
+          }
+          Path('.001d-qualification-summary.json').write_text(json.dumps(value, indent=2) + '\n', encoding='utf-8')
+          PY
+      - name: Upload immutable combined summary
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: second-shift-production-master-001d-summary-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .001d-qualification-summary.json
+          if-no-files-found: error
+          retention-days: 30
+      - name: Enforce exact-SHA PASS
+        env:
+          HOSTED_JOB_RESULT: ${{ needs.hosted.result }}
+          A01_RESULT_CLASS: ${{ needs.a01.outputs.result_class }}
+        run: |
+          test "$HOSTED_JOB_RESULT" = "success"
+          test "$A01_RESULT_CLASS" = "PASS"
