@@ -133,6 +133,7 @@ jobs:
             .001d-hosted-evidence.json
             .second-shift-supervisor-v2-stress.json
           if-no-files-found: error
+          include-hidden-files: true
           retention-days: 30
 
   a01:
@@ -197,6 +198,7 @@ jobs:
           name: second-shift-production-master-001d-summary-${{ github.run_id }}-${{ github.run_attempt }}
           path: .001d-qualification-summary.json
           if-no-files-found: error
+          include-hidden-files: true
           retention-days: 30
       - name: Enforce exact-SHA PASS
         env:
