@@ -15,7 +15,7 @@ from urllib.parse import urlparse
 
 MODEL_DISPATCH_PROTOCOL = "control-gateway.a01-model-dispatch.v1"
 DEFAULT_LEMONADE_BASE_URL = "http://127.0.0.1:13305/api/v1"
-DEFAULT_MODEL = "Qwen3.6-35B-A3B-GGUF"
+DEFAULT_MODEL = "gpt-oss-20b-NPU"
 PROVIDER_ID = "lemonade"
 MAX_PROMPT_BYTES = 64 * 1024
 MAX_CAPTURE_BYTES = 4 * 1024 * 1024

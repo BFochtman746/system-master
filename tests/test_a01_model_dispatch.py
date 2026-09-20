@@ -81,6 +81,7 @@ class ModelDispatchTests(unittest.TestCase):
             validate_ai_coding_payload(p)
 
     def test_config_is_local_and_deny_by_default(self):
+        self.assertEqual(DEFAULT_MODEL, "gpt-oss-20b-NPU")
         config = build_opencode_config(payload("a" * 40))
         self.assertEqual(config["provider"]["lemonade"]["options"]["baseURL"], DEFAULT_LEMONADE_BASE_URL)
         self.assertEqual(config["permission"]["*"], "deny")
