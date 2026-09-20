@@ -252,7 +252,7 @@ async function executeTask() {
 
   const responseRequest = {
     model: MODEL,
-    input: instruction,
+    input: [{ role: 'user', content: instruction }],
     max_output_tokens: payload.max_output_tokens,
     temperature: 0
   };
