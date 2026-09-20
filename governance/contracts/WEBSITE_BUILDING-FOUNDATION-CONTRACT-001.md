@@ -39,7 +39,7 @@ Fail closed on invalid requirements/target, revision drift, build/test failure, 
 
 ## 7. Evidence target
 
-`qualification/foundation/website-building-foundation-001.json`.
+Future evidence target (currently absent until implementation qualification): `qualification/foundation/website-building-foundation-001.json`.
 Required contents: `C40`, `WEBSITE_BUILDING`, owner `SYSTEM_MASTER/PROGRAMMING`, current authority/crosswalk identifiers, exact subject Git blobs, scaffold/edit/build/preview/test/package/deploy-boundary coverage, writer/dependency/failure/idempotency tests, acceptance command and `PASS|FAIL`.
 
 ## 8. Acceptance target

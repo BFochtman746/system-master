@@ -38,7 +38,7 @@ Fail closed on missing authority/consent, unsupported voice policy, provider/run
 
 ## 7. Evidence target
 
-`qualification/foundation/voice-foundation-001.json`.
+Future evidence target (currently absent until implementation qualification): `qualification/foundation/voice-foundation-001.json`.
 Required contents: `C33`, `VOICE`, owner `SYSTEM_MASTER/MEDIA`, current authority/crosswalk identifiers, exact subject Git blobs, transcription/synthesis/transform/inspect/export coverage, provider-boundary/writer/failure/idempotency tests, acceptance command and `PASS|FAIL`.
 
 ## 8. Acceptance target
