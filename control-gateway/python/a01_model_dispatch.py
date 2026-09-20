@@ -27,6 +27,7 @@ OPENCODE_VERSION = "v1.18.31"
 OPENCODE_WINDOWS_X64_URL = "https://github.com/anomalyco/opencode/releases/download/v1.18.31/opencode-windows-x64.zip"
 OPENCODE_WINDOWS_X64_ARCHIVE_SHA256 = "0ecd7ffc7f26390ce7799e7bcd409e4f11c410144308a6a5b0fcdce63d871006"
 MAX_OPENCODE_ARCHIVE_BYTES = 70 * 1024 * 1024
+MAX_OPENCODE_EXECUTABLE_BYTES = 192 * 1024 * 1024
 
 _FORBIDDEN_PATH_PARTS = {".git", ".opencode"}
 _FORBIDDEN_COMMAND_PATTERNS = (
@@ -345,7 +346,7 @@ def _bootstrap_pinned_opencode(
                     {"candidate_count": len(candidates)},
                 )
             info = candidates[0]
-            if info.file_size > 100 * 1024 * 1024:
+            if info.file_size > MAX_OPENCODE_EXECUTABLE_BYTES:
                 raise ModelDispatchFailed("Pinned OpenCode executable exceeds bounded size")
             with bundle.open(info) as source, executable.open("wb") as target:
                 shutil.copyfileobj(source, target, length=1024 * 1024)

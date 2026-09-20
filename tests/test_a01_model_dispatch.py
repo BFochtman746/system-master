@@ -20,6 +20,7 @@ from a01_model_dispatch import (
     DEFAULT_LEMONADE_BASE_URL,
     DEFAULT_MODEL,
     MODEL_DISPATCH_PROTOCOL,
+    MAX_OPENCODE_EXECUTABLE_BYTES,
     OPENCODE_VERSION,
     OPENCODE_WINDOWS_X64_ARCHIVE_SHA256,
     OPENCODE_WINDOWS_X64_URL,
@@ -176,6 +177,8 @@ class ModelDispatchTests(unittest.TestCase):
             self.assertEqual(receipt["archive_sha256"], digest)
             self.assertEqual(receipt["cache_scope"], "runner_temp")
             self.assertEqual(OPENCODE_VERSION, "v1.18.31")
+            self.assertEqual(MAX_OPENCODE_EXECUTABLE_BYTES, 192 * 1024 * 1024)
+            self.assertGreater(MAX_OPENCODE_EXECUTABLE_BYTES, 179_998_248)
             self.assertTrue(OPENCODE_WINDOWS_X64_URL.endswith("/v1.18.31/opencode-windows-x64.zip"))
             self.assertEqual(
                 OPENCODE_WINDOWS_X64_ARCHIVE_SHA256,
