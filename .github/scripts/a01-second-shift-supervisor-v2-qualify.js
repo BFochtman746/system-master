@@ -44,6 +44,7 @@ function main() {
     'control-gateway/python/a01_github_ingress.py',
     'control-gateway/python/a01_model_dispatch.py',
     'control-gateway/python/a01_execution_worker.py',
+    'control-gateway/python/a01_second_shift_001g_ai_coding_smoke.py',
     'tests/test_control_gateway_a01_supervisor_adapter.py',
     'tests/test_control_gateway_a01_supervisor_coordination.py',
     'tests/test_control_gateway_a01_supervisor_coordination_authority.py',
@@ -51,6 +52,7 @@ function main() {
     'tests/test_a01_github_ingress.py',
     'tests/test_a01_model_dispatch.py',
     'tests/test_a01_execution_worker_ai_coding.py',
+    'tests/test_a01_second_shift_001g_ai_coding_smoke.py',
     'tests/test_control_gateway_failure_restart_idempotency.py',
     'tests/run_control_gateway_failure_restart_idempotency_bounded.py',
     'tests/test_control_gateway_cg011_dispatch_failure_replay.py',
@@ -76,6 +78,18 @@ function main() {
   stage('A01_GITHUB_INGRESS', 'python', ['tests/test_a01_github_ingress.py'], { timeout: 180000 });
   stage('A01_MODEL_DISPATCH', 'python', ['tests/test_a01_model_dispatch.py'], { timeout: 180000 });
   stage('A01_EXECUTION_WORKER_AI_CODING', 'python', ['tests/test_a01_execution_worker_ai_coding.py'], { timeout: 180000 });
+  stage('A01_LIVE_AI_CODING_SMOKE', 'python', ['control-gateway/python/a01_second_shift_001g_ai_coding_smoke.py'], { timeout: 600000 });
+  const aiCodingSmokePath = path.join(EVIDENCE_DIR, 'second-shift-001g-ai-coding-smoke-summary.json');
+  if (!fs.existsSync(aiCodingSmokePath)) fail('A01_LIVE_AI_CODING_SMOKE_EVIDENCE_MISSING');
+  const aiCodingSmoke = readJson(aiCodingSmokePath);
+  if (
+    aiCodingSmoke.state !== 'PASS' ||
+    aiCodingSmoke.subject_sha !== actual ||
+    aiCodingSmoke.model !== 'gpt-oss-20b-NPU' ||
+    aiCodingSmoke.live_ready_queue_touched !== false ||
+    aiCodingSmoke.repository_commit_authority_granted !== false ||
+    aiCodingSmoke.root_checkout_mutated !== false
+  ) fail('A01_LIVE_AI_CODING_SMOKE_EVIDENCE_INVALID');
   stage('CG008_SUPERVISOR_ADAPTER', 'python', ['tests/test_control_gateway_a01_supervisor_adapter.py'], { timeout: 120000 });
   stage('CG009_COORDINATION_BASE', 'python', ['tests/test_control_gateway_a01_supervisor_coordination.py'], { timeout: 120000 });
   stage('CG009_COORDINATION_AUTHORITY', 'python', ['tests/test_control_gateway_a01_supervisor_coordination_authority.py'], { timeout: 120000 });
@@ -94,7 +108,7 @@ function main() {
   stage('MASTERY_CONTRACT_REGRESSION', 'node', ['--test', 'tests/test_second_shift_mastery_contracts.js'], { timeout: 120000 });
 
   const evidence = {
-    evidence_version: 3,
+    evidence_version: 4,
     qualification_id: process.env.A01_QUALIFICATION_ID || 'SECOND-SHIFT-SUPERVISOR-V2-A01-STRESS',
     workstream_id: process.env.A01_WORKSTREAM_ID || 'SECOND-SHIFT-CONTROL-GATEWAY',
     subject_sha: actual,
@@ -104,6 +118,7 @@ function main() {
     adapter_contract: 'control-gateway.a01-supervisor-handoff.v1',
     scheduling_owner: 'A01_SUPERVISOR',
     github_role: 'ADMISSION_TRANSPORT_EVIDENCE_ONLY',
+    live_ai_coding_smoke: aiCodingSmoke,
     supervisor_stress: report,
   };
   writeJson(path.join(EVIDENCE_DIR, 'second-shift-supervisor-v2-stress.json'), report);
