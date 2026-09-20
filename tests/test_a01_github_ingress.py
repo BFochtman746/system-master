@@ -198,7 +198,7 @@ def make_ai_coding_delegation(**payload_overrides):
         "prompt": "Implement the admitted bounded change.",
         "allowed_paths": ["control-gateway/python/example.py"],
         "allowed_commands": ["python -m unittest tests.test_example"],
-        "model": "Qwen3.6-35B-A3B-GGUF",
+        "model": "gpt-oss-20b-NPU",
         "base_url": "http://127.0.0.1:13305/api/v1",
         "max_steps": 16,
         "timeout_seconds": 300,
