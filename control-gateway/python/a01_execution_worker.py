@@ -1066,7 +1066,10 @@ class A01ExecutionWorker:
                 {"reconciliation_required": True, **exc.details},
             ) from exc
         except ModelDispatchFailed as exc:
-            raise WorkExecutionFailed("AI_CODING model dispatch failed", exc.details) from exc
+            raise WorkExecutionFailed(
+                "AI_CODING model dispatch failed",
+                {"dispatch_error": str(exc), **exc.details},
+            ) from exc
         except ModelDispatchError as exc:
             raise WorkExecutionFailed("AI_CODING model dispatch rejected", {"error": str(exc)}) from exc
 
