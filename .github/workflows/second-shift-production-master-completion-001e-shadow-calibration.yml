@@ -6,194 +6,138 @@ on:
       - second-shift-production-master-completion-001
     paths:
       - .github/workflows/second-shift-production-master-completion-001e-shadow-calibration.yml
+      - .github/scripts/a01-second-shift-production-master-001e-shadow-calibration.js
+      - control-gateway/python/a01_second_shift_001e_shadow_calibration.py
+      - tests/test_a01_second_shift_001e_shadow_calibration.py
 
 permissions:
   contents: read
   actions: read
 
+concurrency:
+  group: second-shift-production-master-001e-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   authority:
-    name: Wait for exact 001E authority binding
+    name: Require exact 001E authority binding
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 5
     steps:
-      - name: Checkout exact candidate
+      - name: Checkout candidate
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           persist-credentials: false
           fetch-depth: 1
-      - name: Wait for recovery-v4 to name exact subject
+          path: candidate
+      - name: Checkout recovery-v4 authority
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+          ref: control-gateway-state/active-work/second-shift-production-master-completion-001-recovery-v4
+          path: authority
+      - name: Enforce exact subject
         env:
-          GH_TOKEN: ${{ github.token }}
           EXPECTED_SHA: ${{ github.sha }}
-        shell: bash
         run: |
-          set -euo pipefail
           python - <<'PY'
-          import base64, json, os, time, urllib.parse, urllib.request
-          expected = os.environ["EXPECTED_SHA"].lower()
-          token = os.environ["GH_TOKEN"]
-          ref = "control-gateway-state/active-work/second-shift-production-master-completion-001-recovery-v4"
-          query = urllib.parse.urlencode({"ref": ref})
-          url = "https://api.github.com/repos/BFochtman746/system-master/contents/control-gateway-state/active-work/head.json?" + query
-          for _ in range(60):
-              request = urllib.request.Request(
-                  url,
-                  headers={
-                      "Accept": "application/vnd.github+json",
-                      "Author" + "ization": "Bear" + "er " + token,
-                      "X-GitHub-Api-Version": "2022-11-28",
-                  },
-              )
-              with urllib.request.urlopen(request, timeout=20) as response:
-                  value = json.load(response)
-              head = json.loads(base64.b64decode(value["content"]).decode("utf-8"))
-              packet = head.get("packet", {})
-              subject = str(packet.get("authoritative_subject", {}).get("oid", "")).lower()
-              current = packet.get("current_operation", {})
-              if (
-                  subject == expected
-                  and current.get("operation_id") == "SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION-001E"
-                  and current.get("state") == "ACTIVE"
-                  and packet.get("qualification_state") == "PASSED"
-                  and packet.get("github_admission_state") == "ADMITTED"
-              ):
-                  print(f"SECOND_SHIFT_001E_AUTHORITY=PASS subject={subject} epoch={packet.get('authority_epoch')}")
-                  raise SystemExit(0)
-              time.sleep(5)
-          raise SystemExit("SECOND_SHIFT_001E_AUTHORITY=FAIL exact subject was not rebound in time")
+          import json, os
+          head=json.load(open('authority/control-gateway-state/active-work/head.json',encoding='utf-8'))
+          packet=head['packet']
+          assert packet['current_operation']['operation_id']=='SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION-001E'
+          assert packet['current_operation']['state']=='ACTIVE'
+          assert packet['authoritative_subject']['oid'].lower()==os.environ['EXPECTED_SHA'].lower()
+          assert packet['qualification_state']=='PASSED'
+          assert packet['github_admission_state']=='ADMITTED'
+          print('SECOND_SHIFT_001E_AUTHORITY=PASS')
           PY
 
   hosted_preflight:
-    name: Non-mutating 001E hosted regressions
+    name: Hosted dedicated shadow contract
     needs: authority
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 8
     steps:
-      - name: Checkout exact candidate
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           persist-credentials: false
           fetch-depth: 1
-      - name: Verify integrated shadow surfaces
-        shell: bash
+      - name: Verify dedicated qualifier contract
         run: |
-          set -euo pipefail
-          python -m py_compile             control-gateway/python/a01_github_ingress.py             control-gateway/python/a01_execution_worker.py             control-gateway/python/a01_registered_task_worker.py             control-gateway/python/a01_night_scheduler.py
-          node --check .github/scripts/a01-agent-registered-task-production-binding-001.js
-          python -m unittest \
-            tests.test_a01_registered_task_ingress \
-            tests.test_a01_registered_task_worker \
-            tests.test_a01_execution_worker_ai_coding \
-            tests.test_control_gateway_a01_night_scheduler \
-            tests.test_control_gateway_a01_supervisor_coordination_authority
+          python -m py_compile control-gateway/python/a01_second_shift_001e_shadow_calibration.py
+          node --check .github/scripts/a01-second-shift-production-master-001e-shadow-calibration.js
+          python tests/test_a01_second_shift_001e_shadow_calibration.py
           echo SECOND_SHIFT_001E_HOSTED_PREFLIGHT=PASS
 
-  registered_task_shadow:
-    name: A-01 bounded registered-task shadow
+  shadow:
+    name: A-01 dedicated non-mutating 001E shadow calibration
     needs: hosted_preflight
-    uses: BFochtman746/system-master/.github/workflows/a01-control-plane-gateway.yml@20e592938922b87eb4c35dbd071752cce580903c
+    uses: BFochtman746/system-master/.github/workflows/a01-control-plane-gateway.yml@c0d9c46f6fa8c18501bc9450f8dc6c66838615fc
     with:
-      qualification_id: A01-AGENT-REGISTERED-TASK-PRODUCTION-BINDING-001
-      workstream_id: SYSTEM-MASTER
+      qualification_id: SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION-001E-SHADOW-CALIBRATION
+      workstream_id: SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION
       subject_sha: ${{ github.sha }}
       origin_ref: ${{ github.ref_name }}
-      resume_on_pass: Return exact-subject registered-task evidence to 001E shadow calibration only; do not activate production.
-      resume_on_failure: Preserve exact A-01 evidence and repair only the first registered-task shadow boundary.
+      resume_on_pass: Return exact-subject 001E shadow calibration evidence only; do not begin canary.
+      resume_on_failure: Preserve exact shadow evidence and repair only the demonstrated 001E boundary.
       notification_target: originating-workstream
       execution_context: normal
       qualifier_timeout_minutes: 25
       job_timeout_minutes: 30
       repair_attempt: 0
       max_repair_attempts: 1
+      repair_transaction_id: ''
     secrets: inherit
 
-  supervisor_shadow:
-    name: A-01 supervisor stress shadow
-    needs: hosted_preflight
-    uses: BFochtman746/system-master/.github/workflows/a01-control-plane-gateway.yml@20e592938922b87eb4c35dbd071752cce580903c
-    with:
-      qualification_id: SECOND-SHIFT-SUPERVISOR-V2-A01-STRESS
-      workstream_id: SECOND-SHIFT-CONTROL-GATEWAY
-      subject_sha: ${{ github.sha }}
-      origin_ref: ${{ github.ref_name }}
-      resume_on_pass: Return exact-subject supervisor stress evidence to 001E shadow calibration only; do not begin canary.
-      resume_on_failure: Preserve exact A-01 evidence and repair only the first supervisor shadow boundary.
-      notification_target: originating-workstream
-      execution_context: normal
-      qualifier_timeout_minutes: 28
-      job_timeout_minutes: 30
-      repair_attempt: 0
-      max_repair_attempts: 1
-    secrets: inherit
-
-  freeze_calibration:
-    name: Freeze clean 001E calibration evidence
+  freeze:
+    name: Freeze non-promoting 001E shadow standing
     if: always()
-    needs: [registered_task_shadow, supervisor_shadow]
+    needs: [hosted_preflight, shadow]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
-      REGISTERED_RESULT: ${{ needs.registered_task_shadow.outputs.result_class }}
-      REGISTERED_PROMOTION: ${{ needs.registered_task_shadow.outputs.promotion_authorized }}
-      REGISTERED_CONTROL_SHA: ${{ needs.registered_task_shadow.outputs.control_plane_sha }}
-      SUPERVISOR_RESULT: ${{ needs.supervisor_shadow.outputs.result_class }}
-      SUPERVISOR_PROMOTION: ${{ needs.supervisor_shadow.outputs.promotion_authorized }}
-      SUPERVISOR_CONTROL_SHA: ${{ needs.supervisor_shadow.outputs.control_plane_sha }}
+      HOSTED_RESULT: ${{ needs.hosted_preflight.result }}
+      SHADOW_JOB_RESULT: ${{ needs.shadow.result }}
+      SHADOW_RESULT: ${{ needs.shadow.outputs.result_class }}
+      SHADOW_PROMOTION: ${{ needs.shadow.outputs.promotion_authorized }}
+      SHADOW_CONTROL_SHA: ${{ needs.shadow.outputs.control_plane_sha }}
+      PINNED_CONTROL_SHA: c0d9c46f6fa8c18501bc9450f8dc6c66838615fc
     steps:
-      - name: Freeze thresholds only from two clean shadow passes
-        shell: bash
+      - name: Enforce durable shadow PASS only
         run: |
-          set -euo pipefail
+          test "$HOSTED_RESULT" = "success"
+          test "$SHADOW_JOB_RESULT" = "success"
+          test "$SHADOW_RESULT" = "PASS"
+          test "$SHADOW_PROMOTION" != "true"
+          test "$SHADOW_CONTROL_SHA" = "$PINNED_CONTROL_SHA"
+      - name: Write 001E standing
+        env:
+          SUBJECT_SHA: ${{ github.sha }}
+        run: |
           python - <<'PY'
           import json, os, pathlib
-          reg = os.environ.get("REGISTERED_RESULT", "")
-          sup = os.environ.get("SUPERVISOR_RESULT", "")
-          if reg != "PASS" or sup != "PASS":
-              raise SystemExit(f"SECOND_SHIFT_001E_SHADOW=FAIL registered={reg!r} supervisor={sup!r}")
-          if os.environ.get("REGISTERED_PROMOTION", "").lower() == "true":
-              raise SystemExit("registered-task shadow unexpectedly authorized promotion")
-          if os.environ.get("SUPERVISOR_PROMOTION", "").lower() == "true":
-              raise SystemExit("supervisor shadow unexpectedly authorized promotion")
-          control = "20e592938922b87eb4c35dbd071752cce580903c"
-          for key in ("REGISTERED_CONTROL_SHA", "SUPERVISOR_CONTROL_SHA"):
-              value = os.environ.get(key, "")
-              if value and value.lower() != control:
-                  raise SystemExit(f"control-plane drift: {key}={value}")
-          evidence = {
-              "protocol_version": "second-shift.production-master.001e-shadow-calibration.v1",
-              "phase": "SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION-001E",
-              "subject_sha": os.environ["GITHUB_SHA"].lower(),
-              "control_plane_sha": control,
-              "shadow_mode": True,
-              "production_side_effects_authorized": False,
-              "canary_authorized": False,
-              "shadow_qualifications": {
-                  "A01-AGENT-REGISTERED-TASK-PRODUCTION-BINDING-001": reg,
-                  "SECOND-SHIFT-SUPERVISOR-V2-A01-STRESS": sup,
-              },
-              "frozen_thresholds": {
-                  "required_shadow_qualifications": 2,
-                  "allowed_failed_shadow_qualifications": 0,
-                  "max_lane_concurrency": 1,
-                  "supervisor_randomized_transition_floor": 20000,
-                  "registered_task_model": "gpt-oss-20b-NPU",
-                  "registered_task_temperature": 0,
-                  "registered_task_max_output_tokens": 1024,
-              },
+          evidence={
+            'protocol_version':'second-shift.production-master.001e-shadow-standing.v2',
+            'phase':'SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION-001E',
+            'subject_sha':os.environ['SUBJECT_SHA'].lower(),
+            'control_plane_sha':os.environ['PINNED_CONTROL_SHA'],
+            'standing':'PASS',
+            'shadow_mode':True,
+            'production_side_effects_authorized':False,
+            'canary_authorized':False,
+            'qualification_id':'SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION-001E-SHADOW-CALIBRATION',
+            'calibration_source':'authoritative A-01 evidence/second-shift-001e-shadow-calibration-summary.json',
           }
-          out = pathlib.Path(".001e-shadow-evidence")
-          out.mkdir(parents=True, exist_ok=True)
-          (out / "second-shift-production-master-001e-shadow-calibration.json").write_text(
-              json.dumps(evidence, indent=2, sort_keys=True) + "\n",
-              encoding="utf-8",
-          )
-          print("SECOND_SHIFT_001E_SHADOW_CALIBRATION=PASS")
+          p=pathlib.Path('.001e-shadow-evidence')
+          p.mkdir(parents=True,exist_ok=True)
+          (p/'second-shift-production-master-001e-shadow-standing.json').write_text(json.dumps(evidence,indent=2,sort_keys=True)+'\n',encoding='utf-8')
+          print('SECOND_SHIFT_001E_SHADOW_STANDING=PASS')
           PY
-      - name: Upload immutable 001E calibration evidence
+      - name: Upload immutable 001E standing
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: second-shift-production-master-001e-${{ github.run_id }}-evidence
+          name: second-shift-production-master-001e-${{ github.run_id }}-standing
           path: .001e-shadow-evidence
           if-no-files-found: error
           retention-days: 30
