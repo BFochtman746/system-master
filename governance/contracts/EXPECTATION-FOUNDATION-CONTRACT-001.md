@@ -1,5 +1,8 @@
 # EXPECTATION — Foundation Contract 001
 
+**Capability** `C11`  
+**Capability inventory** `governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json`  
+
 **Owner** `SYSTEM_MASTER/CORE` · **Lane** CORE · **Effective** 2026-09-15  
 **Authority** `governance/CURRENT-AUTHORITY.json` → `CURRENT-AUTHORITY-005` / Topology 007  
 **Engine** `RESPONSE-EXPECTATION-ENGINE-001`  
@@ -74,7 +77,13 @@ Policies are caller-owned inputs. C11 normalizes them for validation/digesting b
 
 Any claimed durable C11 evidence must be registered through the existing Foundation evidence path; C11 does not create a parallel evidence store.
 
+
+Canonical semantic writer: `SYSTEM_MASTER/CORE` owns C11 response-expectation semantics; C11 itself is runtime-stateless.  
+Physical persistence: admitted Git repository/evidence writers persist implementation and qualification records; C11 creates no independent durable state store.
+
 ## 5. Dependencies
+
+Platform baseline: C11 depends on applicable Foundation requirements P00–P12 and P15 for repository authority, qualification, and evidence handling.
 
 C11 runtime depends only on Node.js standard-library primitives used for deterministic SHA-256 hashing.
 
@@ -88,6 +97,8 @@ Repository qualification depends on the existing canonical `verify.sh` auto-disc
 `governance/EXPECTATION-REGISTRY-007.json` is intentionally **not** a runtime dependency or implementation-evidence dependency for C11.
 
 ## 6. Failure semantics
+
+Fail closed on malformed policy, invalid response class, or any unmet declared expectation. C11 is read-only and therefore does not consume a mutation `idempotency_key`; repeated identical inputs are deterministic and idempotent.
 
 C11 is fail-closed.
 
@@ -106,6 +117,8 @@ Validation and policy digesting are deterministic and idempotent for identical e
 
 ## 7. Evidence target
 
+Future evidence target (currently absent until Foundation qualification): `qualification/foundation/expectation-foundation-001.json`.
+
 Required exact-subject repository evidence for C11 closure:
 
 - exact Git commit containing `control-gateway/src/response-expectation-engine.js`;
@@ -118,6 +131,9 @@ Required exact-subject repository evidence for C11 closure:
 Only immutable evidence tied to the exact qualified subject may be registered in `FOUNDATION-CLOSURE-EVIDENCE-REGISTRY-001.json`. A governance registry, historical census row, branch name, source-file presence, or prior C04 PASS is insufficient.
 
 ## 8. Acceptance target
+
+Common specification gate: `node .github/scripts/foundation-capability-contract-spec-check.js EXPECTATION`.  
+Common implementation gate: `node .github/scripts/foundation-capability-acceptance.js EXPECTATION`.
 
 From repository root, the direct C11 acceptance command is:
 
@@ -144,6 +160,8 @@ PASS requires:
 Local or branch PASS alone does not close C11 in the Foundation matrix.
 
 ## 9. Authority boundary
+
+Canonical owner boundary: `SYSTEM_MASTER/CORE`.
 
 C11/CORE may define and implement reusable response-expectation validation mechanics and stable generic validation errors.
 

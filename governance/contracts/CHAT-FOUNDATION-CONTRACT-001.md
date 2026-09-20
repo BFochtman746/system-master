@@ -1,5 +1,8 @@
 # CHAT — Foundation Contract 001
 
+**Capability** `C04`  
+**Capability inventory** `governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json`  
+
 **Owner** `SYSTEM_MASTER/CORE` · **Lane** CORE · **Effective** 2026-09-15  
 **Authority** `governance/CURRENT-AUTHORITY.json` → `CURRENT-AUTHORITY-005` / Topology 007  
 **Response governor** `SYSTEM-MASTER-DEVELOPMENT-RESPONSE-GOVERNOR-001`  
@@ -59,7 +62,13 @@ Development response receipts are immutable evidence objects carried in governed
 
 A write arriving outside the admitted repository/controller writer path is rejected or treated as non-authoritative evidence.
 
+
+Canonical semantic writer: `SYSTEM_MASTER/CORE` owns C04 development-chat semantics and receipt/admission composition.  
+Physical persistence: shared repository, artifact, evidence, and controller stores remain under their existing canonical writers; C04 creates no parallel store.
+
 ## 5. Dependencies
+
+Platform baseline: C04 depends on applicable Foundation requirements P00–P12 and P15 under current authority.
 
 - `governance/CURRENT-AUTHORITY.json` and its selected owner/topology/job/completion records — current execution truth.
 - `governance/CHATGPT-OPERATING-CONTRACT-002.md` and owner-chat startup contracts — repository-grounded chat operating rules.
@@ -72,6 +81,8 @@ A write arriving outside the admitted repository/controller writer path is rejec
 These dependencies remain semantically owned by their current owners. C04 consumes them without ownership transfer.
 
 ## 6. Failure semantics
+
+Fail closed on invalid authority, malformed response policy, rejected canonical writes, or uncertain side-effect state. Mutation retries reuse the caller's `idempotency_key`; C04 never invents a replacement identity.
 
 C04 is fail-closed for governed build execution.
 
@@ -87,6 +98,8 @@ C04 is fail-closed for governed build execution.
 Validation is deterministic and idempotent for the same exact response, contract version, and authority context. Reissuing against changed response or authority produces a different digest and requires fresh validation.
 
 ## 7. Evidence target
+
+Future evidence target (currently absent until Foundation qualification): `qualification/foundation/chat-foundation-001.json`.
 
 Required repository evidence:
 
@@ -107,6 +120,9 @@ Required external/runtime evidence before final C04 closure:
 3. installation/activation evidence for the System Master ChatGPT Project instruction and Build Governor Skill if claiming native ChatGPT response governance is active.
 
 ## 8. Acceptance target
+
+Common specification gate: `node .github/scripts/foundation-capability-contract-spec-check.js CHAT`.  
+Common implementation gate: `node .github/scripts/foundation-capability-acceptance.js CHAT`.
 
 From repository root:
 
@@ -135,6 +151,8 @@ PASS requires zero failed tests, a non-vacuous positive test count, and explicit
 Foundation/C04 completion still requires the current repository evidence policy and matrix generator; local PASS alone is not product/Foundation completion.
 
 ## 9. Authority boundary
+
+Canonical owner boundary: `SYSTEM_MASTER/CORE`.
 
 C04/CORE may decide and implement shared ChatGPT development-response formatting, response compliance validation, response receipts, shared controller admission wrapping, and shared chat/controller evidence interfaces.
 
