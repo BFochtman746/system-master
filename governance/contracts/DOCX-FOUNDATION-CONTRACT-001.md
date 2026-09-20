@@ -39,7 +39,7 @@ Fail closed on authority mismatch, malformed document model, unresolved asset re
 
 ## 7. Evidence target
 
-`qualification/foundation/docx-foundation-001.json`.
+Future evidence target (currently absent until implementation qualification): `qualification/foundation/docx-foundation-001.json`.
 Required contents: `C09`, `DOCX`, owner `SYSTEM_MASTER/DOCUMENTS`, current authority/crosswalk identifiers, exact subject Git blobs, route coverage, canonical-writer assertion, dependency/failure/idempotency test results, acceptance command, result `PASS|FAIL`, and immutable artifact/evidence refs.
 
 ## 8. Acceptance target

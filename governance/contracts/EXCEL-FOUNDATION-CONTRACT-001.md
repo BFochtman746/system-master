@@ -38,7 +38,7 @@ Fail closed on invalid formula/schema, circular dependency not explicitly permit
 
 ## 7. Evidence target
 
-`qualification/foundation/excel-foundation-001.json`.
+Future evidence target (currently absent until implementation qualification): `qualification/foundation/excel-foundation-001.json`.
 Required contents: `C10`, `EXCEL`, owner `SYSTEM_MASTER/SPREADSHEET_DATA`, current authority/crosswalk identifiers, exact subject Git blobs, workbook/formula/chart route coverage, writer/dependency/failure/idempotency tests, acceptance command and `PASS|FAIL`.
 
 ## 8. Acceptance target

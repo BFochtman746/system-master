@@ -39,7 +39,7 @@ Fail closed on missing authority, path/ref ambiguity, content-hash mismatch, uns
 
 ## 7. Evidence target
 
-`qualification/foundation/file-foundation-001.json`.
+Future evidence target (currently absent until implementation qualification): `qualification/foundation/file-foundation-001.json`.
 Required contents: `C13`, `FILE`, owner `SYSTEM_MASTER/DOCUMENTS`, current authority/crosswalk identifiers, exact subject Git blobs, route coverage, canonical-writer assertion, content-address/idempotency/dependency-failure tests, acceptance command, result `PASS|FAIL`, and immutable evidence refs.
 
 ## 8. Acceptance target

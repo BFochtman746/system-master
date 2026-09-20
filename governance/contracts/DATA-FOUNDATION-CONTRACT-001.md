@@ -39,7 +39,7 @@ Fail closed on authority/schema mismatch, unresolved source identity, unsafe tra
 
 ## 7. Evidence target
 
-`qualification/foundation/data-foundation-001.json`.
+Future evidence target (currently absent until implementation qualification): `qualification/foundation/data-foundation-001.json`.
 Required contents: `C08`, `DATA`, owner `SYSTEM_MASTER/SPREADSHEET_DATA`, current authority/crosswalk identifiers, exact subject Git blobs, route/schema/lineage coverage, writer/dependency/failure/idempotency tests, acceptance command and `PASS|FAIL`.
 
 ## 8. Acceptance target

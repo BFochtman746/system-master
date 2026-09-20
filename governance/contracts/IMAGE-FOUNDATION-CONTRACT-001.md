@@ -38,7 +38,7 @@ Fail closed on authority/policy failure, unresolved source identity, unsupported
 
 ## 7. Evidence target
 
-`qualification/foundation/image-foundation-001.json`.
+Future evidence target (currently absent until implementation qualification): `qualification/foundation/image-foundation-001.json`.
 Required contents: `C15`, `IMAGE`, owner `SYSTEM_MASTER/MEDIA`, current authority/crosswalk identifiers, exact subject Git blobs, generation/transform/inspect/export coverage, writer/dependency/failure/idempotency tests, acceptance command and `PASS|FAIL`.
 
 ## 8. Acceptance target

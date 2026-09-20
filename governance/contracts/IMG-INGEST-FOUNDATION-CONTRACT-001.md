@@ -39,7 +39,7 @@ Fail closed on source-hash mismatch, decode/format ambiguity, unsupported normal
 
 ## 7. Evidence target
 
-`qualification/foundation/img-ingest-foundation-001.json`.
+Future evidence target (currently absent until implementation qualification): `qualification/foundation/img-ingest-foundation-001.json`.
 Required contents: `C16`, `IMG-INGEST`, owner `SYSTEM_MASTER/DOCUMENTS`, current authority/crosswalk identifiers, exact subject Git blobs, route coverage, source/derived lineage proof, writer/dependency/failure/idempotency tests, acceptance command and `PASS|FAIL`.
 
 ## 8. Acceptance target

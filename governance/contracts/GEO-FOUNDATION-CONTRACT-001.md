@@ -38,7 +38,7 @@ Fail closed on unresolved/ambiguous place identity when precision is required, s
 
 ## 7. Evidence target
 
-`qualification/foundation/geo-foundation-001.json`.
+Future evidence target (currently absent until implementation qualification): `qualification/foundation/geo-foundation-001.json`.
 Required contents: `C14`, `GEO`, owner `SYSTEM_MASTER/RESEARCH_KNOWLEDGE`, current authority/crosswalk identifiers, exact subject Git blobs, geocode/reverse/place/spatial route coverage, provenance/writer/failure/idempotency tests, acceptance command and `PASS|FAIL`.
 
 ## 8. Acceptance target
