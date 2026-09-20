@@ -10,6 +10,15 @@ on:
       - '.github/workflows/a01-engineering-candidate-ingress.yml'
       - 'governance/control-gateway/A01-ENGINEERING-CANDIDATE-INGRESS-001.json'
       - 'qualification/a01/engineering/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'control-gateway/python/a01_candidate_ingress.py'
+      - 'tests/test_a01_candidate_ingress.py'
+      - '.github/workflows/a01-engineering-candidate-ingress.yml'
+      - 'governance/control-gateway/A01-ENGINEERING-CANDIDATE-INGRESS-001.json'
+      - 'qualification/a01/engineering/**'
   workflow_dispatch:
 
 permissions:
