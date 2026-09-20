@@ -40,7 +40,7 @@ Fail closed on missing asset identity, invalid timeline/composition, authority f
 
 ## 7. Evidence target
 
-`qualification/foundation/media-foundation-001.json`.
+Future evidence target (currently absent until implementation qualification): `qualification/foundation/media-foundation-001.json`.
 Required contents: `C23`, `MEDIA`, owner `SYSTEM_MASTER/MEDIA`, current authority/crosswalk identifiers, exact subject Git blobs, composition/render/export route coverage, writer/dependency/failure/idempotency tests, acceptance command and `PASS|FAIL`.
 
 ## 8. Acceptance target

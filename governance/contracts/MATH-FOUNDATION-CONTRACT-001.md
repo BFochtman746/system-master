@@ -37,7 +37,7 @@ Fail closed on invalid units/types, undefined/non-convergent operation, precisio
 
 ## 7. Evidence target
 
-`qualification/foundation/math-foundation-001.json`.
+Future evidence target (currently absent until implementation qualification): `qualification/foundation/math-foundation-001.json`.
 Required contents: `C22`, `MATH`, owner `SYSTEM_MASTER/SPREADSHEET_DATA`, current authority/crosswalk identifiers, exact subject Git blobs, operation/precision/unit coverage, writer/dependency/failure/idempotency tests, acceptance command and `PASS|FAIL`.
 
 ## 8. Acceptance target

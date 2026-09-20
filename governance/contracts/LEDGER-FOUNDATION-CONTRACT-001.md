@@ -37,7 +37,7 @@ Fail closed on duplicate event identity with divergent payload, schema mismatch,
 
 ## 7. Evidence target
 
-`qualification/foundation/ledger-foundation-001.json`.
+Future evidence target (currently absent until implementation qualification): `qualification/foundation/ledger-foundation-001.json`.
 Required contents: `C19`, `LEDGER`, owner `SYSTEM_MASTER/SPREADSHEET_DATA`, current authority/crosswalk identifiers, exact subject Git blobs, append/query/reconcile route coverage, writer/CAS/idempotency/failure tests, acceptance command and `PASS|FAIL`.
 
 ## 8. Acceptance target

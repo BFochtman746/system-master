@@ -42,7 +42,7 @@ Fail closed on authority mismatch, invalid input/schema, unavailable required de
 
 ## 7. Evidence target
 
-`qualification/foundation/learning-foundation-001.json`.
+Future evidence target (currently absent until implementation qualification): `qualification/foundation/learning-foundation-001.json`.
 Required contents: `C18`, `LEARNING`, owner `SYSTEM_MASTER/LEARNING`, current authority/crosswalk identifiers, exact subject Git blobs, route coverage, canonical-writer assertion, dependency/failure/idempotency test results, acceptance command, result `PASS|FAIL`, and immutable evidence/artifact references.
 
 ## 8. Acceptance target

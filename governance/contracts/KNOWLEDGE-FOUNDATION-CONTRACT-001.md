@@ -39,7 +39,7 @@ Fail closed on missing source identity for claims requiring provenance, conflict
 
 ## 7. Evidence target
 
-`qualification/foundation/knowledge-foundation-001.json`.
+Future evidence target (currently absent until implementation qualification): `qualification/foundation/knowledge-foundation-001.json`.
 Required contents: `C17`, `KNOWLEDGE`, owner `SYSTEM_MASTER/RESEARCH_KNOWLEDGE`, current authority/crosswalk identifiers, exact subject Git blobs, ingest/retrieve/entity/provenance coverage, writer/conflict/failure/idempotency tests, acceptance command and `PASS|FAIL`.
 
 ## 8. Acceptance target

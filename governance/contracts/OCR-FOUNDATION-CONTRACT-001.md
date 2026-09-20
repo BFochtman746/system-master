@@ -39,7 +39,7 @@ Fail closed on missing/mismatched source identity, unsupported content, authorit
 
 ## 7. Evidence target
 
-`qualification/foundation/ocr-foundation-001.json`.
+Future evidence target (currently absent until implementation qualification): `qualification/foundation/ocr-foundation-001.json`.
 Required contents: `C24`, `OCR`, owner `SYSTEM_MASTER/DOCUMENTS`, current authority/crosswalk identifiers, exact subject Git blobs, route/source-binding coverage, canonical-writer, confidence/failure/idempotency tests, acceptance command and `PASS|FAIL`.
 
 ## 8. Acceptance target
