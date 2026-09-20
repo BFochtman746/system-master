@@ -15,7 +15,7 @@ test('registry binds local inference baseline to the exact subject wrapper', () 
   const entry = registry.qualifications[id];
   assert.ok(registry.registry_version >= 32);
   assert.ok(entry);
-  assert.equal(entry.workstream_id, 'SYSTEM-MASTER-OWNER-LANE-EXECUTION-LEASE-ADOPTION-001');
+  assert.equal(entry.workstream_id, 'SYSTEM-MASTER');
   assert.equal(entry.gate_class, 'focused');
   assert.equal(entry.source, 'subject');
   assert.equal(entry.executable, 'node');

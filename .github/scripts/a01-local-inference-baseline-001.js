@@ -6,7 +6,7 @@ const os = require('os');
 const crypto = require('crypto');
 
 const QUALIFICATION = 'A01-LOCAL-INFERENCE-BASELINE-001';
-const WORKSTREAM = 'SYSTEM-MASTER-OWNER-LANE-EXECUTION-LEASE-ADOPTION-001';
+const WORKSTREAM = 'SYSTEM-MASTER';
 const MODEL = 'gpt-oss-20b-NPU';
 const PROMPT = 'Reply with exactly: A01_LOCAL_LLM_OK';
 const HOST = 'http://127.0.0.1:13305';
