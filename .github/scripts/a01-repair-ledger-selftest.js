@@ -9,19 +9,28 @@ const root = path.resolve(__dirname, '..', '..');
 const inboxRel = 'governance/repair/BOOK-REPAIR-INBOX.json';
 const inboxAbs = path.join(root, inboxRel);
 const originalInbox = fs.readFileSync(inboxAbs, 'utf8');
+const coreInboxRel = 'governance/repair/CORE-REPAIR-INBOX.json';
+const coreInboxAbs = path.join(root, coreInboxRel);
+const originalCoreInbox = fs.readFileSync(coreInboxAbs, 'utf8');
 const txId = 'A01-REPAIR-synthetic-ledger-selftest-A1';
+const infraTxId = 'A01-REPAIR-synthetic-ledger-infra-selftest-A1';
 const eventDir = path.join(root, 'governance/repair/events', txId);
+const infraEventDir = path.join(root, 'governance/repair/events', infraTxId);
 const dispatchPath = path.join(root, 'governance/repair/agent-dispatch', `${txId}.json`);
 const ticketPath = path.join(root, 'qualification/a01/repair-requests', `${txId}.json`);
+const infraTicketPath = path.join(root, 'qualification/a01/repair-requests', `${infraTxId}-A1-infra-R0.json`);
 const A = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
 const B = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb';
 
 function assert(condition, message) { if (!condition) throw new Error(message); }
 function cleanup() {
   fs.writeFileSync(inboxAbs, originalInbox);
+  fs.writeFileSync(coreInboxAbs, originalCoreInbox);
   fs.rmSync(eventDir, { recursive: true, force: true });
+  fs.rmSync(infraEventDir, { recursive: true, force: true });
   fs.rmSync(dispatchPath, { force: true });
   fs.rmSync(ticketPath, { force: true });
+  fs.rmSync(infraTicketPath, { force: true });
 }
 
 try {
@@ -79,10 +88,49 @@ try {
   assert(tx.failed_subject_sha === A && tx.replacement_subject_sha === B, 'inbox must preserve failed and replacement SHA lineage');
   assert(tx.authoritative_pass === false, 'repair projection cannot create A-01 PASS');
 
+  const infraOpened = openTransaction({
+    transaction_id: infraTxId,
+    receipt_id: 'synthetic-ledger-infra-selftest',
+    qualification_id: 'A01-LOCAL-INFERENCE-BASELINE-001',
+    workstream_id: 'SYSTEM-MASTER',
+    failed_subject_sha: A,
+    receipt: { result_class: 'INFRA_FAILURE' },
+    repair_attempt: 0,
+    max_repair_attempts: 1,
+    evidence_pointer: 'synthetic:infra-selftest',
+    created_at: '2026-09-20T05:55:00Z'
+  });
+  assert(infraOpened.transaction.state === 'RETRY_REQUEST_READY', 'infra failure must open same-SHA retry transaction');
+
+  const infraIngested = ledger.ingest(infraOpened);
+  assert(infraIngested.action === 'INGESTED', 'infra retry transaction must be durably ingested');
+  assert(fs.existsSync(infraTicketPath), 'initial infra ingest must emit durable same-SHA retry ticket');
+  assert(fs.existsSync(path.join(infraEventDir, '0001-transaction_opened.json')), 'infra open event must be append-only event 0001');
+  assert(fs.existsSync(path.join(infraEventDir, '0002-a01_retry_ticket_emitted.json')), 'initial retry-ticket event must be append-only event 0002');
+
+  const coreInbox = JSON.parse(fs.readFileSync(coreInboxAbs, 'utf8'));
+  const infraTx = coreInbox.active_transactions.find((x) => x.transaction_id === infraTxId);
+  const expectedInfraTicketRel = `qualification/a01/repair-requests/${infraTxId}-A1-infra-R0.json`;
+  assert(infraTx && infraTx.state === 'RETRY_REQUEST_READY', 'CORE inbox must project RETRY_REQUEST_READY');
+  assert(infraTx.failed_subject_sha === A, 'infra retry must preserve exact failed SHA');
+  assert(infraTx.retry_ticket_pointer === expectedInfraTicketRel, 'CORE inbox must point at initial retry ticket');
+  assert(infraTx.same_sha_infra_retry_count === 0, 'initial infra retry ingest must not consume retry budget');
+
+  const infraTicket = JSON.parse(fs.readFileSync(infraTicketPath, 'utf8'));
+  assert(infraTicket.subject_sha === A, 'initial retry ticket must bind unchanged failed SHA');
+  assert(infraTicket.workstream_id === 'SYSTEM-MASTER', 'initial retry ticket must preserve workstream');
+  assert(infraTicket.qualification_id === 'A01-LOCAL-INFERENCE-BASELINE-001', 'initial retry ticket must preserve qualification');
+
+  const rerun = ledger.prepareRerun({ transaction_id: infraTxId });
+  assert(rerun.standing === 'A01_RERUN_ADMISSION_READY', 'ingested infra retry must be immediately rerun-admission ready');
+  assert(rerun.subject_sha === A, 'prepared infra rerun must preserve exact failed SHA');
+  assert(rerun.ticket_pointer === expectedInfraTicketRel, 'prepared infra rerun must use initial retry ticket');
+
   console.log('A01_REPAIR_LEDGER_SELFTEST_PASS');
   console.log('durable_inbox_ingest=PASS');
   console.log('agent_dispatch_packet=PASS');
   console.log('replacement_ticket_emission=PASS');
+  console.log('retry_ticket_ingest=PASS');
   console.log('repair_authority=ZERO');
 } finally {
   cleanup();

@@ -181,6 +181,22 @@ function ingest(envelope) {
     appendEvent('AGENT_DISPATCH_READY', normalized, { dispatch_packet_pointer: dispatchPointer, repair_subject_sha: packet.repair_subject_sha });
   }
 
+  if (tx.state === 'RETRY_REQUEST_READY') {
+    const retryCount = Number(normalized.same_sha_infra_retry_count || 0);
+    const ticket = retryTicket(normalized);
+    const ticketPointer = path.posix.join(
+      registry.replacement_ticket_root,
+      `${sanitize(normalized.transaction_id)}-A${Number(normalized.candidate_repair_attempt || nextCandidateAttempt(normalized))}-infra-R${retryCount}.json`
+    );
+    writeJson(ticketPointer, ticket);
+    normalized.retry_ticket_pointer = ticketPointer;
+    normalized.same_sha_infra_retry_count = retryCount;
+    normalized.last_event_pointer = appendEvent('A01_RETRY_TICKET_EMITTED', normalized, {
+      retry_ticket: ticket,
+      same_sha_infra_retry_count: retryCount
+    }, { replacement_ticket_pointer: ticketPointer });
+  }
+
   if (activeStates.has(tx.state)) {
     inbox.active_transactions = [...(inbox.active_transactions || []), normalized];
   } else {
