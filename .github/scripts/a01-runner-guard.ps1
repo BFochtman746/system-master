@@ -126,8 +126,11 @@ if ($memoryProfileMode -eq 'UNIFIED_VGM_SPLIT') {
           if ($allowUnload) {
             $lemonadeCleanup.attempted = $true
             $baseUrl = [string]$memoryProfile.lemonade_base_url
-            if (-not $baseUrl) { $baseUrl = 'http://127.0.0.1:13305' }
-            $paths = @('/v1/unload', '/api/v1/unload')
+            if (-not $baseUrl) { $baseUrl = 'http://127.0.0.1:13305/api/v1' }
+            # One path, not a guess between two. lemonade_base_url carries the /api/v1
+            # prefix, so the route below is appended to it verbatim. Trying several paths
+            # until one answers hid the fact that the configured base was wrong.
+            $paths = @('/unload')
             foreach ($path in $paths) {
               try {
                 $uri = $baseUrl.TrimEnd('/') + $path
