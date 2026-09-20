@@ -69,7 +69,7 @@ async function main() {
 
   const writerTransport = new GitHubReadConsistentReceiptCasRestTransport({ owner, repo, tokenProvider });
   const writer = new GitHubReceiptConsumingCasWriter({ transport: writerTransport });
-  const executionReceipt = await writer.execute({ grant: productionGrant, plan });
+  const executionReceipt = await writer.execute({ grant: productionGrant, plan, leaseReceipt });
   const leaseReleaseReceipt = await leaseCoordinator.release(leaseReceipt, {
     resultCommitSha: executionReceipt.result_commit_sha
   });
