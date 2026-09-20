@@ -1,0 +1,67 @@
+name: A-01 Agent Registered Task Production Binding
+
+on:
+  push:
+    branches:
+      - system-master/owner-lane-execution-lease-adoption-001
+    paths:
+      - qualification/a01/registry.json
+      - .github/scripts/a01-agent-registered-task-production-binding-001.js
+      - control-gateway/python/a01_execution_worker.py
+      - control-gateway/python/a01_github_ingress.py
+      - .github/workflows/a01-agent-registered-task-production-binding-001.yml
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  preflight:
+    name: Validate registered task production binding
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Validate qualification contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check .github/scripts/a01-agent-registered-task-production-binding-001.js
+          python -m py_compile control-gateway/python/a01_execution_worker.py control-gateway/python/a01_github_ingress.py
+          node - <<'NODE'
+          const fs = require('fs');
+          const registry = JSON.parse(fs.readFileSync('qualification/a01/registry.json', 'utf8'));
+          const id = 'A01-AGENT-REGISTERED-TASK-PRODUCTION-BINDING-001';
+          const entry = registry.qualifications?.[id];
+          if (!entry) throw new Error('qualification entry missing');
+          if (entry.workstream_id !== 'SYSTEM-MASTER') throw new Error('workstream mismatch');
+          if (entry.gate_class !== 'focused') throw new Error('gate_class mismatch');
+          if (entry.source !== 'subject') throw new Error('source mismatch');
+          if (entry.executable !== 'node') throw new Error('executable mismatch');
+          if (JSON.stringify(entry.args) !== JSON.stringify(['.github/scripts/a01-agent-registered-task-production-binding-001.js'])) throw new Error('args mismatch');
+          if (entry.overnight_eligible !== true) throw new Error('overnight eligibility mismatch');
+          console.log('A01_REGISTERED_TASK_PRODUCTION_BINDING_PREFLIGHT=PASS');
+          NODE
+
+  qualify:
+    name: Route exact registered task through canonical A-01 control plane
+    needs: preflight
+    uses: BFochtman746/system-master/.github/workflows/a01-control-plane-gateway.yml@ff9c4a0817f993fac1e4c3005a64b49abe00675b
+    with:
+      qualification_id: A01-AGENT-REGISTERED-TASK-PRODUCTION-BINDING-001
+      workstream_id: SYSTEM-MASTER
+      subject_sha: ${{ github.sha }}
+      origin_ref: ${{ github.ref_name }}
+      resume_on_pass: Terminalize the proven production binding and activate only the bounded READY queue for unattended Second Shift execution.
+      resume_on_failure: Preserve exact A-01 evidence and repair only the first failing registered-task production boundary.
+      notification_target: originating-workstream
+      execution_context: normal
+      qualifier_timeout_minutes: 25
+      job_timeout_minutes: 30
+      repair_attempt: 0
+      max_repair_attempts: 1
+    secrets: inherit
