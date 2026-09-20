@@ -232,6 +232,19 @@ async function executeTask() {
   const statsBefore = await requestJson(HOST + prefix + '/stats', { timeoutMs: 30000 });
   writeJson(path.join(evidenceDir, 'registered-task-stats-before.json'), statsBefore);
 
+  let unloadResponse;
+  try {
+    unloadResponse = await requestJson(HOST + prefix + '/unload', {
+      method: 'POST',
+      body: { model_name: MODEL },
+      timeoutMs: 60000
+    });
+  } catch (error) {
+    if (error?.status !== 404) throw error;
+    unloadResponse = { status: 'not_loaded', http_status: 404, model_name: MODEL };
+  }
+  writeJson(path.join(evidenceDir, 'registered-task-unload-response.json'), unloadResponse);
+
   const loadRequest = { model_name: MODEL, ctx_size: 4096 };
   writeJson(path.join(evidenceDir, 'registered-task-load-request.json'), loadRequest);
   const loadResponse = await requestJson(HOST + prefix + '/load', { method: 'POST', body: loadRequest, timeoutMs: 180000 });
