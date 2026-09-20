@@ -13,6 +13,7 @@ async function main() {
     GitHubReceiptConsumingCasWriter
   } = await import('../../control-gateway/src/github-production-mutation.js');
   const { GitHubReadConsistentReceiptCasRestTransport } = await import('../../control-gateway/src/github-production-read-consistency.js');
+  const { GitHubSystemFileLeaseCoordinator } = await import('../../control-gateway/src/github-system-file-lease.js');
   const fs = await import('node:fs');
   const path = await import('node:path');
 
@@ -41,21 +42,37 @@ async function main() {
   const chatAdapter = new GitHubChatReconstructionAdapter({ publisher });
   const authorityAdapter = new GitHubMutationAuthorityAdapter({ chatReconstructionAdapter: chatAdapter });
   const governedAdmissionGate = new GovernedGitHubMutationAdmissionGate({
-  reconstructionAdapter: authorityAdapter,
-  mutationTransport: authorityTransport
-});
-const governedAdmission = await governedAdmissionGate.admit(request, { responseText, responseReceipt });
-const admissionReceipt = governedAdmission.admission_receipt;
-const governedFreshnessGate = {
-  verifyGrantFresh: async (_receipt, freshRequest) =>
-    governedAdmissionGate.verifyGrantFresh(governedAdmission, freshRequest, responseText)
-};
+    reconstructionAdapter: authorityAdapter,
+    mutationTransport: authorityTransport
+  });
+  const governedAdmission = await governedAdmissionGate.admit(request, { responseText, responseReceipt });
+  const admissionReceipt = governedAdmission.admission_receipt;
+  const governedFreshnessGate = {
+    verifyGrantFresh: async (_receipt, freshRequest) =>
+      governedAdmissionGate.verifyGrantFresh(governedAdmission, freshRequest, responseText)
+  };
   const productionGate = new GitHubProductionMutationGate({ admissionGate: governedFreshnessGate });
   const productionGrant = await productionGate.authorize({ receipt: admissionReceipt, request, plan });
-  
+
+  const leaseCoordinator = new GitHubSystemFileLeaseCoordinator({ transport: authorityTransport });
+  const leaseReceipt = await leaseCoordinator.acquire({
+    paths: productionGrant.paths,
+    holder: {
+      workstream_id: request.workstream_id,
+      operation_id: productionGrant.operation_id,
+      mutation_id: productionGrant.mutation_id
+    },
+    targetRef: productionGrant.target_ref,
+    expectedPredecessorSha: productionGrant.observed_predecessor_sha
+  });
+  await leaseCoordinator.requireAuthority(leaseReceipt);
+
   const writerTransport = new GitHubReadConsistentReceiptCasRestTransport({ owner, repo, tokenProvider });
   const writer = new GitHubReceiptConsumingCasWriter({ transport: writerTransport });
   const executionReceipt = await writer.execute({ grant: productionGrant, plan });
+  const leaseReleaseReceipt = await leaseCoordinator.release(leaseReceipt, {
+    resultCommitSha: executionReceipt.result_commit_sha
+  });
 
   if (evidenceDir) {
     fs.mkdirSync(evidenceDir, { recursive: true });
@@ -65,11 +82,13 @@ const governedFreshnessGate = {
     fs.writeFileSync(path.join(evidenceDir, 'development-response.txt'), responseText, 'utf8');
     write('admission-receipt.json', admissionReceipt);
     write('production-grant.json', productionGrant);
+    write('system-file-lease-acquisition.json', leaseReceipt);
     write('execution-receipt.json', executionReceipt);
+    write('system-file-lease-release.json', leaseReleaseReceipt);
     write('request.json', request);
     write('plan.json', plan);
   }
-  console.log(`CONTROL_GATEWAY_PRODUCTION_MUTATION=PASS mutation_id=${executionReceipt.mutation_id} result_commit=${executionReceipt.result_commit_sha} replay=${executionReceipt.idempotent_replay}`);
+  console.log(`CONTROL_GATEWAY_PRODUCTION_MUTATION=PASS mutation_id=${executionReceipt.mutation_id} result_commit=${executionReceipt.result_commit_sha} replay=${executionReceipt.idempotent_replay} lease_state_commit=${leaseReleaseReceipt.state_commit_sha}`);
 }
 
 main().catch((error) => {
