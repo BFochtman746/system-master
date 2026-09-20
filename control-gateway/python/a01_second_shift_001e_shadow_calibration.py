@@ -12,6 +12,8 @@ from typing import Any
 
 QUALIFICATION_ID = "SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION-001E-SHADOW-CALIBRATION"
 WORKSTREAM_ID = "SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION"
+REGISTERED_TASK_QUALIFICATION_ID = "A01-AGENT-REGISTERED-TASK-PRODUCTION-BINDING-001"
+REGISTERED_TASK_WORKSTREAM_ID = "SYSTEM-MASTER"
 MODEL = "gpt-oss-20b-NPU"
 TASK_TYPE = "TEXT_RESPONSE_V1"
 EXPECTED_RESPONSE = "A01_REGISTERED_TASK_OK"
@@ -20,8 +22,8 @@ CYCLE_COUNT = 3
 
 def build_registered_task_payload(subject: str, cycle: int) -> dict[str, Any]:
     return {
-        "qualification_id": QUALIFICATION_ID,
-        "workstream_id": WORKSTREAM_ID,
+        "qualification_id": REGISTERED_TASK_QUALIFICATION_ID,
+        "workstream_id": REGISTERED_TASK_WORKSTREAM_ID,
         "subject_sha": subject,
         "control_plane_sha": subject,
         "task_id": f"SECOND-SHIFT-001E-SHADOW-TASK-{cycle:03d}",
@@ -87,7 +89,7 @@ def run_cycle(root: Path, evidence_root: Path, subject: str, cycle: int, now: dt
         "repository": "BFochtman746/system-master",
         "authority_ref": control_ref,
         "authority_ref_head_sha": subject,
-        "operation_id": QUALIFICATION_ID,
+        "operation_id": REGISTERED_TASK_QUALIFICATION_ID,
         "predecessor_receipt_id": "SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION-001D-RECEIPT",
         "command_id": "CMD-" + task_id,
         "task_id": task_id,
@@ -166,7 +168,7 @@ def run_cycle(root: Path, evidence_root: Path, subject: str, cycle: int, now: dt
         "valid_for_control_head": subject,
         "a01_execution": {
             "protocol_version": "control-gateway.a01-github-ingress-execution.v1",
-            "qualification_id": QUALIFICATION_ID,
+            "qualification_id": REGISTERED_TASK_QUALIFICATION_ID,
             "subject_sha": subject,
             "handoff": handoff,
             "coordination_contract": contract,
@@ -195,8 +197,8 @@ def run_cycle(root: Path, evidence_root: Path, subject: str, cycle: int, now: dt
     }
     qualification_registry = {
         "qualifications": {
-            QUALIFICATION_ID: {
-                "workstream_id": WORKSTREAM_ID,
+            REGISTERED_TASK_QUALIFICATION_ID: {
+                "workstream_id": REGISTERED_TASK_WORKSTREAM_ID,
                 "source": "subject",
                 "overnight_eligible": True,
             }
