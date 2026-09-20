@@ -46,11 +46,67 @@ $workspaceDrive = Get-DriveSnapshot $env:GITHUB_WORKSPACE
 $tempDrive = Get-DriveSnapshot $env:RUNNER_TEMP
 $availableMemoryGb = [math]::Round(($os.FreePhysicalMemory * 1KB) / 1GB, 2)
 $totalMemoryGb = [math]::Round($computer.TotalPhysicalMemory / 1GB, 2)
+$memoryPerf = $null
+try { $memoryPerf = Get-CimInstance Win32_PerfFormattedData_PerfOS_Memory -ErrorAction Stop } catch {}
+$committedMemoryGb = if ($memoryPerf -and $null -ne $memoryPerf.CommittedBytes) { [math]::Round(([double]$memoryPerf.CommittedBytes) / 1GB, 2) } else { $null }
+$commitLimitGb = if ($memoryPerf -and $null -ne $memoryPerf.CommitLimit) { [math]::Round(([double]$memoryPerf.CommitLimit) / 1GB, 2) } else { $null }
+$commitHeadroomGb = if ($null -ne $committedMemoryGb -and $null -ne $commitLimitGb) { [math]::Round([math]::Max(0, $commitLimitGb - $committedMemoryGb), 2) } else { $null }
 $node = Get-Command node -ErrorAction SilentlyContinue
 $git = Get-Command git -ErrorAction SilentlyContinue
 
 $warnings = New-Object System.Collections.Generic.List[string]
 $failures = New-Object System.Collections.Generic.List[string]
+
+$topMemoryProcesses = @()
+try {
+  $topMemoryProcesses = @(Get-Process -ErrorAction SilentlyContinue |
+    Sort-Object WorkingSet64 -Descending |
+    Select-Object -First 10 |
+    ForEach-Object {
+      [ordered]@{
+        name = $_.ProcessName
+        id = $_.Id
+        working_set_gb = [math]::Round($_.WorkingSet64 / 1GB, 2)
+        private_memory_gb = [math]::Round($_.PrivateMemorySize64 / 1GB, 2)
+      }
+    })
+} catch {
+  $warnings.Add("TOP_MEMORY_PROCESS_SNAPSHOT_UNAVAILABLE:$($_.Exception.Message)")
+}
+
+$memoryProfile = $health.memory_profile
+$memoryProfileMode = if ($memoryProfile -and $memoryProfile.mode) { [string]$memoryProfile.mode } else { 'GENERIC' }
+$memoryProfileMatch = $false
+$declaredUnifiedTotalGb = $null
+$configuredVgmGb = $null
+$unifiedTotalToleranceGb = $null
+$estimatedUnifiedTotalGb = $null
+$minCommitHeadroomGb = $null
+
+if ($memoryProfileMode -eq 'UNIFIED_VGM_SPLIT') {
+  $declaredUnifiedTotalGb = [double]$memoryProfile.unified_total_gb
+  $configuredVgmGb = [double]$memoryProfile.configured_vgm_gb
+  $unifiedTotalToleranceGb = [double]$memoryProfile.unified_total_tolerance_gb
+  $minCommitHeadroomGb = [double]$memoryProfile.min_commit_headroom_gb
+
+  if ($declaredUnifiedTotalGb -le 0 -or $configuredVgmGb -lt 0 -or $unifiedTotalToleranceGb -lt 0 -or $minCommitHeadroomGb -le 0) {
+    $failures.Add('MEMORY_PROFILE_POLICY_INVALID')
+  } else {
+    $estimatedUnifiedTotalGb = [math]::Round($totalMemoryGb + $configuredVgmGb, 2)
+    if ([math]::Abs($estimatedUnifiedTotalGb - $declaredUnifiedTotalGb) -gt $unifiedTotalToleranceGb) {
+      $failures.Add("MEMORY_PROFILE_MISMATCH estimated_unified_gb=$estimatedUnifiedTotalGb expected_unified_gb=$declaredUnifiedTotalGb tolerance_gb=$unifiedTotalToleranceGb windows_visible_gb=$totalMemoryGb configured_vgm_gb=$configuredVgmGb")
+    } else {
+      $memoryProfileMatch = $true
+      if ($null -eq $commitHeadroomGb) {
+        $failures.Add('COMMIT_HEADROOM_UNAVAILABLE')
+      } elseif ($commitHeadroomGb -lt $minCommitHeadroomGb) {
+        $failures.Add("LOW_COMMIT_HEADROOM headroom_gb=$commitHeadroomGb required_gb=$minCommitHeadroomGb")
+      }
+    }
+  }
+} elseif ($memoryProfileMode -ne 'GENERIC') {
+  $failures.Add("MEMORY_PROFILE_UNSUPPORTED mode=$memoryProfileMode")
+}
 
 if ($env:RUNNER_NAME -ne $policy.runner.name) { $failures.Add("RUNNER_NAME expected=$($policy.runner.name) actual=$($env:RUNNER_NAME)") }
 if ($env:RUNNER_OS -ne 'Windows') { $failures.Add("RUNNER_OS expected=Windows actual=$($env:RUNNER_OS)") }
@@ -65,7 +121,13 @@ foreach ($drive in $diskSnapshots) {
   }
 }
 if ($availableMemoryGb -lt [double]$health.min_available_memory_gb) {
-  $failures.Add("LOW_MEMORY available_gb=$availableMemoryGb required_gb=$($health.min_available_memory_gb)")
+  if ($memoryProfileMode -eq 'UNIFIED_VGM_SPLIT' -and $memoryProfileMatch) {
+    if ($null -ne $commitHeadroomGb -and $commitHeadroomGb -ge $minCommitHeadroomGb) {
+      $warnings.Add("LOW_CPU_PHYSICAL_MEMORY available_gb=$availableMemoryGb generic_required_gb=$($health.min_available_memory_gb) commit_headroom_gb=$commitHeadroomGb")
+    }
+  } else {
+    $failures.Add("LOW_MEMORY available_gb=$availableMemoryGb required_gb=$($health.min_available_memory_gb)")
+  }
 }
 
 $sleepGuardCapable = $false
@@ -127,7 +189,7 @@ if ($health.cleanup_stale_a01_temp_after_hours -and $env:RUNNER_TEMP) {
 }
 
 $snapshot = [ordered]@{
-  guard_version = 3
+  guard_version = 4
   mode = $Mode
   captured_at = (Get-Date).ToUniversalTime().ToString('o')
   runner = [ordered]@{
@@ -143,6 +205,19 @@ $snapshot = [ordered]@{
   resources = [ordered]@{
     total_memory_gb = $totalMemoryGb
     available_memory_gb = $availableMemoryGb
+    committed_memory_gb = $committedMemoryGb
+    commit_limit_gb = $commitLimitGb
+    commit_headroom_gb = $commitHeadroomGb
+    memory_profile = [ordered]@{
+      mode = $memoryProfileMode
+      declared_unified_total_gb = $declaredUnifiedTotalGb
+      configured_vgm_gb = $configuredVgmGb
+      unified_total_tolerance_gb = $unifiedTotalToleranceGb
+      estimated_unified_total_gb = $estimatedUnifiedTotalGb
+      profile_match = $memoryProfileMatch
+      min_commit_headroom_gb = $minCommitHeadroomGb
+    }
+    top_memory_processes = @($topMemoryProcesses)
     drives = @($diskSnapshots)
   }
   network = [ordered]@{ github_https_443 = $networkOk }
@@ -167,5 +242,5 @@ if ($snapshot.standing -eq 'FAIL' -and $Mode -eq 'preflight') {
   exit 2
 }
 
-Write-Host "A01_RUNNER_GUARD=$($snapshot.standing) mode=$Mode memory_gb=$availableMemoryGb"
+Write-Host "A01_RUNNER_GUARD=$($snapshot.standing) mode=$Mode memory_gb=$availableMemoryGb commit_headroom_gb=$commitHeadroomGb profile=$memoryProfileMode profile_match=$memoryProfileMatch"
 exit 0

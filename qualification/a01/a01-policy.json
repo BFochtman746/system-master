@@ -1,5 +1,5 @@
 {
-  "policy_version": 8,
+  "policy_version": 9,
   "control_plane_id": "A01-CONTROL-PLANE-001",
   "canonical_ref": "main",
   "runner": {
@@ -21,7 +21,15 @@
       "record_preflight_postflight": true,
       "cleanup_stale_a01_temp_after_hours": 24,
       "cleanup_is_best_effort": true,
-      "fail_closed_on_identity_or_resource_guard": true
+      "fail_closed_on_identity_or_resource_guard": true,
+      "memory_profile": {
+        "mode": "UNIFIED_VGM_SPLIT",
+        "unified_total_gb": 128,
+        "configured_vgm_gb": 96,
+        "unified_total_tolerance_gb": 2,
+        "min_commit_headroom_gb": 8,
+        "low_physical_memory_behavior": "WARN_WHEN_PROFILE_MATCHES_AND_COMMIT_HEADROOM_IS_SAFE"
+      }
     }
   },
   "admission": {
