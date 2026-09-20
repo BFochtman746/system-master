@@ -42,6 +42,8 @@ RESUMABLE_RESULT_STATES = {"RUNNING", "RESULT_READY"}
 RETRY_SAFE = "RETRY_SAFE"
 RECONCILIATION_REQUIRED = "RECONCILIATION_REQUIRED"
 RETRY_POLICIES = {RETRY_SAFE, RECONCILIATION_REQUIRED}
+REGISTERED_TASK_EXECUTOR = "A01_REGISTERED_TASK"
+REGISTERED_TASK_PROTOCOL = "control-gateway.a01-registered-task-result.v1"
 
 
 class ExecutionWorkerError(RuntimeError):
@@ -135,11 +137,13 @@ class A01ExecutionWorker:
         self.worker_id = worker_id or f"worker-{os.getpid()}-{uuid.uuid4().hex}"
         self.executors: dict[str, Executor] = {
             "A01_CONTROL_PLANE_QUALIFICATION": self._execute_a01_qualification,
+            REGISTERED_TASK_EXECUTOR: self._execute_registered_task,
         }
         if executors:
             self.executors.update(executors)
         self.executor_retry_safety: dict[str, str] = {
             "A01_CONTROL_PLANE_QUALIFICATION": RETRY_SAFE,
+            REGISTERED_TASK_EXECUTOR: RETRY_SAFE,
         }
         if executor_retry_safety:
             self.executor_retry_safety.update(executor_retry_safety)
@@ -1007,6 +1011,66 @@ class A01ExecutionWorker:
             except ProcessLookupError:
                 pass
             proc.wait(timeout=5)
+
+    def _execute_registered_task(self, payload: dict[str, Any], context: ExecutionContext) -> dict[str, Any]:
+        if not isinstance(payload, dict):
+            raise WorkExecutionFailed("registered task payload must be an object")
+        expected = {"qualification_id", "workstream_id", "subject_sha", "control_plane_sha", "task_id", "task_type", "instruction", "model", "max_output_tokens", "temperature"}
+        if set(payload) != expected:
+            raise WorkExecutionFailed("registered task payload fields differ from frozen contract")
+        subject_sha = self._require_string(payload, "subject_sha")
+        control_plane_sha = self._require_string(payload, "control_plane_sha")
+        task_id = self._require_string(payload, "task_id")
+        if self._require_string(payload, "task_type") != "TEXT_RESPONSE_V1":
+            raise WorkExecutionFailed("registered task_type is not TEXT_RESPONSE_V1")
+        if self._require_string(payload, "model") != "gpt-oss-20b-NPU":
+            raise WorkExecutionFailed("registered task model differs from frozen local model")
+        if len(self._require_string(payload, "instruction")) > 12000:
+            raise WorkExecutionFailed("registered task instruction exceeds 12000 characters")
+        if type(payload.get("max_output_tokens")) is not int or not 1 <= payload["max_output_tokens"] <= 1024:
+            raise WorkExecutionFailed("registered task max_output_tokens must be integer 1..1024")
+        if payload.get("temperature") != 0:
+            raise WorkExecutionFailed("registered task temperature must be exactly 0")
+        checkout = self._git_head()
+        if subject_sha.lower() != checkout.lower() or control_plane_sha.lower() != checkout.lower():
+            raise WorkExecutionFailed("registered task is not bound to exact local checkout")
+        row = self.store.conn.execute("SELECT handoff_json FROM night_scheduler_queue WHERE delegation_id=?", (context.delegation_id,)).fetchone()
+        if row is None:
+            raise WorkExecutionFailed("registered task dispatch is missing its scheduler handoff")
+        handoff = json.loads(row["handoff_json"])
+        receipt = handoff.get("admission_receipt")
+        if handoff.get("executor_kind") != REGISTERED_TASK_EXECUTOR or not isinstance(receipt, dict) or receipt.get("task_id") != task_id:
+            raise WorkExecutionFailed("registered task identity differs from admitted handoff")
+        evidence_dir = context.evidence_dir
+        evidence_dir.mkdir(parents=True, exist_ok=False)
+        input_path = evidence_dir / "registered-task-input.json"
+        result_path = evidence_dir / "registered-task-result.json"
+        input_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        script = self.root / ".github" / "scripts" / "a01-agent-registered-task-production-binding-001.js"
+        if not script.is_file():
+            raise WorkExecutionFailed("registered task executor wrapper is missing")
+        env = os.environ.copy()
+        env.update({"A01_REGISTERED_TASK_INPUT": str(input_path), "A01_REGISTERED_TASK_RESULT": str(result_path), "A01_REGISTERED_TASK_EVIDENCE_DIR": str(evidence_dir), "A01_REGISTERED_TASK_IDEMPOTENCY_KEY": context.idempotency_key, "A01_REGISTERED_TASK_ATTEMPT_ID": context.attempt_id, "A01_REGISTERED_TASK_EXECUTION_GENERATION": str(context.execution_generation), "A01_SUBJECT_ROOT": str(self.root), "A01_SUBJECT_SHA": subject_sha})
+        proc = self._spawn_managed_process(["node", str(script), "--execute-task"], cwd=self.root, env=env)
+        stdout = ""
+        stderr = ""
+        try:
+            while True:
+                try:
+                    stdout, stderr = proc.communicate(timeout=self.renew_seconds)
+                    break
+                except subprocess.TimeoutExpired:
+                    context.renew(checkpoint_pointer=f"execution:{context.dispatch_id}:registered-task-running")
+        except StaleWorker:
+            self._terminate_process_tree(proc)
+            raise
+        result = json.loads(result_path.read_text(encoding="utf-8-sig")) if result_path.is_file() else None
+        details = {"returncode": proc.returncode, "stdout_tail": stdout[-4000:], "stderr_tail": stderr[-4000:], "result": result}
+        if proc.returncode != 0 or not isinstance(result, dict):
+            raise WorkExecutionFailed("registered local task executor failed", details)
+        if result.get("protocol_version") != REGISTERED_TASK_PROTOCOL or not isinstance(result.get("response_text"), str) or not result["response_text"].strip():
+            raise WorkExecutionFailed("registered local task result is invalid", details)
+        return result
 
     def _execute_a01_qualification(self, payload: dict[str, Any], context: ExecutionContext) -> dict[str, Any]:
         if not isinstance(payload, dict):
