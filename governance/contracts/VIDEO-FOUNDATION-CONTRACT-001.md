@@ -39,7 +39,7 @@ Fail closed on authority/policy error, missing source, invalid timeline, render 
 
 ## 7. Evidence target
 
-`qualification/foundation/video-foundation-001.json`.
+Future evidence target (currently absent until implementation qualification): `qualification/foundation/video-foundation-001.json`.
 Required contents: `C32`, `VIDEO`, owner `SYSTEM_MASTER/MEDIA`, current authority/crosswalk identifiers, exact subject Git blobs, generate/edit/compose/render/inspect/export coverage, writer/dependency/failure/idempotency tests, acceptance command and `PASS|FAIL`.
 
 ## 8. Acceptance target

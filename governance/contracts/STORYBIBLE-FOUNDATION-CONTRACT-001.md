@@ -42,7 +42,7 @@ Fail closed on authority mismatch, missing book/canon identity, stale version, c
 
 ## 7. Evidence target
 
-`qualification/foundation/storybible-foundation-001.json`.
+Future evidence target (currently absent until implementation qualification): `qualification/foundation/storybible-foundation-001.json`.
 Required contents: `C31`, `STORYBIBLE`, owner `SYSTEM_MASTER/BOOK`, current authority/crosswalk identifiers, exact subject Git blobs, route coverage, canonical-writer assertion, dependency/failure/idempotency test results, acceptance command, result `PASS|FAIL`, and immutable evidence/artifact references.
 
 ## 8. Acceptance target

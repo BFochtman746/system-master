@@ -39,7 +39,7 @@ Fail closed on disallowed source access, missing provenance for a claimed findin
 
 ## 7. Evidence target
 
-`qualification/foundation/research-foundation-001.json`.
+Future evidence target (currently absent until implementation qualification): `qualification/foundation/research-foundation-001.json`.
 Required contents: `C30`, `RESEARCH`, owner `SYSTEM_MASTER/RESEARCH_KNOWLEDGE`, current authority/crosswalk identifiers, exact subject Git blobs, plan/search/fetch/synthesize/cite coverage, provenance/writer/failure/idempotency tests, acceptance command and `PASS|FAIL`.
 
 ## 8. Acceptance target

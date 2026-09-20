@@ -39,7 +39,7 @@ Fail closed on malformed PDF/source, unresolved page/assets, authority failure, 
 
 ## 7. Evidence target
 
-`qualification/foundation/pdf-foundation-001.json`.
+Future evidence target (currently absent until implementation qualification): `qualification/foundation/pdf-foundation-001.json`.
 Required contents: `C25`, `PDF`, owner `SYSTEM_MASTER/DOCUMENTS`, current authority/crosswalk identifiers, exact subject Git blobs, route coverage, writer/artifact identity, dependency/failure/idempotency tests, acceptance command and `PASS|FAIL`.
 
 ## 8. Acceptance target

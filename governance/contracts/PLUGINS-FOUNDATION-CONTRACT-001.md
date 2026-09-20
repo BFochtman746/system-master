@@ -38,7 +38,7 @@ Fail closed on missing permission, unsupported action/schema, provider auth fail
 
 ## 7. Evidence target
 
-`qualification/foundation/plugins-foundation-001.json`.
+Future evidence target (currently absent until implementation qualification): `qualification/foundation/plugins-foundation-001.json`.
 Required contents: `C27`, `PLUGINS`, owner `SYSTEM_MASTER/CONNECTED_ACTIONS`, current authority/crosswalk identifiers, exact subject Git blobs, discovery/read/invoke/authorize coverage, permission/provider/writer/failure/idempotency tests, acceptance command and `PASS|FAIL`.
 
 ## 8. Acceptance target

@@ -38,7 +38,7 @@ Fail closed on missing native/user authority, source-hash mismatch, unsupported 
 
 ## 7. Evidence target
 
-`qualification/foundation/photo-foundation-001.json`.
+Future evidence target (currently absent until implementation qualification): `qualification/foundation/photo-foundation-001.json`.
 Required contents: `C26`, `PHOTO`, owner `SYSTEM_MASTER/MEDIA`, current authority/crosswalk identifiers, exact subject Git blobs, import/edit/inspect/export coverage, original-preservation, writer/dependency/failure/idempotency tests, acceptance command and `PASS|FAIL`.
 
 ## 8. Acceptance target

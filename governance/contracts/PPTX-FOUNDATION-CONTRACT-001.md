@@ -39,7 +39,7 @@ Fail closed on invalid slide graph, missing asset/data ref, authority failure, r
 
 ## 7. Evidence target
 
-`qualification/foundation/pptx-foundation-001.json`.
+Future evidence target (currently absent until implementation qualification): `qualification/foundation/pptx-foundation-001.json`.
 Required contents: `C28`, `PPTX`, owner `SYSTEM_MASTER/DOCUMENTS`, current authority/crosswalk identifiers, exact subject Git blobs, route/render coverage, canonical-writer, dependency/failure/idempotency tests, acceptance command and `PASS|FAIL`.
 
 ## 8. Acceptance target
