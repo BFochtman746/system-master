@@ -15,6 +15,18 @@ test('native state ingress is owner-authenticated and narrowly issue-triggered',
   assert.equal(ingress.includes('pull_request_target'), false);
 });
 
+test('native state ingress requires exact development response and receipt envelope', () => {
+  assert.ok(ingress.includes("control-gateway.github-native-command.v1"));
+  assert.ok(ingress.includes("STATE_TRANSITION"));
+  assert.ok(ingress.includes('development_response_base64'));
+  assert.ok(ingress.includes('development_response_receipt'));
+  assert.ok(ingress.includes('development_response_receipt_json'));
+  assert.ok(workflow.includes('development_response_base64:'));
+  assert.ok(workflow.includes('development_response_receipt_json:'));
+  assert.ok(workflow.includes('CONTROL_GATEWAY_DEVELOPMENT_RESPONSE_BASE64'));
+  assert.ok(workflow.includes('CONTROL_GATEWAY_DEVELOPMENT_RESPONSE_RECEIPT_JSON'));
+});
+
 test('native state ingress permits only governed terminalization, rebind, or atomic successor authorization', () => {
   assert.ok(ingress.includes('TERMINATE_CURRENT)'));
   assert.ok(ingress.includes('REBIND_AUTHORITY)'));
@@ -24,6 +36,14 @@ test('native state ingress permits only governed terminalization, rebind, or ato
   assert.ok(script.includes('rebindAuthority'));
   assert.ok(script.includes('finalizeActiveWorkPacket'));
   assert.ok(script.includes('startNextLegalOperation'));
+});
+
+test('state publisher verifies response authorization before durable state reconstruction', () => {
+  assert.ok(script.includes('assertDevelopmentResponseAuthorization({'));
+  assert.ok(script.includes("channel: 'GITHUB_ACTIVE_WORK_STATE_TRANSITION'"));
+  assert.ok(script.includes('CONTROL_GATEWAY_DEVELOPMENT_RESPONSE_BASE64'));
+  assert.ok(script.includes('CONTROL_GATEWAY_DEVELOPMENT_RESPONSE_RECEIPT_JSON'));
+  assert.ok(script.indexOf('assertDevelopmentResponseAuthorization({') < script.indexOf('await publisher.reconstruct()'));
 });
 
 test('atomic successor authorization widens scope only through rebind and stages exactly one successor', () => {
@@ -56,6 +76,9 @@ test('publisher reconstructs verified durable state before exact-CAS publication
 
 test('publisher rejects arbitrary packet replacement and records immutable evidence', () => {
   assert.equal(script.includes('request.packet'), false);
+  assert.ok(script.includes("'development-response-authority-context.json'"));
+  assert.ok(script.includes("'development-response-receipt.json'"));
+  assert.ok(script.includes("'development-response.txt'"));
   assert.ok(script.includes("'transition-request.json'"));
   assert.ok(script.includes("'predecessor-envelope.json'"));
   assert.ok(script.includes("'result-envelope.json'"));

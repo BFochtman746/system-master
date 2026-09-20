@@ -20,10 +20,17 @@ const SAFE_BOOTSTRAP_WRITER = [
   'CONTROL_GATEWAY_DEVELOPMENT_RESPONSE_RECEIPT_JSON'
 ].join('\n');
 
+const SAFE_STATE_PUBLISHER = [
+  'assertDevelopmentResponseAuthorization({',
+  'CONTROL_GATEWAY_DEVELOPMENT_RESPONSE_BASE64',
+  'CONTROL_GATEWAY_DEVELOPMENT_RESPONSE_RECEIPT_JSON'
+].join('\n');
+
 function createFixture(t, {
   source = 'export const safe = true;\n',
   productionWriter = SAFE_PRODUCTION_WRITER,
-  bootstrapWriter = SAFE_BOOTSTRAP_WRITER
+  bootstrapWriter = SAFE_BOOTSTRAP_WRITER,
+  statePublisher = SAFE_STATE_PUBLISHER
 } = {}) {
   const root = fs.mkdtempSync(
     path.join(os.tmpdir(), 'development-response-production-enforcement-')
@@ -49,6 +56,12 @@ function createFixture(t, {
   fs.writeFileSync(
     path.join(root, '.github', 'scripts', 'control-gateway-authority-bootstrap.js'),
     bootstrapWriter,
+    'utf8'
+  );
+
+  fs.writeFileSync(
+    path.join(root, '.github', 'scripts', 'control-gateway-active-work-publisher.js'),
+    statePublisher,
     'utf8'
   );
 
@@ -102,6 +115,24 @@ test('missing bootstrap response receipt marker fails enforcement', (t) => {
   assert.ok(
     violations.some(({ path: violationPath, missing }) =>
       violationPath === '.github/scripts/control-gateway-authority-bootstrap.js' &&
+      missing === 'CONTROL_GATEWAY_DEVELOPMENT_RESPONSE_RECEIPT_JSON'
+    )
+  );
+});
+
+test('missing active-work state publisher response receipt marker fails enforcement', (t) => {
+  const root = createFixture(t, {
+    statePublisher: [
+      'assertDevelopmentResponseAuthorization({',
+      'CONTROL_GATEWAY_DEVELOPMENT_RESPONSE_BASE64'
+    ].join('\n')
+  });
+
+  const violations = auditDevelopmentResponseProductionEnforcement(root);
+
+  assert.ok(
+    violations.some(({ path: violationPath, missing }) =>
+      violationPath === '.github/scripts/control-gateway-active-work-publisher.js' &&
       missing === 'CONTROL_GATEWAY_DEVELOPMENT_RESPONSE_RECEIPT_JSON'
     )
   );

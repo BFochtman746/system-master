@@ -3,19 +3,33 @@
 async function main() {
   const { GitHubActiveWorkPublisher, GitHubActiveWorkRestTransport } = await import('../../control-gateway/src/github-active-work-publication.js');
   const { transitionCurrentOperation, rebindAuthority, finalizeActiveWorkPacket, startNextLegalOperation } = await import('../../control-gateway/src/active-work-state.js');
+  const { assertDevelopmentResponseAuthorization } = await import('../../control-gateway/src/development-response-governor.js');
   const fs = await import('node:fs');
   const path = await import('node:path');
 
   const request = JSON.parse(process.env.CONTROL_GATEWAY_STATE_TRANSITION_REQUEST_JSON || 'null');
+  const responseBase64 = String(process.env.CONTROL_GATEWAY_DEVELOPMENT_RESPONSE_BASE64 || '').trim();
+  const responseReceipt = JSON.parse(process.env.CONTROL_GATEWAY_DEVELOPMENT_RESPONSE_RECEIPT_JSON || 'null');
+  const responseText = responseBase64 ? Buffer.from(responseBase64, 'base64').toString('utf8') : '';
   const token = String(process.env.CONTROL_GATEWAY_WRITER_TOKEN || '').trim();
   const evidenceDir = String(process.env.CONTROL_GATEWAY_WRITER_EVIDENCE_DIR || '').trim();
   const actualAppSlug = String(process.env.CONTROL_GATEWAY_WRITER_ACTUAL_APP_SLUG || '').trim();
   const expectedAppSlug = String(process.env.CONTROL_GATEWAY_WRITER_EXPECTED_APP_SLUG || '').trim();
   const installationId = String(process.env.CONTROL_GATEWAY_WRITER_INSTALLATION_ID || '').trim();
 
-  if (!request || !token || !actualAppSlug || !expectedAppSlug || !installationId) throw new Error('ACTIVE_WORK_PUBLICATION_INPUTS_MISSING');
+  if (!request || !responseBase64 || !responseReceipt || !responseText || !token || !actualAppSlug || !expectedAppSlug || !installationId) throw new Error('ACTIVE_WORK_PUBLICATION_INPUTS_MISSING');
   if (actualAppSlug !== expectedAppSlug) throw new Error(`ACTIVE_WORK_PUBLICATION_WRITER_APP_MISMATCH:${actualAppSlug}`);
   if (process.env.GITHUB_ACTIONS === 'true' && process.env.GITHUB_REF !== 'refs/heads/main') throw new Error(`ACTIVE_WORK_PUBLICATION_REF_FORBIDDEN:${process.env.GITHUB_REF || '<missing>'}`);
+
+  const authorityContext = {
+    channel: 'GITHUB_ACTIVE_WORK_STATE_TRANSITION',
+    transition_request: request
+  };
+  assertDevelopmentResponseAuthorization({
+    responseText,
+    responseReceipt,
+    authorityContext
+  });
 
   const exactKeys = (value, expected, label) => {
     if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error(`${label}_INVALID`);
@@ -101,6 +115,9 @@ async function main() {
 
   if (evidenceDir) {
     fs.mkdirSync(evidenceDir, { recursive: true });
+    fs.writeFileSync(path.join(evidenceDir, 'development-response-authority-context.json'), `${JSON.stringify(authorityContext, null, 2)}\n`, 'utf8');
+    fs.writeFileSync(path.join(evidenceDir, 'development-response-receipt.json'), `${JSON.stringify(responseReceipt, null, 2)}\n`, 'utf8');
+    fs.writeFileSync(path.join(evidenceDir, 'development-response.txt'), responseText, 'utf8');
     fs.writeFileSync(path.join(evidenceDir, 'transition-request.json'), `${JSON.stringify(request, null, 2)}\n`, 'utf8');
     fs.writeFileSync(path.join(evidenceDir, 'predecessor-envelope.json'), `${JSON.stringify(reconstructed.envelope, null, 2)}\n`, 'utf8');
     fs.writeFileSync(path.join(evidenceDir, 'result-envelope.json'), `${JSON.stringify(result.envelope, null, 2)}\n`, 'utf8');

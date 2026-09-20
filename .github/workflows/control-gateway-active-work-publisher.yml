@@ -7,10 +7,26 @@ on:
         description: Exact active-work transition request JSON
         required: true
         type: string
+      development_response_base64:
+        description: Exact governed development response encoded as base64
+        required: true
+        type: string
+      development_response_receipt_json:
+        description: Exact development-response receipt JSON
+        required: true
+        type: string
   workflow_call:
     inputs:
       transition_request_json:
         description: Exact active-work transition request JSON
+        required: true
+        type: string
+      development_response_base64:
+        description: Exact governed development response encoded as base64
+        required: true
+        type: string
+      development_response_receipt_json:
+        description: Exact development-response receipt JSON
         required: true
         type: string
 
@@ -49,6 +65,8 @@ jobs:
         shell: bash
         env:
           CONTROL_GATEWAY_STATE_TRANSITION_REQUEST_JSON: ${{ inputs.transition_request_json }}
+          CONTROL_GATEWAY_DEVELOPMENT_RESPONSE_BASE64: ${{ inputs.development_response_base64 }}
+          CONTROL_GATEWAY_DEVELOPMENT_RESPONSE_RECEIPT_JSON: ${{ inputs.development_response_receipt_json }}
           CONTROL_GATEWAY_WRITER_TOKEN: ${{ steps.writer-token.outputs.token }}
           CONTROL_GATEWAY_WRITER_ACTUAL_APP_SLUG: ${{ steps.writer-token.outputs.app-slug }}
           CONTROL_GATEWAY_WRITER_EXPECTED_APP_SLUG: ${{ vars.CONTROL_GATEWAY_WRITER_APP_SLUG }}

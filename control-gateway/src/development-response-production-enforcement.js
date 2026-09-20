@@ -24,6 +24,11 @@ const ENTRYPOINT_REQUIRED = Object.freeze({
     'assertDevelopmentResponseAuthorization({',
     'CONTROL_GATEWAY_DEVELOPMENT_RESPONSE_BASE64',
     'CONTROL_GATEWAY_DEVELOPMENT_RESPONSE_RECEIPT_JSON'
+  ]),
+  '.github/scripts/control-gateway-active-work-publisher.js': Object.freeze([
+    'assertDevelopmentResponseAuthorization({',
+    'CONTROL_GATEWAY_DEVELOPMENT_RESPONSE_BASE64',
+    'CONTROL_GATEWAY_DEVELOPMENT_RESPONSE_RECEIPT_JSON'
   ])
 });
 
@@ -56,7 +61,7 @@ export function auditDevelopmentResponseProductionEnforcement(repositoryRoot) {
       if (pattern.test(text)) violations.push({ path: rel, pattern: String(pattern) });
     }
   }
-    for (const [entrypoint, requiredMarkers] of Object.entries(ENTRYPOINT_REQUIRED)) {
+  for (const [entrypoint, requiredMarkers] of Object.entries(ENTRYPOINT_REQUIRED)) {
     const entrypointPath = path.join(repositoryRoot, ...entrypoint.split('/'));
     const text = fs.readFileSync(entrypointPath, 'utf8');
 
