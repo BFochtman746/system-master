@@ -252,13 +252,14 @@ async function executeTask() {
 
   const responseRequest = {
     model: MODEL,
-    input: [{ role: 'user', content: instruction }],
-    max_output_tokens: payload.max_output_tokens,
-    temperature: 0
+    messages: [{ role: 'user', content: instruction }],
+    max_completion_tokens: payload.max_output_tokens,
+    temperature: 0,
+    stream: false
   };
   writeJson(path.join(evidenceDir, 'registered-task-response-request.json'), responseRequest);
   const inferenceStarted = Date.now();
-  const response = await requestJson(HOST + prefix + '/responses', { method: 'POST', body: responseRequest, timeoutMs: 240000 });
+  const response = await requestJson(HOST + prefix + '/chat/completions', { method: 'POST', body: responseRequest, timeoutMs: 240000 });
   const inferenceMs = Date.now() - inferenceStarted;
   writeJson(path.join(evidenceDir, 'registered-task-response-raw.json'), response);
 
