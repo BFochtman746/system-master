@@ -1,5 +1,5 @@
 {
-  "registry_version": 33,
+  "registry_version": 34,
   "qualifications": {
     "A01-CONTROL-PLANE-SELFTEST": {
       "workstream_id": "SYSTEM-MASTER",
@@ -373,6 +373,20 @@
       "overnight_max_runtime_minutes": 30,
       "checkpoint_capable": false,
       "description": "Qualify the exact-subject A-01 registered-task production binding end to end: revalidate an already-admitted bounded text task through GitHub ingress, the existing A-01 scheduler, execution-generation fencing, the fixed registered-task worker wrapper, and local Lemonade gpt-oss-20b-NPU. PASS requires the fixed A01_REGISTERED_TASK_OK response plus durable ingress/worker/model evidence and grants no arbitrary-command, external-URL, promotion, or READY-queue activation authority."
+    },
+    "SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION-001E-SHADOW-CALIBRATION": {
+      "workstream_id": "SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION",
+      "gate_class": "focused",
+      "source": "subject",
+      "executable": "node",
+      "args": [
+        ".github/scripts/a01-second-shift-production-master-001e-shadow-calibration.js"
+      ],
+      "evidence_artifact": "second-shift-production-master-001e-shadow-calibration",
+      "overnight_eligible": true,
+      "overnight_max_runtime_minutes": 30,
+      "checkpoint_capable": false,
+      "description": "Qualify the exact-subject Second Shift 001E non-mutating shadow calibration through three temporary-supervisor-database cycles using the integrated registered-task ingress, A01NightScheduler, A01RegisteredTaskExecutionWorker, and local Lemonade gpt-oss-20b-NPU. Each cycle must return exact A01_REGISTERED_TASK_OK, preserve evidence-derived calibration timing, and prove the live READY queue was not touched. PASS grants no canary, scheduler-cutover, promotion, live-queue activation, or production-freeze authority."
     }
   }
 }
