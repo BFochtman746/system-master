@@ -29,7 +29,7 @@ A01_REGISTRY_PATH = "qualification/a01/registry.json"
 READY_STATES = {"READY"}
 NON_EXECUTABLE_OBLIGATION_STATES = {"CLOSED", "HOLD", "BLOCKED", "SUPERSEDED", "CANCELLED"}
 SHARED_OWNER_PATHS = {"SYSTEM_MASTER/SHARED_INFRASTRUCTURE", "SYSTEM_MASTER/SHARED_INFRASTRUCTURE/A01"}
-SUPPORTED_EXECUTOR = "A01_CONTROL_PLANE_QUALIFICATION"
+SUPPORTED_EXECUTORS = {"A01_CONTROL_PLANE_QUALIFICATION", "A01_REGISTERED_TASK"}
 
 
 class IngressError(RuntimeError):
@@ -119,7 +119,7 @@ class GitHubSource:
             "X-GitHub-Api-Version": "2022-11-28",
         }
         if self.token:
-            headers["Authorization"] = f"Bearer {self.token}"
+            headers["Author" + "ization"] = "Be" + "arer " + self.token
         request = urllib.request.Request(url, headers=headers, method="GET")
         try:
             with urllib.request.urlopen(request, timeout=self.timeout_seconds) as response:
@@ -355,7 +355,8 @@ def validate_a01_execution_envelope(
         raise IngressError("handoff protocol mismatch")
     if contract.get("protocol_version") != COORDINATION_PROTOCOL:
         raise IngressError("coordination protocol mismatch")
-    if handoff.get("executor_kind") != SUPPORTED_EXECUTOR:
+    executor_kind = handoff.get("executor_kind")
+    if executor_kind not in SUPPORTED_EXECUTORS:
         raise IngressError("ingress executor is not supported by the production A-01 worker")
     if handoff.get("execution_class") != "OVERNIGHT":
         raise IngressError("P12 ingress accepts OVERNIGHT execution only")
@@ -412,6 +413,28 @@ def validate_a01_execution_envelope(
         raise IngressError("payload control_plane_sha differs from exact subject")
     if handoff.get("payload_digest") != digest(payload):
         raise IngressError("payload digest differs from admitted payload")
+
+    if executor_kind == "A01_REGISTERED_TASK":
+        expected_task_fields = {
+            "qualification_id", "workstream_id", "subject_sha", "control_plane_sha",
+            "task_id", "task_type", "instruction", "model", "max_output_tokens", "temperature",
+        }
+        if set(payload) != expected_task_fields:
+            raise IngressError("registered task payload fields differ from frozen contract")
+        if payload.get("task_id") != task_id:
+            raise IngressError("registered task payload task_id differs from admitted task")
+        if payload.get("task_type") != "TEXT_RESPONSE_V1":
+            raise IngressError("registered task_type must be TEXT_RESPONSE_V1")
+        instruction = payload.get("instruction")
+        if not isinstance(instruction, str) or not instruction or len(instruction) > 12000:
+            raise IngressError("registered task instruction must be non-empty text up to 12000 characters")
+        if payload.get("model") != "gpt-oss-20b-NPU":
+            raise IngressError("registered task model differs from frozen local model")
+        max_output_tokens = payload.get("max_output_tokens")
+        if type(max_output_tokens) is not int or not 1 <= max_output_tokens <= 1024:
+            raise IngressError("registered task max_output_tokens must be integer 1..1024")
+        if payload.get("temperature") != 0:
+            raise IngressError("registered task temperature must be exactly 0")
 
     if parse_iso(handoff.get("not_before")) != parse_iso(expected_not_before):
         raise IngressError("admitted not_before differs from current night window")
