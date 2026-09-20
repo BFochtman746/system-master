@@ -92,10 +92,10 @@ jobs:
   shadow:
     name: A-01 dedicated non-mutating 001E shadow calibration
     needs: hosted_preflight
-    uses: BFochtman746/system-master/.github/workflows/a01-control-plane-gateway.yml@c0d9c46f6fa8c18501bc9450f8dc6c66838615fc
+    uses: BFochtman746/system-master/.github/workflows/a01-control-plane-gateway.yml@df7c0a328b8708458518a15cdf7615e889475df9
     with:
       qualification_id: SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION-001E-SHADOW-CALIBRATION
-      workstream_id: SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION
+      workstream_id: SYSTEM-MASTER
       subject_sha: ${{ github.sha }}
       origin_ref: ${{ github.ref_name }}
       resume_on_pass: Return exact-subject 001E shadow calibration evidence only; do not begin canary.
@@ -121,7 +121,7 @@ jobs:
       SHADOW_RESULT: ${{ needs.shadow.outputs.result_class }}
       SHADOW_PROMOTION: ${{ needs.shadow.outputs.promotion_authorized }}
       SHADOW_CONTROL_SHA: ${{ needs.shadow.outputs.control_plane_sha }}
-      PINNED_CONTROL_SHA: c0d9c46f6fa8c18501bc9450f8dc6c66838615fc
+      PINNED_CONTROL_SHA: df7c0a328b8708458518a15cdf7615e889475df9
     steps:
       - name: Enforce durable shadow PASS only
         run: |

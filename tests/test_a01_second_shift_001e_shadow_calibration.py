@@ -27,7 +27,7 @@ class ShadowCalibrationContractTest(unittest.TestCase):
         self.assertEqual(payload["qualification_id"], "A01-AGENT-REGISTERED-TASK-PRODUCTION-BINDING-001")
         self.assertEqual(payload["workstream_id"], "SYSTEM-MASTER")
         self.assertEqual(shadow001e.QUALIFICATION_ID, "SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION-001E-SHADOW-CALIBRATION")
-        self.assertEqual(shadow001e.WORKSTREAM_ID, "SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION")
+        self.assertEqual(shadow001e.WORKSTREAM_ID, "SYSTEM-MASTER")
         self.assertEqual(payload["task_type"], "TEXT_RESPONSE_V1")
         self.assertEqual(payload["model"], "gpt-oss-20b-NPU")
         self.assertEqual(payload["temperature"], 0)
