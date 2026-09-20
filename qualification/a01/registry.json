@@ -1,12 +1,14 @@
 {
-  "registry_version": 31,
+  "registry_version": 32,
   "qualifications": {
     "A01-CONTROL-PLANE-SELFTEST": {
       "workstream_id": "SYSTEM-MASTER",
       "gate_class": "promotion",
       "source": "control_plane",
       "executable": "node",
-      "args": [".github/scripts/a01-control-plane-selftest.js"],
+      "args": [
+        ".github/scripts/a01-control-plane-selftest.js"
+      ],
       "evidence_artifact": "a01-control-plane-selftest",
       "overnight_eligible": false,
       "description": "Qualify policy, registry, schemas, bootstrap, gateway safety, cross-ref subject execution, receipt production, exact-SHA binding, shared queue behavior, and overnight admission policy for A01-CONTROL-PLANE-001."
@@ -16,7 +18,9 @@
       "gate_class": "focused",
       "source": "subject",
       "executable": "node",
-      "args": [".github/scripts/a01-closed-loop-repair-selftest.js"],
+      "args": [
+        ".github/scripts/a01-closed-loop-repair-selftest.js"
+      ],
       "evidence_artifact": "a01-closed-loop-repair-selftest",
       "overnight_eligible": false,
       "description": "Qualify the exact A01-CLOSED-LOOP-REPAIR-001 sidecar candidate: authoritative receipt classification, bounded repair-attempt budget, repair-worker zero-authority contract, changed-SHA and deterministic-prequalification binding, exact workstream/qualification lineage, non-automatable owner routes, dead-letter behavior, arbitrary-command denial, replacement-request A01_ELIGIBLE-only standing, and preservation of the frozen gateway/policy execution model. PASS is exact-SHA focused evidence only and grants no promotion or automatic product-repair authority."
@@ -26,7 +30,9 @@
       "gate_class": "consolidated",
       "source": "subject",
       "executable": "node",
-      "args": [".github/scripts/a01-second-shift-supervisor-v2-qualify.js"],
+      "args": [
+        ".github/scripts/a01-second-shift-supervisor-v2-qualify.js"
+      ],
       "evidence_artifact": "second-shift-supervisor-v2-a01-stress",
       "overnight_eligible": false,
       "description": "Qualify the exact admitted SecondShiftSupervisorV2 and Control Gateway handoff boundary on A-01: exact subject identity, gateway-to-supervisor admission binding, sole A-01 supervisor scheduling ownership, SQLite lease/fencing/idempotency/outbox semantics, crash/concurrency stress, and deterministic evidence production. PASS is exact-SHA A-01 evidence only and does not production-activate the Control Gateway."
@@ -36,7 +42,9 @@
       "gate_class": "focused",
       "source": "subject",
       "executable": "node",
-      "args": [".github/scripts/a01-book-system-canonical-state-001.js"],
+      "args": [
+        ".github/scripts/a01-book-system-canonical-state-001.js"
+      ],
       "evidence_artifact": "book-system-canonical-book-state-model-001",
       "overnight_eligible": false,
       "description": "Qualify the exact Book System parent canonical-state subject through the repository-owned wrapper: object completeness, exact state-version and state-digest preconditions, legal transition enforcement, Prose and Book Evaluator canonical-write denial, research-scope atomicity, author-decision handling, publication-authority boundary, and exact rollback retention. PASS is bounded to the tested subject SHA and does not create publication or production authority."
@@ -46,7 +54,9 @@
       "gate_class": "focused",
       "source": "subject",
       "executable": "node",
-      "args": [".github/scripts/a01-book-system-service-interface-001.js"],
+      "args": [
+        ".github/scripts/a01-book-system-service-interface-001.js"
+      ],
       "evidence_artifact": "book-system-service-interface-registry-001",
       "overnight_eligible": false,
       "description": "Qualify the exact Book System parent service-interface registry: four service families and seventeen operations, request/response schema and provider binding, minimum projection enforcement, canonical-write denial, stale projection rejection, idempotent replay and idempotency conflict handling, unsafe non-idempotent retry rejection, abstention/error preservation, and parent-admission handoff boundaries. PASS is bounded to the tested subject SHA and grants no parent canonical-write, publication, or production authority to a provider."
@@ -56,7 +66,9 @@
       "gate_class": "focused",
       "source": "subject",
       "executable": "node",
-      "args": [".github/scripts/a01-book-system-service-interface-002.js"],
+      "args": [
+        ".github/scripts/a01-book-system-service-interface-002.js"
+      ],
       "evidence_artifact": "book-system-service-interface-registry-002",
       "overnight_eligible": false,
       "description": "Qualify the exact Book System Service Interface Registry V2 successor: four service families and twenty-one operations, strict V2 schema isolation from V1, canonical Prose/Book Evaluator ownership, exact parent/source/artifact identity, provider canonical/lifecycle/export-freeze/publication denial, editorial-stage evidence without provider stage authority, target-medium generation/validation/proof separation, source-to-render/accessibility/correction evidence, artifact currentness and changed-byte digest invalidation, provenance evidence-only/currentness, idempotent replay and non-idempotent reconciliation, and no Book-owned document engine authority. PASS is exact-SHA only and transfers no V1 qualification, author, publication, production, or future document-tool topology authority."
@@ -66,7 +78,9 @@
       "gate_class": "focused",
       "source": "subject",
       "executable": "node",
-      "args": [".github/scripts/a01-book-system-integration-proposal-runtime-002.js"],
+      "args": [
+        ".github/scripts/a01-book-system-integration-proposal-runtime-002.js"
+      ],
       "evidence_artifact": "book-system-integration-proposal-runtime-002",
       "overnight_eligible": false,
       "description": "Qualify the exact Book System Integration Proposal Runtime V2 executable subject against the exact A-01-qualified Service Interface Registry V2 dependency: one parent-owned intake path for all four provider families, strict request/response/provider/parent/source/artifact/provenance identity, immutable intake/proposal/receipt/outbox state, durable non-success and disagreement preservation, idempotent replay and conflict handling, non-idempotent reconciliation, editorial evidence without provider lifecycle authority, stale source/artifact/provenance blocking, rights/privacy invalidation, author handoff without fabricated approval, target-medium proof distinct from export freeze/publication, changed-byte provenance digest preservation, transactional rollback identity, and no Book-owned document engine. PASS is exact-SHA only and grants no manuscript promotion, author, export-freeze, publication, production, or provider canonical-write authority."
@@ -76,7 +90,9 @@
       "gate_class": "focused",
       "source": "subject",
       "executable": "node",
-      "args": [".github/scripts/a01-book-system-lifecycle-transition-001.js"],
+      "args": [
+        ".github/scripts/a01-book-system-lifecycle-transition-001.js"
+      ],
       "evidence_artifact": "book-system-lifecycle-transition-engine-001",
       "overnight_eligible": false,
       "description": "Qualify the exact Book System lifecycle transition engine: parent/project and unit transition gates, author-required boundaries, direct-service transition denial, stale service-evidence rejection, exact parent and lifecycle-ledger concurrency, defer/resume, transitive invalidation and revalidation restore, deterministic replay without double commit, request/idempotency conflicts, transaction atomicity, and exact rollback identity. PASS is bounded to the tested subject SHA and grants no autonomous author, publication, promotion, or provider canonical-write authority."
@@ -86,7 +102,9 @@
       "gate_class": "focused",
       "source": "subject",
       "executable": "node",
-      "args": [".github/scripts/a01-book-system-lifecycle-current-parent-compatibility-001.js"],
+      "args": [
+        ".github/scripts/a01-book-system-lifecycle-current-parent-compatibility-001.js"
+      ],
       "evidence_artifact": "book-system-lifecycle-current-parent-compatibility-adapter-001",
       "overnight_eligible": false,
       "description": "Qualify the exact Book System current-parent Lifecycle compatibility adapter: 21-case current-parent identity compatibility matrix plus 18-case Lifecycle v1 regression, preserving Lifecycle v1 transition policy semantics while adapting only the current parent identity boundary. PASS is exact-SHA focused evidence only and grants no provider, author, document-engine, export-freeze, publication, promotion, or production authority."
@@ -96,7 +114,9 @@
       "gate_class": "focused",
       "source": "subject",
       "executable": "node",
-      "args": [".github/scripts/a01-book-system-lifecycle-current-parent-rebind-001.js"],
+      "args": [
+        ".github/scripts/a01-book-system-lifecycle-current-parent-rebind-001.js"
+      ],
       "evidence_artifact": "book-system-lifecycle-current-parent-rebind-001",
       "overnight_eligible": false,
       "description": "Qualify the exact Book System persistent Lifecycle current-parent rebind compatibility repair: preserve existing lifecycle unit/dependency/transition history while advancing only the lifecycle-ledger parent binding across one exact already-authorized non-lifecycle parent successor; exercise real Integration Runtime V2, Author Decision Queue, Export Freeze and Version/Rollback receipts; enforce parent-only authority, exact pre/post/ledger identity, unchanged lifecycle status, deterministic replay/conflicts, and zero lifecycle-policy, parent-successor, author, provider, document, export-freeze or publication authority. PASS is exact-SHA focused evidence only and grants no promotion or production authority."
@@ -106,7 +126,9 @@
       "gate_class": "focused",
       "source": "subject",
       "executable": "node",
-      "args": [".github/scripts/a01-book-system-e2e-authority-guards-001.js"],
+      "args": [
+        ".github/scripts/a01-book-system-e2e-authority-guards-001.js"
+      ],
       "evidence_artifact": "book-system-e2e-authority-guards-001",
       "overnight_eligible": false,
       "description": "Qualify the exact Book System bounded E2E authority guard repair: strict active-governed-subject currentness around Author Decision Queue v1 and mandatory non-empty exact parent admission around Export Freeze v1; preserve exact qualified predecessor bytes; reject stale historical author subjects and technical-only freeze; retain conditional author-decision semantics; grant no author, provider, lifecycle, document, export-freeze, publication, promotion, or production authority. PASS is exact-SHA focused evidence only."
@@ -116,7 +138,9 @@
       "gate_class": "focused",
       "source": "subject",
       "executable": "node",
-      "args": [".github/scripts/book-system-version-and-rollback-001-qualify-v2.js"],
+      "args": [
+        ".github/scripts/book-system-version-and-rollback-001-qualify-v2.js"
+      ],
       "evidence_artifact": "book-system-version-and-rollback-001",
       "overnight_eligible": false,
       "description": "Qualify the exact Book System Version and Rollback authority-v2 boundary: 48-case contract/research/forensic/lifecycle-clarification/authority-ingest matrix, immutable complete-state snapshots and object-version lineage, exact active-version binding, exact parent/ledger compare-and-swap, no direct lifecycle status mutation, authorized already-committed parent successor receipt ingestion, restore-as-new-successor semantics, append-only evidence history, idempotent replay and conflicts, current rights/privacy/evidence and author-decision revalidation, full-state publication-authority refusal, branch-like divergence preservation, atomic receipt/outbox identity, and author/publication/provider authority non-synthesis. PASS is exact-SHA focused evidence only and grants no author, publication, production, lifecycle, or provider canonical-write authority."
@@ -126,9 +150,13 @@
       "gate_class": "focused",
       "source": "subject",
       "executable": "node",
-      "args": [".github/scripts/a01-continuity-target-windows-reboot.js"],
+      "args": [
+        ".github/scripts/a01-continuity-target-windows-reboot.js"
+      ],
       "evidence_artifact": "system-master-continuity-target-windows-reboot",
-      "allowed_post_actions": ["windows_reboot"],
+      "allowed_post_actions": [
+        "windows_reboot"
+      ],
       "overnight_eligible": false,
       "description": "Run the repository-owned TARGET_WINDOWS_REBOOT ARM or VERIFY phase while preserving durable reboot handoff evidence. ARM may request the registered windows_reboot post-action only after its receipt and evidence are produced. Disruptive reboot qualifications are intentionally excluded from A01-OVERNIGHT-001 v1."
     },
@@ -137,7 +165,9 @@
       "gate_class": "focused",
       "source": "subject",
       "executable": "node",
-      "args": [".github/scripts/a01-literary-research-deep-harvest.js"],
+      "args": [
+        ".github/scripts/a01-literary-research-deep-harvest.js"
+      ],
       "evidence_artifact": "literary-research-overnight-deep",
       "overnight_eligible": true,
       "overnight_max_runtime_minutes": 30,
@@ -149,7 +179,9 @@
       "gate_class": "consolidated",
       "source": "subject",
       "executable": "node",
-      "args": [".github/scripts/a01-literary-prose-overnight-research-regression-sweep.js"],
+      "args": [
+        ".github/scripts/a01-literary-prose-overnight-research-regression-sweep.js"
+      ],
       "evidence_artifact": "literary-prose-overnight-research-regression-sweep",
       "overnight_eligible": true,
       "overnight_max_runtime_minutes": 180,
@@ -161,7 +193,9 @@
       "gate_class": "focused",
       "source": "subject",
       "executable": "node",
-      "args": [".github/scripts/book-eval-repair005-private-gold-recovery-qualify.js"],
+      "args": [
+        ".github/scripts/book-eval-repair005-private-gold-recovery-qualify.js"
+      ],
       "evidence_artifact": "book-eval-repair005-gate-d-private-gold-recovery",
       "overnight_eligible": true,
       "overnight_max_runtime_minutes": 90,
@@ -173,7 +207,9 @@
       "gate_class": "focused",
       "source": "subject",
       "executable": "node",
-      "args": [".github/scripts/book-eval-repair005-gate-d-teacher-freeze-qualify.js"],
+      "args": [
+        ".github/scripts/book-eval-repair005-gate-d-teacher-freeze-qualify.js"
+      ],
       "evidence_artifact": "book-eval-repair005-gate-d-teacher-freeze",
       "overnight_eligible": true,
       "overnight_max_runtime_minutes": 30,
@@ -185,7 +221,9 @@
       "gate_class": "consolidated",
       "source": "subject",
       "executable": "node",
-      "args": [".github/scripts/book-eval-repair005-gate-d-student-selective-qualify.js"],
+      "args": [
+        ".github/scripts/book-eval-repair005-gate-d-student-selective-qualify.js"
+      ],
       "evidence_artifact": "book-eval-repair005-gate-d-student-selective",
       "overnight_eligible": true,
       "overnight_max_runtime_minutes": 240,
@@ -197,7 +235,9 @@
       "gate_class": "promotion",
       "source": "subject",
       "executable": "node",
-      "args": [".github/scripts/learning-pilot-001-run-001-human-session-qualify.js"],
+      "args": [
+        ".github/scripts/learning-pilot-001-run-001-human-session-qualify.js"
+      ],
       "evidence_artifact": "learning-pilot-001-run-001-human-session",
       "overnight_eligible": true,
       "overnight_max_runtime_minutes": 120,
@@ -209,7 +249,9 @@
       "gate_class": "promotion",
       "source": "subject",
       "executable": "node",
-      "args": [".github/scripts/learning-pilot-001-run-001-execution-prep-qualify.js"],
+      "args": [
+        ".github/scripts/learning-pilot-001-run-001-execution-prep-qualify.js"
+      ],
       "evidence_artifact": "learning-pilot-001-run-001-execution-prep",
       "overnight_eligible": true,
       "overnight_max_runtime_minutes": 60,
@@ -221,7 +263,9 @@
       "gate_class": "promotion",
       "source": "subject",
       "executable": "node",
-      "args": [".github/scripts/learning-pilot-001-run-001-closed-loop-overnight-qualify.js"],
+      "args": [
+        ".github/scripts/learning-pilot-001-run-001-closed-loop-overnight-qualify.js"
+      ],
       "evidence_artifact": "learning-pilot-001-run-001-closed-loop",
       "overnight_eligible": true,
       "overnight_max_runtime_minutes": 60,
@@ -233,7 +277,9 @@
       "gate_class": "promotion",
       "source": "subject",
       "executable": "node",
-      "args": [".github/scripts/learning-pilot-001-run-001-final-human-execution-qualify.js"],
+      "args": [
+        ".github/scripts/learning-pilot-001-run-001-final-human-execution-qualify.js"
+      ],
       "evidence_artifact": "learning-pilot-001-run-001-final-human-execution",
       "overnight_eligible": true,
       "overnight_max_runtime_minutes": 60,
@@ -245,7 +291,9 @@
       "gate_class": "focused",
       "source": "subject",
       "executable": "node",
-      "args": [".github/scripts/a01-assurance-recon-001b-deep-census.js"],
+      "args": [
+        ".github/scripts/a01-assurance-recon-001b-deep-census.js"
+      ],
       "evidence_artifact": "system-master-assurance-recon-001b-overnight-deep-census",
       "overnight_eligible": true,
       "overnight_max_runtime_minutes": 150,
@@ -257,7 +305,9 @@
       "gate_class": "focused",
       "source": "subject",
       "executable": "node",
-      "args": [".github/scripts/book-system-author-decision-queue-001-qualify-v2.js"],
+      "args": [
+        ".github/scripts/book-system-author-decision-queue-001-qualify-v2.js"
+      ],
       "evidence_artifact": "book-system-author-decision-queue-001",
       "overnight_eligible": false,
       "description": "Qualify the exact Book System Author Decision Queue implementation: append-only queue/request/receipt history, exact parent/queue/request compare-and-swap, current subject binding, duplicate-handoff preservation, no-steering presentation, defer/reopen/withdraw/supersede, explicit author identity/session-proof boundary, confirmation binding, explicit option-to-APPROVED-or-REJECTED mapping, stale/concurrent resolution refusal, idempotent replay, one immutable canonical AUTHOR_DECISION append, Version/Rollback authority handoff, and zero same-operation manuscript/lifecycle/proposal/export/publication mutation. Fixtures are synthetic only and PASS grants no real author-choice, publication, production, or provider authority."
@@ -267,7 +317,9 @@
       "gate_class": "focused",
       "source": "subject",
       "executable": "node",
-      "args": [".github/scripts/book-system-export-freeze-001-qualify-v2.js"],
+      "args": [
+        ".github/scripts/book-system-export-freeze-001-qualify-v2.js"
+      ],
       "evidence_artifact": "book-system-export-freeze-001",
       "overnight_eligible": false,
       "description": "Qualify the exact Book System Export Freeze runtime and contract: exact parent/manuscript/artifact/profile identity, current validation/proof/accessibility/provenance/rights/privacy evidence, changed-byte and open-correction rejection, immutable one-format-one-digest EXPORT_RELEASE append, hard release-ID conflict without a durable idempotency receipt, exact replay/conflict behavior, supersession lineage, lifecycle handoff without lifecycle mutation, and zero author-choice, publication, provider, or generic document-engine authority synthesis. PASS is exact-SHA focused evidence only and does not render, validate, publish, deliver, or authorize a book."
@@ -277,7 +329,9 @@
       "gate_class": "consolidated",
       "source": "subject",
       "executable": "node",
-      "args": [".github/scripts/a01-book-system-end-to-end-authoring-001.js"],
+      "args": [
+        ".github/scripts/a01-book-system-end-to-end-authoring-001.js"
+      ],
       "evidence_artifact": "book-system-end-to-end-authoring-qualification-001",
       "overnight_eligible": false,
       "description": "Qualify the exact Book System repaired 48-case synthetic end-to-end authoring composition subject through the stable v2 wrapper: exact predecessor bindings, provider non-success and disagreement preservation, parent-only admission/lifecycle authority, strict current author-subject handling, mandatory parent admission before export freeze, persistent lifecycle-ledger rebinding across non-lifecycle parent successors, version/rollback receipt integration, stale artifact/proof/rights/privacy/provenance blocking, export-freeze versus publication separation, replay/concurrency/atomicity behavior, Prose child non-self-admission, and explicit synthetic-fixture boundaries. PASS is exact-SHA consolidated evidence only and grants no real author, publication, promotion, production, provider canonical-write, document-engine, or new lifecycle authority."
@@ -287,10 +341,24 @@
       "gate_class": "focused",
       "source": "subject",
       "executable": "node",
-      "args": [".github/scripts/a01-system-master-knowledge-recovery-001.js"],
+      "args": [
+        ".github/scripts/a01-system-master-knowledge-recovery-001.js"
+      ],
       "evidence_artifact": "system-master-knowledge-recovery-programming-001",
       "overnight_eligible": false,
       "description": "Supervised first qualification of SYSTEM-MASTER-KNOWLEDGE-RECOVERY-001 using Programming as the proving corpus. Verify exact subject-resident authority/catalog/manifest bytes, process every frozen source record, preserve external Library/archive bytes as unverified when not presented, emit deterministic asset-catalog/trace/source-observation evidence, reject architecture promotion, and keep Second Shift eligibility false. PASS proves pipeline integrity and truthful frozen-corpus processing only; it does not prove full historical byte custody, Programming system admission, implementation completion, Apple-native evidence, production standing, or Second Shift eligibility."
+    },
+    "A01-LOCAL-INFERENCE-BASELINE-001": {
+      "workstream_id": "SYSTEM-MASTER",
+      "gate_class": "focused",
+      "source": "subject",
+      "executable": "node",
+      "args": [
+        ".github/scripts/a01-local-inference-baseline-001.js"
+      ],
+      "evidence_artifact": "a01-local-inference-baseline-001",
+      "overnight_eligible": false,
+      "description": "Run the exact-subject first local A-01 LLM baseline through Lemonade Server only: verify gpt-oss-20b-NPU is registered, capture redacted health/system-info/system-stats, explicitly load the model, execute one fixed deterministic Responses-API prompt, preserve exact request/response plus timing and token-rate evidence, and defer production-model selection until measured comparison. PASS proves one bounded local response on the exact A-01 subject only and grants no production-model, promotion, download, or arbitrary-command authority."
     }
   }
 }
