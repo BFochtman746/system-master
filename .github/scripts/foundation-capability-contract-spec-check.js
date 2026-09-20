@@ -26,6 +26,70 @@ function sectionBodies(text) {
   return out;
 }
 function slug(moduleKey) { return moduleKey.toLowerCase().replaceAll('_', '-'); }
+function requireAll(failures, moduleKey, code, text, needles) {
+  if (needles.some((needle) => !text.includes(needle))) failures.push(`${moduleKey}:${code}`);
+}
+function validateSpecializedContract(entry, text, sections, failures) {
+  if (entry.module_key === 'CHAT') {
+    requireAll(failures, 'CHAT', 'SPECIALIZED_IDENTITY_INCOMPLETE', text, [
+      'C04',
+      'SYSTEM-MASTER-DEVELOPMENT-RESPONSE-GOVERNOR-001'
+    ]);
+    requireAll(failures, 'CHAT', 'SPECIALIZED_WRITER_RULE_INCOMPLETE', sections.get(4) || '', [
+      'canonical durable definition',
+      'second canonical project-state writer'
+    ]);
+    requireAll(failures, 'CHAT', 'SPECIALIZED_DEPENDENCY_BASELINE_INCOMPLETE', sections.get(5) || '', [
+      'governance/CURRENT-AUTHORITY.json',
+      'control-gateway/src/github-mutation-admission.js',
+      'control-gateway/src/a01-supervisor-handoff.js'
+    ]);
+    const s6 = sections.get(6) || '';
+    if (!/fail-closed/i.test(s6) || !/idempotent/i.test(s6)) failures.push('CHAT:SPECIALIZED_FAILURE_IDEMPOTENCY_INCOMPLETE');
+    requireAll(failures, 'CHAT', 'SPECIALIZED_EVIDENCE_TARGET_INCOMPLETE', sections.get(7) || '', [
+      'control-gateway/src/development-response-governor.js',
+      'control-gateway/src/governed-execution-admission.js',
+      '.github/scripts/development-response-governor-qualify.js'
+    ]);
+    requireAll(failures, 'CHAT', 'SPECIALIZED_ACCEPTANCE_COMMAND_INCOMPLETE', sections.get(8) || '', [
+      'node --test',
+      'node .github/scripts/development-response-governor-qualify.js'
+    ]);
+    if (!(sections.get(9) || '').includes('C04/CORE')) failures.push('CHAT:SPECIALIZED_OWNER_BOUNDARY_MISSING');
+    return true;
+  }
+
+  if (entry.module_key === 'EXPECTATION') {
+    requireAll(failures, 'EXPECTATION', 'SPECIALIZED_IDENTITY_INCOMPLETE', text, [
+      'C11',
+      'RESPONSE-EXPECTATION-ENGINE-001'
+    ]);
+    requireAll(failures, 'EXPECTATION', 'SPECIALIZED_WRITER_RULE_INCOMPLETE', sections.get(4) || '', [
+      'no new canonical state writer',
+      'control-gateway/src/response-expectation-engine.js'
+    ]);
+    requireAll(failures, 'EXPECTATION', 'SPECIALIZED_DEPENDENCY_BASELINE_INCOMPLETE', sections.get(5) || '', [
+      'control-gateway/src/response-expectation-engine.js',
+      'control-gateway/src/development-response-governor.js',
+      'verify.sh'
+    ]);
+    const s6 = sections.get(6) || '';
+    if (!/fail-closed/i.test(s6) || !/deterministic/i.test(s6) || !/idempotent/i.test(s6)) failures.push('EXPECTATION:SPECIALIZED_FAILURE_IDEMPOTENCY_INCOMPLETE');
+    requireAll(failures, 'EXPECTATION', 'SPECIALIZED_EVIDENCE_TARGET_INCOMPLETE', sections.get(7) || '', [
+      '.github/scripts/response-expectation-engine-qualify.js',
+      'development-response-governor-qualify.js',
+      'verify.sh'
+    ]);
+    requireAll(failures, 'EXPECTATION', 'SPECIALIZED_ACCEPTANCE_COMMAND_INCOMPLETE', sections.get(8) || '', [
+      'node .github/scripts/response-expectation-engine-qualify.js',
+      'bash ./verify.sh'
+    ]);
+    if (!(sections.get(9) || '').includes('C11/CORE')) failures.push('EXPECTATION:SPECIALIZED_OWNER_BOUNDARY_MISSING');
+    return true;
+  }
+
+  return false;
+}
 
 const authority = readJson(AUTHORITY_REL);
 if (!authority.capability_crosswalk) fail('CROSSWALK_POINTER_ABSENT');
@@ -47,13 +111,16 @@ for (const entry of rows) {
   const text = fs.readFileSync(abs, 'utf8');
   const sections = sectionBodies(text);
   if (PLACEHOLDER.test(text)) failures.push(`${entry.module_key}:PLACEHOLDER_PRESENT`);
-  if (!text.includes(`**Capability** \`${entry.capability_id}\``)) failures.push(`${entry.module_key}:CAPABILITY_ID_MISMATCH`);
   if (!text.includes(`**Owner** \`${entry.owner_path}\``)) failures.push(`${entry.module_key}:OWNER_MISMATCH`);
   if (!text.includes('`governance/CURRENT-AUTHORITY.json`')) failures.push(`${entry.module_key}:AUTHORITY_SELECTOR_MISSING`);
-  if (!text.includes(`\`${authority.capability_crosswalk}\``)) failures.push(`${entry.module_key}:CURRENT_CROSSWALK_MISSING`);
   for (let n = 1; n <= 9; n++) {
     if (!sections.has(n) || !sections.get(n)) failures.push(`${entry.module_key}:SECTION_${n}_EMPTY`);
   }
+
+  if (validateSpecializedContract(entry, text, sections, failures)) continue;
+
+  if (!text.includes(`**Capability** \`${entry.capability_id}\``)) failures.push(`${entry.module_key}:CAPABILITY_ID_MISMATCH`);
+  if (!text.includes(`\`${authority.capability_crosswalk}\``)) failures.push(`${entry.module_key}:CURRENT_CROSSWALK_MISSING`);
   const s4 = sections.get(4) || '';
   if (!s4.includes('Canonical semantic writer:') || !s4.includes('Physical persistence:')) failures.push(`${entry.module_key}:WRITER_RULE_INCOMPLETE`);
   const s5 = sections.get(5) || '';
