@@ -1,0 +1,44 @@
+name: A-01 Engineering Candidate Ingress
+
+on:
+  push:
+    branches:
+      - 'a01-engineering/candidate-ingress-001'
+    paths:
+      - 'control-gateway/python/a01_candidate_ingress.py'
+      - 'tests/test_a01_candidate_ingress.py'
+      - '.github/workflows/a01-engineering-candidate-ingress.yml'
+      - 'governance/control-gateway/A01-ENGINEERING-CANDIDATE-INGRESS-001.json'
+      - 'qualification/a01/engineering/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'control-gateway/python/a01_candidate_ingress.py'
+      - 'tests/test_a01_candidate_ingress.py'
+      - '.github/workflows/a01-engineering-candidate-ingress.yml'
+      - 'governance/control-gateway/A01-ENGINEERING-CANDIDATE-INGRESS-001.json'
+      - 'qualification/a01/engineering/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  candidate-ingress:
+    name: Bounded receive / preserve / no-execute qualification
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact candidate branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Run candidate-ingress acceptance tests
+        shell: bash
+        run: python3 -m unittest tests.test_a01_candidate_ingress -v
+      - name: Re-run existing A-01 Python regression surface
+        shell: bash
+        run: python3 -m unittest discover -s tests -p 'test_a01_*.py' -v

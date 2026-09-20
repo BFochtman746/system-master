@@ -1,0 +1,46 @@
+{
+  "contract_id": "A01-ENGINEERING-CANDIDATE-INGRESS-001",
+  "version": 1,
+  "owner_path": "SYSTEM_MASTER/CORE",
+  "classification": "BOUNDED_A01_SHARED_INFRASTRUCTURE_RECEIVER",
+  "workstream_id": "A01-ENGINEERING-CANDIDATE-INGRESS-001",
+  "target_ref": "a01-engineering/candidate-ingress-001",
+  "implementation": "control-gateway/python/a01_candidate_ingress.py",
+  "tests": "tests/test_a01_candidate_ingress.py",
+  "workflow": ".github/workflows/a01-engineering-candidate-ingress.yml",
+  "fixture": "qualification/a01/engineering/A01-ENGINEERING-CANDIDATE-INGRESS-001/fixture.json",
+  "package_protocol": "control-gateway.a01-candidate-package.v1",
+  "receipt_protocol": "control-gateway.a01-candidate-ingress-receipt.v1",
+  "limits": {
+    "max_package_bytes": 1048576,
+    "max_uncompressed_bytes": 4194304,
+    "max_payload_entries": 64
+  },
+  "required_behavior": [
+    "accept one deterministic test ZIP whose exact outer SHA-256 is supplied by the caller",
+    "validate a strict manifest and reject malformed, duplicate, encrypted, directory, symbolic-link, path-escaping, oversized, content-set-mismatched, size-mismatched, and digest-mismatched packages",
+    "persist the validated package as exact opaque bytes under its SHA-256 content address",
+    "recompute SHA-256 from the persisted file and emit a receipt proving received_sha256 equals stored_sha256",
+    "never extract, import, invoke, execute, schedule, or grant authority to candidate payload bytes"
+  ],
+  "forbidden_authority": [
+    "arbitrary command execution",
+    "candidate payload execution",
+    "archive extraction to the filesystem",
+    "A-01 qualification admission expansion",
+    "GitHub mutation authority expansion",
+    "production or publication authority",
+    "candidate package writes outside the caller-supplied content store"
+  ],
+  "pass_boundary": {
+    "deterministic_fixture_received": true,
+    "malformed_rejected": true,
+    "path_escape_rejected": true,
+    "oversized_rejected": true,
+    "tampered_rejected": true,
+    "exact_bytes_persisted": true,
+    "received_digest_equals_stored_digest": true,
+    "candidate_bytes_executed": false,
+    "existing_a01_python_regressions_required": true
+  }
+}
