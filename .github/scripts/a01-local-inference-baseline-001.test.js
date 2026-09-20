@@ -45,7 +45,7 @@ test('qualifier preserves evidence while redacting local paths and defers produc
 });
 
 test('caller routes exact subject through exact registered A-01 control plane instead of direct self-hosted execution', () => {
-  assert.match(workflow, /uses: BFochtman746\/system-master\/\.github\/workflows\/a01-control-plane-gateway\.yml@main/);
+  assert.match(workflow, /uses: BFochtman746\/system-master\/\.github\/workflows\/a01-control-plane-gateway\.yml@ff9c4a0817f993fac1e4c3005a64b49abe00675b/);
   assert.match(workflow, /qualification_id: A01-LOCAL-INFERENCE-BASELINE-001/);
   assert.match(workflow, /subject_sha: \$\{\{ github\.sha \}\}/);
   assert.equal(workflow.includes('uses: ./.github/workflows/a01-control-plane-gateway.yml'), false);
