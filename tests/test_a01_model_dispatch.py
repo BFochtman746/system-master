@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import subprocess
 import sys
 import tempfile
 import unittest
+import zipfile
 from pathlib import Path
 from unittest import mock
 
@@ -18,9 +20,13 @@ from a01_model_dispatch import (
     DEFAULT_LEMONADE_BASE_URL,
     DEFAULT_MODEL,
     MODEL_DISPATCH_PROTOCOL,
+    OPENCODE_VERSION,
+    OPENCODE_WINDOWS_X64_ARCHIVE_SHA256,
+    OPENCODE_WINDOWS_X64_URL,
     DispatchAmbiguousError,
     ModelDispatchError,
     ModelDispatchFailed,
+    _bootstrap_pinned_opencode,
     _sanitized_environment,
     build_opencode_config,
     dispatch_ai_coding,
@@ -148,6 +154,33 @@ class ModelDispatchTests(unittest.TestCase):
                 dispatch_ai_coding(payload(sha), ctx, root=repo, opencode_executable=str(fake))
             self.assertIn("outside admitted surface", str(caught.exception))
             self.assertEqual((repo / "forbidden.txt").read_text(encoding="utf-8"), "stable\n")
+
+    def test_pinned_opencode_bootstrap_verifies_archive_before_extraction(self):
+        with tempfile.TemporaryDirectory() as td:
+            base = Path(td)
+            source = base / "source.zip"
+            with zipfile.ZipFile(source, "w", compression=zipfile.ZIP_DEFLATED) as bundle:
+                bundle.writestr("nested/opencode.exe", b"MZ-fake-opencode")
+            digest = hashlib.sha256(source.read_bytes()).hexdigest()
+            evidence_dir = base / "evidence"
+            executable = Path(
+                _bootstrap_pinned_opencode(
+                    evidence_dir,
+                    cache_root=base / "cache",
+                    archive_url=source.as_uri(),
+                    expected_sha256=digest,
+                )
+            )
+            self.assertEqual(executable.read_bytes(), b"MZ-fake-opencode")
+            receipt = json.loads((evidence_dir / "opencode-bootstrap.json").read_text(encoding="utf-8"))
+            self.assertEqual(receipt["archive_sha256"], digest)
+            self.assertEqual(receipt["cache_scope"], "runner_temp")
+            self.assertEqual(OPENCODE_VERSION, "v1.18.31")
+            self.assertTrue(OPENCODE_WINDOWS_X64_URL.endswith("/v1.18.31/opencode-windows-x64.zip"))
+            self.assertEqual(
+                OPENCODE_WINDOWS_X64_ARCHIVE_SHA256,
+                "0ecd7ffc7f26390ce7799e7bcd409e4f11c410144308a6a5b0fcdce63d871006",
+            )
 
     def test_transport_and_secret_boundaries_are_fail_closed(self):
         p = payload("a" * 40)

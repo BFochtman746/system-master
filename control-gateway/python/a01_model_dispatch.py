@@ -9,9 +9,11 @@ import signal
 import subprocess
 import tempfile
 import time
+import zipfile
 from pathlib import Path
 from typing import Any, Optional
 from urllib.parse import urlparse
+from urllib.request import Request, urlopen
 
 MODEL_DISPATCH_PROTOCOL = "control-gateway.a01-model-dispatch.v1"
 DEFAULT_LEMONADE_BASE_URL = "http://127.0.0.1:13305/api/v1"
@@ -21,6 +23,10 @@ MAX_PROMPT_BYTES = 64 * 1024
 MAX_CAPTURE_BYTES = 4 * 1024 * 1024
 MAX_ALLOWED_PATHS = 64
 MAX_ALLOWED_COMMANDS = 64
+OPENCODE_VERSION = "v1.18.31"
+OPENCODE_WINDOWS_X64_URL = "https://github.com/anomalyco/opencode/releases/download/v1.18.31/opencode-windows-x64.zip"
+OPENCODE_WINDOWS_X64_ARCHIVE_SHA256 = "0ecd7ffc7f26390ce7799e7bcd409e4f11c410144308a6a5b0fcdce63d871006"
+MAX_OPENCODE_ARCHIVE_BYTES = 70 * 1024 * 1024
 
 _FORBIDDEN_PATH_PARTS = {".git", ".opencode"}
 _FORBIDDEN_COMMAND_PATTERNS = (
@@ -257,6 +263,128 @@ def _write_evidence(path: Path, data: str | bytes) -> None:
         path.write_text(data, encoding="utf-8")
 
 
+def _sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _bootstrap_pinned_opencode(
+    evidence_dir: Path,
+    *,
+    cache_root: Optional[Path] = None,
+    archive_url: str = OPENCODE_WINDOWS_X64_URL,
+    expected_sha256: str = OPENCODE_WINDOWS_X64_ARCHIVE_SHA256,
+) -> str:
+    cache_root = cache_root or (
+        Path(os.environ.get("RUNNER_TEMP") or tempfile.gettempdir())
+        / "system-master-tools"
+        / "opencode"
+        / OPENCODE_VERSION
+    )
+    cache_root.mkdir(parents=True, exist_ok=True)
+    archive = cache_root / "opencode-windows-x64.zip"
+    part = cache_root / "opencode-windows-x64.zip.part"
+    executable = cache_root / "opencode.exe"
+    try:
+        archive_ok = archive.is_file() and _sha256_file(archive) == expected_sha256
+        if not archive_ok:
+            archive.unlink(missing_ok=True)
+            part.unlink(missing_ok=True)
+            request = Request(
+                archive_url,
+                headers={"User-Agent": "system-master-a01-opencode-bootstrap/1"},
+            )
+            digest = hashlib.sha256()
+            total = 0
+            with urlopen(request, timeout=60) as response, part.open("wb") as handle:
+                declared = response.headers.get("Content-Length")
+                if declared and int(declared) > MAX_OPENCODE_ARCHIVE_BYTES:
+                    raise ModelDispatchFailed("Pinned OpenCode archive exceeds bounded download size")
+                while True:
+                    chunk = response.read(1024 * 1024)
+                    if not chunk:
+                        break
+                    total += len(chunk)
+                    if total > MAX_OPENCODE_ARCHIVE_BYTES:
+                        raise ModelDispatchFailed("Pinned OpenCode archive exceeds bounded download size")
+                    digest.update(chunk)
+                    handle.write(chunk)
+            actual = digest.hexdigest()
+            if actual != expected_sha256:
+                raise ModelDispatchFailed(
+                    "Pinned OpenCode archive digest mismatch",
+                    {"expected_sha256": expected_sha256, "actual_sha256": actual},
+                )
+            part.replace(archive)
+
+        actual = _sha256_file(archive)
+        if actual != expected_sha256:
+            raise ModelDispatchFailed(
+                "Pinned OpenCode cache digest mismatch",
+                {"expected_sha256": expected_sha256, "actual_sha256": actual},
+            )
+
+        with zipfile.ZipFile(archive) as bundle:
+            candidates = []
+            for info in bundle.infolist():
+                normalized = info.filename.replace("\\", "/")
+                if info.is_dir():
+                    continue
+                if normalized.startswith("/") or re.match(r"^[A-Za-z]:", normalized):
+                    raise ModelDispatchFailed("Pinned OpenCode archive contains an unsafe path")
+                if ".." in normalized.split("/"):
+                    raise ModelDispatchFailed("Pinned OpenCode archive contains a traversal path")
+                if normalized.rsplit("/", 1)[-1].lower() == "opencode.exe":
+                    candidates.append(info)
+            if len(candidates) != 1:
+                raise ModelDispatchFailed(
+                    "Pinned OpenCode archive does not contain exactly one opencode.exe",
+                    {"candidate_count": len(candidates)},
+                )
+            info = candidates[0]
+            if info.file_size > 100 * 1024 * 1024:
+                raise ModelDispatchFailed("Pinned OpenCode executable exceeds bounded size")
+            with bundle.open(info) as source, executable.open("wb") as target:
+                shutil.copyfileobj(source, target, length=1024 * 1024)
+
+        evidence = {
+            "protocol_version": "control-gateway.a01-opencode-bootstrap.v1",
+            "version": OPENCODE_VERSION,
+            "archive_url": archive_url,
+            "archive_sha256": expected_sha256,
+            "executable_sha256": _sha256_file(executable),
+            "cache_scope": "runner_temp",
+        }
+        _write_evidence(
+            evidence_dir / "opencode-bootstrap.json",
+            _canonical(evidence) + "\n",
+        )
+        return str(executable)
+    except ModelDispatchFailed:
+        part.unlink(missing_ok=True)
+        raise
+    except Exception as exc:
+        part.unlink(missing_ok=True)
+        raise ModelDispatchFailed(
+            "Pinned OpenCode bootstrap failed",
+            {"bootstrap_error": f"{type(exc).__name__}: {exc}"},
+        ) from exc
+
+
+def _resolve_opencode(evidence_dir: Path, explicit: Optional[str] = None) -> str:
+    if explicit:
+        return explicit
+    existing = shutil.which("opencode") or shutil.which("opencode.exe")
+    if existing:
+        return existing
+    if os.name != "nt":
+        raise ModelDispatchFailed("OpenCode executable is not installed or not on PATH")
+    return _bootstrap_pinned_opencode(evidence_dir)
+
+
 def _sanitized_environment(config_json: str) -> dict[str, str]:
     env = os.environ.copy()
     for key in list(env):
@@ -287,9 +415,7 @@ def dispatch_ai_coding(
     if resolved != payload["subject_sha"]:
         raise ModelDispatchFailed("AI_CODING exact subject is not the requested commit")
 
-    opencode = opencode_executable or shutil.which("opencode") or shutil.which("opencode.exe")
-    if not opencode:
-        raise ModelDispatchFailed("OpenCode executable is not installed or not on PATH")
+    opencode = _resolve_opencode(evidence_dir, opencode_executable)
 
     config = build_opencode_config(payload)
     config_json = _canonical(config)
