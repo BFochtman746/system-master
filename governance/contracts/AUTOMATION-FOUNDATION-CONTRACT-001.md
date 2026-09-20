@@ -38,7 +38,7 @@ Fail closed on invalid workflow graph, missing authority, dependency failure, le
 
 ## 7. Evidence target
 
-`qualification/foundation/automation-foundation-001.json`.
+Future evidence target (currently absent until implementation qualification): `qualification/foundation/automation-foundation-001.json`.
 Required contents: `C01`, `AUTOMATION`, owner `SYSTEM_MASTER/PROGRAMMING`, current authority/crosswalk identifiers, exact subject Git blobs, trigger/execute/resume/cancel coverage, writer/fencing/dependency/failure/idempotency tests, acceptance command and `PASS|FAIL`.
 
 ## 8. Acceptance target

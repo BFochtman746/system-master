@@ -39,7 +39,7 @@ Fail closed on revision drift, mutation outside scope, build/test failure, autho
 
 ## 7. Evidence target
 
-`qualification/foundation/code-foundation-001.json`.
+Future evidence target (currently absent until implementation qualification): `qualification/foundation/code-foundation-001.json`.
 Required contents: `C05`, `CODE`, owner `SYSTEM_MASTER/PROGRAMMING`, current authority/crosswalk identifiers, exact subject Git blobs, inspect/patch/build/test/package coverage, revision/writer/dependency/failure/idempotency tests, acceptance command and `PASS|FAIL`.
 
 ## 8. Acceptance target

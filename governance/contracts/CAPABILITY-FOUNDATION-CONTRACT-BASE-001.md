@@ -31,7 +31,7 @@ Authority/schema/dependency/persistence ambiguity fails closed. Retries reuse `i
 
 ## Evidence baseline
 
-Each capability evidence target is `qualification/foundation/<module>-foundation-001.json` and must include capability/module/owner identity, current authority/crosswalk, exact subject Git blobs, route coverage, canonical-writer assertion, dependency/failure/idempotency/owner-boundary test results, acceptance command, final `PASS|FAIL`, and immutable evidence references.
+Each capability future evidence target (currently absent until that capability is qualified) is `qualification/foundation/<module>-foundation-001.json` and must include capability/module/owner identity, current authority/crosswalk, exact subject Git blobs, route coverage, canonical-writer assertion, dependency/failure/idempotency/owner-boundary test results, acceptance command, final `PASS|FAIL`, and immutable evidence references.
 
 ## Acceptance baseline
 

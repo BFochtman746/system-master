@@ -38,7 +38,7 @@ Fail closed on missing user authority, provider identity ambiguity, permission/a
 
 ## 7. Evidence target
 
-`qualification/foundation/calendar-foundation-001.json`.
+Future evidence target (currently absent until implementation qualification): `qualification/foundation/calendar-foundation-001.json`.
 Required contents: `C03`, `CALENDAR`, owner `SYSTEM_MASTER/CONNECTED_ACTIONS`, current authority/crosswalk identifiers, exact subject Git blobs, read/mutation route coverage, consent/provider reconciliation/writer/failure/idempotency tests, acceptance command and `PASS|FAIL`.
 
 ## 8. Acceptance target

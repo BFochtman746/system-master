@@ -38,7 +38,7 @@ Fail closed on missing user authority, ambiguous target, authentication/permissi
 
 ## 7. Evidence target
 
-`qualification/foundation/browser-foundation-001.json`.
+Future evidence target (currently absent until implementation qualification): `qualification/foundation/browser-foundation-001.json`.
 Required contents: `C02`, `BROWSER`, owner `SYSTEM_MASTER/CONNECTED_ACTIONS`, current authority/crosswalk identifiers, exact subject Git blobs, read/write route coverage, consent/side-effect/writer/dependency/idempotency tests, acceptance command and `PASS|FAIL`.
 
 ## 8. Acceptance target

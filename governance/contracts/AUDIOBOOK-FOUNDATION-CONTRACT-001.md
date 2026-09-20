@@ -38,7 +38,7 @@ Fail closed on missing manuscript/version, voice-policy mismatch, render/assembl
 
 ## 7. Evidence target
 
-`qualification/foundation/audiobook-foundation-001.json`.
+Future evidence target (currently absent until implementation qualification): `qualification/foundation/audiobook-foundation-001.json`.
 Required contents: `C00`, `AUDIOBOOK`, owner `SYSTEM_MASTER/MEDIA`, current authority/crosswalk identifiers, exact subject Git blobs, route/render/assembly coverage, writer/dependency/failure/idempotency tests, acceptance command and `PASS|FAIL`.
 
 ## 8. Acceptance target
