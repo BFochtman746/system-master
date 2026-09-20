@@ -178,7 +178,20 @@ def main() -> int:
             )
             result_row = worker.consume_dispatch(claim.dispatch_id, now=now)
             if result_row.get("state") != "SUCCEEDED" or result_row.get("terminal_state") != "VALIDATING":
-                raise RuntimeError("AI_CODING smoke did not stop at independent-evaluator barrier")
+                diagnostic = {
+                    "state": result_row.get("state"),
+                    "terminal_state": result_row.get("terminal_state"),
+                    "error_class": result_row.get("error_class"),
+                    "error_message": result_row.get("error_message"),
+                    "result_json": result_row.get("result_json"),
+                }
+                (evidence_root / "second-shift-001g-ai-coding-smoke-failure.json").write_text(
+                    json.dumps(diagnostic, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+                )
+                raise RuntimeError(
+                    "AI_CODING smoke did not stop at independent-evaluator barrier: "
+                    + json.dumps(diagnostic, sort_keys=True)
+                )
             staged = json.loads(result_row.get("result_json") or "{}")
             candidate = staged.get("result")
             if not isinstance(candidate, dict):
