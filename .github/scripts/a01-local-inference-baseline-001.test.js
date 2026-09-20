@@ -44,9 +44,10 @@ test('qualifier preserves evidence while redacting local paths and defers produc
   assert.match(qualifier, /LOCAL_LLM_SENTINEL_MISSING/);
 });
 
-test('caller routes through the existing A-01 control plane instead of direct self-hosted execution', () => {
-  assert.match(workflow, /uses: \.\/\.github\/workflows\/a01-control-plane-gateway\.yml/);
+test('caller routes exact subject through canonical main A-01 control plane instead of direct self-hosted execution', () => {
+  assert.match(workflow, /uses: BFochtman746\/system-master\/\.github\/workflows\/a01-control-plane-gateway\.yml@main/);
   assert.match(workflow, /qualification_id: A01-LOCAL-INFERENCE-BASELINE-001/);
   assert.match(workflow, /subject_sha: \$\{\{ github\.sha \}\}/);
+  assert.equal(workflow.includes('uses: ./.github/workflows/a01-control-plane-gateway.yml'), false);
   assert.equal(workflow.includes('runs-on: [self-hosted, Windows, X64]'), false);
 });

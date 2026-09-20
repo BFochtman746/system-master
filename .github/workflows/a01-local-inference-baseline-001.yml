@@ -29,9 +29,9 @@ jobs:
         run: node .github/scripts/a01-local-inference-baseline-001.test.js
 
   qualify:
-    name: Route exact subject through A-01 control plane
+    name: Route exact subject through canonical A-01 control plane
     needs: preflight
-    uses: ./.github/workflows/a01-control-plane-gateway.yml
+    uses: BFochtman746/system-master/.github/workflows/a01-control-plane-gateway.yml@main
     with:
       qualification_id: A01-LOCAL-INFERENCE-BASELINE-001
       workstream_id: SYSTEM-MASTER
