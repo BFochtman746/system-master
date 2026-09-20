@@ -1,108 +1,149 @@
 # Foundation Closure Census 001 - Disposition Matrix
 
-Rebuilt 2026-09-14 under `CURRENT-AUTHORITY-005` / `SYSTEM-TOPOLOGY-007`.
+Generated 2026-09-19T21:43:11.762Z under `CURRENT-AUTHORITY-005` / `SYSTEM-TOPOLOGY-007`.
 
-Inventory authority: `SYSTEM-MASTER-CAPABILITY-CROSSWALK-003` selected through `CURRENT-AUTHORITY-005`  
-Ownership consistency: `SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006`  
-Evidence authority: `governance/census/FOUNDATION-CLOSURE-EVIDENCE-REGISTRY-001.json`
+Inventory authority: `governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json` selected by `governance/CURRENT-AUTHORITY.json`
+Ownership consistency: `SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006`
+Crosswalk: `SYSTEM-MASTER-CAPABILITY-CROSSWALK-003`
+Evidence registry: `governance/census/FOUNDATION-CLOSURE-EVIDENCE-REGISTRY-001.json`
 
-> Historical census/P6 module-allocation artifacts remain provenance and evidence only. They do not enumerate or define the current capability inventory. Current rows enumerate from the capability crosswalk selected by `CURRENT-AUTHORITY-005`; the current allocation is a fail-closed ownership/deferred consistency check.
+Entries: 50 capability + 16 platform = 66 total.
 
-> Contract prose is specification, not acceptance evidence. `COMPLETE_WITH_EVIDENCE` requires a current-authority PASS receipt whose exact subject Git blobs still match. Historical PASS receipts remain preserved when their subjects drift, but they do not transfer PASS to changed current subjects.
+> Historical census/P6 module-allocation evidence is provenance only. Current rows are enumerated exclusively from the authority-selected capability crosswalk; allocation is a fail-closed ownership/deferred consistency check.
 
-> All 36 currently owned/programmed capabilities (C00-C34 and C40) now have populated nine-section Foundation contract specifications. They remain `ACTIVE_GAP` until current-authority implementation evidence is qualified and admitted.
+> Populated contract prose is specification, not acceptance evidence. COMPLETE_WITH_EVIDENCE requires a current-authority PASS receipt whose exact subject blobs still match.
 
 ## Disposition summary
 
 | State | Rows |
 | --- | ---: |
-| `COMPLETE_WITH_EVIDENCE` | 0 |
-| `ACTIVE_GAP` | 50 |
+| `COMPLETE_WITH_EVIDENCE` | 13 |
+| `ACTIVE_GAP` | 37 |
 | `DURABLY_BLOCKED_EXTERNAL_HUMAN_PRIVATE_NATIVE` | 0 |
 | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | 16 |
 | **Total** | **66** |
 
-**Foundation 1.0 completion with evidence: 0% (0 of 50 in-scope rows).**
+**Foundation 1.0 completion with evidence: 26% (13 of 50 in-scope rows).**
 
-## Current disposition matrix
+## Disposition matrix
 
-| ID | Capability / requirement | Canonical owner | State | Current disposition |
-| --- | --- | --- | --- | --- |
-| `C00` | AUDIOBOOK | SYSTEM_MASTER/MEDIA | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-| `C01` | AUTOMATION | SYSTEM_MASTER/PROGRAMMING | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-| `C02` | BROWSER | SYSTEM_MASTER/CONNECTED_ACTIONS | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-| `C03` | CALENDAR | SYSTEM_MASTER/CONNECTED_ACTIONS | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-| `C04` | CHAT | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-| `C05` | CODE | SYSTEM_MASTER/PROGRAMMING | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-| `C06` | COMMS | SYSTEM_MASTER/CONNECTED_ACTIONS | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-| `C07` | CURRICULUM | SYSTEM_MASTER/LEARNING | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-| `C08` | DATA | SYSTEM_MASTER/SPREADSHEET_DATA | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-| `C09` | DOCX | SYSTEM_MASTER/DOCUMENTS | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-| `C10` | EXCEL | SYSTEM_MASTER/SPREADSHEET_DATA | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-| `C11` | EXPECTATION | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-| `C12` | EXPERIENCE | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-| `C13` | FILE | SYSTEM_MASTER/DOCUMENTS | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-| `C14` | GEO | SYSTEM_MASTER/RESEARCH_KNOWLEDGE | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-| `C15` | IMAGE | SYSTEM_MASTER/MEDIA | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-| `C16` | IMG-INGEST | SYSTEM_MASTER/DOCUMENTS | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-| `C17` | KNOWLEDGE | SYSTEM_MASTER/RESEARCH_KNOWLEDGE | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-| `C18` | LEARNING | SYSTEM_MASTER/LEARNING | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-| `C19` | LEDGER | SYSTEM_MASTER/SPREADSHEET_DATA | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-| `C20` | LOCALAI | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-| `C21` | MANUSCRIPT | SYSTEM_MASTER/BOOK | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-| `C22` | MATH | SYSTEM_MASTER/SPREADSHEET_DATA | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-| `C23` | MEDIA | SYSTEM_MASTER/MEDIA | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-| `C24` | OCR | SYSTEM_MASTER/DOCUMENTS | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-| `C25` | PDF | SYSTEM_MASTER/DOCUMENTS | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-| `C26` | PHOTO | SYSTEM_MASTER/MEDIA | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-| `C27` | PLUGINS | SYSTEM_MASTER/CONNECTED_ACTIONS | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-| `C28` | PPTX | SYSTEM_MASTER/DOCUMENTS | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-| `C29` | PROJECTS | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-| `C30` | RESEARCH | SYSTEM_MASTER/RESEARCH_KNOWLEDGE | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-| `C31` | STORYBIBLE | SYSTEM_MASTER/BOOK | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-| `C32` | VIDEO | SYSTEM_MASTER/MEDIA | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-| `C33` | VOICE | SYSTEM_MASTER/MEDIA | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-| `C34` | WRITING | SYSTEM_MASTER/BOOK | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-| `C35` | AIINCOME | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Deferred until Foundation 1.0 closure. |
-| `C36` | CAD | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Headless interop only. |
-| `C37` | PHONEOPS | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Absorbed into Experience/Automation foundation. |
-| `C38` | PHYSICALAI | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Deferred optional. |
-| `C39` | PORTFOLIO | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Deferred until Foundation 1.0 closure. |
-| `C40` | WEBSITE_BUILDING | SYSTEM_MASTER/PROGRAMMING | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-| `C41` | RESERVED | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Reserved unallocated capability identifier. |
-| `C42` | RESERVED | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Reserved unallocated capability identifier. |
-| `C43` | RESERVED | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Reserved unallocated capability identifier. |
-| `C44` | RESERVED | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Reserved unallocated capability identifier. |
-| `C45` | RESERVED | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Reserved unallocated capability identifier. |
-| `C46` | RESERVED | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Reserved unallocated capability identifier. |
-| `C47` | RESERVED | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Reserved unallocated capability identifier. |
-| `C48` | RESERVED | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Reserved unallocated capability identifier. |
-| `C49` | RESERVED | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Reserved unallocated capability identifier. |
-| `P00` | P00 | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Historical PASS receipt preserved, but current-invalid: `SUBJECT_DRIFT:governance/CURRENT-AUTHORITY.json`; fresh current-subject qualification required. |
-| `P01` | P01 | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Historical PASS receipt preserved, but current-invalid: `SUBJECT_DRIFT:governance/CURRENT-AUTHORITY.json`; fresh current-subject qualification required. |
-| `P02` | P02 | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Historical PASS receipt preserved, but current-invalid: `SUBJECT_DRIFT:governance/CURRENT-AUTHORITY.json`; fresh current-subject qualification required. |
-| `P03` | P03 | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Historical PASS receipt preserved, but current-invalid: `SUBJECT_DRIFT:governance/CURRENT-AUTHORITY.json`; fresh current-subject qualification required. |
-| `P04` | P04 | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Historical PASS receipt preserved, but current-invalid: `SUBJECT_DRIFT:governance/CURRENT-AUTHORITY.json`; fresh current-subject qualification required. |
-| `P05` | P05 | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-| `P06` | P06 | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-| `P07` | P07 | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-| `P08` | P08 | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-| `P09` | P09 | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-| `P10` | P10 | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-| `P11` | P11 | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-| `P12` | P12 | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-| `P13` | P13 | SYSTEM_MASTER/CORE | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Absorbed into C20 LOCALAI. |
-| `P14` | P14 | SYSTEM_MASTER/CORE | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | Absorbed into C27 PLUGINS. |
-| `P15` | P15 | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | Contract populated; current-authority Foundation evidence receipt not registered. |
-
-## Evidence-complete rows
-
-`NONE` under the current exact subjects. The historical P00-P04 PASS receipts remain preserved in `FOUNDATION-CLOSURE-EVIDENCE-REGISTRY-001.json`, but all five bind an earlier `CURRENT-AUTHORITY.json` Git blob and therefore do not transfer completion to the current authority subject.
+| ID | Capability / requirement | Owner | State | Missing required | Gap / blocker | Evidence / successor |
+| --- | --- | --- | --- | ---: | --- | --- |
+| `C00` | AUDIOBOOK | SYSTEM_MASTER/MEDIA | `ACTIVE_GAP` | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target | governance/contracts/AUDIOBOOK-FOUNDATION-CONTRACT-001.md |
+| `C01` | AUTOMATION | SYSTEM_MASTER/PROGRAMMING | `ACTIVE_GAP` | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target | governance/contracts/AUTOMATION-FOUNDATION-CONTRACT-001.md |
+| `C02` | BROWSER | SYSTEM_MASTER/CONNECTED_ACTIONS | `ACTIVE_GAP` | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target | governance/contracts/BROWSER-FOUNDATION-CONTRACT-001.md |
+| `C03` | CALENDAR | SYSTEM_MASTER/CONNECTED_ACTIONS | `ACTIVE_GAP` | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target | governance/contracts/CALENDAR-FOUNDATION-CONTRACT-001.md |
+| `C04` | CHAT | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | 0/9 | Contract may be populated, but no current-authority Foundation evidence receipt is registered. | governance/contracts/CHAT-FOUNDATION-CONTRACT-001.md |
+| `C05` | CODE | SYSTEM_MASTER/PROGRAMMING | `ACTIVE_GAP` | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target | governance/contracts/CODE-FOUNDATION-CONTRACT-001.md |
+| `C06` | COMMS | SYSTEM_MASTER/CONNECTED_ACTIONS | `ACTIVE_GAP` | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target | governance/contracts/COMMS-FOUNDATION-CONTRACT-001.md |
+| `C07` | CURRICULUM | SYSTEM_MASTER/LEARNING | `ACTIVE_GAP` | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target | governance/contracts/CURRICULUM-FOUNDATION-CONTRACT-001.md |
+| `C08` | DATA | SYSTEM_MASTER/SPREADSHEET_DATA | `ACTIVE_GAP` | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target | governance/contracts/DATA-FOUNDATION-CONTRACT-001.md |
+| `C09` | DOCX | SYSTEM_MASTER/DOCUMENTS | `ACTIVE_GAP` | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target | governance/contracts/DOCX-FOUNDATION-CONTRACT-001.md |
+| `C10` | EXCEL | SYSTEM_MASTER/SPREADSHEET_DATA | `ACTIVE_GAP` | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target | governance/contracts/EXCEL-FOUNDATION-CONTRACT-001.md |
+| `C11` | EXPECTATION | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | 0/9 | Contract may be populated, but no current-authority Foundation evidence receipt is registered. | governance/contracts/EXPECTATION-FOUNDATION-CONTRACT-001.md |
+| `C12` | EXPERIENCE | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target | governance/contracts/EXPERIENCE-FOUNDATION-CONTRACT-001.md |
+| `C13` | FILE | SYSTEM_MASTER/DOCUMENTS | `ACTIVE_GAP` | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target | governance/contracts/FILE-FOUNDATION-CONTRACT-001.md |
+| `C14` | GEO | SYSTEM_MASTER/RESEARCH_KNOWLEDGE | `ACTIVE_GAP` | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target | governance/contracts/GEO-FOUNDATION-CONTRACT-001.md |
+| `C15` | IMAGE | SYSTEM_MASTER/MEDIA | `ACTIVE_GAP` | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target | governance/contracts/IMAGE-FOUNDATION-CONTRACT-001.md |
+| `C16` | IMG-INGEST | SYSTEM_MASTER/DOCUMENTS | `ACTIVE_GAP` | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target | governance/contracts/IMG-INGEST-FOUNDATION-CONTRACT-001.md |
+| `C17` | KNOWLEDGE | SYSTEM_MASTER/RESEARCH_KNOWLEDGE | `ACTIVE_GAP` | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target | governance/contracts/KNOWLEDGE-FOUNDATION-CONTRACT-001.md |
+| `C18` | LEARNING | SYSTEM_MASTER/LEARNING | `ACTIVE_GAP` | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target | governance/contracts/LEARNING-FOUNDATION-CONTRACT-001.md |
+| `C19` | LEDGER | SYSTEM_MASTER/SPREADSHEET_DATA | `ACTIVE_GAP` | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target | governance/contracts/LEDGER-FOUNDATION-CONTRACT-001.md |
+| `C20` | LOCALAI | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target | governance/contracts/LOCALAI-FOUNDATION-CONTRACT-001.md |
+| `C21` | MANUSCRIPT | SYSTEM_MASTER/BOOK | `ACTIVE_GAP` | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target | governance/contracts/MANUSCRIPT-FOUNDATION-CONTRACT-001.md |
+| `C22` | MATH | SYSTEM_MASTER/SPREADSHEET_DATA | `ACTIVE_GAP` | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target | governance/contracts/MATH-FOUNDATION-CONTRACT-001.md |
+| `C23` | MEDIA | SYSTEM_MASTER/MEDIA | `ACTIVE_GAP` | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target | governance/contracts/MEDIA-FOUNDATION-CONTRACT-001.md |
+| `C24` | OCR | SYSTEM_MASTER/DOCUMENTS | `ACTIVE_GAP` | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target | governance/contracts/OCR-FOUNDATION-CONTRACT-001.md |
+| `C25` | PDF | SYSTEM_MASTER/DOCUMENTS | `ACTIVE_GAP` | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target | governance/contracts/PDF-FOUNDATION-CONTRACT-001.md |
+| `C26` | PHOTO | SYSTEM_MASTER/MEDIA | `ACTIVE_GAP` | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target | governance/contracts/PHOTO-FOUNDATION-CONTRACT-001.md |
+| `C27` | PLUGINS | SYSTEM_MASTER/CONNECTED_ACTIONS | `ACTIVE_GAP` | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target | governance/contracts/PLUGINS-FOUNDATION-CONTRACT-001.md |
+| `C28` | PPTX | SYSTEM_MASTER/DOCUMENTS | `ACTIVE_GAP` | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target | governance/contracts/PPTX-FOUNDATION-CONTRACT-001.md |
+| `C29` | PROJECTS | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target | governance/contracts/PROJECTS-FOUNDATION-CONTRACT-001.md |
+| `C30` | RESEARCH | SYSTEM_MASTER/RESEARCH_KNOWLEDGE | `ACTIVE_GAP` | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target | governance/contracts/RESEARCH-FOUNDATION-CONTRACT-001.md |
+| `C31` | STORYBIBLE | SYSTEM_MASTER/BOOK | `ACTIVE_GAP` | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target | governance/contracts/STORYBIBLE-FOUNDATION-CONTRACT-001.md |
+| `C32` | VIDEO | SYSTEM_MASTER/MEDIA | `ACTIVE_GAP` | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target | governance/contracts/VIDEO-FOUNDATION-CONTRACT-001.md |
+| `C33` | VOICE | SYSTEM_MASTER/MEDIA | `ACTIVE_GAP` | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target | governance/contracts/VOICE-FOUNDATION-CONTRACT-001.md |
+| `C34` | WRITING | SYSTEM_MASTER/BOOK | `ACTIVE_GAP` | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target | governance/contracts/WRITING-FOUNDATION-CONTRACT-001.md |
+| `C35` | AIINCOME | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | 0/9 | Explicitly out of scope by current authority-selected crosswalk (EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY__DEFERRED_UNTIL_FOUNDATION_1_0_CLOSURE). | governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json |
+| `C36` | CAD | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | 0/9 | Explicitly out of scope by current authority-selected crosswalk (EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY__HEADLESS_INTEROP_ONLY). | governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json |
+| `C37` | PHONEOPS | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | 0/9 | Explicitly out of scope by current authority-selected crosswalk (EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY__ABSORBED_EXPERIENCE_AUTOMATION_FOUNDATION). | governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json |
+| `C38` | PHYSICALAI | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | 0/9 | Explicitly out of scope by current authority-selected crosswalk (EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY__DEFERRED_OPTIONAL). | governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json |
+| `C39` | PORTFOLIO | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | 0/9 | Explicitly out of scope by current authority-selected crosswalk (EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY__DEFERRED_UNTIL_FOUNDATION_1_0_CLOSURE). | governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json |
+| `C40` | WEBSITE_BUILDING | SYSTEM_MASTER/PROGRAMMING | `ACTIVE_GAP` | 9/9 | No Foundation contract at governance/contracts/WEBSITE_BUILDING-FOUNDATION-CONTRACT-001.md. | UNPOPULATED |
+| `C41` | C41 | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | 0/9 | Reserved unallocated capability identifier by current authority-selected crosswalk. | governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json |
+| `C42` | C42 | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | 0/9 | Reserved unallocated capability identifier by current authority-selected crosswalk. | governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json |
+| `C43` | C43 | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | 0/9 | Reserved unallocated capability identifier by current authority-selected crosswalk. | governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json |
+| `C44` | C44 | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | 0/9 | Reserved unallocated capability identifier by current authority-selected crosswalk. | governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json |
+| `C45` | C45 | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | 0/9 | Reserved unallocated capability identifier by current authority-selected crosswalk. | governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json |
+| `C46` | C46 | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | 0/9 | Reserved unallocated capability identifier by current authority-selected crosswalk. | governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json |
+| `C47` | C47 | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | 0/9 | Reserved unallocated capability identifier by current authority-selected crosswalk. | governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json |
+| `C48` | C48 | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | 0/9 | Reserved unallocated capability identifier by current authority-selected crosswalk. | governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json |
+| `C49` | C49 | UNPOPULATED | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | 0/9 | Reserved unallocated capability identifier by current authority-selected crosswalk. | governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json |
+| `P00` | P00 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | 0/9 | Current-authority Foundation evidence receipt PASS with exact subject bindings. | github-actions-run:34976730080; github-actions-artifact:10399092723:sha256:26cd50acf074b73d6d6d03566747513991ade19876429f0a6424ccc9396f2250 |
+| `P01` | P01 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | 0/9 | Current-authority Foundation evidence receipt PASS with exact subject bindings. | github-actions-run:34869129891; github-actions-artifact:10358422012:sha256:072d65a7c45375f574687043f7712d2ac5e84b9e18dc211d15ee656bbf9a0f60 |
+| `P02` | P02 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | 0/9 | Current-authority Foundation evidence receipt PASS with exact subject bindings. | github-actions-run:34870093312; github-actions-artifact:10359180477:sha256:ce9d143fe744ca99149ee1812b1e8649d6e56b9bd01d53b6a42c635cdb64affa |
+| `P03` | P03 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | 0/9 | Current-authority Foundation evidence receipt PASS with exact subject bindings. | github-actions-run:34976730087; github-actions-artifact:10399801228:sha256:b1bad7a7ddc3039db3d05d71d1a08c883ff8dc6d08ca7006b57a11dceddf355c |
+| `P04` | P04 | SYSTEM_MASTER/CORE | `ACTIVE_GAP` | 0/9 | Foundation evidence receipt is not current-valid (SUBJECT_DRIFT:.github/workflows/p04-content-addressed-authority-write-foundation-qualification.yml). | governance/contracts/P04-FOUNDATION-CONTRACT-001.md |
+| `P05` | P05 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | 0/9 | Current-authority Foundation evidence receipt PASS with exact subject bindings. | github-actions-run:34976730359; github-actions-artifact:10400125276:sha256:873f607d669c4cb2b01e69f376807b99d80b32a97bc61e06431fe78b262f8a48 |
+| `P06` | P06 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | 0/9 | Current-authority Foundation evidence receipt PASS with exact subject bindings. | github-actions-run:34976730308; github-actions-artifact:10399627812:sha256:9ac39deb26070ddb945df5a1a31735b8b3c7ecd6a20c86b9446ca83d55a53c8e |
+| `P07` | P07 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | 0/9 | Current-authority Foundation evidence receipt PASS with exact subject bindings. | github-actions-run:34976730150; github-actions-artifact:10399581960:sha256:82fe5955dc0ce0a4b6162ebc24adca33ad90c8ff1851fbd4606daaad1284b672 |
+| `P08` | P08 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | 0/9 | Current-authority Foundation evidence receipt PASS with exact subject bindings. | github-actions-run:34976731472; github-actions-artifact:10399109324:sha256:302c240834035abdf340bf7eb7b8bd550da4280dd5a96fb24cff27723cde3655 |
+| `P09` | P09 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | 0/9 | Current-authority Foundation evidence receipt PASS with exact subject bindings. | github-actions-run:34976731982; github-actions-artifact:10399089362:sha256:1b0f33fbd480976776cd5f2f47b20a208de27e142ce11a00472c9e8f4a6358f1 |
+| `P10` | P10 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | 0/9 | Current-authority Foundation evidence receipt PASS with exact subject bindings. | github-actions-run:35027315783; github-actions-artifact:10420056817:sha256:3236d99e3f6681c17c4ba49c66dd787013ebe4dced548b393bd0a37ca7853795 |
+| `P11` | P11 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | 0/9 | Current-authority Foundation evidence receipt PASS with exact subject bindings. | github-actions-run:35027315783; github-actions-artifact:10420056817:sha256:3236d99e3f6681c17c4ba49c66dd787013ebe4dced548b393bd0a37ca7853795 |
+| `P12` | P12 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | 0/9 | Current-authority Foundation evidence receipt PASS with exact subject bindings. | github-actions-run:35027315783; github-actions-artifact:10420056817:sha256:3236d99e3f6681c17c4ba49c66dd787013ebe4dced548b393bd0a37ca7853795 |
+| `P13` | P13 | SYSTEM_MASTER/CORE | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | 0/9 | Absorbed into C20 by current authority-selected crosswalk. | successor=C20; governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json |
+| `P14` | P14 | SYSTEM_MASTER/CORE | `EXPLICITLY_OUT_OF_SCOPE_WITH_AUTHORITY` | 0/9 | Absorbed into C27 by current authority-selected crosswalk. | successor=C27; governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json |
+| `P15` | P15 | SYSTEM_MASTER/CORE | `COMPLETE_WITH_EVIDENCE` | 0/9 | Current-authority Foundation evidence receipt PASS with exact subject bindings. | github-actions-run:35027315783; github-actions-artifact:10420056817:sha256:3236d99e3f6681c17c4ba49c66dd787013ebe4dced548b393bd0a37ca7853795 |
 
 ## Unresolved gap successor register
 
-50 `ACTIVE_GAP` rows remain. Ordering is shared platform dependency first, then the current nine-peer order from Topology 007: CORE, LEARNING, BOOK, DOCUMENTS, SPREADSHEET_DATA, MEDIA, CONNECTED_ACTIONS, RESEARCH_KNOWLEDGE, PROGRAMMING.
+37 ACTIVE_GAP rows remain, ordered by shared platform dependency first and then current nine-peer owner order.
 
-**Exact next ACTIVE_GAP: `P00` - Authority pointer of record.**
+| Gap | ID | Owner | Missing | Reason |
+| --- | --- | --- | ---: | --- |
+| `FCC-002-GAP-P04` | P04 P04 | SYSTEM_MASTER/CORE | 0/9 | Foundation evidence receipt is not current-valid (SUBJECT_DRIFT:.github/workflows/p04-content-addressed-authority-write-foundation-qualification.yml). |
+| `FCC-002-GAP-C04` | C04 CHAT | SYSTEM_MASTER/CORE | 0/9 | Contract may be populated, but no current-authority Foundation evidence receipt is registered. |
+| `FCC-002-GAP-C11` | C11 EXPECTATION | SYSTEM_MASTER/CORE | 0/9 | Contract may be populated, but no current-authority Foundation evidence receipt is registered. |
+| `FCC-002-GAP-C12` | C12 EXPERIENCE | SYSTEM_MASTER/CORE | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target |
+| `FCC-002-GAP-C20` | C20 LOCALAI | SYSTEM_MASTER/CORE | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target |
+| `FCC-002-GAP-C29` | C29 PROJECTS | SYSTEM_MASTER/CORE | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target |
+| `FCC-002-GAP-C07` | C07 CURRICULUM | SYSTEM_MASTER/LEARNING | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target |
+| `FCC-002-GAP-C18` | C18 LEARNING | SYSTEM_MASTER/LEARNING | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target |
+| `FCC-002-GAP-C21` | C21 MANUSCRIPT | SYSTEM_MASTER/BOOK | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target |
+| `FCC-002-GAP-C31` | C31 STORYBIBLE | SYSTEM_MASTER/BOOK | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target |
+| `FCC-002-GAP-C34` | C34 WRITING | SYSTEM_MASTER/BOOK | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target |
+| `FCC-002-GAP-C09` | C09 DOCX | SYSTEM_MASTER/DOCUMENTS | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target |
+| `FCC-002-GAP-C13` | C13 FILE | SYSTEM_MASTER/DOCUMENTS | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target |
+| `FCC-002-GAP-C16` | C16 IMG-INGEST | SYSTEM_MASTER/DOCUMENTS | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target |
+| `FCC-002-GAP-C24` | C24 OCR | SYSTEM_MASTER/DOCUMENTS | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target |
+| `FCC-002-GAP-C25` | C25 PDF | SYSTEM_MASTER/DOCUMENTS | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target |
+| `FCC-002-GAP-C28` | C28 PPTX | SYSTEM_MASTER/DOCUMENTS | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target |
+| `FCC-002-GAP-C08` | C08 DATA | SYSTEM_MASTER/SPREADSHEET_DATA | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target |
+| `FCC-002-GAP-C10` | C10 EXCEL | SYSTEM_MASTER/SPREADSHEET_DATA | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target |
+| `FCC-002-GAP-C19` | C19 LEDGER | SYSTEM_MASTER/SPREADSHEET_DATA | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target |
+| `FCC-002-GAP-C22` | C22 MATH | SYSTEM_MASTER/SPREADSHEET_DATA | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target |
+| `FCC-002-GAP-C00` | C00 AUDIOBOOK | SYSTEM_MASTER/MEDIA | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target |
+| `FCC-002-GAP-C15` | C15 IMAGE | SYSTEM_MASTER/MEDIA | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target |
+| `FCC-002-GAP-C23` | C23 MEDIA | SYSTEM_MASTER/MEDIA | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target |
+| `FCC-002-GAP-C26` | C26 PHOTO | SYSTEM_MASTER/MEDIA | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target |
+| `FCC-002-GAP-C32` | C32 VIDEO | SYSTEM_MASTER/MEDIA | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target |
+| `FCC-002-GAP-C33` | C33 VOICE | SYSTEM_MASTER/MEDIA | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target |
+| `FCC-002-GAP-C02` | C02 BROWSER | SYSTEM_MASTER/CONNECTED_ACTIONS | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target |
+| `FCC-002-GAP-C03` | C03 CALENDAR | SYSTEM_MASTER/CONNECTED_ACTIONS | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target |
+| `FCC-002-GAP-C06` | C06 COMMS | SYSTEM_MASTER/CONNECTED_ACTIONS | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target |
+| `FCC-002-GAP-C27` | C27 PLUGINS | SYSTEM_MASTER/CONNECTED_ACTIONS | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target |
+| `FCC-002-GAP-C14` | C14 GEO | SYSTEM_MASTER/RESEARCH_KNOWLEDGE | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target |
+| `FCC-002-GAP-C17` | C17 KNOWLEDGE | SYSTEM_MASTER/RESEARCH_KNOWLEDGE | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target |
+| `FCC-002-GAP-C30` | C30 RESEARCH | SYSTEM_MASTER/RESEARCH_KNOWLEDGE | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target |
+| `FCC-002-GAP-C01` | C01 AUTOMATION | SYSTEM_MASTER/PROGRAMMING | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target |
+| `FCC-002-GAP-C05` | C05 CODE | SYSTEM_MASTER/PROGRAMMING | 8/9 | Contract exists but 8/9 required sections unpopulated: contract_or_interface, ingress_routes, egress_routes, persistence_or_canonical_writer, dependencies, failure_semantics, evidence_target, test_or_acceptance_target |
+| `FCC-002-GAP-C40` | C40 WEBSITE_BUILDING | SYSTEM_MASTER/PROGRAMMING | 9/9 | No Foundation contract at governance/contracts/WEBSITE_BUILDING-FOUNDATION-CONTRACT-001.md. |
 
-Continue `P00-P12`, `P15`, then owner-valid capability gaps in dependency-valid order. `PROSE` receives no current successor because it is terminally retired.
+## Exact next ACTIVE_GAP
+
+`P04`
+
+## Machine-readable required columns
+
+The `--json` form contains all required row fields, including authority boundary, exact evidence pointer, successor, and the current-inventory guard.
