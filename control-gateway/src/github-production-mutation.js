@@ -328,9 +328,10 @@ export class GitHubReceiptConsumingCasWriter {
     this.transport = transport;
   }
 
-  async execute({ grant, plan, leaseReceipt = null }) {
+  async execute({ grant, plan, leaseReceipt = null, replayOnly = false }) {
     assertGrantMatchesPlan(grant, plan);
     if (leaseReceipt) validateLeaseReceiptForGrant(leaseReceipt, grant);
+    if (typeof replayOnly !== 'boolean') fail('PRODUCTION_MUTATION_REPLAY_MODE_INVALID', 'replayOnly must be boolean');
     if (repositoryFromTransport(this.transport) !== grant.repository) fail('PRODUCTION_MUTATION_TRANSPORT_REPOSITORY_MISMATCH', 'writer transport targets a different repository');
     const predecessor = grant.observed_predecessor_sha;
     const expectedMessage = exactCommitMessage(plan, grant, leaseReceipt);
@@ -351,6 +352,7 @@ export class GitHubReceiptConsumingCasWriter {
       if (!replayMatches) fail('PRODUCTION_MUTATION_PREDECESSOR_MISMATCH', 'target ref moved away from exact admitted predecessor');
       return makeExecutionReceipt({ grant, resultCommitSha: current.sha, resultTreeSha: desiredTree.sha, replayed: true });
     }
+    if (replayOnly) fail('PRODUCTION_MUTATION_REPLAY_TARGET_REWOUND', 'replay-only execution refuses to create a new commit from the predecessor');
 
     const parent = await this.transport.getCommit(predecessor);
     if (!parent || parent.sha !== predecessor || !SHA1_RE.test(parent.tree_sha ?? '')) fail('PRODUCTION_MUTATION_PREDECESSOR_INVALID', 'admitted predecessor commit metadata is invalid');
