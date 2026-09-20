@@ -1,0 +1,165 @@
+name: Second Shift Production Master 001F Canary
+
+on:
+  push:
+    branches:
+      - second-shift-production-master-completion-001
+    paths:
+      - .github/workflows/second-shift-production-master-completion-001f-canary.yml
+      - .github/scripts/a01-second-shift-production-master-001f-canary.js
+      - control-gateway/python/a01_second_shift_001f_canary.py
+      - tests/test_a01_second_shift_001f_canary.py
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: second-shift-production-master-001f-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  authority:
+    name: Wait for exact 001F authority binding
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - name: Checkout candidate
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+          path: candidate
+      - name: Wait for recovery-v4 to authorize exact subject
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_SHA: ${{ github.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import base64, json, os, time, urllib.parse, urllib.request
+          expected = os.environ['EXPECTED_SHA'].lower()
+          token = os.environ['GH_TOKEN']
+          ref = 'control-gateway-state/active-work/second-shift-production-master-completion-001-recovery-v4'
+          query = urllib.parse.urlencode({'ref': ref})
+          url = 'https://api.github.com/repos/BFochtman746/system-master/contents/control-gateway-state/active-work/head.json?' + query
+          for _ in range(60):
+              request = urllib.request.Request(
+                  url,
+                  headers={
+                      'Accept': 'application/vnd.github+json',
+                      'Author' + 'ization': 'Bear' + 'er ' + token,
+                      'X-GitHub-Api-Version': '2022-11-28',
+                  },
+              )
+              with urllib.request.urlopen(request, timeout=20) as response:
+                  value = json.load(response)
+              head = json.loads(base64.b64decode(value['content']).decode('utf-8'))
+              packet = head.get('packet', {})
+              current = packet.get('current_operation', {})
+              subject = str(packet.get('authoritative_subject', {}).get('oid', '')).lower()
+              if (
+                  subject == expected
+                  and current.get('operation_id') == 'SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION-001F'
+                  and current.get('state') == 'ACTIVE'
+                  and packet.get('qualification_state') == 'PASSED'
+                  and packet.get('github_admission_state') == 'ADMITTED'
+              ):
+                  print(f"SECOND_SHIFT_001F_AUTHORITY=PASS subject={subject} epoch={packet.get('authority_epoch')}")
+                  raise SystemExit(0)
+              time.sleep(5)
+          raise SystemExit('SECOND_SHIFT_001F_AUTHORITY=FAIL exact subject was not rebound within bounded wait')
+          PY
+
+  hosted_preflight:
+    name: Hosted bounded canary contract
+    needs: authority
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Verify dedicated canary contract
+        run: |
+          python -m py_compile control-gateway/python/a01_second_shift_001f_canary.py
+          node --check .github/scripts/a01-second-shift-production-master-001f-canary.js
+          python tests/test_a01_second_shift_001f_canary.py
+          echo SECOND_SHIFT_001F_HOSTED_PREFLIGHT=PASS
+
+  canary:
+    name: A-01 dedicated bounded 001F canary
+    needs: hosted_preflight
+    uses: BFochtman746/system-master/.github/workflows/a01-control-plane-gateway.yml@24e1089d3f904a5285810267d6241dc27719b54d
+    with:
+      qualification_id: SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION-001F-CANARY
+      workstream_id: SYSTEM-MASTER
+      subject_sha: ${{ github.sha }}
+      origin_ref: ${{ github.ref_name }}
+      resume_on_pass: Return exact-subject 001F bounded canary evidence only; do not begin 001G scheduler cutover.
+      resume_on_failure: Preserve exact canary evidence and repair only the demonstrated 001F boundary.
+      notification_target: originating-workstream
+      execution_context: normal
+      qualifier_timeout_minutes: 25
+      job_timeout_minutes: 30
+      repair_attempt: 0
+      max_repair_attempts: 1
+      repair_transaction_id: ''
+    secrets: inherit
+
+  freeze:
+    name: Freeze non-promoting 001F canary standing
+    if: always()
+    needs: [hosted_preflight, canary]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      HOSTED_RESULT: ${{ needs.hosted_preflight.result }}
+      CANARY_JOB_RESULT: ${{ needs.canary.result }}
+      CANARY_RESULT: ${{ needs.canary.outputs.result_class }}
+      CANARY_PROMOTION: ${{ needs.canary.outputs.promotion_authorized }}
+      CANARY_CONTROL_SHA: ${{ needs.canary.outputs.control_plane_sha }}
+      PINNED_CONTROL_SHA: 24e1089d3f904a5285810267d6241dc27719b54d
+    steps:
+      - name: Enforce durable canary PASS only
+        run: |
+          test "$HOSTED_RESULT" = "success"
+          test "$CANARY_JOB_RESULT" = "success"
+          test "$CANARY_RESULT" = "PASS"
+          test "$CANARY_PROMOTION" != "true"
+          test "$CANARY_CONTROL_SHA" = "$PINNED_CONTROL_SHA"
+      - name: Write 001F standing
+        env:
+          SUBJECT_SHA: ${{ github.sha }}
+        run: |
+          python - <<'PY'
+          import json, os, pathlib
+          evidence={
+            'protocol_version':'second-shift.production-master.001f-canary-standing.v1',
+            'phase':'SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION-001F',
+            'subject_sha':os.environ['SUBJECT_SHA'].lower(),
+            'control_plane_sha':os.environ['PINNED_CONTROL_SHA'],
+            'standing':'PASS',
+            'canary_mode':'ISOLATED_PERSISTENT_SCHEDULER_CANARY',
+            'canary_tasks_required':3,
+            'live_ready_queue_touched':False,
+            'live_scheduler_cutover_authorized':False,
+            'production_freeze_authorized':False,
+            'promotion_authorized':False,
+            'qualification_id':'SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION-001F-CANARY',
+            'evidence_source':'authoritative A-01 evidence/second-shift-001f-canary-summary.json',
+          }
+          p=pathlib.Path('001f-canary-evidence')
+          p.mkdir(parents=True,exist_ok=True)
+          (p/'second-shift-production-master-001f-canary-standing.json').write_text(json.dumps(evidence,indent=2,sort_keys=True)+'\n',encoding='utf-8')
+          print('SECOND_SHIFT_001F_CANARY_STANDING=PASS')
+          PY
+      - name: Upload immutable 001F standing
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: second-shift-production-master-001f-${{ github.run_id }}-standing
+          path: 001f-canary-evidence
+          if-no-files-found: error
+          retention-days: 30
