@@ -76,6 +76,20 @@ try {
 
 $memoryProfile = $health.memory_profile
 $memoryProfileMode = if ($memoryProfile -and $memoryProfile.mode) { [string]$memoryProfile.mode } else { 'GENERIC' }
+$qualificationId = [string]$env:A01_QUALIFICATION_ID
+$commitGateQualificationIds = @()
+if ($memoryProfile -and $memoryProfile.commit_headroom_qualification_ids) {
+  $commitGateQualificationIds = @($memoryProfile.commit_headroom_qualification_ids | ForEach-Object { [string]$_ })
+}
+$commitGateRequired = if ($commitGateQualificationIds.Count -gt 0) { $commitGateQualificationIds -contains $qualificationId } else { $true }
+$lemonadeCleanup = [ordered]@{
+  attempted = $false
+  succeeded = $false
+  endpoint = $null
+  before_commit_headroom_gb = $commitHeadroomGb
+  after_commit_headroom_gb = $commitHeadroomGb
+  error = $null
+}
 $memoryProfileMatch = $false
 $declaredUnifiedTotalGb = $null
 $configuredVgmGb = $null
@@ -98,9 +112,60 @@ if ($memoryProfileMode -eq 'UNIFIED_VGM_SPLIT') {
     } else {
       $memoryProfileMatch = $true
       if ($null -eq $commitHeadroomGb) {
-        $failures.Add('COMMIT_HEADROOM_UNAVAILABLE')
+        if ($commitGateRequired) {
+          $failures.Add('COMMIT_HEADROOM_UNAVAILABLE')
+        } else {
+          $warnings.Add("COMMIT_HEADROOM_UNAVAILABLE_NON_LLM qualification_id=$qualificationId")
+        }
       } elseif ($commitHeadroomGb -lt $minCommitHeadroomGb) {
-        $failures.Add("LOW_COMMIT_HEADROOM headroom_gb=$commitHeadroomGb required_gb=$minCommitHeadroomGb")
+        if ($commitGateRequired) {
+          $allowUnload = $Mode -eq 'preflight' -and
+            $qualificationId -eq 'A01-LOCAL-INFERENCE-BASELINE-001' -and
+            $memoryProfile.lemonade_unload_before_local_inference -eq $true
+
+          if ($allowUnload) {
+            $lemonadeCleanup.attempted = $true
+            $baseUrl = [string]$memoryProfile.lemonade_base_url
+            if (-not $baseUrl) { $baseUrl = 'http://127.0.0.1:13305' }
+            $paths = @('/v1/unload', '/api/v1/unload')
+            foreach ($path in $paths) {
+              try {
+                $uri = $baseUrl.TrimEnd('/') + $path
+                $null = Invoke-RestMethod -Method Post -Uri $uri -TimeoutSec 10 -ErrorAction Stop
+                $lemonadeCleanup.succeeded = $true
+                $lemonadeCleanup.endpoint = $uri
+                break
+              } catch {
+                $lemonadeCleanup.error = $_.Exception.Message
+              }
+            }
+
+            if ($lemonadeCleanup.succeeded) {
+              $waitSeconds = if ($memoryProfile.lemonade_unload_wait_seconds) { [int]$memoryProfile.lemonade_unload_wait_seconds } else { 15 }
+              $deadline = (Get-Date).AddSeconds([math]::Max(1, $waitSeconds))
+              do {
+                Start-Sleep -Seconds 1
+                $os = Get-CimInstance Win32_OperatingSystem
+                $availableMemoryGb = [math]::Round(($os.FreePhysicalMemory * 1KB) / 1GB, 2)
+                try { $memoryPerf = Get-CimInstance Win32_PerfFormattedData_PerfOS_Memory -ErrorAction Stop } catch { $memoryPerf = $null }
+                $committedMemoryGb = if ($memoryPerf -and $null -ne $memoryPerf.CommittedBytes) { [math]::Round(([double]$memoryPerf.CommittedBytes) / 1GB, 2) } else { $null }
+                $commitLimitGb = if ($memoryPerf -and $null -ne $memoryPerf.CommitLimit) { [math]::Round(([double]$memoryPerf.CommitLimit) / 1GB, 2) } else { $null }
+                $commitHeadroomGb = if ($null -ne $committedMemoryGb -and $null -ne $commitLimitGb) { [math]::Round([math]::Max(0, $commitLimitGb - $committedMemoryGb), 2) } else { $null }
+              } while ($null -ne $commitHeadroomGb -and $commitHeadroomGb -lt $minCommitHeadroomGb -and (Get-Date) -lt $deadline)
+              $lemonadeCleanup.after_commit_headroom_gb = $commitHeadroomGb
+            }
+          }
+
+          if ($null -eq $commitHeadroomGb) {
+            $failures.Add('COMMIT_HEADROOM_UNAVAILABLE')
+          } elseif ($commitHeadroomGb -lt $minCommitHeadroomGb) {
+            $failures.Add("LOW_COMMIT_HEADROOM headroom_gb=$commitHeadroomGb required_gb=$minCommitHeadroomGb")
+          } elseif ($lemonadeCleanup.succeeded) {
+            $warnings.Add("LEMONADE_MODELS_UNLOADED_FOR_LOCAL_INFERENCE before_headroom_gb=$($lemonadeCleanup.before_commit_headroom_gb) after_headroom_gb=$commitHeadroomGb")
+          }
+        } else {
+          $warnings.Add("LOW_COMMIT_HEADROOM_NON_LLM qualification_id=$qualificationId headroom_gb=$commitHeadroomGb local_inference_required_gb=$minCommitHeadroomGb")
+        }
       }
     }
   }
@@ -122,7 +187,7 @@ foreach ($drive in $diskSnapshots) {
 }
 if ($availableMemoryGb -lt [double]$health.min_available_memory_gb) {
   if ($memoryProfileMode -eq 'UNIFIED_VGM_SPLIT' -and $memoryProfileMatch) {
-    if ($null -ne $commitHeadroomGb -and $commitHeadroomGb -ge $minCommitHeadroomGb) {
+    if (-not $commitGateRequired -or ($null -ne $commitHeadroomGb -and $commitHeadroomGb -ge $minCommitHeadroomGb)) {
       $warnings.Add("LOW_CPU_PHYSICAL_MEMORY available_gb=$availableMemoryGb generic_required_gb=$($health.min_available_memory_gb) commit_headroom_gb=$commitHeadroomGb")
     }
   } else {
@@ -216,6 +281,9 @@ $snapshot = [ordered]@{
       estimated_unified_total_gb = $estimatedUnifiedTotalGb
       profile_match = $memoryProfileMatch
       min_commit_headroom_gb = $minCommitHeadroomGb
+      qualification_id = $qualificationId
+      commit_gate_required = $commitGateRequired
+      lemonade_cleanup = $lemonadeCleanup
     }
     top_memory_processes = @($topMemoryProcesses)
     drives = @($diskSnapshots)
@@ -242,5 +310,5 @@ if ($snapshot.standing -eq 'FAIL' -and $Mode -eq 'preflight') {
   exit 2
 }
 
-Write-Host "A01_RUNNER_GUARD=$($snapshot.standing) mode=$Mode memory_gb=$availableMemoryGb commit_headroom_gb=$commitHeadroomGb profile=$memoryProfileMode profile_match=$memoryProfileMatch"
+Write-Host "A01_RUNNER_GUARD=$($snapshot.standing) mode=$Mode qualification=$qualificationId memory_gb=$availableMemoryGb commit_headroom_gb=$commitHeadroomGb profile=$memoryProfileMode profile_match=$memoryProfileMatch commit_gate_required=$commitGateRequired lemonade_cleanup=$($lemonadeCleanup.succeeded)"
 exit 0

@@ -4,7 +4,11 @@
   "canonical_ref": "main",
   "runner": {
     "name": "A-01",
-    "required_labels": ["self-hosted", "Windows", "X64"],
+    "required_labels": [
+      "self-hosted",
+      "Windows",
+      "X64"
+    ],
     "global_concurrency_group": "a01-global-r2",
     "concurrency_generation": 2,
     "queue_mode": "max",
@@ -28,7 +32,13 @@
         "configured_vgm_gb": 96,
         "unified_total_tolerance_gb": 2,
         "min_commit_headroom_gb": 8,
-        "low_physical_memory_behavior": "WARN_WHEN_PROFILE_MATCHES_AND_COMMIT_HEADROOM_IS_SAFE"
+        "low_physical_memory_behavior": "WARN_WHEN_PROFILE_MATCHES_AND_COMMIT_HEADROOM_IS_SAFE",
+        "commit_headroom_qualification_ids": [
+          "A01-LOCAL-INFERENCE-BASELINE-001"
+        ],
+        "lemonade_unload_before_local_inference": true,
+        "lemonade_base_url": "http://127.0.0.1:13305",
+        "lemonade_unload_wait_seconds": 15
       }
     }
   },
@@ -61,9 +71,18 @@
     "never_treat_rerun_as_control_plane_refresh": true
   },
   "gate_classes": {
-    "focused": {"purpose": "Changed capability plus immediate integration dependencies", "promotion_authority": false},
-    "consolidated": {"purpose": "Accumulated slice plus broader regressions", "promotion_authority": false},
-    "promotion": {"purpose": "Exact promotion subject and required regressions", "promotion_authority": true}
+    "focused": {
+      "purpose": "Changed capability plus immediate integration dependencies",
+      "promotion_authority": false
+    },
+    "consolidated": {
+      "purpose": "Accumulated slice plus broader regressions",
+      "promotion_authority": false
+    },
+    "promotion": {
+      "purpose": "Exact promotion subject and required regressions",
+      "promotion_authority": true
+    }
   },
   "runtime": {
     "normal_qualifier_timeout_minutes": 28,
@@ -103,15 +122,39 @@
       "goal": "Maximize reduction in next-day work, uncertainty, waiting, and critical-path distance rather than raw runner utilization.",
       "require_completion_delta_for_ready": true,
       "require_stop_condition_for_ready": true,
-      "lanes": ["FINISH", "BUILD_AHEAD", "RESEARCH_AHEAD", "PREPARE_NEXT", "EXPLORE"],
-      "lane_order": ["FINISH", "BUILD_AHEAD", "RESEARCH_AHEAD", "PREPARE_NEXT", "EXPLORE"],
-      "research_must_produce": ["source_provenance", "gap_or_question_answered", "implementation_or_evaluation_implication", "next_day_handoff"],
-      "build_ahead_requires": ["bounded_scope", "repository_owned_tests_or_acceptance", "no_human_decision_dependency", "no_promotion_without_registered_gate"],
+      "lanes": [
+        "FINISH",
+        "BUILD_AHEAD",
+        "RESEARCH_AHEAD",
+        "PREPARE_NEXT",
+        "EXPLORE"
+      ],
+      "lane_order": [
+        "FINISH",
+        "BUILD_AHEAD",
+        "RESEARCH_AHEAD",
+        "PREPARE_NEXT",
+        "EXPLORE"
+      ],
+      "research_must_produce": [
+        "source_provenance",
+        "gap_or_question_answered",
+        "implementation_or_evaluation_implication",
+        "next_day_handoff"
+      ],
+      "build_ahead_requires": [
+        "bounded_scope",
+        "repository_owned_tests_or_acceptance",
+        "no_human_decision_dependency",
+        "no_promotion_without_registered_gate"
+      ],
       "never_create_work_for_utilization": true
     }
   },
   "post_actions": {
-    "allowed": ["windows_reboot"],
+    "allowed": [
+      "windows_reboot"
+    ],
     "receipt_before_action": true,
     "evidence_upload_before_action": true,
     "verification_required_after_disruptive_action": true,
@@ -120,9 +163,48 @@
     "trusted_metadata_fallback_supported": false,
     "strategy": "Disruptive qualifications remain fail-closed unless an independently available hosted settle/admission path is restored; policy v8 metadata-only self-hosted admission is non-disruptive only."
   },
-  "states": ["BUILDING", "PREQUALIFIED", "A01_ELIGIBLE", "A01_QUEUED", "A01_RUNNING", "A01_FAILED", "A01_PASSED", "REPAIR_REQUIRED", "SUPERSEDED", "PROMOTION_ELIGIBLE", "CANONICAL"],
-  "result_classes": ["PASS", "SUBJECT_FAILURE", "INFRA_FAILURE", "CONTROL_PLANE_FAILURE"],
-  "admission_states": ["ADMITTED", "WAITING_FOR_REGISTRATION", "REGISTERED_EXECUTABLE_MISSING", "WORKSTREAM_MISMATCH", "INVALID_SUBJECT_SHA", "SUBJECT_CHECKOUT_MISMATCH", "SUBJECT_METADATA_READ_FAILURE", "SUBJECT_METADATA_IDENTITY_MISMATCH", "SUBJECT_METADATA_TREE_TRUNCATED", "CONTROL_PLANE_CHECKOUT_MISMATCH", "INVALID_CONTROL_PLANE_POLICY", "INVALID_REGISTRY", "INVALID_REGISTERED_WRAPPER_PATH", "INVALID_REGISTERED_WRAPPER_SOURCE", "INVALID_EXECUTION_CONTEXT", "INVALID_QUALIFIER_TIMEOUT", "QUALIFICATION_NOT_OVERNIGHT_ELIGIBLE", "QUALIFIER_TIMEOUT_EXCEEDS_REGISTRY", "DISRUPTIVE_QUALIFICATION_NOT_ALLOWED_OVERNIGHT", "DISRUPTIVE_QUALIFICATION_REQUIRES_HOSTED_BARRIER", "CONTROL_PLANE_READ_FAILURE"],
+  "states": [
+    "BUILDING",
+    "PREQUALIFIED",
+    "A01_ELIGIBLE",
+    "A01_QUEUED",
+    "A01_RUNNING",
+    "A01_FAILED",
+    "A01_PASSED",
+    "REPAIR_REQUIRED",
+    "SUPERSEDED",
+    "PROMOTION_ELIGIBLE",
+    "CANONICAL"
+  ],
+  "result_classes": [
+    "PASS",
+    "SUBJECT_FAILURE",
+    "INFRA_FAILURE",
+    "CONTROL_PLANE_FAILURE"
+  ],
+  "admission_states": [
+    "ADMITTED",
+    "WAITING_FOR_REGISTRATION",
+    "REGISTERED_EXECUTABLE_MISSING",
+    "WORKSTREAM_MISMATCH",
+    "INVALID_SUBJECT_SHA",
+    "SUBJECT_CHECKOUT_MISMATCH",
+    "SUBJECT_METADATA_READ_FAILURE",
+    "SUBJECT_METADATA_IDENTITY_MISMATCH",
+    "SUBJECT_METADATA_TREE_TRUNCATED",
+    "CONTROL_PLANE_CHECKOUT_MISMATCH",
+    "INVALID_CONTROL_PLANE_POLICY",
+    "INVALID_REGISTRY",
+    "INVALID_REGISTERED_WRAPPER_PATH",
+    "INVALID_REGISTERED_WRAPPER_SOURCE",
+    "INVALID_EXECUTION_CONTEXT",
+    "INVALID_QUALIFIER_TIMEOUT",
+    "QUALIFICATION_NOT_OVERNIGHT_ELIGIBLE",
+    "QUALIFIER_TIMEOUT_EXCEEDS_REGISTRY",
+    "DISRUPTIVE_QUALIFICATION_NOT_ALLOWED_OVERNIGHT",
+    "DISRUPTIVE_QUALIFICATION_REQUIRES_HOSTED_BARRIER",
+    "CONTROL_PLANE_READ_FAILURE"
+  ],
   "stale_request_policy": {
     "queued_superseded_subject": "SUPERSEDE",
     "running_superseded_subject": "FINISH_IF_EVIDENCE_USEFUL",
@@ -136,5 +218,8 @@
     "require_evidence": true,
     "promotion_requires_pass": true
   },
-  "return_ticket": {"schema": "qualification/a01/schema/return-ticket.schema.json", "required": true}
+  "return_ticket": {
+    "schema": "qualification/a01/schema/return-ticket.schema.json",
+    "required": true
+  }
 }
