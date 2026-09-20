@@ -1,5 +1,5 @@
 {
-  "registry_version": 32,
+  "registry_version": 33,
   "qualifications": {
     "A01-CONTROL-PLANE-SELFTEST": {
       "workstream_id": "SYSTEM-MASTER",
@@ -359,6 +359,18 @@
       "evidence_artifact": "a01-local-inference-baseline-001",
       "overnight_eligible": false,
       "description": "Run the exact-subject first local A-01 LLM baseline through Lemonade Server only: verify gpt-oss-20b-NPU is registered, capture redacted health/system-info/system-stats, explicitly load the model, execute one fixed deterministic Responses-API prompt, preserve exact request/response plus timing and token-rate evidence, and defer production-model selection until measured comparison. PASS proves one bounded local response on the exact A-01 subject only and grants no production-model, promotion, download, or arbitrary-command authority."
+    },
+    "A01-AGENT-REGISTERED-TASK-PRODUCTION-BINDING-001": {
+      "workstream_id": "SYSTEM-MASTER",
+      "gate_class": "focused",
+      "source": "subject",
+      "executable": "node",
+      "args": [
+        ".github/scripts/a01-agent-registered-task-production-binding-001.js"
+      ],
+      "evidence_artifact": "a01-agent-registered-task-production-binding-001",
+      "overnight_eligible": true,
+      "description": "Qualify the bounded production registered-task path on the exact A-01 subject: construct one pre-admitted READY task, revalidate it through the existing GitHub ingress, enqueue it through the night scheduler, claim it with the fenced A-01 execution worker, execute only the fixed local gpt-oss-20b-NPU Lemonade wrapper, require exact final answer A01_REGISTERED_TASK_OK, and preserve durable task/result evidence. PASS proves this one bounded registered text-task path only and grants no arbitrary shell, URL, model-selection, promotion, or unrestricted agent authority."
     }
   }
 }
