@@ -1,88 +1,56 @@
 # PLUGINS — Foundation Contract 001
 
-**Owner** `SYSTEM_MASTER/CONNECTED_ACTIONS` · **Lane** CONNECTED_ACTIONS · **Effective** <UNSET>
-**Authority** `governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-005.json`
-**Scaffolded** 2026-09-13 from `.github/scripts/scaffold-foundation-contracts.js`
+**Capability** `C27` · **Owner** `SYSTEM_MASTER/CONNECTED_ACTIONS` · **Lane** `CONNECTED_ACTIONS`
+**Authority selector** `governance/CURRENT-AUTHORITY.json`
+**Capability inventory** `governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json`
+**Owner consistency** `governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006.json`
+**Common envelope** `governance/contracts/CAPABILITY-FOUNDATION-CONTRACT-BASE-001.md`
 
-> **This contract is a stub.** Sections 1–8 are the census gap-forcing columns and
-> are empty on purpose. A section containing "TBD", a placeholder, or a plausible
-> guess counts as unpopulated — the census forbids inferring completion from
-> planning volume. Delete this block when all eight are genuinely filled.
-
-## Known from the census
-
-- **Module name:** Plugins / Connectors
-- **Interaction direction:** HEADLESS_CONNECTOR_CAPABILITY
-- **Census standing:** `CURRENT_CORE_CONNECTOR_FOUNDATIONS_PARTIAL__PRODUCT_MODULE_NOT_FULLY_PROVEN`
-- **Census evidence summary:** Core owns shared tool/connector infrastructure and historical Platform-011 evidence exists; historical Plugins research left implementation/provider/credential sandbox empirical decisions open.
-
-This is what P6 recorded. It is background, not a populated section.
-
-## Boundary rules touching this module
-
-- CORE owns the connector action runtime; CONNECTED_ACTIONS owns module policy.
-- RESEARCH_KNOWLEDGE consumes BROWSER from CONNECTED_ACTIONS and does not own it.
-- No CONNECTED_ACTIONS module reaches production authority before Foundation 1.0 closure.
-
-Crossing any of these is an `owner` decision, never lane discretion.
+> Specification only. This does not claim implementation or qualification PASS.
 
 ## 1. Contract / interface
 
-<!-- What this module promises callers: named operations, inputs, outputs, and what is explicitly not offered. -->
-
-**UNPOPULATED**
+Operations: `discover_connector`, `read_connector`, `invoke_connector`, `authorize_action`, `record_connector_result`. Invocations carry connector/action identity, permission scope, user authority, typed args and `idempotency_key`.
 
 ## 2. Ingress routes
 
-<!-- Every way work enters. Name the caller, the transport, and the authority that admits it. A route with no named admitting authority is a gap, not a route. -->
-
-**UNPOPULATED**
+Chat/Automation/peer-system request naming connector capability and user authority, or approved connector event. CONNECTED_ACTIONS admits all connector calls that can affect external systems.
 
 ## 3. Egress routes
 
-<!-- Every way results leave: return values, emitted artifacts, notifications, side effects on other modules. -->
-
-**UNPOPULATED**
+Connector data/result, explicit action receipt, permission/error state, provider refs and immutable evidence reference.
 
 ## 4. Persistence and canonical writer
 
-<!-- Exactly one component may write each piece of durable state. Name it, name the store, and name what happens to a write arriving from anywhere else. -->
-
-**UNPOPULATED**
+**Canonical semantic writer:** `SYSTEM_MASTER/CONNECTED_ACTIONS`. Plugin service writes connection/permission/action ledger and provider-reference state.
+**Physical persistence:** Remote provider is authoritative for provider-side state; CORE stores local evidence/connection metadata according to policy.
 
 ## 5. Dependencies
 
-<!-- Modules and shared infrastructure required, and the direction of each. Flag any that cross a boundary rule below. -->
-
-**UNPOPULATED**
+Baseline platform dependencies are P00–P12 and P15 as selected by current authority.
+- CHAT/CORE.
+- AUTOMATION/PROGRAMMING.
+- FILE/DOCUMENTS for connector file payloads.
 
 ## 6. Failure semantics
 
-<!-- What happens when each ingress route fails, a dependency is unavailable, or a write is refused. State fail-closed or fail-open, and justify any fail-open. Include the idempotency rule. -->
-
-**UNPOPULATED**
+Fail closed on missing permission, unsupported action/schema, provider auth failure, dependency failure, rate/availability failure or unknown commit state. Read-only and mutating actions remain distinct. Retries reuse `idempotency_key`; unknown mutation outcomes require provider reconciliation before replay.
 
 ## 7. Evidence target
 
-<!-- The artifact that proves this module did what it claimed: path, format, required contents. A log line is not evidence. -->
-
-**UNPOPULATED**
+Future evidence target (currently absent until implementation qualification): `qualification/foundation/plugins-foundation-001.json`.
+Required contents: `C27`, `PLUGINS`, owner `SYSTEM_MASTER/CONNECTED_ACTIONS`, current authority/crosswalk identifiers, exact subject Git blobs, discovery/read/invoke/authorize coverage, permission/provider/writer/failure/idempotency tests, acceptance command and `PASS|FAIL`.
 
 ## 8. Acceptance target
 
-<!-- The exact command returning PASS or FAIL, and the PASS condition. Must be runnable by someone who did not write the module. -->
-
-**UNPOPULATED**
+Pre-code specification gate: `node .github/scripts/foundation-capability-contract-spec-check.js PLUGINS`.
+Implementation acceptance gate: `node .github/scripts/foundation-capability-acceptance.js PLUGINS`.
+PASS requires connector discovery/read plus authorized and denied mutation cases, schema errors, provider uncertainty reconciliation, writer isolation and idempotent replay.
 
 ## 9. Authority boundary
 
-<!-- What this module may decide alone vs. what needs the owner. Mirrors
-     governance/DECISION-RIGHTS-001.md, scoped to this module. -->
+`SYSTEM_MASTER/CONNECTED_ACTIONS` owns connector invocation and side-effect policy. Other peers request actions through this interface but do not inherit permissions; provider owns remote state; CORE owns shared runtime/evidence.
 
-**UNPOPULATED**
+## 10. Open implementation gaps
 
-## 10. Open gaps
-
-- Sections 1–9 are unpopulated. This module remains `ACTIVE_GAP` in
-  Foundation Closure Census 001 until they are filled.
-
+Specification-ready does not mean implemented. Production/provider/user-auth qualification and Foundation evidence remain open until implementation acceptance passes and a current receipt is admitted.

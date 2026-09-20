@@ -1,80 +1,56 @@
 # PHOTO — Foundation Contract 001
 
-**Owner** `SYSTEM_MASTER/MEDIA` · **Lane** MEDIA · **Effective** <UNSET>
-**Authority** `governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-005.json`
-**Scaffolded** 2026-09-13 from `.github/scripts/scaffold-foundation-contracts.js`
+**Capability** `C26` · **Owner** `SYSTEM_MASTER/MEDIA` · **Lane** `MEDIA`
+**Authority selector** `governance/CURRENT-AUTHORITY.json`
+**Capability inventory** `governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json`
+**Owner consistency** `governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006.json`
+**Common envelope** `governance/contracts/CAPABILITY-FOUNDATION-CONTRACT-BASE-001.md`
 
-> **This contract is a stub.** Sections 1–8 are the census gap-forcing columns and
-> are empty on purpose. A section containing "TBD", a placeholder, or a plausible
-> guess counts as unpopulated — the census forbids inferring completion from
-> planning volume. Delete this block when all eight are genuinely filled.
-
-## Known from the census
-
-- **Module name:** Photo Lab
-- **Interaction direction:** MEDIA_TOOL_OR_STUDIO__NOT_IMPLICIT_SYSTEM
-- **Census standing:** `RESEARCH_CLOSED__IMPLEMENTATION_NOT_CURRENTLY_PROVEN`
-- **Census evidence summary:** Historical research closed but implementation/empirical/production authority was not proven.
-
-This is what P6 recorded. It is background, not a populated section.
+> Specification only. This does not claim implementation or qualification PASS.
 
 ## 1. Contract / interface
 
-<!-- What this module promises callers: named operations, inputs, outputs, and what is explicitly not offered. -->
-
-**UNPOPULATED**
+Operations: `import_photo`, `normalize_photo`, `edit_photo`, `inspect_photo`, `export_photo`. Inputs are native/file source refs and edit policy; outputs are photo refs, edit recipe, inspection metadata or typed failure.
 
 ## 2. Ingress routes
 
-<!-- Every way work enters. Name the caller, the transport, and the authority that admits it. A route with no named admitting authority is a gap, not a route. -->
-
-**UNPOPULATED**
+User/native capture or FILE/MEDIA request with immutable source identity and edit policy. Native capture permission is an upstream authority prerequisite, not implied by this contract.
 
 ## 3. Egress routes
 
-<!-- Every way results leave: return values, emitted artifacts, notifications, side effects on other modules. -->
-
-**UNPOPULATED**
+Photo asset refs, edit recipe, metadata, inspection/evidence and export refs.
 
 ## 4. Persistence and canonical writer
 
-<!-- Exactly one component may write each piece of durable state. Name it, name the store, and name what happens to a write arriving from anywhere else. -->
-
-**UNPOPULATED**
+**Canonical semantic writer:** `SYSTEM_MASTER/MEDIA`. Photo service writes photo-asset/edit semantic state.
+**Physical persistence:** CORE artifact storage writes immutable original/derived photo binaries; DOCUMENTS Image-Ingest may normalize file representations without becoming photo semantic owner.
 
 ## 5. Dependencies
 
-<!-- Modules and shared infrastructure required, and the direction of each. Flag any that cross a boundary rule below. -->
-
-**UNPOPULATED**
+Baseline platform dependencies are P00–P12 and P15 as selected by current authority.
+- IMG-INGEST/DOCUMENTS.
+- FILE/DOCUMENTS.
+- IMAGE/MEDIA.
 
 ## 6. Failure semantics
 
-<!-- What happens when each ingress route fails, a dependency is unavailable, or a write is refused. State fail-closed or fail-open, and justify any fail-open. Include the idempotency rule. -->
-
-**UNPOPULATED**
+Fail closed on missing native/user authority, source-hash mismatch, unsupported edit, dependency failure or rejected write. Originals remain immutable. Retries reuse `idempotency_key` and must recover the same edit lineage for identical source/options.
 
 ## 7. Evidence target
 
-<!-- The artifact that proves this module did what it claimed: path, format, required contents. A log line is not evidence. -->
-
-**UNPOPULATED**
+Future evidence target (currently absent until implementation qualification): `qualification/foundation/photo-foundation-001.json`.
+Required contents: `C26`, `PHOTO`, owner `SYSTEM_MASTER/MEDIA`, current authority/crosswalk identifiers, exact subject Git blobs, import/edit/inspect/export coverage, original-preservation, writer/dependency/failure/idempotency tests, acceptance command and `PASS|FAIL`.
 
 ## 8. Acceptance target
 
-<!-- The exact command returning PASS or FAIL, and the PASS condition. Must be runnable by someone who did not write the module. -->
-
-**UNPOPULATED**
+Pre-code specification gate: `node .github/scripts/foundation-capability-contract-spec-check.js PHOTO`.
+Implementation acceptance gate: `node .github/scripts/foundation-capability-acceptance.js PHOTO`.
+PASS requires source identity, original immutability, edit/export routes, permission failure, writer isolation and idempotent replay proof.
 
 ## 9. Authority boundary
 
-<!-- What this module may decide alone vs. what needs the owner. Mirrors
-     governance/DECISION-RIGHTS-001.md, scoped to this module. -->
+`SYSTEM_MASTER/MEDIA` owns photo asset/edit semantics. DOCUMENTS owns generic ingest/file mechanics; CORE owns physical durability; native permission remains explicit platform/user authority. Cross-owner changes require fresh authority and qualification.
 
-**UNPOPULATED**
+## 10. Open implementation gaps
 
-## 10. Open gaps
-
-- Sections 1–9 are unpopulated. This module remains `ACTIVE_GAP` in
-  Foundation Closure Census 001 until they are filled.
-
+Specification-ready does not mean implemented. Native/production/external qualification and Foundation evidence remain open until the implementation acceptance gate passes and a current receipt is admitted.

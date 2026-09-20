@@ -1,86 +1,57 @@
 # DOCX — Foundation Contract 001
 
-**Owner** `SYSTEM_MASTER/DOCUMENTS` · **Lane** DOCUMENTS · **Effective** <UNSET>
-**Authority** `governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-005.json`
-**Scaffolded** 2026-09-13 from `.github/scripts/scaffold-foundation-contracts.js`
+**Capability** `C09` · **Owner** `SYSTEM_MASTER/DOCUMENTS` · **Lane** `DOCUMENTS`
+**Authority selector** `governance/CURRENT-AUTHORITY.json`
+**Capability inventory** `governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json`
+**Owner consistency** `governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006.json`
+**Common envelope** `governance/contracts/CAPABILITY-FOUNDATION-CONTRACT-BASE-001.md`
 
-> **This contract is a stub.** Sections 1–8 are the census gap-forcing columns and
-> are empty on purpose. A section containing "TBD", a placeholder, or a plausible
-> guess counts as unpopulated — the census forbids inferring completion from
-> planning volume. Delete this block when all eight are genuinely filled.
-
-## Known from the census
-
-- **Module name:** Word / DOCX Document System
-- **Interaction direction:** HEADLESS_OUTPUT_TOOL_WITH_CONTROL_REVIEW_AND_NATIVE_HANDOFF
-- **Census standing:** `HISTORICAL_SUBSTANTIAL_IMPLEMENTATION_EVIDENCE__CURRENT_CANONICAL_ADMISSION_REQUIRED`
-- **Census evidence summary:** Historical Document World Class/Universal Document Spine evidence includes substantial DOCX semantic, preservation, render and accessibility qualification, but the current canonical GitHub topology/control does not admit MOD-DOCX-001 as a current owner system/module implementation.
-
-This is what P6 recorded. It is background, not a populated section.
-
-## Boundary rules touching this module
-
-- BOOK owns authoring and prose semantics; DOCUMENTS owns the artifact mechanics they render into.
-
-Crossing any of these is an `owner` decision, never lane discretion.
+> Specification only. Populating this contract makes the capability specification-ready; it does not claim implementation or qualification PASS. Any changed subject requires fresh evidence.
 
 ## 1. Contract / interface
 
-<!-- What this module promises callers: named operations, inputs, outputs, and what is explicitly not offered. -->
-
-**UNPOPULATED**
+Operations: `create_docx`, `edit_docx`, `render_docx`, `inspect_docx`, `export_docx`.
+Inputs are structured document/content refs plus layout/export policy; outputs are DOCX artifact refs, render/inspection results, metadata, evidence, or typed failure. Authored-text semantics remain with the source owner.
 
 ## 2. Ingress routes
 
-<!-- Every way work enters. Name the caller, the transport, and the authority that admits it. A route with no named admitting authority is a gap, not a route. -->
-
-**UNPOPULATED**
+Chat/Automation or owner-system request with document model/content refs. All ingress is admitted by DOCUMENTS through current CORE dispatch controls; external file destinations require CONNECTED_ACTIONS authority.
 
 ## 3. Egress routes
 
-<!-- Every way results leave: return values, emitted artifacts, notifications, side effects on other modules. -->
-
-**UNPOPULATED**
+DOCX artifact ref, render/inspection report, document metadata, and typed completion/failure event. Cross-owner output is by artifact/interface reference rather than direct mutation.
 
 ## 4. Persistence and canonical writer
 
-<!-- Exactly one component may write each piece of durable state. Name it, name the store, and name what happens to a write arriving from anywhere else. -->
-
-**UNPOPULATED**
+**Canonical semantic writer:** `SYSTEM_MASTER/DOCUMENTS`. DOCUMENTS DOCX service writes document model/export manifest and version metadata; source-domain content remains owned by its originating system.
+**Physical persistence:** CORE artifact storage is sole physical writer for immutable DOCX/render binaries. Non-owner semantic writes are rejected.
 
 ## 5. Dependencies
 
-<!-- Modules and shared infrastructure required, and the direction of each. Flag any that cross a boundary rule below. -->
-
-**UNPOPULATED**
+Baseline platform dependencies are P00–P12 and P15 as selected by current authority.
+- FILE/DOCUMENTS for file identity/versioning.
+- IMAGE/MEDIA for supplied visual assets.
+- WRITING/BOOK only when Book-owned authored prose semantics are requested.
 
 ## 6. Failure semantics
 
-<!-- What happens when each ingress route fails, a dependency is unavailable, or a write is refused. State fail-closed or fail-open, and justify any fail-open. Include the idempotency rule. -->
-
-**UNPOPULATED**
+Fail closed on authority mismatch, malformed document model, unresolved asset ref, unsafe/unsupported mutation, render failure, or rejected canonical write. A failed export never replaces the prior valid artifact. Retries reuse `idempotency_key` and must return the existing committed artifact or a typed conflict without duplicate versions.
 
 ## 7. Evidence target
 
-<!-- The artifact that proves this module did what it claimed: path, format, required contents. A log line is not evidence. -->
-
-**UNPOPULATED**
+Future evidence target (currently absent until implementation qualification): `qualification/foundation/docx-foundation-001.json`.
+Required contents: `C09`, `DOCX`, owner `SYSTEM_MASTER/DOCUMENTS`, current authority/crosswalk identifiers, exact subject Git blobs, route coverage, canonical-writer assertion, dependency/failure/idempotency test results, acceptance command, result `PASS|FAIL`, and immutable artifact/evidence refs.
 
 ## 8. Acceptance target
 
-<!-- The exact command returning PASS or FAIL, and the PASS condition. Must be runnable by someone who did not write the module. -->
-
-**UNPOPULATED**
+Pre-code specification gate: `node .github/scripts/foundation-capability-contract-spec-check.js DOCX`.
+Implementation acceptance gate: `node .github/scripts/foundation-capability-acceptance.js DOCX`.
+PASS requires current-subject evidence proving create/edit/render/inspect/export routes, writer isolation, deterministic artifact identity where applicable, dependency failures and idempotent retries.
 
 ## 9. Authority boundary
 
-<!-- What this module may decide alone vs. what needs the owner. Mirrors
-     governance/DECISION-RIGHTS-001.md, scoped to this module. -->
+`SYSTEM_MASTER/DOCUMENTS` owns generic DOCX/document mechanics. BOOK owns Book text/manuscript semantics; MEDIA owns image/media semantics; CORE owns shared storage/evidence primitives. Cross-owner contract changes require authority/crosswalk/allocation update and fresh qualification.
 
-**UNPOPULATED**
+## 10. Open implementation gaps
 
-## 10. Open gaps
-
-- Sections 1–9 are unpopulated. This module remains `ACTIVE_GAP` in
-  Foundation Closure Census 001 until they are filled.
-
+Specification-ready does not mean implemented. Production/native/external qualification and Foundation evidence remain open until the implementation acceptance gate passes and a current receipt is admitted.

@@ -1,86 +1,57 @@
 # DATA — Foundation Contract 001
 
-**Owner** `SYSTEM_MASTER/SPREADSHEET_DATA` · **Lane** SPREADSHEET_DATA · **Effective** <UNSET>
-**Authority** `governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-005.json`
-**Scaffolded** 2026-09-13 from `.github/scripts/scaffold-foundation-contracts.js`
+**Capability** `C08` · **Owner** `SYSTEM_MASTER/SPREADSHEET_DATA` · **Lane** `SPREADSHEET_DATA`
+**Authority selector** `governance/CURRENT-AUTHORITY.json`
+**Capability inventory** `governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json`
+**Owner consistency** `governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006.json`
+**Common envelope** `governance/contracts/CAPABILITY-FOUNDATION-CONTRACT-BASE-001.md`
 
-> **This contract is a stub.** Sections 1–8 are the census gap-forcing columns and
-> are empty on purpose. A section containing "TBD", a placeholder, or a plausible
-> guess counts as unpopulated — the census forbids inferring completion from
-> planning volume. Delete this block when all eight are genuinely filled.
-
-## Known from the census
-
-- **Module name:** Data / Database / BI System
-- **Interaction direction:** COMPOSITE_SHARED_DATA_FOUNDATION_PLUS_POSSIBLE_HEADLESS_ANALYTICS_TOOL
-- **Census standing:** `CURRENT_CORE_DATA_FOUNDATION_PARTIAL__HISTORICAL_PRODUCT_MODULE_NOT_FULLY_PROVEN`
-- **Census evidence summary:** P1 confirms DATA-001 is part of the Core foundation train with a portable binding gap/repaired local candidate and target/custody work still open. The historical MOD-DATA-001 product row is broader (Data/Database/BI) and cannot be equated wholesale with Core persistence.
-
-This is what P6 recorded. It is background, not a populated section.
-
-## Boundary rules touching this module
-
-- CORE owns the shared data foundation; SPREADSHEET_DATA owns product BI and analysis semantics.
-
-Crossing any of these is an `owner` decision, never lane discretion.
+> Specification only. Populating this contract makes the capability specification-ready; it does not claim implementation or qualification PASS. Any changed subject requires fresh evidence.
 
 ## 1. Contract / interface
 
-<!-- What this module promises callers: named operations, inputs, outputs, and what is explicitly not offered. -->
-
-**UNPOPULATED**
+Operations: `ingest_dataset`, `profile_dataset`, `query_dataset`, `transform_dataset`, `export_dataset`. Inputs are dataset/file refs, schema and transformation intent; outputs are typed datasets/tables, lineage, export refs, evidence, or typed failure.
 
 ## 2. Ingress routes
 
-<!-- Every way work enters. Name the caller, the transport, and the authority that admits it. A route with no named admitting authority is a gap, not a route. -->
-
-**UNPOPULATED**
+Chat/Automation or Spreadsheet/Data work item with dataset/file refs and schema intent. SPREADSHEET_DATA admits semantic data work; remote acquisition/export routes through CONNECTED_ACTIONS.
 
 ## 3. Egress routes
 
-<!-- Every way results leave: return values, emitted artifacts, notifications, side effects on other modules. -->
-
-**UNPOPULATED**
+Typed tables/datasets, transformation results, lineage, export refs and evidence. Cross-owner consumers receive typed refs/results rather than direct data-store mutation.
 
 ## 4. Persistence and canonical writer
 
-<!-- Exactly one component may write each piece of durable state. Name it, name the store, and name what happens to a write arriving from anywhere else. -->
-
-**UNPOPULATED**
+**Canonical semantic writer:** `SYSTEM_MASTER/SPREADSHEET_DATA`. DATA writes dataset metadata, schema and transformation lineage.
+**Physical persistence:** CORE shared persistence/artifact storage writes immutable payloads and durable records without owning data-analysis semantics.
 
 ## 5. Dependencies
 
-<!-- Modules and shared infrastructure required, and the direction of each. Flag any that cross a boundary rule below. -->
-
-**UNPOPULATED**
+Baseline platform dependencies are P00–P12 and P15 as selected by current authority.
+- FILE/DOCUMENTS.
+- MATH/SPREADSHEET_DATA.
+- LEDGER/SPREADSHEET_DATA.
+- EXCEL/SPREADSHEET_DATA.
 
 ## 6. Failure semantics
 
-<!-- What happens when each ingress route fails, a dependency is unavailable, or a write is refused. State fail-closed or fail-open, and justify any fail-open. Include the idempotency rule. -->
-
-**UNPOPULATED**
+Fail closed on authority/schema mismatch, unresolved source identity, unsafe transformation, required-dependency failure or rejected canonical write. Transformations are versioned; retries reuse `idempotency_key` and never duplicate committed lineage or overwrite a prior valid dataset silently.
 
 ## 7. Evidence target
 
-<!-- The artifact that proves this module did what it claimed: path, format, required contents. A log line is not evidence. -->
-
-**UNPOPULATED**
+Future evidence target (currently absent until implementation qualification): `qualification/foundation/data-foundation-001.json`.
+Required contents: `C08`, `DATA`, owner `SYSTEM_MASTER/SPREADSHEET_DATA`, current authority/crosswalk identifiers, exact subject Git blobs, route/schema/lineage coverage, writer/dependency/failure/idempotency tests, acceptance command and `PASS|FAIL`.
 
 ## 8. Acceptance target
 
-<!-- The exact command returning PASS or FAIL, and the PASS condition. Must be runnable by someone who did not write the module. -->
-
-**UNPOPULATED**
+Pre-code specification gate: `node .github/scripts/foundation-capability-contract-spec-check.js DATA`.
+Implementation acceptance gate: `node .github/scripts/foundation-capability-acceptance.js DATA`.
+PASS requires ingest/profile/query/transform/export cases plus writer isolation, schema failure, dependency failure and idempotent replay proof.
 
 ## 9. Authority boundary
 
-<!-- What this module may decide alone vs. what needs the owner. Mirrors
-     governance/DECISION-RIGHTS-001.md, scoped to this module. -->
+`SYSTEM_MASTER/SPREADSHEET_DATA` owns product data-analysis semantics. DOCUMENTS owns file mechanics; CORE owns shared persistence/runtime; CONNECTED_ACTIONS owns external side effects. Cross-owner changes require current authority/crosswalk/allocation update and fresh qualification.
 
-**UNPOPULATED**
+## 10. Open implementation gaps
 
-## 10. Open gaps
-
-- Sections 1–9 are unpopulated. This module remains `ACTIVE_GAP` in
-  Foundation Closure Census 001 until they are filled.
-
+Specification-ready does not mean implemented. Production/native/external qualification and Foundation evidence remain open until the implementation acceptance gate passes and a current receipt is admitted.

@@ -1,80 +1,57 @@
 # VIDEO — Foundation Contract 001
 
-**Owner** `SYSTEM_MASTER/MEDIA` · **Lane** MEDIA · **Effective** <UNSET>
-**Authority** `governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-005.json`
-**Scaffolded** 2026-09-13 from `.github/scripts/scaffold-foundation-contracts.js`
+**Capability** `C32` · **Owner** `SYSTEM_MASTER/MEDIA` · **Lane** `MEDIA`
+**Authority selector** `governance/CURRENT-AUTHORITY.json`
+**Capability inventory** `governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json`
+**Owner consistency** `governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006.json`
+**Common envelope** `governance/contracts/CAPABILITY-FOUNDATION-CONTRACT-BASE-001.md`
 
-> **This contract is a stub.** Sections 1–8 are the census gap-forcing columns and
-> are empty on purpose. A section containing "TBD", a placeholder, or a plausible
-> guess counts as unpopulated — the census forbids inferring completion from
-> planning volume. Delete this block when all eight are genuinely filled.
-
-## Known from the census
-
-- **Module name:** Video System
-- **Interaction direction:** HEADLESS_MEDIA_PRODUCTION_WITH_OPTIONAL_CONTROL_SURFACE
-- **Census standing:** `RESEARCH_CLOSED__IMPLEMENTATION_NOT_CURRENTLY_PROVEN`
-- **Census evidence summary:** The historical index's stage labels do not override its explicit NOT_AUTHORIZED / NOT_PROVEN implementation, empirical and production states.
-
-This is what P6 recorded. It is background, not a populated section.
+> Specification only. This does not claim implementation or qualification PASS.
 
 ## 1. Contract / interface
 
-<!-- What this module promises callers: named operations, inputs, outputs, and what is explicitly not offered. -->
-
-**UNPOPULATED**
+Operations: `generate_video`, `edit_video`, `compose_video`, `render_video`, `inspect_video`, `export_video`. Inputs are source/timeline refs and generation/render policy; outputs are video refs, timeline/render metadata, inspection evidence or typed failure.
 
 ## 2. Ingress routes
 
-<!-- Every way work enters. Name the caller, the transport, and the authority that admits it. A route with no named admitting authority is a gap, not a route. -->
-
-**UNPOPULATED**
+Chat/Automation or peer-system media request with source/timeline refs and render policy. MEDIA admits generation/edit/render mutations.
 
 ## 3. Egress routes
 
-<!-- Every way results leave: return values, emitted artifacts, notifications, side effects on other modules. -->
-
-**UNPOPULATED**
+Video artifact refs, timeline/render metadata, inspection/evidence, progress events and export refs.
 
 ## 4. Persistence and canonical writer
 
-<!-- Exactly one component may write each piece of durable state. Name it, name the store, and name what happens to a write arriving from anywhere else. -->
-
-**UNPOPULATED**
+**Canonical semantic writer:** `SYSTEM_MASTER/MEDIA`. Video service writes video-project/timeline/edit state.
+**Physical persistence:** CORE artifact storage writes immutable source/derived video binaries and evidence records.
 
 ## 5. Dependencies
 
-<!-- Modules and shared infrastructure required, and the direction of each. Flag any that cross a boundary rule below. -->
-
-**UNPOPULATED**
+Baseline platform dependencies are P00–P12 and P15 as selected by current authority.
+- IMAGE/MEDIA.
+- VOICE/MEDIA.
+- FILE/DOCUMENTS.
+- MEDIA/MEDIA orchestration.
 
 ## 6. Failure semantics
 
-<!-- What happens when each ingress route fails, a dependency is unavailable, or a write is refused. State fail-closed or fail-open, and justify any fail-open. Include the idempotency rule. -->
-
-**UNPOPULATED**
+Fail closed on authority/policy error, missing source, invalid timeline, render failure, dependency failure or rejected write. Partial renders stay partial and never replace a valid master. Retries reuse `idempotency_key` and recover prior committed render state.
 
 ## 7. Evidence target
 
-<!-- The artifact that proves this module did what it claimed: path, format, required contents. A log line is not evidence. -->
-
-**UNPOPULATED**
+Future evidence target (currently absent until implementation qualification): `qualification/foundation/video-foundation-001.json`.
+Required contents: `C32`, `VIDEO`, owner `SYSTEM_MASTER/MEDIA`, current authority/crosswalk identifiers, exact subject Git blobs, generate/edit/compose/render/inspect/export coverage, writer/dependency/failure/idempotency tests, acceptance command and `PASS|FAIL`.
 
 ## 8. Acceptance target
 
-<!-- The exact command returning PASS or FAIL, and the PASS condition. Must be runnable by someone who did not write the module. -->
-
-**UNPOPULATED**
+Pre-code specification gate: `node .github/scripts/foundation-capability-contract-spec-check.js VIDEO`.
+Implementation acceptance gate: `node .github/scripts/foundation-capability-acceptance.js VIDEO`.
+PASS requires all primary routes, partial-render behavior, source identity, writer isolation, dependency failure and idempotent replay.
 
 ## 9. Authority boundary
 
-<!-- What this module may decide alone vs. what needs the owner. Mirrors
-     governance/DECISION-RIGHTS-001.md, scoped to this module. -->
+`SYSTEM_MASTER/MEDIA` owns video generation/edit/render semantics. DOCUMENTS owns generic files; CONNECTED_ACTIONS owns external publication/deployment effects; CORE owns shared durability. Cross-owner changes require fresh authority and qualification.
 
-**UNPOPULATED**
+## 10. Open implementation gaps
 
-## 10. Open gaps
-
-- Sections 1–9 are unpopulated. This module remains `ACTIVE_GAP` in
-  Foundation Closure Census 001 until they are filled.
-
+Specification-ready does not mean implemented. Production/native/external qualification and Foundation evidence remain open until the implementation acceptance gate passes and a current receipt is admitted.

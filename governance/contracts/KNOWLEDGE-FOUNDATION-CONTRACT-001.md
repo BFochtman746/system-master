@@ -1,86 +1,57 @@
 # KNOWLEDGE — Foundation Contract 001
 
-**Owner** `SYSTEM_MASTER/RESEARCH_KNOWLEDGE` · **Lane** RESEARCH_KNOWLEDGE · **Effective** <UNSET>
-**Authority** `governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-005.json`
-**Scaffolded** 2026-09-13 from `.github/scripts/scaffold-foundation-contracts.js`
+**Capability** `C17` · **Owner** `SYSTEM_MASTER/RESEARCH_KNOWLEDGE` · **Lane** `RESEARCH_KNOWLEDGE`
+**Authority selector** `governance/CURRENT-AUTHORITY.json`
+**Capability inventory** `governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json`
+**Owner consistency** `governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006.json`
+**Common envelope** `governance/contracts/CAPABILITY-FOUNDATION-CONTRACT-BASE-001.md`
 
-> **This contract is a stub.** Sections 1–8 are the census gap-forcing columns and
-> are empty on purpose. A section containing "TBD", a placeholder, or a plausible
-> guess counts as unpopulated — the census forbids inferring completion from
-> planning volume. Delete this block when all eight are genuinely filled.
-
-## Known from the census
-
-- **Module name:** Unified Knowledge System
-- **Interaction direction:** HEADLESS_SHARED_KNOWLEDGE_CAPABILITY
-- **Census standing:** `RESEARCH_CLOSED__IMPLEMENTATION_NOT_CURRENTLY_PROVEN`
-- **Census evidence summary:** Historical knowledge research is closed but implementation authority was NOT_AUTHORIZED; P1 Core foundations provide reusable data/evidence primitives without proving the historical end-user Knowledge module.
-
-This is what P6 recorded. It is background, not a populated section.
-
-## Boundary rules touching this module
-
-- RESEARCH_KNOWLEDGE consumes BROWSER from CONNECTED_ACTIONS and does not own it.
-
-Crossing any of these is an `owner` decision, never lane discretion.
+> Specification only. This does not claim implementation or qualification PASS.
 
 ## 1. Contract / interface
 
-<!-- What this module promises callers: named operations, inputs, outputs, and what is explicitly not offered. -->
-
-**UNPOPULATED**
+Operations: `ingest_fact`, `ingest_source`, `resolve_entity`, `retrieve_context`, `link_provenance`. Every admitted assertion is source-linked or explicitly marked unverified/inferred.
 
 ## 2. Ingress routes
 
-<!-- Every way work enters. Name the caller, the transport, and the authority that admits it. A route with no named admitting authority is a gap, not a route. -->
-
-**UNPOPULATED**
+Research result, approved file/source ingest, or peer-system knowledge query with source identity and provenance requirements.
 
 ## 3. Egress routes
 
-<!-- Every way results leave: return values, emitted artifacts, notifications, side effects on other modules. -->
-
-**UNPOPULATED**
+Grounded context package, entity/source refs, provenance graph updates, confidence/standing metadata and typed failure.
 
 ## 4. Persistence and canonical writer
 
-<!-- Exactly one component may write each piece of durable state. Name it, name the store, and name what happens to a write arriving from anywhere else. -->
-
-**UNPOPULATED**
+**Canonical semantic writer:** `SYSTEM_MASTER/RESEARCH_KNOWLEDGE`. Knowledge service is sole semantic writer for knowledge/provenance graph state and entity/source linkage.
+**Physical persistence:** CORE provides physical durability/evidence; source artifacts remain immutable and owned by their source/file domain.
 
 ## 5. Dependencies
 
-<!-- Modules and shared infrastructure required, and the direction of each. Flag any that cross a boundary rule below. -->
-
-**UNPOPULATED**
+Baseline platform dependencies are P00–P12 and P15 as selected by current authority.
+- RESEARCH/RESEARCH_KNOWLEDGE.
+- FILE/DOCUMENTS.
+- BROWSER/CONNECTED_ACTIONS.
+- PLUGINS/CONNECTED_ACTIONS.
 
 ## 6. Failure semantics
 
-<!-- What happens when each ingress route fails, a dependency is unavailable, or a write is refused. State fail-closed or fail-open, and justify any fail-open. Include the idempotency rule. -->
-
-**UNPOPULATED**
+Fail closed on missing source identity for claims requiring provenance, conflicting canonical entity mutation without adjudication, authority mismatch, dependency failure or rejected write. Unverified data may be stored only with explicit standing. Retries reuse `idempotency_key`; duplicate source/assertion identities cannot create duplicate canonical facts.
 
 ## 7. Evidence target
 
-<!-- The artifact that proves this module did what it claimed: path, format, required contents. A log line is not evidence. -->
-
-**UNPOPULATED**
+Future evidence target (currently absent until implementation qualification): `qualification/foundation/knowledge-foundation-001.json`.
+Required contents: `C17`, `KNOWLEDGE`, owner `SYSTEM_MASTER/RESEARCH_KNOWLEDGE`, current authority/crosswalk identifiers, exact subject Git blobs, ingest/retrieve/entity/provenance coverage, writer/conflict/failure/idempotency tests, acceptance command and `PASS|FAIL`.
 
 ## 8. Acceptance target
 
-<!-- The exact command returning PASS or FAIL, and the PASS condition. Must be runnable by someone who did not write the module. -->
-
-**UNPOPULATED**
+Pre-code specification gate: `node .github/scripts/foundation-capability-contract-spec-check.js KNOWLEDGE`.
+Implementation acceptance gate: `node .github/scripts/foundation-capability-acceptance.js KNOWLEDGE`.
+PASS requires source-bound ingest/retrieval, unverified standing, entity conflict handling, writer isolation and idempotent duplicate prevention.
 
 ## 9. Authority boundary
 
-<!-- What this module may decide alone vs. what needs the owner. Mirrors
-     governance/DECISION-RIGHTS-001.md, scoped to this module. -->
+`SYSTEM_MASTER/RESEARCH_KNOWLEDGE` owns research knowledge/provenance semantics. BOOK/LEARNING/PROGRAMMING and other peers consume context but keep their own domain state; CONNECTED_ACTIONS owns provider access; CORE owns physical durability.
 
-**UNPOPULATED**
+## 10. Open implementation gaps
 
-## 10. Open gaps
-
-- Sections 1–9 are unpopulated. This module remains `ACTIVE_GAP` in
-  Foundation Closure Census 001 until they are filled.
-
+Specification-ready does not mean implemented. Production/provider/external qualification and Foundation evidence remain open until implementation acceptance passes and a current receipt is admitted.

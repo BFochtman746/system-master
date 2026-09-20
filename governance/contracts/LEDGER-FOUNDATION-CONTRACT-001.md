@@ -1,86 +1,55 @@
 # LEDGER — Foundation Contract 001
 
-**Owner** `SYSTEM_MASTER/SPREADSHEET_DATA` · **Lane** SPREADSHEET_DATA · **Effective** <UNSET>
-**Authority** `governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-005.json`
-**Scaffolded** 2026-09-13 from `.github/scripts/scaffold-foundation-contracts.js`
+**Capability** `C19` · **Owner** `SYSTEM_MASTER/SPREADSHEET_DATA` · **Lane** `SPREADSHEET_DATA`
+**Authority selector** `governance/CURRENT-AUTHORITY.json`
+**Capability inventory** `governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json`
+**Owner consistency** `governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006.json`
+**Common envelope** `governance/contracts/CAPABILITY-FOUNDATION-CONTRACT-BASE-001.md`
 
-> **This contract is a stub.** Sections 1–8 are the census gap-forcing columns and
-> are empty on purpose. A section containing "TBD", a placeholder, or a plausible
-> guess counts as unpopulated — the census forbids inferring completion from
-> planning volume. Delete this block when all eight are genuinely filled.
-
-## Known from the census
-
-- **Module name:** Household Ledger
-- **Interaction direction:** HEADLESS_OR_DEDICATED_DOMAIN_CAPABILITY_UNDECIDED
-- **Census standing:** `EVIDENCE_REVIEW_REQUIRED__NAME_COLLISION`
-- **Census evidence summary:** The historical module is explicitly Household Ledger. Current governance completion/obligation/repair ledgers are unrelated infrastructure and cannot be used as product implementation proof. Historical Household Ledger research closed but implementation decisions remain open.
-
-This is what P6 recorded. It is background, not a populated section.
-
-## Boundary rules touching this module
-
-- CORE owns the shared data foundation; SPREADSHEET_DATA owns product BI and analysis semantics.
-
-Crossing any of these is an `owner` decision, never lane discretion.
+> Specification only. Populating this contract makes the capability specification-ready; it does not claim implementation or qualification PASS. Any changed subject requires fresh evidence.
 
 ## 1. Contract / interface
 
-<!-- What this module promises callers: named operations, inputs, outputs, and what is explicitly not offered. -->
-
-**UNPOPULATED**
+Operations: `append_entry`, `read_ledger`, `reconcile_ledger`, `derive_balance`, `export_ledger`. Appends require ledger id, immutable event id, schema/version and idempotency identity.
 
 ## 2. Ingress routes
 
-<!-- Every way work enters. Name the caller, the transport, and the authority that admits it. A route with no named admitting authority is a gap, not a route. -->
-
-**UNPOPULATED**
+Owner-system append/query/reconcile request through current dispatch controls. No peer may write ledger storage directly.
 
 ## 3. Egress routes
 
-<!-- Every way results leave: return values, emitted artifacts, notifications, side effects on other modules. -->
-
-**UNPOPULATED**
+Append receipt, query/reconciliation result, derived balance, export ref and typed failure/evidence.
 
 ## 4. Persistence and canonical writer
 
-<!-- Exactly one component may write each piece of durable state. Name it, name the store, and name what happens to a write arriving from anywhere else. -->
-
-**UNPOPULATED**
+**Canonical semantic writer:** `SYSTEM_MASTER/SPREADSHEET_DATA`. Ledger service is sole semantic writer for ledger entries and reconciliation state.
+**Physical persistence:** CORE persistence writes the physical durable record under append-only/content-addressed/CAS rules; non-ledger direct writes are rejected.
 
 ## 5. Dependencies
 
-<!-- Modules and shared infrastructure required, and the direction of each. Flag any that cross a boundary rule below. -->
-
-**UNPOPULATED**
+Baseline platform dependencies are P00–P12 and P15 as selected by current authority.
+- DATA/SPREADSHEET_DATA.
+- MATH/SPREADSHEET_DATA.
 
 ## 6. Failure semantics
 
-<!-- What happens when each ingress route fails, a dependency is unavailable, or a write is refused. State fail-closed or fail-open, and justify any fail-open. Include the idempotency rule. -->
-
-**UNPOPULATED**
+Fail closed on duplicate event identity with divergent payload, schema mismatch, sequence/CAS conflict, dependency failure or rejected write. Append is atomic. Retries reuse `idempotency_key`; exact duplicates return the original receipt, while conflicting duplicates return a typed conflict.
 
 ## 7. Evidence target
 
-<!-- The artifact that proves this module did what it claimed: path, format, required contents. A log line is not evidence. -->
-
-**UNPOPULATED**
+Future evidence target (currently absent until implementation qualification): `qualification/foundation/ledger-foundation-001.json`.
+Required contents: `C19`, `LEDGER`, owner `SYSTEM_MASTER/SPREADSHEET_DATA`, current authority/crosswalk identifiers, exact subject Git blobs, append/query/reconcile route coverage, writer/CAS/idempotency/failure tests, acceptance command and `PASS|FAIL`.
 
 ## 8. Acceptance target
 
-<!-- The exact command returning PASS or FAIL, and the PASS condition. Must be runnable by someone who did not write the module. -->
-
-**UNPOPULATED**
+Pre-code specification gate: `node .github/scripts/foundation-capability-contract-spec-check.js LEDGER`.
+Implementation acceptance gate: `node .github/scripts/foundation-capability-acceptance.js LEDGER`.
+PASS requires atomic append, duplicate replay, divergent duplicate rejection, reconcile/read/export, writer isolation and recovery proof.
 
 ## 9. Authority boundary
 
-<!-- What this module may decide alone vs. what needs the owner. Mirrors
-     governance/DECISION-RIGHTS-001.md, scoped to this module. -->
+`SYSTEM_MASTER/SPREADSHEET_DATA` owns ledger semantics; CORE owns shared physical durability and transaction primitives only. Cross-owner changes require current authority/crosswalk/allocation update and fresh qualification.
 
-**UNPOPULATED**
+## 10. Open implementation gaps
 
-## 10. Open gaps
-
-- Sections 1–9 are unpopulated. This module remains `ACTIVE_GAP` in
-  Foundation Closure Census 001 until they are filled.
-
+Specification-ready does not mean implemented. Production/native/external qualification and Foundation evidence remain open until the implementation acceptance gate passes and a current receipt is admitted.

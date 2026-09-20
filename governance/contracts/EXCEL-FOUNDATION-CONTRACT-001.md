@@ -1,86 +1,56 @@
 # EXCEL — Foundation Contract 001
 
-**Owner** `SYSTEM_MASTER/SPREADSHEET_DATA` · **Lane** SPREADSHEET_DATA · **Effective** <UNSET>
-**Authority** `governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-005.json`
-**Scaffolded** 2026-09-13 from `.github/scripts/scaffold-foundation-contracts.js`
+**Capability** `C10` · **Owner** `SYSTEM_MASTER/SPREADSHEET_DATA` · **Lane** `SPREADSHEET_DATA`
+**Authority selector** `governance/CURRENT-AUTHORITY.json`
+**Capability inventory** `governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json`
+**Owner consistency** `governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006.json`
+**Common envelope** `governance/contracts/CAPABILITY-FOUNDATION-CONTRACT-BASE-001.md`
 
-> **This contract is a stub.** Sections 1–8 are the census gap-forcing columns and
-> are empty on purpose. A section containing "TBD", a placeholder, or a plausible
-> guess counts as unpopulated — the census forbids inferring completion from
-> planning volume. Delete this block when all eight are genuinely filled.
-
-## Known from the census
-
-- **Module name:** Excel / Spreadsheet System
-- **Interaction direction:** HEADLESS_EXECUTION_WITH_CONTROL_REVIEW_AND_NATIVE_EDITOR_HANDOFF
-- **Census standing:** `RESEARCH_BUILD_SPEC_PRESERVED__PRODUCTION_IMPLEMENTATION_NOT_CURRENTLY_PROVEN`
-- **Census evidence summary:** Historical EXCEL-QUAL authority/research exists. The later spreadsheet tools-portfolio scope explicitly states that its packet does not implement a spreadsheet engine or authorize production and treats native Excel/web/iPhone as interoperable adapters, not semantic owners.
-
-This is what P6 recorded. It is background, not a populated section.
-
-## Boundary rules touching this module
-
-- CORE owns the shared data foundation; SPREADSHEET_DATA owns product BI and analysis semantics.
-
-Crossing any of these is an `owner` decision, never lane discretion.
+> Specification only. Populating this contract makes the capability specification-ready; it does not claim implementation or qualification PASS. Any changed subject requires fresh evidence.
 
 ## 1. Contract / interface
 
-<!-- What this module promises callers: named operations, inputs, outputs, and what is explicitly not offered. -->
-
-**UNPOPULATED**
+Operations: `create_workbook`, `edit_workbook`, `calculate_workbook`, `chart_workbook`, `export_workbook`. Inputs are workbook/data refs, formulas and format policy; outputs are workbook/artifact refs, calculations/charts, validation evidence or typed failure.
 
 ## 2. Ingress routes
 
-<!-- Every way work enters. Name the caller, the transport, and the authority that admits it. A route with no named admitting authority is a gap, not a route. -->
-
-**UNPOPULATED**
+Chat/Automation or DATA request with workbook/data refs and calculation intent. SPREADSHEET_DATA admits workbook mutations; external destinations require CONNECTED_ACTIONS.
 
 ## 3. Egress routes
 
-<!-- Every way results leave: return values, emitted artifacts, notifications, side effects on other modules. -->
-
-**UNPOPULATED**
+XLSX artifact ref, calculation/chart results, workbook metadata and validation evidence.
 
 ## 4. Persistence and canonical writer
 
-<!-- Exactly one component may write each piece of durable state. Name it, name the store, and name what happens to a write arriving from anywhere else. -->
-
-**UNPOPULATED**
+**Canonical semantic writer:** `SYSTEM_MASTER/SPREADSHEET_DATA`. Excel service writes workbook semantic model, formula graph and version metadata.
+**Physical persistence:** CORE artifact store writes immutable XLSX/render/export binaries; DOCUMENTS may transport files but does not own workbook semantics.
 
 ## 5. Dependencies
 
-<!-- Modules and shared infrastructure required, and the direction of each. Flag any that cross a boundary rule below. -->
-
-**UNPOPULATED**
+Baseline platform dependencies are P00–P12 and P15 as selected by current authority.
+- DATA/SPREADSHEET_DATA.
+- MATH/SPREADSHEET_DATA.
+- FILE/DOCUMENTS.
 
 ## 6. Failure semantics
 
-<!-- What happens when each ingress route fails, a dependency is unavailable, or a write is refused. State fail-closed or fail-open, and justify any fail-open. Include the idempotency rule. -->
-
-**UNPOPULATED**
+Fail closed on invalid formula/schema, circular dependency not explicitly permitted, unresolved data ref, calculation/export failure or rejected canonical write. Failed calculation/export does not replace prior valid workbook state. Retries reuse `idempotency_key` and recover the committed version.
 
 ## 7. Evidence target
 
-<!-- The artifact that proves this module did what it claimed: path, format, required contents. A log line is not evidence. -->
-
-**UNPOPULATED**
+Future evidence target (currently absent until implementation qualification): `qualification/foundation/excel-foundation-001.json`.
+Required contents: `C10`, `EXCEL`, owner `SYSTEM_MASTER/SPREADSHEET_DATA`, current authority/crosswalk identifiers, exact subject Git blobs, workbook/formula/chart route coverage, writer/dependency/failure/idempotency tests, acceptance command and `PASS|FAIL`.
 
 ## 8. Acceptance target
 
-<!-- The exact command returning PASS or FAIL, and the PASS condition. Must be runnable by someone who did not write the module. -->
-
-**UNPOPULATED**
+Pre-code specification gate: `node .github/scripts/foundation-capability-contract-spec-check.js EXCEL`.
+Implementation acceptance gate: `node .github/scripts/foundation-capability-acceptance.js EXCEL`.
+PASS requires create/edit/calculate/chart/export cases, formula correctness, failed-write rollback, writer isolation and idempotent replay.
 
 ## 9. Authority boundary
 
-<!-- What this module may decide alone vs. what needs the owner. Mirrors
-     governance/DECISION-RIGHTS-001.md, scoped to this module. -->
+`SYSTEM_MASTER/SPREADSHEET_DATA` owns workbook and spreadsheet semantics. DOCUMENTS owns generic file mechanics; CORE owns physical durability; other peers consume by interface. Cross-owner changes require current authority/crosswalk/allocation update and fresh qualification.
 
-**UNPOPULATED**
+## 10. Open implementation gaps
 
-## 10. Open gaps
-
-- Sections 1–9 are unpopulated. This module remains `ACTIVE_GAP` in
-  Foundation Closure Census 001 until they are filled.
-
+Specification-ready does not mean implemented. Production/native/external qualification and Foundation evidence remain open until the implementation acceptance gate passes and a current receipt is admitted.

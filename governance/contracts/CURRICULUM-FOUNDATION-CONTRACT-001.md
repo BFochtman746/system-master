@@ -1,80 +1,60 @@
 # CURRICULUM — Foundation Contract 001
 
-**Owner** `SYSTEM_MASTER/LEARNING` · **Lane** LEARNING · **Effective** <UNSET>
-**Authority** `governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-005.json`
-**Scaffolded** 2026-09-13 from `.github/scripts/scaffold-foundation-contracts.js`
+**Capability** `C07` · **Owner** `SYSTEM_MASTER/LEARNING` · **Lane** `LEARNING`
+**Authority selector** `governance/CURRENT-AUTHORITY.json`
+**Capability inventory** `governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json`
+**Owner consistency** `governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006.json`
+**Common envelope** `governance/contracts/CAPABILITY-FOUNDATION-CONTRACT-BASE-001.md`
 
-> **This contract is a stub.** Sections 1–8 are the census gap-forcing columns and
-> are empty on purpose. A section containing "TBD", a placeholder, or a plausible
-> guess counts as unpopulated — the census forbids inferring completion from
-> planning volume. Delete this block when all eight are genuinely filled.
-
-## Known from the census
-
-- **Module name:** Curriculum System
-- **Interaction direction:** LEARNING_CAPABILITY
-- **Census standing:** `CURRENT_CANONICAL_OWNER_CAPABILITY__ACTIVE`
-- **Census evidence summary:** The full-standard curriculum compiler is the selected Learning gap; frozen 66-node source identity and Domain I/II work are preserved with post-P2 candidates through Domain II Batch 02 and Batch 03 selected.
-
-This is what P6 recorded. It is background, not a populated section.
+> Specification only. Populating this contract makes the capability specification-ready; it does not claim implementation or qualification PASS. Any changed subject requires fresh evidence.
 
 ## 1. Contract / interface
 
-<!-- What this module promises callers: named operations, inputs, outputs, and what is explicitly not offered. -->
-
-**UNPOPULATED**
+Operations: `define_goal`, `compile_curriculum`, `plan_lesson`, `plan_assessment`, `revise_sequence`.
+Every operation uses the common request/response envelope and returns typed result, evidence reference, or typed failure. The capability does not inherit another owner's mutation authority.
 
 ## 2. Ingress routes
 
-<!-- Every way work enters. Name the caller, the transport, and the authority that admits it. A route with no named admitting authority is a gap, not a route. -->
-
-**UNPOPULATED**
+Learning/Chat request with learner goal, constraints, standards/evidence refs.
+All ingress is admitted by the owning lane and the current CORE authority/dispatch controls; external side effects require CONNECTED_ACTIONS authorization.
 
 ## 3. Egress routes
 
-<!-- Every way results leave: return values, emitted artifacts, notifications, side effects on other modules. -->
-
-**UNPOPULATED**
+curriculum graph, lesson/assessment plans, prerequisite/dependency records.
+Cross-owner output is by typed interface/artifact/event reference, never by direct mutation of another owner's state.
 
 ## 4. Persistence and canonical writer
 
-<!-- Exactly one component may write each piece of durable state. Name it, name the store, and name what happens to a write arriving from anywhere else. -->
-
-**UNPOPULATED**
+**Canonical semantic writer:** `SYSTEM_MASTER/LEARNING`. LEARNING Curriculum service is canonical writer for curriculum/sequence state; CORE supplies physical persistence/evidence.
+**Physical persistence:** CORE-owned shared persistence/artifact/evidence primitives may store bytes or records but do not become semantic owner. Non-owner writes are rejected and must be resubmitted through the canonical owner interface.
 
 ## 5. Dependencies
 
-<!-- Modules and shared infrastructure required, and the direction of each. Flag any that cross a boundary rule below. -->
-
-**UNPOPULATED**
+Baseline platform dependencies are P00–P12 and P15 as selected by current authority.
+- LEARNING/LEARNING.
+- RESEARCH/RESEARCH_KNOWLEDGE.
+- MEDIA/MEDIA.
+- DOCUMENTS/DOCUMENTS.
 
 ## 6. Failure semantics
 
-<!-- What happens when each ingress route fails, a dependency is unavailable, or a write is refused. State fail-closed or fail-open, and justify any fail-open. Include the idempotency rule. -->
-
-**UNPOPULATED**
+Fail closed on authority mismatch, invalid input/schema, unavailable required dependency, rejected canonical write, or uncertain external-side-effect state. Curriculum changes that lack learner/goal identity, prerequisite consistency, or evidence linkage remain draft-only. Retries require the same `idempotency_key`; duplicate requests must return/recover the prior result or a typed conflict without duplicating durable state or external effects. Cancellation must preserve already-committed evidence and expose whether any irreversible effect occurred.
 
 ## 7. Evidence target
 
-<!-- The artifact that proves this module did what it claimed: path, format, required contents. A log line is not evidence. -->
-
-**UNPOPULATED**
+Future evidence target (currently absent until implementation qualification): `qualification/foundation/curriculum-foundation-001.json`.
+Required contents: `C07`, `CURRICULUM`, owner `SYSTEM_MASTER/LEARNING`, current authority/crosswalk identifiers, exact subject Git blobs, route coverage, canonical-writer assertion, dependency/failure/idempotency test results, acceptance command, result `PASS|FAIL`, and immutable evidence/artifact references.
 
 ## 8. Acceptance target
 
-<!-- The exact command returning PASS or FAIL, and the PASS condition. Must be runnable by someone who did not write the module. -->
-
-**UNPOPULATED**
+Pre-code specification gate: `node .github/scripts/foundation-capability-contract-spec-check.js CURRICULUM`.
+Implementation acceptance gate: `node .github/scripts/foundation-capability-acceptance.js CURRICULUM`.
+PASS requires the specification gate plus a current-authority evidence target with exact subject bindings and successful route, writer, dependency, failure, idempotency and owner-boundary tests.
 
 ## 9. Authority boundary
 
-<!-- What this module may decide alone vs. what needs the owner. Mirrors
-     governance/DECISION-RIGHTS-001.md, scoped to this module. -->
+`SYSTEM_MASTER/LEARNING` may define and change this capability's domain semantics and internal implementation within the current contract. CORE retains shared runtime/A-01/durability infrastructure; RESEARCH_KNOWLEDGE retains source/provenance semantics; other peers retain their own domain state. Cross-owner contract or ownership changes require current authority/crosswalk/allocation update and fresh qualification.
 
-**UNPOPULATED**
+## 10. Open implementation gaps
 
-## 10. Open gaps
-
-- Sections 1–9 are unpopulated. This module remains `ACTIVE_GAP` in
-  Foundation Closure Census 001 until they are filled.
-
+Contract specification is complete when the pre-code specification gate passes. Implementation, production, native/human/external qualification, and Foundation evidence remain open until the implementation acceptance gate passes and a current receipt is admitted.

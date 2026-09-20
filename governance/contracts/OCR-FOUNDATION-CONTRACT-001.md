@@ -1,86 +1,57 @@
 # OCR — Foundation Contract 001
 
-**Owner** `SYSTEM_MASTER/DOCUMENTS` · **Lane** DOCUMENTS · **Effective** <UNSET>
-**Authority** `governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-005.json`
-**Scaffolded** 2026-09-13 from `.github/scripts/scaffold-foundation-contracts.js`
+**Capability** `C24` · **Owner** `SYSTEM_MASTER/DOCUMENTS` · **Lane** `DOCUMENTS`
+**Authority selector** `governance/CURRENT-AUTHORITY.json`
+**Capability inventory** `governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json`
+**Owner consistency** `governance/architecture/SYSTEM-MASTER-TOOL-OWNER-ALLOCATION-006.json`
+**Common envelope** `governance/contracts/CAPABILITY-FOUNDATION-CONTRACT-BASE-001.md`
 
-> **This contract is a stub.** Sections 1–8 are the census gap-forcing columns and
-> are empty on purpose. A section containing "TBD", a placeholder, or a plausible
-> guess counts as unpopulated — the census forbids inferring completion from
-> planning volume. Delete this block when all eight are genuinely filled.
-
-## Known from the census
-
-- **Module name:** OCR / Vision Document System
-- **Interaction direction:** HEADLESS_INGEST_CAPABILITY
-- **Census standing:** `RESEARCH_CLOSED__IMPLEMENTATION_NOT_CURRENTLY_PROVEN`
-- **Census evidence summary:** Historical module research is closed, but the historical index says implementation authority NOT_AUTHORIZED and empirical/production NOT_PROVEN; no current canonical OCR owner implementation is established by P0-P5.
-
-This is what P6 recorded. It is background, not a populated section.
-
-## Boundary rules touching this module
-
-- BOOK owns authoring and prose semantics; DOCUMENTS owns the artifact mechanics they render into.
-
-Crossing any of these is an `owner` decision, never lane discretion.
+> Specification only. Populating this contract makes the capability specification-ready; it does not claim implementation or qualification PASS. Any changed subject requires fresh evidence.
 
 ## 1. Contract / interface
 
-<!-- What this module promises callers: named operations, inputs, outputs, and what is explicitly not offered. -->
-
-**UNPOPULATED**
+Operations: `extract_text`, `extract_layout`, `extract_tables`, `ocr_region`, `validate_extraction`.
+Inputs are immutable image/PDF source refs plus extraction policy; outputs are source-bound extraction records with confidence/provenance.
 
 ## 2. Ingress routes
 
-<!-- Every way work enters. Name the caller, the transport, and the authority that admits it. A route with no named admitting authority is a gap, not a route. -->
-
-**UNPOPULATED**
+IMG-INGEST/PDF/File request with immutable source ref, region/page scope and extraction policy.
 
 ## 3. Egress routes
 
-<!-- Every way results leave: return values, emitted artifacts, notifications, side effects on other modules. -->
-
-**UNPOPULATED**
+Text/layout/table extraction record, confidence/evidence, derived artifact refs, and typed unsupported/low-confidence results.
 
 ## 4. Persistence and canonical writer
 
-<!-- Exactly one component may write each piece of durable state. Name it, name the store, and name what happens to a write arriving from anywhere else. -->
-
-**UNPOPULATED**
+**Canonical semantic writer:** `SYSTEM_MASTER/DOCUMENTS`. OCR writes extraction records tied to immutable source hashes and extraction version.
+**Physical persistence:** CORE persists extraction/evidence records and immutable source/derived artifacts; OCR never mutates source binaries.
 
 ## 5. Dependencies
 
-<!-- Modules and shared infrastructure required, and the direction of each. Flag any that cross a boundary rule below. -->
-
-**UNPOPULATED**
+Baseline platform dependencies are P00–P12 and P15 as selected by current authority.
+- IMG-INGEST/DOCUMENTS.
+- PDF/DOCUMENTS.
+- FILE/DOCUMENTS.
 
 ## 6. Failure semantics
 
-<!-- What happens when each ingress route fails, a dependency is unavailable, or a write is refused. State fail-closed or fail-open, and justify any fail-open. Include the idempotency rule. -->
-
-**UNPOPULATED**
+Fail closed on missing/mismatched source identity, unsupported content, authority/schema failure, unavailable required dependency, or rejected extraction write. Low confidence is a typed result, not a fabricated success. Retries reuse `idempotency_key` and source/extractor version.
 
 ## 7. Evidence target
 
-<!-- The artifact that proves this module did what it claimed: path, format, required contents. A log line is not evidence. -->
-
-**UNPOPULATED**
+Future evidence target (currently absent until implementation qualification): `qualification/foundation/ocr-foundation-001.json`.
+Required contents: `C24`, `OCR`, owner `SYSTEM_MASTER/DOCUMENTS`, current authority/crosswalk identifiers, exact subject Git blobs, route/source-binding coverage, canonical-writer, confidence/failure/idempotency tests, acceptance command and `PASS|FAIL`.
 
 ## 8. Acceptance target
 
-<!-- The exact command returning PASS or FAIL, and the PASS condition. Must be runnable by someone who did not write the module. -->
-
-**UNPOPULATED**
+Pre-code specification gate: `node .github/scripts/foundation-capability-contract-spec-check.js OCR`.
+Implementation acceptance gate: `node .github/scripts/foundation-capability-acceptance.js OCR`.
+PASS requires text/layout/table extraction cases, source-hash binding, unsupported/low-confidence behavior, dependency failure and idempotent replay proof.
 
 ## 9. Authority boundary
 
-<!-- What this module may decide alone vs. what needs the owner. Mirrors
-     governance/DECISION-RIGHTS-001.md, scoped to this module. -->
+`SYSTEM_MASTER/DOCUMENTS` owns OCR/extraction semantics. Source-domain meaning remains with the source owner; CORE owns physical durability only. Cross-owner changes require current authority/crosswalk/allocation update and fresh qualification.
 
-**UNPOPULATED**
+## 10. Open implementation gaps
 
-## 10. Open gaps
-
-- Sections 1–9 are unpopulated. This module remains `ACTIVE_GAP` in
-  Foundation Closure Census 001 until they are filled.
-
+Specification-ready does not mean implemented. Production/native/external qualification and Foundation evidence remain open until the implementation acceptance gate passes and a current receipt is admitted.
