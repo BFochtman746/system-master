@@ -148,7 +148,7 @@ jobs:
             'qualification_id':'SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION-001E-SHADOW-CALIBRATION',
             'calibration_source':'authoritative A-01 evidence/second-shift-001e-shadow-calibration-summary.json',
           }
-          p=pathlib.Path('.001e-shadow-evidence')
+          p=pathlib.Path('001e-shadow-evidence')
           p.mkdir(parents=True,exist_ok=True)
           (p/'second-shift-production-master-001e-shadow-standing.json').write_text(json.dumps(evidence,indent=2,sort_keys=True)+'\n',encoding='utf-8')
           print('SECOND_SHIFT_001E_SHADOW_STANDING=PASS')
@@ -157,6 +157,6 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: second-shift-production-master-001e-${{ github.run_id }}-standing
-          path: .001e-shadow-evidence
+          path: 001e-shadow-evidence
           if-no-files-found: error
           retention-days: 30
