@@ -55,17 +55,32 @@ async function main() {
   const productionGrant = await productionGate.authorize({ receipt: admissionReceipt, request, plan });
 
   const leaseCoordinator = new GitHubSystemFileLeaseCoordinator({ transport: authorityTransport });
-  const leaseReceipt = await leaseCoordinator.acquire({
-    paths: productionGrant.paths,
-    holder: {
-      workstream_id: request.workstream_id,
-      operation_id: productionGrant.operation_id,
-      mutation_id: productionGrant.mutation_id
-    },
-    targetRef: productionGrant.target_ref,
-    expectedPredecessorSha: productionGrant.observed_predecessor_sha
-  });
-  await leaseCoordinator.requireAuthority(leaseReceipt);
+  const holder = {
+    workstream_id: request.workstream_id,
+    operation_id: productionGrant.operation_id,
+    mutation_id: productionGrant.mutation_id
+  };
+  const observedTarget = await authorityTransport.getRef(productionGrant.target_ref);
+  let leaseReceipt;
+  let leaseRecovery = null;
+  if (observedTarget.sha === productionGrant.observed_predecessor_sha) {
+    leaseReceipt = await leaseCoordinator.acquire({
+      paths: productionGrant.paths,
+      holder,
+      targetRef: productionGrant.target_ref,
+      expectedPredecessorSha: productionGrant.observed_predecessor_sha
+    });
+    await leaseCoordinator.requireAuthority(leaseReceipt);
+  } else {
+    leaseRecovery = await leaseCoordinator.recoverApplied({
+      paths: productionGrant.paths,
+      holder,
+      targetRef: productionGrant.target_ref,
+      expectedPredecessorSha: productionGrant.observed_predecessor_sha,
+      resultCommitSha: observedTarget.sha
+    });
+    leaseReceipt = leaseRecovery.lease_receipt;
+  }
 
   const writerTransport = new GitHubReadConsistentReceiptCasRestTransport({ owner, repo, tokenProvider });
   const writer = new GitHubReceiptConsumingCasWriter({ transport: writerTransport });
@@ -83,6 +98,7 @@ async function main() {
     write('admission-receipt.json', admissionReceipt);
     write('production-grant.json', productionGrant);
     write('system-file-lease-acquisition.json', leaseReceipt);
+    if (leaseRecovery) write('system-file-lease-recovery.json', leaseRecovery);
     write('execution-receipt.json', executionReceipt);
     write('system-file-lease-release.json', leaseReleaseReceipt);
     write('request.json', request);

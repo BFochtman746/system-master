@@ -98,6 +98,19 @@ function eventRecord(held, released, acquisitionCommit, releasedAt) {
   return e;
 }
 
+function parseEvent(raw, expectedMutationId, expectedPath) {
+  if (raw === null) fail('LEASE_EVENT_MISSING', 'lease event missing for ' + expectedPath);
+  let e;
+  try { e = JSON.parse(raw); } catch { fail('LEASE_EVENT_INVALID', 'lease event JSON invalid'); }
+  if (e.protocol_version !== SYSTEM_FILE_LEASE_EVENT_PROTOCOL || e.mutation_id !== expectedMutationId || e.path !== expectedPath) fail('LEASE_EVENT_INVALID', 'lease event identity invalid');
+  if (!SHA256.test(e.event_digest || '') || e.event_digest !== digestWithout(e, 'event_digest')) fail('LEASE_EVENT_INVALID', 'lease event digest invalid');
+  if (!SHA1.test(e.result_commit_sha || '') || !SHA1.test(e.acquisition_commit_sha || '')) fail('LEASE_EVENT_INVALID', 'lease event commit identity invalid');
+  if (!SHA256.test(e.fence_token || '') || !SHA256.test(e.acquisition_record_digest || '') || !SHA256.test(e.release_record_digest || '')) fail('LEASE_EVENT_INVALID', 'lease event lease identity invalid');
+  if (!Number.isSafeInteger(e.path_revision) || e.path_revision < 1 || !Number.isSafeInteger(e.lease_epoch) || e.lease_epoch < 1) fail('LEASE_EVENT_INVALID', 'lease event counters invalid');
+  if (!sameHolder(e.holder, e.holder)) fail('LEASE_EVENT_INVALID', 'lease event holder invalid');
+  return e;
+}
+
 export class GitHubSystemFileLeaseCoordinator {
   constructor({ transport, stateRef = SYSTEM_FILE_LEASE_STATE_REF, ttlMs = 600000, maxCasAttempts = 3, randomBytesFn = randomBytes }) {
     for (const m of ['getRef', 'getCommit', 'readFile', 'createCommitFromFiles', 'updateRefFastForward']) if (typeof transport?.[m] !== 'function') throw new TypeError('transport.' + m + ' required');
@@ -108,6 +121,56 @@ export class GitHubSystemFileLeaseCoordinator {
     const out = [];
     for (const p of paths) out.push(parseRecord(await this.transport.readFile(commit, systemFileLeaseRecordPath(p)), p));
     return out;
+  }
+
+  async findAcquisitionCommit(headSha, path, recordDigest) {
+    let cursor = headSha;
+    for (let depth = 0; depth < 10000; depth += 1) {
+      const current = parseRecord(await this.transport.readFile(cursor, systemFileLeaseRecordPath(path)), path);
+      if (!current || current.record_digest !== recordDigest) fail('LEASE_RECOVERY_HISTORY_MISMATCH', 'lease acquisition record is not present at recovery head for ' + path);
+      const commit = await this.transport.getCommit(cursor);
+      if (!commit || !Array.isArray(commit.parents)) fail('LEASE_RECOVERY_HISTORY_INVALID', 'lease state commit metadata invalid');
+      const parentSha = commit.parents[0] ?? null;
+      if (!parentSha) return cursor;
+      const previous = parseRecord(await this.transport.readFile(parentSha, systemFileLeaseRecordPath(path)), path);
+      if (!previous || previous.record_digest !== recordDigest) return cursor;
+      cursor = parentSha;
+    }
+    fail('LEASE_RECOVERY_HISTORY_EXHAUSTED', 'lease acquisition history exceeded bounded scan');
+  }
+
+  async recoverApplied({ paths, holder, targetRef, expectedPredecessorSha, resultCommitSha }) {
+    paths = normalizePaths(paths); validateHolder(holder);
+    if (!SHA1.test(expectedPredecessorSha || '') || !SHA1.test(resultCommitSha || '')) fail('LEASE_SCHEMA_INVALID', 'recovery commit identity invalid');
+    const target = await this.transport.getRef(targetRef);
+    if (!target || target.sha !== resultCommitSha || resultCommitSha === expectedPredecessorSha) fail('LEASE_RECOVERY_TARGET_MISMATCH', 'recovery requires the exact already-applied target commit');
+    const head = await this.transport.getRef(this.stateRef);
+    if (!head || !SHA1.test(head.sha || '')) fail('LEASE_STATE_REF_INVALID', 'state ref invalid');
+    const current = await this.records(head.sha, paths);
+    if (current.some((r) => !r)) fail('LEASE_RECOVERY_NOT_FOUND', 'durable lease state missing for applied target');
+    const states = new Set(current.map((r) => r.state));
+    if (states.size !== 1) fail('LEASE_SET_INCONSISTENT', 'lease recovery set mixes held and released records');
+    const state = current[0].state;
+    const recovered = [];
+    let acquisitionCommitSha = null;
+    for (const record of current) {
+      if (!sameHolder(record.holder, holder) || record.target_ref !== targetRef || record.expected_predecessor_sha !== expectedPredecessorSha) fail('LEASE_RECOVERY_BINDING_MISMATCH', 'durable lease state does not bind the applied mutation');
+      if (state === 'HELD') {
+        const commitSha = await this.findAcquisitionCommit(head.sha, record.path, record.record_digest);
+        if (acquisitionCommitSha === null) acquisitionCommitSha = commitSha;
+        else if (acquisitionCommitSha !== commitSha) fail('LEASE_SET_INCONSISTENT', 'multi-path lease acquisition did not originate in one atomic state commit');
+        recovered.push(record);
+        continue;
+      }
+      if (record.result_commit_sha !== resultCommitSha) fail('LEASE_RECOVERY_RESULT_MISMATCH', 'released lease result does not match current target');
+      const event = parseEvent(await this.transport.readFile(head.sha, systemFileLeaseEventPath(holder.mutation_id, record.path)), holder.mutation_id, record.path);
+      if (!sameHolder(event.holder, holder) || event.target_ref !== targetRef || event.expected_predecessor_sha !== expectedPredecessorSha || event.result_commit_sha !== resultCommitSha || event.release_record_digest !== record.record_digest || event.lease_epoch !== record.lease_epoch || event.fence_token !== record.fence_token) fail('LEASE_EVENT_INVALID', 'lease event does not bind released record');
+      if (acquisitionCommitSha === null) acquisitionCommitSha = event.acquisition_commit_sha;
+      else if (acquisitionCommitSha !== event.acquisition_commit_sha) fail('LEASE_SET_INCONSISTENT', 'multi-path lease events disagree on acquisition commit');
+      recovered.push({ ...record, path_revision: event.path_revision - 1, state: 'HELD', result_commit_sha: null, record_digest: event.acquisition_record_digest });
+    }
+    const receipt = this.acquisitionReceipt(acquisitionCommitSha, targetRef, expectedPredecessorSha, holder, recovered, true);
+    return Object.freeze({ protocol_version:'control-gateway.system-file-lease-recovery.v1', state_ref:this.stateRef, observed_state:state, result_commit_sha:resultCommitSha, lease_receipt:receipt });
   }
 
   async acquire({ paths, holder, targetRef, expectedPredecessorSha, now = new Date() }) {
@@ -164,8 +227,7 @@ export class GitHubSystemFileLeaseCoordinator {
       for (let i = 0; i < current.length; i += 1) {
         const r = current[i], l = receipt.leases[i];
         if (!r || r.state !== 'HELD' || !sameHolder(r.holder, receipt.holder) || r.lease_epoch !== l.lease_epoch || r.fence_token !== l.fence_token || r.record_digest !== l.record_digest) fail('FENCED_STALE_EXECUTOR', 'lease fence stale for ' + l.path);
-        if (moment.getTime() >= Date.parse(r.expires_at)) fail('LEASE_EXPIRED', 'lease expired before release for ' + l.path);
-        const rr = releasedRecord(r, resultCommitSha); released.push(rr); events.push(eventRecord(r, rr, receipt.state_commit_sha, moment));
+          const rr = releasedRecord(r, resultCommitSha); released.push(rr); events.push(eventRecord(r, rr, receipt.state_commit_sha, moment));
       }
       const files = {};
       for (const r of released) files[systemFileLeaseRecordPath(r.path)] = canon(r) + '\n';
