@@ -34,12 +34,10 @@ test('qualifier is fixed-model fixed-prompt and uses only local Lemonade HTTP AP
   assert.match(qualifier, /system-info/);
   assert.match(qualifier, /system-stats/);
   assert.match(qualifier, /tokens_per_second/);
-  assert.match(qualifier, /requiredGet\(prefix, 'stats', 'stats-after'\)/);
-  assert.match(qualifier, /requiredGet\(prefix, 'system-stats', 'system-stats-after'\)/);
-  assert.match(qualifier, /requiredGet\(prefix, 'health', 'health-after'\)/);
-  assert.equal(qualifier.includes("requiredGet(prefix, 'stats-after')"), false);
-  assert.equal(qualifier.includes("requiredGet(prefix, 'system-stats-after')"), false);
-  assert.equal(qualifier.includes("requiredGet(prefix, 'health-after')"), false);
+  assert.match(qualifier, /max_output_tokens: 256/);
+  assert.equal(qualifier.includes("requiredGet(prefix, 'stats', 'stats-after')"), true);
+  assert.equal(qualifier.includes("requiredGet(prefix, 'system-stats', 'system-stats-after')"), true);
+  assert.equal(qualifier.includes("requiredGet(prefix, 'health', 'health-after')"), true);
   assert.equal(qualifier.includes('child_process'), false);
 });
 
@@ -47,7 +45,10 @@ test('qualifier preserves evidence while redacting local paths and defers produc
   assert.match(qualifier, /redacted-local-path/);
   assert.match(qualifier, /evidence-manifest\.json/);
   assert.match(qualifier, /production_model_selected: false/);
-  assert.match(qualifier, /LOCAL_LLM_SENTINEL_MISSING/);
+  assert.equal(qualifier.includes("const marker = '<|channel|>final<|message|>';"), true);
+  assert.match(qualifier, /finalText !== 'A01_LOCAL_LLM_OK'/);
+  assert.match(qualifier, /LOCAL_LLM_SENTINEL_MISMATCH/);
+  assert.equal(qualifier.includes("outputText.includes('A01_LOCAL_LLM_OK')"), false);
 });
 
 test('caller routes exact subject through exact registered A-01 control plane instead of direct self-hosted execution', () => {

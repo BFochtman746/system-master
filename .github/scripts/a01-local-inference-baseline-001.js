@@ -89,6 +89,18 @@ function extractOutputText(payload) {
   return '';
 }
 
+function extractFinalAnswer(payload) {
+  const raw = extractOutputText(payload).trim();
+  if (!raw) return '';
+  const marker = '<|channel|>final<|message|>';
+  const markerIndex = raw.lastIndexOf(marker);
+  if (markerIndex === -1) return raw;
+  let finalText = raw.slice(markerIndex + marker.length);
+  const endIndex = finalText.indexOf('<|end|>');
+  if (endIndex !== -1) finalText = finalText.slice(0, endIndex);
+  return finalText.trim();
+}
+
 function evidenceManifest() {
   mkdir();
   const files = fs.readdirSync(evidenceDir)
@@ -105,8 +117,8 @@ function evidenceManifest() {
   return manifest;
 }
 
-async function requiredGet(prefix, endpoint, evidenceName = endpoint) {
-  const value = await requestJson(`${HOST}${prefix}/${endpoint}`, { timeoutMs: 30000 });
+async function requiredGet(prefix, endpointName, evidenceName = endpointName) {
+  const value = await requestJson(`${HOST}${prefix}/${endpointName}`, { timeoutMs: 30000 });
   writeJson(`${evidenceName.replaceAll('/', '-')}.json`, sanitize(value));
   return value;
 }
@@ -148,15 +160,16 @@ async function requiredGet(prefix, endpoint, evidenceName = endpoint) {
     const loadMs = Date.now() - loadStarted;
     writeJson('load-response.json', sanitize(loadResponse));
 
-    const responseRequest = { model: MODEL, input: PROMPT, max_output_tokens: 64, temperature: 0 };
+    const responseRequest = { model: MODEL, input: PROMPT, max_output_tokens: 256, temperature: 0 };
     writeJson('response-request.json', responseRequest);
     const inferenceStarted = Date.now();
     const response = await requestJson(`${HOST}${prefix}/responses`, { method: 'POST', body: responseRequest, timeoutMs: 240000 });
     const inferenceMs = Date.now() - inferenceStarted;
     writeJson('response.json', sanitize(response));
-    const outputText = extractOutputText(response).trim();
-    if (!outputText) throw new Error('LOCAL_LLM_RESPONSE_TEXT_EMPTY');
-    if (!outputText.includes('A01_LOCAL_LLM_OK')) throw new Error(`LOCAL_LLM_SENTINEL_MISSING:${outputText.slice(0, 160)}`);
+    const rawOutputText = extractOutputText(response).trim();
+    if (!rawOutputText) throw new Error('LOCAL_LLM_RESPONSE_TEXT_EMPTY');
+    const finalText = extractFinalAnswer(response);
+    if (finalText !== 'A01_LOCAL_LLM_OK') throw new Error(`LOCAL_LLM_SENTINEL_MISMATCH:${finalText.slice(0, 160)}`);
 
     const statsAfter = await requiredGet(prefix, 'stats', 'stats-after');
     const systemStatsAfter = await requiredGet(prefix, 'system-stats', 'system-stats-after');
@@ -189,7 +202,7 @@ async function requiredGet(prefix, endpoint, evidenceName = endpoint) {
       },
       hardware: sanitize(systemInfo),
       fixed_prompt: PROMPT,
-      response_text: outputText,
+      response_text: finalText,
       started_at: startedAt.toISOString(),
       completed_at: completedAt.toISOString(),
       elapsed_ms: completedAt.getTime() - startedAt.getTime(),
