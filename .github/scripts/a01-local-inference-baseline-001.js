@@ -105,9 +105,9 @@ function evidenceManifest() {
   return manifest;
 }
 
-async function requiredGet(prefix, name) {
-  const value = await requestJson(`${HOST}${prefix}/${name}`, { timeoutMs: 30000 });
-  writeJson(`${name.replaceAll('/', '-')}.json`, sanitize(value));
+async function requiredGet(prefix, endpoint, evidenceName = endpoint) {
+  const value = await requestJson(`${HOST}${prefix}/${endpoint}`, { timeoutMs: 30000 });
+  writeJson(`${evidenceName.replaceAll('/', '-')}.json`, sanitize(value));
   return value;
 }
 
@@ -158,9 +158,9 @@ async function requiredGet(prefix, name) {
     if (!outputText) throw new Error('LOCAL_LLM_RESPONSE_TEXT_EMPTY');
     if (!outputText.includes('A01_LOCAL_LLM_OK')) throw new Error(`LOCAL_LLM_SENTINEL_MISSING:${outputText.slice(0, 160)}`);
 
-    const statsAfter = await requiredGet(prefix, 'stats-after');
-    const systemStatsAfter = await requiredGet(prefix, 'system-stats-after');
-    const healthAfter = await requiredGet(prefix, 'health-after');
+    const statsAfter = await requiredGet(prefix, 'stats', 'stats-after');
+    const systemStatsAfter = await requiredGet(prefix, 'system-stats', 'system-stats-after');
+    const healthAfter = await requiredGet(prefix, 'health', 'health-after');
 
     const completedAt = new Date();
     const summary = {

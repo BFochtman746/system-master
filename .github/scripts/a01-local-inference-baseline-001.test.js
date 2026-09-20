@@ -34,6 +34,12 @@ test('qualifier is fixed-model fixed-prompt and uses only local Lemonade HTTP AP
   assert.match(qualifier, /system-info/);
   assert.match(qualifier, /system-stats/);
   assert.match(qualifier, /tokens_per_second/);
+  assert.match(qualifier, /requiredGet\(prefix, 'stats', 'stats-after'\)/);
+  assert.match(qualifier, /requiredGet\(prefix, 'system-stats', 'system-stats-after'\)/);
+  assert.match(qualifier, /requiredGet\(prefix, 'health', 'health-after'\)/);
+  assert.equal(qualifier.includes("requiredGet(prefix, 'stats-after')"), false);
+  assert.equal(qualifier.includes("requiredGet(prefix, 'system-stats-after')"), false);
+  assert.equal(qualifier.includes("requiredGet(prefix, 'health-after')"), false);
   assert.equal(qualifier.includes('child_process'), false);
 });
 
