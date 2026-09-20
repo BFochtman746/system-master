@@ -24,7 +24,7 @@ jobs:
   authority:
     name: Wait for exact 001G live-coding authority binding
     runs-on: ubuntu-latest
-    timeout-minutes: 7
+    timeout-minutes: 17
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
@@ -44,7 +44,7 @@ jobs:
           ref = 'control-gateway-state/active-work/second-shift-production-master-completion-001-recovery-v4'
           query = urllib.parse.urlencode({'ref': ref})
           url = 'https://api.github.com/repos/BFochtman746/system-master/contents/control-gateway-state/active-work/head.json?' + query
-          for _ in range(60):
+          for _ in range(180):
               request = urllib.request.Request(
                   url,
                   headers={
