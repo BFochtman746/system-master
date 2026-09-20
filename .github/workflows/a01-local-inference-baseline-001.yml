@@ -1,0 +1,48 @@
+name: A-01 Local Inference Baseline
+
+on:
+  push:
+    branches:
+      - system-master/owner-lane-execution-lease-adoption-001
+    paths:
+      - qualification/a01/registry.json
+      - .github/scripts/a01-local-inference-baseline-001.js
+      - .github/scripts/a01-local-inference-baseline-001.test.js
+      - .github/workflows/a01-local-inference-baseline-001.yml
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  preflight:
+    name: Validate registered local inference baseline
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Run local inference registration contract tests
+        run: node .github/scripts/a01-local-inference-baseline-001.test.js
+
+  qualify:
+    name: Route exact subject through A-01 control plane
+    needs: preflight
+    uses: ./.github/workflows/a01-control-plane-gateway.yml
+    with:
+      qualification_id: A01-LOCAL-INFERENCE-BASELINE-001
+      workstream_id: SYSTEM-MASTER-OWNER-LANE-EXECUTION-LEASE-ADOPTION-001
+      subject_sha: ${{ github.sha }}
+      origin_ref: ${{ github.ref_name }}
+      resume_on_pass: Record the first real A-01 gpt-oss-20b-NPU response and continue to measured production-model comparison.
+      resume_on_failure: Preserve exact A-01 evidence, repair only the failing local-inference boundary, and rerun the same qualification.
+      notification_target: originating-workstream
+      execution_context: normal
+      qualifier_timeout_minutes: 20
+      job_timeout_minutes: 25
+      repair_attempt: 0
+      max_repair_attempts: 1
+    secrets: inherit
