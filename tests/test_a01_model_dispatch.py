@@ -21,6 +21,7 @@ from a01_model_dispatch import (
     DEFAULT_MODEL,
     MODEL_DISPATCH_PROTOCOL,
     MAX_OPENCODE_EXECUTABLE_BYTES,
+    MODEL_PROVISION_TIMEOUT_SECONDS,
     REQUIRED_MODEL_LABELS,
     OPENCODE_VERSION,
     OPENCODE_WINDOWS_X64_ARCHIVE_SHA256,
@@ -121,6 +122,38 @@ class ModelDispatchTests(unittest.TestCase):
         )
         self.assertEqual(set(REQUIRED_MODEL_LABELS), {"coding", "tool-calling"})
         self.assertTrue(ready["downloaded"])
+
+    def test_model_readiness_provisions_exact_model_and_renews_lease(self):
+        evidence = Path(tempfile.mkdtemp()) / "evidence"
+        context = FakeContext(evidence)
+        base = {
+            "model": DEFAULT_MODEL,
+            "recipe": "llamacpp",
+            "labels": ["chat", "coding", "tool-calling"],
+            "size": 18.6,
+        }
+        responses = [
+            {**base, "id": DEFAULT_MODEL, "downloaded": False},
+            {"id": f"model:{DEFAULT_MODEL}", "model_name": DEFAULT_MODEL, "status": "downloading"},
+            [{"id": f"model:{DEFAULT_MODEL}", "model_name": DEFAULT_MODEL, "status": "downloading", "complete": False}],
+            {**base, "id": DEFAULT_MODEL, "downloaded": False},
+            [{"id": f"model:{DEFAULT_MODEL}", "model_name": DEFAULT_MODEL, "status": "complete", "complete": True}],
+            {**base, "id": DEFAULT_MODEL, "downloaded": True},
+        ]
+        with mock.patch("a01_model_dispatch._lemonade_json_request", side_effect=responses) as request, \
+             mock.patch("a01_model_dispatch.time.sleep"):
+            ready = _require_lemonade_model_ready(payload("a" * 40), evidence, context)
+        pull_call = request.call_args_list[1]
+        self.assertEqual(pull_call.args[1], "pull")
+        self.assertEqual(pull_call.kwargs["method"], "POST")
+        self.assertEqual(
+            pull_call.kwargs["payload"],
+            {"model_name": DEFAULT_MODEL, "stream": True, "subscribe": False},
+        )
+        self.assertTrue(ready["downloaded"])
+        self.assertTrue(ready["provisioned"])
+        self.assertTrue(context.renewals)
+        self.assertEqual(MODEL_PROVISION_TIMEOUT_SECONDS, 60 * 60)
 
     def _repo(self, base: Path) -> tuple[Path, str]:
         repo = base / "repo"

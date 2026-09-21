@@ -22,6 +22,8 @@ DEFAULT_MODEL = "Qwen3-Coder-30B-A3B-Instruct-GGUF"
 PROVIDER_ID = "lemonade"
 REQUIRED_MODEL_LABELS = frozenset({"coding", "tool-calling"})
 MAX_LEMONADE_CONTROL_RESPONSE_BYTES = 1024 * 1024
+MODEL_PROVISION_TIMEOUT_SECONDS = 60 * 60
+MODEL_PROVISION_POLL_SECONDS = 10
 MAX_PROMPT_BYTES = 64 * 1024
 MAX_CAPTURE_BYTES = 4 * 1024 * 1024
 MAX_ALLOWED_PATHS = 64
@@ -163,7 +165,12 @@ def validate_ai_coding_payload(payload: Any) -> dict[str, Any]:
 
 
 
-def _validate_lemonade_model_metadata(metadata: Any, model: str) -> dict[str, Any]:
+def _validate_lemonade_model_metadata(
+    metadata: Any,
+    model: str,
+    *,
+    require_downloaded: bool = True,
+) -> dict[str, Any]:
     if not isinstance(metadata, dict) or metadata.get("id") != model:
         raise ModelDispatchFailed("Lemonade model metadata does not match AI_CODING model")
     labels = metadata.get("labels")
@@ -176,38 +183,134 @@ def _validate_lemonade_model_metadata(metadata: Any, model: str) -> dict[str, An
             "Lemonade model lacks required AI_CODING capabilities",
             {"model": model, "labels": sorted(label_set), "missing_labels": missing},
         )
-    if metadata.get("downloaded") is not True:
+    downloaded = metadata.get("downloaded") is True
+    if require_downloaded and not downloaded:
         raise ModelDispatchFailed("Lemonade AI_CODING model is not downloaded locally", {"model": model})
     return {
         "model": model,
         "recipe": metadata.get("recipe"),
         "labels": sorted(label_set),
-        "downloaded": True,
+        "downloaded": downloaded,
         "size": metadata.get("size"),
     }
 
 
-def _require_lemonade_model_ready(payload: dict[str, Any], evidence_dir: Path) -> dict[str, Any]:
-    model = payload["model"]
-    url = f"{payload['base_url'].rstrip('/')}/models/{quote(model, safe='')}"
+def _lemonade_json_request(
+    base_url: str,
+    path: str,
+    *,
+    method: str = "GET",
+    payload: Optional[dict[str, Any]] = None,
+) -> Any:
+    data = None if payload is None else _canonical(payload).encode("utf-8")
+    headers = {"Accept": "application/json"}
+    if data is not None:
+        headers["Content-Type"] = "application/json"
     try:
-        request = Request(url, headers={"Accept": "application/json"}, method="GET")
+        request = Request(
+            f"{base_url.rstrip('/')}/{path.lstrip('/')}",
+            data=data,
+            headers=headers,
+            method=method,
+        )
         with urlopen(request, timeout=30) as response:
             raw = response.read(MAX_LEMONADE_CONTROL_RESPONSE_BYTES + 1)
     except Exception as exc:
-        raise ModelDispatchFailed("Lemonade model-readiness request failed", {"model": model}) from exc
+        raise ModelDispatchFailed(
+            "Lemonade model-management request failed",
+            {"path": path, "method": method},
+        ) from exc
     if len(raw) > MAX_LEMONADE_CONTROL_RESPONSE_BYTES:
-        raise ModelDispatchFailed("Lemonade model-readiness response exceeded bounded size")
+        raise ModelDispatchFailed("Lemonade model-management response exceeded bounded size")
     try:
-        metadata = json.loads(raw.decode("utf-8"))
+        return json.loads(raw.decode("utf-8"))
     except (UnicodeDecodeError, json.JSONDecodeError) as exc:
-        raise ModelDispatchFailed("Lemonade model-readiness response was not valid JSON") from exc
-    ready = _validate_lemonade_model_metadata(metadata, model)
+        raise ModelDispatchFailed("Lemonade model-management response was not valid JSON") from exc
+
+
+def _require_lemonade_model_ready(
+    payload: dict[str, Any],
+    evidence_dir: Path,
+    context: Any,
+) -> dict[str, Any]:
+    model = payload["model"]
+    model_path = f"models/{quote(model, safe='')}"
+    before = _validate_lemonade_model_metadata(
+        _lemonade_json_request(payload["base_url"], model_path),
+        model,
+        require_downloaded=False,
+    )
+    provisioned = False
+    pull_job: Any = None
+    last_download: Any = None
+    if not before["downloaded"]:
+        pull_job = _lemonade_json_request(
+            payload["base_url"],
+            "pull",
+            method="POST",
+            payload={"model_name": model, "stream": True, "subscribe": False},
+        )
+        if not isinstance(pull_job, dict) or pull_job.get("model_name") != model:
+            raise ModelDispatchFailed("Lemonade pull did not bind the exact AI_CODING model")
+        pull_id = str(pull_job.get("id") or f"model:{model}")
+        deadline = time.monotonic() + MODEL_PROVISION_TIMEOUT_SECONDS
+        provisioned = True
+        while True:
+            renew = getattr(context, "renew", None)
+            if callable(renew):
+                renew(checkpoint_pointer=f"model-readiness:{model}:downloading")
+            downloads = _lemonade_json_request(payload["base_url"], "downloads")
+            if not isinstance(downloads, list):
+                raise ModelDispatchFailed("Lemonade downloads response must be a list")
+            last_download = next(
+                (
+                    item
+                    for item in downloads
+                    if isinstance(item, dict)
+                    and (item.get("id") == pull_id or item.get("model_name") == model)
+                ),
+                None,
+            )
+            if isinstance(last_download, dict):
+                if last_download.get("error"):
+                    raise ModelDispatchFailed(
+                        "Lemonade model download failed",
+                        {"model": model, "download": last_download},
+                    )
+                if last_download.get("status") in {"cancelled", "paused", "error"}:
+                    raise ModelDispatchFailed(
+                        "Lemonade model download stopped before completion",
+                        {"model": model, "download": last_download},
+                    )
+                if last_download.get("complete") is True:
+                    break
+            candidate = _validate_lemonade_model_metadata(
+                _lemonade_json_request(payload["base_url"], model_path),
+                model,
+                require_downloaded=False,
+            )
+            if candidate["downloaded"]:
+                break
+            if time.monotonic() >= deadline:
+                raise ModelDispatchFailed(
+                    "Lemonade model provisioning exceeded bounded timeout",
+                    {"model": model, "timeout_seconds": MODEL_PROVISION_TIMEOUT_SECONDS},
+                )
+            time.sleep(MODEL_PROVISION_POLL_SECONDS)
+
+    ready = _validate_lemonade_model_metadata(
+        _lemonade_json_request(payload["base_url"], model_path),
+        model,
+    )
     evidence = {
         "protocol_version": "control-gateway.a01-lemonade-model-readiness.v1",
         "status": "READY",
         **ready,
         "required_labels": sorted(REQUIRED_MODEL_LABELS),
+        "provisioned": provisioned,
+        "pull_job": pull_job,
+        "last_download": last_download,
+        "provision_timeout_seconds": MODEL_PROVISION_TIMEOUT_SECONDS,
     }
     _write_evidence(evidence_dir / "lemonade-model-readiness.json", _canonical(evidence) + "\n")
     return evidence
@@ -513,7 +616,7 @@ def dispatch_ai_coding(
         raise ModelDispatchFailed("AI_CODING exact subject is not the requested commit")
 
     opencode = _resolve_opencode(evidence_dir, opencode_executable)
-    _require_lemonade_model_ready(payload, evidence_dir)
+    _require_lemonade_model_ready(payload, evidence_dir, context)
 
     config = build_opencode_config(payload)
     config_json = _canonical(config)
