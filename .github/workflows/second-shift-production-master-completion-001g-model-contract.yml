@@ -83,6 +83,7 @@ jobs:
         run: |
           python -m py_compile control-gateway/python/a01_model_dispatch.py
           python tests/test_a01_model_dispatch.py
+          python tests/test_a01_github_ingress.py
           python tests/test_a01_execution_worker_ai_coding.py
           echo SECOND_SHIFT_001G_MODEL_CONTRACT=PASS
 
@@ -108,7 +109,7 @@ jobs:
             'phase':'SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION-001G',
             'subject_sha':os.environ['SUBJECT_SHA'].lower(),
             'standing':'PASS',
-            'ai_coding_model':'gpt-oss-20b-NPU',
+            'ai_coding_model':'Qwen3-Coder-30B-A3B-Instruct-GGUF',
             'hosted_contract_only':True,
             'live_ai_coding_smoke_passed':False,
             'live_ready_queue_touched':False,
