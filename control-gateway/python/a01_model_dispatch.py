@@ -488,6 +488,9 @@ def dispatch_ai_coding(
         command = [
             opencode,
             "--pure",
+            "--print-logs",
+            "--log-level",
+            "INFO",
             "run",
             "--model",
             f"{PROVIDER_ID}/{payload['model']}",
@@ -516,6 +519,14 @@ def dispatch_ai_coding(
             remaining = deadline - time.monotonic()
             if remaining <= 0:
                 _terminate_process_tree(proc)
+                try:
+                    stdout, stderr = proc.communicate(timeout=10)
+                except subprocess.TimeoutExpired:
+                    stdout, stderr = "", "OpenCode output capture timed out after process termination\n"
+                stdout = stdout or ""
+                stderr = stderr or ""
+                _write_evidence(evidence_dir / "opencode.stdout.ndjson", stdout[-MAX_CAPTURE_BYTES:])
+                _write_evidence(evidence_dir / "opencode.stderr.log", stderr[-MAX_CAPTURE_BYTES:])
                 changed = _changed_paths(worktree)
                 reconciliation = {
                     "protocol_version": MODEL_DISPATCH_PROTOCOL,
@@ -526,6 +537,8 @@ def dispatch_ai_coding(
                     "worktree": str(worktree),
                     "changed_paths": changed,
                     "reason": "OPENCODE_TIMEOUT_AFTER_POSSIBLE_MUTATION",
+                    "stdout_tail": stdout[-4000:],
+                    "stderr_tail": stderr[-4000:],
                 }
                 evidence_path = evidence_dir / "model-dispatch-reconciliation.json"
                 _write_evidence(evidence_path, _canonical(reconciliation) + "\n")

@@ -66,7 +66,7 @@ def build_payload(subject: str) -> dict[str, Any]:
         "model": MODEL,
         "base_url": "http://127.0.0.1:13305/api/v1",
         "max_steps": 8,
-        "timeout_seconds": 300,
+        "timeout_seconds": 900,
         "evaluator_required": True,
     }
 

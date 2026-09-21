@@ -241,6 +241,8 @@ class ModelDispatchTests(unittest.TestCase):
                 returncode = None
                 def poll(self):
                     return None
+                def communicate(self, timeout=None):
+                    return ('{"type":"step_start"}\n', 'INFO waiting for local model\n')
 
             fake_proc = FakeProc()
             real_popen = subprocess.Popen
@@ -257,6 +259,10 @@ class ModelDispatchTests(unittest.TestCase):
             self.assertTrue(evidence_path.is_file())
             evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
             self.assertEqual(evidence["status"], "RECONCILIATION_REQUIRED")
+            self.assertIn("step_start", evidence["stdout_tail"])
+            self.assertIn("waiting for local model", evidence["stderr_tail"])
+            self.assertTrue((ctx.evidence_dir / "opencode.stdout.ndjson").is_file())
+            self.assertTrue((ctx.evidence_dir / "opencode.stderr.log").is_file())
             worktree = Path(caught.exception.details["worktree"])
             self.assertTrue(worktree.exists())
             subprocess.run(["git", "-C", str(repo), "worktree", "remove", "--force", str(worktree)], check=False, capture_output=True)
