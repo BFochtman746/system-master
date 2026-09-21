@@ -423,8 +423,10 @@ def dispatch_ai_coding(
     _write_evidence(evidence_dir / "model-dispatch-request.json", _canonical(payload) + "\n")
     _write_evidence(evidence_dir / "opencode-config.sha256", _sha256_bytes(config_json.encode("utf-8")) + "\n")
 
-    worktree_parent = Path(tempfile.mkdtemp(prefix="a01-model-dispatch-", dir=str(evidence_dir)))
-    worktree = worktree_parent / "worktree"
+    worktree_temp_root = Path(os.environ.get("RUNNER_TEMP") or tempfile.gettempdir()).resolve() / "sm-aic"
+    worktree_temp_root.mkdir(parents=True, exist_ok=True)
+    worktree_parent = Path(tempfile.mkdtemp(prefix="w-", dir=str(worktree_temp_root)))
+    worktree = worktree_parent / "wt"
     added = False
     proc: Optional[subprocess.Popen[str]] = None
     started = time.monotonic()

@@ -145,6 +145,21 @@ class ModelDispatchTests(unittest.TestCase):
             self.assertIn("+after", patch)
             self.assertTrue((ctx.evidence_dir / "model-dispatch-result.json").is_file())
 
+    def test_dispatch_uses_short_runner_temp_worktree_root(self):
+        with tempfile.TemporaryDirectory() as td:
+            base = Path(td)
+            repo, sha = self._repo(base)
+            ctx = FakeContext(base / "deep" / "nested" / "evidence")
+            fake = self._fake_opencode(base)
+            runner_temp = base / "runner-temp"
+            with mock.patch.dict(os.environ, {"RUNNER_TEMP": str(runner_temp)}, clear=False):
+                result = dispatch_ai_coding(payload(sha), ctx, root=repo, opencode_executable=str(fake))
+            self.assertEqual(result["status"], "CANDIDATE_READY_FOR_INDEPENDENT_EVALUATION")
+            short_root = (runner_temp / "sm-aic").resolve()
+            self.assertTrue(short_root.is_dir())
+            self.assertFalse(any(short_root.iterdir()))
+            self.assertFalse(str(short_root).startswith(str(ctx.evidence_dir.resolve())))
+
     def test_dispatch_rejects_unauthorized_changed_path(self):
         with tempfile.TemporaryDirectory() as td:
             base = Path(td)
