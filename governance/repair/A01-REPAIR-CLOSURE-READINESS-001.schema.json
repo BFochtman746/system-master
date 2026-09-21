@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "SYSTEM-MASTER/A01-REPAIR-CLOSURE-READINESS-001",
+  "title": "A-01 Repair Closure Readiness",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "report_version",
+    "read_only",
+    "database_integrity",
+    "foreign_key_integrity",
+    "evidence_manifest_integrity",
+    "authority_coherence",
+    "claim_and_fence_closure",
+    "process_cleanup",
+    "workspace_cleanup",
+    "repair_ref_disposition",
+    "standing",
+    "generated_at"
+  ],
+  "properties": {
+    "report_version": {"const": 1},
+    "read_only": {"const": true},
+    "database_integrity": {"$ref": "#/$defs/gate"},
+    "foreign_key_integrity": {"$ref": "#/$defs/gate"},
+    "evidence_manifest_integrity": {"$ref": "#/$defs/gate"},
+    "authority_coherence": {"$ref": "#/$defs/gate"},
+    "claim_and_fence_closure": {"$ref": "#/$defs/gate"},
+    "process_cleanup": {"$ref": "#/$defs/gate"},
+    "workspace_cleanup": {"$ref": "#/$defs/gate"},
+    "repair_ref_disposition": {"$ref": "#/$defs/gate"},
+    "standing": {"enum": ["READY_FOR_NEXT_REPAIR_CYCLE", "READY_WITH_RESUMABLE_REPAIR", "MORNING_ATTENTION_REQUIRED", "NEXT_REPAIR_CYCLE_BLOCKED"]},
+    "generated_at": {"type": "string", "minLength": 1}
+  },
+  "$defs": {
+    "gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "detail"],
+      "properties": {
+        "state": {"enum": ["PASS", "FAIL", "NOT_EVALUATED"]},
+        "detail": {}
+      }
+    }
+  }
+}

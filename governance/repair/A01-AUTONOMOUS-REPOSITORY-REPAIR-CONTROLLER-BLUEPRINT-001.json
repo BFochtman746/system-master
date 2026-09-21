@@ -1,0 +1,59 @@
+{
+  "blueprint_id": "A01-AUTONOMOUS-REPOSITORY-REPAIR-CONTROLLER-BLUEPRINT-001",
+  "status": "DESIGN_LOCKED__WAVE1_READ_ONLY_FOUNDATION",
+  "owner_path": "SYSTEM_MASTER/CORE",
+  "purpose": "Define the single A-01 repository-repair controller as orchestration over existing authority, supervisor, repair ledger, qualification, reconciler, and exact-CAS writer components without creating a second writer or truth store.",
+  "research_basis": [
+    "NIST SP 800-218 SSDF v1.1",
+    "JSON Schema Draft 2020-12",
+    "SQLite integrity_check and foreign_key_check",
+    "Git exact object identity",
+    "GitHub self-hosted runner isolation guidance"
+  ],
+  "stages": [
+    "AUTHORITY_PREFLIGHT",
+    "COHERENCE_CENSUS",
+    "REPAIR_CLASSIFICATION",
+    "CLAIM_AND_FENCE",
+    "ISOLATE_AND_BUILD_REPAIR",
+    "EXACT_SHA_PREQUALIFICATION",
+    "A01_TARGET_QUALIFICATION_AND_EVIDENCE_SEAL",
+    "EXACT_CAS_PROMOTION_OR_ROLLBACK",
+    "CLOSURE_AND_MORNING_RECONCILIATION"
+  ],
+  "wave1": {
+    "scope": "READ_ONLY_FOUNDATIONS",
+    "may_mutate_repository": false,
+    "may_acquire_repair_write_authority": false,
+    "may_delete_refs": false,
+    "may_promote": false,
+    "adds": [
+      "governance/repair/A01-AUTONOMOUS-REPOSITORY-REPAIR-CONTROLLER-BLUEPRINT-001.json",
+      "governance/repair/A01-REPOSITORY-REPAIR-PREFLIGHT-REPORT-001.schema.json",
+      "governance/repair/A01-REPAIR-CLOSURE-READINESS-001.schema.json",
+      "control-gateway/src/a01-repository-repair-preflight.js",
+      ".github/scripts/a01-repository-repair-preflight.js",
+      "control-gateway/test/a01-repository-repair-preflight.test.js",
+      "control-gateway/python/a01_repair_closure_evidence.py",
+      "control-gateway/python/test_a01_repair_closure_evidence.py",
+      ".github/scripts/a01-autonomous-repository-repair-wave1-qualify.js"
+    ],
+    "acceptance_cases": [
+      "stale authority pointer blocks repair",
+      "stale live contract blocks repair",
+      "historical superseded topology reference does not block",
+      "tampered evidence manifest blocks closure readiness",
+      "SQLite integrity failure blocks closure readiness",
+      "SQLite foreign-key violation blocks closure readiness",
+      "read-only closure evidence cannot emit READY_FOR_NEXT_REPAIR_CYCLE while required future gates remain unevaluated"
+    ]
+  },
+  "single_writer_rule": "All future mutation remains behind the existing governed response receipt, mutation admission, repair claim/fence, and receipt-consuming exact-predecessor CAS writer.",
+  "forbidden_authority": [
+    "A01_PASS",
+    "PROMOTION_AUTHORITY",
+    "PRODUCTION_AUTHORITY",
+    "BRANCH_DELETION_AUTHORITY",
+    "SECOND_MUTATION_WRITER"
+  ]
+}
