@@ -1,0 +1,132 @@
+{
+  "protocol_version": "second-shift.production-master.001h-main-carrier-reconciliation.v1",
+  "record_id": "SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION-001H-MAIN-CARRIER-RECONCILIATION-001",
+  "operation_id": "SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION-001H",
+  "status": "FROZEN_MAIN_BYTE_IDENTICAL_CARRIER__SELECTIVE_PORT_NOT_YET_COMPLETE",
+  "purpose": "Bind the active 001H work carrier to an exact current-main tree so the existing receipt-consuming v1 writer can selectively port evidence-backed Second Shift paths while preserving every unselected current-main path.",
+  "authority_snapshot": {
+    "active_work_publication_revision": 41,
+    "active_work_authority_epoch": 45,
+    "active_work_publication_commit_sha": "a62498067d91dd9217103d8f81420784f04aef18",
+    "active_work_packet_digest": "9cb491c41ad784d76a526bf9bd320eef28e9bf6a617589cfeef90d2fa49ed786",
+    "authoritative_subject_sha": "15d3ced2d948adaeec240586e72c7f4c67009df9",
+    "work_ref": "fix/a01-lemonade-api-prefix",
+    "predecessor_receipt_id": "SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION-001G-RECEIPT"
+  },
+  "main_carrier_proof": {
+    "main_ref": "main",
+    "main_commit_sha": "eb810f77302052844d5fb7e9076d45ae483d6678",
+    "main_tree_sha": "b5805faabdebf53e1ca805a1a5b0d6acd7c49c4c",
+    "carrier_ref": "fix/a01-lemonade-api-prefix",
+    "carrier_commit_sha": "15d3ced2d948adaeec240586e72c7f4c67009df9",
+    "carrier_tree_sha": "b5805faabdebf53e1ca805a1a5b0d6acd7c49c4c",
+    "tree_sha_equal": true,
+    "meaning": "Git tree object identity proves the complete recursive file/mode/subtree snapshot is identical even though commit ancestry differs."
+  },
+  "source_candidate": {
+    "historical_work_ref": "second-shift-production-master-completion-001",
+    "reconciliation_manifest_commit_sha": "95483c45d54567bebce19d0002db4b91b2674f64",
+    "reconciliation_manifest_blob_sha": "fa46499200a60f5c9880821fa9b4f3ee2cc809db",
+    "historical_branch_is_source_evidence_only": true,
+    "historical_branch_is_not_current_mutation_authority": true
+  },
+  "selected_port_scope": {
+    "candidate_only_path_count": 30,
+    "candidate_only_paths": [
+      ".github/scripts/a01-agent-registered-task-production-binding-001.js",
+      ".github/scripts/a01-second-shift-production-master-001e-shadow-calibration.js",
+      ".github/scripts/a01-second-shift-production-master-001f-canary.js",
+      ".github/scripts/second-shift-mastery-contract-validate.js",
+      ".github/workflows/second-shift-mastery-001-contracts.yml",
+      ".github/workflows/second-shift-production-master-completion-001d-qualify.yml",
+      ".github/workflows/second-shift-production-master-completion-001e-shadow-calibration.yml",
+      ".github/workflows/second-shift-production-master-completion-001f-canary.yml",
+      ".github/workflows/second-shift-production-master-completion-001g-live-coding-smoke.yml",
+      ".github/workflows/second-shift-production-master-completion-001g-model-contract.yml",
+      "control-gateway/python/a01_model_dispatch.py",
+      "control-gateway/python/a01_registered_task_worker.py",
+      "control-gateway/python/a01_second_shift_001e_shadow_calibration.py",
+      "control-gateway/python/a01_second_shift_001f_canary.py",
+      "control-gateway/python/a01_second_shift_001g_ai_coding_smoke.py",
+      "governance/second-shift/SECOND-SHIFT-ASSIGNMENT-CONTRACT-SCHEMA-003.json",
+      "governance/second-shift/SECOND-SHIFT-MASTERY-001-ALL-NIGHT-OPERATING-MODEL.md",
+      "governance/second-shift/SECOND-SHIFT-NIGHT-SELECTION-GATE-SCHEMA-001.json",
+      "governance/second-shift/SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION-001.md",
+      "governance/second-shift/SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION-001A-DISPOSITION-MIN.md",
+      "governance/second-shift/SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION-001B-BLUEPRINT.json",
+      "tests/fixtures/second_shift_001g_ai_coding_smoke_target.txt",
+      "tests/test_a01_execution_worker_ai_coding.py",
+      "tests/test_a01_model_dispatch.py",
+      "tests/test_a01_registered_task_ingress.py",
+      "tests/test_a01_registered_task_worker.py",
+      "tests/test_a01_second_shift_001e_shadow_calibration.py",
+      "tests/test_a01_second_shift_001f_canary.py",
+      "tests/test_a01_second_shift_001g_ai_coding_smoke.py",
+      "tests/test_second_shift_mastery_contracts.js"
+    ],
+    "overlap_path_count": 8,
+    "overlap_paths": [
+      ".github/scripts/a01-second-shift-supervisor-v2-qualify.js",
+      "control-gateway/python/a01_execution_worker.py",
+      "control-gateway/python/a01_github_ingress.py",
+      "control-gateway/python/a01_night_scheduler.py",
+      "governance/second-shift/CORE-DELEGATIONS.json",
+      "tests/test_a01_github_ingress.py",
+      "tests/test_control_gateway_a01_night_scheduler.py",
+      "tools/second_shift_supervisor_v2.py"
+    ],
+    "overlap_rule": "Each overlap must be reconciled against current-main semantics before its final blob is admitted; CORE-DELEGATIONS preserves current main live owner state."
+  },
+  "existing_writer_validity": {
+    "plan_protocol": "control-gateway.github-production-mutation-plan.v1",
+    "writer_base_tree_rule": "The writer derives base_tree from the exact admitted work-ref predecessor.",
+    "why_sufficient_now": "The admitted predecessor tree equals the bound current-main tree, so full-content selected writes preserve every unselected current-main path by construction.",
+    "new_tree_base_primitive_required_now": false
+  },
+  "main_movement_fence": {
+    "before_every_selected_port": [
+      "re-resolve current main ref and tree",
+      "re-resolve exact active carrier predecessor tree",
+      "require current main tree SHA to equal the bound carrier baseline tree SHA unless an explicit researched reconciliation updates the baseline",
+      "require active-work branch_or_ref and subject to match the exact carrier predecessor"
+    ],
+    "if_main_tree_moves": "STOP. Do not transfer carrier equivalence. Reconcile to the new current-main tree through a new governed main-byte-identical carrier or another explicitly proven preservation mechanism before continuing executable porting."
+  },
+  "execution_order": [
+    "Preserve this record and the historical reconciliation manifest as planning/evidence artifacts.",
+    "Port candidate-only files in bounded exact-CAS groups sized for native issue ingress; rebind active authority after each successful carrier commit before the next write.",
+    "Reconcile the eight overlap paths against then-current main, preserving main semantics and adding only evidence-backed Second Shift behavior.",
+    "After the full selected port, prove every unselected path remains byte-identical to the bound current-main baseline and that no stale historical-only path was imported.",
+    "Run current enforcement on the exact reconciled SHA, then fresh hosted and A-01 qualification where host dependent.",
+    "Satisfy Mastery activation, nine-lane live proof, morning telemetry/evaluator/drift proof, explicit promotion and terminal freeze before 001H receipt."
+  ],
+  "research_basis": [
+    {
+      "source": "official_git_docs",
+      "reference": "https://git-scm.com/docs/user-manual",
+      "supports": "Trees and blobs are content-addressed; identical tree SHA names mean recursively identical tree contents."
+    },
+    {
+      "source": "official_git_docs",
+      "reference": "https://git-scm.com/book/en/v2/Git-Internals-Git-Objects",
+      "supports": "Git is a content-addressable filesystem and tree objects represent directory/file snapshots."
+    },
+    {
+      "source": "official_github_docs",
+      "reference": "https://docs.github.com/en/rest/git/trees",
+      "supports": "Create-tree overlays supplied entries on a base_tree, preserving unselected entries."
+    },
+    {
+      "source": "repository",
+      "reference": "control-gateway/src/github-production-mutation.js@eb810f77302052844d5fb7e9076d45ae483d6678",
+      "supports": "Production writer derives base_tree from admitted predecessor and updates ref with force=false."
+    },
+    {
+      "source": "repository",
+      "reference": "control-gateway-state/active-work/second-shift-production-master-completion-001-recovery-v4@a62498067d91dd9217103d8f81420784f04aef18",
+      "supports": "001H current authority is the main-byte-identical carrier ref/subject."
+    }
+  ],
+  "promotion_allowed": false,
+  "terminal_001h_receipt_allowed": false
+}
