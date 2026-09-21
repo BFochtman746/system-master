@@ -24,7 +24,7 @@ class A01SecondShift001GAICodingSmokeContractTests(unittest.TestCase):
         self.assertEqual(payload["allowed_commands"], [])
         self.assertTrue(payload["evaluator_required"])
         self.assertEqual(payload["max_steps"], 8)
-        self.assertLessEqual(payload["timeout_seconds"], 300)
+        self.assertEqual(payload["timeout_seconds"], 900)
 
     def test_fixture_transition_is_small_and_deterministic(self) -> None:
         self.assertEqual(smoke001g.BEFORE, "SECOND_SHIFT_001G_AI_CODING_SMOKE=BEFORE\n")

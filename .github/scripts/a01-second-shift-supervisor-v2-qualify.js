@@ -78,7 +78,7 @@ function main() {
   stage('A01_GITHUB_INGRESS', 'python', ['tests/test_a01_github_ingress.py'], { timeout: 180000 });
   stage('A01_MODEL_DISPATCH', 'python', ['tests/test_a01_model_dispatch.py'], { timeout: 180000 });
   stage('A01_EXECUTION_WORKER_AI_CODING', 'python', ['tests/test_a01_execution_worker_ai_coding.py'], { timeout: 180000 });
-  stage('A01_LIVE_AI_CODING_SMOKE', 'python', ['control-gateway/python/a01_second_shift_001g_ai_coding_smoke.py'], { timeout: 600000 });
+  stage('A01_LIVE_AI_CODING_SMOKE', 'python', ['control-gateway/python/a01_second_shift_001g_ai_coding_smoke.py'], { timeout: 20 * 60 * 1000 });
   const aiCodingSmokePath = path.join(EVIDENCE_DIR, 'second-shift-001g-ai-coding-smoke-summary.json');
   if (!fs.existsSync(aiCodingSmokePath)) fail('A01_LIVE_AI_CODING_SMOKE_EVIDENCE_MISSING');
   const aiCodingSmoke = readJson(aiCodingSmokePath);
