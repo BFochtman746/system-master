@@ -21,6 +21,7 @@ from a01_model_dispatch import (
     DEFAULT_MODEL,
     MODEL_DISPATCH_PROTOCOL,
     MAX_OPENCODE_EXECUTABLE_BYTES,
+    REQUIRED_MODEL_LABELS,
     OPENCODE_VERSION,
     OPENCODE_WINDOWS_X64_ARCHIVE_SHA256,
     OPENCODE_WINDOWS_X64_URL,
@@ -30,6 +31,8 @@ from a01_model_dispatch import (
     _bootstrap_pinned_opencode,
     _configure_windows_git_bash,
     _derive_windows_git_bash_path,
+    _require_lemonade_model_ready,
+    _validate_lemonade_model_metadata,
     _sanitized_environment,
     build_opencode_config,
     dispatch_ai_coding,
@@ -79,6 +82,10 @@ def payload(subject_sha: str) -> dict:
 
 
 class ModelDispatchTests(unittest.TestCase):
+    def _dispatch(self, *args, **kwargs):
+        with mock.patch("a01_model_dispatch._require_lemonade_model_ready", return_value={"status": "READY"}):
+            return dispatch_ai_coding(*args, **kwargs)
+
     def test_payload_rejects_remote_endpoint_and_forbidden_command(self):
         p = payload("a" * 40)
         p["base_url"] = "https://example.com/v1"
@@ -90,7 +97,7 @@ class ModelDispatchTests(unittest.TestCase):
             validate_ai_coding_payload(p)
 
     def test_config_is_local_and_deny_by_default(self):
-        self.assertEqual(DEFAULT_MODEL, "gpt-oss-20b-NPU")
+        self.assertEqual(DEFAULT_MODEL, "Qwen3-Coder-30B-A3B-Instruct-GGUF")
         config = build_opencode_config(payload("a" * 40))
         self.assertEqual(config["provider"]["lemonade"]["options"]["baseURL"], DEFAULT_LEMONADE_BASE_URL)
         self.assertEqual(config["permission"]["*"], "deny")
@@ -100,6 +107,20 @@ class ModelDispatchTests(unittest.TestCase):
         self.assertEqual(config["permission"]["bash"]["*"], "deny")
         self.assertEqual(config["permission"]["webfetch"], "deny")
         self.assertEqual(config["permission"]["websearch"], "deny")
+        self.assertEqual(config["agent"]["build"]["steps"], 8)
+        self.assertEqual(config["agent"]["build"]["model"], f"lemonade/{DEFAULT_MODEL}")
+
+    def test_model_metadata_requires_coding_tool_calling_and_download(self):
+        base = {"id": DEFAULT_MODEL, "recipe": "llamacpp", "size": 18.6}
+        with self.assertRaises(ModelDispatchFailed):
+            _validate_lemonade_model_metadata({**base, "labels": ["chat"], "downloaded": True}, DEFAULT_MODEL)
+        with self.assertRaises(ModelDispatchFailed):
+            _validate_lemonade_model_metadata({**base, "labels": ["coding", "tool-calling"], "downloaded": False}, DEFAULT_MODEL)
+        ready = _validate_lemonade_model_metadata(
+            {**base, "labels": ["chat", "coding", "tool-calling"], "downloaded": True}, DEFAULT_MODEL
+        )
+        self.assertEqual(set(REQUIRED_MODEL_LABELS), {"coding", "tool-calling"})
+        self.assertTrue(ready["downloaded"])
 
     def _repo(self, base: Path) -> tuple[Path, str]:
         repo = base / "repo"
@@ -138,7 +159,7 @@ class ModelDispatchTests(unittest.TestCase):
             repo, sha = self._repo(base)
             ctx = FakeContext(base / "evidence")
             fake = self._fake_opencode(base)
-            result = dispatch_ai_coding(payload(sha), ctx, root=repo, opencode_executable=str(fake))
+            result = self._dispatch(payload(sha), ctx, root=repo, opencode_executable=str(fake))
             self.assertEqual(result["status"], "CANDIDATE_READY_FOR_INDEPENDENT_EVALUATION")
             self.assertEqual(result["subject_sha"], sha)
             self.assertEqual(result["changed_paths"], ["allowed.txt"])
@@ -155,7 +176,7 @@ class ModelDispatchTests(unittest.TestCase):
             fake = self._fake_opencode(base)
             runner_temp = base / "runner-temp"
             with mock.patch.dict(os.environ, {"RUNNER_TEMP": str(runner_temp)}, clear=False):
-                result = dispatch_ai_coding(payload(sha), ctx, root=repo, opencode_executable=str(fake))
+                result = self._dispatch(payload(sha), ctx, root=repo, opencode_executable=str(fake))
             self.assertEqual(result["status"], "CANDIDATE_READY_FOR_INDEPENDENT_EVALUATION")
             short_root = (runner_temp / "sm-aic").resolve()
             self.assertTrue(short_root.is_dir())
@@ -169,7 +190,7 @@ class ModelDispatchTests(unittest.TestCase):
             ctx = FakeContext(base / "evidence")
             fake = self._fake_opencode(base, unauthorized=True)
             with self.assertRaises(ModelDispatchFailed) as caught:
-                dispatch_ai_coding(payload(sha), ctx, root=repo, opencode_executable=str(fake))
+                self._dispatch(payload(sha), ctx, root=repo, opencode_executable=str(fake))
             self.assertIn("outside admitted surface", str(caught.exception))
             self.assertEqual((repo / "forbidden.txt").read_text(encoding="utf-8"), "stable\n")
 
@@ -254,7 +275,7 @@ class ModelDispatchTests(unittest.TestCase):
                  mock.patch("a01_model_dispatch._terminate_process_tree"), \
                  mock.patch("a01_model_dispatch.time.monotonic", side_effect=[0.0, 61.0]):
                 with self.assertRaises(DispatchAmbiguousError) as caught:
-                    dispatch_ai_coding(payload(sha), ctx, root=repo, opencode_executable="fake-opencode")
+                    self._dispatch(payload(sha), ctx, root=repo, opencode_executable="fake-opencode")
             evidence_path = ctx.evidence_dir / "model-dispatch-reconciliation.json"
             self.assertTrue(evidence_path.is_file())
             evidence = json.loads(evidence_path.read_text(encoding="utf-8"))

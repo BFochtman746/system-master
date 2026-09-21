@@ -13,13 +13,15 @@ import time
 import zipfile
 from pathlib import Path
 from typing import Any, Optional
-from urllib.parse import urlparse
+from urllib.parse import quote, urlparse
 from urllib.request import Request, urlopen
 
 MODEL_DISPATCH_PROTOCOL = "control-gateway.a01-model-dispatch.v1"
 DEFAULT_LEMONADE_BASE_URL = "http://127.0.0.1:13305/api/v1"
-DEFAULT_MODEL = "gpt-oss-20b-NPU"
+DEFAULT_MODEL = "Qwen3-Coder-30B-A3B-Instruct-GGUF"
 PROVIDER_ID = "lemonade"
+REQUIRED_MODEL_LABELS = frozenset({"coding", "tool-calling"})
+MAX_LEMONADE_CONTROL_RESPONSE_BYTES = 1024 * 1024
 MAX_PROMPT_BYTES = 64 * 1024
 MAX_CAPTURE_BYTES = 4 * 1024 * 1024
 MAX_ALLOWED_PATHS = 64
@@ -160,6 +162,57 @@ def validate_ai_coding_payload(payload: Any) -> dict[str, Any]:
     return normalized
 
 
+
+def _validate_lemonade_model_metadata(metadata: Any, model: str) -> dict[str, Any]:
+    if not isinstance(metadata, dict) or metadata.get("id") != model:
+        raise ModelDispatchFailed("Lemonade model metadata does not match AI_CODING model")
+    labels = metadata.get("labels")
+    if not isinstance(labels, list) or not all(isinstance(label, str) for label in labels):
+        raise ModelDispatchFailed("Lemonade model metadata lacks valid labels")
+    label_set = set(labels)
+    missing = sorted(REQUIRED_MODEL_LABELS - label_set)
+    if missing:
+        raise ModelDispatchFailed(
+            "Lemonade model lacks required AI_CODING capabilities",
+            {"model": model, "labels": sorted(label_set), "missing_labels": missing},
+        )
+    if metadata.get("downloaded") is not True:
+        raise ModelDispatchFailed("Lemonade AI_CODING model is not downloaded locally", {"model": model})
+    return {
+        "model": model,
+        "recipe": metadata.get("recipe"),
+        "labels": sorted(label_set),
+        "downloaded": True,
+        "size": metadata.get("size"),
+    }
+
+
+def _require_lemonade_model_ready(payload: dict[str, Any], evidence_dir: Path) -> dict[str, Any]:
+    model = payload["model"]
+    url = f"{payload['base_url'].rstrip('/')}/models/{quote(model, safe='')}"
+    try:
+        request = Request(url, headers={"Accept": "application/json"}, method="GET")
+        with urlopen(request, timeout=30) as response:
+            raw = response.read(MAX_LEMONADE_CONTROL_RESPONSE_BYTES + 1)
+    except Exception as exc:
+        raise ModelDispatchFailed("Lemonade model-readiness request failed", {"model": model}) from exc
+    if len(raw) > MAX_LEMONADE_CONTROL_RESPONSE_BYTES:
+        raise ModelDispatchFailed("Lemonade model-readiness response exceeded bounded size")
+    try:
+        metadata = json.loads(raw.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise ModelDispatchFailed("Lemonade model-readiness response was not valid JSON") from exc
+    ready = _validate_lemonade_model_metadata(metadata, model)
+    evidence = {
+        "protocol_version": "control-gateway.a01-lemonade-model-readiness.v1",
+        "status": "READY",
+        **ready,
+        "required_labels": sorted(REQUIRED_MODEL_LABELS),
+    }
+    _write_evidence(evidence_dir / "lemonade-model-readiness.json", _canonical(evidence) + "\n")
+    return evidence
+
+
 def build_opencode_config(payload: dict[str, Any]) -> dict[str, Any]:
     payload = validate_ai_coding_payload(payload)
     edit_permissions: dict[str, str] = {"*": "deny"}
@@ -184,6 +237,7 @@ def build_opencode_config(payload: dict[str, Any]) -> dict[str, Any]:
             }
         },
         "share": "disabled",
+        "agent": {"build": {"mode": "primary", "model": f"{PROVIDER_ID}/{payload['model']}", "steps": payload["max_steps"]}},
         "permission": {
             "*": "deny",
             "read": {"*": "allow", "*.env": "deny", "*.env.*": "deny"},
@@ -459,6 +513,7 @@ def dispatch_ai_coding(
         raise ModelDispatchFailed("AI_CODING exact subject is not the requested commit")
 
     opencode = _resolve_opencode(evidence_dir, opencode_executable)
+    _require_lemonade_model_ready(payload, evidence_dir)
 
     config = build_opencode_config(payload)
     config_json = _canonical(config)
@@ -492,6 +547,8 @@ def dispatch_ai_coding(
             "--log-level",
             "INFO",
             "run",
+            "--agent",
+            "build",
             "--model",
             f"{PROVIDER_ID}/{payload['model']}",
             "--format",

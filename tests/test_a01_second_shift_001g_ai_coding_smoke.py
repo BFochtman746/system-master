@@ -18,7 +18,7 @@ class A01SecondShift001GAICodingSmokeContractTests(unittest.TestCase):
         subject = "a" * 40
         payload = smoke001g.build_payload(subject)
         self.assertEqual(payload["subject_sha"], subject)
-        self.assertEqual(payload["model"], "gpt-oss-20b-NPU")
+        self.assertEqual(payload["model"], "Qwen3-Coder-30B-A3B-Instruct-GGUF")
         self.assertEqual(payload["base_url"], "http://127.0.0.1:13305/api/v1")
         self.assertEqual(payload["allowed_paths"], [smoke001g.TARGET])
         self.assertEqual(payload["allowed_commands"], [])
