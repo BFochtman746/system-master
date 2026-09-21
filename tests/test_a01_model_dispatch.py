@@ -28,6 +28,8 @@ from a01_model_dispatch import (
     ModelDispatchError,
     ModelDispatchFailed,
     _bootstrap_pinned_opencode,
+    _configure_windows_git_bash,
+    _derive_windows_git_bash_path,
     _sanitized_environment,
     build_opencode_config,
     dispatch_ai_coding,
@@ -199,6 +201,21 @@ class ModelDispatchTests(unittest.TestCase):
                 OPENCODE_WINDOWS_X64_ARCHIVE_SHA256,
                 "0ecd7ffc7f26390ce7799e7bcd409e4f11c410144308a6a5b0fcdce63d871006",
             )
+
+    def test_windows_git_bash_binding_is_explicit_and_deterministic(self):
+        git_executable = r"C:\Program Files\Git\cmd\git.exe"
+        expected = r"C:\Program Files\Git\bin\bash.exe"
+        self.assertEqual(_derive_windows_git_bash_path(git_executable), expected)
+
+        env = {"SHELL": r"C:\Windows\System32\bash.exe"}
+        _configure_windows_git_bash(
+            env,
+            os_name="nt",
+            which=lambda name: git_executable if name in {"git", "git.exe"} else None,
+            is_file=lambda path: path == expected,
+        )
+        self.assertNotIn("SHELL", env)
+        self.assertEqual(env["OPENCODE_GIT_BASH_PATH"], expected)
 
     def test_transport_and_secret_boundaries_are_fail_closed(self):
         p = payload("a" * 40)

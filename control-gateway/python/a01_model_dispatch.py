@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import ntpath
 import os
 import re
 import shutil
@@ -386,6 +387,47 @@ def _resolve_opencode(evidence_dir: Path, explicit: Optional[str] = None) -> str
     return _bootstrap_pinned_opencode(evidence_dir)
 
 
+def _derive_windows_git_bash_path(git_executable: str) -> str:
+    git_dir = ntpath.dirname(ntpath.normpath(git_executable))
+    if ntpath.basename(git_dir).lower() == "cmd":
+        git_root = ntpath.dirname(git_dir)
+    elif ntpath.basename(git_dir).lower() == "bin" and ntpath.basename(ntpath.dirname(git_dir)).lower() == "usr":
+        git_root = ntpath.dirname(ntpath.dirname(git_dir))
+    else:
+        git_root = ntpath.dirname(git_dir)
+    return ntpath.join(git_root, "bin", "bash.exe")
+
+
+def _configure_windows_git_bash(
+    env: dict[str, str],
+    *,
+    os_name: str = os.name,
+    which: Any = shutil.which,
+    is_file: Any = os.path.isfile,
+) -> None:
+    if os_name != "nt":
+        return
+    env.pop("SHELL", None)
+    explicit = env.get("OPENCODE_GIT_BASH_PATH")
+    if explicit:
+        if not is_file(explicit):
+            raise ModelDispatchFailed(
+                "Configured OPENCODE_GIT_BASH_PATH does not exist",
+                {"git_bash_path": explicit},
+            )
+        return
+    git_executable = which("git") or which("git.exe")
+    if not git_executable:
+        raise ModelDispatchFailed("Git executable is not available for OpenCode shell resolution")
+    git_bash = _derive_windows_git_bash_path(git_executable)
+    if not is_file(git_bash):
+        raise ModelDispatchFailed(
+            "Git Bash executable was not found beside Git for Windows",
+            {"git_executable": git_executable, "git_bash_path": git_bash},
+        )
+    env["OPENCODE_GIT_BASH_PATH"] = git_bash
+
+
 def _sanitized_environment(config_json: str) -> dict[str, str]:
     env = os.environ.copy()
     for key in list(env):
@@ -397,6 +439,7 @@ def _sanitized_environment(config_json: str) -> dict[str, str]:
     env["OPENCODE_DISABLE_PRUNE"] = "true"
     env["NO_PROXY"] = "127.0.0.1,localhost"
     env["no_proxy"] = "127.0.0.1,localhost"
+    _configure_windows_git_bash(env)
     return env
 
 
