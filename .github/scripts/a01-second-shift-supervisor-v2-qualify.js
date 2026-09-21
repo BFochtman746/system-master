@@ -85,7 +85,7 @@ function main() {
   if (
     aiCodingSmoke.state !== 'PASS' ||
     aiCodingSmoke.subject_sha !== actual ||
-    aiCodingSmoke.model !== 'gpt-oss-20b-NPU' ||
+    aiCodingSmoke.model !== 'Qwen3-Coder-30B-A3B-Instruct-GGUF' ||
     aiCodingSmoke.live_ready_queue_touched !== false ||
     aiCodingSmoke.repository_commit_authority_granted !== false ||
     aiCodingSmoke.root_checkout_mutated !== false
