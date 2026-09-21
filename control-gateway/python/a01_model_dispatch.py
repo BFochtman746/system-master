@@ -439,7 +439,6 @@ def _sanitized_environment(config_json: str) -> dict[str, str]:
     env["OPENCODE_DISABLE_PRUNE"] = "true"
     env["NO_PROXY"] = "127.0.0.1,localhost"
     env["no_proxy"] = "127.0.0.1,localhost"
-    _configure_windows_git_bash(env)
     return env
 
 
@@ -484,6 +483,7 @@ def dispatch_ai_coding(
             raise ModelDispatchFailed("detached AI_CODING worktree resolved to the wrong subject")
 
         env = _sanitized_environment(config_json)
+        _configure_windows_git_bash(env)
 
         command = [
             opencode,
