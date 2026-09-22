@@ -1,0 +1,197 @@
+{
+  "protocol_version": "second-shift.production-master.001h-current-main-reconciliation.v2",
+  "record_id": "SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION-001H-CURRENT-MAIN-RECONCILIATION-002",
+  "operation_id": "SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION-001H",
+  "status": "FROZEN_CURRENT_MAIN_RECONCILIATION__IMPLEMENTATION_NOT_YET_COMPLETE",
+  "authority_snapshot": {
+    "authority_id": "CURRENT-AUTHORITY-005",
+    "topology_id": "SYSTEM-TOPOLOGY-007",
+    "main_sha": "6231290d046b85aacb97de18b94ded1ed847ca6f",
+    "main_tree_sha": "bf5be9e75de788db8eab11eae8229227ab100d46",
+    "active_work_state_ref": "control-gateway-state/active-work/second-shift-production-master-completion-001h-main-reconciliation-001",
+    "active_work_publication_commit_sha": "82b88feacbe77dcf46405d62358ea1602c369cd0",
+    "active_work_publication_revision": 1,
+    "authority_epoch": 50,
+    "active_work_packet_digest": "f3ad29be181e07515b8850963fafdcd1d78f06379974cf6f1de01ff8c41f551e",
+    "target_ref": "main",
+    "predecessor_receipt_id": "SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION-001G-RECEIPT"
+  },
+  "single_writer_resolution": {
+    "foundation_carrier": "FOUNDATION-P02-P08-EVIDENCE-CLOSURE-001",
+    "foundation_outcome": "SUPERSEDED",
+    "foundation_next_legal_operation": "NO_LEGAL_SUCCESSOR",
+    "stale_001h_state_ref": "control-gateway-state/active-work/second-shift-production-master-completion-001-recovery-v4",
+    "stale_001h_outcome": "SUPERSEDED",
+    "stale_001h_next_legal_operation": "NO_LEGAL_SUCCESSOR",
+    "fresh_001h_is_only_mutation_authority": true,
+    "stale_retry_packets": [
+      "#702",
+      "#709"
+    ],
+    "stale_retry_disposition": "DO_NOT_REPLAY"
+  },
+  "donor_branch": {
+    "ref": "fix/a01-lemonade-api-prefix",
+    "head_sha": "00588d213b68b99b1c376cfab97e611bc72d2c5f",
+    "merge_base_sha": "24e1089d3f904a5285810267d6241dc27719b54d",
+    "ahead_by": 8,
+    "behind_by": 16,
+    "compare_listed_path_count": 11,
+    "actual_end_state_difference_count": 9
+  },
+  "commit_dispositions": [
+    {
+      "sha": "9098f5a23ea460ed8691539bc15e81b0564b55ba",
+      "title": "a01: lemonade_base_url carries the /api/v1 prefix",
+      "disposition": "ALREADY_ABSORBED_ON_MAIN__NO_PORT",
+      "reason": "qualification/a01/a01-policy.json is byte-identical on current main and donor head."
+    },
+    {
+      "sha": "15d3ced2d948adaeec240586e72c7f4c67009df9",
+      "title": "a01 runner guard: one unload route, not a guess between two",
+      "disposition": "ALREADY_ABSORBED_ON_MAIN__NO_PORT",
+      "reason": ".github/scripts/a01-runner-guard.ps1 is byte-identical on current main and donor head."
+    },
+    {
+      "sha": "91646c3e9d692bdc63539a775f561b206e03167d",
+      "title": "second shift: freeze 001H main carrier reconciliation",
+      "disposition": "HISTORICAL_PLAN_ONLY__DO_NOT_PORT_AS_CURRENT_AUTHORITY",
+      "reason": "The record binds obsolete main/carrier snapshots and has been superseded by this current-main reconciliation."
+    },
+    {
+      "sha": "a03093f868b40c1736e1f20ec39ea2b3864eef4d",
+      "title": "second shift: port inactive mastery schemas",
+      "disposition": "PRESERVE_PROVENANCE__SUPERSEDE_BEFORE_ACTIVATION",
+      "reason": "Historical global-primary WIP-one semantics conflict with current owner-driven nine-lane execution."
+    },
+    {
+      "sha": "a783c34fc19529ed17a29a18267a14ba3c3b67c2",
+      "title": "second shift: qualify mastery contracts on current carrier",
+      "disposition": "REUSE_TEST_INTENT__REWRITE_FOR_CURRENT_SUCCESSOR_CONTRACTS",
+      "reason": "Validator/workflow/tests bind historical schemas and must target current multi-lane successors."
+    },
+    {
+      "sha": "dd1340f395dec1dacd6270bb7a7c8eccbf4b1789",
+      "title": "second shift: reconcile mastery to current nine-lane authority",
+      "disposition": "SUPERSEDED_BY_32E790__NO_DIRECT_PORT",
+      "reason": "Same reconciliation record was corrected by the next donor commit."
+    },
+    {
+      "sha": "32e79095a64c4bb4fca39f0ce8c85fe3aafa9c4b",
+      "title": "second shift: repair mastery main snapshot",
+      "disposition": "PRESERVE_REASONING__REGENERATE_CURRENT_SNAPSHOT",
+      "reason": "Its nine-lane conclusions remain relevant but the recorded main/authority snapshot is stale."
+    },
+    {
+      "sha": "00588d213b68b99b1c376cfab97e611bc72d2c5f",
+      "title": "second shift: add independent evaluator lifecycle",
+      "disposition": "SELECTIVE_RUNTIME_DONOR__PORT_WITH_FRESH_TESTS_AND_QUALIFICATION",
+      "reason": "It is the remaining direct Supervisor v2 runtime candidate and current main lacks its VALIDATING/evaluator lifecycle."
+    }
+  ],
+  "remaining_paths": [
+    {
+      "path": ".github/scripts/second-shift-mastery-contract-validate.js",
+      "action": "REWRITE_CURRENT_MULTI_LANE"
+    },
+    {
+      "path": ".github/workflows/second-shift-mastery-001-contracts.yml",
+      "action": "REWRITE_CURRENT_MULTI_LANE"
+    },
+    {
+      "path": "governance/second-shift/SECOND-SHIFT-ASSIGNMENT-CONTRACT-SCHEMA-003.json",
+      "action": "PROVENANCE_ONLY_SUPERSEDE"
+    },
+    {
+      "path": "governance/second-shift/SECOND-SHIFT-MASTERY-001-CURRENT-AUTHORITY-RECONCILIATION-001.json",
+      "action": "PROVENANCE_ONLY_REGENERATE_CURRENT"
+    },
+    {
+      "path": "governance/second-shift/SECOND-SHIFT-NIGHT-SELECTION-GATE-SCHEMA-001.json",
+      "action": "PROVENANCE_ONLY_SUPERSEDE"
+    },
+    {
+      "path": "governance/second-shift/SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION-001H-MAIN-CARRIER-RECONCILIATION.json",
+      "action": "DO_NOT_PORT_OBSOLETE_SNAPSHOT"
+    },
+    {
+      "path": "governance/second-shift/SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION-001H-RECONCILIATION.json",
+      "action": "DO_NOT_PORT_OBSOLETE_SNAPSHOT"
+    },
+    {
+      "path": "tests/test_second_shift_mastery_contracts.js",
+      "action": "REWRITE_FOR_CURRENT_MULTI_LANE"
+    },
+    {
+      "path": "tools/second_shift_supervisor_v2.py",
+      "action": "SELECTIVE_PORT_EVALUATOR_LIFECYCLE_WITH_TESTS"
+    }
+  ],
+  "implementation_gates": [
+    {
+      "order": 1,
+      "id": "EVALUATOR_LIFECYCLE",
+      "required": "Port independent VALIDATING/evaluator lifecycle onto current Supervisor v2 and add negative/idempotency/stale-authority tests."
+    },
+    {
+      "order": 2,
+      "id": "CURRENT_MASTERY_CONTRACTS",
+      "required": "Replace historical global-primary schemas with owner-driven nine-lane per-lane-WIP successor contracts, validator, workflow, and regression tests."
+    },
+    {
+      "order": 3,
+      "id": "WORKER_SCHEDULER_HANDOFF",
+      "required": "Generalize worker-to-evaluator result handoff and make VALIDATING an active scheduler barrier without creating a second scheduler."
+    },
+    {
+      "order": 4,
+      "id": "REPAIR_CONTROLLER_MUTATION_READINESS",
+      "required": "Advance repository repair controller beyond read-only Wave 1 using existing repair claim/fence, response receipt, system-file lease, exact-SHA qualification, and exact-CAS writer; no second writer or truth store."
+    },
+    {
+      "order": 5,
+      "id": "EXACT_SUBJECT_QUALIFICATION_AND_LIVE_TRIAL",
+      "required": "Run current hosted controls plus exact-SHA A-01 qualification, then a bounded live cleanup trial with durable morning handoff evidence before unattended all-night activation."
+    }
+  ],
+  "cleanup_operating_laws": {
+    "portfolio_model": "OWNER_DRIVEN_NINE_LANE_PORTFOLIO",
+    "global_primary_system_exclusivity": false,
+    "mutation_wip_per_lane": 1,
+    "blocked_lane_does_not_block_independent_safe_other_lane": true,
+    "same_lane_successor_requires_current_owner_objective_authority": true,
+    "repair_precedence": "CURRENT_REPAIR_AND_CONTROL_HEALTH_BEFORE_SPECULATIVE_BUILD_AHEAD",
+    "branch_deletion_authority": false,
+    "retired_prose_dispatch_forbidden": true,
+    "website_building_lane": "PROGRAMMING"
+  },
+  "research_basis": [
+    {
+      "source": "GitHub Docs",
+      "reference": "https://docs.github.com/en/actions/concepts/workflows-and-actions/concurrency",
+      "supports": "Serialize conflicting jobs/workflows by concurrency group while allowing independent work."
+    },
+    {
+      "source": "GitHub Docs",
+      "reference": "https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets",
+      "supports": "Protect updates/deletions, require status checks, and constrain bypass actors."
+    },
+    {
+      "source": "SQLite Docs",
+      "reference": "https://sqlite.org/wal.html",
+      "supports": "WAL concurrency/checkpoint behavior for durable supervisor coordination."
+    },
+    {
+      "source": "SQLite Docs",
+      "reference": "https://www.sqlite.org/pragma.html#pragma_synchronous",
+      "supports": "FULL synchronous mode adds WAL sync at commit for power-loss durability."
+    },
+    {
+      "source": "NIST SP 800-218",
+      "reference": "https://csrc.nist.gov/pubs/sp/800/218/final",
+      "supports": "Independent review/testing and evidence-backed secure software change practices."
+    }
+  ],
+  "promotion_allowed": false,
+  "night_cleanup_unattended_activation_allowed": false
+}
