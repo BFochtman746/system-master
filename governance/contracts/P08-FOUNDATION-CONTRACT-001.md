@@ -139,3 +139,7 @@ Granting promotion authority remains the highest-consequence registry edit becau
 P08 has a live exact-SHA proof procedure. Its Foundation closure condition is therefore evidence-registration, not missing implementation.
 
 Queued-but-unstarted operator visibility remains a **P15 observability concern**. It does not change P08 result semantics and must not be used to classify an unstarted request as a subject failure.
+
+### Current-subject evidence refresh rule
+
+When any blob bound by the current P08 Foundation evidence receipt changes, the prior P08 PASS remains historical evidence only. Current Foundation closure requires the canonical P08 workflow to succeed again on an exact descendant subject that contains the current bound blobs, including a live A-01 receipt proving `ADMITTED`, `PASS`, exact subject checkout, and `promotion_authorized: true`. The evidence registry may be refreshed only after that exact-subject run succeeds; no historical PASS may be transferred across changed P08 subjects.
