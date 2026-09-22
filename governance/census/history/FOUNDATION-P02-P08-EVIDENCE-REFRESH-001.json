@@ -1,0 +1,103 @@
+{
+  "history_id": "FOUNDATION-P02-P08-EVIDENCE-REFRESH-001",
+  "effective_date": "2026-09-22",
+  "standing": "IMMUTABLE_SUPERSEDED_P02_P08_RECEIPT_HISTORY",
+  "authority_id": "CURRENT-AUTHORITY-005",
+  "reason": "Preserve the immediately superseded P02 and P08 exact-subject PASS receipts before current-subject evidence refresh. Historical PASS remains bound to its original subject bytes and is not relabeled or transferred.",
+  "superseded_receipts": [
+    {
+      "requirement_or_capability_id": "P02",
+      "owner_path": "SYSTEM_MASTER/CORE",
+      "authority_id": "CURRENT-AUTHORITY-005",
+      "status": "PASS",
+      "subject_sha": "efc325ab682fa92985569ceaa2619220dd4a6d3f",
+      "subjects": [
+        {
+          "path": "governance/CURRENT-AUTHORITY.json",
+          "git_blob_sha": "a67b9641023e0504a5557d8f7ecd3e0e76087f44"
+        },
+        {
+          "path": "governance/contracts/P02-FOUNDATION-CONTRACT-001.md",
+          "git_blob_sha": "b3c92eb6e037e2c6d861c1af784d658ff314880f"
+        },
+        {
+          "path": "governance/WORK-OBLIGATION-REGISTRY-017.json",
+          "git_blob_sha": "48834ad914edb18b9e48e25e3e5c8dc65c4b9b4e"
+        },
+        {
+          "path": ".github/workflows/p02-obligation-registry-foundation-qualification.yml",
+          "git_blob_sha": "5002dbc4ef4ae96230f0a5b3b5be5cbc79247c35"
+        }
+      ],
+      "qualification": {
+        "workflow_run_id": 34870093312,
+        "artifact_id": 10359180477,
+        "artifact_digest": "sha256:ce9d143fe744ca99149ee1812b1e8649d6e56b9bd01d53b6a42c635cdb64affa",
+        "head_sha": "efc325ab682fa92985569ceaa2619220dd4a6d3f",
+        "conclusion": "success"
+      },
+      "prior_receipt_history_ref": "governance/census/history/P02-FOUNDATION-EVIDENCE-RECEIPT-001.json"
+    },
+    {
+      "requirement_or_capability_id": "P08",
+      "owner_path": "SYSTEM_MASTER/CORE",
+      "authority_id": "CURRENT-AUTHORITY-005",
+      "status": "PASS",
+      "subject_sha": "3273ad26d4f04984b6cb7932ff0ed255c2149170",
+      "subjects": [
+        {
+          "path": "governance/CURRENT-AUTHORITY.json",
+          "git_blob_sha": "a67b9641023e0504a5557d8f7ecd3e0e76087f44"
+        },
+        {
+          "path": "governance/catalog/SYSTEM-MASTER-CAPABILITY-CROSSWALK-003.json",
+          "git_blob_sha": "8053420bdf9b18eb5cbf149f5a810aedc49e60d4"
+        },
+        {
+          "path": "governance/contracts/P08-FOUNDATION-CONTRACT-001.md",
+          "git_blob_sha": "a2a435871a0847ce9111d4d126e4e717d9f03136"
+        },
+        {
+          "path": ".github/scripts/a01-control-plane.js",
+          "git_blob_sha": "8afa1b1ad4c0219e384dc821743aa83bb60ee676"
+        },
+        {
+          "path": ".github/scripts/a01-control-plane-selftest.js",
+          "git_blob_sha": "bcb904a069f641eb5f17ce17f1f62795179fa5fa"
+        },
+        {
+          "path": ".github/workflows/a01-control-plane-executor.yml",
+          "git_blob_sha": "78c271833fcca5319533e63de9f6f6c6355ff741"
+        },
+        {
+          "path": ".github/workflows/p08-qualification-pass-semantics-foundation-qualification.yml",
+          "git_blob_sha": "f46a2eb2053ff833863e8e13d86401450c22a55b"
+        },
+        {
+          "path": "qualification/a01/a01-policy.json",
+          "git_blob_sha": "57a840e2fcb326584328bf45a5acd8f449b7ff57"
+        },
+        {
+          "path": "qualification/a01/registry.json",
+          "git_blob_sha": "25c63063b2124fc7dd787251e0d80deffcdf0f6c"
+        },
+        {
+          "path": "qualification/a01/schema/qualification-receipt.schema.json",
+          "git_blob_sha": "d7ded8d8cc77b2a1b637b0616eb37f8a5ebec65a"
+        }
+      ],
+      "qualification": {
+        "workflow_run_id": 34976731472,
+        "artifact_id": 10399109324,
+        "artifact_digest": "sha256:302c240834035abdf340bf7eb7b8bd550da4280dd5a96fb24cff27723cde3655",
+        "head_sha": "3273ad26d4f04984b6cb7932ff0ed255c2149170",
+        "conclusion": "success",
+        "qualification_id": "A01-CONTROL-PLANE-SELFTEST",
+        "result_class": "PASS",
+        "promotion_authorized": true
+      },
+      "prior_receipt_history_ref": "governance/census/history/FOUNDATION-P09-EVIDENCE-REFRESH-001.json"
+    }
+  ],
+  "history_rule": "The superseded receipts are immutable historical evidence. No prior PASS is relabeled or transferred; refreshed P02/P08 receipts must independently bind current blobs and exact qualification artifacts."
+}
