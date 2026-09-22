@@ -235,6 +235,20 @@ test('ambiguous update is recovered by exact reread and exact replay is idempote
   assert.equal(transport.updateCalls, 1);
 });
 
+test('replay-only execution accepts exact applied commit and refuses predecessor rewind', async () => {
+  const { grant } = await productionGrant();
+  const transport = new FakeWriterTransport();
+  const writer = new GitHubReceiptConsumingCasWriter({ transport });
+  const first = await writer.execute({ grant, plan: plan() });
+  assert.equal(first.idempotent_replay, false);
+  const replay = await writer.execute({ grant, plan: plan(), replayOnly: true });
+  assert.equal(replay.idempotent_replay, true);
+  assert.equal(replay.result_commit_sha, RESULT_COMMIT_SHA);
+  transport.refSha = PREDECESSOR_SHA;
+  await rejectsCode(writer.execute({ grant, plan: plan(), replayOnly: true }), 'PRODUCTION_MUTATION_REPLAY_TARGET_REWOUND');
+  assert.equal(transport.updateCalls, 1);
+});
+
 test('changed bytes after grant are rejected before ref mutation', async () => {
   const original = plan('alpha\n');
   const { grant } = await productionGrant({ mutationPlan: original });

@@ -215,8 +215,55 @@ function repositoryFromTransport(transport) {
   return `${transport.owner}/${transport.repo}`;
 }
 
-function exactCommitMessage(plan, grant) {
-  return `${plan.commit_message.trimEnd()}\n\nControl-Gateway-Mutation: ${grant.mutation_id}\nControl-Gateway-Admission-Digest: ${grant.admission_digest}\nControl-Gateway-Plan-Digest: ${grant.plan_digest}\nControl-Gateway-Grant-Digest: ${grant.grant_digest}`;
+function withoutLeaseReceiptDigest(receipt) {
+  const copy = clone(receipt);
+  delete copy.receipt_digest;
+  return copy;
+}
+
+function validateLeaseReceiptForGrant(receipt, grant) {
+  strictKeys(receipt, [
+    'protocol_version', 'state_ref', 'state_commit_sha', 'target_ref', 'expected_predecessor_sha',
+    'holder', 'leases', 'idempotent_replay', 'receipt_digest'
+  ], 'system_file_lease_receipt');
+  if (receipt.protocol_version !== 'control-gateway.system-file-lease-acquisition.v1') fail('PRODUCTION_MUTATION_LEASE_RECEIPT_INVALID', 'lease receipt protocol invalid');
+  if (receipt.state_ref !== 'control-gateway-state/system-file-leases') fail('PRODUCTION_MUTATION_LEASE_STATE_REF_INVALID', 'lease receipt must use canonical system-file lease state ref');
+  requiredString(receipt.state_commit_sha, 'lease.state_commit_sha', SHA1_RE);
+  requiredString(receipt.target_ref, 'lease.target_ref', REF_RE);
+  requiredString(receipt.expected_predecessor_sha, 'lease.expected_predecessor_sha', SHA1_RE);
+  requiredString(receipt.receipt_digest, 'lease.receipt_digest', SHA256_RE);
+  if (receipt.target_ref !== grant.target_ref || receipt.expected_predecessor_sha !== grant.observed_predecessor_sha) fail('PRODUCTION_MUTATION_LEASE_BINDING_MISMATCH', 'lease target/predecessor differs from production grant');
+  strictKeys(receipt.holder, ['workstream_id', 'operation_id', 'mutation_id'], 'lease.holder');
+  requiredString(receipt.holder.workstream_id, 'lease.holder.workstream_id', ID_RE);
+  requiredString(receipt.holder.operation_id, 'lease.holder.operation_id', ID_RE);
+  requiredString(receipt.holder.mutation_id, 'lease.holder.mutation_id', ID_RE);
+  if (receipt.holder.operation_id !== grant.operation_id || receipt.holder.mutation_id !== grant.mutation_id) fail('PRODUCTION_MUTATION_LEASE_BINDING_MISMATCH', 'lease holder differs from production grant');
+  if (!Array.isArray(receipt.leases) || receipt.leases.length === 0) fail('PRODUCTION_MUTATION_LEASE_RECEIPT_INVALID', 'lease entries required');
+  const paths = [];
+  for (const [index, lease] of receipt.leases.entries()) {
+    strictKeys(lease, ['path', 'path_revision', 'lease_epoch', 'fence_token', 'record_digest', 'expires_at'], `lease.leases[${index}]`);
+    validateExactPath(lease.path, `lease.leases[${index}].path`);
+    if (!Number.isSafeInteger(lease.path_revision) || lease.path_revision < 0 || !Number.isSafeInteger(lease.lease_epoch) || lease.lease_epoch < 1) fail('PRODUCTION_MUTATION_LEASE_RECEIPT_INVALID', `lease counters invalid for ${lease.path}`);
+    requiredString(lease.fence_token, `lease.leases[${index}].fence_token`, SHA256_RE);
+    requiredString(lease.record_digest, `lease.leases[${index}].record_digest`, SHA256_RE);
+    if (typeof lease.expires_at !== 'string' || !Number.isFinite(Date.parse(lease.expires_at))) fail('PRODUCTION_MUTATION_LEASE_RECEIPT_INVALID', `lease expiry invalid for ${lease.path}`);
+    paths.push(lease.path);
+  }
+  if (typeof receipt.idempotent_replay !== 'boolean') fail('PRODUCTION_MUTATION_LEASE_RECEIPT_INVALID', 'lease idempotent_replay must be boolean');
+  if (canonicalize(sortedUnique(paths, 'lease paths')) !== canonicalize([...grant.paths].sort())) fail('PRODUCTION_MUTATION_LEASE_PATH_SET_MISMATCH', 'lease paths differ from production grant');
+  if (sha256(withoutLeaseReceiptDigest(receipt)) !== receipt.receipt_digest) fail('PRODUCTION_MUTATION_LEASE_RECEIPT_DIGEST_MISMATCH', 'lease receipt digest mismatch');
+  return true;
+}
+
+function exactCommitMessage(plan, grant, leaseReceipt = null) {
+  if (leaseReceipt && /^System-File-Lease\s*:/im.test(plan.commit_message)) fail('PRODUCTION_MUTATION_CALLER_LEASE_TRAILER_FORBIDDEN', 'caller-supplied System-File-Lease trailers are forbidden');
+  const base = `${plan.commit_message.trimEnd()}\n\nControl-Gateway-Mutation: ${grant.mutation_id}\nControl-Gateway-Admission-Digest: ${grant.admission_digest}\nControl-Gateway-Plan-Digest: ${grant.plan_digest}\nControl-Gateway-Grant-Digest: ${grant.grant_digest}`;
+  if (!leaseReceipt) return base;
+  validateLeaseReceiptForGrant(leaseReceipt, grant);
+  const trailers = [...leaseReceipt.leases]
+    .sort((left, right) => left.path.localeCompare(right.path))
+    .map((lease) => `System-File-Lease: ${lease.path}@${lease.lease_epoch}/${lease.fence_token}`);
+  return `${base}\n${trailers.join('\n')}`;
 }
 
 function assertGrantMatchesPlan(grant, plan) {
@@ -281,11 +328,13 @@ export class GitHubReceiptConsumingCasWriter {
     this.transport = transport;
   }
 
-  async execute({ grant, plan }) {
+  async execute({ grant, plan, leaseReceipt = null, replayOnly = false }) {
     assertGrantMatchesPlan(grant, plan);
+    if (leaseReceipt) validateLeaseReceiptForGrant(leaseReceipt, grant);
+    if (typeof replayOnly !== 'boolean') fail('PRODUCTION_MUTATION_REPLAY_MODE_INVALID', 'replayOnly must be boolean');
     if (repositoryFromTransport(this.transport) !== grant.repository) fail('PRODUCTION_MUTATION_TRANSPORT_REPOSITORY_MISMATCH', 'writer transport targets a different repository');
     const predecessor = grant.observed_predecessor_sha;
-    const expectedMessage = exactCommitMessage(plan, grant);
+    const expectedMessage = exactCommitMessage(plan, grant, leaseReceipt);
     const desiredTree = await this.transport.createTreeFromPlan({ baseCommitSha: predecessor, plan: normalizePlan(plan) });
     if (!desiredTree || !SHA1_RE.test(desiredTree.sha ?? '')) fail('PRODUCTION_MUTATION_TREE_INVALID', 'writer transport did not return a valid Git tree SHA');
 
@@ -303,6 +352,7 @@ export class GitHubReceiptConsumingCasWriter {
       if (!replayMatches) fail('PRODUCTION_MUTATION_PREDECESSOR_MISMATCH', 'target ref moved away from exact admitted predecessor');
       return makeExecutionReceipt({ grant, resultCommitSha: current.sha, resultTreeSha: desiredTree.sha, replayed: true });
     }
+    if (replayOnly) fail('PRODUCTION_MUTATION_REPLAY_TARGET_REWOUND', 'replay-only execution refuses to create a new commit from the predecessor');
 
     const parent = await this.transport.getCommit(predecessor);
     if (!parent || parent.sha !== predecessor || !SHA1_RE.test(parent.tree_sha ?? '')) fail('PRODUCTION_MUTATION_PREDECESSOR_INVALID', 'admitted predecessor commit metadata is invalid');
