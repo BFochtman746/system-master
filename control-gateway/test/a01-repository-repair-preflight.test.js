@@ -104,3 +104,42 @@ test('historical superseded topology evidence does not block current repair', ()
     assert.ok(!report.live_control_documents_checked.some((row) => row.path.includes('OLD-TOPOLOGY-EVIDENCE')));
   } finally { fs.rmSync(root, { recursive: true, force: true }); }
 });
+
+
+test('FILE_BLOB owner control resolves from the committed control-record blob', () => {
+  const root = fixture();
+  try {
+    const controlPath = 'governance/control-records/CORE-CONTROL-RECORD-001.json';
+    write(root, controlPath, { control_record_id: 'CORE-CONTROL-RECORD-001' });
+    git(root, ['add', '.']);
+    git(root, ['commit', '-q', '-m', 'add file blob control']);
+    const blob = git(root, ['rev-parse', `HEAD:${controlPath}`]);
+    write(root, 'governance/second-shift/CORE-DELEGATIONS.json', {
+      control_ref: 'core/control-v1',
+      control_binding: { type: 'FILE_BLOB', path: controlPath },
+      last_known_control_head: blob,
+      active_delegations: []
+    });
+    git(root, ['add', '.']);
+    git(root, ['commit', '-q', '-m', 'bind file blob control']);
+    const report = evaluateRepository(root, { liveHeads: true, runStateReconciler: false, fixtureMode: true });
+    assert.equal(report.standing, 'SAFE_TO_REPAIR');
+    const owner = report.owner_heads.find((row) => row.lane === 'CORE');
+    assert.equal(owner.control_binding_type, 'FILE_BLOB');
+    assert.equal(owner.live_sha, blob);
+    assert.equal(owner.recorded_sha, blob);
+  } finally { fs.rmSync(root, { recursive: true, force: true }); }
+});
+
+test('changed live BRANCH_HEAD fails closed as STALE_DELEGATION', () => {
+  const root = fixture();
+  try {
+    const remote = path.join(root, 'control-origin.git');
+    git(root, ['init', '--bare', '-q', remote]);
+    git(root, ['remote', 'add', 'origin', remote]);
+    git(root, ['push', '-q', 'origin', 'HEAD:refs/heads/core/control-v1']);
+    const report = evaluateRepository(root, { liveHeads: true, runStateReconciler: false, fixtureMode: true });
+    assert.equal(report.standing, 'REPAIR_BLOCKED_BY_STALE_CONTROL_TRUTH');
+    assert.ok(report.findings.some((row) => row.type === 'STALE_DELEGATION' && row.lane === 'CORE'));
+  } finally { fs.rmSync(root, { recursive: true, force: true }); }
+});

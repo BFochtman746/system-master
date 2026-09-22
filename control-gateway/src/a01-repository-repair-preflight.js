@@ -9,6 +9,7 @@ const BLOCKING = new Set([
   'LIVE_TOPOLOGY_REFERENCE_STALE',
   'COMPLETION_OR_RETIREMENT_DRIFT',
   'OWNER_CONTROL_HEAD_UNRESOLVED',
+  'STALE_DELEGATION',
   'OVERLAPPING_MUTATION_CLAIM',
   'MISSING_LIVE_CONTROL',
   'EXECUTABLE_CONTRACT_DIVERGENCE',
@@ -85,21 +86,55 @@ function lsRemote(root, ref) {
   }
 }
 
-function recordedHead(root, secondShiftRegistry, lane) {
+function ownerControlBinding(root, secondShiftRegistry, lane, fallbackRef) {
   const ownerFile = secondShiftRegistry?.owner_files?.[lane];
-  if (!ownerFile || !exists(root, ownerFile)) return null;
-  try { return readJson(root, ownerFile).last_known_control_head || null; } catch { return null; }
+  if (!ownerFile || !exists(root, ownerFile)) {
+    return { recorded_sha: null, type: 'BRANCH_HEAD', ref: fallbackRef };
+  }
+  try {
+    const data = readJson(root, ownerFile);
+    const binding = data.control_binding || { type: 'BRANCH_HEAD', ref: data.control_ref || fallbackRef };
+    if (binding.type === 'FILE_BLOB') {
+      return { recorded_sha: data.last_known_control_head || null, type: 'FILE_BLOB', ref: binding.path || data.control_ref || fallbackRef };
+    }
+    return { recorded_sha: data.last_known_control_head || null, type: 'BRANCH_HEAD', ref: binding.ref || data.control_ref || fallbackRef };
+  } catch {
+    return { recorded_sha: null, type: 'BRANCH_HEAD', ref: fallbackRef };
+  }
 }
 
 function collectOwnerHeads(root, topology, secondShiftRegistry, findings, liveHeads, fixtureMode) {
   const rows = [];
   for (const owner of topologyOwnerRows(topology)) {
-    const recorded = recordedHead(root, secondShiftRegistry, owner.lane);
-    const live = liveHeads ? lsRemote(root, owner.control_ref) : null;
+    const binding = ownerControlBinding(root, secondShiftRegistry, owner.lane, owner.control_ref);
+    const recorded = binding.recorded_sha;
+    const live = binding.type === 'FILE_BLOB'
+      ? (binding.ref ? blobSha(root, binding.ref) : null)
+      : (liveHeads ? lsRemote(root, binding.ref || owner.control_ref) : null);
     if (liveHeads && !SHA_RE.test(live || '')) {
-      addFinding(findings, 'ERROR', 'OWNER_CONTROL_HEAD_UNRESOLVED', `live owner head could not be resolved for ${owner.lane}`, { lane: owner.lane, control_ref: owner.control_ref });
+      addFinding(findings, 'ERROR', 'OWNER_CONTROL_HEAD_UNRESOLVED', `live owner head could not be resolved for ${owner.lane}`, {
+        lane: owner.lane,
+        control_ref: owner.control_ref,
+        control_binding_type: binding.type,
+        control_binding_ref: binding.ref
+      });
+    } else if (liveHeads && SHA_RE.test(recorded || '') && SHA_RE.test(live || '') && recorded.toLowerCase() !== live.toLowerCase()) {
+      addFinding(findings, 'ERROR', 'STALE_DELEGATION', `recorded owner head is stale for ${owner.lane}`, {
+        lane: owner.lane,
+        control_ref: owner.control_ref,
+        control_binding_type: binding.type,
+        control_binding_ref: binding.ref,
+        recorded_sha: recorded,
+        live_sha: live
+      });
     }
-    rows.push({ ...owner, recorded_sha: recorded, live_sha: live });
+    rows.push({
+      ...owner,
+      control_binding_type: binding.type,
+      control_binding_ref: binding.ref,
+      recorded_sha: recorded,
+      live_sha: live
+    });
   }
   if (!liveHeads && !fixtureMode) addFinding(findings, 'ERROR', 'LIVE_OWNER_HEADS_NOT_CHECKED', 'production repair preflight requires fresh live owner heads');
   return rows;
