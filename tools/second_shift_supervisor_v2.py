@@ -276,6 +276,14 @@ class SupervisorStore:
                 raise Conflict("delegation head differs from live lane head")
             if self._active_claim(c, lane):
                 raise Conflict("cannot bind successor while live claim exists")
+            validating = c.execute(
+                "SELECT delegation_id FROM delegations WHERE lane=? AND state='VALIDATING' ORDER BY delegation_id LIMIT 1",
+                (lane,),
+            ).fetchone()
+            if validating is not None:
+                raise Conflict(
+                    f"cannot bind successor while delegation {validating['delegation_id']} awaits independent evaluation"
+                )
             existing = c.execute("SELECT * FROM delegations WHERE delegation_id=?", (delegation_id,)).fetchone()
             if existing:
                 same = existing["lane"] == lane and existing["objective_id"] == objective_id and existing["control_head"] == control_head
@@ -445,6 +453,113 @@ class SupervisorStore:
             c.execute("UPDATE claims SET heartbeat_at=?,status='RUNNING' WHERE lease_id=?", (iso(now), lease_id))
             self._event(c, claim["lane"], "PROGRESS", now, delegation_id=claim["delegation_id"], objective_id=claim["objective_id"], lease_id=lease_id, dispatch_id=claim["dispatch_id"], idempotency_key=claim["idempotency_key"], fencing_token=fencing_token, control_head=claim["control_head"], payload=payload)
 
+
+    @staticmethod
+    def _require_sha256(value: str, label: str) -> str:
+        if not isinstance(value, str) or len(value) != 64 or any(ch not in "0123456789abcdefABCDEF" for ch in value):
+            raise ValueError(f"{label} must be an exact SHA-256 digest")
+        return value.lower()
+
+    def await_evaluation(
+        self,
+        lease_id: str,
+        fencing_token: int,
+        candidate_digest: str,
+        payload: Optional[dict[str, Any]] = None,
+        now: Optional[dt.datetime] = None,
+    ) -> None:
+        candidate_digest = self._require_sha256(candidate_digest, "candidate_digest")
+        if payload is None:
+            payload = {}
+        if not isinstance(payload, dict):
+            raise ValueError("validation payload must be an object")
+        now = now or utcnow()
+        validation_payload = {"candidate_digest": candidate_digest, "candidate": payload}
+        with self.tx() as c:
+            claim = self._claim(c, lease_id)
+            delegation = c.execute(
+                "SELECT * FROM delegations WHERE delegation_id=?",
+                (claim["delegation_id"],),
+            ).fetchone()
+            if delegation is None:
+                raise Conflict("validation claim has no delegation")
+            if claim["released_at"] is not None:
+                recorded = json.loads(claim["terminal_reason"] or "{}")
+                exact_replay = (
+                    claim["status"] == "VALIDATING"
+                    and delegation["state"] == "VALIDATING"
+                    and int(fencing_token) == int(claim["fencing_token"])
+                    and recorded == validation_payload
+                )
+                if exact_replay:
+                    return
+                if int(fencing_token) != int(claim["fencing_token"]) or claim["status"] == "STALE":
+                    raise StaleWorker("validation handoff replay is stale")
+                raise Conflict("validation handoff conflicts with recorded state")
+            self._assert_live_worker(c, claim, fencing_token, now)
+            outbox = c.execute("SELECT * FROM dispatch_outbox WHERE lease_id=?", (lease_id,)).fetchone()
+            if outbox is None or outbox["state"] != "DISPATCHED":
+                raise Conflict("validation handoff requires an acknowledged dispatch")
+            c.execute("UPDATE claims SET status='VALIDATING',released_at=?,terminal_reason=? WHERE lease_id=?", (iso(now), json.dumps(validation_payload, sort_keys=True), lease_id))
+            c.execute("UPDATE delegations SET state='VALIDATING',updated_at=? WHERE delegation_id=?", (iso(now), claim["delegation_id"]))
+            c.execute("UPDATE lanes SET state='RECONCILE',current_delegation_id=NULL,updated_at=? WHERE lane=?", (iso(now), claim["lane"]))
+            c.execute("UPDATE dispatch_outbox SET state='VALIDATING',updated_at=? WHERE lease_id=?", (iso(now), lease_id))
+            self._event(c, claim["lane"], "VALIDATING", now, delegation_id=claim["delegation_id"], objective_id=claim["objective_id"], lease_id=lease_id, dispatch_id=claim["dispatch_id"], idempotency_key=claim["idempotency_key"], fencing_token=claim["fencing_token"], control_head=claim["control_head"], payload=validation_payload)
+
+    def evaluator_verdict(
+        self,
+        lease_id: str,
+        fencing_token: int,
+        verdict_id: str,
+        verdict: str,
+        candidate_digest: str,
+        evidence: dict[str, Any],
+        now: Optional[dt.datetime] = None,
+    ) -> str:
+        if not isinstance(verdict_id, str) or not verdict_id.strip():
+            raise ValueError("verdict_id is required")
+        verdict_id = verdict_id.strip()
+        if verdict not in {"PASS", "BLOCKED", "REWORK", "DRIFT"}:
+            raise ValueError("verdict must be PASS, BLOCKED, REWORK, or DRIFT")
+        candidate_digest = self._require_sha256(candidate_digest, "candidate_digest")
+        if not isinstance(evidence, dict) or not evidence:
+            raise ValueError("evaluator evidence must be a non-empty object")
+        now = now or utcnow()
+        verdict_payload = {"verdict_id": verdict_id, "verdict": verdict, "candidate_digest": candidate_digest, "evidence": evidence}
+        terminal_state = "COMPLETED" if verdict == "PASS" else "BLOCKED"
+        with self.tx() as c:
+            prior = c.execute("SELECT lease_id,payload_json FROM events WHERE event_type='EVALUATOR_VERDICT' ORDER BY seq").fetchall()
+            for event in prior:
+                payload = json.loads(event["payload_json"] or "{}")
+                if payload.get("verdict_id") != verdict_id:
+                    continue
+                if event["lease_id"] != lease_id or payload != verdict_payload:
+                    raise Conflict("evaluator verdict id collision")
+                return terminal_state
+            claim = self._claim(c, lease_id)
+            if int(fencing_token) != int(claim["fencing_token"]):
+                raise StaleWorker("evaluator verdict fence differs from candidate claim")
+            if claim["status"] != "VALIDATING" or claim["released_at"] is None:
+                raise Conflict("evaluator verdict requires a released VALIDATING claim")
+            lane = self._lane(c, claim["lane"])
+            if lane["control_head"] != claim["control_head"] or int(lane["fencing_counter"]) != int(claim["fencing_token"]):
+                raise StaleWorker("evaluator verdict candidate authority is stale")
+            validation_payload = json.loads(claim["terminal_reason"] or "{}")
+            if validation_payload.get("candidate_digest") != candidate_digest:
+                raise Conflict("evaluator verdict candidate digest differs from validation handoff")
+            delegation = c.execute("SELECT * FROM delegations WHERE delegation_id=?", (claim["delegation_id"],)).fetchone()
+            outbox = c.execute("SELECT * FROM dispatch_outbox WHERE lease_id=?", (lease_id,)).fetchone()
+            if delegation is None or delegation["state"] != "VALIDATING":
+                raise Conflict("evaluator verdict requires a VALIDATING delegation")
+            if outbox is None or outbox["state"] != "VALIDATING":
+                raise Conflict("evaluator verdict requires a VALIDATING dispatch")
+            c.execute("UPDATE claims SET status=?,terminal_reason=? WHERE lease_id=?", (terminal_state, json.dumps(verdict_payload, sort_keys=True), lease_id))
+            c.execute("UPDATE delegations SET state=?,updated_at=? WHERE delegation_id=?", (terminal_state, iso(now), claim["delegation_id"]))
+            c.execute("UPDATE dispatch_outbox SET state=?,updated_at=? WHERE lease_id=?", (terminal_state, iso(now), lease_id))
+            self._event(c, claim["lane"], "EVALUATOR_VERDICT", now, delegation_id=claim["delegation_id"], objective_id=claim["objective_id"], lease_id=lease_id, dispatch_id=claim["dispatch_id"], idempotency_key=claim["idempotency_key"], fencing_token=claim["fencing_token"], control_head=claim["control_head"], payload=verdict_payload)
+            self._event(c, claim["lane"], terminal_state, now, delegation_id=claim["delegation_id"], objective_id=claim["objective_id"], lease_id=lease_id, dispatch_id=claim["dispatch_id"], idempotency_key=claim["idempotency_key"], fencing_token=claim["fencing_token"], control_head=claim["control_head"], payload={"verdict_id": verdict_id, "candidate_digest": candidate_digest, "evaluator_verdict": verdict})
+            return terminal_state
+
     def _release_dispatch_for_stale_authority(self, c: sqlite3.Connection, lease_id: str, now: dt.datetime) -> None:
         c.execute(
             "UPDATE dispatch_outbox SET state=CASE "
@@ -504,6 +619,16 @@ class SupervisorStore:
             c.execute("UPDATE delegations SET state='STALE',updated_at=? WHERE delegation_id=?", (iso(now), claim["delegation_id"]))
             self._release_dispatch_for_stale_authority(c, claim["lease_id"], now)
             self._event(c, lane, "STALE", now, delegation_id=claim["delegation_id"], objective_id=claim["objective_id"], lease_id=claim["lease_id"], dispatch_id=claim["dispatch_id"], idempotency_key=claim["idempotency_key"], fencing_token=claim["fencing_token"], control_head=claim["control_head"], payload={"reason": "CONTROL_HEAD_CHANGED", "new_control_head": new_control_head})
+        validating = c.execute(
+            "SELECT * FROM claims WHERE lane=? AND status='VALIDATING' AND released_at IS NOT NULL ORDER BY lease_id",
+            (lane,),
+        ).fetchall()
+        for candidate in validating:
+            stale_payload = {"reason": "CONTROL_HEAD_CHANGED", "new_control_head": new_control_head}
+            c.execute("UPDATE claims SET status='STALE',terminal_reason=? WHERE lease_id=? AND status='VALIDATING'", (json.dumps(stale_payload, sort_keys=True), candidate["lease_id"]))
+            c.execute("UPDATE delegations SET state='STALE',updated_at=? WHERE delegation_id=? AND state='VALIDATING'", (iso(now), candidate["delegation_id"]))
+            c.execute("UPDATE dispatch_outbox SET state='CANCELLED',updated_at=? WHERE lease_id=? AND state='VALIDATING'", (iso(now), candidate["lease_id"]))
+            self._event(c, lane, "STALE", now, delegation_id=candidate["delegation_id"], objective_id=candidate["objective_id"], lease_id=candidate["lease_id"], dispatch_id=candidate["dispatch_id"], idempotency_key=candidate["idempotency_key"], fencing_token=candidate["fencing_token"], control_head=candidate["control_head"], payload=stale_payload)
         c.execute("UPDATE delegations SET state='STALE',updated_at=? WHERE lane=? AND state='READY'", (iso(now), lane))
         c.execute("UPDATE lanes SET control_head=?,fencing_counter=?,state='RECONCILE',current_delegation_id=NULL,updated_at=? WHERE lane=?", (new_control_head, new_fence, iso(now), lane))
         self._event(c, lane, "CONTROL_HEAD_CHANGED", now, fencing_token=new_fence, control_head=new_control_head, payload={"previous_control_head": lane_row["control_head"]})
@@ -559,6 +684,18 @@ class SupervisorStore:
         orphan = self.conn.execute("SELECT d.dispatch_id FROM dispatch_outbox d LEFT JOIN claims c ON c.lease_id=d.lease_id WHERE c.lease_id IS NULL").fetchall()
         if orphan:
             problems.append("ORPHAN_DISPATCH_OUTBOX")
+        invalid_validating = self.conn.execute(
+            """
+            SELECT d.delegation_id
+            FROM delegations d
+            LEFT JOIN claims c ON c.delegation_id=d.delegation_id
+            LEFT JOIN dispatch_outbox o ON o.lease_id=c.lease_id
+            WHERE d.state='VALIDATING'
+              AND (c.lease_id IS NULL OR c.status!='VALIDATING' OR c.released_at IS NULL OR o.state!='VALIDATING')
+            """
+        ).fetchall()
+        if invalid_validating:
+            problems.append("INVALID_VALIDATING_LIFECYCLE")
         if deep:
             integrity = self.conn.execute("PRAGMA integrity_check").fetchone()[0]
             if integrity != "ok":
