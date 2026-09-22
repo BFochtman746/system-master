@@ -9,13 +9,48 @@
     "operating_mode": "governance/second-shift/SECOND-SHIFT-OPERATING-MODE-002.md",
     "registry": "governance/second-shift/SECOND-SHIFT-REGISTRY-001.json",
     "utilization_schema": "governance/second-shift/SECOND-SHIFT-UTILIZATION-EVENT-SCHEMA-001.json",
-    "main_sha": "eb810f77302052844d5fb7e9076d45ae483d6678",
+    "research_baseline_main_sha": "eb810f77302052844d5fb7e9076d45ae483d6678",
+    "current_main_sha": "21320d5390de89456777d822a2bc3c1e2913b34e",
+    "authoritative_subject_sha": "a783c34fc19529ed17a29a18267a14ba3c3b67c2",
+    "pre_correction_carrier_head_sha": "dd1340f395dec1dacd6270bb7a7c8eccbf4b1789",
     "carrier_ref": "fix/a01-lemonade-api-prefix",
-    "carrier_sha": "a783c34fc19529ed17a29a18267a14ba3c3b67c2",
     "active_work_revision": 44,
     "authority_epoch": 48,
     "publication_commit_sha": "20a7136cf91e5609c0ac1da38469e83f1ee29bcc",
     "packet_digest": "41ac9f382be927c2fed47e238b094798c4fb9e32951dfaad87b76566243d3243"
+  },
+  "main_advance_reconciliation": {
+    "status": "AUTHORITY_EQUIVALENT_FOR_MASTERY_INPUTS__NOT_GLOBALLY_GREEN",
+    "from_main_sha": "eb810f77302052844d5fb7e9076d45ae483d6678",
+    "to_main_sha": "21320d5390de89456777d822a2bc3c1e2913b34e",
+    "ahead_by": 1,
+    "changed_paths_count": 9,
+    "changed_scope": "A01_AUTONOMOUS_REPOSITORY_REPAIR_WAVE1_READ_ONLY_FOUNDATIONS",
+    "mastery_authority_inputs_byte_identical": true,
+    "verified_unchanged_inputs": [
+      "governance/CURRENT-AUTHORITY.json",
+      "governance/SYSTEM-TOPOLOGY-007.json",
+      "governance/second-shift/SECOND-SHIFT-OPERATING-MODE-002.md",
+      "governance/second-shift/SECOND-SHIFT-REGISTRY-001.json",
+      "governance/second-shift/SECOND-SHIFT-UTILIZATION-EVENT-SCHEMA-001.json",
+      "qualification/a01/a01-policy.json",
+      "governance/contracts/P10-FOUNDATION-CONTRACT-001.md",
+      "governance/contracts/P11-FOUNDATION-CONTRACT-001.md",
+      "control-gateway/python/a01_night_scheduler.py",
+      "tools/second_shift_supervisor_v2.py"
+    ],
+    "required_verification": {
+      "run_id": 35629140023,
+      "standing": "FAIL",
+      "failing_check": "foundation-closure-matrix committed projection freshness",
+      "failure_detail": "P07 committed=COMPLETE_WITH_EVIDENCE live=ACTIVE_GAP",
+      "mastery_scope_overlap": false
+    },
+    "passing_current_main_checks": [
+      "SECOND_SHIFT_ENFORCEMENT",
+      "A01_CONTROL_PLANE_ENFORCEMENT",
+      "SYSTEM_STATE_RECONCILER"
+    ]
   },
   "historical_mastery": {
     "donor_sha": "2457ef40c425c6c382179e0581528dd7f0d73fe6",
@@ -98,8 +133,9 @@
     "CURRENT-AUTHORITY-005 + SYSTEM-TOPOLOGY-007 + SECOND-SHIFT-OPERATING-MODE-002",
     "P10/P11 Foundation contracts and current P11 scheduler implementation",
     "qualification/a01/a01-policy.json policy v8",
-    "SQLite WAL and transaction documentation",
-    "GitHub Actions concurrency documentation"
+    "https://www.sqlite.org/wal.html",
+    "https://www.sqlite.org/lang_transaction.html",
+    "https://docs.github.com/en/actions/concepts/workflows-and-actions/concurrency"
   ],
   "non_activation": {
     "runtime_bytes_changed": false,
