@@ -2,10 +2,10 @@
   "owner_system_id": "CORE",
   "owner_path": "SYSTEM_MASTER/CORE",
   "control_ref": "system-master/control-v2",
-  "last_known_control_head": "d88a5952e93b5bae4ce96e4017f334aeb8abaa00",
+  "last_known_control_head": "54de1268b1036f966dd9235f5463e430ab1fcd19",
   "program_job_lock": "governance/SYSTEM-PROGRAM-JOB-LOCK-001.json",
   "system_completion_status": "governance/SYSTEM-COMPLETION-STATUS-002.json",
-  "delegation_epoch": 30,
+  "delegation_epoch": 31,
   "active_delegations": [
     {
       "delegation_id": "SECOND-SHIFT-CORE-FOUNDATION-1-0-CLOSURE-001",
@@ -16,9 +16,9 @@
       "state": "READY",
       "priority": "CENTRAL_NEXT_OBJECTIVE",
       "valid_for_control_ref": "system-master/control-v2",
-      "valid_for_control_head": "d88a5952e93b5bae4ce96e4017f334aeb8abaa00",
+      "valid_for_control_head": "54de1268b1036f966dd9235f5463e430ab1fcd19",
       "created_at": "2026-09-13T15:39:35-04:00",
-      "last_revalidated_at": "2026-09-13T15:39:35-04:00",
+      "last_revalidated_at": "2026-09-19T06:13:04Z",
       "completion_delta": "Close Foundation Closure Census 001 by producing the missing C00-C49/P00-P15 capability crosswalk and per-module foundation contracts until the disposition matrix reports zero ACTIVE_GAP, without taking peer-system semantics.",
       "stop_condition": "governance/census/FOUNDATION-CLOSURE-CENSUS-001-DISPOSITION-MATRIX.md is complete and node .github/scripts/foundation-closure-matrix.js --summary reports zero ACTIVE_GAP, or an exact authority/human/native/external blocker is durably recorded.",
       "allowed_work": [
@@ -45,13 +45,25 @@
       "state": "READY",
       "priority": "HIGHEST_DISCRETIONARY_SYSTEM_MASTER_PRIORITY",
       "valid_for_control_ref": "system-master/control-v2",
-      "valid_for_control_head": "d88a5952e93b5bae4ce96e4017f334aeb8abaa00",
+      "valid_for_control_head": "54de1268b1036f966dd9235f5463e430ab1fcd19",
       "created_at": "2026-09-10T21:03:00-04:00",
-      "last_revalidated_at": "2026-09-13T15:39:35-04:00",
+      "last_revalidated_at": "2026-09-19T06:13:04Z",
       "completion_delta": "Use owner-valid unattended-safe CORE capacity to continue the Programming proving-corpus source/custody/provenance recovery to the next durable full-corpus boundary, then recover remaining authorized catalog/archive evidence. Preserve exact source identities and do not create a Programming peer lane or any Prose work.",
       "stop_condition": "Programming recovery reaches the next exact custody/Manifest-003/full-corpus A-01-preparation boundary or a durable source/authority blocker; after the proving corpus is durable, bind the next authorized catalog/archive recovery successor without changing topology or peer jobs.",
-      "allowed_work": ["recover exact Programming bytes/custody/provenance through already-authorized sources","prepare versioned manifests, asset-catalog and trace candidates","classify missing/identity-unproven/conflicting sources without fabrication","prepare exact-subject A-01 qualification only within current admission policy","after the Programming proving-corpus boundary, continue remaining authorized catalog/archive recovery"],
-      "forbidden_authority": ["do not promote Programming to a peer system","do not perform Programming product implementation as Core work","do not redefine any active peer job","do not create, inherit, repair, qualify, research, telemeter or bind successor work for retired PROSE","do not bypass A-01, source-custody, human, author, private, native, external, publication or production boundaries"],
+      "allowed_work": [
+        "recover exact Programming bytes/custody/provenance through already-authorized sources",
+        "prepare versioned manifests, asset-catalog and trace candidates",
+        "classify missing/identity-unproven/conflicting sources without fabrication",
+        "prepare exact-subject A-01 qualification only within current admission policy",
+        "after the Programming proving-corpus boundary, continue remaining authorized catalog/archive recovery"
+      ],
+      "forbidden_authority": [
+        "do not promote Programming to a peer system",
+        "do not perform Programming product implementation as Core work",
+        "do not redefine any active peer job",
+        "do not create, inherit, repair, qualify, research, telemeter or bind successor work for retired PROSE",
+        "do not bypass A-01, source-custody, human, author, private, native, external, publication or production boundaries"
+      ],
       "on_pass": "Preserve exact recovery evidence, re-read live authority, and bind the next dependency-valid recovery successor while independent peer lanes continue.",
       "on_failure": "Preserve source-specific blockers, exact observed evidence and retry classification; select only independent owner-valid CORE work without inventing bytes, identity, PASS or cross-lane authority."
     },
@@ -64,23 +76,47 @@
       "state": "CANDIDATE",
       "priority": "MANDATORY_PORTFOLIO_COORDINATION__NONDISCRETIONARY_WHEN_RECONCILIATION_REQUIRED",
       "valid_for_control_ref": "system-master/control-v2",
-      "valid_for_control_head": "d88a5952e93b5bae4ce96e4017f334aeb8abaa00",
+      "valid_for_control_head": "54de1268b1036f966dd9235f5463e430ab1fcd19",
       "created_at": "2026-09-10T22:35:00-04:00",
-      "last_revalidated_at": "2026-09-13T15:39:35-04:00",
+      "last_revalidated_at": "2026-09-19T06:13:04Z",
       "completion_delta": "Keep System Master product integration coherent while all eight active peers finish independently. Reconcile authority/control drift when required, enforce terminal Prose retirement, and ensure execution-ready peer coverage matches Second Shift registry coverage without creating systems.",
       "stop_condition": "Current authority, topology, job/completion locks, obligations, owner delegations, repair routing and startup controls agree; execution-ready peer coverage is exactly the topology readiness set; retired Prose has no active execution domain; no false completion or cross-lane selector remains.",
-      "allowed_work": ["reconcile central authority and integration selectors when drift exists","verify live owner heads/current obligations without taking peer mutation authority","repair stale governance/delegation metadata that violates the job lock or retired-system boundary","verify topology execution-ready coverage equals Second Shift owner coverage and provision only already-declared peers when machine-resolvable","prepare shared System Master interface/integration contracts owned by CORE"],
-      "forbidden_authority": ["do not implement another peer's product logic","do not create, resurrect or dispatch PROSE","do not declare SYSTEM_MASTER or any active peer complete","do not create a SYSTEM_MASTER root worker or Programming peer worker lane"],
+      "allowed_work": [
+        "reconcile central authority and integration selectors when drift exists",
+        "verify live owner heads/current obligations without taking peer mutation authority",
+        "repair stale governance/delegation metadata that violates the job lock or retired-system boundary",
+        "verify topology execution-ready coverage equals Second Shift owner coverage and provision only already-declared peers when machine-resolvable",
+        "prepare shared System Master interface/integration contracts owned by CORE"
+      ],
+      "forbidden_authority": [
+        "do not implement another peer's product logic",
+        "do not create, resurrect or dispatch PROSE",
+        "do not declare SYSTEM_MASTER or any active peer complete",
+        "do not create a SYSTEM_MASTER root worker or Programming peer worker lane"
+      ],
       "on_pass": "Preserve reconciliation evidence and keep this coordination objective machine-bound for future authority deltas.",
       "on_failure": "Preserve the exact cross-lane/stale/completion/coverage mismatch, fail invalid selection closed, and repair only governance/shared integration metadata."
     }
   ],
   "retired_delegations": [
-    {"delegation_id":"SECOND-SHIFT-CORE-KNOWLEDGE-RECOVERY-PROGRAMMING-001__PRIOR_PRIORITY_FORM","state":"SUPERSEDED","retirement_classification":"PRIOR_SUPPORTING_PRIORITY_FORM_SUPERSEDED__KR001_RESTORED_AS_HIGHEST_DISCRETIONARY","history_preserved":true},
-    {"delegation_id":"SECOND-SHIFT-CORE-SMR021-GITHUB-NATIVE-TRANSPORT-009","state":"SUPERSEDED","retirement_classification":"OWNER_OBJECTIVE_REMAINS_OPEN__CURRENT_CORE_PRIORITY_RECONCILED","history_preserved":true}
+    {
+      "delegation_id": "SECOND-SHIFT-CORE-KNOWLEDGE-RECOVERY-PROGRAMMING-001__PRIOR_PRIORITY_FORM",
+      "state": "SUPERSEDED",
+      "retirement_classification": "PRIOR_SUPPORTING_PRIORITY_FORM_SUPERSEDED__KR001_RESTORED_AS_HIGHEST_DISCRETIONARY",
+      "history_preserved": true
+    },
+    {
+      "delegation_id": "SECOND-SHIFT-CORE-SMR021-GITHUB-NATIVE-TRANSPORT-009",
+      "state": "SUPERSEDED",
+      "retirement_classification": "OWNER_OBJECTIVE_REMAINS_OPEN__CURRENT_CORE_PRIORITY_RECONCILED",
+      "history_preserved": true
+    }
   ],
-  "prior_full_history": {"blob_sha":"3512aef6067ec5a0a1eeab7791f0f401e56b8ac0","standing":"IMMUTABLE_GIT_HISTORY_PRESERVED"},
+  "prior_full_history": {
+    "blob_sha": "3512aef6067ec5a0a1eeab7791f0f401e56b8ac0",
+    "standing": "IMMUTABLE_GIT_HISTORY_PRESERVED"
+  },
   "owner_revalidation_required": false,
-  "reason": "Topology 006 eight-peer reconciliation established control records and execution-ready owner lanes for all eight peers. Foundation Closure 001 is the current central objective and is now explicitly bound to CORE Second Shift while Knowledge Recovery 001 remains the highest discretionary objective and integration coordination remains a candidate for authority deltas.",
+  "reason": "Live CORE control head advanced to 54de1268b1036f966dd9235f5463e430ab1fcd19. Central Foundation closure, Knowledge Recovery support, and integration-coordination delegations remain product-level CORE responsibilities and are rebound to the live owner head without importing the live branch's independent Durable Runtime/Continuity recovery semantics into central governance.",
   "empty_is_valid": false
 }
