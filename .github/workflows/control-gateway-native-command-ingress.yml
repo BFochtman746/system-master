@@ -21,7 +21,6 @@ jobs:
     outputs:
       state_ref: ${{ steps.validate.outputs.state_ref }}
       mutation_request_json: ${{ steps.validate.outputs.mutation_request_json }}
-      mutation_plan_json: ${{ steps.validate.outputs.mutation_plan_json }}
       development_response_base64: ${{ steps.validate.outputs.development_response_base64 }}
       development_response_receipt_json: ${{ steps.validate.outputs.development_response_receipt_json }}
     steps:
@@ -69,11 +68,9 @@ jobs:
           test "${plan_repo}" = "${CONTROL_GATEWAY_REPOSITORY}"
 
           request_json="$(jq -c '.mutation_request' "${command_file}")"
-          plan_json="$(jq -c '.mutation_plan' "${command_file}")"
 
           printf 'state_ref=%s\n' "${state_ref}" >> "${GITHUB_OUTPUT}"
           printf 'mutation_request_json=%s\n' "${request_json}" >> "${GITHUB_OUTPUT}"
-          printf 'mutation_plan_json=%s\n' "${plan_json}" >> "${GITHUB_OUTPUT}"
           printf 'development_response_base64=%s\n' "${development_response_base64}" >> "${GITHUB_OUTPUT}"
           printf 'development_response_receipt_json=%s\n' "${development_response_receipt_json}" >> "${GITHUB_OUTPUT}"
 
@@ -84,7 +81,7 @@ jobs:
     with:
       state_ref: ${{ needs.validate-command.outputs.state_ref }}
       mutation_request_json: ${{ needs.validate-command.outputs.mutation_request_json }}
-      mutation_plan_json: ${{ needs.validate-command.outputs.mutation_plan_json }}
+      mutation_plan_json: ${{ toJSON(fromJSON(github.event.issue.body).mutation_plan) }}
       development_response_base64: ${{ needs.validate-command.outputs.development_response_base64 }}
       development_response_receipt_json: ${{ needs.validate-command.outputs.development_response_receipt_json }}
 

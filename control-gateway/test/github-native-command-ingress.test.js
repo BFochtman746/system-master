@@ -37,3 +37,11 @@ test('native ingress stays narrow and does not add alternate remote dispatch sur
   assert.equal(ingress.includes('pull_request_target'), false);
   assert.equal(ingress.includes('workflow_dispatch'), false);
 });
+
+test('validated mutation plan bypasses secret-filtered job outputs and still depends on validation', () => {
+  assert.ok(ingress.includes('needs: validate-command'));
+  assert.ok(ingress.includes('mutation_plan_json: ${{ toJSON(fromJSON(github.event.issue.body).mutation_plan) }}'));
+  assert.equal(ingress.includes('mutation_plan_json: ${{ needs.validate-command.outputs.mutation_plan_json }}'), false);
+  assert.equal(ingress.includes("printf 'mutation_plan_json=%s\\n'"), false);
+  assert.equal(ingress.includes('mutation_plan_json: ${{ steps.validate.outputs.mutation_plan_json }}'), false);
+});
