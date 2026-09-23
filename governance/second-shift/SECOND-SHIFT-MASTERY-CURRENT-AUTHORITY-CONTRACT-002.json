@@ -1,0 +1,77 @@
+{
+  "contract_id": "SECOND-SHIFT-MASTERY-CURRENT-AUTHORITY-CONTRACT-002",
+  "status": "ACTIVE__VALIDATION_ADAPTER_ONLY__NO_SECOND_TRUTH_STORE",
+  "product_root": "SYSTEM_MASTER",
+  "authority_model": {
+    "current_authority": "governance/CURRENT-AUTHORITY.json",
+    "topology": "governance/SYSTEM-TOPOLOGY-007.json",
+    "registry": "governance/second-shift/SECOND-SHIFT-REGISTRY-001.json",
+    "execution_control": "governance/second-shift/SECOND-SHIFT-EXECUTION-CONTROL-001.md",
+    "delegation_schema": "governance/second-shift/SECOND-SHIFT-DELEGATION-SCHEMA-003.json"
+  },
+  "portfolio_model": "OWNER_DRIVEN_NINE_LANE",
+  "execution_ready_peer_system_ids": [
+    "CORE",
+    "LEARNING",
+    "BOOK",
+    "DOCUMENTS",
+    "SPREADSHEET_DATA",
+    "MEDIA",
+    "CONNECTED_ACTIONS",
+    "RESEARCH_KNOWLEDGE",
+    "PROGRAMMING"
+  ],
+  "concurrency_contract": {
+    "global_primary_system_exclusivity": false,
+    "mutation_wip_per_lane": 1,
+    "same_lane_conflicting_mutation_serialized": true,
+    "independent_nonconflicting_lanes_may_progress": true,
+    "blocked_lane_does_not_block_independent_safe_other_lane": true,
+    "cross_lane_claim_forbidden": true
+  },
+  "evaluation_contract": {
+    "independent_evaluation_required_for_mutation_candidate": true,
+    "runtime_state": "VALIDATING",
+    "worker_self_approval_forbidden": true,
+    "exact_candidate_digest_required": true,
+    "durable_idempotent_verdict_required": true,
+    "same_lane_successor_before_verdict_forbidden": true,
+    "authority_change_or_timeout_fences_candidate": true
+  },
+  "successor_contract": {
+    "re_read_current_authority": true,
+    "re_read_live_owner_head": true,
+    "preserve_same_lane_owner_job": true,
+    "dependency_valid_successor_only": true,
+    "all_eight_rungs_exhausted_required_before_idle": true
+  },
+  "retirement_contract": {
+    "PROSE": "COMPLETE_RETIRED_TERMINAL__NON_DISPATCHABLE",
+    "WEBSITE_BUILDING": "PROGRAMMING_CAPABILITY__NOT_PEER_LANE"
+  },
+  "historical_mastery_dispositions": [
+    {
+      "id": "SECOND-SHIFT-NIGHT-SELECTION-GATE-SCHEMA-001",
+      "disposition": "PROVENANCE_ONLY__DO_NOT_ACTIVATE",
+      "reason": "Global primary/reserve selection and global WIP=1 conflict with current nine-lane owner-driven execution."
+    },
+    {
+      "id": "SECOND-SHIFT-ASSIGNMENT-CONTRACT-SCHEMA-003",
+      "disposition": "PROVENANCE_ONLY__DO_NOT_ACTIVATE",
+      "reason": "Global system-level WIP=1 conflicts with current one-mutation-claim-per-owner-lane execution."
+    }
+  ],
+  "authority_boundary": "This contract validates current execution semantics only. It creates no backlog, writer, scheduler, product authority, A-01 authority, external-action authority, publication authority or promotion authority.",
+  "research_basis": [
+    {
+      "source": "GitHub Actions concurrency",
+      "reference": "https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency",
+      "application": "Serialize conflicting work by concurrency group while permitting independent work to run concurrently."
+    },
+    {
+      "source": "NIST SP 800-218 SSDF v1.1",
+      "reference": "https://csrc.nist.gov/pubs/sp/800/218/final",
+      "application": "Use explicit, repeatable secure development and verification practices rather than implicit or stale execution assumptions."
+    }
+  ]
+}

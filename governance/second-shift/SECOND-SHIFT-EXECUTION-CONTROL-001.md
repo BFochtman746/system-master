@@ -8,7 +8,7 @@ Scope: execution control and observability only. This contract does not transfer
 ```json
 {
   "execution_control_id": "SECOND-SHIFT-EXECUTION-CONTROL-001",
-  "revision": 3,
+  "revision": 4,
   "topology_id": "SYSTEM-TOPOLOGY-007",
   "registry_id": "SECOND-SHIFT-REGISTRY-001",
   "peer_system_ids": [
@@ -70,16 +70,19 @@ WEBSITE BUILDING: C40 under PROGRAMMING. It is not a peer lane. Website construc
 
 ## Execution state machine
 
-READY -> CLAIMED -> RUNNING -> {COMPLETED | BLOCKED | STALE}
+READY -> CLAIMED -> RUNNING -> {VALIDATING | BLOCKED | STALE}
+VALIDATING -> {COMPLETED | BLOCKED | STALE}
 COMPLETED -> RECONCILE -> SUCCESSOR_BOUND -> READY
 BLOCKED -> RECONCILE -> {SUCCESSOR_BOUND -> READY | ALL_RUNGS_EXHAUSTED -> IDLE_VALID}
 STALE -> RECONCILE -> {SUCCESSOR_BOUND -> READY | ALL_RUNGS_EXHAUSTED -> IDLE_VALID}
 
 Retired systems do not enter this state machine.
 
-## Claim and live-head law
+## Claim, evaluation and live-head law
 
 One mutation-capable claim per execution-ready peer owner lane. Changed live owner head invalidates mutation until revalidation. PROSE has no claim domain. Website Building uses the PROGRAMMING claim domain and cannot create a tenth claim domain.
+
+A mutation candidate marked `independent_evaluation_required` cannot enter COMPLETED directly from RUNNING. The worker must hand off an exact candidate digest into durable VALIDATING state; the same lane cannot bind a successor until an independent evaluator records PASS, BLOCKED, REWORK or DRIFT. Authority change or evaluation timeout fences the candidate. Other owner lanes remain independently dispatchable when their own authority and dependencies are valid.
 
 ## Dispatch and successor law
 

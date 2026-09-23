@@ -3,7 +3,7 @@
   "effective_date": "2026-09-13",
   "product_root": "SYSTEM_MASTER",
   "topology": "governance/SYSTEM-TOPOLOGY-007.json",
-  "schema": "governance/second-shift/SECOND-SHIFT-DELEGATION-SCHEMA-002.json",
+  "schema": "governance/second-shift/SECOND-SHIFT-DELEGATION-SCHEMA-003.json",
   "execution_control": "governance/second-shift/SECOND-SHIFT-EXECUTION-CONTROL-001.md",
   "program_job_lock": "governance/SYSTEM-PROGRAM-JOB-LOCK-001.json",
   "programming_work_program_lock": "governance/programs/PROGRAMMING-WORK-PROGRAM-LOCK-001.json",
@@ -55,7 +55,17 @@
   "auto_provisioning_invariant": {
     "topology_peer_source": "governance/SYSTEM-TOPOLOGY-007.json::execution_readiness.execution_ready_peer_system_ids",
     "registry_lane_source": "owner_files",
-    "expected_active_peers": ["CORE", "LEARNING", "BOOK", "DOCUMENTS", "SPREADSHEET_DATA", "MEDIA", "CONNECTED_ACTIONS", "RESEARCH_KNOWLEDGE", "PROGRAMMING"],
+    "expected_active_peers": [
+      "CORE",
+      "LEARNING",
+      "BOOK",
+      "DOCUMENTS",
+      "SPREADSHEET_DATA",
+      "MEDIA",
+      "CONNECTED_ACTIONS",
+      "RESEARCH_KNOWLEDGE",
+      "PROGRAMMING"
+    ],
     "current_coverage_complete": true,
     "machine_resolvable_missing_peer_must_be_provisioned": true,
     "implicit_system_creation_forbidden": true,
@@ -72,5 +82,15 @@
   "no_work_rule": "An active peer lane may be idle only after durable all-eight-rungs exhaustion for its own locked job. Retired systems require no lane or exhaustion proof.",
   "successor_rule": "After completion/material block, re-read live authority and select the next dependency-valid successor inside the same active lane job. Never bind a Prose successor.",
   "utilization_rule": "Active peer ledgers are exactly the nine owner_files lanes. Book-owned preserved-Prose integration is BOOK telemetry only. Programming product work is PROGRAMMING telemetry; Programming Knowledge Recovery remains CORE telemetry.",
-  "work_ahead_ladder": ["current repair/control health", "completion and evidence census", "authoritative research and provenance", "architecture/contracts/state/interface/evidence specification", "tests/benchmarks/property/concurrency/failure injection", "bounded implementation with objective verification", "exact-SHA qualification and A-01 preparation", "next successor build packet"]
+  "work_ahead_ladder": [
+    "current repair/control health",
+    "completion and evidence census",
+    "authoritative research and provenance",
+    "architecture/contracts/state/interface/evidence specification",
+    "tests/benchmarks/property/concurrency/failure injection",
+    "bounded implementation with objective verification",
+    "exact-SHA qualification and A-01 preparation",
+    "next successor build packet"
+  ],
+  "mastery_current_contract": "governance/second-shift/SECOND-SHIFT-MASTERY-CURRENT-AUTHORITY-CONTRACT-002.json"
 }
