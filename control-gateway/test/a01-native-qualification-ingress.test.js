@@ -6,8 +6,9 @@ import { fileURLToPath } from 'node:url';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HERE, '../..');
-const gateway = fs.readFileSync(path.join(ROOT, '.github/workflows/a01-control-plane-gateway.yml'), 'utf8');
-const ingress = fs.readFileSync(path.join(ROOT, '.github/workflows/control-gateway-native-a01-qualification-ingress.yml'), 'utf8');
+const normalizeNewlines = (value) => value.replace(/\r\n?/g, '\n');
+const gateway = normalizeNewlines(fs.readFileSync(path.join(ROOT, '.github/workflows/a01-control-plane-gateway.yml'), 'utf8'));
+const ingress = normalizeNewlines(fs.readFileSync(path.join(ROOT, '.github/workflows/control-gateway-native-a01-qualification-ingress.yml'), 'utf8'));
 
 test('public pull-request events cannot enter the reusable A-01 gateway', () => {
   assert.match(gateway, /if: \$\{\{ github\.event_name != 'pull_request' && github\.event_name != 'pull_request_target' \}\}/);
