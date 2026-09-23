@@ -143,6 +143,15 @@ class SupervisorCoordinationAdapter:
 
             if self.store._active_claim(c, handoff["lane"]):
                 raise CoordinationError("cannot bind coordinated work while lane has live claim")
+            validating = c.execute(
+                "SELECT delegation_id FROM delegations WHERE lane=? AND state='VALIDATING' "
+                "ORDER BY delegation_id LIMIT 1",
+                (handoff["lane"],),
+            ).fetchone()
+            if validating is not None:
+                raise CoordinationError(
+                    f"cannot bind coordinated successor while delegation {validating['delegation_id']} awaits independent evaluation"
+                )
 
             existing = c.execute("SELECT * FROM delegations WHERE delegation_id=?", (handoff["delegation_id"],)).fetchone()
             if existing is None:
@@ -156,6 +165,8 @@ class SupervisorCoordinationAdapter:
                             "admission_digest": handoff["admission_receipt"]["admission_digest"],
                             "execution_class": handoff["execution_class"], "execution_order": handoff["execution_order"],
                             "priority": handoff["priority"], "not_before": handoff["not_before"], "not_after": handoff["not_after"],
+                            "independent_evaluation_required": isinstance(handoff["payload"], dict)
+                            and handoff["payload"].get("independent_evaluation_required") is True,
                             "payload_digest": handoff["payload_digest"], "payload": handoff["payload"],
                         }, sort_keys=True),
                         iso(now),

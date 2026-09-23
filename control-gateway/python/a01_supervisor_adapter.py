@@ -116,6 +116,8 @@ class SupervisorGatewayAdapter:
                 "admission_digest": handoff["admission_receipt"]["admission_digest"],
                 "execution_class": handoff["execution_class"], "execution_order": handoff["execution_order"],
                 "priority": handoff["priority"], "not_before": handoff["not_before"], "not_after": handoff["not_after"],
+                "independent_evaluation_required": isinstance(handoff["payload"], dict)
+                and handoff["payload"].get("independent_evaluation_required") is True,
                 "payload_digest": handoff["payload_digest"], "payload": handoff["payload"],
             },
             now=now,
