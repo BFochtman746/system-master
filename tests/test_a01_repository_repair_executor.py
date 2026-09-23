@@ -31,6 +31,23 @@ class FakeResponse:
 
 
 class RepositoryRepairExecutorTransportTests(unittest.TestCase):
+    @staticmethod
+    def _base_payload():
+        return {
+            "protocol_version": repair.REPAIR_EXECUTOR_PROTOCOL,
+            "qualification_id": "Q",
+            "subject_sha": "a" * 40,
+            "workstream_id": "W",
+            "state_ref": "control-gateway-state/active-work/example",
+            "authority": {},
+            "qualification": {},
+            "mutation_plan": {},
+            "effects": ["CONTROL_GATEWAY_DEVELOPMENT_WRITE"],
+            "development_response_base64": "eA==",
+            "development_response_receipt": {},
+            "writer_timeout_minutes": 5,
+        }
+
     def test_protocol_and_executor_kind_are_frozen(self):
         self.assertEqual(repair.REPAIR_EXECUTOR_KIND, "A01_REPOSITORY_REPAIR")
         self.assertEqual(
@@ -83,6 +100,37 @@ class RepositoryRepairExecutorTransportTests(unittest.TestCase):
 
     def test_transport_budget_stays_below_github_workflow_dispatch_limit(self):
         self.assertLess(repair.MAX_WORKFLOW_INPUT_CHARS, 65535)
+
+    def test_repair_payload_schema_accepts_exact_run_now_authorization(self):
+        payload = self._base_payload()
+        payload["user_directed_run_now"] = {
+            "protocol_version": repair.RUN_NOW_AUTH_PROTOCOL,
+            "command_id": "RUN-NOW-1",
+            "issue_number": 123,
+        }
+        repair._validate_repair_payload_schema(payload)
+
+    def test_repair_payload_schema_keeps_overnight_payload_valid(self):
+        repair._validate_repair_payload_schema(self._base_payload())
+
+    def test_repair_payload_schema_rejects_malformed_run_now_authorization(self):
+        payload = self._base_payload()
+        payload["user_directed_run_now"] = {
+            "protocol_version": repair.RUN_NOW_AUTH_PROTOCOL,
+            "command_id": "RUN-NOW-1",
+            "issue_number": 123,
+            "extra": True,
+        }
+        with self.assertRaises(repair.RepositoryRepairExecutionError) as ctx:
+            repair._validate_repair_payload_schema(payload)
+        self.assertEqual(ctx.exception.code, "REPAIR_PAYLOAD_INVALID")
+
+    def test_repair_payload_schema_rejects_unknown_top_level_field(self):
+        payload = self._base_payload()
+        payload["unexpected"] = True
+        with self.assertRaises(repair.RepositoryRepairExecutionError) as ctx:
+            repair._validate_repair_payload_schema(payload)
+        self.assertEqual(ctx.exception.code, "REPAIR_PAYLOAD_INVALID")
 
 
 if __name__ == "__main__":

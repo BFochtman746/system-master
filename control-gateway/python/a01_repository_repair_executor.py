@@ -14,6 +14,7 @@ from typing import Any, Callable, Optional
 
 REPAIR_EXECUTOR_KIND = "A01_REPOSITORY_REPAIR"
 REPAIR_EXECUTOR_PROTOCOL = "control-gateway.a01-repository-repair-executor.v1"
+RUN_NOW_AUTH_PROTOCOL = "control-gateway.a01-user-directed-run-now-authorization.v1"
 PRODUCTION_WRITER_WORKFLOW = "control-gateway-production-writer.yml"
 GITHUB_API_VERSION = "2026-03-10"
 MAX_WORKFLOW_INPUT_CHARS = 60_000
@@ -56,6 +57,28 @@ def _sha(value: Any, label: str) -> str:
 def _write_json(path: Path, value: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def _validate_user_directed_run_now(payload: dict[str, Any]) -> None:
+    auth = payload.get("user_directed_run_now")
+    if auth is None:
+        return
+    auth = _dict(auth, "user_directed_run_now")
+    if set(auth) != {"protocol_version", "command_id", "issue_number"}:
+        _fail("REPAIR_PAYLOAD_INVALID", "user_directed_run_now fields differ from frozen contract")
+    if auth.get("protocol_version") != RUN_NOW_AUTH_PROTOCOL:
+        _fail("REPAIR_PAYLOAD_INVALID", "user_directed_run_now protocol mismatch")
+    _text(auth.get("command_id"), "user_directed_run_now.command_id")
+    if type(auth.get("issue_number")) is not int or auth["issue_number"] < 1:
+        _fail("REPAIR_PAYLOAD_INVALID", "user_directed_run_now.issue_number must be a positive integer")
+
+
+def _validate_repair_payload_schema(payload: dict[str, Any]) -> None:
+    required = {"protocol_version","qualification_id","subject_sha","workstream_id","state_ref","authority","qualification","mutation_plan","effects","development_response_base64","development_response_receipt","writer_timeout_minutes"}
+    allowed = required | {"user_directed_run_now"}
+    if not required.issubset(payload) or not set(payload).issubset(allowed) or payload.get("protocol_version") != REPAIR_EXECUTOR_PROTOCOL:
+        _fail("REPAIR_PAYLOAD_INVALID", "repair payload differs from frozen executor contract")
+    _validate_user_directed_run_now(payload)
 
 
 def _claim(context: Any) -> dict[str, Any]:
@@ -188,8 +211,7 @@ def _verify_result(transport: Any, plan: dict[str, Any], result_sha: str) -> Non
 
 def execute_repository_repair(payload: dict[str, Any], context: Any, *, claim_loader: Callable[[Any],dict[str,Any]]=_claim, preflight_runner: Callable[[Path],dict[str,Any]]=_preflight, readiness_builder: Callable[[Path,dict[str,Any]],dict[str,Any]]=_readiness, transport_factory: Callable[[str,str,str],Any]=GitHubRepairTransport, sleep_fn: Callable[[float],None]=time.sleep) -> dict[str, Any]:
     payload = _dict(payload, "repair payload")
-    expected = {"protocol_version","qualification_id","subject_sha","workstream_id","state_ref","authority","qualification","mutation_plan","effects","development_response_base64","development_response_receipt","writer_timeout_minutes"}
-    if set(payload) != expected or payload.get("protocol_version") != REPAIR_EXECUTOR_PROTOCOL: _fail("REPAIR_PAYLOAD_INVALID", "repair payload differs from frozen executor contract")
+    _validate_repair_payload_schema(payload)
     subject = _sha(payload["subject_sha"], "subject_sha")
     plan, authority, qualification = _dict(payload["mutation_plan"],"mutation_plan"), _dict(payload["authority"],"authority"), _dict(payload["qualification"],"qualification")
     if qualification.get("result_class") != "PASS" or str(qualification.get("subject_sha","")).lower() != subject or qualification.get("promotion_authorized") is not False: _fail("REPAIR_QUALIFICATION_INVALID", "repair requires fresh exact-subject PASS with no promotion authority")
