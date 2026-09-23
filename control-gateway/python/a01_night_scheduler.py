@@ -19,8 +19,8 @@ from a01_supervisor_coordination import CoordinationError, SupervisorCoordinatio
 from tools.second_shift_supervisor_v2 import SupervisorStore, in_shift, iso, parse_iso, utcnow
 
 NIGHT_SCHEDULER_PROTOCOL = "control-gateway.a01-night-scheduler.v1"
-QUEUE_STATES = {"BINDING", "QUEUED", "CLAIMED", "TERMINAL", "CANCELLED", "RECONCILE"}
-ACTIVE_STAGE_STATES = {"BINDING", "QUEUED", "CLAIMED", "RECONCILE"}
+QUEUE_STATES = {"BINDING", "QUEUED", "CLAIMED", "VALIDATING", "TERMINAL", "CANCELLED", "RECONCILE"}
+ACTIVE_STAGE_STATES = {"BINDING", "QUEUED", "CLAIMED", "VALIDATING", "RECONCILE"}
 A01_POLICY_PATH = ROOT / "qualification" / "a01" / "a01-policy.json"
 _SCHEDULER_SCHEMA_OBJECTS = frozenset(
     {
@@ -331,7 +331,9 @@ class A01NightScheduler:
                     state = "CANCELLED"
                 elif delegation is None:
                     state = "RECONCILE"
-                elif delegation["state"] in ("COMPLETED", "BLOCKED", "CANCELLED"):
+                elif delegation["state"] == "VALIDATING":
+                    state = "VALIDATING"
+                elif delegation["state"] in ("COMPLETED", "BLOCKED", "STALE", "CANCELLED"):
                     state = "TERMINAL" if delegation["state"] != "CANCELLED" else "CANCELLED"
                 elif live is not None:
                     state = "CLAIMED"
@@ -369,25 +371,41 @@ class A01NightScheduler:
         self.reconcile(now=now)
         return result
 
-    def _minimum_active_order(self) -> Optional[int]:
-        orders: list[int] = []
+    def _active_orders_by_lane(self) -> dict[str, int]:
+        orders: dict[str, int] = {}
         for row in self.store.conn.execute(
             "SELECT state,handoff_json FROM night_scheduler_queue"
         ).fetchall():
-            if row["state"] in ACTIVE_STAGE_STATES:
-                orders.append(int(json.loads(row["handoff_json"])["execution_order"]))
-        return min(orders) if orders else None
+            if row["state"] not in ACTIVE_STAGE_STATES:
+                continue
+            handoff = json.loads(row["handoff_json"])
+            lane = str(handoff["lane"])
+            execution_order = int(handoff["execution_order"])
+            orders[lane] = min(execution_order, orders.get(lane, execution_order))
+        return orders
+
+    def _validating_lanes(self) -> set[str]:
+        return {
+            str(json.loads(row["handoff_json"])["lane"])
+            for row in self.store.conn.execute(
+                "SELECT handoff_json FROM night_scheduler_queue WHERE state='VALIDATING'"
+            ).fetchall()
+        }
 
     def _ordered_candidates(self, now: dt.datetime) -> list[tuple[dict[str, Any], dict[str, Any], Any]]:
-        minimum_order = self._minimum_active_order()
-        if minimum_order is None:
+        active_orders = self._active_orders_by_lane()
+        if not active_orders:
             return []
+        validating_lanes = self._validating_lanes()
         candidates: list[tuple[dict[str, Any], dict[str, Any], Any]] = []
         for row in self.store.conn.execute(
             "SELECT * FROM night_scheduler_queue WHERE state='QUEUED'"
         ).fetchall():
             handoff = json.loads(row["handoff_json"])
-            if int(handoff["execution_order"]) != minimum_order:
+            lane = str(handoff["lane"])
+            if lane in validating_lanes:
+                continue
+            if int(handoff["execution_order"]) != active_orders.get(lane):
                 continue
             contract = json.loads(row["contract_json"])
             not_before = parse_iso(handoff["not_before"]) if handoff["not_before"] else None
@@ -400,6 +418,8 @@ class A01NightScheduler:
         candidates.sort(
             key=lambda item: (
                 -int(item[0]["priority"]),
+                int(item[0]["execution_order"]),
+                item[0]["lane"],
                 item[0]["delegation_id"],
             )
         )
@@ -578,6 +598,81 @@ class A01NightScheduler:
                 c.execute("SELECT * FROM claims WHERE lease_id=?", (lease_id,)).fetchone()
             )
 
+    def submit_worker_result(
+        self,
+        delegation_id: str,
+        lease_id: str,
+        fencing_token: int,
+        state: str,
+        payload: Optional[dict[str, Any]] = None,
+        *,
+        candidate_digest: Optional[str] = None,
+        evaluation_timeout_seconds: int = 900,
+        now: Optional[dt.datetime] = None,
+    ) -> dict[str, Any]:
+        if state not in {"COMPLETED", "BLOCKED", "STALE"}:
+            raise ValueError("worker result state must be COMPLETED, BLOCKED, or STALE")
+        now = now or utcnow()
+        payload = payload or {}
+        row = self.store.conn.execute(
+            "SELECT handoff_json FROM night_scheduler_queue WHERE delegation_id=?",
+            (delegation_id,),
+        ).fetchone()
+        if row is None:
+            raise NightSchedulerError("worker result delegation is not scheduled overnight work")
+        claim = self.store.conn.execute(
+            "SELECT delegation_id,fencing_token FROM claims WHERE lease_id=?",
+            (lease_id,),
+        ).fetchone()
+        if claim is None or claim["delegation_id"] != delegation_id:
+            raise NightSchedulerError("worker result lease does not match scheduled delegation")
+        if int(claim["fencing_token"]) != int(fencing_token):
+            raise NightSchedulerError("worker result fencing token differs from scheduled claim")
+        handoff = json.loads(row["handoff_json"])
+        handoff_payload = handoff.get("payload") if isinstance(handoff.get("payload"), dict) else {}
+        if state == "COMPLETED" and handoff_payload.get("independent_evaluation_required") is True:
+            if candidate_digest is None:
+                raise NightSchedulerError("independent evaluation requires candidate_digest")
+            self.store.await_evaluation(
+                lease_id, fencing_token, candidate_digest, payload,
+                evaluation_timeout_seconds=evaluation_timeout_seconds, now=now,
+            )
+            self.reconcile(now=now)
+            return {"delegation_id": delegation_id, "lease_id": lease_id, "state": "VALIDATING", "candidate_digest": candidate_digest}
+        self.store.terminal(lease_id, fencing_token, state, payload=payload, now=now)
+        self.reconcile(now=now)
+        return {"delegation_id": delegation_id, "lease_id": lease_id, "state": state}
+
+    def submit_evaluator_verdict(
+        self,
+        delegation_id: str,
+        lease_id: str,
+        fencing_token: int,
+        verdict_id: str,
+        verdict: str,
+        candidate_digest: str,
+        evaluator_id: str,
+        evidence: dict[str, Any],
+        now: Optional[dt.datetime] = None,
+    ) -> dict[str, Any]:
+        now = now or utcnow()
+        row = self.store.conn.execute(
+            "SELECT 1 FROM night_scheduler_queue WHERE delegation_id=?",
+            (delegation_id,),
+        ).fetchone()
+        claim = self.store.conn.execute(
+            "SELECT delegation_id FROM claims WHERE lease_id=?",
+            (lease_id,),
+        ).fetchone()
+        if row is None or claim is None or claim["delegation_id"] != delegation_id:
+            raise NightSchedulerError("evaluator verdict does not match scheduled delegation")
+        state = self.store.evaluator_verdict(
+            lease_id, fencing_token, verdict_id, verdict, candidate_digest,
+            evaluator_id, evidence, now=now,
+        )
+        self.reconcile(now=now)
+        return {"delegation_id": delegation_id, "lease_id": lease_id, "state": state, "verdict": verdict}
+
     def tick(
         self,
         now: Optional[dt.datetime] = None,
@@ -592,14 +687,16 @@ class A01NightScheduler:
             self.reconcile(now=now)
             return {
                 "protocol_version": NIGHT_SCHEDULER_PROTOCOL,
-                "at": iso(now), "shift_open": False, "claims": [], "blocked": [],
+                "at": iso(now), "shift_open": False, "active_execution_order": None,
+                "active_execution_orders": {}, "claims": [], "blocked": [],
                 "night_budget": self._budget_status(now),
             }
 
         self.reconcile(now=now)
         claims: list[dict[str, Any]] = []
         blocked: list[dict[str, Any]] = []
-        active_order = self._minimum_active_order()
+        active_orders = self._active_orders_by_lane()
+        active_order = min(active_orders.values()) if active_orders else None
         for handoff, contract, _row in self._ordered_candidates(now):
             if len(claims) >= max_claims:
                 break
@@ -621,6 +718,7 @@ class A01NightScheduler:
         return {
             "protocol_version": NIGHT_SCHEDULER_PROTOCOL,
             "at": iso(now), "shift_open": True, "active_execution_order": active_order,
+            "active_execution_orders": dict(sorted(active_orders.items())),
             "claims": claims, "blocked": blocked,
             "night_budget": self._budget_status(now),
         }

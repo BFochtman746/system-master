@@ -31,13 +31,18 @@ NEXT_SHIFT = IN_SHIFT + dt.timedelta(days=1)
 OUT_SHIFT = dt.datetime(2026, 9, 12, 12, 0, tzinfo=UTC)
 
 
-def overnight(name, lane, *, order=1, priority=100, not_before=None, not_after=None):
+def overnight(name, lane, *, order=1, priority=100, not_before=None, not_after=None, independent_evaluation_required=False):
     h = helpers.make_handoff(name, lane, execution_class="OVERNIGHT")
     for target in (h["admission_receipt"], h):
         target["execution_order"] = order
         target["priority"] = priority
         target["not_before"] = not_before
         target["not_after"] = not_after
+    if independent_evaluation_required:
+        h["payload"]["independent_evaluation_required"] = True
+        payload_digest = helpers.digest(h["payload"])
+        h["payload_digest"] = payload_digest
+        h["admission_receipt"]["payload_digest"] = payload_digest
     receipt = h["admission_receipt"]
     receipt_body = dict(receipt)
     receipt_body.pop("admission_digest")
@@ -61,10 +66,11 @@ class NightSchedulerTests(unittest.TestCase):
         self.tmp.cleanup()
 
     def enqueue(self, name, lane, *, order=1, priority=100, deps=None, resource=None, limit=1,
-                not_before=None, not_after=None):
+                not_before=None, not_after=None, independent_evaluation_required=False):
         h = overnight(
             name, lane, order=order, priority=priority,
             not_before=not_before, not_after=not_after,
+            independent_evaluation_required=independent_evaluation_required,
         )
         c = helpers.make_coord(
             h,
@@ -117,24 +123,25 @@ class NightSchedulerTests(unittest.TestCase):
         self.assertIsNone(self.store.conn.execute("SELECT 1 FROM claims WHERE released_at IS NULL").fetchone())
         self.assertEqual(result["night_budget"]["used_slots"], 0)
 
-    def test_execution_order_is_hard_stage_barrier_and_priority_orders_stage(self):
-        self.enqueue("C", "LANE-C", order=2, priority=999)
-        self.enqueue("A", "LANE-A", order=1, priority=100)
-        self.enqueue("B", "LANE-B", order=1, priority=500)
+    def test_execution_order_is_per_lane_barrier_and_independent_lanes_progress(self):
+        self.enqueue("A1", "LANE-A", order=1, priority=100)
+        self.enqueue("A2", "LANE-A", order=2, priority=999)
+        self.enqueue("B", "LANE-B", order=2, priority=500)
         first = self.scheduler.tick(now=IN_SHIFT, max_claims=3)
         self.assertEqual(first["active_execution_order"], 1)
-        self.assertEqual([x["delegation_id"] for x in first["claims"]], ["D-B", "D-A"])
-        self.assertNotIn("D-C", [x["delegation_id"] for x in first["claims"]])
-        self.terminal_claim(first["claims"][0], 1)
-        self.terminal_claim(first["claims"][1], 2)
+        self.assertEqual(first["active_execution_orders"], {"LANE-A": 1, "LANE-B": 2})
+        self.assertEqual([x["delegation_id"] for x in first["claims"]], ["D-B", "D-A1"])
+        self.assertNotIn("D-A2", [x["delegation_id"] for x in first["claims"]])
+        by_id = {x["delegation_id"]: x for x in first["claims"]}
+        self.terminal_claim(by_id["D-A1"], 1)
+        self.terminal_claim(by_id["D-B"], 2)
         second = self.scheduler.tick(now=IN_SHIFT + dt.timedelta(seconds=3), max_claims=3)
-        self.assertEqual(second["active_execution_order"], 2)
-        self.assertEqual([x["delegation_id"] for x in second["claims"]], ["D-C"])
+        self.assertEqual([x["delegation_id"] for x in second["claims"]], ["D-A2"])
 
     def test_future_lower_stage_blocks_later_stage_until_completed(self):
         future = (IN_SHIFT + dt.timedelta(hours=1)).isoformat().replace("+00:00", "Z")
         self.enqueue("A", "LANE-A", order=0, not_before=future)
-        self.enqueue("B", "LANE-B", order=1)
+        self.enqueue("B", "LANE-A", order=1)
         first = self.scheduler.tick(now=IN_SHIFT, max_claims=2)
         self.assertEqual(first["active_execution_order"], 0)
         self.assertEqual(first["claims"], [])
@@ -167,10 +174,39 @@ class NightSchedulerTests(unittest.TestCase):
 
     def test_cancelled_lower_stage_unlocks_next_stage(self):
         self.enqueue("A", "LANE-A", order=0)
-        self.enqueue("B", "LANE-B", order=1)
+        self.enqueue("B", "LANE-A", order=1)
         self.scheduler.request_cancel("D-A", "operator cancelled", now=IN_SHIFT)
         result = self.scheduler.tick(now=IN_SHIFT)
         self.assertEqual([x["delegation_id"] for x in result["claims"]], ["D-B"])
+
+    def test_validating_is_durable_same_lane_barrier_while_independent_lane_progresses(self):
+        self.enqueue("A1", "LANE-A", order=1, priority=500, independent_evaluation_required=True)
+        self.enqueue("A2", "LANE-A", order=2, priority=900)
+        self.enqueue("B", "LANE-B", order=4, priority=100)
+        first = self.scheduler.tick(now=IN_SHIFT, max_claims=1)
+        claim = first["claims"][0]
+        self.assertEqual(claim["delegation_id"], "D-A1")
+        self.store.mark_dispatched(claim["dispatch_id"], "worker-A1", IN_SHIFT + dt.timedelta(seconds=1))
+        result = self.scheduler.submit_worker_result(
+            "D-A1", claim["lease_id"], claim["fencing_token"], "COMPLETED",
+            {"candidate": "A1"}, candidate_digest="a" * 64,
+            evaluation_timeout_seconds=120, now=IN_SHIFT + dt.timedelta(seconds=2),
+        )
+        self.assertEqual(result["state"], "VALIDATING")
+        self.store.close()
+        self.store = SupervisorStore(self.db)
+        self.scheduler = A01NightScheduler(self.store)
+        second = self.scheduler.tick(now=IN_SHIFT + dt.timedelta(seconds=3), max_claims=2)
+        self.assertEqual(second["active_execution_orders"], {"LANE-A": 1, "LANE-B": 4})
+        self.assertEqual([x["delegation_id"] for x in second["claims"]], ["D-B"])
+        verdict = self.scheduler.submit_evaluator_verdict(
+            "D-A1", claim["lease_id"], claim["fencing_token"], "VERDICT-A1", "PASS",
+            "a" * 64, "evaluator-A1", {"checks": "pass"},
+            now=IN_SHIFT + dt.timedelta(seconds=4),
+        )
+        self.assertEqual(verdict["state"], "COMPLETED")
+        third = self.scheduler.tick(now=IN_SHIFT + dt.timedelta(seconds=5), max_claims=2)
+        self.assertEqual([x["delegation_id"] for x in third["claims"]], ["D-A2"])
 
     def test_queued_night_task_cannot_bypass_scheduler_through_coordination_claim(self):
         h, c = self.enqueue("A", "LANE-A")
