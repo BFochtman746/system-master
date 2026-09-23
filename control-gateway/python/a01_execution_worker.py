@@ -27,6 +27,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from a01_night_scheduler import A01NightScheduler
+from a01_repository_repair_executor import REPAIR_EXECUTOR_KIND, execute_repository_repair
 from tools.second_shift_supervisor_v2 import (
     Conflict,
     StaleWorker,
@@ -135,11 +136,13 @@ class A01ExecutionWorker:
         self.worker_id = worker_id or f"worker-{os.getpid()}-{uuid.uuid4().hex}"
         self.executors: dict[str, Executor] = {
             "A01_CONTROL_PLANE_QUALIFICATION": self._execute_a01_qualification,
+            REPAIR_EXECUTOR_KIND: execute_repository_repair,
         }
         if executors:
             self.executors.update(executors)
         self.executor_retry_safety: dict[str, str] = {
             "A01_CONTROL_PLANE_QUALIFICATION": RETRY_SAFE,
+            REPAIR_EXECUTOR_KIND: RECONCILIATION_REQUIRED,
         }
         if executor_retry_safety:
             self.executor_retry_safety.update(executor_retry_safety)

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -36,6 +37,23 @@ class RepositoryRepairExecutorTransportTests(unittest.TestCase):
             repair.REPAIR_EXECUTOR_PROTOCOL,
             "control-gateway.a01-repository-repair-executor.v1",
         )
+
+    def test_default_worker_registers_repository_repair_as_reconciliation_required(self):
+        from a01_execution_worker import A01ExecutionWorker, RECONCILIATION_REQUIRED
+        from a01_night_scheduler import A01NightScheduler
+        from tools.second_shift_supervisor_v2 import SupervisorStore
+
+        with tempfile.TemporaryDirectory() as tmp:
+            with SupervisorStore(Path(tmp) / "supervisor.db") as store:
+                worker = A01ExecutionWorker(store, scheduler=A01NightScheduler(store))
+                self.assertIs(
+                    worker.executors[repair.REPAIR_EXECUTOR_KIND],
+                    repair.execute_repository_repair,
+                )
+                self.assertEqual(
+                    worker.executor_retry_safety[repair.REPAIR_EXECUTOR_KIND],
+                    RECONCILIATION_REQUIRED,
+                )
 
     def test_workflow_dispatch_requests_exact_run_details(self):
         captured = {}
