@@ -44,3 +44,15 @@ test('native A-01 ingress dispatches the existing bridge instead of a second exe
   assert.match(ingress, /repository_write_authority=false/);
   assert.match(ingress, /promotion_authority=false/);
 });
+
+test('native A-01 ingress requires governed response receipt and handoff before bridge dispatch', () => {
+  assert.match(ingress, /development_response_base64/);
+  assert.match(ingress, /development_response_receipt/);
+  assert.match(ingress, /admitGovernedA01Execution/);
+  assert.match(ingress, /buildGovernedA01SupervisorHandoff/);
+  assert.match(ingress, /development-response-receipt\.json/);
+  assert.match(ingress, /governed-a01-supervisor-handoff\.json/);
+  assert.ok(ingress.indexOf('buildGovernedA01SupervisorHandoff') < ingress.indexOf('Dispatch existing registered A-01 bridge'));
+  assert.doesNotMatch(ingress, /\badmitA01Execution\s*\(/);
+  assert.doesNotMatch(ingress, /\bbuildA01SupervisorHandoff\s*\(/);
+});

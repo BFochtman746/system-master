@@ -36,12 +36,14 @@ jobs:
           printf '%s' "${COMMAND_BODY}" > "${command_file}"
 
           jq -e 'type == "object"' "${command_file}" >/dev/null
-          test "$(jq -c 'keys' "${command_file}")" = '["authority_epoch","authority_packet_digest","command_id","kind","operation_id","protocol_version","qualification_id","state_ref","subject_sha"]'
+          test "$(jq -c 'keys' "${command_file}")" = '["authority_epoch","authority_packet_digest","command_id","development_response_base64","development_response_receipt","kind","operation_id","protocol_version","qualification_id","state_ref","subject_sha"]'
           test "$(jq -r '.protocol_version // empty' "${command_file}")" = 'control-gateway.a01-qualification-command.v1'
           test "$(jq -r '.kind // empty' "${command_file}")" = 'A01_QUALIFICATION'
           test "$(jq -r '.operation_id // empty' "${command_file}")" = 'SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION-001H'
           test "$(jq -r '.qualification_id // empty' "${command_file}")" = 'SECOND-SHIFT-SUPERVISOR-V2-A01-STRESS'
           test "$(jq -r '.state_ref // empty' "${command_file}")" = 'control-gateway-state/active-work/second-shift-production-master-completion-001h-main-reconciliation-001'
+          jq -e '.development_response_base64 | type == "string" and length > 0' "${command_file}" >/dev/null
+          jq -e '.development_response_receipt | type == "object"' "${command_file}" >/dev/null
 
           command_id="$(jq -r '.command_id // empty' "${command_file}")"
           subject_sha="$(jq -r '.subject_sha // empty' "${command_file}")"
@@ -93,6 +95,110 @@ jobs:
           test "$(jq -r '.packet.authority_epoch' "${state_file}")" = "${AUTHORITY_EPOCH}"
           test "$(jq -r '.packet_digest' "${state_file}")" = "${PACKET_DIGEST}"
           echo 'A01_QUALIFICATION_LIVE_AUTHORITY=PASS'
+
+      - name: Checkout exact governed A-01 control plane
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ steps.command.outputs.subject_sha }}
+          path: .governed-a01-control
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Validate governed A-01 admission and supervisor handoff
+        shell: bash
+        env:
+          COMMAND_BODY: ${{ github.event.issue.body }}
+          REPOSITORY: ${{ github.repository }}
+          GOVERNED_A01_EVIDENCE_DIR: ${{ runner.temp }}/governed-a01-ingress
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import path from 'node:path';
+          import { execFileSync } from 'node:child_process';
+          import { pathToFileURL } from 'node:url';
+
+          const command = JSON.parse(process.env.COMMAND_BODY);
+          const stateFile = '.active-work-authority/control-gateway-state/active-work/head.json';
+          const publication = JSON.parse(fs.readFileSync(stateFile, 'utf8'));
+          const publicationHead = execFileSync('git', ['-C', '.active-work-authority', 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+          const controlRoot = path.join(process.cwd(), '.governed-a01-control', 'control-gateway', 'src');
+          const governed = await import(pathToFileURL(path.join(controlRoot, 'governed-execution-admission.js')).href);
+          const activeWork = await import(pathToFileURL(path.join(controlRoot, 'active-work-state.js')).href);
+          const responseText = Buffer.from(command.development_response_base64, 'base64').toString('utf8');
+          const authority = {
+            ...publication.packet,
+            publication_commit_sha: publicationHead,
+            packet_digest: publication.packet_digest,
+          };
+          const payload = {
+            qualification_id: command.qualification_id,
+            exact_subject: command.subject_sha,
+            workstream_id: 'SECOND-SHIFT-CONTROL-GATEWAY',
+            origin_ref: 'main',
+          };
+          const request = {
+            protocol_version: 'control-gateway.a01-admission-request.v1',
+            admission_id: `${command.command_id}-ADMISSION`,
+            mission_version: authority.mission_version,
+            workstream_id: authority.workstream_id,
+            authority_epoch: command.authority_epoch,
+            authority_publication_commit_sha: publicationHead,
+            authority_packet_digest: command.authority_packet_digest,
+            authoritative_subject: { algorithm: 'sha1', oid: command.subject_sha },
+            repository: process.env.REPOSITORY,
+            authority_ref: authority.branch_or_ref,
+            authority_ref_head_sha: command.subject_sha,
+            operation_id: command.operation_id,
+            predecessor_receipt_id: authority.current_operation.predecessor_receipt_id,
+            command_id: command.command_id,
+            task_id: command.qualification_id,
+            idempotency_key: command.command_id,
+            execution_class: 'A01_QUALIFICATION',
+            execution_order: 0,
+            priority: 100,
+            not_before: null,
+            not_after: null,
+            lane: 'CONTROL_GATEWAY',
+            owner_path: 'SYSTEM_MASTER/CORE',
+            delegation_id: 'SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION-001H',
+            objective_id: 'SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION-001H-GATE5-A01-QUALIFICATION',
+            control_ref: 'main',
+            control_head: command.subject_sha,
+            executor_kind: 'A01_CONTROL_PLANE_QUALIFICATION',
+            payload_digest: activeWork.sha256(payload),
+            dependency_receipt_ids: ['SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION-001G-RECEIPT'],
+          };
+          const admission = governed.admitGovernedA01Execution({
+            request,
+            authority,
+            responseText,
+            responseReceipt: command.development_response_receipt,
+          });
+          const handoff = governed.buildGovernedA01SupervisorHandoff({
+            request,
+            authority,
+            governedAdmission: admission,
+            responseText,
+            payload,
+          });
+          fs.mkdirSync(process.env.GOVERNED_A01_EVIDENCE_DIR, { recursive: true });
+          const writeJson = (name, value) => fs.writeFileSync(path.join(process.env.GOVERNED_A01_EVIDENCE_DIR, name), `${JSON.stringify(value, null, 2)}\n`, 'utf8');
+          fs.writeFileSync(path.join(process.env.GOVERNED_A01_EVIDENCE_DIR, 'development-response.txt'), responseText, 'utf8');
+          writeJson('development-response-receipt.json', command.development_response_receipt);
+          writeJson('a01-admission-request.json', request);
+          writeJson('governed-a01-admission.json', admission);
+          writeJson('governed-a01-supervisor-handoff.json', handoff);
+          console.log(`GOVERNED_A01_INGRESS=PASS admission=${admission.governed_digest} handoff=${handoff.governed_digest}`);
+          NODE
+
+      - name: Upload governed A-01 ingress evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: governed-a01-ingress-${{ steps.command.outputs.command_id }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/governed-a01-ingress
+          if-no-files-found: error
+          retention-days: 30
 
       - name: Dispatch existing registered A-01 bridge
         id: dispatch
