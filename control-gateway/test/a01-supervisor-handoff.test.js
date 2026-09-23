@@ -51,7 +51,7 @@ function request(overrides = {}) {
     authoritative_subject: { algorithm: 'sha1', oid: SUBJECT },
     repository: 'BFochtman746/system-master',
     authority_ref: 'second-shift-control-gateway/cg-009-dependency-ordering',
-    authority_ref_head_sha: HEAD,
+    authority_ref_head_sha: SUBJECT,
     operation_id: 'SECOND-SHIFT-CONTROL-GATEWAY-CG-009',
     predecessor_receipt_id: PREDECESSOR,
     command_id: 'CMD-001',
@@ -146,6 +146,12 @@ test('tampered supervisor scheduling owner is rejected', async () => {
   await expectCode('A01_SCHEDULER_AUTHORITY_INVALID', async () => validateA01SupervisorHandoff(handoff));
 });
 
-test('control head must be exact admitted authority ref head', async () => {
-  await expectCode('A01_CONTROL_HEAD_MISMATCH', async () => admitA01Execution({ request: request({ control_head: 'f'.repeat(40) }), authority: authority() }));
+test('owner control head is independently carried from the authority ref head', () => {
+  const receipt = admitA01Execution({ request: request({ control_head: 'f'.repeat(40) }), authority: authority() });
+  assert.equal(receipt.authority_ref_head_sha, SUBJECT);
+  assert.equal(receipt.control_head, 'f'.repeat(40));
+});
+
+test('stale authority ref head fails closed', async () => {
+  await expectCode('A01_AUTHORITY_REF_HEAD_MISMATCH', async () => admitA01Execution({ request: request({ authority_ref_head_sha: HEAD }), authority: authority() }));
 });

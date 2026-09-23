@@ -99,7 +99,7 @@ function exactContinuationBinding(request, authority) {
   if (!sameSubject(request.authoritative_subject, authority.authoritative_subject)) fail('A01_AUTHORITY_SUBJECT_MISMATCH', 'authoritative subject mismatch');
   if (request.repository !== authority.repository) fail('A01_REPOSITORY_MISMATCH', 'repository mismatch');
   if (request.authority_ref !== authority.branch_or_ref) fail('A01_REF_MISMATCH', 'authority ref mismatch');
-  if (request.control_head !== request.authority_ref_head_sha) fail('A01_CONTROL_HEAD_MISMATCH', 'supervisor control_head must equal exact admitted authority ref head');
+  if (request.authority_ref_head_sha !== request.authoritative_subject.oid) fail('A01_AUTHORITY_REF_HEAD_MISMATCH', 'authority_ref_head_sha must equal the exact admitted authoritative subject');
   if (authority.current_operation?.state !== 'ACTIVE') fail('A01_OPERATION_NOT_ACTIVE', 'A-01 admission requires ACTIVE current operation');
   if (request.operation_id !== authority.current_operation.operation_id || request.predecessor_receipt_id !== authority.current_operation.predecessor_receipt_id) fail('A01_OPERATION_MISMATCH', 'operation/predecessor mismatch');
   if (authority.github_admission_state !== 'ADMITTED') fail('A01_GITHUB_ADMISSION_REQUIRED', 'GitHub admission must be ADMITTED before A-01 release');

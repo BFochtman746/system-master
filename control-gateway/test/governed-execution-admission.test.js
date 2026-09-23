@@ -139,7 +139,7 @@ function a01Request(overrides = {}) {
     authoritative_subject: { algorithm: 'sha1', oid: 'c'.repeat(40) },
     repository: REPO,
     authority_ref: 'second-shift-control-gateway/cg-009-dependency-ordering',
-    authority_ref_head_sha: 'd'.repeat(40),
+    authority_ref_head_sha: 'c'.repeat(40),
     operation_id: 'SECOND-SHIFT-CONTROL-GATEWAY-CG-009',
     predecessor_receipt_id: 'RECEIPT-CG008-PREDECESSOR',
     command_id: 'CMD-C04-001',
