@@ -27,5 +27,5 @@ test('reusable production-writer workflow exposes exact result without widening 
   assert.match(workflow, /execution_digest: \$\{\{ steps\.mutation\.outputs\.execution_digest \}\}/);
   assert.match(workflow, /idempotent_replay: \$\{\{ steps\.mutation\.outputs\.idempotent_replay \}\}/);
   assert.match(workflow, /id: mutation/);
-  assert.match(workflow, /permissions:\n  contents: read\n  actions: read/);
+  assert.match(workflow, /permissions:\r?\n  contents: read\r?\n  actions: read/);
 });
