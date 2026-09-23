@@ -37,7 +37,7 @@ class RepositoryRepairExecutorTransportTests(unittest.TestCase):
             "control-gateway.a01-repository-repair-executor.v1",
         )
 
-    def test_workflow_dispatch_uses_only_documented_ref_and_inputs(self):
+    def test_workflow_dispatch_requests_exact_run_details(self):
         captured = {}
 
         def fake_urlopen(request, timeout):
@@ -58,10 +58,10 @@ class RepositoryRepairExecutorTransportTests(unittest.TestCase):
 
         self.assertEqual(run_id, 123456789)
         self.assertEqual(captured["method"], "POST")
-        self.assertEqual(set(captured["body"]), {"ref", "inputs"})
+        self.assertEqual(set(captured["body"]), {"ref", "inputs", "return_run_details"})
         self.assertEqual(captured["body"]["ref"], "main")
         self.assertEqual(captured["body"]["inputs"], {"state_ref": "state-ref"})
-        self.assertNotIn("return_run_details", captured["body"])
+        self.assertIs(captured["body"]["return_run_details"], True)
 
     def test_transport_budget_stays_below_github_workflow_dispatch_limit(self):
         self.assertLess(repair.MAX_WORKFLOW_INPUT_CHARS, 65535)

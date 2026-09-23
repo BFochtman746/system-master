@@ -133,7 +133,7 @@ class GitHubRepairTransport:
         return value
 
     def dispatch(self, ref: str, inputs: dict[str, str]) -> int:
-        status, _, raw = self._request("POST", f"/actions/workflows/{PRODUCTION_WRITER_WORKFLOW}/dispatches", {"ref":ref,"inputs":inputs})
+        status, _, raw = self._request("POST", f"/actions/workflows/{PRODUCTION_WRITER_WORKFLOW}/dispatches", {"ref":ref,"inputs":inputs,"return_run_details":True})
         if status != 200: _fail("REPAIR_WRITER_DISPATCH_AMBIGUOUS", "workflow dispatch did not return exact run details", http_status=status)
         run_id = self._json(raw).get("workflow_run_id")
         if not isinstance(run_id, int) or run_id <= 0: _fail("REPAIR_WRITER_DISPATCH_INVALID", "workflow dispatch response lacks workflow_run_id")
