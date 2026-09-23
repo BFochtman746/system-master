@@ -104,6 +104,18 @@ async function main() {
     resultCommitSha: executionReceipt.result_commit_sha
   });
 
+  const githubOutput = String(process.env.GITHUB_OUTPUT || '').trim();
+  if (githubOutput) {
+    fs.appendFileSync(
+      githubOutput,
+      `result_commit_sha=${executionReceipt.result_commit_sha}\n` +
+        `result_tree_sha=${executionReceipt.result_tree_sha}\n` +
+        `execution_digest=${executionReceipt.execution_digest}\n` +
+        `idempotent_replay=${executionReceipt.idempotent_replay}\n`,
+      'utf8'
+    );
+  }
+
   if (evidenceDir) {
     fs.mkdirSync(evidenceDir, { recursive: true });
     const write = (name, value) => fs.writeFileSync(path.join(evidenceDir, name), `${JSON.stringify(value, null, 2)}\n`, 'utf8');

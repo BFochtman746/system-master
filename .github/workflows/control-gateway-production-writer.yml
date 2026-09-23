@@ -46,6 +46,19 @@ on:
         description: Exact byte-bound production mutation plan JSON
         required: true
         type: string
+    outputs:
+      result_commit_sha:
+        description: Exact commit produced or idempotently recovered by the receipt-consuming CAS writer
+        value: ${{ jobs.receipt-cas-write.outputs.result_commit_sha }}
+      result_tree_sha:
+        description: Exact tree bound to the resulting commit
+        value: ${{ jobs.receipt-cas-write.outputs.result_tree_sha }}
+      execution_digest:
+        description: Exact production-mutation execution receipt digest
+        value: ${{ jobs.receipt-cas-write.outputs.execution_digest }}
+      idempotent_replay:
+        description: Whether the exact write was recovered as an idempotent replay
+        value: ${{ jobs.receipt-cas-write.outputs.idempotent_replay }}
 
 permissions:
   contents: read
@@ -58,6 +71,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     environment: control-gateway-production
+    outputs:
+      result_commit_sha: ${{ steps.mutation.outputs.result_commit_sha }}
+      result_tree_sha: ${{ steps.mutation.outputs.result_tree_sha }}
+      execution_digest: ${{ steps.mutation.outputs.execution_digest }}
+      idempotent_replay: ${{ steps.mutation.outputs.idempotent_replay }}
     steps:
       - name: Checkout exact production controller
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -78,6 +96,7 @@ jobs:
           owner: ${{ github.repository_owner }}
           repositories: ${{ github.event.repository.name }}
       - name: Execute admitted exact-CAS mutation
+        id: mutation
         shell: bash
         env:
           CONTROL_GATEWAY_STATE_REF: ${{ inputs.state_ref }}
