@@ -1,0 +1,49 @@
+name: Control Gateway Native A-01 Run Now Ingress
+on:
+  issues:
+    types: [opened]
+permissions:
+  contents: read
+  issues: read
+  actions: read
+concurrency:
+  group: a01-global-r2
+  cancel-in-progress: false
+jobs:
+  run-now:
+    if: >-
+      github.actor == github.repository_owner &&
+      github.event.issue.author_association == 'OWNER' &&
+      startsWith(github.event.issue.title, '[CONTROL-GATEWAY-A01-RUN-NOW] ')
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 35
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      A01_INGRESS_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with: {ref: "${{ github.sha }}", fetch-depth: 1, clean: true, persist-credentials: false}
+      - name: Resolve existing supervisor DB
+        shell: powershell
+        run: |
+          $c=[System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+          if($env:A01_SUPERVISOR_DB){[void]$c.Add([IO.Path]::GetFullPath($env:A01_SUPERVISOR_DB))}
+          Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | ? {$_.CommandLine -match 'a01_(?:execution_service|execution_worker|ingress_service)\.py'} | % {
+            $m=[regex]::Match($_.CommandLine,'--db\s+(?:"([^"]+)"|''([^'']+)''|(\S+))');if($m.Success){$v=@($m.Groups[1].Value,$m.Groups[2].Value,$m.Groups[3].Value)|?{$_}|select -First 1;if($v){[void]$c.Add([IO.Path]::GetFullPath($v))}}
+          }
+          $e=@($c|?{Test-Path -LiteralPath $_});if($e.Count -ne 1){throw "A01_SUPERVISOR_DB_UNRESOLVED existing_count=$($e.Count)"};"A01_SUPERVISOR_DB=$($e[0])"|Add-Content $env:GITHUB_ENV
+      - name: Execute exact RUN NOW issue
+        shell: powershell
+        run: |
+          $ev=Join-Path $env:RUNNER_TEMP 'a01-run-now-evidence';$log=Join-Path $env:RUNNER_TEMP 'a01-run-now-result.json'
+          & python control-gateway/python/a01_run_now_once.py --db $env:A01_SUPERVISOR_DB --event-path $env:GITHUB_EVENT_PATH --root $env:GITHUB_WORKSPACE --evidence-root $ev | Tee-Object -FilePath $log
+          if($LASTEXITCODE -ne 0){throw "RUN_NOW_ONE_SHOT_FAILED:$LASTEXITCODE"}
+      - if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: a01-user-directed-run-now-${{ github.run_id }}-evidence
+          path: |
+            ${{ runner.temp }}\a01-run-now-result.json
+            ${{ runner.temp }}\a01-run-now-evidence
+          if-no-files-found: warn
+          retention-days: 30

@@ -54,7 +54,9 @@ function main() {
     'tests/test_control_gateway_a01_supervisor_coordination_authority.py',
     'tests/test_control_gateway_a01_night_scheduler.py',
     'tests/test_control_gateway_a01_execution_worker.py',
+    'control-gateway/python/a01_run_now_once.py',
     'tests/test_a01_user_directed_run_now.py',
+    'tests/test_a01_run_now_once.py',
     'tests/test_control_gateway_failure_restart_idempotency.py',
     'tests/run_control_gateway_failure_restart_idempotency_bounded.py',
     'tests/test_control_gateway_cg011_dispatch_failure_replay.py',
@@ -84,6 +86,7 @@ function main() {
   stage('CG010_NIGHT_SCHEDULER', 'python', ['tests/test_control_gateway_a01_night_scheduler.py'], { timeout: 180000 });
   stage('PQF_REPAIR_A01_EXECUTION_WORKER', 'python', ['tests/test_control_gateway_a01_execution_worker.py'], { timeout: 240000 });
   stage('USER_DIRECTED_RUN_NOW', 'python', ['tests/test_a01_user_directed_run_now.py'], { timeout: 120000 });
+  stage('USER_DIRECTED_RUN_NOW_LIVE_PATH', 'python', ['tests/test_a01_run_now_once.py'], { timeout: 120000 });
   stage('GATE4_REPAIR_WAVE1_FOUNDATIONS', 'node', ['.github/scripts/a01-autonomous-repository-repair-wave1-qualify.js'], { timeout: 180000 });
   stage('GATE4_MUTATION_READINESS', 'node', ['--test', 'control-gateway/test/a01-repository-repair-mutation-readiness.test.js'], { timeout: 180000 });
   stage('GATE4_LIVE_REPAIR_PREFLIGHT', 'node', ['.github/scripts/a01-repository-repair-preflight.js'], { timeout: 180000 });
