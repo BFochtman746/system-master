@@ -23,7 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with: {ref: "${{ github.sha }}", fetch-depth: 1, clean: true, persist-credentials: false}
-      - name: Resolve existing supervisor DB
+      - name: Resolve or initialize canonical supervisor DB
         shell: powershell
         run: |
           $c=[System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
@@ -39,8 +39,16 @@ jobs:
           Get-ScheduledTask -TaskName 'SystemMaster-A01-Execution' -ErrorAction SilentlyContinue | % {
             foreach($a in $_.Actions){$m=[regex]::Match("$($a.Execute) $($a.Arguments)",'--db\s+(?:"([^"]+)"|''([^'']+)''|(\S+))');if($m.Success){$v=@($m.Groups[1].Value,$m.Groups[2].Value,$m.Groups[3].Value)|?{$_}|select -First 1;if($v){Add-ExistingSupervisorDb $v}}}
           }
-          Add-ExistingSupervisorDb 'C:\SystemMaster\a01-supervisor.db'
-          $e=@($c);if($e.Count -ne 1){throw "A01_SUPERVISOR_DB_UNRESOLVED existing_count=$($e.Count)"};"A01_SUPERVISOR_DB=$($e[0])"|Add-Content $env:GITHUB_ENV
+          $canonical='C:\SystemMaster\a01-supervisor.db'
+          Add-ExistingSupervisorDb $canonical
+          $e=@($c)
+          if($e.Count -gt 1){throw "A01_SUPERVISOR_DB_AMBIGUOUS existing_count=$($e.Count)"}
+          if($e.Count -eq 1){$db=$e[0]} else {
+            $parent=Split-Path -Parent $canonical
+            if(-not (Test-Path -LiteralPath $parent -PathType Container)){New-Item -ItemType Directory -Force -Path $parent | Out-Null}
+            $db=[IO.Path]::GetFullPath($canonical)
+          }
+          "A01_SUPERVISOR_DB=$db"|Add-Content $env:GITHUB_ENV
       - name: Execute exact RUN NOW issue
         shell: powershell
         run: |
