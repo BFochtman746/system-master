@@ -1,0 +1,145 @@
+name: Control Gateway Native A-01 Qualification Ingress
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  actions: write
+  contents: read
+  issues: read
+
+concurrency:
+  group: control-gateway-native-a01-qualification-ingress
+  cancel-in-progress: false
+
+jobs:
+  validate-and-dispatch:
+    name: Validate owner command and dispatch exact A-01 qualification
+    if: >-
+      github.actor == github.repository_owner &&
+      github.event.issue.author_association == 'OWNER' &&
+      startsWith(github.event.issue.title, '[CONTROL-GATEWAY-A01] ')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Validate exact owner-authenticated qualification command
+        id: command
+        shell: bash
+        env:
+          COMMAND_BODY: ${{ github.event.issue.body }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          EVENT_MAIN_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          command_file="${RUNNER_TEMP}/a01-qualification-command.json"
+          printf '%s' "${COMMAND_BODY}" > "${command_file}"
+
+          jq -e 'type == "object"' "${command_file}" >/dev/null
+          test "$(jq -c 'keys' "${command_file}")" = '["authority_epoch","authority_packet_digest","command_id","kind","operation_id","protocol_version","qualification_id","state_ref","subject_sha"]'
+          test "$(jq -r '.protocol_version // empty' "${command_file}")" = 'control-gateway.a01-qualification-command.v1'
+          test "$(jq -r '.kind // empty' "${command_file}")" = 'A01_QUALIFICATION'
+          test "$(jq -r '.operation_id // empty' "${command_file}")" = 'SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION-001H'
+          test "$(jq -r '.qualification_id // empty' "${command_file}")" = 'SECOND-SHIFT-SUPERVISOR-V2-A01-STRESS'
+          test "$(jq -r '.state_ref // empty' "${command_file}")" = 'control-gateway-state/active-work/second-shift-production-master-completion-001h-main-reconciliation-001'
+
+          command_id="$(jq -r '.command_id // empty' "${command_file}")"
+          subject_sha="$(jq -r '.subject_sha // empty' "${command_file}")"
+          authority_epoch="$(jq -r '.authority_epoch // empty' "${command_file}")"
+          packet_digest="$(jq -r '.authority_packet_digest // empty' "${command_file}")"
+          state_ref="$(jq -r '.state_ref // empty' "${command_file}")"
+
+          [[ "${command_id}" =~ ^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$ ]]
+          [[ "${subject_sha}" =~ ^[0-9a-f]{40}$ ]]
+          [[ "${packet_digest}" =~ ^[0-9a-f]{64}$ ]]
+          [[ "${authority_epoch}" =~ ^[1-9][0-9]*$ ]]
+          test "${ISSUE_TITLE}" = "[CONTROL-GATEWAY-A01] ${command_id}"
+          test "${subject_sha}" = "${EVENT_MAIN_SHA}"
+
+          printf 'command_id=%s\n' "${command_id}" >> "${GITHUB_OUTPUT}"
+          printf 'subject_sha=%s\n' "${subject_sha}" >> "${GITHUB_OUTPUT}"
+          printf 'authority_epoch=%s\n' "${authority_epoch}" >> "${GITHUB_OUTPUT}"
+          printf 'packet_digest=%s\n' "${packet_digest}" >> "${GITHUB_OUTPUT}"
+          printf 'state_ref=%s\n' "${state_ref}" >> "${GITHUB_OUTPUT}"
+
+      - name: Checkout exact active-work authority ref
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ steps.command.outputs.state_ref }}
+          path: .active-work-authority
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Revalidate live 001H authority before dispatch
+        shell: bash
+        env:
+          SUBJECT_SHA: ${{ steps.command.outputs.subject_sha }}
+          AUTHORITY_EPOCH: ${{ steps.command.outputs.authority_epoch }}
+          PACKET_DIGEST: ${{ steps.command.outputs.packet_digest }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          state_file='.active-work-authority/control-gateway-state/active-work/head.json'
+          test -f "${state_file}"
+          test "$(jq -r '.protocol_version' "${state_file}")" = 'control-gateway.github-active-work-publication.v1'
+          test "$(jq -r '.packet.protocol_version' "${state_file}")" = 'control-gateway.active-work.v1'
+          test "$(jq -r '.packet.repository' "${state_file}")" = "${REPOSITORY}"
+          test "$(jq -r '.packet.current_operation.operation_id' "${state_file}")" = 'SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION-001H'
+          test "$(jq -r '.packet.current_operation.state' "${state_file}")" = 'ACTIVE'
+          test "$(jq -r '.packet.qualification_state' "${state_file}")" = 'PASSED'
+          test "$(jq -r '.packet.github_admission_state' "${state_file}")" = 'ADMITTED'
+          test "$(jq -r '.packet.authoritative_subject.algorithm' "${state_file}")" = 'sha1'
+          test "$(jq -r '.packet.authoritative_subject.oid' "${state_file}")" = "${SUBJECT_SHA}"
+          test "$(jq -r '.packet.authority_epoch' "${state_file}")" = "${AUTHORITY_EPOCH}"
+          test "$(jq -r '.packet_digest' "${state_file}")" = "${PACKET_DIGEST}"
+          echo 'A01_QUALIFICATION_LIVE_AUTHORITY=PASS'
+
+      - name: Dispatch existing registered A-01 bridge
+        id: dispatch
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SUBJECT_SHA: ${{ steps.command.outputs.subject_sha }}
+        run: |
+          set -euo pipefail
+          advanced_json='{"notification_target":"second-shift-001h-gate5","qualifier_timeout_minutes":28,"job_timeout_minutes":30}'
+          payload="$(jq -cn \
+            --arg sha "${SUBJECT_SHA}" \
+            --arg advanced "${advanced_json}" \
+            '{ref:"main",inputs:{qualification_id:"SECOND-SHIFT-SUPERVISOR-V2-A01-STRESS",workstream_id:"SECOND-SHIFT-CONTROL-GATEWAY",subject_sha:$sha,origin_ref:"main",resume_on_pass:"Return exact-subject Gate 5 A-01 evidence to 001H; do not activate unattended cleanup until the bounded live cleanup trial passes.",resume_on_failure:"Preserve exact-subject Gate 5 evidence, classify the failing A-01 boundary, and do not activate unattended cleanup.",execution_context:"normal",repair_attempt:"0",max_repair_attempts:"1",advanced_json:$advanced}}')"
+          response_file="${RUNNER_TEMP}/a01-dispatch-response.json"
+          http_code="$(curl --silent --show-error --location \
+            --output "${response_file}" \
+            --write-out '%{http_code}' \
+            --request POST \
+            --header 'Accept: application/vnd.github+json' \
+            --header "Authorization: Bearer ${GH_TOKEN}" \
+            --header 'X-GitHub-Api-Version: 2026-03-10' \
+            --data "${payload}" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/workflows/a01-control-plane-dispatch-bridge.yml/dispatches")"
+          case "${http_code}" in
+            200|204) ;;
+            *) cat "${response_file}" >&2; echo "A01_QUALIFICATION_DISPATCH=FAIL http=${http_code}" >&2; exit 1 ;;
+          esac
+          if [[ "${http_code}" == '200' && -s "${response_file}" ]]; then
+            jq -e '.workflow_run_id | type == "number"' "${response_file}" >/dev/null
+            jq -r '"workflow_run_id=\(.workflow_run_id)"' "${response_file}" >> "${GITHUB_OUTPUT}"
+          fi
+          echo "A01_QUALIFICATION_DISPATCH=PASS http=${http_code} subject=${SUBJECT_SHA}"
+
+      - name: Publish dispatch summary
+        shell: bash
+        env:
+          SUBJECT_SHA: ${{ steps.command.outputs.subject_sha }}
+          AUTHORITY_EPOCH: ${{ steps.command.outputs.authority_epoch }}
+          WORKFLOW_RUN_ID: ${{ steps.dispatch.outputs.workflow_run_id }}
+        run: |
+          {
+            echo '## Gate 5 exact-subject A-01 qualification dispatch'
+            echo "subject_sha=${SUBJECT_SHA}"
+            echo "authority_epoch=${AUTHORITY_EPOCH}"
+            echo 'qualification_id=SECOND-SHIFT-SUPERVISOR-V2-A01-STRESS'
+            echo 'repository_write_authority=false'
+            echo 'promotion_authority=false'
+            if [[ -n "${WORKFLOW_RUN_ID}" ]]; then echo "workflow_run_id=${WORKFLOW_RUN_ID}"; fi
+          } >> "${GITHUB_STEP_SUMMARY}"

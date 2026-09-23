@@ -118,6 +118,7 @@ permissions:
 jobs:
   route:
     name: Route through trusted metadata-only admission before subject execution
+    if: ${{ github.event_name != 'pull_request' && github.event_name != 'pull_request_target' }}
     uses: ./.github/workflows/a01-control-plane-admission-broker.yml
     with:
       qualification_id: ${{ inputs.qualification_id || 'A01-CONTROL-PLANE-SELFTEST' }}
