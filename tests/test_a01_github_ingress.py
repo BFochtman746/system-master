@@ -79,7 +79,7 @@ def registry(*, qualification_id=QUALIFICATION_ID, overnight=True):
     }
 
 
-def make_delegation(*, qualifier=QUALIFICATION_ID, subject_sha=SUBJECT_SHA):
+def make_delegation(*, qualifier=QUALIFICATION_ID, subject_sha=SUBJECT_SHA, executor_kind="A01_CONTROL_PLANE_QUALIFICATION"):
     payload = {
         "qualification_id": qualifier,
         "workstream_id": WORKSTREAM_ID,
@@ -118,7 +118,7 @@ def make_delegation(*, qualifier=QUALIFICATION_ID, subject_sha=SUBJECT_SHA):
         "objective_id": OBJECTIVE_ID,
         "control_ref": CONTROL_REF,
         "control_head": CONTROL_HEAD,
-        "executor_kind": "A01_CONTROL_PLANE_QUALIFICATION",
+        "executor_kind": executor_kind,
         "payload_digest": payload_digest,
         "dependency_receipt_ids": [],
         "scheduling_owner": "A01_SUPERVISOR",
@@ -280,6 +280,14 @@ class P12IngressAuthorityTests(unittest.TestCase):
         handoff, contract = validate(delegation)
         self.assertEqual(handoff, expected_handoff)
         self.assertEqual(contract, expected_contract)
+
+    def test_repository_repair_executor_is_supported_without_expanding_coordination_authority(self):
+        delegation = make_delegation(executor_kind="A01_REPOSITORY_REPAIR")
+        handoff, contract = validate(delegation)
+        self.assertEqual(handoff["executor_kind"], "A01_REPOSITORY_REPAIR")
+        self.assertEqual(contract["max_concurrency"], 1)
+        self.assertEqual(handoff["scheduling_owner"], "A01_SUPERVISOR")
+        self.assertEqual(handoff["github_role"], "ADMISSION_TRANSPORT_EVIDENCE_ONLY")
 
     def test_module_has_no_local_admission_or_coordination_builder(self):
         self.assertFalse(hasattr(ingress_module, "build_handoff"))
