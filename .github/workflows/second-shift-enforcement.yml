@@ -26,6 +26,7 @@ on:
       - '.github/scripts/second-shift-owner-coverage.js'
       - '.github/scripts/second-shift-execution-control-enforce.js'
       - '.github/scripts/second-shift-eight-lane-qualification.py'
+      - 'tests/second-shift-execution-control-contract.test.js'
       - '.github/scripts/programming-work-program-enforce.js'
       - 'tools/second_shift_supervisor_v2.py'
       - '.github/workflows/second-shift-enforcement.yml'
@@ -51,6 +52,7 @@ on:
       - '.github/scripts/second-shift-owner-coverage.js'
       - '.github/scripts/second-shift-execution-control-enforce.js'
       - '.github/scripts/second-shift-eight-lane-qualification.py'
+      - 'tests/second-shift-execution-control-contract.test.js'
       - '.github/scripts/programming-work-program-enforce.js'
       - 'tools/second_shift_supervisor_v2.py'
       - '.github/workflows/second-shift-enforcement.yml'
@@ -82,6 +84,7 @@ jobs:
           node --check .github/scripts/second-shift-enforce.js
           node --check .github/scripts/second-shift-owner-coverage.js
           node --check .github/scripts/second-shift-execution-control-enforce.js
+          node --check tests/second-shift-execution-control-contract.test.js
           node --check .github/scripts/programming-work-program-enforce.js
           node --check .github/scripts/validate-system-topology.js
           python3 -m py_compile .github/scripts/second-shift-eight-lane-qualification.py
@@ -106,6 +109,9 @@ jobs:
       - name: Qualify all current Second Shift execution lanes
         run: |
           python3 .github/scripts/second-shift-eight-lane-qualification.py --out=.second-shift-enforcement/current-lane-qualification.json
+
+      - name: Run current execution-control and Mastery contract regressions
+        run: node tests/second-shift-execution-control-contract.test.js
 
       - name: Self-test Second Shift invariants
         run: |

@@ -263,6 +263,25 @@ test('telemetry freshness SLA is actually enforced by validator source', () => {
   assert(count > 1, 'telemetry_freshness_sla_minutes is configured but never enforced');
 });
 
+
+const { validateMasteryContract } = require('../.github/scripts/second-shift-execution-control-enforce.js');
+function currentMasteryFixture(){return {
+ authority:JSON.parse(fs.readFileSync(path.join(ROOT,'governance','CURRENT-AUTHORITY.json'),'utf8')),
+ topology:JSON.parse(fs.readFileSync(path.join(ROOT,'governance','SYSTEM-TOPOLOGY-007.json'),'utf8')),
+ registry:JSON.parse(fs.readFileSync(path.join(ROOT,'governance','second-shift','SECOND-SHIFT-REGISTRY-001.json'),'utf8')),
+ mastery:JSON.parse(fs.readFileSync(path.join(ROOT,'governance','second-shift','SECOND-SHIFT-MASTERY-CURRENT-AUTHORITY-CONTRACT-002.json'),'utf8')),
+ delegationSchema:JSON.parse(fs.readFileSync(path.join(ROOT,'governance','second-shift','SECOND-SHIFT-DELEGATION-SCHEMA-003.json'),'utf8'))
+};}
+function expectMasteryReject(mutator,label){const fixture=currentMasteryFixture();mutator(fixture);assert.throws(()=>validateMasteryContract(fixture),/SECOND_SHIFT_EXECUTION_CONTROL_DRIFT/,label);}
+test('current nine-lane Mastery contract passes exact authority validation',()=>{const report=validateMasteryContract(currentMasteryFixture());assert.strictEqual(report.contract_id,'SECOND-SHIFT-MASTERY-CURRENT-AUTHORITY-CONTRACT-002');assert.strictEqual(report.peer_count,9);assert.strictEqual(report.mutation_wip_per_lane,1);assert.strictEqual(report.evaluation_state,'VALIDATING');});
+test('global-primary exclusivity cannot be reactivated',()=>expectMasteryReject(f=>{f.mastery.concurrency_contract.global_primary_system_exclusivity=true;},'global-primary exclusivity'));
+test('Mastery lane coverage must remain exact current topology',()=>expectMasteryReject(f=>{f.mastery.execution_ready_peer_system_ids=f.mastery.execution_ready_peer_system_ids.slice(0,-1);},'lane coverage drift'));
+test('worker self-approval cannot be enabled',()=>expectMasteryReject(f=>{f.mastery.evaluation_contract.worker_self_approval_forbidden=false;},'self approval'));
+test('VALIDATING remains the independent-evaluation barrier',()=>expectMasteryReject(f=>{f.mastery.evaluation_contract.runtime_state='RUNNING';},'runtime state drift'));
+test('historical global-primary schemas remain provenance-only',()=>expectMasteryReject(f=>{f.mastery.historical_mastery_dispositions[0].disposition='ACTIVE';},'historical mastery activation'));
+test('registry must point at delegation schema 003',()=>expectMasteryReject(f=>{f.registry.schema='governance/second-shift/SECOND-SHIFT-DELEGATION-SCHEMA-002.json';},'schema pointer drift'));
+test('same-lane successor is blocked while independent evaluation is pending',()=>expectMasteryReject(f=>{f.delegationSchema.independent_evaluation_runtime_rule.same_lane_successor_while_validating=true;},'validating successor barrier'));
+
 let failed = 0;
 for (const [name, fn] of cases) {
   try {
