@@ -333,8 +333,10 @@ class A01NightScheduler:
                     state = "RECONCILE"
                 elif delegation["state"] == "VALIDATING":
                     state = "VALIDATING"
-                elif delegation["state"] in ("COMPLETED", "BLOCKED", "STALE", "CANCELLED"):
+                elif delegation["state"] in ("COMPLETED", "BLOCKED", "CANCELLED"):
                     state = "TERMINAL" if delegation["state"] != "CANCELLED" else "CANCELLED"
+                elif delegation["state"] == "STALE":
+                    state = "RECONCILE"
                 elif live is not None:
                     state = "CLAIMED"
                 elif delegation["state"] == "READY":
