@@ -1,6 +1,6 @@
 # A01-REPAIR-BROKER-001
 
-Status: CANONICAL REPAIR-ROUTING CONTRACT / TOPOLOGY-004 / PROGRAM-JOB-LOCKED
+Status: CANONICAL REPAIR-ROUTING CONTRACT / TOPOLOGY-007 / PROGRAM-JOB-LOCKED
 Owner: `SYSTEM_MASTER/SHARED_INFRASTRUCTURE/A01`
 Administrative owner: `SYSTEM_MASTER/CORE`
 
@@ -14,18 +14,13 @@ The repository is the event/evidence bus. Chats and agents are working surfaces.
 
 ## Current authority and owner mapping
 
-The broker resolves `workstream_id` only through the topology selected by `governance/CURRENT-AUTHORITY.json`, currently `governance/SYSTEM-TOPOLOGY-004.json`, and must conform to `governance/SYSTEM-PROGRAM-JOB-LOCK-001.json`.
+The broker resolves `workstream_id` only through the topology selected by `governance/CURRENT-AUTHORITY.json`, currently `governance/SYSTEM-TOPOLOGY-007.json`, and must conform to `governance/SYSTEM-PROGRAM-JOB-LOCK-001.json`.
 
-- `SYSTEM-MASTER`, Continuity, Assurance/Reconciliation and A-01 control-plane work map to CORE/shared infrastructure as defined by topology.
-- `LEARNING` maps to LEARNING.
-- `BOOK-SYSTEM` maps to BOOK.
-- `LITERARY-PROSE` and `BOOK-EVAL-LEMONADE-001` are Book-child workstreams and execute/repair through BOOK.
-- `DOCUMENTS` and `DOCUMENT-ARTIFACTS` map to DOCUMENTS.
-- an unmapped workstream fails closed as `UNALLOCATED`; it is not repaired.
+The active repair-owner set is exactly the current execution-ready peer set: `CORE`, `LEARNING`, `BOOK`, `DOCUMENTS`, `SPREADSHEET_DATA`, `MEDIA`, `CONNECTED_ACTIONS`, `RESEARCH_KNOWLEDGE`, and `PROGRAMMING`. Workstream-to-owner routing is read from the selected topology's `execution_lane_owner_map`; the broker does not maintain a second routing table. `WEBSITE_BUILDING` remains a PROGRAMMING-owned capability, not a separate peer. An unmapped workstream fails closed as `UNALLOCATED`; it is not repaired.
 
-PROSE is the completed active specialist child at `SYSTEM_MASTER/BOOK/PROSE`. It has no independent repair lane. A current Book-Prose subject failure may open a BOOK-owned repair transaction only when it is a demonstrated defect or current integration failure; the broker must not reopen completed Prose feature scope merely because a historical Prose receipt exists.
+PROSE is `COMPLETE_RETIRED_TERMINAL`. No new standalone or inherited PROSE repair transaction, repair lane, successor, qualification, or mutation claim may be created. A genuinely current Book integration defect involving preserved Prose capability is BOOK-owned work and routes through BOOK without resurrecting PROSE.
 
-DOCUMENTS must not absorb, schedule, repair or claim Book-specific Prose literary work.
+DOCUMENTS must not absorb, schedule, repair or claim Book-specific literary semantics or retired PROSE work.
 
 ## Open transaction classifications
 
@@ -70,7 +65,7 @@ Historical qualification of earlier broker versions remains exact-subject eviden
 
 ## Repair inboxes
 
-Active peer execution owners have live repair inboxes for CORE, LEARNING, BOOK and DOCUMENTS. `SYSTEM_MASTER/BOOK/PROSE` routes current child repair work through BOOK and has no separate active inbox for new transactions. Historical standalone Prose repair records remain immutable evidence.
+Active repair inboxes exist for exactly the nine execution-ready peer owners: CORE, LEARNING, BOOK, DOCUMENTS, SPREADSHEET_DATA, MEDIA, CONNECTED_ACTIONS, RESEARCH_KNOWLEDGE, and PROGRAMMING. PROSE has no active or inherited repair inbox route; its historical repair records remain immutable evidence only. Current Book-owned integration failures involving preserved Prose capability route to BOOK because BOOK owns the integration semantics, not because PROSE remains active.
 
 A repair request is active only while its state is one of `REPAIR_REQUEST_READY`, `CLAIMED`, `CANDIDATE_PREQUAL_REQUIRED`, `A01_REQUEUE_READY`, `OWNER_ACTION_REQUIRED`, `OWNER_AUTHORITY_REQUIRED`, `WAIT_FOR_PREDECESSOR`, `REPLAN_ADMISSION`, or `RETRY_REQUEST_READY`.
 
@@ -80,7 +75,7 @@ Terminal transaction state is preserved in history rather than erased.
 
 Every owner chat and Second Shift worker checks its repair inbox after resolving current authority/job lock and before selecting unrelated build-ahead. A changed owner control head does not erase a repair transaction; the owner revalidates the transaction against current state before mutation.
 
-Book-Prose repair activity uses BOOK scheduling, claims and telemetry. No standalone Prose mutation claim, repair lane or Second Shift lane may be created.
+Current Book-owned integration repair uses BOOK scheduling, claims and telemetry. No standalone or inherited PROSE mutation claim, repair lane, repair transaction, qualification lane, telemetry lane, or Second Shift lane may be created.
 
 ## Authority limits
 
@@ -92,4 +87,4 @@ The State Reconciler proves current ownership and state consistency. The Repair 
 
 ## Closed-loop boundary
 
-The existing closed-loop repair train remains authoritative for receipt classification, durable ledgering, owner dispatch, exact-SHA prequalification binding, replacement-ticket emission, and same-lineage A-01 rerun adjudication. This topology-004 update changes only current owner routing semantics and transfers no PASS or product authority.
+The existing closed-loop repair train remains authoritative for receipt classification, durable ledgering, owner dispatch, exact-SHA prequalification binding, replacement-ticket emission, and same-lineage A-01 rerun adjudication. This Topology 007 reconciliation changes only the canonical documented routing/retirement contract to match already-selected live authority; it transfers no PASS, repair budget, production authority, or product ownership.
