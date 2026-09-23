@@ -49,11 +49,13 @@ function main() {
     'control-gateway/python/a01_supervisor_coordination_strict.py',
     'control-gateway/python/a01_night_scheduler.py',
     'control-gateway/python/a01_execution_worker.py',
+    'control-gateway/python/a01_execution_service.py',
     'tests/test_control_gateway_a01_supervisor_adapter.py',
     'tests/test_control_gateway_a01_supervisor_coordination.py',
     'tests/test_control_gateway_a01_supervisor_coordination_authority.py',
     'tests/test_control_gateway_a01_night_scheduler.py',
     'tests/test_control_gateway_a01_execution_worker.py',
+    'tests/test_a01_execution_service.py',
     'control-gateway/python/a01_run_now_once.py',
     'tests/test_a01_user_directed_run_now.py',
     'tests/test_a01_run_now_once.py',
@@ -85,6 +87,7 @@ function main() {
   stage('CG009_COORDINATION_AUTHORITY', 'python', ['tests/test_control_gateway_a01_supervisor_coordination_authority.py'], { timeout: 120000 });
   stage('CG010_NIGHT_SCHEDULER', 'python', ['tests/test_control_gateway_a01_night_scheduler.py'], { timeout: 180000 });
   stage('PQF_REPAIR_A01_EXECUTION_WORKER', 'python', ['tests/test_control_gateway_a01_execution_worker.py'], { timeout: 240000 });
+  stage('PQF_REPAIR_A01_EXECUTION_SERVICE', 'python', ['tests/test_a01_execution_service.py'], { timeout: 120000 });
   stage('USER_DIRECTED_RUN_NOW', 'python', ['tests/test_a01_user_directed_run_now.py'], { timeout: 120000 });
   stage('USER_DIRECTED_RUN_NOW_LIVE_PATH', 'python', ['tests/test_a01_run_now_once.py'], { timeout: 120000 });
   stage('GATE4_REPAIR_WAVE1_FOUNDATIONS', 'node', ['.github/scripts/a01-autonomous-repository-repair-wave1-qualify.js'], { timeout: 180000 });
@@ -124,6 +127,8 @@ function main() {
       'RECOVERY_IDENTITY_MISMATCH_FAILS_CLOSED',
       'ATTEMPT_EVIDENCE_IDENTITY_IS_GENERATION_SCOPED',
       'FENCE_LOSS_TERMINATES_MANAGED_PROCESS_TREE_ON_TARGET_HOST',
+      'PRODUCTION_SERVICE_REGISTERS_A01_REPOSITORY_REPAIR',
+      'REPOSITORY_REPAIR_RETRY_REQUIRES_RECONCILIATION',
     ],
     gate4_repository_repair_invariants: [
       'READ_ONLY_WAVE1_FOUNDATIONS_PASS',
@@ -137,7 +142,7 @@ function main() {
       'PROMOTION_AUTHORITY_FALSE',
       'BRANCH_DELETION_AUTHORITY_FALSE',
     ],
-    cumulative_modules: ['P10', 'CG-008', 'CG-009', 'CG-010', 'CG-011', 'PQF-REPAIR-A01-001', 'A01-REPOSITORY-REPAIR-WAVE1', 'GATE4-MUTATION-READINESS'],
+    cumulative_modules: ['P10', 'CG-008', 'CG-009', 'CG-010', 'CG-011', 'PQF-REPAIR-A01-001', 'A01-EXECUTION-SERVICE', 'A01-REPOSITORY-REPAIR-WAVE1', 'GATE4-MUTATION-READINESS'],
     completed_stages: stages,
     adapter_contract: 'control-gateway.a01-supervisor-handoff.v1',
     execution_worker_protocol: 'control-gateway.a01-execution-worker.v1',
@@ -150,6 +155,7 @@ function main() {
   writeJson(path.join(EVIDENCE_DIR, 'cg011-a01-cumulative-qualification.json'), evidence);
   console.log('GATE4_REPOSITORY_REPAIR_MUTATION_READINESS=PASS');
   console.log('PQF_REPAIR_A01_001_EXECUTION_WORKER=PASS');
+  console.log('PQF_REPAIR_A01_EXECUTION_SERVICE=PASS');
   console.log('CG011_A01_CUMULATIVE_QUALIFIER=PASS');
   console.log('P10_FOUNDATION_INVARIANTS=PASS');
 }
