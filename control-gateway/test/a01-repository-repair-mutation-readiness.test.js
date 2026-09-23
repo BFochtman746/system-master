@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import test from 'node:test';
-import { buildRepositoryRepairMutationCommand, RepairMutationReadinessError, REPAIR_MUTATION_READINESS_PROTOCOL } from './a01-repository-repair-mutation-readiness.js';
+import { buildRepositoryRepairMutationCommand, RepairMutationReadinessError, REPAIR_MUTATION_READINESS_PROTOCOL } from '../src/a01-repository-repair-mutation-readiness.js';
 
 const sha = (c) => c.repeat(40);
 const sha256 = (s) => createHash('sha256').update(s, 'utf8').digest('hex');
