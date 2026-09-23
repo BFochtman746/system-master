@@ -52,6 +52,8 @@ jobs:
       - name: Execute exact RUN NOW issue
         shell: powershell
         run: |
+          & git config --global --add safe.directory $env:GITHUB_WORKSPACE
+          if($LASTEXITCODE -ne 0){throw "RUN_NOW_SAFE_DIRECTORY_BIND_FAILED:$LASTEXITCODE"}
           $ev=Join-Path $env:RUNNER_TEMP 'a01-run-now-evidence';$log=Join-Path $env:RUNNER_TEMP 'a01-run-now-result.json'
           & python control-gateway/python/a01_run_now_once.py --db $env:A01_SUPERVISOR_DB --event-path $env:GITHUB_EVENT_PATH --root $env:GITHUB_WORKSPACE --evidence-root $ev | Tee-Object -FilePath $log
           if($LASTEXITCODE -ne 0){throw "RUN_NOW_ONE_SHOT_FAILED:$LASTEXITCODE"}
