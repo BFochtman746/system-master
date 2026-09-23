@@ -133,6 +133,122 @@ class P10FoundationTests(unittest.TestCase):
         self.assertEqual(int(circuit["retry_budget"]), 3)
         self.assertEqual(circuit["next_probe_at"], expected)
 
+    def _evaluation_claim(self, *, timeout_seconds: int = 60):
+        self.fx.store.conn.execute(
+            "UPDATE delegations SET payload_json=? WHERE delegation_id='D1'",
+            (json.dumps({"kind": "p10", "independent_evaluation_required": True}, sort_keys=True),),
+        )
+        claim = self.fx.claim()
+        self.fx.store.mark_dispatched(claim.dispatch_id, "worker-run-1", T0 + dt.timedelta(seconds=1))
+        return claim, timeout_seconds
+
+    def test_independent_evaluation_blocks_direct_completion_and_successor_until_verdict(self) -> None:
+        claim, timeout_seconds = self._evaluation_claim()
+        with self.assertRaises(Conflict):
+            self.fx.store.terminal(claim.lease_id, claim.fencing_token, "COMPLETED", now=T0 + dt.timedelta(seconds=2))
+        digest = "a" * 64
+        self.fx.store.await_evaluation(
+            claim.lease_id, claim.fencing_token, digest, {"candidate": "one"},
+            evaluation_timeout_seconds=timeout_seconds, now=T0 + dt.timedelta(seconds=3),
+        )
+        with self.assertRaises(Conflict):
+            self.fx.store.bind_ready("CORE", "D2", "O2", HEAD, "O2", now=T0 + dt.timedelta(seconds=4))
+        result = self.fx.store.evaluator_verdict(
+            claim.lease_id, claim.fencing_token, "VERDICT-1", "PASS", digest,
+            "evaluator-run-1", {"checks": "pass"}, now=T0 + dt.timedelta(seconds=5),
+        )
+        self.assertEqual(result, "COMPLETED")
+        self.fx.store.bind_ready("CORE", "D2", "O2", HEAD, "O2", now=T0 + dt.timedelta(seconds=6))
+        self.assertEqual(self.fx.store.audit_invariants(), [])
+
+    def test_validation_handoff_requires_ack_and_exact_replay_is_idempotent(self) -> None:
+        self.fx.store.conn.execute(
+            "UPDATE delegations SET payload_json=? WHERE delegation_id='D1'",
+            (json.dumps({"kind": "p10", "independent_evaluation_required": True}, sort_keys=True),),
+        )
+        claim = self.fx.claim()
+        digest = "b" * 64
+        with self.assertRaises(Conflict):
+            self.fx.store.await_evaluation(
+                claim.lease_id, claim.fencing_token, digest, {"candidate": "two"},
+                evaluation_timeout_seconds=60, now=T0 + dt.timedelta(seconds=1),
+            )
+        self.fx.store.mark_dispatched(claim.dispatch_id, "worker-run-2", T0 + dt.timedelta(seconds=2))
+        self.fx.store.await_evaluation(
+            claim.lease_id, claim.fencing_token, digest, {"candidate": "two"},
+            evaluation_timeout_seconds=60, now=T0 + dt.timedelta(seconds=3),
+        )
+        self.fx.store.await_evaluation(
+            claim.lease_id, claim.fencing_token, digest, {"candidate": "two"},
+            evaluation_timeout_seconds=60, now=T0 + dt.timedelta(seconds=4),
+        )
+        count = self.fx.store.conn.execute(
+            "SELECT COUNT(*) FROM events WHERE lease_id=? AND event_type='VALIDATING'",
+            (claim.lease_id,),
+        ).fetchone()[0]
+        self.assertEqual(count, 1)
+
+    def test_evaluator_identity_digest_and_verdict_replay_are_enforced(self) -> None:
+        claim, timeout_seconds = self._evaluation_claim()
+        digest = "c" * 64
+        self.fx.store.await_evaluation(
+            claim.lease_id, claim.fencing_token, digest, {"candidate": "three"},
+            evaluation_timeout_seconds=timeout_seconds, now=T0 + dt.timedelta(seconds=2),
+        )
+        with self.assertRaises(Conflict):
+            self.fx.store.evaluator_verdict(
+                claim.lease_id, claim.fencing_token, "VERDICT-3A", "PASS", digest,
+                "worker-run-1", {"checks": "pass"}, now=T0 + dt.timedelta(seconds=3),
+            )
+        with self.assertRaises(Conflict):
+            self.fx.store.evaluator_verdict(
+                claim.lease_id, claim.fencing_token, "VERDICT-3B", "PASS", "d" * 64,
+                "evaluator-run-3", {"checks": "pass"}, now=T0 + dt.timedelta(seconds=3),
+            )
+        first = self.fx.store.evaluator_verdict(
+            claim.lease_id, claim.fencing_token, "VERDICT-3C", "PASS", digest,
+            "evaluator-run-3", {"checks": "pass"}, now=T0 + dt.timedelta(seconds=4),
+        )
+        replay = self.fx.store.evaluator_verdict(
+            claim.lease_id, claim.fencing_token, "VERDICT-3C", "PASS", digest,
+            "evaluator-run-3", {"checks": "pass"}, now=T0 + dt.timedelta(seconds=5),
+        )
+        self.assertEqual((first, replay), ("COMPLETED", "COMPLETED"))
+
+    def test_validating_candidate_is_staled_by_owner_head_change(self) -> None:
+        claim, timeout_seconds = self._evaluation_claim()
+        digest = "e" * 64
+        self.fx.store.await_evaluation(
+            claim.lease_id, claim.fencing_token, digest, {"candidate": "four"},
+            evaluation_timeout_seconds=timeout_seconds, now=T0 + dt.timedelta(seconds=2),
+        )
+        self.fx.store.invalidate_head("CORE", "2" * 40, T0 + dt.timedelta(seconds=3))
+        row = self.fx.store.conn.execute("SELECT status FROM claims WHERE lease_id=?", (claim.lease_id,)).fetchone()
+        dispatch = self.fx.store.conn.execute("SELECT state FROM dispatch_outbox WHERE lease_id=?", (claim.lease_id,)).fetchone()
+        self.assertEqual(row["status"], "STALE")
+        self.assertEqual(dispatch["state"], "CANCELLED")
+        with self.assertRaises(StaleWorker):
+            self.fx.store.evaluator_verdict(
+                claim.lease_id, claim.fencing_token, "VERDICT-4", "PASS", digest,
+                "evaluator-run-4", {"checks": "pass"}, now=T0 + dt.timedelta(seconds=4),
+            )
+
+    def test_evaluation_timeout_fences_candidate_and_allows_successor(self) -> None:
+        claim, _ = self._evaluation_claim(timeout_seconds=30)
+        digest = "f" * 64
+        self.fx.store.await_evaluation(
+            claim.lease_id, claim.fencing_token, digest, {"candidate": "five"},
+            evaluation_timeout_seconds=30, now=T0 + dt.timedelta(seconds=2),
+        )
+        recovered = self.fx.store.recover(T0 + dt.timedelta(seconds=33), heartbeat_sla_seconds=300)
+        self.assertIn(claim.lease_id, recovered["stale_leases"])
+        self.assertEqual(stale_reason(self.fx.store, claim.lease_id), "EVALUATOR_TIMEOUT")
+        lane = self.fx.store.conn.execute("SELECT fencing_counter,state FROM lanes WHERE lane='CORE'").fetchone()
+        self.assertGreater(int(lane["fencing_counter"]), claim.fencing_token)
+        self.assertEqual(lane["state"], "RECONCILE")
+        self.fx.store.bind_ready("CORE", "D2", "O2", HEAD, "O2", now=T0 + dt.timedelta(seconds=34))
+        self.assertEqual(self.fx.store.audit_invariants(), [])
+
     def test_audit_invariants_detects_each_claimed_logical_violation(self) -> None:
         # 1. MULTIPLE_ACTIVE_CLAIMS: deliberately remove the storage guard, then seed corruption.
         claim = self.fx.claim()
