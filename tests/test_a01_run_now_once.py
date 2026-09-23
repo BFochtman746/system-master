@@ -16,8 +16,8 @@ class T(unittest.TestCase):
  def test_bound_issue(self):
   i={"number":1};self.assertEqual(EventBoundRunNowSource("BFochtman746","system-master",i).list_run_now_issues(),[i])
  def test_immediate_executes_without_night_queue(self):
-  h=handoff("R","LANE-R","IMMEDIATE");c=helpers.make_coord(h,resource="OWNER-LANE:LANE-R",graph="R");a=SupervisorCoordinationAdapter(self.s);a.bind(h,c,now=DAY);claim=a.claim(h,c,now=DAY);self.assertIsNone(self.s.conn.execute("SELECT 1 FROM night_scheduler_queue WHERE delegation_id=?",(h["delegation_id"],)).fetchone())
-  w=A01RunNowExecutionWorker(self.s,scheduler=A01NightScheduler(self.s),root=ROOT,lease_seconds=60,renew_seconds=10,heartbeat_sla_seconds=120,clock=lambda:DAY,worker_id="w");w._git_head=lambda:"d"*40;cap={}
+  scheduler=A01NightScheduler(self.s);h=handoff("R","LANE-R","IMMEDIATE");c=helpers.make_coord(h,resource="OWNER-LANE:LANE-R",graph="R");a=SupervisorCoordinationAdapter(self.s);a.bind(h,c,now=DAY);claim=a.claim(h,c,now=DAY);self.assertIsNone(self.s.conn.execute("SELECT 1 FROM night_scheduler_queue WHERE delegation_id=?",(h["delegation_id"],)).fetchone())
+  w=A01RunNowExecutionWorker(self.s,scheduler=scheduler,root=ROOT,lease_seconds=60,renew_seconds=10,heartbeat_sla_seconds=120,clock=lambda:DAY,worker_id="w");w._git_head=lambda:"d"*40;cap={}
   class P:
    returncode=0
    def communicate(self,timeout=None): return ("OK","")
