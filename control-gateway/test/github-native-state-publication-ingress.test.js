@@ -2,9 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
-const ingress = fs.readFileSync(new URL('../../.github/workflows/control-gateway-native-state-publication-ingress.yml', import.meta.url), 'utf8');
-const workflow = fs.readFileSync(new URL('../../.github/workflows/control-gateway-active-work-publisher.yml', import.meta.url), 'utf8');
-const script = fs.readFileSync(new URL('../../.github/scripts/control-gateway-active-work-publisher.js', import.meta.url), 'utf8');
+const readText = (url) => fs.readFileSync(url, 'utf8').replace(/\r\n/g, '\n');
+const ingress = readText(new URL('../../.github/workflows/control-gateway-native-state-publication-ingress.yml', import.meta.url));
+const workflow = readText(new URL('../../.github/workflows/control-gateway-active-work-publisher.yml', import.meta.url));
+const script = readText(new URL('../../.github/scripts/control-gateway-active-work-publisher.js', import.meta.url));
 
 test('native state ingress is owner-authenticated and narrowly issue-triggered', () => {
   assert.ok(ingress.includes('issues:\n    types: [opened]'));
