@@ -1,0 +1,120 @@
+{
+  "contract_id": "PQF-001F-MULTI-LANGUAGE-QUALITY-BASELINE-CONTRACT-001",
+  "program": "PROGRAMMING-QUALITY-FOUNDATION-001",
+  "operation": "PQF-001F",
+  "title": "Multi-Language Coverage, Complexity & Duplication Baseline",
+  "baseline_parent_sha": "90e83fb1db8086ed93dec10cd2aaa2c754400e8f",
+  "authority": {
+    "owner": "SYSTEM_MASTER/PROGRAMMING",
+    "current_authority": "CURRENT-AUTHORITY-005",
+    "mode": "REPORT_ONLY",
+    "production_source_mutation_authorized": false,
+    "quality_threshold_authority": "NONE_IN_PQF_001F"
+  },
+  "languages": [
+    "java",
+    "python",
+    "javascript"
+  ],
+  "coverage": {
+    "java": {
+      "tool": "JaCoCo",
+      "version": "0.8.15",
+      "metrics": [
+        "line",
+        "branch",
+        "method",
+        "complexity"
+      ],
+      "test_class_exclusion": "*Test.java and *Tests.java are excluded from the production denominator because System Master intentionally compiles many qualification tests as main classes"
+    },
+    "python": {
+      "tool": "coverage.py",
+      "version": "7.16.1",
+      "branch": true,
+      "source_roots": [
+        "control-gateway/python",
+        "tools"
+      ]
+    },
+    "javascript": {
+      "tool": "c8",
+      "version": "12.0.0",
+      "all": true,
+      "source_roots": [
+        "control-gateway/src",
+        "system-master/book-system"
+      ]
+    }
+  },
+  "complexity": {
+    "tool": "Lizard",
+    "version": "1.24.0",
+    "metrics": [
+      "nloc",
+      "cyclomatic_complexity",
+      "token_count",
+      "parameter_count",
+      "function_length"
+    ],
+    "enforcement": false
+  },
+  "duplication": {
+    "tool": "jscpd",
+    "version": "5.2.0",
+    "formats": [
+      "java",
+      "javascript",
+      "python"
+    ],
+    "mode": "mild",
+    "min_lines": 5,
+    "min_tokens": 50,
+    "clone_policy": "EXACT_DEFAULT_BASELINE_ONLY",
+    "enforcement": false
+  },
+  "production_scope": [
+    "system-master/**/*.java",
+    "control-gateway/src/**/*.js",
+    "control-gateway/python/**/*.py",
+    "tools/**/*.py",
+    "system-master/book-system/**/*.js"
+  ],
+  "denominator_exclusions": [
+    "**/test/**",
+    "**/tests/**",
+    "**/*.test.js",
+    "**/test_*.py",
+    "**/*Test.java",
+    "**/*Tests.java",
+    "**/target/**",
+    "**/node_modules/**",
+    "**/qualification-output/**"
+  ],
+  "execution_failure_policy": {
+    "continue_measurement_where_possible": true,
+    "record_every_test_or_qualification_failure": true,
+    "suppress_or_greenwash": false,
+    "admission_requires_zero_failures": true,
+    "cross_owner_findings_require_owner_adjudication": true
+  },
+  "post_merge_exact_subject_rerun": true,
+  "acceptance": [
+    "Bind every report to the exact workflow subject SHA.",
+    "Produce Java line/branch/method/complexity coverage after executing the current Maven qualification bridge.",
+    "Produce Python line and branch coverage over declared production roots with never-executed source retained in the denominator.",
+    "Produce JavaScript line/branch/function/statement coverage with --all over declared production roots.",
+    "Continue report collection after an individual test or qualification failure when technically possible, preserving that failure in execution-health evidence.",
+    "Do not convert a failing test into a green baseline; zero unresolved execution failures are required for PQF-001F admission.",
+    "Produce cross-language function-level structural complexity measurements.",
+    "Produce cross-language exact/mild clone statistics and clone locations.",
+    "Emit pinned tool versions and SHA-256 digests for raw reports.",
+    "Emit one machine-readable PQF-001F baseline receipt.",
+    "Rerun the dedicated baseline on the exact post-merge main SHA before treating the baseline as authoritative.",
+    "Do not enforce any coverage, complexity, density, parameter-count, or duplication threshold.",
+    "Do not refactor or otherwise mutate production source in order to improve the baseline."
+  ],
+  "interpretation_law": "MEASURE_THEN_UNDERSTAND_THEN_BASELINE_THEN_RISK_CLASSIFY_THEN_DERIVE_RATIONAL_THRESHOLDS_LATER",
+  "successor_gate": "PQF-001G may begin only after PQF-001F has a complete exact-subject receipt with zero unresolved execution failures or every cross-owner execution finding has been repaired and requalified.",
+  "successor_after_numeric_baseline": "PQF-001G — STATIC ANALYSIS, SECURITY & SUPPLY-CHAIN BASELINE"
+}
