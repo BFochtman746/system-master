@@ -1,0 +1,75 @@
+{
+  "binding_id": "A01-CODE-QUAL-001-AUTHORING-SUBJECT-BINDING-001",
+  "operation_id": "A01-CODE-QUAL-001",
+  "purpose": "Prevent the qualification from attributing code-authoring capability to the A-01 execution host when the measured work was actually produced by a separate coding agent/model.",
+  "measured_subject_definition": "The measured subject is the exact fresh System Master Second Shift ChatGPT scheduled development worker configuration operating against the isolated candidate-visible benchmark workspace during the sealed 30-minute window. A-01 is the controlled Windows/X64 execution, timing corroboration, evidence, freeze, and post-freeze evaluation host; it is not the authoring subject.",
+  "required_identities": {
+    "authoring_agent": [
+      "provider_or_runtime",
+      "agent_or_model_name",
+      "agent_or_model_version_when_available",
+      "reasoning_or_effort_configuration_when_available",
+      "system_or_project_instruction_digest",
+      "tool_permission_profile_digest",
+      "authoring_entrypoint_identity"
+    ],
+    "a01_execution_environment": [
+      "runner_name",
+      "operating_system",
+      "architecture",
+      "toolchain_manifest_digest",
+      "workspace_isolation_contract_digest"
+    ],
+    "benchmark": [
+      "contract_digest",
+      "assignment_digest",
+      "candidate_fixture_digest",
+      "hidden_evaluator_digest",
+      "runner_digest"
+    ]
+  },
+  "validity_law": [
+    "A run with an unidentified authoring runtime or entrypoint is INVALID_RUN.",
+    "Unavailable platform-managed model/version or reasoning metadata must be recorded as unavailable rather than guessed; availability gaps must be reported with the result.",
+    "A run that exercises only A-01 qualification/execution commands is not evidence of code-authoring capability.",
+    "A run may be compared with another run only when subject-identity differences are explicitly reported.",
+    "Changing the authoring model, project instructions, tool permissions, or execution environment creates a new measured subject configuration even if the benchmark contract is unchanged.",
+    "A chat/session that has inspected hidden evaluator implementation or hidden run material is ineligible as the measured candidate for that sealed benchmark instance.",
+    "A locally available coding agent must not be substituted for the System Master Second Shift authoring subject without explicit subject reclassification."
+  ],
+  "current_repository_finding": {
+    "status": "AUTHORING_ENTRYPOINT_IDENTIFIED_DEADLINE_AND_ISOLATION_BRIDGE_PENDING",
+    "authoring_system": "System Master Second Shift ChatGPT scheduled development worker",
+    "a01_role": "Controlled Windows/X64 execution, timing corroboration, evidence, freeze, and post-freeze evaluation host",
+    "overnight_repository_evidence": {
+      "window_start_utc": "2026-09-15T05:15:28Z",
+      "window_end_utc": "2026-09-15T06:29:02Z",
+      "first_observed_code_commit": "545ec1c2e4028d67fba6f73d9c898736490c9cd2",
+      "last_observed_code_commit": "e89c98e02194263cf149af991cd7a6700d7ad3de"
+    },
+    "observed_authoring_entrypoint": {
+      "provider_or_runtime": "ChatGPT scheduled task automation",
+      "task_title": "Second Shift Overnight",
+      "schedule_observed": "2026-09-15 starting 01:00 America/New_York, hourly, eight occurrences",
+      "last_run_time_utc_observed": "2026-09-15T06:35:26.787308Z",
+      "prompt_sha256": "c8a5f36d3da78a7e0653d1fba5c1b114d30985c279b3fc1579bf887322c47732",
+      "model_or_agent_version": "NOT_EXPOSED_BY_AUTOMATION_METADATA",
+      "reasoning_or_effort_configuration": "NOT_EXPOSED_BY_AUTOMATION_METADATA",
+      "entrypoint_adjudication": "This is the observed external ChatGPT authoring mechanism associated with the overnight System Master work; it is distinct from the A-01 Windows runner."
+    },
+    "a01_local_agent_probe": {
+      "probe_subject": "03b25a0a88aa625ae5dac8feff525a1e58c91c20",
+      "workflow_run_id": "35034030089",
+      "runner": "A-01",
+      "claude_code_version": "2.1.270",
+      "claude_authenticated": true,
+      "claude_files_modified_during_overnight_window": 0,
+      "claude_latest_metadata_write_utc": "2026-09-13T18:48:44.3795799Z",
+      "adjudication": "Claude Code was installed and authenticated but was not the authoring process for the exact overnight System Master coding window."
+    },
+    "remaining_identity_gap": "The platform-managed ChatGPT model/version, reasoning configuration, and exact tool-permission profile are not exposed by current automation metadata and must be recorded as unavailable or captured if a future executor bridge exposes them.",
+    "remaining_execution_gap": "The ChatGPT scheduled authoring entrypoint is callable, but current automation control does not provide a hard external 1,800-second process kill or a technically enforced candidate-only tool/filesystem sandbox. The first baseline remains invalid until those two controls are proven or an equivalent controlled fresh-session bridge is introduced.",
+    "current_session_eligibility": "INELIGIBLE_AS_MEASURED_CANDIDATE because this development session inspected hidden evaluator implementation while repairing the grader.",
+    "consequence": "Do not start or label the first sealed 30-minute baseline as valid until a fresh unexposed Second Shift ChatGPT session is launched through a bridge that enforces the candidate-only boundary and hard deadline while capturing the available authoring identity fields."
+  }
+}
