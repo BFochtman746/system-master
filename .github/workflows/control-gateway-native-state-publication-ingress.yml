@@ -86,6 +86,14 @@ jobs:
               jq -e '.parameters.successor_candidate.required_receipt_ids | type == "array"' "${request_file}" >/dev/null
               jq -e '.parameters.authoritative_subject | type == "object"' "${request_file}" >/dev/null
               ;;
+            RECORD_A01_QUALIFICATION_PASS)
+              test "$(jq -c '.parameters | keys' "${request_file}")" = '["artifact_digest","artifact_name","qualification_id","subject_sha","workflow_run_id"]'
+              jq -e '.parameters.qualification_id | type == "string" and test("^[A-Za-z0-9][A-Za-z0-9._:/-]{0,191}$")' "${request_file}" >/dev/null
+              jq -e '.parameters.subject_sha | type == "string" and test("^[0-9a-f]{40}$")' "${request_file}" >/dev/null
+              jq -e '.parameters.workflow_run_id | type == "number" and floor == . and . > 0' "${request_file}" >/dev/null
+              jq -e '.parameters.artifact_name | type == "string" and length > 0' "${request_file}" >/dev/null
+              jq -e '.parameters.artifact_digest | type == "string" and test("^sha256:[0-9a-f]{64}$")' "${request_file}" >/dev/null
+              ;;
             *) exit 1 ;;
           esac
 
