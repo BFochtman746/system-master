@@ -5,7 +5,7 @@ on:
 permissions:
   contents: read
   issues: read
-  actions: read
+  actions: write
 concurrency:
   group: a01-global-r2
   cancel-in-progress: false
@@ -20,6 +20,7 @@ jobs:
     env:
       PYTHONPATH: ${{ github.workspace }}
       A01_INGRESS_TOKEN: ${{ github.token }}
+      A01_REPAIR_DISPATCH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with: {ref: "${{ github.sha }}", fetch-depth: 1, clean: true, persist-credentials: false}
