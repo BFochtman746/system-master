@@ -1,5 +1,5 @@
 {
-  "registry_version": 36,
+  "registry_version": 37,
   "qualifications": {
     "A01-CONTROL-PLANE-SELFTEST": {
       "workstream_id": "SYSTEM-MASTER",
@@ -401,6 +401,19 @@
       "overnight_max_runtime_minutes": 30,
       "checkpoint_capable": false,
       "description": "Qualify the exact-subject Second Shift 001F bounded canary through three ordered registered text tasks using one isolated persistent scheduler database, one scheduler claim per tick, database reopen/restart between executions, the existing fenced registered-task worker, and local Lemonade gpt-oss-20b-NPU. Each task must return exact A01_REGISTERED_TASK_OK within the calibrated 60-second task ceiling, durable canary evidence must prove live_ready_queue_touched:false, and PASS grants no scheduler-cutover, 001G, production-freeze, or unrestricted live READY-queue authority."
+    },
+    "REPOSITORY-NORMALIZATION-RECOVERY-A01": {
+      "workstream_id": "SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION",
+      "gate_class": "focused",
+      "source": "subject",
+      "executable": "node",
+      "args": [
+        ".github/scripts/a01-repository-normalization-qualify.js"
+      ],
+      "evidence_artifact": "repository-normalization-recovery-a01",
+      "overnight_eligible": false,
+      "allowed_post_actions": [],
+      "description": "Qualify the exact repository-normalization recovery subject on A-01: generic owner-authenticated qualification ingress, exact ACTIVE/PENDING operation binding, exact SHA/epoch/packet/development-response receipt checks, focused state-publication regressions, mutation-readiness, and live repository preflight. PASS is exact-SHA focused evidence only and grants no promotion, repository-write, repair-dispatch, or branch-deletion authority."
     }
   }
 }
