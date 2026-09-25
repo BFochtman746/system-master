@@ -63,6 +63,23 @@ function runNode(args, failureCode) {
   return `${result.stdout ?? ''}\n${result.stderr ?? ''}`;
 }
 
+// Machine-readable qualifier output lives on stdout only. Node writes runtime
+// warnings (e.g. MODULE_TYPELESS_PACKAGE_JSON) to stderr; merging them into the
+// JSON text made C11_C04_QUALIFIER_OUTPUT_INVALID fire on a PASSing C04.
+function runNodeStdout(args, failureCode) {
+  const result = spawnSync(process.execPath, args, {
+    cwd: root,
+    encoding: 'utf8',
+    env: process.env
+  });
+  if (result.status !== 0) {
+    process.stderr.write(result.stdout ?? '');
+    process.stderr.write(result.stderr ?? '');
+    fail(failureCode, `exit=${result.status ?? 'null'}`);
+  }
+  return result.stdout ?? '';
+}
+
 function parseTestSummary(combined) {
   // Accept either reporter's counter line (TAP `# pass N`, spec `ℹ pass N`).
   // Unparseable counters yield pass=0 / fail=-1, which trips the non-vacuity
@@ -111,7 +128,7 @@ function main() {
   const summary = parseTestSummary(testOutput);
   assert(summary.pass >= 21 && summary.fail === 0, 'C11_NON_VACUOUS_TEST_GATE_FAILED', `pass=${summary.pass} fail=${summary.fail}`);
 
-  const c04Output = runNode([PATHS.c04Qualifier], 'C11_C04_QUALIFIER_FAILED');
+  const c04Output = runNodeStdout([PATHS.c04Qualifier], 'C11_C04_QUALIFIER_FAILED');
   let c04Result;
   try {
     c04Result = JSON.parse(c04Output.trim());
