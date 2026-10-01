@@ -1,0 +1,175 @@
+name: F8 A6 Privileged Broker Canary 001
+
+on:
+  push:
+    branches:
+      - f8-privileged-broker-bootstrap-001
+    paths:
+      - '.github/workflows/f8-a6-privileged-broker-canary-001.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: f8-a6-privileged-broker-canary-001
+  cancel-in-progress: false
+
+jobs:
+  canary:
+    name: Enqueue exact A6 request through privileged broker
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 10
+    steps:
+      - name: Verify exact request and live broker
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if ($env:GITHUB_REF -ne 'refs/heads/f8-privileged-broker-bootstrap-001') { throw 'WRONG_CANARY_REF' }
+
+          $request = 'S:\SystemMasterLab\engineering-fabric\workspace-candidates\privileged-operations-broker-v1\F8_A6_PRIVILEGED_REQUEST.json'
+          if (-not (Test-Path -LiteralPath $request)) { throw 'A6_REQUEST_MISSING' }
+          $actual = (Get-FileHash -LiteralPath $request -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($actual -ne 'a2e98344c85115b1dee6780713431370b3aa241eeda8dedf38524a47ca7f62c1') { throw "A6_REQUEST_HASH_MISMATCH:$actual" }
+
+          $body = Get-Content -LiteralPath $request -Raw | ConvertFrom-Json
+          if ($body.request_id -ne 'F8-A6-CANARY-001') { throw 'A6_REQUEST_ID_MISMATCH' }
+          if ($body.operation_id -ne 'A6_INSTALL_CAMPAIGN_FABRIC_CANARY_V1') { throw 'A6_OPERATION_MISMATCH' }
+          if ([int64]$body.supervisor_fencing_token -ne 282) { throw 'A6_REQUEST_FENCE_MISMATCH' }
+          if ($body.expected_subject_digest -ne '3065bd15b8f3a694373c533d8db6ad316f693a589651e792a4cef56387d07e38') { throw 'A6_BROKER_SUBJECT_MISMATCH' }
+
+          $service = Get-CimInstance Win32_Service -Filter "Name='SystemMasterPrivilegedBroker'"
+          if ($null -eq $service) { throw 'PRIVILEGED_BROKER_MISSING' }
+          if ($service.State -ne 'Running') { throw "PRIVILEGED_BROKER_NOT_RUNNING:$($service.State)" }
+          if ($service.StartName -ne 'LocalSystem') { throw "PRIVILEGED_BROKER_ACCOUNT_MISMATCH:$($service.StartName)" }
+          if ($service.PathName -ne 'C:\ProgramData\SystemMaster\PrivilegedBroker\bin\SystemMaster.PrivilegedBroker.exe --service') { throw "PRIVILEGED_BROKER_PATH_MISMATCH:$($service.PathName)" }
+
+          Add-Type -TypeDefinition @'
+          using System;
+          using System.Runtime.InteropServices;
+          public static class F8A6ClaimReader {
+              const int SQLITE_OK=0, SQLITE_ROW=100, SQLITE_OPEN_READONLY=1;
+              [DllImport("winsqlite3.dll", CallingConvention=CallingConvention.Cdecl, CharSet=CharSet.Ansi)]
+              static extern int sqlite3_open_v2([MarshalAs(UnmanagedType.LPUTF8Str)] string filename, out IntPtr db, int flags, string vfs);
+              [DllImport("winsqlite3.dll", CallingConvention=CallingConvention.Cdecl, CharSet=CharSet.Ansi)]
+              static extern int sqlite3_prepare_v2(IntPtr db, [MarshalAs(UnmanagedType.LPUTF8Str)] string sql, int nByte, out IntPtr stmt, IntPtr tail);
+              [DllImport("winsqlite3.dll", CallingConvention=CallingConvention.Cdecl)] static extern int sqlite3_step(IntPtr stmt);
+              [DllImport("winsqlite3.dll", CallingConvention=CallingConvention.Cdecl)] static extern IntPtr sqlite3_column_text(IntPtr stmt, int col);
+              [DllImport("winsqlite3.dll", CallingConvention=CallingConvention.Cdecl)] static extern long sqlite3_column_int64(IntPtr stmt, int col);
+              [DllImport("winsqlite3.dll", CallingConvention=CallingConvention.Cdecl)] static extern int sqlite3_column_type(IntPtr stmt, int col);
+              [DllImport("winsqlite3.dll", CallingConvention=CallingConvention.Cdecl)] static extern int sqlite3_finalize(IntPtr stmt);
+              [DllImport("winsqlite3.dll", CallingConvention=CallingConvention.Cdecl)] static extern int sqlite3_close_v2(IntPtr db);
+              static string Text(IntPtr stmt,int col) { var p=sqlite3_column_text(stmt,col); return p==IntPtr.Zero ? "" : Marshal.PtrToStringAnsi(p); }
+              public static string Read() {
+                  IntPtr db,stmt;
+                  if(sqlite3_open_v2(@"C:\SystemMaster\a01-supervisor.db",out db,SQLITE_OPEN_READONLY,null)!=SQLITE_OK) throw new Exception("SQLITE_OPEN_FAILED");
+                  try {
+                      const string sql="select fencing_token,status,released_at,expires_at from claims where lease_id='CORE-913161b7-7e87-4fba-9514-6bcb61bd79a3' limit 1";
+                      if(sqlite3_prepare_v2(db,sql,-1,out stmt,IntPtr.Zero)!=SQLITE_OK) throw new Exception("SQLITE_PREPARE_FAILED");
+                      try {
+                          if(sqlite3_step(stmt)!=SQLITE_ROW) throw new Exception("F8_CLAIM_MISSING");
+                          var released=sqlite3_column_type(stmt,2)==5 ? "" : Text(stmt,2);
+                          return sqlite3_column_int64(stmt,0)+"|"+Text(stmt,1)+"|"+released+"|"+Text(stmt,3);
+                      } finally { sqlite3_finalize(stmt); }
+                  } finally { sqlite3_close_v2(db); }
+              }
+          }
+          '@
+          $claim = [F8A6ClaimReader]::Read().Split('|')
+          if ([int64]$claim[0] -ne 282) { throw 'F8_CLAIM_FENCE_MISMATCH' }
+          if ($claim[1] -notin @('CLAIMED','RUNNING')) { throw 'F8_CLAIM_INACTIVE' }
+          if (-not [string]::IsNullOrEmpty($claim[2])) { throw 'F8_CLAIM_RELEASED' }
+          if ([DateTimeOffset]::Parse($claim[3]) -le [DateTimeOffset]::UtcNow) { throw 'F8_CLAIM_EXPIRED' }
+
+      - name: Enqueue fixed A6 request and await broker receipt
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $source = 'S:\SystemMasterLab\engineering-fabric\workspace-candidates\privileged-operations-broker-v1\F8_A6_PRIVILEGED_REQUEST.json'
+          $ready = 'C:\ProgramData\SystemMaster\PrivilegedBroker\inbox\ready\F8-A6-CANARY-001.json'
+          $receipt = 'C:\ProgramData\SystemMaster\PrivilegedBroker\receipts\F8-A6-CANARY-001.json.receipt.json'
+          $quarantine = 'C:\ProgramData\SystemMaster\PrivilegedBroker\quarantine'
+
+          if (Test-Path -LiteralPath $ready) { throw 'A6_READY_ALREADY_EXISTS' }
+          if (Test-Path -LiteralPath $receipt) { throw 'A6_RECEIPT_ALREADY_EXISTS' }
+          $priorFailure = Get-ChildItem -LiteralPath $quarantine -Filter 'F8-A6-CANARY-001.json*.error.json' -ErrorAction SilentlyContinue
+          if ($priorFailure) { throw 'A6_PRIOR_FAILURE_PRESENT' }
+
+          Copy-Item -LiteralPath $source -Destination $ready
+
+          $deadline = [DateTime]::UtcNow.AddMinutes(4)
+          do {
+            Start-Sleep -Milliseconds 500
+            if (Test-Path -LiteralPath $receipt) { break }
+            $failure = Get-ChildItem -LiteralPath $quarantine -Filter 'F8-A6-CANARY-001.json*.error.json' -ErrorAction SilentlyContinue | Select-Object -First 1
+            if ($failure) {
+              Get-Content -LiteralPath $failure.FullName
+              throw 'A6_BROKER_QUARANTINED_REQUEST'
+            }
+          } while ([DateTime]::UtcNow -lt $deadline)
+
+          if (-not (Test-Path -LiteralPath $receipt)) { throw 'A6_BROKER_RECEIPT_TIMEOUT' }
+          $r = Get-Content -LiteralPath $receipt -Raw | ConvertFrom-Json
+          if ($r.ProtocolVersion -ne 'system-master.privileged-receipt.v1') { throw 'A6_RECEIPT_PROTOCOL_MISMATCH' }
+          if ($r.RequestId -ne 'F8-A6-CANARY-001') { throw 'A6_RECEIPT_REQUEST_MISMATCH' }
+          if ($r.OperationId -ne 'A6_INSTALL_CAMPAIGN_FABRIC_CANARY_V1') { throw 'A6_RECEIPT_OPERATION_MISMATCH' }
+          if ($r.Result -ne 'PASS') { throw "A6_RECEIPT_NONPASS:$($r.Result)" }
+          if ([string]$r.ReceiptDigest -notmatch '^[0-9a-f]{64}$') { throw 'A6_RECEIPT_DIGEST_INVALID' }
+          Get-Content -LiteralPath $receipt
+
+      - name: Verify A6 campaign evidence
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $psql = 'C:\Program Files\PostgreSQL\18\bin\psql.exe'
+          function Sql([string]$q) {
+            $v = & $psql -X -h 127.0.0.1 -p 55432 -U system_master_shadow -d system_master_shadow -v ON_ERROR_STOP=1 -At -c $q
+            if ($LASTEXITCODE -ne 0) { throw "PSQL_FAILED:$LASTEXITCODE" }
+            return ($v | Out-String).Trim()
+          }
+          $campaign = Sql "select state from campaign.campaigns where campaign_id='A6-SERVICE-CANARY-001' and campaign_version='1.0.0';"
+          if ($campaign -ne 'PASS') { throw "A6_CAMPAIGN_NONPASS:$campaign" }
+          $event = Sql "select event_type from campaign.campaign_events where campaign_id='A6-SERVICE-CANARY-001' order by event_seq desc limit 1;"
+          if ($event -ne 'CAMPAIGN_PASS') { throw "A6_TERMINAL_EVENT_MISMATCH:$event" }
+          $attempts = Sql "select attempt_no||':'||state from campaign.campaign_attempts where campaign_id='A6-SERVICE-CANARY-001' order by attempt_no;"
+          $receipt = Sql "select receipt_digest from campaign.campaign_receipts where campaign_id='A6-SERVICE-CANARY-001' and result='PASS' order by created_at desc limit 1;"
+          if ($receipt -notmatch '^[0-9a-f]{64}$') { throw 'A6_CAMPAIGN_RECEIPT_INVALID' }
+          $effect = 'S:\SystemMasterLab\engineering-fabric\workspace-candidates\durable-campaign-fabric-v1\evidence\A6-SERVICE-CANARY-001.effect'
+          if (-not (Test-Path -LiteralPath $effect)) { throw 'A6_EFFECT_MISSING' }
+          $effectCount = (Get-Content -LiteralPath $effect).Count
+          if ($effectCount -ne 1) { throw "A6_EFFECT_COUNT_MISMATCH:$effectCount" }
+          Write-Output "A6_CAMPAIGN=PASS"
+          Write-Output "A6_ATTEMPTS=$attempts"
+          Write-Output "A6_TERMINAL_EVENT=$event"
+          Write-Output "A6_CAMPAIGN_RECEIPT=$receipt"
+          Write-Output "A6_EFFECT_COUNT=$effectCount"
+
+      - name: Emit immutable F8 A6 evidence
+        if: always()
+        shell: powershell
+        run: |
+          $evidence = Join-Path $env:RUNNER_TEMP "f8-a6-canary-$env:GITHUB_RUN_ID"
+          New-Item -ItemType Directory -Path $evidence -Force | Out-Null
+          $sourceReceipt = 'C:\ProgramData\SystemMaster\PrivilegedBroker\receipts\F8-A6-CANARY-001.json.receipt.json'
+          if (Test-Path -LiteralPath $sourceReceipt) { Copy-Item -LiteralPath $sourceReceipt -Destination (Join-Path $evidence 'privileged-receipt.json') -Force }
+          $restart = 'S:\SystemMasterLab\engineering-fabric\workspace-candidates\durable-campaign-fabric-v1\evidence\A6-SERVICE-CANARY-001.restart.json'
+          if (Test-Path -LiteralPath $restart) { Copy-Item -LiteralPath $restart -Destination (Join-Path $evidence 'campaign-restart-evidence.json') -Force }
+          $request = 'S:\SystemMasterLab\engineering-fabric\workspace-candidates\privileged-operations-broker-v1\F8_A6_PRIVILEGED_REQUEST.json'
+          Copy-Item -LiteralPath $request -Destination (Join-Path $evidence 'privileged-request.json') -Force
+          $record = [ordered]@{
+            protocol_version='system-master.f8-a6-canary-evidence.v1'
+            run_id=$env:GITHUB_RUN_ID
+            request_sha256=(Get-FileHash -LiteralPath $request -Algorithm SHA256).Hash.ToLowerInvariant()
+            broker_subject='3065bd15b8f3a694373c533d8db6ad316f693a589651e792a4cef56387d07e38'
+            supervisor_fence=282
+            completed_at=[DateTime]::UtcNow.ToString('o')
+          }
+          $record | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $evidence 'run-evidence.json') -Encoding utf8
+
+      - name: Upload F8 A6 evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: f8-a6-canary-${{ github.run_id }}-evidence
+          path: ${{ runner.temp }}\f8-a6-canary-${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 90
