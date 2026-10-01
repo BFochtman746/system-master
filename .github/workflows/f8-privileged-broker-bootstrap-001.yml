@@ -1,0 +1,137 @@
+name: F8 Privileged Broker Bootstrap 001
+
+on:
+  push:
+    branches:
+      - f8-privileged-broker-bootstrap-001
+    paths:
+      - '.github/workflows/f8-privileged-broker-bootstrap-001.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: f8-privileged-broker-bootstrap-001
+  cancel-in-progress: false
+
+jobs:
+  bootstrap:
+    name: Install exact F8 privileged broker on A-01
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 15
+    steps:
+      - name: Verify exact bootstrap authority and candidate
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if ($env:GITHUB_REF -ne 'refs/heads/f8-privileged-broker-bootstrap-001') { throw 'WRONG_BOOTSTRAP_REF' }
+
+          $candidate = 'S:\SystemMasterLab\engineering-fabric\workspace-candidates\privileged-operations-broker-v1'
+          $manifestPath = Join-Path $candidate 'F8_BOOTSTRAP_MANIFEST.json'
+          if (-not (Test-Path -LiteralPath $manifestPath)) { throw 'F8_BOOTSTRAP_MANIFEST_MISSING' }
+          $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
+          if ($manifest.protocol_version -ne 'system-master.f8-privileged-broker-bootstrap.v1') { throw 'F8_BOOTSTRAP_MANIFEST_PROTOCOL' }
+          if ([int64]$manifest.supervisor_fence -ne 282) { throw 'F8_BOOTSTRAP_FENCE_MISMATCH' }
+          if ($manifest.contract_id -ne 'A01-FAULT-ISOLATED-DURABLE-EXECUTION-FABRIC-001') { throw 'F8_BOOTSTRAP_CONTRACT_MISMATCH' }
+
+          $claimJson = & python -c "import sqlite3,json,datetime; db=sqlite3.connect(r'C:\SystemMaster\a01-supervisor.db'); row=db.execute(\"select lease_id,fencing_token,status,released_at,expires_at from claims where lease_id='CORE-913161b7-7e87-4fba-9514-6bcb61bd79a3'\").fetchone(); print(json.dumps(row))"
+          if ($LASTEXITCODE -ne 0) { throw 'SUPERVISOR_QUERY_FAILED' }
+          $claim = $claimJson | ConvertFrom-Json
+          if ($null -eq $claim) { throw 'F8_CLAIM_MISSING' }
+          if ([int64]$claim[1] -ne 282) { throw 'F8_CLAIM_FENCE_MISMATCH' }
+          if ($null -ne $claim[3]) { throw 'F8_CLAIM_RELEASED' }
+          if ($claim[2] -notin @('CLAIMED','RUNNING')) { throw 'F8_CLAIM_INACTIVE' }
+          if ([DateTimeOffset]::Parse($claim[4]) -le [DateTimeOffset]::UtcNow) { throw 'F8_CLAIM_EXPIRED' }
+
+          $admin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+          if (-not $admin) { throw 'RUNNER_NOT_ELEVATED_ADMIN' }
+
+          $source = Join-Path $candidate 'bin\Release\net10.0-windows'
+          foreach ($entry in $manifest.installed_subject.files.psobject.Properties) {
+            $path = Join-Path $source $entry.Name
+            if (-not (Test-Path -LiteralPath $path)) { throw "BROKER_FILE_MISSING:$($entry.Name)" }
+            $actual = (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant()
+            if ($actual -ne [string]$entry.Value) { throw "BROKER_HASH_MISMATCH:$($entry.Name):$actual" }
+          }
+
+      - name: Install exact LocalSystem broker service
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $candidate = 'S:\SystemMasterLab\engineering-fabric\workspace-candidates\privileged-operations-broker-v1'
+          $manifest = Get-Content -LiteralPath (Join-Path $candidate 'F8_BOOTSTRAP_MANIFEST.json') -Raw | ConvertFrom-Json
+          $source = Join-Path $candidate 'bin\Release\net10.0-windows'
+          $root = 'C:\ProgramData\SystemMaster\PrivilegedBroker'
+          $bin = Join-Path $root 'bin'
+          $dirs = @($root,$bin,(Join-Path $root 'inbox\ready'),(Join-Path $root 'inbox\processing'),(Join-Path $root 'receipts'),(Join-Path $root 'evidence'),(Join-Path $root 'state'),(Join-Path $root 'quarantine'))
+          foreach ($dir in $dirs) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }
+
+          foreach ($entry in $manifest.installed_subject.files.psobject.Properties) {
+            Copy-Item -LiteralPath (Join-Path $source $entry.Name) -Destination (Join-Path $bin $entry.Name) -Force
+          }
+          Copy-Item -LiteralPath (Join-Path $candidate 'installed-subject.json') -Destination (Join-Path $root 'installed-subject.json') -Force
+
+          foreach ($entry in $manifest.installed_subject.files.psobject.Properties) {
+            $actual = (Get-FileHash -LiteralPath (Join-Path $bin $entry.Name) -Algorithm SHA256).Hash.ToLowerInvariant()
+            if ($actual -ne [string]$entry.Value) { throw "INSTALLED_HASH_MISMATCH:$($entry.Name):$actual" }
+          }
+
+          $svc = Get-Service -Name 'SystemMasterPrivilegedBroker' -ErrorAction SilentlyContinue
+          if ($null -ne $svc) { throw 'BROKER_SERVICE_ALREADY_EXISTS_UNEXPECTEDLY' }
+
+          $binPath = '"C:\ProgramData\SystemMaster\PrivilegedBroker\bin\SystemMaster.PrivilegedBroker.exe" --service'
+          & sc.exe create SystemMasterPrivilegedBroker binPath= $binPath start= auto obj= LocalSystem DisplayName= "System Master Privileged Broker"
+          if ($LASTEXITCODE -ne 0) { throw "SC_CREATE_BROKER_FAILED:$LASTEXITCODE" }
+          & sc.exe sidtype SystemMasterPrivilegedBroker unrestricted
+          if ($LASTEXITCODE -ne 0) { throw "SC_SIDTYPE_BROKER_FAILED:$LASTEXITCODE" }
+          & sc.exe failure SystemMasterPrivilegedBroker reset= 86400 actions= restart/5000/restart/5000
+          if ($LASTEXITCODE -ne 0) { throw "SC_FAILURE_BROKER_FAILED:$LASTEXITCODE" }
+
+          & icacls.exe $root /inheritance:r /grant:r 'SYSTEM:(OI)(CI)F' 'Administrators:(OI)(CI)F' 'NT SERVICE\SystemMasterPrivilegedBroker:(OI)(CI)F'
+          if ($LASTEXITCODE -ne 0) { throw "BROKER_ROOT_ACL_FAILED:$LASTEXITCODE" }
+          & icacls.exe (Join-Path $root 'inbox\ready') /grant:r 'NT SERVICE\SystemMasterCommandGateway:(OI)(CI)M'
+          if ($LASTEXITCODE -ne 0) { throw "BROKER_READY_ACL_FAILED:$LASTEXITCODE" }
+
+          Start-Service -Name 'SystemMasterPrivilegedBroker'
+          $deadline = [DateTime]::UtcNow.AddSeconds(30)
+          do {
+            Start-Sleep -Milliseconds 250
+            $state = (Get-Service -Name 'SystemMasterPrivilegedBroker').Status
+          } while ($state -ne 'Running' -and [DateTime]::UtcNow -lt $deadline)
+          if ($state -ne 'Running') { throw "BROKER_SERVICE_NOT_RUNNING:$state" }
+
+      - name: Emit bootstrap evidence
+        if: always()
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Continue'
+          $evidence = Join-Path $env:RUNNER_TEMP "f8-privileged-broker-bootstrap-$env:GITHUB_RUN_ID"
+          New-Item -ItemType Directory -Path $evidence -Force | Out-Null
+          $candidate = 'S:\SystemMasterLab\engineering-fabric\workspace-candidates\privileged-operations-broker-v1'
+          $manifest = Get-Content -LiteralPath (Join-Path $candidate 'F8_BOOTSTRAP_MANIFEST.json') -Raw | ConvertFrom-Json
+          $service = Get-CimInstance Win32_Service -Filter "Name='SystemMasterPrivilegedBroker'" -ErrorAction SilentlyContinue
+          $record = [ordered]@{
+            protocol_version = 'system-master.f8-privileged-broker-bootstrap-evidence.v1'
+            run_id = $env:GITHUB_RUN_ID
+            branch = $env:GITHUB_REF
+            contract_id = $manifest.contract_id
+            supervisor_fence = $manifest.supervisor_fence
+            installed_subject_digest = $manifest.installed_subject.subject_digest
+            service_name = 'SystemMasterPrivilegedBroker'
+            service_state = if ($service) { $service.State } else { 'MISSING' }
+            service_account = if ($service) { $service.StartName } else { $null }
+            service_path = if ($service) { $service.PathName } else { $null }
+            completed_at = [DateTime]::UtcNow.ToString('o')
+          }
+          $record | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $evidence 'bootstrap-evidence.json') -Encoding utf8
+          Copy-Item -LiteralPath (Join-Path $candidate 'F8_BOOTSTRAP_MANIFEST.json') -Destination $evidence -Force
+          Get-Content -LiteralPath (Join-Path $evidence 'bootstrap-evidence.json')
+
+      - name: Upload immutable bootstrap evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: f8-privileged-broker-bootstrap-${{ github.run_id }}-evidence
+          path: ${{ runner.temp }}\f8-privileged-broker-bootstrap-${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 90
