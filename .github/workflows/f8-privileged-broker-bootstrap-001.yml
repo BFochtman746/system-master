@@ -57,7 +57,7 @@ jobs:
               static extern int sqlite3_close_v2(IntPtr db);
               static string Text(IntPtr stmt,int col) {
                   var p=sqlite3_column_text(stmt,col);
-                  return p==IntPtr.Zero ? "" : Marshal.PtrToStringUTF8(p);
+                  return p==IntPtr.Zero ? "" : Marshal.PtrToStringAnsi(p);
               }
               public static string Read() {
                   IntPtr db,stmt;
