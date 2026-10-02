@@ -1,0 +1,84 @@
+name: A01 Final Headless Bootstrap
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: a01-final-headless-bootstrap
+  cancel-in-progress: false
+
+jobs:
+  bootstrap:
+    runs-on: [self-hosted, Windows, X64, A-01]
+    timeout-minutes: 15
+    steps:
+      - name: Verify fenced authority and apply frozen bootstrap
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if ($env:RUNNER_NAME -ne 'A-01') { throw "RUNNER_NAME_MISMATCH:$env:RUNNER_NAME" }
+
+          $authorityPath = 'C:\SystemMaster\authority-reference\direct-ingress-authority.json'
+          $bootstrapPath = 'S:\SystemMasterLab\engineering-fabric\workspace-candidates\privileged-operations-broker-v1\FINAL_BOOTSTRAP_HOST_AND_CONTROL_AGENT.ps1'
+          $manifestPath = 'S:\SystemMasterLab\engineering-fabric\workspace-candidates\privileged-operations-broker-v1\PROMOTION-RELEASE.json'
+          $evidencePath = 'S:\SystemMasterLab\engineering-fabric\evidence\A01-FINAL-HEADLESS-BOOTSTRAP-001-result.json'
+
+          $authority = Get-Content -LiteralPath $authorityPath -Raw | ConvertFrom-Json
+          $policy = $authority.runtime_policy
+          if ($policy.github_execution_trigger_allowed -ne $false) { throw 'GLOBAL_GITHUB_EXECUTION_MUST_REMAIN_DISABLED' }
+          if ($policy.github_runtime_role -ne 'REFERENCE_ONLY') { throw 'GITHUB_RUNTIME_ROLE_MISMATCH' }
+
+          $x = $policy.headless_bootstrap_exception
+          if ($null -eq $x) { throw 'BOOTSTRAP_EXCEPTION_MISSING' }
+          if ($x.protocol_version -ne 'system-master.headless-bootstrap-exception.v1') { throw 'BOOTSTRAP_EXCEPTION_PROTOCOL_MISMATCH' }
+          if ($x.exception_id -ne 'A01-FINAL-HEADLESS-BOOTSTRAP-001') { throw 'BOOTSTRAP_EXCEPTION_ID_MISMATCH' }
+          if ($x.state -ne 'CLAIMED') { throw "BOOTSTRAP_EXCEPTION_NOT_CLAIMED:$($x.state)" }
+          if ($x.workflow_id -ne 'a01-final-headless-bootstrap') { throw 'BOOTSTRAP_WORKFLOW_ID_MISMATCH' }
+          if ($x.runner_name -ne 'A-01') { throw 'BOOTSTRAP_RUNNER_MISMATCH' }
+          if ($x.bootstrap_script_sha256 -ne '039c9812b1bc3bcbbac75cc454efec909bee944acf53c1c7b4ec2ef093de8166') { throw 'BOOTSTRAP_SCRIPT_BINDING_MISMATCH' }
+          if ($x.broker_manifest_sha256 -ne 'f97d5a67c1edc69bd331efefa34948a2e5a533370d5662bdf4202737c8b2fba1') { throw 'BROKER_MANIFEST_BINDING_MISMATCH' }
+          if ($x.control_agent_subject_digest -ne 'aefee1111af29b90c4f123d95088dc4cf95bbbfedd3e8e4d13212036b9a4a620') { throw 'CONTROL_AGENT_SUBJECT_BINDING_MISMATCH' }
+          if ($x.core_control_head -ne $authority.core_control_head) { throw 'CORE_CONTROL_HEAD_MISMATCH' }
+          if ([DateTimeOffset]::UtcNow -ge [DateTimeOffset]::Parse($x.expires_at_utc)) { throw 'BOOTSTRAP_EXCEPTION_EXPIRED' }
+          if ([string]::IsNullOrWhiteSpace([string]$x.claimed_lease_id)) { throw 'BOOTSTRAP_LEASE_MISSING' }
+          if ([int64]$x.claimed_fencing_token -le 0) { throw 'BOOTSTRAP_FENCE_MISSING' }
+
+          $bootstrapHash = (Get-FileHash -LiteralPath $bootstrapPath -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($bootstrapHash -ne $x.bootstrap_script_sha256) { throw "BOOTSTRAP_SCRIPT_HASH_MISMATCH:$bootstrapHash" }
+          $manifestHash = (Get-FileHash -LiteralPath $manifestPath -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($manifestHash -ne $x.broker_manifest_sha256) { throw "BROKER_MANIFEST_HASH_MISMATCH:$manifestHash" }
+
+          $env:PYTHONPATH = 'C:\SystemMaster\direct-ingress'
+          $lease = [string]$x.claimed_lease_id
+          $fence = [int64]$x.claimed_fencing_token
+          $heartbeat = python -c "from direct_ingress_broker_client import broker_request; import json; print(json.dumps(broker_request({'protocol_version':'system-master.supervisor-broker.request.v1','op':'HEARTBEAT','lease_id':'$lease','fencing_token':$fence,'checkpoint_pointer':'A01-FINAL-HEADLESS-BOOTSTRAP-001/RUNNER-VERIFIED'}),sort_keys=True))"
+          if ($LASTEXITCODE -ne 0) { throw 'SUPERVISOR_HEARTBEAT_FAILED' }
+          $heartbeatObj = $heartbeat | ConvertFrom-Json
+          if ($heartbeatObj.status -ne 'HEARTBEAT_RECORDED') { throw "SUPERVISOR_HEARTBEAT_REJECTED:$($heartbeatObj.status)" }
+
+          $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
+          $principal = [Security.Principal.WindowsPrincipal]::new($identity)
+          if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) { throw 'RUNNER_NOT_ELEVATED_ADMINISTRATOR' }
+
+          $raw = & $bootstrapPath -Apply | Out-String
+          if ($LASTEXITCODE -ne 0) { throw "BOOTSTRAP_PROCESS_FAILED:$LASTEXITCODE" }
+          $result = $raw | ConvertFrom-Json
+          if ($result.result -ne 'PASS') { throw "BOOTSTRAP_RESULT_NOT_PASS:$raw" }
+
+          $evidence = [ordered]@{
+            protocol_version = 'system-master.final-headless-bootstrap-evidence.v1'
+            result = 'PASS'
+            completed_at_utc = [DateTimeOffset]::UtcNow.ToString('O')
+            runner_name = $env:RUNNER_NAME
+            lease_id = $lease
+            fencing_token = $fence
+            bootstrap_script_sha256 = $bootstrapHash
+            broker_manifest_sha256 = $manifestHash
+            bootstrap_result = $result
+          }
+          $temp = "$evidencePath.$([Guid]::NewGuid().ToString('N')).tmp"
+          $evidence | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $temp -Encoding UTF8
+          Move-Item -LiteralPath $temp -Destination $evidencePath -Force
