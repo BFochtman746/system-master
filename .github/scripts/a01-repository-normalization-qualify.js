@@ -35,7 +35,7 @@ function main() {
   const evidence = {
     evidence_version: 2,
     qualification_id: process.env.A01_QUALIFICATION_ID || 'REPOSITORY-NORMALIZATION-RECOVERY-A01',
-    workstream_id: process.env.A01_WORKSTREAM_ID || 'SECOND-SHIFT-PRODUCTION-MASTER-COMPLETION',
+    workstream_id: process.env.A01_WORKSTREAM_ID || 'SYSTEM-MASTER',
     subject_sha: actual,
     exact_subject_verified: true,
     qualification_state_required_at_ingress: 'PENDING',
