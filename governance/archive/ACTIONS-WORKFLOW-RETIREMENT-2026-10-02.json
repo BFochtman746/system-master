@@ -1,0 +1,25 @@
+{
+  "archive_id": "ACTIONS-WORKFLOW-RETIREMENT-2026-10-02",
+  "date": "2026-10-02",
+  "purpose": "Retire the obsolete direct self-hosted GitHub Run Now wrapper after local governed DirectIngress became the canonical explicit user-directed A-01 ingress.",
+  "retirement_rule": "Retiring a workflow file removes it from the active Actions workflow surface. Historical workflow runs and exact bytes remain preserved in Git history; reusable Run Now engine code and regression tests remain active.",
+  "retired_workflows": [
+    {
+      "path": ".github/workflows/control-gateway-native-a01-run-now-ingress.yml",
+      "blob_sha": "aef0c4778204067ca346cda9707306ebd8e8ced1",
+      "reason": "ARCHIVE_GITHUB_RUNTIME; direct self-hosted wrapper superseded by governed local DirectIngress/Supervisor IMMEDIATE execution. Preserve a01_ingress_service.py, a01_run_now_once.py, and their engine tests."
+    }
+  ],
+  "retained_runtime": [
+    "control-gateway/python/a01_ingress_service.py",
+    "control-gateway/python/a01_run_now_once.py",
+    "tests/test_a01_run_now_once.py"
+  ],
+  "replacement": {
+    "ingress": "C:\\SystemMaster\\direct-ingress",
+    "supervisor": "C:\\SystemMaster\\supervisor-broker",
+    "execution_class": "IMMEDIATE",
+    "second_scheduler_created": false,
+    "general_github_execution_enabled": false
+  }
+}
