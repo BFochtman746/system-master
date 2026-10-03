@@ -66,6 +66,52 @@ jobs:
             }
           }
 
+      - name: Probe installed Broker operation registry
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $manifest = 'f42b890a9105108a143917521057440f66ab33c00686d96a36368a9a9923c047'
+          $payloadJson = '{"release_manifest_sha256":"' + $manifest + '"}'
+          $sha = [System.Security.Cryptography.SHA256]::Create()
+          try {
+            $payloadDigest = ([BitConverter]::ToString($sha.ComputeHash([Text.Encoding]::UTF8.GetBytes($payloadJson)))).Replace('-','').ToLowerInvariant()
+          } finally {
+            $sha.Dispose()
+          }
+          $request = [ordered]@{
+            protocol_version = 'system-master.privileged-request.v1'
+            request_id = 'READ_ONLY_REGISTRY_PROBE'
+            operation_id = 'PROMOTE_SYSTEM_MASTER_PRIVILEGED_BROKER_V1'
+            operation_version = '1.0.0'
+            idempotency_key = 'READ_ONLY_REGISTRY_PROBE'
+            owner_lane = 'CORE'
+            objective_id = 'A01-EXECUTION-FABRIC-CL4-CLOSURE-001'
+            contract_id = 'A01-FAULT-ISOLATED-DURABLE-EXECUTION-FABRIC-001'
+            contract_version = '2.0.0'
+            contract_digest = ('0' * 64)
+            catalog_revision = 44
+            catalog_digest = ('1' * 64)
+            authority_context_digest = ('2' * 64)
+            supervisor_lease_id = 'READ_ONLY'
+            supervisor_fencing_token = 1
+            expected_subject_digest = ('3' * 64)
+            payload = @{ release_manifest_sha256 = $manifest }
+            payload_digest = $payloadDigest
+            submitted_at = [DateTimeOffset]::UtcNow.ToString('O')
+          }
+          $path = Join-Path $env:RUNNER_TEMP 'broker-registry-probe.json'
+          $request | ConvertTo-Json -Depth 6 -Compress | Set-Content -LiteralPath $path -Encoding utf8
+          $exe = 'C:\ProgramData\SystemMaster\PrivilegedBroker\bin\SystemMaster.PrivilegedBroker.exe'
+          $output = & $exe --validate-request $path 2>&1
+          $code = $LASTEXITCODE
+          Write-Output $output
+          Write-Output "BROKER_PROMOTE_REGISTRY_EXIT=$code"
+          if ($code -eq 0) {
+            Write-Output 'BROKER_PROMOTE_OPERATION_SUPPORTED=True'
+          } else {
+            Write-Output 'BROKER_PROMOTE_OPERATION_SUPPORTED=False'
+          }
+
       - name: Read Broker process topology
         shell: powershell
         run: |
