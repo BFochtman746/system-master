@@ -1,0 +1,122 @@
+name: A-01 F9B Runner Privilege Canary
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/a01-f9b-runner-privilege-canary.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: a01-f9b-runner-privilege-canary
+  cancel-in-progress: false
+
+jobs:
+  canary:
+    name: Read-only runner privilege canary
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 5
+    steps:
+      - name: Prove runner identity and token
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $id = [System.Security.Principal.WindowsIdentity]::GetCurrent()
+          $principal = [System.Security.Principal.WindowsPrincipal]::new($id)
+          $isAdmin = $principal.IsInRole([System.Security.Principal.WindowsBuiltInRole]::Administrator)
+          Write-Output "RUNNER_IDENTITY=$($id.Name)"
+          Write-Output "RUNNER_SID=$($id.User.Value)"
+          Write-Output "RUNNER_IS_ADMIN=$isAdmin"
+          whoami /groups
+          whoami /priv
+
+      - name: Read protected Broker subject
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $svc = Get-CimInstance Win32_Service -Filter "Name='SystemMasterPrivilegedBroker'"
+          if (-not $svc) { throw 'BROKER_SERVICE_MISSING' }
+          Write-Output "BROKER_SERVICE_STATE=$($svc.State)"
+          Write-Output "BROKER_SERVICE_ACCOUNT=$($svc.StartName)"
+          Write-Output "BROKER_SERVICE_PATH=$($svc.PathName)"
+
+          $root = 'C:\ProgramData\SystemMaster\PrivilegedBroker'
+          $bin = Join-Path $root 'bin'
+          foreach ($name in @(
+            'SystemMaster.PrivilegedBroker.exe',
+            'SystemMaster.PrivilegedBroker.dll',
+            'SystemMaster.PrivilegedBroker.deps.json',
+            'SystemMaster.PrivilegedBroker.runtimeconfig.json'
+          )) {
+            $path = Join-Path $bin $name
+            if (-not (Test-Path -LiteralPath $path)) { throw "BROKER_FILE_MISSING:$name" }
+            $hash = (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant()
+            Write-Output "BROKER_FILE_SHA256 $name=$hash"
+          }
+
+          foreach ($name in @('active-release.json','promotion-journal.json','activation-request.json','installed-subject.json')) {
+            $path = Join-Path $root $name
+            Write-Output "BROKER_META_EXISTS $name=$(Test-Path -LiteralPath $path)"
+            if (Test-Path -LiteralPath $path) {
+              $hash = (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant()
+              Write-Output "BROKER_META_SHA256 $name=$hash"
+            }
+          }
+
+      - name: Probe installed Broker operation registry
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $manifest = 'f42b890a9105108a143917521057440f66ab33c00686d96a36368a9a9923c047'
+          $payloadJson = '{"release_manifest_sha256":"' + $manifest + '"}'
+          $sha = [System.Security.Cryptography.SHA256]::Create()
+          try {
+            $payloadDigest = ([BitConverter]::ToString($sha.ComputeHash([Text.Encoding]::UTF8.GetBytes($payloadJson)))).Replace('-','').ToLowerInvariant()
+          } finally {
+            $sha.Dispose()
+          }
+          $request = [ordered]@{
+            protocol_version = 'system-master.privileged-request.v1'
+            request_id = 'READ_ONLY_REGISTRY_PROBE'
+            operation_id = 'PROMOTE_SYSTEM_MASTER_PRIVILEGED_BROKER_V1'
+            operation_version = '1.0.0'
+            idempotency_key = 'READ_ONLY_REGISTRY_PROBE'
+            owner_lane = 'CORE'
+            objective_id = 'A01-EXECUTION-FABRIC-CL4-CLOSURE-001'
+            contract_id = 'A01-FAULT-ISOLATED-DURABLE-EXECUTION-FABRIC-001'
+            contract_version = '2.0.0'
+            contract_digest = ('0' * 64)
+            catalog_revision = 44
+            catalog_digest = ('1' * 64)
+            authority_context_digest = ('2' * 64)
+            supervisor_lease_id = 'READ_ONLY'
+            supervisor_fencing_token = 1
+            expected_subject_digest = ('3' * 64)
+            payload = @{ release_manifest_sha256 = $manifest }
+            payload_digest = $payloadDigest
+            submitted_at = [DateTimeOffset]::UtcNow.ToString('O')
+          }
+          $path = Join-Path $env:RUNNER_TEMP 'broker-registry-probe.json'
+          $request | ConvertTo-Json -Depth 6 -Compress | Set-Content -LiteralPath $path -Encoding utf8
+          $exe = 'C:\ProgramData\SystemMaster\PrivilegedBroker\bin\SystemMaster.PrivilegedBroker.exe'
+          $output = & $exe --validate-request $path 2>&1
+          $code = $LASTEXITCODE
+          Write-Output $output
+          Write-Output "BROKER_PROMOTE_REGISTRY_EXIT=$code"
+          if ($code -eq 0) {
+            Write-Output 'BROKER_PROMOTE_OPERATION_SUPPORTED=True'
+          } else {
+            Write-Output 'BROKER_PROMOTE_OPERATION_SUPPORTED=False'
+          }
+
+      - name: Read Broker process topology
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Get-CimInstance Win32_Process |
+            Where-Object { $_.Name -eq 'SystemMaster.PrivilegedBroker.exe' } |
+            Select-Object ProcessId,ParentProcessId,Name,ExecutablePath,CommandLine |
+            Format-List
