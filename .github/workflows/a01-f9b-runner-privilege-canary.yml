@@ -1,0 +1,72 @@
+name: A-01 F9B Runner Privilege Canary
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: a01-f9b-runner-privilege-canary
+  cancel-in-progress: false
+
+jobs:
+  canary:
+    name: Read-only runner privilege canary
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 5
+    steps:
+      - name: Prove runner identity and token
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $id = [System.Security.Principal.WindowsIdentity]::GetCurrent()
+          $principal = [System.Security.Principal.WindowsPrincipal]::new($id)
+          $isAdmin = $principal.IsInRole([System.Security.Principal.WindowsBuiltInRole]::Administrator)
+          Write-Output "RUNNER_IDENTITY=$($id.Name)"
+          Write-Output "RUNNER_SID=$($id.User.Value)"
+          Write-Output "RUNNER_IS_ADMIN=$isAdmin"
+          whoami /groups
+          whoami /priv
+
+      - name: Read protected Broker subject
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $svc = Get-CimInstance Win32_Service -Filter "Name='SystemMasterPrivilegedBroker'"
+          if (-not $svc) { throw 'BROKER_SERVICE_MISSING' }
+          Write-Output "BROKER_SERVICE_STATE=$($svc.State)"
+          Write-Output "BROKER_SERVICE_ACCOUNT=$($svc.StartName)"
+          Write-Output "BROKER_SERVICE_PATH=$($svc.PathName)"
+
+          $root = 'C:\ProgramData\SystemMaster\PrivilegedBroker'
+          $bin = Join-Path $root 'bin'
+          foreach ($name in @(
+            'SystemMaster.PrivilegedBroker.exe',
+            'SystemMaster.PrivilegedBroker.dll',
+            'SystemMaster.PrivilegedBroker.deps.json',
+            'SystemMaster.PrivilegedBroker.runtimeconfig.json'
+          )) {
+            $path = Join-Path $bin $name
+            if (-not (Test-Path -LiteralPath $path)) { throw "BROKER_FILE_MISSING:$name" }
+            $hash = (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant()
+            Write-Output "BROKER_FILE_SHA256 $name=$hash"
+          }
+
+          foreach ($name in @('active-release.json','promotion-journal.json','activation-request.json','installed-subject.json')) {
+            $path = Join-Path $root $name
+            Write-Output "BROKER_META_EXISTS $name=$(Test-Path -LiteralPath $path)"
+            if (Test-Path -LiteralPath $path) {
+              $hash = (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant()
+              Write-Output "BROKER_META_SHA256 $name=$hash"
+            }
+          }
+
+      - name: Read Broker process topology
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Get-CimInstance Win32_Process |
+            Where-Object { $_.Name -eq 'SystemMaster.PrivilegedBroker.exe' } |
+            Select-Object ProcessId,ParentProcessId,Name,ExecutablePath,CommandLine |
+            Format-List
